@@ -76,6 +76,9 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
               {o.fulfilment === 'delivery' ? <Bike size={12} /> : <StoreIcon size={12} />}
               {o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
             </span>
+            {o.source === 'website' && (
+              <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: 'var(--surface-muted)', color: 'var(--brand-muted)' }} data-testid="order-website">{t('orders.fromWebsite', 'website')}</span>
+            )}
             {o.standing_id && (
               <span className="inline-flex items-center gap-1 text-[11px]" style={{ color: 'var(--brand-muted)' }} title={t('orders.weeklyTitle', 'Repeats every week')} data-testid="order-weekly">
                 <Repeat size={11} /> {t('orders.weekly', 'weekly')}
@@ -173,7 +176,7 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
               <label className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }} htmlFor={`assign-${o.id}`}>{t('orders.assign', 'Courier')}</label>
               <select
                 id={`assign-${o.id}`}
-                value={o.courier?.id || ''}
+                value={o.courier?.user_id || ''}
                 disabled={busy}
                 onChange={(e) => onAssign(o, e.target.value || null)}
                 className="px-2 min-h-[40px] rounded-lg border text-sm bg-white"
@@ -181,22 +184,9 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
                 data-testid={`order-assign-${o.id}`}
               >
                 <option value="">{t('orders.unassigned', 'Not assigned')}</option>
-                {(couriers || []).map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                {(couriers || []).filter((c) => c.status === 'active').map((c) => <option key={c.user_id} value={c.user_id}>{c.name || c.email}</option>)}
               </select>
-              {o.courier && (() => {
-                const c = (couriers || []).find((x) => x.id === o.courier.id);
-                if (!c?.phone_e164 || !c?.token) return null;
-                const url = `${window.location.origin}/orders/courier/${c.token}`;
-                const msg = t('orders.courierShareText', '{{name}}: delivery for {{customer}} ({{when}}). Your run sheet: {{url}}', {
-                  name: c.name, customer: o.customer_name, when: (o.needed_by || '').replace('T', ' '), url,
-                });
-                return (
-                  <a href={`https://wa.me/${c.phone_e164}?text=${encodeURIComponent(msg)}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-send-runsheet">
-                    <MessageCircle size={12} /> {t('orders.sendRunsheet', 'Send run sheet')}
-                  </a>
-                );
-              })()}
-              {(couriers || []).length === 0 && <span className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>{t('orders.noCouriersYet', 'Add a courier from the toolbar first')}</span>}
+              {!(couriers || []).some((c) => c.status === 'active') && <span className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>{t('orders.noCouriersYet', 'Invite a courier from the toolbar first')}</span>}
             </div>
           )}
           {onPayment && (

@@ -481,6 +481,11 @@ class ProductItem(BaseModel):
     and let the buyer message the seller. Kept lean on purpose so the
     onboarding stays fast.
     """
+    # A stable id, so an order line can point at a product (orders spec
+    # O1 noted there was nothing to point at). Assigned on every save;
+    # products stored before this exist are addressed by position until
+    # their listing is next saved.
+    id: str = Field(default_factory=lambda: uuid.uuid4().hex[:12])
     name: str
     price: float
     currency: str = "ILS"

@@ -532,6 +532,21 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "needed_by": {"$gte": today_il, "$lte": today_il + "￿"},
     })
     orders_new = await db.store_orders.count_documents({"owner_user_id": uid, "status": "new"})
+    # The other two hats a person can wear on orders: courier (invited or
+    # active for some business) and customer (ordered on the site).
+    me = await db.users.find_one({"id": uid}, {"_id": 0, "email": 1})
+    my_email = (me or {}).get("email")
+    courier_q = {"couriers": {"$elemMatch": {"$or": [{"user_id": uid}, {"email": my_email}]}}} if my_email else {"couriers.user_id": uid}
+    courier_invites, courier_active = 0, 0
+    async for b in db.businesses.find(courier_q, {"couriers": 1}):
+        for c in b.get("couriers") or []:
+            if c.get("user_id") == uid or (my_email and c.get("email") == my_email):
+                if c.get("status") == "active":
+                    courier_active += 1
+                else:
+                    courier_invites += 1
+    courier_deliveries_open = await db.store_orders.count_documents({"courier.user_id": uid, "status": {"$in": ["new", "preparing", "ready"]}})
+    customer_orders = await db.store_orders.count_documents({"customer_user_id": uid})
 
     return {
         "bookings_awaiting_reply": bookings_awaiting,
@@ -541,4 +556,8 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "gigs_count": gigs_count,
         "orders_due_today": orders_due_today,
         "orders_new": orders_new,
+        "courier_invites": courier_invites,
+        "courier_businesses": courier_active,
+        "courier_deliveries_open": courier_deliveries_open,
+        "customer_orders": customer_orders,
     }

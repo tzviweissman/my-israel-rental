@@ -19,7 +19,7 @@
  */
 import { useTranslation } from 'react-i18next';
 import {
-  LayoutDashboard, Building2, Layers, Store, Wrench, CalendarCheck, Inbox, Briefcase, ClipboardList,
+  LayoutDashboard, Building2, Layers, Store, Wrench, CalendarCheck, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
   Home, MessageCircle, Bell, Heart, KeyRound, FileText,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
@@ -58,6 +58,10 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
         // Store orders (docs/orders-and-delivery-spec.md). Shown to anyone
         // who can run a business: the tab is where a shop's day lives.
         { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: showGigTabs },
+        // A courier's own deliveries: shown to anyone a business invited.
+        { id: 'deliveries', label: t('dashboard.deliveries', 'Deliveries'), Icon: Bike, badge: (summary.courier_deliveries_open || 0) + (summary.courier_invites || 0), show: (summary.courier_businesses || 0) > 0 || (summary.courier_invites || 0) > 0 },
+        // A customer's own orders from stores on the site.
+        { id: 'my-orders', label: t('dashboard.myOrders', 'My orders'), Icon: ShoppingBag, show: (summary.customer_orders || 0) > 0 },
         { id: 'my-requests', label: t('dashboard.myRequests', 'My Requests'), Icon: Inbox, badge: summary.requests_with_responses, show: true },
         { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, show: showGigTabs || hasPostedJobs },
         { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, badge: summary.work_offers_open, show: showGigTabs },
@@ -102,6 +106,8 @@ export const ALL_TAB_IDS = [
   'contracts',
   'bookings',
   'orders',
+  'deliveries',
+  'my-orders',
   'my-requests',
   'my-jobs',
   'job-requests',

@@ -144,6 +144,12 @@ export default function OrderTrackPage() {
           )}
         </section>
 
+        {data.delivered_photo_url && (
+          <section className="rounded-2xl border bg-white p-4 mt-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="track-photo">
+            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.photoTitle', 'Delivered {{time}}', { time: String(data.delivered_at || '').slice(11, 16) })}</p>
+            <a href={data.delivered_photo_url} target="_blank" rel="noopener noreferrer"><img src={data.delivered_photo_url} alt="" className="w-full rounded-xl object-cover max-h-72" /></a>
+          </section>
+        )}
         {delivery && !closedBad && data.status !== 'done' && (
           <p className="text-xs mt-4 px-1" style={{ color: 'var(--brand-muted)' }} data-testid="track-phone-notice">
             {t('orders.track.phoneNotice', 'The delivery person will see your number to reach you.')}

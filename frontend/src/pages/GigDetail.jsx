@@ -7,13 +7,13 @@
  * modal — driven by `gig.booking_mode`.
  */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import DateField from '../components/common/DateField';
 import FitImage from '../components/common/FitImage';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { MessageCircle, Send, Loader2, ArrowLeft, Award, Zap, Calendar, Clock, Camera, ChevronLeft, ChevronRight, X, ShoppingBag } from 'lucide-react';
 // The shared calendar handles its own language, direction and
 // screen-reader labels — see components/ui/calendar.jsx.
 import { visitorHeaders } from '../utils/visitorId';
@@ -945,8 +945,11 @@ const GigDetail = () => {
                             className="w-full mt-1 inline-flex items-center justify-center gap-1 py-1.5 rounded-md text-[11px] font-semibold text-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 hover:bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/15 transition-colors"
                             data-testid={`gig-product-ask-${i}`}
                           >
-                            <MessageCircle size={11} /> Ask about this →
+                            <MessageCircle size={11} /> {t('gigDetail.askAbout', 'Ask about this')} →
                           </button>
+                          <Link to={`/order/${gig.id}?add=${encodeURIComponent(p.id || `idx:${i}`)}`} onClick={(e) => e.stopPropagation()} className="w-full mt-1 inline-flex items-center justify-center gap-1 py-1.5 rounded-md text-[11px] font-semibold" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid={`gig-product-order-${i}`}>
+                            <ShoppingBag size={11} /> {t('gigDetail.orderThis', 'Order')}
+                          </Link>
                         </div>
                       </div>
                     );
@@ -1065,6 +1068,13 @@ const GigDetail = () => {
               {/* WhatsApp CTAs get WhatsApp green so the destination is
                   obvious before the tap; the in-platform flow keeps the
                   brand teal. */}
+              {/* Every store takes orders on the site (Tzvi, 2026-09-08):
+                  the black button is Order; messaging stays below it. */}
+              {isStore && (
+                <Link to={`/order/${gig.id}`} className="w-full flex items-center justify-center gap-2 py-3 mb-2 rounded-lg text-sm font-bold" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="gig-order-btn">
+                  <ShoppingBag size={14} /> {t('gigDetail.orderNow', 'Order now')}
+                </Link>
+              )}
               <button onClick={handleBookClick}
                 disabled={isAppointment && (!appointmentDate || !appointmentSlot)}
                 className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold text-white disabled:opacity-40 transition-colors ${

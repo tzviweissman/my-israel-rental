@@ -138,7 +138,7 @@ const AvailabilityExtended = lazy(() => import('./pages/AvailabilityExtended'));
 const GigDetail = lazy(() => import('./pages/GigDetail'));
 const StaffOrdersPage = lazy(() => import('./pages/StaffOrdersPage'));
 const OrdersPrintPage = lazy(() => import('./pages/OrdersPrintPage'));
-const CourierRunSheet = lazy(() => import('./pages/CourierRunSheet'));
+const OrderPage = lazy(() => import('./pages/OrderPage'));
 const OrderTrackPage = lazy(() => import('./pages/OrderTrackPage'));
 const CreateGig = lazy(() => import('./pages/CreateGig'));
 const JobsBoard = lazy(() => import('./pages/JobsBoard'));
@@ -459,7 +459,7 @@ function App() {
                 counter's board, no login, one capability token per
                 business; and the owner's print view. */}
             <Route path="/orders/staff/:token" element={<StaffOrdersPage />} />
-            <Route path="/orders/courier/:token" element={<CourierRunSheet />} />
+            <Route path="/order/:gigId" element={<OrderPage />} />
             <Route path="/orders/track/:token" element={<OrderTrackPage />} />
             <Route path="/orders/print" element={user ? <OrdersPrintPage /> : <ToAuth />} />
 

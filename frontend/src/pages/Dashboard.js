@@ -20,6 +20,8 @@ import MessagesTab from '../components/dashboard/MessagesTab';
 import MyGigsTab from '../components/dashboard/MyGigsTab';
 import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
 import OrdersTab from '../components/dashboard/OrdersTab';
+import DeliveriesTab from '../components/dashboard/DeliveriesTab';
+import MyOrdersTab from '../components/dashboard/MyOrdersTab';
 import JobRequestsTab from '../components/dashboard/JobRequestsTab';
 import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
@@ -487,6 +489,14 @@ const Dashboard = () => {
 
         {activeTab === 'orders' && showGigTabs && (
           <OrdersTab API={API} token={token} />
+        )}
+
+        {activeTab === 'deliveries' && (
+          <DeliveriesTab API={API} token={token} />
+        )}
+
+        {activeTab === 'my-orders' && (
+          <MyOrdersTab API={API} token={token} />
         )}
 
         {activeTab === 'my-gigs' && showGigTabs && (

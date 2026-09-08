@@ -779,6 +779,12 @@ async def public_business(
         # Order cutoffs (orders spec O8): "Friday orders close Thursday
         # 2pm". Set from the Orders tab, shown in the good-to-know band.
         "order_cutoffs": biz.get("order_cutoffs") or [],
+        # What the public order form needs to know before someone orders:
+        # windows, fee, minimum. Never the default courier.
+        "order_settings": {
+            k: (biz.get("order_settings") or {}).get(k)
+            for k in ("windows", "delivery_fee", "min_order")
+        },
         "kosher_certification": biz.get("kosher_certification"),
         "license_number": biz.get("license_number"),
         # K1/K2 — page identity. `accent` is a NAME; the hexes live on

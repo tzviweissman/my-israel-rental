@@ -146,7 +146,8 @@ export default function OrdersTab({ API, token }) {
   });
   const [panel, setPanel] = useState(null);           // 'staff' | 'import' | 'couriers' | null
   const [couriers, setCouriers] = useState([]);
-  const [cutoffs, setCutoffs] = useState([]);
+  const [settings, setSettings] = useState({ cutoffs: [], pickup_windows: [], delivery_windows: [], delivery_fee: null, min_order: null, default_courier_user_id: null });
+  const cutoffs = settings.cutoffs;
   const [standing, setStanding] = useState([]);
 
   const loadSettings = useCallback(async () => {
@@ -156,7 +157,7 @@ export default function OrdersTab({ API, token }) {
         axios.get(`${API}/marketplace/businesses/${bizId}/orders/settings`, auth),
         axios.get(`${API}/marketplace/businesses/${bizId}/standing-orders`, auth),
       ]);
-      setCutoffs(st.cutoffs || []);
+      setSettings(st);
       setStanding(so || []);
     } catch { /* the board works without them */ }
   }, [API, auth, bizId]);
@@ -246,12 +247,12 @@ export default function OrdersTab({ API, token }) {
     }
   };
 
-  const assign = async (order, courierId) => {
+  const assign = async (order, courierUserId) => {
     setBusyId(order.id);
     try {
-      const { data } = await axios.patch(`${API}/marketplace/orders/${order.id}/assign`, { courier_id: courierId }, auth);
+      const { data } = await axios.patch(`${API}/marketplace/orders/${order.id}/assign`, { courier_user_id: courierUserId }, auth);
       setOrders((prev) => prev.map((o) => (o.id === data.order.id ? data.order : o)));
-      if (courierId) toast.success(data.sms_sent ? t('orders.assignedSms', 'Assigned and texted the run sheet') : t('orders.assigned', 'Assigned - send them the run sheet'));
+      if (courierUserId) toast.success(t('orders.assigned', 'Assigned - it is on their Deliveries tab'));
     } catch (err) {
       toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
     } finally {
@@ -434,7 +435,7 @@ export default function OrdersTab({ API, token }) {
           ['export', Download, t('orders.export', 'Export CSV'), exportCsv],
           ['import', Upload, t('orders.import', 'Import customers'), () => setPanel(panel === 'import' ? null : 'import')],
           ['couriers', Bike, t('orders.couriers', 'Couriers'), () => setPanel(panel === 'couriers' ? null : 'couriers')],
-          ['cutoffs', Timer, t('orders.cutoffs', 'Cutoffs'), () => setPanel(panel === 'cutoffs' ? null : 'cutoffs')],
+          ['cutoffs', Timer, t('orders.settings', 'Hours & fees'), () => setPanel(panel === 'cutoffs' ? null : 'cutoffs')],
           ['standing', Repeat, t('orders.standing', 'Weekly'), () => setPanel(panel === 'standing' ? null : 'standing')],
         ].map(([key, Icon, lbl, fn]) => (
           <button
@@ -453,8 +454,8 @@ export default function OrdersTab({ API, token }) {
 
       {panel === 'staff' && <StaffLinkPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'import' && <ImportCustomersPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
-      {panel === 'couriers' && <CouriersPanel API={API} auth={auth} businessId={biz.id} couriers={couriers} onChanged={loadCouriers} onClose={() => setPanel(null)} />}
-      {panel === 'cutoffs' && <CutoffsPanel API={API} auth={auth} businessId={biz.id} cutoffs={cutoffs} onSaved={loadSettings} onClose={() => setPanel(null)} />}
+      {panel === 'couriers' && <CouriersPanel API={API} auth={auth} businessId={biz.id} couriers={couriers} settings={settings} onChanged={() => Promise.all([loadCouriers(), loadSettings(), load()])} onClose={() => setPanel(null)} />}
+      {panel === 'cutoffs' && <SettingsPanel API={API} auth={auth} businessId={biz.id} settings={settings} couriers={couriers} onSaved={() => Promise.all([loadSettings(), load()])} onClose={() => setPanel(null)} />}
       {panel === 'standing' && <StandingPanel API={API} auth={auth} standing={standing} onChanged={() => Promise.all([loadSettings(), load()])} onClose={() => setPanel(null)} />}
 
       {/* Range tabs */}
@@ -1217,24 +1218,23 @@ function MoneyStrip({ orders, t }) {
 }
 
 /**
- * The trusted list (spec O5). A courier is a relationship: the friend
- * with the scooter, by name and phone, no account. Each one has their
- * own run-sheet link; the owner sends it once on WhatsApp.
+ * Couriers (spec O5, revised): people with accounts. Invite by email;
+ * they accept in their dashboard; their deliveries land there. The
+ * first courier to accept becomes the default automatically.
  */
-function CouriersPanel({ API, auth, businessId, couriers, onChanged, onClose }) {
+function CouriersPanel({ API, auth, businessId, couriers, settings, onChanged, onClose }) {
   const { t } = useTranslation();
-  const [name, setName] = useState('');
-  const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [busy, setBusy] = useState(false);
-  const phoneErr = phoneError(phone, t);
 
-  const add = async (e) => {
+  const invite = async (e) => {
     e.preventDefault();
-    if (!name.trim() || !phone.trim() || phoneErr) return;
+    if (!email.trim()) return;
     setBusy(true);
     try {
-      await axios.post(`${API}/marketplace/businesses/${businessId}/couriers`, { name: name.trim(), phone: phone.trim() }, auth);
-      setName(''); setPhone('');
+      await axios.post(`${API}/marketplace/businesses/${businessId}/couriers/invite`, { email: email.trim() }, auth);
+      setEmail('');
+      toast.success(t('orders.invited', 'Invite sent'));
       await onChanged();
     } catch (err) {
       toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
@@ -1245,10 +1245,10 @@ function CouriersPanel({ API, auth, businessId, couriers, onChanged, onClose }) 
 
   const remove = async (c) => {
     // eslint-disable-next-line no-alert
-    if (!window.confirm(t('orders.courierRemoveConfirm', 'Remove {{name}}? Their link stops working and their open deliveries go back to unassigned.', { name: c.name }))) return;
+    if (!window.confirm(t('orders.courierRemoveConfirm', 'Remove {{name}}? Their open deliveries go back to unassigned.', { name: c.name || c.email }))) return;
     setBusy(true);
     try {
-      await axios.delete(`${API}/marketplace/businesses/${businessId}/couriers/${c.id}`, auth);
+      await axios.delete(`${API}/marketplace/businesses/${businessId}/couriers/${encodeURIComponent(c.user_id || c.email)}`, auth);
       await onChanged();
     } catch (err) {
       toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
@@ -1257,16 +1257,13 @@ function CouriersPanel({ API, auth, businessId, couriers, onChanged, onClose }) 
     }
   };
 
-  const input = 'px-3 min-h-[44px] rounded-lg border text-base bg-white';
-  const inputStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
-
   return (
     <div className="rounded-2xl border p-4 mb-4 bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="couriers-panel">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="font-bold" style={{ color: 'var(--ink)' }}>{t('orders.couriersTitle', 'Your couriers')}</h3>
           <p className="text-sm mt-1" style={{ color: 'var(--brand-muted)' }}>
-            {t('orders.couriersBody', 'People you trust with a delivery - by name and phone, no account needed. Each gets their own run-sheet link; assign an order to them and send it once.')}
+            {t('orders.couriersBody', 'Invite the people who deliver for you by the email they use on MyIsraelRental. When they accept, every delivery goes straight to their Deliveries tab.')}
           </p>
         </div>
         <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}>
@@ -1276,36 +1273,28 @@ function CouriersPanel({ API, auth, businessId, couriers, onChanged, onClose }) 
 
       {couriers.length > 0 && (
         <ul className="mt-3 divide-y" style={{ borderColor: 'var(--brand-border)' }}>
-          {couriers.map((c) => {
-            const url = `${window.location.origin}/orders/courier/${c.token}`;
-            return (
-              <li key={c.id} className="py-2 flex flex-wrap items-center gap-2" data-testid={`courier-${c.id}`}>
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold" dir="auto" style={{ color: 'var(--ink)' }}>{c.name}</div>
-                  <div className="text-xs" dir="ltr" style={{ color: 'var(--brand-muted)' }}>{c.phone}</div>
+          {couriers.map((c) => (
+            <li key={c.user_id || c.email} className="py-2 flex flex-wrap items-center gap-2" data-testid={`courier-${c.user_id || c.email}`}>
+              <div className="min-w-0 flex-1">
+                <div className="text-sm font-semibold" dir="auto" style={{ color: 'var(--ink)' }}>
+                  {c.name || c.email}
+                  {settings?.default_courier_user_id && c.user_id === settings.default_courier_user_id && <span className="ms-2 text-[10px] px-1.5 py-0.5 rounded font-semibold" style={{ background: 'var(--accent-soft)', color: 'var(--accent-soft-ink)' }}>{t('orders.defaultBadge', 'default')}</span>}
                 </div>
-                <a href={`https://wa.me/${c.phone_e164}?text=${encodeURIComponent(t('orders.courierLinkText', 'Your run sheet from {{name}}: {{url}}', { name: '', url }).replace(/^[^:]*: /, ''))}`} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="courier-send-link">
-                  <MessageCircle size={12} /> {t('orders.courierSendLink', 'Send their link')}
-                </a>
-                <a href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
-                  <Link2 size={12} /> {t('orders.staff.open', 'Open')}
-                </a>
-                <button type="button" disabled={busy} onClick={() => remove(c)} className="inline-flex items-center justify-center min-h-[40px] min-w-[40px] rounded-full" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.courierRemove', 'Remove')} data-testid="courier-remove">
-                  <Trash2 size={14} />
-                </button>
-              </li>
-            );
-          })}
+                <div className="text-xs" dir="ltr" style={{ color: 'var(--brand-muted)' }}>{c.email}{c.status !== 'active' ? ` · ${t('orders.courierInvited', 'invited, not accepted yet')}` : ''}</div>
+              </div>
+              <button type="button" disabled={busy} onClick={() => remove(c)} className="inline-flex items-center justify-center min-h-[40px] min-w-[40px] rounded-full" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.courierRemove', 'Remove')} data-testid="courier-remove">
+                <Trash2 size={14} />
+              </button>
+            </li>
+          ))}
         </ul>
       )}
 
-      <form onSubmit={add} className="flex flex-wrap gap-2 mt-3" data-testid="courier-add-form">
-        <input value={name} onChange={(e) => setName(e.target.value)} placeholder={t('orders.courierName', 'Name')} dir="auto" className={`${input} flex-1 min-w-[140px]`} style={inputStyle} data-testid="courier-name" />
-        <input value={phone} onChange={(e) => setPhone(e.target.value)} type="tel" inputMode="tel" placeholder="050-123-4567" className={`${input} flex-1 min-w-[140px]`} style={{ ...inputStyle, borderColor: phoneErr ? 'var(--ink)' : 'var(--brand-border)' }} data-testid="courier-phone" />
-        <button type="submit" disabled={busy || !name.trim() || !phone.trim() || !!phoneErr} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-50" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="courier-add">
-          {busy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} {t('orders.courierAdd', 'Add courier')}
+      <form onSubmit={invite} className="flex flex-wrap gap-2 mt-3" data-testid="courier-invite-form">
+        <input value={email} onChange={(e) => setEmail(e.target.value)} type="email" inputMode="email" placeholder={t('orders.courierEmailPh', 'courier@example.com')} className="px-3 min-h-[44px] rounded-lg border text-base bg-white flex-1 min-w-[200px]" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="courier-email" />
+        <button type="submit" disabled={busy || !email.trim()} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-50" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="courier-invite">
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Plus size={14} />} {t('orders.courierInviteBtn', 'Invite')}
         </button>
-        {phoneErr && <p className="w-full text-[11px]" style={{ color: 'var(--ink)' }}>{phoneErr}</p>}
       </form>
     </div>
   );
@@ -1314,24 +1303,32 @@ function CouriersPanel({ API, auth, businessId, couriers, onChanged, onClose }) 
 const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
 
 /**
- * Cutoffs (spec O8): "Friday orders close Thursday 2pm". One per
- * weekday. Shown on the business page and warned about in the form.
+ * Hours & fees (spec O8, revised): cutoffs per weekday, pickup and
+ * delivery windows per weekday, delivery fee, minimum order, and the
+ * default courier every delivery goes to automatically.
  */
-function CutoffsPanel({ API, auth, businessId, cutoffs, onSaved, onClose }) {
+function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onClose }) {
   const { t } = useTranslation();
-  const [rows, setRows] = useState(cutoffs.length ? cutoffs : [{ for_day: 5, closes_day: 4, closes_time: '14:00' }]);
+  const [rows, setRows] = useState(settings.cutoffs.length ? settings.cutoffs : []);
+  const [pickup, setPickup] = useState(settings.pickup_windows || []);
+  const [delivery, setDelivery] = useState(settings.delivery_windows || []);
+  const [fee, setFee] = useState(settings.delivery_fee == null ? '' : String(settings.delivery_fee));
+  const [minOrder, setMinOrder] = useState(settings.min_order == null ? '' : String(settings.min_order));
+  const [courier, setCourier] = useState(settings.default_courier_user_id || '');
   const [busy, setBusy] = useState(false);
-  const set = (i, k, v) => setRows((r) => r.map((row, j) => (j === i ? { ...row, [k]: v } : row)));
-  const usedDays = new Set(rows.map((r) => r.for_day));
   const dayName = (d) => t(`weekday.${d}`, String(d));
+  const active = (couriers || []).filter((c) => c.status === 'active');
 
   const save = async () => {
     setBusy(true);
     try {
-      const { data } = await axios.put(`${API}/marketplace/businesses/${businessId}/orders/settings`, { cutoffs: rows }, auth);
-      setRows(data.cutoffs);
+      await axios.put(`${API}/marketplace/businesses/${businessId}/orders/settings`, {
+        cutoffs: rows, pickup_windows: pickup, delivery_windows: delivery,
+        delivery_fee: fee === '' ? null : Number(fee), min_order: minOrder === '' ? null : Number(minOrder),
+        default_courier_user_id: courier || null,
+      }, auth);
       await onSaved();
-      toast.success(t('orders.cutoffsSaved', 'Cutoffs saved - they show on your page'));
+      toast.success(t('orders.settingsSaved', 'Saved - customers see this on your page'));
     } catch (err) {
       const d = err?.response?.data?.detail;
       toast.error(typeof d === 'string' ? d : t('orders.saveFailed', 'Could not save'));
@@ -1342,39 +1339,87 @@ function CutoffsPanel({ API, auth, businessId, cutoffs, onSaved, onClose }) {
 
   const sel = 'px-2 min-h-[40px] rounded-lg border text-sm bg-white';
   const selStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
+  const h = (txt) => <h4 className="text-xs font-bold uppercase tracking-wide mt-4 mb-2" style={{ color: 'var(--brand-muted)' }}>{txt}</h4>;
+  const windowsEditor = (list, setList, testid) => (
+    <div className="space-y-2" data-testid={testid}>
+      {list.map((w, i) => (
+        <div key={i} className="grid grid-cols-[1fr_auto] sm:grid-cols-[1fr_auto_auto_auto_auto] items-center gap-2 text-sm" style={{ color: 'var(--ink)' }}>
+          <select value={w.weekday} onChange={(e) => setList((l) => l.map((x, j) => (j === i ? { ...x, weekday: Number(e.target.value) } : x)))} className={`${sel} min-w-0`} style={selStyle}>
+            {WEEKDAYS.map((d) => <option key={d} value={d}>{dayName(d)}</option>)}
+          </select>
+          <button type="button" onClick={() => setList((l) => l.filter((_, j) => j !== i))} className="inline-flex items-center justify-center min-h-[40px] min-w-[40px] rounded-full sm:order-last" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.courierRemove', 'Remove')}><Trash2 size={14} /></button>
+          <input type="time" value={w.start} onChange={(e) => setList((l) => l.map((x, j) => (j === i ? { ...x, start: e.target.value } : x)))} className={`${sel} min-w-0`} style={selStyle} />
+          <span className="hidden sm:inline">–</span>
+          <input type="time" value={w.end} onChange={(e) => setList((l) => l.map((x, j) => (j === i ? { ...x, end: e.target.value } : x)))} className={`${sel} min-w-0`} style={selStyle} />
+        </div>
+      ))}
+      <button type="button" onClick={() => setList((l) => [...l, { weekday: 5, start: '08:00', end: '12:00' }])} className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={selStyle}>
+        <Plus size={13} /> {t('orders.windowAdd', 'Add a window')}
+      </button>
+    </div>
+  );
+
   return (
-    <div className="rounded-2xl border p-4 mb-4 bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="cutoffs-panel">
+    <div className="rounded-2xl border p-4 mb-4 bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="settings-panel">
       <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="font-bold" style={{ color: 'var(--ink)' }}>{t('orders.cutoffsTitle', 'Order cutoffs')}</h3>
-          <p className="text-sm mt-1" style={{ color: 'var(--brand-muted)' }}>{t('orders.cutoffsBody', 'When orders for a given day close. Shown on your page; the form warns you when an order comes in late, but you decide.')}</p>
+          <h3 className="font-bold" style={{ color: 'var(--ink)' }}>{t('orders.settingsTitle', 'Hours, fees and your courier')}</h3>
+          <p className="text-sm mt-1" style={{ color: 'var(--brand-muted)' }}>{t('orders.settingsBody', 'What customers can pick when they order on your page, and who your deliveries go to.')}</p>
         </div>
         <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}><X size={18} /></button>
       </div>
-      <div className="mt-3 space-y-2">
+
+      {h(t('orders.defaultCourier', 'Default courier'))}
+      <select value={courier} onChange={(e) => setCourier(e.target.value)} className={sel} style={selStyle} data-testid="settings-courier">
+        <option value="">{t('orders.noDefaultCourier', 'None - deliveries wait for me to assign them')}</option>
+        {active.map((c) => <option key={c.user_id} value={c.user_id}>{c.name || c.email}</option>)}
+      </select>
+      <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('orders.defaultCourierHint', 'Every delivery goes to them the moment it exists. You can move any order to someone else on its card.')}</p>
+
+      {h(t('orders.pickupWindows', 'Pickup times'))}
+      {windowsEditor(pickup, setPickup, 'settings-pickup-windows')}
+      {h(t('orders.deliveryWindows', 'Delivery times'))}
+      {windowsEditor(delivery, setDelivery, 'settings-delivery-windows')}
+      <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('orders.windowsHint', 'No windows on a day means customers pick the day and you confirm the time.')}</p>
+
+      {h(t('orders.feesTitle', 'Delivery fee and minimum'))}
+      <div className="grid grid-cols-2 gap-3">
+        <div>
+          <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--brand-muted)' }} htmlFor="settings-fee">{t('orders.deliveryFee', 'Delivery fee (₪)')}</label>
+          <input id="settings-fee" type="number" inputMode="decimal" min="0" step="0.5" value={fee} onChange={(e) => setFee(e.target.value)} className={`${sel} w-full`} style={selStyle} placeholder="0" data-testid="settings-fee" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--brand-muted)' }} htmlFor="settings-min">{t('orders.minOrder', 'Minimum for delivery (₪)')}</label>
+          <input id="settings-min" type="number" inputMode="decimal" min="0" step="1" value={minOrder} onChange={(e) => setMinOrder(e.target.value)} className={`${sel} w-full`} style={selStyle} placeholder="—" data-testid="settings-min" />
+        </div>
+      </div>
+
+      {h(t('orders.cutoffsTitle', 'Order cutoffs'))}
+      <div className="space-y-2">
         {rows.map((r, i) => (
           <div key={i} className="flex flex-wrap items-center gap-2 text-sm" style={{ color: 'var(--ink)' }} data-testid={`cutoff-row-${i}`}>
-            <select value={r.for_day} onChange={(e) => set(i, 'for_day', Number(e.target.value))} className={sel} style={selStyle} aria-label={t('orders.cutoffFor', 'Orders for')}>
-              {WEEKDAYS.map((d) => <option key={d} value={d} disabled={d !== r.for_day && usedDays.has(d)}>{dayName(d)}</option>)}
+            <select value={r.for_day} onChange={(e) => setRows((rs) => rs.map((x, j) => (j === i ? { ...x, for_day: Number(e.target.value) } : x)))} className={sel} style={selStyle} aria-label={t('orders.cutoffFor', 'Orders for')}>
+              {WEEKDAYS.map((d) => <option key={d} value={d} disabled={d !== r.for_day && rows.some((x) => x.for_day === d)}>{dayName(d)}</option>)}
             </select>
             <span>{t('orders.cutoffClose', 'close')}</span>
-            <select value={r.closes_day} onChange={(e) => set(i, 'closes_day', Number(e.target.value))} className={sel} style={selStyle} aria-label={t('orders.cutoffOn', 'on')}>
+            <select value={r.closes_day} onChange={(e) => setRows((rs) => rs.map((x, j) => (j === i ? { ...x, closes_day: Number(e.target.value) } : x)))} className={sel} style={selStyle} aria-label={t('orders.cutoffOn', 'on')}>
               {WEEKDAYS.map((d) => <option key={d} value={d}>{dayName(d)}</option>)}
             </select>
-            <input type="time" value={r.closes_time} onChange={(e) => set(i, 'closes_time', e.target.value)} className={sel} style={selStyle} aria-label={t('orders.cutoffAt', 'at')} />
+            <input type="time" value={r.closes_time} onChange={(e) => setRows((rs) => rs.map((x, j) => (j === i ? { ...x, closes_time: e.target.value } : x)))} className={sel} style={selStyle} aria-label={t('orders.cutoffAt', 'at')} />
             <button type="button" onClick={() => setRows((rs) => rs.filter((_, j) => j !== i))} className="inline-flex items-center justify-center min-h-[40px] min-w-[40px] rounded-full" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.courierRemove', 'Remove')}><Trash2 size={14} /></button>
           </div>
         ))}
-      </div>
-      <div className="flex flex-wrap items-center gap-2 mt-3">
-        <button type="button" disabled={busy} onClick={save} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-50" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="cutoffs-save">
-          {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} {t('orders.save', 'Save')}
-        </button>
         {rows.length < 7 && (
-          <button type="button" onClick={() => setRows((rs) => [...rs, { for_day: WEEKDAYS.find((d) => !usedDays.has(d)), closes_day: 4, closes_time: '14:00' }])} className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-sm font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
-            <Plus size={14} /> {t('orders.cutoffAdd', 'Another day')}
+          <button type="button" onClick={() => setRows((rs) => [...rs, { for_day: WEEKDAYS.find((d) => !rs.some((x) => x.for_day === d)), closes_day: 4, closes_time: '14:00' }])} className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={selStyle}>
+            <Plus size={13} /> {t('orders.cutoffAdd', 'Another day')}
           </button>
         )}
+      </div>
+
+      <div className="mt-4">
+        <button type="button" disabled={busy} onClick={save} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-50" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="settings-save">
+          {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} {t('orders.saveSettings', 'Save')}
+        </button>
       </div>
     </div>
   );
