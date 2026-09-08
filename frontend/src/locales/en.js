@@ -634,6 +634,13 @@ const en = {
             forWho: 'Anyone with a trade, a shop or a service \u2014 not only property owners.',
             cta: 'Set up my page',
           },
+          'orders-and-delivery': {
+            title: 'Orders and deliveries without the spreadsheet',
+            benefit: 'Paste a WhatsApp order, hand a delivery to your courier, keep every shekel. No commission.',
+            body: 'Type what the customer asked for, or paste their message and the form fills itself. Your staff see the day on their own screen with no login. Hand a delivery to the friend with the scooter and they get one list: Waze, the items, what is due. The customer gets a link that says where their order is. Challah every Friday? Set it once. Delivery apps take 22% and more of every order; this takes nothing.',
+            forWho: 'Bakeries, caterers, florists, grocers \u2014 any shop that takes orders by phone and WhatsApp.',
+            cta: 'Open my orders',
+          },
           'put-it-on-a-flyer': {
             title: 'Put your business on a flyer',
             benefit: 'A short link and a QR code, and a count of how many people used them.',
@@ -1280,6 +1287,8 @@ const en = {
         attentionBookings: '{{n}} bookings awaiting your reply',
         attentionExpiring: '{{n}} requests expiring this week',
         attentionResponses: '{{n}} requests have replies',
+        attentionOrdersToday: '{{n}} orders due today',
+        attentionOrdersNew: '{{n}} new orders not started',
         attentionOffers: '{{n}} work offers you have not answered',
         sharePanelBody: 'One link showing everything you have listed. Send it to anyone.',
         sharePanelBody2: 'One link and a QR code for everything you have listed. Send it in a message, or print the code for a flyer or a sign.',

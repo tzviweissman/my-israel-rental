@@ -260,6 +260,9 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
               summary.requests_expiring_soon > 0 && { key: 'expiring', tab: 'my-requests', text: t('dashboard.attentionExpiring', '{{n}} requests expiring this week', { n: summary.requests_expiring_soon }) },
               summary.requests_with_responses > 0 && { key: 'responses', tab: 'my-requests', text: t('dashboard.attentionResponses', '{{n}} requests have replies', { n: summary.requests_with_responses }) },
               summary.work_offers_open > 0 && { key: 'offers', tab: 'job-requests', text: t('dashboard.attentionOffers', '{{n}} work offers you have not answered', { n: summary.work_offers_open }) },
+              // Store orders: today's board, and anything nobody has started.
+              summary.orders_due_today > 0 && { key: 'orders-today', tab: 'orders', text: t('dashboard.attentionOrdersToday', '{{n}} orders due today', { n: summary.orders_due_today }) },
+              summary.orders_new > 0 && { key: 'orders-new', tab: 'orders', text: t('dashboard.attentionOrdersNew', '{{n}} new orders not started', { n: summary.orders_new }) },
             ].filter(Boolean);
             if (!rows.length) {
               return <p className="text-sm" style={{ color: 'var(--brand-muted)' }} data-testid="overview-attention-empty">{t('overview.attentionNone', 'All clear.')}</p>;

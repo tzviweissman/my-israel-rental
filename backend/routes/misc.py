@@ -521,10 +521,24 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "expires_at": {"$lte": week, "$gte": now.isoformat()},
     })
 
+    # Store orders (docs/orders-and-delivery-spec.md): what is due today
+    # across every business this person owns, and what is still `new`
+    # (nobody has started it). Both feed the Overview's attention list so
+    # a Friday morning does not hide behind a tab.
+    from zoneinfo import ZoneInfo
+    today_il = datetime.now(ZoneInfo("Asia/Jerusalem")).date().isoformat()
+    orders_due_today = await db.store_orders.count_documents({
+        "owner_user_id": uid, "status": {"$in": ["new", "preparing", "ready"]},
+        "needed_by": {"$gte": today_il, "$lte": today_il + "￿"},
+    })
+    orders_new = await db.store_orders.count_documents({"owner_user_id": uid, "status": "new"})
+
     return {
         "bookings_awaiting_reply": bookings_awaiting,
         "work_offers_open": work_offers,
         "requests_with_responses": requests_with_responses,
         "requests_expiring_soon": requests_expiring,
         "gigs_count": gigs_count,
+        "orders_due_today": orders_due_today,
+        "orders_new": orders_new,
     }

@@ -46,6 +46,17 @@ export const FEATURES = [
     built: 'frontend/src/pages/BusinessPage.jsx',
   },
   {
+    // Store orders and delivery (docs/orders-and-delivery-spec.md). The
+    // zero-commission line in its copy is a real argument here, not a
+    // slogan: Wolt's published average is 22%, and the spec says to say
+    // it plainly on the page that sells this.
+    slug: 'orders-and-delivery',
+    icon: 'ClipboardList',
+    audiences: ['business'],
+    cta: '/dashboard?tab=orders',
+    built: 'backend/routes/marketplace/orders.py',
+  },
+  {
     slug: 'put-it-on-a-flyer',
     icon: 'QrCode',
     audiences: ['business', 'host'],
