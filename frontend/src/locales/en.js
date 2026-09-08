@@ -1452,7 +1452,7 @@ const en = {
         v2: {
           hero: {
             kick: 'Rentals · Businesses · Requests',
-            sub: 'Every card behind this text is a real listing or business on the site right now.',
+            sub: 'Free to search, free to list, no commission.',
             ctaBusinesses: 'Find a business',
             ctaAdd: 'Add your business — free',
           },

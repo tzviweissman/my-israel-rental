@@ -405,3 +405,53 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
 @media (min-width: 1024px) {
   body.theme-preview #root { zoom: 0.8; }
 }
+
+/* ── The film hero (preview page) ─────────────────────────────────────
+   A generated loop of glass blocks that build, burst and resolve into a
+   skyline of gold glass, behind the headline. The build happens on the
+   right two-thirds of the frame by design (the stills were composed that
+   way), so the copy sits on the quiet left over a soft white scrim and is
+   never on top of the motion. Phones get a portrait render (the build in
+   the lower two-thirds, the copy above it). */
+.hv2-hero--film { position: relative; background: #fff; }
+.hv2-hero--film .hv2-film {
+  position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: 62% 50%;
+  background: #fff;
+}
+.hv2-hero--film .hv2-hero-scrim {
+  background:
+    linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, .92) 30%, rgba(255, 255, 255, .55) 46%, rgba(255, 255, 255, 0) 62%),
+    linear-gradient(180deg, rgba(255, 255, 255, .7) 0%, rgba(255, 255, 255, 0) 26%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, .85) 100%);
+}
+.hv2-hero--film .hv2-hero-inner {
+  align-items: flex-start; text-align: start;
+  max-width: 1180px; margin-inline: auto;
+  padding-inline: clamp(20px, 5vw, 56px);
+}
+.hv2-hero--film .hv2-hero-inner > div:first-child { max-width: 560px; }
+.hv2-hero--film .hv2-hero-tagline { justify-content: flex-start; }
+.hv2-hero--film .hv2-hero-foot { align-items: flex-start; }
+.hv2-hero--film .hv2-hero-foot p { text-align: start; }
+.hv2-hero--film .hv2-hero-ctas { justify-content: flex-start; }
+@media (max-width: 760px) {
+  .hv2-hero--film .hv2-film { object-position: 50% 100%; }
+  .hv2-hero--film .hv2-hero-scrim {
+    /* The copy runs to about half the screen on a phone, so the white holds
+       to there and the build shows beneath it. */
+    background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, .94) 48%, rgba(255, 255, 255, .6) 60%, rgba(255, 255, 255, 0) 72%, rgba(255, 255, 255, .8) 100%);
+  }
+  .hv2-hero--film .hv2-hero-inner { justify-content: flex-start; gap: 22px; }
+  .hv2-hero--film .hv2-film { object-position: 50% 115%; }
+}
+/* Tablets: the portrait render (the build in the lower two-thirds) under the
+   desktop copy layout (the foot at the bottom), so the foot needs paper under
+   it. Between the phone rules above and the desktop ones. */
+@media (min-width: 761px) and (max-width: 1000px) {
+  .hv2-hero--film .hv2-hero-scrim {
+    background:
+      linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, .8) 34%, rgba(255, 255, 255, 0) 60%),
+      linear-gradient(180deg, rgba(255, 255, 255, .7) 0%, rgba(255, 255, 255, 0) 24%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, .94) 70%, #fff 100%);
+  }
+  .hv2-hero--film .hv2-film { object-position: 50% 40%; }
+}

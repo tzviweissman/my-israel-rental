@@ -35,7 +35,7 @@ import {
   GalleryGridCell,
 } from '../components/ui/cta-section-with-gallery';
 import useFavorites from '../hooks/useFavorites';
-import ImageStreamHero from '../components/ui/image-stream-hero';
+import FilmBackground from '../components/home/FilmBackground';
 import AntiMetalButton from '../components/ui/anti-metal-button';
 import LiquidButton from '../components/ui/liquid-button';
 import FlowButton from '../components/ui/flow-button';
@@ -94,7 +94,7 @@ function useReveal(root) {
 export default function HomePreview() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { streamImages, gallery, picks, hasDeals, rentals, businesses, loaded } = useHomeShowcase();
+  const { gallery, picks, hasDeals, rentals, businesses, loaded } = useHomeShowcase();
   // Which card the coverflow has centred. The component names it in its
   // caption but cannot open it, so the page renders the control.
   const [pick, setPick] = useState(0);
@@ -148,20 +148,22 @@ export default function HomePreview() {
         noindex
       />
 
-      {/* ── Hero: the corridor of real listings and businesses ─────────── */}
-      <ImageStreamHero
-        images={streamImages}
-        // Twelve, not the component's default nine: both rails walk the same
-        // sequence from index 0, so `cards` is also how many DISTINCT photos
-        // ever appear. Nine cards showed nine listings and ignored the rest.
-        // Raising it only makes the corridor denser (the tearing failure mode
-        // is lowering it), so this is the safe direction.
-        cards={12}
-        speed={22}
-        axis={56}
-        className="hv2-hero"
-        data-testid="home-preview-hero"
-      >
+      {/* ── Hero: the film ────────────────────────────────────────────────
+          Tzvi, 8 Sep 2026: a cinematic background that builds, transforms
+          and morphs, in the spirit of a motion piece he sent (glass blocks
+          assembling, bursting, flowing, resolving). Generated on Higgsfield
+          as three legs anchored on shared stills, so the joints are
+          frame-locked and the last frame returns to the first: it loops
+          without a visible restart. The blocks resolve into a skyline of
+          gold glass, the site's mark. Answers on file: multicolour like
+          the reference, loops forever, full-bleed with the headline on the
+          quiet left, a portrait render for phones.
+
+          Preview page only (body.theme-preview). The corridor of real
+          listings (ImageStreamHero) stays in the codebase; this page just
+          no longer mounts it. Reduced motion gets the poster, still. */}
+      <section className="hv2-hero hv2-hero--film" data-testid="home-preview-hero">
+        <FilmBackground />
         <div className="hv2-hero-scrim" aria-hidden="true" />
         <div className="hv2-hero-inner">
           <div>
@@ -182,7 +184,7 @@ export default function HomePreview() {
             </p>
           </div>
           <div className="hv2-hero-foot">
-            <p>{t('home.v2.hero.sub', 'Every card behind this text is a real listing or business on the site right now.')}</p>
+            <p>{t('home.v2.hero.sub', 'Free to search, free to list, no commission.')}</p>
             <div className="hv2-hero-ctas">
               {/* The SOLID liquid button is used once on the page, here.
                   This is the single action the home page most wants — a
@@ -207,7 +209,7 @@ export default function HomePreview() {
             </button>
           </div>
         </div>
-      </ImageStreamHero>
+      </section>
 
       {/* ── Doors ──────────────────────────────────────────────────────── */}
       <section className="hv2-pad hv2-doors-wrap">
