@@ -19,6 +19,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel, Field
 
 from routes.deps import db, verify_token
+from routes.marketplace.gigs import _has_any_photo
 from routes.marketplace.shared import HAS_ANY_PHOTO
 
 router = APIRouter()
@@ -62,7 +63,7 @@ async def admin_gigs(
     biz_ids = list({g.get("business_id") for g in gigs if g.get("business_id")})
     businesses = {
         b["_id"]: b
-        async for b in db.businesses.find({"_id": {"$in": biz_ids}}, {"_id": 1, "name": 1})
+        async for b in db.businesses.find({"_id": {"$in": biz_ids}}, {"_id": 1, "name": 1, "verified": 1})
     } if biz_ids else {}
 
     out = []
@@ -72,13 +73,15 @@ async def admin_gigs(
         products = g.get("products") or []
         if not prices and products:
             prices = [p.get("price") for p in products if p.get("price") is not None]
+        biz = businesses.get(g.get("business_id")) or {}
         out.append({
             "id": g["_id"],
             "title": g.get("title") or "",
             "business_id": g.get("business_id"),
             # None, not "Unknown": a missing business is a real state worth
             # seeing in the console rather than a label that hides it.
-            "business_name": (businesses.get(g.get("business_id")) or {}).get("name"),
+            "business_name": biz.get("name"),
+            "business_verified": bool(biz.get("verified")),
             "provider_user_id": g.get("provider_user_id"),
             "category": g.get("category"),
             "area": g.get("area"),
@@ -86,6 +89,11 @@ async def admin_gigs(
             "currency": (tiers[0].get("currency") if tiers else None) or "ILS",
             "status": g.get("status"),
             "featured": bool(g.get("featured")),
+            # The attention queue's "no photo" row promised a way to find
+            # these; the same check it counts with (HAS_ANY_PHOTO / spec S5)
+            # so the console and the queue never disagree about which
+            # listings are photoless.
+            "has_photo": _has_any_photo(g),
             "created_at": g.get("created_at"),
         })
     return out

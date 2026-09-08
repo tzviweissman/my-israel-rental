@@ -1,12 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar, Briefcase, MapPin, Mail } from 'lucide-react';
+import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar, Briefcase, MapPin, Mail, Flag } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { useApiSWR } from '../hooks/useApiSWR';
 import { useAdminLiveEvents } from '../hooks/useAdminLiveEvents';
 import OverviewTab from '../components/admin/OverviewTab';
 import SiteQrPanel from '../components/admin/SiteQrPanel';
 import ServicesTab from '../components/admin/ServicesTab';
+import RequestReportsTab from '../components/admin/RequestReportsTab';
 import AreaAliasManager from '../components/admin/AreaAliasManager';
 import ListingsTab from '../components/admin/ListingsTab';
 import UsersTab from '../components/admin/UsersTab';
@@ -44,6 +45,10 @@ const TAB_GROUPS = [
   { group: 'admin.groupDemand', items: [
     { key: 'bookings', labelKey: 'admin.bookings', icon: Calendar },
     { key: 'chats', labelKey: 'admin.chats', icon: MessageCircle },
+    // Dead-ends audit 2026-09-08 finding #1/#2: the attention queue's
+    // "requests expiring" row, and the report queue underneath it, had no
+    // tab to land on — this closes both at once.
+    { key: 'requests', labelKey: 'admin.requestsTab', icon: Flag },
   ] },
   { group: 'admin.groupPeople', items: [
     { key: 'users', labelKey: 'admin.users', icon: Users },
@@ -65,7 +70,12 @@ const TAB_GROUPS = [
   ] },
 ];
 
-const TAB_KEYS = TAB_GROUPS.flatMap((g) => g.items);
+// The closed set `navigate()` checks against, so an attention-queue row or
+// KPI card that names a tab which doesn't exist falls back to Overview
+// instead of setting state nothing matches (dead-ends audit 2026-09-08
+// finding #1 — the same class of bug already fixed once for the owner
+// dashboard's `?tab=` deep link).
+const ADMIN_TAB_IDS = TAB_GROUPS.flatMap((g) => g.items).map((i) => i.key);
 
 /**
  * Super Admin Dashboard — top-level shell.
@@ -78,6 +88,16 @@ const AdminDashboard = () => {
   // Cleared after the Users tab consumes it, so re-clicking the Users
   // tab in the nav resets to a blank search.
   const [usersPrefilter, setUsersPrefilter] = useState('');
+  // Same idea for Services: the attention queue's "no photo" / "not
+  // verified" rows carry a filter so the destination can actually show
+  // which N, not just the tab that contains them somewhere.
+  const [servicesFilter, setServicesFilter] = useState(null);
+
+  const navigate = (tab, filter) => {
+    if (tab === 'services') setServicesFilter(filter || null);
+    if (tab === 'users') setUsersPrefilter('');
+    setActiveTab(ADMIN_TAB_IDS.includes(tab) ? tab : 'overview');
+  };
 
   const { data: dashboard, refresh: fetchDashboard } = useApiSWR(
     `${API}/admin/dashboard`, token
@@ -116,10 +136,7 @@ const AdminDashboard = () => {
         <div className="sm:hidden mb-6">
           <select
             value={activeTab}
-            onChange={(e) => {
-              if (e.target.value === 'users') setUsersPrefilter('');
-              setActiveTab(e.target.value);
-            }}
+            onChange={(e) => navigate(e.target.value)}
             className="w-full px-3 py-2.5 rounded-lg border bg-white text-sm font-medium"
             style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
             data-testid="admin-tabs-mobile"
@@ -156,12 +173,7 @@ const AdminDashboard = () => {
                 return (
                   <button
                     key={tab.key}
-                    onClick={() => {
-                      // A manual click on the Users tab should start blank —
-                      // any leftover prefilter from a Quick Add jump is stale.
-                      if (tab.key === 'users') setUsersPrefilter('');
-                      setActiveTab(tab.key);
-                    }}
+                    onClick={() => navigate(tab.key)}
                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${activeTab === tab.key ? 'bg-[var(--brand-primary)] text-white' : 'bg-white text-gray-700 border border-[var(--brand-border)] hover:bg-gray-50'}`}
                     data-testid={`admin-tab-${tab.key}`}
                   >
@@ -176,14 +188,15 @@ const AdminDashboard = () => {
 
         {activeTab === 'overview' && (
           <>
-            <OverviewTab dashboard={dashboard} token={token} onNavigate={setActiveTab} />
+            <OverviewTab dashboard={dashboard} token={token} onNavigate={navigate} />
             {/* Codes for advertising the site itself — one per campaign,
                 each with its own scan count. */}
             <SiteQrPanel API={API} token={token} />
           </>
         )}
         {activeTab === 'listings' && <ListingsTab token={token} onStatsChange={fetchDashboard} />}
-        {activeTab === 'services' && <ServicesTab token={token} />}
+        {activeTab === 'services' && <ServicesTab token={token} initialFilter={servicesFilter} />}
+        {activeTab === 'requests' && <RequestReportsTab token={token} />}
         {activeTab === 'areas' && <AreaAliasManager token={token} />}
         {activeTab === 'bookings' && <BookingsTab token={token} />}
         {activeTab === 'users' && <UsersTab token={token} onStatsChange={fetchDashboard} prefilter={usersPrefilter} />}

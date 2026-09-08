@@ -1396,6 +1396,7 @@ const he = {
         listings: 'נכסים',
         users: 'משתמשים',
         chats: 'צ׳אטים',
+        requestsTab: 'בקשות',
         smartLists: 'רשימות חכמות',
         import: 'ייבוא',
         services: 'שירותי מסמכים',

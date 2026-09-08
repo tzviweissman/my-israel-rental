@@ -61,6 +61,10 @@ export default function AttentionQueue({ token, onNavigate }) {
       Icon: ImageOff,
       text: (n) => `${n} published service${n === 1 ? '' : 's'} with no photo`,
       go: 'services',
+      // Services tab applies this as a client-side filter on arrival —
+      // otherwise the count is trivia the admin can't act on (dead-ends
+      // audit 2026-09-08, finding #4).
+      filter: 'no-photo',
     },
     {
       key: 'businesses-unverified',
@@ -73,6 +77,8 @@ export default function AttentionQueue({ token, onNavigate }) {
       // not been looked at yet.
       text: (n) => `${n} trading business${n === 1 ? '' : 'es'} not verified yet`,
       go: 'services',
+      // See `filter` note on services-no-photo above (finding #3).
+      filter: 'unverified',
     },
     {
       key: 'emails-bounced',
@@ -99,11 +105,11 @@ export default function AttentionQueue({ token, onNavigate }) {
       >
         Needs attention
       </p>
-      {rows.map(({ key, n, Icon, text, go }) => (
+      {rows.map(({ key, n, Icon, text, go, filter }) => (
         <button
           key={key}
           type="button"
-          onClick={() => onNavigate && onNavigate(go)}
+          onClick={() => onNavigate && onNavigate(go, filter)}
           className="w-full flex items-center gap-3 px-4 py-2.5 text-start border-t hover:bg-gray-50 transition-colors"
           style={{ borderColor: 'var(--brand-border)' }}
           data-testid={`attention-${key}`}
