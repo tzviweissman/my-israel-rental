@@ -70,7 +70,6 @@
   .on-blush { background: var(--blush-pale); color: var(--navy); }
   .accent { color: var(--sc-accent); font-style: italic; }
   .sc-grain { opacity: 0.035; }
-  .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
   /* ----------------------------------------------------------------- bar --
      Fixed at the bottom, the booking pattern a phone already knows. Her
@@ -139,11 +138,17 @@
   .same .sc-copy--lead p { margin: 0; color: var(--muted); font-size: var(--sc-t-base); }
   .pairs {
     position: absolute; inset-inline-start: var(--sc-gutter); top: 50%; translate: 0 -46%;
-    width: min(44vw, 34rem); list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(0.5rem, 1.6vh, 1rem);
+    width: min(44vw, 34rem); list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(0.5rem, 1.6vh, 1rem); margin-top: 2rem;
   }
   .pair { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: var(--sc-4); align-items: baseline; }
-  .pair .before { position: relative; display: inline-block; font-family: var(--font-head); font-size: clamp(1.15rem, 2vw, 1.7rem); color: var(--muted); }
-  .pair .before i { position: absolute; inset-inline-start: -2%; top: 56%; width: 104%; height: 2px; background: var(--rose-text); transform: scaleX(0); transform-origin: 0 50%; }
+  .pair .before { font-family: var(--font-head); font-size: clamp(1.15rem, 2vw, 1.7rem); color: var(--muted); }
+  /* Each fragment is one unbreakable run with its own strike, so a phrase
+     that wraps is struck on every line rather than underlined between them. */
+  .pair .before .w {
+    display: inline-block; white-space: nowrap;
+    background-image: linear-gradient(var(--rose-text), var(--rose-text)); background-repeat: no-repeat;
+    background-position: 0 58%; background-size: calc(var(--t, 0) * 100%) 2px;
+  }
   .pair .after { font-family: var(--font-head); font-size: clamp(1.25rem, 2.2vw, 1.9rem); font-weight: 500; color: var(--navy); }
   .pair .after em { font-style: italic; color: var(--rose-text); }
   .pair .after small { display: block; font-family: var(--font-body); font-size: var(--sc-t-xs); color: var(--muted); font-weight: 600; margin-top: 2px; }
@@ -172,6 +177,7 @@
   .bundle .big { font-family: var(--font-body); font-weight: 800; font-size: clamp(2.4rem, 5vw, 4rem); color: var(--rose-gold); line-height: 1; }
   .bundle .big small { display: block; font-weight: 500; font-size: var(--sc-t-sm); color: #C9CFDA; }
   .grad { margin: var(--sc-6) 0 0; padding-inline-start: var(--sc-5); border-inline-start: 3px solid var(--rose-gold); color: #FFFFFF; font-size: var(--sc-t-lg); line-height: 1.4; max-width: 40rem; }
+  .enrol { margin: var(--sc-6) 0 0; color: #C9CFDA; font-size: var(--sc-t-base); }
   .grad b { display: block; margin-top: var(--sc-2); font-family: var(--font-body); font-size: var(--sc-t-sm); font-weight: 600; color: var(--rose-gold); }
 
   /* --------------------------------------------------------------- close --
@@ -202,7 +208,7 @@
     .same .sc-copy--lead h2 { font-size: clamp(1.5rem, 6.4vw, 2rem); }
     .pairs { width: auto; inset-inline: var(--sc-gutter); top: 30vh; translate: none; gap: 0.35rem; }
     .pair { gap: var(--sc-3); }
-    .pair .before { font-size: 1rem; } .pair .after { font-size: 1.1rem; } .pair .after small { display: none; }
+    .pair .before { font-size: 1rem; } .pair .after { font-size: 1.1rem; } .pair .after small { font-size: 0.7rem; }
     .voices { width: auto; inset-inline: var(--sc-gutter); top: auto; bottom: calc(var(--bar-h) + 1rem); translate: none; gap: var(--sc-3); }
     .voice { grid-template-columns: 40px 1fr; } .voice img { width: 40px; height: 40px; } .voice p { font-size: var(--sc-t-xs); }
     .voice:nth-child(3) { display: none; }
@@ -218,12 +224,18 @@
   }
   @media (prefers-reduced-motion: reduce) {
     .card { opacity: 1 !important; }
-    .pair .before i { transform: scaleX(1) !important; }
+    .pair .before { --t: 1 !important; }
   }
 </style>
 </head>
 <body id="top">
 <div class="sc-grain" aria-hidden="true"></div>
+
+<nav class="bar" aria-label="Book">
+  <img class="bar__mark" src="assets/mark.jpg" width="96" height="96" alt="">
+  <p class="bar__assure"><b>Consultation ₪100.</b> Sun to Thu, 10 to 2, by appointment. Bet Shemesh.</p>
+  <a class="cta" href="#close">Message Michal Simkin</a>
+</nav>
 
 <main>
   <!-- 1  Recognition: her headline, her clients dealt one by one -->
@@ -234,7 +246,7 @@
         <h1 data-sc-kinetic="lines">The difference between a wig that works and <em>a wig you love.</em></h1>
         <p class="lede">We create wigs that are a joy to wear, because when your wig feels right, you feel right.</p>
       </div>
-      <div class="deck" id="deck" aria-label="Clients in the salon, photographed by Michal">
+      <div class="deck" id="deck" aria-label="Clients in the salon">
         <figure class="card" style="--r: -7deg; --x: -6%; --y: 3%"><img src="assets/client-8.jpg" width="720" height="960" alt="A client in the salon chair, long dark wig, the wig shelves behind her" loading="eager"></figure>
         <figure class="card" style="--r: 5deg; --x: 5%; --y: -2%"><img src="assets/client-7.jpg" width="720" height="960" alt="A client smiling in a shoulder-length dark wig"></figure>
         <figure class="card" style="--r: -3deg; --x: 2%; --y: 4%"><img src="assets/client-6.jpg" width="720" height="960" alt="A client in a long wavy honey-brown wig"></figure>
@@ -276,24 +288,24 @@
         <p>What clients said about the wig they walked in with, and what they said after. Every pair is one woman's own review.</p>
       </div>
       <ul class="pairs" id="pairs" aria-label="Before and after, in clients' own words">
-        <li class="pair" data-at="0.06"><span class="before">"it's fine"<i></i></span><span class="after" data-sc-cue="0.10 1 0.3 0"><em>cute, light, works amazingly</em><small>Miriam</small></span></li>
-        <li class="pair" data-at="0.18"><span class="before">"dread wearing it"<i></i></span><span class="after" data-sc-cue="0.22 1 0.3 0"><em>brought back to life</em><small>Debbie</small></span></li>
-        <li class="pair" data-at="0.30"><span class="before">"old style, uncomfortable"<i></i></span><span class="after" data-sc-cue="0.34 1 0.3 0"><em>I finally feel myself</em><small>Shaina</small></span></li>
-        <li class="pair" data-at="0.42"><span class="before">"lost its wow factor"<i></i></span><span class="after" data-sc-cue="0.46 1 0.3 0"><em>a fabulous fit</em><small>Tova Leah</small></span></li>
-        <li class="pair" data-at="0.54"><span class="before">"hating all my wigs"<i></i></span><span class="after" data-sc-cue="0.58 1 0.3 0"><em>2 years later, still love it</em><small>Yael</small></span></li>
+        <li class="pair" data-at="0.06"><span class="before"><span class="w">"it's fine"</span></span><span class="after" data-sc-cue="0.10 1 0.3 0"><em>cute, light, works amazingly</em><small>Miriam</small></span></li>
+        <li class="pair" data-at="0.18"><span class="before"><span class="w">"dread wearing it"</span></span><span class="after" data-sc-cue="0.22 1 0.3 0"><em>brought the sheitl back to life</em><small>Debbie</small></span></li>
+        <li class="pair" data-at="0.30"><span class="before"><span class="w">"super old style</span> <span class="w">and uncomfortable"</span></span><span class="after" data-sc-cue="0.34 1 0.3 0"><em>I finally feel myself</em><small>Shaina</small></span></li>
+        <li class="pair" data-at="0.42"><span class="before"><span class="w">"lost its wow factor"</span></span><span class="after" data-sc-cue="0.46 1 0.3 0"><em>a fabulous fit</em><small>Tova Leah</small></span></li>
+        <li class="pair" data-at="0.54"><span class="before"><span class="w">"hating all my wigs"</span></span><span class="after" data-sc-cue="0.58 1 0.3 0"><em>2 years later, still love it</em><small>Yael</small></span></li>
       </ul>
       <div class="voices">
-        <figure class="voice" data-sc-cue="0.34 1 0.3 0">
+        <figure class="voice" data-sc-cue="0.12 1 0.3 0">
           <img src="assets/debbie.jpg" width="160" height="160" alt="">
-          <figcaption><p>"I had a sheitl I wore regularly, but every time I put it on I was frustrated. Instead of throwing it out, I brought it to Michal. Immediately she saw the problems and brought it back to life. I can't believe my new look is from the same sheitl I used to dread wearing."<b>Debbie Burack</b></p></figcaption>
+          <figcaption><p>"I had a sheitl that I wore regularly, but every time I put it on I was frustrated by how it looked. Instead of throwing it out, I brought it to Michal. Immediately, she saw the problems and brought the sheitl back to life! Now, I love it, and I can't believe that my new &amp; improved look is actually from the same sheitl I used to dread wearing!"<b>Debbie Burack</b></p></figcaption>
         </figure>
-        <figure class="voice" data-sc-cue="0.52 1 0.3 0">
+        <figure class="voice" data-sc-cue="0.30 1 0.3 0">
           <img src="assets/yael.jpg" width="160" height="160" alt="">
-          <figcaption><p>"I came with a tight budget, after three other wig places and hating all my wigs since I got married. She had a ton of options, tried so many on me, honest opinion, no pressure to buy. Two years later I still love the wig I got."<b>Yael Stoolback</b></p></figcaption>
+          <figcaption><p>"I came to Michal, with a tight budget, after going to 3 other wig places and hating all my wigs since I got married. She had a ton of options and she tried so many on me, giving her honest opinion, with no pressure to buy. I felt like she had all the time in the world. Its not surprising that 2 years later I still love the wig I got."<b>Yael Stoolback</b></p></figcaption>
         </figure>
-        <figure class="voice" data-sc-cue="0.70 1 0.3 0">
+        <figure class="voice" data-sc-cue="0.50 1 0.3 0">
           <img src="assets/miriam.jpg" width="160" height="160" alt="">
-          <figcaption><p>"She transformed my 'it's fine' wig, a hand-me-down from my aunt, into something I actually think is cute, light, and works amazingly for me."<b>Miriam Campbell</b></p></figcaption>
+          <figcaption><p>"I cannot thank Michal enough for transforming my 'its fine' wig that I got as a hand-me down from my aunt, into something I actually think is cute, light, and works AMAZINGLY for me!"<b>Miriam Campbell</b></p></figcaption>
         </figure>
       </div>
     </div>
@@ -307,19 +319,20 @@
         <p class="lede">Professional wig styling and cutting, taught in person: demonstrations, then hands-on practice. Starts 3 November 2026, Sunday and Tuesday mornings at 10:00. Ten students at most.</p>
       </div>
       <div class="courses" data-sc-in data-sc-stagger="120">
-        <article class="course"><h3>Styling Mastery</h3><p>Ten in-depth lessons: curls, blow-dry techniques, volume, tool control.</p><span class="price">₪8,000</span></article>
-        <article class="course"><h3>Cutting Mastery</h3><p>Nine advanced lessons: wig construction, weight, balance, natural flow.</p><span class="price">₪8,000</span></article>
-        <article class="course"><h3>The Salon Hub</h3><p>A private group for ongoing support: pricing questions, real-world guidance.</p><span class="price">Included<small>with either course</small></span></article>
+        <article class="course"><h3>Styling Mastery</h3><p>Ten in-depth lessons: curls, blow-dry techniques, volume, tool control.</p><span class="price">₪8,000<small>course fee</small></span></article>
+        <article class="course"><h3>Cutting Mastery</h3><p>Nine advanced lessons: wig construction, weight, balance, natural flow.</p><span class="price">₪8,000<small>course fee</small></span></article>
+        <article class="course"><h3>The Salon Hub</h3><p>A private group for ongoing support: pricing questions, real-world guidance.</p><span class="price">Part of the programme</span></article>
       </div>
       <div class="bundle" data-sc-reveal="right" data-sc-reveal-at="0.1 0.5">
         <div>
           <h3>Both courses, one place in the class.</h3>
-          <p>₪16,000 separately. Enrol early and the toolkit, worth ₪3,000, is included.</p>
+          <p>₪16,000 separately. Sign up before chag and the toolkit, worth ₪3,000, is free.</p>
         </div>
         <span class="big">₪12,000<small>the full bundle</small></span>
       </div>
       <p class="grad" data-sc-in>Chaya Basya took the course. She now runs her own salon in Ramat Beit Shemesh Daled, with a clientele of her own.<b>Chaya Basya, graduate of the academy</b></p>
-      <p style="margin: var(--sc-6) 0 0"><a class="cta" href="#top">Message Michal Simkin</a></p>
+      <p class="enrol">Enrolment is by message. Say "Academy" and she takes it from there.</p>
+      <p style="margin: var(--sc-4) 0 0"><a class="cta" href="#close">Message Michal Simkin</a></p>
     </div>
   </section>
 
@@ -333,25 +346,24 @@
           <img src="assets/michal-small.jpg" width="160" height="160" alt="Michal Simkin">
           <p>Michal<small>Bet Shemesh</small></p>
         </div>
-        <a class="cta" href="#top">Message Michal Simkin</a>
-        <p class="facts">Consultation ₪100. Sunday to Thursday, 10 to 2, by appointment. English and Hebrew. Custom wigs, cuts and transformations, wash and sets, handwork, repairs, cap adjustments, baby hairs, colour.</p>
+        <a class="cta" href="#close">Message Michal Simkin</a>
+        <p class="facts">Send a message with what you're looking for. Appointments are arranged in reply. Consultation ₪100. Sunday to Thursday, 10 to 2, by appointment. English and Hebrew. Custom wigs, cuts and transformations, wash and sets, handwork, repairs, cap adjustments, baby hairs, colour.</p>
       </div>
-      <p class="foot">Michal Simkin, Bet Shemesh, on MyIsraelRental. Every photograph on this page is hers.</p>
+      <p class="foot">Michal Simkin, Bet Shemesh, on MyIsraelRental. Also on WhatsApp, 054-682-6258. Every photograph on this page is from her website.</p>
     </div>
   </section>
 </main>
 
-<nav class="bar" aria-label="Book">
-  <img class="bar__mark" src="assets/mark.jpg" width="96" height="96" alt="">
-  <p class="bar__assure"><b>Consultation ₪100.</b> Sun to Thu, 10 to 2, by appointment. Bet Shemesh.</p>
-  <a class="cta" href="#top">Message Michal Simkin</a>
-</nav>
 
 <script src="scrollcraft.js"></script>
 <script>
   ScrollCraft.mount(document.body);
   (function () {
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    /* The bar wraps on phones, so its height is measured, not assumed. */
+    var bar = document.querySelector('.bar');
+    function barH() { document.documentElement.style.setProperty('--bar-h', Math.ceil(bar.getBoundingClientRect().height) + 'px'); }
+    if (bar) { barH(); new ResizeObserver(barH).observe(bar); }
     var ease = function (t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
     var clamp = function (v) { return Math.min(Math.max(v, 0), 1); };
     function onProgress(el, fn) {
@@ -371,7 +383,8 @@
     var N = cards.length;
     function paintDeck(p) {
       cards.forEach(function (c, k) {
-        var start = 0.02 + k * (0.72 / N), t = reduce ? 1 : ease(clamp((p - start) / 0.16));
+        /* Card 0 is already on the table at p=0, so the first screen has a face on it. */
+        var start = -0.16 + k * (0.88 / N), t = reduce ? 1 : ease(clamp((p - start) / 0.16));
         var r = parseFloat(c.style.getPropertyValue('--r')) || 0;
         var x = parseFloat(c.style.getPropertyValue('--x')) || 0;
         var y = parseFloat(c.style.getPropertyValue('--y')) || 0;
@@ -390,7 +403,7 @@
       pairs.forEach(function (li) {
         var at = parseFloat(li.getAttribute('data-at')) || 0;
         var t = reduce ? 1 : ease(clamp((p - at) / 0.08));
-        li.querySelector('.before i').style.transform = 'scaleX(' + t.toFixed(3) + ')';
+        li.querySelector('.before').style.setProperty('--t', t.toFixed(3));
       });
     }
     if (pairs.length) onProgress(document.getElementById('same'), paintStrike);
