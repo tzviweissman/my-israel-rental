@@ -406,52 +406,71 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
   body.theme-preview #root { zoom: 0.8; }
 }
 
-/* ── The film hero (preview page) ─────────────────────────────────────
-   A generated loop of glass blocks that build, burst and resolve into a
-   skyline of gold glass, behind the headline. The build happens on the
-   right two-thirds of the frame by design (the stills were composed that
-   way), so the copy sits on the quiet left over a soft white scrim and is
-   never on top of the motion. Phones get a portrait render (the build in
-   the lower two-thirds, the copy above it). */
+/* The film hero: a generated loop, built to the reference Tzvi sent, of
+   frosted glass blocks that tumble in, stack into a rotating cube, burst,
+   flatten into a mosaic, stream into a ribbon and resolve into the skyline
+   of gold glass. The camera moves the whole way, so there is no quiet
+   corner to put the copy in: the headline sits on a SOLID white panel at
+   the inline-start, with a short soft edge, and the film runs full-bleed
+   behind it. A translucent scrim was measured under the old render and
+   the blocks kept drifting under the headline; solid is the fix, not a
+   taste call. Phones get a portrait render, the panel across the top. */
 .hv2-hero--film { position: relative; background: #fff; }
 .hv2-hero--film .hv2-film {
   position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%;
-  object-fit: cover; object-position: 62% 50%;
+  object-fit: cover; object-position: 70% 50%;
   background: #fff;
 }
 .hv2-hero--film .hv2-hero-scrim {
   background:
-    linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, .92) 30%, rgba(255, 255, 255, .55) 46%, rgba(255, 255, 255, 0) 62%),
-    linear-gradient(180deg, rgba(255, 255, 255, .7) 0%, rgba(255, 255, 255, 0) 26%, rgba(255, 255, 255, 0) 70%, rgba(255, 255, 255, .85) 100%);
+    linear-gradient(90deg, #fff 0%, #fff 44%, rgba(255, 255, 255, .86) 49%, rgba(255, 255, 255, 0) 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 78%, rgba(255, 255, 255, .8) 100%);
+}
+[dir="rtl"] .hv2-hero--film .hv2-film { object-position: 30% 50%; }
+[dir="rtl"] .hv2-hero--film .hv2-hero-scrim {
+  background:
+    linear-gradient(270deg, #fff 0%, #fff 44%, rgba(255, 255, 255, .86) 49%, rgba(255, 255, 255, 0) 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 78%, rgba(255, 255, 255, .8) 100%);
 }
 .hv2-hero--film .hv2-hero-inner {
   align-items: flex-start; text-align: start;
   max-width: 1180px; margin-inline: auto;
   padding-inline: clamp(20px, 5vw, 56px);
 }
-.hv2-hero--film .hv2-hero-inner > div:first-child { max-width: 560px; }
+.hv2-hero--film .hv2-hero-inner > div:first-child { max-width: 520px; }
+.hv2-hero--film .hv2-hero-foot { max-width: 520px; }
 .hv2-hero--film .hv2-hero-tagline { justify-content: flex-start; }
 .hv2-hero--film .hv2-hero-foot { align-items: flex-start; }
 .hv2-hero--film .hv2-hero-foot p { text-align: start; }
 .hv2-hero--film .hv2-hero-ctas { justify-content: flex-start; }
 @media (max-width: 760px) {
-  .hv2-hero--film .hv2-film { object-position: 50% 100%; }
-  .hv2-hero--film .hv2-hero-scrim {
-    /* The copy runs to about half the screen on a phone, so the white holds
-       to there and the build shows beneath it. */
-    background: linear-gradient(180deg, #fff 0%, rgba(255, 255, 255, .94) 48%, rgba(255, 255, 255, .6) 60%, rgba(255, 255, 255, 0) 72%, rgba(255, 255, 255, .8) 100%);
+  /* The copy runs to about 60% of the hero on a phone (measured at 375 wide
+     with the add-your-business link last), so the panel is the top 62%,
+     solid, and the build shows beneath it. */
+  .hv2-hero--film .hv2-film,
+  [dir="rtl"] .hv2-hero--film .hv2-film { object-position: 50% 100%; }
+  .hv2-hero--film .hv2-hero-scrim,
+  [dir="rtl"] .hv2-hero--film .hv2-hero-scrim {
+    background: linear-gradient(180deg, #fff 0%, #fff 62%, rgba(255, 255, 255, .86) 67%, rgba(255, 255, 255, 0) 76%, rgba(255, 255, 255, 0) 90%, rgba(255, 255, 255, .8) 100%);
   }
   .hv2-hero--film .hv2-hero-inner { justify-content: flex-start; gap: 22px; }
-  .hv2-hero--film .hv2-film { object-position: 50% 115%; }
 }
-/* Tablets: the portrait render (the build in the lower two-thirds) under the
-   desktop copy layout (the foot at the bottom), so the foot needs paper under
-   it. Between the phone rules above and the desktop ones. */
+/* Tablets: the portrait render under the desktop copy layout (the foot at
+   the bottom). The headline is narrowed so it wraps inside the panel (at
+   768 it ran as one line, half of it over the cube), and the panel is the
+   start 58% plus paper under the foot. */
 @media (min-width: 761px) and (max-width: 1000px) {
+  .hv2-hero--film .hv2-hero-inner > div:first-child { max-width: 400px; }
   .hv2-hero--film .hv2-hero-scrim {
     background:
-      linear-gradient(90deg, #fff 0%, rgba(255, 255, 255, .8) 34%, rgba(255, 255, 255, 0) 60%),
-      linear-gradient(180deg, rgba(255, 255, 255, .7) 0%, rgba(255, 255, 255, 0) 24%, rgba(255, 255, 255, 0) 50%, rgba(255, 255, 255, .94) 70%, #fff 100%);
+      linear-gradient(90deg, #fff 0%, #fff 58%, rgba(255, 255, 255, .86) 63%, rgba(255, 255, 255, 0) 72%),
+      linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, .94) 78%, #fff 100%);
   }
-  .hv2-hero--film .hv2-film { object-position: 50% 40%; }
+  [dir="rtl"] .hv2-hero--film .hv2-hero-scrim {
+    background:
+      linear-gradient(270deg, #fff 0%, #fff 58%, rgba(255, 255, 255, .86) 63%, rgba(255, 255, 255, 0) 72%),
+      linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, .94) 78%, #fff 100%);
+  }
+  .hv2-hero--film .hv2-film,
+  [dir="rtl"] .hv2-hero--film .hv2-film { object-position: 50% 40%; }
 }
