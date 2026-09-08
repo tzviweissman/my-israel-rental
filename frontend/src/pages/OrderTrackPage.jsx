@@ -97,7 +97,7 @@ export default function OrderTrackPage() {
                 const done = current > idx;
                 const now = current === idx;
                 return (
-                  <li key={key} className="flex items-center gap-3" data-step={key} data-state={done ? 'done' : now ? 'now' : 'todo'}>
+                  <li key={key} className="flex items-center gap-3" data-step={key} data-state={done ? 'done' : now ? 'now' : 'todo'} aria-current={now ? 'step' : undefined}>
                     <span
                       className="grid place-content-center w-8 h-8 rounded-full shrink-0 text-sm font-bold"
                       style={done
@@ -110,6 +110,9 @@ export default function OrderTrackPage() {
                       {done ? <Check size={16} /> : idx}
                     </span>
                     <span className={`text-base ${now || done ? 'font-semibold' : ''}`} style={{ color: now || done ? 'var(--ink)' : 'var(--brand-muted)' }}>
+                      <span className="sr-only">
+                        {done ? t('orders.track.a11yDone', 'Done. ') : now ? t('orders.track.a11yNow', 'Current step. ') : t('orders.track.a11yTodo', 'Not yet. ')}
+                      </span>
                       {label}
                       {now && key === 'ready' && delivery && !data.out_for_delivery && (
                         <span className="block text-xs font-normal" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.readyWaitingCourier', 'Packed and waiting for the courier')}</span>

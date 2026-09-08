@@ -123,7 +123,7 @@ export default function StaffOrdersPage() {
       <div className="max-w-md mx-auto px-4 py-24 text-center" data-testid="staff-bad-link">
         <ClipboardList size={26} className="inline mb-3" style={{ color: 'var(--brand-muted)' }} />
         <h1 className="text-lg font-bold" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{t('orders.staff.badLinkTitle', 'This link no longer works')}</h1>
-        <p className="text-sm mt-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.staff.badLinkBody', 'Ask the owner for a new one — links are replaced when they are reset.')}</p>
+        <p className="text-sm mt-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.staff.badLinkBody', 'Ask the owner for a new one. Links are replaced when they are reset.')}</p>
       </div>
     );
   }
@@ -150,7 +150,7 @@ export default function StaffOrdersPage() {
       </header>
 
       <main className="max-w-2xl mx-auto px-4 py-4">
-        <div className="flex gap-1 mb-3 overflow-x-auto" role="tablist">
+        <div className="flex gap-1 mb-3 overflow-x-auto">
           {[
             ['today', t('orders.rangeToday', 'Today')],
             ['tomorrow', t('orders.tomorrow', 'Tomorrow')],
@@ -160,8 +160,7 @@ export default function StaffOrdersPage() {
             <button
               key={key}
               type="button"
-              role="tab"
-              aria-selected={range === key}
+              aria-pressed={range === key}
               onClick={() => { setRange(key); setStatusFilter(''); }}
               className="px-3 min-h-[40px] rounded-lg text-sm font-semibold whitespace-nowrap"
               style={range === key ? { background: 'var(--ink)', color: 'var(--action-ink)' } : { color: 'var(--brand-muted)' }}

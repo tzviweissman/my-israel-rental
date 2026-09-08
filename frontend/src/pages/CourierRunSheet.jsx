@@ -236,7 +236,7 @@ function Stop({ stop: s, index, business, token, onChanged, t }) {
       {/* Row 2: close it. Only when ready. */}
       {ready && mode === null && (
         <div className="flex items-center gap-2 mt-2">
-          <button type="button" onClick={() => setMode('deliver')} className={`${big} flex-1`} style={{ background: 'var(--status-open-bg)', color: 'var(--status-open)' }} data-testid="stop-deliver">
+          <button type="button" onClick={() => setMode('deliver')} className={`${big} flex-1`} style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="stop-deliver">
             <Check size={16} /> {t('orders.action.delivered', 'Delivered')}
           </button>
           <button type="button" onClick={() => setMode('fail')} className={`${big} border`} style={outline} data-testid="stop-fail">

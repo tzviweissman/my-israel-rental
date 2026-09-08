@@ -311,7 +311,7 @@ input[type="date"]:valid:before {
    as its own LTR run keeps "196." and "₪0." intact while the <b>
    itself is still placed right-to-left within the sentence. */
 .strip b{direction:ltr;unicode-bidi:isolate}
-.strip b .fs{color:var(--gold-lg)}
+.strip b .fs{color:var(--gold-text)}
 /* These three were inside @media blocks in the preview. My extraction
    flattened them, so `.scene video{display:none}` — a REDUCED-MOTION rule —
    applied at every width and hid the video for everyone. The page rendered

@@ -59,7 +59,7 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
     >
       <div className="flex items-start gap-3">
         <div className="shrink-0 w-14 text-center">
-          <div className="text-base font-bold tabular-nums" style={{ color: 'var(--ink)' }}>{time || '—'}</div>
+          <div className="text-base font-bold tabular-nums" style={{ color: 'var(--ink)' }}>{time || ''}</div>
           <div className="text-[10px]" style={{ color: 'var(--brand-muted)' }}>{time ? '' : t('orders.anyTime', 'any time')}</div>
         </div>
         <div className="min-w-0 flex-1">
@@ -123,9 +123,7 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
             disabled={busy}
             onClick={() => onStatus(next)}
             className="px-4 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-60"
-            style={next === 'done'
-              ? { background: 'var(--status-open-bg)', color: 'var(--status-open)' }
-              : { background: 'var(--action)', color: 'var(--action-ink)' }}
+            style={{ background: 'var(--action)', color: 'var(--action-ink)' }}
             data-testid={`order-next-${o.id}`}
           >
             {busy ? <Loader2 size={14} className="animate-spin inline" /> : nextLabel}

@@ -75,7 +75,7 @@ export default function OrdersPrintPage() {
         <div>
           <h1 className="text-xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>{bizName}</h1>
           <p className="text-sm">
-            {t('orders.print.title', 'Orders')} · {from === to ? fmtDay(from) : `${fmtDay(from)} – ${fmtDay(to)}`}
+            {t('orders.print.title', 'Orders')} · {from === to ? fmtDay(from) : `${fmtDay(from)} - ${fmtDay(to)}`}
             {' · '}{t('orders.print.count', '{{n}} open', { n: rows.length })}
           </p>
         </div>
@@ -108,7 +108,7 @@ export default function OrdersPrintPage() {
             <tbody>
               {list.map((o) => (
                 <tr key={o.id} className="align-top">
-                  <td className="py-2 pe-2 border-b border-gray-300 tabular-nums font-semibold">{(o.needed_by || '').includes('T') ? o.needed_by.slice(11, 16) : '—'}</td>
+                  <td className="py-2 pe-2 border-b border-gray-300 tabular-nums font-semibold">{(o.needed_by || '').includes('T') ? o.needed_by.slice(11, 16) : ''}</td>
                   <td className="py-2 pe-2 border-b border-gray-300">
                     <div className="font-semibold" dir="auto">{o.customer_name}</div>
                     {o.customer_phone && <div className="text-xs" dir="ltr">{o.customer_phone}</div>}

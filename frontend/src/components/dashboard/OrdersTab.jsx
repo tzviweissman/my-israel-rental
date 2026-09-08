@@ -354,7 +354,7 @@ export default function OrdersTab({ API, token }) {
     return (
       <div className="rounded-2xl border p-8 text-center" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }} data-testid="orders-no-business">
         <ClipboardList size={22} className="inline mb-2" />
-        <p className="text-sm">{t('orders.needBusiness', 'Add a business first — orders belong to a business.')}</p>
+        <p className="text-sm">{t('orders.needBusiness', 'Add a business first. Orders belong to a business.')}</p>
       </div>
     );
   }
@@ -458,7 +458,7 @@ export default function OrdersTab({ API, token }) {
       {panel === 'standing' && <StandingPanel API={API} auth={auth} standing={standing} onChanged={() => Promise.all([loadSettings(), load()])} onClose={() => setPanel(null)} />}
 
       {/* Range tabs */}
-      <div className="flex gap-1 mb-3 overflow-x-auto" role="tablist" data-testid="orders-range">
+      <div className="flex gap-1 mb-3 overflow-x-auto" data-testid="orders-range">
         {[
           ['today', t('orders.rangeToday', 'Today')],
           ['friday', t('orders.rangeFriday', 'Friday')],
@@ -469,8 +469,7 @@ export default function OrdersTab({ API, token }) {
           <button
             key={key}
             type="button"
-            role="tab"
-            aria-selected={range === key}
+            aria-pressed={range === key}
             onClick={() => { setRange(key); setStatusFilter(''); }}
             className="px-3 min-h-[40px] rounded-lg text-sm font-semibold whitespace-nowrap"
             style={range === key
@@ -628,10 +627,10 @@ function OrderForm({ API, auth, businessId, initial, orderId, cutoffs, onCancel,
       }));
       if (d.notes) setShowNotes(true);
       setPasteOpen(false);
-      toast.success(t('orders.extracted', 'Filled in — check it, then save'));
+      toast.success(t('orders.extracted', 'Filled in. Check it, then save'));
       nameRef.current?.focus();
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('orders.extractFailed', 'Could not read that message — fill the form by hand'));
+      toast.error(err?.response?.data?.detail || t('orders.extractFailed', 'Could not read that message. Fill the form by hand'));
     } finally {
       setExtracting(false);
     }
@@ -855,7 +854,7 @@ function OrderForm({ API, auth, businessId, initial, orderId, cutoffs, onCancel,
             onChange={set('address')}
             className={input}
             style={inputStyle}
-            placeholder={t('orders.addressPh', 'Street, number, city — floor or entrance if it matters')}
+            placeholder={t('orders.addressPh', 'Street, number, city, plus floor or entrance if it matters')}
             required
             data-testid="order-address"
           />
@@ -884,7 +883,7 @@ function OrderForm({ API, auth, businessId, initial, orderId, cutoffs, onCancel,
       )}
 
       <p className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>
-        {t('orders.moneyNote', 'The total is your own record. Payment happens between you and the customer — MyIsraelRental never handles it.')}
+        {t('orders.moneyNote', 'The total is your own record. Payment happens between you and the customer. MyIsraelRental never handles it.')}
       </p>
 
       <div className="flex items-center gap-2 pt-1">
@@ -924,7 +923,7 @@ function OrdersTable({ orders, busyId, onStatus, onEdit, t }) {
   }, [orders, sort]);
   const th = (key, label, extra = '') => (
     <th className={`text-start font-semibold py-2 px-2 whitespace-nowrap ${extra}`} style={{ color: 'var(--brand-muted)' }}>
-      <button type="button" onClick={() => setSort((s) => ({ key, dir: s.key === key ? -s.dir : 1 }))} className="inline-flex items-center gap-1 min-h-[32px]">
+      <button type="button" onClick={() => setSort((s) => ({ key, dir: s.key === key ? -s.dir : 1 }))} className="inline-flex items-center gap-1 min-h-[44px]">
         {label}{sort.key === key && <span aria-hidden="true">{sort.dir === 1 ? '\u2191' : '\u2193'}</span>}
       </button>
     </th>
@@ -978,12 +977,12 @@ function OrdersTable({ orders, busyId, onStatus, onEdit, t }) {
                 </td>
                 <td className="py-2 px-2 whitespace-nowrap text-end">
                   {next && (
-                    <button type="button" disabled={busyId === o.id} onClick={() => onStatus(o, next)} className="px-3 min-h-[32px] rounded-full text-xs font-semibold me-1 disabled:opacity-60" style={next === 'done' ? { background: 'var(--status-open-bg)', color: 'var(--status-open)' } : { background: 'var(--action)', color: 'var(--action-ink)' }}>
+                    <button type="button" disabled={busyId === o.id} onClick={() => onStatus(o, next)} className="px-3 min-h-[44px] rounded-full text-xs font-semibold me-1 disabled:opacity-60" style={{ background: 'var(--action)', color: 'var(--action-ink)' }}>
                       {busyId === o.id ? <Loader2 size={12} className="animate-spin inline" /> : nextLabel}
                     </button>
                   )}
                   {OPEN.has(o.status) && (
-                    <button type="button" onClick={() => onEdit(o)} className="inline-flex items-center justify-center min-h-[32px] min-w-[32px] rounded-full" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.edit', 'Edit')}>
+                    <button type="button" onClick={() => onEdit(o)} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.edit', 'Edit')}>
                       <Pencil size={13} />
                     </button>
                   )}
