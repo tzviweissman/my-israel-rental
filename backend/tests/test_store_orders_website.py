@@ -158,3 +158,68 @@ def test_signed_in_customer_sees_their_orders(store):
     assert mine[0]["business"]["name"] == "TEST_web bakery" and mine[0]["total"] == 54
     summary = requests.get(f"{BASE}/dashboard/summary", headers=_auth(cust), timeout=30).json()
     assert summary["customer_orders"] == 1
+
+
+# ---------------------------------------------------------------------------
+# A store that prices in dollars, groups its add-ons, and asks how you'll pay
+# (Tzvi, 2026-09-08: the order pages for the scroll-craft demos).
+# ---------------------------------------------------------------------------
+
+@pytest.fixture(scope="module")
+def dollar_store(owner):
+    biz = requests.post(f"{BASE}/marketplace/businesses", json={"name": "TEST_web boards"}, headers=_auth(owner), timeout=30).json()
+    requests.patch(f"{BASE}/marketplace/businesses/{biz['id']}", json={"areas": ["jerusalem"], "payment_note": "credit card, Zelle, bank transfer"}, headers=_auth(owner), timeout=30)
+    gig = requests.post(f"{BASE}/marketplace/gigs", json={
+        "title": "TEST_web meat boards", "description": "for the order form", "category": "shops-products", "area": "Jerusalem",
+        "gig_type": "store", "budget_currency": "USD", "booking_mode": "whatsapp", "whatsapp": "+972501234567", "gallery": [],
+        "products": [
+            {"name": "Mini Board", "price": 75, "currency": "USD", "images": ["https://example.com/m.jpg"], "group": "Boards", "serves": 4},
+            {"name": "Party Board", "price": 750, "currency": "USD", "images": ["https://example.com/p.jpg"], "group": "Boards"},
+            {"name": "Bartenura Moscato", "price": 35, "currency": "USD", "images": ["https://example.com/w.jpg"], "group": "Add a bottle"},
+            {"name": "Shekel thing", "price": 20, "currency": "ILS", "images": ["https://example.com/s.jpg"]},
+        ],
+    }, headers=_auth(owner), timeout=30)
+    assert gig.status_code in (200, 201), gig.text
+    return {"biz": biz["id"], "gig": gig.json()["id"]}
+
+
+def test_form_carries_group_and_serves(dollar_store):
+    f = requests.get(f"{BASE}/marketplace/order-form/{dollar_store['gig']}", timeout=30).json()
+    by = {p["name"]: p for p in f["products"]}
+    assert by["Mini Board"]["group"] == "Boards" and by["Mini Board"]["serves"] == 4
+    assert by["Bartenura Moscato"]["group"] == "Add a bottle"
+    assert by["Party Board"]["serves"] is None            # not stated, so not invented
+    assert by["Mini Board"]["currency"] == "USD"
+
+
+def test_dollar_order_keeps_its_currency_and_how_they_pay(dollar_store, owner):
+    f = requests.get(f"{BASE}/marketplace/order-form/{dollar_store['gig']}", timeout=30).json()
+    ids = {p["name"]: p["id"] for p in f["products"]}
+    day = (datetime.now(IL).date() + timedelta(days=3)).isoformat()
+    r = requests.post(f"{BASE}/marketplace/order-form/{dollar_store['gig']}/orders", json={
+        "lines": [{"product_id": ids["Mini Board"], "qty": 2}, {"product_id": ids["Bartenura Moscato"], "qty": 1}],
+        "fulfilment": "pickup", "date": day, "notes": "no onions",
+        "customer_name": "Dollar Customer", "customer_phone": "054-1234567", "pay_by": "Zelle",
+    }, timeout=30)
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["total"] == 185 and body["currency"] == "USD"
+    # The listing attaches to the owner's default business, not necessarily the
+    # one the fixture made; the form says which, so read it from there.
+    rows = requests.get(f"{BASE}/marketplace/businesses/{f['business']['id']}/orders", params={"from": day, "to": day}, headers=_auth(owner), timeout=30).json()["orders"]
+    o = next(x for x in rows if x["id"] == body["order_id"])
+    assert o["currency"] == "USD"
+    assert o["notes"] == "no onions\nPays by: Zelle"        # visible on every surface the store already has
+    tr = requests.get(f"{BASE}/marketplace/orders/track/{body['track_token']}", timeout=30).json()
+    assert tr["currency"] == "USD" and tr["total"] == 185
+
+
+def test_mixed_currencies_are_refused(dollar_store):
+    f = requests.get(f"{BASE}/marketplace/order-form/{dollar_store['gig']}", timeout=30).json()
+    ids = {p["name"]: p["id"] for p in f["products"]}
+    day = (datetime.now(IL).date() + timedelta(days=3)).isoformat()
+    r = requests.post(f"{BASE}/marketplace/order-form/{dollar_store['gig']}/orders", json={
+        "lines": [{"product_id": ids["Mini Board"], "qty": 1}, {"product_id": ids["Shekel thing"], "qty": 1}],
+        "fulfilment": "pickup", "date": day, "customer_name": "Mixed", "customer_phone": "054-1234567",
+    }, timeout=30)
+    assert r.status_code == 400 and "currenc" in r.text

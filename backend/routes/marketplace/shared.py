@@ -501,6 +501,12 @@ class ProductItem(BaseModel):
     image: Optional[str] = None
     images: list[str] = Field(default_factory=list)
     in_stock: bool = True
+    # Optional, both set by the business. `group` lets an order page keep
+    # add-ons (a bottle, a card) apart from the main list; `serves` is how
+    # many people the product feeds, so a page can show a per-person
+    # figure. Neither is guessed: absent means the page shows nothing.
+    group: Optional[str] = Field(None, max_length=60)
+    serves: Optional[int] = Field(None, ge=1, le=500)
 
 
 class WeeklyWindow(BaseModel):

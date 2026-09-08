@@ -64,6 +64,7 @@ router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 _IL_TZ = ZoneInfo("Asia/Jerusalem")
 
 STATUSES = ("new", "preparing", "ready", "done", "cancelled", "failed")
+_CURRENCY_SYMBOL = {"ILS": "₪", "USD": "$", "EUR": "€", "GBP": "£"}
 OPEN_STATUSES = ("new", "preparing", "ready")
 
 # From -> the set it may become. Forward, one step back, and the exits.
@@ -1663,8 +1664,12 @@ class WebsiteOrderIn(BaseModel):
     customer_name: str = Field(..., min_length=1, max_length=120)
     customer_phone: str = Field(..., min_length=5, max_length=40)
     customer_email: Optional[str] = Field(None, max_length=200)
+    # How the customer intends to pay, in the store's own terms (its
+    # payment_note lists them). Recorded, never charged: the site does
+    # not process payments.
+    pay_by: Optional[str] = Field(None, max_length=60)
 
-    @field_validator("extra_items", "notes", "address", "customer_name", "customer_phone", "customer_email")
+    @field_validator("extra_items", "notes", "address", "customer_name", "customer_phone", "customer_email", "pay_by")
     @classmethod
     def _strip(cls, v):
         return v.strip() if isinstance(v, str) else v
@@ -1691,6 +1696,8 @@ def _products_for_order(gig: dict[str, Any]) -> list[dict[str, Any]]:
             "description": p.get("description") or "",
             "image": (p.get("images") or [None])[0] or p.get("image"),
             "in_stock": p.get("in_stock", True),
+            "group": p.get("group") or None,
+            "serves": p.get("serves") or None,
         })
     return out
 
@@ -1763,9 +1770,11 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     elif payload.window:
         payload.window = None
 
-    # The lines: products the store lists, in stock, with the store's price.
+    # The lines: products the store lists, in stock, with the store's price,
+    # in the store's currency. One currency per order: a total is one number.
     products = {p["id"]: p for p in _products_for_order(gig)}
     lines, subtotal = [], 0.0
+    currencies: set[str] = set()
     for ln in payload.lines:
         prod = products.get(ln.product_id)
         if not prod or not prod.get("in_stock", True):
@@ -1773,6 +1782,11 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         price = float(prod.get("price") or 0)
         lines.append({"product_id": prod["id"], "name": prod["name"], "price": price, "qty": ln.qty})
         subtotal += price * ln.qty
+        currencies.add((prod.get("currency") or "ILS").upper())
+    if len(currencies) > 1:
+        raise HTTPException(status_code=400, detail="Those items are priced in different currencies; order them separately")
+    currency = next(iter(currencies), "ILS")
+    sym = _CURRENCY_SYMBOL.get(currency, currency + " ")
 
     # Delivery: a city the store serves, an address, the minimum, the fee.
     fee = 0.0
@@ -1785,7 +1799,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
                 raise HTTPException(status_code=400, detail="This store does not deliver there")
         min_order = st.get("min_order")
         if min_order and subtotal < float(min_order):
-            raise HTTPException(status_code=400, detail=f"Delivery needs an order of at least ₪{min_order:g}")
+            raise HTTPException(status_code=400, detail=f"Delivery needs an order of at least {sym}{float(min_order):g}")
         fee = float(st.get("delivery_fee") or 0)
         city_label = next((a["label"] for a in _areas_out(biz) if a["slug"] == payload.city), payload.city or "")
         address = f"{payload.address}, {city_label}".strip(", ") if city_label and city_label.lower() not in payload.address.lower() else payload.address
@@ -1797,6 +1811,11 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     items_text = "\n".join(f"{ln['qty']} × {ln['name']}" for ln in lines)
     if payload.extra_items:
         items_text = (items_text + "\n" if items_text else "") + payload.extra_items
+    # The stated way to pay goes into the notes, where every surface the
+    # store already has (board, print sheet, run sheet) shows it.
+    notes = payload.notes
+    if payload.pay_by:
+        notes = (notes + "\n" if notes else "") + f"Pays by: {payload.pay_by}"
     needed_by = payload.date + (f"T{payload.window.start}" if payload.window else "")
     total = round(subtotal + fee, 2) if lines else None
 
@@ -1816,13 +1835,14 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         "subtotal": round(subtotal, 2) if lines else None,
         "delivery_fee": fee if payload.fulfilment == "delivery" else 0.0,
         "total": total,
-        "currency": "ILS",
+        "currency": currency,
+        "pay_by": payload.pay_by or None,
         "needed_by": needed_by,
         "window": payload.window.model_dump() if payload.window else None,
         "fulfilment": payload.fulfilment,
         "city": payload.city if payload.fulfilment == "delivery" else None,
         "address": address,
-        "notes": payload.notes,
+        "notes": notes,
         "status": "new",
         "source": "website",
         "courier": None,
@@ -1845,7 +1865,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         (owner or {}).get("email"), f"New order from {payload.customer_name}",
         f"<p><strong>{payload.customer_name}</strong> ordered on your page:</p><p>{items_text.replace(chr(10), '<br>')}</p>"
         f"<p>{'Delivery to ' + (address or '') if payload.fulfilment == 'delivery' else 'Pickup'} · {needed_by.replace('T', ' ')}"
-        + (f" · ₪{total:g}" if total is not None else "") + "</p>",
+        + (f" · {sym}{total:g}" if total is not None else "") + "</p>",
         tag="order-new", button=("Open my orders", f"{_frontend_url()}/dashboard?tab=orders"),
     )
     # Tell the customer, with the link and how to pay.
@@ -1855,11 +1875,11 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         payload.customer_email, f"Your order from {biz.get('name')}",
         f"<p>Thanks, {payload.customer_name}. {biz.get('name')} has your order:</p><p>{items_text.replace(chr(10), '<br>')}</p>"
         f"<p>{'Delivery to ' + (address or '') if payload.fulfilment == 'delivery' else 'Pickup at the store'} · {needed_by.replace('T', ' ')}"
-        + (f" · ₪{total:g}" if total is not None else "") + "</p>"
+        + (f" · {sym}{total:g}" if total is not None else "") + "</p>"
         + (f"<p>Payment goes to the store directly. {pay}</p>{links}" if (pay or links) else "<p>Payment goes to the store directly.</p>"),
         tag="order-confirmation", button=("Follow your order", track),
     )
-    return {"order_id": doc["_id"], "track_token": doc["track_token"], "track_url": track, "total": total, "delivery_fee": doc["delivery_fee"]}
+    return {"order_id": doc["_id"], "track_token": doc["track_token"], "track_url": track, "total": total, "currency": currency, "delivery_fee": doc["delivery_fee"]}
 
 
 @router.get("/orders/mine")

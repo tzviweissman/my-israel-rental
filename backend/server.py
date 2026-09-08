@@ -143,6 +143,11 @@ _raw_origins = os.environ.get("CORS_ORIGINS", _DEFAULT_CORS)
 # Tolerate trailing slashes, accidental whitespace, and empty entries —
 # easy to introduce when editing the env via a control panel.
 _cors_origins = [o.strip().rstrip("/") for o in _raw_origins.split(",") if o.strip()]
+# The scroll-craft demo pages (scrollcraft/builds/*) are served on their own
+# local ports and call this API directly. Allowed only where DEV_AUTOLOGIN
+# is on, which is never Railway (see routes/auth.py).
+if os.environ.get("DEV_AUTOLOGIN", "") == "1":
+    _cors_origins += [f"http://localhost:{p}" for p in (3210, 4500, 4501, 4502)]
 
 app.add_middleware(
     CORSMiddleware,
