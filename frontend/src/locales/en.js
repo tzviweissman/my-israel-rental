@@ -525,6 +525,44 @@ const en = {
         toastUpdated: 'Updated',
         updateFailed: 'Could not update that job',
       },
+      // Dashboard → Appointments. Both sides of an in-platform gig booking:
+      // requests a business has to answer, and requests a customer sent.
+      appointments: {
+        incomingTitle: 'Requests to you',
+        incomingLede: 'A pending request holds the time on your calendar until you answer it.',
+        mineTitle: 'Your requests',
+        mineLede: 'Services you asked to book, and what the business said.',
+        empty: 'No booking requests yet.',
+        emptyHint: 'When someone books one of your services on the site — or you book one — it shows up here.',
+        untitled: 'Your listing',
+        from: 'From {{name}}',
+        with: 'With {{name}}',
+        minutes: '{{n}} min',
+        holdLeft: '{{n}}h left to answer',
+        viewListing: 'View listing',
+        yourReply: 'Your note',
+        theirReply: 'Their reply',
+        replyLabel: 'Note back to the customer',
+        replyPh: 'Add a note back (optional) — when you can come, what you need from them…',
+        accept: 'Accept',
+        decline: 'Decline',
+        complete: 'Mark complete',
+        cancelBooking: 'Cancel',
+        // Neutral on purpose: the same pill is read by the side who owes
+        // an answer and the side waiting for one.
+        status_pending: 'Pending',
+        status_accepted: 'Accepted',
+        status_declined: 'Declined',
+        status_completed: 'Completed',
+        status_cancelled: 'Cancelled',
+        status_expired: 'Expired',
+        toastAccepted: 'Accepted. The customer has been told.',
+        toastDeclined: 'Declined, and the time is free again.',
+        toastCompleted: 'Marked complete.',
+        toastCancelled: 'Cancelled, and the time is free again.',
+        toastUpdated: 'Updated',
+        updateFailed: 'Could not update that booking',
+      },
       contracts: {
         notAuthorized: 'You are not authorized to view this contract',
         notAvailable: 'Contract not available',
@@ -1350,6 +1388,7 @@ const en = {
         deliveries: 'Deliveries',
         myOrders: 'My orders',
         orders: 'Orders',
+        appointments: 'Appointments',
         // D1 — these four tabs shared three words between them and no
         // user could predict what was behind any of them. Named now by
         // WHOSE work it is and which direction it flows.
