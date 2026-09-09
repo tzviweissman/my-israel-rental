@@ -196,10 +196,35 @@ async def _owned_order(order_id: str, user: dict[str, Any]) -> dict[str, Any]:
     return order
 
 
-def _public(order: dict[str, Any]) -> dict[str, Any]:
+# Phone and address: the fields that turn a leaked board link into a
+# customer list. Named once so the reveal endpoint and the redaction
+# below cannot drift apart.
+_CONTACT_FIELDS = ("customer_phone", "customer_phone_e164", "address")
+
+
+def _public(order: dict[str, Any], *, contact: bool = True) -> dict[str, Any]:
+    """The owner's own view of an order. `contact=False` withholds the
+    customer's phone and address until someone asks for that one order.
+
+    The staff board is deliberately login-free - the token in the URL is
+    the whole credential - so whoever ends up holding that link (forwarded,
+    screenshotted, still in a WhatsApp thread from six months ago) had
+    standing access to every customer's name, phone and address for the
+    business, for every order it has ever taken. The courier's own view
+    already refuses to do this: `_stop()` reveals a phone only while the
+    order is `ready`, and writes down each reveal. The board had no
+    equivalent, which was an inconsistency rather than a decision.
+
+    `has_contact` is left behind so the board can offer the reveal only
+    where there is something to reveal.
+    """
     out = dict(order)
     out["id"] = out.pop("_id")
     out.pop("owner_user_id", None)
+    if not contact:
+        out["has_contact"] = any(out.get(f) for f in _CONTACT_FIELDS)
+        for f in _CONTACT_FIELDS:
+            out.pop(f, None)
     return out
 
 
@@ -283,6 +308,8 @@ async def _list(
     date_from: Optional[str],
     date_to: Optional[str],
     limit: int,
+    *,
+    contact: bool = True,
 ) -> dict[str, Any]:
     q: dict[str, Any] = {"business_id": business_id}
     if date_from or date_to:
@@ -319,7 +346,7 @@ async def _list(
             # first time the owner looks at them. One write, once.
             d["track_token"] = secrets.token_urlsafe(16)
             await db.store_orders.update_one({"_id": d["_id"]}, {"$set": {"track_token": d["track_token"]}})
-        docs.append(_public(d))
+        docs.append(_public(d, contact=contact))
     return {"orders": docs, "status_counts": counts, "total": sum(counts.values())}
 
 
@@ -408,10 +435,12 @@ async def set_order_status(order_id: str, payload: StatusIn, user=Depends(verify
     return await _transition(order, payload, by=user["user_id"])
 
 
-async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str) -> dict[str, Any]:
+async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str, contact: bool = True) -> dict[str, Any]:
+    # contact=False for the token-only staff board: the response to a
+    # status change must not hand back the phone the board just withheld.
     current = order["status"]
     if payload.status == current:
-        return _public(order)
+        return _public(order, contact=contact)
     if not can_transition(current, payload.status, order.get("fulfilment", "pickup")):
         raise HTTPException(
             status_code=409,
@@ -429,7 +458,7 @@ async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str) -> d
         },
     )
     fresh = await db.store_orders.find_one({"_id": order["_id"]})
-    return _public(fresh)
+    return _public(fresh, contact=contact)
 
 
 # ---------------------------------------------------------------------------
@@ -504,9 +533,35 @@ async def staff_board(
     check_rate(request, bucket="orders_staff", limit=600, window_seconds=600)
     biz = await _business_by_staff_token(token)
     await generate_standing_orders(biz["_id"])
-    out = await _list(biz["_id"], status, date_from, date_to, 300)
+    # contact=False: see _public. The counter gets the phone one order at
+    # a time, through the endpoint below, and each time is written down.
+    out = await _list(biz["_id"], status, date_from, date_to, 300, contact=False)
     out["business"] = {"name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url")}
     return out
+
+
+@router.get("/orders/staff/{token}/{order_id}/contact")
+async def staff_reveal_contact(token: str, order_id: str, request: Request):
+    """One order's phone and address, for the person at the counter who
+    needs to ring a customer about their pickup.
+
+    The point is not to withhold it - staff genuinely need it - but to
+    make getting it a per-order act that leaves a trace, so a link that
+    escapes no longer hands over the whole customer list in one screen.
+    The limit is well above a busy Friday and far below an enumeration.
+    """
+    check_rate(request, bucket="orders_staff_contact", limit=120, window_seconds=600)
+    biz = await _business_by_staff_token(token)
+    order = await db.store_orders.find_one({"_id": order_id, "business_id": biz["_id"]})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    # Capped, or a board left open on a till grows the document forever.
+    await db.store_orders.update_one(
+        {"_id": order_id},
+        {"$push": {"contact_reveals": {"$each": [{"at": _now_iso(), "by": "staff"}], "$slice": -50}}},
+    )
+    logger.info("[orders] staff contact reveal: business=%s order=%s", biz["_id"], order_id)
+    return {k: order.get(k) for k in _CONTACT_FIELDS}
 
 
 @router.patch("/orders/staff/{token}/{order_id}/status")
@@ -516,7 +571,7 @@ async def staff_set_status(token: str, order_id: str, payload: StatusIn, request
     order = await db.store_orders.find_one({"_id": order_id, "business_id": biz["_id"]})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    return await _transition(order, payload, by="staff")
+    return await _transition(order, payload, by="staff", contact=False)
 
 
 # ---------------------------------------------------------------------------

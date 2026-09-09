@@ -36,8 +36,15 @@ export function pillStyle(status, on) {
  * `couriers`, `onAssign` and `onPayment` are the owner's: the staff board
  * passes none of them and so shows none of the controls. Assignment is
  * delivery-only; payment is any order (a pickup is paid at the counter).
+ *
+ * `onReveal` is the staff board's, and only the staff board's. That board
+ * needs no login - the token in the URL is the whole credential - so it is
+ * served without the customer's phone or address, and asks for them one
+ * order at a time when someone actually needs to ring that customer. The
+ * owner's tab passes no `onReveal` because its orders already carry the
+ * contact details; nothing about that view changes.
  */
-export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, onRepeat, couriers, t }) {
+export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, onRepeat, onReveal, couriers, t }) {
   const [more, setMore] = useState(false);
   const time = (o.needed_by || '').includes('T') ? o.needed_by.slice(11, 16) : '';
   const closed = !OPEN.has(o.status);
@@ -154,6 +161,17 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
           >
             <MessageCircle size={16} />
           </a>
+        )}
+        {onReveal && o.has_contact && !o.customer_phone && !o.address && (
+          <button
+            type="button"
+            onClick={() => onReveal(o)}
+            className="inline-flex items-center gap-1.5 px-3 min-h-[44px] rounded-full border text-xs font-semibold"
+            style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+            data-testid={`order-reveal-${o.id}`}
+          >
+            <Phone size={14} /> {t('orders.showContact', 'Show contact')}
+          </button>
         )}
         {!closed && (
           <button

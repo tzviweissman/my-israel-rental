@@ -70,6 +70,24 @@ export default function StaffOrdersPage() {
     return () => clearInterval(id);
   }, [load]);
 
+  // The board arrives without customer phones or addresses: this link has
+  // no login, so anyone still holding it would otherwise have the whole
+  // customer list. Staff ask for one order's details when they need to
+  // ring that customer, and the server writes each request down.
+  const reveal = async (order) => {
+    try {
+      const { data } = await axios.get(
+        `${API}/marketplace/orders/staff/${encodeURIComponent(token)}/${order.id}/contact`,
+      );
+      setData((prev) => prev && ({
+        ...prev,
+        orders: prev.orders.map((o) => (o.id === order.id ? { ...o, ...data } : o)),
+      }));
+    } catch {
+      toast.error(t('orders.contactFailed', 'Could not show the contact details'));
+    }
+  };
+
   const setStatus = async (order, status) => {
     setBusyId(order.id);
     try {
@@ -198,7 +216,7 @@ export default function StaffOrdersPage() {
                 </h2>
                 <div className="space-y-2">
                   {list.map((o) => (
-                    <OrderCard key={o.id} order={o} busy={busyId === o.id} onStatus={(s) => setStatus(o, s)} t={t} />
+                    <OrderCard key={o.id} order={o} busy={busyId === o.id} onStatus={(s) => setStatus(o, s)} onReveal={reveal} t={t} />
                   ))}
                 </div>
               </section>

@@ -29,7 +29,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ClipboardPaste, Store as StoreIcon, Bike, X, Sparkles, ClipboardList,
-  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, MessageCircle, Trash2, Repeat, Timer, Pause, Play,
+  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Timer, Pause, Play,
 } from 'lucide-react';
 import { phoneError } from '../../utils/phoneValidation';
 import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
@@ -1068,7 +1068,7 @@ function StaffLinkPanel({ API, auth, businessId, onClose }) {
         <div>
           <h3 className="font-bold" style={{ color: 'var(--ink)' }}>{t('orders.staff.title', 'The board for your staff')}</h3>
           <p className="text-sm mt-1" style={{ color: 'var(--brand-muted)' }}>
-            {t('orders.staff.body', 'One link for the counter. Anyone who has it sees the day\'s orders and can mark them started, ready and done - no login, no account. They cannot add or change orders.')}
+            {t('orders.staff.body', 'One link for the counter. Anyone who has it sees the day\'s orders and can mark them started, ready and done - no login, no account. They cannot add or change orders, and customer phone numbers and addresses stay hidden until someone taps to show one.')}
           </p>
         </div>
         <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}>
@@ -1085,9 +1085,12 @@ function StaffLinkPanel({ API, auth, businessId, onClose }) {
             <button type="button" onClick={copy} className={btn} style={{ background: 'var(--action)', color: 'var(--action-ink)', borderColor: 'transparent' }} data-testid="staff-link-copy">
               {copied ? <Check size={13} /> : <Copy size={13} />} {copied ? t('orders.staff.copied', 'Copied') : t('orders.staff.copy', 'Copy link')}
             </button>
-            <a href={`https://wa.me/?text=${encodeURIComponent(t('orders.staff.shareText', 'Orders board: {{url}}', { url }))}`} target="_blank" rel="noopener noreferrer" className={btn} style={btnStyle}>
-              <MessageCircle size={13} /> {t('orders.staff.share', 'Send on WhatsApp')}
-            </a>
+            {/* There was a "Send on WhatsApp" button here until 9 Sep 2026.
+                This link is a standing credential with no expiry, and that
+                button made forwarding it the default gesture - into a chat
+                history where it stays readable long after the person who
+                needed it has left. Copy still does everything it did; it
+                just makes the owner choose where the link goes. */}
             <a href={url} target="_blank" rel="noopener noreferrer" className={btn} style={btnStyle}>
               <Link2 size={13} /> {t('orders.staff.open', 'Open')}
             </a>
