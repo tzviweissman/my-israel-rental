@@ -2,35 +2,48 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { RoundedBoxGeometry } from 'three/examples/jsm/geometries/RoundedBoxGeometry.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { BokehPass } from 'three/examples/jsm/postprocessing/BokehPass.js';
 
 /**
- * The preview page's hero, built in code after three rounds of generated
- * video could not match the reference Tzvi sent (a motion piece where
- * hundreds of glass blocks tumble in, stack into a rotating cube, burst
- * into a cloud, flatten into a mosaic of tiles, stream into a curved
- * ribbon, and resolve). Generated video reinterprets that every render and
- * morphs between the stages; this moves the same 512 blocks through the
- * same six shapes, in order, smoothly, on a loop that closes on itself.
+ * The preview page's hero: hundreds of glass blocks that tumble in, stack
+ * into a rotating cube, burst, flatten into a field of tiles, stream into
+ * a ribbon, and resolve into the site's mark.
  *
- * The sixth shape is the site's own mark: the blocks stack into the tower
- * profile traced from brand/logo-mark.png and turn gold glass.
+ * Built in code after three rounds of generated video could not hold the
+ * choreography. Compared frame by frame against the reference Tzvi sent,
+ * this pass closes the gaps that reading the two side by side made plain:
  *
- * One instanced mesh, one draw call. Every block has a pose (position,
- * rotation, scale, colour) in each of the seven keyframes below, and the
- * timeline blends neighbouring keyframes with a per-block stagger so the
- * blocks stream rather than move as one. Flights are not straight lines:
- * each block rises on an arc, drifts sideways, spins about its own axis,
- * and settles with a small overshoot, which is most of the difference
- * between a morph and something a motion designer would have keyed. The
- * ribbon is a closed loop the tiles flow around while it holds, so the
- * mosaic peels into a moving stream rather than a parked arch. The camera
- * follows a closed Catmull-Rom path, so it never stops and the last frame
- * flows into the first.
+ * 1. SCALE. The reference fills its frame and lets the shapes run off the
+ *    edges; the first build kept everything inside, which read as a small
+ *    object on a table. Tzvi approved cropping on 9 Sep, so the camera now
+ *    sits close and the cube, the field and the ribbon all overflow. The
+ *    MARK is the exception: a logo cut in half is not a logo, so its
+ *    keyframes pull back far enough to hold it whole.
+ * 2. DEPTH OF FIELD. The reference is shot like a macro lens, the blocks
+ *    nearest the lens melting into blur. A BokehPass focused on the
+ *    camera's own target does the same here, and it is most of what
+ *    separates the look from a diagram.
+ * 3. MATERIAL. Reference blocks carry colour inside the volume, shifting
+ *    across each block. Every instance here has two colours mixed along
+ *    its local height by a small shader injection, so no block is one
+ *    flat tone.
+ * 4. SIZE VARIETY. The reference mixes big slabs, small chips and thin
+ *    bars. A single repeated size is what made the first build read as
+ *    generated, so every block carries a persistent size class used
+ *    wherever the formation is loose. The cube and the mark stay uniform,
+ *    because those two shapes are grids.
+ *
+ * One instanced mesh, one draw call. Every block has a pose in each of the
+ * seven keyframes below; the timeline blends neighbouring keyframes with a
+ * per-block stagger, and each flight arcs, drifts, spins and settles with
+ * a small overshoot. The camera follows a closed Catmull-Rom path, so the
+ * 24s loop has no seam.
  *
  * The copy sits on a solid white panel at the inline-start (the top up to
- * 1000px). The scene is framed into the clear area by an off-centre view
- * offset and a camera distance fitted to that area, with a floor on how
- * close the camera may come, so nothing is ever cropped at any width.
+ * 1000px), and the scene is centred in the clear area beside it by an
+ * off-centre view offset.
  */
 
 const N = 512;                  // 8 x 8 x 8, the cube
@@ -40,14 +53,25 @@ const PANEL_TOP_PX = 432;       // the copy's height when the panel is on top, p
 const PANEL_TOP_WIDE_PX = 470;  // the same above 760px, where the headline is larger
 const STACK_MAX = 1000;         // up to this width the copy sits above the scene
 
-// Sampled from the reference: coral, magenta, pinks, purples, blues, teal,
-// amber, and a share of clear blocks.
+// How much of the world the clear area should show, in world units, and
+// the distance the camera keyframes below are authored at. A formation
+// larger than SUBJECT overflows and crops, which is the point.
+const SUBJECT = 7;
+const REF_DIST = 11;
+
+// Sampled from the reference: saturated glass in coral, magenta, violet,
+// blue and amber, plus the frosted near-whites it mixes through them.
 const PALETTE = [
-  '#F7C948', '#F0532B', '#E8177C', '#F26AA6', '#7B2FBE', '#B274E6',
-  '#2C7BE5', '#39C3F2', '#3ED2C5', '#EE8B1E', '#F4F5F9', '#F4F5F9', '#E9ECF3',
+  '#E7A63A', '#DE6A46', '#D2437E', '#DE7FA8', '#7A4BB0', '#A87BD2',
+  '#4A76C8', '#4FA8CE', '#5CBBB4', '#DE8F4E', '#D65F6A', '#8A6BD2',
+  // Frosted near-whites, a third of the set: they are what keeps a mass
+  // of coloured glass from reading as plastic confetti.
+  '#F4F5F8', '#F4F5F8', '#EDEFF4', '#FAF8F5', '#F0F2F6', '#F7F4F0',
 ];
 const GOLD_LOW = new THREE.Color('#A8650F');
 const GOLD_HIGH = new THREE.Color('#F2C24A');
+// The ribbon's bands, across its width, echoing the reference's arc.
+const RIBBON_BANDS = ['#1F63E8', '#6D21C4', '#A02BC9', '#E2076B', '#EF4A1E', '#F07A10', '#F5B417', '#F2C24A'];
 
 // The mark: 28 columns across brand/logo-mark.png, each the tower's height
 // and its lift off the ground as fractions of the image height. Traced from
@@ -58,7 +82,7 @@ const MARK_LIFT = [0, 0.025, 0.025, 0.025, 0.025, 0.05, 0.025, 0.05, 0.025, 0, 0
 
 const RIB_SAMPLES = 512;        // baked poses around the ribbon loop
 const RIB_LANES = 8;
-const RIB_FLOW = 0.075;         // loops per second while the ribbon holds
+const RIB_FLOW = 0.06;          // loops per second while the ribbon holds
 
 // Deterministic randomness, so every visitor sees the same film.
 function mulberry32(seed) {
@@ -79,11 +103,12 @@ const easeInQuad = (u) => u * u;
 // locking into the cube or a tower.
 const easeOutBack = (u) => { const c1 = 1.2, c3 = c1 + 1; return 1 + c3 * Math.pow(u - 1, 3) + c1 * Math.pow(u - 1, 2); };
 
-/** Builds the keyframes. Each is { pos, quat, scale, color } as flat arrays. */
+/** Builds the keyframes. Each is { pos, quat, scale, color, color2 } as flat arrays. */
 function buildKeyframes() {
   const rnd = mulberry32(20260909);
   const make = () => ({
-    pos: new Float32Array(N * 3), quat: new Float32Array(N * 4), scale: new Float32Array(N * 3), color: new Float32Array(N * 3),
+    pos: new Float32Array(N * 3), quat: new Float32Array(N * 4), scale: new Float32Array(N * 3),
+    color: new Float32Array(N * 3), color2: new Float32Array(N * 3),
   });
   const q = new THREE.Quaternion();
   const e = new THREE.Euler();
@@ -91,70 +116,87 @@ function buildKeyframes() {
   const setQ = (k, i, qq) => { k.quat[i * 4] = qq.x; k.quat[i * 4 + 1] = qq.y; k.quat[i * 4 + 2] = qq.z; k.quat[i * 4 + 3] = qq.w; };
   const setP = (k, i, x, y, z) => { k.pos[i * 3] = x; k.pos[i * 3 + 1] = y; k.pos[i * 3 + 2] = z; };
   const setS = (k, i, x, y, z) => { k.scale[i * 3] = x; k.scale[i * 3 + 1] = y; k.scale[i * 3 + 2] = z; };
-  const setC = (k, i, col) => { k.color[i * 3] = col.r; k.color[i * 3 + 1] = col.g; k.color[i * 3 + 2] = col.b; };
+  const setC = (k, i, a, b) => {
+    k.color[i * 3] = a.r; k.color[i * 3 + 1] = a.g; k.color[i * 3 + 2] = a.b;
+    k.color2[i * 3] = b.r; k.color2[i * 3 + 1] = b.g; k.color2[i * 3 + 2] = b.b;
+  };
   const randQ = () => q.setFromEuler(e.set(rnd() * Math.PI * 2, rnd() * Math.PI * 2, rnd() * Math.PI * 2));
 
-  const base = new Array(N);
-  for (let i = 0; i < N; i++) base[i] = new THREE.Color(PALETTE[Math.floor(rnd() * PALETTE.length)]);
+  // Two colours per block, mixed up its local height: the reference's
+  // blocks are never one flat tone. The second is a near neighbour in the
+  // palette, sometimes a frosted white, so the gradient stays in family.
+  const colA = new Array(N), colB = new Array(N);
+  // Persistent size class: big slabs, medium, chips, and thin bars. Used
+  // wherever the formation is loose; the cube and the mark ignore it.
+  const size = new Float32Array(N), isBar = new Uint8Array(N);
+  for (let i = 0; i < N; i++) {
+    const j = Math.floor(rnd() * PALETTE.length);
+    colA[i] = new THREE.Color(PALETTE[j]);
+    colB[i] = new THREE.Color(PALETTE[(j + 1 + Math.floor(rnd() * 3)) % PALETTE.length]);
+    const r = rnd();
+    size[i] = r < 0.16 ? 1.9 + rnd() * 0.7 : r < 0.48 ? 1.15 + rnd() * 0.35 : r < 0.8 ? 0.7 + rnd() * 0.3 : 0.4 + rnd() * 0.2;
+    isBar[i] = rnd() < 0.18 ? 1 : 0;
+  }
 
   // K0 sky: above and around, out of frame, ready to tumble in.
   const sky = make();
   for (let i = 0; i < N; i++) {
-    const a = rnd() * Math.PI * 2; const r = 4 + rnd() * 9;
-    setP(sky, i, Math.cos(a) * r, 18 + rnd() * 16, Math.sin(a) * r);
-    setQ(sky, i, randQ()); setS(sky, i, 1, 1, 1); setC(sky, i, base[i]);
+    const a = rnd() * Math.PI * 2; const r = 3 + rnd() * 8;
+    setP(sky, i, Math.cos(a) * r, 9 + rnd() * 11, Math.sin(a) * r);
+    setQ(sky, i, randQ()); setS(sky, i, size[i], size[i], size[i]); setC(sky, i, colA[i], colB[i]);
   }
 
-  // K1 pile: landed loose on the ground, a few on top of others.
+  // K1 pile: a dense drift of blocks near the ground, wider than the frame
+  // at the close keyframes, so the camera passes through it rather than
+  // looking at it.
   const pile = make();
   for (let i = 0; i < N; i++) {
-    const a = rnd() * Math.PI * 2; const r = Math.sqrt(rnd()) * 6.5;
-    const stacked = rnd() < 0.18;
-    setP(pile, i, Math.cos(a) * r, stacked ? 1.5 : 0.5, Math.sin(a) * r);
+    const a = rnd() * Math.PI * 2; const r = Math.sqrt(rnd()) * 7.5;
+    setP(pile, i, Math.cos(a) * r, size[i] * 0.5 + rnd() * 1.8, Math.sin(a) * r);
     setQ(pile, i, q.setFromEuler(e.set(0, rnd() * Math.PI, 0)));
-    setS(pile, i, 1, 1, 1); setC(pile, i, base[i]);
+    setS(pile, i, size[i], size[i], size[i]); setC(pile, i, colA[i], colB[i]);
   }
 
-  // K2 cube: 8 x 8 x 8, floating a little above the ground. Rotation is
-  // applied at run time so the cube turns while it holds.
+  // K2 cube: 8 x 8 x 8, uniform, floating a little above the ground. Its
+  // spin is applied at run time so it turns while it holds.
   const cube = make();
   for (let i = 0; i < N; i++) {
     const x = i % 8, y = Math.floor(i / 8) % 8, z = Math.floor(i / 64);
-    setP(cube, i, (x - 3.5) * 1.02, y * 1.02 + 1.0, (z - 3.5) * 1.02);
-    setQ(cube, i, q.identity()); setS(cube, i, 1, 1, 1); setC(cube, i, base[i]);
+    setP(cube, i, (x - 3.5) * 1.02, y * 1.02 + 1.4, (z - 3.5) * 1.02);
+    setQ(cube, i, q.identity()); setS(cube, i, 1, 1, 1); setC(cube, i, colA[i], colB[i]);
   }
 
-  // K3 cloud: burst outward into an ellipsoid.
+  // K3 cloud: burst outward into an ellipsoid, sizes back in play.
   const cloud = make();
   for (let i = 0; i < N; i++) {
     const u = rnd() * 2 - 1, th = rnd() * Math.PI * 2, r = Math.cbrt(rnd());
     const s = Math.sqrt(1 - u * u);
-    setP(cloud, i, r * s * Math.cos(th) * 8.5, 6 + r * u * 4.5, r * s * Math.sin(th) * 8.5);
-    setQ(cloud, i, randQ()); setS(cloud, i, 1, 1, 1); setC(cloud, i, base[i]);
+    setP(cloud, i, r * s * Math.cos(th) * 8, 5.5 + r * u * 4.5, r * s * Math.sin(th) * 8);
+    setQ(cloud, i, randQ()); setS(cloud, i, size[i], size[i], size[i]); setC(cloud, i, colA[i], colB[i]);
   }
 
-  // K4 mosaic: a 32 x 16 field of thin tiles lying flat, sizes varied, with
-  // a share of narrow bars the way the reference mixes them.
+  // K4 field: the reference's mosaic is not a flat floor. It is a loose
+  // slab of tiles at many depths and many sizes, some panels broad and
+  // frosted, some narrow bars, drifting above the ground.
   const mosaic = make();
   for (let i = 0; i < N; i++) {
     const gx = i % 32, gz = Math.floor(i / 32);
-    const bar = rnd() < 0.2;
-    setP(mosaic, i, (gx - 15.5) * 0.86, 0.07, (gz - 7.5) * 0.86);
-    setQ(mosaic, i, q.setFromEuler(e.set(0, bar && rnd() < 0.5 ? Math.PI / 2 : 0, 0)));
-    setS(mosaic, i, bar ? 0.24 : 0.55 + rnd() * 0.35, 0.12, bar ? 0.95 : 0.55 + rnd() * 0.35);
-    setC(mosaic, i, base[i]);
+    const jx = (rnd() - 0.5) * 0.5, jz = (rnd() - 0.5) * 0.5;
+    setP(mosaic, i, (gx - 15.5) * 0.72 + jx, 0.15 + rnd() * 2.6, (gz - 7.5) * 0.72 + jz);
+    setQ(mosaic, i, q.setFromEuler(e.set(0, isBar[i] && rnd() < 0.5 ? Math.PI / 2 : 0, 0)));
+    if (isBar[i]) setS(mosaic, i, 0.22 * size[i], 0.1, 1.5 * size[i]);
+    else setS(mosaic, i, 0.9 * size[i], 0.11, 0.9 * size[i]);
+    setC(mosaic, i, colA[i], colB[i]);
   }
 
-  // K5 ribbon: a closed, tilted loop the tiles flow around. The keyframe
-  // holds each block's lane and its starting place on the loop; the pose
-  // itself is sampled at run time from the baked loop so it can flow.
+  // K5 ribbon: a closed, tilted loop the tiles flow around, with tiles
+  // wide enough to touch so it reads as one banded ribbon rather than a
+  // string of chips. Colour runs across its width, as the reference's does.
   const ribbonU = new Float32Array(N), ribbonLane = new Float32Array(N);
   const loopPts = [];
   for (let k = 0; k < 12; k++) {
     const a = (k / 12) * Math.PI * 2;
-    // An elongated loop, tilted so the near side rides high and curls: the
-    // far side runs low along the back, the near side sweeps past the camera.
-    loopPts.push(new THREE.Vector3(Math.cos(a) * 11.5, 5.5 + Math.sin(a) * 3.6 + Math.sin(a * 2) * 1.4, Math.sin(a) * 6 - 0.5));
+    loopPts.push(new THREE.Vector3(Math.cos(a) * 11, 5.5 + Math.sin(a) * 3.4 + Math.sin(a * 2) * 1.3, Math.sin(a) * 5.5 - 0.5));
   }
   const loopCurve = new THREE.CatmullRomCurve3(loopPts, true, 'catmullrom', 0.5);
   const frames = loopCurve.computeFrenetFrames(RIB_SAMPLES, true);
@@ -170,10 +212,12 @@ function buildKeyframes() {
   }
   const perLane = N / RIB_LANES;
   const ribbon = make();
+  const bandCols = RIBBON_BANDS.map((h) => new THREE.Color(h));
   for (let i = 0; i < N; i++) {
     const lane = i % RIB_LANES, k = Math.floor(i / RIB_LANES);
-    ribbonU[i] = k / perLane; ribbonLane[i] = (lane - (RIB_LANES - 1) / 2) * 0.98;
-    setS(ribbon, i, 0.85, 0.12, 0.85); setC(ribbon, i, base[i]);
+    ribbonU[i] = k / perLane; ribbonLane[i] = (lane - (RIB_LANES - 1) / 2) * 1.25;
+    setS(ribbon, i, 1.5, 0.13, 1.35);
+    setC(ribbon, i, bandCols[lane], bandCols[Math.min(RIB_LANES - 1, lane + 1)]);
     // Position and rotation come from the loop at run time; the arrays
     // hold the u = 0 pose so a debugger reading them sees something sane.
     setP(ribbon, i, ribPos[0], ribPos[1], ribPos[2]);
@@ -184,7 +228,7 @@ function buildKeyframes() {
   // blocks left over rest around the foot of the mark in their own colours.
   const mark = make();
   const cells = [];
-  const unit = 0.64, maxH = 18;
+  const unit = 0.46, maxH = 18;
   for (let layer = 0; layer < 3; layer++) {
     for (let col = 0; col < MARK_HEIGHTS.length; col++) {
       const h = Math.round(MARK_HEIGHTS[col] * maxH), lift = Math.round(MARK_LIFT[col] * maxH);
@@ -203,12 +247,12 @@ function buildKeyframes() {
       setP(mark, i, cell.x, cell.y, cell.z);
       setQ(mark, i, q.identity()); setS(mark, i, unit, unit, unit);
       c.copy(GOLD_LOW).lerp(GOLD_HIGH, clamp01(cell.top * 1.05));
-      setC(mark, i, c);
+      setC(mark, i, c, GOLD_HIGH);
     } else {
-      const a = litterRnd() * Math.PI * 2; const r = 7 + litterRnd() * 6;
+      const a = litterRnd() * Math.PI * 2; const r = 6 + litterRnd() * 6;
       setP(mark, i, Math.cos(a) * r, unit / 2, Math.sin(a) * r);
       setQ(mark, i, q.setFromEuler(e.set(0, litterRnd() * Math.PI, 0)));
-      setS(mark, i, unit, unit, unit); setC(mark, i, base[i]);
+      setS(mark, i, unit, unit, unit); setC(mark, i, colA[i], colB[i]);
     }
   }
 
@@ -224,7 +268,7 @@ function buildKeyframes() {
     rank.random[i] = rnd();
     rank.cubeUp[i] = (Math.floor(i / 8) % 8) / 8 + rnd() * 0.12;
     rank.mosaicSweep[i] = ((i % 32) / 32) * 0.8 + rnd() * 0.2;
-    rank.markTop[i] = clamp01(1 - mark.pos[i * 3 + 1] / 12) * 0.8 + rnd() * 0.2;
+    rank.markTop[i] = clamp01(1 - mark.pos[i * 3 + 1] / 9) * 0.8 + rnd() * 0.2;
     const a = rnd() * Math.PI * 2;
     drift[i * 3] = Math.cos(a); drift[i * 3 + 1] = 0; drift[i * 3 + 2] = Math.sin(a);
     v.set(rnd() - 0.5, rnd() - 0.5, rnd() - 0.5).normalize();
@@ -252,19 +296,30 @@ const TIMELINE = [
   { at: 22.2, to: 'sky', from: 'mark', dur: 1.2, stagger: 0.5, rank: 'markTop', ease: easeInOut, arc: 0, swirl: 0.8, spin: 0.7 }, // ends at 23.9, inside the loop
 ];
 
-// Camera path: closed, so the loop's seam is invisible. Times must rise.
+/**
+ * Camera path: closed, so the loop's seam is invisible. Distances are
+ * authored against REF_DIST and scaled to the clear area at run time.
+ * The close keyframes (5.4 to 7.4) put the lens inside the formation, the
+ * way the reference does; the two mark keyframes pull back, because a
+ * cropped logo is not a logo.
+ */
 const CAMERA = [
-  { t: 0.0, pos: [19, 9, 23], look: [0, 3, 0] },
-  { t: 3.3, pos: [15, 6, 16], look: [0, 3, 0] },
-  { t: 5.4, pos: [10.5, 6, 11.5], look: [0, 4.5, 0] },
-  { t: 7.4, pos: [-7.5, 8.5, 10.5], look: [0, 4.5, 0] },
-  { t: 9.4, pos: [-14, 8, 18], look: [0, 5.5, 0] },
-  { t: 12.4, pos: [-4, 9, 25], look: [0, 1, 0] },
-  { t: 14.4, pos: [12, 5, 17], look: [-2, 0.5, 0] },
-  { t: 16.6, pos: [6, 4.5, 20], look: [-2, 5.5, -1] },
-  { t: 19.4, pos: [-1, 6, 21], look: [0, 5, 0] },
-  { t: 22.4, pos: [3, 7, 22], look: [0, 5, 0] },
-  { t: LOOP, pos: [19, 9, 23], look: [0, 3, 0] },
+  // Aimed high at the open, or the blocks are still above the frame while
+  // they fall and the loop starts on an empty screen.
+  { t: 0.0, pos: [7, 9, 15], look: [0, 8, 0] },
+  { t: 3.3, pos: [6, 4.5, 10], look: [0, 2.6, 0] },
+  // The one pass inside the formation, brief, the way the reference dives
+  // through its blocks before it shows the cube.
+  { t: 5.2, pos: [3.5, 5, 4.5], look: [0, 4.6, 0] },
+  { t: 6.8, pos: [7, 6.5, 11.5], look: [0, 5, 0] },
+  { t: 8.2, pos: [-6, 7, 10.5], look: [0, 5, 0] },
+  { t: 9.6, pos: [-8, 7, 12], look: [0, 5.5, 0] },
+  { t: 12.4, pos: [-3, 3.5, 11], look: [0, 1.2, 0] },
+  { t: 14.4, pos: [7, 4, 12], look: [-1, 4, 0] },
+  { t: 16.8, pos: [2, 7, 19], look: [0, 5.5, 0] },
+  { t: 19.4, pos: [0, 5, 21], look: [0, 4, 0] },
+  { t: 22.4, pos: [3, 5.5, 22], look: [0, 4, 0] },
+  { t: LOOP, pos: [7, 9, 15], look: [0, 8, 0] },
 ];
 
 function cameraCurve(key) {
@@ -315,14 +370,14 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
 
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0xffffff);
-    scene.fog = new THREE.Fog(0xffffff, 34, 64);
+    scene.fog = new THREE.Fog(0xffffff, 30, 62);
     const pmrem = new THREE.PMREMGenerator(renderer);
     scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
     const camera = new THREE.PerspectiveCamera(32, 1, 0.5, 120);
 
-    scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe3ea, 0.9));
-    const sun = new THREE.DirectionalLight(0xffffff, 1.9);
+    scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe3ea, 0.85));
+    const sun = new THREE.DirectionalLight(0xffffff, 2.1);
     sun.position.set(9, 16, 7);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
@@ -332,73 +387,83 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
     sun.shadow.radius = 6;
     sun.shadow.bias = -0.0008;
     scene.add(sun);
-    // A cool rim from behind, the second light glass needs to show its edges.
-    const rim = new THREE.DirectionalLight(0xdbe8ff, 0.9);
+    // A cool rim from behind: the second light glass needs to show its edges.
+    const rim = new THREE.DirectionalLight(0xdbe8ff, 1.1);
     rim.position.set(-12, 9, -14);
     scene.add(rim);
 
+    // A plain white ground with a soft shadow, no reflection: the
+    // reference's blocks sit in an open void, not on a glossy tabletop.
     const ground = new THREE.Mesh(
       new THREE.PlaneGeometry(240, 240),
       new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 1, metalness: 0 }),
     );
     ground.rotation.x = -Math.PI / 2;
     ground.receiveShadow = true;
-    ground.renderOrder = 0;
     scene.add(ground);
 
     // Softly bevelled edges catch the highlights: most of what makes a block
     // read as glass rather than plastic.
     const geometry = new RoundedBoxGeometry(1, 1, 1, 4, 0.07);
-    // Glass: light passes through (transmission tinted by the block's own
-    // colour), a polished surface with a clearcoat catches the room and the
-    // rim light, and the colour sits in the volume rather than on the skin.
-    // Transmission samples what is behind the glass once per frame, so a
-    // block does not refract another block; overlaps blend by opacity.
     const material = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff, roughness: 0.1, metalness: 0,
-      transmission: 0.5, thickness: 1.2, ior: 1.5,
-      clearcoat: 1, clearcoatRoughness: 0.06,
-      specularIntensity: 1, envMapIntensity: 2.1,
-      transparent: true, opacity: 0.8,
+      color: 0xffffff, roughness: 0.12, metalness: 0,
+      transmission: 0.35, thickness: 1.2, ior: 1.5,
+      clearcoat: 1, clearcoatRoughness: 0.05,
+      specularIntensity: 1, envMapIntensity: 2.2,
+      transparent: true, opacity: 0.88,
     });
+    // Each block carries a second colour, mixed along its own height, so
+    // the colour lives in the volume the way the reference's does.
+    const color2 = new THREE.InstancedBufferAttribute(new Float32Array(N * 3), 3);
+    geometry.setAttribute('aColor2', color2);
+    material.onBeforeCompile = (shader) => {
+      shader.vertexShader = shader.vertexShader
+        .replace('#include <common>', '#include <common>\nattribute vec3 aColor2;\nvarying vec3 vColorB;\nvarying float vGrad;')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvColorB = aColor2;\nvGrad = clamp( position.y + 0.5, 0.0, 1.0 );');
+      shader.fragmentShader = shader.fragmentShader
+        .replace('#include <common>', '#include <common>\nvarying vec3 vColorB;\nvarying float vGrad;')
+        .replace('#include <color_fragment>', 'diffuseColor.rgb *= mix( vColor, vColorB, vGrad );');
+    };
     const mesh = new THREE.InstancedMesh(geometry, material, N);
     mesh.castShadow = true;
     mesh.receiveShadow = false;
+    // The instance matrices change every frame, so the bounding sphere
+    // three computes once is always stale. It never showed while the
+    // camera stayed far, and blanked the whole scene the moment the
+    // close keyframes landed: the stale sphere fell outside the frustum
+    // and the one mesh in the scene was culled.
+    mesh.frustumCulled = false;
     mesh.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
     scene.add(mesh);
-    // The floor reflection: the same instances mirrored through the ground,
-    // faint, seen through a ground that is not quite opaque. It shares the
-    // instance buffers, so it costs one draw call and no per-block work.
-    const mirror = new THREE.InstancedMesh(geometry, new THREE.MeshPhysicalMaterial({
-      color: 0xffffff, roughness: 0.3, metalness: 0, clearcoat: 0.6,
-      envMapIntensity: 1.2, transparent: true, opacity: 0.35, side: THREE.DoubleSide, depthWrite: false,
-    }), N);
-    mirror.instanceMatrix = mesh.instanceMatrix;
-    mirror.scale.y = -1;
-    mirror.renderOrder = -1;
-    scene.add(mirror);
-    ground.material.transparent = true;
-    ground.material.opacity = 0.78;
-    ground.material.depthWrite = true;
 
     const K = buildKeyframes();
     const camPos = cameraCurve('pos');
     const camLook = cameraCurve('look');
+
+    // Depth of field. The reference is shot close with a shallow plane of
+    // focus, and the blur on the blocks nearest the lens is most of what
+    // separates it from a diagram.
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bokeh = new BokehPass(scene, camera, { focus: 11, aperture: 0.0022, maxblur: 0.012 });
+    composer.addPass(bokeh);
 
     // Scratch objects for the per-frame pose blend.
     const pA = new THREE.Vector3(), pB = new THREE.Vector3(), p = new THREE.Vector3();
     const qA = new THREE.Quaternion(), qB = new THREE.Quaternion(), qq = new THREE.Quaternion();
     const sA = new THREE.Vector3(), sB = new THREE.Vector3(), s = new THREE.Vector3();
     const cA = new THREE.Color(), cB = new THREE.Color(), col = new THREE.Color();
+    const c2A = new THREE.Color(), c2B = new THREE.Color(), col2 = new THREE.Color();
     const mat = new THREE.Matrix4();
     const camP = new THREE.Vector3(), camL = new THREE.Vector3();
     const rotQ = new THREE.Quaternion(), yAxis = new THREE.Vector3(0, 1, 0), axis = new THREE.Vector3();
 
     // Live poses: a keyframe plus what it does while it holds.
-    const readPose = (k, i, t, outP, outQ, outS, outC) => {
+    const readPose = (k, i, t, outP, outQ, outS, outC, outC2) => {
       const key = K[k];
       outS.set(key.scale[i * 3], key.scale[i * 3 + 1], key.scale[i * 3 + 2]);
       outC.setRGB(key.color[i * 3], key.color[i * 3 + 1], key.color[i * 3 + 2]);
+      outC2.setRGB(key.color2[i * 3], key.color2[i * 3 + 1], key.color2[i * 3 + 2]);
       if (k === 'ribbon') {
         // Sampled from the loop: the tile's own place plus the flow so far.
         let u = K.ribbonU[i] + (t - 14.4) * RIB_FLOW;
@@ -415,7 +480,7 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
         // The whole cube turns slowly about its centre and breathes a little.
         const th = (t - 3.3) * 0.32;
         rotQ.setFromAxisAngle(yAxis, th);
-        outP.y -= 4.6; outP.applyQuaternion(rotQ); outP.y += 4.6 + Math.sin(t * 0.9) * 0.15;
+        outP.y -= 5.0; outP.applyQuaternion(rotQ); outP.y += 5.0 + Math.sin(t * 0.9) * 0.15;
         outQ.premultiply(rotQ);
       } else if (k === 'cloud') {
         // The cloud drifts and each block turns a little.
@@ -448,15 +513,16 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
 
     const renderAt = (t) => {
       const { move, holding } = stateAt(t);
+      const c2 = color2.array;
       for (let i = 0; i < N; i++) {
         if (!move) {
-          readPose(holding, i, t, p, qq, s, col);
+          readPose(holding, i, t, p, qq, s, col, col2);
         } else {
           const start = move.at + K.rank[move.rank][i] * move.stagger;
           const u = clamp01((t - start) / move.dur);
           const w = move.ease(u);
-          readPose(move.from, i, t, pA, qA, sA, cA);
-          readPose(move.to, i, t, pB, qB, sB, cB);
+          readPose(move.from, i, t, pA, qA, sA, cA, c2A);
+          readPose(move.to, i, t, pB, qB, sB, cB, c2B);
           // Flight: an arc up, a sideways drift, and a spin about the
           // block's own axis, all zero at both ends so it leaves and lands
           // exactly on the keyed poses.
@@ -473,56 +539,50 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
           }
           s.lerpVectors(sA, sB, w);
           col.lerpColors(cA, cB, w);
+          col2.lerpColors(c2A, c2B, w);
         }
         mat.compose(p, qq, s);
         mesh.setMatrixAt(i, mat);
         mesh.setColorAt(i, col);
+        c2[i * 3] = col2.r; c2[i * 3 + 1] = col2.g; c2[i * 3 + 2] = col2.b;
       }
       mesh.instanceMatrix.needsUpdate = true;
-      if (mesh.instanceColor) {
-        mesh.instanceColor.needsUpdate = true;
-        if (mirror.instanceColor !== mesh.instanceColor) mirror.instanceColor = mesh.instanceColor;
-      }
+      if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
+      color2.needsUpdate = true;
 
       const u = cameraParam(t);
       camPos.getPoint(u, camP);
       camLook.getPoint(u, camL);
-      // Fit: pull the camera back along its line of sight until the scene
-      // fits the clear area, whatever the window's shape. The close pass
-      // over the cube is held to a floor, so the cube is never cropped by
-      // the panel or the edge of the clear area.
-      camP.sub(camL).multiplyScalar(fit);
-      const d = camP.length();
-      if (d < minDist) camP.multiplyScalar(minDist / d);
-      camP.add(camL);
+      // The authored distance, scaled so the clear area shows SUBJECT
+      // units. A formation larger than that overflows and crops, which is
+      // how the reference is framed.
+      camP.sub(camL).multiplyScalar(fit).add(camL);
       camera.position.copy(camP);
       camera.lookAt(camL);
-      renderer.render(scene, camera);
+      // Focus travels with the subject, so the blocks nearest the lens blur.
+      if (bokeh.uniforms && bokeh.uniforms.focus) bokeh.uniforms.focus.value = Math.max(1, camP.distanceTo(camL));
+      composer.render();
     };
 
-    let fit = 1, minDist = 0;
+    let fit = 1;
     const resize = () => {
       const host = canvas.parentElement || canvas;
       const w = Math.max(1, host.clientWidth), h = Math.max(1, host.clientHeight);
       renderer.setSize(w, h, false);
+      composer.setSize(w, h);
       camera.aspect = w / h;
       const rtl = (document.documentElement.getAttribute('dir') || '').toLowerCase() === 'rtl';
       const L = layoutFor(w, h, rtl);
       // Shift the projection so the scene's centre lands in the clear area.
       camera.setViewOffset(w, h, (0.5 - L.cx) * w, (0.5 - L.cy) * h, w, h);
-      // The choreography's full spread is about 28 units across and 16 up
-      // at the wide keyframes, 24 units from the target. Scale that
-      // distance so the whole of it fits the clear rectangle: Tzvi's rule
-      // is that nothing is cut off, at any width.
       const tanHalf = Math.tan((camera.fov * Math.PI) / 360);
-      const needW = (28 * (w / L.visW)) / (2 * tanHalf * camera.aspect);
-      const needH = (16 * (h / L.visH)) / (2 * tanHalf);
-      fit = Math.max(needW, needH) / 24;
-      fit = Math.min(Math.max(fit, 0.85), 6);
-      minDist = 21 * fit;
+      const dW = (SUBJECT / 2) / (tanHalf * camera.aspect) * (w / L.visW);
+      const dH = (SUBJECT / 2) / tanHalf * (h / L.visH);
+      fit = Math.max(dW, dH) / REF_DIST;
+      fit = Math.min(Math.max(fit, 0.8), 3.2);
       // The fog and the shadow frustum are authored for fit = 1; a camera
       // pulled back past the fog would see nothing.
-      scene.fog.near = 34 * fit; scene.fog.far = 64 * fit;
+      scene.fog.near = 30 * fit; scene.fog.far = 62 * fit;
       camera.far = 120 * fit;
       const sb = 24 * fit;
       sun.shadow.camera.left = -sb; sun.shadow.camera.right = sb;
@@ -552,17 +612,13 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
     };
     if (dev) {
       window.__blocksHeroSeek = (t) => { pinned = t; };
-      // Renders n frames back to back and returns the CPU milliseconds per
-      // frame (pose blend plus draw submission); the GPU's own time is not
-      // included, but on a white scene with one draw call the CPU is the
-      // cost that matters.
-      window.__blocksHeroBench = (n = 60) => {
+      // CPU milliseconds per frame: the pose blend plus draw submission.
+      window.__blocksHeroBench = (n = 40) => {
         const t1 = performance.now();
         for (let k = 0; k < n; k++) renderAt((k / n) * LOOP);
         return (performance.now() - t1) / n;
       };
-      // Renders one frame and returns it as a JPEG data URL: how the
-      // fallback poster in public/images/preview-hero is made.
+      // One frame as a JPEG data URL: how the fallback poster is made.
       window.__blocksHeroCapture = (t = 20.6) => { renderAt(t); return canvas.toDataURL('image/jpeg', 0.85); };
     }
     const start = () => {
@@ -584,7 +640,8 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
       io.disconnect(); ro.disconnect(); dirObserver.disconnect();
       document.removeEventListener('visibilitychange', onVis);
       reduced.removeEventListener('change', start);
-      geometry.dispose(); material.dispose(); mirror.material.dispose(); ground.geometry.dispose(); ground.material.dispose();
+      composer.dispose();
+      geometry.dispose(); material.dispose(); ground.geometry.dispose(); ground.material.dispose();
       pmrem.dispose(); renderer.dispose();
     };
   }, []);
