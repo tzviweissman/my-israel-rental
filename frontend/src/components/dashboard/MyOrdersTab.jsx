@@ -4,23 +4,62 @@
  * delivery photo once it has arrived - the proof, kept where they can
  * find it again.
  */
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
-import { Loader2, ClipboardList, Bike, Store as StoreIcon, Camera, ExternalLink } from 'lucide-react';
+import { Loader2, ClipboardList, Bike, Store as StoreIcon, Camera, ExternalLink, AlertCircle, RefreshCw } from 'lucide-react';
 import { pillStyle } from './OrderCard';
 
 export default function MyOrdersTab({ API, token }) {
   const { t, i18n } = useTranslation();
-  const [orders, setOrders] = useState(null);
+  // Three states, not two. `.catch(() => setOrders([]))` made a network
+  // blip, an expired token and a real 500 all render as "Nothing yet.
+  // Order from any store page and it will show up here" - a confident
+  // claim about the person's own history that we had no basis for
+  // (site audit, 8 Sep 2026). An empty list is a fact; a failed fetch is
+  // an absence of facts, and the two must not look the same.
+  const [orders, setOrders] = useState(null);   // null = loading
+  const [failed, setFailed] = useState(false);
   const lang = String(i18n.language || 'en').split('-')[0];
 
-  useEffect(() => {
+  const load = useCallback(() => {
+    setFailed(false);
+    setOrders(null);
     axios.get(`${API}/marketplace/orders/mine`, { headers: { Authorization: `Bearer ${token}` } })
       .then(({ data }) => setOrders(data || []))
-      .catch(() => setOrders([]));
+      .catch(() => { setOrders(null); setFailed(true); });
   }, [API, token]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const heading = (
+    <>
+      <h2 className="text-lg font-bold mb-1" style={{ color: 'var(--ink)' }}>{t('myOrders.title', 'My orders')}</h2>
+      <p className="text-sm mb-4" style={{ color: 'var(--brand-muted)' }}>{t('myOrders.body', 'Orders you placed with stores on the site, and where each one is.')}</p>
+    </>
+  );
+
+  if (failed) {
+    return (
+      <div data-testid="my-orders-tab">
+        {heading}
+        <div className="rounded-2xl border p-8 text-center" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }} data-testid="my-orders-error">
+          <AlertCircle size={22} className="inline mb-2" />
+          <p className="text-sm">{t('myOrders.loadFailed', "We couldn't load your orders just now. This doesn't mean you have none.")}</p>
+          <button
+            type="button"
+            onClick={load}
+            className="mt-3 inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold"
+            style={{ background: 'var(--action)', color: 'var(--action-ink)' }}
+            data-testid="my-orders-retry"
+          >
+            <RefreshCw size={14} /> {t('myOrders.retry', 'Try again')}
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (orders === null) return <div className="py-16 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 className="animate-spin inline" size={18} /></div>;
 
@@ -39,8 +78,7 @@ export default function MyOrdersTab({ API, token }) {
 
   return (
     <div data-testid="my-orders-tab">
-      <h2 className="text-lg font-bold mb-1" style={{ color: 'var(--ink)' }}>{t('myOrders.title', 'My orders')}</h2>
-      <p className="text-sm mb-4" style={{ color: 'var(--brand-muted)' }}>{t('myOrders.body', 'Orders you placed with stores on the site, and where each one is.')}</p>
+      {heading}
       {orders.length === 0 ? (
         <div className="rounded-2xl border p-8 text-center" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }}>
           <ClipboardList size={22} className="inline mb-2" />

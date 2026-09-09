@@ -370,6 +370,8 @@ const en = {
         title: 'My orders',
         body: 'Orders you placed with stores on the site, and where each one is.',
         empty: 'Nothing yet. Order from any store page and it will show up here.',
+        loadFailed: "We couldn't load your orders just now. This doesn't mean you have none.",
+        retry: 'Try again',
         deliveredPhoto: 'Delivered {{time}} - photo',
       },
       myGigs: {
