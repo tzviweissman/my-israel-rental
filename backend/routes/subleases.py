@@ -272,6 +272,20 @@ async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> dict:
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found or link is invalid")
 
+    # A contract is signed once. The booking flow next door has always said
+    # so (`_load_booking_for_signing`: "Contract already signed"); this one
+    # did not, and since f4a96e9 made each signing REBUILD the combined PDF
+    # that omission stopped being a duplicate row in signatures[] and became
+    # a rewrite of the document itself.
+    #
+    # The sign_token is a bearer credential with no expiry and no single-use
+    # enforcement, so anyone still holding the link - it was emailed - could
+    # call this directly and quietly replace an already-signed legal
+    # agreement with one carrying a different name. The UI hides the form
+    # once `signed` is true, which is why nobody hit it by accident.
+    if contract.get("signed"):
+        raise HTTPException(status_code=400, detail="This contract has already been signed")
+
     signer_name = body.get("signer_name", "").strip()
     signature_data = body.get("signature_data", "")
 
@@ -310,7 +324,13 @@ async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> dict:
             sublease_doc = await db.subleases.find_one(
                 {"id": contract.get("sublease_id")}, {"_id": 0, "title": 1},
             ) if contract.get("sublease_id") else None
-            signed_name = f"signed_{contract['id']}.pdf"
+            # Stamped with the signing time, so a rebuild can never land on
+            # top of a file someone has already downloaded and kept. The
+            # guard above should mean there is only ever one, but a fixed
+            # name makes "only ever one" a thing the filesystem assumes
+            # rather than a thing the code enforces - and this is the one
+            # directory in the app where losing a file is unrecoverable.
+            signed_name = f"signed_{contract['id']}_{datetime.now(UTC).strftime('%Y%m%dT%H%M%S')}.pdf"
             build_signed_pdf(
                 source,
                 CONTRACT_DIR / signed_name,

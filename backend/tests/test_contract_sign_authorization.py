@@ -155,3 +155,66 @@ def test_the_token_holder_route_is_untouched(contract):
     r = requests.get(f"{BASE}/contracts/sign/{contract['sign_token']}", timeout=30)
     assert r.status_code == 200, r.text
     assert r.json()["id"] == contract["id"]
+
+
+# ---------------------------------------------------------------------------
+# re-signing a sublease (site audit finding 4)
+# ---------------------------------------------------------------------------
+#
+# The sign_token is a bearer credential: no expiry, no single-use rule, and
+# it was emailed. The booking flow next door has always refused a second
+# signing ("Contract already signed"); this one did not. That was survivable
+# while a second call only appended a row to signatures[] - but since the
+# signed PDF started being rebuilt on each call, the second signing replaced
+# the canonical document everyone downloads, silently, with the earlier
+# signature no longer represented in it. Not reachable by clicking (the form
+# disappears once signed); very reachable by anyone still holding the link.
+
+
+@pytest.fixture(scope="module")
+def resign_contract(owner):
+    stamp = datetime.now(UTC).strftime("%H%M%S%f")
+    r = requests.post(f"{BASE}/subleases", json={
+        "title": f"TEST_resign_{stamp}",
+        "description": "A room for the summer, described at some length.",
+        "area": "Jerusalem", "price": 4200, "price_type": "monthly",
+        "available_from": "2026-10-01", "available_to": "2027-01-31",
+    }, headers=_auth(owner), timeout=30)
+    assert r.status_code in (200, 201), r.text
+    r = requests.post(
+        f"{BASE}/subleases/{r.json()['id']}/contract",
+        files={"file": ("agreement.pdf", io.BytesIO(PDF), "application/pdf")},
+        headers=_auth(owner), timeout=60,
+    )
+    assert r.status_code in (200, 201), r.text
+    body = r.json()
+    yield {"id": body["id"], "sign_token": body["sign_token"]}
+    requests.delete(f"{BASE}/contracts/{body['id']}", headers=_auth(owner), timeout=30)
+
+
+def test_the_sublessee_can_sign_once(resign_contract):
+    r = requests.post(
+        f"{BASE}/contracts/sign/{resign_contract['sign_token']}",
+        json={"signer_name": "Miriam Katz", "signature_data": FORGED_INK}, timeout=30,
+    )
+    assert r.status_code == 200, r.text
+
+
+def test_a_second_signing_is_refused(resign_contract):
+    """Same token, different name - the rewrite the finding describes."""
+    r = requests.post(
+        f"{BASE}/contracts/sign/{resign_contract['sign_token']}",
+        json={"signer_name": "Somebody Else", "signature_data": FORGED_INK}, timeout=30,
+    )
+    assert r.status_code == 400, r.text
+    assert "already been signed" in r.text
+
+
+def test_the_document_still_carries_the_first_signature(resign_contract, owner):
+    r = requests.get(f"{BASE}/contracts/sign/{resign_contract['sign_token']}", timeout=30)
+    assert r.status_code == 200, r.text
+    names = [s.get("signer_name") for s in (r.json().get("signatures") or [])]
+    assert names == ["Miriam Katz"], f"signatures were rewritten: {names}"
+    # And the file the parties download is a real signed PDF, once.
+    f = requests.get(f"{BASE}/contracts/sign/{resign_contract['sign_token']}/file", timeout=30)
+    assert f.status_code == 200 and f.content.startswith(b"%PDF")
