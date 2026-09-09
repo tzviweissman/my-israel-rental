@@ -19,6 +19,12 @@
  * considered flow, not a quick correction. They are one step away in the
  * wizard.
  *
+ * The SUBCATEGORY is here, and is not an exception to that rule: it does
+ * not change what the listing is, it narrows it inside the category it
+ * already has. It is also the only way an already-published listing can
+ * ever get one — the field is a live filter on the board and nothing in
+ * the app could set it (dead-ends audit 2026-09-08, #5).
+ *
  * The OFFER belongs here rather than in the wizard for the same reason the
  * typo does: a business decides to run one on a Tuesday and wants it up in
  * a minute, and takes it down the same way. It is percent-only, and it
@@ -38,6 +44,7 @@ import { X, Trash2, ImagePlus, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { uploadFilesFast, reportUploadFailure } from '../../utils/fastUpload';
 import { productPhotos } from '../../utils/productPhotos';
+import { SUBCATEGORIES } from '../../lib/categories';
 
 const MAX_PHOTOS = 6;
 
@@ -48,6 +55,10 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
 
   const [title, setTitle] = useState(gig.title || '');
   const [description, setDescription] = useState(gig.description || '');
+  // Only the four merged categories have sub-buckets; for the rest this
+  // is undefined and the whole block never renders.
+  const subOptions = SUBCATEGORIES[gig.category];
+  const [subcategory, setSubcategory] = useState(gig.subcategory || '');
   // Options are edited as a shallow copy so Cancel really cancels.
   const [options, setOptions] = useState(() => originals.map((o) => ({
     ...o,
@@ -158,6 +169,9 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       const payload = {};
       if (title.trim() !== (gig.title || '')) payload.title = title.trim();
       if (description !== (gig.description || '')) payload.description = description;
+      // null, not '', to clear it: the API reads a falsy value as "no tag"
+      // and stores None, which is what the board's filter tests against.
+      if (subOptions && subcategory !== (gig.subcategory || '')) payload.subcategory = subcategory || null;
 
       // Rebuilt from the ORIGINAL objects so nothing this sheet does not
       // show — features, delivery_days, duration_minutes, in_stock — is
@@ -271,6 +285,36 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
               {t('editListing.translationNote', 'The Hebrew version is regenerated from this when you save.')}
             </p>
           </div>
+
+          {subOptions && (
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-gray-700">
+                {t('services.specificType', 'Specific type')}
+              </p>
+              <p className="text-[11px] text-gray-500">
+                {t('services.specificTypeProviderHint', 'Optional — customers filter by this, so it helps the right ones find you.')}
+              </p>
+              <div className="flex flex-wrap gap-2 pt-1" data-testid="edit-listing-subcategory-row">
+                {subOptions.map((sub) => (
+                  <button
+                    key={sub.slug}
+                    type="button"
+                    onClick={() => setSubcategory(subcategory === sub.slug ? '' : sub.slug)}
+                    className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                      subcategory === sub.slug
+                        ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                        : 'bg-white text-gray-700 hover:border-[var(--brand-primary)]'
+                    }`}
+                    style={subcategory === sub.slug ? undefined : { borderColor: 'var(--brand-border)' }}
+                    aria-pressed={subcategory === sub.slug}
+                    data-testid={`edit-listing-sub-${sub.slug}`}
+                  >
+                    {sub.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Offer. Off unless one is running; switching it on reveals the
               three fields. The note under them is not decoration - a

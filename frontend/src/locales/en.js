@@ -3674,6 +3674,10 @@ const en = {
         whatsappResolved: 'Customers will message you at +{{number}}',
         from: 'from',
         photoRequired: 'Add at least one photo — a listing without one is very hard to book.',
+        // The optional narrowing tag on a gig. Written from the seller's
+        // side — postJob's pair says the same thing from the buyer's.
+        specificType: 'Specific type',
+        specificTypeProviderHint: 'Optional — customers filter by this, so it helps the right ones find you.',
         productPhotoLimit: 'Up to {{n}} photos per product',
         askForQuote: 'Ask for a quote',
         noImage: 'No image',
