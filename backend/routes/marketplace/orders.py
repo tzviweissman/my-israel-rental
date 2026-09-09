@@ -37,6 +37,7 @@ door and the customer-phone rule (O5, O6), the customer's status link
 from __future__ import annotations
 
 import csv
+import html as _html
 import io
 import json
 import os
@@ -924,11 +925,56 @@ async def _notify(user_id: str, *, type_: str, message: str, action_url: str, **
     })
 
 
+def _esc(v: Any) -> str:
+    """Every user-supplied value that goes into an email body goes through
+    here first.
+
+    Orders are placed by ANONYMOUS visitors (`place_website_order` takes
+    `optional_user`), so `customer_name`, `items`, `address` and `notes`
+    are attacker-controlled text that is validated for length and nothing
+    else. Spliced raw into an HTML body they become working markup in the
+    store owner's real inbox, under this platform's sender identity and
+    inside a mail that otherwise looks exactly like a normal "New order"
+    notification - a link, a tracking pixel, or fake payment instructions.
+    Small local businesses are a good phishing target and this made us the
+    delivery mechanism.
+
+    utils/email.py already does this for chat-mention mail; the order
+    emails added on 2026-09-07 did not follow the pattern. Escape at the
+    point the value enters HTML, not at the point it is stored, so the
+    board and the CSV export keep showing what the customer actually typed.
+    """
+    return _html.escape(str(v)) if v is not None else ""
+
+
+def _esc_ml(v: Any) -> str:
+    """Same, for free text whose line breaks should survive as <br>.
+
+    Order the two steps this way round and never the other: escaping after
+    inserting the <br> would turn the tags we just wrote into visible text.
+    """
+    return _esc(v).replace("\n", "<br>")
+
+
+def _subject(s: str) -> str:
+    """One line, always. A name carrying a newline splices a second line
+    into the subject; what the mail provider does with that is its
+    business, not something to find out in production."""
+    return " ".join(str(s or "").split())
+
+
 async def _email(to: Optional[str], subject: str, inner_html: str, *, tag: str, button: tuple[str, str] | None = None) -> None:
     """Fire-and-forget through the site's Postmark wrapper. Missing address
-    or unconfigured mail is a no-op, never an error on the request."""
+    or unconfigured mail is a no-op, never an error on the request.
+
+    NOTE: `inner_html` is trusted markup by the time it arrives here. Every
+    caller is responsible for putting user text through `_esc`/`_esc_ml`
+    first - there is no way to do it in this function without also
+    escaping the tags the caller deliberately wrote.
+    """
     if not to:
         return
+    subject = _subject(subject)
     try:
         from utils.email import _button, _wrap, send_email
         html = inner_html + (_button(button[0], button[1]) if button else "")
@@ -964,7 +1010,9 @@ async def _assign_to(order: dict[str, Any], biz: dict[str, Any], courier: dict[s
     await _email(
         courier.get("email"),
         f"New delivery from {biz.get('name') or 'a store'}",
-        f"<p>{biz.get('name') or 'A store'} has a delivery for you:</p><p><strong>{_order_line(o=order)}</strong><br>{(order.get('address') or '')}</p><p>Open your Deliveries tab for the full list.</p>",
+        f"<p>{_esc(biz.get('name') or 'A store')} has a delivery for you:</p>"
+        f"<p><strong>{_esc(_order_line(o=order))}</strong><br>{_esc(order.get('address'))}</p>"
+        f"<p>Open your Deliveries tab for the full list.</p>",
         tag="order-delivery-assigned", button=("Open my deliveries", f"{_frontend_url()}/dashboard?tab=deliveries"),
     )
     return await db.store_orders.find_one({"_id": order["_id"]})
@@ -1031,7 +1079,7 @@ async def invite_courier(business_id: str, payload: CourierInviteIn, user=Depend
         await _notify(account["id"], type_="courier_invite", message=f"{biz.get('name')} invited you to deliver for them", action_url="/dashboard?tab=deliveries", business_id=business_id)
     await _email(
         payload.email, f"{biz.get('name')} wants you as their courier",
-        f"<p>{biz.get('name')} on MyIsraelRental would like you to deliver their orders.</p>"
+        f"<p>{_esc(biz.get('name'))} on MyIsraelRental would like you to deliver their orders.</p>"
         + ("<p>Open your dashboard to accept.</p>" if account else "<p>Sign up with this email address, then accept the invite in your dashboard.</p>"),
         tag="order-courier-invite",
         button=("Open my dashboard", f"{_frontend_url()}/dashboard?tab=deliveries") if account else ("Sign up", f"{_frontend_url()}/join"),
@@ -1267,9 +1315,9 @@ async def courier_set_status(order_id: str, payload: CourierStatusIn, user=Depen
         track = f"{_frontend_url()}/orders/track/{order.get('track_token')}"
         await _email(
             order.get("customer_email"), f"Delivered: your order from {biz.get('name')}",
-            f"<p>Your order from {biz.get('name')} was delivered at {now[11:16]}.</p>"
-            f"<p><img src=\"{payload.photo_url}\" alt=\"Delivery photo\" style=\"max-width:100%;border-radius:12px\"></p>"
-            f"<p>{(order.get('items') or '').replace(chr(10), '<br>')}</p>",
+            f"<p>Your order from {_esc(biz.get('name'))} was delivered at {_esc(now[11:16])}.</p>"
+            + (f"<p><img src=\"{_esc(payload.photo_url)}\" alt=\"Delivery photo\" style=\"max-width:100%;border-radius:12px\"></p>" if payload.photo_url else "")
+            + f"<p>{_esc_ml(order.get('items'))}</p>",
             tag="order-delivered", button=("See your order", track),
         )
         if order.get("customer_user_id"):
@@ -1863,20 +1911,23 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"_id": 0, "email": 1})
     await _email(
         (owner or {}).get("email"), f"New order from {payload.customer_name}",
-        f"<p><strong>{payload.customer_name}</strong> ordered on your page:</p><p>{items_text.replace(chr(10), '<br>')}</p>"
-        f"<p>{'Delivery to ' + (address or '') if payload.fulfilment == 'delivery' else 'Pickup'} · {needed_by.replace('T', ' ')}"
-        + (f" · {sym}{total:g}" if total is not None else "") + "</p>",
+        f"<p><strong>{_esc(payload.customer_name)}</strong> ordered on your page:</p><p>{_esc_ml(items_text)}</p>"
+        f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else 'Pickup'} · {_esc(needed_by.replace('T', ' '))}"
+        + (f" · {_esc(sym)}{total:g}" if total is not None else "") + "</p>",
         tag="order-new", button=("Open my orders", f"{_frontend_url()}/dashboard?tab=orders"),
     )
     # Tell the customer, with the link and how to pay.
     pay = biz.get("payment_note") or ""
-    links = "".join(f'<p><a href="{l.get("url")}">{l.get("label") or l.get("url")}</a></p>' for l in biz.get("payment_links") or [])
+    links = "".join(
+        f'<p><a href="{_esc(l.get("url"))}">{_esc(l.get("label") or l.get("url"))}</a></p>'
+        for l in biz.get("payment_links") or []
+    )
     await _email(
         payload.customer_email, f"Your order from {biz.get('name')}",
-        f"<p>Thanks, {payload.customer_name}. {biz.get('name')} has your order:</p><p>{items_text.replace(chr(10), '<br>')}</p>"
-        f"<p>{'Delivery to ' + (address or '') if payload.fulfilment == 'delivery' else 'Pickup at the store'} · {needed_by.replace('T', ' ')}"
-        + (f" · {sym}{total:g}" if total is not None else "") + "</p>"
-        + (f"<p>Payment goes to the store directly. {pay}</p>{links}" if (pay or links) else "<p>Payment goes to the store directly.</p>"),
+        f"<p>Thanks, {_esc(payload.customer_name)}. {_esc(biz.get('name'))} has your order:</p><p>{_esc_ml(items_text)}</p>"
+        f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else 'Pickup at the store'} · {_esc(needed_by.replace('T', ' '))}"
+        + (f" · {_esc(sym)}{total:g}" if total is not None else "") + "</p>"
+        + (f"<p>Payment goes to the store directly. {_esc(pay)}</p>{links}" if (pay or links) else "<p>Payment goes to the store directly.</p>"),
         tag="order-confirmation", button=("Follow your order", track),
     )
     return {"order_id": doc["_id"], "track_token": doc["track_token"], "track_url": track, "total": total, "currency": currency, "delivery_fee": doc["delivery_fee"]}
