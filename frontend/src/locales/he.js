@@ -1346,7 +1346,11 @@ const he = {
         myGigs: 'העבודות שלי',
         myBusinesses: 'עסקים',
         deliveries: 'משלוחים',
-        myOrders: 'ההזמנות שלי',
+        // Two tabs in this sidebar are "הזמנות" in Hebrew: a renter's
+        // property bookings (myBookings) and a customer's store orders.
+        // English tells them apart by Bookings/Orders; Hebrew has one
+        // word, so this one names where the orders were placed.
+        myOrders: 'ההזמנות שלי מחנויות',
         orders: 'הזמנות',
         appointments: 'תורים',
         // D1 — ראו את ההערה בצד האנגלי.
