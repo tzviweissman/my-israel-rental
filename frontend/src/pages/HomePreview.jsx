@@ -35,7 +35,7 @@ import {
   GalleryGridCell,
 } from '../components/ui/cta-section-with-gallery';
 import useFavorites from '../hooks/useFavorites';
-import FilmBackground from '../components/home/FilmBackground';
+import BlocksHero from '../components/home/BlocksHero';
 import AntiMetalButton from '../components/ui/anti-metal-button';
 import LiquidButton from '../components/ui/liquid-button';
 import FlowButton from '../components/ui/flow-button';
@@ -163,7 +163,7 @@ export default function HomePreview() {
           listings (ImageStreamHero) stays in the codebase; this page just
           no longer mounts it. Reduced motion gets the poster, still. */}
       <section className="hv2-hero hv2-hero--film" data-testid="home-preview-hero">
-        <FilmBackground />
+        <BlocksHero />
         <div className="hv2-hero-scrim" aria-hidden="true" />
         <div className="hv2-hero-inner">
           <div>

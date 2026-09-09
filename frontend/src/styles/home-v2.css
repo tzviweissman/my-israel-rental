@@ -406,31 +406,17 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
   body.theme-preview #root { zoom: 0.8; }
 }
 
-/* The film hero: a generated loop, built to the reference Tzvi sent, of
-   frosted glass blocks that tumble in, stack into a rotating cube, burst,
-   flatten into a mosaic, stream into a ribbon and resolve into the skyline
-   of gold glass. The camera moves the whole way, so there is no quiet
-   corner to put the copy in: the headline sits on a SOLID white panel at
-   the inline-start, with a short soft edge, and the film runs full-bleed
-   behind it. A translucent scrim was measured under the old render and
-   the blocks kept drifting under the headline; solid is the fix, not a
-   taste call. Phones get a portrait render, the panel across the top. */
+/* The blocks hero: hundreds of frosted glass blocks, animated in code
+   (components/home/BlocksHero.jsx) through the reference's six shapes and
+   ending on the site's mark. The canvas fills the hero; the copy sits on a
+   SOLID white panel at the inline-start with a short soft edge, and the
+   scene frames itself into the clear area beside it (the band below it on
+   phones), so nothing is cropped at any width. The panel's extent here and
+   the constants at the top of BlocksHero.jsx describe the same rectangle:
+   change them together. */
 .hv2-hero--film { position: relative; background: #fff; }
-.hv2-hero--film .hv2-film {
-  /* The film gets its own box rather than the whole hero under the panel:
-     the render's action is centred in its frame, so a full-width film put
-     the cube and the skyline half under the panel edge. The box starts at
-     42%, under the SOLID part of the panel (which ends at 44%), because a
-     box edge inside the soft fade showed as a hard vertical cut through
-     the cube. It is 84% of the hero's height: at the full height the film
-     (16:9) is wider than the box and its centre landed past the viewport
-     edge in LTR. At 84% the film is 1075px wide against a 720px hero, the
-     box shows its middle two thirds centred, and the cube and the skyline
-     sit in the clear area at 1280 and wider. Cover trims only the film's
-     own white sides. Symmetric, so RTL needs no override. */
-  position: absolute; top: 8%; inset-inline-start: 42%;
-  z-index: 0; width: 58%; height: 84%;
-  object-fit: cover; object-position: 50% 50%;
+.hv2-hero--film .hv2-blocks {
+  position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; display: block;
   background: #fff;
 }
 .hv2-hero--film .hv2-hero-scrim {
@@ -454,43 +440,20 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
 .hv2-hero--film .hv2-hero-foot { align-items: flex-start; }
 .hv2-hero--film .hv2-hero-foot p { text-align: start; }
 .hv2-hero--film .hv2-hero-ctas { justify-content: flex-start; }
-@media (max-width: 760px) {
-  /* The copy runs to about 60% of the hero on a phone (measured at 375 wide
-     with the add-your-business link last), so the panel is the top 62%,
-     solid, and the build shows beneath it. */
-  /* The copy is a fixed pixel height (it ends at about 420px at 375 wide,
-     the add-your-business link last), so the panel is measured in pixels,
-     the hero takes the full screen, and the film gets the band below the
-     copy. The render's action sits in the middle of its frame, so the
-     band looks at that middle rather than the film's bottom. */
-  .hv2-hero--film { height: 100svh; min-height: 640px; --copy-h: 432px; }
-  .hv2-hero--film .hv2-film {
-    inset-inline-start: 0; width: 100%;
-    top: var(--copy-h); height: calc(100% - var(--copy-h));
-    object-position: 50% 62%;
-  }
+@media (max-width: 1000px) {
+  /* Up to 1000px the panel is the top of the hero and the scene runs full
+     width below it: a side panel left too narrow a strip for the scene
+     (Tzvi's own window is about 1000px wide). The copy is a fixed pixel
+     height (it ends at about 420px, the add-your-business link last), so
+     the panel is measured in pixels and the hero takes the full screen.
+     STACK_MAX and PANEL_TOP_PX in BlocksHero.jsx are the same numbers. */
+  .hv2-hero--film { height: 100svh; min-height: 640px; --copy-h: 470px; }
   .hv2-hero--film .hv2-hero-scrim,
   [dir="rtl"] .hv2-hero--film .hv2-hero-scrim {
     background: linear-gradient(180deg, #fff 0, #fff var(--copy-h), rgba(255, 255, 255, .86) calc(var(--copy-h) + 18px), rgba(255, 255, 255, 0) calc(var(--copy-h) + 44px), rgba(255, 255, 255, 0) 92%, rgba(255, 255, 255, .8) 100%);
   }
   .hv2-hero--film .hv2-hero-inner { justify-content: flex-start; gap: 22px; }
 }
-/* Tablets: the portrait render under the desktop copy layout (the foot at
-   the bottom). The headline is narrowed so it wraps inside the panel (at
-   768 it ran as one line, half of it over the cube), the panel is the
-   start 58% plus paper under the foot, and the film sits in a box on the
-   inline-end above that paper, looking at the film's lower band. */
-@media (min-width: 761px) and (max-width: 1000px) {
-  .hv2-hero--film .hv2-hero-inner > div:first-child { max-width: 400px; }
-  .hv2-hero--film .hv2-hero-scrim {
-    background:
-      linear-gradient(90deg, #fff 0%, #fff 58%, rgba(255, 255, 255, .86) 63%, rgba(255, 255, 255, 0) 72%),
-      linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, .94) 78%, #fff 100%);
-  }
-  [dir="rtl"] .hv2-hero--film .hv2-hero-scrim {
-    background:
-      linear-gradient(270deg, #fff 0%, #fff 58%, rgba(255, 255, 255, .86) 63%, rgba(255, 255, 255, 0) 72%),
-      linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, .94) 78%, #fff 100%);
-  }
-  .hv2-hero--film .hv2-film { top: 0; inset-inline-start: 55%; width: 45%; height: 66%; object-position: 50% 85%; }
+@media (max-width: 760px) {
+  .hv2-hero--film { --copy-h: 432px; }
 }

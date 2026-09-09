@@ -35,7 +35,8 @@
     "serve-handler": "^6.1.5",
     "sonner": "^2.0.3",
     "tailwind-merge": "^3.2.0",
-    "tailwindcss-animate": "^1.0.7"
+    "tailwindcss-animate": "^1.0.7",
+    "three": "^0.170.0"
   },
   "scripts": {
     "start": "craco start",
