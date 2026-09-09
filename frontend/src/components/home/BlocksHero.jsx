@@ -73,7 +73,7 @@ const PALETTE = [
 const GOLD_LOW = new THREE.Color('#A8650F');
 const GOLD_HIGH = new THREE.Color('#F2C24A');
 // The ribbon's bands, across its width, echoing the reference's arc.
-const RIBBON_BANDS = ['#1F63E8', '#6D21C4', '#A02BC9', '#E2076B', '#EF4A1E', '#F07A10', '#F5B417', '#F2C24A'];
+const RIBBON_BANDS = ['#2C5FC4', '#5F2AA6', '#8C2FAE', '#C22668', '#D1502C', '#D3792C', '#D69E28', '#D9AE45'];
 
 // The mark: 28 columns across brand/logo-mark.png, each the tower's height
 // and its lift off the ground as fractions of the image height. Traced from
@@ -82,9 +82,14 @@ const RIBBON_BANDS = ['#1F63E8', '#6D21C4', '#A02BC9', '#E2076B', '#EF4A1E', '#F
 const MARK_HEIGHTS = [0, 0.225, 0.275, 0.325, 0.375, 0.45, 0.55, 0.525, 0.525, 0, 0.3, 0.725, 0.8, 0.85, 0.9, 0.675, 0.65, 0.375, 0.575, 0.625, 0.125, 0.525, 0.475, 0.2, 0.275, 0.25, 0.25, 0.15];
 const MARK_LIFT = [0, 0.025, 0.025, 0.025, 0.025, 0.05, 0.025, 0.05, 0.025, 0, 0.025, 0.05, 0.05, 0.05, 0.05, 0.225, 0.2, 0.175, 0.025, 0.025, 0.5, 0.05, 0.05, 0.025, 0.025, 0.05, 0.025, 0.05];
 
-const RIB_SAMPLES = 512;        // baked poses around the ribbon loop
-const RIB_LANES = 8;
-const RIB_FLOW = 0.06;          // loops per second while the ribbon holds
+const RIB_SAMPLES = 512;        // baked poses along the ribbon
+const RIB_LANES = 8;            // tiles across its width
+const RIB_RINGS = 42;           // tiles along its length
+const RIB_BODY = RIB_LANES * RIB_RINGS;   // 336 make the ribbon
+const RIB_FEED = N - RIB_BODY;            // 176 stream into its tail
+const FEED_SPEED = 0.14;        // trips along the feed path per second
+// Where the stream comes from, far enough out to be off frame.
+const FEED_FAR = [-26, -7, 17];
 
 // Deterministic randomness, so every visitor sees the same film.
 function mulberry32(seed) {
@@ -194,37 +199,85 @@ function buildKeyframes() {
     setC(mosaic, i, colA[i], colB[i]);
   }
 
-  // K5 ribbon: a closed, tilted loop the tiles flow around, with tiles
-  // wide enough to touch so it reads as one banded ribbon rather than a
-  // string of chips. Colour runs across its width, as the reference's does.
+  // K5 ribbon: an OPEN strip that rises from a low tail, sweeps up and
+  // curls over on itself, with a stream of small tiles flowing along the
+  // tail and merging into it. The closed loop this replaced read as a
+  // banded bracelet: no curl, and nothing feeding it, which was the last
+  // structural difference from the reference.
+  //
+  // 336 of the blocks tile the strip, packed edge to edge across eight
+  // lanes so it reads as one surface with bands running along its length.
+  // The remaining 176 are the stream: they travel the feed path, fading
+  // in far out and fading out as they reach the tail, so the ribbon looks
+  // fed rather than merely present.
   const ribbonU = new Float32Array(N), ribbonLane = new Float32Array(N);
-  const loopPts = [];
-  for (let k = 0; k < 12; k++) {
-    const a = (k / 12) * Math.PI * 2;
-    loopPts.push(new THREE.Vector3(Math.cos(a) * 11, 5.5 + Math.sin(a) * 3.4 + Math.sin(a * 2) * 1.3, Math.sin(a) * 5.5 - 0.5));
-  }
-  const loopCurve = new THREE.CatmullRomCurve3(loopPts, true, 'catmullrom', 0.5);
-  const frames = loopCurve.computeFrenetFrames(RIB_SAMPLES, true);
-  const ribPos = new Float32Array(RIB_SAMPLES * 3), ribQuat = new Float32Array(RIB_SAMPLES * 4), ribBin = new Float32Array(RIB_SAMPLES * 3);
+  const feedScatter = new Float32Array(N * 3);
+  const ribPts = [
+    new THREE.Vector3(-17.5, -1.5, 10),
+    new THREE.Vector3(-13, 0.5, 7),
+    new THREE.Vector3(-9, 2.6, 4),
+    new THREE.Vector3(-5.5, 4.6, 1.2),
+    new THREE.Vector3(-2.7, 6.4, -0.6),
+    new THREE.Vector3(-0.3, 7.8, 0.2),
+    // The curl: the strip turns back on itself and shows its underside.
+    new THREE.Vector3(0.7, 7.9, 2.6),
+    new THREE.Vector3(-0.5, 6.6, 4.6),
+    new THREE.Vector3(-2.6, 5.9, 4.8),
+  ];
+  const ribCurve = new THREE.CatmullRomCurve3(ribPts, false, 'catmullrom', 0.5);
+  // Sampled by ARC LENGTH, not by the curve parameter. getPoint spaces
+  // its samples unevenly, which left the strip bunched in the bends and
+  // gapped on the straights: it read as slats, not as a ribbon.
+  //
+  // The frame is built from a fixed world up rather than by Frenet, whose
+  // normal spins through the curl and tore the strip into a fan. The
+  // tangent here never comes near vertical, so a fixed up is stable, and
+  // a small roll along the length gives the twist Frenet was overdoing.
+  const ribPos = new Float32Array(RIB_SAMPLES * 3), ribQuat = new Float32Array(RIB_SAMPLES * 4);
+  const ribBin = new Float32Array(RIB_SAMPLES * 3), ribNrm = new Float32Array(RIB_SAMPLES * 3);
   const m = new THREE.Matrix4();
+  const up = new THREE.Vector3(0, 1, 0);
+  const tan = new THREE.Vector3(), bin = new THREE.Vector3(), nrm = new THREE.Vector3();
+  const rollQ = new THREE.Quaternion();
   for (let k = 0; k < RIB_SAMPLES; k++) {
-    const p = loopCurve.getPoint(k / RIB_SAMPLES);
-    ribPos[k * 3] = p.x; ribPos[k * 3 + 1] = p.y; ribPos[k * 3 + 2] = p.z;
-    const bin = frames.binormals[k];
+    const u = k / (RIB_SAMPLES - 1);
+    const pt = ribCurve.getPointAt(u);
+    ribPos[k * 3] = pt.x; ribPos[k * 3 + 1] = pt.y; ribPos[k * 3 + 2] = pt.z;
+    ribCurve.getTangentAt(u, tan).normalize();
+    bin.crossVectors(tan, up).normalize();
+    nrm.crossVectors(bin, tan).normalize();
+    rollQ.setFromAxisAngle(tan, u * 0.6);
+    bin.applyQuaternion(rollQ); nrm.applyQuaternion(rollQ);
     ribBin[k * 3] = bin.x; ribBin[k * 3 + 1] = bin.y; ribBin[k * 3 + 2] = bin.z;
-    m.makeBasis(frames.tangents[k], frames.normals[k], bin); q.setFromRotationMatrix(m);
+    ribNrm[k * 3] = nrm.x; ribNrm[k * 3 + 1] = nrm.y; ribNrm[k * 3 + 2] = nrm.z;
+    m.makeBasis(tan, nrm, bin); q.setFromRotationMatrix(m);
     ribQuat[k * 4] = q.x; ribQuat[k * 4 + 1] = q.y; ribQuat[k * 4 + 2] = q.z; ribQuat[k * 4 + 3] = q.w;
   }
-  const perLane = N / RIB_LANES;
+  // Tiles overlap slightly along both axes, or the strip reads as a grid
+  // of chips with gaps rather than as a ribbon.
+  const laneW = 1.3;
+  const tileLen = (ribCurve.getLength() / (RIB_RINGS - 1)) * 1.18;
   const ribbon = make();
   const bandCols = RIBBON_BANDS.map((h) => new THREE.Color(h));
   for (let i = 0; i < N; i++) {
-    const lane = i % RIB_LANES, k = Math.floor(i / RIB_LANES);
-    ribbonU[i] = k / perLane; ribbonLane[i] = (lane - (RIB_LANES - 1) / 2) * 1.25;
-    setS(ribbon, i, 1.5, 0.13, 1.35);
-    setC(ribbon, i, bandCols[lane], bandCols[Math.min(RIB_LANES - 1, lane + 1)]);
-    // Position and rotation come from the loop at run time; the arrays
-    // hold the u = 0 pose so a debugger reading them sees something sane.
+    if (i < RIB_BODY) {
+      const lane = i % RIB_LANES, ring = Math.floor(i / RIB_LANES);
+      ribbonU[i] = ring / (RIB_RINGS - 1);
+      ribbonLane[i] = (lane - (RIB_LANES - 1) / 2) * laneW;
+      setS(ribbon, i, tileLen, 0.12, laneW * 1.08);
+      setC(ribbon, i, bandCols[lane], bandCols[Math.min(RIB_LANES - 1, lane + 1)]);
+    } else {
+      // A stream chip: its own colour, its own phase, scattered around
+      // the feed path and converging as it arrives.
+      ribbonU[i] = rnd();
+      ribbonLane[i] = 0;
+      const sc = 0.34 + rnd() * 0.4;
+      setS(ribbon, i, sc * 1.5, 0.11, sc);
+      setC(ribbon, i, colA[i], colB[i]);
+      feedScatter[i * 3] = (rnd() - 0.5) * 7;
+      feedScatter[i * 3 + 1] = (rnd() - 0.5) * 5;
+      feedScatter[i * 3 + 2] = (rnd() - 0.5) * 7;
+    }
     setP(ribbon, i, ribPos[0], ribPos[1], ribPos[2]);
     setQ(ribbon, i, q.set(ribQuat[0], ribQuat[1], ribQuat[2], ribQuat[3]));
   }
@@ -281,7 +334,7 @@ function buildKeyframes() {
     spinTurns[i] = 0.5 + rnd() * 1.5;
   }
 
-  return { sky, pile, cube, cloud, mosaic, ribbon, mark, rank, drift, spinAxis, spinTurns, ribbonU, ribbonLane, ribPos, ribQuat, ribBin };
+  return { sky, pile, cube, cloud, mosaic, ribbon, mark, rank, drift, spinAxis, spinTurns, ribbonU, ribbonLane, feedScatter, ribPos, ribQuat, ribBin, ribNrm };
 }
 
 /**
@@ -320,8 +373,8 @@ const CAMERA = [
   { t: 8.2, pos: [-7, 7, 12], look: [0, 5, 0] },
   { t: 9.6, pos: [-8, 7, 12], look: [0, 5.5, 0] },
   { t: 12.4, pos: [-2.5, 6, 13], look: [0, 5.5, 0] },
-  { t: 14.4, pos: [7, 4, 12], look: [-1, 4, 0] },
-  { t: 16.8, pos: [4, 9.5, 21], look: [0, 5.5, 0] },
+  { t: 14.4, pos: [6, 5.5, 14], look: [-3, 4.5, 3] },
+  { t: 16.8, pos: [9, 12, 19], look: [-1, 6.5, 2.5] },
   { t: 19.4, pos: [0, 5, 21], look: [0, 4, 0] },
   { t: 22.4, pos: [3, 5.5, 22], look: [0, 4, 0] },
   { t: LOOP, pos: [7, 9, 15], look: [0, 8, 0] },
@@ -472,13 +525,38 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
       outC.setRGB(key.color[i * 3], key.color[i * 3 + 1], key.color[i * 3 + 2]);
       outC2.setRGB(key.color2[i * 3], key.color2[i * 3 + 1], key.color2[i * 3 + 2]);
       if (k === 'ribbon') {
-        // Sampled from the loop: the tile's own place plus the flow so far.
-        let u = K.ribbonU[i] + (t - 14.4) * RIB_FLOW;
-        u -= Math.floor(u);
-        const idx = Math.min(RIB_SAMPLES - 1, Math.floor(u * RIB_SAMPLES));
-        const off = K.ribbonLane[i];
-        outP.set(K.ribPos[idx * 3] + K.ribBin[idx * 3] * off, K.ribPos[idx * 3 + 1] + K.ribBin[idx * 3 + 1] * off, K.ribPos[idx * 3 + 2] + K.ribBin[idx * 3 + 2] * off);
-        outQ.set(K.ribQuat[idx * 4], K.ribQuat[idx * 4 + 1], K.ribQuat[idx * 4 + 2], K.ribQuat[idx * 4 + 3]);
+        if (i < RIB_BODY) {
+          // A tile of the strip: its fixed place along the curve and
+          // across the width, with a slow swell travelling down the
+          // ribbon so the surface is never dead still.
+          const u = K.ribbonU[i];
+          const idx = Math.min(RIB_SAMPLES - 1, Math.round(u * (RIB_SAMPLES - 1)));
+          const off = K.ribbonLane[i];
+          const swell = Math.sin(t * 1.6 - u * 7) * 0.11;
+          outP.set(
+            K.ribPos[idx * 3] + K.ribBin[idx * 3] * off + K.ribNrm[idx * 3] * swell,
+            K.ribPos[idx * 3 + 1] + K.ribBin[idx * 3 + 1] * off + K.ribNrm[idx * 3 + 1] * swell,
+            K.ribPos[idx * 3 + 2] + K.ribBin[idx * 3 + 2] * off + K.ribNrm[idx * 3 + 2] * swell,
+          );
+          outQ.set(K.ribQuat[idx * 4], K.ribQuat[idx * 4 + 1], K.ribQuat[idx * 4 + 2], K.ribQuat[idx * 4 + 3]);
+          return;
+        }
+        // A stream chip travelling the feed path into the ribbon's tail.
+        // It fades in far out and fades out as it merges, so the wrap
+        // back to the start is never seen.
+        let ph = K.ribbonU[i] + (t - 14.4) * FEED_SPEED;
+        ph -= Math.floor(ph);
+        const e = ph * ph * (3 - 2 * ph);
+        const spread = (1 - ph) * (1 - ph);
+        outP.set(
+          FEED_FAR[0] + (K.ribPos[0] - FEED_FAR[0]) * e + K.feedScatter[i * 3] * spread,
+          FEED_FAR[1] + (K.ribPos[1] - FEED_FAR[1]) * e + K.feedScatter[i * 3 + 1] * spread,
+          FEED_FAR[2] + (K.ribPos[2] - FEED_FAR[2]) * e + K.feedScatter[i * 3 + 2] * spread,
+        );
+        const fade = clamp01(ph / 0.12) * clamp01((1 - ph) / 0.12);
+        outS.multiplyScalar(fade);
+        rotQ.setFromAxisAngle(yAxis, t * 0.9 + i);
+        outQ.set(K.ribQuat[0], K.ribQuat[1], K.ribQuat[2], K.ribQuat[3]).premultiply(rotQ);
         return;
       }
       outP.set(key.pos[i * 3], key.pos[i * 3 + 1], key.pos[i * 3 + 2]);
