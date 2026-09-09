@@ -417,15 +417,19 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
    taste call. Phones get a portrait render, the panel across the top. */
 .hv2-hero--film { position: relative; background: #fff; }
 .hv2-hero--film .hv2-film {
-  /* The film gets its own box, the inline-end half of the hero, rather than
-     the whole hero under the panel: the render's action is centred in its
-     frame, so a full-width film put the cube and the skyline half under
-     the panel edge. In its own box the action is centred in what the
-     visitor can see. Cover inside that box scales the film to the hero's
-     height and trims only the film's own white sides, so the formation is
-     as large as the hero allows and still whole. */
-  position: absolute; top: 0; bottom: 0; inset-inline-start: 50%;
-  z-index: 0; width: 50%; height: 100%;
+  /* The film gets its own box rather than the whole hero under the panel:
+     the render's action is centred in its frame, so a full-width film put
+     the cube and the skyline half under the panel edge. The box starts at
+     42%, under the SOLID part of the panel (which ends at 44%), because a
+     box edge inside the soft fade showed as a hard vertical cut through
+     the cube. It is 84% of the hero's height: at the full height the film
+     (16:9) is wider than the box and its centre landed past the viewport
+     edge in LTR. At 84% the film is 1075px wide against a 720px hero, the
+     box shows its middle two thirds centred, and the cube and the skyline
+     sit in the clear area at 1280 and wider. Cover trims only the film's
+     own white sides. Symmetric, so RTL needs no override. */
+  position: absolute; top: 8%; inset-inline-start: 42%;
+  z-index: 0; width: 58%; height: 84%;
   object-fit: cover; object-position: 50% 50%;
   background: #fff;
 }
@@ -488,5 +492,5 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
       linear-gradient(270deg, #fff 0%, #fff 58%, rgba(255, 255, 255, .86) 63%, rgba(255, 255, 255, 0) 72%),
       linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 62%, rgba(255, 255, 255, .94) 78%, #fff 100%);
   }
-  .hv2-hero--film .hv2-film { inset-inline-start: 55%; width: 45%; height: 66%; object-position: 50% 85%; }
+  .hv2-hero--film .hv2-film { top: 0; inset-inline-start: 55%; width: 45%; height: 66%; object-position: 50% 85%; }
 }
