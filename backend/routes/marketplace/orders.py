@@ -53,6 +53,7 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from routes.deps import db, logger, optional_user, verify_token
+from utils.media_url import MAX_MEDIA_URL_LEN, is_allowed_media_url
 from utils.rate_limit import check_rate
 from utils.whatsapp_link import normalize_whatsapp_number
 
@@ -947,8 +948,27 @@ class CourierStatusIn(BaseModel):
     status: str = Field(..., pattern="^(done|failed)$")
     reason: Optional[str] = Field(None, pattern="^(nobody_home|wrong_address|refused|not_found|other)$")
     note: str = Field("", max_length=300)
-    photo_url: Optional[str] = Field(None, max_length=600)
+    photo_url: Optional[str] = Field(None, max_length=MAX_MEDIA_URL_LEN)
     payment: Optional[PaymentIn] = None
+
+    @field_validator("photo_url")
+    @classmethod
+    def _photo_is_ours(cls, v):
+        """The proof-of-delivery photo has to live where we put it.
+
+        This value is embedded as <img src> in the "Delivered" email we send
+        under our own sender identity, and returned verbatim from the
+        unauthenticated tracking page. Until 9 Sep 2026 it was accepted with
+        no scheme and no host check, so a courier account - real, and only
+        needing to be compromised rather than malicious - could point it at
+        anything. See utils/media_url.py for what is on the list.
+        """
+        if v is None or not str(v).strip():
+            return None
+        v = str(v).strip()
+        if not is_allowed_media_url(v):
+            raise ValueError("The delivery photo must be one uploaded through this app")
+        return v
 
 
 def _public_courier(c: dict[str, Any]) -> dict[str, Any]:

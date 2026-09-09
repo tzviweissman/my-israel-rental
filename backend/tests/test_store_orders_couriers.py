@@ -191,16 +191,16 @@ def test_delivered_needs_ready_and_photo_and_records_cash(owner, business, couri
     ctoken, _ = courier_acct
     o = _delivery(owner, business, customer_name="Door Test", total=120)
     url = f"{BASE}/marketplace/courier/deliveries/{o['id']}/status"
-    assert requests.patch(url, json={"status": "done", "photo_url": "https://example.com/p.jpg"}, headers=_auth(ctoken), timeout=30).status_code == 409
+    assert requests.patch(url, json={"status": "done", "photo_url": "https://res.cloudinary.com/demo/image/upload/v1/p.jpg"}, headers=_auth(ctoken), timeout=30).status_code == 409
     _status(owner, o["id"], "preparing")
     _status(owner, o["id"], "ready")
     assert requests.patch(url, json={"status": "done"}, headers=_auth(ctoken), timeout=30).status_code == 400
-    assert requests.patch(url, json={"status": "done", "photo_url": "https://example.com/p.jpg", "payment": {"method": "cash"}},
+    assert requests.patch(url, json={"status": "done", "photo_url": "https://res.cloudinary.com/demo/image/upload/v1/p.jpg", "payment": {"method": "cash"}},
                           headers=_auth(ctoken), timeout=30).status_code == 400
-    r = requests.patch(url, json={"status": "done", "photo_url": "https://example.com/p.jpg", "payment": {"method": "cash", "amount": 120}},
+    r = requests.patch(url, json={"status": "done", "photo_url": "https://res.cloudinary.com/demo/image/upload/v1/p.jpg", "payment": {"method": "cash", "amount": 120}},
                        headers=_auth(ctoken), timeout=30)
     assert r.status_code == 200, r.text
-    assert r.json()["status"] == "done" and r.json()["delivery"]["photo_url"] == "https://example.com/p.jpg"
+    assert r.json()["status"] == "done" and r.json()["delivery"]["photo_url"] == "https://res.cloudinary.com/demo/image/upload/v1/p.jpg"
     assert r.json()["payment"]["amount"] == 120
     assert "customer_phone" not in r.json()
     # The customer's status link now carries the photo.
@@ -208,7 +208,7 @@ def test_delivered_needs_ready_and_photo_and_records_cash(owner, business, couri
                         params={"from": "2031-05-05", "to": "2031-05-05"}, headers=_auth(owner), timeout=30).json()
     rec = next(x for x in full["orders"] if x["id"] == o["id"])
     tr = requests.get(f"{BASE}/marketplace/orders/track/{rec['track_token']}", timeout=30).json()
-    assert tr["delivered_photo_url"] == "https://example.com/p.jpg"
+    assert tr["delivered_photo_url"] == "https://res.cloudinary.com/demo/image/upload/v1/p.jpg"
 
 
 def test_failed_needs_reason(owner, business, courier_acct):
@@ -246,3 +246,20 @@ def test_removing_courier_unassigns_open_orders(owner, business, courier_acct):
     assert rec["courier"] is None
     st = requests.get(f"{BASE}/marketplace/businesses/{business}/orders/settings", headers=_auth(owner), timeout=30).json()
     assert st["default_courier_user_id"] is None
+
+
+def test_a_delivery_photo_must_be_one_we_host(owner, business, courier_acct):
+    """Site audit, 8 Sep 2026: photo_url was length-checked and nothing
+    else, then embedded as <img src> in the "Delivered" email we send and
+    returned from the public tracking page. A courier account only has to
+    be compromised, not malicious, for that to be a tracking pixel in the
+    shop owner's inbox. See utils/media_url.py."""
+    ctoken, _ = courier_acct
+    o = _delivery(owner, business, customer_name="Photo Host Test", total=90)
+    url = f"{BASE}/marketplace/courier/deliveries/{o['id']}/status"
+    for bad in ("https://evil.example/px.gif",
+                "https://evil-cloudinary.com/px.gif",
+                "http://res.cloudinary.com/demo/a.jpg"):
+        r = requests.patch(url, json={"status": "done", "photo_url": bad},
+                           headers=_auth(ctoken), timeout=30)
+        assert r.status_code == 422, f"{bad} was accepted: {r.status_code}"
