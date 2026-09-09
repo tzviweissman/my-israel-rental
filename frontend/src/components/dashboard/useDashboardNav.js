@@ -78,7 +78,13 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       label: t('dashboard.groupAccount', 'Account'),
       tabs: [
         { id: 'messages', label: t('dashboard.messages'), Icon: MessageCircle, badge: unreadMessages, urgent: true, show: true },
-        { id: 'alerts', label: t('dashboard.alerts'), Icon: Bell, show: isRenter },
+        // Every role, not just renters. Anyone signed in can save a property
+        // search — the popover is always visible (Properties.js) and
+        // routes/saved_searches.py has no role check — and this tab is
+        // where the "N new properties matched" banner points. Gated on
+        // isRenter, an owner or provider who saved one followed that link
+        // to a blank panel (dead-ends audit 2026-09-08, #1).
+        { id: 'alerts', label: t('dashboard.alerts'), Icon: Bell, show: true },
         { id: 'liked', label: t('dashboard.liked'), Icon: Heart, show: true },
         { id: 'settings', label: t('dashboard.settings'), Icon: KeyRound, show: true },
       ],

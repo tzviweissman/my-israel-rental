@@ -402,7 +402,10 @@ const Dashboard = () => {
           <SettingsTab user={user} token={token} API={API} />
         )}
 
-        {activeTab === 'alerts' && isRenter && (
+        {/* Not gated on isRenter — see the note beside this tab in
+            useDashboardNav. The panel and the tab have to agree, and the
+            tab is now shown to everyone. */}
+        {activeTab === 'alerts' && (
           <SavedSearchesTab API={API} token={token} />
         )}
 
