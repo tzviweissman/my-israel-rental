@@ -3445,6 +3445,28 @@ const he = {
         'immigration-documents': 'עלייה ומסמכים',
         'medical-health':        'רפואה ובריאות',
       },
+      // תת-הקטגוריות של ארבע הקטגוריות המאוחדות. עד כה הן הוצגו באנגלית
+      // בעמוד השירותים ובטפסים, גם כשכל השאר היה בעברית.
+      subcategoryLabels: {
+        plumbing:           'אינסטלציה',
+        electrical:         'חשמל',
+        handyman:           'הנדימן',
+        'appliance-repair': 'תיקון מוצרי חשמל',
+        'interior-design':  'עיצוב פנים',
+        'tour-guide':       'מדריך טיולים',
+        'tour-operator':    'מארגן טיולים',
+        hotel:              'מלון ואירוח',
+        'travel-agency':    'סוכנות נסיעות',
+        photography:        'צילום',
+        videography:        'צילום וידאו',
+        'graphic-design':   'עיצוב גרפי',
+        'web-design':       'עיצוב אתרים',
+        bookkeeping:        'הנהלת חשבונות',
+        accounting:         'ראיית חשבון',
+        'tax-prep':         'הכנת דוחות מס',
+        legal:              'שירותים משפטיים',
+        consulting:         'ייעוץ עסקי',
+      },
       categoryGroups: {
         homeProperty:   'בית ונכסים',
         shops:          'חנויות',

@@ -44,7 +44,7 @@ import { X, Trash2, ImagePlus, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { uploadFilesFast, reportUploadFailure } from '../../utils/fastUpload';
 import { productPhotos } from '../../utils/productPhotos';
-import { SUBCATEGORIES } from '../../lib/categories';
+import { SUBCATEGORIES, subcategoryLabel } from '../../lib/categories';
 
 const MAX_PHOTOS = 6;
 
@@ -309,7 +309,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                     aria-pressed={subcategory === sub.slug}
                     data-testid={`edit-listing-sub-${sub.slug}`}
                   >
-                    {sub.label}
+                    {subcategoryLabel(sub, t)}
                   </button>
                 ))}
               </div>

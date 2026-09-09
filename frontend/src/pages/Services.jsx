@@ -30,7 +30,7 @@ import { localizedTitle } from '../utils/gigLocale';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import ServicesHeroSearch from '../components/marketplace/ServicesHeroSearch';
 import { saveReturnPath } from '../hooks/useBackNavigation';
-import { SUBCATEGORIES } from '../lib/categories';
+import { SUBCATEGORIES, subcategoryLabel } from '../lib/categories';
 // ServicesHeroTitle (the shimmer-on-white H1) is no longer rendered — the
 // headline now lives in the photo band. The component file is left in
 // place rather than deleted until 2c is approved.
@@ -481,7 +481,7 @@ const Services = () => {
                     data-testid={`services-sub-${s.slug}`}
                     aria-pressed={active}
                   >
-                    {s.label}
+                    {subcategoryLabel(s, t)}
                   </button>
                 );
               })}

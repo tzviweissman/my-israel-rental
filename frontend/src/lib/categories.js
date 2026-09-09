@@ -110,6 +110,22 @@ export const SUBCATEGORIES = {
  * drifts silently and the drift here has legal weight rather than
  * cosmetic weight.
  */
+/**
+ * A subcategory's name in the reader's language.
+ *
+ * The labels above are English, the way CATEGORY_LABELS is, because both
+ * mirror the backend. Categories are localised through
+ * `categoryLabels.<slug>` (see lib/categoryGroups.js); subcategories now
+ * follow the same shape, with the English label as the fallback so a
+ * subcategory added to the map still shows a name before anyone
+ * translates it.
+ *
+ * @param {{slug: string, label: string}} sub
+ * @param {Function} [t] i18next `t`; omit for the English label
+ */
+export const subcategoryLabel = (sub, t) =>
+  (typeof t === 'function' ? t(`subcategoryLabels.${sub.slug}`, sub.label) : sub.label);
+
 export const CATEGORIES_WITH_DISCLAIMER = new Set(['money-exchange']);
 
 export const needsDirectoryDisclaimer = (slug) =>

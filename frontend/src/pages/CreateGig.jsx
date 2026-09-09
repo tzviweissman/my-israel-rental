@@ -35,7 +35,7 @@ import {
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import CategoryPicker from '../components/marketplace/CategoryPicker';
-import { SUBCATEGORIES } from '../lib/categories';
+import { SUBCATEGORIES, subcategoryLabel } from '../lib/categories';
 import { uploadFilesFast, reportUploadFailure } from '../utils/fastUpload';
 import { useFormDraft, readDraft, clearDraft } from '../hooks/useFormDraft';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
@@ -650,7 +650,7 @@ const CreateGig = () => {
                       aria-pressed={form.subcategory === sub.slug}
                       data-testid={`wizard-sub-${sub.slug}`}
                     >
-                      {sub.label}
+                      {subcategoryLabel(sub, t)}
                     </button>
                   ))}
                 </div>
