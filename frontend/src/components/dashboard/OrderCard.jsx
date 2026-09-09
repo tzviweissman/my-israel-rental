@@ -12,6 +12,7 @@ import {
   Loader2, Phone, MapPin, Store as StoreIcon, Bike, Pencil, ChevronDown, Undo2, MessageCircle, Camera, Repeat,
 } from 'lucide-react';
 import { buildWhatsAppLink } from '../../utils/whatsappLink';
+import { money } from '../../utils/currency';
 
 export const STATUS_ORDER = ['new', 'preparing', 'ready', 'done', 'cancelled', 'failed'];
 export const NEXT = { new: 'preparing', preparing: 'ready', ready: 'done' };
@@ -25,7 +26,9 @@ export const OPEN = new Set(['new', 'preparing', 'ready']);
 export function pillStyle(status, on) {
   const base = { borderColor: 'var(--brand-border)', color: 'var(--ink)', background: 'var(--surface)' };
   if (status === 'new') Object.assign(base, { background: 'var(--accent-soft)', color: 'var(--accent-soft-ink)', borderColor: 'transparent' });
-  if (status === 'ready') Object.assign(base, { background: 'var(--status-open-bg)', color: 'var(--status-open)', borderColor: 'transparent' });
+  // The pill's ink is a darker green than the icon green: 11px text on the
+  // green wash needs 4.5:1 and --status-open measures 4.44:1 there.
+  if (status === 'ready') Object.assign(base, { background: 'var(--status-open-bg)', color: 'var(--status-open-ink)', borderColor: 'transparent' });
   if (status === 'preparing') Object.assign(base, { background: 'var(--surface-muted)' });
   if (status === 'done' || status === 'cancelled' || status === 'failed') Object.assign(base, { color: 'var(--brand-muted)' });
   if (on) Object.assign(base, { outline: '2px solid var(--ink)', outlineOffset: 1 });
@@ -92,7 +95,7 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
               </span>
             )}
             {o.total != null && (
-              <span className="text-[12px] font-semibold ms-auto" style={{ color: 'var(--ink)' }}>₪{Number(o.total).toLocaleString()}</span>
+              <span className="text-[12px] font-semibold ms-auto" style={{ color: 'var(--ink)' }}>{money(o.total, o.currency)}</span>
             )}
           </div>
           {(o.courier || o.payment?.method || o.delivery?.delivered_at || o.delivery?.failed_at) && (
@@ -100,7 +103,7 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
               {o.courier && <span className="inline-flex items-center gap-1" data-testid="order-courier"><Bike size={11} /> {o.courier.name}</span>}
               {o.payment?.method && (
                 <span style={{ color: 'var(--status-open)' }} data-testid="order-paid">
-                  {t('orders.paidShort', 'paid')} · {t(`orders.pay.${o.payment.method}`, o.payment.method)}{o.payment.amount != null ? ` ₪${Number(o.payment.amount).toLocaleString()}` : ''}
+                  {t('orders.paidShort', 'paid')} · {t(`orders.pay.${o.payment.method}`, o.payment.method)}{o.payment.amount != null ? ` ${money(o.payment.amount, o.currency)}` : ''}
                 </span>
               )}
               {o.delivery?.delivered_at && (
@@ -213,7 +216,7 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
               {[['cash', t('orders.pay.cash', 'Cash')], ['bit', t('orders.pay.bit', 'Bit')], ['', t('orders.pay.none', 'Not yet')]].map(([m, lbl]) => {
                 const on = (o.payment?.method || '') === m;
                 return (
-                  <button key={m || 'none'} type="button" disabled={busy} onClick={() => onPayment(o, m || null)} aria-pressed={on} className="px-3 min-h-[36px] rounded-full text-xs font-semibold border" style={on ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : { borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid={`order-pay-${m || 'none'}-${o.id}`}>{lbl}</button>
+                  <button key={m || 'none'} type="button" disabled={busy} onClick={() => onPayment(o, m || null)} aria-pressed={on} className="px-3 min-h-[44px] rounded-full text-xs font-semibold border" style={on ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : { borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid={`order-pay-${m || 'none'}-${o.id}`}>{lbl}</button>
                 );
               })}
             </div>

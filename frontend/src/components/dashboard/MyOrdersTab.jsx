@@ -10,6 +10,7 @@ import { Link } from 'react-router-dom';
 import axios from 'axios';
 import { Loader2, ClipboardList, Bike, Store as StoreIcon, Camera, ExternalLink, AlertCircle, RefreshCw } from 'lucide-react';
 import { pillStyle } from './OrderCard';
+import { money } from '../../utils/currency';
 
 export default function MyOrdersTab({ API, token }) {
   const { t, i18n } = useTranslation();
@@ -99,10 +100,10 @@ export default function MyOrdersTab({ API, token }) {
                 </span>
               </div>
               <p className="text-sm mt-2 whitespace-pre-line" dir="auto" style={{ color: 'var(--ink)' }}>{o.items}</p>
-              {o.total != null && <p className="text-sm mt-1" style={{ color: 'var(--ink)' }}>{t('orders.track.total', 'Total: ₪{{n}}', { n: Number(o.total).toLocaleString() })}{o.paid && <span className="ms-2" style={{ color: 'var(--status-open)' }}>· {t('orders.paidShort', 'paid')}</span>}</p>}
+              {o.total != null && <p className="text-sm mt-1" style={{ color: 'var(--ink)' }}>{t('orders.track.total', 'Total: {{n}}', { n: money(o.total, o.currency) })}{o.paid && <span className="ms-2" style={{ color: 'var(--status-open)' }}>· {t('orders.paidShort', 'paid')}</span>}</p>}
               {o.delivered_photo_url && (
                 <a href={o.delivered_photo_url} target="_blank" rel="noopener noreferrer" className="mt-2 inline-flex items-center gap-2 text-xs" style={{ color: 'var(--ink)' }} data-testid="my-order-photo">
-                  <img src={o.delivered_photo_url} alt="" className="w-16 h-16 rounded-lg object-cover" />
+                  <img src={o.delivered_photo_url} alt={t('orders.track.photoAlt', 'Photo of the delivery at your door')} className="w-16 h-16 rounded-lg object-cover" />
                   <span className="inline-flex items-center gap-1"><Camera size={12} /> {t('myOrders.deliveredPhoto', 'Delivered {{time}} - photo', { time: String(o.delivered_at || '').slice(11, 16) })}</span>
                 </a>
               )}

@@ -195,7 +195,7 @@ export default function StaffOrdersPage() {
             const on = statusFilter === s;
             return (
               <button key={s} type="button" onClick={() => setStatusFilter(on ? '' : s)} aria-pressed={on}
-                className="inline-flex items-center gap-1 px-2.5 min-h-[32px] rounded-full text-xs font-semibold border" style={pillStyle(s, on)}>
+                className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs font-semibold border" style={pillStyle(s, on)}>
                 {t(`orders.status.${s}`, s)} <span className="opacity-70">{n}</span>
               </button>
             );

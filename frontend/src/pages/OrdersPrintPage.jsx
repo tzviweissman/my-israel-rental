@@ -14,6 +14,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { ArrowLeft, Printer } from 'lucide-react';
 import { API, AuthContext } from '../App';
+import { money } from '../utils/currency';
 
 const pad = (n) => String(n).padStart(2, '0');
 const localDate = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -101,7 +102,7 @@ export default function OrdersPrintPage() {
                 <th className="text-start py-1 pe-2 border-b border-black">{t('orders.name', 'Customer')}</th>
                 <th className="text-start py-1 pe-2 border-b border-black">{t('orders.items', 'Items')}</th>
                 <th className="text-start py-1 pe-2 border-b border-black">{t('orders.fulfilment', 'Pickup or delivery')}</th>
-                <th className="text-start py-1 pe-2 border-b border-black w-16">{t('orders.total', 'Total (₪)')}</th>
+                <th className="text-start py-1 pe-2 border-b border-black w-16">{t('orders.print.total', 'Total')}</th>
                 <th className="text-start py-1 border-b border-black w-16">{t('orders.print.done', 'Done')}</th>
               </tr>
             </thead>
@@ -121,7 +122,7 @@ export default function OrdersPrintPage() {
                     {o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
                     {o.address && <div className="text-xs" dir="auto">{o.address}</div>}
                   </td>
-                  <td className="py-2 pe-2 border-b border-gray-300 tabular-nums">{o.total != null ? Number(o.total).toLocaleString() : ''}</td>
+                  <td className="py-2 pe-2 border-b border-gray-300 tabular-nums">{o.total != null ? money(o.total, o.currency) : ''}</td>
                   <td className="py-2 border-b border-gray-300"><span className="inline-block w-5 h-5 border border-black rounded-sm" aria-hidden="true" /></td>
                 </tr>
               ))}

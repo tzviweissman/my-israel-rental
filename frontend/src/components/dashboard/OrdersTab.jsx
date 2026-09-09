@@ -32,6 +32,8 @@ import {
   LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Timer, Pause, Play,
 } from 'lucide-react';
 import { phoneError } from '../../utils/phoneValidation';
+import { money } from '../../utils/currency';
+import { pastCutoff } from '../../utils/orderCutoffs';
 import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
 
 
@@ -68,23 +70,7 @@ const nextFriday = () => {
   return localDate(d);
 };
 
-/** Pure twin of the server's `past_cutoff`: the cutoff an order for
- * `date` has already missed, or null. Weekdays are JS-style. */
-export const pastCutoff = (date, cutoffs, now = new Date()) => {
-  if (!date) return null;
-  const day = new Date(`${date}T00:00`);
-  const wd = day.getDay();
-  for (const c of cutoffs || []) {
-    if (c.for_day !== wd) continue;
-    const back = (wd - c.closes_day + 7) % 7;
-    const closes = new Date(day);
-    closes.setDate(closes.getDate() - back);
-    const [h, m] = String(c.closes_time || '00:00').split(':').map(Number);
-    closes.setHours(h, m, 0, 0);
-    if (now > closes) return { ...c, closes };
-  }
-  return null;
-};
+export { pastCutoff };
 
 const rangeParams = (range) => {
   const today = localDate(new Date());
@@ -1204,6 +1190,10 @@ function MoneyStrip({ orders, t }) {
   const cash = sum(paid.filter((o) => o.payment.method === 'cash'), (o) => o.payment.amount ?? o.total);
   const bit = sum(paid.filter((o) => o.payment.method !== 'cash'), (o) => o.payment.amount ?? o.total);
   const unpaidDone = live.filter((o) => o.status === 'done' && !o.payment?.method).length;
+  // Manual orders are always ILS (the server writes it); website orders
+  // carry the store's currency. The strip shows the currency the day's
+  // orders share, or the one most of them use on a mixed day.
+  const strip = (() => { const n = {}; live.forEach((o) => { const c = o.currency || 'ILS'; n[c] = (n[c] || 0) + 1; }); return Object.keys(n).sort((a, b) => n[b] - n[a])[0] || 'ILS'; })();
   const cell = (label, value, testid) => (
     <div className="min-w-0" data-testid={testid}>
       <div className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>{label}</div>
@@ -1212,9 +1202,9 @@ function MoneyStrip({ orders, t }) {
   );
   return (
     <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 rounded-2xl border p-3 mb-4" style={{ borderColor: 'var(--brand-border)', background: 'var(--surface-muted)' }} data-testid="money-strip">
-      {cell(t('orders.money.expected', 'Expected today'), `₪${expected.toLocaleString()}`, 'money-expected')}
-      {cell(t('orders.money.cash', 'Cash collected'), `₪${cash.toLocaleString()}`, 'money-cash')}
-      {cell(t('orders.money.store', 'Paid to the store'), `₪${bit.toLocaleString()}`, 'money-store')}
+      {cell(t('orders.money.expected', 'Expected today'), money(expected, strip), 'money-expected')}
+      {cell(t('orders.money.cash', 'Cash collected'), money(cash, strip), 'money-cash')}
+      {cell(t('orders.money.store', 'Paid to the store'), money(bit, strip), 'money-store')}
       {cell(t('orders.money.unpaid', 'Done, not marked paid'), String(unpaidDone), 'money-unpaid')}
     </div>
   );
@@ -1393,7 +1383,7 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
         </div>
         <div>
           <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--brand-muted)' }} htmlFor="settings-min">{t('orders.minOrder', 'Minimum for delivery (₪)')}</label>
-          <input id="settings-min" type="number" inputMode="decimal" min="0" step="1" value={minOrder} onChange={(e) => setMinOrder(e.target.value)} className={`${sel} w-full`} style={selStyle} placeholder="—" data-testid="settings-min" />
+          <input id="settings-min" type="number" inputMode="decimal" min="0" step="1" value={minOrder} onChange={(e) => setMinOrder(e.target.value)} className={`${sel} w-full`} style={selStyle} placeholder="" data-testid="settings-min" />
         </div>
       </div>
 
@@ -1472,7 +1462,7 @@ function StandingPanel({ API, auth, standing, onChanged, onClose }) {
             <li key={sd.id} className="py-2 flex flex-wrap items-center gap-2" style={{ opacity: sd.active ? 1 : 0.6 }} data-testid={`standing-${sd.id}`}>
               <div className="min-w-0 flex-1">
                 <div className="text-sm font-semibold" dir="auto" style={{ color: 'var(--ink)' }}>{sd.customer_name} <span className="font-normal" style={{ color: 'var(--brand-muted)' }}>· {dayName(sd.weekday)}{sd.time ? ` ${sd.time}` : ''}</span></div>
-                <div className="text-xs whitespace-pre-line" dir="auto" style={{ color: 'var(--brand-muted)' }}>{sd.items}{sd.total != null ? ` · ₪${Number(sd.total).toLocaleString()}` : ''}{!sd.active ? ` · ${t('orders.standingPaused', 'paused')}` : ''}</div>
+                <div className="text-xs whitespace-pre-line" dir="auto" style={{ color: 'var(--brand-muted)' }}>{sd.items}{sd.total != null ? ` · ${money(sd.total, sd.currency)}` : ''}{!sd.active ? ` · ${t('orders.standingPaused', 'paused')}` : ''}</div>
               </div>
               <button type="button" disabled={busy === sd.id} onClick={() => toggle(sd)} className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="standing-toggle">
                 {sd.active ? <><Pause size={12} /> {t('orders.standingPause', 'Pause')}</> : <><Play size={12} /> {t('orders.standingResume', 'Resume')}</>}
