@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileText, Upload, Loader2, Copy, Check } from 'lucide-react';
 import { areaLabel } from '../../../utils/areaNames';
@@ -17,13 +17,25 @@ const SubleaseListItem = ({
   onConfirmDelete,
   onUpload,
   onCopySignLink,
+  highlighted = false,
 }) => {
   // `sub.area` is a DB value — localise it via utils/areaNames.
   const { t } = useTranslation();
+  // Same mechanism as BookingRow: a sublease notification links here with
+  // `highlight=<id>`, and the row it names scrolls into view with a ring so
+  // the reader can tell which of their listings it was about.
+  const rootRef = useRef(null);
+  useEffect(() => {
+    if (highlighted && rootRef.current) rootRef.current.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  }, [highlighted]);
   return (
     <div
-      className="rounded-xl border border-gray-200 bg-white overflow-hidden"
+      ref={rootRef}
+      className={`rounded-xl border bg-white overflow-hidden ${
+        highlighted ? 'border-[var(--brand-primary)] ring-2 ring-[var(--brand-primary)]/30' : 'border-gray-200'
+      }`}
       data-testid={`sublease-${sub.id}`}
+      data-highlighted={highlighted ? '1' : undefined}
     >
       <div className="flex items-center gap-4 p-4">
         <div

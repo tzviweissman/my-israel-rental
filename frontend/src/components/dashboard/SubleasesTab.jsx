@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { Plus, Home } from 'lucide-react';
@@ -36,6 +37,14 @@ const EMPTY_FORM = {
 const SubleasesTab = ({ API, token }) => {
   const { t } = useTranslation();
   const { user } = useContext(AuthContext);
+  // Navigation.js sends a sublease notification to
+  // `/dashboard?tab=subleases&highlight=<id>`. Dashboard.js reads the param
+  // but forwards it only to BookingsList, so this tab — the one that
+  // actually renders for tab=subleases — ignored it and the reader landed
+  // on the right list with no idea which row was meant
+  // (dead-ends audit 2026-09-08, #3).
+  const [searchParams] = useSearchParams();
+  const highlightId = searchParams.get('highlight');
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [form, setForm] = useState(EMPTY_FORM);
@@ -373,6 +382,7 @@ const SubleasesTab = ({ API, token }) => {
                   onConfirmDelete={confirmDelete}
                   onUpload={triggerUpload}
                   onCopySignLink={copySignLink}
+                  highlighted={!!highlightId && sub.id === highlightId}
                 />
               ))}
             </div>
