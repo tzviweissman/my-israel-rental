@@ -68,12 +68,13 @@ const PALETTE = [
   // coloured blocks from reading as plastic confetti. Held well below
   // white, because on a white ground a near-white block does not read as
   // frosted, it reads as a hole.
-  '#D7DCE6', '#E1E5EC', '#CED5E1', '#E6E3DD',
+  '#BFC9DA', '#C9D2DF', '#B6C1D4', '#D6D2C9',
 ];
+const WHITE = new THREE.Color('#FFFFFF');
 const GOLD_LOW = new THREE.Color('#A8650F');
 const GOLD_HIGH = new THREE.Color('#F2C24A');
 // The ribbon's bands, across its width, echoing the reference's arc.
-const RIBBON_BANDS = ['#2C5FC4', '#5F2AA6', '#8C2FAE', '#C22668', '#D1502C', '#D3792C', '#D69E28', '#D9AE45'];
+const RIBBON_BANDS = ['#2B55AE', '#552697', '#7E2A9C', '#AE225D', '#BC4527', '#BC6B26', '#B98722', '#B8933A'];
 
 // The mark: 28 columns across brand/logo-mark.png, each the tower's height
 // and its lift off the ground as fractions of the image height. Traced from
@@ -129,9 +130,20 @@ function buildKeyframes() {
   };
   const randQ = () => q.setFromEuler(e.set(rnd() * Math.PI * 2, rnd() * Math.PI * 2, rnd() * Math.PI * 2));
 
-  // Two colours per block, mixed up its local height: the reference's
-  // blocks are never one flat tone. The second is a near neighbour in the
-  // palette, sometimes a frosted white, so the gradient stays in family.
+  // Two colours per block, mixed up its local height. Tzvi's photo of
+  // real glass cubes is the target: the colour pools in the lower part of
+  // the block and the glass above it lightens. The second colour is
+  // always the first lifted toward white, never a different hue.
+  //
+  // It is lifted far less than the photo shows, and the level below is a
+  // smooth gradient rather than the photo's hard line, because those
+  // cubes stand on a DARK ground where clear glass reads as glass. On
+  // this white page a near-clear top is not glass, it is a hole: tried at
+  // 0.8 the blocks came apart into floating strips of colour, and at 0.4
+  // the cube still had white gaps punched through it. What carries over
+  // from the photo on a white ground is the rest of it: colour that
+  // varies through the body, crisp bright edges, real thickness, and a
+  // glow spilling out of the block.
   const colA = new Array(N), colB = new Array(N);
   // Persistent size class: big slabs, medium, chips, and thin bars. Used
   // wherever the formation is loose; the cube and the mark ignore it.
@@ -139,7 +151,7 @@ function buildKeyframes() {
   for (let i = 0; i < N; i++) {
     const j = Math.floor(rnd() * PALETTE.length);
     colA[i] = new THREE.Color(PALETTE[j]);
-    colB[i] = new THREE.Color(PALETTE[(j + 1 + Math.floor(rnd() * 3)) % PALETTE.length]);
+    colB[i] = colA[i].clone().lerp(WHITE, 0.24 + rnd() * 0.12);
     const r = rnd();
     size[i] = r < 0.16 ? 1.9 + rnd() * 0.7 : r < 0.48 ? 1.15 + rnd() * 0.35 : r < 0.8 ? 0.7 + rnd() * 0.3 : 0.4 + rnd() * 0.2;
     isBar[i] = rnd() < 0.18 ? 1 : 0;
@@ -212,17 +224,21 @@ function buildKeyframes() {
   // fed rather than merely present.
   const ribbonU = new Float32Array(N), ribbonLane = new Float32Array(N);
   const feedScatter = new Float32Array(N * 3);
+  // A long sweep that rises, crests and comes back down toward the lens,
+  // rather than a tight scroll. Turned back on itself the strip's outer
+  // lanes had to travel much further than its inner ones, so the tiles
+  // splayed into blades at the fold: a broad crest keeps the surface
+  // continuous and still reads as a ribbon curving through space.
   const ribPts = [
-    new THREE.Vector3(-17.5, -1.5, 10),
-    new THREE.Vector3(-13, 0.5, 7),
-    new THREE.Vector3(-9, 2.6, 4),
-    new THREE.Vector3(-5.5, 4.6, 1.2),
-    new THREE.Vector3(-2.7, 6.4, -0.6),
-    new THREE.Vector3(-0.3, 7.8, 0.2),
-    // The curl: the strip turns back on itself and shows its underside.
-    new THREE.Vector3(0.7, 7.9, 2.6),
-    new THREE.Vector3(-0.5, 6.6, 4.6),
-    new THREE.Vector3(-2.6, 5.9, 4.8),
+    new THREE.Vector3(-17, -1, 9),
+    new THREE.Vector3(-12.5, 0.8, 6.5),
+    new THREE.Vector3(-8.5, 2.8, 4),
+    new THREE.Vector3(-5, 4.8, 1.8),
+    new THREE.Vector3(-1.8, 6.5, 0.2),
+    new THREE.Vector3(1.2, 7.4, -0.4),
+    new THREE.Vector3(4.2, 7.4, 0.6),
+    new THREE.Vector3(6.4, 6.4, 2.6),
+    new THREE.Vector3(7.4, 5.0, 5.2),
   ];
   const ribCurve = new THREE.CatmullRomCurve3(ribPts, false, 'catmullrom', 0.5);
   // Sampled by ARC LENGTH, not by the curve parameter. getPoint spaces
@@ -246,7 +262,7 @@ function buildKeyframes() {
     ribCurve.getTangentAt(u, tan).normalize();
     bin.crossVectors(tan, up).normalize();
     nrm.crossVectors(bin, tan).normalize();
-    rollQ.setFromAxisAngle(tan, u * 0.6);
+    rollQ.setFromAxisAngle(tan, u * 0.25);
     bin.applyQuaternion(rollQ); nrm.applyQuaternion(rollQ);
     ribBin[k * 3] = bin.x; ribBin[k * 3 + 1] = bin.y; ribBin[k * 3 + 2] = bin.z;
     ribNrm[k * 3] = nrm.x; ribNrm[k * 3 + 1] = nrm.y; ribNrm[k * 3 + 2] = nrm.z;
@@ -265,7 +281,11 @@ function buildKeyframes() {
       ribbonU[i] = ring / (RIB_RINGS - 1);
       ribbonLane[i] = (lane - (RIB_LANES - 1) / 2) * laneW;
       setS(ribbon, i, tileLen, 0.12, laneW * 1.08);
-      setC(ribbon, i, bandCols[lane], bandCols[Math.min(RIB_LANES - 1, lane + 1)]);
+      // Barely lifted, unlike the chunky blocks. These tiles are thin in
+      // their local Y, which is the axis the gradient runs along, so the
+      // face the camera sees IS the top: lifted 0.6 toward white the whole
+      // ribbon rendered as a white smear.
+      setC(ribbon, i, bandCols[lane], bandCols[lane].clone().lerp(WHITE, 0.14));
     } else {
       // A stream chip: its own colour, its own phase, scattered around
       // the feed path and converging as it arrives.
@@ -305,7 +325,7 @@ function buildKeyframes() {
       setP(mark, i, cell.x, cell.y, cell.z);
       setQ(mark, i, q.identity()); setS(mark, i, unit, unit, unit);
       c.copy(GOLD_LOW).lerp(GOLD_HIGH, clamp01(cell.top * 1.05));
-      setC(mark, i, c, GOLD_HIGH);
+      setC(mark, i, c, c.clone().lerp(WHITE, 0.55));
     } else {
       const a = litterRnd() * Math.PI * 2; const r = 6 + litterRnd() * 6;
       setP(mark, i, Math.cos(a) * r, unit / 2, Math.sin(a) * r);
@@ -365,16 +385,21 @@ const CAMERA = [
   // Aimed high at the open, or the blocks are still above the frame while
   // they fall and the loop starts on an empty screen.
   { t: 0.0, pos: [7, 9, 15], look: [0, 8, 0] },
-  { t: 3.3, pos: [6, 4.5, 10], look: [0, 2.6, 0] },
-  // The one pass inside the formation, brief, the way the reference dives
-  // through its blocks before it shows the cube.
-  { t: 5.2, pos: [3.5, 5, 4.5], look: [0, 4.6, 0] },
-  { t: 6.8, pos: [8, 6.5, 13], look: [0, 5, 0] },
-  { t: 8.2, pos: [-7, 7, 12], look: [0, 5, 0] },
+  // The one pass inside the formation, and it happens while the blocks
+  // are still loose. It used to sit at 5.2, in the middle of the cube
+  // assembling, so the assembly was watched from inside a jumble and
+  // never read as a cube coming together.
+  { t: 2.6, pos: [4, 3.5, 7], look: [0, 2.6, 0] },
+  { t: 3.9, pos: [5, 4, 9.5], look: [0, 3, 0] },
+  { t: 5.4, pos: [8, 6, 13], look: [0, 5, 0] },
+  { t: 6.8, pos: [9, 6.5, 14], look: [0, 5, 0] },
+  { t: 8.2, pos: [-7.5, 7, 12.5], look: [0, 5, 0] },
   { t: 9.6, pos: [-8, 7, 12], look: [0, 5.5, 0] },
   { t: 12.4, pos: [-2.5, 6, 13], look: [0, 5.5, 0] },
   { t: 14.4, pos: [6, 5.5, 14], look: [-3, 4.5, 3] },
-  { t: 16.8, pos: [9, 12, 19], look: [-1, 6.5, 2.5] },
+  // Above the strip, because it lies flat and a shallow camera sees it
+  // edge on and it disappears into streaks.
+  { t: 16.8, pos: [4, 13, 15], look: [0, 4.5, 1.5] },
   { t: 19.4, pos: [0, 5, 21], look: [0, 4, 0] },
   { t: 22.4, pos: [3, 5.5, 22], look: [0, 4, 0] },
   { t: LOOP, pos: [7, 9, 15], look: [0, 8, 0] },
@@ -464,13 +489,15 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
     // read as glass rather than plastic.
     const geometry = new RoundedBoxGeometry(1, 1, 1, 4, 0.07);
     const material = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff, roughness: 0.22, metalness: 0,
-      transmission: 0.35, thickness: 1.2, ior: 1.5,
-      clearcoat: 1, clearcoatRoughness: 0.12,
+      color: 0xffffff, roughness: 0.08, metalness: 0,
+      // Enough light passes through to see the far edges of a block, as
+      // it does in the photo, and the body is thick enough to tint it.
+      transmission: 0.5, thickness: 1.5, ior: 1.52,
+      clearcoat: 1, clearcoatRoughness: 0.04,
       // 2.2 here, with the clearcoat and a 2.1 sun, burned whole faces to
       // pure white and took their colour with them.
-      specularIntensity: 0.8, envMapIntensity: 1.25,
-      transparent: true, opacity: 0.9,
+      specularIntensity: 0.9, envMapIntensity: 1.35,
+      transparent: true, opacity: 0.94,
     });
     // Each block carries a second colour, mixed along its own height, so
     // the colour lives in the volume the way the reference's does.
@@ -482,7 +509,13 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
         .replace('#include <begin_vertex>', '#include <begin_vertex>\nvColorB = aColor2;\nvGrad = clamp( position.y + 0.5, 0.0, 1.0 );');
       shader.fragmentShader = shader.fragmentShader
         .replace('#include <common>', '#include <common>\nvarying vec3 vColorB;\nvarying float vGrad;')
-        .replace('#include <color_fragment>', 'diffuseColor.rgb *= mix( vColor, vColorB, vGrad );');
+        // The colour deepens toward the foot of the block, as the photo's
+        // does, but as a gradient: a hard level needs a dark ground.
+        .replace('#include <color_fragment>', 'float gLvl = smoothstep( 0.04, 0.96, vGrad );\nvec3 gCol = mix( vColor, vColorB, gLvl );\ndiffuseColor.rgb *= gCol;')
+        // Lit from inside rather than painted on, strongest where the
+        // colour pools. This is what makes the photo's cubes glow onto
+        // the surface they stand on.
+        .replace('#include <emissivemap_fragment>', '#include <emissivemap_fragment>\ntotalEmissiveRadiance += gCol * ( 1.0 - gLvl ) * 0.09;');
     };
     const mesh = new THREE.InstancedMesh(geometry, material, N);
     mesh.castShadow = true;
