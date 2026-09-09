@@ -17,7 +17,11 @@ import PageMeta from '../components/PageMeta';
 import { useReturnDestination } from '../hooks/useBackNavigation';
 import Breadcrumb from '../components/common/Breadcrumb';
 
-const JOB_RETURN_PREFIXES = ['/businesses/jobs'];
+// Both spellings, for the same reason GigDetail lists both: `/services/jobs`
+// is a live route (App.js) that saveReturnPath() can and does store, and a
+// prefix list missing it drops the visitor's filters on the way back.
+// PostJob.jsx already lists both; this was the one that did not.
+const JOB_RETURN_PREFIXES = ['/businesses/jobs', '/services/jobs'];
 
 const JobDetail = () => {
   const { t, i18n } = useTranslation();
