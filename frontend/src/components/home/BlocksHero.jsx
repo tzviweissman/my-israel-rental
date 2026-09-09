@@ -64,9 +64,11 @@ const REF_DIST = 11;
 const PALETTE = [
   '#E7A63A', '#DE6A46', '#D2437E', '#DE7FA8', '#7A4BB0', '#A87BD2',
   '#4A76C8', '#4FA8CE', '#5CBBB4', '#DE8F4E', '#D65F6A', '#8A6BD2',
-  // Frosted near-whites, a third of the set: they are what keeps a mass
-  // of coloured glass from reading as plastic confetti.
-  '#F4F5F8', '#F4F5F8', '#EDEFF4', '#FAF8F5', '#F0F2F6', '#F7F4F0',
+  // Frosted glass, a quarter of the set: it is what keeps a mass of
+  // coloured blocks from reading as plastic confetti. Held well below
+  // white, because on a white ground a near-white block does not read as
+  // frosted, it reads as a hole.
+  '#D7DCE6', '#E1E5EC', '#CED5E1', '#E6E3DD',
 ];
 const GOLD_LOW = new THREE.Color('#A8650F');
 const GOLD_HIGH = new THREE.Color('#F2C24A');
@@ -175,17 +177,20 @@ function buildKeyframes() {
     setQ(cloud, i, randQ()); setS(cloud, i, size[i], size[i], size[i]); setC(cloud, i, colA[i], colB[i]);
   }
 
-  // K4 field: the reference's mosaic is not a flat floor. It is a loose
-  // slab of tiles at many depths and many sizes, some panels broad and
-  // frosted, some narrow bars, drifting above the ground.
+  // K4 field: the reference's mosaic hangs in the air as a curtain seen
+  // side on, tiles at many depths, broad frosted panels behind small
+  // colour chips. Laid flat it read as a tiled floor instead.
   const mosaic = make();
   for (let i = 0; i < N; i++) {
-    const gx = i % 32, gz = Math.floor(i / 32);
-    const jx = (rnd() - 0.5) * 0.5, jz = (rnd() - 0.5) * 0.5;
-    setP(mosaic, i, (gx - 15.5) * 0.72 + jx, 0.15 + rnd() * 2.6, (gz - 7.5) * 0.72 + jz);
-    setQ(mosaic, i, q.setFromEuler(e.set(0, isBar[i] && rnd() < 0.5 ? Math.PI / 2 : 0, 0)));
-    if (isBar[i]) setS(mosaic, i, 0.22 * size[i], 0.1, 1.5 * size[i]);
-    else setS(mosaic, i, 0.9 * size[i], 0.11, 0.9 * size[i]);
+    const gx = i % 32, gy = Math.floor(i / 32);
+    const jx = (rnd() - 0.5) * 0.55, jy = (rnd() - 0.5) * 0.55;
+    setP(mosaic, i, (gx - 15.5) * 0.74 + jx, 0.8 + gy * 0.68 + jy, (rnd() - 0.5) * 4.5);
+    setQ(mosaic, i, q.identity());
+    // Thin in Z: the tiles face the camera and the curtain stands up.
+    if (isBar[i]) {
+      if (rnd() < 0.5) setS(mosaic, i, 1.5 * size[i], 0.22 * size[i], 0.1);
+      else setS(mosaic, i, 0.22 * size[i], 1.5 * size[i], 0.1);
+    } else setS(mosaic, i, 0.9 * size[i], 0.9 * size[i], 0.11);
     setC(mosaic, i, colA[i], colB[i]);
   }
 
@@ -311,12 +316,12 @@ const CAMERA = [
   // The one pass inside the formation, brief, the way the reference dives
   // through its blocks before it shows the cube.
   { t: 5.2, pos: [3.5, 5, 4.5], look: [0, 4.6, 0] },
-  { t: 6.8, pos: [7, 6.5, 11.5], look: [0, 5, 0] },
-  { t: 8.2, pos: [-6, 7, 10.5], look: [0, 5, 0] },
+  { t: 6.8, pos: [8, 6.5, 13], look: [0, 5, 0] },
+  { t: 8.2, pos: [-7, 7, 12], look: [0, 5, 0] },
   { t: 9.6, pos: [-8, 7, 12], look: [0, 5.5, 0] },
-  { t: 12.4, pos: [-3, 3.5, 11], look: [0, 1.2, 0] },
+  { t: 12.4, pos: [-2.5, 6, 13], look: [0, 5.5, 0] },
   { t: 14.4, pos: [7, 4, 12], look: [-1, 4, 0] },
-  { t: 16.8, pos: [2, 7, 19], look: [0, 5.5, 0] },
+  { t: 16.8, pos: [4, 9.5, 21], look: [0, 5.5, 0] },
   { t: 19.4, pos: [0, 5, 21], look: [0, 4, 0] },
   { t: 22.4, pos: [3, 5.5, 22], look: [0, 4, 0] },
   { t: LOOP, pos: [7, 9, 15], look: [0, 8, 0] },
@@ -377,7 +382,7 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
     const camera = new THREE.PerspectiveCamera(32, 1, 0.5, 120);
 
     scene.add(new THREE.HemisphereLight(0xffffff, 0xdfe3ea, 0.85));
-    const sun = new THREE.DirectionalLight(0xffffff, 2.1);
+    const sun = new THREE.DirectionalLight(0xffffff, 1.5);
     sun.position.set(9, 16, 7);
     sun.castShadow = true;
     sun.shadow.mapSize.set(2048, 2048);
@@ -388,7 +393,7 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
     sun.shadow.bias = -0.0008;
     scene.add(sun);
     // A cool rim from behind: the second light glass needs to show its edges.
-    const rim = new THREE.DirectionalLight(0xdbe8ff, 1.1);
+    const rim = new THREE.DirectionalLight(0xdbe8ff, 0.8);
     rim.position.set(-12, 9, -14);
     scene.add(rim);
 
@@ -406,11 +411,13 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
     // read as glass rather than plastic.
     const geometry = new RoundedBoxGeometry(1, 1, 1, 4, 0.07);
     const material = new THREE.MeshPhysicalMaterial({
-      color: 0xffffff, roughness: 0.12, metalness: 0,
+      color: 0xffffff, roughness: 0.22, metalness: 0,
       transmission: 0.35, thickness: 1.2, ior: 1.5,
-      clearcoat: 1, clearcoatRoughness: 0.05,
-      specularIntensity: 1, envMapIntensity: 2.2,
-      transparent: true, opacity: 0.88,
+      clearcoat: 1, clearcoatRoughness: 0.12,
+      // 2.2 here, with the clearcoat and a 2.1 sun, burned whole faces to
+      // pure white and took their colour with them.
+      specularIntensity: 0.8, envMapIntensity: 1.25,
+      transparent: true, opacity: 0.9,
     });
     // Each block carries a second colour, mixed along its own height, so
     // the colour lives in the volume the way the reference's does.
@@ -493,8 +500,9 @@ export default function BlocksHero({ className = 'hv2-blocks' }) {
         rotQ.setFromAxisAngle(yAxis, t * 1.5 + i);
         outQ.premultiply(rotQ);
       } else if (k === 'mosaic') {
-        // A slow wave runs across the field.
-        outP.y += (Math.sin(t * 1.4 + outP.x * 0.5) + 1) * 0.12;
+        // A slow swell runs across the curtain, in depth rather than
+        // height, so the tiles breathe towards the lens.
+        outP.z += Math.sin(t * 1.2 + outP.x * 0.45) * 0.35;
       }
     };
 
