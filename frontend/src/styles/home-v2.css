@@ -457,3 +457,119 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
 @media (max-width: 760px) {
   .hv2-hero--film { --copy-h: 432px; }
 }
+
+/* ── The three-clip sequence (SequenceHero) ───────────────────────────────
+   Replaces the canvas in the same slot, so it keeps .hv2-blocks and every
+   rule above that targets it. What is new here is only the layers inside.
+
+   THE VIDEO IS MIRRORED UNDER RTL. The clips were framed for a hero whose
+   copy sits on the left: the ribbon in clip 3 lives in the right-hand third
+   and the left half is deliberately empty white. Under [dir="rtl"] the copy
+   panel flips to the right, and without this the ribbon would sit directly
+   under it while the empty half faced the reader. The subject is abstract
+   glass with no text and no handedness, so mirroring costs nothing and is
+   the only way the composition survives the flip. */
+/* z-index:auto, deliberately, overriding .hv2-blocks above: with a z-index
+   of its own this element becomes a stacking context and the mark inside it
+   can never rise above the hero's white scrim, which is z-index 1 and close
+   to opaque across the copy side.
+
+   It has to out-specify `.hv2-hero--film .hv2-blocks` above, which also sets
+   z-index 0 — a bare `.hv2-seq` loses to it on specificity whatever the order,
+   and the symptom is subtle: the mark lands in the right place, at opacity 1,
+   in the right colour, and still renders as pale grey, because it is being
+   seen through 94% white. */
+.hv2-hero--film .hv2-seq { position: absolute; inset: 0; z-index: auto; overflow: hidden; background: #fff; }
+.hv2-seq-clip,
+.hv2-seq-poster {
+  position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%;
+  object-fit: cover; background-size: cover; background-position: center;
+  /* Frame-boundary swaps only. Long enough not to strobe if a decoder
+     stutters, short enough that it is not a cross-fade — the clips are one
+     continuous shot and a real fade would read as a dip in brightness. */
+  transition: opacity .18s linear;
+}
+[dir="rtl"] .hv2-seq-clip,
+[dir="rtl"] .hv2-seq-poster { transform: scaleX(-1); }
+
+/* The mark resolves on clear ground, and where that is had to be MEASURED
+   rather than chosen. The brief asked for it over the half clip 3 clears; on
+   this page that half is not empty — it holds the headline, the CTAs and the
+   join link from top to bottom — and the obvious alternative, the foot of the
+   film on the far side, sits right on the tile trail: sampled there the box
+   reads YMIN 134 at saturation 23, which is a coloured, busy ground for a
+   gold mark and ink text.
+
+   Side-by-side layout: the clean band is between the copy's scrim edge and
+   the ribbon, low down — sampled flat white (YMIN 232, saturation 0) from 44%
+   to 59% of the width. Percentages, not pixels, because the film is
+   object-fit: cover and the ribbon travels with the box.
+
+   z-index 2 puts it above the white scrim, which is 1 and opaque across the
+   copy side. The copy is also 2 and comes later in the DOM, so the copy still
+   wins any overlap. */
+.hv2-seq-mark {
+  position: absolute; z-index: 2;
+  inset-block-end: 9%;
+  inset-inline-start: 46%;
+  display: flex; align-items: center; gap: 11px;
+  opacity: 0; transform: translateY(6px);
+  transition: opacity .9s ease, transform .9s ease;
+  pointer-events: none;
+}
+.hv2-seq-mark.is-in { opacity: 1; transform: none; }
+/* 56px, not the nav's 44px. The mark is a gold skyline with fine strokes,
+   and on white those strokes dissolve: composited at 40px its darkest pixel
+   measured Y=228 against a Y=232 ground, which is no mark at all. At this
+   size it reads, and an end card is the one place on the page where the mark
+   is the subject rather than a way back to the home page. */
+.hv2-seq-mark img { height: 56px; width: auto; display: block; }
+.hv2-seq-mark span {
+  font-family: var(--font-head); font-weight: 700; font-size: 24px;
+  letter-spacing: -.01em; color: var(--ink);
+}
+@media (prefers-reduced-motion: reduce) {
+  /* The end card is meant to arrive finished, not to animate into place. */
+  .hv2-seq-mark { transition: none; }
+  .hv2-seq-clip, .hv2-seq-poster { transition: none; }
+}
+@media (max-width: 1000px) {
+  /* Stacked: the film starts BELOW the copy band rather than spanning the
+     whole hero behind it. Filling the hero here meant fitting a 16:9 clip
+     into a box taller than it is wide, and object-fit: cover then crops the
+     width away — the cube and most of the ribbon were outside the frame and
+     what showed was a vertical slice of tile ground. Confined to the band it
+     actually occupies, the box is wider than 16:9 again and the crop goes
+     back to being a mild vertical one. The scrim is solid white above
+     --copy-h anyway, so nothing was visible up there to lose. */
+  /* `height: auto` is not optional: .hv2-blocks above sets height:100%, so
+     moving the top edge alone pushed the whole box down instead of
+     shrinking it — the film overflowed the hero's `overflow: clip` and
+     took the mark off the bottom of the screen with it. */
+  .hv2-hero--film .hv2-seq { inset-block-start: var(--copy-h); height: auto; }
+
+  /* The band left over on a phone is nearly square, and cover-cropping a 16:9
+     frame into it lands on the middle — which for the end card is the empty
+     white half, so the last thing a phone visitor saw was a blank rectangle.
+     The clips are fine centred (the cube and the burst are centre-framed);
+     only the end card has its subject off to one side, so only the end card
+     is re-aimed. `contain` was tried first and is worse: it shrinks the frame
+     to a thin strip and opens a white gap under the copy. */
+  .hv2-hero--film .hv2-seq-end { background-position: 76% center; }
+
+  /* The copy is a band across the top and the film runs full width below it,
+     so the whole inline-start side of the film is clear — sampled YMIN 234,
+     saturation 0 — and the mark goes there, aligned with the copy above. */
+  .hv2-seq-mark { inset-block-end: 30px; inset-inline-start: clamp(20px, 5vw, 56px); }
+}
+@media (max-width: 760px) {
+  /* Lifted clear of the two peek FABs, which are fixed to the bottom corners
+     and reach up to y=692 in a 780 viewport. At the shared 30px inset the
+     mark's inline-end edge met the right-hand one under RTL with 9px of
+     overlap — the LTR case never showed it, because there the mark runs away
+     from the FAB rather than into it. Raising it keeps the mark aligned with
+     the copy above, which insetting it further would have broken. */
+  .hv2-seq-mark { inset-block-end: 96px; }
+  .hv2-seq-mark img { height: 44px; }
+  .hv2-seq-mark span { font-size: 19px; }
+}

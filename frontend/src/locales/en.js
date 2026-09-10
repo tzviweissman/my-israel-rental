@@ -1499,6 +1499,11 @@ const en = {
             sub: 'Free to search, free to list, no commission.',
             ctaBusinesses: 'Find a business',
             ctaAdd: 'Add your business — free',
+            // The hero mark's wordmark. The brand reads MyIsraelRental in
+            // Hebrew copy too, so both locales carry the same string; the
+            // key exists so a real Hebrew wordmark can be dropped in
+            // without touching SequenceHero.
+            wordmark: 'MyIsraelRental',
           },
           doors: {
             h2: 'Start your search',

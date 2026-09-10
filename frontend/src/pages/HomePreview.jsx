@@ -35,7 +35,7 @@ import {
   GalleryGridCell,
 } from '../components/ui/cta-section-with-gallery';
 import useFavorites from '../hooks/useFavorites';
-import BlocksHero from '../components/home/BlocksHero';
+import SequenceHero from '../components/home/SequenceHero';
 import AntiMetalButton from '../components/ui/anti-metal-button';
 import LiquidButton from '../components/ui/liquid-button';
 import FlowButton from '../components/ui/flow-button';
@@ -149,21 +149,25 @@ export default function HomePreview() {
       />
 
       {/* ── Hero: the film ────────────────────────────────────────────────
-          Tzvi, 8 Sep 2026: a cinematic background that builds, transforms
-          and morphs, in the spirit of a motion piece he sent (glass blocks
-          assembling, bursting, flowing, resolving). Generated on Higgsfield
-          as three legs anchored on shared stills, so the joints are
-          frame-locked and the last frame returns to the first: it loops
-          without a visible restart. The blocks resolve into a skyline of
-          gold glass, the site's mark. Answers on file: multicolour like
-          the reference, loops forever, full-bleed with the headline on the
-          quiet left, a portrait render for phones.
+          Three generated clips played as one continuous shot: glass blocks
+          tumble in and assemble into a cube, the cube bursts into a field of
+          tiles receding to the horizon, the tiles stream forward and a glass
+          ribbon rises out of them. Clip 3 is framed with its right-hand third
+          full and the other half empty, so the copy has somewhere to sit; the
+          site's mark fades in there when the film settles.
 
-          Preview page only (body.theme-preview). The corridor of real
-          listings (ImageStreamHero) stays in the codebase; this page just
-          no longer mounts it. Reduced motion gets the poster, still. */}
+          It does NOT loop, and the video is not a background. Thirty-two
+          seconds plays once and holds on the last frame. Under reduced motion
+          there is no video element at all, on a phone only the first clip
+          plays and then cuts to the end card, and a stall inside two seconds
+          drops to that same card. All of that lives in SequenceHero.
+
+          Preview page only (body.theme-preview). The live home page's hero is
+          exempt by ruling and is untouched. BlocksHero — the three.js version
+          of this same sequence — stays in the codebase; this page just no
+          longer mounts it. */}
       <section className="hv2-hero hv2-hero--film" data-testid="home-preview-hero">
-        <BlocksHero />
+        <SequenceHero />
         <div className="hv2-hero-scrim" aria-hidden="true" />
         <div className="hv2-hero-inner">
           <div>
