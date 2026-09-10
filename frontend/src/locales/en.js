@@ -1499,6 +1499,15 @@ const en = {
             sub: 'Free to search, free to list, no commission.',
             ctaBusinesses: 'Find a business',
             ctaAdd: 'Add your business — free',
+            // The preview hero's own headline. Deliberately NOT home.hero.h1
+            // / home.hero.accent: those two are the LIVE home page's hero,
+            // which is exempt by ruling, and they are read by CinematicHero.
+            h1: 'Grow. Build.',
+            // Non-breaking space: at 78px the phrase cannot fit the 520px
+            // copy column on one line, and the free break stranded
+            // "stream" alone on a third line. Bound, it breaks after
+            // "Any" and the noun stays whole.
+            accent: 'Any revenue stream',
             // The hero mark's wordmark. The brand reads MyIsraelRental in
             // Hebrew copy too, so both locales carry the same string; the
             // key exists so a real Hebrew wordmark can be dropped in

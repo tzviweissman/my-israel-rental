@@ -172,9 +172,11 @@ export default function HomePreview() {
         <div className="hv2-hero-inner">
           <div>
             <div className="kick">{t('home.v2.hero.kick', 'Rentals · Businesses · Requests')}</div>
+            {/* Its own keys, not the live hero's home.hero.h1/accent — that
+                page is exempt and reads the same two strings. */}
             <h1>
-              {t('home.hero.h1', 'Find your place')}{' '}
-              <span className="a">{t('home.hero.accent', 'in Israel.')}</span>
+              {t('home.v2.hero.h1', 'Grow. Build.')}{' '}
+              <span className="a">{t('home.v2.hero.accent', 'Any revenue stream')}</span>
             </h1>
             {/* The supply-side promise, under the demand-side headline. The
                 gradient is on "without limits" rather than the whole phrase:

@@ -1453,6 +1453,8 @@ const he = {
             sub: 'חינם לחפש, חינם לפרסם, בלי עמלה.',
             ctaBusinesses: 'חיפוש עסק',
             ctaAdd: 'הוסיפו את העסק שלכם — בחינם',
+            h1: 'צמחו. בנו.',
+            accent: 'כל מקור הכנסה',
             wordmark: 'MyIsraelRental',
           },
           doors: {
