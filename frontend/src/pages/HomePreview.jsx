@@ -35,7 +35,7 @@ import {
   GalleryGridCell,
 } from '../components/ui/cta-section-with-gallery';
 import useFavorites from '../hooks/useFavorites';
-import SequenceHero from '../components/home/SequenceHero';
+import LoopHero from '../components/home/LoopHero';
 import AntiMetalButton from '../components/ui/anti-metal-button';
 import LiquidButton from '../components/ui/liquid-button';
 import FlowButton from '../components/ui/flow-button';
@@ -148,26 +148,28 @@ export default function HomePreview() {
         noindex
       />
 
-      {/* ── Hero: the film ────────────────────────────────────────────────
-          Three generated clips played as one continuous shot: glass blocks
-          tumble in and assemble into a cube, the cube bursts into a field of
-          tiles receding to the horizon, the tiles stream forward and a glass
-          ribbon rises out of them. Clip 3 is framed with its right-hand third
-          full and the other half empty, so the copy has somewhere to sit; the
-          site's mark fades in there when the film settles.
+      {/* ── Hero: the loop ────────────────────────────────────────────────
+          A seamless 40s glass loop: scattered blocks lock into a cube, the
+          cube blooms into a flat chip plane, the chips curl up into a ribbon,
+          and the ribbon unwinds back to the scattered blocks it started from.
+          Segment four ends on segment one's first frame, so it loops with no
+          crossfade.
 
-          It does NOT loop, and the video is not a background. Thirty-two
-          seconds plays once and holds on the last frame. Under reduced motion
-          there is no video element at all, on a phone only the first clip
-          plays and then cuts to the end card, and a stall inside two seconds
-          drops to that same card. All of that lives in SequenceHero.
+          It replaces a one-shot film that resolved on the site's mark at the
+          very end. A hero gets a few seconds before somebody scrolls, so a
+          payoff at 0:36 was a payoff nobody saw; with a loop there is no
+          beginning to miss and whatever moment a visitor lands on is a good
+          one. The long cut is still a good asset elsewhere.
+
+          Framed with its subject in the inline-end third and the other half
+          empty, so the copy has clean ground. Reduced motion gets the poster
+          and no video element at all; so does a stall past two seconds. All
+          of that lives in LoopHero.
 
           Preview page only (body.theme-preview). The live home page's hero is
-          exempt by ruling and is untouched. BlocksHero — the three.js version
-          of this same sequence — stays in the codebase; this page just no
-          longer mounts it. */}
+          exempt by ruling and is untouched. */}
       <section className="hv2-hero hv2-hero--film" data-testid="home-preview-hero">
-        <SequenceHero />
+        <LoopHero />
         <div className="hv2-hero-scrim" aria-hidden="true" />
         <div className="hv2-hero-inner">
           <div>
