@@ -1522,11 +1522,13 @@ const en = {
           },
           picks: {
             eyebrow: 'Fresh today',
-            // "Deals" is the heading Tzvi chose (3 Sep, reaffirmed after the
-            // honesty note). The paragraph under it describes what the cards
-            // actually are, so the body copy does not claim a discount the
-            // card may not carry.
-            h2: "Today's deals",
+            // This heading is for the NO-OFFERS state, and it no longer says
+            // "deals". It did until 11 Sep — chosen 3 Sep, with the body copy
+            // carrying the honesty instead — but a heading that says deals
+            // over cards that carry none is the thing the section is now
+            // built to avoid. `h2Deals` below is the heading when offers are
+            // genuinely running, and it is the only one that says deals.
+            h2: "Today's picks",
             p: 'A new selection every day, from everything listed on the site. Drag to browse.',
             kindStay: 'Rental',
             kindBiz: 'Local business',
@@ -1539,6 +1541,13 @@ const en = {
             eyebrowDeals: 'On offer now',
             h2Deals: "Today's deals",
             pDeals: 'Offers running right now, put up by the businesses themselves. Drag to browse.',
+            // Shown when one, two or three businesses have an offer on: a
+            // plain row, no carousel, so "drag to browse" would be a lie.
+            eyebrowNone: 'Offers',
+            pDealsFew: 'Put up by the businesses themselves.',
+            // The honest zero state. The section says this rather than
+            // rendering an empty grid or vanishing without explanation.
+            empty: 'No offers yet. When a business puts one up, it shows here the same day.',
             offer: 'Offer',
             until: 'Until',
             openOffer: 'See this offer',
@@ -1546,9 +1555,13 @@ const en = {
             openBiz: 'See this business',
           },
           rentals: {
-            eyebrow: 'Handpicked',
-            h2: 'Featured rentals',
-            p: 'Live listings, posted by the people who hold the keys.',
+            // Was "Handpicked" / "Featured rentals". Five of the live
+            // listings actually carry is_featured, so both words were a
+            // claim the data did not support; the row is ordered purely by
+            // when a listing was posted and now says so.
+            eyebrow: 'Just listed',
+            h2: 'Recently added',
+            p: 'The newest listings on the site, posted by the people who hold the keys.',
             more: 'See all stays',
             empty: 'New listings are on their way.',
           },

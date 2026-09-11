@@ -550,3 +550,62 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
   .hv2-hero--film .hv2-loop { transition: none; }
   .hv2-loop-video, .hv2-loop-poster { transition: none; }
 }
+
+/* ── Today's deals: the thin row ─────────────────────────────────────────
+   One, two or three offers. The coverflow needs four to read as a ring, and
+   padding the row out to reach four is exactly what put empty cards under
+   this heading, so a short list gets a plain row instead. */
+.hv2-deal-row {
+  display: flex; flex-wrap: wrap; gap: 18px; justify-content: center;
+  margin-top: 26px;
+}
+.hv2-deal-card {
+  display: flex; flex-direction: column; width: min(260px, 78vw);
+  text-align: start; background: #fff; color: var(--ink);
+  border: 1px solid var(--brand-border); border-radius: 14px; overflow: hidden;
+  cursor: pointer; transition: box-shadow .25s ease, transform .25s ease;
+}
+.hv2-deal-card:hover { transform: translateY(-2px); box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 12px 28px rgba(0,0,0,.10); }
+.hv2-deal-card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.hv2-deal-body { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px 14px; }
+.hv2-deal-title { font-family: var(--font-head); font-weight: 600; font-size: 16px; }
+.hv2-deal-off { color: var(--gold-text); font-weight: 600; font-size: 14px; }
+.hv2-deal-where { color: var(--brand-muted); font-size: 13px; }
+
+/* ── Recently added: the moving row ──────────────────────────────────────
+   The track holds the same cards twice and travels exactly half its width,
+   so the wrap lands on an identical frame. Duration scales with the card
+   count rather than being fixed, or a longer list would race.
+
+   `mask-image` feathers both ends so cards enter and leave instead of being
+   guillotined at the container edge. */
+.hv2-marquee {
+  overflow: hidden; margin-top: 26px;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+}
+.hv2-marquee-track {
+  display: flex; gap: 18px; width: max-content;
+  animation: hv2-marquee 60s linear infinite;
+}
+.hv2-marquee-cell { width: 300px; flex: 0 0 auto; }
+@keyframes hv2-marquee { to { transform: translateX(calc(-50% - 9px)); } }
+/* RTL travels the other way. The gap correction is half of the flex gap,
+   which sits between the two passes and is not part of either one's width. */
+[dir="rtl"] .hv2-marquee-track { animation-name: hv2-marquee-rtl; }
+@keyframes hv2-marquee-rtl { to { transform: translateX(calc(50% + 9px)); } }
+
+/* Stop while somebody is reading or reaching for a card. focus-within covers
+   the keyboard: a row that slides out from under a focused link is unusable. */
+.hv2-marquee:hover .hv2-marquee-track,
+.hv2-marquee:focus-within .hv2-marquee-track { animation-play-state: paused; }
+
+@media (max-width: 760px) { .hv2-marquee-cell { width: 240px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* No movement at all, and the row becomes something you scroll yourself.
+     The duplicate pass stays in the DOM but is aria-hidden, so it reads as
+     one list either way. */
+  .hv2-marquee { overflow-x: auto; }
+  .hv2-marquee-track, [dir="rtl"] .hv2-marquee-track { animation: none; }
+}
