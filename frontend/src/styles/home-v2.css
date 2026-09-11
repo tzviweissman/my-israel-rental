@@ -455,7 +455,13 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
   .hv2-hero--film .hv2-hero-inner { justify-content: flex-start; gap: 22px; }
 }
 @media (max-width: 760px) {
-  .hv2-hero--film { --copy-h: 432px; }
+  /* 432px until 11 Sep, which the three-line headline outgrew: the copy ran
+     to 452px and the film's top edge is pinned to this number, so the "Add
+     your business" link sat 20px inside the film. It only looked right
+     because that strip of the loop happens to be white — luck, not design.
+     Measured at 375 in both languages; 768 was never close, it has 54px of
+     clearance in English and 103px in Hebrew. */
+  .hv2-hero--film { --copy-h: 472px; }
 }
 
 /* ── The seamless loop (LoopHero) ─────────────────────────────────────────
