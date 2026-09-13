@@ -143,19 +143,36 @@ _raw_origins = os.environ.get("CORS_ORIGINS", _DEFAULT_CORS)
 # Tolerate trailing slashes, accidental whitespace, and empty entries —
 # easy to introduce when editing the env via a control panel.
 _cors_origins = [o.strip().rstrip("/") for o in _raw_origins.split(",") if o.strip()]
+_DEV_PORTS = (3210, 4500, 4501, 4502)
+# Any *.preview.emergentagent.com preview URL, so those always work even if
+# the env var does not list the specific run.
+_origin_regex = r"https://.*\.preview\.emergentagent\.com"
+
 # The scroll-craft demo pages (scrollcraft/builds/*) are served on their own
 # local ports and call this API directly. Allowed only where DEV_AUTOLOGIN
 # is on, which is never Railway (see routes/auth.py).
 if os.environ.get("DEV_AUTOLOGIN", "") == "1":
-    _cors_origins += [f"http://localhost:{p}" for p in (3210, 4500, 4501, 4502)]
+    _cors_origins += [f"http://localhost:{p}" for p in _DEV_PORTS]
+    # ...and the same ports on a PRIVATE-NETWORK address, so the site can be
+    # opened from a phone on the same Wi-Fi. Without this the dev server hands
+    # the phone a page whose every API call the browser then blocks, which
+    # looks like an empty site rather than a CORS refusal.
+    #
+    # Dev-only by construction: this whole branch is behind DEV_AUTOLOGIN,
+    # which is never set on Railway, and the ranges below are RFC 1918 only —
+    # 10/8, 192.168/16 and 172.16/12 — so it can never admit a public origin.
+    _private_host = (
+        r"10\.\d{1,3}\.\d{1,3}\.\d{1,3}"
+        r"|192\.168\.\d{1,3}\.\d{1,3}"
+        r"|172\.(?:1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}"
+    )
+    _origin_regex += rf"|http://(?:{_private_host}):(?:{'|'.join(str(p) for p in _DEV_PORTS)})"
 
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
     allow_origins=_cors_origins,
-    # Also allow any *.preview.emergentagent.com domain so preview URLs
-    # always work even if the env var doesn't list this specific run.
-    allow_origin_regex=r"https://.*\.preview\.emergentagent\.com",
+    allow_origin_regex=_origin_regex,
     allow_methods=["*"],
     allow_headers=["*"],
     expose_headers=["Content-Disposition", "X-Build-Id"],

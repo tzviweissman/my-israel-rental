@@ -65,6 +65,8 @@ const en = {
         needBusiness: 'Add a business first. Orders belong to a business.',
         loadFailed: 'Could not load orders',
         saveFailed: 'Could not save',
+        showContact: 'Show contact',
+        contactFailed: 'Could not show the contact details',
         saved: 'Order saved',
         updated: 'Order updated',
         rangeToday: 'Today',
@@ -149,13 +151,11 @@ const en = {
         importResult: '{{n}} of {{rows}} rows imported',
         staff: {
           title: 'The board for your staff',
-          body: "One link for the counter. Anyone who has it sees the day's orders and can mark them started, ready and done - no login, no account. They cannot add or change orders.",
+          body: "One link for the counter. Anyone who has it sees the day's orders and can mark them started, ready and done - no login, no account. They cannot add or change orders, and customer phone numbers and addresses stay hidden until someone taps to show one.",
           create: 'Create the link',
           copy: 'Copy link',
           copied: 'Copied',
           copyFailed: 'Could not copy - select the link and copy it by hand',
-          share: 'Send on WhatsApp',
-          shareText: 'Orders board: {{url}}',
           open: 'Open',
           reset: 'Reset link',
           off: 'Turn off',
@@ -169,6 +169,7 @@ const en = {
           footer: "This board is for staff. Orders are entered from the owner's dashboard.",
         },
         print: {
+          total: 'Total',
           button: 'Print',
           back: 'Back to orders',
           title: 'Orders',
@@ -242,7 +243,8 @@ const en = {
           cancelled: 'This order was cancelled. If that is a surprise, get in touch with the store.',
           failed: "We couldn't deliver this one. The store will be in touch to sort it out.",
           pickupAtStore: 'Pickup at the store',
-          total: 'Total: ₪{{n}}',
+          total: 'Total: {{n}}',
+          photoAlt: 'Photo of the delivery at your door',
           phoneNotice: 'The delivery person will see your number to reach you.',
           footer: 'Questions about the order? Contact the store directly.',
           badLinkTitle: 'This link no longer works',
@@ -287,7 +289,7 @@ const en = {
           footer: 'Payment goes to the store, never through MyIsraelRental.',
           go: 'Ready to go',
           notReady: 'Not ready yet',
-          due: 'Due: ₪{{n}}',
+          due: 'Due: {{n}}',
           navigate: 'Waze',
           phoneWhenReady: 'Phone shows when the store marks it ready',
           couldNot: "Couldn't deliver",
@@ -301,7 +303,7 @@ const en = {
           notPaid: 'Not yet',
           storeHint: "Show the customer the store's payment:",
           noStorePayment: 'The store has not set up a payment link yet.',
-          amount: 'Amount collected (₪)',
+          amount: 'Amount collected ({{cur}})',
           confirmDelivered: 'Confirm delivered',
           confirmFailed: 'Mark as not delivered',
           markedDelivered: 'Marked delivered',
@@ -332,7 +334,8 @@ const en = {
         more: 'More',
         city: 'City',
         cityPick: 'Where the store delivers',
-        minOrder: 'Delivery from ₪{{n}}',
+        minOrder: 'Delivery from {{n}}',
+        closedWhy: '{{day}} orders close {{closesDay}} at {{time}}',
         belowMin: 'add a little more, or choose pickup',
         when: 'When?',
         closed: 'Orders for this day have closed',
@@ -351,7 +354,7 @@ const en = {
         doneTitle: 'Order sent',
         doneBody: '{{name}} has your order. Follow it here:',
         follow: 'Follow my order',
-        totalDue: 'Total: ₪{{n}}',
+        totalDue: 'Total: {{n}}',
         emailSent: 'We emailed the details to {{email}}.',
       },
       deliveries: {
@@ -370,6 +373,8 @@ const en = {
         title: 'My orders',
         body: 'Orders you placed with stores on the site, and where each one is.',
         empty: 'Nothing yet. Order from any store page and it will show up here.',
+        loadFailed: "We couldn't load your orders just now. This doesn't mean you have none.",
+        retry: 'Try again',
         deliveredPhoto: 'Delivered {{time}} - photo',
       },
       myGigs: {
@@ -519,6 +524,44 @@ const en = {
         toastReopened: 'Job reopened.',
         toastUpdated: 'Updated',
         updateFailed: 'Could not update that job',
+      },
+      // Dashboard → Appointments. Both sides of an in-platform gig booking:
+      // requests a business has to answer, and requests a customer sent.
+      appointments: {
+        incomingTitle: 'Requests to you',
+        incomingLede: 'A pending request holds the time on your calendar until you answer it.',
+        mineTitle: 'Your requests',
+        mineLede: 'Services you asked to book, and what the business said.',
+        empty: 'No booking requests yet.',
+        emptyHint: 'When someone books one of your services on the site — or you book one — it shows up here.',
+        untitled: 'Your listing',
+        from: 'From {{name}}',
+        with: 'With {{name}}',
+        minutes: '{{n}} min',
+        holdLeft: '{{n}}h left to answer',
+        viewListing: 'View listing',
+        yourReply: 'Your note',
+        theirReply: 'Their reply',
+        replyLabel: 'Note back to the customer',
+        replyPh: 'Add a note back (optional) — when you can come, what you need from them…',
+        accept: 'Accept',
+        decline: 'Decline',
+        complete: 'Mark complete',
+        cancelBooking: 'Cancel',
+        // Neutral on purpose: the same pill is read by the side who owes
+        // an answer and the side waiting for one.
+        status_pending: 'Pending',
+        status_accepted: 'Accepted',
+        status_declined: 'Declined',
+        status_completed: 'Completed',
+        status_cancelled: 'Cancelled',
+        status_expired: 'Expired',
+        toastAccepted: 'Accepted. The customer has been told.',
+        toastDeclined: 'Declined, and the time is free again.',
+        toastCompleted: 'Marked complete.',
+        toastCancelled: 'Cancelled, and the time is free again.',
+        toastUpdated: 'Updated',
+        updateFailed: 'Could not update that booking',
       },
       contracts: {
         notAuthorized: 'You are not authorized to view this contract',
@@ -1345,6 +1388,7 @@ const en = {
         deliveries: 'Deliveries',
         myOrders: 'My orders',
         orders: 'Orders',
+        appointments: 'Appointments',
         // D1 — these four tabs shared three words between them and no
         // user could predict what was behind any of them. Named now by
         // WHOSE work it is and which direction it flows.
@@ -1452,9 +1496,23 @@ const en = {
         v2: {
           hero: {
             kick: 'Rentals · Businesses · Requests',
-            sub: 'Every card behind this text is a real listing or business on the site right now.',
+            sub: 'Free to search, free to list, no commission.',
             ctaBusinesses: 'Find a business',
             ctaAdd: 'Add your business — free',
+            // The preview hero's own headline. Deliberately NOT home.hero.h1
+            // / home.hero.accent: those two are the LIVE home page's hero,
+            // which is exempt by ruling, and they are read by CinematicHero.
+            h1: 'Grow. Build.',
+            // Non-breaking space: at 78px the phrase cannot fit the 520px
+            // copy column on one line, and the free break stranded
+            // "stream" alone on a third line. Bound, it breaks after
+            // "Any" and the noun stays whole.
+            accent: 'Any revenue stream',
+            // The hero mark's wordmark. The brand reads MyIsraelRental in
+            // Hebrew copy too, so both locales carry the same string; the
+            // key exists so a real Hebrew wordmark can be dropped in
+            // without touching SequenceHero.
+            wordmark: 'MyIsraelRental',
           },
           doors: {
             h2: 'Start your search',
@@ -1464,11 +1522,13 @@ const en = {
           },
           picks: {
             eyebrow: 'Fresh today',
-            // "Deals" is the heading Tzvi chose (3 Sep, reaffirmed after the
-            // honesty note). The paragraph under it describes what the cards
-            // actually are, so the body copy does not claim a discount the
-            // card may not carry.
-            h2: "Today's deals",
+            // This heading is for the NO-OFFERS state, and it no longer says
+            // "deals". It did until 11 Sep — chosen 3 Sep, with the body copy
+            // carrying the honesty instead — but a heading that says deals
+            // over cards that carry none is the thing the section is now
+            // built to avoid. `h2Deals` below is the heading when offers are
+            // genuinely running, and it is the only one that says deals.
+            h2: "Today's picks",
             p: 'A new selection every day, from everything listed on the site. Drag to browse.',
             kindStay: 'Rental',
             kindBiz: 'Local business',
@@ -1481,6 +1541,13 @@ const en = {
             eyebrowDeals: 'On offer now',
             h2Deals: "Today's deals",
             pDeals: 'Offers running right now, put up by the businesses themselves. Drag to browse.',
+            // Shown when one, two or three businesses have an offer on: a
+            // plain row, no carousel, so "drag to browse" would be a lie.
+            eyebrowNone: 'Offers',
+            pDealsFew: 'Put up by the businesses themselves.',
+            // The honest zero state. The section says this rather than
+            // rendering an empty grid or vanishing without explanation.
+            empty: 'No offers yet. When a business puts one up, it shows here the same day.',
             offer: 'Offer',
             until: 'Until',
             openOffer: 'See this offer',
@@ -1488,9 +1555,13 @@ const en = {
             openBiz: 'See this business',
           },
           rentals: {
-            eyebrow: 'Handpicked',
-            h2: 'Featured rentals',
-            p: 'Live listings, posted by the people who hold the keys.',
+            // Was "Handpicked" / "Featured rentals". Five of the live
+            // listings actually carry is_featured, so both words were a
+            // claim the data did not support; the row is ordered purely by
+            // when a listing was posted and now says so.
+            eyebrow: 'Just listed',
+            h2: 'Recently added',
+            p: 'The newest listings on the site, posted by the people who hold the keys.',
             more: 'See all stays',
             empty: 'New listings are on their way.',
           },
@@ -3562,6 +3633,29 @@ const en = {
         'immigration-documents': 'Immigration & Documents',
         'medical-health':        'Medical & Health',
       },
+      // The sub-buckets under the four merged categories. Keyed by slug,
+      // like categoryLabels, and read through subcategoryLabel() in
+      // lib/categories.js.
+      subcategoryLabels: {
+        plumbing:           'Plumbing',
+        electrical:         'Electrical',
+        handyman:           'Handyman',
+        'appliance-repair': 'Appliance Repair',
+        'interior-design':  'Interior Design',
+        'tour-guide':       'Tour Guide',
+        'tour-operator':    'Tour Operator',
+        hotel:              'Hotel / Lodging',
+        'travel-agency':    'Travel Agency',
+        photography:        'Photography',
+        videography:        'Videography',
+        'graphic-design':   'Graphic Design',
+        'web-design':       'Web Design',
+        bookkeeping:        'Bookkeeping',
+        accounting:         'Accounting',
+        'tax-prep':         'Tax Preparation',
+        legal:              'Legal',
+        consulting:         'Consulting',
+      },
       categoryGroups: {
         homeProperty:   'Home & Property',
         shops:          'Shops',
@@ -3630,6 +3724,10 @@ const en = {
         whatsappResolved: 'Customers will message you at +{{number}}',
         from: 'from',
         photoRequired: 'Add at least one photo — a listing without one is very hard to book.',
+        // The optional narrowing tag on a gig. Written from the seller's
+        // side — postJob's pair says the same thing from the buyer's.
+        specificType: 'Specific type',
+        specificTypeProviderHint: 'Optional — customers filter by this, so it helps the right ones find you.',
         productPhotoLimit: 'Up to {{n}} photos per product',
         askForQuote: 'Ask for a quote',
         noImage: 'No image',

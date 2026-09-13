@@ -35,7 +35,7 @@ import {
   GalleryGridCell,
 } from '../components/ui/cta-section-with-gallery';
 import useFavorites from '../hooks/useFavorites';
-import ImageStreamHero from '../components/ui/image-stream-hero';
+import LoopHero from '../components/home/LoopHero';
 import AntiMetalButton from '../components/ui/anti-metal-button';
 import LiquidButton from '../components/ui/liquid-button';
 import FlowButton from '../components/ui/flow-button';
@@ -50,6 +50,10 @@ import SiteFooter from '../components/common/SiteFooter';
 import { prettyArea } from '../utils/areaNames';
 import { propertyTitle, isAreaOnlyTitle } from '../utils/propertyTitle';
 import '../styles/home-v2.css';
+
+// Below this a moving row has too few cards to fill the track twice over,
+// so the wrap would be visible. It falls back to a static grid instead.
+const MARQUEE_MIN = 6;
 
 /**
  * The nav is fixed chrome rendered outside this page, and it is white-on-dark
@@ -94,7 +98,10 @@ function useReveal(root) {
 export default function HomePreview() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { streamImages, gallery, picks, hasDeals, rentals, businesses, loaded } = useHomeShowcase();
+  const { gallery, picks, dealCards, hasDeals, recent, rentals, businesses, loaded } = useHomeShowcase();
+  // Offers win when any exist; otherwise the daily rotation. Never a mix,
+  // and never padded to reach a count.
+  const shelf = hasDeals ? dealCards : picks;
   // Which card the coverflow has centred. The component names it in its
   // caption but cannot open it, so the page renders the control.
   const [pick, setPick] = useState(0);
@@ -107,7 +114,7 @@ export default function HomePreview() {
 
   // The carousel takes flat slides; the page keeps the objects so its own CTA
   // can open whichever card is centred.
-  const pickSlides = picks.map((it) => {
+  const pickSlides = shelf.map((it) => {
     // Most rentals are titled with nothing but their neighbourhood, so the
     // headline and the "Where" row said the same words twice. propertyTitle
     // builds the headline the listing cards use, and the row is dropped when
@@ -148,27 +155,37 @@ export default function HomePreview() {
         noindex
       />
 
-      {/* ── Hero: the corridor of real listings and businesses ─────────── */}
-      <ImageStreamHero
-        images={streamImages}
-        // Twelve, not the component's default nine: both rails walk the same
-        // sequence from index 0, so `cards` is also how many DISTINCT photos
-        // ever appear. Nine cards showed nine listings and ignored the rest.
-        // Raising it only makes the corridor denser (the tearing failure mode
-        // is lowering it), so this is the safe direction.
-        cards={12}
-        speed={22}
-        axis={56}
-        className="hv2-hero"
-        data-testid="home-preview-hero"
-      >
+      {/* ── Hero: the loop ────────────────────────────────────────────────
+          A seamless 40s glass loop: scattered blocks lock into a cube, the
+          cube blooms into a flat chip plane, the chips curl up into a ribbon,
+          and the ribbon unwinds back to the scattered blocks it started from.
+          Segment four ends on segment one's first frame, so it loops with no
+          crossfade.
+
+          It replaces a one-shot film that resolved on the site's mark at the
+          very end. A hero gets a few seconds before somebody scrolls, so a
+          payoff at 0:36 was a payoff nobody saw; with a loop there is no
+          beginning to miss and whatever moment a visitor lands on is a good
+          one. The long cut is still a good asset elsewhere.
+
+          Framed with its subject in the inline-end third and the other half
+          empty, so the copy has clean ground. Reduced motion gets the poster
+          and no video element at all; so does a stall past two seconds. All
+          of that lives in LoopHero.
+
+          Preview page only (body.theme-preview). The live home page's hero is
+          exempt by ruling and is untouched. */}
+      <section className="hv2-hero hv2-hero--film" data-testid="home-preview-hero">
+        <LoopHero />
         <div className="hv2-hero-scrim" aria-hidden="true" />
         <div className="hv2-hero-inner">
           <div>
             <div className="kick">{t('home.v2.hero.kick', 'Rentals · Businesses · Requests')}</div>
+            {/* Its own keys, not the live hero's home.hero.h1/accent — that
+                page is exempt and reads the same two strings. */}
             <h1>
-              {t('home.hero.h1', 'Find your place')}{' '}
-              <span className="a">{t('home.hero.accent', 'in Israel.')}</span>
+              {t('home.v2.hero.h1', 'Grow. Build.')}{' '}
+              <span className="a">{t('home.v2.hero.accent', 'Any revenue stream')}</span>
             </h1>
             {/* The supply-side promise, under the demand-side headline. The
                 gradient is on "without limits" rather than the whole phrase:
@@ -182,7 +199,7 @@ export default function HomePreview() {
             </p>
           </div>
           <div className="hv2-hero-foot">
-            <p>{t('home.v2.hero.sub', 'Every card behind this text is a real listing or business on the site right now.')}</p>
+            <p>{t('home.v2.hero.sub', 'Free to search, free to list, no commission.')}</p>
             <div className="hv2-hero-ctas">
               {/* The SOLID liquid button is used once on the page, here.
                   This is the single action the home page most wants — a
@@ -207,7 +224,7 @@ export default function HomePreview() {
             </button>
           </div>
         </div>
-      </ImageStreamHero>
+      </section>
 
       {/* ── Doors ──────────────────────────────────────────────────────── */}
       <section className="hv2-pad hv2-doors-wrap">
@@ -228,12 +245,80 @@ export default function HomePreview() {
         </div>
       </section>
 
-      {/* ── Today's picks ────────────────────────────────────────────────
-          A coverflow of listings and businesses that rotates by the calendar
-          day. Deliberately NOT "today's deals": nothing in this product
-          records a discount, so a card headed "deal" would claim something
-          about price that no field on the listing supports. */}
-      {picks.length >= 4 && (
+      {/* ── Today's deals, or today's picks ──────────────────────────────
+          The heading follows the data; the data is never bent to fit the
+          heading. Three states, and each one is the truth:
+
+            offers running   "Today's deals", exactly as many cards as there
+                             are offers. Four or more get the coverflow; one,
+                             two or three get a plain row, because a ring of
+                             three raked cards reads as three loose photos —
+                             and because dropping a business's only offer to
+                             protect a carousel's geometry is the wrong trade.
+                             Every offer here has a cover image; the hook
+                             filters the ones that do not, which is what used
+                             to put a blank card under this heading.
+            no offers        "Today's picks", the daily rotation of everything
+                             listed. Real cards, honestly labelled.
+            nothing at all   a line saying so. Not an empty grid, and not a
+                             section that silently vanishes. */}
+      {loaded && shelf.length === 0 && (
+        <section className="hv2-picks" id="picks">
+          <div className="hv2-wrap">
+            <div className="hv2-picks-head">
+              {/* Not "On offer now" — there is nothing on offer. */}
+              <div className="hv2-eyebrow hv2-eyebrow-gold">
+                {t('home.v2.picks.eyebrowNone', 'Offers')}
+              </div>
+              <h2>{t('home.v2.picks.h2Deals', "Today's deals")}</h2>
+              <p>
+                {t('home.v2.picks.empty',
+                  'No offers yet. When a business puts one up, it shows here the same day.')}
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+      {shelf.length > 0 && shelf.length < 4 && (
+        <section className="hv2-picks" id="picks">
+          <div className="hv2-wrap">
+            <div className="hv2-picks-head">
+              <div className="hv2-eyebrow hv2-eyebrow-gold">
+                {t('home.v2.picks.eyebrowDeals', 'On offer now')}
+              </div>
+              <h2>{t('home.v2.picks.h2Deals', "Today's deals")}</h2>
+              <p>
+                {t('home.v2.picks.pDealsFew', 'Put up by the businesses themselves.')}
+              </p>
+            </div>
+            <div className="hv2-deal-row" data-testid="home-preview-deal-row">
+              {shelf.map((it) => (
+                <button
+                  key={it.key}
+                  type="button"
+                  className="hv2-deal-card"
+                  onClick={() => navigate(it.href)}
+                  data-href={it.href}
+                >
+                  <img src={it.src} alt="" loading="lazy" />
+                  <span className="hv2-deal-body">
+                    <span className="hv2-deal-title">
+                      {(i18n.language || '').startsWith('he') && it.title_he ? it.title_he : it.title}
+                    </span>
+                    {it.discount?.percent ? (
+                      <span className="hv2-deal-off">
+                        {t('offers.percentOff', { defaultValue: '{{percent}}% off', percent: it.discount.percent })}
+                      </span>
+                    ) : null}
+                    {it.area ? <span className="hv2-deal-where">{prettyArea(it.area, t)}</span> : null}
+                  </span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+      {shelf.length >= 4 && (
         <section className="hv2-picks" id="picks">
           <div className="hv2-wrap">
             <div className="hv2-picks-head">
@@ -269,13 +354,13 @@ export default function HomePreview() {
               <button
                 type="button"
                 className="btn btn-white"
-                onClick={() => navigate(picks[pick]?.href || '/stays')}
+                onClick={() => navigate(shelf[pick]?.href || '/stays')}
                 data-testid="home-preview-pick-open"
-                data-href={picks[pick]?.href || ''}
+                data-href={shelf[pick]?.href || ''}
               >
-                {picks[pick]?.discount?.percent
+                {shelf[pick]?.discount?.percent
                   ? t('home.v2.picks.openOffer', 'See this offer')
-                  : (picks[pick]?.kind === 'biz'
+                  : (shelf[pick]?.kind === 'biz'
                     ? t('home.v2.picks.openBiz', 'See this business')
                     : t('home.v2.picks.openStay', 'See this rental'))}
               </button>
@@ -284,14 +369,27 @@ export default function HomePreview() {
         </section>
       )}
 
-      {/* ── Featured rentals ───────────────────────────────────────────── */}
+      {/* ── Recently added ─────────────────────────────────────────────
+          Was "Featured rentals". Five of the live listings actually carry
+          is_featured, so the heading was a claim the data did not support and
+          the row underneath was mostly ordinary listings sorted newest-first
+          anyway. Now it says what it is, and the order is purely by when the
+          listing was posted.
+
+          It moves. The track is the same twelve cards twice over, translated
+          by exactly half its width, so the wrap lands on an identical frame
+          and there is no jump. The copy is aria-hidden so a screen reader
+          reads twelve listings rather than twenty-four. It pauses on hover
+          and on focus — a row that keeps sliding while somebody is trying to
+          click a card is hostile — and under reduced motion it does not move
+          at all, becoming a normal scrollable row. */}
       <section className="hv2-pad" id="rentals">
         <div className="hv2-wrap">
           <div className="hv2-sec-head reveal">
             <div>
-              <div className="hv2-eyebrow">{t('home.v2.rentals.eyebrow', 'Handpicked')}</div>
-              <h2>{t('home.v2.rentals.h2', 'Featured rentals')}</h2>
-              <p>{t('home.v2.rentals.p', 'Live listings, posted by the people who hold the keys.')}</p>
+              <div className="hv2-eyebrow">{t('home.v2.rentals.eyebrow', 'Just listed')}</div>
+              <h2>{t('home.v2.rentals.h2', 'Recently added')}</h2>
+              <p>{t('home.v2.rentals.p', 'The newest listings on the site, posted by the people who hold the keys.')}</p>
             </div>
             {/* Flow buttons carry the repeated secondary actions. At rest
                 this is a hairline and a word, which is what a "see all" should
@@ -304,21 +402,53 @@ export default function HomePreview() {
               data-testid="home-preview-more-stays"
             />
           </div>
-          <div className="hv2-grid-3 reveal" data-testid="home-preview-rentals">
-            {rentals.map((p) => (
-              <StaysCard
-                key={p.id}
-                property={p}
-                fullWidth
-                liked={likedIds.has(p.id)}
-                onToggleLike={(e) => toggleLike(p.id, e)}
-                onClick={() => navigate(`/property/${p.id}`)}
-              />
-            ))}
-            {loaded && rentals.length === 0 && (
-              <p className="hv2-empty">{t('home.v2.rentals.empty', 'New listings are on their way.')}</p>
-            )}
-          </div>
+          {recent.length >= MARQUEE_MIN ? (
+            <div
+              className="hv2-marquee reveal"
+              data-testid="home-preview-recent"
+              aria-label={t('home.v2.rentals.h2', 'Recently added')}
+            >
+              <div className="hv2-marquee-track">
+                {recent.map((p) => (
+                  <div className="hv2-marquee-cell" key={p.id}>
+                    <StaysCard
+                      property={p}
+                      liked={likedIds.has(p.id)}
+                      onToggleLike={(e) => toggleLike(p.id, e)}
+                      onClick={() => navigate(`/property/${p.id}`)}
+                    />
+                  </div>
+                ))}
+                {/* The second pass is what makes the wrap seamless. It is
+                    decoration only — the same listings are already above. */}
+                {recent.map((p) => (
+                  <div className="hv2-marquee-cell" key={`dup-${p.id}`} aria-hidden="true">
+                    <StaysCard
+                      property={p}
+                      liked={likedIds.has(p.id)}
+                      onClick={() => navigate(`/property/${p.id}`)}
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="hv2-grid-3 reveal" data-testid="home-preview-recent">
+              {recent.map((p) => (
+                <StaysCard
+                  key={p.id}
+                  property={p}
+                  fullWidth
+                  liked={likedIds.has(p.id)}
+                  onToggleLike={(e) => toggleLike(p.id, e)}
+                  onClick={() => navigate(`/property/${p.id}`)}
+                />
+              ))}
+              {loaded && recent.length === 0 && (
+                <p className="hv2-empty">{t('home.v2.rentals.empty', 'New listings are on their way.')}</p>
+              )}
+            </div>
+          )}
         </div>
       </section>
 
@@ -351,7 +481,7 @@ export default function HomePreview() {
           cards on the right morph from a ring into an arch, both off the
           same scroll. See components/home/CommunitySection.jsx for why one
           progress value drives both. */}
-      <CommunitySection items={picks.length ? picks : gallery} />
+      <CommunitySection items={shelf.length ? shelf : gallery} />
 
       {/* ── Supply CTA, with a gallery of real businesses and homes ────
           Replaces the section library's flat colour band. The four photos

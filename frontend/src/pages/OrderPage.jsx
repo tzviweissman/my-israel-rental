@@ -24,7 +24,8 @@ import { Loader2, Minus, Plus, Store as StoreIcon, Bike, Check, ExternalLink, Ar
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import { phoneError } from '../utils/phoneValidation';
-import { pastCutoff } from '../components/dashboard/OrdersTab';
+import { pastCutoff } from '../utils/orderCutoffs';
+import { money } from '../utils/currency';
 
 const pad = (n) => String(n).padStart(2, '0');
 const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
@@ -114,6 +115,9 @@ export default function OrderPage() {
 
   const bizName = (lang === 'he' && data.business.name_he) || data.business.name;
   const products = data.products.filter((p) => p.in_stock);
+  // One currency per store, the server refuses a mixed basket; the fee and
+  // the minimum are in that currency too.
+  const currency = (products[0] || data.products[0] || {}).currency || 'ILS';
   const lines = products.filter((p) => (qty[p.id] || 0) > 0).map((p) => ({ product: p, qty: qty[p.id] }));
   const subtotal = lines.reduce((s, l) => s + Number(l.product.price || 0) * l.qty, 0);
   const fee = fulfilment === 'delivery' ? Number(data.settings.delivery_fee || 0) : 0;
@@ -156,6 +160,19 @@ export default function OrderPage() {
   };
 
   const fmtDay = (d) => new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' }).format(d);
+  // Why a struck-through day is struck through, said once per weekday: the
+  // title tooltip never shows on a phone, which is where this form lives.
+  const weekdayName = (wd) => new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'long' }).format(new Date(2024, 0, 7 + wd));
+  const closedWhy = (() => {
+    const seen = new Set(); const out = [];
+    days.filter((d) => d.closed).forEach((d) => {
+      const c = pastCutoff(d.key, data.settings.cutoffs);
+      if (!c || seen.has(d.dow)) return;
+      seen.add(d.dow);
+      out.push({ day: weekdayName(d.dow), closesDay: weekdayName(c.closes_day), time: c.closes_time || '00:00' });
+    });
+    return out;
+  })();
   const input = 'w-full px-3 min-h-[44px] rounded-lg border text-base bg-white';
   const inputStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
   const label = 'block text-xs font-semibold mb-1';
@@ -172,14 +189,14 @@ export default function OrderPage() {
           <a href={`/orders/track/${done.track_token}`} className="inline-flex items-center gap-1.5 mt-3 px-4 min-h-[44px] rounded-full text-sm font-semibold" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="order-track-link">
             {t('order.follow', 'Follow my order')} <ExternalLink size={14} />
           </a>
-          {done.total != null && <p className="text-sm mt-4" style={{ color: 'var(--ink)' }}>{t('order.totalDue', 'Total: ₪{{n}}', { n: Number(done.total).toLocaleString() })}</p>}
+          {done.total != null && <p className="text-sm mt-4" style={{ color: 'var(--ink)' }}>{t('order.totalDue', 'Total: {{n}}', { n: money(done.total, done.currency || currency) })}</p>}
           <p className="text-xs mt-2" style={{ color: 'var(--brand-muted)' }}>
             {t('order.payNote', 'Payment goes to the store directly, not through MyIsraelRental.')}
             {data.business.payment_note ? ` ${data.business.payment_note}` : ''}
           </p>
           {(data.business.payment_links || []).length > 0 && (
             <div className="flex flex-wrap justify-center gap-1.5 mt-2">
-              {data.business.payment_links.map((l, i) => <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" className="px-3 min-h-[36px] inline-flex items-center rounded-full border text-xs font-semibold" style={inputStyle}>{l.label || l.url}</a>)}
+              {data.business.payment_links.map((l, i) => <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" className="px-3 min-h-[44px] inline-flex items-center rounded-full border text-xs font-semibold" style={inputStyle}>{l.label || l.url}</a>)}
             </div>
           )}
           {email.trim() && <p className="text-xs mt-3" style={{ color: 'var(--brand-muted)' }}>{t('order.emailSent', 'We emailed the details to {{email}}.', { email: email.trim() })}</p>}
@@ -208,12 +225,12 @@ export default function OrderPage() {
                 {p.image && <img src={p.image} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />}
                 <div className="min-w-0 flex-1">
                   <div className="text-sm font-semibold" dir="auto" style={{ color: 'var(--ink)' }}>{p.name}</div>
-                  <div className="text-xs" style={{ color: 'var(--brand-muted)' }}>{p.currency === 'USD' ? '$' : '₪'}{Number(p.price).toLocaleString()}{p.description ? ` · ${p.description}` : ''}</div>
+                  <div className="text-xs" style={{ color: 'var(--brand-muted)' }}>{money(p.price, p.currency || currency)}{p.description ? ` · ${p.description}` : ''}</div>
                 </div>
                 <div className="inline-flex items-center rounded-full border" style={{ borderColor: 'var(--brand-border)' }}>
-                  <button type="button" onClick={() => setQ(p.id, (qty[p.id] || 0) - 1)} className="w-10 h-10 grid place-content-center rounded-full" aria-label={t('order.less', 'Less')} style={{ color: 'var(--ink)' }}><Minus size={14} /></button>
+                  <button type="button" onClick={() => setQ(p.id, (qty[p.id] || 0) - 1)} className="w-11 h-11 grid place-content-center rounded-full" aria-label={t('order.less', 'Less')} style={{ color: 'var(--ink)' }}><Minus size={14} /></button>
                   <span className="w-6 text-center text-sm font-semibold tabular-nums" style={{ color: 'var(--ink)' }} data-testid={`order-qty-${p.id}`}>{qty[p.id] || 0}</span>
-                  <button type="button" onClick={() => setQ(p.id, (qty[p.id] || 0) + 1)} className="w-10 h-10 grid place-content-center rounded-full" aria-label={t('order.more', 'More')} style={{ color: 'var(--ink)' }} data-testid={`order-add-${p.id}`}><Plus size={14} /></button>
+                  <button type="button" onClick={() => setQ(p.id, (qty[p.id] || 0) + 1)} className="w-11 h-11 grid place-content-center rounded-full" aria-label={t('order.more', 'More')} style={{ color: 'var(--ink)' }} data-testid={`order-add-${p.id}`}><Plus size={14} /></button>
                 </div>
               </li>
             ))}
@@ -226,7 +243,7 @@ export default function OrderPage() {
           <div className="grid grid-cols-2 gap-1 rounded-lg p-1" style={{ background: 'var(--surface-muted)' }} role="radiogroup">
             {[['pickup', StoreIcon, t('orders.pickup', 'Pickup')], ['delivery', Bike, t('orders.delivery', 'Delivery')]].map(([v, Icon, lbl]) => (
               <button key={v} type="button" role="radio" aria-checked={fulfilment === v} disabled={v === 'delivery' && !deliveryPossible} onClick={() => setFulfilment(v)} className="inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-md text-sm font-semibold disabled:opacity-40" style={fulfilment === v ? { background: 'var(--ink)', color: 'var(--action-ink)' } : { color: 'var(--ink)' }} data-testid={`order-fulfilment-${v}`}>
-                <Icon size={14} /> {lbl}{v === 'delivery' && fee > 0 ? ` · ₪${fee}` : ''}
+                <Icon size={14} /> {lbl}{v === 'delivery' && fee > 0 ? ` · ${money(fee, currency)}` : ''}
               </button>
             ))}
           </div>
@@ -247,7 +264,7 @@ export default function OrderPage() {
               </div>
               {minOrder > 0 && (
                 <p className="text-xs" style={{ color: belowMin ? 'var(--ink)' : 'var(--brand-muted)' }} data-testid="order-min">
-                  {t('order.minOrder', 'Delivery from ₪{{n}}', { n: minOrder })}{belowMin ? ` · ${t('order.belowMin', 'add a little more, or choose pickup')}` : ''}
+                  {t('order.minOrder', 'Delivery from {{n}}', { n: money(minOrder, currency) })}{belowMin ? ` · ${t('order.belowMin', 'add a little more, or choose pickup')}` : ''}
                 </p>
               )}
             </div>
@@ -257,17 +274,22 @@ export default function OrderPage() {
             <span className={label} style={labelStyle}>{t('order.when', 'When?')}</span>
             <div className="flex gap-1.5 overflow-x-auto pb-1" role="radiogroup" data-testid="order-days">
               {days.map((d) => (
-                <button key={d.key} type="button" role="radio" aria-checked={date === d.key} disabled={d.closed} onClick={() => setDate(d.key)} className="shrink-0 px-3 min-h-[44px] rounded-full text-xs font-semibold border disabled:opacity-35 disabled:line-through" style={date === d.key ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : inputStyle} data-testid={`order-day-${d.key}`} title={d.closed ? t('order.closed', 'Orders for this day have closed') : undefined}>
+                <button key={d.key} type="button" role="radio" aria-checked={date === d.key} disabled={d.closed} onClick={() => setDate(d.key)} className="shrink-0 px-3 min-h-[44px] rounded-full text-xs font-semibold border disabled:opacity-35 disabled:line-through" style={date === d.key ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : inputStyle} data-testid={`order-day-${d.key}`} title={d.closed ? t('order.closed', 'Orders for this day have closed') : undefined} aria-describedby={d.closed ? 'order-closed-why' : undefined}>
                   {fmtDay(d.date)}
                 </button>
               ))}
             </div>
+            {closedWhy.length > 0 && (
+              <p id="order-closed-why" className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }} data-testid="order-closed-why">
+                {closedWhy.map((c) => t('order.closedWhy', '{{day}} orders close {{closesDay}} at {{time}}', c)).join('. ')}.
+              </p>
+            )}
             {windowsForDay.length > 0 && (
               <div className="flex flex-wrap gap-1.5 mt-2" role="radiogroup" data-testid="order-windows">
                 {windowsForDay.map((w) => {
                   const k = `${w.start}-${w.end}`;
                   return (
-                    <button key={k} type="button" role="radio" aria-checked={windowKey === k} onClick={() => setWindowKey(k)} className="px-3 min-h-[40px] rounded-full text-xs font-semibold border tabular-nums" style={windowKey === k ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : inputStyle}>
+                    <button key={k} type="button" role="radio" aria-checked={windowKey === k} onClick={() => setWindowKey(k)} className="px-3 min-h-[44px] rounded-full text-xs font-semibold border tabular-nums" style={windowKey === k ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : inputStyle}>
                       {w.start}–{w.end}
                     </button>
                   );
@@ -310,9 +332,9 @@ export default function OrderPage() {
         <div className="rounded-2xl border bg-white p-3" style={{ borderColor: 'var(--brand-border)' }}>
           {lines.length > 0 && (
             <ul className="text-sm mb-2" style={{ color: 'var(--ink)' }} data-testid="order-summary">
-              {lines.map((l) => <li key={l.product.id} className="flex justify-between"><span dir="auto">{l.qty} × {l.product.name}</span><span className="tabular-nums">₪{(Number(l.product.price) * l.qty).toLocaleString()}</span></li>)}
-              {fee > 0 && <li className="flex justify-between"><span>{t('order.deliveryFee', 'Delivery')}</span><span className="tabular-nums">₪{fee.toLocaleString()}</span></li>}
-              <li className="flex justify-between font-bold border-t mt-1 pt-1" style={{ borderColor: 'var(--brand-border)' }}><span>{t('order.total', 'Total')}</span><span className="tabular-nums" data-testid="order-total">₪{Number(total).toLocaleString()}</span></li>
+              {lines.map((l) => <li key={l.product.id} className="flex justify-between"><span dir="auto">{l.qty} × {l.product.name}</span><span className="tabular-nums">{money(Number(l.product.price) * l.qty, currency)}</span></li>)}
+              {fee > 0 && <li className="flex justify-between"><span>{t('order.deliveryFee', 'Delivery')}</span><span className="tabular-nums">{money(fee, currency)}</span></li>}
+              <li className="flex justify-between font-bold border-t mt-1 pt-1" style={{ borderColor: 'var(--brand-border)' }}><span>{t('order.total', 'Total')}</span><span className="tabular-nums" data-testid="order-total">{money(total, currency)}</span></li>
             </ul>
           )}
           <button type="submit" disabled={!canSubmit || busy} className="w-full inline-flex items-center justify-center gap-2 min-h-[52px] rounded-full text-base font-semibold disabled:opacity-50" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="order-submit">

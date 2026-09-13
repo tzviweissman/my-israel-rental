@@ -35,6 +35,7 @@ import {
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import CategoryPicker from '../components/marketplace/CategoryPicker';
+import { SUBCATEGORIES, subcategoryLabel } from '../lib/categories';
 import { uploadFilesFast, reportUploadFailure } from '../utils/fastUpload';
 import { useFormDraft, readDraft, clearDraft } from '../hooks/useFormDraft';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
@@ -139,6 +140,7 @@ const CreateGig = () => {
     gig_type: 'deliverable',
     title: '',
     category: '',
+    subcategory: '',
     description: '',
     faqs: [],
     tiers: [emptyTierFor('deliverable')],
@@ -432,6 +434,15 @@ const CreateGig = () => {
         gig_type: form.gig_type,
         title: form.title,
         category: form.category,
+        // Optional narrowing tag. The buyer-side filter on /businesses has
+        // read this since the merged categories shipped and no provider
+        // could ever set it, so it could never match anything
+        // (dead-ends audit 2026-09-08, #5). Only sent when it belongs to
+        // the chosen category — a stale value from a category the person
+        // changed their mind about would be a wrong tag, not a missing one.
+        subcategory: (SUBCATEGORIES[form.category] || []).some((x) => x.slug === form.subcategory)
+          ? form.subcategory
+          : null,
         description: form.description,
         faqs: cleanFaqs(form.faqs),
         gallery: form.gallery,
@@ -607,12 +618,44 @@ const CreateGig = () => {
                 <CategoryPicker
                   categories={categories}
                   value={form.category}
-                  onChange={(slug) => set({ category: slug })}
+                  onChange={(slug) => set({ category: slug, subcategory: '' })}
                   testidPrefix="wizard-cat"
                   variant="primary"
                 />
               </div>
             </div>
+            {/* The four merged categories carry sub-buckets, and the board
+                already filters on them. Same chips and the same
+                SUBCATEGORIES list the filter reads, so the two cannot
+                offer different options. Never required. */}
+            {SUBCATEGORIES[form.category] && (
+              <div>
+                <label className="text-sm font-semibold text-gray-700">
+                  {t('services.specificType', 'Specific type')}
+                </label>
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {t('services.specificTypeProviderHint', 'Optional — customers filter by this, so it helps the right ones find you.')}
+                </p>
+                <div className="flex flex-wrap gap-2 mt-2" data-testid="wizard-subcategory-row">
+                  {SUBCATEGORIES[form.category].map((sub) => (
+                    <button
+                      key={sub.slug}
+                      type="button"
+                      onClick={() => set({ subcategory: form.subcategory === sub.slug ? '' : sub.slug })}
+                      className={`px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors ${
+                        form.subcategory === sub.slug
+                          ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                          : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--brand-primary)]'
+                      }`}
+                      aria-pressed={form.subcategory === sub.slug}
+                      data-testid={`wizard-sub-${sub.slug}`}
+                    >
+                      {subcategoryLabel(sub, t)}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
         )}
 

@@ -405,3 +405,213 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
 @media (min-width: 1024px) {
   body.theme-preview #root { zoom: 0.8; }
 }
+
+/* The blocks hero: hundreds of frosted glass blocks, animated in code
+   (components/home/BlocksHero.jsx) through the reference's six shapes and
+   ending on the site's mark. The canvas fills the hero; the copy sits on a
+   SOLID white panel at the inline-start with a short soft edge, and the
+   scene frames itself into the clear area beside it (the band below it on
+   phones), so nothing is cropped at any width. The panel's extent here and
+   the constants at the top of BlocksHero.jsx describe the same rectangle:
+   change them together. */
+.hv2-hero--film { position: relative; background: #fff; }
+.hv2-hero--film .hv2-blocks {
+  position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; display: block;
+  background: #fff;
+}
+.hv2-hero--film .hv2-hero-scrim {
+  background:
+    linear-gradient(90deg, #fff 0%, #fff 44%, rgba(255, 255, 255, .86) 49%, rgba(255, 255, 255, 0) 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 78%, rgba(255, 255, 255, .8) 100%);
+}
+[dir="rtl"] .hv2-hero--film .hv2-hero-scrim {
+  background:
+    linear-gradient(270deg, #fff 0%, #fff 44%, rgba(255, 255, 255, .86) 49%, rgba(255, 255, 255, 0) 58%),
+    linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 78%, rgba(255, 255, 255, .8) 100%);
+}
+.hv2-hero--film .hv2-hero-inner {
+  align-items: flex-start; text-align: start;
+  max-width: 1180px; margin-inline: auto;
+  padding-inline: clamp(20px, 5vw, 56px);
+}
+.hv2-hero--film .hv2-hero-inner > div:first-child { max-width: 520px; }
+.hv2-hero--film .hv2-hero-foot { max-width: 520px; }
+.hv2-hero--film .hv2-hero-tagline { justify-content: flex-start; }
+.hv2-hero--film .hv2-hero-foot { align-items: flex-start; }
+.hv2-hero--film .hv2-hero-foot p { text-align: start; }
+.hv2-hero--film .hv2-hero-ctas { justify-content: flex-start; }
+@media (max-width: 1000px) {
+  /* Up to 1000px the panel is the top of the hero and the scene runs full
+     width below it: a side panel left too narrow a strip for the scene
+     (Tzvi's own window is about 1000px wide). The copy is a fixed pixel
+     height (it ends at about 420px, the add-your-business link last), so
+     the panel is measured in pixels and the hero takes the full screen.
+     STACK_MAX and PANEL_TOP_PX in BlocksHero.jsx are the same numbers. */
+  .hv2-hero--film { height: 100svh; min-height: 640px; --copy-h: 470px; }
+  .hv2-hero--film .hv2-hero-scrim,
+  [dir="rtl"] .hv2-hero--film .hv2-hero-scrim {
+    background: linear-gradient(180deg, #fff 0, #fff var(--copy-h), rgba(255, 255, 255, .86) calc(var(--copy-h) + 18px), rgba(255, 255, 255, 0) calc(var(--copy-h) + 44px), rgba(255, 255, 255, 0) 92%, rgba(255, 255, 255, .8) 100%);
+  }
+  .hv2-hero--film .hv2-hero-inner { justify-content: flex-start; gap: 22px; }
+}
+@media (max-width: 760px) {
+  /* 432px until 11 Sep, which the three-line headline outgrew: the copy ran
+     to 452px and the film's top edge is pinned to this number, so the "Add
+     your business" link sat 20px inside the film. It only looked right
+     because that strip of the loop happens to be white — luck, not design.
+     Measured at 375 in both languages; 768 was never close, it has 54px of
+     clearance in English and 103px in Hebrew. */
+  .hv2-hero--film { --copy-h: 472px; }
+}
+
+/* ── The seamless loop (LoopHero) ─────────────────────────────────────────
+   Replaces the three-clip film in the same slot, so it keeps .hv2-blocks and
+   every rule above that targets it.
+
+   THE VIDEO IS MIRRORED UNDER RTL. The loop is framed for a hero whose copy
+   sits at the inline start: its subject lives in the right-hand third and the
+   left half is deliberately empty white. Under [dir="rtl"] the copy panel
+   flips, and without this the subject would sit under it while the empty half
+   faced the reader. The subject is abstract glass with no text and no
+   handedness, so mirroring costs nothing and is the only way the composition
+   survives the flip. The feather below is a logical-direction gradient for the
+   same reason — a physical `to right` would feather the wrong edge in Hebrew.
+
+   z-index:auto out-specifies `.hv2-hero--film .hv2-blocks` above, which sets
+   z-index 0. With a z-index of its own this element becomes a stacking context
+   and nothing inside it can rise above the hero's white scrim. */
+.hv2-hero--film .hv2-loop {
+  position: absolute; inset: 0; z-index: auto; overflow: hidden; background: #fff;
+  will-change: transform;
+  transition: transform .5s cubic-bezier(.16, 1, .3, 1);
+}
+.hv2-loop-video,
+.hv2-loop-poster {
+  position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%;
+  object-fit: cover; object-position: center;
+  background-size: cover; background-position: center;
+  transition: opacity .4s linear;
+}
+/* The poster is the floor; the video fades in over it. */
+.hv2-loop-poster { z-index: -1; }
+
+/* Feather the copy-side edge so the film dissolves into the page instead of
+   ending on a hard rectangle behind the scrim. */
+.hv2-loop-video,
+.hv2-loop-poster {
+  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 22%);
+  mask-image: linear-gradient(to right, transparent 0%, #000 22%);
+}
+[dir="rtl"] .hv2-loop-video,
+[dir="rtl"] .hv2-loop-poster {
+  transform: scaleX(-1);
+}
+
+@media (max-width: 1000px) {
+  /* Stacked: the film starts BELOW the copy band rather than spanning the
+     whole hero behind it. Filling the hero here meant fitting a 16:9 frame
+     into a box taller than it is wide, and object-fit: cover then crops the
+     width away — the subject ended up outside the frame and what showed was a
+     vertical slice of floor. Confined to the band it actually occupies, the
+     box is wider than 16:9 again and the crop is a mild vertical one.
+
+     `height: auto` is not optional: .hv2-blocks sets height:100%, so moving
+     the top edge alone pushes the box down instead of shrinking it, and the
+     film overflows the hero's `overflow: clip`.
+
+     The feather is dropped here — the copy sits above the film rather than
+     beside it, so there is no vertical edge to dissolve. */
+  .hv2-hero--film .hv2-loop { inset-block-start: var(--copy-h); height: auto; }
+  .hv2-loop-video,
+  .hv2-loop-poster { -webkit-mask-image: none; mask-image: none; }
+}
+
+/* ── The copy arrives, one line at a time ────────────────────────────────
+   CSS animations rather than the spec's `ready` state flipped from a
+   requestAnimationFrame: an animation with `both` runs on mount on its own,
+   so this needs no React state, cannot get stuck at opacity 0 if a render is
+   interrupted, and adds nothing to the component. */
+@keyframes hv2-rise {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: none; }
+}
+.hv2-hero--film .kick,
+.hv2-hero--film h1,
+.hv2-hero--film .hv2-hero-tagline,
+.hv2-hero--film .hv2-hero-foot {
+  animation: hv2-rise .7s cubic-bezier(.16, 1, .3, 1) both;
+}
+.hv2-hero--film .kick            { animation-delay: .12s; }
+.hv2-hero--film h1               { animation-delay: .26s; }
+.hv2-hero--film .hv2-hero-tagline { animation-delay: .40s; }
+.hv2-hero--film .hv2-hero-foot    { animation-delay: .60s; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Everything arrives already in place. `both` would otherwise hold the
+     from-state, so these have to be cleared rather than merely un-animated. */
+  .hv2-hero--film .kick,
+  .hv2-hero--film h1,
+  .hv2-hero--film .hv2-hero-tagline,
+  .hv2-hero--film .hv2-hero-foot { animation: none; opacity: 1; transform: none; }
+  .hv2-hero--film .hv2-loop { transition: none; }
+  .hv2-loop-video, .hv2-loop-poster { transition: none; }
+}
+
+/* ── Today's deals: the thin row ─────────────────────────────────────────
+   One, two or three offers. The coverflow needs four to read as a ring, and
+   padding the row out to reach four is exactly what put empty cards under
+   this heading, so a short list gets a plain row instead. */
+.hv2-deal-row {
+  display: flex; flex-wrap: wrap; gap: 18px; justify-content: center;
+  margin-top: 26px;
+}
+.hv2-deal-card {
+  display: flex; flex-direction: column; width: min(260px, 78vw);
+  text-align: start; background: #fff; color: var(--ink);
+  border: 1px solid var(--brand-border); border-radius: 14px; overflow: hidden;
+  cursor: pointer; transition: box-shadow .25s ease, transform .25s ease;
+}
+.hv2-deal-card:hover { transform: translateY(-2px); box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 12px 28px rgba(0,0,0,.10); }
+.hv2-deal-card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
+.hv2-deal-body { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px 14px; }
+.hv2-deal-title { font-family: var(--font-head); font-weight: 600; font-size: 16px; }
+.hv2-deal-off { color: var(--gold-text); font-weight: 600; font-size: 14px; }
+.hv2-deal-where { color: var(--brand-muted); font-size: 13px; }
+
+/* ── Recently added: the moving row ──────────────────────────────────────
+   The track holds the same cards twice and travels exactly half its width,
+   so the wrap lands on an identical frame. Duration scales with the card
+   count rather than being fixed, or a longer list would race.
+
+   `mask-image` feathers both ends so cards enter and leave instead of being
+   guillotined at the container edge. */
+.hv2-marquee {
+  overflow: hidden; margin-top: 26px;
+  -webkit-mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+  mask-image: linear-gradient(to right, transparent, #000 6%, #000 94%, transparent);
+}
+.hv2-marquee-track {
+  display: flex; gap: 18px; width: max-content;
+  animation: hv2-marquee 60s linear infinite;
+}
+.hv2-marquee-cell { width: 300px; flex: 0 0 auto; }
+@keyframes hv2-marquee { to { transform: translateX(calc(-50% - 9px)); } }
+/* RTL travels the other way. The gap correction is half of the flex gap,
+   which sits between the two passes and is not part of either one's width. */
+[dir="rtl"] .hv2-marquee-track { animation-name: hv2-marquee-rtl; }
+@keyframes hv2-marquee-rtl { to { transform: translateX(calc(50% + 9px)); } }
+
+/* Stop while somebody is reading or reaching for a card. focus-within covers
+   the keyboard: a row that slides out from under a focused link is unusable. */
+.hv2-marquee:hover .hv2-marquee-track,
+.hv2-marquee:focus-within .hv2-marquee-track { animation-play-state: paused; }
+
+@media (max-width: 760px) { .hv2-marquee-cell { width: 240px; } }
+
+@media (prefers-reduced-motion: reduce) {
+  /* No movement at all, and the row becomes something you scroll yourself.
+     The duplicate pass stays in the DOM but is aria-hidden, so it reads as
+     one list either way. */
+  .hv2-marquee { overflow-x: auto; }
+  .hv2-marquee-track, [dir="rtl"] .hv2-marquee-track { animation: none; }
+}

@@ -1108,9 +1108,112 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         "hold_hours": _hold_h,
     }
     await db.marketplace_bookings.insert_one(booking)
+    # Tell the provider somebody is waiting. Nothing did, until now: the
+    # hold sweep would nudge them hours later about a request they had
+    # never been told about in the first place.
+    _when = " ".join(x for x in (payload.preferred_date, payload.time_slot) if x)
+    await _notify(
+        gig["provider_user_id"], "booking_request",
+        f"New booking request for {gig.get('title') or 'your listing'}"
+        f"{(' — ' + _when) if _when else ''}.",
+        booking["_id"],
+    )
     logger.info("[marketplace] booking created: gig=%s client=%s tier=%s", gig_id, user["user_id"], payload.tier_name)
     return {"ok": True, "booking_id": booking["_id"]}
 
+
+
+@router.get("/bookings")
+async def list_bookings(
+    role: str = Query("provider", pattern="^(provider|client)$"),
+    user=Depends(verify_token),
+):
+    """Both sides of an in-platform gig booking.
+
+    `role=provider` — requests waiting on ME to answer.
+    `role=client`   — requests I sent, and what came back.
+
+    ONE endpoint with a side, not two, because the only difference is
+    which column the caller's id sits in and the row the dashboard draws
+    is the same shape either way.
+
+    This is the read half of a loop that shipped with only its write half:
+    `POST /gigs/{id}/book` created a request and `PATCH /bookings/{id}`
+    answered one, and until now nothing in the frontend could list either
+    — so a provider had no screen showing what had been asked of them
+    (dead-ends audit 2026-09-08, #4).
+
+    Bookings taken over WhatsApp and logged through `/leads/{id}/answer`
+    carry `client_user_id: None` on purpose, so they appear in the
+    provider's list and can never appear in anybody's client list.
+    """
+    field = "provider_user_id" if role == "provider" else "client_user_id"
+    rows = await (
+        db.marketplace_bookings.find({field: user["user_id"]})
+        .sort("created_at", -1)
+        .limit(200)
+        .to_list(200)
+    )
+    if not rows:
+        return []
+
+    gigs = {
+        g["_id"]: g
+        async for g in db.marketplace_gigs.find(
+            {"_id": {"$in": list({r.get("gig_id") for r in rows if r.get("gig_id")})}},
+            {"title": 1, "gig_type": 1, "business_id": 1, "currency": 1},
+        )
+    }
+    # Name the other party. The provider needs to know who is asking; the
+    # client needs to know whose calendar they are on. `users` stores the
+    # readable label as `name` (not `full_name`) — the same trap noted in
+    # jobs.py's applications loader.
+    other_field = "client_user_id" if role == "provider" else "provider_user_id"
+    other_ids = [r.get(other_field) for r in rows if r.get(other_field)]
+    users = {}
+    if other_ids:
+        users = {
+            u["id"]: u
+            async for u in db.users.find({"id": {"$in": list(set(other_ids))}}, {"_id": 0, "id": 1, "name": 1})
+        }
+
+    now_iso = datetime.now(UTC).isoformat()
+    out = []
+    for r in rows:
+        gig = gigs.get(r.get("gig_id")) or {}
+        # Lazy expiry, reported the same way `_live_hold_query` enforces it:
+        # a pending hold whose deadline has passed has ALREADY released its
+        # slot, whether or not the sweep has run. Reporting the stored
+        # `pending` would offer the provider an Accept button for a time
+        # somebody else may have booked since.
+        status = r.get("status") or "pending"
+        expires = r.get("hold_expires_at")
+        if status == "pending" and expires and expires <= now_iso:
+            status = STATUS_EXPIRED
+        out.append({
+            "id": r["_id"],
+            "gig_id": r.get("gig_id"),
+            "gig_title": gig.get("title") or "",
+            "gig_type": gig.get("gig_type") or "deliverable",
+            "status": status,
+            "tier_name": r.get("tier_name"),
+            "message": r.get("message") or "",
+            "provider_reply": r.get("provider_reply") or "",
+            "preferred_date": r.get("preferred_date"),
+            "time_slot": r.get("time_slot"),
+            "duration_minutes": r.get("duration_minutes"),
+            "created_at": r.get("created_at"),
+            "responded_at": r.get("responded_at"),
+            "hold_expires_at": r.get("hold_expires_at"),
+            "source": r.get("source") or "in_platform",
+            # Contact details belong to the person who volunteered them, and
+            # they volunteered them TO the provider. A client reading their
+            # own row already knows their own email.
+            "contact_email": r.get("contact_email") if role == "provider" else None,
+            "contact_phone": r.get("contact_phone") if role == "provider" else None,
+            "other_party": (users.get(r.get(other_field)) or {}).get("name") or None,
+        })
+    return out
 
 
 @router.patch("/bookings/{booking_id}")
@@ -1139,6 +1242,23 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
         update["responded_at"] = now.isoformat()
 
     await db.marketplace_bookings.update_one({"_id": booking_id}, {"$set": update})
+
+    # The client asked a question and this is the answer. Without it the
+    # only way they could learn the outcome was to open the dashboard and
+    # look — an answered request that announces nothing is barely an
+    # answer.
+    if booking.get("client_user_id") and booking.get("status") != payload.status:
+        gig = await db.marketplace_gigs.find_one({"_id": booking.get("gig_id")}, {"title": 1})
+        what = (gig or {}).get("title") or "your request"
+        said = {
+            "accepted": f"Your booking for {what} was accepted.",
+            "declined": f"Your booking for {what} was declined.",
+            "completed": f"{what} is marked complete.",
+            "cancelled": f"Your booking for {what} was cancelled.",
+        }.get(payload.status)
+        if said:
+            await _notify(booking["client_user_id"], f"booking_{payload.status}", said, booking_id)
+
     fresh = await db.marketplace_bookings.find_one({"_id": booking_id})
     fresh["id"] = fresh.pop("_id")
     return fresh
@@ -1463,7 +1583,15 @@ async def answer_lead(lead_id: str, payload: LeadAnswer, user=Depends(verify_tok
 
 async def _notify(user_id: Optional[str], kind: str, message: str, booking_id: str) -> None:
     """One in-app notification. Never raises — a booking must not fail to
-    expire because a notification could not be written."""
+    expire because a notification could not be written.
+
+    `action_url` is not decoration. Navigation.js routes a notification
+    carrying `booking_id` and no action_url to `?tab=bookings`, which is
+    the PROPERTY rental list — it would look up a marketplace booking id
+    there, find nothing, and highlight nothing. The explicit url wins over
+    that branch (Navigation.js:257) and lands on the tab that holds gig
+    bookings.
+    """
     if not user_id:
         return
     try:
@@ -1472,6 +1600,7 @@ async def _notify(user_id: Optional[str], kind: str, message: str, booking_id: s
             "user_id": user_id,
             "type": kind,
             "booking_id": booking_id,
+            "action_url": f"/dashboard?tab=appointments&highlight={booking_id}",
             "message": message,
             "read": False,
             "created_at": datetime.now(UTC).isoformat(),

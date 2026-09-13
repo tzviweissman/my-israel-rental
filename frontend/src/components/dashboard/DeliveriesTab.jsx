@@ -21,6 +21,7 @@ import {
 import { pillStyle } from './OrderCard';
 import { buildWhatsAppLink } from '../../utils/whatsappLink';
 import { uploadOneFile } from '../../utils/fastUpload';
+import { money, symbolFor } from '../../utils/currency';
 
 const REFRESH_MS = 30_000;
 const REASONS = ['nobody_home', 'wrong_address', 'refused', 'not_found', 'other'];
@@ -126,7 +127,7 @@ export default function DeliveriesTab({ API, token, onChanged }) {
                       <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border" style={pillStyle(s.status, false)}>
                         {s.status === 'done' ? t('orders.action.delivered', 'Delivered') : t('orders.status.failed', 'Failed')}
                       </span>
-                      {s.payment?.method === 'cash' && <span className="text-[11px] ms-auto" style={{ color: 'var(--ink)' }}>₪{Number(s.payment.amount).toLocaleString()} {t('orders.courier.cashShort', 'cash')}</span>}
+                      {s.payment?.method === 'cash' && <span className="text-[11px] ms-auto" style={{ color: 'var(--ink)' }}>{money(s.payment.amount, s.currency)} {t('orders.courier.cashShort', 'cash')}</span>}
                     </div>
                     <div className="text-xs mt-1" dir="auto" style={{ color: 'var(--brand-muted)' }}>{s.business?.name} · {s.address}</div>
                   </div>
@@ -219,7 +220,7 @@ function Stop({ stop: s, index, API, token, onChanged, t }) {
           {s.notes && <p className="text-xs mt-1 italic" dir="auto" style={{ color: 'var(--brand-muted)' }}>{s.notes}</p>}
           {s.total != null && (
             <p className="text-sm mt-2 font-semibold" style={{ color: 'var(--ink)' }}>
-              {t('orders.courier.due', 'Due: ₪{{n}}', { n: Number(s.total).toLocaleString() })}
+              {t('orders.courier.due', 'Due: {{n}}', { n: money(s.total, s.currency) })}
               {s.payment?.method && <span className="font-normal ms-2" style={{ color: 'var(--status-open)' }}>· {t('orders.paidShort', 'paid')}</span>}
             </p>
           )}
@@ -240,7 +241,9 @@ function Stop({ stop: s, index, API, token, onChanged, t }) {
 
       {ready && mode === null && (
         <div className="flex items-center gap-2 mt-2">
-          <button type="button" onClick={() => setMode('deliver')} className={`${big} flex-1`} style={{ background: 'var(--status-open-bg)', color: 'var(--status-open)' }} data-testid="stop-deliver"><Check size={16} /> {t('orders.action.delivered', 'Delivered')}</button>
+          {/* The action pair, not the green wash: green carries state on this
+              surface, and the wash measured 4.44:1 under this 14px label. */}
+          <button type="button" onClick={() => setMode('deliver')} className={`${big} flex-1`} style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="stop-deliver"><Check size={16} /> {t('orders.action.delivered', 'Delivered')}</button>
           <button type="button" onClick={() => setMode('fail')} className={`${big} border`} style={outline} data-testid="stop-fail"><X size={16} /> {t('orders.courier.couldNot', "Couldn't deliver")}</button>
         </div>
       )}
@@ -274,7 +277,7 @@ function Stop({ stop: s, index, API, token, onChanged, t }) {
                 <div className="mt-2 text-xs" style={{ color: 'var(--brand-muted)' }}>
                   {t('orders.courier.storeHint', "Show the customer the store's payment:")}
                   <div className="flex flex-wrap gap-1.5 mt-1">
-                    {(biz.payment_links || []).map((l, i) => <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" className="px-3 min-h-[36px] inline-flex items-center rounded-full border text-xs font-semibold" style={outline}>{l.label || l.url}</a>)}
+                    {(biz.payment_links || []).map((l, i) => <a key={i} href={l.url} target="_blank" rel="noopener noreferrer" className="px-3 min-h-[44px] inline-flex items-center rounded-full border text-xs font-semibold" style={outline}>{l.label || l.url}</a>)}
                     {biz.payment_note && <span className="px-1 py-2" dir="auto">{biz.payment_note}</span>}
                     {!(biz.payment_links || []).length && !biz.payment_note && <span className="px-1 py-2">{t('orders.courier.noStorePayment', 'The store has not set up a payment link yet.')}</span>}
                   </div>
@@ -282,7 +285,7 @@ function Stop({ stop: s, index, API, token, onChanged, t }) {
               )}
               {pay === 'cash' && (
                 <div className="mt-2">
-                  <label className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }} htmlFor={`amt-${s.id}`}>{t('orders.courier.amount', 'Amount collected (₪)')}</label>
+                  <label className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }} htmlFor={`amt-${s.id}`}>{t('orders.courier.amount', 'Amount collected ({{cur}})', { cur: symbolFor(s.currency).trim() })}</label>
                   <input id={`amt-${s.id}`} type="number" inputMode="decimal" min="0" step="0.5" value={amount} onChange={(e) => setAmount(e.target.value)} className="w-full px-3 min-h-[44px] rounded-lg border text-base bg-white mt-1" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="stop-amount" />
                 </div>
               )}

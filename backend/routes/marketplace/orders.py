@@ -37,6 +37,7 @@ door and the customer-phone rule (O5, O6), the customer's status link
 from __future__ import annotations
 
 import csv
+import html as _html
 import io
 import json
 import os
@@ -52,6 +53,14 @@ from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from routes.deps import db, logger, optional_user, verify_token
+from utils.media_url import MAX_MEDIA_URL_LEN, is_allowed_media_url
+# Every payment link this module serves goes through allowed_payment_links.
+# The allowlist gates WRITES, so links saved while their provider was accepted
+# stay in the database after it is withdrawn (Zelle, 27 Aug 2026). Reading
+# `biz["payment_links"]` raw put those in front of customers on the order form,
+# the courier's view and the confirmation email. See
+# tests/test_order_payment_links.py.
+from utils.payment_links import allowed_payment_links
 from utils.rate_limit import check_rate
 from utils.whatsapp_link import normalize_whatsapp_number
 
@@ -195,10 +204,35 @@ async def _owned_order(order_id: str, user: dict[str, Any]) -> dict[str, Any]:
     return order
 
 
-def _public(order: dict[str, Any]) -> dict[str, Any]:
+# Phone and address: the fields that turn a leaked board link into a
+# customer list. Named once so the reveal endpoint and the redaction
+# below cannot drift apart.
+_CONTACT_FIELDS = ("customer_phone", "customer_phone_e164", "address")
+
+
+def _public(order: dict[str, Any], *, contact: bool = True) -> dict[str, Any]:
+    """The owner's own view of an order. `contact=False` withholds the
+    customer's phone and address until someone asks for that one order.
+
+    The staff board is deliberately login-free - the token in the URL is
+    the whole credential - so whoever ends up holding that link (forwarded,
+    screenshotted, still in a WhatsApp thread from six months ago) had
+    standing access to every customer's name, phone and address for the
+    business, for every order it has ever taken. The courier's own view
+    already refuses to do this: `_stop()` reveals a phone only while the
+    order is `ready`, and writes down each reveal. The board had no
+    equivalent, which was an inconsistency rather than a decision.
+
+    `has_contact` is left behind so the board can offer the reveal only
+    where there is something to reveal.
+    """
     out = dict(order)
     out["id"] = out.pop("_id")
     out.pop("owner_user_id", None)
+    if not contact:
+        out["has_contact"] = any(out.get(f) for f in _CONTACT_FIELDS)
+        for f in _CONTACT_FIELDS:
+            out.pop(f, None)
     return out
 
 
@@ -282,6 +316,8 @@ async def _list(
     date_from: Optional[str],
     date_to: Optional[str],
     limit: int,
+    *,
+    contact: bool = True,
 ) -> dict[str, Any]:
     q: dict[str, Any] = {"business_id": business_id}
     if date_from or date_to:
@@ -318,7 +354,7 @@ async def _list(
             # first time the owner looks at them. One write, once.
             d["track_token"] = secrets.token_urlsafe(16)
             await db.store_orders.update_one({"_id": d["_id"]}, {"$set": {"track_token": d["track_token"]}})
-        docs.append(_public(d))
+        docs.append(_public(d, contact=contact))
     return {"orders": docs, "status_counts": counts, "total": sum(counts.values())}
 
 
@@ -407,10 +443,12 @@ async def set_order_status(order_id: str, payload: StatusIn, user=Depends(verify
     return await _transition(order, payload, by=user["user_id"])
 
 
-async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str) -> dict[str, Any]:
+async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str, contact: bool = True) -> dict[str, Any]:
+    # contact=False for the token-only staff board: the response to a
+    # status change must not hand back the phone the board just withheld.
     current = order["status"]
     if payload.status == current:
-        return _public(order)
+        return _public(order, contact=contact)
     if not can_transition(current, payload.status, order.get("fulfilment", "pickup")):
         raise HTTPException(
             status_code=409,
@@ -428,7 +466,7 @@ async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str) -> d
         },
     )
     fresh = await db.store_orders.find_one({"_id": order["_id"]})
-    return _public(fresh)
+    return _public(fresh, contact=contact)
 
 
 # ---------------------------------------------------------------------------
@@ -503,9 +541,35 @@ async def staff_board(
     check_rate(request, bucket="orders_staff", limit=600, window_seconds=600)
     biz = await _business_by_staff_token(token)
     await generate_standing_orders(biz["_id"])
-    out = await _list(biz["_id"], status, date_from, date_to, 300)
+    # contact=False: see _public. The counter gets the phone one order at
+    # a time, through the endpoint below, and each time is written down.
+    out = await _list(biz["_id"], status, date_from, date_to, 300, contact=False)
     out["business"] = {"name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url")}
     return out
+
+
+@router.get("/orders/staff/{token}/{order_id}/contact")
+async def staff_reveal_contact(token: str, order_id: str, request: Request):
+    """One order's phone and address, for the person at the counter who
+    needs to ring a customer about their pickup.
+
+    The point is not to withhold it - staff genuinely need it - but to
+    make getting it a per-order act that leaves a trace, so a link that
+    escapes no longer hands over the whole customer list in one screen.
+    The limit is well above a busy Friday and far below an enumeration.
+    """
+    check_rate(request, bucket="orders_staff_contact", limit=120, window_seconds=600)
+    biz = await _business_by_staff_token(token)
+    order = await db.store_orders.find_one({"_id": order_id, "business_id": biz["_id"]})
+    if not order:
+        raise HTTPException(status_code=404, detail="Order not found")
+    # Capped, or a board left open on a till grows the document forever.
+    await db.store_orders.update_one(
+        {"_id": order_id},
+        {"$push": {"contact_reveals": {"$each": [{"at": _now_iso(), "by": "staff"}], "$slice": -50}}},
+    )
+    logger.info("[orders] staff contact reveal: business=%s order=%s", biz["_id"], order_id)
+    return {k: order.get(k) for k in _CONTACT_FIELDS}
 
 
 @router.patch("/orders/staff/{token}/{order_id}/status")
@@ -515,7 +579,7 @@ async def staff_set_status(token: str, order_id: str, payload: StatusIn, request
     order = await db.store_orders.find_one({"_id": order_id, "business_id": biz["_id"]})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    return await _transition(order, payload, by="staff")
+    return await _transition(order, payload, by="staff", contact=False)
 
 
 # ---------------------------------------------------------------------------
@@ -891,8 +955,27 @@ class CourierStatusIn(BaseModel):
     status: str = Field(..., pattern="^(done|failed)$")
     reason: Optional[str] = Field(None, pattern="^(nobody_home|wrong_address|refused|not_found|other)$")
     note: str = Field("", max_length=300)
-    photo_url: Optional[str] = Field(None, max_length=600)
+    photo_url: Optional[str] = Field(None, max_length=MAX_MEDIA_URL_LEN)
     payment: Optional[PaymentIn] = None
+
+    @field_validator("photo_url")
+    @classmethod
+    def _photo_is_ours(cls, v):
+        """The proof-of-delivery photo has to live where we put it.
+
+        This value is embedded as <img src> in the "Delivered" email we send
+        under our own sender identity, and returned verbatim from the
+        unauthenticated tracking page. Until 9 Sep 2026 it was accepted with
+        no scheme and no host check, so a courier account - real, and only
+        needing to be compromised rather than malicious - could point it at
+        anything. See utils/media_url.py for what is on the list.
+        """
+        if v is None or not str(v).strip():
+            return None
+        v = str(v).strip()
+        if not is_allowed_media_url(v):
+            raise ValueError("The delivery photo must be one uploaded through this app")
+        return v
 
 
 def _public_courier(c: dict[str, Any]) -> dict[str, Any]:
@@ -924,11 +1007,56 @@ async def _notify(user_id: str, *, type_: str, message: str, action_url: str, **
     })
 
 
+def _esc(v: Any) -> str:
+    """Every user-supplied value that goes into an email body goes through
+    here first.
+
+    Orders are placed by ANONYMOUS visitors (`place_website_order` takes
+    `optional_user`), so `customer_name`, `items`, `address` and `notes`
+    are attacker-controlled text that is validated for length and nothing
+    else. Spliced raw into an HTML body they become working markup in the
+    store owner's real inbox, under this platform's sender identity and
+    inside a mail that otherwise looks exactly like a normal "New order"
+    notification - a link, a tracking pixel, or fake payment instructions.
+    Small local businesses are a good phishing target and this made us the
+    delivery mechanism.
+
+    utils/email.py already does this for chat-mention mail; the order
+    emails added on 2026-09-07 did not follow the pattern. Escape at the
+    point the value enters HTML, not at the point it is stored, so the
+    board and the CSV export keep showing what the customer actually typed.
+    """
+    return _html.escape(str(v)) if v is not None else ""
+
+
+def _esc_ml(v: Any) -> str:
+    """Same, for free text whose line breaks should survive as <br>.
+
+    Order the two steps this way round and never the other: escaping after
+    inserting the <br> would turn the tags we just wrote into visible text.
+    """
+    return _esc(v).replace("\n", "<br>")
+
+
+def _subject(s: str) -> str:
+    """One line, always. A name carrying a newline splices a second line
+    into the subject; what the mail provider does with that is its
+    business, not something to find out in production."""
+    return " ".join(str(s or "").split())
+
+
 async def _email(to: Optional[str], subject: str, inner_html: str, *, tag: str, button: tuple[str, str] | None = None) -> None:
     """Fire-and-forget through the site's Postmark wrapper. Missing address
-    or unconfigured mail is a no-op, never an error on the request."""
+    or unconfigured mail is a no-op, never an error on the request.
+
+    NOTE: `inner_html` is trusted markup by the time it arrives here. Every
+    caller is responsible for putting user text through `_esc`/`_esc_ml`
+    first - there is no way to do it in this function without also
+    escaping the tags the caller deliberately wrote.
+    """
     if not to:
         return
+    subject = _subject(subject)
     try:
         from utils.email import _button, _wrap, send_email
         html = inner_html + (_button(button[0], button[1]) if button else "")
@@ -964,7 +1092,9 @@ async def _assign_to(order: dict[str, Any], biz: dict[str, Any], courier: dict[s
     await _email(
         courier.get("email"),
         f"New delivery from {biz.get('name') or 'a store'}",
-        f"<p>{biz.get('name') or 'A store'} has a delivery for you:</p><p><strong>{_order_line(o=order)}</strong><br>{(order.get('address') or '')}</p><p>Open your Deliveries tab for the full list.</p>",
+        f"<p>{_esc(biz.get('name') or 'A store')} has a delivery for you:</p>"
+        f"<p><strong>{_esc(_order_line(o=order))}</strong><br>{_esc(order.get('address'))}</p>"
+        f"<p>Open your Deliveries tab for the full list.</p>",
         tag="order-delivery-assigned", button=("Open my deliveries", f"{_frontend_url()}/dashboard?tab=deliveries"),
     )
     return await db.store_orders.find_one({"_id": order["_id"]})
@@ -1031,7 +1161,7 @@ async def invite_courier(business_id: str, payload: CourierInviteIn, user=Depend
         await _notify(account["id"], type_="courier_invite", message=f"{biz.get('name')} invited you to deliver for them", action_url="/dashboard?tab=deliveries", business_id=business_id)
     await _email(
         payload.email, f"{biz.get('name')} wants you as their courier",
-        f"<p>{biz.get('name')} on MyIsraelRental would like you to deliver their orders.</p>"
+        f"<p>{_esc(biz.get('name'))} on MyIsraelRental would like you to deliver their orders.</p>"
         + ("<p>Open your dashboard to accept.</p>" if account else "<p>Sign up with this email address, then accept the invite in your dashboard.</p>"),
         tag="order-courier-invite",
         button=("Open my dashboard", f"{_frontend_url()}/dashboard?tab=deliveries") if account else ("Sign up", f"{_frontend_url()}/join"),
@@ -1187,7 +1317,7 @@ def _stop(order: dict[str, Any], biz: dict[str, Any], *, reveal_phone: bool) -> 
     out["id"] = order["_id"]
     out["business"] = {
         "id": biz["_id"], "name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url"),
-        "payment_links": biz.get("payment_links") or [], "payment_note": biz.get("payment_note"),
+        "payment_links": allowed_payment_links(biz.get("payment_links")), "payment_note": biz.get("payment_note"),
     }
     if reveal_phone:
         out["customer_phone"] = order.get("customer_phone")
@@ -1267,9 +1397,9 @@ async def courier_set_status(order_id: str, payload: CourierStatusIn, user=Depen
         track = f"{_frontend_url()}/orders/track/{order.get('track_token')}"
         await _email(
             order.get("customer_email"), f"Delivered: your order from {biz.get('name')}",
-            f"<p>Your order from {biz.get('name')} was delivered at {now[11:16]}.</p>"
-            f"<p><img src=\"{payload.photo_url}\" alt=\"Delivery photo\" style=\"max-width:100%;border-radius:12px\"></p>"
-            f"<p>{(order.get('items') or '').replace(chr(10), '<br>')}</p>",
+            f"<p>Your order from {_esc(biz.get('name'))} was delivered at {_esc(now[11:16])}.</p>"
+            + (f"<p><img src=\"{_esc(payload.photo_url)}\" alt=\"Delivery photo\" style=\"max-width:100%;border-radius:12px\"></p>" if payload.photo_url else "")
+            + f"<p>{_esc_ml(order.get('items'))}</p>",
             tag="order-delivered", button=("See your order", track),
         )
         if order.get("customer_user_id"):
@@ -1730,7 +1860,7 @@ async def order_form(gig_id: str):
         "business": {
             "id": biz["_id"], "name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url"), "slug": biz.get("slug"),
             "areas": _areas_out(biz), "serves_nationwide": bool(biz.get("serves_nationwide")),
-            "payment_links": biz.get("payment_links") or [], "payment_note": biz.get("payment_note"),
+            "payment_links": allowed_payment_links(biz.get("payment_links")), "payment_note": biz.get("payment_note"),
         },
         "products": _products_for_order(gig),
         "settings": {
@@ -1863,20 +1993,23 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"_id": 0, "email": 1})
     await _email(
         (owner or {}).get("email"), f"New order from {payload.customer_name}",
-        f"<p><strong>{payload.customer_name}</strong> ordered on your page:</p><p>{items_text.replace(chr(10), '<br>')}</p>"
-        f"<p>{'Delivery to ' + (address or '') if payload.fulfilment == 'delivery' else 'Pickup'} · {needed_by.replace('T', ' ')}"
-        + (f" · {sym}{total:g}" if total is not None else "") + "</p>",
+        f"<p><strong>{_esc(payload.customer_name)}</strong> ordered on your page:</p><p>{_esc_ml(items_text)}</p>"
+        f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else 'Pickup'} · {_esc(needed_by.replace('T', ' '))}"
+        + (f" · {_esc(sym)}{total:g}" if total is not None else "") + "</p>",
         tag="order-new", button=("Open my orders", f"{_frontend_url()}/dashboard?tab=orders"),
     )
     # Tell the customer, with the link and how to pay.
     pay = biz.get("payment_note") or ""
-    links = "".join(f'<p><a href="{l.get("url")}">{l.get("label") or l.get("url")}</a></p>' for l in biz.get("payment_links") or [])
+    links = "".join(
+        f'<p><a href="{_esc(l.get("url"))}">{_esc(l.get("label") or l.get("url"))}</a></p>'
+        for l in allowed_payment_links(biz.get("payment_links"))
+    )
     await _email(
         payload.customer_email, f"Your order from {biz.get('name')}",
-        f"<p>Thanks, {payload.customer_name}. {biz.get('name')} has your order:</p><p>{items_text.replace(chr(10), '<br>')}</p>"
-        f"<p>{'Delivery to ' + (address or '') if payload.fulfilment == 'delivery' else 'Pickup at the store'} · {needed_by.replace('T', ' ')}"
-        + (f" · {sym}{total:g}" if total is not None else "") + "</p>"
-        + (f"<p>Payment goes to the store directly. {pay}</p>{links}" if (pay or links) else "<p>Payment goes to the store directly.</p>"),
+        f"<p>Thanks, {_esc(payload.customer_name)}. {_esc(biz.get('name'))} has your order:</p><p>{_esc_ml(items_text)}</p>"
+        f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else 'Pickup at the store'} · {_esc(needed_by.replace('T', ' '))}"
+        + (f" · {_esc(sym)}{total:g}" if total is not None else "") + "</p>"
+        + (f"<p>Payment goes to the store directly. {_esc(pay)}</p>{links}" if (pay or links) else "<p>Payment goes to the store directly.</p>"),
         tag="order-confirmation", button=("Follow your order", track),
     )
     return {"order_id": doc["_id"], "track_token": doc["track_token"], "track_url": track, "total": total, "currency": currency, "delivery_fee": doc["delivery_fee"]}

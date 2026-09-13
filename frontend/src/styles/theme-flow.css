@@ -68,6 +68,10 @@
   --action: #000000;
   --action-ink: #FFFFFF;
   --action-hover: #1F2937;
+  /* Small green text on the green wash: --status-open (#2E7D4F) is 4.44:1
+     on --status-open-bg, a hundredth short for 11px. This is 7.49:1 there;
+     icons and green on white keep --status-open. */
+  --status-open-ink: #1E5735;
 
   /* Historical accent names — see the note above. They hold the accent
      now, not gold. `--gold-text-on-light` is a THIRD gold name, defined in

@@ -34,7 +34,14 @@ import Breadcrumb from '../components/common/Breadcrumb';
 import ContactChannels from '../components/marketplace/ContactChannels';
 import { prettyArea } from '../utils/areaNames';
 
-const GIG_RETURN_PREFIXES = ['/services'];
+// BOTH spellings of the board. The primary nav's Services link is
+// `/businesses` (Navigation.js), `/services` is the permanent legacy alias
+// (App.js), and saveReturnPath() stores whichever one the visitor was
+// actually on. Whitelisting only `/services` meant almost every real
+// visitor failed the prefix test and was dropped on a bare, unfiltered
+// board — losing their filters and their place in it (dead-ends audit
+// 2026-09-08, #2).
+const GIG_RETURN_PREFIXES = ['/businesses', '/services'];
 
 // Resolve which number a gig's WhatsApp CTA should dial. The per-gig
 // number (typed in the create wizard) wins; the provider's account-level
@@ -252,11 +259,13 @@ const GigDetail = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { token, user } = useContext(AuthContext);
-  // Compute where "Back to services" should return the visitor. If they
-  // came from a filtered /services grid (or from an adjacent
+  // Compute where "Back to businesses" should return the visitor. If they
+  // came from a filtered board (or from an adjacent
   // /businesses/provider/... or /businesses/jobs page), send them back to
-  // that exact URL. Otherwise fall through to the plain /services hub.
-  const backTo = useReturnDestination(GIG_RETURN_PREFIXES, '/services');
+  // that exact URL. Otherwise fall through to the plain hub — under the
+  // name the nav uses, so the fallback lands where the link they clicked
+  // would have.
+  const backTo = useReturnDestination(GIG_RETURN_PREFIXES, '/businesses');
   const [gig, setGig] = useState(null);
   const [loading, setLoading] = useState(true);
   const [tier, setTier] = useState(null);

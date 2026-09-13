@@ -19,7 +19,7 @@
  */
 import { useTranslation } from 'react-i18next';
 import {
-  LayoutDashboard, Building2, Layers, Store, Wrench, CalendarCheck, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
+  LayoutDashboard, Building2, Layers, Store, Wrench, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
   Home, MessageCircle, Bell, Heart, KeyRound, FileText,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
@@ -55,6 +55,11 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       label: t('dashboard.groupActivity', 'Activity'),
       tabs: [
         { id: 'bookings', label: t('dashboard.myBookings'), Icon: CalendarCheck, badge: summary.bookings_awaiting_reply, show: true },
+        // Gig bookings, both directions (docs/audits/2026-09-08-dead-ends-audit.md #4).
+        // Shown to anyone who can be asked for a slot OR has ever asked for
+        // one — a buyer is usually a renter, and gating this on the seller
+        // role would leave them with nowhere to read the answer.
+        { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: showGigTabs || (summary.my_service_bookings || 0) > 0 },
         // Store orders (docs/orders-and-delivery-spec.md). Shown to anyone
         // who can run a business: the tab is where a shop's day lives.
         { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: showGigTabs },
@@ -73,7 +78,13 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       label: t('dashboard.groupAccount', 'Account'),
       tabs: [
         { id: 'messages', label: t('dashboard.messages'), Icon: MessageCircle, badge: unreadMessages, urgent: true, show: true },
-        { id: 'alerts', label: t('dashboard.alerts'), Icon: Bell, show: isRenter },
+        // Every role, not just renters. Anyone signed in can save a property
+        // search — the popover is always visible (Properties.js) and
+        // routes/saved_searches.py has no role check — and this tab is
+        // where the "N new properties matched" banner points. Gated on
+        // isRenter, an owner or provider who saved one followed that link
+        // to a blank panel (dead-ends audit 2026-09-08, #1).
+        { id: 'alerts', label: t('dashboard.alerts'), Icon: Bell, show: true },
         { id: 'liked', label: t('dashboard.liked'), Icon: Heart, show: true },
         { id: 'settings', label: t('dashboard.settings'), Icon: KeyRound, show: true },
       ],
@@ -105,6 +116,7 @@ export const ALL_TAB_IDS = [
   'my-gigs',
   'contracts',
   'bookings',
+  'appointments',
   'orders',
   'deliveries',
   'my-orders',

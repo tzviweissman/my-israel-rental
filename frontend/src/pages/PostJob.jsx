@@ -20,7 +20,7 @@ import { API, AuthContext } from '../App';
 import { useReturnDestination, backLabelFor } from '../hooks/useBackNavigation';
 import PageMeta from '../components/PageMeta';
 import DateField from '../components/common/DateField';
-import { SUBCATEGORIES } from '../lib/categories';
+import { SUBCATEGORIES, subcategoryLabel } from '../lib/categories';
 import CategoryPicker from '../components/marketplace/CategoryPicker';
 
 const PostJob = () => {
@@ -167,7 +167,7 @@ const PostJob = () => {
                     }`}
                     data-testid={`post-job-sub-${s.slug}`}
                   >
-                    {s.label}
+                    {subcategoryLabel(s, t)}
                   </button>
                 ))}
               </div>

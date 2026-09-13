@@ -86,11 +86,12 @@
   .bar {
     position: fixed; inset-block-start: 0; inset-inline: 0; z-index: var(--sc-z-chrome);
     display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
-    padding: var(--sc-4) var(--sc-gutter); pointer-events: none;
+    padding: var(--sc-3) var(--sc-gutter); pointer-events: none;
+    background: linear-gradient(rgba(58, 8, 18, 0.72), rgba(58, 8, 18, 0));
   }
   .bar > * { pointer-events: auto; }
   .bar__mark { display: inline-flex; align-items: center; gap: var(--sc-3); font-family: var(--font-body); font-weight: 800; letter-spacing: -0.02em; font-size: var(--sc-t-lg); color: var(--sc-ink); text-decoration: none; text-transform: uppercase; }
-  .bar__mark img { height: 34px; width: auto; }
+  .bar__mark img { height: 34px; width: 34px; border-radius: 50%; object-fit: cover; }
   .bar__end { display: flex; align-items: center; gap: var(--sc-3); }
   .bar__cta {
     min-height: 40px; display: inline-flex; align-items: center; padding: 0 var(--sc-4); border-radius: var(--sc-r-pill);
@@ -100,6 +101,15 @@
     backdrop-filter: blur(10px);
     transition: background var(--sc-d-fast) var(--sc-ease-out);
   }
+  .bar__nav { display: flex; gap: var(--sc-1); margin-inline: auto; }
+  .bar__nav a {
+    position: relative; padding: 0.55rem 0.8rem; border-radius: var(--sc-r-pill); text-decoration: none;
+    font-family: var(--font-body); font-size: var(--sc-t-xs); font-weight: 700; color: var(--sc-ink-soft);
+    transition: color var(--sc-d-fast) var(--sc-ease-out), background var(--sc-d-fast) var(--sc-ease-out);
+  }
+  .bar__nav a:hover { color: var(--sc-ink); }
+  .bar__nav a[aria-current="true"] { color: var(--sc-ink); background: color-mix(in oklab, var(--ox-0) 70%, transparent); }
+  .bar__nav a[aria-current="true"]::after { content: ""; position: absolute; inset-inline: 0.8rem; bottom: 0.3rem; height: 2px; background: var(--gold); border-radius: 1px; }
   .bar__cta { background: var(--gold); color: var(--sc-accent-ink); border-color: transparent; }
   .bar__cta:hover { background: #F2C25A; }
 
@@ -231,8 +241,13 @@
 
   /* -------------------------------------------------------------- mobile -- */
   @media (max-width: 860px) {
+    .bar { flex-wrap: wrap; row-gap: 0; padding-block: var(--sc-2); }
     .bar__mark { font-size: var(--sc-t-base); } .bar__mark img { height: 28px; }
-    .bar__cta { display: none; }
+    .bar__end { margin-inline-start: auto; }
+    .bar__cta { min-height: 36px; padding-inline: var(--sc-3); }
+    .bar__nav { order: 3; flex-basis: 100%; margin: 0; overflow-x: auto; scrollbar-width: none; gap: 0; }
+    .bar__nav::-webkit-scrollbar { display: none; }
+    .bar__nav a { white-space: nowrap; padding: 0.45rem 0.6rem; }
     .hero .name { font-size: clamp(3.6rem, 21vw, 8rem); inset-block-start: clamp(4.5rem, 12vh, 7rem); }
     .tumble, .tumble__shadow { width: 90vw; margin-left: -45vw; }
     .tumble { margin-top: calc(90vw * -0.407); } .tumble__shadow { margin-top: calc(90vw * -0.30); }
@@ -255,9 +270,16 @@
 </head>
 <body id="top">
 <header class="bar">
-  <a class="bar__mark" href="#top"><img src="assets/their-logo.png" alt="" width="1170" height="782"> Blazin' Boards</a>
+  <a class="bar__mark" href="#top"><img src="assets/their-logo-small.png" alt="" width="120" height="120"> Blazin' Boards</a>
+  <nav class="bar__nav" aria-label="On this page" data-spy>
+    <a href="#hero">The board</a>
+    <a href="#sizes">Sizes</a>
+    <a href="#menu">Every board</a>
+    <a href="#facts">How it goes</a>
+    <a href="#order">Order</a>
+  </nav>
   <div class="bar__end">
-    <a class="bar__cta" href="#order">Message Blazin' Boards</a>
+    <a class="bar__cta" href="order.html">Order a board</a>
   </div>
 </header>
 <div class="heat" aria-hidden="true"></div>
@@ -392,8 +414,8 @@
       <div class="sc-scrim sc-scrim--vignette"></div>
       <div class="sc-copy sc-copy--center" data-sc-cue="0.06">
         <h2 class="sc-display sc-display--lg" data-sc-kinetic="lines">Ready when you are.</h2>
-        <a class="cta" href="#top" data-sc-magnet="0.26">Message Blazin' Boards</a>
-        <p class="close__assure">Orders 48 hours ahead. Pay by card, Zelle or bank transfer. You talk to the business directly.</p>
+        <a class="cta" href="order.html" data-sc-magnet="0.26">Order a board</a>
+        <p class="close__assure">Three steps, no payment here: you pay Blazin' Boards directly by card, Zelle or bank transfer. Orders 48 hours ahead.</p>
       </div>
       <p class="close__foot">Blazin' Boards, Farn 5, Jerusalem, on MyIsraelRental. Every photograph on this page is theirs.</p>
     </div>
@@ -495,6 +517,33 @@
       addEventListener('resize', function () { fitScale(); paintPlank(lastP); }, { passive: true });
     }
 
+
+    /* ------------------------------------------------------------ nav spy --
+       The nav says where you are: the section whose box holds the middle
+       of the viewport is the current one. Pinned acts are tall boxes, so
+       this holds through a pin. */
+    (function () {
+      var links = Array.prototype.slice.call(document.querySelectorAll('[data-spy] a[href^="#"]'));
+      if (!links.length) return;
+      var targets = links.map(function (a) { return document.getElementById(a.getAttribute('href').slice(1)); });
+      var current = null;
+      function spy() {
+        var mid = innerHeight * 0.5, best = null;
+        targets.forEach(function (el, i) {
+          if (!el) return;
+          var r = el.getBoundingClientRect();
+          if (r.top <= mid && r.bottom > mid) best = i;
+        });
+        if (best === null) { var last = targets.length - 1; if (targets[last] && targets[last].getBoundingClientRect().top <= mid) best = last; else best = 0; }
+        if (best === current) return;
+        current = best;
+        links.forEach(function (a, i) { if (i === best) a.setAttribute('aria-current', 'true'); else a.removeAttribute('aria-current'); });
+      }
+      var t = false;
+      addEventListener('scroll', function () { if (t) return; t = true; requestAnimationFrame(function () { spy(); t = false; }); }, { passive: true });
+      addEventListener('resize', spy, { passive: true });
+      spy();
+    })();
     /* ----------------------------------------------------------- the flame -- */
     if (!reduce) {
       var lastY = scrollY, lastT = performance.now();

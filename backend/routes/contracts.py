@@ -416,6 +416,16 @@ async def sign_contract(contract_id: str, signature: ContractSignature, payload:
     if not contract:
         raise HTTPException(status_code=404, detail="Contract not found")
 
+    # Signing is a stronger act than reading, so it gets at least the same
+    # gate: owner, a renter with a booking against the property, or admin.
+    # Until 8 Sep 2026 this route checked only that SOMEBODY was logged in,
+    # so any account could push a fabricated signer_name + signature_data
+    # onto any contract on the site and flip it to signed: true. The
+    # external signer who has no account does not come through here at all
+    # - they use /contracts/sign/{sign_token}, keyed on the token they hold.
+    if not await _may_access_contract(contract, payload):
+        raise HTTPException(status_code=403, detail="Not authorized to sign this contract")
+
     new_signature = {
         "signer_id": payload['user_id'],
         "signer_name": signature.signer_name,

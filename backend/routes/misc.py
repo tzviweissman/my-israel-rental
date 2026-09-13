@@ -480,6 +480,11 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         which is the moment renewing still helps.
       * gigs_count — services this user owns, used to decide whether the
         My Gigs tab is shown at all. Not a badge; a visibility test.
+      * service_bookings_pending — gig booking requests waiting on this
+        provider's answer. A badge.
+      * my_service_bookings — gig bookings this person SENT, ever. Like
+        gigs_count, a visibility test rather than a badge: a buyer with no
+        requests has no Appointments tab.
     """
     uid = payload["user_id"]
     now = datetime.now(UTC)
@@ -548,6 +553,15 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
     courier_deliveries_open = await db.store_orders.count_documents({"courier.user_id": uid, "status": {"$in": ["new", "preparing", "ready"]}})
     customer_orders = await db.store_orders.count_documents({"customer_user_id": uid})
 
+    # Gig bookings, both hats. `service_bookings_pending` is a badge — how
+    # many people are waiting on this provider to answer. `my_service_
+    # bookings` is a visibility test, like gigs_count: a buyer who has ever
+    # requested an appointment gets the tab that shows what came of it.
+    service_bookings_pending = await db.marketplace_bookings.count_documents({
+        "provider_user_id": uid, "status": "pending",
+    })
+    my_service_bookings = await db.marketplace_bookings.count_documents({"client_user_id": uid})
+
     return {
         "bookings_awaiting_reply": bookings_awaiting,
         "work_offers_open": work_offers,
@@ -560,4 +574,6 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "courier_businesses": courier_active,
         "courier_deliveries_open": courier_deliveries_open,
         "customer_orders": customer_orders,
+        "service_bookings_pending": service_bookings_pending,
+        "my_service_bookings": my_service_bookings,
     }

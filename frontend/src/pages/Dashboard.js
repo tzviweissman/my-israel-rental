@@ -22,6 +22,7 @@ import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
 import OrdersTab from '../components/dashboard/OrdersTab';
 import DeliveriesTab from '../components/dashboard/DeliveriesTab';
 import MyOrdersTab from '../components/dashboard/MyOrdersTab';
+import AppointmentsTab from '../components/dashboard/AppointmentsTab';
 import JobRequestsTab from '../components/dashboard/JobRequestsTab';
 import MyJobsTab from '../components/dashboard/MyJobsTab';
 import ManagerHeader from '../components/dashboard/ManagerHeader';
@@ -401,7 +402,10 @@ const Dashboard = () => {
           <SettingsTab user={user} token={token} API={API} />
         )}
 
-        {activeTab === 'alerts' && isRenter && (
+        {/* Not gated on isRenter — see the note beside this tab in
+            useDashboardNav. The panel and the tab have to agree, and the
+            tab is now shown to everyone. */}
+        {activeTab === 'alerts' && (
           <SavedSearchesTab API={API} token={token} />
         )}
 
@@ -472,6 +476,14 @@ const Dashboard = () => {
             API={API}
             highlightId={highlightBookingId}
           />
+        )}
+
+        {/* Ungated on purpose, like `my-orders` and `liked`: the component
+            renders only the sections the caller actually has, and a booking
+            notification deep-links here for the BUYER too, whose role would
+            fail any seller-side test. */}
+        {activeTab === 'appointments' && (
+          <AppointmentsTab API={API} token={token} />
         )}
 
         {activeTab === 'messages' && (

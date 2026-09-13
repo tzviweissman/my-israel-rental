@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Loader2, ClipboardList, Check, Bike, Store as StoreIcon, Clock, MapPin } from 'lucide-react';
 import { API } from '../lib/apiBase';
+import { money } from '../utils/currency';
 
 const REFRESH_MS = 30_000;
 
@@ -138,7 +139,7 @@ export default function OrderTrackPage() {
           <p className="whitespace-pre-line pt-1 border-t" dir="auto" style={{ color: 'var(--ink)', borderColor: 'var(--brand-border)' }}>{data.items}</p>
           {data.total != null && (
             <p style={{ color: 'var(--ink)' }}>
-              {t('orders.track.total', 'Total: ₪{{n}}', { n: Number(data.total).toLocaleString() })}
+              {t('orders.track.total', 'Total: {{n}}', { n: money(data.total, data.currency) })}
               {data.paid && <span className="ms-2" style={{ color: 'var(--status-open)' }}>· {t('orders.paidShort', 'paid')}</span>}
             </p>
           )}
@@ -147,7 +148,7 @@ export default function OrderTrackPage() {
         {data.delivered_photo_url && (
           <section className="rounded-2xl border bg-white p-4 mt-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="track-photo">
             <p className="text-xs font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.photoTitle', 'Delivered {{time}}', { time: String(data.delivered_at || '').slice(11, 16) })}</p>
-            <a href={data.delivered_photo_url} target="_blank" rel="noopener noreferrer"><img src={data.delivered_photo_url} alt="" className="w-full rounded-xl object-cover max-h-72" /></a>
+            <a href={data.delivered_photo_url} target="_blank" rel="noopener noreferrer"><img src={data.delivered_photo_url} alt={t('orders.track.photoAlt', 'Photo of the delivery at your door')} className="w-full rounded-xl object-cover aspect-[4/3] max-h-72" /></a>
           </section>
         )}
         {delivery && !closedBad && data.status !== 'done' && (
