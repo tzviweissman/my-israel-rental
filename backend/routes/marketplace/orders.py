@@ -54,6 +54,13 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 
 from routes.deps import db, logger, optional_user, verify_token
 from utils.media_url import MAX_MEDIA_URL_LEN, is_allowed_media_url
+# Every payment link this module serves goes through allowed_payment_links.
+# The allowlist gates WRITES, so links saved while their provider was accepted
+# stay in the database after it is withdrawn (Zelle, 27 Aug 2026). Reading
+# `biz["payment_links"]` raw put those in front of customers on the order form,
+# the courier's view and the confirmation email. See
+# tests/test_order_payment_links.py.
+from utils.payment_links import allowed_payment_links
 from utils.rate_limit import check_rate
 from utils.whatsapp_link import normalize_whatsapp_number
 
@@ -1310,7 +1317,7 @@ def _stop(order: dict[str, Any], biz: dict[str, Any], *, reveal_phone: bool) -> 
     out["id"] = order["_id"]
     out["business"] = {
         "id": biz["_id"], "name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url"),
-        "payment_links": biz.get("payment_links") or [], "payment_note": biz.get("payment_note"),
+        "payment_links": allowed_payment_links(biz.get("payment_links")), "payment_note": biz.get("payment_note"),
     }
     if reveal_phone:
         out["customer_phone"] = order.get("customer_phone")
@@ -1853,7 +1860,7 @@ async def order_form(gig_id: str):
         "business": {
             "id": biz["_id"], "name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url"), "slug": biz.get("slug"),
             "areas": _areas_out(biz), "serves_nationwide": bool(biz.get("serves_nationwide")),
-            "payment_links": biz.get("payment_links") or [], "payment_note": biz.get("payment_note"),
+            "payment_links": allowed_payment_links(biz.get("payment_links")), "payment_note": biz.get("payment_note"),
         },
         "products": _products_for_order(gig),
         "settings": {
@@ -1995,7 +2002,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     pay = biz.get("payment_note") or ""
     links = "".join(
         f'<p><a href="{_esc(l.get("url"))}">{_esc(l.get("label") or l.get("url"))}</a></p>'
-        for l in biz.get("payment_links") or []
+        for l in allowed_payment_links(biz.get("payment_links"))
     )
     await _email(
         payload.customer_email, f"Your order from {biz.get('name')}",
