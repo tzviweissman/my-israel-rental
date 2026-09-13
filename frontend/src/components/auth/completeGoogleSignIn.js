@@ -10,6 +10,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import i18n from 'i18next';
 import { API } from '../../App';
+import safeRedirect from '../../utils/safeRedirect';
 
 // sessionStorage key used to smuggle role intent through the sign-in step.
 // Lives here (single source of truth) so the button and this helper can't
@@ -23,8 +24,10 @@ export const LAST_LOGIN_HINT_KEY = 'last_login_hint';
  * @param {string} accessToken  Google OAuth access token from the GIS popup.
  * @param {(token: string, user: object) => void} login  AuthContext.login
  * @param {(to: string, opts?: object) => void} navigate  react-router navigate
+ * @param {string|null} [redirectTo]  the `?redirect=` the visitor arrived with.
+ *   Validated here, so callers pass the raw value.
  */
-export default async function completeGoogleSignIn(accessToken, login, navigate) {
+export default async function completeGoogleSignIn(accessToken, login, navigate, redirectTo = null) {
   const res = await axios.post(`${API}/auth/google/session`, { access_token: accessToken });
   let { token, user } = res.data || {};
   if (!token || !user) throw new Error('Invalid response from auth server');
@@ -93,8 +96,25 @@ export default async function completeGoogleSignIn(accessToken, login, navigate)
   login(token, user);
   toast.success(`Welcome, ${user.name || user.email}`);
 
-  // Route by final role.
-  if (user.role === 'provider') {
+  // Route. The SAME rules as the email path in pages/Auth.js, which is the
+  // point: until 13 Sep 2026 this routed by role alone, so anyone who hit a
+  // login wall and chose Google instead of a password lost the page they were
+  // on — the message to an owner, the job application, the order — with no
+  // error. The email form had always sent them back.
+  //
+  //   1. A brand-new business goes to onboarding even with a redirect, exactly
+  //      as the email signup does: listing the business is why they came.
+  //   2. Otherwise a safe ?redirect= wins, for every role.
+  //   3. Otherwise by role. Admins go to /admin, which the email path always
+  //      did and this path did not.
+  const back = safeRedirect(redirectTo);
+  if (intentRole === 'provider' && user.role === 'provider') {
+    navigate('/businesses/add?welcome=1', { replace: true });
+  } else if (back) {
+    navigate(back, { replace: true });
+  } else if (user.role === 'admin') {
+    navigate('/admin', { replace: true });
+  } else if (user.role === 'provider') {
     navigate('/businesses/add?welcome=1', { replace: true });
   } else if (user.role === 'owner') {
     navigate('/dashboard?welcome=1', { replace: true });

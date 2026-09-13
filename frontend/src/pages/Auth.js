@@ -15,6 +15,7 @@ import { phoneError, phonePreview } from '../utils/phoneValidation';
 import PhoneInput from '../components/common/PhoneInput';
 import ContinueAsBanner from '../components/auth/ContinueAsBanner';
 import { LAST_LOGIN_HINT_KEY } from '../components/auth/completeGoogleSignIn';
+import safeRedirect from '../utils/safeRedirect';
 
 const Auth = () => {
   const { mode } = useParams();
@@ -25,7 +26,9 @@ const Auth = () => {
   // After auth, honor an explicit ?redirect=… (set when the user was trying
   // to book or message from a property page) — otherwise drop them on their
   // dashboard. Admins go to /admin.
-  const redirectParam = searchParams.get('redirect');
+  // Through safeRedirect, which this used the raw query value without — any
+  // string at all reached navigate(). The Google path uses the same guard.
+  const redirectParam = safeRedirect(searchParams.get('redirect'));
   const postAuthDestination = (u) => {
     if (redirectParam) return redirectParam;
     if (u?.role === 'admin') return '/admin';
