@@ -74,7 +74,14 @@ export default function useGoogleSignIn() {
               return;
             }
             try {
-              await completeGoogleSignIn(resp.access_token, login, navigate);
+              // Read when sign-in COMPLETES, off the page the button is on —
+              // /auth/login, /auth/signup or /join, all of which carry the
+              // ?redirect= a gated route sent. Reading it here rather than
+              // taking a prop covers every entry point (this button and the
+              // "Continue as" banner) without threading it through each one.
+              // completeGoogleSignIn validates it.
+              const redirectTo = new URLSearchParams(window.location.search).get('redirect');
+              await completeGoogleSignIn(resp.access_token, login, navigate, redirectTo);
             } catch (e) {
               const msg = e?.response?.data?.detail || e.message || 'Google sign-in failed';
               toast.error(String(msg));
