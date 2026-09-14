@@ -1,4 +1,6 @@
 """LLM-backed translation helper shared by the contract-translation routes."""
+import logging
+import re
 import uuid
 from typing import Any
 
@@ -81,6 +83,53 @@ def detect_lang(*texts: str) -> str:
 
 LANG_NAMES = {"he": "Hebrew", "en": "English"}
 
+logger = logging.getLogger(__name__)
+
+# ── Is this actually a translation? ───────────────────────────────────
+#
+# The model does not always translate. Given a short or odd input it can
+# answer the input instead, and that answer was saved as the post's other
+# language: a gig titled "Cheese danish" carried, as its Hebrew title,
+# "גביניות דניות --- It seems like you may have sent a test message... Please
+# share the marketing copy you'd like translated into Hebrew", and a Hebrew
+# visitor read that on the home page. Nothing between the model and the
+# database looked at what came back.
+#
+# Three cheap, deterministic checks. Rejecting is always safe: the field is
+# left empty and the UI falls back to the language the post was written in.
+_META_REPLY = re.compile(
+    r"\b(?:it seems like|it looks like you|please (?:share|provide|send)|"
+    r"could you (?:please )?(?:share|provide|clarify)|"
+    r"i(?:'d| would) be happy to|here(?: is|'s) the translation|"
+    r"translated? (?:it )?into (?:hebrew|english)|as an ai|"
+    r"i (?:can't|cannot|don't see|do not see))\b",
+    re.IGNORECASE,
+)
+# A translation of short copy is roughly the same length. Four times the
+# source plus a sentence of slack only happens when something was added.
+_MAX_GROWTH = 4
+_GROWTH_SLACK = 60
+
+
+def plausible_translation(source: str, out: str, target_lang: str) -> bool:
+    """True when ``out`` reads as a translation of ``source`` into ``target_lang``.
+
+    Rejects: empty output; output that talks to the user (the refusal and
+    commentary phrases above); output mostly in the wrong language (the same
+    letter ratio detect_lang uses, so a Hebrew title may keep Latin place
+    names and prices); and output far longer than its source.
+    """
+    out = (out or "").strip()
+    if not out:
+        return False
+    if _META_REPLY.search(out):
+        return False
+    if detect_lang(out) != target_lang:
+        return False
+    if len(out) > len((source or "").strip()) * _MAX_GROWTH + _GROWTH_SLACK:
+        return False
+    return True
+
 
 async def translate_marketing(text: str, target_lang: str) -> str:
     """Marketing-copy translator, in either direction (spec 1.3).
@@ -114,8 +163,16 @@ async def translate_marketing(text: str, target_lang: str) -> str:
         ),
     )
     chat.with_model("anthropic", "claude-sonnet-4-6")
-    out = await chat.send_message(UserMessage(text=text))
-    return (out or "").strip().strip('"').strip("'")
+    out = (await chat.send_message(UserMessage(text=text)) or "").strip().strip('"').strip("'")
+    if not plausible_translation(text, out, target_lang):
+        # Logged without the text: it is user copy, and the length is enough
+        # to tell a refusal from a rejected-but-real translation.
+        logger.warning(
+            "translate_marketing: rejected output for target %s (%d chars from %d)",
+            target_lang, len(out), len(text),
+        )
+        return ""
+    return out
 
 
 async def translate_marketing_to_hebrew(text: str) -> str:
