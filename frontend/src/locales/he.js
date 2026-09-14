@@ -1448,6 +1448,7 @@ const he = {
         // so the finale rendered in English for Hebrew readers.
         // תצוגה מקדימה של דף הבית החדש (pages/HomePreview.jsx, נתיב /home-preview).
         v2: {
+          retry: 'לנסות שוב',
           hero: {
             kick: 'נכסים · עסקים · בקשות',
             sub: 'חינם לחפש, חינם לפרסם, בלי עמלה.',
@@ -1481,6 +1482,7 @@ const he = {
             eyebrowNone: 'מבצעים',
             pDealsFew: 'פורסמו על ידי העסקים עצמם.',
             empty: 'אין עדיין מבצעים. ברגע שעסק יפרסם מבצע, הוא יופיע כאן באותו יום.',
+            loadError: 'לא הצלחנו לטעון את המבצעים כרגע.',
             offer: 'המבצע',
             until: 'עד',
             openOffer: 'לצפייה במבצע',
@@ -1493,6 +1495,7 @@ const he = {
             p: 'המודעות החדשות באתר, שפורסמו על ידי מי שמחזיק במפתחות.',
             more: 'לכל הנכסים',
             empty: 'מודעות חדשות בדרך.',
+            loadError: 'לא הצלחנו לטעון את המודעות החדשות כרגע.',
           },
           biz: {
             eyebrow: 'עסקים מקומיים',
@@ -2833,19 +2836,22 @@ const he = {
         sortBy: 'מיין לפי',
         whatsappPreview: 'תצוגה בוואטסאפ',
         // Admin Smart Lists — filtering & selection
-        smartListsIntro: '.סננו דירות פעילות, סמנו את אלה ששווה לשלוח, ושתפו רשימה קצרה בוואטסאפ, במייל או בטלגרם',
-        monthlyRentRange: '(₪) שכר דירה חודשי',
+        // Punctuation goes at the END of the string, as typed. These were
+        // written visually reversed ('.text', '(₪) text'); the browser's
+        // bidi layout already places a trailing period on the left in RTL.
+        smartListsIntro: 'סננו דירות פעילות, סמנו את אלה ששווה לשלוח, ושתפו רשימה קצרה בוואטסאפ, במייל או בטלגרם.',
+        monthlyRentRange: 'שכר דירה חודשי (₪)',
         minShort: 'מינימום',
         maxShort: 'מקסימום',
-        priceOffForVacation: '.מסנן המחיר מושבת עבור דירות נופש',
-        usdAutoConverted: '.מחירים בדולר מומרים אוטומטית לשקלים לפני הסינון',
+        priceOffForVacation: 'מסנן המחיר מושבת עבור דירות נופש.',
+        usdAutoConverted: 'מחירים בדולר מומרים אוטומטית לשקלים לפני הסינון.',
         bedroomsRange: 'חדרי שינה',
         minBedroomsAria: 'מינימום חדרי שינה',
         maxBedroomsAria: 'מקסימום חדרי שינה',
         anyMin: 'הכל',
         anyMax: 'הכל',
         addedToSite: 'נוספו לאתר',
-        addedToSiteHint: '.דירות ללא תאריך הוספה אינן נכללות ברשימת החדשות',
+        addedToSiteHint: 'דירות ללא תאריך הוספה אינן נכללות ברשימת החדשות.',
         copied: 'הועתק',
         copySelected: 'העתק {{n}} שנבחרו',
         shareSelectedWhatsApp: 'שתף {{n}} בוואטסאפ',
@@ -2859,6 +2865,19 @@ const he = {
         messageLength: '{{used}} / {{max}} תווים',
         tooLongUntick: 'ארוך מדי להודעת וואטסאפ אחת',
         includeInMessage: 'כלול את {{area}} בהודעה',
+        listedWithinAny: 'בכל זמן',
+        listedWithin7: 'ב-7 הימים האחרונים',
+        listedWithin14: 'ב-14 הימים האחרונים',
+        listedWithin30: 'ב-30 הימים האחרונים',
+        sortNewest: 'החדשים ביותר קודם',
+        sortOldest: 'הישנים ביותר קודם',
+        addedToday: 'נוסף היום',
+        addedYesterday: 'נוסף אתמול',
+        addedDaysAgo: 'נוסף לפני {{n}} ימים',
+        capReached: 'הגעתם למקסימום של {{n}} דירות. בטלו סימון של אחת, או הגדילו את המקסימום.',
+        minRentOverMax: 'שכר הדירה המינימלי גבוה מהמקסימלי.',
+        minBedsOverMax: 'מספר חדרי השינה המינימלי גבוה מהמקסימלי.',
+        tooLongForWhatsApp: 'ארוך מדי להודעת וואטסאפ אחת ({{used}} מתוך {{max}} תווים). בטלו סימון של כמה דירות ונסו שוב.',
         // Admin Duplicates
         duplicateListings: 'מודעות כפולות',
         noDuplicatesFound: 'לא נמצאו כפילויות',

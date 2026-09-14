@@ -1,9 +1,9 @@
 """Smart Lists — super-admin tool for generating shareable rental shortlists.
 
-A super admin can filter the catalog by three simple criteria — location,
-maximum monthly rent (in ILS), and availability window — then export the
-result as a copy-paste-friendly text block for WhatsApp / email / Telegram.
-Lists can also be saved by name for later reuse.
+A super admin can filter the catalog by location, rent range (in ILS),
+bedroom range, availability window, and how recently a listing was added —
+then export the result as a copy-paste-friendly text block for WhatsApp /
+email / Telegram. Lists can also be saved by name for later reuse.
 
 Endpoints
 ---------
@@ -23,6 +23,10 @@ Design notes
     - long-term rentals  →  ``starting_date``
     - short-term rentals →  ``available_from``
 * The frontend public-property URL is built from ``FRONTEND_URL``.
+* "Recently added" is ``created_at`` — a listing with no ``created_at``
+  is EXCLUDED when that filter is on. Roughly a handful of production
+  rows predate the field, and quietly presenting a six-month-old listing
+  inside a "new this week" WhatsApp blast is worse than omitting it.
 """
 from __future__ import annotations
 
@@ -72,10 +76,16 @@ _VACATION_LIKE = {"vacation", "sukkot", "pesach"}
 # ---------------------------------------------------------------------------
 class SmartListFilters(BaseModel):
     location: str | None = None
+    min_monthly_rent_ils: float | None = Field(default=None, ge=0)
     max_monthly_rent_ils: float | None = Field(default=None, ge=0)
     min_bedrooms: float | None = Field(default=None, ge=0)
+    max_bedrooms: float | None = Field(default=None, ge=0)
     availability: Availability = "anytime"
     rental_category: RentalCategory = "any"
+    # "Added in the last N days" — None means no recency restriction.
+    # Capped at a year so a stray value can't turn into an unbounded scan
+    # that silently means "everything".
+    listed_within_days: int | None = Field(default=None, ge=1, le=365)
 
 
 class SmartListSaveBody(SmartListFilters):
@@ -96,6 +106,9 @@ class SmartListPropertyOut(BaseModel):
     available_from: str | None = None
     rental_type: str
     listing_url: str
+    # When the listing was added. Drives the "Added 2 days ago" stamp and
+    # the newest-first sort in the admin UI.
+    created_at: str | None = None
 
 
 class SmartListGenerateResponse(BaseModel):
@@ -156,6 +169,24 @@ def _parse_iso_date(value: str | None) -> datetime | None:
         return None
 
 
+def _parse_iso_datetime(value: str | None) -> datetime | None:
+    """Full-precision sibling of ``_parse_iso_date``.
+
+    ``_parse_iso_date`` deliberately truncates to midnight because the
+    availability filter compares whole days. Recency needs the time of day
+    (a listing added four hours ago and one added twenty hours ago are
+    both "today"), so this one keeps it. Naive values are assumed UTC,
+    matching how ``created_at`` is written.
+    """
+    if not value:
+        return None
+    try:
+        d = datetime.fromisoformat(str(value).replace("Z", "+00:00"))
+    except (TypeError, ValueError):
+        return None
+    return d if d.tzinfo is not None else d.replace(tzinfo=UTC)
+
+
 async def _apply_filters(filters: SmartListFilters) -> tuple[list[dict], float | None]:
     """Return (matching properties, usd_to_ils rate used or None)."""
     # Category drives the rental_type set and whether the price filter applies.
@@ -187,25 +218,48 @@ async def _apply_filters(filters: SmartListFilters) -> tuple[list[dict], float |
                 "$options": "i",
             }
 
+    # Bedrooms is a range, not just a floor: "3+" pulls in every penthouse
+    # when someone asked for a 3-bedroom.
+    bedroom_bounds: dict = {}
     if filters.min_bedrooms is not None:
-        query["bedrooms"] = {"$gte": filters.min_bedrooms}
+        bedroom_bounds["$gte"] = filters.min_bedrooms
+    if filters.max_bedrooms is not None:
+        bedroom_bounds["$lte"] = filters.max_bedrooms
+    if bedroom_bounds:
+        query["bedrooms"] = bedroom_bounds
 
     docs = await db.properties.find(query, {"_id": 0}).to_list(1000)
 
     # Currency conversion + availability filter happen in Python.
+    has_price_bound = (
+        filters.min_monthly_rent_ils is not None
+        or filters.max_monthly_rent_ils is not None
+    )
     rate: float | None = None
-    if filters.max_monthly_rent_ils is not None and not skip_price_filter:
+    if has_price_bound and not skip_price_filter:
         # Prime the FX cache by converting 1 USD -> ILS once.
         rate = await convert_amount(1.0, "USD", "ILS")
 
     now = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     window_days = _AVAILABILITY_DAYS.get(filters.availability)
     cutoff = now + timedelta(days=window_days) if window_days else None
+    listed_cutoff = (
+        datetime.now(UTC) - timedelta(days=filters.listed_within_days)
+        if filters.listed_within_days
+        else None
+    )
 
     results: list[dict] = []
     for prop in docs:
+        # ----- recency filter -----
+        if listed_cutoff is not None:
+            added = _parse_iso_datetime(prop.get("created_at"))
+            # No created_at -> we cannot honestly call it recent. Exclude.
+            if added is None or added < listed_cutoff:
+                continue
+
         # ----- price filter (always in ILS, only for monthly-rent categories) -----
-        if filters.max_monthly_rent_ils is not None and not skip_price_filter:
+        if has_price_bound and not skip_price_filter:
             price = prop.get("monthly_price")
             if price is None:
                 continue  # category is monthly-rent so a missing monthly_price excludes
@@ -215,7 +269,15 @@ async def _apply_filters(filters: SmartListFilters) -> tuple[list[dict], float |
             else:
                 price_ils = float(price)
             prop["_price_ils"] = price_ils
-            if price_ils > filters.max_monthly_rent_ils:
+            if (
+                filters.max_monthly_rent_ils is not None
+                and price_ils > filters.max_monthly_rent_ils
+            ):
+                continue
+            if (
+                filters.min_monthly_rent_ils is not None
+                and price_ils < filters.min_monthly_rent_ils
+            ):
                 continue
 
         # ----- availability filter -----
@@ -277,6 +339,7 @@ def _shape_for_output(prop: dict) -> SmartListPropertyOut:
         available_from=prop.get(date_field) or None,
         rental_type=rental_type,
         listing_url=_public_listing_url(prop["id"]),
+        created_at=prop.get("created_at") or None,
     )
 
 
@@ -387,12 +450,11 @@ async def save_smart_list(
 ) -> dict:
     _require_admin(payload)
     # Run the query once so we can store an accurate snapshot count up-front.
+    # Build from the declared filter fields rather than naming each one:
+    # every field added to SmartListFilters was previously dropped on save,
+    # which is how a saved preset could silently lose a filter.
     filters = SmartListFilters(
-        location=body.location,
-        max_monthly_rent_ils=body.max_monthly_rent_ils,
-        min_bedrooms=body.min_bedrooms,
-        availability=body.availability,
-        rental_category=body.rental_category,
+        **{k: getattr(body, k) for k in SmartListFilters.model_fields}
     )
     matches, _ = await _apply_filters(filters)
 

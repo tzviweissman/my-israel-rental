@@ -1494,6 +1494,8 @@ const en = {
         // a fix, not a feature.
         // Home overhaul preview (pages/HomePreview.jsx, route /home-preview).
         v2: {
+          // The could-not-load state's button (useHomeShowcase retries first).
+          retry: 'Try again',
           hero: {
             kick: 'Rentals · Businesses · Requests',
             sub: 'Free to search, free to list, no commission.',
@@ -1548,6 +1550,9 @@ const en = {
             // The honest zero state. The section says this rather than
             // rendering an empty grid or vanishing without explanation.
             empty: 'No offers yet. When a business puts one up, it shows here the same day.',
+            // When the lists behind this section did not load. Never shown
+            // as "no offers": that would be a claim the page cannot make.
+            loadError: "We couldn't load today's offers just now.",
             offer: 'Offer',
             until: 'Until',
             openOffer: 'See this offer',
@@ -1564,6 +1569,7 @@ const en = {
             p: 'The newest listings on the site, posted by the people who hold the keys.',
             more: 'See all stays',
             empty: 'New listings are on their way.',
+            loadError: "We couldn't load the newest listings just now.",
           },
           biz: {
             eyebrow: 'Local businesses',
@@ -2997,6 +3003,19 @@ const en = {
         messageLength: '{{used}} / {{max}} characters',
         tooLongUntick: 'too long for one WhatsApp message',
         includeInMessage: 'Include {{area}} in the message',
+        listedWithinAny: 'Any time',
+        listedWithin7: 'Last 7 days',
+        listedWithin14: 'Last 14 days',
+        listedWithin30: 'Last 30 days',
+        sortNewest: 'Newest first',
+        sortOldest: 'Oldest first',
+        addedToday: 'Added today',
+        addedYesterday: 'Added yesterday',
+        addedDaysAgo: 'Added {{n}} days ago',
+        capReached: "That's the {{n}}-listing cap. Untick one first, or raise the cap.",
+        minRentOverMax: 'Minimum rent is higher than the maximum.',
+        minBedsOverMax: 'Minimum bedrooms is higher than the maximum.',
+        tooLongForWhatsApp: 'Too long for one WhatsApp message ({{used}} of {{max}} characters). Untick a few listings and try again.',
         // Admin Duplicates
         duplicateListings: 'Duplicate listings',
         noDuplicatesFound: 'No duplicates found',

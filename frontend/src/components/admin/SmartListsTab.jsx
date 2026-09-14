@@ -1,11 +1,20 @@
 /**
  * Smart Lists tab — super-admin tool for generating shareable property
- * shortlists by location + max monthly rent (ILS) + availability window.
+ * shortlists by location, rent range, bedrooms, availability and how
+ * recently a listing was added.
+ *
+ * WHY THE SELECTION LAYER EXISTS. The first version shared every match.
+ * That was fine at 30 listings and useless at 300: nobody reads a
+ * hundred-apartment WhatsApp message, and wa.me silently truncated
+ * anything past ~4000 characters, so the tail of a long list was being
+ * dropped without anyone noticing. Filters narrow the pool; the admin
+ * then ticks the handful that actually go out, under a visible cap and a
+ * live character count.
  *
  * Owns its own state; mounted from AdminDashboard. Saved lists live in the
  * `smart_lists` Mongo collection (private to the super admin).
  */
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -23,177 +32,42 @@ import {
   Home,
   Check,
   MessageCircle,
+  Clock,
+  CheckSquare,
+  Square,
+  ListFilter,
 } from 'lucide-react';
 import { API } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
-
-const AVAILABILITY_OPTIONS = [
-  { value: 'next_month', label: 'Available within the next month' },
-  { value: 'next_3_months', label: 'Available within the next 3 months' },
-  { value: 'next_6_months', label: 'Available within the next 6 months' },
-  { value: 'anytime', label: 'Available anytime (no date restriction)' },
-];
-
-const formatPrice = (amount, currency) => {
-  if (amount == null) return '—';
-  const sym = currency === 'USD' ? '$' : '₪';
-  return `${sym}${Number(amount).toLocaleString()}`;
-};
-
-const RENTAL_CATEGORY_OPTIONS = [
-  { value: 'any', label: 'Any type' },
-  { value: 'long-term', label: 'Long-term' },
-  { value: 'short-term', label: 'Short-term' },
-  { value: 'vacation', label: 'Vacation' },
-  { value: 'sukkot', label: 'Sukkot rental' },
-  { value: 'pesach', label: 'Pesach rental' },
-];
-
-const VACATION_LIKE_CATEGORIES = new Set(['vacation', 'sukkot', 'pesach']);
-
-const formatAvailable = (iso) => {
-  if (!iso) return 'Available now';
-  try {
-    const d = new Date(iso);
-    if (Number.isNaN(d.getTime())) return `Available ${iso}`;
-    return `Available ${d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
-  } catch {
-    return `Available ${iso}`;
-  }
-};
-
-const formatBedrooms = (n) => {
-  if (n == null) return null;
-  const v = Number(n);
-  if (!Number.isFinite(v)) return null;
-  // 2.5 BR etc. — round to 1 decimal but drop trailing ".0".
-  const display = v % 1 === 0 ? `${v}` : v.toFixed(1);
-  return `${display} bedroom${v === 1 ? '' : 's'}`;
-};
-
-const stripCity = (loc) => {
-  if (!loc) return '';
-  const trimmed = loc.trim();
-  return trimmed.includes(' - ') ? trimmed.split(' - ', 2)[1].trim() : trimmed;
-};
-
-const CATEGORY_TITLE = {
-  any: 'rentals',
-  'long-term': 'long-term rentals',
-  'short-term': 'short-term rentals',
-  vacation: 'vacation rentals',
-  sukkot: 'Sukkot rentals',
-  pesach: 'Pesach rentals',
-};
-
-const buildHeader = (filters) => {
-  // Headline broker-style: "MyIsraelRental.com" big, then "<Neighborhood>
-  // <category> rentals" subtitle. WhatsApp/email recipients should know in
-  // two seconds where the list came from and what's in it.
-  const neighborhood = stripCity(filters?.location);
-  const categoryLabel = CATEGORY_TITLE[filters?.rental_category] || 'rentals';
-  const subtitle = neighborhood
-    ? `${neighborhood} ${categoryLabel}`
-    : categoryLabel.charAt(0).toUpperCase() + categoryLabel.slice(1);
-  return ['MyIsraelRental.com', subtitle];
-};
-
-const buildCopyText = (properties, filters = {}) => {
-  const [brand, subtitle] = buildHeader(filters);
-  // Leading the message with the bare homepage URL on its own line is the
-  // trick that gets messaging apps (WhatsApp, iMessage, Telegram) to fetch
-  // the site's Open Graph metadata and render the MyIsraelRental logo as
-  // the preview card at the very top of the message. Without this, the
-  // first URL in the message would be a property listing URL and WhatsApp
-  // would show that property's photo as the preview instead of the logo.
-  const SITE_URL = 'https://myisraelrental.com';
-  const body = properties
-    .map((p) => {
-      // When the admin picked a specific location, force every row to that
-      // canonical form so the list never mixes "Maalot Dafna" with
-      // "Jerusalem - Maalot Dafna".
-      const area = filters?.location || p.area || 'Israel';
-      const beds = formatBedrooms(p.bedrooms);
-      const lines = [
-        area,
-        `${formatPrice(p.price, p.currency)}${p.price_label || ''}`,
-      ];
-      if (beds) lines.push(beds);
-      lines.push(formatAvailable(p.available_from));
-      lines.push(p.listing_url);
-      return lines.join('\n');
-    })
-    .join('\n\n');
-  return `${SITE_URL}\n\n${brand}\n${subtitle}\n\n${body}`;
-};
-
-const SORT_OPTIONS = [
-  { value: 'default',       label: 'Default order' },
-  { value: 'price_asc',     label: 'Cheapest first' },
-  { value: 'price_desc',    label: 'Most expensive first' },
-  { value: 'bedrooms_asc',  label: 'Fewest bedrooms first' },
-  { value: 'bedrooms_desc', label: 'Most bedrooms first' },
-];
-
-/**
- * Sort the generated property list by the chosen criterion. Returns a
- * new array — never mutates the original. Properties with missing fields
- * are pushed to the end regardless of sort direction (so a price-asc
- * sort won't bubble priceless rows to the top just because `null < 1`).
- *
- * Currency normalization: if the smart-list endpoint included a
- * usd_to_ils_rate, USD-priced rows are converted to an ILS-equivalent
- * for sort purposes only. Display values stay untouched.
- */
-const applySort = (properties, sortOrder, usdToIlsRate) => {
-  if (!sortOrder || sortOrder === 'default' || !properties?.length) return properties;
-  const sorted = [...properties];
-
-  const priceInIls = (p) => {
-    if (p.price == null) return null;
-    const v = Number(p.price);
-    if (!Number.isFinite(v)) return null;
-    // Fall back to a sensible USD→ILS rate when the backend doesn't
-    // include one (e.g. no live FX in the response). Keeps a mixed-
-    // currency list ordered roughly correctly. Display values are
-    // untouched — this conversion is for sort only.
-    const fallbackRate = 3.7;
-    if (p.currency === 'USD') return v * (usdToIlsRate || fallbackRate);
-    return v;
-  };
-  const bedrooms = (p) => {
-    if (p.bedrooms == null) return null;
-    const v = Number(p.bedrooms);
-    return Number.isFinite(v) ? v : null;
-  };
-
-  // Stable sort that pushes nulls to the end no matter the direction.
-  const cmp = (asc, getter) => (a, b) => {
-    const av = getter(a);
-    const bv = getter(b);
-    if (av == null && bv == null) return 0;
-    if (av == null) return 1;
-    if (bv == null) return -1;
-    return asc ? av - bv : bv - av;
-  };
-
-  switch (sortOrder) {
-    case 'price_asc':     sorted.sort(cmp(true,  priceInIls)); break;
-    case 'price_desc':    sorted.sort(cmp(false, priceInIls)); break;
-    case 'bedrooms_asc':  sorted.sort(cmp(true,  bedrooms));   break;
-    case 'bedrooms_desc': sorted.sort(cmp(false, bedrooms));   break;
-    default: break;
-  }
-  return sorted;
-};
+import {
+  AVAILABILITY_OPTIONS,
+  LISTED_WITHIN_OPTIONS,
+  RENTAL_CATEGORY_OPTIONS,
+  SEND_CAP_OPTIONS,
+  SORT_OPTIONS,
+  VACATION_LIKE_CATEGORIES,
+  WA_TEXT_LIMIT,
+  applySort,
+  buildCopyText,
+  buildHeader,
+  describeFilters,
+  formatAdded,
+  formatAvailable,
+  formatBedrooms,
+  formatPrice,
+} from './smartListText';
 
 const SmartListsTab = ({ token }) => {
   const { t } = useTranslation();
   const [location, setLocation] = useState('');
+  const [minRent, setMinRent] = useState('');
   const [maxRent, setMaxRent] = useState('');
   const [minBedrooms, setMinBedrooms] = useState('');
+  const [maxBedrooms, setMaxBedrooms] = useState('');
   const [rentalCategory, setRentalCategory] = useState('any');
   const [availability, setAvailability] = useState('anytime');
+  // '' = any time; otherwise a day count sent as listed_within_days.
+  const [listedWithin, setListedWithin] = useState('');
   const [results, setResults] = useState(null); // { properties, count, usd_to_ils_rate }
   // Snapshot of filters used to generate ``results`` so the display + copy
   // text stay consistent even if the admin changes the filter inputs after
@@ -206,6 +80,11 @@ const SmartListsTab = ({ token }) => {
   // Sort order applied to the generated list before copy / share / render.
   // Lives next to results state so it survives until a new list is generated.
   const [sortOrder, setSortOrder] = useState('default');
+  // Ids ticked for sending. Held as an array (not a Set) so that changing
+  // it is an ordinary state replacement React can diff.
+  const [selectedIds, setSelectedIds] = useState([]);
+  // Listings allowed in one message. 0 = no cap.
+  const [sendCap, setSendCap] = useState(10);
 
   // Sorted view of ``results.properties`` — single source of truth so the
   // visible cards, the clipboard payload and the WhatsApp link can never
@@ -214,6 +93,60 @@ const SmartListsTab = ({ token }) => {
     () => applySort(results?.properties, sortOrder, results?.usd_to_ils_rate),
     [results, sortOrder],
   );
+
+  // Fast membership test for the row checkboxes.
+  const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+
+  // Rows that will actually be sent, in the order currently on screen —
+  // so the message reads top-to-bottom exactly like the list the admin is
+  // looking at, whatever order they selected them in.
+  const selectedProperties = useMemo(
+    () => (sortedProperties || []).filter((p) => selectedSet.has(p.id)),
+    [sortedProperties, selectedSet],
+  );
+
+  const capReached = sendCap > 0 && selectedIds.length >= sendCap;
+
+  // Pick the first N on screen. Used both by the "Top N" button and to
+  // pre-select after a fresh generate, so the send buttons are never a
+  // no-op the admin has to discover by clicking.
+  const selectTop = useCallback(
+    (rows, cap) => {
+      const limit = cap > 0 ? cap : rows.length;
+      setSelectedIds(rows.slice(0, limit).map((p) => p.id));
+    },
+    [],
+  );
+
+  const toggleOne = (id) => {
+    if (selectedSet.has(id)) {
+      setSelectedIds((prev) => prev.filter((x) => x !== id));
+      return;
+    }
+    // Refuse rather than silently evict someone else's pick — the admin
+    // decides what to drop. Checked here, not inside the state updater:
+    // React may run an updater twice (StrictMode does in development), and
+    // a toast in there fired twice.
+    if (sendCap > 0 && selectedIds.length >= sendCap) {
+      toast.error(t('sweep.capReached', "That's the {{n}}-listing cap. Untick one first, or raise the cap.", { n: sendCap }));
+      return;
+    }
+    setSelectedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+  };
+
+  // Only the two sorts this change added are translated; the older labels
+  // are still English across this admin tab.
+  const SORT_LABEL_KEYS = { newest: 'sweep.sortNewest', oldest: 'sweep.sortOldest' };
+
+  // Live size of the message that will actually be sent.
+  const messageText = useMemo(
+    () =>
+      selectedProperties.length
+        ? buildCopyText(selectedProperties, appliedFilters || {})
+        : '',
+    [selectedProperties, appliedFilters],
+  );
+  const overWaLimit = messageText.length > WA_TEXT_LIMIT;
 
   const headers = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
@@ -230,16 +163,39 @@ const SmartListsTab = ({ token }) => {
     { initial: [] },
   );
 
+  // Single source of truth for the filter payload — used by generate and
+  // save alike, so a saved preset can never disagree with what was on
+  // screen when it was saved.
+  const currentFilters = () => ({
+    location: location.trim() || null,
+    min_monthly_rent_ils: minRent === '' ? null : Number(minRent),
+    max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
+    min_bedrooms: minBedrooms === '' ? null : Number(minBedrooms),
+    max_bedrooms: maxBedrooms === '' ? null : Number(maxBedrooms),
+    availability,
+    rental_category: rentalCategory,
+    listed_within_days: listedWithin === '' ? null : Number(listedWithin),
+  });
+
   const generate = async () => {
+    // Catch the inverted range here rather than letting the server answer
+    // "0 properties matched", which reads like empty inventory.
+    if (minRent !== '' && maxRent !== '' && Number(minRent) > Number(maxRent)) {
+      toast.error(t('sweep.minRentOverMax', 'Minimum rent is higher than the maximum.'));
+      return;
+    }
+    if (
+      minBedrooms !== '' &&
+      maxBedrooms !== '' &&
+      Number(minBedrooms) > Number(maxBedrooms)
+    ) {
+      toast.error(t('sweep.minBedsOverMax', 'Minimum bedrooms is higher than the maximum.'));
+      return;
+    }
     setLoading(true);
     setResults(null);
-    const snapshot = {
-      location: location.trim() || null,
-      max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
-      min_bedrooms: minBedrooms === '' ? null : Number(minBedrooms),
-      availability,
-      rental_category: rentalCategory,
-    };
+    setSelectedIds([]);
+    const snapshot = currentFilters();
     try {
       const res = await axios.post(
         `${API}/admin/smart-lists/generate`,
@@ -248,6 +204,13 @@ const SmartListsTab = ({ token }) => {
       );
       setResults(res.data);
       setAppliedFilters(snapshot);
+      // Pre-tick the first N in the order the server returned. The admin
+      // adjusts from there instead of starting from an empty selection
+      // and a dead "Share" button.
+      selectTop(
+        applySort(res.data.properties, sortOrder, res.data.usd_to_ils_rate) || [],
+        sendCap,
+      );
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to generate list');
     } finally {
@@ -263,14 +226,7 @@ const SmartListsTab = ({ token }) => {
     try {
       await axios.post(
         `${API}/admin/smart-lists`,
-        {
-          name: savingName.trim(),
-          location: location.trim() || null,
-          max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
-          min_bedrooms: minBedrooms === '' ? null : Number(minBedrooms),
-          availability,
-          rental_category: rentalCategory,
-        },
+        { name: savingName.trim(), ...currentFilters() },
         { headers },
       );
       toast.success('List saved');
@@ -287,16 +243,25 @@ const SmartListsTab = ({ token }) => {
       const res = await axios.get(`${API}/admin/smart-lists/${id}`, { headers });
       const { filters } = res.data;
       setLocation(filters?.location || '');
+      setMinRent(filters?.min_monthly_rent_ils ?? '');
       setMaxRent(filters?.max_monthly_rent_ils ?? '');
       setMinBedrooms(filters?.min_bedrooms ?? '');
+      setMaxBedrooms(filters?.max_bedrooms ?? '');
       setRentalCategory(filters?.rental_category || 'any');
       setAvailability(filters?.availability || 'anytime');
+      setListedWithin(
+        filters?.listed_within_days == null ? '' : String(filters.listed_within_days),
+      );
       setResults({
         properties: res.data.properties,
         count: res.data.properties.length,
         usd_to_ils_rate: res.data.usd_to_ils_rate,
       });
       setAppliedFilters(filters || {});
+      selectTop(
+        applySort(res.data.properties, sortOrder, res.data.usd_to_ils_rate) || [],
+        sendCap,
+      );
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to load list');
     }
@@ -314,8 +279,8 @@ const SmartListsTab = ({ token }) => {
   };
 
   const copyToClipboard = async () => {
-    if (!results?.properties?.length) return;
-    const text = buildCopyText(sortedProperties, appliedFilters || {});
+    if (!selectedProperties.length) return;
+    const text = messageText;
     try {
       await navigator.clipboard.writeText(text);
       setCopyOk(true);
@@ -338,15 +303,21 @@ const SmartListsTab = ({ token }) => {
   };
 
   const shareToWhatsApp = () => {
-    if (!results?.properties?.length) return;
-    // wa.me supports a single ?text param; WhatsApp's URL length cap is
-    // roughly 4000 chars, so we truncate gracefully if a list gets huge.
-    let text = buildCopyText(sortedProperties, appliedFilters || {});
-    const MAX = 3900;
-    if (text.length > MAX) {
-      text = text.slice(0, MAX) + '\n\n…(list truncated — full list copied separately)';
+    if (!selectedProperties.length) return;
+    // Truncating silently is how the tail of a long list used to vanish
+    // without anyone noticing. Refuse instead and say what to do — the
+    // selection UI above makes "untick a few" a two-second fix.
+    if (messageText.length > WA_TEXT_LIMIT) {
+      toast.error(
+        t(
+          'sweep.tooLongForWhatsApp',
+          'Too long for one WhatsApp message ({{used}} of {{max}} characters). Untick a few listings and try again.',
+          { used: messageText.length.toLocaleString(), max: WA_TEXT_LIMIT.toLocaleString() },
+        ),
+      );
+      return;
     }
-    const url = `https://wa.me/?text=${encodeURIComponent(text)}`;
+    const url = `https://wa.me/?text=${encodeURIComponent(messageText)}`;
     window.open(url, '_blank', 'noopener,noreferrer');
   };
 
@@ -363,14 +334,16 @@ const SmartListsTab = ({ token }) => {
         <div>
           <h2 className="text-2xl font-bold text-gray-900">{t("sweep.smartLists", "Smart Lists")}</h2>
           <p className="text-sm text-gray-500 mt-1">
-            Generate a shareable list of active rentals by location, price ceiling, and
-            availability — then copy it for WhatsApp, email, or Telegram.
+            {t(
+              'sweep.smartListsIntro',
+              'Filter active rentals, tick the ones worth sending, and share a short list on WhatsApp, email or Telegram.',
+            )}
           </p>
         </div>
       </div>
 
       {/* ---------------- Filters ---------------- */}
-      <div className="bg-white rounded-2xl border border-gray-200 p-6 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4">
+      <div className="bg-white rounded-2xl border border-gray-200 p-6 grid grid-cols-1 md:grid-cols-3 lg:grid-cols-6 gap-4">
         {/* Location — dropdown of areas with at least one active listing */}
         <div>
           <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
@@ -417,52 +390,80 @@ const SmartListsTab = ({ token }) => {
           </select>
         </div>
 
-        {/* Max rent — disabled for vacation / sukkot / pesach */}
+        {/* Rent range — disabled for vacation / sukkot / pesach */}
         {(() => {
           const isVacationLike = VACATION_LIKE_CATEGORIES.has(rentalCategory);
+          const priceInput =
+            'w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm disabled:bg-gray-50 disabled:text-gray-400';
           return (
             <div>
               <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
-                <Banknote size={12} /> Max monthly rent (₪)
+                <Banknote size={12} /> {t('sweep.monthlyRentRange', 'Monthly rent (₪)')}
               </label>
-              <input
-                type="number"
-                value={isVacationLike ? '' : maxRent}
-                onChange={(e) => setMaxRent(e.target.value)}
-                disabled={isVacationLike}
-                placeholder={isVacationLike ? 'N/A for vacation' : 'e.g. 10000'}
-                className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm disabled:bg-gray-50 disabled:text-gray-400"
-                data-testid="smart-list-max-rent-input"
-                min="0"
-              />
+              <div className="mt-2 flex items-center gap-2">
+                <input
+                  type="number"
+                  value={isVacationLike ? '' : minRent}
+                  onChange={(e) => setMinRent(e.target.value)}
+                  disabled={isVacationLike}
+                  placeholder={isVacationLike ? '—' : t('sweep.minShort', 'Min')}
+                  className={priceInput}
+                  data-testid="smart-list-min-rent-input"
+                  min="0"
+                />
+                <span className="text-gray-300 text-sm shrink-0">–</span>
+                <input
+                  type="number"
+                  value={isVacationLike ? '' : maxRent}
+                  onChange={(e) => setMaxRent(e.target.value)}
+                  disabled={isVacationLike}
+                  placeholder={isVacationLike ? '—' : t('sweep.maxShort', 'Max')}
+                  className={priceInput}
+                  data-testid="smart-list-max-rent-input"
+                  min="0"
+                />
+              </div>
               <p className="text-[11px] text-gray-400 mt-1">
                 {isVacationLike
-                  ? 'Price filter disabled for vacation rentals.'
-                  : 'USD listings auto-converted to ILS before filtering.'}
+                  ? t('sweep.priceOffForVacation', 'Price filter disabled for vacation rentals.')
+                  : t('sweep.usdAutoConverted', 'USD listings auto-converted to ILS before filtering.')}
               </p>
             </div>
           );
         })()}
 
-        {/* Bedrooms (minimum) */}
+        {/* Bedrooms — a range, so "3 bedroom" doesn't drag in every penthouse */}
         <div>
           <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
-            <Bed size={12} /> Bedrooms (min)
+            <Bed size={12} /> {t('sweep.bedroomsRange', 'Bedrooms')}
           </label>
-          <select
-            value={minBedrooms}
-            onChange={(e) => setMinBedrooms(e.target.value)}
-            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm bg-white"
-            data-testid="smart-list-bedrooms-select"
-          >
-            <option value="">Any</option>
-            <option value="1">1+</option>
-            <option value="2">2+</option>
-            <option value="3">3+</option>
-            <option value="4">4+</option>
-            <option value="5">5+</option>
-            <option value="6">6+</option>
-          </select>
+          <div className="mt-2 flex items-center gap-2">
+            <select
+              value={minBedrooms}
+              onChange={(e) => setMinBedrooms(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm bg-white"
+              data-testid="smart-list-bedrooms-select"
+              aria-label={t('sweep.minBedroomsAria', 'Minimum bedrooms')}
+            >
+              <option value="">{t('sweep.anyMin', 'Any')}</option>
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+            <span className="text-gray-300 text-sm shrink-0">–</span>
+            <select
+              value={maxBedrooms}
+              onChange={(e) => setMaxBedrooms(e.target.value)}
+              className="w-full px-3 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm bg-white"
+              data-testid="smart-list-max-bedrooms-select"
+              aria-label={t('sweep.maxBedroomsAria', 'Maximum bedrooms')}
+            >
+              <option value="">{t('sweep.anyMax', 'Any')}</option>
+              {[1, 2, 3, 4, 5, 6].map((n) => (
+                <option key={n} value={n}>{n}</option>
+              ))}
+            </select>
+          </div>
         </div>
 
         {/* Availability */}
@@ -484,7 +485,32 @@ const SmartListsTab = ({ token }) => {
           </select>
         </div>
 
-        <div className="md:col-span-3 lg:col-span-5 flex flex-wrap items-center gap-3 pt-2">
+        {/* Recently added — the "here's what's new this week" blast */}
+        <div>
+          <label className="text-xs font-semibold text-gray-600 uppercase tracking-wide flex items-center gap-1.5">
+            <Clock size={12} /> {t('sweep.addedToSite', 'Added to site')}
+          </label>
+          <select
+            value={listedWithin}
+            onChange={(e) => setListedWithin(e.target.value)}
+            className="mt-2 w-full px-4 py-2.5 rounded-lg border border-gray-200 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 focus:border-[var(--brand-primary)] text-sm bg-white"
+            data-testid="smart-list-listed-within-select"
+          >
+            {LISTED_WITHIN_OPTIONS.map((o) => (
+              <option key={o.value} value={o.value}>
+                {t(`sweep.listedWithin${o.value || 'Any'}`, o.label)}
+              </option>
+            ))}
+          </select>
+          <p className="text-[11px] text-gray-400 mt-1">
+            {t(
+              'sweep.addedToSiteHint',
+              'Listings without an added-on date are left out of a recent list.',
+            )}
+          </p>
+        </div>
+
+        <div className="md:col-span-3 lg:col-span-6 flex flex-wrap items-center gap-3 pt-2">
           <button
             type="button"
             onClick={generate}
@@ -500,12 +526,14 @@ const SmartListsTab = ({ token }) => {
               <button
                 type="button"
                 onClick={copyToClipboard}
-                disabled={!results.properties?.length}
+                disabled={!selectedProperties.length}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
                 data-testid="smart-list-copy-btn"
               >
                 {copyOk ? <Check size={16} className="text-green-600" /> : <Copy size={16} />}
-                {copyOk ? 'Copied' : 'Copy list'}
+                {copyOk
+                  ? t('sweep.copied', 'Copied')
+                  : t('sweep.copySelected', 'Copy {{n}} selected', { n: selectedProperties.length })}
               </button>
               {/* Sort selector — applies to copy / WhatsApp / on-screen
                   list together so all three views always agree. Only
@@ -521,18 +549,23 @@ const SmartListsTab = ({ token }) => {
                   aria-label="Sort list by"
                 >
                   {SORT_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>{opt.label}</option>
+                    <option key={opt.value} value={opt.value}>
+                      {SORT_LABEL_KEYS[opt.value] ? t(SORT_LABEL_KEYS[opt.value], opt.label) : opt.label}
+                    </option>
                   ))}
                 </select>
               </label>
               <button
                 type="button"
                 onClick={shareToWhatsApp}
-                disabled={!results.properties?.length}
+                disabled={!selectedProperties.length || overWaLimit}
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-[#25D366] text-white text-sm font-semibold hover:bg-[#1ebe57] disabled:opacity-40 transition-colors"
                 data-testid="smart-list-whatsapp-btn"
               >
-                <MessageCircle size={16} /> Share on WhatsApp
+                <MessageCircle size={16} />{' '}
+                {t('sweep.shareSelectedWhatsApp', 'Share {{n}} on WhatsApp', {
+                  n: selectedProperties.length,
+                })}
               </button>
               <button
                 type="button"
@@ -540,14 +573,14 @@ const SmartListsTab = ({ token }) => {
                 className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50"
                 data-testid="smart-list-save-toggle"
               >
-                <Save size={16} /> Save this list
+                <Save size={16} /> {t('sweep.saveThisList', 'Save this list')}
               </button>
             </>
           )}
         </div>
 
         {showSaveBox && (
-          <div className="md:col-span-3 lg:col-span-5 flex flex-wrap items-center gap-2 pt-2">
+          <div className="md:col-span-3 lg:col-span-6 flex flex-wrap items-center gap-2 pt-2">
             <input
               type="text"
               value={savingName}
@@ -571,9 +604,16 @@ const SmartListsTab = ({ token }) => {
       {/* ---------------- Results ---------------- */}
       {results && (
         <div className="bg-white rounded-2xl border border-gray-200 p-6" data-testid="smart-list-results">
-          <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center justify-between mb-2 gap-3 flex-wrap">
             <h3 className="text-lg font-bold text-gray-900">
-              {results.count} {results.count === 1 ? 'property' : 'properties'} matched
+              {/* Interpolated as `n`, never `count`: i18next treats `count`
+                  as a plural trigger and resolves a suffixed key, which
+                  Hebrew (one/two/many/other) would need a different key
+                  set for than English. See utils/listedAgo.js. */}
+              {t('sweep.matchedSelected', '{{n}} matched · {{sel}} selected', {
+                n: results?.count ?? 0,
+                sel: selectedIds.length,
+              })}
             </h3>
             {results.usd_to_ils_rate && (
               <span className="text-xs text-gray-400">
@@ -581,6 +621,85 @@ const SmartListsTab = ({ token }) => {
               </span>
             )}
           </div>
+
+          {/* ---- Selection toolbar ----
+              The whole point of the tab at this scale: the filters decide
+              what is eligible, this row decides what is actually sent. */}
+          {sortedProperties.length > 0 && (
+            <div
+              className="flex flex-wrap items-center gap-2 mb-4 pb-4 border-b border-gray-100"
+              data-testid="smart-list-selection-toolbar"
+            >
+              <label className="inline-flex items-center gap-2 px-3 py-2 rounded-lg bg-gray-50 border border-gray-200 text-sm text-gray-700">
+                <ListFilter size={14} className="text-gray-400" />
+                <span className="text-xs text-gray-500 font-medium">
+                  {t('sweep.maxPerMessage', 'Max per message')}
+                </span>
+                <select
+                  value={sendCap}
+                  onChange={(e) => {
+                    const next = Number(e.target.value);
+                    setSendCap(next);
+                    // Trim an over-cap selection down rather than leaving
+                    // the count and the cap contradicting each other.
+                    if (next > 0) {
+                      setSelectedIds((prev) => (prev.length > next ? prev.slice(0, next) : prev));
+                    }
+                  }}
+                  className="bg-transparent text-sm font-semibold text-gray-800 focus:outline-none cursor-pointer"
+                  data-testid="smart-list-cap-select"
+                >
+                  {SEND_CAP_OPTIONS.map((n) => (
+                    <option key={n} value={n}>
+                      {n === 0 ? t('sweep.noCap', 'No cap') : n}
+                    </option>
+                  ))}
+                </select>
+              </label>
+
+              <button
+                type="button"
+                onClick={() => selectTop(sortedProperties, sendCap)}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50"
+                data-testid="smart-list-select-top-btn"
+              >
+                <CheckSquare size={14} />
+                {sendCap > 0
+                  ? t('sweep.selectTopN', 'Select top {{n}}', {
+                      n: Math.min(sendCap, sortedProperties.length),
+                    })
+                  : t('sweep.selectAll', 'Select all')}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setSelectedIds([])}
+                disabled={!selectedIds.length}
+                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-gray-200 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-40"
+                data-testid="smart-list-clear-selection-btn"
+              >
+                <Square size={14} /> {t('sweep.clearSelection', 'Clear')}
+              </button>
+
+              {/* Live message size. The old build truncated past the wa.me
+                  limit without telling anyone; this makes the ceiling
+                  visible before the send instead of after it. */}
+              {selectedProperties.length > 0 && (
+                <span
+                  className={`text-xs ms-auto ${overWaLimit ? 'text-red-600 font-semibold' : 'text-gray-400'}`}
+                  data-testid="smart-list-char-count"
+                >
+                  {t('sweep.messageLength', '{{used}} / {{max}} characters', {
+                    used: messageText.length.toLocaleString(),
+                    max: WA_TEXT_LIMIT.toLocaleString(),
+                  })}
+                  {overWaLimit
+                    ? ` · ${t('sweep.tooLongUntick', 'too long for one WhatsApp message')}`
+                    : ''}
+                </span>
+              )}
+            </div>
+          )}
           {/* Live preview of the title block recipients will see in the
               WhatsApp/copy output. Keeps the broker confident that the share
               text is going to read right before they hit send. */}
@@ -589,7 +708,12 @@ const SmartListsTab = ({ token }) => {
               <p className="text-xs uppercase tracking-wider text-gray-400">{t("sweep.listHeader", "List header")}</p>
               {/* Mock WhatsApp link-preview card so the admin can see the
                   MyIsraelRental logo will sit on top of the shared list. */}
-              <div className="mt-2 mb-3 inline-flex items-center gap-3 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 max-w-md">
+              {/* `flex` + `w-full`, not `inline-flex`: an inline-flex box
+                  sizes to its content and refuses to shrink, so the
+                  truncate on the lines below never engaged and this mock
+                  card pushed the whole tab into horizontal scroll on a
+                  phone. */}
+              <div className="mt-2 mb-3 flex w-full items-center gap-3 px-3 py-2 rounded-xl border border-gray-200 bg-gray-50 max-w-md">
                 <img
                   src="/brand-logo.png"
                   alt="MyIsraelRental logo"
@@ -614,9 +738,30 @@ const SmartListsTab = ({ token }) => {
               {sortedProperties.map((p) => {
                 const displayArea = appliedFilters?.location || p.area || 'Israel';
                 const beds = formatBedrooms(p.bedrooms);
+                const addedLabel = formatAdded(p.created_at, t);
+                const isSelected = selectedSet.has(p.id);
+                // Only rows that are OUT and blocked by the cap get the
+                // disabled treatment — a selected row must always stay
+                // clickable so the admin can swap one out for another.
+                const blocked = !isSelected && capReached;
                 return (
-                <li key={p.id} className="py-4 flex items-start justify-between gap-4" data-testid={`smart-list-row-${p.id}`}>
-                  <div className="min-w-0">
+                <li
+                  key={p.id}
+                  className={`py-4 flex items-start gap-3 ${isSelected ? '' : 'opacity-70'}`}
+                  data-testid={`smart-list-row-${p.id}`}
+                >
+                  <input
+                    type="checkbox"
+                    checked={isSelected}
+                    disabled={blocked}
+                    onChange={() => toggleOne(p.id)}
+                    className="mt-1 w-4 h-4 shrink-0 accent-[var(--brand-primary)] cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
+                    data-testid={`smart-list-check-${p.id}`}
+                    aria-label={t('sweep.includeInMessage', 'Include {{area}} in the message', {
+                      area: displayArea,
+                    })}
+                  />
+                  <div className="min-w-0 flex-1">
                     <p className="font-semibold text-gray-900 text-sm flex items-center gap-2">
                       <MapPin size={13} className="text-[var(--brand-primary)] shrink-0" />
                       <span className="truncate">{displayArea}</span>
@@ -639,6 +784,12 @@ const SmartListsTab = ({ token }) => {
                       )}
                       <span className="text-gray-300 mx-1.5">·</span>
                       <span className="text-gray-500">{formatAvailable(p.available_from)}</span>
+                      {addedLabel && (
+                        <>
+                          <span className="text-gray-300 mx-1.5">·</span>
+                          <span className="text-[var(--brand-primary)] font-medium">{addedLabel}</span>
+                        </>
+                      )}
                     </p>
                     <a
                       href={p.listing_url}
@@ -686,16 +837,7 @@ const SmartListsTab = ({ token }) => {
                     {s.name}
                   </p>
                   <p className="text-xs text-gray-500 mt-0.5">
-                    {s.filters?.location || 'Any location'} ·{' '}
-                    {s.filters?.rental_category && s.filters.rental_category !== 'any'
-                      ? `${s.filters.rental_category} · `
-                      : ''}
-                    {s.filters?.max_monthly_rent_ils
-                      ? `≤ ₪${Number(s.filters.max_monthly_rent_ils).toLocaleString()}`
-                      : 'Any price'}
-                    {s.filters?.min_bedrooms
-                      ? ` · ${s.filters.min_bedrooms}+ beds`
-                      : ''}
+                    {describeFilters(s.filters)}
                     {' · '}
                     {s.snapshot_count} match{s.snapshot_count === 1 ? '' : 'es'} when saved
                   </p>
