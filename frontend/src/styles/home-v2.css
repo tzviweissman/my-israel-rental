@@ -608,10 +608,16 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
 
 @media (max-width: 760px) { .hv2-marquee-cell { width: 240px; } }
 
-@media (prefers-reduced-motion: reduce) {
-  /* No movement at all, and the row becomes something you scroll yourself.
-     The duplicate pass stays in the DOM but is aria-hidden, so it reads as
-     one list either way. */
-  .hv2-marquee { overflow-x: auto; }
+/* No movement, and the row becomes something you scroll yourself, under
+   reduced motion AND on any device that cannot hover. Hover and focus are the
+   only things that pause the animation, and a phone has neither, so there the
+   row slid under a thumb reaching for a card with no way to stop it.
+
+   The duplicate pass exists only to hide the wrap, so without the animation
+   it is hidden too — otherwise scrolling the row shows every listing twice. */
+@media (prefers-reduced-motion: reduce), (hover: none) {
+  .hv2-marquee { overflow-x: auto; scroll-snap-type: x proximity; }
+  .hv2-marquee-cell { scroll-snap-align: start; }
   .hv2-marquee-track, [dir="rtl"] .hv2-marquee-track { animation: none; }
+  .hv2-marquee-cell[inert] { display: none; }
 }
