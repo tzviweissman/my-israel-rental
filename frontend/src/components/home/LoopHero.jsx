@@ -47,7 +47,14 @@ const LOOP = {
 // the same pixels and there is no jump when playback begins.
 const POSTER = `${BASE}/hero-loop-poster.jpg`;
 
+// Two budgets, because the two starts are not comparable. The video is
+// preload="metadata", so no frame is buffered before play() — on a phone the
+// clock and the download start together, over cellular, and a 2s budget sent
+// merely-slow connections to the still for the whole visit (`failed` is never
+// reset). The deadline is also cancelled the moment data arrives: a video that
+// has loaded but not yet been allowed to start is not a failure.
 const START_DEADLINE_MS = 2000;
+const COLD_START_DEADLINE_MS = 6000;
 // Degrees of travel, matching the spec. Small enough to read as depth rather
 // than as the page moving under the pointer.
 const TILT_PX = 8;
@@ -90,8 +97,13 @@ const LoopHero = () => {
       // Read the element, not a state flag: `playing` captured here is always
       // false, so the flag would fire the fallback on a working video.
       if (!video.currentTime) setFailed(true);
-    }, START_DEADLINE_MS);
-    return () => window.clearTimeout(bail);
+    }, phone ? COLD_START_DEADLINE_MS : START_DEADLINE_MS);
+    const arrived = () => window.clearTimeout(bail);
+    video.addEventListener('loadeddata', arrived, { once: true });
+    return () => {
+      window.clearTimeout(bail);
+      video.removeEventListener('loadeddata', arrived);
+    };
   }, [showStill, phone]);
 
   React.useEffect(() => {

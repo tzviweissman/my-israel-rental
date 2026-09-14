@@ -101,7 +101,15 @@ export default function HomePreview() {
   const { gallery, picks, dealCards, hasDeals, recent, rentals, businesses, loaded } = useHomeShowcase();
   // Offers win when any exist; otherwise the daily rotation. Never a mix,
   // and never padded to reach a count.
-  const shelf = hasDeals ? dealCards : picks;
+  //
+  // A card whose photo fails to load is dropped, not shown. The hook filters
+  // offers with NO cover, but it cannot know a cover URL has since been
+  // deleted — that rendered a broken-image glyph over an empty square, the
+  // very empty card this section exists to avoid. If every photo is dead,
+  // the section falls through to its honest "no offers" state.
+  const [deadImages, setDeadImages] = useState(() => new Set());
+  const markDead = (key) => setDeadImages((s) => (s.has(key) ? s : new Set(s).add(key)));
+  const shelf = (hasDeals ? dealCards : picks).filter((it) => !deadImages.has(it.key));
   // Which card the coverflow has centred. The component names it in its
   // caption but cannot open it, so the page renders the control.
   const [pick, setPick] = useState(0);
@@ -109,6 +117,26 @@ export default function HomePreview() {
   // to be wired here — a control that does nothing is worse than no control.
   const { likedIds, toggleLike } = useFavorites();
   const root = useRef(null);
+
+  // The moving row starts from its first card when somebody reaches it. The
+  // animation begins at mount, so a visitor arriving twenty seconds later
+  // landed on an arbitrary offset, usually with the newest listing — the one
+  // the row is ordered to show first — already out of view. Once per page
+  // view, so scrolling back does not yank the row out from under a reader.
+  const marqueeRef = useRef(null);
+  const hasMarquee = recent.length >= MARQUEE_MIN;
+  useEffect(() => {
+    const box = marqueeRef.current;
+    if (!box || typeof IntersectionObserver === 'undefined') return undefined;
+    const io = new IntersectionObserver(([entry]) => {
+      if (!entry.isIntersecting) return;
+      io.disconnect();
+      const track = box.querySelector('.hv2-marquee-track');
+      (track?.getAnimations?.() || []).forEach((a) => { a.currentTime = 0; });
+    }, { threshold: 0.25 });
+    io.observe(box);
+    return () => io.disconnect();
+  }, [hasMarquee]);
   useReveal(root);
   useLightNav();
 
@@ -300,7 +328,7 @@ export default function HomePreview() {
                   onClick={() => navigate(it.href)}
                   data-href={it.href}
                 >
-                  <img src={it.src} alt="" loading="lazy" />
+                  <img src={it.src} alt="" loading="lazy" onError={() => markDead(it.key)} />
                   <span className="hv2-deal-body">
                     <span className="hv2-deal-title">
                       {(i18n.language || '').startsWith('he') && it.title_he ? it.title_he : it.title}
@@ -402,8 +430,9 @@ export default function HomePreview() {
               data-testid="home-preview-more-stays"
             />
           </div>
-          {recent.length >= MARQUEE_MIN ? (
+          {hasMarquee ? (
             <div
+              ref={marqueeRef}
               className="hv2-marquee reveal"
               data-testid="home-preview-recent"
               aria-label={t('home.v2.rentals.h2', 'Recently added')}
@@ -420,9 +449,13 @@ export default function HomePreview() {
                   </div>
                 ))}
                 {/* The second pass is what makes the wrap seamless. It is
-                    decoration only — the same listings are already above. */}
+                    decoration only — the same listings are already above.
+                    `inert`, not aria-hidden: aria-hidden hid it from screen
+                    readers but left every card and heart in the tab order,
+                    so a keyboard walked 24 silent stops through a copy of
+                    what it had just read. inert removes it from both. */}
                 {recent.map((p) => (
-                  <div className="hv2-marquee-cell" key={`dup-${p.id}`} aria-hidden="true">
+                  <div className="hv2-marquee-cell" key={`dup-${p.id}`} inert>
                     <StaysCard
                       property={p}
                       liked={likedIds.has(p.id)}
