@@ -98,7 +98,15 @@ function useReveal(root) {
 export default function HomePreview() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
-  const { gallery, picks, dealCards, hasDeals, recent, rentals, businesses, loaded } = useHomeShowcase();
+  const {
+    gallery, picks, dealCards, hasDeals, recent, rentals, businesses,
+    loaded, failed, retrying, retry,
+  } = useHomeShowcase();
+  // An empty state is a claim about the site, so it is only made when every
+  // list behind it answered. A shelf that is empty because a request failed
+  // says the page could not load, and offers a retry, instead.
+  const shelfFailed = failed.properties || failed.gigs || failed.deals;
+  const recentFailed = failed.properties;
   // Offers win when any exist; otherwise the daily rotation. Never a mix,
   // and never padded to reach a count.
   //
@@ -289,8 +297,11 @@ export default function HomePreview() {
             no offers        "Today's picks", the daily rotation of everything
                              listed. Real cards, honestly labelled.
             nothing at all   a line saying so. Not an empty grid, and not a
-                             section that silently vanishes. */}
-      {loaded && shelf.length === 0 && (
+                             section that silently vanishes.
+            could not load   a line saying THAT, with a retry. Only after the
+                             hook's own retries have run out; while they run,
+                             the section waits rather than flashing an error. */}
+      {loaded && shelf.length === 0 && !shelfFailed && (
         <section className="hv2-picks" id="picks">
           <div className="hv2-wrap">
             <div className="hv2-picks-head">
@@ -303,6 +314,24 @@ export default function HomePreview() {
                 {t('home.v2.picks.empty',
                   'No offers yet. When a business puts one up, it shows here the same day.')}
               </p>
+            </div>
+          </div>
+        </section>
+      )}
+      {loaded && shelf.length === 0 && shelfFailed && !retrying && (
+        <section className="hv2-picks" id="picks">
+          <div className="hv2-wrap">
+            <div className="hv2-picks-head" data-testid="home-preview-picks-error" role="status">
+              <h2>{t('home.v2.picks.h2', "Today's picks")}</h2>
+              <p>{t('home.v2.picks.loadError', "We couldn't load today's offers just now.")}</p>
+              <button
+                type="button"
+                className="btn btn-ghost hv2-retry"
+                onClick={retry}
+                data-testid="home-preview-picks-retry"
+              >
+                {t('home.v2.retry', 'Try again')}
+              </button>
             </div>
           </div>
         </section>
@@ -477,8 +506,21 @@ export default function HomePreview() {
                   onClick={() => navigate(`/property/${p.id}`)}
                 />
               ))}
-              {loaded && recent.length === 0 && (
+              {loaded && recent.length === 0 && !recentFailed && (
                 <p className="hv2-empty">{t('home.v2.rentals.empty', 'New listings are on their way.')}</p>
+              )}
+              {loaded && recent.length === 0 && recentFailed && !retrying && (
+                <div className="hv2-empty" data-testid="home-preview-recent-error" role="status">
+                  <p>{t('home.v2.rentals.loadError', "We couldn't load the newest listings just now.")}</p>
+                  <button
+                    type="button"
+                    className="btn btn-ghost hv2-retry"
+                    onClick={retry}
+                    data-testid="home-preview-recent-retry"
+                  >
+                    {t('home.v2.retry', 'Try again')}
+                  </button>
+                </div>
               )}
             </div>
           )}
