@@ -557,6 +557,10 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
   .hv2-loop-video, .hv2-loop-poster { transition: none; }
 }
 
+/* The could-not-load state, in the offers head and in the rentals grid. The
+   button is the design system's ghost button; this only spaces it. */
+.hv2-retry { margin-top: 14px; min-height: 44px; }
+
 /* ── Today's deals: the thin row ─────────────────────────────────────────
    One, two or three offers. The coverflow needs four to read as a ring, and
    padding the row out to reach four is exactly what put empty cards under

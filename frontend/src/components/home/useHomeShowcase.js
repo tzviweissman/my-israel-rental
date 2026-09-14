@@ -22,7 +22,7 @@
  * the site's own generated stills, so the hero never runs blank — the
  * same reason siteAssets.js exists at all.
  */
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 
 import { API } from '../../lib/apiBase';
@@ -66,30 +66,85 @@ export const propertyPhoto = (p) => {
 
 const byNewest = (a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''));
 
+const SOURCES = {
+  properties: () => axios.get(`${API}/properties`, { params: { limit: 200 } }),
+  gigs: () => axios.get(`${API}/marketplace/gigs`, { params: { limit: 60 } }),
+  // The offers shelf. Its own endpoint, so an empty result here is a fact
+  // about the site - nobody is running an offer today - and not a filter
+  // that failed.
+  deals: () => axios.get(`${API}/marketplace/deals`, { params: { limit: 24 } }),
+};
+const ALL_SOURCES = Object.keys(SOURCES);
+const NONE_FAILED = { properties: false, gigs: false, deals: false };
+
+// A FAILED LIST IS NOT AN EMPTY LIST. A failed request used to leave its
+// list at [] and still set `loaded`, so the page could not tell "nothing is
+// listed" from "the API did not answer". During a backend deploy the API is
+// unreachable for about a minute, and in that window the home page told
+// visitors "No offers yet" and "New listings are on their way" on a site with
+// 164 listings. Every outage would do the same.
+//
+// So a list that fails is retried on its own, on a schedule that outlasts a
+// deploy swap, and `failed` says which lists never arrived. The page shows an
+// empty state only when every list it depends on actually answered.
+const RETRY_DELAYS_MS = [3000, 8000, 20000];
+
 export default function useHomeShowcase() {
   const [properties, setProperties] = useState([]);
   const [gigs, setGigs] = useState([]);
   const [deals, setDeals] = useState([]);
   const [loaded, setLoaded] = useState(false);
+  const [failed, setFailed] = useState(NONE_FAILED);
+  // True while a failed list is waiting for its next attempt. The page shows
+  // nothing during it, rather than flashing an error that the next attempt
+  // is likely to clear.
+  const [retrying, setRetrying] = useState(false);
+  // Bumped by retry() and by the browser coming back online; each bump is a
+  // fresh round of attempts.
+  const [round, setRound] = useState(0);
 
   useEffect(() => {
     let alive = true;
-    Promise.allSettled([
-      axios.get(`${API}/properties`, { params: { limit: 200 } }),
-      axios.get(`${API}/marketplace/gigs`, { params: { limit: 60 } }),
-      // The offers shelf. Its own endpoint, so an empty result here is a
-      // fact about the site - nobody is running an offer today - and not a
-      // filter that failed.
-      axios.get(`${API}/marketplace/deals`, { params: { limit: 24 } }),
-    ]).then(([props, svc, offers]) => {
-      if (!alive) return;
-      if (props.status === 'fulfilled' && Array.isArray(props.value.data)) setProperties(props.value.data);
-      if (svc.status === 'fulfilled' && Array.isArray(svc.value.data)) setGigs(svc.value.data);
-      if (offers.status === 'fulfilled' && Array.isArray(offers.value.data)) setDeals(offers.value.data);
-      setLoaded(true);
-    });
-    return () => { alive = false; };
+    let timer = null;
+    const setters = { properties: setProperties, gigs: setGigs, deals: setDeals };
+    const attempt = (names, tryIndex) => {
+      Promise.allSettled(names.map((n) => SOURCES[n]())).then((results) => {
+        if (!alive) return;
+        const stillFailing = names.filter((n, i) => {
+          const r = results[i];
+          if (r.status === 'fulfilled' && Array.isArray(r.value.data)) {
+            setters[n](r.value.data);
+            return false;
+          }
+          return true;
+        });
+        // Lists not in this attempt already arrived, so they are not failed.
+        setFailed({ ...NONE_FAILED, ...Object.fromEntries(stillFailing.map((n) => [n, true])) });
+        setLoaded(true);
+        if (stillFailing.length && tryIndex < RETRY_DELAYS_MS.length) {
+          setRetrying(true);
+          timer = window.setTimeout(() => attempt(stillFailing, tryIndex + 1), RETRY_DELAYS_MS[tryIndex]);
+        } else {
+          setRetrying(false);
+        }
+      });
+    };
+    attempt(ALL_SOURCES, 0);
+    return () => { alive = false; window.clearTimeout(timer); };
+  }, [round]);
+
+  const retry = useCallback(() => {
+    setRetrying(true);
+    setRound((r) => r + 1);
   }, []);
+
+  // A dropped connection that comes back should not need a click.
+  const anyFailed = failed.properties || failed.gigs || failed.deals;
+  useEffect(() => {
+    if (!anyFailed) return undefined;
+    window.addEventListener('online', retry);
+    return () => window.removeEventListener('online', retry);
+  }, [anyFailed, retry]);
 
   const rentals = useMemo(
     () =>
@@ -242,7 +297,8 @@ export default function useHomeShowcase() {
   }, [rentals, businesses]);
 
   return {
-    loaded, streamImages, gallery, picks, dealCards, hasDeals, recent,
+    loaded, failed, retrying, retry,
+    streamImages, gallery, picks, dealCards, hasDeals, recent,
     rentals: rentals.slice(0, 6), businesses: businesses.slice(0, 8),
   };
 }
