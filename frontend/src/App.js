@@ -2,6 +2,7 @@ import React, { useState, useEffect, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { apexUrl, currentBusinessHostSlug } from './utils/businessHost';
 import useBuildRefresh from './hooks/useBuildRefresh';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -181,6 +182,37 @@ export { API };
 
 export const AuthContext = React.createContext();
 
+/**
+ * <Routes>, aware of business subdomains.
+ *
+ * On blazinboards.myisraelrental.com the address bar says "/", and the
+ * router must mount the business page for "blazinboards". So the routes are
+ * matched against a location whose path is /business/blazinboards, while the
+ * address bar keeps showing the short address the owner shared.
+ *
+ * Any OTHER path on a business host belongs to the main site: the session,
+ * Google sign-in and the rest of the app live there. frontend/server.js
+ * redirects those on a full page load; this covers navigation inside the app,
+ * which never reaches the server (a link from the business page to one of its
+ * services, the sign-in button).
+ *
+ * Off everywhere else, including localhost and the Railway preview host.
+ */
+const BUSINESS_HOST_SLUG = currentBusinessHostSlug();
+
+function HostAwareRoutes({ children }) {
+  const location = useLocation();
+  const offPage = !!BUSINESS_HOST_SLUG && location.pathname !== '/';
+  useEffect(() => {
+    if (offPage) window.location.replace(apexUrl(`${location.pathname}${location.search}${location.hash}`));
+  }, [offPage, location]);
+  if (offPage) return <RouteFallback />;
+  const routed = BUSINESS_HOST_SLUG
+    ? { ...location, pathname: `/business/${BUSINESS_HOST_SLUG}` }
+    : location;
+  return <Routes location={routed}>{children}</Routes>;
+}
+
 function App() {
   const { i18n } = useTranslation();
   const [user, setUser] = useState(null);
@@ -344,7 +376,7 @@ function App() {
               of being stranded on a blank document. */}
           <ErrorBoundary>
           <Suspense fallback={<RouteFallback />}>
-          <Routes>
+          <HostAwareRoutes>
             {/* `/` lands on the marketing-style Home page (hero +
                 slideshow + featured properties + 3-segment search pill).
                 Tapping Search there pushes the renter to `/stays` with
@@ -474,7 +506,7 @@ function App() {
                 area, which looks like a broken site rather than a wrong
                 address. Must stay LAST in this list. */}
             <Route path="*" element={<NotFound />} />
-          </Routes>
+          </HostAwareRoutes>
           </Suspense>
           </ErrorBoundary>
         </div>

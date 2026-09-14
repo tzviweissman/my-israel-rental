@@ -9,6 +9,7 @@ import { needsDirectoryDisclaimer } from '../../lib/categories';
 import { uploadOneFile } from '../../utils/fastUpload';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import { apiErrorMessage } from '../../utils/apiError';
+import WebAddressField from './WebAddressField';
 
 /**
  * Edit the facts behind a business's "Good to know" band (spec C6).
@@ -233,6 +234,12 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
             {t('businesses.detailsHint', 'All optional. Anything you leave blank simply is not shown on your page.')}
           </p>
+
+          {/* Saved on its own button, not with Save below: changing an
+              address is a separate decision with its own consequence, and
+              an owner fixing a typo in their hours should never change it
+              by accident. */}
+          <WebAddressField business={b} API={API} token={token} onChanged={onSaved} />
 
           {/* Logo. First, because it is the first item on the checklist
               that sends people here, and the one they could not find. */}

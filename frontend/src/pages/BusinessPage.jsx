@@ -17,6 +17,8 @@ import axios from 'axios';
 import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import NotFound from './NotFound';
+import { businessCanonicalUrl, currentBusinessHostSlug } from '../utils/businessHost';
 import BlockList from '../components/pagebuilder/BlockList';
 import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
@@ -115,6 +117,10 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   const scrim = useCoverScrim(coverSrc);
 
   if (missing) {
+    // On <slug>.myisraelrental.com there is nothing else at this address,
+    // so an unclaimed or mistyped subdomain is a plain 404 page - not
+    // "no longer listed", which would claim a business once existed.
+    if (!injected && currentBusinessHostSlug()) return <NotFound />;
     return (
       <div className="min-h-screen flex items-center justify-center px-6 text-center"
         style={{ background: 'var(--bg)' }}>
@@ -252,6 +258,9 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           description={shareDescription}
           image={shareImage}
           path={`/business/${biz.slug || biz.id}`}
+          // The page is served at two addresses, so it names one. Path
+          // by default - see utils/businessHost.js.
+          canonicalUrl={businessCanonicalUrl(biz.slug, biz.id)}
         />
       )}
 

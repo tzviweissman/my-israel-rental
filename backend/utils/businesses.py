@@ -22,6 +22,7 @@ touch one — that is still the provider check, unchanged.
 """
 from __future__ import annotations
 
+import os
 import re
 import uuid
 from datetime import datetime, timezone
@@ -34,6 +35,87 @@ UTC = timezone.utc
 # Five is a guess at "enough for a real person, few enough that the
 # categories cannot be papered with near-identical shells" (spec M8).
 MAX_BUSINESSES_PER_USER = 5
+
+# ── Slugs are also subdomains ───────────────────────────────────────────
+#
+# `blazinboards.myisraelrental.com` is the same page as
+# `/business/blazinboards`: the subdomain IS the slug, with the same rename
+# history and the same resolver. That makes two things load-bearing that
+# were harmless while a slug was only ever a path segment.
+#
+# RESERVED WORDS. As a path, /business/api is just a page. As a host,
+# api.myisraelrental.com resolving to somebody's cleaning business is an
+# outage, and mail. or autodiscover. breaks email clients. `unique_slug`
+# refuses these, so no path (signup, migration, rename) can mint one, and a
+# collision is handled exactly like a duplicate name: -2, -3.
+#
+# Three copies of this list exist, because three runtimes need it: this
+# one, frontend/businessHost.js (the Node server, which decides what a Host
+# header means) and frontend/src/utils/businessHost.js (the browser app).
+# scripts/test-business-hosts.mjs fails if they differ.
+RESERVED_SLUGS = frozenset("""
+www admin api app mail smtp imap pop ftp cdn static assets media img
+ns1 ns2 dns mx autodiscover autoconfig webmail dev staging test preview
+blog help support docs status dashboard account accounts auth login
+p og short link links go my me new signup register business businesses
+properties property stays services requests jobs manager chat
+""".split())
+
+# A DNS label: lowercase letters, digits and inner hyphens, 1-60 long (the
+# slug cap, under DNS's 63). `slugify` already produces exactly this shape;
+# the pattern exists for addresses an OWNER types, which nothing normalises.
+SLUG_PATTERN = re.compile(r"^[a-z0-9](?:[a-z0-9-]{0,58}[a-z0-9])?$")
+
+
+def address_problem(candidate: str) -> str | None:
+    """Why `candidate` cannot be a web address, or None if its SHAPE is fine.
+
+    'invalid' or 'reserved'. Whether another business already holds it is a
+    database question, answered by the caller.
+    """
+    if not SLUG_PATTERN.fullmatch(candidate or ""):
+        return "invalid"
+    if candidate in RESERVED_SLUGS:
+        return "reserved"
+    return None
+
+
+def slug_change(biz: dict[str, Any], new_slug: str) -> dict[str, Any]:
+    """The update that moves a business to `new_slug` and keeps the old one.
+
+    Shared by rename and by the owner choosing an address, so there is one
+    rule for what happens to a slug being replaced: it retires into
+    `previous_slugs`, where `_resolve` still finds it and `unique_slug` will
+    not hand it to anyone else. Capped at twenty, oldest dropped first.
+    """
+    old = biz.get("slug")
+    update: dict[str, Any] = {"slug": new_slug}
+    history = [x for x in (biz.get("previous_slugs") or []) if x != new_slug]
+    if old and old != new_slug:
+        history.append(old)
+    update["previous_slugs"] = history[-20:]
+    return update
+
+
+def public_site_host() -> str:
+    """The apex the subdomains hang off. Staging runs on a different host."""
+    return (os.environ.get("PUBLIC_SITE_HOST") or "myisraelrental.com").strip().lower().rstrip(".")
+
+
+def business_canonical_url(slug: str) -> str:
+    """Where search engines should consolidate a business page.
+
+    Two URLs serve the same page. Google treats a subdomain as largely a
+    separate site, so authority earned by myisraelrental.com does not flow
+    to it well; by default the canonical is therefore the PATH form, and the
+    subdomain is the address people share. BUSINESS_CANONICAL=subdomain flips
+    it, if a business address should one day rank on its own. The browser
+    app reads the same decision from REACT_APP_BUSINESS_CANONICAL.
+    """
+    host = public_site_host()
+    if (os.environ.get("BUSINESS_CANONICAL") or "path").strip().lower() == "subdomain":
+        return f"https://{slug}.{host}/"
+    return f"https://{host}/business/{slug}"
 
 
 def slugify(name: str, *, fallback: str = "business") -> str:
@@ -63,16 +145,20 @@ async def unique_slug(name: str, *, exclude_id: str | None = None) -> str:
 
     `exclude_id` is the business being renamed: its own slugs must not
     count as a clash with itself.
+
+    Reserved words (RESERVED_SLUGS) count as taken, so "API Solutions"
+    becomes api-solutions and a business called just "Admin" gets admin-2.
     """
     base = slugify(name)
     slug = base
     n = 2
     while True:
-        taken = {"$or": [{"slug": slug}, {"previous_slugs": slug}]}
-        if exclude_id:
-            taken = {"$and": [taken, {"_id": {"$ne": exclude_id}}]}
-        if not await db.businesses.find_one(taken, {"_id": 1}):
-            return slug
+        if slug not in RESERVED_SLUGS:
+            taken = {"$or": [{"slug": slug}, {"previous_slugs": slug}]}
+            if exclude_id:
+                taken = {"$and": [taken, {"_id": {"$ne": exclude_id}}]}
+            if not await db.businesses.find_one(taken, {"_id": 1}):
+                return slug
         slug = f"{base}-{n}"
         n += 1
         if n > 50:  # pathological; give up and use an opaque one

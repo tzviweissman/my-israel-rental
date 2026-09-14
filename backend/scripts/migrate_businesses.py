@@ -107,9 +107,12 @@ async def main() -> int:
         # candidate, because within one run the earlier inserts may not be
         # visible yet under --apply=False and two providers can easily
         # share a name.
+        # Reserved words count as taken: a slug is also a subdomain, and
+        # api. or mail. must never become somebody's business.
+        from utils.businesses import RESERVED_SLUGS  # noqa: PLC0415
         base = slugify(name)
         slug, n = base, 2
-        while slug in used_slugs:
+        while slug in used_slugs or slug in RESERVED_SLUGS:
             slug, n = f"{base}-{n}", n + 1
         used_slugs.add(slug)
 
