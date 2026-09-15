@@ -87,7 +87,11 @@ const NONE_FAILED = { properties: false, gigs: false, deals: false };
 // So a list that fails is retried on its own, on a schedule that outlasts a
 // deploy swap, and `failed` says which lists never arrived. The page shows an
 // empty state only when every list it depends on actually answered.
-const RETRY_DELAYS_MS = [3000, 8000, 20000];
+//
+// Attempts at 0, 3, 11, 31 and 61 seconds. A Railway deploy swap takes about
+// a minute; the schedule was 31 seconds while this comment said a minute, so
+// a visitor arriving mid-deploy had to click for the back half of it.
+const RETRY_DELAYS_MS = [3000, 8000, 20000, 30000];
 
 export default function useHomeShowcase() {
   const [properties, setProperties] = useState([]);

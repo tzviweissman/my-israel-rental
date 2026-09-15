@@ -1513,6 +1513,7 @@ const en = {
         v2: {
           // The could-not-load state's button (useHomeShowcase retries first).
           retry: 'Try again',
+          retrying: 'Trying again…',
           hero: {
             kick: 'Rentals · Businesses · Requests',
             sub: 'Free to search, free to list, no commission.',
@@ -3018,7 +3019,8 @@ const en = {
         selectTopN: 'Select top {{n}}',
         selectAll: 'Select all',
         clearSelection: 'Clear',
-        messageLength: '{{used}} / {{max}} characters',
+        messageLength: '{{used}} / {{max}} link characters',
+        includeListing: 'Include {{area}}, {{price}} in the message',
         tooLongUntick: 'too long for one WhatsApp message',
         includeInMessage: 'Include {{area}} in the message',
         listedWithinAny: 'Any time',

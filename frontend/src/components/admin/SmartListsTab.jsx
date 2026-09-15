@@ -46,7 +46,8 @@ import {
   SEND_CAP_OPTIONS,
   SORT_OPTIONS,
   VACATION_LIKE_CATEGORIES,
-  WA_TEXT_LIMIT,
+  WA_URL_LIMIT,
+  whatsappUrl,
   applySort,
   buildCopyText,
   buildHeader,
@@ -146,7 +147,9 @@ const SmartListsTab = ({ token }) => {
         : '',
     [selectedProperties, appliedFilters],
   );
-  const overWaLimit = messageText.length > WA_TEXT_LIMIT;
+  // Measured as the encoded link, which is what WhatsApp truncates.
+  const waLength = messageText ? whatsappUrl(messageText).length : 0;
+  const overWaLimit = waLength > WA_URL_LIMIT;
 
   const headers = useMemo(() => ({ Authorization: `Bearer ${token}` }), [token]);
 
@@ -166,10 +169,16 @@ const SmartListsTab = ({ token }) => {
   // Single source of truth for the filter payload — used by generate and
   // save alike, so a saved preset can never disagree with what was on
   // screen when it was saved.
+  //
+  // Rent is sent only when the rent inputs are live. For a vacation-like
+  // category they are disabled and blank, but the state behind them was
+  // still sent, so a saved vacation preset kept a hidden rent bound that
+  // came back the moment its category was switched to long-term.
+  const rentLive = !VACATION_LIKE_CATEGORIES.has(rentalCategory);
   const currentFilters = () => ({
     location: location.trim() || null,
-    min_monthly_rent_ils: minRent === '' ? null : Number(minRent),
-    max_monthly_rent_ils: maxRent === '' ? null : Number(maxRent),
+    min_monthly_rent_ils: rentLive && minRent !== '' ? Number(minRent) : null,
+    max_monthly_rent_ils: rentLive && maxRent !== '' ? Number(maxRent) : null,
     min_bedrooms: minBedrooms === '' ? null : Number(minBedrooms),
     max_bedrooms: maxBedrooms === '' ? null : Number(maxBedrooms),
     availability,
@@ -180,7 +189,7 @@ const SmartListsTab = ({ token }) => {
   const generate = async () => {
     // Catch the inverted range here rather than letting the server answer
     // "0 properties matched", which reads like empty inventory.
-    if (minRent !== '' && maxRent !== '' && Number(minRent) > Number(maxRent)) {
+    if (rentLive && minRent !== '' && maxRent !== '' && Number(minRent) > Number(maxRent)) {
       toast.error(t('sweep.minRentOverMax', 'Minimum rent is higher than the maximum.'));
       return;
     }
@@ -307,18 +316,17 @@ const SmartListsTab = ({ token }) => {
     // Truncating silently is how the tail of a long list used to vanish
     // without anyone noticing. Refuse instead and say what to do — the
     // selection UI above makes "untick a few" a two-second fix.
-    if (messageText.length > WA_TEXT_LIMIT) {
+    if (overWaLimit) {
       toast.error(
         t(
           'sweep.tooLongForWhatsApp',
           'Too long for one WhatsApp message ({{used}} of {{max}} characters). Untick a few listings and try again.',
-          { used: messageText.length.toLocaleString(), max: WA_TEXT_LIMIT.toLocaleString() },
+          { used: waLength.toLocaleString(), max: WA_URL_LIMIT.toLocaleString() },
         ),
       );
       return;
     }
-    const url = `https://wa.me/?text=${encodeURIComponent(messageText)}`;
-    window.open(url, '_blank', 'noopener,noreferrer');
+    window.open(whatsappUrl(messageText), '_blank', 'noopener,noreferrer');
   };
 
   // Autocomplete suggestions: prefix match on the canonical area values.
@@ -689,9 +697,9 @@ const SmartListsTab = ({ token }) => {
                   className={`text-xs ms-auto ${overWaLimit ? 'text-red-600 font-semibold' : 'text-gray-400'}`}
                   data-testid="smart-list-char-count"
                 >
-                  {t('sweep.messageLength', '{{used}} / {{max}} characters', {
-                    used: messageText.length.toLocaleString(),
-                    max: WA_TEXT_LIMIT.toLocaleString(),
+                  {t('sweep.messageLength', '{{used}} / {{max}} link characters', {
+                    used: waLength.toLocaleString(),
+                    max: WA_URL_LIMIT.toLocaleString(),
                   })}
                   {overWaLimit
                     ? ` · ${t('sweep.tooLongUntick', 'too long for one WhatsApp message')}`
@@ -745,11 +753,18 @@ const SmartListsTab = ({ token }) => {
                 // clickable so the admin can swap one out for another.
                 const blocked = !isSelected && capReached;
                 return (
-                <li
-                  key={p.id}
-                  className={`py-4 flex items-start gap-3 ${isSelected ? '' : 'opacity-70'}`}
-                  data-testid={`smart-list-row-${p.id}`}
-                >
+                <li key={p.id} data-testid={`smart-list-row-${p.id}`}>
+                  {/* The whole row is the label, so the text beside the box
+                      is a click target too, not just a 16px square. Selection
+                      is shown by an inline-start bar, not by dimming the
+                      unselected rows: opacity-70 took their grey text to
+                      2.8:1 and 3.6:1, under the 4.5:1 floor, on exactly the
+                      rows the admin reads to decide what to swap in. */}
+                  <label
+                    className={`py-4 ps-3 flex items-start gap-3 border-s-2 ${
+                      isSelected ? 'border-[var(--brand-primary)]' : 'border-transparent'
+                    } ${blocked ? 'cursor-not-allowed' : 'cursor-pointer'}`}
+                  >
                   <input
                     type="checkbox"
                     checked={isSelected}
@@ -757,8 +772,11 @@ const SmartListsTab = ({ token }) => {
                     onChange={() => toggleOne(p.id)}
                     className="mt-1 w-4 h-4 shrink-0 accent-[var(--brand-primary)] cursor-pointer disabled:cursor-not-allowed disabled:opacity-40"
                     data-testid={`smart-list-check-${p.id}`}
-                    aria-label={t('sweep.includeInMessage', 'Include {{area}} in the message', {
+                    // Area AND price: on a list filtered to one area, the
+                    // area alone gave every checkbox the same name.
+                    aria-label={t('sweep.includeListing', 'Include {{area}}, {{price}} in the message', {
                       area: displayArea,
+                      price: `${formatPrice(p.price, p.currency)}${p.price_label || ''}`,
                     })}
                   />
                   <div className="min-w-0 flex-1">
@@ -802,6 +820,7 @@ const SmartListsTab = ({ token }) => {
                       <span className="truncate max-w-[460px]">{p.listing_url}</span>
                     </a>
                   </div>
+                  </label>
                 </li>
               );})}
             </ul>

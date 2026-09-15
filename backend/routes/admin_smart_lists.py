@@ -36,7 +36,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Literal
 
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError, model_validator
 
 from routes.deps import db, verify_token
 from utils.area_filter import area_mongo_query, canonicalize_area
@@ -86,6 +86,18 @@ class SmartListFilters(BaseModel):
     # Capped at a year so a stray value can't turn into an unbounded scan
     # that silently means "everything".
     listed_within_days: int | None = Field(default=None, ge=1, le=365)
+
+    @model_validator(mode="after")
+    def _ranges_not_inverted(self) -> "SmartListFilters":
+        # The form checks this, but only the form did. Any other caller
+        # sending min > max got a silent count of 0 - or saved a preset that
+        # is empty forever - with nothing saying why. A 422 names the field.
+        for lo, hi in (("min_monthly_rent_ils", "max_monthly_rent_ils"),
+                       ("min_bedrooms", "max_bedrooms")):
+            a, b = getattr(self, lo), getattr(self, hi)
+            if a is not None and b is not None and a > b:
+                raise ValueError(f"{lo} ({a:g}) is greater than {hi} ({b:g})")
+        return self
 
 
 class SmartListSaveBody(SmartListFilters):
@@ -490,7 +502,15 @@ async def get_saved_smart_list(
     )
     if not doc:
         raise HTTPException(status_code=404, detail="Smart list not found")
-    filters = SmartListFilters(**(doc.get("filters") or {}))
+    try:
+        filters = SmartListFilters(**(doc.get("filters") or {}))
+    except ValidationError as e:
+        # A preset saved before ranges were validated server-side can hold
+        # an inverted range. Say so, rather than 500 on opening it.
+        raise HTTPException(
+            status_code=422,
+            detail=f"This saved list has invalid filters: {e.errors()[0].get('msg', 'invalid')}",
+        ) from e
     matches, rate = await _apply_filters(filters)
     shaped = [_shape_for_output(p) for p in matches]
     shaped.sort(key=lambda p: (p.price_ils_equivalent or p.price or 1e12))

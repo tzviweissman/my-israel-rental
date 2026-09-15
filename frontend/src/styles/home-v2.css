@@ -414,10 +414,10 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
    phones), so nothing is cropped at any width. The panel's extent here and
    the constants at the top of BlocksHero.jsx describe the same rectangle:
    change them together. */
-.hv2-hero--film { position: relative; background: #fff; }
+.hv2-hero--film { position: relative; background: var(--surface, #fff); }
 .hv2-hero--film .hv2-blocks {
   position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; display: block;
-  background: #fff;
+  background: var(--surface, #fff);
 }
 .hv2-hero--film .hv2-hero-scrim {
   background:
@@ -481,7 +481,7 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
    z-index 0. With a z-index of its own this element becomes a stacking context
    and nothing inside it can rise above the hero's white scrim. */
 .hv2-hero--film .hv2-loop {
-  position: absolute; inset: 0; z-index: auto; overflow: hidden; background: #fff;
+  position: absolute; inset: 0; z-index: auto; overflow: hidden; background: var(--surface, #fff);
   will-change: transform;
   transition: transform .5s cubic-bezier(.16, 1, .3, 1);
 }
@@ -571,11 +571,11 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
 }
 .hv2-deal-card {
   display: flex; flex-direction: column; width: min(260px, 78vw);
-  text-align: start; background: #fff; color: var(--ink);
+  text-align: start; background: var(--surface, #fff); color: var(--ink);
   border: 1px solid var(--brand-border); border-radius: 14px; overflow: hidden;
   cursor: pointer; transition: box-shadow .25s ease, transform .25s ease;
 }
-.hv2-deal-card:hover { transform: translateY(-2px); box-shadow: 0 1px 2px rgba(0,0,0,.10), 0 12px 28px rgba(0,0,0,.10); }
+.hv2-deal-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-md); }
 .hv2-deal-card img { width: 100%; aspect-ratio: 1; object-fit: cover; display: block; }
 .hv2-deal-body { display: flex; flex-direction: column; gap: 4px; padding: 12px 14px 14px; }
 .hv2-deal-title { font-family: var(--font-head); font-weight: 600; font-size: 16px; }
@@ -620,7 +620,12 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
    The duplicate pass exists only to hide the wrap, so without the animation
    it is hidden too — otherwise scrolling the row shows every listing twice. */
 @media (prefers-reduced-motion: reduce), (hover: none) {
-  .hv2-marquee { overflow-x: auto; scroll-snap-type: x proximity; }
+  /* The feather is for cards gliding in and out. A row you scroll yourself
+     must show its first and last card whole, so the mask goes too. */
+  .hv2-marquee {
+    overflow-x: auto; scroll-snap-type: x proximity;
+    -webkit-mask-image: none; mask-image: none;
+  }
   .hv2-marquee-cell { scroll-snap-align: start; }
   .hv2-marquee-track, [dir="rtl"] .hv2-marquee-track { animation: none; }
   .hv2-marquee-cell[inert] { display: none; }
