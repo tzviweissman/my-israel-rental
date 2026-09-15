@@ -446,8 +446,6 @@ const he = {
         seeAll: 'הצגת כל {{n}}',
         moreFrom: 'עוד מהעסק הזה',
         showMore: 'הצגת {{n}} נוספים',
-        addYours: 'יש לכם עסק? הוסיפו אותו — בחינם.',
-        addYoursCta: 'הוספת העסק שלי',
         goodToKnow: 'כדאי לדעת',
         hours: 'שעות פעילות',
         languages: 'שפות',

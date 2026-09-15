@@ -562,24 +562,14 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             exactly the audience we want and nowhere else reaches them at
             that moment. Quiet on purpose: it sits under someone else's
             storefront and must not compete with it. */}
-        <div
-          className="mt-10 rounded-2xl border px-5 py-4 flex items-center justify-between gap-4 flex-wrap"
-          style={{ background: 'var(--surface)', borderColor: 'var(--brand-border)' }}
-          data-testid="business-add-yours"
-        >
-          <p className="text-sm" style={{ color: 'var(--ink)' }}>
-            {t('businessPage.addYours', 'Are you a business? Add yours — free.')}
-          </p>
-          <button
-            type="button"
-            onClick={() => navigate('/signup')}
-            className="text-sm font-semibold whitespace-nowrap"
-            style={{ color: 'var(--brand-primary)' }}
-            data-testid="business-add-yours-cta"
-          >
-            {t('businessPage.addYoursCta', 'Add your business')} →
-          </button>
-        </div>
+        {/* That band now lives ONCE, below: the attribution band at the foot
+            of the page. There used to be two asks about 200px apart, this
+            one sending people to /signup and that one to /join, which is
+            the role picker where someone says what they are. One ask, one
+            destination (UI audit 2026-09-15, finding 10). The attribution
+            band is the one kept because it says who hosts the page before
+            it asks for anything, which matters now that owners share this
+            page at their own subdomain. */}
 
         {/* Repeated for anyone who has read to the end — asking them to
             scroll back up to act is how intent gets lost. */}

@@ -9,7 +9,50 @@ import {
   formatPrice,
   WA_URL_LIMIT,
   whatsappUrl,
+  toggleSelection,
+  topIds,
+  trimToCap,
 } from './smartListText';
+
+describe('selection rules', () => {
+  const rows = ['a', 'b', 'c', 'd'].map((id) => ({ id }));
+
+  test('topIds takes the first N on screen, or all when uncapped', () => {
+    expect(topIds(rows, 2)).toEqual(['a', 'b']);
+    expect(topIds(rows, 0)).toEqual(['a', 'b', 'c', 'd']);
+    expect(topIds(rows, 10)).toEqual(['a', 'b', 'c', 'd']);
+    expect(topIds(null, 3)).toEqual([]);
+  });
+
+  test('ticking under the cap adds, in the order picked', () => {
+    expect(toggleSelection(['b'], 'a', 3)).toEqual({ ids: ['b', 'a'], refused: false });
+  });
+
+  // The admin decides what to drop. A tick at the cap must not quietly
+  // evict an earlier pick.
+  test('a tick at the cap is refused and changes nothing', () => {
+    const ids = ['a', 'b'];
+    const out = toggleSelection(ids, 'c', 2);
+    expect(out.refused).toBe(true);
+    expect(out.ids).toBe(ids);
+  });
+
+  // Swapping a pick out has to stay possible at the cap.
+  test('unticking always works, including at the cap', () => {
+    expect(toggleSelection(['a', 'b'], 'a', 2)).toEqual({ ids: ['b'], refused: false });
+  });
+
+  test('no cap never refuses', () => {
+    expect(toggleSelection(['a', 'b', 'c'], 'd', 0).refused).toBe(false);
+  });
+
+  test('lowering the cap keeps the earliest picks; raising or removing it keeps all', () => {
+    expect(trimToCap(['c', 'a', 'd'], 2)).toEqual(['c', 'a']);
+    const ids = ['a', 'b'];
+    expect(trimToCap(ids, 5)).toBe(ids);
+    expect(trimToCap(ids, 0)).toBe(ids);
+  });
+});
 
 const DAY = 86400000;
 const now = Date.now();

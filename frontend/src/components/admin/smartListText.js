@@ -208,6 +208,32 @@ export const describeFilters = (f = {}) => {
   return parts.join(' · ');
 };
 
+// ── The selection rules ─────────────────────────────────────────────────
+//
+// The part of the tab that decides what is actually SENT. Pure, so the
+// rules can be tested without mounting the component (site audit
+// 2026-09-14, finding 6: the selection layer had no coverage at all).
+// `cap` is listings per message; 0 means no cap.
+
+/** The first `cap` ids on screen, or all of them when uncapped. */
+export const topIds = (rows, cap) => (rows || []).slice(0, cap > 0 ? cap : undefined).map((p) => p.id);
+
+/**
+ * Tick or untick one row.
+ *
+ * Unticking always works, including at the cap, so a pick can be swapped.
+ * A tick past the cap is REFUSED and the selection returned unchanged,
+ * never made room for by evicting someone else's pick.
+ */
+export const toggleSelection = (ids, id, cap) => {
+  if (ids.includes(id)) return { ids: ids.filter((x) => x !== id), refused: false };
+  if (cap > 0 && ids.length >= cap) return { ids, refused: true };
+  return { ids: [...ids, id], refused: false };
+};
+
+/** Lowering the cap keeps the earliest picks, in the order they were made. */
+export const trimToCap = (ids, cap) => (cap > 0 && ids.length > cap ? ids.slice(0, cap) : ids);
+
 export const SORT_OPTIONS = [
   { value: 'default',       label: 'Default order' },
   { value: 'newest',        label: 'Newest first' },
