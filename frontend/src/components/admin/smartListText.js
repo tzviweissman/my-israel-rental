@@ -44,9 +44,17 @@ export const LISTED_WITHIN_OPTIONS = [
 // the protocol. `0` is the deliberate escape hatch for "send everything".
 export const SEND_CAP_OPTIONS = [5, 10, 15, 20, 25, 0];
 
-// wa.me accepts a single ?text param and WhatsApp stops around 4000
-// characters. Warn before the cap rather than truncating after it.
-export const WA_TEXT_LIMIT = 3900;
+// The link is what gets cut off, so the link is what is measured. The first
+// version compared the raw message against 3900, but the message travels
+// URL-encoded: every ₪ is sent as %E2%82%AA (9 characters for 1), every
+// newline as %0A and every space as %20. A message that measured 3600 could
+// reach WhatsApp far longer, and the tail was dropped exactly as before.
+// 3900 is the budget the tool always assumed, now spent in the unit that
+// actually overflows.
+export const WA_URL_LIMIT = 3900;
+
+/** The wa.me link for a message. Measure THIS, never the raw text. */
+export const whatsappUrl = (text) => `https://wa.me/?text=${encodeURIComponent(text || '')}`;
 
 export const formatAvailable = (iso) => {
   if (!iso) return 'Available now';

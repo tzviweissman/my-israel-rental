@@ -1465,6 +1465,7 @@ const he = {
         // תצוגה מקדימה של דף הבית החדש (pages/HomePreview.jsx, נתיב /home-preview).
         v2: {
           retry: 'לנסות שוב',
+          retrying: 'מנסים שוב…',
           hero: {
             kick: 'נכסים · עסקים · בקשות',
             sub: 'חינם לחפש, חינם לפרסם, בלי עמלה.',
@@ -2879,7 +2880,8 @@ const he = {
         selectTopN: 'בחר {{n}} ראשונים',
         selectAll: 'בחר הכל',
         clearSelection: 'נקה',
-        messageLength: '{{used}} / {{max}} תווים',
+        messageLength: '{{used}} / {{max}} תווים בקישור',
+        includeListing: 'כלול את {{area}}, {{price}} בהודעה',
         tooLongUntick: 'ארוך מדי להודעת וואטסאפ אחת',
         includeInMessage: 'כלול את {{area}} בהודעה',
         listedWithinAny: 'בכל זמן',

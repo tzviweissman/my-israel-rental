@@ -7,6 +7,8 @@ import {
   formatAdded,
   formatBedrooms,
   formatPrice,
+  WA_URL_LIMIT,
+  whatsappUrl,
 } from './smartListText';
 
 const DAY = 86400000;
@@ -139,6 +141,23 @@ describe('buildHeader', () => {
     expect(buildHeader({ listed_within_days: 30, rental_category: 'any' })[1]).toMatch(
       /^New this month — /,
     );
+  });
+});
+
+describe('whatsappUrl', () => {
+  // The link is what WhatsApp truncates, and it is much longer than the
+  // text: ₪ travels as %E2%82%AA. Measuring the raw text let an over-long
+  // link through (site audit 2026-09-14, finding 1).
+  test('measures the encoded link, not the raw text', () => {
+    const text = buildCopyText(Array.from({ length: 20 }, (_, i) => row(`id${i}`, 1)), { listed_within_days: 7 });
+    const url = whatsappUrl(text);
+    expect(url.startsWith('https://wa.me/?text=')).toBe(true);
+    expect(url.length).toBeGreaterThan(text.length * 1.3);
+    expect(decodeURIComponent(url.slice('https://wa.me/?text='.length))).toBe(text);
+  });
+
+  test('the limit is on the link', () => {
+    expect(WA_URL_LIMIT).toBeGreaterThan(0);
   });
 });
 

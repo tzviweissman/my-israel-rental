@@ -93,6 +93,21 @@ class TestFilterModel:
         assert (f.min_monthly_rent_ils, f.max_monthly_rent_ils) == (5000, 9000)
         assert (f.min_bedrooms, f.max_bedrooms) == (2, 3)
 
+    def test_inverted_ranges_are_refused(self):
+        """The form checked this; the API did not, and answered a silent 0."""
+        import pytest
+        from pydantic import ValidationError
+
+        with pytest.raises(ValidationError):
+            SmartListFilters(min_monthly_rent_ils=9000, max_monthly_rent_ils=5000)
+        with pytest.raises(ValidationError):
+            SmartListFilters(min_bedrooms=4, max_bedrooms=2)
+        with pytest.raises(ValidationError):
+            SmartListSaveBody(name="x", min_bedrooms=4, max_bedrooms=2)
+        # Equal and one-sided bounds are fine.
+        SmartListFilters(min_bedrooms=3, max_bedrooms=3)
+        SmartListFilters(min_monthly_rent_ils=9000)
+
     def test_save_body_carries_every_filter_field(self):
         """The regression that motivated building filters from model_fields."""
         missing = set(SmartListFilters.model_fields) - set(SmartListSaveBody.model_fields)

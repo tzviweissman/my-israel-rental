@@ -61,6 +61,33 @@ def test_commentary_phrases_are_rejected():
         assert not plausible_translation("דירה", reply, "en"), reply
 
 
+def test_hebrew_refusals_are_rejected():
+    """An English->Hebrew refusal written in Hebrew passes the language
+    check by construction; the phrase list has to catch it."""
+    for reply in (
+        "נראה ששלחת הודעת בדיקה. אנא שלח את הטקסט שברצונך לתרגם.",
+        "תוכל לשלוח את הטקסט המלא?",
+        "להלן התרגום: דירה יפה",
+        "כמודל שפה, אינני יכול לעזור בזה",
+    ):
+        assert not plausible_translation("Cheese danish", reply, "he"), reply
+
+
+def test_a_clarifying_question_is_rejected_when_the_source_asks_nothing():
+    assert not plausible_translation("Deep clean", "מה בדיוק לתרגם?", "he")
+    # A question in the source may be translated as a question.
+    assert plausible_translation("Need a mover?", "צריכים מוביל?", "he")
+
+
+def test_ordinary_hebrew_marketing_copy_still_passes():
+    for source, out in (
+        ("Happy to help with your move", "נשמח לעזור לכם במעבר"),
+        ("Translation services, English and Hebrew", "שירותי תרגום, אנגלית ועברית"),
+        ("Send us a message today", "שלחו לנו הודעה היום"),
+    ):
+        assert plausible_translation(source, out, "he"), out
+
+
 def test_runaway_length_is_rejected():
     long_he = "דירה " * 40
     assert not plausible_translation("Flat", long_he, "he")

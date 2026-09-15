@@ -105,6 +105,19 @@ _META_REPLY = re.compile(
     r"i (?:can't|cannot|don't see|do not see))\b",
     re.IGNORECASE,
 )
+# The same failure in Hebrew. For an English->Hebrew request a Hebrew
+# refusal IS in the target language, so the language check cannot see it;
+# the English list above could not either. These are phrases about the
+# conversation itself ("you sent", "the text you want", "as a language
+# model"), not words a listing would use.
+_META_REPLY_HE = re.compile(
+    r"נראה ש(?:שלחת|ההודעה)|שלחת(?:ם)? (?:לי|הודעה)|"
+    r"(?:אנא|בבקשה) (?:שלח|שלחו|שתף|שתפו|ספק|ספקו)|"
+    r"(?:תוכל|תוכלי|תוכלו) (?:לשלוח|לשתף|לספק|להבהיר)|"
+    r"הטקסט ש(?:ברצונך|תרצה|תרצו|אתה רוצה)|"
+    r"(?:הנה|להלן) התרגום|כמודל שפה|אני מודל|"
+    r"אינני יכול|אני לא יכול(?:ה)? לתרגם|לא (?:הבנתי|ברור לי) מה"
+)
 # A translation of short copy is roughly the same length. Four times the
 # source plus a sentence of slack only happens when something was added.
 _MAX_GROWTH = 4
@@ -122,7 +135,11 @@ def plausible_translation(source: str, out: str, target_lang: str) -> bool:
     out = (out or "").strip()
     if not out:
         return False
-    if _META_REPLY.search(out):
+    if _META_REPLY.search(out) or _META_REPLY_HE.search(out):
+        return False
+    # Language-agnostic backstop: a clarifying question. Translating a
+    # source that asks nothing does not produce a question.
+    if "?" not in (source or "") and re.search(r"[?؟]\s*$", out):
         return False
     if detect_lang(out) != target_lang:
         return False

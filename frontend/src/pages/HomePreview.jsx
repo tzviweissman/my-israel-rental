@@ -107,6 +107,16 @@ export default function HomePreview() {
   // says the page could not load, and offers a retry, instead.
   const shelfFailed = failed.properties || failed.gigs || failed.deals;
   const recentFailed = failed.properties;
+  // Once someone presses Try again, the message stays on screen with the
+  // button reading "Trying again..." until the round ends. Before, the click
+  // hid the whole block for up to a minute, which read as the click having
+  // broken something. Automatic retries before any click still show nothing.
+  const [retryClicked, setRetryClicked] = useState(false);
+  const retryNow = () => { setRetryClicked(true); retry(); };
+  const showLoadError = !retrying || retryClicked;
+  const retryLabel = retrying
+    ? t('home.v2.retrying', 'Trying again…')
+    : t('home.v2.retry', 'Try again');
   // Offers win when any exist; otherwise the daily rotation. Never a mix,
   // and never padded to reach a count.
   //
@@ -318,19 +328,30 @@ export default function HomePreview() {
           </div>
         </section>
       )}
-      {loaded && shelf.length === 0 && shelfFailed && !retrying && (
+      {/* The live region is mounted for the whole visit and only its TEXT
+          changes. A region inserted already holding its message is not
+          announced by most screen readers, so the error was silent. */}
+      <div className="sr-only" role="status" data-testid="home-preview-load-status">
+        {loaded && (shelfFailed || recentFailed) && showLoadError
+          ? (retrying
+            ? t('home.v2.retrying', 'Trying again…')
+            : t('home.v2.picks.loadError', "We couldn't load today's offers just now."))
+          : ''}
+      </div>
+      {loaded && shelf.length === 0 && shelfFailed && showLoadError && (
         <section className="hv2-picks" id="picks">
           <div className="hv2-wrap">
-            <div className="hv2-picks-head" data-testid="home-preview-picks-error" role="status">
+            <div className="hv2-picks-head" data-testid="home-preview-picks-error">
               <h2>{t('home.v2.picks.h2', "Today's picks")}</h2>
               <p>{t('home.v2.picks.loadError', "We couldn't load today's offers just now.")}</p>
               <button
                 type="button"
                 className="btn btn-ghost hv2-retry"
-                onClick={retry}
+                onClick={retryNow}
+                disabled={retrying}
                 data-testid="home-preview-picks-retry"
               >
-                {t('home.v2.retry', 'Try again')}
+                {retryLabel}
               </button>
             </div>
           </div>
@@ -463,6 +484,12 @@ export default function HomePreview() {
             <div
               ref={marqueeRef}
               className="hv2-marquee reveal"
+              // role="group": ARIA drops a name on a bare div, so the row was
+              // unnamed. tabIndex: it is a scroll container on touch and under
+              // reduced motion, and focusing it also pauses the moving row
+              // (.hv2-marquee:focus-within in home-v2.css).
+              role="group"
+              tabIndex={0}
               data-testid="home-preview-recent"
               aria-label={t('home.v2.rentals.h2', 'Recently added')}
             >
@@ -509,16 +536,17 @@ export default function HomePreview() {
               {loaded && recent.length === 0 && !recentFailed && (
                 <p className="hv2-empty">{t('home.v2.rentals.empty', 'New listings are on their way.')}</p>
               )}
-              {loaded && recent.length === 0 && recentFailed && !retrying && (
-                <div className="hv2-empty" data-testid="home-preview-recent-error" role="status">
+              {loaded && recent.length === 0 && recentFailed && showLoadError && (
+                <div className="hv2-empty" data-testid="home-preview-recent-error">
                   <p>{t('home.v2.rentals.loadError', "We couldn't load the newest listings just now.")}</p>
                   <button
                     type="button"
                     className="btn btn-ghost hv2-retry"
-                    onClick={retry}
+                    onClick={retryNow}
+                    disabled={retrying}
                     data-testid="home-preview-recent-retry"
                   >
-                    {t('home.v2.retry', 'Try again')}
+                    {retryLabel}
                   </button>
                 </div>
               )}
