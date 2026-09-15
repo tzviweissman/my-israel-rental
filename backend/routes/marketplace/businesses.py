@@ -25,8 +25,10 @@ from routes.deps import db, optional_user, verify_token
 from utils import view_tracking
 from utils.businesses import (
     MAX_BUSINESSES_PER_USER,
+    address_problem,
     ensure_default_business,
     new_business_doc,
+    slug_change,
     unique_slug,
 )
 from utils.page_composition import PageBrief, PageComposition, dial_catalog
@@ -217,6 +219,9 @@ def _public(
         "name": doc.get("name") or "",
         "name_he": doc.get("name_he"),
         "slug": doc.get("slug"),
+        # Whether the owner picked the address. The editor uses it to say so,
+        # and a rename leaves a chosen address alone (see update_business).
+        "slug_chosen": bool(doc.get("slug_chosen_at")),
         "description": doc.get("description") or "",
         "logo_url": doc.get("logo_url"),
         "categories": doc.get("categories") or [],
@@ -488,17 +493,23 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         # every printed QR and pasted link keeps resolving. `unique_slug`
         # refuses to hand a retired slug to anyone else, so those links
         # cannot later point at a stranger's business.
+        #
+        # UNLESS THE OWNER CHOSE THEIR ADDRESS. A slug is now also a web
+        # address (<slug>.myisraelrental.com) that an owner can pick by hand
+        # - which a Hebrew-named business has to, since its name yields no
+        # ASCII slug at all. Correcting a typo in the name must not quietly
+        # throw away the address they chose and printed on a van.
+        # `slug_chosen_at` records that choice; it is a flag on the slug,
+        # not a second identifier.
         old_slug = biz.get("slug")
-        fresh_slug = await unique_slug(name, exclude_id=business_id)
-        if old_slug and fresh_slug != old_slug:
-            update["slug"] = fresh_slug
-            # Capped, and oldest-first: renaming is rare, but the list is
-            # driven by a field the owner controls and nothing unbounded
-            # should be. Twenty renames of history is far more than any
-            # real business needs and still cheap to index.
-            history = [x for x in (biz.get("previous_slugs") or []) if x != fresh_slug]
-            history.append(old_slug)
-            update["previous_slugs"] = history[-20:]
+        if not biz.get("slug_chosen_at"):
+            fresh_slug = await unique_slug(name, exclude_id=business_id)
+            if old_slug and fresh_slug != old_slug:
+                # Capped, and oldest-first: renaming is rare, but the list is
+                # driven by a field the owner controls and nothing unbounded
+                # should be. Twenty renames of history is far more than any
+                # real business needs and still cheap to index.
+                update.update(slug_change(biz, fresh_slug))
 
         # The Hebrew name is cleared so the translation pipeline refills it
         # for the new name rather than leaving the old one, which would
@@ -569,6 +580,81 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
 
     update["updated_at"] = datetime.now(UTC).isoformat()
     await db.businesses.update_one({"_id": business_id}, {"$set": update})
+    fresh = await db.businesses.find_one({"_id": business_id})
+    count = await db.marketplace_gigs.count_documents({"business_id": business_id})
+    return _public(fresh, count)
+
+
+# ------------------------------------------------------ the web address
+#
+# <slug>.myisraelrental.com. The subdomain IS the slug, so choosing an
+# address is changing the slug - through the same retire-into-history rule
+# a rename uses, so an address that was ever printed keeps resolving.
+
+
+class WebAddressIn(BaseModel):
+    address: str = Field(..., min_length=1, max_length=80)
+
+
+_ADDRESS_REFUSALS = {
+    "invalid": "Use lowercase English letters, numbers and hyphens (not at the start or end), up to 60 characters.",
+    "reserved": "That address is reserved for the site itself. Try another.",
+    "taken": "Another business already uses that address.",
+}
+
+
+async def _address_status(candidate: str, business_id: str, biz: dict[str, Any]) -> dict[str, Any]:
+    """Whether `candidate` can become this business's address, and why not.
+
+    Lowercased and trimmed first: an owner typing "BlazinBoards" means
+    blazinboards, and the host a browser sends is lowercase anyway. Nothing
+    else is normalised - turning "Levi's Bakery" into levi-s-bakery is a
+    guess about what they want, and an address is too permanent to guess.
+    """
+    address = (candidate or "").strip().lower()
+    if address == biz.get("slug"):
+        return {"address": address, "available": False, "reason": "current"}
+    problem = address_problem(address)
+    if problem:
+        return {"address": address, "available": False, "reason": problem}
+    # Retired slugs count, as in unique_slug: a printed QR for another
+    # business must never start opening this one. This business's OWN
+    # retired addresses do not, so an owner can go back to an old one.
+    clash = await db.businesses.find_one(
+        {"$and": [
+            {"$or": [{"slug": address}, {"previous_slugs": address}]},
+            {"_id": {"$ne": business_id}},
+        ]},
+        {"_id": 1},
+    )
+    if clash:
+        return {"address": address, "available": False, "reason": "taken"}
+    return {"address": address, "available": True, "reason": None}
+
+
+@router.get("/businesses/{business_id}/web-address/check")
+async def check_web_address(business_id: str, address: str, user=Depends(verify_token)):
+    """The editor's live availability check. Owner-only: probing addresses
+    is harmless, but there is no reason to answer it for strangers."""
+    biz = await _owned(business_id, user)
+    return await _address_status(address, business_id, biz)
+
+
+@router.put("/businesses/{business_id}/web-address")
+async def set_web_address(business_id: str, payload: WebAddressIn, user=Depends(verify_token)):
+    biz = await _owned(business_id, user)
+    status = await _address_status(payload.address, business_id, biz)
+    if status["reason"] != "current":
+        if not status["available"]:
+            raise HTTPException(
+                status_code=409 if status["reason"] == "taken" else 400,
+                detail=_ADDRESS_REFUSALS[status["reason"]],
+            )
+        now = datetime.now(UTC).isoformat()
+        update = slug_change(biz, status["address"])
+        update["slug_chosen_at"] = now
+        update["updated_at"] = now
+        await db.businesses.update_one({"_id": business_id}, {"$set": update})
     fresh = await db.businesses.find_one({"_id": business_id})
     count = await db.marketplace_gigs.count_documents({"business_id": business_id})
     return _public(fresh, count)

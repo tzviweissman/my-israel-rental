@@ -30,6 +30,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
 from routes.deps import db, verify_token
+from utils.businesses import business_canonical_url
 
 router = APIRouter()
 
@@ -353,7 +354,7 @@ async def _preview_meta(target_type: str, target_id: str) -> dict[str, str]:
         # this projection has to resolve the reference to keep them the
         # same.
         fields = {"name": 1, "description": 1, "logo_url": 1, "cover_url": 1,
-                  "categories": 1, "areas": 1, "_id": 1}
+                  "categories": 1, "areas": 1, "_id": 1, "slug": 1}
         biz = (
             await db.businesses.find_one({"_id": target_id}, fields)
             or await db.businesses.find_one({"slug": target_id}, fields)
@@ -379,6 +380,9 @@ async def _preview_meta(target_type: str, target_id: str) -> dict[str, str]:
                 "title": biz.get("name") or "MyIsraelRental",
                 "description": desc[:200],
                 "image": img or site_img,
+                # The LIVE slug, whichever key found the business, so a card
+                # fetched by a retired address canonicalises to the current one.
+                "slug": biz.get("slug") or "",
             }
     elif target_type == "property":
         prop = await db.properties.find_one(
@@ -397,7 +401,9 @@ async def _preview_meta(target_type: str, target_id: str) -> dict[str, str]:
     }
 
 
-def _preview_html(meta: dict[str, str], target: str, *, refresh: bool = True) -> str:
+def _preview_html(
+    meta: dict[str, str], target: str, *, refresh: bool = True, canonical: str | None = None,
+) -> str:
     """A tiny page whose only job is to carry OG tags to a crawler.
 
     Needed because the front end is a static CRA bundle: react-helmet
@@ -417,6 +423,10 @@ def _preview_html(meta: dict[str, str], target: str, *, refresh: bool = True) ->
     refresh_tag = (
         f'<meta http-equiv="refresh" content="0;url={e(target)}"/>' if refresh else ""
     )
+    # The same canonical the page itself declares (PageMeta), so a crawler
+    # reading only this head reaches the same conclusion about which of the
+    # two addresses is the real one.
+    canonical_tag = f'<link rel="canonical" href="{e(canonical)}"/>' if canonical else ""
     return f"""<!doctype html>
 <html lang="en">
 <head>
@@ -433,6 +443,7 @@ def _preview_html(meta: dict[str, str], target: str, *, refresh: bool = True) ->
 <meta name="twitter:title" content="{e(meta["title"])}"/>
 <meta name="twitter:description" content="{e(meta["description"])}"/>
 <meta name="twitter:image" content="{e(meta["image"])}"/>
+{canonical_tag}
 {refresh_tag}
 </head>
 <body><a href="{e(target)}">{e(meta["title"])}</a></body>
@@ -496,12 +507,17 @@ async def business_link_preview(slug_or_id: str):
     already show to anyone holding the URL.
     """
     meta = await _preview_meta("business", slug_or_id)
-    target = f"{_SITE_ORIGIN}/business/{slug_or_id}"
+    # Asked for by path (/business/{slug}) or, since subdomains, by host
+    # ({slug}.myisraelrental.com) - frontend/server.js calls this for both.
+    # og:url and the canonical are the same URL, chosen by
+    # utils.businesses.business_canonical_url, and use the LIVE slug so a
+    # retired address consolidates onto the current one.
+    canonical = business_canonical_url(meta.get("slug") or slug_or_id)
     return HTMLResponse(
         # No refresh: the crawler is already at the canonical URL, and a
         # refresh pointing back at it would loop for anything that renders
         # the page rather than just reading its head.
-        content=_preview_html(meta, target, refresh=False),
+        content=_preview_html(meta, canonical, refresh=False, canonical=canonical),
         headers={
             # Crawlers refetch on every paste, and a business's name and
             # cover change rarely. Five minutes is short enough that an

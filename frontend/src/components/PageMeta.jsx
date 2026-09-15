@@ -27,7 +27,10 @@ const GOOGLE_VERIFICATION = process.env.REACT_APP_GOOGLE_VERIFICATION;
 // requires a rebuild, not a restart.
 const IS_PREVIEW = process.env.REACT_APP_PREVIEW === '1';
 
-const PageMeta = ({ title, description, path, image, jsonLd, noindex = false }) => {
+// `canonicalUrl` overrides the derived canonical outright, for a page that
+// is served on more than one host (a business page, on the main site and on
+// its own subdomain) and has to name one of them. utils/businessHost.js.
+const PageMeta = ({ title, description, path, image, jsonLd, noindex = false, canonicalUrl }) => {
   // Force-on for preview builds; individual pages can still opt in via the
   // prop on production (coming-soon pages, placeholders).
   const suppressIndexing = noindex || IS_PREVIEW;
@@ -40,7 +43,7 @@ const PageMeta = ({ title, description, path, image, jsonLd, noindex = false }) 
   // browser path if the caller didn't pass one in.
   const resolvedPath =
     path ?? (typeof window !== 'undefined' ? window.location.pathname : '/');
-  const canonical = `${CANONICAL_ORIGIN}${resolvedPath}`;
+  const canonical = canonicalUrl || `${CANONICAL_ORIGIN}${resolvedPath}`;
   const ogImage =
     image ??
     `${CANONICAL_ORIGIN}/brand-logo.png`;

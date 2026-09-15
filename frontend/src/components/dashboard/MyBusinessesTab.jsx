@@ -24,6 +24,7 @@ import BusinessCompleteness from './BusinessCompleteness';
 import BlockTimePanel from './BlockTimePanel';
 import MyGigsTab from './MyGigsTab';
 import ShareListingsPanel from './ShareListingsPanel';
+import { businessPublicUrl } from '../../utils/businessHost';
 
 const MAX_ACTIVE = 5;
 
@@ -383,7 +384,9 @@ export default function MyBusinessesTab({ API, token }) {
                     token={token}
                     userId={b.owner_id}
                     target={{ type: 'business', id: b.id }}
-                    longLink={`${window.location.origin}/business/${b.slug || b.id}`}
+                    // <slug>.myisraelrental.com once REACT_APP_BUSINESS_SUBDOMAINS
+                    // is on; the path form until then (utils/businessHost.js).
+                    longLink={businessPublicUrl(b.slug, b.id)}
                     title={t('businesses.sharePanelTitle', 'Your business page')}
                     body={t('businesses.sharePanelBody', 'One link and a QR code for this business — send it in a message, or print the code for a flyer, a van or a sign.')}
                     filename={`myisraelrental-${(b.slug || 'business').toString().slice(0, 40)}-qr`}

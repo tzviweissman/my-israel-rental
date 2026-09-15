@@ -41,6 +41,7 @@ const https = require('node:https');
 const fs = require('node:fs');
 const path = require('node:path');
 const handler = require('serve-handler');
+const { slugFromHost } = require('./businessHost');
 
 const BUILD = path.join(__dirname, 'build');
 const PORT = Number(process.env.PORT) || 3000;
@@ -101,6 +102,61 @@ function businessSlug(req) {
   // A slug is a URL segment, not a path. Anything else is not ours to
   // forward to the backend.
   return /^[A-Za-z0-9._-]{1,120}$/.test(slug) ? slug : null;
+}
+
+/* ─────────────────────────────────────────────────────────────────────
+   BUSINESS SUBDOMAINS
+
+   blazinboards.myisraelrental.com is the same page as
+   /business/blazinboards. The rules for reading a Host header live in
+   ./businessHost.js.
+
+   A business host serves exactly ONE page, its root, and the build's own
+   files (scripts, images, the favicon). Every other path 302s to the same
+   path on the main site. That is the mapping, applied consistently:
+
+     * a signed-in session lives in the main site's storage, which a
+       different origin cannot read, so /dashboard or /chat on a business
+       host would only ever show a signed-out copy of the site;
+     * Google sign-in is authorised for the main site's origin, not for
+       every subdomain;
+     * a link inside the business page to one of its services
+       (/businesses/123) is still a working link, it just opens on the
+       main site, where the rest of the site is.
+
+   The browser app applies the same rule to navigation that never reaches
+   this server (App.js, HostAwareRoutes).
+
+   Read from PUBLIC_SITE_HOST, not hardcoded: staging runs on another host,
+   and a second, shorter domain may follow. */
+const PUBLIC_SITE_HOST = (process.env.PUBLIC_SITE_HOST || 'myisraelrental.com')
+  .trim().toLowerCase().replace(/\.$/, '');
+
+function pathnameOf(req) {
+  try {
+    return new URL(req.url, 'http://localhost').pathname;
+  } catch {
+    return null;
+  }
+}
+
+/** A real file in the build, which a business host must still serve. */
+function isBuildFile(pathname) {
+  if (!pathname || pathname === '/') return false;
+  let decoded;
+  try {
+    decoded = decodeURIComponent(pathname);
+  } catch {
+    return false;
+  }
+  const full = path.join(BUILD, path.normalize(decoded));
+  // Never outside the build directory, whatever the path says.
+  if (!full.startsWith(BUILD + path.sep)) return false;
+  try {
+    return fs.statSync(full).isFile();
+  } catch {
+    return false;
+  }
 }
 
 /** The backend's preview HTML, or null if it cannot be had quickly. */
@@ -300,7 +356,25 @@ const server = http.createServer(async (req, res) => {
   }
 
 
-  const slug = isPreviewBot(req) ? businessSlug(req) : null;
+  // After the proxy, deliberately: /api on a business host is still the
+  // API, never a redirect.
+  const hostSlug = slugFromHost(req.headers.host, PUBLIC_SITE_HOST);
+  const pathname = pathnameOf(req);
+  if (hostSlug && pathname !== '/' && !isBuildFile(pathname)) {
+    res.writeHead(302, {
+      Location: `https://${PUBLIC_SITE_HOST}${req.url}`,
+      'Cache-Control': 'no-cache',
+    });
+    res.end();
+    return;
+  }
+
+  // The card a crawler gets. On a business host the slug comes from the
+  // HOST, since the path there is just "/"; without this every subdomain
+  // link pasted into WhatsApp got the generic card, which is the one bug
+  // this file exists to prevent. Same fetchPreview, same fail-open.
+  let slug = null;
+  if (isPreviewBot(req)) slug = hostSlug && pathname === '/' ? hostSlug : businessSlug(req);
   if (slug) {
     const html = await fetchPreview(slug);
     if (html) {
