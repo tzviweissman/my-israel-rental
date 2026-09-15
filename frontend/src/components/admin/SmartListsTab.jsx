@@ -48,6 +48,9 @@ import {
   VACATION_LIKE_CATEGORIES,
   WA_URL_LIMIT,
   whatsappUrl,
+  toggleSelection,
+  topIds,
+  trimToCap,
   applySort,
   buildCopyText,
   buildHeader,
@@ -111,28 +114,19 @@ const SmartListsTab = ({ token }) => {
   // Pick the first N on screen. Used both by the "Top N" button and to
   // pre-select after a fresh generate, so the send buttons are never a
   // no-op the admin has to discover by clicking.
-  const selectTop = useCallback(
-    (rows, cap) => {
-      const limit = cap > 0 ? cap : rows.length;
-      setSelectedIds(rows.slice(0, limit).map((p) => p.id));
-    },
-    [],
-  );
+  const selectTop = useCallback((rows, cap) => setSelectedIds(topIds(rows, cap)), []);
 
   const toggleOne = (id) => {
-    if (selectedSet.has(id)) {
-      setSelectedIds((prev) => prev.filter((x) => x !== id));
-      return;
-    }
-    // Refuse rather than silently evict someone else's pick — the admin
-    // decides what to drop. Checked here, not inside the state updater:
-    // React may run an updater twice (StrictMode does in development), and
-    // a toast in there fired twice.
-    if (sendCap > 0 && selectedIds.length >= sendCap) {
+    // The rules live in smartListText.toggleSelection, where they are
+    // tested. The toast is decided here, outside any state updater: React
+    // may run an updater twice (StrictMode does in development), and a toast
+    // in there fired twice.
+    const { ids, refused } = toggleSelection(selectedIds, id, sendCap);
+    if (refused) {
       toast.error(t('sweep.capReached', "That's the {{n}}-listing cap. Untick one first, or raise the cap.", { n: sendCap }));
       return;
     }
-    setSelectedIds((prev) => (prev.includes(id) ? prev : [...prev, id]));
+    setSelectedIds(ids);
   };
 
   // Only the two sorts this change added are translated; the older labels
@@ -651,7 +645,7 @@ const SmartListsTab = ({ token }) => {
                     // Trim an over-cap selection down rather than leaving
                     // the count and the cap contradicting each other.
                     if (next > 0) {
-                      setSelectedIds((prev) => (prev.length > next ? prev.slice(0, next) : prev));
+                      setSelectedIds((prev) => trimToCap(prev, next));
                     }
                   }}
                   className="bg-transparent text-sm font-semibold text-gray-800 focus:outline-none cursor-pointer"
