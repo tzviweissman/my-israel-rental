@@ -1970,6 +1970,7 @@ const en = {
         listings: 'Listings',
         users: 'Users',
         chats: 'Chats',
+        requestsTab: 'Requests',
         smartLists: 'Smart Lists',
         import: 'Import',
         services: 'Document Services',

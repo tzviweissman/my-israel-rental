@@ -70,9 +70,7 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
     { key: 'active-listings', label: t('admin.kpiActiveListings', 'Active listings'), value: stock.active_listings, icon: Home, go: 'listings' },
     { key: 'active-services', label: t('admin.kpiActiveServices', 'Active services'), value: stock.active_services, icon: Briefcase, go: 'services' },
     { key: 'businesses', label: t('admin.kpiBusinesses', 'Businesses'), value: stock.businesses, icon: Store, go: 'services' },
-    // No Requests tab exists yet, so this one genuinely has nowhere to go
-    // and stays a plain div rather than pretending otherwise.
-    { key: 'open-requests', label: t('admin.kpiOpenRequests', 'Open requests'), value: stock.open_requests, icon: Inbox },
+    { key: 'open-requests', label: t('admin.kpiOpenRequests', 'Open requests'), value: stock.open_requests, icon: Inbox, go: 'requests' },
   ] : [];
 
   const renderCard = ({ key, label, value, icon: Icon, go }) => {

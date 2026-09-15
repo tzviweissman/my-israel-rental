@@ -15,20 +15,32 @@
  * admin acting on a report needs to stop something showing immediately and
  * to put it back when the report turns out to be wrong; deleting would
  * take the reviews and the owner's work with it.
+ *
+ * `initialFilter` ('no-photo' | 'unverified') arrives from the attention
+ * queue (spec A3 follow-up, dead-ends audit 2026-09-08): a count like
+ * "N published services with no photo" is trivia unless the destination
+ * can actually show which N. Both filters are just client-side predicates
+ * over the same list this tab already loads — no new endpoint needed.
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
-import { Search, ExternalLink, EyeOff, Eye, Loader2, Undo2 } from 'lucide-react';
+import { Search, ExternalLink, EyeOff, Eye, Loader2, Undo2, ImageOff, BadgeCheck, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { API } from '../../App';
 import formatDate from '../../utils/formatDate';
 
 const BORDER = 'var(--brand-border)';
 
-export default function ServicesTab({ token }) {
+export default function ServicesTab({ token, initialFilter = null }) {
   const [rows, setRows] = useState(null);
   const [q, setQ] = useState('');
   const [busyId, setBusyId] = useState(null);
+  const [busyBizId, setBusyBizId] = useState(null);
+  // Seeded from the attention queue's row, cleared once the admin acts on
+  // it deliberately (a manual search, or the chip's own close button) —
+  // it should not silently keep filtering a tab the admin navigated to
+  // directly on a later click.
+  const [filter, setFilter] = useState(initialFilter);
   // The last flip, so it can be undone. One deep: an admin who wants to
   // reverse five actions is better served by the list itself, and a stack
   // would let a stale entry restore something to a status it has since
@@ -70,6 +82,24 @@ export default function ServicesTab({ token }) {
     }
   };
 
+  // Verification lives on the BUSINESS, not the gig (spec M5) — a business
+  // can have several rows here, and all of them flip together.
+  const toggleVerified = async (row) => {
+    if (!row.business_id) return;
+    const next = !row.business_verified;
+    setBusyBizId(row.business_id);
+    try {
+      await axios.patch(`${API}/businesses/${row.business_id}/verified`, { verified: next }, auth);
+      setRows((prev) => prev.map((r) => (
+        r.business_id === row.business_id ? { ...r, business_verified: next } : r
+      )));
+    } catch {
+      toast.error('That did not work');
+    } finally {
+      setBusyBizId(null);
+    }
+  };
+
   if (rows === null) {
     return (
       <div className="py-16 text-center" style={{ color: 'var(--brand-muted)' }}>
@@ -78,11 +108,17 @@ export default function ServicesTab({ token }) {
     );
   }
 
+  const visibleRows = rows.filter((r) => {
+    if (filter === 'no-photo') return r.status === 'published' && !r.has_photo;
+    if (filter === 'unverified') return !r.business_verified;
+    return true;
+  });
+
   return (
     <div data-testid="admin-services-tab">
       <div className="flex items-center justify-between gap-3 mb-4 flex-wrap">
         <h2 className="text-xl font-bold" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-          Services ({rows.length})
+          Services ({visibleRows.length}{visibleRows.length !== rows.length ? ` of ${rows.length}` : ''})
         </h2>
         <form
           onSubmit={(e) => { e.preventDefault(); load(q); }}
@@ -105,6 +141,21 @@ export default function ServicesTab({ token }) {
           </button>
         </form>
       </div>
+
+      {/* The attention queue's promise made visible: whichever row an admin
+          clicked to get here stays applied until they clear it. */}
+      {filter && (
+        <div
+          className="inline-flex items-center gap-2 mb-4 px-3 py-1.5 rounded-full text-xs font-semibold"
+          style={{ background: 'rgb(var(--brand-primary-rgb) / 0.1)', color: 'var(--brand-primary)' }}
+          data-testid="admin-services-filter-chip"
+        >
+          {filter === 'no-photo' ? 'Filtered: published, no photo' : 'Filtered: business not verified'}
+          <button type="button" onClick={() => setFilter(null)} aria-label="Clear filter" data-testid="admin-services-filter-clear">
+            <X size={13} />
+          </button>
+        </div>
+      )}
 
       {/* Undo sits above the table so it is visible without scrolling back
           to the row that was just changed. */}
@@ -133,6 +184,10 @@ export default function ServicesTab({ token }) {
         <p className="text-sm" style={{ color: 'var(--brand-muted)' }} data-testid="admin-services-empty">
           No services yet.
         </p>
+      ) : visibleRows.length === 0 ? (
+        <p className="text-sm" style={{ color: 'var(--brand-muted)' }} data-testid="admin-services-empty">
+          Nothing matches this filter.
+        </p>
       ) : (
         <div className="bg-white rounded-xl border overflow-x-auto" style={{ borderColor: BORDER }}>
           <table className="w-full text-sm">
@@ -144,12 +199,14 @@ export default function ServicesTab({ token }) {
                 <th className="px-3 py-2 font-semibold">Area</th>
                 <th className="px-3 py-2 font-semibold">From</th>
                 <th className="px-3 py-2 font-semibold">Status</th>
+                <th className="px-3 py-2 font-semibold">Photo</th>
+                <th className="px-3 py-2 font-semibold">Verified</th>
                 <th className="px-3 py-2 font-semibold">Created</th>
                 <th className="px-3 py-2 font-semibold" />
               </tr>
             </thead>
             <tbody>
-              {rows.map((r) => (
+              {visibleRows.map((r) => (
                 <tr key={r.id} className="border-t hover:bg-gray-50" style={{ borderColor: BORDER }}
                   data-testid={`admin-service-${r.id}`}>
                   <td className="px-3 py-2 font-medium" style={{ color: 'var(--ink)' }}>{r.title}</td>
@@ -171,6 +228,34 @@ export default function ServicesTab({ token }) {
                         : { background: '#F3F0E9', color: 'var(--brand-muted)' }}>
                       {r.status}
                     </span>
+                  </td>
+                  <td className="px-3 py-2">
+                    {r.has_photo ? (
+                      <span style={{ color: 'var(--brand-muted)' }}>—</span>
+                    ) : (
+                      <span
+                        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
+                        style={{ background: '#FBECEC', color: '#B23B3B' }}
+                        data-testid={`admin-service-no-photo-${r.id}`}
+                      >
+                        <ImageOff size={11} /> No photo
+                      </span>
+                    )}
+                  </td>
+                  <td className="px-3 py-2">
+                    <button
+                      type="button"
+                      disabled={!r.business_id || busyBizId === r.business_id}
+                      onClick={() => toggleVerified(r)}
+                      className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold disabled:opacity-50"
+                      style={r.business_verified
+                        ? { background: '#E3F3EA', color: '#1F8A50' }
+                        : { background: '#F3F0E9', color: 'var(--brand-muted)' }}
+                      title={r.business_id ? 'Click to toggle' : 'No business to verify'}
+                      data-testid={`admin-service-verified-${r.id}`}
+                    >
+                      <BadgeCheck size={11} /> {r.business_verified ? 'Verified' : 'Unverified'}
+                    </button>
                   </td>
                   <td className="px-3 py-2" style={{ color: 'var(--brand-muted)' }}>
                     {formatDate(String(r.created_at || '').slice(0, 10))}
