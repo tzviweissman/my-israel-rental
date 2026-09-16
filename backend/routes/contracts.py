@@ -18,7 +18,11 @@ from models_response import (
 from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, ROOT_DIR, db, logger, verify_token
 from utils.errors import api_error
 from utils.cloud_storage import fetch_contract_from_cloudinary
-from utils.contract_files import CONTRACT_MEDIA_TYPES, resolve_private_contract_file
+from utils.contract_files import (
+    CONTRACT_MEDIA_TYPES,
+    load_contract_by_sign_token,
+    resolve_private_contract_file,
+)
 from utils.contract_template import ensure_templates as ensure_contract_templates
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
 from utils.translate import translate_text as _translate_text
@@ -243,11 +247,10 @@ async def download_contract_for_signing(sign_token: str) -> FileResponse:
     through the same basename-only helper the other readers use, so a stored
     value containing "../" resolves to nothing rather than to /etc/passwd.
     """
-    contract = await db.contracts.find_one({"sign_token": sign_token}, {"_id": 0})
-    if not contract:
-        # Same wording and status as the sign page's own lookup, so a stale
-        # link says the same thing wherever it is used.
-        raise HTTPException(status_code=404, detail="Contract not found or link is invalid")
+    # Unknown and expired links are both refused here, in the same words the
+    # sign page's own lookup uses, so a stale link says the same thing
+    # wherever it is used.
+    contract = await load_contract_by_sign_token(sign_token)
 
     file_path, ext, download_name = _contract_file(contract)
     if file_path is None:

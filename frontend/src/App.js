@@ -146,6 +146,10 @@ const JobsBoard = lazy(() => import('./pages/JobsBoard'));
 const JobDetail = lazy(() => import('./pages/JobDetail'));
 const PostJob = lazy(() => import('./pages/PostJob'));
 const FAQ = lazy(() => import('./pages/FAQ'));
+// Both signup screens link a REQUIRED "I agree to the Terms & Privacy
+// Policy" checkbox here. Without this route that link 404s and the consent
+// is to a page nobody can read. See pages/Terms.jsx.
+const Terms = lazy(() => import('./pages/Terms'));
 const NotFound = lazy(() => import('./pages/NotFound'));
 
 // Shared spinner used both by the initial auth-loading gate AND by the
@@ -501,6 +505,7 @@ function App() {
             <Route path="/businesses/provider/:userId" element={<ProviderRedirect />} />
             <Route path="/services/provider/:userId" element={<ProviderRedirect />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/terms" element={<Terms />} />
             {/* Catch-all — any URL no route above claims. Without it an
                 unknown URL rendered the nav shell over an empty content
                 area, which looks like a broken site rather than a wrong

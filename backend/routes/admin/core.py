@@ -8,6 +8,7 @@ modules inside the ``routes.admin`` package:
   * ``properties_bulk`` — bulk delete/restore/mark-booked, managed/featured toggles
 """
 import asyncio
+import uuid
 from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
 
@@ -23,7 +24,7 @@ from models_response import (
     MessageResponse,
     UserPublic,
 )
-from routes.deps import db, verify_token
+from routes.deps import db, logger, verify_token
 from utils.auth import JWT_SECRET
 from utils.events import publish
 
@@ -293,16 +294,132 @@ async def update_user_status(user_id: str, payload: dict = Depends(verify_token)
     return {"message": f"User {new_status}", "status": new_status}
 
 
+# Everything that belongs to ONE person and to nobody else. Deleting the
+# account deletes these, because leaving them behind is what produced live
+# gigs by a ghost provider, businesses with no owner, and a Requests board
+# advertising people who no longer exist.
+#
+# `(collection, field)`. The fields are not guessable and were read off the
+# real documents rather than inferred from the route code, which names the
+# same thing `user_id`, `owner_id`, `owner_user_id`, `provider_user_id`,
+# `poster_user_id` and `subleasor_id` in different places.
+_USER_OWNED = (
+    ("properties", "owner_id"),
+    ("businesses", "owner_user_id"),
+    ("marketplace_gigs", "provider_user_id"),
+    ("marketplace_providers", "user_id"),
+    ("marketplace_jobs", "poster_user_id"),
+    ("marketplace_job_searches", "user_id"),
+    ("requests", "poster_user_id"),
+    ("subleases", "subleasor_id"),
+    ("smart_lists", "owner_id"),
+    ("short_links", "owner_user_id"),
+    ("saved_searches", "user_id"),
+    ("saved_search_alerts", "user_id"),
+    ("liked_properties", "user_id"),
+    ("notification_preferences", "user_id"),
+    ("job_notification_preferences", "user_id"),
+    ("notifications", "user_id"),
+    ("onboarding_dismissals", "user_id"),
+    ("onboarding_tour", "user_id"),
+    ("onboarding_tour_events", "user_id"),
+    ("password_resets", "user_id"),
+    ("chat_email_throttle", "sender_id"),
+    ("marketplace_view_events", "owner_id"),
+    ("lead_events", "poster_id"),
+)
+
+# Deliberately NOT deleted, and this is the decision rather than an omission
+# (Tzvi, 16 Sep 2026). Each of these has a SECOND person in it, and that
+# person did not ask to be forgotten:
+#
+#   bookings, marketplace_bookings  - the other party's booking
+#   contracts                       - a signed contract belongs to both
+#   messages                        - the other half of a conversation
+#   marketplace_reviews             - what they wrote about someone else
+#   store_orders, store_standing_orders, marketplace_job_applications
+#   request_reports                 - moderation evidence about a third party
+#
+# The /terms page states this in as many words ("a signed contract belongs
+# to both parties"), so changing it here means changing that too.
+_TWO_PARTY_KEPT = (
+    "bookings", "marketplace_bookings", "contracts", "messages",
+    "marketplace_reviews", "store_orders", "store_standing_orders",
+    "marketplace_job_applications", "request_reports",
+)
+
+
 @api_router.delete("/admin/users/{user_id}", response_model=MessageResponse)
 async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> dict:
+    """Delete an account and everything that was only ever theirs.
+
+    THE BUG. This used to delete exactly two things: the user row and their
+    properties. Everything else keyed to them stayed: their business pages,
+    their service listings, their posts on the Requests board, their saved
+    searches and alerts, their subleases. A deleted landlord's gigs went on
+    being browsable and messageable by people who could never get a reply.
+
+    IT TAKES A SNAPSHOT FIRST. Every document about to be removed is written
+    to `user_tombstones` before anything is deleted, the same way the bulk
+    property delete works. This is the only reason the operation is safe to
+    run at all: an admin who deletes the wrong row has the rows back, and
+    the snapshot is the record of what a deletion actually took.
+    """
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
     if user_id == payload['user_id']:
         raise HTTPException(status_code=400, detail="Cannot delete your own account")
+
+    user = await db.users.find_one({"id": user_id}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # ---- snapshot, before a single delete runs ----------------------------
+    snapshot: dict[str, list] = {}
+    for collection, field in _USER_OWNED:
+        rows = await db[collection].find({field: user_id}, {"_id": 0}).to_list(5000)
+        if rows:
+            snapshot[collection] = rows
+
+    snapshot_id = str(uuid.uuid4())
+    await db.user_tombstones.insert_one({
+        "id": snapshot_id,
+        "user_id": user_id,
+        # The account row carries the password hash; it is not wanted in a
+        # snapshot an admin can read back, and it is not needed to restore
+        # who the person was.
+        "user": {k: v for k, v in user.items() if k != "password"},
+        "collections": snapshot,
+        "deleted_by": payload['user_id'],
+        "deleted_at": datetime.now(UTC).isoformat(),
+        "kept_two_party": list(_TWO_PARTY_KEPT),
+    })
+
+    # ---- delete ------------------------------------------------------------
+    removed: dict[str, int] = {}
+    for collection, field in _USER_OWNED:
+        res = await db[collection].delete_many({field: user_id})
+        if res.deleted_count:
+            removed[collection] = res.deleted_count
     await db.users.delete_one({"id": user_id})
-    await db.properties.delete_many({"owner_id": user_id})
-    await publish("invalidate", {"prefixes": ["/api/admin/users", "/api/admin/properties", "/api/admin/dashboard"]})
-    return {"message": "User and their properties deleted"}
+
+    logger.info(
+        "[admin] user %s deleted by %s: %s (snapshot %s)",
+        user_id, payload['user_id'], removed or "nothing else", snapshot_id,
+    )
+
+    await publish("invalidate", {"prefixes": [
+        "/api/admin/users", "/api/admin/properties", "/api/admin/dashboard",
+        "/api/marketplace", "/api/requests", "/api/businesses",
+    ]})
+    total = sum(removed.values())
+    return {
+        "message": (
+            f"Account deleted, along with {total} of their own record(s). "
+            "Bookings, contracts, orders, reviews and chats involving other "
+            "people were kept."
+        ),
+    }
 
 
 @api_router.post("/admin/users/{user_id}/impersonate")

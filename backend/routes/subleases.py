@@ -17,6 +17,7 @@ from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, db,
 from utils.area_filter import area_mongo_query
 from utils.property_rows import keep_valid_rows
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
+from utils.contract_files import load_contract_by_sign_token, sign_token_expiry
 from utils.signed_contract import build_signed_pdf
 
 router = APIRouter()
@@ -236,9 +237,7 @@ async def get_contract_for_signing(sign_token: str) -> dict:
     BYTES, and every route that does is kept together so the access rule on
     each can be read in one place.
     """
-    contract = await db.contracts.find_one({"sign_token": sign_token}, {"_id": 0})
-    if not contract:
-        raise HTTPException(status_code=404, detail="Contract not found or link is invalid")
+    contract = await load_contract_by_sign_token(sign_token)
 
     sublease = None
     if contract.get("sublease_id"):
@@ -268,9 +267,7 @@ async def get_contract_for_signing(sign_token: str) -> dict:
 @api_router.post("/contracts/sign/{sign_token}", response_model=ContractSignResponse)
 async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> dict:
     """Public endpoint - sublessee signs the contract via sign_token"""
-    contract = await db.contracts.find_one({"sign_token": sign_token}, {"_id": 0})
-    if not contract:
-        raise HTTPException(status_code=404, detail="Contract not found or link is invalid")
+    contract = await load_contract_by_sign_token(sign_token)
 
     # A contract is signed once. The booking flow next door has always said
     # so (`_load_booking_for_signing`: "Contract already signed"); this one
@@ -292,18 +289,31 @@ async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> dict:
     if not signer_name or not signature_data:
         raise HTTPException(status_code=400, detail="Name and signature are required")
 
+    signed_at = datetime.now(UTC)
     new_signature = {
         "signer_id": "sublessee",
         "signer_name": signer_name,
         "signature_data": signature_data,
-        "signed_at": datetime.now(UTC).isoformat()
+        "signed_at": signed_at.isoformat()
     }
 
     await db.contracts.update_one(
         {"sign_token": sign_token},
         {
             "$push": {"signatures": new_signature},
-            "$set": {"signed": True, "updated_at": datetime.now(UTC).isoformat()}
+            "$set": {
+                "signed": True,
+                "updated_at": signed_at.isoformat(),
+                # The link stops working a month from now. Until this moment
+                # it had no deadline at all, which is what the 10 Sep audit
+                # found: a forwarded link, a screenshot, or browser history on
+                # a shared device kept serving a finished legal agreement
+                # forever. The window is measured from the signature rather
+                # than the upload so the signer keeps a real chance to
+                # download their own executed copy - this link is their only
+                # route to it. See utils/contract_files.SIGN_TOKEN_GRACE_DAYS.
+                "sign_token_expires_at": sign_token_expiry(signed_at),
+            }
         }
     )
 

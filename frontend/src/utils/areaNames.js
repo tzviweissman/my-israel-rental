@@ -93,6 +93,41 @@ export const AREA_CANONICALS = [
   // "Mekor Chaim" is the catalogue (and dropdown) spelling; "Mekor Haim" is
   // the spelling that drifted into the DB. Both fold here.
   ['Mekor Haim', ['Mekor Haim', 'Mekor Chaim']],
+
+  // ---------------------------------------------------------------------
+  // Cities.
+  //
+  // A listing whose `area` is just the city name - which is most of them -
+  // fell straight through `areaLabel`'s "unknown values are returned exactly
+  // as stored" fallback, so the Hebrew Stays page read "נכסים ב Jerusalem"
+  // above a row of cards each captioned "Tel Aviv". A Hebrew sentence with
+  // an English place name in the middle of it.
+  //
+  // These are the 16 real cities of LOCATION_OPTIONS; its seventeenth entry,
+  // "Other Cities", is a grouping label and not a place. NEIGHBOURHOODS are
+  // still untranslated: there are roughly three hundred of them, only 31
+  // have Hebrew, and which of the rest actually occur is a question about
+  // live data rather than about this file. That is its own task.
+  //
+  // Safe to add here because the direct variant lookup runs BEFORE the
+  // city/neighbourhood split: 'Jerusalem - Ramat Eshkol' still resolves to
+  // Ramat Eshkol, not to Jerusalem.
+  ['Jerusalem', ['Jerusalem', 'Yerushalayim']],
+  ['Tel Aviv', ['Tel Aviv', 'Tel Aviv-Yafo', 'Tel Aviv Yafo', 'Tel-Aviv']],
+  ['Haifa', ['Haifa', 'Hefa']],
+  ['Beersheba', ['Beersheba', 'Beer Sheva', 'Be\'er Sheva', 'Beersheva']],
+  ['Netanya', ['Netanya', 'Natanya']],
+  ['Ashdod', ['Ashdod']],
+  ['Ashkelon', ['Ashkelon', 'Ashqelon']],
+  ['Petah Tikva', ['Petah Tikva', 'Petach Tikva', 'Petah Tiqwa']],
+  ['Rishon LeZion', ['Rishon LeZion', 'Rishon Lezion', 'Rishon Le Zion']],
+  ['Ramat Gan', ['Ramat Gan']],
+  ['Herzliya', ['Herzliya', 'Hertzliya']],
+  ['Raanana', ['Raanana', 'Ra\'anana']],
+  ['Kfar Saba', ['Kfar Saba', 'Kfar Sava']],
+  ['Modiin', ['Modiin', 'Modi\'in', 'Modiin-Maccabim-Reut']],
+  ['Beit Shemesh', ['Beit Shemesh', 'Bet Shemesh']],
+  ['Eilat', ['Eilat', 'Elat']],
 ];
 
 /**

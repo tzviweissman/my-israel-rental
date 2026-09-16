@@ -2886,6 +2886,26 @@ const en = {
       // en.js and he.js or Hebrew silently renders the English fallback.
       // ---------------------------------------------------------------
       areas: {
+        // Cities. Added because a listing whose `area` is just the city
+        // name fell through areaLabel's unknown-value fallback and rendered
+        // in English on Hebrew pages. Keys come from `i18nKeyFor` in
+        // utils/areaNames.js - do not rename one side only.
+        jerusalem: 'Jerusalem',
+        telAviv: 'Tel Aviv',
+        haifa: 'Haifa',
+        beersheba: 'Beersheba',
+        netanya: 'Netanya',
+        ashdod: 'Ashdod',
+        ashkelon: 'Ashkelon',
+        petahTikva: 'Petah Tikva',
+        rishonLeZion: 'Rishon LeZion',
+        ramatGan: 'Ramat Gan',
+        herzliya: 'Herzliya',
+        raanana: 'Raanana',
+        kfarSaba: 'Kfar Saba',
+        modiin: 'Modiin',
+        beitShemesh: 'Beit Shemesh',
+        eilat: 'Eilat',
         ramatEshkol: 'Ramat Eshkol',
         geula: 'Geula',
         nachlaot: 'Nachlaot',
@@ -3922,7 +3942,68 @@ const en = {
           },
           moreFilters: 'More filters'
         }
-      }
+      },
+      // The Terms & Privacy page (/terms). Both signup screens have a
+      // REQUIRED "I agree to the Terms & Privacy Policy" checkbox whose link
+      // pointed at /terms, and no such route existed - so every account on
+      // this site was created by someone agreeing to a page that 404'd.
+      //
+      // Written in plain language on purpose: the people signing up are
+      // renters, cleaners, plumbers and landlords, not lawyers, and a wall of
+      // boilerplate nobody reads is how you get consent that is technically
+      // given and practically meaningless.
+      //
+      // Every factual claim here is checked against what the code actually
+      // does. "No commission" is MARKETPLACE_IS_FREE; the thirty-day signing
+      // link is utils/contract_files.SIGN_TOKEN_GRACE_DAYS; "never published
+      // at a public web address" is the private-contract rule in CLAUDE.md.
+      // If one of those changes, this page becomes wrong and has to change
+      // with it.
+      terms: {
+        metaTitle: 'Terms & Privacy | MyIsraelRental',
+        metaDescription: 'How MyIsraelRental works, what we expect from you, what we collect, and who can see it. Written in plain language.',
+        title: 'Terms & Privacy',
+        updated: 'Last updated 16 September 2026',
+        intro: 'MyIsraelRental connects people who have something to offer with people who need it: places to rent, local services, and a board for posting what you are looking for. This page explains what you can expect from us and what we expect from you.',
+        contactCta: 'Something here not match what you experienced?',
+        contactLink: 'Email us',
+
+        s1Head: 'Using the site is free',
+        s1Body: 'There is no subscription, no listing fee and no commission. Listing a property, offering a service and answering a request all cost nothing.\n\nIf that ever changes we will say so on this page before it takes effect, not after.',
+
+        s2Head: 'Your account',
+        s2Body: 'You need an account to post a listing, send a message or respond to a request. You can sign in with Google, or with an email address and a password.\n\nKeep your sign-in details to yourself. You are responsible for what happens under your account. Write to us if you think someone else has got into it.\n\nGive real details. A listing with an invented name or address wastes the time of everyone who answers it.',
+
+        s3Head: 'What you post',
+        s3Body: 'What you write and the photos you upload stay yours. By posting them here you let us show them on the site and in the ordinary places a listing appears, such as search results and the preview card when someone shares a link.\n\nOnly post what you have the right to post. Do not use someone else’s photographs of a property, and do not describe a place or a service in a way you know is not accurate.\n\nWe can take down anything that breaks these terms, and we can hide a listing that is reported and turns out to be misleading.',
+
+        s4Head: 'Agreements are between you and the other person',
+        s4Body: 'This is the most important thing on this page. When you rent a place, hire a cleaner or take a job through this site, the agreement is between you and the other person. We are not a party to it, we do not hold your money, and we cannot guarantee that someone will turn up, pay, or be who they say they are.\n\nWe check what we reasonably can and we act on reports. You should still do what you would do anywhere else: speak to the person, see the place, read the agreement before you sign it, and be careful with deposits.',
+
+        s5Head: 'Contracts and documents',
+        s5Body: 'A rental contract you upload or sign here is private. It is stored away from the public parts of the site and served only to the people party to it: the owner, the person renting, and an administrator. It is never published at a public web address.\n\nA signing link is a credential. Anyone holding it can read the agreement, and before it is signed, sign it. Send it to the person who is meant to sign and nobody else. The link stops working thirty days after the contract is signed.',
+
+        s6Head: 'Money',
+        s6Body: 'We do not take payments for rentals or services and we do not hold anyone’s money. Rent, deposits and fees are paid directly between the two of you, on whatever terms you agree.\n\nSome businesses show their own payment links. Those belong to the business, not to us. Check who you are paying before you send anything.',
+
+        s7Head: 'What is not allowed',
+        s7Body: 'Do not post anything unlawful, discriminatory, threatening or deliberately false. Do not list a property you have no right to let. Do not collect other people’s phone numbers or addresses from the site. Do not use the site to advertise something that is not what it appears to be.\n\nWe can suspend or close an account that does any of this.',
+
+        s8Head: 'What we collect',
+        s8Body: 'Your name and email address, because an account needs them. A phone number, if you choose to add one. What you post: listings, requests, messages, reviews and photos. The basic technical information every website receives, such as your browser type and the pages you open, which we use to keep the site working and to stop abuse.\n\nWe do not sell your information and we do not pass it to advertisers.',
+
+        s9Head: 'Who can see what',
+        s9Body: 'Your listings, your posts on the Requests board and your public profile are visible to anyone. Your messages are visible to the person you send them to. Your email address is not shown on the site.\n\nA phone number is revealed only where you have chosen to show it, or to the person fulfilling an order you placed, at the point they need it.\n\nWe use a small number of services to run the site: a database host, an image host, an email sender, and Google if you sign in with it. They hold this information to do that job and nothing else.',
+
+        s10Head: 'Emails, and turning them off',
+        s10Body: 'We email you about things that happen to you here: a booking, a message, a reply to your request. Every one of those emails has a link at the bottom to stop that kind of email, and you can change what you receive in your settings.\n\nWe will not add you to a marketing list you did not ask for.',
+
+        s11Head: 'Deleting your account',
+        s11Body: 'Write to us and we will delete your account and what you posted. A few things have to stay: a signed contract belongs to both parties, and we keep the records we are required to keep.',
+
+        s12Head: 'Changes, and getting in touch',
+        s12Body: 'If we change this page in a way that matters, we will change the date at the top and say what changed. Carrying on using the site after that means you accept the new version.\n\nQuestions, complaints, or anything on this page that does not match what you experienced: write to us.'
+      },
     };
 
 export default en;

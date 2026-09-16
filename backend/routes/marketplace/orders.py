@@ -51,6 +51,7 @@ from zoneinfo import ZoneInfo
 from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field, field_validator, model_validator
+from pymongo import ReturnDocument
 
 from routes.deps import db, logger, optional_user, verify_token
 from utils.media_url import MAX_MEDIA_URL_LEN, is_allowed_media_url
@@ -458,14 +459,43 @@ async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str, cont
     entry: dict[str, Any] = {"status": payload.status, "at": now, "by": by}
     if payload.note:
         entry["note"] = payload.note
-    await db.store_orders.update_one(
-        {"_id": order["_id"]},
+
+    # `"status": current` in the FILTER is the whole fix (12 Sep site audit,
+    # F5). Three people can be looking at the same order - the owner on the
+    # dashboard, whoever is at the counter on the staff board, and the
+    # courier on their phone - and the check above ran against a status read
+    # moments ago. Writing unconditionally meant two of them could each pass
+    # a legal transition and the later write would win, while BOTH history
+    # entries were recorded: an order reading 'done' with a history saying it
+    # went new -> preparing -> done -> ready, and nobody able to tell which
+    # happened.
+    #
+    # Now the write only lands if the order is still where we found it. The
+    # loser is told what it actually is rather than silently overwriting it,
+    # because a courier who marked something delivered needs to know their tap
+    # did not take, not be shown a success screen for a write that vanished.
+    fresh = await db.store_orders.find_one_and_update(
+        {"_id": order["_id"], "status": current},
         {
             "$set": {"status": payload.status, "status_changed_at": now, "updated_at": now},
             "$push": {"history": entry},
         },
+        return_document=ReturnDocument.AFTER,
     )
-    fresh = await db.store_orders.find_one({"_id": order["_id"]})
+    if fresh is None:
+        # Someone moved it between our read and our write. Re-read to say
+        # what it is now, in the same shape as the transition-table refusal
+        # above, so the client refreshes instead of retrying into the wall.
+        latest = await db.store_orders.find_one({"_id": order["_id"]})
+        if latest is None:
+            raise HTTPException(status_code=404, detail="This order no longer exists")
+        raise HTTPException(
+            status_code=409,
+            detail=(
+                f"Someone else moved this order to '{latest['status']}' a moment ago. "
+                "Refresh to see where it is now."
+            ),
+        )
     return _public(fresh, contact=contact)
 
 

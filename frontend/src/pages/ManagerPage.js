@@ -11,12 +11,15 @@ import { sizedImage, srcSet } from '../utils/cdnImage';
 import { areaLabel, areaGroupKey, sameArea } from '../utils/areaNames';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 
+// No `storage`: discontinued (CLAUDE.md). This is a public manager page, so
+// the tab was advertising a category to renters. Any storage listing a
+// manager still holds is not hidden by this - it stays under "All", which is
+// the tab this page opens on.
 const RENTAL_TYPES = [
   { key: 'all', label: 'All' },
   { key: 'long-term', label: 'Long Term' },
   { key: 'short-term', label: 'Short Term' },
   { key: 'vacation', label: 'Vacation' },
-  { key: 'storage', label: 'Storage' },
 ];
 
 const ManagerPage = () => {
