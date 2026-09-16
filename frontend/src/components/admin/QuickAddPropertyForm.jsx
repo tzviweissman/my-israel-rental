@@ -20,11 +20,12 @@ import { uploadFilesFast } from '../../utils/fastUpload';
 
 import { API } from '../../lib/apiBase';
 
+// No `storage`: discontinued (CLAUDE.md). This form creates listings, and
+// an admin quick-add was one of the two remaining ways to make a new one.
 const RENTAL_TYPES = [
   { v: 'long-term', label: 'Long-term' },
   { v: 'short-term', label: 'Short-term' },
   { v: 'vacation', label: 'Vacation' },
-  { v: 'storage', label: 'Storage' },
 ];
 
 const CURRENCIES = [

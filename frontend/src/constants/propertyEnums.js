@@ -3,11 +3,17 @@
 // the DB and rendered in PropertyDetail / Properties filters, so the two
 // upload paths MUST produce identical values for the same option.
 
+// `storage` is NOT here. Storage rentals are discontinued (CLAUDE.md), and
+// this list is what the bulk upload and bulk edit OFFER, so leaving it in
+// meant the product could still be created months after it was killed. The
+// value itself is untouched everywhere it is READ - existing storage rows
+// still load, still render their label, and are still findable in the admin
+// listings filter - because the job here is to stop new ones, not to lose
+// the old ones. Removing the value outright is its own cleanup task.
 export const RENTAL_TYPES = [
   { v: 'long-term', label: 'Long-term rental' },
   { v: 'short-term', label: 'Short-term rental' },
   { v: 'vacation', label: 'Vacation / Airbnb' },
-  { v: 'storage', label: 'Storage' },
 ];
 
 export const PROPERTY_TYPES = [

@@ -48,12 +48,16 @@ const AREA_GROUPS = [
   },
 ];
 
+// No `storage`: discontinued (CLAUDE.md). Offering it here invited someone
+// to save an alert for a category nothing new will ever be posted in, which
+// is a promise of results that cannot arrive. A saved search created before
+// this still carries its stored value and still runs; it just cannot be
+// chosen again.
 const RENTAL_TYPES = [
   { value: 'all', tk: 'anyType' },
   { value: 'long-term', tk: 'longTermLabel' },
   { value: 'short-term', tk: 'shortTermLabel' },
   { value: 'vacation', tk: 'vacationLabel' },
-  { value: 'storage', tk: 'storageLabel' },
 ];
 
 const EMPTY_FILTERS = {

@@ -2886,6 +2886,26 @@ const en = {
       // en.js and he.js or Hebrew silently renders the English fallback.
       // ---------------------------------------------------------------
       areas: {
+        // Cities. Added because a listing whose `area` is just the city
+        // name fell through areaLabel's unknown-value fallback and rendered
+        // in English on Hebrew pages. Keys come from `i18nKeyFor` in
+        // utils/areaNames.js - do not rename one side only.
+        jerusalem: 'Jerusalem',
+        telAviv: 'Tel Aviv',
+        haifa: 'Haifa',
+        beersheba: 'Beersheba',
+        netanya: 'Netanya',
+        ashdod: 'Ashdod',
+        ashkelon: 'Ashkelon',
+        petahTikva: 'Petah Tikva',
+        rishonLeZion: 'Rishon LeZion',
+        ramatGan: 'Ramat Gan',
+        herzliya: 'Herzliya',
+        raanana: 'Raanana',
+        kfarSaba: 'Kfar Saba',
+        modiin: 'Modiin',
+        beitShemesh: 'Beit Shemesh',
+        eilat: 'Eilat',
         ramatEshkol: 'Ramat Eshkol',
         geula: 'Geula',
         nachlaot: 'Nachlaot',

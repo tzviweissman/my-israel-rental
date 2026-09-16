@@ -2752,6 +2752,26 @@ const he = {
       // an Israeli renter actually uses, not transliterations of the
       // English spelling.
       areas: {
+        // Cities. Added because a listing whose `area` is just the city
+        // name fell through areaLabel's unknown-value fallback and rendered
+        // in English on Hebrew pages. Keys come from `i18nKeyFor` in
+        // utils/areaNames.js - do not rename one side only.
+        jerusalem: 'ירושלים',
+        telAviv: 'תל אביב',
+        haifa: 'חיפה',
+        beersheba: 'באר שבע',
+        netanya: 'נתניה',
+        ashdod: 'אשדוד',
+        ashkelon: 'אשקלון',
+        petahTikva: 'פתח תקווה',
+        rishonLeZion: 'ראשון לציון',
+        ramatGan: 'רמת גן',
+        herzliya: 'הרצליה',
+        raanana: 'רעננה',
+        kfarSaba: 'כפר סבא',
+        modiin: 'מודיעין',
+        beitShemesh: 'בית שמש',
+        eilat: 'אילת',
         ramatEshkol: 'רמת אשכול',
         geula: 'גאולה',
         nachlaot: 'נחלאות',
