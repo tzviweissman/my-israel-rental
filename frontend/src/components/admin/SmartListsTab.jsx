@@ -299,7 +299,7 @@ const SmartListsTab = ({ token }) => {
         setCopyOk(true);
         setTimeout(() => setCopyOk(false), 2000);
       } catch {
-        toast.error('Copy failed — please select manually.');
+        toast.error(t('sweep.copyFailed', 'Copy failed - please select manually.'));
       }
       document.body.removeChild(ta);
     }
@@ -408,7 +408,7 @@ const SmartListsTab = ({ token }) => {
                   value={isVacationLike ? '' : minRent}
                   onChange={(e) => setMinRent(e.target.value)}
                   disabled={isVacationLike}
-                  placeholder={isVacationLike ? '—' : t('sweep.minShort', 'Min')}
+                  placeholder={isVacationLike ? '-' : t('sweep.minShort', 'Min')}
                   className={priceInput}
                   data-testid="smart-list-min-rent-input"
                   min="0"
@@ -419,7 +419,7 @@ const SmartListsTab = ({ token }) => {
                   value={isVacationLike ? '' : maxRent}
                   onChange={(e) => setMaxRent(e.target.value)}
                   disabled={isVacationLike}
-                  placeholder={isVacationLike ? '—' : t('sweep.maxShort', 'Max')}
+                  placeholder={isVacationLike ? '-' : t('sweep.maxShort', 'Max')}
                   className={priceInput}
                   data-testid="smart-list-max-rent-input"
                   min="0"
@@ -723,7 +723,7 @@ const SmartListsTab = ({ token }) => {
                 />
                 <div className="min-w-0">
                   <p className="text-[11px] text-gray-400 uppercase tracking-wide">{t("sweep.whatsappPreview", "WhatsApp preview")}</p>
-                  <p className="text-sm font-bold text-gray-900 truncate">MyIsraelRental — Rentals across Israel</p>
+                  <p className="text-sm font-bold text-gray-900 truncate">{t('sweep.waPreviewTitle', 'MyIsraelRental - Rentals across Israel')}</p>
                   <p className="text-[11px] text-gray-500 truncate">myisraelrental.com</p>
                 </div>
               </div>
@@ -734,7 +734,7 @@ const SmartListsTab = ({ token }) => {
             </div>
           )}
           {sortedProperties.length === 0 ? (
-            <p className="text-sm text-gray-500">No properties match — try widening the filters.</p>
+            <p className="text-sm text-gray-500">{t('sweep.noMatches', 'No properties match - try widening the filters.')}</p>
           ) : (
             <ul className="divide-y divide-gray-100">
               {sortedProperties.map((p) => {
@@ -794,13 +794,9 @@ const SmartListsTab = ({ token }) => {
                           <span className="text-gray-500">{beds}</span>
                         </>
                       )}
-                      <span className="text-gray-300 mx-1.5">·</span>
-                      <span className="text-gray-500">{formatAvailable(p.available_from)}</span>
+                      <span className="text-gray-500 ms-3">{formatAvailable(p.available_from)}</span>
                       {addedLabel && (
-                        <>
-                          <span className="text-gray-300 mx-1.5">·</span>
-                          <span className="text-[var(--brand-primary)] font-medium">{addedLabel}</span>
-                        </>
+                        <span className="text-[var(--brand-primary)] font-medium ms-3">{addedLabel}</span>
                       )}
                     </p>
                     <a

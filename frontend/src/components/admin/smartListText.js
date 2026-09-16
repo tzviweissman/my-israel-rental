@@ -15,7 +15,7 @@ export const AVAILABILITY_OPTIONS = [
 ];
 
 export const formatPrice = (amount, currency) => {
-  if (amount == null) return '—';
+  if (amount == null) return '-';
   const sym = currency === 'USD' ? '$' : '₪';
   return `${sym}${Number(amount).toLocaleString()}`;
 };
@@ -143,7 +143,7 @@ export const buildHeader = (filters) => {
   if (days > 0) {
     const prefix =
       days <= 7 ? 'Just listed' : days <= 14 ? 'New this fortnight' : 'New this month';
-    subtitle = `${prefix} — ${subtitle}`;
+    subtitle = `${prefix} - ${subtitle}`;
   }
   return ['MyIsraelRental.com', subtitle];
 };

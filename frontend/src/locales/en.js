@@ -2966,6 +2966,9 @@ const en = {
       // so the diff stays reviewable and the Hebrew maintainers can
       // audit one block instead of chasing them across every file.
       sweep: {
+        copyFailed: 'Copy failed - please select manually.',
+        waPreviewTitle: 'MyIsraelRental - Rentals across Israel',
+        noMatches: 'No properties match - try widening the filters.',
         // Step 4 photo gate — a photo per option is REQUIRED to continue,
         // rather than optional and checked once at submit.
         tierPhotos: 'Photos of this service',

@@ -131,7 +131,7 @@ describe('formatBedrooms and formatPrice', () => {
   test('price: currency symbol and a missing price', () => {
     expect(formatPrice(8000, 'ILS')).toBe('₪8,000');
     expect(formatPrice(1200, 'USD')).toBe('$1,200');
-    expect(formatPrice(null, 'ILS')).toBe('—');
+    expect(formatPrice(null, 'ILS')).toBe('-');
   });
 });
 
@@ -179,10 +179,10 @@ describe('buildHeader', () => {
   // the recipient should be able to tell in the first line.
   test('flags a recency-filtered list in the subtitle', () => {
     expect(buildHeader({ listed_within_days: 7, rental_category: 'any' })[1]).toMatch(
-      /^Just listed — /,
+      /^Just listed - /,
     );
     expect(buildHeader({ listed_within_days: 30, rental_category: 'any' })[1]).toMatch(
-      /^New this month — /,
+      /^New this month - /,
     );
   });
 });

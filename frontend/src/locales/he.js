@@ -2828,6 +2828,9 @@ const he = {
       // stiff textbook Hebrew). Uses Hebrew geresh (׳) for abbreviations
       // and established loan-words (וואטסאפ, צ׳ק-אין, וכו׳).
       sweep: {
+        copyFailed: 'ההעתקה נכשלה - בחרו ידנית.',
+        waPreviewTitle: 'MyIsraelRental - השכרות ברחבי ישראל',
+        noMatches: 'אין נכסים מתאימים - נסו להרחיב את הסינון.',
         // See the note on the English copy.
         tierPhotos: 'תמונות של השירות הזה',
         photoShapeHint: 'תמונות לרוחב ממלאות את העמוד הכי טוב (16:9, בערך 1600 × 900). פלייר לאורך מוצג בשלמותו, אבל קטן יותר.',
