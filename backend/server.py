@@ -496,6 +496,8 @@ async def startup_tasks() -> None:
         await db.businesses.create_index("slug", unique=True, background=True)
         from routes.site_visits import ensure_site_visit_indexes
         await ensure_site_visit_indexes()
+        from routes.marketplace.connections import ensure_connection_indexes
+        await ensure_connection_indexes()
         logger.info("Hot-path indexes ensured")
     except Exception as e:  # noqa: BLE001
         logger.warning(f"hot-path index creation failed (non-fatal): {e}")

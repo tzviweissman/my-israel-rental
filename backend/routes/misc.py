@@ -27,6 +27,7 @@ from routes.deps import (
 )
 from utils.llm import LlmChat, UserMessage
 from utils.rate_limit import check_rate
+from routes.marketplace.connections import incoming_request_count
 from utils.cloud_storage import (
     CLOUDINARY_ENABLED,
     delete_from_cloudinary,
@@ -571,6 +572,9 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "orders_due_today": orders_due_today,
         "orders_new": orders_new,
         "courier_invites": courier_invites,
+        # Business connection requests waiting on one of this person's
+        # businesses - the Network tab's badge.
+        "network_requests_in": await incoming_request_count(uid),
         "courier_businesses": courier_active,
         "courier_deliveries_open": courier_deliveries_open,
         "customer_orders": customer_orders,

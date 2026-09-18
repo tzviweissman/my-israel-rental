@@ -26,6 +26,7 @@ import { getGigCover } from '../utils/gigAvailability';
 import { visitorHeaders } from '../utils/visitorId';
 import BusinessCoverBand, { BusinessLogoMark } from '../components/marketplace/BusinessCoverBand';
 import SafeImage from '../components/common/SafeImage';
+import ConnectButton from '../components/marketplace/ConnectButton';
 import { prettyArea } from '../utils/areaNames';
 import { accentFor, accentColors } from '../utils/businessAccent';
 import useCoverScrim from '../hooks/useCoverScrim';
@@ -373,6 +374,15 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   none - the facts on this page are edited on the
                   dashboard, two screens away. Not shown inside the page
                   editor's preview, which has its own controls. */}
+              {/* Business to business (docs/business-network-spec.md). Renders
+                  nothing for customers, for someone with no business, and
+                  for the owner on their own page. */}
+              {!preview && token && user?.id !== biz.owner_user_id && (
+                <div className="mt-3">
+                  <ConnectButton target={biz} token={token} />
+                </div>
+              )}
+
               {!preview && user?.id && user.id === biz.owner_user_id && (
                 <button
                   type="button"

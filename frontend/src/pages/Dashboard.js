@@ -21,6 +21,7 @@ import MyGigsTab from '../components/dashboard/MyGigsTab';
 import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
 import OrdersTab from '../components/dashboard/OrdersTab';
 import DeliveriesTab from '../components/dashboard/DeliveriesTab';
+import NetworkTab from '../components/dashboard/NetworkTab';
 import MyOrdersTab from '../components/dashboard/MyOrdersTab';
 import AppointmentsTab from '../components/dashboard/AppointmentsTab';
 import JobRequestsTab from '../components/dashboard/JobRequestsTab';
@@ -503,6 +504,9 @@ const Dashboard = () => {
           <OrdersTab API={API} token={token} />
         )}
 
+        {activeTab === 'network' && (
+          <NetworkTab API={API} token={token} />
+        )}
         {activeTab === 'deliveries' && (
           <DeliveriesTab API={API} token={token} />
         )}
