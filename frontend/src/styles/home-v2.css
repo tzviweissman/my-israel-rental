@@ -398,12 +398,14 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
    in the subtree, type and spacing and radii alike, lays out at 0.8, and
    viewport units keep meaning the viewport, so the 100vh community stage
    and the corridor's container-relative geometry are untouched. Scoped
-   to the preview page, like every other experiment here. */
+   to this page. */
 /* Desktop only. Tzvi's recording was a laptop screen; on a phone the same
    0.8 takes a fifth off every tap target and every font, and nothing on a
    phone was "too big and too close up". (2026-09-04 audit 2, finding 1.) */
 @media (min-width: 1024px) {
-  body.theme-preview #root { zoom: 0.8; }
+  /* body.home-v2, not body.theme-preview: this is the approved page, now the
+     live home page, not an experiment (19 Sep 2026). */
+  body.home-v2 #root { zoom: 0.8; }
 }
 
 /* The blocks hero: hundreds of frosted glass blocks, animated in code
