@@ -6,6 +6,7 @@ Covers the bug-fix verification requested in review:
   - POST /api/admin/duplicates/auto-resolve + /api/admin/duplicates/resolve still respond
 """
 import os
+from pathlib import Path
 import uuid
 import requests
 import pytest
@@ -182,3 +183,31 @@ class TestDuplicatesEndpoints:
                           headers={"Authorization": f"Bearer {admin_token}"},
                           json={}, timeout=30)
         assert r.status_code != 405 and r.status_code != 404
+
+
+def test_a_nightly_price_that_reads_like_a_month_is_flagged_for_review_only(admin_token):
+    """Live on 18 Sep 2026: a two-bedroom at 10,000 shekels a night. The
+    audit flags it; the auto-fix must NOT hide it, because a big villa can
+    genuinely cost that and hiding a real listing is worse than a look."""
+    import uuid
+    from pymongo import MongoClient
+    from dotenv import load_dotenv
+    load_dotenv(Path(__file__).resolve().parents[1] / ".env")
+    db = MongoClient(os.environ["MONGO_URL"])[os.environ["DB_NAME"]]
+    pid = f"test-highnight-{uuid.uuid4()}"
+    db.properties.insert_one({"id": pid, "title": "TEST high nightly", "rental_type": "vacation",
+                              "nightly_price": 10000, "currency": "ILS", "status": "active", "area": "Romema"})
+    try:
+        h = {"Authorization": f"Bearer {admin_token}"}
+        r = requests.get(f"{API}/admin/properties/pricing-audit", headers=h, timeout=60)
+        assert r.status_code == 200, r.text
+        body = r.json()
+        assert any(p.get("id") == pid for p in body["high_nightly"]), "10,000 a night should be flagged"
+        assert body["totals"]["high_nightly"] >= 1
+
+        requests.post(f"{API}/admin/properties/pricing-autofix", headers=h, timeout=120)
+        row = db.properties.find_one({"id": pid})
+        assert not row.get("is_hidden"), "review only: the auto-fix must not hide a listing for a high nightly price"
+        assert row["nightly_price"] == 10000
+    finally:
+        db.properties.delete_one({"id": pid})

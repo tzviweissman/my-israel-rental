@@ -474,6 +474,8 @@ async def admin_repair_misplaced_prices(payload: dict = Depends(verify_token)) -
 async def pricing_audit(
     low_monthly_ils: float = 1500,
     low_monthly_usd: float = 500,
+    high_nightly_ils: float = 4000,
+    high_nightly_usd: float = 1100,
     payload: dict = Depends(verify_token),
 ) -> dict:
     if payload.get("role") != "admin":
@@ -497,6 +499,13 @@ async def pricing_audit(
     zero_price: list[dict] = []
     low_monthly: list[dict] = []
     wrong_field: list[dict] = []
+    # The mirror of low_monthly, and missing until 18 Sep 2026: a NIGHTLY
+    # price that reads like a monthly rent or a whole stay. Live that day:
+    # a two-bedroom at 10,000 shekels a night, a five-bedroom at 8,000.
+    # REVIEW ONLY. The auto-fix below never touches this bucket: a large
+    # villa can genuinely cost this, and hiding a real listing is worse
+    # than asking an admin to look.
+    high_nightly: list[dict] = []
 
     for p in all_props:
         # Skip listings already quarantined by a previous pricing auto-fix
@@ -527,6 +536,12 @@ async def pricing_audit(
         # but flagged so the admin can review.
         if rt in ("long-term", "short-term") and nightly > 0 and monthly > 0:
             wrong_field.append(p)
+            continue
+
+        if rt != "long-term" and nightly > 0:
+            ceiling = high_nightly_usd if cur == "USD" else high_nightly_ils
+            if nightly >= ceiling:
+                high_nightly.append(p)
 
     return {
         "totals": {
@@ -534,16 +549,20 @@ async def pricing_audit(
             "zero_price": len(zero_price),
             "low_monthly": len(low_monthly),
             "wrong_field": len(wrong_field),
+            "high_nightly": len(high_nightly),
         },
         "thresholds": {
             "low_monthly_ils": low_monthly_ils,
             "low_monthly_usd": low_monthly_usd,
+            "high_nightly_ils": high_nightly_ils,
+            "high_nightly_usd": high_nightly_usd,
         },
         # Truncate to 200 per bucket so the response stays manageable — the
         # totals still convey full counts if a bucket is bigger.
         "zero_price": zero_price[:200],
         "low_monthly": low_monthly[:200],
         "wrong_field": wrong_field[:200],
+        "high_nightly": high_nightly[:200],
     }
 
 

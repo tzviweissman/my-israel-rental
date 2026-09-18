@@ -52,3 +52,36 @@ export const byPrice = (currency, direction = 'asc', rate = FX_USD_TO_ILS) => (a
   if (!pb) return -1;
   return direction === 'desc' ? pb - pa : pa - pb;
 };
+
+/**
+ * The price a card or a map pin SHOWS, and what it is per.
+ *
+ * Nightly for a vacation stay, monthly otherwise - the same rule as
+ * `listingPrice` - with one addition: a vacation listing priced ONLY for a
+ * holiday shows that price, per night or for the whole holiday as its owner
+ * said (`holiday_lump_is_per_night`). Until 18 Sep 2026 such a listing read
+ * "Price on request" on /stays while its own page showed $6,000 for Sukkot.
+ *
+ * Never an invented number: no price is `null`. The map used to derive a
+ * nightly figure from a monthly rent (monthly / 30) that no owner set.
+ *
+ * `per` is 'night' | 'month' | 'holiday' | 'holidayNight'. Holiday prices are
+ * deliberately NOT in `listingPrice`: a whole-Sukkot total sorted against
+ * nightly rates would be a comparison of different things.
+ */
+export const shownPrice = (p) => {
+  if (!p) return null;
+  if (p.rental_type === 'vacation') {
+    if (p.nightly_price) return { amount: Number(p.nightly_price), currency: p.currency || 'ILS', per: 'night' };
+    if (p.holiday_lump_price) {
+      return {
+        amount: Number(p.holiday_lump_price),
+        currency: p.holiday_lump_currency || p.currency || 'ILS',
+        per: p.holiday_lump_is_per_night ? 'holidayNight' : 'holiday',
+        holiday: (p.holiday_tags || [])[0] || null,
+      };
+    }
+    return null;
+  }
+  return p.monthly_price ? { amount: Number(p.monthly_price), currency: p.currency || 'ILS', per: 'month' } : null;
+};

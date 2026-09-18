@@ -940,7 +940,8 @@ const BookingSidebar = ({
                 {t('property.availableFor', 'Also available for')} {holidayCTA.tag.charAt(0).toUpperCase() + holidayCTA.tag.slice(1)}
               </p>
               <p className="mt-0.5 text-lg font-bold text-[var(--brand-primary)] leading-tight" data-testid="holiday-cta-price">
-                {property.holiday_lump_currency === 'USD' ? '$' : '₪'}
+                {/* The listing's currency when the holiday one is unset, as line ~95 already does. */}
+                {(property.holiday_lump_currency || property.currency) === 'USD' ? '$' : '₪'}
                 {property.holiday_lump_price.toLocaleString()}
                 <span className="text-xs font-medium text-gray-500 ms-1">
                   {property.holiday_lump_is_per_night
