@@ -10,6 +10,7 @@
  * cycle behaves regardless of how many times React runs it.
  */
 import React, { useEffect, useRef } from 'react';
+import { shownPrice } from '../../utils/listingPrice';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
@@ -75,16 +76,16 @@ const symOf = (cur) => {
 
 // Compact price label for the pin. Vacation/short-term show nightly,
 // long-term show monthly, both abbreviated to keep the pill narrow.
+// The same price the card shows (utils/listingPrice.shownPrice), abbreviated.
+// It used to invent a nightly figure for a short-term listing from its
+// monthly rent (monthly / 30), so the pin and the card disagreed and the
+// pin showed a number no owner set.
 const priceLabel = (p) => {
-  const cur = p.currency || 'ILS';
-  const s = symOf(cur);
-  if (p.rental_type === 'long-term') {
-    if (!p.monthly_price) return s + '—';
-    return `${s}${Math.round(p.monthly_price / 1000)}k`;
-  }
-  const nightly = p.nightly_price ?? (p.monthly_price ? p.monthly_price / 30 : null);
-  if (!nightly) return s + '—';
-  return `${s}${Math.round(nightly)}`;
+  const shown = shownPrice(p);
+  const s = symOf(shown?.currency || p.currency || 'ILS');
+  if (!shown) return s + '—';
+  const n = shown.amount;
+  return n >= 10000 ? `${s}${Math.round(n / 1000)}k` : `${s}${Math.round(n).toLocaleString()}`;
 };
 
 const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency, activeId, onPinClick }) => {
