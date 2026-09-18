@@ -40,7 +40,6 @@ import LoopHero from '../components/home/LoopHero';
 import AntiMetalButton from '../components/ui/anti-metal-button';
 import LiquidButton from '../components/ui/liquid-button';
 import FlowButton from '../components/ui/flow-button';
-import { GradientText } from '../components/ui/gradient-text';
 import CoverflowCarousel from '../components/ui/coverflow-carousel';
 import useHomeShowcase from '../components/home/useHomeShowcase';
 import CommunitySection from '../components/home/CommunitySection';
@@ -290,9 +289,7 @@ export default function HomePreview() {
                 leaves nothing steady to read it against. */}
             <p className="hv2-hero-tagline">
               {t('home.hero.growA', 'Grow')}{' '}
-              <GradientText className="hv2-gradient-word">
-                {t('home.hero.growB', 'without limits')}
-              </GradientText>
+              <span className="hv2-gradient-word">{t('home.hero.growB', 'without limits')}</span>
             </p>
           </div>
           <div className="hv2-hero-foot">
