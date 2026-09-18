@@ -83,5 +83,13 @@ export const shownPrice = (p) => {
     }
     return null;
   }
-  return p.monthly_price ? { amount: Number(p.monthly_price), currency: p.currency || 'ILS', per: 'month' } : null;
+  if (p.monthly_price) return { amount: Number(p.monthly_price), currency: p.currency || 'ILS', per: 'month' };
+  // A short-term listing whose owner filled in only the NIGHTLY box: show
+  // what they entered, with the unit they entered it in. Two live flats,
+  // 18 Sep 2026, read "Price on request" on their cards and "₪—" under
+  // the map while carrying 7,500 and 8,000 a night. Whether that figure is
+  // right is the owner's to fix (the admin price check flags it); hiding it
+  // is not ours to decide.
+  if (p.nightly_price) return { amount: Number(p.nightly_price), currency: p.currency || 'ILS', per: 'night' };
+  return null;
 };

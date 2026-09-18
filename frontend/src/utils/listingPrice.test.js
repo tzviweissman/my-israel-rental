@@ -26,6 +26,11 @@ describe('shownPrice', () => {
       .toEqual({ amount: 8000, currency: 'ILS', per: 'month' });
   });
 
+  test('a short-term listing with only a nightly price shows it, per night', () => {
+    expect(shownPrice({ rental_type: 'short-term', nightly_price: 7500, monthly_price: 0, currency: 'ILS' }))
+      .toEqual({ amount: 7500, currency: 'ILS', per: 'night' });
+  });
+
   test('no price is null, not zero', () => {
     expect(shownPrice({ rental_type: 'vacation' })).toBeNull();
     expect(shownPrice({ rental_type: 'long-term' })).toBeNull();
