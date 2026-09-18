@@ -21,6 +21,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatShownPrice } from '../utils/listingPrice';
 import { formatDate } from '../utils/formatDate';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Home as HomeIcon, Store, Megaphone } from 'lucide-react';
@@ -181,7 +182,7 @@ export default function HomePreview() {
         it.discount?.ends_at ? { label: t('home.v2.picks.until', 'Until'), value: formatDate(it.discount.ends_at, i18n.language) } : null,
         it.area && !areaIsRedundant ? { label: t('home.v2.picks.where', 'Where'), value: prettyArea(it.area, t) } : null,
         it.beds ? { label: t('home.v2.picks.beds', 'Bedrooms'), value: it.beds } : null,
-        it.price ? { label: t('home.v2.picks.price', 'Price'), value: it.price } : null,
+        it.shown ? { label: t('home.v2.picks.price', 'Price'), value: formatShownPrice(it.shown, t) } : null,
       ].filter(Boolean),
     };
   });

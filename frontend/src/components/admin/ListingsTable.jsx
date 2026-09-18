@@ -1,4 +1,5 @@
 import React from 'react';
+import { formatShownPrice, shownPrice } from '../../utils/listingPrice';
 import { Trash2, ToggleLeft, ToggleRight, Loader2, CalendarX, CalendarCheck, Lock, Briefcase, Star, EyeOff, Undo2, ImageOff } from 'lucide-react';
 
 // Backend already returns properties sorted by created_at desc, so the
@@ -186,7 +187,7 @@ export default function ListingsTable({
               </td>
               <td className="px-4 py-3 text-sm">{p.area}</td>
               <td className="px-4 py-3"><span className="px-2 py-1 rounded-full text-xs bg-[#E5E5E5]">{p.rental_type}</span></td>
-              <td className="px-4 py-3 font-bold text-sm">{p.currency === 'USD' ? '$' : '₪'}{p.monthly_price || p.nightly_price || 0}</td>
+              <td className="px-4 py-3 font-bold text-sm">{formatShownPrice(shownPrice(p), t) || '—'}</td>
               <td className="px-4 py-3 text-xs text-gray-500" title={p.created_at ? new Date(p.created_at).toLocaleString() : ''}>
                 {p.created_at ? relativeAdded(p.created_at) : '—'}
               </td>
@@ -314,7 +315,7 @@ export default function ListingsTable({
                 </div>
                 <p className="text-xs text-gray-500 mt-0.5">{p.owner_name} · {p.area}</p>
                 <p className="text-xs text-gray-700 mt-0.5">
-                  <span className="font-semibold">{p.currency === 'USD' ? '$' : '₪'}{p.monthly_price || p.nightly_price || 0}</span>
+                  <span className="font-semibold">{formatShownPrice(shownPrice(p), t) || '—'}</span>
                   <span className="text-gray-400"> · {p.rental_type}</span>
                   {p.created_at && (
                     <span

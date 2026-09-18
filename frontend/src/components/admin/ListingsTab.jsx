@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { shownPrice } from '../../utils/listingPrice';
 import { useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -504,10 +505,10 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     if (featuredFilter === 'featured' && !p.is_featured) return false;
     if (quarantinedFilter === 'quarantined' && !p.is_hidden) return false;
     if (rentalTypeFilter !== 'all' && p.rental_type !== rentalTypeFilter) return false;
-    // Effective price = whatever the table column shows: monthly first,
-    // nightly as fallback. Keeps the filter result consistent with what
-    // the admin sees on screen.
-    const price = p.monthly_price || p.nightly_price || 0;
+    // Effective price = whatever the table column shows, which is now the
+    // shared rule (utils/listingPrice.shownPrice), so the filter and the
+    // column cannot disagree.
+    const price = shownPrice(p)?.amount || 0;
     const minN = minPrice ? Number(minPrice) : null;
     const maxN = maxPrice ? Number(maxPrice) : null;
     if (minN !== null && !Number.isNaN(minN) && price < minN) return false;

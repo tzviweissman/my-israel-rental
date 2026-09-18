@@ -1,39 +1,37 @@
-import { shownPrice, listingPrice } from './listingPrice';
+import { shownPrice, listingPrice, unitLabel, formatShownPrice } from './listingPrice';
+// The same cases the server's implementation is held to
+// (backend/tests/test_listing_price_parity.py). Change a rule there first.
+import cases from '../../../shared/listing_price_cases.json';
 
-// Shapes taken from live listings, 18 Sep 2026.
-describe('shownPrice', () => {
-  test('a vacation stay shows its nightly price', () => {
-    expect(shownPrice({ rental_type: 'vacation', nightly_price: 500, currency: 'ILS' }))
-      .toEqual({ amount: 500, currency: 'ILS', per: 'night' });
+const t = (key, fallback, vars) => {
+  const s = typeof fallback === 'string' ? fallback : key;
+  return vars ? s.replace(/\{\{(\w+)\}\}/g, (_, k) => vars[k]) : s;
+};
+
+describe('shownPrice: the shared cases', () => {
+  test.each(cases.cases.map((c) => [c.name, c]))('%s', (_name, c) => {
+    expect(shownPrice(c.property, { holiday: c.holiday || null })).toEqual(c.expected);
+  });
+});
+
+describe('what a person reads', () => {
+  test('whole-holiday price', () => {
+    const p = { rental_type: 'vacation', holiday_lump_price: 6000, holiday_lump_currency: 'USD', holiday_tags: ['sukkot'] };
+    expect(formatShownPrice(shownPrice(p), t)).toBe('$6,000 / Sukkot');
   });
 
-  test('a stay priced only for Sukkot shows that price, not "Price on request"', () => {
-    const p = { rental_type: 'vacation', holiday_lump_price: 6000, holiday_lump_currency: 'USD', currency: 'ILS', holiday_tags: ['sukkot'] };
-    expect(shownPrice(p)).toEqual({ amount: 6000, currency: 'USD', per: 'holiday', holiday: 'sukkot' });
-  });
-
-  test('a per-night holiday price says per night', () => {
+  test('per-night holiday price never reads as the whole holiday', () => {
     const p = { rental_type: 'vacation', holiday_lump_price: 154, holiday_lump_currency: 'USD', holiday_lump_is_per_night: true, holiday_tags: ['sukkot'] };
-    expect(shownPrice(p).per).toBe('holidayNight');
+    expect(formatShownPrice(shownPrice(p), t)).toBe('$154 / night (Sukkot)');
   });
 
-  test('the holiday currency falls back to the listing currency', () => {
-    expect(shownPrice({ rental_type: 'vacation', holiday_lump_price: 900, currency: 'USD' }).currency).toBe('USD');
+  test('both holidays are both named', () => {
+    const p = { rental_type: 'vacation', holiday_lump_price: 9000, holiday_tags: ['pesach', 'sukkot'] };
+    expect(unitLabel(shownPrice(p), t)).toBe('Sukkot/Pesach');
   });
 
-  test('a short-term listing shows its monthly rent, never a nightly figure derived from it', () => {
-    expect(shownPrice({ rental_type: 'short-term', monthly_price: 8000, currency: 'ILS' }))
-      .toEqual({ amount: 8000, currency: 'ILS', per: 'month' });
-  });
-
-  test('a short-term listing with only a nightly price shows it, per night', () => {
-    expect(shownPrice({ rental_type: 'short-term', nightly_price: 7500, monthly_price: 0, currency: 'ILS' }))
-      .toEqual({ amount: 7500, currency: 'ILS', per: 'night' });
-  });
-
-  test('no price is null, not zero', () => {
-    expect(shownPrice({ rental_type: 'vacation' })).toBeNull();
-    expect(shownPrice({ rental_type: 'long-term' })).toBeNull();
+  test('no price reads as nothing, not "₪0"', () => {
+    expect(formatShownPrice(shownPrice({ rental_type: 'vacation' }), t)).toBeNull();
   });
 
   test('holiday prices stay out of the nightly sort and filter', () => {

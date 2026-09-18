@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { priceSymbol, shownPrice, unitLabel } from '../utils/listingPrice';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
 import { Bed, Bath, Home as HomeIcon, MapPin, User, LogIn, Mail } from 'lucide-react';
@@ -363,11 +364,17 @@ const ManagerPage = () => {
                   )}
                 </div>
                 <div className="flex items-center justify-between">
+                  {/* Shared rule (utils/listingPrice). Was "monthly || nightly || 0",
+                      so a Sukkot-only flat on a public manager page read "₪0". */}
                   <span className="text-base md:text-2xl font-bold" style={{ color: 'var(--gold-text-on-light)' }}>
-                    {property.currency === 'USD' ? '$' : '₪'}{(property.monthly_price || property.nightly_price || 0).toLocaleString()}
-                    <span className="text-[10px] md:text-sm font-normal text-gray-600">
-                      {property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth')}
-                    </span>
+                    {(() => {
+                      const sp = shownPrice(property);
+                      if (!sp) return <span className="text-sm font-semibold text-gray-500">{t('stays.priceOnRequest', 'Price on request')}</span>;
+                      return (<>
+                        {priceSymbol(sp.currency)}{Math.round(sp.amount).toLocaleString()}
+                        <span className="text-[10px] md:text-sm font-normal text-gray-600"> / {unitLabel(sp, t)}</span>
+                      </>);
+                    })()}
                   </span>
                   <span className="hidden md:inline text-sm px-3 py-1 rounded-full" style={{ backgroundColor: '#E5E5E5', color: 'var(--brand-primary)' }}>
                     {rentalTypeLabels[property.rental_type] || property.rental_type}

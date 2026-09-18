@@ -40,6 +40,7 @@ from pydantic import BaseModel, Field, ValidationError, model_validator
 
 from routes.deps import db, verify_token
 from utils.area_filter import area_mongo_query, canonicalize_area
+from utils.listing_price import price_label, shown_price
 from utils.fx import convert_amount
 
 router = APIRouter()
@@ -335,38 +336,16 @@ def _shape_for_output(prop: dict, category: str | None = None, rate: float | Non
     rental_type = prop.get("rental_type", "")
     date_field = _availability_date_field(rental_type)
 
-    # Pick the best price field + label for each rental type. Vacation
-    # rentals prefer the holiday-lump price (e.g. "$5,000 / Sukkot") when
-    # set, otherwise fall back to the nightly rate.
-    if rental_type == "vacation":
-        lump = prop.get("holiday_lump_price")
-        tags = prop.get("holiday_tags") or []
-        if lump:
-            price_value = lump
-            price_currency = (
-                prop.get("holiday_lump_currency") or prop.get("currency") or "ILS"
-            ).upper()
-            # The holiday the LIST is about, when it is about one. The
-            # first tag was used before, so a flat tagged for Pesach and
-            # Sukkot read "/ Pesach" in a Sukkot list.
-            holiday = category if category in ("sukkot", "pesach") else (tags[0] if tags else None)
-            name = holiday.capitalize() if holiday else None
-            if prop.get("holiday_lump_is_per_night"):
-                # The owner said this is a NIGHTLY holiday rate. It was
-                # labelled as the price of the whole holiday, so a real
-                # Sukkot list told customers a flat was "$154 / Sukkot".
-                # Same wording the site's own listing card uses.
-                price_label = f"/night ({name})" if name else "/night"
-            else:
-                price_label = f"/ {name}" if name else "/ holiday"
-        else:
-            price_value = prop.get("nightly_price")
-            price_currency = (prop.get("currency") or "ILS").upper()
-            price_label = "/night"
-    else:
-        price_value = prop.get("monthly_price")
-        price_currency = (prop.get("currency") or "ILS").upper()
-        price_label = "/mo"
+    # The shared rule (utils/listing_price.shown_price), with the list's own
+    # holiday as context: the same answer the listing card gives, so the
+    # message a customer receives and the page they open cannot disagree.
+    # This block used to decide for itself, and was the one that called a
+    # per-night Sukkot price "$154 / Sukkot".
+    holiday = category if category in ("sukkot", "pesach") else None
+    shown = shown_price(prop, holiday)
+    price_value = shown["amount"] if shown else None
+    price_currency = (shown["currency"] if shown else (prop.get("currency") or "ILS")).upper()
+    price_label_text = price_label(shown)
 
     return SmartListPropertyOut(
         id=prop["id"],
@@ -379,7 +358,7 @@ def _shape_for_output(prop: dict, category: str | None = None, rate: float | Non
         price=price_value,
         currency=price_currency,
         price_ils_equivalent=_in_ils(price_value, price_currency, rate),
-        price_label=price_label,
+        price_label=price_label_text,
         bedrooms=prop.get("bedrooms"),
         available_from=prop.get(date_field) or None,
         rental_type=rental_type,
