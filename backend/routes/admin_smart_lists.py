@@ -247,10 +247,14 @@ async def _apply_filters(filters: SmartListFilters) -> tuple[list[dict], float |
         filters.min_monthly_rent_ils is not None
         or filters.max_monthly_rent_ils is not None
     )
-    rate: float | None = None
-    if has_price_bound and not skip_price_filter:
-        # Prime the FX cache by converting 1 USD -> ILS once.
-        rate = await convert_amount(1.0, "USD", "ILS")
+    # Fetched for EVERY list, not only when a rent filter is set. Sorting
+    # needs it too: without it a vacation or holiday list sorted by the
+    # raw number, so "$400" came before "₪500" (17 Sep 2026, a real
+    # Sukkot list sent to customers). Cached, so this is one lookup.
+    try:
+        rate: float | None = await convert_amount(1.0, "USD", "ILS")
+    except Exception:  # noqa: BLE001 - no live rate: the sort falls back below
+        rate = None
 
     now = datetime.now(UTC).replace(hour=0, minute=0, second=0, microsecond=0)
     window_days = _AVAILABILITY_DAYS.get(filters.availability)
@@ -280,7 +284,6 @@ async def _apply_filters(filters: SmartListFilters) -> tuple[list[dict], float |
                 price_ils = float(price) * rate
             else:
                 price_ils = float(price)
-            prop["_price_ils"] = price_ils
             if (
                 filters.max_monthly_rent_ils is not None
                 and price_ils > filters.max_monthly_rent_ils
@@ -307,7 +310,28 @@ async def _apply_filters(filters: SmartListFilters) -> tuple[list[dict], float |
     return results, rate
 
 
-def _shape_for_output(prop: dict) -> SmartListPropertyOut:
+# Used only when no live rate could be fetched, so a mixed-currency list
+# still sorts roughly right. The same figure the admin screen falls back to
+# (components/admin/smartListText.js). Never shown to anyone.
+_FALLBACK_USD_ILS = 3.7
+
+
+def _in_ils(amount, currency: str, rate: float | None) -> float | None:
+    """The DISPLAYED price in shekels, for ordering rows. Only for sorting:
+    the customer still reads the price in the currency the owner set."""
+    try:
+        v = float(amount)
+    except (TypeError, ValueError):
+        return None
+    return v * (rate or _FALLBACK_USD_ILS) if currency == "USD" else v
+
+
+def _sort_key(p) -> tuple:
+    # Priceless ("flexible") rows last, never first.
+    return (p.price_ils_equivalent is None, p.price_ils_equivalent or 0)
+
+
+def _shape_for_output(prop: dict, category: str | None = None, rate: float | None = None) -> SmartListPropertyOut:
     rental_type = prop.get("rental_type", "")
     date_field = _availability_date_field(rental_type)
 
@@ -322,10 +346,19 @@ def _shape_for_output(prop: dict) -> SmartListPropertyOut:
             price_currency = (
                 prop.get("holiday_lump_currency") or prop.get("currency") or "ILS"
             ).upper()
-            first_tag = tags[0] if tags else None
-            price_label = (
-                f"/ {first_tag.capitalize()}" if first_tag else "/ holiday"
-            )
+            # The holiday the LIST is about, when it is about one. The
+            # first tag was used before, so a flat tagged for Pesach and
+            # Sukkot read "/ Pesach" in a Sukkot list.
+            holiday = category if category in ("sukkot", "pesach") else (tags[0] if tags else None)
+            name = holiday.capitalize() if holiday else None
+            if prop.get("holiday_lump_is_per_night"):
+                # The owner said this is a NIGHTLY holiday rate. It was
+                # labelled as the price of the whole holiday, so a real
+                # Sukkot list told customers a flat was "$154 / Sukkot".
+                # Same wording the site's own listing card uses.
+                price_label = f"/night ({name})" if name else "/night"
+            else:
+                price_label = f"/ {name}" if name else "/ holiday"
         else:
             price_value = prop.get("nightly_price")
             price_currency = (prop.get("currency") or "ILS").upper()
@@ -345,7 +378,7 @@ def _shape_for_output(prop: dict) -> SmartListPropertyOut:
         address=prop.get("address"),
         price=price_value,
         currency=price_currency,
-        price_ils_equivalent=prop.get("_price_ils"),
+        price_ils_equivalent=_in_ils(price_value, price_currency, rate),
         price_label=price_label,
         bedrooms=prop.get("bedrooms"),
         available_from=prop.get(date_field) or None,
@@ -419,9 +452,9 @@ async def generate_smart_list(
     """Preview matches for the given filters without saving anything."""
     _require_admin(payload)
     matches, rate = await _apply_filters(filters)
-    shaped = [_shape_for_output(p) for p in matches]
+    shaped = [_shape_for_output(p, filters.rental_category, rate) for p in matches]
     # Sort: cheapest (in ILS) first; flexible (no price) last
-    shaped.sort(key=lambda p: (p.price_ils_equivalent or p.price or 1e12))
+    shaped.sort(key=_sort_key)
     return {
         "properties": [s.model_dump() for s in shaped],
         "count": len(shaped),
@@ -512,8 +545,8 @@ async def get_saved_smart_list(
             detail=f"This saved list has invalid filters: {e.errors()[0].get('msg', 'invalid')}",
         ) from e
     matches, rate = await _apply_filters(filters)
-    shaped = [_shape_for_output(p) for p in matches]
-    shaped.sort(key=lambda p: (p.price_ils_equivalent or p.price or 1e12))
+    shaped = [_shape_for_output(p, filters.rental_category, rate) for p in matches]
+    shaped.sort(key=_sort_key)
     return {
         "id": doc["id"],
         "name": doc["name"],

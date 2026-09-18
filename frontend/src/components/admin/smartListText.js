@@ -56,11 +56,20 @@ export const WA_URL_LIMIT = 3900;
 /** The wa.me link for a message. Measure THIS, never the raw text. */
 export const whatsappUrl = (text) => `https://wa.me/?text=${encodeURIComponent(text || '')}`;
 
-export const formatAvailable = (iso) => {
+export const formatAvailable = (iso, now = new Date()) => {
   if (!iso) return 'Available now';
   try {
-    const d = new Date(iso);
+    // A bare "YYYY-MM-DD" is a calendar day, not an instant. `new Date()`
+    // reads it as midnight UTC, which west of UTC is the evening before,
+    // so a flat free on the 24th was announced for the 23rd.
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(iso));
+    const d = m ? new Date(Number(m[1]), Number(m[2]) - 1, Number(m[3])) : new Date(iso);
     if (Number.isNaN(d.getTime())) return `Available ${iso}`;
+    // A date already passed means it is free now. "Available July 15",
+    // sent in September, read as next July (a real Sukkot list, 17 Sep
+    // 2026). Compared by calendar day, so today's date is "now" too.
+    const day = (x) => new Date(x.getFullYear(), x.getMonth(), x.getDate()).getTime();
+    if (day(d) <= day(now)) return 'Available now';
     return `Available ${d.toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}`;
   } catch {
     return `Available ${iso}`;
