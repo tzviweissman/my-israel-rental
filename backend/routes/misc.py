@@ -575,6 +575,10 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         # Business connection requests waiting on one of this person's
         # businesses - the Network tab's badge.
         "network_requests_in": await incoming_request_count(uid),
+        # Runs a business at all. A courier who lists a business to receive
+        # automated deliveries has no services, so the gig-based rule that
+        # shows the Orders and Network tabs would hide both from them.
+        "businesses_owned": await db.businesses.count_documents({"owner_user_id": uid}),
         "courier_businesses": courier_active,
         "courier_deliveries_open": courier_deliveries_open,
         "customer_orders": customer_orders,

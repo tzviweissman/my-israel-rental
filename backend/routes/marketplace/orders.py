@@ -496,6 +496,14 @@ async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str, cont
                 "Refresh to see where it is now."
             ),
         )
+    # Hand the order on to partners whose automations are waiting for this
+    # status (routes/marketplace/automations.py). In the background, so a
+    # shop marking an order ready gets its answer at once, and inside the
+    # engine every failure is caught and logged: a broken rule must never
+    # stop the shop moving its own order. Imported here, not at the top,
+    # because automations imports this module.
+    from routes.marketplace.automations import fire_in_background
+    fire_in_background("order.status_changed", {"order": fresh, "status": payload.status})
     return _public(fresh, contact=contact)
 
 
