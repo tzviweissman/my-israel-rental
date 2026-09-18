@@ -28,6 +28,7 @@ from routes.deps import db, logger, verify_token
 from utils import view_tracking
 from utils.auth import JWT_SECRET
 from utils.contract_files import resolve_private_contract_file
+from routes.site_visits import site_summary
 from utils.events import publish
 
 router = APIRouter()
@@ -212,6 +213,17 @@ async def get_admin_metrics(
     )
     flow["qr_scans"] = sum((await _qr_scans_by_owner(range)).values())
 
+    # The whole site, not just listings (Tzvi, 18 Sep 2026): the home page,
+    # Stays, search, the Requests board - where most people land and which
+    # no other counter here sees. Israel-day keys, like the QR buckets, so
+    # "today" means since midnight in Jerusalem.
+    site_days = None
+    if range != "all":
+        _, site_days = view_tracking.il_day_window(max(METRIC_RANGES.get(range) or 1, 1))
+    site = await site_summary(site_days)
+    flow["site_visitors"] = site["visitors"]
+    flow["site_pageviews"] = site["pageviews"]
+
     # When view logging actually began, so "all time" can say what it means
     # instead of implying it covers the whole life of the site.
     first = await db.property_view_events.find_one({}, {"at": 1}, sort=[("at", 1)])
@@ -223,6 +235,9 @@ async def get_admin_metrics(
         "stock": stock,
         "views_source": "events",
         "views_since": views_since,
+        # First day the site-wide counter ran. Lifetime means "since then":
+        # nothing before it was recorded, and saying so is the honest label.
+        "site_since": site["since"],
     }
 
 
