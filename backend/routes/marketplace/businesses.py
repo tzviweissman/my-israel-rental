@@ -19,6 +19,7 @@ from datetime import UTC, datetime
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request
+from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel, Field
 
 from routes.deps import db, optional_user, verify_token
@@ -442,7 +443,19 @@ async def create_business(payload: BusinessIn, user=Depends(verify_token)):
     doc["serves_nationwide"] = bool(payload.serves_nationwide)
     if payload.logo_url:
         doc["logo_url"] = payload.logo_url
-    await db.businesses.insert_one(doc)
+    try:
+        await db.businesses.insert_one(doc)
+    except DuplicateKeyError:
+        # unique_slug() checked, then we inserted; another registration
+        # with the same name landed in between. The unique index on
+        # businesses.slug (server.py) refused the copy - a slug is a
+        # hostname, and two businesses at one address is not recoverable.
+        # A clean 409 instead of an unhandled 500; trying again mints the
+        # next free slug.
+        raise HTTPException(
+            status_code=409,
+            detail="That business name was just taken. Please try again.",
+        )
     return _public(doc, 0)
 
 

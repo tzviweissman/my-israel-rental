@@ -192,6 +192,14 @@ function Stop({ stop: s, index, API, token, onChanged, t }) {
       onChanged();
     } catch (err) {
       toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+      // 409 means the order moved under us - the owner or the counter got
+      // there first. The message says "refresh"; do it for them, so the
+      // panel shows where the order actually is instead of a stale stop
+      // with a button that will keep failing (17 Sep dead-ends audit).
+      if (err?.response?.status === 409) {
+        setMode(null);
+        onChanged();
+      }
     } finally {
       setBusy(false);
     }

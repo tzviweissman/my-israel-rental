@@ -224,7 +224,7 @@ export default function ServicesTab({ token, initialFilter = null }) {
                   <td className="px-3 py-2">
                     <span className="px-2 py-0.5 rounded-full text-xs font-semibold"
                       style={r.status === 'published'
-                        ? { background: '#E6F4EA', color: '#2E7D4F' }
+                        ? { background: 'var(--status-open-bg)', color: 'var(--status-open)' }
                         : { background: '#F3F0E9', color: 'var(--brand-muted)' }}>
                       {r.status}
                     </span>
@@ -249,7 +249,7 @@ export default function ServicesTab({ token, initialFilter = null }) {
                       onClick={() => toggleVerified(r)}
                       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold disabled:opacity-50"
                       style={r.business_verified
-                        ? { background: '#E3F3EA', color: '#1F8A50' }
+                        ? { background: 'var(--success-bg)', color: 'var(--success)' }
                         : { background: '#F3F0E9', color: 'var(--brand-muted)' }}
                       title={r.business_id ? 'Click to toggle' : 'No business to verify'}
                       data-testid={`admin-service-verified-${r.id}`}

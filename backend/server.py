@@ -483,6 +483,15 @@ async def startup_tasks() -> None:
         await db.short_links.create_index(
             [("target_type", 1), ("target_id", 1)], background=True,
         )
+        # Same reasoning, one step further: a business slug is about to be
+        # a HOSTNAME (<slug>.myisraelrental.com). unique_slug() checks for
+        # a taken name before choosing one, but check and insert are two
+        # operations, and two "Cohen Movers" registering in the same second
+        # could both pass the check. Without this the second insert would
+        # succeed and two businesses would answer at one address; with it
+        # the database refuses, and utils/businesses turns that refusal
+        # into a retry. (17 Sep audit.)
+        await db.businesses.create_index("slug", unique=True, background=True)
         logger.info("Hot-path indexes ensured")
     except Exception as e:  # noqa: BLE001
         logger.warning(f"hot-path index creation failed (non-fatal): {e}")

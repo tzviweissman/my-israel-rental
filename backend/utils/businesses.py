@@ -28,6 +28,9 @@ import uuid
 from datetime import datetime, timezone
 from typing import Any
 
+from fastapi import HTTPException
+from pymongo.errors import DuplicateKeyError
+
 from routes.deps import db
 
 UTC = timezone.utc
@@ -252,6 +255,20 @@ async def ensure_default_business(user_id: str, *, name: str | None = None) -> d
         user = await db.users.find_one({"id": user_id}) or await db.users.find_one({"_id": user_id})
         name = (user or {}).get("name") or "My business"
 
-    doc = new_business_doc(user_id, name, slug=await unique_slug(name))
-    await db.businesses.insert_one(doc)
-    return doc
+    # Two attempts, because unique_slug() reads and insert_one() writes, and
+    # a second registration with the same name can slip between them. The
+    # unique index on businesses.slug (server.py) is what makes the
+    # database refuse the duplicate; this is what turns that refusal into a
+    # fresh slug instead of an unhandled 500.
+    for attempt in range(2):
+        doc = new_business_doc(user_id, name, slug=await unique_slug(name))
+        try:
+            await db.businesses.insert_one(doc)
+            return doc
+        except DuplicateKeyError:
+            if attempt == 1:
+                raise HTTPException(
+                    status_code=409,
+                    detail="That business name was just taken. Please try again.",
+                )
+    return doc  # unreachable; keeps type checkers calm
