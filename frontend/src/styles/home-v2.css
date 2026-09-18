@@ -76,9 +76,10 @@
   color: var(--ink);
 }
 .hv2-hero h1 .a { color: var(--gold-lg); }
-/* The gradient phrase under the headline. The word itself carries the
-   surface as its own background - see gradient-text.jsx - so it needs no
-   panel behind it, only room to breathe. */
+/* The accent phrase under the headline. It was a GradientText, whose
+   effect needs a solid white fill behind the word; once the video ran behind
+   the copy that fill showed as a white box (Tzvi, 19 Sep 2026), so it is
+   plain accent text now, the same blue as "Any revenue stream". */
 .hv2-hero-tagline {
   margin-top: 14px;
   font-family: var(--font-head);
@@ -89,9 +90,9 @@
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: .35em;
+  gap: .25em;
 }
-.hv2-gradient-word { border-radius: 6px; padding: 0 .12em; }
+.hv2-gradient-word { color: #00387B; }
 
 .hv2-hero-foot { display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .hv2-hero-foot p {
