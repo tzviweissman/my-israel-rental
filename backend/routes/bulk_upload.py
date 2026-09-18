@@ -97,7 +97,9 @@ def _split_list(val: Any) -> list:
     return [x.strip() for x in str(val).split(";") if x.strip()]
 
 
-_VALID_RENTAL_TYPES = {"long-term", "short-term", "vacation", "storage"}
+# One list, owned by the model, so the CSV path cannot accept a type the
+# form path refuses. This set used to carry "storage" on its own.
+from models import RENTAL_TYPES as _VALID_RENTAL_TYPES  # noqa: E402
 _BOOL_FIELDS = ("has_elevator", "is_shabbat_elevator", "is_tama", "sukkah_compatible", "has_agent_fee")
 _INT_FIELDS = ("bedrooms", "bathrooms", "floor", "porches", "minimum_booking_days")
 _FLOAT_FIELDS = ("square_meters", "porch_square_meters", "monthly_price", "nightly_price", "agent_fee_price")

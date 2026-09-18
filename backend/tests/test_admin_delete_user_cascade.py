@@ -15,9 +15,17 @@ other half of a conversation all survive. The /terms page says this out
 loud ("a signed contract belongs to both parties"), so the two have to move
 together.
 
-The test below is deliberately written from BOTH sides. Asserting only that
-the right things vanished would pass just as happily for a cascade that
-deleted the whole database.
+DATA-DRIVEN, on purpose. The first version of this file hand-listed eight
+of the twenty-two owned collections and three of the eight kept ones, and
+the 17 Sep audit rightly called that partial. The fixture below seeds ONE
+row in EVERY collection the cascade names, read from the cascade's own
+tables, so adding a collection to `_USER_OWNED` without a row here is
+impossible - the test seeds it automatically - and dropping one from the
+cascade fails the test that expects it gone.
+
+The test is written from BOTH sides. Asserting only that the right things
+vanished would pass just as happily for a cascade that deleted the whole
+database.
 
 Needs the live local API, the local Mongo, and the local test accounts
 (see backend/tests/.env.test).
@@ -25,6 +33,7 @@ Needs the live local API, the local Mongo, and the local test accounts
 from __future__ import annotations
 
 import os
+import sys
 import uuid
 from datetime import UTC, datetime
 from pathlib import Path
@@ -34,12 +43,40 @@ import requests
 from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
 load_dotenv(ROOT / ".env")
 
 from pymongo import MongoClient  # noqa: E402
 
+from routes.admin.core import _TWO_PARTY_KEPT, _USER_OWNED  # noqa: E402
+from routes.deps import CONTRACT_DIR  # noqa: E402
+
 BASE = os.environ.get("TEST_API_BASE", "http://localhost:8001/api")
 ADMIN = {"email": "admin@rental.com", "password": "Admin1234!"}
+
+# The field that names the DELETED person in each kept collection. These
+# were read off real documents, same as the cascade's own table.
+_KEPT_FIELD = {
+    "bookings": "owner_id",
+    "marketplace_bookings": "provider_user_id",
+    "contracts": "owner_id",
+    "messages": "sender_id",
+    "marketplace_reviews": "reviewer_user_id",
+    "store_orders": "owner_user_id",
+    "store_standing_orders": "owner_user_id",
+    "marketplace_job_applications": "applicant_user_id",
+    "request_reports": "reporter_user_id",
+}
+
+# Fields a collection's unique index insists on. Without a slug, two
+# slugless businesses collide on `slug: null`.
+_EXTRA = {
+    "businesses": lambda tag: {"slug": f"test-{tag}", "name": f"TEST_{tag}", "active": True},
+    "properties": lambda tag: {"title": f"TEST_{tag}", "area": "Jerusalem", "status": "active"},
+    "marketplace_gigs": lambda tag: {"title": f"TEST_{tag}", "status": "published"},
+    "requests": lambda tag: {"title": f"TEST_{tag}", "status": "open"},
+    "short_links": lambda tag: {"slug": f"t{tag[:8]}", "target_type": "business", "target_id": f"{tag}-biz"},
+}
 
 
 @pytest.fixture(scope="module")
@@ -56,15 +93,16 @@ def admin():
 
 @pytest.fixture()
 def victim(db):
-    """An account with one of everything, plus a booking from someone else.
+    """An account with one row in EVERY collection the cascade names, a
+    contract file on disk, and a second person to leave records behind for.
 
-    Seeded straight into Mongo rather than through the API: the point is the
-    delete, and half of these have no create endpoint an owner can reach.
+    Seeded straight into Mongo: the point is the delete, and half of these
+    have no create endpoint an owner can reach.
     """
     uid = f"del-{uuid.uuid4()}"
     other_id = f"other-{uuid.uuid4()}"
     stamp = datetime.now(UTC).isoformat()
-    tag = uid[:12]
+    tag = uid[4:16]
 
     db.users.insert_one({
         "id": uid, "email": f"{tag}@example.com", "name": "Delete Me",
@@ -75,79 +113,76 @@ def victim(db):
         "role": "renter", "password": "not-a-real-hash", "created_at": stamp,
     })
 
-    prop_id = f"{tag}-prop"
-    owned = {
-        "properties": {"id": prop_id, "owner_id": uid, "title": f"TEST_{tag}",
-                       "area": "Jerusalem", "status": "active"},
-        # `slug` is a UNIQUE index and a business without one collides with
-        # every other slugless row, including the next run of this test.
-        "businesses": {"id": f"{tag}-biz", "owner_user_id": uid, "name": f"TEST_{tag}",
-                       "slug": f"test-{tag}", "active": True},
-        "marketplace_gigs": {"id": f"{tag}-gig", "provider_user_id": uid,
-                             "title": f"TEST_{tag}", "status": "published"},
-        "requests": {"id": f"{tag}-req", "poster_user_id": uid, "status": "open",
-                     "title": f"TEST_{tag}"},
-        "subleases": {"id": f"{tag}-sub", "subleasor_id": uid, "title": f"TEST_{tag}"},
-        "saved_searches": {"id": f"{tag}-ss", "user_id": uid, "name": f"TEST_{tag}"},
-        "liked_properties": {"id": f"{tag}-like", "user_id": uid, "property_id": prop_id},
-        "notification_preferences": {"id": f"{tag}-np", "user_id": uid, "mode": "instant"},
-    }
-    for collection, doc in owned.items():
-        db[collection].insert_one(dict(doc))
+    # A real file under CONTRACT_DIR, referenced the way the upload path
+    # stores it, so the cascade has something physical to remove.
+    contract_file = CONTRACT_DIR / f"test-cascade-{tag}.pdf"
+    contract_file.write_bytes(b"%PDF-1.4\n%%EOF\n")
 
-    # The other party's records. These must survive.
-    kept = {
-        "bookings": {"id": f"{tag}-bk", "owner_id": uid, "renter_id": other_id,
-                     "property_id": prop_id, "status": "confirmed"},
-        "contracts": {"id": f"{tag}-ct", "owner_id": uid, "signed": True,
-                      "original_filename": "agreement.pdf"},
-        "messages": {"id": f"{tag}-msg", "sender_id": uid, "property_id": prop_id,
-                     "text": "hello"},
-    }
-    for collection, doc in kept.items():
-        db[collection].insert_one(dict(doc))
+    owned = {}
+    for collection, field in _USER_OWNED:
+        doc = {"id": f"{tag}-{collection}", field: uid, "created_at": stamp}
+        doc.update(_EXTRA.get(collection, lambda _t: {})(tag))
+        if collection == "properties":
+            doc["contract_url"] = f"/api/uploads/{contract_file.name}"
+        db[collection].insert_one(doc)
+        owned[collection] = doc["id"]
+
+    kept = {}
+    for collection in _TWO_PARTY_KEPT:
+        field = _KEPT_FIELD[collection]
+        doc = {"id": f"{tag}-{collection}", field: uid, "other_party": other_id, "created_at": stamp}
+        db[collection].insert_one(doc)
+        kept[collection] = doc["id"]
 
     yield {"uid": uid, "other_id": other_id, "tag": tag,
-           "owned": owned, "kept": kept}
+           "owned": owned, "kept": kept, "contract_file": contract_file}
 
-    # Clean up whatever the test did not delete.
     for collection in list(owned) + list(kept):
         db[collection].delete_many({"id": {"$regex": f"^{tag}-"}})
     db.users.delete_many({"id": {"$in": [uid, other_id]}})
     db.user_tombstones.delete_many({"user_id": uid})
+    contract_file.unlink(missing_ok=True)
 
 
 def _delete(admin, uid):
     return requests.delete(f"{BASE}/admin/users/{uid}", headers=admin, timeout=60)
 
 
-def test_their_own_things_are_deleted(admin, db, victim):
+def test_every_owned_collection_is_cleared(admin, db, victim):
     r = _delete(admin, victim["uid"])
     assert r.status_code == 200, r.text
-
     assert db.users.find_one({"id": victim["uid"]}) is None, "the account itself must go"
 
     still_here = {
-        collection: doc["id"]
-        for collection, doc in victim["owned"].items()
-        if db[collection].find_one({"id": doc["id"]}) is not None
+        c: doc_id for c, doc_id in victim["owned"].items()
+        if db[c].find_one({"id": doc_id}) is not None
     }
     assert not still_here, (
         "these were only ever this person's and should have gone with the "
-        f"account: {still_here}"
+        f"account: {sorted(still_here)}"
     )
 
 
-def test_the_other_party_keeps_theirs(admin, db, victim):
+def test_every_two_party_collection_survives(admin, db, victim):
     """The half that makes this a cascade rather than a purge."""
     assert _delete(admin, victim["uid"]).status_code == 200
 
-    for collection, doc in victim["kept"].items():
-        assert db[collection].find_one({"id": doc["id"]}) is not None, (
-            f"{collection} has a second person in it and must survive the "
-            "deletion of one of them"
-        )
+    gone = [c for c, doc_id in victim["kept"].items() if db[c].find_one({"id": doc_id}) is None]
+    assert not gone, (
+        f"{gone} have a second person in them and must survive the deletion of one of them"
+    )
     assert db.users.find_one({"id": victim["other_id"]}) is not None
+
+
+def test_the_contract_file_on_disk_is_removed_with_the_property(admin, victim):
+    """The DB pointer used to go and the file stayed: a legal document with
+    a tenant's name in it, on the persistent volume, unreachable forever
+    (17 Sep audit)."""
+    assert victim["contract_file"].exists(), "fixture did not write the file"
+    assert _delete(admin, victim["uid"]).status_code == 200
+    assert not victim["contract_file"].exists(), (
+        "the property's contract file must be unlinked when its owner is deleted"
+    )
 
 
 def test_a_snapshot_is_written_before_anything_is_deleted(admin, db, victim):
@@ -157,23 +192,20 @@ def test_a_snapshot_is_written_before_anything_is_deleted(admin, db, victim):
     snap = db.user_tombstones.find_one({"user_id": victim["uid"]})
     assert snap is not None, "no snapshot was taken"
     assert snap["user"]["email"].startswith(victim["tag"])
-    assert "password" not in snap["user"], (
-        "the snapshot must not carry the password hash"
-    )
+    assert "password" not in snap["user"], "the snapshot must not carry the password hash"
 
     saved = snap["collections"]
-    for collection, doc in victim["owned"].items():
-        rows = saved.get(collection) or []
-        assert any(r.get("id") == doc["id"] for r in rows), (
-            f"{collection} was deleted but not snapshotted - it cannot be undone"
-        )
+    missing = [
+        c for c, doc_id in victim["owned"].items()
+        if not any(r.get("id") == doc_id for r in (saved.get(c) or []))
+    ]
+    assert not missing, f"deleted but not snapshotted, so it cannot be undone: {missing}"
 
 
 def test_an_admin_cannot_delete_themselves(admin, db):
     me = requests.get(f"{BASE}/admin/users", headers=admin, timeout=30)
     assert me.status_code == 200, me.text
     admin_row = next(u for u in me.json() if u["email"] == ADMIN["email"])
-
     r = _delete(admin, admin_row["id"])
     assert r.status_code == 400, r.text
     assert db.users.find_one({"id": admin_row["id"]}) is not None

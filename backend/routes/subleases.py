@@ -3,6 +3,7 @@ import uuid
 from datetime import UTC, datetime
 
 from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
+from pymongo import ReturnDocument
 
 from models import SubleaseCreate
 from models_response import (
@@ -297,8 +298,14 @@ async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> dict:
         "signed_at": signed_at.isoformat()
     }
 
-    await db.contracts.update_one(
-        {"sign_token": sign_token},
+    # `"signed": {"$ne": True}` in the FILTER, for the same reason the order
+    # status write carries its starting status (17 Sep audit): the guard
+    # above ran against a document read a moment ago. Two signers with the
+    # same emailed link, submitting at once, could both pass it, and the
+    # second write would push a second signature and rebuild the PDF over
+    # the first person's. Now only one write can land; the other is told.
+    signed_now = await db.contracts.find_one_and_update(
+        {"sign_token": sign_token, "signed": {"$ne": True}},
         {
             "$push": {"signatures": new_signature},
             "$set": {
@@ -314,8 +321,17 @@ async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> dict:
                 # route to it. See utils/contract_files.SIGN_TOKEN_GRACE_DAYS.
                 "sign_token_expires_at": sign_token_expiry(signed_at),
             }
-        }
+        },
+        return_document=ReturnDocument.AFTER,
     )
+    if signed_now is None:
+        # Someone else's signature landed between our read and our write.
+        # Theirs is the contract now; say so rather than silently losing
+        # this one or, worse, stacking it on top.
+        raise HTTPException(
+            status_code=409,
+            detail="This contract was signed by someone else a moment ago. Refresh to see it.",
+        )
 
     # Build the document the two of them can actually send someone: the
     # agreement with a signature page after it.

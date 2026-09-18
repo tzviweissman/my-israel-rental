@@ -140,7 +140,7 @@ export default function RequestReportsTab({ token }) {
                         className="px-2 py-0.5 rounded-full text-xs font-semibold"
                         style={r.hidden_by_admin
                           ? { background: '#F3F0E9', color: 'var(--brand-muted)' }
-                          : { background: '#E6F4EA', color: '#2E7D4F' }}
+                          : { background: 'var(--status-open-bg)', color: 'var(--status-open)' }}
                       >
                         {r.hidden_by_admin ? 'Hidden' : 'Visible on board'}
                       </span>
@@ -192,7 +192,7 @@ export default function RequestReportsTab({ token }) {
                     disabled={busyId === r.id || (decided && !r.hidden_by_admin && !r.needs_review && !r.report_count)}
                     onClick={() => moderate(r, 'allow')}
                     className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold disabled:opacity-50"
-                    style={{ background: '#E6F4EA', color: '#2E7D4F' }}
+                    style={{ background: 'var(--status-open-bg)', color: 'var(--status-open)' }}
                     data-testid={`admin-request-report-allow-${r.id}`}
                   >
                     <Eye size={12} /> Allow

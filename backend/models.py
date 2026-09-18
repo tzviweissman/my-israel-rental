@@ -80,11 +80,27 @@ class RoleUpdate(BaseModel):
     role: str  # 'owner' (only valid value for now)
 
 
+# The rental types a listing may be CREATED with. `storage` is not here:
+# storage rentals are discontinued (CLAUDE.md). Every frontend picker
+# dropped it on 16 Sep, but this model accepted any string, so a direct API
+# call or a CSV row could still create the dead category (17 Sep audit).
+# Rows that already hold `storage` are read, rendered and filtered as
+# before - this gates what comes in, not what exists.
+RENTAL_TYPES = frozenset({"long-term", "short-term", "vacation"})
+
+
 class PropertyCreate(BaseModel):
     title: str
     description: str | None = None
     rental_type: str
     property_type: str
+
+    @field_validator("rental_type")
+    @classmethod
+    def _known_rental_type(cls, v: str) -> str:
+        if v not in RENTAL_TYPES:
+            raise ValueError(f"rental_type must be one of {sorted(RENTAL_TYPES)}")
+        return v
     bedrooms: float | None = None
     bathrooms: float | None = None
     area: str

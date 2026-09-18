@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Home, Eye, Users, Calendar, Briefcase, Store, Inbox } from 'lucide-react';
+import { Home, Eye, Users, Calendar, Briefcase, Store, Inbox, MessageCircle, QrCode } from 'lucide-react';
 import axios from 'axios';
 import { API } from '../../App';
 import AttentionQueue from './AttentionQueue';
@@ -59,7 +59,14 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
   const stock = metrics?.stock;
 
   const flowCards = flow ? [
-    { key: 'views', label: t('admin.kpiViews', 'Views'), value: flow.views, icon: Eye },
+    { key: 'views', label: t('admin.kpiViews', 'Property views'), value: flow.views, icon: Eye },
+    // Demand, not just supply. These three were always recorded and never
+    // shown here, so the console could count listings but not whether
+    // anyone wanted them. "WhatsApp taps" is every counted tap on a
+    // property, service or request contact button, site-wide.
+    { key: 'service-views', label: t('admin.kpiServiceViews', 'Service & business views'), value: flow.service_views, icon: Eye, go: 'services' },
+    { key: 'whatsapp-clicks', label: t('admin.kpiWhatsappClicks', 'WhatsApp taps'), value: flow.whatsapp_clicks, icon: MessageCircle },
+    { key: 'qr-scans', label: t('admin.kpiQrScans', 'QR scans'), value: flow.qr_scans, icon: QrCode },
     { key: 'new-listings', label: t('admin.kpiNewListings', 'New listings'), value: flow.new_listings, icon: Home, go: 'listings' },
     { key: 'new-users', label: t('admin.kpiNewUsers', 'New users'), value: flow.new_users, icon: Users, go: 'users' },
     { key: 'bookings', label: t('admin.kpiBookings', 'Bookings'), value: flow.bookings, icon: Calendar, go: 'bookings' },
