@@ -25,6 +25,7 @@ from models_response import (
     UserPublic,
 )
 from routes.deps import db, logger, verify_token
+from utils import view_tracking
 from utils.auth import JWT_SECRET
 from utils.events import publish
 
@@ -162,6 +163,36 @@ async def get_admin_metrics(
     # Datetime cutoff here — different collection, different stored type.
     view_q = {} if dt_cut is None else {"at": {"$gte": dt_cut}}
     flow["views"] = await db.property_view_events.count_documents(view_q)
+
+    # The demand side, which this endpoint never reported (Tzvi, 18 Sep
+    # 2026: "how many WhatsApp clicks, so I can track growth"). Every one of
+    # these was already being RECORDED - owners see their own numbers - but
+    # the site-wide total reached no screen, so the console could say how
+    # many listings existed and not whether anyone wanted them.
+    #
+    # Three collections, three timestamp shapes, per the note above:
+    #   marketplace_view_events.at   - datetime (same writer style as
+    #                                  property views; gigs + business pages)
+    #   lead_events.created_at       - ISO string (every WhatsApp redirect)
+    #   short_links.daily.YYYY-MM-DD - per-Israel-day counters, no events
+    flow["service_views"] = await db.marketplace_view_events.count_documents(view_q)
+    flow["whatsapp_clicks"] = await db.lead_events.count_documents(
+        {"type": "whatsapp_click", **since}
+    )
+    if iso_cut is None:
+        agg = await db.short_links.aggregate([
+            {"$group": {"_id": None, "n": {"$sum": "$scan_count"}}}
+        ]).to_list(1)
+        flow["qr_scans"] = int(agg[0]["n"]) if agg else 0
+    else:
+        # Sum the day buckets inside the window. Same Israel-day keys the
+        # scan writer uses, so a 23:30 scan lands on the day it happened in.
+        _, day_keys = view_tracking.il_day_window(max(METRIC_RANGES.get(range) or 1, 1))
+        wanted = set(day_keys)
+        total = 0
+        async for link in db.short_links.find({"daily": {"$exists": True}}, {"daily": 1}):
+            total += sum(int(v) for k, v in (link.get("daily") or {}).items() if k in wanted)
+        flow["qr_scans"] = total
 
     # When view logging actually began, so "all time" can say what it means
     # instead of implying it covers the whole life of the site.
