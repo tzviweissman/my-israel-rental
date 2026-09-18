@@ -47,7 +47,7 @@ import useExchangeRate from '../hooks/useExchangeRate';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 import { areaLabel, areaGroupKey, canonicalArea, UNGROUPED_AREA } from '../utils/areaNames';
 import { getRecentSearches, recordSearch } from '../utils/recentSearches';
-import { byPrice, priceIn } from '../utils/listingPrice';
+import { byPrice, priceIn, shownPrice } from '../utils/listingPrice';
 import SortSelect, {
   SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC, SORT_NEAREST, parseSort,
 } from '../components/search/SortSelect';
@@ -812,12 +812,17 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
               >
                 {filteredWithDistance.slice(0, 12).map((p) => {
                   const cover = (p.images && p.images[0]) || '';
-                  const cur = (p.currency || 'ILS').toUpperCase();
+                  // Same rule as the cards and the map pins (utils/listingPrice.
+                  // shownPrice). This strip had its own copy: a short-term flat
+                  // priced by the month and a flat priced only for Sukkot both
+                  // read "₪—" here while their cards showed a price.
+                  const shown = shownPrice(p);
+                  const cur = (shown?.currency || p.currency || 'ILS').toUpperCase();
                   const sym = cur === 'USD' ? '$' : cur === 'EUR' ? '€' : '₪';
-                  const isLT = p.rental_type === 'long-term';
-                  const price = isLT
-                    ? (p.monthly_price ? `${sym}${Math.round(p.monthly_price / 1000)}k/mo` : `${sym}—`)
-                    : (p.nightly_price ? `${sym}${Math.round(p.nightly_price)}/nt` : `${sym}—`);
+                  const price = !shown ? `${sym}—`
+                    : shown.per === 'month' ? `${sym}${Math.round(shown.amount / 1000)}k/mo`
+                    : shown.per === 'holiday' ? `${sym}${Math.round(shown.amount).toLocaleString()} ${t(`stays.holiday_${shown.holiday}`, shown.holiday || '')}`.trim()
+                    : `${sym}${Math.round(shown.amount).toLocaleString()}/nt`;
                   const isActive = p.id === activeMapId;
                   return (
                     <button
