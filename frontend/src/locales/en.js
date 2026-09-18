@@ -1404,6 +1404,7 @@ const en = {
         myGigs: 'My Gigs',
         myBusinesses: 'Businesses',
         deliveries: 'Deliveries',
+        noPriceSet: 'No price set',
         myOrders: 'My orders',
         orders: 'Orders',
         appointments: 'Appointments',

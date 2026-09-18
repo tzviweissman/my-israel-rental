@@ -1363,6 +1363,7 @@ const he = {
         myGigs: 'העבודות שלי',
         myBusinesses: 'עסקים',
         deliveries: 'משלוחים',
+        noPriceSet: 'לא הוגדר מחיר',
         // Two tabs in this sidebar are "הזמנות" in Hebrew: a renter's
         // property bookings (myBookings) and a customer's store orders.
         // English tells them apart by Bookings/Orders; Hebrew has one

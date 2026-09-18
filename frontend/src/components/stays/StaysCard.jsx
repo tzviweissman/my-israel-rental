@@ -45,7 +45,7 @@ import VideoCoverBadge from '../property/VideoCoverBadge';
 
 // Re-exported from utils/listingPrice so the card, the /stays filter and the
 // /stays price sort all convert with the same rate.
-import { FX_USD_TO_ILS, shownPrice } from '../../utils/listingPrice';
+import { FX_USD_TO_ILS, shownPrice, unitLabel } from '../../utils/listingPrice';
 
 const StaysCard = ({
   property,
@@ -66,17 +66,7 @@ const StaysCard = ({
   const price = shown?.amount;
   const propCur = shown?.currency || property.currency || 'ILS';
   const sym = propCur === 'ILS' ? '₪' : '$';
-  const holidayName = shown?.holiday
-    ? t(`stays.holiday_${shown.holiday}`, shown.holiday.charAt(0).toUpperCase() + shown.holiday.slice(1))
-    : null;
-  const unit = {
-    night: t('stays.unitNight', 'night'),
-    month: t('stays.unitMonth', 'month'),
-    holiday: holidayName || t('stays.unitHoliday', 'holiday'),
-    holidayNight: holidayName
-      ? t('stays.unitHolidayNight', 'night ({{holiday}})', { holiday: holidayName })
-      : t('stays.unitNight', 'night'),
-  }[shown?.per] || '';
+  const unit = unitLabel(shown, t);
   const listedAgo = listedAgoLabel(property.created_at, t);
   const fresh = isFreshListing(property.created_at);
 

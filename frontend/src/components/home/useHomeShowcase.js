@@ -23,6 +23,7 @@
  * same reason siteAssets.js exists at all.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { shownPrice } from '../../utils/listingPrice';
 import axios from 'axios';
 
 import { API } from '../../lib/apiBase';
@@ -257,9 +258,6 @@ export default function useHomeShowcase() {
   // genuinely differs from one day to the next.
   const picks = useMemo(() => {
     const day = Math.floor(Date.now() / 86400000);
-    const money = (n, currency, per) => (
-      n ? `${currency === 'USD' ? '$' : '₪'}${Number(n).toLocaleString()}${per}` : null
-    );
     const stay = (p) => ({
       key: `p-${p.id}`,
       src: framedImage(propertyPhoto(p), PICK_SIZE, PICK_SIZE),
@@ -271,7 +269,10 @@ export default function useHomeShowcase() {
       title: p.title || '',
       area: p.area || '',
       href: `/property/${p.id}`,
-      price: money(p.monthly_price, p.currency, '/mo') || money(p.nightly_price, p.currency, '/night'),
+      // The shared rule's answer; the page formats it in its own language.
+      // This was an English string ("/mo", "/night") shown on the Hebrew
+      // page too, and a holiday-only flat had no price.
+      shown: shownPrice(p),
       beds: p.bedrooms ? String(p.bedrooms) : null,
       rentalType: p.rental_type || '',
     });

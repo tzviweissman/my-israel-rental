@@ -6,6 +6,7 @@ import { API } from '../../App';
 import AttentionQueue from './AttentionQueue';
 import DemandByPerson from './DemandByPerson';
 import { formatDate } from '../../utils/formatDate';
+import { formatShownPrice, shownPrice } from '../../utils/listingPrice';
 
 /**
  * Super Admin → Overview tab.
@@ -202,7 +203,7 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
                 <td className="px-5 py-3 font-medium text-sm">{p.title}</td>
                 <td className="px-5 py-3 text-sm text-gray-600">{p.area}</td>
                 <td className="px-5 py-3"><span className="px-2 py-1 rounded-full text-xs bg-[var(--brand-border)]">{p.rental_type}</span></td>
-                <td className="px-5 py-3 font-bold text-sm">{p.currency === 'USD' ? '$' : '₪'}{p.monthly_price || p.nightly_price || 0}</td>
+                <td className="px-5 py-3 font-bold text-sm">{formatShownPrice(shownPrice(p), t) || '—'}</td>
                 <td className="px-5 py-3 text-sm">{p.views || 0}</td>
               </tr>
             ))}

@@ -47,7 +47,7 @@ import useExchangeRate from '../hooks/useExchangeRate';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 import { areaLabel, areaGroupKey, canonicalArea, UNGROUPED_AREA } from '../utils/areaNames';
 import { getRecentSearches, recordSearch } from '../utils/recentSearches';
-import { byPrice, priceIn, shownPrice } from '../utils/listingPrice';
+import { byPrice, priceIn, shownPrice, unitLabel } from '../utils/listingPrice';
 import SortSelect, {
   SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC, SORT_NEAREST, parseSort,
 } from '../components/search/SortSelect';
@@ -821,7 +821,7 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
                   const sym = cur === 'USD' ? '$' : cur === 'EUR' ? '€' : '₪';
                   const price = !shown ? `${sym}—`
                     : shown.per === 'month' ? `${sym}${Math.round(shown.amount / 1000)}k/mo`
-                    : shown.per === 'holiday' ? `${sym}${Math.round(shown.amount).toLocaleString()} ${t(`stays.holiday_${shown.holiday}`, shown.holiday || '')}`.trim()
+                    : shown.per === 'holiday' ? `${sym}${Math.round(shown.amount).toLocaleString()} ${unitLabel(shown, t)}`
                     : `${sym}${Math.round(shown.amount).toLocaleString()}/nt`;
                   const isActive = p.id === activeMapId;
                   return (

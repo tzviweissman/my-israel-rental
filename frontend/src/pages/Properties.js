@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useContext, useRef, useCallback } from 'react';
+import { shownPrice } from '../utils/listingPrice';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -324,9 +325,12 @@ const Properties = () => {
     // hide listings that genuinely matched the renter's budget.
     const fx = exchangeRate?.usd_to_ils || FX_USD_TO_ILS;
     return items.filter((p) => {
-      const raw = p.monthly_price || p.nightly_price || 0;
+      // The price this listing's card shows (utils/listingPrice.shownPrice),
+      // so the budget filter and the card cannot disagree.
+      const shown = shownPrice(p);
+      const raw = shown?.amount || 0;
       if (!raw) return true; // no price listed — don't block
-      const propCurrency = p.currency || 'ILS';
+      const propCurrency = shown?.currency || p.currency || 'ILS';
       let priceInTarget = raw;
       if (propCurrency !== targetCurrency) {
         if (targetCurrency === 'USD' && propCurrency === 'ILS') {
