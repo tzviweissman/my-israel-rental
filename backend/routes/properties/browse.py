@@ -632,19 +632,25 @@ async def property_performance_summary(user=Depends(verify_token)) -> dict:
         if pid:
             per_prop[pid] = per_prop.get(pid, 0) + 1
 
+    views = await view_tracking.view_summary(owner_id, _PROP_PERIOD_DAYS, prop_ids)
+
+    # One row per listing that had a visitor OR a tap in the window, each
+    # carrying both numbers (Tzvi, 18 Sep 2026). Rows used to be taps only,
+    # so a flat 40 people looked at and nobody messaged about - the listing
+    # most worth rewriting - never appeared at all.
+    seen = views.get("by_entity") or {}
     by_listing = sorted(
         (
-            {"id": pid, "title": titles.get(pid, ""), "count": n}
-            for pid, n in per_prop.items()
+            {"id": pid, "title": titles.get(pid, ""),
+             "count": per_prop.get(pid, 0), "views": seen.get(pid, 0)}
+            for pid in set(per_prop) | {k for k, n in seen.items() if n}
             # A tap against a since-deleted listing still counts in the
             # total; it just has no row to show, because there is nothing
             # left to name.
             if pid in titles
         ),
-        key=lambda r: (-r["count"], r["title"]),
+        key=lambda r: (-r["count"], -r["views"], r["title"]),
     )
-
-    views = await view_tracking.view_summary(owner_id, _PROP_PERIOD_DAYS, prop_ids)
 
     # The day the oldest listing went live - the counter's real denominator.
     live_since = None

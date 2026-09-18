@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Home, Eye, Users, Calendar, Briefcase, Store, Inbox, MessageCircle, QrCode } from 'lucide-react';
+import { Home, Eye, Users, Calendar, Briefcase, Store, Inbox, MessageCircle, QrCode, Globe, MousePointerClick } from 'lucide-react';
 import axios from 'axios';
 import { API } from '../../App';
 import AttentionQueue from './AttentionQueue';
+import DemandByPerson from './DemandByPerson';
+import { formatDate } from '../../utils/formatDate';
 
 /**
  * Super Admin → Overview tab.
@@ -59,6 +61,10 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
   const stock = metrics?.stock;
 
   const flowCards = flow ? [
+    // The whole site first: people who came at all, and pages they opened.
+    // Everything after this is one slice of that.
+    { key: 'site-visitors', label: t('admin.kpiSiteVisitors', 'Site visitors'), value: flow.site_visitors, icon: Globe },
+    { key: 'site-pageviews', label: t('admin.kpiSitePageviews', 'Pages opened'), value: flow.site_pageviews, icon: MousePointerClick },
     { key: 'views', label: t('admin.kpiViews', 'Property views'), value: flow.views, icon: Eye },
     // Demand, not just supply. These three were always recorded and never
     // shown here, so the console could count listings but not whether
@@ -83,8 +89,13 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
   const renderCard = ({ key, label, value, icon: Icon, go }) => {
     const body = (
       <div className="flex items-center gap-3">
-        <div className="p-2 rounded-lg shrink-0" style={{ backgroundColor: 'var(--brand-primary)' }}>
-          <Icon size={18} color="var(--gold)" />
+        {/* A soft wash with the accent icon, the same tile the owners'
+            dashboard uses. This was the primary blue with a `--gold` icon,
+            and since the flow theme put the accent blue into every gold
+            name, the icon was blue on blue: every card showed a solid
+            square. */}
+        <div className="p-2 rounded-lg shrink-0" style={{ background: 'rgb(var(--brand-primary-rgb) / 0.10)' }}>
+          <Icon size={18} color="var(--brand-primary)" aria-hidden="true" />
         </div>
         <div className="min-w-0">
           <p className="text-2xl font-bold">{typeof value === 'number' ? value.toLocaleString() : value}</p>
@@ -147,6 +158,14 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
 
       {/* Views only exist from the day event logging started. Saying so
           keeps "All time" from claiming more history than it has. */}
+      {/* Same honesty for the site-wide counter, which began later. */}
+      {metrics?.site_since && (
+        <p className="text-xs mb-1" style={{ color: 'var(--brand-muted)' }} data-testid="admin-site-since">
+          {t('admin.siteSince', 'Site visitors counted since {{date}}', {
+            date: formatDate(metrics.site_since),
+          })}
+        </p>
+      )}
       {metrics?.views_since && (
         <p className="text-xs mb-8" style={{ color: 'var(--brand-muted)' }} data-testid="admin-views-since">
           {t('admin.viewsSince', 'Views counted since {{date}}', {
@@ -154,6 +173,8 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
           })}
         </p>
       )}
+
+      <DemandByPerson token={token} range={range} />
 
       {/* --- stock: true right now, whatever the range says --- */}
       <h2 className="text-sm font-bold uppercase tracking-wide mb-3" style={{ color: 'var(--brand-muted)' }}>

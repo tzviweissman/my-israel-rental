@@ -151,18 +151,39 @@ export default function PerformancePanel({
             />
           </div>
 
-          {rows.length > 0 && (
-            <ul className="mt-4 pt-3 border-t border-gray-100 space-y-1" data-testid="perf-by-gig">
-              <li className="text-[11px] font-semibold text-gray-500 mb-1">
-                {rowsLabel || t('perf.byListing', 'Taps by listing')}
-              </li>
-              {rows.map((r) => (
-                <li key={r.gig_id || r.id} className="flex items-center justify-between gap-3 text-xs">
-                  <span className="text-gray-700 truncate">{r.title}</span>
-                  <span className="font-semibold text-gray-900 shrink-0">{r.count}</span>
-                </li>
-              ))}
-            </ul>
+          {/* Visitors AND taps per listing (18 Sep 2026). Rows used to carry
+              taps alone, so the listing most worth rewriting - plenty of
+              people looked, nobody messaged - never appeared. The business
+              page gets its own row because a visit to the storefront is a
+              visit to no single service. */}
+          {(rows.length > 0 || data.page_views > 0) && (
+            <table className="mt-4 w-full text-xs border-t border-gray-100" data-testid="perf-by-gig">
+              <thead>
+                <tr className="text-[11px] font-semibold text-gray-500">
+                  <th className="pt-3 pb-1 text-start font-semibold">
+                    {rowsLabel || t('perf.byListing', 'By listing, last 30 days')}
+                  </th>
+                  <th className="pt-3 pb-1 px-2 text-end font-semibold">{t('perf.colVisitors', 'Visitors')}</th>
+                  <th className="pt-3 pb-1 text-end font-semibold">{t('perf.colTaps', 'Taps')}</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.page_views > 0 && (
+                  <tr data-testid="perf-row-business-page">
+                    <td className="py-0.5 text-gray-700 italic">{t('perf.businessPage', 'Your business page')}</td>
+                    <td className="py-0.5 px-2 text-end tabular-nums text-gray-900">{data.page_views}</td>
+                    <td className="py-0.5 text-end text-gray-400">–</td>
+                  </tr>
+                )}
+                {rows.map((r) => (
+                  <tr key={r.gig_id || r.id} data-testid="perf-row">
+                    <td className="py-0.5 text-gray-700 truncate max-w-[16rem]" dir="auto">{r.title}</td>
+                    <td className="py-0.5 px-2 text-end tabular-nums text-gray-900">{r.views ?? 0}</td>
+                    <td className="py-0.5 text-end tabular-nums font-semibold text-gray-900">{r.count}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           )}
         </>
       )}

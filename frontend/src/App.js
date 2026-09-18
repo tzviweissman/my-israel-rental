@@ -23,6 +23,7 @@ import '@/styles/page-theme.css';
 import Navigation from './components/Navigation';
 import ImpersonationBanner from './components/ImpersonationBanner';
 import WhatsAppButton from './components/WhatsAppButton';
+import SiteVisitTracker from './components/SiteVisitTracker';
 import AccessibilityButton from './components/AccessibilityButton';
 import ThemePreviewOverride from './components/ThemePreviewOverride';
 import { installStaleBuildInterceptor } from './utils/staleBuildInterceptor';
@@ -354,6 +355,7 @@ function App() {
               </Helmet>
             )}
             <ScrollToTop />
+            <SiteVisitTracker />
             <BuildRefresh />
             <ThemePreviewOverride />
             <div className="App">

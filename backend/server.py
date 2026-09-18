@@ -47,6 +47,7 @@ from routes import (  # noqa: E402
     properties,
     saved_searches,
     short_links,
+    site_visits,
     tours_3d,
     smart_pricing,
     subleases,
@@ -88,6 +89,7 @@ for mod in (
     payments,
     geocode,
     short_links,
+    site_visits,
     tours_3d,
 ):
     api_router.include_router(mod.router)
@@ -492,6 +494,8 @@ async def startup_tasks() -> None:
         # the database refuses, and utils/businesses turns that refusal
         # into a retry. (17 Sep audit.)
         await db.businesses.create_index("slug", unique=True, background=True)
+        from routes.site_visits import ensure_site_visit_indexes
+        await ensure_site_visit_indexes()
         logger.info("Hot-path indexes ensured")
     except Exception as e:  # noqa: BLE001
         logger.warning(f"hot-path index creation failed (non-fatal): {e}")
