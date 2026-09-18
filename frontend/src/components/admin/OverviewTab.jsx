@@ -4,6 +4,7 @@ import { Home, Eye, Users, Calendar, Briefcase, Store, Inbox, MessageCircle, QrC
 import axios from 'axios';
 import { API } from '../../App';
 import AttentionQueue from './AttentionQueue';
+import DemandByPerson from './DemandByPerson';
 
 /**
  * Super Admin → Overview tab.
@@ -154,6 +155,8 @@ export const OverviewTab = ({ dashboard, token, onNavigate }) => {
           })}
         </p>
       )}
+
+      <DemandByPerson token={token} range={range} />
 
       {/* --- stock: true right now, whatever the range says --- */}
       <h2 className="text-sm font-bold uppercase tracking-wide mb-3" style={{ color: 'var(--brand-muted)' }}>

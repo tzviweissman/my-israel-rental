@@ -1028,6 +1028,35 @@ async def leads_summary(
     if oldest:
         live_since = _il_day(oldest[0].get("created_at"))
 
+    # Visitors PER LISTING, beside taps (Tzvi, 18 Sep 2026: owners should see
+    # views and clicks on each of their listings). `view_summary` has always
+    # computed `by_entity`; this endpoint dropped it, so a row could say "3
+    # taps" but never "out of 40 visitors". Rows now carry both, and a
+    # listing people looked at without tapping gets a row too - that is the
+    # one an owner most needs to see.
+    seen = views.get("by_entity") or {}
+    in_rows = {r["gig_id"] for r in by_gig}
+    viewed_only = [gid for gid, n in seen.items() if n and gid not in in_rows]
+    if viewed_only:
+        async for g in db.marketplace_gigs.find(
+            {"_id": {"$in": viewed_only}, **mine_q}, {"title": 1, "business_id": 1},
+        ):
+            by_gig.append({
+                "gig_id": g["_id"], "title": g.get("title") or "",
+                "business_id": g.get("business_id"), "count": 0,
+            })
+    for r in by_gig:
+        r["views"] = seen.get(r["gig_id"], 0)
+    by_gig.sort(key=lambda r: (-r["count"], -r["views"], r["title"]))
+
+    if business_id:
+        page_views = seen.get(business_id, 0)
+    else:
+        biz_ids = [b["_id"] async for b in db.businesses.find(
+            {"owner_user_id": provider_id}, {"_id": 1},
+        )]
+        page_views = sum(seen.get(b, 0) for b in biz_ids)
+
     return {
         "total": total,
         "period_days": LEADS_PERIOD_DAYS,
@@ -1037,6 +1066,10 @@ async def leads_summary(
         "daily": [{"date": k, "count": buckets[k]} for k in day_keys],
         "since": since,
         "by_gig": by_gig,
+        # Visitors to the business page itself, which is no single service.
+        # With no business named, every business the caller owns is summed,
+        # so the all-businesses view does not quietly drop the storefront.
+        "page_views": page_views,
         "views": {
             "total": views["total"],
             "period_total": views["period_total"],

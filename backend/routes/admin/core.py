@@ -106,6 +106,30 @@ def _range_cutoffs(rng: str) -> tuple[datetime | None, str | None]:
     return cutoff, cutoff.replace(tzinfo=None).isoformat()
 
 
+async def _qr_scans_by_owner(rng: str) -> dict:
+    """QR / short-link scans per owner for a range key.
+
+    short_links keeps no events: a running `scan_count` plus per-Israel-day
+    buckets under `daily.YYYY-MM-DD`. "All time" reads the total; any other
+    range sums the buckets inside the window, keyed the way the scan writer
+    keys them, so a 23:30 scan lands on the day it happened in.
+    """
+    out: dict = {}
+    wanted = None
+    if rng != "all":
+        _, day_keys = view_tracking.il_day_window(max(METRIC_RANGES.get(rng) or 1, 1))
+        wanted = set(day_keys)
+    async for link in db.short_links.find({}, {"owner_user_id": 1, "scan_count": 1, "daily": 1}):
+        if wanted is None:
+            n = int(link.get("scan_count") or 0)
+        else:
+            n = sum(int(v) for k, v in (link.get("daily") or {}).items() if k in wanted)
+        if n:
+            owner = link.get("owner_user_id")
+            out[owner] = out.get(owner, 0) + n
+    return out
+
+
 @api_router.get("/admin/metrics")
 async def get_admin_metrics(
     payload: dict = Depends(verify_token),
@@ -176,24 +200,17 @@ async def get_admin_metrics(
     #                                  property views; gigs + business pages)
     #   lead_events.created_at       - ISO string (every WhatsApp redirect)
     #   short_links.daily.YYYY-MM-DD - per-Israel-day counters, no events
-    flow["service_views"] = await db.marketplace_view_events.count_documents(view_q)
+    # gig + business only. This stream ALSO carries property visitors
+    # (entity_type "property"), and counting them here double-reported
+    # properties under a "services" label - caught 18 Sep, the day after
+    # this card shipped.
+    flow["service_views"] = await db.marketplace_view_events.count_documents(
+        {**view_q, "entity_type": {"$in": ["gig", "business"]}}
+    )
     flow["whatsapp_clicks"] = await db.lead_events.count_documents(
         {"type": "whatsapp_click", **since}
     )
-    if iso_cut is None:
-        agg = await db.short_links.aggregate([
-            {"$group": {"_id": None, "n": {"$sum": "$scan_count"}}}
-        ]).to_list(1)
-        flow["qr_scans"] = int(agg[0]["n"]) if agg else 0
-    else:
-        # Sum the day buckets inside the window. Same Israel-day keys the
-        # scan writer uses, so a 23:30 scan lands on the day it happened in.
-        _, day_keys = view_tracking.il_day_window(max(METRIC_RANGES.get(range) or 1, 1))
-        wanted = set(day_keys)
-        total = 0
-        async for link in db.short_links.find({"daily": {"$exists": True}}, {"daily": 1}):
-            total += sum(int(v) for k, v in (link.get("daily") or {}).items() if k in wanted)
-        flow["qr_scans"] = total
+    flow["qr_scans"] = sum((await _qr_scans_by_owner(range)).values())
 
     # When view logging actually began, so "all time" can say what it means
     # instead of implying it covers the whole life of the site.
@@ -207,6 +224,81 @@ async def get_admin_metrics(
         "views_source": "events",
         "views_since": views_since,
     }
+
+
+@api_router.get("/admin/metrics/by-user")
+async def get_admin_metrics_by_user(
+    payload: dict = Depends(verify_token),
+    range: str = "all",
+    limit: int = 200,
+) -> dict:
+    """WhatsApp taps, visitors and QR scans per person, for a range.
+
+    The site-wide cards say whether demand is growing; this says whose it
+    is (Tzvi, 18 Sep 2026). Each person's numbers are the sum across
+    everything they own - flats, services, business pages, Requests posts.
+
+    Who a tap belongs to is stored under a different name per source, read
+    off the real documents: `owner_id` for a property, `provider_id` for a
+    service, `poster_id` for a Requests post. Coalesced here rather than
+    migrated, so no row is rewritten to answer a report.
+
+    "Visitors" is the deduplicated stream (one visitor per listing per day,
+    never the owner) - the same number each person sees on their own
+    dashboard, so the two screens cannot disagree about one listing.
+    """
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    if range not in METRIC_RANGES:
+        raise HTTPException(status_code=400, detail=f"range must be one of {sorted(METRIC_RANGES)}")
+    limit = max(1, min(limit, 1000))
+
+    dt_cut, iso_cut = _range_cutoffs(range)
+    since = {} if iso_cut is None else {"created_at": {"$gte": iso_cut}}
+    view_q = {} if dt_cut is None else {"at": {"$gte": dt_cut}}
+
+    taps: dict = {}
+    async for row in db.lead_events.aggregate([
+        {"$match": {"type": "whatsapp_click", **since}},
+        {"$group": {
+            "_id": {"$ifNull": ["$owner_id", {"$ifNull": ["$provider_id", "$poster_id"]}]},
+            "n": {"$sum": 1},
+        }},
+    ]):
+        taps[row["_id"]] = row["n"]
+
+    visitors: dict = {}
+    async for row in db.marketplace_view_events.aggregate([
+        {"$match": view_q},
+        {"$group": {"_id": "$owner_id", "n": {"$sum": 1}}},
+    ]):
+        visitors[row["_id"]] = row["n"]
+
+    scans = await _qr_scans_by_owner(range)
+
+    ids = [i for i in set(taps) | set(visitors) | set(scans) if i]
+    people = {
+        u["id"]: u async for u in db.users.find(
+            {"id": {"$in": ids}}, {"_id": 0, "id": 1, "name": 1, "email": 1, "role": 1},
+        )
+    }
+    rows = []
+    for uid in ids:
+        u = people.get(uid) or {}
+        rows.append({
+            "user_id": uid,
+            # None when the account has since been deleted: their taps and
+            # visitors still happened, and dropping them would make the
+            # per-person total disagree with the site-wide card above it.
+            "name": u.get("name"),
+            "email": u.get("email"),
+            "role": u.get("role"),
+            "whatsapp_clicks": taps.get(uid, 0),
+            "visitors": visitors.get(uid, 0),
+            "qr_scans": scans.get(uid, 0),
+        })
+    rows.sort(key=lambda r: (-r["whatsapp_clicks"], -r["visitors"], -r["qr_scans"], r["name"] or ""))
+    return {"range": range, "people": len(rows), "rows": rows[:limit]}
 
 
 @api_router.get("/admin/bookings")
