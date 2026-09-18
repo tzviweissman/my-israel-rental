@@ -23,7 +23,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { formatShownPrice } from '../utils/listingPrice';
 import { formatDate } from '../utils/formatDate';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { ArrowRight, Check, Home as HomeIcon, Store, Megaphone } from 'lucide-react';
 
 import { MotionConfig } from 'motion/react';
@@ -63,20 +63,28 @@ const MARQUEE_MIN = 6;
  * `home-v2.css` carries a light variant scoped to that mark. Nothing about the
  * nav's own file changes, and no other page can be affected.
  */
-function useLightNav() {
+function useLightNav(isLab) {
   useEffect(() => {
     document.body.classList.add('hv2-light-nav');
-    // `theme-preview` is the scope for palette experiments. Tzvi's rule,
-    // 3 September, after a trial palette reached the live home page for ten
-    // minutes: a theme under test is written under `body.theme-preview` and
-    // so exists on this page and nowhere else. scripts/test-theme-scope.mjs
-    // fails the build if an experimental theme file has a rule outside it.
-    document.body.classList.add('theme-preview');
+    // `home-v2` carries what this page IS - today the desktop 80% scale
+    // Tzvi asked for (home-v2.css). It is set wherever the page renders,
+    // including the live home page at "/".
+    document.body.classList.add('home-v2');
+    // `theme-preview` is the scope for palette EXPERIMENTS, and it stays on
+    // /home-preview only, never on "/". Tzvi's rule, 3 September, after a
+    // trial palette reached the live home page for ten minutes: a theme under
+    // test is written under `body.theme-preview` and exists on the lab page
+    // and nowhere else. This page became the live home page on 19 September;
+    // setting the lab class on "/" too would have put every future
+    // experiment straight onto the front door. scripts/test-theme-scope.mjs
+    // fails the build if an experimental theme file escapes the scope.
+    if (isLab) document.body.classList.add('theme-preview');
     return () => {
       document.body.classList.remove('hv2-light-nav');
+      document.body.classList.remove('home-v2');
       document.body.classList.remove('theme-preview');
     };
-  }, []);
+  }, [isLab]);
 }
 
 /** Fail-safe reveal: content is visible unless JS proves it is running. */
@@ -99,6 +107,9 @@ function useReveal(root) {
 export default function HomePreview() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  // The same page serves "/" (live) and "/home-preview" (the lab, where
+  // palette experiments are scoped and search engines are kept out).
+  const isLab = useLocation().pathname.startsWith('/home-preview');
   const {
     gallery, picks, dealCards, hasDeals, recent, rentals, businesses,
     loaded, failed, retrying, retry,
@@ -157,7 +168,7 @@ export default function HomePreview() {
     return () => io.disconnect();
   }, [hasMarquee]);
   useReveal(root);
-  useLightNav();
+  useLightNav(isLab);
 
   // The carousel takes flat slides; the page keeps the objects so its own CTA
   // can open whichever card is centred.
@@ -195,11 +206,51 @@ export default function HomePreview() {
 
   return (
     <div ref={root} className="hv2" data-testid="home-preview">
+      {/* The live home page's search title, description and structured data,
+          carried over verbatim when this page replaced it on 19 Sep 2026, so
+          the site's standing in search does not reset. The description keeps
+          its rule from the old page: it makes claims about OUR costs only,
+          never about owners' or agents' fees. /home-preview is the lab copy
+          of the same page and stays out of search, pointing at "/". */}
       <PageMeta
-        title="MyIsraelRental — Rentals and local businesses across Israel"
-        description="Find a place to rent and the people to help you settle in. Free to search, free to list, no commission."
-        path="/home-preview"
-        noindex
+        title="MyIsraelRental — Find your perfect rental in Israel | Free to search"
+        description="Browse long-term, short-term, and vacation rentals across Israel — free to search and contact owners directly. Listings in Jerusalem, Tel Aviv, Haifa and more, in English."
+        path="/"
+        noindex={isLab}
+        jsonLd={[
+          // Organization — surfaces the brand name + logo in Google's
+          // knowledge-panel-style rich results.
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            '@id': 'https://myisraelrental.com/#organization',
+            name: 'MyIsraelRental',
+            url: 'https://myisraelrental.com',
+            logo: 'https://myisraelrental.com/brand-logo.png',
+            description: 'Find long-term, short-term, and vacation rentals across Israel. Free for renters, free for owners.',
+            areaServed: { '@type': 'Country', name: 'Israel' },
+          },
+          // WebSite — lets Google show a sitelinks search box that
+          // points straight into the /stays results page, dramatically
+          // improving direct-from-SERP discoverability for brand searches.
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            '@id': 'https://myisraelrental.com/#website',
+            name: 'MyIsraelRental',
+            url: 'https://myisraelrental.com',
+            publisher: { '@id': 'https://myisraelrental.com/#organization' },
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: {
+                '@type': 'EntryPoint',
+                urlTemplate: 'https://myisraelrental.com/stays?area={search_term_string}',
+              },
+              'query-input': 'required name=search_term_string',
+            },
+            inLanguage: ['en', 'he'],
+          },
+        ]}
       />
 
       {/* ── Hero: the loop ────────────────────────────────────────────────
@@ -220,8 +271,7 @@ export default function HomePreview() {
           and no video element at all; so does a stall past two seconds. All
           of that lives in LoopHero.
 
-          Preview page only (body.theme-preview). The live home page's hero is
-          exempt by ruling and is untouched. */}
+          The live home page's hero since 19 Sep 2026. */}
       <section className="hv2-hero hv2-hero--film" data-testid="home-preview-hero">
         <LoopHero />
         <div className="hv2-hero-scrim" aria-hidden="true" />
@@ -267,7 +317,7 @@ export default function HomePreview() {
               </LiquidButton>
             </div>
             <button type="button" className="hv2-hero-link" onClick={() => navigate('/businesses/add')}>
-              {t('home.v2.hero.ctaAdd', 'Add your business — free')} <ArrowRight size={14} className="rtl:rotate-180" />
+              {t('home.v2.hero.ctaAdd', 'Add your business, free')} <ArrowRight size={14} className="rtl:rotate-180" />
             </button>
           </div>
         </div>

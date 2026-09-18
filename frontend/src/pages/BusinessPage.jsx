@@ -626,7 +626,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)' }}
             data-testid="business-attribution-cta"
           >
-            {t('businessPage.listYours', 'List your business — free')}
+            {t('businessPage.listYours', 'List your business, free')}
           </Link>
         </div>
       </div>

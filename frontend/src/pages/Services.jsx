@@ -944,7 +944,7 @@ const Services = () => {
         </div>
         <div className="svc-cta svc-cta-offer">
           <div>
-            <h4>{t('services.ctaOfferTitle', 'Add your business — free')}</h4>
+            <h4>{t('services.ctaOfferTitle', 'Add your business, free')}</h4>
             <small>{t('services.ctaOfferBody', 'One free listing reaches everyone on the platform — renters, owners and property managers alike.')}</small>
           </div>
           <button
