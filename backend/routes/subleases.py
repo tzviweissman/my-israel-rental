@@ -94,6 +94,13 @@ async def create_sublease(sublease_data: SubleaseCreate, payload: dict = Depends
 
 
 
+# The two public sublease reads never return the contract's sign_token. It is
+# the ONLY credential on /contracts/sign/{token} (view, download, sign), and
+# until 20 Sep 2026 both endpoints handed it to anyone (security scan F1).
+# The subleasor still gets it from /my-subleases, which is behind a login.
+_PUBLIC_FIELDS = {"_id": 0, "sign_token": 0}
+
+
 @api_router.get("/subleases", response_model=list[SubleaseOut])
 async def list_subleases(area: str | None = None, holiday_tag: str | None = None) -> list[dict]:
     query: dict = {"active": True}
@@ -105,14 +112,14 @@ async def list_subleases(area: str | None = None, holiday_tag: str | None = None
             query["area"] = area_q
     if holiday_tag:
         query["holiday_tags"] = holiday_tag
-    subleases = await db.subleases.find(query, {"_id": 0}).sort("created_at", -1).to_list(500)
+    subleases = await db.subleases.find(query, _PUBLIC_FIELDS).sort("created_at", -1).to_list(500)
     # One malformed row must not 500 the whole board - see utils/property_rows.py.
     return keep_valid_rows(subleases, SubleaseOut, route="GET /subleases", logger=logger)
 
 
 @api_router.get("/subleases/{sublease_id}", response_model=SubleaseOut)
 async def get_sublease_by_id(sublease_id: str) -> dict:
-    sublease = await db.subleases.find_one({"id": sublease_id}, {"_id": 0})
+    sublease = await db.subleases.find_one({"id": sublease_id}, _PUBLIC_FIELDS)
     if not sublease:
         raise HTTPException(status_code=404, detail="Sublease not found")
     return sublease
