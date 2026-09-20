@@ -265,7 +265,7 @@ const Dashboard = () => {
   const activeLabel = nav.groups.flatMap((g) => g.tabs).find((tab) => tab.id === activeTab)?.label;
   // Tabs that already open on their own heading (usually with their main
   // action beside it) get no second one from the shell.
-  const OWN_TITLE = ['properties', 'my-businesses', 'orders', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts'];
+  const OWN_TITLE = ['properties', 'my-businesses', 'orders', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts', 'bookings', 'contracts'];
   const pageTitle = OWN_TITLE.includes(activeTab) ? null : (onOverview || !activeLabel ? t('dashboard.title') : activeLabel);
   const showListingActions = onOverview || activeTab === 'properties' || activeTab === 'bulk-manager';
 
