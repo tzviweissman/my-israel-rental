@@ -23,6 +23,16 @@ A repeatable, evidence-driven review of this codebase. **Investigate and report 
 - **Invented numbers.** Grep the frontend for hardcoded counts, "500+", "1,200+", star ratings, review counts, "X people viewing". Every user-facing figure must trace to a query. *(Precedent: "1,200+ active rentals / 19 cities / 450+ verified pros" shipped from preview placeholders when the real figures were 196, one city, three providers.)*
 - **Claims that outrun the data** — response times with too few samples, availability implied but not checked, "verified" badges not backed by a verification record.
 - **Dark patterns**: fake scarcity, countdowns, painted progress. None should exist.
+- **The live listings' prices. Run this every time, and before reading any code:**
+
+  ```bash
+  python3 backend/scripts/live_price_check.py --out docs/audits/$(date -u +%F)-price-check.md
+  ```
+
+  It reads only the public list the /stays page loads (no login, no database, nothing written) and flags prices a customer would misread: a monthly rent typed into the nightly box, a per-night holiday price that reads like the whole holiday, a listing with no price at all, and so on. Put its **DATA** findings in the morning summary as a short "worth a call to the owner" list, with the links. Only mention a finding that is new since the last report in `docs/audits/`, so the same flat is not reported every night.
+  *(Precedent, 18 Sep 2026: a Sukkot list sent to customers said "$154 / Sukkot" when the owner had said $154 a night. Months of code-reading audits never looked at a real listing. One pass over the live data found that whole family of bugs in minutes.)*
+  If the script prints **PRICE CHECK DID NOT RUN**, say so under "Not checked". Never let a check that could not run read as "no problems".
+  Also run `pip install -q pytest && python3 -m pytest backend/tests/test_listing_price_parity.py -q`. It needs no server or database, and it proves the website and the server still price every listing the same way. A failure there is a **High** finding.
 
 ## 2. Bilingual completeness
 

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { formatShownPrice, shownPrice } from '../../utils/listingPrice';
 import axios from 'axios';
 import { Heart, MapPin, Bed, Bath } from 'lucide-react';
 import { toast } from 'sonner';
@@ -130,12 +131,12 @@ const LikedTab = ({ API, token }) => {
                   )}
                 </div>
                 <div className="flex items-center justify-between">
+                  {/* Shared rule (utils/listingPrice). Was "monthly || nightly || 0"
+                      with an English unit: a Sukkot-only flat read "₪0/night". */}
                   <span className="text-lg font-bold" style={{ color: 'var(--gold)' }}>
-                    {property.currency === 'USD' ? '$' : '₪'}
-                    {(property.monthly_price || property.nightly_price || 0).toLocaleString()}
-                    <span className="text-xs font-normal text-gray-500">
-                      {property.rental_type === 'vacation' ? '/night' : '/mo'}
-                    </span>
+                    {formatShownPrice(shownPrice(property), t) || (
+                      <span className="text-sm font-semibold text-gray-500">{t('stays.priceOnRequest', 'Price on request')}</span>
+                    )}
                   </span>
                   <button
                     onClick={(e) => {

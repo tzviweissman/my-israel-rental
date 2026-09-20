@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { holidayShown, priceSymbol, regularShown, unitLabel } from '../../utils/listingPrice';
 import ShareListingsPanel from './ShareListingsPanel';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -26,70 +27,34 @@ import PerformancePanel from './PerformancePanel';
 // through (which left holiday-only listings displaying just a bare currency
 // glyph with no number).
 const PriceBlock = ({ property, t }) => {
-  const isVacation = property.rental_type === 'vacation';
-  const regularPrice = isVacation ? property.nightly_price : property.monthly_price;
-  const regularSym = property.currency === 'USD' ? '$' : '₪';
-  const regularLabel = isVacation ? t('property.perNight') : t('property.perMonth');
+  // Both prices a listing can carry, each from the shared rule
+  // (utils/listingPrice): the everyday one and the holiday one. The owner
+  // sees both because both are theirs to check; a renter sees one.
+  const regular = regularShown(property);
+  const holiday = holidayShown(property);
 
-  const hasHoliday =
-    isVacation && property.holiday_lump_price != null && property.holiday_lump_price > 0;
-  const holidaySym =
-    (property.holiday_lump_currency || property.currency) === 'USD' ? '$' : '₪';
-  const tags = property.holiday_tags || [];
-  // Pick the suffix label. Existing i18n keys are full suffixes (e.g. '/ Sukkot'),
-  // so we use them directly for the lump-sum case. For per-night holiday pricing
-  // we tag onto `/night` so renters know it's the holiday rate variant.
-  let holidaySuffix;
-  if (property.holiday_lump_is_per_night) {
-    const tagName = tags.includes('sukkot') && tags.includes('pesach')
-      ? 'Sukkot/Pesach'
-      : tags.includes('pesach') ? 'Pesach' : 'Sukkot';
-    holidaySuffix = `${t('property.perNight')} (${tagName})`;
-  } else if (tags.includes('sukkot') && tags.includes('pesach')) {
-    holidaySuffix = `${t('property.perSukkot')} / ${t('property.perPesach').replace(/^\/\s*/, '')}`;
-  } else if (tags.includes('pesach')) {
-    holidaySuffix = t('property.perPesach');
-  } else if (tags.includes('sukkot')) {
-    holidaySuffix = t('property.perSukkot');
-  } else {
-    holidaySuffix = t('property.perHoliday');
-  }
-
-  const hasRegular = regularPrice != null && regularPrice > 0;
-
-  if (!hasRegular && !hasHoliday) {
+  if (!regular && !holiday) {
     return (
-      <span
-        className="text-sm text-gray-400 italic"
-        data-testid={`dashboard-no-price-${property.id}`}
-      >
-        No price set
+      <span className="text-sm text-gray-400 italic" data-testid={`dashboard-no-price-${property.id}`}>
+        {t('dashboard.noPriceSet', 'No price set')}
       </span>
     );
   }
 
   return (
     <div className="flex flex-col gap-0.5 min-w-0">
-      {hasRegular && (
-        <span
-          className="text-lg font-bold leading-tight"
-          style={{ color: 'var(--brand-primary)' }}
-          data-testid={`dashboard-regular-price-${property.id}`}
-        >
-          {regularSym}
-          {Number(regularPrice).toLocaleString()}
-          <span className="text-[11px] font-normal text-gray-500 ms-1">{regularLabel}</span>
+      {regular && (
+        <span className="text-lg font-bold leading-tight" style={{ color: 'var(--brand-primary)' }}
+          data-testid={`dashboard-regular-price-${property.id}`}>
+          {priceSymbol(regular.currency)}{Number(regular.amount).toLocaleString()}
+          <span className="text-[11px] font-normal text-gray-500 ms-1">/ {unitLabel(regular, t)}</span>
         </span>
       )}
-      {hasHoliday && (
-        <span
-          className="text-sm font-semibold leading-tight"
-          style={{ color: 'var(--gold)' }}
-          data-testid={`dashboard-holiday-price-${property.id}`}
-        >
-          {holidaySym}
-          {Number(property.holiday_lump_price).toLocaleString()}
-          <span className="text-[10px] font-normal text-gray-500 ms-1">{holidaySuffix}</span>
+      {holiday && (
+        <span className="text-sm font-semibold leading-tight" style={{ color: 'var(--gold)' }}
+          data-testid={`dashboard-holiday-price-${property.id}`}>
+          {priceSymbol(holiday.currency)}{Number(holiday.amount).toLocaleString()}
+          <span className="text-[10px] font-normal text-gray-500 ms-1">/ {unitLabel(holiday, t)}</span>
         </span>
       )}
     </div>

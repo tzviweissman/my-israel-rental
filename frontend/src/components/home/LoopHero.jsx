@@ -2,11 +2,9 @@ import React from 'react';
 import { playWhenAllowed } from '../../utils/videoAutoplay';
 
 /**
- * The /home-preview hero: one seamless glass loop behind the copy.
- *
- * PREVIEW PAGE ONLY. The live home page's hero is CinematicHero and is exempt
- * by ruling (CLAUDE.md). The shared autoplay logic lives in
- * utils/videoAutoplay.js so it is not written twice.
+ * The home page hero: one seamless glass loop behind the copy. Live at "/"
+ * since 19 Sep 2026, when this page replaced the cinematic one. The shared
+ * autoplay logic lives in utils/videoAutoplay.js so it is not written twice.
  *
  * WHY A LOOP, NOT THE 40s FILM. This replaces a one-shot film that resolved on
  * the site's mark at the very end. A hero gets a few seconds before somebody

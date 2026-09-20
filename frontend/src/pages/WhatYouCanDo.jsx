@@ -128,7 +128,7 @@ export default function WhatYouCanDo() {
           style={{ background: 'var(--surface)', borderColor: 'var(--brand-border)' }}
         >
           <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
-            {t('features.ctaBand', 'Have something to offer? Add your business — free.')}
+            {t('features.ctaBand', 'Have something to offer? Add your business, free.')}
           </p>
           <Link
             to="/signup"

@@ -10,6 +10,7 @@
  * cycle behaves regardless of how many times React runs it.
  */
 import React, { useEffect, useRef } from 'react';
+import { FX_USD_TO_ILS, shownPrice } from '../../utils/listingPrice';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
@@ -75,16 +76,16 @@ const symOf = (cur) => {
 
 // Compact price label for the pin. Vacation/short-term show nightly,
 // long-term show monthly, both abbreviated to keep the pill narrow.
+// The same price the card shows (utils/listingPrice.shownPrice), abbreviated.
+// It used to invent a nightly figure for a short-term listing from its
+// monthly rent (monthly / 30), so the pin and the card disagreed and the
+// pin showed a number no owner set.
 const priceLabel = (p) => {
-  const cur = p.currency || 'ILS';
-  const s = symOf(cur);
-  if (p.rental_type === 'long-term') {
-    if (!p.monthly_price) return s + '—';
-    return `${s}${Math.round(p.monthly_price / 1000)}k`;
-  }
-  const nightly = p.nightly_price ?? (p.monthly_price ? p.monthly_price / 30 : null);
-  if (!nightly) return s + '—';
-  return `${s}${Math.round(nightly)}`;
+  const shown = shownPrice(p);
+  const s = symOf(shown?.currency || p.currency || 'ILS');
+  if (!shown) return s + '—';
+  const n = shown.amount;
+  return n >= 10000 ? `${s}${Math.round(n / 1000)}k` : `${s}${Math.round(n).toLocaleString()}`;
 };
 
 const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency, activeId, onPinClick }) => {
@@ -170,21 +171,26 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency, ac
     // filtered set get a gold pin — a subtle visual cue that these are
     // the premium picks in the current viewport. Long-term listings
     // never get the boost since their price scale is different.
-    const shortTerm = pinRows.filter(
-      (p) => p.rental_type !== 'long-term' && (p.nightly_price || p.monthly_price),
-    );
+    // Only listings actually priced BY THE NIGHT compete: a monthly rent is
+    // no longer turned into a pretend nightly figure (monthly / 30) to rank
+    // it. Dollars converted so $400 and 400 shekels are not "equal".
+    const perNightIls = (p) => {
+      const sp = shownPrice(p);
+      if (!sp || (sp.per !== 'night' && sp.per !== 'holidayNight')) return null;
+      return sp.currency === 'USD' ? sp.amount * FX_USD_TO_ILS : sp.amount;
+    };
+    const nightlies = pinRows.map(perNightIls).filter((n) => n != null);
     let premiumThreshold = Infinity;
-    if (shortTerm.length >= 4) {
-      const prices = shortTerm.map((p) => p.nightly_price || (p.monthly_price / 30));
-      prices.sort((a, b) => a - b);
+    if (nightlies.length >= 4) {
+      const prices = [...nightlies].sort((a, b) => a - b);
       premiumThreshold = prices[Math.floor(prices.length * 0.75)];
     }
 
     const points = [];
     for (const p of pinRows) {
       const label = priceLabel(p);
-      const nightly = p.nightly_price || (p.monthly_price ? p.monthly_price / 30 : 0);
-      const isPremium = p.rental_type !== 'long-term' && nightly >= premiumThreshold;
+      const nightly = perNightIls(p);
+      const isPremium = nightly != null && nightly >= premiumThreshold;
       const marker = L.marker([p.lat, p.lng], { icon: priceIcon(label, isPremium) }).addTo(group);
 
       // Rich popup: cover thumbnail (if any) + title + area + click-through.

@@ -76,9 +76,10 @@
   color: var(--ink);
 }
 .hv2-hero h1 .a { color: var(--gold-lg); }
-/* The gradient phrase under the headline. The word itself carries the
-   surface as its own background - see gradient-text.jsx - so it needs no
-   panel behind it, only room to breathe. */
+/* The accent phrase under the headline. It was a GradientText, whose
+   effect needs a solid white fill behind the word; once the video ran behind
+   the copy that fill showed as a white box (Tzvi, 19 Sep 2026), so it is
+   plain accent text now, the same blue as "Any revenue stream". */
 .hv2-hero-tagline {
   margin-top: 14px;
   font-family: var(--font-head);
@@ -89,9 +90,9 @@
   display: flex;
   align-items: baseline;
   justify-content: center;
-  gap: .35em;
+  gap: .25em;
 }
-.hv2-gradient-word { border-radius: 6px; padding: 0 .12em; }
+.hv2-gradient-word { color: #00387B; }
 
 .hv2-hero-foot { display: flex; flex-direction: column; align-items: center; gap: 18px; }
 .hv2-hero-foot p {
@@ -398,12 +399,14 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
    in the subtree, type and spacing and radii alike, lays out at 0.8, and
    viewport units keep meaning the viewport, so the 100vh community stage
    and the corridor's container-relative geometry are untouched. Scoped
-   to the preview page, like every other experiment here. */
+   to this page. */
 /* Desktop only. Tzvi's recording was a laptop screen; on a phone the same
    0.8 takes a fifth off every tap target and every font, and nothing on a
    phone was "too big and too close up". (2026-09-04 audit 2, finding 1.) */
 @media (min-width: 1024px) {
-  body.theme-preview #root { zoom: 0.8; }
+  /* body.home-v2, not body.theme-preview: this is the approved page, now the
+     live home page, not an experiment (19 Sep 2026). */
+  body.home-v2 #root { zoom: 0.8; }
 }
 
 /* The blocks hero: hundreds of frosted glass blocks, animated in code
@@ -419,16 +422,31 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
   position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; display: block;
   background: var(--surface, #fff);
 }
+/* A scrim, not a wall (Tzvi, 19 Sep 2026: "full-bleed video, text on top").
+   This was SOLID white across the copy side to 44% and gone by 58%, which
+   with the mask on the video (removed below) hid nearly half the render: the
+   cubes' left faces never showed. Now the video runs edge to edge and this
+   one gradient recedes it behind the type - near-white under "Grow. Build.",
+   the cubes visible through "revenue stream", clear by 78%.
+   THE ONLY KNOB. If the headline is hard to read, move the .55 stop right;
+   if the cubes look washed out, move it left. Do not dim the video instead.
+   Logical direction: in Hebrew the copy is on the right, so it mirrors. */
 .hv2-hero--film .hv2-hero-scrim {
-  background:
-    linear-gradient(90deg, #fff 0%, #fff 44%, rgba(255, 255, 255, .86) 49%, rgba(255, 255, 255, 0) 58%),
-    linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 78%, rgba(255, 255, 255, .8) 100%);
+  background: linear-gradient(to right,
+    rgba(255, 255, 255, .94) 0%, rgba(255, 255, 255, .88) 26%,
+    rgba(255, 255, 255, .55) 44%, rgba(255, 255, 255, .12) 62%,
+    rgba(255, 255, 255, 0) 78%);
 }
 [dir="rtl"] .hv2-hero--film .hv2-hero-scrim {
-  background:
-    linear-gradient(270deg, #fff 0%, #fff 44%, rgba(255, 255, 255, .86) 49%, rgba(255, 255, 255, 0) 58%),
-    linear-gradient(180deg, rgba(255, 255, 255, .55) 0%, rgba(255, 255, 255, 0) 18%, rgba(255, 255, 255, 0) 78%, rgba(255, 255, 255, .8) 100%);
+  background: linear-gradient(to left,
+    rgba(255, 255, 255, .94) 0%, rgba(255, 255, 255, .88) 26%,
+    rgba(255, 255, 255, .55) 44%, rgba(255, 255, 255, .12) 62%,
+    rgba(255, 255, 255, 0) 78%);
 }
+/* The accent words sit over the cubes now, not over white. Measured across
+   eight loop frames (19 Sep 2026), --gold-lg read 1.3-2.8:1 there. The
+   darker hero-only blue keeps them readable without whitening the cubes. */
+.hv2-hero--film h1 .a { color: #00387B; }
 .hv2-hero--film .hv2-hero-inner {
   align-items: flex-start; text-align: start;
   max-width: 1180px; margin-inline: auto;
@@ -488,20 +506,19 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
 .hv2-loop-video,
 .hv2-loop-poster {
   position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%;
-  object-fit: cover; object-position: center;
-  background-size: cover; background-position: center;
+  /* 60%: the cube sits a little right of the headline rather than under
+     its first words. Under RTL the element is mirrored, which carries this
+     over to the other side for free. */
+  object-fit: cover; object-position: 60% center;
+  background-size: cover; background-position: 60% center;
   transition: opacity .4s linear;
 }
 /* The poster is the floor; the video fades in over it. */
 .hv2-loop-poster { z-index: -1; }
 
-/* Feather the copy-side edge so the film dissolves into the page instead of
-   ending on a hard rectangle behind the scrim. */
-.hv2-loop-video,
-.hv2-loop-poster {
-  -webkit-mask-image: linear-gradient(to right, transparent 0%, #000 22%);
-  mask-image: linear-gradient(to right, transparent 0%, #000 22%);
-}
+/* NO mask on the video (removed 19 Sep 2026). A mask does not dim, it
+   deletes: `transparent 0% -> #000 22%` erased the left fifth of the render
+   outright. The scrim above recedes it instead, so every cube stays drawn. */
 [dir="rtl"] .hv2-loop-video,
 [dir="rtl"] .hv2-loop-poster {
   transform: scaleX(-1);
@@ -519,11 +536,13 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
      the top edge alone pushes the box down instead of shrinking it, and the
      film overflows the hero's `overflow: clip`.
 
-     The feather is dropped here — the copy sits above the film rather than
-     beside it, so there is no vertical edge to dissolve. */
+     Kept stacked on 19 Sep 2026 when the desktop went full-bleed: behind the
+     text on a phone, cover would crop the 16:9 render to a vertical slice
+     and an 82% wash over that shows almost nothing. Below the copy it is
+     shown whole, edge to edge. */
   .hv2-hero--film .hv2-loop { inset-block-start: var(--copy-h); height: auto; }
   .hv2-loop-video,
-  .hv2-loop-poster { -webkit-mask-image: none; mask-image: none; }
+  .hv2-loop-poster { object-position: center; background-position: center; }
 }
 
 /* ── The copy arrives, one line at a time ────────────────────────────────

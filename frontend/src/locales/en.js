@@ -459,7 +459,7 @@ const en = {
       },
       businessPage: {
         hostedOn: 'This page is on MyIsraelRental',
-        listYours: 'List your business — free',
+        listYours: 'List your business, free',
         payVia: 'Pay this business via',
         mostPopular: 'Start here',
         searchThis: 'Search this business',
@@ -1405,6 +1405,7 @@ const en = {
         myBusinesses: 'Businesses',
         deliveries: 'Deliveries',
         network: 'Network',
+        noPriceSet: 'No price set',
         myOrders: 'My orders',
         orders: 'Orders',
         appointments: 'Appointments',
@@ -1520,7 +1521,7 @@ const en = {
             kick: 'Rentals · Businesses · Requests',
             sub: 'Free to search, free to list, no commission.',
             ctaBusinesses: 'Find a business',
-            ctaAdd: 'Add your business — free',
+            ctaAdd: 'Add your business, free',
             // The preview hero's own headline. Deliberately NOT home.hero.h1
             // / home.hero.accent: those two are the LIVE home page's hero,
             // which is exempt by ruling, and they are read by CinematicHero.
@@ -1621,7 +1622,7 @@ const en = {
           supply: {
             eyebrow: 'For businesses & property owners',
             // The heading is the campaign line (Tzvi, 3 Sep). The standing
-            // supply-side CTA, 'Add your business — free', is still the button
+            // supply-side CTA, 'Add your business, free', is still the button
             // and the first fact under it, so the offer is not lost.
             h2: 'Scale your business through innovation',
             p: 'Free to list, free to be found, no commission. Have a place to rent? List it the same way.',
@@ -2848,6 +2849,10 @@ const en = {
         listedMonthsAgo: 'Listed {{n}} months ago',
         unitNight: 'night',
         unitMonth: 'month',
+        unitHoliday: 'holiday',
+        unitHolidayNight: 'night ({{holiday}})',
+        holiday_sukkot: 'Sukkot',
+        holiday_pesach: 'Pesach',
         removeFromFavorites: 'Remove from favorites',
         saveToFavorites: 'Save to favorites',
         scrollBack: 'Scroll back',
@@ -3859,9 +3864,9 @@ const en = {
         // Dual CTA band
         ctaNeedTitle: 'Need something done?',
         ctaNeedBody: 'Describe the job and let pros come to you — free, and they reply through the site.',
-        ctaOfferTitle: 'Add your business — free',
+        ctaOfferTitle: 'Add your business, free',
         ctaOfferBody: 'Reach more customers. Free to list, free to be found, no commission.',
-        listForFree: 'Add your business — free',
+        listForFree: 'Add your business, free',
         noCutSeller: "You deal with the seller directly — MyIsraelRental doesn't take a cut.",
         noCutProvider: "You deal with the provider directly — MyIsraelRental doesn't take a cut.",
         featuredNearYou: 'Featured near you',
@@ -3926,7 +3931,7 @@ const en = {
         within5km: 'Within 5 km',
         within10km: 'Within 10 km',
         youAreHere: 'You are here',
-        becomeProvider: 'Add your business — free',
+        becomeProvider: 'Add your business, free',
         heroEyebrow: 'The MyIsraelRental Marketplace',
         heroTitleAccent: 'Hire proven talent',
         heroTitleTail: 'who deliver',

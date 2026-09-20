@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { shownPrice, unitLabel } from '../../utils/listingPrice';
 import { Bed, Bath, Home as HomeIcon, MapPin, Building2, Heart } from 'lucide-react';
 import { getCoverImage } from '../../utils/coverImage';
 import { srcSet } from '../../utils/cdnImage';
@@ -34,56 +35,19 @@ const PropertyCard = ({
     vacation: t('property.vacationType'),
     storage: t('property.storageType'),
   };
-  // Pricing display rules:
-  //   • Browsing /sukkot or /pesach AND the listing has the matching tag +
-  //     a holiday_lump_price → show the holiday rate (lump or per-night
-  //     suffix decided by holiday_lump_is_per_night).
-  //   • Browsing /vacation or /all → ALWAYS show the regular nightly rate.
-  //     The lump only surfaces from a holiday-page context, so a single
-  //     listing can carry both prices without confusing renters.
-  //   • Non-vacation rentals always show the monthly rate.
-  const hasHolidayPrice =
-    property.rental_type === 'vacation' &&
-    property.holiday_lump_price != null &&
-    property.holiday_lump_price > 0;
-  const tags = property.holiday_tags || [];
-  // The listing's own everyday rate, if it has one. A lister who only rents
-  // over Pesach leaves this blank on purpose.
-  const regularPrice = Number(
-    property.rental_type === 'vacation' ? property.nightly_price : property.monthly_price,
-  );
-  const hasRegularPrice = regularPrice > 0;
-  const showHolidayPrice =
-    hasHolidayPrice &&
-    // Normally the holiday rate only surfaces from a holiday-page context, so
-    // a listing carrying both prices doesn't confuse renters browsing /all.
-    // But when there is no everyday rate, that rule printed "₪0" on every
-    // surface except the holiday page — advertising a free apartment. If the
-    // holiday rate is the only price the listing has, it IS the price.
-    ((holidayContext != null && tags.includes(holidayContext)) || !hasRegularPrice);
-
-  const priceCurrency = showHolidayPrice
-    ? (property.holiday_lump_currency || property.currency)
-    : property.currency;
-  const rawPrice = showHolidayPrice ? property.holiday_lump_price : regularPrice;
-  // Eight live listings have no price of any kind. They were rendering as
-  // "₪0", which reads as free rather than as missing.
-  const hasAnyPrice = Number(rawPrice) > 0;
-  const converted = convertPrice(rawPrice, priceCurrency);
-
-  const holidayLabelMap = {
-    sukkot: t('property.perSukkot') || '/ Sukkot',
-    pesach: t('property.perPesach') || '/ Pesach',
-  };
-  const perLabel = showHolidayPrice
-    ? (property.holiday_lump_is_per_night
-        // Holiday-mode + per-night → still "per night" but tag-aware label
-        // so the renter knows it's the holiday rate, not the regular one.
-        ? `${t('property.perNight')} (${(holidayContext || '').charAt(0).toUpperCase() + (holidayContext || '').slice(1)})`
-        : holidayLabelMap[holidayContext] || (t('property.perHoliday') || '/ holiday'))
-    : property.rental_type === 'vacation'
-      ? t('property.perNight')
-      : t('property.perMonth');
+  // The shared rule (utils/listingPrice.shownPrice), with this page's holiday
+  // as context: on the Sukkot page a flat offered for Sukkot shows its Sukkot
+  // price; elsewhere its everyday price, or the holiday price when that is
+  // the only one it has. This card used to decide for itself, and printed
+  // "per night ()" for a per-night holiday price seen outside a holiday page.
+  const shown = shownPrice(property, { holiday: holidayContext || null });
+  const hasAnyPrice = !!shown;
+  const priceCurrency = shown?.currency || property.currency;
+  const rawPrice = shown?.amount || 0;
+  // Eight live listings have no price of any kind; they read as missing,
+  // never as "₪0", which reads as free.
+  const converted = hasAnyPrice ? convertPrice(rawPrice, priceCurrency) : null;
+  const perLabel = hasAnyPrice ? ` / ${unitLabel(shown, t)}` : '';
 
   return (
     <div

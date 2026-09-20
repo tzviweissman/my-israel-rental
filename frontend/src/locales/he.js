@@ -440,7 +440,7 @@ const he = {
       },
       businessPage: {
         hostedOn: 'הדף הזה מתארח ב-MyIsraelRental',
-        listYours: 'רשמו את העסק שלכם — בחינם',
+        listYours: 'רשמו את העסק שלכם, בחינם',
         payVia: 'תשלום לעסק דרך',
         mostPopular: 'התחילו כאן',
         searchThis: 'חיפוש בעסק הזה',
@@ -1364,6 +1364,7 @@ const he = {
         myBusinesses: 'עסקים',
         deliveries: 'משלוחים',
         network: 'רשת',
+        noPriceSet: 'לא הוגדר מחיר',
         // Two tabs in this sidebar are "הזמנות" in Hebrew: a renter's
         // property bookings (myBookings) and a customer's store orders.
         // English tells them apart by Bookings/Orders; Hebrew has one
@@ -1472,7 +1473,7 @@ const he = {
             kick: 'נכסים · עסקים · בקשות',
             sub: 'חינם לחפש, חינם לפרסם, בלי עמלה.',
             ctaBusinesses: 'חיפוש עסק',
-            ctaAdd: 'הוסיפו את העסק שלכם — בחינם',
+            ctaAdd: 'הוסיפו את העסק שלכם, בחינם',
             h1: 'צמחו. בנו.',
             accent: 'כל מקור הכנסה',
             wordmark: 'MyIsraelRental',
@@ -2727,6 +2728,10 @@ const he = {
         listedMonthsAgo: 'פורסם לפני {{n}} חודשים',
         unitNight: 'לילה',
         unitMonth: 'חודש',
+        unitHoliday: 'חג',
+        unitHolidayNight: 'לילה ({{holiday}})',
+        holiday_sukkot: 'סוכות',
+        holiday_pesach: 'פסח',
         removeFromFavorites: 'הסר מהמועדפים',
         saveToFavorites: 'שמור למועדפים',
         scrollBack: 'גלול אחורה',
@@ -3674,9 +3679,9 @@ const he = {
         // Dual CTA band
         ctaNeedTitle: 'צריכים שמישהו יבצע עבודה?',
         ctaNeedBody: 'תארו את העבודה ותנו לבעלי המקצוע לפנות אליכם — בחינם, והתשובות מגיעות דרך האתר.',
-        ctaOfferTitle: 'הוסיפו את העסק שלכם — בחינם',
+        ctaOfferTitle: 'הוסיפו את העסק שלכם, בחינם',
         ctaOfferBody: 'פרסום אחד בחינם מגיע לכל מי שנמצא בפלטפורמה — שוכרים, בעלי נכסים ומנהלי נכסים.',
-        listForFree: 'הוסיפו את העסק — בחינם',
+        listForFree: 'הוסיפו את העסק, בחינם',
         noCutSeller: 'אתם סוגרים ישירות מול המוכר — MyIsraelRental לא גובה עמלה.',
         noCutProvider: 'אתם סוגרים ישירות מול נותן השירות — MyIsraelRental לא גובה עמלה.',
         featuredNearYou: 'מומלצים באזורכם',
@@ -3739,7 +3744,7 @@ const he = {
         within5km: 'עד 5 ק"מ',
         within10km: 'עד 10 ק"מ',
         youAreHere: 'אתם כאן',
-        becomeProvider: 'הוסיפו את העסק שלכם — בחינם',
+        becomeProvider: 'הוסיפו את העסק שלכם, בחינם',
         heroEyebrow: 'השוק של MyIsraelRental',
         heroTitleAccent: 'גייסו בעלי מקצוע מוכחים',
         heroTitleTail: 'שמספקים תוצאות',

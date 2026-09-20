@@ -1,0 +1,282 @@
+{
+  "_about": "The one definition of which price a listing shows, and per what. Read by BOTH implementations' tests: frontend/src/utils/listingPrice.test.js (shownPrice) and backend/tests/test_listing_price_parity.py (utils/listing_price.shown_price). Change a rule by changing a case here first; both tests then fail until both implementations agree. Every case below is a shape a real owner produced (18 Sep 2026 live check), not an invented one.",
+  "cases": [
+    {
+      "name": "vacation stay with a nightly price",
+      "property": {
+        "rental_type": "vacation",
+        "nightly_price": 500,
+        "currency": "ILS"
+      },
+      "expected": {
+        "amount": 500,
+        "currency": "ILS",
+        "per": "night",
+        "holidays": []
+      }
+    },
+    {
+      "name": "vacation stay priced only for Sukkot, whole holiday, in dollars",
+      "property": {
+        "rental_type": "vacation",
+        "holiday_lump_price": 6000,
+        "holiday_lump_currency": "USD",
+        "currency": "ILS",
+        "holiday_tags": [
+          "sukkot"
+        ]
+      },
+      "expected": {
+        "amount": 6000,
+        "currency": "USD",
+        "per": "holiday",
+        "holidays": [
+          "sukkot"
+        ]
+      }
+    },
+    {
+      "name": "Sukkot price marked per night",
+      "property": {
+        "rental_type": "vacation",
+        "holiday_lump_price": 154,
+        "holiday_lump_currency": "USD",
+        "holiday_lump_is_per_night": true,
+        "holiday_tags": [
+          "sukkot"
+        ]
+      },
+      "expected": {
+        "amount": 154,
+        "currency": "USD",
+        "per": "holidayNight",
+        "holidays": [
+          "sukkot"
+        ]
+      }
+    },
+    {
+      "name": "holiday currency unset falls back to the listing currency",
+      "property": {
+        "rental_type": "vacation",
+        "holiday_lump_price": 900,
+        "currency": "USD",
+        "holiday_tags": [
+          "pesach"
+        ]
+      },
+      "expected": {
+        "amount": 900,
+        "currency": "USD",
+        "per": "holiday",
+        "holidays": [
+          "pesach"
+        ]
+      }
+    },
+    {
+      "name": "offered for both holidays, no context: both named",
+      "property": {
+        "rental_type": "vacation",
+        "holiday_lump_price": 9000,
+        "currency": "ILS",
+        "holiday_tags": [
+          "pesach",
+          "sukkot"
+        ]
+      },
+      "expected": {
+        "amount": 9000,
+        "currency": "ILS",
+        "per": "holiday",
+        "holidays": [
+          "sukkot",
+          "pesach"
+        ]
+      }
+    },
+    {
+      "name": "offered for both holidays, viewed as a Sukkot list: Sukkot only",
+      "property": {
+        "rental_type": "vacation",
+        "holiday_lump_price": 9000,
+        "currency": "ILS",
+        "holiday_tags": [
+          "pesach",
+          "sukkot"
+        ]
+      },
+      "holiday": "sukkot",
+      "expected": {
+        "amount": 9000,
+        "currency": "ILS",
+        "per": "holiday",
+        "holidays": [
+          "sukkot"
+        ]
+      }
+    },
+    {
+      "name": "nightly and holiday price, in a Sukkot context: the holiday price",
+      "property": {
+        "rental_type": "vacation",
+        "nightly_price": 700,
+        "holiday_lump_price": 5000,
+        "currency": "ILS",
+        "holiday_tags": [
+          "sukkot"
+        ]
+      },
+      "holiday": "sukkot",
+      "expected": {
+        "amount": 5000,
+        "currency": "ILS",
+        "per": "holiday",
+        "holidays": [
+          "sukkot"
+        ]
+      }
+    },
+    {
+      "name": "nightly and holiday price, no context: the everyday nightly price",
+      "property": {
+        "rental_type": "vacation",
+        "nightly_price": 700,
+        "holiday_lump_price": 5000,
+        "currency": "ILS",
+        "holiday_tags": [
+          "sukkot"
+        ]
+      },
+      "expected": {
+        "amount": 700,
+        "currency": "ILS",
+        "per": "night",
+        "holidays": []
+      }
+    },
+    {
+      "name": "Pesach context but the listing is only offered for Sukkot: the everyday price",
+      "property": {
+        "rental_type": "vacation",
+        "nightly_price": 700,
+        "holiday_lump_price": 5000,
+        "currency": "ILS",
+        "holiday_tags": [
+          "sukkot"
+        ]
+      },
+      "holiday": "pesach",
+      "expected": {
+        "amount": 700,
+        "currency": "ILS",
+        "per": "night",
+        "holidays": []
+      }
+    },
+    {
+      "name": "long-term monthly rent",
+      "property": {
+        "rental_type": "long-term",
+        "monthly_price": 7200,
+        "currency": "ILS"
+      },
+      "expected": {
+        "amount": 7200,
+        "currency": "ILS",
+        "per": "month",
+        "holidays": []
+      }
+    },
+    {
+      "name": "short-term priced by the month",
+      "property": {
+        "rental_type": "short-term",
+        "monthly_price": 8000,
+        "currency": "ILS"
+      },
+      "expected": {
+        "amount": 8000,
+        "currency": "ILS",
+        "per": "month",
+        "holidays": []
+      }
+    },
+    {
+      "name": "short-term with only the nightly box filled: show what the owner entered",
+      "property": {
+        "rental_type": "short-term",
+        "nightly_price": 7500,
+        "monthly_price": 0,
+        "currency": "ILS"
+      },
+      "expected": {
+        "amount": 7500,
+        "currency": "ILS",
+        "per": "night",
+        "holidays": []
+      }
+    },
+    {
+      "name": "no price of any kind is none, never zero",
+      "property": {
+        "rental_type": "vacation",
+        "nightly_price": 0,
+        "monthly_price": 0
+      },
+      "expected": null
+    },
+    {
+      "name": "missing currency is shekels",
+      "property": {
+        "rental_type": "long-term",
+        "monthly_price": 5000
+      },
+      "expected": {
+        "amount": 5000,
+        "currency": "ILS",
+        "per": "month",
+        "holidays": []
+      }
+    },
+    {
+      "name": "long-term flat also listed for Sukkot, in a Sukkot context: the Sukkot price",
+      "property": {
+        "rental_type": "long-term",
+        "monthly_price": 9000,
+        "holiday_lump_price": 4000,
+        "currency": "ILS",
+        "holiday_tags": [
+          "sukkot"
+        ]
+      },
+      "holiday": "sukkot",
+      "expected": {
+        "amount": 4000,
+        "currency": "ILS",
+        "per": "holiday",
+        "holidays": [
+          "sukkot"
+        ]
+      }
+    },
+    {
+      "name": "long-term flat also listed for Sukkot, no context: the monthly rent",
+      "property": {
+        "rental_type": "long-term",
+        "monthly_price": 9000,
+        "holiday_lump_price": 4000,
+        "currency": "ILS",
+        "holiday_tags": [
+          "sukkot"
+        ]
+      },
+      "expected": {
+        "amount": 9000,
+        "currency": "ILS",
+        "per": "month",
+        "holidays": []
+      }
+    }
+  ]
+}

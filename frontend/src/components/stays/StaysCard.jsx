@@ -45,7 +45,7 @@ import VideoCoverBadge from '../property/VideoCoverBadge';
 
 // Re-exported from utils/listingPrice so the card, the /stays filter and the
 // /stays price sort all convert with the same rate.
-import { FX_USD_TO_ILS, priceIn } from '../../utils/listingPrice';
+import { FX_USD_TO_ILS, shownPrice, unitLabel } from '../../utils/listingPrice';
 
 const StaysCard = ({
   property,
@@ -61,10 +61,12 @@ const StaysCard = ({
 }) => {
   const { t } = useTranslation();
   const cover = getCoverImage(property.images, 400, '', property.videos, property.id);
-  const propCur = property.currency || 'ILS';
+  // One rule for the card and the map pin (utils/listingPrice.shownPrice).
+  const shown = shownPrice(property);
+  const price = shown?.amount;
+  const propCur = shown?.currency || property.currency || 'ILS';
   const sym = propCur === 'ILS' ? '₪' : '$';
-  const price = property.rental_type === 'vacation' ? property.nightly_price : property.monthly_price;
-  const unit = property.rental_type === 'vacation' ? t('stays.unitNight', 'night') : t('stays.unitMonth', 'month');
+  const unit = unitLabel(shown, t);
   const listedAgo = listedAgoLabel(property.created_at, t);
   const fresh = isFreshListing(property.created_at);
 
@@ -72,7 +74,9 @@ const StaysCard = ({
   if (price && displayCurrency && displayCurrency !== propCur) {
     // Shared with the /stays price filter and sort so a card can't show one
     // number while the filter uses another.
-    const converted = priceIn(property, displayCurrency, fxRate);
+    // Converted from the price actually SHOWN, so a holiday-only listing
+    // does not read "≈ ₪0" under its holiday price.
+    const converted = displayCurrency === 'USD' ? price / fxRate : price * fxRate;
     const convSym = displayCurrency === 'ILS' ? '₪' : '$';
     convertedHint = `≈ ${convSym}${Math.round(converted).toLocaleString()}`;
   }

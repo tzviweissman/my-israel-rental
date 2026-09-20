@@ -5,6 +5,7 @@ import {
   daysSinceAdded,
   describeFilters,
   formatAdded,
+  formatAvailable,
   formatBedrooms,
   formatPrice,
   WA_URL_LIMIT,
@@ -250,5 +251,27 @@ describe('describeFilters', () => {
 
   test('handles an empty preset', () => {
     expect(describeFilters({})).toBe('Any location · Any price');
+  });
+});
+
+describe('formatAvailable', () => {
+  // A real Sukkot list, sent on 17 Sep 2026, told customers flats were
+  // "Available July 15". A date already passed means free now.
+  const sept17 = new Date(2026, 8, 17, 10, 0);
+
+  test('a date in the past reads as available now', () => {
+    expect(formatAvailable('2026-07-15', sept17)).toBe('Available now');
+  });
+
+  test('today reads as available now', () => {
+    expect(formatAvailable('2026-09-17', sept17)).toBe('Available now');
+  });
+
+  test('a future date is named', () => {
+    expect(formatAvailable('2026-09-24', sept17)).toBe('Available September 24');
+  });
+
+  test('no date is available now', () => {
+    expect(formatAvailable(null, sept17)).toBe('Available now');
   });
 });

@@ -2,6 +2,7 @@ import React from 'react';
 import axios from 'axios';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
+import { shownPrice, unitLabel } from '../../utils/listingPrice';
 import { Mail, MessageCircle, X } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
@@ -86,36 +87,30 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice, holidayCo
     property.holiday_lump_price > 0 &&
     tags.length > 0;
   const matchingHolidayTags = tags.filter((tg) => ['sukkot', 'pesach'].includes(tg));
-  const showHolidayPrice =
-    hasHolidayPrice &&
-    holidayContext != null &&
-    matchingHolidayTags.includes(holidayContext);
-
-  const displayCurrency = showHolidayPrice
-    ? (property.holiday_lump_currency || property.currency)
-    : property.currency;
-  const rawPrice = showHolidayPrice
-    ? property.holiday_lump_price
-    : property.rental_type === 'vacation'
-      ? (property.nightly_price || 0)
-      : (property.monthly_price || 0);
-  const converted = convertPrice(rawPrice, displayCurrency);
-  const holidayLabelMap = {
-    sukkot: t('property.perSukkot') || '/ Sukkot',
-    pesach: t('property.perPesach') || '/ Pesach',
-  };
-  const perLabel = showHolidayPrice
-    ? (property.holiday_lump_is_per_night
-        ? `${t('property.perNight')} (${(holidayContext || '').charAt(0).toUpperCase() + (holidayContext || '').slice(1)})`
-        : holidayLabelMap[holidayContext] || (t('property.perHoliday') || '/ holiday'))
-    : property.rental_type === 'vacation' ? t('property.perNight') : t('property.perMonth');
+  // The headline price: the shared rule (utils/listingPrice.shownPrice) with
+  // the rate the renter picked below as context. This used to decide for
+  // itself and showed "₪0 / night" for a flat priced only for Sukkot until
+  // the renter found the Sukkot toggle.
+  const shown = shownPrice(property, { holiday: holidayContext || null });
+  const displayCurrency = shown?.currency || property.currency;
+  const rawPrice = shown?.amount || 0;
+  const converted = shown ? convertPrice(rawPrice, displayCurrency) : null;
+  const perLabel = shown ? ` / ${unitLabel(shown, t)}` : '';
 
   return (
     <>
-      <span className="text-3xl font-bold" style={{ color: 'var(--gold-text-on-light)' }} data-testid="property-detail-price">
-        {displayCurrency === 'USD' ? '$' : '₪'}{rawPrice.toLocaleString()}
-      </span>
-      <span className="text-base text-gray-600">{perLabel}</span>
+      {shown ? (
+        <>
+          <span className="text-3xl font-bold" style={{ color: 'var(--gold-text-on-light)' }} data-testid="property-detail-price">
+            {displayCurrency === 'USD' ? '$' : '₪'}{rawPrice.toLocaleString()}
+          </span>
+          <span className="text-base text-gray-600">{perLabel}</span>
+        </>
+      ) : (
+        <span className="text-lg font-semibold text-gray-500" data-testid="property-detail-price-on-request">
+          {t('stays.priceOnRequest', 'Price on request')}
+        </span>
+      )}
       {converted && (
         <div className="text-xs text-gray-400 mt-1" data-testid="property-detail-converted-price">
           ≈ {converted.symbol}{converted.amount.toLocaleString()}{perLabel}
@@ -940,7 +935,8 @@ const BookingSidebar = ({
                 {t('property.availableFor', 'Also available for')} {holidayCTA.tag.charAt(0).toUpperCase() + holidayCTA.tag.slice(1)}
               </p>
               <p className="mt-0.5 text-lg font-bold text-[var(--brand-primary)] leading-tight" data-testid="holiday-cta-price">
-                {property.holiday_lump_currency === 'USD' ? '$' : '₪'}
+                {/* The listing's currency when the holiday one is unset, as line ~95 already does. */}
+                {(property.holiday_lump_currency || property.currency) === 'USD' ? '$' : '₪'}
                 {property.holiday_lump_price.toLocaleString()}
                 <span className="text-xs font-medium text-gray-500 ms-1">
                   {property.holiday_lump_is_per_night

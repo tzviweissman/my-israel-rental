@@ -21,7 +21,7 @@ export default function PricingAuditBanner({
   handleRestoreQuarantined,
 }) {
   const t = priceAudit?.totals;
-  const flagged = (t?.zero_price || 0) + (t?.low_monthly || 0) + (t?.wrong_field || 0);
+  const flagged = (t?.zero_price || 0) + (t?.low_monthly || 0) + (t?.wrong_field || 0) + (t?.high_nightly || 0);
   if (!priceAudit || flagged <= 0) return null;
 
   return (
@@ -32,7 +32,7 @@ export default function PricingAuditBanner({
       <AlertTriangle size={18} className="text-amber-600 shrink-0 mt-0.5" />
       <div className="flex-1 min-w-0">
         <div className="text-sm font-semibold text-amber-900">
-          {(priceAudit.totals.zero_price + priceAudit.totals.low_monthly + priceAudit.totals.wrong_field).toLocaleString()} listing{(priceAudit.totals.zero_price + priceAudit.totals.low_monthly + priceAudit.totals.wrong_field) === 1 ? '' : 's'} may have wrong prices
+          {flagged.toLocaleString()} listing{flagged === 1 ? '' : 's'} may have wrong prices
         </div>
         <div className="text-xs text-amber-800 mt-0.5 flex flex-wrap gap-x-4 gap-y-1">
           {priceAudit.totals.zero_price > 0 && (
@@ -48,6 +48,12 @@ export default function PricingAuditBanner({
           {priceAudit.totals.wrong_field > 0 && (
             <span data-testid="audit-wrong-field">
               <b>{priceAudit.totals.wrong_field}</b> with both monthly + nightly set
+            </span>
+          )}
+          {/* Review only: the auto-fix button does not touch these. */}
+          {priceAudit.totals.high_nightly > 0 && (
+            <span data-testid="audit-high-nightly">
+              <b>{priceAudit.totals.high_nightly}</b> at ₪{priceAudit.thresholds.high_nightly_ils.toLocaleString()}+ a night (maybe a monthly or whole-stay price, check by hand)
             </span>
           )}
         </div>

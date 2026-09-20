@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatShownPrice, shownPrice } from '../../utils/listingPrice';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
@@ -233,9 +234,10 @@ const BulkManagerTab = ({ properties, onRefresh, API, token }) => {
           </div>
         ) : filtered.map(p => {
           const isSelected = selected.has(p.id);
-          const price = p.rental_type === 'short-term' || p.rental_type === 'vacation'
-            ? (p.nightly_price ? `${p.currency === 'USD' ? '$' : '₪'}${p.nightly_price}/nt` : '—')
-            : (p.monthly_price ? `${p.currency === 'USD' ? '$' : '₪'}${p.monthly_price}/mo` : '—');
+          // Shared rule (utils/listingPrice). This read short-term listings
+          // by the NIGHT while every card reads them by the month, so the
+          // owner's bulk screen and their public card disagreed.
+          const price = formatShownPrice(shownPrice(p), t) || '—';
           const cover = p.images?.[0];
           const coverSrc = cover && cover.startsWith('/api') ? `${API.replace('/api', '')}${cover}` : cover;
           return (

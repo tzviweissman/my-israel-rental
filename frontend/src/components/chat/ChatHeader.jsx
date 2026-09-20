@@ -1,5 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import { formatShownPrice, shownPrice } from '../../utils/listingPrice';
 import { areaLabel } from '../../utils/areaNames';
 import {
   ArrowLeft, Home, Building2, Briefcase, Search, ChevronUp, ChevronDown, X,
@@ -190,12 +191,13 @@ const ChatHeader = ({
                     {sublease.price_type === 'per_night' ? '/night' : ' total'}
                   </span>
                 </>
-              ) : property.monthly_price ? (
+              ) : shownPrice(property) ? (
                 <>
                   <span className="text-gray-300 mx-1">•</span>
+                  {/* Shared rule (utils/listingPrice). Showed monthly rent only,
+                      so a chat about a holiday flat carried no price at all. */}
                   <span className="font-medium" style={{ color: 'var(--gold)' }}>
-                    {property.currency === 'USD' ? '$' : '₪'}
-                    {property.monthly_price?.toLocaleString()}/mo
+                    {formatShownPrice(shownPrice(property), t)}
                   </span>
                 </>
               ) : null}

@@ -98,7 +98,6 @@ function BuildRefresh() {
 // ONLY split page components — small always-mounted chrome (Navigation,
 // banners, floating buttons, ThemePreviewOverride) stays static so we
 // don't ship a spinner where the chrome should already be visible.
-const Home = lazy(() => import('./pages/Home'));
 // The proposed home overhaul, on its own route until it is approved to
 // replace `/`. Not linked from anywhere and noindexed.
 const HomePreview = lazy(() => import('./pages/HomePreview'));
@@ -391,7 +390,11 @@ function App() {
                 and bookmarks). `/home` keeps working as an alias so any
                 external link juice already pointing there still lands
                 on the same hero. */}
-            <Route path="/" element={<Home />} />
+            {/* The redesigned page became the home page on 19 Sep 2026 (Tzvi).
+                /home-preview renders the same page as the lab, where palette
+                experiments are scoped and search engines are kept out. The
+                cinematic page it replaced is in git history, pages/Home.js. */}
+            <Route path="/" element={<HomePreview />} />
             <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="/home-preview" element={<HomePreview />} />
             <Route path="/properties/:type" element={<Properties />} />
