@@ -108,7 +108,8 @@ for (const lng of ['en', 'he']) {
   const items = await page.locator('[data-testid^="sidebar-item-"]').evaluateAll((els) => els.map((e) => e.dataset.testid.replace('sidebar-item-', '')));
   ok(`${lng}: an owner sees listings, bookings, messages and settings`,
     ['overview', 'properties', 'bookings', 'messages', 'settings'].every((id) => items.includes(id)), items.join(','));
-  ok(`${lng}: and not the renter-only tabs`, !items.includes('subleases') && !items.includes('alerts'), items.join(','));
+  // Alerts left this list on 8 Sep 2026: saved searches are for every role.
+  ok(`${lng}: and not the renter-only tabs`, !items.includes('subleases'), items.join(','));
 
   // the cards say what the API says
   const scansValue = (await page.locator('[data-testid="overview-card-scans-value"]').innerText()).trim();
@@ -295,6 +296,8 @@ for (const lng of ['en', 'he']) {
   // passed while the phone showed an empty rail with the owner's name and
   // a Hide button, and the tab strip cut off beside it.
   ok('phone: no sidebar at all', await page.locator('[data-testid="dashboard-sidebar"]').count() === 0);
+  // The strip is folded behind one menu button on a phone (20 Sep 2026).
+  await page.locator('[data-testid="dashboard-menu-button"]').click();
   const strip = await page.locator('button:has-text("Overview")').first().evaluate((el) => {
     const r = el.closest('nav, [role="tablist"], div')?.getBoundingClientRect() || el.getBoundingClientRect();
     return { right: Math.round(r.right), vw: window.innerWidth };

@@ -867,6 +867,7 @@ const en = {
         businessTitle: 'Finish setting up your business',
         propertyTitle: 'Finish setting up your listing',
         count: '{{done}} of {{total}}',
+        showDone: '{{count}} done',
         allDone: 'Your setup is complete.',
         item: {
           biz_named: 'Name your business',
@@ -1346,6 +1347,7 @@ const en = {
         groupListings: 'Listings',
         groupActivity: 'Activity',
         groupAccount: 'Account',
+        menu: 'Menu',
         contracts: 'Contracts',
         hideSidebar: 'Hide',
         role_owner: 'Property owner',

@@ -61,7 +61,7 @@ function Item({ item, open, selected, onSelect }) {
       title={open ? undefined : item.label}
       aria-current={isSelected ? "page" : undefined}
       className={cn(
-        "relative flex h-11 w-full items-center rounded-md transition-colors duration-200 text-start",
+        "relative flex h-9 w-full items-center rounded-md transition-colors duration-200 text-start",
         isSelected
           ? "font-semibold"
           : "hover:bg-[var(--surface-muted,#f9fafb)]",
@@ -163,7 +163,7 @@ export function DashboardShell({ groups, selected, onSelect, brand, header, hide
 
         <div className="min-h-0 flex-1 overflow-y-auto">
           {groups.map((group, gi) => (
-            <div key={group.key} className={cn("space-y-1", gi > 0 && "mt-4 border-t pt-4")} style={gi > 0 ? { borderColor: "var(--brand-border)" } : undefined}>
+            <div key={group.key} className={cn("space-y-0.5", gi > 0 && "mt-3 border-t pt-3")} style={gi > 0 ? { borderColor: "var(--brand-border)" } : undefined}>
               {open && group.label && (
                 <div className="px-3 pb-1 text-[11px] font-semibold uppercase tracking-wide" style={{ color: "var(--brand-muted)" }}>
                   {group.label}

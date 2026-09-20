@@ -62,6 +62,11 @@ export default function SetupChecklist() {
       data-testid="setup-checklist"
       data-tour="setup-checklist"
     >
+      {/* Side by side on a wide screen, and finished rows folded away
+          (20 Sep 2026): two full lists stacked filled the whole first
+          screen of the dashboard with things already done. What is left to
+          do is what shows. */}
+      <div className={lists.length > 1 ? 'grid gap-6 lg:grid-cols-2' : ''}>
       {lists.map((list, listIndex) => {
         const pct = list.total ? Math.round((list.done / list.total) * 100) : 0;
         // The next thing to do. Named separately because the spec's rule is
@@ -70,7 +75,7 @@ export default function SetupChecklist() {
         return (
           <section
             key={list.role}
-            className={listIndex > 0 ? 'mt-6 pt-5 border-t' : ''}
+            className={listIndex > 0 ? 'pt-5 border-t lg:pt-0 lg:border-t-0' : ''}
             style={listIndex > 0 ? { borderColor: 'var(--brand-border)' } : undefined}
             data-testid={`setup-checklist-${list.role}`}
           >
@@ -105,22 +110,9 @@ export default function SetupChecklist() {
             </div>
 
             <ul className="space-y-1.5">
-              {list.items.map((item) => {
+              {list.items.filter((i) => !i.done).map((item) => {
                 const lk = localeKeyFor(item.id);
                 const label = t(`setup.item.${lk}`, item.id);
-                if (item.done) {
-                  return (
-                    <li key={item.id} data-testid={`setup-item-${item.id}`} data-done="true">
-                      <span
-                        className="inline-flex items-center gap-2 text-sm"
-                        style={{ color: 'var(--brand-muted)' }}
-                      >
-                        <CheckCircle2 size={15} style={{ color: DONE_GREEN }} aria-hidden="true" />
-                        <s>{label}</s>
-                      </span>
-                    </li>
-                  );
-                }
                 const isNext = next && next.id === item.id;
                 return (
                   <li key={item.id} data-testid={`setup-item-${item.id}`} data-done="false">
@@ -146,9 +138,27 @@ export default function SetupChecklist() {
                 );
               })}
             </ul>
+            {list.done > 0 && (
+              <details className="mt-2">
+                <summary className="text-xs cursor-pointer select-none" style={{ color: 'var(--brand-muted)' }}>
+                  {t('setup.showDone', '{{count}} done', { count: list.done })}
+                </summary>
+                <ul className="space-y-1.5 mt-2">
+                  {list.items.filter((i) => i.done).map((item) => (
+                    <li key={item.id} data-testid={`setup-item-${item.id}`} data-done="true">
+                      <span className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--brand-muted)' }}>
+                        <CheckCircle2 size={15} style={{ color: DONE_GREEN }} aria-hidden="true" />
+                        <s>{t(`setup.item.${localeKeyFor(item.id)}`, item.id)}</s>
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+            )}
           </section>
         );
       })}
+      </div>
 
       {/* T7 — someone staring at a checklist is already in a learning frame
           of mind. Beneath it, never instead of it. */}

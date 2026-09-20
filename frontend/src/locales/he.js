@@ -848,6 +848,7 @@ const he = {
         businessTitle: '\u05dc\u05e1\u05d9\u05d5\u05dd \u05d4\u05d4\u05d2\u05d3\u05e8\u05d4 \u05e9\u05dc \u05d4\u05e2\u05e1\u05e7',
         propertyTitle: '\u05dc\u05e1\u05d9\u05d5\u05dd \u05d4\u05d4\u05d2\u05d3\u05e8\u05d4 \u05e9\u05dc \u05d4\u05e0\u05db\u05e1',
         count: '{{done}} \u05de\u05ea\u05d5\u05da {{total}}',
+        showDone: '{{count}} הושלמו',
         allDone: '\u05d4\u05d4\u05d2\u05d3\u05e8\u05d4 \u05d4\u05d5\u05e9\u05dc\u05de\u05d4.',
         item: {
           biz_named: '\u05e9\u05dd \u05d4\u05e2\u05e1\u05e7',
@@ -1305,6 +1306,7 @@ const he = {
         groupListings: 'מודעות',
         groupActivity: 'פעילות',
         groupAccount: 'חשבון',
+        menu: 'תפריט',
         contracts: 'חוזים',
         hideSidebar: 'הסתרה',
         role_owner: 'בעל נכס',
