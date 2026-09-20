@@ -1289,7 +1289,14 @@ async def _my_courier_businesses(user: dict[str, Any]) -> tuple[list[dict[str, A
 async def courier_me(user=Depends(verify_token)):
     active, invites, _ = await _my_courier_businesses(user)
     open_count = await db.store_orders.count_documents({"courier.user_id": user["user_id"], "status": {"$in": list(OPEN_STATUSES)}})
-    return {"businesses": active, "invites": invites, "deliveries_open": open_count}
+    # A courier with no business of their own cannot be a connection, so no
+    # shop's automation can reach them (docs/business-network-spec.md, Phase
+    # 0). The Deliveries tab says so once they are delivering for someone.
+    has_business = await db.businesses.count_documents(
+        {"owner_user_id": user["user_id"], "active": {"$ne": False}}, limit=1,
+    ) > 0
+    return {"businesses": active, "invites": invites, "deliveries_open": open_count,
+            "has_business": has_business}
 
 
 @router.post("/courier/invites/{business_id}/accept")

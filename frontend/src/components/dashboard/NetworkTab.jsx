@@ -16,9 +16,10 @@ import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
-import { Users, Inbox, Search, MessageCircle, Check, X, Star, BadgeCheck, Store } from 'lucide-react';
+import { Users, Inbox, Search, MessageCircle, Check, X, Star, BadgeCheck, Store, Zap } from 'lucide-react';
+import AutomationsPanel from './AutomationsPanel';
 
-const VIEWS = ['partners', 'requests', 'find'];
+const VIEWS = ['partners', 'requests', 'automations', 'find'];
 const REMEMBER = 'network.business';
 
 function Avatar({ biz }) {
@@ -181,16 +182,16 @@ export default function NetworkTab({ API, token }) {
         )}
       </div>
 
-      <div role="tablist" className="inline-flex gap-1 p-1 rounded-lg mb-4" style={{ background: 'rgb(var(--brand-primary-rgb) / 0.07)' }}>
+      <div role="tablist" className="flex flex-wrap gap-1 p-1 rounded-lg mb-4" style={{ background: 'rgb(var(--brand-primary-rgb) / 0.07)' }}>
         {VIEWS.map((v) => {
-          const Icon = { partners: Users, requests: Inbox, find: Search }[v];
+          const Icon = { partners: Users, requests: Inbox, automations: Zap, find: Search }[v];
           const n = v === 'partners' ? partners.length : v === 'requests' ? incoming.length : null;
           return (
             <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)}
               className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold ${view === v ? 'bg-white shadow-sm' : ''}`}
               style={{ color: view === v ? 'var(--brand-primary)' : 'var(--brand-muted)' }} data-testid={`network-view-${v}`}>
               <Icon size={15} aria-hidden="true" />
-              {t(`network.view_${v}`, { partners: 'Partners', requests: 'Requests', find: 'Find partners' }[v])}
+              {t(`network.view_${v}`, { partners: 'Partners', requests: 'Requests', automations: 'Automations', find: 'Find partners' }[v])}
               {n > 0 && <span className="ms-1 text-xs tabular-nums">{n}</span>}
             </button>
           );
@@ -261,6 +262,15 @@ export default function NetworkTab({ API, token }) {
               <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>{t('network.noneOutgoing', 'No requests sent.')}</p>
             )}
           </>
+        )}
+
+        {!failed && data && view === 'automations' && (
+          <AutomationsPanel
+            API={API}
+            token={token}
+            bizId={bizId}
+            partners={partners.map((c) => ({ id: c.other.id, name: (lang === 'he' && c.other.name_he) || c.other.name }))}
+          />
         )}
 
         {view === 'find' && (

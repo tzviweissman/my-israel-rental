@@ -2,7 +2,7 @@
 
 The build brief is `docs/business-network-implementation-prompt.md`. This file is that brief adapted to what the code actually is, phase by phase, and it is the one to trust where the two differ.
 
-Status: **Phase 0 and Phase 1 done** (18 Sep 2026). Phases 2 to 9 not started.
+Status: **Phases 0, 1 and 2 done** (Phase 2 screens, 20 Sep 2026). Phases 3 to 9 not started.
 
 ---
 
@@ -79,6 +79,40 @@ Checked in a real browser, as two different people: request with a note, accept,
 
 ---
 
-## Phases 2 to 9
+## Phase 2: automations (built)
 
-As in the brief, with the Phase 0 answers above applied. Before Phase 2 starts, Tzvi decides the courier question.
+The engine is in `backend/routes/marketplace/automations.py`, hooked into
+`orders._transition()`. The screens, 20 Sep 2026:
+
+- **Network → Automations** (`components/dashboard/AutomationsPanel.jsx`).
+  One screen for the three things that are one idea: the rules, the
+  auto-accept list, and the run log. A rule reads WHEN → order for whom,
+  with an On switch, Delete, and Send now on a saved reorder. The form
+  validates what the API validates, in the same words, so Save never
+  walks into a 400.
+- **Auto-accept** sits on the same screen because only the RECEIVING
+  business can grant it, and this is that business's screen. Per partner,
+  with an amount cap and a per-day cap; empty means no limit. Saved
+  through `PUT .../orders/auto-accept`, never through the order settings
+  endpoint, which replaces the whole settings object.
+- **"from <business>" on the order card** (`OrderCard.jsx`). An owner who
+  finds an order they did not take can read why it is there; the title
+  says when it was accepted automatically.
+- **Courier nudge** (`DeliveriesTab.jsx`). A courier is a person and a
+  connection is between two businesses, so a courier who runs no business
+  can never be the target of an automation — Tzvi's ruling (option 1, 19
+  Sep) is that they add one. `GET /marketplace/courier/me` gained
+  `has_business`; the tab shows the nudge only to a courier already
+  delivering for someone.
+
+Checked in a real browser: a rule created through the form, an order
+driven to `ready`, the delivery appearing on the partner's board with the
+chip, auto-accept ticked and the next order landing already accepted, and
+the run log showing all of it. English and Hebrew, 1280, 768 and 375, no
+console errors and no sideways scroll. Tests: `test_business_automations.py`
+12 passing, `test_business_connections.py` 13, `test_store_orders_couriers.py`
+12 (which now also holds `has_business`).
+
+## Phases 3 to 9
+
+As in the brief, with the Phase 0 answers above applied.
