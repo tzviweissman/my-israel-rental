@@ -110,13 +110,13 @@ export default function HomePreview() {
   // palette experiments are scoped and search engines are kept out).
   const isLab = useLocation().pathname.startsWith('/home-preview');
   const {
-    gallery, picks, dealCards, hasDeals, recent, rentals, businesses,
+    gallery, dealCards, recent, rentals, businesses,
     loaded, failed, retrying, retry,
   } = useHomeShowcase();
   // An empty state is a claim about the site, so it is only made when every
   // list behind it answered. A shelf that is empty because a request failed
   // says the page could not load, and offers a retry, instead.
-  const shelfFailed = failed.properties || failed.gigs || failed.deals;
+  const shelfFailed = failed.deals;
   const recentFailed = failed.properties;
   // Once someone presses Try again, the message stays on screen with the
   // button reading "Trying again..." until the round ends. Before, the click
@@ -138,7 +138,10 @@ export default function HomePreview() {
   // the section falls through to its honest "no offers" state.
   const [deadImages, setDeadImages] = useState(() => new Set());
   const markDead = (key) => setDeadImages((s) => (s.has(key) ? s : new Set(s).add(key)));
-  const shelf = (hasDeals ? dealCards : picks).filter((it) => !deadImages.has(it.key));
+  // Deals only (Tzvi, 22 Sep 2026: "it should be today's deals, which shows
+  // the deals from businesses"). The fallback rotation of everything listed
+  // that stood here when nobody ran an offer is gone; the empty state says so.
+  const shelf = dealCards.filter((it) => !deadImages.has(it.key));
   // Which card the coverflow has centred. The component names it in its
   // caption but cannot open it, so the page renders the control.
   const [pick, setPick] = useState(0);
@@ -339,9 +342,8 @@ export default function HomePreview() {
         </div>
       </section>
 
-      {/* ── Today's deals, or today's picks ──────────────────────────────
-          The heading follows the data; the data is never bent to fit the
-          heading. Three states, and each one is the truth:
+      {/* ── Today's deals ─────────────────────────────────────────────────
+          Offers put up by businesses, nothing else. The states:
 
             offers running   "Today's deals", exactly as many cards as there
                              are offers. Four or more get the coverflow; one,
@@ -352,10 +354,9 @@ export default function HomePreview() {
                              Every offer here has a cover image; the hook
                              filters the ones that do not, which is what used
                              to put a blank card under this heading.
-            no offers        "Today's picks", the daily rotation of everything
-                             listed. Real cards, honestly labelled.
-            nothing at all   a line saying so. Not an empty grid, and not a
-                             section that silently vanishes.
+            no offers        a line saying so, and an invitation to put one
+                             up. Not an empty grid, and not a section that
+                             silently vanishes.
             could not load   a line saying THAT, with a retry. Only after the
                              hook's own retries have run out; while they run,
                              the section waits rather than flashing an error. */}
@@ -372,6 +373,9 @@ export default function HomePreview() {
                 {t('home.v2.picks.empty',
                   'No offers yet. When a business puts one up, it shows here the same day.')}
               </p>
+              <button type="button" className="hv2-hero-link" onClick={() => navigate('/businesses/add')} data-testid="home-preview-deals-add">
+                {t('home.v2.hero.ctaAdd', 'Add your business, free')} <ArrowRight size={14} className="rtl:rotate-180" />
+              </button>
             </div>
           </div>
         </section>
@@ -390,7 +394,7 @@ export default function HomePreview() {
         <section className="hv2-picks" id="picks">
           <div className="hv2-wrap">
             <div className="hv2-picks-head" data-testid="home-preview-picks-error">
-              <h2>{t('home.v2.picks.h2', "Today's picks")}</h2>
+              <h2>{t('home.v2.picks.h2Deals', "Today's deals")}</h2>
               <p>{t('home.v2.picks.loadError', "We couldn't load today's offers just now.")}</p>
               <button
                 type="button"
@@ -449,14 +453,10 @@ export default function HomePreview() {
           <div className="hv2-wrap">
             <div className="hv2-picks-head">
               <div className="hv2-eyebrow hv2-eyebrow-gold">
-                {hasDeals ? t('home.v2.picks.eyebrowDeals', 'On offer now') : t('home.v2.picks.eyebrow', 'Fresh today')}
+                {t('home.v2.picks.eyebrowDeals', 'On offer now')}
               </div>
-              <h2>{hasDeals ? t('home.v2.picks.h2Deals', "Today's deals") : t('home.v2.picks.h2', "Today's picks")}</h2>
-              <p>
-                {hasDeals
-                  ? t('home.v2.picks.pDeals', 'Offers running right now, put up by the businesses themselves. Drag to browse.')
-                  : t('home.v2.picks.p', 'A new selection every day, from everything listed on the site. Drag to browse.')}
-              </p>
+              <h2>{t('home.v2.picks.h2Deals', "Today's deals")}</h2>
+              <p>{t('home.v2.picks.pDeals', 'Offers running right now, put up by the businesses themselves. Drag to browse.')}</p>
             </div>
             <CoverflowCarousel
               slides={pickSlides}
@@ -469,7 +469,7 @@ export default function HomePreview() {
               autoplay={0.1}
               showPagination={false}
               onSelect={setPick}
-              label={hasDeals ? t('home.v2.picks.h2Deals', "Today's deals") : t('home.v2.picks.h2', "Today's picks")}
+              label={t('home.v2.picks.h2Deals', "Today's deals")}
               prevLabel={t('home.v2.picks.prev', 'Previous')}
               nextLabel={t('home.v2.picks.next', 'Next')}
               goToLabel={(n) => t('home.v2.picks.goTo', 'Go to card {{n}}', { n })}

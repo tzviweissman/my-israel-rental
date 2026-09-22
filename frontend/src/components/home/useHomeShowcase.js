@@ -23,7 +23,6 @@
  * same reason siteAssets.js exists at all.
  */
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { shownPrice } from '../../utils/listingPrice';
 import axios from 'axios';
 
 import { API } from '../../lib/apiBase';
@@ -37,12 +36,6 @@ const CARD_WIDTH = 520;
 const GALLERY_W = 700;
 // The coverflow's cards are square.
 const PICK_SIZE = 640;
-// The coverflow needs a ring, not a row: below this the raked cards read as
-// three loose photos, so the fallback rotation hides itself rather than
-// showing a thin one. This governs the ROTATION only. Offers are not held to
-// it — one real offer is shown as one card, in a plain row, because hiding a
-// business's only offer to protect a carousel's geometry is the wrong trade.
-const MIN_CARDS = 4;
 const GALLERY_H = 900;
 
 const FALLBACK_STILLS = [
@@ -253,57 +246,9 @@ export default function useHomeShowcase() {
   );
   const hasDeals = dealCards.length > 0;
 
-  // The fallback rotation, shown only when nobody is running an offer: a cut
-  // of everything listed, offset by the calendar day so the selection
-  // genuinely differs from one day to the next.
-  const picks = useMemo(() => {
-    const day = Math.floor(Date.now() / 86400000);
-    const stay = (p) => ({
-      key: `p-${p.id}`,
-      src: framedImage(propertyPhoto(p), PICK_SIZE, PICK_SIZE),
-      alt: p.title || '',
-      kind: 'stay',
-      // The whole row, so the page can build the headline with propertyTitle
-      // rather than the raw title, which for most listings is just the area.
-      property: p,
-      title: p.title || '',
-      area: p.area || '',
-      href: `/property/${p.id}`,
-      // The shared rule's answer; the page formats it in its own language.
-      // This was an English string ("/mo", "/night") shown on the Hebrew
-      // page too, and a holiday-only flat had no price.
-      shown: shownPrice(p),
-      beds: p.bedrooms ? String(p.bedrooms) : null,
-      rentalType: p.rental_type || '',
-    });
-    const biz = (g) => ({
-      key: `b-${g.id}`,
-      src: framedImage(getGigCover(g), PICK_SIZE, PICK_SIZE),
-      alt: g.title || '',
-      kind: 'biz',
-      title: g.title || '',
-      title_he: g.title_he || '',
-      area: g.area || '',
-      href: `/businesses/${g.id}`,
-      category: g.category || '',
-    });
-    const pool = [];
-    const r = rentals.map(stay);
-    const b = businesses.map(biz);
-    for (let i = 0; i < Math.max(r.length, b.length); i++) {
-      if (r[i]) pool.push(r[i]);
-      if (b[i]) pool.push(b[i]);
-    }
-    if (pool.length < MIN_CARDS) return [];
-    // Rotate the whole pool, so every listing comes round over time instead of
-    // the same twelve showing for ever.
-    const start = (day * 3) % pool.length;
-    return Array.from({ length: Math.min(12, pool.length) }, (_, i) => pool[(start + i) % pool.length]);
-  }, [rentals, businesses]);
-
   return {
     loaded, failed, retrying, retry,
-    streamImages, gallery, picks, dealCards, hasDeals, recent,
+    streamImages, gallery, dealCards, hasDeals, recent,
     rentals: rentals.slice(0, 6), businesses: businesses.slice(0, 8),
   };
 }
