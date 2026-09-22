@@ -910,6 +910,7 @@ def _il_day_of(created_at: str) -> Optional[str]:
 
 
 @router.get("/leads/summary")
+@view_tracking.with_week
 async def leads_summary(
     business_id: Optional[str] = Query(None),
     user=Depends(verify_token),
@@ -1023,7 +1024,7 @@ async def leads_summary(
     view_ids = None
     if business_id:
         view_ids = [g["_id"] for g in owned] + [business_id]
-    views = await view_tracking.view_summary(provider_id, LEADS_PERIOD_DAYS, view_ids)
+    views = await view_tracking.view_summary(provider_id, LEADS_PERIOD_DAYS, view_ids, entity_types=["gig", "business"])
 
     # The day the oldest of these listings went live: the counter's real
     # denominator, which `since` (the first EVENT) is not.

@@ -34,6 +34,14 @@ const he = {
         colVisitors: 'מבקרים',
         colTaps: 'לחיצות',
         businessPage: 'דף העסק שלכם',
+        weekTooNew: 'עדיין אין מספיק היסטוריה כדי להשוות בין שבועות.',
+        weekUp: '{{n}} השבוע, עלייה מ-{{b}}',
+        weekDown: '{{n}} השבוע, ירידה מ-{{b}}',
+        weekSame: '{{n}} השבוע, כמו בשבוע שלפני',
+        colSaved: 'נשמר',
+        savedBy_one: 'נשמר על ידי אדם אחד',
+        savedBy_other: 'נשמר על ידי {{count}} אנשים',
+        savedBy_two: 'נשמר על ידי שני אנשים',
       },
       // See the note on the English copy.
       faqEditor: {

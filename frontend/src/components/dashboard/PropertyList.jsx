@@ -4,7 +4,7 @@ import ShareListingsPanel from './ShareListingsPanel';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon, Loader2, CalendarCheck, TrendingUp } from 'lucide-react';
+import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon, Loader2, CalendarCheck, TrendingUp, Heart } from 'lucide-react';
 import { toast } from 'sonner';
 import { getCoverImage } from '../../utils/coverImage';
 import openAuthedFile from '../../utils/openAuthedFile';
@@ -79,6 +79,9 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
   // Smart Pricing modal — single instance, opened with whichever property's
   // button was clicked. Vacation-only (button is hidden on other types).
   const [smartPricingProperty, setSmartPricingProperty] = useState(null);
+  // How many people saved each listing, from the stats panel's own request
+  // (onData) rather than a second one. Absent means nobody: no "saved by 0".
+  const [saves, setSaves] = useState({});
 
   const authHeaders = { headers: { Authorization: `Bearer ${token}` } };
 
@@ -437,6 +440,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
           token={token}
           endpoint="/properties/performance/summary"
           rowsLabel={t('perf.byProperty', 'Taps by property')}
+          onData={(d) => setSaves(d?.saves || {})}
         />
       </div>
       <div className="flex items-center justify-between flex-wrap gap-3 mb-6">
@@ -629,7 +633,13 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
             </div>
             <div className="p-4">
               <h3 className="text-lg font-bold mb-2">{property.title}</h3>
-              <p className="text-gray-600 text-sm mb-4">{areaLabel(property.area, t)}</p>
+              <p className={`text-gray-600 text-sm ${saves[property.id] ? 'mb-1' : 'mb-4'}`}>{areaLabel(property.area, t)}</p>
+              {saves[property.id] > 0 && (
+                <p className="text-xs text-gray-600 mb-3 inline-flex items-center gap-1" data-testid={`saved-by-${property.id}`}>
+                  <Heart size={12} aria-hidden="true" className="shrink-0" />
+                  {t('perf.savedBy', { count: saves[property.id], defaultValue: 'Saved by {{count}} people' })}
+                </p>
+              )}
               <div className="flex items-start justify-between gap-2">
                 <PriceBlock property={property} t={t} />
                 <div className="flex gap-2 shrink-0">

@@ -42,6 +42,14 @@ const en = {
         colVisitors: 'Visitors',
         colTaps: 'Taps',
         businessPage: 'Your business page',
+        weekTooNew: 'Not enough history yet to compare weeks.',
+        weekUp: '{{n}} this week, up from {{b}}',
+        weekDown: '{{n}} this week, down from {{b}}',
+        weekSame: '{{n}} this week, the same as the week before',
+        colSaved: 'Saved',
+        savedBy_one: 'Saved by 1 person',
+        savedBy_other: 'Saved by {{count}} people',
+        savedBy_two: 'Saved by 2 people',
       },
       // Quick edit for a live listing — the answer to "I spotted a typo"
       // and "that's the wrong photo". Deliberately not the wizard.

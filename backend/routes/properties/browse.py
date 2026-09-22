@@ -588,6 +588,7 @@ async def contact_property_on_whatsapp(
 
 
 @api_router.get("/properties/performance/summary")
+@view_tracking.with_week
 async def property_performance_summary(user=Depends(verify_token)) -> dict:
     """Visitors and contact taps for the caller's own properties.
 
@@ -634,6 +635,15 @@ async def property_performance_summary(user=Depends(verify_token)) -> dict:
 
     views = await view_tracking.view_summary(owner_id, _PROP_PERIOD_DAYS, prop_ids)
 
+    saves: dict[str, int] = {}
+    if prop_ids:
+        async for row in db.liked_properties.aggregate([
+            {"$match": {"property_id": {"$in": prop_ids}}},
+            {"$group": {"_id": "$property_id", "n": {"$sum": 1}}},
+        ]):
+            if row["n"]:
+                saves[row["_id"]] = row["n"]
+
     # One row per listing that had a visitor OR a tap in the window, each
     # carrying both numbers (Tzvi, 18 Sep 2026). Rows used to be taps only,
     # so a flat 40 people looked at and nobody messaged about - the listing
@@ -642,8 +652,11 @@ async def property_performance_summary(user=Depends(verify_token)) -> dict:
     by_listing = sorted(
         (
             {"id": pid, "title": titles.get(pid, ""),
-             "count": per_prop.get(pid, 0), "views": seen.get(pid, 0)}
-            for pid in set(per_prop) | {k for k, n in seen.items() if n}
+             "count": per_prop.get(pid, 0), "views": seen.get(pid, 0),
+             "saves": saves.get(pid, 0)}
+            # ...or that somebody saved: a listing people keep for later is
+            # worth a row even in a week nobody opened it.
+            for pid in set(per_prop) | {k for k, n in seen.items() if n} | set(saves)
             # A tap against a since-deleted listing still counts in the
             # total; it just has no row to show, because there is nothing
             # left to name.
@@ -668,6 +681,11 @@ async def property_performance_summary(user=Depends(verify_token)) -> dict:
         "daily": [{"date": k, "count": buckets[k]} for k in day_keys],
         "since": since,
         "by_listing": by_listing,
+        # "Saved by N people" per listing (23 Sep 2026): the likes people
+        # already make, counted. All time, not per period - a save is a
+        # standing interest, not a visit. Listings nobody saved are absent,
+        # so the page never says "saved by 0".
+        "saves": saves,
         "views": {
             "total": views["total"],
             "period_total": views["period_total"],

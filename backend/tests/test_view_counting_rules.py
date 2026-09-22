@@ -119,3 +119,15 @@ def test_who_counts(world, db, kind):
 
     for vid in (v, o, other, bot):
         db.site_visits.delete_many({"visitor": vid})
+
+
+def test_week_compare_needs_both_weeks_counted():
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from utils.view_tracking import week_compare
+    days = [{"date": f"2026-09-{d:02d}", "count": 1 if d > 7 else 3} for d in range(1, 15)]
+    assert week_compare(days, "2026-09-01") == {"last7": 7, "before": 21}
+    # Counting began mid-way: the first week is partly the counter starting.
+    assert week_compare(days, "2026-09-02") == {"last7": 7, "before": None}
+    assert week_compare(days, None) == {"last7": 7, "before": None}
+    assert week_compare(days[:10], "2026-09-01") == {"last7": None, "before": None}

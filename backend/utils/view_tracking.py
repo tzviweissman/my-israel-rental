@@ -191,7 +191,8 @@ def il_day_of_iso(created_at: object) -> Optional[str]:
     return il_day_of(dt)
 
 
-async def view_summary(owner_id: str, days: int, entity_ids: Optional[list[str]] = None) -> dict:
+async def view_summary(owner_id: str, days: int, entity_ids: Optional[list[str]] = None,
+                       entity_types: Optional[list[str]] = None) -> dict:
     """Totals, a per-day series and a per-entity breakdown for one owner.
 
     `entity_ids` restricts to a subset (one business's services, say). An
@@ -200,6 +201,10 @@ async def view_summary(owner_id: str, days: int, entity_ids: Optional[list[str]]
     widen the scope the caller asked for.
     """
     base: dict[str, Any] = {"owner_id": owner_id}
+    # The services panel and the rentals panel read one collection: without
+    # this, a lister with both saw their flats' visitors under their services.
+    if entity_types:
+        base["entity_type"] = {"$in": entity_types}
     if entity_ids is not None:
         if not entity_ids:
             cutoff, keys = il_day_window(days)
@@ -242,6 +247,41 @@ async def view_summary(owner_id: str, days: int, entity_ids: Optional[list[str]]
         "since": since,
         "by_entity": by_entity,
     }
+
+
+def week_compare(daily: list[dict], since: Optional[str]) -> dict:
+    """The last 7 days against the 7 before, from a daily series (oldest
+    first) - or no comparison at all.
+
+    "42, up from 31" is only honest when both weeks were being counted. If
+    counting began inside the earlier week, that week is partly empty for a
+    reason that has nothing to do with the listing, and the comparison would
+    show a rise that never happened. Then `before` is None and the page says
+    there is not enough history yet. One rule, used by the dashboard panel
+    and the weekly email alike."""
+    if len(daily) < 14:
+        return {"last7": None, "before": None}
+    last7 = sum(d["count"] for d in daily[-7:])
+    first_day_before = daily[-14]["date"]
+    comparable = bool(since) and since <= first_day_before
+    before = sum(d["count"] for d in daily[-14:-7]) if comparable else None
+    return {"last7": last7, "before": before}
+
+
+def with_week(fn):
+    """Adds `week` (see week_compare) to a leads/views summary's two
+    halves: taps at the top level, visitors under `views`."""
+    import functools
+
+    @functools.wraps(fn)
+    async def wrapper(*args, **kwargs):
+        out = await fn(*args, **kwargs)
+        out["week"] = week_compare(out.get("daily") or [], out.get("since"))
+        v = out.get("views")
+        if isinstance(v, dict):
+            v["week"] = week_compare(v.get("daily") or [], v.get("since"))
+        return out
+    return wrapper
 
 
 async def ensure_view_indexes() -> None:
