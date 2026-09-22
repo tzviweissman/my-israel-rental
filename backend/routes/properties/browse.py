@@ -711,6 +711,7 @@ async def get_property(
         owner_id=property_data.get("owner_id"),
         viewer_id=(viewer or {}).get("user_id"),
         visitor=request.headers.get("X-Visitor-Id"),
+        user_agent=request.headers.get("user-agent") or "",
     ))
 
     owner = await db.users.find_one(

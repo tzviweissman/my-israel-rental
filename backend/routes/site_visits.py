@@ -37,24 +37,17 @@ from fastapi import APIRouter, Depends, Request, Response
 from routes.deps import db, logger
 from utils.auth import optional_user
 from utils.rate_limit import check_rate
-from utils.view_tracking import il_day_of
+from utils.view_tracking import il_day_of, is_bot as _is_bot_ua
 
 router = APIRouter()
 
 COLLECTION = "site_visits"
 _MAX_VISITOR_LEN = 64
 
-# Crawlers are not visitors. Deliberately broad - a missed bot inflates the
-# number a person reads as growth, a false positive loses one real view.
-_BOT_MARKERS = (
-    "bot", "crawler", "spider", "slurp", "preview", "facebookexternalhit",
-    "whatsapp", "headless", "lighthouse", "pingdom", "uptimerobot", "monitor",
-)
-
-
+# Crawlers are not visitors: one list, in utils/view_tracking, shared with
+# the listings' own counts.
 def _is_bot(request: Request) -> bool:
-    ua = (request.headers.get("user-agent") or "").lower()
-    return not ua or any(m in ua for m in _BOT_MARKERS)
+    return _is_bot_ua(request.headers.get("user-agent"))
 
 
 @router.post("/site/visit", status_code=204)

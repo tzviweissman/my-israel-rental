@@ -85,6 +85,21 @@ def spawn(coro: Coroutine[Any, Any, Any]) -> None:
     task.add_done_callback(_background_tasks.discard)
 
 
+# Crawlers are not visitors - for a listing's own count or the site-wide
+# one (routes/site_visits.py reads this list too, so the two cannot disagree
+# about what a bot is). Deliberately broad: a missed bot inflates a number a
+# person reads as growth, a false positive loses one real view.
+BOT_MARKERS = (
+    "bot", "crawler", "spider", "slurp", "preview", "facebookexternalhit",
+    "whatsapp", "headless", "lighthouse", "pingdom", "uptimerobot", "monitor",
+)
+
+
+def is_bot(user_agent: Optional[str]) -> bool:
+    ua = (user_agent or "").lower()
+    return not ua or any(m in ua for m in BOT_MARKERS)
+
+
 # An id longer than this is not ours — cap rather than store whatever a
 # client chose to send in a header.
 _MAX_VISITOR_LEN = 64
@@ -96,9 +111,16 @@ async def record_view(
     owner_id: Optional[str],
     viewer_id: Optional[str] = None,
     visitor: Optional[str] = None,
+    user_agent: Optional[str] = None,
 ) -> None:
-    """Record one visit. Never raises — a lost metric beats a failed page."""
+    """Record one visit. Never raises — a lost metric beats a failed page.
+
+    `user_agent`: when given, a bot's visit is not recorded. Until 23 Sep
+    2026 only the site-wide counter left crawlers out, so a link preview
+    counted as a visitor to the listing it previewed."""
     if entity_type not in _ENTITY_TYPES or not entity_id:
+        return
+    if user_agent is not None and is_bot(user_agent):
         return
     # The owner looking at their own listing is not demand.
     if viewer_id and owner_id and viewer_id == owner_id:
