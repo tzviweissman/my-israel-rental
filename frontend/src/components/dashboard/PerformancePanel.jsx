@@ -22,14 +22,47 @@
  */
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Eye, MessageCircle } from 'lucide-react';
+import { Eye, MessageCircle, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import ScanChart from '../common/ScanChart';
 import formatDate from '../../utils/formatDate';
 
+/* This week against last week (23 Sep 2026: "the only question the number
+   is asked" is whether it is getting better or worse). Computed on the
+   server (utils/view_tracking.week_compare), where `before` is null unless
+   both weeks were being counted - a young counter gets a plain "not enough
+   history yet", never a rise that is only the counter starting.
+
+   A word and an arrow, never colour alone: green is reserved for status on
+   this site, and the direction has to survive colour-blind readers. Up and
+   down arrows do not mirror, so Hebrew reads the same way. */
+function WeekLine({ week, testid, t }) {
+  if (!week || week.last7 == null) return null;
+  if (week.before == null) {
+    return (
+      <p className="text-[11px] text-gray-500 mt-1" data-testid={`${testid}-week-none`}>
+        {t('perf.weekTooNew', 'Not enough history yet to compare weeks.')}
+      </p>
+    );
+  }
+  const { last7: n, before: b } = week;
+  const Arrow = n > b ? ArrowUp : n < b ? ArrowDown : Minus;
+  const text = n > b
+    ? t('perf.weekUp', { defaultValue: '{{n}} this week, up from {{b}}', n, b })
+    : n < b
+      ? t('perf.weekDown', { defaultValue: '{{n}} this week, down from {{b}}', n, b })
+      : t('perf.weekSame', { defaultValue: '{{n}} this week, the same as the week before', n });
+  return (
+    <p className="text-xs text-gray-700 mt-1 inline-flex items-center gap-1" data-testid={`${testid}-week`}>
+      <Arrow size={13} aria-hidden="true" className="shrink-0" />
+      <span>{text}</span>
+    </p>
+  );
+}
+
 // One column of the panel. Kept local: it is the panel's own layout, not a
 // shape anything else needs.
-function Stat({ icon: Icon, label, periodTotal, allTime, daily, chartTitle, since, testid, t }) {
+function Stat({ icon: Icon, label, periodTotal, allTime, daily, chartTitle, since, week, testid, t }) {
   // Nothing has EVER been recorded for this half — not "a quiet month" but
   // "we were not counting yet". They look identical as a `0`, and the two
   // halves start at different times: taps have months of history, visitors
@@ -57,6 +90,7 @@ function Stat({ icon: Icon, label, periodTotal, allTime, daily, chartTitle, sinc
           {t('perf.allTime', { defaultValue: '{{n}} all time', n: allTime })}
         </span>
       </div>
+      <WeekLine week={week} testid={testid} t={t} />
       {/* Capped: ScanChart draws its text in viewBox units and scales with
           width, so across a full dashboard card the axis dates come out
           enormous. It was built for a 320px popover. */}
@@ -81,6 +115,7 @@ export default function PerformancePanel({
   API, token, businessId = null,
   endpoint = '/marketplace/leads/summary',
   rowsLabel = null,
+  onData = null,
 }) {
   const { t } = useTranslation();
   const [data, setData] = useState(null);
@@ -96,7 +131,7 @@ export default function PerformancePanel({
           // both charts and the rows — describes the same set of listings.
           params: businessId ? { business_id: businessId } : {},
         });
-        if (!cancelled) setData(d);
+        if (!cancelled) { setData(d); onData?.(d); }
       } catch {
         // Render nothing rather than a zero. A failed request and a
         // genuinely quiet month look identical once they are both "0",
@@ -112,7 +147,9 @@ export default function PerformancePanel({
   const views = data.views || { total: 0, period_total: 0, daily: [], since: null };
   // Services return `by_gig`, properties `by_listing` — same shape.
   const rows = data.by_gig || data.by_listing || [];
-  const anything = (data.total || 0) > 0 || (views.total || 0) > 0;
+  // Properties only: businesses have no "save" to count.
+  const hasSaves = rows.some((r) => r.saves > 0);
+  const anything = (data.total || 0) > 0 || (views.total || 0) > 0 || hasSaves;
 
   return (
     <div className="bg-white border border-gray-200 rounded-2xl p-5" data-testid="performance-panel">
@@ -135,6 +172,7 @@ export default function PerformancePanel({
               daily={views.daily}
               chartTitle={t('perf.viewsChart', 'Visitors — last 14 days')}
               since={views.since}
+              week={views.week}
               testid="perf-views"
               t={t}
             />
@@ -146,6 +184,7 @@ export default function PerformancePanel({
               daily={data.daily}
               chartTitle={t('perf.leadsChart', 'Taps — last 14 days')}
               since={data.since}
+              week={data.week}
               testid="perf-leads"
               t={t}
             />
@@ -165,6 +204,7 @@ export default function PerformancePanel({
                   </th>
                   <th className="pt-3 pb-1 px-2 text-end font-semibold">{t('perf.colVisitors', 'Visitors')}</th>
                   <th className="pt-3 pb-1 text-end font-semibold">{t('perf.colTaps', 'Taps')}</th>
+                  {hasSaves && <th className="pt-3 pb-1 ps-2 text-end font-semibold">{t('perf.colSaved', 'Saved')}</th>}
                 </tr>
               </thead>
               <tbody>
@@ -173,6 +213,7 @@ export default function PerformancePanel({
                     <td className="py-0.5 text-gray-700 italic">{t('perf.businessPage', 'Your business page')}</td>
                     <td className="py-0.5 px-2 text-end tabular-nums text-gray-900">{data.page_views}</td>
                     <td className="py-0.5 text-end text-gray-400">–</td>
+                    {hasSaves && <td className="py-0.5 ps-2 text-end text-gray-400">–</td>}
                   </tr>
                 )}
                 {rows.map((r) => (
@@ -180,6 +221,11 @@ export default function PerformancePanel({
                     <td className="py-0.5 text-gray-700 truncate max-w-[16rem]" dir="auto">{r.title}</td>
                     <td className="py-0.5 px-2 text-end tabular-nums text-gray-900">{r.views ?? 0}</td>
                     <td className="py-0.5 text-end tabular-nums font-semibold text-gray-900">{r.count}</td>
+                    {hasSaves && (
+                      <td className="py-0.5 ps-2 text-end tabular-nums text-gray-900" data-testid="perf-row-saves">
+                        {r.saves ? r.saves : ''}
+                      </td>
+                    )}
                   </tr>
                 ))}
               </tbody>

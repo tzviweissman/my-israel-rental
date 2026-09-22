@@ -42,6 +42,14 @@ const en = {
         colVisitors: 'Visitors',
         colTaps: 'Taps',
         businessPage: 'Your business page',
+        weekTooNew: 'Not enough history yet to compare weeks.',
+        weekUp: '{{n}} this week, up from {{b}}',
+        weekDown: '{{n}} this week, down from {{b}}',
+        weekSame: '{{n}} this week, the same as the week before',
+        colSaved: 'Saved',
+        savedBy_one: 'Saved by 1 person',
+        savedBy_other: 'Saved by {{count}} people',
+        savedBy_two: 'Saved by 2 people',
       },
       // Quick edit for a live listing — the answer to "I spotted a typo"
       // and "that's the wrong photo". Deliberately not the wizard.
@@ -1417,6 +1425,31 @@ const en = {
         gymFitnessCenter: 'Gym / Fitness center',
         swimmingPoolIndoorOrOutdoor: 'Swimming pool (indoor or outdoor)',
         onSiteParkingGarageOrLot: 'On-site parking (garage or lot)'
+      },
+      // components/dashboard/EmailSwitches.jsx (Settings)
+      emailSwitches: {
+        title: 'Emails about your listings',
+        insightsTitle: 'Monday summary',
+        insightsHint: 'How your listings did last week: visitors, messages, saves and reviews. Nothing is sent in a quiet week.',
+        requestsTitle: 'Matching requests',
+        requestsHint: 'An email when someone posts on the requests board looking for what you offer.',
+        saved: 'Saved',
+        failed: 'Could not save. Try again.',
+      },
+      // pages/InsightsEmailsOff.jsx, the weekly email's opt-out link
+      insightsOff: {
+        loading: 'One moment',
+        doneTitle: 'Done. No more weekly emails',
+        doneBody: 'We will not send you the Monday summary again. You can turn it back on in Settings, and your numbers are on your dashboard any time.',
+        errorTitle: 'That link did not work',
+        errorBody: 'It may have expired. Your dashboard shows the same numbers.',
+        dashboard: 'Open your dashboard',
+      },
+      // components/dashboard/LookingForYou.jsx
+      lookingForYou: {
+        title: 'People looking for what you offer',
+        board: 'See the board',
+        body: 'Open posts that match your listings. Reply in chat; nobody sees your number.',
       },
       // The dashboard's front page (components/dashboard/OverviewTab.jsx).
       overview: {

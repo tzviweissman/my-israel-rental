@@ -1022,6 +1022,60 @@ async def contact_request_on_whatsapp(
     return RedirectResponse(target, status_code=302)
 
 
+# How many show on the dashboard card. A nudge that the board exists and has
+# people on it, not a second copy of the board.
+LOOKING_FOR_YOU_MAX = 3
+
+
+@router.get("/looking-for-me")
+async def requests_looking_for_me(user=Depends(verify_token)):
+    """Open "want" posts this person could answer, newest first, at most 3.
+
+    The same rule as ``_match_recipients`` (the email digest), read from the
+    other side: a service post matches a published gig in its category, a
+    rental post matches a property whose area contains the post's area.
+    Kept in step by hand; change one, change both. Empty when nothing
+    matches, and the card is then not shown at all.
+
+
+    Not under ``/requests/``: ``/requests/{request_id}`` is registered first
+    and would take "looking-for-me" as a request id.
+    """
+    me = user["user_id"]
+    categories = set(await db.marketplace_gigs.distinct(
+        "category", {"provider_user_id": me, "status": "published"}))
+    areas = [a.lower() for a in await db.properties.distinct(
+        "area", {"owner_id": me, "status": {"$ne": "archived"}}) if a]
+    kinds = []
+    if categories:
+        kinds.append({"request_type": "service", "category": {"$in": list(categories)}})
+    if areas:
+        kinds.append({"request_type": "rental"})
+    if not kinds:
+        return []
+
+    docs = await db.requests.find({
+        "status": "open",
+        "hidden_by_admin": {"$ne": True},
+        "post_kind": {"$in": ["want", None]},
+        "poster_user_id": {"$ne": me},
+        "$or": kinds,
+    }).sort("created_at", -1).to_list(200)
+
+    out = []
+    for d in docs:
+        if d.get("request_type") == "rental":
+            needle = (d.get("area") or "").split(",")[0].strip().lower()
+            if not needle or not any(needle in a for a in areas):
+                continue
+        out.append({k: d.get(k) for k in (
+            "title", "title_he", "title_en", "area", "request_type", "category", "created_at")}
+            | {"id": d["_id"]})
+        if len(out) == LOOKING_FOR_YOU_MAX:
+            break
+    return out
+
+
 @router.get("/my-requests")
 async def my_requests(user=Depends(verify_token)):
     """The seeker's own requests, every status, newest first.

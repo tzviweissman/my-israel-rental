@@ -34,6 +34,14 @@ const he = {
         colVisitors: 'מבקרים',
         colTaps: 'לחיצות',
         businessPage: 'דף העסק שלכם',
+        weekTooNew: 'עדיין אין מספיק היסטוריה כדי להשוות בין שבועות.',
+        weekUp: '{{n}} השבוע, עלייה מ-{{b}}',
+        weekDown: '{{n}} השבוע, ירידה מ-{{b}}',
+        weekSame: '{{n}} השבוע, כמו בשבוע שלפני',
+        colSaved: 'נשמר',
+        savedBy_one: 'נשמר על ידי אדם אחד',
+        savedBy_other: 'נשמר על ידי {{count}} אנשים',
+        savedBy_two: 'נשמר על ידי שני אנשים',
       },
       // See the note on the English copy.
       faqEditor: {
@@ -1377,6 +1385,28 @@ const he = {
         gymFitnessCenter: 'חדר כושר',
         swimmingPoolIndoorOrOutdoor: 'בריכת שחייה (מקורה או פתוחה)',
         onSiteParkingGarageOrLot: 'חניה בבניין (חניון או מגרש)'
+      },
+      emailSwitches: {
+        title: 'מיילים על הרישומים שלכם',
+        insightsTitle: 'סיכום של יום שני',
+        insightsHint: 'איך הלך לרישומים שלכם בשבוע שעבר: מבקרים, הודעות, שמירות וביקורות. בשבוע שקט לא נשלח כלום.',
+        requestsTitle: 'בקשות מתאימות',
+        requestsHint: 'מייל כשמישהו מפרסם בלוח הבקשות שהוא מחפש את מה שאתם מציעים.',
+        saved: 'נשמר',
+        failed: 'השמירה נכשלה. נסו שוב.',
+      },
+      insightsOff: {
+        loading: 'רק רגע',
+        doneTitle: 'בוצע. לא יישלחו עוד מיילים שבועיים',
+        doneBody: 'לא נשלח לכם שוב את הסיכום של יום שני. אפשר להפעיל אותו מחדש בהגדרות, והמספרים שלכם תמיד זמינים בלוח הבקרה.',
+        errorTitle: 'הקישור לא עבד',
+        errorBody: 'ייתכן שפג תוקפו. לוח הבקרה מציג את אותם המספרים.',
+        dashboard: 'ללוח הבקרה',
+      },
+      lookingForYou: {
+        title: 'אנשים שמחפשים את מה שאתם מציעים',
+        board: 'לכל הבקשות',
+        body: 'בקשות פתוחות שמתאימות לרישומים שלכם. עונים בצ׳אט, ואף אחד לא רואה את המספר שלכם.',
       },
       overview: {
         waiting: 'מחכה לתשובה שלכם',
