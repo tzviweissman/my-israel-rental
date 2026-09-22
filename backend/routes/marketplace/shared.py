@@ -339,6 +339,45 @@ _LOCATION_BY_LABEL = {loc["label"].lower(): loc for loc in LOCATIONS}
 MAX_SERVICE_AREAS = 6
 
 
+def areas_from_text(texts: list[str]) -> list[str]:
+    """Catalogue slugs named in free-text areas ("Tel Aviv, Florentin").
+
+    Substring, case-insensitive: the rule the old location filter used,
+    so this finds what search already matched rather than a second
+    reading of the same text. Shared by scripts/backfill_* and the
+    sign-up fill in gigs.create_gig."""
+    found: list[str] = []
+    for raw in texts:
+        text = (raw or "").lower()
+        for loc in LOCATIONS:
+            if loc["label"].lower() in text and loc["slug"] not in found:
+                found.append(loc["slug"])
+    return found[:MAX_SERVICE_AREAS]
+
+
+async def fill_business_from_listing(business: dict, gig: dict) -> None:
+    """Give a business the description and service area its owner already
+    wrote on their first listing, when the business has none.
+
+    Sign-up asks for both on the SERVICE, and the business page checklist
+    then asked for them again on the BUSINESS (Tzvi, 22 Sep 2026: "don't
+    businesses do that when they originally sign up?"). Fill-only: never
+    overwrites what the owner set on the business itself, and never
+    claims `serves_nationwide`."""
+    from routes.deps import db
+    patch: dict = {}
+    if not (business.get("description") or "").strip() and (gig.get("description") or "").strip():
+        patch["description"] = gig["description"]
+        if gig.get("description_he"):
+            patch["description_he"] = gig["description_he"]
+    if not business.get("areas") and not business.get("serves_nationwide"):
+        areas = normalize_service_areas([gig.get("area") or ""]) or areas_from_text([gig.get("area") or ""])
+        if areas:
+            patch["areas"] = areas
+    if patch:
+        await db.businesses.update_one({"_id": business["_id"]}, {"$set": patch})
+
+
 def normalize_service_areas(values: list[str] | None) -> list[str]:
     """Coerce a list of city inputs to canonical LOCATION SLUGS.
 

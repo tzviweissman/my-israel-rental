@@ -45,25 +45,13 @@ from motor.motor_asyncio import AsyncIOMotorClient  # noqa: E402
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
 
 from routes.marketplace.shared import (  # noqa: E402
-    LOCATIONS,
+    areas_from_text,
     normalize_service_areas,
 )
 
 
-def _areas_from_gig_text(areas: list[str]) -> list[str]:
-    """Match free-text gig areas ("Tel Aviv, Florentin") to catalogue slugs.
-
-    Substring, case-insensitive, same rule the old location filter used —
-    deliberately, so this reproduces exactly what search already matched
-    rather than inventing a second interpretation of the same data.
-    """
-    found: list[str] = []
-    for raw in areas:
-        text = (raw or "").lower()
-        for loc in LOCATIONS:
-            if loc["label"].lower() in text and loc["slug"] not in found:
-                found.append(loc["slug"])
-    return found
+# Moved to shared.areas_from_text (22 Sep 2026) so sign-up uses the same rule.
+_areas_from_gig_text = areas_from_text
 
 
 async def main(apply: bool) -> int:

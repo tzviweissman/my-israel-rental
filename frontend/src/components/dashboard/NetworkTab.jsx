@@ -2,10 +2,11 @@
  * NetworkTab — a business's connections with other businesses
  * (docs/business-network-spec.md, Phase 1).
  *
- * Three views: Partners (accepted), Requests (waiting on me, and ones I
- * sent), Find partners. The last one does not rebuild a directory: the
- * site already has one (/businesses), and every business page there now
- * carries a Connect button. Phase 4 adds side-by-side comparison to it.
+ * Views: Partners (accepted), Requests (waiting on me, and ones I sent),
+ * Automations, Find partners. Find partners searches businesses right
+ * here, by kind and name, with Connect on each (22 Sep 2026). It used to
+ * send people to /businesses, whose cards open a service page, where there
+ * is no Connect button at all.
  *
  * Acts as ONE business at a time, chosen the way the Orders tab chooses
  * (and remembered separately, so switching one does not switch the other).
@@ -18,6 +19,8 @@ import { useNavigate, useSearchParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { Users, Inbox, Search, MessageCircle, Check, X, Star, BadgeCheck, Store, Zap } from 'lucide-react';
 import AutomationsPanel from './AutomationsPanel';
+import { groupCategories } from '../../lib/categoryGroups';
+import { CATEGORY_LABELS } from '../../lib/categories';
 
 const VIEWS = ['partners', 'requests', 'automations', 'find'];
 const REMEMBER = 'network.business';
@@ -48,7 +51,7 @@ function BizLine({ biz, t, lang }) {
             {biz.rating_avg} ({biz.rating_count})
           </span>
         )}
-        {(biz.categories || []).slice(0, 2).map((c) => <span key={c}>{t(`categories.${c}`, c)}</span>)}
+        {(biz.categories || []).filter((c) => CATEGORY_LABELS[c]).slice(0, 2).map((c) => <span key={c}>{t(`categoryLabels.${c}`, CATEGORY_LABELS[c])}</span>)}
       </div>
     </div>
   );
@@ -274,17 +277,127 @@ export default function NetworkTab({ API, token, listings = [] }) {
           />
         )}
 
-        {view === 'find' && (
-          <div className="py-2" data-testid="network-find">
-            <p className="text-sm" style={{ color: 'var(--ink)' }}>
-              {t('network.findHow', 'Browse businesses on the site. Every business page has a Connect button.')}
-            </p>
-            <button type="button" className="btn-primary mt-4 inline-flex items-center gap-2" onClick={() => navigate('/businesses')}>
-              <Search size={15} aria-hidden="true" /> {t('network.browse', 'Browse businesses')}
-            </button>
-          </div>
+        {view === 'find' && bizId && (
+          <FindPartners API={API} auth={auth} bizId={bizId} t={t} lang={lang} btn={btn} onChanged={load} />
         )}
       </div>
+    </div>
+  );
+}
+
+/**
+ * Find partners: pick a kind of business ("Transportation" when you need a
+ * courier), narrow by name, connect from the row. The kinds offered are
+ * only those that have a business, with how many.
+ */
+function FindPartners({ API, auth, bizId, t, lang, btn, onChanged }) {
+  const [kind, setKind] = useState('');
+  const [q, setQ] = useState('');
+  const [res, setRes] = useState(null);      // {results, categories}
+  const [failed, setFailed] = useState(false);
+  const [busy, setBusy] = useState(null);
+
+  const search = useCallback(async () => {
+    setFailed(false);
+    try {
+      const { data } = await axios.get(`${API}/marketplace/businesses/${bizId}/partner-search`, { ...auth, params: { q, category: kind } });
+      setRes(data);
+    } catch {
+      setFailed(true);
+    }
+  }, [API, auth, bizId, q, kind]);
+
+  // Typing waits a moment; picking a kind searches at once.
+  useEffect(() => { const h = setTimeout(search, q ? 300 : 0); return () => clearTimeout(h); }, [search, q]);
+
+  const groups = useMemo(() => groupCategories(
+    (res?.categories || []).map((c) => ({ slug: c.slug, label: CATEGORY_LABELS[c.slug] || c.slug, count: c.count })), t,
+  ), [res, t]);
+
+  const act = async (row, call, okMsg) => {
+    setBusy(row.id);
+    try {
+      await call();
+      toast.success(okMsg);
+      await search();
+      onChanged();
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('network.failed', 'That did not work. Please try again.'));
+    } finally {
+      setBusy(null);
+    }
+  };
+  const connect = (row) => act(row, () => axios.post(`${API}/marketplace/businesses/${bizId}/connections`, { target_business_id: row.id }, auth), t('network.requestSent', 'Request sent'));
+  const accept = (row) => act(row, () => axios.post(`${API}/marketplace/connections/${row.connection_id}/accept`, null, auth), t('network.acceptedToast', 'You are now connected'));
+
+  const field = 'w-full rounded-lg border px-3 min-h-[44px] text-sm bg-white';
+  const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
+  const outline = { borderColor: 'var(--brand-primary)', color: 'var(--brand-primary-deep)' };
+
+  return (
+    <div data-testid="network-find">
+      <div className="grid gap-2 sm:grid-cols-2 mb-3">
+        <label className="block">
+          <span className="block text-xs font-semibold mb-1" style={{ color: 'var(--brand-muted)' }}>{t('network.findKind', 'What kind of business?')}</span>
+          <select value={kind} onChange={(e) => setKind(e.target.value)} className={field} style={fieldStyle} data-testid="network-find-kind">
+            <option value="">{t('network.findAllKinds', 'All kinds')}</option>
+            {groups.map((g) => (
+              <optgroup key={g.id} label={g.label}>
+                {g.items.map((c) => <option key={c.slug} value={c.slug}>{c.label} ({c.count})</option>)}
+              </optgroup>
+            ))}
+          </select>
+        </label>
+        <label className="block">
+          <span className="block text-xs font-semibold mb-1" style={{ color: 'var(--brand-muted)' }}>{t('network.findName', 'Name')}</span>
+          <span className="relative block">
+            <Search size={14} className="absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none" style={{ color: 'var(--brand-muted)' }} aria-hidden="true" />
+            <input type="search" value={q} onChange={(e) => setQ(e.target.value)} dir="auto" className={`${field} ps-8`} style={fieldStyle}
+              placeholder={t('network.findNamePh', 'Search by name')} data-testid="network-find-q" />
+          </span>
+        </label>
+      </div>
+
+      {failed && (
+        <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>
+          {t('network.findFailed', 'Businesses could not be loaded.')}{' '}
+          <button type="button" className="underline" onClick={search}>{t('network.retry', 'Try again')}</button>
+        </p>
+      )}
+      {!failed && !res && <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>{t('network.loading', 'Loading…')}</p>}
+      {!failed && res && res.results.length === 0 && (
+        <p className="text-sm py-4" style={{ color: 'var(--brand-muted)' }} data-testid="network-find-empty">
+          {t('network.findNone', 'No businesses match. Try another kind or name.')}
+        </p>
+      )}
+      {!failed && res && res.results.length > 0 && (
+        <ul>
+          {res.results.map((row) => (
+            <li key={row.id} className="flex items-center gap-3 py-3 border-t first:border-t-0" style={{ borderColor: 'var(--brand-border)' }} data-testid="network-find-row">
+              <Avatar biz={row} />
+              <div className="flex-1 min-w-0"><BizLine biz={row} t={t} lang={lang} /></div>
+              <div className="shrink-0">
+                {row.status === 'accepted' && (
+                  <span className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--ink)' }}><Check size={13} aria-hidden="true" /> {t('network.connected', 'Connected')}</span>
+                )}
+                {row.status === 'pending' && row.direction === 'outgoing' && (
+                  <span className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>{t('network.requested', 'Requested')}</span>
+                )}
+                {row.status === 'pending' && row.direction === 'incoming' && (
+                  <button type="button" disabled={busy === row.id} className={btn} style={outline} onClick={() => accept(row)}>
+                    <Check size={13} aria-hidden="true" /> {t('network.accept', 'Accept')}
+                  </button>
+                )}
+                {!['accepted', 'pending'].includes(row.status) && (
+                  <button type="button" disabled={busy === row.id} className={btn} style={outline} onClick={() => connect(row)} data-testid="network-find-connect">
+                    <Users size={13} aria-hidden="true" /> {t('network.connect', 'Connect')}
+                  </button>
+                )}
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }

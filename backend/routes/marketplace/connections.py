@@ -381,6 +381,91 @@ async def set_relationship(conn_id: str, payload: RelationshipIn, user=Depends(v
     return _out(fresh, next(iter(mine)))
 
 
+PARTNER_SEARCH_LIMIT = 30
+
+
+@router.get("/businesses/{business_id}/partner-search")
+async def partner_search(
+    business_id: str,
+    q: str = Query("", max_length=80),
+    category: str = Query("", max_length=60),
+    user=Depends(verify_token),
+):
+    """Businesses to connect with, for the Network tab's Find partners.
+
+    That view used to send people to /businesses, the services list, whose
+    cards open a SERVICE page - and Connect lives only on a business's own
+    page, so nobody found it (Tzvi, 22 Sep 2026). This lists businesses
+    directly, with where each stands with the caller's business, and can
+    be narrowed to one kind ("I need a delivery person, not every
+    business on the site").
+
+    Only businesses someone could actually find on the site: active, with
+    at least one published service. Never the caller's own. A business's
+    kinds are its services' categories plus any it set on itself.
+
+    Returns {"results": [...], "categories": [{slug, count}]}, the second
+    being the kinds that have at least one business, for the picker.
+    """
+    await _owned(business_id, user)
+    import re
+    kinds: dict[str, set[str]] = {}
+    async for row in db.marketplace_gigs.aggregate([
+        {"$match": {"status": "published", "business_id": {"$nin": [None, "", business_id]}}},
+        {"$group": {"_id": "$business_id", "cats": {"$addToSet": "$category"}}},
+    ]):
+        kinds[row["_id"]] = {c for c in row["cats"] if c}
+    query: dict[str, Any] = {
+        "_id": {"$in": list(kinds)},
+        "active": {"$ne": False},
+        "owner_user_id": {"$ne": user["user_id"]},
+    }
+    q = q.strip()
+    if q:
+        rx = {"$regex": re.escape(q), "$options": "i"}
+        query["$or"] = [{"name": rx}, {"name_he": rx}]
+    docs = await db.businesses.find(
+        query, {"name": 1, "name_he": 1, "slug": 1, "logo_url": 1, "categories": 1, "areas": 1},
+    ).sort("name", 1).to_list(500)
+    # Only real categories: `businesses.categories` also holds free text
+    # from before there was a picker ("graphic-designer"), which would show
+    # up raw in the kind picker.
+    from routes.marketplace.shared import CATEGORIES
+    valid = {c["slug"] for c in CATEGORIES}
+    for d in docs:
+        d["_kinds"] = sorted((kinds.get(d["_id"], set()) | set(d.get("categories") or [])) & valid)
+
+    counts: dict[str, int] = {}
+    for d in docs:
+        for k in d["_kinds"]:
+            counts[k] = counts.get(k, 0) + 1
+    if category:
+        docs = [d for d in docs if category in d["_kinds"]]
+    docs = docs[:PARTNER_SEARCH_LIMIT]
+
+    ids = [d["_id"] for d in docs]
+    conns = {}
+    async for c in db.business_connections.find({"$or": [
+        {"a_id": business_id, "b_id": {"$in": ids}}, {"b_id": business_id, "a_id": {"$in": ids}},
+    ]}):
+        conns[_other(c, business_id)] = _out(c, business_id)
+    results = []
+    for d in docs:
+        c = conns.get(d["_id"])
+        results.append({
+            "id": d["_id"], "name": d.get("name") or "", "name_he": d.get("name_he"),
+            "slug": d.get("slug"), "logo_url": d.get("logo_url"),
+            "categories": d["_kinds"], "areas": d.get("areas") or [],
+            "status": c["status"] if c else "none",
+            "connection_id": c["id"] if c else None,
+            "direction": c["direction"] if c else None,
+        })
+    return {
+        "results": results,
+        "categories": [{"slug": k, "count": n} for k, n in sorted(counts.items(), key=lambda kv: -kv[1])],
+    }
+
+
 @router.get("/businesses/{business_id}/connections/{other_id}")
 async def connection_status(business_id: str, other_id: str, user=Depends(verify_token)):
     """What the Connect button on another business's page should say."""

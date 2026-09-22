@@ -61,7 +61,8 @@ export default function BusinessCompleteness({ business, onEditDetails, onOpenLi
     },
     {
       key: 'areas',
-      done: (b.areas || []).length > 0,
+      // "The whole country" is an answer too.
+      done: (b.areas || []).length > 0 || !!b.serves_nationwide,
       label: t('businesses.needAreas', 'Add your service areas'),
       action: onEditDetails,
     },
