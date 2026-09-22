@@ -185,6 +185,21 @@ async def _record_email_failure(
         logger.debug("Failed to record email failure (non-fatal): %s", e)
 
 
+import html as _html_mod
+
+def _esc(v):
+    """HTML-escape a value a person typed before it goes into an email body
+    (security scan F12, F17: a registration name, a listing title and the
+    like were placed in the HTML raw, so anyone could inject a fake notice
+    and link into mail sent from the site's own address). None stays None."""
+    return _html_mod.escape(str(v)) if v is not None else None
+
+
+def _plain(v):
+    """Back to plain text, for subjects - they are not HTML."""
+    return _html_mod.unescape(v) if isinstance(v, str) else v
+
+
 def _strip_html(html: str) -> str:
     """Very small fallback to produce a plain-text body from HTML."""
     import re
@@ -261,6 +276,11 @@ def _detail_row(label: str, value: str) -> str:
 
 # --- High-level transactional email helpers --------------------------------
 async def send_welcome_email(to_email: str, name: str, role: str, verification_link: str | None = None) -> bool:
+    name = _esc(name)
+    shown_email = _esc(to_email)   # the recipient stays raw for send_email
+    role = _esc(role)
+    verification_link = _esc(verification_link)
+
     verify_block = ""
     if verification_link:
         verify_block = (
@@ -277,7 +297,7 @@ async def send_welcome_email(to_email: str, name: str, role: str, verification_l
     <div style="background:#f7f7f4;border-left:4px solid {BRAND_TEAL};border-radius:8px;padding:16px 18px;margin:20px 0;">
       <div style="color:#333;font-size:13px;font-weight:600;margin-bottom:6px;">Your account</div>
       <div style="color:#666;font-size:13px;line-height:1.7;">
-        Email: <strong>{to_email}</strong><br />
+        Email: <strong>{shown_email}</strong><br />
         Role: <strong>{role.title()}</strong>
       </div>
     </div>
@@ -299,6 +319,9 @@ async def send_welcome_email(to_email: str, name: str, role: str, verification_l
 
 
 async def send_password_reset_email(to_email: str, name: str, reset_link: str) -> bool:
+    name = _esc(name)
+    reset_link = _esc(reset_link)
+
     inner = f"""
     <h2 style="color:#222;font-size:22px;margin:0 0 8px;">Reset your password</h2>
     <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 12px;">
@@ -335,6 +358,12 @@ async def send_booking_confirmation_email(
     status: str = "confirmed",
 ) -> bool:
     """Email sent to the GUEST/RENTER confirming their booking (or request)."""
+    guest_name = _esc(guest_name)
+    property_title = _esc(property_title)
+    property_location = _esc(property_location)
+    check_in = _esc(check_in)
+    check_out = _esc(check_out)
+
     is_confirmed = status == "confirmed"
     headline = "Your booking is confirmed 🎉" if is_confirmed else "Booking request received"
     subhead = (
@@ -370,9 +399,9 @@ async def send_booking_confirmation_email(
     </p>
     """
     subject = (
-        f"Booking confirmed — {property_title}"
+        f"Booking confirmed — {_plain(property_title)}"
         if is_confirmed
-        else f"Booking request received — {property_title}"
+        else f"Booking request received — {_plain(property_title)}"
     )
     return await send_email(
         to_email,
@@ -397,6 +426,14 @@ async def send_booking_notification_email(
     is_pending: bool = False,
 ) -> bool:
     """Email sent to the OWNER/MANAGER notifying of a new booking or request."""
+    owner_name = _esc(owner_name)
+    guest_name = _esc(guest_name)
+    guest_email = _esc(guest_email)
+    property_title = _esc(property_title)
+    property_location = _esc(property_location)
+    check_in = _esc(check_in)
+    check_out = _esc(check_out)
+
     headline = "New booking request" if is_pending else "New booking received 🎉"
     subhead = (
         "A guest has requested to book your property. Review and accept from your dashboard."
@@ -430,9 +467,9 @@ async def send_booking_notification_email(
     {_button("Open Dashboard", f"{FRONTEND_URL}/dashboard")}
     """
     subject = (
-        f"New booking request — {property_title}"
+        f"New booking request — {_plain(property_title)}"
         if is_pending
-        else f"New booking — {property_title}"
+        else f"New booking — {_plain(property_title)}"
     )
     return await send_email(
         to_email,
@@ -595,6 +632,10 @@ async def send_payment_confirmation_email(
     ``whatsapp_number`` so the customer email tells the buyer exactly what
     personal info they need to WhatsApp us for us to process their filing.
     """
+    name = _esc(name)
+    description = _esc(description)
+    whatsapp_number = _esc(whatsapp_number)
+
     currency_symbol = "₪" if currency == "ILS" else "$"
     headline = (
         "New paid order" if is_admin_copy else "Payment received — thank you! 🎉"
@@ -682,6 +723,8 @@ async def send_pricing_insights_email(
     check is the caller's responsibility (the weekly cron filters those
     users out before calling this function).
     """
+    owner_name = _esc(owner_name)
+
     currency_symbol = lambda c: "₪" if (c or "ILS") == "ILS" else "$"  # noqa: E731
     total_delta = week_summary.get("total_delta", 0)
     total_ccy = week_summary.get("currency", "ILS")
@@ -703,14 +746,14 @@ async def send_pricing_insights_email(
         if notable:
             notable_html = (
                 f'<div style="margin-top:8px;color:#555;font-size:12px;line-height:1.5;">'
-                f'<strong>This week:</strong> {notable}</div>'
+                f'<strong>This week:</strong> {_esc(notable)}</div>'
             )
         property_blocks.append(f"""
         <div style="background:#fafaf7;border-radius:10px;padding:16px 18px;margin:10px 0;border-left:4px solid {BRAND_TEAL};">
           <div style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div style="flex:1;min-width:0;">
-              <div style="color:{BRAND_TEAL};font-size:15px;font-weight:700;margin-bottom:2px;">{p.get('title', 'Untitled')}</div>
-              <div style="color:#888;font-size:12px;">{p.get('area', '')}</div>
+              <div style="color:{BRAND_TEAL};font-size:15px;font-weight:700;margin-bottom:2px;">{_esc(p.get('title') or 'Untitled')}</div>
+              <div style="color:#888;font-size:12px;">{_esc(p.get('area') or '')}</div>
             </div>
             <div style="background:{delta_bg};color:{delta_color};padding:4px 10px;border-radius:8px;font-size:12px;font-weight:700;white-space:nowrap;">
               {arrow if delta != 0 else '·'} {sym}{abs(delta):,.0f} ({delta_pct:+.1f}%)
@@ -779,6 +822,12 @@ async def send_availability_expiring_email(
     The subject line includes the date so it shows up as a self-contained
     actionable nudge in a busy inbox.
     """
+    owner_name = _esc(owner_name)
+    property_title = _esc(property_title)
+    available_to = _esc(available_to)
+    extend_url = _esc(extend_url)
+    dashboard_url = _esc(dashboard_url)
+
     inner = f"""
     <h2 style="color:#222;font-size:22px;margin:0 0 8px;">Your listing is winding down 🪟</h2>
     <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">
@@ -803,7 +852,7 @@ async def send_availability_expiring_email(
       <a href="{FRONTEND_URL}/dashboard?tab=settings" style="color:{BRAND_TEAL};">dashboard settings</a>.
     </p>
     """
-    subject = f"Heads up — {property_title} stops taking bookings on {available_to}"
+    subject = f"Heads up — {_plain(property_title)} stops taking bookings on {_plain(available_to)}"
     return await send_email(
         to_email,
         subject,
@@ -832,6 +881,9 @@ async def send_pricing_quarantine_email(
         plausibility floor (usually a stranded nightly rate migrated to
         the monthly field by an older import).
     """
+    owner_name = _esc(owner_name)
+    property_title = _esc(property_title)
+
     # /dashboard?tab=properties&edit=<id>: the dashboard opens that
     # listing's edit form on arrival. The old /dashboard/properties/<id>/edit
     # was never a route - editing is a modal - so "Fix pricing now" 404ed
@@ -905,7 +957,7 @@ async def send_pricing_quarantine_email(
       Questions? Reply to this email and we'll help you sort it out.
     </p>
     """
-    subject = f"Action needed — we paused {property_title} while you review the price"
+    subject = f"Action needed — we paused {_plain(property_title)} while you review the price"
     return await send_email(
         to_email,
         subject,
@@ -934,6 +986,10 @@ async def send_property_removed_email(
     bulk delete) — only for renters whose listing has truly gone away
     (no duplicate twin absorbed the chat/booking).
     """
+    renter_name = _esc(renter_name)
+    property_title = _esc(property_title)
+    property_area = _esc(property_area)
+
     # Personalize the opening line based on what the renter had going.
     if had_booking and had_chat:
         reason_line = (
@@ -1000,7 +1056,7 @@ async def send_property_removed_email(
       The My Israel Rental Team
     </p>
     """
-    subject = f"About your inquiry — {property_title} is no longer available"
+    subject = f"About your inquiry — {_plain(property_title)} is no longer available"
     return await send_email(
         to_email,
         subject,

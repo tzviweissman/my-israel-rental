@@ -2,6 +2,7 @@
 
 Extracted from ``properties.py`` in the 2026-07 refactor.
 """
+import html as _html
 import asyncio
 import os
 import uuid
@@ -129,8 +130,8 @@ async def upload_property_contract(
                 frontend = os.environ.get("FRONTEND_URL", "").rstrip("/")
                 dashboard_link = f"{frontend}/dashboard?tab=bookings" if frontend else "/dashboard"
                 html = f"""
-                <p>Hi {renter.get('name','there')},</p>
-                <p>The owner of <strong>{property_data.get('title', 'your rental')}</strong> has uploaded the rental contract.
+                <p>Hi {_html.escape(renter.get('name') or 'there')},</p>
+                <p>The owner of <strong>{_html.escape(property_data.get('title') or 'your rental')}</strong> has uploaded the rental contract.
                 Please review and sign it to finalize your booking.</p>
                 <p><a href="{dashboard_link}" style="background:#1E6A6A;color:#fff;padding:12px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Open your dashboard to sign</a></p>
                 """

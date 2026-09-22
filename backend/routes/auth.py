@@ -1,4 +1,5 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
+import re
 import asyncio
 import hashlib
 import os
@@ -24,6 +25,7 @@ from models import (
 )
 from utils.whatsapp_link import normalize_whatsapp_number
 from models_response import MessageResponse, PasswordResetResponse, TokenResponse, UserPublic
+from utils.auth import forget_user
 from routes.deps import GOOGLE_CLIENT_ID, create_token, db, logger, verify_token
 from utils.email import (
     send_password_reset_email,
@@ -61,16 +63,13 @@ def _hash_token(raw: str) -> str:
 
 
 def _frontend_origin(req: Request | None = None) -> str:
-    """Resolve the frontend origin for building absolute links inside
-    transactional emails. Prefers FRONTEND_URL, falls back to Referer."""
-    origin = os.environ.get("FRONTEND_URL", "")
-    if not origin and req is not None:
-        referer = req.headers.get("referer", "")
-        if referer:
-            from urllib.parse import urlparse
-            parsed = urlparse(referer)
-            origin = f"{parsed.scheme}://{parsed.netloc}"
-    return origin or "https://myisraelrental.com"
+    """The frontend origin for absolute links inside emails: FRONTEND_URL,
+    or the live site. Never a request header - the caller writes those, and
+    a reset link built from their Referer delivered the reset token to a
+    site of their choosing (security scan F14). `req` is kept only so the
+    existing call sites need not change."""
+    from utils.email import FRONTEND_URL
+    return (FRONTEND_URL or "https://myisraelrental.com").rstrip("/")
 
 
 def _new_verification_token() -> tuple[str, str, str]:
@@ -173,9 +172,11 @@ async def login(credentials: UserLogin, req: Request) -> dict:
     login_email = (credentials.email or "").strip().lower()
     user = await db.users.find_one({"email": login_email}, {"_id": 0})
     if not user:
-        # Legacy fallback for rows written before the lowercase migration
+        # Legacy fallback for rows written before the lowercase migration.
+        # Escaped: the email is the caller's, and `EmailStr` allows regex
+        # characters in the local part (security scan F5).
         user = await db.users.find_one(
-            {"email": {"$regex": f"^{login_email}$", "$options": "i"}},
+            {"email": {"$regex": f"^{re.escape(login_email)}$", "$options": "i"}},
             {"_id": 0},
         )
     if not user:
@@ -183,6 +184,10 @@ async def login(credentials: UserLogin, req: Request) -> dict:
 
     if not bcrypt.checkpw(credentials.password.encode('utf-8'), user['password'].encode('utf-8')):
         raise HTTPException(status_code=401, detail="Invalid credentials")
+    # A blocked account gets no new session (security scan F9). After the
+    # password check, so the answer does not say which emails are blocked.
+    if (user.get('status') or 'active') != 'active':
+        raise HTTPException(status_code=403, detail="This account has been blocked")
 
     token = create_token(user['id'], user['role'])
     return {
@@ -381,6 +386,8 @@ async def google_session_exchange(
         except Exception as e:  # noqa: BLE001
             logger.warning(f"Failed to queue welcome email for {email}: {e}")
 
+    if (user_doc.get("status") or "active") != "active":   # security scan F9
+        raise HTTPException(status_code=403, detail="This account has been blocked")
     jwt_token = create_token(user_doc["id"], user_doc.get("role", "renter"))
     return {
         "token": jwt_token,
@@ -527,16 +534,8 @@ async def forgot_password(request: ForgotPasswordRequest, req: Request) -> dict:
         "created_at": datetime.now(UTC).isoformat()
     })
 
-    # Build the reset link using the frontend origin
-    origin = os.environ.get('FRONTEND_URL', '')
-    if not origin:
-        referer = req.headers.get('referer', '')
-        if referer:
-            from urllib.parse import urlparse
-            parsed = urlparse(referer)
-            origin = f"{parsed.scheme}://{parsed.netloc}"
-    if not origin:
-        origin = "http://localhost:3000"
+    # Never from a request header (security scan F14): see _frontend_origin.
+    origin = _frontend_origin()
 
     reset_link = f"{origin}/auth/reset-password?token={reset_token}"
 
@@ -572,8 +571,13 @@ async def reset_password(request: ResetPasswordRequest) -> dict:
             # imported owners who've onboarded from those still holding
             # the throwaway hash. Drives the "Resend set-password" UI.
             "password_set_at": datetime.now(UTC).isoformat(),
+            # Every session from before the reset ends (security scan F6):
+            # someone resetting because they were compromised must lock
+            # the intruder out, not wait up to 30 days.
+            "tokens_valid_after": int(datetime.now(UTC).timestamp()),
         }}
     )
+    forget_user(reset_doc['user_id'])
     await db.password_resets.update_one(
         {"token": request.token},
         {"$set": {"used": True}}
@@ -596,12 +600,17 @@ async def change_password(request: ChangePasswordRequest, payload: dict = Depend
         raise HTTPException(status_code=400, detail="New password must be at least 6 characters")
 
     hashed = bcrypt.hashpw(request.new_password.encode('utf-8'), bcrypt.gensalt())
+    # Other sessions end; this one continues on the new token returned
+    # below, so changing a password does not sign the person out here.
     await db.users.update_one(
         {"id": payload['user_id']},
-        {"$set": {"password": hashed.decode('utf-8')}}
+        {"$set": {"password": hashed.decode('utf-8'),
+                  "tokens_valid_after": int(datetime.now(UTC).timestamp())}}
     )
+    forget_user(payload['user_id'])
 
-    return {"message": "Password changed successfully"}
+    return {"message": "Password changed successfully",
+            "token": create_token(user['id'], user['role'])}
 
 
 
@@ -756,7 +765,7 @@ async def deeplink_consume(payload: DeeplinkConsumeIn):
     user = await db.users.find_one(
         {"id": claims["user_id"]},
         {
-            "_id": 0, "id": 1, "email": 1, "name": 1, "role": 1,
+            "_id": 0, "id": 1, "email": 1, "name": 1, "role": 1, "status": 1,
             "email_verified": 1, "phone": 1, "preferred_language": 1,
         },
     )
@@ -764,6 +773,8 @@ async def deeplink_consume(payload: DeeplinkConsumeIn):
         # Account was deleted between the email being sent and now.
         raise HTTPException(status_code=400, detail="This link is no longer valid.")
 
+    if (user.get("status") or "active") != "active":   # security scan F9
+        raise HTTPException(status_code=403, detail="This account has been blocked")
     session_token = create_token(user["id"], user.get("role") or "renter")
     return {
         "token": session_token,

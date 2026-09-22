@@ -7,6 +7,7 @@ contract text between languages using our LLM client.
 
 Extracted from ``bookings.py`` in the 2026-07 refactor.
 """
+import asyncio
 import logging
 import uuid
 from datetime import UTC, datetime
@@ -138,7 +139,11 @@ async def _stamp_contract_if_present(
     signed_filename = f"signed_{booking_id}_{contract_filename}"
     signed_path = CONTRACT_DIR / signed_filename
     try:
-        stamp_signature_on_contract(
+        # In a thread: a large contract image is seconds of Pillow work,
+        # and on the event loop that is seconds of the whole API not
+        # answering anyone (security scan F7).
+        await asyncio.to_thread(
+            stamp_signature_on_contract,
             contract_path=contract_path,
             signed_path=signed_path,
             signature_data=signature_data,
@@ -261,7 +266,7 @@ async def translate_booking_contract(booking_id: str, body: dict = Body(default=
         return cached
 
     contract_path = await _resolve_contract_path(booking)
-    text = _extract_contract_text(contract_path)
+    text = await asyncio.to_thread(_extract_contract_text, contract_path)
     translated = await _do_translate(text, direction, booking_id)
 
     # Cache on booking to avoid repeated LLM calls

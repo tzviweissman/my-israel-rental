@@ -20,7 +20,7 @@ from models_response import (
     SubscribersResponse,
 )
 from routes.deps import POSTMARK_WEBHOOK_SECRET, db, logger, verify_token
-from utils.auth import decode_query_token
+from utils.auth import check_session, create_stream_ticket, decode_query_token
 from utils.events import publish, subscribe, subscriber_count, unsubscribe
 
 router = APIRouter()
@@ -41,15 +41,30 @@ __all__ = ["router", "publish"]
 # Other admins viewing the dashboard receive the event over SSE within a
 # second and re-fetch only what changed — no 30 s polling.
 #
-# Token is passed via query string because EventSource cannot set custom
-# headers. The token has the same lifetime / scope as the regular Bearer.
+# EventSource cannot set headers, so a one-minute ticket from
+# POST /admin/events/ticket travels in the query string instead of the
+# session token.
+
+@api_router.post("/admin/events/ticket")
+async def admin_events_ticket(payload: dict = Depends(verify_token)) -> dict:
+    """A one-minute ticket to open the stream, asked for with the normal
+    Authorization header (utils.auth.create_stream_ticket)."""
+    if payload.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin access required")
+    return {"ticket": create_stream_ticket(payload["user_id"], "admin")}
+
 
 @api_router.get("/admin/events")
 async def admin_events_stream(token: str) -> StreamingResponse:
-    """SSE stream of cache-invalidation events for super admins."""
+    """SSE stream of cache-invalidation events for super admins.
+
+    `token` is a one-minute stream ticket, never a session (security scan
+    F16). The account is checked as a session would be: a blocked admin, or
+    one whose password was reset, gets no stream."""
     payload = decode_query_token(token)
     if payload.get("role") != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
+    await check_session({k: v for k, v in payload.items() if k != "purpose"})
 
     async def gen() -> AsyncGenerator[str, None]:
         try:

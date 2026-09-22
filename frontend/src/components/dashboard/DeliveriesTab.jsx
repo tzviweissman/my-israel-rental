@@ -14,6 +14,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   Loader2, ClipboardList, RefreshCw, Navigation as NavIcon, Phone, MessageCircle, Camera, Check, X, MapPin, Clock, Store as StoreIcon,
@@ -55,10 +56,18 @@ export default function DeliveriesTab({ API, token, onChanged }) {
     return () => clearInterval(id);
   }, [load]);
 
+  /* `courier_invite=<business id>.<code>` arrives from the invite email.
+     An invite to an address that had no account can only be accepted
+     with that code: it is what proves the invite reached this person. */
+  const [params] = useSearchParams();
+  const inviteParam = params.get('courier_invite') || '';
+  const inviteCode = (bizId) => (inviteParam.startsWith(`${bizId}.`) ? inviteParam.slice(bizId.length + 1) : undefined);
+
   const respond = async (bizId, action) => {
     setBusy(bizId);
     try {
-      await axios.post(`${API}/marketplace/courier/invites/${bizId}/${action}`, null, auth);
+      await axios.post(`${API}/marketplace/courier/invites/${bizId}/${action}`,
+        action === 'accept' ? { code: inviteCode(bizId) } : null, auth);
       toast.success(action === 'accept' ? t('deliveries.accepted', 'You are on their courier list') : t('deliveries.declined', 'Invite declined'));
       await load();
       onChanged?.();
