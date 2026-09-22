@@ -505,6 +505,10 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         "updated_at": now,
     }
     await db.marketplace_gigs.insert_one(gig)
+    # A new listing may be a cheaper option for businesses ordering the
+    # same kind of thing nearby (price_watch.py). In the background.
+    from routes.marketplace.price_watch import listing_saved
+    listing_saved(None, gig)
     # Kick off Nominatim geocoding in the background so /services?nearby=1
     # can sort/pin this gig with street-level precision rather than the
     # ~2 km city-center fallback. Fire-and-forget: the create response
@@ -771,6 +775,10 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
             fill_only=not (needs_title_tr or needs_desc_tr),
         ))
     fresh = await db.marketplace_gigs.find_one({"_id": gig_id})
+    # Prices moved, an offer started, or it went live: tell whoever orders
+    # from this business, and suggest it where it is the cheaper option.
+    from routes.marketplace.price_watch import listing_saved
+    listing_saved(gig, fresh)
     return _clean_gig(fresh)
 
 

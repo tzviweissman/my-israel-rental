@@ -72,16 +72,19 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
   const [failed, setFailed] = useState(false);
   const [busy, setBusy] = useState(null);
   const [form, setForm] = useState(null);
+  const [tips, setTips] = useState(true);
 
   const load = useCallback(async () => {
     if (!bizId) return;
     setFailed(false);
     try {
-      const [a, r, aa] = await Promise.all([
+      const [a, r, aa, pt] = await Promise.all([
         axios.get(`${API}/marketplace/businesses/${bizId}/automations`, auth),
         axios.get(`${API}/marketplace/businesses/${bizId}/automations/runs?limit=20`, auth),
         axios.get(`${API}/marketplace/businesses/${bizId}/orders/auto-accept`, auth),
+        axios.get(`${API}/marketplace/businesses/${bizId}/price-tips`, auth),
       ]);
+      setTips(pt.data.enabled !== false);
       setRules(a.data.automations || []);
       setRuns(r.data.runs || []);
       setAutoAccept(aa.data.auto_accept_from || []);
@@ -237,6 +240,16 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
     } catch (err) {
       toast.error(err?.response?.data?.detail || t('automations.saveFailed', 'That could not be saved'));
       load();
+    }
+  };
+
+  const saveTips = async (on) => {
+    setTips(on);
+    try {
+      await axios.put(`${API}/marketplace/businesses/${bizId}/price-tips`, { enabled: on }, auth);
+    } catch (err) {
+      setTips(!on);
+      toast.error(err?.response?.data?.detail || t('automations.saveFailed', 'That could not be saved'));
     }
   };
 
@@ -560,6 +573,26 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
               </ul>
             </section>
           )}
+
+          {/* Price alerts about the businesses you order from are always
+              on (price_watch.py); only the suggestions can be switched off. */}
+          <section className="border-t pt-4 mb-5" style={{ borderColor: 'var(--brand-border)' }}>
+            <h3 className="text-xs font-semibold uppercase mb-1" style={{ color: 'var(--brand-muted)' }}>
+              {t('automations.pricesTitle', 'Prices')}
+            </h3>
+            <p className="text-xs mb-2" style={{ color: 'var(--brand-muted)' }}>
+              {t('automations.pricesBody', 'When a business you order from changes a price, you are told, with the old and new price.')}
+            </p>
+            <label className="inline-flex items-start gap-2 text-sm" style={{ color: 'var(--ink)' }}>
+              <input type="checkbox" className="mt-1" checked={tips} onChange={(e) => saveTips(e.target.checked)} data-testid="price-tips" />
+              <span>
+                {t('automations.tipsLabel', 'Also tell me about cheaper options')}
+                <span className="block text-xs" style={{ color: 'var(--brand-muted)' }}>
+                  {t('automations.tipsBody', 'A business nearby, in the same line of work as one you order from, that is new, cheaper or running a deal. At most three a week.')}
+                </span>
+              </span>
+            </label>
+          </section>
 
           <section className="border-t pt-4" style={{ borderColor: 'var(--brand-border)' }}>
             <h3 className="text-xs font-semibold uppercase mb-2 inline-flex items-center gap-1" style={{ color: 'var(--brand-muted)' }}>

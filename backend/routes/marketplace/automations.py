@@ -842,6 +842,25 @@ async def list_runs(business_id: str, limit: int = Query(50, ge=1, le=200), user
     } for r in rows]}
 
 
+class PriceTipsIn(BaseModel):
+    enabled: bool
+
+
+@router.get("/businesses/{business_id}/price-tips")
+async def get_price_tips(business_id: str, user=Depends(verify_token)):
+    """Cheaper-option tips (price_watch.py). On unless switched off; price
+    alerts about your own suppliers are not covered by this and always on."""
+    biz = await _owned(business_id, user)
+    return {"enabled": biz.get("price_tips") is not False}
+
+
+@router.put("/businesses/{business_id}/price-tips")
+async def put_price_tips(business_id: str, payload: PriceTipsIn, user=Depends(verify_token)):
+    await _owned(business_id, user)
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"price_tips": payload.enabled}})
+    return {"enabled": payload.enabled}
+
+
 @router.get("/businesses/{business_id}/orders/auto-accept")
 async def get_auto_accept(business_id: str, user=Depends(verify_token)):
     biz = await _owned(business_id, user)
@@ -879,3 +898,6 @@ async def ensure_automation_indexes() -> None:
     await db.automation_runs.create_index([("automation_id", 1), ("trigger_event.order_id", 1)], background=True)
     await db.automation_runs.create_index([("automation_id", 1), ("trigger_event.source_id", 1)], background=True)
     await db.business_automations.create_index([("trigger.type", 1), ("enabled", 1), ("next_run_at", 1)], background=True)
+    await db.business_automations.create_index([("partner_business_id", 1), ("enabled", 1)], background=True)
+    await db.price_tips.create_index([("business_id", 1), ("gig_id", 1)], background=True)
+    await db.price_tips.create_index([("business_id", 1), ("at", -1)], background=True)
