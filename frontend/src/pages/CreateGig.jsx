@@ -190,7 +190,6 @@ const CreateGig = () => {
     gallery: [],
     booking_mode: 'whatsapp',
     whatsapp: '',
-    whatsapp_confirmed: false,
     contact_email: '',
     area: '',
   });
@@ -487,7 +486,7 @@ const CreateGig = () => {
         gallery: form.gallery,
         booking_mode: form.booking_mode,
         whatsapp: form.whatsapp,
-        whatsapp_confirmed: !!form.whatsapp_confirmed,
+        whatsapp_confirmed: hasValidWhatsApp(form.whatsapp),
         contact_email: (form.contact_email || '').trim() || null,
         area: form.area,
         // Only send the arrays relevant to this gig type so we don't
@@ -852,46 +851,10 @@ const CreateGig = () => {
                   />
                 </div>
 
-                {/* The number being the right SHAPE proves nothing: a
-                    landline passes that check and then dead-ends on
-                    wa.me. Listers had been publishing exactly those and
-                    never learning the enquiries had not arrived. So they
-                    state it themselves, and the button only appears when
-                    they have. */}
-                <label
-                  className="mt-3 flex items-start gap-2 text-sm cursor-pointer"
-                  style={{ color: 'var(--ink)' }}
-                >
-                  <input
-                    type="checkbox"
-                    className="mt-0.5"
-                    checked={!!form.whatsapp_confirmed}
-                    onChange={(e) => set({ whatsapp_confirmed: e.target.checked })}
-                    data-testid="wizard-whatsapp-confirm"
-                  />
-                  <span>
-                    {t('services.whatsappConfirm', 'Yes — this number has WhatsApp')}
-                    <span className="block text-xs" style={{ color: 'var(--brand-muted)' }}>
-                      {t(
-                        'services.whatsappConfirmHint',
-                        'A landline or a number without WhatsApp will not work. Leave this unticked and customers reach you by email and on-site messages instead.',
-                      )}
-                    </span>
-                  </span>
-                </label>
-
-                {(form.whatsapp || '').trim() && !form.whatsapp_confirmed && (
-                  <p
-                    className="mt-2 text-xs px-3 py-2 rounded-lg"
-                    style={{ background: 'rgb(var(--brand-primary-rgb) / 0.06)', color: 'var(--ink)' }}
-                    data-testid="wizard-whatsapp-unconfirmed"
-                  >
-                    {t(
-                      'services.whatsappUnconfirmed',
-                      'No WhatsApp button will be shown until you confirm the number.',
-                    )}
-                  </p>
-                )}
+                {/* Typing a number into a field labelled WhatsApp is the
+                    confirmation. A separate "yes, it has WhatsApp" tick-box
+                    asked the same thing twice (Tzvi, 22 Sep 2026); it is
+                    set from the number on submit. */}
               </div>
             )}
 

@@ -1306,6 +1306,9 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
   const [rows, setRows] = useState(settings.cutoffs.length ? settings.cutoffs : []);
   const [pickup, setPickup] = useState(settings.pickup_windows || []);
   const [delivery, setDelivery] = useState(settings.delivery_windows || []);
+  // Customers see Delivery on the order page only when this is on (22 Sep
+  // 2026). Off, the page offers pickup alone.
+  const [deliveryOn, setDeliveryOn] = useState(!!settings.delivery_on);
   const [fee, setFee] = useState(settings.delivery_fee == null ? '' : String(settings.delivery_fee));
   const [minOrder, setMinOrder] = useState(settings.min_order == null ? '' : String(settings.min_order));
   const [courier, setCourier] = useState(settings.default_courier_user_id || '');
@@ -1317,7 +1320,7 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
     setBusy(true);
     try {
       await axios.put(`${API}/marketplace/businesses/${businessId}/orders/settings`, {
-        cutoffs: rows, pickup_windows: pickup, delivery_windows: delivery,
+        delivery_on: deliveryOn, cutoffs: rows, pickup_windows: pickup, delivery_windows: delivery,
         delivery_fee: fee === '' ? null : Number(fee), min_order: minOrder === '' ? null : Number(minOrder),
         default_courier_user_id: courier || null,
       }, auth);
@@ -1372,9 +1375,30 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
 
       {h(t('orders.pickupWindows', 'Pickup times'))}
       {windowsEditor(pickup, setPickup, 'settings-pickup-windows')}
+      <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('orders.windowsHint', 'No windows on a day means customers pick the day and you confirm the time.')}</p>
+
+      {h(t('orders.deliveryTitle', 'Delivery'))}
+      <div className="flex items-start gap-3">
+        <div className="flex-1 min-w-0">
+          <p id="settings-delivery-on-label" className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orders.deliveryOn', 'I deliver')}</p>
+          <p className="text-[11px] mt-0.5" style={{ color: 'var(--brand-muted)' }}>{t('orders.deliveryOnHint', 'Off: customers can only choose pickup. On: they can choose delivery too.')}</p>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={deliveryOn}
+          aria-labelledby="settings-delivery-on-label"
+          onClick={() => setDeliveryOn((v) => !v)}
+          className={`shrink-0 inline-flex h-6 w-11 items-center rounded-full px-1 transition-colors ${deliveryOn ? 'justify-end' : 'justify-start'}`}
+          style={{ background: deliveryOn ? 'var(--brand-primary)' : 'var(--brand-border)' }}
+          data-testid="settings-delivery-on"
+        >
+          <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
+        </button>
+      </div>
+      {deliveryOn && (<>
       {h(t('orders.deliveryWindows', 'Delivery times'))}
       {windowsEditor(delivery, setDelivery, 'settings-delivery-windows')}
-      <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('orders.windowsHint', 'No windows on a day means customers pick the day and you confirm the time.')}</p>
 
       {h(t('orders.feesTitle', 'Delivery fee and minimum'))}
       <div className="grid grid-cols-2 gap-3">
@@ -1387,6 +1411,7 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
           <input id="settings-min" type="number" inputMode="decimal" min="0" step="1" value={minOrder} onChange={(e) => setMinOrder(e.target.value)} className={`${sel} w-full`} style={selStyle} placeholder="" data-testid="settings-min" />
         </div>
       </div>
+      </>)}
 
       {h(t('orders.cutoffsTitle', 'Order cutoffs'))}
       <div className="space-y-2">

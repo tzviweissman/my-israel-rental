@@ -226,8 +226,21 @@ async def get_admin_metrics(
 
     # When view logging actually began, so "all time" can say what it means
     # instead of implying it covers the whole life of the site.
-    first = await db.property_view_events.find_one({}, {"at": 1}, sort=[("at", 1)])
-    views_since = first["at"].isoformat() if first and first.get("at") else None
+    # Some old rows hold `at` as an ISO string, and Mongo sorts every string
+    # before every date, so the earliest of each type is read and compared.
+    # Assuming a datetime put a 500 on the admin overview (22 Sep 2026).
+    starts = []
+    for kind in ("date", "string"):
+        row = await db.property_view_events.find_one({"at": {"$type": kind}}, {"at": 1}, sort=[("at", 1)])
+        at = (row or {}).get("at")
+        if isinstance(at, str):
+            try:
+                at = datetime.fromisoformat(at)
+            except ValueError:
+                at = None
+        if isinstance(at, datetime):
+            starts.append(at if at.tzinfo else at.replace(tzinfo=UTC))
+    views_since = min(starts).isoformat() if starts else None
 
     return {
         "range": range,

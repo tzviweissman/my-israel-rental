@@ -1608,7 +1608,18 @@ class WindowIn(BaseModel):
         return self
 
 
+def offers_delivery(st: dict[str, Any]) -> bool:
+    """Does this store deliver? Its own answer (Tzvi, 22 Sep 2026: "make
+    sure each business chooses that they have a delivery option before
+    offering it"). A store saved before the switch existed and set delivery
+    times had chosen it; one that never did had not."""
+    if "delivery_on" in st:
+        return bool(st["delivery_on"])
+    return bool((st.get("windows") or {}).get("delivery"))
+
+
 class OrderSettingsIn(BaseModel):
+    delivery_on: Optional[bool] = None
     cutoffs: list[CutoffIn] = Field(default_factory=list, max_length=7)
     pickup_windows: list[WindowIn] = Field(default_factory=list, max_length=28)
     delivery_windows: list[WindowIn] = Field(default_factory=list, max_length=28)
@@ -1627,6 +1638,7 @@ class OrderSettingsIn(BaseModel):
 def _settings_out(biz: dict[str, Any]) -> dict[str, Any]:
     st = biz.get("order_settings") or {}
     return {
+        "delivery_on": offers_delivery(st),
         "cutoffs": biz.get("order_cutoffs") or [],
         "pickup_windows": (st.get("windows") or {}).get("pickup") or [],
         "delivery_windows": (st.get("windows") or {}).get("delivery") or [],
@@ -1656,6 +1668,9 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         "delivery_fee": payload.delivery_fee,
         "min_order": payload.min_order,
         "default_courier_user_id": payload.default_courier_user_id,
+        # An older client that does not send the switch keeps the old
+        # meaning: delivery times set means delivery offered.
+        "delivery_on": payload.delivery_on if payload.delivery_on is not None else bool(payload.delivery_windows),
     }
     await db.businesses.update_one({"_id": business_id}, {"$set": {"order_cutoffs": cutoffs, "order_settings": settings}})
     if payload.default_courier_user_id:
@@ -1947,6 +1962,7 @@ async def order_form(gig_id: str):
         },
         "products": _products_for_order(gig),
         "settings": {
+            "delivery_on": offers_delivery(st),
             "cutoffs": biz.get("order_cutoffs") or [],
             "pickup_windows": (st.get("windows") or {}).get("pickup") or [],
             "delivery_windows": (st.get("windows") or {}).get("delivery") or [],
@@ -1973,6 +1989,9 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         raise HTTPException(status_code=400, detail="That day has passed")
     if past_cutoff(payload.date, biz.get("order_cutoffs") or [], now):
         raise HTTPException(status_code=400, detail="Orders for that day have closed")
+
+    if payload.fulfilment == "delivery" and not offers_delivery(st):
+        raise HTTPException(status_code=400, detail="This store does pickup only")
 
     # The window: if the store has any for that weekday and kind, one of them.
     wd = _js_weekday(day)

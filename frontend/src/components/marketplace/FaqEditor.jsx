@@ -11,14 +11,11 @@
  * dropped by `cleanFaqs` before anything is sent, so a person who opened
  * a row and changed their mind has nothing to undo.
  *
- * IT OPENS WITH ONE EMPTY ROW rather than a button. The placeholders are
- * the persuasive part of this component - they show a provider what a
- * good question looks like - and hiding them behind "Add a question"
- * asked people to commit before seeing what they were committing to.
- * The seeded row is DISPLAY ONLY: it is never written into the caller's
- * state on mount, so the edit sheet's "nothing changed" check still
- * sees nothing changed, and `cleanFaqs` drops it if it is left alone.
- * (2026-09-05 audit, the improvement.)
+ * IT OPENS CLOSED: a heading marked optional and an "Add a question"
+ * button, no empty row. It used to open with one blank row (2026-09-05
+ * audit) to show what a good question looks like, and at sign-up that
+ * read as a required field (Tzvi, 22 Sep 2026: "make the FAQs optional").
+ * The placeholders still show the moment a row is added.
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -46,13 +43,8 @@ const newRow = () => { seq += 1; return { q: '', a: '', _k: `faq-${seq}` }; };
 export default function FaqEditor({ faqs = [], onChange, testidPrefix = 'faq' }) {
   const { t } = useTranslation();
   const given = Array.isArray(faqs) ? faqs : [];
-  // One open row when there are none. Held in a ref so it keeps its
-  // identity across renders and is not re-created under the caret.
-  const seeded = React.useRef(null);
-  if (!seeded.current) seeded.current = [newRow()];
-  const rows = given.length ? given : seeded.current;
+  const rows = given;
 
-  // The first keystroke is what commits the seeded row to the caller.
   const setRow = (i, patch) => onChange(rows.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   const remove = (i) => onChange(rows.filter((_, idx) => idx !== i));
   const add = () => { if (rows.length < MAX_FAQS) onChange([...rows, newRow()]); };
@@ -60,9 +52,9 @@ export default function FaqEditor({ faqs = [], onChange, testidPrefix = 'faq' })
   return (
     <div className="space-y-3" data-testid={`${testidPrefix}-editor`}>
       <div>
-        <p className="text-xs font-semibold text-gray-700">{t('faqEditor.title', 'Questions customers ask')}</p>
+        <p className="text-xs font-semibold text-gray-700">{t('faqEditor.title', 'Questions customers ask (optional)')}</p>
         <p className="text-[11px] text-gray-500">
-          {t('faqEditor.hint', 'Optional. Answer the things people message you about anyway: turnaround, what is included, how to pay. Shown on your listing under "FAQs".')}
+          {t('faqEditor.hint', 'You can skip this. Answer the things people message you about anyway: turnaround, what is included, how to pay. Shown on your listing under "FAQs".')}
         </p>
       </div>
 

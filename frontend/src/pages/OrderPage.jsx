@@ -26,7 +26,11 @@ import PageMeta from '../components/PageMeta';
 import { phoneError } from '../utils/phoneValidation';
 import { pastCutoff } from '../utils/orderCutoffs';
 import { money } from '../utils/currency';
+import DateField, { toISODate } from '../components/common/DateField';
 
+// How far ahead a customer can order. The server sets no limit; this keeps
+// the calendar to a sensible reach.
+const ORDER_AHEAD_DAYS = 90;
 const pad = (n) => String(n).padStart(2, '0');
 const iso = (d) => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
 
@@ -77,8 +81,10 @@ export default function OrderPage() {
     }
   }, [user]);
 
-  // The next 14 days, minus days past their cutoff. The store's day is
-  // Israel's; the browser's clock is close enough for a picker.
+  // The next 14 days, for explaining WHY a near day is closed (a cutoff
+  // only ever bites in the coming week). The calendar itself reaches
+  // ORDER_AHEAD_DAYS out: a row of 14 day buttons was the whole choice
+  // until 22 Sep 2026 ("it only allows me to choose 2 weeks").
   const days = useMemo(() => {
     if (!data) return [];
     const out = [];
@@ -124,10 +130,13 @@ export default function OrderPage() {
   const total = lines.length ? subtotal + fee : null;
   const minOrder = Number(data.settings.min_order || 0);
   const belowMin = fulfilment === 'delivery' && minOrder > 0 && subtotal < minOrder;
-  const deliveryPossible = data.business.serves_nationwide || data.business.areas.length > 0;
+  // Delivery only when the store has said it delivers (its own switch in
+  // Orders settings) and there is somewhere to deliver to.
+  const deliveryPossible = !!data.settings.delivery_on && (data.business.serves_nationwide || data.business.areas.length > 0);
   const phoneErr = phoneError(phone, t);
-  const dayInfo = days.find((d) => d.key === date);
-  const canSubmit = (lines.length > 0 || extra.trim()) && date && dayInfo && !dayInfo.closed
+  const closedDay = (d) => !!pastCutoff(toISODate(d), data.settings.cutoffs);
+  const lastDay = (() => { const d = new Date(`${data.today}T00:00`); d.setDate(d.getDate() + ORDER_AHEAD_DAYS); return toISODate(d); })();
+  const canSubmit = (lines.length > 0 || extra.trim()) && date && !pastCutoff(date, data.settings.cutoffs)
     && (windowsForDay.length === 0 || windowKey)
     && name.trim() && phone.trim() && !phoneErr
     && (fulfilment === 'pickup' || (address.trim() && (data.business.serves_nationwide || city) && !belowMin));
@@ -159,7 +168,6 @@ export default function OrderPage() {
     }
   };
 
-  const fmtDay = (d) => new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' }).format(d);
   // Why a struck-through day is struck through, said once per weekday: the
   // title tooltip never shows on a phone, which is where this form lives.
   const weekdayName = (wd) => new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'long' }).format(new Date(2024, 0, 7 + wd));
@@ -235,18 +243,28 @@ export default function OrderPage() {
               </li>
             ))}
           </ul>
-          <input value={extra} onChange={(e) => setExtra(e.target.value)} dir="auto" placeholder={t('order.extraPh', 'Anything else? e.g. 1 gluten-free challah')} className={`${input} mt-2`} style={inputStyle} data-testid="order-extra" />
+          {/* Items the list does not have. The store gets them with the
+              items; "Notes" further down is for instructions. */}
+          <label className={`${label} mt-3`} style={labelStyle} htmlFor="order-extra">{t('order.extraLabel', 'Something not on the list?')} · {t('orders.optional', 'optional')}</label>
+          <input id="order-extra" value={extra} onChange={(e) => setExtra(e.target.value)} dir="auto" placeholder={t('order.extraPh', 'e.g. 1 gluten-free challah')} className={input} style={inputStyle} data-testid="order-extra" />
         </section>
 
         {/* 2. How */}
         <section className="rounded-2xl border bg-white p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }}>
+          {!deliveryPossible && (
+            <p className="inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: 'var(--ink)' }} data-testid="order-pickup-only">
+              <StoreIcon size={14} aria-hidden="true" /> {t('order.pickupOnly', 'Pickup only')}
+            </p>
+          )}
+          {deliveryPossible && (
           <div className="grid grid-cols-2 gap-1 rounded-lg p-1" style={{ background: 'var(--surface-muted)' }} role="radiogroup">
             {[['pickup', StoreIcon, t('orders.pickup', 'Pickup')], ['delivery', Bike, t('orders.delivery', 'Delivery')]].map(([v, Icon, lbl]) => (
-              <button key={v} type="button" role="radio" aria-checked={fulfilment === v} disabled={v === 'delivery' && !deliveryPossible} onClick={() => setFulfilment(v)} className="inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-md text-sm font-semibold disabled:opacity-40" style={fulfilment === v ? { background: 'var(--ink)', color: 'var(--action-ink)' } : { color: 'var(--ink)' }} data-testid={`order-fulfilment-${v}`}>
+              <button key={v} type="button" role="radio" aria-checked={fulfilment === v} onClick={() => setFulfilment(v)} className="inline-flex items-center justify-center gap-1.5 min-h-[44px] rounded-md text-sm font-semibold disabled:opacity-40" style={fulfilment === v ? { background: 'var(--ink)', color: 'var(--action-ink)' } : { color: 'var(--ink)' }} data-testid={`order-fulfilment-${v}`}>
                 <Icon size={14} /> {lbl}{v === 'delivery' && fee > 0 ? ` · ${money(fee, currency)}` : ''}
               </button>
             ))}
           </div>
+          )}
           {fulfilment === 'delivery' && (
             <div className="space-y-2">
               {!data.business.serves_nationwide && (
@@ -272,13 +290,18 @@ export default function OrderPage() {
 
           <div>
             <span className={label} style={labelStyle}>{t('order.when', 'When?')}</span>
-            <div className="flex gap-1.5 overflow-x-auto pb-1" role="radiogroup" data-testid="order-days">
-              {days.map((d) => (
-                <button key={d.key} type="button" role="radio" aria-checked={date === d.key} disabled={d.closed} onClick={() => setDate(d.key)} className="shrink-0 px-3 min-h-[44px] rounded-full text-xs font-semibold border disabled:opacity-35 disabled:line-through" style={date === d.key ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : inputStyle} data-testid={`order-day-${d.key}`} title={d.closed ? t('order.closed', 'Orders for this day have closed') : undefined} aria-describedby={d.closed ? 'order-closed-why' : undefined}>
-                  {fmtDay(d.date)}
-                </button>
-              ))}
-            </div>
+            <DateField
+              value={date}
+              onChange={setDate}
+              min={data.today}
+              max={lastDay}
+              isDisabled={closedDay}
+              clearable={false}
+              placeholder={t('order.pickDay', 'Pick a day')}
+              className={input}
+              style={inputStyle}
+              testid="order-date"
+            />
             {closedWhy.length > 0 && (
               <p id="order-closed-why" className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }} data-testid="order-closed-why">
                 {closedWhy.map((c) => t('order.closedWhy', '{{day}} orders close {{closesDay}} at {{time}}', c)).join('. ')}.

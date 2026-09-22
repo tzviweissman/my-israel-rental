@@ -142,8 +142,10 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
         </div>
         <span className="text-sm text-gray-500">{t('admin.usersCount', { count: filteredUsers.length })}</span>
       </div>
-      <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-hidden">
-        <table className="w-full">
+      {/* Scrolls sideways on a phone. It was overflow-hidden, which cut the
+          columns off at the screen edge with no way to reach them. */}
+      <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-x-auto">
+        <table className="w-full min-w-[720px]">
           <thead className="bg-gray-50">
             <tr>
               <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colName')}</th>
