@@ -27,7 +27,7 @@
 
 export const WALKS = {
   business: [
-    { id: 'b.page', route: '/dashboard?tab=my-businesses', target: ['business-design', 'business-card'],
+    { id: 'b.page', route: '/dashboard?tab=my-businesses', target: 'business-design',
       doIt: { href: '/dashboard?tab=my-businesses&details=1' } },
     { id: 'b.service', route: '/dashboard?tab=my-gigs', target: 'gigs',
       doIt: { href: '/businesses/add' } },

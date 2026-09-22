@@ -183,7 +183,7 @@ export default function CoachMark({
             type="button"
             onClick={onExit}
             aria-label={t('tour.exit', 'End the tour')}
-            className="shrink-0 p-1 rounded"
+            className="shrink-0 inline-flex items-center justify-center min-h-[44px] min-w-[44px] -me-2 -mt-2 rounded"
             style={{ color: 'var(--brand-muted)' }}
             data-testid="tour-exit"
           >
@@ -202,7 +202,7 @@ export default function CoachMark({
           <button
             type="button"
             onClick={onDoIt}
-            className="mt-3 w-full px-4 py-2 rounded-lg text-sm font-semibold"
+            className="mt-3 w-full px-4 min-h-[44px] rounded-lg text-sm font-semibold"
             style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }}
             data-testid="tour-do-it"
           >
@@ -222,7 +222,7 @@ export default function CoachMark({
               <button
                 type="button"
                 onClick={onBack}
-                className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-semibold"
+                className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-lg text-sm font-semibold"
                 style={{ color: 'var(--brand-muted)' }}
                 data-testid="tour-back"
               >
@@ -233,8 +233,11 @@ export default function CoachMark({
             <button
               type="button"
               onClick={onNext}
-              className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold text-white"
-              style={{ background: 'var(--brand-primary)' }}
+              className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-lg text-sm font-semibold"
+              // Black with white, the site's one solid action (CLAUDE.md,
+              // theme-flow). The accent blue measured 3.62:1 with white text
+              // here (UI audit, 22 Sep 2026).
+              style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }}
               data-testid="tour-next"
             >
               {isLast ? t('tour.done', 'Done') : t('tour.next', 'Next')}

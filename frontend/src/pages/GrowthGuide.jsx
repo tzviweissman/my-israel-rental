@@ -32,7 +32,7 @@ export default function GrowthGuide() {
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }} data-testid="growth-guide">
       <PageMeta
-        title={`${t('guide.metaTitle', 'How this site grows your business')} — MyIsraelRental`}
+        title={`${t('guide.metaTitle', 'How this site grows your business')} | MyIsraelRental`}
         description={t('guide.introWalk', 'Once you add your business, a short walk takes you through the site, one page at a time.')}
         path="/getting-started"
       />

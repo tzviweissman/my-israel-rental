@@ -284,7 +284,9 @@ export default function TourProvider({ children }) {
         />
       )}
       {active && paused && (
-        <div className="fixed inset-x-0 bottom-4 z-[100] flex justify-center px-4 pointer-events-none" data-testid="tour-paused">
+        // z-40: under every dialog (z-50 and up), so the form "Do it now"
+        // opened is never covered - it sat over a Save button until 23 Sep.
+        <div className="fixed inset-x-0 bottom-4 z-40 flex justify-center px-4 pointer-events-none" data-testid="tour-paused">
           <div className="pointer-events-auto flex items-center gap-3 rounded-full border px-4 py-2 shadow-xl"
             style={{ background: 'var(--surface)', borderColor: 'var(--brand-border)' }}>
             <Compass size={16} aria-hidden="true" style={{ color: 'var(--brand-primary)' }} />
@@ -292,12 +294,12 @@ export default function TourProvider({ children }) {
               {t('tour.pausedAt', 'The walk is waiting: {{index}} of {{total}}', { index: shownIndex, total: Math.max(total, shownIndex) })}
             </span>
             <button type="button" onClick={resume}
-              className="px-3 py-1.5 rounded-full text-sm font-semibold text-white" style={{ background: 'var(--brand-primary)' }}
+              className="px-4 min-h-[44px] rounded-full text-sm font-semibold" style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }}
               data-testid="tour-continue">
               {t('tour.continue', 'Continue the walk')}
             </button>
             <button type="button" onClick={exit} aria-label={t('tour.exit', 'End the walk')}
-              className="p-1 rounded" style={{ color: 'var(--brand-muted)' }} data-testid="tour-paused-exit">
+              className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded" style={{ color: 'var(--brand-muted)' }} data-testid="tour-paused-exit">
               <X size={15} />
             </button>
           </div>

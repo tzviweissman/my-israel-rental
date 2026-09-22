@@ -214,7 +214,7 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
           <p className="text-xs text-gray-500 mb-3">
             {t('admin.recentlyDeletedDesc', 'Restoring brings back the account and everything that was only theirs. They sign in with Google or use Forgot password; uploaded contract files do not come back.')}
           </p>
-          <div className="bg-white rounded-xl border border-[#E5E5E5] divide-y divide-[#E5E5E5]">
+          <div className="bg-white rounded-xl border border-[var(--brand-border)] divide-y divide-[var(--brand-border)]">
             {deleted.map((d) => (
               <div key={d.id} className="flex items-center gap-3 px-5 py-3 flex-wrap" data-testid={`deleted-user-${d.id}`}>
                 <div className="flex-1 min-w-[200px]">
@@ -227,7 +227,7 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
                   type="button"
                   onClick={() => restoreUser(d.id)}
                   disabled={restoringId === d.id}
-                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#E5E5E5] hover:bg-gray-50 disabled:opacity-50"
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[var(--brand-border)] hover:bg-gray-50 disabled:opacity-50"
                   data-testid={`restore-user-${d.id}`}
                 >
                   <RotateCcw size={13} /> {t('admin.restore', 'Restore')}
