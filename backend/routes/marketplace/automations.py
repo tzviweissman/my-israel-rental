@@ -7,10 +7,24 @@ delivery order appears in the courier's own Orders tab without anyone
 retyping it. If the courier has told the site to accept that shop's
 orders automatically, it lands already accepted.
 
-Phase 2 ships two triggers:
-  * `order.status_changed` - one of my orders reaches a given status;
-  * `manual.reorder`       - a saved order I send with one tap
-                             ("the usual" from my supplier).
+A rule is one sentence: WHEN this happens, DO that. Since 21 Sep 2026 the
+two lists are (Tzvi: never pre-write automations, grow the vocabulary):
+
+  WHEN  `order.status_changed`   one of my orders reaches a status
+        `manual.reorder`         I tap Send ("the usual" from my supplier)
+        `appointment.booked`     someone books one of my gigs
+        `appointment.cancelled`  a booking is cancelled
+        `lead.received`          a customer taps WhatsApp on my gig
+        `schedule`               every week on given days at a time
+                                 (Asia/Jerusalem; see schedule_loop)
+  DO    `send_order`             an order appears at a partner (below)
+        `notify_me`              a bell and an email to me
+        `message_customer`       my words to the order's / booking's
+                                 customer, by email and bell
+
+Only `send_order` needs a partner. A lead has no customer to message; a
+schedule has no customer either. The validator says so in the form's
+words.
 
 THE RULES THAT MAKE IT SAFE TO LEAVE RUNNING
   * A rule can only point at an ACCEPTED connection, checked when it is
@@ -59,18 +73,51 @@ MAX_RULES = 50
 # models
 # ---------------------------------------------------------------------------
 
+class ScheduleIn(BaseModel):
+    """Every week on these days at this time, Asia/Jerusalem. Weekdays are
+    Python's: 0 is Monday, 6 is Sunday."""
+    weekdays: list[int] = Field(min_length=1, max_length=7)
+    time: str = Field(pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
+
+    @field_validator("weekdays")
+    @classmethod
+    def _days(cls, v):
+        if any(d < 0 or d > 6 for d in v):
+            raise ValueError("weekdays are 0 (Monday) to 6 (Sunday)")
+        return sorted(set(v))
+
+
 class TriggerIn(BaseModel):
-    type: Literal["order.status_changed", "manual.reorder"]
+    type: Literal["order.status_changed", "manual.reorder", "appointment.booked",
+                  "appointment.cancelled", "lead.received", "schedule"]
     status: Optional[str] = None
+    schedule: Optional[ScheduleIn] = None
 
     @model_validator(mode="after")
-    def _status_for_orders(self):
+    def _shape(self):
         if self.type == "order.status_changed":
             if self.status not in FIRES_ON:
                 raise ValueError(f"status must be one of {list(FIRES_ON)}")
         else:
             self.status = None
+        if self.type == "schedule":
+            if not self.schedule:
+                raise ValueError("Pick the days and the time")
+        else:
+            self.schedule = None
         return self
+
+
+class ActionIn(BaseModel):
+    """What happens. `send_order` is the original (and the default, so
+    every rule saved before actions existed still reads the same)."""
+    type: Literal["send_order", "notify_me", "message_customer"] = "send_order"
+    text: str = Field("", max_length=1000)
+
+    @field_validator("text")
+    @classmethod
+    def _strip(cls, v):
+        return v.strip()
 
 
 class TemplateIn(BaseModel):
@@ -90,22 +137,38 @@ class TemplateIn(BaseModel):
 
 
 class AutomationIn(BaseModel):
-    partner_business_id: str = Field(min_length=1, max_length=100)
+    partner_business_id: Optional[str] = Field(None, max_length=100)
     name: str = Field(min_length=1, max_length=120)
     enabled: bool = True
     trigger: TriggerIn
-    template: TemplateIn
+    action: ActionIn = Field(default_factory=ActionIn)
+    template: Optional[TemplateIn] = None
 
     @model_validator(mode="after")
     def _coherent(self):
-        manual = self.trigger.type == "manual.reorder"
-        if manual and self.template.copy_from_source:
-            raise ValueError("A saved reorder has no source order to copy from")
-        if not self.template.copy_from_source and not self.template.items:
-            raise ValueError("Say what to order")
-        if (not self.template.copy_from_source and self.template.fulfilment == "delivery"
-                and not self.template.address):
-            raise ValueError("A delivery needs an address")
+        t, a = self.trigger.type, self.action.type
+        if a == "send_order":
+            if not self.partner_business_id:
+                raise ValueError("Pick a partner business")
+            if self.template is None:
+                raise ValueError("Say what to order")
+            tpl = self.template
+            if tpl.copy_from_source and t != "order.status_changed":
+                # Only an order can be sent on as it is; a reorder, a
+                # schedule or an appointment has no source order.
+                raise ValueError("Only an order can be sent on as it is")
+            if not tpl.copy_from_source and not tpl.items:
+                raise ValueError("Say what to order")
+            if not tpl.copy_from_source and tpl.fulfilment == "delivery" and not tpl.address:
+                raise ValueError("A delivery needs an address")
+        else:
+            self.partner_business_id = None
+            self.template = None
+            if a == "message_customer":
+                if not self.action.text:
+                    raise ValueError("Write the message")
+                if t not in ("order.status_changed", "appointment.booked", "appointment.cancelled"):
+                    raise ValueError("Only an order or an appointment has a customer to message")
         return self
 
 
@@ -176,11 +239,30 @@ def _rule_out(rule: dict[str, Any], partner: Optional[dict[str, Any]] = None) ->
         "enabled": bool(rule.get("enabled")),
         "paused_reason": rule.get("paused_reason"),
         "trigger": rule.get("trigger") or {},
+        "action": rule.get("action") or {"type": "send_order", "text": ""},
         "template": rule.get("template") or {},
         "run_count": rule.get("run_count", 0),
         "last_run_at": rule.get("last_run_at"),
+        "next_run_at": rule.get("next_run_at"),
         "created_at": rule.get("created_at"),
     }
+
+
+def next_run(schedule: dict[str, Any], after: Optional[datetime] = None) -> str:
+    """The next moment this schedule fires, as UTC ISO. Computed in
+    Asia/Jerusalem so "Sunday 08:00" stays Sunday 08:00 across the clock
+    change; stored in UTC so the loop compares plain strings."""
+    now = after or datetime.now(_IL_TZ)
+    hh, mm = (int(x) for x in schedule["time"].split(":"))
+    days = set(schedule["weekdays"])
+    for d in range(8):
+        cand = (now + timedelta(days=d)).replace(hour=hh, minute=mm, second=0, microsecond=0)
+        if cand.weekday() in days and cand > now:
+            return cand.astimezone(UTC).isoformat()
+    raise ValueError("no weekday in schedule")   # the model forbids an empty list
+
+
+DID_SOMETHING = ("created", "auto_accepted", "notified", "messaged")
 
 
 def _default_needed_by() -> str:
@@ -204,7 +286,7 @@ async def _record(rule: dict[str, Any], *, result: str, event: dict[str, Any],
         "created_at": _now(),
     }
     await db.automation_runs.insert_one(run)
-    if result in ("created", "auto_accepted"):
+    if result in DID_SOMETHING:
         await db.business_automations.update_one(
             {"_id": rule["_id"]}, {"$inc": {"run_count": 1}, "$set": {"last_run_at": run["created_at"]}},
         )
@@ -326,44 +408,186 @@ async def _create_partner_order(rule: dict[str, Any], *, source: Optional[dict[s
 
 
 # ---------------------------------------------------------------------------
+# the other two actions
+# ---------------------------------------------------------------------------
+
+def _describe(ctx: dict[str, Any]) -> str:
+    """One line a person would recognise: what the event was about."""
+    from routes.marketplace import orders as om
+    if ctx.get("order"):
+        return om._order_line(ctx["order"])
+    if ctx.get("booking"):
+        b, g = ctx["booking"], ctx.get("gig") or {}
+        when = " ".join(x for x in (b.get("preferred_date"), b.get("time_slot")) if x)
+        return " - ".join(x for x in (g.get("title"), when) if x) or "an appointment"
+    if ctx.get("gig"):
+        return ctx["gig"].get("title") or "your listing"
+    return ""
+
+
+def _where(ctx: dict[str, Any]) -> str:
+    if ctx.get("order"):
+        return "/dashboard?tab=orders"
+    if ctx.get("booking"):
+        return f"/dashboard?tab=appointments&highlight={ctx['booking'].get('_id')}"
+    if ctx.get("gig"):
+        return "/dashboard?tab=my-gigs"
+    return "/dashboard?tab=network&view=automations"
+
+
+async def _notify_me(rule: dict[str, Any], ctx: dict[str, Any], event: dict[str, Any]) -> dict[str, Any]:
+    """A bell and an email to the business's owner. Their own words if
+    they wrote any, otherwise the rule's name and what it was about."""
+    from routes.marketplace import orders as om
+    biz = await db.businesses.find_one({"_id": rule["business_id"]}, {"owner_user_id": 1, "name": 1})
+    if not biz:
+        return await _record(rule, result="failed", event=event, error="business no longer exists")
+    text = (rule.get("action") or {}).get("text") or ""
+    about = _describe(ctx)
+    msg = text or ": ".join(x for x in (rule.get("name"), about) if x)
+    await om._notify(biz["owner_user_id"], type_="automation", message=msg[:500], action_url=_where(ctx))
+    owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"_id": 0, "email": 1})
+    if owner and owner.get("email"):
+        body = f"<p>{om._esc(msg)}</p>" + (f"<p>{om._esc(about)}</p>" if text and about else "")
+        await om._email(owner["email"], rule.get("name") or "Automation", body, tag="automation_notify",
+                        button=("Open", _where(ctx)))
+    return await _record(rule, result="notified", event=event)
+
+
+async def _message_customer(rule: dict[str, Any], ctx: dict[str, Any], event: dict[str, Any]) -> dict[str, Any]:
+    """The owner's words to the customer of this order or appointment: an
+    email where there is an address, a bell where there is an account.
+    Neither means the run is skipped and says why - a message nobody
+    could receive must not count as sent."""
+    from routes.marketplace import orders as om
+    text = (rule.get("action") or {}).get("text") or ""
+    biz = await db.businesses.find_one({"_id": rule["business_id"]}, {"name": 1})
+    sender = (biz or {}).get("name") or "A business"
+    email = user_id = None
+    if ctx.get("order"):
+        email, user_id = ctx["order"].get("customer_email"), ctx["order"].get("customer_user_id")
+    elif ctx.get("booking"):
+        email, user_id = ctx["booking"].get("contact_email"), ctx["booking"].get("client_user_id")
+    if not email and not user_id:
+        return await _record(rule, result="skipped", event=event, error="no email or account for this customer")
+    if user_id:
+        await om._notify(user_id, type_="business_message", message=f"{sender}: {text}"[:500], action_url=_where(ctx))
+    if email:
+        await om._email(email, f"A message from {sender}", f"<p>{om._esc_ml(text)}</p>", tag="automation_message")
+    return await _record(rule, result="messaged", event=event)
+
+
+async def _run(rule: dict[str, Any], ctx: dict[str, Any], event: dict[str, Any]) -> dict[str, Any]:
+    kind = (rule.get("action") or {}).get("type") or "send_order"
+    if kind == "notify_me":
+        return await _notify_me(rule, ctx, event)
+    if kind == "message_customer":
+        return await _message_customer(rule, ctx, event)
+    return await _create_partner_order(rule, source=ctx.get("order"), needed_by=None, event=event)
+
+
+# ---------------------------------------------------------------------------
 # the engine
 # ---------------------------------------------------------------------------
+
+async def _businesses_for_gig(gig: dict[str, Any]) -> list[str]:
+    """Rules belong to a business; a gig belongs to a provider, and only
+    newer gigs carry business_id. Fall back to every business the provider
+    owns, so a provider whose gigs predate the field is not left out."""
+    if gig.get("business_id"):
+        return [gig["business_id"]]
+    if not gig.get("provider_user_id"):
+        return []
+    return [b["_id"] async for b in db.businesses.find(
+        {"owner_user_id": gig["provider_user_id"], "active": {"$ne": False}}, {"_id": 1})]
+
 
 async def fire(trigger_type: str, event: dict[str, Any]) -> list[dict[str, Any]]:
     """Run every enabled rule matching this event. Never raises."""
     runs: list[dict[str, Any]] = []
     try:
-        if trigger_type != "order.status_changed":
+        q: dict[str, Any] = {"enabled": True, "trigger.type": trigger_type}
+        if trigger_type == "order.status_changed":
+            order = event.get("order") or {}
+            ctx = {"order": order}
+            q["business_id"] = order.get("business_id")
+            q["trigger.status"] = event.get("status")
+            ev = {"type": trigger_type, "order_id": order.get("_id"), "source_id": order.get("_id"), "status": event.get("status")}
+        elif trigger_type in ("appointment.booked", "appointment.cancelled"):
+            booking, gig = event.get("booking") or {}, event.get("gig") or {}
+            ctx = {"booking": booking, "gig": gig}
+            q["business_id"] = {"$in": await _businesses_for_gig(gig)}
+            ev = {"type": trigger_type, "booking_id": booking.get("_id"), "source_id": booking.get("_id")}
+        elif trigger_type == "lead.received":
+            gig = event.get("gig") or {}
+            ctx = {"gig": gig}
+            q["business_id"] = {"$in": await _businesses_for_gig(gig)}
+            ev = {"type": trigger_type, "gig_id": gig.get("_id"), "source_id": event.get("lead_id")}
+        else:
             return runs
-        order = event.get("order") or {}
-        status = event.get("status")
-        q = {
-            "business_id": order.get("business_id"),
-            "enabled": True,
-            "trigger.type": "order.status_changed",
-            "trigger.status": status,
-        }
         async for rule in db.business_automations.find(q):
-            ev = {"type": trigger_type, "order_id": order.get("_id"), "status": status}
             try:
+                order = ctx.get("order") or {}
                 # Never back to whoever sent this order: mirror-image rules
                 # on two partners would otherwise ping-pong forever.
-                if (order.get("automation") or {}).get("from_business_id") == rule["partner_business_id"]:
+                sender = (order.get("automation") or {}).get("from_business_id") if order else None
+                if sender and sender == rule.get("partner_business_id"):
                     runs.append(await _record(rule, result="skipped", event=ev, error="would send the order back to its sender"))
                     continue
-                # Once per source order, whatever the status does next.
-                if await db.automation_runs.find_one({
-                    "automation_id": rule["_id"], "trigger_event.order_id": order.get("_id"),
-                    "result": {"$in": ["created", "auto_accepted"]},
+                # Once per source, whatever its status does next.
+                if ev.get("source_id") and await db.automation_runs.find_one({
+                    "automation_id": rule["_id"], "trigger_event.source_id": ev["source_id"],
+                    "result": {"$in": list(DID_SOMETHING)},
                 }, {"_id": 1}):
                     continue
-                runs.append(await _create_partner_order(rule, source=order, needed_by=None, event=ev))
+                runs.append(await _run(rule, ctx, ev))
             except Exception as e:  # noqa: BLE001
                 logger.exception("automation %s failed", rule.get("_id"))
                 runs.append(await _record(rule, result="failed", event=ev, error=str(e)[:300]))
     except Exception:  # noqa: BLE001
         logger.exception("automation engine failed for %s", trigger_type)
     return runs
+
+
+async def run_due_schedules() -> int:
+    """Fire every schedule whose time has come. The next time is written
+    with a compare-and-swap on the old one first, so two replicas waking
+    together cannot both send Sunday's order."""
+    now_iso = datetime.now(UTC).isoformat()
+    fired = 0
+    async for rule in db.business_automations.find(
+        {"enabled": True, "trigger.type": "schedule", "next_run_at": {"$lte": now_iso}},
+    ):
+        try:
+            nxt = next_run(rule["trigger"]["schedule"])
+            claimed = await db.business_automations.find_one_and_update(
+                {"_id": rule["_id"], "next_run_at": rule["next_run_at"]},
+                {"$set": {"next_run_at": nxt, "updated_at": _now()}},
+            )
+            if not claimed:
+                continue
+            ev = {"type": "schedule", "due": rule["next_run_at"]}
+            try:
+                await _run(rule, {}, ev)
+            except Exception as e:  # noqa: BLE001
+                logger.exception("scheduled automation %s failed", rule.get("_id"))
+                await _record(rule, result="failed", event=ev, error=str(e)[:300])
+            fired += 1
+        except Exception:  # noqa: BLE001
+            logger.exception("schedule loop: rule %s", rule.get("_id"))
+    return fired
+
+
+async def schedule_loop() -> None:
+    """Once a minute. The first real scheduler on the site (spec, Phase 3):
+    standing orders still generate on read, and folding them in is a
+    separate change."""
+    while True:
+        await asyncio.sleep(60)
+        try:
+            await run_due_schedules()
+        except Exception as e:  # noqa: BLE001
+            logger.warning("automation schedule loop crashed: %s", e)
 
 
 _background: set = set()
@@ -395,26 +619,31 @@ async def list_automations(business_id: str, user=Depends(verify_token)):
 @router.post("/businesses/{business_id}/automations")
 async def create_automation(business_id: str, payload: AutomationIn, user=Depends(verify_token)):
     await _owned(business_id, user)
-    if payload.partner_business_id == business_id:
-        raise HTTPException(status_code=400, detail="Pick a partner business")
-    if not await connected(business_id, payload.partner_business_id):
-        raise HTTPException(status_code=400, detail="You can only automate with a business you are connected to")
+    sends = payload.action.type == "send_order"
+    if sends:
+        if payload.partner_business_id == business_id:
+            raise HTTPException(status_code=400, detail="Pick a partner business")
+        if not await connected(business_id, payload.partner_business_id):
+            raise HTTPException(status_code=400, detail="You can only automate with a business you are connected to")
     if await db.business_automations.count_documents({"business_id": business_id}) >= MAX_RULES:
         raise HTTPException(status_code=400, detail=f"Up to {MAX_RULES} automations per business")
     now = _now()
+    trigger = payload.trigger.model_dump()
     rule = {
         "_id": str(uuid.uuid4()),
         "business_id": business_id,
         "partner_business_id": payload.partner_business_id,
         "name": payload.name.strip(),
         "enabled": payload.enabled,
-        "trigger": payload.trigger.model_dump(),
-        "template": payload.template.model_dump(),
+        "trigger": trigger,
+        "action": payload.action.model_dump(),
+        "template": payload.template.model_dump() if payload.template else None,
+        "next_run_at": next_run(trigger["schedule"]) if trigger["type"] == "schedule" else None,
         "run_count": 0, "last_run_at": None,
         "created_at": now, "updated_at": now,
     }
     await db.business_automations.insert_one(rule)
-    partner = await db.businesses.find_one({"_id": payload.partner_business_id}, {"name": 1})
+    partner = await db.businesses.find_one({"_id": payload.partner_business_id}, {"name": 1}) if sends else None
     return _rule_out(rule, partner)
 
 
@@ -425,14 +654,18 @@ async def update_automation(rule_id: str, payload: AutomationPatch, user=Depends
     if payload.name is not None:
         upd["name"] = payload.name.strip()
     if payload.enabled is not None:
-        if payload.enabled and not await connected(rule["business_id"], rule["partner_business_id"]):
+        if payload.enabled and rule.get("partner_business_id") and not await connected(rule["business_id"], rule["partner_business_id"]):
             raise HTTPException(status_code=400, detail="Reconnect with this business before switching it back on")
         upd["enabled"] = payload.enabled
         if payload.enabled:
             upd["paused_reason"] = None
+            # A schedule switched back on fires at its NEXT time, not at
+            # once for every time it slept through.
+            if (rule.get("trigger") or {}).get("type") == "schedule":
+                upd["next_run_at"] = next_run(rule["trigger"]["schedule"])
     await db.business_automations.update_one({"_id": rule_id}, {"$set": upd})
     fresh = await db.business_automations.find_one({"_id": rule_id})
-    partner = await db.businesses.find_one({"_id": fresh["partner_business_id"]}, {"name": 1})
+    partner = await db.businesses.find_one({"_id": fresh["partner_business_id"]}, {"name": 1}) if fresh.get("partner_business_id") else None
     return _rule_out(fresh, partner)
 
 
@@ -448,8 +681,9 @@ async def delete_automation(rule_id: str, user=Depends(verify_token)):
 async def run_automation(rule_id: str, payload: RunIn = RunIn(), user=Depends(verify_token)):
     """Send a saved reorder now. This IS the "Order again" button."""
     rule = await _rule_owned(rule_id, user)
-    if (rule.get("trigger") or {}).get("type") != "manual.reorder":
-        raise HTTPException(status_code=400, detail="Only a saved reorder can be sent by hand")
+    # A schedule can be sent early by hand too: "the Sunday order, today".
+    if (rule.get("trigger") or {}).get("type") not in ("manual.reorder", "schedule"):
+        raise HTTPException(status_code=400, detail="Only a saved reorder or a schedule can be sent by hand")
     needed_by = None
     if payload.needed_by:
         from routes.marketplace.orders import _clean_needed_by
@@ -457,8 +691,11 @@ async def run_automation(rule_id: str, payload: RunIn = RunIn(), user=Depends(ve
             needed_by = _clean_needed_by(payload.needed_by)
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
-    run = await _create_partner_order(rule, source=None, needed_by=needed_by,
-                                      event={"type": "manual.reorder", "by": user["user_id"]})
+    ev = {"type": "manual.reorder", "by": user["user_id"]}
+    if (rule.get("action") or {}).get("type", "send_order") == "send_order":
+        run = await _create_partner_order(rule, source=None, needed_by=needed_by, event=ev)
+    else:
+        run = await _run(rule, {}, ev)
     if run["result"] in ("failed", "skipped"):
         raise HTTPException(status_code=409, detail=run.get("error") or "That could not be sent")
     return {k: run[k] for k in ("_id", "result", "created_order_id", "created_at")} | {"id": run["_id"]}
@@ -472,7 +709,7 @@ async def list_runs(business_id: str, limit: int = Query(50, ge=1, le=200), user
     rows = await db.automation_runs.find(
         {"$or": [{"business_id": business_id}, {"partner_business_id": business_id}]},
     ).sort("created_at", -1).limit(limit).to_list(limit)
-    ids = {r["business_id"] for r in rows} | {r["partner_business_id"] for r in rows}
+    ids = {r["business_id"] for r in rows} | {r["partner_business_id"] for r in rows if r.get("partner_business_id")}
     names = {b["_id"]: b.get("name") async for b in db.businesses.find({"_id": {"$in": list(ids)}}, {"name": 1})}
     return {"runs": [{
         "id": r["_id"],
@@ -522,3 +759,5 @@ async def ensure_automation_indexes() -> None:
     await db.automation_runs.create_index([("business_id", 1), ("created_at", -1)], background=True)
     await db.automation_runs.create_index([("partner_business_id", 1), ("created_at", -1)], background=True)
     await db.automation_runs.create_index([("automation_id", 1), ("trigger_event.order_id", 1)], background=True)
+    await db.automation_runs.create_index([("automation_id", 1), ("trigger_event.source_id", 1)], background=True)
+    await db.business_automations.create_index([("trigger.type", 1), ("enabled", 1), ("next_run_at", 1)], background=True)

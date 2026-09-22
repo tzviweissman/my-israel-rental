@@ -2,7 +2,7 @@
 
 The build brief is `docs/business-network-implementation-prompt.md`. This file is that brief adapted to what the code actually is, phase by phase, and it is the one to trust where the two differ.
 
-Status: **Phases 0, 1 and 2 done** (Phase 2 screens, 20 Sep 2026). Phases 3 to 9 not started.
+Status: **Phases 0, 1 and 2 done**; the vocabulary grew on 21 Sep 2026 (appointment, lead and schedule triggers; notify-me and message-the-customer actions; starter cards), which covers Phase 3's `schedule` and item H. `request.posted_matching` and Phases 4 to 9 not started.
 
 ---
 
@@ -112,6 +112,43 @@ the run log showing all of it. English and Hebrew, 1280, 768 and 375, no
 console errors and no sideways scroll. Tests: `test_business_automations.py`
 12 passing, `test_business_connections.py` 13, `test_store_orders_couriers.py`
 12 (which now also holds `has_business`).
+
+## The vocabulary (21 Sep 2026)
+
+Tzvi's ruling: never pre-write automations for every kind of business;
+grow two lists and let every word multiply with the others. A rule is
+one sentence, WHEN → DO, and the screen stays one sentence long.
+
+| When | Do |
+|---|---|
+| one of my orders reaches a status | an order appears at a partner (needs an accepted connection) |
+| I tap Send | notify me: a bell and an email |
+| an appointment is booked / cancelled | message the customer: my words, by email where there is an address and a bell where there is an account |
+| a customer taps to message me (a lead) | |
+| every week on given days at a time (Asia/Jerusalem) | |
+
+What cannot be said, and why, in the validator's own words: a lead has no
+customer to message; a schedule has none either; only an order can be
+"sent on as it is". Appointments and leads are matched to a business by
+the gig's `business_id`, or every business the provider owns when a gig
+predates that field.
+
+**The schedule loop** (`automations.schedule_loop`, started in
+`server.py`) is the first real scheduler on the site: once a minute, every
+schedule whose `next_run_at` has passed. The next time is written with a
+compare-and-swap on the old one before the rule runs, so two replicas
+waking together cannot both send Sunday's order. Switching a schedule back
+on fires at its next time, not once for every time it slept through.
+Standing orders still generate on read; folding them in is a separate
+change.
+
+**Starter cards.** Six filled-in forms above the builder, per item H, as
+prefills only: the owner edits every word. Two need a partner and say so
+until there is one.
+
+Tests: `test_business_automations.py` 18 passing, including next-run
+maths across the March clock change and a due schedule firing exactly
+once.
 
 ## Phases 3 to 9
 

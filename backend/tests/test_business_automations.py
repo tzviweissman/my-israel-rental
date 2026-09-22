@@ -244,3 +244,126 @@ def test_the_receiver_sees_why_an_order_arrived(w, db):
     _partner_orders(db, w)
     runs = requests.get(f"{M}/businesses/{w['courier']}/automations/runs", headers=w["h"]["courier"], timeout=30).json()["runs"]
     assert runs and runs[0]["direction"] == "received" and runs[0]["created_order_id"]
+
+
+# ---------------------------------------------------------------------------
+# The vocabulary grew (21 Sep 2026): appointment, lead and schedule
+# triggers; notify-me and message-the-customer actions. Same rules of
+# safety, now for a plumber as much as a bakery.
+# ---------------------------------------------------------------------------
+
+def _runs(db, rule_id, want, tries=30):
+    for _ in range(tries):
+        rows = list(db.automation_runs.find({"automation_id": rule_id, "result": want}))
+        if rows:
+            return rows
+        time.sleep(0.2)
+    return []
+
+
+def _notify_rule(w, trigger, text="", action="notify_me", who="shop"):
+    return requests.post(f"{M}/businesses/{w[who]}/automations", json={
+        "name": "Tell me", "trigger": trigger, "action": {"type": action, "text": text},
+    }, headers=w["h"][who], timeout=30)
+
+
+def test_an_order_can_notify_me_without_a_partner(w, db):
+    r = _notify_rule(w, {"type": "order.status_changed", "status": "ready"}, text="Ready to go out")
+    assert r.status_code == 200, r.text
+    rule = r.json()
+    assert rule["partner_business_id"] is None and rule["action"]["type"] == "notify_me"
+    oid = _order(w)
+    _status(w, oid, "preparing")
+    _status(w, oid, "ready")
+    assert _runs(db, rule["id"], "notified"), "the owner should have been told"
+    owner = db.businesses.find_one({"_id": w["shop"]})["owner_user_id"]
+    bell = db.notifications.find_one({"user_id": owner, "type": "automation", "message": "Ready to go out"})
+    assert bell and bell["action_url"] == "/dashboard?tab=orders"
+    # Once per source order, like every other rule.
+    _status(w, oid, "preparing")
+    _status(w, oid, "ready")
+    time.sleep(1.5)
+    assert len(_runs(db, rule["id"], "notified")) == 1
+
+
+def test_a_customer_with_no_address_is_a_skip_not_a_send(w, db):
+    r = _notify_rule(w, {"type": "order.status_changed", "status": "done"}, text="Thanks!", action="message_customer")
+    assert r.status_code == 200, r.text
+    oid = _order(w)          # no customer_email, no account
+    for s in ("preparing", "ready", "done"):
+        _status(w, oid, s)
+    runs = _runs(db, r.json()["id"], "skipped")
+    assert runs and "no email or account" in runs[0]["error"]
+
+
+def test_message_customer_needs_words_and_a_customer(w):
+    r = _notify_rule(w, {"type": "order.status_changed", "status": "done"}, text="", action="message_customer")
+    assert r.status_code == 422
+    r = _notify_rule(w, {"type": "schedule", "schedule": {"weekdays": [6], "time": "08:00"}},
+                     text="hi", action="message_customer")
+    assert r.status_code == 422, "a schedule has nobody to message"
+
+
+def test_a_lead_notifies_the_business(w, db):
+    # A gig under the shop's business; a WhatsApp tap on it is a lead.
+    g = requests.post(f"{M}/gigs", json={
+        "title": "TEST_auto plumbing", "description": "leak fixing", "category": "home-services-repair",
+        "area": "Tel Aviv", "gig_type": "deliverable", "booking_mode": "whatsapp", "whatsapp": "+972501234567", "gallery": ["https://example.com/photo.jpg"],
+        "business_id": w["shop"], "tiers": [{"name": "Basic", "price": 200, "currency": "ILS"}],
+    }, headers=w["h"]["shop"], timeout=30)
+    assert g.status_code in (200, 201), g.text
+    gig_id = g.json()["id"]
+    db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": {"business_id": w["shop"], "status": "published"}})
+    try:
+        r = _notify_rule(w, {"type": "lead.received"})
+        assert r.status_code == 200, r.text
+        tap = requests.get(f"{M}/gigs/{gig_id}/contact", allow_redirects=False, timeout=30)
+        assert tap.status_code in (302, 307), tap.text
+        assert _runs(db, r.json()["id"], "notified")
+    finally:
+        db.marketplace_gigs.delete_one({"_id": gig_id})
+        db.lead_events.delete_many({"gig_id": gig_id})
+
+
+def test_schedule_next_run_is_in_jerusalem_time():
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from zoneinfo import ZoneInfo
+    from routes.marketplace.automations import next_run
+    il = ZoneInfo("Asia/Jerusalem")
+    # A Wednesday in March, before the clocks go forward on 27 March 2026.
+    wed = datetime(2026, 3, 25, 12, 0, tzinfo=il)
+    nxt = datetime.fromisoformat(next_run({"weekdays": [6], "time": "08:00"}, after=wed))
+    assert nxt.astimezone(il).strftime("%a %H:%M") == "Sun 08:00"
+    assert nxt.astimezone(il).date().isoformat() == "2026-03-29"
+    assert nxt.utcoffset().total_seconds() == 0, "stored in UTC"
+    # Same weekday later today counts if the time has not passed yet.
+    assert datetime.fromisoformat(next_run({"weekdays": [2], "time": "13:00"}, after=wed)).astimezone(il).hour == 13
+    assert datetime.fromisoformat(next_run({"weekdays": [2], "time": "11:00"}, after=wed)).astimezone(il).date().isoformat() == "2026-04-01"
+
+
+def test_a_due_schedule_sends_once_and_moves_on(w, db):
+    import asyncio
+    import sys
+    sys.path.insert(0, str(ROOT))
+    _connect(w)
+    r = _rule(w, trigger={"type": "schedule", "schedule": {"weekdays": list(range(7)), "time": "06:00"}},
+              template={"items": "20 kg flour", "fulfilment": "pickup"}, name="Weekly flour")
+    assert r.status_code == 200, r.text
+    rule = r.json()
+    assert rule["next_run_at"] and rule["next_run_at"] > datetime.now(UTC).isoformat()
+    # Pretend the time has come.
+    db.business_automations.update_one({"_id": rule["id"]}, {"$set": {"next_run_at": "2020-01-01T00:00:00+00:00"}})
+    from routes.marketplace.automations import run_due_schedules
+
+    async def twice():
+        return await run_due_schedules(), await run_due_schedules()
+    first, second = asyncio.run(twice())
+    assert first == 1
+    assert second == 0, "the next time was moved forward, so it does not fire twice"
+    got = list(db.store_orders.find({"business_id": w["courier"], "source": "automation"}))
+    assert len(got) == 1 and got[0]["items"] == "20 kg flour"
+    fresh = db.business_automations.find_one({"_id": rule["id"]})
+    assert fresh["next_run_at"] > datetime.now(UTC).isoformat()
+    # And it can be sent early by hand.
+    assert requests.post(f"{M}/automations/{rule['id']}/run", json={}, headers=w["h"]["shop"], timeout=30).status_code == 200

@@ -1141,6 +1141,11 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         "hold_hours": _hold_h,
     }
     await db.marketplace_bookings.insert_one(booking)
+    # Hand the booking to the business's automations (automations.py):
+    # "when an appointment is booked, notify me / message the customer".
+    # In the background, and never able to fail this request.
+    from routes.marketplace.automations import fire_in_background
+    fire_in_background("appointment.booked", {"booking": booking, "gig": gig})
     # Tell the provider somebody is waiting. Nothing did, until now: the
     # hold sweep would nudge them hours later about a request they had
     # never been told about in the first place.
@@ -1275,6 +1280,10 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
         update["responded_at"] = now.isoformat()
 
     await db.marketplace_bookings.update_one({"_id": booking_id}, {"$set": update})
+    if payload.status == "cancelled" and booking.get("status") != "cancelled":
+        from routes.marketplace.automations import fire_in_background
+        gig_for_rule = await db.marketplace_gigs.find_one({"_id": booking.get("gig_id")})
+        fire_in_background("appointment.cancelled", {"booking": {**booking, **update}, "gig": gig_for_rule or {}})
 
     # The client asked a question and this is the answer. Without it the
     # only way they could learn the outcome was to open the dashboard and
@@ -1994,9 +2003,10 @@ async def contact_gig_on_whatsapp(
         frontend = os.environ.get("FRONTEND_URL", "https://myisraelrental.com").rstrip("/")
         return RedirectResponse(f"{frontend}/services/gig/{gig_id}", status_code=302)
 
+    lead_id = str(uuid.uuid4())
     try:
         await db.lead_events.insert_one({
-            "_id": str(uuid.uuid4()),
+            "_id": lead_id,
             "type": "whatsapp_click",
             "gig_id": gig_id,
             "provider_id": provider_user_id,
@@ -2008,6 +2018,9 @@ async def contact_gig_on_whatsapp(
         })
     except Exception:  # noqa: BLE001 — the lead matters more than the metric
         logger.exception("lead_events insert failed for gig %s", gig_id)
+    # "When a customer taps to message me, notify me" (automations.py).
+    from routes.marketplace.automations import fire_in_background
+    fire_in_background("lead.received", {"gig": gig, "lead_id": lead_id})
 
     return RedirectResponse(target, status_code=302)
 

@@ -268,6 +268,11 @@ async def startup_tasks() -> None:
     # read (see _live_hold_query) — so a missed tick delays the notification,
     # never the release.
     asyncio.create_task(booking_hold_sweep_loop())
+    # Scheduled automations ("every Sunday 08:00, reorder from my
+    # supplier") - once a minute, compare-and-swap on the next time so two
+    # replicas cannot both fire. See routes/marketplace/automations.py.
+    from routes.marketplace.automations import schedule_loop
+    asyncio.create_task(schedule_loop())
     # Requests board lifecycle — daily at 05:00 UTC. Flips open->expired
     # once a request's 30 days are up. A soft flip, not a TTL index, so
     # the seeker can still renew it. See the single-replica note in
