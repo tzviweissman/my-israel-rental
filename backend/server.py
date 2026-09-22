@@ -268,6 +268,11 @@ async def startup_tasks() -> None:
     # read (see _live_hold_query) — so a missed tick delays the notification,
     # never the release.
     asyncio.create_task(booking_hold_sweep_loop())
+    # Scheduled automations ("every Sunday 08:00, reorder from my
+    # supplier") - once a minute, compare-and-swap on the next time so two
+    # replicas cannot both fire. See routes/marketplace/automations.py.
+    from routes.marketplace.automations import schedule_loop
+    asyncio.create_task(schedule_loop())
     # Requests board lifecycle — daily at 05:00 UTC. Flips open->expired
     # once a request's 30 days are up. A soft flip, not a TTL index, so
     # the seeker can still renew it. See the single-replica note in
@@ -496,6 +501,10 @@ async def startup_tasks() -> None:
         await db.businesses.create_index("slug", unique=True, background=True)
         from routes.site_visits import ensure_site_visit_indexes
         await ensure_site_visit_indexes()
+        from routes.marketplace.connections import ensure_connection_indexes
+        await ensure_connection_indexes()
+        from routes.marketplace.automations import ensure_automation_indexes
+        await ensure_automation_indexes()
         logger.info("Hot-path indexes ensured")
     except Exception as e:  # noqa: BLE001
         logger.warning(f"hot-path index creation failed (non-fatal): {e}")

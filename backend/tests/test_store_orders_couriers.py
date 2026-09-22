@@ -107,6 +107,11 @@ def test_invite_existing_account_then_accept(owner, business, courier_acct):
     me = requests.get(f"{BASE}/marketplace/courier/me", headers=_auth(ctoken), timeout=30).json()
     assert [b["business_id"] for b in me["businesses"]] == [business]
     assert me["invites"] == []
+    # A courier is a person, and a connection is between two businesses
+    # (docs/business-network-spec.md, Phase 0), so a courier who runs no
+    # business of their own can never be the target of a shop's
+    # automation. The Deliveries tab reads this flag to say so.
+    assert me["has_business"] is False
     # First to accept becomes the default.
     st = requests.get(f"{BASE}/marketplace/businesses/{business}/orders/settings", headers=_auth(owner), timeout=30).json()
     lst = requests.get(f"{BASE}/marketplace/businesses/{business}/couriers", headers=_auth(owner), timeout=30).json()

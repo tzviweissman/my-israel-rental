@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Layers, KeyRound, Home, Sparkles, Bell, Heart, MessageCircle, Briefcase,
-  Inbox, MoreHorizontal, Store,
+  Inbox, MoreHorizontal, Store, Menu, ChevronDown,
 } from 'lucide-react';
 import useDashboardNav from './useDashboardNav';
 
@@ -86,6 +86,7 @@ const DashboardTabs = ({
   // check on the create path, untouched.
 
   const [moreOpen, setMoreOpen] = useState(false);
+  const [menuOpen, setMenuOpen] = useState(false);
   const [isNarrow, setIsNarrow] = useState(false);
   const moreRef = useRef(null);
 
@@ -125,10 +126,14 @@ const DashboardTabs = ({
   const shownGroups = foldAccount ? GROUPS.filter((g) => g.key !== 'account') : GROUPS;
   const overflowTabs = foldAccount ? accountGroup.tabs : [];
 
+  const allTabs = GROUPS.flatMap((g) => g.tabs);
+  const currentLabel = allTabs.find((tab) => tab.id === activeTab)?.label;
+  const badgeTotal = allTabs.reduce((n, tab) => n + (tab.id === activeTab ? 0 : (tab.badge || 0)), 0);
+
   const renderTab = (tab) => (
     <button
       key={tab.id}
-      onClick={() => setActiveTab(tab.id)}
+      onClick={() => { setActiveTab(tab.id); setMenuOpen(false); }}
       className={`${cls(activeTab === tab.id, tab.colour)} ${tab.Icon || tab.badge ? 'flex items-center justify-center gap-1.5 relative' : ''}`}
       data-testid={`tab-${tab.id}`}
       // Only this one tab is a tour target. `data-tour` is put on the
@@ -155,8 +160,33 @@ const DashboardTabs = ({
           Nothing scrolls off the edge on a phone any more — the strip wraps
           — so a fade would be pointing at nothing. */}
 
+      {/* One button, not a wall (20 Sep 2026). An owner with a business has
+          18 tabs; wrapped, they filled the first screen of a phone before
+          any content. The button names the page you are on and carries the
+          total of the badges, so nothing waiting is hidden by folding. */}
+      <button
+        type="button"
+        onClick={() => setMenuOpen((o) => !o)}
+        aria-expanded={menuOpen}
+        aria-controls="dashboard-tabs-list"
+        className="flex w-full items-center gap-2 rounded-xl border px-4 py-3 mb-3 text-sm font-semibold"
+        style={{ background: 'var(--surface, #fff)', borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+        data-testid="dashboard-menu-button"
+      >
+        <Menu size={16} aria-hidden="true" />
+        <span className="flex-1 text-start truncate">{currentLabel || t('dashboard.menu', 'Menu')}</span>
+        {badgeTotal > 0 && (
+          <span className={`inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] font-bold leading-none ${BADGE_NEUTRAL}`}>
+            {badgeTotal > 9 ? '9+' : badgeTotal}
+          </span>
+        )}
+        <ChevronDown size={16} aria-hidden="true" className={`transition-transform ${menuOpen ? 'rotate-180' : ''}`} />
+      </button>
+
       <div
-        className="flex flex-wrap lg:flex-nowrap gap-1 mb-6 rounded-xl p-1 lg:overflow-x-auto scrollbar-hide"
+        id="dashboard-tabs-list"
+        // A class, not the `hidden` attribute: Tailwind's `.flex` outranks it.
+        className={`${menuOpen ? 'flex' : 'hidden'} flex-wrap lg:flex-nowrap gap-1 mb-6 rounded-xl p-1 lg:overflow-x-auto scrollbar-hide`}
         style={{ background: 'rgb(var(--brand-primary-rgb) / 0.05)' }}
         data-testid="dashboard-tabs"
       >

@@ -90,6 +90,23 @@ export default function DeliveriesTab({ API, token, onChanged }) {
           : t('deliveries.body', 'A business that invites you appears here. Accept, and their deliveries come to this tab.')}
       </p>
 
+      {/* A courier is a person; a connection is between two businesses
+          (docs/business-network-spec.md, Phase 0). Without a business of
+          their own, a shop's automation cannot reach them, and they get
+          every job by phone. Shown once they are actually delivering for
+          someone, not to every new account. */}
+      {me.businesses.length > 0 && !me.has_business && (
+        <div className="rounded-2xl border p-4 mb-4 bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="courier-add-business">
+          <h3 className="font-bold mb-1" style={{ color: 'var(--ink)' }}>{t('deliveries.addBusinessTitle', 'Get deliveries automatically')}</h3>
+          <p className="text-sm mb-3" style={{ color: 'var(--brand-muted)' }}>
+            {t('deliveries.addBusinessBody', 'Shops can only send jobs to another business. Add yours, free, and their automations reach you without a phone call.')}
+          </p>
+          <a href="/dashboard?tab=my-businesses" className="btn-primary inline-flex text-sm px-4 py-2">
+            {t('deliveries.addBusinessCta', 'Add your business, free')}
+          </a>
+        </div>
+      )}
+
       {me.invites.length > 0 && (
         <div className="rounded-2xl border p-4 mb-4 bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="courier-invites">
           <h3 className="font-bold mb-2" style={{ color: 'var(--ink)' }}>{t('deliveries.invites', 'Invites')}</h3>

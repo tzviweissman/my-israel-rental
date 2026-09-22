@@ -21,6 +21,7 @@ import MyGigsTab from '../components/dashboard/MyGigsTab';
 import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
 import OrdersTab from '../components/dashboard/OrdersTab';
 import DeliveriesTab from '../components/dashboard/DeliveriesTab';
+import NetworkTab from '../components/dashboard/NetworkTab';
 import MyOrdersTab from '../components/dashboard/MyOrdersTab';
 import AppointmentsTab from '../components/dashboard/AppointmentsTab';
 import JobRequestsTab from '../components/dashboard/JobRequestsTab';
@@ -258,6 +259,15 @@ const Dashboard = () => {
   // property-listing / contract / bulk-import UI from them so their
   // dashboard stays focused. Owner/manager/admin still see everything.
   const isPropertyLister = user && ['owner', 'manager', 'admin'].includes(user.role);
+  // Each page is titled by what it is, the way the sidebar names it; the
+  // Overview keeps the dashboard's own name.
+  const onOverview = activeTab === 'overview';
+  const activeLabel = nav.groups.flatMap((g) => g.tabs).find((tab) => tab.id === activeTab)?.label;
+  // Tabs that already open on their own heading (usually with their main
+  // action beside it) get no second one from the shell.
+  const OWN_TITLE = ['properties', 'my-businesses', 'orders', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts', 'bookings', 'contracts'];
+  const pageTitle = OWN_TITLE.includes(activeTab) ? null : (onOverview || !activeLabel ? t('dashboard.title') : activeLabel);
+  const showListingActions = onOverview || activeTab === 'properties' || activeTab === 'bulk-manager';
 
   return (
     /* Wraps the WHOLE dashboard, not just the checklist: the tips live
@@ -269,83 +279,6 @@ const Dashboard = () => {
     <TourProvider>
     <div className="min-h-screen" data-testid="dashboard-page">
       <div className="max-w-7xl mx-auto px-4 md:px-6 pt-36 sm:pt-28 md:pt-28 pb-12">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-6 md:mb-8">
-          {/* `var(--font-head)`, not the literal face: an inline
-              'Playfair Display' beats the RTL variable swap, and Playfair
-              has no Hebrew glyphs — so a Hebrew reader silently got a
-              system serif. Fixed here because this heading was touched. */}
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
-            {t('dashboard.title')}
-          </h1>
-          {isPropertyLister && (
-            <div className="flex gap-2 justify-end sm:justify-start sm:w-auto">
-              <button
-                onClick={() => setShowBulkUpload(true)}
-                className="secondary-btn flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap !px-3.5 sm:!px-8 !py-2 sm:!py-3 text-xs sm:text-sm"
-                data-testid="bulk-upload-button"
-              >
-                <Upload size={14} className="sm:w-4 sm:h-4" />
-                {t('dashboard.bulkUpload')}
-              </button>
-              <button
-                onClick={() => {
-                  setEditingProperty(null);
-                  setShowAddProperty(true);
-                }}
-                className="primary-btn flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap !px-3.5 sm:!px-8 !py-2 sm:!py-3 text-xs sm:text-sm"
-                data-testid="add-property-button"
-                data-tour="add-property"
-              >
-                <Plus size={14} className="sm:w-[18px] sm:h-[18px]" />
-                {t('dashboard.addProperty')}
-              </button>
-            </div>
-          )}
-          {isRenter && (
-            <button
-              onClick={() => setActiveTab('subleases')}
-              className="primary-btn flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto"
-              data-testid="sublease-property-button"
-            >
-              <Home size={18} />
-              {t('dashboard.subleaseProperty')}
-            </button>
-          )}
-        </div>
-
-        {/* Manager-only — owners don't need a public manager page or
-            business logo since they typically list a single property. */}
-        {(user?.role === 'manager' || user?.role === 'admin') && (
-          <ManagerHeader user={user} token={token} API={API} />
-        )}
-
-        {/* D6 — the share link used to live here, above the tabs, always
-            open, showing a raw uuid, and rendered even with zero listings.
-            It now sits at the bottom of My Properties (ShareListingsPanel),
-            collapsed, and disappears entirely when there is nothing to
-            share. The dashboard opens on the user's properties instead of
-            on a URL. */}
-
-        <AttentionStrip
-          summary={summary}
-          unreadMessages={unreadConversations}
-          onGoToTab={setActiveTab}
-        />
-
-        {/* T7 — first dashboard load after signup. One quiet line, never a
-            popup, and it competes for the same single slot as everything
-            else so it cannot stack with a tip. */}
-        <ShowMeAroundOffer moment="firstLogin" />
-
-        {/* T1 — the backbone. Above the tabs because it is about the
-            account as a whole, not about whichever tab is open. */}
-        <SetupChecklist />
-        {setupAllDone && (
-          <div className="mb-6 text-sm">
-            <ShowMeAroundOffer moment="complete" eligible={setupAllDone} inline />
-          </div>
-        )}
-
         {/* Wide screens get the sidebar; narrow ones keep the tab strip. Same
             groups, same badges, one source: useDashboardNav. */}
         <DashboardShell
@@ -378,6 +311,90 @@ const Dashboard = () => {
             hasPostedJobs={hasPostedJobs}
             summary={summary}
           />
+        )}
+
+        {(pageTitle || (isPropertyLister && showListingActions) || (isRenter && onOverview)) && (
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4 mb-5">
+          {/* `var(--font-head)`, not the literal face: an inline
+              'Playfair Display' beats the RTL variable swap, and Playfair
+              has no Hebrew glyphs — so a Hebrew reader silently got a
+              system serif. Fixed here because this heading was touched. */}
+          {pageTitle ? (
+            <h1 className="text-2xl sm:text-3xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
+              {pageTitle}
+            </h1>
+          ) : <span />}
+          {isPropertyLister && showListingActions && (
+            <div className="flex gap-2 justify-end sm:justify-start sm:w-auto">
+              <button
+                onClick={() => setShowBulkUpload(true)}
+                className="secondary-btn flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap !px-3.5 sm:!px-8 !py-2 sm:!py-3 text-xs sm:text-sm"
+                data-testid="bulk-upload-button"
+              >
+                <Upload size={14} className="sm:w-4 sm:h-4" />
+                {t('dashboard.bulkUpload')}
+              </button>
+              <button
+                onClick={() => {
+                  setEditingProperty(null);
+                  setShowAddProperty(true);
+                }}
+                className="primary-btn flex items-center justify-center gap-1.5 sm:gap-2 whitespace-nowrap !px-3.5 sm:!px-8 !py-2 sm:!py-3 text-xs sm:text-sm"
+                data-testid="add-property-button"
+                data-tour="add-property"
+              >
+                <Plus size={14} className="sm:w-[18px] sm:h-[18px]" />
+                {t('dashboard.addProperty')}
+              </button>
+            </div>
+          )}
+          {isRenter && onOverview && (
+            <button
+              onClick={() => setActiveTab('subleases')}
+              className="primary-btn flex items-center justify-center gap-2 whitespace-nowrap w-full sm:w-auto"
+              data-testid="sublease-property-button"
+            >
+              <Home size={18} />
+              {t('dashboard.subleaseProperty')}
+            </button>
+          )}
+        </div>
+        )}
+
+        {/* Manager-only — owners don't need a public manager page or
+            business logo since they typically list a single property. */}
+        {onOverview && (user?.role === 'manager' || user?.role === 'admin') && (
+          <ManagerHeader user={user} token={token} API={API} />
+        )}
+
+        {/* D6 — the share link used to live here, above the tabs, always
+            open, showing a raw uuid, and rendered even with zero listings.
+            It now sits at the bottom of My Properties (ShareListingsPanel),
+            collapsed, and disappears entirely when there is nothing to
+            share. The dashboard opens on the user's properties instead of
+            on a URL. */}
+
+        <AttentionStrip
+          summary={summary}
+          unreadMessages={unreadConversations}
+          onGoToTab={setActiveTab}
+        />
+
+        {/* T7 — first dashboard load after signup. One quiet line, never a
+            popup, and it competes for the same single slot as everything
+            else so it cannot stack with a tip. */}
+        {onOverview && <ShowMeAroundOffer moment="firstLogin" />}
+
+        {/* T1 — the backbone. Above the tabs because it is about the
+            account as a whole, not about whichever tab is open. */}
+        {/* Overview only (20 Sep 2026). It sat above EVERY tab, so at laptop
+            height Orders, Businesses and the rest all opened on the same
+            two checklists with their own content below the fold. */}
+        {onOverview && <SetupChecklist />}
+        {onOverview && setupAllDone && (
+          <div className="mb-6 text-sm">
+            <ShowMeAroundOffer moment="complete" eligible={setupAllDone} inline />
+          </div>
         )}
 
         {activeTab === 'overview' && (
@@ -419,7 +436,10 @@ const Dashboard = () => {
           <SubleasesTab API={API} token={token} />
         )}
 
-        {activeTab === 'properties' && isPropertyLister && (
+        {/* Mounted for every tab: the header's Add / Bulk buttons show on the
+            Overview too, where these used to not exist, so the buttons did
+            nothing there. */}
+        {isPropertyLister && (
           <>
             <AddPropertyModal
               isOpen={showAddProperty}
@@ -439,6 +459,11 @@ const Dashboard = () => {
               API={API}
               token={token}
             />
+          </>
+        )}
+
+        {activeTab === 'properties' && isPropertyLister && (
+          <>
             <PropertyList
               properties={properties}
               bookings={bookings}
@@ -503,6 +528,9 @@ const Dashboard = () => {
           <OrdersTab API={API} token={token} />
         )}
 
+        {activeTab === 'network' && (
+          <NetworkTab API={API} token={token} />
+        )}
         {activeTab === 'deliveries' && (
           <DeliveriesTab API={API} token={token} />
         )}

@@ -9,7 +9,7 @@
  */
 import React, { useState } from 'react';
 import {
-  Loader2, Phone, MapPin, Store as StoreIcon, Bike, Pencil, ChevronDown, Undo2, MessageCircle, Camera, Repeat,
+  Loader2, Phone, MapPin, Store as StoreIcon, Bike, Pencil, ChevronDown, Undo2, MessageCircle, Camera, Repeat, Zap,
 } from 'lucide-react';
 import { buildWhatsAppLink } from '../../utils/whatsappLink';
 import { money } from '../../utils/currency';
@@ -88,6 +88,18 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
             </span>
             {o.source === 'website' && (
               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: 'var(--surface-muted)', color: 'var(--brand-muted)' }} data-testid="order-website">{t('orders.fromWebsite', 'website')}</span>
+            )}
+            {/* Where an automated order came from. An owner seeing an order
+                they did not take must be able to read why it is there
+                (docs/business-network-spec.md, Phase 2). */}
+            {o.automation && (
+              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-semibold"
+                style={{ background: 'rgb(var(--brand-primary-rgb) / 0.10)', color: 'var(--brand-primary)' }}
+                title={o.automation.auto_accepted ? t('orders.viaAutoTitle', 'Accepted automatically') : undefined}
+                data-testid="order-automation">
+                <Zap size={10} aria-hidden="true" />
+                {t('orders.viaAutomation', 'from {{name}}', { name: o.automation.from_business_name || t('automations.aPartner', 'a partner') })}
+              </span>
             )}
             {o.standing_id && (
               <span className="inline-flex items-center gap-1 text-[11px]" style={{ color: 'var(--brand-muted)' }} title={t('orders.weeklyTitle', 'Repeats every week')} data-testid="order-weekly">

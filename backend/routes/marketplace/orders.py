@@ -496,6 +496,14 @@ async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str, cont
                 "Refresh to see where it is now."
             ),
         )
+    # Hand the order on to partners whose automations are waiting for this
+    # status (routes/marketplace/automations.py). In the background, so a
+    # shop marking an order ready gets its answer at once, and inside the
+    # engine every failure is caught and logged: a broken rule must never
+    # stop the shop moving its own order. Imported here, not at the top,
+    # because automations imports this module.
+    from routes.marketplace.automations import fire_in_background
+    fire_in_background("order.status_changed", {"order": fresh, "status": payload.status})
     return _public(fresh, contact=contact)
 
 
@@ -1281,7 +1289,14 @@ async def _my_courier_businesses(user: dict[str, Any]) -> tuple[list[dict[str, A
 async def courier_me(user=Depends(verify_token)):
     active, invites, _ = await _my_courier_businesses(user)
     open_count = await db.store_orders.count_documents({"courier.user_id": user["user_id"], "status": {"$in": list(OPEN_STATUSES)}})
-    return {"businesses": active, "invites": invites, "deliveries_open": open_count}
+    # A courier with no business of their own cannot be a connection, so no
+    # shop's automation can reach them (docs/business-network-spec.md, Phase
+    # 0). The Deliveries tab says so once they are delivering for someone.
+    has_business = await db.businesses.count_documents(
+        {"owner_user_id": user["user_id"], "active": {"$ne": False}}, limit=1,
+    ) > 0
+    return {"businesses": active, "invites": invites, "deliveries_open": open_count,
+            "has_business": has_business}
 
 
 @router.post("/courier/invites/{business_id}/accept")

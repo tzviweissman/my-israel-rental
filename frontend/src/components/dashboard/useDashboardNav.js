@@ -20,7 +20,7 @@
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Building2, Layers, Store, Wrench, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
-  Home, MessageCircle, Bell, Heart, KeyRound, FileText,
+  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
 
@@ -64,6 +64,9 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
         // who can run a business: the tab is where a shop's day lives.
         { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: showGigTabs },
         // A courier's own deliveries: shown to anyone a business invited.
+        // Business-to-business connections (docs/business-network-spec.md).
+        // Anyone who runs a business; the badge is requests waiting on them.
+        { id: 'network', label: t('dashboard.network', 'Network'), Icon: Network, badge: summary.network_requests_in, show: showGigTabs || (summary.network_requests_in || 0) > 0 },
         { id: 'deliveries', label: t('dashboard.deliveries', 'Deliveries'), Icon: Bike, badge: (summary.courier_deliveries_open || 0) + (summary.courier_invites || 0), show: (summary.courier_businesses || 0) > 0 || (summary.courier_invites || 0) > 0 },
         // A customer's own orders from stores on the site.
         { id: 'my-orders', label: t('dashboard.myOrders', 'My orders'), Icon: ShoppingBag, show: (summary.customer_orders || 0) > 0 },
@@ -118,6 +121,7 @@ export const ALL_TAB_IDS = [
   'bookings',
   'appointments',
   'orders',
+  'network',
   'deliveries',
   'my-orders',
   'my-requests',
