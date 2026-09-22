@@ -690,40 +690,104 @@ const en = {
         paymentRefused: 'We can only show links from a payment provider we recognise, over https.',
         paymentAccepted: 'Accepted: {{list}}',
       },
+      wizard: {
+        logoPick: 'Choose a logo',
+        logoAdd: 'Add logo',
+        businessName: 'Business name',
+        businessNamePlaceholder: 'e.g. Cohen Cleaning',
+        logoHint: 'Your logo shows on your page and beside everything you list. Optional:',
+        logoLater: 'you can add it later.',
+      },
       tour: {
         next: 'Next',
         back: 'Back',
         done: 'Done',
-        exit: 'End the tour',
         progress: '{{index}} of {{total}}',
+        doIt: 'Do it now',
+        continue: 'Continue the walk',
+        pausedAt: 'The walk is waiting: {{index}} of {{total}}',
+        hostOffer: 'You also rent out a place. Want the short walk for hosts?',
+        hostOfferCta: 'Show me',
+        exit: 'End the walk',
         step: {
-          checklist: {
-            title: 'Start here',
-            body: 'The short list of what is still missing from your public page. Each line links straight to the field that fixes it \u2014 no hunting.',
+          b_page: {
+            title: 'Your page comes first',
+            body: 'This is what customers see when you send your link. A logo and a cover photo are the difference between a page that looks finished and one people close. Owners send it instead of building a website.',
+            doIt: 'Add my logo and cover',
           },
-          'business-page': {
-            title: 'Your own page',
-            body: 'This opens the page customers see, and lets you set the cover photo and colour. Owners send this link instead of building a website.',
+          b_service: {
+            title: 'Your services and prices',
+            body: 'People decide who to contact by the price they can see. Add what you do and what it costs, and you show up when people search for it.',
+            doIt: 'Add a service',
           },
-          'add-property': {
-            title: 'Add a property',
-            body: 'Everything about a listing starts here \u2014 photos, price, availability and how people book it.',
-          },
-          availability: {
-            title: 'Days you are not free',
-            body: 'Block a holiday or a job you took elsewhere and those dates stop being offered. One list, whatever the work came from.',
-          },
-          share: {
+          b_share: {
             title: 'Your link and QR code',
-            body: 'A short link, and a code you can print on a flyer, a van or your packaging. You will see how many people scanned it.',
+            body: 'One short link, and a code to print on a flyer, a van or your packaging. You see how many people scanned it, so you know whether the flyer was worth printing.',
+            doIt: 'Get my link and code',
           },
-          messages: {
+          b_requests: {
+            title: 'People who already need you',
+            body: 'Customers post the job they need doing. Read what has been asked for in your line of work and reply to the ones you want, instead of chasing leads.',
+          },
+          b_orders: {
+            title: 'Orders without the spreadsheet',
+            body: 'Paste a WhatsApp order and the form fills itself. Your staff and your courier each see their own list, and the customer gets a link that says where the order is. No commission.',
+            doIt: 'Enter an order',
+          },
+          b_network: {
+            title: 'Work with other businesses',
+            body: 'Connect with your suppliers, your courier and the businesses you pass work to. Once connected, orders move between you without anyone retyping them.',
+            doIt: 'Find businesses to connect with',
+          },
+          b_automations: {
+            title: 'Let the repeat work run itself',
+            body: 'When this happens, do that, in your own words: send ready orders to your courier, thank people who book, reorder from your supplier every week. You are told when a supplier changes a price.',
+            doIt: 'Create an automation',
+          },
+          b_stats: {
+            title: 'See what is working',
+            body: 'How many people saw your page and how many tapped to message you. Real counts, never estimates, so you can tell a page nobody finds from one people look at and pass over.',
+          },
+          b_messages: {
             title: 'Messages translate themselves',
-            body: 'Write in Hebrew or English \u2014 whoever reads it sees it in their own language, and their reply comes back in yours. Language never costs you the job.',
+            body: 'Write in Hebrew or English. Whoever reads it sees it in their own language, and their reply comes back in yours. Language never costs you the job.',
           },
-          help: {
-            title: 'If you get lost',
-            body: 'This menu is always here. Restart this tour from it, see everything the site can do, or message us.',
+          h_calendar: {
+            title: 'One calendar, everywhere',
+            body: 'Connect the booking calendar you already use and the dates here follow it. No copying dates between sites, no double booking from a site you forgot to update.',
+            doIt: 'Connect a calendar',
+          },
+          h_instant: {
+            title: 'Book instantly, or ask first',
+            body: 'Choose per listing: let good dates book on the spot, or keep the final word on every one.',
+            doIt: 'Choose for this listing',
+          },
+          h_contracts: {
+            title: 'Sign without printing',
+            body: 'Upload your contract once. It is signed on screen by both sides and stored where only the two of you can open it. No printer, no scanner, no meeting up.',
+          },
+          h_share: {
+            title: 'Your link and QR code',
+            body: 'A short link to your listings, and a code for a sign, a card or the flat itself. You see how many people used it.',
+            doIt: 'Get my link and code',
+          },
+          h_automations: {
+            title: 'Let the upkeep run itself',
+            body: 'Cleaning between guests, timed for checkout. A yearly repaint, a yearly plumber check, a monthly garden visit. Write it once, in your words, and it goes to the right person on time.',
+            doIt: 'Create an automation',
+          },
+          h_pricing: {
+            title: 'What to charge',
+            body: 'See what similar places nearby are actually listed at, so your price is not a guess.',
+            doIt: 'Open pricing',
+          },
+          h_stats: {
+            title: 'See what is working',
+            body: 'How many people saw each listing and how many tapped to message you. Real counts, never estimates.',
+          },
+          h_messages: {
+            title: 'Messages translate themselves',
+            body: 'Write in Hebrew or English. Whoever reads it sees it in their own language, and their reply comes back in yours.',
           },
         },
       },
@@ -753,6 +817,7 @@ const en = {
         next: 'Next',
         toDashboard: 'Go to my dashboard',
         join: 'Add your business, free',
+        introWalk: 'Once you add your business, a short walk takes you through the site, one page at a time. At each stop you can set that part up there and then, or carry on.',
       },
       features: {
         metaTitle: 'What you can do here',
@@ -4123,6 +4188,24 @@ const en = {
         pricesBody: 'When a business you order from changes a price, you are told, with the old and new price.',
         tipsLabel: 'Also tell me about cheaper options',
         tipsBody: 'A business nearby, in the same line of work as one you order from, that is new, cheaper or running a deal. At most three a week.',
+        howOften: 'How often',
+        everyWeek: 'Every week',
+        everyMonth: 'Every month',
+        everyYear: 'Every year',
+        inMonth: 'Month',
+        onDay: 'Day',
+        whenMonthly: 'Every month on the {{day}}, at {{time}}',
+        whenYearly: 'Every year on {{date}}, at {{time}}',
+        recipe_yearlyPlumber: 'Every year, a plumber checks the flat',
+        recipe_yearlyPaint: 'Every year, the flat is repainted',
+        recipe_monthlyGarden: 'Every month, the garden is looked after',
+        recipe_yearlyReminder: 'Every year, remind me to renew the contract',
+        plumberItems: 'Yearly check: pipes, taps, boiler and drains',
+        paintItems: 'Yearly repaint: walls and ceilings, touch-ups where needed',
+        gardenItems: 'Monthly garden visit: mow, trim, water system check',
+        yearlyReminderText: 'Time to renew the rental contract and check the rent.',
+        whenOnSchedule: 'On a schedule I set',
+        noListing: 'Not for one listing',
       },
       network: {
         title: 'Your network',

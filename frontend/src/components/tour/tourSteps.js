@@ -1,103 +1,72 @@
 /**
- * What the tour points at, in order.
+ * The walk: the site's one guide (Tzvi, 22 Sep 2026). It replaced both the
+ * short dashboard tour and the card page at /getting-started.
  *
- * TARGETS ARE `data-tour` ATTRIBUTES, never CSS paths or DOM positions. A
- * refactor that moves a button changes its classes and its parents; it does
- * not change an attribute somebody put there on purpose. That is the whole
- * reason for the indirection — a tour anchored to `.flex > div:nth-child(2)`
- * breaks silently the first time somebody adds a wrapper.
+ * It goes through the REAL pages. Each stop opens a page, points at the
+ * part that matters, and says in one sentence how it helps the business
+ * grow. "Do it now" opens the form right there; the walk steps aside and a
+ * small bar brings it back when they are done. Nothing is required.
  *
- * COPY IS NOT HERE. Every string lives in `en.js` / `he.js` under
- * `tour.step.<id>`, so the tour is translated like everything else and a
- * step's wording can change without touching this file.
+ * Two walks, chosen by what the account has (TourProvider):
+ *   business - 9 stops, in the order a new business uses them;
+ *   host     - 8 stops for someone who rents out a place.
+ * Someone who is both takes the business walk first and is offered the
+ * host walk at the end.
  *
- * WHAT THE STEPS TEACH. Not "this is your dashboard, these are your
- * settings" — people can see that, and a tour that spends its first two
- * steps on furniture has lost the reader before it says anything useful.
- * Each step below is something this site does that a general marketplace
- * does not: a page of your own, a QR you can print, chat that translates,
- * a calendar that stops double bookings, a contract signed without a
- * printer.
- *
- * FIVE TO SEVEN STEPS, HARD MAX. A longer tour is abandoned in the middle,
- * which teaches less than a short one finished.
+ * @typedef {object} WalkStep
+ * @property {string}          id      unique across BOTH walks: it is the
+ *                                     server's resume point and the copy key
+ * @property {string}          route   the page this stop lives on
+ * @property {string|string[]} target  `data-tour` value(s) on that page;
+ *                                     the first one present is used, and a
+ *                                     stop with none present is skipped
+ * @property {{href?: string, click?: string|string[]}} [doIt]
+ *                                     "Do it now": go to a form, or press a
+ *                                     control on this page
  */
 
-/**
- * @typedef {object} TourStep
- * @property {string}   id      copy key + analytics key
- * @property {string}   target  `data-tour` value on the real element
- * @property {string}   [route] where the step lives; the engine navigates
- *                              there first. Omitted means "wherever we are".
- * @property {string[]} roles   'business' | 'lister'
- */
-export const TOUR_STEPS = [
-  {
-    id: 'checklist',
-    target: 'setup-checklist',
-    route: '/dashboard',
-    roles: ['business', 'lister'],
-  },
-  {
-    id: 'business-page',
-    target: 'business-design',
-    route: '/dashboard?tab=my-businesses',
-    roles: ['business'],
-  },
-  {
-    id: 'add-property',
-    target: 'add-property',
-    route: '/dashboard',
-    roles: ['lister'],
-  },
-  {
-    id: 'availability',
-    target: 'availability',
-    route: '/dashboard?tab=my-businesses',
-    roles: ['business'],
-  },
-  {
-    /* LISTER ONLY, and that is a finding rather than a preference. The
-       share panel lives inside My Properties (PropertyList.jsx) and is
-       hidden at zero properties by design (D6). A business owner has no
-       properties tab at all, so this step would have been skipped every
-       single time for them — a tour advertising a QR code and then
-       silently not showing it.
+export const WALKS = {
+  business: [
+    { id: 'b.page', route: '/dashboard?tab=my-businesses', target: ['business-design', 'business-card'],
+      doIt: { href: '/dashboard?tab=my-businesses&details=1' } },
+    { id: 'b.service', route: '/dashboard?tab=my-gigs', target: 'gigs',
+      doIt: { href: '/businesses/add' } },
+    { id: 'b.share', route: '/dashboard?tab=my-businesses', target: 'business-share',
+      doIt: { click: 'business-share' } },
+    { id: 'b.requests', route: '/requests', target: 'requests-board' },
+    { id: 'b.orders', route: '/dashboard?tab=orders', target: 'orders-board',
+      doIt: { click: 'orders-new' } },
+    { id: 'b.network', route: '/dashboard?tab=network&view=partners', target: ['network', 'network-no-business'],
+      doIt: { href: '/businesses' } },
+    { id: 'b.automations', route: '/dashboard?tab=network&view=automations', target: ['automation-recipes', 'network-no-business'],
+      doIt: { click: ['automation-new', 'network-add-business'] } },
+    { id: 'b.stats', route: '/dashboard?tab=overview', target: 'overview-stats' },
+    { id: 'b.messages', route: '/dashboard?tab=messages', target: ['messages-panel', 'messages-tab'] },
+  ],
+  host: [
+    { id: 'h.calendar', route: '/dashboard?tab=properties', target: 'ical',
+      doIt: { click: 'ical' } },
+    { id: 'h.instant', route: '/dashboard?tab=properties', target: 'property-edit',
+      doIt: { click: 'property-edit' } },
+    { id: 'h.contracts', route: '/dashboard?tab=contracts', target: 'contracts' },
+    { id: 'h.share', route: '/dashboard?tab=properties', target: 'share-panel',
+      doIt: { click: 'share-panel' } },
+    { id: 'h.automations', route: '/dashboard?tab=network&view=automations', target: ['automation-recipes', 'network-no-business'],
+      doIt: { click: ['automation-new', 'network-add-business'] } },
+    { id: 'h.pricing', route: '/dashboard?tab=properties', target: 'smart-pricing',
+      doIt: { click: 'smart-pricing' } },
+    { id: 'h.stats', route: '/dashboard?tab=properties', target: 'property-stats' },
+    { id: 'h.messages', route: '/dashboard?tab=messages', target: ['messages-panel', 'messages-tab'] },
+  ],
+};
 
-       Businesses do get a QR, but only on the public business page; there
-       is no control for it anywhere in their dashboard. That gap is worth
-       closing separately. Until it is, the business tour reaches the same
-       idea through the feature library, which the final step points at. */
-    id: 'share',
-    target: 'share-panel',
-    route: '/dashboard?tab=properties',
-    roles: ['lister'],
-  },
-  {
-    id: 'messages',
-    target: 'messages-tab',
-    route: '/dashboard',
-    roles: ['business', 'lister'],
-  },
-  {
-    id: 'help',
-    target: 'help',
-    route: '/dashboard',
-    roles: ['business', 'lister'],
-  },
-];
-
-/** Which tour a role gets. Anyone who is not clearly a property lister is
- *  shown the business tour — this site is not aimed at property owners by
- *  default, and the supply side is broader than them. */
+/** Which walk the account's ROLE suggests, when nothing better is known.
+ *  TourProvider prefers what the account actually has. */
 export function tourRoleFor(role) {
-  return role === 'owner' || role === 'manager' ? 'lister' : 'business';
+  return role === 'owner' || role === 'manager' ? 'host' : 'business';
 }
 
-/** The steps for a role, in order. */
-export function stepsForRole(role) {
-  const which = tourRoleFor(role);
-  return TOUR_STEPS.filter((s) => s.roles.includes(which));
-}
+/** The copy key for a stop: `tour.step.<id with dots as underscores>`. */
+export const stepKey = (id) => `tour.step.${id.replace('.', '_')}`;
 
-export default TOUR_STEPS;
+export default WALKS;

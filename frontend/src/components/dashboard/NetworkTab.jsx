@@ -125,9 +125,9 @@ export default function NetworkTab({ API, token, listings = [] }) {
 
   if (businesses && businesses.length === 0) {
     return (
-      <div className="bg-white rounded-2xl border p-8 text-center" style={{ borderColor: 'var(--brand-border)' }} data-testid="network-no-business">
+      <div className="bg-white rounded-2xl border p-8 text-center" style={{ borderColor: 'var(--brand-border)' }} data-testid="network-no-business" data-tour="network-no-business">
         <p style={{ color: 'var(--ink)' }}>{t('network.needBusiness', 'Add your business, free, to connect with other businesses.')}</p>
-        <button type="button" className="btn-primary mt-4" onClick={() => navigate('/dashboard?tab=my-businesses')}>
+        <button type="button" className="btn-primary mt-4" onClick={() => navigate('/dashboard?tab=my-businesses')} data-tour="network-add-business">
           {t('network.addBusiness', 'Add your business')}
         </button>
       </div>
@@ -162,7 +162,7 @@ export default function NetworkTab({ API, token, listings = [] }) {
   const btn = 'inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors disabled:opacity-50';
 
   return (
-    <div data-testid="network-tab">
+    <div data-testid="network-tab" data-tour="network">
       <div className="flex items-end justify-between gap-3 flex-wrap mb-4">
         <div>
           <h2 className="text-2xl" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>

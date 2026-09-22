@@ -273,6 +273,10 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
   );
   const bookedCount = properties.filter((p) => bookedIds.has(p.id)).length;
 
+  // The walk (components/tour) points at these on the first listing that
+  // has them. iCal and Smart Pricing exist on vacation rentals only.
+  const firstVacationId = properties.find((p) => p.rental_type === 'vacation')?.id;
+  const firstId = properties[0]?.id;
   const displayedProperties =
     activeFilter === 'bulk' ? properties.filter(isFreshBulkUpload)
     : activeFilter === 'no_images' ? properties.filter((p) => !p.images || p.images.length === 0)
@@ -427,7 +431,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
       {/* The same panel the services side uses, pointed at the property
           route. One component so the two halves of the site cannot drift
           into describing the same thing differently. */}
-      <div className="mb-6">
+      <div className="mb-6" data-tour="property-stats">
         <PerformancePanel
           API={API}
           token={token}
@@ -629,7 +633,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
               <div className="flex items-start justify-between gap-2">
                 <PriceBlock property={property} t={t} />
                 <div className="flex gap-2 shrink-0">
-                  <button onClick={() => onEdit(property)} className="p-2 hover:bg-gray-100 rounded-lg" data-testid={`edit-property-${property.id}`}>
+                  <button onClick={() => onEdit(property)} className="p-2 hover:bg-gray-100 rounded-lg" data-testid={`edit-property-${property.id}`} data-tour={property.id === firstId ? 'property-edit' : undefined}>
                     <Edit size={18} />
                   </button>
                   <button
@@ -723,6 +727,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
                       color: property.smart_pricing?.enabled ? 'var(--gold)' : 'var(--brand-primary)',
                     }}
                     data-testid={`smart-pricing-btn-${property.id}`}
+                    data-tour={property.id === firstVacationId ? 'smart-pricing' : undefined}
                   >
                     <TrendingUp size={15} />
                     {t('dashboard.smartPricing', 'Smart Pricing')}
@@ -740,6 +745,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
                       color: icalPanel === property.id ? 'var(--gold)' : 'var(--brand-primary)',
                     }}
                     data-testid={`ical-toggle-${property.id}`}
+                    data-tour={property.id === firstVacationId ? 'ical' : undefined}
                   >
                     <CalendarSync size={15} />
                     {t('property.ical.title')}

@@ -365,7 +365,7 @@ async def onboarding_state(payload: dict = Depends(verify_token)) -> dict[str, A
     # "Resume" vs "Show me around", and T7's rule that the inline offers
     # stop once the tour is done while the header entry stays forever.
     tour_doc = await db.onboarding_tour.find_one(
-        {"user_id": uid}, {"_id": 0, "completed_at": 1, "last_step_id": 1},
+        {"user_id": uid}, {"_id": 0, "completed_at": 1, "last_step_id": 1, "started_at": 1},
     ) or {}
 
     # Past the age cap the checklist goes away entirely. Tips and the help
@@ -382,6 +382,9 @@ async def onboarding_state(payload: dict = Depends(verify_token)) -> dict[str, A
         "tour": {
             "completed": bool(tour_doc.get("completed_at")),
             "last_step_id": tour_doc.get("last_step_id"),
+            # The add-a-business wizard's one-time hand-off (`?tour=first`)
+            # starts the walk only if this is false, on any device.
+            "started": bool(tour_doc.get("started_at")),
         },
     }
 

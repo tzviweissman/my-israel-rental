@@ -489,7 +489,7 @@ const RequestsBoard = () => {
         testId="requests-band"
       />
 
-      <div className="hero-panel-float">
+      <div className="hero-panel-float" data-tour="requests-board">
         <div className="hero-panel">
           {/* Side filter — which half of the market. Sits above the type
               tabs because it is the coarser cut: a renter and an owner want

@@ -56,6 +56,7 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
       <div
         className="text-center py-16 bg-white rounded-2xl border border-gray-100"
         data-testid="messages-tab-empty"
+        data-tour="messages-panel"
       >
         <MessageCircle size={36} className="mx-auto mb-3 text-gray-300" />
         <p className="text-gray-500 text-sm">{t('dashboard.noConversations')}</p>
@@ -67,7 +68,7 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
   }
 
   return (
-    <div className="space-y-3" data-testid="messages-tab">
+    <div className="space-y-3" data-testid="messages-tab" data-tour="messages-panel">
       {conversations.map((conv) => {
         const key = `${conv.property_id}-${conv.other_user?.id || conv.other_user?.email || 'x'}`;
         const isUnread = !!conv.unread;

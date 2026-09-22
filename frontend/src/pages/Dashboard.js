@@ -33,7 +33,6 @@ import useDashboardNav, { ALL_TAB_IDS } from '../components/dashboard/useDashboa
 import OverviewTab from '../components/dashboard/OverviewTab';
 import useIsWide from '../hooks/useIsWide';
 import OnboardingProvider from '../components/onboarding/OnboardingProvider';
-import TourProvider from '../components/tour/TourProvider';
 import SetupChecklist from '../components/onboarding/SetupChecklist';
 import ShowMeAroundOffer from '../components/onboarding/ShowMeAroundOffer';
 import { useOnboarding } from '../components/onboarding/OnboardingProvider';
@@ -274,9 +273,6 @@ const Dashboard = () => {
        deep inside the tab components, and the "only one on screen at a
        time" rule can only be enforced from a common ancestor. */
     <OnboardingProvider>
-    {/* Inside OnboardingProvider, because the tour's entry points live in
-        the onboarding surfaces and both need the same auth context. */}
-    <TourProvider>
     <div className="min-h-screen" data-testid="dashboard-page">
       <div className="max-w-7xl mx-auto px-4 md:px-6 pt-36 sm:pt-28 md:pt-28 pb-12">
         {/* Wide screens get the sidebar; narrow ones keep the tab strip. Same
@@ -553,7 +549,6 @@ const Dashboard = () => {
         </DashboardShell>
       </div>
     </div>
-    </TourProvider>
     </OnboardingProvider>
   );
 };
