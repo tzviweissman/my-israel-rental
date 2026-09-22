@@ -453,7 +453,7 @@ export default function ServicesHeroSearch({
           {t('services.hero.moreFilters', 'More filters')}
         </button>
         <a
-          href="/dashboard?tab=my-gigs"
+          href="/dashboard?tab=my-businesses"
           className="inline-flex items-center gap-1.5 text-[var(--brand-primary)] hover:text-[var(--brand-primary-dark)] font-semibold transition-colors"
           data-testid="services-hero-become-provider"
         >

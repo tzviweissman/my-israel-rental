@@ -1038,6 +1038,7 @@ const en = {
         needAreas: 'Add your service areas',
         needPhoto: 'Add one photo to a service',
         editDetails: 'Business details',
+        hoursFees: 'Hours, delivery & fees',
         detailsHint: 'All optional. Anything you leave blank simply is not shown on your page.',
         // The logo field. "Add a logo" was the first checklist item and it
         // opened a form with no logo in it, so no business could ever
@@ -1487,6 +1488,9 @@ const en = {
       },
       dashboard: {
         overview: 'Overview',
+        groupBusiness: 'My business',
+        groupRentals: 'My rentals',
+        groupMine: 'What I ordered',
         groupListings: 'Listings',
         groupActivity: 'Activity',
         groupAccount: 'Account',
@@ -1506,6 +1510,7 @@ const en = {
         cancel: 'Cancel',
         noProperties: 'No properties yet. Add your first listing!',
         myBookings: 'My Bookings',
+        rentalBookings: 'Bookings',
         bookingsAvailabilitySubtitle: 'All your reservations, contracts and unit availability — in one place.',
         searchPropertyHint: 'Search by property or area…',
         availableNow: 'Available now',

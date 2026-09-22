@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList } from 'lucide-react';
+import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer } from 'lucide-react';
 import { toast } from 'sonner';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import BusinessDetailsForm from './BusinessDetailsForm';
@@ -23,6 +23,7 @@ import BusinessPageEditor from './BusinessPageEditor';
 import BusinessCompleteness from './BusinessCompleteness';
 import BlockTimePanel from './BlockTimePanel';
 import MyGigsTab from './MyGigsTab';
+import { BusinessHoursPanel } from './OrdersTab';
 import LookingForYou from './LookingForYou';
 import ShareListingsPanel from './ShareListingsPanel';
 import { businessPublicUrl } from '../../utils/businessHost';
@@ -69,6 +70,9 @@ export default function MyBusinessesTab({ API, token }) {
   // link at its foot was not enough: an owner wrote in that he could not
   // find where to change his hours. Consumed once, then removed from the
   // URL so a reload or Cancel does not reopen it.
+  const [hoursBizId, setHoursBizId] = useState(null);
+  const hoursRef = React.useRef(null);
+  useEffect(() => { if (hoursBizId) hoursRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [hoursBizId]);
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   useEffect(() => {
@@ -278,6 +282,15 @@ export default function MyBusinessesTab({ API, token }) {
           <p className="text-sm">{t('businesses.empty', 'No businesses yet. Add one to start listing.')}</p>
         </div>
       ) : (
+        <>
+        {/* Full width above the cards: inside a card it had a third of
+            the screen, and the day pickers squeezed to nothing. */}
+        {hoursBizId && items.some((b) => b.id === hoursBizId) && (
+          <div ref={hoursRef} className="mb-4" data-testid="business-hours-panel">
+            <p className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>{items.find((b) => b.id === hoursBizId)?.name}</p>
+            <BusinessHoursPanel API={API} token={token} businessId={hoursBizId} onClose={() => setHoursBizId(null)} />
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((b) => (
             <div
@@ -363,6 +376,7 @@ export default function MyBusinessesTab({ API, token }) {
                     className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs font-semibold text-white"
                     style={{ background: 'var(--brand-primary)' }}
                     data-testid={`business-services-${b.id}`}
+                    data-tour={items[0]?.id === b.id ? 'business-services' : undefined}
                   >
                     <LayoutList size={13} />
                     {t('businesses.manageServices', 'Services & photos')}
@@ -418,6 +432,17 @@ export default function MyBusinessesTab({ API, token }) {
                   {t('businesses.editDetails', 'Business details')}
                 </button>
 
+                <button
+                  type="button"
+                  onClick={() => setHoursBizId(hoursBizId === b.id ? null : b.id)}
+                  aria-expanded={hoursBizId === b.id}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold me-3"
+                  style={{ color: 'var(--brand-primary)' }}
+                  data-testid={`business-hours-${b.id}`}
+                >
+                  <Timer size={12} /> {t('businesses.hoursFees', 'Hours, delivery & fees')}
+                </button>
+
                 {/* K3 — accent, cover and payment links, against a live
                     preview of the page they change. */}
                 <button
@@ -458,6 +483,7 @@ export default function MyBusinessesTab({ API, token }) {
             </div>
           ))}
         </div>
+        </>
       )}
 
       {detailsModal}

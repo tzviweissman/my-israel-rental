@@ -117,7 +117,7 @@ const PaymentSuccess = () => {
               Your Pro benefits are live now — publish unlimited gigs, appear in category browse, and get a Pro badge on your provider profile.
             </p>
             <button
-              onClick={() => navigate('/dashboard?tab=my-gigs')}
+              onClick={() => navigate('/dashboard?tab=my-businesses')}
               className="w-full mt-4 primary-btn flex items-center justify-center gap-2"
               data-testid="subscription-goto-my-gigs"
             >
