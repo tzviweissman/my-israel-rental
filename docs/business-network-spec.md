@@ -150,6 +150,37 @@ Tests: `test_business_automations.py` 18 passing, including next-run
 maths across the March clock change and a due schedule firing exactly
 once.
 
+## Hosts (22 Sep 2026)
+
+Tzvi: "if a vacation rental rents out an apartment it should send the times
+they need cleaning in between tenants". Two more WHENs, for anyone with
+listings: a guest stay is **confirmed** (accepted, or instantly booked) or
+**cancelled** (by the host, or a guest's request approved). Optionally for
+one listing only.
+
+- **Send an order** from a stay makes a job due when the guests leave (the
+  listing's `checkout_time`, or just the day), at the listing's address,
+  with the next confirmed arrival written in the notes as the real
+  deadline. The guest's name and phone are never passed on.
+- **A cancelled stay takes its job back** (`withdraw_for_booking`): a job
+  nobody has started is cancelled, compare-and-swap on the status, and the
+  partner is told either way. A cleaner must not turn up for guests who
+  are not coming.
+- **Message the customer** from a stay reaches the guest: check-in details.
+- **Price, ₪** on every order a rule sends. "What to order" already carried
+  the quantity; the price is what the partner's auto-accept money limit is
+  checked against, and without it that limit could never apply.
+
+A host needs a business on the site to connect with a cleaner, the same
+rule as couriers (Tzvi, option 1, 19 Sep). Rules match every business the
+host owns. Hooks: `bookings/accept.py`, `bookings/crud.py` (instant),
+`bookings/cancel.py` (both cancel paths), all through
+`automations.booking_changed`, in the background.
+
+Tests: 21 in `test_business_automations.py`, including a timed job with the
+next arrival, a cancelled stay withdrawing its job, and a rule for one flat
+ignoring another.
+
 ## Phases 3 to 9
 
 As in the brief, with the Phase 0 answers above applied.

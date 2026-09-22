@@ -54,7 +54,7 @@ function BizLine({ biz, t, lang }) {
   );
 }
 
-export default function NetworkTab({ API, token }) {
+export default function NetworkTab({ API, token, listings = [] }) {
   const { t, i18n } = useTranslation();
   const lang = (i18n.language || 'en').split('-')[0];
   const navigate = useNavigate();
@@ -270,6 +270,7 @@ export default function NetworkTab({ API, token }) {
             token={token}
             bizId={bizId}
             partners={partners.map((c) => ({ id: c.other.id, name: (lang === 'he' && c.other.name_he) || c.other.name }))}
+            listings={listings.map((p) => ({ id: p.id, title: p.title }))}
           />
         )}
 

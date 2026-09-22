@@ -500,9 +500,18 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> di
 
     IT TAKES A SNAPSHOT FIRST. Every document about to be removed is written
     to `user_tombstones` before anything is deleted, the same way the bulk
-    property delete works. This is the only reason the operation is safe to
-    run at all: an admin who deletes the wrong row has the rows back, and
-    the snapshot is the record of what a deletion actually took.
+    property delete works, and POST /admin/users/deleted/{id}/restore puts
+    it back. Two things a restore cannot return, and the admin screen says
+    so before the delete: the password (never snapshotted; the person signs
+    in with Google or sets a new one) and uploaded contract files (removed
+    from disk below).
+
+    WITH `_id`. Until 22 Sep 2026 the snapshot read `{"_id": 0}`, and for
+    businesses, gigs, providers, requests, short links and lead events the
+    `_id` IS the record's identity - orders, connections and pages point
+    at it. Those snapshots could not have been restored into anything that
+    still connected; the restore reports such rows instead of inventing
+    new ids for them.
     """
     if payload['role'] != 'admin':
         raise HTTPException(status_code=403, detail="Admin access required")
@@ -516,7 +525,7 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> di
     # ---- snapshot, before a single delete runs ----------------------------
     snapshot: dict[str, list] = {}
     for collection, field in _USER_OWNED:
-        rows = await db[collection].find({field: user_id}, {"_id": 0}).to_list(5000)
+        rows = await db[collection].find({field: user_id}).to_list(5000)
         if rows:
             snapshot[collection] = rows
 
@@ -532,6 +541,7 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> di
         "deleted_by": payload['user_id'],
         "deleted_at": datetime.now(UTC).isoformat(),
         "kept_two_party": list(_TWO_PARTY_KEPT),
+        "keeps_ids": True,
     })
 
     # ---- the one thing a delete_many cannot reach: files on disk ----------
@@ -582,6 +592,100 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> di
             f"Account deleted, along with {total} of their own record(s). "
             "Bookings, contracts, orders, reviews and chats involving other "
             "people were kept."
+        ),
+        "snapshot_id": snapshot_id,
+    }
+
+
+# Never put back. A reset token restored days later is a live way into the
+# account that nobody asked for; the throttle is a timer that has expired.
+_NOT_RESTORED = {"password_resets", "chat_email_throttle"}
+
+
+@api_router.get("/admin/users/deleted")
+async def list_deleted_users(payload: dict = Depends(verify_token)) -> dict:
+    """Accounts deleted and not yet restored, newest first - the place an
+    admin goes when they realise, a day later, that it was the wrong one."""
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    rows = await db.user_tombstones.find(
+        {"restored_at": None}, {"_id": 0, "id": 1, "user": 1, "deleted_at": 1, "collections": 1},
+    ).sort("deleted_at", -1).to_list(100)
+    return {"deleted": [{
+        "id": r["id"],
+        "name": (r.get("user") or {}).get("name"),
+        "email": (r.get("user") or {}).get("email"),
+        "role": (r.get("user") or {}).get("role"),
+        "deleted_at": r.get("deleted_at"),
+        "records": sum(len(v) for k, v in (r.get("collections") or {}).items() if k not in _NOT_RESTORED),
+    } for r in rows]}
+
+
+@api_router.post("/admin/users/deleted/{snapshot_id}/restore")
+async def restore_deleted_user(snapshot_id: str, payload: dict = Depends(verify_token)) -> dict:
+    """Put a deleted account back from its snapshot.
+
+    Refuses if the account id or email has since been taken - two accounts
+    with one email is worse than a deletion. Any single record whose id has
+    since been reused is skipped, never overwritten. The snapshot is marked
+    restored (not deleted) with what came back, so it cannot be applied
+    twice and still records what happened.
+    """
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    snap = await db.user_tombstones.find_one({"id": snapshot_id, "restored_at": None})
+    if not snap:
+        raise HTTPException(status_code=404, detail="Nothing to restore: not found, or already restored")
+    user = dict(snap.get("user") or {})
+    if not user.get("id"):
+        raise HTTPException(status_code=409, detail="This snapshot has no account to restore")
+    clash = await db.users.find_one(
+        {"$or": [{"id": user["id"]}, *([{"email": user["email"]}] if user.get("email") else [])]}, {"_id": 1},
+    )
+    if clash:
+        raise HTTPException(status_code=409, detail="That account id or email is in use again, so restoring would make a duplicate")
+
+    user.pop("_id", None)
+    await db.users.insert_one(user)
+
+    restored: dict[str, int] = {}
+    skipped: dict[str, int] = {}
+    unrestorable: dict[str, int] = {}
+    for collection, rows in (snap.get("collections") or {}).items():
+        if collection in _NOT_RESTORED:
+            continue
+        for row in rows:
+            key = "_id" if "_id" in row else ("id" if "id" in row else None)
+            if key is None:
+                # Snapshot from before 22 Sep 2026, of a collection whose
+                # only identity was `_id`. Inventing a new one would bring
+                # back a record nothing points at.
+                unrestorable[collection] = unrestorable.get(collection, 0) + 1
+                continue
+            if await db[collection].find_one({key: row[key]}, {"_id": 1}):
+                skipped[collection] = skipped.get(collection, 0) + 1
+                continue
+            await db[collection].insert_one(row)
+            restored[collection] = restored.get(collection, 0) + 1
+
+    await db.user_tombstones.update_one({"id": snapshot_id}, {"$set": {
+        "restored_at": datetime.now(UTC).isoformat(), "restored_by": payload['user_id'],
+        "restore_result": {"restored": restored, "skipped": skipped, "unrestorable": unrestorable},
+    }})
+    logger.info("[admin] user %s restored by %s: %s", user["id"], payload['user_id'], restored)
+    await publish("invalidate", {"prefixes": [
+        "/api/admin/users", "/api/admin/properties", "/api/admin/dashboard",
+        "/api/marketplace", "/api/requests", "/api/businesses",
+    ]})
+    return {
+        "user_id": user["id"],
+        "restored": restored,
+        "skipped": skipped,
+        "unrestorable": unrestorable,
+        "message": (
+            f"{user.get('name') or user.get('email') or 'Account'} is back, with "
+            f"{sum(restored.values())} of their record(s). They sign in with Google "
+            "or use Forgot password; uploaded contract files do not come back."
         ),
     }
 

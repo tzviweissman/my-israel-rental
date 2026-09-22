@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Search, Ban, CheckCircle, Trash2, LogIn, Mail } from 'lucide-react';
+import { Search, Ban, CheckCircle, Trash2, LogIn, Mail, RotateCcw } from 'lucide-react';
 import { API, AuthContext } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 
@@ -20,6 +20,30 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
   // `prefilter` (e.g. from the Quick Add Owner shortcut) takes effect via
   // the initial-state argument — no useEffect needed.
   const [searchTerm, setSearchTerm] = useState(prefilter || '');
+  // Deleted accounts can come back (routes/admin/core.py keeps a snapshot).
+  // Listed here because the Undo on the toast lasts seconds, and the
+  // realisation that it was the wrong account can take a day.
+  const { data: deletedData, refresh: fetchDeleted } = useApiSWR(
+    `${API}/admin/users/deleted`, token, { initial: { deleted: [] } }
+  );
+  const deleted = deletedData?.deleted || [];
+  const [restoringId, setRestoringId] = useState('');
+
+  const restoreUser = async (snapshotId) => {
+    setRestoringId(snapshotId);
+    try {
+      const res = await axios.post(`${API}/admin/users/deleted/${snapshotId}/restore`, {}, { headers });
+      const n = Object.values(res.data?.restored || {}).reduce((a, b) => a + b, 0);
+      toast.success(t('admin.userRestored', 'The account is back, with {{count}} of their records. They sign in with Google or use Forgot password.', { count: n }), { duration: 10000 });
+      fetchUsers();
+      fetchDeleted();
+      notifyStatsChange();
+    } catch (e) {
+      toast.error(e.response?.data?.detail || t('admin.restoreFailed', 'Could not restore this account'));
+    } finally {
+      setRestoringId('');
+    }
+  };
 
   const notifyStatsChange = () => { if (onStatsChange) onStatsChange(); };
 
@@ -45,9 +69,14 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
             onClick={async () => {
               toast.dismiss(tid);
               try {
-                await axios.delete(`${API}/admin/users/${userId}`, { headers });
-                toast.success('User deleted');
+                const res = await axios.delete(`${API}/admin/users/${userId}`, { headers });
+                const snap = res.data?.snapshot_id;
+                toast.success(t('admin.userDeletedKept', 'Account deleted. Bookings, contracts, orders, reviews and chats with other people were kept.'), {
+                  duration: 15000,
+                  action: snap ? { label: t('admin.undo', 'Undo'), onClick: () => restoreUser(snap) } : undefined,
+                });
                 fetchUsers();
+                fetchDeleted();
                 notifyStatsChange();
               } catch (e) { toast.error(e.response?.data?.detail || 'Failed to delete user'); }
             }}
@@ -178,6 +207,36 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
         </table>
         {filteredUsers.length === 0 && <p className="text-center text-gray-400 py-8 text-sm">{t('admin.noUsers')}</p>}
       </div>
+
+      {deleted.length > 0 && (
+        <section className="mt-8" data-testid="deleted-users">
+          <h3 className="text-sm font-semibold text-gray-800 mb-1">{t('admin.recentlyDeleted', 'Recently deleted')}</h3>
+          <p className="text-xs text-gray-500 mb-3">
+            {t('admin.recentlyDeletedDesc', 'Restoring brings back the account and everything that was only theirs. They sign in with Google or use Forgot password; uploaded contract files do not come back.')}
+          </p>
+          <div className="bg-white rounded-xl border border-[#E5E5E5] divide-y divide-[#E5E5E5]">
+            {deleted.map((d) => (
+              <div key={d.id} className="flex items-center gap-3 px-5 py-3 flex-wrap" data-testid={`deleted-user-${d.id}`}>
+                <div className="flex-1 min-w-[200px]">
+                  <div className="text-sm font-medium" dir="auto">{d.name || d.email}</div>
+                  <div className="text-xs text-gray-500">
+                    {d.email} · {t('admin.deletedOn', 'deleted {{date}}', { date: d.deleted_at ? new Date(d.deleted_at).toLocaleString() : '' })} · {t('admin.recordsCount', '{{count}} records', { count: d.records })}
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => restoreUser(d.id)}
+                  disabled={restoringId === d.id}
+                  className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#E5E5E5] hover:bg-gray-50 disabled:opacity-50"
+                  data-testid={`restore-user-${d.id}`}
+                >
+                  <RotateCcw size={13} /> {t('admin.restore', 'Restore')}
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   );
 };

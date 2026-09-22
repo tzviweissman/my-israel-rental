@@ -179,6 +179,18 @@ async def _business_items(uid: str) -> list[dict[str, Any]]:
             "done": any_of(lambda b: bool((b.get("hours") or "").strip())),
             "href": "/dashboard?tab=my-businesses&details=1",
         },
+        {
+            # Tzvi, 22 Sep 2026: a business signing up should be recommended
+            # an automation, or it will never learn the feature exists. Last,
+            # because it pays off only once the page and a service are up.
+            # Done by any rule at all - one that only notifies counts.
+            "id": "biz.automation",
+            "endowed": False,
+            "done": bool(await db.business_automations.find_one(
+                {"business_id": {"$in": [b["_id"] for b in businesses]}}, {"_id": 1},
+            )) if businesses else False,
+            "href": "/dashboard?tab=network&view=automations",
+        },
     ]
 
 

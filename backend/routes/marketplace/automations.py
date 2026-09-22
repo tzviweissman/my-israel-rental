@@ -17,6 +17,8 @@ two lists are (Tzvi: never pre-write automations, grow the vocabulary):
         `lead.received`          a customer taps WhatsApp on my gig
         `schedule`               every week on given days at a time
                                  (Asia/Jerusalem; see schedule_loop)
+        `booking.confirmed`      a guest stay on my listing is confirmed
+        `booking.cancelled`      ...or cancelled (its jobs are withdrawn)
   DO    `send_order`             an order appears at a partner (below)
         `notify_me`              a bell and an email to me
         `message_customer`       my words to the order's / booking's
@@ -89,9 +91,14 @@ class ScheduleIn(BaseModel):
 
 class TriggerIn(BaseModel):
     type: Literal["order.status_changed", "manual.reorder", "appointment.booked",
-                  "appointment.cancelled", "lead.received", "schedule"]
+                  "appointment.cancelled", "lead.received", "schedule",
+                  "booking.confirmed", "booking.cancelled"]
     status: Optional[str] = None
     schedule: Optional[ScheduleIn] = None
+    # A guest booking on ONE of my listings; None means any of them. The
+    # host with three flats and two cleaners needs this; everyone else
+    # leaves it empty.
+    property_id: Optional[str] = Field(None, max_length=100)
 
     @model_validator(mode="after")
     def _shape(self):
@@ -105,6 +112,8 @@ class TriggerIn(BaseModel):
                 raise ValueError("Pick the days and the time")
         else:
             self.schedule = None
+        if not self.type.startswith("booking."):
+            self.property_id = None
         return self
 
 
@@ -159,7 +168,9 @@ class AutomationIn(BaseModel):
                 raise ValueError("Only an order can be sent on as it is")
             if not tpl.copy_from_source and not tpl.items:
                 raise ValueError("Say what to order")
-            if not tpl.copy_from_source and tpl.fulfilment == "delivery" and not tpl.address:
+            # A guest booking brings its own address: the listing's.
+            if (not tpl.copy_from_source and tpl.fulfilment == "delivery" and not tpl.address
+                    and not t.startswith("booking.")):
                 raise ValueError("A delivery needs an address")
         else:
             self.partner_business_id = None
@@ -167,8 +178,9 @@ class AutomationIn(BaseModel):
             if a == "message_customer":
                 if not self.action.text:
                     raise ValueError("Write the message")
-                if t not in ("order.status_changed", "appointment.booked", "appointment.cancelled"):
-                    raise ValueError("Only an order or an appointment has a customer to message")
+                if t not in ("order.status_changed", "appointment.booked", "appointment.cancelled",
+                             "booking.confirmed", "booking.cancelled"):
+                    raise ValueError("Only an order, an appointment or a guest booking has a customer to message")
         return self
 
 
@@ -319,8 +331,51 @@ async def _auto_accept_for(partner: dict[str, Any], from_id: str, total: Optiona
     return entry.get("land_in_status") or "preparing"
 
 
+async def _next_arrival(rental: dict[str, Any]) -> Optional[dict[str, Any]]:
+    """The next confirmed stay on the same listing after this one ends: the
+    cleaner's real deadline. Pending requests do not count - they may never
+    happen, and a cleaner rushing for a stay that was declined is worse than
+    one told nothing."""
+    return await db.bookings.find_one(
+        {"property_id": rental.get("property_id"), "status": "confirmed",
+         "id": {"$ne": rental.get("id")}, "start_date": {"$gte": rental.get("end_date") or ""}},
+        {"_id": 0, "start_date": 1}, sort=[("start_date", 1)],
+    )
+
+
+async def _rental_fields(rule: dict[str, Any], me: dict[str, Any], ctx: dict[str, Any]) -> dict[str, Any]:
+    """A job for a partner, timed by a guest booking: due when the guests
+    leave, at the listing's address, with the next arrival as the deadline.
+    The guest's name and phone are NOT passed on - the cleaner needs the
+    flat and the time, not who slept there."""
+    from routes.marketplace import orders as om
+    tpl = rule.get("template") or {}
+    rental, prop = ctx["rental"], ctx.get("property") or {}
+    out_day = (rental.get("end_date") or "")[:10]
+    due = f"{out_day}T{prop['checkout_time']}" if out_day and prop.get("checkout_time") else out_day
+    lines = [f"{prop.get('title') or 'Listing'}: guests leave {out_day}"
+             + (f" at {prop['checkout_time']}" if prop.get("checkout_time") else "")]
+    nxt = await _next_arrival(rental)
+    if nxt:
+        lines.append(f"Next guests arrive {nxt['start_date'][:10]}"
+                     + (f" at {prop['checkin_time']}" if prop.get("checkin_time") else ""))
+    if tpl.get("notes"):
+        lines.append(tpl["notes"])
+    return {
+        "customer_name": me.get("name") or "Partner",
+        **om._phone_fields(None),
+        "items": tpl.get("items") or "Cleaning between guests",
+        "total": tpl.get("total"),
+        "needed_by": due or _default_needed_by(),
+        "fulfilment": "delivery",
+        "address": tpl.get("address") or prop.get("address") or prop.get("area"),
+        "notes": "\n".join(lines),
+    }
+
+
 async def _create_partner_order(rule: dict[str, Any], *, source: Optional[dict[str, Any]],
-                                needed_by: Optional[str], event: dict[str, Any]) -> dict[str, Any]:
+                                needed_by: Optional[str], event: dict[str, Any],
+                                ctx: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     """Build the partner's order, insert it, notify, and log the run."""
     from routes.marketplace import orders as om   # lazy: orders imports this module
 
@@ -335,7 +390,9 @@ async def _create_partner_order(rule: dict[str, Any], *, source: Optional[dict[s
         return await _record(rule, result="skipped", event=event, error="not connected")
 
     tpl = rule.get("template") or {}
-    if tpl.get("copy_from_source") and source:
+    if ctx and ctx.get("rental"):
+        fields = await _rental_fields(rule, me, ctx)
+    elif tpl.get("copy_from_source") and source:
         fields = {
             "customer_name": source.get("customer_name"),
             "customer_phone": source.get("customer_phone"),
@@ -379,6 +436,8 @@ async def _create_partner_order(rule: dict[str, Any], *, source: Optional[dict[s
             "from_business_id": me["_id"],
             "from_business_name": me.get("name"),
             "source_order_id": (source or {}).get("_id"),
+            # So a cancelled stay can take its cleaning job back with it.
+            "source_booking_id": ((ctx or {}).get("rental") or {}).get("id"),
             "auto_accepted": bool(land),
         },
         "placed_by_business_id": me["_id"],
@@ -422,6 +481,9 @@ def _describe(ctx: dict[str, Any]) -> str:
         return " - ".join(x for x in (g.get("title"), when) if x) or "an appointment"
     if ctx.get("gig"):
         return ctx["gig"].get("title") or "your listing"
+    if ctx.get("rental"):
+        r, p = ctx["rental"], ctx.get("property") or {}
+        return f"{p.get('title') or 'Your listing'}: {(r.get('start_date') or '')[:10]} to {(r.get('end_date') or '')[:10]}"
     return ""
 
 
@@ -432,6 +494,8 @@ def _where(ctx: dict[str, Any]) -> str:
         return f"/dashboard?tab=appointments&highlight={ctx['booking'].get('_id')}"
     if ctx.get("gig"):
         return "/dashboard?tab=my-gigs"
+    if ctx.get("rental"):
+        return "/dashboard?tab=bookings"
     return "/dashboard?tab=network&view=automations"
 
 
@@ -468,6 +532,10 @@ async def _message_customer(rule: dict[str, Any], ctx: dict[str, Any], event: di
         email, user_id = ctx["order"].get("customer_email"), ctx["order"].get("customer_user_id")
     elif ctx.get("booking"):
         email, user_id = ctx["booking"].get("contact_email"), ctx["booking"].get("client_user_id")
+    elif ctx.get("rental"):
+        user_id = ctx["rental"].get("renter_id")
+        guest = await db.users.find_one({"id": user_id}, {"_id": 0, "email": 1}) if user_id else None
+        email = (guest or {}).get("email")
     if not email and not user_id:
         return await _record(rule, result="skipped", event=event, error="no email or account for this customer")
     if user_id:
@@ -483,7 +551,7 @@ async def _run(rule: dict[str, Any], ctx: dict[str, Any], event: dict[str, Any])
         return await _notify_me(rule, ctx, event)
     if kind == "message_customer":
         return await _message_customer(rule, ctx, event)
-    return await _create_partner_order(rule, source=ctx.get("order"), needed_by=None, event=event)
+    return await _create_partner_order(rule, source=ctx.get("order"), needed_by=None, event=event, ctx=ctx)
 
 
 # ---------------------------------------------------------------------------
@@ -518,6 +586,16 @@ async def fire(trigger_type: str, event: dict[str, Any]) -> list[dict[str, Any]]
             ctx = {"booking": booking, "gig": gig}
             q["business_id"] = {"$in": await _businesses_for_gig(gig)}
             ev = {"type": trigger_type, "booking_id": booking.get("_id"), "source_id": booking.get("_id")}
+        elif trigger_type in ("booking.confirmed", "booking.cancelled"):
+            rental = event.get("rental") or {}
+            prop = event.get("property") or await db.properties.find_one(
+                {"id": rental.get("property_id")}, {"_id": 0}) or {}
+            ctx = {"rental": rental, "property": prop}
+            owned = [b["_id"] async for b in db.businesses.find(
+                {"owner_user_id": rental.get("owner_id"), "active": {"$ne": False}}, {"_id": 1})]
+            q["business_id"] = {"$in": owned}
+            q["$or"] = [{"trigger.property_id": None}, {"trigger.property_id": rental.get("property_id")}]
+            ev = {"type": trigger_type, "rental_id": rental.get("id"), "source_id": rental.get("id")}
         elif trigger_type == "lead.received":
             gig = event.get("gig") or {}
             ctx = {"gig": gig}
@@ -547,6 +625,46 @@ async def fire(trigger_type: str, event: dict[str, Any]) -> list[dict[str, Any]]
     except Exception:  # noqa: BLE001
         logger.exception("automation engine failed for %s", trigger_type)
     return runs
+
+
+async def withdraw_for_booking(rental: dict[str, Any]) -> int:
+    """A stay was cancelled: take back the jobs it sent. A cleaner must not
+    turn up for guests who are not coming. Only jobs nobody has finished
+    are cancelled (compare-and-swap on the status, like every other status
+    write); the partner is told either way. Never raises."""
+    from routes.marketplace import orders as om
+    withdrawn = 0
+    try:
+        async for o in db.store_orders.find({"automation.source_booking_id": rental.get("id")}):
+            now = om._now_iso()
+            done = await db.store_orders.find_one_and_update(
+                {"_id": o["_id"], "status": {"$in": ["new", "preparing"]}},
+                {"$set": {"status": "cancelled", "status_changed_at": now, "updated_at": now},
+                 "$push": {"history": {"status": "cancelled", "at": now, "by": "automation",
+                                       "note": "the stay was cancelled"}}},
+            )
+            if done:
+                withdrawn += 1
+            what = om._order_line(o)
+            await om._notify(o["owner_user_id"], type_="order_cancelled",
+                             message=(f"Cancelled, the stay it was for was cancelled: {what}" if done
+                                      else f"The stay this job was for was cancelled: {what}"),
+                             action_url="/dashboard?tab=orders", order_id=o["_id"])
+    except Exception:  # noqa: BLE001
+        logger.exception("withdraw_for_booking %s failed", rental.get("id"))
+    return withdrawn
+
+
+def booking_changed(rental: dict[str, Any], status: str) -> None:
+    """The one call the property-booking routes make. In the background:
+    a host confirming a stay must not wait on, or fail because of, a rule."""
+    async def _go():
+        if status == "cancelled":
+            await withdraw_for_booking(rental)
+        await fire(f"booking.{status}", {"rental": rental})
+    task = asyncio.create_task(_go())
+    _background.add(task)
+    task.add_done_callback(_background.discard)
 
 
 async def run_due_schedules() -> int:
@@ -724,6 +842,25 @@ async def list_runs(business_id: str, limit: int = Query(50, ge=1, le=200), user
     } for r in rows]}
 
 
+class PriceTipsIn(BaseModel):
+    enabled: bool
+
+
+@router.get("/businesses/{business_id}/price-tips")
+async def get_price_tips(business_id: str, user=Depends(verify_token)):
+    """Cheaper-option tips (price_watch.py). On unless switched off; price
+    alerts about your own suppliers are not covered by this and always on."""
+    biz = await _owned(business_id, user)
+    return {"enabled": biz.get("price_tips") is not False}
+
+
+@router.put("/businesses/{business_id}/price-tips")
+async def put_price_tips(business_id: str, payload: PriceTipsIn, user=Depends(verify_token)):
+    await _owned(business_id, user)
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"price_tips": payload.enabled}})
+    return {"enabled": payload.enabled}
+
+
 @router.get("/businesses/{business_id}/orders/auto-accept")
 async def get_auto_accept(business_id: str, user=Depends(verify_token)):
     biz = await _owned(business_id, user)
@@ -761,3 +898,6 @@ async def ensure_automation_indexes() -> None:
     await db.automation_runs.create_index([("automation_id", 1), ("trigger_event.order_id", 1)], background=True)
     await db.automation_runs.create_index([("automation_id", 1), ("trigger_event.source_id", 1)], background=True)
     await db.business_automations.create_index([("trigger.type", 1), ("enabled", 1), ("next_run_at", 1)], background=True)
+    await db.business_automations.create_index([("partner_business_id", 1), ("enabled", 1)], background=True)
+    await db.price_tips.create_index([("business_id", 1), ("gig_id", 1)], background=True)
+    await db.price_tips.create_index([("business_id", 1), ("at", -1)], background=True)

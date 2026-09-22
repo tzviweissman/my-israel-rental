@@ -367,3 +367,102 @@ def test_a_due_schedule_sends_once_and_moves_on(w, db):
     assert fresh["next_run_at"] > datetime.now(UTC).isoformat()
     # And it can be sent early by hand.
     assert requests.post(f"{M}/automations/{rule['id']}/run", json={}, headers=w["h"]["shop"], timeout=30).status_code == 200
+
+
+# ---------------------------------------------------------------------------
+# Listers (22 Sep 2026): a guest stay on a listing is a "when" too. The
+# canonical case: the host's cleaner gets a job timed for checkout, at the
+# flat, with the next arrival as the deadline - and loses it again if the
+# stay is cancelled.
+# ---------------------------------------------------------------------------
+
+def _host_listing(db, w, **over):
+    """A listing owned by the shop's owner, seeded directly: the create
+    endpoint needs photos, an area and a dozen fields that are not the
+    point here."""
+    owner = db.businesses.find_one({"_id": w["shop"]})["owner_user_id"]
+    pid = f"TEST_auto_flat_{uuid.uuid4().hex[:8]}"
+    db.properties.insert_one({"id": pid, "owner_id": owner, "title": "TEST_auto Flat 3",
+                              "address": "Emek Refaim 22, Jerusalem", "area": "Jerusalem",
+                              "rental_type": "vacation", "status": "active",
+                              "checkout_time": "11:00", "checkin_time": "15:00", **over})
+    return pid, owner
+
+
+def _stay(db, pid, owner, start, end, status="confirmed"):
+    bid = f"TEST_auto_stay_{uuid.uuid4().hex[:8]}"
+    db.bookings.insert_one({"id": bid, "property_id": pid, "owner_id": owner, "renter_id": f"guest-{bid}",
+                            "start_date": start, "end_date": end, "status": status})
+    return bid
+
+
+def _cleaning_rule(w, **trigger):
+    return requests.post(f"{M}/businesses/{w['shop']}/automations", json={
+        "partner_business_id": w["courier"], "name": "Cleaning between guests",
+        "trigger": {"type": "booking.confirmed", **trigger},
+        "template": {"items": "Full clean, change linen", "fulfilment": "delivery"},
+    }, headers=w["h"]["shop"], timeout=30)
+
+
+def test_a_confirmed_stay_sends_a_timed_cleaning_job(w, db):
+    _connect(w)
+    pid, owner = _host_listing(db, w)
+    try:
+        r = _cleaning_rule(w)
+        assert r.status_code == 200, r.text   # no address needed: the flat has one
+        nxt = _stay(db, pid, owner, "2030-05-14", "2030-05-17")       # the next guests
+        bid = _stay(db, pid, owner, "2030-05-10", "2030-05-14", status="pending")
+        a = requests.post(f"{BASE}/bookings/{bid}/accept", headers=w["h"]["shop"], timeout=30)
+        assert a.status_code == 200, a.text
+        rows = _partner_orders(db, w)
+        assert len(rows) == 1
+        job = rows[0]
+        assert job["needed_by"] == "2030-05-14T11:00", "due when the guests leave"
+        assert job["address"] == "Emek Refaim 22, Jerusalem"
+        assert job["items"] == "Full clean, change linen"
+        assert "Next guests arrive 2030-05-14 at 15:00" in job["notes"]
+        assert "guest-" not in str(job), "the guest's identity is not the cleaner's business"
+        assert job["automation"]["source_booking_id"] == bid
+        db.bookings.delete_one({"id": nxt})
+    finally:
+        db.properties.delete_one({"id": pid})
+        db.bookings.delete_many({"property_id": pid})
+
+
+def test_a_cancelled_stay_withdraws_its_job(w, db):
+    _connect(w)
+    pid, owner = _host_listing(db, w)
+    try:
+        assert _cleaning_rule(w).status_code == 200
+        bid = _stay(db, pid, owner, "2030-06-01", "2030-06-04", status="pending")
+        h = w["h"]["shop"]
+        assert requests.post(f"{BASE}/bookings/{bid}/accept", headers=h, timeout=30).status_code == 200
+        assert len(_partner_orders(db, w)) == 1
+        r = requests.post(f"{BASE}/bookings/{bid}/cancel", json={"reason": "guest ill"}, headers=h, timeout=30)
+        assert r.status_code == 200, r.text
+        for _ in range(30):
+            job = db.store_orders.find_one({"automation.source_booking_id": bid})
+            if job and job["status"] == "cancelled":
+                break
+            time.sleep(0.2)
+        assert job["status"] == "cancelled", "a cleaner must not turn up for guests who are not coming"
+        assert job["history"][-1]["note"] == "the stay was cancelled"
+    finally:
+        db.properties.delete_one({"id": pid})
+        db.bookings.delete_many({"property_id": pid})
+
+
+def test_a_rule_for_one_flat_ignores_the_others(w, db):
+    _connect(w)
+    pid, owner = _host_listing(db, w)
+    other, _ = _host_listing(db, w, title="TEST_auto Other flat")
+    try:
+        assert _cleaning_rule(w, property_id=other).status_code == 200
+        bid = _stay(db, pid, owner, "2030-07-01", "2030-07-03", status="pending")
+        assert requests.post(f"{BASE}/bookings/{bid}/accept", headers=w["h"]["shop"], timeout=30).status_code == 200
+        time.sleep(2)
+        assert _partner_orders(db, w) == [], "that rule is for the other flat"
+    finally:
+        db.properties.delete_many({"id": {"$in": [pid, other]}})
+        db.bookings.delete_many({"property_id": {"$in": [pid, other]}})
+

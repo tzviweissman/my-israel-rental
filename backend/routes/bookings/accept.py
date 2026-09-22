@@ -36,6 +36,9 @@ async def accept_booking(booking_id: str, payload: dict = Depends(verify_token))
     )
 
     _queue_acceptance_email(booking, booking_id, property_data)
+    # "When guests book, send the cleaning to my cleaner" (automations.py).
+    from routes.marketplace.automations import booking_changed
+    booking_changed({**booking, "status": "confirmed"}, "confirmed")
 
     if property_data.get("contract_path") or property_data.get("contract_url"):
         await _attach_contract_signing(booking_id, booking, property_data)

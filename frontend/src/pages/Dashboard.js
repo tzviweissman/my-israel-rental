@@ -529,7 +529,7 @@ const Dashboard = () => {
         )}
 
         {activeTab === 'network' && (
-          <NetworkTab API={API} token={token} />
+          <NetworkTab API={API} token={token} listings={isPropertyLister ? properties : []} />
         )}
         {activeTab === 'deliveries' && (
           <DeliveriesTab API={API} token={token} />
