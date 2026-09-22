@@ -220,3 +220,94 @@ def test_a_non_admin_cannot_delete_anyone(db, victim):
     r = requests.delete(f"{BASE}/admin/users/{victim['uid']}", timeout=30)
     assert r.status_code in (401, 403), r.text
     assert db.users.find_one({"id": victim["uid"]}) is not None
+
+
+# ---------------------------------------------------------------------------
+# Restore (22 Sep 2026). delete_user's docstring promised "an admin who
+# deletes the wrong row has the rows back", and nothing could put them back
+# (dead-ends audit, 21 Sep). Worse, the snapshot dropped `_id`, which for
+# businesses, gigs and requests IS the record's identity.
+# ---------------------------------------------------------------------------
+
+def _restore(admin, snap_id):
+    return requests.post(f"{BASE}/admin/users/deleted/{snap_id}/restore", headers=admin, timeout=60)
+
+
+def test_restore_brings_everything_back_with_the_same_ids(admin, db, victim):
+    # A business keyed the way real ones are: the string _id is the identity,
+    # and an order elsewhere points at it.
+    biz_id = f"{victim['tag']}-realbiz"
+    db.businesses.insert_one({"_id": biz_id, "owner_user_id": victim["uid"], "name": "TEST_restore",
+                              "slug": f"test-restore-{victim['tag']}", "active": True})
+    try:
+        r = _delete(admin, victim["uid"])
+        assert r.status_code == 200, r.text
+        snap_id = r.json()["snapshot_id"]
+        assert db.businesses.find_one({"_id": biz_id}) is None
+
+        listed = requests.get(f"{BASE}/admin/users/deleted", headers=admin, timeout=30).json()["deleted"]
+        assert any(d["id"] == snap_id for d in listed), "a deleted account is listed for restore"
+
+        r = _restore(admin, snap_id)
+        assert r.status_code == 200, r.text
+        user = db.users.find_one({"id": victim["uid"]})
+        assert user and user["email"].startswith(victim["tag"])
+        assert "password" not in user, "the password never comes back; they reset it"
+        assert db.businesses.find_one({"_id": biz_id}), "restored under the SAME id, so orders still point at it"
+        from routes.admin.core import _NOT_RESTORED
+        missing = [c for c, doc_id in victim["owned"].items()
+                   if c not in _NOT_RESTORED and not db[c].find_one({"id": doc_id})]
+        assert not missing, f"not restored: {missing}"
+        assert db.password_resets.find_one({"id": victim["owned"]["password_resets"]}) is None, \
+            "a password reset token must never be brought back to life"
+        assert r.json()["unrestorable"] == {}
+
+        again = _restore(admin, snap_id)
+        assert again.status_code == 404, "a snapshot cannot be applied twice"
+        assert not any(d["id"] == snap_id for d in
+                       requests.get(f"{BASE}/admin/users/deleted", headers=admin, timeout=30).json()["deleted"])
+    finally:
+        db.businesses.delete_one({"_id": biz_id})
+
+
+def test_restore_refuses_when_the_email_is_taken_again(admin, db, victim):
+    r = _delete(admin, victim["uid"])
+    snap_id = r.json()["snapshot_id"]
+    email = db.user_tombstones.find_one({"id": snap_id})["user"]["email"]
+    db.users.insert_one({"id": f"new-{uuid.uuid4()}", "email": email, "name": "Someone new"})
+    try:
+        r = _restore(admin, snap_id)
+        assert r.status_code == 409, "two accounts with one email is worse than a deletion"
+        assert db.users.count_documents({"email": email}) == 1
+    finally:
+        db.users.delete_many({"email": email})
+
+
+def test_an_old_snapshot_without_ids_reports_rather_than_invents(admin, db, victim):
+    """Snapshots taken before 22 Sep have no `_id`. A business whose only
+    identity was its `_id` must be reported, not reborn as a stranger."""
+    snap_id = f"old-{uuid.uuid4()}"
+    db.user_tombstones.insert_one({
+        "id": snap_id, "user_id": f"gone-{victim['tag']}", "restored_at": None,
+        "user": {"id": f"gone-{victim['tag']}", "email": f"gone-{victim['tag']}@example.com", "name": "Old"},
+        "collections": {"businesses": [{"owner_user_id": f"gone-{victim['tag']}", "name": "no id"}]},
+        "deleted_at": datetime.now(UTC).isoformat(),
+    })
+    try:
+        r = _restore(admin, snap_id)
+        assert r.status_code == 200, r.text
+        assert r.json()["unrestorable"] == {"businesses": 1}
+        assert db.businesses.find_one({"name": "no id", "owner_user_id": f"gone-{victim['tag']}"}) is None
+    finally:
+        db.users.delete_many({"id": f"gone-{victim['tag']}"})
+        db.user_tombstones.delete_one({"id": snap_id})
+
+
+def test_a_non_admin_cannot_list_or_restore(db, victim):
+    stamp = datetime.now(UTC).strftime("%H%M%S%f")
+    r = requests.post(f"{BASE}/auth/register", json={
+        "email": f"nonadmin-{stamp}@example.com", "password": f"Pw-{stamp}-ok1", "name": "N", "role": "owner",
+    }, timeout=30)
+    h = {"Authorization": f"Bearer {r.json()['token']}"}
+    assert requests.get(f"{BASE}/admin/users/deleted", headers=h, timeout=30).status_code == 403
+    assert requests.post(f"{BASE}/admin/users/deleted/anything/restore", headers=h, timeout=30).status_code == 403
