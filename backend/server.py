@@ -51,6 +51,7 @@ from routes import (  # noqa: E402
     tours_3d,
     smart_pricing,
     subleases,
+    weekly_insights,
 )
 from routes.deps import UPLOAD_DIR, client, db  # noqa: E402  (import after load_dotenv on purpose)
 from utils.contract_template import ensure_templates as ensure_contract_templates  # noqa: E402
@@ -91,6 +92,7 @@ for mod in (
     short_links,
     site_visits,
     tours_3d,
+    weekly_insights,
 ):
     api_router.include_router(mod.router)
 
@@ -262,6 +264,9 @@ async def startup_tasks() -> None:
     # Availability-expiry reminders — daily at 06:00 UTC. Nudges hosts
     # whose available_to is rolling past in the next 4-6 days.
     asyncio.create_task(availability_reminders.availability_reminders_daily_loop())
+    # "How your listings did" - Mondays 09:00 Israel, one email per person,
+    # none in a week with no activity. See routes/weekly_insights.py.
+    asyncio.create_task(weekly_insights.weekly_insights_loop())
     # Every 15 minutes, not daily: a 24h booking hold with a halfway nudge
     # needs finer resolution than one wake-up a day. Availability itself does
     # not depend on this loop — lapsed holds stop occupying their slot on

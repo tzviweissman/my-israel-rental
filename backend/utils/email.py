@@ -211,26 +211,31 @@ def _strip_html(html: str) -> str:
 
 
 # --- Shared branded wrapper -------------------------------------------------
-def _wrap(inner_html: str, *, preheader: str = "") -> str:
+def _wrap(inner_html: str, *, preheader: str = "", lang: str = "en") -> str:
     """Wrap inner content with branded header/footer. `preheader` is the
-    preview text shown by mail clients next to the subject."""
+    preview text shown by mail clients next to the subject. `lang="he"`
+    sets the whole email right to left, footer included."""
+    he = lang == "he"
+    side = "right" if he else "left"
+    questions = "שאלות? כתבו לנו ל-" if he else "Questions? Reach us at"
+    or_ = "או" if he else "or"
     return f"""<!DOCTYPE html>
-<html lang="en">
+<html lang="{'he' if he else 'en'}" dir="{'rtl' if he else 'ltr'}">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>My Israel Rental</title>
 </head>
-<body style="margin:0;padding:0;background:#f4f4f1;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#2b2b2b;">
+<body dir="{'rtl' if he else 'ltr'}" style="margin:0;padding:0;background:#f4f4f1;direction:{'rtl' if he else 'ltr'};font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;color:#2b2b2b;">
   <span style="display:none !important;visibility:hidden;opacity:0;color:transparent;height:0;width:0;overflow:hidden;">{preheader}</span>
   <table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0" style="background:#f4f4f1;padding:32px 16px;">
     <tr>
       <td align="center">
         <table role="presentation" width="600" cellspacing="0" cellpadding="0" border="0" style="max-width:600px;width:100%;background:#ffffff;border-radius:14px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.05);">
           <tr>
-            <td style="background:{BRAND_TEAL};padding:28px 32px;text-align:left;">
+            <td style="background:{BRAND_TEAL};padding:28px 32px;text-align:{side};">
               <div style="color:#ffffff;font-size:22px;font-weight:700;letter-spacing:0.3px;">My Israel Rental</div>
-              <div style="color:{BRAND_GOLD};font-size:11px;letter-spacing:3px;margin-top:4px;text-transform:uppercase;">Your home in Israel</div>
+              <div style="color:{BRAND_GOLD};font-size:11px;letter-spacing:{'1px' if he else '3px'};margin-top:4px;text-transform:uppercase;">{'הבית שלכם בישראל' if he else 'Your home in Israel'}</div>
             </td>
           </tr>
           <tr>
@@ -240,11 +245,11 @@ def _wrap(inner_html: str, *, preheader: str = "") -> str:
           </tr>
           <tr>
             <td style="background:#fafaf7;padding:20px 32px;border-top:1px solid #ececec;text-align:center;color:#888;font-size:12px;line-height:1.6;">
-              Questions? Reach us at
+              {questions}
               <a href="mailto:{CONTACT_EMAIL}" style="color:{BRAND_TEAL};text-decoration:none;">{CONTACT_EMAIL}</a>
-              or <a href="tel:{CONTACT_PHONE.replace(' ', '')}" style="color:{BRAND_TEAL};text-decoration:none;">{CONTACT_PHONE}</a>.
+              {or_} <a href="tel:{CONTACT_PHONE.replace(' ', '')}" style="color:{BRAND_TEAL};text-decoration:none;" dir="ltr">{CONTACT_PHONE}</a>.
               <br /><br />
-              <span style="color:#bbb;font-size:11px;">&copy; My Israel Rental LLC — <a href="{FRONTEND_URL}" style="color:#bbb;text-decoration:none;">myisraelrental.com</a></span>
+              <span style="color:#bbb;font-size:11px;">&copy; My Israel Rental LLC · <a href="{FRONTEND_URL}" style="color:#bbb;text-decoration:none;">myisraelrental.com</a></span>
             </td>
           </tr>
         </table>

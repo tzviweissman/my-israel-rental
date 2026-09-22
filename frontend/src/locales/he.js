@@ -1386,6 +1386,14 @@ const he = {
         swimmingPoolIndoorOrOutdoor: 'בריכת שחייה (מקורה או פתוחה)',
         onSiteParkingGarageOrLot: 'חניה בבניין (חניון או מגרש)'
       },
+      insightsOff: {
+        loading: 'רק רגע',
+        doneTitle: 'בוצע. לא יישלחו עוד מיילים שבועיים',
+        doneBody: 'לא נשלח לכם שוב את הסיכום של יום שני. המספרים שלכם תמיד זמינים בלוח הבקרה.',
+        errorTitle: 'הקישור לא עבד',
+        errorBody: 'ייתכן שפג תוקפו. לוח הבקרה מציג את אותם המספרים.',
+        dashboard: 'ללוח הבקרה',
+      },
       lookingForYou: {
         title: 'אנשים שמחפשים את מה שאתם מציעים',
         board: 'לכל הבקשות',

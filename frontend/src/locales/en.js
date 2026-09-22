@@ -1426,6 +1426,15 @@ const en = {
         swimmingPoolIndoorOrOutdoor: 'Swimming pool (indoor or outdoor)',
         onSiteParkingGarageOrLot: 'On-site parking (garage or lot)'
       },
+      // pages/InsightsEmailsOff.jsx, the weekly email's opt-out link
+      insightsOff: {
+        loading: 'One moment',
+        doneTitle: 'Done. No more weekly emails',
+        doneBody: 'We will not send you the Monday summary again. Your numbers are still on your dashboard any time.',
+        errorTitle: 'That link did not work',
+        errorBody: 'It may have expired. Your dashboard shows the same numbers.',
+        dashboard: 'Open your dashboard',
+      },
       // components/dashboard/LookingForYou.jsx
       lookingForYou: {
         title: 'People looking for what you offer',
