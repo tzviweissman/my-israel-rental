@@ -1,7 +1,7 @@
 """Pydantic models for API requests/responses"""
 from typing import List
 
-from pydantic import BaseModel, EmailStr, field_validator
+from pydantic import Field, BaseModel, EmailStr, field_validator
 
 from utils.area_normalize import normalize_area
 from utils.whatsapp_link import normalize_whatsapp_number
@@ -10,7 +10,9 @@ from utils.whatsapp_link import normalize_whatsapp_number
 class UserRegister(BaseModel):
     email: EmailStr
     password: str
-    name: str
+    # Bounded (security scan F12): the name goes into the welcome email,
+    # which is now escaped too, but nobody's name is 5,000 characters.
+    name: str = Field(..., min_length=1, max_length=80)
     role: str
     phone: str | None = None
 

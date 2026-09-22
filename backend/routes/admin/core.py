@@ -428,7 +428,14 @@ async def update_user_status(user_id: str, payload: dict = Depends(verify_token)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
     new_status = "blocked" if user.get("status", "active") == "active" else "active"
-    await db.users.update_one({"id": user_id}, {"$set": {"status": new_status}})
+    upd: dict = {"status": new_status}
+    if new_status == "blocked":
+        # Their open sessions end now, not in up to 30 days (security scan
+        # F9); verify_token refuses a blocked account either way.
+        upd["tokens_valid_after"] = int(datetime.now(UTC).timestamp())
+    await db.users.update_one({"id": user_id}, {"$set": upd})
+    from utils.auth import forget_user
+    forget_user(user_id)
     await publish("invalidate", {"prefixes": ["/api/admin/users", "/api/admin/dashboard"]})
     return {"message": f"User {new_status}", "status": new_status}
 

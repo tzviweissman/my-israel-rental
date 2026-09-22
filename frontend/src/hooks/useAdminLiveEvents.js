@@ -27,30 +27,59 @@ export function useAdminLiveEvents(token) {
   useEffect(() => {
     if (!token) return undefined;
     if (sourceRef.current) return undefined; // already connected
+    let stopped = false;
+    let retry = null;
 
-    const url = `${API}/admin/events?token=${encodeURIComponent(token)}`;
-    const es = new EventSource(url);
-    sourceRef.current = es;
-
-    es.onmessage = (ev) => {
+    /* The session token no longer goes in the URL (URLs end up in access
+       logs; security scan F16). A one-minute ticket is fetched with the
+       normal header and used to open the stream. The browser's own
+       reconnect would retry with the SAME, by then expired, ticket, so on
+       an error the stream is closed and reopened with a fresh one. */
+    const open = async () => {
+      let ticket;
       try {
-        const msg = JSON.parse(ev.data);
-        if (msg.type === 'invalidate') {
-          const prefixes = msg.payload?.prefixes || [];
-          for (const p of prefixes) invalidateAdminCache(p);
-        }
+        const res = await fetch(`${API}/admin/events/ticket`, {
+          method: 'POST', headers: { Authorization: `Bearer ${token}` },
+        });
+        if (!res.ok) return;
+        ticket = (await res.json()).ticket;
       } catch {
-        /* ignore malformed events */
+        retry = setTimeout(open, 15000);
+        return;
       }
+      if (stopped || !ticket) return;
+      const es = new EventSource(`${API}/admin/events?token=${encodeURIComponent(ticket)}`);
+      sourceRef.current = es;
+      attach(es);
     };
 
-    es.onerror = () => {
-      // Browser reconnects automatically; nothing to do here. Logging is
-      // off by design — a noisy console in dashboards is annoying.
+    const attach = (es) => {
+      es.onmessage = (ev) => {
+        try {
+          const msg = JSON.parse(ev.data);
+          if (msg.type === 'invalidate') {
+            const prefixes = msg.payload?.prefixes || [];
+            for (const p of prefixes) invalidateAdminCache(p);
+          }
+        } catch {
+          /* ignore malformed events */
+        }
+      };
+
+      es.onerror = () => {
+        // Reopen with a fresh ticket rather than let the browser retry the
+        // expired one. No console noise, by design.
+        es.close();
+        sourceRef.current = null;
+        if (!stopped) retry = setTimeout(open, 5000);
+      };
     };
 
+    open();
     return () => {
-      es.close();
+      stopped = true;
+      clearTimeout(retry);
+      sourceRef.current?.close();
       sourceRef.current = null;
     };
   }, [token]);

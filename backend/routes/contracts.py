@@ -1,4 +1,5 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
+import asyncio
 import io
 import uuid
 from datetime import UTC, datetime
@@ -99,11 +100,11 @@ async def upload_contract(
     # Extract text based on file type
     extracted_text = ""
     if file_ext == "pdf":
-        extracted_text = extract_text_from_pdf(str(file_path))
+        extracted_text = await asyncio.to_thread(extract_text_from_pdf, str(file_path))
     elif file_ext == "docx":
-        extracted_text = extract_text_from_docx(str(file_path))
+        extracted_text = await asyncio.to_thread(extract_text_from_docx, str(file_path))
     elif file_ext in ("jpg", "png", "webp"):
-        extracted_text = extract_text_from_image(str(file_path))
+        extracted_text = await asyncio.to_thread(extract_text_from_image, str(file_path))
 
     contract_doc = {
         "id": contract_id,
@@ -147,21 +148,38 @@ async def list_contracts(property_id: str | None = None, payload: dict = Depends
 
 
 async def _may_access_contract(contract: dict, payload: dict) -> bool:
-    """True when the caller is entitled to read this contract.
+    """True when the caller is a party to THIS contract.
 
-    Contracts are signed legal documents, so access is limited to the people
-    actually party to them: the property owner, an admin, or a renter who has
-    a booking against the same property.
+    Contracts are signed legal documents. Until 23 Sep 2026 any account with
+    any booking on the property - a pending request anyone can make, a
+    cancelled one - could read and sign every contract on it, including
+    other people's sublease contracts (security scan F11). Now:
+
+      * the person who uploaded it, and admins;
+      * anyone who has already signed it (they hold a copy by right);
+      * a SUBLEASE contract: nobody else. Its other party signs through the
+        emailed link (/contracts/sign/{token}), never through a login;
+      * an owner's contract: a renter whose booking on the property is
+        actually agreed - confirmed or completed, or in the middle of a
+        cancellation request - not merely asked for.
     """
     if payload.get("role") == "admin":
         return True
     user_id = payload.get("user_id")
+    if not user_id:
+        return False
     if contract.get("owner_id") == user_id:
         return True
+    if any(s.get("signer_id") == user_id for s in contract.get("signatures") or []):
+        return True
+    if contract.get("sublease_id"):
+        return False
     property_id = contract.get("property_id")
-    if property_id and user_id:
+    if property_id:
         booking = await db.bookings.find_one(
-            {"property_id": property_id, "renter_id": user_id}, {"_id": 1}
+            {"property_id": property_id, "renter_id": user_id,
+             "status": {"$in": ["confirmed", "completed", "cancellation_requested"]}},
+            {"_id": 1},
         )
         if booking:
             return True
@@ -376,6 +394,9 @@ async def get_contract(contract_id: str, payload: dict = Depends(verify_token)) 
         signer_ids = [s.get('signer_id') for s in contract.get('signatures', [])]
         if payload['user_id'] not in signer_ids:
             raise HTTPException(status_code=403, detail="Not authorized")
+        # The signing link is the uploader's to send, not a signer's to
+        # keep (security scan F11).
+        contract.pop('sign_token', None)
     return contract
 
 
@@ -436,13 +457,17 @@ async def sign_contract(contract_id: str, signature: ContractSignature, payload:
         "signed_at": datetime.now(UTC).isoformat()
     }
 
-    await db.contracts.update_one(
-        {"id": contract_id},
+    # Conditional, like the public signing flow: a contract that is already
+    # signed is not signed again over the top of the real signer.
+    res = await db.contracts.update_one(
+        {"id": contract_id, "signed": {"$ne": True}},
         {
             "$push": {"signatures": new_signature},
             "$set": {"signed": True, "updated_at": datetime.now(UTC).isoformat()}
         }
     )
+    if not res.modified_count:
+        raise HTTPException(status_code=409, detail="This contract has already been signed")
 
     return {"message": "Contract signed successfully", "signed_at": new_signature['signed_at']}
 

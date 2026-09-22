@@ -23,11 +23,10 @@ client = AsyncIOMotorClient(_mongo_url)
 db: Any = client[os.environ["DB_NAME"]]
 
 JWT_SECRET = os.environ["JWT_SECRET"]
-# LLM key for the direct Anthropic API (replaces the old EMERGENT_LLM_KEY /
-# emergentintegrations proxy). EMERGENT_LLM_KEY is kept only as a fallback so
-# existing deployments that still set it keep working during the transition.
+# LLM key for the direct Anthropic API. The old EMERGENT_LLM_KEY fallback
+# was removed on 23 Sep 2026 (security scan F19): nothing read it, and a
+# real key of that kind is still in git history and must be revoked.
 ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
 # Google OAuth 2.0 Web-application client id (public, not a secret). Used to
 # verify that an inbound Google access token was actually minted for THIS app
 # before we trust the profile behind it. Blank disables Google sign-in.

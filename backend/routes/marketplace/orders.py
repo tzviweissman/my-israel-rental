@@ -36,6 +36,7 @@ door and the customer-phone rule (O5, O6), the customer's status link
 """
 from __future__ import annotations
 
+import hashlib
 import csv
 import html as _html
 import io
@@ -642,6 +643,18 @@ def _csv_number(v: Any) -> Any:
     return int(f) if f.is_integer() else f
 
 
+def _csv_text(v: Any) -> Any:
+    """A cell a spreadsheet must not run. Website orders take the customer's
+    name, items, address and notes from anyone, and a value starting with
+    = + - @ (or a tab or carriage return) became a live formula when the
+    owner opened the export (security scan F8). A leading apostrophe makes
+    Excel and Sheets show it as text and hides the apostrophe. Numbers are
+    not text and pass through."""
+    if isinstance(v, str) and v[:1] in ("=", "+", "-", "@", chr(9), chr(13)):
+        return "'" + v
+    return v
+
+
 def orders_to_csv(orders: list[dict[str, Any]]) -> str:
     """One row per order, the columns the sheet had. UTF-8 with a BOM so
     Excel on Windows opens Hebrew correctly without an import wizard."""
@@ -651,14 +664,14 @@ def orders_to_csv(orders: list[dict[str, Any]]) -> str:
     w.writerow(_CSV_COLUMNS)
     for o in orders:
         nb = o.get("needed_by") or ""
-        w.writerow([
+        w.writerow([_csv_text(c) for c in (
             nb[:10], nb[11:16] if "T" in nb else "",
             o.get("customer_name") or "", o.get("customer_phone") or "",
             o.get("items") or "", o.get("fulfilment") or "", o.get("address") or "",
             _csv_number(o.get("total")), o.get("currency") or "ILS",
             o.get("status") or "", o.get("notes") or "", o.get("source") or "",
             o.get("created_at") or "",
-        ])
+        )])
     return buf.getvalue()
 
 
@@ -1017,6 +1030,7 @@ class CourierStatusIn(BaseModel):
 
 
 def _public_courier(c: dict[str, Any]) -> dict[str, Any]:
+    # A whitelist, so the invite code's hash never leaves the server.
     return {k: c.get(k) for k in ("user_id", "email", "name", "phone", "phone_e164", "status", "invited_at", "accepted_at")}
 
 
@@ -1183,8 +1197,15 @@ async def invite_courier(business_id: str, payload: CourierInviteIn, user=Depend
     if account and account["id"] == biz.get("owner_user_id"):
         raise HTTPException(status_code=400, detail="That is your own account")
     now = _now_iso()
+    # An invite to an address with no account is claimed with a code that
+    # only the mailbox receives (security scan F13). Registration does not
+    # prove anyone owns the address they type, so "signed up with that
+    # email" is not enough: whoever registered it first would get the
+    # business's customers' names, addresses and phones. Stored hashed.
+    code = None if account else secrets.token_urlsafe(18)
     entry = {
         "user_id": account["id"] if account else None,
+        "invite_code_hash": _code_hash(code) if code else None,
         "email": payload.email,
         "name": (account or {}).get("name"),
         "phone": (account or {}).get("whatsapp_number") or (account or {}).get("phone"),
@@ -1200,9 +1221,10 @@ async def invite_courier(business_id: str, payload: CourierInviteIn, user=Depend
     await _email(
         payload.email, f"{biz.get('name')} wants you as their courier",
         f"<p>{_esc(biz.get('name'))} on MyIsraelRental would like you to deliver their orders.</p>"
-        + ("<p>Open your dashboard to accept.</p>" if account else "<p>Sign up with this email address, then accept the invite in your dashboard.</p>"),
+        + ("<p>Open your dashboard to accept.</p>" if account else "<p>Sign up, then open this link again to accept. The link is yours: it is how the site knows the invite reached you.</p>"),
         tag="order-courier-invite",
-        button=("Open my dashboard", f"{_frontend_url()}/dashboard?tab=deliveries") if account else ("Sign up", f"{_frontend_url()}/join"),
+        button=("Open my dashboard", f"{_frontend_url()}/dashboard?tab=deliveries") if account
+        else ("Accept the invite", f"{_frontend_url()}/dashboard?tab=deliveries&courier_invite={business_id}.{code}"),
     )
     return _public_courier(entry)
 
@@ -1299,16 +1321,32 @@ async def courier_me(user=Depends(verify_token)):
             "has_business": has_business}
 
 
+class InviteAcceptIn(BaseModel):
+    code: Optional[str] = Field(None, max_length=200)
+
+
+def _code_hash(code: str) -> str:
+    return hashlib.sha256(code.encode()).hexdigest()
+
+
 @router.post("/courier/invites/{business_id}/accept")
-async def accept_invite(business_id: str, user=Depends(verify_token)):
+async def accept_invite(business_id: str, payload: InviteAcceptIn = InviteAcceptIn(), user=Depends(verify_token)):
     biz = await db.businesses.find_one({"_id": business_id})
     if not biz:
         raise HTTPException(status_code=404, detail="Business not found")
-    me = await db.users.find_one({"id": user["user_id"]}, {"_id": 0, "email": 1, "name": 1, "phone": 1, "whatsapp_number": 1}) or {}
+    me = await db.users.find_one({"id": user["user_id"]}, {"_id": 0, "email": 1, "name": 1, "phone": 1, "whatsapp_number": 1, "google_linked": 1}) or {}
     couriers = list(biz.get("couriers") or [])
     entry = next((c for c in couriers if c.get("user_id") == user["user_id"] or (me.get("email") and c.get("email") == me.get("email"))), None)
     if not entry:
         raise HTTPException(status_code=404, detail="No invite from this business")
+    # Matched by email only (the account did not exist when invited): the
+    # address must be proved. Google proves it; otherwise the code from the
+    # invite email does (security scan F13).
+    if entry.get("user_id") != user["user_id"] and not me.get("google_linked"):
+        want = entry.get("invite_code_hash")
+        if not (want and payload.code and secrets.compare_digest(_code_hash(payload.code), want)):
+            raise HTTPException(status_code=403, detail="Open the link in your invite email to accept this invite")
+    entry.pop("invite_code_hash", None)
     entry.update({
         "user_id": user["user_id"], "status": "active", "accepted_at": _now_iso(),
         "name": me.get("name") or entry.get("name") or entry.get("email"),

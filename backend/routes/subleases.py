@@ -1,4 +1,5 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
+import asyncio
 import uuid
 from datetime import UTC, datetime
 
@@ -193,11 +194,11 @@ async def upload_sublease_contract(
 
     extracted_text = ""
     if file_ext == "pdf":
-        extracted_text = extract_text_from_pdf(str(file_path))
+        extracted_text = await asyncio.to_thread(extract_text_from_pdf, str(file_path))
     elif file_ext == "docx":
-        extracted_text = extract_text_from_docx(str(file_path))
+        extracted_text = await asyncio.to_thread(extract_text_from_docx, str(file_path))
     elif file_ext in ("jpg", "png", "webp"):
-        extracted_text = extract_text_from_image(str(file_path))
+        extracted_text = await asyncio.to_thread(extract_text_from_image, str(file_path))
 
     sign_token = str(uuid.uuid4())
 

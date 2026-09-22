@@ -131,6 +131,35 @@ def test_invite_unknown_email_is_held(owner, business):
                            headers=_auth(owner), timeout=30).status_code == 200
 
 
+def test_registering_an_invited_address_is_not_enough(owner, business):
+    """Security scan F13: registration does not prove anyone owns the
+    address, so claiming an invite made before the account existed needs
+    the code from the invite email. Without it: refused, and no access."""
+    import hashlib
+    from pymongo import MongoClient
+    stamp = datetime.now(UTC).strftime("%H%M%S%f")
+    email = f"invited-later-{stamp}@example.com"
+    assert requests.post(f"{BASE}/marketplace/businesses/{business}/couriers/invite", json={"email": email},
+                         headers=_auth(owner), timeout=30).status_code == 200
+    r = requests.post(f"{BASE}/auth/register", json={"email": email, "password": f"Pw-{stamp}-ok1",
+                                                     "name": "Squatter", "role": "renter"}, timeout=30)
+    tok = r.json()["token"]
+    bad = requests.post(f"{BASE}/marketplace/courier/invites/{business}/accept", json={"code": "guess"},
+                        headers=_auth(tok), timeout=30)
+    assert bad.status_code == 403, bad.text
+    assert requests.get(f"{BASE}/marketplace/courier/deliveries", headers=_auth(tok), timeout=30).json().get("stops") == []
+    # The real code, as the invite email carries it, works. Planted here
+    # because the email itself is not readable from a test.
+    db = MongoClient(os.environ["MONGO_URL"])[os.environ["DB_NAME"]]
+    code = "test-code-" + stamp
+    db.businesses.update_one({"_id": business, "couriers.email": email},
+                             {"$set": {"couriers.$.invite_code_hash": hashlib.sha256(code.encode()).hexdigest()}})
+    ok = requests.post(f"{BASE}/marketplace/courier/invites/{business}/accept", json={"code": code},
+                       headers=_auth(tok), timeout=30)
+    assert ok.status_code == 200, ok.text
+    requests.delete(f"{BASE}/marketplace/businesses/{business}/couriers/{email}", headers=_auth(owner), timeout=30)
+
+
 # ---------------------------------------------------------------------------
 # automatic assignment
 # ---------------------------------------------------------------------------

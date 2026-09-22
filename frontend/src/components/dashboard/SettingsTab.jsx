@@ -182,12 +182,15 @@ const SettingsTab = ({ user, token, API }) => {
     }
 
     try {
-      await axios.post(`${API}/auth/change-password`, {
+      const { data } = await axios.post(`${API}/auth/change-password`, {
         current_password: passwordForm.current_password,
         new_password: passwordForm.new_password
       }, {
         headers: { Authorization: `Bearer ${token}` }
       });
+      // Every other session ended with the change; this one continues on
+      // the fresh token the server returned.
+      if (data?.token) login(data.token, user);
       
       toast.success('Password changed successfully');
       setPasswordForm({

@@ -16,7 +16,9 @@ import pytest
 import requests
 
 sys.path.insert(0, "/app/backend")
-os.environ.setdefault("JWT_SECRET", "m7jrF-RpPUgn7DoQb4O4QCgK2XtfpdCbT-AnXnAky_hKPHrynRXyx2J7_DsihG8R")
+# JWT_SECRET comes from the environment (backend/.env or tests/.env.test).
+# A real signing key was written here until 23 Sep 2026 (security scan F3);
+# it was the old host's live secret and must be treated as compromised.
 
 BASE_URL = os.environ["REACT_APP_BACKEND_URL"].rstrip("/") if os.environ.get("REACT_APP_BACKEND_URL") else "https://where-am-i-project.preview.emergentagent.com"
 

@@ -89,7 +89,8 @@ def _stamp_signature_on_pdf(
 
     # Resize signature to scaled dimensions
     sig_scaled = sig_img.resize(
-        (max(1, int(sig_w)), max(1, int(sig_h))), Image.Resampling.LANCZOS,
+        (max(1, min(int(sig_w), int(page_width))), max(1, min(int(sig_h), int(page_height)))),
+        Image.Resampling.LANCZOS,
     )
 
     # Save to temp PNG so reportlab can read it
@@ -166,6 +167,7 @@ def _stamp_signature_on_image(
     isig_x, isig_y = int(fx), int(fy)
     isig_w, isig_h = max(1, int(fw)), max(1, int(fh))
 
+    isig_w, isig_h = min(isig_w, native_w), min(isig_h, native_h)
     sig_scaled = sig_img.resize((isig_w, isig_h), Image.Resampling.LANCZOS)
 
     # Layer for signature + printed name
@@ -226,6 +228,20 @@ def _stamp_signature_on_image(
 
 # ---------- public entry point --------------------------------------------
 
+_MAX_PX = 10_000
+
+
+def _bounded(v, lo, hi, default):
+    """A finite number within [lo, hi], or `default` if it is not one."""
+    try:
+        f = float(v)
+    except (TypeError, ValueError):
+        return default
+    if f != f or f in (float("inf"), float("-inf")):
+        return default
+    return min(max(f, lo), hi)
+
+
 def stamp_signature_on_contract(
     contract_path: Path, signed_path: Path,
     signature_data: str,
@@ -235,6 +251,15 @@ def stamp_signature_on_contract(
 ) -> None:
     """Dispatch to the right stamping branch based on contract extension.
     Raises ValueError / IOError on failure."""
+    # Every number here comes from the signer's request body. Unchecked, a
+    # signature box of 50,000 x 50,000 made Pillow allocate about 10 GB and
+    # took the API down for everyone, repeatably (security scan F7, F10).
+    # Bounded to what a real screen and a real page can produce; the
+    # branches below also clamp the resize to the page itself.
+    sig_x, sig_y = _bounded(sig_x, 0, _MAX_PX, 0), _bounded(sig_y, 0, _MAX_PX, 0)
+    sig_w, sig_h = _bounded(sig_w, 1, _MAX_PX, 200), _bounded(sig_h, 1, _MAX_PX, 100)
+    display_width = _bounded(display_width, 1, _MAX_PX, None) if display_width else None
+    display_height = _bounded(display_height, 1, _MAX_PX, None) if display_height else None
     sig_img = _decode_signature_image(signature_data)
     file_ext = contract_path.suffix.lower()
     if file_ext == '.pdf':
