@@ -391,6 +391,18 @@ body.hv2-light-nav [data-testid="nav-logo"] img {
 /* #C9A227 is the on-dark gold and measures about 2.4:1 on white. */
 body.hv2-light-nav .glass-pill svg { color: var(--gold-text); }
 body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
+/* The phone row of Stays / Businesses / Marketplace (NavCategoryItem) paints
+   white label and icon inline for a dark hero; here that was white on white,
+   so on a phone the home page had no visible way to the three boards
+   (found 19 Sep 2026, when the video behind the nav made a ghost of it). */
+body.hv2-light-nav [data-testid="nav-rental-categories-mobile"] span {
+  color: var(--ink) !important;
+  text-shadow: none !important;
+}
+body.hv2-light-nav [data-testid="nav-rental-categories-mobile"] svg {
+  stroke: var(--gold-text);
+  filter: none !important;
+}
 
 /* ── Scale ────────────────────────────────────────────────────────────
    Tzvi recorded the preview with the browser at 80% and asked for that
@@ -459,27 +471,21 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
 .hv2-hero--film .hv2-hero-foot p { text-align: start; }
 .hv2-hero--film .hv2-hero-ctas { justify-content: flex-start; }
 @media (max-width: 1000px) {
-  /* Up to 1000px the panel is the top of the hero and the scene runs full
-     width below it: a side panel left too narrow a strip for the scene
-     (Tzvi's own window is about 1000px wide). The copy is a fixed pixel
-     height (it ends at about 420px, the add-your-business link last), so
-     the panel is measured in pixels and the hero takes the full screen.
-     STACK_MAX and PANEL_TOP_PX in BlocksHero.jsx are the same numbers. */
-  .hv2-hero--film { height: 100svh; min-height: 640px; --copy-h: 470px; }
+  /* Up to 1000px the copy sits at the top of a full-screen hero, with the
+     video behind the whole of it. */
+  .hv2-hero--film { height: 100svh; min-height: 640px; }
   .hv2-hero--film .hv2-hero-scrim,
   [dir="rtl"] .hv2-hero--film .hv2-hero-scrim {
-    background: linear-gradient(180deg, #fff 0, #fff var(--copy-h), rgba(255, 255, 255, .86) calc(var(--copy-h) + 18px), rgba(255, 255, 255, 0) calc(var(--copy-h) + 44px), rgba(255, 255, 255, 0) 92%, rgba(255, 255, 255, .8) 100%);
+    /* The video runs behind the copy here too (Tzvi, 19 Sep 2026). The text
+       spans the full width, so the wash runs top to bottom, not sideways:
+       82% white behind the copy (which ends near 55% of the screen on a
+       phone), thinning below it so the cubes read in full colour. */
+    background: linear-gradient(180deg,
+      rgba(255, 255, 255, .82) 0, rgba(255, 255, 255, .82) 55%,
+      rgba(255, 255, 255, .2) 75%, rgba(255, 255, 255, .2) 90%,
+      rgba(255, 255, 255, .7) 100%);
   }
   .hv2-hero--film .hv2-hero-inner { justify-content: flex-start; gap: 22px; }
-}
-@media (max-width: 760px) {
-  /* 432px until 11 Sep, which the three-line headline outgrew: the copy ran
-     to 452px and the film's top edge is pinned to this number, so the "Add
-     your business" link sat 20px inside the film. It only looked right
-     because that strip of the loop happens to be white — luck, not design.
-     Measured at 375 in both languages; 768 was never close, it has 54px of
-     clearance in English and 103px in Hebrew. */
-  .hv2-hero--film { --copy-h: 472px; }
 }
 
 /* ── The seamless loop (LoopHero) ─────────────────────────────────────────
@@ -525,22 +531,10 @@ body.hv2-light-nav .glass-dot { background: var(--gold-lg); }
 }
 
 @media (max-width: 1000px) {
-  /* Stacked: the film starts BELOW the copy band rather than spanning the
-     whole hero behind it. Filling the hero here meant fitting a 16:9 frame
-     into a box taller than it is wide, and object-fit: cover then crops the
-     width away — the subject ended up outside the frame and what showed was a
-     vertical slice of floor. Confined to the band it actually occupies, the
-     box is wider than 16:9 again and the crop is a mild vertical one.
-
-     `height: auto` is not optional: .hv2-blocks sets height:100%, so moving
-     the top edge alone pushes the box down instead of shrinking it, and the
-     film overflows the hero's `overflow: clip`.
-
-     Kept stacked on 19 Sep 2026 when the desktop went full-bleed: behind the
-     text on a phone, cover would crop the 16:9 render to a vertical slice
-     and an 82% wash over that shows almost nothing. Below the copy it is
-     shown whole, edge to edge. */
-  .hv2-hero--film .hv2-loop { inset-block-start: var(--copy-h); height: auto; }
+  /* Full-bleed behind the copy, like the desktop (Tzvi, 19 Sep 2026). Until
+     then the film started below the copy band, because a 16:9 render in a
+     portrait box crops to a vertical slice; he preferred the cubes behind
+     the words. Centred, so the slice is the middle of the render. */
   .hv2-loop-video,
   .hv2-loop-poster { object-position: center; background-position: center; }
 }
