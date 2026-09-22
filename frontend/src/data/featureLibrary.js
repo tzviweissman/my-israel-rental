@@ -57,6 +57,22 @@ export const FEATURES = [
     built: 'backend/routes/marketplace/orders.py',
   },
   {
+    // docs/business-network-spec.md, Phase 1.
+    slug: 'work-with-other-businesses',
+    icon: 'Network',
+    audiences: ['business'],
+    cta: '/dashboard?tab=network',
+    built: 'backend/routes/marketplace/connections.py',
+  },
+  {
+    // The WHEN -> DO rules, price alerts and cheaper-option tips.
+    slug: 'hand-off-the-repeat-work',
+    icon: 'Workflow',
+    audiences: ['business', 'host'],
+    cta: '/dashboard?tab=network&view=automations',
+    built: 'backend/routes/marketplace/automations.py',
+  },
+  {
     slug: 'put-it-on-a-flyer',
     icon: 'QrCode',
     audiences: ['business', 'host'],
