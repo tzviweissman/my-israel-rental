@@ -1426,11 +1426,21 @@ const en = {
         swimmingPoolIndoorOrOutdoor: 'Swimming pool (indoor or outdoor)',
         onSiteParkingGarageOrLot: 'On-site parking (garage or lot)'
       },
+      // components/dashboard/EmailSwitches.jsx (Settings)
+      emailSwitches: {
+        title: 'Emails about your listings',
+        insightsTitle: 'Monday summary',
+        insightsHint: 'How your listings did last week: visitors, messages, saves and reviews. Nothing is sent in a quiet week.',
+        requestsTitle: 'Matching requests',
+        requestsHint: 'An email when someone posts on the requests board looking for what you offer.',
+        saved: 'Saved',
+        failed: 'Could not save. Try again.',
+      },
       // pages/InsightsEmailsOff.jsx, the weekly email's opt-out link
       insightsOff: {
         loading: 'One moment',
         doneTitle: 'Done. No more weekly emails',
-        doneBody: 'We will not send you the Monday summary again. Your numbers are still on your dashboard any time.',
+        doneBody: 'We will not send you the Monday summary again. You can turn it back on in Settings, and your numbers are on your dashboard any time.',
         errorTitle: 'That link did not work',
         errorBody: 'It may have expired. Your dashboard shows the same numbers.',
         dashboard: 'Open your dashboard',

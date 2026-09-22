@@ -55,7 +55,7 @@ export default function InsightsEmailsOff() {
             </h1>
             <p className="text-sm mb-6" style={{ color: 'var(--brand-muted)' }}>
               {status === 'success'
-                ? t('insightsOff.doneBody', 'We will not send you the Monday summary again. Your numbers are still on your dashboard any time.')
+                ? t('insightsOff.doneBody', 'We will not send you the Monday summary again. You can turn it back on in Settings, and your numbers are on your dashboard any time.')
                 : t('insightsOff.errorBody', 'It may have expired. Your dashboard shows the same numbers.')}
             </p>
             <button type="button" onClick={() => navigate('/dashboard?tab=overview')} className="btn-primary inline-flex items-center gap-2 min-h-[44px] px-5 rounded-full">

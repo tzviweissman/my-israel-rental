@@ -114,6 +114,39 @@ async def _apply_snooze(user_id: str, category: str) -> dict[str, Any]:
     return {"category": category, "until": until_iso}
 
 
+# On/off switches for the two emails that have a "stop these emails" link,
+# so turning one off is not a one-way door. Stored as the same `*_off`
+# flags those links set (requests.py, routes/weekly_insights.py).
+EMAIL_SWITCHES = {"requests_emails": "requests_emails_off", "insights_emails": "insights_emails_off"}
+
+
+class EmailSwitchesIn(BaseModel):
+    requests_emails: bool | None = None
+    insights_emails: bool | None = None
+
+
+async def _switches(user_id: str) -> dict[str, bool]:
+    doc = await db.job_notification_preferences.find_one({"user_id": user_id}) or {}
+    return {k: not doc.get(flag) for k, flag in EMAIL_SWITCHES.items()}
+
+
+@router.get("/emails")
+async def get_email_switches(user=Depends(verify_token)):
+    return await _switches(user["user_id"])
+
+
+@router.patch("/emails")
+async def patch_email_switches(payload: EmailSwitchesIn, user=Depends(verify_token)):
+    changes = {EMAIL_SWITCHES[k]: not v for k, v in payload.model_dump().items() if v is not None}
+    if changes:
+        await db.job_notification_preferences.update_one(
+            {"user_id": user["user_id"]},
+            {"$set": {**changes, "updated_at": datetime.now(UTC).isoformat()}},
+            upsert=True,
+        )
+    return await _switches(user["user_id"])
+
+
 @router.post("/snooze")
 async def snooze(payload: SnoozeIn, user=Depends(verify_token)):
     return await _apply_snooze(user["user_id"], payload.category)
