@@ -31,15 +31,23 @@ const NavCategoryItem = ({ type, Icon, label, active, scrolled, iconHidden = fal
       // aria-current is what says it to everyone else - the desktop pill
       // row already sets it, and these two rows are the same navigation.
       aria-current={active ? 'page' : undefined}
-      onClick={() => window.scrollTo(0, 0)}
-      onMouseEnter={() => setHover(true)}
-      onMouseLeave={() => setHover(false)}
-      className={`${iconHidden ? 'flex-row gap-2 px-3 py-1' : 'flex-col px-3 pb-1'} flex items-center transition-all`}
+      onClick={() => { setHover(false); window.scrollTo(0, 0); }}
+      // Hover is for a mouse only. A tap on a phone fires mouseenter and
+      // never the matching mouseleave, so the tapped item kept its hover
+      // underline after moving on to another (Tzvi, 22 Sep 2026: tap
+      // Businesses, then Stays, and the line stays under Businesses).
+      onPointerEnter={(e) => { if (e.pointerType === 'mouse') setHover(true); }}
+      onPointerLeave={() => setHover(false)}
+      // transition-opacity, not transition-all: animating a border whose
+      // colour is var(--gold) got stuck, so after tapping Stays the line
+      // stayed under Businesses until something else repainted it (Tzvi,
+      // 22 Sep 2026; inline style right, computed colour still the old one).
+      className={`${iconHidden ? 'flex-row gap-2 px-3 py-1' : 'flex-col px-3 pb-1'} flex items-center transition-opacity`}
       style={{
         borderBottom: active
           ? '2px solid var(--gold)'
           : hover
-            ? '2px solid rgba(201, 162, 39,0.6)'
+            ? '2px solid rgb(var(--gold-rgb) / 0.6)'
             : '2px solid transparent',
         opacity: active ? 1 : 0.95,
       }}

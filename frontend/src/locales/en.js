@@ -54,8 +54,8 @@ const en = {
       // Quick edit for a live listing — the answer to "I spotted a typo"
       // and "that's the wrong photo". Deliberately not the wizard.
       faqEditor: {
-        title: 'Questions customers ask',
-        hint: 'Optional. Answer the things people message you about anyway: turnaround, what is included, how to pay. Shown on your listing under "FAQs".',
+        title: 'Questions customers ask (optional)',
+        hint: 'You can skip this. Answer the things people message you about anyway: turnaround, what is included, how to pay. Shown on your listing under "FAQs".',
         question: 'Question',
         answer: 'Answer',
         qPh: 'e.g. How far in advance should I book?',
@@ -203,6 +203,9 @@ const en = {
         defaultBadge: 'default',
         pickupWindows: 'Pickup times',
         deliveryWindows: 'Delivery times',
+        deliveryTitle: 'Delivery',
+        deliveryOn: 'I deliver',
+        deliveryOnHint: 'Off: customers can only choose pickup. On: they can choose delivery too.',
         windowAdd: 'Add a window',
         windowsHint: 'No windows on a day means customers pick the day and you confirm the time.',
         feesTitle: 'Delivery fee and minimum',
@@ -342,7 +345,10 @@ const en = {
         unavailableTitle: 'This store is not taking orders right now',
         what: 'What would you like?',
         noProducts: 'This store has not listed products yet - write what you want below.',
-        extraPh: 'Anything else? e.g. 1 gluten-free challah',
+        extraLabel: 'Something not on the list?',
+        extraPh: 'e.g. 1 gluten-free challah',
+        pickupOnly: 'Pickup only',
+        pickDay: 'Pick a day',
         less: 'Less',
         more: 'More',
         city: 'City',

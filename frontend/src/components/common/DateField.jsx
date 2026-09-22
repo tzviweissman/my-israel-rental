@@ -47,6 +47,9 @@ export default function DateField({
   onChange,
   min,
   max,
+  // (date: Date) => true for a day that cannot be picked (a store's closed
+  // day, say), on top of min and max.
+  isDisabled,
   placeholder,
   disabled = false,
   clearable = true,
@@ -91,6 +94,7 @@ export default function DateField({
   const disabledDays = [];
   if (minDate) disabledDays.push({ before: minDate });
   if (maxDate) disabledDays.push({ after: maxDate });
+  if (isDisabled) disabledDays.push(isDisabled);
 
   return (
     <div ref={wrapRef} className="relative">
