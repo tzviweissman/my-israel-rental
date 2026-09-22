@@ -23,6 +23,7 @@ import BusinessPageEditor from './BusinessPageEditor';
 import BusinessCompleteness from './BusinessCompleteness';
 import BlockTimePanel from './BlockTimePanel';
 import MyGigsTab from './MyGigsTab';
+import LookingForYou from './LookingForYou';
 import ShareListingsPanel from './ShareListingsPanel';
 import { businessPublicUrl } from '../../utils/businessHost';
 
@@ -212,6 +213,7 @@ export default function MyBusinessesTab({ API, token }) {
       {/* S3a — blocked time is per PERSON, not per business, so it sits
           above the list rather than inside one of the cards. */}
       <BlockTimePanel API={API} token={token} />
+      <LookingForYou API={API} token={token} className="mb-5" />
 
       <div className="flex items-center justify-between gap-3 mb-1">
         <h2 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>

@@ -1386,6 +1386,11 @@ const he = {
         swimmingPoolIndoorOrOutdoor: 'בריכת שחייה (מקורה או פתוחה)',
         onSiteParkingGarageOrLot: 'חניה בבניין (חניון או מגרש)'
       },
+      lookingForYou: {
+        title: 'אנשים שמחפשים את מה שאתם מציעים',
+        board: 'לכל הבקשות',
+        body: 'בקשות פתוחות שמתאימות לרישומים שלכם. עונים בצ׳אט, ואף אחד לא רואה את המספר שלכם.',
+      },
       overview: {
         waiting: 'מחכה לתשובה שלכם',
         waitingNone: 'אין מה לענות עליו',

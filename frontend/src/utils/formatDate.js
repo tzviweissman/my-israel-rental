@@ -23,7 +23,14 @@ const LOCALE = { he: 'he-IL', en: 'en-GB' };
 // singleton — several render sites (the board card) receive `t` as a prop
 // and have no i18n instance of their own to pass.
 export function formatDate(iso, lang) {
-  const d = parseISODate(iso);
+  let d = parseISODate(iso);
+  // A full timestamp ("2026-09-19T16:08:33+00:00", what created_at holds):
+  // the Israel calendar day it fell on. Without this the overview's recent
+  // activity printed the raw timestamp.
+  if (!d && typeof iso === 'string' && iso.length > 10) {
+    const at = new Date(iso);
+    if (!Number.isNaN(at.getTime())) d = parseISODate(at.toLocaleDateString('sv-SE', { timeZone: 'Asia/Jerusalem' }));
+  }
   // Not parseable → hand back whatever it was. Showing the raw value is
   // wrong-looking but honest; showing nothing hides that a date exists.
   if (!d) return iso || '';

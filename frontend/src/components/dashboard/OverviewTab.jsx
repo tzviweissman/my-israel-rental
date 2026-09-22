@@ -35,6 +35,7 @@ import { useTranslation } from 'react-i18next';
 import { MessageCircle, Eye, QrCode, CalendarCheck, Bell, ArrowRight } from 'lucide-react';
 
 import ScanChart from '../common/ScanChart';
+import LookingForYou from './LookingForYou';
 import formatDate from '../../utils/formatDate';
 
 function StatCard({ Icon, label, value, sub, chart, testid, onClick, cta }) {
@@ -198,6 +199,8 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
           cta={t('overview.share', 'Share')}
         />
       </div>
+
+      <LookingForYou API={API} token={token} className="mb-6" />
 
       {/* ── activity on the left, needs-attention on the right ────── */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

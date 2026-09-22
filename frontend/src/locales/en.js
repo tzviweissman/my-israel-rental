@@ -1426,6 +1426,12 @@ const en = {
         swimmingPoolIndoorOrOutdoor: 'Swimming pool (indoor or outdoor)',
         onSiteParkingGarageOrLot: 'On-site parking (garage or lot)'
       },
+      // components/dashboard/LookingForYou.jsx
+      lookingForYou: {
+        title: 'People looking for what you offer',
+        board: 'See the board',
+        body: 'Open posts that match your listings. Reply in chat; nobody sees your number.',
+      },
       // The dashboard's front page (components/dashboard/OverviewTab.jsx).
       overview: {
         waiting: 'Waiting on you',
