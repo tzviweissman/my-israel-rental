@@ -106,17 +106,6 @@ export default function ShowMeAroundOffer({ moment, eligible = true, inline = fa
           {cta}
         </Link>
       )}
-      {/* The tour shows WHERE things are; the guide says WHY they are
-          worth setting up. Offered side by side from the first login. */}
-      <span className="text-xs" style={{ color: 'var(--brand-muted)' }} aria-hidden="true">·</span>
-      <Link
-        to="/getting-started"
-        className="text-xs font-semibold hover:underline"
-        style={{ color: 'var(--brand-primary)' }}
-        data-testid={`show-around-${moment}-guide`}
-      >
-        {t('help.growthGuide', 'How this grows your business')}
-      </Link>
       <button
         type="button"
         onClick={dismiss}

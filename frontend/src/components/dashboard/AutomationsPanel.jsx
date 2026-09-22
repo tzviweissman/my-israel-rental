@@ -34,7 +34,7 @@ const WEEK = [6, 0, 1, 2, 3, 4, 5];
 const EMPTY = {
   partner_business_id: '',
   name: '',
-  trigger: { type: 'order.status_changed', status: 'ready', schedule: { weekdays: [6], time: '08:00' }, property_id: '' },
+  trigger: { type: 'order.status_changed', status: 'ready', schedule: { every: 'week', weekdays: [6], day: 1, month: 1, time: '08:00' }, property_id: '' },
   action: { type: 'send_order', text: '' },
   template: { copy_from_source: true, items: '', notes: '', fulfilment: 'pickup', address: '', total: '' },
 };
@@ -60,6 +60,17 @@ const RECIPES = [
     form: { trigger: { type: 'booking.confirmed' }, action: { type: 'send_order', text: '' }, template: { copy_from_source: false, fulfilment: 'delivery' }, itemsKey: 'cleaningItems' } },
   { key: 'checkInDetails', Icon: KeyRound, forHosts: true,
     form: { trigger: { type: 'booking.confirmed' }, action: { type: 'message_customer' }, textKey: 'checkInDetailsText' } },
+  // Upkeep on a calendar, for any kind of rental (Tzvi, 22 Sep 2026: "a
+  // long term apartment can have a yearly repainting or a yearly plumber
+  // check"). Suggestions only: every word, date and partner is theirs.
+  { key: 'yearlyPlumber', Icon: CalendarClock, needsPartner: true, forHosts: true,
+    form: { trigger: { type: 'schedule', schedule: { every: 'year', month: 3, day: 1, time: '09:00', weekdays: [] } }, action: { type: 'send_order', text: '' }, template: { copy_from_source: false, fulfilment: 'delivery' }, itemsKey: 'plumberItems' } },
+  { key: 'yearlyPaint', Icon: CalendarClock, needsPartner: true, forHosts: true,
+    form: { trigger: { type: 'schedule', schedule: { every: 'year', month: 8, day: 1, time: '09:00', weekdays: [] } }, action: { type: 'send_order', text: '' }, template: { copy_from_source: false, fulfilment: 'delivery' }, itemsKey: 'paintItems' } },
+  { key: 'monthlyGarden', Icon: CalendarClock, needsPartner: true, forHosts: true,
+    form: { trigger: { type: 'schedule', schedule: { every: 'month', day: 1, time: '09:00', weekdays: [] } }, action: { type: 'send_order', text: '' }, template: { copy_from_source: false, fulfilment: 'delivery' }, itemsKey: 'gardenItems' } },
+  { key: 'yearlyReminder', Icon: Bell, forHosts: true,
+    form: { trigger: { type: 'schedule', schedule: { every: 'year', month: 10, day: 1, time: '09:00', weekdays: [] } }, action: { type: 'notify_me', text: '' }, textKey: 'yearlyReminderText' } },
 ];
 
 export default function AutomationsPanel({ API, token, bizId, partners, listings = [] }) {
@@ -110,6 +121,9 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
     ? t('automations.atListing', 'at {{title}}', { title: listings.find((l) => l.id === id)?.title || t('automations.aListing', 'one of my listings') })
     : t('automations.anyListing', 'at any of my listings'));
 
+  const monthName = (m) => new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { month: 'long' }).format(new Date(2026, m - 1, 1));
+  const monthDay = (m, d) => new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'long' }).format(new Date(2026, m - 1, d));
+
   const whenLine = (trigger) => {
     const s = trigger?.schedule;
     return {
@@ -120,7 +134,11 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
       'lead.received': t('automations.whenLead', 'When a customer taps to message me'),
       'booking.confirmed': t('automations.whenStay', 'When guests book {{where}}', { where: listingName(trigger?.property_id) }),
       'booking.cancelled': t('automations.whenStayCancelled', 'When guests cancel {{where}}', { where: listingName(trigger?.property_id) }),
-      schedule: s ? t('automations.whenSchedule', 'Every {{days}} at {{time}}', { days: (s.weekdays || []).map(dayName).join(', '), time: s.time }) : '',
+      schedule: !s ? '' : s.every === 'month'
+        ? t('automations.whenMonthly', 'Every month on the {{day}}, at {{time}}', { day: s.day, time: s.time })
+        : s.every === 'year'
+          ? t('automations.whenYearly', 'Every year on {{date}}, at {{time}}', { date: monthDay(s.month, s.day), time: s.time })
+          : t('automations.whenSchedule', 'Every {{days}} at {{time}}', { days: (s.weekdays || []).map(dayName).join(', '), time: s.time }),
     }[trigger?.type] || '';
   };
 
@@ -144,7 +162,7 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
     setForm({
       ...base,
       name: t(`automations.recipe_${recipe.key}`, recipe.key),
-      trigger: { ...base.trigger, ...f.trigger, schedule: f.trigger.schedule || base.trigger.schedule },
+      trigger: { ...base.trigger, ...f.trigger, schedule: { ...base.trigger.schedule, ...(f.trigger.schedule || {}) } },
       action: { type: f.action.type, text: f.textKey ? t(`automations.${f.textKey}`, '') : (f.action.text || '') },
       template: { ...base.template, ...(f.template || {}), ...(f.itemsKey ? { items: t(`automations.${f.itemsKey}`, '') } : {}) },
     });
@@ -159,12 +177,12 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
       const copy = tt === 'order.status_changed' && f.template.copy_from_source;
       if (!f.partner_business_id) return toast.error(t('automations.pickPartner', 'Pick a partner business'));
       if (!copy && !f.template.items.trim()) return toast.error(t('automations.sayWhat', 'Say what to order'));
-      if (!copy && f.template.fulfilment === 'delivery' && !f.template.address.trim() && !tt.startsWith('booking.')) {
+      if (!copy && f.template.fulfilment === 'delivery' && !f.template.address.trim() && !tt.startsWith('booking.') && !(tt === 'schedule' && f.trigger.property_id)) {
         return toast.error(t('automations.needAddress', 'A delivery needs an address'));
       }
     }
     if (at === 'message_customer' && !f.action.text.trim()) return toast.error(t('automations.writeIt', 'Write the message'));
-    if (tt === 'schedule' && !f.trigger.schedule.weekdays.length) return toast.error(t('automations.pickDays', 'Pick at least one day'));
+    if (tt === 'schedule' && (f.trigger.schedule.every || 'week') === 'week' && !f.trigger.schedule.weekdays.length) return toast.error(t('automations.pickDays', 'Pick at least one day'));
     setBusy('new');
     try {
       const copy = tt === 'order.status_changed' && f.template.copy_from_source;
@@ -172,7 +190,15 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
         partner_business_id: at === 'send_order' ? f.partner_business_id : null,
         name: f.name.trim(),
         trigger: tt === 'schedule'
-          ? { type: tt, schedule: f.trigger.schedule }
+          ? {
+            type: tt,
+            property_id: f.trigger.property_id || null,
+            schedule: (f.trigger.schedule.every || 'week') === 'week'
+              ? { every: 'week', weekdays: f.trigger.schedule.weekdays, time: f.trigger.schedule.time }
+              : { every: f.trigger.schedule.every, day: f.trigger.schedule.day || 1,
+                ...(f.trigger.schedule.every === 'year' ? { month: f.trigger.schedule.month || 1 } : {}),
+                time: f.trigger.schedule.time },
+          }
           : { type: tt, status: tt === 'order.status_changed' ? f.trigger.status : null, property_id: tt.startsWith('booking.') ? (f.trigger.property_id || null) : null },
         action: { type: at, text: f.action.text },
         template: at !== 'send_order' ? null : copy
@@ -369,7 +395,7 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                     <option value="lead.received">{t('automations.whenLead', 'When a customer taps to message me')}</option>
                     {isHost && <option value="booking.confirmed">{t('automations.whenStayOption', 'When guests book one of my listings')}</option>}
                     {isHost && <option value="booking.cancelled">{t('automations.whenStayCancelledOption', 'When guests cancel a stay')}</option>}
-                    <option value="schedule">{t('automations.whenWeekly', 'Every week, on days I pick')}</option>
+                    <option value="schedule">{t('automations.whenOnSchedule', 'On a schedule I set')}</option>
                     <option value="manual">{t('automations.whenManual', 'When you tap Send')}</option>
                   </select>
                 </label>
@@ -386,6 +412,42 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
 
                 {form.trigger.type === 'schedule' && (
                   <div className="text-sm sm:col-span-2 flex flex-wrap items-end gap-3" data-testid="automation-schedule">
+                    <label>
+                      <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.howOften', 'How often')}</span>
+                      <select className="rounded-lg border px-3 py-2 text-sm" style={{ borderColor: 'var(--brand-border)' }}
+                        value={form.trigger.schedule.every || 'week'}
+                        onChange={(e) => setForm({ ...form, trigger: { ...form.trigger, schedule: { ...form.trigger.schedule, every: e.target.value } } })}
+                        data-testid="automation-every">
+                        <option value="week">{t('automations.everyWeek', 'Every week')}</option>
+                        <option value="month">{t('automations.everyMonth', 'Every month')}</option>
+                        <option value="year">{t('automations.everyYear', 'Every year')}</option>
+                      </select>
+                    </label>
+                    {(form.trigger.schedule.every || 'week') !== 'week' && (
+                      <>
+                        {form.trigger.schedule.every === 'year' && (
+                          <label>
+                            <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.inMonth', 'Month')}</span>
+                            <select className="rounded-lg border px-3 py-2 text-sm" style={{ borderColor: 'var(--brand-border)' }}
+                              value={form.trigger.schedule.month || 1}
+                              onChange={(e) => setForm({ ...form, trigger: { ...form.trigger, schedule: { ...form.trigger.schedule, month: Number(e.target.value) } } })}
+                              data-testid="automation-month">
+                              {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => <option key={m} value={m}>{monthName(m)}</option>)}
+                            </select>
+                          </label>
+                        )}
+                        <label>
+                          <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.onDay', 'Day')}</span>
+                          <select className="rounded-lg border px-3 py-2 text-sm" style={{ borderColor: 'var(--brand-border)' }}
+                            value={form.trigger.schedule.day || 1}
+                            onChange={(e) => setForm({ ...form, trigger: { ...form.trigger, schedule: { ...form.trigger.schedule, day: Number(e.target.value) } } })}
+                            data-testid="automation-day">
+                            {Array.from({ length: 28 }, (_, i) => i + 1).map((d) => <option key={d} value={d}>{d}</option>)}
+                          </select>
+                        </label>
+                      </>
+                    )}
+                    {(form.trigger.schedule.every || 'week') === 'week' && (
                     <div>
                       <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.onDays', 'On')}</span>
                       <div className="flex flex-wrap gap-1">
@@ -402,6 +464,7 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                         })}
                       </div>
                     </div>
+                    )}
                     <label>
                       <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.atTime', 'At')}</span>
                       <input type="time" className="rounded-lg border px-3 py-2 text-sm" style={{ borderColor: 'var(--brand-border)' }} value={form.trigger.schedule.time}
@@ -410,12 +473,14 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                   </div>
                 )}
 
-                {form.trigger.type.startsWith('booking.') && (
+                {(form.trigger.type.startsWith('booking.') || (form.trigger.type === 'schedule' && isHost)) && (
                   <label className="text-sm sm:col-span-2">
                     <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.whichListing', 'Which listing')}</span>
                     <select className={field} style={{ borderColor: 'var(--brand-border)' }} value={form.trigger.property_id || ''}
                       onChange={(e) => setForm({ ...form, trigger: { ...form.trigger, property_id: e.target.value } })} data-testid="automation-listing">
-                      <option value="">{t('automations.allListings', 'All my listings')}</option>
+                      <option value="">{form.trigger.type === 'schedule'
+                        ? t('automations.noListing', 'Not for one listing')
+                        : t('automations.allListings', 'All my listings')}</option>
                       {listings.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
                     </select>
                   </label>
@@ -458,7 +523,7 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                           <label className="text-sm">
                             <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.address', 'Address')}</span>
                             <input className={field} style={{ borderColor: 'var(--brand-border)' }} dir="auto" value={form.template.address}
-                              placeholder={form.trigger.type.startsWith('booking.') ? t('automations.addressFromListing', "Leave empty: the listing's address is used") : ''}
+                              placeholder={(form.trigger.type.startsWith('booking.') || form.trigger.property_id) ? t('automations.addressFromListing', "Leave empty: the listing's address is used") : ''}
                               onChange={(e) => setForm({ ...form, template: { ...form.template, address: e.target.value } })} />
                           </label>
                         )}
@@ -508,11 +573,11 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
           ) : (
             <>
               <button type="button" className={`${btn} mb-4`} style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
-                onClick={() => startForm(null)} data-testid="automation-new">
+                onClick={() => startForm(null)} data-testid="automation-new" data-tour="automation-new">
                 <Plus size={13} aria-hidden="true" /> {t('automations.new', 'New automation')}
               </button>
               <h3 className="text-xs font-semibold uppercase mb-2" style={{ color: 'var(--brand-muted)' }}>{t('automations.starters', 'Or start from one of these')}</h3>
-              <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 mb-5" data-testid="automation-recipes">
+              <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 mb-5" data-testid="automation-recipes" data-tour="automation-recipes">
                 {RECIPES.filter((r) => !r.forHosts || isHost).map((r) => {
                   const off = r.needsPartner && !canSendOrder;
                   return (

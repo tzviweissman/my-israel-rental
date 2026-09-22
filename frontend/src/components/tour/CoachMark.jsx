@@ -30,6 +30,7 @@ const reducedMotion = () => typeof window !== 'undefined'
 
 export default function CoachMark({
   targetEl, title, body, index, total, onNext, onBack, onExit, isFirst, isLast,
+  doItLabel = null, onDoIt,
 }) {
   const { t } = useTranslation();
   const tipRef = useRef(null);
@@ -194,6 +195,20 @@ export default function CoachMark({
           data-testid="tour-body">
           {body}
         </p>
+
+        {/* "Do it now" - the walk steps aside, the form opens, and a bar at
+            the bottom of the screen brings the walk back (TourProvider). */}
+        {doItLabel && (
+          <button
+            type="button"
+            onClick={onDoIt}
+            className="mt-3 w-full px-4 py-2 rounded-lg text-sm font-semibold"
+            style={{ background: 'var(--action, #000)', color: 'var(--action-ink, #fff)' }}
+            data-testid="tour-do-it"
+          >
+            {doItLabel}
+          </button>
+        )}
 
         <div className="flex items-center justify-between gap-3 mt-4">
           {/* A count, not a bar. "3 of 8" sets an expectation of how much

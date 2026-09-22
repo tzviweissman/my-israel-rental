@@ -155,7 +155,7 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
   return (
     <div data-testid="overview-tab">
       {/* ── the four cards ─────────────────────────────────────────── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6" data-tour="overview-stats">
         <StatCard
           Icon={CalendarCheck}
           label={t('overview.waiting', 'Waiting on you')}

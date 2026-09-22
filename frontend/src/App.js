@@ -24,6 +24,7 @@ import Navigation from './components/Navigation';
 import ImpersonationBanner from './components/ImpersonationBanner';
 import WhatsAppButton from './components/WhatsAppButton';
 import SiteVisitTracker from './components/SiteVisitTracker';
+import TourProvider from './components/tour/TourProvider';
 import AccessibilityButton from './components/AccessibilityButton';
 import ThemePreviewOverride from './components/ThemePreviewOverride';
 import { installStaleBuildInterceptor } from './utils/staleBuildInterceptor';
@@ -340,6 +341,10 @@ function App() {
   return (
     <AuthContext.Provider value={{ user, token, login, logout, impersonate, endImpersonation }}>
       <BrowserRouter>
+        {/* The walk (components/tour) - app-wide, because it visits pages
+            outside the dashboard and its "Continue" bar follows people to
+            whatever form "Do it now" opened. */}
+        <TourProvider>
         <>
             {/* Preview-environment noindex, emitted ONCE for the whole app.
                 It used to live only in PageMeta, which 17 pages never
@@ -523,6 +528,7 @@ function App() {
           </ErrorBoundary>
         </div>
           </>
+        </TourProvider>
       </BrowserRouter>
     </AuthContext.Provider>
   );

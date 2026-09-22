@@ -76,9 +76,19 @@ MAX_RULES = 50
 # ---------------------------------------------------------------------------
 
 class ScheduleIn(BaseModel):
-    """Every week on these days at this time, Asia/Jerusalem. Weekdays are
-    Python's: 0 is Monday, 6 is Sunday."""
-    weekdays: list[int] = Field(min_length=1, max_length=7)
+    """When a schedule fires, Asia/Jerusalem.
+
+    every="week":  on `weekdays` (Python's: 0 is Monday, 6 is Sunday);
+    every="month": on `day` of every month;
+    every="year":  on `day` of `month` every year.
+    Tzvi (22 Sep 2026): a host's upkeep is not only weekly cleaning - a
+    yearly repaint, a yearly plumber check. Days stop at 28 so "every
+    month on the 31st" never silently skips February.
+    """
+    every: Literal["week", "month", "year"] = "week"
+    weekdays: list[int] = Field(default_factory=list, max_length=7)
+    day: Optional[int] = Field(None, ge=1, le=28)
+    month: Optional[int] = Field(None, ge=1, le=12)
     time: str = Field(pattern=r"^([01]\d|2[0-3]):[0-5]\d$")
 
     @field_validator("weekdays")
@@ -87,6 +97,16 @@ class ScheduleIn(BaseModel):
         if any(d < 0 or d > 6 for d in v):
             raise ValueError("weekdays are 0 (Monday) to 6 (Sunday)")
         return sorted(set(v))
+
+    @model_validator(mode="after")
+    def _enough(self):
+        if self.every == "week" and not self.weekdays:
+            raise ValueError("Pick at least one day")
+        if self.every in ("month", "year") and not self.day:
+            raise ValueError("Pick the day of the month")
+        if self.every == "year" and not self.month:
+            raise ValueError("Pick the month")
+        return self
 
 
 class TriggerIn(BaseModel):
@@ -112,7 +132,9 @@ class TriggerIn(BaseModel):
                 raise ValueError("Pick the days and the time")
         else:
             self.schedule = None
-        if not self.type.startswith("booking."):
+        # A listing gives a schedule its address too: "every March, the
+        # plumber checks Flat 3" sends the job to Flat 3's door.
+        if not (self.type.startswith("booking.") or self.type == "schedule"):
             self.property_id = None
         return self
 
@@ -170,7 +192,7 @@ class AutomationIn(BaseModel):
                 raise ValueError("Say what to order")
             # A guest booking brings its own address: the listing's.
             if (not tpl.copy_from_source and tpl.fulfilment == "delivery" and not tpl.address
-                    and not t.startswith("booking.")):
+                    and not t.startswith("booking.") and not self.trigger.property_id):
                 raise ValueError("A delivery needs an address")
         else:
             self.partner_business_id = None
@@ -264,14 +286,27 @@ def next_run(schedule: dict[str, Any], after: Optional[datetime] = None) -> str:
     """The next moment this schedule fires, as UTC ISO. Computed in
     Asia/Jerusalem so "Sunday 08:00" stays Sunday 08:00 across the clock
     change; stored in UTC so the loop compares plain strings."""
-    now = after or datetime.now(_IL_TZ)
+    now = (after or datetime.now(_IL_TZ)).astimezone(_IL_TZ)
     hh, mm = (int(x) for x in schedule["time"].split(":"))
-    days = set(schedule["weekdays"])
+    every = schedule.get("every") or "week"
+    if every == "month":
+        y, m = now.year, now.month
+        for _ in range(3):
+            cand = datetime(y, m, schedule["day"], hh, mm, tzinfo=_IL_TZ)
+            if cand > now:
+                return cand.astimezone(UTC).isoformat()
+            y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    if every == "year":
+        for y in (now.year, now.year + 1):
+            cand = datetime(y, schedule["month"], schedule["day"], hh, mm, tzinfo=_IL_TZ)
+            if cand > now:
+                return cand.astimezone(UTC).isoformat()
+    days = set(schedule.get("weekdays") or [])
     for d in range(8):
         cand = (now + timedelta(days=d)).replace(hour=hh, minute=mm, second=0, microsecond=0)
         if cand.weekday() in days and cand > now:
             return cand.astimezone(UTC).isoformat()
-    raise ValueError("no weekday in schedule")   # the model forbids an empty list
+    raise ValueError("schedule never fires")   # the model forbids this
 
 
 DID_SOMETHING = ("created", "auto_accepted", "notified", "messaged")
@@ -392,6 +427,18 @@ async def _create_partner_order(rule: dict[str, Any], *, source: Optional[dict[s
     tpl = rule.get("template") or {}
     if ctx and ctx.get("rental"):
         fields = await _rental_fields(rule, me, ctx)
+    elif ctx and ctx.get("property") and not tpl.get("copy_from_source"):
+        prop = ctx["property"]
+        fields = {
+            "customer_name": me.get("name") or "Partner",
+            **om._phone_fields(None),
+            "items": tpl.get("items"),
+            "total": tpl.get("total"),
+            "needed_by": needed_by or _default_needed_by(),
+            "fulfilment": "delivery",
+            "address": tpl.get("address") or prop.get("address") or prop.get("area"),
+            "notes": "\n".join(x for x in (prop.get("title"), tpl.get("notes")) if x),
+        }
     elif tpl.get("copy_from_source") and source:
         fields = {
             "customer_name": source.get("customer_name"),
@@ -667,6 +714,15 @@ def booking_changed(rental: dict[str, Any], status: str) -> None:
     task.add_done_callback(_background.discard)
 
 
+async def _schedule_ctx(rule: dict[str, Any]) -> dict[str, Any]:
+    """A schedule tied to one listing carries that listing, for its address."""
+    pid = (rule.get("trigger") or {}).get("property_id")
+    if not pid:
+        return {}
+    prop = await db.properties.find_one({"id": pid}, {"_id": 0})
+    return {"property": prop} if prop else {}
+
+
 async def run_due_schedules() -> int:
     """Fire every schedule whose time has come. The next time is written
     with a compare-and-swap on the old one first, so two replicas waking
@@ -686,7 +742,7 @@ async def run_due_schedules() -> int:
                 continue
             ev = {"type": "schedule", "due": rule["next_run_at"]}
             try:
-                await _run(rule, {}, ev)
+                await _run(rule, await _schedule_ctx(rule), ev)
             except Exception as e:  # noqa: BLE001
                 logger.exception("scheduled automation %s failed", rule.get("_id"))
                 await _record(rule, result="failed", event=ev, error=str(e)[:300])
@@ -811,9 +867,10 @@ async def run_automation(rule_id: str, payload: RunIn = RunIn(), user=Depends(ve
             raise HTTPException(status_code=400, detail=str(e)) from e
     ev = {"type": "manual.reorder", "by": user["user_id"]}
     if (rule.get("action") or {}).get("type", "send_order") == "send_order":
-        run = await _create_partner_order(rule, source=None, needed_by=needed_by, event=ev)
+        run = await _create_partner_order(rule, source=None, needed_by=needed_by, event=ev,
+                                          ctx=await _schedule_ctx(rule))
     else:
-        run = await _run(rule, {}, ev)
+        run = await _run(rule, await _schedule_ctx(rule), ev)
     if run["result"] in ("failed", "skipped"):
         raise HTTPException(status_code=409, detail=run.get("error") or "That could not be sent")
     return {k: run[k] for k in ("_id", "result", "created_order_id", "created_at")} | {"id": run["_id"]}

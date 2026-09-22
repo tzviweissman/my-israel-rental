@@ -445,7 +445,7 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
   }
 
   return (
-    <div className="space-y-6" data-testid="my-gigs-tab">
+    <div className="space-y-6" data-testid="my-gigs-tab" data-tour="gigs">
       {/* Header row: status + primary CTAs */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 bg-white border border-gray-200 rounded-2xl p-5">
         <div className="flex flex-col gap-2">

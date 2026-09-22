@@ -350,7 +350,7 @@ export default function OrdersTab({ API, token }) {
   const statusLabel = (s) => t(`orders.status.${s}`, s);
 
   return (
-    <div data-testid="orders-tab">
+    <div data-testid="orders-tab" data-tour="orders-board">
       {/* Header: title, business picker (only when there is a choice), new-order button */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
         <h2 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('orders.title', 'Orders')}</h2>
@@ -374,6 +374,7 @@ export default function OrdersTab({ API, token }) {
               className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold"
               style={{ background: 'var(--action)', color: 'var(--action-ink)' }}
               data-testid="orders-new"
+              data-tour="orders-new"
             >
               <Plus size={15} /> {t('orders.new', 'New order')}
             </button>

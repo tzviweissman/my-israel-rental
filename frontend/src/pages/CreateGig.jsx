@@ -36,7 +36,7 @@ import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import CategoryPicker from '../components/marketplace/CategoryPicker';
 import { SUBCATEGORIES, subcategoryLabel } from '../lib/categories';
-import { uploadFilesFast, reportUploadFailure } from '../utils/fastUpload';
+import { uploadFilesFast, reportUploadFailure, uploadOneFile } from '../utils/fastUpload';
 import { useFormDraft, readDraft, clearDraft } from '../hooks/useFormDraft';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
 import { productPhotos } from '../utils/productPhotos';
@@ -99,7 +99,7 @@ const emptyProduct = (prevCurrency = 'ILS') => ({
 
 const CreateGig = () => {
   const { t } = useTranslation();
-  const { token } = useContext(AuthContext);
+  const { token, user } = useContext(AuthContext);
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   // Restored together with the answers: bringing someone back to step 1
@@ -117,6 +117,45 @@ const CreateGig = () => {
   // it always has. Read from the URL rather than the draft so that adding
   // to business #2 is never resumed against business #1.
   const targetBusinessId = searchParams.get('business') || null;
+
+  /* The business itself, asked for on step 2 beside the listing's name
+     (Tzvi, 22 Sep 2026: the logo should come earlier). Until now a first
+     business was created silently, named after the person, with no logo,
+     and the logo was only ever asked for later on the checklist.
+
+     `existing` is null while loading, [] for someone with no business yet.
+     The name box shows only then; the logo box shows whenever the business
+     this listing goes to has no logo. Both optional: a blank name falls
+     back to the person's name, exactly as before, and a business without a
+     logo keeps showing its first letter. */
+  const [existing, setExisting] = useState(null);
+  const [bizName, setBizName] = useState('');
+  const [bizLogo, setBizLogo] = useState('');
+  const [logoUploading, setLogoUploading] = useState(false);
+  useEffect(() => {
+    let alive = true;
+    axios.get(`${API}/marketplace/businesses`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(({ data }) => { if (alive) setExisting((data || []).filter((b) => b.active)); })
+      .catch(() => { if (alive) setExisting([]); });
+    return () => { alive = false; };
+  }, [token]);
+  const firstBusiness = existing !== null && existing.length === 0;
+  const destination = existing && (existing.find((b) => b.id === targetBusinessId) || existing[0]);
+  const askLogo = existing !== null && (firstBusiness || (destination && !destination.logo_url));
+
+  const pickLogo = async (e) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+    setLogoUploading(true);
+    try {
+      setBizLogo(await uploadOneFile(file, API, token));
+    } catch (err) {
+      toast.error(err?.message || t('businesses.logoFailed', 'Could not upload that image'));
+    } finally {
+      setLogoUploading(false);
+    }
+  };
 
   // Post-signup onboarding hook — when a provider lands here fresh from
   // the Google sign-in flow (?welcome=1), surface a one-shot friendly
@@ -493,9 +532,21 @@ const CreateGig = () => {
         // behaviour and the right answer for a generic entry point.
         business_id: targetBusinessId,
       };
-      const { data } = await axios.post(`${API}/marketplace/gigs`, payload, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const auth = { headers: { Authorization: `Bearer ${token}` } };
+      // The business first, with the name and logo from step 2, so the
+      // listing is published under it rather than under a silent default.
+      if (firstBusiness && (bizName.trim().length >= 2 || bizLogo)) {
+        // A blank name falls back to the person's name, as the silent
+        // default always did. The API needs two characters.
+        const name = [bizName.trim(), (user?.name || '').trim(), 'My business'].find((n) => n.length >= 2);
+        const { data: biz } = await axios.post(`${API}/marketplace/businesses`, {
+          name, logo_url: bizLogo || null,
+        }, auth).catch(() => ({ data: null }));
+        if (biz?.id) payload.business_id = biz.id;
+      } else if (bizLogo && destination && !destination.logo_url) {
+        await axios.patch(`${API}/marketplace/businesses/${destination.id}`, { logo_url: bizLogo }, auth).catch(() => {});
+      }
+      const { data } = await axios.post(`${API}/marketplace/gigs`, payload, auth);
       // The translation now runs in the background (it used to hold the
       // publish for 3-6 s so this toast could say "also translated"). Say
       // what is true instead: it is coming.
@@ -508,7 +559,10 @@ const CreateGig = () => {
       // reappear the next time they open the wizard.
       setSubmitted(true);
       clearDraft('create-gig');
-      navigate(`/businesses/${data.id}`);
+      // Someone who just added their FIRST business goes straight into the
+      // walk (components/tour), which starts on their page. `tour=first`
+      // starts it only if this account has never taken it, on any device.
+      navigate(firstBusiness ? '/dashboard?tour=first' : `/businesses/${data.id}`);
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to publish');
     } finally {
@@ -603,6 +657,36 @@ const CreateGig = () => {
         {/* --- Step 2: Overview (title + category) --- */}
         {step === 2 && (
           <div className="space-y-4">
+            {askLogo && (
+              <div className="rounded-xl border bg-white p-4 flex items-start gap-4" style={{ borderColor: 'var(--brand-border)' }} data-testid="wizard-business">
+                <label className="shrink-0 cursor-pointer" aria-label={t('wizard.logoPick', 'Choose a logo')}>
+                  <input type="file" accept="image/*" className="hidden" onChange={pickLogo} data-testid="wizard-logo-input" />
+                  <span className="h-20 w-20 rounded-xl border-2 border-dashed inline-flex items-center justify-center overflow-hidden"
+                    style={{ borderColor: 'var(--brand-border)', background: 'var(--surface-muted, #f9fafb)' }}>
+                    {bizLogo
+                      ? <img src={bizLogo} alt="" className="h-full w-full object-cover" data-testid="wizard-logo-preview" />
+                      : logoUploading
+                        ? <Loader2 className="animate-spin" size={18} style={{ color: 'var(--brand-muted)' }} />
+                        : <span className="text-xs text-center px-2" style={{ color: 'var(--brand-muted)' }}>{t('wizard.logoAdd', 'Add logo')}</span>}
+                  </span>
+                </label>
+                <div className="flex-1 min-w-0">
+                  {firstBusiness && (
+                    <>
+                      <label className="text-sm font-semibold text-gray-700">{t('wizard.businessName', 'Business name')}</label>
+                      <input value={bizName} onChange={(e) => setBizName(e.target.value)} dir="auto"
+                        placeholder={t('wizard.businessNamePlaceholder', 'e.g. Cohen Cleaning')}
+                        className="w-full mt-1 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] text-sm"
+                        data-testid="wizard-business-name" />
+                    </>
+                  )}
+                  <p className="text-xs mt-2" style={{ color: 'var(--brand-muted)' }}>
+                    {t('wizard.logoHint', 'Your logo shows on your page and beside everything you list. Optional:')}{' '}
+                    <span className="font-semibold">{t('wizard.logoLater', 'you can add it later.')}</span>
+                  </p>
+                </div>
+              </div>
+            )}
             <div>
               <label className="text-sm font-semibold text-gray-700">Title</label>
               <input value={form.title} onChange={(e) => set({ title: e.target.value })}

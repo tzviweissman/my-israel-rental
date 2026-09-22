@@ -140,7 +140,7 @@ const ContractManager = ({ properties }) => {
   };
 
   return (
-    <div className="space-y-6" data-testid="contract-manager">
+    <div className="space-y-6" data-testid="contract-manager" data-tour="contracts">
       <div className="flex items-center justify-between">
         <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
           Contracts

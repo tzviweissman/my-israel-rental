@@ -466,3 +466,54 @@ def test_a_rule_for_one_flat_ignores_the_others(w, db):
         db.properties.delete_many({"id": {"$in": [pid, other]}})
         db.bookings.delete_many({"property_id": {"$in": [pid, other]}})
 
+
+
+# ---------------------------------------------------------------------------
+# Upkeep on a calendar (22 Sep 2026): monthly and yearly schedules, and a
+# schedule tied to one listing so the job goes to that flat's door.
+# ---------------------------------------------------------------------------
+
+def test_monthly_and_yearly_schedules_land_on_the_right_day():
+    import sys
+    sys.path.insert(0, str(ROOT))
+    from zoneinfo import ZoneInfo
+    from routes.marketplace.automations import next_run
+    il = ZoneInfo("Asia/Jerusalem")
+    now = datetime(2026, 12, 20, 12, 0, tzinfo=il)
+    at = lambda s: datetime.fromisoformat(next_run(s, after=now)).astimezone(il)  # noqa: E731
+    assert at({"every": "month", "day": 5, "time": "09:00"}).strftime("%Y-%m-%d %H:%M") == "2027-01-05 09:00", \
+        "rolls into next year"
+    assert at({"every": "year", "month": 3, "day": 1, "time": "08:00"}).strftime("%Y-%m-%d") == "2027-03-01"
+    assert at({"every": "year", "month": 12, "day": 21, "time": "08:00"}).strftime("%Y-%m-%d") == "2026-12-21", \
+        "later this year if the date has not passed"
+
+
+def test_a_schedule_needs_a_month_and_day_when_it_says_so(w):
+    _connect(w)
+    for bad in ({"every": "year", "day": 1, "time": "08:00"}, {"every": "month", "time": "08:00"}, {"every": "week", "time": "08:00"}):
+        r = _rule(w, trigger={"type": "schedule", "schedule": bad}, template={"items": "x", "fulfilment": "pickup"})
+        assert r.status_code == 422, (bad, r.text)
+
+
+def test_a_yearly_job_for_one_listing_goes_to_that_flat(w, db):
+    import asyncio
+    _connect(w)
+    pid, _owner = _host_listing(db, w)
+    try:
+        r = requests.post(f"{M}/businesses/{w['shop']}/automations", json={
+            "partner_business_id": w["courier"], "name": "Yearly plumber check",
+            "trigger": {"type": "schedule", "property_id": pid,
+                        "schedule": {"every": "year", "month": 3, "day": 1, "time": "09:00"}},
+            "template": {"items": "Yearly check: pipes and boiler", "fulfilment": "delivery", "total": 350}},
+            headers=w["h"]["shop"], timeout=30)
+        assert r.status_code == 200, r.text   # no address typed: the flat has one
+        rule = r.json()
+        assert rule["next_run_at"][:4] in ("2027", "2026")
+        db.business_automations.update_one({"_id": rule["id"]}, {"$set": {"next_run_at": "2020-01-01T00:00:00+00:00"}})
+        from routes.marketplace.automations import run_due_schedules
+        assert asyncio.run(run_due_schedules()) == 1
+        job = db.store_orders.find_one({"business_id": w["courier"], "source": "automation"})
+        assert job and job["address"] == "Emek Refaim 22, Jerusalem" and job["total"] == 350
+        assert "TEST_auto Flat 3" in job["notes"]
+    finally:
+        db.properties.delete_one({"id": pid})

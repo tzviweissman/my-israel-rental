@@ -94,8 +94,11 @@ export default function MyBusinessesTab({ API, token }) {
     next.delete('details');
     next.delete('services');
     setSearchParams(next, { replace: true });
+    // `searchParams` too, not only `items`: the walk's "Do it now" adds
+    // `details=1` to the page the owner is already on, which does not
+    // remount this tab.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [items]);
+  }, [items, searchParams]);
 
   const add = async (e) => {
     e.preventDefault();
