@@ -70,6 +70,11 @@ async def cancel_booking(booking_id: str, reason: str = Body(..., embed=True), p
         }}
     )
     
+    # Take back the cleaning job this stay sent, and run any
+    # "when a booking is cancelled" rules (automations.py).
+    from routes.marketplace.automations import booking_changed
+    booking_changed({**booking, "status": "cancelled"}, "cancelled")
+
     # The lister (owner or sublessor) is cancelling — notify the renter.
     notification = {
         "id": str(uuid.uuid4()),
@@ -175,6 +180,8 @@ async def approve_cancel_request(booking_id: str, payload: dict = Depends(verify
             "cancelled_at": datetime.now(UTC).isoformat()
         }}
     )
+    from routes.marketplace.automations import booking_changed
+    booking_changed({**booking, "status": "cancelled"}, "cancelled")
     
     # Notify renter
     notification = {

@@ -37,6 +37,10 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
         renter_id=payload['user_id'],
     )
     await db.bookings.insert_one(booking_doc)
+    if booking_doc.get("status") == "confirmed":
+        # Instant booking: confirmed the moment it is made (automations.py).
+        from routes.marketplace.automations import booking_changed
+        booking_changed({k: v for k, v in booking_doc.items() if k != "_id"}, "confirmed")
 
     await _send_booking_notifications(
         booking_doc=booking_doc,

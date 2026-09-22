@@ -25,7 +25,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Zap, Plus, Send, Trash2, History, CheckCircle2, AlertTriangle, Loader2, Bell, MessageSquare, Truck, CalendarClock } from 'lucide-react';
+import { Zap, Plus, Send, Trash2, History, CheckCircle2, AlertTriangle, Loader2, Bell, MessageSquare, Truck, CalendarClock, Sparkles, KeyRound } from 'lucide-react';
 
 const FIRES_ON = ['preparing', 'ready', 'done'];
 // Python weekdays, Sunday first because the week does here.
@@ -34,7 +34,7 @@ const WEEK = [6, 0, 1, 2, 3, 4, 5];
 const EMPTY = {
   partner_business_id: '',
   name: '',
-  trigger: { type: 'order.status_changed', status: 'ready', schedule: { weekdays: [6], time: '08:00' } },
+  trigger: { type: 'order.status_changed', status: 'ready', schedule: { weekdays: [6], time: '08:00' }, property_id: '' },
   action: { type: 'send_order', text: '' },
   template: { copy_from_source: true, items: '', notes: '', fulfilment: 'pickup', address: '', total: '' },
 };
@@ -55,9 +55,14 @@ const RECIPES = [
     form: { trigger: { type: 'lead.received' }, action: { type: 'notify_me', text: '' } } },
   { key: 'doneThanks', Icon: MessageSquare,
     form: { trigger: { type: 'order.status_changed', status: 'done' }, action: { type: 'message_customer' }, textKey: 'doneThanksText' } },
+  // Hosts only: shown when the account has listings.
+  { key: 'cleaningBetweenGuests', Icon: Sparkles, needsPartner: true, forHosts: true,
+    form: { trigger: { type: 'booking.confirmed' }, action: { type: 'send_order', text: '' }, template: { copy_from_source: false, fulfilment: 'delivery' }, itemsKey: 'cleaningItems' } },
+  { key: 'checkInDetails', Icon: KeyRound, forHosts: true,
+    form: { trigger: { type: 'booking.confirmed' }, action: { type: 'message_customer' }, textKey: 'checkInDetailsText' } },
 ];
 
-export default function AutomationsPanel({ API, token, bizId, partners }) {
+export default function AutomationsPanel({ API, token, bizId, partners, listings = [] }) {
   const { t, i18n } = useTranslation();
   const lang = (i18n.language || 'en').split('-')[0];
   const auth = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
@@ -97,6 +102,11 @@ export default function AutomationsPanel({ API, token, bizId, partners }) {
     return new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'short' }).format(d);
   };
 
+  const isHost = listings.length > 0;
+  const listingName = (id) => (id
+    ? t('automations.atListing', 'at {{title}}', { title: listings.find((l) => l.id === id)?.title || t('automations.aListing', 'one of my listings') })
+    : t('automations.anyListing', 'at any of my listings'));
+
   const whenLine = (trigger) => {
     const s = trigger?.schedule;
     return {
@@ -105,6 +115,8 @@ export default function AutomationsPanel({ API, token, bizId, partners }) {
       'appointment.booked': t('automations.whenBooked', 'When an appointment is booked'),
       'appointment.cancelled': t('automations.whenCancelled', 'When an appointment is cancelled'),
       'lead.received': t('automations.whenLead', 'When a customer taps to message me'),
+      'booking.confirmed': t('automations.whenStay', 'When guests book {{where}}', { where: listingName(trigger?.property_id) }),
+      'booking.cancelled': t('automations.whenStayCancelled', 'When guests cancel {{where}}', { where: listingName(trigger?.property_id) }),
       schedule: s ? t('automations.whenSchedule', 'Every {{days}} at {{time}}', { days: (s.weekdays || []).map(dayName).join(', '), time: s.time }) : '',
     }[trigger?.type] || '';
   };
@@ -116,7 +128,7 @@ export default function AutomationsPanel({ API, token, bizId, partners }) {
   }[rule.action?.type || 'send_order']);
 
   // What the form can say, given what it already says.
-  const canMessage = (tt) => ['order.status_changed', 'appointment.booked', 'appointment.cancelled'].includes(tt);
+  const canMessage = (tt) => ['order.status_changed', 'appointment.booked', 'appointment.cancelled', 'booking.confirmed', 'booking.cancelled'].includes(tt);
   const canSendOrder = partners.length > 0;
 
   const startForm = (recipe) => {
@@ -131,7 +143,7 @@ export default function AutomationsPanel({ API, token, bizId, partners }) {
       name: t(`automations.recipe_${recipe.key}`, recipe.key),
       trigger: { ...base.trigger, ...f.trigger, schedule: f.trigger.schedule || base.trigger.schedule },
       action: { type: f.action.type, text: f.textKey ? t(`automations.${f.textKey}`, '') : (f.action.text || '') },
-      template: { ...base.template, ...(f.template || {}) },
+      template: { ...base.template, ...(f.template || {}), ...(f.itemsKey ? { items: t(`automations.${f.itemsKey}`, '') } : {}) },
     });
   };
 
@@ -144,7 +156,7 @@ export default function AutomationsPanel({ API, token, bizId, partners }) {
       const copy = tt === 'order.status_changed' && f.template.copy_from_source;
       if (!f.partner_business_id) return toast.error(t('automations.pickPartner', 'Pick a partner business'));
       if (!copy && !f.template.items.trim()) return toast.error(t('automations.sayWhat', 'Say what to order'));
-      if (!copy && f.template.fulfilment === 'delivery' && !f.template.address.trim()) {
+      if (!copy && f.template.fulfilment === 'delivery' && !f.template.address.trim() && !tt.startsWith('booking.')) {
         return toast.error(t('automations.needAddress', 'A delivery needs an address'));
       }
     }
@@ -158,7 +170,7 @@ export default function AutomationsPanel({ API, token, bizId, partners }) {
         name: f.name.trim(),
         trigger: tt === 'schedule'
           ? { type: tt, schedule: f.trigger.schedule }
-          : { type: tt, status: tt === 'order.status_changed' ? f.trigger.status : null },
+          : { type: tt, status: tt === 'order.status_changed' ? f.trigger.status : null, property_id: tt.startsWith('booking.') ? (f.trigger.property_id || null) : null },
         action: { type: at, text: f.action.text },
         template: at !== 'send_order' ? null : copy
           ? { copy_from_source: true, notes: f.template.notes, fulfilment: 'delivery', items: '' }
@@ -342,6 +354,8 @@ export default function AutomationsPanel({ API, token, bizId, partners }) {
                     <option value="appointment.booked">{t('automations.whenBooked', 'When an appointment is booked')}</option>
                     <option value="appointment.cancelled">{t('automations.whenCancelled', 'When an appointment is cancelled')}</option>
                     <option value="lead.received">{t('automations.whenLead', 'When a customer taps to message me')}</option>
+                    {isHost && <option value="booking.confirmed">{t('automations.whenStayOption', 'When guests book one of my listings')}</option>}
+                    {isHost && <option value="booking.cancelled">{t('automations.whenStayCancelledOption', 'When guests cancel a stay')}</option>}
                     <option value="schedule">{t('automations.whenWeekly', 'Every week, on days I pick')}</option>
                     <option value="manual">{t('automations.whenManual', 'When you tap Send')}</option>
                   </select>
@@ -383,6 +397,17 @@ export default function AutomationsPanel({ API, token, bizId, partners }) {
                   </div>
                 )}
 
+                {form.trigger.type.startsWith('booking.') && (
+                  <label className="text-sm sm:col-span-2">
+                    <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.whichListing', 'Which listing')}</span>
+                    <select className={field} style={{ borderColor: 'var(--brand-border)' }} value={form.trigger.property_id || ''}
+                      onChange={(e) => setForm({ ...form, trigger: { ...form.trigger, property_id: e.target.value } })} data-testid="automation-listing">
+                      <option value="">{t('automations.allListings', 'All my listings')}</option>
+                      {listings.map((l) => <option key={l.id} value={l.id}>{l.title}</option>)}
+                    </select>
+                  </label>
+                )}
+
                 {form.action.type === 'send_order' && (
                   <>
                     <label className="text-sm">
@@ -420,8 +445,22 @@ export default function AutomationsPanel({ API, token, bizId, partners }) {
                           <label className="text-sm">
                             <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.address', 'Address')}</span>
                             <input className={field} style={{ borderColor: 'var(--brand-border)' }} dir="auto" value={form.template.address}
+                              placeholder={form.trigger.type.startsWith('booking.') ? t('automations.addressFromListing', "Leave empty: the listing's address is used") : ''}
                               onChange={(e) => setForm({ ...form, template: { ...form.template, address: e.target.value } })} />
                           </label>
+                        )}
+                        {/* The price. "What to order" says how MUCH ("20 kg flour");
+                            this says what it costs, and it is what the partner's
+                            auto-accept money limit is checked against. */}
+                        <label className="text-sm">
+                          <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.total', 'Price, ₪ (optional)')}</span>
+                          <input type="number" min="0" step="1" className={field} style={{ borderColor: 'var(--brand-border)' }} value={form.template.total}
+                            onChange={(e) => setForm({ ...form, template: { ...form.template, total: e.target.value } })} data-testid="automation-total" />
+                        </label>
+                        {form.trigger.type.startsWith('booking.') && (
+                          <p className="text-xs sm:col-span-2" style={{ color: 'var(--brand-muted)' }}>
+                            {t('automations.stayTiming', 'The job is due when the guests leave, and says when the next guests arrive. Guest names and phone numbers are never passed on.')}
+                          </p>
                         )}
                       </>
                     )}
@@ -461,7 +500,7 @@ export default function AutomationsPanel({ API, token, bizId, partners }) {
               </button>
               <h3 className="text-xs font-semibold uppercase mb-2" style={{ color: 'var(--brand-muted)' }}>{t('automations.starters', 'Or start from one of these')}</h3>
               <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 mb-5" data-testid="automation-recipes">
-                {RECIPES.map((r) => {
+                {RECIPES.filter((r) => !r.forHosts || isHost).map((r) => {
                   const off = r.needsPartner && !canSendOrder;
                   return (
                     <li key={r.key}>
