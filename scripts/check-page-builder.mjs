@@ -104,7 +104,7 @@ const blocksMatch = Object.keys(vocab.blocks).length === Object.keys(mod.BLOCK_T
   && Object.entries(vocab.blocks).every(
     ([type, spec]) => JSON.stringify(spec.variants) === JSON.stringify(mod.BLOCK_TYPES[type]),
   );
-ok('and the same eight block types, with the same variants',
+ok('and the same block types, with the same variants',
   blocksMatch, JSON.stringify(Object.keys(mod.BLOCK_TYPES)));
 
 ok('and the same brief', JSON.stringify(vocab.brief.showing) === JSON.stringify(mod.BRIEF.showing)

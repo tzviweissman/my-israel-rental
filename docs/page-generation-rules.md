@@ -58,6 +58,7 @@ Never patched. A patched page is one nobody chose (P1, P4a).
 | `generic` | No sentence that could describe any business: "welcome to", "look no further", "one-stop shop", "passionate about", "quality you can trust", "your satisfaction", "world-class", "top-notch" (and the Hebrew equivalents). |
 | `punctuation` | No exclamation marks. No long dashes (the site's copy rule). No words in capitals unless it's their name. |
 | `structure` | At most 10 blocks. No doubled contact, facts or gallery. No two dividers in a row, and don't end on one. |
+| `signature` | At most one scroll section per page, with its material. The size ladder needs one of their store listings with at least 3 products they measured. |
 | `action` | What the brief asks visitors to do has a place to do it: book or order needs the services block, message needs contact, visit needs the facts (hours, address). |
 | `images` | Only their own photos, and only ones that exist. A photo gallery needs at least 3 photos. Full-bleed imagery needs a cover photo. |
 | `prices` | Loud prices only when there are prices, and never on a premium or quote-based brief. A premium brief is never packed. |
@@ -326,7 +327,12 @@ other block:
 - **The product performs**: their product turning or rolling as you scroll
   (Blender, from their real item).
 - **The size ladder**: their products growing through real sizes with a ruler and
-  their prices (from Blazin' Boards).
+  their prices (from Blazin' Boards). **Built 23 Sep 2026**: the `sizes` block
+  (`frontend/src/components/pagebuilder/SizeLadderBlock.jsx`). Shops enter each
+  product's real width and length in the listing form (optional); only measured
+  products are drawn, all at one scale beside a 10 cm ruler, and scrolling steps
+  from the smallest to the largest. With reduced motion it is one still picture.
+  Checked by `scripts/check-size-ladder.mjs`.
 - **Before and after**: pairs from real clients, with their names and consent (from
   Michal Simkin).
 - **The time of day**: one scroll regrading their own photos from night to morning

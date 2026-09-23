@@ -55,6 +55,7 @@ export const BLOCK_TYPES = {
   cover: ['photo', 'tint'],
   gallery: ['carousel'],
   contact: ['stack'],
+  sizes: ['ladder'],
 };
 
 export const MAX_BLOCKS = 24;

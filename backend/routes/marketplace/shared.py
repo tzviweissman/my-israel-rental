@@ -546,6 +546,11 @@ class ProductItem(BaseModel):
     # figure. Neither is guessed: absent means the page shows nothing.
     group: Optional[str] = Field(None, max_length=60)
     serves: Optional[int] = Field(None, ge=1, le=500)
+    # The real size, set by the business, in centimetres. Read by the
+    # size-ladder section (docs/page-generation-rules.md §9), which draws
+    # to scale; absent means the ladder leaves this product out.
+    width_cm: Optional[float] = Field(None, gt=0, le=500)
+    length_cm: Optional[float] = Field(None, gt=0, le=500)
 
 
 class WeeklyWindow(BaseModel):

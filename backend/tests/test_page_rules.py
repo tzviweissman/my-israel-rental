@@ -214,3 +214,27 @@ def test_each_page_is_unique_among_recent_ones_of_its_kind():
                      theme={"type": "grotesque", "density": "packed", "imagery": "thumbnail"})
     assert check_unique(a, [different])["passed"]
     assert check_unique(a, [])["passed"]
+
+
+def test_the_size_ladder_needs_three_measured_products_and_comes_once():
+    boards = biz("shops-products", "store", items=())
+    boards["listings"] = [{"id": "b1", "title": "Charcuterie boards", "title_he": "מגשי אירוח", "category": "shops-products",
+                           "gig_type": "store", "area": "Beit Shemesh", "gallery": ["a"],
+                           "products": [{"name": n, "price": pr, "width_cm": w, "length_cm": ln, "images": ["x"]}
+                                        for n, pr, w, ln in (("Small", 180, 15, 20), ("Medium", 320, 25, 35), ("Large", 520, 37, 57))]}]
+    ladder = {"id": "sizes", "type": "sizes", "variant": "ladder", "props": {"listing": "b1", "heading": "Boards from 15 to 57 cm"}}
+    good = page("Charcuterie boards in Beit Shemesh", "Order by Thursday.", extra=[ladder])
+    r = check_composition(boards, good, "en")
+    assert r["passed"], r["fix_first"]   # 15 and 57 are their own measurements, not invented
+
+    two = deepcopy(boards)
+    two["listings"][0]["products"][2].pop("width_cm")
+    assert "signature" in failed(check_composition(two, good, "en")), "two measured products is not a ladder"
+
+    stranger = deepcopy(good)
+    stranger["blocks"][-2]["props"]["listing"] = "someone-else"
+    assert "signature" in failed(check_composition(boards, stranger, "en"))
+
+    twice = page("Charcuterie boards in Beit Shemesh", "Order by Thursday.",
+                 extra=[ladder, {**ladder, "id": "sizes-2"}])
+    assert "signature" in failed(check_composition(boards, twice, "en")), "one signature section per page"

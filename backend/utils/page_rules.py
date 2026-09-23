@@ -122,6 +122,11 @@ PLAYBOOKS: dict[str, dict[str, Any]] = {
 }
 DEFAULT_PLAYBOOK = {"lead": {"services", "facts", "gallery"}, "needs": {"services"}}
 
+# The scroll sections the practice pages became (rulebook §9). At most one
+# per page, and only with the material it needs.
+SIGNATURE = {"sizes"}
+SIZES_MIN = 3
+
 # What each brief action needs on the page to be takeable.
 ACTION_BLOCK = {"book": "services", "order": "services", "message": "contact", "visit": "facts"}
 
@@ -160,6 +165,10 @@ def known_numbers(b: dict) -> set[str]:
             nums.add(str(v))
     for g in b.get("listings") or []:
         for i in ((g or {}).get("tiers") or []) + ((g or {}).get("products") or []):
+            for dim in ("width_cm", "length_cm"):
+                if (i or {}).get(dim):
+                    d = float(i[dim])
+                    nums.add(str(int(d)) if d.is_integer() else str(d))
             if (i or {}).get("price"):
                 p = (i or {}).get("price")
                 nums.update({str(p), str(int(p)) if float(p).is_integer() else str(p)})
@@ -220,7 +229,7 @@ def _any_price(b: dict) -> bool:
 # ---------------------------------------------------------------- the check
 
 ORDER = ("schema", "language", "hero", "congruency", "numbers", "claims", "urgency", "generic", "punctuation",
-         "structure", "action", "images", "prices", "playbook")
+         "structure", "signature", "action", "images", "prices", "playbook")
 
 
 def check_composition(business: dict, composition: dict, lang: str = "en") -> dict:
@@ -337,6 +346,24 @@ def check_composition(business: dict, composition: dict, lang: str = "en") -> di
     if blocks[-1]["type"] == "rule":
         issues.append("ends on a divider")
     out["structure"] = (not issues, "Tidy structure." if not issues else "; ".join(issues).capitalize() + ".")
+
+    # signature: at most one scroll section, and only with its material.
+    # The size ladder needs one of THEIR store listings with at least three
+    # products the owner measured; a scale nobody measured is invented.
+    sig = [x for x in blocks if x["type"] in SIGNATURE]
+    sproblems = []
+    if len(sig) > 1:
+        sproblems.append(f"{len(sig)} signature sections; at most one per page")
+    for x in sig:
+        if x["type"] == "sizes":
+            g = next((g for g in b.get("listings") or [] if (g or {}).get("id") == x["props"].get("listing")), None)
+            measured = [p for p in (g or {}).get("products") or [] if (p or {}).get("width_cm")]
+            if not g:
+                sproblems.append(f"{x['id']} names a listing they don't have")
+            elif len(measured) < SIZES_MIN:
+                sproblems.append(f"{x['id']} has {len(measured)} measured product(s); the size ladder needs {SIZES_MIN}")
+    out["signature"] = (not sproblems, "No signature section." if not sig else "The signature section has its material."
+                        if not sproblems else "; ".join(sproblems).capitalize() + ".")
 
     # action: what the brief asks visitors to do has a block to do it in.
     act = (b.get("page_brief") or {}).get("action")
