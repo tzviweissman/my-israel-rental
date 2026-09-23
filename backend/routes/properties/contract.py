@@ -154,14 +154,27 @@ async def upload_property_contract(
 
 
 @api_router.get("/properties/{property_id}/contract", response_model=ContractStatusResponse)
-async def get_property_contract(property_id: str) -> dict:
-    """Get contract details for a property"""
+async def get_property_contract(property_id: str, payload: dict = Depends(verify_token)) -> dict:
+    """Whether a property has a contract, and when it was uploaded.
+
+    Only for the people the contract concerns: the owner, a renter with a
+    booking on the property, or an admin - the rule /contract-file already
+    applies. It was open to anyone, which told a stranger whether a lease
+    existed and when (site audit, 22 Sep 2026). The booking screen, its
+    only caller, always sends the signed-in person.
+    """
     property_data = await db.properties.find_one(
-        {"id": property_id}, 
-        {"_id": 0, "contract_url": 1, "contract_uploaded_at": 1, "rental_type": 1}
+        {"id": property_id},
+        {"_id": 0, "contract_url": 1, "contract_uploaded_at": 1, "rental_type": 1, "owner_id": 1}
     )
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
+    user_id = payload.get("user_id")
+    allowed = payload.get("role") == "admin" or property_data.get("owner_id") == user_id
+    if not allowed and user_id:
+        allowed = await db.bookings.find_one({"property_id": property_id, "renter_id": user_id}, {"_id": 1}) is not None
+    if not allowed:
+        raise HTTPException(status_code=403, detail="Not authorized to access this contract")
     
     return {
         "has_contract": bool(property_data.get('contract_url')),
