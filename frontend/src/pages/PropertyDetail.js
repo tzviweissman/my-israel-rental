@@ -16,6 +16,7 @@ import Tour3DViewer from '../components/property/Tour3DViewer';
 import PropertyStats from '../components/property/PropertyStats';
 import AmenitiesList from '../components/property/AmenitiesList';
 import BookingSidebar from '../components/property/BookingSidebar';
+import ReviewsSection from '../components/reviews/ReviewsSection';
 import MovingServicesCrossSell from '../components/services/MovingServicesCrossSell';
 import Breadcrumb from '../components/common/Breadcrumb';
 import QrShareCard from '../components/common/QrShareCard';
@@ -618,6 +619,15 @@ const PropertyDetail = () => {
                 </span>
               )}
             </div>
+
+            {/* Verified reviews (routes/reviews.py). Nothing at all while
+                they are switched off or the place has none. */}
+            <ReviewsSection
+              listingId={property.id}
+              kind="property"
+              className="mt-8 bg-white p-6 rounded-2xl border border-[var(--brand-border)]"
+              schemaItem={{ '@type': 'Accommodation', name: property.title }}
+            />
           </div>
 
           <div className="lg:col-span-1" id={property.page_upgrade ? 'property-booking' : undefined}>

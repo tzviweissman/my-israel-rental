@@ -254,7 +254,7 @@ async def google_connect(user=Depends(verify_token)) -> dict:
 
 @router.get("/reviews/google/callback")
 async def google_callback(code: str = "", state: str = "", error: str = "") -> RedirectResponse:
-    back = f"{FRONTEND_URL}/dashboard?tab=business"
+    back = f"{FRONTEND_URL}/dashboard?tab=my-businesses"
     if not rv.google_enabled() or error or not code:
         return RedirectResponse(f"{back}&google_reviews=cancelled")
     try:
