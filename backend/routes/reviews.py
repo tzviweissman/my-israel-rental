@@ -242,27 +242,36 @@ async def google_status(user=Depends(verify_token)) -> dict:
             "last_error": (conn or {}).get("last_error")}
 
 
+# The dashboard tabs that show the Connect card; Google sends people back
+# to the one they started on.
+RETURN_TABS = ("my-businesses", "properties")
+
+
 @router.get("/reviews/google/connect")
-async def google_connect(user=Depends(verify_token)) -> dict:
+async def google_connect(tab: str = "my-businesses", user=Depends(verify_token)) -> dict:
     _need_google()
     if not g.configured():
         raise HTTPException(status_code=503, detail="Google reviews are not set up on this server")
     state = jwt.encode({"kind": "google_reviews_state", "user_id": user["user_id"],
+                        "tab": tab if tab in RETURN_TABS else RETURN_TABS[0],
                         "exp": datetime.now(UTC) + timedelta(minutes=10)}, os.environ["JWT_SECRET"], algorithm="HS256")
     return {"url": g.auth_url(state)}
 
 
 @router.get("/reviews/google/callback")
 async def google_callback(code: str = "", state: str = "", error: str = "") -> RedirectResponse:
-    back = f"{FRONTEND_URL}/dashboard?tab=my-businesses"
-    if not rv.google_enabled() or error or not code:
-        return RedirectResponse(f"{back}&google_reviews=cancelled")
     try:
         claims = jwt.decode(state, os.environ["JWT_SECRET"], algorithms=["HS256"])
         if claims.get("kind") != "google_reviews_state":
             raise jwt.InvalidTokenError()
     except jwt.InvalidTokenError:
+        claims = None
+    tab = (claims or {}).get("tab")
+    back = f"{FRONTEND_URL}/dashboard?tab={tab if tab in RETURN_TABS else RETURN_TABS[0]}"
+    if not claims:
         return RedirectResponse(f"{back}&google_reviews=failed")
+    if not rv.google_enabled() or error or not code:
+        return RedirectResponse(f"{back}&google_reviews=cancelled")
     try:
         async with httpx.AsyncClient(timeout=15.0) as http:
             tokens = await g.exchange_code(http, code)

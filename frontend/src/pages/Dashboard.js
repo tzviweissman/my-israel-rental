@@ -470,6 +470,9 @@ const Dashboard = () => {
 
         {activeTab === 'properties' && isPropertyLister && (
           <>
+            {/* Rentals-only people need a way in too; renders nothing
+                unless Google review import is switched on. */}
+            <GoogleReviewsCard API={API} token={token} returnTab="properties" />
             <PropertyList
               properties={properties}
               bookings={bookings}

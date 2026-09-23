@@ -16,7 +16,7 @@ import { Loader2, Star } from 'lucide-react';
 const BORDER = 'var(--brand-border)';
 const MUTED = 'var(--brand-muted)';
 
-export default function GoogleReviewsCard({ API, token }) {
+export default function GoogleReviewsCard({ API, token, returnTab = 'my-businesses' }) {
   const { t } = useTranslation();
   const [params, setParams] = useSearchParams();
   const [status, setStatus] = useState(null);
@@ -59,7 +59,8 @@ export default function GoogleReviewsCard({ API, token }) {
   const connect = async () => {
     setBusy(true);
     try {
-      const { data } = await axios.get(`${API}/reviews/google/connect`, auth);
+      // Google sends the person back to the dashboard tab they started on.
+      const { data } = await axios.get(`${API}/reviews/google/connect`, { ...auth, params: { tab: returnTab } });
       window.location.assign(data.url);
     } catch {
       toast.error(t('googleReviews.notReady', 'Connecting Google is not available yet.'));
