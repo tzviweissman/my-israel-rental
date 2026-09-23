@@ -259,6 +259,13 @@ Give the owner a real choice between three directions, each true to the brief:
 
 Each has its own headline. None breaks a hard rule.
 
+**Nothing the AI makes goes live on its own** (Tzvi, 23 Sep 2026). The pattern
+Shopify and Wix use: what the AI makes is a draft. The owner picks one of the
+three, previews it as a customer sees it on a phone and a laptop, and only a
+**Publish** button puts it on their page. The live page stays untouched until
+then. Every published version is kept, and one tap puts an earlier one back (P7g).
+Publish is offered only for a page that passes the check.
+
 ## 8. Photos, video and the tools
 
 **Generated images and video** (Higgsfield, kie.ai). Tzvi, 23 Sep 2026: mood only.
@@ -340,5 +347,9 @@ Rules for using them:
    Until then generated media can't appear on a built page at all.
 6. **Before and after consent.** The before-and-after section needs a record that
    each pictured client agreed. Decide how consent is collected before building it.
-7. **Which scroll section first.** Recommended: the size ladder or product motion,
-   since the most common businesses are shops.
+7. **Which scroll section first.** Decided (Tzvi delegated, 23 Sep 2026): **the size
+   ladder**. It runs on what a shop already enters (its options, prices and photos),
+   needs no 3D production, and shops are the most common business on the site. It
+   needs one new optional field, the real size of each option, because the ladder
+   draws to scale and a scale nobody measured would be invented. Product motion
+   comes second, once the first Blender jobs have set the method.
