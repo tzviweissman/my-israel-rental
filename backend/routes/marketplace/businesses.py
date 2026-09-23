@@ -841,7 +841,7 @@ async def public_business(
         )
 
     rating = await business_rating(biz["_id"])
-    return {
+    out = {
         "id": biz["_id"],
         "slug": biz.get("slug"),
         "name": biz.get("name") or "",
@@ -924,6 +924,13 @@ async def public_business(
         # page renders from. False for almost everyone.
         "page_upgrade": await has_page_upgrade(biz.get("owner_user_id")),
     }
+    # The upgraded page's leading action and backed strengths, from the
+    # private brief (utils/page_clarity.upgrade_view). Sent only with the
+    # upgrade, and only the result: the brief itself stays private.
+    if out["page_upgrade"]:
+        from utils.page_clarity import upgrade_view
+        out["upgrade_view"] = upgrade_view({**out, "page_brief": biz.get("page_brief") or {}})
+    return out
 
 
 @router.get("/providers/{user_id}/default-business")

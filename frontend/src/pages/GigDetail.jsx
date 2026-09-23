@@ -8,6 +8,8 @@
  */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import ProofLine from '../components/marketplace/ProofLine';
+import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPanel';
+import { money } from '../utils/currency';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import DateField from '../components/common/DateField';
@@ -684,6 +686,46 @@ const GigDetail = () => {
           <ArrowLeft size={14} className="rtl:rotate-180" /> {t('gigDetail.backToServices', 'Back to businesses')}
         </button>
 
+        {/* The paid page upgrade (backend utils/page_upgrade): the four
+            questions above the service. Absent on every standard page. */}
+        {gig.page_upgrade && (() => {
+          const view = gig.upgrade_view || {};
+          const items = (isStore ? gig.products : gig.tiers) || [];
+          const offers = items.map((it) => ({
+            name: it.name,
+            price: Number(it.price) > 0 ? money(it.price, it.currency || 'ILS') : null,
+          }));
+          const toBooking = () => document.getElementById('booking')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          const primary = view.action === 'order' && isStore
+            ? { label: t('upgrade.order', 'Order now'), onClick: () => navigate(`/order/${gig.id}`) }
+            : { label: isStore ? t('upgrade.message', 'Message') : t('upgrade.book', 'Book'), onClick: toBooking };
+          const hasWhy = (view.strengths || []).length || gig.rating_count > 0 || gig.business_proof?.verified || gig.business_proof?.founded_year;
+          return (
+            <ClarityPanel
+              className="mb-6"
+              testid="gig-clarity"
+              where={[displayTitle, gig.provider?.name, gig.area ? prettyArea(gig.area, t) : ''].filter(Boolean).join(' · ')}
+              offers={offers}
+              why={hasWhy ? (
+                <div className="flex flex-wrap items-center gap-y-1">
+                  <StrengthChips strengths={view.strengths} />
+                  <ProofLine
+                    ratingAvg={gig.rating_avg} ratingCount={gig.rating_count}
+                    verified={gig.business_proof?.verified} foundedYear={gig.business_proof?.founded_year}
+                    memberSince={gig.business_proof?.member_since} kosher={gig.business_proof?.kosher_certification}
+                    categories={[gig.category, ...(gig.business_proof?.categories || [])]}
+                    testid="gig-clarity-proof"
+                  />
+                </div>
+              ) : (
+                <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>{t('upgrade.whyAsk', 'Ask anything before you decide. Replies come in the chat.')}</p>
+              )}
+              primary={primary}
+              secondary={gig.rating_count > 0 ? [{ label: t('upgrade.seeReviews', 'Read the reviews'), onClick: () => document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }] : []}
+            />
+          );
+        })()}
+
         <div className="grid md:grid-cols-3 gap-8">
           {/* min-w-0 is load-bearing. A grid item defaults to
               `min-width: auto`, so it refuses to shrink below its
@@ -1043,7 +1085,7 @@ const GigDetail = () => {
               - Store: product list, CTA is "Message the seller".
               - Appointment: service list + date + time-slot picker built from weekly_availability.
               - Deliverable: tier list + optional date picker when enable_date_booking. */}
-          <div className="md:sticky md:top-24 h-fit space-y-4">
+          <div id="booking" className="md:sticky md:top-24 h-fit space-y-4">
             <div className="border border-gray-200 rounded-2xl bg-white p-4 space-y-3">
               <h3 className="text-sm font-bold text-gray-500 uppercase tracking-wide">
                 {optionsHeading}

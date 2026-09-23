@@ -700,6 +700,17 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
             "member_since": (business.get("created_at") or "")[:4] or None,
         }
     gig["page_upgrade"] = await has_page_upgrade(gig.get("provider_user_id"))
+    if gig["page_upgrade"]:
+        # The upgraded page's leading action and backed strengths, judged
+        # for THIS service against its business's private brief.
+        from utils.page_clarity import upgrade_view
+        b = business or {}
+        gig["upgrade_view"] = upgrade_view({
+            "owner_user_id": gig.get("provider_user_id"), "areas": b.get("areas") or [],
+            "founded_year": b.get("founded_year"), "kosher_certification": b.get("kosher_certification"),
+            "license_number": b.get("license_number"), "languages": b.get("languages") or [],
+            "listings": [gig], "page_brief": b.get("page_brief") or {},
+        })
     agg = await _rating_aggregate(gig_id)
     gig["rating_avg"] = agg["rating_avg"]
     gig["rating_count"] = agg["rating_count"]

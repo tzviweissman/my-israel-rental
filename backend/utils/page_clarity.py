@@ -92,6 +92,38 @@ def _strength_backed(s: str, b: dict) -> Optional[str]:
     return None
 
 
+def _possible_actions(b: dict) -> dict[str, bool]:
+    listings = [g for g in (b.get("listings") or []) if g]
+    return {
+        "message": bool(b.get("owner_user_id") and listings),
+        "book": any(g.get("gig_type") != "store" for g in listings),
+        "order": any(g.get("gig_type") == "store" for g in listings),
+        "visit": bool(b.get("areas") or any(g.get("area") for g in listings)),
+    }
+
+
+def upgrade_view(business: dict) -> dict:
+    """What an UPGRADED page renders from the private brief, computed here
+    with the same rules the check uses, so the page never re-decides them:
+
+      action     the brief's action when this page can do it; otherwise
+                 the page's own natural action (order for a store, book
+                 for a service, else message).
+      strengths  the brief's strengths (at most two) that are backed or
+                 not checkable. An unbacked one is dropped, never shown.
+
+    Only sent when utils.page_upgrade says the owner has the upgrade.
+    """
+    b = business or {}
+    brief = b.get("page_brief") or {}
+    possible = _possible_actions(b)
+    act = brief.get("action")
+    if act not in ACTIONS or not possible.get(act):
+        act = "order" if possible["order"] and not possible["book"] else "book" if possible["book"] else "message"
+    strengths = [s for s in (brief.get("strengths") or [])[:2] if not _strength_backed(s, b)]
+    return {"action": act, "strengths": strengths}
+
+
 def check_page(business: dict, lang: str = "en") -> dict:
     """{lang, passed, rules: [{id, passed, reason}], fix_first}."""
     b = business or {}
@@ -121,12 +153,7 @@ def check_page(business: dict, lang: str = "en") -> dict:
 
     # 4. What do I do next? One leading action from the brief, possible here.
     act = brief.get("action")
-    possible = {
-        "message": bool(b.get("owner_user_id") and listings),
-        "book": any(g.get("gig_type") != "store" for g in listings),
-        "order": any(g.get("gig_type") == "store" for g in listings),
-        "visit": bool(b.get("areas") or any(g.get("area") for g in listings)),
-    }
+    possible = _possible_actions(b)
     if act not in ACTIONS:
         out["action"] = (False, "No leading action chosen in the page brief." if not act
                          else "The brief's action ('understand') is not an action a visitor can take.")

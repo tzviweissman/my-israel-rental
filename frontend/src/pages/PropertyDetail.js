@@ -3,7 +3,8 @@ import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { API, AuthContext } from '../App';
-import { FX_USD_TO_ILS } from '../utils/listingPrice';
+import { FX_USD_TO_ILS, shownPrice, formatShownPrice } from '../utils/listingPrice';
+import ClarityPanel from '../components/marketplace/ClarityPanel';
 import { MapPin, Calendar as CalendarIcon, Heart, Share2, Check, QrCode } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -372,7 +373,7 @@ const PropertyDetail = () => {
           needs; the larger breakpoints only ever needed 100. */}
       <div className="h-[130px] sm:h-[100px] md:h-[100px] bg-white"></div>
       
-      <div className="max-w-7xl mx-auto px-4 md:px-6 pb-12 bg-white">
+      <div className={`max-w-7xl mx-auto px-4 md:px-6 bg-white ${property?.page_upgrade ? 'pb-32 lg:pb-12' : 'pb-12'}`}>
         <div className="flex items-center justify-between gap-2 mb-6">
           <div className="min-w-0 flex-1">
             <Breadcrumb current={property?.title || ''} testId="property-breadcrumb" />
@@ -440,6 +441,27 @@ const PropertyDetail = () => {
             )}
           </div>
         </div>
+        {/* The paid page upgrade (backend utils/page_upgrade), for the
+            lister: the four questions above the photos. Absent on every
+            standard page. */}
+        {property.page_upgrade && (() => {
+          const shown = shownPrice(property);
+          const facts = [
+            property.bedrooms ? t('upgrade.bedrooms', { count: Number(property.bedrooms), defaultValue: '{{count}} bedrooms' }) : null,
+            property.bathrooms ? t('upgrade.bathrooms', { count: Number(property.bathrooms), defaultValue: '{{count}} bathrooms' }) : null,
+          ].filter(Boolean).join(', ');
+          return (
+            <ClarityPanel
+              className="mb-6"
+              testid="property-clarity"
+              where={[property.title, areaLabel(property.area, t)].filter(Boolean).join(' · ')}
+              offers={[{ name: facts || t('upgrade.thePlace', 'The place'), price: shown ? formatShownPrice(shown, t) : null }]}
+              why={<p className="text-sm" style={{ color: 'var(--brand-muted)' }}>{t('upgrade.propertyWhy', 'Book directly with the owner. No booking fees.')}</p>}
+              primary={{ label: t('upgrade.book', 'Book'), onClick: () => document.getElementById('property-booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}
+              secondary={[{ label: t('upgrade.askOwner', 'Ask the owner a question'), onClick: () => document.querySelector('[data-testid=message-owner-button]')?.scrollIntoView({ behavior: 'smooth', block: 'center' }) }]}
+            />
+          );
+        })()}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
             <div className="mb-6">
@@ -598,7 +620,7 @@ const PropertyDetail = () => {
             </div>
           </div>
 
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1" id={property.page_upgrade ? 'property-booking' : undefined}>
             <BookingSidebar
               property={property}
               sublease={sublease}
@@ -629,6 +651,26 @@ const PropertyDetail = () => {
           </div>
         </div>
       </div>
+      {/* Upgraded listers only: on a phone the booking box is far below
+          the photos, so the action rides along. Same pattern as the
+          business page's bar; the page above has bottom room for it. */}
+      {property.page_upgrade && (
+        <div
+          className="lg:hidden fixed bottom-0 inset-x-0 z-40 border-t px-4 py-3"
+          style={{ background: 'var(--surface)', borderColor: 'var(--brand-border)', paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))' }}
+          data-testid="property-sticky-bar"
+        >
+          <button
+            type="button"
+            onClick={() => document.getElementById('property-booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+            className="w-full inline-flex items-center justify-center gap-2 min-h-[44px] px-5 rounded-full text-sm font-bold"
+            style={{ background: 'var(--action)', color: 'var(--action-ink)' }}
+            data-testid="property-sticky-book"
+          >
+            {t('upgrade.book', 'Book')}
+          </button>
+        </div>
+      )}
     </div>
   );
 };
