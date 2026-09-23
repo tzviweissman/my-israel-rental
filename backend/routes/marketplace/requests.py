@@ -1186,10 +1186,13 @@ def create_requests_optout_token(user_id: str) -> str:
 
 
 @router.post("/requests/emails/opt-out")
-async def requests_optout_from_email(payload: dict = Body(...)):
+async def requests_optout_from_email(request: Request, payload: dict = Body(...)):
     """Public. Auth is the signed token itself, so the link works straight
     from an email client without logging in — the point of an unsubscribe.
+    Throttled like any unauthenticated POST (site audit, 22 Sep 2026).
     """
+    from utils.rate_limit import check_rate
+    check_rate(request, bucket="emails_optout", limit=30, window_seconds=600)
     try:
         claims = verify_notification_token(payload.get("token") or "", OPT_OUT_PURPOSE)
     except NotificationTokenError as e:

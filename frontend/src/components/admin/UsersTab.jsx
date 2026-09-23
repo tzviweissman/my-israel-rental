@@ -136,7 +136,7 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
             value={searchTerm}
             onChange={e => setSearchTerm(e.target.value)}
             placeholder={t('admin.searchUsers')}
-            className="w-full ps-9 pe-4 py-2 rounded-lg border border-[#E5E5E5] text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
+            className="w-full ps-9 pe-4 py-2 rounded-lg border border-[var(--brand-border)] text-sm focus:outline-none focus:ring-2 focus:ring-black/20"
             data-testid="users-search-input"
           />
         </div>
@@ -144,21 +144,21 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
       </div>
       {/* Scrolls sideways on a phone. It was overflow-hidden, which cut the
           columns off at the screen edge with no way to reach them. */}
-      <div className="bg-white rounded-xl border border-[#E5E5E5] overflow-x-auto">
+      <div className="bg-white rounded-xl border border-[var(--brand-border)] overflow-x-auto">
         <table className="w-full min-w-[720px]">
           <thead className="bg-gray-50">
             <tr>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colName')}</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colEmail')}</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colRole')}</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.status')}</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.colJoined')}</th>
-              <th className="px-5 py-3 text-left text-xs font-semibold text-gray-600 uppercase">{t('admin.actions')}</th>
+              <th className="px-5 py-3 text-start text-xs font-semibold text-gray-600 uppercase">{t('admin.colName')}</th>
+              <th className="px-5 py-3 text-start text-xs font-semibold text-gray-600 uppercase">{t('admin.colEmail')}</th>
+              <th className="px-5 py-3 text-start text-xs font-semibold text-gray-600 uppercase">{t('admin.colRole')}</th>
+              <th className="px-5 py-3 text-start text-xs font-semibold text-gray-600 uppercase">{t('admin.status')}</th>
+              <th className="px-5 py-3 text-start text-xs font-semibold text-gray-600 uppercase">{t('admin.colJoined')}</th>
+              <th className="px-5 py-3 text-start text-xs font-semibold text-gray-600 uppercase">{t('admin.actions')}</th>
             </tr>
           </thead>
           <tbody>
             {filteredUsers.map(u => (
-              <tr key={u.id} className="border-t border-[#E5E5E5] hover:bg-gray-50" data-testid={`user-row-${u.id}`}>
+              <tr key={u.id} className="border-t border-[var(--brand-border)] hover:bg-gray-50" data-testid={`user-row-${u.id}`}>
                 <td className="px-5 py-3 font-medium text-sm">{u.name}</td>
                 <td className="px-5 py-3 text-sm text-gray-600">{u.email}</td>
                 <td className="px-5 py-3">

@@ -191,7 +191,7 @@ export default function NetworkTab({ API, token, listings = [] }) {
           const n = v === 'partners' ? partners.length : v === 'requests' ? incoming.length : null;
           return (
             <button key={v} type="button" role="tab" aria-selected={view === v} onClick={() => setView(v)}
-              className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold ${view === v ? 'bg-white shadow-sm' : ''}`}
+              className={`inline-flex items-center gap-1.5 px-3 min-h-[44px] rounded-md text-sm font-semibold ${view === v ? 'bg-white shadow-sm' : ''}`}
               style={{ color: view === v ? 'var(--brand-primary)' : 'var(--brand-muted)' }} data-testid={`network-view-${v}`}>
               <Icon size={15} aria-hidden="true" />
               {t(`network.view_${v}`, { partners: 'Partners', requests: 'Requests', automations: 'Automations', find: 'Find partners' }[v])}

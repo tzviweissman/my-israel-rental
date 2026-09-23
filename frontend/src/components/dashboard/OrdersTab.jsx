@@ -1409,11 +1409,14 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
           aria-checked={deliveryOn}
           aria-labelledby="settings-delivery-on-label"
           onClick={() => setDeliveryOn((v) => !v)}
-          className={`shrink-0 inline-flex h-6 w-11 items-center rounded-full px-1 transition-colors ${deliveryOn ? 'justify-end' : 'justify-start'}`}
-          style={{ background: deliveryOn ? 'var(--brand-primary)' : 'var(--brand-border)' }}
+          // Same switch as Settings' email switches: 44px to tap, muted-ink OFF track.
+          className="shrink-0 -my-2.5 inline-flex min-h-[44px] min-w-[52px] items-center justify-center"
           data-testid="settings-delivery-on"
         >
-          <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
+          <span className={`inline-flex h-6 w-11 items-center rounded-full px-1 ${deliveryOn ? 'justify-end' : 'justify-start'}`}
+            style={{ background: deliveryOn ? 'var(--brand-primary)' : 'var(--brand-muted)' }}>
+            <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
+          </span>
         </button>
       </div>
       {deliveryOn && (<>

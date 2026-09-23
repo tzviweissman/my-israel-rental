@@ -66,11 +66,15 @@ export default function EmailSwitches({ API, token }) {
               aria-labelledby={`sw-${key}`}
               onClick={() => flip(key)}
               disabled={busy === key}
-              className={`shrink-0 mt-0.5 inline-flex h-6 w-11 items-center rounded-full px-1 transition-colors disabled:opacity-60 ${on[key] ? 'justify-end' : 'justify-start'}`}
-              style={{ background: on[key] ? 'var(--brand-primary)' : 'var(--brand-border)' }}
+              // 44px to tap, 24px to see. The OFF track is the muted ink:
+              // the border grey it used was 1.28:1 on white (audit 23 Sep).
+              className="shrink-0 -my-2.5 inline-flex min-h-[44px] min-w-[52px] items-center justify-center disabled:opacity-60"
               data-testid={`email-switch-${key}`}
             >
-              <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
+              <span className={`inline-flex h-6 w-11 items-center rounded-full px-1 ${on[key] ? 'justify-end' : 'justify-start'}`}
+                style={{ background: on[key] ? 'var(--brand-primary)' : 'var(--brand-muted)' }}>
+                <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
+              </span>
             </button>
           </li>
         ))}

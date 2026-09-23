@@ -37,11 +37,12 @@ from datetime import UTC, date, datetime, time, timedelta
 from typing import Any, Optional
 from zoneinfo import ZoneInfo
 
-from fastapi import APIRouter, Body, HTTPException
+from fastapi import APIRouter, Body, HTTPException, Request
 from pymongo.errors import DuplicateKeyError
 
 from routes.deps import db, logger
 from utils.email import FRONTEND_URL, _button, _esc, _wrap, send_email
+from utils.rate_limit import check_rate
 from utils.notification_tokens import (
     NotificationTokenError,
     _encode,
@@ -254,9 +255,10 @@ def create_optout_token(user_id: str) -> str:
 
 
 @router.post("/insights/emails/opt-out")
-async def insights_optout(payload: dict = Body(...)):
+async def insights_optout(request: Request, payload: dict = Body(...)):
     """Public: the signed token is the auth, so the link works from the
-    inbox without signing in."""
+    inbox without signing in. Throttled like any unauthenticated POST."""
+    check_rate(request, bucket="emails_optout", limit=30, window_seconds=600)
     try:
         claims = verify_notification_token(payload.get("token") or "", OPT_OUT_PURPOSE)
     except NotificationTokenError as e:
