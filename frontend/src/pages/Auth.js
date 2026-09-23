@@ -8,7 +8,6 @@ import { toast } from 'sonner';
 import { apiErrorMessage } from '../utils/apiError';
 import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, CheckCircle, Home, Building2, Briefcase } from 'lucide-react';
 import WelcomePopups from '../components/WelcomePopups';
-import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { GOOGLE_CLIENT_ID } from '../components/auth/useGoogleSignIn';
 import { phoneError, phonePreview } from '../utils/phoneValidation';
@@ -62,7 +61,6 @@ const Auth = () => {
   const [resetDone, setResetDone] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
   const [showWelcomePopups, setShowWelcomePopups] = useState(false);
-  const [showOwnerOffer, setShowOwnerOffer] = useState(false);
 
   // Recomputed each render — cheap, and keeps the message in step with the
   // input without another piece of state to keep in sync.
@@ -105,11 +103,9 @@ const Auth = () => {
       if (mode === 'signup' && formData.role === 'renter') {
         setShowWelcomePopups(true);
       } else if (mode === 'signup' && formData.role === 'owner') {
-        // Pitch our property-management service the moment a fresh owner
-        // lands on the platform — they're most receptive right after signup.
-        // Managers already run their own property portfolio and don't need
-        // this offer, and renters get a different modal (see above).
-        setShowOwnerOffer(true);
+        // Straight into "Add a property" (see SignupJoin); the
+        // property-management pop-up is gone (Tzvi, 23 Sep 2026).
+        navigate(redirectParam ? destination : '/dashboard?welcome=1');
       } else if (mode === 'signup' && formData.role === 'provider') {
         // Service providers land straight in the gig-creation wizard —
         // no property-management upsell, they're here to list services -
@@ -364,13 +360,6 @@ const Auth = () => {
   return (
     <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12">
       {showWelcomePopups && <WelcomePopups onDismiss={() => { setShowWelcomePopups(false); navigate(redirectUrl); }} />}
-      <OwnerManagementOfferModal
-        open={showOwnerOffer}
-        onDismiss={() => {
-          setShowOwnerOffer(false);
-          navigate(redirectUrl);
-        }}
-      />
       <div className="w-full max-w-md">
         <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5]">
           <h2 className="text-3xl font-bold mb-8 text-center" style={{ fontFamily: 'var(--font-head)' }}>

@@ -689,6 +689,10 @@ const he = {
         paymentAccepted: 'נתמכים: {{list}}',
       },
       wizard: {
+        screenBusiness: 'העסק שלכם',
+        screenOffer: 'מה אתם מציעים',
+        screenHours: 'שעות פתיחה',
+        screenContact: 'איך לקוחות יפנו אליכם',
         logoPick: 'לבחור לוגו',
         logoAdd: 'הוספת לוגו',
         businessName: 'שם העסק',

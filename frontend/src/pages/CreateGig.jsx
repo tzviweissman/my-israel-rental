@@ -353,22 +353,32 @@ const CreateGig = () => {
   // Contact — dropping the label is what shortens the whole wizard, since
   // `totalSteps` (and therefore the progress dots and the Publish button)
   // are derived from this array.
+  // THREE SCREENS (Tzvi, 23 Sep 2026: "make it quicker for people to sign
+  // up and add their listing"). Type and overview share the first screen,
+  // the description sits with the services or products on the second, and
+  // contact is the last; appointments add their opening hours before it.
+  // It was five or six screens for what is one short job.
   const stepLabels = useMemo(() => (
     isAppointment
-      ? ['', 'Type', 'Overview', 'Description', 'Services', 'Hours', 'Contact']
-      : ['', 'Type', 'Overview', 'Description', form.gig_type === 'store' ? 'Products' : 'Services & Prices', 'Contact']
-  ), [isAppointment, form.gig_type]);
+      ? ['', t('wizard.screenBusiness', 'Your business'), t('wizard.screenOffer', 'What you offer'), t('wizard.screenHours', 'Opening hours'), t('wizard.screenContact', 'How customers reach you')]
+      : ['', t('wizard.screenBusiness', 'Your business'), t('wizard.screenOffer', 'What you offer'), t('wizard.screenContact', 'How customers reach you')]
+  ), [isAppointment, t]);
   const totalSteps = stepLabels.length - 1;
+  useEffect(() => { if (step > totalSteps) setStep(totalSteps); }, [step, totalSteps]);
+  // The phone given at sign-up fills the WhatsApp box, so it is not typed
+  // twice. Only when the box is empty; still editable.
+  useEffect(() => {
+    const n = user?.whatsapp_number || user?.phone;
+    if (n && !form.whatsapp) set({ whatsapp: n });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user]);
 
   const canNext = () => {
-    // step 1: type picker
-    if (step === 1) return !!form.gig_type;
-    // step 2: title + category
-    if (step === 2) return form.title.trim() && form.category;
-    // step 3: description
-    if (step === 3) return form.description.trim().length > 10;
-    // step 4: primary list (products or tiers)
-    if (step === 4) {
+    // screen 1: type, title, category
+    if (step === 1) return !!form.gig_type && !!form.title.trim() && !!form.category;
+    // screen 2: description, then the primary list (products or tiers)
+    if (step === 2) {
+      if (form.description.trim().length <= 10) return false;
       // A photo is required here, not only at submit. It was checked once,
       // at the very end (see hasAnyPhoto), which meant someone could fill in
       // four more screens before being told to go back — and "at least one
@@ -385,13 +395,13 @@ const CreateGig = () => {
           t.name.trim() && parseFloat(t.price) > 0 && (t.images || []).length > 0
         ));
     }
-    // Appointment inserts hours as step 5
-    if (isAppointment && step === 5) {
+    // Appointment inserts hours as screen 3
+    if (isAppointment && step === 3) {
       const anyOpen = DAYS.some((d) => (form.weekly_availability[d.k] || []).length > 0);
       return anyOpen;
     }
     // Plan selection is the final step now; contact is the one before it.
-    const contactStep = isAppointment ? 6 : 5;
+    const contactStep = isAppointment ? 4 : 3;
     if (step === contactStep) {
       if (!(form.area || '').trim()) return false;
       // Gate on the same normalizer the gig detail page uses to build the
@@ -409,13 +419,13 @@ const CreateGig = () => {
   // missing field.
   const nextBlockReason = () => {
     if (canNext()) return '';
-    if (step === 1) return 'Pick a listing type to continue.';
-    if (step === 2) {
+    if (step === 1) {
+      if (!form.gig_type) return 'Pick a listing type to continue.';
       if (!form.title.trim()) return 'Add a title above.';
       if (!form.category) return 'Pick a category above.';
     }
-    if (step === 3) return 'Write at least 10 characters describing what you offer.';
-    if (step === 4) {
+    if (step === 2) {
+      if (form.description.trim().length <= 10) return 'Write at least 10 characters describing what you offer.';
       if (form.gig_type === 'store') {
         const bad = form.products.find((p) => !p.name.trim() || !(parseFloat(p.price) > 0));
         if (bad && !bad.name.trim()) return 'Give every product a name.';
@@ -438,8 +448,8 @@ const CreateGig = () => {
         });
       }
     }
-    if (isAppointment && step === 5) return 'Turn on at least one open day so customers can book you.';
-    const contactStep = isAppointment ? 6 : 5;
+    if (isAppointment && step === 3) return 'Turn on at least one open day so customers can book you.';
+    const contactStep = isAppointment ? 4 : 3;
     if (step === contactStep) {
       if (!(form.area || '').trim()) return 'Pick a service area (city).';
       if (form.booking_mode === 'whatsapp' && !hasValidWhatsApp(form.whatsapp)) {
@@ -570,7 +580,7 @@ const CreateGig = () => {
   };
 
   // Which real step index maps to contact given the optional hours step.
-  const contactStep = isAppointment ? 6 : 5;
+  const contactStep = isAppointment ? 4 : 3;
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="create-gig-page">
@@ -615,7 +625,7 @@ const CreateGig = () => {
 
         {/* --- Step 1: Gig type picker --- */}
         {step === 1 && (
-          <div className="space-y-3" data-testid="wizard-type-picker">
+          <div className="space-y-3 mb-6" data-testid="wizard-type-picker">
             <p className="text-sm text-gray-600 mb-3">
               Choose the type of listing that best fits your business. This changes what we ask next so we only collect what&apos;s relevant.
             </p>
@@ -653,8 +663,8 @@ const CreateGig = () => {
           </div>
         )}
 
-        {/* --- Step 2: Overview (title + category) --- */}
-        {step === 2 && (
+        {/* --- Screen 1, continued: overview (title + category) --- */}
+        {step === 1 && (
           <div className="space-y-4">
             {askLogo && (
               <div className="rounded-xl border bg-white p-4 flex items-start gap-4" style={{ borderColor: 'var(--brand-border)' }} data-testid="wizard-business">
@@ -742,23 +752,18 @@ const CreateGig = () => {
           </div>
         )}
 
-        {/* --- Step 3: Description --- */}
-        {step === 3 && (
+        {/* --- Screen 2: description, then the services or products --- */}
+        {step === 2 && (
           <div className="space-y-4">
             <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} rows={8}
               placeholder="Describe what you offer, who it's for, and what's included…"
               className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" data-testid="wizard-description" />
             <p className="text-xs text-gray-500">Min 10 characters. Hebrew-browsing renters will see this auto-translated — no need to write it twice.</p>
-            {/* The FAQs. `form.faqs` was initialised and sent from the first
-                day and nothing on any step let anyone write one. */}
-            <div className="pt-2 border-t" style={{ borderColor: 'var(--brand-border)' }}>
-              <FaqEditor faqs={form.faqs || []} onChange={(faqs) => set({ faqs })} testidPrefix="wizard-faq" />
-            </div>
           </div>
         )}
 
-        {/* --- Step 4: Dynamic (Products / Tiers / Services) --- */}
-        {step === 4 && form.gig_type === 'store' && (
+        {/* --- Screen 2, continued: products or services --- */}
+        {step === 2 && form.gig_type === 'store' && (
           <StoreProductsStep
             products={form.products}
             onUpdate={updateProduct}
@@ -769,7 +774,7 @@ const CreateGig = () => {
             onRemoveImage={removeProductImage}
           />
         )}
-        {step === 4 && form.gig_type !== 'store' && (
+        {step === 2 && form.gig_type !== 'store' && (
           <TiersStep
             gigType={form.gig_type}
             tiers={form.tiers}
@@ -784,7 +789,14 @@ const CreateGig = () => {
         )}
 
         {/* --- Step 5 (appointment only): Weekly hours --- */}
-        {isAppointment && step === 5 && (
+        {/* The optional FAQs, last on the screen, after what is required. */}
+        {step === 2 && (
+          <div className="mt-6 pt-4 border-t" style={{ borderColor: 'var(--brand-border)' }}>
+            <FaqEditor faqs={form.faqs || []} onChange={(faqs) => set({ faqs })} testidPrefix="wizard-faq" />
+          </div>
+        )}
+
+        {isAppointment && step === 3 && (
           <AvailabilityStep
             weekly={form.weekly_availability}
             slotDuration={form.slot_duration_minutes}
@@ -891,12 +903,6 @@ const CreateGig = () => {
               <p className="text-[11px] text-gray-500 mt-1 leading-snug">
                 Pick a city so renters within a few km can find your gig via <span className="font-semibold">{t('sweep.showNearby', 'Show nearby')}</span>.
               </p>
-            </div>
-            <div className="rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/6 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/15 p-3 text-xs text-[var(--brand-primary)] leading-snug flex items-start gap-2" data-testid="wizard-translate-notice">
-              <Loader2 size={14} className="mt-0.5 flex-shrink-0 opacity-70" />
-              <span>
-                <b>Heads up:</b> Publishing takes about 4 seconds because we auto-translate your listing to Hebrew so Hebrew-speaking renters can find and read it right away — no extra typing needed.
-              </span>
             </div>
           </div>
         )}

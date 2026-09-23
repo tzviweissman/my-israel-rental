@@ -708,6 +708,10 @@ const en = {
         paymentAccepted: 'Accepted: {{list}}',
       },
       wizard: {
+        screenBusiness: 'Your business',
+        screenOffer: 'What you offer',
+        screenHours: 'Opening hours',
+        screenContact: 'How customers reach you',
         logoPick: 'Choose a logo',
         logoAdd: 'Add logo',
         businessName: 'Business name',
