@@ -2,6 +2,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Clock, Languages, CalendarDays, Truck, Timer, Wallet, BadgeCheck, ScrollText } from 'lucide-react';
 import { needsDirectoryDisclaimer } from '../../lib/categories';
+import { isFoodBusiness, yearsInBusiness, kosherBody } from '../../utils/businessProof';
 
 /**
  * The "Good to know" band on a business page (spec C6).
@@ -21,41 +22,17 @@ import { needsDirectoryDisclaimer } from '../../lib/categories';
  * it cannot go stale the way a typed "12 years" silently does.
  */
 
-// Kosher certification is shown only where it means something. A plumber
-// with a hechsher is not a signal; a bakery without one is.
-//
-// This could never fire before 28 Aug 2026, for two independent reasons,
-// and the block it gates is described three lines below as "often the
-// single most decisive fact on the page":
-//
-//   1. It matched 'food', 'bakery', 'catering' and friends. Not one of
-//      those is a real slug — the taxonomy has `events-catering` and
-//      `shops-products` and nothing else food-shaped — so the set could
-//      not match anything the backend can produce.
-//   2. It read `business.categories`, which is only ever written when an
-//      owner hand-edits the business. Creating a listing does not touch
-//      it, so it is empty almost always. (Same bug the licence block
-//      had; see the note on `regulated` below.)
-//
-// Both are fixed by asking a better question. A business that has ENTERED
-// a hechsher has already told us the category is relevant — it is not a
-// field anyone fills in by accident — so the certificate itself is the
-// signal, and the category list is only used to keep it off a business
-// that plainly is not food. The narrow read (guess the trade, then decide
-// whether to believe the owner) had it backwards.
-const FOOD_CATEGORIES = new Set(['events-catering', 'shops-products']);
-
-/** Categories that would make a hechsher meaningful, if any are known. */
-export const isFoodBusiness = (categories = []) =>
-  (categories || []).some((c) => FOOD_CATEGORIES.has(String(c).toLowerCase()));
+// The kosher, years and "new here" rules moved to utils/businessProof.js
+// (23 Sep 2026) so the proof line beside the main button reads the same
+// ones. The history of why the kosher rule looks the way it does is kept
+// there too.
+export { isFoodBusiness };
 
 export default function GoodToKnow({ business }) {
   const { t } = useTranslation();
   const b = business || {};
 
-  const years = b.founded_year
-    ? Math.max(0, new Date().getFullYear() - Number(b.founded_year))
-    : null;
+  const years = yearsInBusiness(b.founded_year);
 
   const rows = [
     b.hours && { key: 'hours', Icon: Clock, label: t('businessPage.hours', 'Hours'), value: b.hours },
@@ -66,7 +43,7 @@ export default function GoodToKnow({ business }) {
     },
     // Only worth saying once it is a real number. "0 years in business"
     // is worse than silence for someone who started this year.
-    years !== null && years >= 1 && {
+    years && {
       key: 'years', Icon: CalendarDays,
       label: t('businessPage.yearsInBusiness', 'In business'),
       value: t('businessPage.yearsValue', '{{n}} years', { n: years }),
@@ -99,7 +76,7 @@ export default function GoodToKnow({ business }) {
   // withholding it because we could not infer "bakery" from a taxonomy
   // that has no bakery in it serves nobody.
   const cert = b.kosher_certification;
-  const showCert = !!(cert && cert.body && (!known.length || isFoodBusiness(known)));
+  const showCert = !!kosherBody(cert, known);
 
   // Same rule as the hechsher above: shown only where it means
   // something. A licence number on a cleaner is noise; on a money

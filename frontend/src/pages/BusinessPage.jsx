@@ -11,6 +11,11 @@
  * neither will ever break.
  */
 import React, { useContext, useEffect, useState } from 'react';
+import ProofLine from '../components/marketplace/ProofLine';
+import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPanel';
+import { CATEGORY_LABELS } from '../lib/categories';
+import { localizedTitle } from '../utils/gigLocale';
+import { money } from '../utils/currency';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -27,7 +32,7 @@ import { visitorHeaders } from '../utils/visitorId';
 import BusinessCoverBand, { BusinessLogoMark } from '../components/marketplace/BusinessCoverBand';
 import SafeImage from '../components/common/SafeImage';
 import ConnectButton from '../components/marketplace/ConnectButton';
-import { prettyArea } from '../utils/areaNames';
+import { prettyArea, areaLabel } from '../utils/areaNames';
 import { accentFor, accentColors } from '../utils/businessAccent';
 import useCoverScrim from '../hooks/useCoverScrim';
 
@@ -211,6 +216,22 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   };
   // member_since is the joining YEAR, already computed by the API.
   const isNewHere = String(biz.member_since || '') === String(new Date().getFullYear());
+  // Part A: the proof beside every Message button. Everything a
+  // business is known to sell, for the kosher rule (same list the
+  // "Good to know" band uses).
+  const proof = {
+    ratingAvg: biz.rating_avg,
+    ratingCount: biz.rating_count,
+    verified: biz.verified,
+    foundedYear: biz.founded_year,
+    memberSince: biz.member_since,
+    kosher: biz.kosher_certification,
+    categories: [
+      ...(biz.listings || []).map((g) => g && g.category),
+      ...(biz.listing_categories || []),
+      ...(biz.categories || []),
+    ].filter(Boolean),
+  };
 
   // Real data only: fall back through what the business actually has
   // rather than inventing a line for it.
@@ -523,11 +544,59 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   >
                     <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
                   </button>
+                <ProofLine {...proof} className="mt-2 max-w-[18rem]" testid="business-proof-header" />
               </div>
             )}
             </div>
           </div>
         </div>
+
+        {/* The paid page upgrade (backend utils/page_upgrade): the four
+            questions answered above the body. Absent on every standard
+            page; nothing else on the page changes for it. */}
+        {biz.page_upgrade && (() => {
+          const view = biz.upgrade_view || {};
+          const listings = biz.listings || [];
+          const what = [...new Set([...(biz.categories || []), ...listings.map((g) => g.category)].filter(Boolean))]
+            .slice(0, 2).map((c) => t(`categoryLabels.${c}`, CATEGORY_LABELS[c] || c)).join(', ');
+          const where = biz.serves_nationwide
+            ? t('upgrade.nationwide', 'All of Israel')
+            : (biz.areas || []).slice(0, 2).map((a) => areaLabel(prettyArea(a, t), t)).join(', ');
+          const name = (i18n.language || '').startsWith('he') && biz.name_he ? biz.name_he : biz.name;
+          const offers = listings.map((g) => ({
+            name: localizedTitle(g, i18n),
+            price: g.cheapest_price ? t('upgrade.from', { defaultValue: 'from {{price}}', price: money(g.cheapest_price, g.currency || (g.tiers || g.products || [])[0]?.currency || 'ILS') }) : null,
+          }));
+          const firstOf = (type) => listings.find((g) => (type === 'store' ? g.gig_type === 'store' : g.gig_type !== 'store'));
+          const act = view.action || 'message';
+          const primary = act === 'order' && firstOf('store')
+            ? { label: t('upgrade.order', 'Order now'), onClick: () => navigate(`/order/${firstOf('store').id}`) }
+            : act === 'book' && firstOf('service')
+              ? { label: t('upgrade.book', 'Book'), onClick: () => navigate(`/services/gig/${firstOf('service').id}`) }
+              : canMessage ? { label: messageLabel, onClick: messageBusiness } : null;
+          const scrollToBody = () => document.getElementById('business-body')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+          return (
+            <ClarityPanel
+              className="my-6"
+              testid="business-clarity"
+              where={[name, what, where].filter(Boolean).join(' · ')}
+              offers={offers}
+              why={(view.strengths || []).length || proof.ratingCount || proof.verified || proof.foundedYear ? (
+                <div className="flex flex-wrap items-center gap-y-1">
+                  <StrengthChips strengths={view.strengths} />
+                  <ProofLine {...proof} testid="business-clarity-proof" />
+                </div>
+              ) : (
+                <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>{t('upgrade.whyAsk', 'Ask anything before you decide. Replies come in the chat.')}</p>
+              )}
+              primary={primary}
+              secondary={[
+                ...(primary && act !== 'message' && canMessage ? [{ label: messageLabel, onClick: messageBusiness }] : []),
+                { label: t('upgrade.seeAll', 'See everything they offer'), onClick: scrollToBody },
+              ]}
+            />
+          );
+        })()}
 
         {/* THE COMPOSED BODY.
             Everything between the header above and the recruitment band
@@ -546,6 +615,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             travels in `ctx` and stays the reader's, because a document
             that could hold someone's search box open would be a document
             fighting the person reading it. */}
+        {biz.page_upgrade && <div id="business-body" className="scroll-mt-24" />}
         <BlockList
           business={biz}
           ctx={{
@@ -584,7 +654,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         {/* Repeated for anyone who has read to the end — asking them to
             scroll back up to act is how intent gets lost. */}
         {canMessage && (
-          <div className="mt-10 mb-24 sm:mb-10 flex justify-center">
+          <div className="mt-10 mb-24 sm:mb-10 flex flex-col items-center gap-2">
             <button
                     type="button"
                     onClick={messageBusiness}
@@ -593,6 +663,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   >
                     <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
                   </button>
+            <ProofLine {...proof} className="justify-center" testid="business-proof-bottom" />
           </div>
         )}
       </div>
@@ -656,6 +727,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           }}
           data-testid="business-message-bar"
         >
+          <ProofLine {...proof} compact className="justify-center mb-2" testid="business-proof-sticky" />
           <button
             type="button"
             onClick={messageBusiness}

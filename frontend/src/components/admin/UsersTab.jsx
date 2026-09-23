@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Search, Ban, CheckCircle, Trash2, LogIn, Mail, RotateCcw } from 'lucide-react';
+import { Search, Ban, CheckCircle, Trash2, LogIn, Mail, RotateCcw, Sparkles } from 'lucide-react';
 import { API, AuthContext } from '../../App';
 import { useApiSWR } from '../../hooks/useApiSWR';
 
@@ -54,6 +54,17 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
       fetchUsers();
       notifyStatsChange();
     } catch (e) { toast.error('Failed to update user'); }
+  };
+
+  // The paid page upgrade (backend utils/page_upgrade), switched by hand
+  // until payment exists. Re-reads the list, like the other row actions.
+  const togglePageUpgrade = async (u) => {
+    const next = !u.page_upgrade;
+    try {
+      await axios.put(`${API}/admin/users/${u.id}/page-upgrade`, { on: next }, { headers });
+      fetchUsers();
+      toast.success(next ? t('admin.pageUpgradeOn', 'Page upgrade on') : t('admin.pageUpgradeOff', 'Page upgrade off'));
+    } catch (e) { toast.error(t('admin.pageUpgradeFailed', 'Could not change the page upgrade')); }
   };
 
   const deleteUser = (userId) => {
@@ -193,6 +204,18 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
                           <Mail size={16} />
                         </button>
                       )}
+                      <button
+                        onClick={() => togglePageUpgrade(u)}
+                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold"
+                        style={u.page_upgrade
+                          ? { background: 'rgb(var(--brand-primary-rgb) / 0.12)', color: 'var(--brand-primary-deep)' }
+                          : { color: 'var(--brand-muted)' }}
+                        aria-pressed={!!u.page_upgrade}
+                        title={t('admin.pageUpgradeHint', "Paid page upgrade for all of this person's pages")}
+                        data-testid={`page-upgrade-${u.id}`}
+                      >
+                        <Sparkles size={13} aria-hidden="true" /> {u.page_upgrade ? t('admin.pageUpgradeOnShort', 'Upgrade on') : t('admin.pageUpgradeOffShort', 'Upgrade')}
+                      </button>
                       <button onClick={() => toggleUserStatus(u.id)} className="p-1.5 rounded hover:bg-gray-100" title={(u.status || 'active') === 'active' ? t('admin.block') : t('admin.unblock')} data-testid={`toggle-user-${u.id}`}>
                         {(u.status || 'active') === 'active' ? <Ban size={16} className="text-orange-500" /> : <CheckCircle size={16} className="text-green-500" />}
                       </button>

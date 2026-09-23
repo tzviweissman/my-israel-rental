@@ -1,4 +1,5 @@
 import React from 'react';
+import ProofLine from '../marketplace/ProofLine';
 import axios from 'axios';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
@@ -1132,6 +1133,16 @@ const BookingSidebar = ({
             )}
           </span>
         </button>
+        {/* Part A: the lister's proof beside the button. Properties have
+            no reviews and listers no credential yet, so nothing shows
+            until the API sends real ones in `lister_proof`. */}
+        <ProofLine
+          ratingAvg={property?.lister_proof?.rating_avg}
+          ratingCount={property?.lister_proof?.rating_count}
+          verified={property?.lister_proof?.verified}
+          className="justify-center mt-2"
+          testid="property-proof"
+        />
         {cancellationNote && (
           <p
             className="mt-2 text-center text-xs text-gray-500"

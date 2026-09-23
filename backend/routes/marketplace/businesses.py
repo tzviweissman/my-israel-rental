@@ -22,6 +22,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel, Field
 
+from utils.page_upgrade import has_page_upgrade
 from routes.deps import db, optional_user, verify_token
 from utils import view_tracking
 from utils.businesses import (
@@ -840,7 +841,7 @@ async def public_business(
         )
 
     rating = await business_rating(biz["_id"])
-    return {
+    out = {
         "id": biz["_id"],
         "slug": biz.get("slug"),
         "name": biz.get("name") or "",
@@ -919,7 +920,17 @@ async def public_business(
             await db.marketplace_providers.find_one({"user_id": biz.get("owner_user_id")}) or {}
         ),
         "listings": [_public_listing(g) for g in raw],
+        # The paid page upgrade (utils/page_upgrade): the one answer the
+        # page renders from. False for almost everyone.
+        "page_upgrade": await has_page_upgrade(biz.get("owner_user_id")),
     }
+    # The upgraded page's leading action and backed strengths, from the
+    # private brief (utils/page_clarity.upgrade_view). Sent only with the
+    # upgrade, and only the result: the brief itself stays private.
+    if out["page_upgrade"]:
+        from utils.page_clarity import upgrade_view
+        out["upgrade_view"] = upgrade_view({**out, "page_brief": biz.get("page_brief") or {}})
+    return out
 
 
 @router.get("/providers/{user_id}/default-business")
