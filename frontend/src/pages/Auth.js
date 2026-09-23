@@ -112,8 +112,9 @@ const Auth = () => {
         setShowOwnerOffer(true);
       } else if (mode === 'signup' && formData.role === 'provider') {
         // Service providers land straight in the gig-creation wizard —
-        // no property-management upsell, they're here to list services.
-        navigate('/businesses/add');
+        // no property-management upsell, they're here to list services -
+        // unless the link that brought them named where to go.
+        navigate(redirectParam ? destination : '/businesses/add');
       } else {
         navigate(destination);
       }
@@ -618,7 +619,7 @@ const Auth = () => {
                 />
                 <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer leading-snug">
                   {t('auth.agreeToTerms')}{' '}
-                  <a href="/terms" target="_blank" className="font-medium underline underline-offset-2" style={{ color: 'var(--gold)' }} data-testid="auth-terms-link">
+                  <a href="/terms" target="_blank" rel="noreferrer" className="font-medium underline underline-offset-2" style={{ color: 'var(--gold)' }} data-testid="auth-terms-link">
                     {t('auth.termsAndConditions')}
                   </a>
                 </label>

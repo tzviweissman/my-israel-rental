@@ -49,9 +49,9 @@ export default function GrowthGuide() {
 
         <div role="tablist" className="inline-flex gap-1 p-1 rounded-lg mt-5" style={{ background: 'rgb(var(--brand-primary-rgb) / 0.07)' }}>
           {['business', 'host'].map((a) => (
-            <button key={a} type="button" role="tab" aria-selected={audience === a}
+            <button key={a} type="button" role="tab" aria-selected={audience === a} aria-controls="guide-stops" id={`guide-tab-${a}`}
               onClick={() => { const p = new URLSearchParams(params); p.set('for', a); setParams(p, { replace: true }); }}
-              className={`px-3 py-1.5 rounded-md text-sm font-semibold ${audience === a ? 'bg-white shadow-sm' : ''}`}
+              className={`px-3 min-h-[44px] rounded-md text-sm font-semibold ${audience === a ? 'bg-white shadow-sm' : ''}`}
               style={{ color: audience === a ? 'var(--brand-primary)' : 'var(--brand-muted)' }}
               data-testid={`guide-for-${a}`}>
               {t(`guide.for_${a}`, a === 'business' ? 'I run a business' : 'I rent out a place')}
@@ -59,7 +59,7 @@ export default function GrowthGuide() {
           ))}
         </div>
 
-        <ol className="mt-6 space-y-3" data-testid="guide-stops">
+        <ol className="mt-6 space-y-3" id="guide-stops" role="tabpanel" aria-labelledby={`guide-tab-${audience}`} data-testid="guide-stops">
           {WALKS[audience].map((s, n) => (
             <li key={s.id} className="rounded-2xl border bg-white p-4 flex gap-3" style={{ borderColor: 'var(--brand-border)' }}>
               <span className="h-7 w-7 rounded-full inline-flex items-center justify-center shrink-0 text-xs font-bold"

@@ -78,6 +78,25 @@ export default function DeliveriesTab({ API, token, onChanged }) {
     }
   };
 
+  // A courier who accepted an invite could not stop delivering for that
+  // business on their own; only the owner could remove them (dead-ends
+  // audit, 22 Sep 2026). The endpoint existed; this is its button.
+  const leave = async (b) => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(t('deliveries.confirmStop', { defaultValue: 'Stop delivering for {{name}}? Your open deliveries for them go back to them.', name: b.business_name }))) return;
+    setBusy(b.business_id);
+    try {
+      await axios.post(`${API}/marketplace/courier/businesses/${b.business_id}/leave`, null, auth);
+      toast.success(t('deliveries.stopped', { defaultValue: 'You no longer deliver for {{name}}', name: b.business_name }));
+      await load();
+      onChanged?.();
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const lang = String(i18n.language || 'en').split('-')[0];
   if (stops === null || me === null) {
     return <div className="py-16 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 className="animate-spin inline" size={18} /></div>;
@@ -98,6 +117,20 @@ export default function DeliveriesTab({ API, token, onChanged }) {
           ? t('deliveries.bodyFor', 'You deliver for {{names}}. New deliveries appear here by themselves.', { names: me.businesses.map((b) => b.business_name).join(', ') })
           : t('deliveries.body', 'A business that invites you appears here. Accept, and their deliveries come to this tab.')}
       </p>
+      {me.businesses.length > 0 && (
+        <ul className="mb-4 flex flex-wrap gap-2" data-testid="courier-businesses">
+          {me.businesses.map((b) => (
+            <li key={b.business_id} className="inline-flex items-center gap-2 rounded-full border ps-3 pe-1 py-1 text-sm" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
+              <span dir="auto">{b.business_name}</span>
+              <button type="button" disabled={busy === b.business_id} onClick={() => leave(b)}
+                className="inline-flex items-center min-h-[36px] px-3 rounded-full text-xs font-semibold disabled:opacity-50" style={{ color: 'var(--brand-muted)' }}
+                data-testid={`courier-leave-${b.business_id}`}>
+                {t('deliveries.stop', 'Stop delivering')}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {/* A courier is a person; a connection is between two businesses
           (docs/business-network-spec.md, Phase 0). Without a business of

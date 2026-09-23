@@ -212,8 +212,8 @@ export default function PerformancePanel({
                   <tr data-testid="perf-row-business-page">
                     <td className="py-0.5 text-gray-700 italic">{t('perf.businessPage', 'Your business page')}</td>
                     <td className="py-0.5 px-2 text-end tabular-nums text-gray-900">{data.page_views}</td>
-                    <td className="py-0.5 text-end text-gray-400">–</td>
-                    {hasSaves && <td className="py-0.5 ps-2 text-end text-gray-400">–</td>}
+                    <td className="py-0.5 text-end text-gray-400">·</td>
+                    {hasSaves && <td className="py-0.5 ps-2 text-end text-gray-400">·</td>}
                   </tr>
                 )}
                 {rows.map((r) => (
