@@ -12,6 +12,7 @@
  */
 import React, { useContext, useEffect, useState } from 'react';
 import ProofLine from '../components/marketplace/ProofLine';
+import ReviewsSection from '../components/reviews/ReviewsSection';
 import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPanel';
 import { CATEGORY_LABELS } from '../lib/categories';
 import { localizedTitle } from '../utils/gigLocale';
@@ -634,6 +635,15 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             openService: (g) => navigate(`/businesses/${g.id}`),
             apiBase: API,
           }}
+        />
+
+        {/* Verified reviews across this business's listings, plus its
+            own Google reviews (routes/reviews.py). Nothing while off. */}
+        <ReviewsSection
+          businessId={biz.id}
+          kind="business"
+          className="mt-10"
+          schemaItem={{ '@type': 'LocalBusiness', name: biz.name }}
         />
 
         {/* B7 — the highest-intent placement on the site for this CTA.

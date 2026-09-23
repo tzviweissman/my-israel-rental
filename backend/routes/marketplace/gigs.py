@@ -1303,6 +1303,8 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
     now = datetime.now(UTC)
     was_pending = booking.get("status") == "pending"
     update: dict[str, Any] = {"status": payload.status, "updated_at": now.isoformat()}
+    if payload.status == "completed" and booking.get("status") != "completed":
+        update["completed_at"] = now.isoformat()  # starts the review window (utils/reviews.py)
     if payload.reply:
         update["provider_reply"] = payload.reply[:2000]
     if was_pending and payload.status in ("accepted", "declined"):
@@ -2112,6 +2114,11 @@ async def upsert_review(gig_id: str, payload: ReviewIn, user=Depends(verify_toke
         raise HTTPException(status_code=404, detail="Gig not found")
     if gig["provider_user_id"] == user["user_id"]:
         raise HTTPException(status_code=400, detail="You cannot review your own gig")
+    from utils.reviews import native_enabled
+    if native_enabled():
+        # Verified reviews are on: reviews come from completed bookings
+        # only (routes/reviews.py), never from anyone who is signed in.
+        raise HTTPException(status_code=410, detail="Reviews now come from completed bookings")
     now = datetime.now(UTC).isoformat()
     existing = await db.marketplace_reviews.find_one({"gig_id": gig_id, "client_user_id": user["user_id"]})
     if existing:

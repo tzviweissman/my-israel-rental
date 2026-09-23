@@ -8,6 +8,7 @@
  */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import ProofLine from '../components/marketplace/ProofLine';
+import ReviewsSection from '../components/reviews/ReviewsSection';
 import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPanel';
 import { money } from '../utils/currency';
 import { Link, useNavigate, useParams } from 'react-router-dom';
@@ -1024,11 +1025,19 @@ const GigDetail = () => {
               </div>
             )}
 
-            <ReviewSection
-              gig={gig}
-              token={token}
-              user={user}
-              onRatingChange={(avg, count) => setGig((prev) => prev ? { ...prev, rating_avg: avg, rating_count: count } : prev)}
+            {/* Verified reviews when switched on (routes/reviews.py);
+                until then the old section, exactly as before. */}
+            <ReviewsSection
+              listingId={gig.id}
+              kind="gig"
+              fallback={(
+                <ReviewSection
+                  gig={gig}
+                  token={token}
+                  user={user}
+                  onRatingChange={(avg, count) => setGig((prev) => prev ? { ...prev, rating_avg: avg, rating_count: count } : prev)}
+                />
+              )}
             />
 
             {/* Provider mini-profile */}

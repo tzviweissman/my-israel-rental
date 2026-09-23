@@ -1160,3 +1160,38 @@ async def notify_renters_of_property_deletion(property_doc: dict) -> dict:
         "with_booking": len(booking_renter_ids),
         "with_chat": len(chat_user_ids),
     }
+
+
+async def send_review_request_email(
+    to_email: str,
+    guest_name: str,
+    listing_title: str,
+    review_url: str,
+    *,
+    kind: str = "stay",
+    reminder: bool = False,
+) -> bool:
+    """Ask a guest to review a completed booking (utils/reviews.py). At most
+    two per booking: this one and one reminder. Offers nothing in return:
+    a reward would make the review incentivized, which must then be shown
+    on it (FTC 16 CFR Part 465)."""
+    guest_name = _esc(guest_name)
+    listing_title = _esc(listing_title)
+    review_url = _esc(review_url)
+    what = "stay at" if kind == "stay" else "booking with"
+    opener = "A quick reminder: we'd" if reminder else "We'd"
+    inner = f"""
+    <h2 style="color:#222;font-size:22px;margin:0 0 8px;">How was it?</h2>
+    <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">
+      Hi {guest_name or 'there'},<br />
+      {opener} like to hear about your {what} <strong>{listing_title}</strong>.
+      Your review is published as a verified review and helps the next person decide.
+      Good or bad, say what happened.
+    </p>
+    {_button("Write your review", review_url)}
+    <p style="color:#888;font-size:12px;line-height:1.6;">
+      The link works once and expires in 30 days. We'll send at most one reminder.
+    </p>
+    """
+    subject = f"{'Reminder: h' if reminder else 'H'}ow was your {what} {_plain(listing_title)}?"
+    return await send_email(to_email, subject, _wrap(inner, preheader="Tell the next guest what it was like."), tag="review-request")

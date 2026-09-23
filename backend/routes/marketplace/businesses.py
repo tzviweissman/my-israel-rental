@@ -717,16 +717,22 @@ async def business_rating(business_id: str) -> dict[str, Any]:
     describes neither — it quietly punishes the good business and
     launders the bad one.
     """
-    gig_ids = [
-        g["_id"] async for g in db.marketplace_gigs.find({"business_id": business_id}, {"_id": 1})
-    ]
-    if not gig_ids:
-        return {"rating_avg": None, "rating_count": 0}
+    from routes.marketplace.shared import _review_source
+    from utils.reviews import native_enabled
+    if native_enabled():
+        coll, match = _review_source({"business_id": business_id})
+    else:
+        gig_ids = [
+            g["_id"] async for g in db.marketplace_gigs.find({"business_id": business_id}, {"_id": 1})
+        ]
+        if not gig_ids:
+            return {"rating_avg": None, "rating_count": 0}
+        coll, match = db.marketplace_reviews, {"gig_id": {"$in": gig_ids}}
     pipeline = [
-        {"$match": {"gig_id": {"$in": gig_ids}}},
+        {"$match": match},
         {"$group": {"_id": None, "avg": {"$avg": "$rating"}, "count": {"$sum": 1}}},
     ]
-    async for row in db.marketplace_reviews.aggregate(pipeline):
+    async for row in coll.aggregate(pipeline):
         return {
             "rating_avg": round(row["avg"], 1) if row.get("avg") is not None else None,
             "rating_count": row.get("count", 0),

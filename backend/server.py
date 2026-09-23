@@ -45,6 +45,7 @@ from routes import (  # noqa: E402
     onboarding,
     payments,
     properties,
+    reviews,
     saved_searches,
     short_links,
     site_visits,
@@ -93,6 +94,7 @@ for mod in (
     site_visits,
     tours_3d,
     weekly_insights,
+    reviews,
 ):
     api_router.include_router(mod.router)
 
@@ -267,6 +269,10 @@ async def startup_tasks() -> None:
     # "How your listings did" - Mondays 09:00 Israel, one email per person,
     # none in a week with no activity. See routes/weekly_insights.py.
     asyncio.create_task(weekly_insights.weekly_insights_loop())
+    # Verified reviews (routes/reviews.py): the review-request emails and
+    # the Google sync. Both idle while their flag is off.
+    asyncio.create_task(reviews.review_requests_daily_loop())
+    asyncio.create_task(reviews.google_reviews_daily_loop())
     # Every 15 minutes, not daily: a 24h booking hold with a halfway nudge
     # needs finer resolution than one wake-up a day. Availability itself does
     # not depend on this loop — lapsed holds stop occupying their slot on

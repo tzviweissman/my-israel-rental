@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar, Briefcase, MapPin, Mail, Flag } from 'lucide-react';
+import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar, Briefcase, MapPin, Mail, Flag, Star } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { useApiSWR } from '../hooks/useApiSWR';
 import { useAdminLiveEvents } from '../hooks/useAdminLiveEvents';
@@ -8,6 +8,7 @@ import OverviewTab from '../components/admin/OverviewTab';
 import SiteQrPanel from '../components/admin/SiteQrPanel';
 import ServicesTab from '../components/admin/ServicesTab';
 import RequestReportsTab from '../components/admin/RequestReportsTab';
+import ReviewsModerationTab from '../components/admin/ReviewsModerationTab';
 import AreaAliasManager from '../components/admin/AreaAliasManager';
 import ListingsTab from '../components/admin/ListingsTab';
 import UsersTab from '../components/admin/UsersTab';
@@ -49,6 +50,8 @@ const TAB_GROUPS = [
     // "requests expiring" row, and the report queue underneath it, had no
     // tab to land on — this closes both at once.
     { key: 'requests', labelKey: 'admin.requestsTab', icon: Flag },
+    // Reported reviews (routes/reviews.py); says so when reviews are off.
+    { key: 'reviews', labelKey: 'admin.reviewsTab', icon: Star },
   ] },
   { group: 'admin.groupPeople', items: [
     { key: 'users', labelKey: 'admin.users', icon: Users },
@@ -197,6 +200,7 @@ const AdminDashboard = () => {
         {activeTab === 'listings' && <ListingsTab token={token} onStatsChange={fetchDashboard} />}
         {activeTab === 'services' && <ServicesTab token={token} initialFilter={servicesFilter} />}
         {activeTab === 'requests' && <RequestReportsTab token={token} />}
+        {activeTab === 'reviews' && <ReviewsModerationTab token={token} />}
         {activeTab === 'areas' && <AreaAliasManager token={token} />}
         {activeTab === 'bookings' && <BookingsTab token={token} />}
         {activeTab === 'users' && <UsersTab token={token} onStatsChange={fetchDashboard} prefilter={usersPrefilter} />}

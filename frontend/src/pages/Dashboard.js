@@ -18,6 +18,7 @@ import BulkUploadModal from '../components/dashboard/BulkUploadModal';
 import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
 import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
+import GoogleReviewsCard from '../components/dashboard/GoogleReviewsCard';
 import OrdersTab from '../components/dashboard/OrdersTab';
 import DeliveriesTab from '../components/dashboard/DeliveriesTab';
 import NetworkTab from '../components/dashboard/NetworkTab';
@@ -469,6 +470,9 @@ const Dashboard = () => {
 
         {activeTab === 'properties' && isPropertyLister && (
           <>
+            {/* Rentals-only people need a way in too; renders nothing
+                unless Google review import is switched on. */}
+            <GoogleReviewsCard API={API} token={token} returnTab="properties" />
             <PropertyList
               properties={properties}
               bookings={bookings}
@@ -526,7 +530,11 @@ const Dashboard = () => {
             about: fixing only the tab would have shown a My Gigs button
             that rendered an empty panel. */}
         {activeTab === 'my-businesses' && showGigTabs && (
-          <MyBusinessesTab API={API} token={token} />
+          <>
+            {/* Renders nothing unless Google review import is switched on. */}
+            <GoogleReviewsCard API={API} token={token} />
+            <MyBusinessesTab API={API} token={token} />
+          </>
         )}
 
         {activeTab === 'orders' && showGigTabs && (
