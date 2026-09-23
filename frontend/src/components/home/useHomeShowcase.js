@@ -60,9 +60,24 @@ export const propertyPhoto = (p) => {
 
 const byNewest = (a, b) => String(b.created_at || '').localeCompare(String(a.created_at || ''));
 
+// ONLY WHAT THE PAGE SHOWS (23 Sep 2026). This asked for 200 rentals and
+// 60 services, about 240 KB and two seconds, to draw roughly twenty cards;
+// the rest of the catalogue waits until someone opens Stays or Businesses.
+// Rentals are the admin's featured strip (a lean endpoint built for exactly
+// this) plus the newest few, newest-first on the server: the old list came
+// in collection order, so "Recently added" could miss the newest listings.
+// Twenty-four of each leaves room for the ones with no photo.
+const HOME_TAKE = 24;
 const SOURCES = {
-  properties: () => axios.get(`${API}/properties`, { params: { limit: 200 } }),
-  gigs: () => axios.get(`${API}/marketplace/gigs`, { params: { limit: 60 } }),
+  properties: () => Promise.all([
+    axios.get(`${API}/properties/featured`),
+    axios.get(`${API}/properties`, { params: { limit: HOME_TAKE, sort: 'newest' } }),
+  ]).then(([f, n]) => {
+    const seen = new Set();
+    const data = [...(f.data || []), ...(n.data || [])].filter((p) => p && !seen.has(p.id) && seen.add(p.id));
+    return { data };
+  }),
+  gigs: () => axios.get(`${API}/marketplace/gigs`, { params: { limit: HOME_TAKE } }),
   // The offers shelf. Its own endpoint, so an empty result here is a fact
   // about the site - nobody is running an offer today - and not a filter
   // that failed.
