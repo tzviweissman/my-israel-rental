@@ -24,6 +24,27 @@ Related and partly superseded: `docs/business-page-customization-spec.md`,
 3. **The page is fully theirs.** No MyIsraelRental branding on it.
 4. **Every business gets it**, with tiered depth.
 
+## Rulings (Tzvi, 23 Sep 2026): proof for everyone, clarity is paid
+
+5. **Every page gets the proof beside the button.** The star rating and the
+   owner's true credentials (verified, years in business, kosher on a food
+   business) sit right beside the main Message / Book / Order button on every
+   business, service and property page, now and for every page made later.
+   Built as `components/marketplace/ProofLine.jsx`; the rules in
+   `frontend/src/utils/businessProof.js`.
+6. **Everything else stays standard by default.** The standard page is not
+   otherwise improved toward the upgraded one.
+7. **Clarity and psychology are a paid upgrade**, a separate add-on (not part
+   of Pro): the four questions answered at the top, at most two strengths, one
+   leading action, a phone sticky bar on property pages, deliberate empty
+   states. The future AI-built page is part of the same paid upgrade.
+   Switched per person by `utils/page_upgrade.has_page_upgrade(owner)`, the
+   one check every upgraded behaviour reads; an admin turns it on by hand
+   until payment exists.
+8. **Never, for anyone:** invented urgency ("booked 11 times today") unless a
+   real, current count exists; invented testimonials, credentials or claims;
+   hidden low ratings.
+
 ### What ruling 3 means, precisely
 
 **Visually theirs. Structurally ours.** Nothing on the page says MyIsraelRental,
@@ -348,6 +369,41 @@ Every composition, whatever the theme, is validated before it can be saved:
   common case for a new business, and it is where generated pages usually fall
   apart.
 
+## P4a — The clarity floor (Tzvi, 23 Sep 2026)
+
+P4 keeps a page from looking broken. This keeps it from being unclear. It
+applies to upgraded pages (ruling 7) and to every page the AI generator will
+produce: **each of the three options in P7d must pass it before it is shown.
+An option that fails is rejected, not repaired**, the same way P4 treats
+contrast. A repaired page is one nobody chose.
+
+In the first screen, in the page's own language, a visitor can answer:
+
+1. **Where am I?** Who they are, what they do in plain words, and where.
+2. **What do I get?** What they offer, with at least one thing named.
+3. **Why should I care?** A real reason backed by real proof: reviews,
+   verified, years in business, kosher on a food business. Owner-chosen
+   strengths count only when the data backs the checkable ones (kosher needs
+   a certificate, experience a founding year, licensed a licence number,
+   English a language listed).
+4. **What do I do next?** One clearly leading action, the one in their brief
+   (`action`: message, book, visit or order) and possible on this page;
+   everything else visibly secondary.
+
+And:
+
+- **At most two strengths** near the top (`PageBrief.strengths`).
+- **Deliberate empty states.** No photos, no prices or no reviews still reads
+  as intentional ("Ask for a quote"), never a blank.
+- **Hero text within its limits** (`HeroProps`: title 80, accent 40, lede 200).
+- **Nothing invented** (ruling 8).
+
+The check is deterministic, no AI: `backend/utils/page_clarity.py`. Given a
+business, its page and a language, it returns pass or fail per rule, a reason
+in plain words, and the one thing to fix first. English and Hebrew are checked
+separately. It is not shown to owners and not wired to saving; the upgraded
+renderer and the future generator use it.
+
 ## P5 — What we do not do
 
 - **No arbitrary code, ever, on our origin.**
@@ -578,6 +634,10 @@ from the top through to the end of their content. Below that:
 Drop the "New on MyIsraelRental" string at `BusinessPage.jsx:457` — a business's
 own page is the wrong place to advertise how new they are to us. Replace with
 "New here" or nothing.
+
+*Overruled 23 Sep 2026:* Tzvi's proof-beside-the-button brief keeps "New on
+MyIsraelRental" for a business that joined this year, and it now also appears
+in the proof line (ruling 5).
 
 ### The opportunity this creates, worth deciding separately
 
