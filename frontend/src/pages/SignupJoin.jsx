@@ -26,7 +26,6 @@ import {
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import WelcomePopups from '../components/WelcomePopups';
-import OwnerManagementOfferModal from '../components/OwnerManagementOfferModal';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import SignupSphere from '../components/auth/SignupSphere';
 import useIsWide from '../hooks/useIsWide';
@@ -139,9 +138,7 @@ const SignupJoin = () => {
     // draft even if an older build once wrote one.
     password: '',
   }));
-  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPwd, setShowPwd] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [signedUp, setSignedUp] = useState(false);
@@ -156,7 +153,6 @@ const SignupJoin = () => {
   // Post-signup modals (mirrors Auth.js behaviour so the two entry
   // points feel identical after account creation).
   const [showWelcomePopups, setShowWelcomePopups] = useState(false);
-  const [showOwnerOffer, setShowOwnerOffer] = useState(false);
 
   const activeCard = ROLE_CARDS.find((r) => r.key === selectedRole);
   const isWide = useIsWide(1024);
@@ -183,10 +179,6 @@ const SignupJoin = () => {
       toast.error(t('auth.passwordTooShort', 'Password must be at least 6 characters.'));
       return;
     }
-    if (form.password !== confirmPassword) {
-      toast.error(t('auth.passwordMismatch', 'Passwords do not match.'));
-      return;
-    }
     if (!termsAccepted) {
       toast.error(t('auth.mustAcceptTerms', 'You must accept the terms and conditions.'));
       return;
@@ -204,7 +196,11 @@ const SignupJoin = () => {
       if (activeCard.backendRole === 'renter') {
         setShowWelcomePopups(true);
       } else if (activeCard.backendRole === 'owner') {
-        setShowOwnerOffer(true);
+        // Straight into "Add a property" (Dashboard opens it on
+        // ?welcome=1). A property-management sales pop-up stood here and
+        // was removed (Tzvi, 23 Sep 2026): the first thing a new host
+        // sees is their own listing, not an offer.
+        navigate(redirectParam || '/dashboard?welcome=1');
       } else if (activeCard.backendRole === 'provider') {
         // Someone who came to post a job goes back to posting it, not to
         // "Add your business". (Dead-ends audit 2026-09-03, #6.)
@@ -608,6 +604,9 @@ const SignupJoin = () => {
                     testid="signup-phone"
                   />
                 </Field>
+                {/* One password box, with the eye to check it. A repeat box
+                    was one more field between a person and their listing
+                    (Tzvi, 23 Sep 2026); "Forgot password" covers a typo. */}
                 <Field label={t('signupJoin.password', 'Password')} testId="signup-password">
                   <div className="relative">
                     <input
@@ -629,29 +628,6 @@ const SignupJoin = () => {
                       data-testid="signup-password-toggle"
                     >
                       {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
-                    </button>
-                  </div>
-                </Field>
-                <Field label={t('signupJoin.confirmPassword', 'Confirm password')} testId="signup-confirm">
-                  <div className="relative">
-                    <input
-                      type={showConfirm ? 'text' : 'password'}
-                      required
-                      minLength={6}
-                      autoComplete="new-password"
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pe-11 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
-                      data-testid="signup-confirm-input"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirm((s) => !s)}
-                      className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                      aria-label={showConfirm ? 'Hide password' : 'Show password'}
-                      data-testid="signup-confirm-toggle"
-                    >
-                      {showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
                 </Field>
@@ -721,13 +697,6 @@ const SignupJoin = () => {
           }}
         />
       )}
-      <OwnerManagementOfferModal
-        open={showOwnerOffer}
-        onDismiss={() => {
-          setShowOwnerOffer(false);
-          navigate(redirectParam || '/dashboard');
-        }}
-      />
     </div>
   );
 };
