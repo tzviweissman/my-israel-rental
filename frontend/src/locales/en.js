@@ -2098,6 +2098,12 @@ const en = {
         totalSuffix: ' total'
       },
       admin: {
+        pageUpgradeOn: 'Page upgrade on',
+        pageUpgradeOff: 'Page upgrade off',
+        pageUpgradeFailed: 'Could not change the page upgrade',
+        pageUpgradeHint: "Paid page upgrade for all of this person's pages",
+        pageUpgradeOnShort: 'Upgrade on',
+        pageUpgradeOffShort: 'Upgrade',
         groupSupply: 'Supply',
         groupDemand: 'Demand',
         groupPeople: 'People',

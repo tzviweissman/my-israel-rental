@@ -15,6 +15,7 @@ from zoneinfo import ZoneInfo
 import jwt
 
 from fastapi import APIRouter, Depends, HTTPException
+from pydantic import BaseModel
 
 from models import SiteSettings
 from models_response import (
@@ -451,6 +452,24 @@ async def update_user_status(user_id: str, payload: dict = Depends(verify_token)
     forget_user(user_id)
     await publish("invalidate", {"prefixes": ["/api/admin/users", "/api/admin/dashboard"]})
     return {"message": f"User {new_status}", "status": new_status}
+
+
+class PageUpgradeIn(BaseModel):
+    on: bool
+
+
+@api_router.put("/admin/users/{user_id}/page-upgrade")
+async def set_page_upgrade(user_id: str, body: PageUpgradeIn, payload: dict = Depends(verify_token)) -> dict:
+    """Switch the paid page upgrade on or off for one person (utils/
+    page_upgrade). Admin only: the manual override today, and still the
+    override once payment sets the same field."""
+    if payload['role'] != 'admin':
+        raise HTTPException(status_code=403, detail="Admin access required")
+    res = await db.users.update_one({"id": user_id}, {"$set": {"page_upgrade": body.on}})
+    if not res.matched_count:
+        raise HTTPException(status_code=404, detail="User not found")
+    await publish("invalidate", {"prefixes": ["/api/admin/users"]})
+    return {"page_upgrade": body.on}
 
 
 # Everything that belongs to ONE person and to nobody else. Deleting the

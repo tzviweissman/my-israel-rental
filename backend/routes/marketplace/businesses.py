@@ -22,6 +22,7 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel, Field
 
+from utils.page_upgrade import has_page_upgrade
 from routes.deps import db, optional_user, verify_token
 from utils import view_tracking
 from utils.businesses import (
@@ -919,6 +920,9 @@ async def public_business(
             await db.marketplace_providers.find_one({"user_id": biz.get("owner_user_id")}) or {}
         ),
         "listings": [_public_listing(g) for g in raw],
+        # The paid page upgrade (utils/page_upgrade): the one answer the
+        # page renders from. False for almost everyone.
+        "page_upgrade": await has_page_upgrade(biz.get("owner_user_id")),
     }
 
 

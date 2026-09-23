@@ -15,6 +15,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request, Response
 from fastapi.responses import RedirectResponse
 
 from models_response import ManagerPropertiesResponse, PropertyOut
+from utils.page_upgrade import has_page_upgrade
 from routes.deps import db, logger, optional_user, verify_token
 from utils import view_tracking
 from utils.whatsapp_link import build_whatsapp_link
@@ -755,6 +756,8 @@ async def get_property(
     # the per-process TTL cache instead of a per-request Atlas round-trip.
     featured_ids = await get_featured_property_ids()
     property_data['is_featured'] = property_id in featured_ids
+    # The paid page upgrade (utils/page_upgrade), for the lister.
+    property_data['page_upgrade'] = await has_page_upgrade(property_data.get('owner_id'))
 
     # Public, anonymous, identical for every caller (owner_name/email/
     # whatsapp are listing contact details shown to everyone, not

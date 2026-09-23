@@ -18,6 +18,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
 
+from utils.page_upgrade import has_page_upgrade
 from routes.deps import db, logger, optional_user, verify_token
 from utils import view_tracking
 from utils.businesses import ensure_default_business
@@ -698,6 +699,7 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
             "categories": business.get("categories") or [],
             "member_since": (business.get("created_at") or "")[:4] or None,
         }
+    gig["page_upgrade"] = await has_page_upgrade(gig.get("provider_user_id"))
     agg = await _rating_aggregate(gig_id)
     gig["rating_avg"] = agg["rating_avg"]
     gig["rating_count"] = agg["rating_count"]

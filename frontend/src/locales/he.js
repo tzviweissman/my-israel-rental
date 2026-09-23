@@ -1997,6 +1997,12 @@ const he = {
         totalSuffix: ' סה״כ'
       },
       admin: {
+        pageUpgradeOn: 'שדרוג העמוד הופעל',
+        pageUpgradeOff: 'שדרוג העמוד כובה',
+        pageUpgradeFailed: 'לא הצלחנו לשנות את שדרוג העמוד',
+        pageUpgradeHint: 'שדרוג עמוד בתשלום לכל העמודים של האדם הזה',
+        pageUpgradeOnShort: 'שדרוג פעיל',
+        pageUpgradeOffShort: 'שדרוג',
         groupSupply: 'היצע',
         groupDemand: 'ביקוש',
         groupPeople: 'אנשים',
