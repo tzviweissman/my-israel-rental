@@ -268,15 +268,29 @@ Publish is offered only for a page that passes the check.
 
 ## 8. Photos, video and the tools
 
-**Generated images and video** (Higgsfield, kie.ai). Tzvi, 23 Sep 2026: mood only.
-- Allowed only for atmosphere: light, texture, background, a sense of place.
-- **Never shows their product, premises, staff or customers as if real.**
-- The owner approves every generated piece before it can be used.
+**AI images and video** (Higgsfield, kie.ai). Tzvi, 23 Sep 2026: owners should be
+able to look professional even when their own photos aren't, "a moist steaming
+piece of meat being sliced" on Blazin' Boards. Two tools, in this order:
+
+1. **Enhanced from theirs.** Their own photos and clips made to look professional:
+   relit, cleaned up, sharpened, or animated from their actual photo (steam rising,
+   the knife moving). It is still their product, so it can go anywhere, including
+   the product cards.
+2. **Illustrations.** Fully generated "appetite" shots of the same kind of item they
+   really sell (sliced brisket for a business that sells brisket, never a dish they
+   don't make). Allowed in the atmosphere parts of the page (hero, section
+   backgrounds, the scroll sections), **never on the product cards**, where people
+   choose what they will actually get. Each carries a small "Illustration" note.
+
+For both:
+- The owner approves every piece before it can be used.
+- Never a generated person presented as their staff or customer, and never their
+  premises made up.
 - No text baked into an image.
 - Prompts respect the business. On a kosher business nothing non-kosher is in the
-  frame; the Blazin' Boards prompts excluded dairy, pork and shellfish because the
-  flyer carries a hechsher.
-- Today the builder can't place one at all: images are references to their own
+  frame and no meat with dairy; the Blazin' Boards prompts excluded dairy, pork and
+  shellfish because the flyer carries a hechsher.
+- Today the builder can place neither: images are references to their own uploaded
   photos only (open decision 5).
 
 **Movement that copies a reference is built in code, not generated.** Generated
@@ -342,11 +356,14 @@ Rules for using them:
 4. **Advice rules.** Everything above rejects. If some rules turn out too strict
    in practice (say, the 10-word headline), they can become advice fed back to the
    AI instead of a rejection. Decide once there are real pages to look at.
-5. **Approved mood images.** To use generated mood images, the page design needs a
-   new kind of image reference that points only at assets the owner has approved.
-   Until then generated media can't appear on a built page at all.
-6. **Before and after consent.** The before-and-after section needs a record that
-   each pictured client agreed. Decide how consent is collected before building it.
+5. **Approved AI media.** To use enhanced photos and illustrations, the page design
+   needs a new kind of image reference that points only at media the owner has
+   approved, and knows which of the two kinds each piece is (so an illustration can
+   be kept off the product cards and carry its note). Until then AI media can't
+   appear on a built page.
+6. **Before and after consent.** Decided (Tzvi, 23 Sep 2026): for now the owner is
+   asked, once per pair, whether the client pictured agreed to their photos being
+   used. No pair appears without that yes.
 7. **Which scroll section first.** Decided (Tzvi delegated, 23 Sep 2026): **the size
    ladder**. It runs on what a shop already enters (its options, prices and photos),
    needs no 3D production, and shops are the most common business on the site. It

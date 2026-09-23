@@ -420,7 +420,9 @@ document: `docs/page-generation-rules.md`, checked by `backend/utils/page_rules.
   sidesteps the licensing question entirely: looking at references to inform our
   own work is what those products are for.
 - **No stock imagery inserted on the owner's behalf** that implies it is their
-  premises, their staff, or their product.
+  premises, their staff, or their product. Refined 23 Sep 2026: owner-approved AI
+  "illustrations" of the kind of item they really sell are allowed in atmosphere
+  sections, labelled, never on product cards (`docs/page-generation-rules.md` §8).
 - **No claims generated about the business** that it did not make. The model
   arranges and styles what the owner supplied; it does not invent testimonials,
   credentials, or "trusted by" lines.
