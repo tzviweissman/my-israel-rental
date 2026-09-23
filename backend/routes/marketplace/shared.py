@@ -952,15 +952,29 @@ def _clean_gig(gig: dict[str, Any]) -> dict[str, Any]:
     return gig
 
 
+def _review_source(old_match: dict) -> tuple[Any, dict]:
+    """Where the stars come from. With REVIEWS_NATIVE_ENABLED on, the
+    verified guest reviews only (utils/reviews.py), so an unchecked old
+    review never counts; Google reviews are shown beside them, never
+    averaged in. Off, the old collection exactly as before."""
+    from utils.reviews import native_enabled, visible_query
+    if not native_enabled():
+        return db.marketplace_reviews, old_match
+    if "gig_id" in old_match:
+        return db.reviews, visible_query({"listing_id": old_match["gig_id"], "source": "native"})
+    return db.reviews, visible_query({**old_match, "source": "native"})
+
+
 async def _rating_aggregate(gig_id: str) -> dict[str, Any]:
     """Compute {rating_avg, rating_count} for one gig. Small scale — a
     single `$group` over the reviews collection. `rating_avg` is rounded
     to 1 decimal so the UI can render '4.7' without runtime math."""
+    coll, match = _review_source({"gig_id": gig_id})
     pipeline = [
-        {"$match": {"gig_id": gig_id}},
+        {"$match": match},
         {"$group": {"_id": None, "avg": {"$avg": "$rating"}, "count": {"$sum": 1}}},
     ]
-    async for row in db.marketplace_reviews.aggregate(pipeline):
+    async for row in coll.aggregate(pipeline):
         return {
             "rating_avg": round(row["avg"], 1) if row.get("avg") is not None else None,
             "rating_count": row.get("count", 0),
@@ -973,12 +987,14 @@ async def _batch_rating_aggregate(gig_ids: list[str]) -> dict[str, dict[str, Any
     the public browse route doesn't fire N+1 review queries."""
     if not gig_ids:
         return {}
+    coll, match = _review_source({"gig_id": {"$in": gig_ids}})
     pipeline = [
-        {"$match": {"gig_id": {"$in": gig_ids}}},
-        {"$group": {"_id": "$gig_id", "avg": {"$avg": "$rating"}, "count": {"$sum": 1}}},
+        {"$match": match},
+        {"$group": {"_id": "$gig_id" if coll.name == "marketplace_reviews" else "$listing_id",
+                    "avg": {"$avg": "$rating"}, "count": {"$sum": 1}}},
     ]
     result: dict[str, dict[str, Any]] = {}
-    async for row in db.marketplace_reviews.aggregate(pipeline):
+    async for row in coll.aggregate(pipeline):
         result[row["_id"]] = {
             "rating_avg": round(row["avg"], 1) if row.get("avg") is not None else None,
             "rating_count": row.get("count", 0),
