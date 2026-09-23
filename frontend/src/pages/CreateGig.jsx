@@ -241,7 +241,7 @@ const CreateGig = () => {
     if (!arr.length) return;
     const current = form.tiers[i]?.images || [];
     if (current.length + arr.length > 6) {
-      toast.error('Max 6 photos per option');
+      toast.error(t('wizard.maxPhotos', 'Up to 6 photos per option'));
       return;
     }
     try {
@@ -265,7 +265,7 @@ const CreateGig = () => {
       }
       if (good.length > 0) updateTier(i, { images: [...current, ...good.map((r) => r.url)] });
     } catch (err) {
-      toast.error(err.message || 'Upload failed');
+      toast.error(err.message || t('wizard.uploadFailed', 'Upload failed'));
     }
   };
   const removeTierImage = (i, url) => {
@@ -305,16 +305,16 @@ const CreateGig = () => {
         // "Invalid image file") tells someone what to do next; a bare
         // "Upload failed" tells them to retry something that will fail
         // again the same way.
-        toast.error(results.find((r) => r?.error)?.error || 'Upload failed');
+        toast.error(results.find((r) => r?.error)?.error || t('wizard.uploadFailed', 'Upload failed'));
         return;
       }
       const failed = results.length - urls.length;
-      if (failed > 0) toast.error(`${failed} photo(s) did not upload`);
+      if (failed > 0) toast.error(t('wizard.someFailed', { count: failed, defaultValue: '{{count}} photos did not upload' }));
       // Write the whole set to `images` and clear the legacy single
       // field, so a product is described by exactly one of the two.
       updateProduct(i, { images: [...existing, ...urls], image: '' });
     } catch (err) {
-      toast.error(err.message || 'Upload failed');
+      toast.error(err.message || t('wizard.uploadFailed', 'Upload failed'));
     }
   };
 
@@ -420,20 +420,20 @@ const CreateGig = () => {
   const nextBlockReason = () => {
     if (canNext()) return '';
     if (step === 1) {
-      if (!form.gig_type) return 'Pick a listing type to continue.';
-      if (!form.title.trim()) return 'Add a title above.';
-      if (!form.category) return 'Pick a category above.';
+      if (!form.gig_type) return t('wizard.reasonType', 'Pick a listing type to continue.');
+      if (!form.title.trim()) return t('wizard.reasonTitle', 'Add a title above.');
+      if (!form.category) return t('wizard.reasonCategory', 'Pick a category above.');
     }
     if (step === 2) {
-      if (form.description.trim().length <= 10) return 'Write at least 10 characters describing what you offer.';
+      if (form.description.trim().length <= 10) return t('wizard.reasonDescription', 'Write at least 10 characters describing what you offer.');
       if (form.gig_type === 'store') {
         const bad = form.products.find((p) => !p.name.trim() || !(parseFloat(p.price) > 0));
-        if (bad && !bad.name.trim()) return 'Give every product a name.';
-        if (bad) return 'Every product needs a price greater than 0.';
+        if (bad && !bad.name.trim()) return t('wizard.reasonProductName', 'Give every product a name.');
+        if (bad) return t('wizard.reasonProductPrice', 'Every product needs a price greater than 0.');
       } else {
         const bad = form.tiers.find((t) => !t.name.trim() || !(parseFloat(t.price) > 0));
-        if (bad && !bad.name.trim()) return 'Give every service or tier a name (see the highlighted field).';
-        if (bad) return 'Every service needs a price greater than 0.';
+        if (bad && !bad.name.trim()) return t('wizard.reasonTierName', 'Give every service a name (see the highlighted field).');
+        if (bad) return t('wizard.reasonTierPrice', 'Every service needs a price greater than 0.');
       }
       // Named last so the earlier, cheaper problems are reported first —
       // being sent to find a photo while the price is still empty would
@@ -448,10 +448,10 @@ const CreateGig = () => {
         });
       }
     }
-    if (isAppointment && step === 3) return 'Turn on at least one open day so customers can book you.';
+    if (isAppointment && step === 3) return t('wizard.reasonHours', 'Turn on at least one open day so customers can book you.');
     const contactStep = isAppointment ? 4 : 3;
     if (step === contactStep) {
-      if (!(form.area || '').trim()) return 'Pick a service area (city).';
+      if (!(form.area || '').trim()) return t('wizard.reasonArea', 'Pick a service area (city).');
       if (form.booking_mode === 'whatsapp' && !hasValidWhatsApp(form.whatsapp)) {
         return t('services.whatsappInvalid', 'Enter a valid WhatsApp number — e.g. 050-123-4567 or +972 50 123 4567.');
       }
@@ -573,7 +573,7 @@ const CreateGig = () => {
       // starts it only if this account has never taken it, on any device.
       navigate(firstBusiness ? '/dashboard?tour=first' : `/businesses/${data.id}`);
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to publish');
+      toast.error(err.response?.data?.detail || t('wizard.publishFailed', 'Could not publish. Please try again.'));
     } finally {
       setSaving(false);
     }
@@ -584,7 +584,7 @@ const CreateGig = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="create-gig-page">
-      <PageMeta title="Create a service | MyIsraelRental Provider" description="List your service on MyIsraelRental." path="/services/create" />
+      <PageMeta title={t('wizard.metaTitle', 'Add your business | MyIsraelRental')} description={t('wizard.metaDescription', 'List your business on MyIsraelRental, free.')} path="/services/create" />
       <div className="max-w-2xl mx-auto px-4 py-8">
         {showWelcome && (
           <div
@@ -595,21 +595,20 @@ const CreateGig = () => {
               type="button"
               onClick={() => setShowWelcome(false)}
               className="absolute top-3 right-3 text-white/70 hover:text-white transition-colors"
-              aria-label="Dismiss"
+              aria-label={t('wizard.dismiss', 'Dismiss')}
               data-testid="create-gig-welcome-dismiss"
             >
               <X size={16} />
             </button>
             <div className="pr-6">
               <div className="text-xs font-semibold uppercase tracking-wider text-[var(--gold)] mb-1">
-                Welcome aboard
+                {t('wizard.welcomeEyebrow', 'Welcome aboard')}
               </div>
               <div className="text-lg font-semibold mb-1" style={{ fontFamily: 'var(--font-head)' }}>
-                Let&apos;s create your first service
+                {t('wizard.welcomeTitle', 'Let us create your first listing')}
               </div>
               <p className="text-sm text-white/85 leading-snug">
-                Tell us what you offer — customers browsing the marketplace
-                will see your listing within minutes of publishing.
+                {t('wizard.welcomeBody', 'Tell us what you offer. Customers see your listing as soon as you publish it.')}
               </p>
             </div>
           </div>
@@ -627,22 +626,22 @@ const CreateGig = () => {
         {step === 1 && (
           <div className="space-y-3 mb-6" data-testid="wizard-type-picker">
             <p className="text-sm text-gray-600 mb-3">
-              Choose the type of listing that best fits your business. This changes what we ask next so we only collect what&apos;s relevant.
+              {t('wizard.typeIntro', 'Choose the type of listing that best fits your business. This changes what we ask next, so we only ask what is relevant.')}
             </p>
-            {GIG_TYPES.map((t) => {
-              const Icon = t.icon;
-              const active = form.gig_type === t.id;
+            {GIG_TYPES.map((gt) => {
+              const Icon = gt.icon;
+              const active = form.gig_type === gt.id;
               return (
                 <button
-                  key={t.id}
+                  key={gt.id}
                   type="button"
-                  onClick={() => setGigType(t.id)}
-                  className={`w-full text-left rounded-2xl border-2 p-4 flex gap-4 items-start transition-all ${
+                  onClick={() => setGigType(gt.id)}
+                  className={`w-full text-start rounded-2xl border-2 p-4 flex gap-4 items-start transition-all ${
                     active
                       ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 shadow-md'
                       : 'border-gray-200 bg-white hover:border-[var(--gold)] hover:shadow-sm'
                   }`}
-                  data-testid={`wizard-type-${t.id}`}
+                  data-testid={`wizard-type-${gt.id}`}
                 >
                   <div className={`w-11 h-11 rounded-xl flex items-center justify-center flex-shrink-0 ${
                     active ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-100 text-gray-700'
@@ -650,9 +649,9 @@ const CreateGig = () => {
                     <Icon size={22} />
                   </div>
                   <div className="flex-1">
-                    <div className="font-bold text-sm text-gray-900">{t.label}</div>
-                    <div className="text-sm text-gray-700 mt-0.5">{t.tagline}</div>
-                    <div className="text-xs text-gray-500 mt-1">Examples: {t.examples}</div>
+                    <div className="font-bold text-sm text-gray-900">{t(`wizard.type_${gt.id}`, gt.label)}</div>
+                    <div className="text-sm text-gray-700 mt-0.5">{t(`wizard.type_${gt.id}_tagline`, gt.tagline)}</div>
+                    <div className="text-xs text-gray-500 mt-1">{t('wizard.examples', 'Examples:')} {t(`wizard.type_${gt.id}_examples`, gt.examples)}</div>
                   </div>
                   {active && (
                     <div className="w-5 h-5 rounded-full bg-[var(--brand-primary)] text-white flex items-center justify-center text-xs">✓</div>
@@ -697,13 +696,15 @@ const CreateGig = () => {
               </div>
             )}
             <div>
-              <label className="text-sm font-semibold text-gray-700">Title</label>
+              <label className="text-sm font-semibold text-gray-700">{t('wizard.title', 'Title')}</label>
               <input value={form.title} onChange={(e) => set({ title: e.target.value })}
-                placeholder={form.gig_type === 'store' ? 'e.g. Modern Furniture — Tel Aviv Showroom' : 'e.g. Deep apartment cleaning'}
+                placeholder={form.gig_type === 'store'
+                  ? t('wizard.titlePhStore', 'e.g. Modern furniture, Tel Aviv showroom')
+                  : t('wizard.titlePh', 'e.g. Deep apartment cleaning')}
                 className="w-full mt-1 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" data-testid="wizard-title" />
             </div>
             <div>
-              <label className="text-sm font-semibold text-gray-700">Category</label>
+              <label className="text-sm font-semibold text-gray-700">{t('wizard.category', 'Category')}</label>
               {/* Grouped (spec N2). Same testids as the flat grid it
                   replaced — `wizard-cat-<slug>` — so nothing that
                   referenced them needs to change. */}
@@ -756,9 +757,9 @@ const CreateGig = () => {
         {step === 2 && (
           <div className="space-y-4">
             <textarea value={form.description} onChange={(e) => set({ description: e.target.value })} rows={8}
-              placeholder="Describe what you offer, who it's for, and what's included…"
+              placeholder={t('wizard.descriptionPh', 'Describe what you offer, who it is for, and what is included…')}
               className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" data-testid="wizard-description" />
-            <p className="text-xs text-gray-500">Min 10 characters. Hebrew-browsing renters will see this auto-translated — no need to write it twice.</p>
+            <p className="text-xs text-gray-500">{t('wizard.descriptionHint', 'At least 10 characters. It is translated automatically, so write it once, in either language.')}</p>
           </div>
         )}
 
@@ -811,7 +812,7 @@ const CreateGig = () => {
           <div className="space-y-4">
             <div>
               <label className="text-sm font-semibold text-gray-700">
-                {form.gig_type === 'store' ? 'How should buyers reach you?' : 'How should clients book?'}
+                {form.gig_type === 'store' ? t('wizard.reachStore', 'How should buyers reach you?') : t('wizard.reachService', 'How should clients book?')}
               </label>
               {/* Provider's contact preference. Both paths are fully
                   supported for services — unlike rentals, where WhatsApp is
@@ -820,17 +821,17 @@ const CreateGig = () => {
                 {[
                   {
                     v: 'whatsapp',
-                    label: form.gig_type === 'store' ? 'Message on WhatsApp' : 'Book on WhatsApp',
+                    label: form.gig_type === 'store' ? t('wizard.modeWaStore', 'Message on WhatsApp') : t('wizard.modeWa', 'Book on WhatsApp'),
                     hint: t('services.contactHintWhatsApp', 'Customers open a WhatsApp chat with you directly.'),
                   },
                   {
                     v: 'in_platform',
-                    label: form.gig_type === 'store' ? 'Message on MyIsraelRental' : 'Book on MyIsraelRental',
+                    label: form.gig_type === 'store' ? t('wizard.modeSiteStore', 'Message on MyIsraelRental') : t('wizard.modeSite', 'Book on MyIsraelRental'),
                     hint: t('services.contactHintInPlatform', 'Requests arrive in your MyIsraelRental inbox — no phone number shared.'),
                   },
                 ].map((o) => (
                   <button key={o.v} type="button" onClick={() => set({ booking_mode: o.v })}
-                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold border text-left ${
+                    className={`flex-1 px-3 py-2 rounded-lg text-sm font-semibold border text-start ${
                       form.booking_mode === o.v ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--brand-primary)]'
                     }`} data-testid={`wizard-booking-${o.v}`}>
                     <span className="block">{o.label}</span>
@@ -891,9 +892,9 @@ const CreateGig = () => {
               </p>
             </div>
             <div>
-              <label className="text-sm font-semibold text-gray-700">Service area <span className="text-red-500">*</span></label>
+              <label className="text-sm font-semibold text-gray-700">{t('wizard.area', 'Service area')} <span className="text-red-500">*</span></label>
               <input value={form.area} onChange={(e) => set({ area: e.target.value })}
-                placeholder="Tel Aviv, Jerusalem, Haifa…" list="services-city-suggestions"
+                placeholder={t('wizard.areaPh', 'Tel Aviv, Jerusalem, Haifa…')} list="services-city-suggestions"
                 className={`w-full mt-1 px-3 py-2 rounded-lg border text-sm focus:outline-none focus:border-[var(--brand-primary)] ${
                   (form.area || '').trim() ? 'border-gray-200' : 'border-gray-300'
                 }`} data-testid="wizard-area" />
@@ -901,7 +902,7 @@ const CreateGig = () => {
                 {locations.map((l) => (<option key={l.slug} value={l.label} />))}
               </datalist>
               <p className="text-[11px] text-gray-500 mt-1 leading-snug">
-                Pick a city so renters within a few km can find your gig via <span className="font-semibold">{t('sweep.showNearby', 'Show nearby')}</span>.
+                {t('wizard.areaHint', 'Pick a city so people nearby can find you with')} <span className="font-semibold">{t('sweep.showNearby', 'Show nearby')}</span>.
               </p>
             </div>
           </div>
@@ -916,13 +917,13 @@ const CreateGig = () => {
         <div className="flex flex-col items-end mt-8 gap-2 sm:flex-row sm:items-center sm:justify-between">
           <button type="button" disabled={step === 1} onClick={() => setStep((s) => s - 1)}
             className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600 disabled:opacity-30 flex items-center gap-1 self-start sm:self-auto" data-testid="wizard-back">
-            <ArrowLeft size={14} /> Back
+            <ArrowLeft size={14} className="rtl:rotate-180" /> {t('wizard.back', 'Back')}
           </button>
           <div className="flex flex-col items-end gap-1">
             {step < totalSteps ? (
               <button type="button" disabled={!canNext()} onClick={() => setStep((s) => s + 1)}
                 className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-40 flex items-center gap-1" data-testid="wizard-next">
-                Next <ArrowRight size={14} />
+                {t('wizard.next', 'Next')} <ArrowRight size={14} className="rtl:rotate-180" />
               </button>
             ) : (
               <button type="button" disabled={!canNext() || saving} onClick={submit}
@@ -930,10 +931,10 @@ const CreateGig = () => {
                 {saving ? (
                   <>
                     <Loader2 className="animate-spin" size={14} />
-                    <span>Publishing… translating to Hebrew</span>
+                    <span>{t('wizard.publishing', 'Publishing…')}</span>
                   </>
                 ) : (
-                  <>Publish gig <ArrowRight size={14} /></>
+                  <>{t('wizard.publish', 'Publish')} <ArrowRight size={14} className="rtl:rotate-180" /></>
                 )}
               </button>
             )}
@@ -955,7 +956,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
   return (
   <div className="space-y-4" data-testid="wizard-products-step">
     <div className="rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 p-3 text-xs text-[var(--brand-primary)] leading-snug">
-      Add each product you sell as a separate row — with photos, price, and short description. Customers browse the grid and message you to buy.
+      {t('wizard.productsIntro', 'Add each product you sell as its own row, with photos, a price and a short description. Customers browse them and message you to buy.')}
     </div>
     {products.map((p, i) => (
       <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid={`wizard-product-${i}`}>
@@ -981,7 +982,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
                     type="button"
                     onClick={() => onRemoveImage(i, url)}
                     className="absolute top-0.5 end-0.5 w-5 h-5 rounded-full bg-black/60 text-white text-xs leading-none flex items-center justify-center"
-                    aria-label="Remove photo"
+                    aria-label={t('wizard.removePhoto', 'Remove photo')}
                     data-testid={`wizard-product-image-remove-${i}`}
                   >
                     ×
@@ -1009,7 +1010,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
           </div>
           <div className="flex-1 space-y-2">
             <input value={p.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
-              placeholder="Product name (e.g. Oak dining table)"
+              placeholder={t('wizard.productNamePh', 'Product name (e.g. Oak dining table)')}
               className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm font-semibold focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 placeholder:text-gray-400 placeholder:font-normal"
               data-testid={`wizard-product-name-${i}`} />
             <div className="flex gap-2 items-stretch">
@@ -1037,12 +1038,12 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
           </div>
         </div>
         <textarea value={p.description} onChange={(e) => onUpdate(i, { description: e.target.value })} rows={2}
-          placeholder="Short description (optional) — dimensions, materials, colours…"
+          placeholder={t('wizard.productDescPh', 'Short description (optional): size, materials, colours…')}
           className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" />
       </div>
     ))}
     <button type="button" onClick={onAdd} className="text-sm font-semibold text-[var(--brand-primary)] flex items-center gap-1" data-testid="wizard-product-add">
-      <Plus size={14} /> Add another product
+      <Plus size={14} /> {t('wizard.addProduct', 'Add another product')}
     </button>
   </div>
   );
@@ -1057,8 +1058,8 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
     <div className="space-y-4">
       <div className="rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 p-3 text-xs text-[var(--brand-primary)] leading-snug">
         {isAppt
-          ? 'List each bookable service — e.g. a barber might add Haircut (30 min · ₪60), Beard trim (15 min · ₪30), Full grooming (45 min · ₪90). Duration lets us build the time-slot picker.'
-          : 'List each service or tier you offer as a separate option — for example, a designer might add Basic package (3 samples · 3 days · ₪250) and Premium (5 samples · 5 days · ₪450).'}
+          ? t('wizard.tiersIntroAppt', 'List each service people can book. A barber might add Haircut (30 min · ₪60), Beard trim (15 min · ₪30) and Full grooming (45 min · ₪90). The length is what builds your booking times.')
+          : t('wizard.tiersIntro', 'List each service or package as its own option. A designer might add Basic (3 samples · 3 days · ₪250) and Premium (5 samples · 5 days · ₪450).')}
       </div>
       {tiers.map((tt, i) => {
         const missingName = !tt.name.trim();
@@ -1072,12 +1073,12 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
           <div className="flex items-end justify-between gap-2">
             <div className="flex-1">
               <label className="block text-[11px] font-semibold text-gray-600 mb-1">
-                {isAppt ? 'Service name' : 'Service or tier name'} <span className="text-red-500">*</span>
+                {isAppt ? t('wizard.serviceName', 'Service name') : t('wizard.tierName', 'Service or package name')} <span className="text-red-500">*</span>
               </label>
               <input value={tt.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
-                placeholder={isAppt
-                  ? (i === 0 ? 'e.g. Haircut' : 'Service name')
-                  : (i === 0 ? 'e.g. Basic package' : 'Service name')}
+                placeholder={i === 0
+                  ? (isAppt ? t('wizard.serviceNamePhAppt', 'e.g. Haircut') : t('wizard.serviceNamePh', 'e.g. Basic package'))
+                  : t('wizard.serviceName', 'Service name')}
                 className={`w-full px-3 py-2 rounded-lg border text-sm font-semibold placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 ${
                   missingName ? 'border-red-200 bg-red-50/30' : 'border-gray-200 bg-white'
                 }`}
@@ -1118,13 +1119,13 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
                   placeholder={t("sweep.duration", "Duration")}
                   className="w-28 pl-3 pr-8 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
                   data-testid={`wizard-tier-duration-${i}`} />
-                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-gray-500">min</span>
+                <span className="pointer-events-none absolute right-2 top-1/2 -translate-y-1/2 text-[11px] text-gray-500">{t('wizard.min', 'min')}</span>
               </div>
             ) : (
               <input type="number" min="0" value={tt.delivery_days}
                 onChange={(e) => onUpdate(i, { delivery_days: e.target.value })}
                 placeholder={t('sweep.daysToComplete', 'Days to complete')}
-                title="Turnaround in days — leave blank for on-the-spot services"
+                title={t('wizard.daysTitle', 'Turnaround in days. Leave blank for on-the-spot services.')}
                 className="w-44 shrink-0 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
                 data-testid={`wizard-tier-days-${i}`} />
             )}
@@ -1132,14 +1133,14 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
           {i === 0 && (
             <p className="text-[11px] text-gray-500 leading-snug">
               {isAppt ? (
-                <><span className="font-semibold">{t('sweep.duration', 'Duration')}</span> is how long this service takes (used to build your bookable time slots).</>
+                <><span className="font-semibold">{t('sweep.duration', 'Duration')}</span> {t('wizard.durationHint', 'is how long this service takes. It builds your booking times.')}</>
               ) : (
-                <><span className="font-semibold">{t('sweep.daysToComplete', 'Days to complete')}</span> is the turnaround time. Leave blank for on-the-spot services.</>
+                <><span className="font-semibold">{t('sweep.daysToComplete', 'Days to complete')}</span> {t('wizard.daysHint', 'is the turnaround time. Leave blank for on-the-spot services.')}</>
               )}
             </p>
           )}
           <textarea value={tt.description} onChange={(e) => onUpdate(i, { description: e.target.value })} rows={2}
-            placeholder="What's included (optional)" className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" />
+            placeholder={t('wizard.includedPh', 'What is included (optional)')} className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" />
 
           {/* Per-tier photo uploader — lets a provider give each option
               its own visual identity (e.g. "Jerusalem tour" vs. "Tel Aviv
@@ -1224,26 +1225,26 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
             <p className="text-[11px] text-red-600 leading-snug flex items-center gap-1" data-testid={`wizard-tier-hint-${i}`}>
               <span className="inline-block w-1 h-1 rounded-full bg-red-500" />
               {missingName && missingPrice
-                ? 'Add a service name and a price above to continue.'
+                ? t('wizard.tierNeedBoth', 'Add a service name and a price above to continue.')
                 : missingName
-                  ? 'Give this service a name (e.g. Haircut, Deep clean).'
-                  : 'Add a price greater than 0.'}
+                  ? t('wizard.tierNeedName', 'Give this service a name (e.g. Haircut, Deep clean).')
+                  : t('wizard.tierNeedPrice', 'Add a price greater than 0.')}
             </p>
           )}
         </div>
       );})}
       {tiers.length < 15 && (
         <button type="button" onClick={onAdd} className="text-sm font-semibold text-[var(--brand-primary)] flex items-center gap-1" data-testid="wizard-tier-add">
-          <Plus size={14} /> Add another service or tier
+          <Plus size={14} /> {t('wizard.addTier', 'Add another service')}
         </button>
       )}
       {gigType === 'deliverable' && (
         <label className="flex items-start gap-3 p-3 rounded-xl border border-gray-200 bg-white cursor-pointer" data-testid="wizard-date-booking-toggle">
           <input type="checkbox" checked={!!enableDateBooking} onChange={onToggleDateBooking} className="mt-1" />
           <div>
-            <div className="text-sm font-semibold text-gray-900">Let customers pick a service date</div>
+            <div className="text-sm font-semibold text-gray-900">{t('wizard.dateBooking', 'Let customers pick a service date')}</div>
             <div className="text-xs text-gray-600 mt-0.5">
-              Best for cleaners, movers, plumbers, or anyone whose customer needs to nail down the day the work happens. If off, customers just describe what they need in a message.
+              {t('wizard.dateBookingHint', 'Best for cleaners, movers, plumbers, or anyone whose customer needs to fix the day the work happens. If off, customers describe what they need in a message.')}
             </div>
           </div>
         </label>
@@ -1258,7 +1259,7 @@ const AvailabilityStep = ({ weekly, slotDuration, onToggleDay, onUpdateWindow, o
   return (
   <div className="space-y-4" data-testid="wizard-hours-step">
     <div className="rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 p-3 text-xs text-[var(--brand-primary)] leading-snug">
-      Tell us when you&apos;re open. We&apos;ll turn this into bookable time slots on your public page. You can adjust or add exceptions later from your dashboard.
+      {t('wizard.hoursIntro', 'Tell us when you are open. We turn this into booking times on your page. You can change it or add exceptions later from your dashboard.')}
     </div>
     <div>
       <label className="text-sm font-semibold text-gray-700">{t('sweep.slotLength', 'Slot length')}</label>
@@ -1268,7 +1269,7 @@ const AvailabilityStep = ({ weekly, slotDuration, onToggleDay, onUpdateWindow, o
             className={`px-3 py-1.5 rounded-full text-xs font-semibold border ${
               slotDuration === mm ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--gold)]'
             }`} data-testid={`wizard-slot-${mm}`}>
-            {mm} min
+            {mm} {t('wizard.min', 'min')}
           </button>
         ))}
       </div>
@@ -1282,7 +1283,7 @@ const AvailabilityStep = ({ weekly, slotDuration, onToggleDay, onUpdateWindow, o
           <div key={d.k} className="p-3 flex items-center gap-3" data-testid={`wizard-day-${d.k}`}>
             <label className="flex items-center gap-2 w-24 flex-shrink-0 cursor-pointer">
               <input type="checkbox" checked={open} onChange={() => onToggleDay(d.k)} data-testid={`wizard-day-toggle-${d.k}`} />
-              <span className="text-sm font-semibold text-gray-900">{d.label}</span>
+              <span className="text-sm font-semibold text-gray-900">{t(`wizard.day_${d.k}`, d.label)}</span>
             </label>
             {open ? (
               <div className="flex items-center gap-2 flex-1">
@@ -1293,7 +1294,7 @@ const AvailabilityStep = ({ weekly, slotDuration, onToggleDay, onUpdateWindow, o
                   className="px-2 py-1.5 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" data-testid={`wizard-day-end-${d.k}`} />
               </div>
             ) : (
-              <span className="text-xs text-gray-400 italic">Closed</span>
+              <span className="text-xs text-gray-400 italic">{t('wizard.closed', 'Closed')}</span>
             )}
           </div>
         );
