@@ -404,6 +404,10 @@ in plain words, and the one thing to fix first. English and Hebrew are checked
 separately. It is not shown to owners and not wired to saving; the upgraded
 renderer and the future generator use it.
 
+**How a generated page is built and written** (the playbooks per category, the
+writing rules, the claims that need proof, the three-options rule) is its own
+document: `docs/page-generation-rules.md`, checked by `backend/utils/page_rules.py`.
+
 ## P5 — What we do not do
 
 - **No arbitrary code, ever, on our origin.**
