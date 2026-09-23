@@ -12,10 +12,12 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
-from utils.page_rules import check_composition, check_options  # noqa: E402
+from utils.page_rules import check_composition, check_options, check_unique  # noqa: E402
+
+BREAD = (("Sourdough loaf", "לחם מחמצת", 32), ("Challah", "חלה", 45))
 
 
-def biz(category, gig_type="deliverable", **over):
+def biz(category, gig_type="deliverable", items=BREAD, **over):
     b = {
         "name": "Shira's Kitchen", "name_he": "המטבח של שירה", "owner_user_id": "u1",
         "description": "Sourdough and challah from our home bakery in Beit Shemesh. Orders by Thursday for Shabbat.",
@@ -23,10 +25,10 @@ def biz(category, gig_type="deliverable", **over):
         "cover_url": "https://img/cover.jpg", "logo_url": None, "languages": ["en", "he"],
         "page_brief": {"action": "order" if gig_type == "store" else "book", "pricing": "fair", "strengths": [], "note": ""},
         "listings": [
-            {"id": "g1", "title": "Sourdough loaf", "title_he": "לחם מחמצת", "category": category, "gig_type": gig_type,
-             "area": "Beit Shemesh", "gallery": ["a", "b"], "tiers": [{"name": "Loaf", "price": 32, "images": ["c"]}]},
-            {"id": "g2", "title": "Challah", "title_he": "חלה", "category": category, "gig_type": gig_type,
-             "area": "Beit Shemesh", "tiers": [{"name": "Two challahs", "price": 45}]},
+            {"id": f"g{i + 1}", "title": en, "title_he": he, "category": category, "gig_type": gig_type,
+             "area": "Beit Shemesh", "gallery": ["a", "b"] if i == 0 else [],
+             "tiers": [{"name": en, "price": price, **({"images": ["c"]} if i == 0 else {})}]}
+            for i, (en, he, price) in enumerate(items)
         ],
     }
     b.update(over)
@@ -49,35 +51,35 @@ def failed(r):
     return {x["id"] for x in r["rules"] if not x["passed"]}
 
 
-# One good page per playbook, in both languages: (category, gig_type, lead, en, he)
+# One good page per playbook, in both languages: (category, gig_type, lead, their listings, en, he)
 GOLDEN = [
-    ("shops-products", "store", "services",
+    ("shops-products", "store", "services", BREAD,
      ("Sourdough and challah in Beit Shemesh", "Order by Thursday for Shabbat. Two challahs are 45 shekels."),
      ("מחמצת וחלות בבית שמש", "מזמינים עד חמישי לשבת.")),
-    ("personal-care", "appointment", "services",
+    ("personal-care", "appointment", "services", (("Haircut and color", "תספורת וצבע", 180),),
      ("Haircuts and color in Beit Shemesh", "Book a time that suits you."),
      ("תספורות וצבע בבית שמש", "קובעים תור בשעה שנוחה לכם.")),
-    ("home-services-repair", "deliverable", "facts",
+    ("home-services-repair", "deliverable", "facts", (("Home repairs", "תיקונים בבית", 250),),
      ("Repairs around the home in Beit Shemesh", "Tell us what broke and we reply with a quote."),
      ("תיקונים בבית, בבית שמש", "ספרו מה התקלקל ונחזור עם הצעת מחיר.")),
-    ("events-catering", "deliverable", "gallery",
+    ("events-catering", "deliverable", "gallery", (("Catering for simchas", "קייטרינג לשמחות", 90), ("Kiddush platters", "מגשי קידוש", 400)),
      ("Catering for simchas in Beit Shemesh", "Menus for small and large events."),
      ("קייטרינג לשמחות בבית שמש", "תפריטים לאירועים קטנים וגדולים.")),
-    ("cleaning-services", "appointment", "facts",
+    ("cleaning-services", "appointment", "facts", (("Home cleaning", "ניקיון בית", 300),),
      ("Home cleaning in Beit Shemesh", "Weekly or one-off, you choose."),
      ("ניקיון בתים בבית שמש", "כל שבוע או פעם אחת, לבחירתכם.")),
-    ("health-fitness", "appointment", "services",
+    ("health-fitness", "appointment", "services", (("Personal training session", "אימון אישי", 200),),
      ("Personal training in Beit Shemesh", "Sessions at your home or in the park."),
      ("אימון אישי בבית שמש", "אימונים בבית או בפארק.")),
-    ("travel-tourism", "appointment", "gallery",
+    ("travel-tourism", "appointment", "gallery", (("Half-day walking tour", "סיור רגלי חצי יום", 150), ("Family tour", "סיור משפחות", 120)),
      ("Walking tours from Beit Shemesh", "Half-day routes for families."),
      ("סיורים רגליים מבית שמש", "מסלולים של חצי יום למשפחות.")),
 ]
 
 
 def test_every_playbook_has_a_page_that_passes_in_both_languages():
-    for cat, gtype, lead, en, he in GOLDEN:
-        b = biz(cat, gtype)
+    for cat, gtype, lead, items, en, he in GOLDEN:
+        b = biz(cat, gtype, items)
         for lang, (title, lede) in (("en", en), ("he", he)):
             r = check_composition(b, page(title, lede, lead), lang)
             assert r["passed"], (cat, lang, r["fix_first"])
@@ -185,10 +187,30 @@ def test_three_options_must_really_differ():
     near_copy = deepcopy(a)
     near_copy["theme"]["density"] = "airy"
     near_copy["blocks"][0]["props"]["title"] = "Challah and sourdough, Beit Shemesh"
-    other = page("Bread for Shabbat, baked in Beit Shemesh", "Two challahs are 45 shekels.", "gallery",
+    other = page("Challah for Shabbat, from Beit Shemesh", "Two challahs are 45 shekels.", "gallery",
                  theme={"type": "grotesque", "density": "packed"})
     r = check_options(b, [a, near_copy, other], "en")
     assert not r["distinct"] and "options 1 and 2" in r["why_not_distinct"][0]
-    third = page("Your Shabbat bread, from Beit Shemesh", "Order by Thursday.", theme={"type": "geometric", "imagery": "thumbnail"})
+    third = page("Your Shabbat sourdough loaf", "Order by Thursday.", theme={"type": "geometric", "imagery": "thumbnail"})
     assert check_options(b, [a, other, third], "en")["passed"]
     assert not check_options(b, [a, other], "en")["passed"], "three options, not two"
+
+
+def test_the_hero_repeats_what_they_sell_and_stays_short():
+    b = biz("shops-products", "store")
+    r = check_composition(b, page("Something good in Beit Shemesh", "Order by Thursday."), "en")
+    assert "congruency" in failed(r), "a place name alone is not the promise"
+    assert "congruency" not in failed(check_composition(b, page("Challah for Shabbat", "Order by Thursday."), "en"))
+    assert "congruency" not in failed(check_composition(b, page("חלות לשבת", "מזמינים עד חמישי."), "he")), "Hebrew prefixes"
+    long_lede = "Order by Thursday and collect on Friday morning from the bakery door, or ask us about a bigger order for a simcha or event."
+    assert "hero" in failed(check_composition(b, page("Challah for Shabbat", long_lede), "en"))
+
+
+def test_each_page_is_unique_among_recent_ones_of_its_kind():
+    a = page("Challah for Shabbat", "Order by Thursday.")
+    twin = page("Sourdough in Beit Shemesh", "Order by Thursday.", theme={"density": "airy"})
+    assert not check_unique(a, [twin])["passed"], "same layout and nearly the same dials"
+    different = page("Bread for Shabbat", "Order by Thursday.", "gallery",
+                     theme={"type": "grotesque", "density": "packed", "imagery": "thumbnail"})
+    assert check_unique(a, [different])["passed"]
+    assert check_unique(a, [])["passed"]

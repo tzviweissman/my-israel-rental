@@ -7,7 +7,12 @@ automatic check that throws away any page breaking it.
 - Builds on `docs/ai-page-builder-spec.md` (the vocabulary, P2 dials, P4 quality
   floor, P4a clarity floor, P7 brief). Where that document says what the builder
   IS, this one says how a page it makes must be BUILT and WRITTEN.
-- The check: `backend/utils/page_rules.py` (`check_composition`, `check_options`).
+- Draws on what we already learned: the three practice pages (`scrollcraft/builds/`:
+  Blazin' Boards, Lechem Emek, Michal Simkin, and `scrollcraft/FINGERPRINTS.md`),
+  the design-kit skills (scroll-craft, taste-skill, page-conversion-review,
+  design-loop, visual-diff), the project's frontend skill, and the session
+  lessons on generated video. Sections 5a to 5c, 8 and 9 are where those live.
+- The check: `backend/utils/page_rules.py` (`check_composition`, `check_options`, `check_unique`).
   Every rule below marked with an id in `code` is enforced there, with the same id.
 - The golden set: `backend/tests/test_page_rules.py`. One business per playbook with
   a page that passes in English and Hebrew, and one case per way of failing.
@@ -45,7 +50,8 @@ Never patched. A patched page is one nobody chose (P1, P4a).
 |---|---|
 | `schema` | Only our blocks, variants and dials. No links, no code, no styles. |
 | `language` | Everything written is in the page's language. A Hebrew page has Hebrew in every line (their business name may stay as it is). |
-| `hero` | A headline at the top that says **what they do and where**, in at most 10 words. Never just their name again, since the page already shows it. One hero only. |
+| `hero` | A headline at the top that says **what they do and where**, in at most 10 words, with at most 20 words under it. Never just their name again, since the page already shows it. One hero only. |
+| `congruency` | The headline or the line under it names something they actually sell, in the words of their own listings. A place name alone doesn't count. |
 | `numbers` | Every number on the page comes from their own words or our facts (their prices, founding year, review count). |
 | `claims` | A claim needs its proof or the owner's own words. **Kosher** needs a certificate, and is said only on a food business. **Licensed** needs a licence number. **Verified** needs verification. **Reviews, stars, "customers love"** need reviews. **Years, "since", "established"** need a founding year. **English** needs English among their languages. Only the owner's own words can back **best, #1, leading, award, the only, cheapest, guarantee, insured, 24/7, emergency, fresh daily, delivery, trusted by, thousands of**, or anything medical (**cure, heal, weight loss, treatment for**). |
 | `urgency` | Never: "only 3 left", "hurry", "today only", "booked 11 times", "limited time", "don't miss". Nothing we hold is a real, current count. "Open only on Fridays" is a fact, not urgency. |
@@ -60,6 +66,12 @@ Never patched. A patched page is one nobody chose (P1, P4a).
 Three options (P7d, `check_options`): each passes on its own, and **they really
 differ**. Every pair differs in at least two dials or in the order of blocks, and
 no two share a headline. Three near-copies is one option shown three times.
+
+**Every page is its own** (`check_unique`; Tzvi, 23 Sep 2026: "not every page
+should have a rolling jar, each should be unique"). A new page must differ from
+each recent page of the same kind of business on at least 3 of 6 things: what
+leads, the order of sections, the hero's shape, imagery, type, and density. The
+hand-built pages already hold themselves to 4 of 6 (`scrollcraft/FINGERPRINTS.md`).
 
 ## 4. What is reported to the owner instead (content gaps)
 
@@ -91,6 +103,65 @@ quote" instead of a missing price, no reviews section instead of an empty one.
    person. On the page the business speaks as "we" or in its own name.
 9. **Strengths only if backed.** At most two, and a checkable one (kosher,
    experience, licensed, English) appears only with its proof.
+
+## 5a. Lessons from the practice pages
+
+What Blazin' Boards, Lechem Emek and Michal Simkin taught, in the order they matter:
+
+1. **Find what the business actually has before choosing a look.** Their photos,
+   their numbers, the one fact that is really theirs. Blazin' Boards sells boards in
+   sizes; that became the page.
+2. **The product performs, not the camera.** Movement shows the thing they sell.
+   Zooming for its own sake "isn't doing anything" (Tzvi on Blazin' Boards rev 2);
+   the jar rolling as the page scrolled was the part that worked.
+3. **Only their photographs of their work, people and place.** "A generated face
+   here would be a lie about a client" (Michal Simkin). Rev 3 of Blazin' Boards
+   dropped generated media and used the owner's own photos.
+4. **Only their numbers**, never round marketing ones.
+5. **No blank screens.** Every screen shows something of theirs.
+6. **One signature idea, and it is theirs.** The test: could a visitor describe it
+   to a friend in one sentence? (Boards growing through real sizes with a ruler and
+   their prices; real clients' own before and after; one scroll taking a bakery from
+   night to dawn.) Never carried over to the next business.
+7. **One peak per page.** One moment gets the most room and quiet before it; a page
+   with three peaks has none. The ending resolves on the action, never fades out.
+8. **Check what renders, not what was written.** An independent pass on Blazin'
+   Boards found a bar that measured 102px where 84 was assumed, hiding content, and a
+   button that went to the top of the page and looked broken.
+
+## 5b. Design craft (taste-skill, scroll-craft, the frontend skill)
+
+1. **The top of the page holds at most 4 pieces of text**, the headline takes at
+   most 2 lines, and the line under it at most 20 words.
+2. **One wording per purpose.** If the button says "Order", it says "Order"
+   everywhere, not "Buy" in one place and "Get yours" in another.
+3. **Text never sits straight on a photo.** A band or a shaded edge behind it,
+   never a full-frame darkening.
+4. **No default "premium" palette** (warm cream with brass or oxblood) and no
+   AI purple. The palette comes from their logo and photos (P7c).
+5. **No fake screenshots, no generic names or faces, no too-perfect numbers.**
+6. **No scroll cues, no "01/06" counters, no label above every section.**
+7. **The maker doesn't grade its own work** (design-loop). The checker grades the
+   rules; a separate critic, not the generator, judges the rest.
+
+## 5c. Persuasion, and only the honest kind (page-conversion-review)
+
+Each is backed by several independent sources; the count is in brackets.
+
+1. **Repeat the promise that brought them** (4). If a flyer, a QR code or a listing
+   said "challah for Shabbat", the headline says "challah for Shabbat". Checked as
+   `congruency`.
+2. **Reassurance right beside the button** (5). The proof line (rating, verified,
+   years, kosher) already sits beside the main button on every page.
+3. **What happens next as steps, not a paragraph** (4): "Order by Thursday, collect
+   Friday morning".
+4. **One job per page** (4). One leading action; the rest visibly secondary.
+5. **Specific real numbers beat round ones and beat adjectives**, and never a range
+   where one number exists. A total on a button only when it is real.
+6. **Friction that filters or invests helps; friction that taxes hurts.** Asking the
+   event date helps a caterer; asking for an account before a question hurts.
+7. **Never the dark patterns**: fake scarcity or urgency, countdowns, invented
+   counts, hidden low ratings (section 3, `urgency` and `claims`).
 
 ## 6. Playbooks for the most common businesses
 
@@ -188,7 +259,69 @@ Give the owner a real choice between three directions, each true to the brief:
 
 Each has its own headline. None breaks a hard rule.
 
-## 8. Open decisions (need Tzvi)
+## 8. Photos, video and the tools
+
+**Generated images and video** (Higgsfield, kie.ai). Tzvi, 23 Sep 2026: mood only.
+- Allowed only for atmosphere: light, texture, background, a sense of place.
+- **Never shows their product, premises, staff or customers as if real.**
+- The owner approves every generated piece before it can be used.
+- No text baked into an image.
+- Prompts respect the business. On a kosher business nothing non-kosher is in the
+  frame; the Blazin' Boards prompts excluded dairy, pork and shellfish because the
+  flyer carries a hechsher.
+- Today the builder can't place one at all: images are references to their own
+  photos only (open decision 5).
+
+**Movement that copies a reference is built in code, not generated.** Generated
+video reinterprets the reference on every render, so rerolling can't converge on
+"exactly like this". Offer the code-built version instead.
+
+**Blender** (Tzvi, 23 Sep 2026), for three jobs:
+1. **Product motion from real items:** their own product turning or rolling as the
+   page scrolls, made from their photos or a quick scan.
+2. **Polishing generated video:** stabilising, timing to the scroll, clean edges.
+3. **Reusable 3D scenes** for the scroll sections in section 9, each made once to
+   our standard.
+
+No page reuses another business's scene as it is. Blender hasn't been used in the
+project yet, so the first jobs write their lessons here.
+
+**Mobbin and other references** are for studying how a category's pages work (the
+devices), not for copying a look (the mood). They are used at design time by hand,
+and nothing is fetched for visitors (spec P5). On Michal Simkin the category default
+(a search bar over a grid) was studied and deliberately not used.
+
+**Checking a moving page**: screenshots at fixed points through the scroll, not one
+tall screenshot (the pinned parts smear), with video requests blocked during
+capture. Check at 375, 768, about 1000, and 1280 wide, in both languages, and at a
+real laptop height.
+
+## 9. The scroll sections: what the practice pages become
+
+The AI composes from our sections, so the practice pages' best moves become new
+sections, each a distinct device built once to our standard and checked like every
+other block:
+
+- **The product performs**: their product turning or rolling as you scroll
+  (Blender, from their real item).
+- **The size ladder**: their products growing through real sizes with a ruler and
+  their prices (from Blazin' Boards).
+- **Before and after**: pairs from real clients, with their names and consent (from
+  Michal Simkin).
+- **The time of day**: one scroll regrading their own photos from night to morning
+  (from Lechem Emek).
+
+Rules for using them:
+- **At most one signature section per page**, and only when their own photos or
+  items support it.
+- **Not every page gets one.** A page without the right material stays still.
+- **Uniqueness applies** (`check_unique`): the same device with the same settings
+  doesn't go on two businesses of the same kind.
+- **One peak per page.**
+- **Reduced motion shows a still.**
+- **No scroll cues.**
+
+## 10. Open decisions (need Tzvi)
 
 1. **Hebrew and English on one page.** The page design holds hero text in one
    language only, so today a bilingual page means two designs. Recommended: give
@@ -202,3 +335,10 @@ Each has its own headline. None breaks a hard rule.
 4. **Advice rules.** Everything above rejects. If some rules turn out too strict
    in practice (say, the 10-word headline), they can become advice fed back to the
    AI instead of a rejection. Decide once there are real pages to look at.
+5. **Approved mood images.** To use generated mood images, the page design needs a
+   new kind of image reference that points only at assets the owner has approved.
+   Until then generated media can't appear on a built page at all.
+6. **Before and after consent.** The before-and-after section needs a record that
+   each pictured client agreed. Decide how consent is collected before building it.
+7. **Which scroll section first.** Recommended: the size ladder or product motion,
+   since the most common businesses are shops.

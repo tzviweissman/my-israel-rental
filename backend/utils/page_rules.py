@@ -7,6 +7,8 @@ machine can check. Every rule id here appears there with the same name.
         passed, rules: [{id, passed, reason}], fix_first, content_gaps }
     check_options(business, [c1, c2, c3], lang)  -> the same per option,
                                                     plus whether they differ
+    check_unique(composition, recent)            -> differs from each recent page
+                                                    of the same kind of business
 
 Two kinds of failure, kept apart on purpose:
 
@@ -43,6 +45,17 @@ _NUMBER = re.compile(r"\d[\d,.]*")
 FRAME = {"hero", "cover", "rule"}
 MAX_GENERATED_BLOCKS = 10
 HERO_TITLE_MAX_WORDS = 10
+# taste-skill: subtext under a headline is at most 20 words. A lede that
+# needs more is a paragraph, and nobody reads a paragraph in a hero.
+HERO_LEDE_MAX_WORDS = 20
+# A new page differs from each recent page of the same kind on at least
+# this many of the six FINGERPRINT axes (scrollcraft/FINGERPRINTS.md asks 4
+# of 6 of hand-built pages; the block library has fewer moves, so 3).
+MIN_FINGERPRINT_DIFF = 3
+_WORD = re.compile(r"[a-z]{4,}|[֐-׿]{3,}")
+_HE_PREFIX = "ובלהמשכ"
+_STOP = {"with", "your", "from", "that", "this", "what", "have", "more", "about", "their", "they", "here", "every",
+         "יותר", "שלכם", "שלנו", "כל", "עם", "את"}
 
 # ---------------------------------------------------------------- claims
 # A claim the page may make only when the proof exists or the owner said it
@@ -206,7 +219,7 @@ def _any_price(b: dict) -> bool:
 
 # ---------------------------------------------------------------- the check
 
-ORDER = ("schema", "language", "hero", "numbers", "claims", "urgency", "generic", "punctuation",
+ORDER = ("schema", "language", "hero", "congruency", "numbers", "claims", "urgency", "generic", "punctuation",
          "structure", "action", "images", "prices", "playbook")
 
 
@@ -249,9 +262,27 @@ def check_composition(business: dict, composition: dict, lang: str = "en") -> di
         problems.append("the headline is only the business name, which the page already shows")
     if len(title.split()) > HERO_TITLE_MAX_WORDS:
         problems.append(f"the headline is {len(title.split())} words; at most {HERO_TITLE_MAX_WORDS}")
+    if len(lede.split()) > HERO_LEDE_MAX_WORDS:
+        problems.append(f"the lede is {len(lede.split())} words; at most {HERO_LEDE_MAX_WORDS}")
     if len(heroes) > 1:
         problems.append("more than one hero")
     out["hero"] = (not problems, "The hero says what they do." if not problems else "; ".join(problems).capitalize() + ".")
+
+    # congruency (page-conversion-review, 4 sources): the headline repeats
+    # the promise that brought the visitor, i.e. names something they
+    # actually sell, in their own words. A place name alone doesn't count.
+    # What they sell is their listing titles; "Orders by Thursday" in a
+    # description is how, not what. The description stands in only when
+    # there are no listings.
+    said = _words(f"{title} {lede}")
+    titles = " ".join(str(x) for g in b.get("listings") or [] for x in
+                      ((g or {}).get("title"), (g or {}).get("title_he"), (g or {}).get("title_en")) if x)
+    sells = _words(titles or str(b.get("description") or "")) - _place_words(b)
+    shared = sorted(said & sells)
+    out["congruency"] = (bool(shared) or not sells,
+                         f"The hero names what they sell ({', '.join(shared[:3])})." if shared
+                         else "Nothing listed to repeat." if not sells
+                         else "The hero never names what they sell; use a word from their own listings.")
 
     # numbers: every number written is one the owner wrote or we hold.
     known = known_numbers(b)
@@ -369,6 +400,58 @@ def _result(lang: str, out: dict, b: dict, comp: Optional[dict] = None) -> dict:
     return {"lang": lang, "passed": first is None, "rules": rules,
             "fix_first": f"{first['id']}: {first['reason']}" if first else None,
             "content_gaps": [{"id": r["id"], "reason": r["reason"]} for r in gaps]}
+
+
+def _stem(w: str) -> str:
+    """Rough, on purpose: enough to see that two words are the same word.
+    Hebrew attaches prepositions to the front (בבית, הלחם) and marks
+    plurals and gender at the end (חלה, חלות): drop one prefix letter and
+    one ending. English: drop a plural s."""
+    if "֐" <= w[0] <= "׿":
+        if w[0] in _HE_PREFIX and len(w) > 3:
+            w = w[1:]
+        for end in ("ות", "ים", "ה", "ת"):
+            if w.endswith(end) and len(w) - len(end) >= 2:
+                return w[: -len(end)]
+        return w
+    return w[:-1] if w.endswith("s") and len(w) > 4 else w
+
+
+def _words(text: str) -> set[str]:
+    return {_stem(w) for w in _WORD.findall((text or "").lower()) if w not in _STOP}
+
+
+def _place_words(b: dict) -> set[str]:
+    places = " ".join(str(x) for x in (b.get("areas") or [])) + " " + " ".join(
+        str((g or {}).get("area") or "") for g in b.get("listings") or [])
+    return _words(places.replace("-", " "))
+
+
+def fingerprint(comp: dict) -> dict:
+    """The six things that make two pages look alike at a glance. Taken
+    from scrollcraft/FINGERPRINTS.md and cut to what the block library
+    can vary: what leads, the order of everything, the hero's shape, and
+    three dials."""
+    blocks = comp.get("blocks") or []
+    theme = comp.get("theme") or {}
+    content = [x.get("type") for x in blocks if x.get("type") not in FRAME]
+    hero = next((x.get("variant") for x in blocks if x.get("type") == "hero"), None)
+    return {"lead": content[0] if content else None, "order": tuple(x.get("type") for x in blocks),
+            "hero": hero, "imagery": theme.get("imagery"), "type": theme.get("type"), "density": theme.get("density")}
+
+
+def check_unique(composition: dict, recent: list[dict]) -> dict:
+    """Not every page gets the same look (Tzvi, 23 Sep 2026: "each should be
+    unique"). A new page must differ from EACH recent page of the same kind
+    of business on at least MIN_FINGERPRINT_DIFF of the six axes."""
+    mine = fingerprint(composition)
+    too_close = []
+    for i, other in enumerate(recent or []):
+        theirs = fingerprint(other)
+        diff = sum(mine[k] != theirs[k] for k in mine)
+        if diff < MIN_FINGERPRINT_DIFF:
+            too_close.append({"index": i, "differs_on": diff})
+    return {"passed": not too_close, "too_close": too_close, "fingerprint": mine}
 
 
 def _signature(comp: dict) -> tuple:
