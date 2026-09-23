@@ -227,7 +227,7 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
                   </p>
                   <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('overview.unanswered', 'Not answered yet')} · {formatDate(lead.created_at)}</p>
                 </div>
-                <button type="button" onClick={() => onGoToTab('my-gigs')} className="text-xs font-semibold hover:underline" style={{ color: 'var(--brand-primary)' }}>
+                <button type="button" onClick={() => onGoToTab('my-businesses')} className="text-xs font-semibold hover:underline" style={{ color: 'var(--brand-primary)' }}>
                   {t('overview.reply', 'Reply')}
                 </button>
               </li>

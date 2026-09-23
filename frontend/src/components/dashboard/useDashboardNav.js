@@ -19,7 +19,7 @@
  */
 import { useTranslation } from 'react-i18next';
 import {
-  LayoutDashboard, Building2, Layers, Store, Wrench, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
+  LayoutDashboard, Building2, Layers, Store, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
   Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
@@ -32,6 +32,17 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
   const hasGigs = (summary?.gigs_count || 0) > 0;
   const showGigTabs = canPublish || hasGigs;
 
+  // Grouped by what the person RUNS, not by type of record (Tzvi, 22 Sep
+  // 2026: "we need to make the dashboard workflow easier to use"). Each
+  // section shows only to people it applies to, and an item that can be
+  // either side (bookings, appointments, jobs) sits in exactly one place:
+  // with the business or rentals when the person runs one, otherwise
+  // under what they ordered. "My gigs" is gone as a separate item: a
+  // business's services are inside it, in Businesses.
+  const runsRentals = isPropertyLister;
+  // The same rule Dashboard.js renders these panels on; a looser one here
+  // would show menu items that open an empty page.
+  const runsBusiness = showGigTabs;
   const groups = [
     {
       key: 'overview',
@@ -40,40 +51,46 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       ],
     },
     {
-      key: 'listings',
-      label: t('dashboard.groupListings', 'Listings'),
+      key: 'business',
+      label: t('dashboard.groupBusiness', 'My business'),
       tabs: [
-        { id: 'properties', label: t('dashboard.myProperties'), Icon: Building2, show: isPropertyLister },
-        { id: 'bulk-manager', label: t('dashboard.bulkManager'), Icon: Layers, show: isPropertyLister },
-        { id: 'my-businesses', label: t('dashboard.myBusinesses', 'Businesses'), Icon: Store, show: showGigTabs },
-        { id: 'my-gigs', label: t('dashboard.myGigs'), Icon: Wrench, show: showGigTabs },
-        { id: 'contracts', label: t('dashboard.contracts', 'Contracts'), Icon: FileText, show: isPropertyLister },
+        { id: 'my-businesses', label: t('dashboard.myBusinesses', 'Businesses'), Icon: Store, show: runsBusiness },
+        { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: runsBusiness },
+        { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: runsBusiness },
+        { id: 'network', label: t('dashboard.network', 'Network'), Icon: Network, badge: summary.network_requests_in, show: runsBusiness || (summary.network_requests_in || 0) > 0 },
+        { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, badge: summary.work_offers_open, show: runsBusiness },
+        { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, show: runsBusiness },
+        // A courier's own deliveries: shown to anyone a business invited.
+        { id: 'deliveries', label: t('dashboard.deliveries', 'Deliveries'), Icon: Bike, badge: (summary.courier_deliveries_open || 0) + (summary.courier_invites || 0), show: (summary.courier_businesses || 0) > 0 || (summary.courier_invites || 0) > 0 },
       ],
     },
     {
-      key: 'activity',
-      label: t('dashboard.groupActivity', 'Activity'),
+      key: 'rentals',
+      label: t('dashboard.groupRentals', 'My rentals'),
       tabs: [
-        { id: 'bookings', label: t('dashboard.myBookings'), Icon: CalendarCheck, badge: summary.bookings_awaiting_reply, show: true },
-        // Gig bookings, both directions (docs/audits/2026-09-08-dead-ends-audit.md #4).
-        // Shown to anyone who can be asked for a slot OR has ever asked for
-        // one — a buyer is usually a renter, and gating this on the seller
-        // role would leave them with nowhere to read the answer.
-        { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: showGigTabs || (summary.my_service_bookings || 0) > 0 },
-        // Store orders (docs/orders-and-delivery-spec.md). Shown to anyone
-        // who can run a business: the tab is where a shop's day lives.
-        { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: showGigTabs },
-        // A courier's own deliveries: shown to anyone a business invited.
-        // Business-to-business connections (docs/business-network-spec.md).
-        // Anyone who runs a business; the badge is requests waiting on them.
-        { id: 'network', label: t('dashboard.network', 'Network'), Icon: Network, badge: summary.network_requests_in, show: showGigTabs || (summary.network_requests_in || 0) > 0 },
-        { id: 'deliveries', label: t('dashboard.deliveries', 'Deliveries'), Icon: Bike, badge: (summary.courier_deliveries_open || 0) + (summary.courier_invites || 0), show: (summary.courier_businesses || 0) > 0 || (summary.courier_invites || 0) > 0 },
-        // A customer's own orders from stores on the site.
+        { id: 'properties', label: t('dashboard.myProperties'), Icon: Building2, show: runsRentals },
+        { id: 'bookings', label: t('dashboard.rentalBookings', 'Bookings'), Icon: CalendarCheck, badge: summary.bookings_awaiting_reply, show: runsRentals },
+        { id: 'bulk-manager', label: t('dashboard.bulkManager'), Icon: Layers, show: runsRentals },
+        { id: 'contracts', label: t('dashboard.contracts', 'Contracts'), Icon: FileText, show: runsRentals },
+      ],
+    },
+    {
+      key: 'mine',
+      label: t('dashboard.groupMine', 'What I ordered'),
+      tabs: [
+        // A renter's side of the same tabs, when the person runs nothing
+        // that would already show them above.
+        { id: 'bookings', label: t('dashboard.myBookings'), Icon: CalendarCheck, show: !runsRentals && (isRenter || (summary.my_rental_bookings || 0) > 0) },
+        { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, show: !runsBusiness && (summary.my_service_bookings || 0) > 0 },
         { id: 'my-orders', label: t('dashboard.myOrders', 'My orders'), Icon: ShoppingBag, show: (summary.customer_orders || 0) > 0 },
         { id: 'my-requests', label: t('dashboard.myRequests', 'My Requests'), Icon: Inbox, badge: summary.requests_with_responses, show: true },
-        { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, show: showGigTabs || hasPostedJobs },
-        { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, badge: summary.work_offers_open, show: showGigTabs },
+        { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, show: !runsBusiness && hasPostedJobs },
         { id: 'subleases', label: t('dashboard.subleases'), Icon: Home, show: isRenter },
+        // Saved searches and liked homes are for someone looking for a
+        // place. A business or owner sees them only if they have used them,
+        // so nothing anyone saved disappears.
+        { id: 'alerts', label: t('dashboard.alerts'), Icon: Bell, show: isRenter || !!summary.has_saved_searches },
+        { id: 'liked', label: t('dashboard.liked'), Icon: Heart, show: isRenter || !!summary.has_liked },
       ],
     },
     {
@@ -81,14 +98,6 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       label: t('dashboard.groupAccount', 'Account'),
       tabs: [
         { id: 'messages', label: t('dashboard.messages'), Icon: MessageCircle, badge: unreadMessages, urgent: true, show: true },
-        // Every role, not just renters. Anyone signed in can save a property
-        // search — the popover is always visible (Properties.js) and
-        // routes/saved_searches.py has no role check — and this tab is
-        // where the "N new properties matched" banner points. Gated on
-        // isRenter, an owner or provider who saved one followed that link
-        // to a blank panel (dead-ends audit 2026-09-08, #1).
-        { id: 'alerts', label: t('dashboard.alerts'), Icon: Bell, show: true },
-        { id: 'liked', label: t('dashboard.liked'), Icon: Heart, show: true },
         { id: 'settings', label: t('dashboard.settings'), Icon: KeyRound, show: true },
       ],
     },

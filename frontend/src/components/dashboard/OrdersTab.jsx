@@ -29,7 +29,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ClipboardPaste, Store as StoreIcon, Bike, X, Sparkles, ClipboardList,
-  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Timer, Pause, Play,
+  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Pause, Play,
 } from 'lucide-react';
 import { phoneError } from '../../utils/phoneValidation';
 import { money } from '../../utils/currency';
@@ -422,7 +422,6 @@ export default function OrdersTab({ API, token }) {
           ['export', Download, t('orders.export', 'Export CSV'), exportCsv],
           ['import', Upload, t('orders.import', 'Import customers'), () => setPanel(panel === 'import' ? null : 'import')],
           ['couriers', Bike, t('orders.couriers', 'Couriers'), () => setPanel(panel === 'couriers' ? null : 'couriers')],
-          ['cutoffs', Timer, t('orders.settings', 'Hours & fees'), () => setPanel(panel === 'cutoffs' ? null : 'cutoffs')],
           ['standing', Repeat, t('orders.standing', 'Weekly'), () => setPanel(panel === 'standing' ? null : 'standing')],
         ].map(([key, Icon, lbl, fn]) => (
           <button
@@ -442,7 +441,6 @@ export default function OrdersTab({ API, token }) {
       {panel === 'staff' && <StaffLinkPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'import' && <ImportCustomersPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'couriers' && <CouriersPanel API={API} auth={auth} businessId={biz.id} couriers={couriers} settings={settings} onChanged={() => Promise.all([loadCouriers(), loadSettings(), load()])} onClose={() => setPanel(null)} />}
-      {panel === 'cutoffs' && <SettingsPanel API={API} auth={auth} businessId={biz.id} settings={settings} couriers={couriers} onSaved={() => Promise.all([loadSettings(), load()])} onClose={() => setPanel(null)} />}
       {panel === 'standing' && <StandingPanel API={API} auth={auth} standing={standing} onChanged={() => Promise.all([loadSettings(), load()])} onClose={() => setPanel(null)} />}
 
       {/* Range tabs */}
@@ -1301,6 +1299,28 @@ const WEEKDAYS = [0, 1, 2, 3, 4, 5, 6];
  * delivery windows per weekday, delivery fee, minimum order, and the
  * default courier every delivery goes to automatically.
  */
+/**
+ * Hours, delivery and fees for one business, loaded on its own. These are
+ * decisions about the BUSINESS, so they live on its card in Businesses
+ * rather than among the day's orders (Tzvi, 22 Sep 2026: "Hours and fees
+ * are business decisions, nothing to do with future orders").
+ */
+export function BusinessHoursPanel({ API, token, businessId, onClose }) {
+  const auth = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
+  const [loaded, setLoaded] = useState(null);   // {settings, couriers}
+  const load = useCallback(async () => {
+    const [{ data: settings }, couriers] = await Promise.all([
+      axios.get(`${API}/marketplace/businesses/${businessId}/orders/settings`, auth),
+      axios.get(`${API}/marketplace/businesses/${businessId}/couriers`, auth).then((r) => r.data || []).catch(() => []),
+    ]);
+    setLoaded({ settings, couriers });
+  }, [API, auth, businessId]);
+  useEffect(() => { load().catch(() => setLoaded(false)); }, [load]);
+  if (loaded === false) return null;
+  if (!loaded) return <div className="py-4 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 size={16} className="animate-spin inline" /></div>;
+  return <SettingsPanel API={API} auth={auth} businessId={businessId} settings={loaded.settings} couriers={loaded.couriers} onSaved={load} onClose={onClose} />;
+}
+
 function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onClose }) {
   const { t } = useTranslation();
   const [rows, setRows] = useState(settings.cutoffs.length ? settings.cutoffs : []);

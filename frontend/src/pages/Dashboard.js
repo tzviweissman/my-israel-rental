@@ -17,7 +17,6 @@ import AddPropertyModal from '../components/dashboard/AddPropertyModal';
 import BulkUploadModal from '../components/dashboard/BulkUploadModal';
 import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
-import MyGigsTab from '../components/dashboard/MyGigsTab';
 import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
 import OrdersTab from '../components/dashboard/OrdersTab';
 import DeliveriesTab from '../components/dashboard/DeliveriesTab';
@@ -186,6 +185,16 @@ const Dashboard = () => {
     // An unknown id now falls back to the Overview, which is at least a
     // page. (Dead-ends audit 2026-09-04.)
     const tab = searchParams.get('tab');
+    // "My gigs" folded into Businesses (22 Sep 2026). Old links, emails and
+    // notifications still say tab=my-gigs: they open the business's
+    // services, which is the same list.
+    if (tab === 'my-gigs') {
+      const next = new URLSearchParams(searchParams);
+      next.set('tab', 'my-businesses');
+      if (!next.get('services')) next.set('services', '1');
+      setSearchParams(next, { replace: true });
+      return;
+    }
     if (tab) setActiveTab(ALL_TAB_IDS.includes(tab) ? tab : 'overview');
     // `?edit=<property id>` means the properties tab whatever else the URL
     // says: the quarantine email and the availability nudge both send
@@ -533,10 +542,6 @@ const Dashboard = () => {
 
         {activeTab === 'my-orders' && (
           <MyOrdersTab API={API} token={token} />
-        )}
-
-        {activeTab === 'my-gigs' && showGigTabs && (
-          <MyGigsTab API={API} token={token} />
         )}
 
         {activeTab === 'job-requests' && showGigTabs && (

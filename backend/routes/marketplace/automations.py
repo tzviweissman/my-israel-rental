@@ -540,7 +540,7 @@ def _where(ctx: dict[str, Any]) -> str:
     if ctx.get("booking"):
         return f"/dashboard?tab=appointments&highlight={ctx['booking'].get('_id')}"
     if ctx.get("gig"):
-        return "/dashboard?tab=my-gigs"
+        return "/dashboard?tab=my-businesses&services=1"
     if ctx.get("rental"):
         return "/dashboard?tab=bookings"
     return "/dashboard?tab=network&view=automations"

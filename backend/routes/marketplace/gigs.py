@@ -505,6 +505,8 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         "updated_at": now,
     }
     await db.marketplace_gigs.insert_one(gig)
+    from .shared import fill_business_from_listing
+    await fill_business_from_listing(business, gig)
     # A new listing may be a cheaper option for businesses ordering the
     # same kind of thing nearby (price_watch.py). In the background.
     from routes.marketplace.price_watch import listing_saved

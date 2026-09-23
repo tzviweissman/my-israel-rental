@@ -563,6 +563,14 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
     })
     my_service_bookings = await db.marketplace_bookings.count_documents({"client_user_id": uid})
 
+    # The customer-side tabs are shown to a business or owner only when
+    # they have used them (Tzvi, 22 Sep 2026: alerts and liked "is for
+    # booking an apartment, it shouldn't be in their dashboard"). Existence
+    # checks, so limit=1.
+    my_rental_bookings = await db.bookings.count_documents({"renter_id": uid}, limit=1)
+    saved_searches = await db.saved_searches.count_documents({"user_id": uid}, limit=1)
+    liked = await db.liked_properties.count_documents({"user_id": uid}, limit=1)
+
     return {
         "bookings_awaiting_reply": bookings_awaiting,
         "work_offers_open": work_offers,
@@ -584,4 +592,7 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "customer_orders": customer_orders,
         "service_bookings_pending": service_bookings_pending,
         "my_service_bookings": my_service_bookings,
+        "my_rental_bookings": my_rental_bookings,
+        "has_saved_searches": bool(saved_searches),
+        "has_liked": bool(liked),
     }

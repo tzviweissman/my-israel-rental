@@ -202,6 +202,13 @@ const DashboardTabs = ({
                 data-testid={`tab-divider-${group.key}`}
               />
             )}
+            {/* On a phone the menu wraps, so each section gets its name
+                on a line of its own: "My business", "My rentals"... */}
+            {group.label && (
+              <span className="lg:hidden basis-full px-2 pt-2 text-[11px] font-semibold uppercase tracking-wide" style={{ color: 'var(--brand-muted)' }}>
+                {group.label}
+              </span>
+            )}
             {group.tabs.map(renderTab)}
           </React.Fragment>
         ))}

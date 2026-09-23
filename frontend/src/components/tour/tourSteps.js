@@ -29,7 +29,7 @@ export const WALKS = {
   business: [
     { id: 'b.page', route: '/dashboard?tab=my-businesses', target: 'business-design',
       doIt: { href: '/dashboard?tab=my-businesses&details=1' } },
-    { id: 'b.service', route: '/dashboard?tab=my-gigs', target: 'gigs',
+    { id: 'b.service', route: '/dashboard?tab=my-businesses', target: 'business-services',
       doIt: { href: '/businesses/add' } },
     { id: 'b.share', route: '/dashboard?tab=my-businesses', target: 'business-share',
       doIt: { click: 'business-share' } },
