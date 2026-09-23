@@ -707,6 +707,13 @@ const en = {
         paymentRefused: 'We can only show links from a payment provider we recognise, over https.',
         paymentAccepted: 'Accepted: {{list}}',
       },
+      proof: {
+        verified: 'Verified',
+        years_one: '1 year in business',
+        years_other: '{{count}} years in business',
+        kosher: 'Kosher: {{body}}',
+        seeReviews: 'Rated {{avg}} from {{n}} reviews. See the reviews',
+      },
       wizard: {
         logoPick: 'Choose a logo',
         logoAdd: 'Add logo',

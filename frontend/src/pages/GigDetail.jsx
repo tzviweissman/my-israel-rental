@@ -7,6 +7,7 @@
  * modal — driven by `gig.booking_mode`.
  */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
+import ProofLine from '../components/marketplace/ProofLine';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import DateField from '../components/common/DateField';
@@ -121,7 +122,7 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
   const myReview = reviews.find((r) => r.client_user_id === user?.id);
 
   return (
-    <div data-testid="gig-reviews-section">
+    <div id="reviews" className="scroll-mt-24" data-testid="gig-reviews-section">
       <div className="flex items-baseline justify-between mb-3">
         <h2 className="text-lg font-bold">{t('gigDetail.reviews', 'Reviews')}</h2>
         <StarRating value={avg || 0} count={count} size={16} testidPrefix="gig-avg-stars" />
@@ -1102,6 +1103,20 @@ const GigDetail = () => {
                   <><Send size={14} /> {t('services.sendBookingRequest', 'Send booking request')}</>
                 )}
               </button>
+              {/* Part A: the proof beside the button. Stars are THIS
+                  service's reviews, and tapping them goes to the list. */}
+              <ProofLine
+                ratingAvg={gig.rating_avg}
+                ratingCount={gig.rating_count}
+                verified={gig.business_proof?.verified}
+                foundedYear={gig.business_proof?.founded_year}
+                memberSince={gig.business_proof?.member_since}
+                kosher={gig.business_proof?.kosher_certification}
+                categories={[gig.category, ...(gig.business_proof?.categories || [])]}
+                onRatingClick={() => document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                className="justify-center"
+                testid="gig-proof"
+              />
               {/* Present tense on purpose: "never" was a forever-promise
                   the business has not made (Tzvi, 2026-08-18 — a commission
                   may exist one day). Say what is true today, and say it in

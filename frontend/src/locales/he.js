@@ -688,6 +688,14 @@ const he = {
         paymentRefused: 'ניתן להציג רק קישורים מספק תשלום מוכר, ב-https.',
         paymentAccepted: 'נתמכים: {{list}}',
       },
+      proof: {
+        verified: 'מאומת',
+        years_one: 'שנה אחת בעסק',
+        years_two: 'שנתיים בעסק',
+        years_other: '{{count}} שנים בעסק',
+        kosher: 'כשרות: {{body}}',
+        seeReviews: 'דירוג {{avg}} מתוך {{n}} ביקורות. לביקורות',
+      },
       wizard: {
         logoPick: 'לבחור לוגו',
         logoAdd: 'הוספת לוגו',

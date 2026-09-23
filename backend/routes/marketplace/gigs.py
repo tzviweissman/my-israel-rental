@@ -688,6 +688,16 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
             or user_whatsapp(user)
         ),
     }
+    # Part A (23 Sep 2026): the business's public facts for the proof
+    # beside the button. The same fields its own page already shows.
+    if business:
+        gig["business_proof"] = {
+            "verified": bool(business.get("verified")),
+            "founded_year": business.get("founded_year"),
+            "kosher_certification": business.get("kosher_certification"),
+            "categories": business.get("categories") or [],
+            "member_since": (business.get("created_at") or "")[:4] or None,
+        }
     agg = await _rating_aggregate(gig_id)
     gig["rating_avg"] = agg["rating_avg"]
     gig["rating_count"] = agg["rating_count"]

@@ -11,6 +11,7 @@
  * neither will ever break.
  */
 import React, { useContext, useEffect, useState } from 'react';
+import ProofLine from '../components/marketplace/ProofLine';
 import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -211,6 +212,22 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   };
   // member_since is the joining YEAR, already computed by the API.
   const isNewHere = String(biz.member_since || '') === String(new Date().getFullYear());
+  // Part A: the proof beside every Message button. Everything a
+  // business is known to sell, for the kosher rule (same list the
+  // "Good to know" band uses).
+  const proof = {
+    ratingAvg: biz.rating_avg,
+    ratingCount: biz.rating_count,
+    verified: biz.verified,
+    foundedYear: biz.founded_year,
+    memberSince: biz.member_since,
+    kosher: biz.kosher_certification,
+    categories: [
+      ...(biz.listings || []).map((g) => g && g.category),
+      ...(biz.listing_categories || []),
+      ...(biz.categories || []),
+    ].filter(Boolean),
+  };
 
   // Real data only: fall back through what the business actually has
   // rather than inventing a line for it.
@@ -523,6 +540,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   >
                     <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
                   </button>
+                <ProofLine {...proof} className="mt-2 max-w-[18rem]" testid="business-proof-header" />
               </div>
             )}
             </div>
@@ -584,7 +602,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         {/* Repeated for anyone who has read to the end — asking them to
             scroll back up to act is how intent gets lost. */}
         {canMessage && (
-          <div className="mt-10 mb-24 sm:mb-10 flex justify-center">
+          <div className="mt-10 mb-24 sm:mb-10 flex flex-col items-center gap-2">
             <button
                     type="button"
                     onClick={messageBusiness}
@@ -593,6 +611,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   >
                     <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
                   </button>
+            <ProofLine {...proof} className="justify-center" testid="business-proof-bottom" />
           </div>
         )}
       </div>
@@ -656,6 +675,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           }}
           data-testid="business-message-bar"
         >
+          <ProofLine {...proof} compact className="justify-center mb-2" testid="business-proof-sticky" />
           <button
             type="button"
             onClick={messageBusiness}
