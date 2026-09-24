@@ -455,7 +455,7 @@ const PropertyDetail = () => {
             <ClarityPanel
               className="mb-6"
               testid="property-clarity"
-              where={[property.title, areaLabel(property.area, t)].filter(Boolean).join(' · ')}
+              where={[property.title, areaLabel(property.area, t)].filter(Boolean)}
               offers={[{ name: facts || t('upgrade.thePlace', 'The place'), price: shown ? formatShownPrice(shown, t) : null }]}
               why={<p className="text-sm" style={{ color: 'var(--brand-muted)' }}>{t('upgrade.propertyWhy', 'Book directly with the owner. No booking fees.')}</p>}
               primary={{ label: t('upgrade.book', 'Book'), onClick: () => document.getElementById('property-booking')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }}

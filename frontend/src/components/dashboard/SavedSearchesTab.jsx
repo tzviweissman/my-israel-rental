@@ -279,12 +279,16 @@ const CreateAlertForm = ({ API, token, onCreated, onCancel }) => {
             role="switch"
             aria-checked={form.flexible_dates}
             onClick={() => update('flexible_dates', !form.flexible_dates)}
-            className={`relative inline-flex h-6 w-11 flex-shrink-0 items-center rounded-full transition-colors ${form.flexible_dates ? 'bg-[var(--brand-primary)]' : 'bg-gray-300'}`}
+            // 44px to tap, 24px to see; OFF is the muted ink (5.7:1), not
+            // gray-300; the knob side follows the reading direction. The same
+            // switch as EmailSwitches (audits 23 and 24 Sep).
+            className="shrink-0 -my-2.5 inline-flex min-h-[44px] min-w-[52px] items-center justify-center"
             data-testid="flexible-dates-switch"
           >
-            <span
-              className={`inline-block h-5 w-5 transform rounded-full bg-white transition-transform ${form.flexible_dates ? 'translate-x-5' : 'translate-x-0.5'}`}
-            />
+            <span className={`inline-flex h-6 w-11 items-center rounded-full px-1 ${form.flexible_dates ? 'justify-end' : 'justify-start'}`}
+              style={{ background: form.flexible_dates ? 'var(--brand-primary)' : 'var(--brand-muted)' }}>
+              <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
+            </span>
           </button>
         </div>
       )}

@@ -123,7 +123,7 @@ export default function DeliveriesTab({ API, token, onChanged }) {
             <li key={b.business_id} className="inline-flex items-center gap-2 rounded-full border ps-3 pe-1 py-1 text-sm" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}>
               <span dir="auto">{b.business_name}</span>
               <button type="button" disabled={busy === b.business_id} onClick={() => leave(b)}
-                className="inline-flex items-center min-h-[36px] px-3 rounded-full text-xs font-semibold disabled:opacity-50" style={{ color: 'var(--brand-muted)' }}
+                className="inline-flex items-center min-h-[44px] px-3 rounded-full text-xs font-semibold disabled:opacity-50" style={{ color: 'var(--brand-muted)' }}
                 data-testid={`courier-leave-${b.business_id}`}>
                 {t('deliveries.stop', 'Stop delivering')}
               </button>

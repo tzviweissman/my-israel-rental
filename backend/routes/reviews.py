@@ -341,7 +341,11 @@ async def google_mappings(payload: dict = Body(...), user=Depends(verify_token))
 @router.delete("/reviews/google/connection")
 async def google_disconnect(user=Depends(verify_token)) -> dict:
     """Stops syncing, revokes our access at Google, and takes every
-    imported review off the page together (Tzvi, 23 Sep 2026)."""
+    imported review off the page together (Tzvi, 23 Sep 2026).
+
+    Deliberately NOT behind REVIEWS_GOOGLE_IMPORT_ENABLED: an owner who
+    connected while the import was on must still be able to revoke our
+    access after it is switched off (site audit 23 Sep, finding 6)."""
     conn = await db.google_review_connections.find_one({"_id": user["user_id"]})
     if conn:
         try:

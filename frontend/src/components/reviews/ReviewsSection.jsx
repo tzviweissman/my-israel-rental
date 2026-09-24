@@ -19,6 +19,7 @@ import { BadgeCheck, ExternalLink, Flag, Loader2, Star } from 'lucide-react';
 import { API, AuthContext } from '../../App';
 import StarRating from '../marketplace/StarRating';
 
+const SUB_RATINGS = ['cleanliness', 'accuracy', 'communication', 'location', 'value'];
 const REPORT_REASONS = ['spam', 'hate_or_harassment', 'personal_information', 'off_topic', 'conflict_of_interest', 'illegal_content', 'other'];
 const BORDER = 'var(--brand-border)';
 const MUTED = 'var(--brand-muted)';
@@ -184,12 +185,17 @@ export function StarInput({ value, onChange, size = 30, label, testid }) {
 function EditForm({ review, token, onSaved, onCancel, t }) {
   const [rating, setRating] = useState(review.rating);
   const [text, setText] = useState(review.text || '');
+  // A stay's detailed scores stay editable too; leaving them out of the
+  // form made them impossible to change (dead-ends audit 23 Sep).
+  const [subs, setSubs] = useState(review.sub_ratings || {});
+  const isStay = review.booking_kind === 'stay';
   const [busy, setBusy] = useState(false);
   const save = async (e) => {
     e.preventDefault();
     setBusy(true);
     try {
-      const { data } = await axios.patch(`${API}/reviews/${review.id}`, { rating, text }, { headers: { Authorization: `Bearer ${token}` } });
+      const body = { rating, text, ...(isStay ? { sub_ratings: subs } : {}) };
+      const { data } = await axios.patch(`${API}/reviews/${review.id}`, body, { headers: { Authorization: `Bearer ${token}` } });
       onSaved(data);
     } catch (err) {
       toast.error(err.response?.data?.detail?.message || t('reviews.editFailed', 'Your change did not save.'));
@@ -199,6 +205,12 @@ function EditForm({ review, token, onSaved, onCancel, t }) {
   return (
     <form onSubmit={save} className="mt-3 space-y-2" data-testid="review-edit-form">
       <StarInput value={rating} onChange={setRating} size={28} label={t('reviewForm.overall', 'Overall')} testid="review-edit-star" />
+      {isStay && SUB_RATINGS.map((k) => (
+        <div key={k} className="flex items-center justify-between gap-3">
+          <span className="text-sm" style={{ color: 'var(--ink)' }}>{t(`reviews.sub_${k}`)}</span>
+          <StarInput value={subs[k] || 0} onChange={(v) => setSubs((x) => ({ ...x, [k]: v }))} size={20} label={t(`reviews.sub_${k}`)} testid={`review-edit-${k}`} />
+        </div>
+      ))}
       <textarea value={text} onChange={(e) => setText(e.target.value)} minLength={20} maxLength={2000} rows={4} required
         aria-label={t('reviewForm.textLabel', 'Your review')} className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: BORDER }} />
       <div className="flex gap-3">
