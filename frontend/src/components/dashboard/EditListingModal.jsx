@@ -44,6 +44,7 @@ import { X, Trash2, ImagePlus, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { uploadFilesFast, reportUploadFailure } from '../../utils/fastUpload';
 import { productPhotos } from '../../utils/productPhotos';
+import SizeFields, { withSize } from '../marketplace/SizeFields';
 import { SUBCATEGORIES, subcategoryLabel } from '../../lib/categories';
 
 const MAX_PHOTOS = 6;
@@ -177,12 +178,13 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       // show — features, delivery_days, duration_minutes, in_stock — is
       // dropped when the array is replaced.
       const rebuilt = options.map((o, i) => {
-        const base = { ...(originals[i] || {}) };
+        let base = { ...(originals[i] || {}) };
         base.name = String(o.name || '').trim();
         base.price = parseFloat(o.price);
         if (isStore) {
           base.images = o.photos || [];
           base.image = null;
+          base = withSize(base, o);
         } else {
           base.images = o.photos || [];
         }
@@ -496,6 +498,9 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                     </>
                   )}
                 </div>
+                {isStore && (
+                  <SizeFields option={o} onChange={(patch) => setOption(i, patch)} testid={`edit-listing-size-${i}`} />
+                )}
               </div>
             ))}
           </div>

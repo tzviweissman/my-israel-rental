@@ -843,6 +843,16 @@ const en = {
         confirmDisconnect: 'Disconnect Google? Every imported Google review comes off your pages.',
         syncError: 'The last update from Google did not work. We will try again tomorrow.',
       },
+      sizeFields: {
+        label: 'Real size, in cm (optional)',
+        width: 'Width',
+        length: 'Length',
+        hint: 'Measure it and your page can show your products to scale.',
+      },
+      sizeLadder: {
+        label: 'Sizes, drawn to scale',
+        cm: 'cm',
+      },
       upgrade: {
         panelLabel: 'At a glance',
         askQuote: 'Ask for a quote',

@@ -239,6 +239,21 @@ class ContactProps(_Props):
     """
 
 
+class SizesProps(_Props):
+    """pagebuilder/SizeLadderBlock.jsx - the size ladder.
+
+    The first of the scroll sections the practice pages became
+    (docs/page-generation-rules.md §9, from Blazin' Boards): one
+    listing's products drawn to scale, smallest to largest, beside a
+    ruler, each with its own price. `listing` is a service id, shape-
+    checked like every other id here. Only products the owner measured
+    (`width_cm`) are drawn, and the section draws nothing with fewer than
+    three, because a ladder of one is a photo.
+    """
+    listing: str = Field(..., min_length=1, max_length=64)
+    heading: str = Field("", max_length=60)
+
+
 # The library. Order is the spec's own "least work first" ordering
 # (docs/ai-page-builder-spec.md, phase-1 block set), which is also the
 # order they were converted.
@@ -251,6 +266,8 @@ BLOCKS: dict[str, dict[str, Any]] = {
     "cover": {"variants": ("photo", "tint"), "props": CoverProps},
     "gallery": {"variants": ("carousel",), "props": GalleryProps},
     "contact": {"variants": ("stack",), "props": ContactProps},
+    # The first scroll section. Last because it is the newest, not the least work.
+    "sizes": {"variants": ("ladder",), "props": SizesProps},
 }
 
 

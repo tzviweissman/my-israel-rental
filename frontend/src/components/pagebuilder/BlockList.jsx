@@ -31,6 +31,7 @@ import React from 'react';
 import { themeAttrs, readComposition } from '../../utils/pageComposition';
 import { accentColors, accentFor } from '../../utils/businessAccent';
 import ServicesBlock from './ServicesBlock';
+import SizeLadderBlock from './SizeLadderBlock';
 import {
   BlockShell, HeroBlock, RuleBlock, FactsBlock,
   ProvidersBlock, CoverBlock, GalleryBlock, ContactBlock,
@@ -38,7 +39,7 @@ import {
 
 /** The closed vocabulary, on the drawing side. Mirrors BLOCKS in
  *  backend/utils/page_composition.py; check-page-builder.mjs asserts the
- *  two hold the same eight names rather than trusting them to. */
+ *  two hold the same names rather than trusting them to. */
 export const REGISTRY = {
   hero: HeroBlock,
   rule: RuleBlock,
@@ -48,6 +49,7 @@ export const REGISTRY = {
   cover: CoverBlock,
   gallery: GalleryBlock,
   contact: ContactBlock,
+  sizes: SizeLadderBlock,
 };
 
 export const BLOCK_NAMES = Object.keys(REGISTRY);

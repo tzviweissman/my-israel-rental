@@ -40,6 +40,7 @@ import { uploadFilesFast, reportUploadFailure, uploadOneFile } from '../utils/fa
 import { useFormDraft, readDraft, clearDraft } from '../hooks/useFormDraft';
 import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink';
 import { productPhotos } from '../utils/productPhotos';
+import SizeFields, { sizeValue } from '../components/marketplace/SizeFields';
 import PhoneInput from '../components/common/PhoneInput';
 import { useTranslation } from 'react-i18next';
 
@@ -532,6 +533,8 @@ const CreateGig = () => {
           images: p.images || [],
           image: p.image || null,
           in_stock: !!p.in_stock,
+          width_cm: sizeValue(p.width_cm),
+          length_cm: sizeValue(p.length_cm),
         })) : [],
         weekly_availability: form.gig_type === 'appointment' ? form.weekly_availability : null,
         slot_duration_minutes: form.gig_type === 'appointment' ? form.slot_duration_minutes : null,
@@ -974,7 +977,9 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
               onChange={(e) => { onUploadImage(i, e.target.files); e.target.value = ''; }}
               data-testid={`wizard-product-image-input-${i}`}
             />
-            <div className="flex flex-wrap gap-1.5 w-[10.5rem]">
+            {/* One column of photos on a phone, two from sm up: two columns
+                left the name and price boxes too narrow to type in at 375. */}
+            <div className="flex flex-wrap gap-1.5 w-20 sm:w-[10.5rem]">
               {productPhotos(p).map((url) => (
                 <div key={url} className="relative w-20 h-20 rounded-lg overflow-hidden group">
                   <img src={url} alt="" className="w-full h-full object-cover" />
@@ -1008,7 +1013,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
               )}
             </div>
           </div>
-          <div className="flex-1 space-y-2">
+          <div className="flex-1 min-w-0 space-y-2">
             <input value={p.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
               placeholder={t('wizard.productNamePh', 'Product name (e.g. Oak dining table)')}
               className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 text-sm font-semibold focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 placeholder:text-gray-400 placeholder:font-normal"
@@ -1027,7 +1032,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
                 <span className="pointer-events-none absolute inset-y-0 right-2 flex items-center text-gray-400 text-xs">▾</span>
               </div>
               <input type="number" value={p.price} onChange={(e) => onUpdate(i, { price: e.target.value })}
-                placeholder={t("sweep.price", "Price")} className="flex-1 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
+                placeholder={t("sweep.price", "Price")} className="flex-1 min-w-0 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
                 data-testid={`wizard-product-price-${i}`} />
               {products.length > 1 && (
                 <button type="button" onClick={() => onRemove(i)} className="px-2 text-red-500" data-testid={`wizard-product-remove-${i}`}>
@@ -1040,6 +1045,7 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
         <textarea value={p.description} onChange={(e) => onUpdate(i, { description: e.target.value })} rows={2}
           placeholder={t('wizard.productDescPh', 'Short description (optional): size, materials, colours…')}
           className="w-full px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm" />
+        <SizeFields option={p} onChange={(patch) => onUpdate(i, patch)} testid={`wizard-product-size-${i}`} />
       </div>
     ))}
     <button type="button" onClick={onAdd} className="text-sm font-semibold text-[var(--brand-primary)] flex items-center gap-1" data-testid="wizard-product-add">
