@@ -564,7 +564,11 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             ? t('upgrade.nationwide', 'All of Israel')
             : (biz.areas || []).slice(0, 2).map((a) => areaLabel(prettyArea(a, t), t)).join(', ');
           const name = (i18n.language || '').startsWith('he') && biz.name_he ? biz.name_he : biz.name;
-          const offers = listings.map((g) => ({
+          // Cheapest first, priced before "Ask for a quote": the first price
+          // a visitor reads anchors the rest, so it is chosen, not left to
+          // the order things were added (UI audit 24 Sep, Tzvi's go).
+          const priced = (g) => (Number(g.cheapest_price) > 0 ? Number(g.cheapest_price) : Infinity);
+          const offers = listings.slice().sort((a, b) => priced(a) - priced(b)).map((g) => ({
             name: localizedTitle(g, i18n),
             price: g.cheapest_price ? t('upgrade.from', { defaultValue: 'from {{price}}', price: money(g.cheapest_price, g.currency || (g.tiers || g.products || [])[0]?.currency || 'ILS') }) : null,
           }));

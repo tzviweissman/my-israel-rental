@@ -692,7 +692,10 @@ const GigDetail = () => {
         {gig.page_upgrade && (() => {
           const view = gig.upgrade_view || {};
           const items = (isStore ? gig.products : gig.tiers) || [];
-          const offers = items.map((it) => ({
+          // Cheapest first, priced before "Ask for a quote" (the first price
+          // anchors the rest; UI audit 24 Sep).
+          const priced = (it) => (Number(it.price) > 0 ? Number(it.price) : Infinity);
+          const offers = items.slice().sort((a, b) => priced(a) - priced(b)).map((it) => ({
             name: it.name,
             price: Number(it.price) > 0 ? money(it.price, it.currency || 'ILS') : null,
           }));
