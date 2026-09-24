@@ -853,6 +853,9 @@ async def public_business(
         "name": biz.get("name") or "",
         "name_he": biz.get("name_he"),
         "description": biz.get("description") or "",
+        # Hebrew readers get the Hebrew; without it the header showed them
+        # the English description on a Hebrew page (found 24 Sep 2026).
+        "description_he": biz.get("description_he"),
         "logo_url": biz.get("logo_url"),
         "categories": biz.get("categories") or [],
         "areas": biz.get("areas") or [],

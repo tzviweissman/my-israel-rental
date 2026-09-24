@@ -253,6 +253,8 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
     biz.serves_nationwide ? t('serviceArea.chipNationwide', 'All of Israel') : null,
     ...(biz.areas || []).map((a) => prettyArea(a, t)),
   ].filter(Boolean).join(', ');
+  // Their description in the reader's language when they wrote one.
+  const about = ((i18n.language || '').startsWith('he') && biz.description_he) || biz.description;
   const shareDescription =
     biz.description?.slice(0, 155)
     || [ (biz.categories || [])[0], areaSummary ].filter(Boolean).join(' · ')
@@ -458,10 +460,10 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
               {/* B5 — the description had been a single small line. It is
                   the only thing on the page in the business's own voice,
                   so it gets room to be read. */}
-              {biz.description && (
+              {about && (
                 <p className="mt-3 text-[15px] leading-relaxed max-w-2xl" style={{ color: 'var(--ink)' }}
                   data-testid="business-about">
-                  {biz.description}
+                  {about}
                 </p>
               )}
 

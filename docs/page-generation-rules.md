@@ -174,6 +174,15 @@ the mistakes to avoid. The lead block and must-have blocks are checked
 
 Examples are illustrations for an imaginary business, never text to reuse.
 
+**Recipes** (24 Sep 2026): each playbook now names the page recipe it uses,
+from the category study of real sites in `docs/ai-page-builder-spec.md`
+("Category study (Inspo, Sep 2026)"). The recipes are data in
+`backend/utils/page_recipes.py`; the brief's `showing` picks one, and the
+playbook still decides what may lead. What the study found that holds for
+every category: the first screen answers the four questions in one tight
+stack, proof touches the main button, one solid button per screen, and with
+few photos the facts carry the page rather than a padded gallery.
+
 ### Shops and products (16 businesses: bakeries, dips, boards, gifts)
 - **Deciding:** what it looks like, what it costs, whether it's kosher, how to get it.
 - **Lead:** the catalogue with photos and prices (`services`), or a photo gallery
@@ -184,6 +193,10 @@ Examples are illustrations for an imaginary business, never text to reuse.
 - **Avoid:** "fresh daily", "delivery" or "free delivery" unless they said so;
   kosher without a certificate; hiding prices they gave us.
 - *Example headline:* "Sourdough and challah in Beit Shemesh".
+- **Recipe:** `catalogue`; a food shop with a kosher certificate gets `food`.
+  Study: the products come straight after one photo and one line, three to
+  eight of them in the first screen, under a plain heading. The size ladder
+  only when three products are measured.
 
 ### Personal care (5: hair, beauty, spa, therapy)
 - **Deciding:** results, trust with their body, who does it, how easy it is to book.
@@ -193,6 +206,9 @@ Examples are illustrations for an imaginary business, never text to reuse.
 - **Dials:** calm: airy or balanced, quiet or normal prices.
 - **Avoid:** medical or result promises ("cures", "heals", "anti-aging results");
   before/after images that aren't theirs.
+- **Recipe:** `services`. Study (booking-app profiles for salons): each
+  treatment as a compact row with its duration and price; the rating or a
+  credential touching the Book button.
 
 ### Home services and repair (5: handymen, electricians, plumbers)
 - **Deciding:** can they fix my problem, how soon, do they cover my area, are they licensed.
@@ -203,6 +219,10 @@ Examples are illustrations for an imaginary business, never text to reuse.
 - **Dials:** balanced or packed, grotesque type, quiet prices on a quote brief.
 - **Avoid:** "24/7", "emergency", "same day" unless they said so; "licensed"
   without a licence number; "insured".
+- **Recipe:** `services`, facts first. Study: with no photos, the sparsest
+  real handyman profiles still read as deliberate because the facts carry
+  them (licence, years, hours, languages) above a plain list of jobs. With
+  many jobs, the headline names two and says "and more".
 
 ### Events and catering (4)
 - **Deciding:** the food, the kosher level, whether they do my size of event, the date.
@@ -212,6 +232,11 @@ Examples are illustrations for an imaginary business, never text to reuse.
 - **Action:** message with the date, or book.
 - **Dials:** full-bleed imagery with a cover photo, normal prices.
 - **Avoid:** "any size event", guest counts, kosher level beyond the certificate.
+- **Recipe:** `food`, whatever `showing` says. Study: the headline names the
+  food, not a mission; the certificate sits as its own small band right
+  after the lead (our facts band, second) and in the proof line, never
+  crowding the button. No site studied showed kosher; organic and allergen
+  labels were the nearest pattern.
 
 ### Cleaning services (3)
 - **Deciding:** what's included, the price, reliability, the area.
@@ -219,6 +244,7 @@ Examples are illustrations for an imaginary business, never text to reuse.
 - **Proof:** reviews, verified, years.
 - **Action:** book.
 - **Avoid:** "insured", "background-checked", "eco products" unless they said so.
+- **Recipe:** `services`.
 
 ### Health and fitness (2: trainers, classes)
 - **Deciding:** who the trainer is, the kind of sessions, where, when, the price.
@@ -226,6 +252,7 @@ Examples are illustrations for an imaginary business, never text to reuse.
 - **Proof:** reviews, years, licence where relevant.
 - **Action:** book.
 - **Avoid:** weight-loss or health promises, medical words, body-image pressure.
+- **Recipe:** `services` (`one-thing` for a trainer with one session type).
 
 ### Travel and tourism (2: guides, tours)
 - **Deciding:** the route, the language, how long, the price per person, a licensed guide.
@@ -234,6 +261,9 @@ Examples are illustrations for an imaginary business, never text to reuse.
 - **Action:** book or message.
 - **Avoid:** "licensed guide" without a licence; famous-landmark photos that
   aren't theirs; group-size or "best views" claims.
+- **Recipe:** `one-thing` for one tour, `services` for several. Study: every
+  tour page shows what is included and the route as steps; we have no block
+  for either yet (spec, gap 4).
 
 ### Rentals (165 listings: 104 long-term, 56 vacation)
 Not buildable yet: the block library has no property block (open decision 2).
@@ -244,6 +274,11 @@ When it does:
 - **Action:** book or message.
 - **Avoid:** distances ("2 minutes from the Kotel") and "luxury" unless the owner
   wrote them.
+- **Recipe:** `properties`, which today works only when a host's stays are
+  business listings. Study: every reference centres the units (photo, price
+  with its period, rating) and puts the host after them, with the host's
+  proof directly above "Message". The property block needs: photo, title,
+  price per night or month, rooms and size, stay type, one Message action.
 
 ### Any other category
 - **Lead:** services, facts or gallery. **Must have:** services.
@@ -258,7 +293,9 @@ Give the owner a real choice between three directions, each true to the brief:
    otherwise a different lead from the playbook.
 3. **Words-led:** facts or services first, denser or quieter, a different type pairing.
 
-Each has its own headline. None breaks a hard rule.
+Each has its own headline. None breaks a hard rule. Built as
+`page_recipes.options()`: words-led takes the next type pairing, one step
+denser, and the services as a list.
 
 **Nothing the AI makes goes live on its own** (Tzvi, 23 Sep 2026). The pattern
 Shopify and Wix use: what the AI makes is a draft. The owner picks one of the
@@ -376,3 +413,10 @@ Rules for using them:
    needs one new optional field, the real size of each option, because the ladder
    draws to scale and a scale nobody measured would be invented. Product motion
    comes second, once the first Blender jobs have set the method.
+8. **Gaps from the category study** (spec, "Category study"). Two found only
+   by previewing: a hero with no photo draws nothing, so a new business with
+   no photos loses its headline while the check passes (proposed: a `plain`
+   hero variant, the most worth building); and the page header already
+   prints the description the hero's lede would repeat. The rest extend
+   decisions 1 to 3: the property block's fields, steps or what's included,
+   a menu, reviews as a block, a button on each service row.

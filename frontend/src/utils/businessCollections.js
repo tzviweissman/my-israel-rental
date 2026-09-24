@@ -152,7 +152,9 @@ export function buildCollections(listings = [], collections = [], { t } = {}) {
     .sort((a, b) => b[1].length - a[1].length)
     .map(([key, services]) => ({
       id: `auto-${key}`,
-      name: titleCase(key),
+      // The category's own label in the reader's language; the slug,
+      // title-cased, only for a category with no label.
+      name: label(`categoryLabels.${key}`, titleCase(key)),
       description: '',
       services: byAnswerability(services),
     }));
