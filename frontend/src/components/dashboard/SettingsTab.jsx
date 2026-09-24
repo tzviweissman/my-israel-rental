@@ -375,21 +375,20 @@ const SettingsTab = ({ user, token, API }) => {
               aria-checked={!autoNudgeOptOut}
               onClick={handleToggleAutoNudge}
               disabled={savingAutoNudge}
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
-                autoNudgeOptOut ? 'bg-gray-300' : 'bg-[var(--brand-primary)]'
-              } disabled:opacity-60`}
+              // The same switch as EmailSwitches (audits 23 and 24 Sep):
+              // 44px to tap, OFF in the muted ink, knob side by direction.
+              className="shrink-0 -my-2.5 inline-flex min-h-[44px] min-w-[52px] items-center justify-center disabled:opacity-60"
               data-testid="auto-nudge-toggle"
             >
-              <span
-                className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
-                  autoNudgeOptOut ? 'translate-x-1' : 'translate-x-6'
-                }`}
-              />
+              <span className={`inline-flex h-6 w-11 items-center rounded-full px-1 ${autoNudgeOptOut ? 'justify-start' : 'justify-end'}`}
+                style={{ background: autoNudgeOptOut ? 'var(--brand-muted)' : 'var(--brand-primary)' }}>
+                <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
+              </span>
             </button>
             <span className="text-sm font-medium text-gray-800">
               {autoNudgeOptOut
-                ? t('settings.autoNudgeOffLabel', 'Off — no auto reminders')
-                : t('settings.autoNudgeOnLabel', 'On — remind me after 12h')}
+                ? t('settings.autoNudgeOffLabel', 'Off, no automatic reminders')
+                : t('settings.autoNudgeOnLabel', 'On, remind me after 12 hours')}
             </span>
           </label>
           <p className="text-[11px] text-gray-400 mt-2">

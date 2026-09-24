@@ -22,6 +22,9 @@ import { ArrowRight } from 'lucide-react';
 export default function ClarityPanel({ where, offers = [], why = null, primary, secondary = [], className = '', testid = 'clarity' }) {
   const { t } = useTranslation();
   const shown = offers.slice(0, 3);
+  // `where` is [who, what, place]: who leads on its own line, the rest follow
+  // with at most one separator dot (taste-skill: one per line; UI audit 24 Sep).
+  const [who, ...about] = Array.isArray(where) ? where : [where];
   return (
     <section
       className={`rounded-2xl border bg-white p-4 sm:p-5 ${className}`}
@@ -29,19 +32,25 @@ export default function ClarityPanel({ where, offers = [], why = null, primary, 
       aria-label={t('upgrade.panelLabel', 'At a glance')}
       data-testid={testid}
     >
-      <p className="text-base sm:text-lg font-semibold leading-snug" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }} dir="auto" data-testid={`${testid}-where`}>
-        {where}
-      </p>
+      <div data-testid={`${testid}-where`}>
+        <p className="text-base sm:text-lg font-semibold leading-snug" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }} dir="auto">
+          {who}
+        </p>
+        {about.length > 0 && (
+          <p className="text-sm leading-snug" style={{ color: 'var(--brand-muted)' }} dir="auto">{about.join(' · ')}</p>
+        )}
+      </div>
       {shown.length > 0 && (
-        <p className="mt-1.5 text-sm leading-snug" style={{ color: 'var(--ink)' }} data-testid={`${testid}-offer`}>
+        // Spacing between offers, not dots: three offers made two dots on
+        // one line, and a dot left alone at a line end when they wrapped.
+        <p className="mt-1.5 flex flex-wrap gap-x-5 gap-y-0.5 text-sm leading-snug" style={{ color: 'var(--ink)' }} data-testid={`${testid}-offer`}>
           {shown.map((o, i) => (
-            <React.Fragment key={i}>
-              {i > 0 && <span aria-hidden="true" style={{ color: 'var(--brand-muted)' }}> · </span>}
+            <span key={i}>
               <span dir="auto">{o.name}</span>{' '}
               <span className="font-semibold" style={{ color: o.price ? 'var(--gold-text-on-light)' : 'var(--brand-muted)' }}>
                 {o.price || t('upgrade.askQuote', 'Ask for a quote')}
               </span>
-            </React.Fragment>
+            </span>
           ))}
         </p>
       )}

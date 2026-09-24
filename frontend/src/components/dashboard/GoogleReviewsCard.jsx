@@ -49,6 +49,9 @@ export default function GoogleReviewsCard({ API, token, returnTab = 'my-business
     if (!r) return;
     if (r === 'connected') toast.success(t('googleReviews.connected', 'Google is connected. Now match each place to your listing.'));
     else if (r === 'failed') toast.error(t('googleReviews.failed', 'Google did not connect. Try again.'));
+    // Backing out of Google's consent screen: say so, rather than a click
+    // that seems to have done nothing (dead-ends audit 23 Sep).
+    else if (r === 'cancelled') toast(t('googleReviews.cancelled', 'Google was not connected. You can try again any time.'));
     params.delete('google_reviews');
     setParams(params, { replace: true });
     // eslint-disable-next-line react-hooks/exhaustive-deps

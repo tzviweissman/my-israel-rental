@@ -169,7 +169,8 @@ def map_review(g: dict) -> dict:
     reviewer = g.get("reviewer") or {}
     return {
         "external_id": g["name"],
-        "author_display_name": "Google user" if reviewer.get("isAnonymous") else (reviewer.get("displayName") or "Google user"),
+        "author_display_name": "Google user" if reviewer.get("isAnonymous")
+        else (clean_text(reviewer.get("displayName"))[:80] or "Google user"),
         "rating": STARS.get(g.get("starRating"), 0),
         "text": clean_text(g.get("comment") or ""),
         "source_created_at": g.get("createTime"),

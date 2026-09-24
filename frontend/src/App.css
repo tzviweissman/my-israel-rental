@@ -945,6 +945,8 @@ button:focus-visible,
   font-size: 14px;
   color: #4a5551;
   padding: 9px 22px;
+  /* 44px to tap, like every other tab strip (site audit 23 Sep, finding 3). */
+  min-height: 44px;
   border-radius: 999px;
   cursor: pointer;
   transition: all .18s var(--ease);

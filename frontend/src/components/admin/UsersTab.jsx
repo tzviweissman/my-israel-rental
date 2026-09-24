@@ -206,7 +206,7 @@ export const UsersTab = ({ token, onStatsChange, prefilter }) => {
                       )}
                       <button
                         onClick={() => togglePageUpgrade(u)}
-                        className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold"
+                        className="inline-flex items-center gap-1 min-h-[44px] px-2 rounded-full text-xs font-semibold"
                         style={u.page_upgrade
                           ? { background: 'rgb(var(--brand-primary-rgb) / 0.12)', color: 'var(--brand-primary-deep)' }
                           : { color: 'var(--brand-muted)' }}

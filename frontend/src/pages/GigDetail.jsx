@@ -705,7 +705,7 @@ const GigDetail = () => {
             <ClarityPanel
               className="mb-6"
               testid="gig-clarity"
-              where={[displayTitle, gig.provider?.name, gig.area ? prettyArea(gig.area, t) : ''].filter(Boolean).join(' · ')}
+              where={[displayTitle, gig.provider?.name, gig.area ? prettyArea(gig.area, t) : ''].filter(Boolean)}
               offers={offers}
               why={hasWhy ? (
                 <div className="flex flex-wrap items-center gap-y-1">

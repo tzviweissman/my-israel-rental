@@ -425,7 +425,7 @@ export default function MyBusinessesTab({ API, token }) {
                 <button
                   type="button"
                   onClick={() => setDetailsBiz(b)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold me-3"
+                  className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
                   style={{ color: 'var(--brand-primary)' }}
                   data-testid={`business-details-${b.id}`}
                 >
@@ -436,7 +436,7 @@ export default function MyBusinessesTab({ API, token }) {
                   type="button"
                   onClick={() => setHoursBizId(hoursBizId === b.id ? null : b.id)}
                   aria-expanded={hoursBizId === b.id}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold me-3"
+                  className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
                   style={{ color: 'var(--brand-primary)' }}
                   data-testid={`business-hours-${b.id}`}
                 >
@@ -448,7 +448,7 @@ export default function MyBusinessesTab({ API, token }) {
                 <button
                   type="button"
                   onClick={() => setDesignBiz(b)}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold me-3"
+                  className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
                   style={{ color: 'var(--brand-primary)' }}
                   data-testid={`business-design-${b.id}`}
                   // The FIRST card only: the tour needs one anchor,
@@ -462,7 +462,7 @@ export default function MyBusinessesTab({ API, token }) {
                 <button
                   type="button"
                   onClick={() => { setEditingId(b.id); setEditName(b.name); }}
-                  className="inline-flex items-center gap-1.5 text-xs font-semibold me-3"
+                  className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
                   style={{ color: 'var(--brand-muted)' }}
                   data-testid={`business-rename-${b.id}`}
                 >

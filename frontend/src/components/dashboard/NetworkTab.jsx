@@ -162,7 +162,7 @@ export default function NetworkTab({ API, token, listings = [] }) {
     </li>
   );
 
-  const btn = 'inline-flex items-center gap-1 rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors disabled:opacity-50';
+  const btn = 'inline-flex items-center gap-1 min-h-[44px] rounded-full px-3 py-1.5 text-xs font-semibold border transition-colors disabled:opacity-50';
 
   return (
     <div data-testid="network-tab" data-tour="network">

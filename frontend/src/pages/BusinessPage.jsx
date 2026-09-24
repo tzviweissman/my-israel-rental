@@ -580,7 +580,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             <ClarityPanel
               className="my-6"
               testid="business-clarity"
-              where={[name, what, where].filter(Boolean).join(' · ')}
+              where={[name, what, where].filter(Boolean)}
               offers={offers}
               why={(view.strengths || []).length || proof.ratingCount || proof.verified || proof.foundedYear ? (
                 <div className="flex flex-wrap items-center gap-y-1">

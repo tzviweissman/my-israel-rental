@@ -172,14 +172,14 @@ report(
 //    fix it; the check fails if a listed key is no longer a problem, so
 //    the list cannot rot.
 const KNOWN_UNPLURALISED = new Set([
-  'admin.bulkDeleteTitle', 'admin.listingsCount', 'admin.markBookedDescBulk',
-  'admin.selectedCount', 'admin.usersCount', 'admin.usersSuppressed',
+  'admin.bulkDeleteTitle', 'admin.markBookedDescBulk',
+  'admin.selectedCount', 'admin.usersSuppressed',
   'auth.verifyPending.resendIn', 'blocks.count', 'bulk.addedPhotos',
   'bulk.addedPhotosPerProp', 'bulk.photosPropertiesSelected', 'bulk.revertLast',
   'bulk.saveAndApply', 'bulk.selectedCount', 'bulk.selectedPropertiesHint',
   'bulk.totalCount', 'bulk.updatedCount', 'bulk.visibleCount',
   'common.nearbyShortHop', 'common.nearbyTotal', 'common.nearbyWalking',
-  'property.typeWithBeds', 'services.reviewsCount', 'stays.bedroomsPlusChip',
+  'property.typeWithBeds', 'stays.bedroomsPlusChip',
   'stays.showCount',
 ]);
 

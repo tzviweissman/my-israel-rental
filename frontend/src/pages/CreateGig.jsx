@@ -98,6 +98,9 @@ const emptyProduct = (prevCurrency = 'ILS') => ({
   name: '', price: '', currency: prevCurrency, description: '', image: '', images: [], in_stock: true,
 });
 
+// The screen layout a saved draft's step number refers to (see `step` below).
+const DRAFT_LAYOUT = 2;
+
 const CreateGig = () => {
   const { t } = useTranslation();
   const { token, user } = useContext(AuthContext);
@@ -106,7 +109,17 @@ const CreateGig = () => {
   // Restored together with the answers: bringing someone back to step 1
   // with their text still in the boxes reads as "it lost my work" even
   // though nothing was lost.
-  const [step, setStep] = useState(() => readDraft('create-gig')?.step || 1);
+  //
+  // Only when the draft was saved under THIS screen layout. The wizard went
+  // from five or six screens to three on 23 Sep 2026 and a step number means
+  // a different screen now: an old draft at step 3 ("Description") landed on
+  // the new step 3 (Contact, with Publish) and skipped pricing entirely (site
+  // audit 23 Sep, finding 1). An older draft keeps its answers and restarts
+  // at screen 1. Bump DRAFT_LAYOUT whenever the screens are renumbered.
+  const [step, setStep] = useState(() => {
+    const d = readDraft('create-gig');
+    return (d?.layout === DRAFT_LAYOUT && d?.step) || 1;
+  });
   const [categories, setCategories] = useState([]);
   const [locations, setLocations] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -195,7 +208,7 @@ const CreateGig = () => {
     area: '',
   });
 
-  useFormDraft('create-gig', { form, step }, !submitted);
+  useFormDraft('create-gig', { form, step, layout: DRAFT_LAYOUT }, !submitted);
 
   const set = (patch) => setForm((f) => ({ ...f, ...patch }));
 
