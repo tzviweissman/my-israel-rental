@@ -513,6 +513,219 @@ is still phase 1 work rather than phase 3.
 
 ---
 
+## Category study (Inspo, Sep 2026)
+
+24 Sep 2026. How real sites lay out a business's home page, studied per
+answer to the brief's `showing`, and turned into **page recipes**: data the
+future generator chooses from, built only from the blocks and dials above.
+Design-time research only, under P5: nothing calls Inspo or Mobbin at
+runtime, nothing from either is in the repo, and their palettes were ignored.
+Only generic descriptions were sent to them, never a real business.
+
+### Coverage: what the references could and couldn't tell us
+
+Inspo has 24 industries and **none for local services** (no home services,
+beauty, trades or real estate). Unfiltered, "family cleaning business in
+Jerusalem" returned a fintech tool, Mailchimp and a clothing subscription.
+Tzvi approved adding **Mobbin** for the thin groups (same design-time rule).
+
+| Group | Inspo | Mobbin | Honest verdict |
+|---|---|---|---|
+| services | 0 local services; health = apps and supplements | Fresha, Airtasker, Urban Company, Peerspace | Good via Mobbin, but booking-app profiles, not a tradesperson's own site |
+| catalogue | ~12 catalogues, all big online brands | DoorDash and Subway store pages, Blue Apron, Walmart, Faire | Grid-and-price pattern well covered; no neighbourhood shop anywhere |
+| one-thing | 5 single-product pages; 0 tours | GetYourGuide, Airbnb Experiences, Viator, Klook, Tripadvisor | Products solid; tours read through marketplace chrome |
+| place | ~8 restaurants (fine dining, chains); 0 studios | Google Maps place panels, Airbnb Services, Time2book | Layout came almost entirely from Mobbin |
+| properties | 5 hotel or booking sites; 0 rentals | Airbnb listing and host profile, Zillow, Expedia | Strong for host plus a few listings, all marketplace-shaped |
+| food + kosher | ~30 food sites; **0 show kosher** | Uber Eats grocery item, Blue Apron, Sweetgreen | Certificate placement inferred from organic and allergen labels |
+
+Skipped because a pop-up covered them: Function Health, Modern Health,
+Mirazur, Dinner by Heston, Blue Bottle (mobile), Forest Admin (cookies);
+Good Eggs (quiz); Frequency Breathwork (newsletter).
+
+### What the good ones have in common
+
+Across every group, the same six things, which is why the recipes differ
+more in order and dials than in blocks:
+
+1. **The first screen answers all four P4a questions in a tight stack**:
+   name and what, where, proof, one button. Utility pages (a place, a
+   service) stack them densely; product pages give them one photo and room.
+2. **Proof sits touching the main button**, never in its own section:
+   rating and count, or a credential when there are no reviews ("in
+   business since", a certificate). Our ProofLine already does this.
+3. **One solid button per screen.** Secondary actions are outline, links,
+   tabs or small tiles, never a second solid fill.
+4. **With few or no photos, structured facts carry the page** (Airtasker's
+   sparsest handyman profile: services as a list, quick facts, "in business
+   since"). One strong photo beats a thin gallery; nobody pads.
+5. **Hours and where come before the description** on every place page.
+6. **On a phone the action becomes a bar pinned to the bottom**, with the
+   proof or the price beside it. Our page already has this bar.
+
+Per group:
+
+- **services**: profile, not pitch. Name, rating, button, then hours and
+  area, then the jobs as a compact list with price and duration. Dense,
+  plain type, small imagery.
+- **catalogue**: one photo, one line, one button, then the products straight
+  away (3 to 8 in the first screen after the hero), titled plainly. Category
+  chips sit just above the grid when the list is long.
+- **one-thing**: the one offer gets the whole page: one strong photo, the
+  proof above or beside the title, the facts as an icon row (duration,
+  language), and for tours what is included and the steps.
+- **place**: a dense lookup stack: name, rating, hours, where, actions, then
+  what they sell, photos lower down.
+- **properties**: the place first (photo, price with its period, rating),
+  the host after, as context. Host proof sits directly above "Message host".
+- **food**: the headline names the food, not a mission. A certificate is
+  either on the product in the photo or a small labelled band after the
+  hero, never crowding the button.
+
+### The recipes
+
+`backend/utils/page_recipes.py` (`RECIPES`, `fill`, `options`). Checked by
+`backend/tests/test_page_recipes.py`: every recipe, filled from nine sample
+businesses and also forced onto the five hard cases, passes
+`check_composition` in English and Hebrew, and the three options pass
+`check_options`. The recipe is fixed at the recipe when it fails; the
+checker was not touched.
+
+| Recipe | Chosen when | Content order after the hero | Dials (type · density · imagery · price · motion) |
+|---|---|---|---|
+| services | `showing: services`, or no store listings | facts, services (list), gallery, contact | grotesque · balanced · thumbnail · normal · still |
+| catalogue | `showing: catalogue`, or they sell from a store | services (grid), sizes, facts, gallery, contact | serif · balanced · grid · normal · subtle |
+| one-thing | `showing: one-thing` | services (list, 1), gallery, facts, contact | serif · airy · full-bleed · normal · still |
+| place | `showing: place` | facts, gallery, services (grid, 6), contact | serif · balanced · full-bleed · normal · still |
+| properties | `showing: properties` | gallery, services (grid, 6), facts, contact | serif · airy · full-bleed · normal · still |
+| food | a caterer, or a food shop with a kosher certificate, whatever `showing` says | gallery, facts, services (grid), contact | serif · balanced · full-bleed · normal · subtle |
+
+How the rest of the brief moves a recipe:
+
+- **What may lead is the playbook's call** (`page_rules.PLAYBOOKS`); the
+  recipe's order is a preference within it. A café in "shops and products"
+  cannot lead with facts, so its gallery or menu leads and the facts come
+  second.
+- **A block only appears with its material**: a gallery needs three
+  distinct photos that will actually draw, never the hero's photo again;
+  the size ladder needs three measured products; facts need something to
+  say, or a `visit` action.
+- **`action`** guarantees the block it happens in (book or order: services;
+  message: contact; visit: facts, placed right after the lead). The main
+  button itself is the page frame's, not the composition's.
+- **`pricing` and `audience`** move the dials the way `briefToTheme()` does:
+  premium is airy, serif, quiet prices; value is packed, grotesque, loud
+  prices; quote is quiet prices; businesses get geometric; tourists get
+  full-bleed. Then held to what the business supports: no full-bleed without
+  a cover, no loud prices without prices.
+- **`strengths`**: a backed kosher, licensed, experience or English moves
+  the facts band (which shows the proof) to second place.
+
+**Hero copy, only their words.** The headline is a listing title plus their
+area: "{listing} in {area}" / "{listing} ב{area}". With three or more
+listings, "{listing}, {listing} and more in {area}" / "… ועוד ב…", because
+one title would stand for all of them. The accent word is only used for
+the second listing in the photo-led option. The lede is one sentence of
+their own description or brief note, in the page's language, at most 20
+words, never the headline said twice. The hero photo is a photo of what
+they sell, not the cover, which the page header already draws. Hebrew
+place names come only from `locations_catalog.HEBREW_AREA_NAMES`. If no
+listing is named in a language, `fill` returns no page for it and says so;
+a Hebrew-only business has no English page to make.
+
+**The three options** (rulebook §7): the brief straight; photo-led (gallery
+first when the playbook allows it, else a different order); words-led (the
+next type pairing, a step denser, services as a list). Each has its own
+headline shape.
+
+### Previews
+
+`scripts/preview-page-recipes.py` seeds the five hard cases (one service and
+no photos; 25 services; a caterer with a kosher certificate; a brand-new
+business with no reviews; a Hebrew-only business) under all six recipes,
+in both languages, into the LOCAL database only (ids start `rp-`,
+`--clean` removes them; nothing goes through the API, so no paid
+translation runs). `scripts/shot-page-recipes.mjs` shoots each at 1280 and
+375, fold and full page, into `screenshots/recipes/` with an `index.html`
+contact sheet: 240 screenshots, no sideways scroll, every Hebrew page RTL
+with Hebrew headings in Frank Ruhl Libre.
+
+What the previews caught, and the recipe was changed for:
+- The hero used the cover, which the page header already draws directly
+  above it: the same photo twice, stacked. The hero now uses a photo of
+  what they sell.
+- A headline taken from the first line of their description repeated the
+  header, which prints that description under their name.
+
+### Gaps: what the references do that our blocks can't
+
+Proposals only; nothing here is built. Ordered by how much they matter.
+
+1. **A hero with no photo draws nothing** (`HeroBlock` returns null without
+   an image). The common case, a new business with no photos, loses its
+   headline entirely while `check_composition` still passes the page.
+   Proposal: a `hero` variant `plain`, the headline and lede on the page
+   ground with the accent rule, no photo. All groups. **The one most worth
+   closing.** The `hero` rule should then also fail a band hero with no
+   photo to draw.
+2. **The header and the hero say the same thing.** The page header prints
+   their description; the hero's lede can only come from the same
+   description. Proposal: on a composed page with a hero lede, the header
+   shows name, proof and areas and leaves the description to the hero.
+   Needs a change to `BusinessPage.jsx`, so it waits for a ruling.
+3. **Property block** (rulebook open decision 2). Every rentals reference
+   centres the units. Fields: photo, title, price with its period (night or
+   month), rooms and size in Israeli terms, stay type (long, short,
+   vacation), one action (Message about this one). Until it exists the
+   properties recipe works only when a host's stays are business listings.
+4. **Steps / what's included** ("what happens next as steps", rulebook §5c.3;
+   a tour's route; how ordering works). Owner-written items only, 3 to 6.
+   one-thing, services, food.
+5. **Menu / price list** (open decision 3). A dense text list of name and
+   price. Needs no photos, so it is also a no-photo answer for food and
+   place pages.
+6. **Reviews as a placeable block** (open decision 3). `ReviewsSection`
+   already renders below the composed body; a `reviews` block wrapping it,
+   self-hiding with no reviews, would let a recipe put quotes near the top.
+   All groups.
+7. **A button on each row** of the services list (Book, Order) rather than
+   only a click-through card. services, catalogue, place.
+8. **Open now and directions** for places. Open-now needs hours as data,
+   not free text. Directions need an address, which the chat-only business
+   page deliberately never sends (B1): a decision, not a block.
+9. **Hebrew twin for the hero text** (open decision 1). Confirmed:
+   `fill` writes a separate composition per language today.
+
+Already covered, not gaps: the phone bar pinned to the bottom (page frame),
+category chips and search past 16 services (`ServicesBlock`, visible in the
+25-service preview), proof beside the button (`ProofLine`).
+
+### Found on the way, not changed
+
+- **The Hebrew stemmer in `page_rules._stem`** treats a leading ש, מ, כ, ב,
+  ל, ה or ו as a prefix even when it is part of the word (שמחות becomes
+  מחות), and does not fold final letters (ן/נ, ם/מ, ך/כ, ף/פ, ץ/צ). So a
+  Hebrew headline can fail `congruency` while naming exactly what they sell.
+  The recipes fall back to the listing's own name, which always matches.
+  Worth fixing in the checker, with its golden set.
+- **The standard page in Hebrew** shows the English description in the
+  header (the public payload carries no `description_he`) and an English
+  category heading above the services ("Home Services Repair"). Pre-existing,
+  outside this work.
+
+### Reference sites studied (research sources only)
+
+Inspo: Mooala, Grass Roots Farmers' Co-op, Parachute, Ritual, Fellow, Graza,
+Swim Club (product page), Ferm Living (product page), Potion, Tempo, Fitbod,
+Headspace, Dia & Co, Dawn, Chick-fil-A, Chipotle, Wagamama, Atomix, Death &
+Co, Onyx Coffee Lab, Belmond, The Standard, Lyfe Hotels, Explora Journeys,
+Hopper. Mobbin: Fresha, Airtasker, Urban Company, Square, Peerspace,
+DoorDash, Subway, Blue Apron, Walmart, Faire, Etsy, GetYourGuide, Airbnb
+(Experiences, Services, listings, host profile), Klook, Viator, Tripadvisor,
+Zillow, Expedia, Google Maps, Time2book, Open, Sweatpals, Uber Eats,
+Sweetgreen.
+
+---
+
 ## §8a — Answers. Research and codebase passes, 31 Aug 2026.
 
 Full briefs: `docs/page-builder-research.md` and the codebase report in the
