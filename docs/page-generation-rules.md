@@ -31,7 +31,9 @@ whether to use them, in their language, without adding a single fact of our own.
 
 ## 2. What the AI gets, and the only facts it may use
 
-- **The brief** (P7b): what they show, what visitors should do, who it's for,
+- **The brief** (P7b; Tzvi rejected most of it on 24 Sep 2026, see the spec's
+  "Tzvi's verdict on the six questions": the generator decides what leads, the
+  look and the main button, and the owner is asked for facts only): what they show, what visitors should do, who it's for,
   where their prices sit, up to two strengths, their 200-character note.
 - **The business**: name, description, areas, hours, languages, founding year,
   licence number, kosher certificate, verified, review count and average.

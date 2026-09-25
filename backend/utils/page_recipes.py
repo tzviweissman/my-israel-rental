@@ -219,6 +219,15 @@ def theme_for(b: dict, recipe: dict) -> dict:
         t.update(density="packed", price_prominence="loud", type="grotesque")
     if pricing == "quote":
         t["price_prominence"] = "quiet"
+    # `showing` moves a dial even when another recipe won (a caterer asked
+    # "one main thing" saw nothing change, and every brief question must).
+    showing = brief.get("showing")
+    if showing == "one-thing":
+        t["density"] = "airy"
+    if showing == "catalogue" and t["density"] == "balanced":
+        t["density"] = "packed"
+    if showing == "place":
+        t["imagery"] = "full-bleed"
     if audience == "businesses":
         t.update(type="geometric", imagery="grid")
     if audience == "tourists":
@@ -265,7 +274,9 @@ def _lede(b: dict, lang: str, title: str = "") -> str:
     sources = ((b.get("description_he") if lang == "he" else None) or b.get("description") or "",
                (b.get("page_brief") or {}).get("note") or "")
     for text in sources:
-        for s in re.split(r"(?<=[.?])\s+", text.strip()):
+        # "!" ends a sentence too; a live description written in them
+        # read as one long sentence and left the lede empty.
+        for s in re.split(r"(?<=[.?!])\s+", text.strip()):
             s = s.strip()
             if not s or ("!" in s) or "—" in s or "–" in s or not (3 <= len(s.split()) <= HERO_LEDE_MAX_WORDS):
                 continue
