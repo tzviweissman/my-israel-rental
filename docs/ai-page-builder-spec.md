@@ -273,6 +273,58 @@ from a vague adjective.**
 - **Nothing they would have to look up.** If an owner has to go and find something
   to answer, they close the tab and do not come back.
 
+#### Tzvi's verdict on the six questions (walkthrough, 24 Sep 2026)
+
+Tzvi went through the brief as an owner would, on a local copy of a live business
+(L.A. Cholent, a caterer with a kosher certificate), answering each question while
+the page on the side updated. He rejected four of the six, and all four for the same
+reason: **the owner should not be designing their page.** What leads, the look and
+the main button are for our design and conversion skills to decide from the
+business's own data, not for the owner to choose.
+
+| # | Question | His answer | What it did on the page |
+|---|---|---|---|
+| 1 | What are you showing people? | "It's clearly a food product to help make cholent easier" (typed, not picked) | Nothing at first: a caterer with a certificate always gets the food recipe, so the answer was ignored. Fixed the same day (see below). His wording also says the system should already know this from their listings. |
+| 2 | What should someone do when they land here? | **Rejected.** "Every home page for any business should be showcasing that business, explaining what they offer and convincing them to use their product or service. This isn't a good question." | Skipped. |
+| 3 | Who is it mostly for? | Locals nearby | **Nothing.** Only "other businesses" and "tourists" move a dial; the other three answers change nothing, which breaks P7b's own rule that every question must visibly change the output. |
+| 4 | Where do your prices sit? | Fair, middle of the road | Nothing visible for this business: "fair" is where the food recipe already sits. |
+| 5 | What should people know first? | **Rejected.** "The first thing people should see is something which will statistically make it the highest likelihood they will buy the product or use the service." He pointed at Blazin' Boards, which led with the product in its real sizes, not with any of these choices. | Skipped. |
+| 6 | Which of these feels closest? (four looks of their own page) | **Rejected.** "Why are you asking this? Doesn't our design skills deal with this?" | Skipped. |
+
+**What this means for the builder** (his direction; the replacement design is not
+written yet):
+
+- **The generator decides, from the data and the evidence.** What leads is whatever
+  is most likely to make a visitor buy or book (rulebook §5c), chosen by our design
+  and conversion rules, not by the owner ticking a strength.
+- **The main button follows from what they sell**: a store listing gets Order, a
+  bookable service gets Book, anything else Message. Never asked.
+- **The look is ours to set** from their logo, photos and category, not a
+  recognition question.
+- **Questions 2, 5 and 6 go.** Questions 3 and 4 stay only if they can be made to
+  change the page visibly, or go too. Whatever the owner is still asked should be
+  facts only they know (what they sell, their prices, how ordering works), never
+  design choices.
+- `PageBriefForm.jsx` and `briefToTheme()` are live on the standard page editor and
+  were not changed; retiring or cutting them down is a separate, explicit step.
+
+**Found in the same walkthrough, and fixed in `utils/page_recipes.py`:**
+- `showing` now moves a dial even when another recipe wins (one main thing: airy;
+  catalogue: denser; place: full-bleed), as `briefToTheme()` does.
+- A description whose sentences end in "!" read as one long sentence, so the hero's
+  line under the headline came out empty. "!" now ends a sentence too.
+
+**Found, not fixed:**
+- **The three options were weak.** All passed every rule, but the headline could
+  only say "Catering in Jerusalem" because their one listing is named "Catering",
+  while the real product (a cholent kit in three sizes, with who each size feeds and
+  "put it in your crock pot, add water") had no block to show it. That is gaps 4
+  and 5 in the category study (steps, a menu or size list), and it is what Tzvi's
+  "highest likelihood they will buy" rule would lead with.
+- **Their listing photo is a flyer with their phone number and email printed on
+  it**, so the chat-only page shows both through an image. Nothing checks images for
+  this today.
+
 ### P7c — Let them bring what they like
 
 They already know what good looks like, they just cannot say it. So let them point
@@ -857,6 +909,12 @@ own page is the wrong place to advertise how new they are to us. Replace with
 *Overruled 23 Sep 2026:* Tzvi's proof-beside-the-button brief keeps "New on
 MyIsraelRental" for a business that joined this year, and it now also appears
 in the proof line (ruling 5).
+
+**Confirmed 25 Sep 2026 (Tzvi): do not remove either.** The small "List your
+business, free" band at the foot of a business page and "New on MyIsraelRental"
+both stay, on the standard page and on every AI-built page. A design-rules prompt
+written in another conversation proposed removing both as clutter; that part of it
+is overruled.
 
 ### The opportunity this creates, worth deciding separately
 
