@@ -218,7 +218,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
                   onClick={() => toggleLanguage(lang)}
                   className={`px-3 py-1 rounded-full text-xs font-semibold border transition-colors ${
                     active
-                      ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]'
+                      ? 'btn-primary'
                       : 'bg-white text-gray-700 border-gray-200 hover:border-gray-400'
                   }`}
                   data-testid={`provider-lang-${lang.toLowerCase()}`}
@@ -292,7 +292,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
 
         <div className="flex justify-end gap-2 pt-2">
           <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">Cancel</button>
-          <button type="submit" disabled={saving} className="px-5 py-2 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] disabled:opacity-60" data-testid="provider-profile-save">
+          <button type="submit" disabled={saving} className="btn-primary px-5 py-2 rounded-lg text-sm font-semibold disabled:opacity-60" data-testid="provider-profile-save">
             {saving ? <Loader2 className="animate-spin" size={14} /> : 'Save'}
           </button>
         </div>
@@ -499,7 +499,7 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
               so there is nothing to upgrade to and nothing to cancel. */}
           <button
             onClick={() => { saveReturnPath(); navigate(addServiceHref); }}
-            className="px-4 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] flex items-center gap-1.5"
+            className="btn-primary px-4 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-1.5"
             data-testid="my-gigs-create-btn"
           >
             <Plus size={14} /> {t(`businesses.add${noun}`, noun === 'Product' ? 'Add a product' : 'Add a service')}
@@ -538,7 +538,7 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
           </p>
           <button
             onClick={() => { saveReturnPath(); navigate(addServiceHref); }}
-            className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] inline-flex items-center gap-1.5"
+            className="btn-primary px-5 py-2.5 rounded-lg text-sm font-semibold inline-flex items-center gap-1.5"
             data-testid="my-gigs-empty-cta"
           >
             <Plus size={14} /> {t('myGigs.emptyCta', 'Add your first service')}
