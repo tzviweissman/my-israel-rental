@@ -1775,6 +1775,7 @@ const en = {
         ctaMessage: 'Send a message',
         from: 'From',
         kosher: 'Kosher · {{body}}',
+        listedOn: 'Listed on MyIsraelRental',
         fromTheBusiness: 'From the business',
         flyerAlt: 'A flyer from {{name}}',
       },

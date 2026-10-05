@@ -67,6 +67,40 @@ for (const [w, h] of [[1440, 900], [390, 844], [360, 800]]) {
         filledAboveFold: filled, text: word.innerText,
       };
     });
+    // Phase 3: say it once (rule 1.4) and MyIsraelRental steps back.
+    const biz = await (await fetch(`http://localhost:8001/api/marketplace/business/${AFTER}`)).json();
+    const facts = [biz.kosher_certification?.body, lang === 'he' ? 'חדש ב-MyIsraelRental' : 'New on MyIsraelRental'].filter(Boolean);
+    const seen = await page.evaluate((facts) => {
+      const nodes = [];
+      const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+      while (walk.nextNode()) {
+        const n = walk.currentNode; const el = n.parentElement;
+        if (!el || !n.textContent.trim() || el.closest('[hidden], [aria-hidden="true"]')) continue;
+        const cs = getComputedStyle(el); const r = el.getBoundingClientRect();
+        if (cs.display === 'none' || cs.visibility === 'hidden' || r.width === 0) continue;
+        nodes.push({ text: n.textContent, top: r.top + scrollY });
+      }
+      return Object.fromEntries(facts.map((f) => [f, {
+        page: nodes.filter((x) => x.text.includes(f)).length,
+        fold: nodes.filter((x) => x.text.includes(f) && x.top < innerHeight).length,
+      }]));
+    }, facts);
+    for (const [f, c] of Object.entries(seen)) {
+      expect(c.page <= 2, `${tag}: "${f}" appears ${c.page} times; at most twice`);
+      expect(c.fold <= 1, `${tag}: "${f}" appears ${c.fold} times above the fold; at most once`);
+    }
+    const chrome = await page.evaluate(() => ({
+      pills: !!document.querySelector('[data-testid="nav-rental-categories"]')?.offsetParent,
+      auth: !!document.querySelector('[data-testid="nav-auth-cluster"]')?.offsetParent,
+      footer: !!document.querySelector('[data-testid="pv3-footer"]'),
+      oldFooter: !!document.querySelector('[data-testid="site-footer"]'),
+      band: !!document.querySelector('[data-testid="business-attribution"]'),
+      chats: [...document.querySelectorAll('[data-testid="pv3-primary"], [data-testid^="business-message"], [data-testid^="pg-contact"] button')].filter((e) => e.offsetParent).length,
+    }));
+    expect(!chrome.pills && !chrome.auth, `${tag}: the nav still shows its section links or sign-in`);
+    expect(chrome.footer && !chrome.oldFooter, `${tag}: not the one-line footer`);
+    expect(chrome.band, `${tag}: the "List your business" band must stay (Tzvi, 25 Sep)`);
+    expect(chrome.chats <= 3, `${tag}: ${chrome.chats} chat buttons; hero, after the content and the phone bar at most`);
     const need = w >= 1024 ? 96 : 56;
     expect(m.size >= need, `${tag}: wordmark ${m.size}px, needs ${need}px`);
     expect(!m.overflow, `${tag}: scrolls sideways`);

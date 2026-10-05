@@ -1742,6 +1742,7 @@ const he = {
         ctaMessage: 'לשליחת הודעה',
         from: 'מחיר התחלתי',
         kosher: 'כשר · {{body}}',
+        listedOn: 'מופיע ב־MyIsraelRental',
         fromTheBusiness: 'מהעסק',
         flyerAlt: 'פלאייר של {{name}}',
       },

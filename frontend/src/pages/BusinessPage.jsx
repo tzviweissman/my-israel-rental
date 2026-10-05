@@ -29,6 +29,8 @@ import BlockList from '../components/pagebuilder/BlockList';
 import V3Hero from '../components/pagebuilder/v3/V3Hero';
 import V3Flyers from '../components/pagebuilder/v3/V3Flyers';
 import { resolvePhoto, photosOfKind } from '../components/pagebuilder/v3/photos';
+import V3Footer from '../components/pagebuilder/v3/V3Footer';
+import { v3BodyBlocks } from '../components/pagebuilder/v3/ledger';
 import { cheapestFirst } from '../utils/gigPrice';
 import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
@@ -126,6 +128,15 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         ? getGigCover(biz.listings[0]) : null))
     : null;
   const scrim = useCoverScrim(coverSrc);
+
+  // v3 pages thin the global nav (styles/page-v3.css). Above the early
+  // returns for the same reason as the hook above: every render runs it.
+  const v3Shell = Boolean(biz && biz.page_v3 && biz.design_brief && biz.design_brief.palette);
+  useEffect(() => {
+    if (!v3Shell || preview) return undefined;
+    document.body.dataset.pageV3 = '1';
+    return () => { delete document.body.dataset.pageV3; };
+  }, [v3Shell, preview]);
 
   if (missing) {
     // On <slug>.myisraelrental.com there is nothing else at this address,
@@ -254,11 +265,12 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   const proofBelow = v3 ? { ...proof, memberSince: null, kosher: null } : proof;
   const v3Photo = v3Brief?.hero?.tier === 1 ? resolvePhoto(biz, v3Brief.hero.media_id) : null;
   const v3Flyers = v3 ? photosOfKind(biz, v3Brief, 'flyer') : [];
-  // On a v3 page the v3 hero IS the hero: a composed hero or cover band
-  // below it would be a second one, and it crops the cover, which may be a
-  // flyer (rule 4). A page with nothing else falls back to the default body.
+
+  // The composed body under a v3 hero, with "say it once" applied (no second
+  // hero, no fourth chat button, each block type once: v3/ledger.js). A page
+  // left with nothing falls back to the default body.
   const v3Body = v3 && biz.page && Array.isArray(biz.page.blocks)
-    ? { ...biz, page: { ...biz.page, blocks: biz.page.blocks.filter((x) => x && x.type !== 'hero' && x.type !== 'cover') } }
+    ? { ...biz, page: { ...biz.page, blocks: v3BodyBlocks(biz.page.blocks) } }
     : biz;
 
   // Real data only: fall back through what the business actually has
@@ -787,7 +799,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         </div>
       </div>
 
-      <SiteFooter />
+      {v3 ? <V3Footer /> : <SiteFooter />}
 
       {/* Mobile only: the header button is off screen for most of the
           page on a phone, so the action rides along instead. Padding for
