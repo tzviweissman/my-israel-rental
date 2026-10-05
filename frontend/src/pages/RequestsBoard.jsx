@@ -473,7 +473,7 @@ const RequestsBoard = () => {
     <div className="min-h-screen" style={{ background: 'var(--bg)' }} data-testid="requests-board-page">
       <PageMeta
         title="Housing & services requests | MyIsraelRental"
-        description="See what renters and homeowners across Israel are looking for right now — and answer the ones you can help with. Free to post, free to browse."
+        description="See what renters and homeowners across Israel are looking for right now - and answer the ones you can help with. Free to post, free to browse."
         path="/requests"
       />
 
@@ -483,7 +483,7 @@ const RequestsBoard = () => {
         accent={t('requests.heroAccent', 'have it.')}
         lede={t(
           'requests.heroLede',
-          'Say what you are looking for, or what you have coming free. Renters, owners and pros find each other here — instead of losing it all in a hundred WhatsApp groups.',
+          'Say what you are looking for, or what you have coming free. Renters, owners and pros find each other here - instead of losing it all in a hundred WhatsApp groups.',
         )}
         headlineTestId="requests-hero-title"
         testId="requests-band"
@@ -655,7 +655,7 @@ const RequestsBoard = () => {
                 onFocus={() => setQFocused(true)}
                 onBlur={() => setQFocused(false)}
                 className="flex-1 bg-transparent text-sm outline-none"
-                placeholder={t('requests.searchPlaceholder', 'Search the board — e.g. "3BR Ramat Eshkol", "mover Jerusalem"')}
+                placeholder={t('requests.searchPlaceholder', 'Search the board - e.g. "3BR Ramat Eshkol", "mover Jerusalem"')}
                 aria-label={t('requests.searchLabel', 'Search requests')}
                 data-testid="requests-search-input"
               />
@@ -734,7 +734,7 @@ const RequestsBoard = () => {
               {t('requests.emptyTitle', 'Nothing on the board here yet')}
             </p>
             <p className="text-sm mt-2 mb-6" style={{ color: 'var(--brand-muted)' }}>
-              {t('requests.emptyBody', 'Be the first — post what you are looking for, or what you have available.')}
+              {t('requests.emptyBody', 'Be the first - post what you are looking for, or what you have available.')}
             </p>
             <button type="button" onClick={() => { saveReturnPath(); navigate(postHref); }} className="btn-blue-solid" data-testid="requests-empty-cta">
               {t('requests.postCta', 'Post to the marketplace')}

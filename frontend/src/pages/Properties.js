@@ -24,23 +24,23 @@ import { FX_USD_TO_ILS } from '../utils/listingPrice';
 // duplicate-title errors (audit error #6 / #15).
 const RENTAL_TYPE_META = {
   'all': {
-    title: 'All rentals in Israel — apartments, vacation, long & short term | MyIsraelRental',
-    description: 'Search every rental on MyIsraelRental — long-term apartments, short-term lets, vacation homes — across Jerusalem, Tel Aviv, Haifa and more. Free for renters.',
+    title: 'All rentals in Israel - apartments, vacation, long & short term | MyIsraelRental',
+    description: 'Search every rental on MyIsraelRental - long-term apartments, short-term lets, vacation homes - across Jerusalem, Tel Aviv, Haifa and more. Free for renters.',
   },
   'long-term': {
     title: 'Long-term apartment rentals in Israel | MyIsraelRental',
     // No "No broker fees." here — see the note in Home.js. The platform is
     // free to use; what an owner or managing agent charges is theirs to set,
     // and listings that do carry an agent fee display it.
-    description: '12-month and longer apartment rentals across Israel. Browse verified listings in Jerusalem, Tel Aviv, Haifa, Beit Shemesh and more — free to search and contact owners directly.',
+    description: '12-month and longer apartment rentals across Israel. Browse verified listings in Jerusalem, Tel Aviv, Haifa, Beit Shemesh and more - free to search and contact owners directly.',
   },
   'short-term': {
     title: 'Short-term rentals in Israel (1–6 months) | MyIsraelRental',
-    description: 'Furnished short-term rentals across Israel — perfect for olim, students, and remote workers. Browse 1-to-6 month stays in Jerusalem, Tel Aviv, Haifa and more.',
+    description: 'Furnished short-term rentals across Israel - perfect for olim, students, and remote workers. Browse 1-to-6 month stays in Jerusalem, Tel Aviv, Haifa and more.',
   },
   'vacation': {
-    title: 'Vacation rentals in Israel — nightly stays | MyIsraelRental',
-    description: 'Nightly vacation rentals across Israel. Find apartments and homes for Pesach, Sukkot, summer holidays and weekend getaways — Jerusalem, Tel Aviv, Eilat and beyond.',
+    title: 'Vacation rentals in Israel - nightly stays | MyIsraelRental',
+    description: 'Nightly vacation rentals across Israel. Find apartments and homes for Pesach, Sukkot, summer holidays and weekend getaways - Jerusalem, Tel Aviv, Eilat and beyond.',
   },
   // Storage retired but legacy URL still resolves — keep a real
   // (non-promoted) title so it isn't a duplicate of the others.
@@ -416,7 +416,7 @@ const Properties = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data.existing) {
-        toast.success("Alert already active — we'll notify you.");
+        toast.success("Alert already active - we'll notify you.");
       } else {
         toast.success("Alert saved! We'll notify you when a match lists.");
       }
@@ -680,7 +680,7 @@ const Properties = () => {
                 </h3>
                 <p className="text-xs sm:text-sm opacity-90 leading-snug">
                   {t('filters.zeroResultsBody') ||
-                    "We'll email you the moment a new place matches your filters — usually within 24h of a fresh listing."}
+                    "We'll email you the moment a new place matches your filters - usually within 24h of a fresh listing."}
                 </p>
               </div>
             </div>

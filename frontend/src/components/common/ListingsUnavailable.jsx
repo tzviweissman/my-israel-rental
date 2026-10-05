@@ -56,7 +56,7 @@ const ListingsUnavailable = ({ onRetry, compact = false }) => {
       <p className={`mx-auto max-w-md text-gray-600 ${compact ? 'text-xs mt-1.5' : 'text-sm mt-2'}`}>
         {t(
           'errors.listingsBody',
-          'This is a problem on our side, not with your search — the properties are still here. Please try again in a moment.',
+          'This is a problem on our side, not with your search - the properties are still here. Please try again in a moment.',
         )}
       </p>
 

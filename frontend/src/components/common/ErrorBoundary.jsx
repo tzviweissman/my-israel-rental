@@ -125,7 +125,7 @@ class ErrorBoundaryInner extends React.Component {
           <p className="text-sm text-gray-600 mb-6">
             {t(
               'errors.body',
-              "This one's on us, not you. Nothing you did was lost — try reloading, or head back and come at it again.",
+              "This one's on us, not you. Nothing you did was lost - try reloading, or head back and come at it again.",
             )}
           </p>
           <div className="flex gap-2 justify-center">

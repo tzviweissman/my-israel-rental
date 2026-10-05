@@ -94,7 +94,7 @@ async def commit_user_import(req: UserCommitRequest, payload: dict = Depends(ver
             link = f"{_frontend_origin()}/auth/reset-password?token={raw_token}"
             asyncio.create_task(send_email(
                 to_email=email,
-                subject="Welcome to MyIsraelRental — set your password",
+                subject="Welcome to MyIsraelRental - set your password",
                 html_body=(
                     f"<p>Hi {name},</p>"
                     "<p>Your account on <b>MyIsraelRental.com</b> has been created.</p>"

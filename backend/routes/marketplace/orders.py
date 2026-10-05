@@ -947,11 +947,11 @@ async def extract_order(business_id: str, payload: ExtractIn, request: Request, 
         raw = await chat.send_message(UserMessage(text=context))
     except Exception as exc:  # noqa: BLE001 — the form must stay usable
         logger.warning("[orders] extract failed: %s", exc)
-        raise HTTPException(status_code=502, detail="Could not read that message — fill the form by hand") from exc
+        raise HTTPException(status_code=502, detail="Could not read that message - fill the form by hand") from exc
 
     draft = parse_extract_response(raw)
     if not draft:
-        raise HTTPException(status_code=502, detail="Could not read that message — fill the form by hand")
+        raise HTTPException(status_code=502, detail="Could not read that message - fill the form by hand")
     draft["source"] = "whatsapp_paste"
     return {"draft": draft}
 

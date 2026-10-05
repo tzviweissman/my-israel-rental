@@ -36,7 +36,7 @@ const MODES = [
     key: 'both',
     icon: Bell,
     title: 'Both',
-    desc: 'Get the ping AND the digest — belt and braces.',
+    desc: 'Get the ping AND the digest - belt and braces.',
   },
 ];
 

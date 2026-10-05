@@ -78,13 +78,13 @@ export const ListingsTab = ({ token, onStatsChange }) => {
       const res = await axios.post(`${API}/admin/properties/pricing-autofix`, {}, { headers });
       const d = res.data;
       if (d.totals?.total_fixed === 0) {
-        toast.success('Nothing to fix — pricing audit is clean.');
+        toast.success('Nothing to fix - pricing audit is clean.');
       } else {
         toast.success(d.message, { duration: 8000 });
       }
       await Promise.all([refreshAudit(), fetchProperties()]);
     } catch (e) {
-      toast.error(e?.response?.data?.detail || 'Auto-fix failed — try again');
+      toast.error(e?.response?.data?.detail || 'Auto-fix failed - try again');
     } finally {
       setAutoFixing(false);
     }
@@ -97,7 +97,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
     if (unquarantining) return;
     if (!window.confirm(
       'Restore every listing that was quarantined by the pricing auto-fix?\n\n' +
-      'They will re-appear in the public feed with their current prices — ' +
+      'They will re-appear in the public feed with their current prices - ' +
       'even if the prices are still wrong. Owners will need to update them manually.'
     )) return;
     setUnquarantining(true);
@@ -106,7 +106,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
       toast.success(res.data?.message || 'Restored quarantined listings');
       await Promise.all([refreshAudit(), fetchProperties()]);
     } catch (e) {
-      toast.error(e?.response?.data?.detail || 'Restore failed — try again');
+      toast.error(e?.response?.data?.detail || 'Restore failed - try again');
     } finally {
       setUnquarantining(false);
     }
@@ -118,7 +118,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
   const handleRestoreSingle = async (property) => {
     if (restoringId) return;
     if (!window.confirm(
-      `Restore "${property.title}" to the public feed?\n\nThis lifts the pricing quarantine only for this listing — the current price will be shown to renters as-is.`
+      `Restore "${property.title}" to the public feed?\n\nThis lifts the pricing quarantine only for this listing - the current price will be shown to renters as-is.`
     )) return;
     setRestoringId(property.id);
     try {
@@ -128,7 +128,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
       toast.success(res.data?.message || 'Listing restored');
       await Promise.all([refreshAudit(), fetchProperties()]);
     } catch (e) {
-      toast.error(e?.response?.data?.detail || 'Restore failed — try again');
+      toast.error(e?.response?.data?.detail || 'Restore failed - try again');
     } finally {
       setRestoringId(null);
     }
@@ -164,7 +164,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
       const rescuedPhotos = (richest.data?.report || [])
         .reduce((acc, row) => acc + (row.images_merged || 0), 0);
       if (deleted === 0) {
-        toast.success('No duplicate listings found — nothing to sweep');
+        toast.success('No duplicate listings found - nothing to sweep');
       } else {
         toast.success(
           `Swept ${deleted} duplicate ${deleted === 1 ? 'listing' : 'listings'} across ${groups} ${groups === 1 ? 'group' : 'groups'}` +
@@ -173,7 +173,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
       }
       fetchProperties();
     } catch (e) {
-      toast.error(e?.response?.data?.detail || 'Sweep failed — try again or use "Find duplicates" for manual review');
+      toast.error(e?.response?.data?.detail || 'Sweep failed - try again or use "Find duplicates" for manual review');
     } finally {
       setSweeping(false);
     }
@@ -256,7 +256,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
       const res = await axios.post(`${API}/admin/properties/repair-prices`, {}, { headers });
       const d = res.data;
       if (d.total_repaired === 0) {
-        toast.success('All listing prices are already in the correct field — nothing to repair.');
+        toast.success('All listing prices are already in the correct field - nothing to repair.');
       } else {
         toast.success(d.message, { duration: 8000 });
       }
@@ -283,7 +283,7 @@ export const ListingsTab = ({ token, onStatsChange }) => {
         // Surface the listings that need a CSV re-upload in a separate toast
         // so the admin doesn't miss them in the green success message.
         toast.warning(
-          `${d.no_images} listings have no photo URLs at all — re-upload the CSV with "Sync photos" mode to fix those. `
+          `${d.no_images} listings have no photo URLs at all - re-upload the CSV with "Sync photos" mode to fix those. `
           + `Sample: ${(d.no_images_sample || []).slice(0, 3).map(x => x.title || x.id).join(', ')}`,
           { duration: 12000 },
         );

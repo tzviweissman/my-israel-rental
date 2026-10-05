@@ -426,7 +426,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       // that message is more use to the owner than anything written here.
       toast.error(
         err?.response?.data?.detail
-        || t('pageDesign.saveFailed', 'Could not save — try again'),
+        || t('pageDesign.saveFailed', 'Could not save - try again'),
       );
     } finally {
       setSaving(false);

@@ -60,7 +60,7 @@ async def admin_reattach_chats(
     if src_doc:
         raise HTTPException(
             status_code=400,
-            detail=f"Source property '{src}' still exists — use the duplicate resolver to merge two live listings",
+            detail=f"Source property '{src}' still exists - use the duplicate resolver to merge two live listings",
         )
 
     msgs_r = await db.messages.update_many(
@@ -282,7 +282,7 @@ async def nudge_owner(req: NudgeOwnerRequest, payload: dict = Depends(verify_tok
     if not latest or latest["sender_id"] == owner_id:
         raise HTTPException(
             status_code=409,
-            detail="Owner has already replied — no nudge needed.",
+            detail="Owner has already replied - no nudge needed.",
         )
 
     # 24h throttle.
@@ -297,7 +297,7 @@ async def nudge_owner(req: NudgeOwnerRequest, payload: dict = Depends(verify_tok
             if hours_since < 24:
                 raise HTTPException(
                     status_code=429,
-                    detail=f"A nudge was already sent {round(hours_since, 1)}h ago — try again after 24h.",
+                    detail=f"A nudge was already sent {round(hours_since, 1)}h ago - try again after 24h.",
                 )
         except HTTPException:
             raise
@@ -378,7 +378,7 @@ async def _send_owner_nudge_email(
             f"<p>Hi {owner.get('name') or ''},</p>"
             f"<p><b>{renter_name}</b> messaged you about <b>{prop_title}</b> on MyIsraelRental "
             f"more than 12 hours ago and hasn't heard back yet.</p>"
-            f"<p>Replies within a day dramatically increase the chance the listing gets rented — "
+            f"<p>Replies within a day dramatically increase the chance the listing gets rented - "
             f"prospective tenants usually message several owners in parallel and lock in with whoever replies first.</p>"
             f"<p style='margin:24px 0;'>"
             f"<a href=\"{inbox_link}\" style='background:#1E6A6A;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;'>Open the conversation</a>"

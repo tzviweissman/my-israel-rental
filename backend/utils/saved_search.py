@@ -103,7 +103,7 @@ def _text_matches(prop_val: str | None, search_val: str | None) -> bool:
 
 
 async def property_matches_search(prop: dict, search: dict, bookings: list[dict]) -> bool:
-    """Async predicate — small FX I/O when comparing across currencies."""
+    """Async predicate - small FX I/O when comparing across currencies."""
     if prop.get("status") and prop["status"] not in ("active", "available"):
         return False
 
@@ -251,7 +251,7 @@ async def match_property_against_searches(
             try:
                 asyncio.create_task(send_email_fn(
                     s["email"],
-                    f"Match found — {prop.get('title', 'New property')} · MyIsraelRental",
+                    f"Match found - {prop.get('title', 'New property')} · MyIsraelRental",
                     html,
                     tag="saved-search-match",
                 ))

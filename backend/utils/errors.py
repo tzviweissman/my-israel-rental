@@ -103,7 +103,7 @@ def row_error(
         "TypeError": "a value wasn't in the expected format",
         "DuplicateKeyError": "this row already exists",
     }.get(name)
-    return f"Couldn't import this row — {friendly}." if friendly else (
+    return f"Couldn't import this row - {friendly}." if friendly else (
         "Couldn't import this row. The full error is in the server log."
     )
 

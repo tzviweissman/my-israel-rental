@@ -184,7 +184,7 @@ async def translate_marketing(text: str, target_lang: str) -> str:
             f"marketplace from {source} into modern, natural {target}. Preserve "
             f"the tone (friendly, professional). Keep place names, prices and "
             f"phone numbers as they are. Do NOT wrap the output in quotes and do "
-            f"NOT add explanations, notes, or transliteration — return only the "
+            f"NOT add explanations, notes, or transliteration - return only the "
             f"{target} translation of the input."
         ),
     )

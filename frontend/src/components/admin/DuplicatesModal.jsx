@@ -184,7 +184,7 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
         <div className="bg-blue-50 border-b border-blue-200 px-5 py-2.5 flex items-center gap-2 flex-wrap" data-testid="dup-auto-status">
           <Bot size={14} className="text-blue-700 shrink-0" />
           <div className="text-[11px] text-blue-900 flex-1 min-w-[180px] leading-snug">
-            <p><strong>Auto-cleanup on</strong> — every 30 min, listings with 100% identical fields (title, description, prices, photos, amenities) are merged automatically. Chats & bookings are re-attached to the survivor.</p>
+            <p><strong>Auto-cleanup on</strong> - every 30 min, listings with 100% identical fields (title, description, prices, photos, amenities) are merged automatically. Chats & bookings are re-attached to the survivor.</p>
             {autoStatus?.runs?.[0] && (
               <p className="text-blue-700 mt-0.5">
                 Last run {new Date(autoStatus.runs[0].at).toLocaleString(undefined, { dateStyle: 'short', timeStyle: 'short' })} —{' '}
@@ -227,7 +227,7 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
               disabled={bulkBusy}
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-[var(--brand-primary)] text-white text-xs font-semibold disabled:opacity-50 hover:bg-[#175555]"
               data-testid="resolve-all-richest"
-              title="Each group keeps the listing with the most photos (best content) — safest default"
+              title="Each group keeps the listing with the most photos (best content) - safest default"
             >
               {bulkBusy ? <Loader2 size={12} className="animate-spin" /> : <Sparkles size={12} />}
               Keep richest in each
@@ -245,7 +245,7 @@ const DuplicatesModal = ({ token, onClose, onDeleted }) => {
               disabled={bulkBusy}
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-white border border-amber-300 text-amber-900 text-xs font-semibold disabled:opacity-50 hover:bg-amber-100"
               data-testid="resolve-all-oldest"
-              title="Keep the original listing — preserves booking history"
+              title="Keep the original listing - preserves booking history"
             >
               <ChevronDown size={12} /> oldest
             </button>

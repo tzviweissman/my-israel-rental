@@ -35,7 +35,7 @@ export const phoneError = (raw, t) => {
 
   if (digits.length < 8) {
     return tr('phone.tooShort', {
-      defaultValue: "That looks too short — please include the full number.",
+      defaultValue: "That looks too short - please include the full number.",
     });
   }
   if (normalizeWhatsAppNumber(text)) return '';

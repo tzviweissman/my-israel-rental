@@ -137,7 +137,7 @@ async def upload_property_contract(
                 """
                 asyncio.create_task(send_email(
                     renter["email"],
-                    f"Action needed: sign your rental contract — {property_data.get('title', 'My Israel Rental')}",
+                    f"Action needed: sign your rental contract - {property_data.get('title', 'My Israel Rental')}",
                     html,
                     tag="contract-pending",
                 ))

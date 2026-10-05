@@ -214,7 +214,7 @@ async def _get_or_create_billing_plan(plan_key: str | None = None) -> str:
     # the lower rate; it is not a single up-front charge.
     created = await paypal.create_plan(
         product_id=product_id,
-        name=f"{PLAN_NAME} — {plan['months']}-month commitment",
+        name=f"{PLAN_NAME} - {plan['months']}-month commitment",
         amount=plan["monthly_price"],
         currency=SUBSCRIPTION_CURRENCY,
         interval_unit=SUBSCRIPTION_INTERVAL,
@@ -355,7 +355,7 @@ async def activate_subscription(user=Depends(verify_token)):
             status_code=502,
             message=(
                 "We couldn't confirm your subscription with PayPal just now. "
-                "If you completed the payment it will activate shortly — check "
+                "If you completed the payment it will activate shortly - check "
                 "My Gigs in a few minutes before trying again."
             ),
             exc=e, logger=logger, context="PayPal get_subscription during activate",
@@ -423,7 +423,7 @@ async def cancel_subscription_route(user=Depends(verify_token)):
             status_code=502,
             message=(
                 "We couldn't reach PayPal to cancel the subscription. Your "
-                "access is unchanged — please try again in a moment."
+                "access is unchanged - please try again in a moment."
             ),
             exc=e, logger=logger, context="PayPal cancel_subscription",
         ) from e

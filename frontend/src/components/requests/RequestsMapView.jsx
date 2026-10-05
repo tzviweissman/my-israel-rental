@@ -175,7 +175,7 @@ const RequestsMapView = ({ requests, activeId, onPinClick }) => {
       />
       {missing > 0 && (
         <p className="mt-2 text-xs" style={{ color: 'var(--brand-muted)' }} data-testid="requests-map-missing">
-          {t('requests.mapMissing', '{{n}} not shown — we could not place their area on the map.', { n: missing })}
+          {t('requests.mapMissing', '{{n}} not shown - we could not place their area on the map.', { n: missing })}
         </p>
       )}
       {activeId && null}

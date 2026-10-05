@@ -316,5 +316,5 @@ def _row_to_dict(row: tuple[str, str, str, float, float, int]) -> dict:
 
 
 def curated_labels() -> Iterable[str]:
-    """Expose the display labels — occasionally useful for tests."""
+    """Expose the display labels - occasionally useful for tests."""
     return (row[1] for row in _INDEX)

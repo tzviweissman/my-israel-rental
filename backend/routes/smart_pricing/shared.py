@@ -268,7 +268,7 @@ def compute_suggestion(
             price=int(round(base)),
             base=int(round(base)),
             factors=[],
-            reason="Past date — no suggestion.",
+            reason="Past date - no suggestion.",
         )
     if lead_days <= 7 and settings.last_minute_discount_pct:
         price *= 1 - settings.last_minute_discount_pct / 100
@@ -339,7 +339,7 @@ def _build_reason(factors: list[FactorOut], price: int, base: int) -> str:
         bits.append("down due to " + ", ".join(f.name.lower() for f in neg))
     delta = price - base
     direction = "Suggested" if delta == 0 else (f"Suggested ↑ +{delta}" if delta > 0 else f"Suggested ↓ {delta}")
-    return f"{direction} ({price} vs base {base}) — " + "; ".join(bits) + "."
+    return f"{direction} ({price} vs base {base}) - " + "; ".join(bits) + "."
 
 
 # ---------------------------------------------------------------------------

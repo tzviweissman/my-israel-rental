@@ -61,7 +61,7 @@ export const ChatsTab = ({ token }) => {
       );
       const r = res.data.reattached || {};
       toast.success(
-        `Re-attached to "${res.data.to_property_title}" — ${r.messages} messages, ${r.bookings} bookings moved`,
+        `Re-attached to "${res.data.to_property_title}" - ${r.messages} messages, ${r.bookings} bookings moved`,
       );
       setReattachingKey(null);
       setReattachTarget('');

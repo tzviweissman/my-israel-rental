@@ -170,7 +170,7 @@ export default function RequestReportsTab({ token }) {
                     {r.reports.map((rep, i) => (
                       <li key={i}>
                         {rep.reason || '(no reason given)'}
-                        {rep.created_at ? ` — ${formatDate(String(rep.created_at).slice(0, 10))}` : ''}
+                        {rep.created_at ? ` - ${formatDate(String(rep.created_at).slice(0, 10))}` : ''}
                       </li>
                     ))}
                   </ul>

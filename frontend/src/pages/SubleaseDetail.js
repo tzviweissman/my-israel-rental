@@ -185,7 +185,7 @@ const SubleaseDetail = () => {
             {fromDate && toDate && (
               <div className="flex items-center gap-2" data-testid="sublease-dates">
                 <CalendarIcon size={18} />
-                <span>{format(fromDate, 'MMM d, yyyy')} — {format(toDate, 'MMM d, yyyy')}</span>
+                <span>{format(fromDate, 'MMM d, yyyy')} – {format(toDate, 'MMM d, yyyy')}</span>
               </div>
             )}
           </div>
@@ -230,7 +230,7 @@ const SubleaseDetail = () => {
             {fromDate && toDate && (
               <div className="text-sm text-gray-700 mb-5 flex items-center gap-2">
                 <CalendarIcon size={14} />
-                {format(fromDate, 'MMM d')} — {format(toDate, 'MMM d, yyyy')}
+                {format(fromDate, 'MMM d')} – {format(toDate, 'MMM d, yyyy')}
               </div>
             )}
             <button

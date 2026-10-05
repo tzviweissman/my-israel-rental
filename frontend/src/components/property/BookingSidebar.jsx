@@ -152,7 +152,7 @@ const PriceBlock = ({ property, sublease, preSubleaseId, convertPrice, holidayCo
               this listing's check-in falls in the holiday window). */}
           {holidayContext && (
             <p className="text-[11px] text-[var(--brand-primary)] mt-1.5 ml-1" data-testid="rate-auto-hint">
-              {(t('property.holidayRateApplied') || 'Holiday rate applied — switch to Regular if you prefer.')}
+              {(t('property.holidayRateApplied') || 'Holiday rate applied - switch to Regular if you prefer.')}
             </p>
           )}
         </div>
@@ -501,7 +501,7 @@ const BookingCalendar = ({
           </div>
           <div className="text-xs text-gray-500 mt-0.5" data-testid="calendar-range-summary">
             {dateRange.from && dateRange.to
-              ? `${format(dateRange.from, 'MMM d, yyyy')} — ${format(dateRange.to, 'MMM d, yyyy')}`
+              ? `${format(dateRange.from, 'MMM d, yyyy')} - ${format(dateRange.to, 'MMM d, yyyy')}`
               : t('property.addYourDates', 'Add your travel dates for exact pricing')}
           </div>
         </div>

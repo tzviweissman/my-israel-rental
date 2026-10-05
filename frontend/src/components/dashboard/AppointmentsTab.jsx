@@ -204,7 +204,7 @@ const BookingCard = ({ booking, side, API, token, onChanged, highlighted }) => {
             onChange={(e) => setReply(e.target.value)}
             rows={2}
             dir="auto"
-            placeholder={t('appointments.replyPh', 'Add a note back (optional) — when you can come, what you need from them…')}
+            placeholder={t('appointments.replyPh', 'Add a note back (optional) - when you can come, what you need from them…')}
             className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm mb-2"
             data-testid={`appointment-reply-${booking.id}`}
           />
@@ -304,7 +304,7 @@ const AppointmentsTab = ({ API, token }) => {
       <div className="bg-white border border-gray-100 rounded-2xl p-8 text-center" data-testid="appointments-empty">
         <p className="text-gray-700 font-semibold mb-1">{t('appointments.empty', 'No booking requests yet.')}</p>
         <p className="text-sm text-gray-500">
-          {t('appointments.emptyHint', 'When someone books one of your services on the site — or you book one — it shows up here.')}
+          {t('appointments.emptyHint', 'When someone books one of your services on the site - or you book one - it shows up here.')}
         </p>
       </div>
     );

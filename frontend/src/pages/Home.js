@@ -25,8 +25,8 @@ const Home = () => {
           in a search snippet sets an expectation the platform can't keep.
           Keep any claim here about OUR costs, not third parties'. */}
       <PageMeta
-        title="MyIsraelRental — Find your perfect rental in Israel | Free to search"
-        description="Browse long-term, short-term, and vacation rentals across Israel — free to search and contact owners directly. Listings in Jerusalem, Tel Aviv, Haifa and more, in English."
+        title="MyIsraelRental - Find your perfect rental in Israel | Free to search"
+        description="Browse long-term, short-term, and vacation rentals across Israel - free to search and contact owners directly. Listings in Jerusalem, Tel Aviv, Haifa and more, in English."
         path="/"
         jsonLd={[
           // Organization — surfaces the brand name + logo in Google's

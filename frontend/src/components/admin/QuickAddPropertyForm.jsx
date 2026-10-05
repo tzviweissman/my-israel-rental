@@ -221,7 +221,7 @@ const QuickAddPropertyForm = ({ token, onJumpToOwner }) => {
   return (
     <form onSubmit={handleSubmit} className="space-y-5" data-testid="quick-add-form">
       {/* Owner section */}
-      <Section title="1. Owner" subtitle="An account will be created automatically if this email isn't on the platform yet — they'll get a 'set your password' email instantly.">
+      <Section title="1. Owner" subtitle="An account will be created automatically if this email isn't on the platform yet - they'll get a 'set your password' email instantly.">
         <Field label="Email" required Icon={Mail}>
           <input
             type="email"
@@ -394,7 +394,7 @@ const QuickAddPropertyForm = ({ token, onJumpToOwner }) => {
               {isDragOver
                 ? 'Release to upload'
                 : photos.length === 0
-                  ? 'No photos yet — or drag a folder of photos onto this card'
+                  ? 'No photos yet - or drag a folder of photos onto this card'
                   : `${photos.length} attached · drag more here to add`}
             </span>
           </div>

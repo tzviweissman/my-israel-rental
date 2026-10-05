@@ -114,7 +114,7 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
             owner_phone = remapped.get("owner_phone") or ""
 
             if not owner_email:
-                skipped.append({"index": i, "title": raw.get("title") or raw.get("Name"), "error": "Missing owner_email — can't attribute this listing."})
+                skipped.append({"index": i, "title": raw.get("title") or raw.get("Name"), "error": "Missing owner_email - can't attribute this listing."})
                 continue
 
             owner_id, was_created = await _resolve_or_create_owner(
@@ -151,7 +151,7 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
                     if not image_urls and not video_urls:
                         skipped.append({
                             "index": i, "title": dup.get("title"),
-                            "error": "No image_urls in this CSV row — nothing to sync.",
+                            "error": "No image_urls in this CSV row - nothing to sync.",
                         })
                         continue
                     existing_imgs = dup.get("images") or []
@@ -168,7 +168,7 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
                         # paying for a duplicate mirror pass.
                         skipped.append({
                             "index": i, "title": dup.get("title"),
-                            "error": "Listing already fully on Cloudinary — skipped.",
+                            "error": "Listing already fully on Cloudinary - skipped.",
                         })
                         continue
                     update_set: dict = {
@@ -193,7 +193,7 @@ async def commit_property_import(req: PropertyCommitRequest, payload: dict = Dep
                 skipped.append({
                     "index": i, "title": raw.get("title") or raw.get("Name"),
                     "error": (
-                        f"Duplicate of existing listing \"{dup.get('title')}\" — same address + "
+                        f"Duplicate of existing listing \"{dup.get('title')}\" - same address + "
                         f"{remapped.get('rental_type', 'rental type')} for this owner."
                     ),
                 })
@@ -326,7 +326,7 @@ async def admin_remirror_properties(payload: dict = Depends(verify_token)) -> di
     if not CLOUDINARY_ENABLED:
         raise HTTPException(
             status_code=503,
-            detail="Cloudinary is not configured — set CLOUDINARY_URL in backend/.env to enable mirroring.",
+            detail="Cloudinary is not configured - set CLOUDINARY_URL in backend/.env to enable mirroring.",
         )
 
     # Pull every property (we only need id + image + video URLs).
@@ -378,7 +378,7 @@ async def admin_remirror_properties(payload: dict = Depends(verify_token)) -> di
         "message": (
             f"Queued {len(queued)} listings for re-mirroring. "
             f"{already_cdn} already on Cloudinary. "
-            f"{len(no_images)} have no photo URLs — re-upload the CSV with "
+            f"{len(no_images)} have no photo URLs - re-upload the CSV with "
             f'"Sync photos onto existing listings" to backfill those.'
         ),
     }
@@ -749,7 +749,7 @@ async def _notify_owners_of_quarantine(items: list[dict]) -> int:
                 "property_id": item["property_id"],
                 "reason": item["reason"],
                 "message": (
-                    f"We paused \"{item['title']}\" pending a price update — "
+                    f"We paused \"{item['title']}\" pending a price update - "
                     f"tap to fix and republish."
                 ),
                 "action_url": f"/dashboard?tab=properties&edit={item['property_id']}",

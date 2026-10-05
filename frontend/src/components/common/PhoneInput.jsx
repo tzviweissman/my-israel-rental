@@ -192,7 +192,7 @@ const PhoneInput = ({
       >
         {error || hint || t(
           'phone.dropLeadingZero',
-          'Pick your country, then the rest of the number — no need for the leading 0.',
+          'Pick your country, then the rest of the number - no need for the leading 0.',
         )}
       </p>
     </div>

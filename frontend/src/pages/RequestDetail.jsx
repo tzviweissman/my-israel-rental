@@ -114,7 +114,7 @@ const RequestDetail = () => {
       await axios.post(`${API}/marketplace/requests/${id}/report`, { reason: reason.trim() }, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success(t('requests.reported', 'Thanks — we will take a look.'));
+      toast.success(t('requests.reported', 'Thanks - we will take a look.'));
     } catch (err) {
       toast.error(err.response?.data?.detail || t('requests.actionFailed', 'That did not work'));
     }
@@ -344,7 +344,7 @@ const RequestDetail = () => {
               data-testid="request-detail-listing-link"
             >
               <ExternalLink size={14} aria-hidden="true" />
-              {t('requests.viewListingFull', 'See the full listing — photos, price and availability')}
+              {t('requests.viewListingFull', 'See the full listing - photos, price and availability')}
             </a>
           )}
 
@@ -407,7 +407,7 @@ const RequestDetail = () => {
                       'sold',
                       isSold
                         ? t('requests.availableToast', 'Back on sale.')
-                        : t('requests.soldToast', 'Marked sold — the post stays up so buyers know.'),
+                        : t('requests.soldToast', 'Marked sold - the post stays up so buyers know.'),
                       { sold: !isSold },
                     )}
                     disabled={busy}
@@ -462,7 +462,7 @@ const RequestDetail = () => {
               </a>
             )}
               <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>
-                {t('requests.chatOnlyNote', 'Chat happens on MyIsraelRental — no phone numbers are shared.')}
+                {t('requests.chatOnlyNote', 'Chat happens on MyIsraelRental - no phone numbers are shared.')}
               </span>
               {user && (
                 <button
