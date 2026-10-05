@@ -30,6 +30,7 @@ import V3Hero from '../components/pagebuilder/v3/V3Hero';
 import V3Flyers from '../components/pagebuilder/v3/V3Flyers';
 import { resolvePhoto, photosOfKind } from '../components/pagebuilder/v3/photos';
 import V3Footer from '../components/pagebuilder/v3/V3Footer';
+import V3GateNotice from '../components/pagebuilder/v3/V3GateNotice';
 import { primaryLabel } from '../components/pagebuilder/v3/V3Hero';
 import { V3BigList, V3Steps, V3Palate, V3Offer, V3StickyBar } from '../components/pagebuilder/v3/V3Sections';
 import { v3BodyBlocks } from '../components/pagebuilder/v3/ledger';
@@ -92,10 +93,13 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
     (async () => {
       try {
         // See utils/visitorId — this header is what makes a refresh not
-        // count as a second visitor.
+        // count as a second visitor. The sign-in goes too when there is
+        // one: the API's owner preview and an admin's view of a v3 page
+        // the quality check has not passed yet both depend on it.
+        const signedIn = sessionStorage.getItem('token');
         const { data } = await axios.get(
           `${API}/marketplace/business/${encodeURIComponent(slug)}`,
-          { headers: visitorHeaders() },
+          { headers: { ...visitorHeaders(), ...(signedIn ? { Authorization: `Bearer ${signedIn}` } : {}) } },
         );
         if (!cancelled) setFetched(data);
       } catch {
@@ -840,7 +844,9 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           <Link
             to="/join"
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold border transition-colors hover:bg-black/[0.03] shrink-0"
-            style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)' }}
+            // Text in the deep accent: the accent itself is 3.61:1 on white,
+            // under the 4.5:1 small text needs (caught by scripts/check-page.mjs).
+            style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary-deep)' }}
             data-testid="business-attribution-cta"
           >
             {t('businessPage.listYours', 'List your business, free')}
@@ -853,6 +859,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
       {/* Mobile only: the header button is off screen for most of the
           page on a phone, so the action rides along instead. Padding for
           the home indicator on iOS, or it sits under the gesture bar. */}
+      {v3 && <V3GateNotice check={biz.page_check} slug={biz.slug || biz.id} />}
       {v3 && canMessage && (
         <V3StickyBar
           brief={v3Brief}

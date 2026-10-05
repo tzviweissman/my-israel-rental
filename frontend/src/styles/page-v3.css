@@ -422,3 +422,26 @@ body[data-page-v3] [data-testid="nav-auth-cluster"] { display: none !important; 
   [data-tier="2"] .pv3-hero-inner { flex: none; }
   [data-tier="2"] .pv3-hero-inner { padding-inline: 20px; padding-block-start: 32px; }
 }
+
+/* The admin's gate notice: the platform's look, not the business's. */
+.pv3-gate {
+  position: fixed;
+  /* Above the site's floating tabs, which sit in both bottom corners. */
+  inset-block-end: 84px;
+  inset-inline-start: 16px;
+  z-index: 60;
+  max-inline-size: min(440px, calc(100vw - 32px));
+  max-block-size: 50vh;
+  overflow: auto;
+  padding: 12px 16px;
+  border: 1px solid var(--brand-border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 13px/1.5 var(--font-body, system-ui, sans-serif);
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.12);
+}
+.pv3-gate summary { cursor: pointer; font-weight: 700; }
+.pv3-gate p, .pv3-gate ul { margin: 8px 0 0; }
+.pv3-gate ul { padding-inline-start: 18px; color: var(--brand-muted); }
+.pv3-gate code { font-size: 12px; overflow-wrap: anywhere; }

@@ -955,7 +955,44 @@ nothing without it. In the food recipe's order (rules, part 7):
   whose subject is on the right third. Same as a tier 1 photo today; an RTL
   cut of the film (subject left) is the fix if it matters.
 
-**Next:** the quality gate (`checkPage`); the owner checklist in
+**Phase 6: the quality gate, 5 Oct 2026.**
+
+- `scripts/check-page.mjs <slug> [--submit]` renders the page headlessly at
+  1440x900 and 390x844 in English and Hebrew, and at 360x800 with reduced
+  motion, and runs the must-pass list from the build prompt (section 7):
+  a hero with media (tier 1-3), no flyer cropped (cropped pictures in the
+  first screen go through the same Tesseract flyer check as the brief), the
+  headline 96/56px, exactly one filled button above the fold, kosher and
+  "New on" at most twice and once above the fold, no empty section or
+  placeholder text, no sideways scroll, contrast by axe-core, a visible focus
+  on every element Tab reaches, the film (4MB, poster, pause, still under
+  reduced motion), every price on the page a price on the record, and the
+  tagline, occasions and steps in the owner's own words.
+- Blocking: visitors get a v3 page only once a pass is recorded for the
+  brief on the record now (`page_check_passed`, `utils/design_brief.py`).
+  `--submit` records it (`POST /marketplace/businesses/{id}/page-check`,
+  admin only); a result for an older brief is refused (409), and any new
+  brief or film re-dates the brief, so the page goes back to the standard
+  one until it is checked again. An admin sees the v3 page before it
+  passes (that is how the gate renders it), with a notice saying visitors
+  don't, and why.
+- As the prompt asked: the v3 L.A. Cholent copy (rp-exp) passes; its
+  standard page (rp-exp-1) fails with "a flyer is cropped as the hero",
+  "Rabbi Weiner appears 3 times" and "the headline is 24px".
+- Found on the way: the "List your business, free" link was 3.61:1 (the
+  accent on white); now the deep accent, 6.96:1. The business page never
+  sent the visitor's sign-in, so the API's owner preview never applied on
+  it; it does now.
+- Not here: the 1-5 design scores (an AI review, waits for AI calls), and
+  running the gate against production. Railway has no browser, and the
+  script signs in through the local-only dev login, so today a pass can be
+  recorded only on a local database: no v3 page can reach live visitors
+  until the gate runs there (a browser on the server, or the script given
+  an admin session for the live API). The standard page's site footer
+  fails contrast the same way (accent links at 3.61:1): a palette question,
+  raised separately.
+
+**Next:** the owner checklist in
 the dashboard; an admin screen for the v3 switch and the film (both are API
 only); service cards below the hero still crop a flyer that is a
 listing's cover. Phase 1 also does not yet show, on a v3 page, the owner's full

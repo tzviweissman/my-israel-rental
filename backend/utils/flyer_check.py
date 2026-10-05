@@ -106,3 +106,21 @@ def classify(image_bytes: bytes) -> dict:
     # Overlapping strips read some words twice; the area is capped at the
     # picture so a repeat can only make a flyer more certain, never a photo.
     return decide(_read(tess, img, langs), img.width, img.height)
+
+
+if __name__ == "__main__":
+    # For the quality gate (scripts/check-page.mjs): one JSON verdict per URL.
+    #   python -m utils.flyer_check URL [URL ...]
+    import json
+    import sys
+    import urllib.request
+
+    from dotenv import load_dotenv
+    load_dotenv()   # TESSERACT_CMD and TESSDATA_PREFIX, run from backend/
+    for url in sys.argv[1:]:
+        try:
+            with urllib.request.urlopen(url, timeout=20) as r:  # noqa: S310 - our own image URLs
+                verdict = classify(r.read())
+        except Exception as e:  # noqa: BLE001
+            verdict = {"kind": "unknown", "reason": str(e)[:80]}
+        print(json.dumps({"url": url, **verdict}))

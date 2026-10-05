@@ -117,13 +117,27 @@ def test_every_preset_palette_is_readable_with_any_accent():
 
 
 def test_v3_needs_the_site_switch_and_the_business_switch(monkeypatch):
-    biz = {"page_v3": True, "design_brief": _good()}
+    passed = {"passed": True, "brief_at": "t1", "failures": []}
+    biz = {"page_v3": True, "design_brief": _good(), "design_brief_at": "t1", "page_check": passed}
     monkeypatch.delenv("PAGE_BUILDER_V3_ENABLED", raising=False)
     assert not page_v3_on(biz), "off by default"
+    assert not page_v3_on(biz, admin=True), "off by default, even for an admin"
     monkeypatch.setenv("PAGE_BUILDER_V3_ENABLED", "1")
     assert page_v3_on(biz)
     assert not page_v3_on({**biz, "page_v3": False}), "one business at a time"
     assert not page_v3_on({"page_v3": True}), "no brief, no v3"
+
+
+def test_visitors_see_v3_only_after_the_quality_gate_passed_this_brief(monkeypatch):
+    monkeypatch.setenv("PAGE_BUILDER_V3_ENABLED", "1")
+    biz = {"page_v3": True, "design_brief": _good(), "design_brief_at": "t2"}
+    assert not page_v3_on(biz), "never checked"
+    assert page_v3_on(biz, admin=True), "an admin sees it, so the gate can render it"
+    for check, why in (({"passed": False, "brief_at": "t2"}, "failed"),
+                       ({"passed": True, "brief_at": "t1"}, "passed an older brief"),
+                       ({"passed": "yes", "brief_at": "t2"}, "not a real pass")):
+        assert not page_v3_on({**biz, "page_check": check}), why
+    assert page_v3_on({**biz, "page_check": {"passed": True, "brief_at": "t2"}})
     assert os.environ.get("PAGE_BUILDER_V3_ENABLED") == "1"
 
 

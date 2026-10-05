@@ -568,7 +568,19 @@ def v3_enabled() -> bool:
     return os.environ.get("PAGE_BUILDER_V3_ENABLED", "").strip().lower() in ("1", "true", "yes")
 
 
-def page_v3_on(biz: dict) -> bool:
+def page_check_passed(biz: dict) -> bool:
+    """The quality gate (rules, part 9; scripts/check-page.mjs) passed for
+    THIS brief. A new brief, a film added or removed, needs a new pass."""
+    c = (biz or {}).get("page_check") or {}
+    return c.get("passed") is True and bool(c.get("brief_at")) and c.get("brief_at") == (biz or {}).get("design_brief_at")
+
+
+def page_v3_on(biz: dict, admin: bool = False) -> bool:
     """On only when the site switch is on AND this business was switched on
-    by an admin: one business at a time, as asked."""
-    return v3_enabled() and bool((biz or {}).get("page_v3")) and bool((biz or {}).get("design_brief"))
+    by an admin: one business at a time, as asked. Visitors see it only once
+    the quality gate passed for this brief; an admin sees it before, which
+    is how the gate renders it."""
+    b = biz or {}
+    if not (v3_enabled() and b.get("page_v3") and b.get("design_brief")):
+        return False
+    return admin or page_check_passed(b)

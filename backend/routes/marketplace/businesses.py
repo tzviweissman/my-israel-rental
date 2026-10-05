@@ -946,8 +946,9 @@ async def public_business(
     # Page builder v3 (docs/page-builder-design-rules.md): only with the site
     # switch on AND this business switched on. The owner checklist inside the
     # brief is the owner's alone.
-    from utils.design_brief import page_v3_on
-    if page_v3_on(biz):
+    from utils.design_brief import page_check_passed, page_v3_on
+    admin_view = (viewer or {}).get("role") == "admin"
+    if page_v3_on(biz, admin=admin_view):
         brief = dict(biz["design_brief"])
         if not owner_preview:
             brief.pop("missing_content", None)
@@ -956,6 +957,15 @@ async def public_business(
         film = biz.get("brand_film") or {}
         if film.get("url"):
             out["brand_film"] = {k: film.get(k) for k in ("url", "poster_url", "made_with")}
+        if admin_view:
+            # The gate's last word, for the admin only: what it found, and
+            # whether visitors can see this brief yet.
+            check = biz.get("page_check") or {}
+            out["page_check"] = {
+                "live": page_check_passed(biz), "brief_at": biz.get("design_brief_at"),
+                "passed": check.get("passed"), "failures": check.get("failures") or [],
+                "checked_at": check.get("checked_at"), "stale": bool(check) and check.get("brief_at") != biz.get("design_brief_at"),
+            }
     return out
 
 
@@ -1102,6 +1112,7 @@ async def upload_brand_film(
         raise HTTPException(status_code=422, detail=f"Design brief refused: {e}") from e
     if brief:
         update["design_brief"] = brief
+        update["design_brief_at"] = now   # a new hero: the quality gate runs again
     await db.businesses.update_one({"_id": business_id}, {"$set": update})
     old = (biz.get("brand_film") or {}).get("public_id")
     if old and old != up["public_id"]:
@@ -1119,14 +1130,41 @@ async def remove_brand_film(business_id: str, user=Depends(verify_token)):
         raise HTTPException(status_code=404, detail="Business not found")
     from utils.cloud_storage import delete_from_cloudinary
     brief = _rehero(biz, False)
-    update: dict[str, Any] = {"$unset": {"brand_film": ""}, "$set": {"updated_at": datetime.now(UTC).isoformat()}}
+    now = datetime.now(UTC).isoformat()
+    update: dict[str, Any] = {"$unset": {"brand_film": ""}, "$set": {"updated_at": now}}
     if brief:
         update["$set"]["design_brief"] = brief
+        update["$set"]["design_brief_at"] = now   # a new hero: the quality gate runs again
     await db.businesses.update_one({"_id": business_id}, update)
     old = (biz.get("brand_film") or {}).get("public_id")
     if old:
         delete_from_cloudinary(old, is_video=True)
     return {"id": business_id, "brand_film": None, "hero": (brief or {}).get("hero")}
+
+
+class PageCheckIn(BaseModel):
+    brief_at: str = Field(..., max_length=40)
+    passed: bool
+    failures: list[str] = Field(default_factory=list, max_length=60)
+    checked_at: str = Field(..., max_length=40)
+
+
+@router.post("/businesses/{business_id}/page-check")
+async def record_page_check(business_id: str, payload: PageCheckIn, user=Depends(verify_token)):
+    """Admin-only: the quality gate's result (scripts/check-page.mjs, rules
+    part 9). Visitors see a v3 page only once a pass is recorded for the
+    brief that is on the record now; a result for an older brief is
+    refused, so a page changed after its check cannot go live on it."""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    biz = await db.businesses.find_one({"_id": business_id}, {"design_brief_at": 1})
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    if payload.brief_at != biz.get("design_brief_at"):
+        raise HTTPException(status_code=409, detail="The page changed since it was checked; run the check again")
+    check = {**payload.model_dump(), "passed": payload.passed and not payload.failures, "by": user.get("user_id")}
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"page_check": check}})
+    return {"id": business_id, "live": check["passed"], "page_check": check}
 
 
 class VerifyIn(BaseModel):
