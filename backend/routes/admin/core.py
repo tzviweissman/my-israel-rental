@@ -505,7 +505,39 @@ _USER_OWNED = (
     ("chat_email_throttle", "sender_id"),
     ("marketplace_view_events", "owner_id"),
     ("lead_events", "poster_id"),
+    # The Google sign-in for importing their reviews: an encrypted refresh
+    # token that must not outlive the account (site audit 27 Sep, H3).
+    ("google_review_connections", "user_id"),
 )
+
+# Keyed to something they owned rather than to them: a business's rules,
+# runs, price tips and connections, a listing's price history. Added with
+# the business network (site audit 27 Sep, H3). `(parent, collection,
+# field)`: rows whose `field` is the `_id` of a deleted `parent` row.
+_OWNED_VIA = (
+    ("businesses", "business_automations", "business_id"),
+    ("businesses", "automation_runs", "business_id"),
+    ("businesses", "price_tips", "business_id"),
+    ("businesses", "business_connections", "a_id"),
+    ("businesses", "business_connections", "b_id"),
+    ("marketplace_gigs", "price_changes", "gig_id"),
+)
+
+# Their copies of their own Google reviews: imported through their account,
+# about their business. Native reviews stay (a guest wrote those).
+_OWNED_WHERE = (
+    ("reviews", lambda uid: {"source": "google", "owner_user_ids": uid}),
+)
+
+
+def _owned_via_queries(snapshot: dict) -> list[tuple[str, dict]]:
+    """(collection, filter) for every row keyed to a parent being deleted."""
+    out = []
+    for parent, collection, field in _OWNED_VIA:
+        ids = [r["_id"] for r in snapshot.get(parent, []) if "_id" in r]
+        if ids:
+            out.append((collection, {field: {"$in": ids}}))
+    return out
 
 # Deliberately NOT deleted, and this is the decision rather than an omission
 # (Tzvi, 16 Sep 2026). Each of these has a SECOND person in it, and that
@@ -517,6 +549,8 @@ _USER_OWNED = (
 #   marketplace_reviews             - what they wrote about someone else
 #   store_orders, store_standing_orders, marketplace_job_applications
 #   request_reports                 - moderation evidence about a third party
+#   reviews (native), review_reports - what a guest wrote, and
+#                                     moderation evidence about it
 #
 # The /terms page states this in as many words ("a signed contract belongs
 # to both parties"), so changing it here means changing that too.
@@ -524,6 +558,7 @@ _TWO_PARTY_KEPT = (
     "bookings", "marketplace_bookings", "contracts", "messages",
     "marketplace_reviews", "store_orders", "store_standing_orders",
     "marketplace_job_applications", "request_reports",
+    "reviews", "review_reports",
 )
 
 
@@ -567,6 +602,12 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> di
         rows = await db[collection].find({field: user_id}).to_list(5000)
         if rows:
             snapshot[collection] = rows
+    extra = _owned_via_queries(snapshot) + [(c, where(user_id)) for c, where in _OWNED_WHERE]
+    for collection, where in extra:
+        seen = {r["_id"] for r in snapshot.get(collection, [])}
+        rows = [r for r in await db[collection].find(where).to_list(5000) if r["_id"] not in seen]
+        if rows:
+            snapshot.setdefault(collection, []).extend(rows)
 
     snapshot_id = str(uuid.uuid4())
     await db.user_tombstones.insert_one({
@@ -614,6 +655,10 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> di
         res = await db[collection].delete_many({field: user_id})
         if res.deleted_count:
             removed[collection] = res.deleted_count
+    for collection, where in extra:
+        res = await db[collection].delete_many(where)
+        if res.deleted_count:
+            removed[collection] = removed.get(collection, 0) + res.deleted_count
     await db.users.delete_one({"id": user_id})
 
     logger.info(

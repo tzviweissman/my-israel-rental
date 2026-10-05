@@ -30,6 +30,7 @@ from fastapi.responses import HTMLResponse, RedirectResponse
 from pydantic import BaseModel
 
 from routes.deps import db, verify_token
+from utils.rate_limit import check_rate
 from utils.businesses import business_canonical_url
 
 router = APIRouter()
@@ -278,6 +279,8 @@ async def resolve_short_link(slug: str, request: Request):
     performs the redirect after this call. The counting stays server-side
     and still happens on the follow.
     """
+    # Token links are unguessable; the limit is hardening, matching orders/track (site audit 27-28 Sep).
+    check_rate(request, bucket="short_link_follow", limit=600, window_seconds=600)
     doc = await _counted_lookup(slug, request)
     if not doc:
         raise HTTPException(status_code=404, detail="Unknown short link")
@@ -466,6 +469,8 @@ async def follow_short_link(slug: str, request: Request):
     crawlers, and every hop a cache absorbs is a scan the owner never
     sees counted.
     """
+    # Token links are unguessable; the limit is hardening, matching orders/track (site audit 27-28 Sep).
+    check_rate(request, bucket="short_link_follow", limit=600, window_seconds=600)
     doc = await _counted_lookup(slug, request)
     if not doc:
         # A guessed or mistyped slug still lands somewhere sensible.

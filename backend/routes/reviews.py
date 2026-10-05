@@ -79,9 +79,11 @@ async def eligibility(booking_id: str, user=Depends(verify_token)) -> dict:
 
 
 @router.get("/reviews/request/{token}")
-async def request_link(token: str) -> dict:
+async def request_link(token: str, request: Request) -> dict:
     """The emailed link, before the form is filled in. No sign-in needed:
     the signed, single-use token is the proof."""
+    # Token links are unguessable; the limit is hardening, matching orders/track (site audit 27-28 Sep).
+    check_rate(request, bucket="review_request_link", limit=300, window_seconds=600)
     _need_native()
     try:
         t = await rv.read_request_token(db, token)

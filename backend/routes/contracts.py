@@ -5,8 +5,10 @@ import uuid
 from datetime import UTC, datetime
 from pathlib import PurePosixPath
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from fastapi.responses import FileResponse, StreamingResponse
+
+from utils.rate_limit import check_rate
 
 from models import ContractSignature
 from models_response import (
@@ -234,7 +236,7 @@ def _contract_file(contract: dict) -> tuple:
     return original, ext, name
 
 @api_router.get("/contracts/sign/{sign_token}/file")
-async def download_contract_for_signing(sign_token: str) -> FileResponse:
+async def download_contract_for_signing(sign_token: str, request: Request) -> FileResponse:
     """Give the person being asked to sign a copy of what they are signing.
 
     THE BUG THIS FIXES. The signing page at /sign/:signToken is used by an
@@ -265,6 +267,8 @@ async def download_contract_for_signing(sign_token: str) -> FileResponse:
     through the same basename-only helper the other readers use, so a stored
     value containing "../" resolves to nothing rather than to /etc/passwd.
     """
+    # Token links are unguessable; the limit is hardening, matching orders/track (site audit 27-28 Sep).
+    check_rate(request, bucket="contract_sign_view", limit=300, window_seconds=600)
     # Unknown and expired links are both refused here, in the same words the
     # sign page's own lookup uses, so a stale link says the same thing
     # wherever it is used.
