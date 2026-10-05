@@ -383,7 +383,11 @@ Rules for using them:
 - **Not every page gets one.** A page without the right material stays still.
 - **Uniqueness applies** (`check_unique`): the same device with the same settings
   doesn't go on two businesses of the same kind.
-- **One peak per page.**
+- **One peak per page.** A signature section is that peak, so the hero yields:
+  load sequence, no ambient loop, a brand film shows its poster (design rules,
+  Part 5; decided 5 Oct 2026).
+- **Pinning and scrubbing, yes; taking the scroll, no; and no parallax on
+  phones.** Both terms are defined in the design rules, Part 6.
 - **Reduced motion shows a still.**
 - **No scroll cues.**
 

@@ -138,6 +138,7 @@ The page footer says when tier 2 media was used (for example, "Film rendered in 
 
 - Alternate the sections: **set piece → quiet → set piece → quiet**. Never put three sections with the same structure in a row.
 - **One showstopper** per page, usually the hero. Everything else is calm and precise.
+  - When the page carries a signature scroll section (page-generation-rules section 9), that section is the showstopper and the hero stays calm: the orchestrated load sequence, never the ambient loop, and a brand film shows its poster still. Two showstoppers cancel each other out. (Decided 5 Oct 2026, Tzvi delegated.)
 - **Quiet sections:** big type with lots of space. An occasion list set as large display text separated by accent dots works better than small chips.
 - **Palate cleanser:** one full-width image or film still with **no text**, between two copy sections.
 - **Signature detail:** one element only this business would have. Tie it to their world. Examples:
@@ -166,7 +167,9 @@ Premium comes from small, finished moments.
 - **Buttons:** 1px lift and color shift on hover (200ms); a visible press state.
 - **Copy buttons:** "Copy" changes to "Copied" for 1.5s.
 - **Sticky mobile bar:** it slides up when the hero button scrolls away and hides once the offer section is on screen.
-- **Don't:** use scroll-jacking, parallax on phones, autoplaying carousels, or animate text while someone is reading it.
+- **Don't:** use scroll-jacking, parallax on phones, autoplaying carousels, or animate text while someone is reading it. (Terms defined 5 Oct 2026, Tzvi delegated.)
+  - **Scroll-jacking** is taking the scroll away from the visitor: cancelling wheel or touch events, a smooth-scroll library that replaces the browser's own scrolling, snapping between sections, or changing scroll speed. Pinning a section with `position: sticky` while the page scrolls normally, and stepping a picture or a video along with the scroll position, are not scroll-jacking. The signature scroll sections work that way and are allowed.
+  - **On phones** means a touch-only pointer, or a screen 860px wide or less. Layers there sit still in their resting position; the pinned and scrubbed parts keep working. The design-kit scroll engine does this by itself from version 2.2.0.
 - Everything must be readable with motion off. Nothing waits at `opacity: 0` for an observer to fire.
 
 ---
