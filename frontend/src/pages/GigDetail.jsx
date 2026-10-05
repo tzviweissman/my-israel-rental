@@ -665,7 +665,7 @@ const GigDetail = () => {
 
   return (
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="gig-detail-page">
-      <PageMeta title={`${displayTitle} — MyIsraelRental Services`} description={displayDescription?.slice(0, 155) || `Book ${displayTitle} on MyIsraelRental.`} path={`/businesses/${id}`} jsonLd={gigJsonLd} />
+      <PageMeta title={`${displayTitle} | MyIsraelRental Services`} description={displayDescription?.slice(0, 155) || `Book ${displayTitle} on MyIsraelRental.`} path={`/businesses/${id}`} jsonLd={gigJsonLd} />
       <div className="max-w-5xl mx-auto px-4 py-8">
         {/* Only the owner and an admin can load a listing that is not
             live (the API 404s for everyone else), so this banner is the

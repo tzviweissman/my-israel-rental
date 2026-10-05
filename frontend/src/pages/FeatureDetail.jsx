@@ -43,7 +43,7 @@ export default function FeatureDetail() {
     <div className="min-h-screen" style={{ background: 'var(--bg)', paddingTop: 'var(--nav-h, 68px)' }}
       data-testid={`feature-detail-${slug}`}>
       <PageMeta
-        title={`${title} — MyIsraelRental`}
+        title={`${title} | MyIsraelRental`}
         description={benefit}
         path={`/features/${slug}`}
       />
