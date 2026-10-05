@@ -232,6 +232,15 @@ Reviews appear only if they're verified and there are at least 3. Otherwise the 
 | 14 | **Signature detail** that is specific to this business |
 | 15 | **Performance:** LCP under 2.5s; hero video under 4MB with a poster |
 
+**Look through it, fix it, then show it** (Tzvi, 5 Oct 2026). The owner never
+sees a first draft. Before returning, render the page as a visitor meets it
+(laptop and phone, English and Hebrew, reduced motion; a scroll page at several
+positions per section), look at every screen for anything that reads as broken
+or unfinished even when no check above names it, fix it, and render again until
+a full pass is clean. Then return the finished page with a short note of what was
+fixed, and say plainly what could not be (it needs their content or a real
+device). Full procedure: `docs/page-generation-rules.md` §3a.
+
 Return:
 - the page;
 - the design brief;
