@@ -927,8 +927,37 @@ nothing without it. In the food recipe's order (rules, part 7):
   `scripts/check-page-v3-sticky.mjs` (the bar's show and hide, WhatsApp
   clearance, Copy to Copied and back), `scripts/test-page-v3-ledger.mjs` (7).
 
-**Next:** the brand film upload (tier 2); the quality gate (`checkPage`); the owner checklist in
-the dashboard; service cards below the hero still crop a flyer that is a
+**Phase 5: the brand film (tier 2), 5 Oct 2026.**
+
+- Admin-only `POST /marketplace/businesses/{id}/brand-film` (multipart: `file`,
+  `made_with` = `3d` | `ai`) and `DELETE` to take it off. We make the film
+  (Blender or Higgsfield, by hand: no paid generation is called from code);
+  a person checks it shows the setting and props, never the product as if it
+  were theirs, before uploading.
+- Refused with the reason, and the uploaded asset deleted, unless Cloudinary's
+  own reading says H.264, 6 to 10 seconds, 1920x1080 or a larger 16:9, under
+  4MB (`film_problems`). The MP4 header is checked before anything is sent.
+  Not checked by code: the loop seam (no ffmpeg on Railway), by eye for now.
+- Stored as `brand_film` on the business (Cloudinary URL with the audio track
+  dropped, a poster frame from second 0, `made_with`). The hero is re-picked
+  by `pick_hero`: a real photo still wins, then the film, then the panel, and
+  the brief is validated again (a tier 2 hero must be `film`, and the record
+  must have one).
+- The page: muted, looping, `playsInline`, the browser's own autoplay (a
+  `play()` from an effect was aborted by the first load), a pause button,
+  paused on the poster under reduced motion. The footer says "Film rendered
+  in 3D" or "Film made with AI".
+- Phones: the rule's "film about 70% of the screen" put the name and the
+  button below the fold on every phone (the copy needs ~360px). The film now
+  takes what the copy leaves of one screen, between 180px and 70%, and the
+  button stays above the fold at 360, 390 and 375x667.
+- Known limit: in Hebrew on desktop the copy sits on the right, over a film
+  whose subject is on the right third. Same as a tier 1 photo today; an RTL
+  cut of the film (subject left) is the fix if it matters.
+
+**Next:** the quality gate (`checkPage`); the owner checklist in
+the dashboard; an admin screen for the v3 switch and the film (both are API
+only); service cards below the hero still crop a flyer that is a
 listing's cover. Phase 1 also does not yet show, on a v3 page, the owner's full
 description, payment links or the connect button that the standard header
 carried.

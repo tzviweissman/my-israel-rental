@@ -16,9 +16,9 @@ Two rules carried over from the earlier steps, both deliberate:
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel, Field
 
@@ -953,6 +953,9 @@ async def public_business(
             brief.pop("missing_content", None)
         out["page_v3"] = True
         out["design_brief"] = brief
+        film = biz.get("brand_film") or {}
+        if film.get("url"):
+            out["brand_film"] = {k: film.get(k) for k in ("url", "poster_url", "made_with")}
     return out
 
 
@@ -1038,6 +1041,92 @@ async def set_page_v3(business_id: str, payload: PageV3In, user=Depends(verify_t
         "design_brief_history": history[:5], "updated_at": now,
     }})
     return {"id": business_id, "page_v3": True, "design_brief": brief}
+
+
+def _rehero(biz: dict, has_film: bool) -> Optional[dict]:
+    """The stored brief with its hero re-picked for a film added or removed:
+    a real photo still wins (rule 4). Validated, never patched."""
+    from utils.design_brief import DesignBrief, pick_hero
+    brief = biz.get("design_brief")
+    if not brief:
+        return None
+    hero = brief.get("hero") or {}
+    photo = hero.get("media_id") if hero.get("tier") == 1 else None
+    return DesignBrief(**{**brief, "hero": pick_hero(photo, has_film, brief["preset"])}).model_dump()
+
+
+@router.post("/businesses/{business_id}/brand-film")
+async def upload_brand_film(
+    business_id: str,
+    file: UploadFile = File(...),
+    made_with: Literal["3d", "ai"] = Form(...),
+    user=Depends(verify_token),
+):
+    """Admin-only: the tier 2 hero (rules, part 4), a 6-10s loop we made
+    for a business with no usable photos. It shows the setting and props,
+    never the product as if it were theirs; that is checked by a person
+    before upload. `made_with` is what the footer tells visitors."""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    biz = await db.businesses.find_one({"_id": business_id})
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    from utils.cloud_storage import CLOUDINARY_ENABLED, delete_from_cloudinary, upload_bytes_to_cloudinary
+    from utils.design_brief import FILM_MAX_BYTES, film_problems
+    content = await file.read(FILM_MAX_BYTES + 1)
+    if len(content) > FILM_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="The film is over 4MB")
+    if content[4:8] != b"ftyp":
+        raise HTTPException(status_code=415, detail="The film must be an MP4")
+    if not CLOUDINARY_ENABLED:
+        raise HTTPException(status_code=503, detail="Cloudinary not configured")
+    up = await upload_bytes_to_cloudinary(content, is_video=True, folder=f"myisraelrental/brand-films/{business_id}")
+    problems = film_problems(up)
+    if problems:
+        delete_from_cloudinary(up["public_id"], is_video=True)
+        raise HTTPException(status_code=422, detail="Film refused: " + "; ".join(problems))
+
+    import cloudinary.utils
+    url = cloudinary.utils.cloudinary_url(up["public_id"], resource_type="video", format="mp4", secure=True,
+                                          transformation=[{"audio_codec": "none", "quality": "auto"}])[0]
+    poster = cloudinary.utils.cloudinary_url(up["public_id"], resource_type="video", format="jpg", secure=True,
+                                             transformation=[{"start_offset": 0, "quality": "auto"}])[0]
+    film = {"url": url, "poster_url": poster, "public_id": up["public_id"], "made_with": made_with,
+            "seconds": up["duration"], "width": up["width"], "height": up["height"], "bytes": up["bytes"]}
+    now = datetime.now(UTC).isoformat()
+    update = {"brand_film": film, "updated_at": now}
+    try:
+        brief = _rehero({**biz, "brand_film": film}, True)
+    except ValueError as e:
+        delete_from_cloudinary(up["public_id"], is_video=True)
+        raise HTTPException(status_code=422, detail=f"Design brief refused: {e}") from e
+    if brief:
+        update["design_brief"] = brief
+    await db.businesses.update_one({"_id": business_id}, {"$set": update})
+    old = (biz.get("brand_film") or {}).get("public_id")
+    if old and old != up["public_id"]:
+        delete_from_cloudinary(old, is_video=True)
+    return {"id": business_id, "brand_film": film, "hero": (brief or {}).get("hero")}
+
+
+@router.delete("/businesses/{business_id}/brand-film")
+async def remove_brand_film(business_id: str, user=Depends(verify_token)):
+    """Admin-only: take the film off. The hero falls back a tier."""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    biz = await db.businesses.find_one({"_id": business_id})
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    from utils.cloud_storage import delete_from_cloudinary
+    brief = _rehero(biz, False)
+    update: dict[str, Any] = {"$unset": {"brand_film": ""}, "$set": {"updated_at": datetime.now(UTC).isoformat()}}
+    if brief:
+        update["$set"]["design_brief"] = brief
+    await db.businesses.update_one({"_id": business_id}, update)
+    old = (biz.get("brand_film") or {}).get("public_id")
+    if old:
+        delete_from_cloudinary(old, is_video=True)
+    return {"id": business_id, "brand_film": None, "hero": (brief or {}).get("hero")}
 
 
 class VerifyIn(BaseModel):

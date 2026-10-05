@@ -379,3 +379,46 @@ body[data-page-v3] [data-testid="nav-auth-cluster"] { display: none !important; 
 .pv3-price-sym { font-size: 0.5em; vertical-align: 0.55em; margin-inline-end: 0.04em; font-weight: 400; }
 /* Their own words for a size are read, not scanned: normal case. */
 .pv3-spec dt.pv3-dt-plain { text-transform: none; letter-spacing: 0; font-size: 15px; color: var(--text); padding-block-start: 0; }
+
+/* Tier 2: their brand film (rules, part 4). Desktop: full-bleed under the
+   same scrim as a photo, subject on the right third, copy left. Phones: the
+   film on top, cropped to its subject, copy below it, never over it. The
+   rule's "about 70% of the screen" put the name and the button below the
+   fold on every phone (measured: the copy needs ~360px under the film), so
+   the film takes what is left above the copy, up to 70%. */
+.pv3-film-box { position: absolute; inset: 0; z-index: -3; }
+.pv3-film { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 70% 50%; filter: var(--grade, none); display: block; }
+.pv3-film-box .pv3-scrim { z-index: 0; }
+[data-tier="2"].pv3-hero::after { display: none; }
+.pv3-film-toggle {
+  position: absolute;
+  inset-block-start: calc(var(--nav-h, 68px) + 16px);
+  inset-inline-end: clamp(16px, 3vw, 32px);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border: 1px solid color-mix(in srgb, var(--text) 40%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ground) 55%, transparent);
+  color: var(--text);
+  cursor: pointer;
+}
+.pv3-film-toggle:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+@media (max-width: 640px) {
+  /* One screen under the nav; the copy keeps its height and the film
+     grows into the rest, between 180px and 70%. */
+  [data-tier="2"].pv3-hero {
+    flex-direction: column;
+    align-items: stretch;
+    min-block-size: calc(100svh - var(--nav-h, 68px));
+    padding-block-start: 0;
+    padding-inline: 0;
+  }
+  [data-tier="2"] .pv3-film-box { position: relative; inset: auto; z-index: 0; flex: 1 1 0; min-block-size: 180px; max-block-size: 70svh; }
+  [data-tier="2"] .pv3-film-box .pv3-scrim { display: none; }
+  [data-tier="2"] .pv3-film-toggle { inset-block-start: auto; inset-block-end: 16px; }
+  [data-tier="2"] .pv3-hero-inner { flex: none; }
+  [data-tier="2"] .pv3-hero-inner { padding-inline: 20px; padding-block-start: 32px; }
+}

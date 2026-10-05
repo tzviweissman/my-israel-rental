@@ -34,6 +34,9 @@ for (const lang of ['en', 'he']) {
   await p.evaluate(() => document.querySelector('[data-testid="pv3-copy"]').scrollIntoView({ block: 'center' }));
   await p.waitForTimeout(600);
   await p.locator('[data-testid="pv3-copy"]').click();
+  // "Copied" comes after the clipboard promise; a playing hero film is
+  // enough to make reading it straight after the click lose the race.
+  await p.waitForFunction(() => /Copied|הועתק/.test(document.querySelector('[data-testid="pv3-copy"]').innerText), null, { timeout: 1000 }).catch(() => {});
   const copied = await p.locator('[data-testid="pv3-copy"]').innerText();
   if (!/Copied|הועתק/.test(copied)) fails.push(`${lang}: Copy did not change to Copied (${copied})`);
   await p.waitForTimeout(1700);

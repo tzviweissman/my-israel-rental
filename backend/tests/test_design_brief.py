@@ -17,7 +17,7 @@ from pydantic import ValidationError
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from utils.design_brief import (  # noqa: E402
-    DesignBrief, brief_problems, build_brief, contrast, derive_palette, extract_accent, page_v3_on,
+    DesignBrief, brief_problems, build_brief, contrast, derive_palette, extract_accent, film_problems, page_v3_on,
 )
 
 CHOLENT = {
@@ -125,3 +125,33 @@ def test_v3_needs_the_site_switch_and_the_business_switch(monkeypatch):
     assert not page_v3_on({**biz, "page_v3": False}), "one business at a time"
     assert not page_v3_on({"page_v3": True}), "no brief, no v3"
     assert os.environ.get("PAGE_BUILDER_V3_ENABLED") == "1"
+
+
+FILM = {"url": "https://res.cloudinary.com/x/video/upload/f.mp4", "poster_url": "p.jpg", "made_with": "3d"}
+
+
+def test_the_brand_film_is_the_hero_only_without_a_real_photo():
+    """Rule 4: photo, then film, then the typographic panel."""
+    with_film = {**CHOLENT, "brand_film": FILM}
+    assert build_brief(with_film).hero.tier == 2 and build_brief(with_film).hero.media_id == "film"
+    assert build_brief(CHOLENT).hero.tier == 3
+    b = build_brief({**with_film, "cover_url": "c.jpg"}, photos=[{"ref": "cover", "kind": "photo"}])
+    assert b.hero.tier == 1 and b.hero.media_id == "cover"
+
+
+def test_a_film_hero_without_a_film_or_a_film_id_elsewhere_is_refused():
+    film_hero = {"tier": 2, "media_id": "film", "subject_side": "right"}
+    assert any("brand film" in p for p in brief_problems(DesignBrief(**{**_good(), "hero": film_hero}), CHOLENT))
+    for hero in ({"tier": 2, "subject_side": "right"}, {"tier": 3, "media_id": "film"},
+                 {"tier": 2, "media_id": "https://evil.example/x.mp4"}):
+        with pytest.raises(ValidationError):
+            DesignBrief(**{**_good(), "hero": hero})
+
+
+def test_a_film_off_spec_is_refused_with_the_reason():
+    good = {"codec": "h264", "duration": 8.0, "width": 1920, "height": 1080, "bytes": 3_500_000}
+    assert film_problems(good) == []
+    assert film_problems({**good, "width": 3840, "height": 2160}) == []
+    for change, words in (({"codec": "hevc"}, "H.264"), ({"duration": 14.2}, "6 to 10"),
+                          ({"width": 1080, "height": 1920}, "16:9"), ({"bytes": 6_000_000}, "4MB")):
+        assert any(words in p for p in film_problems({**good, **change})), change

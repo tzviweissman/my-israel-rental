@@ -250,7 +250,9 @@ class PhotoRef(BaseModel):
 class Hero(BaseModel):
     model_config = ConfigDict(extra="forbid")
     tier: Literal[1, 2, 3]
-    media_id: Optional[str] = Field(None, pattern=PHOTO_REF)
+    # One of their pictures (tier 1), or "film": the business's brand film,
+    # stored on the record as brand_film (tier 2).
+    media_id: Optional[str] = Field(None, pattern=rf"^(film|{PHOTO_REF[1:-1]})$")
     poster_id: Optional[str] = Field(None, max_length=64)
     subject_side: Literal["left", "right", "center"] = "right"
 
@@ -303,6 +305,8 @@ class DesignBrief(BaseModel):
             kinds = {p.ref: p.kind for p in self.photos}
             if kinds.get(self.hero.media_id or "") != "photo":
                 raise ValueError("a tier 1 hero must be a picture checked as a photo, never a flyer or unchecked")
+        if (self.hero.tier == 2) != (self.hero.media_id == "film"):
+            raise ValueError("a tier 2 hero is the brand film, and only tier 2 is")
         return self
 
     @model_validator(mode="after")
@@ -361,7 +365,44 @@ def brief_problems(brief: DesignBrief, b: dict) -> list[str]:
         for t in items:
             if t.text.lower() not in fields.get(t.source, "").lower():
                 problems.append(f"{kind} {t.text[:40]!r} is not in their words in {t.source}")
+    if brief.hero.tier == 2 and not (b.get("brand_film") or {}).get("url"):
+        problems.append("the hero names a brand film the business does not have")
     return problems
+
+
+def pick_hero(photo_ref: Optional[str], has_film: bool, preset: str) -> dict:
+    """Rule 4: the highest tier their content allows. A real photo, else the
+    brand film, else the typographic panel. The film's subject sits on the
+    right third, so the copy goes left (rules, part 4)."""
+    if photo_ref:
+        return {"tier": 1, "media_id": photo_ref, "subject_side": "right"}
+    if has_film:
+        return {"tier": 2, "media_id": "film", "subject_side": "right"}
+    return {"tier": 3, "subject_side": PRESETS[preset]["hero_side"]}
+
+
+# Rules, part 4 and check 15: 6-10s, 1920x1080 H.264, under 4MB.
+FILM_MAX_BYTES = 4 * 1024 * 1024
+
+
+def film_problems(facts: dict) -> list[str]:
+    """What is wrong with an uploaded brand film, from Cloudinary's own
+    reading of it (never the browser's). Empty means it can be used.
+    ponytail: the loop seam (rules, part 4) is checked by eye before upload;
+    automate it when the server has ffmpeg."""
+    out = []
+    codec = (facts.get("codec") or "").lower()
+    if codec != "h264":
+        out.append(f"it is {codec or 'an unknown codec'}; it must be H.264")
+    seconds = float(facts.get("duration") or 0)
+    if not 5.9 <= seconds <= 10.1:
+        out.append(f"it runs {seconds:.1f}s; a loop is 6 to 10 seconds")
+    w, h = int(facts.get("width") or 0), int(facts.get("height") or 0)
+    if w < 1920 or not h or abs(w / h - 16 / 9) > 0.02:
+        out.append(f"it is {w}x{h}; it must be 1920x1080 or a larger 16:9")
+    if int(facts.get("bytes") or 0) > FILM_MAX_BYTES:
+        out.append("it is over 4MB")
+    return out
 
 
 def _sentences(text: str) -> list[str]:
@@ -502,9 +543,8 @@ def build_brief(b: dict, logo_bytes: Optional[bytes] = None,
         type={**p["type"], "display_weight": p["display_weight"], "caps": p["caps"], "tracking": p["tracking"]},
         texture=p["texture"],
         # Tier 1 when the flyer check found a real photo; never a flyer or a
-        # picture it could not read (rule 4). Otherwise the typographic panel.
-        hero=({"tier": 1, "media_id": hero_photo, "subject_side": "right"} if hero_photo
-              else {"tier": 3, "subject_side": p["hero_side"]}),
+        # picture it could not read (rule 4). Then their film, then the panel.
+        hero=pick_hero(hero_photo, bool((b.get("brand_film") or {}).get("url")), preset),
         photos=photos or [],
         signature_detail=("kashrut certificate shown as a document"
                           if (b.get("kosher_certification") or {}).get("body") and category == "food" else ""),

@@ -367,6 +367,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           name={displayName}
           logoUrl={biz.logo_url}
           photoUrl={v3Photo}
+          film={biz.brand_film}
           priceText={v3Price}
           areaText={v3Area}
           kosherBody={biz.kosher_certification?.body || null}
@@ -847,7 +848,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         </div>
       </div>
 
-      {v3 ? <V3Footer /> : <SiteFooter />}
+      {v3 ? <V3Footer filmMadeWith={v3Brief.hero?.tier === 2 && biz.brand_film?.url ? biz.brand_film.made_with : null} /> : <SiteFooter />}
 
       {/* Mobile only: the header button is off screen for most of the
           page on a phone, so the action rides along instead. Padding for

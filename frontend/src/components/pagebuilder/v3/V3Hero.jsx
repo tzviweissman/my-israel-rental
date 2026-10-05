@@ -4,10 +4,10 @@
  * docs/page-builder-design-rules.md (v3). The brief is built by rules from
  * the business's own record (backend/utils/design_brief.py) and arrives in
  * the page payload only when PAGE_BUILDER_V3_ENABLED is on AND an admin
- * switched this business on. Phase 1 draws tier 3, the typographic brand
- * panel: the wordmark at hero scale on the brand ground, with the preset's
- * texture. Photos come with the flyer check (phase 2); a flyer is never a
- * hero (rule 4).
+ * switched this business on. Tier 1 is their best real photo (phase 2's
+ * flyer check: a flyer is never a hero, rule 4), tier 2 their brand film,
+ * tier 3 the typographic brand panel: the wordmark at hero scale on the
+ * brand ground, with the preset's texture.
  *
  * Everything in it is the business's own: the name, one of their sentences
  * word for word, their real lowest price, their certificate, their areas.
@@ -17,8 +17,9 @@
  * (styles/page-v3.css), so nothing here hardcodes a colour or a face, and
  * the section does not inherit the platform's theme.
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Pause, Play } from 'lucide-react';
 
 import ProofLine from '../../marketplace/ProofLine';
 import '../../../styles/page-v3.css';
@@ -90,6 +91,35 @@ export function primaryLabel(brief, t) {
   return food ? t('pageV3.ctaMessageOrder', 'Message to order') : t('pageV3.ctaMessage', 'Send a message');
 }
 
+/** Tier 2 (rules, part 4): their brand film, muted, looping, with a poster
+ *  and a pause button. The browser's own autoplay starts it (a play() call
+ *  from an effect gets aborted by the first load); reduced motion leaves it
+ *  on the poster. The button follows the video's real state. */
+function Film({ film }) {
+  const { t } = useTranslation();
+  const ref = useRef(null);
+  const [playing, setPlaying] = useState(false);
+  const still = typeof window !== 'undefined' && window.matchMedia
+    && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const toggle = () => {
+    const v = ref.current;
+    if (v.paused) v.play().catch(() => {});
+    else v.pause();
+  };
+  return (
+    <div className="pv3-film-box">
+      <video ref={ref} className="pv3-film" src={film.url} poster={film.poster_url || undefined}
+        muted loop playsInline autoPlay={!still} preload="auto" aria-hidden="true" data-testid="pv3-film"
+        onPlay={() => setPlaying(true)} onPause={() => setPlaying(false)} />
+      <div className="pv3-scrim" aria-hidden="true" />
+      <button type="button" className="pv3-film-toggle" onClick={toggle} data-testid="pv3-film-toggle"
+        aria-label={playing ? t('pageV3.pauseFilm', 'Pause the film') : t('pageV3.playFilm', 'Play the film')}>
+        {playing ? <Pause size={16} aria-hidden="true" /> : <Play size={16} aria-hidden="true" />}
+      </button>
+    </div>
+  );
+}
+
 /** Dots in the wordmark take the accent (rules appendix: "gold dots"). */
 const Wordmark = ({ text }) => (
   <>
@@ -100,7 +130,7 @@ const Wordmark = ({ text }) => (
   </>
 );
 
-export default function V3Hero({ brief, name, logoUrl, photoUrl, priceText, areaText, kosherBody, proof, onPrimary, children }) {
+export default function V3Hero({ brief, name, logoUrl, photoUrl, film, priceText, areaText, kosherBody, proof, onPrimary, children }) {
   const { t, i18n } = useTranslation();
   const he = (i18n.language || '').startsWith('he');
   useFonts(fontsHref((brief && brief.type) || {}));
@@ -119,8 +149,9 @@ export default function V3Hero({ brief, name, logoUrl, photoUrl, priceText, area
   ].filter(Boolean).slice(0, 3);
 
   // Tier 1 only with a picture the flyer check passed as a photo (the API
-  // refuses a brief that names anything else); otherwise the typographic panel.
-  const tier = brief.hero?.tier === 1 && photoUrl ? 1 : 3;
+  // refuses a brief that names anything else), tier 2 with their brand film;
+  // otherwise the typographic panel.
+  const tier = (brief.hero?.tier === 1 && photoUrl && 1) || (brief.hero?.tier === 2 && film?.url && 2) || 3;
 
   return (
     <section
@@ -141,6 +172,7 @@ export default function V3Hero({ brief, name, logoUrl, photoUrl, priceText, area
           <div className="pv3-scrim" aria-hidden="true" />
         </>
       )}
+      {tier === 2 && <Film film={film} />}
       <div className="pv3-texture" aria-hidden="true" />
       <div className="pv3-hero-inner">
         {logoUrl && <img className="pv3-logo" src={logoUrl} alt="" aria-hidden="true" />}
