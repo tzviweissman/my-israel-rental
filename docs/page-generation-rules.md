@@ -110,14 +110,18 @@ once:
 |---|---|
 | **Anything placed on a spot in a photo or video is placed by measurement, never by eye.** Find the object's position and size in the real frames with a detector (circle finder, edge or colour match) at several points through the clip, and drive the overlay from that measured path. | The knob landed beside the slow cooker's dial instead of on it. |
 | **An overlay that has to stay on moving media lives inside the same element as the media**, positioned in that element's own percentages. Never chase a moving picture with script while the page scrolls: the browser moves the page a frame before the script runs, so the overlay trails behind. | The knob drifted off the dial as the section scrolled away. |
+| **If the camera moves, steady the clip on the spot before building on it.** Find the spot in every frame and warp the clip so it never moves, then fix the overlay to that one point. Never key an overlay to the video's playback time: the frame on screen lags the time the browser reports, by a different amount on every machine and screen size. | The knob sat on the dial on the build machine and beside it on Tzvi's wider screen, because it followed the clip's clock rather than its picture. |
 | **Text never re-wraps while its container animates.** A column that widens, narrows or slides keeps its words at a fixed width set for the narrowest it ever gets, or the words fade between states; they are never reflowed live. | The from-scratch words jumped between lines as the panel widened. |
 | **No in-between state may look unfinished.** Every transition is checked at its middle, not only its ends: when content leaves an area, the area goes to the page's own ground (or the next content arrives), never to a bare panel. | The from-scratch side became an empty grey strip mid-scroll. |
 | **Text over imagery is checked at the brightest frame under it and on the narrowest screen.** If a later panel slides over a column of text, the text column is narrowed so it is never covered. | Headline text slid under the widening panel; a line sat on the bright steel of the pot. |
 
 **And checked by a script, every time:** for every overlay meant to sit on
-something in a picture, measure the gap between the two at five or more
-scroll positions on a laptop and a phone size; more than 4px off fails the
-page. A screenshot that "looks right" is not the check.
+something in a picture, hide the overlay, screenshot, find the real spot in
+the screenshot with the detector, and measure the gap. Do it at several
+scroll positions and at least six screen sizes (wide and short laptop, full
+HD, tablet, phone); more than 4px off fails the page. Comparing the overlay
+with the page's own numbers is not the check, because those numbers are what
+can be wrong. A screenshot that "looks right" is not the check either.
 
 ## 4. What is reported to the owner instead (content gaps)
 

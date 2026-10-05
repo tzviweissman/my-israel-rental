@@ -74,11 +74,8 @@
   .pot-frame img, .pot-frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(1.18) contrast(1.04); }
   /* The landed knob lives inside the frame, placed in the frame's own
      fractions, so it moves with the picture with no frame of lag. */
-  .knob.knob-pot { position: absolute; left: calc(var(--dx, 0.678) * 100%); top: calc(var(--dy, 0.698) * 100%);
-    width: calc(var(--dd, 0.07) * 100% / 0.477); height: auto; translate: -50% -50%; --face: 0; opacity: var(--landed, 0); }
-  .heart { position: absolute; left: 69%; top: 2%; width: 22%; height: 34%; overflow: visible; }
-  .heart path { fill: none; stroke: var(--sc-accent); stroke-width: 1.6; stroke-linecap: round; vector-effect: non-scaling-stroke;
-    stroke-dasharray: var(--len, 1000); stroke-dashoffset: calc(var(--len, 1000) * (1 - var(--draw, 0))); opacity: 0.85; }
+  .knob.knob-pot { position: absolute; left: calc(var(--dx, 0.6547) * 100%); top: calc(var(--dy, 0.7463) * 100%);
+    width: calc(var(--dd, 0.0834) * 100% / 0.477); height: auto; translate: -50% -50%; --face: 0; opacity: var(--landed, 0); }
 
   .theirs-copy { position: absolute; right: var(--sc-gutter); top: clamp(5.5rem, 14vh, 9rem); width: min(30rem, 30vw); text-align: right; }
   .lockup .script { display: block; font-size: clamp(1.9rem, 1.4rem + 1.6vw, 3rem); line-height: 1; margin-bottom: -0.2em; }
@@ -244,7 +241,7 @@
        0.10-0.42 the chores pile up, the scratch side widens to 62%
        0.42-0.52 authored silence: the scratch side drains, their one line
        0.50-0.64 the collapse: the divider runs to the edge, the knob to Low
-       0.60-1.00 THE PEAK: the clip, 20 hours, the steam draws their heart -->
+       0.60-1.00 THE PEAK: the clip, the knob on the dial, 20 hours -->
   <section id="split" data-sc-act="pin" data-sc-span="7">
     <div data-sc-stage>
 
@@ -255,9 +252,6 @@
           <img src="assets/pot.webp" alt="">
           <video id="pot" muted playsinline preload="auto"></video>
           <svg class="knob knob-pot" id="knob-pot" viewBox="-30 -30 260 260"></svg>
-          <svg class="heart" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <path id="heart-path" d="M50 98 C 48 84, 52 74, 50 64 C 47 52, 30 50, 24 38 C 17 24, 30 10, 42 16 C 47 19, 49 24, 50 28 C 51 24, 53 19, 58 16 C 70 10, 83 24, 76 38 C 70 50, 53 52, 50 64"/>
-          </svg>
         </div>
         <div class="theirs-shade" aria-hidden="true"></div>
 
@@ -419,9 +413,6 @@
   var knob = document.getElementById('knob');
   var chores = act.querySelectorAll('.chores li');
   var hours = document.getElementById('hours');
-  var heart = document.getElementById('heart-path');
-  var len = heart.getTotalLength();
-  heart.style.setProperty('--len', len);
 
   // A clip scrubbed by the scroll: the playhead walks toward its target one
   // seek at a time. Under reduced motion the still stays and nothing loads.
@@ -457,14 +448,10 @@
   var last = -1, knobScale = 1;
   var knobWrap = document.querySelector('.knob-wrap'), potFrame = document.querySelector('.pot-frame'), divider = document.querySelector('.divider');
   // Where the slow cooker's dial sits in the 16:9 frame (x, y, diameter, as
-  // fractions), measured with a circle finder on five frames of the clip; the
-  // camera drifts, so the knob follows the measured path.
-  var DIAL = [[0, .6784, .6983, .0700], [.25, .6766, .7050, .0732], [.5, .6734, .7172, .0758], [.75, .6647, .7328, .0760], [1, .6553, .7483, .0789]];
-  function dialAt(ct) {
-    var i = 0; while (i < DIAL.length - 2 && ct > DIAL[i + 1][0]) i++;
-    var a = DIAL[i], z = DIAL[i + 1], t = Math.max(0, Math.min(1, (ct - a[0]) / (z[0] - a[0])));
-    return [1, 2, 3].map(function (k) { return a[k] + (z[k] - a[k]) * t; });
-  }
+  // fractions). The clip was steadied on the dial frame by frame (a circle
+  // finder on all 145 frames), so the dial never moves and neither does this.
+  var DIAL_AT = [0.6547, 0.7463, 0.0834];
+  function dialAt() { return DIAL_AT; }
   var knobPot = document.getElementById('knob-pot');
   function frame() {
     var p = parseFloat(act.style.getPropertyValue('--sc-p')) || 0;
@@ -514,7 +501,6 @@
       chores.forEach(function (li, i) { li.classList.toggle('on', p > 0.11 + i * 0.033); });
       var h = span(p, 0.64, 0.92);
       hours.textContent = Math.round(20 * h);
-      heart.style.setProperty('--draw', reduce ? (h > 0 ? 1 : 0) : ease(span(p, 0.70, 0.96)).toFixed(3));
       if (pot.ready) pot.target = span(p, 0.54, 1) * (video.duration || 0);
       if (kitchen.ready) kitchen.target = span(p, 0, 0.42) * (kitchen.el.duration || 0);
     }
