@@ -284,7 +284,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           the share tags of a page nobody is on. */}
       {!preview && (
         <PageMeta
-          title={`${displayName} — MyIsraelRental`}
+          title={`${displayName} | MyIsraelRental`}
           description={shareDescription}
           image={shareImage}
           path={`/business/${biz.slug || biz.id}`}

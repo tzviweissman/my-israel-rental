@@ -14,7 +14,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
   Loader2, ClipboardList, RefreshCw, Navigation as NavIcon, Phone, MessageCircle, Camera, Check, X, MapPin, Clock, Store as StoreIcon,
@@ -143,9 +143,9 @@ export default function DeliveriesTab({ API, token, onChanged }) {
           <p className="text-sm mb-3" style={{ color: 'var(--brand-muted)' }}>
             {t('deliveries.addBusinessBody', 'Shops can only send jobs to another business. Add yours, free, and their automations reach you without a phone call.')}
           </p>
-          <a href="/businesses/add" className="btn-primary inline-flex text-sm px-4 py-2">
+          <Link to="/businesses/add" className="btn-primary inline-flex text-sm px-4 py-2">
             {t('deliveries.addBusinessCta', 'Add your business, free')}
-          </a>
+          </Link>
         </div>
       )}
 

@@ -36,7 +36,7 @@ export default function WhatYouCanDo() {
     <div className="min-h-screen" style={{ background: 'var(--bg)', paddingTop: 'var(--nav-h, 68px)' }}
       data-testid="what-you-can-do">
       <PageMeta
-        title={`${t('features.metaTitle', 'What you can do here')} — MyIsraelRental`}
+        title={`${t('features.metaTitle', 'What you can do here')} | MyIsraelRental`}
         description={t('features.metaDescription',
           'Everything MyIsraelRental does for businesses, hosts and travellers — free to list, free to be found.')}
         path="/what-you-can-do"
