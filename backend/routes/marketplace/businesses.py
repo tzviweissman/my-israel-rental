@@ -1000,17 +1000,36 @@ async def set_page_v3(business_id: str, payload: PageV3In, user=Depends(verify_t
     listings = [g async for g in db.marketplace_gigs.find({"business_id": business_id, "status": "published"})]
     for g in listings:
         g["id"] = g.pop("_id")
+    import httpx
     logo = None
     if biz.get("logo_url"):
         try:
-            import httpx
             async with httpx.AsyncClient(timeout=15) as http:
                 r = await http.get(biz["logo_url"])
                 logo = r.content if r.status_code == 200 else None
         except httpx.HTTPError:
             logo = None   # no logo colour: the preset's accent is used, and the brief says so
+    # Phase 2: every picture of theirs through the flyer check (free, local
+    # Tesseract). Unreadable means "unknown", which is never a hero.
+    import asyncio
+    from utils.design_brief import photo_candidates
+    from utils.flyer_check import classify
+    record = {**biz, "listings": listings}
+    gate = asyncio.Semaphore(4)   # ~7s a picture; four Tesseract runs at once
+
+    async def check(http, ref, url):
+        async with gate:
+            try:
+                r = await http.get(url)
+                verdict = await asyncio.to_thread(classify, r.content) if r.status_code == 200 else {"kind": "unknown"}
+            except httpx.HTTPError:
+                verdict = {"kind": "unknown"}
+            return {"ref": ref, "kind": verdict["kind"]}
+
+    async with httpx.AsyncClient(timeout=20) as http:
+        photos = list(await asyncio.gather(*(check(http, r, u) for r, u in photo_candidates(record)[:12])))
     try:
-        brief = build_brief({**biz, "listings": listings}, logo).model_dump()
+        brief = build_brief(record, logo, photos).model_dump()
     except ValueError as e:
         raise HTTPException(status_code=422, detail=f"Design brief refused: {e}") from e
     history = ([biz["design_brief"]] if biz.get("design_brief") else []) + list(biz.get("design_brief_history") or [])

@@ -235,10 +235,22 @@ class TypeSpec(BaseModel):
         return self
 
 
+# A picture of theirs, by reference, never a URL (P1): the cover, or one
+# image of one listing (its gallery, or a tier's or product's images).
+PHOTO_REF = r"^(cover|listing:[A-Za-z0-9_-]{1,64}:(gallery:\d{1,2}|item:\d{1,2}:\d{1,2}))$"
+
+
+class PhotoRef(BaseModel):
+    """One of their pictures and what the flyer check made of it."""
+    model_config = ConfigDict(extra="forbid")
+    ref: str = Field(..., pattern=PHOTO_REF)
+    kind: Literal["photo", "flyer", "unknown"]
+
+
 class Hero(BaseModel):
     model_config = ConfigDict(extra="forbid")
     tier: Literal[1, 2, 3]
-    media_id: Optional[str] = Field(None, max_length=64)
+    media_id: Optional[str] = Field(None, pattern=PHOTO_REF)
     poster_id: Optional[str] = Field(None, max_length=64)
     subject_side: Literal["left", "right", "center"] = "right"
 
@@ -276,6 +288,17 @@ class DesignBrief(BaseModel):
     primary_action: Action
     taglines: list[Tagline] = Field(default_factory=list, max_length=6)
     missing_content: list[str] = Field(default_factory=list, max_length=12)
+    photos: list[PhotoRef] = Field(default_factory=list, max_length=24)
+
+    @model_validator(mode="after")
+    def _never_a_flyer_as_hero(self) -> "DesignBrief":
+        """Rule 4: a flyer is never the hero, and neither is a picture the
+        check could not read. Tier 1 must name a picture checked as a photo."""
+        if self.hero.tier == 1:
+            kinds = {p.ref: p.kind for p in self.photos}
+            if kinds.get(self.hero.media_id or "") != "photo":
+                raise ValueError("a tier 1 hero must be a picture checked as a photo, never a flyer or unchecked")
+        return self
 
     @model_validator(mode="after")
     def _readable(self) -> "DesignBrief":
@@ -364,11 +387,16 @@ def _preset(category: str, b: dict) -> str:
             "trades": "workshop"}.get(category, "studio")
 
 
-def _missing(b: dict, category: str) -> list[str]:
-    """The owner checklist (rule 1): what would unlock more of the page."""
+def _missing(b: dict, category: str, photos: Optional[list[dict]] = None) -> list[str]:
+    """The owner checklist (rule 1): what would unlock more of the page.
+    Photos count only when the flyer check passed them: a flyer is not a
+    photo of the food."""
     out = []
-    photos = sum(len((g or {}).get("gallery") or []) for g in b.get("listings") or [])
-    if photos < 3:
+    if photos is None:
+        real = sum(len((g or {}).get("gallery") or []) for g in b.get("listings") or [])
+    else:
+        real = sum(1 for x in photos if x.get("kind") == "photo")
+    if real < 3:
         out.append("photos" if category != "food" else "food photos")
     if not _prices(b):
         out.append("prices")
@@ -384,13 +412,33 @@ def _missing(b: dict, category: str) -> list[str]:
     return out
 
 
-def build_brief(b: dict, logo_bytes: Optional[bytes] = None) -> DesignBrief:
+def photo_candidates(b: dict) -> list[tuple[str, str]]:
+    """(ref, url) for every picture of theirs, in the order a hero would be
+    chosen: the cover, then each listing's gallery, then its items' images."""
+    out = [("cover", b["cover_url"])] if b.get("cover_url") else []
+    for g in b.get("listings") or []:
+        g = g or {}
+        gid = g.get("id")
+        if not gid:
+            continue
+        for n, url in enumerate((g.get("gallery") or [])[:10]):
+            out.append((f"listing:{gid}:gallery:{n}", url))
+        for m, item in enumerate(((g.get("tiers") or []) + (g.get("products") or []))[:10]):
+            pics = (item or {}).get("images") or ([item["image"]] if (item or {}).get("image") else [])
+            for k, url in enumerate(pics[:5]):
+                out.append((f"listing:{gid}:item:{m}:{k}", url))
+    return out[:24]
+
+
+def build_brief(b: dict, logo_bytes: Optional[bytes] = None,
+                photos: Optional[list[dict]] = None) -> DesignBrief:
     """A brief from the business's own data and our presets. Raises if the
     result would not validate; callers report that, they don't patch it."""
     category = _category(b)
     preset = _preset(category, b)
     p = PRESETS[preset]
     logo_accent = extract_accent(logo_bytes) if logo_bytes else None
+    hero_photo = next((x["ref"] for x in photos or [] if x.get("kind") == "photo"), None)
     palette = derive_palette(preset, logo_accent or p["accent"])
     listings = [g for g in b.get("listings") or [] if g]
     store = next((g for g in listings if g.get("gig_type") == "store"), None)
@@ -409,14 +457,16 @@ def build_brief(b: dict, logo_bytes: Optional[bytes] = None) -> DesignBrief:
         palette=palette,
         type={**p["type"], "display_weight": p["display_weight"], "caps": p["caps"], "tracking": p["tracking"]},
         texture=p["texture"],
-        # Phase 1 draws the typographic panel only. Photos need the flyer
-        # check first (rule 4: a flyer is never the hero), which is phase 2.
-        hero={"tier": 3, "subject_side": p["hero_side"]},
+        # Tier 1 when the flyer check found a real photo; never a flyer or a
+        # picture it could not read (rule 4). Otherwise the typographic panel.
+        hero=({"tier": 1, "media_id": hero_photo, "subject_side": "right"} if hero_photo
+              else {"tier": 3, "subject_side": p["hero_side"]}),
+        photos=photos or [],
         signature_detail=("kashrut certificate shown as a document"
                           if (b.get("kosher_certification") or {}).get("body") and category == "food" else ""),
         primary_action=action,
         taglines=_taglines(b),
-        missing_content=_missing(b, category),
+        missing_content=_missing(b, category, photos),
     )
     problems = brief_problems(brief, b)
     if problems:
