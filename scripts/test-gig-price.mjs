@@ -18,7 +18,7 @@ import { readFileSync } from 'node:fs';
 // The module imports a sibling for the FX constant; both are plain ESM, so
 // they are loaded directly rather than being duplicated here.
 const url = new URL('../frontend/src/utils/gigPrice.js', import.meta.url);
-const { gigPriceParts, cheapestRow, priceRows } = await import(url);
+const { gigPriceParts, cheapestRow, priceRows, cheapestFirst } = await import(url);
 
 const results = [];
 const ok = (name, cond, detail = '') => {
@@ -78,6 +78,13 @@ const partly = {
 };
 ok('rows without a price are skipped', gigPriceParts(partly).text === '$120', gigPriceParts(partly).text);
 ok('priceRows returns only priced rows', priceRows(partly).length === 1);
+
+// ---- cheapest first, quotes last (site audit 24 Sep: untested) ----
+const offers = [{ n: 'quote', p: null }, { n: 'big', p: 300 }, { n: 'zero', p: 0 }, { n: 'small', p: 45 }, { n: 'mid', p: 120 }];
+const order = cheapestFirst(offers, (x) => x.p).map((x) => x.n).join(',');
+ok('cheapest first, unpriced last in their own order', order === 'small,mid,big,quote,zero', order);
+ok('the input is not reordered in place', offers[0].n === 'quote');
+ok('an empty or missing list is an empty list', cheapestFirst(undefined, (x) => x).length === 0);
 
 // ---- the guard against the original mistake coming back ----
 const src = readFileSync(new URL('../frontend/src/utils/gigPrice.js', import.meta.url), 'utf8');
