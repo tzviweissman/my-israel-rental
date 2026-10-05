@@ -52,3 +52,5 @@ Run it when you are about to guess. Concretely:
 When you stop asking, write the brief back in **6–12 lines**: what you're making, for whom, what it must do, what it must not do, what "done" looks like. Mark anything you inferred rather than heard as an assumption, explicitly.
 
 Then get a yes before starting. The playback is not a formality — it is where they see their own scattered answers as one thing and say "no, not that." Cheapest correction available.
+
+**Leave the door open.** End with "anything I did not ask about that I should have?" The question costs one line and regularly turns up the thing that would have derailed the work.
