@@ -145,3 +145,17 @@ knob landing were checked by screenshot. Not verified: a real phone (iOS
 video decoding and autoplay policy), and keyboard focus order beyond the
 dial (arrow keys and the three size buttons work in code; not tabbed on a
 device).
+
+## Round 2 (5 Oct 2026, Tzvi's review)
+
+Added: a scrubbed clip of the from-scratch kitchen (light flicker, ripples,
+a drip), a looping candlelight clip of the Shabbos table (still under reduced
+motion), and 2K upscales of the generated stills, shown with motion off (the
+stand-ins elsewhere are each clip's own first frame, so nothing jumps when a
+clip starts). Fixed, from Tzvi's notes: the pause went to an empty grey strip
+(the scratch side now fades to the page's dark); the from-scratch words
+re-wrapped as the panel widened (fixed width); the knob sat off the pot's dial
+(dial path measured with a circle finder on five frames, and the landed knob
+now lives inside the clip's frame, 0px off at every checked position). Phone:
+the kitchen sized to the half it shows in. These became the build rules in
+docs/page-generation-rules.md §3a.

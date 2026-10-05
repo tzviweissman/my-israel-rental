@@ -76,6 +76,49 @@ each recent page of the same kind of business on at least 3 of 6 things: what
 leads, the order of sections, the hero's shape, imagery, type, and density. The
 hand-built pages already hold themselves to 4 of 6 (`scrollcraft/FINGERPRINTS.md`).
 
+## 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
+
+"In the future look through the page the AI creates before showing the
+business owner and implement the fixes and then show the finished product."
+
+The owner never sees a first draft. Every page passes this review before it
+reaches them, and the review is done on the **rendered page**, not on the
+composition:
+
+1. **Render it** the way a visitor meets it: laptop and phone width, English
+   and Hebrew, normal and reduced motion. A scroll page is walked top to
+   bottom at several positions per section, never judged from one screenshot.
+2. **Look at every screen** for anything that reads as broken or unfinished,
+   even when no rule names it. Caught on L.A. Cholent: a section that went to
+   an empty grey panel between two moments and looked like a failed load;
+   a heading sliding under the next panel; a dial landing off the object it
+   belongs to while the section scrolled away; text over the brightest part
+   of a photo.
+3. **Measure** what can be measured: contrast on the rendered frames, no
+   sideways scroll, nothing waiting at opacity 0, the hard rules above.
+4. **Fix every finding and render it again.** Repeat until a full pass finds
+   nothing. A fix is checked on the screen it was for, not assumed.
+5. **Only then show the owner**, with the finished page and a short note of
+   what was fixed. Anything that could not be fixed (it needs their content,
+   their decision, or a real device) is said plainly, never hidden.
+
+**Build rules that stop these defects being made in the first place** (from
+the L.A. Cholent fixes, 5 Oct 2026). Each one is a defect that shipped to Tzvi
+once:
+
+| Rule | The defect it prevents |
+|---|---|
+| **Anything placed on a spot in a photo or video is placed by measurement, never by eye.** Find the object's position and size in the real frames with a detector (circle finder, edge or colour match) at several points through the clip, and drive the overlay from that measured path. | The knob landed beside the slow cooker's dial instead of on it. |
+| **An overlay that has to stay on moving media lives inside the same element as the media**, positioned in that element's own percentages. Never chase a moving picture with script while the page scrolls: the browser moves the page a frame before the script runs, so the overlay trails behind. | The knob drifted off the dial as the section scrolled away. |
+| **Text never re-wraps while its container animates.** A column that widens, narrows or slides keeps its words at a fixed width set for the narrowest it ever gets, or the words fade between states; they are never reflowed live. | The from-scratch words jumped between lines as the panel widened. |
+| **No in-between state may look unfinished.** Every transition is checked at its middle, not only its ends: when content leaves an area, the area goes to the page's own ground (or the next content arrives), never to a bare panel. | The from-scratch side became an empty grey strip mid-scroll. |
+| **Text over imagery is checked at the brightest frame under it and on the narrowest screen.** If a later panel slides over a column of text, the text column is narrowed so it is never covered. | Headline text slid under the widening panel; a line sat on the bright steel of the pot. |
+
+**And checked by a script, every time:** for every overlay meant to sit on
+something in a picture, measure the gap between the two at five or more
+scroll positions on a laptop and a phone size; more than 4px off fails the
+page. A screenshot that "looks right" is not the check.
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews

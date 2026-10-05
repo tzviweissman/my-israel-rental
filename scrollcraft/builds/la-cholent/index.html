@@ -47,14 +47,16 @@
   #split { --x: 50; --dim: 0; }
   #split [data-sc-stage] { overflow: hidden; background: var(--sc-canvas); }
   .side { position: absolute; inset: 0; }
-  .side--scratch { background: var(--cold); color: var(--cold-ink); clip-path: inset(0 calc(100% - var(--x) * 1%) 0 0); z-index: 2; }
+  .side--scratch { background: color-mix(in oklab, var(--cold), var(--sc-canvas) calc(var(--dim) * 100%)); color: var(--cold-ink); clip-path: inset(0 calc(100% - var(--x) * 1%) 0 0); z-index: 2; }
   .side--theirs { clip-path: inset(0 0 0 calc(var(--x) * 1%)); z-index: 1; }
 
   /* scratch: the photo in the lower half of its column, the list over it */
   .scratch-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 30% 60%;
     opacity: calc(0.92 - var(--dim) * 0.92); filter: saturate(0.85); }
-  .scratch-wash { position: absolute; inset: 0; background: linear-gradient(180deg, var(--cold) 0%, var(--cold) 34%, color-mix(in oklab, var(--cold) 0%, transparent) 72%); }
-  .scratch-copy { position: absolute; left: var(--sc-gutter); top: clamp(5.5rem, 14vh, 9rem); width: min(34rem, calc(var(--x) * 1vw - var(--sc-gutter) - 4rem)); opacity: calc(1 - var(--dim)); }
+  .scratch-wash { position: absolute; inset: 0; opacity: calc(1 - var(--dim)); background: linear-gradient(180deg, var(--cold) 0%, var(--cold) 34%, color-mix(in oklab, var(--cold) 0%, transparent) 72%); }
+  .scratch-copy { position: absolute; left: var(--sc-gutter); top: clamp(5.5rem, 14vh, 9rem); /* A fixed width, sized for the narrowest the side ever is (50%): as the
+     side widens the words hold still instead of re-wrapping line by line. */
+    width: min(34rem, calc(50vw - var(--sc-gutter) - 5rem)); opacity: calc(1 - var(--dim)); }
   .scratch-copy h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.96; letter-spacing: 0; margin: 0; color: var(--cold-ink); }
   .scratch-copy .lede { margin: var(--sc-4) 0 0; color: var(--cold-soft); font-size: var(--sc-t-lg); max-width: 26ch; }
   .chores { list-style: none; margin: var(--sc-6) 0 0; padding: 0; display: grid; gap: 0.35rem; }
@@ -68,7 +70,12 @@
   .theirs-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 70%; filter: brightness(calc(0.78 - var(--dim) * 0.5)); opacity: calc(1 - var(--pot, 0)); }
   .theirs-shade { position: absolute; inset: 0; opacity: calc(1 - var(--gone, 0)); background: linear-gradient(90deg, transparent 0%, transparent calc(var(--x) * 1%), color-mix(in oklab, var(--sc-canvas) 55%, transparent) calc(var(--x) * 1% + 4%), color-mix(in oklab, var(--sc-canvas) 96%, transparent) 68%); }
   .pot-frame { position: absolute; left: 50%; top: 50%; width: max(100vw, 177.78vh); aspect-ratio: 16 / 9; translate: -50% -50%; opacity: var(--pot, 0); }
+  #pot:not(.is-ready), #scratch-clip:not(.is-ready) { visibility: hidden; }
   .pot-frame img, .pot-frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(1.18) contrast(1.04); }
+  /* The landed knob lives inside the frame, placed in the frame's own
+     fractions, so it moves with the picture with no frame of lag. */
+  .knob.knob-pot { position: absolute; left: calc(var(--dx, 0.678) * 100%); top: calc(var(--dy, 0.698) * 100%);
+    width: calc(var(--dd, 0.07) * 100% / 0.477); height: auto; translate: -50% -50%; --face: 0; opacity: var(--landed, 0); }
   .heart { position: absolute; left: 69%; top: 2%; width: 22%; height: 34%; overflow: visible; }
   .heart path { fill: none; stroke: var(--sc-accent); stroke-width: 1.6; stroke-linecap: round; vector-effect: non-scaling-stroke;
     stroke-dasharray: var(--len, 1000); stroke-dashoffset: calc(var(--len, 1000) * (1 - var(--draw, 0))); opacity: 0.85; }
@@ -128,7 +135,7 @@
   /* ---------- belonging (flow) ----------------------------------------- */
   .belong { position: relative; padding-block: clamp(3rem, 6vw, 6rem) var(--sc-section); }
   .belong figure { margin: 0 0 clamp(2.5rem, 5vw, 4.5rem); }
-  .belong figure img { width: 100%; height: clamp(18rem, 48vw, 40rem); object-fit: cover; object-position: 50% 35%; border-radius: var(--sc-r-md); display: block; }
+  .belong figure .table-clip { width: 100%; height: clamp(18rem, 48vw, 40rem); object-fit: cover; object-position: 50% 35%; border-radius: var(--sc-r-md); display: block; }
   .belong h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.96; margin: 0; max-width: 14ch; }
   .occasions { list-style: none; margin: var(--sc-6) 0 0; padding: 0; display: flex; flex-wrap: wrap; align-items: baseline; row-gap: 0.1em;
     font-family: var(--sc-font-display); font-weight: 200; text-transform: uppercase; font-size: clamp(1.8rem, 1rem + 3.4vw, 4.4rem); line-height: 1.08; }
@@ -181,7 +188,9 @@
     .scratch-copy .lede { font-size: var(--sc-t-base); margin-top: var(--sc-2); }
     .chores { margin-top: var(--sc-3); gap: 0.2rem; grid-template-columns: 1fr 1fr; }
     .chores li { font-size: var(--sc-t-sm); }
-    .scratch-wash { background: linear-gradient(180deg, var(--cold) 0%, var(--cold) 22%, color-mix(in oklab, var(--cold) 70%, transparent) 34%, transparent 62%); }
+    .scratch-photo { height: 50%; object-position: 50% 62%; }
+    /* Only behind the words: the kitchen below them stays visible. */
+    .scratch-wash { background: linear-gradient(180deg, var(--cold) 0%, var(--cold) 17%, color-mix(in oklab, var(--cold) 60%, transparent) 24%, transparent 34%); }
     .theirs-shade { background: linear-gradient(180deg, transparent calc(var(--x) * 1%), color-mix(in oklab, var(--sc-canvas) 82%, transparent) calc(var(--x) * 1% + 6%), color-mix(in oklab, var(--sc-canvas) 96%, transparent) calc(var(--x) * 1% + 30%)); }
     .theirs-copy { top: auto; bottom: 1.6rem; left: var(--sc-gutter); right: var(--sc-gutter); width: auto; text-align: left; }
     .lockup .tag, .steps { margin-left: 0; }
@@ -245,6 +254,7 @@
         <div class="pot-frame" aria-hidden="true">
           <img src="assets/pot.webp" alt="">
           <video id="pot" muted playsinline preload="auto"></video>
+          <svg class="knob knob-pot" id="knob-pot" viewBox="-30 -30 260 260"></svg>
           <svg class="heart" viewBox="0 0 100 100" preserveAspectRatio="none">
             <path id="heart-path" d="M50 98 C 48 84, 52 74, 50 64 C 47 52, 30 50, 24 38 C 17 24, 30 10, 42 16 C 47 19, 49 24, 50 28 C 51 24, 53 19, 58 16 C 70 10, 83 24, 76 38 C 70 50, 53 52, 50 64"/>
           </svg>
@@ -276,8 +286,9 @@
       </div>
 
       <div class="side side--scratch" aria-label="Cholent from scratch">
-        <img class="scratch-photo" src="assets/scratch.webp" width="880" height="1168"
+        <img class="scratch-photo" src="assets/scratch.webp" width="1248" height="1664"
              alt="A cluttered kitchen counter late at night: beans soaking, barley spilling from a bag, potato peelings, onion skins and a knife.">
+        <video class="scratch-photo" id="scratch-clip" muted playsinline preload="auto" aria-hidden="true"></video>
         <div class="scratch-wash" aria-hidden="true"></div>
         <div class="scratch-copy">
           <h2>Cholent<br>from scratch</h2>
@@ -310,7 +321,7 @@
   <section class="belong">
     <div class="sc-wrap">
       <figure data-sc-reveal="up" data-sc-reveal-at="0.05 0.45">
-        <img src="assets/table.webp" width="1344" height="752" alt="A long Shabbos table at night, candles lit, challah under its cover, places set and waiting.">
+        <video class="table-clip" muted loop playsinline preload="none" poster="assets/table.webp" aria-label="A long Shabbos table at night, candles lit, challah under its cover, places set and waiting."></video>
       </figure>
       <div data-sc-in data-sc-stagger="60" class="sc-stack">
         <h2>Any size. Any occasion.</h2>
@@ -399,7 +410,9 @@
       '<g class="rot"><circle class="grip" cx="100" cy="100" r="46"/><rect class="grip" x="91" y="44" width="18" height="112" rx="9"/>' +
       '<line class="pointer" x1="100" y1="96" x2="100" y2="54"/></g>');
   }
-  buildKnob(document.getElementById('knob'), [['OFF', -100], ['LOW', -35], ['HIGH', 35], ['WARM', 100]]);
+  var POT_MARKS = [['OFF', -100], ['LOW', -35], ['HIGH', 35], ['WARM', 100]];
+  buildKnob(document.getElementById('knob'), POT_MARKS);
+  buildKnob(document.getElementById('knob-pot'), POT_MARKS);
 
   /* ---- the split, driven off the act's own --sc-p ---------------------- */
   var act = document.getElementById('split');
@@ -410,19 +423,49 @@
   var len = heart.getTotalLength();
   heart.style.setProperty('--len', len);
 
-  var video = document.getElementById('pot'), vReady = false, vTarget = 0, seeking = false;
-  if (!reduce) {
-    video.src = phone.matches ? 'assets/pot-m.mp4' : 'assets/pot.mp4';
-    video.addEventListener('loadeddata', function () { vReady = true; video.style.opacity = 1; });
-    video.addEventListener('seeked', function () { seeking = false; });
+  // A clip scrubbed by the scroll: the playhead walks toward its target one
+  // seek at a time. Under reduced motion the still stays and nothing loads.
+  function scrubber(el, desk, mob) {
+    var c = { el: el, ready: false, target: 0, seeking: false };
+    if (!reduce) {
+      el.src = phone.matches ? mob : desk;
+      el.addEventListener('loadeddata', function () { c.ready = true; el.classList.add('is-ready'); });
+      el.addEventListener('seeked', function () { c.seeking = false; });
+    }
+    c.step = function () {
+      if (c.ready && !c.seeking && Math.abs(el.currentTime - c.target) > 0.02) {
+        c.seeking = true;
+        el.currentTime = el.currentTime + (c.target - el.currentTime) * 0.25;
+      }
+    };
+    return c;
   }
-  video.style.opacity = 0;
+  var pot = scrubber(document.getElementById('pot'), 'assets/pot.mp4', 'assets/pot-m.mp4');
+  var kitchen = scrubber(document.getElementById('scratch-clip'), 'assets/scratch.mp4', 'assets/scratch-m.mp4');
+  var video = pot.el;
+  // The table loop plays only for people who have not asked for less motion.
+  var table = document.querySelector('.table-clip');
+  if (!reduce) { table.src = 'assets/table.mp4'; table.preload = 'auto'; table.autoplay = true; table.play().catch(function () {}); }
+  // The stand-in pictures are each clip's own first frame, so nothing jumps
+  // when a clip starts. With motion off no clip plays, so the sharper
+  // upscaled stills are shown instead.
+  if (reduce) {
+    document.querySelector('img.scratch-photo').src = 'assets/scratch-hd.webp';
+    table.poster = 'assets/table-hd.webp';
+  }
 
   var last = -1, knobScale = 1;
   var knobWrap = document.querySelector('.knob-wrap'), potFrame = document.querySelector('.pot-frame'), divider = document.querySelector('.divider');
-  // Where the slow cooker's dial sits in the 16:9 frame, as fractions, at
-  // the clip's first and last frame (the camera drifts, so the knob follows).
-  var DIAL_A = [0.677, 0.694, 0.070], DIAL_B = [0.656, 0.744, 0.074];
+  // Where the slow cooker's dial sits in the 16:9 frame (x, y, diameter, as
+  // fractions), measured with a circle finder on five frames of the clip; the
+  // camera drifts, so the knob follows the measured path.
+  var DIAL = [[0, .6784, .6983, .0700], [.25, .6766, .7050, .0732], [.5, .6734, .7172, .0758], [.75, .6647, .7328, .0760], [1, .6553, .7483, .0789]];
+  function dialAt(ct) {
+    var i = 0; while (i < DIAL.length - 2 && ct > DIAL[i + 1][0]) i++;
+    var a = DIAL[i], z = DIAL[i + 1], t = Math.max(0, Math.min(1, (ct - a[0]) / (z[0] - a[0])));
+    return [1, 2, 3].map(function (k) { return a[k] + (z[k] - a[k]) * t; });
+  }
+  var knobPot = document.getElementById('knob-pot');
   function frame() {
     var p = parseFloat(act.style.getPropertyValue('--sc-p')) || 0;
     if (true) {
@@ -452,24 +495,30 @@
       // Measured from the divider every frame, so the knob stays on the dial
       // while the whole stage slides in and out, not only while it is pinned.
       var hy = phone.matches ? home.top : home.top + home.height / 2;
-      var ct = vReady && video.duration ? video.currentTime / video.duration : 0;
-      var D = [0, 1, 2].map(function (k) { return DIAL_A[k] + (DIAL_B[k] - DIAL_A[k]) * ct; });
+      var ct = pot.ready && video.duration ? video.currentTime / video.duration : 0;
+      var D = dialAt(ct);
+      potFrame.style.setProperty('--dx', D[0].toFixed(4));
+      potFrame.style.setProperty('--dy', D[1].toFixed(4));
+      potFrame.style.setProperty('--dd', D[2].toFixed(4));
       var tx = fr.left + fr.width * D[0], ty = fr.top + fr.height * D[1];
       var tScale = (fr.width * D[2]) / (kw.width / knobScale || 1) / 0.48;
       knobScale = 1 + (tScale - 1) * land;
       knobWrap.style.transform = 'translate(' + ((tx - hx) * land).toFixed(1) + 'px,' + ((ty - hy) * land).toFixed(1) + 'px) scale(' + knobScale.toFixed(3) + ')';
       knob.style.setProperty('--face', (1 - land).toFixed(3));
+      // Landed: hand over to the knob inside the frame, which scrolls with it.
+      var landed = land > 0.995 ? 1 : 0;
+      knobWrap.style.opacity = 1 - landed;
+      potFrame.style.setProperty('--landed', landed);
+      knobPot.style.setProperty('--a', ang + 'deg');
+      knobPot.classList.toggle('is-on', on);
       chores.forEach(function (li, i) { li.classList.toggle('on', p > 0.11 + i * 0.033); });
       var h = span(p, 0.64, 0.92);
       hours.textContent = Math.round(20 * h);
       heart.style.setProperty('--draw', reduce ? (h > 0 ? 1 : 0) : ease(span(p, 0.70, 0.96)).toFixed(3));
-      if (vReady) vTarget = span(p, 0.54, 1) * (video.duration || 0);
+      if (pot.ready) pot.target = span(p, 0.54, 1) * (video.duration || 0);
+      if (kitchen.ready) kitchen.target = span(p, 0, 0.42) * (kitchen.el.duration || 0);
     }
-    // The playhead walks toward the scroll target, one seek at a time.
-    if (vReady && !seeking && Math.abs(video.currentTime - vTarget) > 0.02) {
-      seeking = true;
-      video.currentTime = video.currentTime + (vTarget - video.currentTime) * 0.25;
-    }
+    pot.step(); kitchen.step();
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
