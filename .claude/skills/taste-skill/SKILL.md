@@ -264,6 +264,10 @@ Landing pages and portfolios are **visual products**. Text-only pages with fake-
 
 **Hero needs a real visual.** Text + gradient blob is not a hero - it's a placeholder.
 
+**ONE SHOWSTOPPER PER PAGE (mandatory).** One set piece carries the motion budget: a scrubbed video, a pinned sequence, a hero film. The sections either side of it stay quiet. Two set pieces back to back cancel each other out, and motion everywhere reads as noise; no motion at all reads flat, so a page with any motion gets exactly one.
+
+**HERO VIDEO MUST EARN ITS PLACE.** Two tests before keeping an autoplay background video. Mute it and ask what information disappears: nothing means it is decoration. Delete it and ask whether the page got clearer or faster: yes means it stays out. Footage that could belong to any company (a city at night, hands on a laptop, slow motion) fails both. Show the work happening, or the product where it is used.
+
 ### 4.9 Content Density
 
 Landing pages live on the **first impression**, not the full read. Cut ruthlessly.
@@ -403,6 +407,8 @@ Run this matrix before outputting code. This is the last filter.
 - [ ] **EYEBROW COUNT (mechanical)**: count instances of `uppercase tracking` micro-labels above section headlines across all components. Count ≤ ceil(sectionCount / 3)? Hero counts as 1.
 - [ ] **Split-Header Ban**: no "left big headline + right small explainer paragraph" pattern as a section header (vertical stack instead)?
 - [ ] **Zigzag Alternation Cap**: no 3+ consecutive sections with the same image+text-split layout?
+- [ ] **One showstopper**: exactly one motion set piece, with quiet sections either side?
+- [ ] **Hero video** (if any) passes the mute test and the delete test?
 - [ ] **No Duplicate CTA Intent**: no two CTAs with the same intent ("Get in touch" + "Let's talk" both on page = Fail)?
 - [ ] **Logo wall = logo only**: no industry / category labels printed below logos?
 - [ ] **Bento Background Diversity**: at least 2-3 bento cells have real visual variation (image, gradient, pattern), not all white-on-white text cards?
