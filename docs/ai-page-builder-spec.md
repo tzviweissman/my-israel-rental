@@ -778,6 +778,84 @@ Sweetgreen.
 
 ---
 
+## Page builder v3: art direction (started 5 Oct 2026)
+
+The rules are `docs/page-builder-design-rules.md`, committed as Tzvi gave them.
+Built on the branch `feature/page-builder-v3`, not merged, behind
+`PAGE_BUILDER_V3_ENABLED` (off by default) plus a per-business switch.
+
+**Tzvi's rulings for v3 (5 Oct 2026), which override the rules file where
+they differ:**
+- **Chat-only stays.** No phone number or email on a v3 page or in its data.
+  The offer block's "copyable phone and email" becomes the chat button.
+- **The "List your business, free" band and "New on MyIsraelRental" stay**
+  (his 25 Sep ruling). "New on" is said once per page, not repeated.
+- **No AI calls yet.** The design brief is built by rules from the business's
+  own record; the AI-written brief and copy and the AI design scores wait.
+
+**How pages are built today** (what v3 starts from):
+- There is no AI builder and no builder prompt. Nothing calls a model for
+  pages; `backend/utils/llm.py` is used for translation and imports only.
+- A page is a JSON composition document from a closed vocabulary:
+  `backend/utils/page_composition.py:260` (`BLOCKS`), `:313`
+  (`PageComposition`), `:81` (the six dials), `:373` (the owner's brief).
+  Recipes that fill it from a business's data: `backend/utils/page_recipes.py:51`;
+  the rules check: `backend/utils/page_rules.py:249`.
+- Stored on the business record as `page` and `page_brief`
+  (`backend/routes/marketplace/businesses.py:208`, `:212`) and sent with the
+  public page (`:930`).
+- Rendered by `frontend/src/pages/BusinessPage.jsx` through one block
+  renderer, `frontend/src/components/pagebuilder/BlockList.jsx:43` (the
+  registry) and `:57`.
+- Images are uploaded to Cloudinary (`backend/utils/cloud_storage.py:70`);
+  a page refers to them by reference (`cover`, `logo`, `listing:<id>`),
+  never by URL.
+
+So v3 does not fit "a model returns two JSON objects": the smallest change
+that makes it possible is a second, richer document (the design brief) stored
+beside the composition, built today by rules and later by a model under the
+same validation.
+
+**Phase 1, built 5 Oct 2026:**
+- The brief, validated: `backend/utils/design_brief.py` (`DesignBrief` :263,
+  contrast checks :281, `brief_problems` :322 for invented prices and
+  paraphrased taglines, `build_brief` :387). Fonts only from
+  `FONT_ALLOWLIST` :32. The six presets :41, each with its palette recipe,
+  pairing, texture and hero side. The accent from the logo: `extract_accent`
+  :150 (dominant non-neutral hue, taken at its mid-tone), the rest of the
+  palette around it: `derive_palette` :181, which guarantees 4.5:1 text,
+  4.5:1 muted text, 3:1 button on ground and 4.5:1 button text for every
+  preset and any accent (tested on 42 combinations).
+- Stored on the business as `design_brief`, with the last five kept in
+  `design_brief_history`. Switched on per business by an admin:
+  `POST /api/marketplace/businesses/{id}/page-v3 {"on": true}`
+  (`businesses.py:980`), which builds, validates and stores the brief or
+  refuses with the reason. Sent with the page only when both switches are on
+  (`page_v3_on`, `design_brief.py:436`; `businesses.py:950`); the owner
+  checklist inside it goes to the owner only.
+- The tier 3 hero: `frontend/src/components/pagebuilder/v3/V3Hero.jsx` with
+  `frontend/src/styles/page-v3.css`. The wordmark at `clamp(56px, 10.5vw,
+  160px)`, the accent on its dots, their own sentence as the tagline, the
+  chat button with the proof beside it, and a fact strip of at most three
+  real facts (price, certificate, area). The brief becomes custom properties
+  scoped to the section (`themeVars`, :59); only the brief's allowlisted
+  faces are loaded (`fontsHref`, :35), each falling back to the Hebrew face.
+  Replaces the standard header card when switched on (`BusinessPage.jsx:241`,
+  `:314`); kosher and "New on" are not repeated by the proof lines below.
+- Checked by `backend/tests/test_design_brief.py` (9) and
+  `scripts/check-page-v3.mjs` (wordmark size, one filled button above the
+  fold, no sideways scroll at 360 and 390, button contrast, RTL), with
+  before/after screenshots in `screenshots/page-v3/`.
+
+**Not in phase 1, and next:** photos as the hero with the flyer check (phase
+2; needs OCR or a vision model, which is a paid call, so it needs a ruling);
+the brand film upload (tier 2); the section components (BigList, Steps,
+palate cleanser, offer block, sticky bar); the platform chrome and the dedupe
+rule in the renderer; the quality gate (`checkPage`); the owner checklist in
+the dashboard. Phase 1 also does not yet show, on a v3 page, the owner's full
+description, payment links or the connect button that the standard header
+carried.
+
 ## §8a — Answers. Research and codebase passes, 31 Aug 2026.
 
 Full briefs: `docs/page-builder-research.md` and the codebase report in the
