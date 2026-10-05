@@ -6,8 +6,9 @@
  * sold the page.
  *
  * Honest by construction:
- *   - only products the owner measured (`width_cm`) are drawn; a scale
- *     nobody measured would be an invented number;
+ *   - only products the owner measured both ways (`width_cm` and
+ *     `length_cm`) are drawn; a scale nobody measured would be an
+ *     invented number;
  *   - one pixels-per-centimetre ratio for all of them, so the sizes are
  *     comparable, and the ruler is drawn at that same ratio;
  *   - nothing with fewer than three measured products (a ladder of one is
@@ -45,8 +46,10 @@ export default function SizeLadderBlock({ block, ctx }) {
   const p = block.props || {};
   const listing = (business.listings || []).find((g) => g && g.id === p.listing);
   const items = useMemo(() => ((listing && listing.products) || [])
-    .filter((x) => x && Number(x.width_cm) > 0)
-    .map((x) => ({ ...x, w: Number(x.width_cm), l: Number(x.length_cm) || Number(x.width_cm) }))
+    // Both sides measured, or the product is left out: drawing a width-only
+    // product as a square invented its length (site audit 3 Oct).
+    .filter((x) => x && Number(x.width_cm) > 0 && Number(x.length_cm) > 0)
+    .map((x) => ({ ...x, w: Number(x.width_cm), l: Number(x.length_cm) }))
     .sort((a, b) => a.w * a.l - b.w * b.l), [listing]);
 
   const reduced = useReducedMotion();
@@ -161,7 +164,7 @@ export default function SizeLadderBlock({ block, ctx }) {
             style={{ background: 'var(--pg-accent)', color: 'var(--pg-accent-on)' }} aria-live="polite" data-testid="pg-sizes-current">
             <span className="min-w-0">
               <span className="block font-semibold text-sm truncate" dir="auto">{nameOf(cur)}</span>
-              <span className="block text-xs opacity-80">{dims(cur)}</span>
+              <span className="block text-xs">{dims(cur)}</span>
             </span>
             <span className="font-bold text-sm">{money(cur.price, cur.currency)}</span>
           </div>
@@ -176,7 +179,8 @@ export default function SizeLadderBlock({ block, ctx }) {
                   data-testid="pg-sizes-item">
                   <span className="min-w-0">
                     <span className="block font-semibold text-sm truncate" dir="auto">{nameOf(x)}</span>
-                    <span className="block text-xs opacity-80">{dims(x)}</span>
+                    {/* Full strength on the accent fill; faded there it read ~3.79:1 (UI audit 25 Sep). */}
+                    <span className={`block text-xs ${i === shown ? '' : 'opacity-80'}`}>{dims(x)}</span>
                   </span>
                   <span className="font-bold text-sm" style={{ fontSize: 'calc(0.875rem * var(--pg-price-scale))' }}>{money(x.price, x.currency)}</span>
                 </li>

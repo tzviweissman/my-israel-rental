@@ -41,7 +41,7 @@ from utils.locations_catalog import HEBREW_AREA_NAMES
 from utils.page_clarity import FOOD_CATEGORIES, _has_photo, _listing_title, upgrade_view
 from utils.page_composition import BLOCKS, DIALS
 from utils.page_rules import (
-    HERO_LEDE_MAX_WORDS, HERO_TITLE_MAX_WORDS, SIZES_MIN, _any_price, _category, _photo_count, _words, playbook_for,
+    HERO_LEDE_MAX_WORDS, HERO_TITLE_MAX_WORDS, SIZES_MIN, _any_price, measured_both, _category, _photo_count, _words, playbook_for,
 )
 
 # ---------------------------------------------------------------- the data
@@ -139,7 +139,7 @@ def recipe_name(b: dict) -> str:
 def _measured_store(b: dict) -> Optional[str]:
     for g in b.get("listings") or []:
         g = g or {}
-        if g.get("gig_type") == "store" and sum(1 for p in g.get("products") or [] if (p or {}).get("width_cm")) >= SIZES_MIN:
+        if g.get("gig_type") == "store" and sum(1 for p in g.get("products") or [] if measured_both(p)) >= SIZES_MIN:
             return g.get("id")
     return None
 
@@ -274,10 +274,12 @@ def _lede(b: dict, lang: str, title: str = "") -> str:
     sources = ((b.get("description_he") if lang == "he" else None) or b.get("description") or "",
                (b.get("page_brief") or {}).get("note") or "")
     for text in sources:
-        # "!" ends a sentence too; a live description written in them
-        # read as one long sentence and left the lede empty.
+        # "!" ends a sentence too, and is tidied to a full stop: our copy
+        # has none, and a description written in them used to leave the
+        # lede empty (the 25 Sep fix split on "!" but still threw every
+        # such sentence away; site audit 27 Sep).
         for s in re.split(r"(?<=[.?!])\s+", text.strip()):
-            s = s.strip()
+            s = re.sub(r"!+$", ".", s.strip())
             if not s or ("!" in s) or "—" in s or "–" in s or not (3 <= len(s.split()) <= HERO_LEDE_MAX_WORDS):
                 continue
             if bool(heb.search(s)) != (lang == "he") or len(s) > 200:

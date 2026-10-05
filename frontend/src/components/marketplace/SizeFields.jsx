@@ -55,7 +55,7 @@ export default function SizeFields({ option, onChange, testid }) {
         {field('length_cm', t('sizeFields.length', 'Length'))}
       </div>
       <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
-        {t('sizeFields.hint', 'Measure it and your page can show your products to scale.')}
+        {t('sizeFields.hint', 'Measure the width and the length, and your page can show your products to scale.')}
       </p>
     </fieldset>
   );
