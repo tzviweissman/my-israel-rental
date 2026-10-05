@@ -943,6 +943,16 @@ async def public_business(
     if out["page_upgrade"]:
         from utils.page_clarity import upgrade_view
         out["upgrade_view"] = upgrade_view({**out, "page_brief": biz.get("page_brief") or {}})
+    # Page builder v3 (docs/page-builder-design-rules.md): only with the site
+    # switch on AND this business switched on. The owner checklist inside the
+    # brief is the owner's alone.
+    from utils.design_brief import page_v3_on
+    if page_v3_on(biz):
+        brief = dict(biz["design_brief"])
+        if not owner_preview:
+            brief.pop("missing_content", None)
+        out["page_v3"] = True
+        out["design_brief"] = brief
     return out
 
 
@@ -960,6 +970,55 @@ async def provider_default_business(user_id: str):
     if not biz:
         raise HTTPException(status_code=404, detail="No business for this provider")
     return {"id": biz["_id"], "slug": biz.get("slug"), "name": biz.get("name")}
+
+
+class PageV3In(BaseModel):
+    on: bool
+
+
+@router.post("/businesses/{business_id}/page-v3")
+async def set_page_v3(business_id: str, payload: PageV3In, user=Depends(verify_token)):
+    """Admin-only: switch page builder v3 on or off for ONE business.
+
+    Turning it on builds the design brief from the business's own record and
+    logo (utils/design_brief, rules only, no AI), validates it, and stores it
+    on the record with the previous one kept. A brief that fails validation
+    is refused with the reason, never patched. Nothing shows to visitors
+    unless PAGE_BUILDER_V3_ENABLED is also on.
+    """
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    biz = await db.businesses.find_one({"_id": business_id})
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    now = datetime.now(UTC).isoformat()
+    if not payload.on:
+        await db.businesses.update_one({"_id": business_id}, {"$set": {"page_v3": False, "updated_at": now}})
+        return {"id": business_id, "page_v3": False}
+
+    from utils.design_brief import build_brief
+    listings = [g async for g in db.marketplace_gigs.find({"business_id": business_id, "status": "published"})]
+    for g in listings:
+        g["id"] = g.pop("_id")
+    logo = None
+    if biz.get("logo_url"):
+        try:
+            import httpx
+            async with httpx.AsyncClient(timeout=15) as http:
+                r = await http.get(biz["logo_url"])
+                logo = r.content if r.status_code == 200 else None
+        except httpx.HTTPError:
+            logo = None   # no logo colour: the preset's accent is used, and the brief says so
+    try:
+        brief = build_brief({**biz, "listings": listings}, logo).model_dump()
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=f"Design brief refused: {e}") from e
+    history = ([biz["design_brief"]] if biz.get("design_brief") else []) + list(biz.get("design_brief_history") or [])
+    await db.businesses.update_one({"_id": business_id}, {"$set": {
+        "page_v3": True, "design_brief": brief, "design_brief_at": now,
+        "design_brief_history": history[:5], "updated_at": now,
+    }})
+    return {"id": business_id, "page_v3": True, "design_brief": brief}
 
 
 class VerifyIn(BaseModel):
