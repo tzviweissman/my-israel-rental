@@ -893,9 +893,41 @@ program every picture is "unknown", and an unknown picture is never a hero.
   slim nav, one-line footer, band kept, at most three chat buttons), shown to
   fail on the standard page.
 
-**Next:** the brand film upload (tier 2);
-the section components (BigList, Steps,
-palate cleanser, offer block, sticky bar); the quality gate (`checkPage`); the owner checklist in
+**Phase 4, built 5 Oct 2026: the sections** (`v3/V3Sections.jsx`, styles in
+`page-v3.css`). Each takes its data from the brief and the record and draws
+nothing without it. In the food recipe's order (rules, part 7):
+- **Occasions, as big type** (quiet). Their own list, word for word: a
+  sentence of theirs with three or more comma-separated items, each trimmed of
+  lead-in words only ("Order for your", "and"), checked against its source
+  like a tagline (`design_brief._occasions`). For L.A. Cholent: family
+  visiting, shabbos meals, Thursday nights, kiddushim, shalom zachors, simchos
+  of any size, which is the rules' own worked example. In Hebrew only from a
+  Hebrew description.
+- **How it works, numbered** (set piece): only from steps they wrote. Nothing
+  extracts steps from prose yet, so it draws nothing today and the checklist
+  asks for "how ordering works, step by step".
+- **From the business**: the flyers, whole (phase 2).
+- **Palate cleanser**: a second checked photo, full width, no text.
+- **The offer** (set piece): the listing's name, the lowest price in display
+  numerals, a hairline list of what each size costs in their words, the
+  certificate, where they are and serve, hours, notice and delivery when
+  given, the chat button, and the page's own address with a Copy button
+  ("Copied" for 1.5s; without the clipboard the text is selected). Chat-only:
+  never a phone number or email. Links to each listing.
+- **The phone bar**: appears once the hero button has scrolled away, hides
+  over the offer, carries the price, clears the safe area, and moves the
+  site's WhatsApp tab above it. It replaces the standard page's phone bar and
+  bottom button on a v3 page.
+- One wording for the action everywhere (`primaryLabel`). Under a v3 hero the
+  composed body keeps only a catalogue's cards and signature sections; the
+  offer says the facts, so the facts band goes, and an empty body draws
+  nothing rather than falling back to the default (which brought the facts
+  band back: caught by the repeat check).
+- Checked: `scripts/check-page-v3.mjs` (all sizes, both languages, repeats),
+  `scripts/check-page-v3-sticky.mjs` (the bar's show and hide, WhatsApp
+  clearance, Copy to Copied and back), `scripts/test-page-v3-ledger.mjs` (7).
+
+**Next:** the brand film upload (tier 2); the quality gate (`checkPage`); the owner checklist in
 the dashboard; service cards below the hero still crop a flyer that is a
 listing's cover. Phase 1 also does not yet show, on a v3 page, the owner's full
 description, payment links or the connect button that the standard header
