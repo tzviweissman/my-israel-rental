@@ -1,3 +1,5 @@
+> Restored to main on 4 Oct 2026 from the unmerged `business-accent` branch, because docs on main cite it (site audit 28 Sep). Work it describes on that branch may not be on main; check the code before relying on it.
+
 # Goods marketplace: buyer and seller psychology
 
 Status: spec, not built. Written 2026-08-30.

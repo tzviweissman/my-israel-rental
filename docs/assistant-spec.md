@@ -1,3 +1,5 @@
+> Restored to main on 4 Oct 2026 from the unmerged `business-accent` branch, because docs on main cite it (site audit 28 Sep). Work it describes on that branch may not be on main; check the code before relying on it.
+
 # The assistant — an AI concierge inside our own chat
 
 Written 27 Aug 2026. Origin: `Booking Agent On WhatsApp` (Obsidian), which
