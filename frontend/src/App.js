@@ -432,9 +432,11 @@ function App() {
                 connection, and a chunk fetch before the redirect is dead
                 time on the one screen nobody should have to look at. */}
             <Route path="/p/:slug" element={<ShortLinkRedirect />} />
-            <Route path="/chat/:propertyId" element={user ? <Chat /> : <Navigate to="/auth/login" />} />
+            {/* ToAuth keeps the address, so a reply email clicked while signed
+                out comes back to the conversation (dead ends, 4 Oct). */}
+            <Route path="/chat/:propertyId" element={user ? <Chat /> : <ToAuth />} />
             <Route path="/sign/:signToken" element={<SignContract />} />
-            <Route path="/payment/success" element={user ? <PaymentSuccess /> : <Navigate to="/auth/login" />} />
+            <Route path="/payment/success" element={user ? <PaymentSuccess /> : <ToAuth />} />
             <Route path="/payment/cancel" element={<PaymentCancel />} />
             <Route path="/availability-extended" element={<AvailabilityExtended />} />
             <Route path="/stays" element={<Stays />} />

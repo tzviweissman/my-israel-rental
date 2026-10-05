@@ -1,8 +1,10 @@
 /**
- * On/off switches for the two emails that carry a "stop these emails"
- * link: the Monday summary (routes/weekly_insights.py) and the requests
- * board matches (routes/marketplace/requests.py). Without these, that link
- * was a one-way door. Backed by /marketplace/notification-preferences/emails.
+ * On/off switches for every email that promises a way to stop it: the
+ * Monday summary, requests board matches, job matches, availability
+ * reminders and pricing tips. Without these, the "stop these emails" link
+ * or the "pause them in settings" line was a one-way door or a promise
+ * with nowhere to keep it (dead ends, 4 Oct). Backed by
+ * /marketplace/notification-preferences/emails.
  */
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
@@ -13,6 +15,9 @@ import { Mail } from 'lucide-react';
 const SWITCHES = [
   { key: 'insights_emails', title: ['emailSwitches.insightsTitle', 'Monday summary'], hint: ['emailSwitches.insightsHint', 'How your listings did last week: visitors, messages, saves and reviews. Nothing is sent in a quiet week.'] },
   { key: 'requests_emails', title: ['emailSwitches.requestsTitle', 'Matching requests'], hint: ['emailSwitches.requestsHint', 'An email when someone posts on the requests board looking for what you offer.'] },
+  { key: 'jobs_emails', title: ['emailSwitches.jobsTitle', 'Matching jobs'], hint: ['emailSwitches.jobsHint', 'Emails about new jobs that match what you offer, one at a time or as a daily round-up.'] },
+  { key: 'availability_emails', title: ['emailSwitches.availabilityTitle', 'Availability reminders'], hint: ['emailSwitches.availabilityHint', 'A reminder when the dates on one of your rentals are about to run out.'] },
+  { key: 'pricing_emails', title: ['emailSwitches.pricingTitle', 'Pricing tips'], hint: ['emailSwitches.pricingHint', 'A weekly note when a price on one of your rentals looks out of step with similar places.'] },
 ];
 
 export default function EmailSwitches({ API, token }) {

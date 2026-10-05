@@ -130,7 +130,7 @@ export default function NetworkTab({ API, token, listings = [] }) {
     return (
       <div className="bg-white rounded-2xl border p-8 text-center" style={{ borderColor: 'var(--brand-border)' }} data-testid="network-no-business" data-tour="network-no-business">
         <p style={{ color: 'var(--ink)' }}>{t('network.needBusiness', 'Add your business, free, to connect with other businesses.')}</p>
-        <button type="button" className="btn-primary mt-4" onClick={() => navigate('/dashboard?tab=my-businesses')} data-tour="network-add-business">
+        <button type="button" className="btn-primary mt-4" onClick={() => navigate('/businesses/add')} data-tour="network-add-business">
           {t('network.addBusiness', 'Add your business')}
         </button>
       </div>

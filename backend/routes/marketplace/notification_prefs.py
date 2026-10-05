@@ -114,20 +114,36 @@ async def _apply_snooze(user_id: str, category: str) -> dict[str, Any]:
     return {"category": category, "until": until_iso}
 
 
-# On/off switches for the two emails that have a "stop these emails" link,
-# so turning one off is not a one-way door. Stored as the same `*_off`
-# flags those links set (requests.py, routes/weekly_insights.py).
-EMAIL_SWITCHES = {"requests_emails": "requests_emails_off", "insights_emails": "insights_emails_off"}
+# On/off switches for the emails that promise a way to stop them, so turning
+# one off is never a one-way door. Each is stored as the SAME flag its email
+# already reads: `prefs` is job_notification_preferences (requests.py,
+# routes/weekly_insights.py, jobs.py), `users` is the account row
+# (availability_reminders.py, smart_pricing/insights.py). The last three
+# were promised by their emails and had no switch anywhere (dead ends, 4 Oct).
+EMAIL_SWITCHES = {
+    "requests_emails": ("prefs", "requests_emails_off"),
+    "insights_emails": ("prefs", "insights_emails_off"),
+    "jobs_emails": ("prefs", "jobs_emails_off"),
+    "availability_emails": ("users", "availability_reminders_optout"),
+    "pricing_emails": ("users", "pricing_insights_optout"),
+}
 
 
 class EmailSwitchesIn(BaseModel):
     requests_emails: bool | None = None
     insights_emails: bool | None = None
+    jobs_emails: bool | None = None
+    availability_emails: bool | None = None
+    pricing_emails: bool | None = None
 
 
 async def _switches(user_id: str) -> dict[str, bool]:
-    doc = await db.job_notification_preferences.find_one({"user_id": user_id}) or {}
-    return {k: not doc.get(flag) for k, flag in EMAIL_SWITCHES.items()}
+    docs = {
+        "prefs": await db.job_notification_preferences.find_one({"user_id": user_id}) or {},
+        "users": await db.users.find_one({"id": user_id}, {"_id": 0, "availability_reminders_optout": 1,
+                                                          "pricing_insights_optout": 1}) or {},
+    }
+    return {k: not docs[store].get(flag) for k, (store, flag) in EMAIL_SWITCHES.items()}
 
 
 @router.get("/emails")
@@ -137,13 +153,18 @@ async def get_email_switches(user=Depends(verify_token)):
 
 @router.patch("/emails")
 async def patch_email_switches(payload: EmailSwitchesIn, user=Depends(verify_token)):
-    changes = {EMAIL_SWITCHES[k]: not v for k, v in payload.model_dump().items() if v is not None}
-    if changes:
+    now = datetime.now(UTC).isoformat()
+    by_store: dict[str, dict] = {"prefs": {}, "users": {}}
+    for k, v in payload.model_dump().items():
+        if v is not None:
+            store, flag = EMAIL_SWITCHES[k]
+            by_store[store][flag] = not v
+    if by_store["prefs"]:
         await db.job_notification_preferences.update_one(
-            {"user_id": user["user_id"]},
-            {"$set": {**changes, "updated_at": datetime.now(UTC).isoformat()}},
-            upsert=True,
+            {"user_id": user["user_id"]}, {"$set": {**by_store["prefs"], "updated_at": now}}, upsert=True,
         )
+    if by_store["users"]:
+        await db.users.update_one({"id": user["user_id"]}, {"$set": by_store["users"]})
     return await _switches(user["user_id"])
 
 

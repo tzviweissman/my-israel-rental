@@ -143,7 +143,7 @@ export default function DeliveriesTab({ API, token, onChanged }) {
           <p className="text-sm mb-3" style={{ color: 'var(--brand-muted)' }}>
             {t('deliveries.addBusinessBody', 'Shops can only send jobs to another business. Add yours, free, and their automations reach you without a phone call.')}
           </p>
-          <a href="/dashboard?tab=my-businesses" className="btn-primary inline-flex text-sm px-4 py-2">
+          <a href="/businesses/add" className="btn-primary inline-flex text-sm px-4 py-2">
             {t('deliveries.addBusinessCta', 'Add your business, free')}
           </a>
         </div>

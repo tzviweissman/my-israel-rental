@@ -89,7 +89,9 @@ export default function ServicesTab({ token, initialFilter = null }) {
     const next = !row.business_verified;
     setBusyBizId(row.business_id);
     try {
-      await axios.patch(`${API}/businesses/${row.business_id}/verified`, { verified: next }, auth);
+      // Under /marketplace like every business route; the bare path
+      // never existed, so the badge could not be set (dead ends, 4 Oct).
+      await axios.patch(`${API}/marketplace/businesses/${row.business_id}/verified`, { verified: next }, auth);
       setRows((prev) => prev.map((r) => (
         r.business_id === row.business_id ? { ...r, business_verified: next } : r
       )));

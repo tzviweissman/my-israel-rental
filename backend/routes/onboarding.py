@@ -130,6 +130,9 @@ async def _business_items(uid: str) -> list[dict[str, Any]]:
                 {"price": {"$gt": 0}},
                 {"tiers.price": {"$gt": 0}},
                 {"price_from": {"$gt": 0}},
+                # A shop's prices live on its products, not tiers; without
+                # this the item could never tick for a store (dead ends, 4 Oct).
+                {"products.price": {"$gt": 0}},
             ],
         },
         {"_id": 1},

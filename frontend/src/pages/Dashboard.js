@@ -3,6 +3,7 @@ import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Plus, Upload, Home, Sparkles } from 'lucide-react';
+
 import { API, AuthContext } from '../App';
 
 import ContractManager from '../components/ContractManager';
@@ -38,6 +39,15 @@ import ShowMeAroundOffer from '../components/onboarding/ShowMeAroundOffer';
 import { useOnboarding } from '../components/onboarding/OnboardingProvider';
 import AttentionStrip from '../components/dashboard/AttentionStrip';
 import { canPublishGigs } from '../utils/providerTrial';
+
+/** A deliberate empty state for a pane this person has nothing in yet. */
+const EmptyPane = ({ title, body, cta, onClick, testid }) => (
+  <div className="bg-white rounded-2xl border p-8 text-center max-w-xl" style={{ borderColor: 'var(--brand-border)' }} data-testid={testid}>
+    <h2 className="text-xl font-bold mb-2" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{title}</h2>
+    <p className="text-sm mb-5" style={{ color: 'var(--brand-muted)' }}>{body}</p>
+    <button type="button" onClick={onClick} className="btn-primary inline-flex items-center justify-center min-h-[44px] px-5 text-sm">{cta}</button>
+  </div>
+);
 
 const Dashboard = () => {
   const { t } = useTranslation();
@@ -420,6 +430,17 @@ const Dashboard = () => {
         {activeTab === 'contracts' && isPropertyLister && (
           <ContractManager properties={properties} />
         )}
+        {/* A renter sent here (the "sign without printing" feature page)
+            used to get a blank pane: say where their contracts are. */}
+        {activeTab === 'contracts' && !isPropertyLister && (
+          <EmptyPane
+            testid="contracts-not-lister"
+            title={t('dashboard.contractsForRenterTitle', 'Contracts you sign')}
+            body={t('dashboard.contractsForRenterBody', 'When a host sends you a contract, the link comes by email and the booking shows it here in your bookings. You sign on your phone, nothing to print.')}
+            cta={t('dashboard.contractsForRenterCta', 'Go to my bookings')}
+            onClick={() => navigate('/dashboard?tab=bookings')}
+          />
+        )}
 
         {activeTab === 'settings' && (
           <SettingsTab user={user} token={token} API={API} />
@@ -535,6 +556,17 @@ const Dashboard = () => {
             <GoogleReviewsCard API={API} token={token} />
             <MyBusinessesTab API={API} token={token} />
           </>
+        )}
+        {/* Feature pages, tours and emails link here; for someone with no
+            business yet this pane was blank (dead ends, 24 Sep and 4 Oct). */}
+        {activeTab === 'my-businesses' && !showGigTabs && (
+          <EmptyPane
+            testid="no-business-yet"
+            title={t('dashboard.noBusinessTitle', 'No business page yet')}
+            body={t('dashboard.noBusinessBody', 'Add your business and what you offer. Free to list, free to be found, no commission.')}
+            cta={t('dashboard.noBusinessCta', 'Add your business, free')}
+            onClick={() => navigate('/businesses/add')}
+          />
         )}
 
         {activeTab === 'orders' && showGigTabs && (
