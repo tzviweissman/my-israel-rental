@@ -1,0 +1,521 @@
+<!doctype html>
+<!--
+  L.A. Cholent by Rabbi Samuels. Split stage: cholent from scratch against
+  their kit, held side by side until their side wins the screen. See BRIEF.md.
+  Every fact, price and quoted line is theirs (our record and their own
+  flyers). Generated images are setting and props only: the from-scratch
+  kitchen and a closed slow cooker. Engine untouched; the split, the knob,
+  the clip and the dial are page code at the bottom.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>L.A. Cholent by Rabbi Samuels · Shabbos, done</title>
+<meta name="description" content="Rabbi Samuels' famous cholent, as a raw kit: into your crock pot, add water, low for about 20 hours. Kosher. From Jerusalem, all over Israel. From ₪100.">
+<link rel="icon" href="assets/seal.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@200;300;400&family=Pinyon+Script&family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="scrollcraft.css">
+<style>
+  /* Their world: candlelight, steel, marble, their gold. */
+  :root {
+    --sc-canvas:     #0F0C0A;
+    --sc-surface:    #1A1512;
+    --sc-ink:        #F2EBDF;
+    --sc-ink-soft:   #B3A694;
+    --sc-accent:     #D9A54A;
+    --sc-accent-ink: #140F0A;
+    --sc-font-display: "Oswald", system-ui, sans-serif;
+    --sc-font-text:    "Figtree", system-ui, sans-serif;
+    --script: "Pinyon Script", cursive;
+    /* The other world: a kitchen at night under one fluorescent tube. */
+    --cold: #D7DDD5;
+    --cold-ink: #1E2421;
+    --cold-soft: #46504A;
+    --order: "https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels";
+  }
+  body { background: var(--sc-canvas); color: var(--sc-ink); }
+  .script { font-family: var(--script); font-weight: 400; color: var(--sc-accent); letter-spacing: 0; text-transform: none; }
+  .caps { font-family: var(--sc-font-display); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* ---------- the split ------------------------------------------------ */
+  /* --x is the scratch side's share of the screen, in percent: 50 at the
+     open, 62 as the list piles up, 0 when their side wins. Both sides are
+     full-size layers clipped at the divider, so nothing animates width. */
+  #split { --x: 50; --dim: 0; }
+  #split [data-sc-stage] { overflow: hidden; background: var(--sc-canvas); }
+  .side { position: absolute; inset: 0; }
+  .side--scratch { background: var(--cold); color: var(--cold-ink); clip-path: inset(0 calc(100% - var(--x) * 1%) 0 0); z-index: 2; }
+  .side--theirs { clip-path: inset(0 0 0 calc(var(--x) * 1%)); z-index: 1; }
+
+  /* scratch: the photo in the lower half of its column, the list over it */
+  .scratch-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 30% 60%;
+    opacity: calc(0.92 - var(--dim) * 0.92); filter: saturate(0.85); }
+  .scratch-wash { position: absolute; inset: 0; background: linear-gradient(180deg, var(--cold) 0%, var(--cold) 34%, color-mix(in oklab, var(--cold) 0%, transparent) 72%); }
+  .scratch-copy { position: absolute; left: var(--sc-gutter); top: clamp(5.5rem, 14vh, 9rem); width: min(34rem, calc(var(--x) * 1vw - var(--sc-gutter) - 4rem)); opacity: calc(1 - var(--dim)); }
+  .scratch-copy h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.96; letter-spacing: 0; margin: 0; color: var(--cold-ink); }
+  .scratch-copy .lede { margin: var(--sc-4) 0 0; color: var(--cold-soft); font-size: var(--sc-t-lg); max-width: 26ch; }
+  .chores { list-style: none; margin: var(--sc-6) 0 0; padding: 0; display: grid; gap: 0.35rem; }
+  .chores li { font-size: var(--sc-t-lg); font-weight: 600; color: var(--cold-ink); background: color-mix(in oklab, var(--cold) 88%, transparent);
+    width: fit-content; padding: 0.1rem 0.5rem; border-radius: 4px;
+    opacity: 0; transform: translateY(10px); transition: opacity 220ms var(--sc-ease-out), transform 220ms var(--sc-ease-out); }
+  .chores li.on { opacity: 1; transform: none; }
+  .chores li:nth-child(n+7).on { color: #8A2A1E; }
+
+  /* theirs: their own photograph, then the clip, under the copy */
+  .theirs-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 70%; filter: brightness(calc(0.78 - var(--dim) * 0.5)); opacity: calc(1 - var(--pot, 0)); }
+  .theirs-shade { position: absolute; inset: 0; opacity: calc(1 - var(--gone, 0)); background: linear-gradient(90deg, transparent 0%, transparent calc(var(--x) * 1%), color-mix(in oklab, var(--sc-canvas) 55%, transparent) calc(var(--x) * 1% + 4%), color-mix(in oklab, var(--sc-canvas) 96%, transparent) 68%); }
+  .pot-frame { position: absolute; left: 50%; top: 50%; width: max(100vw, 177.78vh); aspect-ratio: 16 / 9; translate: -50% -50%; opacity: var(--pot, 0); }
+  .pot-frame img, .pot-frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(1.18) contrast(1.04); }
+  .heart { position: absolute; left: 69%; top: 2%; width: 22%; height: 34%; overflow: visible; }
+  .heart path { fill: none; stroke: var(--sc-accent); stroke-width: 1.6; stroke-linecap: round; vector-effect: non-scaling-stroke;
+    stroke-dasharray: var(--len, 1000); stroke-dashoffset: calc(var(--len, 1000) * (1 - var(--draw, 0))); opacity: 0.85; }
+
+  .theirs-copy { position: absolute; right: var(--sc-gutter); top: clamp(5.5rem, 14vh, 9rem); width: min(30rem, 30vw); text-align: right; }
+  .lockup .script { display: block; font-size: clamp(1.9rem, 1.4rem + 1.6vw, 3rem); line-height: 1; margin-bottom: -0.2em; }
+  .lockup h1 { font-family: var(--sc-font-display); font-weight: 200; text-transform: uppercase; letter-spacing: 0.02em;
+    font-size: clamp(3.4rem, 2rem + 5vw, 7rem); line-height: 0.9; margin: 0; color: var(--sc-ink); }
+  .lockup h1 .dot { color: var(--sc-accent); }
+  .lockup .tag { margin: var(--sc-4) 0 0 auto; color: var(--sc-ink); font-size: var(--sc-t-lg); max-width: 24ch; }
+  .steps { list-style: none; margin: var(--sc-6) 0 0 auto; padding: 0; display: grid; gap: var(--sc-3); max-width: 24rem; }
+  .steps li { display: grid; grid-template-columns: 2.4rem 1fr; gap: var(--sc-3); align-items: baseline; text-align: left; font-size: var(--sc-t-base); color: var(--sc-ink); }
+  .steps b { font-family: var(--sc-font-display); font-weight: 300; font-size: var(--sc-t-xl); color: var(--sc-accent); }
+  .alone { position: absolute; right: var(--sc-gutter); top: 50%; translate: 0 -50%; width: min(28rem, 30vw); text-align: right;
+    font-family: var(--sc-font-display); font-weight: 300; font-size: var(--sc-t-2xl); line-height: 1.12; color: var(--sc-ink); margin: 0; }
+  .alone cite { display: block; margin-top: var(--sc-4); font: 500 var(--sc-t-sm)/1.4 var(--sc-font-text); color: var(--sc-ink-soft); font-style: normal; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 1.6rem; border-radius: var(--sc-r-pill);
+    background: var(--sc-accent); color: var(--sc-accent-ink); font: 700 var(--sc-t-base)/1 var(--sc-font-text); text-decoration: none; white-space: nowrap;
+    box-shadow: var(--sc-e2); transition: transform 140ms var(--sc-ease-out), filter 140ms var(--sc-ease-out); }
+  .btn:active { transform: translateY(1px) scale(0.98); }
+  @media (hover: hover) and (pointer: fine) { .btn:hover { filter: brightness(1.08); transform: translateY(-1px); } }
+  .btn:focus-visible, .dial:focus-visible, .size-pick button:focus-visible, a:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; }
+  .theirs-copy .btn { margin-top: var(--sc-6); }
+
+  /* the peak copy, left, over the dark side of the frame */
+  .peak { position: absolute; left: var(--sc-gutter); bottom: clamp(3rem, 12vh, 8rem); width: min(36rem, 46vw); }
+  .hours { display: flex; align-items: baseline; gap: var(--sc-3); margin: 0; color: var(--sc-accent); }
+  .hours .sc-nums { font-family: var(--sc-font-display); font-weight: 200; font-size: clamp(5rem, 3rem + 7vw, 10rem); line-height: 0.85; font-variant-numeric: tabular-nums; }
+  .hours span:last-child { font: 600 var(--sc-t-base)/1.3 var(--sc-font-text); color: var(--sc-ink-soft); text-transform: uppercase; letter-spacing: 0.14em; }
+  .peak h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.98; margin: var(--sc-5) 0 0; }
+  .peak .seal-words { margin: var(--sc-5) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-lg); }
+  .peak .seal-words .script { font-size: 1.5em; }
+
+  /* the divider: labels for both sides, and the knob */
+  .divider { position: absolute; top: 0; bottom: 0; left: calc(var(--x) * 1%); width: 0; z-index: 5; pointer-events: none; }
+  .divider::before { content: ""; position: absolute; top: 0; bottom: 0; left: -0.5px; width: 1px; background: color-mix(in oklab, var(--sc-accent) 70%, transparent); opacity: calc(1 - var(--gone, 0)); }
+  .labels { position: absolute; top: clamp(1.2rem, 3vh, 2rem); left: 0; display: flex; translate: -50% 0; gap: 2.6rem; white-space: nowrap;
+    font: 700 var(--sc-t-sm)/1 var(--sc-font-text); letter-spacing: 0.18em; text-transform: uppercase; opacity: calc(1 - var(--gone, 0)); }
+  .labels span:first-child { color: var(--cold-ink); }
+  .labels span:last-child { color: var(--sc-accent); }
+  .knob-wrap { position: absolute; left: 0; top: 50%; translate: -50% -50%; will-change: transform; width: clamp(7rem, 9vw, 9.5rem); }
+
+  /* one knob, drawn once, used twice (the divider and the close) */
+  .knob { display: block; width: 100%; height: auto; overflow: visible; }
+  .knob .face { opacity: var(--face, 1); fill: #17120F; stroke: color-mix(in oklab, var(--sc-accent) 55%, transparent); stroke-width: 1.5; }
+  .knob .ring { fill: #C9CDD1; }
+  .knob .ring-shade { fill: url(#steel); }
+  .knob .grip { fill: #0B0907; }
+  .knob .pointer { stroke: var(--sc-ink); stroke-width: 5; stroke-linecap: round; }
+  .knob .rot { transform-origin: 100px 100px; transform: rotate(var(--a, -100deg)); transition: transform 90ms linear; }
+  .knob .tick { stroke: var(--sc-ink-soft); stroke-width: 2; }
+  .knob text { font: 600 13px var(--sc-font-text); fill: var(--sc-ink); letter-spacing: 0.06em; }
+  .knob .lamp { fill: #3A140F; transition: fill 200ms var(--sc-ease-out); }
+  .knob.is-on .lamp { fill: #FF5A2E; }
+
+  /* ---------- belonging (flow) ----------------------------------------- */
+  .belong { position: relative; padding-block: clamp(3rem, 6vw, 6rem) var(--sc-section); }
+  .belong figure { margin: 0 0 clamp(2.5rem, 5vw, 4.5rem); }
+  .belong figure img { width: 100%; height: clamp(18rem, 48vw, 40rem); object-fit: cover; object-position: 50% 35%; border-radius: var(--sc-r-md); display: block; }
+  .belong h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.96; margin: 0; max-width: 14ch; }
+  .occasions { list-style: none; margin: var(--sc-6) 0 0; padding: 0; display: flex; flex-wrap: wrap; align-items: baseline; row-gap: 0.1em;
+    font-family: var(--sc-font-display); font-weight: 200; text-transform: uppercase; font-size: clamp(1.8rem, 1rem + 3.4vw, 4.4rem); line-height: 1.08; }
+  .occasions li { white-space: nowrap; }
+  .occasions li:not(:last-child)::after { content: ""; display: inline-block; width: 0.16em; height: 0.16em; border-radius: 50%; background: var(--sc-accent); margin-inline: 0.36em; vertical-align: middle; }
+  .proof { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(2rem, 5vw, 5rem); margin-top: clamp(3rem, 6vw, 6rem); align-items: start; }
+  .quote { margin: 0; display: grid; grid-template-columns: 5.5rem 1fr; gap: var(--sc-5); align-items: start; }
+  .quote img { width: 5.5rem; height: 5.5rem; border-radius: 50%; box-shadow: var(--sc-e2); }
+  .quote p { margin: 0; font-size: var(--sc-t-xl); line-height: 1.35; color: var(--sc-ink); }
+  .quote cite { display: block; margin-top: var(--sc-3); font: 500 var(--sc-t-sm)/1.4 var(--sc-font-text); color: var(--sc-ink-soft); font-style: normal; }
+  .facts { margin: 0; display: grid; gap: var(--sc-4); border-top: 1px solid var(--sc-hairline-strong); padding-top: var(--sc-5); }
+  .facts div { display: grid; grid-template-columns: 8.5rem 1fr; gap: var(--sc-4); }
+  .facts dt { font: 600 var(--sc-t-xs)/1.6 var(--sc-font-text); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sc-ink-soft); }
+  .facts dd { margin: 0; color: var(--sc-ink); }
+
+  /* ---------- the close: the knob becomes the order ---------------------- */
+  #order [data-sc-stage] { display: grid; align-content: center; background: radial-gradient(70% 80% at 30% 45%, #231B15 0%, var(--sc-canvas) 70%); }
+  .order { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(2rem, 6vw, 6rem); align-items: center; }
+  .dial-col { display: grid; justify-items: center; gap: var(--sc-5); }
+  .dial { width: min(24rem, 34vw); touch-action: none; cursor: grab; border-radius: 50%; }
+  .dial:active { cursor: grabbing; }
+  .size-pick { display: flex; gap: var(--sc-2); flex-wrap: wrap; justify-content: center; }
+  .size-pick button { min-height: 44px; padding: 0 1rem; border-radius: var(--sc-r-pill); border: 1px solid var(--sc-hairline-strong); background: transparent;
+    color: var(--sc-ink); font: 600 var(--sc-t-sm)/1 var(--sc-font-text); cursor: pointer; transition: border-color 140ms var(--sc-ease-out), background 140ms var(--sc-ease-out); }
+  .size-pick button[aria-pressed="true"] { border-color: var(--sc-accent); background: color-mix(in oklab, var(--sc-accent) 16%, transparent); }
+  .order h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.96; margin: 0; }
+  .pick { margin: var(--sc-5) 0 0; display: flex; align-items: baseline; gap: var(--sc-4); flex-wrap: wrap; }
+  .pick .size-name { font-family: var(--sc-font-display); font-weight: 400; text-transform: uppercase; font-size: var(--sc-t-xl); letter-spacing: 0.04em; }
+  .pick .feeds { color: var(--sc-ink-soft); }
+  .price { margin: var(--sc-2) 0 0; display: flex; align-items: baseline; gap: var(--sc-4); flex-wrap: wrap; }
+  .price .now { font-family: var(--sc-font-display); font-weight: 200; font-size: clamp(4rem, 2.6rem + 5vw, 7.5rem); line-height: 0.9; color: var(--sc-ink); font-variant-numeric: tabular-nums; }
+  .price .now small { font-size: 0.5em; vertical-align: 0.6em; margin-inline-end: 0.06em; }
+  .price .alt { color: var(--sc-ink-soft); max-width: 18rem; }
+  .menu { margin: var(--sc-5) 0 0; display: grid; gap: var(--sc-2); border-top: 1px solid var(--sc-hairline); padding-top: var(--sc-4); color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  .menu div { display: flex; justify-content: space-between; gap: var(--sc-4); }
+  .menu b { color: var(--sc-ink); font-weight: 600; }
+  .act { margin-top: var(--sc-6); display: flex; align-items: center; gap: var(--sc-5); flex-wrap: wrap; }
+  .act p { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); max-width: 22rem; }
+  .act p b { color: var(--sc-ink); font-weight: 600; }
+  .foot { position: absolute; left: 0; right: 0; bottom: 0; padding: var(--sc-4) var(--sc-gutter); display: flex; justify-content: space-between; gap: var(--sc-4); flex-wrap: wrap;
+    border-top: 1px solid var(--sc-hairline); color: var(--sc-ink-soft); font-size: var(--sc-t-xs); }
+  .foot a { color: var(--sc-ink-soft); text-underline-offset: 3px; }
+
+  /* ---------- phones: the split runs top and bottom ------------------------ */
+  @media (max-width: 860px) {
+    .side--scratch { clip-path: inset(0 0 calc(100% - var(--x) * 1%) 0); }
+    .side--theirs { clip-path: inset(calc(var(--x) * 1%) 0 0 0); }
+    .scratch-copy { top: 4.6rem; width: auto; right: var(--sc-gutter); }
+    .scratch-copy h2 { font-size: var(--sc-t-2xl); }
+    .scratch-copy .lede { font-size: var(--sc-t-base); margin-top: var(--sc-2); }
+    .chores { margin-top: var(--sc-3); gap: 0.2rem; grid-template-columns: 1fr 1fr; }
+    .chores li { font-size: var(--sc-t-sm); }
+    .scratch-wash { background: linear-gradient(180deg, var(--cold) 0%, var(--cold) 22%, color-mix(in oklab, var(--cold) 70%, transparent) 34%, transparent 62%); }
+    .theirs-shade { background: linear-gradient(180deg, transparent calc(var(--x) * 1%), color-mix(in oklab, var(--sc-canvas) 82%, transparent) calc(var(--x) * 1% + 6%), color-mix(in oklab, var(--sc-canvas) 96%, transparent) calc(var(--x) * 1% + 30%)); }
+    .theirs-copy { top: auto; bottom: 1.6rem; left: var(--sc-gutter); right: var(--sc-gutter); width: auto; text-align: left; }
+    .lockup .tag, .steps { margin-left: 0; }
+    .lockup h1 { font-size: clamp(3rem, 14vw, 4.2rem); }
+    .lockup .tag { font-size: var(--sc-t-base); }
+    .steps { margin-top: var(--sc-3); gap: var(--sc-1); }
+    .steps li { font-size: var(--sc-t-sm); grid-template-columns: 1.8rem 1fr; }
+    .steps b { font-size: var(--sc-t-lg); }
+    .theirs-copy .btn { margin-top: var(--sc-4); }
+    .alone { left: var(--sc-gutter); right: var(--sc-gutter); width: auto; top: auto; bottom: 18vh; translate: none; font-size: var(--sc-t-xl); }
+    .divider { left: 0; right: 0; width: auto; top: calc(var(--x) * 1%); bottom: auto; height: 0; }
+    .divider::before { top: -0.5px; bottom: auto; left: 0; right: 0; width: auto; height: 1px; }
+    .labels { display: none; }
+    .knob-wrap { left: auto; right: var(--sc-gutter); top: 0; translate: 0 -50%; width: 4.4rem; }
+    /* The film takes the top of the screen and fades into the ground; the
+       words sit below it, never on the pot. */
+    .pot-frame { top: 0; width: auto; height: 58svh; translate: -72% 0;
+      -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%); mask-image: linear-gradient(180deg, #000 70%, transparent 100%); }
+    .hours .sc-nums { font-size: 4.4rem; }
+    .peak h2 { font-size: var(--sc-t-2xl); margin-top: var(--sc-3); }
+    .peak .seal-words { margin-top: var(--sc-3); font-size: var(--sc-t-base); }
+    .peak { width: auto; right: var(--sc-gutter); bottom: 2rem; }
+    .proof { grid-template-columns: 1fr; }
+    .order { grid-template-columns: 1fr; gap: var(--sc-5); }
+    .dial { width: min(15rem, 62vw); }
+    .price .now { font-size: 4rem; }
+    .foot { position: static; margin-top: var(--sc-6); }
+    #order [data-sc-stage] { align-content: start; padding-top: var(--sc-7); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .chores li, .knob .rot { transition: none; }
+  }
+</style>
+</head>
+<body>
+<span data-sc-progress></span>
+<div class="sc-grain" aria-hidden="true"></div>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#F1F2F3"/><stop offset="0.45" stop-color="#9DA2A8"/><stop offset="1" stop-color="#5D6268"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<main id="top">
+
+  <!-- ONE split stage. Phases on act progress p:
+       0.00-0.10 the two worlds at 50/50 (greet)
+       0.10-0.42 the chores pile up, the scratch side widens to 62%
+       0.42-0.52 authored silence: the scratch side drains, their one line
+       0.50-0.64 the collapse: the divider runs to the edge, the knob to Low
+       0.60-1.00 THE PEAK: the clip, 20 hours, the steam draws their heart -->
+  <section id="split" data-sc-act="pin" data-sc-span="7">
+    <div data-sc-stage>
+
+      <div class="side side--theirs">
+        <img class="theirs-photo" src="assets/tubs.webp" width="1600" height="1067"
+             alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps.">
+        <div class="pot-frame" aria-hidden="true">
+          <img src="assets/pot.webp" alt="">
+          <video id="pot" muted playsinline preload="auto"></video>
+          <svg class="heart" viewBox="0 0 100 100" preserveAspectRatio="none">
+            <path id="heart-path" d="M50 98 C 48 84, 52 74, 50 64 C 47 52, 30 50, 24 38 C 17 24, 30 10, 42 16 C 47 19, 49 24, 50 28 C 51 24, 53 19, 58 16 C 70 10, 83 24, 76 38 C 70 50, 53 52, 50 64"/>
+          </svg>
+        </div>
+        <div class="theirs-shade" aria-hidden="true"></div>
+
+        <div class="theirs-copy" data-sc-cue="0 0.43 0 0.04">
+          <div class="lockup">
+            <span class="script">Rabbi Samuels' Famous</span>
+            <h1>L<span class="dot">.</span>A<span class="dot">.</span> Cholent</h1>
+            <p class="tag">Our secret recipe, your new Shabbos favorite.</p>
+          </div>
+          <ol class="steps" data-sc-cue="0.16 0.40 0.04 0.03">
+            <li><b>1</b><span>Select your cholent size.</span></li>
+            <li><b>2</b><span>Place raw LA Cholent kit in your crock pot and add water.</span></li>
+            <li><b>3</b><span>Cook on low for about 20 hours.</span></li>
+          </ol>
+          <a class="btn" href="#order">Choose your size</a>
+        </div>
+
+        <p class="alone" data-sc-cue="0.42 0.55 0.02 0.03">Just throw our raw ingredients into your crock pot, add water, and enjoy!
+          <cite>Rabbi Samuels, L.A. Cholent</cite></p>
+
+        <div class="peak" data-sc-cue="0.64 1 0.04 0">
+          <p class="hours"><span class="sc-nums" id="hours">0</span><span>hours on low,<br>while you do Shabbos</span></p>
+          <h2>Lid on. Low.<br>Go light the candles.</h2>
+          <p class="seal-words"><span class="script">Convenient and consistent.</span><br>A higher standard of flavor.</p>
+        </div>
+      </div>
+
+      <div class="side side--scratch" aria-label="Cholent from scratch">
+        <img class="scratch-photo" src="assets/scratch.webp" width="880" height="1168"
+             alt="A cluttered kitchen counter late at night: beans soaking, barley spilling from a bag, potato peelings, onion skins and a knife.">
+        <div class="scratch-wash" aria-hidden="true"></div>
+        <div class="scratch-copy">
+          <h2>Cholent<br>from scratch</h2>
+          <p class="lede">Thursday night. The beans are soaking. You are nowhere near done.</p>
+          <ul class="chores">
+            <li>Buy the beans and barley</li>
+            <li>Soak the beans overnight</li>
+            <li>Peel the potatoes</li>
+            <li>Chop the onions</li>
+            <li>Brown the meat</li>
+            <li>Layer it all in the pot</li>
+            <li>Guess the spices</li>
+            <li>Guess the water</li>
+            <li>Scrub the pots</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="divider" aria-hidden="true">
+        <div class="labels"><span>From scratch</span><span>L.A. Cholent</span></div>
+        <div class="knob-wrap">
+          <svg class="knob" id="knob" viewBox="-30 -30 260 260">
+          </svg>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section class="belong">
+    <div class="sc-wrap">
+      <figure data-sc-reveal="up" data-sc-reveal-at="0.05 0.45">
+        <img src="assets/table.webp" width="1344" height="752" alt="A long Shabbos table at night, candles lit, challah under its cover, places set and waiting.">
+      </figure>
+      <div data-sc-in data-sc-stagger="60" class="sc-stack">
+        <h2>Any size. Any occasion.</h2>
+        <ul class="occasions" aria-label="What people order it for">
+          <li>Shabbos meals</li><li>Yom Tov</li><li>Thursday nights</li><li>Kiddushim</li><li>Shalom zachors</li><li>Bar mitzvahs</li><li>Family visiting</li><li>Simchos of any size</li>
+        </ul>
+      </div>
+      <div class="proof" data-sc-in data-sc-stagger="70">
+        <blockquote class="quote">
+          <img src="assets/seal.webp" width="480" height="480" alt="The L.A. Cholent seal: convenient and consistent, a higher standard of flavor.">
+          <div>
+            <p>Rabbi Samuels LA Cholent has been a fan favorite for over a decade, and now we've opened an Israel line!</p>
+            <cite>Rabbi Samuels, on L.A. Cholent</cite>
+          </div>
+        </blockquote>
+        <dl class="facts">
+          <div><dt>Kashrus</dt><dd>Vaad HaKashrus, Rabbi Shmuel Weiner</dd></div>
+          <div><dt>Recipes</dt><dd>Original and Spicy</dd></div>
+          <div><dt>From</dt><dd>Jerusalem, delivered all over Israel</dd></div>
+          <div><dt>Each tub</dt><dd>Yields about 3 to 4 pounds</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- The close. The knob from the divider, now the order. Last element. -->
+  <section id="order" data-sc-act="pin" data-sc-span="1.3">
+    <div data-sc-stage>
+      <div class="sc-wrap order">
+        <div class="dial-col">
+          <svg class="knob dial" id="dial" viewBox="-30 -30 260 260" role="slider" tabindex="0"
+               aria-label="Cholent size" aria-valuemin="0" aria-valuemax="2" aria-valuenow="1" aria-valuetext="Large, feeds 8 to 12, 180 shekels">
+          </svg>
+          <div class="size-pick" role="group" aria-label="Pick a size">
+            <button type="button" data-i="0" aria-pressed="false">Medium</button>
+            <button type="button" data-i="1" aria-pressed="true">Large</button>
+            <button type="button" data-i="2" aria-pressed="false">Kiddush</button>
+          </div>
+        </div>
+        <div>
+          <h2>Turn it to your size.</h2>
+          <p class="pick"><span class="size-name" id="size-name">Large</span><span class="feeds" id="feeds">Feeds 8 to 12</span></p>
+          <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
+          <div class="menu">
+            <div><span>Slow cooker liner</span><b>Free</b></div>
+            <div><span>Extra meat</span><b>₪50 / lb</b></div>
+            <div><span>Marrow bones</span><b>₪40 / lb</b></div>
+          </div>
+          <div class="act">
+            <a class="btn" id="order-btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message to order</a>
+            <p><b>Free local delivery on your first order.</b> Kosher, Vaad HaKashrus Rabbi Shmuel Weiner.</p>
+          </div>
+        </div>
+      </div>
+      <footer class="foot">
+        <span>L.A. Cholent by Rabbi Samuels · Jerusalem · delivered all over Israel</span>
+        <a href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Listed on MyIsraelRental</a>
+      </footer>
+    </div>
+  </section>
+
+</main>
+
+<script src="scrollcraft.js"></script>
+<script>ScrollCraft.mount(document.body);</script>
+<script>
+(function () {
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var phone = matchMedia('(max-width: 860px)');
+  var clamp = function (v) { return Math.max(0, Math.min(1, v)); };
+  var span = function (p, a, b) { return clamp((p - a) / (b - a)); };
+  var ease = function (t) { return 1 - Math.pow(1 - t, 3); };
+
+  /* ---- one knob, drawn the same way twice -------------------------------- */
+  // A slow-cooker dial: a dark face, a brushed steel ring, a grip with a
+  // pointer that turns with --a, the settings printed around it, the lamp.
+  function buildKnob(svg, marks) {
+    var t = marks.map(function (m) {
+      var r = m[1] * Math.PI / 180;
+      return '<text x="' + (100 + 90 * Math.sin(r)).toFixed(1) + '" y="' + (104 - 90 * Math.cos(r)).toFixed(1) + '" text-anchor="middle">' + m[0] + '</text>';
+    }).join('');
+    svg.insertAdjacentHTML('beforeend',
+      '<circle class="face" cx="100" cy="100" r="128"/>' + t +
+      '<circle class="lamp" cx="100" cy="190" r="6"/>' +
+      '<circle class="ring" cx="100" cy="100" r="62"/><circle class="ring-shade" cx="100" cy="100" r="58"/>' +
+      '<g class="rot"><circle class="grip" cx="100" cy="100" r="46"/><rect class="grip" x="91" y="44" width="18" height="112" rx="9"/>' +
+      '<line class="pointer" x1="100" y1="96" x2="100" y2="54"/></g>');
+  }
+  buildKnob(document.getElementById('knob'), [['OFF', -100], ['LOW', -35], ['HIGH', 35], ['WARM', 100]]);
+
+  /* ---- the split, driven off the act's own --sc-p ---------------------- */
+  var act = document.getElementById('split');
+  var knob = document.getElementById('knob');
+  var chores = act.querySelectorAll('.chores li');
+  var hours = document.getElementById('hours');
+  var heart = document.getElementById('heart-path');
+  var len = heart.getTotalLength();
+  heart.style.setProperty('--len', len);
+
+  var video = document.getElementById('pot'), vReady = false, vTarget = 0, seeking = false;
+  if (!reduce) {
+    video.src = phone.matches ? 'assets/pot-m.mp4' : 'assets/pot.mp4';
+    video.addEventListener('loadeddata', function () { vReady = true; video.style.opacity = 1; });
+    video.addEventListener('seeked', function () { seeking = false; });
+  }
+  video.style.opacity = 0;
+
+  var last = -1, knobScale = 1;
+  var knobWrap = document.querySelector('.knob-wrap'), potFrame = document.querySelector('.pot-frame'), divider = document.querySelector('.divider');
+  // Where the slow cooker's dial sits in the 16:9 frame, as fractions, at
+  // the clip's first and last frame (the camera drifts, so the knob follows).
+  var DIAL_A = [0.677, 0.694, 0.070], DIAL_B = [0.656, 0.744, 0.074];
+  function frame() {
+    var p = parseFloat(act.style.getPropertyValue('--sc-p')) || 0;
+    if (true) {
+      last = p;
+      var grow = ease(span(p, 0.10, 0.42));
+      var col = ease(span(p, 0.50, 0.64));
+      // A phone stacks the halves, and their half needs the room for its copy.
+      var base = phone.matches ? 38 : 50, more = phone.matches ? 8 : 12;
+      act.style.setProperty('--x', ((base + more * grow) * (1 - col)).toFixed(3));
+      act.style.setProperty('--dim', span(p, 0.42, 0.50).toFixed(3));
+      act.style.setProperty('--gone', span(p, 0.56, 0.64).toFixed(3));
+      act.style.setProperty('--pot', span(p, 0.55, 0.62).toFixed(3));
+      // The knob creeps from Off toward Low while the argument runs, and
+      // clicks onto Low once their side has the screen.
+      var on = col > 0.97;
+      var ang = on ? -35 : -100 + 50 * span(p, 0.04, 0.6);
+      knob.style.setProperty('--a', ang + 'deg');
+      knob.classList.toggle('is-on', on);
+      // The knob rides the divider, then at the collapse it flies onto the
+      // slow cooker's own dial in the frame and shrinks to its size: the
+      // dial on the page IS the pot's dial. Its face fades so only the
+      // grip and the printed settings sit on the steel.
+      var land = ease(span(p, 0.52, 0.66));
+      var kw = knobWrap.getBoundingClientRect(), fr = potFrame.getBoundingClientRect();
+      var home = divider.getBoundingClientRect();
+      var hx = phone.matches ? innerWidth - 20 - (kw.width / knobScale) / 2 : home.left;
+      // Measured from the divider every frame, so the knob stays on the dial
+      // while the whole stage slides in and out, not only while it is pinned.
+      var hy = phone.matches ? home.top : home.top + home.height / 2;
+      var ct = vReady && video.duration ? video.currentTime / video.duration : 0;
+      var D = [0, 1, 2].map(function (k) { return DIAL_A[k] + (DIAL_B[k] - DIAL_A[k]) * ct; });
+      var tx = fr.left + fr.width * D[0], ty = fr.top + fr.height * D[1];
+      var tScale = (fr.width * D[2]) / (kw.width / knobScale || 1) / 0.48;
+      knobScale = 1 + (tScale - 1) * land;
+      knobWrap.style.transform = 'translate(' + ((tx - hx) * land).toFixed(1) + 'px,' + ((ty - hy) * land).toFixed(1) + 'px) scale(' + knobScale.toFixed(3) + ')';
+      knob.style.setProperty('--face', (1 - land).toFixed(3));
+      chores.forEach(function (li, i) { li.classList.toggle('on', p > 0.11 + i * 0.033); });
+      var h = span(p, 0.64, 0.92);
+      hours.textContent = Math.round(20 * h);
+      heart.style.setProperty('--draw', reduce ? (h > 0 ? 1 : 0) : ease(span(p, 0.70, 0.96)).toFixed(3));
+      if (vReady) vTarget = span(p, 0.54, 1) * (video.duration || 0);
+    }
+    // The playhead walks toward the scroll target, one seek at a time.
+    if (vReady && !seeking && Math.abs(video.currentTime - vTarget) > 0.02) {
+      seeking = true;
+      video.currentTime = video.currentTime + (vTarget - video.currentTime) * 0.25;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+
+  /* ---- the close: the knob is the order -------------------------------- */
+  var sizes = [
+    { name: 'Medium', feeds: 'Feeds 4 to 6', price: 100, alt: '₪55 if you add your own meat, or keep it parve.', angle: -60, label: 'MEDIUM' },
+    { name: 'Large', feeds: 'Feeds 8 to 12', price: 180, alt: '₪85 if you add your own meat, or keep it parve.', angle: 0, label: 'LARGE' },
+    { name: 'Extra Large / Kiddush', feeds: 'Sized to your guest list', price: 250, alt: 'Sizes are customizable depending on amount of guests.', angle: 60, label: 'KIDDUSH' }
+  ];
+  var dial = document.getElementById('dial');
+  buildKnob(dial, sizes.map(function (s) { return [s.label, s.angle]; }));
+  var buttons = document.querySelectorAll('.size-pick button');
+  var cur = 1;
+  function pick(i, free) {
+    cur = Math.max(0, Math.min(2, i));
+    var s = sizes[cur];
+    dial.style.setProperty('--a', (free == null ? s.angle : free) + 'deg');
+    dial.classList.add('is-on');
+    dial.setAttribute('aria-valuenow', cur);
+    dial.setAttribute('aria-valuetext', s.name + ', ' + s.feeds.toLowerCase() + ', ' + s.price + ' shekels');
+    document.getElementById('size-name').textContent = s.name;
+    document.getElementById('feeds').textContent = s.feeds;
+    document.getElementById('price').innerHTML = '<small>₪</small>' + s.price;
+    document.getElementById('alt').textContent = s.alt;
+    buttons.forEach(function (b, n) { b.setAttribute('aria-pressed', n === cur ? 'true' : 'false'); });
+  }
+  buttons.forEach(function (b) { b.addEventListener('click', function () { pick(+b.dataset.i); }); });
+  dial.addEventListener('keydown', function (e) {
+    if (e.key === 'ArrowRight' || e.key === 'ArrowUp') { pick(cur + 1); e.preventDefault(); }
+    if (e.key === 'ArrowLeft' || e.key === 'ArrowDown') { pick(cur - 1); e.preventDefault(); }
+  });
+  // Drag to turn: the knob follows the hand, then clicks onto the nearest size.
+  var dragging = false;
+  function angleAt(e) {
+    var r = dial.getBoundingClientRect();
+    var a = Math.atan2(e.clientX - (r.left + r.width / 2), -(e.clientY - (r.top + r.height / 2))) * 180 / Math.PI;
+    return Math.max(-75, Math.min(75, a));
+  }
+  function nearest(a) { return a < -30 ? 0 : a > 30 ? 2 : 1; }
+  dial.addEventListener('pointerdown', function (e) { dragging = true; dial.setPointerCapture(e.pointerId); var a = angleAt(e); pick(nearest(a), a); });
+  dial.addEventListener('pointermove', function (e) { if (dragging) { var a = angleAt(e); pick(nearest(a), a); } });
+  dial.addEventListener('pointerup', function () { dragging = false; pick(cur); });
+  dial.addEventListener('pointercancel', function () { dragging = false; pick(cur); });
+  pick(1);
+}());
+</script>
+</body>
+</html>
