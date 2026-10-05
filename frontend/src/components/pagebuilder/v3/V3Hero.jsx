@@ -80,6 +80,16 @@ export function splitName(name) {
   return m ? { wordmark: m[1], script: m[2] } : { wordmark: name || '', script: null };
 }
 
+/** The primary action's words, the same in the hero, the offer and the
+ *  phone bar (rule 5b.2: one wording per purpose). Verb and object. */
+export function primaryLabel(brief, t) {
+  const kind = brief?.primary_action?.kind || 'message';
+  const food = brief?.category === 'food' || brief?.category === 'restaurants';
+  if (kind === 'order') return t('pageV3.ctaOrder', 'Place an order');
+  if (kind === 'book') return t('pageV3.ctaBook', 'Book a time');
+  return food ? t('pageV3.ctaMessageOrder', 'Message to order') : t('pageV3.ctaMessage', 'Send a message');
+}
+
 /** Dots in the wordmark take the accent (rules appendix: "gold dots"). */
 const Wordmark = ({ text }) => (
   <>
@@ -99,13 +109,7 @@ export default function V3Hero({ brief, name, logoUrl, photoUrl, priceText, area
   // A Hebrew name is shown whole; a Latin one splits the same in both languages.
   const { wordmark, script } = /[֐-׿]/.test(name || '') ? { wordmark: name, script: null } : splitName(name);
   const tagline = (brief.taglines || []).find((x) => x.lang === (he ? 'he' : 'en'));
-  const kind = brief.primary_action?.kind || 'message';
-  const food = brief.category === 'food' || brief.category === 'restaurants';
-  const label = kind === 'order'
-    ? t('pageV3.ctaOrder', 'Place an order')
-    : kind === 'book'
-      ? t('pageV3.ctaBook', 'Book a time')
-      : food ? t('pageV3.ctaMessageOrder', 'Message to order') : t('pageV3.ctaMessage', 'Send a message');
+  const label = primaryLabel(brief, t);
 
   // At most three facts, and each only if the record has it (rule 1).
   const facts = [

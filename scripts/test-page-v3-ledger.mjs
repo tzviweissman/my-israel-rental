@@ -21,7 +21,10 @@ const body = v3BodyBlocks([
 ]);
 const types = body.map((b) => b.type).join(',');
 ok('no second hero, cover or fourth chat button under a v3 hero', !/hero|cover|contact/.test(types), types);
-ok('each other block type once; several services blocks allowed', types === 'facts,services,services,gallery', types);
+ok('one listing: the offer block replaces its card and the facts band', types === 'gallery', types);
+const many = v3BodyBlocks([{ type: 'services', id: 'a' }, { type: 'facts' }, { type: 'services', id: 'b' }, { type: 'gallery' }, { type: 'gallery' }], { listings: 5 })
+  .map((b) => b.type).join(',');
+ok('a catalogue keeps its cards; each other type once', many === 'services,services,gallery', many);
 ok('missing blocks are an empty list', v3BodyBlocks(undefined).length === 0);
 
 console.log(failed ? `\n${failed} failed` : '\nall passed');

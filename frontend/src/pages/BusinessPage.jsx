@@ -10,7 +10,7 @@
  * short-link table already points at /business/{id}, so both resolve and
  * neither will ever break.
  */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import ProofLine from '../components/marketplace/ProofLine';
 import ReviewsSection from '../components/reviews/ReviewsSection';
 import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPanel';
@@ -30,7 +30,10 @@ import V3Hero from '../components/pagebuilder/v3/V3Hero';
 import V3Flyers from '../components/pagebuilder/v3/V3Flyers';
 import { resolvePhoto, photosOfKind } from '../components/pagebuilder/v3/photos';
 import V3Footer from '../components/pagebuilder/v3/V3Footer';
+import { primaryLabel } from '../components/pagebuilder/v3/V3Hero';
+import { V3BigList, V3Steps, V3Palate, V3Offer, V3StickyBar } from '../components/pagebuilder/v3/V3Sections';
 import { v3BodyBlocks } from '../components/pagebuilder/v3/ledger';
+import { readComposition } from '../utils/pageComposition';
 import { cheapestFirst } from '../utils/gigPrice';
 import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
@@ -132,6 +135,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   // v3 pages thin the global nav (styles/page-v3.css). Above the early
   // returns for the same reason as the hook above: every render runs it.
   const v3Shell = Boolean(biz && biz.page_v3 && biz.design_brief && biz.design_brief.palette);
+  const v3OfferRef = useRef(null);
   useEffect(() => {
     if (!v3Shell || preview) return undefined;
     document.body.dataset.pageV3 = '1';
@@ -267,11 +271,36 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   const v3Flyers = v3 ? photosOfKind(biz, v3Brief, 'flyer') : [];
 
   // The composed body under a v3 hero, with "say it once" applied (no second
-  // hero, no fourth chat button, each block type once: v3/ledger.js). A page
-  // left with nothing falls back to the default body.
-  const v3Body = v3 && biz.page && Array.isArray(biz.page.blocks)
-    ? { ...biz, page: { ...biz.page, blocks: v3BodyBlocks(biz.page.blocks) } }
-    : biz;
+  // hero, no fourth chat button, each block type once: v3/ledger.js). Read
+  // through readComposition so a business with no composition of its own is
+  // filtered too. Nothing left means no body: NOT the default body, which
+  // would bring back the facts band the offer block already says.
+  const v3Blocks = v3 ? v3BodyBlocks(readComposition(biz).blocks, { listings: (biz.listings || []).length }) : null;
+  const v3Body = v3 ? { ...biz, page: { ...(biz.page || {}), theme: readComposition(biz).theme, blocks: v3Blocks } } : biz;
+  // Phase 4. The offer block's rows: every one a field on the record.
+  const v3Lang = (i18n.language || '').startsWith('he') ? 'he' : 'en';
+  const v3Second = v3 ? photosOfKind(biz, v3Brief, 'photo').find((u) => u !== v3Photo) || null : null;
+  const v3First = (biz.listings || [])[0];
+  const v3Items = v3First ? [...(v3First.tiers || []), ...(v3First.products || [])].filter((x) => x && Number(x.price) > 0) : [];
+  const v3Rows = !v3 ? [] : [
+    ...v3Items.slice(0, 6).map((x, n) => ({
+      key: `item-${n}`,
+      label: [localizedTitle(x, i18n) || x.name, x.description].filter(Boolean).join(' · '),
+      value: money(x.price, x.currency || 'ILS'),
+      ltr: true,
+      plain: true,
+    })),
+    biz.kosher_certification?.body && { key: 'kosher', label: t('pageV3.supervision', 'Kosher supervision'), value: biz.kosher_certification.body },
+    (biz.areas || []).length > 0 && { key: 'area', label: t('pageV3.basedIn', 'Based in'), value: biz.areas.map((a) => prettyArea(a, t)).join(', ') },
+    biz.serves_nationwide && { key: 'serving', label: t('pageV3.serving', 'Serving'), value: t('serviceArea.chipNationwide', 'All of Israel') },
+    biz.hours && { key: 'hours', label: t('businessPage.hours', 'Hours'), value: biz.hours },
+    biz.lead_time && { key: 'notice', label: t('businessPage.leadTime', 'Notice needed'), value: biz.lead_time },
+    biz.delivery_note && { key: 'delivery', label: t('businessPage.delivery', 'Delivery'), value: biz.delivery_note },
+  ].filter(Boolean);
+  const v3Links = v3 ? (biz.listings || []).filter(Boolean).slice(0, 6).map((g) => ({
+    to: `/businesses/${g.id}`,
+    label: t('pageV3.seeListing', { defaultValue: 'See {{name}}', name: localizedTitle(g, i18n) || g.title }),
+  })) : [];
 
   // Real data only: fall back through what the business actually has
   // rather than inventing a line for it.
@@ -357,7 +386,26 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           )}
         </V3Hero>
       )}
+      {/* The food recipe's order (rules, part 7): occasions (quiet), how it
+          works (set piece), from the business, a palate cleanser, the offer. */}
+      {v3 && <V3BigList brief={v3Brief} lang={v3Lang} />}
+      {v3 && <V3Steps brief={v3Brief} lang={v3Lang} />}
       {v3 && <V3Flyers brief={v3Brief} urls={v3Flyers} name={displayName} />}
+      {v3 && <V3Palate brief={v3Brief} url={v3Second} />}
+      {v3 && (
+        <V3Offer
+          brief={v3Brief}
+          rows={v3Rows}
+          priceText={v3Price}
+          priceIsFrom={v3Items.length > 1 || (biz.listings || []).length > 1}
+          title={v3First ? (localizedTitle(v3First, i18n) || v3First.title) : null}
+          label={primaryLabel(v3Brief, t)}
+          onPrimary={messageBusiness}
+          pageUrl={preview ? null : businessCanonicalUrl(biz.slug, biz.id)}
+          listingLinks={v3Links}
+          offerRef={v3OfferRef}
+        />
+      )}
 
       <div className={`${columnWidth} mx-auto px-4 py-8`}>
         {!v3 && (
@@ -694,7 +742,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             that could hold someone's search box open would be a document
             fighting the person reading it. */}
         {biz.page_upgrade && <div id="business-body" className="scroll-mt-24" />}
-        <BlockList
+        {(!v3 || v3Blocks.length > 0) && <BlockList
           business={v3Body}
           ctx={{
             t,
@@ -712,7 +760,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             openService: (g) => navigate(`/businesses/${g.id}`),
             apiBase: API,
           }}
-        />
+        />}
 
         {/* Verified reviews across this business's listings, plus its
             own Google reviews (routes/reviews.py). Nothing while off. */}
@@ -740,7 +788,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
 
         {/* Repeated for anyone who has read to the end — asking them to
             scroll back up to act is how intent gets lost. */}
-        {canMessage && (
+        {canMessage && !v3 && (
           <div className="mt-10 mb-24 sm:mb-10 flex flex-col items-center gap-2">
             <button
                     type="button"
@@ -804,7 +852,17 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
       {/* Mobile only: the header button is off screen for most of the
           page on a phone, so the action rides along instead. Padding for
           the home indicator on iOS, or it sits under the gesture bar. */}
-      {canMessage && (
+      {v3 && canMessage && (
+        <V3StickyBar
+          brief={v3Brief}
+          label={primaryLabel(v3Brief, t)}
+          priceText={v3Price}
+          onPrimary={messageBusiness}
+          heroSelector='[data-testid="pv3-primary"]'
+          offerRef={v3OfferRef}
+        />
+      )}
+      {canMessage && !v3 && (
         <div
           className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t px-4 py-3"
           style={{

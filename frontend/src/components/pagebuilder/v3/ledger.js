@@ -26,10 +26,14 @@ export function limitRepeats(items, keyOf, max = 2) {
  * - The chat button already sits in the hero, after the content and in the
  *   phone bar (rule 1.3: hero, after the offer, sticky); a contact block
  *   would be a fourth.
- * - Each remaining block type at most once: two facts bands or two galleries
- *   repeat every fact in them.
+ * - The offer block carries the facts and, for one listing, the listing.
+ * - Each remaining block type at most once: two galleries repeat each other.
  */
-export function v3BodyBlocks(blocks) {
-  const kept = (blocks || []).filter((b) => b && !['hero', 'cover', 'contact'].includes(b.type));
+export function v3BodyBlocks(blocks, { listings = 0 } = {}) {
+  // Phase 4: the offer block says the facts (hours, supervision, where), so a
+  // facts band would be the second and third time; and one listing is the
+  // offer, so its card would repeat it. A catalogue keeps its cards.
+  const drop = ['hero', 'cover', 'contact', 'facts', ...(listings <= 1 ? ['services'] : [])];
+  const kept = (blocks || []).filter((b) => b && !drop.includes(b.type));
   return limitRepeats(kept, (b) => (b.type === 'services' ? null : b.type), 1);
 }

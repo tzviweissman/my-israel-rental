@@ -248,3 +248,134 @@ body[data-page-v3] [data-testid="nav-auth-cluster"] { display: none !important; 
 .pv3-footer a { color: var(--brand-muted); text-decoration: underline; text-underline-offset: 3px; }
 .pv3-footer a:hover { color: var(--ink); }
 @media (max-width: 639px) { .pv3-footer { padding-block-end: calc(96px + env(safe-area-inset-bottom)); } }
+
+/* ---- Phase 4: the sections (rules, parts 5 and 6) ----------------------- */
+.pv3-section {
+  padding-block: clamp(64px, 10vw, 140px);
+  padding-inline: clamp(20px, 6vw, 96px);
+  border-block-start: 1px solid var(--rule);
+}
+.pv3-section-inner { max-inline-size: 1180px; margin-inline: auto; }
+.pv3-h2 {
+  font-family: var(--display);
+  font-weight: var(--display-weight);
+  font-size: clamp(30px, 5vw, 60px);
+  line-height: 1;
+  letter-spacing: var(--display-tracking);
+  color: var(--text);
+  margin: 0 0 clamp(20px, 3vw, 36px);
+}
+[data-caps="true"] .pv3-h2 { text-transform: uppercase; }
+[dir="rtl"] .pv3-h2 { font-weight: 700; letter-spacing: 0; }
+
+/* Quiet: big type, lots of room, accent dots between. Each item one line. */
+.pv3-biglist-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  row-gap: 0.15em;
+  font-family: var(--display);
+  font-weight: var(--display-weight);
+  font-size: clamp(30px, 5.2vw, 72px);
+  line-height: 1.05;
+  letter-spacing: var(--display-tracking);
+  color: var(--text);
+}
+[data-caps="true"] .pv3-biglist-items { text-transform: uppercase; }
+[dir="rtl"] .pv3-biglist-items { font-weight: 700; letter-spacing: 0; }
+.pv3-biglist-items li { white-space: nowrap; }
+/* The dot trails each item, so a wrapped line never starts with one. */
+.pv3-biglist-items li:not(:last-child)::after {
+  content: "";
+  display: inline-block;
+  inline-size: 0.16em;
+  block-size: 0.16em;
+  border-radius: 999px;
+  background: var(--accent);
+  margin-inline: 0.42em;
+  vertical-align: middle;
+}
+
+/* Steps: numbered, numbers in the display face with tabular figures. */
+.pv3-steps-list { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(18px, 2.4vw, 28px); }
+.pv3-steps-list li { display: flex; gap: 20px; align-items: baseline; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.6; color: var(--text); }
+.pv3-step-n { font-family: var(--display); font-size: clamp(28px, 3.4vw, 44px); color: var(--accent); min-inline-size: 2ch; }
+
+/* Palate cleanser: one photo, full width, no text. */
+.pv3-palate { position: relative; block-size: clamp(260px, 46vw, 620px); overflow: hidden; }
+.pv3-palate .pv3-photo { position: absolute; inset: 0; z-index: 0; }
+
+/* The offer: the price large in display numerals, a hairline spec list. */
+.pv3-offer-grid { display: grid; gap: clamp(32px, 5vw, 72px); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .pv3-offer-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: start; } }
+.pv3-price { display: flex; align-items: baseline; gap: 14px; margin: 0 0 clamp(24px, 3vw, 36px); }
+.pv3-price .pv3-num { font-family: var(--display); font-weight: var(--display-weight); font-size: clamp(64px, 9vw, 128px); line-height: 0.9; color: var(--text); }
+.pv3-price-unit { font-size: 12px; text-transform: uppercase; letter-spacing: 0.24em; color: var(--muted); }
+[dir="rtl"] .pv3-price-unit { letter-spacing: 0.05em; font-size: 13px; }
+.pv3-spec { margin: 0; border-block-start: 1px solid var(--rule); }
+.pv3-spec-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 16px;
+  padding-block: 16px;
+  border-block-end: 1px solid var(--rule);
+}
+.pv3-spec dt { font-size: 12px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); padding-block-start: 3px; }
+[dir="rtl"] .pv3-spec dt { letter-spacing: 0.04em; font-size: 13px; }
+.pv3-spec dd { margin: 0; font-size: 17px; line-height: 1.5; color: var(--text); }
+.pv3-copy-row dd { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.pv3-copy-value { user-select: all; overflow-wrap: anywhere; font-size: 15px; }
+.pv3-copy-btn {
+  min-block-size: 44px;
+  padding-inline: 16px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+.pv3-copy-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+.pv3-copy-btn:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+.pv3-listing-links { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: clamp(28px, 3vw, 40px) 0 0; font-size: 14px; }
+.pv3-listing-links a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.pv3-listing-links a:hover { color: var(--text); }
+
+/* The phone bar: off until the hero button has gone, off over the offer. */
+.pv3-sticky { display: none; }
+@media (max-width: 639px) {
+  .pv3-sticky {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 45;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-block-start: 1px solid var(--rule);
+    transform: translateY(110%);
+    transition: transform 240ms ease;
+  }
+  .pv3-sticky.is-on { transform: translateY(0); }
+  .pv3-sticky .pv3-btn { flex: 1; }
+  .pv3-sticky-price { font-family: var(--display); font-size: 26px; color: var(--text); }
+  /* The site's own WhatsApp tab moves up so the bar never covers it. */
+  body[data-page-v3] [data-testid="whatsapp-button"] { bottom: calc(92px + env(safe-area-inset-bottom)) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pv3-sticky { transition: none; }
+  .pv3-copy-btn { transition: none; }
+  .pv3-copy-btn:hover { transform: none; }
+}
+
+.pv3-price-sym { font-size: 0.5em; vertical-align: 0.55em; margin-inline-end: 0.04em; font-weight: 400; }
+/* Their own words for a size are read, not scanned: normal case. */
+.pv3-spec dt.pv3-dt-plain { text-transform: none; letter-spacing: 0; font-size: 15px; color: var(--text); padding-block-start: 0; }
