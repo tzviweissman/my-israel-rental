@@ -1,0 +1,166 @@
+/* Page builder v3: everything is scoped to [data-page-v3] and every colour
+   and face comes from the business's design brief as a custom property
+   (components/pagebuilder/v3/V3Hero.jsx, themeVars). No colour is written in
+   this file, so a section can never show one the brief did not validate,
+   and nothing here leaks into the platform's own pages.
+   docs/page-builder-design-rules.md: type scale 3.4, hero tiers part 4,
+   motion part 6. Logical properties only, so Hebrew mirrors. */
+
+[data-page-v3] {
+  background: var(--ground);
+  color: var(--text);
+  font-family: var(--body);
+}
+
+.pv3-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-block-size: min(86svh, 880px);
+  display: flex;
+  align-items: flex-end;
+  /* Rule 5: 96-140px desktop, 64-80px phone. */
+  padding-block: clamp(64px, 11vw, 140px) clamp(48px, 7vw, 96px);
+  padding-inline: clamp(20px, 6vw, 96px);
+  /* Clears the platform's floating nav bar. */
+  padding-block-start: calc(var(--nav-h, 68px) + clamp(40px, 8vw, 120px));
+}
+
+/* Tier 3 texture: one light overlay, drawn in CSS and an inline SVG, no
+   image file. Film grain for Candlelight and Field, paper, stone, linen. */
+.pv3-texture {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+[data-texture="paper"] .pv3-texture { opacity: 0.06; }
+[data-texture="stone"] .pv3-texture { opacity: 0.12; mix-blend-mode: multiply; }
+[data-texture="linen"] .pv3-texture {
+  opacity: 0.07;
+  background-image:
+    repeating-linear-gradient(0deg, var(--text) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, var(--text) 0 1px, transparent 1px 4px);
+}
+[data-texture="none"] .pv3-texture { display: none; }
+/* Soft light falloff toward the copy's corner, from the ground itself. */
+.pv3-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: radial-gradient(120% 90% at 85% 10%, var(--surface) 0%, var(--ground) 62%);
+}
+
+.pv3-hero-inner {
+  max-inline-size: 1180px;
+  inline-size: 100%;
+  margin-inline: auto;
+}
+
+.pv3-logo {
+  inline-size: 64px;
+  block-size: 64px;
+  object-fit: contain;
+  border-radius: 999px;
+  margin-block-end: 28px;
+}
+
+.pv3-script {
+  font-family: var(--script);
+  font-size: clamp(26px, 3.4vw, 44px);
+  line-height: 1.1;
+  color: var(--accent);
+  margin: 0 0 6px;
+}
+
+/* The wordmark: 56-160px (rule 3.4: 96-160 desktop, 56-72 phone). */
+.pv3-wordmark {
+  font-family: var(--display);
+  font-weight: var(--display-weight);
+  font-size: clamp(56px, 10.5vw, 160px);
+  line-height: 0.9;
+  letter-spacing: var(--display-tracking);
+  color: var(--text);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+[data-caps="true"] .pv3-wordmark { text-transform: uppercase; }
+/* Hebrew has no capitals and its faces need their own weight to read. */
+[dir="rtl"] .pv3-wordmark { font-weight: 700; letter-spacing: 0; line-height: 1; }
+.pv3-dot { color: var(--accent); }
+
+.pv3-tagline {
+  max-inline-size: 34em;
+  font-size: clamp(17px, 1.4vw, 19px);
+  line-height: 1.6;
+  color: var(--muted);
+  margin: clamp(18px, 2.4vw, 28px) 0 0;
+}
+
+.pv3-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  margin-block-start: clamp(24px, 3vw, 36px);
+}
+
+/* The one filled accent element on the page (rule 1.3). */
+.pv3-btn {
+  min-block-size: 48px;
+  padding-inline: 26px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 200ms ease, filter 200ms ease;
+}
+.pv3-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.pv3-btn:active { transform: translateY(0); filter: brightness(0.96); }
+.pv3-btn:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+
+/* The proof line inherits the panel's colours, not the platform's. */
+.pv3-proof, .pv3-proof * { color: var(--muted) !important; }
+
+.pv3-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 0;
+  list-style: none;
+  padding: 0;
+  margin: clamp(28px, 3.6vw, 44px) 0 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+}
+/* gap, not a trailing space: a flex item drops it ("FROM₪100"). */
+.pv3-facts li { display: inline-flex; align-items: center; gap: 0.45em; }
+.pv3-facts li + li::before {
+  content: "";
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  margin-inline: 14px;
+}
+[dir="rtl"] .pv3-facts { letter-spacing: 0.05em; font-size: 13px; }
+.pv3-num { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+  .pv3-hero { min-block-size: 62svh; }
+  .pv3-logo { inline-size: 52px; block-size: 52px; margin-block-end: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv3-btn { transition: none; }
+  .pv3-btn:hover { transform: none; }
+}

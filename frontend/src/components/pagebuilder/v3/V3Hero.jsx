@@ -1,0 +1,151 @@
+/**
+ * Page builder v3, phase 1: the hero, drawn from the business's design brief.
+ *
+ * docs/page-builder-design-rules.md (v3). The brief is built by rules from
+ * the business's own record (backend/utils/design_brief.py) and arrives in
+ * the page payload only when PAGE_BUILDER_V3_ENABLED is on AND an admin
+ * switched this business on. Phase 1 draws tier 3, the typographic brand
+ * panel: the wordmark at hero scale on the brand ground, with the preset's
+ * texture. Photos come with the flyer check (phase 2); a flyer is never a
+ * hero (rule 4).
+ *
+ * Everything in it is the business's own: the name, one of their sentences
+ * word for word, their real lowest price, their certificate, their areas.
+ * The button opens the chat (chat-only, Tzvi 5 Oct 2026).
+ *
+ * Colour and type arrive as CSS custom properties scoped to this section
+ * (styles/page-v3.css), so nothing here hardcodes a colour or a face, and
+ * the section does not inherit the platform's theme.
+ */
+import React, { useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
+
+import ProofLine from '../../marketplace/ProofLine';
+import '../../../styles/page-v3.css';
+
+// Mirrors FONT_ALLOWLIST in backend/utils/design_brief.py. A face that is
+// not here is never requested, whatever a stored brief says.
+const ALLOWED = new Set([
+  'Oswald', 'Pinyon Script', 'Figtree', 'Bricolage Grotesque', 'DM Sans',
+  'Cormorant Garamond', 'Manrope', 'Archivo', 'Anton', 'Work Sans',
+  'Barlow Condensed', 'Barlow',
+]);
+
+/** One Google Fonts request for exactly the brief's faces, display=swap. */
+export function fontsHref(type) {
+  const fam = [];
+  const add = (face, weights) => {
+    if (face && ALLOWED.has(face)) fam.push(`family=${face.replace(/ /g, '+')}${weights ? `:wght@${weights}` : ''}`);
+  };
+  add(type.display, [...new Set([type.display_weight || 400, 400])].sort((a, b) => a - b).join(';'));
+  if (type.body !== type.display) add(type.body, '400;600');
+  if (type.accent) add(type.accent, null);
+  return fam.length ? `https://fonts.googleapis.com/css2?${fam.join('&')}&display=swap` : null;
+}
+
+function useFonts(href) {
+  useEffect(() => {
+    if (!href || document.querySelector(`link[data-pv3-fonts="${href}"]`)) return undefined;
+    const pre = document.createElement('link');
+    pre.rel = 'preconnect'; pre.href = 'https://fonts.gstatic.com'; pre.crossOrigin = 'anonymous';
+    const link = document.createElement('link');
+    link.rel = 'stylesheet'; link.href = href; link.dataset.pv3Fonts = href;
+    document.head.append(pre, link);
+    return undefined;
+  }, [href]);
+}
+
+/** The brief's palette and faces as the section's custom properties. */
+export function themeVars(brief) {
+  const p = brief.palette || {};
+  const ty = brief.type || {};
+  // Each stack ends in the Hebrew face, so Hebrew letters (which none of the
+  // preset faces have) fall back to Frank Ruhl Libre / Assistant per glyph.
+  const stack = (face, he, generic) => `${face ? `"${face}", ` : ''}${he}, ${generic}`;
+  return {
+    '--ground': p.ground, '--text': p.text, '--muted': p.muted, '--accent': p.accent,
+    '--surface': p.surface, '--rule': p.rule, '--on-accent': p.on_accent,
+    '--display': stack(ty.display, "'Frank Ruhl Libre'", 'serif'),
+    '--body': stack(ty.body, "'Assistant'", 'system-ui, sans-serif'),
+    '--script': stack(ty.accent, "'Frank Ruhl Libre'", 'cursive'),
+    '--display-weight': ty.display_weight || 400,
+    '--display-tracking': ty.tracking || '0em',
+  };
+}
+
+/** "L.A. Cholent by Rabbi Samuels" -> wordmark "L.A. Cholent", script
+ *  "by Rabbi Samuels". Their own words, only split. */
+export function splitName(name) {
+  const m = /^(.{2,}?)\s+(by\s+.+)$/i.exec(name || '');
+  return m ? { wordmark: m[1], script: m[2] } : { wordmark: name || '', script: null };
+}
+
+/** Dots in the wordmark take the accent (rules appendix: "gold dots"). */
+const Wordmark = ({ text }) => (
+  <>
+    {Array.from(text).map((ch, i) => (ch === '.'
+      // eslint-disable-next-line react/no-array-index-key
+      ? <span key={i} className="pv3-dot">.</span>
+      : ch))}
+  </>
+);
+
+export default function V3Hero({ brief, name, logoUrl, priceText, areaText, kosherBody, proof, onPrimary, children }) {
+  const { t, i18n } = useTranslation();
+  const he = (i18n.language || '').startsWith('he');
+  useFonts(fontsHref((brief && brief.type) || {}));
+  if (!brief || !brief.palette) return null;
+
+  // A Hebrew name is shown whole; a Latin one splits the same in both languages.
+  const { wordmark, script } = /[֐-׿]/.test(name || '') ? { wordmark: name, script: null } : splitName(name);
+  const tagline = (brief.taglines || []).find((x) => x.lang === (he ? 'he' : 'en'));
+  const kind = brief.primary_action?.kind || 'message';
+  const food = brief.category === 'food' || brief.category === 'restaurants';
+  const label = kind === 'order'
+    ? t('pageV3.ctaOrder', 'Place an order')
+    : kind === 'book'
+      ? t('pageV3.ctaBook', 'Book a time')
+      : food ? t('pageV3.ctaMessageOrder', 'Message to order') : t('pageV3.ctaMessage', 'Send a message');
+
+  // At most three facts, and each only if the record has it (rule 1).
+  const facts = [
+    priceText && { key: 'price', label: t('pageV3.from', 'From'), text: priceText, ltr: true },
+    kosherBody && { key: 'kosher', text: t('pageV3.kosher', { defaultValue: 'Kosher · {{body}}', body: kosherBody }) },
+    areaText && { key: 'area', text: areaText },
+  ].filter(Boolean).slice(0, 3);
+
+  return (
+    <section
+      className="pv3-hero"
+      data-page-v3=""
+      data-preset={brief.preset}
+      data-texture={brief.texture}
+      data-caps={brief.type?.caps ? 'true' : 'false'}
+      style={themeVars(brief)}
+      data-testid="pv3-hero"
+    >
+      <div className="pv3-texture" aria-hidden="true" />
+      <div className="pv3-hero-inner">
+        {logoUrl && <img className="pv3-logo" src={logoUrl} alt="" aria-hidden="true" />}
+        {script && <p className="pv3-script" data-testid="pv3-script">{script}</p>}
+        <h1 className="pv3-wordmark" data-testid="pv3-wordmark"><Wordmark text={wordmark} /></h1>
+        {tagline && <p className="pv3-tagline" data-testid="pv3-tagline">{tagline.text}</p>}
+        <div className="pv3-actions">
+          <button type="button" className="pv3-btn" onClick={onPrimary} data-testid="pv3-primary">{label}</button>
+          {/* The proof beside the button (ruling 5). Kosher is in the fact
+              strip just below, so it is not said twice above the fold. */}
+          <ProofLine {...proof} kosher={null} className="pv3-proof" testid="pv3-proof" />
+        </div>
+        {facts.length > 0 && (
+          <ul className="pv3-facts" data-testid="pv3-facts">
+            {facts.map((f) => (
+              // Prices stay left-to-right inside Hebrew (rule 1.6).
+              <li key={f.key}>{f.label ? <span>{f.label}</span> : null}{f.ltr ? <span dir="ltr" className="pv3-num">{f.text}</span> : f.text}</li>
+            ))}
+          </ul>
+        )}
+        {children}
+      </div>
+    </section>
+  );
+}

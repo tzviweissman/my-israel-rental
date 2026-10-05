@@ -26,6 +26,7 @@ import PageMeta from '../components/PageMeta';
 import NotFound from './NotFound';
 import { businessCanonicalUrl, currentBusinessHostSlug } from '../utils/businessHost';
 import BlockList from '../components/pagebuilder/BlockList';
+import V3Hero from '../components/pagebuilder/v3/V3Hero';
 import { cheapestFirst } from '../utils/gigPrice';
 import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
@@ -235,6 +236,21 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
     ].filter(Boolean),
   };
 
+  // Page builder v3 (docs/page-builder-design-rules.md): the API sends the
+  // design brief only when the site switch AND this business's switch are on.
+  const v3 = Boolean(biz.page_v3 && biz.design_brief && biz.design_brief.palette);
+  const v3Brief = v3 ? biz.design_brief : null;
+  const v3Price = v3Brief?.primary_action?.price_anchor
+    ? money(v3Brief.primary_action.price_anchor, v3Brief.primary_action.currency || 'ILS') : null;
+  const v3Area = [
+    ...(biz.areas || []).slice(0, 2).map((a) => prettyArea(a, t)),
+    biz.serves_nationwide ? t('serviceArea.chipNationwide', 'All of Israel') : null,
+  ].filter(Boolean).join(' · ');
+  // Rule 4, "say it once": on a v3 page the hero carries "New on
+  // MyIsraelRental" (kept, Tzvi 25 Sep) and the fact strip carries kosher,
+  // so the proof lines further down do not repeat them.
+  const proofBelow = v3 ? { ...proof, memberSince: null, kosher: null } : proof;
+
   // Real data only: fall back through what the business actually has
   // rather than inventing a line for it.
   /* Cover first, for the same reason the short-link card prefers it: a
@@ -294,7 +310,33 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         />
       )}
 
+      {v3 && (
+        <V3Hero
+          brief={v3Brief}
+          name={displayName}
+          logoUrl={biz.logo_url}
+          priceText={v3Price}
+          areaText={v3Area}
+          kosherBody={biz.kosher_certification?.body || null}
+          proof={proof}
+          onPrimary={messageBusiness}
+        >
+          {!preview && user?.id && user.id === biz.owner_user_id && (
+            <button
+              type="button"
+              onClick={() => navigate(`/dashboard?tab=my-businesses&details=${biz.id}`)}
+              className="mt-6 text-xs font-semibold underline"
+              style={{ color: 'var(--muted)' }}
+              data-testid="business-owner-edit"
+            >
+              {t('businesses.editOnPage', 'Edit hours, areas & logo')}
+            </button>
+          )}
+        </V3Hero>
+      )}
+
       <div className={`${columnWidth} mx-auto px-4 py-8`}>
+        {!v3 && (
         <div className="rounded-2xl border bg-white overflow-hidden mb-6"
           style={{ borderColor: 'var(--brand-border)' }}>
           {/* Cover band. Short enough not to push the name below the
@@ -558,6 +600,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             </div>
           </div>
         </div>
+        )}
 
         {/* The paid page upgrade (backend utils/page_upgrade): the four
             questions answered above the body. Absent on every standard
@@ -683,7 +726,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   >
                     <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
                   </button>
-            <ProofLine {...proof} className="justify-center" testid="business-proof-bottom" />
+            <ProofLine {...proofBelow} className="justify-center" testid="business-proof-bottom" />
           </div>
         )}
       </div>
@@ -747,7 +790,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           }}
           data-testid="business-message-bar"
         >
-          <ProofLine {...proof} compact className="justify-center mb-2" testid="business-proof-sticky" />
+          <ProofLine {...proofBelow} compact className="justify-center mb-2" testid="business-proof-sticky" />
           <button
             type="button"
             onClick={messageBusiness}

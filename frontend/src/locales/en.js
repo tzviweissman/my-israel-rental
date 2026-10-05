@@ -1768,6 +1768,14 @@ const en = {
         attention: 'Needs your attention',
         attentionNone: 'All clear.',
       },
+      pageV3: {
+        ctaOrder: 'Place an order',
+        ctaBook: 'Book a time',
+        ctaMessageOrder: 'Message to order',
+        ctaMessage: 'Send a message',
+        from: 'From',
+        kosher: 'Kosher · {{body}}',
+      },
       dashboard: {
         noBusinessTitle: 'No business page yet',
         noBusinessBody: 'Add your business and what you offer. Free to list, free to be found, no commission.',

@@ -1735,6 +1735,14 @@ const he = {
         attention: 'דורש את תשומת לבכם',
         attentionNone: 'הכול נקי.',
       },
+      pageV3: {
+        ctaOrder: 'לביצוע הזמנה',
+        ctaBook: 'לקביעת תור',
+        ctaMessageOrder: 'לשליחת הודעה והזמנה',
+        ctaMessage: 'לשליחת הודעה',
+        from: 'מחיר התחלתי',
+        kosher: 'כשר · {{body}}',
+      },
       dashboard: {
         noBusinessTitle: 'עדיין אין דף עסק',
         noBusinessBody: 'הוסיפו את העסק שלכם ואת מה שאתם מציעים. בחינם לפרסם, בחינם להימצא, בלי עמלה.',
