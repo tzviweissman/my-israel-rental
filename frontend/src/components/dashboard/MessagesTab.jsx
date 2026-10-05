@@ -148,7 +148,7 @@ const MessagesTab = ({ API, token, onUnreadChange }) => {
                   </span>
                 </div>
               ) : (
-                <p className="text-sm mt-1 text-gray-400 italic">—</p>
+                <p className="text-sm mt-1 text-gray-400 italic"> - </p>
               )}
             </div>
             {isUnread && (

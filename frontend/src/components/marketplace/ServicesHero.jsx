@@ -15,7 +15,7 @@ const ServicesHero = ({ t }) => (
     accent={t('services.heroAccent', 'the pros.')}
     lede={t(
       'services.heroLede',
-      'Cleaners, movers, plumbers, electricians and more — reviewed, rated, zero booking fees.',
+      'Cleaners, movers, plumbers, electricians and more - reviewed, rated, zero booking fees.',
     )}
     headlineTestId="services-hero-title"
     ledeTestId="services-hero-subtitle"

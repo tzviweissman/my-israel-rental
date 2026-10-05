@@ -47,7 +47,7 @@ const UndoBulkDeleteSnackbar = ({ tid, message, snapshotId, headers, onRestored,
       if (onRestored) onRestored();
       if (notifyStatsChange) notifyStatsChange();
     } catch (e) {
-      toast.error(e.response?.data?.detail || t('admin.undoFailed', 'Could not undo — snapshot may have expired'));
+      toast.error(e.response?.data?.detail || t('admin.undoFailed', 'Could not undo - snapshot may have expired'));
       setRestoring(false);
     }
   };

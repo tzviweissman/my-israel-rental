@@ -273,7 +273,7 @@ const CreateGig = () => {
         // failure here is no longer an annoyance, it is a wall.
         const why = failed.find((r) => r.error)?.error;
         toast.error(why
-          ? t('sweep.uploadFailedWhy', { defaultValue: 'Photo upload failed — {{reason}}', reason: why })
+          ? t('sweep.uploadFailedWhy', { defaultValue: 'Photo upload failed - {{reason}}', reason: why })
           : t('sweep.uploadFailed', 'Photo upload failed. Please try a different photo.'));
         reportUploadFailure({ where: 'gig-wizard-tier', count: failed.length, reason: why, API, token });
       }
@@ -457,7 +457,7 @@ const CreateGig = () => {
         : form.tiers.find((t) => !(t.images || []).length);
       if (noPhoto) {
         return t('sweep.needPhotoEach', {
-          defaultValue: 'Add at least one photo to "{{name}}" — listings with a photo get far more enquiries.',
+          defaultValue: 'Add at least one photo to "{{name}}" - listings with a photo get far more enquiries.',
           name: (noPhoto.name || '').trim() || t('sweep.thisOne', 'this one'),
         });
       }
@@ -467,7 +467,7 @@ const CreateGig = () => {
     if (step === contactStep) {
       if (!(form.area || '').trim()) return t('wizard.reasonArea', 'Pick a service area (city).');
       if (form.booking_mode === 'whatsapp' && !hasValidWhatsApp(form.whatsapp)) {
-        return t('services.whatsappInvalid', 'Enter a valid WhatsApp number — e.g. 050-123-4567 or +972 50 123 4567.');
+        return t('services.whatsappInvalid', 'Enter a valid WhatsApp number - e.g. 050-123-4567 or +972 50 123 4567.');
       }
     }
     return '';
@@ -487,7 +487,7 @@ const CreateGig = () => {
       // Stopped here as well as on the server so the reason arrives
       // before the save, not as a failure after it.
       toast.error(t('services.photoRequired',
-        'Add at least one photo — a listing without one is very hard to book.'));
+        'Add at least one photo - a listing without one is very hard to book.'));
       return;
     }
     setSaving(true);
@@ -744,7 +744,7 @@ const CreateGig = () => {
                   {t('services.specificType', 'Specific type')}
                 </label>
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {t('services.specificTypeProviderHint', 'Optional — customers filter by this, so it helps the right ones find you.')}
+                  {t('services.specificTypeProviderHint', 'Optional - customers filter by this, so it helps the right ones find you.')}
                 </p>
                 <div className="flex flex-wrap gap-2 mt-2" data-testid="wizard-subcategory-row">
                   {SUBCATEGORIES[form.category].map((sub) => (
@@ -843,7 +843,7 @@ const CreateGig = () => {
                   {
                     v: 'in_platform',
                     label: form.gig_type === 'store' ? t('wizard.modeSiteStore', 'Message on MyIsraelRental') : t('wizard.modeSite', 'Book on MyIsraelRental'),
-                    hint: t('services.contactHintInPlatform', 'Requests arrive in your MyIsraelRental inbox — no phone number shared.'),
+                    hint: t('services.contactHintInPlatform', 'Requests arrive in your MyIsraelRental inbox - no phone number shared.'),
                   },
                 ].map((o) => (
                   <button key={o.v} type="button" onClick={() => set({ booking_mode: o.v })}

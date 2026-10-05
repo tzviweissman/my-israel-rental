@@ -37,7 +37,7 @@ const RenterTrustBanner = ({ variant = 'full', className = '' }) => {
       >
         {t(
           'trust.compact',
-          'Free to search and contact owners directly — listings in English.',
+          'Free to search and contact owners directly - listings in English.',
         )}
       </p>
     );

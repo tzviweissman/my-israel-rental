@@ -198,7 +198,7 @@ def _stamp_signature_on_image(
         except Exception:
             continue
     if font_reg is None or font_bold is None:
-        logger.warning("DejaVu fonts unavailable — signature name will use a bitmap fallback")
+        logger.warning("DejaVu fonts unavailable - signature name will use a bitmap fallback")
         font_reg = font_bold = ImageFont.load_default()
 
     pad = max(12, int(isig_h * 0.18))

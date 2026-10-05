@@ -343,7 +343,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
       });
       // Flash a tiny hint if smart-match actually helped
       if (matchedCount > 0 && matchedCount < incoming.length) {
-        toast.success(`Matched ${matchedCount} of ${incoming.length} by filename — rest distributed in order`);
+        toast.success(`Matched ${matchedCount} of ${incoming.length} by filename - rest distributed in order`);
       } else if (matchedCount === incoming.length) {
         toast.success(`All ${incoming.length} matched by filename`);
       }
@@ -414,7 +414,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
             {t('dashboard.propertiesEmptyTitle', 'No properties yet')}
           </p>
           <p className="text-sm mb-5" style={{ color: 'var(--brand-muted)' }}>
-            {t('dashboard.propertiesEmptyBody', 'Listing is free — no listing fee, no booking fees, no commission. Add your first and renters can find it today.')}
+            {t('dashboard.propertiesEmptyBody', 'Listing is free - no listing fee, no booking fees, no commission. Add your first and renters can find it today.')}
           </p>
           <button
             type="button"
@@ -478,7 +478,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
                   : 'bg-[#fafaf5] text-gray-600 hover:text-[var(--brand-primary)] border border-[#E5E5E5]'
               }`}
               data-testid="filter-no-images-btn"
-              title="Listings missing cover photos — add images to boost views"
+              title="Listings missing cover photos - add images to boost views"
             >
               <ImageIcon size={12} />
               {t('dashboard.needsImages', 'Needs Images')}

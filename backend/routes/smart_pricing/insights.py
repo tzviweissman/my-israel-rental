@@ -90,7 +90,7 @@ async def _build_owner_digest(owner_id: str) -> dict | None:
                 first_factor = notable.factors[0].name if notable.factors else "Smart Pricing"
                 notable_text = (
                     f"{direction} {sym}{notable.price} on {notable.date} "
-                    f"(was {sym}{notable.base}) — {first_factor.lower()}"
+                    f"(was {sym}{notable.base}) - {first_factor.lower()}"
                 )
 
             properties_data.append({

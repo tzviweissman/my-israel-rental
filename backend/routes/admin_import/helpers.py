@@ -450,7 +450,7 @@ async def _resolve_or_create_owner(
     link = f"{_frontend_origin()}/auth/reset-password?token={raw_token}"
     asyncio.create_task(send_email(
         to_email=email_lc,
-        subject="Your MyIsraelRental account is ready — set your password",
+        subject="Your MyIsraelRental account is ready - set your password",
         html_body=(
             f"<p>Hi {display_name},</p>"
             "<p>An administrator has set up your account on <b>MyIsraelRental.com</b> "

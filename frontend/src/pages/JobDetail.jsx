@@ -69,7 +69,7 @@ const JobDetail = () => {
       await axios.post(`${API}/marketplace/jobs/${id}/apply`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success('Application sent — the poster has been notified by email.');
+      toast.success('Application sent - the poster has been notified by email.');
       setApplyOpen(false);
       setAlreadyApplied(true);
       setJob((j) => ({ ...j, applications_count: (j?.applications_count || 0) + 1 }));

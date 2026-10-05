@@ -192,7 +192,7 @@ const SignupJoin = () => {
       setSignedUp(true);
       clearDraft(SIGNUP_DRAFT);
       login(res.data.token, res.data.user);
-      toast.success(t('auth.accountCreated', 'Account created — welcome!'));
+      toast.success(t('auth.accountCreated', 'Account created - welcome!'));
       if (activeCard.backendRole === 'renter') {
         setShowWelcomePopups(true);
       } else if (activeCard.backendRole === 'owner') {
@@ -288,7 +288,7 @@ const SignupJoin = () => {
               {t('signupJoin.headline', 'Join My Israel Rental')}
             </h1>
             <p className="mt-3 text-base sm:text-lg text-gray-600 max-w-2xl">
-              {t('signupJoin.sub', 'Book a stay, list a property, or offer your services — all in one place.')}
+              {t('signupJoin.sub', 'Book a stay, list a property, or offer your services - all in one place.')}
             </p>
 
             <p className="mt-10 sm:mt-14 text-sm font-semibold tracking-wide uppercase text-gray-500">

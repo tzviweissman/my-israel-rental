@@ -31,7 +31,7 @@ const StaysHero = ({ landing, t }) => {
           ? landing.heroLede
           : t(
               'stays.heroLede',
-              'Long-term, short-term and vacation rentals — direct from owners, zero service fees.',
+              'Long-term, short-term and vacation rentals - direct from owners, zero service fees.',
             )
       }
       headlineTestId={hasLandingCopy ? 'stays-landing-h1' : 'stays-hero-title'}

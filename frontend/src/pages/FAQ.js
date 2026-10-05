@@ -55,19 +55,19 @@ const SECTIONS = [
             <p className="mb-3">Policies are chosen by the lister. Common options include:</p>
             <ul className="space-y-2 list-none">
               <li className="flex gap-2">
-                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Flexible —</span>
+                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Flexible:</span>
                 <span>Full refund if cancelled 24–48 hours before check-in.</span>
               </li>
               <li className="flex gap-2">
-                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Moderate —</span>
+                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Moderate:</span>
                 <span>Full refund up to 5–7 days before arrival.</span>
               </li>
               <li className="flex gap-2">
-                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Strict —</span>
+                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Strict:</span>
                 <span>Refund only if cancelled 30+ days before arrival.</span>
               </li>
               <li className="flex gap-2">
-                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Custom —</span>
+                <span className="font-semibold text-[var(--brand-primary)] flex-shrink-0">Custom:</span>
                 <span>Chosen by the lister.</span>
               </li>
             </ul>
@@ -202,7 +202,7 @@ const FAQ = () => {
   return (
     <div className="min-h-screen bg-[#fafafa] pt-[140px] sm:pt-[160px] md:pt-[220px] pb-20 px-4" data-testid="faq-page">
       <PageMeta
-        title="FAQ — Renting in Israel made simple | MyIsraelRental"
+        title="FAQ - Renting in Israel made simple | MyIsraelRental"
         description="Answers about booking, payments, cancellations, deposits and contracts when renting in Israel. Learn how MyIsraelRental keeps it free for renters and owners."
         path="/faq"
       />

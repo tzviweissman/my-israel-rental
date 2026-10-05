@@ -252,7 +252,7 @@ export default function QrShareCard({ url, filename = 'myisraelrental-qr', testi
       </div>
 
       <p className="mt-2 text-center text-[11px]" style={{ color: 'var(--brand-muted)' }}>
-        {t('qr.printSize', 'Print at least 2 × 2 cm — larger for a building sign.')}
+        {t('qr.printSize', 'Print at least 2 × 2 cm - larger for a building sign.')}
       </p>
 
       {/* Hidden full-resolution canvas that the PNG download reads from. */}

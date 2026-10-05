@@ -272,7 +272,7 @@ async def _notify_matching_providers(job: dict[str, Any]) -> None:
         # Budget-open jobs drop the em-dash tail so the subject stays clean.
         sym = "₪" if job.get("budget_currency", "ILS") == "ILS" else "$"
         if job.get("budget_type") == "fixed" and job.get("budget_amount"):
-            budget_subject = f" — {sym}{int(job['budget_amount'])}"
+            budget_subject = f" - {sym}{int(job['budget_amount'])}"
             budget_body = f"{sym}{int(job['budget_amount'])} · fixed"
         else:
             budget_subject = ""
@@ -361,7 +361,7 @@ async def list_jobs(
     status: str = "open",
     limit: int = Query(60, ge=1, le=120),
 ):
-    """Public job feed. Anyone can browse — no auth required."""
+    """Public job feed. Anyone can browse - no auth required."""
     q: dict[str, Any] = {"status": status}
     if category:
         q["category"] = category
@@ -414,7 +414,7 @@ async def create_job(payload: JobIn, user=Depends(verify_token)):
     if open_count >= MAX_OPEN_JOBS_PER_USER:
         raise HTTPException(
             status_code=400,
-            detail=f"Only {MAX_OPEN_JOBS_PER_USER} open jobs allowed at a time — close one first",
+            detail=f"Only {MAX_OPEN_JOBS_PER_USER} open jobs allowed at a time - close one first",
         )
 
     now = datetime.now(UTC).isoformat()
@@ -962,7 +962,7 @@ async def _send_jobs_digest() -> dict[str, Any]:
         """
         await send_email(
             u["email"],
-            subject=f"Your daily jobs digest — {total_shown} new match{'es' if total_shown != 1 else ''}",
+            subject=f"Your daily jobs digest - {total_shown} new match{'es' if total_shown != 1 else ''}",
             html_body=html,
             tag="job-digest",
         )

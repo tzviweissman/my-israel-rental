@@ -212,7 +212,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
       });
       if (hasError) {
         setRowErrors(errMap);
-        toast.error('Some rows have errors — see them inline');
+        toast.error('Some rows have errors - see them inline');
         setSaving(false);
         return;
       }
@@ -240,7 +240,7 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
           errs[s.index - 1] = s.error || 'Failed to create';
         }
         setRowErrors(errs);
-        toast.error(`${skipped.length} row${skipped.length === 1 ? '' : 's'} skipped — see inline errors.`, { duration: 6000 });
+        toast.error(`${skipped.length} row${skipped.length === 1 ? '' : 's'} skipped - see inline errors.`, { duration: 6000 });
       }
       if (commitRes.data.summary.created > 0) {
         toast.success(`${commitRes.data.summary.created} properties created`);
@@ -300,8 +300,8 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
       setStage('editor');
       toast.success(
         parsed.summary.invalid
-          ? `Imported ${parsed.summary.total} rows — ${parsed.summary.invalid} need fixing`
-          : `Imported ${parsed.summary.total} rows — ready to save`,
+          ? `Imported ${parsed.summary.total} rows - ${parsed.summary.invalid} need fixing`
+          : `Imported ${parsed.summary.total} rows - ready to save`,
       );
     } catch (e) {
       toast.error(e.response?.data?.detail || 'Import failed');
@@ -358,9 +358,9 @@ const BulkUploadModal = ({ isOpen, onClose, onDone, API, token }) => {
       setRows(editorRows);
       setRowErrors({});
       setSmartPaste('');
-      toast.success(`Extracted ${editorRows.length} propert${editorRows.length === 1 ? 'y' : 'ies'} — review below`);
+      toast.success(`Extracted ${editorRows.length} propert${editorRows.length === 1 ? 'y' : 'ies'} - review below`);
     } catch (e) {
-      toast.error(e.response?.data?.detail || 'AI extraction failed — try the manual editor');
+      toast.error(e.response?.data?.detail || 'AI extraction failed - try the manual editor');
     } finally {
       setSmartPasting(false);
     }

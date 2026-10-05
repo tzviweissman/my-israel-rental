@@ -105,7 +105,7 @@ const CinematicHero = ({ reducedMotion }) => {
         <p>
           {t(
             'home.hero.sub',
-            'Rent a home. Hire the pros. — one place for both. Free for renters and owners, no service fees.',
+            'Rent a home. Hire the pros. - one place for both. Free for renters and owners, no service fees.',
           )}
         </p>
         <div className="ctas">
@@ -123,7 +123,7 @@ const CinematicHero = ({ reducedMotion }) => {
         </div>
       </div>
 
-      <div className="hint">{t('home.hero.hint', 'Scroll — the story moves with you')}</div>
+      <div className="hint">{t('home.hero.hint', 'Scroll - the story moves with you')}</div>
     </header>
   );
 };

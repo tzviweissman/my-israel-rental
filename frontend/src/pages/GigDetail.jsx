@@ -236,7 +236,7 @@ const BookingForm = ({ gig, tier, onClose, token }) => {
       >
         <h3 className="text-lg font-bold" dir="auto">
           {t('gigDetail.requestTier', {
-            defaultValue: 'Request "{{tier}}" — ₪{{price}}',
+            defaultValue: 'Request "{{tier}}" - ₪{{price}}',
             tier: tier.name,
             price: tier.price.toLocaleString(),
           })}
@@ -604,7 +604,7 @@ const GigDetail = () => {
         return toast.error(t('services.pickDayAndTimeFirst', 'Pick a day and time slot first'));
       }
       if (useWhatsApp) {
-        const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} on ${appointmentDate} at ${appointmentSlot} (${sym}${tier.price}) from MyIsraelRental.`;
+        const msg = `Hi! I'd like to book your "${displayTitle}" - ${tier.name} on ${appointmentDate} at ${appointmentSlot} (${sym}${tier.price}) from MyIsraelRental.`;
         if (openWhatsApp(msg)) return;
       }
       if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
@@ -614,7 +614,7 @@ const GigDetail = () => {
     // Deliverable
     if (useWhatsApp) {
       const datePart = gig.enable_date_booking && deliverableDate ? ` on ${deliverableDate}` : '';
-      const msg = `Hi! I'd like to book your "${displayTitle}" — ${tier.name} (${sym}${tier.price})${datePart} from MyIsraelRental.`;
+      const msg = `Hi! I'd like to book your "${displayTitle}" - ${tier.name} (${sym}${tier.price})${datePart} from MyIsraelRental.`;
       if (openWhatsApp(msg)) return;
     }
     if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
@@ -1222,8 +1222,8 @@ const GigDetail = () => {
 
               <p className="text-[11px] text-gray-400 text-center mt-3">
                 {isStore
-                  ? t('services.noCutSeller', "You deal with the seller directly — MyIsraelRental doesn't take a cut.")
-                  : t('services.noCutProvider', "You deal with the provider directly — MyIsraelRental doesn't take a cut.")}
+                  ? t('services.noCutSeller', "You deal with the seller directly - MyIsraelRental doesn't take a cut.")
+                  : t('services.noCutProvider', "You deal with the provider directly - MyIsraelRental doesn't take a cut.")}
               </p>
             </div>
           </div>
@@ -1457,7 +1457,7 @@ const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, 
   if (!availableIsoSet.size) {
     return (
       <p className="text-xs text-gray-500 pt-2 border-t border-gray-100" data-testid="gig-appt-no-hours">
-        {t('services.noOpenHoursYet', "This business hasn't set open hours yet — send them a message instead.")}
+        {t('services.noOpenHoursYet', "This business hasn't set open hours yet - send them a message instead.")}
       </p>
     );
   }
@@ -1541,7 +1541,7 @@ const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, 
           purpose — it informs, it should not scare anyone off. */}
       {isWhatsApp && (
         <p className="text-[11px] text-gray-500 leading-snug pt-1" data-testid="gig-appt-wa-notice">
-          {t('services.waHoursNotice', "Times shown are this business's opening hours — confirm with them directly.")}
+          {t('services.waHoursNotice', "Times shown are this business's opening hours - confirm with them directly.")}
         </p>
       )}
     </div>

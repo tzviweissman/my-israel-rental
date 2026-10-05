@@ -333,10 +333,10 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
             <div className="pt-2 border-t space-y-2" style={{ borderColor: 'var(--brand-border)' }}>
               {field('license_number',
                 t('directory.licence', 'Licence number'),
-                t('directory.licencePh', 'Optional — shown on your page as supplied'))}
+                t('directory.licencePh', 'Optional - shown on your page as supplied'))}
               <p className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>
                 {t('directory.licenceHint',
-                  'Currency services are licensed in Israel. Adding your number helps customers trust the listing — we show it as supplied by you and do not verify it.')}
+                  'Currency services are licensed in Israel. Adding your number helps customers trust the listing - we show it as supplied by you and do not verify it.')}
               </p>
             </div>
           )}

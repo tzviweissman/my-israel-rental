@@ -857,10 +857,10 @@ async def resend_set_password_email(user_id: str, payload: dict = Depends(verify
     link = f"{_frontend_origin()}/auth/reset-password?token={raw_token}"
     asyncio.create_task(send_email(
         to_email=email_lc,
-        subject="Your MyIsraelRental account is ready — set your password",
+        subject="Your MyIsraelRental account is ready - set your password",
         html_body=(
             f"<p>Hi {display_name},</p>"
-            "<p>This is a friendly reminder — your <b>MyIsraelRental.com</b> owner account "
+            "<p>This is a friendly reminder - your <b>MyIsraelRental.com</b> owner account "
             "is set up and waiting for you.</p>"
             "<p>To finish onboarding, please set your password using the link below "
             "(valid for 24 hours):</p>"

@@ -66,7 +66,7 @@ const NotifyMeCard = ({ filters, dateRange }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       if (res.data.existing) {
-        toast.success(t('stays.notifyAlreadyActive', "Alert already active — we'll notify you when something matches."));
+        toast.success(t('stays.notifyAlreadyActive', "Alert already active - we'll notify you when something matches."));
       } else {
         toast.success(t('stays.notifySaved', "Saved! We'll email and notify you when a match becomes available."));
       }
@@ -95,7 +95,7 @@ const NotifyMeCard = ({ filters, dateRange }) => {
         {t('stays.notifyTitle', "Don't see what you're looking for?")}
       </h3>
       <p className="text-white/80 text-sm leading-relaxed mb-5 max-w-md mx-auto">
-        {t('stays.notifyBody', "We'll watch new listings for you and ping you by email + in-app the moment a property matches your filters — including ±30 days around your dates.")}
+        {t('stays.notifyBody', "We'll watch new listings for you and ping you by email + in-app the moment a property matches your filters - including ±30 days around your dates.")}
       </p>
 
       {chips.length > 0 && (

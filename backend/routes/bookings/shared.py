@@ -124,7 +124,7 @@ def _assert_not_in_holiday_window(
             status_code=400,
             detail=(
                 f"These dates fall inside the owner's {holiday_label} window "
-                f"({hs} → {he}). Please book the holiday rate instead — "
+                f"({hs} → {he}). Please book the holiday rate instead - "
                 "see the holiday price card on the listing."
             ),
         )

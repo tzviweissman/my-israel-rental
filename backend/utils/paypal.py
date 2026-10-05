@@ -67,7 +67,7 @@ async def get_access_token() -> str:
         raise RuntimeError(
             f"PayPal rejected the credentials for the {mode} environment (401). "
             f"PAYPAL_CLIENT_ID / PAYPAL_CLIENT_SECRET are most likely {other} "
-            f"keys — the two are separate and are not interchangeable. Get the "
+            f"keys - the two are separate and are not interchangeable. Get the "
             f"{mode} pair from developer.paypal.com → Apps & Credentials with "
             f"the {mode.capitalize()} toggle selected."
         )
@@ -215,7 +215,7 @@ async def get_order(order_id: str) -> dict[str, Any]:
 
 # --- Subscriptions (recurring billing) -------------------------------------
 async def create_product(name: str, description: str) -> dict[str, Any]:
-    """Create a PayPal catalog product — required before creating a plan."""
+    """Create a PayPal catalog product - required before creating a plan."""
     token = await get_access_token()
     body = {
         "name": name,

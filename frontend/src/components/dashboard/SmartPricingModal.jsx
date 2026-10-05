@@ -346,8 +346,8 @@ const SmartPricingModal = ({ isOpen, onClose, property, API, token }) => {
             <p className="text-xs text-gray-500">
               {settings.enabled
                 ? settings.auto_apply
-                  ? 'Auto-apply ON — suggestions write to your calendar daily.'
-                  : 'Suggest mode — review and apply prices yourself.'
+                  ? 'Auto-apply ON - suggestions write to your calendar daily.'
+                  : 'Suggest mode - review and apply prices yourself.'
                 : 'Smart Pricing is OFF for this property.'}
             </p>
             <button
@@ -466,7 +466,7 @@ const RulesTab = ({
             label="Weekend premium (Fri/Sat)"
             value={settings.weekend_premium_pct}
             onChange={(v) => set('weekend_premium_pct', v)}
-            help="Israeli weekend nights — Friday and Saturday — get this percentage added on top of your base."
+            help="Israeli weekend nights - Friday and Saturday - get this percentage added on top of your base."
             testid="smart-pricing-weekend"
           />
           <RuleSlider
@@ -485,7 +485,7 @@ const RulesTab = ({
           <RuleSlider
             label="Early-booking premium (≥90 days)"
             value={settings.lead_time_premium_pct}
-            help="Bump nights that are far in the future — early bookers are more committed and less price-sensitive."
+            help="Bump nights that are far in the future - early bookers are more committed and less price-sensitive."
             testid="smart-pricing-lead-time"
           />
           <RuleSlider

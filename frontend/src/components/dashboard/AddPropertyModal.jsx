@@ -169,7 +169,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       if (merged.is_shabbat_elevator) merged.has_elevator = true;
       setPropertyForm(merged);
       setSmartPaste('');
-      toast.success('Filled in fields — review and save');
+      toast.success('Filled in fields - review and save');
     } catch (e) {
       toast.error(e.response?.data?.detail || 'AI extraction failed');
     } finally {
@@ -340,7 +340,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         return;
       }
       if (Array.isArray(detail) && detail[0]?.msg) {
-        msg = `${msg}: ${detail[0].loc?.slice(1).join('.') || 'field'} — ${detail[0].msg}`;
+        msg = `${msg}: ${detail[0].loc?.slice(1).join('.') || 'field'} - ${detail[0].msg}`;
       } else if (typeof detail === 'string') {
         msg = `${msg}: ${detail}`;
       }
@@ -397,7 +397,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 <div>
                   <h3 className="text-sm font-semibold">AI smart paste</h3>
                   <p className="text-xs text-gray-600">
-                    Paste a property description from WhatsApp, email, a listing site — anything. Claude reads it and pre-fills the form below.
+                    Paste a property description from WhatsApp, email, a listing site - anything. Claude reads it and pre-fills the form below.
                   </p>
                 </div>
               </div>
@@ -629,7 +629,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               <div className="md:col-span-2 bg-[#FBF8F2] rounded-xl p-4 border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30">
                 <h3 className="text-base font-bold mb-1 text-[var(--brand-primary)]">{t('sweep.holidayCategories', 'Holiday Categories')}</h3>
                 <p className="text-xs text-gray-500 mb-3">
-                  Optional — tag this listing so it also shows under <span className="font-medium">Sukkot Rentals</span> or <span className="font-medium">Pesach Rentals</span>. Unlocks a separate one-price-for-the-whole-holiday rate below AND auto-lists this apartment under Vacation Rentals during the holiday window.
+                  Optional - tag this listing so it also shows under <span className="font-medium">Sukkot Rentals</span> or <span className="font-medium">Pesach Rentals</span>. Unlocks a separate one-price-for-the-whole-holiday rate below AND auto-lists this apartment under Vacation Rentals during the holiday window.
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {[
@@ -696,7 +696,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 {(propertyForm.holiday_tags || []).length > 0 && (
                   <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-3" data-testid="holiday-window-row">
                     <DateField
-                      label="Holiday window — start"
+                      label="Holiday window - start"
                       value={propertyForm.holiday_start_date}
                       onChange={(v) => setPropertyForm({ ...propertyForm, holiday_start_date: v })}
                       variant="gold"
@@ -705,7 +705,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                       testid="property-holiday-start"
                     />
                     <DateField
-                      label="Holiday window — end"
+                      label="Holiday window - end"
                       value={propertyForm.holiday_end_date}
                       onChange={(v) => setPropertyForm({ ...propertyForm, holiday_end_date: v })}
                       variant="gold"
@@ -745,7 +745,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                         Renters browsing {tagsLabel} rentals see this price.
                         {propertyForm.rental_type === 'vacation'
                           ? ' Other vacation renters see the regular per-night rate above.'
-                          : ` During the holiday window (${propertyForm.holiday_start_date || '—'} → ${propertyForm.holiday_end_date || '—'}), the regular ${propertyForm.rental_type === 'long-term' ? 'monthly' : 'per-night'} rate is blocked so nobody grabs a bargain over the holidays.`}
+                          : ` During the holiday window (${propertyForm.holiday_start_date || ' - '} → ${propertyForm.holiday_end_date || ' - '}), the regular ${propertyForm.rental_type === 'long-term' ? 'monthly' : 'per-night'} rate is blocked so nobody grabs a bargain over the holidays.`}
                       </p>
                     </div>
                     <div className="inline-flex items-center gap-1 p-1 rounded-lg bg-white border border-[rgb(var(--gold-rgb)/<alpha-value>)]/30" data-testid="holiday-price-mode-toggle">
@@ -945,7 +945,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                           Only {daysLeft === 0 ? 'today' : `${daysLeft} more day${daysLeft === 1 ? '' : 's'}`} bookable.
                         </strong>{' '}
                         Renters can't pick any date after{' '}
-                        {new Date(cap).toLocaleDateString()} — including next
+                        {new Date(cap).toLocaleDateString()} - including next
                         summer or the holidays.
                       </>
                     )}
@@ -1127,7 +1127,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
               <p className="text-xs text-gray-500 mt-2" data-testid="instant-booking-unset-note">
                 {t(
                   'property.bookingMode.unsetNote',
-                  'You have not chosen yet — the option marked above is what applies until you do.',
+                  'You have not chosen yet - the option marked above is what applies until you do.',
                 )}
               </p>
             )}

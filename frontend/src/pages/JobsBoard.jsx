@@ -79,7 +79,7 @@ const JobsBoard = () => {
         await axios.delete(`${API}/marketplace/job-searches/${matchedSaved.id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        toast.success(t('jobsBoard.unsaved', "Search unsaved — you'll go back to one email per post."));
+        toast.success(t('jobsBoard.unsaved', "Search unsaved - you'll go back to one email per post."));
       } else {
         await axios.post(`${API}/marketplace/job-searches`,
           { category: activeCat, area: activeArea || null },
@@ -119,7 +119,7 @@ const JobsBoard = () => {
     <div className="min-h-screen bg-[#FAFAF7]" style={{ paddingTop: 'var(--nav-h, 68px)' }} data-testid="jobs-board-page">
       <PageMeta
         title={t('jobsBoard.metaTitle', 'Open jobs · MyIsraelRental')}
-        description={t('jobsBoard.metaDescription', 'Browse jobs posted by renters and owners on MyIsraelRental — apply directly to reach customers.')}
+        description={t('jobsBoard.metaDescription', 'Browse jobs posted by renters and owners on MyIsraelRental - apply directly to reach customers.')}
         path="/businesses/jobs"
       />
       <div className="max-w-6xl mx-auto px-4 py-8">
@@ -129,7 +129,7 @@ const JobsBoard = () => {
               {t('jobsBoard.title', 'Open jobs')}
             </h1>
             <p className="text-sm text-gray-600 mt-1">
-              {t('jobsBoard.subtitle', 'Real people looking for real work — apply directly, no middleman.')}
+              {t('jobsBoard.subtitle', 'Real people looking for real work - apply directly, no middleman.')}
             </p>
           </div>
           <button
@@ -218,7 +218,7 @@ const JobsBoard = () => {
               {t('jobsBoard.emptyTitle', 'No open jobs in this category right now.')}
             </p>
             <p className="text-gray-500 text-sm mb-5">
-              {t('jobsBoard.emptyBody', 'Be the first to post — matching providers will reach out.')}
+              {t('jobsBoard.emptyBody', 'Be the first to post - matching providers will reach out.')}
             </p>
             <button
               onClick={() => { saveReturnPath(); navigate(token ? '/businesses/post-job' : `/auth/login?redirect=${encodeURIComponent('/businesses/post-job')}`); }}

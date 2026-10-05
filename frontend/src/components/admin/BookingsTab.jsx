@@ -120,7 +120,7 @@ const BookingsTab = ({ token }) => {
     const dateRange = `${new Date(b.start_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} → ${new Date(b.end_date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}`;
     const propLabel = b.property_title || 'your listing';
     const guest = b.guest_name ? ` for guest ${b.guest_name}` : '';
-    const subject = `Regarding booking #${shortId} — ${propLabel}`;
+    const subject = `Regarding booking #${shortId} - ${propLabel}`;
     const body =
       `Hi ${first},\n\n` +
       `I'm reaching out from MyIsraelRental about booking #${shortId} at ${propLabel}${guest}, for ${dateRange}.\n\n` +

@@ -156,7 +156,7 @@ const PropertyAvailabilityCard = ({
         <div className="border-t border-gray-100 px-3 md:px-4 py-3 bg-gray-50/60 space-y-3">
           {bookingsForProp.length === 0 ? (
             <p className="text-sm text-gray-500 text-center py-2" data-testid={`property-no-bookings-${property.property_id}`}>
-              {t('dashboard.noBookingsYetOpen', 'No bookings yet — open to take new reservations.')}
+              {t('dashboard.noBookingsYetOpen', 'No bookings yet - open to take new reservations.')}
             </p>
           ) : (
             <div className="space-y-2">
@@ -478,7 +478,7 @@ const OwnerStackedView = ({ bookings, user, token, API, actions, onUpdate }) => 
             {t('dashboard.myBookings')}
           </h2>
           <p className="text-sm text-gray-500 mt-0.5">
-            {t('dashboard.bookingsAvailabilitySubtitle', 'All your reservations, contracts and unit availability — in one place.')}
+            {t('dashboard.bookingsAvailabilitySubtitle', 'All your reservations, contracts and unit availability - in one place.')}
           </p>
         </div>
 

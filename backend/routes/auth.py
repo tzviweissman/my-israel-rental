@@ -302,7 +302,7 @@ async def google_session_exchange(
     access_token = access_token.strip()
 
     if not GOOGLE_CLIENT_ID:
-        logger.error("GOOGLE_CLIENT_ID is not set — Google sign-in is disabled")
+        logger.error("GOOGLE_CLIENT_ID is not set - Google sign-in is disabled")
         raise HTTPException(status_code=503, detail="Google sign-in is not configured")
 
     try:
@@ -316,7 +316,7 @@ async def google_session_exchange(
                 raise HTTPException(status_code=401, detail="Invalid or expired Google token")
             info = ti.json() or {}
             if (info.get("aud") or info.get("azp") or "") != GOOGLE_CLIENT_ID:
-                logger.warning("Google token audience mismatch — rejecting sign-in")
+                logger.warning("Google token audience mismatch - rejecting sign-in")
                 raise HTTPException(
                     status_code=401, detail="Token was not issued for this application"
                 )
@@ -683,7 +683,7 @@ async def set_user_role(payload_in: RoleUpdate, payload: dict = Depends(verify_t
     if target not in {"renter", "owner", "provider"}:
         raise HTTPException(
             status_code=400,
-            detail="Target role must be 'renter', 'owner', or 'provider' — promotion to manager/admin requires admin help",
+            detail="Target role must be 'renter', 'owner', or 'provider' - promotion to manager/admin requires admin help",
         )
 
     current_role = payload.get("role")

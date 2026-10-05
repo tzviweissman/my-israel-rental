@@ -108,7 +108,7 @@ SERVICE_REQUIRED_INFO = {
         "Account numbers for electricity, water, and Arnona (if known)",
     ],
     "bituach_leumi_registration": [
-        "Full name and Teudat Zehut (ID) — or passport number if not yet issued",
+        "Full name and Teudat Zehut (ID) - or passport number if not yet issued",
         "Date of arrival in Israel and visa / immigration status",
         "Current address in Israel",
         "Marital status (and spouse's full name + Teudat Zehut if married)",
