@@ -26,6 +26,7 @@ import PageMeta from '../components/PageMeta';
 import NotFound from './NotFound';
 import { businessCanonicalUrl, currentBusinessHostSlug } from '../utils/businessHost';
 import BlockList from '../components/pagebuilder/BlockList';
+import { cheapestFirst } from '../utils/gigPrice';
 import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
 import { getGigCover } from '../utils/gigAvailability';
@@ -253,12 +254,16 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
     biz.serves_nationwide ? t('serviceArea.chipNationwide', 'All of Israel') : null,
     ...(biz.areas || []).map((a) => prettyArea(a, t)),
   ].filter(Boolean).join(', ');
-  // Their description in the reader's language when they wrote one.
-  const about = ((i18n.language || '').startsWith('he') && biz.description_he) || biz.description;
+  // Their name and description in the reader's language when they wrote
+  // one, everywhere the page says them: header, <title>, share card
+  // (site audit 27 Sep: the first fix covered the body text only).
+  const isHe = (i18n.language || '').startsWith('he');
+  const displayName = (isHe && biz.name_he) || biz.name;
+  const about = (isHe && biz.description_he) || biz.description;
   const shareDescription =
-    biz.description?.slice(0, 155)
+    about?.slice(0, 155)
     || [ (biz.categories || [])[0], areaSummary ].filter(Boolean).join(' · ')
-    || `${biz.name} on MyIsraelRental.`;
+    || `${displayName} on MyIsraelRental.`;
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)', paddingTop: 'var(--nav-h, 68px)' }}
@@ -279,7 +284,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           the share tags of a page nobody is on. */}
       {!preview && (
         <PageMeta
-          title={`${biz.name} — MyIsraelRental`}
+          title={`${displayName} — MyIsraelRental`}
           description={shareDescription}
           image={shareImage}
           path={`/business/${biz.slug || biz.id}`}
@@ -299,7 +304,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
               <>
                 <SafeImage
                   src={bandImage}
-                  name={biz.name}
+                  name={displayName}
                   category={(biz.categories || [])[0]}
                   className="w-full h-full object-cover"
                 />
@@ -328,7 +333,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
               </>
             ) : (
               <BusinessCoverBand
-                name={biz.name}
+                name={displayName}
                 accent={accentFor(biz)}
                 className="w-full h-full"
               />
@@ -369,16 +374,16 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                 {biz.logo_url
                   ? <SafeImage
                       src={biz.logo_url}
-                      name={biz.name}
+                      name={displayName}
                       category={(biz.categories || [])[0]}
                       className="w-full h-full object-cover"
                     />
-                  : <BusinessLogoMark name={biz.name} className="w-full h-full" />}
+                  : <BusinessLogoMark name={displayName} className="w-full h-full" />}
               </div>
               <div className="min-w-0 flex-1 pt-10 sm:pt-14">
               <h1 className="text-2xl font-bold flex items-center gap-2 flex-wrap"
                 style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-                {biz.name}
+                {displayName}
                 {/* M5 — verification belongs to the BUSINESS. Someone
                     verified as a property owner is not thereby a verified
                     plumber, so this badge is never borrowed from the
@@ -565,12 +570,11 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           const where = biz.serves_nationwide
             ? t('upgrade.nationwide', 'All of Israel')
             : (biz.areas || []).slice(0, 2).map((a) => areaLabel(prettyArea(a, t), t)).join(', ');
-          const name = (i18n.language || '').startsWith('he') && biz.name_he ? biz.name_he : biz.name;
+          const name = displayName;
           // Cheapest first, priced before "Ask for a quote": the first price
           // a visitor reads anchors the rest, so it is chosen, not left to
           // the order things were added (UI audit 24 Sep, Tzvi's go).
-          const priced = (g) => (Number(g.cheapest_price) > 0 ? Number(g.cheapest_price) : Infinity);
-          const offers = listings.slice().sort((a, b) => priced(a) - priced(b)).map((g) => ({
+          const offers = cheapestFirst(listings, (g) => g.cheapest_price).map((g) => ({
             name: localizedTitle(g, i18n),
             price: g.cheapest_price ? t('upgrade.from', { defaultValue: 'from {{price}}', price: money(g.cheapest_price, g.currency || (g.tiers || g.products || [])[0]?.currency || 'ILS') }) : null,
           }));

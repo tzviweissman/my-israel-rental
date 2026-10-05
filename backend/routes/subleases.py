@@ -3,7 +3,7 @@ import asyncio
 import uuid
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Body, Depends, File, HTTPException, UploadFile
+from fastapi import APIRouter, Body, Depends, File, HTTPException, Request, UploadFile
 from pymongo import ReturnDocument
 
 from models import SubleaseCreate
@@ -21,6 +21,7 @@ from utils.property_rows import keep_valid_rows
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
 from utils.contract_files import load_contract_by_sign_token, sign_token_expiry
 from utils.signed_contract import build_signed_pdf
+from utils.rate_limit import check_rate
 
 router = APIRouter()
 api_router = router  # alias so existing @api_router decorators work verbatim
@@ -238,7 +239,7 @@ async def upload_sublease_contract(
 
 
 @api_router.get("/contracts/sign/{sign_token}", response_model=PublicContractResponse)
-async def get_contract_for_signing(sign_token: str) -> dict:
+async def get_contract_for_signing(sign_token: str, request: Request) -> dict:
     """Public endpoint - sublessee accesses contract via sign_token (no auth needed)
 
     The third endpoint on this token, `GET /contracts/sign/{sign_token}/file`,
@@ -246,6 +247,8 @@ async def get_contract_for_signing(sign_token: str) -> dict:
     BYTES, and every route that does is kept together so the access rule on
     each can be read in one place.
     """
+    # Token links are unguessable; the limit is hardening, matching orders/track (site audit 27-28 Sep).
+    check_rate(request, bucket="contract_sign_view", limit=300, window_seconds=600)
     contract = await load_contract_by_sign_token(sign_token)
 
     sublease = None
@@ -274,8 +277,10 @@ async def get_contract_for_signing(sign_token: str) -> dict:
 
 
 @api_router.post("/contracts/sign/{sign_token}", response_model=ContractSignResponse)
-async def sign_contract_public(sign_token: str, body: dict = Body(...)) -> dict:
+async def sign_contract_public(sign_token: str, request: Request, body: dict = Body(...)) -> dict:
     """Public endpoint - sublessee signs the contract via sign_token"""
+    # Token links are unguessable; the limit is hardening, matching orders/track (site audit 27-28 Sep).
+    check_rate(request, bucket="contract_sign_submit", limit=30, window_seconds=600)
     contract = await load_contract_by_sign_token(sign_token)
 
     # A contract is signed once. The booking flow next door has always said

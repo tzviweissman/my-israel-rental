@@ -30,10 +30,16 @@ async def accept_booking(booking_id: str, payload: dict = Depends(verify_token))
     """
     booking, property_data = await _load_and_authorize_pending(booking_id, payload["user_id"])
 
-    await db.bookings.update_one(
-        {"id": booking_id},
+    # Compare-and-swap on the status, as orders.py and contracts.py already
+    # do: two Accepts at once (a double click, two tabs) both pass the check
+    # above, and without this both would mint a sign token and notify twice
+    # (site audit 27 Sep, M3). The loser is told it was already handled.
+    flipped = await db.bookings.update_one(
+        {"id": booking_id, "status": "pending"},
         {"$set": {"status": "confirmed", "confirmed_at": datetime.now(UTC).isoformat()}},
     )
+    if flipped.modified_count == 0:
+        raise HTTPException(status_code=409, detail="This booking was already accepted")
 
     _queue_acceptance_email(booking, booking_id, property_data)
     # "When guests book, send the cleaning to my cleaner" (automations.py).

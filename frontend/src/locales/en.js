@@ -403,6 +403,9 @@ const en = {
         deliveredPhoto: 'Delivered {{time}} - photo',
       },
       myGigs: {
+        emptyTitle: "You haven't listed a service yet",
+        emptyBody: 'Add your first service. Listing is free, with no commission.',
+        emptyCta: 'Add your first service',
         view: 'View',
         delete: 'Delete',
         deleteConfirm: 'Delete this listing? This cannot be undone.',
@@ -848,7 +851,7 @@ const en = {
         label: 'Real size, in cm (optional)',
         width: 'Width',
         length: 'Length',
-        hint: 'Measure it and your page can show your products to scale.',
+        hint: 'Measure the width and the length, and your page can show your products to scale.',
       },
       sizeLadder: {
         label: 'Sizes, drawn to scale',
@@ -1057,7 +1060,7 @@ const en = {
           },
           h_automations: {
             title: 'Let the upkeep run itself',
-            body: 'Cleaning between guests, timed for checkout. A yearly repaint, a yearly plumber check, a monthly garden visit. Write it once, in your words, and it goes to the right person on time.',
+            body: 'Cleaning between guests, timed for checkout. A yearly repaint, a yearly plumber check, a monthly garden visit. Write it once, in your words, and it goes to the right person on time. It runs from a business page, and adding one is free.',
             doIt: 'Create an automation',
           },
           h_pricing: {
@@ -1322,6 +1325,8 @@ const en = {
         logoFailed: 'Could not upload that image',
         about: 'About your business',
         aboutPh: 'What you do, and what makes you worth choosing.',
+        aboutHe: 'About your business, in Hebrew (optional)',
+        aboutHePh: 'Hebrew readers see this instead. Leave it empty and they see the text above.',
         foundedYear: 'Year started',
         certificateLink: 'Link to certificate',
         detailsSaved: 'Saved',
@@ -1711,6 +1716,12 @@ const en = {
         insightsHint: 'How your listings did last week: visitors, messages, saves and reviews. Nothing is sent in a quiet week.',
         requestsTitle: 'Matching requests',
         requestsHint: 'An email when someone posts on the requests board looking for what you offer.',
+        jobsTitle: 'Matching jobs',
+        jobsHint: 'Emails about new jobs that match what you offer, one at a time or as a daily round-up.',
+        availabilityTitle: 'Availability reminders',
+        availabilityHint: 'A reminder when the dates on one of your rentals are about to run out.',
+        pricingTitle: 'Pricing tips',
+        pricingHint: 'A weekly note when a price on one of your rentals looks out of step with similar places.',
         saved: 'Saved',
         failed: 'Could not save. Try again.',
       },
@@ -1758,6 +1769,12 @@ const en = {
         attentionNone: 'All clear.',
       },
       dashboard: {
+        noBusinessTitle: 'No business page yet',
+        noBusinessBody: 'Add your business and what you offer. Free to list, free to be found, no commission.',
+        noBusinessCta: 'Add your business, free',
+        contractsForRenterTitle: 'Contracts you sign',
+        contractsForRenterBody: 'When a host sends you a contract, the link comes by email and the booking shows it here in your bookings. You sign on your phone, nothing to print.',
+        contractsForRenterCta: 'Go to my bookings',
         overview: 'Overview',
         groupBusiness: 'My business',
         groupRentals: 'My rentals',
@@ -4640,7 +4657,7 @@ const en = {
         s9Body: 'Your listings, your posts on the Requests board and your public profile are visible to anyone. Your messages are visible to the person you send them to. Your email address is not shown on the site.\n\nA phone number is revealed only where you have chosen to show it, or to the person fulfilling an order you placed, at the point they need it.\n\nWe use a small number of services to run the site: a database host, an image host, an email sender, and Google if you sign in with it. They hold this information to do that job and nothing else.',
 
         s10Head: 'Emails, and turning them off',
-        s10Body: 'We email you about things that happen to you here: a booking, a message, a reply to your request. Every one of those emails has a link at the bottom to stop that kind of email, and you can change what you receive in your settings.\n\nWe will not add you to a marketing list you did not ask for.',
+        s10Body: 'We email you about things that happen to you here: a booking, a message, a reply to your request. The regular ones (summaries, matches, reminders and tips) can each be switched off in your settings, and each one says how. Emails about something that involves you directly, such as a booking or a message, are always sent, so you do not miss it.\n\nWe will not add you to a marketing list you did not ask for.',
 
         s11Head: 'Deleting your account',
         s11Body: 'Write to us and we will delete your account and what you posted. A few things have to stay: a signed contract belongs to both parties, and we keep the records we are required to keep.',

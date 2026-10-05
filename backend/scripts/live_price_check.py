@@ -18,7 +18,7 @@ Smart List use, so this check sees what customers see.
 
     python3 backend/scripts/live_price_check.py                 # live site
     python3 backend/scripts/live_price_check.py --base http://localhost:8001
-    python3 backend/scripts/live_price_check.py --out docs/audits/2026-09-19-price-check.md
+    python3 backend/scripts/live_price_check.py --out docs/audits/YYYY-MM-DD-price-check.md
 
 Standard library only, so it runs anywhere Python does.
 """

@@ -301,6 +301,10 @@ async def _notify_matching_providers(job: dict[str, Any]) -> None:
                 continue
             if mode == "digest":
                 continue
+            # The jobs-emails switch stops these too, not only the digest
+            # (dead ends, 4 Oct: the instant email had no way to turn off).
+            if pref.get(JOBS_OPT_OUT_FIELD):
+                continue
 
             # Snooze check.
             snoozed = any(

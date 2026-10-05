@@ -71,7 +71,10 @@ import pytest as _pytest  # noqa: E402
 # module source rather than a marker on every test, because these files
 # predate any such convention and per-test markers are edits a new file
 # would forget to make.
-_LIVE_API_MARKERS = ("TEST_API_BASE", "localhost:8001")
+# REACT_APP_BACKEND_URL added 27 Sep 2026: 45 files resolve their base from
+# it, and without the marker they FAILED rather than skipped with no server
+# up, which hid real regressions in the noise (site audit 27 Sep, H2).
+_LIVE_API_MARKERS = ("TEST_API_BASE", "localhost:8001", "REACT_APP_BACKEND_URL")
 
 _live_api_up = None
 

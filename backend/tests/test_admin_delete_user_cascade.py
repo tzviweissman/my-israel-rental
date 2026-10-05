@@ -48,7 +48,7 @@ load_dotenv(ROOT / ".env")
 
 from pymongo import MongoClient  # noqa: E402
 
-from routes.admin.core import _TWO_PARTY_KEPT, _USER_OWNED  # noqa: E402
+from routes.admin.core import _OWNED_VIA, _OWNED_WHERE, _TWO_PARTY_KEPT, _USER_OWNED  # noqa: E402
 from routes.deps import CONTRACT_DIR  # noqa: E402
 
 BASE = os.environ.get("TEST_API_BASE", "http://localhost:8001/api")
@@ -66,6 +66,8 @@ _KEPT_FIELD = {
     "store_standing_orders": "owner_user_id",
     "marketplace_job_applications": "applicant_user_id",
     "request_reports": "reporter_user_id",
+    "reviews": "author_user_id",
+    "review_reports": "reporter_user_id",
 }
 
 # Fields a collection's unique index insists on. Without a slug, two
@@ -127,6 +129,18 @@ def victim(db):
         db[collection].insert_one(doc)
         owned[collection] = doc["id"]
 
+    # Rows keyed to something they owned (a business, a listing), one per
+    # link, also read from the cascade's own table (site audit 27 Sep, H3).
+    for parent, collection, field in _OWNED_VIA:
+        parent_id = db[parent].find_one({"id": owned[parent]})["_id"]
+        doc = {"id": f"{tag}-{collection}-{field}", field: parent_id, "created_at": stamp}
+        db[collection].insert_one(doc)
+        owned[f"{collection}.{field}"] = doc["id"]
+    for collection, where in _OWNED_WHERE:
+        doc = {"id": f"{tag}-{collection}-owned", **where(uid), "created_at": stamp}
+        db[collection].insert_one(doc)
+        owned[f"{collection}.owned"] = doc["id"]
+
     kept = {}
     for collection in _TWO_PARTY_KEPT:
         field = _KEPT_FIELD[collection]
@@ -137,7 +151,7 @@ def victim(db):
     yield {"uid": uid, "other_id": other_id, "tag": tag,
            "owned": owned, "kept": kept, "contract_file": contract_file}
 
-    for collection in list(owned) + list(kept):
+    for collection in {c.split(".")[0] for c in list(owned) + list(kept)}:
         db[collection].delete_many({"id": {"$regex": f"^{tag}-"}})
     db.users.delete_many({"id": {"$in": [uid, other_id]}})
     db.user_tombstones.delete_many({"user_id": uid})
@@ -155,7 +169,7 @@ def test_every_owned_collection_is_cleared(admin, db, victim):
 
     still_here = {
         c: doc_id for c, doc_id in victim["owned"].items()
-        if db[c].find_one({"id": doc_id}) is not None
+        if db[c.split(".")[0]].find_one({"id": doc_id}) is not None
     }
     assert not still_here, (
         "these were only ever this person's and should have gone with the "
@@ -197,7 +211,7 @@ def test_a_snapshot_is_written_before_anything_is_deleted(admin, db, victim):
     saved = snap["collections"]
     missing = [
         c for c, doc_id in victim["owned"].items()
-        if not any(r.get("id") == doc_id for r in (saved.get(c) or []))
+        if not any(r.get("id") == doc_id for r in (saved.get(c.split(".")[0]) or []))
     ]
     assert not missing, f"deleted but not snapshotted, so it cannot be undone: {missing}"
 
@@ -256,7 +270,7 @@ def test_restore_brings_everything_back_with_the_same_ids(admin, db, victim):
         assert db.businesses.find_one({"_id": biz_id}), "restored under the SAME id, so orders still point at it"
         from routes.admin.core import _NOT_RESTORED
         missing = [c for c, doc_id in victim["owned"].items()
-                   if c not in _NOT_RESTORED and not db[c].find_one({"id": doc_id})]
+                   if c not in _NOT_RESTORED and not db[c.split(".")[0]].find_one({"id": doc_id})]
         assert not missing, f"not restored: {missing}"
         assert db.password_resets.find_one({"id": victim["owned"]["password_resets"]}) is None, \
             "a password reset token must never be brought back to life"

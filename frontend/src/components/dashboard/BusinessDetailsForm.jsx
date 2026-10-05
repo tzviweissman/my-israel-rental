@@ -48,6 +48,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
   const [form, setForm] = useState({
     logo_url: b.logo_url || '',
     description: b.description || '',
+    description_he: b.description_he || '',
     hours: b.hours || '',
     // Kept as text while editing; split on save. A chip editor here means
     // the owner cannot type "Hebrew, English" the way they think of it.
@@ -132,6 +133,8 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
         // the public page and the checklist both test truthiness.
         logo_url: form.logo_url || '',
         description: form.description.trim(),
+        // Empty string clears it, so a removed Hebrew text stops showing.
+        description_he: form.description_he.trim(),
         hours: orNull(form.hours),
         languages,
         founded_year: Number.isFinite(year) && year > 1800 ? year : null,
@@ -187,6 +190,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           placeholder={placeholder}
           className="mt-1 w-full px-3 py-2 rounded-lg border text-sm"
           style={{ borderColor: 'var(--brand-border)' }}
+          dir={opts.dir}
           data-testid={`biz-details-${key}`}
         />
       ) : (
@@ -307,6 +311,8 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
 
           {field('description', t('businesses.about', 'About your business'),
             t('businesses.aboutPh', 'What you do, and what makes you worth choosing.'), { textarea: true })}
+          {field('description_he', t('businesses.aboutHe', 'About your business, in Hebrew (optional)'),
+            t('businesses.aboutHePh', 'Hebrew readers see this instead. Leave it empty and they see the text above.'), { textarea: true, dir: 'rtl' })}
           {field('hours', t('businessPage.hours', 'Hours'), 'Sun–Thu 9:00–18:00 · Fri 9:00–13:00')}
           {field('languages', t('businessPage.languages', 'Languages'), 'Hebrew, English')}
           {field('founded_year', t('businesses.foundedYear', 'Year started'), '2011', { numeric: true })}

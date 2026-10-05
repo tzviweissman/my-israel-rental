@@ -530,16 +530,18 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
 
       {gigs.length === 0 ? (
         <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center" data-testid="my-gigs-empty">
-          <p className="text-gray-700 font-semibold mb-2">You haven&apos;t listed a service yet</p>
+          <p className="text-gray-700 font-semibold mb-2">{t('myGigs.emptyTitle', "You haven't listed a service yet")}</p>
+          {/* Was "a free 30-day trial starts on your first listing": there is
+              no trial, listing is free (Terms s1, CLAUDE.md). Dead ends, 4 Oct. */}
           <p className="text-gray-500 text-sm mb-5">
-            Publish your first gig — a free 30-day trial starts on your first listing.
+            {t('myGigs.emptyBody', 'Add your first service. Listing is free, with no commission.')}
           </p>
           <button
             onClick={() => { saveReturnPath(); navigate(addServiceHref); }}
             className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white bg-[var(--brand-primary)] hover:bg-[#0F3A3A] inline-flex items-center gap-1.5"
             data-testid="my-gigs-empty-cta"
           >
-            <Plus size={14} /> Create your first gig
+            <Plus size={14} /> {t('myGigs.emptyCta', 'Add your first service')}
           </button>
         </div>
       ) : (

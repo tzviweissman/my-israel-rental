@@ -151,6 +151,9 @@ class PaymentLink(BaseModel):
 class BusinessPatch(BaseModel):
     name: Optional[str] = Field(None, min_length=2, max_length=80)
     description: Optional[str] = Field(None, max_length=2000)
+    # Their description in Hebrew, shown to Hebrew readers. The public page
+    # already read it, but nothing let an owner write it (site audit 24 Sep).
+    description_he: Optional[str] = Field(None, max_length=2000)
     categories: Optional[list[str]] = None
     # None means "leave alone"; [] means "clear it". That distinction is
     # why these are Optional rather than defaulted — an owner who moves
@@ -225,6 +228,7 @@ def _public(
         # and a rename leaves a chosen address alone (see update_business).
         "slug_chosen": bool(doc.get("slug_chosen_at")),
         "description": doc.get("description") or "",
+        "description_he": doc.get("description_he") or "",
         "logo_url": doc.get("logo_url"),
         "categories": doc.get("categories") or [],
         "areas": doc.get("areas") or [],
@@ -465,7 +469,7 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
     biz = await _owned(business_id, user)
     update: dict[str, Any] = {}
 
-    for field in ("description", "logo_url", "categories"):
+    for field in ("description", "description_he", "logo_url", "categories"):
         value = getattr(payload, field)
         if value is not None:
             update[field] = value.strip() if isinstance(value, str) else value

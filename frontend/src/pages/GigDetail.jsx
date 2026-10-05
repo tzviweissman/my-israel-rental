@@ -27,7 +27,7 @@ import PageMeta from '../components/PageMeta';
 import { needsDirectoryDisclaimer } from '../lib/categories';
 import StarRating from '../components/marketplace/StarRating';
 import OfferBadge from '../components/marketplace/OfferBadge';
-import { priceRows, cheapestRow } from '../utils/gigPrice';
+import { priceRows, cheapestRow, cheapestFirst } from '../utils/gigPrice';
 import { FX_USD_TO_ILS } from '../utils/listingPrice';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import { buildWhatsAppLinkWithMessage, hasValidWhatsApp } from '../utils/whatsappLink';
@@ -694,8 +694,7 @@ const GigDetail = () => {
           const items = (isStore ? gig.products : gig.tiers) || [];
           // Cheapest first, priced before "Ask for a quote" (the first price
           // anchors the rest; UI audit 24 Sep).
-          const priced = (it) => (Number(it.price) > 0 ? Number(it.price) : Infinity);
-          const offers = items.slice().sort((a, b) => priced(a) - priced(b)).map((it) => ({
+          const offers = cheapestFirst(items, (it) => it.price).map((it) => ({
             name: it.name,
             price: Number(it.price) > 0 ? money(it.price, it.currency || 'ILS') : null,
           }));

@@ -94,4 +94,17 @@ export const gigPriceParts = (gig, rate = FX_USD_TO_ILS) => {
   };
 };
 
+/**
+ * Cheapest first, and anything with no price ("Ask for a quote") after every
+ * priced one, in the order it came. The first price a visitor reads anchors
+ * the rest, so it is chosen rather than left to the order things were added
+ * (UI audit 24 Sep). Shared by the business page and the service page, and
+ * tested in scripts/test-gig-price.mjs, which it had not been (site audit 24 Sep).
+ */
+export const cheapestFirst = (items, priceOf) => {
+  const p = (x) => (Number(priceOf(x)) > 0 ? Number(priceOf(x)) : Infinity);
+  // Equal (including two unpriced: Infinity - Infinity is NaN) compares as 0.
+  return (items || []).slice().sort((a, b) => (p(a) === p(b) ? 0 : p(a) - p(b)));
+};
+
 export default gigPriceParts;

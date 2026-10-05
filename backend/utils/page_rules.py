@@ -127,6 +127,15 @@ DEFAULT_PLAYBOOK = {"lead": {"services", "facts", "gallery"}, "needs": {"service
 SIGNATURE = {"sizes"}
 SIZES_MIN = 3
 
+
+def measured_both(p) -> bool:
+    """Width AND length: the ladder draws both, and a side nobody measured
+    would be invented (site audit 3 Oct: width-only was drawn as a square)."""
+    try:
+        return float((p or {}).get("width_cm") or 0) > 0 and float((p or {}).get("length_cm") or 0) > 0
+    except (TypeError, ValueError):
+        return False
+
 # What each brief action needs on the page to be takeable.
 ACTION_BLOCK = {"book": "services", "order": "services", "message": "contact", "visit": "facts"}
 
@@ -163,17 +172,22 @@ def known_numbers(b: dict) -> set[str]:
     for v in (b.get("founded_year"), y, b.get("rating_count"), b.get("rating_avg")):
         if v:
             nums.add(str(v))
+    def add(v):
+        # Guarded: values are validated on write, but an old or hand-edited
+        # record must cost a number, not the whole check (site audit 3 Oct).
+        try:
+            d = float(v)
+        except (TypeError, ValueError):
+            return
+        nums.update({str(v), str(int(d)) if d.is_integer() else str(d)})
+
     for g in b.get("listings") or []:
         for i in ((g or {}).get("tiers") or []) + ((g or {}).get("products") or []):
-            for dim in ("width_cm", "length_cm"):
-                if (i or {}).get(dim):
-                    d = float(i[dim])
-                    nums.add(str(int(d)) if d.is_integer() else str(d))
-            if (i or {}).get("price"):
-                p = (i or {}).get("price")
-                nums.update({str(p), str(int(p)) if float(p).is_integer() else str(p)})
+            for k in ("width_cm", "length_cm", "price"):
+                if (i or {}).get(k):
+                    add(i[k])
         if (g or {}).get("cheapest_price"):
-            nums.add(str(int(g["cheapest_price"])) if float(g["cheapest_price"]).is_integer() else str(g["cheapest_price"]))
+            add(g["cheapest_price"])
     return nums
 
 
@@ -357,7 +371,7 @@ def check_composition(business: dict, composition: dict, lang: str = "en") -> di
     for x in sig:
         if x["type"] == "sizes":
             g = next((g for g in b.get("listings") or [] if (g or {}).get("id") == x["props"].get("listing")), None)
-            measured = [p for p in (g or {}).get("products") or [] if (p or {}).get("width_cm")]
+            measured = [p for p in (g or {}).get("products") or [] if measured_both(p)]
             if not g:
                 sproblems.append(f"{x['id']} names a listing they don't have")
             elif len(measured) < SIZES_MIN:

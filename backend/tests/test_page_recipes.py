@@ -215,3 +215,25 @@ def test_the_brief_moves_the_recipe():
     # no photos: no gallery, no full-bleed
     none = fill(SAMPLES["one-service-no-photos"], "en")["composition"]
     assert "gallery" not in [x["type"] for x in none["blocks"]] and none["theme"]["imagery"] != "full-bleed"
+
+
+def test_a_description_written_in_exclamations_still_gives_a_lede():
+    """Site audit 27 Sep: "!" sentences were split off and then discarded."""
+    b = dict(SAMPLES["one-service-no-photos"],
+             description="Great food! Home cleaning every week for families in Bet Shemesh!",
+             description_he="אוכל מצוין! ניקיון בתים כל שבוע למשפחות בבית שמש!")
+    for lang, want in (("en", "Home cleaning every week for families in Bet Shemesh."),
+                       ("he", "ניקיון בתים כל שבוע למשפחות בבית שמש.")):
+        comp = fill(b, lang)["composition"]
+        assert comp["blocks"][0]["props"]["lede"] == want, lang
+        assert check_composition(b, comp, lang)["passed"], lang
+
+
+def test_the_size_ladder_needs_both_sides_measured():
+    """Site audit 3 Oct: a width-only product was drawn as a square."""
+    b = json.loads(json.dumps(SAMPLES["board-shop"]))
+    for p in b["listings"][0]["products"]:
+        p.pop("length_cm")
+    assert "sizes" not in [x["type"] for x in fill(b, "en")["composition"]["blocks"]]
+    b["listings"][0]["products"][0]["width_cm"] = "not a number"   # an old hand-edited record
+    assert check_composition(b, fill(b, "en")["composition"], "en")["passed"]
