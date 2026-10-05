@@ -289,6 +289,11 @@ class DesignBrief(BaseModel):
     taglines: list[Tagline] = Field(default_factory=list, max_length=6)
     missing_content: list[str] = Field(default_factory=list, max_length=12)
     photos: list[PhotoRef] = Field(default_factory=list, max_length=24)
+    # Phase 4 sections, each from their own words (rule 1): the occasions they
+    # list, set as big type, and the steps of how ordering works, only when
+    # they wrote them as steps. Same shape and same check as a tagline.
+    occasions: list[Tagline] = Field(default_factory=list, max_length=16)
+    steps: list[Tagline] = Field(default_factory=list, max_length=6)
 
     @model_validator(mode="after")
     def _never_a_flyer_as_hero(self) -> "DesignBrief":
@@ -352,11 +357,48 @@ def brief_problems(brief: DesignBrief, b: dict) -> list[str]:
     for t in brief.taglines:
         if t.text not in fields.get(t.source, ""):
             problems.append(f"tagline {t.text[:40]!r} is not word for word in {t.source}")
+    for kind, items in (("occasion", brief.occasions), ("step", brief.steps)):
+        for t in items:
+            if t.text.lower() not in fields.get(t.source, "").lower():
+                problems.append(f"{kind} {t.text[:40]!r} is not in their words in {t.source}")
     return problems
 
 
 def _sentences(text: str) -> list[str]:
     return [s.strip() for s in re.split(r"(?<=[.?!])\s+", (text or "").strip()) if s.strip()]
+
+
+_LEAD_IN = re.compile(r"^(?:(?:order|perfect|great|ideal|made)\s+for|for|and|or|your|our|the|also)\s+", re.I)
+_LEAD_IN_HE = re.compile(r"^(?:ו|ל|ול)(?=\S{3,})")
+
+
+def _occasions(b: dict) -> list[Tagline]:
+    """The occasions they list themselves, word for word: a sentence of theirs
+    with at least three comma-separated items, each item trimmed of lead-in
+    words ("Order for your", "and") and nothing else. "Order for your family
+    visiting, your shabbos meals, Thursday nights, kiddushim..." gives
+    family visiting · shabbos meals · Thursday nights · kiddushim..."""
+    out = []
+    for lang, field in (("en", "description"), ("he", "description_he")):
+        heb = lang == "he"
+        for s in _sentences(b.get(field) or ""):
+            body = s.rstrip(".!?")
+            parts = [p.strip() for p in re.split(r",\s*|\s+and\s+(?=[^,]+$)", body) if p.strip()]
+            if len(parts) < 3:
+                continue
+            items = []
+            for p in parts:
+                prev = None
+                while prev != p:
+                    prev = p
+                    p = (_LEAD_IN_HE if heb else _LEAD_IN).sub("", p).strip()
+                words = p.split()
+                if 1 <= len(words) <= 4 and not re.search(r"\d|[!?]", p) and bool(re.search(r"[\u0590-\u05FF]", p)) == heb:
+                    items.append(p)
+            if len(items) >= 3:
+                out += [Tagline(text=x, lang=lang, source=field) for x in items[:8]]
+                break
+    return out
 
 
 def _taglines(b: dict) -> list[Tagline]:
@@ -409,6 +451,8 @@ def _missing(b: dict, category: str, photos: Optional[list[dict]] = None) -> lis
         out.append("hours")
     if not b.get("description_he"):
         out.append("description in Hebrew")
+    if category == "food":
+        out.append("how ordering works, step by step")
     return out
 
 
@@ -466,6 +510,7 @@ def build_brief(b: dict, logo_bytes: Optional[bytes] = None,
                           if (b.get("kosher_certification") or {}).get("body") and category == "food" else ""),
         primary_action=action,
         taglines=_taglines(b),
+        occasions=_occasions(b),
         missing_content=_missing(b, category, photos),
     )
     problems = brief_problems(brief, b)
