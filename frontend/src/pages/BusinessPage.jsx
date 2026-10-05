@@ -518,7 +518,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   {biz.serves_nationwide && (
                     <span
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-semibold"
-                      style={{ background: 'var(--gold)', color: 'var(--ink)' }}
+                      style={{ background: 'var(--gold)', color: 'var(--action-ink)' }}
                       data-testid="business-nationwide"
                     >
                       <Globe size={11} /> {t('serviceArea.chipNationwide', 'All of Israel')}
@@ -527,7 +527,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   {(biz.areas || []).map((a) => (
                     <span key={a}
                       className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium"
-                      style={{ background: 'rgb(var(--brand-primary-rgb) / 0.08)', color: 'var(--brand-primary)' }}>
+                      style={{ background: 'rgb(var(--brand-primary-rgb) / 0.08)', color: 'var(--brand-primary-deep)' }}>
                       <MapPin size={11} /> {prettyArea(a, t)}
                     </span>
                   ))}

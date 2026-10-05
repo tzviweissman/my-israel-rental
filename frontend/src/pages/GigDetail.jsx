@@ -1085,7 +1085,7 @@ const GigDetail = () => {
                   </button>
                 </span>
               ) : (
-                <button onClick={() => { saveReturnPath(); navigate(`/businesses/provider/${gig.provider?.user_id}`); }} className="text-xs font-semibold text-[var(--brand-primary)] hover:underline" data-testid="gig-view-provider">
+                <button onClick={() => { saveReturnPath(); navigate(`/businesses/provider/${gig.provider?.user_id}`); }} className="text-xs font-semibold text-[var(--brand-primary-deep)] hover:underline" data-testid="gig-view-provider">
                   {t('gigDetail.viewProfile', 'View profile')}
                 </button>
               )}
@@ -1220,7 +1220,7 @@ const GigDetail = () => {
                 </div>
               )}
 
-              <p className="text-[11px] text-gray-400 text-center mt-3">
+              <p className="text-[11px] text-gray-600 text-center mt-3">
                 {isStore
                   ? t('services.noCutSeller', "You deal with the seller directly - MyIsraelRental doesn't take a cut.")
                   : t('services.noCutProvider', "You deal with the provider directly - MyIsraelRental doesn't take a cut.")}

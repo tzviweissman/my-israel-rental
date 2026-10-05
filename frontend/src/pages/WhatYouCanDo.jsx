@@ -75,7 +75,7 @@ export default function WhatYouCanDo() {
                 className="px-4 py-2 rounded-full text-sm font-semibold transition-colors"
                 style={on
                   ? { background: 'var(--brand-primary)', color: '#fff' }
-                  : { color: 'var(--brand-primary)' }}
+                  : { color: 'var(--brand-primary-deep)' }}
                 data-testid={`features-tab-${a}`}
               >
                 {t(`features.audience.${a}`, a)}

@@ -155,13 +155,13 @@ const WhenPicker = ({
         className="w-full h-full text-left px-4 py-2 hover:bg-black/5 transition-colors min-w-0"
         data-testid={`${testidPrefix}-trigger`}
       >
-        <p className={`text-[10px] font-bold uppercase tracking-wide ${labelClassName || 'text-gray-400'}`}>
+        <p className={`text-[10px] font-bold uppercase tracking-wide ${labelClassName || 'text-gray-600'}`}>
           {t('stays.when', 'When')}
         </p>
         <p
           className={`text-sm font-medium truncate ${
             isPlaceholder
-              ? (variant === 'dark' ? 'text-gray-300' : 'text-gray-400')
+              ? (variant === 'dark' ? 'text-gray-300' : 'text-gray-600')
               : (valueClassName || 'text-gray-800')
           }`}
         >

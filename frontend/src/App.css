@@ -281,7 +281,7 @@ input[type="date"]:valid:before {
 .ncard .sig{margin-top:9px;border-top:1px dashed #d8cfc0;padding-top:9px;font-family:'Playfair Display';font-style:italic;font-size:19px;color:var(--blue-deep)}
 .ncard .ok{display:inline-flex;align-items:center;gap:6px;margin-top:9px;font-size:11px;font-weight:800;color:#1F8A50;background:#E3F3EA;border-radius:999px;padding:3px 10px}
 .ncard .meta{margin-top:7px;font-size:10.5px;color:#8a8377}
-.finale .kick{color:var(--gold-lg)}
+.finale .kick{color:var(--gold-text)}
 .finale h2{font-size:clamp(32px,5vw,62px);font-weight:600;letter-spacing:-1px;color:var(--blue-deep);margin-top:14px;line-height:1.05}
 /* A1 display weight — same cascade reason as .hero-band-head h1 above.
    Note this one passed RTL and failed LTR before the fix, because the
@@ -851,7 +851,9 @@ button:focus-visible,
      value, and no longer needs a text-shadow to survive. So the fill goes
      back to the real brand gold and the TEXT is what moved. */
   background: var(--gold);
-  color: var(--ink);
+  /* White since 5 Oct 2026: the accent went one shade darker for contrast
+     (theme-flow.css), and ink on it fell to 3.8:1; white is 4.66:1. */
+  color: var(--action-ink);
   border: 1.5px solid var(--gold);
   border-radius: 999px;
   font-weight: 700;

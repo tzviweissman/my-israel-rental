@@ -349,7 +349,7 @@ const SignupJoin = () => {
                          this size. */
                       <span
                         className="absolute top-3 end-3 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-                        style={{ background: 'var(--gold)', color: 'var(--brand-primary-deep)' }}
+                        style={{ background: 'var(--gold)', color: 'var(--action-ink)' }}
                       >
                         {tBadgeKey ? t(tBadgeKey, defaultBadge) : defaultBadge}
                       </span>
@@ -400,7 +400,7 @@ const SignupJoin = () => {
                     )}
 
                     <div className="mt-5 flex items-center justify-between">
-                      <span className={`text-xs font-semibold ${active ? 'text-[var(--brand-primary)]' : 'text-gray-400 group-hover:text-gray-600'}`}>
+                      <span className={`text-xs font-semibold ${active ? 'text-[var(--brand-primary)]' : 'text-gray-600 group-hover:text-gray-800'}`}>
                         {active
                           ? t('signupJoin.selected', 'Selected')
                           : t(tCtaKey, defaultCta)}

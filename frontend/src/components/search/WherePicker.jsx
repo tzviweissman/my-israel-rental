@@ -183,7 +183,7 @@ const WherePicker = ({
   return (
     <div className="relative w-full" ref={wrapRef} data-testid={`${testidPrefix}-wrapper`}>
       <div className="px-4 py-2 min-w-0">
-        <p className={`text-[10px] font-bold uppercase tracking-wide ${labelClassName || 'text-gray-400'}`}>
+        <p className={`text-[10px] font-bold uppercase tracking-wide ${labelClassName || 'text-gray-600'}`}>
           {t('stays.where', 'Where')}
         </p>
         <div className="flex items-center">
@@ -199,7 +199,7 @@ const WherePicker = ({
             onBlur={() => setTyping(false)}
             onKeyDown={onKeyDown}
             placeholder={effectivePlaceholder}
-            className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none placeholder:text-gray-400"
+            className="w-full bg-transparent text-sm font-medium text-gray-800 outline-none placeholder:text-gray-600"
             data-testid={`${testidPrefix}-input`}
             autoComplete="off"
             role="combobox"
@@ -233,7 +233,7 @@ const WherePicker = ({
           data-testid={`${testidPrefix}-suggestions`}
         >
           {recentRows.length > 0 && (
-            <p className="px-4 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400">
+            <p className="px-4 pt-1 pb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-600">
               {t('stays.recentSearches', 'Recent searches')}
             </p>
           )}
@@ -250,7 +250,7 @@ const WherePicker = ({
           ))}
 
           {recentRows.length > 0 && optionRows.length > 0 && (
-            <p className="px-4 pt-2 pb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-400">
+            <p className="px-4 pt-2 pb-1.5 text-[10px] font-bold uppercase tracking-wide text-gray-600">
               {isBrowsing && counts
                 ? t('stays.mostListings', 'Most listings')
                 : t('stays.areas', 'Areas')}
