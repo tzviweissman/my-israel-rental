@@ -874,10 +874,28 @@ program every picture is "unknown", and an unknown picture is never a hero.
   nixpacks.toml), which would also fix contract text extraction there.
   Locally: `TESSERACT_CMD` and `TESSDATA_PREFIX` in `backend/.env`.
 
+**Phase 3, built 5 Oct 2026: MyIsraelRental steps back, and each fact once.**
+- On a v3 page the global nav keeps the logo, the language switch, messages
+  and the menu; its section links and sign-in stay in the menu
+  (`body[data-page-v3]`, `page-v3.css`). Leaving the page restores it.
+- The site footer becomes one line, "Listed on MyIsraelRental" with three
+  links (`V3Footer.jsx`). The "List your business, free" band stays, by
+  ruling; the check fails if it disappears.
+- "Say it once" in the renderer, not the prompt (`v3/ledger.js`):
+  `limitRepeats` keeps each key's first two; under a v3 hero the composed
+  body loses its own hero, cover band and contact block (the chat button
+  already sits in the hero, after the content and in the phone bar), and each
+  other block type appears once. The hero leaves kosher to its fact strip and
+  the proof lines below drop kosher and "New on", so each is said once above
+  the fold and at most twice on the page.
+- Checked: `scripts/test-page-v3-ledger.mjs` (6) and new assertions in
+  `scripts/check-page-v3.mjs` (repeat counts on the page and above the fold,
+  slim nav, one-line footer, band kept, at most three chat buttons), shown to
+  fail on the standard page.
+
 **Next:** the brand film upload (tier 2);
 the section components (BigList, Steps,
-palate cleanser, offer block, sticky bar); the platform chrome and the dedupe
-rule in the renderer; the quality gate (`checkPage`); the owner checklist in
+palate cleanser, offer block, sticky bar); the quality gate (`checkPage`); the owner checklist in
 the dashboard; service cards below the hero still crop a flyer that is a
 listing's cover. Phase 1 also does not yet show, on a v3 page, the owner's full
 description, payment links or the connect button that the standard header
