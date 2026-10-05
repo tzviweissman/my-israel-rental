@@ -241,6 +241,15 @@ a full pass is clean. Then return the finished page with a short note of what wa
 fixed, and say plainly what could not be (it needs their content or a real
 device). Full procedure: `docs/page-generation-rules.md` §3a.
 
+Five build rules come with it (same section, with the defect each one prevents):
+anything placed on a spot in a photo or video is placed by measuring the real
+frames, never by eye; an overlay that must stay on moving media lives inside the
+media's own element; text never re-wraps while its container animates; no
+in-between state may look unfinished (an emptied area goes to the page's ground,
+never a bare panel); text over imagery is checked at the brightest frame and the
+narrowest screen. A script measures every overlay-on-picture at five scroll
+positions on a laptop and a phone: more than 4px off fails the page.
+
 Return:
 - the page;
 - the design brief;
