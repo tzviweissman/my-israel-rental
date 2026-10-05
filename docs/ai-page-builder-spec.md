@@ -847,12 +847,39 @@ same validation.
   fold, no sideways scroll at 360 and 390, button contrast, RTL), with
   before/after screenshots in `screenshots/page-v3/`.
 
-**Not in phase 1, and next:** photos as the hero with the flyer check (phase
-2; needs OCR or a vision model, which is a paid call, so it needs a ruling);
-the brand film upload (tier 2); the section components (BigList, Steps,
+**Phase 2, built 5 Oct 2026: real photos, never a flyer.** Tzvi chose the free
+text reader. `backend/utils/flyer_check.py` reads each of a business's pictures
+with Tesseract (through pytesseract, already a dependency) and calls it a flyer
+when its words cover more than 8% of it, or it has 8 or more confident words,
+or a price or phone number. The word count is an addition to the spec's 8%:
+word boxes are tight, and real posters full of lines measured 4 to 6%. The
+whole picture is not read at once, because Tesseract found nothing on L.A.
+Cholent's marble-backed flyer that way; it is read in ten overlapping strips,
+about seven seconds a picture. Measured on ten known pictures (L.A. Cholent's
+four flyers, six plain food photos): all ten right. Without the Tesseract
+program every picture is "unknown", and an unknown picture is never a hero.
+- The brief names pictures by reference, never URL (`PHOTO_REF`: `cover`,
+  `listing:<id>:gallery:<n>`, `listing:<id>:item:<n>:<k>`), with what the
+  check made of each. Tier 1 only for a picture checked as a photo; the
+  model refuses anything else. The owner checklist counts only real photos.
+- The admin switch checks up to 12 pictures, four at a time.
+- Page: a tier 1 hero is their photo, full-bleed, graded the same way for the
+  whole preset, under a scrim toward the copy only. Flyers appear whole, at
+  their own shape, under "From the business" (`V3Flyers.jsx`). A composed
+  hero or cover band no longer draws under a v3 hero.
+- Checked: `backend/tests/test_flyer_check.py` (8, the real reading test
+  runs when Tesseract is installed and skips when not).
+- Production needs the `tesseract-ocr`, `tesseract-ocr-eng` and
+  `tesseract-ocr-heb` packages on the backend service (Railpack, not
+  nixpacks.toml), which would also fix contract text extraction there.
+  Locally: `TESSERACT_CMD` and `TESSDATA_PREFIX` in `backend/.env`.
+
+**Next:** the brand film upload (tier 2);
+the section components (BigList, Steps,
 palate cleanser, offer block, sticky bar); the platform chrome and the dedupe
 rule in the renderer; the quality gate (`checkPage`); the owner checklist in
-the dashboard. Phase 1 also does not yet show, on a v3 page, the owner's full
+the dashboard; service cards below the hero still crop a flyer that is a
+listing's cover. Phase 1 also does not yet show, on a v3 page, the owner's full
 description, payment links or the connect button that the standard header
 carried.
 
