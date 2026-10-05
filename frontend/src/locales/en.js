@@ -1775,6 +1775,8 @@ const en = {
         ctaMessage: 'Send a message',
         from: 'From',
         kosher: 'Kosher · {{body}}',
+        fromTheBusiness: 'From the business',
+        flyerAlt: 'A flyer from {{name}}',
       },
       dashboard: {
         noBusinessTitle: 'No business page yet',

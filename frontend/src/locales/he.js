@@ -1742,6 +1742,8 @@ const he = {
         ctaMessage: 'לשליחת הודעה',
         from: 'מחיר התחלתי',
         kosher: 'כשר · {{body}}',
+        fromTheBusiness: 'מהעסק',
+        flyerAlt: 'פלאייר של {{name}}',
       },
       dashboard: {
         noBusinessTitle: 'עדיין אין דף עסק',

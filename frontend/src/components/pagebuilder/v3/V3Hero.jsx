@@ -90,7 +90,7 @@ const Wordmark = ({ text }) => (
   </>
 );
 
-export default function V3Hero({ brief, name, logoUrl, priceText, areaText, kosherBody, proof, onPrimary, children }) {
+export default function V3Hero({ brief, name, logoUrl, photoUrl, priceText, areaText, kosherBody, proof, onPrimary, children }) {
   const { t, i18n } = useTranslation();
   const he = (i18n.language || '').startsWith('he');
   useFonts(fontsHref((brief && brief.type) || {}));
@@ -114,16 +114,29 @@ export default function V3Hero({ brief, name, logoUrl, priceText, areaText, kosh
     areaText && { key: 'area', text: areaText },
   ].filter(Boolean).slice(0, 3);
 
+  // Tier 1 only with a picture the flyer check passed as a photo (the API
+  // refuses a brief that names anything else); otherwise the typographic panel.
+  const tier = brief.hero?.tier === 1 && photoUrl ? 1 : 3;
+
   return (
     <section
       className="pv3-hero"
       data-page-v3=""
       data-preset={brief.preset}
       data-texture={brief.texture}
+      data-tier={tier}
       data-caps={brief.type?.caps ? 'true' : 'false'}
       style={themeVars(brief)}
       data-testid="pv3-hero"
     >
+      {tier === 1 && (
+        <>
+          {/* Their photo, graded to the page (rule 4: one grade for every
+              photo on the page), with a scrim behind the copy only. */}
+          <img className="pv3-photo" src={photoUrl} alt="" aria-hidden="true" data-testid="pv3-photo" />
+          <div className="pv3-scrim" aria-hidden="true" />
+        </>
+      )}
       <div className="pv3-texture" aria-hidden="true" />
       <div className="pv3-hero-inner">
         {logoUrl && <img className="pv3-logo" src={logoUrl} alt="" aria-hidden="true" />}

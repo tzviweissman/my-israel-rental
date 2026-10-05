@@ -55,6 +55,68 @@
   background: radial-gradient(120% 90% at 85% 10%, var(--surface) 0%, var(--ground) 62%);
 }
 
+/* Tier 1: their photo, full-bleed, under a scrim that darkens toward the
+   copy's corner only. One grade per preset, the same for every photo. */
+[data-preset="candlelight"] { --grade: sepia(0.14) saturate(0.92) contrast(1.05) brightness(0.92); }
+[data-preset="bold-pantry"] { --grade: saturate(1.08) contrast(1.03); }
+[data-preset="jerusalem-stone"] { --grade: sepia(0.08) saturate(0.9) brightness(1.02); }
+[data-preset="studio"] { --grade: contrast(1.04); }
+[data-preset="field"] { --grade: saturate(0.95) contrast(1.06); }
+[data-preset="workshop"] { --grade: contrast(1.03); }
+.pv3-photo {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: 70% 50%;
+  filter: var(--grade, none);
+}
+.pv3-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: linear-gradient(to top, var(--ground) 0%, color-mix(in srgb, var(--ground) 72%, transparent) 38%, transparent 75%),
+              linear-gradient(to right, color-mix(in srgb, var(--ground) 70%, transparent) 0%, transparent 60%);
+}
+[dir="rtl"] .pv3-scrim {
+  background: linear-gradient(to top, var(--ground) 0%, color-mix(in srgb, var(--ground) 72%, transparent) 38%, transparent 75%),
+              linear-gradient(to left, color-mix(in srgb, var(--ground) 70%, transparent) 0%, transparent 60%);
+}
+/* With a photo there is no light-falloff panel; the photo is the light. */
+[data-tier="1"].pv3-hero::after { display: none; }
+
+/* "From the business": flyers whole, at their own shape, never cropped. */
+.pv3-flyers {
+  padding-block: clamp(64px, 9vw, 120px);
+  padding-inline: clamp(20px, 6vw, 96px);
+  border-block-start: 1px solid var(--rule);
+}
+.pv3-flyers-inner { max-inline-size: 1180px; margin-inline: auto; }
+.pv3-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--muted);
+  margin: 0 0 28px;
+}
+[dir="rtl"] .pv3-label { letter-spacing: 0.05em; font-size: 13px; }
+.pv3-flyers-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: clamp(16px, 2.4vw, 32px);
+  align-items: start;
+}
+.pv3-flyer { margin: 0; background: var(--surface); border-radius: 12px; padding: 12px; }
+.pv3-flyer img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  max-block-size: 80svh;
+  object-fit: contain;
+}
+
 .pv3-hero-inner {
   max-inline-size: 1180px;
   inline-size: 100%;

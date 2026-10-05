@@ -27,6 +27,8 @@ import NotFound from './NotFound';
 import { businessCanonicalUrl, currentBusinessHostSlug } from '../utils/businessHost';
 import BlockList from '../components/pagebuilder/BlockList';
 import V3Hero from '../components/pagebuilder/v3/V3Hero';
+import V3Flyers from '../components/pagebuilder/v3/V3Flyers';
+import { resolvePhoto, photosOfKind } from '../components/pagebuilder/v3/photos';
 import { cheapestFirst } from '../utils/gigPrice';
 import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
@@ -250,6 +252,14 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   // MyIsraelRental" (kept, Tzvi 25 Sep) and the fact strip carries kosher,
   // so the proof lines further down do not repeat them.
   const proofBelow = v3 ? { ...proof, memberSince: null, kosher: null } : proof;
+  const v3Photo = v3Brief?.hero?.tier === 1 ? resolvePhoto(biz, v3Brief.hero.media_id) : null;
+  const v3Flyers = v3 ? photosOfKind(biz, v3Brief, 'flyer') : [];
+  // On a v3 page the v3 hero IS the hero: a composed hero or cover band
+  // below it would be a second one, and it crops the cover, which may be a
+  // flyer (rule 4). A page with nothing else falls back to the default body.
+  const v3Body = v3 && biz.page && Array.isArray(biz.page.blocks)
+    ? { ...biz, page: { ...biz.page, blocks: biz.page.blocks.filter((x) => x && x.type !== 'hero' && x.type !== 'cover') } }
+    : biz;
 
   // Real data only: fall back through what the business actually has
   // rather than inventing a line for it.
@@ -315,6 +325,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           brief={v3Brief}
           name={displayName}
           logoUrl={biz.logo_url}
+          photoUrl={v3Photo}
           priceText={v3Price}
           areaText={v3Area}
           kosherBody={biz.kosher_certification?.body || null}
@@ -334,6 +345,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           )}
         </V3Hero>
       )}
+      {v3 && <V3Flyers brief={v3Brief} urls={v3Flyers} name={displayName} />}
 
       <div className={`${columnWidth} mx-auto px-4 py-8`}>
         {!v3 && (
@@ -671,7 +683,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             fighting the person reading it. */}
         {biz.page_upgrade && <div id="business-body" className="scroll-mt-24" />}
         <BlockList
-          business={biz}
+          business={v3Body}
           ctx={{
             t,
             i18n,
