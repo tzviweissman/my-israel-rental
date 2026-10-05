@@ -79,7 +79,7 @@ const JobsEmailsOff = () => {
           <>
             <CheckCircle2 size={40} className="mx-auto mb-4" style={{ color: 'var(--brand-primary)' }} />
             <h1 className="text-xl font-bold mb-2" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-              {t('jobsEmailsOff.doneTitle', 'Done — no more of these emails')}
+              {t('jobsEmailsOff.doneTitle', 'Done - no more of these emails')}
             </h1>
             <p className="text-sm mb-6" style={{ color: 'var(--brand-muted)' }}>
               {t('jobsEmailsOff.doneBody',

@@ -27,7 +27,7 @@ async def translate_chat_message(text: str, target_lang: str) -> str:
             f"renters and property owners. Translate the user's message into "
             f"{target_full}. Keep the tone natural and conversational. "
             f"Preserve emojis, phone numbers, prices, and dates verbatim. "
-            f"Output only the translation — no quotes, prefixes, or notes."
+            f"Output only the translation - no quotes, prefixes, or notes."
         ),
     )
     chat.with_model("anthropic", "claude-sonnet-4-6")

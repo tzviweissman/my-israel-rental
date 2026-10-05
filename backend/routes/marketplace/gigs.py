@@ -427,7 +427,7 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
     if not _has_any_photo(payload):
         raise HTTPException(
             status_code=400,
-            detail="Add at least one photo — a listing without one is very hard to book.",
+            detail="Add at least one photo - a listing without one is very hard to book.",
         )
     prov = await _ensure_provider_record(user["user_id"])
     # Every gig belongs to a business (spec M2). Today that is the one
@@ -462,7 +462,7 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
         })
         if not business:
             logger.warning(
-                "gig create: business_id %s not owned by %s — falling back",
+                "gig create: business_id %s not owned by %s - falling back",
                 payload.business_id, user["user_id"],
             )
     if not business:
@@ -1126,7 +1126,7 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         raise HTTPException(status_code=400, detail="This listing is not taking bookings right now")
     # Store gigs use direct messaging only — no calendar / no tier booking.
     if (gig.get("gig_type") or "deliverable") == "store":
-        raise HTTPException(status_code=400, detail="Store gigs do not accept bookings — message the seller directly")
+        raise HTTPException(status_code=400, detail="Store gigs do not accept bookings - message the seller directly")
     if gig.get("booking_mode") != "in_platform":
         raise HTTPException(status_code=400, detail="This gig only accepts WhatsApp bookings")
     # Appointment gigs require an explicit time slot so the calendar can
@@ -1149,7 +1149,7 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
             # the picker rather than correct the input.
             raise HTTPException(
                 status_code=409,
-                detail="That time has just been taken — please pick another.",
+                detail="That time has just been taken - please pick another.",
             )
 
     _now = datetime.now(UTC)
@@ -1188,7 +1188,7 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
     await _notify(
         gig["provider_user_id"], "booking_request",
         f"New booking request for {gig.get('title') or 'your listing'}"
-        f"{(' — ' + _when) if _when else ''}.",
+        f"{(' - ' + _when) if _when else ''}.",
         booking["_id"],
     )
     logger.info("[marketplace] booking created: gig=%s client=%s tier=%s", gig_id, user["user_id"], payload.tier_name)
@@ -1743,7 +1743,7 @@ async def sweep_expired_holds() -> dict:
             await _notify(
                 b.get("client_user_id"), "booking_expired",
                 f"No reply about {when or 'your request'}, so the time is free "
-                f"again — you can request another.".strip(),
+                f"again - you can request another.".strip(),
                 b["_id"],
             )
             await _notify(
@@ -1779,7 +1779,7 @@ async def sweep_expired_holds() -> dict:
             await _notify(
                 b.get("client_user_id"), "booking_expired",
                 f"No reply about {when or 'your request'}, so the time is free "
-                f"again — you can request another.".strip(),
+                f"again - you can request another.".strip(),
                 b["_id"],
             )
             await _notify(
@@ -1820,7 +1820,7 @@ async def sweep_expired_holds() -> dict:
         hours_left = max(1, int((expires - now).total_seconds() // 3600))
         await _notify(
             b.get("provider_user_id"), "booking_hold_reminder",
-            f"Still waiting on your answer for {when or 'a request'} — "
+            f"Still waiting on your answer for {when or 'a request'} - "
             f"about {hours_left}h before the time is released.".strip(),
             b["_id"],
         )

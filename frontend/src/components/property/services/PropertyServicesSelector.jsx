@@ -110,7 +110,7 @@ const CustomServiceModal = ({ onClose, onAdd }) => {
             <X size={18} />
           </button>
         </div>
-        <p className="text-xs text-gray-500">Something we didn&apos;t list? Add your own — it&apos;ll appear in your listing.</p>
+        <p className="text-xs text-gray-500">Something we didn&apos;t list? Add your own - it&apos;ll appear in your listing.</p>
 
         <div>
           <label className="text-xs font-semibold text-gray-700">Service name *</label>

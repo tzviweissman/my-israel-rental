@@ -73,7 +73,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   const [layout, setLayout] = useState(null);
   /* C8 — how many services are on screen. "Show more" rather than
      infinite scroll: infinite scroll keeps the footer permanently out of
-     reach, and the footer is where B7's "Add yours — free" band lives.
+     reach, and the footer is where B7's "Add yours - free" band lives.
      It also leaves the page crawlable, which endless scroll does not. */
   const [shown, setShown] = useState(PAGE_SIZE);
   // Which collections the reader has opened in full (C1's "See all N").

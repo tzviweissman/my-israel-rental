@@ -153,7 +153,7 @@ const WhyHost = () => {
     <div className="min-h-screen" style={{ background: 'var(--bg)' }} data-testid="why-host-page">
       <PageMeta
         title="List your property on MyIsraelRental | For owners"
-        description="List your apartment or vacation rental free — no listing fee, no booking fees, no commission. Renters message you directly, contracts are signed digitally, and your calendar stays in sync."
+        description="List your apartment or vacation rental free - no listing fee, no booking fees, no commission. Renters message you directly, contracts are signed digitally, and your calendar stays in sync."
         path="/why-host"
       />
 
@@ -187,7 +187,7 @@ const WhyHost = () => {
             <p className="text-base sm:text-lg mb-8 max-w-[48ch]" style={{ color: 'var(--brand-muted)' }}>
               {t(
                 'whyHost.heroBody',
-                'Renters looking for a home in English find you here and message you directly — you keep whatever you agree with them.',
+                'Renters looking for a home in English find you here and message you directly - you keep whatever you agree with them.',
               )}
             </p>
             <button

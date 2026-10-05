@@ -113,7 +113,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
         // do not show it nobody ever sees it.
         const why = failed.find((r) => r?.error)?.error;
         toast.error(why
-          ? t('sweep.uploadFailedWhy', { defaultValue: 'Photo upload failed — {{reason}}', reason: why })
+          ? t('sweep.uploadFailedWhy', { defaultValue: 'Photo upload failed - {{reason}}', reason: why })
           : t('sweep.uploadFailed', 'Photo upload failed. Please try a different photo.'));
         reportUploadFailure({ where: 'edit-listing', count: failed.length, reason: why, API, token });
       }
@@ -294,7 +294,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 {t('services.specificType', 'Specific type')}
               </p>
               <p className="text-[11px] text-gray-500">
-                {t('services.specificTypeProviderHint', 'Optional — customers filter by this, so it helps the right ones find you.')}
+                {t('services.specificTypeProviderHint', 'Optional - customers filter by this, so it helps the right ones find you.')}
               </p>
               <div className="flex flex-wrap gap-2 pt-1" data-testid="edit-listing-subcategory-row">
                 {subOptions.map((sub) => (

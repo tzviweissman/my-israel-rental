@@ -666,7 +666,7 @@ async def smart_extract(
             status_code=502,
             message=(
                 "We couldn't read the extracted listing data. Please try the "
-                "upload again — if it keeps failing, the file may be in an "
+                "upload again - if it keeps failing, the file may be in an "
                 "unexpected format."
             ),
             exc=e, logger=logger, context="parse LLM response as JSON",

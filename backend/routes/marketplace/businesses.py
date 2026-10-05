@@ -680,7 +680,7 @@ async def set_web_address(business_id: str, payload: WebAddressIn, user=Depends(
 
 @router.get("/businesses/{business_id}/listings")
 async def business_listings(business_id: str, user=Depends(verify_token)):
-    """What deactivating this business would hide — asked before doing it."""
+    """What deactivating this business would hide - asked before doing it."""
     await _owned(business_id, user)
     gigs = [
         {"id": g["_id"], "title": g.get("title"), "status": g.get("status")}

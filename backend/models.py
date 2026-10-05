@@ -68,7 +68,7 @@ class LanguagePreference(BaseModel):
 
 
 class WhatsAppNumberUpdate(BaseModel):
-    """Payload for PUT /auth/whatsapp — empty string clears the number."""
+    """Payload for PUT /auth/whatsapp - empty string clears the number."""
     whatsapp_number: str
 
 

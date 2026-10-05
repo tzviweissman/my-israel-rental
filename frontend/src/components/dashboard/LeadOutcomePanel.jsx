@@ -79,10 +79,10 @@ export default function LeadOutcomePanel({ token }) {
       setOpenId(null);
       toast.success(booked
         ? t('leadOutcome.savedYes', 'Added to your calendar.')
-        : t('leadOutcome.savedNo', 'Thanks — noted.'));
+        : t('leadOutcome.savedNo', 'Thanks - noted.'));
     } catch (err) {
       const detail = err.response?.data?.detail;
-      toast.error(detail || t('leadOutcome.failed', 'Could not save that — try again.'));
+      toast.error(detail || t('leadOutcome.failed', 'Could not save that - try again.'));
     } finally {
       setBusyId(null);
     }

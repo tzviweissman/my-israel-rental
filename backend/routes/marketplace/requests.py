@@ -643,7 +643,7 @@ async def create_request(payload: RequestIn, user=Depends(verify_token)):
         raise HTTPException(
             status_code=400,
             detail=(
-                f"Only {MAX_OPEN_REQUESTS_PER_USER} open requests at a time — "
+                f"Only {MAX_OPEN_REQUESTS_PER_USER} open requests at a time - "
                 "mark one as found or close it first"
             ),
         )
@@ -1265,7 +1265,7 @@ def _esc(value: Any) -> str:
 
 
 def _digest_email(name: str, reqs: list[dict[str, Any]], optout_url: str) -> tuple[str, str]:
-    """(subject, html). Short and plain — a nudge, not a newsletter."""
+    """(subject, html). Short and plain - a nudge, not a newsletter."""
     n = len(reqs)
     subject = (
         "Someone is looking for what you offer"

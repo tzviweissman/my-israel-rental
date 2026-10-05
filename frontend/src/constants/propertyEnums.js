@@ -36,10 +36,10 @@ export const FURNITURE_OPTIONS = [
 ];
 
 export const CANCELLATION_POLICIES = [
-  { v: 'flexible', label: 'Flexible — full refund 7+ days before check-in' },
-  { v: 'moderate', label: 'Moderate — 50% refund 14+ days before check-in' },
-  { v: 'strict', label: 'Strict — no refunds after booking' },
-  { v: 'custom', label: 'Custom — write your own policy' },
+  { v: 'flexible', label: 'Flexible - full refund 7+ days before check-in' },
+  { v: 'moderate', label: 'Moderate - 50% refund 14+ days before check-in' },
+  { v: 'strict', label: 'Strict - no refunds after booking' },
+  { v: 'custom', label: 'Custom - write your own policy' },
 ];
 
 // Same 13 amenities as the regular Add/Edit form's checkbox grid.

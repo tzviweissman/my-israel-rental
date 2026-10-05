@@ -111,7 +111,7 @@ const MovingServicesCrossSell = ({ property, variant = 'detail', storageKey }) =
         <div>
           <h3 className="text-sm md:text-base font-bold text-gray-900">
             {isBooked
-              ? t('services.crossSell.bookedTitle', 'Request sent — now sort the move out?')
+              ? t('services.crossSell.bookedTitle', 'Request sent - now sort the move out?')
               : t('services.crossSell.title', 'Moving in? Find movers, cleaners & handymen')}
           </h3>
           <p className="text-xs md:text-sm text-gray-600 mt-0.5">

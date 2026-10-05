@@ -99,7 +99,7 @@ const WhyList = () => {
           <p className="text-base sm:text-lg text-gray-600 max-w-2xl mx-auto mb-8">
             {t(
               'whyList.heroBody',
-              'Whether someone is moving, renovating, celebrating or just needs a job done, this is where they look — in English or Hebrew, at the moment they need you.',
+              'Whether someone is moving, renovating, celebrating or just needs a job done, this is where they look - in English or Hebrew, at the moment they need you.',
             )}
           </p>
           <button
@@ -113,7 +113,7 @@ const WhyList = () => {
             <ArrowRight size={16} className="rtl:rotate-180" />
           </button>
           <p className="text-xs text-gray-500 mt-3">
-            {t('whyList.trialNote', 'Free to list — no card needed.')}
+            {t('whyList.trialNote', 'Free to list - no card needed.')}
           </p>
         </div>
       </section>
@@ -164,7 +164,7 @@ const WhyList = () => {
         <div className="max-w-5xl mx-auto">
           <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 p-5">
             <p className="text-xs font-semibold tracking-wider uppercase text-gray-500 mb-4">
-              {t('whyList.roadmapLabel', 'Coming soon — not available yet')}
+              {t('whyList.roadmapLabel', 'Coming soon - not available yet')}
             </p>
             <div className="grid gap-5 sm:grid-cols-2">
               {ROADMAP.map(({ key, Icon }) => (
@@ -194,7 +194,7 @@ const WhyList = () => {
           <p className="text-sm text-gray-600 mb-5">
             {t(
               'whyList.vsBody',
-              'Most work here still comes from scattered WhatsApp and Facebook groups — your post scrolls away in an hour, nobody can search it later, and a new customer has no way to tell whether you are any good.',
+              'Most work here still comes from scattered WhatsApp and Facebook groups - your post scrolls away in an hour, nobody can search it later, and a new customer has no way to tell whether you are any good.',
             )}
           </p>
           <ul className="space-y-2">

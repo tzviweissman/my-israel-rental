@@ -28,7 +28,7 @@ const VerifyPending = () => {
 
   const handleResend = async () => {
     if (!email) {
-      toast.error(t('auth.verifyPending.noEmailOnRecord', "We don't know your email — please log in or sign up again."));
+      toast.error(t('auth.verifyPending.noEmailOnRecord', "We don't know your email - please log in or sign up again."));
       return;
     }
     setSending(true);
@@ -63,7 +63,7 @@ const VerifyPending = () => {
         <div className="flex items-start gap-2 text-left text-xs bg-amber-50 border border-amber-200 rounded-lg p-3 mb-6">
           <MailWarning size={16} className="text-amber-600 shrink-0 mt-0.5" />
           <p className="text-amber-800 leading-snug">
-            {t('auth.verifyPending.checkSpam', "Can't see it? Check your spam or junk folder — and mark it as 'Not spam' so future updates land in your inbox.")}
+            {t('auth.verifyPending.checkSpam', "Can't see it? Check your spam or junk folder - and mark it as 'Not spam' so future updates land in your inbox.")}
           </p>
         </div>
 

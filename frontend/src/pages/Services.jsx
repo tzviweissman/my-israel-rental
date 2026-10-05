@@ -312,7 +312,7 @@ const Services = () => {
           // where to click to unblock in their browser settings.
           setGeoBlocked(true);
         } else {
-          toast.error(t('services.geoFailed', 'Could not fetch your location — please try again.'));
+          toast.error(t('services.geoFailed', 'Could not fetch your location - please try again.'));
         }
       },
       { enableHighAccuracy: false, timeout: 8000, maximumAge: 5 * 60 * 1000 },
@@ -358,17 +358,17 @@ const Services = () => {
   const seo = useMemo(() => {
     const catLbl = categories.find((c) => c.slug === selectedCat)?.label;
     const locLbl = locations.find((l) => l.slug === selectedLoc)?.label;
-    let title = 'Hire Proven Local Talent in Israel — Cleaners, Movers, Plumbers & more | MyIsraelRental';
-    let description = 'Hire proven talent who deliver — post a job, get bids immediately, see verified work history, reviews and certifications. Cleaning, movers, plumbers, electricians, photographers, barbers, tour guides and more. Zero booking fees.';
+    let title = 'Hire Proven Local Talent in Israel - Cleaners, Movers, Plumbers & more | MyIsraelRental';
+    let description = 'Hire proven talent who deliver - post a job, get bids immediately, see verified work history, reviews and certifications. Cleaning, movers, plumbers, electricians, photographers, barbers, tour guides and more. Zero booking fees.';
     if (catLbl && locLbl) {
-      title = `${catLbl} in ${locLbl} — Services Marketplace | MyIsraelRental`;
+      title = `${catLbl} in ${locLbl} - Services Marketplace | MyIsraelRental`;
       description = `Find and book trusted ${catLbl.toLowerCase()} providers in ${locLbl}. Direct chat, WhatsApp booking, zero renter fees.`;
     } else if (catLbl) {
-      title = `${catLbl} in Israel — Services Marketplace | MyIsraelRental`;
-      description = `Book trusted ${catLbl.toLowerCase()} providers across Israel — direct chat, WhatsApp-ready, no booking fees.`;
+      title = `${catLbl} in Israel - Services Marketplace | MyIsraelRental`;
+      description = `Book trusted ${catLbl.toLowerCase()} providers across Israel - direct chat, WhatsApp-ready, no booking fees.`;
     } else if (locLbl) {
-      title = `Local Services in ${locLbl} — Services Marketplace | MyIsraelRental`;
-      description = `Discover trusted local service providers in ${locLbl} — cleaning, home repair, tours, and more.`;
+      title = `Local Services in ${locLbl} - Services Marketplace | MyIsraelRental`;
+      description = `Discover trusted local service providers in ${locLbl} - cleaning, home repair, tours, and more.`;
     }
     const qs = [
       selectedCat ? `category=${selectedCat}` : null,
@@ -728,7 +728,7 @@ const Services = () => {
                 ? t('services.noServicesOpenBody', 'Nobody with appointment hours listed is inside their open window right now. Try turning the filter off to see everyone.')
                 : (advCount > 0
                     ? t('services.emptyBodyFiltered', 'Try loosening the filters, or clear them all to see everything.')
-                    : t('services.emptyBody', 'Be the first to list your service in this category — free, no commission.'))}
+                    : t('services.emptyBody', 'Be the first to list your service in this category - free, no commission.'))}
             </p>
             {availableNowOnly ? (
               <button
@@ -931,7 +931,7 @@ const Services = () => {
         <div className="svc-cta svc-cta-need">
           <div>
             <h4>{t('services.ctaNeedTitle', 'Need something done?')}</h4>
-            <small>{t('services.ctaNeedBody', 'Describe the job and let pros come to you — free, and they reply through the site.')}</small>
+            <small>{t('services.ctaNeedBody', 'Describe the job and let pros come to you - free, and they reply through the site.')}</small>
           </div>
           <button
             type="button"
@@ -945,7 +945,7 @@ const Services = () => {
         <div className="svc-cta svc-cta-offer">
           <div>
             <h4>{t('services.ctaOfferTitle', 'Add your business, free')}</h4>
-            <small>{t('services.ctaOfferBody', 'One free listing reaches everyone on the platform — renters, owners and property managers alike.')}</small>
+            <small>{t('services.ctaOfferBody', 'One free listing reaches everyone on the platform - renters, owners and property managers alike.')}</small>
           </div>
           <button
             type="button"
@@ -1007,7 +1007,7 @@ const Services = () => {
               </h2>
             </div>
             <p className="text-sm text-gray-600 leading-relaxed mb-4">
-              {t('services.geoBlockedBody', 'Your browser is blocking location for this site — we need it to sort services by distance from you. It only takes a second to re-enable:')}
+              {t('services.geoBlockedBody', 'Your browser is blocking location for this site - we need it to sort services by distance from you. It only takes a second to re-enable:')}
             </p>
             <ol className="text-sm text-gray-700 space-y-1.5 mb-5 ps-4 list-decimal marker:text-[var(--brand-primary)] marker:font-bold">
               <li>{t('services.geoStep1', 'Click the lock (or info) icon in your browser\'s address bar.')}</li>

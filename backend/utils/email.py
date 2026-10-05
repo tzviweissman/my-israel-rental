@@ -100,7 +100,7 @@ async def send_email(
                 if suppressed:
                     reason = suppressed.get("email_suppressed_reason", "unknown")
                     logger.warning(
-                        "Skipping email to %s — suppressed (%s)",
+                        "Skipping email to %s - suppressed (%s)",
                         to_email, reason,
                     )
                     await _record_email_failure(
@@ -120,7 +120,7 @@ async def send_email(
     # test that reads it).
     client = _get_client()
     if client is None:
-        logger.error("Postmark email skipped — POSTMARK_SERVER_TOKEN not set (to=%s, subject=%s)", to_email, subject)
+        logger.error("Postmark email skipped - POSTMARK_SERVER_TOKEN not set (to=%s, subject=%s)", to_email, subject)
         await _record_email_failure(normalized_to, subject, tag, "postmark_client_missing", "POSTMARK_SERVER_TOKEN not set")
         return False
 
@@ -318,7 +318,7 @@ async def send_welcome_email(to_email: str, name: str, role: str, verification_l
     return await send_email(
         to_email,
         "Welcome to My Israel Rental",
-        _wrap(inner, preheader="Welcome to My Israel Rental — your home in Israel"),
+        _wrap(inner, preheader="Welcome to My Israel Rental - your home in Israel"),
         tag="welcome",
     )
 
@@ -344,7 +344,7 @@ async def send_password_reset_email(to_email: str, name: str, reset_link: str) -
     """
     return await send_email(
         to_email,
-        "Reset your password — My Israel Rental",
+        "Reset your password - My Israel Rental",
         _wrap(inner, preheader="Reset your My Israel Rental password"),
         tag="password-reset",
     )
@@ -404,9 +404,9 @@ async def send_booking_confirmation_email(
     </p>
     """
     subject = (
-        f"Booking confirmed — {_plain(property_title)}"
+        f"Booking confirmed - {_plain(property_title)}"
         if is_confirmed
-        else f"Booking request received — {_plain(property_title)}"
+        else f"Booking request received - {_plain(property_title)}"
     )
     return await send_email(
         to_email,
@@ -472,9 +472,9 @@ async def send_booking_notification_email(
     {_button("Open Dashboard", f"{FRONTEND_URL}/dashboard")}
     """
     subject = (
-        f"New booking request — {_plain(property_title)}"
+        f"New booking request - {_plain(property_title)}"
         if is_pending
-        else f"New booking — {_plain(property_title)}"
+        else f"New booking - {_plain(property_title)}"
     )
     return await send_email(
         to_email,
@@ -534,7 +534,7 @@ async def send_mention_notification_email(
     """
     return await send_email(
         to_email,
-        f"@{role_label.lower()} — new mention from {sender_name}",
+        f"@{role_label.lower()} - new mention from {sender_name}",
         _wrap(inner, preheader=f"{sender_name} mentioned you about {property_title}"),
         tag="mention-notification",
     )
@@ -643,7 +643,7 @@ async def send_payment_confirmation_email(
 
     currency_symbol = "₪" if currency == "ILS" else "$"
     headline = (
-        "New paid order" if is_admin_copy else "Payment received — thank you! 🎉"
+        "New paid order" if is_admin_copy else "Payment received - thank you! 🎉"
     )
     subhead = (
         "A customer has just completed a PayPal payment."
@@ -697,9 +697,9 @@ async def send_payment_confirmation_email(
     </p>
     """
     subject = (
-        f"[Admin] New paid order — {currency_symbol}{amount:,.2f}"
+        f"[Admin] New paid order - {currency_symbol}{amount:,.2f}"
         if is_admin_copy
-        else f"Payment receipt — {currency_symbol}{amount:,.2f} {currency}"
+        else f"Payment receipt - {currency_symbol}{amount:,.2f} {currency}"
     )
     return await send_email(
         to_email,
@@ -797,9 +797,9 @@ async def send_pricing_insights_email(
     </p>
     """
     subject = (
-        f"Pricing Insights — {arrow} {currency_symbol(total_ccy)}{abs(total_delta):,.0f} projected this month"
+        f"Pricing Insights - {arrow} {currency_symbol(total_ccy)}{abs(total_delta):,.0f} projected this month"
         if total_delta != 0
-        else "Pricing Insights — your weekly Smart Pricing digest"
+        else "Pricing Insights - your weekly Smart Pricing digest"
     )
     return await send_email(
         to_email,
@@ -857,7 +857,7 @@ async def send_availability_expiring_email(
       <a href="{FRONTEND_URL}/dashboard?tab=settings" style="color:{BRAND_TEAL};">dashboard settings</a>.
     </p>
     """
-    subject = f"Heads up — {_plain(property_title)} stops taking bookings on {_plain(available_to)}"
+    subject = f"Heads up - {_plain(property_title)} stops taking bookings on {_plain(available_to)}"
     return await send_email(
         to_email,
         subject,
@@ -899,19 +899,19 @@ async def send_pricing_quarantine_email(
 
     if reason == "zero_price":
         issue_summary = (
-            "The listing currently has <strong>no price set</strong> — no monthly "
+            "The listing currently has <strong>no price set</strong> - no monthly "
             "rent, nightly rate, or holiday lump sum. Renters browsing the site "
             "were seeing a blank price, which hurts trust and clicks."
         )
         fix_hint = (
-            "Set the price for whichever rental type this listing offers — a "
+            "Set the price for whichever rental type this listing offers - a "
             "monthly rent for long-term, a nightly rate for vacation, or a "
             "holiday lump sum for Sukkot / Pesach short stays."
         )
     else:  # low_monthly
         shown = f"{cur_symbol}{int(monthly_price or 0):,}/month" if monthly_price else "an unusually low monthly amount"
         issue_summary = (
-            f"The listing is set at <strong>{shown}</strong> — well below the "
+            f"The listing is set at <strong>{shown}</strong> - well below the "
             f"typical long-term rent floor in Israel. This usually means a "
             f"nightly rate ended up in the monthly field by mistake, so the "
             f"listing was showing an unrealistic price to renters."
@@ -962,7 +962,7 @@ async def send_pricing_quarantine_email(
       Questions? Reply to this email and we'll help you sort it out.
     </p>
     """
-    subject = f"Action needed — we paused {_plain(property_title)} while you review the price"
+    subject = f"Action needed - we paused {_plain(property_title)} while you review the price"
     return await send_email(
         to_email,
         subject,
@@ -1061,11 +1061,11 @@ async def send_property_removed_email(
       The My Israel Rental Team
     </p>
     """
-    subject = f"About your inquiry — {_plain(property_title)} is no longer available"
+    subject = f"About your inquiry - {_plain(property_title)} is no longer available"
     return await send_email(
         to_email,
         subject,
-        _wrap(inner, preheader="The listing you were inquiring about has been removed. No need to wait for a reply — here are your options."),
+        _wrap(inner, preheader="The listing you were inquiring about has been removed. No need to wait for a reply - here are your options."),
         tag="property-removed-notice",
     )
 

@@ -509,10 +509,10 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
         setNearQuery(q);
         toast.success(t('stays.nearShownFrom', 'Showing stays near "{{addr}}"', { addr: q }));
       } else {
-        toast.error(t('stays.nearNotFound', "We couldn't find that address — try a specific street or landmark."));
+        toast.error(t('stays.nearNotFound', "We couldn't find that address - try a specific street or landmark."));
       }
     } catch (e) {
-      toast.error(t('stays.nearFailed', 'Address lookup failed — please try again.'));
+      toast.error(t('stays.nearFailed', 'Address lookup failed - please try again.'));
     } finally {
       setNearBusy(false);
     }
@@ -569,8 +569,8 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
       data-testid="stays-page"
     >
       <PageMeta
-        title={landing?.title || 'Stays in Israel — Long-term, short-term & vacation rentals | MyIsraelRental'}
-        description={landing?.description || 'Discover stays across Israel — vacation apartments, short-term lets and long-term rentals in Jerusalem, Tel Aviv, Haifa and beyond. Filter by area, dates, price and amenities.'}
+        title={landing?.title || 'Stays in Israel - Long-term, short-term & vacation rentals | MyIsraelRental'}
+        description={landing?.description || 'Discover stays across Israel - vacation apartments, short-term lets and long-term rentals in Jerusalem, Tel Aviv, Haifa and beyond. Filter by area, dates, price and amenities.'}
         path={landing?.path || '/stays'}
       />
       {/* Dark photo band. Also carries the SEO landing copy when one of
@@ -642,7 +642,7 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
               }}
               onSubmit={runAddressSearch}
               onClear={clearAddressSearch}
-              placeholder={t('stays.nearPlaceholder', 'Show stays near an address — e.g. Rothschild Blvd, Tel Aviv')}
+              placeholder={t('stays.nearPlaceholder', 'Show stays near an address - e.g. Rothschild Blvd, Tel Aviv')}
               testId="stays-near"
             />
             <div
@@ -714,7 +714,7 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
             }
           />
           <p className="text-2xl font-bold text-gray-800 mt-12 mb-2">{t('stays.noResultsTitle', 'No stays match those filters')}</p>
-          <p className="text-gray-500 mb-6">{t('stays.noResultsBody', 'Try widening your search or clearing a filter — or have us notify you when something matches.')}</p>
+          <p className="text-gray-500 mb-6">{t('stays.noResultsBody', 'Try widening your search or clearing a filter - or have us notify you when something matches.')}</p>
           <button
             onClick={clearAllFilters}
             className="px-5 py-2.5 rounded-lg text-sm font-semibold text-white"
@@ -819,7 +819,7 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
                   const shown = shownPrice(p);
                   const cur = (shown?.currency || p.currency || 'ILS').toUpperCase();
                   const sym = cur === 'USD' ? '$' : cur === 'EUR' ? '€' : '₪';
-                  const price = !shown ? `${sym}—`
+                  const price = !shown ? `${sym} - `
                     : shown.per === 'month' ? `${sym}${Math.round(shown.amount / 1000)}k/mo`
                     : shown.per === 'holiday' ? `${sym}${Math.round(shown.amount).toLocaleString()} ${unitLabel(shown, t)}`
                     : `${sym}${Math.round(shown.amount).toLocaleString()}/nt`;
@@ -914,7 +914,7 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
               <RenterTrustBanner variant="compact" className="mt-0.5" />
               {nearCoords && nearQuery && (
                 <p className="text-xs text-gray-500 mt-0.5 truncate max-w-md" data-testid="stays-near-label-grid">
-                  {t('stays.nearestFirst', 'Nearest first — from')} {nearQuery}
+                  {t('stays.nearestFirst', 'Nearest first - from')} {nearQuery}
                 </p>
               )}
               {nearCoords && (
@@ -931,7 +931,7 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
                 </p>
               ) : (checkin || checkout) && (
                 <p className="text-xs text-gray-500 mt-0.5">
-                  {checkin || '—'} → {checkout || '—'}
+                  {checkin || '-'} → {checkout || '-'}
                 </p>
               )}
             </div>

@@ -188,13 +188,13 @@ const PostRequest = () => {
       set({ photos: [...form.photos, ...urls].slice(0, MAX_ITEM_PHOTOS) });
       if (files.length > room) {
         toast.message(t('requests.photosTrimmed', {
-          defaultValue: 'Added {{n}} — that is the maximum.', n: room,
+          defaultValue: 'Added {{n}} - that is the maximum.', n: room,
         }));
       }
     } catch {
       // The upload helper already reports the technical failure; this is
       // the part the person needs, and it must not lose what they typed.
-      toast.error(t('requests.photoFailed', 'Those photos would not upload. The rest of your post is safe — try again.'));
+      toast.error(t('requests.photoFailed', 'Those photos would not upload. The rest of your post is safe - try again.'));
     } finally {
       setUploading(false);
     }
@@ -262,7 +262,7 @@ const PostRequest = () => {
       label: t('requests.stepAbout', 'Title and details'),
       blocker: () => {
         if (form.title.trim().length < 6) return t('requests.needTitle', 'Give your post a title (at least 6 characters).');
-        if (form.description.trim().length < 10) return t('requests.needDescription', 'Add a few more details — at least 10 characters.');
+        if (form.description.trim().length < 10) return t('requests.needDescription', 'Add a few more details - at least 10 characters.');
         return null;
       },
     },
@@ -339,7 +339,7 @@ const PostRequest = () => {
     // self-evident, and the draft comes back with them.
     if (!token) {
       writeDraft(form, STEPS.length - 1);
-      toast.message(t('requests.signInToPost', 'One last step — create an account so people can reply to you. Your post is saved.'));
+      toast.message(t('requests.signInToPost', 'One last step - create an account so people can reply to you. Your post is saved.'));
       navigate(`/join?redirect=${encodeURIComponent('/requests/post')}`);
       return;
     }
@@ -381,8 +381,8 @@ const PostRequest = () => {
         headers: { Authorization: `Bearer ${token}` },
       });
       toast.success(isOffer
-        ? t('requests.postedOffer', 'Your post is live — renters can now reach you.')
-        : t('requests.posted', 'Your request is live — owners and pros can now reach you.'));
+        ? t('requests.postedOffer', 'Your post is live - renters can now reach you.')
+        : t('requests.posted', 'Your request is live - owners and pros can now reach you.'));
       navigate(`/requests/${data.id}`);
     } catch (err) {
       // The server owns the real rules (open cap, cooldown); surface its
@@ -503,8 +503,8 @@ const PostRequest = () => {
             </h1>
             <p className="text-sm mb-7" style={{ color: 'var(--brand-muted)' }}>
               {isOffer
-                ? t('requests.postSubOffer', 'Free to post. Renters reply through on-platform chat — your phone and email are never shown. For a full listing with photos and pricing, list it on Stays instead.')
-                : t('requests.postSub', 'Free to post. Owners and pros reply through on-platform chat — your phone and email are never shown.')}
+                ? t('requests.postSubOffer', 'Free to post. Renters reply through on-platform chat - your phone and email are never shown. For a full listing with photos and pricing, list it on Stays instead.')
+                : t('requests.postSub', 'Free to post. Owners and pros reply through on-platform chat - your phone and email are never shown.')}
             </p>
 
             <div className="space-y-5">
@@ -598,7 +598,7 @@ const PostRequest = () => {
                           : t('requests.descriptionPhItemWant', 'What you are after, and what condition you would accept.'))
                         : isOffer
                           ? (isRental
-                            ? t('requests.descriptionPhOffer', 'What makes it worth a look — the floor, the light, when it is free.')
+                            ? t('requests.descriptionPhOffer', 'What makes it worth a look - the floor, the light, when it is free.')
                             : t('requests.descriptionPhOfferService', 'What you do, who you do it for, and where you work.'))
                           : t('requests.descriptionPh', 'The things that would make an offer right or wrong for you.')}
                       maxLength={4000} data-testid="post-request-description"
@@ -610,7 +610,7 @@ const PostRequest = () => {
               {current.key === 'where' && (
                 <Field
                   label={t('requests.fieldArea', 'Area')}
-                  hint={t('requests.areaHint', 'A neighbourhood is more useful than a city — it is how people search here.')}
+                  hint={t('requests.areaHint', 'A neighbourhood is more useful than a city - it is how people search here.')}
                 >
                   {/* Type-ahead over the canonical area list. Free text is
                       still accepted, but a pick from the list spells the
@@ -622,8 +622,8 @@ const PostRequest = () => {
                     onChange={(v) => set({ area: v })}
                     className={inputCls}
                     style={{ borderColor: 'var(--brand-border)' }}
-                    placeholder={t('requests.areaPh', 'Start typing — e.g. Ramat Eshkol')}
-                    emptyHint={t('requests.areaFreeText', 'Not on our list? Type it anyway — it still posts.')}
+                    placeholder={t('requests.areaPh', 'Start typing - e.g. Ramat Eshkol')}
+                    emptyHint={t('requests.areaFreeText', 'Not on our list? Type it anyway - it still posts.')}
                     testid="post-request-area"
                   />
                 </Field>
@@ -655,7 +655,7 @@ const PostRequest = () => {
                       </Field>
                       <Field
                         label={t('requests.fieldPickup', 'Collection from')}
-                        hint={t('requests.pickupHint', 'Optional — the street or landmark, not your address.')}
+                        hint={t('requests.pickupHint', 'Optional - the street or landmark, not your address.')}
                       >
                         <input
                           className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
@@ -765,7 +765,7 @@ const PostRequest = () => {
                         value={form.bedrooms_min} onChange={(e) => set({ bedrooms_min: e.target.value })}
                         placeholder={isOffer
                           ? t('requests.bedroomsPhOffer', 'e.g. 3')
-                          : t('requests.bedroomsPh', 'e.g. 3 — leave blank if it does not matter')}
+                          : t('requests.bedroomsPh', 'e.g. 3 - leave blank if it does not matter')}
                         data-testid="post-request-bedrooms"
                       />
                     </Field>
@@ -775,7 +775,7 @@ const PostRequest = () => {
                         type="number" min="1" max="120" inputMode="numeric"
                         className={inputCls} style={{ borderColor: 'var(--brand-border)' }}
                         value={form.lease_months} onChange={(e) => set({ lease_months: e.target.value })}
-                        placeholder={t('requests.leasePh', 'e.g. 12 — optional')}
+                        placeholder={t('requests.leasePh', 'e.g. 12 - optional')}
                         data-testid="post-request-lease"
                       />
                     </Field>
@@ -807,7 +807,7 @@ const PostRequest = () => {
                         className={inputCls}
                         style={{ borderColor: 'var(--brand-border)' }}
                         placeholder={t('requests.pickCategory', 'Type or pick a category…')}
-                        emptyHint={t('requests.noCategoryMatch', 'No category matches that — try a shorter word.')}
+                        emptyHint={t('requests.noCategoryMatch', 'No category matches that - try a shorter word.')}
                         testid="post-request-category"
                       />
                     </Field>
@@ -874,7 +874,7 @@ const PostRequest = () => {
                       the click and then hands over to WhatsApp. */}
                   <Field
                     label={t('requests.fieldWhatsapp', 'WhatsApp number (optional)')}
-                    hint={t('requests.whatsappHint', 'Add it and people can message you on WhatsApp as well as here. Your number is not shown on the board — it opens WhatsApp when someone taps the button. Leave it blank to keep replies on-site only.')}
+                    hint={t('requests.whatsappHint', 'Add it and people can message you on WhatsApp as well as here. Your number is not shown on the board - it opens WhatsApp when someone taps the button. Leave it blank to keep replies on-site only.')}
                   >
                     <input
                       type="tel"
@@ -903,7 +903,7 @@ const PostRequest = () => {
                         value={form.listing_id} onChange={(e) => set({ listing_id: e.target.value })}
                         data-testid="post-request-listing"
                       >
-                        <option value="">{t('requests.noListingLink', 'No listing — just this post')}</option>
+                        <option value="">{t('requests.noListingLink', 'No listing - just this post')}</option>
                         {myListings.map((p) => (
                           <option key={p.id} value={p.id}>{p.title}</option>
                         ))}
@@ -923,7 +923,7 @@ const PostRequest = () => {
                 style={{ borderColor: 'var(--brand-border)', background: '#fff', color: 'var(--brand-muted)' }}
                 data-testid="post-request-signin-note"
               >
-                {t('requests.signInWhy', 'You will be asked to create an account when you post — that is how replies reach you, and it takes a moment. Nothing you have written is lost.')}
+                {t('requests.signInWhy', 'You will be asked to create an account when you post - that is how replies reach you, and it takes a moment. Nothing you have written is lost.')}
               </p>
             )}
             {restored && token && (
@@ -932,7 +932,7 @@ const PostRequest = () => {
                 style={{ borderColor: 'var(--brand-border)', background: '#fff', color: 'var(--ink)' }}
                 data-testid="post-request-restored"
               >
-                {t('requests.draftRestored', 'Welcome back — your post is exactly as you left it. Press post to publish it.')}
+                {t('requests.draftRestored', 'Welcome back - your post is exactly as you left it. Press post to publish it.')}
               </p>
             )}
             <div className="flex items-center gap-3 mt-8">

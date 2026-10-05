@@ -216,7 +216,7 @@ export default function ServicesTab({ token, initialFilter = null }) {
                     {/* A missing business is shown as missing, not papered
                         over with a placeholder name — it is a real state
                         worth noticing in the console. */}
-                    {r.business_name || <span style={{ color: 'var(--brand-muted)' }}>— none —</span>}
+                    {r.business_name || <span style={{ color: 'var(--brand-muted)' }}> - none - </span>}
                   </td>
                   <td className="px-3 py-2" style={{ color: 'var(--brand-muted)' }}>{r.category}</td>
                   <td className="px-3 py-2" style={{ color: 'var(--brand-muted)' }}>{r.area}</td>
@@ -233,7 +233,7 @@ export default function ServicesTab({ token, initialFilter = null }) {
                   </td>
                   <td className="px-3 py-2">
                     {r.has_photo ? (
-                      <span style={{ color: 'var(--brand-muted)' }}>—</span>
+                      <span style={{ color: 'var(--brand-muted)' }}> - </span>
                     ) : (
                       <span
                         className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"

@@ -63,7 +63,7 @@ export default function AddPhotoNudge({
     } catch (err) {
       // Say what actually went wrong. "Try again" is only honest advice
       // when the problem might be transient.
-      toast.error(err?.message || t('photoNudge.failed', "That photo didn't upload — try again"));
+      toast.error(err?.message || t('photoNudge.failed', "That photo didn't upload - try again"));
     } finally {
       setBusy(false);
     }

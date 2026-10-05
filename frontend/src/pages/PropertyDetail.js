@@ -217,7 +217,7 @@ const PropertyDetail = () => {
         toast.error(t('property.notFound', 'Property not found'));
       } else {
         toast.error(
-          t('property.loadFailed', "Couldn't load this listing — please try again in a moment."),
+          t('property.loadFailed', "Couldn't load this listing - please try again in a moment."),
         );
       }
       return;

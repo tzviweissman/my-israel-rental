@@ -168,9 +168,9 @@ export default function ListingsTable({
                       className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-rose-100 text-rose-800"
                       title={
                         p.pricing_review_reason === 'zero_price'
-                          ? `Hidden from public feed — no price set${p.pricing_review_at ? ` · ${new Date(p.pricing_review_at).toLocaleDateString()}` : ''}`
+                          ? `Hidden from public feed - no price set${p.pricing_review_at ? ` · ${new Date(p.pricing_review_at).toLocaleDateString()}` : ''}`
                           : p.pricing_review_reason === 'low_monthly'
-                          ? `Hidden from public feed — monthly rent below plausibility floor${p.pricing_review_at ? ` · ${new Date(p.pricing_review_at).toLocaleDateString()}` : ''}`
+                          ? `Hidden from public feed - monthly rent below plausibility floor${p.pricing_review_at ? ` · ${new Date(p.pricing_review_at).toLocaleDateString()}` : ''}`
                           : 'Hidden from public feed'
                       }
                       data-testid={`quarantine-badge-${p.id}`}
@@ -426,7 +426,7 @@ export default function ListingsTable({
             <p className="text-xs text-gray-500 mt-1">
               {t(
                 'admin.listingsLoadFailedHint',
-                'Your listings are safe — the server just did not answer. This usually clears on its own right after a deploy.',
+                'Your listings are safe - the server just did not answer. This usually clears on its own right after a deploy.',
               )}
             </p>
             <button

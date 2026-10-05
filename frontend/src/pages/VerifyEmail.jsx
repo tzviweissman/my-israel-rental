@@ -14,10 +14,10 @@ import { CheckCircle2, AlertCircle, Clock, MailCheck } from 'lucide-react';
 const STATUS_THEME = {
   success: { Icon: CheckCircle2, color: '#16A34A', bg: '#DCFCE7',
     titleKey: 'auth.verifyEmail.successTitle', titleFallback: 'Email verified',
-    bodyKey: 'auth.verifyEmail.successBody', bodyFallback: 'Your email is confirmed. Welcome aboard — you can now use every feature of MyIsraelRental.' },
+    bodyKey: 'auth.verifyEmail.successBody', bodyFallback: 'Your email is confirmed. Welcome aboard - you can now use every feature of MyIsraelRental.' },
   already: { Icon: MailCheck, color: 'var(--brand-primary)', bg: 'var(--brand-primary)1A',
     titleKey: 'auth.verifyEmail.alreadyTitle', titleFallback: 'Already verified',
-    bodyKey: 'auth.verifyEmail.alreadyBody', bodyFallback: "This account is already verified — you're good to go." },
+    bodyKey: 'auth.verifyEmail.alreadyBody', bodyFallback: "This account is already verified - you're good to go." },
   expired: { Icon: Clock, color: '#D97706', bg: '#FEF3C7',
     titleKey: 'auth.verifyEmail.expiredTitle', titleFallback: 'Link expired',
     bodyKey: 'auth.verifyEmail.expiredBody', bodyFallback: 'This verification link has expired. Log in and request a new one.' },

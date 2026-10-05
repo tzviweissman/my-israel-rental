@@ -161,7 +161,7 @@ async def _stamp_contract_if_present(
             status_code=500,
             message=(
                 "We couldn't add your signature to the contract. Your booking "
-                "is unaffected — please try signing again, and contact us if "
+                "is unaffected - please try signing again, and contact us if "
                 "it keeps failing."
             ),
             exc=e, logger=logger, context="stamp signature on contract",

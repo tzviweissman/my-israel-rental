@@ -75,7 +75,7 @@ export default function ListingsFilterBar({
         onClick={sweepDuplicates}
         disabled={sweeping}
         className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-rose-50 text-rose-700 border border-rose-200 hover:bg-rose-100 disabled:opacity-50"
-        title="Delete every duplicate listing in one pass — identical-fields first, then keep richest of the rest"
+        title="Delete every duplicate listing in one pass - identical-fields first, then keep richest of the rest"
         data-testid="sweep-duplicates-btn"
       >
         {sweeping ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
@@ -126,7 +126,7 @@ export default function ListingsFilterBar({
           disabled={featuredCount === 0}
           className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-semibold transition-colors disabled:opacity-40 disabled:cursor-not-allowed ${featuredFilter === 'featured' ? 'bg-amber-500 text-white' : 'text-gray-600 hover:bg-gray-50'}`}
           data-testid="featured-filter-on"
-          title={featuredCount === 0 ? "Nothing featured yet — toggle a property's star to mark it" : 'Show only featured listings'}
+          title={featuredCount === 0 ? "Nothing featured yet - toggle a property's star to mark it" : 'Show only featured listings'}
         >
           <Star size={12} fill={featuredFilter === 'featured' ? 'currentColor' : 'none'} /> Featured ({featuredCount})
         </button>

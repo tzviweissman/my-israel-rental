@@ -38,8 +38,8 @@ const PayPalPlansPanel = ({ token }) => {
       // different fixes and the generic message sends people hunting.
       const code = e?.response?.status;
       setError(
-        code === 403 ? 'Admin access required — sign in as an admin.'
-          : code === 404 ? 'Endpoint not found — the backend may not have deployed yet.'
+        code === 403 ? 'Admin access required - sign in as an admin.'
+          : code === 404 ? 'Endpoint not found - the backend may not have deployed yet.'
             : "Couldn't load plan status. Try again in a moment.",
       );
     } finally {
@@ -67,7 +67,7 @@ const PayPalPlansPanel = ({ token }) => {
       setStatus({ ...res.data, missing: (res.data.plans || []).filter((p) => !p.exists).map((p) => p.key) });
       const made = res.data.created?.length || 0;
       const failed = res.data.failed?.length || 0;
-      if (failed) toast.error(`${made} created, ${failed} failed — see the list below`);
+      if (failed) toast.error(`${made} created, ${failed} failed - see the list below`);
       else toast.success(made ? `Created ${made} plan${made === 1 ? '' : 's'}` : 'Nothing to create');
     } catch (e) {
       toast.error(e?.response?.data?.detail || 'Plan creation failed');
@@ -118,7 +118,7 @@ const PayPalPlansPanel = ({ token }) => {
             {isLive ? <AlertTriangle size={15} /> : <CheckCircle2 size={15} />}
             <span>
               PayPal mode: <strong>{status.paypal_mode}</strong>
-              {isLive ? ' — changes here affect real billing.' : ' — safe for testing.'}
+              {isLive ? ' - changes here affect real billing.' : ' - safe for testing.'}
             </span>
           </div>
 

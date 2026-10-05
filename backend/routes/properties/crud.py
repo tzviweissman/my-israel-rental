@@ -368,7 +368,7 @@ async def delete_property(property_id: str, payload: dict = Depends(verify_token
         if reattached["images_merged"]:
             bits.append(f"{reattached['images_merged']} photos")
         if bits:
-            msg = f"Deleted — moved {', '.join(bits)} to the duplicate twin."
+            msg = f"Deleted - moved {', '.join(bits)} to the duplicate twin."
     return {"message": msg, "reattached": reattached}
 
 

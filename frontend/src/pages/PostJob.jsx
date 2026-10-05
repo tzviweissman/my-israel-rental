@@ -81,7 +81,7 @@ const PostJob = () => {
       const { data } = await axios.post(`${API}/marketplace/jobs`, payload, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      toast.success(t('postJob.posted', 'Job posted — matching providers will be notified by email.'), {
+      toast.success(t('postJob.posted', 'Job posted - matching providers will be notified by email.'), {
         action: {
           label: t('postJob.myJobs', 'My jobs'),
           onClick: () => navigate('/dashboard?tab=my-jobs'),
@@ -154,7 +154,7 @@ const PostJob = () => {
           {SUBCATEGORIES[form.category] && (
             <Field
               label={t('postJob.fieldSpecificType', 'Specific type')}
-              hint={t('postJob.specificTypeHint', 'Optional — helps us match the right provider.')}
+              hint={t('postJob.specificTypeHint', 'Optional - helps us match the right provider.')}
             >
               <div className="flex flex-wrap gap-2">
                 {SUBCATEGORIES[form.category].map((s) => (
@@ -250,7 +250,7 @@ const PostJob = () => {
           <Field
             label={t('postJob.fieldArea', 'Area / city')}
             required
-            hint={t('postJob.areaHint', 'Free-form — Tel Aviv, Jerusalem, Haifa, or a neighbourhood.')}
+            hint={t('postJob.areaHint', 'Free-form - Tel Aviv, Jerusalem, Haifa, or a neighbourhood.')}
           >
             <input
               value={form.area}

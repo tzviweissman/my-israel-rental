@@ -80,7 +80,7 @@ const AreaAliasManager = ({ token }) => {
       const res = await axios.get(`${API}/admin/area-aliases/suggestions`, { headers });
       setSuggestions(res.data || []);
       if ((res.data || []).length === 0) {
-        toast.success('No new suggestions — your catalog looks clean!');
+        toast.success('No new suggestions - your catalog looks clean!');
       }
     } catch (err) {
       toast.error(err.response?.data?.detail || 'Failed to scan');

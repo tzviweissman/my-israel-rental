@@ -241,7 +241,7 @@ async def startup_tasks() -> None:
     _startup_log = _log.getLogger(__name__)
     if not _os.environ.get("POSTMARK_SERVER_TOKEN"):
         _startup_log.critical(
-            "POSTMARK_SERVER_TOKEN is not set — outbound email will be "
+            "POSTMARK_SERVER_TOKEN is not set - outbound email will be "
             "SKIPPED on this instance. GET /api/admin/email-health will "
             "return postmark_token_present=false. Set the env var and "
             "restart before assuming email works."

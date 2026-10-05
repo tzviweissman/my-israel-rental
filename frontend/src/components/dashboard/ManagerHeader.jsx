@@ -207,7 +207,7 @@ const WhiteLabelSettings = ({ API, token, initial, managerId }) => {
           maxLength={2000}
           onChange={(e) => setBio(e.target.value)}
           rows={3}
-          placeholder="Tell renters who you are — years in the business, what neighborhoods you specialize in, the extra care you bring to your listings…"
+          placeholder="Tell renters who you are - years in the business, what neighborhoods you specialize in, the extra care you bring to your listings…"
           className="w-full px-2 py-2 rounded border border-gray-200 text-xs leading-snug"
           data-testid="wl-bio"
         />

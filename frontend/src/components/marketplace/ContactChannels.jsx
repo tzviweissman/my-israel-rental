@@ -85,7 +85,7 @@ export default function ContactChannels({
       </button>
 
       <p className="text-[11px] text-center" style={{ color: 'var(--brand-muted)' }}>
-        {t('contact.note', 'Messages on the site always reach them — no phone number needed.')}
+        {t('contact.note', 'Messages on the site always reach them - no phone number needed.')}
       </p>
     </div>
   );

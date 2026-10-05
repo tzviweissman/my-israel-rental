@@ -17,7 +17,7 @@ const recentChangelog = [
   {
     date: '2026-07-10',
     title: 'Per-tier photo galleries on service listings',
-    desc: 'Every service or tour can now have its own photos — customers see the right visuals for each option.',
+    desc: 'Every service or tour can now have its own photos - customers see the right visuals for each option.',
   },
   {
     date: '2026-07-10',

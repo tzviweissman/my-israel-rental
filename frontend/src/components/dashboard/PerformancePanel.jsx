@@ -78,7 +78,7 @@ function Stat({ icon: Icon, label, periodTotal, allTime, daily, chartTitle, sinc
       </div>
       {notCountingYet ? (
         <p className="text-xs text-gray-500" data-testid={`${testid}-not-yet`}>
-          {t('perf.notCountingYet', 'Just switched on — check back tomorrow.')}
+          {t('perf.notCountingYet', 'Just switched on - check back tomorrow.')}
         </p>
       ) : (
       <>
@@ -159,7 +159,7 @@ export default function PerformancePanel({
 
       {!anything ? (
         <p className="text-xs text-gray-500" data-testid="perf-empty">
-          {t('perf.none', 'Nobody has visited these listings yet — this counts them from now on.')}
+          {t('perf.none', 'Nobody has visited these listings yet - this counts them from now on.')}
         </p>
       ) : (
         <>
@@ -170,7 +170,7 @@ export default function PerformancePanel({
               periodTotal={views.period_total}
               allTime={views.total}
               daily={views.daily}
-              chartTitle={t('perf.viewsChart', 'Visitors — last 14 days')}
+              chartTitle={t('perf.viewsChart', 'Visitors - last 14 days')}
               since={views.since}
               week={views.week}
               testid="perf-views"
@@ -182,7 +182,7 @@ export default function PerformancePanel({
               periodTotal={data.period_total}
               allTime={data.total}
               daily={data.daily}
-              chartTitle={t('perf.leadsChart', 'Taps — last 14 days')}
+              chartTitle={t('perf.leadsChart', 'Taps - last 14 days')}
               since={data.since}
               week={data.week}
               testid="perf-leads"

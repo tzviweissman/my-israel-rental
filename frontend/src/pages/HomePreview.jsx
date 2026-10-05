@@ -215,8 +215,8 @@ export default function HomePreview() {
           never about owners' or agents' fees. /home-preview is the lab copy
           of the same page and stays out of search, pointing at "/". */}
       <PageMeta
-        title="MyIsraelRental — Find your perfect rental in Israel | Free to search"
-        description="Browse long-term, short-term, and vacation rentals across Israel — free to search and contact owners directly. Listings in Jerusalem, Tel Aviv, Haifa and more, in English."
+        title="MyIsraelRental - Find your perfect rental in Israel | Free to search"
+        description="Browse long-term, short-term, and vacation rentals across Israel - free to search and contact owners directly. Listings in Jerusalem, Tel Aviv, Haifa and more, in English."
         path="/"
         noindex={isLab}
         jsonLd={[
@@ -610,7 +610,7 @@ export default function HomePreview() {
             <div>
               <div className="hv2-eyebrow">{t('home.v2.biz.eyebrow', 'Local businesses')}</div>
               <h2>{t('home.v2.biz.h2', 'The people who help you settle in')}</h2>
-              <p>{t('home.v2.biz.p', 'Cleaners, movers, caterers, tutors and more — message them directly, no booking fees.')}</p>
+              <p>{t('home.v2.biz.p', 'Cleaners, movers, caterers, tutors and more - message them directly, no booking fees.')}</p>
             </div>
             <FlowButton
               text={t('home.v2.biz.more', 'See all businesses')}

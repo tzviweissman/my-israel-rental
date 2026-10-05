@@ -51,7 +51,7 @@ def _rate_limiting_disabled() -> bool:
     if os.environ.get("RAILWAY_ENVIRONMENT"):
         logger.error(
             "DISABLE_RATE_LIMIT=1 is set on a Railway deployment and is being "
-            "IGNORED. Rate limiting stays on. Remove this variable — it is a "
+            "IGNORED. Rate limiting stays on. Remove this variable - it is a "
             "local-testing switch and must never be set in a deploy."
         )
         return False
@@ -154,7 +154,7 @@ def check_rate(
         retry_after = max(1, int(q[0] + window_seconds - now))
         raise HTTPException(
             status_code=429,
-            detail=f"Too many requests — try again in {retry_after}s",
+            detail=f"Too many requests - try again in {retry_after}s",
             headers={"Retry-After": str(retry_after)},
         )
     q.append(now)

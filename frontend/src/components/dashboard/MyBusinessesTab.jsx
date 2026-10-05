@@ -239,7 +239,7 @@ export default function MyBusinessesTab({ API, token }) {
       <p className="text-sm mb-4" style={{ color: 'var(--brand-muted)' }}>
         {atCap
           ? t('businesses.atCap', 'You have the maximum of {{n}} active businesses. Hide one to add another.', { n: MAX_ACTIVE })
-          : t('businesses.body', 'Run more than one? Add each separately — they each get their own listings, page and QR code.')}
+          : t('businesses.body', 'Run more than one? Add each separately - they each get their own listings, page and QR code.')}
       </p>
 
       {adding && (
@@ -247,7 +247,7 @@ export default function MyBusinessesTab({ API, token }) {
           <input
             value={name}
             onChange={(e) => setName(e.target.value)}
-            placeholder={t('businesses.namePh', 'Business name — e.g. Cohen Movers')}
+            placeholder={t('businesses.namePh', 'Business name - e.g. Cohen Movers')}
             className="flex-1 min-w-[220px] px-3 py-2 rounded-lg border text-sm"
             style={{ borderColor: 'var(--brand-border)' }}
             data-testid="businesses-name-input"
@@ -407,7 +407,7 @@ export default function MyBusinessesTab({ API, token }) {
                     // is on; the path form until then (utils/businessHost.js).
                     longLink={businessPublicUrl(b.slug, b.id)}
                     title={t('businesses.sharePanelTitle', 'Your business page')}
-                    body={t('businesses.sharePanelBody', 'One link and a QR code for this business — send it in a message, or print the code for a flyer, a van or a sign.')}
+                    body={t('businesses.sharePanelBody', 'One link and a QR code for this business - send it in a message, or print the code for a flyer, a van or a sign.')}
                     filename={`myisraelrental-${(b.slug || 'business').toString().slice(0, 40)}-qr`}
                     testidPrefix={`business-share-${b.id}`}
                     tour={items[0]?.id === b.id ? 'business-share' : undefined}

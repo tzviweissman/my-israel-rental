@@ -123,7 +123,7 @@ export function TakeBookingsCard() {
       testid="take-bookings-card"
       title={t('whyList.bookingsTitle', 'Take bookings without a phone call')}
       body={t('whyList.bookingsBody',
-        'A request arrives with what they need and when. You accept it, and it is in your calendar — no missed call, no chasing.')}
+        'A request arrives with what they need and when. You accept it, and it is in your calendar - no missed call, no chasing.')}
     >
       {/* The request. Arrives, then is answered — the whole point is that
           nothing was dialled. */}
@@ -194,7 +194,7 @@ export function LivePageCard() {
       testid="live-page-card"
       title={t('whyList.pageTitle', 'A page of your own, without building one')}
       body={t('whyList.pageBody',
-        'Your services, your area and your photos on a page you can send to anyone — or print as a QR code. It is made from what you already filled in.')}
+        'Your services, your area and your photos on a page you can send to anyone - or print as a QR code. It is made from what you already filled in.')}
     >
       {/* A browser frame that assembles itself. No time claim in the copy
           and no digits in here — "ten minutes" would be a promise nobody

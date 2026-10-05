@@ -95,7 +95,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
         toast.warning(res.data.warnings.join(' '), { duration: 6000 });
       } else {
         const kind = res.data.detected_schema_kind === 'user' ? 'users' : 'properties';
-        toast.success(`Detected ${kind} — ${res.data.total_rows} rows ready to import`);
+        toast.success(`Detected ${kind} - ${res.data.total_rows} rows ready to import`);
       }
     } catch (e) {
       // Build a maximally informative error message so we don't leave the
@@ -113,9 +113,9 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
           ? resp.data.slice(0, 160)
           : null;
         msg = `Preview failed (HTTP ${resp.status})${detail ? `: ${detail}` : bodySnippet ? `: ${bodySnippet}` : ''}`;
-        if (resp.status === 401) msg = 'Preview failed (HTTP 401) — your session expired. Please log out and back in.';
-        if (resp.status === 413) msg = 'Preview failed (HTTP 413) — your CSV is too large for the server. Try splitting it into smaller batches.';
-        if (resp.status === 502 || resp.status === 504) msg = `Preview failed (HTTP ${resp.status}) — the server took too long. Try a smaller CSV or retry in a moment.`;
+        if (resp.status === 401) msg = 'Preview failed (HTTP 401) - your session expired. Please log out and back in.';
+        if (resp.status === 413) msg = 'Preview failed (HTTP 413) - your CSV is too large for the server. Try splitting it into smaller batches.';
+        if (resp.status === 502 || resp.status === 504) msg = `Preview failed (HTTP ${resp.status}) - the server took too long. Try a smaller CSV or retry in a moment.`;
       }
       toast.error(msg, { duration: 10000 });
       // Also log so the admin can paste from devtools if asked.
@@ -144,8 +144,8 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
       const kindLabel = schemaKind === 'user' ? 'users' : 'properties';
       const { created, skipped } = res.data.summary;
       if (created > 0 && skipped === 0) toast.success(`Imported ${created} ${kindLabel}`);
-      else if (created > 0) toast.success(`Imported ${created}, skipped ${skipped} — see report below`);
-      else toast.error(`No rows imported — ${skipped} skipped, see report`);
+      else if (created > 0) toast.success(`Imported ${created}, skipped ${skipped} - see report below`);
+      else toast.error(`No rows imported - ${skipped} skipped, see report`);
     } catch (e) {
       toast.error(e.response?.data?.detail || 'Commit failed');
     } finally { setCommitting(false); }
@@ -276,7 +276,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
               setPreview(null); setSchemaKind(null); setResult(null);
             }
           }}
-          placeholder={'From CSV:\n"3BR in Sanhedria","Sanhedria",3,8500,owner@example.com\n\nFrom Excel/Sheets (⌘+C then ⌘+V here — tabs preserved):\n3BR in Sanhedria\tSanhedria\t3\t8500\towner@example.com'}
+          placeholder={'From CSV:\n"3BR in Sanhedria","Sanhedria",3,8500,owner@example.com\n\nFrom Excel/Sheets (⌘+C then ⌘+V here - tabs preserved):\n3BR in Sanhedria\tSanhedria\t3\t8500\towner@example.com'}
           className="w-full px-3 py-2 rounded-lg border border-gray-200 font-mono text-xs h-40 focus:border-[var(--brand-primary)] focus:outline-none focus:ring-1 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/40"
           data-testid="import-csv-textarea"
         />
@@ -347,7 +347,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
                   className="flex-1 px-2 py-1.5 rounded border border-gray-200 text-xs"
                   data-testid={`import-map-${h}`}
                 >
-                  <option value="">— Ignore —</option>
+                  <option value=""> - Ignore - </option>
                   {targets.map((t) => <option key={t} value={t}>{t}</option>)}
                 </select>
               </label>
@@ -385,7 +385,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
                     <p className="text-xs font-semibold text-amber-900 mb-2">
                       {hasPerRow
                         ? 'Default rental type (used only on rows missing a value):'
-                        : '⚠ Your CSV has no rental_type column — pick the rental type to apply to every row:'}
+                        : '⚠ Your CSV has no rental_type column - pick the rental type to apply to every row:'}
                     </p>
                     <div className="flex flex-wrap gap-2">
                       {['long-term', 'short-term', 'vacation'].map((t) => (
@@ -530,7 +530,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
             <div className="text-[11px] bg-blue-50 border border-blue-200 text-blue-800 rounded px-2 py-1.5 mb-3">
               Listings are live with their original photo URLs. We&apos;re mirroring
               {' '}<strong>{result.summary.mirror_pending_count}</strong>{' '}
-              {result.summary.mirror_pending_count === 1 ? 'listing\'s photos' : 'listings\' photos'} to Cloudinary in the background — refresh in a minute to see the CDN-hosted versions.
+              {result.summary.mirror_pending_count === 1 ? 'listing\'s photos' : 'listings\' photos'} to Cloudinary in the background - refresh in a minute to see the CDN-hosted versions.
             </div>
           )}
           {result.summary?.cloudinary_enabled === false && (
@@ -555,7 +555,7 @@ export const ImportTab = ({ token, onJumpToOwner }) => {
                             ? 'bg-amber-100 text-amber-800'
                             : 'bg-gray-100 text-gray-700'
                         }`}
-                        title={c.images_count === 0 ? 'No photos saved — see above' : `${c.images_count} photos saved`}
+                        title={c.images_count === 0 ? 'No photos saved - see above' : `${c.images_count} photos saved`}
                       >
                         {c.images_count} 📷
                       </span>

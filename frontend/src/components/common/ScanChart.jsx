@@ -34,7 +34,7 @@ const DAYS_SHOWN = 14;
 // the scans wording keeps every existing caller unchanged.
 export default function ScanChart({ daily, testidPrefix = 'qr', title }) {
   const { t } = useTranslation();
-  const heading = title || t('qr.chartTitle', 'Scans — last 14 days');
+  const heading = title || t('qr.chartTitle', 'Scans - last 14 days');
   if (!Array.isArray(daily) || daily.length === 0) return null;
 
   const days = daily.slice(-DAYS_SHOWN);

@@ -260,7 +260,7 @@ export default function Tour3DUpload({ propertyId, token, onChange }) {
         >
           <Loader2 size={16} className="animate-spin" aria-hidden="true" />
           {t('tour3d.processing',
-            'Building your 3D tour. This usually takes a while — you can leave this page.')}
+            'Building your 3D tour. This usually takes a while - you can leave this page.')}
         </div>
       )}
 

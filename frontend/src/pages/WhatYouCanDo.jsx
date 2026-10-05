@@ -38,7 +38,7 @@ export default function WhatYouCanDo() {
       <PageMeta
         title={`${t('features.metaTitle', 'What you can do here')} | MyIsraelRental`}
         description={t('features.metaDescription',
-          'Everything MyIsraelRental does for businesses, hosts and travellers — free to list, free to be found.')}
+          'Everything MyIsraelRental does for businesses, hosts and travellers - free to list, free to be found.')}
         path="/what-you-can-do"
       />
 
@@ -52,7 +52,7 @@ export default function WhatYouCanDo() {
           {t('features.title', 'What you can do here')}
         </h1>
         <p className="mt-2 text-[15px] max-w-2xl" style={{ color: 'var(--brand-muted)' }}>
-          {t('features.intro', 'Free to list, free to be found, and no commission. Here is what the site actually does — pick the one that sounds like you.')}
+          {t('features.intro', 'Free to list, free to be found, and no commission. Here is what the site actually does - pick the one that sounds like you.')}
         </p>
 
         {/* F1 — the three audiences, in the same order and with the same
