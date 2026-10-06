@@ -114,14 +114,57 @@ once:
 | **Text never re-wraps while its container animates.** A column that widens, narrows or slides keeps its words at a fixed width set for the narrowest it ever gets, or the words fade between states; they are never reflowed live. | The from-scratch words jumped between lines as the panel widened. |
 | **No in-between state may look unfinished.** Every transition is checked at its middle, not only its ends: when content leaves an area, the area goes to the page's own ground (or the next content arrives), never to a bare panel. | The from-scratch side became an empty grey strip mid-scroll. |
 | **Text over imagery is checked at the brightest frame under it and on the narrowest screen.** If a later panel slides over a column of text, the text column is narrowed so it is never covered. | Headline text slid under the widening panel; a line sat on the bright steel of the pot. |
+| **A section that holds the screen still (pinned) must fit its content on the shortest common screen.** Anything taller than the screen is cut off, because the held screen cannot scroll. Size its contents to the screen height (fewer lines, smaller type, two columns), and if it still cannot fit at 650px tall, it does not hold the screen: it becomes an ordinary section at least one screen tall, which can grow. The last section, where the order is, is never held for this reason. | "Turn it to your size" was cut off on Tzvi's 1536x753 laptop; the chores list and the "Choose your size" button ran off the bottom below about 820px. |
+| **A line of items separated by dots never wraps.** If it might wrap, stack the items instead; a wrapped dotted line starts with a stray dot. | The price, kosher and area line under the button wrapped with a dot at the start of its second line. |
+| **Something fixed to the screen (a bottom bar) never covers content.** Content that can sit under it gets room for it. | The phone order bar covered the last two lines of the "Lid on. Low." screen. |
 
-**And checked by a script, every time:** for every overlay meant to sit on
-something in a picture, hide the overlay, screenshot, find the real spot in
-the screenshot with the detector, and measure the gap. Do it at several
-scroll positions and at least six screen sizes (wide and short laptop, full
-HD, tablet, phone); more than 4px off fails the page. Comparing the overlay
-with the page's own numbers is not the check, because those numbers are what
-can be wrong. A screenshot that "looks right" is not the check either.
+**And checked by a script, every time:**
+
+- **Overlays:** for every overlay meant to sit on something in a picture,
+  hide the overlay, screenshot, find the real spot in the screenshot with the
+  detector, and measure the gap. Do it at several scroll positions and at least
+  six screen sizes (wide and short laptop, full HD, tablet, phone); more than
+  4px off fails the page. Comparing the overlay with the page's own numbers is
+  not the check, because those numbers are what can be wrong. A screenshot that
+  "looks right" is not the check either.
+- **Cut off:** for every held screen, at several scroll positions, find any
+  visible text, button or control that sticks out past its edges. Run it at
+  nine sizes: 1280x650, 1366x657, 1536x753, 1280x720, 1440x900, 1920x1080,
+  375x667, 390x844 and 360x640. Anything cut off at any size fails the page.
+  The short laptop heights are not optional: the default 900px-tall test is
+  exactly the screen that hides this.
+
+## 3b. The category checklist (from the Inspo study)
+
+Every page, before anyone sees it, is held against what the best real sites
+for its kind of business have in common (the "Category study (Inspo, Sep
+2026)" section of `docs/ai-page-builder-spec.md`, and the matching recipe in
+`backend/utils/page_recipes.py`). A hand-built or scroll page is held to this
+as much as a generated one: the L.A. Cholent page was built without it and
+failed four of the six until it was applied (Tzvi, 6 Oct 2026). Each failure is
+fixed using only the business's own words and facts.
+
+1. **The first screen answers all four questions:** what it is, where, why
+   trust it, what to do next. The line under the name says plainly what you
+   get (for food, it names the food and how it arrives, not a slogan).
+2. **Proof touches the main button:** the price, the credential (a kosher
+   certificate, a licence, years in business) or the rating sits right beside
+   or under it, never only in a section further down.
+3. **One solid button per screen.** Everything else is an outline, a link or
+   a small tile.
+4. **With few photos, facts carry the page:** a list of what they offer, the
+   key facts, nothing padded.
+5. **For a place, hours and where come before the description.**
+6. **On a phone the action is pinned to the bottom** with the price or the
+   proof beside it, from after the first screen until the section where you
+   order.
+
+For a food business also: **a kosher certificate is a small labelled band
+just after the opening**, never crowding the button and never only at the
+bottom, and kosher is said at most twice on the page.
+
+The page goes to the owner only when all six (and the food rule, where it
+applies) pass, with the review in §3a.
 
 ## 4. What is reported to the owner instead (content gaps)
 
