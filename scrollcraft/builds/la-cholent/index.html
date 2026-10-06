@@ -56,11 +56,13 @@
   .scratch-wash { position: absolute; inset: 0; opacity: calc(1 - var(--dim)); background: linear-gradient(180deg, var(--cold) 0%, var(--cold) 34%, color-mix(in oklab, var(--cold) 0%, transparent) 72%); }
   .scratch-copy { position: absolute; left: var(--sc-gutter); top: clamp(5.5rem, 14vh, 9rem); /* A fixed width, sized for the narrowest the side ever is (50%): as the
      side widens the words hold still instead of re-wrapping line by line. */
-    width: min(34rem, calc(50vw - var(--sc-gutter) - 5rem)); opacity: calc(1 - var(--dim)); }
+    width: min(34rem, calc(50vw - var(--sc-gutter) - 5rem));
+    /* The words leave first, before the ground darkens under them. */
+    opacity: max(0, calc(1 - var(--dim) * 2.5)); }
   .scratch-copy h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.96; letter-spacing: 0; margin: 0; color: var(--cold-ink); }
-  .scratch-copy .lede { margin: var(--sc-4) 0 0; color: var(--cold-soft); font-size: var(--sc-t-lg); max-width: 26ch; }
+  .scratch-copy .lede { margin: var(--sc-4) 0 0; color: var(--cold-ink); font-size: var(--sc-t-lg); max-width: 26ch; }
   .chores { list-style: none; margin: var(--sc-6) 0 0; padding: 0; display: grid; gap: 0.35rem; }
-  .chores li { font-size: var(--sc-t-lg); font-weight: 600; color: var(--cold-ink); background: color-mix(in oklab, var(--cold) 88%, transparent);
+  .chores li { font-size: var(--sc-t-lg); font-weight: 600; color: var(--cold-ink); background: var(--cold);
     width: fit-content; padding: 0.1rem 0.5rem; border-radius: 4px;
     opacity: 0; transform: translateY(10px); transition: opacity 220ms var(--sc-ease-out), transform 220ms var(--sc-ease-out); }
   .chores li.on { opacity: 1; transform: none; }
@@ -217,14 +219,15 @@
     .chores li { font-size: var(--sc-t-sm); }
     .scratch-photo { height: 50%; object-position: 50% 62%; }
     /* Only behind the words: the kitchen below them stays visible. */
-    .scratch-wash { background: linear-gradient(180deg, var(--cold) 0%, var(--cold) 17%, color-mix(in oklab, var(--cold) 60%, transparent) 24%, transparent 34%); }
+    .scratch-wash { background: linear-gradient(180deg, var(--cold) 0%, var(--cold) 25%, color-mix(in oklab, var(--cold) 60%, transparent) 31%, transparent 40%); }
     .theirs-shade { background: linear-gradient(180deg, transparent calc(var(--x) * 1%), color-mix(in oklab, var(--sc-canvas) 82%, transparent) calc(var(--x) * 1% + 6%), color-mix(in oklab, var(--sc-canvas) 96%, transparent) calc(var(--x) * 1% + 30%)); }
     .theirs-copy { top: auto; bottom: 1.6rem; left: var(--sc-gutter); right: var(--sc-gutter); width: auto; text-align: left; }
     .lockup .tag, .steps { margin-left: 0; }
     /* On a phone the three steps would push the name up into the light half
        (they keep their room while faded); the line above already says it. */
     .theirs-copy .steps { display: none; }
-    .proofline { align-items: flex-start; }
+    .proofline { align-items: flex-start; font-size: var(--sc-t-sm); letter-spacing: 0.05em; }
+    .foot { font-size: var(--sc-t-sm); }
     .lockup h1 { font-size: clamp(3rem, 14vw, 4.2rem); }
     .lockup .tag { font-size: var(--sc-t-base); }
     .steps { margin-top: var(--sc-3); gap: var(--sc-1); }
@@ -238,7 +241,9 @@
     .knob-wrap { left: auto; right: var(--sc-gutter); top: 0; translate: 0 -50%; width: 4.4rem; }
     /* The film takes the top of the screen and fades into the ground; the
        words sit below it, never on the pot. */
-    .pot-frame { top: 0; width: auto; height: 58svh; translate: -72% 0;
+    /* Sized and placed by the page script (measurePeak): it fills the width,
+       stays 16:9 so the knob's fractions hold, and ends above the words. */
+    .pot-frame { top: 0; translate: none;
       -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%); mask-image: linear-gradient(180deg, #000 70%, transparent 100%); }
     .hours .sc-nums { font-size: 4.4rem; }
     .peak h2 { font-size: var(--sc-t-2xl); margin-top: var(--sc-3); }
@@ -500,6 +505,19 @@
 
   var last = -1, knobScale = 1;
   var buybar = document.getElementById('buybar'), orderSec = document.getElementById('order');
+  var peakEl = document.querySelector('.peak');
+  function measurePeak() {
+    var f = document.querySelector('.pot-frame');
+    if (!phone.matches) { f.style.width = f.style.height = f.style.left = ''; return; }
+    // The space above the words and the order bar; the picture keeps 16:9,
+    // fills the screen's width, and puts the pot (70% across) in the middle
+    // without ever leaving a gap at either edge.
+    var avail = Math.max(innerHeight * 0.3, innerHeight - (peakEl.offsetHeight + 88 + 24));
+    var W = Math.max(innerWidth, avail * 16 / 9);
+    var left = Math.min(0, Math.max(innerWidth - W, innerWidth / 2 - 0.70 * W));
+    f.style.width = W + 'px'; f.style.height = (W * 9 / 16) + 'px'; f.style.left = left + 'px';
+  }
+  measurePeak(); addEventListener('resize', measurePeak); document.fonts.ready.then(measurePeak);
   var knobWrap = document.querySelector('.knob-wrap'), potFrame = document.querySelector('.pot-frame'), divider = document.querySelector('.divider');
   // Where the slow cooker's dial sits in the 16:9 frame (x, y, diameter, as
   // fractions). The clip was steadied on the dial frame by frame (a circle
@@ -548,7 +566,10 @@
       knob.style.setProperty('--face', (1 - land).toFixed(3));
       // Landed: hand over to the knob inside the frame, which scrolls with it.
       var landed = land > 0.995 ? 1 : 0;
-      knobWrap.style.opacity = 1 - landed;
+      // On a phone the knob would sit on the chores list, so it arrives in
+      // the pause, when the list has gone, and flies to the pot from there.
+      var show = phone.matches ? span(p, 0.42, 0.48) : 1;
+      knobWrap.style.opacity = (1 - landed) * show;
       potFrame.style.setProperty('--landed', landed);
       knobPot.style.setProperty('--a', ang + 'deg');
       knobPot.classList.toggle('is-on', on);
