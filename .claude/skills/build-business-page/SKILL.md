@@ -1,6 +1,6 @@
 ---
 name: build-business-page
-description: Tzvi's rules for building a website or landing page for a business (any site, any stack). Use when building, redesigning or reviewing a business's home page, landing page, scroll page or AI-generated page, before showing it to the owner. Covers facts and honesty, copy voice, layout and motion build rules, the category checklist, and the review-and-check loop with two ready scripts (readability and cut-off).
+description: Tzvi's complete method for building a website or landing page for a business (any site, any stack), including scroll cinematic pages. Use when building, redesigning or reviewing a business's home page, landing page, scroll page or AI-generated page, before showing it to the owner. Points to the same tools (design-kit skills incl. scroll-craft, Inspo, Mobbin, Higgsfield) and covers facts and honesty, copy voice, the category checklist, motion and video build rules, a worked cinematic example, and the review loop with four scripts (readability, cut-off, overlay alignment, preview video).
 ---
 
 # Building a page for a business
@@ -12,6 +12,54 @@ Tzvi made on real builds. Every rule here is a defect that once reached him.
 The job in one line: **arrange what the business told you into the clearest
 page for someone deciding whether to use them, without adding a single fact
 of your own.**
+
+## 0. Use the same tools (this is what gives the full capability)
+
+Invoke these rather than improvising; each is what the rules below were
+learned with. Check what is connected in this session first.
+
+**Skills (design-kit plugin)**
+- `design-kit:design-pipeline`: the router; start here if unsure which to use.
+- `design-kit:scroll-craft`: **the scroll cinematic.** Any page where
+  scrolling drives the story (pinned scenes, scrubbed video, split stage, a
+  signature move). It brings the engine (`scrollcraft.js/.css`), the eight
+  grammars, devices, feeling curve, the uniqueness registry (FINGERPRINTS),
+  asset generation through kie.ai, `encode.sh`, `shoot.mjs` and its own verify
+  steps. Build the cinematic with it, then hold the result to this skill.
+- `design-kit:taste-skill` (anti-generic design), `design-kit:brandkit`
+  (identity from their logo and photos), `design-kit:redesign-skill`
+  (upgrading an existing page), `design-kit:image-to-code-skill` (from a mockup).
+- Grading, by something other than the maker: `design-kit:page-conversion-review`
+  (honest persuasion), `design-kit:design-loop` (critic loop and checks),
+  `design-kit:visual-diff` (against a mockup), `design-kit:dead-ends`.
+- `interview-me`: only when there is no brief and the facts aren't available.
+
+**Connections (MCP)**
+- **Inspo**: before designing, study the category: one `recommend`, one or
+  two `search_screens`, `get_screen` on 3 to 5 keepers. Take composition,
+  not looks. The six-point checklist in section 3 came from this study.
+- **Mobbin**: how a category's flows and sections work (devices, not mood).
+- **Higgsfield**: generated stills and clips, upscales. Methods and model
+  choices in `reference/media-and-video.md`.
+- **Browser pane / preview**: show the rendered page; never ask the owner to
+  sign in to see it.
+
+**Local tools**: Playwright (the scripts here), ffmpeg (encoding, previews),
+Python with OpenCV (finding spots in frames, steadying clips, motion masks).
+
+**Files in this skill**
+- `reference/full-rules.md`: the complete MyIsraelRental rulebook (hard rules
+  table, category study, playbooks with recipes, three-option rule, AI media
+  policy, Blender, scroll sections, open decisions). This page is the
+  distilled version; read the full one for anything not covered here.
+- `reference/playbooks.md`: per kind of business.
+- `reference/media-and-video.md`: generating, steadying, masking, encoding,
+  placing overlays, recording previews.
+- `examples/la-cholent/`: a finished cinematic page (index.html) and its
+  brief: the split-stage grammar, knob signature move, kosher band, phone
+  order bar, every rule applied. `examples/FINGERPRINTS-myisraelrental.md`:
+  the looks already used, which a new page must differ from.
+- `scripts/`: `readable.mjs`, `cutoff.mjs`, `overlay-truth.mjs`, `record.mjs`.
 
 ## 1. Facts: only theirs
 
@@ -125,9 +173,13 @@ The owner never sees a first draft. Before showing anything:
      against the real pixels behind it, photos and video included.
    - `node ~/.claude/skills/build-business-page/scripts/cutoff.mjs <url>`:
      anything cut off by a pinned or full-screen section at nine sizes.
-   - Overlays on media: hide the overlay, find the real spot in a screenshot
-     with a detector, measure the gap at six sizes; over 4px fails.
+   - `scripts/overlay-truth.mjs <url> <overlay> <section>`: for anything
+     placed on a spot in a picture; hides it, finds the real spot with
+     OpenCV, measures the miss at six sizes; over 4px fails.
+   - The cinematic's own checks from scroll-craft (`shoot.mjs` at 1440x900,
+     390x844 and reduced motion).
 4. **Fix every finding, render again**, repeat until a full pass is clean.
 5. **Then show the owner** the finished page with a short plain note of what
    was fixed and what could not be (needs their content, a decision, or a real
-   device). For a shareable preview, record a phone-size scroll-through video.
+   device). For a shareable preview:
+   `node <skill>/scripts/record.mjs <url> 390 844 preview-phone.mp4`.
