@@ -47,7 +47,13 @@ for (const [w, h] of sizes) {
         // half off the screen, or under the fixed order bar: scrolling past, not reading
         const bar = document.querySelector('.buybar.is-on');
         const barTop = bar ? bar.getBoundingClientRect().top : innerHeight;
-        if (rects[0].top < 4 || rects[rects.length - 1].bottom > Math.min(innerHeight - 4, barTop) && !(bar && bar.contains(el))) continue;
+        // ...or sliding under a fixed header at the top
+        let topCover = 0;
+        for (const f of document.querySelectorAll('header, nav, [class*="bar"]')) {
+          const fr = f.getBoundingClientRect(), fp = getComputedStyle(f).position;
+          if ((fp === 'fixed' || fp === 'sticky') && fr.top <= 1 && fr.height < innerHeight * 0.3 && !f.contains(el)) topCover = Math.max(topCover, fr.bottom);
+        }
+        if (rects[0].top < Math.max(4, topCover) - 2 || rects[rects.length - 1].bottom > Math.min(innerHeight - 4, barTop) && !(bar && bar.contains(el))) continue;
         // is it actually on top (not under a clipped side or another layer)?
         const r0 = rects[0];
         const hit = document.elementFromPoint(Math.min(innerWidth - 1, Math.max(0, r0.left + r0.width / 2)), Math.min(innerHeight - 1, Math.max(0, r0.top + r0.height / 2)));

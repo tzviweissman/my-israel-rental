@@ -138,6 +138,24 @@ crowding the button, said at most twice on the page.
 Per-category guidance (what a visitor decides, what leads, proof, action,
 what to avoid): `reference/playbooks.md`.
 
+## 3b. The sections every page has (Tzvi, 6 Oct 2026)
+
+1. **A dramatic hero**: their product or setting full-bleed, the headline at
+   display scale, strong contrast; never a small card on a quiet picture.
+2. **A features section**: one scannable item per service or product, price
+   and what is included, in their words.
+3. **A CTA section** of its own near the end: the one action, proof beside it.
+4. **An FAQ in their words**: ask the owner to send their customers' questions
+   with their answers (suggest the questions that matter in their category).
+   No FAQ section until they do; never invented, never empty. **The request
+   shows 5 to 8 example questions written for this business**, each drawn
+   from something real in their listing (a fee, an exclusion, their areas,
+   their busy season, who books them) or what their category must know
+   before booking. The owner answers the ones customers really ask, in their
+   own words; skipped questions stay off the page.
+5. **Social proof only if real**: platform reviews, or testimonials the owner
+   sends with name and permission. None means no section, and ask them.
+
 ## 4. Design and story
 
 - Find what the business actually has before choosing a look; the page is

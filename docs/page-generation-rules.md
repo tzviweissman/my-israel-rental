@@ -85,6 +85,47 @@ each recent page of the same kind of business on at least 3 of 6 things: what
 leads, the order of sections, the hero's shape, imagery, type, and density. The
 hand-built pages already hold themselves to 4 of 6 (`scrollcraft/FINGERPRINTS.md`).
 
+## 3. (cont.) The sections every page has (Tzvi, 6 Oct 2026)
+
+"Each page needs a dramatic hero, feature section, cta section, faq question
+which you can ask them to send, and social proof if they have."
+
+1. **A dramatic hero.** The first screen is the page's boldest moment: their
+   product or setting full-bleed, the headline at display scale, strong
+   contrast. Never a small card floating on a quiet picture. It still answers
+   the four questions (what, where, why trust, what next).
+2. **A features section.** What they offer, laid out so it can be scanned:
+   one item per service or product, each with its price and what is included,
+   in their words.
+3. **A call-to-action section.** A section of its own near the end whose only
+   job is the one action, with the price or proof beside the button. The
+   button in the hero does not replace it.
+4. **An FAQ, in their words.** We never write the answers. The owner is asked
+   to send the questions customers ask them, with their answers; to help,
+   we suggest the questions that matter in their category (section 6). Until
+   they send them, the page has no FAQ section at all (never an empty one or
+   a made-up one), and the FAQ is listed as a content gap.
+5. **Social proof, only if real.** Reviews on our platform, or testimonials
+   and reviews the owner sends with the customer's name and permission. If
+   there are none, no section, no placeholder, no "trusted by"; the owner is
+   asked whether they have any.
+
+The owner's message after a build asks for the FAQ and any reviews in one
+plain request (it is a question about their business, so it is allowed).
+
+**How the FAQ is asked** (Tzvi, 6 Oct 2026: "show example questions relevant
+to their business"). The request carries 5 to 8 example questions written
+for this business, never a generic list. Each one comes from something real:
+a price or fee they listed, an exclusion or limit in their own words, their
+areas, their busiest season, the people who book them, or what a customer in
+their category must know before booking. For KasherMyBnb that meant asking
+about the travel fee outside Jerusalem, booking before Pesach, whether a
+guest must be home, frying pans and non-steel pots, dishwashers and glass
+stovetops, and what the guest receives afterwards. The examples are prompts
+only: the owner picks the ones customers really ask, answers in their own
+words, and adds their own. Nothing reaches the page until they answer, and
+any question they skip is left off.
+
 ## 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
 
 "In the future look through the page the AI creates before showing the
