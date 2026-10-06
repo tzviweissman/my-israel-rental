@@ -250,6 +250,14 @@ never a bare panel); text over imagery is checked at the brightest frame and the
 narrowest screen. A script measures every overlay-on-picture at five scroll
 positions on a laptop and a phone: more than 4px off fails the page.
 
+Also from L.A. Cholent (6 Oct 2026): a section that holds the screen still must
+fit its content at 650px tall or it does not hold the screen, checked for
+anything cut off at nine sizes including short laptops; and every page is held
+to the category checklist from the Inspo study (four questions on the first
+screen, proof at the button, one solid button, facts over padding, hours first
+for places, a pinned phone action, and for food a small kosher band after the
+opening). Both in `docs/page-generation-rules.md` §3a and §3b.
+
 Return:
 - the page;
 - the design brief;
