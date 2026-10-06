@@ -24,6 +24,19 @@ The worked page is `examples/la-cholent/` (its BRIEF.md says what every asset is
 - Clips: `generate_video` with `seedance_2_5`, giving the still as the
   `start_image` (omni reference), 5s, a small physical motion only (steam,
   a pour, candle flicker). Then `upscale_video` if needed.
+- **The MCP connection can refuse** with "Requires basic plan or higher"
+  even with credits showing (seen 6 Oct 2026 on the free web plan). Then
+  use the API, and never mention it to the business owner.
+- **API model ids are not the MCP's names, and the SDK's README example
+  (`bytedance/seedream/v4/text-to-image`) returns `model_not_found`.** The
+  real list is `https://docs.higgsfield.ai/docs/openapi.json` (paths are the
+  ids). Probe an id at no cost by submitting without a prompt: a validation
+  error means it exists, `model_not_found` / `model_blocked` means not.
+  Working still: `higgsfield-ai/soul/standard`, `aspect_ratio` one of
+  9:16, 16:9, 4:3, 3:4, 1:1, 2:3, 3:2, `resolution` 720p or 1080p
+  (returns 2048x1152 at 16:9), result in `images[0].url`. Video:
+  `bytedance/seedance-2.5/text-to-video`. Worked script:
+  `scrollcraft/builds/kashermybnb/gen/still.py` in the MyIsraelRental repo.
 - From code: the `higgsfield-client` Python SDK (`subscribe` with
   `on_queue_update`), key in `HF_KEY` in a gitignored `.env.local`
   (`key-id:key-secret`), never printed. Worked example in the

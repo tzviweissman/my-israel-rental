@@ -69,6 +69,11 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 
 ## 1. Facts: only theirs
 
+- **Ask the owner only about their business**: facts the record leaves
+  open or contradicts (where they work, booking lead time, who books them,
+  languages). Never about how we build: no tools, credits, image sources,
+  plans, vendors or design. A tooling problem is ours to solve silently.
+
 - Use only what the business gave you: name, description, areas, hours,
   languages, founding year, licence or certificate, reviews, prices, products,
   photos. **Anything not in that list does not go on the page.** No "since
@@ -162,6 +167,8 @@ what to avoid): `reference/playbooks.md`.
 | **A pinned section must fit at 650px tall**, or it is not pinned. The order section is never pinned. | The order controls were cut off on a 1536x753 laptop. |
 | **A line of items separated by dots never wraps.** Stack them if it might. | A stray dot started the second line. |
 | **A fixed bar never covers content.** Give content room for it. | The phone order bar hid two lines. |
+| **A label never covers the thing it labels.** Compute where the spot lands once the camera settles; if the card would sit on it, the card takes the other side for that spot. | The oven card sat on the oven on a phone. |
+| **A caption stays up until the next one replaces it**, including while the camera travels. | Bare kitchen between stations. |
 
 ## 6. Look through it, fix it, then show it
 

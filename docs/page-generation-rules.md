@@ -40,6 +40,15 @@ whether to use them, in their language, without adding a single fact of our own.
 - **Their listings**: titles, descriptions, prices, photos.
 - **Their photos**: cover, logo, listing photos. Referenced, never copied or linked.
 
+**What the owner is asked** (Tzvi, 6 Oct 2026, playing the owner of
+KasherMyBnb: "dont ask a business that question"). Only facts about their
+own business that the record leaves open or contradicts: where they work,
+how far ahead to book, who books them, their languages. Never anything
+about how we build: no tools, credits, image sources, plans, vendors or
+design choices. When our tooling hits a wall (a generator refuses, credits
+run out), we solve it or build with what we have, and the owner never
+hears about it.
+
 **Anything not in that list does not go on the page.** Not a number, not a
 "since 1998", not "fresh every morning", not "trusted by families". If the owner
 did not say it and we cannot prove it, it is not true as far as the page knows.
@@ -117,6 +126,8 @@ once:
 | **A section that holds the screen still (pinned) must fit its content on the shortest common screen.** Anything taller than the screen is cut off, because the held screen cannot scroll. Size its contents to the screen height (fewer lines, smaller type, two columns), and if it still cannot fit at 650px tall, it does not hold the screen: it becomes an ordinary section at least one screen tall, which can grow. The last section, where the order is, is never held for this reason. | "Turn it to your size" was cut off on Tzvi's 1536x753 laptop; the chores list and the "Choose your size" button ran off the bottom below about 820px. |
 | **A line of items separated by dots never wraps.** If it might wrap, stack the items instead; a wrapped dotted line starts with a stray dot. | The price, kosher and area line under the button wrapped with a dot at the start of its second line. |
 | **Something fixed to the screen (a bottom bar) never covers content.** Content that can sit under it gets room for it. | The phone order bar covered the last two lines of the "Lid on. Low." screen. |
+| **A label never covers the thing it labels.** Where a card names a spot in a picture, work out where that spot lands on screen once the camera settles, and if the card would sit on it, the card takes the other side (right on a laptop, top on a phone) for that spot. | On KasherMyBnb the "Oven, with racks" card sat on the oven on a phone (6 Oct 2026, caught in review). |
+| **A caption stays up until the next one replaces it.** While the camera travels between two spots, the last card stays; the screen is never left with no words. | KasherMyBnb's first draft showed bare kitchen between stations. |
 
 **And checked by a script, every time:**
 
