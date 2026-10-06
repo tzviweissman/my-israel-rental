@@ -39,8 +39,14 @@ learned with. Check what is connected in this session first.
   two `search_screens`, `get_screen` on 3 to 5 keepers. Take composition,
   not looks. The six-point checklist in section 3 came from this study.
 - **Mobbin**: how a category's flows and sections work (devices, not mood).
-- **Higgsfield**: generated stills and clips, upscales. Methods and model
-  choices in `reference/media-and-video.md`.
+- **Higgsfield**, connected two ways: the **MCP connection** for one-off
+  stills, clips and upscales while building, and the **API** (Python SDK
+  `higgsfield-client`, key in `HF_KEY` in a gitignored `.env.local`, never
+  printed; worked example `backend/higgsfield_demo/main.py` in the
+  MyIsraelRental repo) when a site or script must generate on its own. API
+  credits are prepaid and separate from the web plan; every call is billable,
+  so confirm before running one. Methods and model choices in
+  `reference/media-and-video.md`.
 - **Browser pane / preview**: show the rendered page; never ask the owner to
   sign in to see it.
 
