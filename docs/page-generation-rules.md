@@ -206,10 +206,11 @@ quote" instead of a missing price, no reviews section instead of an empty one.
 11. **Short labels are still full phrases** (Tzvi, 6 Oct 2026). A proof line or
    badge may be brief, but it has to read as a phrase a person would say, with
    the relationship spelled out. "Kosher, Rabbi Weiner" left out what the rabbi
-   has to do with it; it became "Kosher, hechsher of Rabbi Weiner". "Jerusalem,
+   has to do with it; it became "Kosher, hechsher from Rabbi Weiner". "Jerusalem,
    all over Israel" mashed two facts together; it became "Made in Jerusalem,
    delivered across Israel". Use the category's own term (hechsher, licensed,
-   certified) and a verb for each place (made in, based in, delivered to).
+   certified), a verb for each place (made in, based in, delivered to), and the
+   word people actually use with it: a hechsher is "from" a rabbi, not "of".
 
 ## 5a. Lessons from the practice pages
 
