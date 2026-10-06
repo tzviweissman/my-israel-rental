@@ -196,6 +196,20 @@ quote" instead of a missing price, no reviews section instead of an empty one.
    person. On the page the business speaks as "we" or in its own name.
 9. **Strengths only if backed.** At most two, and a checkable one (kosher,
    experience, licensed, English) appears only with its proof.
+10. **A professional voice, always** (Tzvi, 6 Oct 2026). The page speaks the way a
+   respected business would in print. Describe the customer's problem in neutral
+   terms; never tease, scold or talk down to the visitor, and no slang or jokey
+   asides. "You are nowhere near done" became "Thursday night, with hours of
+   preparation still ahead"; "Guess the spices" became "Balance the seasoning".
+   Before showing, read every line aloud as the owner and ask: would they print
+   this on their menu? If not, rewrite it.
+11. **Short labels are still full phrases** (Tzvi, 6 Oct 2026). A proof line or
+   badge may be brief, but it has to read as a phrase a person would say, with
+   the relationship spelled out. "Kosher, Rabbi Weiner" left out what the rabbi
+   has to do with it; it became "Kosher, hechsher of Rabbi Weiner". "Jerusalem,
+   all over Israel" mashed two facts together; it became "Made in Jerusalem,
+   delivered across Israel". Use the category's own term (hechsher, licensed,
+   certified) and a verb for each place (made in, based in, delivered to).
 
 ## 5a. Lessons from the practice pages
 
