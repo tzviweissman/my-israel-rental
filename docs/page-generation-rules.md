@@ -113,6 +113,19 @@ which you can ask them to send, and social proof if they have."
 The owner's message after a build asks for the FAQ and any reviews in one
 plain request (it is a question about their business, so it is allowed).
 
+**How the FAQ is asked** (Tzvi, 6 Oct 2026: "show example questions relevant
+to their business"). The request carries 5 to 8 example questions written
+for this business, never a generic list. Each one comes from something real:
+a price or fee they listed, an exclusion or limit in their own words, their
+areas, their busiest season, the people who book them, or what a customer in
+their category must know before booking. For KasherMyBnb that meant asking
+about the travel fee outside Jerusalem, booking before Pesach, whether a
+guest must be home, frying pans and non-steel pots, dishwashers and glass
+stovetops, and what the guest receives afterwards. The examples are prompts
+only: the owner picks the ones customers really ask, answers in their own
+words, and adds their own. Nothing reaches the page until they answer, and
+any question they skip is left off.
+
 ## 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
 
 "In the future look through the page the AI creates before showing the
