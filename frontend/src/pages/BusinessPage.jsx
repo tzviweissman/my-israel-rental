@@ -31,14 +31,14 @@ import CardAction, { BasketBar } from '../components/marketplace/CardAction';
 import { useBasket } from '../utils/storeBasket';
 import { useSavedItems } from '../hooks/useFavorites';
 import SaveHeart from '../components/marketplace/SaveHeart';
-import V3Hero from '../components/pagebuilder/v3/V3Hero';
+import V3Hero, { themeVars } from '../components/pagebuilder/v3/V3Hero';
 import V3Flyers from '../components/pagebuilder/v3/V3Flyers';
 import { resolvePhoto, photosOfKind } from '../components/pagebuilder/v3/photos';
 import V3Footer from '../components/pagebuilder/v3/V3Footer';
 import V3GateNotice from '../components/pagebuilder/v3/V3GateNotice';
 import { primaryLabel } from '../components/pagebuilder/v3/V3Hero';
-import { V3BigList, V3Steps, V3Palate, V3Offer, V3StickyBar } from '../components/pagebuilder/v3/V3Sections';
-import { useFx } from '../components/pagebuilder/v3/effects';
+import { V3BigList, V3Steps, V3Rail, V3Palate, V3Offer, V3StickyBar } from '../components/pagebuilder/v3/V3Sections';
+import { hasFx, needsEngine, useFx, useScrollcraft } from '../components/pagebuilder/v3/effects';
 import { v3BodyBlocks } from '../components/pagebuilder/v3/ledger';
 import { readComposition } from '../utils/pageComposition';
 import { cheapestFirst } from '../utils/gigPrice';
@@ -103,9 +103,15 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         // one: the API's owner preview and an admin's view of a v3 page
         // the quality check has not passed yet both depend on it.
         const signedIn = sessionStorage.getItem('token');
+        // ?pv= is a page version's preview link (backend utils/page_versions):
+        // the visual check renders a version here before it is live.
+        const pv = new URLSearchParams(window.location.search).get('pv');
         const { data } = await axios.get(
           `${API}/marketplace/business/${encodeURIComponent(slug)}`,
-          { headers: { ...visitorHeaders(), ...(signedIn ? { Authorization: `Bearer ${signedIn}` } : {}) } },
+          {
+            headers: { ...visitorHeaders(), ...(signedIn ? { Authorization: `Bearer ${signedIn}` } : {}) },
+            params: pv ? { pv } : undefined,
+          },
         );
         if (!cancelled) setFetched(data);
       } catch {
@@ -170,7 +176,10 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   }, [v3Shell, preview]);
   // Effects (Tzvi, 6 Oct 2026): entrances wait until each v3 block is seen.
   // Above the early returns too: a hook runs on every render.
-  useFx(v3Shell && Boolean(biz.design_brief.effects && biz.design_brief.effects.length));
+  // Not in a preview: those render inside the editor's frame, and these
+  // watch and drive the host document, not the frame's.
+  useFx(v3Shell && !preview && Boolean(biz.design_brief.effects && biz.design_brief.effects.length));
+  useScrollcraft(v3Shell && !preview && needsEngine(biz.design_brief));
 
   if (missing) {
     // On <slug>.myisraelrental.com there is nothing else at this address,
@@ -438,6 +447,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           works (set piece), from the business, a palate cleanser, the offer. */}
       {v3 && <V3BigList brief={v3Brief} lang={v3Lang} />}
       {v3 && <V3Steps brief={v3Brief} lang={v3Lang} />}
+      {v3 && <V3Rail brief={v3Brief} urls={photosOfKind(biz, v3Brief, 'photo')} />}
       {v3 && <V3Flyers brief={v3Brief} urls={v3Flyers} name={displayName} />}
       {v3 && <V3Palate brief={v3Brief} url={v3Second} />}
       {v3 && (
@@ -913,6 +923,11 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           page on a phone, so the action rides along instead. Padding for
           the home indicator on iOS, or it sits under the gesture bar. */}
       {v3 && <V3GateNotice check={biz.page_check} slug={biz.slug || biz.id} />}
+      {/* How far down the page you are, as a 2px accent line (effect
+          progress-hairline); the scroll engine draws it. */}
+      {v3 && hasFx(v3Brief, 'progress-hairline') && (
+        <div data-sc-progress="" data-page-v3="" style={themeVars(v3Brief)} aria-hidden="true" data-testid="pv3-progress" />
+      )}
       {v3 && canMessage && (
         <V3StickyBar
           brief={v3Brief}

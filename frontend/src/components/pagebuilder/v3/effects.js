@@ -12,6 +12,7 @@
  * it, so with no script, or reduced motion, everything is simply there.
  */
 import { useEffect } from 'react';
+import '../../../styles/page-v3-engine.css';
 
 // id: [slot, engine]. Slots mirror page_effects.SLOTS.
 export const EFFECTS = {
@@ -21,8 +22,7 @@ export const EFFECTS = {
   'rail-gallery': ['rail', true],
   'rail-occasions': ['biglist', true],
   'rail-steps': ['steps', true],
-  'stack-steps': ['steps', true],
-  'pin-offer-count': ['offer', true],
+  'stack-steps': ['steps', false],
   'parallax-hero': ['hero', true],
   'parallax-palate': ['palate', true],
   'drift-ground': ['page', true],
@@ -85,6 +85,47 @@ export function fxFor(brief, slot) {
 
 export const hasFx = (brief, id) => known(brief).includes(id);
 
+// Drift: the ground moves between the page's two dark tones as each block
+// comes on screen, never to a colour the palette did not already pass.
+const DRIFT_TONE = { hero: 'ground', biglist: 'surface', steps: 'ground', offer: 'surface' };
+
+/** What the scroll engine reads on a block (data-sc-*), for this brief's
+ *  effects. A block is an act (the engine's unit of scroll) only when one of
+ *  its effects needs scroll progress; nothing here changes layout. */
+export function engineAttrs(brief, slot) {
+  const a = {};
+  const tone = hasFx(brief, 'drift-ground') && brief.palette && brief.palette[DRIFT_TONE[slot]];
+  if (tone) {
+    a['data-sc-act'] = 'flow';
+    a['data-sc-drift'] = tone;
+  }
+  if ((slot === 'hero' && hasFx(brief, 'parallax-hero')) || (slot === 'palate' && hasFx(brief, 'parallax-palate'))) {
+    a['data-sc-act'] = 'flow';
+  }
+  if (slot === 'offer' && hasFx(brief, 'spotlight-offer')) a['data-sc-spotlight'] = '';
+  if (railOf(brief, slot)) {
+    a['data-sc-act'] = 'pan';
+    a['data-sc-span'] = RAIL_SPAN[slot];
+  }
+  return a;
+}
+
+// A sideways rail: the block holds while its row travels (rail-*).
+const RAILS = { biglist: 'rail-occasions', steps: 'rail-steps', rail: 'rail-gallery' };
+// How many screens of scroll each rail holds for: roughly its travel, so a
+// short row does not hold the reader for long while barely moving.
+const RAIL_SPAN = { biglist: '2', steps: '1.7', rail: '2.4' };
+export const railOf = (brief, slot) => Boolean(RAILS[slot]) && hasFx(brief, RAILS[slot]);
+
+/** The block's inner box is the rail's stage, its list the track. */
+export const stageAttrs = (brief, slot) => (railOf(brief, slot) ? { 'data-sc-stage': '' } : {});
+export const trackAttrs = (brief, slot) => (railOf(brief, slot) ? { 'data-sc-pan': '0' } : {});
+
+/** Parallax: the photo drifts slower than the page, up to 30px either way,
+ *  inside a frame cut 40px larger so no edge ever shows. Off on phones (the
+ *  engine checks), and not at all with reduced motion. */
+export const parallaxAttrs = (brief, id) => (hasFx(brief, id) ? { 'data-sc-parallax': '0.6' } : {});
+
 /** Whether this page needs the scroll engine at all. */
 export const needsEngine = (brief) => known(brief).some((id) => EFFECTS[id][1]);
 
@@ -108,6 +149,25 @@ export function useFx(on) {
     return () => {
       io.disconnect();
       root.classList.remove('fx-ready');
+    };
+  }, [on]);
+}
+
+/** The scroll engine, for the effects that need it (pins, rails, parallax,
+ *  the scrubbed film, pointer touches). Fetched only when the page has one,
+ *  and torn down with the page: the engine's listeners are on window, which
+ *  outlives every page in a single-page app. */
+export function useScrollcraft(on) {
+  useEffect(() => {
+    if (!on) return undefined;
+    let api = null;
+    let gone = false;
+    import('../../../vendor/scrollcraft').then(() => {
+      if (!gone && window.ScrollCraft) api = window.ScrollCraft.mount(document);
+    });
+    return () => {
+      gone = true;
+      if (api) api.destroy();
     };
   }, [on]);
 }

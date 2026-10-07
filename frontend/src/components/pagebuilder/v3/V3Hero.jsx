@@ -25,7 +25,7 @@ import ProofLine from '../../marketplace/ProofLine';
 import '../../../styles/page-v3.css';
 // After page-v3.css: the effects build on its rules.
 import '../../../styles/page-v3-motion.css';
-import { Words, fxFor, hasFx } from './effects';
+import { Words, engineAttrs, fxFor, hasFx, parallaxAttrs } from './effects';
 
 // Mirrors FONT_ALLOWLIST in backend/utils/design_brief.py. A face that is
 // not here is never requested, whatever a stored brief says.
@@ -98,7 +98,7 @@ export function primaryLabel(brief, t) {
  *  and a pause button. The browser's own autoplay starts it (a play() call
  *  from an effect gets aborted by the first load); reduced motion leaves it
  *  on the poster. The button follows the video's real state. */
-function Film({ film }) {
+function Film({ film, scrub = false }) {
   const { t } = useTranslation();
   const ref = useRef(null);
   const [playing, setPlaying] = useState(false);
@@ -109,6 +109,20 @@ function Film({ film }) {
     if (v.paused) v.play().catch(() => {});
     else v.pause();
   };
+  // Effect scrub-film: scroll drives the film instead of time. The engine
+  // fetches it, so it has no src of its own; the poster is a picture of its
+  // own that stays up until a real frame has painted, and for good with
+  // reduced motion, when the film is never fetched at all.
+  if (scrub) {
+    return (
+      <div className="pv3-film-box">
+        {film.poster_url && <img className="pv3-film sc-stage__poster" src={film.poster_url} alt="" aria-hidden="true" />}
+        <video className="pv3-film" data-sc-scrub="" data-sc-src={film.url} muted playsInline preload="none"
+          aria-hidden="true" data-testid="pv3-film" />
+        <div className="pv3-scrim" aria-hidden="true" />
+      </div>
+    );
+  }
   return (
     <div className="pv3-film-box">
       <video ref={ref} className="pv3-film" src={film.url} poster={film.poster_url || undefined}
@@ -164,8 +178,13 @@ export default function V3Hero({ brief, name, logoUrl, photoUrl, film, priceText
   // refuses a brief that names anything else), tier 2 with their brand film;
   // otherwise the typographic panel.
   const tier = (brief.hero?.tier === 1 && photoUrl && 1) || (brief.hero?.tier === 2 && film?.url && 2) || 3;
+  // A pinned hero (pin-hero-hold, pin-hero-pushin, scrub-film): the hero is
+  // the stage of an act around it, so it holds while the act scrolls by.
+  const pin = (hasFx(brief, 'pin-hero-hold') && 'hold')
+    || (tier === 1 && hasFx(brief, 'pin-hero-pushin') && 'pushin')
+    || (tier === 2 && hasFx(brief, 'scrub-film') && 'film') || null;
 
-  return (
+  const hero = (
     <section
       className="pv3-hero"
       data-page-v3=""
@@ -176,16 +195,17 @@ export default function V3Hero({ brief, name, logoUrl, photoUrl, film, priceText
       data-fx={fxFor(brief, 'hero')}
       style={themeVars(brief)}
       data-testid="pv3-hero"
+      {...(pin ? { 'data-sc-stage': '' } : engineAttrs(brief, 'hero'))}
     >
       {tier === 1 && (
         <>
           {/* Their photo, graded to the page (rule 4: one grade for every
               photo on the page), with a scrim behind the copy only. */}
-          <img className="pv3-photo" src={photoUrl} alt="" aria-hidden="true" data-testid="pv3-photo" />
+          <img className="pv3-photo" src={photoUrl} alt="" aria-hidden="true" data-testid="pv3-photo" {...parallaxAttrs(brief, 'parallax-hero')} />
           <div className="pv3-scrim" aria-hidden="true" />
         </>
       )}
-      {tier === 2 && <Film film={film} />}
+      {tier === 2 && <Film film={film} scrub={pin === 'film'} />}
       <div className="pv3-texture" aria-hidden="true" />
       <div className="pv3-hero-inner">
         {logoUrl && <img className="pv3-logo" src={logoUrl} alt="" aria-hidden="true" />}
@@ -201,7 +221,9 @@ export default function V3Hero({ brief, name, logoUrl, photoUrl, film, priceText
           </p>
         )}
         <div className="pv3-actions">
-          <button type="button" className="pv3-btn" onClick={onPrimary} data-testid="pv3-primary">{label}</button>
+          {/* The magnet is on this one button only: the page's primary action. */}
+          <button type="button" className="pv3-btn" onClick={onPrimary} data-testid="pv3-primary"
+            data-sc-magnet={hasFx(brief, 'btn-magnet') ? '0.25' : undefined}>{label}</button>
           {/* The proof beside the button (ruling 5). Kosher is in the fact
               strip just below, so it is not said twice above the fold. */}
           <ProofLine {...proof} kosher={null} className="pv3-proof" testid="pv3-proof" />
@@ -217,5 +239,12 @@ export default function V3Hero({ brief, name, logoUrl, photoUrl, film, priceText
         {children}
       </div>
     </section>
+  );
+  if (!pin) return hero;
+  return (
+    <div className="pv3-hero-pin" data-page-v3="" data-pin={pin} {...engineAttrs(brief, 'hero')}
+      data-sc-act="pin" data-sc-span={pin === 'film' ? '2.6' : '1.6'}>
+      {hero}
+    </div>
   );
 }

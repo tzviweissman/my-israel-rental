@@ -184,10 +184,21 @@ def test_a_brief_written_before_effects_still_loads():
     assert DesignBrief(**old).effects == []
 
 
+def test_a_brief_saved_with_a_retired_effect_still_loads():
+    """pin-offer-count was retired on 7 Oct 2026 (the order section is never
+    pinned). A page saved with it as its bold moment loads, with the hero as
+    its bold moment again."""
+    stored = build_brief(CHOLENT).model_dump()
+    stored["effects"] = ["pin-offer-count"] + [e for e in stored["effects"] if e != stored["showstopper"]]
+    stored["showstopper"] = "pin-offer-count"
+    b = DesignBrief(**stored)
+    assert "pin-offer-count" not in b.effects and b.showstopper == "hero"
+
+
 def test_a_built_brief_carries_one_valid_bold_moment():
     b = build_brief(CHOLENT)
     peaks = [e for e in b.effects if e in {"pin-hero-hold", "pin-hero-pushin", "scrub-film", "rail-gallery",
-                                           "rail-occasions", "rail-steps", "stack-steps", "pin-offer-count"}]
+                                           "rail-occasions", "rail-steps", "stack-steps"}]
     assert len(peaks) <= 1
     assert b.showstopper == (peaks[0] if peaks else "hero")
     assert brief_problems(b, CHOLENT) == []

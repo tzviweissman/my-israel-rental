@@ -18,7 +18,7 @@ from __future__ import annotations
 from datetime import UTC, datetime
 from typing import Any, Literal, Optional
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
 from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel, Field
 
@@ -806,7 +806,8 @@ def _public_listing(gig: dict[str, Any]) -> dict[str, Any]:
 
 @router.get("/business/{slug_or_id}")
 async def public_business(
-    slug_or_id: str, request: Request, viewer=Depends(optional_user),
+    slug_or_id: str, request: Request, response: Response, viewer=Depends(optional_user),
+    pv: Optional[str] = None,
 ):
     """The public page for one business (spec M4).
 
@@ -865,13 +866,16 @@ async def public_business(
     #
     # `record_view` already drops a view whose viewer IS the owner, so the
     # owner-preview responses added above cannot inflate anybody's numbers.
-    view_tracking.spawn(view_tracking.record_view(
-        view_tracking.ENTITY_BUSINESS, biz["_id"],
-        owner_id=biz.get("owner_user_id"),
-        viewer_id=(viewer or {}).get("user_id"),
-        visitor=request.headers.get("X-Visitor-Id"),
-        user_agent=request.headers.get("user-agent") or "",
-    ))
+    # A page-version preview (?pv=) is the visual check rendering a page
+    # that is not live, several times over: never a visit.
+    if not pv:
+        view_tracking.spawn(view_tracking.record_view(
+            view_tracking.ENTITY_BUSINESS, biz["_id"],
+            owner_id=biz.get("owner_user_id"),
+            viewer_id=(viewer or {}).get("user_id"),
+            visitor=request.headers.get("X-Visitor-Id"),
+            user_agent=request.headers.get("user-agent") or "",
+        ))
 
     ratings = await _batch_rating_aggregate([g["_id"] for g in raw])
     for g in raw:
@@ -986,10 +990,20 @@ async def public_business(
     # Page builder v3 (docs/page-builder-design-rules.md): only with the site
     # switch on AND this business switched on. The owner checklist inside the
     # brief is the owner's alone.
-    from utils.design_brief import page_check_passed, page_v3_on
+    from utils.design_brief import page_check_passed, page_v3_on, v3_enabled
     admin_view = (viewer or {}).get("role") == "admin"
-    if page_v3_on(biz, admin=admin_view):
-        brief = dict(biz["design_brief"])
+    # A preview link (utils/page_versions): one version of this business's
+    # page, before it is live, for the check that decides whether it may go
+    # live. Never cached; a bad or expired token just shows the live page.
+    preview = None
+    if pv and v3_enabled() and biz.get("page_v3"):
+        from utils.page_versions import preview_ok, token_hash
+        version = await db.business_page_versions.find_one({"business_id": biz["_id"], "preview.hash": token_hash(pv)})
+        if version and preview_ok(version, pv, datetime.now(UTC)):
+            preview = version["brief"]
+            response.headers["Cache-Control"] = "no-store"
+    if preview or page_v3_on(biz, admin=admin_view):
+        brief = dict(preview or biz["design_brief"])
         if not owner_preview:
             brief.pop("missing_content", None)
         out["page_v3"] = True
@@ -1050,37 +1064,7 @@ async def set_page_v3(business_id: str, payload: PageV3In, user=Depends(verify_t
         return {"id": business_id, "page_v3": False}
 
     from utils.design_brief import build_brief
-    listings = [g async for g in db.marketplace_gigs.find({"business_id": business_id, "status": "published"})]
-    for g in listings:
-        g["id"] = g.pop("_id")
-    import httpx
-    logo = None
-    if biz.get("logo_url"):
-        try:
-            async with httpx.AsyncClient(timeout=15) as http:
-                r = await http.get(biz["logo_url"])
-                logo = r.content if r.status_code == 200 else None
-        except httpx.HTTPError:
-            logo = None   # no logo colour: the preset's accent is used, and the brief says so
-    # Phase 2: every picture of theirs through the flyer check (free, local
-    # Tesseract). Unreadable means "unknown", which is never a hero.
-    import asyncio
-    from utils.design_brief import photo_candidates
-    from utils.flyer_check import classify
-    record = {**biz, "listings": listings}
-    gate = asyncio.Semaphore(4)   # ~7s a picture; four Tesseract runs at once
-
-    async def check(http, ref, url):
-        async with gate:
-            try:
-                r = await http.get(url)
-                verdict = await asyncio.to_thread(classify, r.content) if r.status_code == 200 else {"kind": "unknown"}
-            except httpx.HTTPError:
-                verdict = {"kind": "unknown"}
-            return {"ref": ref, "kind": verdict["kind"]}
-
-    async with httpx.AsyncClient(timeout=20) as http:
-        photos = list(await asyncio.gather(*(check(http, r, u) for r, u in photo_candidates(record)[:12])))
+    record, logo, photos = await brief_inputs(biz)
     try:
         recent = await recent_briefs(_brief_category(record), business_id)
         brief = build_brief(record, logo, photos, recent=recent).model_dump()
@@ -1094,18 +1078,71 @@ async def set_page_v3(business_id: str, payload: PageV3In, user=Depends(verify_t
     return {"id": business_id, "page_v3": True, "design_brief": brief}
 
 
+async def brief_inputs(biz: dict) -> tuple[dict, Optional[bytes], list[dict]]:
+    """What a design brief is built from: the record with its published
+    listings, the logo's bytes (for its colour), and every picture of theirs
+    through the flyer check (free, local Tesseract). Unreadable means
+    "unknown", which is never a hero. A picture's verdict is kept by the
+    hash of its bytes, so building again (three versions, a new generation)
+    does not run Tesseract again on pictures it has already read."""
+    import asyncio
+    import hashlib
+
+    import httpx
+
+    from utils.design_brief import photo_candidates
+    from utils.flyer_check import classify
+    listings = [g async for g in db.marketplace_gigs.find({"business_id": biz["_id"], "status": "published"})]
+    for g in listings:
+        g["id"] = g.pop("_id")
+    logo = None
+    if biz.get("logo_url"):
+        try:
+            async with httpx.AsyncClient(timeout=15) as http:
+                r = await http.get(biz["logo_url"])
+                logo = r.content if r.status_code == 200 else None
+        except httpx.HTTPError:
+            logo = None   # no logo colour: the preset's accent is used, and the brief says so
+    record = {**biz, "listings": listings}
+    gate = asyncio.Semaphore(4)   # ~7s a picture; four Tesseract runs at once
+
+    async def check(http, ref, url):
+        async with gate:
+            try:
+                r = await http.get(url)
+            except httpx.HTTPError:
+                return {"ref": ref, "kind": "unknown"}
+            if r.status_code != 200:
+                return {"ref": ref, "kind": "unknown"}
+            key = hashlib.sha256(r.content).hexdigest()
+            seen = await db.photo_checks.find_one({"_id": key})
+            if seen:
+                return {"ref": ref, "kind": seen["kind"]}
+            kind = (await asyncio.to_thread(classify, r.content))["kind"]
+            if kind != "unknown":   # unknown may be a missing Tesseract: ask again next time
+                await db.photo_checks.update_one({"_id": key}, {"$set": {"kind": kind}}, upsert=True)
+            return {"ref": ref, "kind": kind}
+
+    async with httpx.AsyncClient(timeout=20) as http:
+        photos = list(await asyncio.gather(*(check(http, r, u) for r, u in photo_candidates(record)[:12])))
+    return record, logo, photos
+
+
 def _brief_category(record: dict) -> str:
     from utils.design_brief import _category
     return _category(record)
 
 
 async def recent_briefs(category: str, exclude_id: str) -> list[dict]:
-    """The newest v3 pages of a category, newest first, as the effects
+    """The newest LIVE v3 pages of a category, newest first, as the effects
     picker reads them: the ledger "not too similar" is checked against
-    (utils/page_effects). Each business's stored brief IS the ledger."""
+    (utils/page_effects). Each business's stored brief IS the ledger, and
+    only a brief that passed its check is live (design_brief.page_check_passed):
+    a page nobody can see cannot make another one look like it."""
     from utils.page_effects import COMPARE_WINDOW
     cur = db.businesses.find(
-        {"design_brief.category": category, "page_v3": True, "_id": {"$ne": exclude_id}},
+        {"design_brief.category": category, "page_v3": True, "_id": {"$ne": exclude_id},
+         "page_check.passed": True, "$expr": {"$eq": ["$page_check.brief_at", "$design_brief_at"]}},
         {"design_brief.effects": 1, "design_brief.showstopper": 1},
     ).sort("design_brief_at", -1).limit(COMPARE_WINDOW)
     return [d.get("design_brief") or {} async for d in cur]

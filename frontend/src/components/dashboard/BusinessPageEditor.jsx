@@ -46,6 +46,7 @@ import { ACCENTS, ACCENT_NAMES, DEFAULT_ACCENT } from '../../utils/businessAccen
 import BusinessShelfEditor, { cleanCollections } from './BusinessShelfEditor';
 import PageThemeDials, { dialLabel, dialValueLabel } from './PageThemeDials';
 import PageBriefForm from './PageBriefForm';
+import PageVersions from './PageVersions';
 import {
   DIAL_DEFAULTS, PRESETS, briefToTheme, composeDefault, normalizeTheme, themeDiff,
 } from '../../utils/pageComposition';
@@ -507,6 +508,9 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       className="w-full flex-1 lg:flex-none lg:w-[380px] min-h-0 lg:shrink-0 overflow-y-auto p-5 space-y-6 bg-white lg:border-e"
       style={{ borderColor: 'var(--brand-border)' }}
     >
+      {/* ---- Page builder v3: versions to choose from (shown once it is on) ---- */}
+      {page && <PageVersions business={business} page={page} API={API} token={token} onLive={onSaved} />}
+
       {/* ---- Accent (K1) ---- */}
       <section>
         <h3 className="text-sm font-bold" style={{ color: 'var(--ink)' }}>

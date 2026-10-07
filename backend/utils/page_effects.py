@@ -52,6 +52,12 @@ def _fx(cat: str, tier: str, slot: str, axis: str, *, needs: Optional[dict] = No
             "group": group, "engine": engine, "phone": phone, "rtl": rtl}
 
 
+# Retired ids, dropped when a stored brief is read rather than refused, so a
+# page saved with one still loads. pin-offer-count (7 Oct 2026): it pinned the
+# offer, and the build rules say the order section is never pinned (a pinned
+# order block once cut its controls off on a 1536x753 laptop).
+RETIRED = frozenset({"pin-offer-count"})
+
 EFFECTS: dict[str, dict] = {
     # ---- motion: the page moves as you scroll. Every peak is here.
     "pin-hero-hold":     _fx("motion", "peak", "hero", "hero", group="hero-motion", engine=True),
@@ -65,10 +71,9 @@ EFFECTS: dict[str, dict] = {
                              group="biglist-motion", engine=True, rtl="mirror"),
     "rail-steps":        _fx("motion", "peak", "steps", "travel", needs={"steps_both": 3},
                              group="steps-motion", engine=True, rtl="mirror"),
+    # Plain CSS sticky stacking: no engine needed (7 Oct 2026).
     "stack-steps":       _fx("motion", "peak", "steps", "travel", needs={"steps_both": 3},
-                             group="steps-motion", engine=True),
-    "pin-offer-count":   _fx("motion", "peak", "offer", "close", needs={"price": True},
-                             group="offer-count", engine=True),
+                             group="steps-motion"),
     "parallax-hero":     _fx("motion", "accent", "hero", "hero", needs={"hero_photo": True},
                              group="hero-motion", engine=True, phone="off"),
     "parallax-palate":   _fx("motion", "accent", "palate", "framing", needs={"photos": 2},
@@ -165,7 +170,7 @@ PRESET_WEIGHTS: dict[str, dict[str, int]] = {
                "corners-sharp": 3, "wipe-up-sections": 3},
     "field": {"rail-gallery": 3, "rail-steps": 3, "parallax-hero": 3, "parallax-palate": 3,
               "subject-bleed": 3, "progress-hairline": 3},
-    "workshop": {"stack-steps": 3, "pin-offer-count": 3, "oversize-numerals": 3, "hairline-draw": 3,
+    "workshop": {"stack-steps": 3, "count-price": 3, "oversize-numerals": 3, "hairline-draw": 3,
                  "rules-double": 3, "btn-arrow-nudge": 3, "corners-sharp": 3,
                  "rail-gallery": 0, "rail-occasions": 0, "rail-steps": 0,
                  "parallax-hero": 0, "parallax-palate": 0},

@@ -1,0 +1,171 @@
+/* Page builder v3: what the scroll engine's devices need to work
+   (vendor/scrollcraft.js), scoped to v3 pages. The engine's own stylesheet
+   is not imported: it resets html, body, every element and form control,
+   which would restyle the whole site. These are its device rules, rewritten.
+
+   One deliberate change: the engine starts captions at opacity 0 so nothing
+   flashes before its first read. Here they start visible. Without the script,
+   or before it loads, or with reduced motion, the page is simply readable;
+   a caption seen for one frame before it fades is the smaller fault. */
+
+[data-page-v3] .sc-act--pinned { position: relative; }
+[data-page-v3] .sc-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: clip;
+}
+[data-page-v3] .sc-stage :is(video[data-sc-scrub], canvas[data-sc-sequence], .sc-stage__poster) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* The poster holds the frame until the clip has painted one. */
+[data-page-v3] video[data-sc-scrub] { opacity: 0; transition: opacity 380ms ease-out; }
+[data-page-v3] .sc-has-clip video[data-sc-scrub],
+[data-page-v3] video[data-sc-scrub].sc-has-clip { opacity: 1; }
+[data-page-v3] .sc-stage__poster { z-index: 0; transition: opacity 380ms ease-out; }
+[data-page-v3] .sc-has-clip .sc-stage__poster { opacity: 0; }
+
+[data-page-v3] [data-sc-cue] { will-change: opacity, transform; }
+[data-page-v3] [data-sc-pan] { display: flex; will-change: transform; }
+[data-page-v3] [data-sc-reveal] { will-change: clip-path; }
+[data-page-v3] [data-sc-parallax],
+[data-page-v3] [data-sc-magnet] { will-change: transform; }
+[data-page-v3] [data-sc-tilt] { transform-style: preserve-3d; will-change: transform; }
+
+/* Position only where nothing else set one (zero specificity), or a stage
+   carrying it would stop being sticky and scroll away instead of pinning. */
+[data-page-v3] [data-sc-spotlight] { isolation: isolate; }
+:where([data-page-v3] [data-sc-spotlight]) { position: relative; }
+[data-page-v3] [data-sc-spotlight]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(28rem 28rem at calc(var(--sc-mx, 0.5) * 100%) calc(var(--sc-my, 0.5) * 100%),
+    color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+  opacity: 0;
+  transition: opacity 600ms ease-out;
+}
+[data-page-v3] [data-sc-spotlight]:hover::after { opacity: 1; }
+
+/* Effect progress-hairline. The bar carries data-page-v3 itself: it sits
+   outside the page's blocks so no block's stacking context can cover it. */
+[data-sc-progress][data-page-v3] {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  height: 2px;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  will-change: transform;
+}
+[dir="rtl"] [data-sc-progress][data-page-v3] { transform-origin: 100% 50%; }
+
+/* Effect drift-ground: the engine sets --sc-canvas on the page as each block
+   comes on screen, moving between the palette's ground and surface. */
+[data-page-v3][data-sc-drift].pv3-section { background-color: var(--sc-canvas, var(--ground)); }
+
+/* Effects parallax-hero and parallax-palate: the photo is cut 40px larger
+   than its frame on each side, so its 30px of travel never shows an edge. */
+[data-page-v3] .pv3-photo[data-sc-parallax] {
+  inset-block: -40px;
+  block-size: calc(100% + 80px);
+}
+
+/* Rails (rail-occasions, rail-steps, rail-gallery). The block holds as a
+   stage one screen tall while its row travels; the row's end padding is
+   twice the gutter, because the engine travels the row by its overflow and
+   the stage's own start padding would otherwise leave the last item under
+   the far edge. */
+[data-page-v3][data-sc-act="pan"].pv3-section { --rail-gutter: clamp(20px, 6vw, 96px); padding: 0; }
+[data-page-v3][data-sc-act="pan"] .pv3-section-inner {
+  max-inline-size: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(20px, 3vw, 40px);
+  padding-inline-start: var(--rail-gutter);
+}
+[data-page-v3] [data-sc-pan] {
+  flex-wrap: nowrap;
+  inline-size: max-content;
+  padding-inline-end: calc(2 * var(--rail-gutter));
+  gap: clamp(28px, 4vw, 64px);
+}
+/* No item wider than the screen less its margins: a phone shows each one
+   whole at the end of the travel. A long occasion wraps instead. */
+[data-page-v3] [data-sc-pan] > * { max-inline-size: calc(100vw - 3 * var(--rail-gutter)); }
+[data-page-v3] .pv3-biglist-items[data-sc-pan] { font-size: clamp(36px, 9vw, 150px); }
+[data-page-v3] .pv3-biglist-items[data-sc-pan] li { white-space: normal; }
+[data-page-v3] .pv3-steps-list[data-sc-pan] { display: flex; align-items: stretch; }
+[data-page-v3] .pv3-steps-list[data-sc-pan] li {
+  flex: 0 0 clamp(280px, 44vw, 620px);
+  flex-direction: column;
+  gap: 12px;
+  padding-block-start: 18px;
+  border-block-start: 1px solid var(--rule);
+}
+[data-page-v3] .pv3-rail-photo {
+  block-size: min(62svh, 560px);
+  inline-size: auto;
+  object-fit: cover;
+  border-radius: 4px;
+  filter: var(--grade, none);
+}
+
+/* Hero pins (pin-hero-hold, pin-hero-pushin, scrub-film). The hero holds
+   for part of a screen while: the photo dims toward the ground (hold), or
+   the camera moves in on the subject (push-in), or the film plays under the
+   reader's scroll. --sc-p is the act's progress, written by the engine.
+   A pinned block must fit at its height, so below 700px tall, and with
+   reduced motion, the hero is simply not held. */
+@media (prefers-reduced-motion: no-preference) and (min-height: 700px) {
+  [data-page-v3].pv3-hero-pin[data-pin="hold"] .pv3-photo {
+    filter: var(--grade, none) brightness(calc(1 - var(--sc-p, 0) * 0.45));
+  }
+  [data-page-v3].pv3-hero-pin[data-pin="pushin"] .pv3-photo {
+    scale: calc(1 + var(--sc-p, 0) * 0.12);
+    transform-origin: 70% 50%;
+  }
+}
+@media (prefers-reduced-motion: reduce), (max-height: 699px) {
+  [data-page-v3].pv3-hero-pin { height: auto !important; }
+  [data-page-v3].pv3-hero-pin > .sc-stage { position: relative; height: auto; overflow: hidden; }
+}
+/* On a phone the film hero stacks the film above the copy, and held at one
+   screen tall it would push the copy off the bottom. So it is not held:
+   the film still runs with the scroll while the hero goes by. */
+@media (max-width: 860px) {
+  [data-page-v3].pv3-hero-pin[data-pin="film"] { height: auto !important; }
+  [data-page-v3].pv3-hero-pin[data-pin="film"] > .sc-stage { position: relative; height: auto; overflow: hidden; }
+}
+[data-page-v3].sc-has-clip .sc-stage__poster { opacity: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Every position change goes; the content stays. */
+  [data-page-v3] [data-sc-cue] { opacity: 1 !important; transform: none !important; }
+  [data-page-v3] [data-sc-parallax],
+  [data-page-v3] [data-sc-pan] { transform: none !important; }
+  [data-page-v3] [data-sc-reveal] { clip-path: none !important; }
+  /* A rail's travel is how its items are reached, so it becomes an
+     ordinary sideways scroll instead of parking on the first screenful, and
+     the block is not held: it is as tall as its content, like any other. */
+  [data-page-v3][data-sc-act="pan"] { height: auto !important; padding-block: clamp(64px, 10vw, 140px); }
+  [data-page-v3][data-sc-act="pan"] :is(.sc-stage, [data-sc-stage]) {
+    position: static;
+    height: auto;
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+  }
+  [data-page-v3] [data-sc-pan] > * { scroll-snap-align: center; }
+  [data-page-v3] [data-sc-spotlight]::after { display: none; }
+}
