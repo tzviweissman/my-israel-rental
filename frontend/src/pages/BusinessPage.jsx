@@ -154,8 +154,10 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   }, [v3Shell, preview]);
   // Effects (Tzvi, 6 Oct 2026): entrances wait until each v3 block is seen.
   // Above the early returns too: a hook runs on every render.
-  useFx(v3Shell && Boolean(biz.design_brief.effects && biz.design_brief.effects.length));
-  useScrollcraft(v3Shell && needsEngine(biz.design_brief));
+  // Not in a preview: those render inside the editor's frame, and these
+  // watch and drive the host document, not the frame's.
+  useFx(v3Shell && !preview && Boolean(biz.design_brief.effects && biz.design_brief.effects.length));
+  useScrollcraft(v3Shell && !preview && needsEngine(biz.design_brief));
 
   if (missing) {
     // On <slug>.myisraelrental.com there is nothing else at this address,
