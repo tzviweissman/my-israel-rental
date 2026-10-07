@@ -778,6 +778,227 @@ Sweetgreen.
 
 ---
 
+## Page builder v3: art direction (started 5 Oct 2026)
+
+The rules are `docs/page-builder-design-rules.md`, committed as Tzvi gave them.
+Built on the branch `feature/page-builder-v3`, not merged, behind
+`PAGE_BUILDER_V3_ENABLED` (off by default) plus a per-business switch.
+
+**Tzvi's rulings for v3 (5 Oct 2026), which override the rules file where
+they differ:**
+- **Chat-only stays.** No phone number or email on a v3 page or in its data.
+  The offer block's "copyable phone and email" becomes the chat button.
+- **The "List your business, free" band and "New on MyIsraelRental" stay**
+  (his 25 Sep ruling). "New on" is said once per page, not repeated.
+- **No AI calls yet.** The design brief is built by rules from the business's
+  own record; the AI-written brief and copy and the AI design scores wait.
+
+**How pages are built today** (what v3 starts from):
+- There is no AI builder and no builder prompt. Nothing calls a model for
+  pages; `backend/utils/llm.py` is used for translation and imports only.
+- A page is a JSON composition document from a closed vocabulary:
+  `backend/utils/page_composition.py:260` (`BLOCKS`), `:313`
+  (`PageComposition`), `:81` (the six dials), `:373` (the owner's brief).
+  Recipes that fill it from a business's data: `backend/utils/page_recipes.py:51`;
+  the rules check: `backend/utils/page_rules.py:249`.
+- Stored on the business record as `page` and `page_brief`
+  (`backend/routes/marketplace/businesses.py:208`, `:212`) and sent with the
+  public page (`:930`).
+- Rendered by `frontend/src/pages/BusinessPage.jsx` through one block
+  renderer, `frontend/src/components/pagebuilder/BlockList.jsx:43` (the
+  registry) and `:57`.
+- Images are uploaded to Cloudinary (`backend/utils/cloud_storage.py:70`);
+  a page refers to them by reference (`cover`, `logo`, `listing:<id>`),
+  never by URL.
+
+So v3 does not fit "a model returns two JSON objects": the smallest change
+that makes it possible is a second, richer document (the design brief) stored
+beside the composition, built today by rules and later by a model under the
+same validation.
+
+**Phase 1, built 5 Oct 2026:**
+- The brief, validated: `backend/utils/design_brief.py` (`DesignBrief` :263,
+  contrast checks :281, `brief_problems` :322 for invented prices and
+  paraphrased taglines, `build_brief` :387). Fonts only from
+  `FONT_ALLOWLIST` :32. The six presets :41, each with its palette recipe,
+  pairing, texture and hero side. The accent from the logo: `extract_accent`
+  :150 (dominant non-neutral hue, taken at its mid-tone), the rest of the
+  palette around it: `derive_palette` :181, which guarantees 4.5:1 text,
+  4.5:1 muted text, 3:1 button on ground and 4.5:1 button text for every
+  preset and any accent (tested on 42 combinations).
+- Stored on the business as `design_brief`, with the last five kept in
+  `design_brief_history`. Switched on per business by an admin:
+  `POST /api/marketplace/businesses/{id}/page-v3 {"on": true}`
+  (`businesses.py:980`), which builds, validates and stores the brief or
+  refuses with the reason. Sent with the page only when both switches are on
+  (`page_v3_on`, `design_brief.py:436`; `businesses.py:950`); the owner
+  checklist inside it goes to the owner only.
+- The tier 3 hero: `frontend/src/components/pagebuilder/v3/V3Hero.jsx` with
+  `frontend/src/styles/page-v3.css`. The wordmark at `clamp(56px, 10.5vw,
+  160px)`, the accent on its dots, their own sentence as the tagline, the
+  chat button with the proof beside it, and a fact strip of at most three
+  real facts (price, certificate, area). The brief becomes custom properties
+  scoped to the section (`themeVars`, :59); only the brief's allowlisted
+  faces are loaded (`fontsHref`, :35), each falling back to the Hebrew face.
+  Replaces the standard header card when switched on (`BusinessPage.jsx:241`,
+  `:314`); kosher and "New on" are not repeated by the proof lines below.
+- Checked by `backend/tests/test_design_brief.py` (9) and
+  `scripts/check-page-v3.mjs` (wordmark size, one filled button above the
+  fold, no sideways scroll at 360 and 390, button contrast, RTL), with
+  before/after screenshots in `screenshots/page-v3/`.
+
+**Phase 2, built 5 Oct 2026: real photos, never a flyer.** Tzvi chose the free
+text reader. `backend/utils/flyer_check.py` reads each of a business's pictures
+with Tesseract (through pytesseract, already a dependency) and calls it a flyer
+when its words cover more than 8% of it, or it has 8 or more confident words,
+or a price or phone number. The word count is an addition to the spec's 8%:
+word boxes are tight, and real posters full of lines measured 4 to 6%. The
+whole picture is not read at once, because Tesseract found nothing on L.A.
+Cholent's marble-backed flyer that way; it is read in ten overlapping strips,
+about seven seconds a picture. Measured on ten known pictures (L.A. Cholent's
+four flyers, six plain food photos): all ten right. Without the Tesseract
+program every picture is "unknown", and an unknown picture is never a hero.
+- The brief names pictures by reference, never URL (`PHOTO_REF`: `cover`,
+  `listing:<id>:gallery:<n>`, `listing:<id>:item:<n>:<k>`), with what the
+  check made of each. Tier 1 only for a picture checked as a photo; the
+  model refuses anything else. The owner checklist counts only real photos.
+- The admin switch checks up to 12 pictures, four at a time.
+- Page: a tier 1 hero is their photo, full-bleed, graded the same way for the
+  whole preset, under a scrim toward the copy only. Flyers appear whole, at
+  their own shape, under "From the business" (`V3Flyers.jsx`). A composed
+  hero or cover band no longer draws under a v3 hero.
+- Checked: `backend/tests/test_flyer_check.py` (8, the real reading test
+  runs when Tesseract is installed and skips when not).
+- Production needs the `tesseract-ocr`, `tesseract-ocr-eng` and
+  `tesseract-ocr-heb` packages on the backend service (Railpack, not
+  nixpacks.toml), which would also fix contract text extraction there.
+  Locally: `TESSERACT_CMD` and `TESSDATA_PREFIX` in `backend/.env`.
+
+**Phase 3, built 5 Oct 2026: MyIsraelRental steps back, and each fact once.**
+- On a v3 page the global nav keeps the logo, the language switch, messages
+  and the menu; its section links and sign-in stay in the menu
+  (`body[data-page-v3]`, `page-v3.css`). Leaving the page restores it.
+- The site footer becomes one line, "Listed on MyIsraelRental" with three
+  links (`V3Footer.jsx`). The "List your business, free" band stays, by
+  ruling; the check fails if it disappears.
+- "Say it once" in the renderer, not the prompt (`v3/ledger.js`):
+  `limitRepeats` keeps each key's first two; under a v3 hero the composed
+  body loses its own hero, cover band and contact block (the chat button
+  already sits in the hero, after the content and in the phone bar), and each
+  other block type appears once. The hero leaves kosher to its fact strip and
+  the proof lines below drop kosher and "New on", so each is said once above
+  the fold and at most twice on the page.
+- Checked: `scripts/test-page-v3-ledger.mjs` (6) and new assertions in
+  `scripts/check-page-v3.mjs` (repeat counts on the page and above the fold,
+  slim nav, one-line footer, band kept, at most three chat buttons), shown to
+  fail on the standard page.
+
+**Phase 4, built 5 Oct 2026: the sections** (`v3/V3Sections.jsx`, styles in
+`page-v3.css`). Each takes its data from the brief and the record and draws
+nothing without it. In the food recipe's order (rules, part 7):
+- **Occasions, as big type** (quiet). Their own list, word for word: a
+  sentence of theirs with three or more comma-separated items, each trimmed of
+  lead-in words only ("Order for your", "and"), checked against its source
+  like a tagline (`design_brief._occasions`). For L.A. Cholent: family
+  visiting, shabbos meals, Thursday nights, kiddushim, shalom zachors, simchos
+  of any size, which is the rules' own worked example. In Hebrew only from a
+  Hebrew description.
+- **How it works, numbered** (set piece): only from steps they wrote. Nothing
+  extracts steps from prose yet, so it draws nothing today and the checklist
+  asks for "how ordering works, step by step".
+- **From the business**: the flyers, whole (phase 2).
+- **Palate cleanser**: a second checked photo, full width, no text.
+- **The offer** (set piece): the listing's name, the lowest price in display
+  numerals, a hairline list of what each size costs in their words, the
+  certificate, where they are and serve, hours, notice and delivery when
+  given, the chat button, and the page's own address with a Copy button
+  ("Copied" for 1.5s; without the clipboard the text is selected). Chat-only:
+  never a phone number or email. Links to each listing.
+- **The phone bar**: appears once the hero button has scrolled away, hides
+  over the offer, carries the price, clears the safe area, and moves the
+  site's WhatsApp tab above it. It replaces the standard page's phone bar and
+  bottom button on a v3 page.
+- One wording for the action everywhere (`primaryLabel`). Under a v3 hero the
+  composed body keeps only a catalogue's cards and signature sections; the
+  offer says the facts, so the facts band goes, and an empty body draws
+  nothing rather than falling back to the default (which brought the facts
+  band back: caught by the repeat check).
+- Checked: `scripts/check-page-v3.mjs` (all sizes, both languages, repeats),
+  `scripts/check-page-v3-sticky.mjs` (the bar's show and hide, WhatsApp
+  clearance, Copy to Copied and back), `scripts/test-page-v3-ledger.mjs` (7).
+
+**Phase 5: the brand film (tier 2), 5 Oct 2026.**
+
+- Admin-only `POST /marketplace/businesses/{id}/brand-film` (multipart: `file`,
+  `made_with` = `3d` | `ai`) and `DELETE` to take it off. We make the film
+  (Blender or Higgsfield, by hand: no paid generation is called from code);
+  a person checks it shows the setting and props, never the product as if it
+  were theirs, before uploading.
+- Refused with the reason, and the uploaded asset deleted, unless Cloudinary's
+  own reading says H.264, 6 to 10 seconds, 1920x1080 or a larger 16:9, under
+  4MB (`film_problems`). The MP4 header is checked before anything is sent.
+  Not checked by code: the loop seam (no ffmpeg on Railway), by eye for now.
+- Stored as `brand_film` on the business (Cloudinary URL with the audio track
+  dropped, a poster frame from second 0, `made_with`). The hero is re-picked
+  by `pick_hero`: a real photo still wins, then the film, then the panel, and
+  the brief is validated again (a tier 2 hero must be `film`, and the record
+  must have one).
+- The page: muted, looping, `playsInline`, the browser's own autoplay (a
+  `play()` from an effect was aborted by the first load), a pause button,
+  paused on the poster under reduced motion. The footer says "Film rendered
+  in 3D" or "Film made with AI".
+- Phones: the rule's "film about 70% of the screen" put the name and the
+  button below the fold on every phone (the copy needs ~360px). The film now
+  takes what the copy leaves of one screen, between 180px and 70%, and the
+  button stays above the fold at 360, 390 and 375x667.
+- Known limit: in Hebrew on desktop the copy sits on the right, over a film
+  whose subject is on the right third. Same as a tier 1 photo today; an RTL
+  cut of the film (subject left) is the fix if it matters.
+
+**Phase 6: the quality gate, 5 Oct 2026.**
+
+- `scripts/check-page.mjs <slug> [--submit]` renders the page headlessly at
+  1440x900 and 390x844 in English and Hebrew, and at 360x800 with reduced
+  motion, and runs the must-pass list from the build prompt (section 7):
+  a hero with media (tier 1-3), no flyer cropped (cropped pictures in the
+  first screen go through the same Tesseract flyer check as the brief), the
+  headline 96/56px, exactly one filled button above the fold, kosher and
+  "New on" at most twice and once above the fold, no empty section or
+  placeholder text, no sideways scroll, contrast by axe-core, a visible focus
+  on every element Tab reaches, the film (4MB, poster, pause, still under
+  reduced motion), every price on the page a price on the record, and the
+  tagline, occasions and steps in the owner's own words.
+- Blocking: visitors get a v3 page only once a pass is recorded for the
+  brief on the record now (`page_check_passed`, `utils/design_brief.py`).
+  `--submit` records it (`POST /marketplace/businesses/{id}/page-check`,
+  admin only); a result for an older brief is refused (409), and any new
+  brief or film re-dates the brief, so the page goes back to the standard
+  one until it is checked again. An admin sees the v3 page before it
+  passes (that is how the gate renders it), with a notice saying visitors
+  don't, and why.
+- As the prompt asked: the v3 L.A. Cholent copy (rp-exp) passes; its
+  standard page (rp-exp-1) fails with "a flyer is cropped as the hero",
+  "Rabbi Weiner appears 3 times" and "the headline is 24px".
+- Found on the way: the "List your business, free" link was 3.61:1 (the
+  accent on white); now the deep accent, 6.96:1. The business page never
+  sent the visitor's sign-in, so the API's owner preview never applied on
+  it; it does now.
+- Not here: the 1-5 design scores (an AI review, waits for AI calls), and
+  running the gate against production. Railway has no browser, and the
+  script signs in through the local-only dev login, so today a pass can be
+  recorded only on a local database: no v3 page can reach live visitors
+  until the gate runs there (a browser on the server, or the script given
+  an admin session for the live API). The standard page's site footer
+  fails contrast the same way (accent links at 3.61:1): a palette question,
+  raised separately.
+
+**Next:** the owner checklist in
+the dashboard; an admin screen for the v3 switch and the film (both are API
+only); service cards below the hero still crop a flyer that is a
+listing's cover. Phase 1 also does not yet show, on a v3 page, the owner's full
+description, payment links or the connect button that the standard header
+carried.
+
 ## §8a — Answers. Research and codebase passes, 31 Aug 2026.
 
 Full briefs: `docs/page-builder-research.md` and the codebase report in the

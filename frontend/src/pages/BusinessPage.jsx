@@ -10,7 +10,7 @@
  * short-link table already points at /business/{id}, so both resolve and
  * neither will ever break.
  */
-import React, { useContext, useEffect, useState, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import ProofLine from '../components/marketplace/ProofLine';
 import ReviewsSection from '../components/reviews/ReviewsSection';
 import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPanel';
@@ -31,6 +31,16 @@ import CardAction, { BasketBar } from '../components/marketplace/CardAction';
 import { useBasket } from '../utils/storeBasket';
 import { useSavedItems } from '../hooks/useFavorites';
 import SaveHeart from '../components/marketplace/SaveHeart';
+import V3Hero from '../components/pagebuilder/v3/V3Hero';
+import V3Flyers from '../components/pagebuilder/v3/V3Flyers';
+import { resolvePhoto, photosOfKind } from '../components/pagebuilder/v3/photos';
+import V3Footer from '../components/pagebuilder/v3/V3Footer';
+import V3GateNotice from '../components/pagebuilder/v3/V3GateNotice';
+import { primaryLabel } from '../components/pagebuilder/v3/V3Hero';
+import { V3BigList, V3Steps, V3Palate, V3Offer, V3StickyBar } from '../components/pagebuilder/v3/V3Sections';
+import { useFx } from '../components/pagebuilder/v3/effects';
+import { v3BodyBlocks } from '../components/pagebuilder/v3/ledger';
+import { readComposition } from '../utils/pageComposition';
 import { cheapestFirst } from '../utils/gigPrice';
 import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
@@ -89,10 +99,13 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
     (async () => {
       try {
         // See utils/visitorId — this header is what makes a refresh not
-        // count as a second visitor.
+        // count as a second visitor. The sign-in goes too when there is
+        // one: the API's owner preview and an admin's view of a v3 page
+        // the quality check has not passed yet both depend on it.
+        const signedIn = sessionStorage.getItem('token');
         const { data } = await axios.get(
           `${API}/marketplace/business/${encodeURIComponent(slug)}`,
-          { headers: visitorHeaders() },
+          { headers: { ...visitorHeaders(), ...(signedIn ? { Authorization: `Bearer ${signedIn}` } : {}) } },
         );
         if (!cancelled) setFetched(data);
       } catch {
@@ -145,6 +158,19 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
     ro.observe(el);
     return () => ro.disconnect();
   }, [biz]);
+
+  // v3 pages thin the global nav (styles/page-v3.css). Above the early
+  // returns for the same reason as the hook above: every render runs it.
+  const v3Shell = Boolean(biz && biz.page_v3 && biz.design_brief && biz.design_brief.palette);
+  const v3OfferRef = useRef(null);
+  useEffect(() => {
+    if (!v3Shell || preview) return undefined;
+    document.body.dataset.pageV3 = '1';
+    return () => { delete document.body.dataset.pageV3; };
+  }, [v3Shell, preview]);
+  // Effects (Tzvi, 6 Oct 2026): entrances wait until each v3 block is seen.
+  // Above the early returns too: a hook runs on every render.
+  useFx(v3Shell && Boolean(biz.design_brief.effects && biz.design_brief.effects.length));
 
   if (missing) {
     // On <slug>.myisraelrental.com there is nothing else at this address,
@@ -274,6 +300,55 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
     ].filter(Boolean),
   };
 
+  // Page builder v3 (docs/page-builder-design-rules.md): the API sends the
+  // design brief only when the site switch AND this business's switch are on.
+  const v3 = Boolean(biz.page_v3 && biz.design_brief && biz.design_brief.palette);
+  const v3Brief = v3 ? biz.design_brief : null;
+  const v3Price = v3Brief?.primary_action?.price_anchor
+    ? money(v3Brief.primary_action.price_anchor, v3Brief.primary_action.currency || 'ILS') : null;
+  const v3Area = [
+    ...(biz.areas || []).slice(0, 2).map((a) => prettyArea(a, t)),
+    biz.serves_nationwide ? t('serviceArea.chipNationwide', 'All of Israel') : null,
+  ].filter(Boolean).join(' · ');
+  // Rule 4, "say it once": on a v3 page the hero carries "New on
+  // MyIsraelRental" (kept, Tzvi 25 Sep) and the fact strip carries kosher,
+  // so the proof lines further down do not repeat them.
+  const proofBelow = v3 ? { ...proof, memberSince: null, kosher: null } : proof;
+  const v3Photo = v3Brief?.hero?.tier === 1 ? resolvePhoto(biz, v3Brief.hero.media_id) : null;
+  const v3Flyers = v3 ? photosOfKind(biz, v3Brief, 'flyer') : [];
+
+  // The composed body under a v3 hero, with "say it once" applied (no second
+  // hero, no fourth chat button, each block type once: v3/ledger.js). Read
+  // through readComposition so a business with no composition of its own is
+  // filtered too. Nothing left means no body: NOT the default body, which
+  // would bring back the facts band the offer block already says.
+  const v3Blocks = v3 ? v3BodyBlocks(readComposition(biz).blocks, { listings: (biz.listings || []).length }) : null;
+  const v3Body = v3 ? { ...biz, page: { ...(biz.page || {}), theme: readComposition(biz).theme, blocks: v3Blocks } } : biz;
+  // Phase 4. The offer block's rows: every one a field on the record.
+  const v3Lang = (i18n.language || '').startsWith('he') ? 'he' : 'en';
+  const v3Second = v3 ? photosOfKind(biz, v3Brief, 'photo').find((u) => u !== v3Photo) || null : null;
+  const v3First = (biz.listings || [])[0];
+  const v3Items = v3First ? [...(v3First.tiers || []), ...(v3First.products || [])].filter((x) => x && Number(x.price) > 0) : [];
+  const v3Rows = !v3 ? [] : [
+    ...v3Items.slice(0, 6).map((x, n) => ({
+      key: `item-${n}`,
+      label: [localizedTitle(x, i18n) || x.name, x.description].filter(Boolean).join(' · '),
+      value: money(x.price, x.currency || 'ILS'),
+      ltr: true,
+      plain: true,
+    })),
+    biz.kosher_certification?.body && { key: 'kosher', label: t('pageV3.supervision', 'Kosher supervision'), value: biz.kosher_certification.body },
+    (biz.areas || []).length > 0 && { key: 'area', label: t('pageV3.basedIn', 'Based in'), value: biz.areas.map((a) => prettyArea(a, t)).join(', ') },
+    biz.serves_nationwide && { key: 'serving', label: t('pageV3.serving', 'Serving'), value: t('serviceArea.chipNationwide', 'All of Israel') },
+    biz.hours && { key: 'hours', label: t('businessPage.hours', 'Hours'), value: biz.hours },
+    biz.lead_time && { key: 'notice', label: t('businessPage.leadTime', 'Notice needed'), value: biz.lead_time },
+    biz.delivery_note && { key: 'delivery', label: t('businessPage.delivery', 'Delivery'), value: biz.delivery_note },
+  ].filter(Boolean);
+  const v3Links = v3 ? (biz.listings || []).filter(Boolean).slice(0, 6).map((g) => ({
+    to: `/businesses/${g.id}`,
+    label: t('pageV3.seeListing', { defaultValue: 'See {{name}}', name: localizedTitle(g, i18n) || g.title }),
+  })) : [];
+
   // Real data only: fall back through what the business actually has
   // rather than inventing a line for it.
   /* Cover first, for the same reason the short-link card prefers it: a
@@ -333,7 +408,55 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         />
       )}
 
+      {v3 && (
+        <V3Hero
+          brief={v3Brief}
+          name={displayName}
+          logoUrl={biz.logo_url}
+          photoUrl={v3Photo}
+          film={biz.brand_film}
+          priceText={v3Price}
+          areaText={v3Area}
+          kosherBody={biz.kosher_certification?.body || null}
+          proof={proof}
+          onPrimary={messageBusiness}
+        >
+          {!preview && user?.id && user.id === biz.owner_user_id && (
+            <button
+              type="button"
+              onClick={() => navigate(`/dashboard?tab=my-businesses&details=${biz.id}`)}
+              className="mt-6 text-xs font-semibold underline"
+              style={{ color: 'var(--muted)' }}
+              data-testid="business-owner-edit"
+            >
+              {t('businesses.editOnPage', 'Edit hours, areas & logo')}
+            </button>
+          )}
+        </V3Hero>
+      )}
+      {/* The food recipe's order (rules, part 7): occasions (quiet), how it
+          works (set piece), from the business, a palate cleanser, the offer. */}
+      {v3 && <V3BigList brief={v3Brief} lang={v3Lang} />}
+      {v3 && <V3Steps brief={v3Brief} lang={v3Lang} />}
+      {v3 && <V3Flyers brief={v3Brief} urls={v3Flyers} name={displayName} />}
+      {v3 && <V3Palate brief={v3Brief} url={v3Second} />}
+      {v3 && (
+        <V3Offer
+          brief={v3Brief}
+          rows={v3Rows}
+          priceText={v3Price}
+          priceIsFrom={v3Items.length > 1 || (biz.listings || []).length > 1}
+          title={v3First ? (localizedTitle(v3First, i18n) || v3First.title) : null}
+          label={primaryLabel(v3Brief, t)}
+          onPrimary={messageBusiness}
+          pageUrl={preview ? null : businessCanonicalUrl(biz.slug, biz.id)}
+          listingLinks={v3Links}
+          offerRef={v3OfferRef}
+        />
+      )}
+
       <div className={`${columnWidth} mx-auto px-4 py-8`}>
+        {!v3 && (
         <div className="rounded-2xl border bg-white overflow-hidden mb-6"
           style={{ borderColor: 'var(--brand-border)' }}>
           {/* Cover band. Short enough not to push the name below the
@@ -599,6 +722,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             </div>
           </div>
         </div>
+        )}
 
         {/* The paid page upgrade (backend utils/page_upgrade): the four
             questions answered above the body. Absent on every standard
@@ -670,8 +794,8 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         {biz.page_upgrade && <div id="business-body" className="scroll-mt-24" />}
         {/* The owner's first featured item, large. Nothing featured: nothing. */}
         <FeaturedHero business={biz} t={t} i18n={i18n} onOpen={(g) => navigate(`/businesses/${g.id}`)} />
-        <BlockList
-          business={biz}
+        {(!v3 || v3Blocks.length > 0) && <BlockList
+          business={v3Body}
           ctx={{
             t,
             i18n,
@@ -690,7 +814,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             cardHeart,
             apiBase: API,
           }}
-        />
+        />}
 
         {/* Verified reviews across this business's listings, plus its
             own Google reviews (routes/reviews.py). Nothing while off. */}
@@ -718,7 +842,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
 
         {/* Repeated for anyone who has read to the end — asking them to
             scroll back up to act is how intent gets lost. */}
-        {canMessage && (
+        {canMessage && !v3 && (
           <div className="mt-10 mb-24 sm:mb-10 flex flex-col items-center gap-2">
             <button
                     type="button"
@@ -728,7 +852,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   >
                     <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
                   </button>
-            <ProofLine {...proof} className="justify-center" testid="business-proof-bottom" />
+            <ProofLine {...proofBelow} className="justify-center" testid="business-proof-bottom" />
           </div>
         )}
       </div>
@@ -769,7 +893,9 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           <Link
             to="/join"
             className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full text-sm font-semibold border transition-colors hover:bg-black/[0.03] shrink-0"
-            style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary)' }}
+            // Text in the deep accent: the accent itself is 3.61:1 on white,
+            // under the 4.5:1 small text needs (caught by scripts/check-page.mjs).
+            style={{ borderColor: 'var(--brand-primary)', color: 'var(--brand-primary-deep)' }}
             data-testid="business-attribution-cta"
           >
             {t('businessPage.listYours', 'List your business, free')}
@@ -777,16 +903,27 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         </div>
       </div>
 
-      <SiteFooter />
-      {canMessage && <div className="sm:hidden" style={{ height: stickyH }} aria-hidden="true" data-testid="business-sticky-room" />}
+      {v3 ? <V3Footer filmMadeWith={v3Brief.hero?.tier === 2 && biz.brand_film?.url ? biz.brand_film.made_with : null} /> : <SiteFooter />}
+      {canMessage && !v3 && <div className="sm:hidden" style={{ height: stickyH }} aria-hidden="true" data-testid="business-sticky-room" />}
 
       {/* The basket, floating, wherever the sticky bar is not carrying it. */}
-      <BasketBar business={biz} basket={basket} t={t} className={canMessage ? 'hidden sm:block' : ''} />
+      <BasketBar business={biz} basket={basket} t={t} className={canMessage && !v3 ? 'hidden sm:block' : ''} />
 
       {/* Mobile only: the header button is off screen for most of the
           page on a phone, so the action rides along instead. Padding for
           the home indicator on iOS, or it sits under the gesture bar. */}
-      {canMessage && (
+      {v3 && <V3GateNotice check={biz.page_check} slug={biz.slug || biz.id} />}
+      {v3 && canMessage && (
+        <V3StickyBar
+          brief={v3Brief}
+          label={primaryLabel(v3Brief, t)}
+          priceText={v3Price}
+          onPrimary={messageBusiness}
+          heroSelector='[data-testid="pv3-primary"]'
+          offerRef={v3OfferRef}
+        />
+      )}
+      {canMessage && !v3 && (
         <div
           className="sm:hidden fixed bottom-0 inset-x-0 z-40 border-t px-4 py-3"
           style={{
@@ -798,7 +935,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           ref={stickyRef}
         >
           <BasketBar business={biz} basket={basket} t={t} inline />
-          {!basket.count && <ProofLine {...proof} compact className="justify-center mb-2" testid="business-proof-sticky" />}
+          {!basket.count && <ProofLine {...proofBelow} compact className="justify-center mb-2" testid="business-proof-sticky" />}
           <button
             type="button"
             onClick={messageBusiness}

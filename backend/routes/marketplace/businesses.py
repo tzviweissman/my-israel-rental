@@ -16,9 +16,9 @@ Two rules carried over from the earlier steps, both deliberate:
 from __future__ import annotations
 
 from datetime import UTC, datetime
-from typing import Any, Optional
+from typing import Any, Literal, Optional
 
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
 from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel, Field
 
@@ -983,6 +983,29 @@ async def public_business(
     if out["page_upgrade"]:
         from utils.page_clarity import upgrade_view
         out["upgrade_view"] = upgrade_view({**out, "page_brief": biz.get("page_brief") or {}})
+    # Page builder v3 (docs/page-builder-design-rules.md): only with the site
+    # switch on AND this business switched on. The owner checklist inside the
+    # brief is the owner's alone.
+    from utils.design_brief import page_check_passed, page_v3_on
+    admin_view = (viewer or {}).get("role") == "admin"
+    if page_v3_on(biz, admin=admin_view):
+        brief = dict(biz["design_brief"])
+        if not owner_preview:
+            brief.pop("missing_content", None)
+        out["page_v3"] = True
+        out["design_brief"] = brief
+        film = biz.get("brand_film") or {}
+        if film.get("url"):
+            out["brand_film"] = {k: film.get(k) for k in ("url", "poster_url", "made_with")}
+        if admin_view:
+            # The gate's last word, for the admin only: what it found, and
+            # whether visitors can see this brief yet.
+            check = biz.get("page_check") or {}
+            out["page_check"] = {
+                "live": page_check_passed(biz), "brief_at": biz.get("design_brief_at"),
+                "passed": check.get("passed"), "failures": check.get("failures") or [],
+                "checked_at": check.get("checked_at"), "stale": bool(check) and check.get("brief_at") != biz.get("design_brief_at"),
+            }
     return out
 
 
@@ -1000,6 +1023,210 @@ async def provider_default_business(user_id: str):
     if not biz:
         raise HTTPException(status_code=404, detail="No business for this provider")
     return {"id": biz["_id"], "slug": biz.get("slug"), "name": biz.get("name")}
+
+
+class PageV3In(BaseModel):
+    on: bool
+
+
+@router.post("/businesses/{business_id}/page-v3")
+async def set_page_v3(business_id: str, payload: PageV3In, user=Depends(verify_token)):
+    """Admin-only: switch page builder v3 on or off for ONE business.
+
+    Turning it on builds the design brief from the business's own record and
+    logo (utils/design_brief, rules only, no AI), validates it, and stores it
+    on the record with the previous one kept. A brief that fails validation
+    is refused with the reason, never patched. Nothing shows to visitors
+    unless PAGE_BUILDER_V3_ENABLED is also on.
+    """
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    biz = await db.businesses.find_one({"_id": business_id})
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    now = datetime.now(UTC).isoformat()
+    if not payload.on:
+        await db.businesses.update_one({"_id": business_id}, {"$set": {"page_v3": False, "updated_at": now}})
+        return {"id": business_id, "page_v3": False}
+
+    from utils.design_brief import build_brief
+    listings = [g async for g in db.marketplace_gigs.find({"business_id": business_id, "status": "published"})]
+    for g in listings:
+        g["id"] = g.pop("_id")
+    import httpx
+    logo = None
+    if biz.get("logo_url"):
+        try:
+            async with httpx.AsyncClient(timeout=15) as http:
+                r = await http.get(biz["logo_url"])
+                logo = r.content if r.status_code == 200 else None
+        except httpx.HTTPError:
+            logo = None   # no logo colour: the preset's accent is used, and the brief says so
+    # Phase 2: every picture of theirs through the flyer check (free, local
+    # Tesseract). Unreadable means "unknown", which is never a hero.
+    import asyncio
+    from utils.design_brief import photo_candidates
+    from utils.flyer_check import classify
+    record = {**biz, "listings": listings}
+    gate = asyncio.Semaphore(4)   # ~7s a picture; four Tesseract runs at once
+
+    async def check(http, ref, url):
+        async with gate:
+            try:
+                r = await http.get(url)
+                verdict = await asyncio.to_thread(classify, r.content) if r.status_code == 200 else {"kind": "unknown"}
+            except httpx.HTTPError:
+                verdict = {"kind": "unknown"}
+            return {"ref": ref, "kind": verdict["kind"]}
+
+    async with httpx.AsyncClient(timeout=20) as http:
+        photos = list(await asyncio.gather(*(check(http, r, u) for r, u in photo_candidates(record)[:12])))
+    try:
+        recent = await recent_briefs(_brief_category(record), business_id)
+        brief = build_brief(record, logo, photos, recent=recent).model_dump()
+    except ValueError as e:
+        raise HTTPException(status_code=422, detail=f"Design brief refused: {e}") from e
+    history = ([biz["design_brief"]] if biz.get("design_brief") else []) + list(biz.get("design_brief_history") or [])
+    await db.businesses.update_one({"_id": business_id}, {"$set": {
+        "page_v3": True, "design_brief": brief, "design_brief_at": now,
+        "design_brief_history": history[:5], "updated_at": now,
+    }})
+    return {"id": business_id, "page_v3": True, "design_brief": brief}
+
+
+def _brief_category(record: dict) -> str:
+    from utils.design_brief import _category
+    return _category(record)
+
+
+async def recent_briefs(category: str, exclude_id: str) -> list[dict]:
+    """The newest v3 pages of a category, newest first, as the effects
+    picker reads them: the ledger "not too similar" is checked against
+    (utils/page_effects). Each business's stored brief IS the ledger."""
+    from utils.page_effects import COMPARE_WINDOW
+    cur = db.businesses.find(
+        {"design_brief.category": category, "page_v3": True, "_id": {"$ne": exclude_id}},
+        {"design_brief.effects": 1, "design_brief.showstopper": 1},
+    ).sort("design_brief_at", -1).limit(COMPARE_WINDOW)
+    return [d.get("design_brief") or {} async for d in cur]
+
+
+async def ensure_page_indexes() -> None:
+    await db.businesses.create_index([("design_brief.category", 1), ("design_brief_at", -1)], background=True)
+
+
+def _rehero(biz: dict, has_film: bool) -> Optional[dict]:
+    """The stored brief with its hero re-picked for a film added or removed:
+    a real photo still wins (rule 4). Validated, never patched."""
+    from utils.design_brief import pick_hero, with_hero
+    brief = biz.get("design_brief")
+    if not brief:
+        return None
+    hero = brief.get("hero") or {}
+    photo = hero.get("media_id") if hero.get("tier") == 1 else None
+    return with_hero(brief, biz, pick_hero(photo, has_film, brief["preset"])).model_dump()
+
+
+@router.post("/businesses/{business_id}/brand-film")
+async def upload_brand_film(
+    business_id: str,
+    file: UploadFile = File(...),
+    made_with: Literal["3d", "ai"] = Form(...),
+    user=Depends(verify_token),
+):
+    """Admin-only: the tier 2 hero (rules, part 4), a 6-10s loop we made
+    for a business with no usable photos. It shows the setting and props,
+    never the product as if it were theirs; that is checked by a person
+    before upload. `made_with` is what the footer tells visitors."""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    biz = await db.businesses.find_one({"_id": business_id})
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    from utils.cloud_storage import CLOUDINARY_ENABLED, delete_from_cloudinary, upload_bytes_to_cloudinary
+    from utils.design_brief import FILM_MAX_BYTES, film_problems
+    content = await file.read(FILM_MAX_BYTES + 1)
+    if len(content) > FILM_MAX_BYTES:
+        raise HTTPException(status_code=413, detail="The film is over 4MB")
+    if content[4:8] != b"ftyp":
+        raise HTTPException(status_code=415, detail="The film must be an MP4")
+    if not CLOUDINARY_ENABLED:
+        raise HTTPException(status_code=503, detail="Cloudinary not configured")
+    up = await upload_bytes_to_cloudinary(content, is_video=True, folder=f"myisraelrental/brand-films/{business_id}")
+    problems = film_problems(up)
+    if problems:
+        delete_from_cloudinary(up["public_id"], is_video=True)
+        raise HTTPException(status_code=422, detail="Film refused: " + "; ".join(problems))
+
+    import cloudinary.utils
+    url = cloudinary.utils.cloudinary_url(up["public_id"], resource_type="video", format="mp4", secure=True,
+                                          transformation=[{"audio_codec": "none", "quality": "auto"}])[0]
+    poster = cloudinary.utils.cloudinary_url(up["public_id"], resource_type="video", format="jpg", secure=True,
+                                             transformation=[{"start_offset": 0, "quality": "auto"}])[0]
+    film = {"url": url, "poster_url": poster, "public_id": up["public_id"], "made_with": made_with,
+            "seconds": up["duration"], "width": up["width"], "height": up["height"], "bytes": up["bytes"]}
+    now = datetime.now(UTC).isoformat()
+    update = {"brand_film": film, "updated_at": now}
+    try:
+        brief = _rehero({**biz, "brand_film": film}, True)
+    except ValueError as e:
+        delete_from_cloudinary(up["public_id"], is_video=True)
+        raise HTTPException(status_code=422, detail=f"Design brief refused: {e}") from e
+    if brief:
+        update["design_brief"] = brief
+        update["design_brief_at"] = now   # a new hero: the quality gate runs again
+    await db.businesses.update_one({"_id": business_id}, {"$set": update})
+    old = (biz.get("brand_film") or {}).get("public_id")
+    if old and old != up["public_id"]:
+        delete_from_cloudinary(old, is_video=True)
+    return {"id": business_id, "brand_film": film, "hero": (brief or {}).get("hero")}
+
+
+@router.delete("/businesses/{business_id}/brand-film")
+async def remove_brand_film(business_id: str, user=Depends(verify_token)):
+    """Admin-only: take the film off. The hero falls back a tier."""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    biz = await db.businesses.find_one({"_id": business_id})
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    from utils.cloud_storage import delete_from_cloudinary
+    brief = _rehero(biz, False)
+    now = datetime.now(UTC).isoformat()
+    update: dict[str, Any] = {"$unset": {"brand_film": ""}, "$set": {"updated_at": now}}
+    if brief:
+        update["$set"]["design_brief"] = brief
+        update["$set"]["design_brief_at"] = now   # a new hero: the quality gate runs again
+    await db.businesses.update_one({"_id": business_id}, update)
+    old = (biz.get("brand_film") or {}).get("public_id")
+    if old:
+        delete_from_cloudinary(old, is_video=True)
+    return {"id": business_id, "brand_film": None, "hero": (brief or {}).get("hero")}
+
+
+class PageCheckIn(BaseModel):
+    brief_at: str = Field(..., max_length=40)
+    passed: bool
+    failures: list[str] = Field(default_factory=list, max_length=60)
+    checked_at: str = Field(..., max_length=40)
+
+
+@router.post("/businesses/{business_id}/page-check")
+async def record_page_check(business_id: str, payload: PageCheckIn, user=Depends(verify_token)):
+    """Admin-only: the quality gate's result (scripts/check-page.mjs, rules
+    part 9). Visitors see a v3 page only once a pass is recorded for the
+    brief that is on the record now; a result for an older brief is
+    refused, so a page changed after its check cannot go live on it."""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    biz = await db.businesses.find_one({"_id": business_id}, {"design_brief_at": 1})
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    if payload.brief_at != biz.get("design_brief_at"):
+        raise HTTPException(status_code=409, detail="The page changed since it was checked; run the check again")
+    check = {**payload.model_dump(), "passed": payload.passed and not payload.failures, "by": user.get("user_id")}
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"page_check": check}})
+    return {"id": business_id, "live": check["passed"], "page_check": check}
 
 
 class VerifyIn(BaseModel):

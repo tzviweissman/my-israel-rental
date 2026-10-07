@@ -1,0 +1,457 @@
+/* Page builder v3: everything is scoped to [data-page-v3] and every colour
+   and face comes from the business's design brief as a custom property
+   (components/pagebuilder/v3/V3Hero.jsx, themeVars). No colour is written in
+   this file, so a section can never show one the brief did not validate,
+   and nothing here leaks into the platform's own pages.
+   docs/page-builder-design-rules.md: type scale 3.4, hero tiers part 4,
+   motion part 6. Logical properties only, so Hebrew mirrors. */
+
+[data-page-v3] {
+  background: var(--ground);
+  color: var(--text);
+  font-family: var(--body);
+}
+
+.pv3-hero {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-block-size: min(86svh, 880px);
+  display: flex;
+  align-items: flex-end;
+  /* Rule 5: 96-140px desktop, 64-80px phone. */
+  padding-block: clamp(64px, 11vw, 140px) clamp(48px, 7vw, 96px);
+  padding-inline: clamp(20px, 6vw, 96px);
+  /* Clears the platform's floating nav bar. */
+  padding-block-start: calc(var(--nav-h, 68px) + clamp(40px, 8vw, 120px));
+}
+
+/* Tier 3 texture: one light overlay, drawn in CSS and an inline SVG, no
+   image file. Film grain for Candlelight and Field, paper, stone, linen. */
+.pv3-texture {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.09;
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 1 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+[data-texture="paper"] .pv3-texture { opacity: 0.06; }
+[data-texture="stone"] .pv3-texture { opacity: 0.12; mix-blend-mode: multiply; }
+[data-texture="linen"] .pv3-texture {
+  opacity: 0.07;
+  background-image:
+    repeating-linear-gradient(0deg, var(--text) 0 1px, transparent 1px 4px),
+    repeating-linear-gradient(90deg, var(--text) 0 1px, transparent 1px 4px);
+}
+[data-texture="none"] .pv3-texture { display: none; }
+/* Soft light falloff toward the copy's corner, from the ground itself. */
+.pv3-hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: radial-gradient(120% 90% at 85% 10%, var(--surface) 0%, var(--ground) 62%);
+}
+
+/* Tier 1: their photo, full-bleed, under a scrim that darkens toward the
+   copy's corner only. One grade per preset, the same for every photo. */
+[data-preset="candlelight"] { --grade: sepia(0.14) saturate(0.92) contrast(1.05) brightness(0.92); }
+[data-preset="bold-pantry"] { --grade: saturate(1.08) contrast(1.03); }
+[data-preset="jerusalem-stone"] { --grade: sepia(0.08) saturate(0.9) brightness(1.02); }
+[data-preset="studio"] { --grade: contrast(1.04); }
+[data-preset="field"] { --grade: saturate(0.95) contrast(1.06); }
+[data-preset="workshop"] { --grade: contrast(1.03); }
+.pv3-photo {
+  position: absolute;
+  inset: 0;
+  z-index: -3;
+  inline-size: 100%;
+  block-size: 100%;
+  object-fit: cover;
+  object-position: 70% 50%;
+  filter: var(--grade, none);
+}
+.pv3-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  /* Measured, not judged (scripts/check-page-v3-effects.mjs, 6 Oct): the
+     lighter version left the tagline at 3.7:1 and the wordmark's accent dots
+     under 3:1 over a bright photo. */
+  background: linear-gradient(to top, var(--ground) 0%, color-mix(in srgb, var(--ground) 84%, transparent) 42%, color-mix(in srgb, var(--ground) 40%, transparent) 72%, transparent 92%),
+              linear-gradient(to right, color-mix(in srgb, var(--ground) 82%, transparent) 0%, color-mix(in srgb, var(--ground) 55%, transparent) 42%, transparent 68%);
+}
+[dir="rtl"] .pv3-scrim {
+  background: linear-gradient(to top, var(--ground) 0%, color-mix(in srgb, var(--ground) 84%, transparent) 42%, color-mix(in srgb, var(--ground) 40%, transparent) 72%, transparent 92%),
+              linear-gradient(to left, color-mix(in srgb, var(--ground) 82%, transparent) 0%, color-mix(in srgb, var(--ground) 55%, transparent) 42%, transparent 68%);
+}
+/* On a phone the copy spans the whole width, so the side shading cannot
+   help; the whole photo is toned down under it instead. */
+@media (max-width: 860px) {
+  .pv3-scrim, [dir="rtl"] .pv3-scrim {
+    background: linear-gradient(to top, var(--ground) 0%, color-mix(in srgb, var(--ground) 86%, transparent) 50%, color-mix(in srgb, var(--ground) 55%, transparent) 100%);
+  }
+}
+/* With a photo there is no light-falloff panel; the photo is the light. */
+[data-tier="1"].pv3-hero::after { display: none; }
+
+/* "From the business": flyers whole, at their own shape, never cropped. */
+.pv3-flyers {
+  padding-block: clamp(64px, 9vw, 120px);
+  padding-inline: clamp(20px, 6vw, 96px);
+  border-block-start: 1px solid var(--rule);
+}
+.pv3-flyers-inner { max-inline-size: 1180px; margin-inline: auto; }
+.pv3-label {
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.24em;
+  color: var(--muted);
+  margin: 0 0 28px;
+}
+[dir="rtl"] .pv3-label { letter-spacing: 0.05em; font-size: 13px; }
+.pv3-flyers-row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  gap: clamp(16px, 2.4vw, 32px);
+  align-items: start;
+}
+.pv3-flyer { margin: 0; background: var(--surface); border-radius: 12px; padding: 12px; }
+.pv3-flyer img {
+  display: block;
+  inline-size: 100%;
+  block-size: auto;
+  max-block-size: 80svh;
+  object-fit: contain;
+}
+
+.pv3-hero-inner {
+  max-inline-size: 1180px;
+  inline-size: 100%;
+  margin-inline: auto;
+}
+
+.pv3-logo {
+  inline-size: 64px;
+  block-size: 64px;
+  object-fit: contain;
+  border-radius: 999px;
+  margin-block-end: 28px;
+}
+
+.pv3-script {
+  font-family: var(--script);
+  font-size: clamp(26px, 3.4vw, 44px);
+  line-height: 1.1;
+  color: var(--accent);
+  margin: 0 0 6px;
+}
+
+/* The wordmark: 56-160px (rule 3.4: 96-160 desktop, 56-72 phone). */
+.pv3-wordmark {
+  font-family: var(--display);
+  font-weight: var(--display-weight);
+  font-size: clamp(56px, 10.5vw, 160px);
+  line-height: 0.9;
+  letter-spacing: var(--display-tracking);
+  color: var(--text);
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+[data-caps="true"] .pv3-wordmark { text-transform: uppercase; }
+/* Hebrew has no capitals and its faces need their own weight to read. */
+[dir="rtl"] .pv3-wordmark { font-weight: 700; letter-spacing: 0; line-height: 1; }
+.pv3-dot { color: var(--accent); }
+
+.pv3-tagline {
+  max-inline-size: 34em;
+  font-size: clamp(17px, 1.4vw, 19px);
+  line-height: 1.6;
+  color: var(--muted);
+  margin: clamp(18px, 2.4vw, 28px) 0 0;
+}
+
+.pv3-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px 20px;
+  margin-block-start: clamp(24px, 3vw, 36px);
+}
+
+/* The one filled accent element on the page (rule 1.3). */
+.pv3-btn {
+  min-block-size: 48px;
+  padding-inline: 26px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-family: var(--body);
+  font-weight: 700;
+  font-size: 16px;
+  cursor: pointer;
+  transition: transform 200ms ease, filter 200ms ease;
+}
+.pv3-btn:hover { transform: translateY(-1px); filter: brightness(1.06); }
+.pv3-btn:active { transform: translateY(0); filter: brightness(0.96); }
+.pv3-btn:focus-visible { outline: 3px solid var(--text); outline-offset: 3px; }
+
+/* The proof line inherits the panel's colours, not the platform's. */
+.pv3-proof, .pv3-proof * { color: var(--muted) !important; }
+
+.pv3-facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 0;
+  list-style: none;
+  padding: 0;
+  margin: clamp(28px, 3.6vw, 44px) 0 0;
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.22em;
+  color: var(--muted);
+}
+/* gap, not a trailing space: a flex item drops it ("FROM₪100"). */
+.pv3-facts li { display: inline-flex; align-items: center; gap: 0.45em; }
+.pv3-facts li + li::before {
+  content: "";
+  inline-size: 5px;
+  block-size: 5px;
+  border-radius: 999px;
+  background: var(--accent);
+  margin-inline: 14px;
+}
+[dir="rtl"] .pv3-facts { letter-spacing: 0.05em; font-size: 13px; }
+.pv3-num { font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+  .pv3-hero { min-block-size: 62svh; }
+  .pv3-logo { inline-size: 52px; block-size: 52px; margin-block-end: 20px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pv3-btn { transition: none; }
+  .pv3-btn:hover { transform: none; }
+}
+
+/* Phase 3: MyIsraelRental steps back on a v3 page (rules, part 2). The top
+   bar keeps the logo, the language switch, messages and the menu; the
+   section links and sign-in move to the menu, where they already are. */
+body[data-page-v3] [data-testid="nav-rental-categories"],
+body[data-page-v3] [data-testid="nav-auth-cluster"] { display: none !important; }
+
+.pv3-footer {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px 20px;
+  padding-block: 20px calc(20px + env(safe-area-inset-bottom));
+  padding-inline: 16px;
+  border-block-start: 1px solid var(--brand-border);
+  font-size: 12px;
+  color: var(--brand-muted);
+}
+.pv3-footer a { color: var(--brand-muted); text-decoration: underline; text-underline-offset: 3px; }
+.pv3-footer a:hover { color: var(--ink); }
+@media (max-width: 639px) { .pv3-footer { padding-block-end: calc(96px + env(safe-area-inset-bottom)); } }
+
+/* ---- Phase 4: the sections (rules, parts 5 and 6) ----------------------- */
+.pv3-section {
+  padding-block: clamp(64px, 10vw, 140px);
+  padding-inline: clamp(20px, 6vw, 96px);
+  border-block-start: 1px solid var(--rule);
+}
+.pv3-section-inner { max-inline-size: 1180px; margin-inline: auto; }
+.pv3-h2 {
+  font-family: var(--display);
+  font-weight: var(--display-weight);
+  font-size: clamp(30px, 5vw, 60px);
+  line-height: 1;
+  letter-spacing: var(--display-tracking);
+  color: var(--text);
+  margin: 0 0 clamp(20px, 3vw, 36px);
+}
+[data-caps="true"] .pv3-h2 { text-transform: uppercase; }
+[dir="rtl"] .pv3-h2 { font-weight: 700; letter-spacing: 0; }
+
+/* Quiet: big type, lots of room, accent dots between. Each item one line. */
+.pv3-biglist-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  row-gap: 0.15em;
+  font-family: var(--display);
+  font-weight: var(--display-weight);
+  font-size: clamp(30px, 5.2vw, 72px);
+  line-height: 1.05;
+  letter-spacing: var(--display-tracking);
+  color: var(--text);
+}
+[data-caps="true"] .pv3-biglist-items { text-transform: uppercase; }
+[dir="rtl"] .pv3-biglist-items { font-weight: 700; letter-spacing: 0; }
+.pv3-biglist-items li { white-space: nowrap; }
+/* The dot trails each item, so a wrapped line never starts with one. */
+.pv3-biglist-items li:not(:last-child)::after {
+  content: "";
+  display: inline-block;
+  inline-size: 0.16em;
+  block-size: 0.16em;
+  border-radius: 999px;
+  background: var(--accent);
+  margin-inline: 0.42em;
+  vertical-align: middle;
+}
+
+/* Steps: numbered, numbers in the display face with tabular figures. */
+.pv3-steps-list { list-style: none; margin: 0; padding: 0; display: grid; gap: clamp(18px, 2.4vw, 28px); }
+.pv3-steps-list li { display: flex; gap: 20px; align-items: baseline; font-size: clamp(17px, 1.5vw, 20px); line-height: 1.6; color: var(--text); }
+.pv3-step-n { font-family: var(--display); font-size: clamp(28px, 3.4vw, 44px); color: var(--accent); min-inline-size: 2ch; }
+
+/* Palate cleanser: one photo, full width, no text. */
+.pv3-palate { position: relative; block-size: clamp(260px, 46vw, 620px); overflow: hidden; }
+.pv3-palate .pv3-photo { position: absolute; inset: 0; z-index: 0; }
+
+/* The offer: the price large in display numerals, a hairline spec list. */
+.pv3-offer-grid { display: grid; gap: clamp(32px, 5vw, 72px); grid-template-columns: minmax(0, 1fr); }
+@media (min-width: 900px) { .pv3-offer-grid { grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); align-items: start; } }
+.pv3-price { display: flex; align-items: baseline; gap: 14px; margin: 0 0 clamp(24px, 3vw, 36px); }
+.pv3-price .pv3-num { font-family: var(--display); font-weight: var(--display-weight); font-size: clamp(64px, 9vw, 128px); line-height: 0.9; color: var(--text); }
+.pv3-price-unit { font-size: 12px; text-transform: uppercase; letter-spacing: 0.24em; color: var(--muted); }
+[dir="rtl"] .pv3-price-unit { letter-spacing: 0.05em; font-size: 13px; }
+.pv3-spec { margin: 0; border-block-start: 1px solid var(--rule); }
+.pv3-spec-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
+  gap: 16px;
+  padding-block: 16px;
+  border-block-end: 1px solid var(--rule);
+}
+.pv3-spec dt { font-size: 12px; text-transform: uppercase; letter-spacing: 0.2em; color: var(--muted); padding-block-start: 3px; }
+[dir="rtl"] .pv3-spec dt { letter-spacing: 0.04em; font-size: 13px; }
+.pv3-spec dd { margin: 0; font-size: 17px; line-height: 1.5; color: var(--text); }
+.pv3-copy-row dd { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.pv3-copy-value { user-select: all; overflow-wrap: anywhere; font-size: 15px; }
+.pv3-copy-btn {
+  min-block-size: 44px;
+  padding-inline: 16px;
+  border: 1px solid var(--rule);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  transition: border-color 200ms ease, transform 200ms ease;
+}
+.pv3-copy-btn:hover { border-color: var(--accent); transform: translateY(-1px); }
+.pv3-copy-btn:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+.pv3-listing-links { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: clamp(28px, 3vw, 40px) 0 0; font-size: 14px; }
+.pv3-listing-links a { color: var(--muted); text-decoration: underline; text-underline-offset: 3px; }
+.pv3-listing-links a:hover { color: var(--text); }
+
+/* The phone bar: off until the hero button has gone, off over the offer. */
+.pv3-sticky { display: none; }
+@media (max-width: 639px) {
+  .pv3-sticky {
+    position: fixed;
+    inset-inline: 0;
+    inset-block-end: 0;
+    z-index: 45;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 12px 16px calc(12px + env(safe-area-inset-bottom));
+    background: var(--surface);
+    border-block-start: 1px solid var(--rule);
+    transform: translateY(110%);
+    transition: transform 240ms ease;
+  }
+  .pv3-sticky.is-on { transform: translateY(0); }
+  .pv3-sticky .pv3-btn { flex: 1; }
+  .pv3-sticky-price { font-family: var(--display); font-size: 26px; color: var(--text); }
+  /* The site's own WhatsApp tab moves up so the bar never covers it. */
+  body[data-page-v3] [data-testid="whatsapp-button"] { bottom: calc(92px + env(safe-area-inset-bottom)) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .pv3-sticky { transition: none; }
+  .pv3-copy-btn { transition: none; }
+  .pv3-copy-btn:hover { transform: none; }
+}
+
+.pv3-price-sym { font-size: 0.5em; vertical-align: 0.55em; margin-inline-end: 0.04em; font-weight: 400; }
+/* Their own words for a size are read, not scanned: normal case. */
+.pv3-spec dt.pv3-dt-plain { text-transform: none; letter-spacing: 0; font-size: 15px; color: var(--text); padding-block-start: 0; }
+
+/* Tier 2: their brand film (rules, part 4). Desktop: full-bleed under the
+   same scrim as a photo, subject on the right third, copy left. Phones: the
+   film on top, cropped to its subject, copy below it, never over it. The
+   rule's "about 70% of the screen" put the name and the button below the
+   fold on every phone (measured: the copy needs ~360px under the film), so
+   the film takes what is left above the copy, up to 70%. */
+.pv3-film-box { position: absolute; inset: 0; z-index: -3; }
+.pv3-film { position: absolute; inset: 0; inline-size: 100%; block-size: 100%; object-fit: cover; object-position: 70% 50%; filter: var(--grade, none); display: block; }
+.pv3-film-box .pv3-scrim { z-index: 0; }
+[data-tier="2"].pv3-hero::after { display: none; }
+.pv3-film-toggle {
+  position: absolute;
+  inset-block-start: calc(var(--nav-h, 68px) + 16px);
+  inset-inline-end: clamp(16px, 3vw, 32px);
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  inline-size: 44px;
+  block-size: 44px;
+  border: 1px solid color-mix(in srgb, var(--text) 40%, transparent);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--ground) 55%, transparent);
+  color: var(--text);
+  cursor: pointer;
+}
+.pv3-film-toggle:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+@media (max-width: 640px) {
+  /* One screen under the nav; the copy keeps its height and the film
+     grows into the rest, between 180px and 70%. */
+  [data-tier="2"].pv3-hero {
+    flex-direction: column;
+    align-items: stretch;
+    min-block-size: calc(100svh - var(--nav-h, 68px));
+    padding-block-start: 0;
+    padding-inline: 0;
+  }
+  [data-tier="2"] .pv3-film-box { position: relative; inset: auto; z-index: 0; flex: 1 1 0; min-block-size: 180px; max-block-size: 70svh; }
+  [data-tier="2"] .pv3-film-box .pv3-scrim { display: none; }
+  [data-tier="2"] .pv3-film-toggle { inset-block-start: auto; inset-block-end: 16px; }
+  [data-tier="2"] .pv3-hero-inner { flex: none; }
+  [data-tier="2"] .pv3-hero-inner { padding-inline: 20px; padding-block-start: 32px; }
+}
+
+/* The admin's gate notice: the platform's look, not the business's. */
+.pv3-gate {
+  position: fixed;
+  /* Above the site's floating tabs, which sit in both bottom corners. */
+  inset-block-end: 84px;
+  inset-inline-start: 16px;
+  z-index: 60;
+  max-inline-size: min(440px, calc(100vw - 32px));
+  max-block-size: 50vh;
+  overflow: auto;
+  padding: 12px 16px;
+  border: 1px solid var(--brand-border);
+  border-radius: 12px;
+  background: var(--surface);
+  color: var(--ink);
+  font: 13px/1.5 var(--font-body, system-ui, sans-serif);
+  box-shadow: 0 8px 24px rgba(17, 24, 39, 0.12);
+}
+.pv3-gate summary { cursor: pointer; font-weight: 700; }
+.pv3-gate p, .pv3-gate ul { margin: 8px 0 0; }
+.pv3-gate ul { padding-inline-start: 18px; color: var(--brand-muted); }
+.pv3-gate code { font-size: 12px; overflow-wrap: anywhere; }

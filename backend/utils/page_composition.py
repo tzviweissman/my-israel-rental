@@ -87,9 +87,14 @@ DIALS: dict[str, tuple[str, ...]] = {
     "density": ("airy", "balanced", "packed"),
     "imagery": ("full-bleed", "grid", "thumbnail"),
     "price_prominence": ("quiet", "normal", "loud"),
-    # There is no "lively". Motion above `subtle` on a page an owner sends
-    # to a customer is decoration that costs the reader time, and every
-    # value here is already gated behind prefers-reduced-motion.
+    # This dial is the v2 page's, and stays at two values. It once also
+    # stood for a wider ruling ("there is no lively: motion above subtle is
+    # decoration that costs the reader time"), written when the builder had
+    # no effects and no way to choose between them, so allowing almost
+    # nothing was the only safe rule. Tzvi overturned that for generated (v3)
+    # pages on 6 Oct 2026: their motion is governed by utils/page_effects.py,
+    # one bold moment per page, every effect with a still fallback, and a
+    # phone and reduced-motion gate before a page goes live.
     "motion": ("still", "subtle"),
 }
 

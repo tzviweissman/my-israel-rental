@@ -83,6 +83,11 @@ async def upload_bytes_to_cloudinary(
         "bytes": res.get("bytes", len(content)),
         "format": res.get("format"),
         "resource_type": res.get("resource_type"),
+        # Cloudinary's own reading of a video, for callers that check it.
+        "duration": res.get("duration"),
+        "width": res.get("width"),
+        "height": res.get("height"),
+        "codec": (res.get("video") or {}).get("codec"),
     }
 
 
