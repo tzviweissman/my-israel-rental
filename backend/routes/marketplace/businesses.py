@@ -25,6 +25,7 @@ from pydantic import BaseModel, Field
 from utils.page_upgrade import has_page_upgrade
 from routes.deps import db, logger, optional_user, verify_token
 from utils.bg_tasks import spawn
+from utils import highlights as hl
 from utils.translate import detect_lang, translate_marketing
 from utils import view_tracking
 from utils.businesses import (
@@ -885,6 +886,8 @@ async def public_business(
         )
 
     rating = await business_rating(biz["_id"])
+    # Food business? Decides which highlights may show (utils/highlights.py).
+    food = hl.is_food([*(biz.get("categories") or []), *(g.get("category") for g in raw)])
     out = {
         "id": biz["_id"],
         "slug": biz.get("slug"),
@@ -969,7 +972,7 @@ async def public_business(
         "response_bucket": _response_bucket(
             await db.marketplace_providers.find_one({"user_id": biz.get("owner_user_id")}) or {}
         ),
-        "listings": [_public_listing(g) for g in raw],
+        "listings": [{**_public_listing(g), "highlights": hl.visible(g.get("highlights"), hl.kind_of(g), food)} for g in raw],
         # The paid page upgrade (utils/page_upgrade): the one answer the
         # page renders from. False for almost everyone.
         "page_upgrade": await has_page_upgrade(biz.get("owner_user_id")),

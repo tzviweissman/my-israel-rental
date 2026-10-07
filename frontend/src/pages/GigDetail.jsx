@@ -30,6 +30,7 @@ import OfferBadge from '../components/marketplace/OfferBadge';
 import { priceRows, cheapestRow, cheapestFirst } from '../utils/gigPrice';
 import { FX_USD_TO_ILS } from '../utils/listingPrice';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
+import Highlights from '../components/marketplace/Highlights';
 import { buildWhatsAppLinkWithMessage, hasValidWhatsApp } from '../utils/whatsappLink';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import { productPhotos, productCover } from '../utils/productPhotos';
@@ -926,11 +927,13 @@ const GigDetail = () => {
               <p className="text-gray-600 mt-1" dir="auto" data-testid="gig-byline">
                 {gig.provider?.name}{gig.area ? ` · ${prettyArea(gig.area, t)}` : ''}
               </p>
-              {(gig.rating_count > 0) && (
+              {/* Stars only from three reviews up, as everywhere else. */}
+              {gig.rating_count >= 3 && gig.rating_avg != null && (
                 <div className="mt-2">
                   <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={14} testidPrefix="gig-header-stars" />
                 </div>
               )}
+              <Highlights items={gig.highlights} t={t} className="mt-3" testid="gig-highlights" />
               {/* The offer, directly under the name of the business running
                   it. The full form here rather than the card's chip: this is
                   the page where someone decides, so what the offer is for and

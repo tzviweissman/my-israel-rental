@@ -38,6 +38,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import FaqEditor, { cleanFaqs } from '../marketplace/FaqEditor';
+import { HighlightChip } from '../marketplace/Highlights';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { X, Trash2, ImagePlus, Loader2 } from 'lucide-react';
@@ -68,6 +69,18 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
   // The offer. `on` is kept separate from the numbers because switching it
   // off and saving is what REMOVES it - the API reads a null as "take it
   // down", so an offer that was on and is now off has to send something.
+  /* What you get: up to four from the fixed list for this item (the
+     server decides which; food-only ones appear for food businesses). */
+  const [hl, setHl] = useState({ options: [], max: 4, selected: [] });
+  const [hlPicked, setHlPicked] = useState(null);
+  useEffect(() => {
+    let live = true;
+    axios.get(`${API}/marketplace/gigs/${gig.id}/highlight-options`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(({ data }) => { if (live) { setHl(data); setHlPicked(data.selected || []); } })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [API, gig.id, token]);
+  const toggleHl = (id) => setHlPicked((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : cur.length >= hl.max ? cur : [...cur, id]));
   const [offerOn, setOfferOn] = useState(Boolean(gig.discount));
   const [offerPercent, setOfferPercent] = useState(gig.discount?.percent ?? 10);
   const [offerLabel, setOfferLabel] = useState(gig.discount?.label || '');
@@ -212,6 +225,8 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
         : null;
       if (JSON.stringify(nextOffer) !== JSON.stringify(prevOffer)) payload.discount = nextOffer;
 
+      if (hlPicked && JSON.stringify(hlPicked) !== JSON.stringify(hl.selected || [])) payload.highlights = hlPicked;
+
       const nextFaqs = cleanFaqs(faqs);
       if (JSON.stringify(nextFaqs) !== JSON.stringify(cleanFaqs(gig.faqs))) payload.faqs = nextFaqs;
 
@@ -323,6 +338,24 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
               customer told the price has changed who is then charged the
               old one blames the site, so the sheet says plainly what the
               badge does and what it does not. */}
+          {hl.options.length > 0 && hlPicked && (
+            <div className="rounded-xl border p-3 space-y-2" style={{ borderColor: 'var(--brand-border)' }} data-testid="edit-listing-highlights">
+              <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('highlights.editTitle', 'What you get')}</p>
+              <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
+                {t('highlights.editHelp', { defaultValue: 'Pick up to {{max}}. They show as small badges on this item.', max: hl.max })}
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {hl.options.map((o) => (
+                  <HighlightChip key={o.id} id={o.id} icon={o.icon} t={t} selected={hlPicked.includes(o.id)}
+                    onClick={() => toggleHl(o.id)} testid={`edit-listing-highlight-${o.id}`} />
+                ))}
+              </div>
+              {hlPicked.length >= hl.max && (
+                <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('highlights.editFull', 'That is the most. Untick one to choose another.')}</p>
+              )}
+            </div>
+          )}
+
           <div
             className="rounded-xl border p-3 space-y-3"
             style={{ borderColor: 'var(--brand-border)' }}

@@ -671,6 +671,9 @@ class GigPatch(BaseModel):
     whatsapp: Optional[str] = None
     area: Optional[str] = None
     faqs: Optional[list[dict[str, str]]] = None
+    # "What you get": ids from utils/highlights.py, at most four, checked
+    # against the item's kind and the business's food status in patch_gig.
+    highlights: Optional[list[str]] = None
     # THREE states, and only two of them are the provider's to set:
     #
     #   published    - live.

@@ -18,6 +18,10 @@
 //     shows one with no headline; the services store, with nothing
 //     featured, shows no large card; a one-item store can feature its item;
 //   * the large card's item does not appear again in the "Start here" row.
+// Phase 3, highlights:
+//   * the mixed store's cards show the owner's chosen chips; the products
+//     store (food) shows Kosher; the services store, with none chosen,
+//     shows no chips at all.
 // --shots writes screenshots of every store at 1280/768/375, EN and HE, to
 // screenshots/storefront/.
 import { chromium } from 'playwright';
@@ -67,6 +71,10 @@ for (const [kind, slug] of Object.entries(STORES)) {
   }
   if (kind === 'products') expect(section && !avg && cards.length === 2 && !headerStars, 'products: 2 reviews listed, no average anywhere');
   if (kind === 'single') { await ctx.close(); continue; }
+  const chips = await p.$$eval('[data-testid^="gig-highlights-"] li', (els) => els.map((e) => e.textContent.trim()));
+  if (kind === 'mixed') expect(chips.includes('Same-day') && chips.includes('Weekends'), `mixed: chosen highlights on the cards (${chips.join(', ')})`);
+  if (kind === 'products') expect(chips.includes('Kosher') && chips.includes('Handmade'), `products: food highlights on the card (${chips.join(', ')})`);
+  if (kind === 'services') expect(chips.length === 0, 'services: no highlights when none are chosen');
   if (kind === 'services') expect(!section, 'services: no reviews box for a visitor when there are none');
   const hero = await p.$('[data-testid="featured-hero"]');
   const headline = await p.$('[data-testid="featured-headline"]');
@@ -102,6 +110,12 @@ if (SHOTS) {
         await p.screenshot({ path: `${OUT}/${kind}-${lang}-${width}-top.png` });
         const fh = await p.$('[data-testid="featured-hero"]');
         if (fh) { await fh.scrollIntoViewIfNeeded(); await p.waitForTimeout(300); await fh.screenshot({ path: `${OUT}/${kind}-${lang}-${width}-featured.png` }); }
+        const hl = await p.$('[data-testid^="gig-highlights-"]');
+        if (hl) {
+          const card = await hl.evaluateHandle((e) => e.closest('[data-testid^="services-gig-"]'));
+          await card.scrollIntoViewIfNeeded(); await p.waitForTimeout(300);
+          await card.asElement().screenshot({ path: `${OUT}/${kind}-${lang}-${width}-card.png` });
+        }
         const sec = await p.$('[data-testid="reviews-section"]');
         if (sec) { await sec.scrollIntoViewIfNeeded(); await p.waitForTimeout(300); await sec.screenshot({ path: `${OUT}/${kind}-${lang}-${width}-reviews.png` }); }
         await ctx.close();

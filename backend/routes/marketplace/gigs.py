@@ -690,6 +690,9 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
             or user_whatsapp(user)
         ),
     }
+    # What you get: only the highlights that still fit this item.
+    from utils import highlights as hl
+    gig["highlights"] = hl.visible(gig.get("highlights"), hl.kind_of(gig), await hl.business_is_food(db, gig.get("business_id")))
     # Part A (23 Sep 2026): the business's public facts for the proof
     # beside the button. The same fields its own page already shows.
     if business:
@@ -723,6 +726,18 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
     )
     return _clean_gig(gig)
 
+
+
+@router.get("/gigs/{gig_id}/highlight-options")
+async def highlight_options(gig_id: str, user=Depends(verify_token)):
+    """What the owner may pick for this item ("What you get")."""
+    from utils import highlights as hl
+    gig = await db.marketplace_gigs.find_one({"_id": gig_id})
+    if not gig or gig.get("provider_user_id") != user["user_id"]:
+        raise HTTPException(status_code=404, detail="Gig not found")
+    food = await hl.business_is_food(db, gig.get("business_id"))
+    return {"options": hl.options(hl.kind_of(gig), food), "max": hl.MAX_PER_ITEM,
+            "selected": [h["id"] for h in hl.visible(gig.get("highlights"), hl.kind_of(gig), food)]}
 
 
 @router.patch("/gigs/{gig_id}")
@@ -765,6 +780,13 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     if "subcategory" in update:
         effective_cat = update.get("category") or gig.get("category") or ""
         _validate_subcategory(effective_cat, update["subcategory"])
+    if "highlights" in update:
+        from utils import highlights as hl
+        merged = {**gig, **update}
+        try:
+            update["highlights"] = hl.clean(update["highlights"], hl.kind_of(merged), await hl.business_is_food(db, merged.get("business_id")))
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
     update["updated_at"] = datetime.now(UTC).isoformat()
     await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": update})
     # If area changed, re-geocode in the background so distance sort

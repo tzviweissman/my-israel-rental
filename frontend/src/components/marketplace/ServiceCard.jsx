@@ -9,6 +9,7 @@ import { gigPriceParts } from '../../utils/gigPrice';
 import { prettyArea } from '../../utils/areaNames';
 import { serviceFacts } from '../../utils/serviceFacts';
 import { Clock, Check } from 'lucide-react';
+import Highlights from './Highlights';
 
 const GOLD = 'var(--gold)';
 
@@ -145,6 +146,7 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
           <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={12} testidPrefix={`gig-stars-${gig.id}`} />
         </div>
       )}
+      <Highlights items={gig.highlights} t={t} size="xs" className="mt-1.5" testid={`gig-highlights-${gig.id}`} />
       {/* C7 — a price line is always rendered. A blank where a number
           should be reads as a broken card. */}
       {/* `svc-price` is the hook the price-prominence dial needs. It is
@@ -234,6 +236,7 @@ const ServiceRow = ({ gig, onClick, i18n, t }) => {
             )}
           </p>
         )}
+        <Highlights items={gig.highlights} t={t} size="xs" className="mt-1" testid={`gig-highlights-${gig.id}`} />
         {gig.rating_count >= 3 && gig.rating_avg != null && (
           <div className="mt-1">
             <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={11} testidPrefix={`gig-stars-${gig.id}`} />
