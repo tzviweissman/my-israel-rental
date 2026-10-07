@@ -24,7 +24,9 @@ const EMPTY_FORM = {
   amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS',
   images: [], videos: [], cancellation_policy: 'flexible', custom_cancellation_policy: '',
   available_from: '', available_to: '', starting_date: '', minimum_booking_days: '',
-  checkin_time: '', checkout_time: '',
+  // Common defaults, filled in so the owner starts from a time rather
+  // than a blank (Tzvi, 7 Oct 2026); they change it if theirs differs.
+  checkin_time: '15:00', checkout_time: '11:00',
   holiday_tags: [],
   holiday_lump_price: '',
   holiday_lump_currency: 'ILS',
@@ -220,8 +222,8 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         available_to: editingProperty.available_to || '',
         starting_date: editingProperty.starting_date || '',
         minimum_booking_days: editingProperty.minimum_booking_days ? String(editingProperty.minimum_booking_days) : '',
-        checkin_time: editingProperty.checkin_time || '',
-        checkout_time: editingProperty.checkout_time || '',
+        checkin_time: editingProperty.checkin_time || '15:00',
+        checkout_time: editingProperty.checkout_time || '11:00',
         holiday_tags: editingProperty.holiday_tags || [],
         holiday_lump_price: editingProperty.holiday_lump_price || '',
         holiday_lump_currency: editingProperty.holiday_lump_currency || 'ILS',
@@ -320,9 +322,11 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       floor: toNumOrNull(propertyForm.floor),
       porches: toIntOrNull(propertyForm.porches) ?? 0,
       minimum_booking_days: toIntOrNull(propertyForm.minimum_booking_days),
-      // Empty clears it; the server keeps only a real clock time.
-      checkin_time: propertyForm.checkin_time || null,
-      checkout_time: propertyForm.checkout_time || null,
+      // Only stays counted in nights have them; a long-term listing sends
+      // neither, and the server keeps whatever is stored. Empty clears it.
+      ...(['vacation', 'short-term'].includes(propertyForm.rental_type)
+        ? { checkin_time: propertyForm.checkin_time || null, checkout_time: propertyForm.checkout_time || null }
+        : {}),
       holiday_lump_price: toNumOrNull(propertyForm.holiday_lump_price),
       holiday_lump_is_per_night: !!propertyForm.holiday_lump_is_per_night,
     };
