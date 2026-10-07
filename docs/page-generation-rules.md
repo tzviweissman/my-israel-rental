@@ -227,6 +227,70 @@ bottom, and kosher is said at most twice on the page.
 The page goes to the owner only when all six (and the food rule, where it
 applies) pass, with the review in §3a.
 
+## 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+
+Six videos Tzvi chose, watched frame by frame: AI design with and without
+real references, the psychology of habit, premium e-commerce, beginner UI
+mistakes, a product page taken from 2% to 7%, and Claude making video in
+code. Each rule names what it prevents.
+
+1. **References first, always.** Before designing, study 3 to 5 real
+   screens from the category (Inspo or Mobbin) and write down which ones
+   were used in the brief. Take their structure (what sits where, what is
+   beside the button), never their look; the palette and type come from the
+   business. Without the business's own colours a reference gets cloned.
+   *Prevents: the page every AI makes from memory.*
+2. **No AI default look.** Cream ground with a serif headline and one
+   italic word is banned unless the business's own brand is exactly that.
+   Sections must separate: at least one section on a contrasting ground (a
+   dark band, their brand colour), not only hairlines between near-identical
+   blocks. *Prevents: "anyone landing on this would know it's AI".*
+3. **Proof sits where the worry is.** Every worry the owner names ("will it
+   arrive hot", "do I need to be home") gets its answer right beside the
+   button or the price it belongs to, in their words. Never a wall of
+   one-line reviews. The strongest proof is the hardest to fake: a
+   certificate, a licence, a named review, a specific guarantee.
+4. **Show it in use.** Lead with the owner's photo of the product or service
+   being used, served or delivered, not the item alone on white (the
+   "imagination gap"). A generated image may only set the scene around their
+   own picture; it never stands in for what the customer gets.
+5. **Choices are visible.** Sizes, flavours and tiers are tiles to tap,
+   never a dropdown. A short note may say how each differs, in the owner's
+   words. "Most popular" appears only when the owner marks it or orders show
+   it. Bundles show what they save, in real numbers.
+6. **The button says what happens next.** "Order, delivered Friday",
+   "Book a time", never just "Submit" or "Buy now", and the same words
+   everywhere (section 5). Under it, a row of up to three icons with the
+   owner's real guarantees: delivery area, kosher, returns, a guarantee.
+7. **Offers are contained.** Every offer has an end date or is limited to
+   a first order. Prefer free delivery over an amount, or a bundle, to a
+   percentage off. No permanent sale, never a discount on the thing they are
+   known for unless they say so.
+8. **Say what happens after the order.** If the owner tells us about the
+   first days (reheat before serving, the first lesson is gentle, a stain
+   lightens after a day), the page and the order-tracking page say it before
+   it happens. Whoever names that moment first decides how it is read.
+9. **One system, quietly.** One corner radius, one icon set (lucide), one
+   soft shadow, no two-colour gradients, no arrows or outlines that do
+   nothing. Every button visibly reacts when pressed and shows when it is
+   working. *Prevents: the beginner look.*
+10. **Come-back features only where they help the customer.** Saved items,
+    reorder, order updates and an owner's setup checklist, yes. Never fake
+    urgency, endless feeds, random rewards, or streaks that guilt people.
+11. **Video is drawn, then checked.** A preview video should be rendered
+    frame by frame (each frame a function of its time) rather than recorded
+    live, so it never stutters and comes out the same every time. The skill's
+    `record.mjs` still records live; until it renders frames, check its
+    contact sheet for stutter. Before any video is sent, pull a contact sheet,
+    look at it, fix, render again. Anything paid (generated stills or clips)
+    waits for the owner's yes on two or three style frames.
+
+**Three more questions for the owner**, asked with the FAQ request
+(section 3, cont.) and only when their page does not already answer them:
+- What do customers worry about before they order or book?
+- What happens in the first days after they get it?
+- Do you have a photo of it being used, served or delivered?
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews

@@ -159,6 +159,42 @@ what to avoid): `reference/playbooks.md`.
 5. **Social proof only if real**: platform reviews, or testimonials the owner
    sends with name and permission. None means no section, and ask them.
 
+Ask with the FAQ, only if the page does not already answer it: **what do
+customers worry about before ordering, what happens in the first days after
+they get it, and do you have a photo of it being used, served or delivered?**
+
+## 3c. From the design and persuasion study (Tzvi, 7 Oct 2026)
+
+Full text and reasons: `reference/full-rules.md` §3c.
+
+1. **References first**: 3 to 5 real category screens (Inspo or Mobbin),
+   named in the brief. Copy structure, never looks; colours and type are theirs.
+2. **No AI default look**: no cream + serif + one italic word unless that is
+   their brand. At least one section on a contrasting ground.
+3. **Proof where the worry is**: each worry the owner names is answered beside
+   the button or price it belongs to. No wall of one-line reviews.
+4. **Show it in use**: their photo of it used, served or delivered leads; a
+   generated image only sets the scene around their own picture.
+5. **Choices are tiles**, never a dropdown. "Most popular" only if the owner
+   marks it or orders show it. Bundles show the real saving.
+6. **The button says what happens next** ("Order, delivered Friday"); under
+   it up to three icons of their real guarantees.
+7. **Offers are contained**: an end date or first order only; free delivery
+   over an amount or a bundle before a percentage off; no permanent sale.
+8. **Name the first days**: if the owner tells you what happens after the
+   order, the page and the tracking page say it first.
+9. **One quiet system**: one radius, one icon set, one soft shadow, no
+   two-colour gradients, no decorative arrows or outlines; every button
+   reacts when pressed and shows when it is working.
+10. **Come-back features only if they help the customer** (saved items,
+    reorder, order updates). Never fake urgency, endless feeds, random
+    rewards or guilt streaks.
+11. **Video: draw it, then check it.** Prefer rendering each frame for its
+    exact time over recording live (no stutter, same result every time);
+    `scripts/record.mjs` still records live, so check its contact sheet for
+    stutter before sending. Paid generation waits for the owner's yes on two
+    or three style frames.
+
 ## 4. Design and story
 
 - Find what the business actually has before choosing a look; the page is
