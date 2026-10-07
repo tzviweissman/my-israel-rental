@@ -889,6 +889,32 @@ async def _update_response_ema(provider_user_id: str, elapsed_hours: float) -> N
     )
 
 
+
+async def record_chat_reply(property_id: str, sender_id: str, receiver_id: str, sent_at: str) -> None:
+    """Feed the reply badge from chat, where most service leads arrive.
+
+    Counts only a provider's FIRST message in a conversation a customer
+    started: the hours from the customer's first message to that reply.
+    A conversation the provider opened never starts the clock, and later
+    messages never count again. Rentals have no badge yet, so a chat about
+    a property is ignored here."""
+    gig = await db.marketplace_gigs.find_one({"_id": property_id, "provider_user_id": sender_id}, {"_id": 1})
+    if not gig or not receiver_id or receiver_id == sender_id:
+        return
+    convo = {"property_id": property_id}
+    if await db.messages.find_one({**convo, "sender_id": sender_id, "receiver_id": receiver_id,
+                                   "created_at": {"$lt": sent_at}}, {"_id": 1}):
+        return
+    first = await db.messages.find_one({**convo, "sender_id": receiver_id, "receiver_id": sender_id,
+                                        "created_at": {"$lt": sent_at}}, {"created_at": 1}, sort=[("created_at", 1)])
+    if not first:
+        return
+    asked = datetime.fromisoformat(first["created_at"].replace("Z", "+00:00"))
+    answered = datetime.fromisoformat(sent_at.replace("Z", "+00:00"))
+    if asked.tzinfo is None:
+        asked = asked.replace(tzinfo=timezone.utc)
+    await _update_response_ema(sender_id, (answered - asked).total_seconds() / 3600)
+
 # The marketplace is free. Listing a service costs nothing, so nothing
 # about a provider's billing decides whether their gigs are visible.
 #
