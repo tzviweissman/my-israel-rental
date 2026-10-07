@@ -11,7 +11,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import PhoneInput from '../common/PhoneInput';
 import { phoneError } from '../../utils/phoneValidation';
-import { Plus, Loader2, ExternalLink, Trash2, Pencil, Upload, X, FileText, Globe, Award, ArrowLeft, PauseCircle, PlayCircle, EyeOff } from 'lucide-react';
+import { Plus, Loader2, ExternalLink, Trash2, Pencil, Upload, X, FileText, Globe, Award, ArrowLeft, PauseCircle, PlayCircle, EyeOff, Star } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { uploadFilesFast } from '../../utils/fastUpload';
 import CoverPlaceholder from '../common/CoverPlaceholder';
@@ -418,6 +418,47 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
     }
   };
 
+  /* "Feature this": up to three per business, the first shown large at
+     the top of the storefront under the owner's own headline. Never
+     chosen for them. */
+  const bizOf = (g) => businesses.find((b) => b.id === g.business_id);
+  const saveFeature = async (biz, patch) => {
+    const { data } = await axios.patch(`${API}/marketplace/businesses/${biz.id}`, patch,
+      { headers: { Authorization: `Bearer ${token}` } });
+    setBusinesses((list) => list.map((b) => (b.id === biz.id ? { ...b, ...data } : b)));
+  };
+  const toggleFeature = async (gig) => {
+    const biz = bizOf(gig);
+    if (!biz) return;
+    const pinned = biz.pinned_service_ids || [];
+    const on = pinned.includes(gig.id);
+    if (!on && pinned.length >= 3) {
+      toast.error(t('myGigs.featureCap', 'You can feature up to 3. Unfeature one first.'));
+      return;
+    }
+    setBusyId(gig.id);
+    try {
+      await saveFeature(biz, { pinned_service_ids: on ? pinned.filter((x) => x !== gig.id) : [...pinned, gig.id] });
+      toast.success(on ? t('myGigs.unfeatured', 'No longer featured.')
+        : pinned.length === 0 ? t('myGigs.featuredFirst', 'Featured. It now shows large at the top of your page.')
+          : t('myGigs.featured', 'Featured.'));
+    } catch (err) {
+      toast.error(err.response?.data?.detail || t('myGigs.featureFailed', 'Could not change that'));
+    } finally {
+      setBusyId(null);
+    }
+  };
+  const [headlineDraft, setHeadlineDraft] = useState({});
+  const saveHeadline = async (biz) => {
+    const text = (headlineDraft[biz.id] ?? biz.featured_headline ?? '').trim();
+    try {
+      await saveFeature(biz, { featured_headline: text || null });
+      toast.success(t('myGigs.headlineSaved', 'Saved. It is translated for the other language in a moment.'));
+    } catch (err) {
+      toast.error(err.response?.data?.detail?.[0]?.msg || t('myGigs.featureFailed', 'Could not change that'));
+    }
+  };
+
   const deleteGig = async (id) => {
     if (!window.confirm(t('myGigs.deleteConfirm', 'Delete this listing? This cannot be undone.'))) return;
     try {
@@ -629,6 +670,24 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
                       <span className="font-semibold">{sym}{cheap.toLocaleString()}</span>
                     </p>
                   )}
+                  {bizOf(g) && (bizOf(g).pinned_service_ids || [])[0] === g.id && (
+                    <div className="pt-2 border-t border-gray-100" data-testid={`my-gigs-headline-${g.id}`}>
+                      <label className="text-[11px] font-semibold text-gray-700" htmlFor={`headline-${g.id}`}>
+                        {t('myGigs.headlineLabel', 'Shown large at the top of your page. Headline (optional)')}
+                      </label>
+                      <div className="mt-1 flex gap-2">
+                        <input id={`headline-${g.id}`} maxLength={60} dir="auto"
+                          value={headlineDraft[bizOf(g).id] ?? bizOf(g).featured_headline ?? ''}
+                          onChange={(e) => setHeadlineDraft((d) => ({ ...d, [bizOf(g).id]: e.target.value }))}
+                          placeholder={t('myGigs.headlinePh', 'e.g. Our Shabbos favourite, ready Friday')}
+                          className="min-w-0 flex-1 px-2.5 py-1.5 rounded-lg border border-gray-200 text-xs" data-testid={`my-gigs-headline-input-${g.id}`} />
+                        <button type="button" onClick={() => saveHeadline(bizOf(g))}
+                          className="px-3 py-1.5 rounded-lg text-xs font-semibold btn-primary" data-testid={`my-gigs-headline-save-${g.id}`}>
+                          {t('common.save', 'Save')}
+                        </button>
+                      </div>
+                    </div>
+                  )}
                   <div className="flex justify-between items-center gap-2 pt-2 border-t border-gray-100">
                     <div className="flex items-center gap-3">
                       <button
@@ -663,6 +722,19 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
                         </button>
                       )}
                     </div>
+                    {bizOf(g) && status === 'published' && (() => {
+                      const biz = bizOf(g);
+                      const on = (biz.pinned_service_ids || []).includes(g.id);
+                      return (
+                        <button onClick={() => toggleFeature(g)} disabled={busyId === g.id} aria-pressed={on}
+                          className="text-xs font-semibold flex items-center gap-1 disabled:opacity-50"
+                          style={{ color: on ? 'var(--gold-text-on-light)' : 'var(--brand-muted)' }}
+                          data-testid={`my-gigs-feature-${g.id}`}>
+                          <Star size={11} fill={on ? 'currentColor' : 'none'} />
+                          {on ? t('myGigs.featuredBadge', 'Featured') : t('myGigs.feature', 'Feature this')}
+                        </button>
+                      );
+                    })()}
                     <button
                       onClick={() => deleteGig(g.id)}
                       className="text-xs text-red-500 hover:text-red-700 flex items-center gap-1"

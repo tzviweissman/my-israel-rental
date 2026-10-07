@@ -431,6 +431,13 @@ body[data-page-v3] [data-testid="nav-auth-cluster"] { display: none !important; 
   [data-tier="2"] .pv3-film-toggle { inset-block-start: auto; inset-block-end: 16px; }
   [data-tier="2"] .pv3-hero-inner { flex: none; }
   [data-tier="2"] .pv3-hero-inner { padding-inline: 20px; padding-block-start: 32px; }
+  /* The site's WhatsApp tab peeks up to ~38px in from the right edge of a
+     phone, level with the hero's button. Hebrew lines up on the right, so
+     the end of the proof line sat under it ("New on MyIsraelRental", 360
+     wide). Keep the hero's right edge clear of it. */
+  [dir="rtl"] .pv3-hero { padding-right: 44px; }
+  [dir="rtl"] [data-tier="2"].pv3-hero { padding-right: 0; }
+  [dir="rtl"] [data-tier="2"] .pv3-hero-inner { padding-right: 44px; }
 }
 
 /* The admin's gate notice: the platform's look, not the business's. */

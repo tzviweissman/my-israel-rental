@@ -66,7 +66,7 @@ code {
         --popover-foreground: 220 39% 11%;
         --primary: 0 0% 0%;             /* solid actions are black */
         --primary-foreground: 0 0% 100%;
-        --secondary: 202 77% 47%;       /* #1C8DD4 */
+        --secondary: 203 79% 40%;       /* #167AB8: the accent, one shade darker for contrast (theme-flow.css, 5 Oct 2026) */
         --secondary-foreground: 0 0% 100%;
         --muted: 210 20% 98%;           /* #F9FAFB */
         --muted-foreground: 0 0% 40%;   /* #666666 */

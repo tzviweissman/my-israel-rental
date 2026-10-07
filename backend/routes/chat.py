@@ -73,7 +73,15 @@ async def send_message(chat_data: ChatMessage, payload: dict = Depends(verify_to
     }
     
     await db.messages.insert_one(message_doc)
-    
+
+    # A provider's first answer to a customer feeds their reply badge.
+    # Never allowed to fail the send.
+    try:
+        from routes.marketplace.shared import record_chat_reply
+        await record_chat_reply(chat_data.property_id, payload["user_id"], chat_data.receiver_id, message_doc["created_at"])
+    except Exception as e:  # noqa: BLE001
+        logger.warning("reply badge from chat failed: %s", e)
+
     # Notification body adapts to what was sent — image vs video vs text.
     if chat_data.message.strip():
         notif_body = "You have a new message"

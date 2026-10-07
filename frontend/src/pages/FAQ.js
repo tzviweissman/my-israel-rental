@@ -223,7 +223,7 @@ const FAQ = () => {
         </button>
 
         <header className="mb-8">
-          <p className="text-xs font-semibold text-[var(--gold)] uppercase tracking-[0.2em] mb-2">
+          <p className="text-xs font-semibold text-[var(--gold-text)] uppercase tracking-[0.2em] mb-2">
             Help center
           </p>
           <h1
@@ -288,7 +288,7 @@ const FAQ = () => {
               href="https://wa.me/972553225141"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-[#25D366] hover:bg-[#1fb558] text-white transition-colors"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-lg text-xs font-bold bg-[#25D366] hover:bg-[#1fb558] text-[var(--ink)] transition-colors"
             >
               <MessageCircle size={14} /> Ask on WhatsApp
             </a>
@@ -354,7 +354,7 @@ const FAQ = () => {
             href="https://wa.me/972553225141"
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-[#25D366] hover:bg-[#1fb558] text-white transition-colors"
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm font-bold bg-[#25D366] hover:bg-[#1fb558] text-[var(--ink)] transition-colors"
             data-testid="faq-whatsapp-cta"
           >
             <MessageCircle size={16} /> Chat on WhatsApp

@@ -17,6 +17,7 @@
  */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { parseItems } from '../utils/storeBasket';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -67,6 +68,9 @@ export default function OrderPage() {
         setData(d);
         const add = params.get('add');
         if (add && d.products.some((p) => p.id === add)) setQty({ [add]: 1 });
+        // From the storefront's basket: ?items=productId:qty,...
+        const fromBasket = parseItems(params.get('items'), d.products.map((p) => p.id));
+        if (Object.keys(fromBasket).length) setQty(fromBasket);
         if (d.business.areas.length === 1) setCity(d.business.areas[0].slug);
       })
       .catch(() => setData(false));

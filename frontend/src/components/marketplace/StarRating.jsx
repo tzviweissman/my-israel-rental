@@ -57,11 +57,11 @@ export const StarRating = ({
           <span className="text-xs text-gray-700 font-semibold" data-testid={`${testidPrefix}-label`}>
             {Number(value).toFixed(1)}
             {typeof count === 'number' && count > 0 && (
-              <span className="text-gray-400 font-normal"> ({count})</span>
+              <span className="text-gray-600 font-normal"> ({count})</span>
             )}
           </span>
         ) : (
-          <span className="text-xs text-gray-400" data-testid={`${testidPrefix}-empty`}>
+          <span className="text-xs text-gray-600" data-testid={`${testidPrefix}-empty`}>
             {t('gigDetail.noReviews', 'No reviews yet')}
           </span>
         )

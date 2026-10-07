@@ -379,6 +379,16 @@ const CreateGig = () => {
   ), [isAppointment, t]);
   const totalSteps = stepLabels.length - 1;
   useEffect(() => { if (step > totalSteps) setStep(totalSteps); }, [step, totalSteps]);
+  // Each step starts at its top. Next is pressed at the bottom of a long
+  // step, and the new one opened where the old one ended, mid "What you
+  // offer" (Tzvi, 7 Oct 2026). Not on first render: a saved draft opens
+  // where the browser puts it.
+  const stepShown = useRef(step);
+  useEffect(() => {
+    if (stepShown.current === step) return;
+    stepShown.current = step;
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [step]);
   // The phone given at sign-up fills the WhatsApp box, so it is not typed
   // twice. Only when the box is empty; still editable.
   useEffect(() => {

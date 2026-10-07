@@ -35,7 +35,8 @@ export default function ProofLine({
   const body = kosherBody(kosher, categories);
 
   const items = [];
-  if (count > 0) {
+  // Stars only from three reviews up, never an average two can swing.
+  if (count >= 3 && ratingAvg != null) {
     const stars = <StarRating value={Number(ratingAvg) || 0} count={count} size={12} testidPrefix={`${testid}-stars`} />;
     items.push(onRatingClick ? (
       <button key="stars" type="button" onClick={onRatingClick} className="inline-flex items-center hover:underline"

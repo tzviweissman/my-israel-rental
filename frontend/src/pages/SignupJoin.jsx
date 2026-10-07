@@ -11,7 +11,7 @@
  * modals, and post-signup upsells mirror /pages/Auth.js so the two paths
  * stay behaviourally identical from the app's perspective.
  */
-import React, { useContext, useMemo, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { useFormDraft, readDraft, clearDraft } from '../hooks/useFormDraft';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -50,7 +50,7 @@ const ROLE_CARDS = [
     tDescKey: 'signupJoin.travelerDesc',
     defaultDesc: 'I want to book stays and hire local services for my trip',
     tValueKey: 'signupJoin.travelerValue',
-    defaultValue: 'free to browse · no booking fees',
+    defaultValue: 'Free to browse · no booking fees',
     tBadgeKey: 'signupJoin.travelerBadge',
     defaultBadge: 'Most popular',
     tCtaKey: 'signupJoin.travelerCta',
@@ -139,6 +139,9 @@ const SignupJoin = () => {
     password: '',
   }));
   const [showPwd, setShowPwd] = useState(false);
+  // Never saved either (see above).
+  const [confirmPwd, setConfirmPwd] = useState('');
+  const pwdMismatch = confirmPwd.length > 0 && confirmPwd !== form.password;
   const [termsAccepted, setTermsAccepted] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [signedUp, setSignedUp] = useState(false);
@@ -161,6 +164,14 @@ const SignupJoin = () => {
     if (!selectedRole) return;
     setStep(2);
   };
+  // Each step opens at its top: Continue sits below the role list, and
+  // the form used to open scrolled to where the list ended.
+  const stepShown = React.useRef(step);
+  useEffect(() => {
+    if (stepShown.current === step) return;
+    stepShown.current = step;
+    window.scrollTo({ top: 0, behavior: 'auto' });
+  }, [step]);
 
   // Recomputed each render so the message tracks the input without extra
   // state. Empty phone is always fine — the field is optional.
@@ -177,6 +188,10 @@ const SignupJoin = () => {
     }
     if (form.password.length < 6) {
       toast.error(t('auth.passwordTooShort', 'Password must be at least 6 characters.'));
+      return;
+    }
+    if (confirmPwd !== form.password) {
+      toast.error(t('auth.passwordMismatch', 'Passwords do not match'));
       return;
     }
     if (!termsAccepted) {
@@ -261,10 +276,10 @@ const SignupJoin = () => {
 
         {/* Step indicator */}
         <div className="mt-6 sm:mt-10 flex items-center gap-3 text-xs font-semibold tracking-wide text-gray-500">
-          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 1 ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-200 text-gray-500'}`}>1</span>
+          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 1 ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-200 text-gray-700'}`}>1</span>
           <span className={step === 1 ? 'text-[var(--brand-primary)]' : ''}>{t('signupJoin.stepRole', 'YOUR ROLE')}</span>
           <div className="h-px w-8 bg-gray-300" />
-          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 2 ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-200 text-gray-500'}`}>2</span>
+          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 2 ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-200 text-gray-700'}`}>2</span>
           <span className={step === 2 ? 'text-[var(--brand-primary)]' : ''}>{t('signupJoin.stepDetails', 'YOUR DETAILS')}</span>
         </div>
 
@@ -295,155 +310,104 @@ const SignupJoin = () => {
               {t('signupJoin.question', 'What best describes you?')}
             </p>
 
-            <div
-              className="mt-4 grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 2xl:grid-cols-3 gap-4 sm:gap-5"
-              data-testid="signup-role-cards"
-            >
+            {/* The three roles as one list of rows (redesign, 7 Oct 2026):
+                icon, who it is for, what it costs, and a round mark that
+                fills when chosen. The tall cards with their own "Continue
+                as" line and arrow made three choices take two screens; a
+                choice is a tile you tap, and the one button below is the
+                only action (page rules 3c: choices are tiles, one quiet
+                system, no arrows that do nothing). The "Most popular"
+                badge is gone: nothing measured it. */}
+            <div className="mt-4 space-y-3" role="radiogroup" aria-label={t('signupJoin.question', 'What best describes you?')} data-testid="signup-role-cards">
               {ROLE_CARDS.map(({
                 key, Icon, tKey, defaultLabel, tDescKey, defaultDesc,
                 tValueKey, defaultValue, learnMoreHref, tLearnMoreKey, defaultLearnMore,
-                tBadgeKey, defaultBadge, tCtaKey, defaultCta,
               }) => {
                 const active = selectedRole === key;
                 return (
-                  /* Wrapper exists so the Host card's "See how hosting
-                     works" link can be a SIBLING of the selection button.
-                     A link inside a button is invalid HTML, and clicking it
-                     would also toggle the card. */
-                  <div key={key} className="relative flex flex-col h-full">
-                  <button
-                    type="button"
-                    onClick={() => setSelectedRole(key)}
-                    className={`group relative w-full flex-1 text-start rounded-2xl border bg-white p-6 sm:p-7 transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 ${
-                      // The "See how it works" link used to be pinned to
-                      // the card's bottom over reserved padding, which
-                      // collided with the CTA row by 7px once B2 grew the
-                      // value line and it started wrapping. Bottom padding
-                      // could not fix it: the row sits in normal flow after
-                      // the content, so it moves down with the content
-                      // while the pinned link never moves. The link is now
-                      // in flow below the button, where nothing can reach
-                      // it. Cards keep equal heights via the flex column.
-                      learnMoreHref ? 'rounded-b-none border-b-0' : ''
-                    } ${
-                      active
-                        ? 'border-[var(--brand-primary)] -translate-y-0.5'
-                        : 'border-gray-200 hover:border-gray-300 hover:-translate-y-0.5'
-                    }`}
+                  /* The learn-more link is a SIBLING of the choice button
+                     (a link inside a button is invalid, and clicking it
+                     would also choose the row); the frame holds both. */
+                  <div
+                    key={key}
+                    className="rounded-2xl border bg-white transition-colors"
                     style={{
-                      // Inline rather than a Tailwind arbitrary value: these
-                      // shadows carry rgba() with spaces, and an arbitrary
-                      // value containing a space is silently dropped. The
-                      // selected card had NO shadow because of exactly that.
-                      boxShadow: active
-                        ? '0 20px 50px -15px rgb(var(--brand-primary-rgb) / 0.35)'
-                        : '0 4px 15px -8px rgba(0,0,0,0.15)',
+                      borderColor: active ? 'var(--brand-primary)' : 'var(--brand-border)',
+                      background: active ? 'rgb(var(--brand-primary-rgb) / 0.04)' : 'var(--surface, #fff)',
+                      boxShadow: active ? '0 0 0 1px var(--brand-primary)' : 'none',
                     }}
-                    aria-pressed={active}
-                    data-testid={`signup-role-${key}`}
                   >
-                    {defaultBadge && (
-                      /* Gold pill, matching the badge treatment used across
-                         the redesign. Gold fill with brand-primary text —
-                         the reverse (gold text on white) fails contrast at
-                         this size. */
+                    <button
+                      type="button"
+                      role="radio"
+                      aria-checked={active}
+                      onClick={() => setSelectedRole(key)}
+                      onDoubleClick={() => { setSelectedRole(key); setStep(2); }}
+                      className="w-full flex items-start gap-4 p-4 sm:p-5 text-start rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 active:scale-[0.995] transition-transform"
+                      data-testid={`signup-role-${key}`}
+                    >
                       <span
-                        className="absolute top-3 end-3 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full"
-                        style={{ background: 'var(--gold)', color: 'var(--brand-primary-deep)' }}
+                        className={`shrink-0 h-12 w-12 rounded-xl flex items-center justify-center transition-colors ${active ? 'text-white' : 'text-[var(--brand-primary)]'}`}
+                        style={{ background: active ? 'var(--brand-primary)' : 'rgb(var(--brand-primary-rgb) / 0.08)' }}
                       >
-                        {tBadgeKey ? t(tBadgeKey, defaultBadge) : defaultBadge}
+                        <Icon size={22} aria-hidden="true" />
                       </span>
-                    )}
-                    <div
-                      className="h-14 w-14 rounded-2xl flex items-center justify-center transition-colors"
-                      style={{
-                        background: active
-                          ? 'linear-gradient(135deg, var(--brand-primary) 0%, var(--brand-primary-dark) 100%)'
-                          : 'rgb(var(--brand-primary-rgb) / 0.07)',
-                      }}
-                    >
-                      <Icon size={26} className={active ? 'text-[var(--gold)]' : 'text-[var(--brand-primary)]'} />
-                    </div>
-                    <h3
-                      className="mt-5 text-xl font-bold"
-                      style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
-                    >
-                      {t(tKey, defaultLabel)}
-                    </h3>
-                    <p className="mt-1.5 text-sm leading-relaxed" style={{ color: 'var(--brand-muted)' }}>
-                      {t(tDescKey, defaultDesc)}
-                    </p>
-
-                    {/* The reason to pick this card, in one line. This page
-                        is the only supply-side pitch most visitors will
-                        see now that the nav's "List / Offer" link is gone,
-                        so "free" has to appear on the card itself. */}
-                    {tValueKey && (
-                      <p
-                        // B2: on the two supply-side cards this is the
-                        // offer, not a footnote, so it steps up from 12px
-                        // fine print to a readable claim. The traveler card
-                        // keeps the small treatment — "free to browse" is
-                        // expected of any listings site and promoting it
-                        // would spend emphasis on the least surprising
-                        // thing on the page.
-                        className={
-                          key === 'traveler'
-                            ? 'mt-2.5 text-xs font-bold'
-                            : 'mt-3 text-[15px] font-bold leading-snug'
-                        }
-                        style={{ color: 'var(--gold-text-on-light)' }}
-                        data-testid={`signup-role-value-${key}`}
-                      >
-                        {t(tValueKey, defaultValue)}
-                      </p>
-                    )}
-
-                    <div className="mt-5 flex items-center justify-between">
-                      <span className={`text-xs font-semibold ${active ? 'text-[var(--brand-primary)]' : 'text-gray-400 group-hover:text-gray-600'}`}>
-                        {active
-                          ? t('signupJoin.selected', 'Selected')
-                          : t(tCtaKey, defaultCta)}
-                      </span>
-                      {active ? (
-                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-[var(--brand-primary)] text-white">
-                          <Check size={14} strokeWidth={3} />
+                      <span className="min-w-0 flex-1">
+                        <span className="block text-lg font-semibold leading-tight" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+                          {t(tKey, defaultLabel)}
                         </span>
-                      ) : (
-                        <ArrowRight size={16} className="text-gray-400 group-hover:text-[var(--brand-primary)] transition-colors" />
-                      )}
-                    </div>
-                  </button>
-
-                  {/* Host's deeper pitch. /why-list left the nav in this
-                      change but is still the page that sells hosting, so
-                      the card that cares about it links there directly.
-                      Sits over the button's reserved bottom padding. */}
-                  {learnMoreHref && (
-                    <Link
-                      to={learnMoreHref}
-                      className="rounded-b-2xl border border-t-0 bg-white px-6 sm:px-7 pb-5 pt-1 inline-flex items-center gap-1 text-xs font-bold hover:underline"
-                      style={{ color: 'var(--brand-primary)', borderColor: 'var(--brand-border)' }}
-                      data-testid={`signup-role-learnmore-${key}`}
-                    >
-                      {t(tLearnMoreKey, defaultLearnMore)}
-                      <ArrowRight size={12} aria-hidden="true" />
-                    </Link>
-                  )}
+                        <span className="mt-1 block text-sm leading-relaxed" style={{ color: 'var(--brand-muted)' }}>
+                          {t(tDescKey, defaultDesc)}
+                        </span>
+                        {tValueKey && (
+                          /* Each part with its own tick, not dots between them: a
+                             dot left at a line end on a phone reads as a stray
+                             mark, and bare spacing ran the parts together. */
+                          <span className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-sm font-semibold" style={{ color: 'var(--gold-text-on-light)' }} data-testid={`signup-role-value-${key}`}>
+                            {t(tValueKey, defaultValue).split(/\s*·\s*/).map((part) => (
+                              <span key={part} className="inline-flex items-center gap-1 first-letter:uppercase">
+                                <Check size={13} strokeWidth={3} aria-hidden="true" className="shrink-0" />
+                                <span className="inline-block first-letter:uppercase">{part}</span>
+                              </span>
+                            ))}
+                          </span>
+                        )}
+                      </span>
+                      <span
+                        className="shrink-0 mt-1 h-6 w-6 rounded-full border-2 flex items-center justify-center transition-colors"
+                        style={{
+                          borderColor: active ? 'var(--brand-primary)' : 'var(--brand-border)',
+                          background: active ? 'var(--brand-primary)' : 'transparent',
+                        }}
+                        aria-hidden="true"
+                      >
+                        {active && <Check size={14} strokeWidth={3} className="text-white" />}
+                      </span>
+                    </button>
+                    {learnMoreHref && (
+                      <Link
+                        to={learnMoreHref}
+                        className="block px-4 sm:px-5 pb-4 -mt-1 ps-[4.5rem] sm:ps-[5.25rem] text-sm sm:text-xs font-semibold hover:underline"
+                        style={{ color: 'var(--brand-primary)' }}
+                        data-testid={`signup-role-learnmore-${key}`}
+                      >
+                        {t(tLearnMoreKey, defaultLearnMore)}
+                      </Link>
+                    )}
                   </div>
                 );
               })}
             </div>
 
             <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <p className="text-xs text-gray-500 max-w-md">
+              <p className="text-sm sm:text-xs text-gray-600 max-w-md">
                 {t('signupJoin.roleHint', 'You can always add another role later from your account settings.')}
               </p>
               <button
                 type="button"
                 onClick={handleContinue}
                 disabled={!selectedRole}
-                className="inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-bold shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-xl hover:-translate-y-0.5"
+                className="w-full sm:w-auto justify-center inline-flex items-center gap-2 rounded-full px-8 py-3 text-sm font-bold shadow-lg transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0"
                 // The theme's black action with a white label. This read `--gold` on
                   // the primary blue; since the flow theme put the accent blue into
                   // every gold name, the label was blue on blue and the button blank.
@@ -451,7 +415,7 @@ const SignupJoin = () => {
                 data-testid="signup-continue-btn"
               >
                 {t('signupJoin.continue', 'Continue')}
-                <ArrowRight size={16} />
+                <ArrowRight size={16} className="[[dir=rtl]_&]:rotate-180" aria-hidden="true" />
               </button>
             </div>
 
@@ -504,7 +468,7 @@ const SignupJoin = () => {
               className="inline-flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-[var(--brand-primary)] transition-colors"
               data-testid="signup-back-btn"
             >
-              <ArrowLeft size={16} />
+              <ArrowLeft size={16} className="[[dir=rtl]_&]:rotate-180" aria-hidden="true" />
               {t('signupJoin.back', 'Back to role')}
             </button>
 
@@ -604,9 +568,10 @@ const SignupJoin = () => {
                     testid="signup-phone"
                   />
                 </Field>
-                {/* One password box, with the eye to check it. A repeat box
-                    was one more field between a person and their listing
-                    (Tzvi, 23 Sep 2026); "Forgot password" covers a typo. */}
+                {/* Password, then the same again. The repeat box was taken
+                    out on 23 Sep 2026 as one field too many, and put back
+                    on 7 Oct 2026 (Tzvi: "it doesn't ask to confirm the
+                    password anymore"). The eye shows both. */}
                 <Field label={t('signupJoin.password', 'Password')} testId="signup-password">
                   <div className="relative">
                     <input
@@ -630,6 +595,25 @@ const SignupJoin = () => {
                       {showPwd ? <EyeOff size={18} /> : <Eye size={18} />}
                     </button>
                   </div>
+                </Field>
+                <Field label={t('signupJoin.confirmPassword', 'Confirm password')} testId="signup-confirm">
+                  <input
+                    type={showPwd ? 'text' : 'password'}
+                    required
+                    autoComplete="new-password"
+                    value={confirmPwd}
+                    onChange={(e) => setConfirmPwd(e.target.value)}
+                    aria-invalid={pwdMismatch}
+                    aria-describedby={pwdMismatch ? 'signup-confirm-error' : undefined}
+                    className={`w-full rounded-xl border bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 ${pwdMismatch ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-[var(--brand-primary)] focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20'}`}
+                    placeholder={t('signupJoin.confirmPasswordPh', 'Type it again')}
+                    data-testid="signup-confirm-input"
+                  />
+                  {pwdMismatch && (
+                    <p id="signup-confirm-error" className="mt-1.5 text-xs text-red-600" role="alert" data-testid="signup-confirm-error">
+                      {t('auth.passwordMismatch', 'Passwords do not match')}
+                    </p>
+                  )}
                 </Field>
 
                 <label className="flex items-start gap-3 pt-2 cursor-pointer">
@@ -676,12 +660,14 @@ const SignupJoin = () => {
         )}
       </div>
 
-      {/* Sticky, one screen tall: on the role step the left column runs
-          to three tall cards, and a panel that simply stretched put the
-          sphere a screen and a half down. Mounted only where it is shown,
-          so a phone does not fetch a sphere it never draws. */}
+      {/* The dark panel runs the full height of the form beside it, and
+          its sphere and words stay in view while the form scrolls (they are
+          sticky inside it). It used to be one screen tall and stuck, which
+          left the panel ending halfway down a long form (Tzvi, 7 Oct 2026:
+          "on the right it's not fitting the page"). Mounted only where it
+          is shown, so a phone does not fetch a sphere it never draws. */}
       {isWide && (
-        <div className="hidden lg:block lg:self-start lg:sticky lg:top-24 lg:h-[calc(100vh-7rem)]" data-testid="signup-right-panel">
+        <div className="hidden lg:block lg:self-stretch" data-testid="signup-right-panel">
           <SignupSphere />
         </div>
       )}

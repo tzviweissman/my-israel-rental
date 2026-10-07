@@ -316,12 +316,13 @@ def test_averages_are_kept_apart_by_source():
         await rv.create_native(db, booking_id="mb1", user_id=s["client"], rating=4, text=TEXT, today=TODAY)
         await g.sync_location(db, FakeGoogle([gr(0, stars="FIVE"), gr(1, stars="TWO"), gr(2, stars="TWO")]), "tok", MAPPING, s["owner"])
         summ = await rv.summary(db, {"listing_id": "gig1"})
-        assert summ == {"native": {"avg": 4.0, "count": 1}, "google": {"avg": 3.0, "count": 3}}
+        # one verified review: counted, but no average below three (7 Oct 2026)
+        assert summ == {"native": {"avg": None, "count": 1}, "google": {"avg": 3.0, "count": 3}}
         assert (await rv.summary(db, {"business_id": "biz1"}))["google"]["count"] == 3
         # a removed review drops out of the average; an under-review one stays
         low = await db.reviews.find_one({"source": "google", "rating": 2})
         await rv.remove_review(db, low["_id"], "admin", "spam")
-        assert (await rv.summary(db, {"listing_id": "gig1"}))["google"] == {"avg": 3.5, "count": 2}
+        assert (await rv.summary(db, {"listing_id": "gig1"}))["google"] == {"avg": None, "count": 2}
         page = await rv.list_reviews(db, {"listing_id": "gig1"}, source=None, sort="lowest", page=1)
         assert [x["rating"] for x in page["reviews"]] == [2, 4, 5]
     run(t)

@@ -144,6 +144,7 @@ const StaffOrdersPage = lazy(() => import('./pages/StaffOrdersPage'));
 const OrdersPrintPage = lazy(() => import('./pages/OrdersPrintPage'));
 const OrderPage = lazy(() => import('./pages/OrderPage'));
 const OrderTrackPage = lazy(() => import('./pages/OrderTrackPage'));
+const BookingTrackPage = lazy(() => import('./pages/BookingTrackPage'));
 const WriteReview = lazy(() => import('./pages/WriteReview'));
 const CreateGig = lazy(() => import('./pages/CreateGig'));
 const JobsBoard = lazy(() => import('./pages/JobsBoard'));
@@ -514,6 +515,7 @@ function App() {
             <Route path="/orders/staff/:token" element={<StaffOrdersPage />} />
             <Route path="/order/:gigId" element={<OrderPage />} />
             <Route path="/orders/track/:token" element={<OrderTrackPage />} />
+            <Route path="/bookings/track/:token" element={<BookingTrackPage />} />
             <Route path="/review/booking/:bookingId" element={<WriteReview />} />
             <Route path="/review/:token" element={<WriteReview />} />
             <Route path="/orders/print" element={user ? <OrdersPrintPage /> : <ToAuth />} />

@@ -9,6 +9,7 @@ import { gigPriceParts } from '../../utils/gigPrice';
 import { prettyArea } from '../../utils/areaNames';
 import { serviceFacts } from '../../utils/serviceFacts';
 import { Clock, Check } from 'lucide-react';
+import Highlights from './Highlights';
 
 const GOLD = 'var(--gold)';
 
@@ -31,11 +32,23 @@ const GOLD = 'var(--gold)';
  * nothing looks arbitrary. 96px rather than the 72 a WhatsApp catalog
  * uses: 72px of a sourdough loaf is a brown blob.
  */
-export default function ServiceCard({ gig, onClick, variant = 'grid', i18n, t }) {
-  if (variant === 'list') {
-    return <ServiceRow gig={gig} onClick={onClick} i18n={i18n} t={t} />;
-  }
-  return <ServiceGridCard gig={gig} onClick={onClick} i18n={i18n} t={t} />;
+export default function ServiceCard({ gig, onClick, variant = 'grid', i18n, t, action = null, heart = null }) {
+  const card = variant === 'list'
+    ? <ServiceRow gig={gig} onClick={onClick} i18n={i18n} t={t} />
+    : <ServiceGridCard gig={gig} onClick={onClick} i18n={i18n} t={t} />;
+  if (!action && !heart) return card;
+  /* A card with its own action (the storefront's Book / Message / Add to
+     order). The action cannot live inside the card's button, so the card
+     surface moves to a wrapper holding both (App.css .svc-card--with-action). */
+  return (
+    <div className={`svc-card svc-card--with-action ${variant === 'list' ? 'w-full' : 'h-full'} flex flex-col`}>
+      {card}
+      <div className="mt-2 flex items-center gap-2">
+        <div className="flex-1 min-w-0">{action}</div>
+        {heart}
+      </div>
+    </div>
+  );
 }
 
 // --- grid: the original card, unchanged ---
@@ -140,11 +153,12 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
           </span>
         )}
       </p>
-      {(gig.rating_count > 0) && (
+      {gig.rating_count >= 3 && gig.rating_avg != null && (
         <div className="mt-0.5">
           <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={12} testidPrefix={`gig-stars-${gig.id}`} />
         </div>
       )}
+      <Highlights items={gig.highlights} t={t} size="xs" className="mt-1.5" testid={`gig-highlights-${gig.id}`} />
       {/* C7 — a price line is always rendered. A blank where a number
           should be reads as a broken card. */}
       {/* `svc-price` is the hook the price-prominence dial needs. It is
@@ -234,7 +248,8 @@ const ServiceRow = ({ gig, onClick, i18n, t }) => {
             )}
           </p>
         )}
-        {gig.rating_count > 0 && (
+        <Highlights items={gig.highlights} t={t} size="xs" className="mt-1" testid={`gig-highlights-${gig.id}`} />
+        {gig.rating_count >= 3 && gig.rating_avg != null && (
           <div className="mt-1">
             <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={11} testidPrefix={`gig-stars-${gig.id}`} />
           </div>

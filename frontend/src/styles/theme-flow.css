@@ -47,13 +47,18 @@
   --brand-border: #E3E3E3;
   --input-border: #EBEBEB;
 
-  /* Accent — the supplied `--secondary`. Links, icons, focus, chips. */
-  --brand-primary: #1C8DD4;
-  --brand-primary-dark: #167AB8;
+  /* Accent: links, icons, focus, chips. One shade darker than the supplied
+     `--secondary` (#1C8DD4) since 5 Oct 2026, Tzvi's choice: #1C8DD4 is
+     3.61:1 on white, under the 4.5:1 small text needs, and white text on it
+     was 3.61:1 too. An axe-core sweep of eight public pages found 164 such
+     spots, 130 of them this one colour. #167AB8 is the palette's own dark
+     step (4.66:1 both ways), so hover moves to the deep step. */
+  --brand-primary: #167AB8;
+  --brand-primary-dark: #0F5E8F;
   --brand-primary-deep: #0F5E8F;
-  --brand-primary-rgb: 28 141 212;
-  --teal: #1C8DD4;
-  --teal-dark: #167AB8;
+  --brand-primary-rgb: 22 122 184;
+  --teal: #167AB8;
+  --teal-dark: #0F5E8F;
   --teal-deep: #0F5E8F;
 
   /* Soft accent wash, straight from the palette, and the ink that sits on
@@ -80,8 +85,8 @@
      blue-and-black page, which is exactly the "three colours that do not
      agree" complaint this theme exists to answer. */
   --gold-text-on-light: #0F5E8F;
-  --gold: #1C8DD4;
-  --gold-rgb: 28 141 212;
+  --gold: #167AB8;          /* the accent, darkened 5 Oct 2026: see above */
+  --gold-rgb: 22 122 184;
   --gold-text: #0F5E8F;   /* small accent text on light */
   --gold-lg: #167AB8;     /* display accent on light */
 

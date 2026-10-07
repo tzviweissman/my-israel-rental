@@ -64,11 +64,11 @@ const StayTypePicker = ({
         className="w-full px-4 py-2 text-start min-w-0"
         data-testid={`${testidPrefix}-toggle`}
       >
-        <p className={`text-[10px] font-bold uppercase tracking-wide ${labelClassName || 'text-gray-400'}`}>
+        <p className={`text-[10px] font-bold uppercase tracking-wide ${labelClassName || 'text-gray-600'}`}>
           {t('stays.stayType', 'Stay type')}
         </p>
         <div className="flex items-center justify-between gap-1">
-          <span className={`text-sm font-medium truncate ${selected ? 'text-gray-800' : 'text-gray-400'}`}>
+          <span className={`text-sm font-medium truncate ${selected ? 'text-gray-800' : 'text-gray-600'}`}>
             {selected ? selected.label : (emptyLabel ?? t('stays.any', 'Any'))}
           </span>
           <div className="flex items-center gap-1 shrink-0">
