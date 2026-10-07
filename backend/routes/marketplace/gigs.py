@@ -8,6 +8,7 @@ Extracted from ``marketplace.py`` in the 2026-07 refactor.
 import asyncio
 import os
 import re
+import secrets
 import uuid
 from datetime import UTC, datetime, time, timedelta
 from typing import Any, Optional
@@ -689,6 +690,9 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
             or user_whatsapp(user)
         ),
     }
+    # What you get: only the highlights that still fit this item.
+    from utils import highlights as hl
+    gig["highlights"] = hl.visible(gig.get("highlights"), hl.kind_of(gig), await hl.business_is_food(db, gig.get("business_id")))
     # Part A (23 Sep 2026): the business's public facts for the proof
     # beside the button. The same fields its own page already shows.
     if business:
@@ -722,6 +726,18 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
     )
     return _clean_gig(gig)
 
+
+
+@router.get("/gigs/{gig_id}/highlight-options")
+async def highlight_options(gig_id: str, user=Depends(verify_token)):
+    """What the owner may pick for this item ("What you get")."""
+    from utils import highlights as hl
+    gig = await db.marketplace_gigs.find_one({"_id": gig_id})
+    if not gig or gig.get("provider_user_id") != user["user_id"]:
+        raise HTTPException(status_code=404, detail="Gig not found")
+    food = await hl.business_is_food(db, gig.get("business_id"))
+    return {"options": hl.options(hl.kind_of(gig), food), "max": hl.MAX_PER_ITEM,
+            "selected": [h["id"] for h in hl.visible(gig.get("highlights"), hl.kind_of(gig), food)]}
 
 
 @router.patch("/gigs/{gig_id}")
@@ -764,6 +780,13 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     if "subcategory" in update:
         effective_cat = update.get("category") or gig.get("category") or ""
         _validate_subcategory(effective_cat, update["subcategory"])
+    if "highlights" in update:
+        from utils import highlights as hl
+        merged = {**gig, **update}
+        try:
+            update["highlights"] = hl.clean(update["highlights"], hl.kind_of(merged), await hl.business_is_food(db, merged.get("business_id")))
+        except ValueError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
     update["updated_at"] = datetime.now(UTC).isoformat()
     await db.marketplace_gigs.update_one({"_id": gig_id}, {"$set": update})
     # If area changed, re-geocode in the background so distance sort
@@ -1114,8 +1137,30 @@ async def leads_summary(
     }
 
 
+_EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
+
+
 @router.post("/gigs/{gig_id}/book")
-async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
+async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depends(optional_user)):
+    """Signed in or not. Nobody has to sign in to book (Tzvi, 7 Oct 2026):
+    a guest gives a name and an email or a phone, and the reply comes back
+    on a status link (GET /bookings/track/{token}) instead of a dashboard."""
+    from utils.rate_limit import check_rate
+    guest_name = (payload.guest_name or "").strip()
+    email = (payload.contact_email or "").strip()
+    phone = (payload.contact_phone or "").strip()
+    if email and not _EMAIL_RE.match(email):
+        raise HTTPException(status_code=400, detail="Please check the email address")
+    if not user:
+        # A guest request holds a slot, so it is limited per address and
+        # must say who and how to reach them.
+        check_rate(request, bucket="guest-booking", limit=6, window_seconds=3600)
+        if len(guest_name) < 2:
+            raise HTTPException(status_code=400, detail="Please add your name")
+        if not (email or phone):
+            raise HTTPException(status_code=400, detail="Please add an email or a phone number so the business can reach you")
+    elif not email:
+        raise HTTPException(status_code=400, detail="Email required")
     gig = await db.marketplace_gigs.find_one({"_id": gig_id})
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
@@ -1142,6 +1187,13 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         start = _minutes(payload.time_slot)
         if start is None:
             raise HTTPException(status_code=400, detail="Invalid time slot")
+        # A time that has already passed in Israel, where the business is.
+        try:
+            when = datetime.fromisoformat(f"{payload.preferred_date}T{payload.time_slot}").replace(tzinfo=_IL_TZ)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date") from None
+        if when <= datetime.now(_IL_TZ):
+            raise HTTPException(status_code=400, detail="That time has passed - please pick a later one.")
         taken = (await _busy_spans(gig_id, gig.get("provider_user_id"), payload.preferred_date)).get(payload.preferred_date, [])
         if _overlaps(start, start + duration, taken):
             # 409 rather than 400: the request was well formed, someone
@@ -1158,11 +1210,14 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         "_id": str(uuid.uuid4()),
         "gig_id": gig_id,
         "provider_user_id": gig["provider_user_id"],
-        "client_user_id": user["user_id"],
+        "client_user_id": (user or {}).get("user_id"),
+        "guest_name": None if user else guest_name,
         "tier_name": payload.tier_name,
         "message": payload.message,
-        "contact_email": payload.contact_email,
-        "contact_phone": payload.contact_phone,
+        "contact_email": email or None,
+        "contact_phone": phone or None,
+        # The customer's own status link, the only one a guest has.
+        "track_token": secrets.token_urlsafe(16),
         "preferred_date": payload.preferred_date,
         "time_slot": payload.time_slot,
         # Frozen at creation — see _booking_duration.
@@ -1191,8 +1246,33 @@ async def book_gig(gig_id: str, payload: BookingIn, user=Depends(verify_token)):
         f"{(' - ' + _when) if _when else ''}.",
         booking["_id"],
     )
-    logger.info("[marketplace] booking created: gig=%s client=%s tier=%s", gig_id, user["user_id"], payload.tier_name)
-    return {"ok": True, "booking_id": booking["_id"]}
+    logger.info("[marketplace] booking created: gig=%s client=%s tier=%s", gig_id, (user or {}).get("user_id") or "guest", payload.tier_name)
+    return {"ok": True, "booking_id": booking["_id"], "track_path": f"/bookings/track/{booking['track_token']}"}
+
+
+@router.get("/bookings/track/{token}")
+async def track_booking(token: str, request: Request):
+    """The customer's status link for a booking, no account needed. Only
+    what they already know plus the answer; never anyone's contact details."""
+    from utils.rate_limit import check_rate
+    check_rate(request, bucket="bookings_track", limit=300, window_seconds=600)
+    if not token or len(token) < 16:
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    b = await db.marketplace_bookings.find_one({"track_token": token})
+    if not b:
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    gig = await db.marketplace_gigs.find_one({"_id": b.get("gig_id")}, {"title": 1, "title_he": 1, "business_id": 1}) or {}
+    biz = await db.businesses.find_one({"_id": gig.get("business_id")}, {"name": 1, "name_he": 1, "slug": 1, "logo_url": 1}) or {}
+    status = b.get("status") or "pending"
+    expires = b.get("hold_expires_at")
+    if status == "pending" and expires and expires <= datetime.now(UTC).isoformat():
+        status = STATUS_EXPIRED
+    return {
+        "business": {"name": biz.get("name") or "", "name_he": biz.get("name_he"), "slug": biz.get("slug"), "logo_url": biz.get("logo_url")},
+        "gig_title": gig.get("title") or "", "gig_title_he": gig.get("title_he"),
+        "tier_name": b.get("tier_name"), "preferred_date": b.get("preferred_date"), "time_slot": b.get("time_slot"),
+        "status": status, "provider_reply": b.get("provider_reply") or "", "created_at": b.get("created_at"),
+    }
 
 
 
@@ -1284,7 +1364,7 @@ async def list_bookings(
             # own row already knows their own email.
             "contact_email": r.get("contact_email") if role == "provider" else None,
             "contact_phone": r.get("contact_phone") if role == "provider" else None,
-            "other_party": (users.get(r.get(other_field)) or {}).get("name") or None,
+            "other_party": (users.get(r.get(other_field)) or {}).get("name") or (r.get("guest_name") if role == "provider" else None) or None,
         })
     return out
 

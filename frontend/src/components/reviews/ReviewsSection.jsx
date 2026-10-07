@@ -45,11 +45,15 @@ function Summary({ summary, kind, t }) {
     parts.push({ key: 'google', avg: summary.google.avg,
       label: t('reviews.googleReviews', { count: summary.google.count, defaultValue: '{{count}} Google reviews' }) });
   }
+  // A source below three reviews has no average (the server sends none):
+  // its reviews are listed, but no number sits over them.
+  const shown = parts.filter((p) => p.avg != null);
+  if (!shown.length) return null;
   return (
     // Spacing, not a separator: a "|" is left dangling at a line end when
     // the two averages wrap on a phone.
     <p className="flex flex-wrap items-center gap-x-6 gap-y-1 text-sm" data-testid="reviews-summary">
-      {parts.map((p) => (
+      {shown.map((p) => (
         <React.Fragment key={p.key}>
           <span className="inline-flex items-center gap-1.5" data-testid={`reviews-summary-${p.key}`}>
             <Star size={15} className="fill-[var(--gold)] text-[var(--gold)]" aria-hidden="true" />
@@ -76,9 +80,16 @@ function SourceBadge({ r, t, lang }) {
         data-testid="review-badge-google">{inner}</a>
     ) : <span className="inline-flex items-center gap-1 text-xs" style={{ color: MUTED }} data-testid="review-badge-google">{inner}</span>;
   }
+  // A review that rests on a conversation, not a purchase, says so plainly
+  // and never wears the verified badge.
+  if (!r.verified) {
+    return <span className="text-xs" style={{ color: MUTED }} data-testid="review-badge-chat">{t('reviews.badgeChat', 'Spoke with the business')}</span>;
+  }
   const label = r.booking_kind === 'stay'
     ? t('reviews.badgeStay', { when: monthYear(r.stay_end || r.stay_start, lang), defaultValue: 'Verified stay · {{when}}' })
-    : t('reviews.badgeCustomer', 'Verified customer');
+    : r.booking_kind === 'order'
+      ? t('reviews.badgeOrder', 'Verified order')
+      : t('reviews.badgeCustomer', 'Verified customer');
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold"
       style={{ background: 'var(--success-bg)', color: 'var(--success)' }} data-testid="review-badge-verified">
@@ -224,6 +235,46 @@ function EditForm({ review, token, onSaved, onCancel, t }) {
   );
 }
 
+/** A business review written from the storefront. The server decides what
+ *  entitles the writer (a booking, an order or a conversation). */
+function WriteForm({ businessId, token, onPosted, onCancel, t }) {
+  const [rating, setRating] = useState(0);
+  const [text, setText] = useState('');
+  const [busy, setBusy] = useState(false);
+  const send = async (e) => {
+    e.preventDefault();
+    if (!rating || text.trim().length < 20) return;
+    setBusy(true);
+    try {
+      const { data } = await axios.post(`${API}/reviews`, { business_id: businessId, rating, text }, { headers: { Authorization: `Bearer ${token}` } });
+      toast.success(t('reviews.writeThanks', 'Thank you. Your review is up.'));
+      onPosted(data);
+    } catch (err) {
+      toast.error(err.response?.data?.detail?.message || t('reviews.writeFailed', 'Your review did not post. Try again.'));
+      setBusy(false);
+    }
+  };
+  return (
+    <form onSubmit={send} className="mt-3 p-4 rounded-xl border space-y-3" style={{ borderColor: BORDER }} data-testid="review-write-form">
+      <StarInput value={rating} onChange={setRating} size={28} label={t('reviewForm.overall', 'Overall')} testid="review-write-star" />
+      <textarea value={text} onChange={(e) => setText(e.target.value)} minLength={20} maxLength={2000} rows={4} required dir="auto"
+        aria-label={t('reviewForm.textLabel', 'Your review')}
+        placeholder={t('reviews.writePlaceholder', 'What was it like? At least 20 characters.')}
+        className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: BORDER }} data-testid="review-write-text" />
+      <p className="text-xs" style={{ color: MUTED }}>{t('reviews.writeNamed', 'Shown with your first name and last initial.')}</p>
+      <div className="flex gap-3">
+        <button type="submit" disabled={busy || !rating || text.trim().length < 20} className="min-h-[44px] px-4 rounded-full text-sm font-bold disabled:opacity-50"
+          style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="review-write-send">
+          {t('reviews.writeSend', 'Post review')}
+        </button>
+        <button type="button" onClick={onCancel} className="min-h-[44px] px-2 text-sm font-semibold underline" style={{ color: MUTED }}>
+          {t('reviews.cancel', 'Cancel')}
+        </button>
+      </div>
+    </form>
+  );
+}
+
 function ReviewCard({ r, kind, token, onChange, t, lang }) {
   const [mode, setMode] = useState(null); // 'report' | 'respond' | 'edit'
   const [reported, setReported] = useState(false);
@@ -290,6 +341,9 @@ export default function ReviewsSection({ listingId, businessId, kind = 'gig', sc
   const [sort, setSort] = useState('newest');
   const [source, setSource] = useState('');
   const [more, setMore] = useState(false);
+  // Storefront only: may this signed-in person write a review here?
+  const [canWrite, setCanWrite] = useState(false);
+  const [writing, setWriting] = useState(false);
 
   const url = listingId ? `${API}/listings/${listingId}/reviews` : `${API}/businesses/${businessId}/reviews`;
   const headers = token ? { Authorization: `Bearer ${token}` } : undefined;
@@ -303,6 +357,15 @@ export default function ReviewsSection({ listingId, businessId, kind = 'gig', sc
     return () => { live = false; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [url, sort, source, token]);
+
+  useEffect(() => {
+    if (kind !== 'business' || !businessId || !token) { setCanWrite(false); return undefined; }
+    let live = true;
+    axios.get(`${API}/businesses/${businessId}/review-eligibility`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(({ data }) => live && setCanWrite(!!data.eligible))
+      .catch(() => live && setCanWrite(false));
+    return () => { live = false; };
+  }, [kind, businessId, token]);
 
   const loadMore = async () => {
     setMore(true);
@@ -318,13 +381,14 @@ export default function ReviewsSection({ listingId, businessId, kind = 'gig', sc
   if (!state.enabled) return fallback;
   const summary = state.summary || {};
   const total = (summary.native?.count || 0) + (summary.google?.count || 0);
-  if (!total) return null;
+  // No reviews and nothing to invite: no empty box.
+  if (!total && !canWrite) return null;
   const both = summary.native && summary.google;
 
   // Structured data for VERIFIED reviews only: Google's guidelines don't
   // allow marking up reviews that came from another site.
   const nativeShown = (state.reviews || []).filter((r) => r.source === 'native');
-  const jsonLd = schemaItem && summary.native ? {
+  const jsonLd = schemaItem && summary.native?.avg != null ? {
     '@context': 'https://schema.org', ...schemaItem,
     aggregateRating: { '@type': 'AggregateRating', ratingValue: summary.native.avg, reviewCount: summary.native.count, bestRating: 5, worstRating: 1 },
     review: nativeShown.slice(0, 5).map((r) => ({
@@ -341,7 +405,22 @@ export default function ReviewsSection({ listingId, businessId, kind = 'gig', sc
         {t('reviews.title', 'Reviews')}
       </h2>
       <Summary summary={summary} kind={kind} t={t} />
-      <div className="mt-3 flex flex-wrap items-center gap-2">
+      {canWrite && !writing && (
+        <button type="button" onClick={() => setWriting(true)} className="mt-3 min-h-[44px] px-5 rounded-full border text-sm font-semibold"
+          style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }} data-testid="review-write">
+          {t('reviews.write', 'Write a review')}
+        </button>
+      )}
+      {writing && (
+        <WriteForm businessId={businessId} token={token} t={t} onCancel={() => setWriting(false)}
+          onPosted={(r) => {
+            setWriting(false); setCanWrite(false);
+            setState((s) => ({ ...s, reviews: [r, ...(s.reviews || [])],
+              summary: { ...(s.summary || {}), native: { avg: s.summary?.native?.avg ?? null, count: (s.summary?.native?.count || 0) + 1 } } }));
+          }} />
+      )}
+
+      {total > 1 && <div className="mt-3 flex flex-wrap items-center gap-2">
         {both && ['', 'native', 'google'].map((s) => (
           <button key={s || 'all'} type="button" onClick={() => setSource(s)} aria-pressed={source === s}
             className="min-h-[44px] px-3 rounded-full border text-sm font-semibold"
@@ -359,7 +438,7 @@ export default function ReviewsSection({ listingId, businessId, kind = 'gig', sc
             <option value="lowest">{t('reviews.sortLowest', 'Lowest rated')}</option>
           </select>
         </label>
-      </div>
+      </div>}
       <ul className="mt-2" aria-busy={state.loading}>
         {(state.reviews || []).map((r) => (
           <ReviewCard key={r.id} r={r} kind={kind} token={token} t={t} lang={i18n.language}

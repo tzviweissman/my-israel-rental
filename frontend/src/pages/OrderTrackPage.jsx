@@ -13,10 +13,10 @@
  * chrome, refreshes itself while open.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Loader2, ClipboardList, Check, Bike, Store as StoreIcon, Clock, MapPin } from 'lucide-react';
+import { Loader2, ClipboardList, Check, Bike, Store as StoreIcon, Clock, MapPin, Star } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { money } from '../utils/currency';
 
@@ -26,6 +26,25 @@ export default function OrderTrackPage() {
   const { token } = useParams();
   const { t, i18n } = useTranslation();
   const [data, setData] = useState(null);
+  const navigate = useNavigate();
+  // Once the order is done, the customer can review it from here with no
+  // account: this tracking link is the proof they placed it.
+  const [reviewsOn, setReviewsOn] = useState(false);
+  const [reviewMsg, setReviewMsg] = useState('');
+  useEffect(() => {
+    axios.get(`${API}/reviews/config`).then(({ data: c }) => setReviewsOn(!!c.native)).catch(() => {});
+  }, []);
+  const startReview = async () => {
+    setReviewMsg('');
+    try {
+      const { data: r } = await axios.post(`${API}/orders/track/${encodeURIComponent(token)}/review-link`);
+      navigate(`/review/${encodeURIComponent(r.token)}`);
+    } catch (err) {
+      const code = err?.response?.data?.detail?.code;
+      setReviewMsg(code === 'already_reviewed' ? t('orders.track.reviewDone', 'Thank you, you already reviewed this order.')
+        : t('orders.track.reviewClosed', 'This order can no longer be reviewed.'));
+    }
+  };
 
   useEffect(() => {
     document.body.classList.add('orders-bare');
@@ -149,6 +168,16 @@ export default function OrderTrackPage() {
           <section className="rounded-2xl border bg-white p-4 mt-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="track-photo">
             <p className="text-xs font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.photoTitle', 'Delivered {{time}}', { time: String(data.delivered_at || '').slice(11, 16) })}</p>
             <a href={data.delivered_photo_url} target="_blank" rel="noopener noreferrer"><img src={data.delivered_photo_url} alt={t('orders.track.photoAlt', 'Photo of the delivery at your door')} className="w-full rounded-xl object-cover aspect-[4/3] max-h-72" /></a>
+          </section>
+        )}
+        {reviewsOn && data.status === 'done' && (
+          <section className="mt-4 rounded-2xl border bg-white p-4 text-center" style={{ borderColor: 'var(--brand-border)' }} data-testid="track-review">
+            <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orders.track.reviewAsk', 'How was your order?')}</p>
+            <button type="button" onClick={startReview} className="mt-3 min-h-[44px] px-5 rounded-full text-sm font-bold inline-flex items-center gap-2"
+              style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="track-review-button">
+              <Star size={15} aria-hidden="true" /> {t('orders.track.reviewButton', 'Write a review')}
+            </button>
+            {reviewMsg && <p className="text-xs mt-2" style={{ color: 'var(--brand-muted)' }} role="status">{reviewMsg}</p>}
           </section>
         )}
         {delivery && !closedBad && data.status !== 'done' && (

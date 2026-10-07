@@ -23,7 +23,10 @@ from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel, Field
 
 from utils.page_upgrade import has_page_upgrade
-from routes.deps import db, optional_user, verify_token
+from routes.deps import db, logger, optional_user, verify_token
+from utils.bg_tasks import spawn
+from utils import highlights as hl
+from utils.translate import detect_lang, translate_marketing
 from utils import view_tracking
 from utils.businesses import (
     MAX_BUSINESSES_PER_USER,
@@ -191,6 +194,10 @@ class BusinessPatch(BaseModel):
     # everything is featured features nothing, and a cap enforced only in
     # a form is a cap that a second client ignores.
     pinned_service_ids: Optional[list[str]] = Field(None, max_length=3)
+    # The owner's line over the first featured item, shown large at the top
+    # of the storefront. Translated in the background on save; shown as
+    # typed if that fails. Null clears it.
+    featured_headline: Optional[str] = Field(None, max_length=60)
     # The composition document: this business's page as data (phase 1 of
     # docs/ai-page-builder-spec.md). Validated against a CLOSED vocabulary
     # in utils/page_composition - an unknown block type, an unknown
@@ -266,6 +273,9 @@ def _public(
         # page payload.
         "page": doc.get("page"),
         "page_brief": doc.get("page_brief"),
+        # What the owner features ("Feature this" in the dashboard).
+        "pinned_service_ids": (doc.get("pinned_service_ids") or [])[:3],
+        "featured_headline": doc.get("featured_headline"),
         "verified": bool(doc.get("verified")),
         "active": doc.get("active", True),
         "created_at": doc.get("created_at"),
@@ -554,6 +564,14 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
     provided = payload.model_fields_set
     if "pinned_service_ids" in provided:
         update["pinned_service_ids"] = (payload.pinned_service_ids or [])[:3]
+    headline = None
+    if "featured_headline" in provided:
+        headline = " ".join((payload.featured_headline or "").split())[:60] or None
+        update["featured_headline"] = headline
+        update["featured_headline_lang"] = detect_lang(headline) if headline else None
+        # Cleared now and refilled by the translation below, so a reader of
+        # the other language never sees the previous headline's translation.
+        update["featured_headline_translated"] = None
     if "collections" in provided:
         update["collections"] = [c.model_dump() for c in (payload.collections or [])]
     if "page" in provided:
@@ -598,6 +616,8 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
 
     update["updated_at"] = datetime.now(UTC).isoformat()
     await db.businesses.update_one({"_id": business_id}, {"$set": update})
+    if headline:
+        spawn(_translate_headline(business_id, headline, update["featured_headline_lang"]))
     fresh = await db.businesses.find_one({"_id": business_id})
     count = await db.marketplace_gigs.count_documents({"business_id": business_id})
     return _public(fresh, count)
@@ -713,6 +733,20 @@ async def _resolve(slug_or_id: str) -> dict[str, Any] | None:
     )
 
 
+async def _translate_headline(business_id: str, text: str, lang: str) -> None:
+    """The featured headline in the other language, on create and edit
+    only. A failure leaves it untranslated, and the page shows it as typed.
+    Written only if the headline is still the one that was translated."""
+    try:
+        out = await translate_marketing(text, "en" if lang == "he" else "he")
+    except Exception as e:  # noqa: BLE001  the save already succeeded
+        logger.warning("featured headline translation failed for %s: %s", business_id, type(e).__name__)
+        return
+    if out:
+        await db.businesses.update_one({"_id": business_id, "featured_headline": text},
+                                       {"$set": {"featured_headline_translated": out}})
+
+
 async def business_rating(business_id: str) -> dict[str, Any]:
     """Stars for a BUSINESS, aggregated over its own listings (spec M5).
 
@@ -736,11 +770,12 @@ async def business_rating(business_id: str) -> dict[str, Any]:
         {"$match": match},
         {"$group": {"_id": None, "avg": {"$avg": "$rating"}, "count": {"$sum": 1}}},
     ]
+    from utils.reviews import MIN_FOR_AVERAGE
     async for row in coll.aggregate(pipeline):
-        return {
-            "rating_avg": round(row["avg"], 1) if row.get("avg") is not None else None,
-            "rating_count": row.get("count", 0),
-        }
+        count = row.get("count", 0)
+        # No average two reviews can swing (same floor as the reviews list).
+        enough = count >= MIN_FOR_AVERAGE and row.get("avg") is not None
+        return {"rating_avg": round(row["avg"], 1) if enough else None, "rating_count": count}
     return {"rating_avg": None, "rating_count": 0}
 
 
@@ -851,6 +886,8 @@ async def public_business(
         )
 
     rating = await business_rating(biz["_id"])
+    # Food business? Decides which highlights may show (utils/highlights.py).
+    food = hl.is_food([*(biz.get("categories") or []), *(g.get("category") for g in raw)])
     out = {
         "id": biz["_id"],
         "slug": biz.get("slug"),
@@ -917,6 +954,9 @@ async def public_business(
         # drift between here and there.
         "collections": biz.get("collections") or [],
         "pinned_service_ids": (biz.get("pinned_service_ids") or [])[:3],
+        "featured_headline": biz.get("featured_headline"),
+        "featured_headline_lang": biz.get("featured_headline_lang"),
+        "featured_headline_translated": biz.get("featured_headline_translated"),
         # The composition, as stored. Public because it IS the page: the
         # client renders from it, skipping any block type or reference it
         # cannot resolve, so a document written by an older build degrades
@@ -932,7 +972,7 @@ async def public_business(
         "response_bucket": _response_bucket(
             await db.marketplace_providers.find_one({"user_id": biz.get("owner_user_id")}) or {}
         ),
-        "listings": [_public_listing(g) for g in raw],
+        "listings": [{**_public_listing(g), "highlights": hl.visible(g.get("highlights"), hl.kind_of(g), food)} for g in raw],
         # The paid page upgrade (utils/page_upgrade): the one answer the
         # page renders from. False for almost everyone.
         "page_upgrade": await has_page_upgrade(biz.get("owner_user_id")),

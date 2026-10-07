@@ -30,6 +30,9 @@ import OfferBadge from '../components/marketplace/OfferBadge';
 import { priceRows, cheapestRow, cheapestFirst } from '../utils/gigPrice';
 import { FX_USD_TO_ILS } from '../utils/listingPrice';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
+import Highlights from '../components/marketplace/Highlights';
+import SaveHeart from '../components/marketplace/SaveHeart';
+import { useSavedItems } from '../hooks/useFavorites';
 import { buildWhatsAppLinkWithMessage, hasValidWhatsApp } from '../utils/whatsappLink';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import { productPhotos, productCover } from '../utils/productPhotos';
@@ -195,37 +198,53 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
   );
 };
 
-const BookingForm = ({ gig, tier, onClose, token }) => {
-  const { t } = useTranslation();
+/* Booking needs no account (Tzvi, 7 Oct 2026). Signed out, the form asks
+   for a name and an email or a phone, and the answer comes back on a
+   status page the customer keeps. An appointment carries the day and time
+   picked on the page; until 7 Oct this form dropped them, and the server
+   refused every in-platform appointment for want of a time slot. */
+export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot = null, initialDate = '' }) => {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const [message, setMessage] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(initialDate || '');
   const [saving, setSaving] = useState(false);
+  const guest = !token;
   const submit = async (e) => {
     e.preventDefault();
-    if (!email.trim()) return toast.error(t('gigDetail.emailRequired', 'Email required'));
+    if (guest && name.trim().length < 2) return toast.error(t('gigDetail.nameRequired', 'Please add your name'));
+    if (guest ? !(email.trim() || phone.trim()) : !email.trim()) {
+      return toast.error(guest ? t('gigDetail.reachRequired', 'Add an email or a phone number so the business can reach you') : t('gigDetail.emailRequired', 'Email required'));
+    }
     setSaving(true);
     try {
-      await axios.post(
+      const { data } = await axios.post(
         `${API}/marketplace/gigs/${gig.id}/book`,
         {
           tier_name: tier.name,
           message,
           contact_email: email,
           contact_phone: phone,
-          preferred_date: date || null,
+          guest_name: guest ? name : undefined,
+          preferred_date: slot ? slotDate : (date || null),
+          time_slot: slot || undefined,
         },
-        { headers: { Authorization: `Bearer ${token}` } },
+        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
       );
       toast.success(t('gigDetail.requestSent', 'Booking request sent!'));
       onClose();
+      if (guest && data?.track_path) navigate(data.track_path);
     } catch (err) {
-      toast.error(err.response?.data?.detail || t('gigDetail.requestFailed', 'Failed to send request'));
+      const d = err.response?.data?.detail;
+      toast.error(typeof d === 'string' ? d : t('gigDetail.requestFailed', 'Failed to send request'));
     } finally {
       setSaving(false);
     }
   };
+  const field = 'w-full px-3 py-2 rounded-lg border border-gray-200 text-sm';
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
       <form
@@ -241,10 +260,23 @@ const BookingForm = ({ gig, tier, onClose, token }) => {
             price: tier.price.toLocaleString(),
           })}
         </h3>
-        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("sweep.yourEmail", "Your email")} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="gig-booking-email" />
-        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={t('gigDetail.phoneOptional', 'Phone (optional)')} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
-        <DateField value={date} onChange={setDate} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white" testid="gig-booking-date" />
-        <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('gigDetail.messagePh', 'Tell the provider what you need…')} rows={3} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+        {slot && (
+          <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }} data-testid="gig-booking-when">
+            {t('gigDetail.bookingWhen', { defaultValue: '{{date}} at {{time}}', time: slot,
+              date: new Date(`${slotDate}T12:00:00`).toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' }) })}
+          </p>
+        )}
+        {guest && (
+          <input required value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoComplete="name"
+            placeholder={t('gigDetail.yourName', 'Your name')} className={field} data-testid="gig-booking-name" />
+        )}
+        <input required={!guest} type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email"
+          placeholder={guest ? t('gigDetail.emailOrPhone', 'Email (or a phone below)') : t('sweep.yourEmail', 'Your email')} className={field} data-testid="gig-booking-email" />
+        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel"
+          placeholder={guest ? t('gigDetail.phone', 'Phone') : t('gigDetail.phoneOptional', 'Phone (optional)')} className={field} data-testid="gig-booking-phone" />
+        {!slot && <DateField value={date} onChange={setDate} className={`${field} bg-white`} testid="gig-booking-date" />}
+        <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('gigDetail.messagePh', 'Tell the provider what you need…')} rows={3} className={field} />
+        {guest && <p className="text-xs text-gray-500">{t('gigDetail.guestNote', 'No account needed. You get a page that shows the reply.')}</p>}
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">
             {t('common.cancel', 'Cancel')}
@@ -263,6 +295,8 @@ const GigDetail = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { token, user } = useContext(AuthContext);
+  // Phase 5: save this item (the heart by the title).
+  const { savedIds, toggleSave } = useSavedItems();
   // Compute where "Back to businesses" should return the visitor. If they
   // came from a filtered board (or from an adjacent
   // /businesses/provider/... or /businesses/jobs page), send them back to
@@ -607,7 +641,6 @@ const GigDetail = () => {
         const msg = `Hi! I'd like to book your "${displayTitle}" - ${tier.name} on ${appointmentDate} at ${appointmentSlot} (${sym}${tier.price}) from MyIsraelRental.`;
         if (openWhatsApp(msg)) return;
       }
-      if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
       setShowBook(true);
       return;
     }
@@ -617,7 +650,6 @@ const GigDetail = () => {
       const msg = `Hi! I'd like to book your "${displayTitle}" - ${tier.name} (${sym}${tier.price})${datePart} from MyIsraelRental.`;
       if (openWhatsApp(msg)) return;
     }
-    if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
     setShowBook(true);
   };
 
@@ -889,22 +921,28 @@ const GigDetail = () => {
                   rule, so a Hebrew title fell back to a system serif.
                   dir="auto" because the title is the POSTER's text and
                   may be in either language regardless of the page. */}
-              <h1
-                className="text-2xl md:text-3xl font-bold text-gray-900"
-                style={{ fontFamily: 'var(--font-head)' }}
-                dir="auto"
-                data-testid="gig-title"
-              >
-                {displayTitle}
-              </h1>
+              <div className="flex items-start justify-between gap-3">
+                <h1
+                  className="text-2xl md:text-3xl font-bold text-gray-900"
+                  style={{ fontFamily: 'var(--font-head)' }}
+                  dir="auto"
+                  data-testid="gig-title"
+                >
+                  {displayTitle}
+                </h1>
+                <SaveHeart saved={savedIds.has(gig.id)} t={t} testid="gig-save"
+                  onClick={(e) => toggleSave(gig, `/businesses/${gig.id}`, e)} />
+              </div>
               <p className="text-gray-600 mt-1" dir="auto" data-testid="gig-byline">
                 {gig.provider?.name}{gig.area ? ` · ${prettyArea(gig.area, t)}` : ''}
               </p>
-              {(gig.rating_count > 0) && (
+              {/* Stars only from three reviews up, as everywhere else. */}
+              {gig.rating_count >= 3 && gig.rating_avg != null && (
                 <div className="mt-2">
                   <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={14} testidPrefix="gig-header-stars" />
                 </div>
               )}
+              <Highlights items={gig.highlights} t={t} className="mt-3" testid="gig-highlights" />
               {/* The offer, directly under the name of the business running
                   it. The full form here rather than the card's chip: this is
                   the page where someone decides, so what the offer is for and
@@ -1231,7 +1269,8 @@ const GigDetail = () => {
       </div>
 
       {showBook && tier && (
-        <BookingForm gig={gig} tier={tier} onClose={() => setShowBook(false)} token={token} />
+        <BookingForm gig={gig} tier={tier} onClose={() => setShowBook(false)} token={token}
+          slotDate={isAppointment ? appointmentDate : null} slot={isAppointment ? appointmentSlot : null} initialDate={deliverableDate || ''} />
       )}
 
       {lightboxIndex !== null && activeGallery.length > 0 && (
@@ -1252,7 +1291,7 @@ const GigDetail = () => {
 
 // ---------- Sidebar sub-components ----------
 
-const TierList = ({ tiers, selected, onSelect, isAppointment, testidPrefix = 'gig-tier' }) => {
+export const TierList = ({ tiers, selected, onSelect, isAppointment, testidPrefix = 'gig-tier' }) => {
   const { t } = useTranslation();
   if (!tiers.length) return <p className="text-sm text-gray-500">{t('gigDetail.noPackages', 'No packages listed yet.')}</p>;
   return tiers.map((tt) => {
@@ -1359,6 +1398,8 @@ const StoreProductList = ({ products, selected, onSelect, testidPrefix = 'gig-pr
 // ahead. The previous 14-day cap plus a horizontal-scroll pill row hid
 // most future dates and looked like a "can't book more than a week"
 // bug from the buyer's perspective.
+const isoOf = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 const buildAppointmentSlots = (gig, tier, locale) => {
   const weekly = gig.weekly_availability || {};
   const slotMin = gig.slot_duration_minutes || 30;
@@ -1367,9 +1408,18 @@ const buildAppointmentSlots = (gig, tier, locale) => {
   const byDate = {};
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  /* Times are the business's, in Israel. Never offer one that has already
+     passed there: the grid used to offer this morning's 09:00 at 15:00,
+     and the server took it (found 7 Oct 2026). */
+  const il = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date()).map((x) => [x.type, x.value]));
+  const ilToday = `${il.year}-${il.month}-${il.day}`;
+  const ilNowMin = Number(il.hour) * 60 + Number(il.minute);
   for (let offset = 0; offset < 90; offset += 1) {
     const day = new Date(today);
     day.setDate(today.getDate() + offset);
+    if (isoOf(day) < ilToday) continue;
     const key = dayKeys[day.getDay()];
     const windows = weekly[key] || [];
     if (!windows.length) continue;
@@ -1380,6 +1430,7 @@ const buildAppointmentSlots = (gig, tier, locale) => {
       const startMin = sh * 60 + sm;
       const endMin = eh * 60 + em;
       for (let t = startMin; t + duration <= endMin; t += slotMin) {
+        if (isoOf(day) === ilToday && t <= ilNowMin) continue;
         const hh = String(Math.floor(t / 60)).padStart(2, '0');
         const mm = String(t % 60).padStart(2, '0');
         slots.push(`${hh}:${mm}`);
@@ -1400,7 +1451,7 @@ const buildAppointmentSlots = (gig, tier, locale) => {
   return byDate;
 };
 
-const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, onSelectDate, onSelectSlot }) => {
+export const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, onSelectDate, onSelectSlot }) => {
   /* S0 — times already spoken for. The grid is generated in the browser
      from weekly_availability, so without asking the server it offers
      every slot to everybody and two customers can take the same one.

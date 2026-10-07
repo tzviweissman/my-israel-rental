@@ -788,6 +788,19 @@ button:focus-visible,
   transform: translateY(-3px);
   box-shadow: 0 12px 32px rgba(30, 45, 60, .12);
 }
+/* A card with its own action button: the wrapper is the surface, the inner
+   card button is plain (ServiceCard, storefront phase 4). */
+/* No lift when the card carries a button: a target that moves away from
+   the pointer as it arrives is hard to press. */
+.svc-card--with-action:hover { transform: none; }
+.svc-card--with-action > .svc-card {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  box-shadow: none;
+  transform: none;
+  flex: 1 1 auto;
+}
 /* Image zoom on hover, matching Stays. The overflow-hidden wrapper is
    the image div inside the card, so the zoom is clipped to its radius. */
 .svc-card .aspect-square > img,

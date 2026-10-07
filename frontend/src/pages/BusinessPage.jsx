@@ -10,7 +10,7 @@
  * short-link table already points at /business/{id}, so both resolve and
  * neither will ever break.
  */
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import ProofLine from '../components/marketplace/ProofLine';
 import ReviewsSection from '../components/reviews/ReviewsSection';
 import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPanel';
@@ -26,6 +26,11 @@ import PageMeta from '../components/PageMeta';
 import NotFound from './NotFound';
 import { businessCanonicalUrl, currentBusinessHostSlug } from '../utils/businessHost';
 import BlockList from '../components/pagebuilder/BlockList';
+import FeaturedHero from '../components/marketplace/FeaturedHero';
+import CardAction, { BasketBar } from '../components/marketplace/CardAction';
+import { useBasket } from '../utils/storeBasket';
+import { useSavedItems } from '../hooks/useFavorites';
+import SaveHeart from '../components/marketplace/SaveHeart';
 import { cheapestFirst } from '../utils/gigPrice';
 import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
@@ -123,6 +128,23 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         ? getGigCover(biz.listings[0]) : null))
     : null;
   const scrim = useCoverScrim(coverSrc);
+  // Phase 4's basket is a hook too, so it is hoisted for the same reason.
+  const basket = useBasket(biz ? biz.id : null);
+  // Phase 5: the save heart. A hook, hoisted with the rest.
+  const { savedIds, toggleSave } = useSavedItems();
+  /* The phone's bottom bar (Message, and the basket when it has things in
+     it) is fixed, so the page ends with room for its real height: a fixed
+     bar must never sit over the last of the content. Hoisted with the
+     other hooks. */
+  const stickyRef = useRef(null);
+  const [stickyH, setStickyH] = useState(0);
+  useEffect(() => {
+    const el = stickyRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') return undefined;
+    const ro = new ResizeObserver(() => setStickyH(el.offsetHeight));
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, [biz]);
 
   if (missing) {
     // On <slug>.myisraelrental.com there is nothing else at this address,
@@ -181,6 +203,23 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   };
 
   const messageLabel = t('businessPage.message', 'Message');
+
+  /* Phase 4: each card's own action, and the basket its products go into.
+     A message about one item opens the thread about that item. */
+  const messageAbout = (gig) => {
+    if (!token) {
+      navigate(`/auth/login?redirect=${encodeURIComponent(`/business/${biz.slug || biz.id}`)}`);
+      return;
+    }
+    navigate(`/chat/${gig.id}?with=${encodeURIComponent(biz.owner_user_id)}`);
+  };
+  const cardHeart = (gig) => (
+    <SaveHeart saved={savedIds.has(gig.id)} t={t} size="sm" testid={`save-${gig.id}`}
+      onClick={(e) => toggleSave(gig, `/business/${biz.slug || biz.id}`, e)} />
+  );
+  const cardAction = (gig) => (
+    <CardAction gig={gig} basket={basket} t={t} title={localizedTitle(gig, i18n)} onMessage={messageAbout} />
+  );
 
   /* C2 — the layout follows how much there is. A grid of squares is
      right for a handful and becomes a wall at fifteen; compact rows fit
@@ -428,7 +467,9 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                 style={{ color: 'var(--brand-muted)' }}>
                 {/* Stars for THIS business only. A five-star landlord must
                     not read as a five-star plumber. */}
-                {biz.rating_count > 0 ? (
+                {/* An average only from three reviews up (the server sends
+                    none below that), so two reviews can't swing a headline. */}
+                {biz.rating_avg != null ? (
                   <span className="inline-flex items-center gap-1" data-testid="business-rating">
                     <Star size={14} style={{ color: 'var(--gold)' }} fill="currentColor" />
                     <strong style={{ color: 'var(--ink)' }}>{biz.rating_avg}</strong>
@@ -627,6 +668,8 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             that could hold someone's search box open would be a document
             fighting the person reading it. */}
         {biz.page_upgrade && <div id="business-body" className="scroll-mt-24" />}
+        {/* The owner's first featured item, large. Nothing featured: nothing. */}
+        <FeaturedHero business={biz} t={t} i18n={i18n} onOpen={(g) => navigate(`/businesses/${g.id}`)} />
         <BlockList
           business={biz}
           ctx={{
@@ -643,6 +686,8 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             canMessage,
             messageBusiness,
             openService: (g) => navigate(`/businesses/${g.id}`),
+            cardAction,
+            cardHeart,
             apiBase: API,
           }}
         />
@@ -733,6 +778,10 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
       </div>
 
       <SiteFooter />
+      {canMessage && <div className="sm:hidden" style={{ height: stickyH }} aria-hidden="true" data-testid="business-sticky-room" />}
+
+      {/* The basket, floating, wherever the sticky bar is not carrying it. */}
+      <BasketBar business={biz} basket={basket} t={t} className={canMessage ? 'hidden sm:block' : ''} />
 
       {/* Mobile only: the header button is off screen for most of the
           page on a phone, so the action rides along instead. Padding for
@@ -746,8 +795,10 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             paddingBottom: 'calc(0.75rem + env(safe-area-inset-bottom))',
           }}
           data-testid="business-message-bar"
+          ref={stickyRef}
         >
-          <ProofLine {...proof} compact className="justify-center mb-2" testid="business-proof-sticky" />
+          <BasketBar business={biz} basket={basket} t={t} inline />
+          {!basket.count && <ProofLine {...proof} compact className="justify-center mb-2" testid="business-proof-sticky" />}
           <button
             type="button"
             onClick={messageBusiness}
