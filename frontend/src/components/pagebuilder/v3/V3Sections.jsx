@@ -19,10 +19,12 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { themeVars } from './V3Hero';
+import { fxFor, hasFx } from './effects';
 
 const Section = ({ brief, kind, testid, children }) => (
   <section className={`pv3-section pv3-${kind}`} data-page-v3="" data-preset={brief.preset}
-    data-caps={brief.type?.caps ? 'true' : 'false'} style={themeVars(brief)} data-testid={testid}>
+    data-caps={brief.type?.caps ? 'true' : 'false'} data-fx={fxFor(brief, kind)} style={themeVars(brief)}
+    data-testid={testid}>
     <div className="pv3-section-inner">{children}</div>
   </section>
 );
@@ -37,7 +39,7 @@ export function V3BigList({ brief, lang }) {
     <Section brief={brief} kind="biglist" testid="pv3-biglist">
       <p className="pv3-label">{t('pageV3.occasions', 'For')}</p>
       <ul className="pv3-biglist-items">
-        {items.map((x) => <li key={x.text}>{x.text}</li>)}
+        {items.map((x, i) => <li key={x.text} style={{ '--i': i }}>{x.text}</li>)}
       </ul>
     </Section>
   );
@@ -53,7 +55,7 @@ export function V3Steps({ brief, lang }) {
       <h2 className="pv3-h2">{t('pageV3.howItWorks', 'How it works')}</h2>
       <ol className="pv3-steps-list">
         {steps.map((s, i) => (
-          <li key={s.text}><span className="pv3-step-n pv3-num" dir="ltr">{String(i + 1).padStart(2, '0')}</span><span>{s.text}</span></li>
+          <li key={s.text} style={{ '--i': i }}><span className="pv3-step-n pv3-num" dir="ltr">{String(i + 1).padStart(2, '0')}</span><span>{s.text}</span></li>
         ))}
       </ol>
     </Section>
@@ -64,10 +66,44 @@ export function V3Steps({ brief, lang }) {
 export function V3Palate({ brief, url }) {
   if (!brief || !url) return null;
   return (
-    <div className="pv3-palate" data-page-v3="" data-preset={brief.preset} style={themeVars(brief)} aria-hidden="true" data-testid="pv3-palate">
+    <div className="pv3-palate" data-page-v3="" data-preset={brief.preset} data-fx={fxFor(brief, 'palate')}
+      style={themeVars(brief)} aria-hidden="true" data-testid="pv3-palate">
       <img className="pv3-photo" src={url} alt="" loading="lazy" />
     </div>
   );
+}
+
+/** The price counting up to itself once it is seen (effect count-price).
+ *  It shows the real price at rest and on every path that is not a clean
+ *  count: no observer, reduced motion, a number it cannot read. It only
+ *  drops to zero at the moment it is seen, and runs straight back up. */
+function CountUp({ value, on }) {
+  const ref = useRef(null);
+  const [shown, setShown] = useState(value);
+  useEffect(() => {
+    const el = ref.current;
+    const target = Number(String(value).replace(/,/g, ''));
+    const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!on || !el || !Number.isFinite(target) || target <= 0 || still || typeof IntersectionObserver === 'undefined') {
+      setShown(value);
+      return undefined;
+    }
+    let raf = 0;
+    const io = new IntersectionObserver(([e]) => {
+      if (!e.isIntersecting) return;
+      io.disconnect();
+      const t0 = performance.now();
+      const step = (now) => {
+        const k = Math.min(1, (now - t0) / 1200);
+        setShown(k < 1 ? Math.round(target * (1 - (1 - k) ** 3)).toLocaleString('en-US') : value);
+        if (k < 1) raf = requestAnimationFrame(step);
+      };
+      raf = requestAnimationFrame(step);
+    }, { threshold: 0.6 });
+    io.observe(el);
+    return () => { io.disconnect(); cancelAnimationFrame(raf); };
+  }, [on, value]);
+  return <span ref={ref}>{shown}</span>;
 }
 
 /** "Copy" turns to "Copied" for 1.5s; without the clipboard, the text is
@@ -120,7 +156,11 @@ export function V3Offer({ brief, rows, priceText, priceIsFrom, title, label, onP
               <span className="pv3-num" dir="ltr">
                 {(/^(\D+)(.*)$/.exec(priceText) || [null, '', priceText]).slice(1).map((part, n) => (
                   // eslint-disable-next-line react/no-array-index-key
-                  part ? <span key={n} className={n === 0 ? 'pv3-price-sym' : undefined}>{part}</span> : null))}
+                  part ? (
+                    <span key={n} className={n === 0 ? 'pv3-price-sym' : undefined}>
+                      {n === 1 ? <CountUp value={part} on={hasFx(brief, 'count-price')} /> : part}
+                    </span>
+                  ) : null))}
               </span>
             </p>
           )}
@@ -172,7 +212,7 @@ export function V3StickyBar({ brief, label, priceText, onPrimary, heroSelector, 
   }, [heroSelector, offerRef]);
   if (!brief) return null;
   return (
-    <div className={`pv3-sticky${show ? ' is-on' : ''}`} data-page-v3="" data-preset={brief.preset}
+    <div className={`pv3-sticky${show ? ' is-on' : ''}`} data-page-v3="" data-preset={brief.preset} data-fx={fxFor(brief, 'button')}
       style={themeVars(brief)} aria-hidden={show ? undefined : 'true'} data-testid="pv3-sticky">
       {priceText && <span className="pv3-sticky-price pv3-num" dir="ltr">{priceText}</span>}
       <button type="button" className="pv3-btn" onClick={onPrimary} tabIndex={show ? 0 : -1} data-testid="pv3-sticky-primary">{label}</button>

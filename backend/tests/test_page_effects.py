@@ -21,15 +21,15 @@ from utils.page_effects import (  # noqa: E402
 PRESETS = ("candlelight", "bold-pantry", "jerusalem-stone", "studio", "field", "workshop")
 
 
-def brief(photos=0, flyers=0, tier=3, occasions=0, steps=0, tagline=False, price=None):
-    """A brief-shaped dict with exactly the material asked for."""
+def brief(photos=0, flyers=0, tier=3, occasions=0, steps=0, tagline=False, price=None, langs=("en", "he")):
+    """A brief-shaped dict with exactly the material asked for, in each language."""
     pics = [{"ref": f"cover{i}", "kind": "photo"} for i in range(photos)]
     pics += [{"ref": f"flyer{i}", "kind": "flyer"} for i in range(flyers)]
     return {
         "hero": {"tier": tier, "media_id": "film" if tier == 2 else ("cover0" if tier == 1 else None)},
         "photos": pics,
-        "occasions": [{"text": f"o{i}", "lang": "en"} for i in range(occasions)],
-        "steps": [{"text": f"s{i}", "lang": "en"} for i in range(steps)],
+        "occasions": [{"text": f"o{i}", "lang": lang} for lang in langs for i in range(occasions)],
+        "steps": [{"text": f"s{i}", "lang": lang} for lang in langs for i in range(steps)],
         "taglines": [{"text": "Made by hand", "lang": "en"}] if tagline else [],
         "primary_action": {"kind": "message", "price_anchor": price},
     }
@@ -84,6 +84,16 @@ def test_effects_appear_only_with_their_material():
     assert "count-price" not in available(BARE)          # no price, no counter
     assert "rail-steps" not in available(material(brief(steps=2)))
     assert "stagger-steps" in available(material(brief(steps=2)))
+
+
+def test_a_bold_moment_needs_its_list_in_both_languages():
+    """Their occasions in English only: the Hebrew page draws no list, so a
+    rail of them would leave it with no bold moment. A quiet touch may stay."""
+    english = material(brief(occasions=6, steps=4, langs=("en",)))
+    assert not {"rail-occasions", "rail-steps", "stack-steps"} & set(available(english))
+    assert {"stagger-biglist", "stagger-steps"} <= set(available(english))
+    both = material(brief(occasions=6, steps=4))
+    assert {"rail-occasions", "rail-steps", "stack-steps"} <= set(available(both))
 
 
 def test_letters_animate_only_on_a_short_name():
@@ -206,3 +216,18 @@ def test_a_pick_differs_from_recent_pages_on_enough_axes():
         recent_fps = [effect_fingerprint(r["effects"], r["showstopper"]) for r in recent]
         assert check_effect_unique(fp, recent_fps)["passed"], (seed, effects)
         recent.insert(0, {"effects": effects, "showstopper": show})
+
+
+# ------------------------------------------------------------------ the mirror
+
+def test_the_frontend_mirror_agrees_with_the_catalog():
+    """The page renders these ids (frontend/.../v3/effects.js); a mirror that
+    silently disagrees would drop an effect, or stamp one the API refuses."""
+    import re
+    js = (Path(__file__).resolve().parents[2] / "frontend" / "src" / "components" / "pagebuilder" / "v3"
+          / "effects.js").read_text(encoding="utf-8")
+    mirror = {m[0]: (m[1], m[2] == "true")
+              for m in re.findall(r"'([a-z0-9-]+)': \['([a-z]+)', (true|false)\]", js)}
+    assert set(mirror) == set(EFFECTS), set(mirror) ^ set(EFFECTS)
+    for eid, (slot, engine) in mirror.items():
+        assert (slot, engine) == (EFFECTS[eid]["slot"], EFFECTS[eid]["engine"]), eid

@@ -61,11 +61,11 @@ EFFECTS: dict[str, dict] = {
                              group="hero-motion", engine=True),
     "rail-gallery":      _fx("motion", "peak", "rail", "travel", needs={"photos": 5},
                              engine=True, rtl="mirror"),
-    "rail-occasions":    _fx("motion", "peak", "biglist", "travel", needs={"occasions": 5},
+    "rail-occasions":    _fx("motion", "peak", "biglist", "travel", needs={"occasions_both": 5},
                              group="biglist-motion", engine=True, rtl="mirror"),
-    "rail-steps":        _fx("motion", "peak", "steps", "travel", needs={"steps": 3},
+    "rail-steps":        _fx("motion", "peak", "steps", "travel", needs={"steps_both": 3},
                              group="steps-motion", engine=True, rtl="mirror"),
-    "stack-steps":       _fx("motion", "peak", "steps", "travel", needs={"steps": 3},
+    "stack-steps":       _fx("motion", "peak", "steps", "travel", needs={"steps_both": 3},
                              group="steps-motion", engine=True),
     "pin-offer-count":   _fx("motion", "peak", "offer", "close", needs={"price": True},
                              group="offer-count", engine=True),
@@ -77,14 +77,15 @@ EFFECTS: dict[str, dict] = {
     "progress-hairline": _fx("motion", "quiet", "page", "surface", engine=True, rtl="mirror"),
 
     # ---- entrances: how things arrive.
-    "load-sequence-hero":     _fx("entrance", "accent", "hero", "type"),
-    "kinetic-words-headline": _fx("entrance", "accent", "hero", "type", group="kinetic"),
+    # One hero entrance per page: these all animate the same block.
+    "load-sequence-hero":     _fx("entrance", "accent", "hero", "type", group="hero-entrance"),
+    "kinetic-words-headline": _fx("entrance", "accent", "hero", "type", group="hero-entrance"),
     "kinetic-words-tagline":  _fx("entrance", "accent", "hero", "type", needs={"tagline": True},
-                                  group="kinetic"),
+                                  group="hero-entrance"),
     # taste.md says splitting into letters is "almost never"; a short name
     # is the one place it reads as a wordmark rather than a gimmick.
     "kinetic-chars-wordmark": _fx("entrance", "accent", "hero", "type", needs={"name_max": 12},
-                                  group="kinetic"),
+                                  group="hero-entrance"),
     "wipe-up-sections":       _fx("entrance", "quiet", "page", "surface", group="section-entrance"),
     "fade-rise-sections":     _fx("entrance", "quiet", "page", "surface", group="section-entrance"),
     "wipe-side-photos":       _fx("entrance", "quiet", "palate", "framing", needs={"photos": 2},
@@ -100,7 +101,8 @@ EFFECTS: dict[str, dict] = {
     "count-price":            _fx("entrance", "accent", "offer", "close", needs={"price": True},
                                   group="offer-count"),
     "hairline-draw":          _fx("entrance", "quiet", "page", "surface", rtl="mirror"),
-    "logo-settle":            _fx("entrance", "quiet", "hero", "hero", needs={"logo": True}),
+    "logo-settle":            _fx("entrance", "quiet", "hero", "hero", needs={"logo": True},
+                                  group="hero-entrance"),
 
     # ---- touches: what answers the hand.
     "btn-fill-wipe":       _fx("touch", "accent", "button", "pointer", group="button-style", rtl="mirror"),
@@ -123,12 +125,16 @@ EFFECTS: dict[str, dict] = {
                               group="scrim", rtl="mirror"),
     "scrim-band":         _fx("still", "quiet", "hero", "hero", needs={"hero_media": True}, group="scrim"),
     "scrim-vignette":     _fx("still", "quiet", "hero", "hero", needs={"hero_media": True}, group="scrim"),
-    "ground-split-hero":  _fx("still", "accent", "hero", "hero", group="hero-frame", rtl="mirror"),
+    # The split ground and the centred stack only read on the typographic
+    # hero: a photo hides the ground, and centred copy sits on its brightest part.
+    "ground-split-hero":  _fx("still", "accent", "hero", "hero", needs={"hero_media": False},
+                              group="hero-frame", rtl="mirror"),
     "hero-split":         _fx("still", "accent", "hero", "framing", needs={"hero_photo": True},
                               group="hero-frame", rtl="mirror"),
     "hero-split-narrow":  _fx("still", "accent", "hero", "framing", needs={"hero_photo": True},
                               group="hero-frame", rtl="mirror"),
-    "hero-center-stack":  _fx("still", "accent", "hero", "framing", group="hero-frame"),
+    "hero-center-stack":  _fx("still", "accent", "hero", "framing", needs={"hero_media": False},
+                              group="hero-frame"),
     "subject-bleed":      _fx("still", "accent", "hero", "framing", needs={"hero_photo": True},
                               group="hero-frame", rtl="mirror"),
     "tagline-pullquote":  _fx("still", "accent", "hero", "type", needs={"tagline": True}),
@@ -182,11 +188,15 @@ def material(brief, record: Optional[dict] = None) -> dict:
     tier = _get(hero, "tier")
     photos = sum(1 for p in (_get(brief, "photos") or []) if _get(p, "kind") == "photo")
 
-    def per_lang(items):
-        counts: dict[str, int] = {}
+    # Lists the owner wrote are drawn only in their own language, and every
+    # page is shown in English and Hebrew. A touch counts the fuller language
+    # (missing from the other page, it is simply not there); a bold moment
+    # counts the thinner one, or a Hebrew visitor gets a page with none.
+    def per_lang(items, worst=False):
+        counts = {"en": 0, "he": 0}
         for t in items or []:
             counts[_get(t, "lang")] = counts.get(_get(t, "lang"), 0) + 1
-        return max(counts.values(), default=0)
+        return (min if worst else max)(counts.values())
 
     action = _get(brief, "primary_action") or {}
     price = _get(action, "price_anchor") is not None
@@ -197,7 +207,9 @@ def material(brief, record: Optional[dict] = None) -> dict:
         "film": tier == 2,
         "hero_media": tier in (1, 2),
         "occasions": per_lang(_get(brief, "occasions")),
+        "occasions_both": per_lang(_get(brief, "occasions"), worst=True),
         "steps": steps,
+        "steps_both": per_lang(_get(brief, "steps"), worst=True),
         "tagline": bool(_get(brief, "taglines")),
         "price": price,
         "steps_or_price": price or steps >= 2,

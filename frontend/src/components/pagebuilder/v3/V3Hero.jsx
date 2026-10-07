@@ -23,6 +23,9 @@ import { Pause, Play } from 'lucide-react';
 
 import ProofLine from '../../marketplace/ProofLine';
 import '../../../styles/page-v3.css';
+// After page-v3.css: the effects build on its rules.
+import '../../../styles/page-v3-motion.css';
+import { Words, fxFor, hasFx } from './effects';
 
 // Mirrors FONT_ALLOWLIST in backend/utils/design_brief.py. A face that is
 // not here is never requested, whatever a stored brief says.
@@ -120,15 +123,24 @@ function Film({ film }) {
   );
 }
 
-/** Dots in the wordmark take the accent (rules appendix: "gold dots"). */
-const Wordmark = ({ text }) => (
-  <>
-    {Array.from(text).map((ch, i) => (ch === '.'
-      // eslint-disable-next-line react/no-array-index-key
-      ? <span key={i} className="pv3-dot">.</span>
-      : ch))}
-  </>
-);
+/** Dots in the wordmark take the accent (rules appendix: "gold dots").
+ *  With the letters effect each letter is its own numbered span; spaces
+ *  stay plain text so the name still wraps and copies as before. */
+const Wordmark = ({ text, letters = false }) => {
+  let n = 0;
+  return (
+    <>
+      {Array.from(text).map((ch, i) => {
+        if (letters && ch.trim()) {
+          // eslint-disable-next-line react/no-array-index-key
+          return <span key={i} className={ch === '.' ? 'pv3-c pv3-dot' : 'pv3-c'} style={{ '--i': n++ }}>{ch}</span>;
+        }
+        // eslint-disable-next-line react/no-array-index-key
+        return ch === '.' ? <span key={i} className="pv3-dot">.</span> : ch;
+      })}
+    </>
+  );
+};
 
 export default function V3Hero({ brief, name, logoUrl, photoUrl, film, priceText, areaText, kosherBody, proof, onPrimary, children }) {
   const { t, i18n } = useTranslation();
@@ -161,6 +173,7 @@ export default function V3Hero({ brief, name, logoUrl, photoUrl, film, priceText
       data-texture={brief.texture}
       data-tier={tier}
       data-caps={brief.type?.caps ? 'true' : 'false'}
+      data-fx={fxFor(brief, 'hero')}
       style={themeVars(brief)}
       data-testid="pv3-hero"
     >
@@ -177,8 +190,16 @@ export default function V3Hero({ brief, name, logoUrl, photoUrl, film, priceText
       <div className="pv3-hero-inner">
         {logoUrl && <img className="pv3-logo" src={logoUrl} alt="" aria-hidden="true" />}
         {script && <p className="pv3-script" data-testid="pv3-script">{script}</p>}
-        <h1 className="pv3-wordmark" data-testid="pv3-wordmark"><Wordmark text={wordmark} /></h1>
-        {tagline && <p className="pv3-tagline" data-testid="pv3-tagline">{tagline.text}</p>}
+        <h1 className="pv3-wordmark" data-testid="pv3-wordmark">
+          {hasFx(brief, 'kinetic-words-headline')
+            ? <Words text={wordmark} render={(w) => <Wordmark text={w} />} />
+            : <Wordmark text={wordmark} letters={hasFx(brief, 'kinetic-chars-wordmark')} />}
+        </h1>
+        {tagline && (
+          <p className="pv3-tagline" data-testid="pv3-tagline">
+            {hasFx(brief, 'kinetic-words-tagline') ? <Words text={tagline.text} /> : tagline.text}
+          </p>
+        )}
         <div className="pv3-actions">
           <button type="button" className="pv3-btn" onClick={onPrimary} data-testid="pv3-primary">{label}</button>
           {/* The proof beside the button (ruling 5). Kosher is in the fact

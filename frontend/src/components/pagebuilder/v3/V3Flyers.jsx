@@ -11,12 +11,13 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 
 import { themeVars } from './V3Hero';
+import { fxFor } from './effects';
 
 export default function V3Flyers({ brief, urls, name }) {
   const { t } = useTranslation();
   if (!brief || !urls || urls.length === 0) return null;
   return (
-    <section className="pv3-flyers" data-page-v3="" style={themeVars(brief)} data-testid="pv3-flyers">
+    <section className="pv3-flyers" data-page-v3="" data-fx={fxFor(brief, 'flyers')} style={themeVars(brief)} data-testid="pv3-flyers">
       <div className="pv3-flyers-inner">
         <p className="pv3-label">{t('pageV3.fromTheBusiness', 'From the business')}</p>
         <div className="pv3-flyers-row">
