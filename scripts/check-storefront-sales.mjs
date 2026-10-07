@@ -12,6 +12,12 @@
 //   * a signed-in person who had a conversation with that store sees
 //     "Write a review"; a stranger does not;
 //   * no phone, email or reviewer id anywhere in what the pages fetch.
+// Phase 2, featured items:
+//   * the mixed store shows its first featured item large, under the
+//     owner's headline (in Hebrew, the translation); the products store
+//     shows one with no headline; the services store, with nothing
+//     featured, shows no large card; a one-item store can feature its item;
+//   * the large card's item does not appear again in the "Start here" row.
 // --shots writes screenshots of every store at 1280/768/375, EN and HE, to
 // screenshots/storefront/.
 import { chromium } from 'playwright';
@@ -19,7 +25,7 @@ import { mkdirSync } from 'node:fs';
 
 const API = 'http://localhost:8001/api';
 const WEB = 'http://localhost:3210';
-const STORES = { services: 'test-owner', products: 'threesvc', mixed: 'my-business' };
+const STORES = { services: 'test-owner', products: 'threesvc', mixed: 'my-business', single: 'listing-check-mtkgxf2n' };
 const SHOTS = process.argv.includes('--shots');
 const OUT = 'screenshots/storefront';
 const failures = [];
@@ -60,7 +66,19 @@ for (const [kind, slug] of Object.entries(STORES)) {
     expect(await p.$('[data-testid="review-badge-chat"]'), 'mixed: the conversation review is labelled, not verified');
   }
   if (kind === 'products') expect(section && !avg && cards.length === 2 && !headerStars, 'products: 2 reviews listed, no average anywhere');
+  if (kind === 'single') { await ctx.close(); continue; }
   if (kind === 'services') expect(!section, 'services: no reviews box for a visitor when there are none');
+  const hero = await p.$('[data-testid="featured-hero"]');
+  const headline = await p.$('[data-testid="featured-headline"]');
+  if (kind === 'mixed') expect(hero && headline && (await headline.textContent()).includes('deep clean'), 'mixed: large featured card under the owner headline');
+  if (kind === 'products') expect(hero && !headline, 'products: large featured card, no headline');
+  if (kind === 'services') expect(!hero, 'services: nothing featured, no large card');
+  if (kind === 'single') expect(hero, 'single: a one-item store can feature its item');
+  if (hero) {
+    const heroTitle = (await hero.$eval('h2', (e) => e.textContent)).trim();
+    const rowTitles = await p.$$eval('[data-source="featured"] [data-testid^="services-gig-"]', (els) => els.map((e) => e.textContent));
+    expect(!rowTitles.some((x) => x.includes(heroTitle)) || kind === 'single', `${kind}: the large card's item is repeated in the featured row`);
+  }
   await ctx.close();
 }
 
@@ -77,10 +95,13 @@ for (const [kind, slug] of Object.entries(STORES)) {
 if (SHOTS) {
   mkdirSync(OUT, { recursive: true });
   for (const [kind, slug] of Object.entries(STORES)) {
+    if (kind === 'single') continue;
     for (const lang of ['en', 'he']) {
       for (const width of [1280, 768, 375]) {
         const { p, ctx } = await open(slug, { width, lang, as: kind === 'services' ? 'renter' : null });
         await p.screenshot({ path: `${OUT}/${kind}-${lang}-${width}-top.png` });
+        const fh = await p.$('[data-testid="featured-hero"]');
+        if (fh) { await fh.scrollIntoViewIfNeeded(); await p.waitForTimeout(300); await fh.screenshot({ path: `${OUT}/${kind}-${lang}-${width}-featured.png` }); }
         const sec = await p.$('[data-testid="reviews-section"]');
         if (sec) { await sec.scrollIntoViewIfNeeded(); await p.waitForTimeout(300); await sec.screenshot({ path: `${OUT}/${kind}-${lang}-${width}-reviews.png` }); }
         await ctx.close();

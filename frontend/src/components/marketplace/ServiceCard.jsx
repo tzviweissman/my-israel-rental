@@ -140,7 +140,7 @@ const ServiceGridCard = ({ gig, onClick, i18n, t }) => {
           </span>
         )}
       </p>
-      {(gig.rating_count > 0) && (
+      {gig.rating_count >= 3 && gig.rating_avg != null && (
         <div className="mt-0.5">
           <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={12} testidPrefix={`gig-stars-${gig.id}`} />
         </div>
@@ -234,7 +234,7 @@ const ServiceRow = ({ gig, onClick, i18n, t }) => {
             )}
           </p>
         )}
-        {gig.rating_count > 0 && (
+        {gig.rating_count >= 3 && gig.rating_avg != null && (
           <div className="mt-1">
             <StarRating value={gig.rating_avg || 0} count={gig.rating_count} size={11} testidPrefix={`gig-stars-${gig.id}`} />
           </div>

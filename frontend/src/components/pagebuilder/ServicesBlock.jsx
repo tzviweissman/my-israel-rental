@@ -116,10 +116,12 @@ export default function ServicesBlock({ block, ctx }) {
   // ---- the three narrow sources, each a plain set of cards ----------
 
   if (source === 'featured') {
-    const gigs = pinnedOf(business);
+    // The first featured item is already large at the top (FeaturedHero);
+    // the row carries the rest, so nothing shows twice.
+    const gigs = pinnedOf(business).slice(1);
     if (gigs.length === 0) return null;
     return (
-      <section data-testid={`pg-services-${block.id}`}>
+      <section data-testid={`pg-services-${block.id}`} data-source="featured">
         <h3 className="text-base font-bold mb-3 pg-head">
           {props.heading || t('businessPage.mostPopular', 'Start here')}
         </h3>

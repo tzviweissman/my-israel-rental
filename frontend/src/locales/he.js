@@ -388,6 +388,16 @@ const he = {
         deliveredPhoto: 'נמסר {{time}}, תמונה',
       },
       myGigs: {
+        feature: 'להציג כמומלץ',
+        featuredBadge: 'מומלץ',
+        featureCap: 'אפשר להציג עד 3 כמומלצים. קודם יש להסיר אחד.',
+        unfeatured: 'כבר לא מוצג כמומלץ.',
+        featuredFirst: 'מוצג כמומלץ. עכשיו הוא מופיע בגדול בראש העמוד שלך.',
+        featured: 'מוצג כמומלץ.',
+        featureFailed: 'לא ניתן היה לשנות את זה',
+        headlineSaved: 'נשמר. התרגום לשפה השנייה יופיע בעוד רגע.',
+        headlineLabel: 'מופיע בגדול בראש העמוד שלך. כותרת (לא חובה)',
+        headlinePh: 'לדוגמה: האהוב שלנו לשבת, מוכן ביום שישי',
         emptyTitle: 'עדיין לא פרסמתם שירות',
         emptyBody: 'הוסיפו את השירות הראשון שלכם. הפרסום בחינם, בלי עמלה.',
         emptyCta: 'להוסיף שירות ראשון',
@@ -766,6 +776,11 @@ const he = {
         sub_location: 'מיקום',
         sub_value: 'תמורה למחיר',
       },
+    featured: {
+      label: 'מומלץ',
+      kicker: 'מומלץ',
+      see: 'לפרטים',
+    },
     bookingTrack: {
       from: 'ההזמנה שלך אצל',
       pending: 'ממתינים לתשובה מהעסק',

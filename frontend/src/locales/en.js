@@ -407,6 +407,16 @@ const en = {
         deliveredPhoto: 'Delivered {{time}} - photo',
       },
       myGigs: {
+        feature: 'Feature this',
+        featuredBadge: 'Featured',
+        featureCap: 'You can feature up to 3. Unfeature one first.',
+        unfeatured: 'No longer featured.',
+        featuredFirst: 'Featured. It now shows large at the top of your page.',
+        featured: 'Featured.',
+        featureFailed: 'Could not change that',
+        headlineSaved: 'Saved. It is translated for the other language in a moment.',
+        headlineLabel: 'Shown large at the top of your page. Headline (optional)',
+        headlinePh: 'e.g. Our Shabbos favourite, ready Friday',
         emptyTitle: "You haven't listed a service yet",
         emptyBody: 'Add your first service. Listing is free, with no commission.',
         emptyCta: 'Add your first service',
@@ -781,6 +791,11 @@ const en = {
         sub_location: 'Location',
         sub_value: 'Value',
       },
+    featured: {
+      label: 'Featured',
+      kicker: 'Featured',
+      see: 'See details',
+    },
     bookingTrack: {
       from: 'Your booking with',
       pending: 'Waiting for the business to reply',

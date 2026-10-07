@@ -26,6 +26,7 @@ import PageMeta from '../components/PageMeta';
 import NotFound from './NotFound';
 import { businessCanonicalUrl, currentBusinessHostSlug } from '../utils/businessHost';
 import BlockList from '../components/pagebuilder/BlockList';
+import FeaturedHero from '../components/marketplace/FeaturedHero';
 import { cheapestFirst } from '../utils/gigPrice';
 import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
@@ -629,6 +630,8 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             that could hold someone's search box open would be a document
             fighting the person reading it. */}
         {biz.page_upgrade && <div id="business-body" className="scroll-mt-24" />}
+        {/* The owner's first featured item, large. Nothing featured: nothing. */}
+        <FeaturedHero business={biz} t={t} i18n={i18n} onOpen={(g) => navigate(`/businesses/${g.id}`)} />
         <BlockList
           business={biz}
           ctx={{
