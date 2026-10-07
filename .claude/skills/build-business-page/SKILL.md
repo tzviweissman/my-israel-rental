@@ -189,11 +189,10 @@ Full text and reasons: `reference/full-rules.md` §3c.
 10. **Come-back features only if they help the customer** (saved items,
     reorder, order updates). Never fake urgency, endless feeds, random
     rewards or guilt streaks.
-11. **Video: draw it, then check it.** Prefer rendering each frame for its
-    exact time over recording live (no stutter, same result every time);
-    `scripts/record.mjs` still records live, so check its contact sheet for
-    stutter before sending. Paid generation waits for the owner's yes on two
-    or three style frames.
+11. **Video: draw it, then check it.** `scripts/record.mjs` renders each
+    frame for its exact time (no stutter, same result every run) and writes a
+    contact sheet beside the video: look at it before sending. Paid
+    generation waits for the owner's yes on two or three style frames.
 
 ## 4. Design and story
 

@@ -277,13 +277,13 @@ code. Each rule names what it prevents.
 10. **Come-back features only where they help the customer.** Saved items,
     reorder, order updates and an owner's setup checklist, yes. Never fake
     urgency, endless feeds, random rewards, or streaks that guilt people.
-11. **Video is drawn, then checked.** A preview video should be rendered
-    frame by frame (each frame a function of its time) rather than recorded
-    live, so it never stutters and comes out the same every time. The skill's
-    `record.mjs` still records live; until it renders frames, check its
-    contact sheet for stutter. Before any video is sent, pull a contact sheet,
-    look at it, fix, render again. Anything paid (generated stills or clips)
-    waits for the owner's yes on two or three style frames.
+11. **Video is drawn, then checked.** A preview video is rendered frame by
+    frame (each frame a function of its time), never recorded live, so it
+    never stutters and comes out the same every time: the skill's
+    `record.mjs` does this (rebuilt 7 Oct 2026) and writes a contact sheet.
+    Before any video is sent, look at the sheet, fix, render again. Anything
+    paid (generated stills or clips) waits for the owner's yes on two or
+    three style frames.
 
 **Three more questions for the owner**, asked with the FAQ request
 (section 3, cont.) and only when their page does not already answer them:

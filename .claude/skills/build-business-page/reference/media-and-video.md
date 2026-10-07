@@ -82,5 +82,11 @@ The worked page is `examples/la-cholent/` (its BRIEF.md says what every asset is
 - Widths 375, 390, 768, ~1000 (Tzvi's usual window, and the band between
   breakpoints that once cropped a hero), 1280, 1440, 1536x753, 1920.
 - Owner preview: `scripts/record.mjs` makes a phone-size MP4 scroll-through,
-  about a minute, ~10 MB, fine for WhatsApp. Never publish a page carrying a
+  about 45 seconds, fine for WhatsApp. It draws the video frame by frame
+  rather than recording the screen: the page's clock, its animations, its
+  videos and the scroll are set for each frame's exact time, then the frame
+  is captured. So a heavy page never stutters, and two runs match (to the
+  eye; a darkened background video can differ by a few decoder pixels). It
+  takes about 0.3 s a frame, so 6 to 8 minutes for a phone preview, and it
+  writes `<name>-sheet.jpg`, a contact sheet to check before sending. Never publish a page carrying a
   real business's branding as a public artifact; send the video instead.
