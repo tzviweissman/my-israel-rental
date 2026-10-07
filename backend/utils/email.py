@@ -843,8 +843,8 @@ async def send_availability_expiring_email(
     <p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">
       If you'd like to keep renting it out, just tap <em>Extend by one month</em>
       below — we'll push your availability cap forward in one click, no login needed.
-      Otherwise, open the dashboard to set a new specific window, clear the cap entirely,
-      or pause the listing.
+      Otherwise, open the dashboard to set a new specific window or clear the cap
+      entirely.
     </p>
     {_button("Extend by one month", extend_url)}
     <p style="text-align:center;margin:6px 0 22px;">

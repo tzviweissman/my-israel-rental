@@ -383,8 +383,10 @@ async def _send_owner_nudge_email(
     else:
         why = ("Replies within a day dramatically increase the chance the listing gets rented - "
                "prospective tenants usually message several owners in parallel and lock in with whoever replies first.")
-        after = ("If you no longer have this listing available, please mark it as unavailable "
-                 "in your dashboard so we stop showing it.")
+        # A rental has no pause control (services do): name the two
+        # controls that exist, an end date or deleting it (dead ends, 7 Oct).
+        after = ("If this place is no longer available, set an end date on the listing "
+                 "or delete it from your dashboard, so it stops being shown.")
     subject = f"Reminder: {who} is waiting to hear from you about {title}"
     inner = (
         f"<p>Hi {_esc(owner.get('name')) or ''},</p>"
