@@ -164,3 +164,19 @@ def test_order_without_an_account_reviews_from_its_tracking_link():
         # without the link, an anonymous order is still nobody's to review
         assert (await rv.check_eligibility(db, await rv.load_booking(db, "o9"), None))["reason"] == "not_yours"
     run(t)
+
+
+def test_booking_without_an_account_reviews_from_its_status_link():
+    async def t(db):
+        await seed(db)
+        await db.marketplace_bookings.insert_one({"_id": "gb1", "gig_id": "gig1", "provider_user_id": "owner", "client_user_id": None,
+                                                  "guest_name": "Ruth Adler", "track_token": "trk-guest-booking-1",
+                                                  "status": "accepted"})
+        with pytest.raises(rv.ReviewError):
+            await rv.order_review_link(db, "trk-guest-booking-1", collection="marketplace_bookings")  # not done yet
+        await db.marketplace_bookings.update_one({"_id": "gb1"}, {"$set": {"status": "completed", "completed_at": now()}})
+        link = await rv.order_review_link(db, "trk-guest-booking-1", collection="marketplace_bookings")
+        claim = await rv.read_request_token(db, link)
+        doc = await rv.create_native(db, booking_id=claim["booking_id"], user_id=None, rating=4, text=TEXT, token_jti=claim["jti"])
+        assert doc["verified"] and doc["booking_kind"] == "service" and doc["author_display_name"] == "Ruth A."
+    run(t)

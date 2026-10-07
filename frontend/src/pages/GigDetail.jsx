@@ -195,37 +195,53 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
   );
 };
 
-const BookingForm = ({ gig, tier, onClose, token }) => {
+/* Booking needs no account (Tzvi, 7 Oct 2026). Signed out, the form asks
+   for a name and an email or a phone, and the answer comes back on a
+   status page the customer keeps. An appointment carries the day and time
+   picked on the page; until 7 Oct this form dropped them, and the server
+   refused every in-platform appointment for want of a time slot. */
+const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot = null, initialDate = '' }) => {
   const { t } = useTranslation();
+  const navigate = useNavigate();
   const [message, setMessage] = useState('');
+  const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
-  const [date, setDate] = useState('');
+  const [date, setDate] = useState(initialDate || '');
   const [saving, setSaving] = useState(false);
+  const guest = !token;
   const submit = async (e) => {
     e.preventDefault();
-    if (!email.trim()) return toast.error(t('gigDetail.emailRequired', 'Email required'));
+    if (guest && name.trim().length < 2) return toast.error(t('gigDetail.nameRequired', 'Please add your name'));
+    if (guest ? !(email.trim() || phone.trim()) : !email.trim()) {
+      return toast.error(guest ? t('gigDetail.reachRequired', 'Add an email or a phone number so the business can reach you') : t('gigDetail.emailRequired', 'Email required'));
+    }
     setSaving(true);
     try {
-      await axios.post(
+      const { data } = await axios.post(
         `${API}/marketplace/gigs/${gig.id}/book`,
         {
           tier_name: tier.name,
           message,
           contact_email: email,
           contact_phone: phone,
-          preferred_date: date || null,
+          guest_name: guest ? name : undefined,
+          preferred_date: slot ? slotDate : (date || null),
+          time_slot: slot || undefined,
         },
-        { headers: { Authorization: `Bearer ${token}` } },
+        token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
       );
       toast.success(t('gigDetail.requestSent', 'Booking request sent!'));
       onClose();
+      if (guest && data?.track_path) navigate(data.track_path);
     } catch (err) {
-      toast.error(err.response?.data?.detail || t('gigDetail.requestFailed', 'Failed to send request'));
+      const d = err.response?.data?.detail;
+      toast.error(typeof d === 'string' ? d : t('gigDetail.requestFailed', 'Failed to send request'));
     } finally {
       setSaving(false);
     }
   };
+  const field = 'w-full px-3 py-2 rounded-lg border border-gray-200 text-sm';
   return (
     <div className="fixed inset-0 z-50 bg-black/60 flex items-center justify-center p-4" onClick={onClose}>
       <form
@@ -241,10 +257,22 @@ const BookingForm = ({ gig, tier, onClose, token }) => {
             price: tier.price.toLocaleString(),
           })}
         </h3>
-        <input required type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder={t("sweep.yourEmail", "Your email")} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="gig-booking-email" />
-        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} placeholder={t('gigDetail.phoneOptional', 'Phone (optional)')} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
-        <DateField value={date} onChange={setDate} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm bg-white" testid="gig-booking-date" />
-        <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('gigDetail.messagePh', 'Tell the provider what you need…')} rows={3} className="w-full px-3 py-2 rounded-lg border border-gray-200 text-sm" />
+        {slot && (
+          <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }} data-testid="gig-booking-when">
+            {t('gigDetail.bookingWhen', { defaultValue: '{{date}} at {{time}}', date: slotDate, time: slot })}
+          </p>
+        )}
+        {guest && (
+          <input required value={name} onChange={(e) => setName(e.target.value)} maxLength={80} autoComplete="name"
+            placeholder={t('gigDetail.yourName', 'Your name')} className={field} data-testid="gig-booking-name" />
+        )}
+        <input required={!guest} type="email" value={email} onChange={(e) => setEmail(e.target.value)} autoComplete="email"
+          placeholder={guest ? t('gigDetail.emailOrPhone', 'Email (or a phone below)') : t('sweep.yourEmail', 'Your email')} className={field} data-testid="gig-booking-email" />
+        <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel"
+          placeholder={guest ? t('gigDetail.phone', 'Phone') : t('gigDetail.phoneOptional', 'Phone (optional)')} className={field} data-testid="gig-booking-phone" />
+        {!slot && <DateField value={date} onChange={setDate} className={`${field} bg-white`} testid="gig-booking-date" />}
+        <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('gigDetail.messagePh', 'Tell the provider what you need…')} rows={3} className={field} />
+        {guest && <p className="text-xs text-gray-500">{t('gigDetail.guestNote', 'No account needed. You get a page that shows the reply.')}</p>}
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">
             {t('common.cancel', 'Cancel')}
@@ -607,7 +635,6 @@ const GigDetail = () => {
         const msg = `Hi! I'd like to book your "${displayTitle}" - ${tier.name} on ${appointmentDate} at ${appointmentSlot} (${sym}${tier.price}) from MyIsraelRental.`;
         if (openWhatsApp(msg)) return;
       }
-      if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
       setShowBook(true);
       return;
     }
@@ -617,7 +644,6 @@ const GigDetail = () => {
       const msg = `Hi! I'd like to book your "${displayTitle}" - ${tier.name} (${sym}${tier.price})${datePart} from MyIsraelRental.`;
       if (openWhatsApp(msg)) return;
     }
-    if (!token) { toast.error(t('gigDetail.signInToBook', 'Please sign in to book')); navigate(`/auth/login?redirect=${encodeURIComponent(`/businesses/${id}`)}`); return; }
     setShowBook(true);
   };
 
@@ -1231,7 +1257,8 @@ const GigDetail = () => {
       </div>
 
       {showBook && tier && (
-        <BookingForm gig={gig} tier={tier} onClose={() => setShowBook(false)} token={token} />
+        <BookingForm gig={gig} tier={tier} onClose={() => setShowBook(false)} token={token}
+          slotDate={isAppointment ? appointmentDate : null} slot={isAppointment ? appointmentSlot : null} initialDate={deliverableDate || ''} />
       )}
 
       {lightboxIndex !== null && activeGallery.length > 0 && (

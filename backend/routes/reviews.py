@@ -104,6 +104,17 @@ async def request_link(token: str, request: Request) -> dict:
     return await _booking_view(booking, verdict)
 
 
+@router.post("/bookings/track/{track_token}/review-link")
+async def booking_review_link(track_token: str, request: Request) -> dict:
+    """From a booking's status page, no account: once it is completed."""
+    check_rate(request, bucket="booking-review-link", limit=30, window_seconds=600)
+    _need_native()
+    try:
+        return {"token": await rv.order_review_link(db, track_token, collection="marketplace_bookings")}
+    except rv.ReviewError as e:
+        _raise(e)
+
+
 @router.post("/orders/track/{track_token}/review-link")
 async def order_review_link(track_token: str, request: Request) -> dict:
     """From the order's tracking page, no account: a single-use link to

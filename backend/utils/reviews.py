@@ -181,7 +181,7 @@ async def load_booking(db, booking_id: str) -> dict | None:
             "start": b.get("preferred_date"), "end": b.get("preferred_date"), "done_on": _day(done),
             "listing_id": b.get("gig_id"), "listing_kind": "gig", "listing_title": gig.get("title") or "",
             "owner_ids": {x for x in (gig.get("provider_user_id"), b.get("provider_user_id"), (biz or {}).get("owner_user_id")) if x},
-            "business_id": gig.get("business_id"),
+            "business_id": gig.get("business_id"), "guest_name": b.get("guest_name"),
         }
     o = await db.store_orders.find_one({"_id": booking_id})
     if o:
@@ -242,8 +242,9 @@ async def check_eligibility(db, booking: dict | None, user_id: str | None, *, to
     today = today or today_il()
     if not booking:
         return {"eligible": False, "reason": "not_found"}
-    anonymous_order = via_link and booking["kind"] == "order" and not booking["guest_id"]
-    if not anonymous_order:
+    # An order or a service booking made without an account.
+    anonymous = via_link and booking["kind"] in ("order", "service") and not booking["guest_id"]
+    if not anonymous:
         if not user_id or booking["guest_id"] != user_id:
             return {"eligible": False, "reason": "not_yours"}
         if user_id in booking["owner_ids"]:
@@ -302,13 +303,13 @@ async def business_basis(db, business_id: str, user_id: str | None) -> dict:
     return {"eligible": False, "reason": "no_relationship", "basis_id": None, "kind": None}
 
 
-async def order_review_link(db, track_token: str) -> str:
-    """A single-use review link for the order behind a tracking link, once
-    it is done. Whoever holds the tracking link placed the order."""
-    # Same floor as the tracking page itself (routes/marketplace/orders.py).
-    o = await db.store_orders.find_one({"track_token": track_token}, {"_id": 1}) if len(track_token or "") >= 16 else None
+async def order_review_link(db, track_token: str, *, collection: str = "store_orders") -> str:
+    """A single-use review link for the order (or service booking) behind
+    a status link, once it is done. Whoever holds the status link placed it."""
+    # Same floor as the status pages themselves.
+    o = await db[collection].find_one({"track_token": track_token}, {"_id": 1}) if len(track_token or "") >= 16 else None
     if not o:
-        raise ReviewError(404, "not_found", "Order not found.")
+        raise ReviewError(404, "not_found", "Not found.")
     booking = await load_booking(db, o["_id"])
     verdict = await check_eligibility(db, booking, booking["guest_id"], via_link=True)
     if not verdict["eligible"]:

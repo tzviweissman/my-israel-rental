@@ -719,8 +719,11 @@ class ProviderPatch(BaseModel):
 class BookingIn(BaseModel):
     tier_name: str
     message: str = ""
-    contact_email: str
+    # Booking needs no account (Tzvi, 7 Oct 2026): a guest gives a name and
+    # an email or a phone, and gets a status link instead of a dashboard.
+    contact_email: str = ""
     contact_phone: Optional[str] = None
+    guest_name: Optional[str] = Field(None, max_length=80)
     preferred_date: Optional[str] = None                  # ISO YYYY-MM-DD
     # Appointment-only. Provider-side time slot chosen by the buyer.
     # Format: ``HH:MM`` in the provider's local time (Israel).
