@@ -65,6 +65,10 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
 )
 logger = logging.getLogger("server")
+# httpx logs every request's full URL at INFO, and iCal feed URLs carry the
+# calendar's private access token: 8 of them sat in the Railway logs on
+# 7 Oct 2026. Warnings and errors still show; request lines do not.
+logging.getLogger("httpx").setLevel(logging.WARNING)
 
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
