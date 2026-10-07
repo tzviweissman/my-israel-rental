@@ -104,3 +104,20 @@ def test_without_tesseract_nothing_is_guessed(monkeypatch):
     import utils.flyer_check as fc
     monkeypatch.setattr(fc, "_tesseract", lambda: None)
     assert fc.classify(_flyer_png())["kind"] == "unknown"
+
+
+@pytest.mark.parametrize("langs,want", [(["eng", "heb", "osd"], True), (["eng", "osd"], False), (None, False)])
+def test_health_reports_ocr_only_with_hebrew_and_english(monkeypatch, langs, want):
+    """English alone is not enough: Hebrew flyers would read as photos."""
+    import utils.flyer_check as fc
+
+    class Tess:
+        @staticmethod
+        def get_languages(config=""):
+            return langs
+    monkeypatch.setattr(fc, "_tesseract", lambda: Tess if langs is not None else None)
+    fc.reads_both_languages.cache_clear()
+    try:
+        assert fc.reads_both_languages() is want
+    finally:
+        fc.reads_both_languages.cache_clear()

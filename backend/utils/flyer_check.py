@@ -18,6 +18,7 @@ typographic panel rather than risk cropping a flyer.
 from __future__ import annotations
 
 import io
+import functools
 import os
 import re
 from typing import Optional
@@ -60,6 +61,20 @@ def _tesseract() -> Optional[object]:
 
 def available() -> bool:
     return _tesseract() is not None
+
+
+@functools.cache
+def reads_both_languages() -> bool:
+    """Tesseract is installed with Hebrew and English, so photos are told
+    from flyers and contract photos give their text. Reported by
+    /api/health: on 6 Oct 2026 production had silently run without it since
+    the move to Railpack, and every picture classified "unknown". Cached:
+    the binary cannot appear while the process runs."""
+    tess = _tesseract()
+    try:
+        return bool(tess) and {"heb", "eng"} <= set(tess.get_languages(config=""))
+    except Exception:  # noqa: BLE001
+        return False
 
 
 def _read(tess, img, langs) -> list[tuple[str, float, int, int]]:

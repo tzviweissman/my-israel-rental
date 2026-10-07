@@ -56,6 +56,7 @@ from routes import (  # noqa: E402
 )
 from routes.deps import UPLOAD_DIR, client, db  # noqa: E402  (import after load_dotenv on purpose)
 from utils.contract_template import ensure_templates as ensure_contract_templates  # noqa: E402
+from utils.flyer_check import reads_both_languages  # noqa: E402
 from utils.helpers import sync_all_ical_feeds  # noqa: E402
 from utils.mention_email import mention_email_loop  # noqa: E402
 
@@ -134,6 +135,9 @@ async def health() -> dict:
         # config failure the rest of this file's deploy notes are about.
         # Still booleans only: no value, resolved or not, is ever echoed.
         "cloudinary": _config_ok("CLOUDINARY_CLOUD_NAME") and _config_ok("CLOUDINARY_API_SECRET"),
+        # Photo recognition and contract OCR. False means every picture is
+        # "unknown" and page effects that need photos never appear.
+        "ocr": reads_both_languages(),
     }
 
 

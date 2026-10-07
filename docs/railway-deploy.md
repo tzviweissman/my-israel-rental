@@ -24,10 +24,19 @@ uvicorn server:app --host 0.0.0.0 --port $PORT
 > returns `""` with a log line, and a contract uploaded as a photo silently
 > loses its extracted text.
 >
-> Confirm with `tesseract --version` in the deployed container. Two candidate
-> fixes, both needing a preview deploy first: switch the service builder back
-> to NIXPACKS so the existing file applies, or add a Railpack/Dockerfile
-> equivalent of its `aptPkgs`.
+> **The fix (7 Oct 2026):** one service variable, which Railpack reads to
+> install system packages into the final image:
+>
+> ```
+> RAILPACK_DEPLOY_APT_PACKAGES=tesseract-ocr tesseract-ocr-heb tesseract-ocr-eng
+> ```
+>
+> No builder switch and no Dockerfile. It matters beyond contracts: the page
+> builder's photo check (`utils/flyer_check.py`) needs the same program, and
+> without it every picture is "unknown", so generated pages get no photo
+> hero and none of the photo effects. `GET /api/health` now reports `"ocr"`:
+> `true` only when Tesseract reads both Hebrew and English. Check it after
+> every backend deploy.
 
 Do **not** hardcode a port — Railway injects `$PORT`.
 
