@@ -656,7 +656,6 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           kind="business"
           className="mt-10"
           schemaItem={{ '@type': 'LocalBusiness', name: biz.name }}
-          onSignIn={() => navigate(`/auth/login?redirect=${encodeURIComponent(`/business/${biz.slug || biz.id}#reviews`)}`)}
         />
 
         {/* B7 — the highest-intent placement on the site for this CTA.

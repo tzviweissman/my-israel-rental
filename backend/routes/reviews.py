@@ -100,8 +100,20 @@ async def request_link(token: str, request: Request) -> dict:
     except rv.ReviewError as e:
         return {"eligible": False, "reason": e.code}
     booking = await rv.load_booking(db, t["booking_id"])
-    verdict = await rv.check_eligibility(db, booking, (booking or {}).get("guest_id"))
+    verdict = await rv.check_eligibility(db, booking, (booking or {}).get("guest_id"), via_link=True)
     return await _booking_view(booking, verdict)
+
+
+@router.post("/orders/track/{track_token}/review-link")
+async def order_review_link(track_token: str, request: Request) -> dict:
+    """From the order's tracking page, no account: a single-use link to
+    the review form once the order is done."""
+    check_rate(request, bucket="order-review-link", limit=30, window_seconds=600)
+    _need_native()
+    try:
+        return {"token": await rv.order_review_link(db, track_token)}
+    except rv.ReviewError as e:
+        _raise(e)
 
 
 @router.post("/reviews")

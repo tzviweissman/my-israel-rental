@@ -137,3 +137,30 @@ def test_no_average_below_three():
                                      "status": "published", "source_connected": True})
         assert await rv.summary(db, {"business_id": "biz1"}) == {"native": {"avg": 3.0, "count": 3}}
     run(t)
+
+
+def test_order_without_an_account_reviews_from_its_tracking_link():
+    """Nobody signs in to order or to review (Tzvi, 7 Oct 2026)."""
+    async def t(db):
+        await seed(db)
+        await db.store_orders.insert_one({"_id": "o9", "business_id": "biz1", "owner_user_id": "owner", "gig_id": "gig1",
+                                          "customer_user_id": None, "customer_name": "Miriam ben david", "track_token": "trk9-0123456789ab",
+                                          "status": "ready", "status_changed_at": now()})
+        with pytest.raises(rv.ReviewError):
+            await rv.order_review_link(db, "trk9-0123456789ab")  # not done yet
+        with pytest.raises(rv.ReviewError):
+            await rv.order_review_link(db, "nope")
+        await db.store_orders.update_one({"_id": "o9"}, {"$set": {"status": "done", "status_changed_at": now()}})
+        link = await rv.order_review_link(db, "trk9-0123456789ab")
+        claim = await rv.read_request_token(db, link)
+        doc = await rv.create_native(db, booking_id=claim["booking_id"], user_id=None, rating=5, text=TEXT, token_jti=claim["jti"])
+        assert doc["verified"] and doc["booking_kind"] == "order" and doc["author_user_id"] is None
+        assert doc["author_display_name"] == "Miriam D."
+        # the link is spent, and the order can't be reviewed twice
+        with pytest.raises(rv.ReviewError):
+            await rv.read_request_token(db, link)
+        with pytest.raises(rv.ReviewError):
+            await rv.order_review_link(db, "trk9-0123456789ab")
+        # without the link, an anonymous order is still nobody's to review
+        assert (await rv.check_eligibility(db, await rv.load_booking(db, "o9"), None))["reason"] == "not_yours"
+    run(t)

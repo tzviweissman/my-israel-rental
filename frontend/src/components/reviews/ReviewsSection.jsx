@@ -334,7 +334,7 @@ function ReviewCard({ r, kind, token, onChange, t, lang }) {
   );
 }
 
-export default function ReviewsSection({ listingId, businessId, kind = 'gig', schemaItem = null, fallback = null, className = '', onSignIn = null }) {
+export default function ReviewsSection({ listingId, businessId, kind = 'gig', schemaItem = null, fallback = null, className = '' }) {
   const { t, i18n } = useTranslation();
   const { token } = useContext(AuthContext);
   const [state, setState] = useState({ loading: true });
@@ -419,12 +419,7 @@ export default function ReviewsSection({ listingId, businessId, kind = 'gig', sc
               summary: { ...(s.summary || {}), native: { avg: s.summary?.native?.avg ?? null, count: (s.summary?.native?.count || 0) + 1 } } }));
           }} />
       )}
-      {!token && onSignIn && total > 0 && (
-        <button type="button" onClick={onSignIn} className="mt-2 min-h-[44px] text-sm underline underline-offset-2" style={{ color: MUTED }}
-          data-testid="review-sign-in">
-          {t('reviews.signInToWrite', 'Bought from or spoke with this business? Sign in to write a review')}
-        </button>
-      )}
+
       {total > 1 && <div className="mt-3 flex flex-wrap items-center gap-2">
         {both && ['', 'native', 'google'].map((s) => (
           <button key={s || 'all'} type="button" onClick={() => setSource(s)} aria-pressed={source === s}

@@ -192,6 +192,7 @@ async def load_booking(db, booking_id: str) -> dict | None:
             "done_on": _day(o.get("status_changed_at")) if o.get("status") == "done" else None,
             "listing_id": o.get("gig_id"), "listing_kind": "gig", "listing_title": gig.get("title") or "",
             "owner_ids": {x for x in (o.get("owner_user_id"),) if x}, "business_id": o.get("business_id"),
+            "guest_name": o.get("customer_name"),
         }
     if booking_id.startswith(CHAT_PREFIX):
         return await _load_chat(db, booking_id)
@@ -227,18 +228,27 @@ async def _load_chat(db, key: str) -> dict | None:
     }
 
 
-async def check_eligibility(db, booking: dict | None, user_id: str | None, *, today: date | None = None) -> dict:
+async def check_eligibility(db, booking: dict | None, user_id: str | None, *, today: date | None = None,
+                            via_link: bool = False) -> dict:
     """Why this person may or may not review this booking. Never raises;
     returns {eligible, reason}. Reasons: not_found, not_yours, not_completed,
-    cancelled, too_early, window_closed, already_reviewed, own_listing."""
+    cancelled, too_early, window_closed, already_reviewed, own_listing.
+
+    via_link: the request carries a single-use review link we issued. For
+    an order placed without an account (Tzvi, 7 Oct 2026: nobody signs in
+    to order or to review) that link, handed out only on the order's own
+    tracking page, is the proof of who they are; there is no account to
+    compare."""
     today = today or today_il()
     if not booking:
         return {"eligible": False, "reason": "not_found"}
-    if not user_id or booking["guest_id"] != user_id:
-        return {"eligible": False, "reason": "not_yours"}
-    if user_id in booking["owner_ids"]:
-        return {"eligible": False, "reason": "own_listing"}
-    guest = await db.users.find_one({"id": user_id}, {"email": 1}) or {}
+    anonymous_order = via_link and booking["kind"] == "order" and not booking["guest_id"]
+    if not anonymous_order:
+        if not user_id or booking["guest_id"] != user_id:
+            return {"eligible": False, "reason": "not_yours"}
+        if user_id in booking["owner_ids"]:
+            return {"eligible": False, "reason": "own_listing"}
+    guest = await db.users.find_one({"id": user_id}, {"email": 1}) or {} if user_id else {}
     dom = _domain(guest.get("email"))
     if dom and dom not in _PUBLIC_MAIL:
         async for o in db.users.find({"id": {"$in": list(booking["owner_ids"])}}, {"email": 1}):
@@ -290,6 +300,20 @@ async def business_basis(db, business_id: str, user_id: str | None) -> dict:
         if r in reasons:
             return {"eligible": False, "reason": r, "basis_id": None, "kind": None}
     return {"eligible": False, "reason": "no_relationship", "basis_id": None, "kind": None}
+
+
+async def order_review_link(db, track_token: str) -> str:
+    """A single-use review link for the order behind a tracking link, once
+    it is done. Whoever holds the tracking link placed the order."""
+    # Same floor as the tracking page itself (routes/marketplace/orders.py).
+    o = await db.store_orders.find_one({"track_token": track_token}, {"_id": 1}) if len(track_token or "") >= 16 else None
+    if not o:
+        raise ReviewError(404, "not_found", "Order not found.")
+    booking = await load_booking(db, o["_id"])
+    verdict = await check_eligibility(db, booking, booking["guest_id"], via_link=True)
+    if not verdict["eligible"]:
+        raise ReviewError(409 if verdict["reason"] == "already_reviewed" else 422, verdict["reason"], "This order can't be reviewed.")
+    return await mint_request_token(db, o["_id"])
 
 
 # ---------------------------------------------------------------- tokens
@@ -356,10 +380,10 @@ def _validate_body(rating: Any, sub_ratings: Any, text: Any, *, stay: bool) -> t
     return rating, subs or None, body
 
 
-async def create_native(db, *, booking_id: str, user_id: str, rating: Any, text: Any,
+async def create_native(db, *, booking_id: str, user_id: str | None, rating: Any, text: Any,
                         sub_ratings: Any = None, token_jti: str | None = None, today: date | None = None) -> dict:
     booking = await load_booking(db, booking_id)
-    verdict = await check_eligibility(db, booking, user_id, today=today)
+    verdict = await check_eligibility(db, booking, user_id, today=today, via_link=bool(token_jti))
     if not verdict["eligible"]:
         raise ReviewError(403 if verdict["reason"] in ("not_yours", "own_listing") else 409 if verdict["reason"] == "already_reviewed" else 422,
                           verdict["reason"], "This booking can't be reviewed.")
@@ -370,7 +394,7 @@ async def create_native(db, *, booking_id: str, user_id: str, rating: Any, text:
             {"_id": token_jti, "used_at": None}, {"$set": {"used_at": now_iso()}})
         if not spent:
             raise ReviewError(410, "link_used", "This review link has already been used.")
-    author = await db.users.find_one({"id": user_id}, {"name": 1}) or {}
+    author = (await db.users.find_one({"id": user_id}, {"name": 1}) or {}) if user_id else {"name": (booking or {}).get("guest_name")}
     now = now_iso()
     doc = {
         "_id": uuid.uuid4().hex, "listing_id": booking["listing_id"], "listing_kind": booking["listing_kind"],
