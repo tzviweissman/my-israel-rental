@@ -1551,6 +1551,9 @@ const he = {
         noFeesDetail: 'חינם לשוכרים. חינם לבעלי דירות.'
       },
       property: {
+        checkinFrom: 'כניסה מהשעה',
+        checkoutBy: 'יציאה עד',
+        stayTimesHint: 'מוצג לאורחים במודעה. תזכורת הניקיון אחרי יציאה מתוזמנת לפי שעת היציאה.',
         // Instant-book vs request-to-book — see the note on the English side.
         bookingMode: {
           currentTag: 'חל כעת',

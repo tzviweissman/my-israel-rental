@@ -603,6 +603,22 @@ const PropertyDetail = () => {
               </div>
             )}
 
+            {/* The owner's check-in and check-out times, when set. */}
+            {!sublease && (property.checkin_time || property.checkout_time) && (
+              <div className="bg-gray-50 border border-gray-200 p-3 rounded-xl mb-6 flex flex-wrap items-center gap-x-6 gap-y-1 text-sm" data-testid="property-stay-times">
+                {property.checkin_time && (
+                  <span className="text-gray-700">
+                    {t('property.checkinFrom', 'Check-in from')} <strong className="text-gray-900">{property.checkin_time}</strong>
+                  </span>
+                )}
+                {property.checkout_time && (
+                  <span className="text-gray-700">
+                    {t('property.checkoutBy', 'Check-out by')} <strong className="text-gray-900">{property.checkout_time}</strong>
+                  </span>
+                )}
+              </div>
+            )}
+
             <div className="bg-white p-6 rounded-2xl border border-[#E5E5E5] mb-8">
               <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'var(--font-head)' }}>{t('property.description')}</h2>
               <p className="text-gray-700 leading-relaxed">

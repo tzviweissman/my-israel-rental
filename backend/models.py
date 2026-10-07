@@ -145,6 +145,21 @@ class PropertyCreate(BaseModel):
     minimum_booking_days: int | None = None
     checkin_time: str | None = None
     checkout_time: str | None = None
+
+    @field_validator("checkin_time", "checkout_time")
+    @classmethod
+    def _clock(cls, v):
+        # "15:00". The checkout-cleaning automation builds a timestamp from
+        # it (automations.py), so anything else is refused, and empty
+        # clears it.
+        v = (v or "").strip()
+        if not v:
+            return None
+        import re
+        if not re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", v[:5]):
+            raise ValueError("Use a time like 15:00")
+        return v[:5]
+
     # Holiday categories — only meaningful when rental_type='vacation'.
     # Empty list means "regular vacation". Allowed values: 'sukkot', 'pesach'.
     holiday_tags: List[str] | None = []

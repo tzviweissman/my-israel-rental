@@ -1560,6 +1560,9 @@ const en = {
         noFeesDetail: 'Free for renters. Free for owners.'
       },
       property: {
+        checkinFrom: 'Check-in from',
+        checkoutBy: 'Check-out by',
+        stayTimesHint: 'Shown to guests on your listing. The checkout cleaning reminder uses the check-out time.',
         // Instant-book vs request-to-book, chosen by the lister in the
         // add/edit property form. The two `default*` strings describe what
         // happens while the lister hasn't chosen — that state is real and

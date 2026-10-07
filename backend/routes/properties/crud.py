@@ -149,6 +149,12 @@ async def update_property(property_id: str, property_data: PropertyCreate, paylo
     # unless this request actually carried the key.
     if 'instant_booking' not in property_data.model_fields_set:
         update_doc['instant_booking'] = existing.get('instant_booking')
+    # Same for the check-in and check-out times: an edit that does not carry
+    # them (an older bundle, the importer) must not erase what the bulk
+    # editor or the listing form set.
+    for key in ('checkin_time', 'checkout_time'):
+        if key not in property_data.model_fields_set:
+            update_doc[key] = existing.get(key)
 
     # Auto-republish: if this listing was quarantined by the admin
     # pricing auto-fix, and the owner has now supplied a plausible

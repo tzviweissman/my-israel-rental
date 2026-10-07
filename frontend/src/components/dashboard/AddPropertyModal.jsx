@@ -24,6 +24,7 @@ const EMPTY_FORM = {
   amenities: [], monthly_price: '', nightly_price: '', currency: 'ILS',
   images: [], videos: [], cancellation_policy: 'flexible', custom_cancellation_policy: '',
   available_from: '', available_to: '', starting_date: '', minimum_booking_days: '',
+  checkin_time: '', checkout_time: '',
   holiday_tags: [],
   holiday_lump_price: '',
   holiday_lump_currency: 'ILS',
@@ -219,6 +220,8 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         available_to: editingProperty.available_to || '',
         starting_date: editingProperty.starting_date || '',
         minimum_booking_days: editingProperty.minimum_booking_days ? String(editingProperty.minimum_booking_days) : '',
+        checkin_time: editingProperty.checkin_time || '',
+        checkout_time: editingProperty.checkout_time || '',
         holiday_tags: editingProperty.holiday_tags || [],
         holiday_lump_price: editingProperty.holiday_lump_price || '',
         holiday_lump_currency: editingProperty.holiday_lump_currency || 'ILS',
@@ -317,6 +320,9 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       floor: toNumOrNull(propertyForm.floor),
       porches: toIntOrNull(propertyForm.porches) ?? 0,
       minimum_booking_days: toIntOrNull(propertyForm.minimum_booking_days),
+      // Empty clears it; the server keeps only a real clock time.
+      checkin_time: propertyForm.checkin_time || null,
+      checkout_time: propertyForm.checkout_time || null,
       holiday_lump_price: toNumOrNull(propertyForm.holiday_lump_price),
       holiday_lump_is_per_night: !!propertyForm.holiday_lump_is_per_night,
     };
@@ -1021,6 +1027,31 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
                 : 'Minimum number of months a renter must book (e.g., 6, 12, 24 months)'}
             </p>
           </div>
+
+          {/* Check-in and check-out times, for stays counted in nights.
+              They were settable only in the bulk editor, never shown, and
+              the checkout-cleaning automation times itself from check-out
+              (dead ends, 7 Oct 2026). */}
+          {['vacation', 'short-term'].includes(propertyForm.rental_type) && (
+            <div className="grid grid-cols-2 gap-3" data-testid="stay-times">
+              {[['checkin_time', t('bulk.fieldLabels.checkin_time', 'Check-in time'), '15:00'],
+                ['checkout_time', t('bulk.fieldLabels.checkout_time', 'Check-out time'), '11:00']].map(([key, label]) => (
+                <label key={key} className="block">
+                  <span className="block text-sm font-medium mb-2">{label}</span>
+                  <input
+                    type="time"
+                    value={propertyForm[key]}
+                    onChange={(e) => setPropertyForm({ ...propertyForm, [key]: e.target.value })}
+                    className="w-full px-4 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
+                    data-testid={`property-${key}`}
+                  />
+                </label>
+              ))}
+              <p className="col-span-2 -mt-1 text-xs text-gray-500">
+                {t('property.stayTimesHint', 'Shown to guests on your listing. The checkout cleaning reminder uses the check-out time.')}
+              </p>
+            </div>
+          )}
 
           {/* How bookings arrive — instant confirm vs. request to book.
               Three states, not two: null means the lister hasn't chosen and
