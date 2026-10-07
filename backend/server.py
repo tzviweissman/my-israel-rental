@@ -525,7 +525,9 @@ async def startup_tasks() -> None:
         from routes.marketplace.automations import ensure_automation_indexes
         await ensure_automation_indexes()
         from routes.marketplace.businesses import ensure_page_indexes
+        from routes.marketplace.page_versions import ensure_version_indexes
         await ensure_page_indexes()
+        await ensure_version_indexes()
         logger.info("Hot-path indexes ensured")
     except Exception as e:  # noqa: BLE001
         logger.warning(f"hot-path index creation failed (non-fatal): {e}")

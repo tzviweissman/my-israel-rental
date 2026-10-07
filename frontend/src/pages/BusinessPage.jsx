@@ -98,9 +98,15 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         // one: the API's owner preview and an admin's view of a v3 page
         // the quality check has not passed yet both depend on it.
         const signedIn = sessionStorage.getItem('token');
+        // ?pv= is a page version's preview link (backend utils/page_versions):
+        // the visual check renders a version here before it is live.
+        const pv = new URLSearchParams(window.location.search).get('pv');
         const { data } = await axios.get(
           `${API}/marketplace/business/${encodeURIComponent(slug)}`,
-          { headers: { ...visitorHeaders(), ...(signedIn ? { Authorization: `Bearer ${signedIn}` } : {}) } },
+          {
+            headers: { ...visitorHeaders(), ...(signedIn ? { Authorization: `Bearer ${signedIn}` } : {}) },
+            params: pv ? { pv } : undefined,
+          },
         );
         if (!cancelled) setFetched(data);
       } catch {
