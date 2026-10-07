@@ -31,7 +31,12 @@ uvicorn server:app --host 0.0.0.0 --port $PORT
 > RAILPACK_DEPLOY_APT_PACKAGES=tesseract-ocr tesseract-ocr-heb tesseract-ocr-eng
 > ```
 >
-> No builder switch and no Dockerfile. It matters beyond contracts: the page
+> No builder switch and no Dockerfile. Set on `backend-preview` and the live
+> backend on 7 Oct 2026; preview reported `"ocr": true`. Note: that day's
+> live build ran **Nixpacks** (v1.41.0), not Railpack, and installed
+> Tesseract from `nixpacks.toml` itself, so on the live service the variable
+> is a backstop in case the builder goes back to Railpack. Check which
+> builder ran in the build log before trusting either file. It matters beyond contracts: the page
 > builder's photo check (`utils/flyer_check.py`) needs the same program, and
 > without it every picture is "unknown", so generated pages get no photo
 > hero and none of the photo effects. `GET /api/health` now reports `"ocr"`:
