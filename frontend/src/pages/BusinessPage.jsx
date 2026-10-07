@@ -33,7 +33,7 @@ import V3Footer from '../components/pagebuilder/v3/V3Footer';
 import V3GateNotice from '../components/pagebuilder/v3/V3GateNotice';
 import { primaryLabel } from '../components/pagebuilder/v3/V3Hero';
 import { V3BigList, V3Steps, V3Palate, V3Offer, V3StickyBar } from '../components/pagebuilder/v3/V3Sections';
-import { useFx } from '../components/pagebuilder/v3/effects';
+import { needsEngine, useFx, useScrollcraft } from '../components/pagebuilder/v3/effects';
 import { v3BodyBlocks } from '../components/pagebuilder/v3/ledger';
 import { readComposition } from '../utils/pageComposition';
 import { cheapestFirst } from '../utils/gigPrice';
@@ -149,6 +149,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   // Effects (Tzvi, 6 Oct 2026): entrances wait until each v3 block is seen.
   // Above the early returns too: a hook runs on every render.
   useFx(v3Shell && Boolean(biz.design_brief.effects && biz.design_brief.effects.length));
+  useScrollcraft(v3Shell && needsEngine(biz.design_brief));
 
   if (missing) {
     // On <slug>.myisraelrental.com there is nothing else at this address,

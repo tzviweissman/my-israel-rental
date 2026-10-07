@@ -12,6 +12,7 @@
  * it, so with no script, or reduced motion, everything is simply there.
  */
 import { useEffect } from 'react';
+import '../../../styles/page-v3-engine.css';
 
 // id: [slot, engine]. Slots mirror page_effects.SLOTS.
 export const EFFECTS = {
@@ -108,6 +109,25 @@ export function useFx(on) {
     return () => {
       io.disconnect();
       root.classList.remove('fx-ready');
+    };
+  }, [on]);
+}
+
+/** The scroll engine, for the effects that need it (pins, rails, parallax,
+ *  the scrubbed film, pointer touches). Fetched only when the page has one,
+ *  and torn down with the page: the engine's listeners are on window, which
+ *  outlives every page in a single-page app. */
+export function useScrollcraft(on) {
+  useEffect(() => {
+    if (!on) return undefined;
+    let api = null;
+    let gone = false;
+    import('../../../vendor/scrollcraft').then(() => {
+      if (!gone && window.ScrollCraft) api = window.ScrollCraft.mount(document);
+    });
+    return () => {
+      gone = true;
+      if (api) api.destroy();
     };
   }, [on]);
 }

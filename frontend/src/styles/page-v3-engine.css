@@ -1,0 +1,86 @@
+/* Page builder v3: what the scroll engine's devices need to work
+   (vendor/scrollcraft.js), scoped to v3 pages. The engine's own stylesheet
+   is not imported: it resets html, body, every element and form control,
+   which would restyle the whole site. These are its device rules, rewritten.
+
+   One deliberate change: the engine starts captions at opacity 0 so nothing
+   flashes before its first read. Here they start visible. Without the script,
+   or before it loads, or with reduced motion, the page is simply readable;
+   a caption seen for one frame before it fades is the smaller fault. */
+
+[data-page-v3] .sc-act--pinned { position: relative; }
+[data-page-v3] .sc-stage {
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  height: 100svh;
+  overflow: clip;
+}
+[data-page-v3] .sc-stage :is(video[data-sc-scrub], canvas[data-sc-sequence], .sc-stage__poster) {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+/* The poster holds the frame until the clip has painted one. */
+[data-page-v3] video[data-sc-scrub] { opacity: 0; transition: opacity 380ms ease-out; }
+[data-page-v3] .sc-has-clip video[data-sc-scrub],
+[data-page-v3] video[data-sc-scrub].sc-has-clip { opacity: 1; }
+[data-page-v3] .sc-stage__poster { z-index: 0; transition: opacity 380ms ease-out; }
+[data-page-v3] .sc-has-clip .sc-stage__poster { opacity: 0; }
+
+[data-page-v3] [data-sc-cue] { will-change: opacity, transform; }
+[data-page-v3] [data-sc-pan] { display: flex; will-change: transform; }
+[data-page-v3] [data-sc-reveal] { will-change: clip-path; }
+[data-page-v3] [data-sc-parallax],
+[data-page-v3] [data-sc-magnet] { will-change: transform; }
+[data-page-v3] [data-sc-tilt] { transform-style: preserve-3d; will-change: transform; }
+
+/* Position only where nothing else set one (zero specificity), or a stage
+   carrying it would stop being sticky and scroll away instead of pinning. */
+[data-page-v3] [data-sc-spotlight] { isolation: isolate; }
+:where([data-page-v3] [data-sc-spotlight]) { position: relative; }
+[data-page-v3] [data-sc-spotlight]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  pointer-events: none;
+  background: radial-gradient(28rem 28rem at calc(var(--sc-mx, 0.5) * 100%) calc(var(--sc-my, 0.5) * 100%),
+    color-mix(in srgb, var(--accent) 16%, transparent), transparent 70%);
+  opacity: 0;
+  transition: opacity 600ms ease-out;
+}
+[data-page-v3] [data-sc-spotlight]:hover::after { opacity: 1; }
+
+[data-page-v3] [data-sc-progress] {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  height: 2px;
+  background: var(--accent);
+  transform-origin: 0 50%;
+  transform: scaleX(0);
+  will-change: transform;
+}
+[dir="rtl"] [data-page-v3] [data-sc-progress],
+[dir="rtl"][data-page-v3] [data-sc-progress] { transform-origin: 100% 50%; }
+
+@media (prefers-reduced-motion: reduce) {
+  /* Every position change goes; the content stays. */
+  [data-page-v3] [data-sc-cue] { opacity: 1 !important; transform: none !important; }
+  [data-page-v3] [data-sc-parallax],
+  [data-page-v3] [data-sc-pan] { transform: none !important; }
+  [data-page-v3] [data-sc-reveal] { clip-path: none !important; }
+  /* A rail's travel is how its items are reached, so it becomes an
+     ordinary sideways scroll instead of parking on the first screenful. */
+  [data-page-v3] [data-sc-act="pan"] :is(.sc-stage, [data-sc-stage]) {
+    overflow-x: auto;
+    overflow-y: hidden;
+    overscroll-behavior-x: contain;
+    scroll-snap-type: x proximity;
+  }
+  [data-page-v3] [data-sc-pan] > * { scroll-snap-align: center; }
+  [data-page-v3] [data-sc-spotlight]::after { display: none; }
+}
