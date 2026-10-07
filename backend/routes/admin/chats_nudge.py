@@ -262,7 +262,7 @@ async def nudge_owner(req: NudgeOwnerRequest, payload: dict = Depends(verify_tok
         raise HTTPException(status_code=400, detail="Couldn't identify owner / renter for this conversation")
 
     owner = await db.users.find_one({"id": owner_id}, {"_id": 0, "name": 1, "email": 1})
-    renter = await db.users.find_one({"id": renter_id}, {"_id": 0, "name": 1})
+    renter = await db.users.find_one({"id": renter_id}, {"_id": 0, "id": 1, "name": 1})
     if not owner or not owner.get("email"):
         raise HTTPException(status_code=400, detail="Owner has no email on file")
 
@@ -361,32 +361,44 @@ async def _send_owner_nudge_email(
     renter: Optional[dict],
     prop_title: str,
     source: str,
+    kind: str = "rental",
 ) -> None:
     """Compose + dispatch the courtesy email. Shared by the admin-manual
     route and the auto-pass runner. Copy references the 12h delay so it
-    matches the automated cadence."""
-    from utils.email import send_email, FRONTEND_URL
+    matches the automated cadence. `kind` is "rental" or "service"; the
+    words follow it, because a business is not renting anything out.
 
-    inbox_link = f"{(FRONTEND_URL or 'https://myisraelrental.com').rstrip('/')}/chat/{property_id}"
-    renter_name = (renter or {}).get("name") or "a prospective renter"
+    A reminder only: it opens the conversation and the owner answers."""
+    from utils.email import FRONTEND_URL, _button, _esc, _plain, _wrap, send_email
+
+    base = (FRONTEND_URL or "https://myisraelrental.com").rstrip("/")
+    inbox_link = f"{base}/chat/{property_id}" + (f"?with={(renter or {}).get('id')}" if (renter or {}).get("id") else "")
+    title = _esc(prop_title)
+    who = _esc((renter or {}).get("name")) or ("a customer" if kind == "service" else "a prospective renter")
     tag = "auto-owner-nudge" if source == "auto" else "admin-owner-nudge"
-
+    if kind == "service":
+        why = ("Customers often message more than one business and go with whoever answers first, "
+               "so a quick reply makes a real difference.")
+        after = "If you no longer offer this, you can pause the listing from your dashboard."
+    else:
+        why = ("Replies within a day dramatically increase the chance the listing gets rented - "
+               "prospective tenants usually message several owners in parallel and lock in with whoever replies first.")
+        after = ("If you no longer have this listing available, please mark it as unavailable "
+                 "in your dashboard so we stop showing it.")
+    subject = f"Reminder: {who} is waiting to hear from you about {title}"
+    inner = (
+        f"<p>Hi {_esc(owner.get('name')) or ''},</p>"
+        f"<p><b>{who}</b> messaged you about <b>{title}</b> on MyIsraelRental "
+        f"more than 12 hours ago and hasn't heard back yet.</p>"
+        f"<p>{why}</p>"
+        + _button("Open the conversation", inbox_link)
+        + f"<p style='color:#888;font-size:13px;'>{after} "
+        f"You can turn these reminders off from Dashboard → Settings.</p>"
+    )
     await send_email(
         to_email=owner["email"],
-        subject=f"Reminder: {renter_name} is waiting to hear from you about {prop_title}",
-        html_body=(
-            f"<p>Hi {owner.get('name') or ''},</p>"
-            f"<p><b>{renter_name}</b> messaged you about <b>{prop_title}</b> on MyIsraelRental "
-            f"more than 12 hours ago and hasn't heard back yet.</p>"
-            f"<p>Replies within a day dramatically increase the chance the listing gets rented - "
-            f"prospective tenants usually message several owners in parallel and lock in with whoever replies first.</p>"
-            f"<p style='margin:24px 0;'>"
-            f"<a href=\"{inbox_link}\" style='background:#1E6A6A;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;'>Open the conversation</a>"
-            f"</p>"
-            f"<p style='color:#888;font-size:13px;'>If you no longer have this listing available, "
-            f"please mark it as unavailable in your dashboard so we stop showing it. "
-            f"You can turn these reminders off from Dashboard → Settings.</p>"
-        ),
+        subject=_plain(subject),
+        html_body=_wrap(inner, preheader=_plain(subject)),
         tag=tag,
         skip_suppression_check=False,
     )
@@ -399,14 +411,15 @@ async def run_auto_owner_nudge_pass(logger_prefix: str = "auto-nudge") -> dict:
     for the log entry so admins can see what the last run did."""
     now = datetime.now(UTC)
     cutoff = now - timedelta(hours=AUTO_NUDGE_STALE_HOURS)
-    cutoff_iso = cutoff.isoformat()
 
     # Aggregate the newest message per (property, participant-pair) —
     # matches the same key shape used by the admin chats view so both
     # feeds converge on the same conv_key namespace.
     stats = {"scanned": 0, "sent": 0, "throttled": 0, "already_replied": 0, "no_email": 0, "opted_out": 0, "errors": 0}
+    # No date filter before grouping: filtering to old messages first made
+    # "latest" the newest OLD message, so a chat the owner had answered an
+    # hour ago still looked unanswered. The age check is below.
     async for msg in db.messages.aggregate([
-        {"$match": {"created_at": {"$lte": cutoff_iso}}},
         {"$sort": {"created_at": -1}},
         {"$group": {
             "_id": {
@@ -439,12 +452,21 @@ async def run_auto_owner_nudge_pass(logger_prefix: str = "auto-nudge") -> dict:
         if created_dt > cutoff:
             continue
 
+        # A rental chat is keyed by the property id, a service chat by the
+        # gig id; the person to remind is the owner or the provider.
         prop = await db.properties.find_one(
             {"id": property_id}, {"_id": 0, "title": 1, "owner_id": 1},
         )
-        if not prop:
-            continue
-        owner_id = prop.get("owner_id")
+        kind = "rental"
+        if prop:
+            owner_id = prop.get("owner_id")
+        else:
+            prop = await db.marketplace_gigs.find_one(
+                {"_id": property_id}, {"_id": 0, "title": 1, "provider_user_id": 1},
+            )
+            if not prop:
+                continue
+            owner_id, kind = prop.get("provider_user_id"), "service"
         if not owner_id:
             continue
 
@@ -481,7 +503,7 @@ async def run_auto_owner_nudge_pass(logger_prefix: str = "auto-nudge") -> dict:
             stats["opted_out"] += 1
             continue
 
-        renter = await db.users.find_one({"id": renter_id}, {"_id": 0, "name": 1})
+        renter = await db.users.find_one({"id": renter_id}, {"_id": 0, "id": 1, "name": 1})
 
         # Write the throttle row BEFORE emailing so a concurrent second
         # pass (or an admin click) inside the same second can't double-fire.
@@ -506,6 +528,7 @@ async def run_auto_owner_nudge_pass(logger_prefix: str = "auto-nudge") -> dict:
                 renter=renter,
                 prop_title=prop.get("title") or "your listing",
                 source="auto",
+                kind=kind,
             )
             stats["sent"] += 1
         except Exception as e:  # noqa: BLE001

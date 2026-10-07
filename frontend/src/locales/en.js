@@ -3572,7 +3572,7 @@ const en = {
         whatsappLeaveBlank: 'Leave blank to hide the WhatsApp button on your listings and turn off WhatsApp notifications. International format recommended (+country code).',
         whatsappSaved: 'WhatsApp number saved',
         autoNudgeTitle: 'Auto reply reminders',
-        autoNudgeHint: "We'll email you if a renter's message has been sitting in your inbox for 12+ hours without a reply. Replies within a day dramatically increase booking rates.",
+        autoNudgeHint: "We'll email you if a customer's message has been sitting in your inbox for 12+ hours without a reply. Replies within a day dramatically increase booking rates.",
         autoNudgeOn: 'Auto reminders turned on',
         autoNudgeOff: 'Auto reminders turned off',
         autoNudgeOnLabel: 'On, remind me after 12 hours',
