@@ -41,7 +41,8 @@ import FaqEditor, { cleanFaqs } from '../marketplace/FaqEditor';
 import { HighlightChip } from '../marketplace/Highlights';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { X, Trash2, ImagePlus, Loader2 } from 'lucide-react';
+import { X, Trash2, ImagePlus, Loader2, Wand2 } from 'lucide-react';
+import PhotoMatch from './PhotoMatch';
 import { useTranslation } from 'react-i18next';
 import { uploadFilesFast, reportUploadFailure } from '../../utils/fastUpload';
 import { productPhotos } from '../../utils/productPhotos';
@@ -80,6 +81,16 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       .catch(() => {});
     return () => { live = false; };
   }, [API, gig.id, token]);
+  /* Make my photos match: hidden unless the server has it switched on. */
+  const [pmState, setPmState] = useState({ enabled: false });
+  const [pmAt, setPmAt] = useState(null); // { i, url }
+  useEffect(() => {
+    let live = true;
+    axios.get(`${API}/marketplace/gigs/${gig.id}/photo-match`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(({ data }) => { if (live) setPmState(data); })
+      .catch(() => {});
+    return () => { live = false; };
+  }, [API, gig.id, token]);
   const toggleHl = (id) => setHlPicked((cur) => (cur.includes(id) ? cur.filter((x) => x !== id) : cur.length >= hl.max ? cur : [...cur, id]));
   const [offerOn, setOfferOn] = useState(Boolean(gig.discount));
   const [offerPercent, setOfferPercent] = useState(gig.discount?.percent ?? 10);
@@ -93,7 +104,10 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
 
   // Escape closes, and the page behind must not scroll while this is open.
   useEffect(() => {
-    const onKey = (e) => { if (e.key === 'Escape' && !saving) onClose(); };
+    const onKey = (e) => {
+      if (e.key !== 'Escape' || saving) return;
+      if (pmAt) setPmAt(null); else onClose();
+    };
     document.addEventListener('keydown', onKey);
     const prev = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
@@ -101,7 +115,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       document.removeEventListener('keydown', onKey);
       document.body.style.overflow = prev;
     };
-  }, [onClose, saving]);
+  }, [onClose, saving, pmAt]);
 
   const setOption = (i, patch) => setOptions((prev) =>
     prev.map((o, k) => (k === i ? { ...o, ...patch } : o)));
@@ -135,6 +149,10 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       setUploadingAt(null);
     }
   };
+
+  const swapPhoto = (i, from, to) => setOption(i, {
+    photos: (options[i].photos || []).map((u) => (u === from ? to : u)),
+  });
 
   const removePhoto = (i, url) => setOption(i, {
     photos: (options[i].photos || []).filter((u) => u !== url),
@@ -489,6 +507,18 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                           {t('editListing.makeCover', 'Make cover')}
                         </button>
                       )}
+                      {pmState.enabled && (
+                        <button
+                          type="button"
+                          onClick={() => setPmAt({ i, url })}
+                          className="absolute top-0.5 start-0.5 w-5 h-5 rounded-full bg-black/60 text-white flex items-center justify-center"
+                          aria-label={t('photoMatch.open', 'Plain background')}
+                          title={t('photoMatch.open', 'Plain background')}
+                          data-testid={`edit-listing-photo-match-${i}-${k}`}
+                        >
+                          <Wand2 size={10} />
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => removePhoto(i, url)}
@@ -563,6 +593,27 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
           </button>
         </div>
       </div>
+      {pmAt && (
+        <PhotoMatch
+          API={API}
+          token={token}
+          gigId={gig.id}
+          url={pmAt.url}
+          state={pmState}
+          onDone={(r) => setPmState((st) => ({
+            ...st,
+            color: r.color,
+            left_today: Math.max(0, (st.left_today ?? 1) - 1),
+            originals: { ...(st.originals || {}), [r.url]: r.original },
+          }))}
+          onUse={(to) => {
+            swapPhoto(pmAt.i, pmAt.url, to);
+            setPmAt(null);
+            toast.success(t('photoMatch.saveToKeep', 'Photo changed. Press Save changes to keep it.'));
+          }}
+          onClose={() => setPmAt(null)}
+        />
+      )}
     </div>
   );
 }
