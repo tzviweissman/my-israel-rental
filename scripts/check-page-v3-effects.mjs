@@ -20,7 +20,9 @@
 //     grade included) as a share of 4.5:1, or 3:1 when large. Where the page
 //     without effects is itself under that, it is reported as a warning;
 //   - a counted price that does not end on the real price;
-//   - a stray data-sc-* attribute (the engine's, never on v3 without it);
+//   - an engine effect that does nothing where it should (a mouse on a wide
+//     screen), or moves where it should not (a narrow screen, reduced motion);
+//   - a data-sc-* attribute on a page with no engine effect;
 // and once, on a grep of page-v3-motion.css for the banned patterns.
 //   Needs: local API on :8001, the dev server (WEB, default :3211)
 //   Run:   python scripts/page-v3-effects-fixtures.py > fx.json
@@ -152,6 +154,59 @@ const heroContrast = async (page) => {
   }, { png, items });
 };
 
+// Engine effects must do something, where they should and only there: the
+// pointer touches answer a mouse, parallax moves on a wide screen and rests
+// on a narrow one, and with reduced motion none of them move at all.
+const ENGINE = new Set([...(await readFile(new URL('../frontend/src/components/pagebuilder/v3/effects.js', import.meta.url), 'utf8'))
+  .matchAll(/'([a-z0-9-]+)': \['[a-z]+', true\]/g)].map((m) => m[1]));
+const inlineTransform = (page, sel) => page.evaluate((s) => { const el = document.querySelector(s); return el ? el.style.transform : null; }, sel);
+const hoverOver = async (page, sel) => {
+  await page.evaluate((s) => document.querySelector(s).scrollIntoView({ block: 'center', behavior: 'instant' }), sel);
+  await page.waitForTimeout(200);
+  const r = await page.evaluate((s) => { const b = document.querySelector(s).getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; }, sel);
+  await page.mouse.move(r[0] - 30, r[1] - 10);
+  await page.mouse.move(r[0] + 18, r[1] + 6, { steps: 6 });
+  await page.waitForTimeout(700);
+};
+const engineCheck = async (page, want, w, motion) => {
+  const out = [];
+  const still = motion === 'reduce';
+  const moved = (t) => Boolean(t) && !/^(none|translate3d\(0px, 0px, 0px\))$/.test(t);
+  if (want.includes('progress-hairline')) {
+    const t = await inlineTransform(page, '[data-sc-progress]');
+    if (!/scaleX\(0\.9\d|scaleX\(1/.test(t || '')) out.push(`progress hairline at ${t || 'nothing'} at the bottom of the page`);
+  }
+  if (want.includes('parallax-hero') || want.includes('parallax-palate')) {
+    for (const [id, sel] of [['parallax-hero', '[data-testid="pv3-hero"] .pv3-photo'], ['parallax-palate', '[data-testid="pv3-palate"] .pv3-photo']]) {
+      if (!want.includes(id) || !(await page.$(sel))) continue;
+      await page.evaluate((s) => document.querySelector(s).scrollIntoView({ block: 'end', behavior: 'instant' }), sel);
+      await page.waitForTimeout(250);
+      const t = await page.evaluate((s) => getComputedStyle(document.querySelector(s)).transform, sel);
+      const should = !still && w > 860;
+      if (should && !moved(t)) out.push(`${id} does not move on a wide screen`);
+      if (!should && moved(t)) out.push(`${id} moves ${still ? 'with reduced motion' : 'on a narrow screen'} (${t})`);
+    }
+  }
+  if (want.includes('drift-ground')) {
+    await page.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight / 2));
+    await page.waitForTimeout(250);
+    if (!(await page.evaluate(() => document.documentElement.style.getPropertyValue('--sc-canvas')))) out.push('drift-ground never set the page colour');
+  }
+  for (const [id, sel] of [['btn-magnet', '[data-testid="pv3-primary"]'], ['card-tilt-offer', '.pv3-offer-card']]) {
+    if (!want.includes(id) || !(await page.$(sel))) continue;
+    await hoverOver(page, sel);
+    const t = await inlineTransform(page, sel);
+    if (!still && !moved(t)) out.push(`${id} does not answer the mouse`);
+    if (still && moved(t)) out.push(`${id} moves with reduced motion (${t})`);
+  }
+  if (want.includes('spotlight-offer')) {
+    await hoverOver(page, '[data-testid="pv3-offer"]');
+    const op = await page.evaluate(() => getComputedStyle(document.querySelector('[data-testid="pv3-offer"]'), '::after').opacity);
+    if (!still && op !== '1') out.push(`spotlight-offer at opacity ${op} under the mouse`);
+  }
+  return out;
+};
+
 const b = await chromium.launch();
 for (const f of fixtures) {
   const body = JSON.stringify(f.biz);
@@ -197,7 +252,7 @@ for (const f of fixtures) {
     const hid = await page.evaluate(hiddenText);
     if (hid.length) fails.push(`${tag}: still hidden after scrolling: ${hid.slice(0, 4).join(', ')}`);
     if (r.overflow > 1) fails.push(`${tag}: sideways scroll ${r.overflow}px`);
-    if (r.sc) fails.push(`${tag}: ${r.sc} stray data-sc attributes`);
+    if (r.sc && !want.some((e) => ENGINE.has(e))) fails.push(`${tag}: ${r.sc} data-sc attributes on a page with no engine effect`);
     if (lang === 'he' && r.dir !== 'rtl') fails.push(`${tag}: Hebrew page is not right to left`);
 
     const price = f.biz.design_brief.primary_action.price_anchor;
@@ -206,6 +261,7 @@ for (const f of fixtures) {
       if (!shown.replace(/[,\s]/g, '').includes(String(Math.round(price)))) fails.push(`${tag}: counted price does not end on ${price}`);
     }
     if (errs.length) fails.push(`${tag}: page error ${errs[0]}`);
+    for (const e of await engineCheck(page, want, w, motion)) fails.push(`${tag}: ${e}`);
 
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(300);

@@ -19,12 +19,12 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { themeVars } from './V3Hero';
-import { fxFor, hasFx } from './effects';
+import { engineAttrs, fxFor, hasFx, parallaxAttrs } from './effects';
 
 const Section = ({ brief, kind, testid, children }) => (
   <section className={`pv3-section pv3-${kind}`} data-page-v3="" data-preset={brief.preset}
     data-caps={brief.type?.caps ? 'true' : 'false'} data-fx={fxFor(brief, kind)} style={themeVars(brief)}
-    data-testid={testid}>
+    data-testid={testid} {...engineAttrs(brief, kind)}>
     <div className="pv3-section-inner">{children}</div>
   </section>
 );
@@ -67,8 +67,8 @@ export function V3Palate({ brief, url }) {
   if (!brief || !url) return null;
   return (
     <div className="pv3-palate" data-page-v3="" data-preset={brief.preset} data-fx={fxFor(brief, 'palate')}
-      style={themeVars(brief)} aria-hidden="true" data-testid="pv3-palate">
-      <img className="pv3-photo" src={url} alt="" loading="lazy" />
+      style={themeVars(brief)} aria-hidden="true" data-testid="pv3-palate" {...engineAttrs(brief, 'palate')}>
+      <img className="pv3-photo" src={url} alt="" loading="lazy" {...parallaxAttrs(brief, 'parallax-palate')} />
     </div>
   );
 }
@@ -146,7 +146,7 @@ export function V3Offer({ brief, rows, priceText, priceIsFrom, title, label, onP
   return (
     <Section brief={brief} kind="offer" testid="pv3-offer">
       <div ref={offerRef} className="pv3-offer-grid">
-        <div>
+        <div className="pv3-offer-card" data-sc-tilt={hasFx(brief, 'card-tilt-offer') ? '4' : undefined}>
           <p className="pv3-label">{t('pageV3.theOffer', 'The offer')}</p>
           {title && <h2 className="pv3-h2">{title}</h2>}
           {priceText && (

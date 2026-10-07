@@ -198,8 +198,10 @@
 
 /* Press works on touch too: the one touch every button gets if picked. */
 @media (prefers-reduced-motion: no-preference) {
-  [data-fx~="btn-press"] .pv3-btn { transition: transform var(--fx-fast) var(--fx-ease), filter var(--fx-fast) ease; }
-  [data-fx~="btn-press"] .pv3-btn:active { transform: scale(0.97); }
+  /* `scale`, not transform: the magnet writes transform inline, and the
+     two must stack rather than one silently cancelling the other. */
+  [data-fx~="btn-press"] .pv3-btn { transition: transform var(--fx-fast) var(--fx-ease), scale var(--fx-fast) var(--fx-ease), filter var(--fx-fast) ease; }
+  [data-fx~="btn-press"] .pv3-btn:active { scale: 0.97; }
 }
 
 /* Fill wipe: the button fills with the text colour and its label takes the
@@ -257,10 +259,11 @@
 
 @media (hover: hover) and (pointer: fine) {
   [data-fx~="photo-hover-zoom"].pv3-palate .pv3-photo { transform-origin: 50% 50%; }
-  [data-fx~="photo-hover-zoom"].pv3-palate:hover .pv3-photo { transform: scale(1.04); }
+  /* `scale` stacks with the parallax the engine writes as transform. */
+  [data-fx~="photo-hover-zoom"].pv3-palate:hover .pv3-photo { scale: 1.04; }
   [data-fx~="rule-brighten"] .pv3-spec-row:hover { border-block-end-color: var(--accent); }
   @media (prefers-reduced-motion: no-preference) {
-    [data-fx~="photo-hover-zoom"].pv3-palate .pv3-photo { transition: transform 1200ms var(--fx-ease); }
+    [data-fx~="photo-hover-zoom"].pv3-palate .pv3-photo { transition: scale 1200ms var(--fx-ease); }
     [data-fx~="rule-brighten"] .pv3-spec-row { transition: border-color var(--fx-fast) ease; }
   }
 }

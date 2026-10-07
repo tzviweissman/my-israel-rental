@@ -23,7 +23,6 @@ export const EFFECTS = {
   'rail-occasions': ['biglist', true],
   'rail-steps': ['steps', true],
   'stack-steps': ['steps', true],
-  'pin-offer-count': ['offer', true],
   'parallax-hero': ['hero', true],
   'parallax-palate': ['palate', true],
   'drift-ground': ['page', true],
@@ -85,6 +84,32 @@ export function fxFor(brief, slot) {
 }
 
 export const hasFx = (brief, id) => known(brief).includes(id);
+
+// Drift: the ground moves between the page's two dark tones as each block
+// comes on screen, never to a colour the palette did not already pass.
+const DRIFT_TONE = { hero: 'ground', biglist: 'surface', steps: 'ground', offer: 'surface' };
+
+/** What the scroll engine reads on a block (data-sc-*), for this brief's
+ *  effects. A block is an act (the engine's unit of scroll) only when one of
+ *  its effects needs scroll progress; nothing here changes layout. */
+export function engineAttrs(brief, slot) {
+  const a = {};
+  const tone = hasFx(brief, 'drift-ground') && brief.palette && brief.palette[DRIFT_TONE[slot]];
+  if (tone) {
+    a['data-sc-act'] = 'flow';
+    a['data-sc-drift'] = tone;
+  }
+  if ((slot === 'hero' && hasFx(brief, 'parallax-hero')) || (slot === 'palate' && hasFx(brief, 'parallax-palate'))) {
+    a['data-sc-act'] = 'flow';
+  }
+  if (slot === 'offer' && hasFx(brief, 'spotlight-offer')) a['data-sc-spotlight'] = '';
+  return a;
+}
+
+/** Parallax: the photo drifts slower than the page, up to 30px either way,
+ *  inside a frame cut 40px larger so no edge ever shows. Off on phones (the
+ *  engine checks), and not at all with reduced motion. */
+export const parallaxAttrs = (brief, id) => (hasFx(brief, id) ? { 'data-sc-parallax': '0.6' } : {});
 
 /** Whether this page needs the scroll engine at all. */
 export const needsEngine = (brief) => known(brief).some((id) => EFFECTS[id][1]);

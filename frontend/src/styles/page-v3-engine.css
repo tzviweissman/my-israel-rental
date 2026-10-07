@@ -54,7 +54,9 @@
 }
 [data-page-v3] [data-sc-spotlight]:hover::after { opacity: 1; }
 
-[data-page-v3] [data-sc-progress] {
+/* Effect progress-hairline. The bar carries data-page-v3 itself: it sits
+   outside the page's blocks so no block's stacking context can cover it. */
+[data-sc-progress][data-page-v3] {
   position: fixed;
   inset: 0 0 auto 0;
   z-index: 60;
@@ -64,8 +66,18 @@
   transform: scaleX(0);
   will-change: transform;
 }
-[dir="rtl"] [data-page-v3] [data-sc-progress],
-[dir="rtl"][data-page-v3] [data-sc-progress] { transform-origin: 100% 50%; }
+[dir="rtl"] [data-sc-progress][data-page-v3] { transform-origin: 100% 50%; }
+
+/* Effect drift-ground: the engine sets --sc-canvas on the page as each block
+   comes on screen, moving between the palette's ground and surface. */
+[data-page-v3][data-sc-drift].pv3-section { background-color: var(--sc-canvas, var(--ground)); }
+
+/* Effects parallax-hero and parallax-palate: the photo is cut 40px larger
+   than its frame on each side, so its 30px of travel never shows an edge. */
+[data-page-v3] .pv3-photo[data-sc-parallax] {
+  inset-block: -40px;
+  block-size: calc(100% + 80px);
+}
 
 @media (prefers-reduced-motion: reduce) {
   /* Every position change goes; the content stays. */

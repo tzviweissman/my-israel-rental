@@ -25,7 +25,7 @@ from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
-from utils.page_effects import MAX_EFFECTS, effects_problems, material, pick_effects
+from utils.page_effects import MAX_EFFECTS, RETIRED, effects_problems, material, pick_effects
 
 
 HEX = r"^#[0-9a-f]{6}$"
@@ -315,6 +315,17 @@ class DesignBrief(BaseModel):
         if (self.hero.tier == 2) != (self.hero.media_id == "film"):
             raise ValueError("a tier 2 hero is the brand film, and only tier 2 is")
         return self
+
+    @model_validator(mode="before")
+    @classmethod
+    def _drop_retired(cls, data):
+        """A page saved with a retired effect still loads, without it; if it
+        was the bold moment, the hero is again."""
+        if isinstance(data, dict) and isinstance(data.get("effects"), list):
+            data = {**data, "effects": [e for e in data["effects"] if e not in RETIRED]}
+            if data.get("showstopper") in RETIRED:
+                data["showstopper"] = "hero"
+        return data
 
     @model_validator(mode="after")
     def _effects_hold(self) -> "DesignBrief":

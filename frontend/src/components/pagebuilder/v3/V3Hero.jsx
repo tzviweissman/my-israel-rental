@@ -25,7 +25,7 @@ import ProofLine from '../../marketplace/ProofLine';
 import '../../../styles/page-v3.css';
 // After page-v3.css: the effects build on its rules.
 import '../../../styles/page-v3-motion.css';
-import { Words, fxFor, hasFx } from './effects';
+import { Words, engineAttrs, fxFor, hasFx, parallaxAttrs } from './effects';
 
 // Mirrors FONT_ALLOWLIST in backend/utils/design_brief.py. A face that is
 // not here is never requested, whatever a stored brief says.
@@ -176,12 +176,13 @@ export default function V3Hero({ brief, name, logoUrl, photoUrl, film, priceText
       data-fx={fxFor(brief, 'hero')}
       style={themeVars(brief)}
       data-testid="pv3-hero"
+      {...engineAttrs(brief, 'hero')}
     >
       {tier === 1 && (
         <>
           {/* Their photo, graded to the page (rule 4: one grade for every
               photo on the page), with a scrim behind the copy only. */}
-          <img className="pv3-photo" src={photoUrl} alt="" aria-hidden="true" data-testid="pv3-photo" />
+          <img className="pv3-photo" src={photoUrl} alt="" aria-hidden="true" data-testid="pv3-photo" {...parallaxAttrs(brief, 'parallax-hero')} />
           <div className="pv3-scrim" aria-hidden="true" />
         </>
       )}
@@ -201,7 +202,9 @@ export default function V3Hero({ brief, name, logoUrl, photoUrl, film, priceText
           </p>
         )}
         <div className="pv3-actions">
-          <button type="button" className="pv3-btn" onClick={onPrimary} data-testid="pv3-primary">{label}</button>
+          {/* The magnet is on this one button only: the page's primary action. */}
+          <button type="button" className="pv3-btn" onClick={onPrimary} data-testid="pv3-primary"
+            data-sc-magnet={hasFx(brief, 'btn-magnet') ? '0.25' : undefined}>{label}</button>
           {/* The proof beside the button (ruling 5). Kosher is in the fact
               strip just below, so it is not said twice above the fold. */}
           <ProofLine {...proof} kosher={null} className="pv3-proof" testid="pv3-proof" />

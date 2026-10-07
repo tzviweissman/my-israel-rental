@@ -44,7 +44,7 @@ def add(label, biz, base, effects, show):
 STEPS = [{"text": t, "lang": lang, "source": "order_settings"} for lang, ts in (
     ("en", ("Choose your pot", "Order by Thursday", "We deliver Friday")),
     ("he", ("בוחרים סיר", "מזמינים עד חמישי", "משלוח ביום שישי"))) for t in ts]
-bare = {**biz, "name": "Lechem", "cover_url": None,
+bare = {**biz, "name": "Lechem", "cover_url": None, "brand_film": None,
         "listings": [{**gig, "gallery": []}] + biz["listings"][1:]}
 done = set()
 for tag, b, pics in (("rich", biz, photos), ("bare", bare, [])):
@@ -57,10 +57,9 @@ for tag, b, pics in (("rich", biz, photos), ("bare", bare, [])):
         for seed in range(2 if tag == "rich" else 1):
             effects, show = pick_effects(m, preset, seed=seed)
             add(f"{tag}-{preset}-{seed}", b, base, effects, show)
-    # Cover every effect the page draws today (no engine yet), greedily,
+    # Cover every effect that is not a bold moment, greedily,
     # one valid set at a time, each with the hero as its bold moment.
-    left = [e for e in available(m) if not EFFECTS[e]["engine"]
-            and EFFECTS[e]["tier"] != "peak" and e not in done]
+    left = [e for e in available(m) if EFFECTS[e]["tier"] != "peak" and e not in done]
     n = 0
     while left:
         cur = []
@@ -74,7 +73,7 @@ for tag, b, pics in (("rich", biz, photos), ("bare", bare, [])):
         done.update(cur)
         n += 1
 
-missing = {e for e in EFFECTS if not EFFECTS[e]["engine"] and EFFECTS[e]["tier"] != "peak"} - done
+missing = {e for e in EFFECTS if EFFECTS[e]["tier"] != "peak"} - done
 if missing:
     sys.exit(f"no fixture carries: {sorted(missing)}")
 json.dump(out, sys.stdout)
