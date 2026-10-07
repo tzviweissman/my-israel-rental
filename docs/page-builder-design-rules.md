@@ -170,7 +170,63 @@ Premium comes from small, finished moments.
 - **Don't:** use scroll-jacking, parallax on phones, autoplaying carousels, or animate text while someone is reading it. (Terms defined 5 Oct 2026, Tzvi delegated.)
   - **Scroll-jacking** is taking the scroll away from the visitor: cancelling wheel or touch events, a smooth-scroll library that replaces the browser's own scrolling, snapping between sections, or changing scroll speed. Pinning a section with `position: sticky` while the page scrolls normally, and stepping a picture or a video along with the scroll position, are not scroll-jacking. The signature scroll sections work that way and are allowed.
   - **On phones** means a touch-only pointer, or a screen 860px wide or less. Layers there sit still in their resting position; the pinned and scrubbed parts keep working. The design-kit scroll engine does this by itself from version 2.2.0.
-- Everything must be readable with motion off. Nothing waits at `opacity: 0` for an observer to fire.
+- Everything must be readable with motion off. Reworded 6 Oct 2026 to its intent: **nothing is invisible with motion off, without the script, or before it runs.** An entrance may hold a block back only once the page has marked itself ready and is watching it (`fx-ready`), never with reduced motion, and the scroll engine's captions start visible rather than at `opacity: 0`.
+
+### 6.1 The effects catalog (Tzvi, 6 Oct 2026)
+
+Generated pages pick their motion, touches, still treatments and entrances from
+a closed catalog (`backend/utils/page_effects.py`, mirrored in
+`frontend/src/components/pagebuilder/v3/effects.js`), so pages stop looking
+alike. Rules only, no AI: the same business and seed always give the same page.
+Asked for: "one main bold moment but there can be more subtle boldish additions
+... buttons can do something cool or words can fade into the page or pages can
+start moving horizontally".
+
+- **The "no lively" ruling is overturned for generated pages** (Tzvi, 6 Oct). The
+  comment in `page_composition.py` is rewritten, not deleted: it still holds for
+  the v2 motion dial.
+- **One bold moment per page, at most three accents and four quiet touches,
+  eight in all.** Bold moments: the hero held while its photo dims, a push-in on
+  the hero photo, a brand film driven by scroll, a sideways rail of their photos,
+  of their occasions or of their steps, and steps stacking like cards. Without one
+  the hero is the bold moment, as before.
+- **Material decides.** An effect appears only when the business has what it
+  needs: a rail of photos needs five real photos (never a flyer), a counter needs
+  a price already proven to be theirs, letters animating need a name of twelve
+  characters or less. **A bold moment built on a list they wrote needs it in both
+  languages** (7 Oct), or the Hebrew page has no bold moment.
+- **A brand film is the looping hero or the scrubbed film, never both.**
+- **The order section is never pinned.** `pin-offer-count` was retired on 7 Oct
+  for that reason; a page saved with it loads, with the hero as its bold moment.
+- **Held sections fit or are not held.** Nothing is held below 700px of window
+  height or with reduced motion; the film hero is not held on phones (held at one
+  screen tall it pushed the copy off the bottom). A rail ends with its last item
+  whole on screen at every width, travels rightwards in Hebrew, and with reduced
+  motion is an ordinary sideways scroll.
+- **Parallax rests on phones** (860px or less, or a touch pointer) and with
+  reduced motion. Magnet, tilt and spotlight answer a mouse only.
+- **The catalog has 52 effects, not the 67 first planned.** Left out: a scrubbed
+  frame sequence (no business has one), the camera flight through their places
+  (it needs a world v3 pages do not build), leader-line callouts (they need
+  measured placement on each photo), and effects that duplicated behaviour the
+  page already had.
+- **Not too similar** (Tzvi: "they dont need to all be completely different ...
+  i just dont want them to look too similar"). A page differs from each of the ten
+  newest **live** pages of its category on at least 2 of 7 axes, and does not
+  reuse the bold moment of the five newest. Live means its check passed; a page
+  nobody can see does not count. Checked when versions are made (a near miss is
+  never offered), when one is published, and again at the moment it would go live.
+  The three numbers are constants in `page_effects.py`. The hand-built scroll-craft
+  registry (`scrollcraft/FINGERPRINTS.md`) is separate: it scores six hand-design
+  dimensions a generated page does not have.
+- **Owners choose** (Tzvi, 6 Oct: "owners pick from three versions, from the
+  start"), once an admin has switched their business on. Up to three versions,
+  each a different bold moment (fewer when the business has fewer); publishing
+  runs the visual check, and only a pass replaces the live page. The owner reads
+  why a version failed in plain words.
+- **The default hero scrim was darkened** (Tzvi, 7 Oct): measured over a bright
+  photo, the tagline was 3.7:1 on a phone. On phones every scrim gives way to one
+  measured wash.
 
 ---
 
@@ -257,6 +313,16 @@ to the category checklist from the Inspo study (four questions on the first
 screen, proof at the button, one solid button, facts over padding, hours first
 for places, a pinned phone action, and for food a small kosher band after the
 opening). Both in `docs/page-generation-rules.md` §3a and §3b.
+
+**Checked by machine** (6-7 Oct 2026). One module, `page-check/check-core.mjs`,
+renders a page at 1440, 390 and 360 wide, a 1280x720 laptop and a 1280x650
+screen, English and Hebrew, motion on and reduced, and fails on: a page error, an
+effect no element carries, sideways scroll, any text hidden, hero text under 4.5:1
+(3:1 when large) against the brightest pixels actually behind it, a counter that
+does not end on the real price, and any engine effect that does nothing where it
+should or moves where it should not. It runs locally as the effects gate
+(`scripts/check-page-v3-effects.mjs`, every effect on prepared pages) and on the
+server as the page-check service, before any version an owner picked goes live.
 
 Return:
 - the page;
