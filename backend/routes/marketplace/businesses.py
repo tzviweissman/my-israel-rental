@@ -1042,7 +1042,8 @@ async def set_page_v3(business_id: str, payload: PageV3In, user=Depends(verify_t
     async with httpx.AsyncClient(timeout=20) as http:
         photos = list(await asyncio.gather(*(check(http, r, u) for r, u in photo_candidates(record)[:12])))
     try:
-        brief = build_brief(record, logo, photos).model_dump()
+        recent = await recent_briefs(_brief_category(record), business_id)
+        brief = build_brief(record, logo, photos, recent=recent).model_dump()
     except ValueError as e:
         raise HTTPException(status_code=422, detail=f"Design brief refused: {e}") from e
     history = ([biz["design_brief"]] if biz.get("design_brief") else []) + list(biz.get("design_brief_history") or [])
@@ -1053,16 +1054,37 @@ async def set_page_v3(business_id: str, payload: PageV3In, user=Depends(verify_t
     return {"id": business_id, "page_v3": True, "design_brief": brief}
 
 
+def _brief_category(record: dict) -> str:
+    from utils.design_brief import _category
+    return _category(record)
+
+
+async def recent_briefs(category: str, exclude_id: str) -> list[dict]:
+    """The newest v3 pages of a category, newest first, as the effects
+    picker reads them: the ledger "not too similar" is checked against
+    (utils/page_effects). Each business's stored brief IS the ledger."""
+    from utils.page_effects import COMPARE_WINDOW
+    cur = db.businesses.find(
+        {"design_brief.category": category, "page_v3": True, "_id": {"$ne": exclude_id}},
+        {"design_brief.effects": 1, "design_brief.showstopper": 1},
+    ).sort("design_brief_at", -1).limit(COMPARE_WINDOW)
+    return [d.get("design_brief") or {} async for d in cur]
+
+
+async def ensure_page_indexes() -> None:
+    await db.businesses.create_index([("design_brief.category", 1), ("design_brief_at", -1)], background=True)
+
+
 def _rehero(biz: dict, has_film: bool) -> Optional[dict]:
     """The stored brief with its hero re-picked for a film added or removed:
     a real photo still wins (rule 4). Validated, never patched."""
-    from utils.design_brief import DesignBrief, pick_hero
+    from utils.design_brief import pick_hero, with_hero
     brief = biz.get("design_brief")
     if not brief:
         return None
     hero = brief.get("hero") or {}
     photo = hero.get("media_id") if hero.get("tier") == 1 else None
-    return DesignBrief(**{**brief, "hero": pick_hero(photo, has_film, brief["preset"])}).model_dump()
+    return with_hero(brief, biz, pick_hero(photo, has_film, brief["preset"])).model_dump()
 
 
 @router.post("/businesses/{business_id}/brand-film")

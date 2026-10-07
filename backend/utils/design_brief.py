@@ -18,11 +18,14 @@ every other record in this codebase is.
 from __future__ import annotations
 
 import colorsys
+import hashlib
 import io
 import re
 from typing import Literal, Optional
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
+
+from utils.page_effects import MAX_EFFECTS, effects_problems, material, pick_effects
 
 
 HEX = r"^#[0-9a-f]{6}$"
@@ -285,7 +288,11 @@ class DesignBrief(BaseModel):
     type: TypeSpec
     texture: Literal["grain", "paper", "stone", "linen", "none"]
     hero: Hero
+    # The page's one bold moment (utils/page_effects.py): the peak among
+    # `effects`, or "hero" when the page has none, which is every brief
+    # written before effects existed.
     showstopper: str = Field("hero", max_length=60)
+    effects: list[str] = Field(default_factory=list, max_length=MAX_EFFECTS)
     signature_detail: str = Field("", max_length=120)
     primary_action: Action
     taglines: list[Tagline] = Field(default_factory=list, max_length=6)
@@ -307,6 +314,16 @@ class DesignBrief(BaseModel):
                 raise ValueError("a tier 1 hero must be a picture checked as a photo, never a flyer or unchecked")
         if (self.hero.tier == 2) != (self.hero.media_id == "film"):
             raise ValueError("a tier 2 hero is the brand film, and only tier 2 is")
+        return self
+
+    @model_validator(mode="after")
+    def _effects_hold(self) -> "DesignBrief":
+        """One bold moment, the caps, and only effects the page has the
+        material for. Checks that need the record (a logo, the name's
+        length) run in brief_problems."""
+        problems = effects_problems(self.effects, self.showstopper, material(self))
+        if problems:
+            raise ValueError("; ".join(problems))
         return self
 
     @model_validator(mode="after")
@@ -367,6 +384,7 @@ def brief_problems(brief: DesignBrief, b: dict) -> list[str]:
                 problems.append(f"{kind} {t.text[:40]!r} is not in their words in {t.source}")
     if brief.hero.tier == 2 and not (b.get("brand_film") or {}).get("url"):
         problems.append("the hero names a brand film the business does not have")
+    problems += effects_problems(brief.effects, brief.showstopper, material(brief, b), with_record=True)
     return problems
 
 
@@ -515,10 +533,32 @@ def photo_candidates(b: dict) -> list[tuple[str, str]]:
     return out[:24]
 
 
+def with_hero(brief: dict, b: dict, hero: dict) -> DesignBrief:
+    """The stored brief with a new hero, its effects picked again: a film
+    added or removed changes what the page can carry (a looping film never
+    shares the hero with a scrolling peak). Same seed, so the page stays
+    this business's. Validated, never patched."""
+    fields = {**brief, "hero": hero}
+    effects, showstopper = pick_effects(material(fields, b), fields["preset"], None, effects_seed(b))
+    return DesignBrief(**{**fields, "effects": effects, "showstopper": showstopper})
+
+
+def effects_seed(b: dict, generation: int = 0) -> int:
+    """A stable seed per business, so rebuilding gives the same page, and a
+    different one per generation, so asking again gives a new one."""
+    key = f"{b.get('_id') or b.get('id') or b.get('name') or ''}:{generation}"
+    return int(hashlib.sha256(key.encode()).hexdigest()[:8], 16)
+
+
 def build_brief(b: dict, logo_bytes: Optional[bytes] = None,
-                photos: Optional[list[dict]] = None) -> DesignBrief:
+                photos: Optional[list[dict]] = None, recent: Optional[list[dict]] = None,
+                seed: Optional[int] = None, avoid_peaks: Optional[set[str]] = None) -> DesignBrief:
     """A brief from the business's own data and our presets. Raises if the
-    result would not validate; callers report that, they don't patch it."""
+    result would not validate; callers report that, they don't patch it.
+
+    `recent` is the newest live briefs of the same category (effects and
+    showstopper each), so the page is not too similar to them; `avoid_peaks`
+    keeps versions shown side by side on different bold moments."""
     category = _category(b)
     preset = _preset(category, b)
     p = PRESETS[preset]
@@ -534,7 +574,7 @@ def build_brief(b: dict, logo_bytes: Optional[bytes] = None,
         action = {"kind": "message", "href": "#message"}   # chat-only, never a phone
     if prices:
         action["price_anchor"] = min(prices)
-    brief = DesignBrief(
+    fields = dict(
         category=category,
         feeling=p["feeling"],
         preset=preset,
@@ -553,6 +593,9 @@ def build_brief(b: dict, logo_bytes: Optional[bytes] = None,
         occasions=_occasions(b),
         missing_content=_missing(b, category, photos),
     )
+    effects, showstopper = pick_effects(material(fields, b), preset, recent,
+                                        effects_seed(b) if seed is None else seed, avoid_peaks)
+    brief = DesignBrief(**fields, effects=effects, showstopper=showstopper)
     problems = brief_problems(brief, b)
     if problems:
         raise ValueError("; ".join(problems))

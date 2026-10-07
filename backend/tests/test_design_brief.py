@@ -155,7 +155,10 @@ def test_the_brand_film_is_the_hero_only_without_a_real_photo():
 
 def test_a_film_hero_without_a_film_or_a_film_id_elsewhere_is_refused():
     film_hero = {"tier": 2, "media_id": "film", "subject_side": "right"}
-    assert any("brand film" in p for p in brief_problems(DesignBrief(**{**_good(), "hero": film_hero}), CHOLENT))
+    # A hand-built film brief carries no effects: those were picked for a
+    # photo or panel hero, and a looping film rules several out.
+    bare = {**_good(), "hero": film_hero, "effects": [], "showstopper": "hero"}
+    assert any("brand film" in p for p in brief_problems(DesignBrief(**bare), CHOLENT))
     for hero in ({"tier": 2, "subject_side": "right"}, {"tier": 3, "media_id": "film"},
                  {"tier": 2, "media_id": "https://evil.example/x.mp4"}):
         with pytest.raises(ValidationError):
@@ -169,3 +172,56 @@ def test_a_film_off_spec_is_refused_with_the_reason():
     for change, words in (({"codec": "hevc"}, "H.264"), ({"duration": 14.2}, "6 to 10"),
                           ({"width": 1080, "height": 1920}, "16:9"), ({"bytes": 6_000_000}, "4MB")):
         assert any(words in p for p in film_problems({**good, **change})), change
+
+
+# ------------------------------------------------------------------ effects (6 Oct 2026)
+
+def test_a_brief_written_before_effects_still_loads():
+    """Every stored brief predates effects: no `effects`, showstopper "hero"."""
+    old = build_brief(CHOLENT).model_dump()
+    old.pop("effects")
+    old["showstopper"] = "hero"
+    assert DesignBrief(**old).effects == []
+
+
+def test_a_built_brief_carries_one_valid_bold_moment():
+    b = build_brief(CHOLENT)
+    peaks = [e for e in b.effects if e in {"pin-hero-hold", "pin-hero-pushin", "scrub-film", "rail-gallery",
+                                           "rail-occasions", "rail-steps", "stack-steps", "pin-offer-count"}]
+    assert len(peaks) <= 1
+    assert b.showstopper == (peaks[0] if peaks else "hero")
+    assert brief_problems(b, CHOLENT) == []
+
+
+def test_a_brief_naming_an_unknown_effect_is_refused():
+    d = build_brief(CHOLENT).model_dump()
+    d["effects"] = ["sparkle-storm"]
+    with pytest.raises(ValidationError, match="unknown effect"):
+        DesignBrief(**d)
+
+
+def test_the_same_business_gets_the_same_page_and_a_new_generation_a_new_one():
+    from utils.design_brief import effects_seed
+    assert build_brief(CHOLENT).effects == build_brief(CHOLENT).effects
+    assert effects_seed(CHOLENT, 0) != effects_seed(CHOLENT, 1)
+
+
+def test_recent_pages_steer_the_bold_moment():
+    first = build_brief(CHOLENT)
+    if first.showstopper == "hero":
+        pytest.skip("this record affords no peak to steer")
+    again = build_brief(CHOLENT, recent=[{"effects": first.effects, "showstopper": first.showstopper}])
+    assert again.showstopper != first.showstopper
+
+
+def test_adding_a_film_repicks_the_effects_instead_of_breaking_the_brief():
+    """Found while building effects: re-picking only the hero kept effects a
+    looping film rules out, so the brief failed to validate on film upload."""
+    from utils.design_brief import pick_hero, with_hero
+    stored = build_brief(CHOLENT).model_dump()
+    filmed = {**CHOLENT, "brand_film": {"url": "https://res.cloudinary.com/x/film.mp4"}}
+    b = with_hero(stored, filmed, pick_hero(None, True, stored["preset"]))
+    assert b.hero.tier == 2
+    assert b.showstopper in ("hero", "scrub-film")
+    assert "load-sequence-hero" not in b.effects
+    assert brief_problems(b, filmed) == []
