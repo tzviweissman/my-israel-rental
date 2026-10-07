@@ -91,3 +91,10 @@ def test_a_taken_time_is_refused_to_the_second_guest():
     second = book("appt", guest_name="Bat", contact_email="bat@example.com", preferred_date=DAY, time_slot="10:00")
     assert second.status_code == 409
     assert book("appt", guest_name="Bat", contact_email="bat@example.com").status_code == 400   # no time picked
+
+
+def test_a_time_that_has_passed_is_refused():
+    from datetime import date as _d
+    yesterday = (_d.today() - timedelta(days=1)).isoformat()
+    r = book("appt", guest_name="Avi", contact_email="avi@example.com", preferred_date=yesterday, time_slot="10:00")
+    assert r.status_code == 400 and "passed" in r.text

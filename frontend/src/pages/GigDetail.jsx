@@ -201,8 +201,8 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
    status page the customer keeps. An appointment carries the day and time
    picked on the page; until 7 Oct this form dropped them, and the server
    refused every in-platform appointment for want of a time slot. */
-const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot = null, initialDate = '' }) => {
-  const { t } = useTranslation();
+export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot = null, initialDate = '' }) => {
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [message, setMessage] = useState('');
   const [name, setName] = useState('');
@@ -260,7 +260,8 @@ const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot = null, 
         </h3>
         {slot && (
           <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }} data-testid="gig-booking-when">
-            {t('gigDetail.bookingWhen', { defaultValue: '{{date}} at {{time}}', date: slotDate, time: slot })}
+            {t('gigDetail.bookingWhen', { defaultValue: '{{date}} at {{time}}', time: slot,
+              date: new Date(`${slotDate}T12:00:00`).toLocaleDateString(i18n.language, { weekday: 'long', day: 'numeric', month: 'long' }) })}
           </p>
         )}
         {guest && (
@@ -1282,7 +1283,7 @@ const GigDetail = () => {
 
 // ---------- Sidebar sub-components ----------
 
-const TierList = ({ tiers, selected, onSelect, isAppointment, testidPrefix = 'gig-tier' }) => {
+export const TierList = ({ tiers, selected, onSelect, isAppointment, testidPrefix = 'gig-tier' }) => {
   const { t } = useTranslation();
   if (!tiers.length) return <p className="text-sm text-gray-500">{t('gigDetail.noPackages', 'No packages listed yet.')}</p>;
   return tiers.map((tt) => {
@@ -1389,6 +1390,8 @@ const StoreProductList = ({ products, selected, onSelect, testidPrefix = 'gig-pr
 // ahead. The previous 14-day cap plus a horizontal-scroll pill row hid
 // most future dates and looked like a "can't book more than a week"
 // bug from the buyer's perspective.
+const isoOf = (d) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+
 const buildAppointmentSlots = (gig, tier, locale) => {
   const weekly = gig.weekly_availability || {};
   const slotMin = gig.slot_duration_minutes || 30;
@@ -1397,9 +1400,18 @@ const buildAppointmentSlots = (gig, tier, locale) => {
   const byDate = {};
   const today = new Date();
   today.setHours(0, 0, 0, 0);
+  /* Times are the business's, in Israel. Never offer one that has already
+     passed there: the grid used to offer this morning's 09:00 at 15:00,
+     and the server took it (found 7 Oct 2026). */
+  const il = Object.fromEntries(new Intl.DateTimeFormat('en-CA', {
+    timeZone: 'Asia/Jerusalem', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hourCycle: 'h23',
+  }).formatToParts(new Date()).map((x) => [x.type, x.value]));
+  const ilToday = `${il.year}-${il.month}-${il.day}`;
+  const ilNowMin = Number(il.hour) * 60 + Number(il.minute);
   for (let offset = 0; offset < 90; offset += 1) {
     const day = new Date(today);
     day.setDate(today.getDate() + offset);
+    if (isoOf(day) < ilToday) continue;
     const key = dayKeys[day.getDay()];
     const windows = weekly[key] || [];
     if (!windows.length) continue;
@@ -1410,6 +1422,7 @@ const buildAppointmentSlots = (gig, tier, locale) => {
       const startMin = sh * 60 + sm;
       const endMin = eh * 60 + em;
       for (let t = startMin; t + duration <= endMin; t += slotMin) {
+        if (isoOf(day) === ilToday && t <= ilNowMin) continue;
         const hh = String(Math.floor(t / 60)).padStart(2, '0');
         const mm = String(t % 60).padStart(2, '0');
         slots.push(`${hh}:${mm}`);
@@ -1430,7 +1443,7 @@ const buildAppointmentSlots = (gig, tier, locale) => {
   return byDate;
 };
 
-const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, onSelectDate, onSelectSlot }) => {
+export const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, onSelectDate, onSelectSlot }) => {
   /* S0 — times already spoken for. The grid is generated in the browser
      from weekly_availability, so without asking the server it offers
      every slot to everybody and two customers can take the same one.

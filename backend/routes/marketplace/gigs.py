@@ -1187,6 +1187,13 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         start = _minutes(payload.time_slot)
         if start is None:
             raise HTTPException(status_code=400, detail="Invalid time slot")
+        # A time that has already passed in Israel, where the business is.
+        try:
+            when = datetime.fromisoformat(f"{payload.preferred_date}T{payload.time_slot}").replace(tzinfo=_IL_TZ)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid date") from None
+        if when <= datetime.now(_IL_TZ):
+            raise HTTPException(status_code=400, detail="That time has passed - please pick a later one.")
         taken = (await _busy_spans(gig_id, gig.get("provider_user_id"), payload.preferred_date)).get(payload.preferred_date, [])
         if _overlaps(start, start + duration, taken):
             # 409 rather than 400: the request was well formed, someone

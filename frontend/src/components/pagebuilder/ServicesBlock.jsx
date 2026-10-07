@@ -74,6 +74,7 @@ const Card = ({ gig, listLayout, ctx }) => (
     i18n={ctx.i18n}
     t={ctx.t}
     onClick={() => ctx.openService(gig)}
+    action={ctx.cardAction ? ctx.cardAction(gig) : null}
   />
 );
 

@@ -32,11 +32,20 @@ const GOLD = 'var(--gold)';
  * nothing looks arbitrary. 96px rather than the 72 a WhatsApp catalog
  * uses: 72px of a sourdough loaf is a brown blob.
  */
-export default function ServiceCard({ gig, onClick, variant = 'grid', i18n, t }) {
-  if (variant === 'list') {
-    return <ServiceRow gig={gig} onClick={onClick} i18n={i18n} t={t} />;
-  }
-  return <ServiceGridCard gig={gig} onClick={onClick} i18n={i18n} t={t} />;
+export default function ServiceCard({ gig, onClick, variant = 'grid', i18n, t, action = null }) {
+  const card = variant === 'list'
+    ? <ServiceRow gig={gig} onClick={onClick} i18n={i18n} t={t} />
+    : <ServiceGridCard gig={gig} onClick={onClick} i18n={i18n} t={t} />;
+  if (!action) return card;
+  /* A card with its own action (the storefront's Book / Message / Add to
+     order). The action cannot live inside the card's button, so the card
+     surface moves to a wrapper holding both (App.css .svc-card--with-action). */
+  return (
+    <div className={`svc-card svc-card--with-action ${variant === 'list' ? 'w-full' : 'h-full'} flex flex-col`}>
+      {card}
+      <div className="mt-2">{action}</div>
+    </div>
+  );
 }
 
 // --- grid: the original card, unchanged ---
