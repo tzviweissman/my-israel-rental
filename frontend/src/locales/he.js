@@ -2877,6 +2877,7 @@ const he = {
         password: 'סיסמה',
         passwordPh: 'לפחות 6 תווים',
         confirmPassword: 'אימות סיסמה',
+        confirmPasswordPh: 'הקלידו אותה שוב',
         agree: 'אני מסכים/ה ל',
         terms: 'תנאי השימוש ומדיניות הפרטיות',
         creating: '...יוצר את החשבון שלכם',

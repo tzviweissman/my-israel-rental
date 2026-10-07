@@ -69,7 +69,7 @@ export default function SignupSphere() {
 
   return (
     <div
-      className="relative flex h-full min-h-[560px] flex-col overflow-hidden rounded-md p-8 text-white sm:p-12 lg:p-14"
+      className="relative flex h-full min-h-[560px] flex-col overflow-clip rounded-md p-8 text-white sm:p-12 lg:p-14"
       style={{
         background:
           'linear-gradient(180deg, #000 0%, #0F5E8F 140%)',
@@ -89,7 +89,12 @@ export default function SignupSphere() {
       />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 50% at 50% 60%, rgba(28,141,212,0.35), transparent 70%)' }} />
 
-      <div className="relative z-10 max-w-[460px]">
+      {/* Words and sphere stay in view while the panel runs the height of
+          the form beside it. The panel clips with overflow-clip, not
+          hidden: hidden makes the panel its own scroller and the sticky
+          block stuck to the panel, not the window. */}
+      <div className="relative z-10 flex flex-1 flex-col lg:sticky lg:top-[9.5rem] lg:h-[calc(100vh-13rem)] lg:flex-none">
+      <div className="max-w-[460px]">
         <motion.p
           initial={from({ opacity: 0, y: 12, filter: 'blur(6px)' })}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
@@ -132,6 +137,7 @@ export default function SignupSphere() {
         ) : (
           <div className="h-48 w-48 rounded-full border border-white/10" aria-hidden="true" />
         )}
+      </div>
       </div>
     </div>
   );
