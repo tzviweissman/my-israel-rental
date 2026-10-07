@@ -2194,6 +2194,7 @@ const he = {
         resetting: 'מאפס...',
         forgotPassword: 'שכחת את הסיסמה?',
         verifyEmail: {
+          checking: 'מאמתים את האימייל שלך…',
           goToDashboard: 'עבור ללוח הבקרה',
           goToLogin: 'התחבר כדי לשלוח שוב',
           successTitle: 'המייל אומת',

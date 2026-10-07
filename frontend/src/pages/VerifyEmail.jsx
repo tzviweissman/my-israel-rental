@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useLocation, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { CheckCircle2, AlertCircle, Clock, MailCheck } from 'lucide-react';
+import { CheckCircle2, AlertCircle, Clock, MailCheck, Loader2 } from 'lucide-react';
+import { API } from '../lib/apiBase';
 
 /**
  * Landing page after the backend redirects back from /api/auth/verify-email.
@@ -10,6 +11,14 @@ import { CheckCircle2, AlertCircle, Clock, MailCheck } from 'lucide-react';
  *   already  — user was already verified (idempotent re-click)
  *   expired  — token has expired (>24h old)
  *   invalid  — token doesn't match anyone (already used / typo)
+ *
+ * THE EMAIL LINKS HERE WITH `?token=`, not to the API (auth.py
+ * _send_verification_email). This page used to read only `?status=`, so
+ * every emailed link showed "Invalid link" and no account was ever
+ * verified (dead-ends audit 6 Oct 2026; broken since about 16 Sep). Now a
+ * visit carrying a token hands it straight to the API, which verifies and
+ * comes back here with the status. Fixing it here, rather than changing
+ * the email's link, also repairs every email already sent.
  */
 const STATUS_THEME = {
   success: { Icon: CheckCircle2, color: '#16A34A', bg: '#DCFCE7',
@@ -30,10 +39,26 @@ const VerifyEmail = () => {
   const { t } = useTranslation();
   const { search } = useLocation();
   const navigate = useNavigate();
-  const status = new URLSearchParams(search).get('status') || 'invalid';
+  const params = new URLSearchParams(search);
+  const token = params.get('token');
+  const checking = Boolean(token) && !params.get('status');
+  useEffect(() => {
+    if (checking) window.location.replace(`${API}/auth/verify-email?token=${encodeURIComponent(token)}`);
+  }, [checking, token]);
+  const status = params.get('status') || 'invalid';
   const theme = STATUS_THEME[status] || STATUS_THEME.invalid;
   const Icon = theme.Icon;
   const success = status === 'success' || status === 'already';
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4 py-12" style={{ background: 'var(--bg)' }} data-testid="verify-email-page-checking">
+        <p className="inline-flex items-center gap-2 text-sm" style={{ color: 'var(--brand-muted)' }}>
+          <Loader2 size={16} className="animate-spin" aria-hidden="true" /> {t('auth.verifyEmail.checking', 'Confirming your email…')}
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#F8F5EF] px-4 py-12" data-testid={`verify-email-page-${status}`}>

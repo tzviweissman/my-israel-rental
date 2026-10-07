@@ -2286,6 +2286,7 @@ const en = {
         resetting: 'Resetting...',
         forgotPassword: 'Forgot your password?',
         verifyEmail: {
+          checking: 'Confirming your email…',
           goToDashboard: 'Go to dashboard',
           goToLogin: 'Log in to resend',
           successTitle: 'Email verified',
