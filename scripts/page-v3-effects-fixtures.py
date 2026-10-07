@@ -48,7 +48,9 @@ OCCASIONS_HE = ["משפחה שמגיעה", "ארוחות שבת", "ליל חמי
 bare = {**biz, "name": "Lechem", "cover_url": None, "brand_film": None,
         "listings": [{**gig, "gallery": []}] + biz["listings"][1:]}
 done = set()
-for tag, b, pics in (("rich", biz, photos), ("bare", bare, [])):
+# Their brand film and no photos: the film hero, and the scrubbed film.
+film = {**bare, "name": biz["name"], "brand_film": biz.get("brand_film")}
+for tag, b, pics in (("rich", biz, photos), ("bare", bare, []), ("film", film, [])):
     base = build_brief(b, photos=pics)
     # Steps everywhere, Hebrew occasions where the record has English ones:
     # the rails need their list in both languages.
@@ -58,7 +60,7 @@ for tag, b, pics in (("rich", biz, photos), ("bare", bare, [])):
     m = material(base, b)
     add(f"{tag}-none", b, base, [], "hero")   # the page as it was, to compare
     for preset in PRESETS:
-        for seed in range(2 if tag == "rich" else 1):
+        for seed in range(2 if tag == "rich" else 1 if tag == "bare" else 0):
             effects, show = pick_effects(m, preset, seed=seed)
             add(f"{tag}-{preset}-{seed}", b, base, effects, show)
     # Each bold moment the business can carry, on its own.

@@ -30,21 +30,41 @@
   to { opacity: 1; transform: none; }
 }
 
+/* Effect stack-steps (a bold moment, no engine): each step holds below the
+   one before as the page scrolls, so they stack like cards. Sticky, so it
+   never takes the scroll, and it is the same layout with motion off. */
+[data-fx~="stack-steps"] .pv3-steps-list { gap: 0; }
+[data-fx~="stack-steps"] .pv3-steps-list li {
+  position: sticky;
+  inset-block-start: calc(var(--nav-h, 68px) + 24px + var(--i, 0) * 14px);
+  min-block-size: clamp(160px, 22vh, 220px);
+  margin-block-end: clamp(48px, 10vh, 96px);
+  padding: clamp(20px, 3vw, 36px);
+  background: var(--surface);
+  border: 1px solid var(--rule);
+  border-radius: 6px;
+  align-items: flex-start;
+}
+[data-fx~="stack-steps"] .pv3-steps-list li:last-child { margin-block-end: 0; }
+
 /* ======================================================= still treatments */
 
 /* Scrims: the dark behind the copy, three ways. Each keeps the copy's side
    and the bottom dark; scripts/check-page-v3-effects.mjs measures the text
    against the brightest pixels behind it. */
 [data-fx~="scrim-lead"] .pv3-scrim {
-  background: linear-gradient(to right, var(--ground) 0%, color-mix(in srgb, var(--ground) 82%, transparent) 42%, transparent 78%),
-              linear-gradient(to top, color-mix(in srgb, var(--ground) 80%, transparent) 0%, transparent 46%);
+  background: linear-gradient(to right, var(--ground) 0%, color-mix(in srgb, var(--ground) 88%, transparent) 46%, transparent 80%),
+              linear-gradient(to top, color-mix(in srgb, var(--ground) 85%, transparent) 0%, transparent 50%);
 }
 [dir="rtl"] [data-fx~="scrim-lead"] .pv3-scrim {
-  background: linear-gradient(to left, var(--ground) 0%, color-mix(in srgb, var(--ground) 82%, transparent) 42%, transparent 78%),
-              linear-gradient(to top, color-mix(in srgb, var(--ground) 80%, transparent) 0%, transparent 46%);
+  background: linear-gradient(to left, var(--ground) 0%, color-mix(in srgb, var(--ground) 88%, transparent) 46%, transparent 80%),
+              linear-gradient(to top, color-mix(in srgb, var(--ground) 85%, transparent) 0%, transparent 50%);
 }
+/* A band, solid under the copy: on a wide screen the copy reaches three
+   quarters of the way up, so the band does too, and only the top of the
+   photo stays clear. */
 [data-fx~="scrim-band"] .pv3-scrim {
-  background: linear-gradient(to top, var(--ground) 0%, var(--ground) 34%, color-mix(in srgb, var(--ground) 55%, transparent) 52%, transparent 70%);
+  background: linear-gradient(to top, var(--ground) 0%, var(--ground) 42%, color-mix(in srgb, var(--ground) 86%, transparent) 64%, color-mix(in srgb, var(--ground) 40%, transparent) 82%, transparent 96%);
 }
 /* The light falls on the subject; the edges, the copy's side and the
    bottom go dark. */

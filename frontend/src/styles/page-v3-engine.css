@@ -120,6 +120,34 @@
   filter: var(--grade, none);
 }
 
+/* Hero pins (pin-hero-hold, pin-hero-pushin, scrub-film). The hero holds
+   for part of a screen while: the photo dims toward the ground (hold), or
+   the camera moves in on the subject (push-in), or the film plays under the
+   reader's scroll. --sc-p is the act's progress, written by the engine.
+   A pinned block must fit at its height, so below 700px tall, and with
+   reduced motion, the hero is simply not held. */
+@media (prefers-reduced-motion: no-preference) and (min-height: 700px) {
+  [data-page-v3].pv3-hero-pin[data-pin="hold"] .pv3-photo {
+    filter: var(--grade, none) brightness(calc(1 - var(--sc-p, 0) * 0.45));
+  }
+  [data-page-v3].pv3-hero-pin[data-pin="pushin"] .pv3-photo {
+    scale: calc(1 + var(--sc-p, 0) * 0.12);
+    transform-origin: 70% 50%;
+  }
+}
+@media (prefers-reduced-motion: reduce), (max-height: 699px) {
+  [data-page-v3].pv3-hero-pin { height: auto !important; }
+  [data-page-v3].pv3-hero-pin > .sc-stage { position: relative; height: auto; overflow: hidden; }
+}
+/* On a phone the film hero stacks the film above the copy, and held at one
+   screen tall it would push the copy off the bottom. So it is not held:
+   the film still runs with the scroll while the hero goes by. */
+@media (max-width: 860px) {
+  [data-page-v3].pv3-hero-pin[data-pin="film"] { height: auto !important; }
+  [data-page-v3].pv3-hero-pin[data-pin="film"] > .sc-stage { position: relative; height: auto; overflow: hidden; }
+}
+[data-page-v3].sc-has-clip .sc-stage__poster { opacity: 0; }
+
 @media (prefers-reduced-motion: reduce) {
   /* Every position change goes; the content stays. */
   [data-page-v3] [data-sc-cue] { opacity: 1 !important; transform: none !important; }

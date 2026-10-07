@@ -71,8 +71,9 @@ EFFECTS: dict[str, dict] = {
                              group="biglist-motion", engine=True, rtl="mirror"),
     "rail-steps":        _fx("motion", "peak", "steps", "travel", needs={"steps_both": 3},
                              group="steps-motion", engine=True, rtl="mirror"),
+    # Plain CSS sticky stacking: no engine needed (7 Oct 2026).
     "stack-steps":       _fx("motion", "peak", "steps", "travel", needs={"steps_both": 3},
-                             group="steps-motion", engine=True),
+                             group="steps-motion"),
     "parallax-hero":     _fx("motion", "accent", "hero", "hero", needs={"hero_photo": True},
                              group="hero-motion", engine=True, phone="off"),
     "parallax-palate":   _fx("motion", "accent", "palate", "framing", needs={"photos": 2},

@@ -69,6 +69,8 @@ const RUNS = [
   [360, 800, 'en', 'no-preference'],
   [360, 800, 'he', 'reduce'],
   [1440, 900, 'en', 'reduce'],
+  [1280, 720, 'en', 'no-preference'],   // a short laptop: pinned blocks must fit
+  [1280, 650, 'he', 'no-preference'],   // shorter still: nothing is held
 ];
 
 // Text an owner wrote that a visitor cannot see: faded, clipped to nothing
@@ -124,10 +126,18 @@ const heroContrast = async (page) => {
     }
     return out;
   });
+  // The site's own floating buttons (chat, accessibility) are hidden too:
+  // what is measured is the hero, not a widget that happens to sit on it.
   const style = await page.addStyleTag({ content: '[data-testid="pv3-hero"] * { color: transparent !important; text-shadow: none !important; }' });
+  const hiddenFixed = await page.evaluate(() => {
+    const els = [...document.querySelectorAll('body *')].filter((el) => getComputedStyle(el).position === 'fixed' && !el.closest('[data-page-v3]:not(body)'));
+    els.forEach((el) => { el.dataset.gateHid = el.style.visibility; el.style.visibility = 'hidden'; });
+    return els.length;
+  });
   await page.waitForTimeout(50);
   const png = (await page.screenshot()).toString('base64');
   await style.evaluate((el) => el.remove());
+  if (hiddenFixed) await page.evaluate(() => document.querySelectorAll('[data-gate-hid]').forEach((el) => { el.style.visibility = el.dataset.gateHid; delete el.dataset.gateHid; }));
   return page.evaluate(async ({ png, items }) => {
     const img = new Image(); img.src = `data:image/png;base64,${png}`; await img.decode();
     const c = document.createElement('canvas'); c.width = img.width; c.height = img.height;
@@ -235,6 +245,45 @@ const engineCheck = async (page, want, w, motion, rtl) => {
     const end = await at(1);
     if (end.last[0] < -2 || end.last[1] > end.vw + 2) out.push(`${id} ends with its last item off screen (${end.last.map(Math.round).join('..')})`);
   }
+  // Pins: held where they fit and motion is on, simply there otherwise, and
+  // never cutting their own text off while held.
+  const pinId = ['pin-hero-hold', 'pin-hero-pushin', 'scrub-film'].find((e) => want.includes(e));
+  if (pinId && await page.$('.pv3-hero-pin')) {
+    const short = await page.evaluate(() => innerHeight < 700);
+    await page.evaluate(() => { const a = document.querySelector('.pv3-hero-pin'); window.scrollTo(0, a.getBoundingClientRect().top + scrollY + Math.max(a.offsetHeight - innerHeight, 0) * 0.5); });
+    await page.waitForTimeout(400);
+    const r = await page.evaluate(() => {
+      const a = document.querySelector('.pv3-hero-pin');
+      const stage = a.querySelector('.pv3-hero');
+      const sr = stage.getBoundingClientRect();
+      const photo = stage.querySelector('.pv3-photo');
+      const cut = [...stage.querySelectorAll('h1, p, li, .pv3-btn')].filter((el) => {
+        const b = el.getBoundingClientRect();
+        return b.height && (b.top < Math.max(sr.top, 0) - 1 || b.bottom > Math.min(sr.bottom, innerHeight) + 1);
+      }).map((el) => el.textContent.trim().slice(0, 20));
+      return { held: a.offsetHeight / innerHeight, top: sr.top, cut,
+        scale: photo ? getComputedStyle(photo).scale : null, filter: photo ? getComputedStyle(photo).filter : null };
+    });
+    const should = !still && !short && !(pinId === 'scrub-film' && w <= 860);
+    if (should && (r.held < 1.3 || Math.abs(r.top) > 2)) out.push(`${pinId} is not held (act ${r.held.toFixed(2)} screens, hero at ${Math.round(r.top)}px)`);
+    if (!should && r.held > 1.3) out.push(`${pinId} is held ${r.held.toFixed(1)} screens ${still ? 'with reduced motion' : 'on a short screen'}`);
+    if (r.cut.length) out.push(`${pinId}: hero text cut off while held: ${r.cut.slice(0, 3).join(', ')}`);
+    if (pinId === 'pin-hero-pushin' && should && !(parseFloat(r.scale) > 1.02)) out.push(`pin-hero-pushin: photo not pushed in (${r.scale})`);
+    if (pinId === 'pin-hero-pushin' && !should && parseFloat(r.scale) > 1.001) out.push(`pin-hero-pushin moves ${still ? 'with reduced motion' : 'on a short screen'}`);
+    if (pinId === 'pin-hero-hold' && should && r.filter && !/brightness\(0\.[0-9]/.test(r.filter)) out.push(`pin-hero-hold: photo does not dim (${r.filter})`);
+    if (pinId === 'scrub-film' && !still && !short) {
+      await page.waitForTimeout(2600);
+      const v = await page.evaluate(() => { const el = document.querySelector('video[data-sc-scrub]'); return { t: el.currentTime, shown: el.classList.contains('sc-has-clip') }; });
+      if (!v.shown || !(v.t > 0)) out.push(`scrub-film: film not driven by scroll (time ${v.t}, painted ${v.shown})`);
+    }
+  }
+  if (want.includes('stack-steps') && await page.$('[data-testid="pv3-steps"]')) {
+    await page.evaluate(() => { const s = document.querySelector('[data-testid="pv3-steps"]'); window.scrollTo(0, s.getBoundingClientRect().bottom + scrollY - innerHeight); });
+    await page.waitForTimeout(300);
+    const tops = await page.evaluate(() => [...document.querySelectorAll('[data-testid="pv3-steps"] li')].map((li) => [getComputedStyle(li).position, Math.round(li.getBoundingClientRect().top)]));
+    if (tops.some(([pos]) => pos !== 'sticky')) out.push('stack-steps: steps are not sticky');
+    if (tops.some(([, t], i) => i && t <= tops[i - 1][1])) out.push(`stack-steps: steps out of order (${tops.map(([, t]) => t).join(', ')})`);
+  }
   if (want.includes('spotlight-offer')) {
     await hoverOver(page, '[data-testid="pv3-offer"]');
     const op = await page.evaluate(() => getComputedStyle(document.querySelector('[data-testid="pv3-offer"]'), '::after').opacity);
@@ -256,6 +305,13 @@ for (const f of fixtures) {
     const errs = [];
     page.on('pageerror', (e) => errs.push(e.message));
     await page.route(new RegExp(`/api/marketplace/business/${SLUG}(\\?|$)`), (r) => r.fulfill({ contentType: 'application/json', body }));
+    // The scroll engine fetches a film as data, which needs CORS. Production
+    // films are on Cloudinary, which allows it; the local API does not allow
+    // this dev port, so local uploads get the header here.
+    await page.route(/\/api\/uploads\//, async (r) => {
+      const res = await r.fetch();
+      r.fulfill({ response: res, headers: { ...res.headers(), 'access-control-allow-origin': '*' } });
+    });
     await page.goto(`${WEB}/business/${SLUG}?lng=${lang}`, { waitUntil: 'networkidle' });
     await page.locator('[data-testid="pv3-hero"]').waitFor({ timeout: 20000 });
     await page.evaluate(() => document.fonts.ready);

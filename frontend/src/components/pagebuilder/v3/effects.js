@@ -22,7 +22,7 @@ export const EFFECTS = {
   'rail-gallery': ['rail', true],
   'rail-occasions': ['biglist', true],
   'rail-steps': ['steps', true],
-  'stack-steps': ['steps', true],
+  'stack-steps': ['steps', false],
   'parallax-hero': ['hero', true],
   'parallax-palate': ['palate', true],
   'drift-ground': ['page', true],
