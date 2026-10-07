@@ -32,7 +32,7 @@ import { resolvePhoto, photosOfKind } from '../components/pagebuilder/v3/photos'
 import V3Footer from '../components/pagebuilder/v3/V3Footer';
 import V3GateNotice from '../components/pagebuilder/v3/V3GateNotice';
 import { primaryLabel } from '../components/pagebuilder/v3/V3Hero';
-import { V3BigList, V3Steps, V3Palate, V3Offer, V3StickyBar } from '../components/pagebuilder/v3/V3Sections';
+import { V3BigList, V3Steps, V3Rail, V3Palate, V3Offer, V3StickyBar } from '../components/pagebuilder/v3/V3Sections';
 import { hasFx, needsEngine, useFx, useScrollcraft } from '../components/pagebuilder/v3/effects';
 import { v3BodyBlocks } from '../components/pagebuilder/v3/ledger';
 import { readComposition } from '../utils/pageComposition';
@@ -400,6 +400,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           works (set piece), from the business, a palate cleanser, the offer. */}
       {v3 && <V3BigList brief={v3Brief} lang={v3Lang} />}
       {v3 && <V3Steps brief={v3Brief} lang={v3Lang} />}
+      {v3 && <V3Rail brief={v3Brief} urls={photosOfKind(biz, v3Brief, 'photo')} />}
       {v3 && <V3Flyers brief={v3Brief} urls={v3Flyers} name={displayName} />}
       {v3 && <V3Palate brief={v3Brief} url={v3Second} />}
       {v3 && (

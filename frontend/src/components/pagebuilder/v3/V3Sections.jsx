@@ -19,13 +19,13 @@ import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 
 import { themeVars } from './V3Hero';
-import { engineAttrs, fxFor, hasFx, parallaxAttrs } from './effects';
+import { engineAttrs, fxFor, hasFx, parallaxAttrs, stageAttrs, trackAttrs } from './effects';
 
 const Section = ({ brief, kind, testid, children }) => (
   <section className={`pv3-section pv3-${kind}`} data-page-v3="" data-preset={brief.preset}
     data-caps={brief.type?.caps ? 'true' : 'false'} data-fx={fxFor(brief, kind)} style={themeVars(brief)}
     data-testid={testid} {...engineAttrs(brief, kind)}>
-    <div className="pv3-section-inner">{children}</div>
+    <div className="pv3-section-inner" {...stageAttrs(brief, kind)}>{children}</div>
   </section>
 );
 
@@ -38,7 +38,7 @@ export function V3BigList({ brief, lang }) {
   return (
     <Section brief={brief} kind="biglist" testid="pv3-biglist">
       <p className="pv3-label">{t('pageV3.occasions', 'For')}</p>
-      <ul className="pv3-biglist-items">
+      <ul className="pv3-biglist-items" {...trackAttrs(brief, 'biglist')}>
         {items.map((x, i) => <li key={x.text} style={{ '--i': i }}>{x.text}</li>)}
       </ul>
     </Section>
@@ -53,11 +53,25 @@ export function V3Steps({ brief, lang }) {
   return (
     <Section brief={brief} kind="steps" testid="pv3-steps">
       <h2 className="pv3-h2">{t('pageV3.howItWorks', 'How it works')}</h2>
-      <ol className="pv3-steps-list">
+      <ol className="pv3-steps-list" {...trackAttrs(brief, 'steps')}>
         {steps.map((s, i) => (
           <li key={s.text} style={{ '--i': i }}><span className="pv3-step-n pv3-num" dir="ltr">{String(i + 1).padStart(2, '0')}</span><span>{s.text}</span></li>
         ))}
       </ol>
+    </Section>
+  );
+}
+
+/** Their photos in one row that travels sideways as the page scrolls
+ *  (effect rail-gallery, the page's bold moment). Real photos only: the
+ *  brief's pictures the flyer check passed, never a flyer. No text. */
+export function V3Rail({ brief, urls }) {
+  if (!brief || !hasFx(brief, 'rail-gallery') || !urls || urls.length < 5) return null;
+  return (
+    <Section brief={brief} kind="rail" testid="pv3-rail">
+      <div className="pv3-rail-track" {...trackAttrs(brief, 'rail')}>
+        {urls.map((u) => <img key={u} className="pv3-rail-photo" src={u} alt="" aria-hidden="true" loading="lazy" />)}
+      </div>
     </Section>
   );
 }

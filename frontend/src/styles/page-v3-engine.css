@@ -79,6 +79,47 @@
   block-size: calc(100% + 80px);
 }
 
+/* Rails (rail-occasions, rail-steps, rail-gallery). The block holds as a
+   stage one screen tall while its row travels; the row's end padding is
+   twice the gutter, because the engine travels the row by its overflow and
+   the stage's own start padding would otherwise leave the last item under
+   the far edge. */
+[data-page-v3][data-sc-act="pan"].pv3-section { --rail-gutter: clamp(20px, 6vw, 96px); padding: 0; }
+[data-page-v3][data-sc-act="pan"] .pv3-section-inner {
+  max-inline-size: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(20px, 3vw, 40px);
+  padding-inline-start: var(--rail-gutter);
+}
+[data-page-v3] [data-sc-pan] {
+  flex-wrap: nowrap;
+  inline-size: max-content;
+  padding-inline-end: calc(2 * var(--rail-gutter));
+  gap: clamp(28px, 4vw, 64px);
+}
+/* No item wider than the screen less its margins: a phone shows each one
+   whole at the end of the travel. A long occasion wraps instead. */
+[data-page-v3] [data-sc-pan] > * { max-inline-size: calc(100vw - 3 * var(--rail-gutter)); }
+[data-page-v3] .pv3-biglist-items[data-sc-pan] { font-size: clamp(36px, 9vw, 150px); }
+[data-page-v3] .pv3-biglist-items[data-sc-pan] li { white-space: normal; }
+[data-page-v3] .pv3-steps-list[data-sc-pan] { display: flex; align-items: stretch; }
+[data-page-v3] .pv3-steps-list[data-sc-pan] li {
+  flex: 0 0 clamp(280px, 44vw, 620px);
+  flex-direction: column;
+  gap: 12px;
+  padding-block-start: 18px;
+  border-block-start: 1px solid var(--rule);
+}
+[data-page-v3] .pv3-rail-photo {
+  block-size: min(62svh, 560px);
+  inline-size: auto;
+  object-fit: cover;
+  border-radius: 4px;
+  filter: var(--grade, none);
+}
+
 @media (prefers-reduced-motion: reduce) {
   /* Every position change goes; the content stays. */
   [data-page-v3] [data-sc-cue] { opacity: 1 !important; transform: none !important; }
@@ -86,8 +127,12 @@
   [data-page-v3] [data-sc-pan] { transform: none !important; }
   [data-page-v3] [data-sc-reveal] { clip-path: none !important; }
   /* A rail's travel is how its items are reached, so it becomes an
-     ordinary sideways scroll instead of parking on the first screenful. */
-  [data-page-v3] [data-sc-act="pan"] :is(.sc-stage, [data-sc-stage]) {
+     ordinary sideways scroll instead of parking on the first screenful, and
+     the block is not held: it is as tall as its content, like any other. */
+  [data-page-v3][data-sc-act="pan"] { height: auto !important; padding-block: clamp(64px, 10vw, 140px); }
+  [data-page-v3][data-sc-act="pan"] :is(.sc-stage, [data-sc-stage]) {
+    position: static;
+    height: auto;
     overflow-x: auto;
     overflow-y: hidden;
     overscroll-behavior-x: contain;

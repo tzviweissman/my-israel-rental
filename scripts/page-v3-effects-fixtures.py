@@ -44,19 +44,27 @@ def add(label, biz, base, effects, show):
 STEPS = [{"text": t, "lang": lang, "source": "order_settings"} for lang, ts in (
     ("en", ("Choose your pot", "Order by Thursday", "We deliver Friday")),
     ("he", ("בוחרים סיר", "מזמינים עד חמישי", "משלוח ביום שישי"))) for t in ts]
+OCCASIONS_HE = ["משפחה שמגיעה", "ארוחות שבת", "ליל חמישי", "קידושים", "שלום זכר", "שמחות בכל גודל"]
 bare = {**biz, "name": "Lechem", "cover_url": None, "brand_film": None,
         "listings": [{**gig, "gallery": []}] + biz["listings"][1:]}
 done = set()
 for tag, b, pics in (("rich", biz, photos), ("bare", bare, [])):
     base = build_brief(b, photos=pics)
-    if tag == "bare":
-        base = DesignBrief(**{**base.model_dump(), "steps": STEPS})
+    # Steps everywhere, Hebrew occasions where the record has English ones:
+    # the rails need their list in both languages.
+    occ = base.model_dump()["occasions"]
+    occ_he = [{"text": t, "lang": "he", "source": "description_he"} for t in OCCASIONS_HE[:len(occ)]]
+    base = DesignBrief(**{**base.model_dump(), "steps": STEPS, "occasions": occ + occ_he})
     m = material(base, b)
     add(f"{tag}-none", b, base, [], "hero")   # the page as it was, to compare
     for preset in PRESETS:
         for seed in range(2 if tag == "rich" else 1):
             effects, show = pick_effects(m, preset, seed=seed)
             add(f"{tag}-{preset}-{seed}", b, base, effects, show)
+    # Each bold moment the business can carry, on its own.
+    for e in available(m):
+        if EFFECTS[e]["tier"] == "peak":
+            add(f"{tag}-peak-{e}", b, base, [e], e)
     # Cover every effect that is not a bold moment, greedily,
     # one valid set at a time, each with the hero as its bold moment.
     left = [e for e in available(m) if EFFECTS[e]["tier"] != "peak" and e not in done]

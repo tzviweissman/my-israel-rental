@@ -38,9 +38,8 @@ const fixtures = JSON.parse(await readFile(process.argv[2], 'utf8'))
 await mkdir(OUT, { recursive: true });
 
 const fails = [];
-// Bold moments whose section is not built yet: the sideways gallery needs
-// V3Rail, which comes with the scroll engine (plan step 6). Remove when it lands.
-const NOT_YET = new Set(['rail-gallery']);
+// Bold moments whose section is not built yet (none since V3Rail, 7 Oct).
+const NOT_YET = new Set([]);
 const warns = [];
 const baseline = {};   // view -> worst contrast share on the page without effects
 
@@ -168,7 +167,7 @@ const hoverOver = async (page, sel) => {
   await page.mouse.move(r[0] + 18, r[1] + 6, { steps: 6 });
   await page.waitForTimeout(700);
 };
-const engineCheck = async (page, want, w, motion) => {
+const engineCheck = async (page, want, w, motion, rtl) => {
   const out = [];
   const still = motion === 'reduce';
   const moved = (t) => Boolean(t) && !/^(none|translate3d\(0px, 0px, 0px\))$/.test(t);
@@ -198,6 +197,43 @@ const engineCheck = async (page, want, w, motion) => {
     const t = await inlineTransform(page, sel);
     if (!still && !moved(t)) out.push(`${id} does not answer the mouse`);
     if (still && moved(t)) out.push(`${id} moves with reduced motion (${t})`);
+  }
+  // Rails: the row travels the reader's way, ends with its last item on
+  // screen, and with reduced motion is an ordinary sideways scroll instead.
+  for (const [id, sel] of [['rail-occasions', '[data-testid="pv3-biglist"]'], ['rail-steps', '[data-testid="pv3-steps"]'], ['rail-gallery', '[data-testid="pv3-rail"]']]) {
+    if (!want.includes(id) || !(await page.$(sel))) continue;
+    const at = async (p) => {
+      await page.evaluate(([s, p]) => {
+        const a = document.querySelector(s);
+        const top = a.getBoundingClientRect().top + scrollY;
+        window.scrollTo(0, top + Math.max(a.offsetHeight - innerHeight, 0) * p);
+      }, [sel, p]);
+      await page.waitForTimeout(350);
+      return page.evaluate((s) => {
+        const a = document.querySelector(s);
+        const track = a.querySelector('[data-sc-pan]');
+        const stage = a.querySelector('[data-sc-stage]');
+        const last = track.lastElementChild.getBoundingClientRect();
+        const sr = stage.getBoundingClientRect();
+        const cut = [...stage.querySelectorAll('li, p, h2, img')].filter((el) => {
+          const r = el.getBoundingClientRect();
+          return r.height && (r.top < sr.top - 1 || r.bottom > sr.bottom + 1);
+        }).length;
+        return { x: new DOMMatrix(getComputedStyle(track).transform).m41, held: a.offsetHeight / innerHeight,
+          last: [last.left, last.right], vw: innerWidth, scrolls: stage.scrollWidth > stage.clientWidth + 1, cut };
+      }, sel);
+    };
+    const mid = await at(0.5);
+    if (still) {
+      if (mid.x !== 0) out.push(`${id} moves with reduced motion`);
+      if (!mid.scrolls) out.push(`${id} cannot be scrolled sideways with reduced motion`);
+      if (mid.held > 1.3) out.push(`${id} is held ${mid.held.toFixed(1)} screens tall with reduced motion`);
+      continue;
+    }
+    if (rtl ? mid.x <= 0 : mid.x >= 0) out.push(`${id} travels the wrong way (${mid.x.toFixed(0)}px) for ${rtl ? 'Hebrew' : 'English'}`);
+    if (mid.cut) out.push(`${id}: ${mid.cut} items cut off by the held stage`);
+    const end = await at(1);
+    if (end.last[0] < -2 || end.last[1] > end.vw + 2) out.push(`${id} ends with its last item off screen (${end.last.map(Math.round).join('..')})`);
   }
   if (want.includes('spotlight-offer')) {
     await hoverOver(page, '[data-testid="pv3-offer"]');
@@ -261,7 +297,7 @@ for (const f of fixtures) {
       if (!shown.replace(/[,\s]/g, '').includes(String(Math.round(price)))) fails.push(`${tag}: counted price does not end on ${price}`);
     }
     if (errs.length) fails.push(`${tag}: page error ${errs[0]}`);
-    for (const e of await engineCheck(page, want, w, motion)) fails.push(`${tag}: ${e}`);
+    for (const e of await engineCheck(page, want, w, motion, lang === 'he')) fails.push(`${tag}: ${e}`);
 
     await page.evaluate(() => window.scrollTo(0, 0));
     await page.waitForTimeout(300);

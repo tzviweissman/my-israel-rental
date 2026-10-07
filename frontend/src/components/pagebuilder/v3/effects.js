@@ -103,8 +103,23 @@ export function engineAttrs(brief, slot) {
     a['data-sc-act'] = 'flow';
   }
   if (slot === 'offer' && hasFx(brief, 'spotlight-offer')) a['data-sc-spotlight'] = '';
+  if (railOf(brief, slot)) {
+    a['data-sc-act'] = 'pan';
+    a['data-sc-span'] = RAIL_SPAN[slot];
+  }
   return a;
 }
+
+// A sideways rail: the block holds while its row travels (rail-*).
+const RAILS = { biglist: 'rail-occasions', steps: 'rail-steps', rail: 'rail-gallery' };
+// How many screens of scroll each rail holds for: roughly its travel, so a
+// short row does not hold the reader for long while barely moving.
+const RAIL_SPAN = { biglist: '2', steps: '1.7', rail: '2.4' };
+export const railOf = (brief, slot) => Boolean(RAILS[slot]) && hasFx(brief, RAILS[slot]);
+
+/** The block's inner box is the rail's stage, its list the track. */
+export const stageAttrs = (brief, slot) => (railOf(brief, slot) ? { 'data-sc-stage': '' } : {});
+export const trackAttrs = (brief, slot) => (railOf(brief, slot) ? { 'data-sc-pan': '0' } : {});
 
 /** Parallax: the photo drifts slower than the page, up to 30px either way,
  *  inside a frame cut 40px larger so no edge ever shows. Off on phones (the

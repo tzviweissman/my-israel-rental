@@ -1224,6 +1224,21 @@
     }
     addEventListener('resize', onResize, { passive: true });
 
+    // Positions are measured, so anything that moves the page under an act
+    // (an image arriving, a header that shrinks once you scroll, text
+    // loading in another block) leaves every act reading stale positions:
+    // a rail then stops short of its last item. Re-measure whenever the
+    // page's height changes. Setting an act's own height never changes it
+    // again, so this cannot loop.
+    var ro = null, lastH = 0;
+    if ('ResizeObserver' in window) {
+      ro = new ResizeObserver(function () {
+        var h = document.documentElement.scrollHeight;
+        if (h !== lastH && !destroyed) { lastH = h; layout(); }
+      });
+      ro.observe(document.body);
+    }
+
     if (document.fonts && document.fonts.ready) {
       // Line splitting measures line boxes, so it has to wait for the real face.
       document.fonts.ready.then(function () {
@@ -1257,6 +1272,7 @@
       unprime();
       if (io) io.disconnect();
       if (cio) cio.disconnect();
+      if (ro) ro.disconnect();
       playheads.forEach(function (V) {
         try { V.el.pause(); } catch (e) {}
         if (V.el.src && V.el.src.indexOf('blob:') === 0) {
