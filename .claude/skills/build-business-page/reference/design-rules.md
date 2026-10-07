@@ -147,6 +147,7 @@ The page footer says when tier 2 media was used (for example, "Film rendered in 
   - Walking times from a rental to the Kotel.
   - A dial showing Low/High settings.
 - **End on the offer**, not a contact form: price, what's included, supervision, service area, then the button and copyable phone and email.
+  - **Contact details stay, for now** (Tzvi, 7 Oct 2026). This clashed with the chat-only rule for store pages (no phone or email shown to customers); Tzvi's ruling: "for now keep store details". A page keeps the business's own phone and email in its offer section. Revisit before changing either rule.
 - Section padding: 96–140px on desktop and 64–80px on mobile. Use generous space; tight spacing makes a page look cheap.
 
 ### Layout patterns to reach for
