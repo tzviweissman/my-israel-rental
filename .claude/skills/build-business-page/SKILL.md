@@ -69,6 +69,9 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 
 ## 1. Facts: only theirs
 
+- **Never re-ask what they already told us.** Read the record, every
+  listing, hours, photos and flyer text first; anything answered there is
+  never asked, not even to confirm.
 - **Ask the owner only about their business**: facts the record leaves
   open or contradicts (where they work, booking lead time, who books them,
   languages). Never about how we build: no tools, credits, image sources,

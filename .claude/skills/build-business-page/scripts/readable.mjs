@@ -45,15 +45,19 @@ for (const [w, h] of sizes) {
         const rects = [...range.getClientRects()].filter((r) => r.width > 2 && r.height > 2 && r.bottom > 0 && r.top < innerHeight && r.right > 0 && r.left < innerWidth);
         if (!rects.length) continue;
         // half off the screen, or under the fixed order bar: scrolling past, not reading
-        const bar = document.querySelector('.buybar.is-on');
-        const barTop = bar ? bar.getBoundingClientRect().top : innerHeight;
-        // ...or sliding under a fixed header at the top
-        let topCover = 0;
-        for (const f of document.querySelectorAll('header, nav, [class*="bar"]')) {
-          const fr = f.getBoundingClientRect(), fp = getComputedStyle(f).position;
-          if ((fp === 'fixed' || fp === 'sticky') && fr.top <= 1 && fr.height < innerHeight * 0.3 && !f.contains(el)) topCover = Math.max(topCover, fr.bottom);
+        // Any bar fixed to the top or bottom edge counts (a header, an order
+        // bar); text inside the bar itself is still judged.
+        let topCover = 0, barTop = innerHeight, inBar = false;
+        for (const f of document.querySelectorAll('header, nav, footer, [class*="bar"]')) {
+          const fp = getComputedStyle(f).position;
+          if (fp !== 'fixed' && fp !== 'sticky') continue;
+          const fr = f.getBoundingClientRect();
+          if (fr.height === 0 || fr.height > innerHeight * 0.3) continue;
+          if (f.contains(el)) { inBar = true; continue; }
+          if (fr.top <= 1) topCover = Math.max(topCover, fr.bottom);
+          else if (fr.bottom >= innerHeight - 1 && fr.top < innerHeight) barTop = Math.min(barTop, fr.top);
         }
-        if (rects[0].top < Math.max(4, topCover) - 2 || rects[rects.length - 1].bottom > Math.min(innerHeight - 4, barTop) && !(bar && bar.contains(el))) continue;
+        if (!inBar && (rects[0].top < Math.max(4, topCover) - 2 || rects[rects.length - 1].bottom > Math.min(innerHeight - 4, barTop))) continue;
         // is it actually on top (not under a clipped side or another layer)?
         const r0 = rects[0];
         const hit = document.elementFromPoint(Math.min(innerWidth - 1, Math.max(0, r0.left + r0.width / 2)), Math.min(innerHeight - 1, Math.max(0, r0.top + r0.height / 2)));

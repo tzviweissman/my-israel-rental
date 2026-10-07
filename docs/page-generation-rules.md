@@ -40,6 +40,15 @@ whether to use them, in their language, without adding a single fact of our own.
 - **Their listings**: titles, descriptions, prices, photos.
 - **Their photos**: cover, logo, listing photos. Referenced, never copied or linked.
 
+**Never re-ask what they already told us** (Tzvi, 6 Oct 2026, playing a
+new owner: "all of these questions can be answered from looking at her
+page"). Before asking anything, read everything they have given: the
+business record, every listing and its tiers, their hours, their photos and
+the words on their flyers. A question whose answer is anywhere in that is
+never put to them, not even as a confirmation. Ask only what is missing (a
+price they left out, their languages, a qualification a claim would need,
+photos of themselves) or what two of their own sources contradict.
+
 **What the owner is asked** (Tzvi, 6 Oct 2026, playing the owner of
 KasherMyBnb: "dont ask a business that question"). Only facts about their
 own business that the record leaves open or contradicts: where they work,
