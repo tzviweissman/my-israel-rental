@@ -1,0 +1,8 @@
+{
+  "name": "page-check",
+  "private": true,
+  "type": "module",
+  "description": "Renders a business page version and decides whether it may go live (page builder v3).",
+  "scripts": { "start": "node server.mjs" },
+  "dependencies": { "playwright": "1.62.1" }
+}
