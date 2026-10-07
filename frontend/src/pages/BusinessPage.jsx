@@ -29,6 +29,8 @@ import BlockList from '../components/pagebuilder/BlockList';
 import FeaturedHero from '../components/marketplace/FeaturedHero';
 import CardAction, { BasketBar } from '../components/marketplace/CardAction';
 import { useBasket } from '../utils/storeBasket';
+import { useSavedItems } from '../hooks/useFavorites';
+import SaveHeart from '../components/marketplace/SaveHeart';
 import { cheapestFirst } from '../utils/gigPrice';
 import { PAGE_SIZE } from '../components/pagebuilder/ServicesBlock';
 import SiteFooter from '../components/common/SiteFooter';
@@ -128,6 +130,8 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   const scrim = useCoverScrim(coverSrc);
   // Phase 4's basket is a hook too, so it is hoisted for the same reason.
   const basket = useBasket(biz ? biz.id : null);
+  // Phase 5: the save heart. A hook, hoisted with the rest.
+  const { savedIds, toggleSave } = useSavedItems();
   /* The phone's bottom bar (Message, and the basket when it has things in
      it) is fixed, so the page ends with room for its real height: a fixed
      bar must never sit over the last of the content. Hoisted with the
@@ -209,6 +213,10 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
     }
     navigate(`/chat/${gig.id}?with=${encodeURIComponent(biz.owner_user_id)}`);
   };
+  const cardHeart = (gig) => (
+    <SaveHeart saved={savedIds.has(gig.id)} t={t} size="sm" testid={`save-${gig.id}`}
+      onClick={(e) => toggleSave(gig, `/business/${biz.slug || biz.id}`, e)} />
+  );
   const cardAction = (gig) => (
     <CardAction gig={gig} basket={basket} t={t} title={localizedTitle(gig, i18n)} onMessage={messageAbout} />
   );
@@ -679,6 +687,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             messageBusiness,
             openService: (g) => navigate(`/businesses/${g.id}`),
             cardAction,
+            cardHeart,
             apiBase: API,
           }}
         />

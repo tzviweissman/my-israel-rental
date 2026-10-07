@@ -828,6 +828,14 @@ const en = {
       send: 'Send order',
       noPayment: 'No account and no payment here. The business confirms with you.',
     },
+    saved: {
+      save: 'Save',
+      unsave: 'Remove from Saved',
+      done: 'Saved. You will find it under Saved in your dashboard.',
+      removed: 'Removed from Saved.',
+      failed: 'That did not save. Try again.',
+      itemsTitle: 'Saved services and products',
+    },
     featured: {
       label: 'Featured',
       kicker: 'Featured',

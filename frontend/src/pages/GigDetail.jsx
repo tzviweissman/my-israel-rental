@@ -31,6 +31,8 @@ import { priceRows, cheapestRow, cheapestFirst } from '../utils/gigPrice';
 import { FX_USD_TO_ILS } from '../utils/listingPrice';
 import { localizedTitle, localizedDescription } from '../utils/gigLocale';
 import Highlights from '../components/marketplace/Highlights';
+import SaveHeart from '../components/marketplace/SaveHeart';
+import { useSavedItems } from '../hooks/useFavorites';
 import { buildWhatsAppLinkWithMessage, hasValidWhatsApp } from '../utils/whatsappLink';
 import { isAvailableNow, getGigCover } from '../utils/gigAvailability';
 import { productPhotos, productCover } from '../utils/productPhotos';
@@ -293,6 +295,8 @@ const GigDetail = () => {
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { token, user } = useContext(AuthContext);
+  // Phase 5: save this item (the heart by the title).
+  const { savedIds, toggleSave } = useSavedItems();
   // Compute where "Back to businesses" should return the visitor. If they
   // came from a filtered board (or from an adjacent
   // /businesses/provider/... or /businesses/jobs page), send them back to
@@ -917,14 +921,18 @@ const GigDetail = () => {
                   rule, so a Hebrew title fell back to a system serif.
                   dir="auto" because the title is the POSTER's text and
                   may be in either language regardless of the page. */}
-              <h1
-                className="text-2xl md:text-3xl font-bold text-gray-900"
-                style={{ fontFamily: 'var(--font-head)' }}
-                dir="auto"
-                data-testid="gig-title"
-              >
-                {displayTitle}
-              </h1>
+              <div className="flex items-start justify-between gap-3">
+                <h1
+                  className="text-2xl md:text-3xl font-bold text-gray-900"
+                  style={{ fontFamily: 'var(--font-head)' }}
+                  dir="auto"
+                  data-testid="gig-title"
+                >
+                  {displayTitle}
+                </h1>
+                <SaveHeart saved={savedIds.has(gig.id)} t={t} testid="gig-save"
+                  onClick={(e) => toggleSave(gig, `/businesses/${gig.id}`, e)} />
+              </div>
               <p className="text-gray-600 mt-1" dir="auto" data-testid="gig-byline">
                 {gig.provider?.name}{gig.area ? ` · ${prettyArea(gig.area, t)}` : ''}
               </p>

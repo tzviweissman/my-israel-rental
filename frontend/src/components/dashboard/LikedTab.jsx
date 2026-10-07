@@ -7,6 +7,50 @@ import { Heart, MapPin, Bed, Bath } from 'lucide-react';
 import { toast } from 'sonner';
 import { getCoverImage } from '../../utils/coverImage';
 import { areaLabel } from '../../utils/areaNames';
+import ServiceCard from '../marketplace/ServiceCard';
+import SaveHeart from '../marketplace/SaveHeart';
+
+/** Saved services and products (storefront phase 5): the same favourites,
+ *  extended to items. Drawn only when there are some. */
+function SavedItems({ API, token }) {
+  const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
+  const [items, setItems] = useState(null);
+  useEffect(() => {
+    axios.get(`${API}/saved-gigs`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(({ data }) => setItems(data || []))
+      .catch(() => setItems([]));
+  }, [API, token]);
+  const unsave = async (gig) => {
+    try {
+      await axios.post(`${API}/gigs/${encodeURIComponent(gig.id)}/save`, { saved: false }, { headers: { Authorization: `Bearer ${token}` } });
+      setItems((cur) => cur.filter((g) => g.id !== gig.id));
+      toast.success(t('saved.removed', 'Removed from Saved.'));
+    } catch {
+      toast.error(t('saved.failed', 'That did not save. Try again.'));
+    }
+  };
+  if (!items || !items.length) return null;
+  return (
+    <section className="space-y-3" data-testid="saved-items">
+      <h3 className="text-lg font-semibold" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+        {t('saved.itemsTitle', 'Saved services and products')}
+      </h3>
+      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+        {items.map((g) => (
+          <ServiceCard key={g.id} gig={g} i18n={i18n} t={t} onClick={() => navigate(`/businesses/${g.id}`)}
+            action={g.business?.slug ? (
+              <button type="button" onClick={() => navigate(`/business/${g.business.slug}`)} className="text-xs font-semibold underline underline-offset-2 truncate max-w-full"
+                style={{ color: 'var(--ink)' }} dir="auto">
+                {(i18n.language || '').startsWith('he') && g.business.name_he ? g.business.name_he : g.business.name}
+              </button>
+            ) : null}
+            heart={<SaveHeart saved t={t} size="sm" testid={`saved-item-${g.id}`} onClick={() => unsave(g)} />} />
+        ))}
+      </div>
+    </section>
+  );
+}
 
 /**
  * Renter's "Liked Properties" dashboard tab.
@@ -154,6 +198,7 @@ const LikedTab = ({ API, token }) => {
           ))}
         </div>
       )}
+      <SavedItems API={API} token={token} />
     </div>
   );
 };

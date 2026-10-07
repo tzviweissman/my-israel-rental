@@ -30,6 +30,11 @@
 //   * the basket's Send order opens the order form with the quantities in
 //     it, signed out; the existing Message buttons are still there;
 //   * on a phone, scrolled to the very end, nothing is under the bottom bar.
+// Phase 5, save for later:
+//   * a heart on every card; signed out, a tap goes to sign-in with the
+//     save carried in the return address; arriving back signed in finishes
+//     the save (the heart fills), and the item is in the Saved tab;
+//   * no "saved by N" count anywhere on the page.
 // --shots writes screenshots of every store at 1280/768/375, EN and HE, to
 // screenshots/storefront/.
 import { chromium } from 'playwright';
@@ -137,6 +142,29 @@ for (const [kind, slug] of Object.entries(STORES)) {
     return Math.round(room.height - bar.height);
   });
   expect(gap >= 0, `phone: the page leaves room for the bottom bar (short by ${-gap}px)`);
+  await ctx.close();
+}
+
+{
+  const { p, ctx } = await open(STORES.mixed, { width: 390 });
+  const hearts = await p.$$('[data-testid^="save-"]');
+  expect(hearts.length > 0 && hearts.length === (await p.$$('.svc-card--with-action')).length, 'save: a heart on every card');
+  const gid = (await hearts[0].getAttribute('data-testid')).replace('save-', '');
+  await hearts[0].scrollIntoViewIfNeeded(); await hearts[0].click();
+  await p.waitForURL(/\/auth\/login/, { timeout: 15000 });
+  const back = decodeURIComponent(new URL(p.url()).searchParams.get('redirect') || '');
+  expect(back === `/business/${STORES.mixed}?save=gig:${gid}`, `save: sign-in carries the save (${back})`);
+  // "Signing in" locally: the dev sign-in on the same return address.
+  await p.goto(`${WEB}${back}&as=renter`, { waitUntil: 'networkidle' });
+  await p.waitForSelector(`[data-testid="save-${gid}"][data-saved="true"]`, { state: 'attached', timeout: 30000 });
+  expect(!p.url().includes('save='), 'save: the address is tidied after saving');
+  expect(!/saved by/i.test(await p.evaluate(() => document.body.innerText)), 'save: no "saved by" count');
+  await p.goto(`${WEB}/dashboard?tab=liked`, { waitUntil: 'networkidle' });
+  await p.waitForSelector(`[data-testid="saved-item-${gid}"]`, { timeout: 30000 }).catch(() => {});
+  expect(await p.$(`[data-testid="saved-item-${gid}"]`), 'save: the item is in the Saved tab');
+  if (SHOTS) await (await p.$('[data-testid="saved-items"]'))?.screenshot({ path: `${OUT}/saved-tab-375.png` });
+  // put it back as it was
+  await (await p.$(`[data-testid="saved-item-${gid}"]`))?.click();
   await ctx.close();
 }
 
