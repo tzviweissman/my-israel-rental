@@ -11,7 +11,7 @@ past, with two one-tap actions in the email:
 
   2. **Open dashboard** — deep link into the property's edit modal so the
      host can do anything else (set a new explicit window, clear the cap,
-     pause the listing, etc.).
+     or clear the cap).
 
 The cron runs once a day at 06:00 UTC (≈ 09:00 Israel). It dedupes via
 ``availability_expiry_alerted_at`` on the property doc — we don't email

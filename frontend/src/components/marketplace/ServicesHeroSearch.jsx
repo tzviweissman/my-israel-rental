@@ -32,6 +32,7 @@
  * correctly and shows a removable chip. Putting the box back is this
  * component's job alone — see the commit that removed it.
  */
+import { Link } from 'react-router-dom';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Briefcase, Calendar as CalendarIcon, Wallet, SlidersHorizontal, ChevronDown, Check, Coins } from 'lucide-react';
@@ -452,14 +453,17 @@ export default function ServicesHeroSearch({
           <SlidersHorizontal size={14} />
           {t('services.hero.moreFilters', 'More filters')}
         </button>
-        <a
-          href="/dashboard?tab=my-businesses"
+        {/* Straight to adding a business: signed out, the route sends them
+            to sign up and back; it sent them to the dashboard, which bounced
+            a visitor to log in and showed a member an empty pane (dead ends,
+            7 Oct 2026). The site's standing invitation, word for word. */}
+        <Link
+          to="/businesses/add"
           className="inline-flex items-center gap-1.5 text-[var(--brand-primary)] hover:text-[var(--brand-primary-dark)] font-semibold transition-colors"
           data-testid="services-hero-become-provider"
         >
-          {t('services.becomeProvider', 'Become a provider')}
-          <span aria-hidden="true">→</span>
-        </a>
+          {t('dashboard.noBusinessCta', 'Add your business, free')}
+        </Link>
       </div>
     </div>
   );

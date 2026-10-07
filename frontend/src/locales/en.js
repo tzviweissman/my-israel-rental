@@ -1939,6 +1939,10 @@ const en = {
         flyerAlt: 'A flyer from {{name}}',
       },
       dashboard: {
+        noOrdersTitle: 'Orders come in through your business page',
+        noRentalsTitle: 'No rentals listed yet',
+        noRentalsBody: 'Editing many listings at once works once you list a rental. Listing is free, with no commission.',
+        noRentalsCta: 'See how hosting works',
         noBusinessTitle: 'No business page yet',
         noBusinessBody: 'Add your business and what you offer. Free to list, free to be found, no commission.',
         noBusinessCta: 'Add your business, free',

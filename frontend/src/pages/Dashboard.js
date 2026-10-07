@@ -443,7 +443,7 @@ const Dashboard = () => {
         )}
 
         {activeTab === 'settings' && (
-          <SettingsTab user={user} token={token} API={API} />
+          <SettingsTab user={user} token={token} API={API} runsBusiness={showGigTabs} />
         )}
 
         {/* Not gated on isRenter — see the note beside this tab in
@@ -521,6 +521,15 @@ const Dashboard = () => {
             token={token}
           />
         )}
+        {activeTab === 'bulk-manager' && !isPropertyLister && (
+          <EmptyPane
+            testid="no-rentals-yet"
+            title={t('dashboard.noRentalsTitle', 'No rentals listed yet')}
+            body={t('dashboard.noRentalsBody', 'Editing many listings at once works once you list a rental. Listing is free, with no commission.')}
+            cta={t('dashboard.noRentalsCta', 'See how hosting works')}
+            onClick={() => navigate('/why-host')}
+          />
+        )}
 
         {activeTab === 'bookings' && (
           <BookingsList
@@ -571,6 +580,17 @@ const Dashboard = () => {
 
         {activeTab === 'orders' && showGigTabs && (
           <OrdersTab API={API} token={token} />
+        )}
+        {/* The feature page's "orders" button lands here for anyone; with
+            no business it was blank (dead ends, 7 Oct 2026). */}
+        {activeTab === 'orders' && !showGigTabs && (
+          <EmptyPane
+            testid="no-orders-business"
+            title={t('dashboard.noOrdersTitle', 'Orders come in through your business page')}
+            body={t('dashboard.noBusinessBody', 'Add your business and what you offer. Free to list, free to be found, no commission.')}
+            cta={t('dashboard.noBusinessCta', 'Add your business, free')}
+            onClick={() => navigate('/businesses/add')}
+          />
         )}
 
         {activeTab === 'network' && (

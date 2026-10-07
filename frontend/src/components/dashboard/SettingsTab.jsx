@@ -9,7 +9,7 @@ import EmailSwitches from './EmailSwitches';
 import { phoneError, phonePreview } from '../../utils/phoneValidation';
 import PhoneInput from '../common/PhoneInput';
 
-const SettingsTab = ({ user, token, API }) => {
+const SettingsTab = ({ user, token, API, runsBusiness = false }) => {
   const { i18n, t } = useTranslation();
   const { login } = useContext(AuthContext);
   const [language, setLanguage] = useState(
@@ -350,7 +350,9 @@ const SettingsTab = ({ user, token, API }) => {
       {/* Auto chat-reminder toggle — visible only for owner/manager/admin
           since renters aren't the ones being nudged. Backed by
           PUT /api/user/auto-nudge-opt-out. */}
-      {isPropertyLister && (
+      {/* Anyone a customer can message: hosts, and since 7 Oct 2026
+          businesses, whose reminder email points them here. */}
+      {(isPropertyLister || runsBusiness) && (
         <div
           className="bg-white rounded-2xl border border-gray-200 p-6 max-w-2xl mb-6"
           data-testid="auto-nudge-card"

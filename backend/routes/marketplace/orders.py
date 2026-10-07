@@ -1111,7 +1111,14 @@ async def _email(to: Optional[str], subject: str, inner_html: str, *, tag: str, 
     subject = _subject(subject)
     try:
         from utils.email import _button, _wrap, send_email
-        html = inner_html + (_button(button[0], button[1]) if button else "")
+        # A mail client cannot follow "/dashboard?...": callers pass the
+        # in-app path (the same one the bell uses), made absolute here.
+        # Price alerts and automations sent links that went nowhere
+        # (dead ends, 7 Oct 2026).
+        href = button[1] if button else ""
+        if href.startswith("/"):
+            href = _frontend_url() + href
+        html = inner_html + (_button(button[0], href) if button else "")
         await send_email(to, subject, _wrap(html), tag=tag)
     except Exception as exc:  # noqa: BLE001
         logger.warning("[orders] email '%s' to %s failed: %s", tag, (to or "")[:3] + "***", exc)

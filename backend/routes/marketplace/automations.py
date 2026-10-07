@@ -586,7 +586,11 @@ async def _message_customer(rule: dict[str, Any], ctx: dict[str, Any], event: di
     if not email and not user_id:
         return await _record(rule, result="skipped", event=event, error="no email or account for this customer")
     if user_id:
-        await om._notify(user_id, type_="business_message", message=f"{sender}: {text}"[:500], action_url=_where(ctx))
+        # The customer's side: their orders live under My orders (the
+        # business tab is blank for them). Appointments and rental
+        # bookings open the same tab for both sides.
+        where = "/dashboard?tab=my-orders" if ctx.get("order") else _where(ctx)
+        await om._notify(user_id, type_="business_message", message=f"{sender}: {text}"[:500], action_url=where)
     if email:
         await om._email(email, f"A message from {sender}", f"<p>{om._esc_ml(text)}</p>", tag="automation_message")
     return await _record(rule, result="messaged", event=event)
