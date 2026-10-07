@@ -19,6 +19,17 @@ Decisions (Tzvi, 23 Sep 2026):
   * Old unchecked service reviews: those whose writer has a completed
     booking with that service become verified; the rest are left in
     marketplace_reviews and simply not read (scripts/migrate_reviews.py).
+
+Widened 7 Oct 2026 (Tzvi, storefront sales features): a business may also
+be reviewed by someone who was a party to it in two more ways, checked as a
+relationship, never as a role:
+  * a store order placed while signed in and marked done (the account on
+    the order is what makes it checkable; anonymous orders still don't count);
+  * a real chat conversation with the business: the person wrote to it and
+    it wrote back. One such review per person per business, and it is not
+    marked "verified" (nothing was bought), so it never earns the badge.
+An average is shown only from MIN_FOR_AVERAGE reviews up, the same floor
+the response-time figure uses; below it the reviews are listed without one.
 """
 from __future__ import annotations
 
@@ -50,6 +61,11 @@ REPORT_REASONS = ADMIN_REMOVAL_REASONS + ("other",)
 
 SUB_RATINGS = ("cleanliness", "accuracy", "communication", "location", "value")
 TEXT_MIN, TEXT_MAX = 20, 2000
+# Fewer reviews than this: list them, but show no average or count badge.
+# Same floor as MIN_RESPONSES_FOR_BADGE in routes/marketplace/shared.py.
+MIN_FOR_AVERAGE = 3
+# A review that rests on a conversation, not a purchase.
+CHAT_PREFIX = "chat:"
 EDIT_HOURS = 48
 REQUEST_TOKEN_DAYS = 30
 
@@ -167,7 +183,48 @@ async def load_booking(db, booking_id: str) -> dict | None:
             "owner_ids": {x for x in (gig.get("provider_user_id"), b.get("provider_user_id"), (biz or {}).get("owner_user_id")) if x},
             "business_id": gig.get("business_id"),
         }
+    o = await db.store_orders.find_one({"_id": booking_id})
+    if o:
+        gig = await db.marketplace_gigs.find_one({"_id": o.get("gig_id")}, {"title": 1}) or {}
+        return {
+            "kind": "order", "id": o["_id"], "guest_id": o.get("customer_user_id"), "status": o.get("status"),
+            "start": None, "end": None,
+            "done_on": _day(o.get("status_changed_at")) if o.get("status") == "done" else None,
+            "listing_id": o.get("gig_id"), "listing_kind": "gig", "listing_title": gig.get("title") or "",
+            "owner_ids": {x for x in (o.get("owner_user_id"),) if x}, "business_id": o.get("business_id"),
+        }
+    if booking_id.startswith(CHAT_PREFIX):
+        return await _load_chat(db, booking_id)
     return None
+
+
+def chat_key(business_id: str, user_id: str) -> str:
+    return f"{CHAT_PREFIX}{business_id}:{user_id}"
+
+
+async def _load_chat(db, key: str) -> dict | None:
+    """A conversation as the basis of a review: the person wrote to the
+    business about one of its listings and the business wrote back."""
+    try:
+        business_id, user_id = key[len(CHAT_PREFIX):].split(":", 1)
+    except ValueError:
+        return None
+    biz = await db.businesses.find_one({"_id": business_id}, {"owner_user_id": 1, "name": 1})
+    owner = (biz or {}).get("owner_user_id")
+    if not owner or not user_id:
+        return None
+    gig_ids = [g["_id"] async for g in db.marketplace_gigs.find({"business_id": business_id}, {"_id": 1})]
+    if not gig_ids:
+        return None
+    sent = await db.messages.find_one({"property_id": {"$in": gig_ids}, "sender_id": user_id, "receiver_id": owner}, {"_id": 1})
+    got = await db.messages.find_one({"property_id": {"$in": gig_ids}, "sender_id": owner, "receiver_id": user_id}, {"_id": 1})
+    if not (sent and got):
+        return None
+    return {
+        "kind": "chat", "id": key, "guest_id": user_id, "status": "open", "start": None, "end": None,
+        "done_on": None, "listing_id": None, "listing_kind": "business", "listing_title": biz.get("name") or "",
+        "owner_ids": {owner}, "business_id": business_id,
+    }
 
 
 async def check_eligibility(db, booking: dict | None, user_id: str | None, *, today: date | None = None) -> dict:
@@ -195,13 +252,44 @@ async def check_eligibility(db, booking: dict | None, user_id: str | None, *, to
             return {"eligible": False, "reason": "not_completed"}
         if not booking["done_on"] or booking["done_on"] >= today:
             return {"eligible": False, "reason": "too_early"}
+    elif booking["kind"] == "order":
+        if status != "done" or not booking["done_on"]:
+            return {"eligible": False, "reason": "not_completed"}
+    elif booking["kind"] == "chat":
+        pass  # _load_chat only returns a conversation both sides took part in
     elif status != "completed" or not booking["done_on"]:
         return {"eligible": False, "reason": "not_completed"}
-    if today > booking["done_on"] + timedelta(days=window_days()):
+    if booking["done_on"] and today > booking["done_on"] + timedelta(days=window_days()):
         return {"eligible": False, "reason": "window_closed"}
     if await db.reviews.find_one({"booking_id": booking["id"]}, {"_id": 1}):
         return {"eligible": False, "reason": "already_reviewed"}
     return {"eligible": True, "reason": None}
+
+
+async def business_basis(db, business_id: str, user_id: str | None) -> dict:
+    """The first thing that lets this person review this business, best
+    evidence first: a completed booking, then a done order, then a
+    conversation. {eligible, reason, basis_id, kind}; never raises."""
+    if not user_id:
+        return {"eligible": False, "reason": "not_yours", "basis_id": None, "kind": None}
+    gig_ids = [g["_id"] async for g in db.marketplace_gigs.find({"business_id": business_id}, {"_id": 1})]
+    ids = [b["_id"] async for b in db.marketplace_bookings.find(
+        {"gig_id": {"$in": gig_ids}, "client_user_id": user_id, "status": "completed"}, {"_id": 1}).sort("completed_at", -1).limit(20)]
+    ids += [o["_id"] async for o in db.store_orders.find(
+        {"business_id": business_id, "customer_user_id": user_id, "status": "done"}, {"_id": 1}).sort("status_changed_at", -1).limit(20)]
+    ids.append(chat_key(business_id, user_id))
+    reasons = []
+    for basis_id in ids:
+        booking = await load_booking(db, basis_id)
+        verdict = await check_eligibility(db, booking, user_id)
+        if verdict["eligible"]:
+            return {"eligible": True, "reason": None, "basis_id": basis_id, "kind": booking["kind"]}
+        reasons.append(verdict["reason"])
+    # Say the most useful thing: their own business, or already done.
+    for r in ("own_listing", "already_reviewed", "window_closed"):
+        if r in reasons:
+            return {"eligible": False, "reason": r, "basis_id": None, "kind": None}
+    return {"eligible": False, "reason": "no_relationship", "basis_id": None, "kind": None}
 
 
 # ---------------------------------------------------------------- tokens
@@ -287,7 +375,9 @@ async def create_native(db, *, booking_id: str, user_id: str, rating: Any, text:
     doc = {
         "_id": uuid.uuid4().hex, "listing_id": booking["listing_id"], "listing_kind": booking["listing_kind"],
         "business_id": booking["business_id"], "owner_user_ids": sorted(booking["owner_ids"]),
-        "source": "native", "verified": True, "booking_id": booking["id"], "booking_kind": booking["kind"],
+        # A conversation is a real relationship but not a purchase: listed,
+        # never badged "verified".
+        "source": "native", "verified": booking["kind"] != "chat", "booking_id": booking["id"], "booking_kind": booking["kind"],
         "author_user_id": user_id, "author_display_name": display_name(author.get("name")),
         "rating": rating, "sub_ratings": subs, "text": body,
         "stay_start": booking["start"], "stay_end": booking["end"],
@@ -405,13 +495,15 @@ def visible_query(extra: dict) -> dict:
 async def summary(db, match: dict) -> dict:
     """Averages kept apart by source, from the database:
     {"native": {"avg": 4.8, "count": 23}, "google": {...}}. A source with no
-    reviews is absent."""
+    reviews is absent; one with fewer than MIN_FOR_AVERAGE has a count and
+    avg None, so nothing shows an average two reviews can swing."""
     out: dict[str, dict] = {}
     async for row in db.reviews.aggregate([
         {"$match": visible_query(match)},
         {"$group": {"_id": "$source", "avg": {"$avg": "$rating"}, "count": {"$sum": 1}}},
     ]):
-        out[row["_id"]] = {"avg": round(row["avg"], 1), "count": row["count"]}
+        enough = row["count"] >= MIN_FOR_AVERAGE
+        out[row["_id"]] = {"avg": round(row["avg"], 1) if enough else None, "count": row["count"]}
     return out
 
 

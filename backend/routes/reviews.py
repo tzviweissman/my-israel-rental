@@ -78,6 +78,16 @@ async def eligibility(booking_id: str, user=Depends(verify_token)) -> dict:
     return await _booking_view(booking, verdict)
 
 
+@router.get("/businesses/{business_id}/review-eligibility")
+async def business_eligibility(business_id: str, user=Depends(verify_token)) -> dict:
+    """May the signed-in person review this business, and on what basis
+    (booking, order or conversation). Off when reviews are off."""
+    if not rv.native_enabled():
+        return {"eligible": False, "reason": "off", "kind": None}
+    b = await rv.business_basis(db, business_id, user["user_id"])
+    return {"eligible": b["eligible"], "reason": b["reason"], "kind": b["kind"]}
+
+
 @router.get("/reviews/request/{token}")
 async def request_link(token: str, request: Request) -> dict:
     """The emailed link, before the form is filled in. No sign-in needed:
@@ -109,6 +119,17 @@ async def create_review(request: Request, payload: dict = Body(...), viewer=Depe
         jti = t["jti"]
         booking = await rv.load_booking(db, booking_id)
         user_id = (booking or {}).get("guest_id")
+    elif payload.get("business_id"):
+        # From the storefront: the server finds what entitles this person
+        # (booking, order or conversation); the page never names it.
+        if not viewer:
+            raise HTTPException(status_code=401, detail="Sign in to write a review")
+        user_id = viewer["user_id"]
+        basis = await rv.business_basis(db, str(payload["business_id"]), user_id)
+        if not basis["eligible"]:
+            _raise(rv.ReviewError(409 if basis["reason"] == "already_reviewed" else 403,
+                                  basis["reason"], "You can't review this business yet."))
+        booking_id = basis["basis_id"]
     else:
         if not viewer:
             raise HTTPException(status_code=401, detail="Sign in to write a review")

@@ -428,7 +428,9 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                 style={{ color: 'var(--brand-muted)' }}>
                 {/* Stars for THIS business only. A five-star landlord must
                     not read as a five-star plumber. */}
-                {biz.rating_count > 0 ? (
+                {/* An average only from three reviews up (the server sends
+                    none below that), so two reviews can't swing a headline. */}
+                {biz.rating_avg != null ? (
                   <span className="inline-flex items-center gap-1" data-testid="business-rating">
                     <Star size={14} style={{ color: 'var(--gold)' }} fill="currentColor" />
                     <strong style={{ color: 'var(--ink)' }}>{biz.rating_avg}</strong>
@@ -654,6 +656,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           kind="business"
           className="mt-10"
           schemaItem={{ '@type': 'LocalBusiness', name: biz.name }}
+          onSignIn={() => navigate(`/auth/login?redirect=${encodeURIComponent(`/business/${biz.slug || biz.id}#reviews`)}`)}
         />
 
         {/* B7 — the highest-intent placement on the site for this CTA.

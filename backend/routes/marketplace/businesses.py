@@ -736,11 +736,12 @@ async def business_rating(business_id: str) -> dict[str, Any]:
         {"$match": match},
         {"$group": {"_id": None, "avg": {"$avg": "$rating"}, "count": {"$sum": 1}}},
     ]
+    from utils.reviews import MIN_FOR_AVERAGE
     async for row in coll.aggregate(pipeline):
-        return {
-            "rating_avg": round(row["avg"], 1) if row.get("avg") is not None else None,
-            "rating_count": row.get("count", 0),
-        }
+        count = row.get("count", 0)
+        # No average two reviews can swing (same floor as the reviews list).
+        enough = count >= MIN_FOR_AVERAGE and row.get("avg") is not None
+        return {"rating_avg": round(row["avg"], 1) if enough else None, "rating_count": count}
     return {"rating_avg": None, "rating_count": 0}
 
 
