@@ -242,6 +242,10 @@ code. Each rule names what it prevents.
    *Prevents: the page every AI makes from memory.*
 2. **No AI default look.** Cream ground with a serif headline and one
    italic word is banned unless the business's own brand is exactly that.
+   It is the combination that is banned: the page builder's one-word accent
+   on another ground stays allowed (`docs/page-builder-design-rules.md`
+   3.2, 3.4 and Part 10, where all eleven rules are applied to generated
+   pages).
    Sections must separate: at least one section on a contrasting ground (a
    dark band, their brand colour), not only hairlines between near-identical
    blocks. *Prevents: "anyone landing on this would know it's AI".*

@@ -58,6 +58,14 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   table, category study, playbooks with recipes, three-option rule, AI media
   policy, Blender, scroll sections, open decisions). This page is the
   distilled version; read the full one for anything not covered here.
+- `reference/design-rules.md`: the page builder's design rules (v3,
+  `docs/page-builder-design-rules.md` in the repo): non-negotiables, why
+  pages come out bland, the brief, palette and type rules, the six presets,
+  the three hero tiers, page rhythm and the showstopper, motion, **the
+  effects catalog** (one bold moment, "not too similar" to live pages,
+  owners choosing between versions), recipes by business type, copy, the
+  quality gate and a worked L.A. Cholent example. Section 3d below is the
+  short version; read the file for the rest.
 - `reference/playbooks.md`: per kind of business.
 - `reference/media-and-video.md`: generating, steadying, masking, encoding,
   placing overlays, recording previews.
@@ -193,6 +201,38 @@ Full text and reasons: `reference/full-rules.md` §3c.
     frame for its exact time (no stutter, same result every run) and writes a
     contact sheet beside the video: look at it before sending. Paid
     generation waits for the owner's yes on two or three style frames.
+
+## 3d. The page builder's design rules (v3, the other half of this skill)
+
+Full text: `reference/design-rules.md`. The rules both builders share are
+the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
+
+- **Diagnose bland first**: platform chrome louder than the business, the
+  same colours and fonts on every page, a hero headline of 40 to 60px, text
+  on a plain ground, everything centred, every section a white card, equal
+  weight everywhere. Each has its fix in Part 2.
+- **Identity from the business**: the accent from their logo; ground, text,
+  muted, surface and rule built around it (5 to 6 colours, neutrals leaning
+  to the accent); the accent fills only the primary button. At most three
+  faces; hero headline 96 to 160px on a laptop, 56 to 72px on a phone.
+- **Six presets as starting points** (Candlelight, Bold Pantry, Jerusalem
+  Stone, Studio, Field, Workshop), always with their accent swapped in and
+  one more element changed.
+- **Hero tiers, highest the content allows**: 1 their real photo (graded,
+  never a flyer); 2 a brand film of the setting and props, never the product
+  as theirs, with a pause button and an invisible loop; 3 a typographic brand
+  panel. The footer says when tier 2 was used.
+- **Rhythm**: set piece, quiet, set piece; one showstopper (a signature scroll
+  section takes the role from the hero); a palate cleanser with no text; one
+  signature detail only they would have; end on the offer.
+- **Effects catalog**: one bold moment, up to three accents and four quiet
+  touches; an effect only when the business has the material for it; held
+  sections fit or are not held; the order section is never pinned; a page
+  differs from each of the ten newest live pages of its category on at least
+  2 of 7 axes; owners choose from up to three versions, and only a version
+  that passes the visual check goes live.
+- **Quality gate** (Part 9): score the page before returning it, list what
+  is below the bar and give the owner a checklist of what would unlock more.
 
 ## 4. Design and story
 
