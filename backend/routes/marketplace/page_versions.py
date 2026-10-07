@@ -114,6 +114,12 @@ async def publish_version(business_id: str, version_id: str, user=Depends(verify
             {"business_id": business_id, "status": "checking", "_id": {"$ne": version_id}}):
         if can_publish(other, now):   # still within its check window
             raise HTTPException(status_code=409, detail="Another version is being checked")
+    # Another page in the category may have gone live since this one was
+    # made; a version that is now too close to it is not checked at all.
+    from routes.marketplace.businesses import _brief_category, recent_briefs
+    from utils.page_versions import TOO_CLOSE, too_close
+    if too_close(v["brief"], await recent_briefs(_brief_category(biz), business_id)):
+        raise HTTPException(status_code=409, detail=f"This version is {TOO_CLOSE.split(' (')[0]}. Make new versions to choose from.")
     token, preview = new_preview_token(now)
     await db.business_page_versions.update_one({"_id": version_id}, {"$set": {
         "status": "checking", "checking_since": now.isoformat(), "preview": preview, "failures": [],
@@ -157,9 +163,18 @@ async def record_version_check(
     passed = payload.passed and not payload.failures
     by = "page-check" if service else (viewer or {}).get("user_id")
     done = {"checked_at": now, "failures": payload.failures, "checking_since": None, "preview": None}
+    failures = list(payload.failures)
+    if passed:
+        # Checked again at the moment it would go live: another page in the
+        # category may have gone live while this one was being rendered.
+        from routes.marketplace.businesses import _brief_category, recent_briefs
+        from utils.page_versions import TOO_CLOSE, too_close
+        if too_close(v["brief"], await recent_briefs(_brief_category(biz), business_id)):
+            passed, failures = False, [f"This version is {TOO_CLOSE}"]
     if not passed:
-        await db.business_page_versions.update_one({"_id": version_id}, {"$set": {**done, "status": "failed"}})
-        return {"id": version_id, "status": "failed", "failures": payload.failures}
+        await db.business_page_versions.update_one(
+            {"_id": version_id}, {"$set": {**done, "failures": failures, "status": "failed"}})
+        return {"id": version_id, "status": "failed", "failures": failures}
 
     history = ([biz["design_brief"]] if biz.get("design_brief") else []) + list(biz.get("design_brief_history") or [])
     await db.businesses.update_one({"_id": business_id}, {"$set": {

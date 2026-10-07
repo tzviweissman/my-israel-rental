@@ -1094,12 +1094,15 @@ def _brief_category(record: dict) -> str:
 
 
 async def recent_briefs(category: str, exclude_id: str) -> list[dict]:
-    """The newest v3 pages of a category, newest first, as the effects
+    """The newest LIVE v3 pages of a category, newest first, as the effects
     picker reads them: the ledger "not too similar" is checked against
-    (utils/page_effects). Each business's stored brief IS the ledger."""
+    (utils/page_effects). Each business's stored brief IS the ledger, and
+    only a brief that passed its check is live (design_brief.page_check_passed):
+    a page nobody can see cannot make another one look like it."""
     from utils.page_effects import COMPARE_WINDOW
     cur = db.businesses.find(
-        {"design_brief.category": category, "page_v3": True, "_id": {"$ne": exclude_id}},
+        {"design_brief.category": category, "page_v3": True, "_id": {"$ne": exclude_id},
+         "page_check.passed": True, "$expr": {"$eq": ["$page_check.brief_at", "$design_brief_at"]}},
         {"design_brief.effects": 1, "design_brief.showstopper": 1},
     ).sort("design_brief_at", -1).limit(COMPARE_WINDOW)
     return [d.get("design_brief") or {} async for d in cur]

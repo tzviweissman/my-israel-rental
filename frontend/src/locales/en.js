@@ -1769,6 +1769,7 @@ const en = {
         attentionNone: 'All clear.',
       },
       pageVersions: {
+        reasonTooClose: "A page that went live since this was made looks too much like it. Make new versions.",
         reasonFaint: "Some text is hard to read over the picture",
         reasonSideways: "Part of the page spills off the side of a phone screen",
         reasonHidden: "Some text did not appear",

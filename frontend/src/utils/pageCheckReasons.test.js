@@ -22,3 +22,8 @@ test('an expired link and an unknown finding still say something plain', () => {
     .toEqual(['Something did not look right on one screen size']);
   expect(plainReasons(undefined, t)).toEqual([]);
 });
+
+test('a page that became too close says so plainly', () => {
+  expect(plainReasons(['This version is too much like another page that went live since it was made (too close to a recent live page)'], t))
+    .toEqual(['A page that went live since this was made looks too much like it. Make new versions.']);
+});

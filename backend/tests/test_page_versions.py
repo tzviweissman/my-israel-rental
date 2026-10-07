@@ -20,7 +20,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 
 from tests.test_design_brief import CHOLENT  # noqa: E402
 from utils.page_versions import (  # noqa: E402
-    CHECK_TIMEOUT, PREVIEW_TTL, can_publish, candidates, check_secret_ok, new_preview_token, preview_ok,
+    CHECK_TIMEOUT, PREVIEW_TTL, can_publish, candidates, check_secret_ok, new_preview_token, preview_ok, too_close,
 )
 
 NOW = datetime(2026, 10, 7, 12, 0, tzinfo=UTC)
@@ -49,6 +49,31 @@ def test_a_new_generation_gives_new_versions_and_the_same_one_repeats():
     one = [b["effects"] for b in candidates(rec, None, PHOTOS, [], generation=1)]
     assert one == [b["effects"] for b in candidates(rec, None, PHOTOS, [], generation=1)]
     assert one != [b["effects"] for b in candidates(rec, None, PHOTOS, [], generation=2)]
+
+
+def test_a_page_is_too_close_to_its_twin_and_not_to_a_different_one():
+    a = {"effects": ["pin-hero-hold", "btn-press", "rules-double"], "showstopper": "pin-hero-hold"}
+    b = {"effects": ["rail-gallery", "btn-invert", "corners-soft", "kinetic-words-headline"], "showstopper": "rail-gallery"}
+    assert too_close(a, [a]) and not too_close(a, [b]) and not too_close(a, [])
+
+
+def test_a_near_miss_is_never_offered(monkeypatch):
+    """The picker keeps its nearest miss when nothing passes; such a version
+    is not offered, since publishing it would be refused."""
+    import utils.page_versions as pv
+    live = {"effects": ["pin-hero-hold", "btn-press", "rules-double"], "showstopper": "pin-hero-hold"}
+    other = {"effects": ["rail-gallery", "btn-invert", "corners-soft", "kinetic-words-headline"], "showstopper": "rail-gallery"}
+
+    class Brief:
+        def __init__(self, d):
+            self.d, self.showstopper = d, d["showstopper"]
+
+        def model_dump(self):
+            return dict(self.d)
+    made = iter([live, other])      # first the twin of a live page, then a different one
+    monkeypatch.setattr(pv, "build_brief", lambda *a, **k: Brief(next(made, other)))
+    offered = pv.candidates({**CHOLENT, "_id": "b1"}, None, PHOTOS, [live], generation=1)
+    assert [b["showstopper"] for b in offered] == ["rail-gallery"]
 
 
 @pytest.mark.parametrize("status,since,ok", [
@@ -213,3 +238,60 @@ def test_generating_again_replaces_unpicked_versions_only(world):
     statuses = [v["status"] for v in client.get(_url(ids), headers=hdr["owner"]).json()["versions"]]
     assert statuses.count("candidate") == len(second) and statuses.count("checking") == 1
     assert {v["id"] for v in second}.isdisjoint({v["id"] for v in first})
+
+
+def _live_twin(db, ids, brief, live=True):
+    """Another business of the same category, live (or not) with this brief."""
+    other = f"twin-{uuid.uuid4().hex[:8]}"
+    at = datetime.now(UTC).isoformat()
+    db.businesses.insert_one({"_id": other, "slug": other, "name": "Twin", "owner_user_id": "nobody", "page_v3": True,
+                              "design_brief": brief, "design_brief_at": at,
+                              "page_check": {"brief_at": at if live else "earlier", "passed": True}})
+    ids.setdefault("twins", []).append(other)
+    return other
+
+
+def test_only_live_pages_are_the_ledger(world):
+    import asyncio
+    from routes.marketplace.businesses import recent_briefs
+    client, db, ids, hdr = world
+    import routes.deps
+    b = db.businesses.find_one({"_id": ids["biz"]})["design_brief"]
+
+    def ledger():
+        routes.deps.client._io_loop = None
+        try:
+            return len(asyncio.run(recent_briefs(b["category"], ids["biz"])))
+        finally:
+            routes.deps.client._io_loop = None
+    base = ledger()
+    _live_twin(db, ids, b, live=False)
+    unchecked = ledger()
+    _live_twin(db, ids, b, live=True)
+    try:
+        assert unchecked == base                   # a page nobody can see is not in the ledger
+        assert ledger() == base + 1                # a live one is
+    finally:
+        db.businesses.delete_many({"_id": {"$in": ids.get("twins", [])}})
+
+
+def test_a_version_that_became_too_close_is_refused_and_a_race_fails_at_go_live(world):
+    client, db, ids, hdr = world
+    vs = client.post(_url(ids), headers=hdr["owner"]).json()["versions"]
+    try:
+        # A twin of version 0 goes live elsewhere: publishing it is refused.
+        _live_twin(db, ids, vs[0]["brief"])
+        r = client.post(_url(ids, f"/{vs[0]['id']}/publish"), headers=hdr["owner"])
+        assert r.status_code == 409 and "too much like another page" in r.json()["detail"]
+
+        # Version 1 starts its check; its twin goes live meanwhile; the pass
+        # becomes a fail and the old page stays.
+        assert client.post(_url(ids, f"/{vs[1]['id']}/publish"), headers=hdr["owner"]).json()["status"] == "checking"
+        before = db.businesses.find_one({"_id": ids["biz"]})["design_brief"]
+        _live_twin(db, ids, vs[1]["brief"])
+        r = client.post(_url(ids, f"/{vs[1]['id']}/check"), json={"passed": True},
+                        headers={"X-Page-Check-Secret": "s3cret-for-tests"}).json()
+        assert r["status"] == "failed" and "too close" in r["failures"][0]
+        assert db.businesses.find_one({"_id": ids["biz"]})["design_brief"] == before
+    finally:
+        db.businesses.delete_many({"_id": {"$in": ids.get("twins", [])}})

@@ -24,6 +24,7 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 from utils.design_brief import build_brief, effects_seed
+from utils.page_effects import check_effect_unique, effect_fingerprint
 
 STATUSES = ("candidate", "checking", "failed", "live", "archived")
 CANDIDATES = 3
@@ -36,19 +37,37 @@ CHECK_TIMEOUT = timedelta(minutes=10)
 PUBLISHABLE = ("candidate", "failed", "archived")
 
 
+TOO_CLOSE = ("too much like another page that went live since it was made "
+             "(too close to a recent live page)")
+
+
+def too_close(brief: dict, recent: list[dict]) -> bool:
+    """Fails "not too similar" against the recent live pages of its category
+    (page_effects.MIN_AXES of seven axes against each of the newest ten)."""
+    fp = effect_fingerprint(brief.get("effects") or [], brief.get("showstopper") or "hero")
+    others = [effect_fingerprint(r.get("effects") or [], r.get("showstopper") or "hero") for r in recent]
+    return not check_effect_unique(fp, others)["passed"]
+
+
 def candidates(record: dict, logo: Optional[bytes], photos: list[dict], recent: list[dict],
                generation: int) -> list[dict]:
-    """Three briefs for the owner to choose from. Each has a different bold
-    moment, or the choice would be between near-identical pages; beyond
-    that they may share touches. Each also passes "not too similar" against
-    the recent live pages of the category, as any brief does. A business
-    with fewer than three bold moments available gets fewer versions."""
+    """Up to three briefs for the owner to choose from. Each has a different
+    bold moment, or the choice would be between near-identical pages; beyond
+    that they may share touches. Each passes "not too similar" against the
+    recent live pages of the category: the picker keeps its nearest miss
+    when nothing passes, and an owner is never offered a page that would be
+    refused at publish. A business with fewer bold moments, or a crowded
+    category, gets fewer versions."""
     out, shown = [], set()
-    for n in range(CANDIDATES):
-        brief = build_brief(record, logo, photos, recent=recent,
-                            seed=effects_seed(record, generation * CANDIDATES + n), avoid_peaks=shown)
-        if brief.showstopper in shown:
+    for n in range(CANDIDATES * 3):
+        if len(out) == CANDIDATES:
             break
+        brief = build_brief(record, logo, photos, recent=recent,
+                            seed=effects_seed(record, generation * CANDIDATES * 3 + n), avoid_peaks=shown)
+        if brief.showstopper in shown:
+            break   # no bold moment left that is not already offered
+        if too_close(brief.model_dump(), recent):
+            continue
         shown.add(brief.showstopper)
         out.append(brief.model_dump())
     return out

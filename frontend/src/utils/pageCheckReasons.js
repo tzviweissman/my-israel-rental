@@ -2,6 +2,7 @@
 // terms ("he-390: hero text too faint ... 2.4:1"); an owner needs to know what
 // is wrong, not which ratio. Unknown findings fall back to a general line.
 const REASONS = [
+  [/too close|too much like/, 'reasonTooClose', 'A page that went live since this was made looks too much like it. Make new versions.'],
   [/faint/, 'reasonFaint', 'Some text is hard to read over the picture'],
   [/sideways scroll/, 'reasonSideways', 'Part of the page spills off the side of a phone screen'],
   [/hidden/, 'reasonHidden', 'Some text did not appear'],

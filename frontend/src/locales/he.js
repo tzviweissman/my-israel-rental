@@ -1736,6 +1736,7 @@ const he = {
         attentionNone: 'הכול נקי.',
       },
       pageVersions: {
+        reasonTooClose: "דף שעלה לאוויר מאז שהגרסה הזו נוצרה דומה לה מדי. צרו גרסאות חדשות.",
         reasonFaint: "חלק מהטקסט קשה לקריאה על גבי התמונה",
         reasonSideways: "חלק מהדף בורח מצד המסך בטלפון",
         reasonHidden: "חלק מהטקסט לא הופיע",
