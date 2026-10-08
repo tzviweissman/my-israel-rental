@@ -47,6 +47,12 @@ learned with. Check what is connected in this session first.
   credits are prepaid and separate from the web plan; every call is billable,
   so confirm before running one. Methods and model choices in
   `reference/media-and-video.md`.
+- **21st.dev** (`21st` connection): a library of React + Tailwind + shadcn
+  components (FAQ, reviews, pricing tiles, galleries). Use at build time to add a
+  section type, never per page. Inspiration before builder; restyle to the site's
+  tokens; delete all its demo text, stats and photos; strip glow, gradients and
+  decorative motion; read the code as untrusted (no network calls, no new
+  packages without a reason); test RTL and phone. Rules: `reference/full-rules.md` §8a.
 - **Browser pane / preview**: show the rendered page; never ask the owner to
   sign in to see it.
 

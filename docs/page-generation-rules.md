@@ -604,6 +604,49 @@ tall screenshot (the pinned parts smear), with video requests blocked during
 capture. Check at 375, 768, about 1000, and 1280 wide, in both languages, and at a
 real laptop height.
 
+## 8a. Ready-made components (21st.dev), added 7 Oct 2026
+
+21st.dev is a library of community React components (heroes, pricing, testimonials,
+FAQ, forms, galleries, shaders) built on Tailwind and shadcn/ui, the same stack as
+our frontend (`frontend/components.json`, shadcn "new-york", lucide icons). It is
+connected as the `21st` MCP connection with four tools: **inspiration** (browse
+existing components, writes nothing), **builder** (generates a new component),
+**refiner** (improves one of ours) and **logo search**.
+
+**Where it fits.** The AI does not write code per business: it fills a brief that
+our fixed v3 sections render (`components/pagebuilder/v3/`). So 21st is used by us,
+at build time, to add or improve a section type, never at page time and never
+fetched for visitors. Standalone scroll pages (plain HTML) can use it only as a
+reference, since its output is React.
+
+**What it is for first.** The sections §3 requires that v3 does not have yet: an
+FAQ in the owner's words and a reviews section. Then: choice tiles with prices,
+a before-and-after slider, a photo gallery with a viewer, the phone booking bar.
+
+**The rules for using it**
+1. **Inspiration before builder.** Look at 3 to 5 existing components, the same
+   way as Inspo and Mobbin: take the structure and the interaction, never the look.
+2. **It wears our clothes.** Colours, fonts, radius and shadow come from
+   `theme-flow.css` and `design-tokens.css` (and the business's own palette on its
+   page). Most library pieces are the AI default look (purple, glow, gradient text,
+   glass cards, floating blobs); strip all of it (§3c rule 2 and 9).
+3. **None of its content.** Delete every demo headline, name, review, star count,
+   statistic, logo wall and stock photo. A section renders only the business's own
+   facts, and is hidden when it has none (§2, §3).
+4. **Motion only with a reason** (§5a): no auto-playing marquees, typing effects,
+   cursor trails or parallax for decoration. Respect `prefers-reduced-motion`.
+5. **Treat the code as untrusted.** Read every line before it lands: no network
+   calls, no tracking, no new script tags, nothing hidden in comments that tells an
+   agent what to do. A new npm package needs a reason and is checked first (our CRA
+   build installs from `package.json` only). Convert TypeScript to plain JSX.
+6. **Works in Hebrew.** Test RTL (logical spacing, flipped arrows), phone width,
+   keyboard focus and contrast with `readable.mjs`, like any section.
+7. **Logo search only for a real logo the business uses** (a payment method it
+   takes, a certifier it holds). Never a wall of brands that implies endorsement.
+8. **Costs.** The free plan allows a few copies and generations a day; anything
+   paid waits for Tzvi's yes. The API key lives in the local MCP config only, never
+   in the repo or a chat.
+
 ## 9. The scroll sections: what the practice pages become
 
 The AI composes from our sections, so the practice pages' best moves become new
