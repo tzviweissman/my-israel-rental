@@ -6,12 +6,9 @@ import DOMPurify from 'dompurify';
 import { API, AuthContext } from '../App';
 import { toast } from 'sonner';
 import { apiErrorMessage } from '../utils/apiError';
-import { Eye, EyeOff, ArrowLeft, KeyRound, CheckCircle, Home, Building2, Briefcase } from 'lucide-react';
-import WelcomePopups from '../components/WelcomePopups';
+import { Eye, EyeOff, ArrowLeft, KeyRound, CheckCircle } from 'lucide-react';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { GOOGLE_CLIENT_ID } from '../components/auth/useGoogleSignIn';
-import { phoneError, phonePreview } from '../utils/phoneValidation';
-import PhoneInput from '../components/common/PhoneInput';
 import ContinueAsBanner from '../components/auth/ContinueAsBanner';
 import { LAST_LOGIN_HINT_KEY } from '../components/auth/completeGoogleSignIn';
 import safeRedirect from '../utils/safeRedirect';
@@ -22,7 +19,7 @@ const Auth = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { login, user: currentUser } = useContext(AuthContext);
+  const { login } = useContext(AuthContext);
   // After auth, honor an explicit ?redirect=… (set when the user was trying
   // to book or message from a property page) — otherwise drop them on their
   // dashboard. Admins go to /admin.
@@ -34,20 +31,8 @@ const Auth = () => {
     if (u?.role === 'admin') return '/admin';
     return '/dashboard';
   };
-  // Keep `redirectUrl` for the existing modal flows (they fall back to home
-  // only when no other destination is known).
-  const redirectUrl = redirectParam || (currentUser?.role === 'admin' ? '/admin' : '/dashboard');
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    name: '',
-    phone: '',
-    role: 'renter'
-  });
-  const [confirmPassword, setConfirmPassword] = useState('');
+  const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [termsAccepted, setTermsAccepted] = useState(false);
 
   // Forgot password state
   const [forgotEmail, setForgotEmail] = useState('');
@@ -61,31 +46,11 @@ const Auth = () => {
   const [resetting, setResetting] = useState(false);
   const [resetDone, setResetDone] = useState(false);
   const [showResetPassword, setShowResetPassword] = useState(false);
-  const [showWelcomePopups, setShowWelcomePopups] = useState(false);
-
-  // Recomputed each render — cheap, and keeps the message in step with the
-  // input without another piece of state to keep in sync.
-  const phoneErr = mode === 'signup' ? phoneError(formData.phone, t) : '';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (mode === 'signup' && phoneErr) {
-      // Block rather than silently save an ambiguous number: it would get
-      // no WhatsApp button later, with nothing to explain why.
-      toast.error(phoneErr);
-      return;
-    }
-    if (mode === 'signup' && formData.password !== confirmPassword) {
-      toast.error(t('auth.passwordMismatch'));
-      return;
-    }
-    if (mode === 'signup' && !termsAccepted) {
-      toast.error(t('auth.mustAcceptTerms'));
-      return;
-    }
     try {
-      const endpoint = mode === 'login' ? '/auth/login' : '/auth/register';
-      const response = await axios.post(`${API}${endpoint}`, formData);
+      const response = await axios.post(`${API}/auth/login`, formData);
       login(response.data.token, response.data.user);
       // Persist "Continue as X" hint for the next visit — populated on
       // both email/password and Google flows so returning visitors get
@@ -99,22 +64,8 @@ const Auth = () => {
           ts: Date.now(),
         }));
       } catch { /* quota / private mode */ }
-      toast.success(mode === 'login' ? t('auth.welcomeBack') : t('auth.accountCreated'));
-      const destination = postAuthDestination(response.data.user);
-      if (mode === 'signup' && formData.role === 'renter') {
-        setShowWelcomePopups(true);
-      } else if (mode === 'signup' && formData.role === 'owner') {
-        // Straight into "Add a property" (see SignupJoin); the
-        // property-management pop-up is gone (Tzvi, 23 Sep 2026).
-        navigate(redirectParam ? destination : '/dashboard?welcome=1');
-      } else if (mode === 'signup' && formData.role === 'provider') {
-        // Service providers land straight in the gig-creation wizard —
-        // no property-management upsell, they're here to list services -
-        // unless the link that brought them named where to go.
-        navigate(redirectParam ? destination : '/businesses/add');
-      } else {
-        navigate(destination);
-      }
+      toast.success(t('auth.welcomeBack'));
+      navigate(postAuthDestination(response.data.user));
     } catch (error) {
       // 8s, not the 4s default: this is the sign-in failure a real
       // person hit thirteen times in three minutes. It is a sentence
@@ -172,7 +123,7 @@ const Auth = () => {
     }
   };
 
-  // The old sign-up form lived here. /signup (SignupJoin) replaced it and
+  // The old sign-up form lived here (removed 7 Oct 2026). /signup replaced it and
   // nothing links to /auth/signup any more, so an old bookmark or email
   // lands on the real one, keeping ?redirect=.
   if (mode === 'signup') {
@@ -357,21 +308,17 @@ const Auth = () => {
     );
   }
 
-  // --- Login / Signup View ---
+  // --- Login View ---
   return (
     <>
-      {showWelcomePopups && <WelcomePopups onDismiss={() => { setShowWelcomePopups(false); navigate(redirectUrl); }} />}
       <AuthShell testId="auth-page">
         <div>
           <h1 className="display-weight text-3xl sm:text-4xl font-semibold lg:font-normal tracking-tight mb-6" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-            {mode === 'login' ? t('auth.loginTitle') : t('auth.signupTitle')}
+            {t('auth.loginTitle')}
           </h1>
 
-          {/* Track-2: "Continue as X" one-tap re-login. Only shown on
-              login mode — on signup the visitor is (by definition) a
-              first-time user and shouldn't be nudged into a return flow. */}
-          {mode === 'login' && (
-            <ContinueAsBanner
+          {/* Track-2: "Continue as X" one-tap re-login. */}
+          <ContinueAsBanner
               onFocusEmailField={(email) => {
                 setFormData((f) => ({ ...f, email }));
                 // Focus the password field so the user only has to type
@@ -381,12 +328,10 @@ const Auth = () => {
                 }, 50);
               }}
             />
-          )}
 
           {/* Google Sign-In — sits above the email/password form so
-              returning users don't scroll past it. Same button shape on
-              login + signup because the underlying flow is identical
-              (we upsert by email server-side). Divider is gated with the
+              returning users don't scroll past it (we upsert by email
+              server-side, so it signs up too). Divider is gated with the
               button so it can't render orphaned when Google is unconfigured. */}
           {GOOGLE_CLIENT_ID && (
             <>
@@ -402,21 +347,6 @@ const Auth = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4" data-testid="auth-form">
-            {mode === 'signup' && (
-              <div>
-                <label htmlFor="auth-name" className={authLabel}>{t('auth.name')}</label>
-                <input
-                  id="auth-name"
-                  type="text"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className={`${authInput}`}
-                  required
-                  data-testid="auth-name-input"
-                />
-              </div>
-            )}
-
             <div>
               <label htmlFor="auth-email" className={authLabel}>{t('auth.email')}</label>
               <input
@@ -451,8 +381,7 @@ const Auth = () => {
                   {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
-              {mode === 'login' && (
-                <div className="mt-2 text-end">
+              <div className="mt-2 text-end">
                   <a
                     href="/auth/forgot-password"
                     className="text-sm font-medium hover:underline transition-colors"
@@ -461,188 +390,23 @@ const Auth = () => {
                   >
                     {t('auth.forgotPassword')}
                   </a>
-                </div>
-              )}
+              </div>
             </div>
 
-            {mode === 'signup' && (
-              <>
-                <div>
-                  <label htmlFor="auth-confirm-password" className={authLabel}>{t('auth.confirmPassword')}</label>
-                  <div className="relative">
-                    <input
-                      id="auth-confirm-password"
-                      type={showConfirmPassword ? 'text' : 'password'}
-                      value={confirmPassword}
-                      onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`${authInput} pe-12 ${confirmPassword && confirmPassword !== formData.password ? '!border-red-400' : ''}`}
-                      required
-                      data-testid="auth-confirm-password-input"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
-                      data-testid="toggle-confirm-password-visibility"
-                    >
-                      {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
-                    </button>
-                  </div>
-                  {confirmPassword && confirmPassword !== formData.password && (
-                    <p className="text-xs text-red-500 mt-1" data-testid="password-mismatch-error">{t('auth.passwordMismatch')}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label htmlFor="auth-phone" className={authLabel}>
-                    {t('auth.whatsappNumber', 'WhatsApp number')}
-                    <span className="text-gray-500 font-normal ml-2 text-xs">
-                      ({t('auth.recommendedOptional', 'recommended, optional')})
-                    </span>
-                  </label>
-                  <PhoneInput
-                    value={formData.phone}
-                    onChange={(v) => setFormData({ ...formData, phone: v })}
-                    error={phoneErr}
-                    hint={phonePreview(formData.phone)
-                      ? t('phone.willDial', {
-                          number: phonePreview(formData.phone),
-                          defaultValue: `Renters will reach you at ${phonePreview(formData.phone)}`,
-                        })
-                      : t('auth.whatsappHelp', 'Shown on your listings so renters can WhatsApp you, and used to notify you.')}
-                    testid="auth-phone"
-                  />
-                </div>
-
-                <div>
-                  <span id="auth-role-label" className={authLabel}>{t('auth.role', 'I want to')}</span>
-                  <div className="grid grid-cols-3 gap-2" role="group" aria-labelledby="auth-role-label" data-testid="auth-role-select">
-                    {[
-                      { value: 'renter', label: t('auth.renter', 'Rent'), sub: t('auth.renterSub', 'Find a home'), Icon: Home },
-                      // Group `owner` and `manager` under one "List" card
-                      // so the top-level picker stays at three tiles.
-                      // Clicking it either selects owner OR expands a
-                      // secondary picker (below) — see `listGroupActive`.
-                      { value: 'list', label: t('auth.list', 'List a home'), sub: t('auth.listSub', 'Owner or manager'), Icon: Building2 },
-                      { value: 'provider', label: t('auth.provider', 'Offer services'), sub: t('auth.providerSub', 'Cleaner, mover, etc.'), Icon: Briefcase },
-                    ].map(({ value, label, sub, Icon }) => {
-                      const listGroupActive = value === 'list' && (formData.role === 'owner' || formData.role === 'manager');
-                      const active = value === 'list' ? listGroupActive : formData.role === value;
-                      return (
-                        <button
-                          type="button"
-                          key={value}
-                          onClick={() => {
-                            if (value === 'list') {
-                              // Default to `owner` when the group is first
-                              // opened; the secondary picker below lets
-                              // the user toggle to `manager` if they run
-                              // multiple listings and want bulk-import
-                              // + a public agency page with a logo.
-                              if (!listGroupActive) setFormData({ ...formData, role: 'owner' });
-                            } else {
-                              setFormData({ ...formData, role: value });
-                            }
-                          }}
-                          className={`flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-all ${
-                            active
-                              ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 ring-2 ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25'
-                              : 'border-[#E5E5E5] hover:border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50'
-                          }`}
-                          data-testid={`auth-role-${value}`}
-                          aria-pressed={active}
-                        >
-                          <Icon size={18} className={active ? 'text-[var(--brand-primary)]' : 'text-gray-500'} />
-                          <span className="text-sm font-semibold text-gray-900 leading-tight">{label}</span>
-                          <span className="text-[11px] text-gray-500 leading-tight">{sub}</span>
-                        </button>
-                      );
-                    })}
-                  </div>
-
-                  {/* Secondary picker — appears only when the "List a
-                      home" group is active. Owner keeps the flow simple
-                      (one or two personal properties, no logo). Manager
-                      unlocks bulk CSV/paste import and a public agency
-                      page with a custom logo. */}
-                  {(formData.role === 'owner' || formData.role === 'manager') && (
-                    <div className="mt-3 grid grid-cols-2 gap-2" data-testid="auth-list-subrole">
-                      {[
-                        { value: 'owner', label: t('auth.ownerSubroleLabel', 'Owner'), sub: t('auth.ownerSub', '1-2 personal properties') },
-                        { value: 'manager', label: t('auth.manager', 'Manager'), sub: t('auth.managerSub', 'Multiple listings · bulk import · agency page') },
-                      ].map(({ value, label, sub }) => {
-                        const isActive = formData.role === value;
-                        return (
-                          <button
-                            type="button"
-                            key={value}
-                            onClick={() => setFormData({ ...formData, role: value })}
-                            className={`flex flex-col items-start gap-0.5 rounded-lg border p-2.5 text-left transition-all ${
-                              isActive
-                                ? 'border-[var(--brand-primary)] bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 ring-2 ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/25'
-                                : 'border-[#E5E5E5] hover:border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50'
-                            }`}
-                            data-testid={`auth-subrole-${value}`}
-                            aria-pressed={isActive}
-                          >
-                            <span className="text-xs font-semibold text-gray-900 leading-tight">{label}</span>
-                            <span className="text-[10px] text-gray-500 leading-tight">{sub}</span>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
-                </div>
-              </>
-            )}
-
-            {mode === 'signup' && (
-              <div className="flex items-start gap-3">
-                <input
-                  type="checkbox"
-                  id="terms"
-                  checked={termsAccepted}
-                  onChange={(e) => setTermsAccepted(e.target.checked)}
-                  className="mt-1 w-4 h-4 rounded border-gray-300 accent-[var(--gold)] cursor-pointer"
-                  required
-                  data-testid="auth-terms-checkbox"
-                />
-                <label htmlFor="terms" className="text-sm text-gray-600 cursor-pointer leading-snug">
-                  {t('auth.agreeToTerms')}{' '}
-                  <a href="/terms" target="_blank" rel="noreferrer" className="font-medium underline underline-offset-2" style={{ color: 'var(--gold)' }} data-testid="auth-terms-link">
-                    {t('auth.termsAndConditions')}
-                  </a>
-                </label>
-              </div>
-            )}
-
             <button type="submit" className={authButton} style={authButtonStyle} data-testid="auth-submit-button">
-              {mode === 'login' ? t('auth.loginButton', 'Log in') : t('auth.signupButton', 'Create Account')}
+              {t('auth.loginButton', 'Log in')}
             </button>
           </form>
 
           <div className="mt-6 text-center">
-            {(() => {
-              // Preserve ?redirect=… across the login↔signup toggle so a user
-              // who came from "Book" or "Message Owner" on a property still
-              // returns to that property after auth.
-              const qs = redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : '';
-              return mode === 'login' ? (
-                <p className="text-sm text-gray-600">
-                  {t('auth.noAccount')}{' '}
-                  <a href={`/signup${qs}`} className="font-medium" style={{ color: 'var(--brand-primary)' }} data-testid="auth-toggle-link">
-                    {t('auth.signUpHere')}
-                  </a>
-                </p>
-              ) : (
-                <p className="text-sm text-gray-600">
-                  {t('auth.haveAccount')}{' '}
-                  <a href={`/auth/login${qs}`} className="font-medium" style={{ color: 'var(--brand-primary)' }} data-testid="auth-toggle-link">
-                    {t('auth.loginHere')}
-                  </a>
-                </p>
-              );
-            })()}
+            {/* ?redirect=… carries over, so someone who came from "Book" or
+                "Message Owner" still returns to that property after signing up. */}
+            <p className="text-sm text-gray-600">
+              {t('auth.noAccount')}{' '}
+              <a href={`/signup${redirectParam ? `?redirect=${encodeURIComponent(redirectParam)}` : ''}`} className="font-medium" style={{ color: 'var(--brand-primary)' }} data-testid="auth-toggle-link">
+                {t('auth.signUpHere')}
+              </a>
+            </p>
           </div>
         </div>
       </AuthShell>

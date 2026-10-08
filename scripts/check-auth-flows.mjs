@@ -55,7 +55,12 @@ const fresh = async (lng = 'en') => {
   page.__lng = lng;
   return { ctx, page };
 };
-const go = (page, path) => page.goto(`${APP}${path}${path.includes('?') ? '&' : '?'}lng=${page.__lng}`, { waitUntil: 'networkidle' });
+// networkidle is not enough: the app goes quiet before it prefetches route
+// chunks, so a page can still be blank then. Wait for a form as well.
+const go = async (page, path) => {
+  await page.goto(`${APP}${path}${path.includes('?') ? '&' : '?'}lng=${page.__lng}`, { waitUntil: 'networkidle' });
+  await page.waitForSelector('form, [data-testid="signup-step-role"], [data-testid="reset-password-invalid"]', { timeout: 10000 }).catch(() => {});
+};
 
 /** The text of every toast currently on screen. */
 const toasts = (page) => page.evaluate(() =>
@@ -203,7 +208,7 @@ print(d['token'] if d else '')
     await page.fill('[data-testid="reset-confirm-password-input"]', NEW);
     await page.click('[data-testid="reset-submit-btn"]');
     await page.waitForTimeout(2000);
-    ok('reset confirmed on screen', /reset successfully|back to login|אופס|חזרה/i.test(await page.innerText('body')));
+    ok('reset confirmed on screen', !!(await page.waitForSelector('[data-testid="back-to-login-btn"]', { timeout: 10000 }).catch(() => null)));
 
     const r = await fetch(`${API}/auth/login`, { method: 'POST', headers: { 'content-type': 'application/json' },
       body: JSON.stringify({ email: acct.email, password: NEW }) });
@@ -220,28 +225,14 @@ print(d['token'] if d else '')
 }
 
 // ---------------------------------------------------------------------------
-// 6. The older /auth/signup form still works too
+// 6. The old /auth/signup address opens the real sign-up page (form removed 7 Oct 2026)
 // ---------------------------------------------------------------------------
-console.log('\n6. /auth/signup (the older form)\n');
+console.log('\n6. /auth/signup goes to /signup\n');
 {
   const { ctx, page } = await fresh();
-  const acct = { email: `authcheck-legacy-${stamp}@example.com`, name: 'Legacy Form' };
-  await go(page, '/auth/signup');
-  const hasForm = await page.$('[data-testid="auth-form"]');
-  ok('/auth/signup renders its form', !!hasForm);
-  if (hasForm) {
-    await page.fill('[data-testid="auth-name-input"]', acct.name);
-    await page.fill('[data-testid="auth-email-input"]', acct.email);
-    await page.fill('[data-testid="auth-password-input"]', PASSWORD);
-    await page.fill('[data-testid="auth-confirm-password-input"]', PASSWORD);
-    const roleBtn = await page.$('[data-testid="auth-role-renter"]');
-    if (roleBtn) await roleBtn.click();
-    await page.check('[data-testid="auth-terms-checkbox"]');
-    await page.click('[data-testid="auth-submit-button"]');
-    await page.waitForTimeout(2500);
-    const u = await me(page);
-    ok('account created via /auth/signup', u && u.email === acct.email, u ? '' : JSON.stringify(await toasts(page)));
-  }
+  await go(page, '/auth/signup?redirect=/businesses');
+  ok('/auth/signup lands on /signup with its redirect', page.url().includes('/signup?redirect=%2Fbusinesses') || page.url().includes('/signup?redirect=/businesses'), page.url());
+  ok('the sign-up role step shows', !!(await page.waitForSelector('[data-testid="signup-step-role"]', { timeout: 10000 }).catch(() => null)));
   await ctx.close();
 }
 
@@ -272,6 +263,9 @@ console.log('\n8. Google sign-in button present\n');
   const { ctx, page } = await fresh();
   for (const path of ['/auth/login', '/join']) {
     await go(page, path);
+    // The route chunk can arrive after networkidle (the app goes quiet
+    // before it prefetches), so wait for the form itself.
+    await page.waitForSelector('[data-testid="auth-form"], [data-testid="signup-step-role"]', { timeout: 10000 }).catch(() => {});
     if (path === '/join') { await page.click('[data-testid="signup-role-host"]'); await page.click('[data-testid="signup-continue-btn"]'); }
     const text = await page.innerText('body');
     ok(`${path}: a Google option is on the page`, /google/i.test(text));
