@@ -1,24 +1,18 @@
 Hi Michal,
 
-We've built a page for Let's Workout and it's nearly ready. A few things from you would make it much stronger. Answer whatever you can, and skip anything that doesn't apply.
+We've made you a page for Let's Workout. Here's a short video of it on a phone.
 
-1. **A photo of you.** Ideally you training a client (with her permission), or just you. Right now the page only has pictures of equipment, and people want to see who they'll be training with.
+Everything a woman needs to decide is in one place: training at her home, at her gym, online or with you, women only, ₪60 for 30 minutes, what you work on, and your WhatsApp at the bottom.
 
-2. **Your prices** for small group circuits, gym sessions and online sessions. At the moment only the ₪60 one-to-one session shows a price.
+We also used marketing psychology throughout the page to raise your conversion, so more of the women who look at it go on to book with you.
 
-3. **Your qualifications.** For example, a personal training certificate or a pre and post natal course. Please send a photo or the name of the course, and we'll mention it next to the pre and post natal training.
+The best part is how easy it is to share. One link you can:
+• *send whenever someone asks about training*, so you don't have to type it all out again
+• *post in your WhatsApp groups*, like your community, school or neighbourhood groups, where women are looking for exactly this
+• *put on your WhatsApp status and in your Instagram bio*
 
-4. **What happens in the first session?** For example, a chat about goals, a fitness check, or straight into a workout. We'll tell new clients so they know what to expect.
+You're new to Yerushalayim, so most women haven't heard of you yet. A page like this shows them a real business before they've even met you.
 
-5. **Reviews.** If clients have said nice things about training with you, send them with each person's name and their OK to show it.
+It's free: no listing fee, no booking fee, no commission.
 
-6. **Questions clients ask you.** Answer the ones people really ask, in your own words:
-   - Do I need any equipment at home?
-   - Which parts of Jerusalem do you travel to?
-   - Can I train with you while pregnant, or soon after giving birth?
-   - How much is a group circuit per person, and who brings the group together?
-   - How do online sessions work (Zoom, WhatsApp video)?
-   - What if I need to cancel or move a session?
-   - Do you train complete beginners?
-
-Thank you!
+Have a look and tell me what you think. If there's anything you'd like changed, I'll change it.

@@ -145,7 +145,11 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
    across Israel", not "Jerusalem, all over Israel".
 7. **Plain punctuation.** No exclamation marks, no long dashes, no capitals
    unless it is their name. (A quote of the owner may keep theirs.)
-8. **Address the visitor as "you"**; the business speaks as "we" or its name.
+8. **Address the visitor as "you"**; the business speaks as "we" or its name,
+   **never "they", "them" or "their" about itself** ("We confirm your board",
+   not "They confirm the board"), in labels, errors, captions and alt text too.
+   Search the visible text for they/them/their before showing a page, and read
+   every line aloud as the owner would say it: it must make sense in English.
 9. **One wording per purpose.** If the button says "Order", it says "Order" everywhere.
    - **End on what the customer gains**: a closing moment names their result
      in the owner's words ("A stronger, healthier you"), never "done" or "complete".
@@ -208,8 +212,13 @@ Full text and reasons: `reference/full-rules.md` §3c.
    build, starting with how businesses of the same kind built their sites;
    keep 3 to 5 real screens, named in the brief. Copy structure, never looks; colours and type are theirs.
    **Plus 21st on every page**, for sections and for effects (button hover and
-   press, a moving arrow, a lifting tile, how a price is set): show the owner
-   3 or 4 options in their colours on a test page, then build the chosen one.
+   press, a moving arrow, a lifting tile, how a price is set). **Choose it
+   yourself** from that research and say in one line what you picked and why;
+   an options page only when Tzvi asks for one.
+   **Search fresh for every piece on every build**: the button, the arrow, each
+   effect and section get their own Mobbin, 21st and Inspo search for that kind
+   of business before the library is opened; say for each pick whether it came
+   from a new search (name it) or the library.
 2. **No AI default look**: no cream + serif + one italic word unless that is
    their brand. At least one section on a contrasting ground.
 3. **Proof where the worry is**: each worry the owner names is answered beside

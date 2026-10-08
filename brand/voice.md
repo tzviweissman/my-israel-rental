@@ -85,6 +85,9 @@ room, free should carry a reason.
   (taste-skill 9.F)
 - **The company name as a headline.** "Join My Israel Rental" pays off nothing.
   Say what joining gets you.
+- **Tzvi's name as a signature.** A message, email or note written for
+  MyIsraelRental is never signed "Tzvi" (Tzvi, 7 Oct 2026: "don't add my name
+  at the end for MyIsraelRental, ever"). End on the last line of the message.
 - **Placeholder figures that read as claims.** The stat strip once carried
   "1,200+ active rentals" and "19 cities" from a preview file. The real numbers
   were 196 listings, all in one city. (`FinaleStats.jsx`)

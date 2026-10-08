@@ -264,9 +264,18 @@ code. Each rule names what it prevents.
    for different sections and different effects, to make pages look as
    professional as possible"). Search it for the sections the page needs
    and for the details that make it feel finished: the button's hover and
-   press, an arrow that moves, a tile that lifts, how a price is set. Show
-   the owner 3 or 4 options built in their colours before choosing (section
-   8a). An effect still needs its reason (rule 9): one that says what a
+   press, an arrow that moves, a tile that lifts, how a price is set. **We
+   choose** (Tzvi, 7 Oct 2026: "you always choose a button function or arrow
+   or different types of features section by looking at our Inspo skill and
+   Mobbin and 21st"): the builder picks from what the research found for this
+   kind of business and says in one line what was picked and why. No options
+   page is put to Tzvi or the owner unless asked for (section 8a).
+   **Every piece is searched fresh for that build** (Tzvi, 7 Oct 2026, after
+   the Blazin' Boards and KasherMyBnb buttons came from the library instead):
+   the button, the arrow, each card or list effect and each section each get
+   their own search on Mobbin, 21st and Inspo for that kind of business, before
+   anything is taken from the effects library. The note says, for each pick,
+   where it came from: a new search (name the site or component) or the library. An effect still needs its reason (rule 9): one that says what a
    control does passes, one that only decorates does not.
    *Prevents: the page every AI makes from memory, and the flat page with
    nothing that reacts.*
@@ -365,6 +374,16 @@ quote" instead of a missing price, no reviews section instead of an empty one.
    judged in Hebrew.
 8. **Address the visitor as "you"**, never the business's customers in the third
    person. On the page the business speaks as "we" or in its own name.
+   **Never "they", "them" or "their" for the business itself** (Tzvi, 7 Oct
+   2026): the page is the business talking about itself. "We confirm your board
+   and the day", never "They confirm the board"; "You pay us directly", never
+   "You pay them the way they take it"; "Our full price list", never "Their
+   price list". That covers labels, form hints, error messages, captions, alt
+   text and footers too. Before a page is shown, search its visible text for
+   they, them and their, and keep only those about the visitor's own guests.
+   **And the English has to make sense** (same day): read every line aloud as
+   the owner would say it to a customer; a line written from our side ("as the
+   business sets them", "between you and them") is rewritten from theirs.
 9. **Strengths only if backed.** At most two, and a checkable one (kosher,
    experience, licensed, English) appears only with its proof.
 10. **A professional voice, always** (Tzvi, 6 Oct 2026). The page speaks the way a
@@ -665,10 +684,10 @@ reference, since its output is React.
 Inspo and Mobbin, search 21st for the page's sections and its effects (Buttons,
 Calls to action, Cards, Features, Testimonials, Pricing). For a plain HTML page
 the chosen piece is rebuilt in plain CSS from its code, in the business's
-colours, with nothing loaded from outside. Show 3 or 4 options side by side on a
-test page so the owner picks by pointing and tapping (worked example:
-`scrollcraft/builds/michal-yodaiken/buttons.html`, where Tzvi chose the outline
-that fills with her pink and moves its arrow).
+colours, with nothing loaded from outside. The builder chooses, from what the
+research showed fits this kind of business, and names the choice and its source
+in the note that goes with the page. An options page (several versions side by
+side) is made only when Tzvi asks for one.
 
 **The effects library** (Tzvi: "we should have many different options for
 different businesses"): `~/.claude/skills/build-business-page/examples/effects-library/index.html`
