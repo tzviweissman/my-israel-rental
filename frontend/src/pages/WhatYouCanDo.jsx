@@ -24,6 +24,7 @@ import { ArrowRight } from 'lucide-react';
 import { AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import SiteFooter from '../components/common/SiteFooter';
+import BackLink from '../components/common/BackLink';
 import { AUDIENCES, featuresFor, defaultAudience } from '../data/featureLibrary';
 
 export default function WhatYouCanDo() {
@@ -43,6 +44,9 @@ export default function WhatYouCanDo() {
       />
 
       <div className="max-w-5xl mx-auto px-4 py-10 sm:py-14">
+        {/* Reached mid-signup from "Not sure yet?" on the join page, and
+            from the footer: back goes wherever they came from. */}
+        <BackLink testId="features-back" className="mb-6" />
         <h1
           className="text-3xl sm:text-4xl font-bold"
           // `var(--font-head)`, never the literal face — Playfair has no
