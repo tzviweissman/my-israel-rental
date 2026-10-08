@@ -121,6 +121,25 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
     return () => { cancelled = true; };
   }, [slug, injected]);
 
+  /* A hand-built page replaces this one for a few businesses (Tzvi, 7 Oct
+     2026; scripts/publish-page.mjs). The server answers a full load of
+     /business/<slug> with it; navigation inside the app never reaches the
+     server, so this reloads into it. Production only: the dev server does
+     not serve those pages, and reloading there would loop. */
+  useEffect(() => {
+    if (injected || preview || process.env.NODE_ENV !== 'production' || !fetched?.slug) return undefined;
+    let cancelled = false;
+    fetch('/pages/pages.json', { cache: 'no-cache' })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list) => {
+        if (!cancelled && Array.isArray(list) && list.includes(fetched.slug)) {
+          window.location.replace(`/business/${fetched.slug}${window.location.hash}`);
+        }
+      })
+      .catch(() => { /* no list: the standard page stays */ });
+    return () => { cancelled = true; };
+  }, [fetched, injected, preview]);
+
   /* Split out of the fetch above so the editor gets the same remembered
      layout the visitor would see. Reading it inside the fetch meant it was
      only ever read on a fetch, and the preview would ignore a choice the

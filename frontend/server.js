@@ -201,6 +201,17 @@ function serveConfig() {
 
 const CONFIG = serveConfig();
 
+// Businesses with a hand-built page (scripts/publish-page.mjs writes the list).
+const HAND_BUILT_FILE = /^\/pages\/([a-z0-9-]{2,60})\/([a-z0-9-]{1,40})\.html$/;
+const HAND_BUILT = (() => {
+  try {
+    const list = JSON.parse(fs.readFileSync(path.join(BUILD, 'pages', 'pages.json'), 'utf8'));
+    return new Set(Array.isArray(list) ? list.filter((s) => /^[a-z0-9-]{2,60}$/.test(s)) : []);
+  } catch {
+    return new Set();
+  }
+})();
+
 /* ─────────────────────────────────────────────────────────────────────
    SAME-ORIGIN API PROXY
 
@@ -387,6 +398,35 @@ const server = http.createServer(async (req, res) => {
     }
     // Fell through on purpose. The crawler gets what it would have got
     // before this file existed.
+  }
+  // A hand-built page in place of the standard listing (Tzvi, 7 Oct 2026):
+  // /business/<slug>, or the root of <slug>.myisraelrental.com, answers with
+  // build/pages/<slug>/index.html when the slug is in build/pages/pages.json. Link
+  // previews were answered above, so a pasted link still gets the business's
+  // card. Published by scripts/publish-page.mjs; BusinessPage.jsx reloads
+  // into this for navigation that never reaches the server.
+  // The page's other HTML files (an order page) are answered directly too:
+  // serve.json's catch-all rewrite would otherwise turn /pages/x/order.html
+  // into the app's "page not found".
+  const pageFile = HAND_BUILT_FILE.exec(pathname || '');
+  if (pageFile && HAND_BUILT.has(pageFile[1])) {
+    try {
+      const html = fs.readFileSync(path.join(BUILD, 'pages', pageFile[1], `${pageFile[2]}.html`));
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+      res.end(html);
+      return;
+    } catch { /* not there: fall through to the normal handler */ }
+  }
+  const built = hostSlug && pathname === '/' ? hostSlug : businessSlug(req);
+  if (built && HAND_BUILT.has(built)) {
+    try {
+      const html = fs.readFileSync(path.join(BUILD, 'pages', built, 'index.html'));
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+      res.end(html);
+      return;
+    } catch {
+      // Listed but missing from the build: the standard page, never an error.
+    }
   }
   return handler(req, res, CONFIG);
 });
