@@ -234,16 +234,9 @@ const SignupJoin = () => {
   return (
     <div
       className="min-h-screen relative [overflow-x:clip]"
-      style={{
-        // Limestone base with a gold and a blue bloom. Was hardcoded
-        // rgba() + #FBF7EF from the teal era — the numbers had been
-        // find-replaced to the new blue but never moved onto tokens, so
-        // this page would not have followed a future palette change.
-        background:
-          'radial-gradient(1200px 600px at 20% -10%, rgb(var(--gold-rgb) / 0.10), transparent 60%),'
-          + ' radial-gradient(900px 500px at 100% 100%, rgb(var(--brand-primary-rgb) / 0.10), transparent 60%),'
-          + ' var(--bg)',
-      }}
+      // The flow theme's one alternate surface, so the white card reads as
+      // the page (Tzvi, 7 Oct 2026: "cleaner", one card, fits on one screen).
+      style={{ background: '#F9FAFB' }}
       data-testid="signup-join-page"
     >
       {/* Two panels from lg up (Tzvi, 4 Sep 2026: "make this the sign
@@ -253,29 +246,24 @@ const SignupJoin = () => {
           not drawn at all: the form is the job there, and a 360px
           sphere above it would be a screen of scrolling before the first
           field. */}
-      <div className="mx-auto max-w-[1400px] px-3 sm:px-4 pt-20 sm:pt-24 pb-6 lg:grid lg:grid-cols-[0.94fr_1.06fr] lg:gap-4">
+      {/* One white card holding both halves (Tzvi, 7 Oct 2026: the form
+          should not be a card of its own beside a second panel). From lg
+          up the card is exactly one screen under the fixed nav, the form
+          is centred in its half, and the dark panel sits inset on the
+          right. Short screens drop the line under the headline and the
+          step labels rather than scroll. */}
+      <div className="mx-auto max-w-[1320px] px-3 sm:px-4 pt-20 sm:pt-24 lg:pt-[4.75rem] pb-4 lg:pb-2">
       <div
-        className="rounded-md border bg-white px-4 py-8 sm:px-8 sm:py-10 lg:px-12 xl:px-16"
-        style={{ borderColor: 'var(--brand-border)' }}
+        className="rounded-3xl bg-white shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-12px_rgba(17,24,39,0.12)] lg:grid lg:grid-cols-[1.4fr_1fr] xl:grid-cols-2 lg:h-[calc(100svh-5.5rem)] lg:min-h-[500px] lg:p-3"
+        data-testid="signup-card"
+      >
+      <div
+        className="px-5 py-8 sm:px-10 sm:py-10 lg:py-5 lg:flex lg:flex-col lg:overflow-y-auto"
         data-testid="signup-form-panel"
       >
-        {/* Top-right: log-in shortcut. The global fixed nav already
-            shows the brand mark so we don't duplicate it here. */}
-        <header className="flex items-center justify-end">
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            {t('signupJoin.haveAccount', 'Already have an account?')}
-            <Link
-              to={loginHref}
-              className="font-semibold text-[var(--brand-primary)] hover:underline"
-              data-testid="signup-login-link"
-            >
-              {t('signupJoin.logIn', 'Log in')}
-            </Link>
-          </div>
-        </header>
-
+        <div className="w-full max-w-[30rem] m-auto">
         {/* Step indicator */}
-        <div className="mt-6 sm:mt-10 flex items-center gap-3 text-xs font-semibold tracking-wide text-gray-500">
+        <div className="flex items-center gap-3 [@media(max-height:760px)]:hidden text-xs font-semibold tracking-wide text-gray-500">
           <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 1 ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-200 text-gray-700'}`}>1</span>
           <span className={step === 1 ? 'text-[var(--brand-primary)]' : ''}>{t('signupJoin.stepRole', 'YOUR ROLE')}</span>
           <div className="h-px w-8 bg-gray-300" />
@@ -285,9 +273,9 @@ const SignupJoin = () => {
 
         {/* STEP 1 — role picker */}
         {step === 1 && (
-          <section className="mt-8 sm:mt-12" data-testid="signup-step-role">
+          <section className="mt-6 [@media(max-height:760px)]:mt-0" data-testid="signup-step-role">
             <h1
-              className="display-weight text-4xl sm:text-5xl font-semibold lg:font-normal tracking-tight"
+              className="display-weight text-3xl sm:text-4xl font-semibold lg:font-normal tracking-tight"
               // Playfair (Frank Ruhl Libre in Hebrew) via the token, and
               // --ink instead of the leftover #0F3A3A dark teal.
               // font-black is dropped: Playfair ships 600–800 here, so a
@@ -302,11 +290,11 @@ const SignupJoin = () => {
             >
               {t('signupJoin.headline', 'Join My Israel Rental')}
             </h1>
-            <p className="mt-3 text-base sm:text-lg text-gray-600 max-w-2xl">
+            <p className="mt-2 text-base text-gray-600 [@media(max-height:760px)]:hidden">
               {t('signupJoin.sub', 'Book a stay, list a property, or offer your services - all in one place.')}
             </p>
 
-            <p className="mt-10 sm:mt-14 text-sm font-semibold tracking-wide uppercase text-gray-500">
+            <p className="mt-6 text-xs font-semibold tracking-wide uppercase text-gray-500 [@media(max-height:680px)]:hidden">
               {t('signupJoin.question', 'What best describes you?')}
             </p>
 
@@ -318,7 +306,7 @@ const SignupJoin = () => {
                 only action (page rules 3c: choices are tiles, one quiet
                 system, no arrows that do nothing). The "Most popular"
                 badge is gone: nothing measured it. */}
-            <div className="mt-4 space-y-3" role="radiogroup" aria-label={t('signupJoin.question', 'What best describes you?')} data-testid="signup-role-cards">
+            <div className="mt-3 [@media(max-height:680px)]:mt-4 space-y-2.5" role="radiogroup" aria-label={t('signupJoin.question', 'What best describes you?')} data-testid="signup-role-cards">
               {ROLE_CARDS.map(({
                 key, Icon, tKey, defaultLabel, tDescKey, defaultDesc,
                 tValueKey, defaultValue, learnMoreHref, tLearnMoreKey, defaultLearnMore,
@@ -343,27 +331,27 @@ const SignupJoin = () => {
                       aria-checked={active}
                       onClick={() => setSelectedRole(key)}
                       onDoubleClick={() => { setSelectedRole(key); setStep(2); }}
-                      className="w-full flex items-start gap-4 p-4 sm:p-5 text-start rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 active:scale-[0.995] transition-transform"
+                      className="w-full flex items-start gap-3.5 p-3.5 text-start rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 active:scale-[0.995] transition-transform"
                       data-testid={`signup-role-${key}`}
                     >
                       <span
-                        className={`shrink-0 h-12 w-12 rounded-xl flex items-center justify-center transition-colors ${active ? 'text-white' : 'text-[var(--brand-primary)]'}`}
+                        className={`shrink-0 h-10 w-10 rounded-xl flex items-center justify-center transition-colors ${active ? 'text-white' : 'text-[var(--brand-primary)]'}`}
                         style={{ background: active ? 'var(--brand-primary)' : 'rgb(var(--brand-primary-rgb) / 0.08)' }}
                       >
-                        <Icon size={22} aria-hidden="true" />
+                        <Icon size={20} aria-hidden="true" />
                       </span>
                       <span className="min-w-0 flex-1">
-                        <span className="block text-lg font-semibold leading-tight" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+                        <span className="block text-base font-semibold leading-tight" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
                           {t(tKey, defaultLabel)}
                         </span>
-                        <span className="mt-1 block text-sm leading-relaxed" style={{ color: 'var(--brand-muted)' }}>
+                        <span className="mt-0.5 block text-sm leading-snug" style={{ color: 'var(--brand-muted)' }}>
                           {t(tDescKey, defaultDesc)}
                         </span>
                         {tValueKey && (
                           /* Each part with its own tick, not dots between them: a
                              dot left at a line end on a phone reads as a stray
                              mark, and bare spacing ran the parts together. */
-                          <span className="mt-1.5 flex flex-wrap gap-x-3 gap-y-0.5 text-sm font-semibold" style={{ color: 'var(--gold-text-on-light)' }} data-testid={`signup-role-value-${key}`}>
+                          <span className="mt-1 flex flex-wrap gap-x-3 gap-y-0.5 text-[13px] font-semibold" style={{ color: 'var(--gold-text-on-light)' }} data-testid={`signup-role-value-${key}`}>
                             {t(tValueKey, defaultValue).split(/\s*·\s*/).map((part) => (
                               <span key={part} className="inline-flex items-center gap-1 first-letter:uppercase">
                                 <Check size={13} strokeWidth={3} aria-hidden="true" className="shrink-0" />
@@ -387,7 +375,7 @@ const SignupJoin = () => {
                     {learnMoreHref && (
                       <Link
                         to={learnMoreHref}
-                        className="block px-4 sm:px-5 pb-4 -mt-1 ps-[4.5rem] sm:ps-[5.25rem] text-sm sm:text-xs font-semibold hover:underline"
+                        className="block px-3.5 pb-2.5 -mt-2 ps-[4.75rem] text-sm sm:text-xs font-semibold hover:underline"
                         style={{ color: 'var(--brand-primary)' }}
                         data-testid={`signup-role-learnmore-${key}`}
                       >
@@ -399,7 +387,7 @@ const SignupJoin = () => {
               })}
             </div>
 
-            <div className="mt-8 sm:mt-10 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+            <div className="mt-5 [@media(max-height:680px)]:mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
               <p className="text-sm sm:text-xs text-gray-600 max-w-md">
                 {t('signupJoin.roleHint', 'You can always add another role later from your account settings.')}
               </p>
@@ -439,29 +427,31 @@ const SignupJoin = () => {
                 deciding which card to press is exactly who benefits from
                 reading what the site actually does. Below the cards, so it
                 never competes with the choice itself. */}
-            <p className="mt-8 text-center text-sm" style={{ color: 'var(--brand-muted)' }}>
-              {t('signupJoin.notSure', 'Not sure yet?')}{' '}
-              <Link
-                to="/what-you-can-do"
-                className="font-semibold text-[var(--brand-primary)] hover:underline"
-                data-testid="signup-what-you-can-do"
-              >
-                {t('features.title', 'What you can do here')}
-              </Link>
-            </p>
-
-            <p className="mt-10 text-center sm:hidden text-sm text-gray-600">
-              {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
-              <Link to={loginHref} className="font-semibold text-[var(--brand-primary)]" data-testid="signup-login-link-mobile">
-                {t('signupJoin.logIn', 'Log in')}
-              </Link>
-            </p>
+            <div className="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm" style={{ color: 'var(--brand-muted)' }}>
+              <span>
+                {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
+                <Link to={loginHref} className="font-semibold text-[var(--brand-primary)] hover:underline" data-testid="signup-login-link">
+                  {t('signupJoin.logIn', 'Log in')}
+                </Link>
+              </span>
+              <span>
+                {t('signupJoin.notSure', 'Not sure yet?')}{' '}
+                <Link
+                  to="/what-you-can-do"
+                  className="font-semibold text-[var(--brand-primary)] hover:underline"
+                  data-testid="signup-what-you-can-do"
+                >
+                  {t('features.title', 'What you can do here')}
+                </Link>
+              </span>
+            </div>
           </section>
         )}
 
         {/* STEP 2 — details form */}
         {step === 2 && activeCard && (
-          <section className="mt-8 sm:mt-12" data-testid="signup-step-details">
+          <section className="mt-5 [@media(max-height:760px)]:mt-0" data-testid="signup-step-details">
+            <div className="flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
               onClick={() => setStep(1)}
@@ -471,19 +461,20 @@ const SignupJoin = () => {
               <ArrowLeft size={16} className="[[dir=rtl]_&]:rotate-180" aria-hidden="true" />
               {t('signupJoin.back', 'Back to role')}
             </button>
-
-            <div className="mt-6 max-w-xl">
               <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 text-[var(--brand-primary)] text-xs font-semibold">
                 <activeCard.Icon size={14} />
                 {t('signupJoin.signingUpAs', 'Signing up as')} · {t(activeCard.tKey, activeCard.defaultLabel)}
               </div>
+            </div>
+
+            <div className="mt-3">
               <h1
-                className="mt-4 text-3xl sm:text-4xl font-extrabold tracking-tight"
+                className="text-2xl sm:text-3xl font-extrabold tracking-tight"
                 style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
               >
                 {t('signupJoin.detailsHeadline', 'Create your account')}
               </h1>
-              <p className="mt-2 text-sm text-gray-600">
+              <p className="mt-1.5 text-sm text-gray-600 [@media(max-height:760px)]:hidden">
                 {t(activeCard.tDetailsSubKey, activeCard.defaultDetailsSub)}
               </p>
 
@@ -499,9 +490,9 @@ const SignupJoin = () => {
                   the least-privileged order to do it in. See
                   completeGoogleSignIn.js. */}
               {GOOGLE_CLIENT_ID && (
-                <div className="mt-6">
+                <div className="mt-3">
                   <GoogleSignInButton intentRole={activeCard?.backendRole || ''} />
-                  <div className="flex items-center gap-3 mt-4 mb-1" aria-hidden="true">
+                  <div className="flex items-center gap-3 mt-2.5" aria-hidden="true">
                     <div className="flex-1 h-px bg-gray-200" />
                     <span className="text-xs uppercase tracking-wider text-gray-400">
                       {t('auth.orContinueWith', 'or')}
@@ -511,7 +502,8 @@ const SignupJoin = () => {
                 </div>
               )}
 
-              <form onSubmit={handleSubmit} className="mt-8 space-y-4" data-testid="signup-form">
+              <form onSubmit={handleSubmit} className="mt-3 space-y-3 [@media(max-height:680px)]:space-y-2" data-testid="signup-form">
+                <div className="grid gap-3 sm:grid-cols-2">
                 <Field
                   label={t('signupJoin.fullName', 'Full name')}
                   testId="signup-name"
@@ -522,7 +514,7 @@ const SignupJoin = () => {
                     autoComplete="name"
                     value={form.name}
                     onChange={(e) => setForm({ ...form, name: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
                     placeholder={t('signupJoin.fullNamePh', 'Jane Doe')}
                     data-testid="signup-name-input"
                   />
@@ -534,11 +526,12 @@ const SignupJoin = () => {
                     autoComplete="email"
                     value={form.email}
                     onChange={(e) => setForm({ ...form, email: e.target.value })}
-                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
+                    className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
                     placeholder="you@example.com"
                     data-testid="signup-email-input"
                   />
                 </Field>
+                </div>
                 <Field
                   label={t('signupJoin.phone', 'Phone')}
                   optional
@@ -572,6 +565,7 @@ const SignupJoin = () => {
                     out on 23 Sep 2026 as one field too many, and put back
                     on 7 Oct 2026 (Tzvi: "it doesn't ask to confirm the
                     password anymore"). The eye shows both. */}
+                <div className="grid gap-3 sm:grid-cols-2">
                 <Field label={t('signupJoin.password', 'Password')} testId="signup-password">
                   <div className="relative">
                     <input
@@ -581,7 +575,7 @@ const SignupJoin = () => {
                       autoComplete="new-password"
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
-                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-3 pe-11 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
+                      className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 pe-11 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
                       placeholder={t('signupJoin.passwordPh', 'At least 6 characters')}
                       data-testid="signup-password-input"
                     />
@@ -605,7 +599,7 @@ const SignupJoin = () => {
                     onChange={(e) => setConfirmPwd(e.target.value)}
                     aria-invalid={pwdMismatch}
                     aria-describedby={pwdMismatch ? 'signup-confirm-error' : undefined}
-                    className={`w-full rounded-xl border bg-white px-4 py-3 text-sm focus:outline-none focus:ring-2 ${pwdMismatch ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-[var(--brand-primary)] focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20'}`}
+                    className={`w-full rounded-xl border bg-white px-4 py-2.5 text-sm focus:outline-none focus:ring-2 ${pwdMismatch ? 'border-red-400 focus:border-red-500 focus:ring-red-200' : 'border-gray-200 focus:border-[var(--brand-primary)] focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20'}`}
                     placeholder={t('signupJoin.confirmPasswordPh', 'Type it again')}
                     data-testid="signup-confirm-input"
                   />
@@ -615,8 +609,9 @@ const SignupJoin = () => {
                     </p>
                   )}
                 </Field>
+                </div>
 
-                <label className="flex items-start gap-3 pt-2 cursor-pointer">
+                <label className="flex items-start gap-3 pt-1 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={termsAccepted}
@@ -636,7 +631,7 @@ const SignupJoin = () => {
                 <button
                   type="submit"
                   disabled={submitting}
-                  className="w-full mt-2 inline-flex items-center justify-center gap-2 rounded-full px-8 py-3.5 text-sm font-bold shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
+                  className="w-full mt-1 inline-flex items-center justify-center gap-2 rounded-full px-8 py-3 text-sm font-bold shadow-lg transition-all hover:shadow-xl hover:-translate-y-0.5 disabled:opacity-60 disabled:cursor-not-allowed"
                   // The theme's black action with a white label. This read `--gold` on
                   // the primary blue; since the flow theme put the accent blue into
                   // every gold name, the label was blue on blue and the button blank.
@@ -648,7 +643,7 @@ const SignupJoin = () => {
                     : t('signupJoin.createAccount', 'Create account')}
                 </button>
 
-                <p className="text-center text-sm text-gray-600 pt-2">
+                <p className="text-center text-sm text-gray-600 [@media(max-height:680px)]:hidden">
                   {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
                   <Link to={loginHref} className="font-semibold text-[var(--brand-primary)]" data-testid="signup-login-link-form">
                     {t('signupJoin.logIn', 'Log in')}
@@ -658,6 +653,7 @@ const SignupJoin = () => {
             </div>
           </section>
         )}
+        </div>
       </div>
 
       {/* The dark panel runs the full height of the form beside it, and
@@ -667,10 +663,11 @@ const SignupJoin = () => {
           "on the right it's not fitting the page"). Mounted only where it
           is shown, so a phone does not fetch a sphere it never draws. */}
       {isWide && (
-        <div className="hidden lg:block lg:self-stretch" data-testid="signup-right-panel">
+        <div className="hidden lg:block lg:min-h-0" data-testid="signup-right-panel">
           <SignupSphere />
         </div>
       )}
+      </div>
       </div>
 
       {/* Post-signup modals (renter welcome + owner upsell), mirrored

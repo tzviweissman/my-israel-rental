@@ -42,7 +42,7 @@ export default function SignupSphere() {
   React.useEffect(() => {
     const el = boxRef.current;
     if (!el || typeof ResizeObserver === 'undefined') return undefined;
-    const set = () => setSize(Math.max(280, Math.min(640, Math.floor(Math.min(el.clientWidth, el.clientHeight)))));
+    const set = () => setSize(Math.max(220, Math.min(640, Math.floor(Math.min(el.clientWidth, el.clientHeight)))));
     set();
     const ro = new ResizeObserver(set);
     ro.observe(el);
@@ -69,7 +69,7 @@ export default function SignupSphere() {
 
   return (
     <div
-      className="relative flex h-full min-h-[560px] flex-col overflow-clip rounded-md p-8 text-white sm:p-12 lg:p-14"
+      className="relative flex h-full flex-col overflow-clip rounded-2xl p-8 text-white xl:p-10"
       style={{
         background:
           'linear-gradient(180deg, #000 0%, #0F5E8F 140%)',
@@ -89,11 +89,9 @@ export default function SignupSphere() {
       />
       <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 50% at 50% 60%, rgba(28,141,212,0.35), transparent 70%)' }} />
 
-      {/* Words and sphere stay in view while the panel runs the height of
-          the form beside it. The panel clips with overflow-clip, not
-          hidden: hidden makes the panel its own scroller and the sticky
-          block stuck to the panel, not the window. */}
-      <div className="relative z-10 flex flex-1 flex-col lg:sticky lg:top-[9.5rem] lg:h-[calc(100vh-13rem)] lg:flex-none">
+      {/* The card is one screen tall now, so the panel is too and nothing
+          needs to stick (it did while the form ran longer than a screen). */}
+      <div className="relative z-10 flex min-h-0 flex-1 flex-col">
       <div className="max-w-[460px]">
         <motion.p
           initial={from({ opacity: 0, y: 12, filter: 'blur(6px)' })}
@@ -107,14 +105,14 @@ export default function SignupSphere() {
           initial={from({ opacity: 0, y: 18, filter: 'blur(8px)' })}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.8, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-4 text-2xl font-light leading-tight tracking-[-0.02em] text-white/90 sm:text-3xl"
+          className="mt-3 text-2xl font-light leading-tight tracking-[-0.02em] text-white/90 xl:text-[1.75rem]"
           style={{ fontFamily: 'var(--font-head)' }}
         >
           {t('signupJoin.sphereQuote', 'Every circle is a home or a business listed here right now. Turn it, tap one.')}
         </motion.blockquote>
       </div>
 
-      <div ref={boxRef} className="relative z-10 mt-6 flex min-h-[320px] flex-1 items-center justify-center">
+      <div ref={boxRef} className="relative z-10 mt-4 flex min-h-[220px] flex-1 items-center justify-center">
         {loaded && images.length > 0 ? (
           <motion.div
             initial={from({ opacity: 0, scale: 0.9 })}
