@@ -28,7 +28,12 @@ const HOLD = 2.5, dt = 1000 / fps;
 const dir = mkdtempSync(join(tmpdir(), 'rec-'));
 
 const b = await chromium.launch();
-const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: w < 600 ? 2 : 1 });
+// A phone-sized video is recorded as a phone (touch, no hover), so what the
+// page shows touch screens (a button filled at rest, open captions) is what
+// the owner sees; without it, hover-only styles showed outline buttons that
+// no phone ever draws (Michal Yodaiken, 7 Oct 2026).
+const phone = w < 600;
+const ctx = await b.newContext({ viewport: { width: w, height: h }, deviceScaleFactor: phone ? 2 : 1, isMobile: phone, hasTouch: phone });
 // Media plays only when we say so: play() is noted, not started, and each
 // frame moves a "playing" video on by exactly one frame. A video the page
 // scrubs itself (setting currentTime from the scroll) is left to the page.

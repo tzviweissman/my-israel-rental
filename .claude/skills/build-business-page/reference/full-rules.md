@@ -178,6 +178,9 @@ once:
 | **Something fixed to the screen (a bottom bar) never covers content.** Content that can sit under it gets room for it. | The phone order bar covered the last two lines of the "Lid on. Low." screen. |
 | **A label never covers the thing it labels.** Where a card names a spot in a picture, work out where that spot lands on screen once the camera settles, and if the card would sit on it, the card takes the other side (right on a laptop, top on a phone) for that spot. | On KasherMyBnb the "Oven, with racks" card sat on the oven on a phone (6 Oct 2026, caught in review). |
 | **A caption stays up until the next one replaces it.** While the camera travels between two spots, the last card stays; the screen is never left with no words. | KasherMyBnb's first draft showed bare kitchen between stations. |
+| **A payoff is seen where it happens, on every device, and from its start.** Anything that builds to a moment (a counter, a clock, a progress line, a price counting up) is on screen from the moment it starts counting and is checked at its start and its finish on a phone and a laptop. Whatever hides a bar or a button must never hide the thing whose finish the visitor is meant to see. | Michal Yodaiken's session clock ran to 30:00 on a laptop, but on a phone the bar holding it slid away just before it got there, because the bar left with its button (7 Oct 2026). |
+| **Every state is checked on the device that shows it.** A look that depends on the device (hover only, touch only, short screens, phone bar on or off) is checked, screenshotted and recorded as that device: touch emulation for phones, never a narrow desktop window. | Michal's preview video showed outline buttons no phone ever draws, because it was recorded as a narrow desktop (fixed in `record.mjs`, 7 Oct 2026). |
+| **Two rules that touch the same element are checked together.** When one rule changes an element (hide the bar's button over the booking section), check what else lives in that element and keep it. | The "no second button" rule took the session clock with it. |
 
 **And checked by a script, every time:**
 
@@ -194,6 +197,14 @@ once:
   375x667, 390x844 and 360x640. Anything cut off at any size fails the page.
   The short laptop heights are not optional: the default 900px-tall test is
   exactly the screen that hides this.
+- **Phones as phones, and every payoff at its moment** (Tzvi, 7 Oct 2026:
+  "make sure similar issues don't happen in the future"). Phones are checked
+  and recorded with touch emulation (`record.mjs` does it for any width under
+  600), so hover-only and touch-only looks are seen as a visitor sees them.
+  Anything the page builds to (a counter's finish, a bar changing colour, a
+  closing line) is screenshotted at that moment on a phone and a laptop, and a
+  rule that hides part of a bar or section is checked against everything else
+  that lives there.
 
 ## 3b. The category checklist (from the Inspo study)
 
@@ -219,6 +230,11 @@ fixed using only the business's own words and facts.
 6. **On a phone the action is pinned to the bottom** with the price or the
    proof beside it, from after the first screen until the section where you
    order.
+   If the bar also carries something that runs with the scroll (a counter,
+   a clock, a progress line), the bar is there from the very first screen
+   and only its button waits: a running element never appears late, and
+   never leaves before its finish (Tzvi, 7 Oct 2026: Michal Yodaiken's
+   session clock first showed five seconds in, then vanished before 30:00).
 
 For a food business also: **a kosher certificate is a small labelled band
 just after the opening**, never crowding the button and never only at the
@@ -234,12 +250,26 @@ real references, the psychology of habit, premium e-commerce, beginner UI
 mistakes, a product page taken from 2% to 7%, and Claude making video in
 code. Each rule names what it prevents.
 
-1. **References first, always.** Before designing, study 3 to 5 real
-   screens from the category (Inspo or Mobbin) and write down which ones
+1. **References first, always.** Before designing, search every source we
+   have: Inspo, Mobbin and 21st, each time (Tzvi, 7 Oct 2026: "also look at
+   Mobbin and our other inspo sources so we have many options, and so you can
+   see how similar business categories built their sites"). Look first at how
+   businesses of the same kind built theirs (trainers for a trainer, bakeries
+   for a bakery), then keep 3 to 5 real screens and write down which ones
    were used in the brief. Take their structure (what sits where, what is
    beside the button), never their look; the palette and type come from the
    business. Without the business's own colours a reference gets cloned.
-   *Prevents: the page every AI makes from memory.*
+   **And 21st.dev, every page** (Tzvi, 7 Oct 2026: "besides Mobbin and
+   whatever other inspiration sources we have, also look at 21st for ideas
+   for different sections and different effects, to make pages look as
+   professional as possible"). Search it for the sections the page needs
+   and for the details that make it feel finished: the button's hover and
+   press, an arrow that moves, a tile that lifts, how a price is set. Show
+   the owner 3 or 4 options built in their colours before choosing (section
+   8a). An effect still needs its reason (rule 9): one that says what a
+   control does passes, one that only decorates does not.
+   *Prevents: the page every AI makes from memory, and the flat page with
+   nothing that reacts.*
 2. **No AI default look.** Cream ground with a serif headline and one
    italic word is banned unless the business's own brand is exactly that.
    It is the combination that is banned: the page builder's one-word accent
@@ -288,6 +318,18 @@ code. Each rule names what it prevents.
     Before any video is sent, look at the sheet, fix, render again. Anything
     paid (generated stills or clips) waits for the owner's yes on two or
     three style frames.
+
+12. **Everything fits on one screen** (Tzvi, 7 Oct 2026, from
+    woodwrights.co.nz). Wherever a visitor stops scrolling, each photo is
+    seen whole together with its words and price: no block (a hero's copy and
+    button, a heading, a tile, a list, the closing offer) is taller than the
+    screen, on a short laptop (1280x650) as much as on 1440x900 and a phone.
+    A photo is capped by the screen's height (`svh`), a big headline too
+    (`min(clamp(...), N svh)`), and a main tile puts its photo beside its
+    words rather than words under a tall picture. Checked by measuring every
+    block's height at the three sizes, never by eye. *Prevents: seeing half a
+    picture and scrolling to find what it is about (Michal Yodaiken's
+    1-to-1 tile was 940px tall).*
 
 **Three more questions for the owner**, asked with the FAQ request
 (section 3, cont.) and only when their page does not already answer them:
@@ -618,6 +660,32 @@ our fixed v3 sections render (`components/pagebuilder/v3/`). So 21st is used by 
 at build time, to add or improve a section type, never at page time and never
 fetched for visitors. Standalone scroll pages (plain HTML) can use it only as a
 reference, since its output is React.
+
+**On every page, not only for new section types** (Tzvi, 7 Oct 2026). Beside
+Inspo and Mobbin, search 21st for the page's sections and its effects (Buttons,
+Calls to action, Cards, Features, Testimonials, Pricing). For a plain HTML page
+the chosen piece is rebuilt in plain CSS from its code, in the business's
+colours, with nothing loaded from outside. Show 3 or 4 options side by side on a
+test page so the owner picks by pointing and tapping (worked example:
+`scrollcraft/builds/michal-yodaiken/buttons.html`, where Tzvi chose the outline
+that fills with her pink and moves its arrow).
+
+**The effects library** (Tzvi: "we should have many different options for
+different businesses"): `~/.claude/skills/build-business-page/examples/effects-library/index.html`
+holds 35 options, each rebuilt in plain CSS from a named 21st component and
+switchable between five business palettes (trainer, bakery, cleaner, tour guide,
+handyman): 12 buttons, 6 links and arrows, 7 tiles, 6 prices, 4 headings, each
+marked with the businesses it suits. Choose per business so two pages in a row
+never share the same set; a piece Tzvi likes but did not choose is kept for
+another business (B5, the button that flips to show the price). Every new piece
+rebuilt from 21st is added to the library.
+
+**The library never replaces the search** (Tzvi, 7 Oct 2026: "why build now
+instead of looking by each build, so you will have many more options to choose
+from"). Every build starts with a fresh 21st search for that business's
+sections and effects, which reaches thousands of pieces; the library is the
+shelf of ones already rebuilt and tested (phone, touch, reduced motion), used to
+add to that search, never as the whole menu.
 
 **What it is for first.** The sections §3 requires that v3 does not have yet: an
 FAQ in the owner's words and a reviews section. Then: choice tiles with prices,

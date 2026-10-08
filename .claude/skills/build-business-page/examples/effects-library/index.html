@@ -1,0 +1,397 @@
+<!doctype html>
+<!--
+  The effects library: buttons, links and arrows, tiles, prices and headings
+  for business pages, each rebuilt in plain CSS (and a few lines of script)
+  from a 21st.dev component, so it works on a plain HTML page and in React.
+  Nothing loads from outside except the two fonts. Every option reads only
+  five colours (--ground --surface --ink --soft --accent, plus --on-accent),
+  so it wears any business's palette; the swatches at the top switch them.
+
+  Rules that still apply (docs/page-generation-rules.md 3c rule 9 and 8a):
+  an effect needs a reason (it says what a control does, or draws the eye to
+  the price or the action); one bold effect per page; prefers-reduced-motion
+  switches all motion off; touch screens get the hovered look at rest where
+  hover would have carried the meaning.
+
+  Each card: code, name, "from" (the 21st component it follows, or "ours"),
+  and "suits" (which businesses it fits). Tzvi's picks are marked.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Effects library · business pages</title>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Fraunces:opsz,wght@9..144,500;9..144,700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- palettes: one per kind of business --------------------------- */
+  :root, [data-pal="trainer"] { --ground:#0B0A0C; --surface:#17151A; --ink:#FFFFFF; --soft:#C9C3CC; --accent:#FF3D9A; --on-accent:#0B0A0C; --rule:#2A262D; --display:"Anton", Impact, sans-serif; --caps:uppercase; }
+  [data-pal="bakery"]   { --ground:#2B1A12; --surface:#3A251B; --ink:#FFF4E6; --soft:#E2CDB8; --accent:#F2A93B; --on-accent:#2B1A12; --rule:#4E3426; --display:"Fraunces", Georgia, serif; --caps:none; }
+  [data-pal="cleaner"]  { --ground:#FFFFFF; --surface:#F2F7F7; --ink:#0F2A2E; --soft:#46636A; --accent:#0B7A75; --on-accent:#FFFFFF; --rule:#D5E3E4; --display:"DM Sans", system-ui, sans-serif; --caps:none; }
+  [data-pal="tours"]    { --ground:#0E1B33; --surface:#162745; --ink:#F4F6FB; --soft:#B8C2D6; --accent:#FF7A59; --on-accent:#0E1B33; --rule:#26385A; --display:"Fraunces", Georgia, serif; --caps:none; }
+  [data-pal="handyman"] { --ground:#F4F1EA; --surface:#FFFFFF; --ink:#1C1C1A; --soft:#55524A; --accent:#E8B21A; --on-accent:#1C1C1A; --rule:#DCD6C8; --display:"Anton", Impact, sans-serif; --caps:uppercase; }
+  :root { --ease: cubic-bezier(.22,1,.36,1); --r: 6px; }
+
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--ground); color: var(--ink); font: 16px/1.5 "DM Sans", system-ui, sans-serif; transition: background 300ms, color 300ms; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding: 40px 20px 80px; }
+  header.top { position: sticky; top: 0; z-index: 10; background: var(--ground); border-bottom: 1px solid var(--rule); }
+  header.top .wrap { padding-block: 14px; display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; }
+  header.top h1 { margin: 0; font: 400 1.5rem/1 var(--display); text-transform: var(--caps); }
+  .pals { display: flex; flex-wrap: wrap; gap: 8px; margin-inline-start: auto; }
+  .pals button { font: 600 13px/1 "DM Sans", sans-serif; padding: 9px 12px; border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); cursor: pointer; display: inline-flex; gap: 8px; align-items: center; }
+  .pals button[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .pals i { width: 14px; height: 14px; border-radius: 50%; display: inline-block; }
+  h2.cat { font: 400 clamp(1.8rem, 1rem + 2vw, 2.6rem)/1 var(--display); text-transform: var(--caps); margin: 56px 0 6px; }
+  p.cat { color: var(--soft); margin: 0 0 22px; max-width: 60ch; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; }
+  .opt { background: var(--surface); border: 1px solid var(--rule); border-radius: var(--r); padding: 18px; display: grid; gap: 10px; align-content: start; }
+  .opt .meta { display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+  .opt .code { font: 700 12px/1 "DM Sans"; color: var(--on-accent); background: var(--accent); padding: 4px 7px; border-radius: 4px; }
+  .opt .name { font-weight: 700; }
+  .opt .pick { font-size: 12px; font-weight: 700; color: var(--accent); }
+  .opt .src, .opt .suits { margin: 0; font-size: 13px; color: var(--soft); }
+  .stage { min-height: 110px; display: flex; align-items: center; justify-content: flex-start; padding: 12px 0; }
+  a { color: inherit; }
+  .ic { width: 18px; height: 18px; flex: none; }
+
+  /* ================= BUTTONS =================================================== */
+  .b { position: relative; display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 22px; border-radius: var(--r); font: 700 15px/1 "DM Sans", sans-serif; text-decoration: none; cursor: pointer; border: 0; -webkit-tap-highlight-color: transparent; }
+  .b:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .b:active { scale: .97; }
+
+  /* B1 lift */
+  .b1 { background: var(--accent); color: var(--on-accent); transition: translate 200ms var(--ease), box-shadow 200ms var(--ease); }
+  .b1:hover { translate: 0 -3px; box-shadow: 0 12px 24px -12px var(--accent); }
+  /* B2 sweep fill (Michal) */
+  .b2 { border: 2px solid var(--accent); color: var(--ink); background: transparent; overflow: hidden; isolation: isolate; transition: color 380ms var(--ease); }
+  .b2::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 380ms var(--ease); }
+  .b2 .ic { transition: translate 380ms var(--ease); }
+  .b2:hover { color: var(--on-accent); } .b2:hover::before { transform: scaleX(1); } .b2:hover .ic { translate: 4px 0; }
+  /* B3 circle grows */
+  .b3 { border: 2px solid var(--accent); color: var(--ink); border-radius: 999px; padding: 0 24px 0 62px; overflow: hidden; isolation: isolate; transition: color 450ms var(--ease); }
+  .b3::before { content: ""; position: absolute; z-index: -1; inset: 4px auto 4px 4px; width: 40px; border-radius: 999px; background: var(--accent); transition: width 450ms var(--ease); }
+  .b3 .ic { position: absolute; left: 15px; color: var(--on-accent); transition: translate 450ms var(--ease); }
+  .b3:hover { color: var(--on-accent); } .b3:hover::before { width: calc(100% - 8px); } .b3:hover .ic { translate: 6px 0; }
+  /* B4 arrow travels with a line */
+  .b4 { background: var(--accent); color: var(--on-accent); }
+  .b4 .tail { position: relative; width: 20px; height: 20px; transition: width 350ms var(--ease); }
+  .b4 .tail::before { content: ""; position: absolute; left: 0; right: 9px; top: 50%; height: 2px; margin-top: -1px; background: currentColor; transform: scaleX(0); transform-origin: left; transition: transform 350ms var(--ease); }
+  .b4 .tail .ic { position: absolute; right: 0; top: 1px; }
+  .b4:hover .tail { width: 36px; } .b4:hover .tail::before { transform: scaleX(1); }
+  /* B5 flip to the price (kept for another business) */
+  .b5 { display: inline-grid; align-items: stretch; padding: 0; perspective: 600px; color: var(--on-accent); background: none; }
+  .b5 span { grid-area: 1/1; display: flex; align-items: center; justify-content: center; gap: 6px; padding: 0 24px; border-radius: var(--r); backface-visibility: hidden; transition: transform 420ms var(--ease), opacity 420ms; }
+  .b5 .f { background: var(--accent); }
+  .b5 .k { background: var(--ink); color: var(--ground); transform: rotateX(-90deg); opacity: 0; }
+  .b5 .k b { font: 400 1.4rem/1 var(--display); color: var(--accent); }
+  .b5:hover .f { transform: rotateX(90deg); opacity: 0; } .b5:hover .k { transform: none; opacity: 1; }
+  /* B6 arrow swap: out to the right, a new one in from the left */
+  .b6 { background: var(--ink); color: var(--ground); overflow: hidden; }
+  .b6 .sw { position: relative; width: 18px; height: 18px; overflow: hidden; }
+  .b6 .sw .ic { position: absolute; inset: 0; transition: translate 320ms var(--ease); }
+  .b6 .sw .ic + .ic { translate: -24px 0; }
+  .b6:hover .sw .ic { translate: 24px 0; } .b6:hover .sw .ic + .ic { translate: 0 0; }
+  /* B7 label rolls up */
+  .b7 { background: var(--accent); color: var(--on-accent); overflow: hidden; }
+  .b7 .roll { display: grid; height: 1.2em; overflow: hidden; line-height: 1.2em; }
+  .b7 .roll span { transition: translate 340ms var(--ease); }
+  .b7:hover .roll span { translate: 0 -100%; }
+  /* B8 corner brackets close in */
+  .b8 { color: var(--ink); background: transparent; padding: 0 26px; }
+  .b8 .c { position: absolute; width: 10px; height: 10px; border: 2px solid var(--accent); transition: inset 300ms var(--ease), width 300ms var(--ease), height 300ms var(--ease); }
+  .b8 .c1 { top: 0; left: 0; border-right: 0; border-bottom: 0; } .b8 .c2 { top: 0; right: 0; border-left: 0; border-bottom: 0; }
+  .b8 .c3 { bottom: 0; left: 0; border-right: 0; border-top: 0; } .b8 .c4 { bottom: 0; right: 0; border-left: 0; border-top: 0; }
+  .b8::before { content: ""; position: absolute; inset: 0; background: var(--accent); opacity: 0; transition: opacity 300ms; border-radius: 2px; z-index: -1; }
+  .b8 { isolation: isolate; transition: color 300ms; }
+  .b8:hover { color: var(--on-accent); } .b8:hover::before { opacity: 1; } .b8:hover .c { width: 50%; height: 50%; }
+  /* B9 icon chip turns */
+  .b9 { background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: 999px; padding: 0 6px 0 22px; gap: 14px; }
+  .b9 .chip { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; transition: rotate 300ms var(--ease); }
+  .b9:hover .chip { rotate: -45deg; }
+  /* B10 text button, underline grows */
+  .b10 { padding: 0 2px; height: auto; background: none; color: var(--ink); }
+  .b10 .t { background: linear-gradient(var(--accent), var(--accent)) no-repeat 0 100% / 30% 2px; padding-bottom: 4px; transition: background-size 350ms var(--ease); }
+  .b10 .ic { color: var(--accent); transition: translate 350ms var(--ease); }
+  .b10:hover .t { background-size: 100% 2px; } .b10:hover .ic { translate: 4px 0; }
+  /* B11 one light pass */
+  .b11 { background: var(--accent); color: var(--on-accent); overflow: hidden; }
+  .b11::after { content: ""; position: absolute; top: 0; bottom: 0; width: 40%; left: -60%; background: linear-gradient(100deg, transparent, rgb(255 255 255 / .45), transparent); transform: skewX(-20deg); }
+  .b11:hover::after { left: 130%; transition: left 700ms var(--ease); }
+  /* B12 pressable (tactile) */
+  .b12 { background: var(--accent); color: var(--on-accent); box-shadow: 0 5px 0 color-mix(in srgb, var(--accent) 55%, #000); translate: 0 -3px; transition: translate 90ms, box-shadow 90ms; }
+  .b12:hover { filter: brightness(1.05); }
+  .b12:active { scale: 1; translate: 0 2px; box-shadow: 0 0 0 color-mix(in srgb, var(--accent) 55%, #000); }
+
+  /* B13 label and arrow block, apart */
+  .b13 { padding: 0; gap: 3px; background: none; }
+  .b13 .lb, .b13 .ab { height: 52px; display: inline-flex; align-items: center; background: var(--accent); color: var(--on-accent); }
+  .b13 .lb { padding: 0 20px; border-radius: var(--r) 0 0 var(--r); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; }
+  .b13 .ab { width: 52px; justify-content: center; border-radius: 0 var(--r) var(--r) 0; overflow: hidden; transition: width 300ms var(--ease); }
+  .b13 .ab .ic { transition: translate 300ms var(--ease); }
+  .b13:hover .ab { width: 64px; } .b13:hover .ab .ic { translate: 4px 0; }
+
+  /* touch screens: no hover, so the filled look is the resting look */
+  @media (hover: none) {
+    .b2, .b3, .b8 { color: var(--on-accent); }
+    .b2::before { transform: none; } .b3::before { width: calc(100% - 8px); } .b8::before { opacity: 1; }
+    .b10 .t { background-size: 100% 2px; }
+  }
+
+  /* ================= LINKS AND ARROWS ========================================== */
+  .l { font-weight: 600; font-size: 17px; text-decoration: none; color: var(--ink); display: inline-flex; align-items: center; gap: 6px; }
+  .l:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+  .l1 { background: linear-gradient(var(--accent), var(--accent)) no-repeat 0 100% / 0 2px; padding-bottom: 3px; transition: background-size 320ms var(--ease); }
+  .l1:hover, .l1:focus-visible { background-size: 100% 2px; }
+  .l2 { background: linear-gradient(var(--accent), var(--accent)) no-repeat 50% 100% / 0 2px; padding-bottom: 3px; transition: background-size 320ms var(--ease); }
+  .l2:hover { background-size: 100% 2px; }
+  .l3 .ic { color: var(--accent); transition: translate 260ms var(--ease); }
+  .l3:hover .ic { translate: 3px -3px; }
+  .l4 .ring { width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid var(--accent); display: grid; place-items: center; overflow: hidden; color: var(--accent); transition: background 260ms, color 260ms; }
+  .l4 .ring .ic { transition: translate 300ms var(--ease); }
+  .l4:hover .ring { background: var(--accent); color: var(--on-accent); } .l4:hover .ring .ic { animation: slip 420ms var(--ease); }
+  @keyframes slip { 0% { translate: 0 0; } 49% { translate: 26px 0; } 50% { translate: -26px 0; } 100% { translate: 0 0; } }
+  .l5 { position: relative; padding-bottom: 8px; }
+  .l5 svg.sq { position: absolute; left: 0; bottom: 0; width: 100%; height: 8px; color: var(--accent); stroke-dasharray: 220; stroke-dashoffset: 220; transition: stroke-dashoffset 500ms var(--ease); }
+  .l5:hover svg.sq { stroke-dashoffset: 0; }
+  .l6 { background: linear-gradient(color-mix(in srgb, var(--accent) 40%, transparent), color-mix(in srgb, var(--accent) 40%, transparent)) no-repeat 0 85% / 0 45%; transition: background-size 380ms var(--ease); padding: 0 2px; }
+  .l6:hover { background-size: 100% 45%; }
+
+  /* ================= TILES ===================================================== */
+  .tile { position: relative; width: 100%; max-width: 240px; border-radius: var(--r); overflow: hidden; background: var(--ground); border: 1px solid var(--rule); text-decoration: none; color: var(--ink); display: block; }
+  .tile .ph { aspect-ratio: 4/3; background: linear-gradient(135deg, color-mix(in srgb, var(--accent) 55%, var(--ground)), var(--surface)); }
+  .tile .tx { padding: 12px 14px; }
+  .tile .tx b { display: block; font: 400 1.25rem/1.1 var(--display); text-transform: var(--caps); }
+  .tile .tx small { color: var(--soft); }
+  .t1 { transition: translate 260ms var(--ease), box-shadow 260ms var(--ease); }
+  .t1:hover { translate: 0 -5px; box-shadow: 0 16px 30px -18px var(--accent); }
+  .t2 .ph { transition: scale 600ms var(--ease); } .t2 .phw { overflow: hidden; } .t2:hover .ph { scale: 1.07; }
+  .t3::after { content: ""; position: absolute; inset: 0; border: 2px solid var(--accent); border-radius: var(--r); clip-path: inset(0 100% 100% 0); transition: clip-path 500ms var(--ease); pointer-events: none; }
+  .t3:hover::after { clip-path: inset(0 0 0 0); }
+  .t4 { transform-style: preserve-3d; transition: transform 200ms var(--ease); will-change: transform; }
+  .t5 { --mx: 50%; --my: 50%; }
+  .t5::before { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 250ms; background: radial-gradient(220px circle at var(--mx) var(--my), color-mix(in srgb, var(--accent) 30%, transparent), transparent 60%); }
+  .t5:hover::before { opacity: 1; }
+  .t6 .tx { position: absolute; inset: auto 0 0 0; background: color-mix(in srgb, var(--ground) 88%, transparent); translate: 0 calc(100% - 46px); transition: translate 380ms var(--ease); }
+  .t6:hover .tx, .t6:focus-visible .tx { translate: 0 0; }
+  .t6 .tx small { display: block; margin-top: 6px; }
+  @media (hover: none) { .t6 .tx { translate: 0 0; } }
+  .t7wrap { position: relative; display: grid; grid-template-columns: 1fr 1fr; gap: 8px; width: 100%; }
+  .t7wrap .hl { position: absolute; z-index: 0; border-radius: var(--r); background: color-mix(in srgb, var(--accent) 22%, transparent); transition: all 300ms var(--ease); opacity: 0; pointer-events: none; }
+  .t7wrap .mini { position: relative; z-index: 1; padding: 14px; border-radius: var(--r); border: 1px solid var(--rule); text-decoration: none; color: var(--ink); font-weight: 600; font-size: 14px; }
+
+  /* ================= PRICES ==================================================== */
+  .p1 { display: flex; align-items: baseline; gap: 8px; }
+  .p1 .n { font: 400 4rem/0.9 var(--display); color: var(--ink); }
+  .p1 .s { font-size: .5em; vertical-align: .55em; color: var(--accent); }
+  .p1 small { color: var(--soft); font-weight: 600; }
+  .p2 .n { font: 400 4rem/1 var(--display); color: var(--accent); font-variant-numeric: tabular-nums; }
+  .p3 { position: relative; display: inline-flex; align-items: center; gap: 8px; padding: 10px 18px 10px 26px; background: var(--accent); color: var(--on-accent); font-weight: 700; clip-path: polygon(14px 0, 100% 0, 100% 100%, 14px 100%, 0 50%); }
+  .p3 b { font: 400 1.7rem/1 var(--display); }
+  .p3::before { content: ""; position: absolute; left: 10px; top: 50%; width: 6px; height: 6px; margin-top: -3px; border-radius: 50%; background: var(--surface); }
+  .p4 { display: grid; gap: 2px; }
+  .p4 .was { color: var(--soft); text-decoration: line-through; text-decoration-color: var(--accent); }
+  .p4 .now { font: 400 2.6rem/1 var(--display); color: var(--ink); }
+  .p4 .until { font-size: 13px; color: var(--accent); font-weight: 700; }
+  .p5 { display: flex; align-items: stretch; border: 1px solid var(--rule); border-radius: var(--r); overflow: hidden; }
+  .p5 > * { padding: 10px 16px; display: grid; align-content: center; }
+  .p5 .a { background: var(--accent); color: var(--on-accent); font: 400 2rem/1 var(--display); }
+  .p5 .u { font-size: 14px; color: var(--soft); line-height: 1.3; } .p5 .u b { color: var(--ink); display: block; }
+  .p6 { font: 400 3.2rem/1 var(--display); position: relative; display: inline-block; z-index: 0; }
+  .p6::after { content: ""; position: absolute; left: -4px; right: -4px; bottom: 0; height: 22%; background: var(--accent); opacity: .45; z-index: -1; transform: scaleX(0); transform-origin: left; transition: transform 600ms var(--ease); }
+  .p6.in::after { transform: scaleX(1); }
+
+  /* ================= HEADINGS ================================================== */
+  .h { font: 400 2.1rem/1.02 var(--display); text-transform: var(--caps); margin: 0; }
+  .h em { font-style: normal; color: var(--accent); }
+  .js .h1 .w { display: inline-block; overflow: hidden; vertical-align: bottom; }
+  .js .h1 .w > span { display: inline-block; translate: 0 105%; transition: translate 700ms var(--ease); transition-delay: calc(var(--i) * 70ms); }
+  .js .h1.in .w > span { translate: 0 0; }
+  .js .h2w .w { display: inline-block; opacity: 0; filter: blur(8px); translate: 0 8px; transition: all 700ms var(--ease); transition-delay: calc(var(--i) * 80ms); }
+  .js .h2w.in .w { opacity: 1; filter: none; translate: 0 0; }
+  .h3p { font-size: 18px; line-height: 1.55; margin: 0; }
+  .js .h3p .w { color: color-mix(in srgb, var(--ink) 28%, transparent); transition: color 200ms; }
+  .js .h3p .w.on { color: var(--ink); }
+  .h4 em { background: linear-gradient(var(--accent), var(--accent)) no-repeat 0 92% / 0 6px; color: inherit; transition: background-size 700ms var(--ease) 200ms; }
+  .h4.in em { background-size: 100% 6px; }
+  .replay { font: 600 12px/1 "DM Sans"; background: none; border: 1px solid var(--rule); color: var(--soft); border-radius: 999px; padding: 6px 10px; cursor: pointer; justify-self: start; }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 1ms !important; animation: none !important; }
+    .js .h1 .w > span, .js .h2w .w { translate: none !important; opacity: 1 !important; filter: none !important; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="arr" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="chev" viewBox="0 0 24 24"><path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="diag" viewBox="0 0 24 24"><path d="M7 17L17 7M9 7h8v8" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></symbol>
+  <symbol id="msg" viewBox="0 0 24 24"><path d="M21 11.5a8.4 8.4 0 0 1-12.6 7.3L3 20.5l1.7-5.2A8.4 8.4 0 1 1 21 11.5z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></symbol>
+</svg>
+
+<header class="top"><div class="wrap">
+  <h1>Effects library</h1>
+  <div class="pals" role="group" aria-label="Try it in another business's colours">
+    <button data-p="trainer" aria-pressed="true"><i style="background:#FF3D9A"></i>Trainer</button>
+    <button data-p="bakery" aria-pressed="false"><i style="background:#F2A93B"></i>Bakery</button>
+    <button data-p="cleaner" aria-pressed="false"><i style="background:#0B7A75"></i>Cleaner</button>
+    <button data-p="tours" aria-pressed="false"><i style="background:#FF7A59"></i>Tour guide</button>
+    <button data-p="handyman" aria-pressed="false"><i style="background:#E8B21A"></i>Handyman</button>
+  </div>
+</div></header>
+
+<main class="wrap">
+  <p class="cat" style="margin-top:8px">Point at, tap and click each one. Switch the colours at the top to see it on a different business. Every option is built in plain code from a 21st.dev component or a real site found on Mobbin or Inspo, with nothing loaded from outside. This is a shelf of tested pieces: every build still searches fresh.</p>
+
+  <!-- BUTTONS -->
+  <h2 class="cat">Buttons</h2>
+  <p class="cat">The main action. One style per page, the same on every button of that page.</p>
+  <div class="grid">
+    <div class="opt"><div class="meta"><span class="code">B1</span><span class="name">Lift</span></div><div class="stage"><a class="b b1" href="#">Book a time</a></div><p class="src">From: ours (the site's own button)</p><p class="suits">Suits: anyone; the quiet default</p></div>
+    <div class="opt"><div class="meta"><span class="code">B2</span><span class="name">Colour sweeps in</span><span class="pick">Michal Yodaiken</span></div><div class="stage"><a class="b b2" href="#">Message to book<svg class="ic"><use href="#arr"/></svg></a></div><p class="src">From: 21st "Mask Button"</p><p class="suits">Suits: dark pages with a loud brand colour, fitness, studios</p></div>
+    <div class="opt"><div class="meta"><span class="code">B3</span><span class="name">Circle that fills</span></div><div class="stage"><a class="b b3" href="#"><svg class="ic"><use href="#arr"/></svg>Get a quote</a></div><p class="src">From: 21st "Motion Button"</p><p class="suits">Suits: modern services, designers, cleaners</p></div>
+    <div class="opt"><div class="meta"><span class="code">B4</span><span class="name">Arrow that travels</span></div><div class="stage"><a class="b b4" href="#">See the menu<span class="tail"><svg class="ic"><use href="#chev"/></svg></span></a></div><p class="src">From: 21st "Morphing Arrow Button"</p><p class="suits">Suits: food, shops, anything with a next page</p></div>
+    <div class="opt"><div class="meta"><span class="code">B5</span><span class="name">Flips to the price</span><span class="pick">Liked, kept for someone</span></div><div class="stage"><a class="b b5" href="#" aria-label="Order, ₪90"><span class="f">Order</span><span class="k"><b>₪90</b>per tray</span></a></div><p class="src">From: 21st "Flip Button"</p><p class="suits">Suits: one clear price (a tray, a lesson, a clean)</p></div>
+    <div class="opt"><div class="meta"><span class="code">B6</span><span class="name">Arrow swaps</span></div><div class="stage"><a class="b b6" href="#">Check dates<span class="sw"><svg class="ic"><use href="#arr"/></svg><svg class="ic"><use href="#arr"/></svg></span></a></div><p class="src">From: 21st "Interactive Hover Button"</p><p class="suits">Suits: rentals, tours, bookings</p></div>
+    <div class="opt"><div class="meta"><span class="code">B7</span><span class="name">Words roll up</span></div><div class="stage"><a class="b b7" href="#"><span class="roll"><span>Call us</span><span aria-hidden="true">Call us</span></span></a></div><p class="src">From: 21st "Book A Call Button"</p><p class="suits">Suits: short labels, playful brands, kids' classes</p></div>
+    <div class="opt"><div class="meta"><span class="code">B8</span><span class="name">Corners close in</span></div><div class="stage"><a class="b b8" href="#"><span class="c c1"></span><span class="c c2"></span><span class="c c3"></span><span class="c c4"></span>Book a repair</a></div><p class="src">From: 21st "Motion Button" (corner brackets)</p><p class="suits">Suits: trades, handymen, workshops, architects</p></div>
+    <div class="opt"><div class="meta"><span class="code">B9</span><span class="name">Icon chip turns</span></div><div class="stage"><a class="b b9" href="#">WhatsApp us<span class="chip"><svg class="ic"><use href="#arr"/></svg></span></a></div><p class="src">From: 21st "Link Button" (rotating arrow)</p><p class="suits">Suits: chat-first businesses, light pages</p></div>
+    <div class="opt"><div class="meta"><span class="code">B10</span><span class="name">Text with a growing line</span></div><div class="stage"><a class="b b10" href="#"><span class="t">See all prices</span><svg class="ic"><use href="#arr"/></svg></a></div><p class="src">From: 21st "Animated Link"</p><p class="suits">Suits: the second action beside a solid one</p></div>
+    <div class="opt"><div class="meta"><span class="code">B11</span><span class="name">One light pass</span></div><div class="stage"><a class="b b11" href="#">Reserve a table</a></div><p class="src">From: 21st "Button Colorful" (shine only)</p><p class="suits">Suits: jewellers, events, premium food; use sparingly</p></div>
+    <div class="opt"><div class="meta"><span class="code">B12</span><span class="name">Presses down</span></div><div class="stage"><a class="b b12" href="#">Add to order</a></div><p class="src">From: 21st "Tactile Button" (the press, no shader)</p><p class="suits">Suits: shops and orders, things you tap often</p></div>
+    <div class="opt"><div class="meta"><span class="code">B13</span><span class="name">Label and arrow apart</span></div><div class="stage"><a class="b b13" href="#"><span class="lb">Book a consultation</span><span class="ab"><svg class="ic"><use href="#arr"/></svg></span></a></div><p class="src">From: Mobbin, The Performance Lab (a training studio)</p><p class="suits">Suits: trainers, clinics, serious and technical brands</p></div>
+  </div>
+
+  <!-- LINKS AND ARROWS -->
+  <h2 class="cat">Links and arrows</h2>
+  <p class="cat">Smaller actions: "see the listing", "read more", a link in a sentence.</p>
+  <div class="grid">
+    <div class="opt"><div class="meta"><span class="code">L1</span><span class="name">Line wipes in</span></div><div class="stage"><a class="l l1" href="#">See the full menu</a></div><p class="src">From: 21st "Underline Link"</p><p class="suits">Suits: anyone</p></div>
+    <div class="opt"><div class="meta"><span class="code">L2</span><span class="name">Line grows from the middle</span></div><div class="stage"><a class="l l2" href="#">Our areas</a></div><p class="src">From: 21st "Animated Link" (centre)</p><p class="suits">Suits: centred layouts, menus</p></div>
+    <div class="opt"><div class="meta"><span class="code">L3</span><span class="name">Arrow lifts away</span></div><div class="stage"><a class="l l3" href="#">Open on Google Maps<svg class="ic"><use href="#diag"/></svg></a></div><p class="src">From: 21st "Animated Link" (diagonal arrow)</p><p class="suits">Suits: links that leave the page (maps, Instagram)</p></div>
+    <div class="opt"><div class="meta"><span class="code">L4</span><span class="name">Arrow in a ring</span></div><div class="stage"><a class="l l4" href="#">Next tour<span class="ring"><svg class="ic"><use href="#arr"/></svg></span></a></div><p class="src">From: 21st "Interactive Animated Arrow Icon"</p><p class="suits">Suits: tours, galleries, step-by-step pages</p></div>
+    <div class="opt"><div class="meta"><span class="code">L5</span><span class="name">Squiggle draws in</span></div><div class="stage"><a class="l l5" href="#">Party packages<svg class="sq" viewBox="0 0 120 8" preserveAspectRatio="none" aria-hidden="true"><path d="M0 4 Q 5 0 10 4 T 20 4 T 30 4 T 40 4 T 50 4 T 60 4 T 70 4 T 80 4 T 90 4 T 100 4 T 110 4 T 120 4" fill="none" stroke="currentColor" stroke-width="2"/></svg></a></div><p class="src">From: 21st "Squiggly Underline"</p><p class="suits">Suits: kids, parties, playful brands only</p></div>
+    <div class="opt"><div class="meta"><span class="code">L6</span><span class="name">Marker highlight</span></div><div class="stage"><a class="l l6" href="#">How the first lesson works</a></div><p class="src">From: 21st "Animated Underline Text"</p><p class="suits">Suits: teachers, tutors, friendly services</p></div>
+  </div>
+
+  <!-- TILES -->
+  <h2 class="cat">Tiles and cards</h2>
+  <p class="cat">A service, a product or a place to choose from. The tile reacts so it reads as something you can tap.</p>
+  <div class="grid">
+    <div class="opt"><div class="meta"><span class="code">T1</span><span class="name">Lift with a glow</span><span class="pick">Michal Yodaiken</span></div><div class="stage"><a class="tile t1" href="#"><div class="ph"></div><div class="tx"><b>At your gym</b><small>Message for a price</small></div></a></div><p class="src">From: 21st "card-hover"</p><p class="suits">Suits: dark pages, a brand colour to glow</p></div>
+    <div class="opt"><div class="meta"><span class="code">T2</span><span class="name">Photo eases closer</span></div><div class="stage"><a class="tile t2" href="#"><div class="phw"><div class="ph"></div></div><div class="tx"><b>Sourdough</b><small>₪28 a loaf</small></div></a></div><p class="src">From: 21st "Card Hover"</p><p class="suits">Suits: food, products, rentals: wherever the photo sells</p></div>
+    <div class="opt"><div class="meta"><span class="code">T3</span><span class="name">Border draws round</span></div><div class="stage"><a class="tile t3" href="#"><div class="ph"></div><div class="tx"><b>Deep clean</b><small>From ₪350</small></div></a></div><p class="src">From: 21st "Hover Effect"</p><p class="suits">Suits: light, tidy pages, cleaners, clinics</p></div>
+    <div class="opt"><div class="meta"><span class="code">T4</span><span class="name">Tilts toward you</span></div><div class="stage"><a class="tile t4" href="#" data-tilt><div class="ph"></div><div class="tx"><b>Old City walk</b><small>3 hours · ₪120</small></div></a></div><p class="src">From: 21st "Tilt Card"</p><p class="suits">Suits: tours, experiences; one row at most</p></div>
+    <div class="opt"><div class="meta"><span class="code">T5</span><span class="name">Light follows the pointer</span></div><div class="stage"><a class="tile t5" href="#" data-spot><div class="ph"></div><div class="tx"><b>Shabbos tray</b><small>Serves 6</small></div></a></div><p class="src">From: 21st "Tilt Card" (spotlight)</p><p class="suits">Suits: dark, premium pages</p></div>
+    <div class="opt"><div class="meta"><span class="code">T6</span><span class="name">Details slide up</span></div><div class="stage"><a class="tile t6" href="#"><div class="ph" style="aspect-ratio:4/3.6"></div><div class="tx"><b>Kitchen shelves</b><small>Fitted in a day. Wood or metal, your choice.</small></div></a></div><p class="src">From: 21st "card-hover" (caption)</p><p class="suits">Suits: portfolios, past work, galleries. Open by default on phones</p></div>
+    <div class="opt"><div class="meta"><span class="code">T7</span><span class="name">Highlight glides between</span></div><div class="stage"><div class="t7wrap" data-glide><span class="hl"></span><a class="mini" href="#">Home</a><a class="mini" href="#">Office</a><a class="mini" href="#">After a move</a><a class="mini" href="#">Windows</a></div></div><p class="src">From: 21st "Hover Effect" (sliding)</p><p class="suits">Suits: a small set of choices, sizes, areas</p></div>
+  </div>
+
+  <!-- PRICES -->
+  <h2 class="cat">Prices</h2>
+  <p class="cat">The number people look for. Real prices only; an offer only with its end date.</p>
+  <div class="grid">
+    <div class="opt"><div class="meta"><span class="code">P1</span><span class="name">Big numerals, small sign</span></div><div class="stage"><div class="p1"><span class="n"><span class="s">₪</span>60</span><small>for 30 minutes</small></div></div><p class="src">From: ours (the page builder's offer)</p><p class="suits">Suits: anyone with one main price</p></div>
+    <div class="opt"><div class="meta"><span class="code">P2</span><span class="name">Counts up when seen</span></div><div class="stage"><div class="p2"><span class="n" data-count="350">₪350</span></div></div><button class="replay" data-replay="count">Replay</button><p class="src">From: 21st "Pricing With Usage Slider" (animated digits)</p><p class="suits">Suits: a bigger job price; once per page</p></div>
+    <div class="opt"><div class="meta"><span class="code">P3</span><span class="name">Price tag</span></div><div class="stage"><span class="p3"><b>₪90</b>a tray</span></div><p class="src">From: 21st "Pricing Card" (badge)</p><p class="suits">Suits: food, shops, markets</p></div>
+    <div class="opt"><div class="meta"><span class="code">P4</span><span class="name">An offer with its date</span></div><div class="stage"><div class="p4"><span class="was">₪450</span><span class="now">₪380</span><span class="until">First clean, until 31 October</span></div></div><p class="src">From: 21st "Pricing Cards" (highlighted)</p><p class="suits">Suits: only a real offer the owner set, with an end date</p></div>
+    <div class="opt"><div class="meta"><span class="code">P5</span><span class="name">Price and unit, side by side</span></div><div class="stage"><div class="p5"><span class="a">₪120</span><span class="u"><b>per person</b>3 hours, small group</span></div></div><p class="src">From: 21st "Pricing Card"</p><p class="suits">Suits: tours, classes, per-hour work</p></div>
+    <div class="opt"><div class="meta"><span class="code">P6</span><span class="name">Marker under the price</span></div><div class="stage"><span class="p6" data-inview>₪28</span></div><button class="replay" data-replay="p6">Replay</button><p class="src">From: 21st "Animated Underline Text"</p><p class="suits">Suits: friendly, light pages, bakeries</p></div>
+  </div>
+
+  <!-- HEADINGS -->
+  <h2 class="cat">Headings coming into view</h2>
+  <p class="cat">Once, as the section arrives. Never on every section; never while the words are being read.</p>
+  <div class="grid">
+    <div class="opt"><div class="meta"><span class="code">H1</span><span class="name">Words rise from a line</span></div><div class="stage"><h3 class="h h1" data-inview data-split>Fresh every <em>Friday</em></h3></div><button class="replay" data-replay="h">Replay</button><p class="src">From: 21st "Text Reveal (Mask)"</p><p class="suits">Suits: bold display type, one section</p></div>
+    <div class="opt"><div class="meta"><span class="code">H2</span><span class="name">Words come into focus</span></div><div class="stage"><h3 class="h h2w" data-inview data-split>Your home, <em>spotless</em></h3></div><button class="replay" data-replay="h">Replay</button><p class="src">From: 21st "Text Reveal" (blur)</p><p class="suits">Suits: calm brands, clinics, spas</p></div>
+    <div class="opt"><div class="meta"><span class="code">H3</span><span class="name">Reads itself as you scroll</span></div><div class="stage"><p class="h3p" data-read data-split>We have guided families through the Old City for twelve years, in English and Hebrew.</p></div><p class="src">From: 21st "Reading Text Reveal"</p><p class="suits">Suits: one short story paragraph (the owner's own words)</p></div>
+    <div class="opt"><div class="meta"><span class="code">H4</span><span class="name">Key word underlined</span></div><div class="stage"><h3 class="h h4" data-inview>Fixed <em>the same day</em></h3></div><button class="replay" data-replay="h">Replay</button><p class="src">From: 21st "Animated Underline Text"</p><p class="suits">Suits: trades, anyone with one promise to stress</p></div>
+  </div>
+</main>
+
+<script>
+(function () {
+  document.documentElement.classList.add('js');
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // palettes
+  document.querySelectorAll('.pals button').forEach(function (b) {
+    b.addEventListener('click', function () {
+      document.documentElement.dataset.pal = b.dataset.p;
+      document.querySelectorAll('.pals button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+    });
+  });
+  if (location.hash.length > 1) { var hp = location.hash.slice(1); document.documentElement.dataset.pal = hp; document.querySelectorAll('.pals button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.p === hp)); }); }
+  // split words (headings and the reading paragraph)
+  document.querySelectorAll('[data-split]').forEach(function (el) {
+    var i = 0;
+    (function walk(node) {
+      [].slice.call(node.childNodes).forEach(function (c) {
+        if (c.nodeType === 3) {
+          var frag = document.createDocumentFragment();
+          c.textContent.split(/(\s+)/).forEach(function (t) {
+            if (!t) return;
+            if (/^\s+$/.test(t)) { frag.appendChild(document.createTextNode(t)); return; }
+            var w = document.createElement('span'); w.className = 'w'; w.style.setProperty('--i', i++);
+            if (el.classList.contains('h1')) { var s = document.createElement('span'); s.textContent = t; w.appendChild(s); } else w.textContent = t;
+            frag.appendChild(w);
+          });
+          c.replaceWith(frag);
+        } else if (c.nodeType === 1) walk(c);
+      });
+    })(el);
+  });
+  // in view, once
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: 0.6 });
+  document.querySelectorAll('[data-inview]').forEach(function (el) { io.observe(el); });
+  // count up
+  function count(el) {
+    var to = +el.dataset.count, t0 = performance.now();
+    if (still) { el.textContent = '₪' + to; return; }
+    (function f(now) { var k = Math.min(1, (now - t0) / 1100); el.textContent = '₪' + Math.round(to * (1 - Math.pow(1 - k, 3))); if (k < 1) requestAnimationFrame(f); })(t0);
+  }
+  var io2 = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { count(e.target); io2.unobserve(e.target); } }); }, { threshold: 0.6 });
+  document.querySelectorAll('[data-count]').forEach(function (el) { io2.observe(el); });
+  // replays
+  document.querySelectorAll('[data-replay]').forEach(function (b) {
+    b.addEventListener('click', function () {
+      var box = b.closest('.opt'), el = box.querySelector('[data-inview], [data-count]');
+      if (el.dataset.count) return count(el);
+      el.classList.remove('in'); void el.offsetWidth; requestAnimationFrame(function () { el.classList.add('in'); });
+    });
+  });
+  // reading paragraph: words light up as it passes the middle of the screen
+  var reads = [].slice.call(document.querySelectorAll('[data-read]'));
+  function read() {
+    reads.forEach(function (p) {
+      var r = p.getBoundingClientRect(), ws = p.querySelectorAll('.w');
+      var k = still ? 1 : Math.max(0, Math.min(1, (innerHeight * 0.85 - r.top) / (innerHeight * 0.5)));
+      ws.forEach(function (w, i) { w.classList.toggle('on', i < Math.round(k * ws.length)); });
+    });
+  }
+  addEventListener('scroll', read, { passive: true }); read();
+  // tilt
+  document.querySelectorAll('[data-tilt]').forEach(function (el) {
+    if (still) return;
+    el.addEventListener('pointermove', function (e) { var r = el.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - .5, y = (e.clientY - r.top) / r.height - .5; el.style.transform = 'perspective(700px) rotateY(' + (x * 10) + 'deg) rotateX(' + (-y * 10) + 'deg)'; });
+    el.addEventListener('pointerleave', function () { el.style.transform = ''; });
+  });
+  // spotlight
+  document.querySelectorAll('[data-spot]').forEach(function (el) {
+    el.addEventListener('pointermove', function (e) { var r = el.getBoundingClientRect(); el.style.setProperty('--mx', (e.clientX - r.left) + 'px'); el.style.setProperty('--my', (e.clientY - r.top) + 'px'); });
+  });
+  // gliding highlight
+  document.querySelectorAll('[data-glide]').forEach(function (wrap) {
+    var hl = wrap.querySelector('.hl');
+    wrap.querySelectorAll('.mini').forEach(function (m) {
+      function go() { hl.style.left = m.offsetLeft + 'px'; hl.style.top = m.offsetTop + 'px'; hl.style.width = m.offsetWidth + 'px'; hl.style.height = m.offsetHeight + 'px'; hl.style.opacity = 1; }
+      m.addEventListener('pointerenter', go); m.addEventListener('focus', go);
+    });
+    wrap.addEventListener('pointerleave', function () { hl.style.opacity = 0; });
+  });
+  // the demo links go nowhere
+  document.querySelectorAll('a[href="#"]').forEach(function (a) { a.addEventListener('click', function (e) { e.preventDefault(); }); });
+})();
+</script>
+</body>
+</html>

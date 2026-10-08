@@ -37,7 +37,7 @@ import { resolvePhoto, photosOfKind } from '../components/pagebuilder/v3/photos'
 import V3Footer from '../components/pagebuilder/v3/V3Footer';
 import V3GateNotice from '../components/pagebuilder/v3/V3GateNotice';
 import { primaryLabel } from '../components/pagebuilder/v3/V3Hero';
-import { V3BigList, V3Steps, V3Rail, V3Palate, V3Offer, V3StickyBar } from '../components/pagebuilder/v3/V3Sections';
+import { V3BigList, V3Steps, V3Rail, V3Palate, V3Offer, V3StickyBar, V3Faq, V3Reviews } from '../components/pagebuilder/v3/V3Sections';
 import { hasFx, needsEngine, useFx, useScrollcraft } from '../components/pagebuilder/v3/effects';
 import { v3BodyBlocks } from '../components/pagebuilder/v3/ledger';
 import { readComposition } from '../utils/pageComposition';
@@ -449,7 +449,12 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
       {v3 && <V3Steps brief={v3Brief} lang={v3Lang} />}
       {v3 && <V3Rail brief={v3Brief} urls={photosOfKind(biz, v3Brief, 'photo')} />}
       {v3 && <V3Flyers brief={v3Brief} urls={v3Flyers} name={displayName} />}
+      {/* Proof, then the worries answered, then the offer (rules §3): each
+          hidden until the business has the real thing. */}
+      {v3 && <V3Reviews brief={v3Brief} businessId={biz.id} testimonials={biz.testimonials}
+        schemaItem={{ '@type': 'LocalBusiness', name: biz.name }} />}
       {v3 && <V3Palate brief={v3Brief} url={v3Second} />}
+      {v3 && <V3Faq brief={v3Brief} listings={biz.listings} />}
       {v3 && (
         <V3Offer
           brief={v3Brief}
@@ -828,12 +833,13 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
 
         {/* Verified reviews across this business's listings, plus its
             own Google reviews (routes/reviews.py). Nothing while off. */}
-        <ReviewsSection
+        {/* On a v3 page the reviews are V3Reviews, above the offer. */}
+        {!v3 && <ReviewsSection
           businessId={biz.id}
           kind="business"
           className="mt-10"
           schemaItem={{ '@type': 'LocalBusiness', name: biz.name }}
-        />
+        />}
 
         {/* B7 — the highest-intent placement on the site for this CTA.
             The people who read a competitor's business page to the end

@@ -85,6 +85,28 @@ class KosherCert(BaseModel):
     certificate_url: Optional[str] = None
 
 
+class Testimonial(BaseModel):
+    """A testimonial the owner sent us (docs/page-generation-rules.md §3:
+    social proof only if real). Shown on the page only with the person's
+    name and their permission; one without permission is stored for the
+    owner's record and never published."""
+    name: str = Field(..., min_length=1, max_length=80)
+    text: str = Field(..., min_length=1, max_length=800)
+    permission: bool = False
+
+
+def public_testimonials(items: Any) -> list[dict[str, str]]:
+    """The testimonials a visitor may see: named, with permission, worded."""
+    out = []
+    for t in items if isinstance(items, list) else []:
+        if not isinstance(t, dict) or t.get("permission") is not True:
+            continue
+        name, text = str(t.get("name") or "").strip(), str(t.get("text") or "").strip()
+        if name and text:
+            out.append({"name": name, "text": text})
+    return out[:12]
+
+
 class BusinessIn(BaseModel):
     name: str = Field(..., min_length=2, max_length=80)
     description: str = Field("", max_length=2000)
@@ -217,6 +239,9 @@ class BusinessPatch(BaseModel):
     # never re-asks" and "editing the brief is free" are both promises the
     # spec makes, and neither is keepable if the answers are not kept.
     page_brief: Optional[PageBrief] = None
+    # Testimonials the owner sent, each with the person's name and whether
+    # they gave permission (only those with it reach the page). Null clears.
+    testimonials: Optional[list[Testimonial]] = Field(None, max_length=12)
 
 
 
@@ -273,6 +298,8 @@ def _public(
         # page payload.
         "page": doc.get("page"),
         "page_brief": doc.get("page_brief"),
+        # The owner's own view: every testimonial, permission flag included.
+        "testimonials": doc.get("testimonials") or [],
         # What the owner features ("Feature this" in the dashboard).
         "pinned_service_ids": (doc.get("pinned_service_ids") or [])[:3],
         "featured_headline": doc.get("featured_headline"),
@@ -610,6 +637,8 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
             update[key] = value
     if "languages" in provided:
         update["languages"] = payload.languages or []
+    if "testimonials" in provided:
+        update["testimonials"] = [t.model_dump() for t in (payload.testimonials or [])]
 
     if not update:
         raise HTTPException(status_code=400, detail="Nothing to update")
@@ -972,6 +1001,8 @@ async def public_business(
         # public endpoint. The owner gets it through their dashboard, and
         # through this endpoint only when it is their own page.
         "page": biz.get("page"),
+        # Owner-sent testimonials: only named ones with permission.
+        "testimonials": public_testimonials(biz.get("testimonials")),
         **({"page_brief": biz.get("page_brief")} if owner_preview else {}),
         "response_bucket": _response_bucket(
             await db.marketplace_providers.find_one({"user_id": biz.get("owner_user_id")}) or {}

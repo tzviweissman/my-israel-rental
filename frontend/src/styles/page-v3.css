@@ -462,3 +462,67 @@ body[data-page-v3] [data-testid="nav-auth-cluster"] { display: none !important; 
 .pv3-gate p, .pv3-gate ul { margin: 8px 0 0; }
 .pv3-gate ul { padding-inline-start: 18px; color: var(--brand-muted); }
 .pv3-gate code { font-size: 12px; overflow-wrap: anywhere; }
+
+/* ---- FAQ and reviews (docs/page-generation-rules.md §3, §8a) ------------
+   Structures from 21st.dev ("FAQ 3", "Staggered Testimonials Grid"), worn
+   in the brief's colours: hairline rules, one radius, no shadow, no glow. */
+.pv3-section[hidden] { display: none; }
+.pv3-faq-wrap { max-inline-size: 820px; margin-inline: auto; }
+.pv3-faq-list { border-block-start: 1px solid var(--rule); }
+.pv3-faq-item { border-block-end: 1px solid var(--rule); }
+.pv3-faq-q {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  min-block-size: 44px;
+  padding-block: 20px;
+  cursor: pointer;
+  list-style: none;
+  font-size: clamp(17px, 1.6vw, 20px);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--text);
+}
+.pv3-faq-q::-webkit-details-marker { display: none; }
+.pv3-faq-q:hover > span { text-decoration: underline; text-underline-offset: 4px; text-decoration-color: var(--accent); }
+.pv3-faq-q:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+.pv3-faq-icon { flex-shrink: 0; color: var(--accent); transition: transform 200ms ease; }
+.pv3-faq-item[open] .pv3-faq-icon { transform: rotate(180deg); }
+.pv3-faq-a { margin: 0 0 22px; max-inline-size: 68ch; font-size: 17px; line-height: 1.65; color: var(--muted); white-space: pre-line; }
+
+/* Reviews: the platform's ReviewsSection, set in the page's own colours. */
+.pv3-reviews [data-testid="reviews-section"] { color: var(--text); }
+/* The stars and reply rule read the site's --gold; here they take the brief's accent. */
+.pv3-reviews { --gold: var(--accent); }
+.pv3-reviews [data-testid="reviews-section"] [style*="--ink"]:not([aria-pressed="true"]),
+.pv3-reviews [data-testid="reviews-section"] [style*="--brand-muted"] { color: inherit !important; }
+.pv3-reviews [data-testid="reviews-summary"] { font-size: 16px; color: var(--muted); }
+.pv3-review-grid {
+  list-style: none;
+  margin: clamp(20px, 3vw, 32px) 0 0;
+  padding: 0;
+  display: grid;
+  gap: clamp(16px, 2vw, 24px);
+  grid-template-columns: minmax(0, 1fr);
+}
+@media (min-width: 760px) { .pv3-review-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.pv3-review-grid > li {
+  margin: 0;
+  padding: clamp(22px, 2.6vw, 32px) !important;
+  border: 1px solid var(--rule) !important;
+  border-radius: 12px;
+  background: var(--surface);
+}
+.pv3-quote { margin: 0; display: flex; flex-direction: column; justify-content: space-between; gap: 22px; block-size: 100%; }
+.pv3-quote blockquote { margin: 0; display: flex; gap: 14px; }
+.pv3-quote-mark { flex-shrink: 0; color: var(--accent); margin-block-start: 2px; }
+.pv3-quote p { margin: 0; font-size: 17px; line-height: 1.65; color: var(--text); white-space: pre-line; }
+.pv3-quote figcaption { display: flex; flex-direction: column; gap: 2px; padding-inline-start: 36px; }
+.pv3-quote cite { font-style: normal; font-weight: 700; font-size: 15px; color: var(--text); }
+.pv3-quote figcaption span { font-size: 13px; color: var(--muted); }
+@media (prefers-reduced-motion: reduce) { .pv3-faq-icon { transition: none; } }
+/* The review form controls carry a white fill of their own; on a dark
+   brief that put light text on white. They take the page's surface. */
+.pv3-reviews select,
+.pv3-reviews textarea { background: var(--surface) !important; color: var(--text) !important; border-color: var(--rule) !important; }

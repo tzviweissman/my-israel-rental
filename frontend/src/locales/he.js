@@ -1910,6 +1910,9 @@ const he = {
         listedOn: 'מופיע ב־MyIsraelRental',
         fromTheBusiness: 'מהעסק',
         flyerAlt: 'פלאייר של {{name}}',
+        faqTitle: 'שאלות שלקוחות שואלים',
+        reviewsTitle: 'מה הלקוחות אומרים',
+        testimonialFrom: 'נשלח לעסק ומפורסם ברשות הלקוח',
       },
       dashboard: {
         noOrdersTitle: 'הזמנות מגיעות דרך דף העסק שלכם',

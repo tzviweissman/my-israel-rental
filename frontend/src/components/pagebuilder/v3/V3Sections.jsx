@@ -8,6 +8,8 @@
  *   V3Steps     their steps, numbered, only when they wrote them (set piece)
  *   V3Palate    one of their photos, full width, no text          (quiet)
  *   V3Offer     price, what's included, the button               (set piece)
+ *   V3Faq       their own questions and answers, only when written
+ *   V3Reviews   platform reviews and permitted testimonials, only when real
  *   V3StickyBar the phone bar: after the hero button, before the offer
  *
  * Chat-only (Tzvi, 5 Oct 2026): the offer block's copyable line is the page's
@@ -17,7 +19,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import { ChevronDown, Quote } from 'lucide-react';
 
+import ReviewsSection from '../../reviews/ReviewsSection';
 import { themeVars } from './V3Hero';
 import { engineAttrs, fxFor, hasFx, parallaxAttrs, stageAttrs, trackAttrs } from './effects';
 
@@ -231,5 +235,92 @@ export function V3StickyBar({ brief, label, priceText, onPrimary, heroSelector, 
       {priceText && <span className="pv3-sticky-price pv3-num" dir="ltr">{priceText}</span>}
       <button type="button" className="pv3-btn" onClick={onPrimary} tabIndex={show ? 0 : -1} data-testid="pv3-sticky-primary">{label}</button>
     </div>
+  );
+}
+
+/**
+ * The FAQ, in the owner's words only (docs/page-generation-rules.md §3):
+ * the questions and answers they wrote on their listings (FaqEditor), the
+ * same question once. None written: no section, and the FAQ stays on the
+ * owner's checklist. Structure from 21st.dev "FAQ 3" (a centred heading
+ * over a hairline accordion), rebuilt on <details> so it opens without
+ * script, needs no new package and reads the same in Hebrew.
+ */
+export function V3Faq({ brief, listings }) {
+  const { t } = useTranslation();
+  if (!brief) return null;
+  const seen = new Set();
+  const items = (listings || []).flatMap((g) => (g && Array.isArray(g.faqs) ? g.faqs : []))
+    .map((f) => ({ q: String(f?.q || '').trim(), a: String(f?.a || '').trim() }))
+    .filter((f) => {
+      const key = f.q.toLowerCase();
+      if (!f.q || !f.a || seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    })
+    .slice(0, 12);
+  if (!items.length) return null;
+  return (
+    <Section brief={brief} kind="faq" testid="pv3-faq">
+      <div className="pv3-faq-wrap">
+        <h2 className="pv3-h2">{t('pageV3.faqTitle', 'Questions customers ask')}</h2>
+        <div className="pv3-faq-list">
+          {items.map((f) => (
+            <details key={f.q} className="pv3-faq-item" data-testid="pv3-faq-item">
+              <summary className="pv3-faq-q">
+                <span dir="auto">{f.q}</span>
+                <ChevronDown className="pv3-faq-icon" size={20} aria-hidden="true" />
+              </summary>
+              <p className="pv3-faq-a" dir="auto">{f.a}</p>
+            </details>
+          ))}
+        </div>
+      </div>
+    </Section>
+  );
+}
+
+/**
+ * Social proof, only if real (§3): verified platform reviews and Google
+ * reviews through the site's own ReviewsSection (badges, owner replies and
+ * reporting kept), then testimonials the owner sent with the person's name
+ * and permission (the API sends only those). Card structure from 21st.dev
+ * "Staggered Testimonials Grid": quote mark, their words, their name. Its
+ * demo people, avatars, corner marks and stagger are gone. Nothing real:
+ * the section stays hidden.
+ */
+export function V3Reviews({ brief, businessId, testimonials, schemaItem }) {
+  const { t } = useTranslation();
+  const [reviewsShown, setReviewsShown] = useState(false);
+  const own = (testimonials || []).filter((x) => x && x.name && x.text);
+  if (!brief) return null;
+  const hidden = !reviewsShown && !own.length;
+  return (
+    <section className="pv3-section pv3-reviews" data-page-v3="" data-preset={brief.preset}
+      data-caps={brief.type?.caps ? 'true' : 'false'} data-fx={fxFor(brief, 'reviews')} style={themeVars(brief)}
+      data-testid="pv3-reviews" hidden={hidden} aria-labelledby="pv3-reviews-h" {...engineAttrs(brief, 'reviews')}>
+      <div className="pv3-section-inner" {...stageAttrs(brief, 'reviews')}>
+        <h2 id="pv3-reviews-h" className="pv3-h2">{t('pageV3.reviewsTitle', 'What customers say')}</h2>
+        <ReviewsSection businessId={businessId} kind="business" schemaItem={schemaItem} bare onShown={setReviewsShown} />
+        {own.length > 0 && (
+          <ul className="pv3-review-grid pv3-testimonials" data-testid="pv3-testimonials">
+            {own.map((x) => (
+              <li key={`${x.name}-${x.text.slice(0, 24)}`}>
+                <figure className="pv3-quote">
+                  <blockquote>
+                    <Quote className="pv3-quote-mark" size={22} aria-hidden="true" />
+                    <p dir="auto">{x.text}</p>
+                  </blockquote>
+                  <figcaption>
+                    <cite dir="auto">{x.name}</cite>
+                    <span>{t('pageV3.testimonialFrom', "Sent to the business, shared with the customer's permission")}</span>
+                  </figcaption>
+                </figure>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
+    </section>
   );
 }

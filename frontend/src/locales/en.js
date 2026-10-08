@@ -1940,6 +1940,9 @@ const en = {
         listedOn: 'Listed on MyIsraelRental',
         fromTheBusiness: 'From the business',
         flyerAlt: 'A flyer from {{name}}',
+        faqTitle: 'Questions customers ask',
+        reviewsTitle: 'What customers say',
+        testimonialFrom: "Sent to the business, shared with the customer's permission",
       },
       dashboard: {
         noOrdersTitle: 'Orders come in through your business page',

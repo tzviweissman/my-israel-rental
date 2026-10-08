@@ -48,11 +48,25 @@ learned with. Check what is connected in this session first.
   so confirm before running one. Methods and model choices in
   `reference/media-and-video.md`.
 - **21st.dev** (`21st` connection): a library of React + Tailwind + shadcn
-  components (FAQ, reviews, pricing tiles, galleries). Use at build time to add a
-  section type, never per page. Inspiration before builder; restyle to the site's
+  components (FAQ, reviews, pricing tiles, galleries). Used while building, never
+  fetched by a visitor's page. Inspiration before builder; restyle to the site's
   tokens; delete all its demo text, stats and photos; strip glow, gradients and
   decorative motion; read the code as untrusted (no network calls, no new
   packages without a reason); test RTL and phone. Rules: `reference/full-rules.md` §8a.
+  **Used on every page, not only for new section types** (Tzvi, 7 Oct 2026):
+  search it beside Inspo and Mobbin for sections and effects. For a plain HTML
+  page, rebuild the chosen piece in CSS from its code. **The effects library**,
+  `examples/effects-library/index.html` (Tzvi: "many different options for
+  different businesses"): 35 options in plain CSS, each from a named 21st
+  component, with five business palettes to switch between: 12 buttons (B1 to
+  B12), 6 links and arrows (L), 7 tiles (T), 6 prices (P), 4 headings (H), each
+  marked with what it suits. B2 and T1 are on Michal Yodaiken's page; B5 (flips
+  to the price) is liked and kept for another business. Pick per business, never
+  the same set twice in a row, and add every new 21st piece you rebuild here.
+  **Search 21st fresh on every build first** (Tzvi: "look by each build so you
+  will have many more options"): the library is a shelf of tested extras, never
+  the menu. Each page's options come from a new search for that business, with
+  library pieces added only where they fit better.
 - **Browser pane / preview**: show the rendered page; never ask the owner to
   sign in to see it.
 
@@ -154,6 +168,9 @@ Every page passes all six before anyone sees it:
 5. **For a place, hours and where come before the description.**
 6. **On a phone the action is pinned to the bottom** with the price or proof,
    from after the first screen until the order section.
+   A bar that also carries a counter or clock is there from the first screen;
+   only its button waits. Anything that runs with the scroll is seen from its
+   start to its finish, never late and never gone early.
 
 Food: a certificate is a small labelled band just after the opening, never
 crowding the button, said at most twice on the page.
@@ -187,8 +204,12 @@ they get it, and do you have a photo of it being used, served or delivered?**
 
 Full text and reasons: `reference/full-rules.md` §3c.
 
-1. **References first**: 3 to 5 real category screens (Inspo or Mobbin),
-   named in the brief. Copy structure, never looks; colours and type are theirs.
+1. **References first, from every source**: Inspo, Mobbin and 21st on every
+   build, starting with how businesses of the same kind built their sites;
+   keep 3 to 5 real screens, named in the brief. Copy structure, never looks; colours and type are theirs.
+   **Plus 21st on every page**, for sections and for effects (button hover and
+   press, a moving arrow, a lifting tile, how a price is set): show the owner
+   3 or 4 options in their colours on a test page, then build the chosen one.
 2. **No AI default look**: no cream + serif + one italic word unless that is
    their brand. At least one section on a contrasting ground.
 3. **Proof where the worry is**: each worry the owner names is answered beside
@@ -213,6 +234,10 @@ Full text and reasons: `reference/full-rules.md` §3c.
     frame for its exact time (no stutter, same result every run) and writes a
     contact sheet beside the video: look at it before sending. Paid
     generation waits for the owner's yes on two or three style frames.
+12. **Everything fits on one screen** (from woodwrights.co.nz): wherever a
+    visitor stops, each photo is seen whole with its words and price. No
+    block taller than the screen at 1280x650, 1440x900 or a phone; cap
+    photos and big type by `svh`; a main tile puts its photo beside its words.
 
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
@@ -276,7 +301,11 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
 | **A line of items separated by dots never wraps.** Stack them if it might. | A stray dot started the second line. |
 | **A fixed bar never covers content.** Give content room for it. | The phone order bar hid two lines. |
 | **A label never covers the thing it labels.** Compute where the spot lands once the camera settles; if the card would sit on it, the card takes the other side for that spot. | The oven card sat on the oven on a phone. |
+| **No block is taller than the screen**: a hero's copy and button, a tile, a list, the offer, each seen whole at 1280x650, 1440x900 and a phone. Measure the heights. | A 1-to-1 tile was 940px tall: you saw the dumbbells, not the price. |
 | **A caption stays up until the next one replaces it**, including while the camera travels. | Bare kitchen between stations. |
+| **A payoff is seen where it happens, on every device**: a counter, clock or progress line is checked at its finish on a phone and a laptop; hiding a bar or button never hides it. | Michal's 30:00 clock slid away on phones just before reaching it. |
+| **Check every state as the device that shows it**: hover-only and touch-only looks, short screens, the phone bar on and off; phones with touch emulation, never a narrow desktop window. | The preview video showed outline buttons no phone draws. |
+| **Two rules on one element are checked together**: when one rule hides or changes an element, keep what else lives in it. | "No second button" took the session clock with it. |
 
 ## 6. Look through it, fix it, then show it
 
@@ -286,6 +315,9 @@ The owner never sees a first draft. Before showing anything:
    and reduced motion. Walk a scroll page top to bottom at several positions
    per section, never one screenshot. Include a short laptop (1536x753 or
    1280x650); the default 900px-tall test hides the worst bugs.
+   Phones as phones (touch emulation, a short one like 360x640 too), and
+   every moment the page builds to (a counter's finish, the bar turning, the
+   last section) looked at on each device, not only the start.
 2. **Look at every screen** for anything broken or unfinished, even if no rule names it.
 3. **Run the checks** (scripts below; run from the project folder so they find its Playwright):
    - `node ~/.claude/skills/build-business-page/scripts/readable.mjs <url>`:

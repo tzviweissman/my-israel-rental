@@ -382,6 +382,12 @@ Parts 1 to 9; where one seems to clash, the note says how they fit.
     checked on their contact sheet before sending. Paid generation (tier 2
     films, stills) waits for the owner's yes on two or three style frames.
 
+12. **Everything fits on one screen** (Tzvi, 7 Oct 2026): no block (hero
+    copy and button, heading, tile, list, offer) is taller than the screen at
+    1280x650, 1440x900 or 390x844; photos and display type are capped by
+    `svh`, a main tile sets its photo beside its words. Measured, not judged.
+    Full text: `docs/page-generation-rules.md` 3c rule 12.
+
 **Three questions for the owner**, asked with the FAQ request and only when
 the page does not already answer them: what do customers worry about before
 ordering; what happens in the first days after they get it; do you have a

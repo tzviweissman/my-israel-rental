@@ -334,7 +334,13 @@ function ReviewCard({ r, kind, token, onChange, t, lang }) {
   );
 }
 
-export default function ReviewsSection({ listingId, businessId, kind = 'gig', schemaItem = null, fallback = null, className = '' }) {
+/*
+ * `bare` (page builder v3): the section's heading and frame come from the
+ * page around it, the cards sit in a two-column grid, and `onShown` hears
+ * whether anything was drawn, so the page can hide its own section when
+ * there are no reviews (docs/page-generation-rules.md §3: no empty section).
+ */
+export default function ReviewsSection({ listingId, businessId, kind = 'gig', schemaItem = null, fallback = null, className = '', bare = false, onShown = null }) {
   const { t, i18n } = useTranslation();
   const { token } = useContext(AuthContext);
   const [state, setState] = useState({ loading: true });
@@ -377,10 +383,12 @@ export default function ReviewsSection({ listingId, businessId, kind = 'gig', sc
     }
   };
 
-  if (state.loading && state.enabled === undefined) return null;
-  if (!state.enabled) return fallback;
   const summary = state.summary || {};
   const total = (summary.native?.count || 0) + (summary.google?.count || 0);
+  const drawn = !(state.loading && state.enabled === undefined) && Boolean(state.enabled) && Boolean(total || canWrite);
+  useEffect(() => { if (onShown) onShown(drawn); }, [drawn, onShown]);
+  if (state.loading && state.enabled === undefined) return null;
+  if (!state.enabled) return fallback;
   // No reviews and nothing to invite: no empty box.
   if (!total && !canWrite) return null;
   const both = summary.native && summary.google;
@@ -399,11 +407,13 @@ export default function ReviewsSection({ listingId, businessId, kind = 'gig', sc
   } : null;
 
   return (
-    <section id="reviews" className={`scroll-mt-24 ${className}`} aria-labelledby="reviews-heading" data-testid="reviews-section">
+    <section id={bare ? undefined : 'reviews'} className={`scroll-mt-24 ${className}`} aria-labelledby={bare ? undefined : 'reviews-heading'} data-testid="reviews-section">
       {jsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, '\\u003c') }} />}
-      <h2 id="reviews-heading" className="text-xl font-semibold mb-2" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
-        {t('reviews.title', 'Reviews')}
-      </h2>
+      {!bare && (
+        <h2 id="reviews-heading" className="text-xl font-semibold mb-2" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
+          {t('reviews.title', 'Reviews')}
+        </h2>
+      )}
       <Summary summary={summary} kind={kind} t={t} />
       {canWrite && !writing && (
         <button type="button" onClick={() => setWriting(true)} className="mt-3 min-h-[44px] px-5 rounded-full border text-sm font-semibold"
@@ -439,7 +449,7 @@ export default function ReviewsSection({ listingId, businessId, kind = 'gig', sc
           </select>
         </label>
       </div>}
-      <ul className="mt-2" aria-busy={state.loading}>
+      <ul className={bare ? 'pv3-review-grid' : 'mt-2'} aria-busy={state.loading}>
         {(state.reviews || []).map((r) => (
           <ReviewCard key={r.id} r={r} kind={kind} token={token} t={t} lang={i18n.language}
             onChange={(fresh) => setState((s) => ({ ...s, reviews: s.reviews.map((x) => (x.id === fresh.id ? fresh : x)) }))} />
