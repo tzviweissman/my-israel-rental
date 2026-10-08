@@ -31,7 +31,14 @@ class FakePlaces:
     def __init__(self, tag):
         self.tag, self.calls, self.max = tag, 0, 99
 
-    async def search(self, text):
+    async def city_area(self, city):
+        return None
+
+    async def _post(self, url, body, fields, method="POST"):
+        # The neighbourhood centre lookup: "North" sits on the shared place.
+        return {"places": [{"location": {"latitude": 31.781, "longitude": 35.211}}]}
+
+    async def search(self, text, area=None):
         self.calls += 1
         yield {"id": f"{self.tag}-shared", "displayName": {"text": "Shared Cafe"},
                "location": {"latitude": 31.78, "longitude": 35.21}}
@@ -49,6 +56,7 @@ def town(monkeypatch):
     yield tag, city
     run(db.restaurants.delete_many({"place_id": {"$regex": f"^{tag}-"}}))
     run(db.restaurant_import_progress.delete_many({"_id": {"$regex": f"^{city}"}}))
+    run(db.restaurant_city_areas.delete_many({"_id": city}))
 
 
 def test_dedupes_keeps_first_place_and_collects_categories(town):
@@ -56,11 +64,14 @@ def test_dedupes_keeps_first_place_and_collects_categories(town):
     client = FakePlaces(tag)
     run(imp.run_import(client, [city], fresh=False, dry_run=False))
     assert client.calls == 4                                  # (city + North) x 2 categories
+    near = {d["place_id"]: d["neighborhood"] for d in run(db.restaurants.find({"place_id": {"$regex": f"^{tag}-"}}).to_list(None))}
+    assert near[f"{tag}-shared"] == "North"                   # 0.1 km from the centre
+    assert near[f"{tag}-1"] is None                           # 10 km away: no neighbourhood
     docs = run(db.restaurants.find({"place_id": {"$regex": f"^{tag}-"}}).to_list(None))
     assert len(docs) == 5                                     # shared once + 4 singles
     shared = next(d for d in docs if d["place_id"].endswith("-shared"))
     assert sorted(shared["categories"]) == ["cafe", "pizza"]
-    assert shared["neighborhood"] is None and shared["city"] == city and shared["region"] == "Jerusalem"
+    assert shared["city"] == city and shared["region"] == "Jerusalem"
     assert shared["verified"] is False and shared["kashrut"] is None and shared["kosher_certification"] is None
     assert shared["location"]["coordinates"] == [35.21, 31.78] and shared["location_fetched_at"]
     # Google's names are never kept (terms of use).

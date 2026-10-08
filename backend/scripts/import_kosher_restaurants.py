@@ -37,6 +37,7 @@ import os
 import sys
 from collections import Counter
 from datetime import UTC, datetime, timedelta
+from math import cos, hypot, radians
 
 import httpx
 
@@ -67,6 +68,23 @@ CATEGORIES = {
     "breakfast": "israeli breakfast",
     "fish": "fish seafood restaurant",
     "steakhouse": "steakhouse",
+}
+
+# Google's own type for a place decides its category when it has one: the
+# search a place turned up in is a weak signal ("kosher burgers" also
+# returns the taco place next door). The search word is the fallback.
+TYPE_TO_CATEGORY = {
+    "pizza_restaurant": "pizza", "hamburger_restaurant": "burgers",
+    "barbecue_restaurant": "meat_grill", "steak_house": "steakhouse",
+    "sushi_restaurant": "sushi_asian", "japanese_restaurant": "sushi_asian",
+    "asian_restaurant": "sushi_asian", "chinese_restaurant": "sushi_asian",
+    "thai_restaurant": "sushi_asian", "ramen_restaurant": "sushi_asian",
+    "cafe": "cafe", "coffee_shop": "cafe", "bakery": "bakery",
+    "italian_restaurant": "dairy_italian", "ice_cream_shop": "dessert",
+    "dessert_shop": "dessert", "dessert_restaurant": "dessert", "confectionery": "dessert",
+    "deli": "deli", "breakfast_restaurant": "breakfast", "brunch_restaurant": "breakfast",
+    "seafood_restaurant": "fish", "falafel_restaurant": "shawarma_falafel",
+    "kebab_shop": "shawarma_falafel", "hummus_restaurant": "hummus",
 }
 
 # Big cities are searched per neighbourhood as well, because one search
@@ -153,8 +171,12 @@ class Places:
             return r.json()
         raise RuntimeError("Google kept refusing (rate limit); try again later")
 
-    async def search(self, text):
+    async def search(self, text, area=None):
         body, token = {"textQuery": text, "regionCode": "IL", "languageCode": "en", "pageSize": 20}, None
+        if area:
+            # Only places inside the city. Without this "German Colony,
+            # Jerusalem" also returned Haifa's German Colony.
+            body["locationRestriction"] = {"rectangle": area}
         for _ in range(MAX_PAGES):
             if token:
                 body["pageToken"] = token
@@ -165,9 +187,47 @@ class Places:
             if not token:
                 return
 
+    async def city_area(self, city):
+        """The city's own box on Google's map, looked up once per city."""
+        data = await self._post(SEARCH_URL, {"textQuery": f"{city}, Israel", "regionCode": "IL", "pageSize": 1},
+                                "places.viewport")
+        vp = ((data.get("places") or [{}])[0]).get("viewport")
+        return {"low": vp["low"], "high": vp["high"]} if vp else None
+
     async def location(self, place_id):
         data = await self._post(DETAILS_URL.format(place_id), None, "location", method="GET")
         return data.get("location")
+
+
+async def area_for(client, city):
+    """Cached in restaurant_city_areas: a box is not Places content about a
+    business, and a city does not move."""
+    doc = await db.restaurant_city_areas.find_one({"_id": city})
+    if doc:
+        return doc["area"]
+    area = await client.city_area(city)
+    if area:
+        await db.restaurant_city_areas.update_one({"_id": city}, {"$set": {"area": area}}, upsert=True)
+    return area
+
+
+def inside(point, area, margin=0.01):
+    if not point or not area:
+        return True
+    lng, lat = point["coordinates"]
+    return (area["low"]["latitude"] - margin <= lat <= area["high"]["latitude"] + margin
+            and area["low"]["longitude"] - margin <= lng <= area["high"]["longitude"] + margin)
+
+
+async def prune_outside(client, cities):
+    """Remove places saved before the city box existed that lie outside it."""
+    for city in cities:
+        area = await area_for(client, city)
+        docs = await db.restaurants.find({"city": city, "location": {"$ne": None}}, {"location": 1}).to_list(None)
+        out = [d["_id"] for d in docs if not inside(d["location"], area)]
+        if out:
+            await db.restaurants.delete_many({"_id": {"$in": out}})
+        print(f"{city}: removed {len(out)} outside the city, {len(docs) - len(out)} kept")
 
 
 async def ensure_indexes():
@@ -187,21 +247,58 @@ async def save(place, city, hood, cat, now):
         {
             "$setOnInsert": {
                 "place_id": place["id"], "source": "google",
-                # Where it was first found. A later neighbourhood search
-                # finding it again does not move it.
-                "city": city, "neighborhood": hood, "region": CITIES[city],
+                # The neighbourhood is set afterwards from the map (see
+                # assign_neighbourhoods): the first search to find a place
+                # says little about where it is.
+                "city": city, "neighborhood": None, "region": CITIES[city],
                 "kashrut": None,                # meat | dairy | pareve, set by a person
                 "kosher_certification": None,   # set by a person
                 "verified": False,
                 "status": "listed",
                 "first_seen_at": now,
             },
-            "$addToSet": {"categories": cat},
+            "$addToSet": {"categories": TYPE_TO_CATEGORY.get(place.get("primaryType"), cat)},
             "$set": {"location": point, "location_fetched_at": now if point else None, "last_synced_at": now},
         },
         upsert=True,
     )
     return res.upserted_id is not None
+
+
+async def hood_point(client, city, hood):
+    """A neighbourhood's centre on the map, looked up once and cached."""
+    key = f"{city}|{hood}"
+    doc = await db.restaurant_city_areas.find_one({"_id": key})
+    if doc:
+        return doc.get("point")
+    data = await client._post(SEARCH_URL, {"textQuery": f"{hood}, {city}, Israel", "regionCode": "IL", "pageSize": 1},
+                              "places.location")
+    loc = ((data.get("places") or [{}])[0]).get("location")
+    point = [loc["longitude"], loc["latitude"]] if loc else None
+    await db.restaurant_city_areas.update_one({"_id": key}, {"$set": {"point": point}}, upsert=True)
+    return point
+
+
+def km(a, b):
+    return hypot((a[0] - b[0]) * 111.32 * cos(radians((a[1] + b[1]) / 2)), (a[1] - b[1]) * 110.57)
+
+
+HOOD_RADIUS_KM = 1.8
+
+
+async def assign_neighbourhoods(client, city):
+    """Each place takes the nearest neighbourhood centre within 1.8 km, or none."""
+    hoods = NEIGHBOURHOODS.get(city, [])
+    if not hoods:
+        return
+    centres = {h: await hood_point(client, city, h) for h in hoods}
+    centres = {h: p for h, p in centres.items() if p}
+    docs = await db.restaurants.find({"city": city, "location": {"$ne": None}}, {"location": 1}).to_list(None)
+    for d in docs:
+        here = d["location"]["coordinates"]
+        best = min(centres.items(), key=lambda hp: km(here, hp[1]), default=None)
+        hood = best[0] if best and km(here, best[1]) <= HOOD_RADIUS_KM else None
+        await db.restaurants.update_one({"_id": d["_id"]}, {"$set": {"neighborhood": hood}})
 
 
 async def run_import(client, cities, fresh, dry_run):
@@ -225,17 +322,20 @@ async def run_import(client, cities, fresh, dry_run):
                 print(f"\n== {city} ({CITIES[city]})")
                 last_city = city
             found = new = 0
-            async for p in client.search(query_text(city, hood, cat)):
+            area = await area_for(client, city)
+            async for p in client.search(query_text(city, hood, cat), area):
                 found += 1
                 if await save(p, city, hood, cat, now()):
                     new += 1
-                    by_cat[cat] += 1
+                    by_cat[TYPE_TO_CATEGORY.get(p.get("primaryType"), cat)] += 1
                     names[p["id"]] = ((p.get("displayName") or {}).get("text", "?"), hood or city, cat)
             seen_total += found
             new_total += new
             await db.restaurant_import_progress.update_one(
                 {"_id": progress_key(city, hood, cat)}, {"$set": {"done_at": now(), "found": found, "new": new}}, upsert=True)
             print(f"  {(hood or 'whole city')[:26]:<26} {cat:<17} {found:>3} found, {new:>3} new   (calls {client.calls})")
+        for city in cities:
+            await assign_neighbourhoods(client, city)
     except Budget:
         print(f"\nStopped at the budget of {client.max} calls; rerun to continue where it stopped.")
     print(f"\n{new_total} new places from {seen_total} results, {client.calls} calls to Google")
@@ -273,6 +373,16 @@ async def refresh_stale(client):
     print(f"refreshed {fixed}, dropped {dropped}, {client.calls} calls")
 
 
+async def sample(client, cities, n):
+    """N random saved places, named from Google now (shown, not stored)."""
+    docs = await db.restaurants.aggregate([{"$match": {"city": {"$in": cities}}}, {"$sample": {"size": n}}]).to_list(None)
+    for d in docs:
+        data = await client._post(DETAILS_URL.format(d["place_id"]), None, "displayName,primaryTypeDisplayName,shortFormattedAddress", method="GET")
+        print(f"  {(data.get('displayName') or {}).get('text', '?')[:34]:<34} "
+              f"{(data.get('primaryTypeDisplayName') or {}).get('text', '')[:18]:<18} "
+              f"{(data.get('shortFormattedAddress') or '')[:40]:<40} {','.join(d['categories'])}")
+
+
 async def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--city", action="append", help="run only this city (repeatable)")
@@ -280,6 +390,9 @@ async def main():
     ap.add_argument("--fresh", action="store_true", help="ignore the record of finished searches")
     ap.add_argument("--max-requests", type=int, default=1000)
     ap.add_argument("--refresh-stale", action="store_true")
+    ap.add_argument("--assign-hoods", action="store_true", help="set neighbourhoods from the map")
+    ap.add_argument("--prune-outside", action="store_true", help="drop saved places outside their city's box")
+    ap.add_argument("--sample", type=int, default=0, help="print N saved places with names fetched live")
     a = ap.parse_args()
 
     cities = a.city or list(CITIES)
@@ -301,6 +414,14 @@ async def main():
     try:
         if a.refresh_stale:
             await refresh_stale(client)
+        elif a.assign_hoods:
+            for c in cities:
+                await assign_neighbourhoods(client, c)
+            print("neighbourhoods assigned,", client.calls, "calls")
+        elif a.prune_outside:
+            await prune_outside(client, cities)
+        elif a.sample:
+            await sample(client, cities, a.sample)
         else:
             await run_import(client, cities, a.fresh, False)
     finally:
@@ -308,4 +429,5 @@ async def main():
 
 
 if __name__ == "__main__":
+    sys.stdout.reconfigure(encoding="utf-8")   # Hebrew names on a Windows console
     asyncio.run(main())
