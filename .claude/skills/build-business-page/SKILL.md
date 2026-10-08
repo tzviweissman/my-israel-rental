@@ -127,6 +127,12 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
    unless it is their name. (A quote of the owner may keep theirs.)
 8. **Address the visitor as "you"**; the business speaks as "we" or its name.
 9. **One wording per purpose.** If the button says "Order", it says "Order" everywhere.
+   - **End on what the customer gains**: a closing moment names their result
+     in the owner's words ("A stronger, healthier you"), never "done" or "complete".
+   - **Every line makes sense where it sits**: it must not read as the next item
+     of the list above it.
+   - **"Or" and "prefer" only when the other choice is visible.** The only
+     contact is stated plainly: "WhatsApp Michal: 07563 299474".
 10. **Other languages are written, not translated** (Hebrew: natural word
     order, right gender and plural forms, RTL layout checked).
 

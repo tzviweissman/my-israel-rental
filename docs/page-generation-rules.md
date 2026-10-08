@@ -372,6 +372,19 @@ What Blazin' Boards, Lechem Emek and Michal Simkin taught, in the order they mat
    most 2 lines, and the line under it at most 20 words.
 2. **One wording per purpose.** If the button says "Order", it says "Order"
    everywhere, not "Buy" in one place and "Get yours" in another.
+   - **End on what the customer gains** (Tzvi, 7 Oct 2026). A finish line, last
+     step or closing moment names the result for the customer, never just
+     "done", "finished" or "complete"; use the owner's own benefit words. The
+     workout page's session clock said "Session done" at 30:00; it says "A
+     stronger, healthier you", from her own description.
+   - **Every line makes sense where it sits.** Read it in its place: it must not
+     look like the next item of the list above it. "Or WhatsApp me" under four
+     places to train read as a fifth place.
+   - **"Or" and "prefer" only when the other choice is on the page.** A contact
+     offered as an alternative needs a visible, named first option. When it is
+     the only one, state it: "WhatsApp Michal: 07563 299474", not "Prefer
+     WhatsApp?" (a button that silently opens our chat does not count as a
+     visible option).
 3. **Text never sits straight on a photo.** A band or a shaded edge behind it,
    never a full-frame darkening.
 4. **No default "premium" palette** (warm cream with brass or oxblood) and no
