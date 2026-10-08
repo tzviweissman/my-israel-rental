@@ -265,5 +265,8 @@ export default function useHomeShowcase() {
     loaded, failed, retrying, retry,
     streamImages, gallery, dealCards, hasDeals, recent,
     rentals: rentals.slice(0, 6), businesses: businesses.slice(0, 8),
+    // Everything fetched that has a photo, for the sign-up sphere, which
+    // has room for thirty-odd and was repeating the fourteen above.
+    allRentals: rentals, allBusinesses: businesses,
   };
 }

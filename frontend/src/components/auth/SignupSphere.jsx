@@ -5,9 +5,10 @@
  * Tzvi: "add to the black side this img sphere with businesses and
  * rentals in them". The photos come from useHomeShowcase, the same
  * source as the home page's corridor, so nothing here is stock and
- * nothing is invented; when the site has fewer than the sphere wants,
- * the list repeats rather than showing gaps, and a repeat is marked in
- * its alt text so a screen reader is not told there are two.
+ * nothing is invented. Every circle is a different picture: no repeats
+ * (Tzvi, 7 Oct 2026, "I can see repeating ones"), and a business with
+ * several listings under one logo shows it once. When the site has fewer
+ * than the sphere wants, the sphere is smaller, never padded.
  *
  * The source's "fluted glass" background was a WebGL shader from a
  * package this project does not carry. Vertical flutes in CSS - a
@@ -35,7 +36,7 @@ export default function SignupSphere() {
   // `initial={false}` starts them at their final state.
   const reduced = useReducedMotion();
   const from = (v) => (reduced ? false : v);
-  const { rentals, businesses, loaded } = useHomeShowcase();
+  const { allRentals: rentals, allBusinesses: businesses, loaded } = useHomeShowcase();
   const boxRef = React.useRef(null);
   const [size, setSize] = React.useState(420);
 
@@ -52,17 +53,17 @@ export default function SignupSphere() {
   const images = React.useMemo(() => {
     const r = (rentals || []).map((p) => ({ id: `p-${p.id}`, src: sizedImage(propertyPhoto(p), 240), alt: p.title || '', title: p.title || '', href: `/property/${p.id}` }));
     const b = (businesses || []).map((g) => ({ id: `b-${g.id}`, src: sizedImage(getGigCover(g), 240), alt: g.title || '', title: g.title || '', href: `/businesses/${g.id}` }));
-    const base = [];
-    for (let i = 0; base.length < 24 && (i < r.length || i < b.length); i += 1) {
-      if (r[i]) base.push(r[i]);
-      if (b[i]) base.push(b[i]);
-    }
-    if (!base.length) return [];
+    // Alternate homes and businesses, one circle per picture: the same
+    // file under a different transform is still the same picture.
+    const seen = new Set();
     const out = [];
-    for (let i = 0; out.length < WANT; i += 1) {
-      const it = base[i % base.length];
-      const round = Math.floor(i / base.length);
-      out.push(round ? { ...it, id: `${it.id}-${round}`, alt: `${it.alt} (${round + 1})` } : it);
+    for (let i = 0; out.length < WANT && (i < r.length || i < b.length); i += 1) {
+      for (const it of [r[i], b[i]]) {
+        const key = it && it.src ? it.src.split('/').pop().split('?')[0] : '';
+        if (!key || seen.has(key) || out.length >= WANT) continue;
+        seen.add(key);
+        out.push(it);
+      }
     }
     return out;
   }, [rentals, businesses]);
