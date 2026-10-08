@@ -45,6 +45,7 @@ from routes import (  # noqa: E402
     onboarding,
     payments,
     properties,
+    restaurants,
     reviews,
     saved_searches,
     short_links,
@@ -100,6 +101,7 @@ for mod in (
     tours_3d,
     weekly_insights,
     reviews,
+    restaurants,
 ):
     api_router.include_router(mod.router)
 
