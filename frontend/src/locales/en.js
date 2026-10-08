@@ -3004,7 +3004,7 @@ const en = {
         email: 'Email',
         phone: 'Phone',
         password: 'Password',
-        passwordPh: 'At least 6 characters',
+        passwordPh: '6+ characters',
         confirmPassword: 'Confirm password',
         confirmPasswordPh: 'Type it again',
         agree: 'I agree to the',

@@ -29,7 +29,7 @@ export default function AuthShell({ children, testId }) {
           data-testid="auth-card"
         >
           <div
-            className="flex flex-1 flex-col px-5 py-8 sm:px-10 sm:py-10 lg:py-5 lg:overflow-y-auto"
+            className="flex flex-1 flex-col px-4 py-5 sm:px-10 sm:py-10 lg:py-5 lg:overflow-y-auto"
             data-testid="signup-form-panel"
           >
             <div className="w-full max-w-[30rem] m-auto">{children}</div>

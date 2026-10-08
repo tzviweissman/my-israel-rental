@@ -2919,7 +2919,7 @@ const he = {
         email: 'אימייל',
         phone: 'טלפון',
         password: 'סיסמה',
-        passwordPh: 'לפחות 6 תווים',
+        passwordPh: '6+ תווים',
         confirmPassword: 'אימות סיסמה',
         confirmPasswordPh: 'הקלידו אותה שוב',
         agree: 'אני מסכים/ה ל',

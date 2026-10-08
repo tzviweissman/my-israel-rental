@@ -233,7 +233,7 @@ const SignupJoin = () => {
     <>
     <AuthShell testId="signup-join-page">
         {/* Step indicator */}
-        <div className="flex items-center gap-3 [@media(max-height:760px)]:hidden text-xs font-semibold tracking-wide text-gray-500">
+        <div className="flex items-center gap-3 max-sm:hidden [@media(max-height:760px)]:hidden text-xs font-semibold tracking-wide text-gray-500">
           <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 1 ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-200 text-gray-700'}`}>1</span>
           <span className={step === 1 ? 'text-[var(--brand-primary)]' : ''}>{t('signupJoin.stepRole', 'YOUR ROLE')}</span>
           <div className="h-px w-8 bg-gray-300" />
@@ -243,7 +243,7 @@ const SignupJoin = () => {
 
         {/* STEP 1 — role picker */}
         {step === 1 && (
-          <section className="mt-6 [@media(max-height:760px)]:mt-0" data-testid="signup-step-role">
+          <section className="mt-6 max-sm:mt-0 [@media(max-height:760px)]:mt-0" data-testid="signup-step-role">
             <h1
               className="display-weight text-3xl sm:text-4xl font-semibold lg:font-normal tracking-tight"
               // Playfair (Frank Ruhl Libre in Hebrew) via the token, and
@@ -260,11 +260,11 @@ const SignupJoin = () => {
             >
               {t('signupJoin.headline', 'Join My Israel Rental')}
             </h1>
-            <p className="mt-2 text-base text-gray-600 [@media(max-height:760px)]:hidden">
+            <p className="mt-2 text-base text-gray-600 max-sm:hidden [@media(max-height:760px)]:hidden">
               {t('signupJoin.sub', 'Book a stay, list a property, or offer your services - all in one place.')}
             </p>
 
-            <p className="mt-6 text-xs font-semibold tracking-wide uppercase text-gray-500 [@media(max-height:680px)]:hidden">
+            <p className="mt-6 text-xs font-semibold tracking-wide uppercase text-gray-500 max-sm:hidden [@media(max-height:680px)]:hidden">
               {t('signupJoin.question', 'What best describes you?')}
             </p>
 
@@ -276,7 +276,7 @@ const SignupJoin = () => {
                 only action (page rules 3c: choices are tiles, one quiet
                 system, no arrows that do nothing). The "Most popular"
                 badge is gone: nothing measured it. */}
-            <div className="mt-3 [@media(max-height:680px)]:mt-4 space-y-2.5" role="radiogroup" aria-label={t('signupJoin.question', 'What best describes you?')} data-testid="signup-role-cards">
+            <div className="mt-3 max-sm:mt-4 [@media(max-height:680px)]:mt-4 space-y-2 sm:space-y-2.5" role="radiogroup" aria-label={t('signupJoin.question', 'What best describes you?')} data-testid="signup-role-cards">
               {ROLE_CARDS.map(({
                 key, Icon, tKey, defaultLabel, tDescKey, defaultDesc,
                 tValueKey, defaultValue, learnMoreHref, tLearnMoreKey, defaultLearnMore,
@@ -301,11 +301,11 @@ const SignupJoin = () => {
                       aria-checked={active}
                       onClick={() => setSelectedRole(key)}
                       onDoubleClick={() => { setSelectedRole(key); setStep(2); }}
-                      className="w-full flex items-start gap-3.5 p-3.5 text-start rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 active:scale-[0.995] transition-transform"
+                      className="w-full flex items-start gap-3 sm:gap-3.5 p-3 sm:p-3.5 text-start rounded-2xl focus:outline-none focus-visible:ring-2 focus-visible:ring-[var(--brand-primary)] focus-visible:ring-offset-2 active:scale-[0.995] transition-transform"
                       data-testid={`signup-role-${key}`}
                     >
                       <span
-                        className={`shrink-0 h-10 w-10 rounded-xl flex items-center justify-center transition-colors ${active ? 'text-white' : 'text-[var(--brand-primary)]'}`}
+                        className={`shrink-0 h-9 w-9 sm:h-10 sm:w-10 rounded-xl flex items-center justify-center transition-colors ${active ? 'text-white' : 'text-[var(--brand-primary)]'}`}
                         style={{ background: active ? 'var(--brand-primary)' : 'rgb(var(--brand-primary-rgb) / 0.08)' }}
                       >
                         <Icon size={20} aria-hidden="true" />
@@ -345,7 +345,7 @@ const SignupJoin = () => {
                     {learnMoreHref && (
                       <Link
                         to={learnMoreHref}
-                        className="block px-3.5 pb-2.5 -mt-2 ps-[4.75rem] text-sm sm:text-xs font-semibold hover:underline"
+                        className="block px-3 sm:px-3.5 pb-2.5 -mt-2 ps-[4.5rem] sm:ps-[4.75rem] text-sm sm:text-xs font-semibold hover:underline"
                         style={{ color: 'var(--brand-primary)' }}
                         data-testid={`signup-role-learnmore-${key}`}
                       >
@@ -357,8 +357,8 @@ const SignupJoin = () => {
               })}
             </div>
 
-            <div className="mt-5 [@media(max-height:680px)]:mt-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-              <p className="text-sm sm:text-xs text-gray-600 max-w-md">
+            <div className="mt-4 sm:mt-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+              <p className="max-sm:hidden text-xs text-gray-600 max-w-md">
                 {t('signupJoin.roleHint', 'You can always add another role later from your account settings.')}
               </p>
               <button
@@ -397,7 +397,7 @@ const SignupJoin = () => {
                 deciding which card to press is exactly who benefits from
                 reading what the site actually does. Below the cards, so it
                 never competes with the choice itself. */}
-            <div className="mt-5 flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm" style={{ color: 'var(--brand-muted)' }}>
+            <div className="mt-4 sm:mt-5 flex flex-wrap justify-center gap-x-5 gap-y-1 text-sm" style={{ color: 'var(--brand-muted)' }}>
               <span>
                 {t('signupJoin.haveAccount', 'Already have an account?')}{' '}
                 <Link to={loginHref} className="font-semibold text-[var(--brand-primary)] hover:underline" data-testid="signup-login-link">
@@ -420,7 +420,7 @@ const SignupJoin = () => {
 
         {/* STEP 2 — details form */}
         {step === 2 && activeCard && (
-          <section className="mt-5 [@media(max-height:760px)]:mt-0" data-testid="signup-step-details">
+          <section className="mt-5 max-sm:mt-0 [@media(max-height:760px)]:mt-0" data-testid="signup-step-details">
             <div className="flex flex-wrap items-center justify-between gap-3">
             <button
               type="button"
@@ -444,7 +444,7 @@ const SignupJoin = () => {
               >
                 {t('signupJoin.detailsHeadline', 'Create your account')}
               </h1>
-              <p className="mt-1.5 text-sm text-gray-600 [@media(max-height:760px)]:hidden">
+              <p className="mt-1.5 text-sm text-gray-600 max-sm:hidden [@media(max-height:760px)]:hidden">
                 {t(activeCard.tDetailsSubKey, activeCard.defaultDetailsSub)}
               </p>
 
@@ -535,7 +535,7 @@ const SignupJoin = () => {
                     out on 23 Sep 2026 as one field too many, and put back
                     on 7 Oct 2026 (Tzvi: "it doesn't ask to confirm the
                     password anymore"). The eye shows both. */}
-                <div className="grid gap-3 sm:grid-cols-2">
+                <div className="grid gap-3 grid-cols-2">
                 <Field label={t('signupJoin.password', 'Password')} testId="signup-password">
                   <div className="relative">
                     <input
@@ -546,7 +546,7 @@ const SignupJoin = () => {
                       value={form.password}
                       onChange={(e) => setForm({ ...form, password: e.target.value })}
                       className="w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 pe-11 text-sm focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
-                      placeholder={t('signupJoin.passwordPh', 'At least 6 characters')}
+                      placeholder={t('signupJoin.passwordPh', '6+ characters')}
                       data-testid="signup-password-input"
                     />
                     <button
