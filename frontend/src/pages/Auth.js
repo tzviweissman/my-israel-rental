@@ -1,5 +1,5 @@
 import React, { useState, useContext } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { Navigate, useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import DOMPurify from 'dompurify';
@@ -171,6 +171,13 @@ const Auth = () => {
       setResetting(false);
     }
   };
+
+  // The old sign-up form lived here. /signup (SignupJoin) replaced it and
+  // nothing links to /auth/signup any more, so an old bookmark or email
+  // lands on the real one, keeping ?redirect=.
+  if (mode === 'signup') {
+    return <Navigate to={`/signup${window.location.search}`} replace />;
+  }
 
   // --- Forgot Password View ---
   if (mode === 'forgot-password') {
