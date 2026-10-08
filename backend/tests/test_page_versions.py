@@ -144,6 +144,7 @@ def world(app, monkeypatch):
     monkeypatch.setenv("PAGE_BUILDER_V3_ENABLED", "1")
     monkeypatch.delenv("PAGE_CHECK_URL", raising=False)
     monkeypatch.setenv("PAGE_CHECK_SECRET", "s3cret-for-tests")
+    monkeypatch.setenv("OWNER_PAGE_VERSIONS_ENABLED", "1")
     from utils.auth import create_token
     ids = {k: uuid.uuid4().hex for k in ("owner", "other", "admin", "biz", "gig")}
     from utils.design_brief import build_brief
@@ -295,3 +296,16 @@ def test_a_version_that_became_too_close_is_refused_and_a_race_fails_at_go_live(
         assert db.businesses.find_one({"_id": ids["biz"]})["design_brief"] == before
     finally:
         db.businesses.delete_many({"_id": {"$in": ids.get("twins", [])}})
+
+
+def test_owners_cannot_choose_until_switched_on_but_an_admin_can(world, monkeypatch):
+    """Tzvi, 8 Oct 2026: the rules are being tuned, so no owner builds a page yet."""
+    client, db, ids, hdr = world
+    monkeypatch.delenv("OWNER_PAGE_VERSIONS_ENABLED", raising=False)
+    assert client.get(_url(ids), headers=hdr["owner"]).status_code == 403
+    assert client.post(_url(ids), headers=hdr["owner"]).status_code == 403
+    made = client.post(_url(ids), headers=hdr["admin"])
+    assert made.status_code == 200 and made.json()["versions"]
+    vid = made.json()["versions"][0]["id"]
+    assert client.post(_url(ids, f"/{vid}/publish"), headers=hdr["owner"]).status_code == 403
+    assert client.post(_url(ids, f"/{vid}/publish"), headers=hdr["admin"]).json()["status"] == "checking"

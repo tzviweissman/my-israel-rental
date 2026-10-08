@@ -40,9 +40,15 @@ async def _business(business_id: str) -> dict:
 
 
 async def _owned_v3(business_id: str, user: dict) -> dict:
+    from utils.page_versions import owners_may_choose
     biz = await _business(business_id)
-    if biz.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
+    if user.get("role") == "admin":
+        return biz
+    if biz.get("owner_user_id") != user["user_id"]:
         raise HTTPException(status_code=403, detail="Not your business")
+    if not owners_may_choose():
+        # While the rules are being tuned, the page is made by an admin.
+        raise HTTPException(status_code=403, detail="Not available yet")
     return biz
 
 

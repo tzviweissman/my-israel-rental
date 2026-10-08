@@ -109,6 +109,15 @@ def preview_ok(version: dict, token: str, now: datetime) -> bool:
     return hmac.compare_digest(stored["hash"], token_hash(token))
 
 
+def owners_may_choose() -> bool:
+    """OWNER_PAGE_VERSIONS_ENABLED, off by default (Tzvi, 8 Oct 2026: "i dont
+    want owners to be able to build pages with ai yet i want to fine tune the
+    ai page builder rules"). Off: only an admin makes, publishes or restores
+    versions, and an owner's editor shows nothing. Read per call, like
+    PAGE_BUILDER_V3_ENABLED, so turning it on needs no code change."""
+    return os.environ.get("OWNER_PAGE_VERSIONS_ENABLED", "").strip().lower() in ("1", "true", "yes")
+
+
 def check_secret_ok(given: Optional[str]) -> bool:
     """The page-check service's shared secret, compared in constant time.
     No secret configured means the service path is off, never open."""
