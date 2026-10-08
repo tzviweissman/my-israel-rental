@@ -20,7 +20,7 @@ from pydantic import BaseModel, Field
 
 from routes.deps import db, verify_token
 from utils.rate_limit import check_rate
-from utils.restaurant_places import CATEGORIES, CITIES, NEIGHBOURHOODS, REGIONS, SLUG_TO_CITY, city_slug
+from utils.restaurant_places import CATEGORIES, CITIES, CITY_HE, NEIGHBOURHOODS, REGIONS, SLUG_TO_CITY, city_slug
 
 router = APIRouter(tags=["restaurants"])
 
@@ -47,7 +47,7 @@ def _card(d, distance_km=None):
         "kashrut": d.get("kashrut"),
         "certification": d.get("kosher_certification"),
         "verified": bool(d.get("verified")),
-        "city": d.get("city"), "city_slug": city_slug(d["city"]) if d.get("city") else None,
+        "city": d.get("city"), "city_he": CITY_HE.get(d.get("city")), "city_slug": city_slug(d["city"]) if d.get("city") else None,
         "neighborhood": d.get("neighborhood"), "region": d.get("region"),
         "address": c.get("address"),
         "website": c.get("website"), "phone": c.get("phone"), "whatsapp": c.get("whatsapp"),
@@ -109,7 +109,8 @@ async def restaurant_facets(city: Optional[str] = None):
     base = {"status": "listed", **NAMED}
     by_city = {r["_id"]: r["n"] async for r in db.restaurants.aggregate(
         [{"$match": base}, {"$group": {"_id": "$city", "n": {"$sum": 1}}}])}
-    cities = [{"name": c, "slug": city_slug(c), "region": reg, "count": by_city.get(c, 0)} for c, reg in CITIES.items()]
+    cities = [{"name": c, "name_he": CITY_HE.get(c), "slug": city_slug(c), "region": reg, "count": by_city.get(c, 0)}
+              for c, reg in CITIES.items()]
     scope = dict(base)
     chosen = SLUG_TO_CITY.get(city, city) if city else None
     if chosen:
@@ -127,6 +128,7 @@ async def restaurant_facets(city: Optional[str] = None):
         "regions": REGIONS,
         "cities": cities,
         "city": chosen,
+        "city_he": CITY_HE.get(chosen) if chosen else None,
         "neighborhoods": hoods,
         "categories": [{"key": k, "count": n} for k, n in
                        ((x["name"], x["count"]) for x in await count("categories", unwind=True)) if k in CATEGORIES],

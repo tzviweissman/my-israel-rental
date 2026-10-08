@@ -118,6 +118,7 @@ const WhyHost = lazy(() => import('./pages/WhyHost'));
 // The feature library (perks spec Part 1). Lazy like its neighbours:
 // it is a marketing surface, not part of the first paint.
 const WhatYouCanDo = lazy(() => import('./pages/WhatYouCanDo'));
+const Restaurants = lazy(() => import('./pages/Restaurants'));
 const GrowthGuide = lazy(() => import('./pages/GrowthGuide'));
 const FeatureDetail = lazy(() => import('./pages/FeatureDetail'));
 const PropertyDetail = lazy(() => import('./pages/PropertyDetail'));
@@ -484,6 +485,8 @@ function App() {
                 linkable, shareable and indexable — and so the help
                 menu has somewhere real to send people. */}
             <Route path="/what-you-can-do" element={<WhatYouCanDo />} />
+            <Route path="/restaurants" element={<Restaurants />} />
+            <Route path="/restaurants/:city" element={<Restaurants />} />
             <Route path="/getting-started" element={<GrowthGuide />} />
             <Route path="/features/:slug" element={<FeatureDetail />} />
             <Route path="/why-list" element={<WhyList />} />

@@ -12,6 +12,7 @@
 import React, { useEffect, useRef } from 'react';
 import { FX_USD_TO_ILS, shownPrice } from '../../utils/listingPrice';
 import L from 'leaflet';
+import { addBaseTiles } from '../../utils/mapTiles';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -131,14 +132,7 @@ const StaysMapView = ({ properties, userCoords, focusOnUser, displayCurrency, ac
       wheelDebounceTime: 40,
     });
     L.control.zoom({ position: 'topright' }).addTo(map);
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> · ' +
-        '&copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 20,
-      keepBuffer: 4,
-    }).addTo(map);
+    addBaseTiles(map); // see utils/mapTiles.js: CARTO now needs a key
     mapRef.current = map;
     // The moment the user grabs the map (drag) or scrolls it (zoom)
     // we lock our programmatic recentering out — see hasUserInteractedRef.

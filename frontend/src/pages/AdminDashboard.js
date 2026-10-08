@@ -1,12 +1,13 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar, Briefcase, MapPin, Mail, Flag, Star } from 'lucide-react';
+import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar, Briefcase, MapPin, Mail, Flag, Star, UtensilsCrossed } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { useApiSWR } from '../hooks/useApiSWR';
 import { useAdminLiveEvents } from '../hooks/useAdminLiveEvents';
 import OverviewTab from '../components/admin/OverviewTab';
 import SiteQrPanel from '../components/admin/SiteQrPanel';
 import ServicesTab from '../components/admin/ServicesTab';
+import RestaurantsTab from '../components/admin/RestaurantsTab';
 import RequestReportsTab from '../components/admin/RequestReportsTab';
 import ReviewsModerationTab from '../components/admin/ReviewsModerationTab';
 import AreaAliasManager from '../components/admin/AreaAliasManager';
@@ -42,6 +43,7 @@ const TAB_GROUPS = [
   { group: 'admin.groupSupply', items: [
     { key: 'listings', labelKey: 'admin.listings', icon: Home },
     { key: 'services', labelKey: 'admin.servicesTab', icon: Briefcase },
+    { key: 'restaurants', labelKey: 'admin.restaurantsTab', icon: UtensilsCrossed },
   ] },
   { group: 'admin.groupDemand', items: [
     { key: 'bookings', labelKey: 'admin.bookings', icon: Calendar },
@@ -199,6 +201,7 @@ const AdminDashboard = () => {
         )}
         {activeTab === 'listings' && <ListingsTab token={token} onStatsChange={fetchDashboard} />}
         {activeTab === 'services' && <ServicesTab token={token} initialFilter={servicesFilter} />}
+        {activeTab === 'restaurants' && <RestaurantsTab token={token} />}
         {activeTab === 'requests' && <RequestReportsTab token={token} />}
         {activeTab === 'reviews' && <ReviewsModerationTab token={token} />}
         {activeTab === 'areas' && <AreaAliasManager token={token} />}

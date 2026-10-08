@@ -88,3 +88,18 @@ def city_slug(city):
 SLUG_TO_CITY = {city_slug(c): c for c in CITIES}
 
 REGIONS = ["North", "Haifa", "Center", "Tel Aviv", "Jerusalem", "South", "Judea & Samaria"]
+
+CITY_HE = {
+    "Jerusalem": "ירושלים", "Tel Aviv-Yafo": "תל אביב-יפו", "Haifa": "חיפה", "Beit Shemesh": "בית שמש",
+    "Ramat Gan": "רמת גן", "Bnei Brak": "בני ברק", "Petah Tikva": "פתח תקווה", "Netanya": "נתניה",
+    "Ashdod": "אשדוד", "Ashkelon": "אשקלון", "Rishon LeZion": "ראשון לציון", "Holon": "חולון",
+    "Bat Yam": "בת ים", "Rehovot": "רחובות", "Modiin": "מודיעין", "Modiin Illit": "מודיעין עילית",
+    "Beitar Illit": "ביתר עילית", "Efrat": "אפרת", "Ma'ale Adumim": "מעלה אדומים", "Kfar Saba": "כפר סבא",
+    "Ra'anana": "רעננה", "Herzliya": "הרצליה", "Hod HaSharon": "הוד השרון", "Givatayim": "גבעתיים",
+    "Kiryat Ono": "קריית אונו", "Lod": "לוד", "Ramla": "רמלה", "Be'er Sheva": "באר שבע", "Eilat": "אילת",
+    "Tiberias": "טבריה", "Tzfat": "צפת", "Kiryat Gat": "קריית גת", "Kiryat Shmona": "קריית שמונה",
+    "Afula": "עפולה", "Nof HaGalil": "נוף הגליל", "Karmiel": "כרמיאל", "Akko": "עכו", "Nahariya": "נהריה",
+    "Hadera": "חדרה", "Zichron Yaakov": "זכרון יעקב", "Caesarea": "קיסריה", "Arad": "ערד", "Dimona": "דימונה",
+    "Yeruham": "ירוחם", "Mitzpe Ramon": "מצפה רמון", "Elad": "אלעד", "Ariel": "אריאל", "Kiryat Arba": "קריית ארבע",
+    "Hebron": "חברון", "Katzrin": "קצרין", "Dead Sea": "ים המלח",
+}

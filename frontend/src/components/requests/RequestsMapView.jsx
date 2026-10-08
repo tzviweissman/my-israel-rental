@@ -24,6 +24,7 @@
  */
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
+import { addBaseTiles } from '../../utils/mapTiles';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -104,10 +105,7 @@ const RequestsMapView = ({ requests, activeId, onPinClick }) => {
   useEffect(() => {
     if (!hostRef.current || mapRef.current) return undefined;
     const map = L.map(hostRef.current, { scrollWheelZoom: false, zoomControl: true });
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution: '&copy; OpenStreetMap &copy; CARTO',
-      maxZoom: 19,
-    }).addTo(map);
+    addBaseTiles(map); // see utils/mapTiles.js: CARTO now needs a key
     map.fitBounds(ISRAEL_BOUNDS);
     mapRef.current = map;
     layerRef.current = L.layerGroup().addTo(map);

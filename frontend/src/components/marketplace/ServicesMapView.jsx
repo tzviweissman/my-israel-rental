@@ -16,6 +16,7 @@
  */
 import React, { useEffect, useRef } from 'react';
 import L from 'leaflet';
+import { addBaseTiles } from '../../utils/mapTiles';
 import 'leaflet/dist/leaflet.css';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
@@ -123,20 +124,10 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm, activeId, onPinClick
     // travel + services apps (subtle grey roads, soft greens for parks,
     // light blue water). Retains just enough visual character to help
     // renters pick out neighborhoods without competing with our teal
-    // pins for attention. Free under CC BY, no API key required.
+    // pins for attention. (CARTO began requiring a key on 8 Oct 2026; tiles now come from utils/mapTiles.js.)
     // Retina tiles (`{r}` = "@2x") auto-serve on hi-DPI screens so the
     // base looks tack-sharp on modern laptops + phones.
-    L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
-      attribution:
-        '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> · ' +
-        '&copy; <a href="https://carto.com/attributions">CARTO</a>',
-      subdomains: 'abcd',
-      maxZoom: 20,
-      // A hair of extra tile buffer keeps the edges smooth when the
-      // user pans quickly — otherwise Positron flashes empty grey
-      // rectangles for a beat.
-      keepBuffer: 4,
-    }).addTo(map);
+    addBaseTiles(map); // see utils/mapTiles.js: CARTO now needs a key
     mapRef.current = map;
     // Interaction lock — see hasUserInteractedRef comment.
     map.on('dragstart zoomstart', () => {
