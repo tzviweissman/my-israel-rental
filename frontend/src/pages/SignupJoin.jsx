@@ -27,8 +27,7 @@ import {
 import { API, AuthContext } from '../App';
 import WelcomePopups from '../components/WelcomePopups';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
-import SignupSphere from '../components/auth/SignupSphere';
-import useIsWide from '../hooks/useIsWide';
+import AuthShell from '../components/auth/AuthShell';
 
 // Namespaced so it cannot collide with the listing wizard's draft.
 const SIGNUP_DRAFT = 'signup-join';
@@ -158,7 +157,6 @@ const SignupJoin = () => {
   const [showWelcomePopups, setShowWelcomePopups] = useState(false);
 
   const activeCard = ROLE_CARDS.find((r) => r.key === selectedRole);
-  const isWide = useIsWide(1024);
 
   const handleContinue = () => {
     if (!selectedRole) return;
@@ -232,36 +230,8 @@ const SignupJoin = () => {
   };
 
   return (
-    <div
-      className="min-h-screen relative [overflow-x:clip]"
-      // The flow theme's one alternate surface, so the white card reads as
-      // the page (Tzvi, 7 Oct 2026: "cleaner", one card, fits on one screen).
-      style={{ background: '#F9FAFB' }}
-      data-testid="signup-join-page"
-    >
-      {/* Two panels from lg up (Tzvi, 4 Sep 2026: "make this the sign
-          up"): the form in a white card on the left, and on the right a
-          dark panel with a sphere of the homes and businesses already
-          listed - every circle a real page. On a phone the sphere is
-          not drawn at all: the form is the job there, and a 360px
-          sphere above it would be a screen of scrolling before the first
-          field. */}
-      {/* One white card holding both halves (Tzvi, 7 Oct 2026: the form
-          should not be a card of its own beside a second panel). From lg
-          up the card is exactly one screen under the fixed nav, the form
-          is centred in its half, and the dark panel sits inset on the
-          right. Short screens drop the line under the headline and the
-          step labels rather than scroll. */}
-      <div className="mx-auto max-w-[1320px] px-3 sm:px-4 pt-20 sm:pt-24 lg:pt-[4.75rem] pb-4 lg:pb-2">
-      <div
-        className="rounded-3xl bg-white shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-12px_rgba(17,24,39,0.12)] lg:grid lg:grid-cols-[1.4fr_1fr] xl:grid-cols-2 lg:h-[calc(100svh-5.5rem)] lg:min-h-[500px] lg:p-3"
-        data-testid="signup-card"
-      >
-      <div
-        className="px-5 py-8 sm:px-10 sm:py-10 lg:py-5 lg:flex lg:flex-col lg:overflow-y-auto"
-        data-testid="signup-form-panel"
-      >
-        <div className="w-full max-w-[30rem] m-auto">
+    <>
+    <AuthShell testId="signup-join-page">
         {/* Step indicator */}
         <div className="flex items-center gap-3 [@media(max-height:760px)]:hidden text-xs font-semibold tracking-wide text-gray-500">
           <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 1 ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-200 text-gray-700'}`}>1</span>
@@ -653,22 +623,7 @@ const SignupJoin = () => {
             </div>
           </section>
         )}
-        </div>
-      </div>
-
-      {/* The dark panel runs the full height of the form beside it, and
-          its sphere and words stay in view while the form scrolls (they are
-          sticky inside it). It used to be one screen tall and stuck, which
-          left the panel ending halfway down a long form (Tzvi, 7 Oct 2026:
-          "on the right it's not fitting the page"). Mounted only where it
-          is shown, so a phone does not fetch a sphere it never draws. */}
-      {isWide && (
-        <div className="hidden lg:block lg:min-h-0" data-testid="signup-right-panel">
-          <SignupSphere />
-        </div>
-      )}
-      </div>
-      </div>
+    </AuthShell>
 
       {/* Post-signup modals (renter welcome + owner upsell), mirrored
           from Auth.js so the two entry points behave identically. */}
@@ -680,7 +635,7 @@ const SignupJoin = () => {
           }}
         />
       )}
-    </div>
+    </>
   );
 };
 

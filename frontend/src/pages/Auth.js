@@ -6,7 +6,7 @@ import DOMPurify from 'dompurify';
 import { API, AuthContext } from '../App';
 import { toast } from 'sonner';
 import { apiErrorMessage } from '../utils/apiError';
-import { Eye, EyeOff, ArrowLeft, Mail, KeyRound, CheckCircle, Home, Building2, Briefcase } from 'lucide-react';
+import { Eye, EyeOff, ArrowLeft, KeyRound, CheckCircle, Home, Building2, Briefcase } from 'lucide-react';
 import WelcomePopups from '../components/WelcomePopups';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import { GOOGLE_CLIENT_ID } from '../components/auth/useGoogleSignIn';
@@ -15,6 +15,7 @@ import PhoneInput from '../components/common/PhoneInput';
 import ContinueAsBanner from '../components/auth/ContinueAsBanner';
 import { LAST_LOGIN_HINT_KEY } from '../components/auth/completeGoogleSignIn';
 import safeRedirect from '../utils/safeRedirect';
+import AuthShell, { authInput, authLabel, authButton, authButtonStyle } from '../components/auth/AuthShell';
 
 const Auth = () => {
   const { mode } = useParams();
@@ -174,9 +175,8 @@ const Auth = () => {
   // --- Forgot Password View ---
   if (mode === 'forgot-password') {
     return (
-      <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5]">
+      <AuthShell testId="auth-page">
+          <div>
             {forgotSent ? (
               <div className="text-center py-4">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -186,7 +186,7 @@ const Auth = () => {
                 <p className="text-gray-600 text-sm mb-6" dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(t('auth.resetLinkSent', { email: `<strong>${forgotEmail}</strong>` })) }} />
                 <button
                   onClick={() => navigate('/auth/login')}
-                  className="w-full primary-btn"
+                  className={authButton} style={authButtonStyle}
                 >
                   {t('auth.backToLogin')}
                 </button>
@@ -209,16 +209,15 @@ const Auth = () => {
                 </div>
                 <form onSubmit={handleForgotPassword} className="space-y-5" data-testid="forgot-password-form">
                   <div>
-                    <label htmlFor="forgot-email" className="block text-sm font-medium mb-2">{t('auth.emailAddress')}</label>
+                    <label htmlFor="forgot-email" className={authLabel}>{t('auth.emailAddress')}</label>
                     <div className="relative">
-                      <Mail size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                       <input
                         id="forgot-email"
                         type="email"
                         value={forgotEmail}
                         onChange={(e) => setForgotEmail(e.target.value)}
                         placeholder={t('auth.emailPlaceholder')}
-                        className="w-full pl-10 pr-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
+                        className={`${authInput}`}
                         required
                         data-testid="forgot-email-input"
                       />
@@ -227,7 +226,7 @@ const Auth = () => {
                   <button
                     type="submit"
                     disabled={forgotSending}
-                    className="w-full primary-btn disabled:opacity-50"
+                    className={authButton} style={authButtonStyle}
                     data-testid="forgot-submit-btn"
                   >
                     {forgotSending ? t('auth.sending') : t('auth.resetPasswordBtn')}
@@ -236,8 +235,7 @@ const Auth = () => {
               </>
             )}
           </div>
-        </div>
-      </div>
+      </AuthShell>
     );
   }
 
@@ -247,9 +245,8 @@ const Auth = () => {
     // that only someone with the emailed token can reach this form.
     if (!resetToken && !resetDone) {
       return (
-        <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12" data-testid="reset-password-invalid">
-          <div className="w-full max-w-md">
-            <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5] text-center">
+        <AuthShell testId="reset-password-invalid">
+            <div className="text-center">
               <div className="w-14 h-14 bg-red-50 rounded-full flex items-center justify-center mx-auto mb-3">
                 <KeyRound size={24} className="text-red-500" />
               </div>
@@ -261,20 +258,18 @@ const Auth = () => {
               </p>
               <button
                 onClick={() => navigate('/auth/forgot-password')}
-                className="w-full primary-btn"
+                className={authButton} style={authButtonStyle}
                 data-testid="reset-password-restart"
               >
                 {t('auth.requestResetEmail', 'Request a Reset Email')}
               </button>
             </div>
-          </div>
-        </div>
+        </AuthShell>
       );
     }
     return (
-      <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12">
-        <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5]">
+      <AuthShell testId="auth-page">
+          <div>
             {resetDone ? (
               <div className="text-center py-4">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -284,7 +279,7 @@ const Auth = () => {
                 <p className="text-gray-600 text-sm mb-6">{t('auth.passwordResetSuccess')}</p>
                 <button
                   onClick={() => navigate('/auth/login')}
-                  className="w-full primary-btn"
+                  className={authButton} style={authButtonStyle}
                   data-testid="back-to-login-btn"
                 >
                   {t('auth.goToLogin')}
@@ -301,7 +296,7 @@ const Auth = () => {
                 </div>
                 <form onSubmit={handleResetPassword} className="space-y-5" data-testid="reset-password-form">
                   <div>
-                    <label htmlFor="reset-new-password" className="block text-sm font-medium mb-2">{t('auth.newPassword')}</label>
+                    <label htmlFor="reset-new-password" className={authLabel}>{t('auth.newPassword')}</label>
                     <div className="relative">
                       <input
                         id="reset-new-password"
@@ -309,7 +304,7 @@ const Auth = () => {
                         value={resetPassword}
                         onChange={(e) => setResetPassword(e.target.value)}
                         placeholder={t('auth.newPasswordPlaceholderShort')}
-                        className="w-full px-4 py-3 pr-12 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
+                        className={`${authInput} pe-12`}
                         required
                         minLength={6}
                         data-testid="reset-new-password-input"
@@ -317,21 +312,21 @@ const Auth = () => {
                       <button
                         type="button"
                         onClick={() => setShowResetPassword(!showResetPassword)}
-                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
+                        className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700"
                       >
                         {showResetPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                       </button>
                     </div>
                   </div>
                   <div>
-                    <label htmlFor="reset-confirm-password" className="block text-sm font-medium mb-2">{t('auth.confirmNewPassword')}</label>
+                    <label htmlFor="reset-confirm-password" className={authLabel}>{t('auth.confirmNewPassword')}</label>
                     <input
                       id="reset-confirm-password"
                       type="password"
                       value={resetConfirmPassword}
                       onChange={(e) => setResetConfirmPassword(e.target.value)}
                       placeholder={t('auth.confirmNewPasswordPlaceholder')}
-                      className={`w-full px-4 py-3 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 ${resetConfirmPassword && resetConfirmPassword !== resetPassword ? 'border-red-400' : 'border-[#E5E5E5]'}`}
+                      className={`${authInput} ${resetConfirmPassword && resetConfirmPassword !== resetPassword ? '!border-red-400' : ''}`}
                       required
                       data-testid="reset-confirm-password-input"
                     />
@@ -342,7 +337,7 @@ const Auth = () => {
                   <button
                     type="submit"
                     disabled={resetting}
-                    className="w-full primary-btn disabled:opacity-50"
+                    className={authButton} style={authButtonStyle}
                     data-testid="reset-submit-btn"
                   >
                     {resetting ? t('auth.resetting') : t('auth.setNewPassword')}
@@ -351,20 +346,19 @@ const Auth = () => {
               </>
             )}
           </div>
-        </div>
-      </div>
+      </AuthShell>
     );
   }
 
   // --- Login / Signup View ---
   return (
-    <div className="min-h-screen flex items-center justify-center px-6 pt-20 pb-12">
+    <>
       {showWelcomePopups && <WelcomePopups onDismiss={() => { setShowWelcomePopups(false); navigate(redirectUrl); }} />}
-      <div className="w-full max-w-md">
-        <div className="bg-white rounded-2xl p-8 border border-[#E5E5E5]">
-          <h2 className="text-3xl font-bold mb-8 text-center" style={{ fontFamily: 'var(--font-head)' }}>
+      <AuthShell testId="auth-page">
+        <div>
+          <h1 className="display-weight text-3xl sm:text-4xl font-semibold lg:font-normal tracking-tight mb-6" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
             {mode === 'login' ? t('auth.loginTitle') : t('auth.signupTitle')}
-          </h2>
+          </h1>
 
           {/* Track-2: "Continue as X" one-tap re-login. Only shown on
               login mode — on signup the visitor is (by definition) a
@@ -400,16 +394,16 @@ const Auth = () => {
             </>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6" data-testid="auth-form">
+          <form onSubmit={handleSubmit} className="space-y-4" data-testid="auth-form">
             {mode === 'signup' && (
               <div>
-                <label htmlFor="auth-name" className="block text-sm font-medium mb-2">{t('auth.name')}</label>
+                <label htmlFor="auth-name" className={authLabel}>{t('auth.name')}</label>
                 <input
                   id="auth-name"
                   type="text"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
+                  className={`${authInput}`}
                   required
                   data-testid="auth-name-input"
                 />
@@ -417,41 +411,41 @@ const Auth = () => {
             )}
 
             <div>
-              <label htmlFor="auth-email" className="block text-sm font-medium mb-2">{t('auth.email')}</label>
+              <label htmlFor="auth-email" className={authLabel}>{t('auth.email')}</label>
               <input
                 id="auth-email"
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-4 py-3 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
+                className={`${authInput}`}
                 required
                 data-testid="auth-email-input"
               />
             </div>
 
             <div>
-              <label htmlFor="auth-password" className="block text-sm font-medium mb-2">{t('auth.password')}</label>
+              <label htmlFor="auth-password" className={authLabel}>{t('auth.password')}</label>
               <div className="relative">
                 <input
                   id="auth-password"
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password}
                   onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                  className="w-full px-4 py-3 pr-12 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50"
+                  className={`${authInput} pe-12`}
                   required
                   data-testid="auth-password-input"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+                  className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
                   data-testid="toggle-password-visibility"
                 >
                   {showPassword ? <Eye size={20} /> : <EyeOff size={20} />}
                 </button>
               </div>
               {mode === 'login' && (
-                <div className="mt-2 text-right">
+                <div className="mt-2 text-end">
                   <a
                     href="/auth/forgot-password"
                     className="text-sm font-medium hover:underline transition-colors"
@@ -467,21 +461,21 @@ const Auth = () => {
             {mode === 'signup' && (
               <>
                 <div>
-                  <label htmlFor="auth-confirm-password" className="block text-sm font-medium mb-2">{t('auth.confirmPassword')}</label>
+                  <label htmlFor="auth-confirm-password" className={authLabel}>{t('auth.confirmPassword')}</label>
                   <div className="relative">
                     <input
                       id="auth-confirm-password"
                       type={showConfirmPassword ? 'text' : 'password'}
                       value={confirmPassword}
                       onChange={(e) => setConfirmPassword(e.target.value)}
-                      className={`w-full px-4 py-3 pr-12 rounded-lg border focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 ${confirmPassword && confirmPassword !== formData.password ? 'border-red-400' : 'border-[#E5E5E5]'}`}
+                      className={`${authInput} pe-12 ${confirmPassword && confirmPassword !== formData.password ? '!border-red-400' : ''}`}
                       required
                       data-testid="auth-confirm-password-input"
                     />
                     <button
                       type="button"
                       onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                      className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
+                      className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-700 transition-colors"
                       data-testid="toggle-confirm-password-visibility"
                     >
                       {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
@@ -493,7 +487,7 @@ const Auth = () => {
                 </div>
 
                 <div>
-                  <label htmlFor="auth-phone" className="block text-sm font-medium mb-2">
+                  <label htmlFor="auth-phone" className={authLabel}>
                     {t('auth.whatsappNumber', 'WhatsApp number')}
                     <span className="text-gray-500 font-normal ml-2 text-xs">
                       ({t('auth.recommendedOptional', 'recommended, optional')})
@@ -514,7 +508,7 @@ const Auth = () => {
                 </div>
 
                 <div>
-                  <span id="auth-role-label" className="block text-sm font-medium mb-2">{t('auth.role', 'I want to')}</span>
+                  <span id="auth-role-label" className={authLabel}>{t('auth.role', 'I want to')}</span>
                   <div className="grid grid-cols-3 gap-2" role="group" aria-labelledby="auth-role-label" data-testid="auth-role-select">
                     {[
                       { value: 'renter', label: t('auth.renter', 'Rent'), sub: t('auth.renterSub', 'Find a home'), Icon: Home },
@@ -615,7 +609,7 @@ const Auth = () => {
               </div>
             )}
 
-            <button type="submit" className="w-full primary-btn" data-testid="auth-submit-button">
+            <button type="submit" className={authButton} style={authButtonStyle} data-testid="auth-submit-button">
               {mode === 'login' ? t('auth.loginButton', 'Log in') : t('auth.signupButton', 'Create Account')}
             </button>
           </form>
@@ -644,8 +638,8 @@ const Auth = () => {
             })()}
           </div>
         </div>
-      </div>
-    </div>
+      </AuthShell>
+    </>
   );
 };
 
