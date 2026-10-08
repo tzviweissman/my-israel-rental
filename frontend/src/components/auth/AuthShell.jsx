@@ -7,7 +7,8 @@
  * The form column centres with auto margins, not justify-center: a flex
  * column centred that way clips its top out of reach of the scrollbar once
  * it overflows. Below lg the sphere is not mounted at all (a phone would
- * fetch a sphere it never draws) and the page simply scrolls.
+ * fetch a sphere it never draws); the card still fills the screen, with a
+ * short form centred in it, and a long one simply scrolls the page.
  */
 import React from 'react';
 import SignupSphere from './SignupSphere';
@@ -24,11 +25,11 @@ export default function AuthShell({ children, testId }) {
     >
       <div className="mx-auto max-w-[1320px] px-3 sm:px-4 pt-20 sm:pt-24 lg:pt-[4.75rem] pb-4 lg:pb-2">
         <div
-          className="rounded-3xl bg-white shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-12px_rgba(17,24,39,0.12)] lg:grid lg:grid-cols-[1.4fr_1fr] xl:grid-cols-2 lg:h-[calc(100svh-5.5rem)] lg:min-h-[500px] lg:p-3"
+          className="flex flex-col min-h-[calc(100svh-6rem)] sm:min-h-[calc(100svh-7rem)] rounded-3xl bg-white shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-12px_rgba(17,24,39,0.12)] lg:grid lg:grid-cols-[1.4fr_1fr] xl:grid-cols-2 lg:h-[calc(100svh-5.5rem)] lg:min-h-[500px] lg:p-3"
           data-testid="auth-card"
         >
           <div
-            className="px-5 py-8 sm:px-10 sm:py-10 lg:py-5 lg:flex lg:flex-col lg:overflow-y-auto"
+            className="flex flex-1 flex-col px-5 py-8 sm:px-10 sm:py-10 lg:py-5 lg:overflow-y-auto"
             data-testid="signup-form-panel"
           >
             <div className="w-full max-w-[30rem] m-auto">{children}</div>
