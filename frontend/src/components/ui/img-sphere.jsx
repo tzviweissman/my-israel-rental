@@ -222,7 +222,7 @@ export function SphereImageGrid({
         "relative select-none cursor-grab active:cursor-grabbing rounded-full outline-none",
         // Its own ring: the global focus-visible rule covers form
         // elements only, so a focusable div would have shown nothing.
-        "focus-visible:ring-2 focus-visible:ring-white/80 focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
+        "focus-visible:ring-2 focus-visible:ring-[#167AB8] focus-visible:ring-offset-2 focus-visible:ring-offset-transparent",
         className,
       )}
       style={{ width: containerSize, height: containerSize, touchAction: "none", ...rest.style }}
@@ -265,7 +265,7 @@ export function SphereImageGrid({
             aria-hidden="true"
             data-testid={`img-sphere-node-${index}`}
           >
-            <div className="relative h-full w-full overflow-hidden rounded-full border-2 border-white/25 shadow-lg" style={{ background: "#1f2937" }}>
+            <div className="relative h-full w-full overflow-hidden rounded-full border-2 border-white shadow-[0_6px_16px_-6px_rgba(15,94,143,0.45)]" style={{ background: "#E3EEF5" }}>
               <img
                 src={image.src}
                 alt={image.alt}

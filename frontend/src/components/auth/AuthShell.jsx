@@ -1,6 +1,6 @@
 /**
  * The frame every sign-in page shares: one white card, one screen tall from
- * lg up, the form centred on the left and the dark sphere panel inset on the
+ * lg up, the form centred on the left and the sphere panel inset on the
  * right (Tzvi, 7 Oct 2026: "cleaner", one card, fits on one screen; "the log
  * in page should look the same").
  *

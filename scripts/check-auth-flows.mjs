@@ -296,7 +296,9 @@ console.log('\n8. Google sign-in button present\n');
       named: !!sphere?.getAttribute('aria-label'),
     };
   });
-  ok('the sphere is drawn', shape.nodes > 10, JSON.stringify(shape));
+  // One circle per distinct photo since 7 Oct 2026 (no repeats), and the
+  // local test data has only a handful, so 'drawn' means a few, not dozens.
+  ok('the sphere is drawn', shape.nodes >= 4, JSON.stringify(shape));
   ok('and is ONE tab stop, not one per photo', shape.stops === 1 && shape.tabbableNodes === 0, JSON.stringify(shape));
   ok('with a role and a name', shape.role === 'group' && shape.named, JSON.stringify(shape));
 

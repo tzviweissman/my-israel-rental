@@ -1,5 +1,5 @@
 /**
- * The dark half of the sign-up page: a turning sphere of what is on the
+ * The right half of the sign-in pages: a turning sphere of what is on the
  * site right now, businesses and homes alike, every circle a real page.
  *
  * Tzvi: "add to the black side this img sphere with businesses and
@@ -10,11 +10,8 @@
  * several listings under one logo shows it once. When the site has fewer
  * than the sphere wants, the sphere is smaller, never padded.
  *
- * The source's "fluted glass" background was a WebGL shader from a
- * package this project does not carry. Vertical flutes in CSS - a
- * repeating gradient over a black-to-deep-blue ground - give the same
- * ribbed sheen with no dependency and no GPU requirement, and they hold
- * under `prefers-reduced-motion` because they do not move.
+ * The ground is white with a mist of the accent blue (see below); it was
+ * a fluted black-to-navy panel until 7 Oct 2026.
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
@@ -70,26 +67,17 @@ export default function SignupSphere() {
 
   return (
     <div
-      className="relative flex h-full flex-col overflow-clip rounded-2xl p-8 text-white xl:p-10"
+      className="relative flex h-full flex-col overflow-clip rounded-2xl p-8 xl:p-10"
+      // White with a mist of the accent blue behind the sphere (Tzvi, 7 Oct
+      // 2026, option D: the black-to-navy panel was "too dark, my site is
+      // lighter"). Ink text, white-rimmed photos.
       style={{
-        background:
-          'linear-gradient(180deg, #000 0%, #0F5E8F 140%)',
+        background: 'radial-gradient(60% 55% at 50% 68%, rgba(36,175,235,0.28), transparent 70%), #FFFFFF',
+        color: 'var(--ink, #111827)',
+        boxShadow: 'inset 0 0 0 1px #E3E3E3',
       }}
       data-testid="signup-sphere-panel"
     >
-      {/* the flutes */}
-      <div
-        aria-hidden="true"
-        className="pointer-events-none absolute inset-0"
-        style={{
-          backgroundImage:
-            'repeating-linear-gradient(90deg, rgba(255,255,255,0.09) 0px, rgba(255,255,255,0.02) 6px, rgba(0,0,0,0.25) 12px, rgba(255,255,255,0.05) 18px)',
-          mixBlendMode: 'overlay',
-          opacity: 0.9,
-        }}
-      />
-      <div aria-hidden="true" className="pointer-events-none absolute inset-0" style={{ background: 'radial-gradient(60% 50% at 50% 60%, rgba(28,141,212,0.35), transparent 70%)' }} />
-
       {/* The card is one screen tall now, so the panel is too and nothing
           needs to stick (it did while the form ran longer than a screen). */}
       <div className="relative z-10 flex min-h-0 flex-1 flex-col">
@@ -98,7 +86,7 @@ export default function SignupSphere() {
           initial={from({ opacity: 0, y: 12, filter: 'blur(6px)' })}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="text-xs font-semibold uppercase tracking-[0.18em] text-white/60"
+          className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: '#0F5E8F' }}
         >
           {t('signupJoin.sphereEyebrow', 'Already on the site')}
         </motion.p>
@@ -106,7 +94,7 @@ export default function SignupSphere() {
           initial={from({ opacity: 0, y: 18, filter: 'blur(8px)' })}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.8, delay: 0.12, ease: [0.22, 1, 0.36, 1] }}
-          className="mt-3 text-2xl font-light leading-tight tracking-[-0.02em] text-white/90 xl:text-[1.75rem]"
+          className="mt-3 text-2xl font-light leading-tight tracking-[-0.02em] xl:text-[1.75rem]"
           style={{ fontFamily: 'var(--font-head)' }}
         >
           {t('signupJoin.sphereQuote', 'Every circle is a home or a business listed here right now. Turn it, tap one.')}
@@ -134,7 +122,7 @@ export default function SignupSphere() {
             />
           </motion.div>
         ) : (
-          <div className="h-48 w-48 rounded-full border border-white/10" aria-hidden="true" />
+          <div className="h-48 w-48 rounded-full border border-[#E3E3E3]" aria-hidden="true" />
         )}
       </div>
       </div>
