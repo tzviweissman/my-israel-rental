@@ -123,3 +123,6 @@ already spent per the task brief even though its entry could not be sourced here
 2026-09-15 - social proof (specific, countable) - see 2026-09-15-ui-audit.md
 (date unknown) - choice overload - see earlier audits
 2026-10-08 - foot-in-the-door - review ask on order and booking tracking pages
+# Mechanisms already proposed (one line each: date - mechanism - surface)
+2026-09-22 - (index created; earlier entries) halo effect, peak-end rule, loss aversion (real loss only), denominator neglect, endowed progress, cognitive fluency, ambiguity aversion, automation bias, implementation intentions, banner blindness, position bias, social proof, choice overload - see docs/audits/*.md
+2026-10-09 - isolation effect (Von Restorff) - "Certificate checked" mark on restaurant cards
