@@ -4779,6 +4779,15 @@ const he = {
         directionsTo: 'הוראות הגעה ל{{name}}',
         footerLink: 'מסעדות כשרות',
       },
+      showcase: {
+        metaTitle: 'דפי עסקים | MyIsraelRental',
+        title: 'דפי עסקים',
+        intro: 'דפים שנבנו לעסקים שרשומים ב-MyIsraelRental. פתחו דף כדי לראות אותו כמו שהלקוחות רואים.',
+        open: 'פתיחת הדף של {{name}}',
+        ctaTitle: 'רוצים דף כזה לעסק שלכם?',
+        ctaButton: 'הוסיפו את העסק שלכם, בחינם',
+        footerLink: 'דפי עסקים',
+      },
     };
 
 export default he;

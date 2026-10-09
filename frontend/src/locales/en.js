@@ -4963,6 +4963,15 @@ const en = {
         directionsTo: 'Directions to {{name}}',
         footerLink: 'Kosher restaurants',
       },
+      showcase: {
+        metaTitle: 'Business pages | MyIsraelRental',
+        title: 'Business pages',
+        intro: 'Pages built for businesses listed on MyIsraelRental. Open one to see it the way their customers do.',
+        open: 'Open the page of {{name}}',
+        ctaTitle: 'Want a page like these for your business?',
+        ctaButton: 'Add your business, free',
+        footerLink: 'Business pages',
+      },
     };
 
 export default en;

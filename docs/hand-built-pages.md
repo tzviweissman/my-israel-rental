@@ -51,3 +51,28 @@ push; the frontend deploy ships it.
 
 Delete `frontend/public/pages/<slug>/`, remove the slug from `pages.json`,
 commit and push.
+
+## No flash of the standard page (9 Oct 2026)
+
+Inside the app, a business page or one of its listings used to render the
+standard page and then jump to the hand-built one. `frontend/src/utils/
+handBuiltPages.js` now fetches `pages.json` once at start-up, and
+`BusinessPage.jsx` and `GigDetail.jsx` hold their loader until they know, so
+the standard page never shows for a business in the list. Nothing to do per
+page: publishing adds the slug, and that is all the check reads.
+
+## Show it on /showcase (the Mobbin-style gallery)
+
+Every published page also goes on `/showcase`, a grid of live previews
+(Tzvi, 9 Oct 2026, after Mobbin's sites gallery). After publishing:
+
+```
+cd frontend && node ../scripts/showcase-preview.mjs <slug>
+```
+
+writes `frontend/public/showcase/<slug>.mp4` (a 12 s, 960 px clip of the live
+page scrolling) and `<slug>.webp` (its still). Then add the business to
+`frontend/public/showcase/showcase.json`: `slug`, `name`, `line` (one line
+in their words) and `line_he`, and `logo` (a 96 px square in the same
+folder) or `mark` + `markColor` + `markInk` when there is no logo. Newest
+first.

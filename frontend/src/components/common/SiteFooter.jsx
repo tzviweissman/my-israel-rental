@@ -26,6 +26,7 @@ export default function SiteFooter() {
     // The kosher directory: in the footer, not the main nav, whose order
     // (Stays, Businesses, Marketplace) is fixed.
     { to: '/restaurants', label: t('restaurants.footerLink', 'Kosher restaurants') },
+    { to: '/showcase', label: t('showcase.footerLink', 'Business pages') },
     // F4 — the feature library is linked from the footer, so it is
     // reachable from every page rather than only from the dashboard.
     { to: '/what-you-can-do', label: t('features.title', 'What you can do here') },
