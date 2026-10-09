@@ -7,6 +7,7 @@
  * modal — driven by `gig.booking_mode`.
  */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
+import { useHandBuilt } from '../utils/handBuiltPages';
 import ProofLine from '../components/marketplace/ProofLine';
 import ReviewsSection from '../components/reviews/ReviewsSection';
 import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPanel';
@@ -387,21 +388,9 @@ const GigDetail = () => {
   /* A business with a hand-built page (frontend/public/pages/pages.json,
      scripts/publish-page.mjs) shows that page instead of its listings: search
      results link here, so a visitor kept landing on the standard listing for
-     Blazin' Boards (Tzvi, 9 Oct 2026). Not for the owner, who still needs
-     their listing; production only, as in BusinessPage.jsx. */
-  useEffect(() => {
-    const slug = gig?.business_slug;
-    if (!slug || process.env.NODE_ENV !== 'production') return undefined;
-    if (user?.id && user.id === gig.provider?.user_id) return undefined;
-    let cancelled = false;
-    fetch('/pages/pages.json', { cache: 'no-cache' })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((list) => {
-        if (!cancelled && Array.isArray(list) && list.includes(slug)) window.location.replace(`/business/${slug}`);
-      })
-      .catch(() => { /* no list: the listing stays */ });
-    return () => { cancelled = true; };
-  }, [gig, user]);
+     Blazin' Boards (Tzvi, 9 Oct 2026). The loader holds until the answer is
+     known, so the listing never shows first. Not for the listing's owner. */
+  const handBuilt = useHandBuilt(gig && !(user?.id && user.id === gig.provider?.user_id) ? gig.business_slug : null);
 
   // JSON-LD Service schema — declared BEFORE the early returns so React
   // hooks ordering stays stable across renders. Falls back to null when
@@ -465,7 +454,7 @@ const GigDetail = () => {
     return block;
   }, [gig]);
 
-  if (loading) {
+  if (loading || handBuilt.hold) {
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ paddingTop: 'var(--nav-h, 68px)' }}>
         <Loader2 className="animate-spin text-[var(--brand-primary)]" size={28} />

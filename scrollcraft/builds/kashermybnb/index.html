@@ -1,0 +1,491 @@
+<!doctype html>
+<!--
+  KasherMyBnb. Gallery grammar: one kitchen wall is the collection, each
+  station an object with the same label, the index of stations is the nav.
+  See BRIEF.md. Every fact, price and quoted line is theirs (our record,
+  their listing, their flyer). The kitchen photo is generated setting only.
+  Engine untouched; the walk and the marks are page code at the bottom.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KasherMyBnb · Kitchen kashering in Jerusalem and across Israel</title>
+<meta name="description" content="Kitchen kashering for vacation rentals, new homes and Pesach, in Jerusalem and across Israel. Whole kitchen $350, pots and cutlery $180. Expert mashgichim, following cRc guidelines. Since 2019.">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="scrollcraft.css">
+<style>
+  /* Their logo: the blue K, the red roof, on white. */
+  :root {
+    --sc-canvas:     #FFFFFF;
+    --sc-surface:    #F3F6F9;
+    --sc-ink:        #13202C;
+    --sc-ink-soft:   #4A5763;
+    --sc-accent:     #306090;
+    --sc-accent-ink: #FFFFFF;
+    --sc-font-display: "Bricolage Grotesque", system-ui, sans-serif;
+    --sc-font-text:    "Instrument Sans", system-ui, sans-serif;
+    --roof: #C8322A;
+    --bar-h: 64px;
+  }
+  body { background: var(--sc-canvas); color: var(--sc-ink); font-family: var(--sc-font-text); }
+  h1, h2, h3 { font-family: var(--sc-font-display); letter-spacing: -0.02em; font-weight: 600; }
+  /* The button: the label and its arrow in two blocks; pointed at, the arrow
+     slides out and a fresh one slides in, the arrow block widens (Mobbin, The
+     Performance Lab; chosen for KasherMyBnb 7 Oct 2026). */
+  .btn { display: inline-flex; align-items: stretch; gap: 3px; text-decoration: none; color: var(--sc-accent-ink); font: 600 var(--sc-t-base)/1 var(--sc-font-text);
+    filter: drop-shadow(0 6px 12px rgb(48 96 144 / 0.28)); transition: filter 200ms var(--sc-ease-out); }
+  .btn .lb, .btn .ab { display: inline-flex; align-items: center; background: var(--sc-accent); min-height: 48px; }
+  .btn .lb { padding: 0 1.3rem; border-radius: 999px 6px 6px 999px; }
+  .btn .ab { width: 48px; justify-content: center; border-radius: 6px 999px 999px 6px; transition: width 300ms var(--sc-ease-out); }
+  .btn .sw { position: relative; width: 18px; height: 18px; overflow: hidden; }
+  .btn .sw svg { position: absolute; inset: 0; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: translate 340ms var(--sc-ease-out); }
+  .btn .sw svg + svg { translate: -22px 0; }
+  @media (hover: hover) {
+    .btn:hover .ab { width: 58px; } .btn:hover .sw svg { translate: 22px 0; } .btn:hover .sw svg + svg { translate: 0 0; }
+  }
+  .btn:active .lb, .btn:active .ab { scale: 0.97; }
+  .btn:focus-visible, .index a:focus-visible { outline: 3px solid var(--roof); outline-offset: 3px; }
+
+  /* ---------- the index: the stations, ticking as the walk reaches them -- */
+  .bar { position: fixed; inset: 0 0 auto 0; z-index: 60; height: var(--bar-h); display: flex; align-items: center; gap: var(--sc-5);
+    padding: 0 var(--sc-gutter); background: rgb(255 255 255 / 0.94); border-bottom: 1px solid var(--sc-hairline); }
+  .brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: var(--sc-ink); font: 700 1.05rem/1 var(--sc-font-display); }
+  .brand img { width: 30px; height: 30px; object-fit: contain; }
+  .index { display: flex; gap: 0.25rem; margin: 0 0 0 auto; padding: 0; list-style: none; }
+  .index a { display: flex; align-items: center; gap: 0.45rem; padding: 0.45rem 0.7rem; border-radius: var(--sc-r-pill); color: var(--sc-ink-soft);
+    font: 500 var(--sc-t-sm)/1 var(--sc-font-text); text-decoration: none; }
+  .index a:hover { background: var(--sc-surface); color: var(--sc-ink); }
+  .tick { width: 18px; height: 18px; flex: none; border-radius: 50%; border: 1.5px solid #9AA6B2; display: grid; place-items: center; transition: background 220ms, border-color 220ms; }
+  .tick svg { width: 11px; height: 11px; stroke: #fff; stroke-width: 3; fill: none; opacity: 0; transition: opacity 220ms; }
+  .is-done .tick { background: var(--sc-accent); border-color: var(--sc-accent); }
+  .is-done .tick svg { opacity: 1; }
+  .is-here a { color: var(--sc-ink); background: var(--sc-surface); }
+
+  /* ---------- the walk ---------------------------------------------------- */
+  #walk [data-sc-stage] { overflow: hidden; background: var(--sc-canvas); }
+  /* The camera: the whole photo and its marks move as one, so a mark can
+     never leave the thing it marks. Positioned and scaled in script. */
+  .cam { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+  .cam img { display: block; width: 100%; height: 100%; }
+  .mark { position: absolute; width: 0; height: 0; }
+  .mark i { position: absolute; left: -22px; top: -22px; width: 44px; height: 44px; border-radius: 50%; background: var(--sc-accent);
+    box-shadow: 0 0 0 6px rgb(255 255 255 / 0.85), 0 8px 20px -6px rgb(19 32 44 / 0.5); display: grid; place-items: center;
+    transform: scale(calc(var(--m, 0) * var(--zs, 1))); transition: transform 320ms var(--sc-ease-out); }
+  .mark i svg { width: 22px; height: 22px; stroke: #fff; stroke-width: 3.2; fill: none; }
+  .mark.is-dim i { opacity: 0.9; }
+
+  /* the copy, on its own white band, never on the photo itself */
+  .panel { position: absolute; left: var(--sc-gutter); bottom: clamp(1.5rem, 5vh, 3.5rem); width: min(31rem, calc(100% - 2 * var(--sc-gutter)));
+    background: #fff; border-radius: var(--sc-r-lg); padding: clamp(1.25rem, 2.6vw, 2.25rem); box-shadow: 0 24px 60px -28px rgb(19 32 44 / 0.45); }
+  /* The hero: the headline at display scale across the bare wall, on a white
+     wash from the top (a shaded edge, never type straight on the photo);
+     the button and its proof on a band at the foot. */
+  .hero { position: absolute; inset: 0; opacity: calc(1 - var(--out, 0)); visibility: var(--hero-vis, visible); }
+  .hero-wash { position: absolute; inset: 0; background: linear-gradient(180deg, rgb(255 255 255 / 0.95) 0%, rgb(255 255 255 / 0.9) 50%, rgb(255 255 255 / 0) 74%); }
+  .hero-top { position: absolute; left: var(--sc-gutter); right: var(--sc-gutter); top: calc(var(--bar-h) + clamp(1.5rem, 5vh, 3.5rem)); }
+  .hero h1 { margin: 0; max-width: 15ch; font-size: clamp(2.6rem, 1rem + 5.6vw, 6.6rem); line-height: 0.95; letter-spacing: -0.035em; font-weight: 700; }
+  .hero h1 em { font-style: normal; color: var(--sc-accent); }
+  .hero .lede { margin: var(--sc-4) 0 0; max-width: 34rem; font-size: var(--sc-t-lg); line-height: 1.45; color: var(--sc-ink); }
+  .hero .act { width: auto; max-width: calc(100% - 2 * var(--sc-gutter)); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sc-4); padding: var(--sc-4) var(--sc-5); }
+  .proof { margin: 0; padding: 0; list-style: none; display: grid; gap: 0.15rem; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.35; }
+  .proof b { color: var(--sc-ink); font-weight: 600; }
+
+  /* one card per station, stacked; only the current one shows */
+  .cards { position: absolute; left: var(--sc-gutter); bottom: clamp(1.5rem, 5vh, 3.5rem); width: min(26rem, calc(100% - 2 * var(--sc-gutter))); }
+  .card { position: absolute; left: 0; bottom: 0; width: 100%; opacity: 0; transform: translateY(10px);
+    transition: opacity 260ms var(--sc-ease-out), transform 260ms var(--sc-ease-out); visibility: hidden; }
+  .card.is-on { opacity: 1; transform: none; visibility: visible; }
+  /* when the station would sit under the card, the card moves aside */
+  @media (min-width: 861px) { .cards.is-flip { left: auto; right: var(--sc-gutter); } }
+  .card .n { font: 600 var(--sc-t-xs)/1 var(--sc-font-text); letter-spacing: 0.14em; text-transform: uppercase; color: var(--roof); }
+  .card h2 { margin: var(--sc-2) 0 0; font-size: clamp(1.8rem, 1.3rem + 1.6vw, 2.6rem); line-height: 1.05; }
+  .card p { margin: var(--sc-2) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-base); line-height: 1.45; }
+  .card p b { color: var(--sc-ink); font-weight: 600; }
+
+  /* The peak sits on the bare wall above the counters, so every mark shows. */
+  .ready { opacity: var(--ready, 0); visibility: var(--ready-vis, hidden); }
+  @media (min-width: 861px) { .ready { left: 30vw; bottom: auto; top: calc(var(--bar-h) + 3vh); width: min(30rem, 36vw); } }
+  .ready h2 { margin: 0; font-size: clamp(2.4rem, 1.4rem + 3.4vw, 4.4rem); line-height: 1; }
+  .ready h2 span { color: var(--sc-accent); }
+  #ready-list { margin: var(--sc-3) 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem var(--sc-4); font-size: var(--sc-t-sm); }
+  #ready-list li { display: flex; align-items: center; gap: 0.5rem; }
+  /* "Ready to use": each item ticks itself off in turn as the panel arrives,
+     the kitchen finished item by item (21st "Task Checkbox", the check only). */
+  #ready-list .tick { width: 16px; height: 16px; border-color: var(--sc-accent); background: transparent; transition: background 240ms var(--sc-ease-out); transition-delay: calc(var(--i) * 140ms); }
+  #ready-list .tick svg { opacity: 1; width: 10px; height: 10px; stroke-dasharray: 24; stroke-dashoffset: 24; transition: stroke-dashoffset 320ms var(--sc-ease-out); transition-delay: calc(var(--i) * 140ms + 100ms); }
+  .ready.is-in #ready-list .tick { background: var(--sc-accent); }
+  .ready.is-in #ready-list .tick svg { stroke-dashoffset: 0; }
+  /* the price cards draw a border round when pointed at (21st "Hover Effect") */
+  .feat { position: relative; }
+  .feat::after { content: ""; position: absolute; inset: 0; border: 2px solid var(--sc-accent); border-radius: inherit; clip-path: inset(0 100% 100% 0); transition: clip-path 520ms var(--sc-ease-out); pointer-events: none; }
+  @media (hover: hover) { .feat:hover::after { clip-path: inset(0 0 0 0); } }
+  .ready .act { margin-top: var(--sc-5); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sc-4); }
+
+  /* ---------- after the walk: plain sections ---------------------------- */
+  .sec { padding-block: clamp(4.5rem, 10vw, 8.5rem); }
+  .sec + .sec { border-top: 1px solid var(--sc-hairline); }
+  .wrap { max-width: 72rem; margin: 0 auto; padding-inline: var(--sc-gutter); }
+  .sec h2 { margin: 0; font-size: clamp(2rem, 1.3rem + 2vw, 3.2rem); line-height: 1.04; max-width: 18ch; }
+  .label { margin: var(--sc-5) 0 0; display: grid; gap: 0; border-top: 1px solid var(--sc-hairline-strong); }
+  .label > div { display: grid; grid-template-columns: minmax(8rem, 13rem) 1fr; gap: var(--sc-4); padding: var(--sc-3) 0; border-bottom: 1px solid var(--sc-hairline); }
+  .label dt { font: 600 var(--sc-t-xs)/1.6 var(--sc-font-text); letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc-ink-soft); }
+  .label dd { margin: 0; font-size: var(--sc-t-base); line-height: 1.5; }
+
+  .feats { margin-top: var(--sc-6); display: grid; grid-template-columns: repeat(2, 1fr); gap: var(--sc-4); }
+  .feat { background: var(--sc-surface); border-radius: var(--sc-r-lg); padding: clamp(1.25rem, 2.4vw, 2rem); }
+  .feat h3 { margin: 0; font-size: var(--sc-t-xl); line-height: 1.1; }
+  .feat p { margin: var(--sc-2) 0 0; line-height: 1.5; }
+  .feat .price { margin-top: var(--sc-2); }
+  .feat .small { color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  .feat--photo { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sc-5); align-items: center; background: #fff; border: 1px solid var(--sc-hairline); }
+  .feat--photo img { width: 100%; height: auto; display: block; }
+  .price { display: flex; align-items: baseline; gap: 0.6rem; margin: var(--sc-4) 0 0; }
+  .price b { font: 600 clamp(2.4rem, 1.8rem + 2vw, 3.4rem)/1 var(--sc-font-display); letter-spacing: -0.02em; }
+  .price span { color: var(--sc-ink-soft); }
+
+  .asks { margin: var(--sc-5) 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sc-4); }
+  .asks li { background: var(--sc-surface); border-radius: var(--sc-r-md); padding: var(--sc-5); font: 600 var(--sc-t-lg)/1.3 var(--sc-font-display); }
+  .asks li small { display: block; margin-top: var(--sc-2); font: 400 var(--sc-t-sm)/1.5 var(--sc-font-text); color: var(--sc-ink-soft); }
+
+  /* the close: an inquiry plate, set like the station labels */
+  #book { background: var(--sc-surface); }
+  .plate { background: #fff; border-radius: var(--sc-r-lg); padding: clamp(1.5rem, 4vw, 3rem); box-shadow: 0 30px 70px -40px rgb(19 32 44 / 0.45);
+    display: grid; grid-template-columns: 1fr auto; gap: var(--sc-6); align-items: end; }
+  .plate img { width: 64px; height: 64px; object-fit: contain; }
+  .plate h2 { margin: var(--sc-3) 0 0; max-width: none; }
+  .plate .label { margin-top: var(--sc-4); }
+  .plate .side { display: grid; gap: var(--sc-3); justify-items: start; }
+  .plate .side p { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); max-width: 22rem; line-height: 1.45; }
+  .foot { padding: var(--sc-6) var(--sc-gutter); display: flex; flex-wrap: wrap; gap: var(--sc-2) var(--sc-5); justify-content: space-between;
+    color: var(--sc-ink-soft); font-size: var(--sc-t-sm); background: var(--sc-surface); }
+  .foot a { color: var(--sc-accent); }
+
+  .buybar { display: none; }
+
+  /* ---------- short laptop screens ---------------------------------------- */
+  @media (min-width: 861px) and (max-height: 760px) {
+    .hero h1 { font-size: min(clamp(2.6rem, 1rem + 5.6vw, 6.6rem), 10.5vh); }
+    .hero .lede { font-size: var(--sc-t-base); }
+    .ready h2 { font-size: min(clamp(2.4rem, 1.4rem + 3.4vw, 4.4rem), 8vh); }
+  }
+  @media (max-width: 1180px) and (min-width: 861px) { .index a span.long { display: none; } }
+
+  /* ---------- phones ---------------------------------------------------- */
+  @media (max-width: 860px) {
+    :root { --bar-h: 56px; }
+    .index { gap: 0.35rem; }
+    .index a { padding: 0.3rem; }
+    .index a span { display: none; }
+    .panel, .cards { left: 12px; right: 12px; width: auto; bottom: 12px; }
+    .panel { padding: 1.1rem 1.15rem 1.2rem; }
+    .hero .lede { font-size: var(--sc-t-base); }
+    .ready .act { margin-top: var(--sc-4); flex-direction: column; align-items: flex-start; gap: var(--sc-3); }
+    .hero-top { left: 16px; right: 16px; top: calc(var(--bar-h) + 1.1rem); }
+    .hero h1 { font-size: clamp(2.3rem, 11vw, 3.3rem); }
+    .hero-wash { background: linear-gradient(180deg, rgb(255 255 255 / 0.95) 0%, rgb(255 255 255 / 0.9) 46%, rgb(255 255 255 / 0) 64%); }
+    .hero .act { flex-direction: column; align-items: flex-start; gap: var(--sc-3); padding: 1rem 1.1rem; }
+    .card h2 { font-size: 1.8rem; }
+    .card .n { font-size: var(--sc-t-sm); letter-spacing: 0.1em; }
+    .plate, .feats, .feat--photo { grid-template-columns: 1fr; }
+    /* short phones: the booking card still fits one screen (rule 12, 3c) */
+    @media (max-height: 700px) { .plate { padding: 1.1rem 1.25rem; } .plate img { width: 44px; height: 44px; } .plate .label { margin-top: var(--sc-3); } }
+    .asks { grid-template-columns: 1fr; }
+    .label > div { grid-template-columns: 1fr; gap: 0.2rem; }
+    .buybar { position: fixed; inset-inline: 0; bottom: 0; z-index: 70; display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
+      padding: 0.7rem var(--sc-gutter) calc(0.7rem + env(safe-area-inset-bottom)); background: rgb(255 255 255 / 0.96);
+      border-top: 1px solid var(--sc-hairline-strong); transform: translateY(110%); transition: transform 240ms var(--sc-ease-out); }
+    .buybar.is-on { transform: none; }
+    .buybar span { color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+    .buybar b { color: var(--sc-ink); font: 600 1.3rem/1 var(--sc-font-display); }
+    .buybar .btn .lb { padding: 0 1rem; } .buybar .btn .lb, .buybar .btn .ab { min-height: 44px; } .buybar .btn .ab { width: 44px; }
+    .after { padding-bottom: 5rem; }
+    .cards { bottom: calc(12px + 4.6rem); }
+    /* the peak's panel sits right under the whole-wall strip */
+    .ready { top: calc(var(--bar-h) + 56.25vw + 22px); bottom: auto; }
+    .cards.is-flip { bottom: auto; top: calc(var(--bar-h) + 12px); }
+    .cards.is-flip .card { bottom: auto; top: 0; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .card, .mark i, .tick, .tick svg, .buybar, .btn, .btn .ab, .btn .sw svg, .feat::after, #ready-list .tick, #ready-list .tick svg { transition: none !important; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></symbol></svg>
+
+<header class="bar">
+  <a class="brand" href="#top"><img src="assets/logo.png" alt="">KasherMyBnb</a>
+  <nav aria-label="What we kasher">
+    <ol class="index" id="index"></ol>
+  </nav>
+</header>
+
+<main id="top">
+  <section id="walk" data-sc-act="pin" data-sc-span="6">
+    <div data-sc-stage>
+      <div class="cam" id="cam">
+        <img src="assets/kitchen.webp" alt="A rental kitchen: oven, microwave, gas stovetop, countertops, sink and a hot plate along one wall" width="2048" height="1152">
+      </div>
+
+      <div class="hero">
+        <div class="hero-wash"></div>
+        <div class="hero-top">
+          <h1>Kitchen kashering for rentals, in Jerusalem and <em>across Israel.</em></h1>
+          <p class="lede">We kasher your kitchen so you can settle in with confidence: fully prepared, strictly kosher and ready to use.</p>
+        </div>
+        <div class="panel act">
+          <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services"><span class="lb">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+          <ul class="proof">
+            <li><b>Whole kitchen $350</b>, about 2 hours</li>
+            <li>Expert mashgichim, following cRc guidelines</li>
+            <li>Kashering kitchens since 2019</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="cards" id="cards" aria-live="polite"></div>
+
+      <div class="panel ready">
+        <h2>Ready to <span>use.</span></h2>
+        <ul id="ready-list"></ul>
+        <div class="act">
+          <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services" tabindex="-1"><span class="lb">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+          <ul class="proof">
+            <li><b>Whole kitchen $350</b>, about 2 hours</li>
+            <li>Prices for Jerusalem; elsewhere, a fee by distance</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="after">
+    <section class="sec" id="features">
+      <div class="wrap">
+        <h2 data-sc-in>What we kasher.</h2>
+        <div class="feats">
+          <article class="feat" data-sc-in>
+            <h3>Whole kitchen</h3>
+            <p class="price"><b>$350</b><span>about 2 hours</span></p>
+            <p>Oven with racks, stovetop (electric or gas), microwave, countertops, sinks and faucets, hot plate.</p>
+            <p class="small">Prices are for Jerusalem; other locations may have a fee by distance.</p>
+          </article>
+          <article class="feat feat--photo" id="pots" data-sc-in>
+            <img src="assets/pots.webp" alt="Stainless steel pots, a colander and cutlery" width="1200" height="1200" loading="lazy">
+            <div>
+              <h3>Pots, cutlery and utensils</h3>
+              <p class="price"><b>$180</b><span>about 1 hour</span></p>
+              <p>Pots (stainless steel only; other materials cannot be kashered), cutlery and kitchen utensils.</p>
+              <p class="small">Frying pans cannot be kashered. We can bring a new one for $15.</p>
+            </div>
+          </article>
+          <article class="feat" data-sc-in>
+            <h3>Extra oven cleaning</h3>
+            <p class="price"><b>$40</b><span>with a whole kitchen</span></p>
+            <p>Additional oven cleaning and kashering, added to a whole-kitchen booking.</p>
+          </article>
+          <article class="feat" data-sc-in>
+            <h3>Finding a rental</h3>
+            <p class="price"><span>for our guests</span></p>
+            <p>We also help guests find the most suitable vacation rental for their stay.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="sec" id="who">
+      <div class="wrap">
+        <h2 data-sc-in>For guests in vacation rentals, and for Pesach.</h2>
+        <ul class="asks" data-sc-in>
+          <li>Staying in a vacation rental?<small>We kasher the kitchen of the apartment you are staying in, for guests who keep kosher.</small></li>
+          <li>Preparing for Pesach?<small>Your kitchen kashered and ready before Yom Tov.</small></li>
+          <li>Moving into a new home?<small>For homeowners and property managers too.</small></li>
+        </ul>
+        <dl class="label" data-sc-in>
+          <div><dt>Where</dt><dd>Jerusalem, and across Israel. Prices are for Jerusalem; other places have a fee by distance.</dd></div>
+          <div><dt>Who kashers</dt><dd>Expert mashgichim, following cRc guidelines.</dd></div>
+          <div><dt>Languages</dt><dd>English and Hebrew.</dd></div>
+          <div><dt>Booking</dt><dd>Send us your dates and the address, and we will find a time with you.</dd></div>
+          <div><dt>Since</dt><dd>2019.</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="sec" id="book">
+      <div class="wrap">
+        <div class="plate" data-sc-in>
+          <div>
+            <img src="assets/logo.png" alt="KasherMyBnb">
+            <h2>Book your kashering.</h2>
+            <dl class="label">
+              <div><dt>Whole kitchen</dt><dd>$350, about 2 hours. Oven and racks, stovetop, microwave, countertops, sink and faucet, hot plate.</dd></div>
+              <div><dt>Pots and cutlery</dt><dd>$180, about 1 hour.</dd></div>
+              <div><dt>Extra oven cleaning</dt><dd>$40.</dd></div>
+            </dl>
+          </div>
+          <div class="side">
+            <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services"><span class="lb">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+            <p><b>Expert mashgichim, following cRc guidelines. Since 2019.</b><br>Opens our page on MyIsraelRental, where you can message us with your dates.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+    <footer class="foot">
+      <span>KasherMyBnb · kitchen kashering in Jerusalem and across Israel</span>
+      <a href="https://myisraelrental.com/business/kashermybnb-kashering-services">Listed on MyIsraelRental</a>
+    </footer>
+  </div>
+</main>
+
+<div class="buybar" id="buybar" aria-hidden="true">
+  <span>Whole kitchen <b>$350</b></span>
+  <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services" tabindex="-1"><span class="lb">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+</div>
+
+<script src="scrollcraft.js"></script>
+<script>ScrollCraft.mount(document.body);</script>
+<script>
+(function () {
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var phone = matchMedia('(max-width: 860px)');
+  var clamp = function (v, a, b) { return Math.max(a === undefined ? 0 : a, Math.min(b === undefined ? 1 : b, v)); };
+  var span = function (p, a, b) { return clamp((p - a) / (b - a)); };
+  var ease = function (t) { return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+  var OK = '<svg viewBox="0 0 24 24"><use href="#ok"/></svg>';
+
+  // The six stations, in the order the kitchen wall runs, with where each
+  // sits in the photo (fractions of its width and height, checked against
+  // crops of the photo itself), and their listing's own words.
+  var S = [
+    { id: 'oven',    short: 'Oven',        name: 'Oven, with racks',        at: [0.1225, 0.813], note: 'Extra oven cleaning and kashering, <b>$40</b>.' },
+    { id: 'micro',   short: 'Microwave',   name: 'Microwave',               at: [0.125, 0.544] },
+    { id: 'stove',   short: 'Stovetop',    name: 'Stovetop, electric or gas', at: [0.4125, 0.600] },
+    { id: 'counter', short: 'Countertops', name: 'Countertops',             at: [0.575, 0.615] },
+    { id: 'sink',    short: 'Sink',        name: 'Sink and faucet',         at: [0.73, 0.604] },
+    { id: 'plate',   short: 'Hot plate',   name: 'Hot plate',               at: [0.8775, 0.582] }
+  ];
+  // Where in the walk each station holds: the camera arrives in the first
+  // 40% of its window and stays for the rest.
+  var W0 = 0.10, W1 = 0.80, win = (W1 - W0) / S.length;
+
+  var act = document.getElementById('walk'), cam = document.getElementById('cam');
+  var cards = document.getElementById('cards'), index = document.getElementById('index'), readyList = document.getElementById('ready-list');
+  S.forEach(function (s, i) {
+    var m = document.createElement('div'); m.className = 'mark';
+    m.style.left = (s.at[0] * 100) + '%'; m.style.top = (s.at[1] * 100) + '%';
+    m.innerHTML = '<i>' + OK + '</i>'; cam.appendChild(m); s.mark = m;
+    var c = document.createElement('div'); c.className = 'card panel';
+    c.innerHTML = '<span class="n">Kitchen kashering</span><h2>' + s.name + '</h2>' +
+      '<p><b>Included</b> in the whole kitchen, $350.' + (s.note ? '<br>' + s.note : '') + '</p>';
+    cards.appendChild(c); s.card = c;
+    var li = document.createElement('li');
+    li.innerHTML = '<a href="#' + s.id + '"><span class="tick">' + OK + '</span><span>' + s.short + '</span></a>';
+    li.querySelector('a').addEventListener('click', function (e) { e.preventDefault(); go(W0 + (i + 0.7) * win); });
+    index.appendChild(li); s.li = li;
+    readyList.insertAdjacentHTML('beforeend', '<li style="--i:' + i + '"><span class="tick">' + OK + '</span>' + s.name + '</li>');
+  });
+  var potsLi = document.createElement('li');
+  potsLi.innerHTML = '<a href="#pots"><span class="tick" style="border-style:dashed">' + OK + '</span><span>Pots <span class="long">and cutlery</span></span></a>';
+  index.appendChild(potsLi);
+
+  function go(p) {
+    var top = act.offsetTop + (act.offsetHeight - innerHeight) * p;
+    scrollTo({ top: top, behavior: reduce ? 'auto' : 'smooth' });
+  }
+
+  // The camera. Base: the photo covers the stage. A visit scales it and puts
+  // the station at a chosen spot on screen, never showing past the photo's edge.
+  var Z = function () { return phone.matches ? 1.25 : 1.55; };
+  function place(fx, fy, z) {
+    var vw = innerWidth, vh = innerHeight, bar = phone.matches ? 56 : 64;
+    var cw = Math.max(vw, vh * 16 / 9), ch = cw * 9 / 16;
+    cam.style.width = cw + 'px'; cam.style.height = ch + 'px';
+    // Desktop: the station sits right of the copy; phone: above it.
+    var cx = phone.matches ? vw / 2 : vw * 0.66, cy = phone.matches ? bar + (vh - bar) * 0.33 : bar + (vh - bar) * 0.45;
+    // Never past the photo's edge; a photo narrower than the screen (the
+    // phone's whole-wall view) is centred and sits under the bar.
+    var tx = cw * z <= vw ? (vw - cw * z) / 2 : clamp(cx - fx * cw * z, vw - cw * z, 0);
+    var ty = ch * z <= vh ? (z < 1 ? bar + 10 : (vh - ch * z) / 2) : clamp(cy - fy * ch * z, vh - ch * z, 0);
+    return [tx, ty, z, cw, ch];
+  }
+  var HOME = function () { return phone.matches ? [0.41, 0.6, 1] : [0.5, 0.5, 1]; };
+  // The peak: the whole wall. On a phone that means the photo at the
+  // screen's width, as a strip under the bar.
+  var WALL = function () { return phone.matches ? [0.5, 0.5, innerWidth / Math.max(innerWidth, innerHeight * 16 / 9)] : [0.5, 0.5, 1]; };
+  function lerp(a, b, t) { return a + (b - a) * t; }
+
+  var buybar = document.getElementById('buybar'), pots = document.getElementById('pots');
+  var hero = act.querySelector('.hero'), ready = act.querySelector('.ready');
+  var readyBtn = ready.querySelector('.btn');
+  function frame() {
+    var p = parseFloat(act.style.getPropertyValue('--sc-p')) || 0;
+    // Which station, and how far the camera has travelled to it.
+    var k = Math.floor((p - W0) / win), here = -1, from, to, t;
+    var home = HOME();
+    var back = ease(span(p, W1, W1 + 0.07));
+    if (p < W0) { from = to = home; t = 0; }
+    else if (k >= S.length) { var last = S[S.length - 1]; from = [last.at[0], last.at[1], Z()]; to = WALL(); t = back; }
+    else {
+      here = k;
+      var a = k === 0 ? home : [S[k - 1].at[0], S[k - 1].at[1], Z()];
+      from = a; to = [S[k].at[0], S[k].at[1], Z()];
+      t = ease(span(p, W0 + k * win, W0 + (k + 0.4) * win));
+    }
+    var A = place(from[0], from[1], from[2]), B = place(to[0], to[1], to[2]);
+    if (reduce) A = B;
+    var z = lerp(A[2], B[2], t);
+    cam.style.transform = 'translate3d(' + lerp(A[0], B[0], t).toFixed(1) + 'px,' + lerp(A[1], B[1], t).toFixed(1) + 'px,0) scale(' + z.toFixed(4) + ')';
+    // Marks keep one size on screen whatever the camera does (smaller on
+    // the phone's whole-wall strip).
+    cam.style.setProperty('--zs', ((z < 1 ? 0.62 : 1) / z).toFixed(4));
+
+    // The copy: the opening leaves before the first visit; the cards swap
+    // whole (no text reflows); the peak arrives once the camera is back.
+    act.style.setProperty('--out', span(p, 0.06, 0.10).toFixed(3));
+    act.style.setProperty('--hero-vis', p < 0.10 ? 'visible' : 'hidden');
+    var r = span(p, W1 + 0.06, W1 + 0.075);
+    act.style.setProperty('--ready', r.toFixed(3));
+    act.style.setProperty('--ready-vis', r > 0 ? 'visible' : 'hidden');
+    readyBtn.tabIndex = r > 0.5 ? 0 : -1;
+    ready.classList.toggle('is-in', r > 0.5);
+    // The card and the index follow the last station reached, so a card
+    // stays up while the camera travels to the next one.
+    var cur = -1;
+    S.forEach(function (s, i) { if (p >= W0 + (i + 0.4) * win - 0.002) cur = i; });
+    // Where that station sits once the camera has settled on it: if that is
+    // where the card would be, its card goes to the other side.
+    if (cur >= 0) {
+      var C = place(S[cur].at[0], S[cur].at[1], Z());
+      var sx = C[0] + S[cur].at[0] * C[3] * C[2], sy = C[1] + S[cur].at[1] * C[4] * C[2];
+      cards.classList.toggle('is-flip', phone.matches ? sy > innerHeight - 290 : sx < 34 * 16 + 120);
+    }
+    S.forEach(function (s, i) {
+      var done = i <= cur;
+      s.mark.style.setProperty('--m', done ? 1 : 0);
+      s.li.classList.toggle('is-done', done);
+      s.li.classList.toggle('is-here', i === cur && p < W1);
+      // The last card stays until "Ready to use" is half in: never a gap with no words.
+      s.card.classList.toggle('is-on', i === cur && r < 0.5);
+    });
+
+    // The phone bar: on from the first visit until the close, except while
+    // the peak's own button is on screen.
+    var inPin = act.getBoundingClientRect().bottom > innerHeight + 2;
+    var bookTop = document.getElementById('book').getBoundingClientRect().top;
+    var barOn = phone.matches && p > 0.1 && !(inPin && r > 0.05) && bookTop > innerHeight * 0.75;
+    if (barOn !== buybar.classList.contains('is-on')) {
+      buybar.classList.toggle('is-on', barOn);
+      buybar.setAttribute('aria-hidden', barOn ? 'false' : 'true');
+      buybar.querySelector('a').tabIndex = barOn ? 0 : -1;
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

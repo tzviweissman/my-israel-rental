@@ -56,7 +56,10 @@ function rewrite(html) {
     // A link back to the page itself goes to the business's address.
     .replace(/(\shref=")(?:\.\/)?index\.html(#[^"]*)?"/g, (m, a, h) => `${a}/business/${slug}${h || ''}"`)
     .replace(/(\s(?:src|href|poster)=")([^"]+)"/g, (m, a, u) => (relative(u) ? `${a}${BASE}${withStamp(u)}"` : m))
-    .replace(/url\((['"]?)([^)'"]+)\1\)/g, (m, q, u) => (relative(u) ? `url(${q}${BASE}${withStamp(u)}${q})` : m));
+    .replace(/url\((['"]?)([^)'"]+)\1\)/g, (m, q, u) => (relative(u) ? `url(${q}${BASE}${withStamp(u)}${q})` : m))
+    // Addresses the page's own script builds, e.g. scrubber(el, 'assets/pot.mp4')
+    // (La Cholent, 9 Oct 2026): relative strings broke at /business/<slug>.
+    .replace(/(['"])(?:\.\/)?(assets\/[^'"\s]*)\1/g, (m, q, u) => `${q}${BASE}${/\.\w{2,5}$/.test(u) ? withStamp(u) : u}${q}`);
 }
 
 let files = 0;

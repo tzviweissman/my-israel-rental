@@ -18,6 +18,7 @@ import { CATEGORY_LABELS } from '../lib/categories';
 import { localizedTitle } from '../utils/gigLocale';
 import { money } from '../utils/currency';
 import { Link, useParams, useNavigate } from 'react-router-dom';
+import { useHandBuilt } from '../utils/handBuiltPages';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe } from 'lucide-react';
@@ -124,21 +125,9 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
   /* A hand-built page replaces this one for a few businesses (Tzvi, 7 Oct
      2026; scripts/publish-page.mjs). The server answers a full load of
      /business/<slug> with it; navigation inside the app never reaches the
-     server, so this reloads into it. Production only: the dev server does
-     not serve those pages, and reloading there would loop. */
-  useEffect(() => {
-    if (injected || preview || process.env.NODE_ENV !== 'production' || !fetched?.slug) return undefined;
-    let cancelled = false;
-    fetch('/pages/pages.json', { cache: 'no-cache' })
-      .then((r) => (r.ok ? r.json() : []))
-      .then((list) => {
-        if (!cancelled && Array.isArray(list) && list.includes(fetched.slug)) {
-          window.location.replace(`/business/${fetched.slug}${window.location.hash}`);
-        }
-      })
-      .catch(() => { /* no list: the standard page stays */ });
-    return () => { cancelled = true; };
-  }, [fetched, injected, preview]);
+     server, so this reloads into it, and holds a loader until it knows, so
+     the standard page never shows first (utils/handBuiltPages.js). */
+  const handBuilt = useHandBuilt(injected || preview ? null : (fetched?.slug || slug));
 
   /* Split out of the fetch above so the editor gets the same remembered
      layout the visitor would see. Reading it inside the fetch meant it was
@@ -221,7 +210,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
     );
   }
 
-  if (!biz) {
+  if (!biz || handBuilt.hold) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="animate-spin" size={20} style={{ color: 'var(--brand-muted)' }} />

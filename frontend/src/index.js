@@ -26,6 +26,7 @@ import App from "@/App";
 import { Toaster } from "sonner";
 import SilentBoundary from "@/components/common/SilentBoundary";
 import { i18nReady } from "@/i18n";
+import { loadHandBuilt } from "@/utils/handBuiltPages";
 
 // Silence the benign "ResizeObserver loop completed with undelivered
 // notifications" browser warning so it doesn't surface in the
@@ -46,6 +47,10 @@ window.addEventListener('unhandledrejection', (e) => {
     e.preventDefault();
   }
 });
+
+// Which businesses have a hand-built page, asked once at start-up so a
+// business page or listing knows before it would render (handBuiltPages.js).
+loadHandBuilt();
 
 const root = ReactDOM.createRoot(document.getElementById("root"));
 

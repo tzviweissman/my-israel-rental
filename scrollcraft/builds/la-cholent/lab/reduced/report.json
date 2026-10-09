@@ -1,0 +1,245 @@
+{
+  "doc": {
+    "height": 9039,
+    "vh": 900,
+    "acts": [
+      "pin"
+    ],
+    "world": null
+  },
+  "report": [
+    {
+      "i": 0,
+      "y": 108,
+      "pct": 1,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "Rabbi Samuels' Famous L.A. Cholent Our r",
+          "dir": "light-on-dark",
+          "worst": 13.96,
+          "mean": 15.96
+        }
+      ],
+      "cues": [
+        {
+          "t": "Rabbi Samuels' Famous L.A. Cholent Our raw ing",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        0
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0F0C0A"
+    },
+    {
+      "i": 1,
+      "y": 1145,
+      "pct": 14,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "Rabbi Samuels' Famous L.A. Cholent Our r",
+          "dir": "light-on-dark",
+          "worst": 10.87,
+          "mean": 15.83
+        },
+        {
+          "t": "1Select your cholent size. 2Place raw LA",
+          "dir": "light-on-dark",
+          "worst": 15.72,
+          "mean": 16.13
+        }
+      ],
+      "cues": [
+        {
+          "t": "Rabbi Samuels' Famous L.A. Cholent Our raw ing",
+          "o": 1
+        },
+        {
+          "t": "1Select your cholent size. 2Place raw LA Chole",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        0
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0F0C0A"
+    },
+    {
+      "i": 2,
+      "y": 2182,
+      "pct": 27,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "Rabbi Samuels' Famous L.A. Cholent Our r",
+          "dir": "light-on-dark",
+          "worst": 5.26,
+          "mean": 15.31
+        }
+      ],
+      "cues": [
+        {
+          "t": "Rabbi Samuels' Famous L.A. Cholent Our raw ing",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        0
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0F0C0A"
+    },
+    {
+      "i": 3,
+      "y": 3218,
+      "pct": 40,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        0
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0F0C0A"
+    },
+    {
+      "i": 4,
+      "y": 4255,
+      "pct": 52,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "11hours on low,while you do Shabbos Lid ",
+          "dir": "light-on-dark",
+          "worst": 7.73,
+          "mean": 14.76
+        }
+      ],
+      "cues": [
+        {
+          "t": "11hours on low,while you do Shabbos Lid on. Lo",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        0
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0F0C0A"
+    },
+    {
+      "i": 5,
+      "y": 5292,
+      "pct": 65,
+      "settled": true,
+      "contrast": [
+        {
+          "t": "20hours on low,while you do Shabbos Lid ",
+          "dir": "light-on-dark",
+          "worst": 7.73,
+          "mean": 14.76
+        }
+      ],
+      "cues": [
+        {
+          "t": "20hours on low,while you do Shabbos Lid on. Lo",
+          "o": 1
+        }
+      ],
+      "clips": [],
+      "rails": [],
+      "wipes": [
+        "none"
+      ],
+      "act": "pin",
+      "stages": [
+        0
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0F0C0A"
+    },
+    {
+      "i": 6,
+      "y": 8139,
+      "pct": 100,
+      "settled": true,
+      "contrast": [],
+      "cues": [],
+      "clips": [],
+      "rails": [],
+      "wipes": [
+        "none"
+      ],
+      "act": "-",
+      "stages": [
+        -2739
+      ],
+      "segs": [],
+      "custom": [],
+      "customHold": false,
+      "seg": null,
+      "segp": null,
+      "bg": "#0F0C0A"
+    }
+  ],
+  "consoleErrors": [],
+  "failed": []
+}
