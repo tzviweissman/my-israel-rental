@@ -117,12 +117,23 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   delivery, or anything medical.
 - No fake urgency, ever: "only 3 left", "hurry", "today only", countdowns,
   invented counts. "Open only on Fridays" is a fact, not urgency.
-- Generated images and video: allowed for atmosphere (hero, backgrounds,
-  scroll scenes) and to enhance their own photos. Never on product cards
-  where people choose what they get, never a generated person shown as their
-  staff or customer, never their premises made up, no text baked in. Respect
+- Generated images and video: allowed anywhere they make the page look
+  better, product cards and choice tiles included, no label (Tzvi, 8 Oct
+  2026). Generate as little as possible: edit their own photo of a sibling
+  item to show a missing flavour or size, so it stays their product. Only
+  items they really sell. Never a generated person shown as their staff or
+  customer, never their premises made up, no text baked in. Respect
   the business (a kosher business: nothing non-kosher, no meat with dairy).
   Movement copied from a reference video is built in code, not generated.
+- **If it would look better as a generated clip, generate it** (Tzvi, 8 Oct
+  2026): any moving piece a filmed clip would do better than code (a pour,
+  drizzle, cream, sauce, steam, melt, food cut or served, a product opened or
+  used) is a generated clip, never SVG/CSS. Code keeps text, interface, layout,
+  scroll-tied motion and exact choreography copied from a reference.
+  Start frame = their item before, end frame = their item after (edited from
+  their photo), both on the page's background colour; a start/end-frame model
+  (MiniMax H3 Max) fills only the pour. Code decides when it plays and swaps to
+  the still at the end. Preflight cost, generate one, check it, then the rest.
 
 ## 2. How to write
 
@@ -223,8 +234,8 @@ Full text and reasons: `reference/full-rules.md` §3c.
    their brand. At least one section on a contrasting ground.
 3. **Proof where the worry is**: each worry the owner names is answered beside
    the button or price it belongs to. No wall of one-line reviews.
-4. **Show it in use**: their photo of it used, served or delivered leads; a
-   generated image only sets the scene around their own picture.
+4. **Show it in use**: their photo of it used, served or delivered leads;
+   generated images fill the gaps, best made by editing their own photo.
 5. **Choices are tiles**, never a dropdown. "Most popular" only if the owner
    marks it or orders show it. Bundles show the real saving.
 6. **The button says what happens next** ("Order, delivered Friday"); under
@@ -247,6 +258,36 @@ Full text and reasons: `reference/full-rules.md` §3c.
     visitor stops, each photo is seen whole with its words and price. No
     block taller than the screen at 1280x650, 1440x900 or a phone; cap
     photos and big type by `svh`; a main tile puts its photo beside its words.
+
+## 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+
+Full text, sources and the rejected list: `reference/full-rules.md` §3e.
+
+1. **Order by the visitor's questions**: what is it, can I trust it, what does
+   it cost, what do I do; prices before any enquiry form. A small label above
+   the headline says who and where. The headline is the customer's outcome.
+2. **One action, one label**: every section ends on the same action as the
+   header button; the page's words match what sent the visitor.
+3. **Buttons say what happens, with real numbers** ("Order 4 buns, ₪55");
+   price, unit and action together; packages as tiles.
+4. **Measured contrast**: button text 4.5:1 on its fill. Every button has
+   rest, hover, pressed, disabled; fields have focus and error; every action
+   confirms. Hover-only things get a phone version.
+5. **Cards**: one reading order (name largest, one accent fact, rest lighter),
+   big photos, worst-case content handled (truncate; icons on a solid circle).
+   Text under owner photos on a plain strip, or on a dark gradient.
+6. **System**: 4 px spacing grid, related close and unrelated apart; one body
+   family, up to three weights, six sizes; one radius for images and buttons.
+7. **Motion**: never linear, grows from the tap, under 0.5 s. Carousels show
+   the next card's edge and have buttons or dots (mirrored in Hebrew); sheets
+   close by swipe AND a button. Background video: locked camera, ~6 s loop,
+   poster, reduced-motion still.
+8. **Flows end**: a "Done" screen, lists that end, "save and finish later".
+   Progress and loyalty only with true numbers; a reminder only for a real
+   unfinished thing, once, with an off switch. The owner stays a person.
+9. **Process**: keep each reference's link; after building, rank the top five
+   fixes section by section; polish states on any 21st or generated component.
+10. Pinned sections stay, but never take over the scroll's speed or direction.
 
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 

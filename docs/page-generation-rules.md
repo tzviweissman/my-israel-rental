@@ -295,8 +295,8 @@ code. Each rule names what it prevents.
    certificate, a licence, a named review, a specific guarantee.
 4. **Show it in use.** Lead with the owner's photo of the product or service
    being used, served or delivered, not the item alone on white (the
-   "imagination gap"). A generated image may only set the scene around their
-   own picture; it never stands in for what the customer gets.
+   "imagination gap"). Generated images may fill the gaps their photos leave,
+   best made by editing their own photo (section 8, kind 2).
 5. **Choices are visible.** Sizes, flavours and tiers are tiles to tap,
    never a dropdown. A short note may say how each differs, in the owner's
    words. "Most popular" appears only when the owner marks it or orders show
@@ -345,6 +345,93 @@ code. Each rule names what it prevents.
 - What do customers worry about before they order or book?
 - What happens in the first days after they get it?
 - Do you have a photo of it being used, served or delivered?
+
+## 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
+
+Twelve YouTube talks on landing pages, product pages, UI craft, motion and
+"addictive" apps, watched as video (frames every 3-10 s, frame strips for
+motion), the transcript only alongside. Tzvi approved every rule below and the
+two proposals at the end ("add all the rules and go with your proposals").
+Per-video notes, timestamps and key frames: `docs/ui-videos/notes/`; the full
+draft with sources: `docs/ui-videos/draft-rules.md`.
+
+**Order and the first screen**
+1. Sections follow the visitor's questions in order: what is it, can I trust it,
+   what does it cost, what do I do. Menu and prices come before any enquiry form.
+2. A small label above the headline says who it is for and where ("Home-baked
+   buns, Ramat Eshkol").
+3. Each section has one job and ends on the same single action, with the same
+   label and destination as the header button.
+4. The headline says what the customer gets, not what the business does.
+5. The page's words match what sent the visitor there (the ad, the WhatsApp
+   message, the listing).
+
+**Buttons and prices**
+6. The button says what happens, with a real number when there is one: "Order 4
+   buns, ₪55", "Show 12 sessions".
+7. Price, unit and action sit together; packages are tiles with name and price.
+8. Button text is at least 4.5:1 on its fill, measured, never judged by eye (a
+   bright green measured 1.8:1 in one of the videos).
+9. Every button has rest, hover, pressed and disabled states; every field has
+   focus and error states with a message; every action shows a confirmation
+   ("Sent", "Copied"). Anything hover-only has a visible version on phones.
+
+**Cards, type and spacing**
+10. A card has one reading order: the name largest, one emphasised fact (usually
+    the price, in the accent, used nowhere else on the card), the rest lighter.
+    Card photos are big, never thumbnails.
+11. Design for the worst content: long names truncate; an icon on a photo sits on
+    a solid circle or a gradient, never straight on the picture.
+12. Text goes on a plain strip under an owner photo, not over it. Where text must
+    sit on a photo: a gradient into a dark area, not a flat dim.
+13. Spacing on a 4 px grid: related things close, unrelated things clearly apart;
+    items of one kind identical (icon size, row height).
+14. One body family in up to three weights, at most six text sizes; headings
+    tightened about -2% with 110-120% line height. Test Hebrew before the
+    tightening applies to it.
+15. One corner radius for images and buttons alike.
+
+**Motion**
+16. Never linear easing: ease-out or a spring. A transition grows from what was
+    tapped and finishes under 0.5 s.
+17. A carousel shows a sliver of the next card, and every swipe has visible
+    buttons or dots, mirrored in Hebrew. A bottom sheet closes by swipe-down AND
+    a close button.
+18. A background video: camera locked, subtle, a seamless loop of about 6 s, with
+    a still poster and a still for reduced motion.
+
+**Flows and coming back (the honest form of "addictive" design)**
+19. Every flow has a visible end: a clear "Done" screen after ordering, lists that
+    end, "Save and finish later" on long forms.
+20. Progress only with true numbers: "Step 2 of 4", "Session 6 of 12", "5th loaf
+    free, you have 3" (only for a loyalty offer the owner really runs).
+21. A reminder only for something real the customer left unfinished (an
+    unconfirmed booking, a saved order), sent once, with an off switch.
+22. The owner stays visible as a person: name, real photo, direct WhatsApp.
+
+**How we work**
+23. After building, review a screenshot section by section, a reference for each
+    point, rank the top five fixes, then keep or reject each with a reason.
+24. Keep the source link with every Mobbin, Inspo and 21st reference in the brief.
+25. Components from 21st or from generated code get a polish pass for hover,
+    focus and pressed states before they ship.
+
+**Rejected, as shown in the videos:** countdowns, "limited time", "offer ends
+soon", "selling fast", "only 13 left", "3 spots open" (unless it is the owner's
+real availability); strike-through prices never charged; "$80 of value" gifts;
+a monthly price shown while billing quarterly; intro prices that renew higher;
+invented counters; "Trusted by 10k+", logo walls, "As seen on", award laurels;
+invented "Best match" or "Popular" badges; stars and counts without real
+reviews; sweepstakes; random rewards; streaks; endless feeds; likes,
+leaderboards, fake unread badges; slide-to-confirm on ordinary forms.
+
+**Settled with Tzvi:**
+- Scroll: one video says never hijack the scroll. Our pinned sections stay (each
+  fits one screen and never traps the order section), but the scroll's own speed
+  and direction are never taken over.
+- Backgrounds: one video builds from stock and AI backgrounds only. Our rule is
+  unchanged: generated images are made from the owner's own photos, and never
+  stand in for their premises or their people.
 
 ## 4. What is reported to the owner instead (content gaps)
 
@@ -645,11 +732,15 @@ piece of meat being sliced" on Blazin' Boards. Two tools, in this order:
    relit, cleaned up, sharpened, or animated from their actual photo (steam rising,
    the knife moving). It is still their product, so it can go anywhere, including
    the product cards.
-2. **Illustrations.** Fully generated "appetite" shots of the same kind of item they
-   really sell (sliced brisket for a business that sells brisket, never a dish they
-   don't make). Allowed in the atmosphere parts of the page (hero, section
-   backgrounds, the scroll sections), **never on the product cards**, where people
-   choose what they will actually get. Each carries a small "Illustration" note.
+2. **Generated to make the page look its best** (Tzvi, 8 Oct 2026, replacing the
+   earlier "never on the product cards": "change the rule that we can generate
+   images so we can have pages look nicer"). Generated or edited images may be used
+   anywhere on the page, the product cards and choice tiles included, without a
+   label. Start from what the business already has and generate as little as
+   possible: a missing flavour or size is made by editing their own photo of a
+   sibling item (their iced cinnamon bun, re-topped as espresso or chocolate), so
+   the product stays theirs in shape, dough and light. Only items they really sell,
+   in the toppings, sizes and colours they really make.
 
 For both:
 - The owner approves every piece before it can be used.
@@ -665,6 +756,29 @@ For both:
 **Movement that copies a reference is built in code, not generated.** Generated
 video reinterprets the reference on every render, so rerolling can't converge on
 "exactly like this". Offer the code-built version instead.
+
+**If it would look better as a generated clip, generate it** (Tzvi, 8 Oct 2026:
+"make it a rule for future to do this to make things look realistic to have the
+best effect", then "anything that would look better as a generated clip should be
+generated"). For every moving piece, ask: would a filmed clip look better than
+what code can draw? If yes, it is a generated clip, never SVG or CSS. Always yes
+for real materials and anything whose realism is the point: glaze or chocolate
+pouring and spreading, cream, sauce, steam, melting cheese, water, smoke, fabric,
+food being cut, served or assembled, a product being opened or used. Code stays
+for what code does better: text, interface, layout, exact choreography copied
+from a reference (above), and motion tied to scroll position or a counter. Code-drawn liquid reads as a tube and a fade however it is
+tuned; the Bun Intended drizzle was built in code twice and both times "doesn't
+look real, you don't see the texture spreading". How:
+- Bracket the clip with their own product: the start frame is their item before
+  (the plain bun), the end frame is their item after (the same bun, topped, edited
+  from their photo). A start-and-end-frame model (MiniMax H3 Max, about 12.5
+  credits for 5 s at 768p) fills only the pour in between, so the product stays
+  theirs and the clip lands exactly on the still that the page shows next.
+- Put both frames on the page's own background colour, so the clip sits on the
+  page with no box around it. Locked-off camera, the item never moves.
+- Code still does the choreography: when it plays (on a choice, on scroll), the
+  swap to the still at the end, the layout. Reduced motion shows the still.
+- Preflight the cost (get_cost) and generate one first; look at it before the rest.
 
 **Blender** (Tzvi, 23 Sep 2026), for three jobs:
 1. **Product motion from real items:** their own product turning or rolling as the
@@ -805,9 +919,9 @@ Rules for using them:
    AI instead of a rejection. Decide once there are real pages to look at.
 5. **Approved AI media.** To use enhanced photos and illustrations, the page design
    needs a new kind of image reference that points only at media the owner has
-   approved, and knows which of the two kinds each piece is (so an illustration can
-   be kept off the product cards and carry its note). Until then AI media can't
-   appear on a built page.
+   approved. (Since 8 Oct 2026 generated images may go anywhere on the page, so it
+   no longer has to tell the two kinds apart.) Until then AI media can't appear on
+   a page built by the page builder; hand-built pages already use it.
 6. **Before and after consent.** Decided (Tzvi, 23 Sep 2026): for now the owner is
    asked, once per pair, whether the client pictured agreed to their photos being
    used. No pair appears without that yes.

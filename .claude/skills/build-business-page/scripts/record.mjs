@@ -10,6 +10,11 @@
 //   Run from the project folder (it uses that project's Playwright):
 //   node ~/.claude/skills/build-business-page/scripts/record.mjs <url> <width> <height> <out.mp4> [seconds] [fps]
 //   e.g. ... record.mjs http://localhost:4503/ 390 844 preview-phone.mp4 40
+// Stops: --stop "<selector>|<seconds>[|<selector to tap>]" (repeatable). The
+// scroll pauses with that element in the middle of the screen for that long,
+// tapping the second selector first if given, so a pour or a choice plays out
+// in full (Bun Intended, 8 Oct 2026: the owner video scrolled past the pour).
+//   ... --stop "#box|6" --stop "#box|6|[data-f=chocolate]"
 // seconds: the scroll itself (default 40); 2.5 s of the opening and 2.5 s
 // at the end are added. fps defaults to 30. It also writes <out>-sheet.jpg,
 // a contact sheet: look at it before sending the video.
@@ -20,10 +25,12 @@ import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { tmpdir } from 'node:os';
 const { chromium } = createRequire(process.cwd() + '/')('playwright');
-const [url, w, h, out] = [process.argv[2], Number(process.argv[3] || 390), Number(process.argv[4] || 844), process.argv[5] || 'preview.mp4'];
-const secs = Number(process.argv[6] || 40);
+const argv = process.argv.slice(2), STOPS = [];
+for (let i = argv.indexOf('--stop'); i >= 0; i = argv.indexOf('--stop')) { STOPS.push(argv[i + 1].split('|')); argv.splice(i, 2); }
+const [url, w, h, out] = [argv[0], Number(argv[1] || 390), Number(argv[2] || 844), argv[3] || 'preview.mp4'];
+const secs = Number(argv[4] || 40);
 // The old 7th argument was a speed-up (1.8); anything under 10 is that.
-const fps = Number(process.argv[7]) >= 10 ? Number(process.argv[7]) : 30;
+const fps = Number(argv[5]) >= 10 ? Number(argv[5]) : 30;
 const HOLD = 2.5, dt = 1000 / fps;
 const dir = mkdtempSync(join(tmpdir(), 'rec-'));
 
@@ -43,7 +50,7 @@ await ctx.addInitScript(() => {
   window.__wait = window.setTimeout.bind(window);
   const P = HTMLMediaElement.prototype;
   P.play = function () { this.__wants = true; this.dispatchEvent(new Event('play')); this.dispatchEvent(new Event('playing')); return Promise.resolve(); };
-  const pause = P.pause; P.pause = function () { this.__wants = false; return pause.call(this); };
+  const pause = P.pause; window.__pause = pause; P.pause = function () { this.__wants = false; return pause.call(this); };
   Object.defineProperty(P, 'paused', { configurable: true, get() { return !this.__wants; } });
 });
 const p = await ctx.newPage();
@@ -67,7 +74,9 @@ async function step(ms) {
     }
     const waits = [];
     for (const v of document.querySelectorAll('video')) {
-      if (v.autoplay && v.__wants === undefined) v.__wants = true;
+      // An autoplay video starts on its own clock too: stop that, so it moves
+      // only by our frames (it ran at double speed before, 8 Oct 2026).
+      if (v.autoplay && v.__wants === undefined) { v.__wants = true; window.__pause.call(v); }
       if (v.readyState < 1) continue;
       if (v.__wants && v.__last === v.currentTime) {
         const d = v.duration || 0, next = v.currentTime + ms / 1000;
@@ -97,10 +106,30 @@ const holdN = Math.round(HOLD * fps), scrollN = Math.round(secs * fps);
 let n = 0;
 const shot = async () => writeFileSync(join(dir, `${String(n++).padStart(5, '0')}.jpg`), Buffer.from((await cdp.send('Page.captureScreenshot', { format: 'jpeg', quality: 92, optimizeForSpeed: true })).data, 'base64'));
 for (let i = 0; i < holdN; i++) { await step(dt); await shot(); }
-for (let i = 1; i <= scrollN; i++) {
-  const t = i / scrollN, e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
-  await p.evaluate((y) => scrollTo(0, y), Math.round(max * (0.15 * t + 0.85 * e)));
-  await step(dt); await shot();
+const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+if (!STOPS.length) {
+  for (let i = 1; i <= scrollN; i++) {
+    const t = i / scrollN;
+    await p.evaluate((y) => scrollTo(0, y), Math.round(max * (0.15 * t + 0.85 * ease(t))));
+    await step(dt); await shot();
+  }
+} else {
+  // Glide from stop to stop (time shared by distance), hold at each.
+  let y0 = 0;
+  const legs = [];
+  for (const [sel, hold, tap] of STOPS) {
+    const y = await p.evaluate((s) => { const e = document.querySelector(s), r = e.getBoundingClientRect(); return Math.max(0, Math.min(document.documentElement.scrollHeight - innerHeight, r.top + scrollY - (innerHeight - r.height) / 2)); }, sel);
+    legs.push({ y: Math.round(y), hold: Number(hold || 3), tap });
+  }
+  legs.push({ y: max, hold: 0 });
+  const dist = legs.reduce((a, l, i) => a + Math.abs(l.y - (i ? legs[i - 1].y : 0)), 0) || 1;
+  for (const l of legs) {
+    const frames = Math.max(Math.round(fps * 0.8), Math.round(scrollN * Math.abs(l.y - y0) / dist));
+    for (let i = 1; i <= frames; i++) { await p.evaluate((y) => scrollTo(0, y), Math.round(y0 + (l.y - y0) * ease(i / frames))); await step(dt); await shot(); }
+    y0 = l.y;
+    if (l.tap) await p.evaluate((s) => document.querySelector(s)?.click(), l.tap);
+    for (let i = 0; i < Math.round(l.hold * fps); i++) { await step(dt); await shot(); }
+  }
 }
 for (let i = 0; i < holdN; i++) { await step(dt); await shot(); }
 await ctx.close(); await b.close();
