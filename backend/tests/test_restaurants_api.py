@@ -97,3 +97,47 @@ def test_admin_verify_and_hide(world):
     assert f"{tag}-near" not in ids(c.get("/api/restaurants", params={"city": "arad"}), tag)
     stats = c.get("/api/admin/restaurants/stats").json()
     assert next(x for x in stats["cities"] if x["city"] == "Arad")["listed"] >= 1
+
+
+def test_nearby_limit_report_and_claim(world):
+    tag, c = world
+    # 'far' is about 3 km from 'near'; a 1 km limit keeps only 'near'.
+    res = c.get("/api/restaurants", params={"lat": 31.258, "lng": 35.212, "max_km": 1, "city": "arad"}).json()
+    assert ids_of(res, tag) == [f"{tag}-near"] and res["total"] >= 1
+    assert c.post(f"/api/restaurants/{tag}-near/reports", json={"kind": "closed", "note": "shut last week"}).status_code == 200
+    assert c.post(f"/api/restaurants/{tag}-near/reports", json={"kind": "nonsense"}).status_code == 400
+    rep = next(x for x in c.get("/api/admin/restaurants/reports").json() if x["place_id"] == f"{tag}-near")
+    assert rep["restaurant"]["name"] == "Place near"
+    assert c.post(f"/api/admin/restaurants/reports/{rep['id']}/resolve").status_code == 200
+    assert c.post(f"/api/restaurants/{tag}-near/claims", json={"name": "Owner", "email": "o@example.com"}).status_code == 200
+    cl = next(x for x in c.get("/api/admin/restaurants/claims").json() if x["place_id"] == f"{tag}-near")
+    assert c.post(f"/api/admin/restaurants/claims/{cl['id']}/reject").status_code == 200
+    run(db.restaurant_reports.delete_many({"place_id": f"{tag}-near"}))
+    run(db.restaurant_claims.delete_many({"place_id": f"{tag}-near"}))
+
+
+def ids_of(body, tag):
+    return [x["id"] for x in body["items"] if x["id"].startswith(tag)]
+
+
+def test_upload_file_keeps_edits_and_drops_stale_locations(world):
+    tag, c = world
+    from datetime import UTC, datetime, timedelta
+    now = datetime.now(UTC).isoformat()
+    old = (datetime.now(UTC) - timedelta(days=40)).isoformat()
+    pt = {"type": "Point", "coordinates": [35.2, 31.25]}
+    rows = [
+        {"place_id": f"{tag}-up1", "source": "google", "city": "Arad", "status": "listed", "categories": ["pizza"],
+         "contact": {"name_en": "Up One"}, "location": pt, "location_fetched_at": now, "verified": True},
+        {"place_id": f"{tag}-up2", "source": "google", "city": "Arad", "status": "hidden", "categories": [],
+         "contact": {}, "location": pt, "location_fetched_at": old},
+        {"place_id": f"{tag}-up3", "city": "Atlantis"},
+    ]
+    assert c.post("/api/admin/restaurants/import", json={"restaurants": rows}).json() == {"new": 2, "updated": 0, "kept_edits": 0}
+    up1 = run(db.restaurants.find_one({"place_id": f"{tag}-up1"}))
+    up2 = run(db.restaurants.find_one({"place_id": f"{tag}-up2"}))
+    assert up1["verified"] is False                     # never imported
+    assert up2["location"] is None                       # older than 30 days
+    c.patch(f"/api/admin/restaurants/{tag}-up1", json={"name_en": "Edited here"})
+    assert c.post("/api/admin/restaurants/import", json={"restaurants": rows[:1]}).json()["kept_edits"] == 1
+    assert run(db.restaurants.find_one({"place_id": f"{tag}-up1"}))["contact"]["name_en"] == "Edited here"

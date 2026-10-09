@@ -13,7 +13,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { BadgeCheck, Check, ExternalLink, Loader2, Pencil, Plus, Search, X } from 'lucide-react';
+import { BadgeCheck, Check, ExternalLink, Loader2, Pencil, Plus, Search, Upload, X } from 'lucide-react';
 import { API } from '../../App';
 
 const BORDER = 'var(--brand-border)';
@@ -61,10 +61,47 @@ export default function RestaurantsTab({ token }) {
   const [adding, setAdding] = useState(false);
   const [add, setAdd] = useState({ city: 'Jerusalem', name_en: '', name_he: '', certification: '', kashrut: '', phone: '', website: '' });
 
+  const [reports, setReports] = useState([]);
+  const [claims, setClaims] = useState([]);
+  const [uploading, setUploading] = useState(false);
+
   const loadStats = useCallback(() => {
     axios.get(`${API}/admin/restaurants/stats`, auth).then((r) => setStats(r.data)).catch(() => {});
     axios.get(`${API}/admin/restaurants/submissions`, auth).then((r) => setSubs(r.data)).catch(() => {});
+    axios.get(`${API}/admin/restaurants/reports`, auth).then((r) => setReports(r.data)).catch(() => {});
+    axios.get(`${API}/admin/restaurants/claims`, auth).then((r) => setClaims(r.data)).catch(() => {});
   }, [token]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  // The places found on a developer's machine (scripts/export_restaurants.py)
+  // arrive here as one file; the server keeps anything already edited.
+  const upload = async (file) => {
+    if (!file) return;
+    setUploading(true);
+    try {
+      const body = JSON.parse(await file.text());
+      const { data } = await axios.post(`${API}/admin/restaurants/import`, body, auth);
+      toast.success(`Loaded: ${data.new} new, ${data.updated} updated, ${data.kept_edits} kept as edited`);
+      load(); loadStats();
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || 'That file could not be loaded');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const resolveReport = async (id) => {
+    await axios.post(`${API}/admin/restaurants/reports/${id}/resolve`, {}, auth).catch(() => {});
+    loadStats();
+  };
+  const decideClaim = async (id, d) => {
+    try {
+      await axios.post(`${API}/admin/restaurants/claims/${id}/${d}`, {}, auth);
+      toast.success(d === 'approve' ? 'Approved, the owner has been emailed' : 'Rejected');
+      loadStats();
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || 'Could not do that');
+    }
+  };
 
   const load = useCallback(() => {
     setRows(null);
@@ -115,8 +152,8 @@ export default function RestaurantsTab({ token }) {
   return (
     <div className="space-y-6" data-testid="admin-restaurants">
       {stats && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-          {[['Listed', stats.listed], ['Not yet checked by a person', stats.unverified], ['Held back for review', stats.hidden], ['Owner requests', stats.pending_submissions]].map(([k, v]) => (
+        <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+          {[['Listed', stats.listed], ['Not yet checked by a person', stats.unverified], ['Held back for review', stats.hidden], ['Owner requests', stats.pending_submissions + (stats.pending_claims || 0)], ['Reported changes', stats.open_reports || 0]].map(([k, v]) => (
             <div key={k} className="rounded-xl border bg-white p-4" style={{ borderColor: BORDER }}>
               <div className="text-xs text-gray-500">{k}</div>
               <div className="text-2xl font-semibold">{v}</div>
@@ -141,6 +178,43 @@ export default function RestaurantsTab({ token }) {
             </tbody>
           </table>
         </details>
+      )}
+
+      {reports.length > 0 && (
+        <div className="rounded-xl border bg-white p-4" style={{ borderColor: BORDER }} data-testid="admin-restaurant-reports">
+          <h3 className="text-sm font-semibold">Reported changes</h3>
+          {reports.map((r) => (
+            <div key={r.id} className="mt-3 flex flex-wrap items-start justify-between gap-3 border-t pt-3 text-sm" style={{ borderColor: BORDER }}>
+              <div>
+                <div className="font-semibold" dir="auto">{r.restaurant?.name || r.place_id} <span className="font-normal text-gray-500">· {r.restaurant?.city}</span></div>
+                <div>{r.kind.replace('_', ' ')}{r.note ? `: ${r.note}` : ''}</div>
+                {r.email && <div className="text-gray-500">{r.email}</div>}
+              </div>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => { setQ(r.restaurant?.name || ''); setStatus('listed'); }} className="rounded-full border px-3 py-1 text-xs font-semibold" style={{ borderColor: BORDER }}>Find it</button>
+                <button type="button" onClick={() => resolveReport(r.id)} className="rounded-full bg-black px-3 py-1 text-xs font-semibold text-white">Done</button>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {claims.length > 0 && (
+        <div className="rounded-xl border bg-white p-4" style={{ borderColor: BORDER }} data-testid="admin-restaurant-claims">
+          <h3 className="text-sm font-semibold">Owners claiming a listing</h3>
+          {claims.map((c) => (
+            <div key={c.id} className="mt-3 flex flex-wrap items-start justify-between gap-3 border-t pt-3 text-sm" style={{ borderColor: BORDER }}>
+              <div>
+                <div className="font-semibold" dir="auto">{c.restaurant?.name || c.place_id} <span className="font-normal text-gray-500">· {c.restaurant?.city}</span></div>
+                <div dir="auto">{c.name}{c.role ? ` (${c.role})` : ''} · {c.email}{c.phone ? ` · ${c.phone}` : ''}</div>
+              </div>
+              <div className="flex gap-2">
+                <button type="button" onClick={() => decideClaim(c.id, 'approve')} className="rounded-full bg-black px-3 py-1 text-xs font-semibold text-white">Approve and email</button>
+                <button type="button" onClick={() => decideClaim(c.id, 'reject')} className="rounded-full border px-3 py-1 text-xs font-semibold" style={{ borderColor: BORDER }}>Reject</button>
+              </div>
+            </div>
+          ))}
+        </div>
       )}
 
       {subs.length > 0 && (
@@ -183,6 +257,11 @@ export default function RestaurantsTab({ token }) {
         <button type="button" onClick={() => setAdding((a) => !a)} className="inline-flex items-center gap-1 rounded-full border bg-white px-3 py-1.5 text-sm font-semibold" style={{ borderColor: BORDER }}>
           <Plus size={14} /> Add a restaurant
         </button>
+        <label className="inline-flex cursor-pointer items-center gap-1 rounded-full border bg-white px-3 py-1.5 text-sm font-semibold" style={{ borderColor: BORDER }} data-testid="admin-restaurants-upload">
+          <Upload size={14} /> {uploading ? 'Loading…' : 'Load restaurants file'}
+          <input type="file" accept="application/json,.json" className="hidden" disabled={uploading}
+            onChange={(e) => { upload(e.target.files?.[0]); e.target.value = ''; }} />
+        </label>
       </div>
 
       {adding && (

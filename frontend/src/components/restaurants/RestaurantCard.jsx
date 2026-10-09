@@ -12,12 +12,13 @@
  * Honest labels: a hechsher read off the restaurant's own website says so.
  * "Certificate checked" is only shown once a person has verified it.
  */
-import React from 'react';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   BadgeCheck, Beef, Coffee, Croissant, EggFried, Fish, Globe, Hamburger,
   IceCreamCone, MapPin, MessageCircle, Navigation, Phone, Pizza, Salad, Sandwich, Soup, UtensilsCrossed,
 } from 'lucide-react';
+import RestaurantFeedback from './RestaurantFeedback';
 
 export const CATEGORY_ICONS = {
   pizza: Pizza, burgers: Hamburger, meat_grill: Beef, sushi_asian: Soup, cafe: Coffee,
@@ -67,6 +68,7 @@ export default function RestaurantCard({ r, active }) {
   const Icon = CATEGORY_ICONS[r.categories[0]] || UtensilsCrossed;
   const cats = r.categories.slice(0, 2).map((c) => categoryLabel(t, c)).join(', ');
   const where = [r.neighborhood, (he && r.city_he) || r.city].filter(Boolean).join(', ');
+  const [panel, setPanel] = useState(null);
   const tel = r.phone ? `tel:${r.phone.replace(/[^\d+*]/g, '')}` : null;
 
   return (
@@ -138,6 +140,18 @@ export default function RestaurantCard({ r, active }) {
             </Action>
           )}
         </div>
+        {/* Kashrut changes: anyone can say so, the owner can take the listing over. */}
+        {!panel && (
+          <div className="mt-2 flex flex-wrap gap-x-4 text-xs">
+            <button type="button" onClick={() => setPanel('report')} className="text-gray-500 underline-offset-2 hover:underline" data-testid="restaurant-report">
+              {t('restaurants.report', 'Report a change')}
+            </button>
+            <button type="button" onClick={() => setPanel('claim')} className="text-gray-500 underline-offset-2 hover:underline" data-testid="restaurant-claim">
+              {t('restaurants.claim', 'Is this your restaurant?')}
+            </button>
+          </div>
+        )}
+        {panel && <RestaurantFeedback id={r.id} mode={panel} onDone={() => setPanel(null)} />}
       </div>
     </article>
   );

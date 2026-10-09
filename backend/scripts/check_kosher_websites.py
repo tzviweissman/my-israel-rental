@@ -63,7 +63,7 @@ CERTIFIERS = [
     (r'((?-i:\bOU\b)|orthodox\s*union)', "OU"),
     (r'((רבנות|rabbanut|rabbinate)[^.\n]{0,40}(מהדרין|mehadrin))|((מהדרין|mehadrin)[^.\n]{0,40}(רבנות|rabbanut|rabbinate))', "Rabbanut, Mehadrin"),
     (r'(רבנות|rabbanut|rabbinate|chief\s*rabbinate)', "Rabbanut"),
-    (r'(בד"?״?ץ|badatz)', "Badatz (name not given)"),
+    (r'(בד"?״?ץ|badatz)', "Badatz"),
 ]
 NOT_KOSHER = r'(לא כשר|אינו כשר|not\s+kosher|non[-\s]?kosher)'
 KOSHER = r'(כשר|כשרות|השגחה|kosher|kashrut|hashgacha|mehadrin|מהדרין)'
@@ -157,7 +157,9 @@ def tidy_contact(c):
         wa = "972" + wa[4:]
     c["whatsapp"] = wa if re.fullmatch(r'972(5\d)\d{7}', wa) or (wa and not wa.startswith("972") and 10 <= len(wa) <= 15) else None
     for k in ("name_en", "name_he"):
-        if c.get(k) and GENERIC_NAMES.match(c[k].strip()):
+        # A generic word, or the site's own address ("momento-events.co.il"),
+        # is not a name: a person fills it in from the admin tab.
+        if c.get(k) and (GENERIC_NAMES.match(c[k].strip()) or re.search(r'\.(co\.il|com|org|net|co|il)\b', c[k], re.I)):
             c[k] = None
     if not (c.get("name_en") or c.get("name_he")):
         reasons.append("no name from their site")

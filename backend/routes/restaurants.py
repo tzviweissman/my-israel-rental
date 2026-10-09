@@ -12,7 +12,7 @@ hechsher found) wait in the admin queue; "removed" is a soft delete.
 """
 import re
 import uuid
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
@@ -83,16 +83,21 @@ async def list_restaurants(
     category: Optional[str] = None, kashrut: Optional[str] = None, certifier: Optional[str] = None,
     q: Optional[str] = None,
     lat: Optional[float] = Query(None, ge=-90, le=90), lng: Optional[float] = Query(None, ge=-180, le=180),
+    max_km: Optional[float] = Query(None, gt=0, le=200),
     page: int = Query(1, ge=1, le=500), limit: int = Query(24, ge=1, le=100),
 ):
     f = _filters(city, neighborhood, region, category, kashrut, certifier, q)
-    total = await db.restaurants.count_documents(f)
+    near = lat is not None and lng is not None
+    within = ({"$and": [f, {"location": {"$geoWithin": {"$centerSphere": [[lng, lat], max_km / 6378.1]}}}]}
+              if near and max_km else f)
+    total = await db.restaurants.count_documents(within)
     skip = (page - 1) * limit
-    if lat is not None and lng is not None:
+    if near:
         # Nearest first. $geoNear must open the pipeline; places whose map
         # location has lapsed (30-day rule) simply drop out of this view.
         pipe = [{"$geoNear": {"near": {"type": "Point", "coordinates": [lng, lat]}, "distanceField": "_dist",
-                              "query": f, "spherical": True}},
+                              "query": f, "spherical": True,
+                              **({"maxDistance": max_km * 1000} if max_km else {})}},
                 {"$skip": skip}, {"$limit": limit}]
         docs = await db.restaurants.aggregate(pipe).to_list(limit)
         items = [_card(d, d["_dist"] / 1000) for d in docs]
@@ -262,6 +267,8 @@ async def admin_stats(payload: dict = Depends(verify_token)):
         "unverified": sum(x["unverified"] for x in cities),
         "hidden": sum(x["hidden"] for x in cities),
         "pending_submissions": await db.restaurant_submissions.count_documents({"status": "pending"}),
+        "open_reports": await db.restaurant_reports.count_documents({"status": "open"}),
+        "pending_claims": await db.restaurant_claims.count_documents({"status": "pending"}),
     }
 
 
@@ -295,6 +302,52 @@ async def admin_add(body: AdminNew, payload: dict = Depends(verify_token)):
     return _card(await db.restaurants.find_one({"place_id": pid}))
 
 
+IMPORT_FIELDS = ("source", "city", "region", "neighborhood", "categories", "kashrut", "kosher_certification",
+                 "kosher_check", "contact", "status", "first_seen_at", "last_synced_at")
+
+
+class ImportBody(BaseModel):
+    restaurants: list[dict]
+
+
+@router.post("/admin/restaurants/import")
+async def admin_import(body: ImportBody, payload: dict = Depends(verify_token)):
+    """Load restaurants found on a developer's machine (scripts/
+    export_restaurants.py) into this database. Upserts by place ID. A place
+    a person has edited here keeps its edits; only its map location is
+    refreshed. Locations older than 30 days are dropped (Google's terms)."""
+    _admin_only(payload)
+    cutoff = (datetime.now(UTC) - timedelta(days=30)).isoformat()
+    new = updated = kept = 0
+    for r in body.restaurants[:20000]:
+        pid = r.get("place_id")
+        if not pid or r.get("city") not in CITIES:
+            continue
+        fresh = (r.get("location_fetched_at") or "") >= cutoff
+        loc = {"location": r.get("location") if fresh else None,
+               "location_fetched_at": r.get("location_fetched_at") if fresh else None}
+        have = await db.restaurants.find_one({"place_id": pid}, {"edited_at": 1})
+        if have and have.get("edited_at"):
+            await db.restaurants.update_one({"place_id": pid}, {"$set": loc})
+            kept += 1
+            continue
+        # `verified` is never imported: it means a person checked the
+        # certificate on THIS site, so a new place starts unchecked.
+        doc = {k: r.get(k) for k in IMPORT_FIELDS}
+        await db.restaurants.update_one(
+            {"place_id": pid},
+            {"$set": {**doc, **loc}, "$setOnInsert": {"place_id": pid, "verified": False}},
+            upsert=True)
+        if have:
+            updated += 1
+        else:
+            new += 1
+    await db.restaurants.create_index("place_id", unique=True)
+    await db.restaurants.create_index([("location", "2dsphere")])
+    await db.restaurants.create_index([("city", 1), ("neighborhood", 1)])
+    return {"new": new, "updated": updated, "kept_edits": kept}
+
+
 @router.get("/admin/restaurants/submissions")
 async def admin_submissions(payload: dict = Depends(verify_token), status: str = "pending"):
     _admin_only(payload)
@@ -326,3 +379,119 @@ async def admin_decide(sub_id: str, decision: str, payload: dict = Depends(verif
         "status": "approved" if decision == "approve" else "rejected", "decided_at": _now(),
         "decided_by": payload.get("user_id"), "restaurant_id": card["id"] if card else None}})
     return {"ok": True, "restaurant": card}
+
+
+# --------------------------------------------------------------- reports and claims
+#
+# Kashrut changes: a certificate lapses, a place changes hands, a branch
+# closes. Anyone can say so from the card ("Report a change"); it lands in
+# the admin tab, nothing changes until a person acts. An owner can claim
+# their listing; once approved they are emailed a link to keep it current
+# and to open a free business page here.
+
+REPORT_KINDS = ("closed", "hechsher_changed", "not_kosher", "wrong_details", "other")
+
+
+class Report(BaseModel):
+    kind: str
+    note: str = Field("", max_length=1000)
+    email: str = Field("", max_length=200)
+
+
+class Claim(BaseModel):
+    name: str = Field(..., min_length=2, max_length=120)
+    email: str = Field(..., min_length=5, max_length=200)
+    phone: str = Field("", max_length=40)
+    role: str = Field("", max_length=80)
+    note: str = Field("", max_length=1000)
+
+
+async def _listed_or_404(place_id):
+    d = await db.restaurants.find_one({"place_id": place_id, "status": "listed"}, {"place_id": 1, "contact": 1, "city": 1})
+    if not d:
+        raise HTTPException(404, "Restaurant not found")
+    return d
+
+
+@router.post("/restaurants/{place_id}/reports")
+async def report_change(place_id: str, body: Report, request: Request):
+    check_rate(request, bucket="restaurant-report", limit=10, window_seconds=3600)
+    if body.kind not in REPORT_KINDS:
+        raise HTTPException(400, "Unknown report type")
+    await _listed_or_404(place_id)
+    await db.restaurant_reports.insert_one({"id": str(uuid.uuid4()), "place_id": place_id, **body.model_dump(),
+                                            "status": "open", "created_at": _now()})
+    return {"ok": True}
+
+
+@router.post("/restaurants/{place_id}/claims")
+async def claim_listing(place_id: str, body: Claim, request: Request):
+    check_rate(request, bucket="restaurant-claim", limit=5, window_seconds=3600)
+    if "@" not in body.email:
+        raise HTTPException(400, "Please give an email we can reach you at")
+    await _listed_or_404(place_id)
+    await db.restaurant_claims.insert_one({"id": str(uuid.uuid4()), "place_id": place_id, **body.model_dump(),
+                                           "status": "pending", "created_at": _now()})
+    return {"ok": True}
+
+
+async def _with_names(rows):
+    ids = list({r["place_id"] for r in rows})
+    names = {d["place_id"]: d async for d in db.restaurants.find({"place_id": {"$in": ids}}, {"place_id": 1, "contact": 1, "city": 1})}
+    for r in rows:
+        d = names.get(r["place_id"]) or {}
+        c = d.get("contact") or {}
+        r["restaurant"] = {"name": c.get("name_en") or c.get("name_he"), "city": d.get("city")}
+    return rows
+
+
+@router.get("/admin/restaurants/reports")
+async def admin_reports(payload: dict = Depends(verify_token), status: str = "open"):
+    _admin_only(payload)
+    return await _with_names(await db.restaurant_reports.find({"status": status}, {"_id": 0}).sort("created_at", -1).to_list(300))
+
+
+@router.post("/admin/restaurants/reports/{report_id}/resolve")
+async def admin_resolve_report(report_id: str, payload: dict = Depends(verify_token)):
+    _admin_only(payload)
+    r = await db.restaurant_reports.update_one({"id": report_id}, {"$set": {
+        "status": "resolved", "resolved_at": _now(), "resolved_by": payload.get("user_id")}})
+    if not r.matched_count:
+        raise HTTPException(404, "No such report")
+    return {"ok": True}
+
+
+@router.get("/admin/restaurants/claims")
+async def admin_claims(payload: dict = Depends(verify_token), status: str = "pending"):
+    _admin_only(payload)
+    return await _with_names(await db.restaurant_claims.find({"status": status}, {"_id": 0}).sort("created_at", -1).to_list(300))
+
+
+@router.post("/admin/restaurants/claims/{claim_id}/{decision}")
+async def admin_decide_claim(claim_id: str, decision: str, payload: dict = Depends(verify_token)):
+    """approve: the listing is marked as managed by the claimant and they are
+    emailed how to keep it current and open a free business page."""
+    _admin_only(payload)
+    if decision not in ("approve", "reject"):
+        raise HTTPException(400, "approve or reject")
+    c = await db.restaurant_claims.find_one({"id": claim_id, "status": "pending"})
+    if not c:
+        raise HTTPException(404, "No pending claim with that id")
+    if decision == "approve":
+        await db.restaurants.update_one({"place_id": c["place_id"]}, {"$set": {
+            "claimed": {"email": c["email"], "name": c["name"], "at": _now()}}})
+        from utils.email import FRONTEND_URL, _button, _esc, _wrap, send_email
+        d = await db.restaurants.find_one({"place_id": c["place_id"]}, {"contact": 1, "city": 1}) or {}
+        name = (d.get("contact") or {}).get("name_en") or (d.get("contact") or {}).get("name_he") or "your restaurant"
+        html = _wrap(f"""
+          <h2 style="margin:0 0 12px">You now manage {_esc(name)} on MyIsraelRental</h2>
+          <p>Thank you, {_esc(c['name'])}. Your claim is approved. When your hechsher, hours or phone change,
+          reply to this email and we update the listing the same day.</p>
+          <p>You can also open a free business page: your menu, photos and orders, with no commission.</p>
+          {_button("Open your free business page", f"{FRONTEND_URL}/signup?redirect=%2Fbusinesses%2Fadd")}
+        """, preheader="Your restaurant listing is approved")
+        await send_email(c["email"], f"{name}: your listing is approved", html, tag="restaurant-claim")
+    await db.restaurant_claims.update_one({"id": claim_id}, {"$set": {
+        "status": "approved" if decision == "approve" else "rejected", "decided_at": _now(),
+        "decided_by": payload.get("user_id")}})
+    return {"ok": True}

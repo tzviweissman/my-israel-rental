@@ -23,6 +23,9 @@ export default function SiteFooter() {
     { to: '/stays', label: t('nav.stays', 'Stays') },
     { to: '/businesses', label: t('nav.services', 'Businesses') },
     { to: '/requests', label: t('nav.requests', 'Marketplace') },
+    // The kosher directory: in the footer, not the main nav, whose order
+    // (Stays, Businesses, Marketplace) is fixed.
+    { to: '/restaurants', label: t('restaurants.footerLink', 'Kosher restaurants') },
     // F4 — the feature library is linked from the footer, so it is
     // reachable from every page rather than only from the dashboard.
     { to: '/what-you-can-do', label: t('features.title', 'What you can do here') },

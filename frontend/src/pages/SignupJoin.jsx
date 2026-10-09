@@ -552,7 +552,7 @@ const SignupJoin = () => {
                     <button
                       type="button"
                       onClick={() => setShowPwd((s) => !s)}
-                      className="absolute end-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+                      className="absolute end-0 top-1/2 -translate-y-1/2 flex h-11 w-11 items-center justify-center text-gray-500 hover:text-gray-800"
                       aria-label={showPwd ? 'Hide password' : 'Show password'}
                       data-testid="signup-password-toggle"
                     >

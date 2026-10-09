@@ -17,6 +17,7 @@ import PropertyStats from '../components/property/PropertyStats';
 import AmenitiesList from '../components/property/AmenitiesList';
 import BookingSidebar from '../components/property/BookingSidebar';
 import ReviewsSection from '../components/reviews/ReviewsSection';
+import KosherNearby from '../components/restaurants/KosherNearby';
 import MovingServicesCrossSell from '../components/services/MovingServicesCrossSell';
 import Breadcrumb from '../components/common/Breadcrumb';
 import QrShareCard from '../components/common/QrShareCard';
@@ -644,6 +645,10 @@ const PropertyDetail = () => {
               className="mt-8 bg-white p-6 rounded-2xl border border-[var(--brand-border)]"
               schemaItem={{ '@type': 'Accommodation', name: property.title }}
             />
+
+            {/* Where a guest can eat: certified places within 2 km.
+                Renders nothing when there are none. */}
+            <KosherNearby lat={property.lat} lng={property.lng} />
           </div>
 
           <div className="lg:col-span-1" id={property.page_upgrade ? 'property-booking' : undefined}>
