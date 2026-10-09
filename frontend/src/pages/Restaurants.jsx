@@ -21,6 +21,7 @@ import SiteFooter from '../components/common/SiteFooter';
 import RestaurantCard, { CATEGORY_ICONS, categoryLabel } from '../components/restaurants/RestaurantCard';
 import RestaurantsMapView from '../components/restaurants/RestaurantsMapView';
 import GetListedForm from '../components/restaurants/GetListedForm';
+import CATEGORY_PHOTOS from '../data/restaurantCategoryPhotos';
 
 const PAGE = 24;
 
@@ -115,7 +116,7 @@ export default function Restaurants() {
   const filtered = !!(category || kashrut || hood || certifier || query || region);
 
   return (
-    <div className="min-h-screen" style={{ background: '#F9FAFB' }} data-testid="restaurants-page">
+    <div className="min-h-screen" style={{ background: 'var(--surface-muted, #F9FAFB)' }} data-testid="restaurants-page">
       <PageMeta
         title={`${title} | MyIsraelRental`}
         description={t('restaurants.metaDescription', {
@@ -177,28 +178,42 @@ export default function Restaurants() {
           </button>
         </form>
 
-        {/* categories, one style for all */}
-        <div className="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1" data-testid="restaurants-categories">
+        {/* Categories as photo tiles (Tzvi, 8 Oct 2026, after adr.it's food
+            tiles: "high end and really clean"). One dish on one cream ground
+            per tile, the name under it; no borders, no colours per category.
+            A category without its photo yet shows its icon on the same
+            ground, so the row never looks half-built. */}
+        <div className="-mx-4 mt-6 flex gap-4 overflow-x-auto px-4 pt-2 pb-3 sm:gap-5" data-testid="restaurants-categories">
           {(facets?.categories || []).map(({ key, count }) => {
             const Icon = CATEGORY_ICONS[key] || UtensilsCrossed;
             const on = category === key;
+            const photo = CATEGORY_PHOTOS[key];
             return (
               <button
                 key={key}
                 type="button"
                 onClick={() => setCategory(on ? '' : key)}
                 aria-pressed={on}
-                className="flex w-24 shrink-0 flex-col items-center gap-1.5 rounded-2xl border bg-white px-2 py-3 text-center text-xs font-semibold transition-colors active:scale-[0.97]"
-                style={{ borderColor: on ? 'var(--brand-primary)' : 'var(--brand-border)', color: 'var(--ink)',
-                  boxShadow: on ? '0 0 0 1px var(--brand-primary)' : 'none' }}
+                className="group flex w-[104px] shrink-0 flex-col items-center gap-2.5 text-center sm:w-[120px]"
                 data-testid={`restaurants-cat-${key}`}
               >
-                <span className="flex h-10 w-10 items-center justify-center rounded-xl"
-                  style={{ background: on ? 'var(--brand-primary)' : 'rgb(var(--brand-primary-rgb) / 0.08)', color: on ? '#fff' : 'var(--brand-primary)' }}>
-                  <Icon size={20} aria-hidden="true" />
+                <span
+                  className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-[22px] transition-transform duration-200 group-hover:-translate-y-0.5 group-active:scale-[0.97]"
+                  style={{
+                    background: '#F6EDE3',
+                    boxShadow: on
+                      ? '0 0 0 2.5px var(--brand-primary), 0 12px 24px -14px rgba(17,24,39,0.35)'
+                      : '0 12px 24px -14px rgba(17,24,39,0.35)',
+                  }}
+                >
+                  {photo
+                    ? <img src={photo} alt="" loading="lazy" width="240" height="240" className="h-full w-full object-cover" />
+                    : <Icon size={34} aria-hidden="true" style={{ color: 'var(--brand-primary)' }} />}
                 </span>
-                <span className="leading-tight">{categoryLabel(t, key)}</span>
-                <span className="font-normal text-gray-500">{count}</span>
+                <span className="text-sm leading-tight" style={{ color: 'var(--ink)', fontWeight: on ? 700 : 500 }}>
+                  {categoryLabel(t, key)}
+                </span>
+                <span className="-mt-1.5 text-xs text-gray-500">{count}</span>
               </button>
             );
           })}
