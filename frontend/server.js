@@ -211,6 +211,116 @@ const HAND_BUILT = (() => {
     return new Set();
   }
 })();
+/* ─────────────────────────────────────────────────────────────────────
+   Owner edits on a hand-built page (Tzvi, 9 Oct 2026: edit it like Claude
+   Design). publish-page.mjs marks what may be edited with data-mir-key; the
+   owner's saved edits (backend routes/marketplace/page_edits.py) are applied
+   HERE, to the HTML, so a visitor never sees the old version first. Fails
+   open: no answer from the API in time means the page as designed.
+   ───────────────────────────────────────────────────────────────────── */
+// Short: an owner who saves and opens their page sees the change (and
+// ?fresh skips it entirely, which the editor's "View live" uses).
+const EDITS_TTL_MS = 5000;
+const editsCache = new Map();
+async function pageEdits(slug, fresh) {
+  const hit = editsCache.get(slug);
+  if (!fresh && hit && Date.now() - hit.at < EDITS_TTL_MS) return hit.data;
+  const control = new AbortController();
+  const timer = setTimeout(() => control.abort(), 1500);
+  try {
+    const res = await fetch(`${API_ORIGIN}/api/marketplace/business/${encodeURIComponent(slug)}/page-edits`, { signal: control.signal });
+    const data = res.ok ? await res.json() : null;
+    editsCache.set(slug, { at: Date.now(), data });
+    return data;
+  } catch {
+    return hit ? hit.data : null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+const KEY_OK = /^[ti]-[0-9a-z]{4,12}-\d{1,3}$/;
+const escAttr = (v) => String(v).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+function styleRules(style) {
+  const css = { d: [], m: [] };
+  for (const [key, devs] of Object.entries(style || {})) {
+    if (!KEY_OK.test(key)) continue;
+    for (const dev of ['d', 'm']) {
+      const v = devs && devs[dev];
+      if (!v) continue;
+      const decl = [];
+      if (Number.isFinite(v.x) || Number.isFinite(v.y)) decl.push(`translate:${Number(v.x) || 0}px ${Number(v.y) || 0}px`);
+      if (Number.isFinite(v.s) && v.s !== 1) decl.push(`scale:${v.s}`);
+      if (v.a) decl.push(`text-align:${{ l: 'left', c: 'center', r: 'right' }[v.a] || 'inherit'}`);
+      if (v.h) decl.push('display:none');
+      if (decl.length) css[dev].push(`[data-mir-key="${key}"]{${decl.map((d) => `${d} !important`).join(';')}}`);
+    }
+  }
+  // Laptop edits hold everywhere a phone edit does not override.
+  return `${css.d.join('')}@media (max-width:767px){${css.m.join('')}}`;
+}
+function applyEdits(html, edits, editor) {
+  let out = html;
+  if (edits) {
+    for (const [key, val] of Object.entries(edits.text || {})) {
+      if (!KEY_OK.test(key)) continue;
+      // The backend keeps only plain inline formatting; the marked element
+      // never contains its own tag, so its end is the first close tag.
+      const re = new RegExp(`(<([a-z0-9]+)\\b[^>]*\\sdata-mir-key="${key}"[^>]*>)[\\s\\S]*?(</\\2>)`, 'i');
+      out = out.replace(re, (m, open, tag, close) => `${open}${val}${close}`);
+    }
+    for (const [key, url] of Object.entries(edits.img || {})) {
+      if (!KEY_OK.test(key) || !/^https:\/\//.test(url)) continue;
+      const re = new RegExp(`<img\\b[^>]*\\sdata-mir-key="${key}"[^>]*>`, 'i');
+      out = out.replace(re, (tag) => tag
+        .replace(/\s(?:srcset|sizes)="[^"]*"/gi, '')
+        .replace(/\ssrc="[^"]*"/i, ` src="${escAttr(url)}"`));
+    }
+    const css = styleRules(edits.style);
+    if (!css.endsWith('{}') || css.length > 26) out = out.replace(/<\/head>/i, `<style id="mir-edits">${css}</style></head>`);
+  }
+  if (editor) {
+    // The dashboard's editor (src/pages/PageEditor.jsx) frames the page with
+    // ?mir-edit=1; it gets the edits as data and the editing script.
+    const data = JSON.stringify(edits || {}).replace(/</g, '\\u003c');
+    out = out.replace(/<\/body>/i, `<script id="mir-edits-data" type="application/json">${data}</script><script src="/pages/mir-editor.js?v=${EDITOR_STAMP}"></script></body>`);
+  }
+  return out;
+}
+/* Prices from the business's own listings. pages/<slug>/prices.json says
+   which listing each price on the page shows ({"Personal Training": {"was":
+   60, "sym": "₪"}}); when the listing's price differs, "₪60" (or "60 NIS")
+   in the page's text becomes the new price. Not inside its scripts, and not
+   when two items show the same number, where it cannot tell which is which. */
+function applyPrices(html, slug, live) {
+  if (!live) return html;
+  let map;
+  try { map = JSON.parse(fs.readFileSync(path.join(BUILD, 'pages', slug, 'prices.json'), 'utf8')); } catch { return html; }
+  const shown = {};
+  for (const v of Object.values(map)) shown[`${v.sym}${v.was}`] = (shown[`${v.sym}${v.was}`] || 0) + 1;
+  const swaps = [];
+  for (const [name, v] of Object.entries(map)) {
+    const now = Number(live[name]);
+    if (!Number.isFinite(now) || now < 0 || now === v.was || shown[`${v.sym}${v.was}`] > 1) continue;
+    const fmt = Number.isInteger(now) ? String(now) : now.toFixed(2);
+    const sym = String(v.sym).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    swaps.push([new RegExp(`(${sym}\\s?)${v.was}(?![\\d.,])`, 'g'), `$1${fmt}`]);
+    if (v.sym === '₪') swaps.push([new RegExp(`(?<![\\d.,])${v.was}(\\s?NIS)`, 'g'), `${fmt}$1`]);
+  }
+  if (!swaps.length) return html;
+  return html.split(/(<script\b[\s\S]*?<\/script>)/i).map((part) => {
+    if (/^<script\b/i.test(part)) return part;
+    return swaps.reduce((s, [re, to]) => s.replace(re, to), part);
+  }).join('');
+}
+const EDITOR_STAMP = Date.now().toString(36);
+async function sendHandBuilt(req, res, slug, file) {
+  const raw = fs.readFileSync(path.join(BUILD, 'pages', slug, file), 'utf8');
+  const editor = /[?&]mir-edit=1(?:&|$)/.test(req.url || '');
+  const data = await pageEdits(slug, editor || /[?&]fresh(?:=|&|$)/.test(req.url || ''));
+  res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+  res.end(applyPrices(applyEdits(raw, data && data.edits, editor), slug, data && data.prices));
+}
+
 
 /* ─────────────────────────────────────────────────────────────────────
    SAME-ORIGIN API PROXY
@@ -411,18 +521,14 @@ const server = http.createServer(async (req, res) => {
   const pageFile = HAND_BUILT_FILE.exec(pathname || '');
   if (pageFile && HAND_BUILT.has(pageFile[1])) {
     try {
-      const html = fs.readFileSync(path.join(BUILD, 'pages', pageFile[1], `${pageFile[2]}.html`));
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
-      res.end(html);
+      await sendHandBuilt(req, res, pageFile[1], `${pageFile[2]}.html`);
       return;
     } catch { /* not there: fall through to the normal handler */ }
   }
   const built = hostSlug && pathname === '/' ? hostSlug : businessSlug(req);
   if (built && HAND_BUILT.has(built)) {
     try {
-      const html = fs.readFileSync(path.join(BUILD, 'pages', built, 'index.html'));
-      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
-      res.end(html);
+      await sendHandBuilt(req, res, built, 'index.html');
       return;
     } catch {
       // Listed but missing from the build: the standard page, never an error.

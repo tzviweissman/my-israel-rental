@@ -27,12 +27,17 @@ import { BusinessHoursPanel } from './OrdersTab';
 import LookingForYou from './LookingForYou';
 import ShareListingsPanel from './ShareListingsPanel';
 import { businessPublicUrl } from '../../utils/businessHost';
+import { handBuiltList } from '../../utils/handBuiltPages';
 
 const MAX_ACTIVE = 5;
 
 export default function MyBusinessesTab({ API, token }) {
   const { t } = useTranslation();
   const [items, setItems] = useState(null);
+  // Businesses whose page was designed for them: theirs is edited in place
+  // (pages/PageEditor.jsx), not with the page designer.
+  const [handBuilt, setHandBuilt] = useState([]);
+  useEffect(() => { handBuiltList().then(setHandBuilt); }, []);
   const [busy, setBusy] = useState(false);
   const [adding, setAdding] = useState(false);
   const [name, setName] = useState('');
@@ -445,6 +450,17 @@ export default function MyBusinessesTab({ API, token }) {
 
                 {/* K3 — accent, cover and payment links, against a live
                     preview of the page they change. */}
+                {handBuilt.includes(b.slug) ? (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/dashboard/page-editor/${b.id}`)}
+                  className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
+                  style={{ color: 'var(--brand-primary)' }}
+                  data-testid={`business-edit-page-${b.id}`}
+                >
+                  <Palette size={12} /> {t('pageEditor.open', 'Edit your page')}
+                </button>
+                ) : (
                 <button
                   type="button"
                   onClick={() => setDesignBiz(b)}
@@ -458,6 +474,7 @@ export default function MyBusinessesTab({ API, token }) {
                 >
                   <Palette size={12} /> {t('pageDesign.open', 'Design your page')}
                 </button>
+                )}
 
                 <button
                   type="button"

@@ -76,3 +76,47 @@ page scrolling) and `<slug>.webp` (its still). Then add the business to
 in their words) and `line_he`, and `logo` (a 96 px square in the same
 folder) or `mark` + `markColor` + `markInk` when there is no logo. Newest
 first.
+
+## The owner edits it in their dashboard (9 Oct 2026)
+
+Tzvi: "easy to move text or change text like I can on Claude design ... or
+photos". A business with a hand-built page gets **Edit your page** in its
+dashboard card (MyBusinessesTab), which opens `/dashboard/page-editor/<id>`
+(`src/pages/PageEditor.jsx`). There they click text to select it and click
+again to type, drag anything to move it (laptop and phone moves are kept
+separately), make it bigger or smaller, align or hide it, and replace a
+photo. Undo, redo, Save, and "Original design" to drop every saved change.
+
+How it fits together:
+
+- **publish-page.mjs** marks what may be edited with `data-mir-key`: every
+  `<img>`, and the outermost element that holds text directly with only
+  inline formatting inside. Keys hash the original content, so a republish
+  of unchanged content keeps the owner's edits; text the page's own script
+  writes (an `aria-live` total, an element its script finds by id) is left
+  alone. `data-mir-skip` on an element keeps it and everything inside it out.
+- **Edits are saved** by `routes/marketplace/page_edits.py`
+  (`PUT /marketplace/businesses/{id}/page-edits`, owner or admin; `DELETE`
+  resets). Text keeps only inline formatting and safe links; photos must be
+  https; moves and sizes are bounded numbers.
+- **frontend/server.js applies them** when it serves the page (text, photo,
+  a style block for moves), so visitors never see the old version first.
+  With `?mir-edit=1` it also adds `public/pages/mir-editor.js`, which is the
+  editing itself; the dashboard frames that.
+
+## Prices follow the dashboard
+
+Put a `prices.json` in the build folder naming which listing each price on
+the page shows:
+
+```
+{ "Personal Training": { "was": 60, "sym": "₪" } }
+```
+
+The name is the product or tier name exactly as in their listing. When the
+listing's price changes, server.js changes "₪60" (and "60 NIS") in the
+page's text to the new price. It does not touch the page's own scripts, and
+it skips a price two items share, since it cannot tell them apart. Set up
+for Michal Yodaiken, KasherMyBnb and Blazin' Boards; Bun Intended's listing
+has one price for every flavour and La Cholent's prices live in its script,
+so those two are not synced.

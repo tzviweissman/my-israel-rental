@@ -119,6 +119,7 @@ const WhyHost = lazy(() => import('./pages/WhyHost'));
 // The feature library (perks spec Part 1). Lazy like its neighbours:
 // it is a marketing surface, not part of the first paint.
 const WhatYouCanDo = lazy(() => import('./pages/WhatYouCanDo'));
+const PageEditor = lazy(() => import('./pages/PageEditor'));
 const Restaurants = lazy(() => import('./pages/Restaurants'));
 const GrowthGuide = lazy(() => import('./pages/GrowthGuide'));
 const FeatureDetail = lazy(() => import('./pages/FeatureDetail'));
@@ -417,6 +418,8 @@ function App() {
             <Route path="/verify-pending" element={<VerifyPending />} />
             <Route path="/verify-email" element={<VerifyEmail />} />
             <Route path="/dashboard" element={user ? <Dashboard /> : <ToAuth />} />
+            {/* Editing a page designed for the business (hand-built), in place. */}
+            <Route path="/dashboard/page-editor/:businessId" element={user ? <PageEditor /> : <ToAuth />} />
             <Route path="/dashboard/settings" element={user ? <Dashboard /> : <ToAuth />} />
             <Route path="/auth/deeplink" element={<AuthDeeplink />} />
             <Route path="/notification-snooze" element={<NotificationSnooze />} />

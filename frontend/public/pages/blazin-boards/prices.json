@@ -1,0 +1,12 @@
+{
+  "mini board": { "was": 75, "sym": "$" },
+  "Small Blazin Board": { "was": 149, "sym": "$" },
+  "Jerky Board": { "was": 149, "sym": "$" },
+  "Medum Blazin Board": { "was": 250, "sym": "$" },
+  "Small premium steak board": { "was": 250, "sym": "$" },
+  "Large  Blazin Board": { "was": 385, "sym": "$" },
+  "Medium Premium steak board": { "was": 350, "sym": "$" },
+  "Large Premium Steak Board": { "was": 485, "sym": "$" },
+  "VIP Board": { "was": 700, "sym": "$" },
+  "Party Board": { "was": 750, "sym": "$" }
+}

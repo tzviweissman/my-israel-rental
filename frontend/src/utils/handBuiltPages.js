@@ -26,6 +26,19 @@ export function loadHandBuilt() {
   return pending;
 }
 
+/* The list itself, in any build: the dashboard's "Edit your page" needs it
+   in development too (the dev server serves public/pages/pages.json). */
+let anyList = null;
+export function handBuiltList() {
+  if (!anyList) {
+    anyList = fetch('/pages/pages.json', { cache: 'no-cache' })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((l) => (Array.isArray(l) ? l : []))
+      .catch(() => []);
+  }
+  return anyList;
+}
+
 /* hold: true while the page must not render (still checking, or leaving for
    the hand-built page). A null slug never holds. */
 export function useHandBuilt(slug) {
