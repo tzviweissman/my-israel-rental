@@ -49,7 +49,8 @@ if (!fs.existsSync(path.join(SRC, 'index.html'))) {
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
 
-const relative = (u) => u && !/^(?:[a-z][a-z0-9+.-]*:|\/|#|\?)/i.test(u);
+// %23 is an escaped # (a fragment inside an inline SVG data URL, Bun Intended 9 Oct 2026).
+const relative = (u) => u && !/^(?:[a-z][a-z0-9+.-]*:|\/|#|%23|\?)/i.test(u);
 function rewrite(html) {
   return html
     // A link back to the page itself goes to the business's address.
