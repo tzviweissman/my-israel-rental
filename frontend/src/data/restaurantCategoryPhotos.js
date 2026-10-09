@@ -20,6 +20,9 @@ const RESTAURANT_CATEGORY_PHOTOS = {
   breakfast: 'https://res.cloudinary.com/dirvyboe9/image/upload/e_background_removal/e_trim/c_pad,w_400,h_400,b_rgb:F6EDE3/c_pad,w_480,h_480,b_rgb:F6EDE3/q_auto,f_auto/v1791509454/myisraelrental/restaurant-categories/breakfast', // Unsplash K9oKpOebg84, amirali mirhashemian
   fish: 'https://res.cloudinary.com/dirvyboe9/image/upload/e_background_removal/e_trim/c_pad,w_400,h_400,b_rgb:F6EDE3/c_pad,w_480,h_480,b_rgb:F6EDE3/q_auto,f_auto/v1791509499/myisraelrental/restaurant-categories/fish', // Unsplash CWUpnRTlXB0, Kostiantyn Vierkieiev
   steakhouse: 'https://res.cloudinary.com/dirvyboe9/image/upload/e_background_removal/e_trim/c_pad,w_400,h_400,b_rgb:F6EDE3/c_pad,w_480,h_480,b_rgb:F6EDE3/q_auto,f_auto/v1791509501/myisraelrental/restaurant-categories/steakhouse', // Unsplash p0Y3ahmsh0M, Dima Solomin
+  pizza: 'https://res.cloudinary.com/dirvyboe9/image/upload/e_background_removal/e_trim/c_pad,w_400,h_400,b_rgb:F6EDE3/c_pad,w_480,h_480,b_rgb:F6EDE3/q_auto,f_auto/v1791509599/myisraelrental/restaurant-categories/pizza', // Unsplash PKfz98depf0, Phillip Goldsberry
+  burgers: 'https://res.cloudinary.com/dirvyboe9/image/upload/e_background_removal/e_trim/c_pad,w_400,h_400,b_rgb:F6EDE3/c_pad,w_480,h_480,b_rgb:F6EDE3/q_auto,f_auto/v1791509598/myisraelrental/restaurant-categories/burgers', // Unsplash Z228_7_7e7s, mk. s
+  dairy_italian: 'https://res.cloudinary.com/dirvyboe9/image/upload/e_background_removal/e_trim/c_pad,w_400,h_400,b_rgb:F6EDE3/c_pad,w_480,h_480,b_rgb:F6EDE3/q_auto,f_auto/v1791509600/myisraelrental/restaurant-categories/dairy_italian', // Unsplash 2TMqlO-zqNY, Helen Van
 };
 
 export default RESTAURANT_CATEGORY_PHOTOS;
