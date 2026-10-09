@@ -1,0 +1,508 @@
+<!doctype html>
+<!--
+  Bun Intended, a homemade cinnamon bun bakery in Ramat Eshkol, Jerusalem.
+  Every fact is theirs: the listing on MyIsraelRental (description, Ramat
+  Eshkol pick-up, pareve, phone) and their own price list image (sizes,
+  flavours, prices, WhatsApp number, seminary deliveries on 5+ orders, the
+  lines "Freshly baked. Made with love." and "Sweet things ahead"). The
+  photograph and the logo are theirs. Nothing generated.
+
+  The idea, theirs to own: build your box. Pick 4 or 8, pick the flavour,
+  and their bun (drawn the way their logo draws it) fills the box slot by
+  slot in that flavour's colours; the price is their price list's; the
+  button sends the whole order to their WhatsApp, written out.
+
+  Chosen from fresh research for this build (7 Oct 2026):
+    box builder   Mobbin, Touchy Coffee (size pill, count, add) and 21st
+                  "Choice Cards" (bordered option cards that light when chosen)
+    send button   21st "Interactive Hover Button": a dot grows to fill it, the
+                  label slides out and a label with an arrow slides in; on tap
+                  "Opening WhatsApp", then a tick
+    icon          21st "Message Circle Heart Icon": the bubble wiggles and its
+                  heart beats, for their brown heart
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Bun Intended · Cinnamon buns, Ramat Eshkol</title>
+<meta name="description" content="Homemade cinnamon buns in Ramat Eshkol, Jerusalem: classic cinnamon, espresso, Lotus and chocolate, in boxes of 4 or 8. Pareve. Order on WhatsApp.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Allura&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* From their logo and price list: cream paper, cocoa ink, caramel lines. */
+  :root {
+    --paper: #FBF5F0; --paper-2: #F3E6DC; --ink: #3A2216; --ink-soft: #6E5446;
+    --caramel: #B07A4E; --caramel-deep: #8A5532; --on-caramel: #FFFFFF; --line: #E2CDBE;
+    --cocoa: #2B180F;
+    --icing: #FFFDF8; --espresso: #6B4430; --lotus: #C8894B; --choc: #4A2A1D; --dough: #E8C08E;
+    --display: "Cormorant Garamond", Georgia, serif; --script: "Allura", cursive; --body: "Jost", Arial, "Noto Sans Hebrew", sans-serif;
+    --ease: cubic-bezier(.22,1,.36,1); --r: 18px; --gutter: clamp(16px, 5vw, 64px);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.55 var(--body); -webkit-font-smoothing: antialiased; }
+  img { max-width: 100%; display: block; }
+  a { color: inherit; }
+  .wrap { max-width: 1160px; margin: 0 auto; padding-inline: var(--gutter); }
+  .caps { font-family: var(--display); font-weight: 700; text-transform: uppercase; letter-spacing: 0.14em; }
+  h1, h2 { font-family: var(--display); font-weight: 600; line-height: 1.02; margin: 0; letter-spacing: -0.01em; }
+  .script { font-family: var(--script); font-weight: 400; letter-spacing: 0; text-transform: none; }
+
+  /* ---------- the send button (21st "Interactive Hover Button") ---------- */
+  .send { position: relative; display: inline-flex; align-items: center; justify-content: center; gap: 10px; min-height: 54px; min-width: 15rem; padding: 0 26px;
+    border-radius: 999px; border: 1.5px solid var(--caramel-deep); background: var(--paper); color: var(--ink); font: 600 16px/1 var(--body);
+    text-decoration: none; cursor: pointer; overflow: hidden; isolation: isolate; -webkit-tap-highlight-color: transparent; }
+  .send .dot { position: absolute; left: 22px; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%; background: var(--caramel-deep); z-index: -1;
+    transition: transform 520ms var(--ease); }
+  .send .a, .send .b { display: inline-flex; align-items: center; gap: 10px; transition: transform 460ms var(--ease), opacity 360ms; }
+  .send .a { padding-left: 16px; }
+  .send .b { position: absolute; inset: 0; justify-content: center; color: var(--on-caramel); opacity: 0; transform: translateX(-46px); }
+  .send svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
+  .send .heart { transform-origin: 20% 90%; }
+  .send:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  /* touch screens have no hover: the filled look is the resting look */
+  .send.is-on .dot, .send.is-busy .dot, .send.is-done .dot { transform: scale(60); }
+  .send.is-on .a, .send.is-busy .a, .send.is-done .a { transform: translateX(70px); opacity: 0; }
+  .send.is-on .b, .send.is-busy .b, .send.is-done .b { transform: none; opacity: 1; }
+  @media (hover: hover) {
+    .send:hover .dot { transform: scale(60); } .send:hover .a { transform: translateX(70px); opacity: 0; } .send:hover .b { transform: none; opacity: 1; }
+    .send:hover .heart { animation: wiggle 800ms var(--ease); } .send:hover .heart .h { animation: beat 800ms var(--ease); transform-box: fill-box; transform-origin: center; }
+  }
+  @media (hover: none) { .send .dot { transform: scale(60); } .send .a { opacity: 0; } .send .b { transform: none; opacity: 1; } }
+  .send:active { scale: 0.97; }
+  .send .busy, .send .done { display: none; }
+  .send.is-busy .go, .send.is-done .go { display: none; }
+  .send.is-busy .busy, .send.is-done .done { display: inline-flex; align-items: center; gap: 10px; }
+  .spin { width: 16px; height: 16px; border-radius: 50%; border: 2px solid rgb(255 255 255 / .35); border-top-color: #fff; animation: spin 700ms linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  @keyframes wiggle { 0%,100% { rotate: 0deg; } 40% { rotate: 8deg; } 60% { rotate: -8deg; } 80% { rotate: 2deg; } }
+  @keyframes beat { 0%,100% { scale: 1; } 30% { scale: .7; } 60% { scale: 1.15; } }
+
+  /* ---------- hero: their logo, their promise, their photo -------------- */
+  .hero { min-height: min(100svh, 900px); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: center; gap: clamp(24px, 5vw, 72px);
+    padding-block: clamp(24px, 5vh, 56px); }
+  .hero .logo { width: clamp(96px, 11vw, 132px); height: auto; border-radius: 50%; box-shadow: 0 10px 30px -18px rgb(58 34 22 / .5); }
+  .hero h1 { margin-top: clamp(14px, 2.4vh, 26px); font-size: min(clamp(2.4rem, 1.2rem + 3vw, 4.2rem), 7.4svh); max-width: 15ch; }
+  .hero h1 .script { display: block; color: var(--caramel-deep); font-size: 1.12em; line-height: 0.9; margin-top: 0.08em; }
+  .hero .lede { margin: clamp(12px, 2.2vh, 22px) 0 0; max-width: 31rem; font-size: clamp(1.02rem, 0.95rem + 0.3vw, 1.18rem); color: var(--ink-soft); }
+  .hero .act { margin-top: clamp(18px, 3.4vh, 34px); display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
+  .proof { margin: 0; padding: 0; list-style: none; font-size: 0.95rem; color: var(--ink-soft); line-height: 1.5; }
+  .proof b { color: var(--ink); font-weight: 600; }
+  .hero figure { margin: 0; position: relative; justify-self: center; width: min(100%, 470px); }
+  .hero figure img { width: 100%; height: min(78svh, 627px); object-fit: cover; border-radius: 240px 240px var(--r) var(--r); box-shadow: 0 30px 60px -36px rgb(58 34 22 / .6); }
+  .hero figure figcaption { position: absolute; left: -18px; bottom: 26px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px;
+    font-size: 0.86rem; box-shadow: 0 10px 24px -16px rgb(58 34 22 / .5); }
+
+  /* ---------- build your box: the signature ----------------------------- */
+  .build { padding-block: clamp(56px, 9vh, 96px); border-top: 1px solid var(--line); }
+  .build-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); align-items: center; }
+  .build h2 { font-size: min(clamp(2.2rem, 1.2rem + 3vw, 3.8rem), 9svh); }
+  .build .sub { margin: 8px 0 0; color: var(--ink-soft); }
+  .step-label { margin: clamp(16px, 2.6vh, 26px) 0 10px; font-size: 0.78rem; }
+  .choices { display: grid; gap: 10px; }
+  .choices.size, .choices.flav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  /* 21st "Choice Cards": bordered, lit when chosen */
+  .choice { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; padding: 13px 16px; min-height: 52px;
+    border: 1.5px solid var(--line); border-radius: 14px; background: #fff; color: var(--ink); font: 500 16px/1.2 var(--body); cursor: pointer;
+    transition: border-color 200ms, background 200ms, transform 200ms var(--ease); }
+  .choice small { display: block; color: var(--ink-soft); font-size: 0.82rem; margin-top: 2px; }
+  .choice .pr { font-family: var(--body); font-weight: 600; font-size: 1.05rem; white-space: nowrap; flex: none; }
+  .choice .nm { min-width: 0; }
+  .choice .sw { width: 16px; height: 16px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12); margin-right: 2px; }
+  .choice .nm { display: flex; align-items: center; gap: 9px; }
+  .choice[aria-pressed="true"] { border-color: var(--caramel-deep); background: var(--paper-2); }
+  .choice[aria-pressed="true"]::after { content: ""; position: absolute; top: -7px; right: -7px; width: 20px; height: 20px; border-radius: 50%; background: var(--caramel-deep)
+    url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M6 12.5l4 4 8-9' fill='none' stroke='white' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/></svg>") center/12px no-repeat; }
+  .choice:focus-visible { outline: 3px solid var(--ink); outline-offset: 2px; }
+  @media (hover: hover) { .choice:hover { border-color: var(--caramel); transform: translateY(-1px); } }
+  .choice.mix { grid-column: 1 / -1; }
+  .choice[hidden] { display: none; }
+  .total .mini { display: none; }
+  .note { margin: 10px 0 0; font-size: 0.9rem; color: var(--ink-soft); min-height: 1.4em; }
+  .when { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 0.95rem; }
+  .when input { font: inherit; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); }
+  .total { margin-top: clamp(14px, 2.4vh, 22px); display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; }
+  .total .sum { font-family: var(--body); font-size: 2rem; font-weight: 600; line-height: 1; }
+  .total .sum small { font-family: var(--body); font-size: 0.9rem; font-weight: 500; color: var(--ink-soft); margin-left: 6px; }
+  .alt { margin: 12px 0 0; font-size: 0.92rem; color: var(--ink-soft); }
+  .alt a { color: var(--caramel-deep); font-weight: 600; }
+
+  /* the box: their bun, slot by slot */
+  .box { position: relative; width: min(100%, 470px); justify-self: center; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .box .stage { width: min(100%, 430px); aspect-ratio: 1; margin: -6% 0 -12%; isolation: auto; }
+  /* the clips' ground is graded to pure white, so multiply leaves exactly the page's paper */
+  .box .stage .pour { width: 100%; height: 100%; display: block; object-fit: cover; mix-blend-mode: multiply;
+    -webkit-mask: linear-gradient(to bottom, transparent 0, #000 26%, #000 88%, transparent), linear-gradient(to right, transparent, #000 10%, #000 90%, transparent); -webkit-mask-composite: source-in;
+    mask: linear-gradient(to bottom, transparent 0, #000 26%, #000 88%, transparent), linear-gradient(to right, transparent, #000 10%, #000 90%, transparent); mask-composite: intersect; }
+  .total .mini img { width: 100%; height: 100%; }
+  .bunimg { width: 100%; height: 100%; object-fit: contain; display: block; }
+  /* Their box, as in their photo: a long kraft paper tray, the buns in a row,
+     touching. Its four walls slope in (each border side is one wall, lit from
+     the top left), a pale cut edge runs round the rim, the floor is in shade. */
+  .box .trays { width: min(100%, 470px); display: grid; gap: 18px; }
+  .tray { position: relative; border-style: solid; border-width: 13px 15px 15px; border-radius: 5px;
+    border-color: #C2A47B #B4956C #DCC5A0 #CDB088;
+    background: radial-gradient(120% 160% at 45% 25%, #A88B66, #85694A 80%),
+      url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='120' height='120'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/><feColorMatrix values='0 0 0 0 .35  0 0 0 0 .25  0 0 0 0 .15  0 0 0 .35 0'/></filter><rect width='120' height='120' filter='url(%23n)'/></svg>");
+    background-blend-mode: multiply;
+    box-shadow: 0 0 0 2.5px #E9DCC4, 0 0 0 3.5px rgb(110 80 45 / .35), 0 28px 38px -22px rgb(58 34 22 / .55), 0 6px 10px -4px rgb(58 34 22 / .25); }
+  /* the folded seam at each corner */
+  .tray::before { content: ""; position: absolute; inset: -13px -15px -15px; border-radius: 5px; pointer-events: none;
+    background: linear-gradient(135deg, rgb(255 255 255 / .18), transparent 18%), linear-gradient(315deg, rgb(0 0 0 / .1), transparent 22%); }
+  /* the ridged edge of the paper, along the front */
+  .tray::after { content: ""; position: absolute; left: -15px; right: -15px; bottom: -18px; height: 3px; border-radius: 2px;
+    background: repeating-linear-gradient(90deg, #D9C6A4 0 2px, #F1E7D4 2px 4px); }
+  .box .slots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0 6%; }
+  .slot { aspect-ratio: 1; display: grid; place-items: center; margin: -10% -9%; }
+  .slot:nth-child(odd) { --r: -8deg; } .slot:nth-child(even) { --r: 7deg; } .slot:nth-child(3n) { --r: 14deg; }
+  .slot img { width: 128%; height: 128%; max-width: none; opacity: 0; transform: translateY(-30px) scale(.86) rotate(calc(var(--r) - 14deg)); transition: opacity 360ms, transform 560ms var(--ease); transition-delay: calc(var(--i) * 70ms); filter: drop-shadow(0 4px 4px rgb(30 15 5 / .35)); }
+  .slot.in img { opacity: 1; transform: rotate(var(--r)); }
+  .box .label { white-space: nowrap; font-family: var(--script); font-size: 2.1rem; line-height: 1.1; color: var(--caramel-deep); }
+  /* prices in lining figures: Cormorant's old-style 1 reads as an I */
+  .choice .pr, .total .sum, .pricecard .p, .bar .pr b, .proof b { font-variant-numeric: lining-nums tabular-nums; }
+
+  /* ---------- the price list (theirs) ------------------------------------ */
+  .menu { padding-block: clamp(56px, 9vh, 96px); border-top: 1px solid var(--line); }
+  .menu h2 { font-size: min(clamp(2rem, 1.2rem + 2.4vw, 3.2rem), 8svh); }
+  .menu h2 .script { color: var(--caramel-deep); font-size: 1.15em; }
+  .boxes { margin-top: clamp(18px, 3vh, 30px); display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 2.4vw, 26px); }
+  .pricecard { border: 1.5px solid var(--line); border-radius: var(--r); background: #fff; padding: clamp(18px, 2.4vw, 28px); }
+  .pricecard h3 { margin: 0 0 8px; font-size: 0.9rem; color: var(--caramel-deep); }
+  .pricecard ul { margin: 0; padding: 0; list-style: none; }
+  .pricecard li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--paper-2); }
+  .pricecard li:last-child { border-bottom: 0; }
+  .pricecard li span:first-child { display: flex; align-items: center; gap: 10px; }
+  .pricecard li i { font-style: normal; font-family: var(--script); font-size: 1.25rem; color: var(--ink-soft); margin-left: 4px; }
+  .pricecard .p { font-family: var(--body); font-weight: 600; font-size: 1.15rem; }
+  .pricecard .p small { font-family: var(--body); font-size: 0.75rem; font-weight: 500; color: var(--ink-soft); margin-left: 3px; letter-spacing: 0.06em; }
+
+  /* ---------- the facts, on a contrasting band --------------------------- */
+  .facts { background: var(--cocoa); color: #F6E9DE; padding-block: clamp(48px, 8vh, 84px); }
+  .facts .row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(16px, 3vw, 36px); }
+  .facts .k { font-size: 0.74rem; color: #D9B48E; }
+  .facts .v { margin-top: 6px; font-family: var(--display); font-size: clamp(1.3rem, 1rem + 0.9vw, 1.7rem); font-weight: 600; line-height: 1.15; }
+  .facts .v small { display: block; font-family: var(--body); font-size: 0.92rem; font-weight: 400; color: #E6D2C2; margin-top: 4px; line-height: 1.45; }
+
+  /* ---------- close -------------------------------------------------------- */
+  .close { padding-block: clamp(64px, 11vh, 120px); text-align: center; }
+  .close h2 { font-size: min(clamp(2.6rem, 1.4rem + 4vw, 5rem), 11svh); }
+  .close h2 .script { display: block; color: var(--caramel-deep); font-size: 1.15em; line-height: 0.95; }
+  .close .act { margin-top: 26px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .foot { border-top: 1px solid var(--line); padding: 22px var(--gutter) calc(22px + var(--bar-pad, 0px)); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px;
+    font-size: 0.85rem; color: var(--ink-soft); }
+
+  /* ---------- phone bar --------------------------------------------------- */
+  .bar { display: none; }
+  @media (max-width: 860px) {
+    :root { --bar-pad: 76px; }
+    .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 20px; gap: 22px; }
+    .hero .head { display: flex; align-items: center; gap: 14px; }
+    .hero .logo { width: 76px; }
+    /* the words and the button first on a phone, then their photo */
+    .hero figure { width: 100%; }
+    .hero figure img { height: min(46svh, 420px); border-radius: 180px 180px var(--r) var(--r); }
+    .hero figure figcaption { left: 12px; bottom: 12px; }
+    .build-grid { grid-template-columns: minmax(0, 1fr); }
+    .box { order: -1; width: min(78%, 330px); }
+    /* while choosing on a phone, the price and the order button stay under the thumb */
+    .total { position: sticky; bottom: 0; z-index: 5; margin-inline: calc(var(--gutter) * -1); padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom));
+      background: var(--paper); border-top: 1px solid var(--line); justify-content: space-between; }
+    .total .send { min-width: 0; padding: 0 18px; }
+    .total { flex-wrap: nowrap; gap: 10px; }
+    .total .sum { font-size: 1.55rem; } .total .sum small { display: block; margin: 2px 0 0; font-size: 0.78rem; }
+    /* a small bun in the bar takes each pour while the big one is scrolled away */
+    .total .mini { display: block; width: 58px; height: 58px; flex: none; margin: -14px -4px -6px -6px; }
+    .total .mini svg, .total .mini img { width: 100%; height: 100%; overflow: visible; }
+    .boxes { grid-template-columns: 1fr; }
+    .facts .row { grid-template-columns: 1fr 1fr; }
+    .bar { position: fixed; inset: auto 0 0 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 12px;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgb(251 245 240 / .97); border-top: 1px solid var(--line);
+      transform: translateY(110%); transition: transform 240ms var(--ease); }
+    .bar.is-on { transform: none; }
+    .bar .pr { font-size: 0.86rem; color: var(--ink-soft); } .bar .pr b { display: block; font-family: var(--body); font-weight: 600; font-size: 1.35rem; color: var(--ink); line-height: 1; }
+    .bar .send { min-width: 0; min-height: 48px; }
+  }
+  /* on a laptop the box is sized by the screen's height, so the bun, the box
+     and the choices are all seen together */
+  @media (min-width: 861px) {
+    .box .stage { width: min(100%, 430px, 40svh); margin: -3svh 0 -5svh; }
+  }
+  /* a short laptop: the whole builder, button included, on one screen */
+  @media (min-width: 861px) and (max-height: 760px) {
+    .build { padding-block: 40px; }
+    .step-label { margin: 12px 0 8px; }
+    .choice { min-height: 46px; padding: 10px 14px; }
+    .when { margin-top: 10px; } .total { margin-top: 12px; } .note { margin-top: 6px; }
+  }
+  /* narrow phones: a flavour's price sits under its name, never against it */
+  @media (max-width: 440px) {
+    .choices.flav .choice:not(.mix) { flex-direction: column; align-items: flex-start; gap: 4px; }
+    .choices.flav .choice:not(.mix) .pr { padding-left: 25px; font-size: 0.95rem; color: var(--ink-soft); }
+  }
+  @media (max-width: 380px) { .facts .row { grid-template-columns: 1fr; } .send { min-width: 0; } }
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after { transition-duration: 1ms !important; animation: none !important; }
+    html { scroll-behavior: auto; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="wa" viewBox="0 0 24 24"><g class="heart"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path class="h" d="M15.8 9.2a2.5 2.5 0 0 0-3.5 0l-.3.4-.35-.3a2.42 2.42 0 1 0-3.2 3.6l3.6 3.5 3.6-3.5c1.2-1.2 1.1-2.7.2-3.7"/></g></symbol>
+  <symbol id="arr" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="tick" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+</svg>
+
+<main>
+  <section class="hero wrap" aria-labelledby="h1">
+    <div>
+      <div class="head"><img class="logo" src="assets/logo.webp" alt="Bun Intended, sweet things ahead, pareve" width="1254" height="1254"></div>
+      <h1 id="h1">Cinnamon buns, baked at home in Ramat Eshkol<span class="script">Made with love.</span></h1>
+      <p class="lede">Boxes of 4 or 8 in classic cinnamon, espresso, Lotus and chocolate. Pareve, and freshly baked for Shabbos, a gift, or a treat for yourself.</p>
+      <div class="act">
+        <a class="send" href="#build" data-send="scroll">
+          <span class="dot" aria-hidden="true"></span>
+          <span class="a">Build your box</span>
+          <span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span>
+        </a>
+        <ul class="proof">
+          <li><b>From ₪55</b> for a box of 4</li>
+          <li>Pick-up in Ramat Eshkol</li>
+        </ul>
+      </div>
+    </div>
+    <figure>
+      <img src="assets/boxes.webp" alt="Two boxes of Bun Intended buns: classic cinnamon with icing, a caramel-topped bun, and Lotus buns with cream and biscuit crumbs" width="768" height="1024">
+      <figcaption>Freshly baked</figcaption>
+    </figure>
+  </section>
+
+  <section class="build" id="build" aria-labelledby="bh">
+    <div class="wrap build-grid">
+      <div>
+        <h2 id="bh">Build your box</h2>
+        <p class="sub">Choose a box and a flavour. We'll get your order on WhatsApp, written out.</p>
+
+        <p class="step-label caps">Box</p>
+        <div class="choices size" role="group" aria-label="Box size">
+          <button type="button" class="choice" data-size="4" aria-pressed="true"><span>4 piece box<small>from ₪55</small></span></button>
+          <button type="button" class="choice" data-size="8" aria-pressed="false"><span>8 piece box<small>from ₪100</small></span></button>
+        </div>
+
+        <p class="step-label caps">Flavour</p>
+        <div class="choices flav" role="group" aria-label="Flavour" id="flavours"></div>
+        <p class="note" id="note" aria-live="polite"></p>
+
+        <label class="when">Needed on <input type="date" id="date" aria-describedby="when-hint"> <span id="when-hint" style="color:var(--ink-soft)">(optional)</span></label>
+
+        <div class="total">
+          <span class="mini" id="mini" aria-hidden="true"></span><span class="sum" id="sum" aria-live="polite">₪55<small>4 buns</small></span>
+          <a class="send" id="order" href="#" target="_blank" rel="noopener">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="a">Order on WhatsApp</span>
+            <span class="b"><span class="go">Order on WhatsApp</span><span class="busy"><span class="spin" aria-hidden="true"></span>Opening WhatsApp</span><span class="done"><svg><use href="#tick"/></svg>Sent to WhatsApp</span><svg class="go"><use href="#wa"/></svg></span>
+          </a>
+        </div>
+        <p class="alt">Prefer to talk? Call or text <a href="tel:+972553321956">055-332-1956</a>.</p>
+      </div>
+      <div class="box" id="box" data-size="4" aria-hidden="true">
+        <div class="stage" id="stage"></div>
+        <div class="trays" id="slots"></div>
+        <span class="label" id="boxlabel">Classic cinnamon</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="menu" aria-labelledby="mh">
+    <div class="wrap">
+      <h2 id="mh">Freshly baked. <span class="script">Made with love.</span></h2>
+      <div class="boxes">
+        <div class="pricecard"><h3 class="caps">4 piece box</h3><ul id="m4"></ul></div>
+        <div class="pricecard"><h3 class="caps">8 piece box</h3><ul id="m8"></ul></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="facts" aria-label="Good to know">
+    <div class="wrap row">
+      <div><div class="k caps">Pareve</div><div class="v">Every bun<small>All our buns are pareve.</small></div></div>
+      <div><div class="k caps">Pick-up</div><div class="v">Ramat Eshkol<small>Jerusalem. Delivery is also an option: ask when you order.</small></div></div>
+      <div><div class="k caps">Seminaries</div><div class="v">Delivered<small>Seminary deliveries on 5 or more orders.</small></div></div>
+      <div><div class="k caps">For</div><div class="v">Shabbos, gifts<small>Or simply treating yourself to something sweet.</small></div></div>
+    </div>
+  </section>
+
+  <section class="close" aria-labelledby="ch">
+    <div class="wrap">
+      <h2 id="ch">Your box is ready when you are.<span class="script">Sweet things ahead</span></h2>
+      <div class="act">
+        <a class="send" href="#build" data-send="scroll">
+          <span class="dot" aria-hidden="true"></span>
+          <span class="a">Build your box</span>
+          <span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span>
+        </a>
+        <ul class="proof"><li><b>From ₪55</b> · Pick-up in Ramat Eshkol</li></ul>
+      </div>
+    </div>
+  </section>
+</main>
+<footer class="foot"><span>Bun Intended · homemade cinnamon buns, Ramat Eshkol, Jerusalem</span><a href="https://myisraelrental.com/business/aidy-yaniv">Listed on MyIsraelRental</a></footer>
+
+<div class="bar" id="bar" aria-hidden="true">
+  <span class="pr">From<b>₪55</b></span>
+  <a class="send" href="#build" data-send="scroll" tabindex="-1">
+    <span class="dot" aria-hidden="true"></span><span class="a">Build your box</span>
+    <span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span>
+  </a>
+</div>
+
+<script>
+(function () {
+  // Their price list, as printed on it.
+  var WA = '18482216022';
+  var F = [
+    { id: 'cinnamon', name: 'Classic cinnamon', p4: 55, p8: 100, c: 'cinnamon' },
+    { id: 'espresso', name: 'Espresso', p4: 55, p8: 100, c: 'espresso' },
+    { id: 'lotus', name: 'Lotus', p4: 65, p8: 120, c: 'lotus' },
+    { id: 'chocolate', name: 'Chocolate', p4: 65, p8: 120, c: 'choc' }
+  ];
+  var MIX8 = 120;
+  var SW = { cinnamon: 'var(--icing)', espresso: 'var(--espresso)', lotus: 'var(--lotus)', choc: 'var(--choc)' };
+  var state = { size: 4, mix: false, picks: ['cinnamon'] };
+  var $ = function (s) { return document.querySelector(s); };
+
+  // The bun, drawn as their buns are: a golden swirl, its topping poured on.
+  // Built in code from their photograph's colours, never generated (a choice
+  // card shows what the customer gets). The pour follows the reference Tzvi
+  // sent (8 Oct 2026): the topping falls from above and coats the bun.
+  var uidN = 0, lastPour = null, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Their bun, photographed. assets/bun-cinnamon is their own iced bun cut out
+  // of their photo; plain, espresso, chocolate and Lotus are the same bun with
+  // only the topping edited (Higgsfield, 8 Oct 2026, Tzvi's go-ahead), so all
+  // five line up exactly.
+  // The pour is filmed, not drawn (rule: real materials are generated, 8 Oct
+  // 2026). Each clip starts on their plain bun and ends on that flavour's
+  // still, generated between the two frames, colour-matched to the page and
+  // faded at the edges so it sits on the paper with no box. The jug that dips
+  // into the top of some clips fades out with the top edge.
+  function bun(c) {
+    return '<img class="bunimg" src="assets/bun-' + c + '.webp" alt="" width="720" height="720" loading="lazy" decoding="async">';
+  }
+  function stage(c, anim) {
+    if (!anim) return '<img class="pour" src="assets/pour-' + c + '-end.webp" alt="" width="640" height="640" decoding="async">';
+    return '<video class="pour" src="assets/pour-' + c + '.mp4" poster="assets/pour-bare.webp" width="640" height="640" muted playsinline autoplay preload="auto" aria-hidden="true"></video>';
+  }
+  // The first time the box comes into view, the chosen flavour is poured on,
+  // so the pour is seen without having to pick anything first.
+  if (!still && 'IntersectionObserver' in window) {
+    var seenStage = new IntersectionObserver(function (es) {
+      if (!es[0].isIntersecting) return;
+      seenStage.disconnect();
+      var st = $('#stage'), cur = st.querySelector('img.pour');
+      if (cur) st.innerHTML = stage(lastPour, true);
+    }, { threshold: 1, rootMargin: '0px 0px -28% 0px' });
+    seenStage.observe($('#stage'));
+  }
+  // warm the clips once the page is idle, so the first pour starts at once
+  addEventListener('load', function () {
+    setTimeout(function () { ['cinnamon', 'espresso', 'choc', 'lotus'].forEach(function (c) { var l = document.createElement('link'); l.rel = 'prefetch'; l.href = 'assets/pour-' + c + '.mp4'; document.head.appendChild(l); }); }, 1200);
+  });
+
+  function price() {
+    if (state.size === 8 && state.mix) return MIX8;
+    var f = F.filter(function (x) { return x.id === state.picks[0]; })[0];
+    return state.size === 4 ? f.p4 : f.p8;
+  }
+  function names() { return state.picks.map(function (id) { return F.filter(function (x) { return x.id === id; })[0].name; }); }
+
+  function renderFlavours() {
+    var html = F.map(function (f) {
+      var on = state.picks.indexOf(f.id) > -1;
+      return '<button type="button" class="choice" data-f="' + f.id + '" aria-pressed="' + on + '"><span class="nm"><span class="sw" style="background:' + SW[f.c] + '"></span>' + f.name + '</span><span class="pr">₪' + (state.size === 4 ? f.p4 : f.p8) + '</span></button>';
+    }).join('');
+    html += '<button type="button" class="choice mix" data-mix aria-pressed="' + state.mix + '"' + (state.size === 8 ? '' : ' hidden') + '><span>2 flavour mix<small>Your choice of any 2 flavours</small></span><span class="pr">₪' + MIX8 + '</span></button>';
+    $('#flavours').innerHTML = html;
+  }
+
+  function paint() {
+    document.querySelectorAll('[data-size]').forEach(function (b) { if (b.classList.contains('choice')) b.setAttribute('aria-pressed', String(+b.getAttribute('data-size') === state.size)); });
+    renderFlavours();
+    var p = price(), n = names();
+    $('#sum').innerHTML = '₪' + p + '<small>' + state.size + ' buns</small>';
+    var need = state.size === 8 && state.mix && state.picks.length < 2;
+    $('#note').textContent = state.size === 8 && state.mix ? (need ? 'Pick a second flavour for your mix.' : 'Half ' + n[0] + ', half ' + n[1] + '.') : '';
+    // The box fills slot by slot in the chosen flavours.
+    var slots = '';
+    for (var i = 0; i < state.size; i++) {
+      var id = state.mix && state.picks.length === 2 ? state.picks[i < state.size / 2 ? 0 : 1] : state.picks[0];
+      var f = F.filter(function (x) { return x.id === id; })[0];
+      if (i % 4 === 0) slots += (i ? '</div></div>' : '') + '<div class="tray"><div class="slots">';
+      slots += '<div class="slot" style="--i:' + i + '">' + bun(f.c) + '</div>';
+    }
+    slots += '</div></div>';
+    $('#slots').innerHTML = slots; $('#box').setAttribute('data-size', state.size);
+    // The big bun takes the latest flavour, poured on as it is chosen.
+    var latest = F.filter(function (x) { return x.id === state.picks[state.picks.length - 1]; })[0];
+    if (latest.c !== lastPour) { var pour = !still && lastPour !== null; $('#stage').innerHTML = stage(latest.c, pour); $('#mini').innerHTML = bun(latest.c); lastPour = latest.c; }
+    $('#boxlabel').textContent = state.mix ? (n.length === 2 ? n[0] + ' & ' + n[1] : n[0] + ' & …') : n[0];
+    requestAnimationFrame(function () { requestAnimationFrame(function () { document.querySelectorAll('.slot').forEach(function (s) { s.classList.add('in'); }); }); });
+    // The order, written out for their WhatsApp.
+    var d = $('#date').value;
+    var when = d ? new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+    var text = 'Hi Bun Intended, I\'d like to order ' + (state.size === 8 ? 'an ' : 'a ') + state.size + ' piece box: '
+      + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + p + ').'
+      + (when ? ' For ' + when + '.' : '') + ' Pick-up in Ramat Eshkol.';
+    var a = $('#order');
+    a.href = need ? '#build' : 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+    a.setAttribute('aria-disabled', String(need));
+  }
+
+  document.addEventListener('click', function (e) {
+    var s = e.target.closest('.choice[data-size]');
+    if (s) { state.size = +s.getAttribute('data-size'); if (state.size === 4) { state.mix = false; state.picks = state.picks.slice(0, 1); } paint(); return; }
+    var m = e.target.closest('[data-mix]');
+    if (m) { state.mix = !state.mix; if (!state.mix) state.picks = state.picks.slice(0, 1); paint(); return; }
+    var f = e.target.closest('[data-f]');
+    if (f) {
+      var id = f.getAttribute('data-f');
+      if (state.mix) {
+        var at = state.picks.indexOf(id);
+        if (at > -1 && state.picks.length > 1) state.picks.splice(at, 1);
+        else if (at < 0) { state.picks.push(id); if (state.picks.length > 2) state.picks.shift(); }
+      } else state.picks = [id];
+      paint();
+    }
+  });
+  $('#date').addEventListener('change', paint);
+  var today = new Date(); $('#date').min = today.toISOString().slice(0, 10);
+
+  // The send button: "Opening WhatsApp", then a tick (21st Interactive Hover Button).
+  $('#order').addEventListener('click', function (e) {
+    var a = e.currentTarget;
+    if (a.getAttribute('aria-disabled') === 'true') { e.preventDefault(); $('#note').textContent = 'Pick a second flavour for your mix.'; return; }
+    a.classList.add('is-busy');
+    setTimeout(function () { a.classList.remove('is-busy'); a.classList.add('is-done'); }, 700);
+    setTimeout(function () { a.classList.remove('is-done'); }, 3200);
+  });
+
+  // Their price list, from the same numbers the builder uses.
+  $('#m4').innerHTML = F.map(function (f) { return '<li><span><span class="sw" style="width:14px;height:14px;border-radius:50%;background:' + SW[f.c] + ';box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)"></span>' + f.name + '</span><span class="p">' + f.p4 + '<small>NIS</small></span></li>'; }).join('');
+  $('#m8').innerHTML = F.map(function (f) { return '<li><span><span class="sw" style="width:14px;height:14px;border-radius:50%;background:' + SW[f.c] + ';box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)"></span>' + f.name + '</span><span class="p">' + f.p8 + '<small>NIS</small></span></li>'; }).join('')
+    + '<li><span>2 flavour mix<i>any 2 flavours</i></span><span class="p">' + MIX8 + '<small>NIS</small></span></li>';
+
+  // Phones: the bar from after the first screen until the box builder's own button is on screen.
+  var bar = $('#bar'), hero = $('.hero .send'), build = $('#order'), close = $('.close .send');
+  function barState() {
+    var phone = matchMedia('(max-width: 860px)').matches;
+    var inView = function (el) { var r = el.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; };
+    var on = phone && hero.getBoundingClientRect().bottom < 0 && !inView(document.getElementById('build')) && !inView(close); /* off while the box builder, with its own button, is on screen */
+    if (on !== bar.classList.contains('is-on')) { bar.classList.toggle('is-on', on); bar.setAttribute('aria-hidden', String(!on)); bar.querySelector('a').tabIndex = on ? 0 : -1; }
+  }
+  addEventListener('scroll', barState, { passive: true }); addEventListener('resize', barState);
+  paint(); barState();
+})();
+</script>
+</body>
+</html>
