@@ -156,7 +156,10 @@ class PropertyCreate(BaseModel):
         if not v:
             return None
         import re
-        if not re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d", v[:5]):
+        # The whole value, not its first five characters: "15:00xyz" used to
+        # pass (audit 8 Oct 2026). Seconds are allowed because a time input
+        # can send "15:00:00"; they are dropped.
+        if not re.fullmatch(r"([01]\d|2[0-3]):[0-5]\d(:[0-5]\d)?", v):
             raise ValueError("Use a time like 15:00")
         return v[:5]
 
