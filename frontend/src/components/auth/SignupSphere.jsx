@@ -72,9 +72,9 @@ export default function SignupSphere() {
       // 2026, option D: the black-to-navy panel was "too dark, my site is
       // lighter"). Ink text, white-rimmed photos.
       style={{
-        background: 'radial-gradient(60% 55% at 50% 68%, rgba(36,175,235,0.28), transparent 70%), #FFFFFF',
+        background: 'radial-gradient(60% 55% at 50% 68%, rgba(36,175,235,0.28), transparent 70%), var(--surface, #FFFFFF)',
         color: 'var(--ink, #111827)',
-        boxShadow: 'inset 0 0 0 1px #E3E3E3',
+        boxShadow: 'inset 0 0 0 1px var(--brand-border, #E3E3E3)',
       }}
       data-testid="signup-sphere-panel"
     >
@@ -86,7 +86,7 @@ export default function SignupSphere() {
           initial={from({ opacity: 0, y: 12, filter: 'blur(6px)' })}
           animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
           transition={{ duration: 0.7, ease: [0.22, 1, 0.36, 1] }}
-          className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: '#0F5E8F' }}
+          className="text-xs font-semibold uppercase tracking-[0.18em]" style={{ color: 'var(--brand-primary-dark, #0F5E8F)' }}
         >
           {t('signupJoin.sphereEyebrow', 'Already on the site')}
         </motion.p>
@@ -122,7 +122,7 @@ export default function SignupSphere() {
             />
           </motion.div>
         ) : (
-          <div className="h-48 w-48 rounded-full border border-[#E3E3E3]" aria-hidden="true" />
+          <div className="h-48 w-48 rounded-full border border-[var(--brand-border)]" aria-hidden="true" />
         )}
       </div>
       </div>

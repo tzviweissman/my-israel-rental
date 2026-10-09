@@ -234,10 +234,10 @@ const SignupJoin = () => {
     <AuthShell testId="signup-join-page">
         {/* Step indicator */}
         <div className="flex items-center gap-3 max-sm:hidden [@media(max-height:760px)]:hidden text-xs font-semibold tracking-wide text-gray-500">
-          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 1 ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-200 text-gray-700'}`}>1</span>
+          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 1 ? 'bg-[var(--action)] text-[var(--action-ink)]' : 'bg-gray-200 text-gray-700'}`}>1</span>
           <span className={step === 1 ? 'text-[var(--brand-primary)]' : ''}>{t('signupJoin.stepRole', 'YOUR ROLE')}</span>
           <div className="h-px w-8 bg-gray-300" />
-          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 2 ? 'bg-[var(--brand-primary)] text-white' : 'bg-gray-200 text-gray-700'}`}>2</span>
+          <span className={`inline-flex h-6 w-6 items-center justify-center rounded-full ${step >= 2 ? 'bg-[var(--action)] text-[var(--action-ink)]' : 'bg-gray-200 text-gray-700'}`}>2</span>
           <span className={step === 2 ? 'text-[var(--brand-primary)]' : ''}>{t('signupJoin.stepDetails', 'YOUR DETAILS')}</span>
         </div>
 

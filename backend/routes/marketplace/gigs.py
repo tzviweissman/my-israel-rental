@@ -1140,6 +1140,35 @@ async def leads_summary(
 _EMAIL_RE = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
+async def _email_guest_status(booking: dict, event: str, gig_title: str | None = None) -> None:
+    """Mail the customer their status link (dead-ends audit 2026-10-08 #1).
+    The tokenized page was the only thing a guest had, and nothing ever
+    delivered it. event: created | accepted | declined | expired. Only when
+    an email was given, and never able to fail the booking."""
+    to = (booking.get("contact_email") or "").strip()
+    token = booking.get("track_token")
+    if not to or not token:
+        return
+    try:
+        from utils import email as em
+        what = em._esc(gig_title or "your request")
+        head, line = {
+            "created": ("We got your request", f"Your request for <strong>{what}</strong> was sent. You will get an email when the business answers; this page always shows the latest."),
+            "accepted": ("Your booking was accepted", f"Good news: <strong>{what}</strong> was accepted."),
+            "declined": ("Your booking was declined", f"<strong>{what}</strong> could not be accepted this time. You can request another time."),
+            "expired": ("No reply yet", f"There was no reply about <strong>{what}</strong>, so the time was released. You can request another."),
+        }[event]
+        link = f"{em.FRONTEND_URL}/bookings/track/{token}"
+        inner = (
+            f'<h2 style="color:#222;font-size:22px;margin:0 0 8px;">{head}</h2>'
+            f'<p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">{line}</p>'
+            + em._button("See your booking", link)
+        )
+        await em.send_email(to, head, em._wrap(inner, preheader=head), tag=f"guest_booking_{event}")
+    except Exception:  # noqa: BLE001
+        logger.exception("could not email booking status link for %s", booking.get("_id"))
+
+
 @router.post("/gigs/{gig_id}/book")
 async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depends(optional_user)):
     """Signed in or not. Nobody has to sign in to book (Tzvi, 7 Oct 2026):
@@ -1246,6 +1275,7 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         f"{(' - ' + _when) if _when else ''}.",
         booking["_id"],
     )
+    await _email_guest_status(booking, "created", gig.get("title"))
     logger.info("[marketplace] booking created: gig=%s client=%s tier=%s", gig_id, (user or {}).get("user_id") or "guest", payload.tier_name)
     return {"ok": True, "booking_id": booking["_id"], "track_path": f"/bookings/track/{booking['track_token']}"}
 
@@ -1417,6 +1447,9 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
         }.get(payload.status)
         if said:
             await _notify(booking["client_user_id"], f"booking_{payload.status}", said, booking_id)
+    if booking.get("status") != payload.status and payload.status in ("accepted", "declined"):
+        gt = (await db.marketplace_gigs.find_one({"_id": booking.get("gig_id")}, {"title": 1})) or {}
+        await _email_guest_status(booking, payload.status, gt.get("title"))
 
     fresh = await db.marketplace_bookings.find_one({"_id": booking_id})
     fresh["id"] = fresh.pop("_id")
@@ -1800,7 +1833,7 @@ async def sweep_expired_holds() -> dict:
     async for b in db.marketplace_bookings.find(
         {"status": "pending", "hold_expires_at": {"$lte": now_iso}},
         {"_id": 1, "gig_id": 1, "provider_user_id": 1, "client_user_id": 1,
-         "preferred_date": 1, "time_slot": 1},
+         "preferred_date": 1, "time_slot": 1, "contact_email": 1, "track_token": 1},
     ):
         try:
             res = await db.marketplace_bookings.update_one(
@@ -1832,6 +1865,7 @@ async def sweep_expired_holds() -> dict:
                 f"The time is bookable again.".strip(),
                 b["_id"],
             )
+            await _email_guest_status(b, "expired")
             await db.marketplace_bookings.update_one(
                 {"_id": b["_id"]}, {"$set": {"expiry_notified_at": now_iso}},
             )
@@ -1846,7 +1880,7 @@ async def sweep_expired_holds() -> dict:
         async for b in db.marketplace_bookings.find(
             {"status": STATUS_EXPIRED, "expiry_notified_at": {"$exists": False}},
             {"_id": 1, "provider_user_id": 1, "client_user_id": 1,
-             "preferred_date": 1, "time_slot": 1},
+             "preferred_date": 1, "time_slot": 1, "contact_email": 1, "track_token": 1},
         ).limit(200):
             res = await db.marketplace_bookings.update_one(
                 {"_id": b["_id"], "expiry_notified_at": {"$exists": False}},
@@ -1868,6 +1902,7 @@ async def sweep_expired_holds() -> dict:
                 f"The time is bookable again.".strip(),
                 b["_id"],
             )
+            await _email_guest_status(b, "expired")
 
     # 2. The halfway nudge. One message, once — `hold_nudged_at` is the
     #    guard, because a sweep running every 15 minutes would otherwise

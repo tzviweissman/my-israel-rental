@@ -12,7 +12,7 @@ import SaveHeart from '../marketplace/SaveHeart';
 
 /** Saved services and products (storefront phase 5): the same favourites,
  *  extended to items. Drawn only when there are some. */
-function SavedItems({ API, token }) {
+function SavedItems({ API, token, onCount }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [items, setItems] = useState(null);
@@ -30,6 +30,7 @@ function SavedItems({ API, token }) {
       toast.error(t('saved.failed', 'That did not save. Try again.'));
     }
   };
+  useEffect(() => { if (items && onCount) onCount(items.length); }, [items]); // eslint-disable-line react-hooks/exhaustive-deps
   if (!items || !items.length) return null;
   return (
     <section className="space-y-3" data-testid="saved-items">
@@ -63,6 +64,9 @@ const LikedTab = ({ API, token }) => {
   const navigate = useNavigate();
   const [likedProperties, setLikedProperties] = useState([]);
   const [loading, setLoading] = useState(true);
+  // dead-ends audit 2026-10-08 #6: saved services count too, so the empty
+  // state must not claim nothing is saved above a list of saved services.
+  const [savedCount, setSavedCount] = useState(0);
 
   const fetchLiked = async () => {
     setLoading(true);
@@ -104,14 +108,14 @@ const LikedTab = ({ API, token }) => {
   return (
     <div className="space-y-6" data-testid="liked-tab">
       <h2 className="text-2xl font-bold" style={{ fontFamily: 'var(--font-head)' }}>
-        Liked Properties
+        {t('saved.tabTitle', 'Saved')}
       </h2>
 
       {loading ? (
         <div className="flex justify-center py-12">
           <div className="w-8 h-8 border-[3px] border-[var(--brand-primary)] border-t-transparent rounded-full animate-spin" />
         </div>
-      ) : likedProperties.length === 0 ? (
+      ) : (likedProperties.length === 0 && savedCount === 0) ? (
         <div className="bg-white rounded-2xl border border-gray-200 p-12 text-center">
           <Heart size={48} className="mx-auto mb-4 text-gray-300" />
           <p className="text-gray-500 text-lg font-medium">No saved properties yet</p>
@@ -127,7 +131,7 @@ const LikedTab = ({ API, token }) => {
             Browse Properties
           </button>
         </div>
-      ) : (
+      ) : likedProperties.length === 0 ? null : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {likedProperties.map((property) => (
             <div
@@ -198,7 +202,7 @@ const LikedTab = ({ API, token }) => {
           ))}
         </div>
       )}
-      <SavedItems API={API} token={token} />
+      <SavedItems API={API} token={token} onCount={setSavedCount} />
     </div>
   );
 };

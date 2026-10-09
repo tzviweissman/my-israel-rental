@@ -36,6 +36,7 @@ door and the customer-phone rule (O5, O6), the customer's status link
 """
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import csv
 import html as _html
@@ -1041,7 +1042,7 @@ def _payment_record(p: Optional[PaymentIn], by: str) -> Optional[dict[str, Any]]
 
 
 def _frontend_url() -> str:
-    return (os.environ.get("FRONTEND_URL") or os.environ.get("PLATFORM_PUBLIC_URL") or "").rstrip("/")
+    return (os.environ.get("FRONTEND_URL") or os.environ.get("PLATFORM_PUBLIC_URL") or "https://myisraelrental.com").rstrip("/")
 
 
 async def _notify(user_id: str, *, type_: str, message: str, action_url: str, **extra: Any) -> None:
@@ -1864,6 +1865,36 @@ async def generate_standing_orders(business_id: str, *, horizon_days: int = 7) -
             {"_id": sd["_id"]}, {"$set": {"last_generated_date": occurrence.isoformat()}},
         )
     return created
+
+
+async def generate_all_standing_orders() -> int:
+    """Run generate_standing_orders for every business with an active
+    standing order. Idempotent: `last_generated_date` plus the unique index
+    on (standing_id, occurrence_date) stop a second run making a duplicate."""
+    made = 0
+    for bid in await db.store_standing_orders.distinct("business_id", {"active": True}):
+        try:
+            made += await generate_standing_orders(bid)
+        except Exception:  # noqa: BLE001
+            logger.exception("[orders] standing generation failed for %s", bid)
+    return made
+
+
+async def standing_orders_daily_loop() -> None:
+    """Daily at 03:30 UTC (dead-ends audit 2026-10-08 #8). The UI promises
+    next week's copy "appears on the board by itself", but generation only
+    ran when someone opened the board. Same shape as jobs_digest_daily_loop;
+    single-replica safe because the generator is idempotent."""
+    while True:
+        now = datetime.now(timezone.utc)
+        next_run = now.replace(hour=3, minute=30, second=0, microsecond=0)
+        if next_run <= now:
+            next_run += timedelta(days=1)
+        await asyncio.sleep((next_run - now).total_seconds())
+        try:
+            await generate_all_standing_orders()
+        except Exception as e:  # noqa: BLE001
+            logger.warning("[orders] standing orders loop crashed: %s", e)
 
 
 # ---------------------------------------------------------------------------

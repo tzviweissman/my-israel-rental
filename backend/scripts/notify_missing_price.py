@@ -99,7 +99,7 @@ def _email_bodies(name: str, listings: list[dict]) -> tuple[str, str, str]:
       <p>Listings with a visible price get materially more enquiries, so it's
          worth adding one. You can set a nightly rate, a monthly rate, or — if
          you only rent over the holidays — just a holiday rate on its own.</p>
-      <p><a href="{SITE_URL}/dashboard"
+      <p><a href="{SITE_URL}/dashboard?tab=properties"
             style="display:inline-block;padding:10px 18px;background:#1E6A6A;
                    color:#fff;border-radius:8px;text-decoration:none">
          Add a price</a></p>

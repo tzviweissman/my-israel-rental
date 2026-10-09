@@ -44,13 +44,17 @@ export default function BusinessCompleteness({ business, onEditDetails, onOpenLi
     {
       key: 'category',
       done: ((b.listing_categories || []).length + (b.categories || []).length) > 0,
-      label: t('businesses.needCategory', 'Choose your categories'),
-      action: null,
+      // dead-ends audit 2026-10-08 #4: categories come from listings, so the
+      // row says that and opens the place a service is added.
+      label: t('businesses.needCategoryFromService', 'Add a service to set your category'),
+      action: onOpenListings,
     },
     {
       key: 'logo',
-      done: !!b.logo_url,
-      label: t('businesses.needLogo', 'Add a logo'),
+      // Same rule as the setup checklist (onboarding.py biz.logo): logo OR
+      // cover. dead-ends audit 2026-10-08 #3.
+      done: !!(b.logo_url || b.cover_url),
+      label: t('businesses.needLogoOrPhoto', 'Add a photo or logo'),
       action: onEditDetails,
     },
     {

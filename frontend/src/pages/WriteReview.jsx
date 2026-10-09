@@ -9,7 +9,7 @@
  * optional. Nothing here offers anything in return for a review.
  */
 import React, { useContext, useEffect, useState } from 'react';
-import { Link, useParams } from 'react-router-dom';
+import { Link, useParams, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { BadgeCheck, CalendarDays, Loader2 } from 'lucide-react';
@@ -32,7 +32,12 @@ export default function WriteReview() {
   const { token } = useContext(AuthContext);
   const { t, i18n } = useTranslation();
   const [info, setInfo] = useState(null);
-  const [rating, setRating] = useState(0);
+  // A star tapped on the tracking page arrives as ?rating=N and is kept.
+  const [searchParams] = useSearchParams();
+  const [rating, setRating] = useState(() => {
+    const n = Number(searchParams.get('rating'));
+    return n >= 1 && n <= 5 ? n : 0;
+  });
   const [subs, setSubs] = useState({});
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);

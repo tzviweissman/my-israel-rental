@@ -50,7 +50,7 @@ export default function PhotoMatch({ API, token, gigId, url, state, onUse, onDon
           <h3 id="photo-match-title" className="text-lg font-semibold" style={{ fontFamily: 'var(--font-head)' }}>
             {t('photoMatch.title', 'Plain background')}
           </h3>
-          <button type="button" onClick={onClose} aria-label={t('photoMatch.close', 'Close')} className="p-1" data-testid="photo-match-close">
+          <button type="button" onClick={onClose} aria-label={t('photoMatch.close', 'Close')} className="-m-2 inline-flex min-h-[44px] min-w-[44px] items-center justify-center" data-testid="photo-match-close">
             <X size={18} />
           </button>
         </div>

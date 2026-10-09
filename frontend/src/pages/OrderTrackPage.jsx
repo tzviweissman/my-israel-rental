@@ -16,7 +16,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Loader2, ClipboardList, Check, Bike, Store as StoreIcon, Clock, MapPin, Star } from 'lucide-react';
+import { StarInput } from '../components/reviews/ReviewsSection';
+import { Loader2, ClipboardList, Check, Bike, Store as StoreIcon, Clock, MapPin } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { money } from '../utils/currency';
 
@@ -34,11 +35,11 @@ export default function OrderTrackPage() {
   useEffect(() => {
     axios.get(`${API}/reviews/config`).then(({ data: c }) => setReviewsOn(!!c.native)).catch(() => {});
   }, []);
-  const startReview = async () => {
+  const startReview = async (stars) => {
     setReviewMsg('');
     try {
       const { data: r } = await axios.post(`${API}/orders/track/${encodeURIComponent(token)}/review-link`);
-      navigate(`/review/${encodeURIComponent(r.token)}`);
+      navigate(`/review/${encodeURIComponent(r.token)}${stars ? `?rating=${stars}` : ''}`);
     } catch (err) {
       const code = err?.response?.data?.detail?.code;
       setReviewMsg(code === 'already_reviewed' ? t('orders.track.reviewDone', 'Thank you, you already reviewed this order.')
@@ -173,10 +174,14 @@ export default function OrderTrackPage() {
         {reviewsOn && data.status === 'done' && (
           <section className="mt-4 rounded-2xl border bg-white p-4 text-center" style={{ borderColor: 'var(--brand-border)' }} data-testid="track-review">
             <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orders.track.reviewAsk', 'How was your order?')}</p>
-            <button type="button" onClick={startReview} className="mt-3 min-h-[44px] px-5 rounded-full text-sm font-bold inline-flex items-center gap-2"
-              style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="track-review-button">
-              <Star size={15} aria-hidden="true" /> {t('orders.track.reviewButton', 'Write a review')}
-            </button>
+            {/* Five stars, not a "Write a review" button (UI audit 8 Oct 2026,
+                foot-in-the-door): tapping one is the small first step, and the
+                form opens with that rating already chosen. */}
+            <div className="mt-2 flex justify-center">
+              <StarInput value={0} onChange={(n) => startReview(n)} size={28}
+                label={t('orders.track.reviewStars', 'Tap a star to rate')} testid="track-review-stars" />
+            </div>
+            <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.reviewStars', 'Tap a star to rate')}</p>
             {reviewMsg && <p className="text-xs mt-2" style={{ color: 'var(--brand-muted)' }} role="status">{reviewMsg}</p>}
           </section>
         )}

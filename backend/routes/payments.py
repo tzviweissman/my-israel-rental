@@ -33,7 +33,8 @@ from utils.email import send_payment_confirmation_email
 logger = logging.getLogger(__name__)
 router = APIRouter()
 
-FRONTEND_URL = os.environ.get("FRONTEND_URL", "").rstrip("/")
+# Default like every other module: "" made links relative (dead-ends audit 2026-10-08 #10).
+FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://myisraelrental.com").rstrip("/")
 PAYPAL_ADMIN_EMAIL = os.environ.get("PAYPAL_ADMIN_EMAIL", "admin@rental.com")
 PAYPAL_WEBHOOK_ID = os.environ.get("PAYPAL_WEBHOOK_ID", "")
 

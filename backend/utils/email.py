@@ -286,6 +286,8 @@ async def send_welcome_email(to_email: str, name: str, role: str, verification_l
     role = _esc(role)
     verification_link = _esc(verification_link)
 
+    # The Subleases tab is renter-only (dead-ends audit 2026-10-08 #7).
+    sublease_li = "<li>List your sublease in a few clicks</li>" if role == "renter" else ""
     verify_block = ""
     if verification_link:
         verify_block = (
@@ -310,7 +312,7 @@ async def send_welcome_email(to_email: str, name: str, role: str, verification_l
     <p style="color:#555;font-size:14px;line-height:1.7;margin:18px 0 8px;">What you can do next:</p>
     <ul style="color:#555;font-size:13px;line-height:1.9;padding-left:20px;margin:0 0 10px;">
       <li>Browse long-term, short-term and vacation rentals across Israel</li>
-      <li>List your sublease in a few clicks</li>
+      {sublease_li}
       <li>Find a local business, or add your own for free</li>
     </ul>
     {_button("Open Dashboard", f"{FRONTEND_URL}/dashboard")}
@@ -398,7 +400,7 @@ async def send_booking_confirmation_email(
         {booking_row}
       </table>
     </div>
-    {_button("View Booking", f"{FRONTEND_URL}/dashboard")}
+    {_button("View Booking", f"{FRONTEND_URL}/dashboard?tab=bookings")}
     <p style="color:#888;font-size:12px;line-height:1.6;margin-top:10px;">
       Need to change anything? Reply to this email or message the owner from your dashboard.
     </p>
@@ -469,7 +471,7 @@ async def send_booking_notification_email(
         {booking_row}
       </table>
     </div>
-    {_button("Open Dashboard", f"{FRONTEND_URL}/dashboard")}
+    {_button("View Booking", f"{FRONTEND_URL}/dashboard?tab=bookings")}
     """
     subject = (
         f"New booking request - {_plain(property_title)}"

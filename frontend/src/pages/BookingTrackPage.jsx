@@ -10,7 +10,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Loader2, CalendarCheck, Star } from 'lucide-react';
+import { StarInput } from '../components/reviews/ReviewsSection';
+import { Loader2, CalendarCheck } from 'lucide-react';
 import { API } from '../lib/apiBase';
 
 const REFRESH_MS = 30_000;
@@ -47,11 +48,11 @@ export default function BookingTrackPage() {
     axios.get(`${API}/reviews/config`).then(({ data: c }) => setReviewsOn(!!c.native)).catch(() => {});
   }, []);
 
-  const startReview = async () => {
+  const startReview = async (stars) => {
     setReviewMsg('');
     try {
       const { data: r } = await axios.post(`${API}/bookings/track/${encodeURIComponent(token)}/review-link`);
-      navigate(`/review/${encodeURIComponent(r.token)}`);
+      navigate(`/review/${encodeURIComponent(r.token)}${stars ? `?rating=${stars}` : ''}`);
     } catch (err) {
       const code = err?.response?.data?.detail?.code;
       setReviewMsg(code === 'already_reviewed' ? t('bookingTrack.reviewDone', 'Thank you, you already reviewed this booking.')
@@ -105,10 +106,14 @@ export default function BookingTrackPage() {
         {reviewsOn && data.status === 'completed' && (
           <section className="mt-4 rounded-2xl border bg-white p-4 text-center" style={{ borderColor: 'var(--brand-border)' }} data-testid="booking-track-review">
             <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('bookingTrack.reviewAsk', 'How did it go?')}</p>
-            <button type="button" onClick={startReview} className="mt-3 min-h-[44px] px-5 rounded-full text-sm font-bold inline-flex items-center gap-2"
-              style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="booking-track-review-button">
-              <Star size={15} aria-hidden="true" /> {t('bookingTrack.reviewButton', 'Write a review')}
-            </button>
+            {/* Five stars, not a "Write a review" button (UI audit 8 Oct 2026,
+                foot-in-the-door): tapping one is the small first step, and the
+                form opens with that rating already chosen. */}
+            <div className="mt-2 flex justify-center">
+              <StarInput value={0} onChange={(n) => startReview(n)} size={28}
+                label={t('bookingTrack.reviewStars', 'Tap a star to rate')} testid="booking-track-review-stars" />
+            </div>
+            <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('bookingTrack.reviewStars', 'Tap a star to rate')}</p>
             {reviewMsg && <p className="text-xs mt-2" style={{ color: 'var(--brand-muted)' }} role="status">{reviewMsg}</p>}
           </section>
         )}

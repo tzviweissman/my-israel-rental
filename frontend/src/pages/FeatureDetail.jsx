@@ -14,9 +14,10 @@
  * captured assets for any of them, and inventing placeholder imagery would
  * be worse than an honest text page. Flagged rather than faked.
  */
-import React from 'react';
+import React, { useContext } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link, useParams, Navigate } from 'react-router-dom';
+import { AuthContext } from '../App';
 import * as Icons from 'lucide-react';
 import { ArrowLeft, Check } from 'lucide-react';
 import PageMeta from '../components/PageMeta';
@@ -26,6 +27,7 @@ import { featureBySlug } from '../data/featureLibrary';
 export default function FeatureDetail() {
   const { t } = useTranslation();
   const { slug } = useParams();
+  const { user } = useContext(AuthContext);
   const feature = featureBySlug(slug);
 
   // An unknown slug goes back to the library rather than to a 404 page:
@@ -97,7 +99,7 @@ export default function FeatureDetail() {
 
         {/* Exactly one CTA, straight into using it. */}
         <Link
-          to={feature.cta}
+          to={(feature.ctaHost && ['owner', 'manager', 'admin'].includes(user?.role)) ? feature.ctaHost : feature.cta}
           className="btn-gold inline-flex items-center gap-2 px-6 py-3 text-sm mt-8"
           data-testid="feature-cta"
         >

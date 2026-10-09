@@ -157,7 +157,7 @@ export default function PageVersions({ business, page, API, token, onLive }) {
               {v.status !== 'checking' && (
                 <button type="button" disabled={busy || Boolean(checking)} onClick={() => publish(v)}
                   className="mt-auto rounded-full px-3 py-2 text-xs font-semibold disabled:opacity-50"
-                  style={{ background: 'var(--brand-primary)', color: '#fff' }}
+                  style={{ background: 'var(--action)', color: 'var(--action-ink)' }}
                   data-testid="page-version-publish">
                   {v.status === 'failed' ? t('pageVersions.tryAgain', 'Check it again') : t('pageVersions.publish', 'Use this one')}
                 </button>

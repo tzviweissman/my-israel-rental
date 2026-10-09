@@ -34,6 +34,7 @@ export const AUDIENCES = ['business', 'host', 'traveller'];
  * @property {string}   icon       lucide-react icon name
  * @property {string[]} audiences  who this is for
  * @property {string}   cta        where the CTA sends someone to use it
+ * @property {string}   [ctaHost]  same, for a property host when the feature also serves businesses
  * @property {string}   built      the code that proves it exists (F5)
  */
 export const FEATURES = [
@@ -76,7 +77,7 @@ export const FEATURES = [
     slug: 'put-it-on-a-flyer',
     icon: 'QrCode',
     audiences: ['business', 'host'],
-    cta: '/dashboard',
+    cta: '/dashboard?tab=my-businesses', ctaHost: '/dashboard?tab=properties',
     built: 'backend/routes/short_links.py',
   },
   {
@@ -113,7 +114,7 @@ export const FEATURES = [
     slug: 'one-calendar',
     icon: 'CalendarSync',
     audiences: ['host'],
-    cta: '/dashboard',
+    cta: '/dashboard?tab=properties',
     built: 'backend/routes/ical.py',
   },
   {
@@ -127,7 +128,7 @@ export const FEATURES = [
     slug: 'instant-or-ask',
     icon: 'Zap',
     audiences: ['host'],
-    cta: '/dashboard',
+    cta: '/dashboard?tab=properties',
     built: 'frontend/src/components/dashboard/AddPropertyModal.jsx',
   },
   {
@@ -141,14 +142,14 @@ export const FEATURES = [
     slug: 'what-to-charge',
     icon: 'TrendingUp',
     audiences: ['host'],
-    cta: '/dashboard',
+    cta: '/dashboard?tab=properties',
     built: 'frontend/src/components/dashboard/SmartPricingModal.jsx',
   },
   {
     slug: 'see-what-works',
     icon: 'BarChart3',
     audiences: ['host', 'business'],
-    cta: '/dashboard',
+    cta: '/dashboard?tab=my-businesses', ctaHost: '/dashboard?tab=properties',
     built: 'frontend/src/components/dashboard/PerformancePanel.jsx',
   },
 

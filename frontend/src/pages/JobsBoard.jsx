@@ -32,6 +32,7 @@ import { toast } from 'sonner';
 import { Loader2, MapPin, Coins, Calendar, Plus, MessageSquare, Bell, BellRing } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import AreaCombobox from '../components/requests/AreaCombobox';
 import { saveReturnPath } from '../hooks/useBackNavigation';
 
 const JobsBoard = () => {
@@ -103,11 +104,26 @@ const JobsBoard = () => {
     setLoading(true);
     const q = new URLSearchParams();
     if (activeCat) q.set('category', activeCat);
+    // dead-ends audit 2026-10-08 #2: ?area= was read and saved but never sent.
+    if (activeArea) q.set('area', activeArea);
     axios.get(`${API}/marketplace/jobs?${q.toString()}`)
       .then((r) => setJobs(r.data))
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [activeCat]);
+  }, [activeCat, activeArea]);
+
+  // Free-text combobox fires per keystroke; commit to the URL after a pause.
+  const [areaDraft, setAreaDraft] = useState(activeArea);
+  useEffect(() => { setAreaDraft(activeArea); }, [activeArea]);
+  useEffect(() => {
+    if (areaDraft.trim() === activeArea) return undefined;
+    const id = setTimeout(() => {
+      const p = new URLSearchParams(params);
+      if (areaDraft.trim()) p.set('area', areaDraft.trim()); else p.delete('area');
+      setParams(p, { replace: true });
+    }, 450);
+    return () => clearTimeout(id);
+  }, [areaDraft]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const setCat = (slug) => {
     const p = new URLSearchParams(params);
@@ -179,6 +195,18 @@ const JobsBoard = () => {
             </button>
           </div>
         )}
+
+        <div className="mb-4 max-w-xs">
+          <AreaCombobox
+            value={areaDraft}
+            onChange={setAreaDraft}
+            className="w-full bg-white border rounded-full px-4 py-2 text-sm"
+            style={{ borderColor: 'var(--brand-border)' }}
+            placeholder={t('jobsBoard.areaPh', 'Any area - start typing a city')}
+            emptyHint={t('jobsBoard.areaFreeText', 'Not on our list? Type it anyway.')}
+            testid="jobs-area-filter"
+          />
+        </div>
 
         {/* Category strip */}
         <div className="flex gap-2 overflow-x-auto pb-2 mb-6 no-scrollbar">

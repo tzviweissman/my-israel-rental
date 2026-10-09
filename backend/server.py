@@ -264,6 +264,9 @@ async def startup_tasks() -> None:
     await ensure_booking_indexes()
     from routes.marketplace.orders import ensure_order_indexes
     await ensure_order_indexes()
+    # "Repeat every week" standing orders, made daily without anyone opening the board.
+    from routes.marketplace.orders import standing_orders_daily_loop
+    asyncio.create_task(standing_orders_daily_loop())
 
     asyncio.create_task(sync_all_ical_feeds())
     asyncio.create_task(mention_email_loop())

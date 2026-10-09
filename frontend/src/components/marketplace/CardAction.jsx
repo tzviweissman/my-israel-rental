@@ -139,7 +139,7 @@ function BookSheet({ gig, title, onClose, t }) {
 export default function CardAction({ gig, basket, t, title, onMessage }) {
   const kind = actionKind(gig);
   const [open, setOpen] = useState(false);
-  const btn = 'min-h-[40px] px-3 sm:px-4 rounded-full text-[13px] sm:text-sm font-bold inline-flex items-center justify-center gap-1.5 whitespace-nowrap';
+  const btn = 'min-h-[44px] px-3 sm:px-4 rounded-full text-[13px] sm:text-sm font-bold inline-flex items-center justify-center gap-1.5 whitespace-nowrap';
   const solid = { background: 'var(--action)', color: 'var(--action-ink)' };
   const quiet = { border: '1px solid var(--brand-border)', color: 'var(--ink)', background: 'var(--surface)' };
 

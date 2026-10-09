@@ -20,7 +20,7 @@ export default function AuthShell({ children, testId }) {
     <div
       className="min-h-screen relative [overflow-x:clip]"
       // The flow theme's one alternate surface, so the white card reads as the page.
-      style={{ background: '#F9FAFB' }}
+      style={{ background: 'var(--surface-muted, #F9FAFB)' }}
       data-testid={testId}
     >
       <div className="mx-auto max-w-[1320px] px-3 sm:px-4 pt-20 sm:pt-24 lg:pt-[4.75rem] pb-4 lg:pb-2">

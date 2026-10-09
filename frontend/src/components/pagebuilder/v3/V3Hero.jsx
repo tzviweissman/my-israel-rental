@@ -67,7 +67,12 @@ export function themeVars(brief) {
   // preset faces have) fall back to Frank Ruhl Libre / Assistant per glyph.
   const stack = (face, he, generic) => `${face ? `"${face}", ` : ''}${he}, ${generic}`;
   return {
-    '--ground': p.ground, '--text': p.text, '--muted': p.muted, '--accent': p.accent,
+    // `--muted` must always be set here: outside these sections it is
+    // shadcn's HSL triplet (index.css), which is not a colour, so a brief
+    // without palette.muted would leave every `color: var(--muted)` in
+    // page-v3.css invalid (UI audit 8 Oct 2026). The fallback is the flow
+    // theme's muted grey.
+    '--ground': p.ground, '--text': p.text, '--muted': p.muted || 'var(--brand-muted, #666666)', '--accent': p.accent,
     '--surface': p.surface, '--rule': p.rule, '--on-accent': p.on_accent,
     '--display': stack(ty.display, "'Frank Ruhl Libre'", 'serif'),
     '--body': stack(ty.body, "'Assistant'", 'system-ui, sans-serif'),
