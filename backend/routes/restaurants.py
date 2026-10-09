@@ -186,6 +186,8 @@ class AdminEdit(BaseModel):
     city: Optional[str] = None
     neighborhood: Optional[str] = None
     categories: Optional[list[str]] = None
+    lat: Optional[float] = None            # a pin for a place added by hand
+    lng: Optional[float] = None
 
 
 async def _apply(place_id, e: AdminEdit, payload):
@@ -218,14 +220,20 @@ async def _apply(place_id, e: AdminEdit, payload):
         sets["neighborhood"] = e.neighborhood or None
     if e.categories is not None:
         sets["categories"] = [c for c in e.categories if c in CATEGORIES]
+    if e.lat is not None and e.lng is not None and place_id.startswith("mir-"):
+        # Ours to keep (not Google's), so no fetched date for the 30-day refresh.
+        sets.update({"location": {"type": "Point", "coordinates": [e.lng, e.lat]},
+                     "location_source": "admin", "location_fetched_at": None})
     if not sets:
         raise HTTPException(400, "Nothing to change")
     sets["edited_at"] = _now()
     r = await db.restaurants.update_one({"place_id": place_id}, {"$set": sets})
     if not r.matched_count:
         raise HTTPException(404, "Restaurant not found")
-    if e.address and place_id.startswith("mir-"):
-        await _pin_from_address(place_id)
+    if e.address and place_id.startswith("mir-") and e.lat is None:
+        # In the background: from Railway, Nominatim can take minutes to answer.
+        import asyncio
+        asyncio.create_task(_pin_from_address(place_id))
 
 
 NOMINATIM = "https://nominatim.openstreetmap.org/search"
@@ -247,7 +255,7 @@ async def _pin_from_address(place_id):
     # street alone still lands within a block or two.
     tries = [addr, f"{c.get('name_en') or c.get('name_he') or ''}, {d.get('city')}",
              re.sub(r"\s*\d+[/\d]*", "", addr)]
-    async with httpx.AsyncClient(timeout=15, headers={"User-Agent": "MyIsraelRental/1.0 (myisraelrental.com)"}) as http:
+    async with httpx.AsyncClient(timeout=6, headers={"User-Agent": "MyIsraelRental/1.0 (myisraelrental.com)"}) as http:
         for q in tries:
             r = await http.get(NOMINATIM, params={"q": q, "countrycodes": "il", "format": "json", "limit": 3,
                                                   "accept-language": "en", "addressdetails": 1})
