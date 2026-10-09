@@ -4970,6 +4970,9 @@ const en = {
         open: 'Open the page of {{name}}',
         ctaTitle: 'Want a page like these for your business?',
         ctaButton: 'Add your business, free',
+        seeAll: 'See all',
+        prev: 'Previous',
+        next: 'Next',
         footerLink: 'Business pages',
       },
     };

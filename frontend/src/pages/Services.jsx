@@ -18,6 +18,7 @@ import { useTranslation } from 'react-i18next';
 import { ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
+import ShowcaseStrip from '../components/showcase/ShowcaseStrip';
 import StarRating from '../components/marketplace/StarRating';
 import GigCard from '../components/marketplace/ServiceCard';
 import CoverPlaceholder from '../components/common/CoverPlaceholder';
@@ -417,6 +418,9 @@ const Services = () => {
 
       {/* Locations + Categories */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
+        {/* The hand-built business pages, as live previews (Tzvi, 9 Oct
+            2026: "add them at the top of the regular business page"). */}
+        <ShowcaseStrip />
         {/* Section headings drop their hardcoded Inter/tracking styles for
             the shared `.section-rhead` rule — the preview's editorial
             Playfair, and the same type as the Stays results header. The
