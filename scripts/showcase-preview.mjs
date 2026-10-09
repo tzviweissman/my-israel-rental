@@ -20,9 +20,9 @@ const OUT = resolve(process.cwd().replace(/[\\/]frontend$/, ''), 'frontend/publi
 const tmp = mkdtempSync(join(tmpdir(), 'show-'));
 const raw = join(tmp, 'raw.mp4');
 execFileSync('node', [join(homedir(), '.claude/skills/build-business-page/scripts/record.mjs'), url, '1440', '900', raw, '14', '24'], { stdio: 'inherit' });
-// The first ~12 s: the opening and the first sections, looping cleanly.
-execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', raw, '-t', '12', '-vf', 'scale=960:-2', '-an', '-c:v', 'libx264',
-  '-crf', '30', '-preset', 'slow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', join(OUT, `${slug}.mp4`)]);
-execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', raw, '-frames:v', '1', '-vf', 'scale=960:-2', '-q:v', '80', join(OUT, `${slug}.webp`)]);
+// The first 10 s, 640 px, 20 fps: ~120 KB, so it plays as soon as it is seen.
+execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', raw, '-t', '10', '-vf', 'scale=640:-2,fps=20', '-an', '-c:v', 'libx264',
+  '-crf', '32', '-preset', 'veryslow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', join(OUT, `${slug}.mp4`)]);
+execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', raw, '-frames:v', '1', '-vf', 'scale=640:-2', '-q:v', '80', join(OUT, `${slug}.webp`)]);
 rmSync(tmp, { recursive: true, force: true });
 console.log(`wrote frontend/public/showcase/${slug}.mp4 and .webp`);

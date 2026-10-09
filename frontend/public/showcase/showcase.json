@@ -1,7 +1,7 @@
 [
-  {"slug": "aidy-yaniv", "name": "Bun Intended", "line": "Homemade cinnamon buns in Ramat Eshkol", "logo": "aidy-yaniv-logo.webp", "line_he": "שבלולי קינמון ביתיים ברמת אשכול"},
-  {"slug": "kashermybnb-kashering-services", "name": "KasherMyBnb", "line": "Kitchen kashering in Jerusalem and across Israel", "logo": "kashermybnb-kashering-services-logo.webp", "line_he": "הכשרת מטבחים בירושלים ובכל הארץ"},
-  {"slug": "l-a-cholent-by-rabbi-samuels", "name": "L.A. Cholent", "line": "Rabbi Samuels' cholent, ready for your crock pot", "logo": "l-a-cholent-by-rabbi-samuels-logo.webp", "line_he": "החמין של הרב סמואלס, מוכן לסיר שלכם"},
-  {"slug": "michal-yodaiken", "name": "Michal Yodaiken", "line": "Personal training for women in Jerusalem", "logo": null, "mark": "MY", "markColor": "#0B0A0C", "markInk": "#FF3D9A", "line_he": "אימונים אישיים לנשים בירושלים"},
-  {"slug": "blazin-boards", "name": "Blazin' Boards", "line": "Premium meat boards in Jerusalem", "logo": "blazin-boards-logo.webp", "line_he": "מגשי בשר פרימיום בירושלים"}
+  {"slug": "aidy-yaniv", "name": "Bun Intended", "line": "Homemade cinnamon buns in Ramat Eshkol", "logo": "aidy-yaniv-logo.webp", "line_he": "שבלולי קינמון ביתיים ברמת אשכול", "v": "2"},
+  {"slug": "kashermybnb-kashering-services", "name": "KasherMyBnb", "line": "Kitchen kashering in Jerusalem and across Israel", "logo": "kashermybnb-kashering-services-logo.webp", "line_he": "הכשרת מטבחים בירושלים ובכל הארץ", "v": "2"},
+  {"slug": "l-a-cholent-by-rabbi-samuels", "name": "L.A. Cholent", "line": "Rabbi Samuels' cholent, ready for your crock pot", "logo": "l-a-cholent-by-rabbi-samuels-logo.webp", "line_he": "החמין של הרב סמואלס, מוכן לסיר שלכם", "v": "2"},
+  {"slug": "michal-yodaiken", "name": "Michal Yodaiken", "line": "Personal training for women in Jerusalem", "logo": null, "mark": "MY", "markColor": "#0B0A0C", "markInk": "#FF3D9A", "line_he": "אימונים אישיים לנשים בירושלים", "v": "2"},
+  {"slug": "blazin-boards", "name": "Blazin' Boards", "line": "Premium meat boards in Jerusalem", "logo": "blazin-boards-logo.webp", "line_he": "מגשי בשר פרימיום בירושלים", "v": "2"}
 ]

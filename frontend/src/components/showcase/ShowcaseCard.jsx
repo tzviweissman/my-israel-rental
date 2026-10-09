@@ -24,23 +24,27 @@ export function useShowcase() {
   return items;
 }
 
-function Preview({ slug, name }) {
+// Small clips (~120 KB, 640 px) fetched at once and started as soon as they
+// can play, so a tile is moving when it is seen, not a still (Tzvi, 9 Oct
+// 2026). Paused while off screen; never plays for reduced motion. v busts the
+// year-long static cache when a clip is remade.
+function Preview({ slug, name, v }) {
   const ref = useRef(null);
-  // Plays only while on screen, and never for reduced motion (the still shows).
   useEffect(() => {
-    const v = ref.current;
-    if (!v) return undefined;
-    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return undefined;
-    if (!('IntersectionObserver' in window)) { v.play().catch(() => {}); return undefined; }
+    const el = ref.current;
+    if (!el) return undefined;
+    if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) { el.removeAttribute('autoplay'); el.pause(); return undefined; }
+    if (!('IntersectionObserver' in window)) return undefined;
     const io = new IntersectionObserver(([e]) => {
-      if (e.isIntersecting) v.play().catch(() => {}); else v.pause();
-    }, { threshold: 0.25 });
-    io.observe(v);
+      if (e.isIntersecting) el.play().catch(() => {}); else el.pause();
+    }, { rootMargin: '200px 0px' });
+    io.observe(el);
     return () => io.disconnect();
   }, []);
+  const q = v ? `?v=${v}` : '';
   return (
-    <video ref={ref} className="sc-frame" src={`/showcase/${slug}.mp4`} poster={`/showcase/${slug}.webp`}
-      muted loop playsInline preload="metadata" aria-label={name} />
+    <video ref={ref} className="sc-frame" src={`/showcase/${slug}.mp4${q}`} poster={`/showcase/${slug}.webp${q}`}
+      muted loop playsInline autoPlay preload="auto" aria-label={name} />
   );
 }
 
@@ -58,7 +62,7 @@ export default function ShowcaseCard({ item }) {
   const he = (i18n.language || '').startsWith('he');
   return (
     <a className="sc-card" href={`/business/${item.slug}`} aria-label={t('showcase.open', 'Open the page of {{name}}', { name: item.name })}>
-      <div className="sc-tile"><Preview slug={item.slug} name={item.name} /></div>
+      <div className="sc-tile"><Preview slug={item.slug} name={item.name} v={item.v} /></div>
       <div className="sc-meta">
         <Mark item={item} />
         <div className="sc-text">
