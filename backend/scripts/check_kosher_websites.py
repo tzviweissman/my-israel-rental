@@ -220,10 +220,15 @@ async def read_site(http, url):
     return texts, contact
 
 
-async def check_one(client, http, doc):
-    data = await client._post(DETAILS_URL.format(doc["place_id"]), None, "displayName,websiteUri", method="GET")
-    name = (data.get("displayName") or {}).get("text", "")
-    site = data.get("websiteUri") or ""
+async def check_one(client, http, doc, known=None):
+    """`known` = (name, website) already fetched with a search; otherwise one
+    Place Details call gets them."""
+    if known is None:
+        data = await client._post(DETAILS_URL.format(doc["place_id"]), None, "displayName,websiteUri", method="GET")
+        name = (data.get("displayName") or {}).get("text", "")
+        site = data.get("websiteUri") or ""
+    else:
+        name, site = known
     texts = [name]
     source = "name"
     contact = None
@@ -247,8 +252,53 @@ async def check_one(client, http, doc):
     return verdict, cert, name, bool(site)
 
 
+SEARCH_FIELDS = "places.id,places.displayName,places.websiteUri,nextPageToken"
+
+
+async def via_search(client, http, cities):
+    """The cheaper way to check many places (Tzvi, 8 Oct 2026): re-run the
+    searches that found unchecked places, asking for each result's website
+    in the same call (Text Search Enterprise: 20 places per call), instead of
+    one Place Details call per place. Only searches that found new places
+    are repeated; a place already checked is skipped."""
+    from scripts.import_kosher_restaurants import area_for, query_text
+    done = {d["_id"] async for d in db.restaurant_check_progress.find({}, {"_id": 1})}
+    rows = await db.restaurant_import_progress.find({"new": {"$gt": 0}}).to_list(None)
+    todo = []
+    for r in rows:
+        city, hood, cat = r["_id"].split("|")
+        if city in cities and r["_id"] not in done:
+            todo.append((r["_id"], city, hood or None, cat))
+    print(f"{len(todo)} searches to repeat with websites")
+    tally, sem = Counter(), asyncio.Semaphore(6)
+
+    async def one(doc, name, site):
+        async with sem:
+            try:
+                v, *_ = await check_one(client, http, doc, known=(name, site))
+                tally[v] += 1
+            except Exception as e:  # one bad site never stops the run
+                print("  skipped", doc["place_id"], type(e).__name__)
+
+    try:
+        for key, city, hood, cat in todo:
+            area = await area_for(client, city)
+            jobs = []
+            async for p in client.search(query_text(city, hood, cat), area, fields=SEARCH_FIELDS):
+                doc = await db.restaurants.find_one({"place_id": p["id"], "kosher_check": {"$exists": False}}, {"place_id": 1})
+                if doc:
+                    jobs.append(one(doc, (p.get("displayName") or {}).get("text", ""), p.get("websiteUri") or ""))
+            await asyncio.gather(*jobs)
+            await db.restaurant_check_progress.update_one({"_id": key}, {"$set": {"done_at": datetime.now(UTC).isoformat()}}, upsert=True)
+            print(f"  {key[:60]:<60} checked {len(jobs):>3}   (calls {client.calls})")
+    except Budget:
+        print(f"Stopped at the budget of {client.max} calls; rerun to continue.")
+    print(f"\n{sum(tally.values())} checked, {client.calls} Google calls: {dict(tally)}")
+
+
 async def main():
     ap = argparse.ArgumentParser()
+    ap.add_argument("--via-search", action="store_true", help="check by repeating searches with websites (cheaper)")
     ap.add_argument("--city", action="append")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--recheck", action="store_true")
@@ -276,6 +326,13 @@ async def main():
     http = httpx.AsyncClient(timeout=12, follow_redirects=True, headers={
         "User-Agent": "Mozilla/5.0 (compatible; MyIsraelRental kashrut check; +https://myisraelrental.com)",
         "Accept-Language": "he,en;q=0.8"})
+    if a.via_search:
+        try:
+            await via_search(client, http, cities)
+        finally:
+            await client.http.aclose()
+            await http.aclose()
+        return
     tally, certs, rows = Counter(), Counter(), []
     sem = asyncio.Semaphore(6)
 

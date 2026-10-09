@@ -100,7 +100,7 @@ class Places:
             return r.json()
         raise RuntimeError("Google kept refusing (rate limit); try again later")
 
-    async def search(self, text, area=None):
+    async def search(self, text, area=None, fields=FIELDS):
         body, token = {"textQuery": text, "regionCode": "IL", "languageCode": "en", "pageSize": 20}, None
         if area:
             # Only places inside the city. Without this "German Colony,
@@ -109,7 +109,7 @@ class Places:
         for _ in range(MAX_PAGES):
             if token:
                 body["pageToken"] = token
-            data = await self._post(SEARCH_URL, body, FIELDS)
+            data = await self._post(SEARCH_URL, body, fields)
             for p in data.get("places", []):
                 yield p
             token = data.get("nextPageToken")
