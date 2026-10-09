@@ -183,7 +183,8 @@ async def save(place, city, hood, cat, now):
                 "kashrut": None,                # meat | dairy | pareve, set by a person
                 "kosher_certification": None,   # set by a person
                 "verified": False,
-                "status": "listed",
+                # Held back until check_kosher_websites finds a named hechsher.
+                "status": "hidden",
                 "first_seen_at": now,
             },
             "$addToSet": {"categories": TYPE_TO_CATEGORY.get(place.get("primaryType"), cat)},
