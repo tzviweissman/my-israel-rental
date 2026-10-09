@@ -86,3 +86,31 @@ def test_resume_skips_finished_searches(town):
     assert again.calls == 0
     run(imp.run_import(again, [city], fresh=True, dry_run=False))
     assert again.calls == 4
+
+
+class FakeLocations:
+    def __init__(self):
+        self.calls = 0
+
+    async def location(self, place_id):
+        self.calls += 1
+        return {"latitude": 31.8, "longitude": 35.2}
+
+
+def test_refresh_stale_spends_calls_only_on_listed_places(town):
+    tag, _ = town
+    old = "2020-01-01T00:00:00+00:00"
+    pin = {"type": "Point", "coordinates": [35.0, 31.0]}
+    run(db.restaurants.insert_many([
+        {"place_id": f"{tag}-listed", "status": "listed", "location": pin, "location_fetched_at": old},
+        {"place_id": f"{tag}-hidden", "status": "hidden", "location": pin, "location_fetched_at": old}]))
+    client = FakeLocations()
+    run(imp.refresh_stale(client))
+    got = {d["place_id"]: d for d in run(db.restaurants.find({"place_id": {"$regex": f"^{tag}-"}}).to_list(None))}
+    assert client.calls == 1
+    assert got[f"{tag}-listed"]["location"]["coordinates"] == [35.2, 31.8]
+    assert got[f"{tag}-hidden"]["location"] is None
+    # No key: every stale pin goes, nothing is kept past 30 days.
+    run(db.restaurants.update_one({"place_id": f"{tag}-listed"}, {"$set": {"location_fetched_at": old}}))
+    run(imp.refresh_stale(None))
+    assert run(db.restaurants.find_one({"place_id": f"{tag}-listed"}))["location"] is None

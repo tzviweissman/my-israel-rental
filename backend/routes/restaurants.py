@@ -495,3 +495,29 @@ async def admin_decide_claim(claim_id: str, decision: str, payload: dict = Depen
         "status": "approved" if decision == "approve" else "rejected", "decided_at": _now(),
         "decided_by": payload.get("user_id")}})
     return {"ok": True}
+
+
+async def restaurant_locations_daily_loop() -> None:
+    """Daily at 02:00 UTC: Google lets us keep a place's coordinates for 30
+    days, so pins older than 27 are refreshed (listed places) or dropped
+    (everything else, or every stale pin when GOOGLE_PLACES_API_KEY is not
+    set). Same shape as standing_orders_daily_loop."""
+    import asyncio
+    import logging
+    import os
+    from scripts.import_kosher_restaurants import Places, refresh_stale
+    while True:
+        now = datetime.now(UTC)
+        next_run = now.replace(hour=2, minute=0, second=0, microsecond=0)
+        if next_run <= now:
+            next_run += timedelta(days=1)
+        await asyncio.sleep((next_run - now).total_seconds())
+        key = os.environ.get("GOOGLE_PLACES_API_KEY", "")
+        client = Places(key, 2000) if key else None
+        try:
+            await refresh_stale(client)
+        except Exception as e:  # noqa: BLE001
+            logging.getLogger(__name__).warning("[restaurants] location refresh crashed: %s", e)
+        finally:
+            if client:
+                await client.http.aclose()

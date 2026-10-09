@@ -267,6 +267,9 @@ async def startup_tasks() -> None:
     # "Repeat every week" standing orders, made daily without anyone opening the board.
     from routes.marketplace.orders import standing_orders_daily_loop
     asyncio.create_task(standing_orders_daily_loop())
+    # Restaurant map pins: Google's 30-day limit on stored coordinates.
+    from routes.restaurants import restaurant_locations_daily_loop
+    asyncio.create_task(restaurant_locations_daily_loop())
 
     asyncio.create_task(sync_all_ical_feeds())
     asyncio.create_task(mention_email_loop())

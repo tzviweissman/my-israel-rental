@@ -278,18 +278,25 @@ async def run_import(client, cities, fresh, dry_run):
 
 
 async def refresh_stale(client):
+    """Only listed places spend a call (a Place Details "location" lookup,
+    10,000 free a month); a hidden place's pin is never shown, so it is just
+    dropped. With no client (no key) every stale pin is dropped: the 30-day
+    limit holds even when nothing can refresh. Runs daily on the server
+    (routes/restaurants.py, restaurant_locations_daily_loop)."""
     cutoff = (datetime.now(UTC) - timedelta(days=LOCATION_DAYS)).isoformat()
     stale = await db.restaurants.find(
-        {"location_fetched_at": {"$lt": cutoff}}, {"place_id": 1}).to_list(None)
+        {"location_fetched_at": {"$lt": cutoff}}, {"place_id": 1, "status": 1}).to_list(None)
     print(f"{len(stale)} place(s) with coordinates older than {LOCATION_DAYS} days")
     fixed = dropped = 0
     for d in stale:
-        try:
-            loc = await client.location(d["place_id"])
-        except Budget:
-            break
-        except RuntimeError:
-            loc = None
+        loc = None
+        if client and d.get("status") == "listed":
+            try:
+                loc = await client.location(d["place_id"])
+            except Budget:
+                break
+            except RuntimeError:
+                pass
         now = datetime.now(UTC).isoformat()
         if loc:
             await db.restaurants.update_one({"_id": d["_id"]}, {"$set": {
@@ -300,7 +307,7 @@ async def refresh_stale(client):
             # Past 30 days we may not keep it; no map pin is better than a breach.
             await db.restaurants.update_one({"_id": d["_id"]}, {"$set": {"location": None, "location_fetched_at": None}})
             dropped += 1
-    print(f"refreshed {fixed}, dropped {dropped}, {client.calls} calls")
+    print(f"refreshed {fixed}, dropped {dropped}, {client.calls if client else 0} calls")
 
 
 async def sample(client, cities, n):
