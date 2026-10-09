@@ -224,6 +224,57 @@ async def _apply(place_id, e: AdminEdit, payload):
     r = await db.restaurants.update_one({"place_id": place_id}, {"$set": sets})
     if not r.matched_count:
         raise HTTPException(404, "Restaurant not found")
+    if e.address and place_id.startswith("mir-"):
+        await _pin_from_address(place_id)
+
+
+NOMINATIM = "https://nominatim.openstreetmap.org/search"
+
+
+async def _pin_from_address(place_id):
+    """A restaurant added by hand has no Google place, so its map pin comes
+    from its address via OpenStreetMap: free, and unlike Google's points
+    ours to keep (location_fetched_at stays None, so the 30-day refresh
+    never drops it). Nominatim allows one request a second, named agent."""
+    import asyncio
+    import httpx
+    d = await db.restaurants.find_one({"place_id": place_id}, {"contact": 1, "city": 1})
+    c = (d or {}).get("contact") or {}
+    if not c.get("address"):
+        return False
+    addr = re.sub(r"\([^)]*\)", "", c["address"]).strip(" ,")
+    # OSM lacks many house numbers ("Luntz 4" fails, "Luntz" works): the
+    # street alone still lands within a block or two.
+    tries = [addr, f"{c.get('name_en') or c.get('name_he') or ''}, {d.get('city')}",
+             re.sub(r"\s*\d+[/\d]*", "", addr)]
+    async with httpx.AsyncClient(timeout=15, headers={"User-Agent": "MyIsraelRental/1.0 (myisraelrental.com)"}) as http:
+        for q in tries:
+            r = await http.get(NOMINATIM, params={"q": q, "countrycodes": "il", "format": "json", "limit": 3,
+                                                  "accept-language": "en", "addressdetails": 1})
+            await asyncio.sleep(1.1)
+            # Only a hit in the restaurant's own city, by OSM's city field:
+            # "Tzefania 61" found a Beit Shemesh street, whose full name
+            # still contains "Jerusalem District".
+            city = (d.get("city") or "").split("-")[0].lower()
+            hit = [h for h in (r.json() if r.status_code == 200 else [])
+                   if city and any(city in (h.get("address") or {}).get(k, "").lower()
+                                   for k in ("city", "town", "village"))]
+            if hit:
+                await db.restaurants.update_one({"place_id": place_id}, {"$set": {
+                    "location": {"type": "Point", "coordinates": [float(hit[0]["lon"]), float(hit[0]["lat"])]},
+                    "location_source": "osm", "location_fetched_at": None}})
+                return True
+    return False
+
+
+@router.post("/admin/restaurants/pin-missing")
+async def admin_pin_missing(payload: dict = Depends(verify_token)):
+    """Map pins for hand-added restaurants that have an address but no pin."""
+    _admin_only(payload)
+    ids = [d["place_id"] async for d in db.restaurants.find(
+        {"place_id": {"$regex": "^mir-"}, "location": None, "contact.address": {"$nin": [None, ""]}}, {"place_id": 1})]
+    done = [pid for pid in ids if await _pin_from_address(pid)]
+    return {"pinned": len(done), "not_found": len(ids) - len(done)}
 
 
 @router.get("/admin/restaurants")
