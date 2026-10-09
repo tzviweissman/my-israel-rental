@@ -282,6 +282,13 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
 
 ## 4. Design and story
 
+- **A set of images reads as one shoot** (Tzvi, 8 Oct 2026): tiles and rows
+  share one angle, one light, one plain background, one subject size. Their
+  own matching photos first; otherwise generate the whole set in one pass
+  from one style preamble (category and atmosphere tiles only, never a
+  product being chosen); stock only from one photographer's series, never
+  cut-outs mixed from many. Check the contact sheet; food stays
+  kosher-appropriate. Full text: `reference/full-rules.md` §8.
 - Find what the business actually has before choosing a look; the page is
   built around the one thing that is really theirs.
 - **The product performs, not the camera.** Motion shows what they sell; no zooming for its own sake.

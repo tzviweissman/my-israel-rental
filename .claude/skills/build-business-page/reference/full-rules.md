@@ -616,6 +616,27 @@ Publish is offered only for a page that passes the check.
 
 ## 8. Photos, video and the tools
 
+**A set of images reads as one shoot** (Tzvi, 8 Oct 2026). Category tiles,
+product grids, any row of pictures side by side: the same camera angle, the
+same light from the same side, the same plain background, the subject at the
+same size and crop. That sameness is most of what makes a row look high-end
+(the reference was adr.it's food tiles). Fourteen stock photos from fourteen
+photographers, with their backgrounds cut out afterwards, never match:
+different angles and colour, rough cut-out edges, mismatched shadows, slices
+of plate left behind. Next to a real set they look cheap. So, in this order:
+1. The business's own photos, if they were shot the same way.
+2. Otherwise generate the whole set in one pass from one style preamble,
+   reused word for word in every prompt (Higgsfield or kie.ai). Allowed for
+   category and atmosphere tiles; never for a product a customer is choosing
+   (§3c rule 4, §1 AI media policy).
+3. Stock only as a last resort, and only from one photographer's matching
+   series.
+Look at the whole set as one contact sheet before it goes on a page, and
+redo any image that breaks the set. Food for a kosher audience is
+kosher-appropriate in every image: no meat with cheese or cream, no
+shellfish, no pork.
+
+
 **AI images and video** (Higgsfield, kie.ai). Tzvi, 23 Sep 2026: owners should be
 able to look professional even when their own photos aren't, "a moist steaming
 piece of meat being sliced" on Blazin' Boards. Two tools, in this order:
