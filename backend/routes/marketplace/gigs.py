@@ -703,6 +703,9 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
             "categories": business.get("categories") or [],
             "member_since": (business.get("created_at") or "")[:4] or None,
         }
+        # Lets the listing page hand over to a hand-built business page
+        # (frontend/public/pages/pages.json), the way /business/<slug> does.
+        gig["business_slug"] = business.get("slug")
     gig["page_upgrade"] = await has_page_upgrade(gig.get("provider_user_id"))
     if gig["page_upgrade"]:
         # The upgraded page's leading action and backed strengths, judged

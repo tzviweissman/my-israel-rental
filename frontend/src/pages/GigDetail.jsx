@@ -384,6 +384,25 @@ const GigDetail = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id, token]);
 
+  /* A business with a hand-built page (frontend/public/pages/pages.json,
+     scripts/publish-page.mjs) shows that page instead of its listings: search
+     results link here, so a visitor kept landing on the standard listing for
+     Blazin' Boards (Tzvi, 9 Oct 2026). Not for the owner, who still needs
+     their listing; production only, as in BusinessPage.jsx. */
+  useEffect(() => {
+    const slug = gig?.business_slug;
+    if (!slug || process.env.NODE_ENV !== 'production') return undefined;
+    if (user?.id && user.id === gig.provider?.user_id) return undefined;
+    let cancelled = false;
+    fetch('/pages/pages.json', { cache: 'no-cache' })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((list) => {
+        if (!cancelled && Array.isArray(list) && list.includes(slug)) window.location.replace(`/business/${slug}`);
+      })
+      .catch(() => { /* no list: the listing stays */ });
+    return () => { cancelled = true; };
+  }, [gig, user]);
+
   // JSON-LD Service schema — declared BEFORE the early returns so React
   // hooks ordering stays stable across renders. Falls back to null when
   // the gig is still loading; PageMeta drops the tag when jsonLd is null.
