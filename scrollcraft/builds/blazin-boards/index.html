@@ -548,10 +548,27 @@
       { p: 0.88, x: 15, y: 9,   s: 1.00, rx: 0,  ry: 0,   rz: 0 },
       { p: 1.00, x: 15, y: 9,   s: 1.00, rx: 0,  ry: 0,   rz: 0 }
     ];
+    /* One continuous path through the keyframes (Catmull-Rom, tangents from
+       the neighbours), not an ease in and out of each: that stopped the board
+       at every keyframe and started it again, which read as jerky (Tzvi,
+       9 Oct 2026: "it doesn't fly in smoothly"). The last two keys are the
+       same, so it still settles into the landing. */
+    var CH = ['x', 'y', 's', 'rx', 'ry', 'rz'];
     function frameAt(p) {
+      p = Math.min(Math.max(p, 0), 1);
       var i = 0; while (i < K.length - 2 && p > K[i + 1].p) i++;
-      var a = K[i], b = K[i + 1], t = ease(Math.min(Math.max((p - a.p) / (b.p - a.p), 0), 1));
-      return { x: lerp(a.x, b.x, t), y: lerp(a.y, b.y, t), s: lerp(a.s, b.s, t), rx: lerp(a.rx, b.rx, t), ry: lerp(a.ry, b.ry, t), rz: lerp(a.rz, b.rz, t) };
+      var k0 = K[Math.max(i - 1, 0)], k1 = K[i], k2 = K[i + 1], k3 = K[Math.min(i + 2, K.length - 1)];
+      var h = k2.p - k1.p, t = h ? (p - k1.p) / h : 0, t2 = t * t, t3 = t2 * t;
+      var out = {};
+      CH.forEach(function (c) {
+        var m1 = (k2[c] - k0[c]) / Math.max(k2.p - k0.p, 1e-6) * h;
+        var m2 = (k3[c] - k1[c]) / Math.max(k3.p - k1.p, 1e-6) * h;
+        // No overshoot: where the path turns or stops, it arrives flat.
+        if ((k2[c] - k1[c]) * (k1[c] - k0[c]) <= 0) m1 = 0;
+        if ((k3[c] - k2[c]) * (k2[c] - k1[c]) <= 0) m2 = 0;
+        out[c] = (2 * t3 - 3 * t2 + 1) * k1[c] + (t3 - 2 * t2 + t) * m1 + (-2 * t3 + 3 * t2) * k2[c] + (t3 - t2) * m2;
+      });
+      return out;
     }
     function paintTumble(p) {
       /* Reduced motion: no flight. The board parks lower right, clear of the name. */
@@ -567,7 +584,27 @@
       shadow.style.transform = 'translate3d(' + x + 'vw,' + (y + 4) + 'vh,0) scale(' + (f.s * 1.08) + ')';
       shadow.style.opacity = (down * 0.9).toFixed(3);
     }
-    if (tumble) onProgress(document.getElementById('hero'), paintTumble);
+    /* The board follows the scroll through its own easing, so a mouse wheel's
+       steps arrive as one glide rather than a jump per notch: the shown
+       progress closes on the scrolled one by a time-based fraction each
+       frame. Reduced motion has no flight, so nothing to smooth. */
+    if (tumble) {
+      var flyTo = 0, flyAt = 0, flyRaf = 0, flyLast = 0;
+      var flyStep = function (now) {
+        var dt = flyLast ? Math.min(now - flyLast, 64) : 16; flyLast = now;
+        flyAt += (flyTo - flyAt) * (1 - Math.exp(-dt / 110));
+        if (Math.abs(flyTo - flyAt) < 0.0004) flyAt = flyTo;
+        paintTumble(flyAt);
+        flyRaf = flyAt === flyTo ? 0 : requestAnimationFrame(flyStep);
+        if (!flyRaf) flyLast = 0;
+      };
+      onProgress(document.getElementById('hero'), function (p) {
+        flyTo = p;
+        if (reduce) { flyAt = p; paintTumble(p); return; }
+        if (!flyRaf) flyRaf = requestAnimationFrame(flyStep);
+      });
+      paintTumble(flyTo);
+    }
 
     /* ------------------------------------------------------------- sizes --
        One pixels-per-centimetre for the whole act, from the space the
