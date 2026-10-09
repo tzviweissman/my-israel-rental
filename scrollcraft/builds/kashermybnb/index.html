@@ -33,10 +33,21 @@
   }
   body { background: var(--sc-canvas); color: var(--sc-ink); font-family: var(--sc-font-text); }
   h1, h2, h3 { font-family: var(--sc-font-display); letter-spacing: -0.02em; font-weight: 600; }
-  .btn { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.9rem 1.5rem; border-radius: var(--sc-r-pill);
-    background: var(--sc-accent); color: var(--sc-accent-ink); font: 600 var(--sc-t-base)/1 var(--sc-font-text); text-decoration: none;
-    box-shadow: 0 6px 18px -8px rgb(48 96 144 / 0.55); transition: transform 200ms var(--sc-ease-out), box-shadow 200ms var(--sc-ease-out); }
-  .btn:hover { transform: translateY(-2px); box-shadow: 0 10px 22px -10px rgb(48 96 144 / 0.6); }
+  /* The button: the label and its arrow in two blocks; pointed at, the arrow
+     slides out and a fresh one slides in, the arrow block widens (Mobbin, The
+     Performance Lab; chosen for KasherMyBnb 7 Oct 2026). */
+  .btn { display: inline-flex; align-items: stretch; gap: 3px; text-decoration: none; color: var(--sc-accent-ink); font: 600 var(--sc-t-base)/1 var(--sc-font-text);
+    filter: drop-shadow(0 6px 12px rgb(48 96 144 / 0.28)); transition: filter 200ms var(--sc-ease-out); }
+  .btn .lb, .btn .ab { display: inline-flex; align-items: center; background: var(--sc-accent); min-height: 48px; }
+  .btn .lb { padding: 0 1.3rem; border-radius: 999px 6px 6px 999px; }
+  .btn .ab { width: 48px; justify-content: center; border-radius: 6px 999px 999px 6px; transition: width 300ms var(--sc-ease-out); }
+  .btn .sw { position: relative; width: 18px; height: 18px; overflow: hidden; }
+  .btn .sw svg { position: absolute; inset: 0; width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; transition: translate 340ms var(--sc-ease-out); }
+  .btn .sw svg + svg { translate: -22px 0; }
+  @media (hover: hover) {
+    .btn:hover .ab { width: 58px; } .btn:hover .sw svg { translate: 22px 0; } .btn:hover .sw svg + svg { translate: 0 0; }
+  }
+  .btn:active .lb, .btn:active .ab { scale: 0.97; }
   .btn:focus-visible, .index a:focus-visible { outline: 3px solid var(--roof); outline-offset: 3px; }
 
   /* ---------- the index: the stations, ticking as the walk reaches them -- */
@@ -102,8 +113,16 @@
   .ready h2 span { color: var(--sc-accent); }
   #ready-list { margin: var(--sc-3) 0 0; padding: 0; list-style: none; display: grid; grid-template-columns: 1fr 1fr; gap: 0.3rem var(--sc-4); font-size: var(--sc-t-sm); }
   #ready-list li { display: flex; align-items: center; gap: 0.5rem; }
-  #ready-list .tick { width: 16px; height: 16px; background: var(--sc-accent); border-color: var(--sc-accent); }
-  #ready-list .tick svg { opacity: 1; width: 10px; height: 10px; }
+  /* "Ready to use": each item ticks itself off in turn as the panel arrives,
+     the kitchen finished item by item (21st "Task Checkbox", the check only). */
+  #ready-list .tick { width: 16px; height: 16px; border-color: var(--sc-accent); background: transparent; transition: background 240ms var(--sc-ease-out); transition-delay: calc(var(--i) * 140ms); }
+  #ready-list .tick svg { opacity: 1; width: 10px; height: 10px; stroke-dasharray: 24; stroke-dashoffset: 24; transition: stroke-dashoffset 320ms var(--sc-ease-out); transition-delay: calc(var(--i) * 140ms + 100ms); }
+  .ready.is-in #ready-list .tick { background: var(--sc-accent); }
+  .ready.is-in #ready-list .tick svg { stroke-dashoffset: 0; }
+  /* the price cards draw a border round when pointed at (21st "Hover Effect") */
+  .feat { position: relative; }
+  .feat::after { content: ""; position: absolute; inset: 0; border: 2px solid var(--sc-accent); border-radius: inherit; clip-path: inset(0 100% 100% 0); transition: clip-path 520ms var(--sc-ease-out); pointer-events: none; }
+  @media (hover: hover) { .feat:hover::after { clip-path: inset(0 0 0 0); } }
   .ready .act { margin-top: var(--sc-5); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sc-4); }
 
   /* ---------- after the walk: plain sections ---------------------------- */
@@ -172,6 +191,8 @@
     .card h2 { font-size: 1.8rem; }
     .card .n { font-size: var(--sc-t-sm); letter-spacing: 0.1em; }
     .plate, .feats, .feat--photo { grid-template-columns: 1fr; }
+    /* short phones: the booking card still fits one screen (rule 12, 3c) */
+    @media (max-height: 700px) { .plate { padding: 1.1rem 1.25rem; } .plate img { width: 44px; height: 44px; } .plate .label { margin-top: var(--sc-3); } }
     .asks { grid-template-columns: 1fr; }
     .label > div { grid-template-columns: 1fr; gap: 0.2rem; }
     .buybar { position: fixed; inset-inline: 0; bottom: 0; z-index: 70; display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
@@ -180,7 +201,7 @@
     .buybar.is-on { transform: none; }
     .buybar span { color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
     .buybar b { color: var(--sc-ink); font: 600 1.3rem/1 var(--sc-font-display); }
-    .buybar .btn { padding: 0.75rem 1.2rem; }
+    .buybar .btn .lb { padding: 0 1rem; } .buybar .btn .lb, .buybar .btn .ab { min-height: 44px; } .buybar .btn .ab { width: 44px; }
     .after { padding-bottom: 5rem; }
     .cards { bottom: calc(12px + 4.6rem); }
     /* the peak's panel sits right under the whole-wall strip */
@@ -189,7 +210,7 @@
     .cards.is-flip .card { bottom: auto; top: 0; }
   }
   @media (prefers-reduced-motion: reduce) {
-    .card, .mark i, .tick, .tick svg, .buybar, .btn { transition: none; }
+    .card, .mark i, .tick, .tick svg, .buybar, .btn, .btn .ab, .btn .sw svg, .feat::after, #ready-list .tick, #ready-list .tick svg { transition: none !important; }
   }
 </style>
 </head>
@@ -217,7 +238,7 @@
           <p class="lede">We kasher your kitchen so you can settle in with confidence: fully prepared, strictly kosher and ready to use.</p>
         </div>
         <div class="panel act">
-          <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services">Message to book</a>
+          <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services"><span class="lb">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
           <ul class="proof">
             <li><b>Whole kitchen $350</b>, about 2 hours</li>
             <li>Expert mashgichim, following cRc guidelines</li>
@@ -232,7 +253,7 @@
         <h2>Ready to <span>use.</span></h2>
         <ul id="ready-list"></ul>
         <div class="act">
-          <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services" tabindex="-1">Message to book</a>
+          <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services" tabindex="-1"><span class="lb">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
           <ul class="proof">
             <li><b>Whole kitchen $350</b>, about 2 hours</li>
             <li>Prices for Jerusalem; elsewhere, a fee by distance</li>
@@ -264,7 +285,7 @@
           </article>
           <article class="feat" data-sc-in>
             <h3>Extra oven cleaning</h3>
-            <p class="price"><b>$40</b><span>with a kitchen</span></p>
+            <p class="price"><b>$40</b><span>with a whole kitchen</span></p>
             <p>Additional oven cleaning and kashering, added to a whole-kitchen booking.</p>
           </article>
           <article class="feat" data-sc-in>
@@ -307,7 +328,7 @@
             </dl>
           </div>
           <div class="side">
-            <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services">Message to book</a>
+            <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services"><span class="lb">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
             <p><b>Expert mashgichim, following cRc guidelines. Since 2019.</b><br>Opens our page on MyIsraelRental, where you can message us with your dates.</p>
           </div>
         </div>
@@ -322,7 +343,7 @@
 
 <div class="buybar" id="buybar" aria-hidden="true">
   <span>Whole kitchen <b>$350</b></span>
-  <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services" tabindex="-1">Message to book</a>
+  <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services" tabindex="-1"><span class="lb">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
 </div>
 
 <script src="scrollcraft.js"></script>
@@ -365,7 +386,7 @@
     li.innerHTML = '<a href="#' + s.id + '"><span class="tick">' + OK + '</span><span>' + s.short + '</span></a>';
     li.querySelector('a').addEventListener('click', function (e) { e.preventDefault(); go(W0 + (i + 0.7) * win); });
     index.appendChild(li); s.li = li;
-    readyList.insertAdjacentHTML('beforeend', '<li><span class="tick">' + OK + '</span>' + s.name + '</li>');
+    readyList.insertAdjacentHTML('beforeend', '<li style="--i:' + i + '"><span class="tick">' + OK + '</span>' + s.name + '</li>');
   });
   var potsLi = document.createElement('li');
   potsLi.innerHTML = '<a href="#pots"><span class="tick" style="border-style:dashed">' + OK + '</span><span>Pots <span class="long">and cutlery</span></span></a>';
@@ -430,6 +451,7 @@
     act.style.setProperty('--ready', r.toFixed(3));
     act.style.setProperty('--ready-vis', r > 0 ? 'visible' : 'hidden');
     readyBtn.tabIndex = r > 0.5 ? 0 : -1;
+    ready.classList.toggle('is-in', r > 0.5);
     // The card and the index follow the last station reached, so a card
     // stays up while the camera travels to the next one.
     var cur = -1;
@@ -446,7 +468,8 @@
       s.mark.style.setProperty('--m', done ? 1 : 0);
       s.li.classList.toggle('is-done', done);
       s.li.classList.toggle('is-here', i === cur && p < W1);
-      s.card.classList.toggle('is-on', i === cur && p < W1 + 0.04);
+      // The last card stays until "Ready to use" is half in: never a gap with no words.
+      s.card.classList.toggle('is-on', i === cur && r < 0.5);
     });
 
     // The phone bar: on from the first visit until the close, except while
