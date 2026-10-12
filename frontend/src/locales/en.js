@@ -1528,6 +1528,7 @@ const en = {
         joinFree: 'Join free',
         account: 'Account menu',
         requests: 'Marketplace',
+        restaurants: 'Restaurants',
         listOffer: 'List / Offer',
         primary: 'Primary',
         home: 'Home',
@@ -4863,6 +4864,8 @@ const en = {
         s12Body: 'If we change this page in a way that matters, we will change the date at the top and say what changed. Carrying on using the site after that means you accept the new version.\n\nQuestions, complaints, or anything on this page that does not match what you experienced: write to us.'
       },
       restaurants: {
+        tileTitle: 'Kosher restaurants',
+        tileText: 'Each with its hechsher, meat or dairy, by city and neighbourhood',
         title: 'Kosher restaurants in {{place}}',
         metaDescription: 'Kosher restaurants in {{place}} with their hechsher, meat or dairy, and how to call, message or find them.',
         israel: 'Israel',

@@ -2,7 +2,7 @@ import React, { useContext, useState, useRef, useEffect } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { AuthContext, API } from '../App';
-import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell, MessageCircle, HelpCircle, Bed, Briefcase, Store, Compass, BookOpen } from 'lucide-react';
+import { Globe, LogOut, LayoutDashboard, Menu, X, Home, Building, Palmtree, Warehouse, ChevronRight, Search, Bell, MessageCircle, HelpCircle, Bed, Briefcase, Store, Compass, BookOpen, UtensilsCrossed } from 'lucide-react';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
@@ -430,6 +430,10 @@ const Navigation = () => {
                 { key: 'stays', label: t('nav.stays', 'Stays'), to: '/stays' },
                 { key: 'services', label: t('nav.services', 'Services'), to: '/businesses' },
                 { key: 'requests', label: t('nav.requests', 'Marketplace'), to: '/requests' },
+                // Restaurants is in the phone row and the drawer, not here: a
+                // fourth pill ran into the language button from 900 to about
+                // 1330px wide (measured 12 Oct 2026). On a laptop the way in
+                // is the tile on /businesses.
                 // No supply link here any more. "List / Offer" spoke to one
                 // of three audiences and duplicated the CTA beside it; the
                 // solid "Join free" button now carries every audience and
@@ -815,6 +819,11 @@ const Navigation = () => {
                     <span>{t('nav.requests', 'Marketplace')}</span>
                     <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
                   </button>
+                  <button onClick={() => handleNav('/restaurants')} className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150 hover:bg-white/5 group" style={{ color: 'var(--gold)' }} data-testid="nav-restaurants">
+                    <UtensilsCrossed size={16} className="opacity-60 group-hover:opacity-100" />
+                    <span>{t('nav.restaurants', 'Restaurants')}</span>
+                    <ChevronRight size={14} className="ml-auto opacity-0 group-hover:opacity-60 transition-opacity" />
+                  </button>
                 </div>
 
                 <div className="mx-4 border-t" style={{ borderColor: 'rgba(201, 162, 39,0.15)' }} />
@@ -944,6 +953,7 @@ const Navigation = () => {
             { type: 'stays', icon: Bed, label: t('nav.stays', 'Stays'), to: '/stays' },
             { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/businesses' },
             { type: 'requests', icon: Store, label: t('nav.requests', 'Marketplace'), to: '/requests' },
+            { type: 'restaurants', icon: UtensilsCrossed, label: t('nav.restaurants', 'Restaurants'), to: '/restaurants' },
           ].map(({ type, icon: Icon, label, to }) => (
             <NavCategoryItem
               key={type}

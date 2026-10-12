@@ -11,7 +11,7 @@
  * is always deep-linkable (e.g. shareable /services?category=photography&min_rating=4&sort=rating).
  */
 import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
@@ -37,6 +37,7 @@ import { SUBCATEGORIES, subcategoryLabel } from '../lib/categories';
 // place rather than deleted until 2c is approved.
 import ServicesHero from '../components/marketplace/ServicesHero';
 import FeaturedProviders from '../components/marketplace/FeaturedProviders';
+import RESTAURANT_CATEGORY_PHOTOS from '../data/restaurantCategoryPhotos';
 
 const TEAL = 'var(--brand-primary)';
 const GOLD = 'var(--gold)';
@@ -445,6 +446,30 @@ const Services = () => {
           selectedLoc={selectedLoc}
           onSelect={(v) => patchUrl({ location: v })}
         />
+
+        {/* Restaurants are their own directory (found from public listings,
+            mostly unclaimed) rather than a category here, so they never
+            crowd out businesses that joined; this tile is the way in from
+            Businesses (Tzvi, 12 Oct 2026). */}
+        <Link
+          to="/restaurants"
+          className="mt-6 flex items-center gap-4 rounded-[22px] border bg-white p-3 pe-5 transition-shadow hover:shadow-md"
+          style={{ borderColor: 'var(--brand-border)' }}
+          data-testid="services-restaurants-tile"
+        >
+          <img
+            src={RESTAURANT_CATEGORY_PHOTOS.meat_grill}
+            alt=""
+            className="h-16 w-16 shrink-0 rounded-2xl object-cover"
+            style={{ background: '#F6EDE3' }}
+            loading="lazy"
+          />
+          <span className="min-w-0 flex-1">
+            <span className="block font-semibold text-gray-900">{t('restaurants.tileTitle', 'Kosher restaurants')}</span>
+            <span className="block text-sm text-gray-600">{t('restaurants.tileText', 'Each with its hechsher, meat or dairy, by city and neighbourhood')}</span>
+          </span>
+          <ArrowRight size={18} className="shrink-0 rtl:rotate-180" style={{ color: 'var(--brand-primary)' }} aria-hidden="true" />
+        </Link>
 
         {/* The big "Browse by category" card row used to sit here. It went
             when the hero SERVICE picker gained an icon per category: the
