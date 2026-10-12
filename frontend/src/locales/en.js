@@ -4976,6 +4976,7 @@ const en = {
         footerLink: 'Business pages',
       },
       pageEditor: {
+        page: 'Page',
         open: 'Edit your page',
         notFound: 'This page could not be opened',
         uploading: 'Uploading the photo…',

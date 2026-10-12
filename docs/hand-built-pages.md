@@ -120,3 +120,30 @@ it skips a price two items share, since it cannot tell them apart. Set up
 for Michal Yodaiken, KasherMyBnb and Blazin' Boards; Bun Intended's listing
 has one price for every flavour and La Cholent's prices live in its script,
 so those two are not synced.
+
+## A page can be a small website, with order pages (12 Oct 2026)
+
+Tzvi: pages "like a website with multiple pages if needed", and "separate
+pages for ordering like other ecommerce websites", starting with
+KasherMyBnb. Every other `*.html` in a build folder is a page of the site:
+
+- **Addresses:** `kitchen.html` is served at `/business/<slug>/kitchen`
+  (server.js). publish-page.mjs rewrites every link to a sibling page,
+  attributes and script strings alike, to that clean address.
+- **site.json** (written on publish) lists the pages, Home first, then the
+  content pages, then an order flow (`book`, `book-details`, `book-review`,
+  `book-sent`) in step order. The dashboard editor shows them as a page
+  switcher; edits are one document per business, keyed by content, so a
+  shared header edited on one page changes on all of them.
+- **Live prices for scripts:** server.js adds the listing prices as
+  `<script id="mir-live-prices" type="application/json">` in the head, so an
+  order total in the page's own script adds up the dashboard price.
+- **Worked example:** `scrollcraft/builds/kashermybnb`. The home page keeps
+  its kitchen walk; `gen/pages.py` writes the rest with one header and footer;
+  `site.css` and `site.js` are shared. The order runs Choose, When and
+  where, Review and send, with a summary and total always in view (a bottom
+  bar on phones), kept in sessionStorage, no sign-in, and is sent to the
+  business on WhatsApp written out (their listing books by WhatsApp). No
+  Shabbos days. Honest persuasion only: a step bar, the total and what is
+  included in view, "nothing to pay on this site" and "we confirm the day
+  with you" by the button (both true), and what happens next.

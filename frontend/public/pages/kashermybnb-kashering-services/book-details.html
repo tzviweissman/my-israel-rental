@@ -1,0 +1,128 @@
+<!doctype html>
+<!-- KasherMyBnb, book-details.html. Written by gen/pages.py; facts from BRIEF.md only. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>When and where · KasherMyBnb</title>
+<meta name="description" content="When and where we kasher, and how we reach you.">
+<link rel="icon" href="/pages/kashermybnb-kashering-services/assets/logo.png?v=mv5jjaum">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/pages/kashermybnb-kashering-services/site.css?v=mv5jjaum">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="/business/kashermybnb-kashering-services"><img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mv5jjaum" alt="" data-mir-key="i-149272c6-0">KasherMyBnb</a>
+  
+</header>
+
+<main class="order">
+  <div class="wrap">
+    <ol class="steps" aria-label="Booking steps"><li class="is-done"><a class="st" href="/business/kashermybnb-kashering-services/book" data-mir-key="t-5d4f456f-0">Step 1: <span>Choose</span></a></li><li class="is-now" aria-current="step"><span class="st">Step 2: <span data-mir-key="t-893801ba-0">When and where</span></span></li><li class=""><span class="st">Step 3: <span data-mir-key="t-5dcb7a34-0">Review and send</span></span></li></ol>
+    <div class="cols">
+      <form class="pane" id="f" novalidate>
+        <h1 data-mir-key="t-55e42266-0">When and where?</h1>
+        <p class="sub" data-mir-key="t-c0f06994-0">Tell us the day you would like. We confirm the day and time with you on WhatsApp.</p>
+        <div class="q">
+          <h2 data-mir-key="t-b88d1f7c-0">Which day would suit you?</h2>
+          <div class="two">
+            <div class="field" id="f-date"><label for="date" data-mir-key="t-e3523d32-0">Day</label><input id="date" type="date" required><span class="err" id="dateErr" data-mir-key="t-1e305bd5-0">Choose a day (not Shabbos).</span></div>
+          </div>
+        </div>
+        <div class="q">
+          <h2 data-mir-key="t-dc0b6b26-0">What time of day?</h2>
+          <div class="chips" role="group" aria-label="Time of day">
+            <button type="button" class="chip" data-time="any" aria-pressed="false" data-mir-key="t-da5f245f-0">Any time</button>
+            <button type="button" class="chip" data-time="morning" aria-pressed="false" data-mir-key="t-6cb4aa39-0">Morning</button>
+            <button type="button" class="chip" data-time="afternoon" aria-pressed="false" data-mir-key="t-7e817767-0">Afternoon</button>
+            <button type="button" class="chip" data-time="evening" aria-pressed="false" data-mir-key="t-240ed03e-0">Evening</button>
+          </div>
+        </div>
+        <div class="q">
+          <h2 data-mir-key="t-8dbc5825-0">Where is the kitchen?</h2>
+          <div class="chips" role="group" aria-label="Where">
+            <button type="button" class="chip" data-place="jerusalem" aria-pressed="false" data-mir-key="t-d9b6be02-0">Jerusalem</button>
+            <button type="button" class="chip" data-place="elsewhere" aria-pressed="false" data-mir-key="t-b652035b-0">Elsewhere in Israel</button>
+          </div>
+          <div class="note" id="feeNote" hidden><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 8v5M12 16h.01"/></svg><span data-mir-key="t-f267dd9c-0">Prices are for Jerusalem. Elsewhere there may be a fee for the distance; we tell you before the day.</span></div>
+          <div class="two" style="margin-top:0.85rem">
+            <div class="field" id="f-city" hidden><label for="city" data-mir-key="t-91ebfa37-0">Town or city</label><input id="city" autocomplete="address-level2"><span class="err" data-mir-key="t-ac1ba6dc-0">Which town or city?</span></div>
+            <div class="field"><label for="address" data-mir-key="t-cbbee9a1-0">Neighbourhood or street <span style="font-weight:400;color:var(--sc-ink-soft)">(optional)</span></label><input id="address" autocomplete="street-address"></div>
+          </div>
+          <span class="err" id="placeErr" style="color:var(--roof);font-size:.88rem" hidden>Choose where the kitchen is.</span>
+        </div>
+        <div class="q">
+          <h2 data-mir-key="t-1e07de81-0">How do we reach you?</h2>
+          <div class="two">
+            <div class="field" id="f-name"><label for="name" data-mir-key="t-5c263b1a-0">Your name</label><input id="name" autocomplete="name" required><span class="err" data-mir-key="t-96af6260-0">Add your name.</span></div>
+            <div class="field" id="f-phone"><label for="phone" data-mir-key="t-6e061c61-0">WhatsApp or phone</label><input id="phone" type="tel" autocomplete="tel" inputmode="tel" required><span class="err" data-mir-key="t-1e2935cf-0">Add a number we can reach you on.</span></div>
+          </div>
+        </div>
+        <div class="q">
+          <div class="field"><label for="notes" data-mir-key="t-3b465deb-0">Anything we should know? <span style="font-weight:400;color:var(--sc-ink-soft)">(optional)</span></label><textarea id="notes" placeholder="For example: a gas stove, getting ready for Pesach, the day you arrive"></textarea></div>
+        </div>
+        <div class="next">
+          <a class="btn" href="/business/kashermybnb-kashering-services/book-review" id="go"><span class="lb" data-mir-key="t-b17a3346-0">Review your booking</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+          <a class="back" href="/business/kashermybnb-kashering-services/book" data-mir-key="t-fa767fba-0">Back</a>
+        </div>
+      </form>
+      <aside class="sum" aria-label="Your order">
+        <div class="who"><img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mv5jjaum" alt="" data-mir-key="i-149272c6-1"><div><b data-mir-key="t-b12fc4a1-0">KasherMyBnb</b><small data-mir-key="t-f149332e-0">Kitchen kashering · since 2019</small></div></div>
+        <ul class="lines" data-lines></ul>
+        <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><b data-total data-mir-key="t-e2b2a704-0">$0</b></div>
+        <p class="fine" data-fee hidden data-mir-key="t-0bb19c33-0">Outside Jerusalem there may be a fee for the distance. We tell you before the day.</p>
+        <ul class="promise">
+          <li data-mir-key="t-2418023f-0"><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Nothing to pay on this site</li>
+          <li data-mir-key="t-d06997b2-0"><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>We confirm the day with you on WhatsApp</li>
+          <li data-mir-key="t-80b02b6c-0"><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Expert mashgichim, cRc guidelines</li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</main>
+<div class="dock"><div><small data-mir-key="t-9263db8f-0">Total</small><b data-total data-mir-key="t-e2b2a704-1">$0</b></div><a class="btn" href="/business/kashermybnb-kashering-services/book-review" id="go2"><span class="lb" data-mir-key="t-f9dc4388-0">Review</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a></div>
+
+<script src="/pages/kashermybnb-kashering-services/site.js?v=mv5jjaum"></script>
+<script>
+(function () {
+  var o = KMB.load();
+  if (!o.kitchen && !o.pots) { location.replace('/business/kashermybnb-kashering-services/book'); return; }
+  var $ = function (id) { return document.getElementById(id); };
+  var d = new Date(); d.setDate(d.getDate() + 1);
+  $('date').min = d.toISOString().slice(0, 10);
+  ['date', 'city', 'address', 'name', 'phone', 'notes'].forEach(function (k) {
+    $(k).value = o[k] || '';
+    $(k).addEventListener('input', function () { o[k] = $(k).value.trim(); var f = $('f-' + k); if (f) f.classList.remove('is-bad'); KMB.save(o); KMB.paint(o); });
+  });
+  function paint() {
+    document.querySelectorAll('[data-time]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.time === b.dataset.time)); });
+    document.querySelectorAll('[data-place]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.place === b.dataset.place)); });
+    $('f-city').hidden = o.place !== 'elsewhere';
+    $('feeNote').hidden = o.place !== 'elsewhere';
+    KMB.save(o); KMB.paint(o);
+  }
+  document.querySelectorAll('[data-time]').forEach(function (b) { b.addEventListener('click', function () { o.time = b.dataset.time; paint(); }); });
+  document.querySelectorAll('[data-place]').forEach(function (b) { b.addEventListener('click', function () { o.place = b.dataset.place; $('placeErr').hidden = true; paint(); }); });
+  function check(e) {
+    var bad = [];
+    // No Shabbos bookings: their calendar has no Saturday hours.
+    if (!o.date || new Date(o.date + 'T12:00:00').getDay() === 6) bad.push('f-date');
+    if (!o.name || o.name.length < 2) bad.push('f-name');
+    if (!o.phone || o.phone.replace(/\D/g, '').length < 7) bad.push('f-phone');
+    if (o.place === 'elsewhere' && !o.city) bad.push('f-city');
+    bad.forEach(function (id) { $(id).classList.add('is-bad'); });
+    $('placeErr').hidden = !!o.place;
+    if (bad.length || !o.place) {
+      e.preventDefault();
+      var first = bad.length ? $(bad[0]).querySelector('input') : document.querySelector('[data-place]');
+      first.focus({ preventScroll: true }); first.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    }
+  }
+  $('go').addEventListener('click', check); $('go2').addEventListener('click', check);
+  paint();
+})();
+</script>
+</body>
+</html>

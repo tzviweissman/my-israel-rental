@@ -4792,6 +4792,7 @@ const he = {
         footerLink: 'דפי עסקים',
       },
       pageEditor: {
+        page: 'עמוד',
         open: 'עריכת הדף שלכם',
         notFound: 'לא הצלחנו לפתוח את הדף',
         uploading: 'מעלים את התמונה…',

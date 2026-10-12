@@ -12,11 +12,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>KasherMyBnb · Kitchen kashering in Jerusalem and across Israel</title>
 <meta name="description" content="Kitchen kashering for vacation rentals, new homes and Pesach, in Jerusalem and across Israel. Whole kitchen $350, pots and cutlery $180. Expert mashgichim, following cRc guidelines. Since 2019.">
-<link rel="icon" href="/pages/kashermybnb-kashering-services/assets/logo.png?v=mv1g29i1">
+<link rel="icon" href="/pages/kashermybnb-kashering-services/assets/logo.png?v=mv5jjaum">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/kashermybnb-kashering-services/scrollcraft.css?v=mv1g29i1">
+<link rel="stylesheet" href="/pages/kashermybnb-kashering-services/scrollcraft.css?v=mv5jjaum">
 <style>
   /* Their logo: the blue K, the red roof, on white. */
   :root {
@@ -165,6 +165,14 @@
   .foot a { color: var(--sc-accent); }
 
   .buybar { display: none; }
+  /* the rest of the site (12 Oct 2026): a Book pill in the bar, links on the cards */
+  .bar-book { margin-left: 0.5rem; display: inline-flex; align-items: center; min-height: 40px; padding: 0 1.1rem; border-radius: 999px; background: var(--sc-accent); color: #fff;
+    font: 600 var(--sc-t-sm)/1 var(--sc-font-text); text-decoration: none; box-shadow: 0 6px 14px -6px rgb(48 96 144 / 0.5); transition: background 160ms; }
+  .bar-book:hover { background: #24507a; }
+  .bar-book:focus-visible { outline: 3px solid var(--roof); outline-offset: 3px; }
+  .feat .more { margin: var(--sc-3) 0 0; }
+  .feat .more a { font-weight: 600; text-decoration: none; border-bottom: 1.5px solid rgb(48 96 144 / 0.35); }
+  .foot-nav { display: flex; flex-wrap: wrap; gap: 0.4rem 1.2rem; }
 
   /* ---------- short laptop screens ---------------------------------------- */
   @media (min-width: 861px) and (max-height: 760px) {
@@ -218,17 +226,18 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></symbol></svg>
 
 <header class="bar">
-  <a class="brand" href="#top"><img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mv1g29i1" alt="" data-mir-key="i-149272c6-0">KasherMyBnb</a>
+  <a class="brand" href="#top"><img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mv5jjaum" alt="" data-mir-key="i-149272c6-0">KasherMyBnb</a>
   <nav aria-label="What we kasher">
     <ol class="index" id="index"></ol>
   </nav>
+  <a class="bar-book" href="/business/kashermybnb-kashering-services/book" data-mir-key="t-3c02b9cf-0">Book</a>
 </header>
 
 <main id="top">
   <section id="walk" data-sc-act="pin" data-sc-span="6">
     <div data-sc-stage>
       <div class="cam" id="cam">
-        <img src="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mv1g29i1" alt="A rental kitchen: oven, microwave, gas stovetop, countertops, sink and a hot plate along one wall" width="2048" height="1152" data-mir-key="i-d27ed8aa-0">
+        <img src="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mv5jjaum" alt="A rental kitchen: oven, microwave, gas stovetop, countertops, sink and a hot plate along one wall" width="2048" height="1152" data-mir-key="i-d27ed8aa-0">
       </div>
 
       <div class="hero">
@@ -238,7 +247,7 @@
           <p class="lede" data-mir-key="t-046f6008-0">We kasher your kitchen so you can settle in with confidence: fully prepared, strictly kosher and ready to use.</p>
         </div>
         <div class="panel act">
-          <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services"><span class="lb" data-mir-key="t-a3c2e840-0">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+          <a class="btn" href="/business/kashermybnb-kashering-services/book"><span class="lb" data-mir-key="t-c035e0ea-0">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
           <ul class="proof">
             <li data-mir-key="t-e2e38c46-0"><b>Whole kitchen $350</b>, about 2 hours</li>
             <li data-mir-key="t-d93d516b-0">Expert mashgichim, following cRc guidelines</li>
@@ -253,7 +262,7 @@
         <h2 data-mir-key="t-6500b8ef-0">Ready to <span>use.</span></h2>
         <ul id="ready-list"></ul>
         <div class="act">
-          <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services" tabindex="-1"><span class="lb" data-mir-key="t-a3c2e840-1">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+          <a class="btn" href="/business/kashermybnb-kashering-services/book" tabindex="-1"><span class="lb" data-mir-key="t-c035e0ea-1">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
           <ul class="proof">
             <li data-mir-key="t-e2e38c46-1"><b>Whole kitchen $350</b>, about 2 hours</li>
             <li data-mir-key="t-60103399-0">Prices for Jerusalem; elsewhere, a fee by distance</li>
@@ -273,14 +282,16 @@
             <p class="price"><b data-mir-key="t-6b1cd785-0">$350</b><span data-mir-key="t-00de61d0-0">about 2 hours</span></p>
             <p data-mir-key="t-03f8b2a9-0">Oven with racks, stovetop (electric or gas), microwave, countertops, sinks and faucets, hot plate.</p>
             <p class="small" data-mir-key="t-15a7c67f-0">Prices are for Jerusalem; other locations may have a fee by distance.</p>
+            <p class="more"><a href="/business/kashermybnb-kashering-services/kitchen" data-mir-key="t-9ef16e28-0">See the whole kitchen</a></p>
           </article>
           <article class="feat feat--photo" id="pots" data-sc-in>
-            <img src="/pages/kashermybnb-kashering-services/assets/pots.webp?v=mv1g29i1" alt="Stainless steel pots, a colander and cutlery" width="1200" height="1200" loading="lazy" data-mir-key="i-3be316bc-0">
+            <img src="/pages/kashermybnb-kashering-services/assets/pots.webp?v=mv5jjaum" alt="Stainless steel pots, a colander and cutlery" width="1200" height="1200" loading="lazy" data-mir-key="i-3be316bc-0">
             <div>
               <h3 data-mir-key="t-fd253d28-0">Pots, cutlery and utensils</h3>
               <p class="price"><b data-mir-key="t-dbe29016-0">$180</b><span data-mir-key="t-e1781f59-0">about 1 hour</span></p>
               <p data-mir-key="t-e633a978-0">Pots (stainless steel only; other materials cannot be kashered), cutlery and kitchen utensils.</p>
-              <p class="small" data-mir-key="t-adcd0529-0">Frying pans cannot be kashered. We can bring a new one for $15.</p>
+              <p class="small" data-mir-key="t-3c248358-0">Frying pans cannot be kashered. A new one on request, $15.</p>
+              <p class="more"><a href="/business/kashermybnb-kashering-services/pots" data-mir-key="t-d021237d-0">See pots and cutlery</a></p>
             </div>
           </article>
           <article class="feat" data-sc-in>
@@ -309,7 +320,7 @@
           <div><dt data-mir-key="t-255e9b8b-0">Where</dt><dd data-mir-key="t-07064552-0">Jerusalem, and across Israel. Prices are for Jerusalem; other places have a fee by distance.</dd></div>
           <div><dt data-mir-key="t-daa0707f-0">Who kashers</dt><dd data-mir-key="t-bfa2bdcd-0">Expert mashgichim, following cRc guidelines.</dd></div>
           <div><dt data-mir-key="t-616f7c9b-0">Languages</dt><dd data-mir-key="t-3b38e0e6-0">English and Hebrew.</dd></div>
-          <div><dt data-mir-key="t-e19c999a-0">Booking</dt><dd data-mir-key="t-60264dbc-0">Send us your dates and the address, and we will find a time with you.</dd></div>
+          <div><dt data-mir-key="t-e19c999a-0">Booking</dt><dd data-mir-key="t-03151910-0"><a href="/business/kashermybnb-kashering-services/book">Book here</a> in three short steps. We confirm the day and time with you on WhatsApp.</dd></div>
           <div><dt data-mir-key="t-9323ab8c-0">Since</dt><dd data-mir-key="t-b62bb4b8-0">2019.</dd></div>
         </dl>
       </div>
@@ -319,7 +330,7 @@
       <div class="wrap">
         <div class="plate" data-sc-in>
           <div>
-            <img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mv1g29i1" alt="KasherMyBnb" data-mir-key="i-6a94de04-0">
+            <img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mv5jjaum" alt="KasherMyBnb" data-mir-key="i-6a94de04-0">
             <h2 data-mir-key="t-03c9f498-0">Book your kashering.</h2>
             <dl class="label">
               <div><dt data-mir-key="t-4efb61b1-0">Whole kitchen</dt><dd data-mir-key="t-f524b42b-0">$350, about 2 hours. Oven and racks, stovetop, microwave, countertops, sink and faucet, hot plate.</dd></div>
@@ -328,25 +339,25 @@
             </dl>
           </div>
           <div class="side">
-            <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services"><span class="lb" data-mir-key="t-a3c2e840-2">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
-            <p data-mir-key="t-1520730b-0"><b>Expert mashgichim, following cRc guidelines. Since 2019.</b><br>Opens our page on MyIsraelRental, where you can message us with your dates.</p>
+            <a class="btn" href="/business/kashermybnb-kashering-services/book"><span class="lb" data-mir-key="t-c035e0ea-2">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+            <p data-mir-key="t-5c56f23b-0"><b>Expert mashgichim, following cRc guidelines. Since 2019.</b><br>Choose what you need and a day. We confirm the time with you on WhatsApp. Nothing to pay on this site.</p>
           </div>
         </div>
       </div>
     </section>
     <footer class="foot">
-      <span data-mir-key="t-77c849d9-0">KasherMyBnb · kitchen kashering in Jerusalem and across Israel</span>
-      <a href="https://myisraelrental.com/business/kashermybnb-kashering-services" data-mir-key="t-6fde72b8-0">Listed on MyIsraelRental</a>
+      <span data-mir-key="t-2431f71e-0">KasherMyBnb · kitchen kashering in Jerusalem and across Israel, since 2019</span>
+      <nav class="foot-nav"><a href="/business/kashermybnb-kashering-services/kitchen" data-mir-key="t-5eaab6eb-0">Whole kitchen</a><a href="/business/kashermybnb-kashering-services/pots" data-mir-key="t-17a4332b-0">Pots and cutlery</a><a href="/business/kashermybnb-kashering-services/book" data-mir-key="t-3c02b9cf-1">Book</a><a href="https://myisraelrental.com/businesses" data-mir-key="t-6fde72b8-0">Listed on MyIsraelRental</a></nav>
     </footer>
   </div>
 </main>
 
 <div class="buybar" id="buybar" aria-hidden="true">
   <span data-mir-key="t-8959189a-0">Whole kitchen <b>$350</b></span>
-  <a class="btn" href="https://myisraelrental.com/business/kashermybnb-kashering-services" tabindex="-1"><span class="lb" data-mir-key="t-a3c2e840-3">Message to book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+  <a class="btn" href="/business/kashermybnb-kashering-services/book" tabindex="-1"><span class="lb" data-mir-key="t-c035e0ea-3">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
 </div>
 
-<script src="/pages/kashermybnb-kashering-services/scrollcraft.js?v=mv1g29i1"></script>
+<script src="/pages/kashermybnb-kashering-services/scrollcraft.js?v=mv5jjaum"></script>
 <script>ScrollCraft.mount(document.body);</script>
 <script>
 (function () {

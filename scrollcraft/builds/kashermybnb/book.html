@@ -1,0 +1,103 @@
+<!doctype html>
+<!-- KasherMyBnb, book.html. Written by gen/pages.py; facts from BRIEF.md only. -->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Book · KasherMyBnb</title>
+<meta name="description" content="Choose what we kasher: the whole kitchen, pots and cutlery, or both.">
+<link rel="icon" href="assets/logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<header class="bar">
+  <a class="brand" href="index.html"><img src="assets/logo.png" alt="">KasherMyBnb</a>
+  
+</header>
+
+<main class="order">
+  <div class="wrap">
+    <ol class="steps" aria-label="Booking steps"><li class="is-now" aria-current="step"><span class="st">Step 1: <span>Choose</span></span></li><li class=""><span class="st">Step 2: <span>When and where</span></span></li><li class=""><span class="st">Step 3: <span>Review and send</span></span></li></ol>
+    <div class="cols">
+      <section class="pane">
+        <h1>What should we kasher?</h1>
+        <p class="sub">Choose one or both. You can change anything before you send it.</p>
+        <div class="q">
+          <div class="pick">
+            <button type="button" class="opt" data-svc="kitchen" aria-pressed="false">
+              <span class="chk"><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+              <span class="top"><b>Whole kitchen</b><span class="amt">$350</span></span>
+              <small>About 2 hours</small>
+              <ul><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Oven with racks, stovetop</li><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Microwave, hot plate</li><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Countertops, sinks and faucets</li></ul>
+            </button>
+            <button type="button" class="opt" data-svc="pots" aria-pressed="false">
+              <span class="chk"><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+              <span class="top"><b>Pots, cutlery and utensils</b><span class="amt">$180</span></span>
+              <small>About 1 hour</small>
+              <ul><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Stainless steel pots</li><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Cutlery</li><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Kitchen utensils</li></ul>
+            </button>
+          </div>
+        </div>
+        <div class="q" id="addons" hidden>
+          <h2>Add to your order</h2>
+          <div class="pick">
+            <button type="button" class="opt row" data-add="oven" aria-pressed="false" hidden>
+              <span class="chk"><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+              <span><b>Oven cleaning and kashering</b><br><small>An extra cleaning of the oven.</small></span><span class="amt">+$40</span>
+            </button>
+            <button type="button" class="opt row" data-add="pan" aria-pressed="false">
+              <span class="chk"><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
+              <span><b>A new frying pan</b><br><small>Frying pans cannot be kashered.</small></span><span class="amt">$15</span>
+            </button>
+          </div>
+        </div>
+        <div class="next">
+          <a class="btn" href="book-details.html" id="go"><span class="lb">Continue</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+          <span class="sub" id="why" style="margin:0">Choose what we kasher to continue.</span>
+        </div>
+      </section>
+      <aside class="sum" aria-label="Your order">
+        <div class="who"><img src="assets/logo.png" alt=""><div><b>KasherMyBnb</b><small>Kitchen kashering · since 2019</small></div></div>
+        <ul class="lines" data-lines></ul>
+        <div class="total"><span>Total</span><b data-total>$0</b></div>
+        <p class="fine" data-fee hidden>Outside Jerusalem there may be a fee for the distance. We tell you before the day.</p>
+        <ul class="promise">
+          <li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Nothing to pay on this site</li>
+          <li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>We confirm the day with you on WhatsApp</li>
+          <li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Expert mashgichim, cRc guidelines</li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</main>
+<div class="dock"><div><small>Total</small><b data-total>$0</b></div><a class="btn" href="book-details.html" id="go2"><span class="lb">Continue</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a></div>
+
+<script src="site.js"></script>
+<script>
+(function () {
+  var o = KMB.load();
+  var s = new URLSearchParams(location.search).get('s');
+  if (s === 'kitchen' || s === 'pots') { o[s] = true; KMB.save(o); }
+  function paint() {
+    document.querySelectorAll('[data-svc]').forEach(function (b) { b.setAttribute('aria-pressed', String(!!o[b.dataset.svc])); });
+    var any = o.kitchen || o.pots;
+    document.getElementById('addons').hidden = !any;
+    document.querySelector('[data-add="oven"]').hidden = !o.kitchen;
+    if (!o.kitchen) o.oven = false;
+    document.querySelector('[data-add="oven"]').setAttribute('aria-pressed', String(!!o.oven));
+    document.querySelector('[data-add="pan"]').setAttribute('aria-pressed', String(o.pans > 0));
+    ['go', 'go2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', String(!any)); });
+    document.getElementById('why').hidden = any;
+    KMB.save(o); KMB.paint(o);
+  }
+  document.querySelectorAll('[data-svc]').forEach(function (b) { b.addEventListener('click', function () { o[b.dataset.svc] = !o[b.dataset.svc]; paint(); }); });
+  document.querySelector('[data-add="oven"]').addEventListener('click', function () { o.oven = !o.oven; paint(); });
+  document.querySelector('[data-add="pan"]').addEventListener('click', function () { o.pans = o.pans > 0 ? 0 : 1; paint(); });
+  paint();
+})();
+</script>
+</body>
+</html>

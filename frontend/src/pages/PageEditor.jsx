@@ -35,6 +35,9 @@ export default function PageEditor() {
   const [ready, setReady] = useState(false);
   const [saving, setSaving] = useState(false);
   const [frameKey, setFrameKey] = useState(0);
+  // A designed site can have several pages (site.json, written on publish).
+  const [pages, setPages] = useState([]);
+  const [pageName, setPageName] = useState('index');
   const [box, setBox] = useState({ w: 1200, h: 800 });
   const frame = useRef(null);
   const stage = useRef(null);
@@ -48,6 +51,14 @@ export default function PageEditor() {
       .then((r) => setBiz(r.data.business || r.data))
       .catch(() => toast.error(t('pageEditor.notFound', 'This page could not be opened')));
   }, [businessId, t]);
+
+  useEffect(() => {
+    if (!biz?.slug) return;
+    fetch(`/pages/${biz.slug}/site.json`, { cache: 'no-cache' })
+      .then((r) => (r.ok ? r.json() : []))
+      .then((l) => setPages(Array.isArray(l) ? l : []))
+      .catch(() => setPages([]));
+  }, [biz]);
 
   // The stage's size, so the laptop view can be scaled to fit.
   useEffect(() => {
@@ -164,6 +175,13 @@ export default function PageEditor() {
     }
   };
 
+  const switchPage = (name) => {
+    if (name === pageName) return;
+    setPageName(name);
+    setReady(false);
+    setFrameKey((k) => k + 1);
+  };
+
   const switchDevice = (d) => {
     if (d === device) return;
     setDevice(d);
@@ -190,6 +208,14 @@ export default function PageEditor() {
           <strong>{t('pageEditor.title', 'Edit your page')}</strong>
           <span>{biz.name}</span>
         </div>
+        {pages.length > 1 && (
+          <label className="pe-page">
+            <span className="pe-hide-sm">{t('pageEditor.page', 'Page')}</span>
+            <select value={pageName} onChange={(e) => switchPage(e.target.value)}>
+              {pages.map((p) => <option key={p.page} value={p.page}>{p.title}</option>)}
+            </select>
+          </label>
+        )}
         <div className="pe-group" role="group" aria-label={t('pageEditor.device', 'Screen')}>
           <button type="button" className={`pe-seg${device === 'd' ? ' on' : ''}`} aria-pressed={device === 'd'} onClick={() => switchDevice('d')}>
             <Laptop size={16} /> <span>{t('pageEditor.laptop', 'Laptop')}</span>
@@ -206,7 +232,7 @@ export default function PageEditor() {
           <button type="button" className="pe-btn pe-ghost" onClick={resetAll} title={t('pageEditor.reset', 'Original design')}>
             <RotateCcw size={15} /> <span className="pe-hide-sm">{t('pageEditor.reset', 'Original design')}</span>
           </button>
-          <a className="pe-btn pe-ghost" href={`/business/${slug}?fresh=1`} target="_blank" rel="noreferrer">
+          <a className="pe-btn pe-ghost" href={`/business/${slug}${pageName === 'index' ? '' : `/${pageName}`}?fresh=1`} target="_blank" rel="noreferrer">
             <ExternalLink size={15} /> <span className="pe-hide-sm">{t('pageEditor.viewLive', 'View live')}</span>
           </a>
           <button type="button" className="pe-btn pe-save" onClick={save} disabled={!dirty || saving}>
@@ -222,7 +248,7 @@ export default function PageEditor() {
             key={frameKey}
             ref={frame}
             title={t('pageEditor.title', 'Edit your page')}
-            src={`/business/${slug}?mir-edit=1`}
+            src={`/business/${slug}${pageName === 'index' ? '' : `/${pageName}`}?mir-edit=1`}
             className={`pe-frame${device === 'm' ? ' phone' : ''}`}
             style={{ width: W, height: H, transform: `scale(${scale})` }}
           />
@@ -247,6 +273,9 @@ const CSS = `
 .pe-seg.on { background: #fff; box-shadow: 0 1px 2px rgb(17 24 39 / .12); }
 .pe-icon:disabled { opacity: .35; }
 .pe-seg:hover:not(.on), .pe-icon:hover:not(:disabled) { background: #E9EAEE; }
+.pe-page { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; font-size: .9rem; color: var(--ink); }
+.pe-page select { min-height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid #E3E3E3; background: #fff; font: inherit; max-width: 220px; }
+.pe-page select:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 .pe-end { display: flex; align-items: center; gap: 8px; }
 .pe-btn { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border-radius: 999px; font-weight: 600; font-size: .9rem; text-decoration: none; transition: background 150ms ease-out, transform 150ms ease-out; }
 .pe-ghost { color: var(--ink); background: transparent; border: 1px solid #E3E3E3; }

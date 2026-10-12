@@ -56,7 +56,15 @@ fs.mkdirSync(OUT, { recursive: true });
 
 // %23 is an escaped # (a fragment inside an inline SVG data URL, Bun Intended 9 Oct 2026).
 const relative = (u) => u && !/^(?:[a-z][a-z0-9+.-]*:|\/|#|%23|\?)/i.test(u);
+// The site's own pages (a hand-built page can be a small website, Tzvi
+// 12 Oct 2026): a link to "kitchen.html" anywhere, attribute or script
+// string, becomes the clean /business/<slug>/kitchen that server.js answers.
+const PAGES = fs.readdirSync(SRC).filter((n) => /\.html$/i.test(n) && n !== 'index.html' && !SKIP_HTML.test(n)).map((n) => n.replace(/\.html$/i, ''));
 function rewrite(html) {
+  for (const name of PAGES) {
+    const re = new RegExp(`(["'])(?:\\./)?${name.replace(/-/g, '\\-')}\\.html(?=[?#"'])`, 'g');
+    html = html.replace(re, `$1/business/${slug}/${name}`);
+  }
   return html
     // A link back to the page itself goes to the business's address.
     .replace(/(\shref=")(?:\.\/)?index\.html(#[^"]*)?"/g, (m, a, h) => `${a}/business/${slug}${h || ''}"`)
@@ -143,6 +151,18 @@ for (const name of fs.readdirSync(SRC)) {
     files += 1;
   }
 }
+
+// The site's pages, for the dashboard editor's page switcher (PageEditor.jsx).
+// Home, then the content pages, then an order flow (book*) in its own order.
+const STEP = ['book', 'book-details', 'book-review', 'book-sent'];
+const rank = (n) => (STEP.includes(n) ? 100 + STEP.indexOf(n) : n.startsWith('book') ? 200 : 0);
+const ORDERED = [...PAGES].sort((x, y) => (rank(x) - rank(y)) || x.localeCompare(y));
+const site = ['index', ...ORDERED].map((name) => {
+  const html = fs.readFileSync(path.join(SRC, `${name}.html`), 'utf8');
+  const title = ((/<title>([^<]*)<\/title>/i.exec(html) || [])[1] || name).split(' · ')[0].trim();
+  return { page: name, title: name === 'index' ? 'Home' : title };
+});
+fs.writeFileSync(path.join(OUT, 'site.json'), `${JSON.stringify(site, null, 2)}\n`);
 
 const listFile = path.join(ROOT, 'frontend', 'public', 'pages', 'pages.json');
 let list = [];

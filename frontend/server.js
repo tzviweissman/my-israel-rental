@@ -318,7 +318,13 @@ async function sendHandBuilt(req, res, slug, file) {
   const editor = /[?&]mir-edit=1(?:&|$)/.test(req.url || '');
   const data = await pageEdits(slug, editor || /[?&]fresh(?:=|&|$)/.test(req.url || ''));
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
-  res.end(applyPrices(applyEdits(raw, data && data.edits, editor), slug, data && data.prices));
+  let html = applyPrices(applyEdits(raw, data && data.edits, editor), slug, data && data.prices);
+  // The same prices for the page's own script (an order total), as data.
+  if (data && data.prices && Object.keys(data.prices).length) {
+    const json = JSON.stringify(data.prices).replace(/</g, '\\u003c');
+    html = html.replace(/<\/head>/i, `<script id="mir-live-prices" type="application/json">${json}</script></head>`);
+  }
+  res.end(html);
 }
 
 
@@ -524,6 +530,19 @@ const server = http.createServer(async (req, res) => {
       await sendHandBuilt(req, res, pageFile[1], `${pageFile[2]}.html`);
       return;
     } catch { /* not there: fall through to the normal handler */ }
+  }
+  // A hand-built page can be a small website (Tzvi, 12 Oct 2026): its other
+  // pages live at /business/<slug>/<page> (or /<page> on the business's own
+  // host), each its build's <page>.html. publish-page.mjs writes links that way.
+  const sub = /^\/business\/([a-z0-9-]{2,60})\/([a-z0-9-]{1,40})\/?$/.exec(pathname || '')
+    || (hostSlug ? /^\/()([a-z0-9-]{1,40})\/?$/.exec(pathname || '') : null);
+  const subSlug = sub && (sub[1] || hostSlug);
+  if (sub && HAND_BUILT.has(subSlug) && sub[2] !== 'index'
+    && fs.existsSync(path.join(BUILD, 'pages', subSlug, `${sub[2]}.html`))) {
+    try {
+      await sendHandBuilt(req, res, subSlug, `${sub[2]}.html`);
+      return;
+    } catch { /* fall through */ }
   }
   const built = hostSlug && pathname === '/' ? hostSlug : businessSlug(req);
   if (built && HAND_BUILT.has(built)) {

@@ -1,0 +1,30 @@
+[
+  {
+    "page": "index",
+    "title": "Home"
+  },
+  {
+    "page": "kitchen",
+    "title": "Whole kitchen kashering"
+  },
+  {
+    "page": "pots",
+    "title": "Pots, cutlery and utensils"
+  },
+  {
+    "page": "book",
+    "title": "Book"
+  },
+  {
+    "page": "book-details",
+    "title": "When and where"
+  },
+  {
+    "page": "book-review",
+    "title": "Review and send"
+  },
+  {
+    "page": "book-sent",
+    "title": "Booking sent"
+  }
+]
