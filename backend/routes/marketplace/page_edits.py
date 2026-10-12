@@ -38,7 +38,8 @@ MAX_TEXT = 3000
 # line break, bold). Nothing that runs, links out or loads anything.
 ALLOWED_TAGS = {"b", "strong", "i", "em", "u", "small", "span", "br", "sup", "sub", "a"}
 # A link inside a line (a phone number, an email) keeps working: only these.
-HREF_RE = re.compile(r"^(?:https://|tel:|mailto:|#|/)[^\s\"'<>]{0,300}$")
+# "/" only for a path on this site: "//evil.com" is another site (audit 11 Oct 2026).
+HREF_RE = re.compile(r"^(?:https://|tel:|mailto:|#|/(?![/\\]))[^\s\"'<>]{0,300}$")
 CLASS_RE = re.compile(r"^[A-Za-z0-9_ -]{0,80}$")
 
 

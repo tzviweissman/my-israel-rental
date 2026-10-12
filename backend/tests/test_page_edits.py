@@ -60,3 +60,9 @@ def test_too_long_or_too_many_is_refused():
         clean_edits({"text": {"t-ab12cd34-0": "x" * 3001}})
     with pytest.raises(HTTPException):
         clean_edits({"text": {f"t-ab12cd34-{i}": "x" for i in range(601)}})
+
+
+def test_links_stay_safe():
+    out = clean_html(r'<a href="//evil.com/x">a</a><a href="/\evil.com">b</a><a href="/business/x">c</a><a href="tel:055">d</a>')
+    assert 'evil' not in out
+    assert 'href="/business/x"' in out and 'href="tel:055"' in out

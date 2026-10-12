@@ -93,7 +93,7 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   brief: the split-stage grammar, knob signature move, kosher band, phone
   order bar, every rule applied. `examples/FINGERPRINTS-myisraelrental.md`:
   the looks already used, which a new page must differ from.
-- `scripts/`: `readable.mjs`, `cutoff.mjs`, `overlay-truth.mjs`, `record.mjs`.
+- `scripts/`: `readable.mjs`, `cutoff.mjs`, `clipped.mjs`, `cutout.py`, `overlay-truth.mjs`, `record.mjs`.
 
 ## 1. Facts: only theirs
 
@@ -357,6 +357,8 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
 | **A pinned section must fit at 650px tall**, or it is not pinned. The order section is never pinned. | The order controls were cut off on a 1536x753 laptop. |
 | **A line of items separated by dots never wraps.** Stack them if it might. | A stray dot started the second line. |
 | **A fixed bar never covers content.** Give content room for it. | The phone order bar hid two lines. |
+| **Nothing is cut off by the box it sits in.** Every label, number, ruler and photo sits wholly inside the section that holds it, at every screen size, laptop, short laptop and phone. Something that flies in from off-screen (mark it `data-clip-ok`) may be cut while it travels, never once it has landed. Run `scripts/clipped.mjs`. | "10 cm" under Blazin' Boards' growing board was sliced in half, and the landed board ran 42px off a short laptop (12 Oct 2026). |
+| **A cut-out is one subject, cleanly.** No stray pieces (a garnish sliced off at the photo's edge, specks), no pale fringe from the old background. Clean it with `scripts/cutout.py`, then `cutout.py --check`, and look at it on a dark and a light ground. | Blazin' Boards' board kept a cut-off olive and white specks (12 Oct 2026). |
 | **A label never covers the thing it labels.** Compute where the spot lands once the camera settles; if the card would sit on it, the card takes the other side for that spot. | The oven card sat on the oven on a phone. |
 | **No block is taller than the screen**: a hero's copy and button, a tile, a list, the offer, each seen whole at 1280x650, 1440x900 and a phone. Measure the heights. | A 1-to-1 tile was 940px tall: you saw the dumbbells, not the price. |
 | **A caption stays up until the next one replaces it**, including while the camera travels. | Bare kitchen between stations. |
@@ -381,6 +383,11 @@ The owner never sees a first draft. Before showing anything:
      every visible word at six sizes and many scroll points; fails under 12px,
      a sentence under 14px on a phone, or contrast under 4.5:1 (3:1 large)
      against the real pixels behind it, photos and video included.
+   - `node ~/.claude/skills/build-business-page/scripts/clipped.mjs <url>`:
+     every word and picture cut by the box it sits in, scrolling the whole page
+     at seven sizes; fails on any. Run it on every page of a site.
+   - `python ~/.claude/skills/build-business-page/scripts/cutout.py --check <img>`:
+     a cut-out has one piece and no pale fringe (and `cutout.py in out` cleans it).
    - `node ~/.claude/skills/build-business-page/scripts/cutoff.mjs <url>`:
      anything cut off by a pinned or full-screen section at nine sizes.
    - `scripts/overlay-truth.mjs <url> <overlay> <section>`: for anything

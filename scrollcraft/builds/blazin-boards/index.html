@@ -125,15 +125,20 @@
   }
   .hero .name span { display: block; }
   .hero .name .b { padding-inline-start: 0.12em; }
+  /* The landed board fits the screen's height too: on a short laptop it ran
+     42px off the bottom (Tzvi, 12 Oct 2026). Landing centre is 9vh below the
+     middle and the board is 0.815 as tall as wide, so its width is held to
+     what the remaining height allows. */
+  .hero { --tw: min(56vw, 860px, calc((41svh - 14px) * 2.454)); }
   .tumble {
-    position: absolute; left: 50%; top: 50%; width: min(56vw, 860px); z-index: 2;
-    margin-left: calc(min(56vw, 860px) / -2); margin-top: calc(min(56vw, 860px) * -0.407);
+    position: absolute; left: 50%; top: 50%; width: var(--tw); z-index: 2;
+    margin-left: calc(var(--tw) / -2); margin-top: calc(var(--tw) * -0.407);
     transform-style: preserve-3d; will-change: transform; backface-visibility: hidden;
   }
   .tumble img { display: block; width: 100%; height: auto; }
   .tumble__shadow {
-    position: absolute; left: 50%; top: 50%; width: min(56vw, 860px); aspect-ratio: 1.6; z-index: 1; pointer-events: none;
-    margin-left: calc(min(56vw, 860px) / -2); margin-top: calc(min(56vw, 860px) * -0.30);
+    position: absolute; left: 50%; top: 50%; width: var(--tw); aspect-ratio: 1.6; z-index: 1; pointer-events: none;
+    margin-left: calc(var(--tw) / -2); margin-top: calc(var(--tw) * -0.30);
     background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.28) 40%, rgba(0, 0, 0, 0) 70%);
     opacity: 0; will-change: transform, opacity;
   }
@@ -172,7 +177,9 @@
   }
   .ruler::before, .ruler::after { content: ""; position: absolute; top: -5px; width: 2px; height: 12px; background: var(--sc-ink-soft); }
   .ruler::before { inset-inline-start: 0; } .ruler::after { inset-inline-end: 0; }
-  .ruler span { position: absolute; inset-inline-start: 0; top: 8px; font-family: var(--font-body); font-size: var(--sc-t-xs); color: var(--sc-ink-soft); letter-spacing: 0.08em; white-space: nowrap; }
+  /* the label sits beside the ruler, never under it, so it can never fall
+     below the section's edge (it was cut in half, Tzvi 12 Oct 2026) */
+  .ruler span { position: absolute; inset-inline-start: calc(100% + 10px); top: -0.6em; font-family: var(--font-body); font-size: var(--sc-t-xs); color: var(--sc-ink-soft); letter-spacing: 0.08em; white-space: nowrap; }
   .tiers { position: absolute; inset-inline-end: var(--sc-gutter); inset-block-end: clamp(2rem, 7vh, 4rem); width: min(40vw, 30rem); height: 58vh; }
   .tier { position: absolute; inset-inline: 0; inset-block-end: 0; margin: 0; }
   .tier__size { margin: 0; font-family: var(--font-body); font-weight: 800; font-size: clamp(2.6rem, 6vw, 5rem); letter-spacing: -0.03em; line-height: 1; }
@@ -349,7 +356,7 @@
       <div class="stage3d">
         <p class="name" data-sc-cue="0 0.44 0 0.38" aria-hidden="true"><span>Blazin’</span><span class="b">Boards</span></p>
         <div class="tumble__shadow" id="tumbleShadow" aria-hidden="true"></div>
-        <div class="tumble" id="tumble">
+        <div class="tumble" id="tumble" data-clip-ok>
           <img src="assets/board-cut.webp" width="1510" height="1230" alt="A Blazin' Boards meat board: rows of sliced steak, candied pastrami, jerky and a bone-in rib, on a wooden board" fetchpriority="high">
         </div>
       </div>

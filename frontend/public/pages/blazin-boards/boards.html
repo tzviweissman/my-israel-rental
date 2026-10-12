@@ -6,15 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Every board · Blazin' Boards</title>
 <meta name="description" content="Every Blazin' Boards meat board, drawn to its real size, with its price and what is on it. Wine and whisky to add. Orders 48 hours ahead.">
-<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mv5kyjss">
+<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mv5nmsmc">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mv5kyjss">
+<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mv5nmsmc">
 </head>
 <body>
 <nav class="nav" aria-label="Blazin' Boards">
-  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv5kyjss" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
+  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv5nmsmc" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
   <ul class="menu">
     <li><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-0">Home</a></li>
     <li><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-0">Every board</a></li>
@@ -66,7 +66,7 @@
   <span data-mir-key="t-005089e7-0">Blazin' Boards · premium meat boards, Jerusalem · orders 48 hours ahead</span>
   <nav><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-1">Home</a><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-1">Every board</a><a href="/business/blazin-boards/order" data-mir-key="t-af6f86d3-0">Order</a><a href="https://myisraelrental.com/businesses" data-mir-key="t-6fde72b8-0">Listed on MyIsraelRental</a></nav>
 </footer>
-<script src="/pages/blazin-boards/site.js?v=mv5kyjss"></script>
+<script src="/pages/blazin-boards/site.js?v=mv5nmsmc"></script>
 <script>
 (function () {
   var o = BB.load(), F = null, show = 'all';
@@ -74,7 +74,7 @@
   function card(p) {
     var q = o.cart[p.id] || 0;
     var stage = p.cm
-      ? '<div class="stage"><img class="board" src="/pages/blazin-boards/assets/board-cut-m.webp?v=mv5kyjss" alt="" width="1000" height="815" loading="lazy" style="width:' + (p.cm[1] * PX / 0.98).toFixed(0) + 'px"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
+      ? '<div class="stage"><img class="board" src="/pages/blazin-boards/assets/board-cut-m.webp?v=mv5nmsmc" alt="" width="1000" height="815" loading="lazy" style="width:' + (p.cm[1] * PX / 0.98).toFixed(0) + 'px"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
       : '<div class="stage"><span style="font-weight:700;color:var(--gold-text)">Size on request</span></div>';
     return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + stage
       + '<div class="body"><span class="line">' + BB.LINES[p.line] + '</span><h3>' + BB.esc(p.short) + '</h3>'

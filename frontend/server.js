@@ -224,7 +224,9 @@ const EDITS_TTL_MS = 5000;
 const editsCache = new Map();
 async function pageEdits(slug, fresh) {
   const hit = editsCache.get(slug);
-  if (!fresh && hit && Date.now() - hit.at < EDITS_TTL_MS) return hit.data;
+  // ?fresh (the editor, "View live") skips the cache, but never more than
+  // once a second per page, so it cannot be used to hammer the API.
+  if (hit && Date.now() - hit.at < (fresh ? 1000 : EDITS_TTL_MS)) return hit.data;
   const control = new AbortController();
   const timer = setTimeout(() => control.abort(), 1500);
   try {

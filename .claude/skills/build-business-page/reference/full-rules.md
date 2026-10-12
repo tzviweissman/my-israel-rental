@@ -346,6 +346,17 @@ code. Each rule names what it prevents.
 - What happens in the first days after they get it?
 - Do you have a photo of it being used, served or delivered?
 
+**Nothing cut off, and clean cut-outs (Tzvi, 12 Oct 2026).** Every label,
+number, ruler and photo sits wholly inside the section that holds it at every
+screen size; something that flies in from off-screen (`data-clip-ok`) may be
+cut only while it travels, never once landed. Checked on every page with the
+skill's `scripts/clipped.mjs` (seven sizes, the whole scroll). A cut-out photo
+is one subject: no stray garnish sliced off at the photo's edge, no specks, no
+pale fringe; cleaned with `scripts/cutout.py` and checked with `--check`, then
+looked at on a dark and a light ground. Defects that made these rules: the
+"10 cm" under Blazin' Boards' growing board was sliced in half, the landed
+board ran 42px off a short laptop, and the board photo kept a cut-off olive.
+
 ## 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
 
 Twelve YouTube talks on landing pages, product pages, UI craft, motion and
