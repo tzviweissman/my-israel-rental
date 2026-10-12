@@ -90,3 +90,4 @@ def test_certificate_pictures_are_found_and_labelled():
     assert certificate_images("https://a.co.il/kashrut/", '<img src="x.jpg">') == ["https://a.co.il/kashrut/x.jpg"]
     assert label_certificate({"certifier": "ארגון רבני צהר", "mehadrin": False}) == "Tzohar"
     assert label_certificate({"certifier": "Some Local Vaad", "mehadrin": False}) == "Some Local Vaad"
+    assert label_certificate({"certifier": 'בד"ץ "בית יוסף"', "mehadrin": False}) == "Badatz Beit Yosef"

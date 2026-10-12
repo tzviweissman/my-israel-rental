@@ -285,7 +285,10 @@ async def read_certificate(http, url):
 def label_certificate(cert):
     """Our label for what a certificate says: the same names the text check
     uses, or the body as written when it is none of them."""
-    words = f"{cert['certifier']} kosher {'מהדרין' if cert.get('mehadrin') else ''}"
+    # Quotes around a name (בד"ץ "בית יוסף") hid Beit Yosef behind plain
+    # "Badatz"; the quote inside בד"ץ itself stays.
+    body = re.sub(r'(?<![֐-׿])["״](?=[֐-׿]{2})|(?<=[֐-׿]{2})["״](?![֐-׿])', '', cert["certifier"])
+    words = f"{body} kosher {'מהדרין' if cert.get('mehadrin') else ''}"
     for pat, name in CERTIFIERS:
         if re.search(pat, words, re.I):
             return name
