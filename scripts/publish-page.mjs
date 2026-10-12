@@ -154,8 +154,9 @@ for (const name of fs.readdirSync(SRC)) {
 
 // The site's pages, for the dashboard editor's page switcher (PageEditor.jsx).
 // Home, then the content pages, then an order flow (book*) in its own order.
-const STEP = ['book', 'book-details', 'book-review', 'book-sent'];
-const rank = (n) => (STEP.includes(n) ? 100 + STEP.indexOf(n) : n.startsWith('book') ? 200 : 0);
+// An order flow's pages in step order (KasherMyBnb's book*, Blazin' Boards' order*).
+const STEP = ['book', 'book-details', 'book-review', 'book-sent', 'order', 'order-when', 'order-details', 'order-done'];
+const rank = (n) => (STEP.includes(n) ? 100 + STEP.indexOf(n) : /^(book|order)/.test(n) ? 200 : 0);
 const ORDERED = [...PAGES].sort((x, y) => (rank(x) - rank(y)) || x.localeCompare(y));
 const site = ['index', ...ORDERED].map((name) => {
   const html = fs.readFileSync(path.join(SRC, `${name}.html`), 'utf8');
