@@ -108,6 +108,11 @@ export default function RestaurantCard({ r, active }) {
             {r.certification}
           </p>
         )}
+        {r.certificate_expired && (
+          <p className="mt-1 text-xs text-gray-600">
+            {t('restaurants.certificateExpired', 'Certificate expired. Check their website or ask in store for the current one.')}
+          </p>
+        )}
         {/* Unchecked is the default and the page intro says so once; a
             line on every card repeating it was noise. Checked is news. */}
         {r.verified && (

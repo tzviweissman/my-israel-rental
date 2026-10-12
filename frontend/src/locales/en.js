@@ -4920,6 +4920,7 @@ const en = {
           steakhouse: 'Steakhouse',
         },
         verified: 'Certificate checked',
+        certificateExpired: 'Certificate expired. Check their website or ask in store for the current one.',
         fromWebsite: 'Hechsher as shown on their website',
         call: 'Call',
         directions: 'Directions',

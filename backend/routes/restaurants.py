@@ -40,6 +40,9 @@ def _admin_only(payload: dict) -> None:
 def _card(d, distance_km=None):
     c = d.get("contact") or {}
     loc = (d.get("location") or {}).get("coordinates")
+    # From a certificate picture, or typed in admin. Past it, the card says so
+    # and sends people to the place for the current one (Tzvi, 12 Oct 2026).
+    until = ((d.get("kosher_check") or {}).get("certificate") or {}).get("valid_until")
     return {
         "id": d["place_id"],
         "name_en": c.get("name_en"), "name_he": c.get("name_he"),
@@ -47,6 +50,8 @@ def _card(d, distance_km=None):
         "kashrut": d.get("kashrut"),
         "certification": d.get("kosher_certification"),
         "verified": bool(d.get("verified")),
+        "certificate_valid_until": until,
+        "certificate_expired": bool(until and until < datetime.now(UTC).date().isoformat()),
         "city": d.get("city"), "city_he": CITY_HE.get(d.get("city")), "city_slug": city_slug(d["city"]) if d.get("city") else None,
         "neighborhood": d.get("neighborhood"), "region": d.get("region"),
         "address": c.get("address"),
@@ -186,6 +191,7 @@ class AdminEdit(BaseModel):
     city: Optional[str] = None
     neighborhood: Optional[str] = None
     categories: Optional[list[str]] = None
+    certificate_valid_until: Optional[str] = None   # YYYY-MM-DD, "" clears
     lat: Optional[float] = None            # a pin for a place added by hand
     lng: Optional[float] = None
 
@@ -220,6 +226,14 @@ async def _apply(place_id, e: AdminEdit, payload):
         sets["neighborhood"] = e.neighborhood or None
     if e.categories is not None:
         sets["categories"] = [c for c in e.categories if c in CATEGORIES]
+    if e.certificate_valid_until is not None:
+        v = e.certificate_valid_until.strip()
+        if v and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):
+            raise HTTPException(400, "Certificate date must be YYYY-MM-DD")
+        # Merged whole: a stored `certificate: null` cannot take a sub-field.
+        cur = (await db.restaurants.find_one({"place_id": place_id}, {"kosher_check.certificate": 1}) or {})
+        cur = (cur.get("kosher_check") or {}).get("certificate") or {}
+        sets["kosher_check.certificate"] = {**cur, "valid_until": v or None}
     if e.lat is not None and e.lng is not None and place_id.startswith("mir-"):
         # Ours to keep (not Google's), so no fetched date for the 30-day refresh.
         sets.update({"location": {"type": "Point", "coordinates": [e.lng, e.lat]},
