@@ -1,537 +1,125 @@
 <!doctype html>
+<!-- Blazin' Boards, order.html. Written by gen/pages.py. -->
 <html lang="en" dir="ltr">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Order a board. Blazin' Boards, Jerusalem.</title>
+<title>Your order · Blazin' Boards</title>
 <meta name="description" content="Order a Blazin' Boards meat board: pick the size, add a bottle, say when and where. Orders 48 hours ahead. You pay the business directly.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23FFFFFF'/><rect x='7' y='10' width='18' height='12' rx='2' fill='%234B0C19'/></svg>">
-<!--
-  The order page. It reads the store's real products, prices, add-ons,
-  areas and payment note from the site's order-form API and places a real
-  order on the store's board, with a track link for the customer. The site
-  processes no payment: the page records how the customer means to pay, in
-  the store's own terms, and the store takes it from there.
-
-  Buyer psychology, honest only:
-  - the two lines side by side at each size, so the larger and the premium
-    board sit beside the one being chosen (anchoring with real prices);
-  - a default already chosen, a step count, and the total always in view;
-  - the add-ons offered after the board, not before;
-  - a per-person figure only for products whose serving count the store
-    has set. This store has set none, so none is shown;
-  - no countdown, no scarcity, no rating, no invented number.
--->
+<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mv5kwb1z">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root {
-    --font-head: 'Playfair Display', Georgia, serif;
-    --font-body: 'Manrope', system-ui, sans-serif;
-    --ox-0: #3A0812; --ox-1: #4B0C19; --ox-2: #5A1222;
-    --gold: #E9B23B; --gold-ink: #3A0812;
-    /* White ground; the brand's oxblood and mustard as accents only. */
-    --paper: #FFFFFF; --paper-2: #FBF6F3;
-    --ink: #2B1017; --soft: #6B5A5E; --line: rgba(58, 8, 18, 0.14);
-    --gold-text: #7A5A10;    /* mustard, dark enough for small text on white */
-    --wash: #FBF1E4;         /* the soft wash the product sits on */
-    --ok: #2E7D4F;
-    --bar-h: 84px;
-  }
-  * { box-sizing: border-box; }
-  :focus-visible { outline: 2px solid var(--ox-1); outline-offset: 2px; }
-  input:focus, select:focus, textarea:focus { outline: 2px solid var(--ox-1); outline-offset: 1px; }
-  html { scroll-behavior: smooth; }
-  body { margin: 0; font: 17px/1.5 var(--font-body); background: var(--paper); color: var(--ink); padding-block-end: var(--bar-h); }
-  h1, h2, h3 { font-family: var(--font-head); font-weight: 500; margin: 0; }
-  a { color: inherit; }
-  button { font: inherit; cursor: pointer; }
-  .wrap { max-width: 1180px; margin-inline: auto; padding-inline: clamp(1.25rem, 5vw, 3rem); }
-
-  /* nav */
-  .nav { position: sticky; top: 0; z-index: 30; display: flex; align-items: center; gap: 1rem; padding: 0.8rem clamp(1.25rem, 5vw, 3rem); background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
-  .nav__mark { display: inline-flex; align-items: center; gap: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; text-decoration: none; }
-  .nav__mark img { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; }
-  .nav__back { margin-inline-start: auto; font-size: 0.9rem; color: var(--soft); text-decoration: none; }
-  .nav__back:hover { color: var(--ink); }
-
-
-  /* gallery: the product first, on a soft wash, then the details */
-  .gallery { display: grid; gap: 0.7rem; margin-bottom: 0.5rem; }
-  .gallery .lead { margin: 0; border-radius: 18px; overflow: hidden; background: var(--wash); aspect-ratio: 4 / 3; display: grid; place-items: center; padding: 6%; }
-  .gallery .lead img { width: 100%; height: 100%; object-fit: contain; }
-  .gallery .more { display: grid; grid-template-columns: 1fr 1fr; gap: 0.7rem; }
-  .gallery .more figure { margin: 0; border-radius: 14px; overflow: hidden; aspect-ratio: 4 / 3; }
-  .gallery .more img { width: 100%; height: 100%; object-fit: cover; display: block; }
-  .gallery figcaption { font-size: 0.75rem; color: var(--soft); padding: 0.3rem 0.2rem 0; }
-  .badge { display: inline-block; padding: 0.15rem 0.6rem; border: 1px solid var(--line); border-radius: 999px; font-size: 0.75rem; font-weight: 700; letter-spacing: 0.04em; color: var(--soft); margin-bottom: 0.4rem; }
-
-  /* header + steps */
-  .head { padding-block: clamp(2rem, 5vw, 3.5rem) 1rem; }
-  .head h1 { font-size: clamp(2rem, 4.2vw, 3.4rem); line-height: 1.05; letter-spacing: -0.02em; }
-  .head h1 em { font-style: italic; color: var(--ox-1); }
-  .head p { margin: 0.6rem 0 0; color: var(--soft); max-width: 40rem; }
-  .steps { display: flex; gap: 0.5rem; flex-wrap: wrap; margin: 1.4rem 0 0; padding: 0; list-style: none; }
-  .steps li { display: inline-flex; align-items: center; gap: 0.5rem; padding: 0.35rem 0.8rem 0.35rem 0.5rem; border-radius: 999px; border: 1px solid var(--line); font-size: 0.85rem; font-weight: 600; color: var(--soft); }
-  .steps li i { display: grid; place-content: center; width: 22px; height: 22px; border-radius: 50%; background: var(--line); font-style: normal; font-size: 0.75rem; color: var(--ink); }
-  .steps li.done { color: var(--ink); border-color: transparent; background: #E6F4EA; }
-  .steps li.done i { background: var(--ok); color: #fff; }
-  .steps li.now { color: #fff; background: var(--ox-1); border-color: transparent; }
-  .steps li.now i { background: var(--gold); color: var(--ox-0); }
-
-  /* layout */
-  .grid { display: grid; grid-template-columns: 1fr minmax(300px, 380px); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: start; padding-block: 1rem 3rem; }
-  section.step { padding: clamp(1.4rem, 3vw, 2rem) 0; border-top: 1px solid var(--line); }
-  section.step h2 { font-size: clamp(1.5rem, 2.6vw, 2.1rem); margin-bottom: 0.3rem; }
-  section.step > p.lead { margin: 0 0 1.2rem; color: var(--soft); }
-
-  /* the size table: rows are sizes, columns are the two lines */
-  .sizes { width: 100%; border-collapse: separate; border-spacing: 0; }
-  .sizes th { text-align: start; font-weight: 600; font-size: 0.8rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--soft); padding: 0 0.6rem 0.6rem; }
-  .sizes td { padding: 0.35rem 0.35rem; vertical-align: top; }
-  .sizes td.size { padding-top: 0.9rem; font-family: var(--font-head); font-size: 1.05rem; white-space: nowrap; color: var(--soft); }
-  .sizes td.size b { display: block; font-family: var(--font-body); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--soft); }
-  .pick { width: 100%; text-align: start; padding: 0.8rem 0.9rem; border-radius: 14px; border: 1px solid var(--line); background: var(--paper-2); color: var(--ink); display: grid; gap: 0.25rem; transition: border-color .15s, background .15s; }
-  .pick:hover { border-color: rgba(75, 12, 25, 0.5); }
-  .pick[aria-pressed="true"] { border-color: var(--ox-1); background: #FBF1E4; box-shadow: 0 0 0 1px var(--ox-1) inset; }
-  .pick .name { font-family: var(--font-head); font-size: 1.05rem; line-height: 1.2; }
-  .pick .price { font-weight: 800; font-size: 1.1rem; color: var(--ox-1); }
-  .pick .price small { font-weight: 500; font-size: 0.75rem; color: var(--soft); margin-inline-start: 0.35rem; }
-  .pick .what { font-size: 0.82rem; color: var(--soft); line-height: 1.35; }
-  .pick .start { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold-text); }
-  .qty { display: flex; align-items: center; gap: 0.4rem; margin-top: 0.4rem; padding-inline: 0.2rem; font-size: 0.85rem; color: var(--soft); }
-  .qty span { margin-inline-end: auto; }
-  .qty[hidden] { display: none; }
-  .qty button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: var(--ink); font-size: 1.1rem; }
-  .qty output { min-width: 1.6rem; text-align: center; font-weight: 700; }
-
-  /* add-ons */
-  .upsell { margin-top: 1rem; padding: 0.9rem 1rem; border-radius: 14px; background: var(--wash); }
-  .upsell h3 { font-family: var(--font-body); font-size: 0.9rem; font-weight: 700; margin: 0 0 0.2rem; }
-  .upsell p { margin: 0 0 0.6rem; font-size: 0.8rem; color: var(--soft); }
-  .addons { display: grid; gap: 0.35rem; }
-  .addon { display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; align-items: center; padding: 0.45rem 0.2rem; border: 0; border-bottom: 1px solid var(--line); background: transparent; color: var(--ink); text-align: start; font-size: 0.9rem; }
-  .addon:last-child { border-bottom: 0; }
-  .addon .l { display: flex; justify-content: space-between; gap: 0.6rem; min-width: 0; }
-  .addon b { font-weight: 600; }
-  .addon small { display: none; }
-  .addon .p { font-weight: 700; color: var(--ox-1); white-space: nowrap; font-variant-numeric: tabular-nums; }
-  .addon .add { padding: 0.3rem 0.7rem; border-radius: 999px; border: 1px solid var(--ox-1); color: var(--ox-1); font-size: 0.8rem; font-weight: 700; background: #fff; }
-  .addon[aria-pressed="true"] .add { background: var(--ox-1); color: #fff; }
-
-  /* fields */
-  .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1rem; }
-  .fields .full { grid-column: 1 / -1; }
-  label.f { display: grid; gap: 0.3rem; font-size: 0.85rem; font-weight: 600; color: var(--soft); }
-  .f input, .f textarea, .f select { font: inherit; color: var(--ink); background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 0.7rem 0.85rem; min-height: 48px; width: 100%; }
-  .f input:focus, .f textarea:focus, .f select:focus { outline: 2px solid var(--ox-1); outline-offset: 1px; }
-  .f textarea { min-height: 96px; resize: vertical; }
-  .f .hint { font-weight: 500; color: var(--soft); font-size: 0.8rem; }
-  .choices { display: flex; flex-wrap: wrap; gap: 0.5rem; }
-  .choice { padding: 0.55rem 0.9rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--ink); font-weight: 600; font-size: 0.9rem; min-height: 44px; }
-  .choice[aria-pressed="true"] { background: var(--ox-1); color: #fff; border-color: transparent; }
-  .err { color: #B3261E; font-size: 0.85rem; margin: 0.4rem 0 0; min-height: 1.2em; }
-
-  /* summary */
-  .summary { position: sticky; top: 76px; padding: 1.2rem 1.3rem; border-radius: 18px; background: var(--paper-2); border: 1px solid var(--line); }
-  .summary h2 { font-size: 1.35rem; margin-bottom: 0.6rem; }
-  .summary .desc { margin: 0 0 0.9rem; font-size: 0.9rem; color: var(--soft); line-height: 1.45; }
-  .lines { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.5rem; }
-  .lines li { display: grid; grid-template-columns: 1fr auto; gap: 0.6rem; font-size: 0.95rem; }
-  .lines li small { display: block; color: var(--soft); font-size: 0.8rem; }
-  .lines li .amt { font-variant-numeric: tabular-nums; font-weight: 600; }
-  .lines .empty { color: var(--soft); font-size: 0.9rem; }
-  .contents { margin: 0.8rem 0 0; padding: 0.8rem 0 0; border-top: 1px solid var(--line); }
-  .contents h3 { font-family: var(--font-body); font-size: 0.8rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--soft); margin: 0 0 0.4rem; }
-  .contents ul { margin: 0; padding: 0 0 0 1.1rem; display: grid; gap: 0.15rem; font-size: 0.9rem; }
-  .contents li::marker { color: var(--ox-1); }
-  .total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--line); }
-  .total b { font-family: var(--font-body); font-weight: 800; font-size: 1.6rem; color: var(--ox-1); font-variant-numeric: tabular-nums; }
-  .cta { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 54px; margin-top: 1rem; border: 0; border-radius: 999px; background: var(--ox-1); color: #fff; font-weight: 800; font-size: 1.05rem; }
-  .cta:hover { background: var(--ox-2); }
-  .cta:disabled { opacity: 0.55; cursor: not-allowed; }
-  .assure { margin: 0.8rem 0 0; color: var(--soft); font-size: 0.85rem; line-height: 1.45; }
-  .assure b { color: var(--ink); font-weight: 600; }
-
-  /* phone bar */
-  .bar { position: fixed; inset-inline: 0; bottom: 0; z-index: 30; display: none; align-items: center; gap: 0.8rem; padding: 0.7rem clamp(1.25rem, 5vw, 3rem) calc(0.7rem + env(safe-area-inset-bottom)); background: rgba(255, 255, 255, 0.92); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
-  .bar .t { display: grid; }
-  .bar .t small { color: var(--soft); font-size: 0.75rem; }
-  .bar .t b { font-weight: 800; font-size: 1.25rem; color: var(--ox-1); }
-  .bar .cta { width: auto; margin: 0; flex: 1; min-height: 48px; }
-
-  /* confirmation */
-  .done { display: none; padding-block: clamp(2rem, 6vw, 4rem); max-width: 40rem; }
-  .done h1 { font-size: clamp(2rem, 4.2vw, 3.2rem); line-height: 1.05; }
-  .done h1 em { font-style: italic; color: var(--ox-1); }
-  .done .card { margin-top: 1.4rem; padding: 1.2rem 1.3rem; border-radius: 18px; background: var(--paper-2); border: 1px solid var(--line); }
-  .done .card p { margin: 0.4rem 0; }
-  .done .track { display: inline-block; margin-top: 0.6rem; font-weight: 700; color: var(--ox-1); }
-  body.is-done .grid, body.is-done .head, body.is-done .bar { display: none !important; }
-  body.is-done .done { display: block; }
-
-  @media (max-width: 900px) {
-    .grid { grid-template-columns: 1fr; }
-    .summary { position: static; }
-    .bar { display: flex; }
-    .fields { grid-template-columns: 1fr; }
-    .sizes th:first-child, .sizes td.size { display: none; }
-    .sizes tr { display: grid; grid-template-columns: 1fr 1fr; gap: 0.4rem; margin-bottom: 0.9rem; }
-    .sizes thead tr { margin-bottom: 0.2rem; }
-    .pick .name::before { content: attr(data-size) " · "; color: var(--soft); font-family: var(--font-body); font-size: 0.8rem; }
-  }
-  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
-</style>
+<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mv5kwb1z">
 </head>
 <body>
-<nav class="nav" aria-label="Order">
-  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv1hbo97" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
-  <a class="nav__back" href="/business/blazin-boards" data-mir-key="t-e137d938-0">Back to the page</a>
+<nav class="nav" aria-label="Blazin' Boards">
+  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv5kwb1z" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
+  <ul class="menu">
+    <li><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-0">Home</a></li>
+    <li><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-0">Every board</a></li>
+    <li><a href="/business/blazin-boards/order" data-mir-key="t-c5c09523-0">Your order</a></li>
+  </ul>
+  <a class="cart" href="/business/blazin-boards/order" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span data-mir-key="t-d988a500-0">Order</span><b data-count hidden data-mir-key="t-266f6835-0">0</b></a>
 </nav>
 
-<main class="wrap">
-  <header class="head">
-    <h1 data-mir-key="t-8ca597b8-0">Order a board, <em>in three steps.</em></h1>
-    <p data-mir-key="t-2ab5a5b0-0">Choose your board, add a bottle if you like, and tell us when and where. You pay us directly, by <span id="payWays">card, Zelle or bank transfer</span>. Orders 48 hours ahead.</p>
-    <ol class="steps" id="steps" aria-label="Progress">
-      <li class="now" data-step="1" data-mir-key="t-f9f64516-0"><i>1</i> The board</li>
-      <li data-step="2" data-mir-key="t-44b26988-0"><i>2</i> When and where</li>
-      <li data-step="3" data-mir-key="t-8773e92f-0"><i>3</i> Your details</li>
-    </ol>
-  </header>
-
-  <div class="grid">
-    <div>
-      <div class="gallery" aria-label="Our boards">
-        <figure class="lead"><img src="/pages/blazin-boards/assets/board-cut-m.webp?v=mv1hbo97" width="1000" height="815" alt="A Blazin' Boards meat board: rows of sliced steak, candied pastrami, jerky and a bone-in rib" data-mir-key="i-4aa54b81-0"></figure>
-        <div class="more">
-          <figure><img src="/pages/blazin-boards/assets/their-long.jpg?v=mv1hbo97" width="1024" height="683" alt="Our long board on marble" loading="lazy" data-mir-key="i-f68f9118-0"></figure>
-          <figure><img src="/pages/blazin-boards/assets/their-salami.jpg?v=mv1hbo97" width="1024" height="683" alt="A square board with salami rounds and olives" loading="lazy" data-mir-key="i-a5ec43d7-0"></figure>
-          <figure><img src="/pages/blazin-boards/assets/their-rustic-m.jpg?v=mv1hbo97" width="1000" height="644" alt="Sliced steak and candied pastrami on a wooden board" loading="lazy" data-mir-key="i-4de1258c-0"></figure>
-          <figure><img src="/pages/blazin-boards/assets/their-jars-m.jpg?v=mv1hbo97" width="1000" height="589" alt="A board with sauces and a bottle of wine" loading="lazy" data-mir-key="i-90777794-0"></figure>
+<main class="order">
+  <div class="wrap">
+    <ol class="steps" aria-label="Order steps"><li class="is-now" aria-current="step"><span class="st" data-mir-key="t-f9b98036-0">Step 1: Your boards</span></li><li class=""><span class="st" data-mir-key="t-bb888e95-0">Step 2: When and where</span></li><li class=""><span class="st" data-mir-key="t-e03c9d03-0">Step 3: Your details</span></li></ol>
+    <div class="cols">
+      <section class="pane">
+        <h1 data-mir-key="t-d51055e9-0">Your <em>boards.</em></h1>
+        <p class="sub" data-mir-key="t-70e3491e-0">Two lines at each size, side by side. Add as many as you need. Prices in US dollars.</p>
+        <ul class="cartlines" id="cartlines"></ul>
+        <div class="q">
+          <h2 id="pickTitle">Choose a board</h2>
+          <button type="button" class="ghost" id="more" hidden aria-expanded="false" aria-controls="picks">Add another board</button>
+          <table class="picks" id="picks" aria-label="Boards by size and line"></table>
+          <p style="margin:.6rem 0 0"><a class="back" href="/business/blazin-boards/boards" data-mir-key="t-1899531c-0">See every board drawn to size</a></p>
         </div>
-        <figcaption data-mir-key="t-21b03aa9-0">Our own photographs.</figcaption>
-      </div>
-      <section class="step" id="step-board">
-        <h2 data-mir-key="t-c70d9f51-0">Choose your board.</h2>
-        <p class="lead" data-mir-key="t-6bef45d1-0">Two lines at each size. The Blazin' line adds chicken and sticky beef bites; the Premium Steak line is all steak. Prices in US dollars.</p>
-        <table class="sizes" id="sizes" aria-label="Boards by size and line"></table>
-        <p class="err" id="errBoard"></p>
-      </section>
-
-      <section class="step" id="step-when">
-        <h2 data-mir-key="t-d2ae67cd-0">When and where.</h2>
-        <p class="lead" data-mir-key="t-037eccf7-0">We need 48 hours' notice. Collect in Jerusalem, or have it delivered anywhere in Israel.</p>
-        <div class="fields">
-          <div class="full">
-            <div class="choices" role="group" aria-label="Collect or deliver">
-              <button type="button" class="choice" data-ful="pickup" aria-pressed="true" data-mir-key="t-aecea55e-0">Collect in Jerusalem</button>
-              <button type="button" class="choice" data-ful="delivery" aria-pressed="false" data-mir-key="t-c71846a9-0">Deliver to me</button>
-            </div>
-          </div>
-          <label class="f">Needed on<input type="date" id="date" required><span class="hint" id="dateHint" data-mir-key="t-6b2baa19-0">The earliest date is two days from today.</span></label>
-          <label class="f" id="windowWrap" hidden>Time window<select id="window"></select></label>
-          <label class="f full" id="addressWrap" hidden>Delivery address<input type="text" id="address" placeholder="Street, number, city, plus floor or entrance if it matters" maxlength="400"></label>
+        <div class="q" id="bottlesQ" hidden>
+          <h2 data-mir-key="t-4ce88f33-0">Add a bottle</h2>
+          <ul class="bottles" id="bottles" style="grid-template-columns:repeat(2,minmax(0,1fr))"></ul>
         </div>
-        <p class="err" id="errWhen"></p>
+        <p class="errline" id="err"></p>
+        <div class="next"><a class="cta" id="go" href="/business/blazin-boards/order-when" data-mir-key="t-f78a4fc0-0">Continue</a><a class="back" href="/business/blazin-boards/boards" data-mir-key="t-e3e389c9-0">Keep looking</a></div>
       </section>
-
-      <section class="step" id="step-you">
-        <h2 data-mir-key="t-8a48470b-0">Your details.</h2>
-        <p class="lead" data-mir-key="t-cf12b247-0">So we can confirm your order with you. We share it with no one else.</p>
-        <div class="fields">
-          <label class="f">Your name<input type="text" id="name" autocomplete="name" required maxlength="120"></label>
-          <label class="f">Mobile<input type="tel" id="phone" autocomplete="tel" inputmode="tel" required placeholder="05x-xxx-xxxx" maxlength="40"></label>
-          <label class="f full">Email, for your confirmation <span class="hint" data-mir-key="t-6672aee6-0">(optional)</span><input type="email" id="email" autocomplete="email" maxlength="200"></label>
-          <label class="f full">Anything we should know? <span class="hint" data-mir-key="t-7c826955-0">(optional) Gluten-free and soy-free boards are available on request.</span><textarea id="notes" maxlength="1000"></textarea></label>
-          <div class="full">
-            <p class="f" style="margin:0 0 .4rem" data-mir-key="t-f95cea3c-0">How will you pay?</p>
-            <div class="choices" id="payBy" role="group" aria-label="How you will pay"></div>
-          </div>
-        </div>
-        <p class="err" id="errYou"></p>
-      </section>
+      <aside class="summary" aria-label="Your order" aria-live="polite">
+        <div class="who"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv5kwb1z" alt="" data-mir-key="i-0746f29b-1"><div><b data-mir-key="t-ba61b3de-0">Your order</b><small data-mir-key="t-eeca8dc1-0">Blazin' Boards · Jerusalem</small></div></div>
+        <ul class="lines" data-lines></ul>
+        <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><b data-total data-mir-key="t-e2b2a704-0">$0</b></div>
+        <ul class="promise">
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>You pay us directly, by <span data-ways data-mir-key="t-868694f2-0">card, Zelle or bank transfer</span>. Nothing is paid on this site.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-mir-key="t-013c28cb-0">We confirm your order with you first.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-mir-key="t-ce089fc6-0">Orders 48 hours ahead.</span></li>
+        </ul>
+      </aside>
     </div>
-
-    <aside class="summary" aria-live="polite">
-      <span class="badge" data-mir-key="t-f0093b33-0">Meatboards · Jerusalem</span>
-      <h2 data-mir-key="t-0be66db8-0">Your order</h2>
-      <p class="desc" data-mir-key="t-c117c394-0">Premium meats, cooked and grilled to perfection. Prices in US dollars.</p>
-      <ul class="lines" id="lines"><li class="empty" data-mir-key="t-71f210ae-0">Nothing chosen yet.</li></ul>
-      <div class="contents" id="contents" hidden><h3 data-mir-key="t-d1f6f135-0">On the board</h3><ul id="contentsList"></ul></div>
-      <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><b id="total">$0</b></div>
-      <button type="button" class="cta" id="place" disabled>Place order</button>
-      <p class="assure" data-mir-key="t-9e761a4a-0"><b>You pay us directly</b>, by <span id="payWays2">card, Zelle or bank transfer</span>. We confirm your order with you first. Orders 48 hours ahead.</p>
-      <div class="upsell" id="step-addons" hidden>
-        <h3 data-mir-key="t-983e6544-0">Add a bottle</h3>
-        <p data-mir-key="t-40e65c5f-0">Wine and whisky to go with your board.</p>
-        <div class="addons" id="addons"></div>
-      </div>
-    </aside>
   </div>
-
-  <section class="done" id="done" aria-live="polite">
-    <h1 data-mir-key="t-2ec283ff-0">Your order is with <em>Blazin' Boards.</em></h1>
-    <div class="card">
-      <p id="doneWhat"></p>
-      <p id="doneWhen"></p>
-      <p data-mir-key="t-380fb995-0">You pay us directly, by <span id="payWays3">card, Zelle or bank transfer</span>. We'll confirm with you before the day.</p>
-      <a class="track" id="track" href="#" target="_blank" rel="noopener">Follow your order</a>
-    </div>
-    <p style="margin-top:1.2rem;color:var(--soft)"><a href="/business/blazin-boards" data-mir-key="t-e137d938-1">Back to the page</a></p>
-  </section>
 </main>
+<div class="dock"><div><small data-mir-key="t-9263db8f-0">Total</small><b data-total data-mir-key="t-e2b2a704-1">$0</b></div><a class="cta" id="go2" href="/business/blazin-boards/order-when" data-mir-key="t-f78a4fc0-1">Continue</a></div>
 
-<div class="bar" aria-hidden="true">
-  <div class="t"><small data-mir-key="t-9263db8f-0">Total</small><b id="totalBar">$0</b></div>
-  <button type="button" class="cta" id="placeBar" disabled>Place order</button>
-</div>
-
+<script src="/pages/blazin-boards/site.js?v=mv5kwb1z"></script>
 <script>
 (function () {
-  /* Same origin on the live site (the site's own /api proxy); the local API
-     when opened from a local build folder. */
-  var LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && location.port !== '3000';
-  var API = LOCAL ? 'http://localhost:8001/api' : '/api';
-  var APP = LOCAL ? 'http://localhost:3210' : location.origin;
-  /* The live listing names its boards loosely ("Medum Blazin Board", "mini
-     board") and carries no sizes or contents, so each is matched by its words
-     to their own published price list, which supplies the name, size and
-     contents shown here. The product id and price always come from the
-     listing, so what is ordered and charged is exactly what it says. */
-  var KNOWN = [
-    { re: /mini/i, name: 'Mini Board', size: '15 × 20 cm', what: 'Entrecote steak, candied pastrami, salami chips, sometimes brisket or London broil, beef jerky.' },
-    { re: /small.*blazin/i, name: "Small Blazin' Board", size: '20 × 30 cm', line: 'blazin', what: 'Salami chips, sticky beef bites, candied pastrami, brisket, London broil, beef jerky.' },
-    { re: /small.*premium/i, name: 'Small Premium Steak Board', size: '20 × 30 cm', line: 'premium', what: 'Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.' },
-    { re: /med[iu]*m.*blazin/i, name: "Medium Blazin' Board", size: '24 × 35 cm', line: 'blazin', what: 'Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, brisket, London broil, beef jerky.' },
-    { re: /med[iu]*m.*premium/i, name: 'Medium Premium Steak Board', size: '24 × 35 cm', line: 'premium', what: 'Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.' },
-    { re: /large.*blazin/i, name: "Large Blazin' Board", size: '33 × 47 cm', line: 'blazin', what: 'Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef jerky.' },
-    { re: /large.*premium/i, name: 'Large Premium Steak Board', size: '33 × 47 cm', line: 'premium', what: 'Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.' },
-    { re: /vip/i, name: 'Extra Large VIP Board', size: '37 × 57 cm', what: 'Rib steak, oyster steak, sliced entrecote, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef facon, beef jerky.' },
-    { re: /party/i, name: 'The Party Board', what: 'Two rib steaks, oyster steak, entrecote, candied pastrami, brisket, London broil, skirt or hanger steak, beef jerky.' },
-    { re: /jerky/i, name: 'The All Jerky Board', size: '20 × 30 cm' }
-  ];
-  function tidy(p) {
-    var k = KNOWN.filter(function (x) { return x.re.test(p.name); })[0];
-    if (!k) return p;
-    var size = k.size ? ' · ' + k.size : '';
-    return Object.assign({}, p, { name: k.name + size, group: p.group || 'Boards', description: p.description && p.description.length > 12 ? p.description : (k.what || p.description || '') });
-  }
-  var SLUG = 'blazin-boards';
-  var NOTICE_DAYS = 2;   /* their rule: orders 48 hours ahead */
-  var SYM = { USD: '$', ILS: '₪', EUR: '€', GBP: '£' };
-  var $ = function (s) { return document.querySelector(s); };
-  var state = { gig: null, products: [], chosen: null, qty: 1, addons: {}, ful: 'pickup', payBy: null, settings: null, business: null };
-
-  function money(n, cur) { var s = SYM[cur] || (cur + ' '); return s + (Math.round(n * 100) / 100).toLocaleString('en-US'); }
-  function sizeOf(name) { var m = name.match(/(\d+)\s*×\s*(\d+)\s*cm/); return m ? m[1] + ' × ' + m[2] + ' cm' : ''; }
-  function shortName(name) { return name.split(' · ')[0]; }
-
-  /* ------------------------------------------------------------ load -- */
-  fetch(API + '/marketplace/business/' + SLUG).then(function (r) { return r.json(); }).then(function (d) {
-    var gigs = d.listings || d.gigs || [];
-    var store = gigs.filter(function (g) { return g.gig_type === 'store'; })[0] || gigs[0];
-    if (!store) throw new Error('no store listing');
-    return fetch(API + '/marketplace/order-form/' + store.id).then(function (r) { return r.json(); });
-  }).then(function (form) {
-    state.gig = form.gig; state.products = (form.products || []).map(tidy); state.settings = form.settings; state.business = form.business;
-    var ways = (form.business.payment_note || 'card, Zelle, bank transfer').split(/,|·/).map(function (s) { return s.replace(/\s+/g, ' ').trim().replace(/zelle/i, "Zelle"); }).filter(Boolean);
-    var waysText = ways.length > 1 ? ways.slice(0, -1).join(', ') + ' or ' + ways[ways.length - 1] : ways.join('');
-    ['payWays', 'payWays2', 'payWays3'].forEach(function (id) { $('#' + id).textContent = waysText; });
-    $('#payBy').innerHTML = ways.map(function (w) { return '<button type="button" class="choice" data-pay="' + w.replace(/"/g, '&quot;') + '" aria-pressed="false">' + w.charAt(0).toUpperCase() + w.slice(1) + '</button>'; }).join('');
-    renderSizes(); renderAddons(); initDate();
-    /* A default already chosen: the middle of the Blazin' line. */
-    var def = state.products.filter(function (p) { return /Medium Blazin/.test(p.name); })[0];
-    /* Delivery only when the listing takes it; otherwise collection only. */
-    if (!(form.settings && form.settings.delivery_on)) { var dl = document.querySelector('[data-ful="delivery"]'); if (dl) dl.hidden = true; }
-    /* Arrived from a board on the page: that board, chosen. */
-    var want = new URLSearchParams(location.search).get('board');
-    if (want) { var w = state.products.filter(function (p) { return p.name.split(' · ')[0] === want; })[0]; if (w) def = w; }
-    if (def) choose(def.id);
-  }).catch(function (e) { $('#errBoard').textContent = LOCAL ? 'Could not load the boards. Is the local API running on 8001? (' + e.message + ')' : 'Could not load the boards. Please refresh the page.'; });
-
-  /* ----------------------------------------------------------- sizes -- */
-  function renderSizes() {
-    var boards = state.products.filter(function (p) { return (p.group || '') === 'Boards' && p.in_stock !== false; });
-    var rows = {};
-    var order = [];
-    boards.forEach(function (p) {
-      var key = sizeOf(p.name) || p.name;
-      if (!rows[key]) { rows[key] = { size: key, blazin: null, premium: null, other: [] }; order.push(key); }
-      if (/Blazin/.test(p.name)) rows[key].blazin = p;
-      else if (/Premium/.test(p.name)) rows[key].premium = p;
-      else rows[key].other.push(p);
-    });
-    var html = '<thead><tr><th>Size</th><th>Blazin\' line</th><th>Premium Steak line</th></tr></thead><tbody>';
-    /* Smallest first; boards with no size (the Party Board) last. A board that
-       shares its size with both lines gets a row of its own, never dropped. */
-    var area = function (k) { var m = /(\d+)\s*×\s*(\d+)/.exec(k); return m ? m[1] * m[2] : 1e9; };
-    order.sort(function (x, y) { return area(x) - area(y); });
-    var flat = [];
-    order.forEach(function (key) {
-      var r = rows[key], cells = [r.blazin, r.premium], rest = r.other.slice();
-      if (!cells[0] && rest.length) cells[0] = rest.shift();
-      if (!cells[1] && rest.length) cells[1] = rest.shift();
-      flat.push({ key: key, cells: cells });
-      while (rest.length) flat.push({ key: key, cells: [rest.shift(), rest.shift() || null] });
-    });
-    flat.forEach(function (row) {
-      var key = row.key, cells = row.cells;
-      html += '<tr><td class="size">' + (sizeOf(key) ? key : '') + (sizeOf(key) ? '' : '<b>' + key + '</b>') + '</td>';
-      cells.forEach(function (p) {
-        html += '<td>' + (p ? pickHTML(p, key) : '') + '</td>';
-      });
-      html += '</tr>';
-    });
-    $('#sizes').innerHTML = html + '</tbody>';
-    $('#sizes').addEventListener('click', function (e) {
-      var b = e.target.closest('.pick'); if (b) { choose(b.getAttribute('data-id')); return; }
-      var q = e.target.closest('[data-qty]'); if (q) { state.qty = Math.max(1, Math.min(20, state.qty + parseInt(q.getAttribute('data-qty'), 10))); paint(); }
-    });
-  }
-  function pickHTML(p, sizeKey) {
-    var per = p.serves ? '<small>about ' + money(p.price / p.serves, p.currency) + ' a person</small>' : '';
-    var isDef = /Medium Blazin/.test(p.name);
-    return '<button type="button" class="pick" data-id="' + p.id + '" aria-pressed="false" data-size="' + (sizeOf(sizeKey) || '') + '">'
-      + '<span class="name" data-size="' + (sizeOf(sizeKey) || '') + '">' + shortName(p.name) + '</span>'
-      + '<span class="price">' + money(p.price, p.currency) + per + '</span>'
-      + (p.description ? '<span class="what">' + p.description + '</span>' : '')
-      + (isDef ? '<span class="start">A good place to start</span>' : '')
-      + '</button>'
-      + '<div class="qty" data-for="' + p.id + '" hidden><span>How many</span><button type="button" data-qty="-1" aria-label="One fewer">−</button><output>1</output><button type="button" data-qty="1" aria-label="One more">+</button></div>';
-  }
-  function choose(id) {
-    state.chosen = state.products.filter(function (p) { return p.id === id; })[0] || null;
-    if (state.chosen) state.qty = state.qty || 1;
-    /* Only when the listing has bottles to add; an empty box offers nothing. */
-    $('#step-addons').hidden = !state.chosen || !$('#addons').children.length;
-    paint();
-  }
-
-  /* ---------------------------------------------------------- add-ons -- */
-  function renderAddons() {
-    var list = state.products.filter(function (p) { return (p.group || '') !== 'Boards' && p.in_stock !== false; });
-    if (!list.length) return;
-    $('#addons').innerHTML = list.map(function (p) {
-      return '<button type="button" class="addon" data-id="' + p.id + '" aria-pressed="false"><span class="l"><b>' + p.name + '</b><span class="p">' + money(p.price, p.currency) + '</span></span><span class="add">Add</span></button>';
-    }).join('');
-    $('#addons').addEventListener('click', function (e) {
-      var b = e.target.closest('.addon'); if (!b) return;
-      var id = b.getAttribute('data-id');
-      state.addons[id] = state.addons[id] ? 0 : 1;
-      paint();
-    });
-  }
-
-  /* -------------------------------------------------------------- when -- */
-  function initDate() {
-    var d = new Date(); d.setDate(d.getDate() + NOTICE_DAYS);
-    var iso = d.toISOString().slice(0, 10);
-    $('#date').min = iso; $('#date').value = iso;
-    $('#date').addEventListener('change', function () { renderWindows(); paint(); });
-    document.querySelectorAll('[data-ful]').forEach(function (b) {
-      b.addEventListener('click', function () {
-        state.ful = b.getAttribute('data-ful');
-        document.querySelectorAll('[data-ful]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
-        $('#addressWrap').hidden = state.ful !== 'delivery';
-        renderWindows(); paint();
-      });
-    });
-    renderWindows();
-  }
-  function renderWindows() {
-    var day = $('#date').value; if (!day) return;
-    var wd = new Date(day + 'T12:00:00').getDay();
-    var wins = ((state.settings || {})[state.ful + '_windows'] || []).filter(function (w) { return parseInt(w.weekday, 10) === wd; });
-    $('#windowWrap').hidden = !wins.length;
-    $('#window').innerHTML = wins.map(function (w) { return '<option value="' + w.start + '|' + w.end + '">' + w.start + ' to ' + w.end + '</option>'; }).join('');
-  }
-
-  /* --------------------------------------------------------------- you -- */
-  $('#payBy').addEventListener('click', function (e) {
-    var b = e.target.closest('[data-pay]'); if (!b) return;
-    state.payBy = b.getAttribute('data-pay');
-    document.querySelectorAll('[data-pay]').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
-    paint();
-  });
-  ['name', 'phone', 'email', 'notes', 'address'].forEach(function (id) { $('#' + id).addEventListener('input', paint); });
-
-  /* ------------------------------------------------------------- paint -- */
-  function lines() {
-    var out = [];
-    if (state.chosen) out.push({ p: state.chosen, qty: state.qty });
-    Object.keys(state.addons).forEach(function (id) {
-      if (!state.addons[id]) return;
-      var p = state.products.filter(function (x) { return x.id === id; })[0];
-      if (p) out.push({ p: p, qty: 1 });
-    });
-    return out;
-  }
+  var o = BB.load(), F = null, open = false;
+  var area = function (p) { return p.cm ? p.cm[0] * p.cm[1] : 1e9; };
+  document.getElementById('more').addEventListener('click', function () { open = true; paint(); document.getElementById('picks').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
   function paint() {
-    document.querySelectorAll('.pick').forEach(function (b) {
-      var on = state.chosen && b.getAttribute('data-id') === state.chosen.id;
-      b.setAttribute('aria-pressed', String(!!on));
+    var ls = BB.lines(F, o);
+    document.getElementById('cartlines').innerHTML = ls.map(function (l) {
+      return '<li><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm · ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
+        + '<span class="stepper"><button type="button" data-dec="' + l.p.id + '" aria-label="One fewer">−</button><output>' + l.qty + '</output><button type="button" data-inc="' + l.p.id + '" aria-label="One more">+</button></span>'
+        + '<span class="amt">' + BB.money(l.p.price * l.qty, l.p.currency) + '</span></li>';
+    }).join('');
+    var boards = F.products.filter(function (p) { return p.board; });
+    var rows = {};
+    boards.forEach(function (p) { var k = p.cm ? p.cm.join('x') : p.short; (rows[k] = rows[k] || { a: area(p), cells: [] }).cells.push(p); });
+    var keys = Object.keys(rows).sort(function (x, y) { return rows[x].a - rows[y].a; });
+    var h = '<thead><tr><th>Size</th><th colspan="2">Boards</th></tr></thead><tbody>';
+    keys.forEach(function (k) {
+      var c = rows[k].cells.sort(function (a, b) { return (a.line === 'premium') - (b.line === 'premium'); });
+      for (var i = 0; i < c.length; i += 2) {
+        h += '<tr><td class="size">' + (i === 0 && c[0].cm ? c[0].cm[0] + ' × ' + c[0].cm[1] + ' cm' : '') + '</td>';
+        [c[i], c[i + 1]].forEach(function (p) {
+          if (!p) { h += '<td></td>'; return; }
+          var on = (o.cart[p.id] || 0) > 0;
+          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + '</button></td>';
+        });
+        h += '</tr>';
+      }
     });
-    document.querySelectorAll('.qty').forEach(function (q) {
-      var on = state.chosen && q.getAttribute('data-for') === state.chosen.id;
-      q.hidden = !on; if (on) q.querySelector('output').textContent = state.qty;
-    });
-    document.querySelectorAll('.addon').forEach(function (b) { var on = !!state.addons[b.getAttribute('data-id')]; b.setAttribute('aria-pressed', String(on)); b.querySelector('.add').textContent = on ? 'Added' : 'Add'; });
-    var ls = lines(), cur = state.chosen ? state.chosen.currency : 'USD', total = 0;
-    if (ls.length) {
-      $('#lines').innerHTML = ls.map(function (l) { total += l.p.price * l.qty; return '<li><span>' + (l.qty > 1 ? l.qty + ' × ' : '') + l.p.name + (l.p.group && l.p.group !== 'Boards' ? '<small>' + l.p.group + '</small>' : '') + '</span><span class="amt">' + money(l.p.price * l.qty, l.p.currency) + '</span></li>'; }).join('');
-    } else {
-      $('#lines').innerHTML = '<li class="empty">Nothing chosen yet.</li>';
-    }
-    $('#total').textContent = money(total, cur); $('#totalBar').textContent = money(total, cur);
-    /* Their own contents list for the chosen board, split at the commas. */
-    var desc = state.chosen && state.chosen.description ? state.chosen.description.replace(/\.$/, '') : '';
-    $('#contents').hidden = !desc;
-    if (desc) $('#contentsList').innerHTML = desc.split(/,\s*/).map(function (x) { return '<li>' + x.charAt(0).toUpperCase() + x.slice(1) + '</li>'; }).join('');
-    /* Steps */
-    var s1 = !!state.chosen;
-    var s2 = s1 && !!$('#date').value && (state.ful !== 'delivery' || $('#address').value.trim().length > 4);
-    var s3 = s2 && $('#name').value.trim() && $('#phone').value.trim().length >= 9 && !!state.payBy;
-    var li = document.querySelectorAll('#steps li');
-    li[0].className = s1 ? 'done' : 'now';
-    li[1].className = s2 ? 'done' : (s1 ? 'now' : '');
-    li[2].className = s3 ? 'done' : (s2 ? 'now' : '');
-    var label = total ? 'Place order · ' + money(total, cur) : 'Place order';
-    $('#place').textContent = label; $('#placeBar').textContent = label;
-    $('#place').disabled = !s1; $('#placeBar').disabled = !s1;
+    document.getElementById('picks').innerHTML = h + '</tbody>';
+    var hasBoard = ls.some(function (l) { return l.p.board; });
+    document.getElementById('pickTitle').hidden = hasBoard;
+    document.getElementById('more').hidden = !hasBoard || open;
+    document.getElementById('picks').hidden = hasBoard && !open;
+    var bottles = F.products.filter(function (p) { return !p.board; });
+    document.getElementById('bottlesQ').hidden = !bottles.length;
+    document.getElementById('bottles').innerHTML = bottles.map(function (p) {
+      var on = (o.cart[p.id] || 0) > 0;
+      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add') + '</button></li>';
+    }).join('');
+    var ok = ls.some(function (l) { return l.p.board; });
+    ['go', 'go2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', String(!ok)); });
+    BB.paint(F, o);
   }
-
-  /* ------------------------------------------------------------- place -- */
-  function place() {
-    $('#errBoard').textContent = ''; $('#errWhen').textContent = ''; $('#errYou').textContent = '';
-    if (!state.chosen) { $('#errBoard').textContent = 'Pick a board first.'; $('#step-board').scrollIntoView(); return; }
-    if (!$('#date').value) { $('#errWhen').textContent = 'Pick a day.'; $('#step-when').scrollIntoView(); return; }
-    if (state.ful === 'delivery' && $('#address').value.trim().length < 5) { $('#errWhen').textContent = 'Where should it go?'; $('#step-when').scrollIntoView(); return; }
-    if (!$('#name').value.trim() || $('#phone').value.trim().length < 9) { $('#errYou').textContent = 'Your name and a mobile number, so we can confirm with you.'; $('#step-you').scrollIntoView(); return; }
-    if (!state.payBy) { $('#errYou').textContent = 'Choose how you will pay.'; $('#step-you').scrollIntoView(); return; }
-    var win = null;
-    if (!$('#windowWrap').hidden && $('#window').value) { var parts = $('#window').value.split('|'); win = { weekday: new Date($('#date').value + 'T12:00:00').getDay(), start: parts[0], end: parts[1] }; }
-    var body = {
-      lines: lines().map(function (l) { return { product_id: l.p.id, qty: l.qty }; }),
-      fulfilment: state.ful, date: $('#date').value, window: win,
-      address: state.ful === 'delivery' ? $('#address').value.trim() : null,
-      customer_name: $('#name').value.trim(), customer_phone: $('#phone').value.trim(),
-      customer_email: $('#email').value.trim() || null, notes: $('#notes').value.trim(), pay_by: state.payBy,
-    };
-    $('#place').disabled = true; $('#placeBar').disabled = true; $('#place').textContent = 'Sending…';
-    fetch(API + '/marketplace/order-form/' + state.gig.id + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
-      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.detail || 'Could not place the order'); return j; }); })
-      .then(function (j) {
-        var ls = lines();
-        $('#doneWhat').textContent = ls.map(function (l) { return (l.qty > 1 ? l.qty + ' × ' : '') + l.p.name; }).join(', ') + ' · ' + money(j.total || 0, j.currency || 'USD') + '.';
-        $('#doneWhen').textContent = (state.ful === 'delivery' ? 'Delivery to ' + $('#address').value.trim() : 'Collect in Jerusalem') + ', ' + $('#date').value + '.';
-        $('#track').href = APP + '/orders/track/' + j.track_token;
-        document.body.classList.add('is-done'); window.scrollTo(0, 0);
-      })
-      .catch(function (e) { $('#errYou').textContent = e.message; $('#place').disabled = false; $('#placeBar').disabled = false; paint(); });
-  }
-  $('#place').addEventListener('click', place); $('#placeBar').addEventListener('click', place);
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-inc],[data-dec],[data-toggle],[data-bottle]'); if (!t || !F) return;
+    var id = t.dataset.inc || t.dataset.dec || t.dataset.toggle || t.dataset.bottle, was = o.cart[id] || 0;
+    if (t.dataset.inc) o.cart[id] = Math.min(20, was + 1);
+    if (t.dataset.dec) o.cart[id] = Math.max(0, was - 1);
+    if (t.dataset.toggle || t.dataset.bottle) o.cart[id] = was ? 0 : 1;
+    if (!o.cart[id]) delete o.cart[id];
+    BB.save(o); paint();
+  });
+  BB.form().then(function (f) {
+    F = f;
+    // Arrived from a board on the home page: that board, in the order.
+    var want = new URLSearchParams(location.search).get('board');
+    if (want) { var w = F.products.filter(function (p) { return p.short === want; })[0]; if (w && !o.cart[w.id]) { o.cart[w.id] = 1; BB.save(o); } }
+    paint();
+  }).catch(function () { document.getElementById('err').textContent = 'Could not load the boards. Please refresh the page.'; });
 })();
 </script>
 </body>

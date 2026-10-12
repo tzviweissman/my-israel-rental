@@ -1,0 +1,118 @@
+<!doctype html>
+<!-- Blazin' Boards, boards.html. Written by gen/pages.py. -->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Every board · Blazin' Boards</title>
+<meta name="description" content="Every Blazin' Boards meat board, drawn to its real size, with its price and what is on it. Wine and whisky to add. Orders 48 hours ahead.">
+<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mv5kwb1z">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mv5kwb1z">
+</head>
+<body>
+<nav class="nav" aria-label="Blazin' Boards">
+  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv5kwb1z" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
+  <ul class="menu">
+    <li><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-0">Home</a></li>
+    <li><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-0">Every board</a></li>
+    <li><a href="/business/blazin-boards/order" data-mir-key="t-c5c09523-0">Your order</a></li>
+  </ul>
+  <a class="cart" href="/business/blazin-boards/order" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span data-mir-key="t-d988a500-0">Order</span><b data-count hidden data-mir-key="t-266f6835-0">0</b></a>
+</nav>
+
+<main>
+  <header class="wrap shop-head">
+    <p class="eyebrow" data-mir-key="t-89a787ea-0">Every board</p>
+    <h1 data-mir-key="t-004f6fad-0">Every board, <em>drawn to its real size.</em></h1>
+    <p data-mir-key="t-98226ddb-0">Premium meats, cooked and grilled to perfection. Two lines at each size: the Blazin' line adds chicken and sticky beef bites, the Premium Steak line is all steak. Prices in US dollars.</p>
+    <p class="scale-note" data-mir-key="t-9e452016-0">Every board below is our own board, shown at its true size against the others. What goes on each one is listed under it.</p>
+    <div class="chips filters" role="group" aria-label="Show">
+      <button type="button" class="chip" data-show="all" aria-pressed="true" data-mir-key="t-7c6daf94-0">All boards</button>
+      <button type="button" class="chip" data-show="blazin" aria-pressed="false" data-mir-key="t-6829743f-0">Blazin' line</button>
+      <button type="button" class="chip" data-show="premium" aria-pressed="false" data-mir-key="t-420de04a-0">Premium Steak line</button>
+      <button type="button" class="chip" data-show="special" aria-pressed="false" data-mir-key="t-ec6e8492-0">Specials</button>
+    </div>
+  </header>
+  <section class="wrap" aria-label="The boards">
+    <ul class="grid-boards" id="boards"><li class="bcard" style="padding:2rem;color:var(--soft)" data-mir-key="t-59b567ef-0">Loading the boards…</li></ul>
+    <p class="errline" id="err"></p>
+  </section>
+  <section class="sec" id="bottles-sec" hidden>
+    <div class="wrap">
+      <p class="eyebrow" data-mir-key="t-0985eaff-0">Add a bottle</p>
+      <h2 data-mir-key="t-c84af358-0">Wine and whisky, to go with your board.</h2>
+      <ul class="bottles" id="bottles"></ul>
+    </div>
+  </section>
+  <section class="sec">
+    <div class="wrap">
+      <p class="eyebrow" data-mir-key="t-2f65a0ae-0">Good to know</p>
+      <h2 data-mir-key="t-9bbb7361-0">Before you order</h2>
+      <dl class="facts">
+        <div><dt data-mir-key="t-de6dc408-0">Notice</dt><dd data-mir-key="t-bdafeefb-0">Orders 48 hours ahead.</dd></div>
+        <div><dt data-mir-key="t-1ab297f3-0">Delivery</dt><dd data-mir-key="t-6adc1c58-0">Collect in Jerusalem, or delivery throughout Israel.</dd></div>
+        <div><dt data-mir-key="t-8aae8311-0">On request</dt><dd data-mir-key="t-35cf8fad-0">Gluten-free and soy-free boards.</dd></div>
+        <div><dt data-mir-key="t-3eab3ead-0">Paying</dt><dd data-mir-key="t-02a14ae4-0">You pay us directly, by <span data-ways>card, Zelle or bank transfer</span>.</dd></div>
+      </dl>
+      <p style="margin-top:2rem"><a class="cta" href="/business/blazin-boards/order" data-mir-key="t-c5dc0dbf-0">Go to your order</a></p>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span data-mir-key="t-005089e7-0">Blazin' Boards · premium meat boards, Jerusalem · orders 48 hours ahead</span>
+  <nav><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-1">Home</a><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-1">Every board</a><a href="/business/blazin-boards/order" data-mir-key="t-af6f86d3-0">Order</a><a href="https://myisraelrental.com/businesses" data-mir-key="t-6fde72b8-0">Listed on MyIsraelRental</a></nav>
+</footer>
+<script src="/pages/blazin-boards/site.js?v=mv5kwb1z"></script>
+<script>
+(function () {
+  var o = BB.load(), F = null, show = 'all';
+  var PX = 4.6; /* one pixels-per-centimetre for every card, so the sizes compare */
+  function card(p) {
+    var q = o.cart[p.id] || 0;
+    var stage = p.cm
+      ? '<div class="stage"><img class="board" src="/pages/blazin-boards/assets/board-cut-m.webp?v=mv5kwb1z" alt="" width="1000" height="815" loading="lazy" style="width:' + (p.cm[1] * PX / 0.98).toFixed(0) + 'px"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
+      : '<div class="stage"><span style="font-weight:700;color:var(--gold-text)">Size on request</span></div>';
+    return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + stage
+      + '<div class="body"><span class="line">' + BB.LINES[p.line] + '</span><h3>' + BB.esc(p.short) + '</h3>'
+      + '<span class="price">' + BB.money(p.price, p.currency) + '</span>'
+      + (p.what ? '<p class="what">' + BB.esc(p.what) + '</p>' : '')
+      + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '')
+      + '<div class="add">' + (q
+        ? '<span class="stepper"><button type="button" data-dec="' + p.id + '" aria-label="One fewer">−</button><output>' + q + '</output><button type="button" data-inc="' + p.id + '" aria-label="One more">+</button></span><a class="ghost" href="/business/blazin-boards/order">Order</a>'
+        : '<button type="button" class="cta" data-inc="' + p.id + '">Add to order</button>')
+      + '</div></div></li>';
+  }
+  function paint() {
+    var boards = F.products.filter(function (p) { return p.board && (show === 'all' || p.line === show); });
+    boards.sort(function (a, b) { return a.price - b.price; });
+    document.getElementById('boards').innerHTML = boards.map(card).join('');
+    var bottles = F.products.filter(function (p) { return !p.board; });
+    document.getElementById('bottles-sec').hidden = !bottles.length;
+    document.getElementById('bottles').innerHTML = bottles.map(function (p) {
+      var on = (o.cart[p.id] || 0) > 0;
+      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add') + '</button></li>';
+    }).join('');
+    BB.paint(F, o);
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-inc],[data-dec],[data-bottle],[data-show]'); if (!t || !F) return;
+    if (t.dataset.show) { show = t.dataset.show; document.querySelectorAll('[data-show]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); }); paint(); return; }
+    var id = t.dataset.inc || t.dataset.dec || t.dataset.bottle;
+    var p = F.products.filter(function (x) { return x.id === id; })[0];
+    var was = o.cart[id] || 0;
+    if (t.dataset.inc) o.cart[id] = Math.min(20, was + 1);
+    if (t.dataset.dec) o.cart[id] = Math.max(0, was - 1);
+    if (t.dataset.bottle) o.cart[id] = was ? 0 : 1;
+    if (!o.cart[id]) delete o.cart[id];
+    BB.save(o); paint();
+    if ((o.cart[id] || 0) > was) BB.toast((p ? p.short : 'Added') + ' added. Total ' + BB.money(BB.total(F, o), BB.cur(F)), '/business/blazin-boards/order', 'Go to order');
+  });
+  BB.form().then(function (f) { F = f; paint(); }).catch(function () { document.getElementById('err').textContent = 'Could not load the boards. Please refresh the page.'; });
+})();
+</script>
+</body>
+</html>

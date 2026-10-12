@@ -1,0 +1,122 @@
+<!doctype html>
+<!-- Blazin' Boards, order-details.html. Written by gen/pages.py. -->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your details · Blazin' Boards</title>
+<meta name="description" content="Your name, how to reach you and how you will pay. Then place your order.">
+<link rel="icon" href="assets/their-logo-small.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<nav class="nav" aria-label="Blazin' Boards">
+  <a class="nav__mark" href="index.html"><img src="assets/their-logo-small.png" alt="" width="120" height="120"> Blazin' Boards</a>
+  <ul class="menu">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="boards.html">Every board</a></li>
+    <li><a href="order.html">Your order</a></li>
+  </ul>
+  <a class="cart" href="order.html" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span>Order</span><b data-count hidden>0</b></a>
+</nav>
+
+<main class="order">
+  <div class="wrap">
+    <ol class="steps" aria-label="Order steps"><li class="is-done"><a class="st" href="order.html">Step 1: Your boards</a></li><li class="is-done"><a class="st" href="order-when.html">Step 2: When and where</a></li><li class="is-now" aria-current="step"><span class="st">Step 3: Your details</span></li></ol>
+    <div class="cols">
+      <section class="pane">
+        <h1>Your <em>details.</em></h1>
+        <p class="sub">So we can confirm your order with you. We share it with no one else.</p>
+        <div class="q two">
+          <div class="field" id="f-name"><label for="name">Your name</label><input id="name" autocomplete="name" maxlength="120"><span class="err">Add your name.</span></div>
+          <div class="field" id="f-phone"><label for="phone">Mobile</label><input id="phone" type="tel" autocomplete="tel" inputmode="tel" placeholder="05x-xxx-xxxx" maxlength="40"><span class="err">A mobile number, so we can confirm with you.</span></div>
+        </div>
+        <div class="q">
+          <div class="field"><label for="email">Email, for your confirmation <span class="hint">(optional)</span></label><input id="email" type="email" autocomplete="email" maxlength="200"></div>
+        </div>
+        <div class="q">
+          <div class="field"><label for="notes">Anything we should know? <span class="hint">(optional) Gluten-free and soy-free boards are available on request.</span></label><textarea id="notes" maxlength="1000"></textarea></div>
+        </div>
+        <div class="q" id="f-pay">
+          <h2>How will you pay?</h2>
+          <div class="chips" id="payBy" role="group" aria-label="How you will pay"></div>
+          <p class="errline" id="payErr" hidden>Choose how you will pay.</p>
+        </div>
+        <dl class="rev" id="rev"></dl>
+        <p class="errline" id="err"></p>
+        <div class="next"><button type="button" class="cta" id="place">Place order</button><a class="back" href="order-when.html">Back</a></div>
+      </section>
+      <aside class="summary" aria-label="Your order" aria-live="polite">
+        <div class="who"><img src="assets/their-logo-small.png" alt=""><div><b>Your order</b><small>Blazin' Boards · Jerusalem</small></div></div>
+        <ul class="lines" data-lines data-full></ul>
+        <div class="total"><span>Total</span><b data-total>$0</b></div>
+        <ul class="promise">
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>You pay us directly, by <span data-ways>card, Zelle or bank transfer</span>. Nothing is paid on this site.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>We confirm your order with you first.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Orders 48 hours ahead.</span></li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</main>
+<div class="dock"><div><small>Total</small><b data-total>$0</b></div><button type="button" class="cta" id="place2">Place order</button></div>
+
+<script src="site.js"></script>
+<script>
+(function () {
+  var o = BB.load(), F = null, $ = function (id) { return document.getElementById(id); };
+  if (!BB.count(o)) { location.replace('order.html'); return; }
+  if (!o.date) { location.replace('order-when.html'); return; }
+  ['name', 'phone', 'email', 'notes'].forEach(function (k) {
+    $(k).value = o[k] || '';
+    $(k).addEventListener('input', function () { o[k] = $(k).value.trim(); var f = $('f-' + k); if (f) f.classList.remove('is-bad'); BB.save(o); });
+  });
+  function paint() {
+    $('payBy').innerHTML = (F.ways || []).map(function (w) { return '<button type="button" class="chip" data-pay="' + BB.esc(w) + '" aria-pressed="' + (o.payBy === w) + '">' + BB.esc(w.charAt(0).toUpperCase() + w.slice(1)) + '</button>'; }).join('');
+    var ls = BB.lines(F, o);
+    $('rev').innerHTML = '<div><dt>Your order</dt><dd>' + ls.map(function (l) { return (l.qty > 1 ? l.qty + ' × ' : '') + BB.esc(l.p.short); }).join('<br>') + '<br><a class="back" href="order.html">Change</a></dd></div>'
+      + '<div><dt>When</dt><dd>' + BB.esc(BB.when(o)) + '<br><a class="back" href="order-when.html">Change</a></dd></div>'
+      + '<div><dt>How</dt><dd>' + BB.esc(BB.where(o)) + '</dd></div>';
+    var label = 'Place order · ' + BB.money(BB.total(F, o), BB.cur(F));
+    $('place').textContent = label; $('place2').textContent = 'Place order';
+    BB.paint(F, o);
+  }
+  $('payBy').addEventListener('click', function (e) { var b = e.target.closest('[data-pay]'); if (!b) return; o.payBy = b.dataset.pay; $('payErr').hidden = true; BB.save(o); paint(); });
+  function place() {
+    var bad = [];
+    if (!o.name || o.name.length < 2) bad.push('f-name');
+    if (!o.phone || o.phone.replace(/\D/g, '').length < 9) bad.push('f-phone');
+    bad.forEach(function (id) { $(id).classList.add('is-bad'); });
+    $('payErr').hidden = !!o.payBy;
+    if (bad.length || !o.payBy) { var first = bad.length ? $(bad[0]).querySelector('input') : $('payBy'); first.scrollIntoView({ block: 'center', behavior: 'smooth' }); if (first.focus) first.focus({ preventScroll: true }); return; }
+    var win = null;
+    if (o.window) { var w = o.window.split('|'); win = { weekday: new Date(o.date + 'T12:00:00').getDay(), start: w[0], end: w[1] }; }
+    var body = {
+      lines: BB.lines(F, o).map(function (l) { return { product_id: l.p.id, qty: l.qty }; }),
+      fulfilment: o.ful, date: o.date, window: win, address: o.ful === 'delivery' ? o.address : null,
+      customer_name: o.name, customer_phone: o.phone, customer_email: o.email || null, notes: o.notes || '', pay_by: o.payBy
+    };
+    ['place', 'place2'].forEach(function (id) { $(id).disabled = true; $(id).classList.add('is-busy'); $(id).textContent = 'Placing your order'; });
+    fetch(BB.API + '/marketplace/order-form/' + F.gig.id + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.detail || 'Could not place the order'); return j; }); })
+      .then(function (j) {
+        var done = { lines: BB.lines(F, o).map(function (l) { return [(l.qty > 1 ? l.qty + ' × ' : '') + l.p.short, BB.money(l.p.price * l.qty, l.p.currency)]; }),
+          total: BB.money(j.total || BB.total(F, o), j.currency || BB.cur(F)), when: BB.when(o), how: BB.where(o), pay: o.payBy, track: BB.APP + '/orders/track/' + j.track_token };
+        try { sessionStorage.setItem('bb-done', JSON.stringify(done)); } catch (e) { /* fine */ }
+        o.cart = {}; BB.save(o);
+        location.href = 'order-done.html';
+      })
+      .catch(function (e) {
+        $('err').textContent = e.message;
+        ['place', 'place2'].forEach(function (id) { $(id).disabled = false; $(id).classList.remove('is-busy'); }); paint();
+      });
+  }
+  $('place').addEventListener('click', place); $('place2').addEventListener('click', place);
+  BB.form().then(function (f) { F = f; paint(); }).catch(function () { $('err').textContent = 'Could not load your order. Please refresh the page.'; });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,114 @@
+<!doctype html>
+<!-- Blazin' Boards, order-when.html. Written by gen/pages.py. -->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>When and where · Blazin' Boards</title>
+<meta name="description" content="Collect in Jerusalem or have it delivered, and the day you need it.">
+<link rel="icon" href="assets/their-logo-small.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<nav class="nav" aria-label="Blazin' Boards">
+  <a class="nav__mark" href="index.html"><img src="assets/their-logo-small.png" alt="" width="120" height="120"> Blazin' Boards</a>
+  <ul class="menu">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="boards.html">Every board</a></li>
+    <li><a href="order.html">Your order</a></li>
+  </ul>
+  <a class="cart" href="order.html" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span>Order</span><b data-count hidden>0</b></a>
+</nav>
+
+<main class="order">
+  <div class="wrap">
+    <ol class="steps" aria-label="Order steps"><li class="is-done"><a class="st" href="order.html">Step 1: Your boards</a></li><li class="is-now" aria-current="step"><span class="st">Step 2: When and where</span></li><li class=""><span class="st">Step 3: Your details</span></li></ol>
+    <div class="cols">
+      <section class="pane">
+        <h1>When and <em>where?</em></h1>
+        <p class="sub">We need 48 hours' notice.</p>
+        <div class="q">
+          <h2>Collect or deliver</h2>
+          <div class="chips" role="group" aria-label="Collect or deliver">
+            <button type="button" class="chip" data-ful="pickup" aria-pressed="true">Collect in Jerusalem</button>
+            <button type="button" class="chip" data-ful="delivery" aria-pressed="false" hidden>Deliver to me</button>
+          </div>
+        </div>
+        <div class="q">
+          <h2>Which day?</h2>
+          <div class="two">
+            <div class="field" id="f-date"><label for="date">Needed on</label><input type="date" id="date"><span class="hint">The earliest day is two days from today.</span><span class="err">Choose a day, two days from today or later, not Shabbos.</span></div>
+            <div class="field" id="f-window" hidden><label for="window">Time</label><select id="window"></select></div>
+          </div>
+        </div>
+        <div class="q" id="addrQ" hidden>
+          <div class="field" id="f-address"><label for="address">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, number, city, plus floor or entrance" maxlength="400"><span class="err">Where should it go?</span></div>
+        </div>
+        <p class="errline" id="err"></p>
+        <div class="next"><a class="cta" id="go" href="order-details.html">Continue</a><a class="back" href="order.html">Back</a></div>
+      </section>
+      <aside class="summary" aria-label="Your order" aria-live="polite">
+        <div class="who"><img src="assets/their-logo-small.png" alt=""><div><b>Your order</b><small>Blazin' Boards · Jerusalem</small></div></div>
+        <ul class="lines" data-lines data-full></ul>
+        <div class="total"><span>Total</span><b data-total>$0</b></div>
+        <ul class="promise">
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>You pay us directly, by <span data-ways>card, Zelle or bank transfer</span>. Nothing is paid on this site.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>We confirm your order with you first.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Orders 48 hours ahead.</span></li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</main>
+<div class="dock"><div><small>Total</small><b data-total>$0</b></div><a class="cta" id="go2" href="order-details.html">Continue</a></div>
+
+<script src="site.js"></script>
+<script>
+(function () {
+  var o = BB.load(), F = null, $ = function (id) { return document.getElementById(id); };
+  if (!BB.count(o)) { location.replace('order.html'); return; }
+  var min = new Date(); min.setDate(min.getDate() + BB.NOTICE_DAYS);
+  $('date').min = min.toISOString().slice(0, 10);
+  $('date').value = o.date || ''; $('address').value = o.address || '';
+  function windows() {
+    var wins = [];
+    if (o.date && F) {
+      var wd = new Date(o.date + 'T12:00:00').getDay();
+      wins = ((F.settings || {})[o.ful + '_windows'] || []).filter(function (w) { return parseInt(w.weekday, 10) === wd; });
+    }
+    $('f-window').hidden = !wins.length;
+    $('window').innerHTML = wins.map(function (w) { var v = w.start + '|' + w.end; return '<option value="' + v + '"' + (o.window === v ? ' selected' : '') + '>' + w.start + ' to ' + w.end + '</option>'; }).join('');
+    o.window = wins.length ? $('window').value : '';
+  }
+  function paint() {
+    document.querySelectorAll('[data-ful]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.ful === b.dataset.ful)); });
+    $('addrQ').hidden = o.ful !== 'delivery';
+    windows(); BB.save(o); if (F) BB.paint(F, o);
+  }
+  document.querySelectorAll('[data-ful]').forEach(function (b) { b.addEventListener('click', function () { o.ful = b.dataset.ful; paint(); }); });
+  $('date').addEventListener('change', function () { o.date = $('date').value; $('f-date').classList.remove('is-bad'); paint(); });
+  $('window').addEventListener('change', function () { o.window = $('window').value; BB.save(o); BB.paint(F, o); });
+  $('address').addEventListener('input', function () { o.address = $('address').value.trim(); $('f-address').classList.remove('is-bad'); BB.save(o); if (F) BB.paint(F, o); });
+  function check(e) {
+    var bad = [];
+    // No Shabbos: a kosher kitchen's boards, and the earliest day is 48 hours out.
+    if (!o.date || o.date < $('date').min || new Date(o.date + 'T12:00:00').getDay() === 6) bad.push('f-date');
+    if (o.ful === 'delivery' && (o.address || '').length < 5) bad.push('f-address');
+    bad.forEach(function (id) { $(id).classList.add('is-bad'); });
+    if (bad.length) { e.preventDefault(); var el = $(bad[0]).querySelector('input'); el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+  }
+  $('go').addEventListener('click', check); $('go2').addEventListener('click', check);
+  BB.form().then(function (f) {
+    F = f;
+    if (F.settings && F.settings.delivery_on) document.querySelector('[data-ful="delivery"]').hidden = false;
+    else o.ful = 'pickup';
+    paint();
+  });
+  paint();
+})();
+</script>
+</body>
+</html>

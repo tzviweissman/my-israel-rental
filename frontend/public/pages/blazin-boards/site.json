@@ -1,0 +1,26 @@
+[
+  {
+    "page": "index",
+    "title": "Home"
+  },
+  {
+    "page": "boards",
+    "title": "Every board"
+  },
+  {
+    "page": "order",
+    "title": "Your order"
+  },
+  {
+    "page": "order-details",
+    "title": "Your details"
+  },
+  {
+    "page": "order-done",
+    "title": "Order placed"
+  },
+  {
+    "page": "order-when",
+    "title": "When and where"
+  }
+]
