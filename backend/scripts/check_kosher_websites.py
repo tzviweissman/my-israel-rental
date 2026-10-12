@@ -192,9 +192,33 @@ def contact_from(raw, url):
     return out
 
 
-async def read_site(http, url):
+CERT_IMG_HINT = re.compile(r'(תעודת|כשרות|כשר|kosher|kashrut|certificate|teuda|rabanut|rabbanut|badatz|השגחה|%D7%9B%D7%A9%D7%A8)', re.I)
+
+
+def certificate_images(base, raw):
+    """Pictures that may be the kashrut certificate: the file name or alt
+    text says so, the page is a kashrut page, or the words "kashrut
+    certificate" sit right beside it. Logos, icons and svg are skipped.
+    Static HTML only: a site that builds its page in the browser shows none."""
+    out = []
+    page_hint = CERT_IMG_HINT.search(base)
+    for m in re.finditer(r'(?is)<img[^>]+>', raw):
+        tag = m.group(0)
+        src = re.search(r'(?:data-lazy-src|data-src|src)=["\']([^"\']+)["\']', tag)
+        if not src or re.search(r'\.(svg|gif)(\?|$)|logo|icon|^data:', src.group(1), re.I):
+            continue
+        near = raw[max(0, m.start() - 1500): m.end() + 1500]
+        if page_hint or CERT_IMG_HINT.search(tag) or re.search(r'(תעודת כשרות|תעודת השגחה|kosher certificate)', near, re.I):
+            u = urljoin(base, src.group(1))
+            if u not in out:
+                out.append(u)
+    return out
+
+
+async def read_site(http, url, images=None):
     """Home page plus up to three linked pages that look like kashrut/about.
-    Returns (texts, contact)."""
+    Returns (texts, contact). Pass a list as `images` to collect pictures
+    that may be the certificate."""
     texts, contact = [], None
     try:
         r = await http.get(url)
@@ -204,6 +228,8 @@ async def read_site(http, url):
         texts.append(page_text(raw))
         contact = contact_from(raw, str(r.url))
         base = str(r.url)
+        if images is not None:
+            images += [u for u in certificate_images(base, raw) if u not in images]
         host = urlparse(base).netloc
         links = []
         for href, label in re.findall(r'(?is)<a[^>]+href=["\']([^"\'#]+)["\'][^>]*>(.*?)</a>', raw):
@@ -215,6 +241,8 @@ async def read_site(http, url):
                 p = await http.get(link)
                 if p.status_code < 400:
                     texts.append(page_text(p.text[:2_000_000]))
+                    if images is not None:
+                        images += [u for u in certificate_images(str(p.url), p.text[:2_000_000]) if u not in images]
             except httpx.HTTPError:
                 pass
     except httpx.HTTPError:
@@ -222,9 +250,54 @@ async def read_site(http, url):
     return texts, contact
 
 
-async def check_one(client, http, doc, known=None):
+CERT_MODEL = "claude-sonnet-5-5"
+CERT_PROMPT = """Is this image a kashrut (kosher) certificate for a food business? Reply with JSON only:
+{"is_certificate": true/false, "business": name on it or null, "certifier": the certifying body as written
+(e.g. "הרבנות הראשית תל אביב-יפו", "בד\"ץ בית יוסף", "ארגון רבני צהר", "OU") or null,
+"mehadrin": true if it says mehadrin/מהדרין else false, "kashrut": "meat"|"dairy"|"pareve"|null,
+"valid_until": "YYYY-MM-DD" or null}"""
+
+
+async def read_certificate(http, url):
+    """Claude reads one picture (about a cent). Returns the fields above, or
+    None when it is not a certificate or cannot be read."""
+    import base64
+    import json
+    from anthropic import AsyncAnthropic
+    try:
+        r = await http.get(url)
+    except httpx.HTTPError:
+        return None
+    kind = r.headers.get("content-type", "").split(";")[0]
+    if r.status_code >= 400 or kind not in ("image/jpeg", "image/png", "image/webp") or not 15_000 < len(r.content) < 5_000_000:
+        return None
+    msg = await AsyncAnthropic().messages.create(model=CERT_MODEL, max_tokens=300, messages=[{"role": "user", "content": [
+        {"type": "image", "source": {"type": "base64", "media_type": kind, "data": base64.b64encode(r.content).decode()}},
+        {"type": "text", "text": CERT_PROMPT}]}])
+    m = re.search(r'\{.*\}', "".join(b.text for b in msg.content if b.type == "text"), re.S)
+    try:
+        out = json.loads(m.group(0)) if m else None
+    except ValueError:
+        return None
+    return out if out and out.get("is_certificate") and out.get("certifier") else None
+
+
+def label_certificate(cert):
+    """Our label for what a certificate says: the same names the text check
+    uses, or the body as written when it is none of them."""
+    words = f"{cert['certifier']} kosher {'מהדרין' if cert.get('mehadrin') else ''}"
+    for pat, name in CERTIFIERS:
+        if re.search(pat, words, re.I):
+            return name
+    return cert["certifier"].strip()[:60]
+
+
+async def check_one(client, http, doc, known=None, read_certs=False):
     """`known` = (name, website) already fetched with a search; otherwise one
-    Place Details call gets them."""
+    Place Details call gets them. `read_certs`: when the site says kosher
+    without naming who (or says nothing), have Claude read up to three
+    pictures that may be the certificate (Tzvi, 12 Oct 2026). An expired
+    certificate does not count."""
     if known is None:
         data = await client._post(DETAILS_URL.format(doc["place_id"]), None, "displayName,websiteUri", method="GET")
         name = (data.get("displayName") or {}).get("text", "")
@@ -233,18 +306,30 @@ async def check_one(client, http, doc, known=None):
         name, site = known
     texts = [name]
     source = "name"
-    contact = None
+    contact, images, certificate = None, [], None
     if site and not any(s in site for s in SOCIAL):
-        pages, contact = await read_site(http, site)
+        pages, contact = await read_site(http, site, images)
         texts += pages
         source = "website"
     verdict, cert, kashrut, snippet = classify(texts)
     if verdict == "certified" and classify([name])[0] == "certified":
         source = "name"
+    if read_certs and verdict in ("kosher_unnamed", "no_evidence"):
+        today = datetime.now(UTC).date().isoformat()
+        for url in images[:3]:
+            c = await read_certificate(http, url)
+            if c and (c.get("valid_until") or "9999") >= today:
+                certificate = {"url": url, "business": c.get("business"), "certifier": c["certifier"],
+                               "valid_until": c.get("valid_until")}
+                verdict, cert, source = "certified", label_certificate(c), "certificate_image"
+                kashrut = c.get("kashrut") if c.get("kashrut") in ("meat", "dairy", "pareve") else kashrut
+                snippet = f"Certificate: {c['certifier']}" + (f", valid until {c['valid_until']}" if c.get("valid_until") else "")
+                break
     now = datetime.now(UTC).isoformat()
     await db.restaurants.update_one({"_id": doc["_id"]}, {"$set": {
         "kosher_check": {"verdict": verdict, "source": source if verdict != "no_evidence" else None,
-                         "had_website": bool(site), "snippet": snippet, "checked_at": now},
+                         "had_website": bool(site), "snippet": snippet, "checked_at": now,
+                         "certificate": certificate},
         "kosher_certification": cert,
         "kashrut": kashrut,
         "status": "listed" if verdict == "certified" else "hidden",
@@ -307,6 +392,10 @@ async def main():
     ap.add_argument("--max-requests", type=int, default=1000)
     ap.add_argument("--only-cert", help="recheck only places read as this certifier")
     ap.add_argument("--only-listed", action="store_true", help="recheck only listed places (to read contacts)")
+    ap.add_argument("--read-certificates", action="store_true",
+                    help="have Claude read certificate pictures when the text names no certifier (~1c each)")
+    ap.add_argument("--certificates-only", action="store_true",
+                    help="only places held back as 'kosher, no certifier' that have a website: no Google calls")
     a = ap.parse_args()
     cities = a.city or list(CITIES)
     q = {"city": {"$in": cities}}
@@ -316,8 +405,11 @@ async def main():
         q["kosher_certification"] = a.only_cert
     elif not a.recheck:
         q["kosher_check"] = {"$exists": False}
-    docs = await db.restaurants.find(q, {"place_id": 1}).to_list(None)
-    print(f"{len(docs)} place(s) to check in {', '.join(cities)}; one Google call each")
+    if a.certificates_only:
+        q = {"city": {"$in": cities}, "kosher_check.verdict": "kosher_unnamed", "contact.website": {"$nin": [None, ""]}}
+        a.read_certificates = True
+    docs = await db.restaurants.find(q, {"place_id": 1, "contact": 1}).to_list(None)
+    print(f"{len(docs)} place(s) to check in {', '.join(cities)}" + ("" if a.certificates_only else "; one Google call each"))
     if a.dry_run:
         print("dry run: nothing fetched")
         return
@@ -341,7 +433,8 @@ async def main():
     async def one(d):
         async with sem:
             try:
-                v, c, name, had = await check_one(client, http, d)
+                known = (((d.get("contact") or {}).get("name_en") or ""), d["contact"]["website"]) if a.certificates_only else None
+                v, c, name, had = await check_one(client, http, d, known=known, read_certs=a.read_certificates)
             except Budget:
                 raise
             except Exception as e:  # one bad site never stops the run

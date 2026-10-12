@@ -80,3 +80,13 @@ def test_lunch_is_not_tzohar():
 def test_kosher_or_not_kosher_is_not_a_verdict():
     assert classify(["ללא חשש של כשר או לא כשר", "בהשגחת רבנות תל אביב, כשר למהדרין"])[0] == "certified"
     assert classify(["המסעדה לא כשרה"])[0] == "says_not_kosher"
+
+
+def test_certificate_pictures_are_found_and_labelled():
+    from scripts.check_kosher_websites import certificate_images, label_certificate
+    raw = ('<img src="/logo.png"><img src="/food.jpg"><p>תעודת כשרות</p><img src="/uploads/cert.jpg">'
+           + 'x' * 4000 + '<img src="/far-away.jpg">')
+    assert certificate_images("https://a.co.il/", raw) == ["https://a.co.il/food.jpg", "https://a.co.il/uploads/cert.jpg"]
+    assert certificate_images("https://a.co.il/kashrut/", '<img src="x.jpg">') == ["https://a.co.il/kashrut/x.jpg"]
+    assert label_certificate({"certifier": "ארגון רבני צהר", "mehadrin": False}) == "Tzohar"
+    assert label_certificate({"certifier": "Some Local Vaad", "mehadrin": False}) == "Some Local Vaad"
