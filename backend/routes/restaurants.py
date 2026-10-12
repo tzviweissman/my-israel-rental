@@ -574,10 +574,12 @@ async def restaurant_locations_daily_loop() -> None:
     """Daily at 02:00 UTC: Google lets us keep a place's coordinates for 30
     days, so pins older than 27 are refreshed (listed places) or dropped
     (everything else, or every stale pin when GOOGLE_PLACES_API_KEY is not
-    set). Same shape as standing_orders_daily_loop."""
+    set). Same shape as standing_orders_daily_loop. Then certificates that
+    run out within 30 days are looked for again on the restaurant's site."""
     import asyncio
     import logging
     import os
+    from scripts.check_kosher_websites import refresh_certificates
     from scripts.import_kosher_restaurants import Places, refresh_stale
     while True:
         now = datetime.now(UTC)
@@ -594,3 +596,7 @@ async def restaurant_locations_daily_loop() -> None:
         finally:
             if client:
                 await client.http.aclose()
+        try:
+            logging.getLogger(__name__).info("[restaurants] certificates: %s", await refresh_certificates())
+        except Exception as e:  # noqa: BLE001
+            logging.getLogger(__name__).warning("[restaurants] certificate refresh crashed: %s", e)

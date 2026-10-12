@@ -342,6 +342,52 @@ async def check_one(client, http, doc, known=None, read_certs=False):
     return verdict, cert, name, bool(site)
 
 
+async def refresh_certificates(limit=40):
+    """Daily on the server (routes/restaurants.py): a listed place whose
+    certificate runs out within 30 days, or has, gets its website read again
+    for a newer certificate picture (Tzvi, 12 Oct 2026: "automatically update
+    the kosher certificates when the restaurant updates it"). At most once a
+    week per place; a few cents a run. A newer date replaces the old one, so
+    the card's "Certificate expired" note goes by itself. Nothing found: the
+    place stays listed and the card keeps saying expired."""
+    from datetime import timedelta
+    if not os.environ.get("ANTHROPIC_API_KEY"):
+        return {"skipped": "no ANTHROPIC_API_KEY"}
+    now = datetime.now(UTC)
+    soon = (now + timedelta(days=30)).date().isoformat()
+    week_ago = (now - timedelta(days=7)).isoformat()
+    docs = await db.restaurants.find({
+        "status": "listed", "contact.website": {"$nin": [None, ""]},
+        "kosher_check.certificate.valid_until": {"$ne": None, "$lte": soon},
+        "$or": [{"kosher_check.certificate.rechecked_at": {"$exists": False}},
+                {"kosher_check.certificate.rechecked_at": {"$lt": week_ago}}],
+    }, {"place_id": 1, "contact.website": 1, "kosher_check.certificate": 1, "kashrut": 1}).to_list(limit)
+    renewed = 0
+    async with httpx.AsyncClient(timeout=15, follow_redirects=True, headers={
+            "User-Agent": "Mozilla/5.0 (compatible; MyIsraelRental kashrut check; +https://myisraelrental.com)"}) as http:
+        for d in docs:
+            old = d["kosher_check"]["certificate"]
+            images = []
+            await read_site(http, d["contact"]["website"], images)
+            new = None
+            for url in ([old["url"]] if old.get("url") else []) + [u for u in images if u != old.get("url")][:3]:
+                c = await read_certificate(http, url)
+                if c and (c.get("valid_until") or "") > (old.get("valid_until") or ""):
+                    new = {"url": url, "business": c.get("business"), "certifier": c["certifier"],
+                           "valid_until": c["valid_until"], "rechecked_at": now.isoformat()}
+                    break
+            if new:
+                kashrut = c.get("kashrut") if c.get("kashrut") in ("meat", "dairy", "pareve") else d.get("kashrut")
+                await db.restaurants.update_one({"_id": d["_id"]}, {"$set": {
+                    "kosher_check.certificate": new, "kosher_certification": label_certificate(c), "kashrut": kashrut,
+                    "kosher_check.snippet": f"Certificate: {c['certifier']}, valid until {c['valid_until']}"}})
+                renewed += 1
+            else:
+                await db.restaurants.update_one({"_id": d["_id"]}, {"$set": {
+                    "kosher_check.certificate": {**old, "rechecked_at": now.isoformat()}}})
+    return {"checked": len(docs), "renewed": renewed}
+
+
 SEARCH_FIELDS = "places.id,places.displayName,places.websiteUri,nextPageToken"
 
 
