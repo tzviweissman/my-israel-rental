@@ -65,7 +65,9 @@ CERTIFIERS = [
     (r'(רבנות|rabbanut|rabbinate|chief\s*rabbinate)', "Rabbanut"),
     (r'(בד"?״?ץ|badatz)', "Badatz"),
 ]
-NOT_KOSHER = r'(לא כשר|אינו כשר|not\s+kosher|non[-\s]?kosher)'
+# "Kosher or not kosher" is a figure of speech, not a verdict (Regina, Tel Aviv:
+# "ללא חשש של כשר או לא כשר" held back a Rabbanut-certified restaurant).
+NOT_KOSHER = r'((?<!או )לא כשר|אינו כשר|(?<!or )not\s+kosher|non[-\s]?kosher)'
 KOSHER = r'(כשר|כשרות|השגחה|kosher|kashrut|hashgacha|mehadrin|מהדרין)'
 KASHRUT = [(r'(חלבי|dairy|halavi|chalavi)', "dairy"), (r'(בשרי|meat\s+restaurant|besari|fleishig)', "meat"),
            (r'(פרווה|parve|pareve)', "pareve")]

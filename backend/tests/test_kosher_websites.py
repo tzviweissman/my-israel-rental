@@ -75,3 +75,8 @@ def test_certificate_image_name_is_read():
 def test_lunch_is_not_tzohar():
     assert classify(["ארוחות צהריים כשר"])[0] == "kosher_unnamed"
     assert classify(["כשר בהשגחת צהר"])[1] == "Tzohar"
+
+
+def test_kosher_or_not_kosher_is_not_a_verdict():
+    assert classify(["ללא חשש של כשר או לא כשר", "בהשגחת רבנות תל אביב, כשר למהדרין"])[0] == "certified"
+    assert classify(["המסעדה לא כשרה"])[0] == "says_not_kosher"
