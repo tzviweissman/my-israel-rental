@@ -5,25 +5,36 @@ description: Work through the newest nightly UI audit report — verify each fin
 
 # Audit follow-up
 
-A scheduled task writes a UI audit to `docs/audits/YYYY-MM-DD-ui-audit.md` at 2am
-against the previous day's frontend diff. **It cannot render anything** — no
-network to the live site, no browser binary in its sandbox. You can. That is the
-entire division of labour, and it decides how to read the report.
-
-**The report is a list of suspicions, not a list of facts.** Treat it that way.
+Three cloud routines audit the site (who does what: `docs/audits/README.md`).
+Each starts a local copy of the site in its sandbox, renders and tests what
+it can, fixes up to five small safe things, and pushes its report and fixes
+to its own `claude/<name>-<random>` branch. **Nothing reaches `main` until
+this follow-up merges it.** The report's "Not checked" section says what its
+sandbox could not run; that part is yours.
 
 ---
 
-## 1. Read it
+## 1. Gather the runs
 
 ```bash
-ls -t docs/audits/*.md | head -3
+bash scripts/audit-history.sh                       # all reports, every branch
+git fetch -q origin && git branch -r --sort=-committerdate | grep claude/ | head -8
 ```
 
-Read the newest. If the newest is older than about two days, say so — either
-nothing has changed, or the task has not been running, and the second is worth
-knowing. Also check whether the app was closed at 2am, since the task runs on
-next launch rather than on time.
+For each audit branch newer than the last follow-up, see what it changed
+beyond `docs/audits/`: `git diff origin/main...origin/<branch> --stat`.
+If the newest report is more than two days old, check the routines are
+still running (`RemoteTrigger` list_runs) and say so.
+
+## 1b. Review and merge
+
+- Review every fix commit on the branch as you would a stranger's: read the
+  diff, re-run the check it names, render it if it is visible. A fix you
+  disagree with is reverted on the branch, with the reason, before merging.
+- Then merge the branch into the working branch (report, `open-issues.md`,
+  screenshots and the fixes you kept) and, with Tzvi's go-ahead to push,
+  into `main`. Two runs may both have edited `open-issues.md`: keep every
+  line from both.
 
 ## 2. Verify before you fix. This is the point of the exercise.
 

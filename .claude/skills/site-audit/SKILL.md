@@ -1,20 +1,48 @@
 ---
 name: site-audit
-description: Run a thorough correctness, security, data-integrity, bilingual and visual audit of MyIsraelRental. Use when asked for a code check, bug check, health check, pre-launch review, or a periodic audit. Read-only by default — produces a triaged report with evidence; fixes only what the user approves afterwards.
+description: Nightly code review of MyIsraelRental, and the method for any correctness, security, data-integrity or bilingual check. Use when asked for a code check, bug check, health check, pre-launch review, or a periodic audit. Produces a triaged report with proof for every finding and fixes only small, safe items itself (docs/audits/README.md).
 ---
 
 # Site audit
 
-A repeatable, evidence-driven review of this codebase. **Investigate and report first; do not fix anything until the report is approved.** A silent fix inside an audit hides the finding.
+**Run as the nightly code review, read `docs/audits/README.md` first and
+follow it**: run `scripts/audit-setup.sh` and `scripts/audit-history.sh`,
+confirm every finding, fix only the small safe items it lists, report in its
+shape, update `open-issues.md`, commit and push this run's branch.
+
+**Nightly scope:** the commits of the last 26 hours, outside the visual
+layer: backend routes and models, `frontend/server.js`, scripts that touch
+data, prices, security, tests and the build. How pages *look* is the UI
+audit's area (`.claude/skills/ui-audit`); the whole-site link sweep is
+`dead-ends`. Sections 2 to 4 and 10 below apply nightly only to what the
+day's commits changed in logic (a missing Hebrew key in new code, say), not
+as a visual review. Run the full list only when asked for a full audit.
+
+```bash
+git log --since="26 hours ago" --oneline      # empty: one line, no report, stop
+OLDEST=$(git log --since="26 hours ago" --format=%H | tail -1)
+git diff "${OLDEST}^" HEAD -- backend/ frontend/server.js frontend/src scripts/
+```
 
 ## Rules of engagement
 
-- **Read-only pass first.** No edits, no migrations, no deploys.
 - **Never print secrets.** Check that a variable is *set*, never its value. `cat .env`, `railway variables list` and full env dumps are forbidden.
-- **Never write to production Atlas.** Any query that touches data runs against the local dev database; confirm `backend/.env`'s `MONGO_URL` before running anything.
-- **No `git push`, no Railway deploy.**
-- **Every finding needs evidence** — file and line, a command output, or a screenshot. A finding without evidence is a guess and should be labelled as one.
+- **Never touch production.** Use the local database `audit-setup.sh` started (`MONGO_URL` on 127.0.0.1). Never fetch myisraelrental.com.
+- **No deploy, never push to `main`.** Push only this run's branch.
+- **Fixes only within the README's limits.** Anything touching payments, sign-in, permissions, contracts or stored data is reported, not fixed.
+- **Every finding needs proof**: a failing test, a command's output, or file and line with the exact input that breaks it. A suspicion goes under "Could not confirm".
 - **Prioritise by what has actually broken here**, not by what is theoretically bad. The classes below are ranked by real incidents in this repo.
+
+## 0. Always run
+
+```bash
+(cd backend && DISABLE_RATE_LIMIT=1 .venv/bin/python -m pytest tests -q -p no:randomly 2>&1 | tail -30)
+(cd frontend && CI=false npx craco build 2>&1 | tail -15)
+for t in scripts/test-*.mjs; do node "$t" >/dev/null 2>&1 && echo "ok   $t" || echo "FAIL $t"; done
+```
+
+A test that failed last night and still fails is "still open", not new.
+Tests that skip because a service is missing are "not checked", not passes.
 
 ---
 
@@ -29,10 +57,12 @@ A repeatable, evidence-driven review of this codebase. **Investigate and report 
   python3 backend/scripts/live_price_check.py --out docs/audits/$(date -u +%F)-price-check.md
   ```
 
+  It reads the live site, which the cloud sandbox's proxy blocks; there it prints PRICE CHECK DID NOT RUN, which is expected. Say so in one line under "Not checked" and rely on the parity test below.
+
   It reads only the public list the /stays page loads (no login, no database, nothing written) and flags prices a customer would misread: a monthly rent typed into the nightly box, a per-night holiday price that reads like the whole holiday, a listing with no price at all, and so on. Put its **DATA** findings in the morning summary as a short "worth a call to the owner" list, with the links. Only mention a finding that is new since the last report in `docs/audits/`, so the same flat is not reported every night.
   *(Precedent, 18 Sep 2026: a Sukkot list sent to customers said "$154 / Sukkot" when the owner had said $154 a night. Months of code-reading audits never looked at a real listing. One pass over the live data found that whole family of bugs in minutes.)*
   If the script prints **PRICE CHECK DID NOT RUN**, say so under "Not checked". Never let a check that could not run read as "no problems".
-  Also run `pip install -q pytest && python3 -m pytest backend/tests/test_listing_price_parity.py -q`. It needs no server or database, and it proves the website and the server still price every listing the same way. A failure there is a **High** finding.
+  Also run `(cd backend && .venv/bin/python -m pytest tests/test_listing_price_parity.py -q)`. It needs no server or database, and it proves the website and the server still price every listing the same way. A failure there is a **High** finding.
 
 ## 2. Bilingual completeness
 
@@ -115,13 +145,7 @@ Use the `visual-diff` skill. Screenshots at **1280 / 768 / 375**, in **both LTR 
 
 ## Output
 
-A single report, in this shape:
-
-1. **Summary** — counts by severity, and the three things worth doing first.
-2. **Findings**, each: severity (Critical / High / Medium / Low), what it is, **evidence** (file:line, output, or screenshot), user-visible impact, and suggested fix.
-3. **Verified clean** — a short list of what was checked and found sound. This matters: it tells the reader what the silence covers.
-4. **Not checked** — anything skipped, and why. Never let an unchecked area read as a clean one.
+The report shape, the summary for Tzvi, and what happens after are in
+`docs/audits/README.md`. Name the file `docs/audits/YYYY-MM-DD-site-audit.md`.
 
 Severity guide: **Critical** = data loss, security, or a false claim to users. **High** = broken flow. **Medium** = degraded experience. **Low** = polish.
-
-Then stop and wait. Fix only what is approved, one group per commit, verified per `docs/acceptance-checklist.md`.

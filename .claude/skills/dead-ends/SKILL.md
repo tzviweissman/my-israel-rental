@@ -5,6 +5,14 @@ description: Audit that every control goes where it says and that every promise 
 
 # Dead ends and broken promises
 
+**Runs weekly (Sunday) over the whole site. Read `docs/audits/README.md`
+first and follow it**: run `scripts/audit-setup.sh` (the site on :3210 with
+`?as=owner|renter|provider|admin`, so every claim below can be clicked) and
+`scripts/audit-history.sh`, report only what you confirmed by clicking or
+by a request, fix only the small safe items it lists, update
+`open-issues.md`, commit and push this run's branch. Issues already on the
+open list are one line under "Still open", never re-reported as new.
+
 Two questions, asked in both directions:
 
 1. **Forward:** does every control take you where its label says?
@@ -135,16 +143,10 @@ links to.
 
 Write `docs/audits/YYYY-MM-DD-dead-ends.md`.
 
-```
-# Dead ends - {date}
-
-## Broken: goes nowhere or errors
-## Dead-end promises: destination lacks the affordance
-## Wrong destination
-## Orphaned capabilities
-## Verified working
-## Not checked (and why)
-```
+Use the shape in `docs/audits/README.md` ("In short" first, in plain
+words), and inside "New findings" group them as: broken (goes nowhere or
+errors), dead-end promises (the destination lacks what was promised), wrong
+destination, orphaned capabilities.
 
 Rules:
 
@@ -157,7 +159,9 @@ Rules:
   coverage and cannot be trusted.
 - **Distinguish "this is broken" from "I could not verify".** Do not report a
   suspicion as a defect.
-- Do not fix during the audit. Report, get approval, then fix.
+- Fix only what the README allows (a wrong link, a label, a missing deep-link
+  read of `?tab=`, under 20 lines, proven by clicking it afterwards). Building
+  a missing feature or removing a promise is Tzvi's decision: report it.
 
 ## Part 7 - Make it cheaper next time
 
