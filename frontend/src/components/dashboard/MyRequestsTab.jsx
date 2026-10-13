@@ -15,8 +15,9 @@ import { useNavigate } from 'react-router-dom';
 import { saveReturnPath } from '../../hooks/useBackNavigation';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
+import EditRequestModal from './EditRequestModal';
 import {
-  Loader2, Plus, RefreshCw, CheckCircle2, Trash2, MessageCircle, Clock, Home, Wrench,
+  Loader2, Plus, RefreshCw, CheckCircle2, Trash2, Pencil, MessageCircle, Clock, Home, Wrench,
 } from 'lucide-react';
 
 const STATUS_PILL = {
@@ -38,6 +39,7 @@ const MyRequestsTab = ({ API, token }) => {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [busyId, setBusyId] = useState(null);
+  const [editing, setEditing] = useState(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -199,6 +201,14 @@ const MyRequestsTab = ({ API, token }) => {
                   </button>
                 )}
                 <button
+                  onClick={() => setEditing(r)}
+                  disabled={busyId === r.id}
+                  className="px-3 py-2 min-h-[44px] rounded-lg text-xs font-semibold border border-gray-300 text-gray-700 disabled:opacity-60 inline-flex items-center gap-1.5"
+                  data-testid={`my-request-edit-${r.id}`}
+                >
+                  <Pencil size={13} />{t('requests.edit', 'Edit')}
+                </button>
+                <button
                   onClick={() => remove(r.id)}
                   disabled={busyId === r.id}
                   className="ms-auto px-3 py-2 rounded-lg text-xs font-semibold text-red-600 border border-red-200 hover:bg-red-50 disabled:opacity-60 inline-flex items-center gap-1.5"
@@ -210,6 +220,15 @@ const MyRequestsTab = ({ API, token }) => {
             </div>
           );
         })
+      )}
+      {editing && (
+        <EditRequestModal
+          request={editing}
+          API={API}
+          token={token}
+          onClose={() => setEditing(null)}
+          onSaved={(updated) => setRequests((list) => list.map((x) => (x.id === updated.id ? { ...x, ...updated } : x)))}
+        />
       )}
     </div>
   );
