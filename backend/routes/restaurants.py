@@ -17,6 +17,7 @@ from datetime import UTC, datetime, timedelta
 from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
+from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from pydantic import BaseModel, Field
 from pymongo.errors import DuplicateKeyError
 
@@ -32,6 +33,25 @@ NAMED = {"$or": [{"contact.name_en": {"$nin": [None, ""]}}, {"contact.name_he": 
 
 def _now():
     return datetime.now(UTC).isoformat()
+
+
+_bearer = HTTPBearer(auto_error=False)
+
+
+async def restaurant_admin(request: Request, credentials: HTTPAuthorizationCredentials = Depends(_bearer)) -> dict:
+    """An admin's session, or the RESTAURANT_ADMIN_TOKEN header so the
+    restaurant data can be loaded from a script without anyone signing in or
+    uploading files (Tzvi, 13 Oct 2026). Restaurant listing endpoints only:
+    never claims or submissions, which send email."""
+    import hmac
+    import os
+    secret = os.environ.get("RESTAURANT_ADMIN_TOKEN", "")
+    given = request.headers.get("X-Restaurant-Admin-Token", "")
+    if len(secret) >= 32 and given and hmac.compare_digest(given, secret):
+        return {"role": "admin", "user_id": "restaurant-admin-token"}
+    if not credentials:
+        raise HTTPException(status_code=401, detail="Not authenticated")
+    return await verify_token(credentials)
 
 
 def _admin_only(payload: dict) -> None:
@@ -305,7 +325,7 @@ async def _pin_from_address(place_id):
 
 
 @router.post("/admin/restaurants/pin-missing")
-async def admin_pin_missing(payload: dict = Depends(verify_token)):
+async def admin_pin_missing(payload: dict = Depends(restaurant_admin)):
     """Map pins for hand-added restaurants that have an address but no pin."""
     _admin_only(payload)
     ids = [d["place_id"] async for d in db.restaurants.find(
@@ -321,7 +341,7 @@ async def admin_pin_missing(payload: dict = Depends(verify_token)):
 
 
 @router.get("/admin/restaurants")
-async def admin_list(payload: dict = Depends(verify_token), status: Optional[str] = "listed",
+async def admin_list(payload: dict = Depends(restaurant_admin), status: Optional[str] = "listed",
                      city: Optional[str] = None, verified: Optional[bool] = None, q: Optional[str] = None,
                      page: int = Query(1, ge=1), limit: int = Query(50, ge=1, le=200)):
     _admin_only(payload)
@@ -343,7 +363,7 @@ async def admin_list(payload: dict = Depends(verify_token), status: Optional[str
 
 
 @router.get("/admin/restaurants/stats")
-async def admin_stats(payload: dict = Depends(verify_token)):
+async def admin_stats(payload: dict = Depends(restaurant_admin)):
     _admin_only(payload)
     rows = {}
     async for r in db.restaurants.aggregate([{"$group": {
@@ -367,7 +387,7 @@ async def admin_stats(payload: dict = Depends(verify_token)):
 
 
 @router.patch("/admin/restaurants/{place_id}")
-async def admin_edit(place_id: str, body: AdminEdit, payload: dict = Depends(verify_token)):
+async def admin_edit(place_id: str, body: AdminEdit, payload: dict = Depends(restaurant_admin)):
     _admin_only(payload)
     await _apply(place_id, body, payload)
     d = await db.restaurants.find_one({"place_id": place_id})
@@ -380,7 +400,7 @@ class AdminNew(AdminEdit):
 
 
 @router.post("/admin/restaurants")
-async def admin_add(body: AdminNew, payload: dict = Depends(verify_token)):
+async def admin_add(body: AdminNew, payload: dict = Depends(restaurant_admin)):
     """Add a restaurant by hand (not from Google): it gets our own ID."""
     _admin_only(payload)
     if body.city not in CITIES:
@@ -405,7 +425,7 @@ class ImportBody(BaseModel):
 
 
 @router.post("/admin/restaurants/import")
-async def admin_import(body: ImportBody, payload: dict = Depends(verify_token)):
+async def admin_import(body: ImportBody, payload: dict = Depends(restaurant_admin)):
     """Load restaurants found on a developer's machine (scripts/
     export_restaurants.py) into this database. Upserts by place ID. A place
     a person has edited here keeps its edits; only its map location is
