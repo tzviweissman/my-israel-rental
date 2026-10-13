@@ -392,23 +392,31 @@ async def list_gigs(
 
 
 
-@router.post("/gigs")
-async def create_gig(payload: GigIn, user=Depends(verify_token)):
-    _validate_category(payload.category)
-    _validate_subcategory(payload.category, payload.subcategory)
-    if payload.booking_mode not in ("whatsapp", "in_platform"):
+def _validate_contact_fields(booking_mode, whatsapp, area) -> None:
+    """Booking-channel and service-area rules shared by create and patch.
+
+    One function so an edit can never be looser than the wizard.
+    """
+    if booking_mode not in ("whatsapp", "in_platform"):
         raise HTTPException(status_code=400, detail="booking_mode must be 'whatsapp' or 'in_platform'")
     # Still required: choosing WhatsApp as the PREFERRED channel without a
     # number would offer a button that dials nothing. Other channels remain
     # available regardless, so this is not a dead end for the provider.
-    if payload.booking_mode == "whatsapp" and not (payload.whatsapp or "").strip():
+    if booking_mode == "whatsapp" and not (whatsapp or "").strip():
         raise HTTPException(status_code=400, detail="WhatsApp number required for WhatsApp booking mode")
     # Service area is required — every published gig has to land in the
     # /services?nearby=1 discovery net. Free text so providers can add
     # neighborhoods after the city (e.g. "Tel Aviv, Florentin"), but the
     # head-of-string still has to resolve to something.
-    if not (payload.area or "").strip():
+    if not (area or "").strip():
         raise HTTPException(status_code=400, detail="Service area (city) is required")
+
+
+@router.post("/gigs")
+async def create_gig(payload: GigIn, user=Depends(verify_token)):
+    _validate_category(payload.category)
+    _validate_subcategory(payload.category, payload.subcategory)
+    _validate_contact_fields(payload.booking_mode, payload.whatsapp, payload.area)
     # Type-specific content validation. Store gigs need at least one
     # product because there's literally nothing to show otherwise. For
     # deliverable/appointment gigs we don't require tiers up-front so
@@ -776,6 +784,30 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
         }
     if "category" in update:
         _validate_category(update["category"])
+    # Same rules the create route applies, checked against the listing as it
+    # will be after this edit. Only when one of these fields is being sent,
+    # so saving an unrelated field on an older listing is never blocked.
+    if {"booking_mode", "whatsapp", "area"} & update.keys():
+        after_c = {**gig, **update}
+        _validate_contact_fields(
+            after_c.get("booking_mode") or "whatsapp",
+            after_c.get("whatsapp"),
+            after_c.get("area"),
+        )
+    # Blank optional text clears the field, as create stores None for blank.
+    for k in ("contact_email", "title_he", "description_he"):
+        if k in update:
+            update[k] = (update[k] or "").strip() or None
+    if "title" in update:
+        update["title"] = update["title"].strip()
+        if not update["title"]:
+            raise HTTPException(status_code=400, detail="Title cannot be empty")
+    # Create only keeps these for the gig type they belong to.
+    eff_type = update.get("gig_type") or gig.get("gig_type") or "deliverable"
+    if "slot_duration_minutes" in update and eff_type != "appointment":
+        update.pop("slot_duration_minutes")
+    if "enable_date_booking" in update and eff_type != "deliverable":
+        update["enable_date_booking"] = False
     # Re-validate subcategory on patch too so a malicious update
     # can't smuggle HTML or overlong strings past the create-time
     # guard. Uses the effective category (new value if being patched,

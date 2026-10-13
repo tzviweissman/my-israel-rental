@@ -14,16 +14,20 @@
  * the things that actually get typed wrong: the title, the description,
  * and each option's name, price and photos.
  *
- * What it does not touch: category, listing type, availability, booking
- * mode, service area. Those change what the listing IS and belong in a
- * considered flow, not a quick correction. They are one step away in the
- * wizard.
+ * Availability, contact, category, service area and the Hebrew text are
+ * here too (Tzvi, 13 Oct 2026). This header used to say they were left out
+ * on purpose, as things that change what the listing IS. In practice that
+ * meant a business whose hours or WhatsApp number changed had to delete the
+ * listing and rebuild it, so they are editable now, from the same controls
+ * the wizard uses (AvailabilityStep, CategoryPicker) and checked by the
+ * server with the same rules as creation (_validate_contact_fields). The
+ * LISTING TYPE (store / deliverable / appointment) is still not editable:
+ * it decides which other fields exist at all.
  *
- * The SUBCATEGORY is here, and is not an exception to that rule: it does
- * not change what the listing is, it narrows it inside the category it
- * already has. It is also the only way an already-published listing can
- * ever get one — the field is a live filter on the board and nothing in
- * the app could set it (dead-ends audit 2026-09-08, #5).
+ * The SUBCATEGORY narrows the category the listing has. It is also the only
+ * way an already-published listing can ever get one - the field is a live
+ * filter on the board and nothing in the app could set it (dead-ends audit
+ * 2026-09-08, #5). Changing the category clears it, as in the wizard.
  *
  * The OFFER belongs here rather than in the wizard for the same reason the
  * typo does: a business decides to run one on a Tuesday and wants it up in
@@ -48,6 +52,10 @@ import { uploadFilesFast, reportUploadFailure } from '../../utils/fastUpload';
 import { productPhotos } from '../../utils/productPhotos';
 import SizeFields, { withSize } from '../marketplace/SizeFields';
 import { SUBCATEGORIES, subcategoryLabel } from '../../lib/categories';
+import AvailabilityStep, { DAYS } from '../marketplace/AvailabilityStep';
+import CategoryPicker from '../marketplace/CategoryPicker';
+import PhoneInput from '../common/PhoneInput';
+import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../../utils/whatsappLink';
 
 const MAX_PHOTOS = 6;
 
@@ -60,8 +68,37 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
   const [description, setDescription] = useState(gig.description || '');
   // Only the four merged categories have sub-buckets; for the rest this
   // is undefined and the whole block never renders.
-  const subOptions = SUBCATEGORIES[gig.category];
+  const [category, setCategory] = useState(gig.category || '');
+  const subOptions = SUBCATEGORIES[category];
   const [subcategory, setSubcategory] = useState(gig.subcategory || '');
+  const [categories, setCategories] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [catOpen, setCatOpen] = useState(false);
+  const [area, setArea] = useState(gig.area || '');
+  const [titleHe, setTitleHe] = useState(gig.title_he || '');
+  const [descHe, setDescHe] = useState(gig.description_he || '');
+  const [bookingMode, setBookingMode] = useState(gig.booking_mode || 'whatsapp');
+  const [whatsapp, setWhatsapp] = useState(gig.whatsapp || '');
+  const [contactEmail, setContactEmail] = useState(gig.contact_email || '');
+  const isAppointment = gig.gig_type === 'appointment';
+  const isDeliverable = gig.gig_type === 'deliverable';
+  const [weekly, setWeekly] = useState(() => DAYS.reduce((acc, d) => ({
+    ...acc,
+    [d.k]: ((gig.weekly_availability || {})[d.k] || []).map((w) => ({ start: w.start, end: w.end })),
+  }), {}));
+  const [slotMinutes, setSlotMinutes] = useState(gig.slot_duration_minutes || 30);
+  const [dateBooking, setDateBooking] = useState(Boolean(gig.enable_date_booking));
+  useEffect(() => {
+    let live = true;
+    axios.get(`${API}/marketplace/categories`).then((r) => { if (live) setCategories(r.data || []); }).catch(() => {});
+    axios.get(`${API}/marketplace/locations`).then((r) => { if (live) setLocations(r.data || []); }).catch(() => {});
+    return () => { live = false; };
+  }, [API]);
+  const toggleDay = (d) => setWeekly((w) => ({ ...w, [d]: w[d].length ? [] : [{ start: '09:00', end: '17:00' }] }));
+  const updateWindow = (d, patch) => setWeekly((w) => ({
+    ...w,
+    [d]: w[d].length ? [{ ...w[d][0], ...patch }] : [{ start: '09:00', end: '17:00', ...patch }],
+  }));
   // Options are edited as a shallow copy so Cancel really cancels.
   const [options, setOptions] = useState(() => originals.map((o) => ({
     ...o,
@@ -170,6 +207,22 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       toast.error(t('editListing.needTitle', 'Give the listing a title.'));
       return;
     }
+    if (!category) {
+      toast.error(t('wizard.reasonCategory', 'Pick a category above.'));
+      return;
+    }
+    if (!area.trim()) {
+      toast.error(t('wizard.reasonArea', 'Pick a service area (city).'));
+      return;
+    }
+    if (bookingMode === 'whatsapp' && !hasValidWhatsApp(whatsapp)) {
+      toast.error(t('services.whatsappInvalid', 'Enter a valid WhatsApp number - e.g. 050-123-4567 or +972 50 123 4567.'));
+      return;
+    }
+    if (isAppointment && !DAYS.some((d) => (weekly[d.k] || []).length > 0)) {
+      toast.error(t('editListing.needHours', 'Open at least one day, or customers cannot book a time.'));
+      return;
+    }
     const bad = options.find((o) => !String(o.name || '').trim());
     if (bad) {
       toast.error(t('editListing.needName', 'Every option needs a name.'));
@@ -203,7 +256,32 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       if (description !== (gig.description || '')) payload.description = description;
       // null, not '', to clear it: the API reads a falsy value as "no tag"
       // and stores None, which is what the board's filter tests against.
-      if (subOptions && subcategory !== (gig.subcategory || '')) payload.subcategory = subcategory || null;
+      const categoryChanged = category !== (gig.category || '');
+      if (categoryChanged) payload.category = category;
+      // A new category invalidates the old sub-bucket, so it is always sent
+      // then (cleared unless a valid one for the new category was picked).
+      const subValid = (SUBCATEGORIES[category] || []).some((x) => x.slug === subcategory) ? subcategory : '';
+      if (categoryChanged ? Boolean(gig.subcategory) || Boolean(subValid) : (subOptions && subValid !== (gig.subcategory || ''))) {
+        payload.subcategory = subValid || null;
+      }
+      if (area.trim() !== (gig.area || '')) payload.area = area.trim();
+      if (titleHe.trim() !== (gig.title_he || '')) payload.title_he = titleHe.trim();
+      if (descHe.trim() !== (gig.description_he || '')) payload.description_he = descHe.trim();
+      if (bookingMode !== (gig.booking_mode || 'whatsapp')) payload.booking_mode = bookingMode;
+      if (whatsapp.trim() !== (gig.whatsapp || '')) {
+        payload.whatsapp = whatsapp.trim();
+        payload.whatsapp_confirmed = hasValidWhatsApp(whatsapp);
+      }
+      if (contactEmail.trim() !== (gig.contact_email || '')) payload.contact_email = contactEmail.trim();
+      if (isAppointment) {
+        const before = DAYS.reduce((acc, d) => ({
+          ...acc,
+          [d.k]: ((gig.weekly_availability || {})[d.k] || []).map((w) => ({ start: w.start, end: w.end })),
+        }), {});
+        if (JSON.stringify(weekly) !== JSON.stringify(before)) payload.weekly_availability = weekly;
+        if (slotMinutes !== (gig.slot_duration_minutes || 30)) payload.slot_duration_minutes = slotMinutes;
+      }
+      if (isDeliverable && dateBooking !== Boolean(gig.enable_date_booking)) payload.enable_date_booking = dateBooking;
 
       // Rebuilt from the ORIGINAL objects so nothing this sheet does not
       // show — features, delivery_days, duration_minutes, in_stock — is
@@ -449,6 +527,183 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 </p>
               </div>
             )}
+          </div>
+
+          {/* Where and what. Same category grid and the same city list as
+              the wizard; the server re-checks both. */}
+          <div className="rounded-xl border p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="edit-listing-where">
+            <p className="text-xs font-semibold text-gray-700">{t('editListing.whereAndWhat', 'Where and what')}</p>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-gray-700" htmlFor="edit-listing-area">
+                {t('wizard.area', 'Service area')}
+              </label>
+              <input
+                id="edit-listing-area"
+                value={area}
+                onChange={(e) => setArea(e.target.value)}
+                list="edit-listing-city-suggestions"
+                placeholder={t('wizard.areaPh', 'Tel Aviv, Jerusalem, Haifa…')}
+                className="w-full px-3 py-2 min-h-[44px] rounded-lg border bg-white text-sm"
+                style={{ borderColor: 'var(--brand-border)' }}
+                data-testid="edit-listing-area"
+              />
+              <datalist id="edit-listing-city-suggestions">
+                {locations.map((l) => (<option key={l.slug} value={l.label} />))}
+              </datalist>
+            </div>
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-gray-700">{t('wizard.category', 'Category')}</p>
+              {!catOpen && (
+                <button
+                  type="button"
+                  onClick={() => setCatOpen(true)}
+                  className="px-3 min-h-[44px] rounded-lg border bg-white text-sm font-semibold text-start"
+                  style={{ borderColor: 'var(--brand-border)' }}
+                  data-testid="edit-listing-category-change"
+                >
+                  {(categories.find((c) => c.slug === category)?.label) || category || t('editListing.chooseCategory', 'Choose a category')}
+                  {' '}<span className="text-xs font-normal" style={{ color: 'var(--brand-muted)' }}>{t('editListing.change', 'Change')}</span>
+                </button>
+              )}
+              {catOpen && (
+                <CategoryPicker
+                  categories={categories}
+                  value={category}
+                  onChange={(slug) => { setCategory(slug); setSubcategory(''); setCatOpen(false); }}
+                  testidPrefix="edit-listing-cat"
+                  variant="primary"
+                />
+              )}
+            </div>
+          </div>
+
+          {/* Availability. Weekly hours only mean something for an
+              appointment listing, date booking only for a deliverable one,
+              so each shows for its own type, as in the wizard. */}
+          <div className="rounded-xl border p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="edit-listing-availability">
+            <p className="text-xs font-semibold text-gray-700">{t('editListing.availability', 'Availability')}</p>
+            {isAppointment && (
+              <AvailabilityStep
+                weekly={weekly}
+                slotDuration={slotMinutes}
+                onToggleDay={toggleDay}
+                onUpdateWindow={updateWindow}
+                onSlotDurationChange={setSlotMinutes}
+                showIntro={false}
+                testid="edit-listing-hours"
+              />
+            )}
+            {isDeliverable && (
+              <label className="flex items-start gap-2 min-h-[44px] cursor-pointer text-sm">
+                <input
+                  type="checkbox"
+                  className="mt-1"
+                  checked={dateBooking}
+                  onChange={() => setDateBooking((v) => !v)}
+                  data-testid="edit-listing-date-booking"
+                />
+                <span>
+                  <span className="block font-semibold text-gray-900">{t('editListing.dateBooking', 'Let customers pick a date')}</span>
+                  <span className="block text-[11px] text-gray-500">{t('editListing.dateBookingHint', 'Customers choose the day they want the job done when they book.')}</span>
+                </span>
+              </label>
+            )}
+            <div className="space-y-1.5">
+              <p className="text-xs font-semibold text-gray-700">
+                {isStore ? t('wizard.reachStore', 'How should buyers reach you?') : t('wizard.reachService', 'How should clients book?')}
+              </p>
+              <div className="flex gap-2">
+                {[
+                  { v: 'whatsapp', label: isStore ? t('wizard.modeWaStore', 'Message on WhatsApp') : t('wizard.modeWa', 'Book on WhatsApp') },
+                  { v: 'in_platform', label: isStore ? t('wizard.modeSiteStore', 'Message on MyIsraelRental') : t('wizard.modeSite', 'Book on MyIsraelRental') },
+                ].map((o) => (
+                  <button
+                    key={o.v}
+                    type="button"
+                    onClick={() => setBookingMode(o.v)}
+                    aria-pressed={bookingMode === o.v}
+                    className={`flex-1 px-3 min-h-[44px] rounded-lg text-sm font-semibold border text-start ${
+                      bookingMode === o.v ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]' : 'bg-white text-gray-700 border-gray-200 hover:border-[var(--brand-primary)]'
+                    }`}
+                    data-testid={`edit-listing-booking-${o.v}`}
+                  >
+                    {o.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Contact. The account email is never shown; the address here is
+              one the business chooses to publish. */}
+          <div className="rounded-xl border p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="edit-listing-contact">
+            <p className="text-xs font-semibold text-gray-700">{t('editListing.contact', 'Contact')}</p>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-gray-700">
+                {t('services.whatsappNumberLabel', 'WhatsApp number')}
+              </label>
+              <PhoneInput
+                value={whatsapp}
+                onChange={setWhatsapp}
+                error={whatsapp.trim() && !hasValidWhatsApp(whatsapp)
+                  ? t('services.whatsappInvalid', 'Enter a valid WhatsApp number.')
+                  : ''}
+                hint={hasValidWhatsApp(whatsapp)
+                  ? t('services.whatsappResolved', {
+                    defaultValue: 'Customers will message you at +{{number}}',
+                    number: normalizeWhatsAppNumber(whatsapp),
+                  })
+                  : ''}
+                testid="edit-listing-whatsapp"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold text-gray-700" htmlFor="edit-listing-email">
+                {t('services.contactEmailLabel', 'Contact email (optional)')}
+              </label>
+              <input
+                id="edit-listing-email"
+                type="email"
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+                placeholder={t('services.contactEmailPh', 'you@example.com')}
+                className="w-full px-3 py-2 min-h-[44px] rounded-lg border bg-white text-sm"
+                style={{ borderColor: 'var(--brand-border)' }}
+                data-testid="edit-listing-email"
+              />
+              <p className="text-[11px] text-gray-500">
+                {t('services.contactEmailHint', 'Shown on your listing so customers can email you. Your account email is never shown.')}
+              </p>
+            </div>
+          </div>
+
+          {/* Hebrew. Blank is fine: the site translates it for you. */}
+          <div className="rounded-xl border p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="edit-listing-hebrew">
+            <p className="text-xs font-semibold text-gray-700">{t('editListing.hebrew', 'Hebrew')}</p>
+            <p className="text-[11px] text-gray-500">
+              {t('editListing.hebrewHint', 'Write the Hebrew yourself, or leave it empty and we translate it for you.')}
+            </p>
+            <input
+              dir="rtl"
+              value={titleHe}
+              onChange={(e) => setTitleHe(e.target.value)}
+              aria-label={t('editListing.titleHe', 'Title in Hebrew')}
+              placeholder={t('editListing.titleHe', 'Title in Hebrew')}
+              className="w-full px-3 py-2 min-h-[44px] rounded-lg border bg-white text-sm"
+              style={{ borderColor: 'var(--brand-border)' }}
+              data-testid="edit-listing-title-he"
+            />
+            <textarea
+              dir="rtl"
+              rows={3}
+              value={descHe}
+              onChange={(e) => setDescHe(e.target.value)}
+              aria-label={t('editListing.descriptionHe', 'Description in Hebrew')}
+              placeholder={t('editListing.descriptionHe', 'Description in Hebrew')}
+              className="w-full px-3 py-2 rounded-lg border bg-white text-sm"
+              style={{ borderColor: 'var(--brand-border)' }}
+              data-testid="edit-listing-description-he"
+            />
           </div>
 
           <div className="rounded-xl border p-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="edit-listing-faqs">
