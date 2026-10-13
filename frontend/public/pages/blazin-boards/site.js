@@ -60,7 +60,7 @@
     });
   }
 
-  var EMPTY = { cart: {}, ful: 'pickup', date: '', window: '', address: '', name: '', phone: '', email: '', notes: '', payBy: '' };
+  var EMPTY = { cart: {}, ful: 'pickup', date: '', window: '', address: '', city: '', name: '', phone: '', email: '', notes: '', payBy: '' };
   function load() {
     var o = {};
     try { o = JSON.parse(sessionStorage.getItem(KEY) || '{}') || {}; } catch (e) { o = {}; }

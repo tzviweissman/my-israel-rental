@@ -114,7 +114,7 @@ async def _business_items(uid: str) -> list[dict[str, Any]]:
         b async for b in db.businesses.find(
             {"owner_user_id": uid},
             {"_id": 1, "name": 1, "description": 1, "logo_url": 1, "cover_url": 1,
-             "areas": 1, "hours": 1},
+             "areas": 1, "serves_nationwide": 1, "hours": 1},
         )
     ]
     any_of = lambda f: any(f(b) for b in businesses)  # noqa: E731
@@ -173,7 +173,7 @@ async def _business_items(uid: str) -> list[dict[str, Any]]:
         {
             "id": "biz.areas",
             "endowed": False,
-            "done": any_of(lambda b: bool(b.get("areas"))),
+            "done": any_of(lambda b: bool(b.get("areas") or b.get("serves_nationwide"))),
             "href": "/dashboard?tab=my-businesses&details=1",
         },
         {
@@ -202,7 +202,7 @@ async def _property_items(uid: str, user_doc: dict[str, Any]) -> list[dict[str, 
     props = [
         p async for p in db.properties.find(
             {"owner_id": uid},
-            {"id": 1, "images": 1, "available_from": 1, "ical_url": 1},
+            {"id": 1, "images": 1, "available_from": 1, "ical_url": 1, "ical_urls": 1},
         )
     ]
     any_of = lambda f: any(f(p) for p in props)  # noqa: E731
@@ -231,7 +231,7 @@ async def _property_items(uid: str, user_doc: dict[str, Any]) -> list[dict[str, 
         {
             "id": "prop.availability",
             "endowed": False,
-            "done": any_of(lambda p: bool(p.get("available_from") or p.get("ical_url"))),
+            "done": any_of(lambda p: bool(p.get("available_from") or p.get("ical_url") or p.get("ical_urls"))),
             "href": "/dashboard?tab=properties",
         },
         {

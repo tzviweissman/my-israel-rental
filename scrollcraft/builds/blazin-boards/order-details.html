@@ -50,7 +50,7 @@
         <div class="next"><button type="button" class="cta" id="place">Place order</button><a class="back" href="order-when.html">Back</a></div>
       </section>
       <aside class="summary" aria-label="Your order" aria-live="polite">
-        <div class="who"><img src="assets/their-logo-small.png" alt=""><div><b>Your order</b><small>Blazin' Boards · Jerusalem</small></div></div>
+        <div class="who"><img src="assets/their-logo-small.png" alt=""><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines data-full></ul>
         <div class="total"><span>Total</span><b data-total>$0</b></div>
         <ul class="promise">
@@ -80,7 +80,7 @@
     $('rev').innerHTML = '<div><dt>Your order</dt><dd>' + ls.map(function (l) { return (l.qty > 1 ? l.qty + ' × ' : '') + BB.esc(l.p.short); }).join('<br>') + '<br><a class="back" href="order.html">Change</a></dd></div>'
       + '<div><dt>When</dt><dd>' + BB.esc(BB.when(o)) + '<br><a class="back" href="order-when.html">Change</a></dd></div>'
       + '<div><dt>How</dt><dd>' + BB.esc(BB.where(o)) + '</dd></div>';
-    var label = 'Place order · ' + BB.money(BB.total(F, o), BB.cur(F));
+    var label = 'Place order, ' + BB.money(BB.total(F, o), BB.cur(F));
     $('place').textContent = label; $('place2').textContent = 'Place order';
     BB.paint(F, o);
   }
@@ -96,7 +96,7 @@
     if (o.window) { var w = o.window.split('|'); win = { weekday: new Date(o.date + 'T12:00:00').getDay(), start: w[0], end: w[1] }; }
     var body = {
       lines: BB.lines(F, o).map(function (l) { return { product_id: l.p.id, qty: l.qty }; }),
-      fulfilment: o.ful, date: o.date, window: win, address: o.ful === 'delivery' ? o.address : null,
+      fulfilment: o.ful, date: o.date, window: win, address: o.ful === 'delivery' ? o.address : null, city: o.ful === 'delivery' ? (o.city || null) : null,
       customer_name: o.name, customer_phone: o.phone, customer_email: o.email || null, notes: o.notes || '', pay_by: o.payBy
     };
     ['place', 'place2'].forEach(function (id) { $(id).disabled = true; $(id).classList.add('is-busy'); $(id).textContent = 'Placing your order'; });

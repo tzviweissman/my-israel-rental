@@ -461,7 +461,7 @@ const Services = () => {
             src={RESTAURANT_CATEGORY_PHOTOS.meat_grill}
             alt=""
             className="h-16 w-16 shrink-0 rounded-2xl object-cover"
-            style={{ background: '#F6EDE3' }}
+            style={{ background: 'var(--surface-muted)' }}
             loading="lazy"
           />
           <span className="min-w-0 flex-1">

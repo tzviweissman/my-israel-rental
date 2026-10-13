@@ -368,20 +368,26 @@ async def refresh_certificates(limit=40):
         for d in docs:
             old = d["kosher_check"]["certificate"]
             images = []
-            await read_site(http, d["contact"]["website"], images)
-            new = None
+            texts, _ = await read_site(http, d["contact"]["website"], images)
+            new, found, read_any = None, None, False
             for url in ([old["url"]] if old.get("url") else []) + [u for u in images if u != old.get("url")][:3]:
                 c = await read_certificate(http, url)
+                read_any = read_any or bool(c)
                 if c and (c.get("valid_until") or "") > (old.get("valid_until") or ""):
                     new = {"url": url, "business": c.get("business"), "certifier": c["certifier"],
                            "valid_until": c["valid_until"], "rechecked_at": now.isoformat()}
+                    found = c
                     break
             if new:
-                kashrut = c.get("kashrut") if c.get("kashrut") in ("meat", "dairy", "pareve") else d.get("kashrut")
+                kashrut = found.get("kashrut") if found.get("kashrut") in ("meat", "dairy", "pareve") else d.get("kashrut")
                 await db.restaurants.update_one({"_id": d["_id"]}, {"$set": {
-                    "kosher_check.certificate": new, "kosher_certification": label_certificate(c), "kashrut": kashrut,
-                    "kosher_check.snippet": f"Certificate: {c['certifier']}, valid until {c['valid_until']}"}})
+                    "kosher_check.certificate": new, "kosher_certification": label_certificate(found), "kashrut": kashrut,
+                    "kosher_check.snippet": f"Certificate: {found['certifier']}, valid until {found['valid_until']}"}})
                 renewed += 1
+            elif not texts or not read_any:
+                # The site was down or no certificate could be read: try again
+                # tomorrow rather than in a week (site audit, 12 Oct 2026).
+                continue
             else:
                 await db.restaurants.update_one({"_id": d["_id"]}, {"$set": {
                     "kosher_check.certificate": {**old, "rechecked_at": now.isoformat()}}})

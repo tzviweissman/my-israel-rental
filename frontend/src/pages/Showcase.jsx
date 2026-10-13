@@ -53,9 +53,9 @@ const CSS = `
 .sc-head h1 { font-size: clamp(2.2rem, 1.4rem + 2.6vw, 3.4rem); line-height: 1.12; letter-spacing: -0.02em; color: var(--ink); margin: 0; }
 .sc-head p { margin: 12px 0 0; font-size: 1.05rem; line-height: 1.6; color: var(--brand-muted); }
 .sc-grid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 40px 24px; }
-.sc-cta { margin: 72px 0 24px; padding-top: 40px; border-top: 1px solid #E3E3E3; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
+.sc-cta { margin: 72px 0 24px; padding-top: 40px; border-top: 1px solid var(--brand-border); display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 18px; }
 .sc-cta h2 { margin: 0; font-size: clamp(1.5rem, 1.1rem + 1.2vw, 2.1rem); color: var(--ink); }
-.sc-btn { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 12px 24px; border-radius: 999px; background: #000; color: #fff; font-weight: 600; text-decoration: none; transition: transform 200ms ease-out; }
+.sc-btn { display: inline-flex; align-items: center; gap: 10px; min-height: 48px; padding: 12px 24px; border-radius: 999px; background: var(--action); color: var(--action-ink); font-weight: 600; text-decoration: none; transition: transform 200ms ease-out; }
 .sc-btn:hover { transform: translateY(-1px); }
 .sc-btn:active { transform: translateY(1px); }
 .sc-btn:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }

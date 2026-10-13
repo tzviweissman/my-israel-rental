@@ -6,15 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Your order · Blazin' Boards</title>
 <meta name="description" content="Order a Blazin' Boards meat board: pick the size, add a bottle, say when and where. Orders 48 hours ahead. You pay the business directly.">
-<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mv5nmsmc">
+<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mv6ahsgf">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mv5nmsmc">
+<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mv6ahsgf">
 </head>
 <body>
 <nav class="nav" aria-label="Blazin' Boards">
-  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv5nmsmc" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
+  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv6ahsgf" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
   <ul class="menu">
     <li><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-0">Home</a></li>
     <li><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-0">Every board</a></li>
@@ -45,7 +45,7 @@
         <div class="next"><a class="cta" id="go" href="/business/blazin-boards/order-when" data-mir-key="t-f78a4fc0-0">Continue</a><a class="back" href="/business/blazin-boards/boards" data-mir-key="t-e3e389c9-0">Keep looking</a></div>
       </section>
       <aside class="summary" aria-label="Your order" aria-live="polite">
-        <div class="who"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv5nmsmc" alt="" data-mir-key="i-0746f29b-1"><div><b data-mir-key="t-ba61b3de-0">Your order</b><small data-mir-key="t-eeca8dc1-0">Blazin' Boards · Jerusalem</small></div></div>
+        <div class="who"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv6ahsgf" alt="" data-mir-key="i-0746f29b-1"><div><b data-mir-key="t-ba61b3de-0">Your order</b><small data-mir-key="t-645d4e11-0">Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines></ul>
         <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><b data-total data-mir-key="t-e2b2a704-0">$0</b></div>
         <ul class="promise">
@@ -59,7 +59,7 @@
 </main>
 <div class="dock"><div><small data-mir-key="t-9263db8f-0">Total</small><b data-total data-mir-key="t-e2b2a704-1">$0</b></div><a class="cta" id="go2" href="/business/blazin-boards/order-when" data-mir-key="t-f78a4fc0-1">Continue</a></div>
 
-<script src="/pages/blazin-boards/site.js?v=mv5nmsmc"></script>
+<script src="/pages/blazin-boards/site.js?v=mv6ahsgf"></script>
 <script>
 (function () {
   var o = BB.load(), F = null, open = false;
@@ -68,7 +68,7 @@
   function paint() {
     var ls = BB.lines(F, o);
     document.getElementById('cartlines').innerHTML = ls.map(function (l) {
-      return '<li><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm · ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
+      return '<li><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
         + '<span class="stepper"><button type="button" data-dec="' + l.p.id + '" aria-label="One fewer">−</button><output>' + l.qty + '</output><button type="button" data-inc="' + l.p.id + '" aria-label="One more">+</button></span>'
         + '<span class="amt">' + BB.money(l.p.price * l.qty, l.p.currency) + '</span></li>';
     }).join('');

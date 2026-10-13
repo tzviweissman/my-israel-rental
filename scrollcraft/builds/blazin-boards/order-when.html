@@ -46,12 +46,13 @@
         </div>
         <div class="q" id="addrQ" hidden>
           <div class="field" id="f-address"><label for="address">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, number, city, plus floor or entrance" maxlength="400"><span class="err">Where should it go?</span></div>
+          <div class="field" id="f-city" hidden><label for="city">City</label><select id="city"></select><span class="err">Choose the city it goes to.</span></div>
         </div>
         <p class="errline" id="err"></p>
         <div class="next"><a class="cta" id="go" href="order-details.html">Continue</a><a class="back" href="order.html">Back</a></div>
       </section>
       <aside class="summary" aria-label="Your order" aria-live="polite">
-        <div class="who"><img src="assets/their-logo-small.png" alt=""><div><b>Your order</b><small>Blazin' Boards · Jerusalem</small></div></div>
+        <div class="who"><img src="assets/their-logo-small.png" alt=""><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines data-full></ul>
         <div class="total"><span>Total</span><b data-total>$0</b></div>
         <ul class="promise">
@@ -86,6 +87,9 @@
   function paint() {
     document.querySelectorAll('[data-ful]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.ful === b.dataset.ful)); });
     $('addrQ').hidden = o.ful !== 'delivery';
+    // A store that is not nationwide delivers only to its own cities, and the
+    // order is refused without one (dead-ends audit, 12 Oct 2026).
+    $('f-city').hidden = !(F && !F.serves_nationwide && (F.areas || []).length);
     windows(); BB.save(o); if (F) BB.paint(F, o);
   }
   document.querySelectorAll('[data-ful]').forEach(function (b) { b.addEventListener('click', function () { o.ful = b.dataset.ful; paint(); }); });
@@ -97,14 +101,19 @@
     // No Shabbos: a kosher kitchen's boards, and the earliest day is 48 hours out.
     if (!o.date || o.date < $('date').min || new Date(o.date + 'T12:00:00').getDay() === 6) bad.push('f-date');
     if (o.ful === 'delivery' && (o.address || '').length < 5) bad.push('f-address');
+    if (o.ful === 'delivery' && !$('f-city').hidden && !o.city) bad.push('f-city');
     bad.forEach(function (id) { $(id).classList.add('is-bad'); });
-    if (bad.length) { e.preventDefault(); var el = $(bad[0]).querySelector('input'); el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+    if (bad.length) { e.preventDefault(); var el = $(bad[0]).querySelector('input, select'); el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
   }
   $('go').addEventListener('click', check); $('go2').addEventListener('click', check);
   BB.form().then(function (f) {
     F = f;
-    if (F.settings && F.settings.delivery_on) document.querySelector('[data-ful="delivery"]').hidden = false;
+    var areas = F.areas || [];
+    if (F.settings && F.settings.delivery_on && (F.serves_nationwide || areas.length)) document.querySelector('[data-ful="delivery"]').hidden = false;
     else o.ful = 'pickup';
+    if (o.city && !areas.some(function (a) { return a.slug === o.city; })) o.city = '';
+    $('city').innerHTML = '<option value="">Choose</option>' + areas.map(function (a) { return '<option value="' + a.slug + '"' + (o.city === a.slug ? ' selected' : '') + '>' + a.label + '</option>'; }).join('');
+    $('city').addEventListener('change', function () { o.city = $('city').value; $('f-city').classList.remove('is-bad'); BB.save(o); });
     paint();
   });
   paint();

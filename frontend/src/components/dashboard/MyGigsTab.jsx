@@ -132,7 +132,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
       >
         <div className="flex justify-between items-center">
           <h3 className="text-lg font-bold">Edit provider profile</h3>
-          <button type="button" onClick={onClose} className="text-gray-400 hover:text-gray-700" data-testid="provider-profile-close">
+          <button type="button" onClick={onClose} className="text-gray-600 hover:text-gray-900 min-h-[44px] min-w-[44px] inline-flex items-center justify-center -me-3" aria-label="Close" data-testid="provider-profile-close">
             <X size={18} />
           </button>
         </div>
@@ -206,7 +206,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
           <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
             <Globe size={12} className="text-[var(--brand-primary)]" />
             Languages you speak
-            <span className="text-[10px] font-normal text-gray-400 ms-1"> - shows on your public profile</span>
+            <span className="text-xs font-normal text-gray-600 ms-1">(shows on your public profile)</span>
           </label>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {languageList.map((lang) => {
@@ -238,7 +238,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
           <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
             <Award size={12} className="text-[var(--gold)]" />
             Credentials &amp; licenses
-            <span className="text-[10px] font-normal text-gray-400 ms-1"> - optional</span>
+            <span className="text-xs font-normal text-gray-600 ms-1">(optional)</span>
           </label>
           <textarea
             value={credentials}

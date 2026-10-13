@@ -59,8 +59,8 @@ const CSS = `
 .scs-tools { display: flex; align-items: center; gap: 8px; }
 .scs-all { font-size: .9rem; font-weight: 600; color: var(--gold-text-on-light, #0F5E8F); margin-inline-end: 6px; }
 .scs-all:hover { text-decoration: underline; }
-.scs-arrow { width: 40px; height: 40px; border-radius: 999px; border: 1px solid #E3E3E3; background: #fff; color: var(--ink); display: grid; place-items: center; transition: background 200ms ease-out, transform 150ms ease-out; }
-.scs-arrow:hover { background: #F9FAFB; }
+.scs-arrow { width: 44px; height: 44px; flex: none; border-radius: 999px; border: 1px solid var(--brand-border); background: var(--surface); color: var(--ink); display: grid; place-items: center; transition: background 200ms ease-out, transform 150ms ease-out; }
+.scs-arrow:hover { background: var(--surface-muted); }
 .scs-arrow:active { transform: scale(.94); }
 .scs-arrow:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 [dir="rtl"] .scs-ico { transform: scaleX(-1); }

@@ -37,7 +37,7 @@ a { color: var(--sc-accent); }
 .brand { display: flex; align-items: center; gap: 0.6rem; text-decoration: none; color: var(--sc-ink); font: 700 1.05rem/1 var(--sc-font-display); }
 .brand img { width: 30px; height: 30px; object-fit: contain; }
 .menu { display: flex; gap: 0.25rem; margin: 0 0 0 auto; padding: 0; list-style: none; }
-.menu a { display: block; padding: 0.55rem 0.85rem; border-radius: 999px; color: var(--sc-ink-soft); font: 500 0.95rem/1 var(--sc-font-text); text-decoration: none; transition: background 160ms ease-out, color 160ms ease-out; }
+.menu a { display: flex; align-items: center; min-height: 44px; padding: 0.55rem 0.85rem; border-radius: 999px; color: var(--sc-ink-soft); font: 500 0.95rem/1 var(--sc-font-text); text-decoration: none; transition: background 160ms ease-out, color 160ms ease-out; }
 .menu a:hover { background: var(--sc-surface); color: var(--sc-ink); }
 .menu a[aria-current="page"] { color: var(--sc-ink); background: var(--sc-surface); }
 .bar .btn .lb { padding: 0 1rem; } .bar .btn .lb, .bar .btn .ab { min-height: 42px; } .bar .btn .ab { width: 42px; }

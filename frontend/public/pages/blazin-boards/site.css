@@ -33,7 +33,7 @@ img { display: block; max-width: 100%; }
 .nav__mark { display: inline-flex; align-items: center; gap: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; text-decoration: none; }
 .nav__mark img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
 .menu { display: flex; gap: 0.2rem; margin: 0 0 0 auto; padding: 0; list-style: none; }
-.menu a { display: block; padding: 0.55rem 0.85rem; border-radius: 999px; color: var(--soft); font-weight: 600; font-size: 0.95rem; text-decoration: none; transition: background 160ms ease-out, color 160ms ease-out; }
+.menu a { display: flex; align-items: center; min-height: 44px; padding: 0.55rem 0.85rem; border-radius: 999px; color: var(--soft); font-weight: 600; font-size: 0.95rem; text-decoration: none; transition: background 160ms ease-out, color 160ms ease-out; }
 .menu a:hover { background: var(--paper-2); color: var(--ink); }
 .menu a[aria-current="page"] { background: var(--paper-2); color: var(--ink); }
 .cart { position: relative; display: inline-flex; align-items: center; gap: 0.55rem; min-height: 44px; padding: 0 1rem; border-radius: 999px; background: var(--ox-1); color: #fff; font-weight: 700; text-decoration: none; transition: background 160ms ease-out, transform 160ms ease-out; }

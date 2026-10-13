@@ -240,7 +240,7 @@ async def _notify_owner_contract_signed(
                 recipient_name=owner.get("name") or "",
                 tenant_name=(renter or {}).get("name") or "your tenant",
                 # Deep link: the owner dashboard booking-detail view.
-                contract_path=f"dashboard?tab=bookings&booking_id={booking['id']}",
+                contract_path=f"dashboard?tab=bookings&highlight={booking['id']}",
                 language=owner.get("preferred_language") or "en",
             )
     except Exception as exc:  # noqa: BLE001

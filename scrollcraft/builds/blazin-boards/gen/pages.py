@@ -20,7 +20,7 @@ def page(name, title, desc, body, script='', order=False):
   </ul>'''
     foot = '' if order else '''
 <footer class="foot">
-  <span>Blazin' Boards · premium meat boards, Jerusalem · orders 48 hours ahead</span>
+  <span>Blazin' Boards, premium meat boards in Jerusalem. Orders 48 hours ahead</span>
   <nav><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Order</a><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></nav>
 </footer>'''
     html = f'''<!doctype html>
@@ -61,7 +61,7 @@ PROMISE = f'''<ul class="promise">
 
 def summary(full=False):
     return f'''<aside class="summary" aria-label="Your order" aria-live="polite">
-        <div class="who"><img src="assets/their-logo-small.png" alt=""><div><b>Your order</b><small>Blazin' Boards · Jerusalem</small></div></div>
+        <div class="who"><img src="assets/their-logo-small.png" alt=""><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines{' data-full' if full else ''}></ul>
         <div class="total"><span>Total</span><b data-total>$0</b></div>
         {PROMISE}
@@ -208,7 +208,7 @@ page('order.html', "Your order · Blazin' Boards",
   function paint() {
     var ls = BB.lines(F, o);
     document.getElementById('cartlines').innerHTML = ls.map(function (l) {
-      return '<li><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm · ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
+      return '<li><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
         + '<span class="stepper"><button type="button" data-dec="' + l.p.id + '" aria-label="One fewer">−</button><output>' + l.qty + '</output><button type="button" data-inc="' + l.p.id + '" aria-label="One more">+</button></span>'
         + '<span class="amt">' + BB.money(l.p.price * l.qty, l.p.currency) + '</span></li>';
     }).join('');
@@ -288,6 +288,7 @@ page('order-when.html', "When and where · Blazin' Boards", 'Collect in Jerusale
         </div>
         <div class="q" id="addrQ" hidden>
           <div class="field" id="f-address"><label for="address">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, number, city, plus floor or entrance" maxlength="400"><span class="err">Where should it go?</span></div>
+          <div class="field" id="f-city" hidden><label for="city">City</label><select id="city"></select><span class="err">Choose the city it goes to.</span></div>
         </div>
         <p class="errline" id="err"></p>
         <div class="next"><a class="cta" id="go" href="order-details.html">Continue</a><a class="back" href="order.html">Back</a></div>
@@ -316,6 +317,9 @@ page('order-when.html', "When and where · Blazin' Boards", 'Collect in Jerusale
   function paint() {
     document.querySelectorAll('[data-ful]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.ful === b.dataset.ful)); });
     $('addrQ').hidden = o.ful !== 'delivery';
+    // A store that is not nationwide delivers only to its own cities, and the
+    // order is refused without one (dead-ends audit, 12 Oct 2026).
+    $('f-city').hidden = !(F && !F.serves_nationwide && (F.areas || []).length);
     windows(); BB.save(o); if (F) BB.paint(F, o);
   }
   document.querySelectorAll('[data-ful]').forEach(function (b) { b.addEventListener('click', function () { o.ful = b.dataset.ful; paint(); }); });
@@ -327,14 +331,19 @@ page('order-when.html', "When and where · Blazin' Boards", 'Collect in Jerusale
     // No Shabbos: a kosher kitchen's boards, and the earliest day is 48 hours out.
     if (!o.date || o.date < $('date').min || new Date(o.date + 'T12:00:00').getDay() === 6) bad.push('f-date');
     if (o.ful === 'delivery' && (o.address || '').length < 5) bad.push('f-address');
+    if (o.ful === 'delivery' && !$('f-city').hidden && !o.city) bad.push('f-city');
     bad.forEach(function (id) { $(id).classList.add('is-bad'); });
-    if (bad.length) { e.preventDefault(); var el = $(bad[0]).querySelector('input'); el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
+    if (bad.length) { e.preventDefault(); var el = $(bad[0]).querySelector('input, select'); el.focus({ preventScroll: true }); el.scrollIntoView({ block: 'center', behavior: 'smooth' }); }
   }
   $('go').addEventListener('click', check); $('go2').addEventListener('click', check);
   BB.form().then(function (f) {
     F = f;
-    if (F.settings && F.settings.delivery_on) document.querySelector('[data-ful="delivery"]').hidden = false;
+    var areas = F.areas || [];
+    if (F.settings && F.settings.delivery_on && (F.serves_nationwide || areas.length)) document.querySelector('[data-ful="delivery"]').hidden = false;
     else o.ful = 'pickup';
+    if (o.city && !areas.some(function (a) { return a.slug === o.city; })) o.city = '';
+    $('city').innerHTML = '<option value="">Choose</option>' + areas.map(function (a) { return '<option value="' + a.slug + '"' + (o.city === a.slug ? ' selected' : '') + '>' + a.label + '</option>'; }).join('');
+    $('city').addEventListener('change', function () { o.city = $('city').value; $('f-city').classList.remove('is-bad'); BB.save(o); });
     paint();
   });
   paint();
@@ -388,7 +397,7 @@ page('order-details.html', "Your details · Blazin' Boards", 'Your name, how to 
     $('rev').innerHTML = '<div><dt>Your order</dt><dd>' + ls.map(function (l) { return (l.qty > 1 ? l.qty + ' × ' : '') + BB.esc(l.p.short); }).join('<br>') + '<br><a class="back" href="order.html">Change</a></dd></div>'
       + '<div><dt>When</dt><dd>' + BB.esc(BB.when(o)) + '<br><a class="back" href="order-when.html">Change</a></dd></div>'
       + '<div><dt>How</dt><dd>' + BB.esc(BB.where(o)) + '</dd></div>';
-    var label = 'Place order · ' + BB.money(BB.total(F, o), BB.cur(F));
+    var label = 'Place order, ' + BB.money(BB.total(F, o), BB.cur(F));
     $('place').textContent = label; $('place2').textContent = 'Place order';
     BB.paint(F, o);
   }
@@ -404,7 +413,7 @@ page('order-details.html', "Your details · Blazin' Boards", 'Your name, how to 
     if (o.window) { var w = o.window.split('|'); win = { weekday: new Date(o.date + 'T12:00:00').getDay(), start: w[0], end: w[1] }; }
     var body = {
       lines: BB.lines(F, o).map(function (l) { return { product_id: l.p.id, qty: l.qty }; }),
-      fulfilment: o.ful, date: o.date, window: win, address: o.ful === 'delivery' ? o.address : null,
+      fulfilment: o.ful, date: o.date, window: win, address: o.ful === 'delivery' ? o.address : null, city: o.ful === 'delivery' ? (o.city || null) : null,
       customer_name: o.name, customer_phone: o.phone, customer_email: o.email || null, notes: o.notes || '', pay_by: o.payBy
     };
     ['place', 'place2'].forEach(function (id) { $(id).disabled = true; $(id).classList.add('is-busy'); $(id).textContent = 'Placing your order'; });

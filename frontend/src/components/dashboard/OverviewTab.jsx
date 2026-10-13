@@ -163,7 +163,7 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
           value={waiting}
           sub={waiting === 0 ? t('overview.waitingNone', 'Nothing needs a reply') : t('overview.waitingSub', { defaultValue: '{{b}} bookings · {{o}} work offers', b: summary.bookings_awaiting_reply || 0, o: summary.work_offers_open || 0 })}
           testid="waiting"
-          onClick={() => onGoToTab(summary.bookings_awaiting_reply ? 'bookings' : 'job-requests')}
+          onClick={() => onGoToTab(!summary.bookings_awaiting_reply && summary.work_offers_open ? 'job-requests' : 'bookings')}
           cta={t('overview.open', 'Open')}
         />
         <StatCard

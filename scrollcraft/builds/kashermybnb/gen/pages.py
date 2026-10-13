@@ -25,7 +25,7 @@ def page(name, title, desc, body, scripts='', order=False):
     cta = '' if order else btn('Book', 'book.html')
     foot = '' if order else f'''
 <footer class="foot">
-  <span>KasherMyBnb · kitchen kashering in Jerusalem and across Israel, since 2019</span>
+  <span>KasherMyBnb, kitchen kashering in Jerusalem and across Israel, since 2019</span>
   <nav><a href="index.html">Home</a><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book</a><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></nav>
 </footer>'''
     html = f'''<!doctype html>
@@ -86,7 +86,7 @@ page('kitchen.html', 'Whole kitchen kashering · KasherMyBnb',
         <p class="eyebrow">Whole kitchen</p>
         <h1>Your kitchen, kashered <em>oven to sink.</em></h1>
         <p class="lede">We kasher your kitchen so you can settle in with confidence, knowing it is fully prepared, strictly kosher, and ready to use.</p>
-        <div class="tag"><b>$350</b><span>about 2 hours · Jerusalem price</span></div>
+        <div class="tag"><b>$350</b><span>about 2 hours, Jerusalem price</span></div>
         <div class="act">
           {btn('Book a kitchen', 'book.html?s=kitchen')}
           <a class="link" href="#included">See what is included</a>
@@ -159,7 +159,7 @@ page('pots.html', 'Pots, cutlery and utensils · KasherMyBnb',
         <p class="eyebrow">Pots, cutlery and utensils</p>
         <h1>Your pots and cutlery, <em>kashered.</em></h1>
         <p class="lede">Bring your own pots, cutlery and kitchen utensils into a kosher kitchen. We kasher them in one visit, with the kitchen or on their own.</p>
-        <div class="tag"><b>$180</b><span>about 1 hour · Jerusalem price</span></div>
+        <div class="tag"><b>$180</b><span>about 1 hour, Jerusalem price</span></div>
         <div class="act">
           {btn('Book pots and cutlery', 'book.html?s=pots')}
           <a class="link" href="#can">What we can kasher</a>
@@ -210,7 +210,7 @@ page('pots.html', 'Pots, cutlery and utensils · KasherMyBnb',
 
 # ------------------------------------------------------------ the order pages
 SUM = '''<aside class="sum" aria-label="Your order">
-        <div class="who"><img src="assets/logo.png" alt=""><div><b>KasherMyBnb</b><small>Kitchen kashering · since 2019</small></div></div>
+        <div class="who"><img src="assets/logo.png" alt=""><div><b>KasherMyBnb</b><small>Kitchen kashering since 2019</small></div></div>
         <ul class="lines" data-lines></ul>
         <div class="total"><span>Total</span><b data-total>$0</b></div>
         <p class="fine" data-fee hidden>Outside Jerusalem there may be a fee for the distance. We tell you before the day.</p>

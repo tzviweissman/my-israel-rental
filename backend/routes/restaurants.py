@@ -10,6 +10,7 @@ certificate; until then the page says the hechsher is "from their website".
 Only `status: "listed"` places with a name are public. Hidden ones (no named
 hechsher found) wait in the admin queue; "removed" is a soft delete.
 """
+import logging
 import re
 import uuid
 from datetime import UTC, datetime, timedelta
@@ -17,6 +18,7 @@ from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from pydantic import BaseModel, Field
+from pymongo.errors import DuplicateKeyError
 
 from routes.deps import db, verify_token
 from utils.rate_limit import check_rate
@@ -246,10 +248,14 @@ async def _apply(place_id, e: AdminEdit, payload):
         raise HTTPException(404, "Restaurant not found")
     if e.address and place_id.startswith("mir-") and e.lat is None:
         # In the background: from Railway, Nominatim can take minutes to answer.
+        # Keep a reference: a bare create_task can be garbage collected mid-run.
         import asyncio
-        asyncio.create_task(_pin_from_address(place_id))
+        task = asyncio.create_task(_pin_from_address(place_id))
+        _PIN_TASKS.add(task)
+        task.add_done_callback(_PIN_TASKS.discard)
 
 
+_PIN_TASKS: set = set()
 NOMINATIM = "https://nominatim.openstreetmap.org/search"
 
 
@@ -271,14 +277,20 @@ async def _pin_from_address(place_id):
              re.sub(r"\s*\d+[/\d]*", "", addr)]
     async with httpx.AsyncClient(timeout=6, headers={"User-Agent": "MyIsraelRental/1.0 (myisraelrental.com)"}) as http:
         for q in tries:
-            r = await http.get(NOMINATIM, params={"q": q, "countrycodes": "il", "format": "json", "limit": 3,
-                                                  "accept-language": "en", "addressdetails": 1})
+            # One slow or failed lookup is a miss, never a crash: the admin
+            # batch below pins the rest (site audit, 11 Oct 2026).
+            try:
+                r = await http.get(NOMINATIM, params={"q": q, "countrycodes": "il", "format": "json", "limit": 3,
+                                                      "accept-language": "en", "addressdetails": 1})
+                found = r.json() if r.status_code == 200 else []
+            except (httpx.HTTPError, ValueError):
+                found = []
             await asyncio.sleep(1.1)
             # Only a hit in the restaurant's own city, by OSM's city field:
             # "Tzefania 61" found a Beit Shemesh street, whose full name
             # still contains "Jerusalem District".
             city = (d.get("city") or "").split("-")[0].lower()
-            hit = [h for h in (r.json() if r.status_code == 200 else [])
+            hit = [h for h in (found if isinstance(found, list) else [])
                    if city and any(city in (h.get("address") or {}).get(k, "").lower()
                                    for k in ("city", "town", "village"))]
             if hit:
@@ -295,7 +307,13 @@ async def admin_pin_missing(payload: dict = Depends(verify_token)):
     _admin_only(payload)
     ids = [d["place_id"] async for d in db.restaurants.find(
         {"place_id": {"$regex": "^mir-"}, "location": None, "contact.address": {"$nin": [None, ""]}}, {"place_id": 1})]
-    done = [pid for pid in ids if await _pin_from_address(pid)]
+    done = []
+    for pid in ids:
+        try:
+            if await _pin_from_address(pid):
+                done.append(pid)
+        except Exception as e:  # noqa: BLE001  one bad record must not lose the batch
+            logging.getLogger(__name__).warning("[restaurants] pin %s failed: %s", pid, e)
     return {"pinned": len(done), "not_found": len(ids) - len(done)}
 
 
@@ -587,6 +605,13 @@ async def restaurant_locations_daily_loop() -> None:
         if next_run <= now:
             next_run += timedelta(days=1)
         await asyncio.sleep((next_run - now).total_seconds())
+        # With more than one replica each would run this (and pay for the
+        # certificate reads twice): the first to take the day's lock runs it.
+        day = datetime.now(UTC).date().isoformat()
+        try:
+            await db.job_runs.insert_one({"_id": f"restaurants-daily-{day}", "at": datetime.now(UTC).isoformat()})
+        except DuplicateKeyError:
+            continue
         key = os.environ.get("GOOGLE_PLACES_API_KEY", "")
         client = Places(key, 2000) if key else None
         try:
