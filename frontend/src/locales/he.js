@@ -57,6 +57,8 @@ const he = {
       },
       // הזמנות לחנות — dashboard/OrdersTab (docs/orders-and-delivery-spec.md).
       orders: {
+        suppliedBy: 'מסופק על ידי {{name}}',
+        suppliedNotSent: 'לא נשלח, אתם כבר לא מחוברים',
         viaAutomation: 'מ{{name}}',
         viaAutoTitle: 'התקבלה אוטומטית',
         title: 'הזמנות',
@@ -231,6 +233,9 @@ const he = {
         sendTrack: 'שליחת קישור מעקב',
         trackShareText: 'היי {{name}}, אפשר לעקוב אחרי ההזמנה כאן: {{url}}',
         track: {
+          partSeparate: 'מגיע בנפרד: {{items}}',
+          partDelivered: 'נמסר',
+          partOnTheWay: 'בדרך אליך',
           a11yDone: 'הושלם. ',
           a11yNow: 'השלב הנוכחי. ',
           a11yTodo: 'עדיין לא. ',
@@ -4872,6 +4877,15 @@ const he = {
         keep: 'להשאיר את המסלול',
         cancelled: 'המסלול בוטל. לא יהיה חיוב נוסף.',
         cancelFailed: 'לא הצלחנו לבטל כרגע. שום דבר לא השתנה, נסו שוב.',
+      },
+      suppliers: {
+        title: 'מסופק על ידי שותף',
+        hint: 'כשלקוח מזמין מוצר ששותף מספק, השותף מקבל את ההזמנה עם פרטי המשלוח ומספק אותה. הלקוח עוקב אחריה בקישור המעקב שלו ולא רואה את הספק.',
+        noPartners: 'כדי ששותף יספק מוצר, קודם צריך להתחבר לעסק שלו ב״רשת״.',
+        openNetwork: 'לפתיחת הרשת',
+        ourselves: 'אנחנו מספקים בעצמנו',
+        saved: 'נשמר',
+        failed: 'השמירה לא הצליחה. נסו שוב.',
       },
       pageEditor: {
         page: 'עמוד',

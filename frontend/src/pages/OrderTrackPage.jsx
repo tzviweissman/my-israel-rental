@@ -17,7 +17,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { StarInput } from '../components/reviews/ReviewsSection';
-import { Loader2, ClipboardList, Check, Bike, Store as StoreIcon, Clock, MapPin } from 'lucide-react';
+import { Loader2, ClipboardList, Check, Bike, Store as StoreIcon, Clock, MapPin, Truck } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { money } from '../utils/currency';
 
@@ -157,6 +157,23 @@ export default function OrderTrackPage() {
           </p>
           {delivery && data.address && <p className="flex items-start gap-2" dir="auto" style={{ color: 'var(--ink)' }}><MapPin size={14} className="mt-0.5 shrink-0" /> <span>{data.address}</span></p>}
           <p className="whitespace-pre-line pt-1 border-t" dir="auto" style={{ color: 'var(--ink)', borderColor: 'var(--brand-border)' }}>{data.items}</p>
+          {/* Part of the order a partner delivers on its own (dropship.py):
+              shown only while it is somewhere other than the order as a
+              whole, so a one-part order reads as one order. */}
+          {(data.parts || []).some((p) => p.status !== data.status) && (data.parts || []).map((p, i) => (
+            <p key={i} className="flex items-start gap-2 text-xs" style={{ color: 'var(--brand-muted)' }} data-testid="track-part">
+              <Truck size={14} className="mt-0.5 shrink-0" aria-hidden="true" />
+              <span dir="auto">
+                {t('orders.track.partSeparate', 'Coming separately: {{items}}', { items: (p.items || '').split('\n').join(', ') })}
+                {' · '}
+                {p.status === 'done'
+                  ? t('orders.track.partDelivered', 'delivered')
+                  : p.out_for_delivery
+                    ? t('orders.track.partOnTheWay', 'on its way')
+                    : t(`orders.status.${p.status}`, p.status)}
+              </span>
+            </p>
+          ))}
           {data.total != null && (
             <p style={{ color: 'var(--ink)' }}>
               {t('orders.track.total', 'Total: {{n}}', { n: money(data.total, data.currency) })}

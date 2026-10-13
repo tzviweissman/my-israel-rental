@@ -67,6 +67,8 @@ const en = {
       // Store orders — dashboard/OrdersTab (docs/orders-and-delivery-spec.md).
       // Written for a phone held in one hand: short words, no jargon.
       orders: {
+        suppliedBy: 'Supplied by {{name}}',
+        suppliedNotSent: 'not sent, you are no longer connected',
         viaAutomation: 'from {{name}}',
         viaAutoTitle: 'Accepted automatically',
         title: 'Orders',
@@ -245,6 +247,9 @@ const en = {
         sendTrack: 'Send status link',
         trackShareText: 'Hi {{name}}, you can follow your order here: {{url}}',
         track: {
+          partSeparate: 'Coming separately: {{items}}',
+          partDelivered: 'delivered',
+          partOnTheWay: 'on its way',
           a11yDone: 'Done. ',
           a11yNow: 'Current step. ',
           a11yTodo: 'Not yet. ',
@@ -5056,6 +5061,15 @@ const en = {
         keep: 'Keep my plan',
         cancelled: 'Your plan is cancelled. You will not be charged again.',
         cancelFailed: 'We could not cancel just now. Nothing has changed; please try again.',
+      },
+      suppliers: {
+        title: 'Supplied by a partner',
+        hint: 'When a customer orders a product a partner supplies, the partner gets the order with the delivery details and delivers it. Your customer follows it on their tracking link and never sees the supplier.',
+        noPartners: 'Connect with a business first, in Network, to have it supply a product.',
+        openNetwork: 'Open Network',
+        ourselves: 'We supply it ourselves',
+        saved: 'Saved',
+        failed: 'Could not save. Please try again.',
       },
       pageEditor: {
         page: 'Page',

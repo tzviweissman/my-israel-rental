@@ -506,6 +506,10 @@ async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str, cont
     # because automations imports this module.
     from routes.marketplace.automations import fire_in_background
     fire_in_background("order.status_changed", {"order": fresh, "status": payload.status})
+    # A supplier's order moving moves the store's order it was made for,
+    # and so the customer's tracking link (dropship.py). Never raises.
+    from routes.marketplace.dropship import on_supplier_status
+    await on_supplier_status(fresh)
     return _public(fresh, contact=contact)
 
 
@@ -1534,6 +1538,8 @@ async def track_order(token: str, request: Request):
         raise HTTPException(status_code=404, detail="This link is not valid")
     biz = await db.businesses.find_one({"_id": o["business_id"]}) or {}
     delivered_at = (o.get("delivery") or {}).get("delivered_at")
+    from routes.marketplace.dropship import public_parts
+    parts = public_parts(o)
     return {
         "business": {
             "name": biz.get("name") or "",
@@ -1551,7 +1557,8 @@ async def track_order(token: str, request: Request):
         "status": o.get("status"),
         "status_changed_at": o.get("status_changed_at"),
         # Only the fact of it, never the courier's own details.
-        "out_for_delivery": bool(o.get("fulfilment") == "delivery" and o.get("status") == "ready" and o.get("courier")),
+        "out_for_delivery": bool(o.get("fulfilment") == "delivery" and o.get("status") == "ready"
+                                 and (o.get("courier") or (parts and all(p["out_for_delivery"] or p["status"] == "done" for p in parts)))),
         "delivered_at": delivered_at,
         # The proof, the way a parcel company shows it.
         "delivered_photo_url": (o.get("delivery") or {}).get("photo_url") if o.get("status") == "done" else None,
@@ -1559,6 +1566,8 @@ async def track_order(token: str, request: Request):
         "lines": o.get("lines"),
         "delivery_fee": o.get("delivery_fee"),
         "paid": bool((o.get("payment") or {}).get("method")),
+        # Parts a partner supplies and delivers separately, without its name.
+        "parts": parts,
     }
 
 
@@ -2126,6 +2135,10 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     }
     await db.store_orders.insert_one(doc)
     doc = await auto_assign(doc, biz)
+    # Lines a partner supplies go to that partner as its own order
+    # (dropship.py). Never raises: the customer's order is already placed.
+    from routes.marketplace.dropship import route_order
+    await route_order(doc)
     track = f"{_frontend_url()}/orders/track/{doc['track_token']}"
 
     # Tell the store: badge, bell, email.

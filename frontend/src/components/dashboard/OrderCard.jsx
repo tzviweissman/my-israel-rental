@@ -9,7 +9,7 @@
  */
 import React, { useState } from 'react';
 import {
-  Loader2, Phone, MapPin, Store as StoreIcon, Bike, Pencil, ChevronDown, Undo2, MessageCircle, Camera, Repeat, Zap,
+  Loader2, Phone, MapPin, Store as StoreIcon, Bike, Pencil, ChevronDown, Undo2, MessageCircle, Camera, Repeat, Zap, Truck,
 } from 'lucide-react';
 import { buildWhatsAppLink } from '../../utils/whatsappLink';
 import { money } from '../../utils/currency';
@@ -130,6 +130,21 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
             </div>
           )}
           <p dir="auto" className="text-sm mt-1 whitespace-pre-line" style={{ color: 'var(--ink)' }}>{o.items}</p>
+          {/* Lines a partner supplies and delivers (dropship.py): who, and where
+              their part is, so the store can answer "where is it?" without
+              asking the supplier. */}
+          {(o.supplied_parts || []).map((p) => (
+            <p key={p.order_id || p.business_id} className="text-xs mt-1 inline-flex items-start gap-1 w-full" style={{ color: 'var(--brand-muted)' }} data-testid="order-supplied-part">
+              <Truck size={12} className="mt-0.5 shrink-0" aria-hidden="true" />
+              <span dir="auto">
+                {t('orders.suppliedBy', 'Supplied by {{name}}', { name: p.business_name || t('automations.aPartner', 'a partner') })}
+                {': '}{(p.items || '').split('\n').join(', ')}{' · '}
+                {p.status === 'not_sent'
+                  ? t('orders.suppliedNotSent', 'not sent, you are no longer connected')
+                  : t(`orders.status.${p.status}`, p.status)}
+              </span>
+            </p>
+          ))}
           {o.fulfilment === 'delivery' && o.address && (
             <p className="text-xs mt-1 inline-flex items-start gap-1" style={{ color: 'var(--brand-muted)' }}>
               <MapPin size={12} className="mt-0.5 shrink-0" /> <span dir="auto">{o.address}</span>
