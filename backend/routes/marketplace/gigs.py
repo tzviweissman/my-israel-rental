@@ -562,7 +562,9 @@ async def list_deals(limit: int = Query(24, ge=1, le=60)):
     have not finished — the same `active_discount` gate every other public
     read uses, so an expired offer cannot appear here either.
     """
-    raw = await db.marketplace_gigs.find({"status": "published"}).to_list(400)
+    # Only listings that carry an offer: reading the first 400 published
+    # listings of any kind missed offers once there were more (13 Oct 2026).
+    raw = await db.marketplace_gigs.find({"status": "published", "discount.percent": {"$gt": 0}}).to_list(400)
     live = [g for g in raw if active_discount(g)]
     if not live:
         return []

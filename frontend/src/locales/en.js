@@ -3369,6 +3369,7 @@ const en = {
         help: 'If you have not answered by then, the time is released so someone else can book it. You get a reminder halfway through.',
       },
       providerProfile: {
+        open: 'Edit profile',
         title: 'Edit provider profile',
         close: 'Close',
         changeAvatar: 'Change avatar',

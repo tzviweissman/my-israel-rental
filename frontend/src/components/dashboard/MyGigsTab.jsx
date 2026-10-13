@@ -534,7 +534,7 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
             className="px-3 py-2.5 rounded-lg text-sm font-semibold text-gray-700 border border-gray-300 hover:bg-gray-50 flex items-center gap-1.5"
             data-testid="my-gigs-edit-profile-btn"
           >
-            <Pencil size={14} /> Edit profile
+            <Pencil size={14} /> {t('providerProfile.open', 'Edit profile')}
           </button>
           {/* "Upgrade to Pro" and "Cancel Pro" lived here. Listing is free,
               so there is nothing to upgrade to and nothing to cancel. */}

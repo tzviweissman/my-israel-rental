@@ -9,20 +9,22 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 ## Open
 
-- [Medium] Subscriptions: a business paying through PayPal has no way to cancel in the app (`POST /marketplace/subscription/cancel` has no caller). First seen 11 Oct (dead-ends). Needs a decision: build the control, or confirm no paid plans are live.
-- [Medium] Emails: several say "reply to this email", but they come from a no-reply address with no Reply-To. First seen 11 Oct (dead-ends). Needs a decision: which address replies go to.
-- [Medium] Restaurants: "we will email you when you are listed" and the claim-rejected message promise emails that are never sent. First seen 11 Oct (dead-ends).
-- [Medium] Requests board: a poster cannot edit their request (typo, budget, WhatsApp); the endpoint exists with no screen. First seen 11 Oct (dead-ends).
-- [Medium] Published services: availability, contact details, area and Hebrew title cannot be changed after publishing. First seen 11 Oct (dead-ends).
-- [Low] Saved-search alerts are not sent for listings added by bulk upload. First seen 11 Oct (dead-ends).
-- [Low] Pricing tips toggle promises a weekly note for any rental; it only runs for vacation listings with Smart Pricing. First seen 11 Oct (dead-ends).
-- [Low] Dashboard, My services: the "Edit provider profile" window is English only. First seen 13 Oct (follow-up).
-- [Low] KasherMyBnb site: the services list is three equal cards (a design ban). First seen 13 Oct (UI audit). Design call.
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
-- [Owner action] Blazin' Boards: "Deliver to me" is hidden because delivery was never turned on in their order settings (the default). First seen 12 Oct.
+- [Low] KasherMyBnb site: the included-items lists are equal tiles. Reviewed 13 Oct: they are checklists of what is included, not a marketing row of three; left as designed unless Tzvi wants them changed.
+- [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
 
 ## Fixed
 
+- [Medium] Subscriptions: a paying business can now see its plan and cancel it in Settings ("Your plan", shown only to a business with a paid plan). Fixed 13 Oct.
+- [Medium] Emails: "reply to this email" replies now reach a real inbox (Reply-To). Fixed 13 Oct.
+- [Medium] Restaurants: listed and claim-rejected emails are now sent. Fixed 13 Oct.
+- [Medium] Requests board: posters can edit their request. Fixed 13 Oct.
+- [Medium] Published services: availability, contact, area, category and Hebrew text can be edited after publishing. Fixed 13 Oct.
+- [Low] Saved-search alerts now fire for bulk-uploaded listings. Fixed 13 Oct.
+- [Low] Pricing tips hint now says it covers vacation rentals with Smart Pricing. Fixed 13 Oct.
+- [Low] Provider profile window and its button are in Hebrew too. Fixed 13 Oct.
+- [Low] Deals shelf only looked at the first 400 published listings, so offers could be missed. Fixed 13 Oct.
+- [Owner action, done] Blazin' Boards: delivery turned on, across Israel, fee confirmed on WhatsApp. 13 Oct.
 - [Medium] Blazin' Boards order page: a delivery order would have been refused for a store that is not nationwide, because the page never sent the city. It now asks for the city from the store's own list. Fixed 13 Oct.
 - [Medium] Dashboard, Overview: "Waiting on you" opened an empty pane for renters and property hosts. Now opens bookings unless there are work offers. Fixed 13 Oct.
 - [Medium] Contracts: the WhatsApp "contract signed" link opened bookings without highlighting the booking. Fixed 13 Oct.
