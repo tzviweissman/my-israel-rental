@@ -10,10 +10,11 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 ## Open
 
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
-- [Low] KasherMyBnb site: the included-items lists are equal tiles. Reviewed 13 Oct: they are checklists of what is included, not a marketing row of three; left as designed unless Tzvi wants them changed.
 - [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
 
 ## Fixed
+
+- [Low] KasherMyBnb: the "what we kasher" lists on the kitchen and pots pages are now a split price list (add-ons left, ticked parts right; on a phone the list first). 13 Oct.
 
 - [Medium] Subscriptions: a paying business can now see its plan and cancel it in Settings ("Your plan", shown only to a business with a paid plan). Fixed 13 Oct.
 - [Medium] Emails: "reply to this email" replies now reach a real inbox (Reply-To). Fixed 13 Oct.

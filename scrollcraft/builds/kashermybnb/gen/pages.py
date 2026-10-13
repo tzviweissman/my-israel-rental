@@ -105,22 +105,24 @@ page('kitchen.html', 'Whole kitchen kashering · KasherMyBnb',
   </section>
 
   <section class="sec" id="included">
-    <div class="wrap">
-      <p class="eyebrow">What we kasher</p>
-      <h2>Six parts of the kitchen, one price.</h2>
-      <p class="sub">Everything you cook and wash up on, done in one visit.</p>
-      <ul class="items">
-        <li>{icon(I['oven'])}<b>Oven</b><span>With its racks.</span></li>
-        <li>{icon(I['stove'])}<b>Stovetop</b><span>Electric or gas.</span></li>
-        <li>{icon(I['micro'])}<b>Microwave</b><span>As part of the kitchen.</span></li>
-        <li>{icon(I['counter'])}<b>Countertops</b><span>Kashered, and covered.</span></li>
-        <li>{icon(I['sink'])}<b>Sinks and faucets</b><span>Sinks with their faucets.</span></li>
-        <li>{icon(I['plate'])}<b>Hot plate</b><span>As part of the kitchen.</span></li>
-      </ul>
-      <div class="extras">
-        <div class="extra"><div><b>Oven cleaning and kashering</b><small>Add it when you book.</small></div><span class="amt">+$40</span></div>
-        <a class="extra" href="pots.html"><div><b>Pots, cutlery and utensils</b><small>Not part of the kitchen. See what we can kasher.</small></div><span class="amt">$180</span></a>
+    <div class="wrap split">
+      <div class="split-l">
+        <p class="eyebrow">What we kasher</p>
+        <h2>Six parts of the kitchen, one price.</h2>
+        <p class="sub">Everything you cook and wash up on, done in one visit.</p>
+        <div class="extras">
+          <div class="extra"><div><b>Oven cleaning and kashering</b><small>Add it when you book.</small></div><span class="amt">+$40</span></div>
+          <a class="extra" href="pots.html"><div><b>Pots, cutlery and utensils</b><small>Not part of the kitchen. See what we can kasher.</small></div><span class="amt">$180</span></a>
+        </div>
       </div>
+      <ul class="checks">
+        <li><b>Oven</b><span>With its racks.</span></li>
+        <li><b>Stovetop</b><span>Electric or gas.</span></li>
+        <li><b>Microwave</b><span>As part of the kitchen.</span></li>
+        <li><b>Countertops</b><span>Kashered, and covered.</span></li>
+        <li><b>Sinks and faucets</b><span>Sinks with their faucets.</span></li>
+        <li><b>Hot plate</b><span>As part of the kitchen.</span></li>
+      </ul>
     </div>
   </section>
 
@@ -177,23 +179,27 @@ page('pots.html', 'Pots, cutlery and utensils · KasherMyBnb',
   </section>
 
   <section class="sec" id="can">
-    <div class="wrap">
-      <p class="eyebrow">What we kasher</p>
-      <h2>What we can kasher</h2>
-      <ul class="items">
-        <li>{icon(I['pot'])}<b>Pots</b><span>Stainless steel pots.</span></li>
-        <li>{icon(I['fork'])}<b>Cutlery</b><span>Knives, forks and spoons.</span></li>
-        <li>{icon(I['ladle'])}<b>Kitchen utensils</b><span>The tools you cook with.</span></li>
-      </ul>
-      <h2 style="margin-top:3.5rem">What cannot be kashered</h2>
-      <p class="sub">Some things cannot be made kosher this way. We tell you plainly, and offer what we can.</p>
-      <ul class="items is-no">
-        <li>{icon(I['x'])}<b>Pots of other materials</b><span>Only stainless steel pots can be kashered.</span></li>
-        <li>{icon(I['pan'])}<b>Frying pans</b><span>Frying pans cannot be kashered.</span></li>
-      </ul>
-      <div class="extras">
-        <div class="extra"><div><b>A new frying pan</b><small>Provided on request. Add it when you book.</small></div><span class="amt">$15</span></div>
-        <a class="extra" href="kitchen.html"><div><b>The whole kitchen</b><small>Oven, stovetop, microwave, countertops, sinks, hot plate.</small></div><span class="amt">$350</span></a>
+    <div class="wrap split">
+      <div class="split-l">
+        <p class="eyebrow">What we kasher</p>
+        <h2>What we can kasher</h2>
+        <div class="extras">
+          <div class="extra"><div><b>A new frying pan</b><small>Provided on request. Add it when you book.</small></div><span class="amt">$15</span></div>
+          <a class="extra" href="kitchen.html"><div><b>The whole kitchen</b><small>Oven, stovetop, microwave, countertops, sinks, hot plate.</small></div><span class="amt">$350</span></a>
+        </div>
+      </div>
+      <div class="split-r">
+        <ul class="checks">
+          <li><b>Pots</b><span>Stainless steel pots.</span></li>
+          <li><b>Cutlery</b><span>Knives, forks and spoons.</span></li>
+          <li><b>Kitchen utensils</b><span>The tools you cook with.</span></li>
+        </ul>
+        <h3>What cannot be kashered</h3>
+        <p class="sub">Some things cannot be made kosher this way. We tell you plainly, and offer what we can.</p>
+        <ul class="checks is-no">
+          <li><b>Pots of other materials</b><span>Only stainless steel pots can be kashered.</span></li>
+          <li><b>Frying pans</b><span>Frying pans cannot be kashered.</span></li>
+        </ul>
       </div>
     </div>
   </section>
