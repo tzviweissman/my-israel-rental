@@ -4323,6 +4323,8 @@ const en = {
       },
       // The public jobs board (/businesses/jobs).
       jobsBoard: {
+        areaPh: 'Any area - start typing a city',
+        areaFreeText: 'Not on our list? Type it anyway.',
         metaTitle: 'Open jobs · MyIsraelRental',
         metaDescription: 'Browse jobs posted by renters and owners on MyIsraelRental - apply directly to reach customers.',
         title: 'Open jobs',
