@@ -16,7 +16,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   BadgeCheck, Beef, Coffee, Croissant, EggFried, Fish, Globe, Hamburger,
-  IceCreamCone, MapPin, MessageCircle, Navigation, Phone, Pizza, Salad, Sandwich, Soup, UtensilsCrossed,
+  IceCreamCone, MapPin, MessageCircle, Navigation, Phone, Pizza, Salad, Sandwich, ShoppingBag, Soup, UtensilsCrossed,
 } from 'lucide-react';
 import RestaurantFeedback from './RestaurantFeedback';
 
@@ -142,6 +142,11 @@ export default function RestaurantCard({ r, active }) {
           {r.website && (
             <Action href={r.website} icon={Globe} external testId="restaurant-website">
               {t('restaurants.website', 'Website')}
+            </Action>
+          )}
+          {r.order_url && (
+            <Action href={r.order_url} icon={ShoppingBag} external testId="restaurant-order">
+              {t('restaurants.orderWolt', 'Order on Wolt')}
             </Action>
           )}
         </div>

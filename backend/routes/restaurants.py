@@ -58,6 +58,8 @@ def _card(d, distance_km=None):
         "neighborhood": d.get("neighborhood"), "region": d.get("region"),
         "address": c.get("address"),
         "website": c.get("website"), "phone": c.get("phone"), "whatsapp": c.get("whatsapp"),
+        # Their Wolt page, beside their own site (Tzvi, 13 Oct 2026).
+        "order_url": c.get("order_url"),
         "lat": loc[1] if loc else None, "lng": loc[0] if loc else None,
         "google_place": d.get("source") == "google",
         "distance_km": round(distance_km, 2) if distance_km is not None else None,
@@ -186,6 +188,7 @@ class AdminEdit(BaseModel):
     phone: Optional[str] = None
     whatsapp: Optional[str] = None
     website: Optional[str] = None
+    order_url: Optional[str] = None
     certification: Optional[str] = None
     kashrut: Optional[str] = None
     verified: Optional[bool] = None
@@ -200,7 +203,7 @@ class AdminEdit(BaseModel):
 
 async def _apply(place_id, e: AdminEdit, payload):
     sets = {}
-    for k in ("name_en", "name_he", "address", "phone", "whatsapp", "website"):
+    for k in ("name_en", "name_he", "address", "phone", "whatsapp", "website", "order_url"):
         v = getattr(e, k)
         if v is not None:
             sets[f"contact.{k}"] = v.strip() or None
@@ -236,7 +239,7 @@ async def _apply(place_id, e: AdminEdit, payload):
         cur = (await db.restaurants.find_one({"place_id": place_id}, {"kosher_check.certificate": 1}) or {})
         cur = (cur.get("kosher_check") or {}).get("certificate") or {}
         sets["kosher_check.certificate"] = {**cur, "valid_until": v or None}
-    if e.lat is not None and e.lng is not None and place_id.startswith("mir-"):
+    if e.lat is not None and e.lng is not None and not place_id.startswith("ChIJ"):
         # Ours to keep (not Google's), so no fetched date for the 30-day refresh.
         sets.update({"location": {"type": "Point", "coordinates": [e.lng, e.lat]},
                      "location_source": "admin", "location_fetched_at": None})
