@@ -383,6 +383,43 @@ async def activate_subscription(user=Depends(verify_token)):
 
 
 
+def subscription_summary(prov: dict | None) -> dict:
+    """What the account settings card shows (Tzvi, 13 Oct 2026: build the
+    cancel control before anyone pays). Nothing here comes from PayPal at
+    read time: the webhook and /activate keep the row current.
+
+    state: "none" (no paid plan: the card is not shown), "pending" (checkout
+    started, not approved), "active", "cancelled" (paid until `until`, will
+    not renew) or "ended"."""
+    prov = prov or {}
+    sub_id = prov.get("paypal_subscription_id")
+    pp = (prov.get("paypal_subscription_status") or "").upper()
+    if not sub_id:
+        state = "none"
+    elif prov.get("subscription_status") == "expired" or pp == "EXPIRED":
+        state = "ended"
+    elif pp in ("CANCELLED", "SUSPENDED"):
+        state = "cancelled"
+    elif prov.get("subscription_status") == "active" and pp in ("ACTIVE", "APPROVED", ""):
+        state = "active"
+    else:
+        state = "pending"
+    return {
+        "state": state,
+        "until": prov.get("subscribed_until"),
+        "cancelled_at": prov.get("cancelled_at"),
+        "plan_months": prov.get("plan_months"),
+        "monthly_price": prov.get("plan_monthly_price"),
+        "currency": SUBSCRIPTION_CURRENCY,
+    }
+
+
+@router.get("/subscription/me")
+async def my_subscription(user=Depends(verify_token)) -> dict:
+    prov = await db.marketplace_providers.find_one({"user_id": user["user_id"]})
+    return subscription_summary(prov)
+
+
 @router.post("/subscription/cancel")
 async def cancel_subscription_route(user=Depends(verify_token)):
     """Cancel the caller's active PayPal subscription. The provider
@@ -435,7 +472,9 @@ async def cancel_subscription_route(user=Depends(verify_token)):
             "cancelled_at": datetime.now(UTC).isoformat(),
         }},
     )
-    return {"ok": True, "message": "Subscription cancelled. Access continues until the current period ends."}
+    prov = await db.marketplace_providers.find_one({"user_id": user["user_id"]})
+    return {"ok": True, "message": "Subscription cancelled. Access continues until the current period ends.",
+            "subscription": subscription_summary(prov)}
 
 
 # --------------------------- Webhook side-effect helper --------------------- #

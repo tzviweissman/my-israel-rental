@@ -23,6 +23,9 @@ EMAIL_FROM = os.environ.get("EMAIL_FROM", "no-reply@myisraelrental.com")
 EMAIL_FROM_NAME = os.environ.get("EMAIL_FROM_NAME", "My Israel Rental")
 FRONTEND_URL = os.environ.get("FRONTEND_URL", "https://myisraelrental.com")
 CONTACT_EMAIL = "support@myisraelrental.com"
+# Mail comes From a no-reply address, but several emails say "reply to this
+# email": a reply now reaches a real inbox (dead-ends audit, 11 Oct 2026).
+EMAIL_REPLY_TO = os.environ.get("EMAIL_REPLY_TO", CONTACT_EMAIL)
 CONTACT_PHONE = os.environ.get("CONTACT_PHONE", "+972 55 322 5141")
 
 # Brand palette
@@ -70,6 +73,7 @@ async def send_email(
     tag: str | None = None,
     text_body: str | None = None,
     skip_suppression_check: bool = False,
+    reply_to: str | None = None,
 ) -> bool:
     """Send an HTML email through Postmark. Non-blocking for callers via
     asyncio.to_thread. Returns True on success, False otherwise.
@@ -135,6 +139,7 @@ async def send_email(
             TextBody=text_body or _strip_html(html_body),
             MessageStream="outbound",
             Tag=tag or "transactional",
+            ReplyTo=reply_to or EMAIL_REPLY_TO,
         )
 
     try:
@@ -402,7 +407,7 @@ async def send_booking_confirmation_email(
     </div>
     {_button("View Booking", f"{FRONTEND_URL}/dashboard?tab=bookings")}
     <p style="color:#888;font-size:12px;line-height:1.6;margin-top:10px;">
-      Need to change anything? Reply to this email or message the owner from your dashboard.
+      Need to change anything? Message the owner from your dashboard, or reply to this email and we will help.
     </p>
     """
     subject = (

@@ -6,15 +6,15 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>When and where · Blazin' Boards</title>
 <meta name="description" content="Collect in Jerusalem or have it delivered, and the day you need it.">
-<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mv6ahsgf">
+<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mv6aycwz">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mv6ahsgf">
+<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mv6aycwz">
 </head>
 <body>
 <nav class="nav" aria-label="Blazin' Boards">
-  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv6ahsgf" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
+  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv6aycwz" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
   <ul class="menu">
     <li><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-0">Home</a></li>
     <li><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-0">Every board</a></li>
@@ -45,14 +45,14 @@
           </div>
         </div>
         <div class="q" id="addrQ" hidden>
-          <div class="field" id="f-address"><label for="address" data-mir-key="t-438c5cbe-0">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, number, city, plus floor or entrance" maxlength="400"><span class="err" data-mir-key="t-def80760-0">Where should it go?</span></div>
+          <div class="field" id="f-address"><label for="address" data-mir-key="t-438c5cbe-0">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, number, city, plus floor or entrance" maxlength="400"><span class="hint" data-mir-key="t-2c1e89bf-0">The delivery fee depends on the city. We confirm it with you on WhatsApp before the day.</span><span class="err" data-mir-key="t-def80760-0">Where should it go?</span></div>
           <div class="field" id="f-city" hidden><label for="city" data-mir-key="t-59b7e1af-0">City</label><select id="city"></select><span class="err" data-mir-key="t-2e9e7fd0-0">Choose the city it goes to.</span></div>
         </div>
         <p class="errline" id="err"></p>
         <div class="next"><a class="cta" id="go" href="/business/blazin-boards/order-details">Continue</a><a class="back" href="/business/blazin-boards/order" data-mir-key="t-fa767fba-0">Back</a></div>
       </section>
       <aside class="summary" aria-label="Your order" aria-live="polite">
-        <div class="who"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv6ahsgf" alt="" data-mir-key="i-0746f29b-1"><div><b data-mir-key="t-ba61b3de-0">Your order</b><small data-mir-key="t-645d4e11-0">Blazin' Boards, Jerusalem</small></div></div>
+        <div class="who"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv6aycwz" alt="" data-mir-key="i-0746f29b-1"><div><b data-mir-key="t-ba61b3de-0">Your order</b><small data-mir-key="t-645d4e11-0">Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines data-full></ul>
         <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><b data-total data-mir-key="t-e2b2a704-0">$0</b></div>
         <ul class="promise">
@@ -66,7 +66,7 @@
 </main>
 <div class="dock"><div><small data-mir-key="t-9263db8f-0">Total</small><b data-total data-mir-key="t-e2b2a704-1">$0</b></div><a class="cta" id="go2" href="/business/blazin-boards/order-details">Continue</a></div>
 
-<script src="/pages/blazin-boards/site.js?v=mv6ahsgf"></script>
+<script src="/pages/blazin-boards/site.js?v=mv6aycwz"></script>
 <script>
 (function () {
   var o = BB.load(), F = null, $ = function (id) { return document.getElementById(id); };
@@ -89,7 +89,8 @@
     $('addrQ').hidden = o.ful !== 'delivery';
     // A store that is not nationwide delivers only to its own cities, and the
     // order is refused without one (dead-ends audit, 12 Oct 2026).
-    $('f-city').hidden = !(F && !F.serves_nationwide && (F.areas || []).length);
+    var B = (F && F.business) || {};
+    $('f-city').hidden = !(F && !B.serves_nationwide && (B.areas || []).length);
     windows(); BB.save(o); if (F) BB.paint(F, o);
   }
   document.querySelectorAll('[data-ful]').forEach(function (b) { b.addEventListener('click', function () { o.ful = b.dataset.ful; paint(); }); });
@@ -108,8 +109,8 @@
   $('go').addEventListener('click', check); $('go2').addEventListener('click', check);
   BB.form().then(function (f) {
     F = f;
-    var areas = F.areas || [];
-    if (F.settings && F.settings.delivery_on && (F.serves_nationwide || areas.length)) document.querySelector('[data-ful="delivery"]').hidden = false;
+    var B = F.business || {}, areas = B.serves_nationwide ? [] : (B.areas || []);
+    if (F.settings && F.settings.delivery_on && (B.serves_nationwide || areas.length)) document.querySelector('[data-ful="delivery"]').hidden = false;
     else o.ful = 'pickup';
     if (o.city && !areas.some(function (a) { return a.slug === o.city; })) o.city = '';
     $('city').innerHTML = '<option value="">Choose</option>' + areas.map(function (a) { return '<option value="' + a.slug + '"' + (o.city === a.slug ? ' selected' : '') + '>' + a.label + '</option>'; }).join('');

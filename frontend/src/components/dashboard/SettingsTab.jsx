@@ -6,6 +6,7 @@ import axios from 'axios';
 import { AuthContext } from '../../App';
 import NotificationSettings from './NotificationSettings';
 import EmailSwitches from './EmailSwitches';
+import SubscriptionCard from './SubscriptionCard';
 import { phoneError, phonePreview } from '../../utils/phoneValidation';
 import PhoneInput from '../common/PhoneInput';
 
@@ -208,6 +209,7 @@ const SettingsTab = ({ user, token, API, runsBusiness = false }) => {
     <div>
       <h2 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-head)' }}>{i18n.t('dashboard.accountSettings')}</h2>
 
+      <SubscriptionCard API={API} token={token} />
       <NotificationSettings API={API} token={token} />
       <EmailSwitches API={API} token={token} />
 

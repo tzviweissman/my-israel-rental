@@ -116,7 +116,7 @@ page('boards.html', "Every board · Blazin' Boards",
       <h2>Before you order</h2>
       <dl class="facts">
         <div><dt>Notice</dt><dd>Orders 48 hours ahead.</dd></div>
-        <div><dt>Delivery</dt><dd>Collect in Jerusalem, or delivery throughout Israel.</dd></div>
+        <div><dt>Delivery</dt><dd>Collect in Jerusalem, or delivery across Israel. The delivery fee depends on the city; we confirm it on WhatsApp.</dd></div>
         <div><dt>On request</dt><dd>Gluten-free and soy-free boards.</dd></div>
         <div><dt>Paying</dt><dd>You pay us directly, by <span data-ways>card, Zelle or bank transfer</span>.</dd></div>
       </dl>
@@ -287,7 +287,7 @@ page('order-when.html', "When and where · Blazin' Boards", 'Collect in Jerusale
           </div>
         </div>
         <div class="q" id="addrQ" hidden>
-          <div class="field" id="f-address"><label for="address">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, number, city, plus floor or entrance" maxlength="400"><span class="err">Where should it go?</span></div>
+          <div class="field" id="f-address"><label for="address">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, number, city, plus floor or entrance" maxlength="400"><span class="hint">The delivery fee depends on the city. We confirm it with you on WhatsApp before the day.</span><span class="err">Where should it go?</span></div>
           <div class="field" id="f-city" hidden><label for="city">City</label><select id="city"></select><span class="err">Choose the city it goes to.</span></div>
         </div>
         <p class="errline" id="err"></p>
@@ -319,7 +319,8 @@ page('order-when.html', "When and where · Blazin' Boards", 'Collect in Jerusale
     $('addrQ').hidden = o.ful !== 'delivery';
     // A store that is not nationwide delivers only to its own cities, and the
     // order is refused without one (dead-ends audit, 12 Oct 2026).
-    $('f-city').hidden = !(F && !F.serves_nationwide && (F.areas || []).length);
+    var B = (F && F.business) || {};
+    $('f-city').hidden = !(F && !B.serves_nationwide && (B.areas || []).length);
     windows(); BB.save(o); if (F) BB.paint(F, o);
   }
   document.querySelectorAll('[data-ful]').forEach(function (b) { b.addEventListener('click', function () { o.ful = b.dataset.ful; paint(); }); });
@@ -338,8 +339,8 @@ page('order-when.html', "When and where · Blazin' Boards", 'Collect in Jerusale
   $('go').addEventListener('click', check); $('go2').addEventListener('click', check);
   BB.form().then(function (f) {
     F = f;
-    var areas = F.areas || [];
-    if (F.settings && F.settings.delivery_on && (F.serves_nationwide || areas.length)) document.querySelector('[data-ful="delivery"]').hidden = false;
+    var B = F.business || {}, areas = B.serves_nationwide ? [] : (B.areas || []);
+    if (F.settings && F.settings.delivery_on && (B.serves_nationwide || areas.length)) document.querySelector('[data-ful="delivery"]').hidden = false;
     else o.ful = 'pickup';
     if (o.city && !areas.some(function (a) { return a.slug === o.city; })) o.city = '';
     $('city').innerHTML = '<option value="">Choose</option>' + areas.map(function (a) { return '<option value="' + a.slug + '"' + (o.city === a.slug ? ' selected' : '') + '>' + a.label + '</option>'; }).join('');

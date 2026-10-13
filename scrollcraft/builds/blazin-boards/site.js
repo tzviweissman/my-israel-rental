@@ -87,7 +87,7 @@
     if (o.window) { var w = o.window.split('|'); d += ', ' + w[0] + ' to ' + w[1]; }
     return d;
   }
-  function where(o) { return o.ful === 'delivery' ? 'Delivery' + (o.address ? ' to ' + o.address : '') : 'Collect in Jerusalem'; }
+  function where(o) { return o.ful === 'delivery' ? 'Delivery' + (o.address ? ' to ' + o.address : '') + ', fee confirmed on WhatsApp' : 'Collect in Jerusalem'; }
 
   function paint(f, o) {
     var ls = lines(f, o), c = cur(f), t = total(f, o);
