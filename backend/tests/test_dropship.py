@@ -130,3 +130,89 @@ async def test_no_supplier_no_extra_order(env):
     c, db = env
     await c.post("/api/marketplace/order-form/gig1/orders", json=_order())
     assert await db.store_orders.count_documents({}) == 1
+
+
+# ---- the two small fixes and the catalogue (13 Oct 2026) -------------------
+
+@pytest_asyncio.fixture
+async def env2(env, monkeypatch):
+    c, db = env
+    import routes.marketplace.orders as om
+    sent = []
+
+    async def _rec(to, subject, *a, **k):
+        sent.append((to, subject))
+
+    monkeypatch.setattr(om, "_email", _rec)
+    await db.marketplace_gigs.insert_one({
+        "_id": "bakgig", "business_id": "bakery", "provider_user_id": SUPPLIER_OWNER, "gig_type": "store",
+        "status": "published", "title": "Bread", "products": [
+            {"id": "rye", "name": "Rye loaf", "price": 25, "currency": "ILS", "description": "Sourdough rye", "images": ["https://x/rye.jpg"]},
+        ],
+    })
+    yield c, db, sent
+
+
+@pytest.mark.asyncio
+async def test_supplier_is_emailed(env2):
+    c, db, sent = env2
+    await c.put("/api/marketplace/gigs/gig1/suppliers", json={"suppliers": {"challah": "bakery"}}, headers=_auth(STORE_OWNER))
+    await c.post("/api/marketplace/order-form/gig1/orders", json=_order())
+    assert ("supplier-owner@example.test", "Gift Baskets needs you to supply an order") in sent
+
+
+@pytest.mark.asyncio
+async def test_typed_in_order_sent_by_hand_and_followed(env2):
+    c, db, _ = env2
+    await db.store_orders.insert_one({
+        "_id": "typed", "business_id": "store", "owner_user_id": STORE_OWNER, "customer_name": "Avi",
+        "items": "3 challot", "fulfilment": "delivery", "address": "Jaffa 5", "status": "new",
+        "history": [], "track_token": "t" * 22, "needed_by": "2030-01-01",
+    })
+    r = await c.post("/api/marketplace/orders/typed/send-to-supplier",
+                     json={"supplier_business_id": "other", "items": "3 challot"}, headers=_auth(STORE_OWNER))
+    assert r.status_code == 400
+    r = await c.post("/api/marketplace/orders/typed/send-to-supplier",
+                     json={"supplier_business_id": "bakery", "items": "3 challot", "whole": True}, headers=_auth(STORE_OWNER))
+    assert r.status_code == 200, r.text
+    sup = await db.store_orders.find_one({"business_id": "bakery"})
+    assert sup["items"] == "3 challot" and sup["address"] == "Jaffa 5"
+    await c.patch(f"/api/marketplace/orders/{sup['_id']}/status", json={"status": "preparing"}, headers=_auth(SUPPLIER_OWNER))
+    assert (await db.store_orders.find_one({"_id": "typed"}))["status"] == "preparing"
+    r = await c.post("/api/marketplace/orders/typed/send-to-supplier",
+                     json={"supplier_business_id": "bakery", "items": "x"}, headers=_auth(STRANGER))
+    assert r.status_code in (403, 404)
+
+
+@pytest.mark.asyncio
+async def test_catalogue_add_price_and_stock(env2):
+    c, db, _ = env2
+    r = await c.put("/api/marketplace/gigs/bakgig/wholesale", json={"offers": {"rye": 15}}, headers=_auth(SUPPLIER_OWNER))
+    assert r.json()["offers"] == {"rye": 15}
+    # nothing about the offer on the supplier's public order form
+    assert "15" not in str((await c.get("/api/marketplace/order-form/bakgig")).json().get("products"))
+    cat = (await c.get("/api/marketplace/businesses/store/supplier-catalog", headers=_auth(STORE_OWNER))).json()["items"]
+    assert [(i["name"], i["wholesale_price"], i["supplier"]["name"]) for i in cat] == [("Rye loaf", 15, "The Bakery")]
+    # a stranger's store cannot see it
+    assert (await c.get("/api/marketplace/businesses/store/supplier-catalog", headers=_auth(STRANGER))).status_code == 403
+
+    r = await c.post("/api/marketplace/gigs/gig1/add-from-supplier",
+                     json={"source_gig_id": "bakgig", "product_id": "rye", "price": 35}, headers=_auth(STORE_OWNER))
+    assert r.status_code == 200, r.text
+    new = r.json()["product"]
+    assert new["price"] == 35 and new["images"] == ["https://x/rye.jpg"]
+    again = await c.post("/api/marketplace/gigs/gig1/add-from-supplier",
+                         json={"source_gig_id": "bakgig", "product_id": "rye", "price": 35}, headers=_auth(STORE_OWNER))
+    assert again.status_code == 409
+
+    await c.post("/api/marketplace/order-form/gig1/orders", json=_order(lines=((new["id"], 2),)))
+    sup = await db.store_orders.find_one({"business_id": "bakery"})
+    assert sup["total"] == 30 and sup["lines"][0]["price"] == 15   # wholesale, not the customer's 35
+
+    # the supplier runs out: the store's copy cannot be ordered
+    await c.patch("/api/marketplace/gigs/bakgig", json={"products": [
+        {"id": "rye", "name": "Rye loaf", "price": 25, "in_stock": False}]}, headers=_auth(SUPPLIER_OWNER))
+    store_gig = await db.marketplace_gigs.find_one({"_id": "gig1"})
+    assert next(p for p in store_gig["products"] if p["id"] == new["id"])["in_stock"] is False
+    r = await c.post("/api/marketplace/order-form/gig1/orders", json=_order(lines=((new["id"], 1),)))
+    assert r.status_code == 400

@@ -11,7 +11,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import PhoneInput from '../common/PhoneInput';
 import { phoneError } from '../../utils/phoneValidation';
-import { Plus, Loader2, ExternalLink, Trash2, Pencil, Upload, X, FileText, Globe, Award, ArrowLeft, PauseCircle, PlayCircle, EyeOff, Star } from 'lucide-react';
+import { Plus, Loader2, ExternalLink, Trash2, Pencil, Upload, X, FileText, Globe, Award, ArrowLeft, PauseCircle, PlayCircle, EyeOff, Star, Truck } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import { uploadFilesFast } from '../../utils/fastUpload';
 import CoverPlaceholder from '../common/CoverPlaceholder';
@@ -19,6 +19,7 @@ import AddPhotoNudge from '../common/AddPhotoNudge';
 import BusinessSelector, { ALL, readStoredBusiness } from './BusinessSelector';
 import PerformancePanel from './PerformancePanel';
 import EditListingModal from './EditListingModal';
+import SupplierCatalog from './SupplierCatalog';
 import LeadOutcomePanel from './LeadOutcomePanel';
 import ChipSelect from '../common/ChipSelect';
 import { nounKey } from '../../utils/businessNoun';
@@ -323,6 +324,7 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
   // The listing being corrected, or null. Held here rather than per-card
   // so only one sheet can ever be open.
   const [editing, setEditing] = useState(null);
+  const [catalogGig, setCatalogGig] = useState(null);
   // Which business a new listing should belong to. The tab knows — it was
   // opened from one — but it used to send the wizard to a bare
   // /businesses/add, so the server fell back to the person's FIRST
@@ -707,6 +709,15 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
                       >
                         <Pencil size={11} /> {t('editListing.edit', 'Edit')}
                       </button>
+                      {g.gig_type === 'store' && g.business_id && (
+                        <button
+                          onClick={() => setCatalogGig(g)}
+                          className="text-xs font-semibold text-gray-700 hover:text-[var(--brand-primary)] flex items-center gap-1"
+                          data-testid={`my-gigs-add-from-supplier-${g.id}`}
+                        >
+                          <Truck size={11} /> {t('catalog.open', 'Add from a supplier')}
+                        </button>
+                      )}
                       {/* Absent, not disabled, while an admin holds it
                           down: a control that can only fail is not one. */}
                       {!heldByAdmin && (
@@ -750,6 +761,9 @@ const MyGigsTab = ({ API, token, business = null, onBack = null }) => {
         </div>
       )}
 
+      {catalogGig && (
+        <SupplierCatalog API={API} token={token} gig={catalogGig} onClose={() => setCatalogGig(null)} onAdded={load} />
+      )}
       {editing && (
         <EditListingModal
           gig={editing}

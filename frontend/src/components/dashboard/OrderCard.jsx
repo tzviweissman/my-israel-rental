@@ -47,7 +47,7 @@ export function pillStyle(status, on) {
  * owner's tab passes no `onReveal` because its orders already carry the
  * contact details; nothing about that view changes.
  */
-export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, onRepeat, onReveal, couriers, t }) {
+export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, onRepeat, onReveal, onSendToSupplier, couriers, t }) {
   const [more, setMore] = useState(false);
   const time = (o.needed_by || '').includes('T') ? o.needed_by.slice(11, 16) : '';
   const closed = !OPEN.has(o.status);
@@ -261,6 +261,11 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
           {onRepeat && !o.standing_id && (
             <button type="button" disabled={busy} onClick={() => onRepeat(o)} className="inline-flex items-center gap-1 px-3 min-h-[40px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-repeat">
               <Repeat size={12} /> {t('orders.repeatWeekly', 'Repeat every week')}
+            </button>
+          )}
+          {onSendToSupplier && !o.automation?.dropship && ['new', 'preparing', 'ready'].includes(o.status) && (
+            <button type="button" disabled={busy} onClick={() => onSendToSupplier(o)} className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-full text-xs font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="order-send-to-supplier">
+              <Truck size={12} /> {t('orders.sendToSupplier', 'Send to a supplier')}
             </button>
           )}
           {o.track_token && o.customer_phone_e164 && (() => {

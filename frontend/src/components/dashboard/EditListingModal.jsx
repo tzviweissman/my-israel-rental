@@ -48,6 +48,7 @@ import { toast } from 'sonner';
 import { X, Trash2, ImagePlus, Loader2, Wand2 } from 'lucide-react';
 import PhotoMatch from './PhotoMatch';
 import ProductSuppliers from './ProductSuppliers';
+import WholesaleOffers from './WholesaleOffers';
 import { useTranslation } from 'react-i18next';
 import { uploadFilesFast, reportUploadFailure } from '../../utils/fastUpload';
 import { productPhotos } from '../../utils/productPhotos';
@@ -825,6 +826,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
           </div>
 
           {isStore && <ProductSuppliers gig={gig} API={API} token={token} />}
+          {isStore && <WholesaleOffers gig={gig} API={API} token={token} />}
         </div>
 
         <div className="flex items-center justify-end gap-2 px-5 py-4 border-t" style={{ borderColor: 'var(--brand-border)' }}>

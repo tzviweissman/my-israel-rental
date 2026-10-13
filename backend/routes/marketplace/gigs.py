@@ -865,6 +865,9 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     # from this business, and suggest it where it is the cheaper option.
     from routes.marketplace.price_watch import listing_saved
     listing_saved(gig, fresh)
+    # Stores selling this supplier's products take its stock (dropship.py).
+    from routes.marketplace.dropship import sync_from_supplier
+    await sync_from_supplier(fresh, gig_id)
     return _clean_gig(fresh)
 
 
@@ -915,6 +918,8 @@ async def delete_gig(gig_id: str, user=Depends(verify_token)):
     if gig["provider_user_id"] != user["user_id"]:
         raise HTTPException(status_code=403, detail="Not your gig")
     await db.marketplace_gigs.delete_one({"_id": gig_id})
+    from routes.marketplace.dropship import sync_from_supplier
+    await sync_from_supplier(None, gig_id)
     return {"ok": True}
 
 

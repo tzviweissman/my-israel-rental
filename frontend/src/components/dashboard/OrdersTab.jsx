@@ -35,6 +35,7 @@ import { phoneError } from '../../utils/phoneValidation';
 import { money } from '../../utils/currency';
 import { pastCutoff } from '../../utils/orderCutoffs';
 import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
+import SendToSupplierDialog from './SendToSupplierDialog';
 
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -114,6 +115,7 @@ export default function OrdersTab({ API, token }) {
   const auth = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
 
   const [businesses, setBusinesses] = useState(null);
+  const [supplyOrder, setSupplyOrder] = useState(null);
   const [bizId, setBizId] = useState(() => {
     try { return localStorage.getItem('orders.business') || ''; } catch { return ''; }
   });
@@ -534,6 +536,7 @@ export default function OrdersTab({ API, token }) {
                     onAssign={assign}
                     onPayment={setPayment}
                     onRepeat={repeatWeekly}
+                    onSendToSupplier={setSupplyOrder}
                     couriers={couriers}
                     t={t}
                   />
@@ -542,6 +545,9 @@ export default function OrdersTab({ API, token }) {
             </section>
           ))}
         </div>
+      )}
+      {supplyOrder && (
+        <SendToSupplierDialog API={API} token={token} businessId={bizId} order={supplyOrder} onClose={() => setSupplyOrder(null)} onSent={() => load()} />
       )}
     </div>
   );
