@@ -417,6 +417,10 @@ async def admin_import(body: ImportBody, payload: dict = Depends(verify_token)):
         fresh = (r.get("location_fetched_at") or "") >= cutoff
         loc = {"location": r.get("location") if fresh else None,
                "location_fetched_at": r.get("location_fetched_at") if fresh else None}
+        # A pin that is not Google's (OpenStreetMap, or placed by hand) is
+        # ours to keep: no date, so the 30-day refresh never drops it.
+        if r.get("location_source") in ("osm", "admin") and not pid.startswith("ChIJ"):
+            loc = {"location": r.get("location"), "location_fetched_at": None, "location_source": r["location_source"]}
         have = await db.restaurants.find_one({"place_id": pid}, {"edited_at": 1})
         if have and have.get("edited_at"):
             await db.restaurants.update_one({"place_id": pid}, {"$set": loc})
