@@ -13,6 +13,7 @@ The CSV format is defined by COLUMNS below — matching the fields in PropertyCr
 Lists (amenities, image_filenames) use `;` as the separator because commas collide
 with the CSV delimiter and most owners know semicolons from ICS/export formats.
 """
+import asyncio
 import csv
 import io
 import json
@@ -38,7 +39,9 @@ from models_response import (
 # raised NameError inside the handler and the whole commit 500'd, instead
 # of that row landing in `skipped`. Same defect as admin_import/properties.
 from routes.deps import UPLOAD_DIR, db, logger, verify_token
+from utils.email import send_email
 from utils.errors import api_error, row_error
+from utils.saved_search import match_property_against_searches
 
 router = APIRouter()
 api_router = router
@@ -404,6 +407,14 @@ async def commit_bulk(body: BulkCommitBody, payload: dict = Depends(verify_token
                 "bulk_created": True,  # drives the "NEW" badge on the dashboard for 24h
             })
             await db.properties.insert_one(doc)
+            # Saved-search alerts, same call as routes/properties/crud.py.
+            # Non-blocking; a failure here never fails the upload.
+            try:
+                asyncio.create_task(match_property_against_searches(
+                    db, property_id, reason="new_listing", send_email_fn=send_email,
+                ))
+            except Exception as e:
+                logger.warning(f"saved-search trigger failed (bulk create): {e}")
             created.append({"index": i, "id": property_id, "title": doc["title"], "image_filenames": image_filenames})
         except Exception as e:
             skipped.append({
