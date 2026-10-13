@@ -1841,7 +1841,7 @@ const en = {
         availabilityTitle: 'Availability reminders',
         availabilityHint: 'A reminder when the dates on one of your rentals are about to run out.',
         pricingTitle: 'Pricing tips',
-        pricingHint: 'A weekly note when a price on one of your rentals looks out of step with similar places.',
+        pricingHint: 'A weekly note on suggested prices. It covers vacation rentals that have Smart Pricing turned on, and nothing else.',
         saved: 'Saved',
         failed: 'Could not save. Try again.',
       },
