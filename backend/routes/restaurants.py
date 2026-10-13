@@ -469,7 +469,50 @@ async def admin_decide(sub_id: str, decision: str, payload: dict = Depends(verif
     await db.restaurant_submissions.update_one({"id": sub_id}, {"$set": {
         "status": "approved" if decision == "approve" else "rejected", "decided_at": _now(),
         "decided_by": payload.get("user_id"), "restaurant_id": card["id"] if card else None}})
+    if card:
+        await _email_listed(s, card)
     return {"ok": True, "restaurant": card}
+
+
+async def _email_listed(sub, card):
+    """Tell the person who asked that their restaurant is listed. Only when
+    they gave an address; a failure is logged and never fails the admin action."""
+    to = (sub.get("contact_email") or "").strip()
+    if not to:
+        return
+    try:
+        from utils.email import FRONTEND_URL, _button, _esc, _wrap, send_email
+        name = card.get("name_en") or card.get("name_he") or sub.get("name") or "your restaurant"
+        city = next((c for c in CITIES if c.lower() == (sub.get("city") or "").lower()), None)
+        link = f"{FRONTEND_URL}/restaurants/{city_slug(city)}" if city else f"{FRONTEND_URL}/restaurants"
+        html = _wrap(f"""
+          <h2 style="margin:0 0 12px">{_esc(name)} is now listed on MyIsraelRental</h2>
+          <p>Thank you for sending it in. We have added it to the kosher restaurants list, free of charge.</p>
+          <p>If a phone number, hours or hechsher change, reply to this email and we update the listing.</p>
+          {_button("See the listing", link)}
+        """, preheader="Your restaurant is listed")
+        await send_email(to, f"{name} is listed", html, tag="restaurant-listed")
+    except Exception:
+        logging.getLogger(__name__).exception("restaurant listed email failed")
+
+
+async def _email_claim_rejected(claim):
+    to = (claim.get("email") or "").strip()
+    if not to:
+        return
+    try:
+        from utils.email import _esc, _wrap, send_email
+        d = await db.restaurants.find_one({"place_id": claim.get("place_id")}, {"contact": 1}) or {}
+        ct = d.get("contact") or {}
+        name = ct.get("name_en") or ct.get("name_he") or "the restaurant"
+        html = _wrap(f"""
+          <h2 style="margin:0 0 12px">About your claim for {_esc(name)}</h2>
+          <p>Thank you, {_esc(claim.get('name') or '')}. We could not confirm that you manage this restaurant, so the claim was not approved.</p>
+          <p>If we got it wrong, reply to this email with a way for us to check, such as the restaurant's own phone number or website, and we will look again.</p>
+        """, preheader="Your restaurant claim")
+        await send_email(to, f"{name}: about your claim", html, tag="restaurant-claim")
+    except Exception:
+        logging.getLogger(__name__).exception("restaurant claim rejected email failed")
 
 
 # --------------------------------------------------------------- reports and claims
@@ -585,6 +628,8 @@ async def admin_decide_claim(claim_id: str, decision: str, payload: dict = Depen
     await db.restaurant_claims.update_one({"id": claim_id}, {"$set": {
         "status": "approved" if decision == "approve" else "rejected", "decided_at": _now(),
         "decided_by": payload.get("user_id")}})
+    if decision == "reject":
+        await _email_claim_rejected(c)
     return {"ok": True}
 
 

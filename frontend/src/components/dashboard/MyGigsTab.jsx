@@ -64,7 +64,7 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
     const file = files?.[0];
     if (!file) return;
     if (credentialDocs.length >= 8) {
-      toast.error('Maximum 8 credential documents');
+      toast.error(t('providerProfile.maxDocs', 'Maximum 8 credential documents'));
       return;
     }
     setDocUploading(true);
@@ -73,9 +73,9 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
       const good = results.find((r) => r.url && !r.error);
       if (good) {
         setCredentialDocs((prev) => [...prev, { url: good.url, label: file.name }]);
-        toast.success('Document uploaded');
+        toast.success(t('providerProfile.docUploaded', 'Document uploaded'));
       } else {
-        toast.error(results[0]?.error || 'Upload failed');
+        toast.error(results[0]?.error || t('providerProfile.uploadFailed', 'Upload failed'));
       }
     } finally {
       setDocUploading(false);
@@ -92,9 +92,9 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
       const good = results.find((r) => r.url && !r.error);
       if (good) {
         setAvatar(good.url);
-        toast.success('Avatar uploaded');
+        toast.success(t('providerProfile.avatarUploaded', 'Avatar uploaded'));
       } else {
-        toast.error(results[0]?.error || 'Upload failed');
+        toast.error(results[0]?.error || t('providerProfile.uploadFailed', 'Upload failed'));
       }
     } finally {
       setUploading(false);
@@ -112,11 +112,11 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
           credential_docs: credentialDocs, booking_hold_hours: holdHours },
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      toast.success('Profile updated');
+      toast.success(t('providerProfile.saved', 'Profile updated'));
       onSaved();
       onClose();
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Failed to save');
+      toast.error(err.response?.data?.detail || t('providerProfile.saveFailed', 'Failed to save'));
     } finally {
       setSaving(false);
     }
@@ -131,8 +131,8 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
         data-testid="provider-profile-modal"
       >
         <div className="flex justify-between items-center">
-          <h3 className="text-lg font-bold">Edit provider profile</h3>
-          <button type="button" onClick={onClose} className="text-gray-600 hover:text-gray-900 min-h-[44px] min-w-[44px] inline-flex items-center justify-center -me-3" aria-label="Close" data-testid="provider-profile-close">
+          <h3 className="text-lg font-bold">{t('providerProfile.title', 'Edit provider profile')}</h3>
+          <button type="button" onClick={onClose} className="text-gray-600 hover:text-gray-900 min-h-[44px] min-w-[44px] inline-flex items-center justify-center -me-3" aria-label={t('providerProfile.close', 'Close')} data-testid="provider-profile-close">
             <X size={18} />
           </button>
         </div>
@@ -152,13 +152,13 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
             data-testid="provider-avatar-btn"
           >
             {uploading ? <Loader2 className="animate-spin" size={12} /> : <Upload size={12} />}
-            {avatar ? 'Change avatar' : 'Upload avatar'}
+            {avatar ? t('providerProfile.changeAvatar', 'Change avatar') : t('providerProfile.uploadAvatar', 'Upload avatar')}
           </button>
         </div>
 
         <div>
-          <label className="text-xs font-semibold text-gray-700">Tagline</label>
-          <input value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder="e.g. Eco-friendly cleaning in Tel Aviv" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-tagline-input" maxLength={80} />
+          <label className="text-xs font-semibold text-gray-700">{t('providerProfile.tagline', 'Tagline')}</label>
+          <input value={tagline} onChange={(e) => setTagline(e.target.value)} placeholder={t('providerProfile.taglinePh', 'e.g. Eco-friendly cleaning in Tel Aviv')} className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-tagline-input" maxLength={80} />
         </div>
         <div>
           {/* Chips, not a dropdown: three options, and the reader should be
@@ -180,11 +180,11 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
           </p>
         </div>
         <div>
-          <label className="text-xs font-semibold text-gray-700">Bio</label>
-          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder="Tell clients about your experience…" className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-bio-input" maxLength={600} />
+          <label className="text-xs font-semibold text-gray-700">{t('providerProfile.bio', 'Bio')}</label>
+          <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={4} placeholder={t('providerProfile.bioPh', 'Tell clients about your experience…')} className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm" data-testid="provider-bio-input" maxLength={600} />
         </div>
         <div>
-          <label className="text-xs font-semibold text-gray-700">WhatsApp</label>
+          <label className="text-xs font-semibold text-gray-700">{t('providerProfile.whatsapp', 'WhatsApp')}</label>
           {/* Doubles as the fallback for any gig published with WhatsApp
               booking mode but a blank per-gig number — see the `whatsapp`
               field on GET /marketplace/gigs/{id}'s provider block, which is
@@ -205,8 +205,8 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
         <div data-testid="provider-languages-section">
           <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
             <Globe size={12} className="text-[var(--brand-primary)]" />
-            Languages you speak
-            <span className="text-xs font-normal text-gray-600 ms-1">(shows on your public profile)</span>
+            {t('providerProfile.languages', 'Languages you speak')}
+            <span className="text-xs font-normal text-gray-600 ms-1">{t('providerProfile.languagesNote', '(shows on your public profile)')}</span>
           </label>
           <div className="mt-2 flex flex-wrap gap-1.5">
             {languageList.map((lang) => {
@@ -237,15 +237,15 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
         <div data-testid="provider-credentials-section">
           <label className="text-xs font-semibold text-gray-700 flex items-center gap-1.5">
             <Award size={12} className="text-[var(--gold)]" />
-            Credentials &amp; licenses
-            <span className="text-xs font-normal text-gray-600 ms-1">(optional)</span>
+            {t('providerProfile.credentials', 'Credentials & licenses')}
+            <span className="text-xs font-normal text-gray-600 ms-1">{t('providerProfile.optional', '(optional)')}</span>
           </label>
           <textarea
             value={credentials}
             onChange={(e) => setCredentials(e.target.value)}
             rows={3}
             maxLength={2000}
-            placeholder="e.g. Licensed tour guide since 2019 (Ministry of Tourism #12345). CPR certified. 200+ five-star reviews."
+            placeholder={t('providerProfile.credentialsPh', 'e.g. Licensed tour guide since 2019 (Ministry of Tourism #12345). CPR certified. 200+ five-star reviews.')}
             className="w-full mt-1 px-3 py-2 rounded-lg border border-gray-200 text-sm"
             data-testid="provider-credentials-input"
           />
@@ -259,11 +259,11 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
                 <input
                   value={doc.label || ''}
                   onChange={(e) => setCredentialDocs((prev) => prev.map((d, idx) => idx === i ? { ...d, label: e.target.value } : d))}
-                  placeholder="Document name"
+                  placeholder={t('providerProfile.docName', 'Document name')}
                   className="flex-1 bg-transparent focus:outline-none text-gray-900"
                   data-testid={`credential-doc-label-${i}`}
                 />
-                <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-[var(--brand-primary)] hover:underline">View</a>
+                <a href={doc.url} target="_blank" rel="noopener noreferrer" className="text-[var(--brand-primary)] hover:underline">{t('providerProfile.view', 'View')}</a>
                 <button
                   type="button"
                   onClick={() => setCredentialDocs((prev) => prev.filter((_, idx) => idx !== i))}
@@ -284,16 +284,16 @@ const ProfileEditModal = ({ API, token, initial, onClose, onSaved }) => {
                 data-testid="add-credential-doc-btn"
               >
                 {docUploading ? <Loader2 className="animate-spin" size={11} /> : <Plus size={11} />}
-                Add document
+                {t('providerProfile.addDocument', 'Add document')}
               </button>
             )}
           </div>
         </div>
 
         <div className="flex justify-end gap-2 pt-2">
-          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">Cancel</button>
+          <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">{t('providerProfile.cancel', 'Cancel')}</button>
           <button type="submit" disabled={saving} className="btn-primary px-5 py-2 rounded-lg text-sm font-semibold disabled:opacity-60" data-testid="provider-profile-save">
-            {saving ? <Loader2 className="animate-spin" size={14} /> : 'Save'}
+            {saving ? <Loader2 className="animate-spin" size={14} /> : t('providerProfile.save', 'Save')}
           </button>
         </div>
       </form>
