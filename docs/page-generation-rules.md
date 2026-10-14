@@ -444,6 +444,68 @@ leaderboards, fake unread badges; slide-to-confirm on ordinary forms.
   unchanged: generated images are made from the owner's own photos, and never
   stand in for their premises or their people.
 
+## 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+
+From The Gift Boutique's first draft: "the ribbon is already gone by the time
+i scroll down to see the different pictures so i miss most of the effect and
+its a bit bland there isnt many affects".
+
+1. **A scroll effect plays while its subject is wholly on screen.** Either
+   hold the subject (a sticky stage that fits the screen, see below) and run
+   the effect over the hold, or start it only once the whole subject is in
+   view and finish it before any of it leaves. Never key it to the subject
+   *entering* the screen. Check: capture the effect at 0, 25, 50, 75 and
+   100 percent on a laptop, a short laptop and a phone; in every frame the
+   whole subject is visible and the effect is visibly mid-way where it should be.
+2. **Every page fills its effect budget, not just its limit.** Before
+   building, write in the brief: one signature moment (held and staged in
+   steps, the page's peak); at least three accents (an opening that arrives
+   in order, one scroll-tied detail in the middle of the page, a payoff at the
+   close that answers the signature); and quiet touches (sections ease in,
+   buttons react to hover and press, tiles lift). Then tick each one off on
+   the captured frames. One effect on an otherwise still page is a draft.
+3. **A held stage fits with everything fixed around it.** Its height is the
+   screen minus the sticky header and minus the phone's bottom bar, so the
+   bar never covers its last line. Things that travel out of the stage
+   (a bow lifting away) live outside any frame that clips, so they leave whole.
+4. **A motif is never doubled.** When an effect reuses part of the logo
+   (the bow), it never lands on the logo that already has it.
+5. **Widths of text are in em or rem, never ch.** Chrome works ch out from
+   the fallback font and keeps it after the web font arrives: the headline
+   came out narrow and five lines tall on first load.
+6. **A text shimmer is a layer over the letters, never the letters' own
+   background** (background-clip: text). The letters keep their real colour,
+   so they stay readable and the readability check can measure them.
+7. **A bottom bar fits at 360 px wide:** its label shrinks or wraps, its
+   button never does. Check the button's words end inside the button.
+8. **A scroll-tied effect finishes while its subject is still in the middle
+   of the screen.** From Rendrly's "How switching works" (13 Oct 2026), whose
+   lines filled with colour as you scrolled: "the coloring only finishes when
+   im past it". Progress ran until the list had moved most of the way up and
+   partly off a short laptop. Map progress from when the subject is in view
+   (its top passing about 85% of the way down) to when its centre reaches the
+   middle of the screen, never to when it leaves. Check with
+   `scripts/scroll-finish.mjs`: at 1920x1080, 1440x900, 1536x753, 1280x650,
+   390x844 and 360x640 the subject's top is still on screen and its centre no
+   higher than 40% of the screen at the moment the effect completes.
+9. **A list that stacks on a phone runs item by item there.** One progress
+   for the whole list suits a row of items side by side on a laptop; stacked,
+   the list is taller than half the screen and the later items light up late.
+   On a phone each item lights as it reaches about 80% of the way down the
+   screen, and the line to the next item fills while that item travels up to
+   the same point.
+10. **An effect that plays once starts where the visitor will see it, or is
+    tied to the scroll.** Rendrly's first version lit the steps one after
+    another, starting the moment the list's edge entered the screen; on a
+    normal scroll it was over before anyone got there ("theres no affect").
+    Start a one-time effect only when its subject is wholly in view (or, if
+    it is taller than half the screen, when its top reaches the middle, so a
+    hidden photo is not held blank for long), or tie its progress to the
+    scroll so it waits for the visitor. Section reveals that hide a whole
+    section keep an early start: holding them back leaves a blank band. The
+    page builder does this in `useFx` (frontend/src/components/pagebuilder/v3/
+    effects.js): list and photo showpieces get `.is-seen` by `seenEnough`.
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews
@@ -790,6 +852,57 @@ look real, you don't see the texture spreading". How:
 - Code still does the choreography: when it plays (on a choice, on scroll), the
   swap to the still at the end, the layout. Reduced motion shows the still.
 - Preflight the cost (get_cost) and generate one first; look at it before the rest.
+- **Generated in Higgsfield, every time** (Tzvi, 13 Oct 2026: "whenever generating
+  an effect like this ribbon or the cinnamon buns drizzle by bun intended we should
+  generate from higgsfield"). Any real-material effect (a ribbon untying, a drizzle,
+  a pour, fabric, steam) is made with Higgsfield: the MCP connection while building,
+  the API when it refuses. Never drawn in code first to "try it", and never another
+  generator. The Gift Boutique ribbon was drawn as CSS bars and a cartoon bow and
+  read as fake ("doesn't look elegant, it looks fake"), the same failure as the
+  Bun Intended drizzle.
+- **Every generated motion shows the real physical process, and flows** (Tzvi,
+  13 Oct 2026, on the Gift Boutique ribbon: "we dont see it unfolding and moving
+  it just kind of undoes magically then slides off", "if the ribbon would flow
+  around more then it would look cooler", and "it should be a general rule which
+  will help many different cases"). Applies to anything generated that moves: a
+  ribbon untying, a lid lifting, paper unfolding, a sauce pouring, cream
+  spreading, cheese stretching, a box opening, petals falling, steam rising.
+  1. **Cause, then effect, every step on screen.** The prompt names each physical
+     step in order (for a bow: a tail is pulled, the knot loosens, the loops slip
+     through, the ribbon unwinds; for a pour: the jug tips, the stream thins, it
+     lands and spreads). Nothing appears, disappears or changes state between
+     frames without a visible cause.
+  2. **It moves the way the material does**: weight, folds, sheen, drips,
+     stretch, bounce. Say the material and how it behaves.
+  3. **The change itself gets the time and the close view** (Tzvi, 13 Oct 2026:
+     "i dont like the loop show more detail when its untying"). Most of the
+     clip, at least half, is the moment the thing changes state (the knot
+     opening, the loops sliding through, the lid lifting, the sauce landing),
+     with the camera close enough to see the material work: creases, folds,
+     drips. What comes after (the ribbon leaving, the camera pulling back) is
+     short.
+  4. **It flows through the scene, gracefully, not past it.** Travel in a soft
+     curve and touch what is there (drapes over, wraps round, spills between)
+     rather than a straight slide or a fade. Never showy: no loops, spirals or
+     twirls that real material would not make on its own; these read as a
+     special effect and take time from the change.
+  5. **One clip, one physical step.** A video model asked for several changes
+     in one clip does the easy one and skips the hard one: asked to untie a
+     bow, it opened the loops and then the knot simply went away with the rest
+     (Tzvi, 13 Oct 2026: "the knot isnt untying its just going awawy"). Before
+     generating, list the steps (loops open, knot unwinds, ribbon leaves). Any
+     step that is hard, small or the point of the effect gets its own clip,
+     bracketed by a start frame and an end frame that show the state before
+     and after it (take them from earlier clips when the API cannot edit a
+     still). The clips are joined end frame to start frame, so the step cannot
+     be skipped. Check each step on its own contact sheet: if a state changes
+     between two frames with nothing on screen causing it, regenerate that
+     step.
+  6. **Generate in the real direction of time.** Never a "doing" clip played
+     backwards to fake "undoing": a reversed wrap reads as a bow dissolving.
+     Bracket it start frame to end frame (end_image_url) instead.
+  7. **Check the frames for these before showing**: a contact sheet of the
+     clip, looking for any step that happens off screen or by magic.
 
 **Blender** (Tzvi, 23 Sep 2026), for three jobs:
 1. **Product motion from real items:** their own product turning or rolling as the

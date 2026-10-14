@@ -129,9 +129,25 @@ export const parallaxAttrs = (brief, id) => (hasFx(brief, id) ? { 'data-sc-paral
 /** Whether this page needs the scroll engine at all. */
 export const needsEngine = (brief) => known(brief).some((id) => EFFECTS[id][1]);
 
-/** Marks the page ready for entrances and reveals each v3 block once it
- *  comes into view. Without IntersectionObserver nothing is marked, so
- *  nothing is ever held back. */
+/** Effects whose whole point is watching them play once: a list arriving item
+ *  by item, a photo wiping or opening. They start only when the visitor can
+ *  see them (docs/page-generation-rules.md §3f.10): started as the block's edge
+ *  entered, Rendrly's steps were over before anyone got there. Section reveals
+ *  keep the early start, since holding a section back leaves a blank band. */
+const SHOWPIECES = ['stagger-steps', 'stagger-biglist', 'wipe-side-photos', 'iris-palate'];
+const isShowpiece = (el) => SHOWPIECES.some((id) => (el.dataset.fx || '').split(' ').includes(id));
+
+/** In view for a showpiece: its list (or the block) wholly on screen, or, if
+ *  taller than half the screen, its top at the middle, so a tall photo band is
+ *  not held blank for long. Already scrolled past counts too, so a jump down the
+ *  page never leaves one unplayed. */
+export function seenEnough(rect, vh) {
+  return rect.bottom <= vh || (rect.height > vh / 2 && rect.top <= vh / 2);
+}
+
+/** Marks the page ready for entrances, reveals each v3 block once it comes
+ *  into view (.is-in) and starts each showpiece once it is seen (.is-seen).
+ *  Without IntersectionObserver nothing is marked, so nothing is held back. */
 export function useFx(on) {
   useEffect(() => {
     if (!on || typeof IntersectionObserver === 'undefined') return undefined;
@@ -144,10 +160,29 @@ export function useFx(on) {
         }
       });
     }, { rootMargin: '0px 0px -10% 0px' });
-    document.querySelectorAll('[data-page-v3][data-fx]').forEach((el) => io.observe(el));
+    const blocks = [...document.querySelectorAll('[data-page-v3][data-fx]')];
+    blocks.forEach((el) => io.observe(el));
+    let waiting = blocks.filter(isShowpiece);
+    const check = () => {
+      waiting = waiting.filter((el) => {
+        const subject = el.querySelector('.pv3-steps-list, .pv3-biglist-items') || el;
+        if (!seenEnough(subject.getBoundingClientRect(), window.innerHeight)) return true;
+        el.classList.add('is-seen');
+        return false;
+      });
+      if (!waiting.length) stop();
+    };
+    const stop = () => {
+      window.removeEventListener('scroll', check);
+      window.removeEventListener('resize', check);
+    };
+    window.addEventListener('scroll', check, { passive: true });
+    window.addEventListener('resize', check);
+    check();
     root.classList.add('fx-ready');
     return () => {
       io.disconnect();
+      stop();
       root.classList.remove('fx-ready');
     };
   }, [on]);

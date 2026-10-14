@@ -330,21 +330,21 @@
 
   /* The palate photo: wiped in from the reading side, or opened by an iris. */
   .fx-ready [data-fx~="wipe-side-photos"].pv3-palate .pv3-photo { transition: clip-path 1100ms var(--fx-ease); }
-  .fx-ready [data-fx~="wipe-side-photos"].pv3-palate:not(.is-in) .pv3-photo { clip-path: inset(0 100% 0 0); }
-  [dir="rtl"] .fx-ready [data-fx~="wipe-side-photos"].pv3-palate:not(.is-in) .pv3-photo,
-  .fx-ready [dir="rtl"] [data-fx~="wipe-side-photos"].pv3-palate:not(.is-in) .pv3-photo { clip-path: inset(0 0 0 100%); }
+  .fx-ready [data-fx~="wipe-side-photos"].pv3-palate:not(.is-seen) .pv3-photo { clip-path: inset(0 100% 0 0); }
+  [dir="rtl"] .fx-ready [data-fx~="wipe-side-photos"].pv3-palate:not(.is-seen) .pv3-photo,
+  .fx-ready [dir="rtl"] [data-fx~="wipe-side-photos"].pv3-palate:not(.is-seen) .pv3-photo { clip-path: inset(0 0 0 100%); }
   .fx-ready [data-fx~="iris-palate"].pv3-palate .pv3-photo { transition: clip-path 1200ms var(--fx-ease); }
-  .fx-ready [data-fx~="iris-palate"].pv3-palate:not(.is-in) .pv3-photo { clip-path: circle(0% at 50% 50%); }
-  .fx-ready [data-fx~="iris-palate"].pv3-palate.is-in .pv3-photo { clip-path: circle(75% at 50% 50%); }
+  .fx-ready [data-fx~="iris-palate"].pv3-palate:not(.is-seen) .pv3-photo { clip-path: circle(0% at 50% 50%); }
+  .fx-ready [data-fx~="iris-palate"].pv3-palate.is-seen .pv3-photo { clip-path: circle(75% at 50% 50%); }
 
-  /* Lists arrive item by item once their section is seen. */
+  /* Lists arrive item by item once the whole list is seen (effects.js seenEnough). */
   .fx-ready [data-fx~="stagger-biglist"] .pv3-biglist-items li,
   .fx-ready [data-fx~="stagger-steps"] .pv3-steps-list li {
     transition: opacity var(--fx-med) var(--fx-ease), transform var(--fx-med) var(--fx-ease);
     transition-delay: calc(var(--i, 0) * 60ms);
   }
-  .fx-ready [data-fx~="stagger-biglist"]:not(.is-in) .pv3-biglist-items li,
-  .fx-ready [data-fx~="stagger-steps"]:not(.is-in) .pv3-steps-list li { opacity: 0; transform: translateY(14px); }
+  .fx-ready [data-fx~="stagger-biglist"]:not(.is-seen) .pv3-biglist-items li,
+  .fx-ready [data-fx~="stagger-steps"]:not(.is-seen) .pv3-steps-list li { opacity: 0; transform: translateY(14px); }
 
   /* A rule that draws itself across, from the reading side. */
   [data-fx~="hairline-draw"].pv3-section { position: relative; border-block-start-color: transparent; }

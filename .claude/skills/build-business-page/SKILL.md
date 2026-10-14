@@ -93,7 +93,7 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   brief: the split-stage grammar, knob signature move, kosher band, phone
   order bar, every rule applied. `examples/FINGERPRINTS-myisraelrental.md`:
   the looks already used, which a new page must differ from.
-- `scripts/`: `readable.mjs`, `cutoff.mjs`, `clipped.mjs`, `cutout.py`, `overlay-truth.mjs`, `record.mjs`.
+- `scripts/`: `readable.mjs`, `cutoff.mjs`, `clipped.mjs`, `scroll-finish.mjs`, `cutout.py`, `overlay-truth.mjs`, `record.mjs`.
 
 ## 1. Facts: only theirs
 
@@ -134,6 +134,22 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   their photo), both on the page's background colour; a start/end-frame model
   (MiniMax H3 Max) fills only the pour. Code decides when it plays and swaps to
   the still at the end. Preflight cost, generate one, check it, then the rest.
+  **Always in Higgsfield** (Tzvi, 13 Oct 2026): a ribbon untying, a drizzle, a
+  pour, fabric or steam is generated there (MCP while building, API if it
+  refuses), never drawn in code first and never another generator. CSS
+  ribbon bars and a drawn bow read as fake on The Gift Boutique.
+  **Any generated motion shows the real physical process and flows**
+  (a ribbon, lid, pour, spread, unfold, steam): every step from cause to
+  effect on screen, nothing appears or vanishes by magic; it moves like its
+  material; the change itself gets at least half the clip, seen close (the
+  knot opening, creases, drips), the exit is short; it travels in one soft
+  curve and touches the products, never a straight slide or a fade, and
+  never showy loops or spirals; it is
+  generated in the real direction of time, start frame to end frame, never a
+  reversed clip. **One clip per physical step**: list the steps first; any
+  hard or key step (the knot unwinding) gets its own clip between a before
+  frame and an after frame, joined end to start, or the model skips it.
+  Full text: page rules, generated-clip section.
 
 ## 2. How to write
 
@@ -289,6 +305,36 @@ Full text, sources and the rejected list: `reference/full-rules.md` §3e.
    fixes section by section; polish states on any 21st or generated component.
 10. Pinned sections stay, but never take over the scroll's speed or direction.
 
+## 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
+
+Full text: `docs/page-generation-rules.md` §3f. From The Gift Boutique: the
+ribbon untied before the photos arrived, and the page had one effect.
+
+1. **A scroll effect plays while its subject is wholly on screen**: hold it
+   on a stage that fits, or start once it is all in view. Never key it to the
+   subject entering. Capture 0/25/50/75/100% on laptop, short laptop, phone.
+2. **Fill the effect budget**: one held signature moment in steps; at least
+   three accents (an arriving opening, a scroll-tied detail mid-page, a
+   closing payoff that answers the signature); quiet touches (eased reveals,
+   hover and press, tile lift). Listed in the brief, ticked on the frames.
+3. **A held stage** is the screen minus the header and the phone bar;
+   anything that travels out of it sits outside clipping frames.
+4. **A logo motif is never doubled** on the logo that already has it.
+5. **Text widths in em/rem, never ch** (Chrome keeps the fallback font's ch).
+6. **A text shimmer is an overlay**, never background-clip on the letters.
+7. **A bottom bar fits at 360 px**: the label gives way, the button never.
+8. **A scroll-tied effect finishes while its subject is mid-screen**, never as
+   it leaves (Rendrly: "the coloring only finishes when im past it"). Progress
+   from its top at ~85% down to its centre at the middle. Run
+   `scripts/scroll-finish.mjs`: at six sizes its top is on screen and its centre
+   no higher than 40% when it completes.
+9. **A list that stacks on a phone runs item by item**: each item lights at
+   ~80% down the screen; one whole-list progress lights the last items late.
+10. **A play-once effect starts when its subject is wholly in view** (or its
+    top at the middle if taller than half the screen), or is tied to the
+    scroll. Started as the edge entered, Rendrly's steps were over before
+    anyone saw them. Section reveals keep an early start (no blank bands).
+
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
 Full text: `reference/design-rules.md`. The rules both builders share are
@@ -383,6 +429,9 @@ The owner never sees a first draft. Before showing anything:
      every visible word at six sizes and many scroll points; fails under 12px,
      a sentence under 14px on a phone, or contrast under 4.5:1 (3:1 large)
      against the real pixels behind it, photos and video included.
+   - `node ~/.claude/skills/build-business-page/scripts/scroll-finish.mjs <url> <selector> "<done>"`:
+     for every scroll-tied effect; scrolls past at six sizes and fails if it
+     completes after its subject has passed the middle of the screen.
    - `node ~/.claude/skills/build-business-page/scripts/clipped.mjs <url>`:
      every word and picture cut by the box it sits in, scrolling the whole page
      at seven sizes; fails on any. Run it on every page of a site.
