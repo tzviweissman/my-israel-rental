@@ -177,7 +177,9 @@ input[type="date"]:valid:before {
    `.glass-nav-*` rather than `.bar`/`.links` so these can't collide with
    the generic class names already used elsewhere in a 125-file app. */
 .glass-nav {
-  background: linear-gradient(180deg, rgba(4, 12, 17, .42), transparent);
+  /* Holds its darkness further down since the section row moved under the
+     logo bar (14 Oct 2026): the row's white labels sit in its lower half. */
+  background: linear-gradient(180deg, rgba(4, 12, 17, .46) 0%, rgba(4, 12, 17, .34) 62%, transparent 100%);
   pointer-events: none;
 }
 .glass-nav > * { pointer-events: auto; }

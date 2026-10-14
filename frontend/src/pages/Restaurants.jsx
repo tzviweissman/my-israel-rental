@@ -126,7 +126,7 @@ export default function Restaurants() {
         path={citySlug ? `/restaurants/${citySlug}` : '/restaurants'}
       />
 
-      <div className="mx-auto max-w-6xl px-4 pt-24 pb-10 sm:pt-28">
+      <div className="mx-auto max-w-6xl px-4 pb-10" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }}>
         <h1 className="text-3xl font-semibold tracking-tight sm:text-4xl" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>
           {title}
         </h1>

@@ -89,7 +89,7 @@ const PaymentSuccess = () => {
   // --- Marketplace subscription success screen ---
   if (flow === 'marketplace-subscription') {
     return (
-      <div className="min-h-screen bg-[#fafafa] pt-24 pb-16 px-4" data-testid="subscription-success-page">
+      <div className="min-h-screen bg-[#fafafa] pb-16 px-4" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }} data-testid="subscription-success-page">
         <div className="max-w-md mx-auto bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           <div className="bg-gradient-to-br from-[var(--brand-primary)] to-[#155454] px-8 py-10 text-white text-center">
             <div className="w-16 h-16 bg-white/20 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -149,7 +149,7 @@ const PaymentSuccess = () => {
 
 
   return (
-    <div className="min-h-screen bg-[#fafafa] pt-24 pb-16 px-4" data-testid="payment-success-page">
+    <div className="min-h-screen bg-[#fafafa] pb-16 px-4" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }} data-testid="payment-success-page">
       <div className="max-w-xl mx-auto">
         <button
           type="button"

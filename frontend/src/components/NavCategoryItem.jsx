@@ -9,14 +9,16 @@ import { Link } from 'react-router-dom';
  *   - active (route matches): brand-gold + underline + heavier stroke
  * Scaling shrinks for the compact (scrolled) navbar.
  */
-const NavCategoryItem = ({ type, Icon, label, active, scrolled, iconHidden = false, testidSuffix = '', to }) => {
+const NavCategoryItem = ({ type, Icon, img, label, active, scrolled, iconHidden = false, testidSuffix = '', to }) => {
   const [hover, setHover] = useState(false);
   const isGold = active || hover;
   // Solid brand gold reads fine over the hero-image backdrop (shadowed
   // for legibility below), but only hits ~3:1 against the scrolled navbar's
   // solid teal fill — short of WCAG AA's 4.5:1 for text. Swap to the paler,
   // AA-compliant gold once scrolled; unscrolled keeps the original brand gold.
-  const color = isGold ? (scrolled ? 'var(--gold-text-on-dark)' : 'var(--gold)') : '#FFFFFF';
+  // With a picture the label stays white: the underline marks the current
+  // section, and pale gold on the grey scrim was hard to read.
+  const color = isGold && !img ? (scrolled ? 'var(--gold-text-on-dark)' : 'var(--gold)') : '#FFFFFF';
 
   // Default route falls back to the legacy /properties/<rental-type> path
   // for backwards compat (rental-type pills still using this component),
@@ -53,7 +55,21 @@ const NavCategoryItem = ({ type, Icon, label, active, scrolled, iconHidden = fal
       }}
       data-testid={`nav-category-${type}${testidSuffix}`}
     >
-      {!iconHidden && (
+      {!iconHidden && img && (
+        <img
+          src={img}
+          alt=""
+          width={40}
+          height={40}
+          className="mb-0.5 h-[34px] w-[34px] md:h-10 md:w-10 object-contain"
+          style={{
+            transform: hover ? 'scale(1.1)' : 'scale(1)',
+            filter: 'drop-shadow(0 2px 4px rgba(0,0,0,0.25))',
+            transition: 'transform 0.18s ease',
+          }}
+        />
+      )}
+      {!iconHidden && !img && (
         <Icon
           size={scrolled ? 18 : 22}
           color={color}
@@ -67,11 +83,13 @@ const NavCategoryItem = ({ type, Icon, label, active, scrolled, iconHidden = fal
         />
       )}
       <span
-        className="font-semibold tracking-wide whitespace-nowrap"
+        className={`font-semibold tracking-wide whitespace-nowrap ${img ? 'text-[11px] md:text-[13px]' : ''}`}
         style={{
           color,
-          textShadow: scrolled ? 'none' : '0 1px 3px rgba(0,0,0,0.5)',
-          fontSize: scrolled ? (iconHidden ? '13px' : '10px') : '12px',
+          // The picture row sits on the nav's scrim over any page, light
+          // ones included, so its labels always carry a shadow.
+          textShadow: img ? '0 1px 3px rgba(0,0,0,0.6)' : scrolled ? 'none' : '0 1px 3px rgba(0,0,0,0.5)',
+          fontSize: img ? undefined : scrolled ? (iconHidden ? '13px' : '10px') : '12px',
           transition: 'color 0.18s ease',
         }}
       >

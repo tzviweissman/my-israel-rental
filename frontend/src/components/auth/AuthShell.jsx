@@ -23,9 +23,9 @@ export default function AuthShell({ children, testId }) {
       style={{ background: 'var(--surface-muted, #F9FAFB)' }}
       data-testid={testId}
     >
-      <div className="mx-auto max-w-[1320px] px-3 sm:px-4 pt-20 sm:pt-24 lg:pt-[4.75rem] pb-4 lg:pb-2">
+      <div className="mx-auto max-w-[1320px] px-3 sm:px-4 pb-4 lg:pb-2" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 10px)' }}>
         <div
-          className="flex flex-col min-h-[calc(100svh-6rem)] sm:min-h-[calc(100svh-7rem)] rounded-3xl bg-white shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-12px_rgba(17,24,39,0.12)] lg:grid lg:grid-cols-[1.4fr_1fr] xl:grid-cols-2 lg:h-[calc(100svh-5.5rem)] lg:min-h-[500px] lg:p-3"
+          className="flex flex-col min-h-[calc(100svh-var(--nav-h,68px)-1.5rem)] rounded-3xl bg-white shadow-[0_1px_2px_rgba(17,24,39,0.04),0_12px_32px_-12px_rgba(17,24,39,0.12)] lg:grid lg:grid-cols-[1.4fr_1fr] xl:grid-cols-2 lg:h-[calc(100svh-var(--nav-h,68px)-1.25rem)] lg:min-h-[500px] lg:p-3"
           data-testid="auth-card"
         >
           <div

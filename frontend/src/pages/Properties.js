@@ -561,7 +561,7 @@ const Properties = () => {
         description={(RENTAL_TYPE_META[type] || RENTAL_TYPE_META['all']).description}
         path={`/properties/${type || 'all'}`}
       />
-      <div className="max-w-7xl mx-auto px-6 pt-36 sm:pt-32 md:pt-28 pb-12">
+      <div className="max-w-7xl mx-auto px-6 pb-12" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }}>
         <div className="flex items-center justify-between mb-3 gap-3">
           <h1
             className="text-2xl sm:text-3xl md:text-4xl font-bold truncate"

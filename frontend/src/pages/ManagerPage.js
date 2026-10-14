@@ -155,7 +155,7 @@ const ManagerPage = () => {
 
   return (
     <div className="min-h-screen" data-testid="manager-page">
-      <div className="max-w-7xl mx-auto px-6 pt-28 pb-12">
+      <div className="max-w-7xl mx-auto px-6 pb-12" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }}>
         <div className="rounded-2xl p-8 border border-[#E5E5E5] mb-10" style={{ background: 'linear-gradient(135deg, var(--brand-primary) 0%, #2A8585 100%)' }}>
           <div className="flex items-center gap-6">
             {data.manager.business_logo ? (

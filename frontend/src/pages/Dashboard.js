@@ -294,7 +294,7 @@ const Dashboard = () => {
        time" rule can only be enforced from a common ancestor. */
     <OnboardingProvider>
     <div className="min-h-screen" data-testid="dashboard-page">
-      <div className="max-w-7xl mx-auto px-4 md:px-6 pt-36 sm:pt-28 md:pt-28 pb-12">
+      <div className="max-w-7xl mx-auto px-4 md:px-6 pb-12" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }}>
         {/* Wide screens get the sidebar; narrow ones keep the tab strip. Same
             groups, same badges, one source: useDashboardNav. */}
         <DashboardShell

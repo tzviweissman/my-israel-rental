@@ -74,7 +74,7 @@ export default function WriteReview() {
   const listingHref = info?.listing_kind === 'property' ? `/property/${info.listing_id}` : info?.listing_id ? `/services/gig/${info.listing_id}` : '/';
 
   return (
-    <main className="min-h-screen px-4 pt-24 pb-16" style={{ background: 'var(--bg)' }} data-testid="write-review-page">
+    <main className="min-h-screen px-4 pb-16" style={{ background: 'var(--bg)', paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }} data-testid="write-review-page">
       <PageMeta title={t('reviewForm.metaTitle', 'Write a review')} noindex />
       <div className="max-w-xl mx-auto">
         {!info && <div className="py-24 text-center" style={{ color: MUTED }}><Loader2 className="animate-spin inline" size={20} /></div>}

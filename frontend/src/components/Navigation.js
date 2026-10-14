@@ -7,7 +7,6 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { playMessagePing, requestDesktopNotificationPermission, showDesktopNotification } from '../utils/messageAlerts';
 import NavCategoryItem from './NavCategoryItem';
-import FlowButton from './ui/flow-button';
 import logoMark from '../assets/brand/logo-mark.png';
 
 const Navigation = () => {
@@ -34,7 +33,6 @@ const Navigation = () => {
   // The home-page overhaul lives on /home-preview and is judged there;
   // everything it tries stays there until Tzvi moves it (CLAUDE.md, theme
   // scope). The flow pills are one of those tries.
-  const isPreview = location.pathname === '/home-preview';
   const [menuOpen, setMenuOpen] = useState(false);
   const [homeScrolled, setHomeScrolled] = useState(false);
   // Mobile-only: collapse the bottom tab strip to text-only once the
@@ -401,77 +399,6 @@ const Navigation = () => {
                 needs an accessible name there. */}
             <span className="sr-only sm:hidden">MyIsraelRental</span>
           </Link>
-
-          {/* Desktop links — text-only glass pills per the previews. The
-              bed/briefcase icon pills they replace are gone by ruling; the
-              mobile drawer keeps icons, since tap targets benefit and the
-              previews don't cover mobile.
-
-              Four links, settled: "How it works" is deliberately absent —
-              the cinematic home page IS the how-it-works, so a nav item
-              pointing at a subsection of it would be circular.
-
-              /requests is backed by a placeholder until Phase 3 replaces it
-              in place, so this row never has to be rebuilt. */}
-          <nav
-            /* 900px, not Tailwind's `md` (768px), because that is the
-               breakpoint the previews use: `@media(max-width:900px){.links,
-               .signin{display:none}}`. At 768 the four link pills, the
-               language pill, Sign in and the CTA do not fit on one line —
-               they overlapped each other and clipped the wordmark. The
-               drawer already carries these links below this width. */
-            className="hidden min-[900px]:flex items-center gap-[9px] pointer-events-none absolute left-1/2 top-1/2"
-            style={{ transform: 'translate(-50%, -50%)' }}
-            data-testid="nav-rental-categories"
-            aria-label={t('nav.primary', 'Primary')}
-          >
-            <div className="flex items-center gap-[9px] pointer-events-auto">
-              {[
-                { key: 'stays', label: t('nav.stays', 'Stays'), to: '/stays' },
-                { key: 'services', label: t('nav.services', 'Services'), to: '/businesses' },
-                { key: 'requests', label: t('nav.requests', 'Marketplace'), to: '/requests' },
-                // Restaurants is in the phone row and the drawer, not here: a
-                // fourth pill ran into the language button from 900 to about
-                // 1330px wide (measured 12 Oct 2026). On a laptop the way in
-                // is the tile on /businesses.
-                // No supply link here any more. "List / Offer" spoke to one
-                // of three audiences and duplicated the CTA beside it; the
-                // solid "Join free" button now carries every audience and
-                // the role picker does the routing. /why-list still exists —
-                // it's the Host card's "full pitch" link on the join page.
-              ].map(({ key, label, to }) => {
-                const active = location.pathname.startsWith(to);
-                if (isPreview) {
-                  return (
-                    <FlowButton
-                      key={key}
-                      as={Link}
-                      to={to}
-                      text={label}
-                      className="px-6 py-2 text-[13px]"
-                      aria-current={active ? 'page' : undefined}
-                      data-testid={`nav-link-${key}`}
-                      data-flow="1"
-                    />
-                  );
-                }
-                return (
-                  <Link
-                    key={key}
-                    to={to}
-                    className={`glass-pill ${active ? 'glass-pill-current' : ''}`}
-                    // The gold dot is decorative; aria-current is what
-                    // actually tells a screen reader which page this is.
-                    aria-current={active ? 'page' : undefined}
-                    data-testid={`nav-link-${key}`}
-                  >
-                    {label}
-                    {active && <span className="glass-dot" aria-hidden="true" />}
-                  </Link>
-                );
-              })}
-            </div>
-          </nav>
 
           {/* Mobile-on-scroll search bar was removed per user request —
               the global nav stays clean on scroll, and dedicated
@@ -938,8 +865,13 @@ const Navigation = () => {
             When the user scrolls past the threshold, the icons hide and
             only the text labels remain — matches Airbnb's compact mobile
             chrome from the screenshots. */}
+        {/* The sections, one row under the logo bar at every width (Tzvi,
+            14 Oct 2026, after Airbnb's and Booking.com's headers): a
+            fourth section in the logo bar ran into the language button on
+            laptops. Each has a 3D picture from one generated set
+            (public/nav-icons); scrolling down folds the row to labels. */}
         <div
-          className={`md:hidden flex items-end justify-around transition-all duration-200 ${
+          className={`flex items-end justify-around md:justify-center md:gap-12 transition-all duration-200 ${
             mobileScrolled ? 'pb-1 pt-0' : 'pb-2 pt-1'
           }`}
           data-testid="nav-rental-categories-mobile"
@@ -950,15 +882,16 @@ const Navigation = () => {
               only by typing the URL - and phones are most of the traffic.
               Any link added to the desktop row above belongs here too. */}
           {[
-            { type: 'stays', icon: Bed, label: t('nav.stays', 'Stays'), to: '/stays' },
-            { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/businesses' },
-            { type: 'requests', icon: Store, label: t('nav.requests', 'Marketplace'), to: '/requests' },
-            { type: 'restaurants', icon: UtensilsCrossed, label: t('nav.restaurants', 'Restaurants'), to: '/restaurants' },
-          ].map(({ type, icon: Icon, label, to }) => (
+            { type: 'stays', icon: Bed, label: t('nav.stays', 'Stays'), to: '/stays', img: '/nav-icons/stays.webp' },
+            { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/businesses', img: '/nav-icons/businesses.webp' },
+            { type: 'requests', icon: Store, label: t('nav.requests', 'Marketplace'), to: '/requests', img: '/nav-icons/marketplace.webp' },
+            { type: 'restaurants', icon: UtensilsCrossed, label: t('nav.restaurants', 'Restaurants'), to: '/restaurants', img: '/nav-icons/restaurants.webp' },
+          ].map(({ type, icon: Icon, label, to, img }) => (
             <NavCategoryItem
               key={type}
               type={type}
               Icon={Icon}
+              img={img}
               label={label}
               to={to}
               active={location.pathname.startsWith(to)}

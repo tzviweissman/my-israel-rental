@@ -82,7 +82,7 @@ const WhyList = () => {
       />
 
       {/* Hero */}
-      <section className="px-6 pt-24 pb-12 bg-gradient-to-b from-[#f2f8f8] to-white">
+      <section className="px-6 pb-12 bg-gradient-to-b from-[#f2f8f8] to-white" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }}>
         {/* Reached mid-signup from the join page's "See what business
             owners get". Without this the reader is stranded on a
             full-screen pitch with no way back to the form they left. */}

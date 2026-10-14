@@ -36,7 +36,7 @@ export default function GrowthGuide() {
         description={t('guide.introWalk', 'Once you add your business, a short walk takes you through the site, one page at a time.')}
         path="/getting-started"
       />
-      <div className="max-w-2xl mx-auto px-4 pt-36 sm:pt-28 pb-16">
+      <div className="max-w-2xl mx-auto px-4 pb-16" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }}>
         <p className="text-xs font-semibold uppercase tracking-wide" style={{ color: 'var(--gold-text)' }}>
           {t('guide.kicker', 'Getting started')}
         </p>

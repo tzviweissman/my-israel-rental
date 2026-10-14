@@ -127,7 +127,7 @@ const AdminDashboard = () => {
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }} data-testid="admin-dashboard-page">
-      <div className="max-w-7xl mx-auto px-6 pt-20 pb-8">
+      <div className="max-w-7xl mx-auto px-6 pb-8" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }}>
         <h1 className="text-4xl font-bold mb-8" style={{ fontFamily: 'var(--font-head)' }} data-testid="admin-title">
           {t('admin.title')}
         </h1>

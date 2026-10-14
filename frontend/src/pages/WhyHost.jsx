@@ -158,7 +158,7 @@ const WhyHost = () => {
       />
 
       {/* Hero - split, photo carries the trust */}
-      <section className="px-6 pt-24 pb-14">
+      <section className="px-6 pb-14" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }}>
         {/* Reached mid-signup from the join page's "See how hosting
             works" — same stranding problem as /why-list. */}
         <div className="max-w-6xl mx-auto mb-6">

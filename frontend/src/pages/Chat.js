@@ -348,7 +348,7 @@ const Chat = () => {
       {/* Mobile nav is taller (top bar + category strip = ~123px); desktop
           nav is ~80px. Pad enough on mobile so the chat header (Back / Live
           Chat / Search / Dashboard) isn't hidden under the nav. */}
-      <div className="max-w-3xl mx-auto px-4 pt-32 md:pt-20 pb-6 h-screen flex flex-col">
+      <div className="max-w-3xl mx-auto px-4 pb-6 h-screen flex flex-col" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }}>
         {/* T2 — the one thing about this chat that is not obvious: it
             translates. Said once, where the typing happens. */}
         <OnboardingTip id="tip.chat" className="mb-2" />
