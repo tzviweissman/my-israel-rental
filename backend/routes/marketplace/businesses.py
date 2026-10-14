@@ -931,6 +931,10 @@ async def public_business(
         # the English description on a Hebrew page (found 24 Sep 2026).
         "description_he": biz.get("description_he"),
         "logo_url": biz.get("logo_url"),
+        # Membership plans open for sign-up: the page shows a Join button
+        # (routes/marketplace/memberships.py).
+        "has_memberships": bool(await db.membership_plans.find_one(
+            {"business_id": biz["_id"], "active": True, "deleted": {"$ne": True}}, {"_id": 1})),
         "categories": biz.get("categories") or [],
         "areas": biz.get("areas") or [],
         "serves_nationwide": bool(biz.get("serves_nationwide")),

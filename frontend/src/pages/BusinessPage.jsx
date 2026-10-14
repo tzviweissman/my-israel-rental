@@ -21,7 +21,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useHandBuilt } from '../utils/handBuiltPages';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe } from 'lucide-react';
+import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe, Users } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import NotFound from './NotFound';
@@ -666,6 +666,20 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                   people to pay before they have agreed what for.
                   Each is labelled with the provider it goes to, so nobody
                   presses a generic "Pay" and lands somewhere unexpected. */}
+              {/* Memberships open for sign-up: a gym or studio's Join
+                  button. Outline, so messaging stays the one solid action. */}
+              {biz.has_memberships && !preview && (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/memberships/${biz.slug || biz.id}`)}
+                  className="mt-3 inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold border"
+                  style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }}
+                  data-testid="business-join"
+                >
+                  <Users size={15} aria-hidden="true" /> {t('members.joinButton', 'Join, see membership plans')}
+                </button>
+              )}
+
               {Array.isArray(biz.payment_links) && biz.payment_links.length > 0 && (
                 <div className="mt-3 flex flex-wrap items-center gap-2" data-testid="business-payment-links">
                   <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>

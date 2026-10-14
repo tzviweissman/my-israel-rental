@@ -5242,6 +5242,7 @@ const en = {
       },
       // Memberships (routes/marketplace/memberships.py).
       members: {
+        joinButton: "Join, see membership plans",
         title: "Members",
         body: "Set your plans, share the sign-up link, and check members in at the door. Payment is arranged with each member directly for now: mark them active once they have paid.",
         needBusiness: "Add a business first. Members belong to a business.",
