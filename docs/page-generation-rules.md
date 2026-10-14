@@ -506,6 +506,65 @@ its a bit bland there isnt many affects".
     page builder does this in `useFx` (frontend/src/components/pagebuilder/v3/
     effects.js): list and photo showpieces get `.is-seen` by `seenEnough`.
 
+## 3g. From the six design videos (Tzvi, 14 Oct 2026)
+
+Six videos Tzvi sent ("i want to you to watch the videos themselves to see
+how professional designers make beautiful unique websites"), watched as
+frames, not transcripts. Notes, timestamps and saved frames:
+`docs/ui-videos/notes/` (Wkf2IjZrRt4, _2FlJYE4p3Q, qTWOkhytG0M, VwGrXe2ricE,
+fq3wx-AR6B0, snErQUyqwCU). All six are mostly sales pitches; only their
+design craft is taken. Their demo sites invent reviews, counters ("174
+bottles", "4.8 stars"), logo walls, a form that sends nowhere and footage
+passed off as the business's own: none of that is ever copied (section 1).
+Tzvi approved all twelve.
+
+1. **A style sheet before building.** Every page starts with a short written
+   sheet: accent, ink, ground, the two faces, the one radius, and the motion
+   limits (what may move, how fast, what never moves). Every section follows
+   it, so a fix is made once. Kept in the build's BRIEF.md.
+2. **The AI-look tells, added to rule 3c.2.** None of these on a page: a
+   default system or template font, a purple or two-colour gradient, exactly
+   three identical cards in a row, frosted glass used everywhere, a headline
+   any competitor could also use.
+3. **One accent per screen**, on a single word or a single object; the rest
+   is ink and grey. The one-word accent is allowed; the cream ground + serif
+   + italic word combination stays banned unless it is their brand (3c.2).
+4. **Every motion has one job**: guide the eye, confirm an action, or reveal
+   the next thing. A loop starts and ends on the same frame (no visible
+   jump). Text settles into place, soft to sharp, without a bounce. Rows of a
+   list may arrive one after another, about 100 ms apart. A menu hover reacts
+   in under 300 ms.
+5. **The story in chapters.** A scroll film or held section carries short
+   labelled steps from the business's real process (ingredient, dough, oven,
+   box; survey, kasher, check), one line each, changing as the scroll moves,
+   ending on the finished thing and the main button.
+6. **The index list**, as a design option for a menu or price list: large
+   names on thin rules, a short note and the price on the same line, the row
+   under the pointer filling solid (a tap on a phone). Suits gift shops,
+   bakeries, menus.
+7. **One closing signature**: the business name set huge and cropped by the
+   bottom edge, or one playful moment kept to the footer or the not-found
+   page. Never more than one, never in the way of the order path.
+8. **Text over video or a busy photo** sits on a solid or frosted card, and
+   its contrast is measured against the brightest frame of the video, not
+   the first.
+9. **A small working piece where it helps**: a mini order card that shows
+   the real price as the quantity changes, a date checker, a size picker with
+   their real photos. It must really work and send where it says.
+10. **Words: the customer's problem first**, then what the business does
+    about it, in the owner's words. Any line a competitor could also say is
+    rewritten until it could only be this business.
+11. **Fonts from a short approved list** that covers Latin and Hebrew, each
+    licence checked for commercial web use (never "free for personal use").
+    Kept in `reference/design-rules.md`; a face is added there before it is
+    used on a page.
+12. **Build order.** The bones first (opening, what they offer, how to
+    order, contact), then separate passes for polish, motion and phone width.
+    Stills of every section are checked before motion is added; fixes are
+    batched into one round; then a real test goes through every form and
+    order button (to a test business, never the owner's live inbox) before
+    the owner sees the page.
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews

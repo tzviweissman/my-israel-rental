@@ -341,6 +341,35 @@ ribbon untied before the photos arrived, and the page had one effect.
     scroll. Started as the edge entered, Rendrly's steps were over before
     anyone saw them. Section reveals keep an early start (no blank bands).
 
+## 3g. From the six design videos (Tzvi, 14 Oct 2026)
+
+Full text, timestamps and frames: page rules §3g, `docs/ui-videos/notes/`.
+
+1. **Style sheet first**: accent, ink, ground, two faces, one radius, motion
+   limits, in BRIEF.md; every section follows it.
+2. **AI-look tells banned**: default font, purple/two-colour gradient,
+   exactly three identical cards, frosted glass everywhere, a headline a
+   competitor could use.
+3. **One accent per screen** (one word or one object); cream + serif +
+   italic word together stays banned unless it is their brand.
+4. **Every motion has one job** (guide, confirm, reveal); loops join
+   invisibly; text settles soft to sharp, no bounce; list rows ~100 ms apart.
+5. **Chapters**: a scroll film or held section carries short labelled steps
+   of their real process, ending on the finished thing and the button.
+6. **Index list** option for menus and price lists: big names on thin rules,
+   price on the line, hovered row fills.
+7. **One closing signature**: the name huge and cropped at the bottom, or one
+   playful moment in the footer or 404. Never more than one.
+8. **Text over video** on a card; contrast measured on the brightest frame.
+9. **A small working piece** (mini order card with the real price, date
+   checker) only if it really works.
+10. **Problem first** in the owner's words; rewrite any line a competitor
+    could say.
+11. **Fonts from the approved Latin + Hebrew list**, licence checked.
+12. **Build order**: bones, then polish, motion, phone passes; stills checked
+    before motion; fixes batched; a real test through every form (to a test
+    business) before the owner sees it.
+
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
 Full text: `reference/design-rules.md`. The rules both builders share are

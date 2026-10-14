@@ -418,3 +418,40 @@ A preview built by following these rules. It shows the target quality for the fo
   - Shabbos order deadline;
   - delivery terms;
   - confirm "Jerusalem · All of Israel".
+
+
+## Approved fonts (Latin and Hebrew)
+
+Page rule §3g.11 (Tzvi, 14 Oct 2026). A page's faces come from this list, so
+the Hebrew page is as designed as the English one and every licence allows
+commercial web use. All below are on Google Fonts under the SIL Open Font
+License (free for commercial use, self-hosting allowed). Before using one,
+open its Google Fonts page and confirm the Hebrew subset is listed: if it is
+not, it is not on this list. Add a face here, with its licence, before it is
+used on a page. Never a "free for personal use" font.
+
+| Face | Kind | Feel | Hebrew |
+|---|---|---|---|
+| Frank Ruhl Libre | serif | classic, editorial, bookish | yes |
+| David Libre | serif | traditional, warm | yes |
+| Noto Serif Hebrew | serif | neutral, many weights | yes (Hebrew only; pair with a Latin serif) |
+| Suez One | display serif | bold, poster | yes |
+| Bona Nova | serif | elegant, old style | yes |
+| Bellefair | display serif | luxury, thin, high contrast | yes |
+| Heebo | sans | clean, modern, the safe default | yes |
+| Assistant | sans | light, friendly, the site's own Hebrew body | yes |
+| Rubik | sans | rounded corners, soft, approachable | yes |
+| IBM Plex Sans Hebrew | sans | technical, precise | yes (Hebrew; pair with IBM Plex Sans) |
+| Noto Sans Hebrew | sans | neutral, many weights | yes (Hebrew only) |
+| Secular One | display sans | heavy, confident headlines | yes |
+| Varela Round | sans | soft, children, sweets | yes |
+| Alef | sans | plain, readable | yes |
+| Fredoka | rounded sans | playful | yes |
+| Amatic SC | handwritten | crafty, market chalkboard | yes |
+| Karantina | condensed display | loud, street, big numbers | yes |
+
+Pairing: one face for headlines, one for text; at most a third for a single
+label style. A Latin display face with no Hebrew (Playfair, Cinzel, Jost)
+may lead the English page only if the Hebrew page names its own face from
+this table in the same feel (Cinzel with Bellefair, Jost with Heebo,
+Playfair with Frank Ruhl Libre).
