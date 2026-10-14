@@ -5243,6 +5243,14 @@ const en = {
       },
       // A business's own questions (backend custom_fields.py).
       fields: {
+        inHebrew: "In Hebrew",
+        inEnglish: "In English",
+        trNote: "For customers browsing in that language. Leave it empty and we translate it when you save. You can correct it.",
+        trAuto: "Translated when you save",
+        trAutoOptions: "Translated when you save, one per line in the same order",
+        trLabel: "The question, translated",
+        trHelp: "The explanation, translated",
+        trOptions: "The options, translated",
         yes: "Yes",
         no: "No",
         ordersButton: "Questions",

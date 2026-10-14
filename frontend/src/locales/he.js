@@ -5060,6 +5060,14 @@ const he = {
       },
       // A business's own questions (backend custom_fields.py).
       fields: {
+        inHebrew: "בעברית",
+        inEnglish: "באנגלית",
+        trNote: "ללקוחות שגולשים בשפה הזו. השאירו ריק ונתרגם כשתשמרו. אפשר לתקן.",
+        trAuto: "יתורגם כשתשמרו",
+        trAutoOptions: "יתורגם כשתשמרו, אפשרות בכל שורה באותו סדר",
+        trLabel: "השאלה, מתורגמת",
+        trHelp: "ההסבר, מתורגם",
+        trOptions: "האפשרויות, מתורגמות",
         yes: "כן",
         no: "לא",
         ordersButton: "שאלות",

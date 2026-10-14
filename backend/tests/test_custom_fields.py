@@ -115,3 +115,27 @@ def test_order_form_shows_and_records_answers():
     rows = orders.get("orders", []) if isinstance(orders, dict) else orders
     o = next(x for x in rows if x["customer_name"] == "Avi")
     assert "Allergies: Nuts" in (o.get("notes") or "")
+
+
+def test_questions_get_the_other_language(owner):
+    biz = requests.post(f"{BASE}/marketplace/businesses", json={"name": "TEST_fields studio"}, headers=_auth(owner), timeout=30).json()
+    r = _set(owner, biz, "membership", [
+        # The business's own Hebrew wording is kept as theirs.
+        {"label": "I agree to the studio rules", "type": "checkbox", "required": True, "tr_label": "אני מסכים/ה לתקנון הסטודיו"},
+        {"label": "Your level", "type": "choice", "options": ["Beginner", "Advanced"]},
+        {"label": "איש קשר לחירום", "type": "text"},
+    ])
+    assert r.status_code == 200, r.text
+    f = {x["label"]: x for x in r.json()["fields"]}
+    assert f["I agree to the studio rules"]["lang"] == "en"
+    assert f["I agree to the studio rules"]["tr"]["label"] == "אני מסכים/ה לתקנון הסטודיו"
+    assert f["איש קשר לחירום"]["lang"] == "he"
+    if not os.environ.get("EXPECT_TRANSLATION", "1") == "1":
+        return
+    # Filled by the translator when the API key is configured here.
+    lvl, contact = f["Your level"], f["איש קשר לחירום"]
+    if lvl["tr"]["label"] is None:
+        pytest.skip("no translator configured in this environment")
+    assert any("֐" <= ch <= "׿" for ch in lvl["tr"]["label"])
+    assert len(lvl["tr"]["options"]) == 2 and all(lvl["tr"]["options"])
+    assert contact["tr"]["label"] and not any("֐" <= ch <= "׿" for ch in contact["tr"]["label"])

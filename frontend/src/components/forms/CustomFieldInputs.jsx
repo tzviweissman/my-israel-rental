@@ -4,16 +4,34 @@
  * a checkbox is true/false, everything else a string.
  */
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-base bg-white min-h-[48px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 
+/** A question in the visitor's language: the business's own wording when
+ * it matches the site's language, else the translation (custom_fields.py
+ * `tr`), else the business's wording. */
+export const localize = (f, uiLang) => {
+  const own = !f.lang || f.lang === uiLang;
+  const tr = f.tr || {};
+  return {
+    label: own ? f.label : (tr.label || f.label),
+    help: own ? f.help : (tr.help || f.help),
+    options: (f.options || []).map((o, i) => ({ value: o, text: own ? o : ((tr.options || [])[i] || o) })),
+  };
+};
+
 export default function CustomFieldInputs({ fields, values, onChange, testid = 'custom-fields' }) {
+  const { i18n } = useTranslation();
+  const uiLang = String(i18n.language || 'en').startsWith('he') ? 'he' : 'en';
   if (!fields || fields.length === 0) return null;
   const set = (id, v) => onChange({ ...values, [id]: v });
   return (
     <div className="space-y-3" data-testid={testid}>
-      {fields.map((f) => {
+      {fields.map((raw) => {
+        const loc = localize(raw, uiLang);
+        const f = { ...raw, label: loc.label, help: loc.help };
         const id = `cf-${f.id}`;
         const v = values[f.id];
         if (f.type === 'checkbox') {
@@ -34,7 +52,7 @@ export default function CustomFieldInputs({ fields, values, onChange, testid = '
           input = (
             <select id={id} required={f.required} value={v || ''} onChange={(e) => set(f.id, e.target.value)} className={field} style={fieldStyle} data-testid={`cf-input-${f.id}`}>
               <option value="" disabled={f.required}>{'—'}</option>
-              {(f.options || []).map((o) => <option key={o} value={o}>{o}</option>)}
+              {loc.options.map((o) => <option key={o.value} value={o.value}>{o.text}</option>)}
             </select>
           );
         } else {

@@ -13,7 +13,14 @@ const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]'
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 const btnOutline = 'inline-flex items-center gap-1.5 px-3 min-h-[44px] rounded-full border text-sm font-semibold';
 
-const blank = () => ({ id: null, label: '', type: 'text', required: false, options: [], help: '' });
+const blank = () => ({ id: null, label: '', type: 'text', required: false, options: [], help: '', tr: { label: '', help: '', options: [] } });
+const isHebrew = (s) => {
+  const he = (String(s).match(/[\u0590-\u05FF]/g) || []).length;
+  const all = (String(s).match(/[A-Za-z\u0590-\u05FF]/g) || []).length;
+  return all > 0 && he / all >= 0.3;
+};
+// What the editor holds: the translation as plain strings, '' = not yet.
+const fromServer = (f) => ({ ...f, help: f.help || '', tr: { label: f.tr?.label || '', help: f.tr?.help || '', options: f.tr?.options || [] } });
 
 export default function CustomFieldsEditor({ API, auth, businessId, form }) {
   const { t } = useTranslation();
@@ -25,7 +32,7 @@ export default function CustomFieldsEditor({ API, auth, businessId, form }) {
     setFields(null);
     if (!businessId) return;
     axios.get(`${API}/marketplace/businesses/${businessId}/custom-fields`, auth)
-      .then(({ data }) => setFields((data[form] || []).map((f) => ({ ...f, help: f.help || '' }))))
+      .then(({ data }) => setFields((data[form] || []).map(fromServer)))
       .catch(() => setFields([]));
   }, [API, auth, businessId, form]);
 
@@ -41,13 +48,23 @@ export default function CustomFieldsEditor({ API, auth, businessId, form }) {
     ['date', t('fields.type.date', 'Date')],
   ];
   const upd = (i, patch) => setFields(fields.map((f, j) => (j === i ? { ...f, ...patch } : f)));
+  // Changing the original makes its translation stale: clear that part so
+  // the next save translates it again.
+  const updSource = (i, key, value) => setFields(fields.map((f, j) => (j === i
+    ? { ...f, [key]: value, tr: { ...f.tr, [key]: key === 'options' ? [] : '' } }
+    : f)));
+  const updTr = (i, key, value) => setFields(fields.map((f, j) => (j === i ? { ...f, tr: { ...f.tr, [key]: value } } : f)));
 
   const save = async () => {
     setSaving(true);
     try {
-      const body = { fields: fields.filter((f) => f.label.trim()).map((f) => ({ ...f, options: f.type === 'choice' ? f.options : [] })) };
+      const body = { fields: fields.filter((f) => f.label.trim()).map((f) => ({
+        id: f.id, label: f.label, type: f.type, required: f.required, help: f.help,
+        options: f.type === 'choice' ? f.options : [],
+        tr_label: f.tr.label, tr_help: f.tr.help, tr_options: f.type === 'choice' ? f.tr.options : [],
+      })) };
       const { data } = await axios.put(`${API}/marketplace/businesses/${businessId}/custom-fields/${form}`, body, auth);
-      setFields(data.fields.map((f) => ({ ...f, help: f.help || '' })));
+      setFields(data.fields.map(fromServer));
       toast.success(t('fields.saved', 'Questions saved'));
     } catch (err) {
       toast.error(err?.response?.data?.detail || t('fields.saveFailed', 'Could not save. Try again.'));
@@ -73,18 +90,40 @@ export default function CustomFieldsEditor({ API, auth, businessId, form }) {
               {fields.map((f, i) => (
                 <div key={f.id || `new-${i}`} className="rounded-xl border p-3 space-y-2" style={{ borderColor: 'var(--brand-border)' }} data-testid="field-row">
                   <div className="grid gap-2 sm:grid-cols-[1fr_auto]">
-                    <input value={f.label} maxLength={200} onChange={(e) => upd(i, { label: e.target.value })} className={field} style={fieldStyle}
+                    <input value={f.label} maxLength={200} onChange={(e) => updSource(i, 'label', e.target.value)} className={field} style={fieldStyle}
                            placeholder={t('fields.question', 'The question')} aria-label={t('fields.question', 'The question')} data-testid="field-label" />
                     <select value={f.type} onChange={(e) => upd(i, { type: e.target.value })} className={field} style={fieldStyle} aria-label={t('fields.kind', 'Kind of answer')} data-testid="field-type">
                       {types.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
                     </select>
                   </div>
                   {f.type === 'choice' && (
-                    <textarea rows={3} value={(f.options || []).join('\n')} onChange={(e) => upd(i, { options: e.target.value.split('\n') })} className={field} style={fieldStyle}
+                    <textarea rows={3} value={(f.options || []).join('\n')} onChange={(e) => updSource(i, 'options', e.target.value.split('\n'))} className={field} style={fieldStyle}
                               placeholder={t('fields.optionsPh', 'One option per line')} aria-label={t('fields.options', 'Options')} data-testid="field-options" />
                   )}
-                  <input value={f.help} maxLength={300} onChange={(e) => upd(i, { help: e.target.value })} className={field} style={fieldStyle}
+                  <input value={f.help} maxLength={300} onChange={(e) => updSource(i, 'help', e.target.value)} className={field} style={fieldStyle}
                          placeholder={t('fields.helpPh', 'A line of explanation under it (optional)')} aria-label={t('fields.help', 'Explanation')} />
+                  {f.label.trim() && (() => {
+                    const other = isHebrew(`${f.label} ${f.help}`) ? 'en' : 'he';
+                    const dir = other === 'he' ? 'rtl' : 'ltr';
+                    return (
+                      <div className="rounded-lg p-2 space-y-2" style={{ background: 'var(--surface-muted, #F9FAFB)' }} data-testid="field-translation">
+                        <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
+                          <b style={{ color: 'var(--ink)' }}>{other === 'he' ? t('fields.inHebrew', 'In Hebrew') : t('fields.inEnglish', 'In English')}</b>
+                          {' · '}{t('fields.trNote', 'For customers browsing in that language. Leave it empty and we translate it when you save. You can correct it.')}
+                        </p>
+                        <input value={f.tr.label} maxLength={300} dir={dir} onChange={(e) => updTr(i, 'label', e.target.value)} className={field} style={fieldStyle}
+                               placeholder={t('fields.trAuto', 'Translated when you save')} aria-label={t('fields.trLabel', 'The question, translated')} data-testid="field-tr-label" />
+                        {f.help.trim() && (
+                          <input value={f.tr.help} maxLength={400} dir={dir} onChange={(e) => updTr(i, 'help', e.target.value)} className={field} style={fieldStyle}
+                                 placeholder={t('fields.trAuto', 'Translated when you save')} aria-label={t('fields.trHelp', 'The explanation, translated')} />
+                        )}
+                        {f.type === 'choice' && (f.options || []).some((o) => o.trim()) && (
+                          <textarea rows={3} value={(f.tr.options || []).join('\n')} dir={dir} onChange={(e) => updTr(i, 'options', e.target.value.split('\n'))} className={field} style={fieldStyle}
+                                    placeholder={t('fields.trAutoOptions', 'Translated when you save, one per line in the same order')} aria-label={t('fields.trOptions', 'The options, translated')} />
+                        )}
+                      </div>
+                    );
+                  })()}
                   <div className="flex items-center justify-between gap-2">
                     <label className="inline-flex items-center gap-2 text-sm min-h-[44px]" style={{ color: 'var(--ink)' }}>
                       <input type="checkbox" checked={f.required} onChange={(e) => upd(i, { required: e.target.checked })} data-testid="field-required" />
