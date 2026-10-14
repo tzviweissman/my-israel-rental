@@ -208,7 +208,7 @@ async def restaurant_pins(
 
 
 @router.get("/restaurants/facets")
-async def restaurant_facets(city: Optional[str] = None):
+async def restaurant_facets(city: Optional[str] = None, neighborhood: Optional[str] = None, region: Optional[str] = None):
     """Counts for the filters: regions -> cities, the chosen city's
     neighbourhoods, categories, certifiers."""
     base = {"status": "listed", **NAMED}
@@ -220,13 +220,21 @@ async def restaurant_facets(city: Optional[str] = None):
     chosen = SLUG_TO_CITY.get(city, city) if city else None
     if chosen:
         scope["city"] = chosen
+    # Category, hechsher and meat/dairy counts follow the chosen area, so a
+    # neighbourhood or region shows its own numbers (Tzvi, 14 Oct 2026); the
+    # neighbourhood list itself stays the whole city's.
+    area = dict(scope)
+    if chosen and neighborhood:
+        area["neighborhood"] = neighborhood
+    elif not chosen and region:
+        area["region"] = region
 
-    async def count(field, unwind=False):
-        pipe = [{"$match": scope}] + ([{"$unwind": f"${field}"}] if unwind else []) + [
+    async def count(field, unwind=False, where=None):
+        pipe = [{"$match": where or area}] + ([{"$unwind": f"${field}"}] if unwind else []) + [
             {"$group": {"_id": f"${field}", "n": {"$sum": 1}}}, {"$sort": {"n": -1}}]
         return [{"name": r["_id"], "count": r["n"]} async for r in db.restaurants.aggregate(pipe) if r["_id"]]
 
-    hoods = await count("neighborhood") if chosen else []
+    hoods = await count("neighborhood", where=scope) if chosen else []
     order = NEIGHBOURHOODS.get(chosen, [])
     hoods.sort(key=lambda h: order.index(h["name"]) if h["name"] in order else 99)
     return {
@@ -239,7 +247,7 @@ async def restaurant_facets(city: Optional[str] = None):
                        ((x["name"], x["count"]) for x in await count("categories", unwind=True)) if k in CATEGORIES],
         "certifiers": _families(await count("kosher_certification")),
         "kashrut": await count("kashrut"),
-        "total": await db.restaurants.count_documents(scope),
+        "total": await db.restaurants.count_documents(area),
     }
 
 

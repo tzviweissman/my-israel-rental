@@ -71,9 +71,10 @@ export default function Restaurants() {
   useEffect(() => { setHood(''); setRegion(''); }, [citySlug]);
 
   useEffect(() => {
-    axios.get(`${API}/restaurants/facets`, { params: { city: citySlug } })
+    // Counts follow the chosen neighbourhood or region, not only the city.
+    axios.get(`${API}/restaurants/facets`, { params: { city: citySlug, neighborhood: hood || undefined, region: (!citySlug && region) || undefined } })
       .then((r) => setFacets(r.data)).catch(() => setFacets(null));
-  }, [citySlug]);
+  }, [citySlug, hood, region]);
 
   const params = useMemo(() => ({
     city: citySlug, neighborhood: hood || undefined, region: (!citySlug && region) || undefined,
