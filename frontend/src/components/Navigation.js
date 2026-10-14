@@ -51,6 +51,10 @@ const Navigation = () => {
     if (!el) return undefined;
     let rafId = 0;
     const apply = () => {
+      // Measured at the top of the page only: scrolling folds the section
+      // row (slimmer bar), and following that would shift every page that
+      // pads by --nav-h up by the difference mid-scroll.
+      if (window.scrollY > 40) return;
       const h = el.offsetHeight || 0;
       document.documentElement.style.setProperty('--nav-h', `${h}px`);
     };
@@ -860,11 +864,6 @@ const Navigation = () => {
           </div>
         </div>
 
-        {/* Mobile-only category row — sits below the logo+menu row.
-            Compact icons with full text labels (no wrap), evenly spaced.
-            When the user scrolls past the threshold, the icons hide and
-            only the text labels remain — matches Airbnb's compact mobile
-            chrome from the screenshots. */}
         {/* The sections, one row under the logo bar at every width (Tzvi,
             14 Oct 2026, after Airbnb's and Booking.com's headers): a
             fourth section in the logo bar ran into the language button on
@@ -872,8 +871,11 @@ const Navigation = () => {
             current one outlined (3D pictures were tried and did not fit
             the site); on a phone scrolling folds the icons away. */}
         <div
+          // Scrolled: icons only. On a laptop the row then moves up into the
+          // logo bar's empty middle, so the sticky bar is one slim line
+          // (Tzvi, 14 Oct 2026: "so the sticky bar isn't so thick").
           className={`flex items-end md:items-center justify-around md:justify-center md:gap-2 transition-all duration-200 ${
-            mobileScrolled ? 'pb-1 pt-0' : 'pb-2 pt-1'
+            mobileScrolled ? 'pb-1 pt-0 md:absolute md:left-1/2 md:-translate-x-1/2 md:top-2 md:h-11 md:p-0' : 'pb-2 pt-1'
           }`}
           data-testid="nav-rental-categories-mobile"
         >
