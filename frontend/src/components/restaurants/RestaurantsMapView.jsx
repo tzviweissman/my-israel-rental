@@ -25,11 +25,14 @@ const youIcon = () => new L.DivIcon({
   html: '<div style="width:20px;height:20px;border-radius:50%;background:#111827;border:3px solid #fff;box-shadow:0 0 0 2px rgba(17,24,39,.3)"></div>',
 });
 
-export default function RestaurantsMapView({ filters, userCoords }) {
+export default function RestaurantsMapView({ filters, userCoords, highlight, onPick }) {
   const { t, i18n } = useTranslation();
   const box = useRef(null);
   const mapRef = useRef(null);
   const layer = useRef(null);
+  const dots = useRef({});
+  const pick = useRef(onPick);
+  pick.current = onPick;
   const [pins, setPins] = useState([]);
 
   useEffect(() => {
@@ -60,6 +63,7 @@ export default function RestaurantsMapView({ filters, userCoords }) {
     if (layer.current) layer.current.remove();
     const group = L.layerGroup().addTo(map);
     layer.current = group;
+    dots.current = {};
     pins.forEach((r) => {
       const name = he ? (r.name_he || r.name_en) : (r.name_en || r.name_he);
       const cats = (r.categories || []).slice(0, 2).map((c) => categoryLabel(t, c)).join(', ');
@@ -71,9 +75,11 @@ export default function RestaurantsMapView({ filters, userCoords }) {
         <a href="${esc(directionsUrl(r))}" target="_blank" rel="noopener noreferrer"
            style="display:inline-block;margin-top:6px;font-size:13px;font-weight:700;color:${ACCENT}">${esc(t('restaurants.directions', 'Directions'))}</a>
       </div>`;
-      L.circleMarker([r.lat, r.lng], { radius: 7, color: '#fff', weight: 2, fillColor: ACCENT, fillOpacity: 1 })
+      const dot = L.circleMarker([r.lat, r.lng], { radius: 7, color: '#fff', weight: 2, fillColor: ACCENT, fillOpacity: 1 })
         .bindPopup(html, { maxWidth: 240, minWidth: 220, className: 'restaurant-popup' })
+        .on('click', () => pick.current && pick.current(r.id))
         .addTo(group);
+      dots.current[r.id] = dot;
     });
     if (userCoords) {
       L.marker([userCoords.lat, userCoords.lng], { icon: youIcon() }).addTo(group);
@@ -85,10 +91,19 @@ export default function RestaurantsMapView({ filters, userCoords }) {
     }
   }, [pins, he, t, userCoords]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // The card under the pointer lights its pin: bigger and dark, on top.
+  useEffect(() => {
+    Object.entries(dots.current).forEach(([id, dot]) => {
+      const on = id === String(highlight);
+      dot.setStyle({ radius: on ? 11 : 7, fillColor: on ? '#111827' : ACCENT, weight: on ? 3 : 2 });
+      if (on) dot.bringToFront();
+    });
+  }, [highlight, pins]);
+
   return (
     <div
       ref={box}
-      className="h-[420px] w-full overflow-hidden rounded-2xl border sm:h-[560px]"
+      className="h-[380px] w-full overflow-hidden rounded-2xl border sm:h-[480px] lg:h-[78vh]"
       style={{ borderColor: 'var(--brand-border)' }}
       data-testid="restaurants-map"
     />

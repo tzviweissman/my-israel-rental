@@ -4855,6 +4855,9 @@ const he = {
         nearMeOn: 'הקרובים קודם',
         geoUnavailable: 'הדפדפן לא יכול לשתף את המיקום שלכם.',
         geoDenied: 'המיקום כבוי. אפשרו אותו בדפדפן כדי למיין לפי מרחק.',
+        backToRegion: 'חזרה ל{{region}}',
+        backToIsrael: 'כל הארץ',
+        removeCity: 'להציג את כל הארץ במקום {{place}}',
         allRegions: 'כל האזורים',
         region: {
           North: 'צפון',

@@ -10,11 +10,11 @@
  * solid action.
  */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { List, LocateFixed, Map as MapIcon, Search, UtensilsCrossed, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, List, LocateFixed, Map as MapIcon, Search, UtensilsCrossed, X } from 'lucide-react';
 import { API } from '../App';
 import PageMeta from '../components/PageMeta';
 import SiteFooter from '../components/common/SiteFooter';
@@ -48,6 +48,11 @@ export default function Restaurants() {
   const he = i18n.language?.startsWith('he');
   const navigate = useNavigate();
   const { city: citySlug } = useParams();
+  // The area a city was picked from, so the way back returns to it
+  // (Tzvi, 14 Oct 2026: "when i clicked tel aviv then ramat gan there was
+  // no way to go back or cancel filters").
+  const location = useLocation();
+  const fromRegion = location.state?.region || '';
   const [facets, setFacets] = useState(null);
   const [items, setItems] = useState([]);
   const [total, setTotal] = useState(0);
@@ -59,16 +64,27 @@ export default function Restaurants() {
   const [kashrut, setKashrut] = useState('');
   const [hood, setHood] = useState('');
   const [certifier, setCertifier] = useState('');
-  const [region, setRegion] = useState('');
+  const [region, setRegion] = useState(() => (citySlug ? '' : fromRegion));
   const [coords, setCoords] = useState(null);
   const [view, setView] = useState('list');
+  // Map view is Airbnb's: the cards beside the map, a card and its pin lit
+  // together (Tzvi, 14 Oct 2026: "it doesnt look like airbnb with cards on
+  // the side"). On a phone the cards are a strip under the map.
+  const [hover, setHover] = useState(null);
+  const pickPin = (id) => {
+    setHover(id);
+    const el = document.getElementById(`rc-${id}`);
+    if (el) el.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+  };
   const [showForm, setShowForm] = useState(false);
 
   const cityName = facets?.city || null;
   const placeName = (he && facets?.city_he) || cityName || t('restaurants.israel', 'Israel');
 
   // A new city starts clean: its neighbourhoods are not the last city's.
-  useEffect(() => { setHood(''); setRegion(''); }, [citySlug]);
+  // Back on all of Israel, the area it came from is picked again.
+  useEffect(() => { setHood(''); setRegion(citySlug ? '' : fromRegion); }, [citySlug]); // eslint-disable-line react-hooks/exhaustive-deps
+  const allIsrael = () => { setCoords(null); navigate('/restaurants', { state: { region: fromRegion } }); };
 
   useEffect(() => {
     // Counts follow the chosen neighbourhood or region, not only the city.
@@ -127,7 +143,8 @@ export default function Restaurants() {
 
   const cities = (facets?.cities || []).filter((c) => c.count > 0 && (!region || c.region === region));
   const title = t('restaurants.title', { place: placeName, defaultValue: `Kosher restaurants in ${placeName}` });
-  const filtered = !!(category || kashrut || hood || certifier || query || region);
+  const filtered = !!(category || kashrut || hood || certifier || query || region || citySlug);
+  const Back = he ? ArrowRight : ArrowLeft;
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--surface-muted, #F9FAFB)' }} data-testid="restaurants-page">
@@ -233,11 +250,36 @@ export default function Restaurants() {
         {!citySlug && region && cities.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-2">
             {cities.map((c) => (
-              <Link key={c.slug} to={`/restaurants/${c.slug}`} className="rounded-full border bg-white px-3 py-1 text-sm hover:underline"
+              <Link key={c.slug} to={`/restaurants/${c.slug}`} state={{ region }} className="rounded-full border bg-white px-3 py-1 text-sm hover:underline"
                 style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}>
                 {(he && c.name_he) || c.name} ({c.count})
               </Link>
             ))}
+          </div>
+        )}
+        {citySlug && (
+          <div className="mt-4 flex flex-wrap items-center gap-2" data-testid="restaurants-city-filter">
+            <button
+              type="button"
+              onClick={allIsrael}
+              className="inline-flex items-center gap-1.5 rounded-full px-3 min-h-[40px] text-sm font-semibold active:scale-[0.97]"
+              style={{ color: 'var(--brand-primary)' }}
+              data-testid="restaurants-back"
+            >
+              <Back size={15} aria-hidden="true" />
+              {fromRegion
+                ? t('restaurants.backToRegion', { region: t(`restaurants.region.${fromRegion}`, fromRegion), defaultValue: 'Back to {{region}}' })
+                : t('restaurants.backToIsrael', 'All of Israel')}
+            </button>
+            <span className="inline-flex items-center gap-1 rounded-full border bg-white ps-3.5 pe-1 py-0.5 text-sm font-semibold"
+              style={{ borderColor: 'var(--brand-primary)', color: 'var(--ink)' }}>
+              {placeName}
+              <button type="button" onClick={allIsrael} className="inline-flex h-8 w-8 items-center justify-center rounded-full hover:bg-gray-100"
+                aria-label={t('restaurants.removeCity', { place: placeName, defaultValue: 'Show all of Israel instead of {{place}}' })}
+                data-testid="restaurants-city-remove">
+                <X size={14} aria-hidden="true" />
+              </button>
+            </span>
           </div>
         )}
         {citySlug && (facets?.neighborhoods || []).length > 0 && (
@@ -290,7 +332,8 @@ export default function Restaurants() {
           </span>
           {filtered && (
             <button type="button" className="inline-flex items-center gap-1 font-semibold" style={{ color: 'var(--brand-primary)' }}
-              onClick={() => { setCategory(''); setKashrut(''); setHood(''); setCertifier(''); setQ(''); setQuery(''); setRegion(''); }}>
+              onClick={() => { setCategory(''); setKashrut(''); setHood(''); setCertifier(''); setQ(''); setQuery(''); setRegion(''); if (citySlug) { setCoords(null); navigate('/restaurants'); } }}
+              data-testid="restaurants-clear">
               <X size={14} aria-hidden="true" /> {t('restaurants.clear', 'Clear filters')}
             </button>
           )}
@@ -298,7 +341,36 @@ export default function Restaurants() {
 
         <div className="mt-3">
           {view === 'map' ? (
-            <RestaurantsMapView filters={{ ...params, lat: undefined, lng: undefined, limit: undefined }} userCoords={coords} />
+            <div className="lg:grid lg:items-start lg:gap-5" style={{ gridTemplateColumns: 'minmax(0, 1.05fr) minmax(0, 1fr)' }} data-testid="restaurants-split">
+              <div className="lg:sticky lg:order-2" style={{ top: 'calc(var(--nav-h, 68px) + 16px)' }}>
+                <RestaurantsMapView
+                  filters={{ ...params, lat: undefined, lng: undefined, limit: undefined }}
+                  userCoords={coords}
+                  highlight={hover}
+                  onPick={pickPin}
+                />
+              </div>
+              <div className="lg:order-1">
+                <div
+                  className="-mx-4 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 lg:mx-0 lg:mt-0 lg:grid lg:grid-cols-1 lg:overflow-visible lg:px-0 lg:pb-0"
+                  data-testid="restaurants-side-list"
+                >
+                  {items.map((r) => (
+                    <div
+                      key={r.id}
+                      id={`rc-${r.id}`}
+                      className="w-[86%] max-w-[22rem] shrink-0 snap-start rounded-2xl transition-shadow lg:w-auto lg:max-w-none"
+                      style={hover === r.id ? { boxShadow: '0 0 0 2.5px var(--brand-primary)' } : undefined}
+                      onMouseEnter={() => setHover(r.id)}
+                      onMouseLeave={() => setHover(null)}
+                      onFocus={() => setHover(r.id)}
+                    >
+                      <RestaurantCard r={r} />
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           ) : (
             <div className="grid gap-3 md:grid-cols-2" data-testid="restaurants-list">
               {items.map((r) => <RestaurantCard key={r.id} r={r} />)}
@@ -309,7 +381,7 @@ export default function Restaurants() {
               {t('restaurants.none', 'No places match these filters yet.')}
             </p>
           )}
-          {view === 'list' && items.length < total && (
+          {items.length < total && (
             <div className="mt-6 flex justify-center">
               <button type="button" onClick={loadMore} disabled={loading}
                 className="rounded-full border bg-white px-6 py-2.5 text-sm font-bold disabled:opacity-60"

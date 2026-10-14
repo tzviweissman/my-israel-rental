@@ -5038,6 +5038,9 @@ const en = {
         nearMeOn: 'Nearest first',
         geoUnavailable: 'Your browser cannot share your location.',
         geoDenied: 'Location is off. Allow it in your browser to sort by distance.',
+        backToRegion: 'Back to {{region}}',
+        backToIsrael: 'All of Israel',
+        removeCity: 'Show all of Israel instead of {{place}}',
         allRegions: 'All regions',
         region: {
           North: 'North',
