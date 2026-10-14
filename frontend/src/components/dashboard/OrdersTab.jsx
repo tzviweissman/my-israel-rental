@@ -29,13 +29,14 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ClipboardPaste, Store as StoreIcon, Bike, X, Sparkles, ClipboardList,
-  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Pause, Play,
+  LayoutList, Table2, TrendingUp, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Pause, Play,
 } from 'lucide-react';
 import { phoneError } from '../../utils/phoneValidation';
 import { money } from '../../utils/currency';
 import { pastCutoff } from '../../utils/orderCutoffs';
 import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
 import SendToSupplierDialog from './SendToSupplierDialog';
+import BusinessInsights from './BusinessInsights';
 
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -419,6 +420,7 @@ export default function OrdersTab({ API, token }) {
           ))}
         </div>
         {[
+          ['insights', TrendingUp, t('insights.open', "How it's going"), () => setPanel(panel === 'insights' ? null : 'insights')],
           ['staff', Link2, t('orders.staffLink', 'Staff link'), () => setPanel(panel === 'staff' ? null : 'staff')],
           ['print', Printer, t('orders.print.button', 'Print'), printOrders],
           ['export', Download, t('orders.export', 'Export CSV'), exportCsv],
@@ -440,6 +442,7 @@ export default function OrdersTab({ API, token }) {
         ))}
       </div>
 
+      {panel === 'insights' && <BusinessInsights API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'staff' && <StaffLinkPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'import' && <ImportCustomersPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'couriers' && <CouriersPanel API={API} auth={auth} businessId={biz.id} couriers={couriers} settings={settings} onChanged={() => Promise.all([loadCouriers(), loadSettings(), load()])} onClose={() => setPanel(null)} />}
