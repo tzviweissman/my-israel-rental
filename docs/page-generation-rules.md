@@ -516,7 +516,8 @@ fq3wx-AR6B0, snErQUyqwCU). All six are mostly sales pitches; only their
 design craft is taken. Their demo sites invent reviews, counters ("174
 bottles", "4.8 stars"), logo walls, a form that sends nowhere and footage
 passed off as the business's own: none of that is ever copied (section 1).
-Tzvi approved all twelve.
+Tzvi approved all twelve, then three more (13 to 15) after asking how they
+make their sites so beautiful: the imagery first, and almost nothing else.
 
 1. **A style sheet before building.** Every page starts with a short written
    sheet: accent, ink, ground, the two faces, the one radius, and the motion
@@ -564,6 +565,46 @@ Tzvi approved all twelve.
     batched into one round; then a real test goes through every form and
     order button (to a test business, never the owner's live inbox) before
     the owner sees the page.
+
+13. **The opening screen holds four things at most** (Tzvi, 14 Oct 2026,
+    after "did you see how they make each website so nice they look
+    beautiful"): the beautiful sites open on the picture, a headline of two
+    to five words, at most one short line, and one button. Small proof (a
+    hechsher, "delivered across Israel") is the one short line or sits under
+    the button; everything else moves down the page. The header does not
+    count.
+14. **One colour grade across every image.** Every photo and clip on a page
+    shares one light and colour mood (warm candlelight, cool morning, soft
+    daylight), graded to match before it goes on the page; the page's
+    colours are taken from that grade. Nothing looks pasted in from another
+    shoot.
+15. **A made-for-them cinematic opening.** Every page opens on a picture or
+    film made for that business at full quality: their own product or
+    premises, set in a generated, lit setting that fits them, or their photo
+    brought to life (a slow push-in, candlelight, steam), made in Higgsfield
+    (§3f). Never a small flyer crop or a low-resolution photo as the hero.
+    The cost is told to Tzvi before each generation, one is made and checked
+    before any more.
+
+16. **The opening has a wow: something happens** (Tzvi, 14 Oct 2026, on a
+    pretty but still opening, a slow push-in on their gift: "i dont like it
+    there isnt enough of a wow factor", then "make sure we have a rule so we
+    dont have bland boring pages like the original"). A beautiful picture
+    that only drifts is not enough. The opening shows an event, a real
+    material changing in front of the visitor, tied to what the business
+    does: a gift box opening and light pouring out, juice or honey pouring,
+    dough rising, a cake being sliced, a kitchen transformed, a perfume drop
+    splashing, clouds parting. It is driven by the scroll or plays as the page
+    arrives, it is generated in steps (§3f), and it ends on their real
+    product and the button.
+    **The test, before anyone sees the page:** watch the first five seconds
+    and the first full scroll, and say in one sentence what HAPPENS. If the
+    answer is "nothing", "the camera moves" or "it fades in", the opening is
+    redone before it is shown. Set it beside the best reference studied for
+    the build (the six videos, Inspo, the showcase): if ours is the quieter
+    of the two, it is not finished. The whole page passes the same test
+    section by section (§3f.2: one held signature and at least three
+    accents), so no page reads as a list of still sections.
 
 ## 4. What is reported to the owner instead (content gaps)
 

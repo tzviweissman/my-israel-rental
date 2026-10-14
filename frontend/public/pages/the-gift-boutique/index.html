@@ -1,14 +1,14 @@
 <!doctype html>
 <!--
-  The Gift Boutique. Signature: their six gifts are held on screen under a
-  real gold satin ribbon and bow, and the scroll unties it: a Higgsfield
-  clip (MiniMax H3, from a still of their own six photos) scrubbed by the
-  scroll, ending on the exact layout of the real photos underneath, which
-  then take over. Laptop and phone clips are separate (gen/ribbon/). At the
-  close the ribbon ties itself back round their gift mark. The six photos
-  are theirs (cut from their flyer), every line is theirs (record, listing,
-  flyer). Tzvi, 13 Oct 2026: the drawn ribbon "looks fake"; the filmed one
-  replaced it, and he chose this first clip over three later versions.
+  The Gift Boutique. Signature: the opening, held while you scroll: a black
+  gift box unties, the lid lifts, golden light pours out, and their six
+  gifts rise out of it (a Higgsfield still and clip of a generated box;
+  every gift shown is their own photograph). Then: what we make as a
+  lit index, the collection with prices from their shop, how to order with
+  a filling gold line, good to know, and their name as the closing
+  signature. Rebuilt 14 Oct 2026 against page rules 3g (Tzvi: "there isnt
+  enough of a wow factor", then "do the whole page"). Every line is theirs
+  (record, listing, flyer, WhatsApp catalogue).
 -->
 <html lang="en">
 <head>
@@ -16,7 +16,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Gift Boutique, hand-wrapped gifts delivered across Israel</title>
 <meta name="description" content="Hand-wrapped gifts and bespoke arrangements for simchas, occasions or just because. From Jerusalem, delivered across Israel. Choose your gifts online and send the order to us on WhatsApp.">
-<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mv7pbk0a">
+<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mv8fwl1w">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
@@ -81,89 +81,74 @@
   .nav a.link:hover { color: var(--gold-hi); }
   @media (max-width: 760px) { .nav a.link { display: none; } .brand span { font-size: .78rem; letter-spacing: .06em; } .brand img { width: 34px; height: 34px; } .nav .ghost { padding: 0 .9rem; font-size: .9rem; } }
 
-  /* hero: their brand panel, black and gold, arriving in order */
-  .hero { background: var(--night); color: #fff; position: relative; overflow: hidden; }
-  .hero .wrap { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center;
-    min-height: min(calc(100svh - var(--bar-h)), 760px); padding-block: clamp(2.5rem, 6vw, 4.5rem); }
-  .hero .label { color: var(--gold); }
-  .hero h1 { margin-top: 1rem; font-size: clamp(2.3rem, 1.2rem + 3.1vw, 4.3rem); line-height: 1.06; color: #fff; max-width: 9.6em; }
-  .hero h1 em { font-style: normal; color: var(--gold); }
-  /* one foil glint after the headline arrives; plain gold before and after */
+  /* THE OPENING (Tzvi, 14 Oct 2026: "there isnt enough of a wow factor",
+     then "the gift opens"). Held while you scroll: the bow loosens, the
+     ribbon slides off, the lid lifts, golden light pours out (a Higgsfield
+     clip made in steps, scrubbed by the scroll), the headline arrives in
+     the light, and their six gifts rise out of the box one by one. The
+     box and the light are generated; every gift that rises is their own
+     photograph. Page rules 3g.13 to 3g.16. */
+  .hero { position: relative; height: calc(100svh + 230vh); background: var(--night); color: #fff; }
+  .hero .stage { position: sticky; top: var(--bar-h); height: calc(100svh - var(--bar-h)); overflow: hidden; }
+  .hero .film { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 55% 50%; }
+  .hero .stage::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgb(14 12 9 / .9) 0%, rgb(14 12 9 / .7) 22%, rgb(14 12 9 / .25) 40%, rgb(14 12 9 / 0) 54%),
+                linear-gradient(0deg, rgb(14 12 9 / .92) 0%, rgb(14 12 9 / .6) 18%, rgb(14 12 9 / 0) 36%),
+                radial-gradient(ellipse at 50% 60%, rgb(14 12 9 / 0) 45%, rgb(14 12 9 / .45) 100%); }
+  .hero .top { position: absolute; z-index: 3; inset: 0 0 auto 0; text-align: center; padding: clamp(1.5rem, 6svh, 3.5rem) var(--gutter) 0; }
+  .hero h1 { font-size: clamp(2.6rem, 1.2rem + 4.2vw, 5.6rem); line-height: 1; color: #fff; margin: 0 auto; max-width: 12em;
+    opacity: var(--h, 0); translate: 0 calc((1 - var(--h, 0)) * 16px); filter: blur(calc((1 - var(--h, 0)) * 6px)); }
+  .hero h1 em { font-style: normal; color: var(--gold-hi); }
+  .hero h1 { text-shadow: 0 2px 28px rgb(14 12 9 / .85), 0 0 2px rgb(14 12 9 / .6); }
+  /* the light pours up behind the headline: a soft dark pool keeps the gold
+     words readable against the brightest frame (page rules 3g.8) */
+  .hero .top::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 0; width: min(110%, 64rem); height: 100%;
+    translate: -50% 0; background: radial-gradient(ellipse 50% 60% at 50% 45%, rgb(14 12 9 / .62), rgb(14 12 9 / 0) 100%); pointer-events: none; }
+  /* one foil glint as the headline lands; plain gold before and after */
   .hero h1 em { position: relative; }
-  .hero h1 em::after { content: attr(data-t); position: absolute; inset: 0; color: #FFF1C2; pointer-events: none; opacity: 0;
+  .hero h1 em::after { content: attr(data-t); position: absolute; inset: 0; color: #FFF6D8; pointer-events: none; opacity: 0;
     -webkit-mask: linear-gradient(100deg, transparent 38%, #000 50%, transparent 62%) 160% 0 / 260% 100% no-repeat;
             mask: linear-gradient(100deg, transparent 38%, #000 50%, transparent 62%) 160% 0 / 260% 100% no-repeat; }
   .hero h1 em.glint::after { opacity: 1; animation: glintm 1600ms ease-in-out forwards; }
-  .hero p.sub { margin: 1.25rem 0 0; max-width: 34rem; color: var(--on-night-soft); font-size: clamp(1.05rem, 1rem + .3vw, 1.2rem); }
-  .act { margin-top: 2rem; display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.25rem; }
-  .proof { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; color: var(--on-night-soft); font-size: .95rem; }
-  .proof li { display: flex; gap: .5rem; align-items: flex-start; }
-  .proof svg { width: 18px; height: 18px; margin-top: .2rem; flex: none; stroke: var(--gold); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
-  .arch { justify-self: center; position: relative; width: min(100%, 22rem, 46svh); aspect-ratio: 299 / 360; }
-  .arch::before { content: ""; position: absolute; inset: -12px; border: 1px solid rgb(212 170 64 / .55); border-radius: 999px 999px 18px 18px; }
-  .arch img.photo { width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; border-radius: 999px 999px 14px 14px; box-shadow: 0 24px 60px -24px rgb(0 0 0 / .8); }
-  .arch .mark { position: absolute; width: 64px; height: auto; left: 50%; bottom: -26px; translate: -50% 0; padding: 10px 12px; background: var(--night); border: 1px solid rgb(212 170 64 / .55); border-radius: 999px; box-sizing: content-box; }
-  @media (max-width: 860px) {
-    .hero .wrap { grid-template-columns: 1fr; min-height: 0; }
-    .arch { width: min(72vw, 17rem); margin: 1rem 0 1.5rem; }
+  .hero .cue { display: inline-block; margin: 1rem 0 0; padding: .45rem .95rem; border-radius: 999px; background: rgb(14 12 9 / .62); color: #fff; font-size: .95rem; letter-spacing: .14em; text-transform: uppercase; opacity: var(--cue, 1); }
+  /* their gifts, rising out of the light */
+  .hero .rise { position: absolute; z-index: 2; inset: 0; list-style: none; margin: 0; padding: 0; pointer-events: none; }
+  .hero .rise li { position: absolute; left: 50%; top: 60%; width: clamp(90px, min(10vw, 15svh), 160px); aspect-ratio: 1; translate: -50% -50%;
+    border-radius: 22%; overflow: hidden; opacity: 0; will-change: transform, opacity;
+    box-shadow: 0 0 0 1px rgb(242 205 106 / .5), 0 0 46px 6px rgb(242 205 106 / .35), 0 24px 40px -18px rgb(0 0 0 / .7); }
+  .hero .rise img { width: 100%; height: 100%; object-fit: cover; }
+  .hero .act { position: absolute; z-index: 3; inset: auto 0 0 0; display: flex; flex-direction: column; align-items: center; gap: .7rem;
+    padding: 0 var(--gutter) clamp(1.5rem, 6svh, 3rem); opacity: var(--a, 0); translate: 0 calc((1 - var(--a, 0)) * 14px); }
+  .hero .act .btn { pointer-events: auto; }
+  .hero .line { margin: 0; color: #fff; font-size: 1rem; text-shadow: 0 1px 10px rgb(0 0 0 / .6); }
+  @media (max-width: 760px) {
+    .hero { height: calc(100svh + 200vh); }
+    .hero .stage { height: calc(100svh - var(--bar-h)); }
+    .hero .film { object-position: 50% 50%; }
+    .hero h1 { font-size: clamp(2.4rem, 1rem + 8vw, 3.4rem); }
+    .hero .rise li { width: 25vw; top: 66%; }
   }
-  @media (prefers-reduced-motion: no-preference) {
-    .js .hero [data-in] { opacity: 0; translate: 0 18px; animation: rise 450ms var(--out) forwards; animation-delay: calc(var(--i) * 60ms + 40ms); }
-    .js .arch img.photo { clip-path: inset(100% 0 0 0 round 999px 999px 14px 14px); animation: reveal 1100ms var(--out) 350ms forwards; }
-    .js .arch::before { opacity: 0; animation: fade 900ms ease-out 900ms forwards; }
-    .js .arch .mark { opacity: 0; scale: .6; animation: pop 600ms var(--out) 1200ms forwards; }
+  /* reduced motion: no hold, the box already open, the gifts in place */
+  @media (prefers-reduced-motion: reduce) {
+    .hero { height: auto; }
+    .hero .stage { position: relative; top: 0; height: calc(100svh - var(--bar-h)); }
+    .hero h1, .hero .act { opacity: 1; translate: 0 0; filter: none; }
+    .hero .cue { display: none; }
   }
+  @keyframes fade { to { opacity: 1; } }
+  @keyframes settle { to { opacity: 1; translate: 0 0; filter: blur(0); } }
   @keyframes rise { to { opacity: 1; translate: 0 0; } }
   @keyframes reveal { to { clip-path: inset(0 0 0 0 round 999px 999px 14px 14px); } }
   @keyframes fade { to { opacity: 1; } }
   @keyframes pop { to { opacity: 1; scale: 1; } }
   @keyframes glintm { from { -webkit-mask-position: 160% 0; mask-position: 160% 0; } to { -webkit-mask-position: -60% 0; mask-position: -60% 0; } }
 
-  /* THE UNWRAP: held on screen while the ribbon unties */
+  /* sections */
   .sec { padding-block: clamp(4rem, 9vw, 7rem); }
   .sec h2 { font-size: clamp(1.9rem, 1.2rem + 2.2vw, 3rem); line-height: 1.08; }
+  .sec h2 em.acc, .close h2 em.acc { font-style: normal; color: var(--gold-ink); }
+  .dark h2 em.acc { color: var(--gold); }
   .sec .lede { margin: .9rem 0 0; color: var(--soft); max-width: 40rem; }
-  .unwrap { position: relative; height: calc(100svh + 140vh); }
-  .stage { position: sticky; top: var(--bar-h); height: calc(100svh - var(--bar-h)); display: flex; flex-direction: column;
-    padding-block: clamp(1.25rem, 4svh, 2.5rem) clamp(1rem, 3svh, 2rem); }
-  .stage .wrap { width: 100%; height: 100%; display: flex; flex-direction: column; }
-  .stage h2 { font-size: clamp(1.7rem, 1.1rem + 1.8vw, 2.6rem); }
-  .stage .lede { margin-top: .5rem; }
-  .gift { position: relative; flex: 1; min-height: 0; display: flex; justify-content: center; align-items: center; margin-top: clamp(.9rem, 2.5svh, 1.75rem); }
-  /* The box is laid out exactly like the clip's last frame (gen/ribbon/
-     grid-clean.png: 1920x1080, 70px edge, 34px gaps, 26px corners), so when
-     the clip ends the real photos underneath take over without a jump. */
-  .box { position: relative; height: 100%; max-width: 100%; aspect-ratio: 16 / 9; container-type: size; }
-  .gifts { list-style: none; margin: 0; padding: 3.646cqw; height: 100%; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: repeat(2, minmax(0, 1fr)); gap: 1.771cqw; }
-  .gifts li { border-radius: 1.354cqw; overflow: hidden; background: var(--ivory-2); box-shadow: var(--shadow); transition: box-shadow 300ms ease-out, translate 300ms var(--out); }
-  .gifts img { width: 100%; height: 100%; object-fit: cover; }
-  @media (hover: hover) { .gifts li:hover { translate: 0 -4px; box-shadow: 0 2px 4px rgb(14 12 9 / .1), 0 22px 40px -18px rgb(14 12 9 / .55); } }
-  /* the ribbon: a filmed clip of real satin, scrubbed by the scroll */
-  .box video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; pointer-events: none; background: var(--ivory); transition: opacity 250ms ease-out; }
-  .box video.off { opacity: 0; }
-  /* the clip's ivory is a shade off the page's: feather its edges so no box shows */
-  .box video { --f: linear-gradient(90deg, transparent, #000 3%, #000 97%, transparent), linear-gradient(180deg, transparent, #000 3%, #000 97%, transparent);
-    -webkit-mask-image: var(--f); mask-image: var(--f); -webkit-mask-composite: source-in; mask-composite: intersect; }
-  .stage .note { margin: clamp(.75rem, 2svh, 1.25rem) 0 0; color: var(--soft); font-size: .95rem; max-width: 46rem; }
-  @media (max-width: 760px) {
-    /* phone clip: 1080x1440, 46px edge, 26px gaps, 22px corners */
-    .box { aspect-ratio: 3 / 4; }
-    .gifts { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(3, minmax(0, 1fr)); padding: 4.259cqw; gap: 2.407cqw; }
-    .gifts li { border-radius: 2.037cqw; }
-    .stage .lede { display: none; }
-    .stage .note { font-size: .875rem; }
-    /* room for the WhatsApp bar, so it never covers the note */
-    .stage { height: calc(100svh - var(--bar-h) - 76px); }
-  }
-  /* reduced motion: no hold, no clip, the gifts already unwrapped */
-  @media (prefers-reduced-motion: reduce) {
-    .unwrap { height: auto; }
-    .stage { position: static; height: auto; }
-    .box { height: auto; width: 100%; aspect-ratio: auto; container-type: inline-size; }
-    .gifts { height: auto; grid-auto-rows: auto; grid-template-rows: none; }
-    .gifts li { aspect-ratio: 7 / 6; }
-    .box video { display: none; }
-  }
 
   /* reveal on scroll, fail-safe: visible unless the script runs */
   @media (prefers-reduced-motion: no-preference) {
@@ -171,13 +156,20 @@
     .js [data-rev].in { opacity: 1; translate: 0 0; }
   }
 
-  /* what we make: rows, not cards */
-  .rows { list-style: none; margin: 2.25rem 0 0; padding: 0; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(2rem, 5vw, 4.5rem); border-top: 1px solid var(--line-ivory); }
-  .rows li { display: grid; grid-template-columns: 34px minmax(0, 1fr); gap: .2rem 1rem; padding: 1.3rem 0; border-bottom: 1px solid var(--line-ivory); }
-  .rows img { width: 30px; height: auto; grid-row: span 2; margin-top: .2rem; }
-  .rows b { font: 600 1.2rem/1.25 var(--font-head); letter-spacing: .01em; }
-  .rows span { color: var(--soft); }
-  @media (max-width: 760px) { .rows { grid-template-columns: 1fr; } }
+  /* what we make: an index. Large names on thin rules; the row crossing
+     the middle of the screen fills gold (page rules 3g.6). */
+  .index { list-style: none; margin: 2.25rem 0 0; padding: 0; border-top: 1px solid var(--line-ivory); counter-reset: ix; }
+  .index li { counter-increment: ix; display: grid; grid-template-columns: 3.5rem minmax(0, 1fr) minmax(0, 18rem); gap: .3rem 1.5rem; align-items: baseline;
+    padding: clamp(1.1rem, 2.6vw, 1.7rem) 0; border-bottom: 1px solid var(--line-ivory); position: relative; transition: color 400ms var(--out); }
+  .index li::before { content: "0" counter(ix); font: 500 .85rem/1 var(--font-body); letter-spacing: .14em; color: var(--soft); }
+  .index li::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(212 170 64 / .22), rgb(212 170 64 / .06));
+    transform: scaleX(var(--f, 0)); transform-origin: 0 50%; transition: transform 500ms var(--out); }
+  [dir="rtl"] .index li::after { transform-origin: 100% 50%; }
+  .index b { font: 600 clamp(1.6rem, 1rem + 2.6vw, 3rem)/1.05 var(--font-head); letter-spacing: .01em; color: var(--ink); }
+  .index span { color: var(--soft); font-size: 1rem; }
+  .index li.lit b { color: var(--gold-ink); }
+  .index { position: relative; z-index: 0; }
+  @media (max-width: 760px) { .index li { grid-template-columns: 2.4rem minmax(0, 1fr); } .index span { grid-column: 2; } }
 
   /* the collection with prices: their WhatsApp catalogue, in stock items only */
   .cat-h { margin: 2.5rem 0 1rem; font: 600 1.2rem/1.25 var(--font-head); letter-spacing: .02em; color: var(--gold-ink); }
@@ -227,15 +219,19 @@
   @media (max-width: 860px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
   @media (max-width: 520px) { .facts { grid-template-columns: 1fr; } }
 
-  /* the close: the ribbon ties itself back round their gift mark */
-  .close { text-align: center; overflow: hidden; }
-  .tie { position: relative; height: 150px; margin: 0 auto 1.5rem; max-width: 40rem; }
-  .tie .mark { position: absolute; left: 50%; top: 50%; width: 110px; translate: -50% -50%; z-index: 2; will-change: transform, filter; }
-  .tie .rb { position: absolute; top: calc(50% + 14px); height: 8px; width: 50%; background: var(--gold); border-radius: 2px; box-shadow: inset 0 1px 0 rgb(255 255 255 / .3); will-change: transform; }
-  .tie .rb.l { left: 0; border-radius: 4px 0 0 4px; } .tie .rb.r { right: 0; border-radius: 0 4px 4px 0; }
-  .tie::before { content: ""; position: absolute; left: 50%; top: calc(50% + 4px); width: 150px; height: 28px; translate: -50% -50%; background: var(--night); z-index: 1; }
+  /* the close: their name, huge, cropped by the bottom edge (page rules
+     3g.7), with one foil glint crossing it as it arrives */
+  .close { text-align: center; overflow: hidden; padding-bottom: 0; }
   .close h2 { max-width: 15em; margin: 0 auto; color: #fff; }
-  .close .act { justify-content: center; }
+  .close .act { justify-content: center; margin-top: clamp(1.5rem, 3vw, 2.25rem); }
+  /* the whole name fits the width; only its foot is cut by the edge */
+  .sign { position: relative; margin: clamp(3rem, 8vw, 6rem) 0 0; height: 5.2vw; overflow: hidden; }
+  .sign b { position: absolute; left: 50%; top: 0; translate: -50% 0; white-space: nowrap; font: 700 7.1vw/1 var(--font-head);
+    letter-spacing: .01em; color: var(--gold); opacity: .92; }
+  .sign b::after { content: attr(data-t); position: absolute; inset: 0; color: #FFF1C2; opacity: 0;
+    -webkit-mask: linear-gradient(100deg, transparent 40%, #000 50%, transparent 60%) 160% 0 / 260% 100% no-repeat;
+            mask: linear-gradient(100deg, transparent 40%, #000 50%, transparent 60%) 160% 0 / 260% 100% no-repeat; }
+  .sign b.glint::after { opacity: 1; animation: glintm 1800ms ease-in-out forwards; }
   .foot { background: var(--night); color: var(--on-night-soft); border-top: 1px solid var(--line-night); padding-block: 1.75rem calc(1.75rem + var(--pad-bottom, 0px)); font-size: .9rem; }
   .foot .wrap { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; justify-content: space-between; }
   .foot a { color: var(--on-night-soft); }
@@ -259,78 +255,62 @@
 
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="The Gift Boutique, back to the top"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mv7pbk0a" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
+    <a class="brand" href="#top" aria-label="The Gift Boutique, back to the top"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mv8fwl1w" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
     <nav class="nav" aria-label="On this page">
-      <a class="link" href="#collection" data-mir-key="t-4dbef323-0">Collection</a>
+      <a class="link" href="#make" data-mir-key="t-4dac8cb1-0">What we make</a>
       <a class="link" href="#prices" data-mir-key="t-53b2fbd0-0">Prices</a>
       <a class="link" href="#order" data-mir-key="t-bbb11a07-0">How to order</a>
-      <a class="link" href="/business/the-gift-boutique/order" data-mir-key="t-af6f86d3-0">Order</a>
-      <a class="ghost" href="https://wa.me/message/7TFTC4CVOY2MG1" target="_blank" rel="noopener" data-mir-key="t-5464fade-0">WhatsApp us</a>
+      <a class="link" href="https://wa.me/message/7TFTC4CVOY2MG1" target="_blank" rel="noopener" data-mir-key="t-aa883ea7-0">WhatsApp</a>
+      <a class="ghost" href="/business/the-gift-boutique/order" data-mir-key="t-f78aa345-0">Order a gift</a>
     </nav>
   </div>
 </header>
 
 <main id="top">
-  <section class="hero" aria-labelledby="h1">
-    <div class="wrap">
-      <div>
-        <p class="label" data-in style="--i:0" data-mir-key="t-6b7b5cd3-0">Jerusalem, delivering across Israel</p>
-        <h1 id="h1" data-in style="--i:1" data-mir-key="t-c0f7a53c-0">Hand-wrapped gifts for <em data-t="every occasion">every occasion</em></h1>
-        <p class="sub" data-in style="--i:2" data-mir-key="t-f4079da4-0">Bespoke arrangements for simchas, occasions or just because, wrapped by hand in Jerusalem and delivered across Israel.</p>
-        <div class="act" data-in style="--i:3">
-          <a class="btn" href="/business/the-gift-boutique/order">
-            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Zm0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>
-            <span style="position:relative" data-mir-key="t-a941eb76-0">Order a gift</span>
-          </a>
-          <ul class="proof">
-            <li data-mir-key="t-c5aefde5-0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.6"/><circle cx="17" cy="17.5" r="1.6"/></svg>Delivery across Israel</li>
-            <li data-mir-key="t-df6193c8-0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Food items sealed, Badatz Eida Hachareidis or Badatz HaRav Rubin only</li>
-          </ul>
-        </div>
+  <section class="hero" id="open" aria-labelledby="h1">
+    <div class="stage">
+      <video class="film" id="film" muted playsinline preload="auto" aria-hidden="true"
+        data-d="/pages/the-gift-boutique/assets/open.mp4?v=mv8fwl1w" data-m="/pages/the-gift-boutique/assets/open-m.mp4?v=mv8fwl1w"
+        data-pd="/pages/the-gift-boutique/assets/open-first.webp?v=mv8fwl1w" data-pm="/pages/the-gift-boutique/assets/open-m-first.webp?v=mv8fwl1w"
+        data-sd="/pages/the-gift-boutique/assets/open-last.webp?v=mv8fwl1w" data-sm="/pages/the-gift-boutique/assets/open-m-last.webp?v=mv8fwl1w"></video>
+      <div class="top">
+        <h1 id="h1">Gifts for <em data-t="every occasion" data-mir-key="t-b8142f80-0">every occasion</em></h1>
+        <p class="cue" id="cue" aria-hidden="true">Scroll to open</p>
       </div>
-      <div class="arch"><img class="photo" src="/pages/the-gift-boutique/assets/gift-2.webp?v=mv7pbk0a" alt="One of our gifts: rolled linens in a black box, tied with a wide gold ribbon" width="299" height="305" fetchpriority="high" data-mir-key="i-c4764232-0"><img class="mark" src="/pages/the-gift-boutique/assets/mark.webp?v=mv7pbk0a" alt="" width="64" height="55" data-mir-key="i-877077c3-0"></div>
+      <ul class="rise" id="rise">
+        <li><img src="/pages/the-gift-boutique/assets/gift-1.webp?v=mv8fwl1w" alt="A welcome baby boy gift: a teddy bear, sweets in a ribboned tray and a bottle" width="300" height="300" data-mir-key="i-fed597db-0"></li>
+        <li><img src="/pages/the-gift-boutique/assets/gift-2.webp?v=mv8fwl1w" alt="Rolled linens in a black box, tied with a wide gold ribbon" width="300" height="300" data-mir-key="i-714fbe4c-0"></li>
+        <li><img src="/pages/the-gift-boutique/assets/gift-3.webp?v=mv8fwl1w" alt="A white towel set with pink embroidery in a black box" width="300" height="300" data-mir-key="i-ab3e6f02-0"></li>
+        <li><img src="/pages/the-gift-boutique/assets/gift-4.webp?v=mv8fwl1w" alt="A soft pink knitted set in a clear box, tied with a silver ribbon" width="300" height="300" data-mir-key="i-1ac2e96e-0"></li>
+        <li><img src="/pages/the-gift-boutique/assets/gift-5.webp?v=mv8fwl1w" alt="Rolled white towels and a mug of sweets on a wooden board" width="300" height="300" data-mir-key="i-9a68eeaa-0"></li>
+        <li><img src="/pages/the-gift-boutique/assets/gift-6.webp?v=mv8fwl1w" alt="A glass bowl and spoon on a silver board with white hydrangeas" width="300" height="300" data-mir-key="i-bfdfe60f-0"></li>
+      </ul>
+      <div class="act">
+        <a class="btn" href="/business/the-gift-boutique/order">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Zm0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>
+          <span style="position:relative" data-mir-key="t-a941eb76-0">Order a gift</span>
+        </a>
+        <p class="line" data-mir-key="t-d5da39e5-0">Wrapped by hand in Jerusalem, delivered across Israel</p>
+      </div>
     </div>
   </section>
 
-  <section class="unwrap" id="collection" aria-labelledby="h-col">
-    <div class="stage">
-      <div class="wrap">
-        <h2 id="h-col" data-mir-key="t-3b1b170c-0">Each gift, wrapped by hand</h2>
-        <p class="lede" data-mir-key="t-3a265b28-0">An exclusive collection of gifts and arrangements, hand wrapped with love and care.</p>
-        <div class="gift">
-          <div class="box" id="box" data-clip-ok>
-            <ul class="gifts">
-              <li><img src="/pages/the-gift-boutique/assets/gift-1.webp?v=mv7pbk0a" alt="A welcome baby boy gift: a teddy bear, sweets in a ribboned tray and a bottle, with blue flowers" width="357" height="305" loading="lazy" data-mir-key="i-382d35f1-0"></li>
-              <li><img src="/pages/the-gift-boutique/assets/gift-2.webp?v=mv7pbk0a" alt="Rolled linens in a black box, tied with a wide gold ribbon" width="299" height="305" loading="lazy" data-mir-key="i-714fbe4c-0"></li>
-              <li><img src="/pages/the-gift-boutique/assets/gift-3.webp?v=mv7pbk0a" alt="A white towel set with pink embroidery in a black box, tied with a silver ribbon" width="355" height="305" loading="lazy" data-mir-key="i-2e7cf830-0"></li>
-              <li><img src="/pages/the-gift-boutique/assets/gift-4.webp?v=mv7pbk0a" alt="A soft pink knitted set in a clear box, tied with a silver ribbon" width="300" height="287" loading="lazy" data-mir-key="i-1ac2e96e-0"></li>
-              <li><img src="/pages/the-gift-boutique/assets/gift-5.webp?v=mv7pbk0a" alt="Rolled white towels and a mug of sweets on a wooden board with pink flowers" width="354" height="287" loading="lazy" data-mir-key="i-d8253cba-0"></li>
-              <li><img src="/pages/the-gift-boutique/assets/gift-6.webp?v=mv7pbk0a" alt="A glass bowl and spoon on a silver board with white hydrangeas" width="355" height="287" loading="lazy" data-mir-key="i-bfdfe60f-0"></li>
-            </ul>
-            <video id="rib" muted playsinline preload="auto" aria-hidden="true"
-              data-d="/pages/the-gift-boutique/assets/untie.mp4?v=mv7pbk0a" data-m="/pages/the-gift-boutique/assets/untie-m.mp4?v=mv7pbk0a" data-pd="/pages/the-gift-boutique/assets/untie-poster.webp?v=mv7pbk0a" data-pm="/pages/the-gift-boutique/assets/untie-poster-m.webp?v=mv7pbk0a"></video>
-          </div>
-        </div>
-        <p class="note" data-mir-key="t-975df3ba-0">Items and wrapping may differ from the photos because of hashgacha or availability; quality and purpose stay the same.</p>
-      </div>
-    </div>
-  </section>
 
   <section class="sec" aria-labelledby="h-make">
     <div class="wrap">
-      <h2 id="h-make" data-rev data-mir-key="t-0d4347a6-0">What we make</h2>
-      <ul class="rows">
-        <li data-rev style="--i:0"><img src="/pages/the-gift-boutique/assets/mark.webp?v=mv7pbk0a" alt="" width="30" height="26" data-mir-key="i-877077c3-1"><b data-mir-key="t-58745cdf-0">Gifts and arrangements</b><span data-mir-key="t-085ed0fd-0">From our own collection, wrapped by hand.</span></li>
-        <li data-rev style="--i:1"><img src="/pages/the-gift-boutique/assets/mark.webp?v=mv7pbk0a" alt="" width="30" height="26" data-mir-key="i-877077c3-2"><b data-mir-key="t-5ea55f7f-0">Bespoke arrangements</b><span data-mir-key="t-dd84bb2b-0">Created for simchas, occasions or just because.</span></li>
-        <li data-rev style="--i:2"><img src="/pages/the-gift-boutique/assets/mark.webp?v=mv7pbk0a" alt="" width="30" height="26" data-mir-key="i-877077c3-3"><b data-mir-key="t-4dccee0e-0">Elegant add-ons</b><span data-mir-key="t-efd6bc9d-0">Enhance any gift, and ask us to personalise it further.</span></li>
-        <li data-rev style="--i:3"><img src="/pages/the-gift-boutique/assets/mark.webp?v=mv7pbk0a" alt="" width="30" height="26" data-mir-key="i-877077c3-4"><b data-mir-key="t-1f334b04-0">Delivered across Israel</b><span data-mir-key="t-38ddc0db-0">Sent from Jerusalem to wherever the gift is going.</span></li>
-      </ul>
+      <h2 id="h-make" data-rev data-mir-key="t-0d4347a6-0">What we <em class="acc">make</em></h2>
+      <ol class="index" id="make">
+        <li><b data-mir-key="t-4e9a8f33-0">Gifts from our collection</b><span data-mir-key="t-fa400bd9-0">Wrapped by hand in Jerusalem, for a simcha, an occasion or just because.</span></li>
+        <li><b data-mir-key="t-5ea55f7f-0">Bespoke arrangements</b><span data-mir-key="t-c6106de0-0">Made for the person and the occasion you tell us about.</span></li>
+        <li><b data-mir-key="t-4dccee0e-0">Elegant add-ons</b><span data-mir-key="t-ad6ac8b2-0">Added to any gift, and personalised further if you ask.</span></li>
+        <li><b data-mir-key="t-1f334b04-0">Delivered across Israel</b><span data-mir-key="t-38ddc0db-0">Sent from Jerusalem to wherever the gift is going.</span></li>
+      </ol>
     </div>
   </section>
 
   <section class="sec" id="prices" aria-labelledby="h-prices">
     <div class="wrap">
-      <h2 id="h-prices" data-rev data-mir-key="t-67c046d4-0">The collection, with prices</h2>
+      <h2 id="h-prices" data-rev data-mir-key="t-67c046d4-0">The collection, <em class="acc">with prices</em></h2>
       <p class="lede" data-rev data-mir-key="t-c711145b-0">Tap a gift to add it to your order, then send the whole order to us on WhatsApp. Items and wrapping may differ because of hashgacha or availability.</p>
       <!-- Live from their shop when the site serves this page (mir-catalog.js):
            the typed-in list below is what shows if that data is missing. -->
@@ -338,42 +318,42 @@
       <div data-mir-list>
       <h3 class="cat-h" data-rev>Wine and bottle gifts</h3>
       <ul class="cat">
-        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Gold%20Luxurious%20Wine%20Holder%20and%20Wine%20Glasses" aria-label="Gold Luxurious Wine Holder and Wine Glasses, $150. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/gold-wine.webp?v=mv7pbk0a" alt="Gold wine holder with wine glasses, a bottle and flowers, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Gold Luxurious Wine Holder and Wine Glasses</b><span class="pr">$150</span></a></li>
-        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=Silver%20Chain%20Wine%20Holder" aria-label="Silver Chain Wine Holder, $52. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/silver-chain.webp?v=mv7pbk0a" alt="A silver chain wine holder with a bottle and a mask, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Silver Chain Wine Holder</b><span class="pr">$52</span></a></li>
-        <li data-rev style="--i:2"><a href="/business/the-gift-boutique/order?add=Electric%20Bottle%20Opener" aria-label="Electric Bottle Opener, $47. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/electric-opener.webp?v=mv7pbk0a" alt="An electric bottle opener and a bottle in a gold-edged box tied with a blue ribbon" width="238" height="240" loading="lazy"></span><b>Electric Bottle Opener</b><span class="pr">$47</span></a></li>
-        <li data-rev style="--i:3"><a href="/business/the-gift-boutique/order?add=Bottle%20Opener" aria-label="Bottle Opener, $45 to $80. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/bottle-opener.webp?v=mv7pbk0a" alt="A bottle opener with a bottle and red roses in a black box with our gold logo" width="238" height="240" loading="lazy"></span><b>Bottle Opener</b><span class="pr">$45 to $80</span></a></li>
-        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Bottle%20Opener%20Gift%20Set" aria-label="Bottle Opener Gift Set, $40. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/opener-set.webp?v=mv7pbk0a" alt="A bottle opener set and a bottle in a black box with a gold ribbon" width="238" height="240" loading="lazy"></span><b>Bottle Opener Gift Set</b><span class="pr">$40</span></a></li>
-        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=Bottle%20Opener" aria-label="Bottle Opener, $25. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/opener-snacks.webp?v=mv7pbk0a" alt="A bottle opener with a bottle and snacks, wrapped in cellophane with a green ribbon" width="238" height="240" loading="lazy"></span><b>Bottle Opener</b><span class="pr">$25</span></a></li>
-        <li class="is-out" data-rev style="--i:2"><div><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/lchaim-cups.webp?v=mv7pbk0a" alt="L&#x27;Chaim cups and a bottle in a clear box tied with a ribbon" width="238" height="240" loading="lazy"></span><b>L&#x27;Chaim Cups</b><span class="pr">Out of stock</span></div></li>
-        <li class="is-out" data-rev style="--i:3"><div><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/bicycle-wine.webp?v=mv7pbk0a" alt="A gold bicycle wine holder with a bottle and a rose, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Gold Bicycle Wine Holder</b><span class="pr">Out of stock</span></div></li>
+        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Gold%20Luxurious%20Wine%20Holder%20and%20Wine%20Glasses" aria-label="Gold Luxurious Wine Holder and Wine Glasses, $150. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/gold-wine.webp?v=mv8fwl1w" alt="Gold wine holder with wine glasses, a bottle and flowers, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Gold Luxurious Wine Holder and Wine Glasses</b><span class="pr">$150</span></a></li>
+        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=Silver%20Chain%20Wine%20Holder" aria-label="Silver Chain Wine Holder, $52. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/silver-chain.webp?v=mv8fwl1w" alt="A silver chain wine holder with a bottle and a mask, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Silver Chain Wine Holder</b><span class="pr">$52</span></a></li>
+        <li data-rev style="--i:2"><a href="/business/the-gift-boutique/order?add=Electric%20Bottle%20Opener" aria-label="Electric Bottle Opener, $47. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/electric-opener.webp?v=mv8fwl1w" alt="An electric bottle opener and a bottle in a gold-edged box tied with a blue ribbon" width="238" height="240" loading="lazy"></span><b>Electric Bottle Opener</b><span class="pr">$47</span></a></li>
+        <li data-rev style="--i:3"><a href="/business/the-gift-boutique/order?add=Bottle%20Opener" aria-label="Bottle Opener, $45 to $80. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/bottle-opener.webp?v=mv8fwl1w" alt="A bottle opener with a bottle and red roses in a black box with our gold logo" width="238" height="240" loading="lazy"></span><b>Bottle Opener</b><span class="pr">$45 to $80</span></a></li>
+        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Bottle%20Opener%20Gift%20Set" aria-label="Bottle Opener Gift Set, $40. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/opener-set.webp?v=mv8fwl1w" alt="A bottle opener set and a bottle in a black box with a gold ribbon" width="238" height="240" loading="lazy"></span><b>Bottle Opener Gift Set</b><span class="pr">$40</span></a></li>
+        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=Bottle%20Opener" aria-label="Bottle Opener, $25. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/opener-snacks.webp?v=mv8fwl1w" alt="A bottle opener with a bottle and snacks, wrapped in cellophane with a green ribbon" width="238" height="240" loading="lazy"></span><b>Bottle Opener</b><span class="pr">$25</span></a></li>
+        <li class="is-out" data-rev style="--i:2"><div><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/lchaim-cups.webp?v=mv8fwl1w" alt="L&#x27;Chaim cups and a bottle in a clear box tied with a ribbon" width="238" height="240" loading="lazy"></span><b>L&#x27;Chaim Cups</b><span class="pr">Out of stock</span></div></li>
+        <li class="is-out" data-rev style="--i:3"><div><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/bicycle-wine.webp?v=mv8fwl1w" alt="A gold bicycle wine holder with a bottle and a rose, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Gold Bicycle Wine Holder</b><span class="pr">Out of stock</span></div></li>
       </ul>
       <h3 class="cat-h" data-rev>For the table</h3>
       <ul class="cat">
-        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Table%20Cloth%20and%20Napkins" aria-label="Table Cloth and Napkins, $45. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/tablecloth.webp?v=mv7pbk0a" alt="A white tablecloth and napkins with pink embroidery in a black box" width="238" height="240" loading="lazy"></span><b>Table Cloth and Napkins</b><span class="pr">$45</span></a></li>
-        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=Napkins%20%26%20Gold%20Flower%20Napkin%20Rings" aria-label="Napkins &amp; Gold Flower Napkin Rings, $30. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/napkin-rings.webp?v=mv7pbk0a" alt="Rolled napkins with gold flower napkin rings in a black box tied with gold organza" width="238" height="240" loading="lazy"></span><b>Napkins &amp; Gold Flower Napkin Rings</b><span class="pr">$30</span></a></li>
-        <li data-rev style="--i:2"><a href="/business/the-gift-boutique/order?add=Set%20of%204%20Rosh%20Hashana%20Napkins" aria-label="Set of 4 Rosh Hashana Napkins, $30. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/rh-napkins.webp?v=mv7pbk0a" alt="Four white napkins with gold apple rings in a box" width="238" height="240" loading="lazy"></span><b>Set of 4 Rosh Hashana Napkins</b><span class="pr">$30</span></a></li>
-        <li data-rev style="--i:3"><a href="/business/the-gift-boutique/order?add=Porcelain%20Napkin%20Holder" aria-label="Porcelain Napkin Holder, $30. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/napkin-holder.webp?v=mv7pbk0a" alt="A white porcelain napkin holder with red roses" width="238" height="240" loading="lazy"></span><b>Porcelain Napkin Holder</b><span class="pr">$30</span></a></li>
-        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Glass%20Salt%20Shaker" aria-label="Glass Salt Shaker, $34. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/salt-shaker.webp?v=mv7pbk0a" alt="Two glass salt shakers and a bottle in a black box" width="238" height="240" loading="lazy"></span><b>Glass Salt Shaker</b><span class="pr">$34</span></a></li>
-        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=Wooden%20serving%20board" aria-label="Wooden serving board, $50. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/wooden-board.webp?v=mv7pbk0a" alt="A wooden serving board with cheese knives and a bottle in a box" width="238" height="240" loading="lazy"></span><b>Wooden serving board</b><span class="pr">$50</span></a></li>
-        <li data-rev style="--i:2"><a href="/business/the-gift-boutique/order?add=Apple%20Shaped%20serving%20board" aria-label="Apple Shaped serving board, $40. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/apple-board.webp?v=mv7pbk0a" alt="An apple-shaped wooden serving board with honey and a bottle in a black box" width="238" height="240" loading="lazy"></span><b>Apple Shaped serving board</b><span class="pr">$40</span></a></li>
+        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Table%20Cloth%20and%20Napkins" aria-label="Table Cloth and Napkins, $45. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/tablecloth.webp?v=mv8fwl1w" alt="A white tablecloth and napkins with pink embroidery in a black box" width="238" height="240" loading="lazy"></span><b>Table Cloth and Napkins</b><span class="pr">$45</span></a></li>
+        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=Napkins%20%26%20Gold%20Flower%20Napkin%20Rings" aria-label="Napkins &amp; Gold Flower Napkin Rings, $30. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/napkin-rings.webp?v=mv8fwl1w" alt="Rolled napkins with gold flower napkin rings in a black box tied with gold organza" width="238" height="240" loading="lazy"></span><b>Napkins &amp; Gold Flower Napkin Rings</b><span class="pr">$30</span></a></li>
+        <li data-rev style="--i:2"><a href="/business/the-gift-boutique/order?add=Set%20of%204%20Rosh%20Hashana%20Napkins" aria-label="Set of 4 Rosh Hashana Napkins, $30. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/rh-napkins.webp?v=mv8fwl1w" alt="Four white napkins with gold apple rings in a box" width="238" height="240" loading="lazy"></span><b>Set of 4 Rosh Hashana Napkins</b><span class="pr">$30</span></a></li>
+        <li data-rev style="--i:3"><a href="/business/the-gift-boutique/order?add=Porcelain%20Napkin%20Holder" aria-label="Porcelain Napkin Holder, $30. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/napkin-holder.webp?v=mv8fwl1w" alt="A white porcelain napkin holder with red roses" width="238" height="240" loading="lazy"></span><b>Porcelain Napkin Holder</b><span class="pr">$30</span></a></li>
+        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Glass%20Salt%20Shaker" aria-label="Glass Salt Shaker, $34. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/salt-shaker.webp?v=mv8fwl1w" alt="Two glass salt shakers and a bottle in a black box" width="238" height="240" loading="lazy"></span><b>Glass Salt Shaker</b><span class="pr">$34</span></a></li>
+        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=Wooden%20serving%20board" aria-label="Wooden serving board, $50. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/wooden-board.webp?v=mv8fwl1w" alt="A wooden serving board with cheese knives and a bottle in a box" width="238" height="240" loading="lazy"></span><b>Wooden serving board</b><span class="pr">$50</span></a></li>
+        <li data-rev style="--i:2"><a href="/business/the-gift-boutique/order?add=Apple%20Shaped%20serving%20board" aria-label="Apple Shaped serving board, $40. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/apple-board.webp?v=mv8fwl1w" alt="An apple-shaped wooden serving board with honey and a bottle in a black box" width="238" height="240" loading="lazy"></span><b>Apple Shaped serving board</b><span class="pr">$40</span></a></li>
       </ul>
       <h3 class="cat-h" data-rev>Bowls, vases and washing cups</h3>
       <ul class="cat">
-        <li data-rev style="--i:3"><a href="/business/the-gift-boutique/order?add=White%20Vase" aria-label="White Vase, $55. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/white-vase.webp?v=mv7pbk0a" alt="A white ribbed vase of white roses on a grey board" width="238" height="240" loading="lazy"></span><b>White Vase</b><span class="pr">$55</span></a></li>
-        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Gold%20Edged%20Bowl" aria-label="Gold Edged Bowl, $35 to $38. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/gold-bowl.webp?v=mv7pbk0a" alt="A gold-edged glass bowl with a gold spoon and red roses" width="238" height="240" loading="lazy"></span><b>Gold Edged Bowl</b><span class="pr">$35 to $38</span></a></li>
-        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=White%20Marble%20Glass%20Bowl" aria-label="White Marble Glass Bowl, $35. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/marble-bowl.webp?v=mv7pbk0a" alt="A white marble glass bowl with spoons and white hydrangeas" width="238" height="240" loading="lazy"></span><b>White Marble Glass Bowl</b><span class="pr">$35</span></a></li>
-        <li data-rev style="--i:2"><a href="/business/the-gift-boutique/order?add=Washing%20Cup%20and%20Hand%20Towels" aria-label="Washing Cup and Hand Towels, $40. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/washing-cup.webp?v=mv7pbk0a" alt="A washing cup and rolled hand towels on a wooden board with pink flowers" width="238" height="240" loading="lazy"></span><b>Washing Cup and Hand Towels</b><span class="pr">$40</span></a></li>
-        <li data-rev style="--i:3"><a href="/business/the-gift-boutique/order?add=Small%20Glass%20Jar" aria-label="Small Glass Jar, $33. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/glass-jar.webp?v=mv7pbk0a" alt="A small glass jar with candles and a bottle, wrapped with a purple ribbon" width="238" height="240" loading="lazy"></span><b>Small Glass Jar</b><span class="pr">$33</span></a></li>
-        <li class="is-out" data-rev style="--i:0"><div><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/gold-rim-bowls.webp?v=mv7pbk0a" alt="Two small gold-rimmed glass bowls in a black box tied with a green ribbon" width="238" height="240" loading="lazy"></span><b>Small Glass, Gold Rimmed Bowls</b><span class="pr">Out of stock</span></div></li>
-        <li class="is-out" data-rev style="--i:1"><div><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/black-gold-vase.webp?v=mv7pbk0a" alt="A black and gold vase with a bottle and towels on a gold board" width="238" height="240" loading="lazy"></span><b>Black/Gold Vase</b><span class="pr">Out of stock</span></div></li>
+        <li data-rev style="--i:3"><a href="/business/the-gift-boutique/order?add=White%20Vase" aria-label="White Vase, $55. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/white-vase.webp?v=mv8fwl1w" alt="A white ribbed vase of white roses on a grey board" width="238" height="240" loading="lazy"></span><b>White Vase</b><span class="pr">$55</span></a></li>
+        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Gold%20Edged%20Bowl" aria-label="Gold Edged Bowl, $35 to $38. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/gold-bowl.webp?v=mv8fwl1w" alt="A gold-edged glass bowl with a gold spoon and red roses" width="238" height="240" loading="lazy"></span><b>Gold Edged Bowl</b><span class="pr">$35 to $38</span></a></li>
+        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=White%20Marble%20Glass%20Bowl" aria-label="White Marble Glass Bowl, $35. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/marble-bowl.webp?v=mv8fwl1w" alt="A white marble glass bowl with spoons and white hydrangeas" width="238" height="240" loading="lazy"></span><b>White Marble Glass Bowl</b><span class="pr">$35</span></a></li>
+        <li data-rev style="--i:2"><a href="/business/the-gift-boutique/order?add=Washing%20Cup%20and%20Hand%20Towels" aria-label="Washing Cup and Hand Towels, $40. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/washing-cup.webp?v=mv8fwl1w" alt="A washing cup and rolled hand towels on a wooden board with pink flowers" width="238" height="240" loading="lazy"></span><b>Washing Cup and Hand Towels</b><span class="pr">$40</span></a></li>
+        <li data-rev style="--i:3"><a href="/business/the-gift-boutique/order?add=Small%20Glass%20Jar" aria-label="Small Glass Jar, $33. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/glass-jar.webp?v=mv8fwl1w" alt="A small glass jar with candles and a bottle, wrapped with a purple ribbon" width="238" height="240" loading="lazy"></span><b>Small Glass Jar</b><span class="pr">$33</span></a></li>
+        <li class="is-out" data-rev style="--i:0"><div><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/gold-rim-bowls.webp?v=mv8fwl1w" alt="Two small gold-rimmed glass bowls in a black box tied with a green ribbon" width="238" height="240" loading="lazy"></span><b>Small Glass, Gold Rimmed Bowls</b><span class="pr">Out of stock</span></div></li>
+        <li class="is-out" data-rev style="--i:1"><div><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/black-gold-vase.webp?v=mv8fwl1w" alt="A black and gold vase with a bottle and towels on a gold board" width="238" height="240" loading="lazy"></span><b>Black/Gold Vase</b><span class="pr">Out of stock</span></div></li>
       </ul>
       <h3 class="cat-h" data-rev>Treats, self-care and keepsakes</h3>
       <ul class="cat">
-        <li data-rev style="--i:2"><a href="/business/the-gift-boutique/order?add=Self-Care%20Gift" aria-label="Self-Care Gift, $35. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/self-care.webp?v=mv7pbk0a" alt="A pink silk eye mask, bath flower and body scrub in a box" width="238" height="240" loading="lazy"></span><b>Self-Care Gift</b><span class="pr">$35</span></a></li>
-        <li data-rev style="--i:3"><a href="/business/the-gift-boutique/order?add=Cream%20and%20Gold%20Cosmetic%20Bag" aria-label="Cream and Gold Cosmetic Bag, $26. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/cream-bag.webp?v=mv7pbk0a" alt="A cream and gold cosmetic bag filled with treats, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Cream and Gold Cosmetic Bag</b><span class="pr">$26</span></a></li>
-        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Black%20and%20Gold%20Cosmetic%20Bag" aria-label="Black and Gold Cosmetic Bag, $26. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/black-bag.webp?v=mv7pbk0a" alt="A black and gold cosmetic bag filled with treats, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Black and Gold Cosmetic Bag</b><span class="pr">$26</span></a></li>
-        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=Small%20Jewellery%20Organiser" aria-label="Small Jewellery Organiser, $25. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/jewellery.webp?v=mv7pbk0a" alt="A pink jewellery organiser with treats, wrapped in cellophane with a pink ribbon" width="238" height="240" loading="lazy"></span><b>Small Jewellery Organiser</b><span class="pr">$25</span></a></li>
-        <li class="is-out" data-rev style="--i:2"><div><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/cookie-jar.webp?v=mv7pbk0a" alt="A glass cookie jar of sweets wrapped in cellophane with a red ribbon" width="238" height="240" loading="lazy"></span><b>Glass Cookie Jar</b><span class="pr">Out of stock</span></div></li>
+        <li data-rev style="--i:2"><a href="/business/the-gift-boutique/order?add=Self-Care%20Gift" aria-label="Self-Care Gift, $35. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/self-care.webp?v=mv8fwl1w" alt="A pink silk eye mask, bath flower and body scrub in a box" width="238" height="240" loading="lazy"></span><b>Self-Care Gift</b><span class="pr">$35</span></a></li>
+        <li data-rev style="--i:3"><a href="/business/the-gift-boutique/order?add=Cream%20and%20Gold%20Cosmetic%20Bag" aria-label="Cream and Gold Cosmetic Bag, $26. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/cream-bag.webp?v=mv8fwl1w" alt="A cream and gold cosmetic bag filled with treats, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Cream and Gold Cosmetic Bag</b><span class="pr">$26</span></a></li>
+        <li data-rev style="--i:0"><a href="/business/the-gift-boutique/order?add=Black%20and%20Gold%20Cosmetic%20Bag" aria-label="Black and Gold Cosmetic Bag, $26. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/black-bag.webp?v=mv8fwl1w" alt="A black and gold cosmetic bag filled with treats, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Black and Gold Cosmetic Bag</b><span class="pr">$26</span></a></li>
+        <li data-rev style="--i:1"><a href="/business/the-gift-boutique/order?add=Small%20Jewellery%20Organiser" aria-label="Small Jewellery Organiser, $25. Add it to your order"><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/jewellery.webp?v=mv8fwl1w" alt="A pink jewellery organiser with treats, wrapped in cellophane with a pink ribbon" width="238" height="240" loading="lazy"></span><b>Small Jewellery Organiser</b><span class="pr">$25</span></a></li>
+        <li class="is-out" data-rev style="--i:2"><div><span class="ph"><img src="/pages/the-gift-boutique/assets/cat/cookie-jar.webp?v=mv8fwl1w" alt="A glass cookie jar of sweets wrapped in cellophane with a red ribbon" width="238" height="240" loading="lazy"></span><b>Glass Cookie Jar</b><span class="pr">Out of stock</span></div></li>
       </ul>
       </div>
       <template data-mir-group><h3 class="cat-h" data-f="group"></h3><ul class="cat" data-f="items"></ul></template>
@@ -386,7 +366,7 @@
   <section class="sec dark" id="order" aria-labelledby="h-order">
     <div class="wrap split">
       <div data-rev>
-        <h2 id="h-order" data-mir-key="t-55e8dd65-0">How to order</h2>
+        <h2 id="h-order" data-mir-key="t-55e8dd65-0">How to <em class="acc">order</em></h2>
         <p class="lede" data-mir-key="t-3a9fb3fb-0">Choose online, and we arrange the rest with you on WhatsApp, in English or Hebrew.</p>
         <div class="act">
           <a class="btn" href="/business/the-gift-boutique/order"><span style="position:relative" data-mir-key="t-a941eb76-1">Order a gift</span></a>
@@ -417,15 +397,12 @@
 
   <section class="sec dark close" id="close" aria-labelledby="h-close">
     <div class="wrap">
-      <div class="tie" id="tie" aria-hidden="true" data-clip-ok>
-        <span class="rb l"></span><span class="rb r"></span>
-        <img class="mark" src="/pages/the-gift-boutique/assets/mark.webp?v=mv7pbk0a" alt="" width="96" height="82" data-mir-key="i-877077c3-5">
-      </div>
-      <h2 id="h-close" data-mir-key="t-9515494f-0">Send love across Israel with a meaningful gift</h2>
+      <h2 id="h-close" data-mir-key="t-9515494f-0">Send love across Israel with a <em class="acc">meaningful gift</em></h2>
       <div class="act">
         <a class="btn" href="/business/the-gift-boutique/order"><span style="position:relative" data-mir-key="t-a941eb76-2">Order a gift</span></a>
       </div>
     </div>
+    <div class="sign" aria-hidden="true" data-sc-act data-clip-ok><b id="sign" data-t="THE GIFT BOUTIQUE">THE GIFT BOUTIQUE</b></div>
   </section>
 </main>
 
@@ -448,40 +425,54 @@
   var seg = function (p, a, b) { return clamp((p - a) / (b - a)); };
   var ease = function (x) { return 1 - Math.pow(1 - x, 3); };
 
-  // 1. THE UNWRAP. The stage is held while the section scrolls by; p runs
-  // 0 to 1 over the hold. Tied, then the bow loosens and lifts, the ribbon
-  // slides away, then the gifts light up one by one.
-  var sec = document.getElementById('collection');
-  var box = document.getElementById('box');
-  // The clip is chosen once by width; the scroll sets its time, never plays it.
-  var rib = document.getElementById('rib');
-  var phone = window.matchMedia('(max-width: 760px)').matches;
-  rib.poster = rib.dataset[phone ? 'pm' : 'pd'];
-  if (!still) { rib.src = rib.dataset[phone ? 'm' : 'd']; rib.load(); }
-  var want = 0, seeking = false;
-  function seek() {
-    if (!rib.duration) return;
-    var t = want * (rib.duration - .05);
-    if (Math.abs(rib.currentTime - t) < .02) { seeking = false; return; }
-    seeking = true; rib.currentTime = t;
+  // THE OPENING. p runs 0 to 1 while the stage is held. 0 to .55: the clip
+  // (bow, ribbon, lid, light), scrubbed. .45 to .6: the headline lands in
+  // the light. .55 to .9: their gifts rise out of the box, one by one, into
+  // an arc. .82 to .95: the button. The scroll sets the time, never plays it.
+  var open = document.getElementById('open'), film = document.getElementById('film');
+  var small = window.matchMedia('(max-width: 760px)').matches;
+  var h1 = document.getElementById('h1'), cue = document.getElementById('cue');
+  var rise = [].slice.call(document.querySelectorAll('#rise li'));
+  film.poster = film.dataset[still ? (small ? 'sm' : 'sd') : (small ? 'pm' : 'pd')];
+  if (!still) { film.src = film.dataset[small ? 'm' : 'd']; film.load(); }
+  var fWant = 0, fBusy = false;
+  function fSeek() {
+    if (!film.duration) return;
+    var t = fWant * (film.duration - .05);
+    if (Math.abs(film.currentTime - t) < .02) { fBusy = false; return; }
+    fBusy = true; film.currentTime = t;
   }
-  rib.addEventListener('seeked', function () { seeking = false; seek(); });
-  rib.addEventListener('loadedmetadata', seek);
-  // 0 to .08 tied and still, .08 to .9 the ribbon comes off, then the real
-  // photos (identical to the clip's last frame) take over.
-  function unwrap(p) {
-    want = seg(p, .08, .9);
-    rib.classList.toggle('off', p >= .92);
-    if (!seeking) seek();
+  film.addEventListener('seeked', function () { fBusy = false; fSeek(); });
+  film.addEventListener('loadedmetadata', fSeek);
+  // where each gift ends: an arc above the open box (laptop), two rows of three (phone)
+  var ARC = small
+    ? [[-31, -27], [0, -30], [31, -27], [-31, -5], [0, -8], [31, -5]]
+    : [[-38, -1], [-25, -11], [-8.5, -15], [8.5, -15], [25, -11], [38, -1]];
+  var glinted = false;
+  function openAt(p) {
+    fWant = seg(p, 0, .55);
+    if (!fBusy) fSeek();
+    var hh = ease(seg(p, .45, .6));
+    h1.style.setProperty('--h', hh.toFixed(3));
+    if (hh > .98 && !glinted) { glinted = true; var em = h1.querySelector('em'); em.classList.add('glint'); em.addEventListener('animationend', function () { em.classList.remove('glint'); }, { once: true }); }
+    cue.style.setProperty('--cue', (1 - seg(p, .03, .12)).toFixed(3));
+    rise.forEach(function (li, i) {
+      var k = ease(seg(p, .55 + i * .05, .72 + i * .05));
+      var to = ARC[i];
+      var x = to[0] * k, y = to[1] * k;
+      li.style.opacity = String(Math.min(1, k * 2.2));
+      li.style.transform = 'translate(' + x + (small ? 'vw' : 'vw') + ',' + y + 'svh) scale(' + (.35 + .65 * k) + ') rotate(' + ((1 - k) * (i % 2 ? 8 : -8)) + 'deg)';
+    });
+    open.querySelector('.act').style.setProperty('--a', ease(seg(p, .82, .95)).toFixed(3));
   }
-  function onUnwrap() {
-    var r = sec.getBoundingClientRect();
+  function onOpen() {
+    var r = open.getBoundingClientRect();
     var stageH = window.innerHeight - 64;
     var travel = r.height - stageH;
-    unwrap(travel > 0 ? clamp((64 - r.top) / travel) : 1);
+    openAt(travel > 0 ? clamp((64 - r.top) / travel) : 1);
   }
 
-  // 2. the steps: a gold line fills as you read down, each number lights
+  // the steps: a gold line fills as you read down, each number lights
   var steps = document.getElementById('steps');
   var lis = [].slice.call(steps.querySelectorAll('li'));
   function onSteps() {
@@ -491,34 +482,36 @@
     lis.forEach(function (li, i) { li.classList.toggle('lit', p >= (i + .2) / lis.length || p > .97); });
   }
 
-  // 3. the close: the ribbon ties itself back round their mark
-  var tie = document.getElementById('tie');
-  var TL = tie.querySelector('.rb.l'), TR = tie.querySelector('.rb.r'), mark = tie.querySelector('.mark');
-  function onTie() {
-    var r = tie.getBoundingClientRect(), vh = window.innerHeight;
-    var p = clamp((vh * .95 - (r.top + r.height / 2)) / (vh * .45));
-    var a = ease(seg(p, 0, .7)), k = seg(p, .65, 1);
-    TL.style.transform = 'translateX(' + (-(1 - a) * 110) + '%)';
-    TR.style.transform = 'translateX(' + ((1 - a) * 110) + '%)';
-    // when the ribbon meets the box, the box answers: a small lift and glow
-    var pop = Math.sin(k * Math.PI);
-    mark.style.transform = 'translateY(' + (-pop * 6) + 'px) scale(' + (1 + pop * .08) + ')';
-    mark.style.filter = pop > .01 ? 'drop-shadow(0 0 ' + (pop * 18).toFixed(1) + 'px rgb(242 205 106 / .6))' : '';
+  // what we make: the row crossing the middle of the screen lights gold
+  var rows = [].slice.call(document.querySelectorAll('#make li'));
+  function onMake() {
+    // only the one row nearest the middle of the screen, and only while
+    // the list is on screen
+    var mid = window.innerHeight * .5, best = -1, dist = 1e9;
+    rows.forEach(function (li, i) {
+      var r = li.getBoundingClientRect(), d = Math.abs((r.top + r.bottom) / 2 - mid);
+      if (r.bottom > 0 && r.top < window.innerHeight && d < dist) { dist = d; best = i; }
+    });
+    rows.forEach(function (li, i) {
+      var on = i === best && dist < window.innerHeight * .3;
+      li.classList.toggle('lit', on);
+      li.style.setProperty('--f', on ? 1 : 0);
+    });
   }
 
-  // the headline's gold words catch the light once, then stay plain gold
-  var em = document.querySelector('.hero h1 em');
-  if (!still && em) {
-    setTimeout(function () { em.classList.add('glint'); }, 1300);
-    em.addEventListener('animationend', function () { em.classList.remove('glint'); });
+  // the close: one foil glint across their name as it comes into view
+  var sign = document.getElementById('sign'), signed = false;
+  function onSign() {
+    if (signed) return;
+    var r = sign.getBoundingClientRect();
+    if (r.top < window.innerHeight * .9) { signed = true; sign.classList.add('glint'); }
   }
 
   if (still) {
-    unwrap(1); steps.style.setProperty('--p', 1); lis.forEach(function (li) { li.classList.add('lit'); });
-    TL.style.transform = TR.style.transform = 'none';
+    openAt(1); steps.style.setProperty('--p', 1); lis.forEach(function (li) { li.classList.add('lit'); });
   } else {
     var raf = 0;
-    var frame = function () { raf = 0; onUnwrap(); onSteps(); onTie(); };
+    var frame = function () { raf = 0; onOpen(); onMake(); onSteps(); onSign(); };
     window.addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(frame); }, { passive: true });
     window.addEventListener('resize', frame);
     frame();

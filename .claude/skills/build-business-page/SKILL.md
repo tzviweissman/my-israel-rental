@@ -370,6 +370,22 @@ Full text, timestamps and frames: page rules §3g, `docs/ui-videos/notes/`.
     before motion; fixes batched; a real test through every form (to a test
     business) before the owner sees it.
 
+13. **Opening screen: four things at most**: the picture, a two-to-five
+    word headline, one short line, one button.
+14. **One colour grade** across every image and clip on a page; the page's
+    colours come from it.
+15. **A made-for-them cinematic opening** (their product or place in a lit,
+    generated setting, or their photo brought to life, made in Higgsfield);
+    never a flyer crop or low-resolution photo as the hero. Cost told to Tzvi
+    first; one made and checked before more.
+
+16. **The opening has a wow: something happens** (a box opens and light
+    pours out, honey pours, dough rises), tied to what they do, ending on
+    their real product and the button. Test before showing: say in one
+    sentence what HAPPENS in the first five seconds and first scroll; "nothing",
+    "the camera moves" or "it fades in" means redo. Beside the best reference,
+    if ours is quieter it is not finished.
+
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
 Full text: `reference/design-rules.md`. The rules both builders share are
