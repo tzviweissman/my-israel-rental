@@ -183,6 +183,9 @@ async def get_page_edits(slug_or_id: str):
                     continue
                 products.append({
                     "id": p.get("id"),
+                    # with the listing, so an order page can place a real
+                    # order for it (POST /order-form/<gig_id>/orders)
+                    "gig_id": g["_id"],
                     "name": name,
                     "price": price,
                     "price_to": p.get("price_to"),

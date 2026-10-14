@@ -14,7 +14,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Order a gift · The Gift Boutique</title>
 <meta name="description" content="Choose your gifts, say who they are for and where they are going, and send the order to The Gift Boutique on WhatsApp. Delivered across Israel.">
-<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mv7jitjm">
+<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mv7pbk0a">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
@@ -114,6 +114,7 @@
   .sum .note { margin: .8rem 0 1.25rem; color: var(--on-night-soft); font-size: .9rem; }
   .sum .btn { width: 100%; }
   .sum .why { margin: .8rem 0 0; color: var(--gold-hi); font-size: .9rem; min-height: 1.4em; }
+  .sum .saved { margin: .8rem 0 0; color: var(--on-night-soft); font-size: .85rem; }
   .sum .wa-line { margin: 1rem 0 0; font-size: .875rem; color: var(--on-night-soft); }
   .sum .wa-line a { color: var(--gold-hi); }
 
@@ -134,7 +135,7 @@
 
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="/business/the-gift-boutique" aria-label="The Gift Boutique, home"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mv7jitjm" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
+    <a class="brand" href="/business/the-gift-boutique" aria-label="The Gift Boutique, home"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mv7pbk0a" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
     <a class="back" href="/business/the-gift-boutique#prices"><span class="lg" data-mir-key="t-ce287b8e-0">Back to the collection</span><span class="sm" data-mir-key="t-4949ccb5-0">Collection</span></a>
   </div>
 </header>
@@ -160,7 +161,7 @@
           <div data-need><label for="to" data-mir-key="t-592a35c8-0">Who is it for?</label><input id="to" name="to" autocomplete="off"><p class="msg" data-mir-key="t-8f71d364-0">Tell us who the gift is for.</p></div>
           <div data-need><label for="city" data-mir-key="t-59b7e1af-0">City</label><input id="city" name="city" autocomplete="address-level2"><p class="msg" data-mir-key="t-132b64fd-0">Which city is it going to?</p></div>
           <div class="full" data-need><label for="addr" data-mir-key="t-db12b167-0">Address</label><input id="addr" name="addr" autocomplete="street-address"><p class="msg" data-mir-key="t-3252eccd-0">Add the street and number.</p></div>
-          <div><label for="when" data-mir-key="t-b862e677-0">Delivery date <small>(optional)</small></label><input id="when" name="when" type="date"></div>
+          <div data-need><label for="when" data-mir-key="t-a0254a34-0">Delivery date</label><input id="when" name="when" type="date"><p class="msg" data-mir-key="t-b60ee01e-0">Pick the day it should arrive.</p></div>
           <div><label for="tophone" data-mir-key="t-a5c8f5c6-0">Their phone <small>(optional, for the delivery)</small></label><input id="tophone" name="tophone" type="tel" inputmode="tel" autocomplete="off"></div>
           <div class="full"><label for="card" data-mir-key="t-adc69b15-0">Message for the card <small>(optional)</small></label><textarea id="card" name="card" maxlength="400"></textarea></div>
         </div>
@@ -170,7 +171,8 @@
         <h2 id="s3" data-mir-key="t-56a49003-0"><span class="n">3</span>Your details</h2>
         <div class="fields">
           <div data-need><label for="me" data-mir-key="t-5c263b1a-0">Your name</label><input id="me" name="me" autocomplete="name"><p class="msg" data-mir-key="t-7317fdc7-0">Add your name.</p></div>
-          <div><label for="note" data-mir-key="t-12e156c1-0">Anything else? <small>(optional)</small></label><input id="note" name="note" autocomplete="off"></div>
+          <div data-need><label for="myphone" data-mir-key="t-d93db2df-0">Your phone</label><input id="myphone" name="myphone" type="tel" inputmode="tel" autocomplete="tel"><p class="msg" data-mir-key="t-da76fc8c-0">Add your phone, so we can reach you about the order.</p></div>
+          <div class="full"><label for="note" data-mir-key="t-12e156c1-0">Anything else? <small>(optional)</small></label><input id="note" name="note" autocomplete="off"></div>
         </div>
       </section>
     </form>
@@ -186,6 +188,7 @@
         <span style="position:relative" data-mir-key="t-568fb5eb-0">Send order on WhatsApp</span>
       </a>
       <p class="why" id="why" aria-live="polite"></p>
+      <p class="saved" data-mir-key="t-d64b031c-0">Your order is also saved with The Gift Boutique on MyIsraelRental, with a link to follow it.</p>
       <p class="wa-line" data-mir-key="t-2c558479-0">Or message us: <a href="https://wa.me/972535386042" target="_blank" rel="noopener">+972 53-538-6042</a></p>
     </aside>
   </div>
@@ -328,18 +331,54 @@ document.addEventListener('DOMContentLoaded', function () {
     if (v('card')) L.push('Card message: "' + v('card') + '"');
     if (v('note')) L.push('Also: ' + v('note'));
     L.push('');
-    L.push('From: ' + v('me'));
+    L.push('From: ' + v('me') + ', ' + v('myphone'));
     return L.join('\n');
+  }
+  // Saved first as a real order on their board (with a tracking link),
+  // then WhatsApp opens with everything written out. If saving fails or
+  // takes too long, WhatsApp opens anyway: an order is never lost.
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var sending = false;
+  function save() {
+    var c = chosen();
+    var gig = c.length && c.every(function (p) { return p.gig_id && p.id && p.gig_id === c[0].gig_id; }) ? c[0].gig_id : null;
+    if (!gig) return Promise.resolve(null);
+    var notes = ['For: ' + v('to') + (v('tophone') ? ', ' + v('tophone') : '')];
+    if (v('card')) notes.push('Card message: "' + v('card') + '"');
+    if (v('note')) notes.push(v('note'));
+    notes.push('Sent from the order page by WhatsApp');
+    var body = {
+      lines: c.map(function (p) { return { product_id: p.id, qty: q[p._k] }; }),
+      fulfilment: 'delivery', date: v('when'), city: v('city').slice(0, 80), address: v('addr'),
+      customer_name: v('me'), customer_phone: v('myphone'), notes: notes.join('\n')
+    };
+    var post = fetch(API + '/marketplace/order-form/' + gig + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    var late = new Promise(function (res) { setTimeout(function () { res(null); }, 5000); });
+    return Promise.race([post, late]);
   }
   function send(e) {
     e.preventDefault();
+    if (sending) return;
     if (!check(true)) {
       var first = document.querySelector('.bad input, .bad textarea');
       if (!chosen().length) document.getElementById('s1').scrollIntoView({ behavior: 'smooth', block: 'start' });
       else if (first) first.focus();
       return;
     }
-    window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(message()), '_blank', 'noopener');
+    sending = true;
+    // opened now, while this still counts as the tap, so no popup blocker stops it
+    var tab = window.open('', '_blank');
+    ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.setAttribute('aria-busy', 'true'); b.lastElementChild.textContent = 'Sending'; });
+    save().then(function (saved) {
+      var text = message();
+      if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      sending = false;
+      ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.removeAttribute('aria-busy'); b.lastElementChild.textContent = id === 'send' ? 'Send order on WhatsApp' : 'Send on WhatsApp'; });
+      why.textContent = saved ? 'Sent. Your order is saved, and the tracking link is in the message.' : '';
+    });
   }
   document.getElementById('send').addEventListener('click', send);
   document.getElementById('send2').addEventListener('click', send);

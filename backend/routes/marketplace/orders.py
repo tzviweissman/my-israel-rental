@@ -1625,14 +1625,39 @@ class WindowIn(BaseModel):
         return self
 
 
-def offers_delivery(st: dict[str, Any]) -> bool:
-    """Does this store deliver? Its own answer (Tzvi, 22 Sep 2026: "make
-    sure each business chooses that they have a delivery option before
-    offering it"). A store saved before the switch existed and set delivery
-    times had chosen it; one that never did had not."""
+_SAYS_DELIVERY = re.compile(r"\bdeliver(?:y|ies|ed|s|ing)?\b|\bshipping\b|\bships\b|משלוח|שליחויות", re.I)
+_SAYS_NO_DELIVERY = re.compile(r"\bno deliver|\bpick-?up only\b|\bcollection only\b|\bdo(?:es)? not deliver|\bdon'?t deliver|ללא משלוח|אין משלוח|איסוף בלבד|באיסוף עצמי בלבד", re.I)
+
+
+def says_delivery(biz: Optional[dict[str, Any]], gig: Optional[dict[str, Any]] = None) -> bool:
+    """Does the business say, in its own words, that it delivers? Its
+    description (either language), its shop listing's title or description,
+    or a shop that serves all of Israel (a shop cannot serve the country by
+    pickup). "Pickup only" and the like say the opposite."""
+    if not biz:
+        return False
+    text = " ".join(str(x or "") for x in (
+        biz.get("description"), biz.get("description_he"), biz.get("tagline"),
+        (gig or {}).get("title"), (gig or {}).get("description"), (gig or {}).get("description_he"),
+    ))
+    if _SAYS_NO_DELIVERY.search(text):
+        return False
+    return bool(_SAYS_DELIVERY.search(text)) or (bool(biz.get("serves_nationwide")) and (gig or {}).get("gig_type") == "store")
+
+
+def offers_delivery(st: dict[str, Any], biz: Optional[dict[str, Any]] = None, gig: Optional[dict[str, Any]] = None) -> bool:
+    """Does this store deliver? Its own answer when it has given one (Tzvi,
+    22 Sep 2026: "make sure each business chooses that they have a delivery
+    option before offering it"): the switch, or delivery times set before
+    the switch existed. When it never chose, what it says about itself
+    decides (Tzvi, 14 Oct 2026: "any business that has delivery on their
+    page should have delivery automatically turned on"); the owner can
+    still switch it off."""
     if "delivery_on" in st:
         return bool(st["delivery_on"])
-    return bool((st.get("windows") or {}).get("delivery"))
+    if (st.get("windows") or {}).get("delivery"):
+        return True
+    return says_delivery(biz, gig)
 
 
 class OrderSettingsIn(BaseModel):
@@ -1652,10 +1677,18 @@ class OrderSettingsIn(BaseModel):
         return self
 
 
-def _settings_out(biz: dict[str, Any]) -> dict[str, Any]:
+async def _store_of(business_id: str) -> Optional[dict[str, Any]]:
+    """The business's published shop listing, whose words count too."""
+    return await db.marketplace_gigs.find_one(
+        {"business_id": business_id, "gig_type": "store", "status": "published"},
+        {"title": 1, "description": 1, "description_he": 1, "gig_type": 1},
+    )
+
+
+def _settings_out(biz: dict[str, Any], store: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     st = biz.get("order_settings") or {}
     return {
-        "delivery_on": offers_delivery(st),
+        "delivery_on": offers_delivery(st, biz, store),
         "cutoffs": biz.get("order_cutoffs") or [],
         "pickup_windows": (st.get("windows") or {}).get("pickup") or [],
         "delivery_windows": (st.get("windows") or {}).get("delivery") or [],
@@ -1668,7 +1701,7 @@ def _settings_out(biz: dict[str, Any]) -> dict[str, Any]:
 @router.get("/businesses/{business_id}/orders/settings")
 async def get_order_settings(business_id: str, user=Depends(verify_token)):
     biz = await _owned_business(business_id, user)
-    return _settings_out(biz)
+    return _settings_out(biz, await _store_of(business_id))
 
 
 @router.put("/businesses/{business_id}/orders/settings")
@@ -1693,7 +1726,7 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
     if payload.default_courier_user_id:
         await _assign_unassigned(business_id)
     fresh = await db.businesses.find_one({"_id": business_id})
-    return _settings_out(fresh)
+    return _settings_out(fresh, await _store_of(business_id))
 
 
 def past_cutoff(needed_by: str, cutoffs: list[dict[str, Any]], now: datetime) -> Optional[dict[str, Any]]:
@@ -2009,7 +2042,7 @@ async def order_form(gig_id: str):
         },
         "products": _products_for_order(gig),
         "settings": {
-            "delivery_on": offers_delivery(st),
+            "delivery_on": offers_delivery(st, biz, gig),
             "cutoffs": biz.get("order_cutoffs") or [],
             "pickup_windows": (st.get("windows") or {}).get("pickup") or [],
             "delivery_windows": (st.get("windows") or {}).get("delivery") or [],
@@ -2037,7 +2070,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     if past_cutoff(payload.date, biz.get("order_cutoffs") or [], now):
         raise HTTPException(status_code=400, detail="Orders for that day have closed")
 
-    if payload.fulfilment == "delivery" and not offers_delivery(st):
+    if payload.fulfilment == "delivery" and not offers_delivery(st, biz, gig):
         raise HTTPException(status_code=400, detail="This store does pickup only")
 
     # The window: if the store has any for that weekday and kind, one of them.

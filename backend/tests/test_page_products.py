@@ -49,6 +49,7 @@ async def test_products_carry_stock_section_and_range(fake):
     assert vase["in_stock"] is True and vase["group"] == "Bowls and vases" and vase["image"] == "https://x/vase.jpg"
     assert opener["in_stock"] is False and opener["price_to"] == 80 and opener["currency"] == "USD"
     assert opener["group"] is None
+    assert vase["id"] == "a" and vase["gig_id"] == "g1"
 
 
 @pytest.mark.asyncio
