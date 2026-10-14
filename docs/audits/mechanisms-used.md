@@ -141,3 +141,4 @@ already spent per the task brief even though its entry could not be sourced here
 2026-09-14 - position bias - Recently added on the home page
 2026-09-15 - social proof (specific, countable) - attribution band on the business page
 2026-10-13 - information scent - Restaurants tile on /businesses (Services.jsx)
+2026-10-14 - endowed progress effect - Gift Boutique order page sticky bar
