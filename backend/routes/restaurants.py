@@ -47,7 +47,10 @@ async def restaurant_admin(request: Request, credentials: HTTPAuthorizationCrede
     import os
     secret = os.environ.get("RESTAURANT_ADMIN_TOKEN", "")
     given = request.headers.get("X-Restaurant-Admin-Token", "")
-    if len(secret) >= 32 and given and hmac.compare_digest(given, secret):
+    # Compared as bytes: compare_digest raises TypeError on a str with
+    # non-ASCII characters, which turned a bad header into a 500 (site
+    # audit, 13 Oct 2026). A wrong token is simply not the token.
+    if len(secret) >= 32 and given and hmac.compare_digest(given.encode("utf-8"), secret.encode("utf-8")):
         return {"role": "admin", "user_id": "restaurant-admin-token"}
     if not credentials:
         raise HTTPException(status_code=401, detail="Not authenticated")
