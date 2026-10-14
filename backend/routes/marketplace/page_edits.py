@@ -166,7 +166,31 @@ async def get_page_edits(slug_or_id: str):
     # shows these (frontend/server.js, pages/<slug>/prices.json), so a price
     # changed in the dashboard changes on the designed page too.
     prices: dict[str, float] = {}
-    async for g in db.marketplace_gigs.find({"business_id": biz["_id"], "status": "published"}, {"products": 1, "tiers": 1}):
+    # And the products themselves, for a designed page with a catalogue
+    # (frontend/public/pages/mir-catalog.js): what is listed, in what order,
+    # in which section, and whether it is in stock right now, all as the
+    # business set it in the dashboard.
+    products: list[dict[str, Any]] = []
+    async for g in db.marketplace_gigs.find({"business_id": biz["_id"], "status": "published"}, {"products": 1, "tiers": 1, "gig_type": 1}):
+        if g.get("gig_type") == "store":
+            for p in g.get("products") or []:
+                name = (p.get("name") or "").strip()
+                try:
+                    price = float(p.get("price"))
+                except (TypeError, ValueError):
+                    continue
+                if not name or price < 0:
+                    continue
+                products.append({
+                    "id": p.get("id"),
+                    "name": name,
+                    "price": price,
+                    "price_to": p.get("price_to"),
+                    "currency": (p.get("currency") or "ILS").upper(),
+                    "image": (p.get("images") or [None])[0] or p.get("image"),
+                    "group": (p.get("group") or "").strip() or None,
+                    "in_stock": bool(p.get("in_stock", True)),
+                })
         for row in (g.get("products") or []) + (g.get("tiers") or []):
             name = (row.get("name") or row.get("title") or "").strip()
             try:
@@ -179,6 +203,7 @@ async def get_page_edits(slug_or_id: str):
         "edits": doc.get("edits") or {"text": {}, "img": {}, "style": {}},
         "updated_at": doc.get("updated_at"),
         "prices": prices,
+        "products": products,
     }
 
 

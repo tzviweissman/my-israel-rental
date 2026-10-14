@@ -45,7 +45,7 @@ import FaqEditor, { cleanFaqs } from '../marketplace/FaqEditor';
 import { HighlightChip } from '../marketplace/Highlights';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { X, Trash2, ImagePlus, Loader2, Wand2 } from 'lucide-react';
+import { X, Trash2, ImagePlus, Loader2, Wand2, Plus } from 'lucide-react';
 import PhotoMatch from './PhotoMatch';
 import ProductSuppliers from './ProductSuppliers';
 import WholesaleOffers from './WholesaleOffers';
@@ -158,6 +158,13 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
 
   const setOption = (i, patch) => setOptions((prev) =>
     prev.map((o, k) => (k === i ? { ...o, ...patch } : o)));
+  // A store adds and removes its own products here, and marks them in or
+  // out of stock; a designed page with a catalogue follows (mir-catalog.js).
+  const addProduct = () => setOptions((prev) => [...prev, {
+    name: '', price: '', currency: prev[0]?.currency || 'ILS', in_stock: true,
+    group: prev[prev.length - 1]?.group || '', photos: [],
+  }]);
+  const removeProduct = (i) => setOptions((prev) => prev.filter((_, k) => k !== i));
 
   const addPhotos = async (i, files) => {
     const chosen = Array.from(files || []).filter((f) => f.type.startsWith('image/'));
@@ -225,9 +232,21 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       toast.error(t('editListing.needHours', 'Open at least one day, or customers cannot book a time.'));
       return;
     }
+    if (isStore && !options.length) {
+      toast.error(t('editListing.needProduct', 'A shop needs at least one product.'));
+      return;
+    }
     const bad = options.find((o) => !String(o.name || '').trim());
     if (bad) {
       toast.error(t('editListing.needName', 'Every option needs a name.'));
+      return;
+    }
+    const noPrice = options.find((o) => !(parseFloat(o.price) >= 0));
+    if (noPrice) {
+      toast.error(t('editListing.needPrice', {
+        defaultValue: 'Add a price to "{{name}}".',
+        name: String(noPrice.name || '').trim(),
+      }));
       return;
     }
     const noPhoto = options.find((o) => !(o.photos || []).length);
@@ -288,21 +307,28 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
       // Rebuilt from the ORIGINAL objects so nothing this sheet does not
       // show — features, delivery_days, duration_minutes, in_stock — is
       // dropped when the array is replaced.
-      const rebuilt = options.map((o, i) => {
-        let base = { ...(originals[i] || {}) };
+      // Each option is a copy of its original (see `options`), so this keeps
+      // them even when products were added or removed above it.
+      const rebuilt = options.map((o) => {
+        let base = { ...o };
         base.name = String(o.name || '').trim();
         base.price = parseFloat(o.price);
         if (isStore) {
           base.images = o.photos || [];
           base.image = null;
           base = withSize(base, o);
+          base.in_stock = o.in_stock !== false;
+          const group = String(o.group || '').trim();
+          base.group = group || null;
+          const to = parseFloat(o.price_to);
+          base.price_to = Number.isFinite(to) && to > base.price ? to : null;
         } else {
           base.images = o.photos || [];
         }
         delete base.photos;
         return base;
       });
-      const changed = JSON.stringify(rebuilt) !== JSON.stringify(
+      const changed = rebuilt.length !== originals.length || JSON.stringify(rebuilt) !== JSON.stringify(
         originals.map((o) => ({ ...o })),
       );
       if (changed) payload[isStore ? 'products' : 'tiers'] = rebuilt;
@@ -821,8 +847,62 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 {isStore && (
                   <SizeFields option={o} onChange={(patch) => setOption(i, patch)} testid={`edit-listing-size-${i}`} />
                 )}
+                {isStore && (
+                  <div className="flex flex-wrap items-center gap-2">
+                    <label className="inline-flex items-center gap-2 min-h-[44px] pe-2 text-sm font-semibold text-gray-700 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={o.in_stock !== false}
+                        onChange={(e) => setOption(i, { in_stock: e.target.checked })}
+                        className="w-4 h-4"
+                        data-testid={`edit-listing-in-stock-${i}`}
+                      />
+                      {t('editListing.inStock', 'In stock')}
+                    </label>
+                    <input
+                      value={o.group || ''}
+                      onChange={(e) => setOption(i, { group: e.target.value })}
+                      placeholder={t('editListing.section', 'Section, e.g. For the table')}
+                      maxLength={60}
+                      className="flex-1 min-w-[10rem] px-3 py-2 rounded-lg border bg-white text-sm"
+                      style={{ borderColor: 'var(--brand-border)' }}
+                      aria-label={t('editListing.sectionLabel', 'Section on your page')}
+                      data-testid={`edit-listing-group-${i}`}
+                    />
+                    <input
+                      type="number"
+                      min="0"
+                      value={o.price_to ?? ''}
+                      onChange={(e) => setOption(i, { price_to: e.target.value })}
+                      placeholder={t('editListing.priceTo', 'Up to (optional)')}
+                      className="w-36 px-3 py-2 rounded-lg border bg-white text-sm"
+                      style={{ borderColor: 'var(--brand-border)' }}
+                      aria-label={t('editListing.priceToLabel', 'Highest price, for a price range')}
+                      data-testid={`edit-listing-price-to-${i}`}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeProduct(i)}
+                      className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-lg text-xs font-semibold text-red-700 hover:bg-red-50"
+                      data-testid={`edit-listing-remove-product-${i}`}
+                    >
+                      <Trash2 size={12} /> {t('editListing.removeProduct', 'Remove')}
+                    </button>
+                  </div>
+                )}
               </div>
             ))}
+            {isStore && (
+              <button
+                type="button"
+                onClick={addProduct}
+                className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-lg border text-sm font-semibold text-gray-800 hover:border-[var(--brand-primary)]"
+                style={{ borderColor: 'var(--brand-border)' }}
+                data-testid="edit-listing-add-product"
+              >
+                <Plus size={14} /> {t('editListing.addProduct', 'Add a product')}
+              </button>
+            )}
           </div>
 
           {isStore && <ProductSuppliers gig={gig} API={API} token={token} />}

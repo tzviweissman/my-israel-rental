@@ -326,6 +326,13 @@ async function sendHandBuilt(req, res, slug, file) {
     const json = JSON.stringify(data.prices).replace(/</g, '\\u003c');
     html = html.replace(/<\/head>/i, `<script id="mir-live-prices" type="application/json">${json}</script></head>`);
   }
+  // A page with a catalogue ([data-mir-catalog]) shows the business's own
+  // products as they are now: added, removed, repriced, out of stock. The
+  // page keeps its typed-in list for when this data is missing.
+  if (data && Array.isArray(data.products) && data.products.length && /data-mir-catalog/.test(html)) {
+    const json = JSON.stringify(data.products).replace(/</g, '\\u003c');
+    html = html.replace(/<\/body>/i, `<script id="mir-live-products" type="application/json">${json}</script><script src="/pages/mir-catalog.js?v=${EDITOR_STAMP}"></script></body>`);
+  }
   res.end(html);
 }
 

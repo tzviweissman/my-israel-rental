@@ -904,6 +904,18 @@ look real, you don't see the texture spreading". How:
   7. **Check the frames for these before showing**: a contact sheet of the
      clip, looking for any step that happens off screen or by magic.
 
+**A page with a product list reads the shop** (Tzvi, 14 Oct 2026: owners mark
+items out of stock and back, and add or remove them, from the dashboard). Any
+designed page that lists products with prices wraps the list in
+`[data-mir-catalog]` with `data-mir-list` (the typed-in list, shown when live
+data is missing) and two templates, `data-mir-group` and `data-mir-item`
+(worked example: The Gift Boutique). The site then redraws it from their store
+products (`frontend/public/pages/mir-catalog.js`): sections from each
+product's section name, price ranges, and out of stock shown greyed with "Out
+of stock" and no link. Mark the wrapper `data-mir-skip` so the page editor
+leaves it to the shop. Load the products into their store listing (a dry run
+first) so the page and the dashboard agree from day one.
+
 **Blender** (Tzvi, 23 Sep 2026), for three jobs:
 1. **Product motion from real items:** their own product turning or rolling as the
    page scrolls, made from their photos or a quick scan.

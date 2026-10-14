@@ -150,6 +150,9 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   hard or key step (the knot unwinding) gets its own clip between a before
   frame and an after frame, joined end to start, or the model skips it.
   Full text: page rules, generated-clip section.
+  **Product lists read the shop**: wrap a priced list in `[data-mir-catalog]`
+  (+ `data-mir-list`, `data-mir-skip`, item and group templates; example The
+  Gift Boutique) so out-of-stock, new and removed items follow the dashboard.
 
 ## 2. How to write
 

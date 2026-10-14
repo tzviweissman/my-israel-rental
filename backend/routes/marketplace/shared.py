@@ -527,6 +527,9 @@ class ProductItem(BaseModel):
     id: str = Field(default_factory=lambda: uuid.uuid4().hex[:12])
     name: str
     price: float
+    # Optional top of a price range ("$45 to $80"), set by the business;
+    # `price` stays the lowest, which is what an order is charged from.
+    price_to: Optional[float] = Field(None, ge=0)
     currency: str = "ILS"
     description: str = ""
     # `image` is the ORIGINAL single thumbnail and stays readable for the
