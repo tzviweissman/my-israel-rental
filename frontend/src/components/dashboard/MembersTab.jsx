@@ -16,6 +16,8 @@ import { toast } from 'sonner';
 import { Loader2, Plus, Users, Copy, Check, DoorOpen, Link2, X, Pencil, Trash2 } from 'lucide-react';
 import { money } from '../../utils/currency';
 import { planPrice, planVisits, stateLabel } from '../members/memberText';
+import CustomFieldsEditor from './CustomFieldsEditor';
+import { AnswersList } from '../forms/CustomFieldInputs';
 
 const FILTERS = ['pending', 'active', 'due', 'paused', 'cancelled'];
 const EMPTY_PLAN = { name: '', description: '', period: 'month', price: '', visits: '', valid_months: '', active: true };
@@ -314,6 +316,8 @@ export default function MembersTab({ API, token }) {
         )}
       </section>
 
+      <div className="mb-6"><CustomFieldsEditor API={API} auth={auth} businessId={biz.id} form="membership" /></div>
+
       {/* Links */}
       {plans.some((p) => p.active) && (
         <section className="mb-6 rounded-2xl border p-4 space-y-3" style={{ borderColor: 'var(--brand-border)', background: 'var(--surface-muted, #F9FAFB)' }} data-testid="members-links">
@@ -390,6 +394,7 @@ export default function MembersTab({ API, token }) {
                       {m.visits_left !== null && m.visits_left !== undefined && ` · ${t('members.visitsLeft', '{{n}} visits left', { n: m.visits_left })}`}
                       {m.last_visit_at && ` · ${t('members.lastVisit', 'Last visit')} ${fmtDate(m.last_visit_at)}`}
                     </p>
+                    <AnswersList answers={m.answers} t={t} />
                   </div>
                   <div className="flex flex-wrap gap-1.5">
                     {m.status === 'pending' && <button type="button" disabled={busy === m.id} className={btnSolid} style={solidStyle} onClick={() => act(m, 'activate')} data-testid="member-activate">{t('members.activate', 'Paid, activate')}</button>}

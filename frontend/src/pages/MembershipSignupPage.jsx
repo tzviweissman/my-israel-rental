@@ -11,6 +11,7 @@ import axios from 'axios';
 import { Loader2, Check, Users } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { planPrice, planVisits } from '../components/members/memberText';
+import CustomFieldInputs from '../components/forms/CustomFieldInputs';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-base bg-white min-h-[48px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
@@ -23,6 +24,7 @@ export default function MembershipSignupPage() {
   const [data, setData] = useState(null);
   const [pick, setPick] = useState('');
   const [form, setForm] = useState({ name: '', phone: '', email: '', note: '' });
+  const [answers, setAnswers] = useState({});
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
 
@@ -51,7 +53,7 @@ export default function MembershipSignupPage() {
     setSending(true);
     try {
       const { data: r } = await axios.post(`${API}/marketplace/memberships/plan/${pick}/join`, {
-        name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim() || null, note: form.note.trim() || null, lang: lang === 'he' ? 'he' : 'en',
+        name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim() || null, note: form.note.trim() || null, lang: lang === 'he' ? 'he' : 'en', answers,
       });
       navigate(`/members/${r.manage_token}?joined=1`);
     } catch (err) {
@@ -101,6 +103,7 @@ export default function MembershipSignupPage() {
             <input required type="tel" minLength={7} maxLength={20} autoComplete="tel" value={form.phone} onChange={set('phone')} className={field} style={fieldStyle} placeholder={t('members.phone', 'Phone')} data-testid="signup-phone" />
             <input type="email" maxLength={200} autoComplete="email" value={form.email} onChange={set('email')} className={field} style={fieldStyle} placeholder={t('members.emailForPass', 'Email, to get your membership pass (optional)')} />
             <textarea maxLength={500} rows={2} value={form.note} onChange={set('note')} className={field} style={fieldStyle} placeholder={t('members.noteOptional', 'Anything the business should know (optional)')} />
+            <CustomFieldInputs fields={data.fields} values={answers} onChange={setAnswers} testid="signup-custom-fields" />
           </fieldset>
 
           {error && <p className="text-sm" role="alert" style={{ color: '#B42318' }}>{error}</p>}

@@ -65,6 +65,7 @@ from utils.media_url import MAX_MEDIA_URL_LEN, is_allowed_media_url
 # tests/test_order_payment_links.py.
 from utils.payment_links import allowed_payment_links
 from utils.rate_limit import check_rate
+from .custom_fields import answers_text, check_answers, public_fields
 from utils.whatsapp_link import normalize_whatsapp_number
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -1976,6 +1977,8 @@ class WebsiteOrderIn(BaseModel):
     # payment_note lists them). Recorded, never charged: the site does
     # not process payments.
     pay_by: Optional[str] = Field(None, max_length=60)
+    # Answers to the store's own questions (custom_fields.py), by field id.
+    answers: dict[str, Any] = Field(default_factory=dict)
 
     @field_validator("extra_items", "notes", "address", "customer_name", "customer_phone", "customer_email", "pay_by")
     @classmethod
@@ -2040,6 +2043,7 @@ async def order_form(gig_id: str):
             "areas": _areas_out(biz), "serves_nationwide": bool(biz.get("serves_nationwide")),
             "payment_links": allowed_payment_links(biz.get("payment_links")), "payment_note": biz.get("payment_note"),
         },
+        "custom_fields": public_fields(biz, "order"),
         "products": _products_for_order(gig),
         "settings": {
             "delivery_on": offers_delivery(st, biz, gig),
@@ -2119,6 +2123,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     phone_e164 = normalize_whatsapp_number(payload.customer_phone)
     if not phone_e164:
         raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
+    answers = check_answers(biz, "order", payload.answers)
 
     items_text = "\n".join(f"{ln['qty']} × {ln['name']}" for ln in lines)
     if payload.extra_items:
@@ -2128,6 +2133,9 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     notes = payload.notes
     if payload.pay_by:
         notes = (notes + "\n" if notes else "") + f"Pays by: {payload.pay_by}"
+    # The store's own questions go into the notes too, for the same reason.
+    if answers:
+        notes = (notes + "\n" if notes else "") + answers_text(answers)
     needed_by = payload.date + (f"T{payload.window.start}" if payload.window else "")
     total = round(subtotal + fee, 2) if lines else None
 
@@ -2149,6 +2157,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         "total": total,
         "currency": currency,
         "pay_by": payload.pay_by or None,
+        "answers": answers,
         "needed_by": needed_by,
         "window": payload.window.model_dump() if payload.window else None,
         "fulfilment": payload.fulfilment,

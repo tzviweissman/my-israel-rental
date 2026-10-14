@@ -39,6 +39,7 @@ from utils.rate_limit import check_rate
 
 # The orders module already owns the site's escaped-email and bell
 # helpers; one implementation of escaping is the point of them.
+from .custom_fields import check_answers, public_fields
 from .orders import _email, _esc, _frontend_url, _notify, _subject
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -182,7 +183,7 @@ async def public_plans(slug_or_id: str):
     """The sign-up page: the business and its live plans."""
     biz = await _public_business(slug_or_id)
     rows = await db.membership_plans.find({"business_id": biz["_id"], "active": True, "deleted": {"$ne": True}}).sort("price", 1).to_list(50)
-    return {"business": _biz_public(biz), "plans": [_plan_out(p) for p in rows]}
+    return {"business": _biz_public(biz), "plans": [_plan_out(p) for p in rows], "fields": public_fields(biz, "membership")}
 
 
 # ---------------------------------------------------------------------------
@@ -196,6 +197,8 @@ class JoinIn(BaseModel):
     start_date: Optional[date] = None
     note: Optional[str] = Field(None, max_length=500)
     lang: Literal["en", "he"] = "en"
+    # Answers to the business's own questions (custom_fields.py).
+    answers: dict[str, Any] = Field(default_factory=dict)
 
 
 async def _new_short_code(business_id: str) -> str:
@@ -222,6 +225,7 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
     phone = "".join(ch for ch in body.phone if ch.isdigit() or ch == "+")
     if len(phone.lstrip("+")) < 9:
         raise HTTPException(status_code=422, detail="Please check the phone number")
+    answers = check_answers(biz, "membership", body.answers)
     start = body.start_date or _today()
     if start < _today():
         start = _today()
@@ -229,7 +233,7 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
         "_id": str(uuid.uuid4()), "business_id": biz["_id"], "owner_user_id": biz["owner_user_id"],
         "plan_id": plan["_id"], "plan": _plan_copy(plan),
         "name": body.name.strip(), "phone": phone, "email": (body.email or "").strip() or None,
-        "customer_user_id": (viewer or {}).get("user_id"), "note": body.note, "lang": body.lang,
+        "customer_user_id": (viewer or {}).get("user_id"), "note": body.note, "lang": body.lang, "answers": answers,
         # Pending until the business confirms payment: nothing is charged here.
         "status": "pending", "start_date": start.isoformat(), "renews_on": None, "visits_left": None,
         "manage_token": secrets.token_urlsafe(16), "checkin_code": secrets.token_urlsafe(12),
@@ -246,7 +250,9 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
     owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"email": 1})
     await _email((owner or {}).get("email"), f"New member: {doc['name']}, {plan['name']}",
                  f"<p><b>{_esc(doc['name'])}</b> signed up for <b>{_esc(plan['name'])}</b>, starting {_esc(start.isoformat())}.</p>"
-                 f"<p>Phone: {_esc(phone)}</p><p>Once they have paid, mark them active in your member list.</p>",
+                 f"<p>Phone: {_esc(phone)}</p>"
+                 + "".join(f"<p>{_esc(a['label'])}: {_esc('Yes' if a['value'] is True else 'No' if a['value'] is False else a['value'])}</p>" for a in answers)
+                 + "<p>Once they have paid, mark them active in your member list.</p>",
                  tag="membership-join", button=("Open members", "/dashboard?tab=members"))
     if doc["email"]:
         he = body.lang == "he"
@@ -307,7 +313,8 @@ def _member_out(m: dict[str, Any]) -> dict[str, Any]:
             "plan_id": m.get("plan_id"), "plan": m["plan"], "status": m["status"], "start_date": m.get("start_date"),
             "renews_on": m.get("renews_on"), "visits_left": m.get("visits_left"), "visits": m.get("visits", 0),
             "last_visit_at": m.get("last_visit_at"), "short_code": m.get("short_code"),
-            "state": _member_state(m), "created_at": m.get("created_at"), "source": m.get("source")}
+            "state": _member_state(m), "created_at": m.get("created_at"), "source": m.get("source"),
+            "answers": m.get("answers") or []}
 
 
 @router.get("/businesses/{business_id}/members")

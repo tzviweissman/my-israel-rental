@@ -29,7 +29,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ClipboardPaste, Store as StoreIcon, Bike, X, Sparkles, ClipboardList,
-  LayoutList, Table2, TrendingUp, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Pause, Play,
+  LayoutList, Table2, TrendingUp, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Pause, Play, ListPlus,
 } from 'lucide-react';
 import { phoneError } from '../../utils/phoneValidation';
 import { money } from '../../utils/currency';
@@ -37,6 +37,7 @@ import { pastCutoff } from '../../utils/orderCutoffs';
 import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
 import SendToSupplierDialog from './SendToSupplierDialog';
 import BusinessInsights from './BusinessInsights';
+import CustomFieldsEditor from './CustomFieldsEditor';
 
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -427,6 +428,7 @@ export default function OrdersTab({ API, token }) {
           ['import', Upload, t('orders.import', 'Import customers'), () => setPanel(panel === 'import' ? null : 'import')],
           ['couriers', Bike, t('orders.couriers', 'Couriers'), () => setPanel(panel === 'couriers' ? null : 'couriers')],
           ['standing', Repeat, t('orders.standing', 'Weekly'), () => setPanel(panel === 'standing' ? null : 'standing')],
+          ['questions', ListPlus, t('fields.ordersButton', 'Questions'), () => setPanel(panel === 'questions' ? null : 'questions')],
         ].map(([key, Icon, lbl, fn]) => (
           <button
             key={key}
@@ -442,6 +444,7 @@ export default function OrdersTab({ API, token }) {
         ))}
       </div>
 
+      {panel === 'questions' && <div className="mb-4"><CustomFieldsEditor API={API} auth={auth} businessId={biz.id} form="order" /></div>}
       {panel === 'insights' && <BusinessInsights API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'staff' && <StaffLinkPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'import' && <ImportCustomersPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}

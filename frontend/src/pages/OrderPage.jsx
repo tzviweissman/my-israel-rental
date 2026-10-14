@@ -28,6 +28,7 @@ import { phoneError } from '../utils/phoneValidation';
 import { pastCutoff } from '../utils/orderCutoffs';
 import { money } from '../utils/currency';
 import DateField, { toISODate } from '../components/common/DateField';
+import CustomFieldInputs from '../components/forms/CustomFieldInputs';
 
 // How far ahead a customer can order. The server sets no limit; this keeps
 // the calendar to a sensible reach.
@@ -46,6 +47,8 @@ export default function OrderPage() {
   const [qty, setQty] = useState({});           // product id -> qty
   const [extra, setExtra] = useState('');
   const [notes, setNotes] = useState('');
+  // The store's own questions (backend custom_fields.py).
+  const [answers, setAnswers] = useState({});
   const [fulfilment, setFulfilment] = useState('pickup');
   const [date, setDate] = useState('');
   const [windowKey, setWindowKey] = useState('');
@@ -143,6 +146,7 @@ export default function OrderPage() {
   const canSubmit = (lines.length > 0 || extra.trim()) && date && !pastCutoff(date, data.settings.cutoffs)
     && (windowsForDay.length === 0 || windowKey)
     && name.trim() && phone.trim() && !phoneErr
+    && (data.custom_fields || []).every((f) => !f.required || (f.type === 'checkbox' ? answers[f.id] === true : String(answers[f.id] || '').trim()))
     && (fulfilment === 'pickup' || (address.trim() && (data.business.serves_nationwide || city) && !belowMin));
 
   const setQ = (id, n) => setQty((q) => ({ ...q, [id]: Math.max(0, Math.min(99, n)) }));
@@ -160,6 +164,7 @@ export default function OrderPage() {
         city: fulfilment === 'delivery' ? (city || null) : null,
         address: fulfilment === 'delivery' ? address.trim() : null,
         customer_name: name.trim(), customer_phone: phone.trim(), customer_email: email.trim() || null,
+        answers,
       };
       const { data: res } = await axios.post(`${API}/marketplace/order-form/${gigId}/orders`, body, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
       setDone(res);
@@ -348,6 +353,7 @@ export default function OrderPage() {
             <label className={label} style={labelStyle} htmlFor="order-notes">{t('orders.notes', 'Notes')} · {t('orders.optional', 'optional')}</label>
             <input id="order-notes" value={notes} onChange={(e) => setNotes(e.target.value)} dir="auto" className={input} style={inputStyle} placeholder={t('orders.notesPh', '"No nuts", "leave with the neighbour"')} data-testid="order-notes" />
           </div>
+          <CustomFieldInputs fields={data.custom_fields} values={answers} onChange={setAnswers} testid="order-custom-fields" />
           {!user && (
             <p className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>
               {t('order.signInHint', 'Have an account?')} <Link to={`/auth/login?redirect=${encodeURIComponent(`/order/${gigId}`)}`} className="underline" style={{ color: 'var(--ink)' }}>{t('order.signIn', 'Sign in')}</Link> {t('order.signInWhy', 'to fill this in and keep your orders in one place.')}
