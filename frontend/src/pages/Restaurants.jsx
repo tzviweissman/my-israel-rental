@@ -22,6 +22,7 @@ import RestaurantCard, { CATEGORY_ICONS, categoryLabel } from '../components/res
 import RestaurantsMapView from '../components/restaurants/RestaurantsMapView';
 import RestaurantSearch from '../components/restaurants/RestaurantSearch';
 import GetListedForm from '../components/restaurants/GetListedForm';
+import FilterDropdown from '../components/restaurants/FilterDropdown';
 import CATEGORY_PHOTOS from '../data/restaurantCategoryPhotos';
 
 const PAGE = 24;
@@ -236,27 +237,6 @@ export default function Restaurants() {
           })}
         </div>
 
-        {/* region (all of Israel) or neighbourhood (one city) */}
-        {!citySlug && (
-          <div className="-mx-4 mt-4 flex gap-2 overflow-x-auto px-4 pb-1">
-            <Chip on={!region} onClick={() => setRegion('')}>{t('restaurants.allRegions', 'All regions')}</Chip>
-            {(facets?.regions || []).map((r) => (
-              <Chip key={r} on={region === r} onClick={() => setRegion(region === r ? '' : r)}>
-                {t(`restaurants.region.${r}`, r)}
-              </Chip>
-            ))}
-          </div>
-        )}
-        {!citySlug && region && cities.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-2">
-            {cities.map((c) => (
-              <Link key={c.slug} to={`/restaurants/${c.slug}`} state={{ region }} className="rounded-full border bg-white px-3 py-1 text-sm hover:underline"
-                style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}>
-                {(he && c.name_he) || c.name} ({c.count})
-              </Link>
-            ))}
-          </div>
-        )}
         {citySlug && (
           <div className="mt-4 flex flex-wrap items-center gap-2" data-testid="restaurants-city-filter">
             <button
@@ -282,37 +262,47 @@ export default function Restaurants() {
             </span>
           </div>
         )}
-        {citySlug && (facets?.neighborhoods || []).length > 0 && (
-          <div className="mt-4">
-            <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-gray-500">{t('restaurants.byArea', 'By area')}</p>
-            <div className="-mx-4 flex gap-2 overflow-x-auto px-4 pb-1" data-testid="restaurants-hoods">
-              {facets.neighborhoods.map((h) => (
-                <Chip key={h.name} on={hood === h.name} onClick={() => setHood(hood === h.name ? '' : h.name)}>
-                  {h.name} <span className="font-normal opacity-70">{h.count}</span>
-                </Chip>
-              ))}
-            </div>
-          </div>
-        )}
 
-        {/* meat / dairy / pareve, certifier, view */}
-        <div className="mt-4 flex flex-wrap items-center gap-2">
+        {/* area and hechsher as dropdowns, meat / dairy / pareve, view */}
+        <div className="mt-4 flex flex-wrap items-center gap-2" data-testid="restaurants-filters">
+          {citySlug ? (
+            (facets?.neighborhoods || []).length > 0 && (
+              <FilterDropdown
+                label={t('restaurants.area', 'Area')}
+                allLabel={t('restaurants.allAreas', 'All areas')}
+                searchLabel={t('restaurants.findArea', 'Find an area')}
+                value={hood}
+                options={facets.neighborhoods.map((h) => ({ value: h.name, label: h.name, count: h.count }))}
+                onChange={(v) => { setCoords(null); setHood(v); }}
+                testId="restaurants-area"
+              />
+            )
+          ) : (
+            <FilterDropdown
+              label={t('restaurants.area', 'Area')}
+              allLabel={t('restaurants.allRegions', 'All regions')}
+              searchLabel={t('restaurants.findArea', 'Find an area')}
+              value={region}
+              valueLabel={region ? t(`restaurants.region.${region}`, region) : ''}
+              options={(facets?.regions || []).map((r) => ({ value: r, label: t(`restaurants.region.${r}`, r) }))}
+              onChange={setRegion}
+              testId="restaurants-area"
+            />
+          )}
+          <FilterDropdown
+            label={t('restaurants.certifier', 'Hechsher')}
+            allLabel={t('restaurants.anyHechsher', 'Any hechsher')}
+            searchLabel={t('restaurants.findHechsher', 'Find a hechsher')}
+            value={certifier}
+            options={(facets?.certifiers || []).map((c) => ({ value: c.name, label: c.name, count: c.count }))}
+            onChange={setCertifier}
+            testId="restaurants-certifier"
+          />
           {['meat', 'dairy', 'pareve'].map((k) => (
             <Chip key={k} on={kashrut === k} onClick={() => setKashrut(kashrut === k ? '' : k)} testId={`restaurants-k-${k}`}>
               {t(`restaurants.${k}`, k[0].toUpperCase() + k.slice(1))}
             </Chip>
           ))}
-          <select
-            value={certifier}
-            onChange={(e) => setCertifier(e.target.value)}
-            className="rounded-full border bg-white px-3.5 py-1.5 text-sm font-semibold"
-            style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
-            aria-label={t('restaurants.certifier', 'Hechsher')}
-            data-testid="restaurants-certifier"
-          >
-            <option value="">{t('restaurants.anyHechsher', 'Any hechsher')}</option>
-            {(facets?.certifiers || []).map((c) => <option key={c.name} value={c.name}>{c.name} ({c.count})</option>)}
-          </select>
           <div className="ms-auto flex rounded-full border bg-white p-0.5" style={{ borderColor: 'var(--brand-border)' }}>
             {[['list', List, t('restaurants.list', 'List')], ['map', MapIcon, t('restaurants.map', 'Map')]].map(([k, Icon, label]) => (
               <button key={k} type="button" onClick={() => setView(k)} aria-pressed={view === k}
@@ -325,6 +315,16 @@ export default function Restaurants() {
           </div>
         </div>
 
+        {!citySlug && region && cities.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-2" data-testid="restaurants-region-cities">
+            {cities.map((c) => (
+              <Link key={c.slug} to={`/restaurants/${c.slug}`} state={{ region }} className="inline-flex min-h-[36px] items-center gap-1 rounded-full border bg-white px-3.5 text-sm font-semibold transition-colors hover:border-[var(--brand-primary)]"
+                style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}>
+                {(he && c.name_he) || c.name} <span className="font-normal text-gray-500">{c.count}</span>
+              </Link>
+            ))}
+          </div>
+        )}
         <div className="mt-5 flex items-center justify-between text-sm text-gray-600">
           <span data-testid="restaurants-count">
             {loading && !items.length ? t('restaurants.loading', 'Loading…')
@@ -352,28 +352,27 @@ export default function Restaurants() {
               </div>
               <div className="lg:order-1">
                 <div
-                  className="-mx-4 mt-3 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-2 lg:mx-0 lg:mt-0 lg:grid lg:grid-cols-1 lg:overflow-visible lg:px-0 lg:pb-0"
+                  className="-mx-4 mt-3 flex snap-x snap-mandatory gap-4 overflow-x-auto px-4 pb-2 lg:mx-0 lg:mt-0 lg:grid lg:grid-cols-2 lg:gap-x-5 lg:gap-y-7 lg:overflow-visible lg:px-0 lg:pb-0"
                   data-testid="restaurants-side-list"
                 >
                   {items.map((r) => (
                     <div
                       key={r.id}
                       id={`rc-${r.id}`}
-                      className="w-[86%] max-w-[22rem] shrink-0 snap-start rounded-2xl transition-shadow lg:w-auto lg:max-w-none"
-                      style={hover === r.id ? { boxShadow: '0 0 0 2.5px var(--brand-primary)' } : undefined}
+                      className="w-[78%] max-w-[20rem] shrink-0 snap-start lg:w-auto lg:max-w-none"
                       onMouseEnter={() => setHover(r.id)}
                       onMouseLeave={() => setHover(null)}
                       onFocus={() => setHover(r.id)}
                     >
-                      <RestaurantCard r={r} />
+                      <RestaurantCard r={r} photoFirst active={hover === r.id} />
                     </div>
                   ))}
                 </div>
               </div>
             </div>
           ) : (
-            <div className="grid gap-3 md:grid-cols-2" data-testid="restaurants-list">
-              {items.map((r) => <RestaurantCard key={r.id} r={r} />)}
+            <div className="grid gap-x-5 gap-y-8 sm:grid-cols-2 lg:grid-cols-3" data-testid="restaurants-list">
+              {items.map((r) => <RestaurantCard key={r.id} r={r} photoFirst />)}
             </div>
           )}
           {!loading && items.length === 0 && (

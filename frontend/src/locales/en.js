@@ -5041,6 +5041,10 @@ const en = {
         backToRegion: 'Back to {{region}}',
         backToIsrael: 'All of Israel',
         removeCity: 'Show all of Israel instead of {{place}}',
+        area: 'Area',
+        allAreas: 'All areas',
+        findArea: 'Find an area',
+        findHechsher: 'Find a hechsher',
         allRegions: 'All regions',
         region: {
           North: 'North',

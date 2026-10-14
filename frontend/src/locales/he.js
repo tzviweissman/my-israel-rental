@@ -4858,6 +4858,10 @@ const he = {
         backToRegion: 'חזרה ל{{region}}',
         backToIsrael: 'כל הארץ',
         removeCity: 'להציג את כל הארץ במקום {{place}}',
+        area: 'אזור',
+        allAreas: 'כל האזורים',
+        findArea: 'חיפוש אזור',
+        findHechsher: 'חיפוש הכשר',
         allRegions: 'כל האזורים',
         region: {
           North: 'צפון',

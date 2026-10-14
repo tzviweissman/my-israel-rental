@@ -11,6 +11,11 @@
  *
  * Honest labels: a hechsher read off the restaurant's own website says so.
  * "Certificate checked" is only shown once a person has verified it.
+ *
+ * Photo first, like Airbnb (Tzvi, 14 Oct 2026: "make the cards photo
+ * first"): their own picture leads, at 4:3, with the name and facts under
+ * it. A place with no picture gets its category's icon on the cream ground
+ * of the category tiles, never a stock dish that would pass for theirs.
  */
 import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
@@ -45,12 +50,12 @@ export const directionsUrl = (r) => {
 
 const formatKm = (km) => (km < 1 ? `${Math.round(km * 1000)} m` : `${km.toFixed(km < 10 ? 1 : 0)} km`);
 
-function Action({ href, icon: Icon, children, testId, external }) {
+function Action({ href, icon: Icon, children, testId, external, small }) {
   return (
     <a
       href={href}
       {...(external ? { target: '_blank', rel: 'noopener noreferrer' } : {})}
-      className="inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold transition-colors hover:bg-[rgb(var(--brand-primary-rgb)/0.06)] active:scale-[0.97]"
+      className={`inline-flex items-center gap-1.5 rounded-full border font-semibold transition-colors hover:bg-[rgb(var(--brand-primary-rgb)/0.06)] active:scale-[0.97] ${small ? 'min-h-[40px] px-3 text-[13px]' : 'px-3 py-1.5 text-sm'}`}
       style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
       data-testid={testId}
     >
@@ -60,7 +65,7 @@ function Action({ href, icon: Icon, children, testId, external }) {
   );
 }
 
-export default function RestaurantCard({ r, active }) {
+export default function RestaurantCard({ r, active, photoFirst }) {
   const { t, i18n } = useTranslation();
   const he = i18n.language?.startsWith('he');
   const first = he ? (r.name_he || r.name_en) : (r.name_en || r.name_he);
@@ -71,6 +76,107 @@ export default function RestaurantCard({ r, active }) {
   const [panel, setPanel] = useState(null);
   const [photoFailed, setPhotoFailed] = useState(false);
   const tel = r.phone ? `tel:${r.phone.replace(/[^\d+*]/g, '')}` : null;
+  const nameFont = /[\u0590-\u05FF]/.test(first || '') ? "'Frank Ruhl Libre', serif" : 'var(--font-head)';
+
+  const actions = (small) => (
+    <>
+      {tel && <Action small={small} href={tel} icon={Phone} testId="restaurant-call">{t('restaurants.call', 'Call')}</Action>}
+      {r.whatsapp && (
+        <Action small={small} href={`https://wa.me/${r.whatsapp}`} icon={MessageCircle} external testId="restaurant-whatsapp">
+          WhatsApp
+        </Action>
+      )}
+      <Action small={small} href={directionsUrl(r)} icon={Navigation} external testId="restaurant-directions">
+        {t('restaurants.directions', 'Directions')}
+      </Action>
+      {r.website && (
+        <Action small={small} href={r.website} icon={Globe} external testId="restaurant-website">
+          {t('restaurants.website', 'Website')}
+        </Action>
+      )}
+      {r.order_url && (
+        <Action small={small} href={r.order_url} icon={ShoppingBag} external testId="restaurant-order">
+          {t('restaurants.orderWolt', 'Order on Wolt')}
+        </Action>
+      )}
+    </>
+  );
+  const feedback = (
+    <>
+      {!panel && (
+        <div className="mt-2 flex flex-wrap gap-x-4 text-xs">
+          <button type="button" onClick={() => setPanel('report')} className="text-gray-500 underline-offset-2 hover:underline" data-testid="restaurant-report">
+            {t('restaurants.report', 'Report a change')}
+          </button>
+          <button type="button" onClick={() => setPanel('claim')} className="text-gray-500 underline-offset-2 hover:underline" data-testid="restaurant-claim">
+            {t('restaurants.claim', 'Is this your restaurant?')}
+          </button>
+        </div>
+      )}
+      {panel && <RestaurantFeedback id={r.id} mode={panel} onDone={() => setPanel(null)} />}
+    </>
+  );
+
+  if (photoFirst) {
+    return (
+      <article className="group flex h-full flex-col" data-testid={`restaurant-${r.id}`}>
+        <div
+          className={`relative aspect-[4/3] overflow-hidden rounded-2xl transition-shadow ${active ? 'shadow-[0_0_0_2.5px_var(--brand-primary)]' : ''}`}
+          style={{ background: '#F6EDE3' }}
+        >
+          {r.photo && !photoFailed ? (
+            <img
+              src={r.photo}
+              alt=""
+              loading="lazy"
+              onError={() => setPhotoFailed(true)}
+              className="h-full w-full object-cover transition-transform duration-500 ease-out group-hover:scale-[1.04]"
+            />
+          ) : (
+            <span className="flex h-full w-full items-center justify-center" aria-hidden="true" style={{ color: 'var(--brand-primary)' }}>
+              <Icon size={44} />
+            </span>
+          )}
+          {r.verified && (
+            <span className="absolute start-3 top-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold shadow-sm" style={{ color: '#1F8A50' }}>
+              {t('restaurants.verified', 'Certificate checked')}
+            </span>
+          )}
+          {r.distance_km != null && (
+            <span className="absolute end-3 top-3 rounded-full bg-white px-2.5 py-1 text-xs font-bold shadow-sm" style={{ color: 'var(--ink)' }}>
+              {formatKm(r.distance_km)}
+            </span>
+          )}
+        </div>
+        <div className="flex flex-1 flex-col pt-3">
+          <div className="flex items-start justify-between gap-2">
+            <h3 className="min-w-0 truncate text-base font-semibold leading-snug" dir="auto" style={{ fontFamily: nameFont, color: 'var(--ink)' }} title={first}>
+              {first}
+            </h3>
+            {r.kashrut && (
+              <span className="shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold" style={{ background: '#F3F4F6', color: 'var(--ink)' }}>
+                {kashrutLabel(t, r.kashrut)}
+              </span>
+            )}
+          </div>
+          <p className="mt-0.5 truncate text-sm text-gray-600">{[cats, where].filter(Boolean).join(' · ')}</p>
+          {r.certification && (
+            <p className="mt-1 flex items-center gap-1.5 text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+              <BadgeCheck size={15} aria-hidden="true" className="shrink-0" style={{ color: 'var(--brand-primary)' }} />
+              <span className="truncate">{r.certification}</span>
+            </p>
+          )}
+          {r.certificate_expired && (
+            <p className="mt-1 text-xs text-gray-600">
+              {t('restaurants.certificateExpired', 'Certificate expired. Check their website or ask in store for the current one.')}
+            </p>
+          )}
+          <div className="mt-2.5 flex flex-wrap gap-1.5">{actions(true)}</div>
+          {feedback}
+        </div>
+      </article>
+    );
+  }
 
   return (
     <article
@@ -143,39 +249,8 @@ export default function RestaurantCard({ r, active }) {
             {r.distance_km != null && <span className="font-semibold" style={{ color: 'var(--brand-primary)' }}>, {formatKm(r.distance_km)}</span>}
           </p>
         )}
-        <div className="mt-3 flex flex-wrap gap-2">
-          {tel && <Action href={tel} icon={Phone} testId="restaurant-call">{t('restaurants.call', 'Call')}</Action>}
-          {r.whatsapp && (
-            <Action href={`https://wa.me/${r.whatsapp}`} icon={MessageCircle} external testId="restaurant-whatsapp">
-              WhatsApp
-            </Action>
-          )}
-          <Action href={directionsUrl(r)} icon={Navigation} external testId="restaurant-directions">
-            {t('restaurants.directions', 'Directions')}
-          </Action>
-          {r.website && (
-            <Action href={r.website} icon={Globe} external testId="restaurant-website">
-              {t('restaurants.website', 'Website')}
-            </Action>
-          )}
-          {r.order_url && (
-            <Action href={r.order_url} icon={ShoppingBag} external testId="restaurant-order">
-              {t('restaurants.orderWolt', 'Order on Wolt')}
-            </Action>
-          )}
-        </div>
-        {/* Kashrut changes: anyone can say so, the owner can take the listing over. */}
-        {!panel && (
-          <div className="mt-2 flex flex-wrap gap-x-4 text-xs">
-            <button type="button" onClick={() => setPanel('report')} className="text-gray-500 underline-offset-2 hover:underline" data-testid="restaurant-report">
-              {t('restaurants.report', 'Report a change')}
-            </button>
-            <button type="button" onClick={() => setPanel('claim')} className="text-gray-500 underline-offset-2 hover:underline" data-testid="restaurant-claim">
-              {t('restaurants.claim', 'Is this your restaurant?')}
-            </button>
-          </div>
-        )}
-        {panel && <RestaurantFeedback id={r.id} mode={panel} onDone={() => setPanel(null)} />}
+        <div className="mt-3 flex flex-wrap gap-2">{actions(false)}</div>
+        {feedback}
       </div>
     </article>
   );
