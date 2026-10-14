@@ -21,6 +21,7 @@ import MessagesTab from '../components/dashboard/MessagesTab';
 import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
 import GoogleReviewsCard from '../components/dashboard/GoogleReviewsCard';
 import OrdersTab from '../components/dashboard/OrdersTab';
+import MembersTab from '../components/dashboard/MembersTab';
 import DeliveriesTab from '../components/dashboard/DeliveriesTab';
 import NetworkTab from '../components/dashboard/NetworkTab';
 import MyOrdersTab from '../components/dashboard/MyOrdersTab';
@@ -284,7 +285,7 @@ const Dashboard = () => {
   const activeLabel = nav.groups.flatMap((g) => g.tabs).find((tab) => tab.id === activeTab)?.label;
   // Tabs that already open on their own heading (usually with their main
   // action beside it) get no second one from the shell.
-  const OWN_TITLE = ['properties', 'my-businesses', 'orders', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts', 'bookings', 'contracts'];
+  const OWN_TITLE = ['properties', 'my-businesses', 'orders', 'members', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts', 'bookings', 'contracts'];
   const pageTitle = OWN_TITLE.includes(activeTab) ? null : (onOverview || !activeLabel ? t('dashboard.title') : activeLabel);
   const showListingActions = onOverview || activeTab === 'properties' || activeTab === 'bulk-manager';
 
@@ -580,6 +581,9 @@ const Dashboard = () => {
 
         {activeTab === 'orders' && showGigTabs && (
           <OrdersTab API={API} token={token} />
+        )}
+        {activeTab === 'members' && showGigTabs && (
+          <MembersTab API={API} token={token} />
         )}
         {/* The feature page's "orders" button lands here for anyone; with
             no business it was blank (dead ends, 7 Oct 2026). */}

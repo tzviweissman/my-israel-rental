@@ -148,6 +148,10 @@ const OrdersPrintPage = lazy(() => import('./pages/OrdersPrintPage'));
 const OrderPage = lazy(() => import('./pages/OrderPage'));
 const OrderTrackPage = lazy(() => import('./pages/OrderTrackPage'));
 const BookingTrackPage = lazy(() => import('./pages/BookingTrackPage'));
+const MembershipSignupPage = lazy(() => import('./pages/MembershipSignupPage'));
+const MemberPassPage = lazy(() => import('./pages/MemberPassPage'));
+const MemberDoorPage = lazy(() => import('./pages/MemberDoorPage'));
+const MemberCheckinPage = lazy(() => import('./pages/MemberDoorPage').then((m) => ({ default: m.MemberCheckinPage })));
 const WriteReview = lazy(() => import('./pages/WriteReview'));
 const CreateGig = lazy(() => import('./pages/CreateGig'));
 const JobsBoard = lazy(() => import('./pages/JobsBoard'));
@@ -527,6 +531,12 @@ function App() {
             <Route path="/order/:gigId" element={<OrderPage />} />
             <Route path="/orders/track/:token" element={<OrderTrackPage />} />
             <Route path="/bookings/track/:token" element={<BookingTrackPage />} />
+            {/* Memberships (routes/marketplace/memberships.py): sign-up with
+                no account, the member's pass, and the door. */}
+            <Route path="/memberships/:slug" element={<MembershipSignupPage />} />
+            <Route path="/members/door/:token" element={<MemberDoorPage />} />
+            <Route path="/members/checkin/:code" element={<MemberCheckinPage />} />
+            <Route path="/members/:token" element={<MemberPassPage />} />
             <Route path="/review/booking/:bookingId" element={<WriteReview />} />
             <Route path="/review/:token" element={<WriteReview />} />
             <Route path="/orders/print" element={user ? <OrdersPrintPage /> : <ToAuth />} />

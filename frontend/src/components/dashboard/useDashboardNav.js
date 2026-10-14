@@ -20,7 +20,7 @@
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Building2, Layers, Store, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
-  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network,
+  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
 
@@ -56,6 +56,7 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       tabs: [
         { id: 'my-businesses', label: t('dashboard.myBusinesses', 'Businesses'), Icon: Store, show: runsBusiness },
         { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: runsBusiness },
+        { id: 'members', label: t('dashboard.members', 'Members'), Icon: Users, show: runsBusiness },
         { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: runsBusiness },
         { id: 'network', label: t('dashboard.network', 'Network'), Icon: Network, badge: summary.network_requests_in, show: runsBusiness || (summary.network_requests_in || 0) > 0 },
         { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, badge: summary.work_offers_open, show: runsBusiness },
@@ -130,6 +131,7 @@ export const ALL_TAB_IDS = [
   'bookings',
   'appointments',
   'orders',
+  'members',
   'network',
   'deliveries',
   'my-orders',
