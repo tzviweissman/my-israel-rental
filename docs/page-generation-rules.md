@@ -916,6 +916,17 @@ of stock" and no link. Mark the wrapper `data-mir-skip` so the page editor
 leaves it to the shop. Load the products into their store listing (a dry run
 first) so the page and the dashboard agree from day one.
 
+**The quickest way to order is the main button** (Tzvi, 14 Oct 2026: "it says
+see full collection on whatsapp but isnt that what the order page is for to
+make things quicker"). Every main button on a page (hero, the how-to-order
+section, the closing section, the phone bar) goes to the fastest path to a
+finished order the business has: their order page if there is one, then their
+price list, and only then a WhatsApp chat or catalogue. One label for it
+everywhere ("Order a gift"). WhatsApp stays as the quiet secondary (the header
+link, "Message us"), and the how-to-order steps describe the real path (choose
+on the order page, send it on WhatsApp, we confirm). When an order page is
+added to a page later, every one of these buttons is changed in the same edit.
+
 **Blender** (Tzvi, 23 Sep 2026), for three jobs:
 1. **Product motion from real items:** their own product turning or rolling as the
    page scrolls, made from their photos or a quick scan.

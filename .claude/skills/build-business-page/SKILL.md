@@ -153,6 +153,9 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   **Product lists read the shop**: wrap a priced list in `[data-mir-catalog]`
   (+ `data-mir-list`, `data-mir-skip`, item and group templates; example The
   Gift Boutique) so out-of-stock, new and removed items follow the dashboard.
+  **Main buttons go to the quickest way to order**: the order page if there
+  is one, else the price list, only then WhatsApp; one label everywhere;
+  WhatsApp is the secondary link. Adding an order page changes them all.
 
 ## 2. How to write
 
