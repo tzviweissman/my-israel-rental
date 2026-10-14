@@ -1,0 +1,358 @@
+<!doctype html>
+<!--
+  The Gift Boutique, order.html (Tzvi, 14 Oct 2026: "make an order page to
+  order more easily so it send all the details to whatsapp"). Pick gifts and
+  quantities, say who it is for and where it goes, and one button opens
+  WhatsApp with the whole order written out. Nothing is paid or stored here.
+  The gifts come from their shop when the site serves the page
+  (#mir-live-products, frontend/server.js), else from the list below.
+  Written from order-src.html by gen/catalog/build_order.py.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Order a gift · The Gift Boutique</title>
+<meta name="description" content="Choose your gifts, say who they are for and where they are going, and send the order to The Gift Boutique on WhatsApp. Delivered across Israel.">
+<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mv7jitjm">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --night: #0E0C09; --ivory: #F6F0E4; --ivory-2: #EDE4D2; --ink: #1D1912; --soft: #5B5244;
+    --gold: #D4AA40; --gold-hi: #F2CD6A; --gold-ink: #7A5A10; --on-night-soft: #CFC6B5;
+    --line-ivory: #DCCFB6; --line-night: #3A3226; --err: #9B2C1F;
+    --r: 14px; --shadow: 0 1px 2px rgb(14 12 9 / .08), 0 14px 34px -18px rgb(14 12 9 / .45);
+    --font-head: 'Cinzel', 'Times New Roman', serif; --font-body: 'Jost', system-ui, sans-serif;
+    --gutter: clamp(18px, 4vw, 40px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--ivory); color: var(--ink); font: 400 1.0625rem/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+  img { display: block; max-width: 100%; }
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 600; letter-spacing: .01em; margin: 0; }
+  .wrap { max-width: 72rem; margin: 0 auto; padding-inline: var(--gutter); }
+
+  .btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: .6rem; min-height: 52px; padding: 0 1.5rem; border-radius: 999px; border: 0;
+    background: var(--gold); color: var(--night); font: 600 1rem/1 var(--font-body); text-decoration: none; cursor: pointer; flex: none;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / .25); transition: background 180ms ease-out, transform 160ms ease-out, opacity 180ms ease-out; }
+  .btn::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 35%, rgb(255 255 255 / .55) 50%, transparent 65%); translate: -120% 0; }
+  .btn:hover { background: var(--gold-hi); }
+  .btn:hover::after { translate: 120% 0; transition: translate 650ms var(--out); }
+  .btn:active { transform: scale(.97); }
+  .btn[aria-disabled="true"] { background: var(--line-ivory); color: var(--soft); cursor: not-allowed; }
+  .btn[aria-disabled="true"]::after { display: none; }
+  .btn svg { width: 20px; height: 20px; flex: none; position: relative; }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+  .bar { position: sticky; top: 0; z-index: 50; height: var(--bar-h); background: rgb(14 12 9 / .94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line-night); }
+  .bar .wrap { height: 100%; display: flex; align-items: center; gap: 1rem; }
+  .brand { display: flex; align-items: center; gap: .65rem; text-decoration: none; color: var(--gold); min-height: 44px; }
+  .brand img { width: 40px; height: 40px; }
+  .brand span { font: 600 1rem/1 var(--font-head); letter-spacing: .08em; white-space: nowrap; }
+  .bar .back { margin-inline-start: auto; color: var(--on-night-soft); text-decoration: none; font-size: .95rem; min-height: 44px; display: inline-flex; align-items: center; padding: 0 .5rem; }
+  .bar .back:hover { color: var(--gold-hi); }
+  .bar .back { white-space: nowrap; } .bar .back .sm { display: none; }
+  @media (max-width: 560px) { .bar .back .lg { display: none; } .bar .back .sm { display: inline; } }
+  @media (max-width: 760px) { .brand span { font-size: .78rem; letter-spacing: .06em; } .brand img { width: 34px; height: 34px; } }
+
+  .head { padding-block: clamp(2rem, 5vw, 3.5rem) 0; }
+  .head h1 { font-size: clamp(1.9rem, 1.2rem + 2.2vw, 3rem); line-height: 1.08; }
+  .head p { margin: .7rem 0 0; color: var(--soft); max-width: 40rem; }
+
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 23rem); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: start; padding-block: 2rem clamp(4rem, 8vw, 6rem); }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .step { margin-bottom: 2.5rem; }
+  .step > h2 { font-size: 1.35rem; display: flex; align-items: center; gap: .7rem; }
+  .step > h2 .n { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; background: var(--night); color: var(--gold); font: 600 1rem/1 var(--font-head); flex: none; }
+  .step > p.hint { margin: .4rem 0 0; color: var(--soft); font-size: .95rem; }
+
+  /* gifts: a list with quantities, grouped by their sections */
+  .grp { margin: 1.6rem 0 .6rem; font: 600 1rem/1.25 var(--font-head); letter-spacing: .02em; color: var(--gold-ink); }
+  .items { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line-ivory); }
+  .items li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: .9rem; align-items: center; padding: .8rem 0; border-bottom: 1px solid var(--line-ivory); }
+  .items .ph { width: 64px; height: 64px; border-radius: 26%; overflow: hidden; background: var(--ivory-2); }
+  .items .ph img { width: 100%; height: 100%; object-fit: cover; scale: 1.08; }
+  .items b { display: block; font-weight: 500; line-height: 1.3; }
+  .items .pr { color: var(--gold-ink); font-weight: 600; font-size: .95rem; }
+  .items li.is-out .ph img { filter: grayscale(.85) opacity(.55); }
+  .items li.is-out .pr { color: var(--soft); font-weight: 500; }
+  .items li.has { background: linear-gradient(90deg, rgb(212 170 64 / .12), transparent 70%); }
+  .qty { display: inline-flex; align-items: center; border: 1px solid var(--line-ivory); border-radius: 999px; background: #fff; }
+  .qty button { width: 44px; height: 44px; border: 0; background: none; color: var(--ink); font: 500 1.3rem/1 var(--font-body); cursor: pointer; border-radius: 999px; }
+  .qty button:hover:not(:disabled) { background: var(--ivory-2); }
+  .qty button:active:not(:disabled) { transform: scale(.92); }
+  .qty button:disabled { color: var(--line-ivory); cursor: not-allowed; }
+  .qty output { min-width: 1.6rem; text-align: center; font-weight: 600; }
+  .add { min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid var(--gold-ink); background: none; color: var(--gold-ink); font: 600 .95rem/1 var(--font-body); cursor: pointer; }
+  .add:hover { background: var(--gold); border-color: var(--gold); color: var(--night); }
+  .add:active { transform: scale(.96); }
+  .outlbl { color: var(--soft); font-size: .9rem; }
+
+  /* fields */
+  .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.1rem; margin-top: 1.1rem; }
+  .fields .full { grid-column: 1 / -1; }
+  @media (max-width: 560px) { .fields { grid-template-columns: 1fr; } }
+  label { display: block; font-weight: 500; font-size: .95rem; margin-bottom: .35rem; }
+  label small { color: var(--soft); font-weight: 400; }
+  input, textarea { width: 100%; min-height: 48px; padding: .7rem .9rem; border: 1px solid var(--line-ivory); border-radius: 12px; background: #fff; color: var(--ink); font: 400 1rem/1.4 var(--font-body); transition: border-color 150ms ease-out, box-shadow 150ms ease-out; }
+  textarea { min-height: 96px; resize: vertical; }
+  input:focus, textarea:focus { outline: none; border-color: var(--gold-ink); box-shadow: 0 0 0 3px rgb(212 170 64 / .3); }
+  .bad input, .bad textarea { border-color: var(--err); }
+  .msg { display: none; margin-top: .3rem; color: var(--err); font-size: .875rem; }
+  .bad .msg { display: block; }
+
+  /* summary */
+  .sum { position: sticky; top: calc(var(--bar-h) + 1.25rem); background: var(--night); color: #fff; border-radius: 20px; padding: 1.5rem; box-shadow: var(--shadow); }
+  .sum h2 { font-size: 1.15rem; color: var(--gold); }
+  .sum ul { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .55rem; }
+  .sum li { display: flex; justify-content: space-between; gap: 1rem; color: var(--on-night-soft); font-size: .95rem; }
+  .sum li span:last-child { color: #fff; white-space: nowrap; }
+  .sum .empty { color: var(--on-night-soft); margin: 1rem 0 0; font-size: .95rem; }
+  .sum .tot { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
+  .sum .tot b { font: 600 1.5rem/1 var(--font-body); color: var(--gold); }
+  .sum .note { margin: .8rem 0 1.25rem; color: var(--on-night-soft); font-size: .9rem; }
+  .sum .btn { width: 100%; }
+  .sum .why { margin: .8rem 0 0; color: var(--gold-hi); font-size: .9rem; min-height: 1.4em; }
+  .sum .wa-line { margin: 1rem 0 0; font-size: .875rem; color: var(--on-night-soft); }
+  .sum .wa-line a { color: var(--gold-hi); }
+
+  /* phones: total and the button pinned to the bottom */
+  .dock { display: none; }
+  @media (max-width: 900px) {
+    .sum .btn, .sum .why { display: none; }
+    .dock { position: fixed; z-index: 60; inset: auto 0 0 0; display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+      padding: .7rem var(--gutter) calc(.7rem + env(safe-area-inset-bottom)); background: rgb(14 12 9 / .96); border-top: 1px solid var(--line-night); color: #fff; }
+    .dock small { display: block; color: var(--on-night-soft); font-size: .8rem; line-height: 1.2; }
+    .dock b { font: 600 1.2rem/1.2 var(--font-body); color: var(--gold); }
+    .dock .btn { min-height: 48px; padding: 0 1.1rem; font-size: .95rem; }
+    main { padding-bottom: 5rem; }
+  }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="/business/the-gift-boutique" aria-label="The Gift Boutique, home"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mv7jitjm" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
+    <a class="back" href="/business/the-gift-boutique#prices"><span class="lg" data-mir-key="t-ce287b8e-0">Back to the collection</span><span class="sm" data-mir-key="t-4949ccb5-0">Collection</span></a>
+  </div>
+</header>
+
+<main data-mir-catalog>
+  <div class="wrap head">
+    <h1 data-mir-key="t-1d56289f-0">Order a gift</h1>
+    <p data-mir-key="t-bcd31d70-0">Choose your gifts and tell us where they are going. The button sends it all to us on WhatsApp, and we confirm the order and the delivery fee with you there.</p>
+  </div>
+
+  <div class="wrap cols">
+    <form id="f" novalidate>
+      <section class="step" aria-labelledby="s1">
+        <h2 id="s1"><span class="n" data-mir-key="t-4083c9f5-0">1</span>Your gifts</h2>
+        <p class="hint" data-mir-key="t-414b7f7e-0">Prices in US dollars, as in our catalogue.</p>
+        <div id="gifts"></div>
+      </section>
+
+      <section class="step" aria-labelledby="s2">
+        <h2 id="s2" data-mir-key="t-fad6f635-0"><span class="n">2</span>Where it is going</h2>
+        <p class="hint" data-mir-key="t-b3d55a20-0">We deliver across Israel.</p>
+        <div class="fields">
+          <div data-need><label for="to" data-mir-key="t-592a35c8-0">Who is it for?</label><input id="to" name="to" autocomplete="off"><p class="msg" data-mir-key="t-8f71d364-0">Tell us who the gift is for.</p></div>
+          <div data-need><label for="city" data-mir-key="t-59b7e1af-0">City</label><input id="city" name="city" autocomplete="address-level2"><p class="msg" data-mir-key="t-132b64fd-0">Which city is it going to?</p></div>
+          <div class="full" data-need><label for="addr" data-mir-key="t-db12b167-0">Address</label><input id="addr" name="addr" autocomplete="street-address"><p class="msg" data-mir-key="t-3252eccd-0">Add the street and number.</p></div>
+          <div><label for="when" data-mir-key="t-b862e677-0">Delivery date <small>(optional)</small></label><input id="when" name="when" type="date"></div>
+          <div><label for="tophone" data-mir-key="t-a5c8f5c6-0">Their phone <small>(optional, for the delivery)</small></label><input id="tophone" name="tophone" type="tel" inputmode="tel" autocomplete="off"></div>
+          <div class="full"><label for="card" data-mir-key="t-adc69b15-0">Message for the card <small>(optional)</small></label><textarea id="card" name="card" maxlength="400"></textarea></div>
+        </div>
+      </section>
+
+      <section class="step" aria-labelledby="s3">
+        <h2 id="s3" data-mir-key="t-56a49003-0"><span class="n">3</span>Your details</h2>
+        <div class="fields">
+          <div data-need><label for="me" data-mir-key="t-5c263b1a-0">Your name</label><input id="me" name="me" autocomplete="name"><p class="msg" data-mir-key="t-7317fdc7-0">Add your name.</p></div>
+          <div><label for="note" data-mir-key="t-12e156c1-0">Anything else? <small>(optional)</small></label><input id="note" name="note" autocomplete="off"></div>
+        </div>
+      </section>
+    </form>
+
+    <aside class="sum" aria-labelledby="sumh">
+      <h2 id="sumh" data-mir-key="t-0be66db8-0">Your order</h2>
+      <p class="empty" id="empty">No gifts chosen yet.</p>
+      <ul id="lines" aria-live="polite"></ul>
+      <div class="tot"><span data-mir-key="t-08a3f96c-0">Gifts</span><b id="total">$0</b></div>
+      <p class="note" data-mir-key="t-b73ddd1c-0">Delivery is added on WhatsApp once we know the city. You pay us directly; nothing is paid on this page.</p>
+      <a class="btn" id="send" href="#" aria-disabled="true">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
+        <span style="position:relative" data-mir-key="t-568fb5eb-0">Send order on WhatsApp</span>
+      </a>
+      <p class="why" id="why" aria-live="polite"></p>
+      <p class="wa-line" data-mir-key="t-2c558479-0">Or message us: <a href="https://wa.me/972535386042" target="_blank" rel="noopener">+972 53-538-6042</a></p>
+    </aside>
+  </div>
+</main>
+
+<div class="dock order-bar" id="dock">
+  <div><small data-mir-key="t-7c8e924e-0">Gifts, before delivery</small><b id="dtotal">$0</b></div>
+  <a class="btn" id="send2" href="#" aria-disabled="true"><span style="position:relative" data-mir-key="t-180df985-0">Send on WhatsApp</span></a>
+</div>
+
+<script id="fallback-products" type="application/json">[{"name":"Gold Luxurious Wine Holder and Wine Glasses","price":150,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-wine.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Silver Chain Wine Holder","price":52,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/silver-chain.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Electric Bottle Opener","price":47,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/electric-opener.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener","price":45,"price_to":80,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/bottle-opener.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener Gift Set","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/opener-set.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener","price":25,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/opener-snacks.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"L'Chaim Cups","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/lchaim-cups.webp","group":"Wine and bottle gifts","in_stock":false},{"name":"Gold Bicycle Wine Holder","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/bicycle-wine.webp","group":"Wine and bottle gifts","in_stock":false},{"name":"Table Cloth and Napkins","price":45,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/tablecloth.webp","group":"For the table","in_stock":true},{"name":"Napkins & Gold Flower Napkin Rings","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/napkin-rings.webp","group":"For the table","in_stock":true},{"name":"Set of 4 Rosh Hashana Napkins","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/rh-napkins.webp","group":"For the table","in_stock":true},{"name":"Porcelain Napkin Holder","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/napkin-holder.webp","group":"For the table","in_stock":true},{"name":"Glass Salt Shaker","price":34,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/salt-shaker.webp","group":"For the table","in_stock":true},{"name":"Wooden serving board","price":50,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/wooden-board.webp","group":"For the table","in_stock":true},{"name":"Apple Shaped serving board","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/apple-board.webp","group":"For the table","in_stock":true},{"name":"White Vase","price":55,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/white-vase.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Gold Edged Bowl","price":35,"price_to":38,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-bowl.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"White Marble Glass Bowl","price":35,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/marble-bowl.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Washing Cup and Hand Towels","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/washing-cup.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Small Glass Jar","price":33,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/glass-jar.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Small Glass, Gold Rimmed Bowls","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-rim-bowls.webp","group":"Bowls, vases and washing cups","in_stock":false},{"name":"Black/Gold Vase","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/black-gold-vase.webp","group":"Bowls, vases and washing cups","in_stock":false},{"name":"Self-Care Gift","price":35,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/self-care.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Cream and Gold Cosmetic Bag","price":26,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/cream-bag.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Black and Gold Cosmetic Bag","price":26,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/black-bag.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Small Jewellery Organiser","price":25,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/jewellery.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Glass Cookie Jar","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/cookie-jar.webp","group":"Treats, self-care and keepsakes","in_stock":false}]</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var WA = '972535386042';
+  function read(id) { var e = document.getElementById(id); if (!e) return null; try { return JSON.parse(e.textContent); } catch (x) { return null; } }
+  var live = read('mir-live-products');
+  var products = (Array.isArray(live) && live.length ? live : read('fallback-products')) || [];
+
+  var SYM = { USD: '$', ILS: '₪', EUR: '€', GBP: '£' };
+  function money(n, cur) { var v = Number(n); return (SYM[cur] || '') + (Number.isInteger(v) ? v : v.toFixed(2)); }
+  function priced(p) { return Number(p.price) > 0; }
+  function priceText(p) {
+    if (!priced(p)) return 'Price on request';
+    var t = money(p.price, p.currency);
+    if (p.price_to != null && Number(p.price_to) > Number(p.price)) t += ' to ' + money(p.price_to, p.currency);
+    return t;
+  }
+
+  // ?add=<name> from a gift on the home page puts one in the order
+  var q = {};
+  var add = new URLSearchParams(location.search).get('add');
+  products.forEach(function (p, i) { p._k = i; if (add && p.in_stock && p.name === add && q[i] == null) q[i] = 1; });
+
+  // the list, in their sections
+  var host = document.getElementById('gifts');
+  var order = [], groups = {};
+  products.forEach(function (p) { var g = p.group || 'More gifts'; if (!groups[g]) { groups[g] = []; order.push(g); } groups[g].push(p); });
+  order.forEach(function (g) {
+    var h = document.createElement('h3'); h.className = 'grp'; h.textContent = g; host.appendChild(h);
+    var ul = document.createElement('ul'); ul.className = 'items'; host.appendChild(ul);
+    groups[g].forEach(function (p) {
+      var li = document.createElement('li'); li.dataset.k = p._k;
+      var ph = document.createElement('span'); ph.className = 'ph';
+      if (p.image) { var im = document.createElement('img'); im.src = p.image; im.alt = ''; im.loading = 'lazy'; im.width = 64; im.height = 64; ph.appendChild(im); }
+      var mid = document.createElement('div');
+      var b = document.createElement('b'); b.textContent = p.name;
+      var pr = document.createElement('span'); pr.className = 'pr'; pr.textContent = p.in_stock ? priceText(p) : 'Out of stock';
+      mid.appendChild(b); mid.appendChild(pr);
+      var ctl = document.createElement('div');
+      if (!p.in_stock) { li.classList.add('is-out'); }
+      li.appendChild(ph); li.appendChild(mid); li.appendChild(ctl);
+      ul.appendChild(li);
+      p._li = li; p._ctl = ctl;
+    });
+  });
+
+  function drawCtl(p) {
+    var ctl = p._ctl; ctl.textContent = '';
+    if (!p.in_stock) return;
+    var n = q[p._k] || 0;
+    p._li.classList.toggle('has', n > 0);
+    if (!n) {
+      var a = document.createElement('button'); a.type = 'button'; a.className = 'add'; a.textContent = 'Add';
+      a.setAttribute('aria-label', 'Add ' + p.name);
+      a.onclick = function () { q[p._k] = 1; update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
+      ctl.appendChild(a); return;
+    }
+    var box = document.createElement('div'); box.className = 'qty';
+    var minus = document.createElement('button'); minus.type = 'button'; minus.textContent = '−'; minus.setAttribute('aria-label', 'One fewer ' + p.name);
+    var out = document.createElement('output'); out.textContent = n; out.setAttribute('aria-label', n + ' of ' + p.name);
+    var plus = document.createElement('button'); plus.type = 'button'; plus.textContent = '+'; plus.dataset.plus = ''; plus.setAttribute('aria-label', 'One more ' + p.name);
+    plus.disabled = n >= 20;
+    minus.onclick = function () { q[p._k] = n - 1; if (!q[p._k]) delete q[p._k]; update(); };
+    plus.onclick = function () { q[p._k] = n + 1; update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
+    box.appendChild(minus); box.appendChild(out); box.appendChild(plus); ctl.appendChild(box);
+  }
+
+  var chosen = function () { return products.filter(function (p) { return q[p._k] > 0; }); };
+  function totals() {
+    var low = 0, ranged = false, ask = false, cur = 'USD';
+    chosen().forEach(function (p) {
+      var n = q[p._k]; cur = p.currency || cur;
+      if (!priced(p)) { ask = true; return; }
+      low += n * Number(p.price);
+      if (p.price_to != null && Number(p.price_to) > Number(p.price)) ranged = true;
+    });
+    return { text: (ranged ? 'from ' : '') + money(low, cur) + (ask ? ' + price on request' : ''), low: low, cur: cur };
+  }
+
+  var lines = document.getElementById('lines'), empty = document.getElementById('empty');
+  function update() {
+    products.forEach(drawCtl);
+    lines.textContent = '';
+    var c = chosen();
+    empty.hidden = c.length > 0;
+    c.forEach(function (p) {
+      var li = document.createElement('li');
+      var a = document.createElement('span'); a.textContent = q[p._k] + ' × ' + p.name;
+      var b = document.createElement('span');
+      b.textContent = priced(p) ? (p.price_to != null && Number(p.price_to) > Number(p.price) ? 'from ' : '') + money(q[p._k] * Number(p.price), p.currency) : 'on request';
+      li.appendChild(a); li.appendChild(b); lines.appendChild(li);
+    });
+    var t = totals().text;
+    document.getElementById('total').textContent = t;
+    document.getElementById('dtotal').textContent = t;
+    check(false);
+  }
+
+  // what is still missing, said plainly; nothing is red until they try to send
+  var why = document.getElementById('why');
+  function check(show) {
+    var missing = [];
+    if (!chosen().length) missing.push('choose a gift');
+    document.querySelectorAll('[data-need]').forEach(function (box) {
+      var ok = box.querySelector('input,textarea').value.trim().length > 0;
+      if (show) box.classList.toggle('bad', !ok);
+      if (!ok) missing.push(box.querySelector('label').textContent.toLowerCase().replace(/\?$/, ''));
+    });
+    var ready = !missing.length;
+    ['send', 'send2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', ready ? 'false' : 'true'); });
+    why.textContent = ready ? '' : (show || chosen().length ? 'Still needed: ' + missing.join(', ') + '.' : '');
+    return ready;
+  }
+  document.querySelectorAll('[data-need] input').forEach(function (i) {
+    i.addEventListener('input', function () { i.closest('[data-need]').classList.remove('bad'); check(false); });
+  });
+
+  function v(id) { return document.getElementById(id).value.trim(); }
+  function message() {
+    var L = ['Hi, I would like to order:'];
+    chosen().forEach(function (p) { L.push('• ' + q[p._k] + ' × ' + p.name + ' (' + priceText(p) + ')'); });
+    L.push('Gifts total: ' + totals().text + ', plus delivery');
+    L.push('');
+    L.push('For: ' + v('to') + (v('tophone') ? ', ' + v('tophone') : ''));
+    L.push('Address: ' + v('addr') + ', ' + v('city'));
+    if (v('when')) {
+      var d = new Date(v('when') + 'T12:00:00');
+      L.push('Delivery date: ' + d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
+    }
+    if (v('card')) L.push('Card message: "' + v('card') + '"');
+    if (v('note')) L.push('Also: ' + v('note'));
+    L.push('');
+    L.push('From: ' + v('me'));
+    return L.join('\n');
+  }
+  function send(e) {
+    e.preventDefault();
+    if (!check(true)) {
+      var first = document.querySelector('.bad input, .bad textarea');
+      if (!chosen().length) document.getElementById('s1').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      else if (first) first.focus();
+      return;
+    }
+    window.open('https://wa.me/' + WA + '?text=' + encodeURIComponent(message()), '_blank', 'noopener');
+  }
+  document.getElementById('send').addEventListener('click', send);
+  document.getElementById('send2').addEventListener('click', send);
+
+  var when = document.getElementById('when');
+  when.min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+
+  update();
+  if (add && chosen().length) {
+    var p = chosen()[0];
+    p._li.scrollIntoView({ block: 'center' });
+  }
+});
+</script>
+</body>
+</html>

@@ -10,7 +10,7 @@
  *
  * The page supplies the look; this script only fills it in:
  *
- *   <div data-mir-catalog data-wa="972535386042"
+ *   <div data-mir-catalog data-wa="972535386042" data-href="order.html?add={name}"
  *        data-msg="Hi, I'd like to order the {name} ({price})."
  *        data-other="More gifts" data-out="Out of stock">
  *     <div data-mir-list> ...the typed-in list, replaced when live data exists... </div>
@@ -19,6 +19,9 @@
  *       <li><a data-f="link"><img data-f="img" alt=""><b data-f="name"></b><span data-f="price"></span></a></li>
  *     </template>
  *   </div>
+ *
+ * data-href (optional) sends a tap to the page's order page with the item
+ * added; without it a tap opens WhatsApp asking for that item (data-wa).
  *
  * Sections follow each product's "group" in the order they first appear
  * (products with none go under data-other, last). An item out of stock is
@@ -53,6 +56,7 @@
     var tItem = cat.querySelector('template[data-mir-item]');
     if (!list || !tGroup || !tItem) return;
     var wa = (cat.getAttribute('data-wa') || '').replace(/\D/g, '');
+    var href = cat.getAttribute('data-href') || '';
     var msg = cat.getAttribute('data-msg') || '';
     var other = cat.getAttribute('data-other') || '';
     var outLabel = cat.getAttribute('data-out') || 'Out of stock';
@@ -85,7 +89,11 @@
         if (img) { if (p.image) { img.src = p.image; img.alt = p.name; } else img.remove(); }
         var a = it.querySelector('[data-f="link"]');
         if (a) {
-          if (p.in_stock && wa) {
+          if (p.in_stock && href) {
+            // the page's own order page, with this item added
+            a.href = href.replace('{name}', encodeURIComponent(p.name));
+            a.setAttribute('aria-label', p.name + ', ' + price + '. Add it to your order');
+          } else if (p.in_stock && wa) {
             a.href = 'https://wa.me/' + wa + '?text=' + encodeURIComponent((Number(p.price) > 0 ? msg : msg.replace(' ({price})', '')).replace('{name}', p.name).replace('{price}', price));
             a.target = '_blank'; a.rel = 'noopener';
             a.setAttribute('aria-label', p.name + ', ' + price + '. Ask for it on WhatsApp');
