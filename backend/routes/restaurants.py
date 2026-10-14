@@ -133,7 +133,13 @@ async def list_restaurants(
         docs = await db.restaurants.aggregate(pipe).to_list(limit)
         items = [_card(d, d["_dist"] / 1000) for d in docs]
     else:
-        docs = await db.restaurants.find(f).sort([("verified", -1), ("contact.name_en", 1)]).skip(skip).limit(limit).to_list(limit)
+        # Places with a photo first: a page of icon-only cards looked bare
+        # (Tzvi, 14 Oct 2026).
+        pipe = [{"$match": f},
+                {"$addFields": {"_has_photo": {"$cond": [{"$gt": [{"$ifNull": ["$contact.photo", ""]}, ""]}, 1, 0]}}},
+                {"$sort": {"verified": -1, "_has_photo": -1, "contact.name_en": 1}},
+                {"$skip": skip}, {"$limit": limit}]
+        docs = await db.restaurants.aggregate(pipe).to_list(limit)
         items = [_card(d) for d in docs]
     return {"items": items, "total": total, "page": page, "pages": (total + limit - 1) // limit}
 
