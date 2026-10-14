@@ -868,10 +868,11 @@ const Navigation = () => {
         {/* The sections, one row under the logo bar at every width (Tzvi,
             14 Oct 2026, after Airbnb's and Booking.com's headers): a
             fourth section in the logo bar ran into the language button on
-            laptops. Each has a 3D picture from one generated set
-            (public/nav-icons); scrolling down folds the row to labels. */}
+            laptops. Booking.com's look: line icon beside the label, the
+            current one outlined (3D pictures were tried and did not fit
+            the site); on a phone scrolling folds the icons away. */}
         <div
-          className={`flex items-end justify-around md:justify-center md:gap-12 transition-all duration-200 ${
+          className={`flex items-end md:items-center justify-around md:justify-center md:gap-2 transition-all duration-200 ${
             mobileScrolled ? 'pb-1 pt-0' : 'pb-2 pt-1'
           }`}
           data-testid="nav-rental-categories-mobile"
@@ -882,20 +883,18 @@ const Navigation = () => {
               only by typing the URL - and phones are most of the traffic.
               Any link added to the desktop row above belongs here too. */}
           {[
-            { type: 'stays', icon: Bed, label: t('nav.stays', 'Stays'), to: '/stays', img: '/nav-icons/stays.webp' },
-            { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/businesses', img: '/nav-icons/businesses.webp' },
-            { type: 'requests', icon: Store, label: t('nav.requests', 'Marketplace'), to: '/requests', img: '/nav-icons/marketplace.webp' },
-            { type: 'restaurants', icon: UtensilsCrossed, label: t('nav.restaurants', 'Restaurants'), to: '/restaurants', img: '/nav-icons/restaurants.webp' },
-          ].map(({ type, icon: Icon, label, to, img }) => (
+            { type: 'stays', icon: Bed, label: t('nav.stays', 'Stays'), to: '/stays' },
+            { type: 'services', icon: Briefcase, label: t('nav.services', 'Services'), to: '/businesses' },
+            { type: 'requests', icon: Store, label: t('nav.requests', 'Marketplace'), to: '/requests' },
+            { type: 'restaurants', icon: UtensilsCrossed, label: t('nav.restaurants', 'Restaurants'), to: '/restaurants' },
+          ].map(({ type, icon: Icon, label, to }) => (
             <NavCategoryItem
               key={type}
               type={type}
               Icon={Icon}
-              img={img}
               label={label}
               to={to}
               active={location.pathname.startsWith(to)}
-              scrolled
               iconHidden={mobileScrolled}
               testidSuffix="-mobile"
             />
