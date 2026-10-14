@@ -20,7 +20,7 @@
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Building2, Layers, Store, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
-  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users,
+  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users, SlidersHorizontal,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
 
@@ -43,6 +43,10 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
   // The same rule Dashboard.js renders these panels on; a looser one here
   // would show menu items that open an empty page.
   const runsBusiness = showGigTabs;
+  // Which business tools this person uses, by what the business sells
+  // and their own choices (backend utils/business_tools.py, Tzvi 14 Oct
+  // 2026). Until the summary arrives, everything shows, as before.
+  const tool = (id) => runsBusiness && (!summary.business_tools || !!summary.business_tools[id]);
   const groups = [
     {
       key: 'overview',
@@ -55,12 +59,15 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       label: t('dashboard.groupBusiness', 'My business'),
       tabs: [
         { id: 'my-businesses', label: t('dashboard.myBusinesses', 'Businesses'), Icon: Store, show: runsBusiness },
-        { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: runsBusiness },
-        { id: 'members', label: t('dashboard.members', 'Members'), Icon: Users, show: runsBusiness },
-        { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: runsBusiness },
-        { id: 'network', label: t('dashboard.network', 'Network'), Icon: Network, badge: summary.network_requests_in, show: runsBusiness || (summary.network_requests_in || 0) > 0 },
-        { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, badge: summary.work_offers_open, show: runsBusiness },
-        { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, show: runsBusiness },
+        { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: tool('orders') },
+        { id: 'members', label: t('dashboard.members', 'Members'), Icon: Users, show: tool('members') },
+        // Waiting appointments or network requests always show: a badge
+        // nobody can see is a customer nobody answers.
+        { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: tool('appointments') || (runsBusiness && (summary.service_bookings_pending || 0) > 0) },
+        { id: 'network', label: t('dashboard.network', 'Network'), Icon: Network, badge: summary.network_requests_in, show: tool('network') || (summary.network_requests_in || 0) > 0 },
+        { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, badge: summary.work_offers_open, show: tool('job-requests') },
+        { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, show: runsBusiness && (hasPostedJobs || !summary.business_tools) },
+        { id: 'tools', label: t('dashboard.tools', 'Tools'), Icon: SlidersHorizontal, show: runsBusiness },
         // A courier's own deliveries: shown to anyone a business invited.
         { id: 'deliveries', label: t('dashboard.deliveries', 'Deliveries'), Icon: Bike, badge: (summary.courier_deliveries_open || 0) + (summary.courier_invites || 0), show: (summary.courier_businesses || 0) > 0 || (summary.courier_invites || 0) > 0 },
       ],
@@ -132,6 +139,7 @@ export const ALL_TAB_IDS = [
   'appointments',
   'orders',
   'members',
+  'tools',
   'network',
   'deliveries',
   'my-orders',

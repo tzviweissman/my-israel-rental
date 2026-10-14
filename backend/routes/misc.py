@@ -27,6 +27,7 @@ from routes.deps import (
 )
 from utils.llm import LlmChat, UserMessage
 from utils.rate_limit import check_rate
+from utils.business_tools import TOOLS, business_tools
 from routes.marketplace.connections import incoming_request_count
 from utils.cloud_storage import (
     CLOUDINARY_ENABLED,
@@ -595,4 +596,26 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "my_rental_bookings": my_rental_bookings,
         "has_saved_searches": bool(saved_searches),
         "has_liked": bool(liked),
+        # Which business tabs to show: by what the business sells, what is
+        # in use, and what the person switched on or off (utils/business_tools).
+        "business_tools": (await business_tools(db, uid))["tools"],
     }
+
+
+class ToolsIn(BaseModel):
+    tools: dict[str, bool]
+
+
+@api_router.get("/dashboard/tools")
+async def get_dashboard_tools(payload: dict = Depends(verify_token)) -> dict:
+    return await business_tools(db, payload["user_id"])
+
+
+@api_router.put("/dashboard/tools")
+async def set_dashboard_tools(body: ToolsIn, payload: dict = Depends(verify_token)) -> dict:
+    """Switch business tools on or off. Only the tools named are changed;
+    the rest keep following the business's type."""
+    sets = {f"dashboard_tools.{k}": bool(v) for k, v in body.tools.items() if k in TOOLS}
+    if sets:
+        await db.users.update_one({"id": payload["user_id"]}, {"$set": sets})
+    return await business_tools(db, payload["user_id"])

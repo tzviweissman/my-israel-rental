@@ -2098,6 +2098,7 @@ const en = {
         myOrders: 'My orders',
         orders: 'Orders',
         members: 'Members',
+        tools: 'Tools',
         appointments: 'Appointments',
         // D1 — these four tabs shared three words between them and no
         // user could predict what was behind any of them. Named now by
@@ -5239,6 +5240,24 @@ const en = {
         save: 'Save',
         savedShort: 'Saved',
         help: 'Click text to select it, click again to type. Drag anything to move it. Click a photo to replace it. Moves on laptop and on phone are kept separately.',
+      },
+      // Dashboard > Tools (backend utils/business_tools.py).
+      tools: {
+        title: "Tools",
+        body: "The tools that suit your business are already on. Switch on anything else you need, or hide what you don’t use. Nothing is deleted when a tool is off.",
+        suggested: "Suits your business",
+        saveFailed: "Could not save. Try again.",
+        loadFailed: "Could not load your tools. Try again.",
+        orders: "Orders",
+        ordersBody: "Take and track orders: for shops, bakeries, caterers and anyone who sells products.",
+        members: "Members",
+        membersBody: "Monthly and yearly memberships and class packs, with check-in at the door: for gyms, studios and classes.",
+        appointments: "Appointments",
+        appointmentsBody: "Bookings for a time slot: for cleaners, tutors, therapists and anyone who books visits.",
+        jobRequests: "Work offers",
+        jobRequestsBody: "Jobs people post in your field, so you can offer to do them.",
+        network: "Network",
+        networkBody: "Connect with other businesses: suppliers, partners and referrals.",
       },
       // Memberships (routes/marketplace/memberships.py).
       members: {

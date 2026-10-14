@@ -243,7 +243,7 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
     await _notify(biz["owner_user_id"], type_="membership_join",
                   message=f"New member sign-up: {doc['name']} ({plan['name']})",
                   action_url="/dashboard?tab=members")
-    owner = await db.users.find_one({"user_id": biz["owner_user_id"]}, {"email": 1})
+    owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"email": 1})
     await _email((owner or {}).get("email"), f"New member: {doc['name']}, {plan['name']}",
                  f"<p><b>{_esc(doc['name'])}</b> signed up for <b>{_esc(plan['name'])}</b>, starting {_esc(start.isoformat())}.</p>"
                  f"<p>Phone: {_esc(phone)}</p><p>Once they have paid, mark them active in your member list.</p>",
