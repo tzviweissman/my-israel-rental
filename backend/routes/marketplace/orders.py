@@ -1627,7 +1627,7 @@ class WindowIn(BaseModel):
 
 
 _SAYS_DELIVERY = re.compile(r"\bdeliver(?:y|ies|ed|s|ing)?\b|\bshipping\b|\bships\b|משלוח|שליחויות", re.I)
-_SAYS_NO_DELIVERY = re.compile(r"\bno deliver|\bpick-?up only\b|\bcollection only\b|\bdo(?:es)? not deliver|\bdon'?t deliver|ללא משלוח|אין משלוח|איסוף בלבד|באיסוף עצמי בלבד", re.I)
+_SAYS_NO_DELIVERY = re.compile(r"\bno deliver|\bpick-?up only\b|\bcollection only\b|\bdo(?:es)? not deliver|\bdon'?t deliver|\bdeliver\w*\s+(?:is\s+|are\s+)?(?:currently\s+|not\s+)*(?:not|un)(?:\s+available|\s+offered|available)\b|(?:\bnot|n't)\s+(?:offer|provide|do)\w*\s+(?:any\s+)?(?:deliver|shipping)|ללא משלוח|אין משלוח|איסוף בלבד|באיסוף עצמי בלבד", re.I)
 
 
 def says_delivery(biz: Optional[dict[str, Any]], gig: Optional[dict[str, Any]] = None) -> bool:

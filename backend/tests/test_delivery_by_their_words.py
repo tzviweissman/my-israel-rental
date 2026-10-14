@@ -46,3 +46,9 @@ def test_delivery_times_set_before_the_switch_still_count():
 
 def test_words_inside_other_words_do_not_count():
     assert not says_delivery({"description": "Undeliverable? No: a shipshape bakery"}, STORE)
+
+
+def test_saying_it_does_not_deliver_stays_off():
+    for words in ("Delivery not available", "We do not offer delivery", "Delivery is currently unavailable",
+                  "Delivery is not offered", "We don't provide shipping"):
+        assert not offers_delivery({}, {"description": words}, STORE), words
