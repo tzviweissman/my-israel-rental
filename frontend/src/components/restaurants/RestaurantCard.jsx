@@ -137,6 +137,12 @@ export default function RestaurantCard({ r, active, photoFirst }) {
               <Icon size={44} />
             </span>
           )}
+          {/* Google's photos must show who took them. */}
+          {r.photo && !photoFailed && r.photo_credit && (
+            <span className="absolute bottom-2 start-2 max-w-[80%] truncate rounded bg-black/45 px-1.5 py-0.5 text-[10px] text-white" dir="ltr">
+              Google · {r.photo_credit}
+            </span>
+          )}
           {r.verified && (
             <span className="absolute start-3 top-3 rounded-full bg-white px-2.5 py-1 text-xs font-semibold shadow-sm" style={{ color: '#1F8A50' }}>
               {t('restaurants.verified', 'Certificate checked')}

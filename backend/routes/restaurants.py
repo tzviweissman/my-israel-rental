@@ -62,6 +62,17 @@ def _admin_only(payload: dict) -> None:
         raise HTTPException(status_code=403, detail="Admin access required")
 
 
+def _photo(d):
+    """Their own / Wolt picture, else Google's through our photo endpoint
+    (Google's photos may not be stored, only shown; Tzvi, 14 Oct 2026)."""
+    c = d.get("contact") or {}
+    if c.get("photo"):
+        return c["photo"]
+    if (d.get("google_photo") or {}).get("name"):
+        return f"/api/restaurants/photo/{d['place_id']}"
+    return None
+
+
 def _card(d, distance_km=None):
     c = d.get("contact") or {}
     loc = (d.get("location") or {}).get("coordinates")
@@ -84,7 +95,8 @@ def _card(d, distance_km=None):
         # Their Wolt page, beside their own site (Tzvi, 13 Oct 2026).
         "order_url": c.get("order_url"),
         # Their own site's picture, else their Wolt picture (Tzvi, 14 Oct 2026).
-        "photo": c.get("photo"),
+        "photo": _photo(d),
+        "photo_credit": None if c.get("photo") else (d.get("google_photo") or {}).get("author"),
         "lat": loc[1] if loc else None, "lng": loc[0] if loc else None,
         "google_place": d.get("source") == "google",
         "distance_km": round(distance_km, 2) if distance_km is not None else None,
@@ -179,12 +191,56 @@ async def list_restaurants(
         # Places with a photo first: a page of icon-only cards looked bare
         # (Tzvi, 14 Oct 2026).
         pipe = [{"$match": f},
-                {"$addFields": {"_has_photo": {"$cond": [{"$gt": [{"$ifNull": ["$contact.photo", ""]}, ""]}, 1, 0]}}},
+                {"$addFields": {"_has_photo": {"$cond": [{"$or": [{"$gt": [{"$ifNull": ["$contact.photo", ""]}, ""]},
+                                                            {"$gt": [{"$ifNull": ["$google_photo.name", ""]}, ""]}]}, 1, 0]}}},
                 {"$sort": {"verified": -1, "_has_photo": -1, "contact.name_en": 1}},
                 {"$skip": skip}, {"$limit": limit}]
         docs = await db.restaurants.aggregate(pipe).to_list(limit)
         items = [_card(d) for d in docs]
     return {"items": items, "total": total, "page": page, "pages": (total + limit - 1) // limit}
+
+
+GOOGLE_PHOTO_CAP = 4000   # photos shown a month (~$28 at $7 per 1,000)
+
+
+@router.get("/restaurants/photo/{place_id}")
+async def restaurant_photo(place_id: str):
+    """Google's photo for a place, fetched when a card is shown (Google lets
+    us keep the place ID, not the picture). Redirects to Google's short-lived
+    image address; 404 once this month's cap is reached, and the card falls
+    back to its category icon. A photo name Google no longer knows is looked
+    up again once (Place Details, photos only)."""
+    import os
+    from fastapi.responses import RedirectResponse
+    import httpx
+    key = os.environ.get("GOOGLE_PLACES_API_KEY", "")
+    d = await db.restaurants.find_one({"place_id": place_id}, {"google_photo": 1, "google_place_id": 1})
+    name = ((d or {}).get("google_photo") or {}).get("name")
+    if not key or not name:
+        raise HTTPException(404, "No photo")
+    month = datetime.now(UTC).strftime("%Y-%m")
+    u = await db.google_usage.find_one_and_update({"_id": f"photos-{month}"}, {"$inc": {"n": 1}}, upsert=True, return_document=True)
+    if (u or {}).get("n", 0) > GOOGLE_PHOTO_CAP:
+        raise HTTPException(404, "Photo limit reached this month")
+    async with httpx.AsyncClient(timeout=10) as h:
+        async def media(nm):
+            r = await h.get(f"https://places.googleapis.com/v1/{nm}/media",
+                            params={"maxWidthPx": 480, "skipHttpRedirect": "true", "key": key})
+            return r.json().get("photoUri") if r.status_code == 200 else None
+        uri = await media(name)
+        gid = (d or {}).get("google_place_id") or (place_id if place_id.startswith("ChIJ") else None)
+        if not uri and gid:
+            r = await h.get(f"https://places.googleapis.com/v1/places/{gid}",
+                            headers={"X-Goog-Api-Key": key, "X-Goog-FieldMask": "photos"})
+            ph = ((r.json() if r.status_code == 200 else {}).get("photos") or [None])[0]
+            if ph:
+                author = ((ph.get("authorAttributions") or [{}])[0]).get("displayName")
+                await db.restaurants.update_one({"place_id": place_id}, {"$set": {
+                    "google_photo": {"name": ph["name"], "author": author, "fetched_at": _now()}}})
+                uri = await media(ph["name"])
+    if not uri:
+        raise HTTPException(404, "No photo")
+    return RedirectResponse(uri, status_code=302, headers={"Cache-Control": "private, max-age=3600"})
 
 
 @router.get("/restaurants/pins")
@@ -197,11 +253,11 @@ async def restaurant_pins(
     popup need: the map showed just the 24 cards loaded in the list."""
     f = _filters(city, neighborhood, region, category, kashrut, certifier, q)
     f = {"$and": [f, {"location": {"$ne": None}}]}
-    docs = await db.restaurants.find(f, {"place_id": 1, "contact.name_en": 1, "contact.name_he": 1, "contact.photo": 1,
+    docs = await db.restaurants.find(f, {"place_id": 1, "contact.name_en": 1, "contact.name_he": 1, "contact.photo": 1, "google_photo": 1,
                                          "kosher_certification": 1, "location": 1, "city": 1, "neighborhood": 1,
                                          "kashrut": 1, "categories": 1}).to_list(8000)
     return [{"id": d["place_id"], "name_en": (d.get("contact") or {}).get("name_en"),
-             "name_he": (d.get("contact") or {}).get("name_he"), "photo": (d.get("contact") or {}).get("photo"),
+             "name_he": (d.get("contact") or {}).get("name_he"), "photo": _photo(d),
              "certification": d.get("kosher_certification"), "city": d.get("city"), "neighborhood": d.get("neighborhood"),
              "kashrut": d.get("kashrut"), "categories": d.get("categories") or [],
              "lat": d["location"]["coordinates"][1], "lng": d["location"]["coordinates"][0]} for d in docs]
@@ -289,6 +345,9 @@ class AdminEdit(BaseModel):
     website: Optional[str] = None
     order_url: Optional[str] = None
     photo: Optional[str] = None
+    google_place_id: Optional[str] = None
+    google_photo_name: Optional[str] = None
+    google_photo_author: Optional[str] = None
     certification: Optional[str] = None
     kashrut: Optional[str] = None
     verified: Optional[bool] = None
@@ -331,6 +390,11 @@ async def _apply(place_id, e: AdminEdit, payload):
         sets["neighborhood"] = e.neighborhood or None
     if e.categories is not None:
         sets["categories"] = [c for c in e.categories if c in CATEGORIES]
+    if e.google_place_id is not None:
+        sets["google_place_id"] = e.google_place_id or None
+    if e.google_photo_name is not None:
+        sets["google_photo"] = ({"name": e.google_photo_name, "author": e.google_photo_author, "fetched_at": _now()}
+                                if e.google_photo_name else None)
     if e.certificate_valid_until is not None:
         v = e.certificate_valid_until.strip()
         if v and not re.fullmatch(r"\d{4}-\d{2}-\d{2}", v):
