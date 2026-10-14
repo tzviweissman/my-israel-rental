@@ -80,6 +80,8 @@ def _card(d, distance_km=None):
         "website": c.get("website"), "phone": c.get("phone"), "whatsapp": c.get("whatsapp"),
         # Their Wolt page, beside their own site (Tzvi, 13 Oct 2026).
         "order_url": c.get("order_url"),
+        # Their own site's picture, else their Wolt picture (Tzvi, 14 Oct 2026).
+        "photo": c.get("photo"),
         "lat": loc[1] if loc else None, "lng": loc[0] if loc else None,
         "google_place": d.get("source") == "google",
         "distance_km": round(distance_km, 2) if distance_km is not None else None,
@@ -209,6 +211,7 @@ class AdminEdit(BaseModel):
     whatsapp: Optional[str] = None
     website: Optional[str] = None
     order_url: Optional[str] = None
+    photo: Optional[str] = None
     certification: Optional[str] = None
     kashrut: Optional[str] = None
     verified: Optional[bool] = None
@@ -223,7 +226,7 @@ class AdminEdit(BaseModel):
 
 async def _apply(place_id, e: AdminEdit, payload):
     sets = {}
-    for k in ("name_en", "name_he", "address", "phone", "whatsapp", "website", "order_url"):
+    for k in ("name_en", "name_he", "address", "phone", "whatsapp", "website", "order_url", "photo"):
         v = getattr(e, k)
         if v is not None:
             sets[f"contact.{k}"] = v.strip() or None

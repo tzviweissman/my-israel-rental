@@ -69,6 +69,7 @@ export default function RestaurantCard({ r, active }) {
   const cats = r.categories.slice(0, 2).map((c) => categoryLabel(t, c)).join(', ');
   const where = [r.neighborhood, (he && r.city_he) || r.city].filter(Boolean).join(', ');
   const [panel, setPanel] = useState(null);
+  const [photoFailed, setPhotoFailed] = useState(false);
   const tel = r.phone ? `tel:${r.phone.replace(/[^\d+*]/g, '')}` : null;
 
   return (
@@ -77,13 +78,26 @@ export default function RestaurantCard({ r, active }) {
       style={{ borderColor: 'var(--brand-border)' }}
       data-testid={`restaurant-${r.id}`}
     >
-      <span
-        className="hidden sm:flex h-16 w-16 shrink-0 items-center justify-center rounded-xl"
-        style={{ background: 'rgb(var(--brand-primary-rgb) / 0.08)', color: 'var(--brand-primary)' }}
-        aria-hidden="true"
-      >
-        <Icon size={28} />
-      </span>
+      {/* Their own site's picture, else their Wolt picture; the category
+          icon when there is none or it fails to load. */}
+      {r.photo && !photoFailed ? (
+        <img
+          src={r.photo}
+          alt=""
+          loading="lazy"
+          onError={() => setPhotoFailed(true)}
+          className="h-20 w-20 sm:h-24 sm:w-24 shrink-0 rounded-xl object-cover"
+          style={{ background: '#F3F4F6' }}
+        />
+      ) : (
+        <span
+          className="hidden sm:flex h-16 w-16 shrink-0 items-center justify-center rounded-xl"
+          style={{ background: 'rgb(var(--brand-primary-rgb) / 0.08)', color: 'var(--brand-primary)' }}
+          aria-hidden="true"
+        >
+          <Icon size={28} />
+        </span>
+      )}
       <div className="min-w-0 flex-1">
         {/* Playfair has no Hebrew letters: a Hebrew name gets the Hebrew face. */}
         <h3 className="text-lg font-semibold leading-snug" dir="auto"
