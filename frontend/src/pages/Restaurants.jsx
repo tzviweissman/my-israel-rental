@@ -20,6 +20,7 @@ import PageMeta from '../components/PageMeta';
 import SiteFooter from '../components/common/SiteFooter';
 import RestaurantCard, { CATEGORY_ICONS, categoryLabel } from '../components/restaurants/RestaurantCard';
 import RestaurantsMapView from '../components/restaurants/RestaurantsMapView';
+import RestaurantSearch from '../components/restaurants/RestaurantSearch';
 import GetListedForm from '../components/restaurants/GetListedForm';
 import CATEGORY_PHOTOS from '../data/restaurantCategoryPhotos';
 
@@ -111,6 +112,18 @@ export default function Restaurants() {
     );
   };
 
+  // Nearest first by default (Tzvi, 14 Oct 2026): on all of Israel the
+  // browser is asked for the visitor's location once; picking a city or a
+  // neighbourhood is "a different area" and switches it off.
+  useEffect(() => {
+    if (citySlug || !navigator?.geolocation) return;
+    navigator.geolocation.getCurrentPosition(
+      (p) => setCoords({ lat: p.coords.latitude, lng: p.coords.longitude }),
+      () => {},
+      { maximumAge: 300000, timeout: 10000 },
+    );
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
   const cities = (facets?.cities || []).filter((c) => c.count > 0 && (!region || c.region === region));
   const title = t('restaurants.title', { place: placeName, defaultValue: `Kosher restaurants in ${placeName}` });
   const filtered = !!(category || kashrut || hood || certifier || query || region);
@@ -140,31 +153,17 @@ export default function Restaurants() {
           className="mt-6 flex flex-col gap-2 sm:flex-row"
           role="search"
         >
-          <label className="relative flex-1">
-            <span className="sr-only">{t('restaurants.searchLabel', 'Search by name')}</span>
-            <Search size={18} className="pointer-events-none absolute start-3.5 top-1/2 -translate-y-1/2 text-gray-400" aria-hidden="true" />
-            <input
-              value={q}
-              onChange={(e) => { setQ(e.target.value); if (!e.target.value) setQuery(''); }}
-              placeholder={t('restaurants.searchPh', 'Search by name')}
-              className="w-full rounded-full border bg-white py-3 pe-4 ps-11 text-sm focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/0.25)]"
-              style={{ borderColor: 'var(--brand-border)' }}
-              data-testid="restaurants-search"
-            />
-          </label>
-          <select
-            value={citySlug || ''}
-            onChange={(e) => navigate(e.target.value ? `/restaurants/${e.target.value}` : '/restaurants')}
-            className="rounded-full border bg-white px-4 py-3 text-sm font-semibold"
-            style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
-            aria-label={t('restaurants.city', 'City')}
-            data-testid="restaurants-city"
-          >
-            <option value="">{t('restaurants.allIsrael', 'All of Israel')}</option>
-            {(facets?.cities || []).filter((c) => c.count > 0 || c.slug === citySlug).map((c) => (
-              <option key={c.slug} value={c.slug}>{(he && c.name_he) || c.name} ({c.count})</option>
-            ))}
-          </select>
+          <RestaurantSearch
+            q={q}
+            setQ={setQ}
+            onQuery={setQuery}
+            facets={facets}
+            citySlug={citySlug}
+            onCity={(slug) => { setCoords(null); navigate(slug ? `/restaurants/${slug}` : '/restaurants'); }}
+            onHood={(h) => { setCoords(null); setHood(h); }}
+            onNearMe={() => { if (!coords) nearMe(); }}
+            nearOn={!!coords}
+          />
           <button
             type="button"
             onClick={nearMe}
@@ -298,7 +297,7 @@ export default function Restaurants() {
 
         <div className="mt-3">
           {view === 'map' ? (
-            <RestaurantsMapView items={items} userCoords={coords} />
+            <RestaurantsMapView filters={{ ...params, lat: undefined, lng: undefined, limit: undefined }} userCoords={coords} />
           ) : (
             <div className="grid gap-3 md:grid-cols-2" data-testid="restaurants-list">
               {items.map((r) => <RestaurantCard key={r.id} r={r} />)}
@@ -309,7 +308,7 @@ export default function Restaurants() {
               {t('restaurants.none', 'No places match these filters yet.')}
             </p>
           )}
-          {items.length < total && (
+          {view === 'list' && items.length < total && (
             <div className="mt-6 flex justify-center">
               <button type="button" onClick={loadMore} disabled={loading}
                 className="rounded-full border bg-white px-6 py-2.5 text-sm font-bold disabled:opacity-60"

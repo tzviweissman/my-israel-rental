@@ -91,6 +91,39 @@ def _card(d, distance_km=None):
     }
 
 
+# The hechsher filter shows families, not every spelling: "Rabbanut
+# Jerusalem", "Rabbanut Haifa, Mehadrin" ... are one "Rabbanut" (Tzvi,
+# 14 Oct 2026: "instead of like 20 different rabanut"). First match wins.
+CERT_FAMILIES = [
+    ("Rabbanut", r"^Rabbanut"),
+    ("Badatz Beit Yosef", r"Beit Yosef"),
+    ("Badatz Eida HaChareidit", r"Eida|Haredi Council"),
+    ("Badatz Yoreh Deah (Rav Machpud)", r"Machpud|Yoreh Deah"),
+    ("Badatz Rav Rubin", r"Rubin"),
+    ("Rav Landau", r"Landau"),
+    ("Badatz Kehillot", r"Kehillot"),
+    ("Tzohar", r"Tzohar"),
+    ("OU", r"\bOU\b"),
+    ("Badatz", r"^Badatz"),
+]
+
+
+def cert_family(cert):
+    for label, rx in CERT_FAMILIES:
+        if cert and re.search(rx, cert, re.I):
+            return label
+    return cert
+
+
+def _families(rows):
+    """Facet counts per family, largest first."""
+    tally = {}
+    for r in rows:
+        fam = cert_family(r["name"])
+        tally[fam] = tally.get(fam, 0) + r["count"]
+    return [{"name": k, "count": v} for k, v in sorted(tally.items(), key=lambda kv: -kv[1])]
+
+
 def _filters(city, neighborhood, region, category, kashrut, certifier, q):
     f = {"status": "listed", **NAMED}
     if city:
@@ -104,7 +137,14 @@ def _filters(city, neighborhood, region, category, kashrut, certifier, q):
     if kashrut:
         f["kashrut"] = kashrut
     if certifier:
-        f["kosher_certification"] = certifier
+        fam = dict(CERT_FAMILIES).get(certifier)
+        if fam:
+            # A family: every spelling in it, and none an earlier family took.
+            earlier = [rx for label, rx in CERT_FAMILIES[:[x[0] for x in CERT_FAMILIES].index(certifier)]]
+            f["kosher_certification"] = {"$regex": fam, "$options": "i",
+                                         **({"$not": {"$regex": "|".join(earlier), "$options": "i"}} if earlier else {})}
+        else:
+            f["kosher_certification"] = certifier
     if q:
         rx = {"$regex": re.escape(q.strip()[:60]), "$options": "i"}
         f = {"$and": [f, {"$or": [{"contact.name_en": rx}, {"contact.name_he": rx}]}]}
@@ -147,6 +187,26 @@ async def list_restaurants(
     return {"items": items, "total": total, "page": page, "pages": (total + limit - 1) // limit}
 
 
+@router.get("/restaurants/pins")
+async def restaurant_pins(
+    city: Optional[str] = None, neighborhood: Optional[str] = None, region: Optional[str] = None,
+    category: Optional[str] = None, kashrut: Optional[str] = None, certifier: Optional[str] = None,
+    q: Optional[str] = None,
+):
+    """Every place matching the filters, with only what a map pin and its
+    popup need: the map showed just the 24 cards loaded in the list."""
+    f = _filters(city, neighborhood, region, category, kashrut, certifier, q)
+    f = {"$and": [f, {"location": {"$ne": None}}]}
+    docs = await db.restaurants.find(f, {"place_id": 1, "contact.name_en": 1, "contact.name_he": 1, "contact.photo": 1,
+                                         "kosher_certification": 1, "location": 1, "city": 1, "neighborhood": 1,
+                                         "kashrut": 1, "categories": 1}).to_list(8000)
+    return [{"id": d["place_id"], "name_en": (d.get("contact") or {}).get("name_en"),
+             "name_he": (d.get("contact") or {}).get("name_he"), "photo": (d.get("contact") or {}).get("photo"),
+             "certification": d.get("kosher_certification"), "city": d.get("city"), "neighborhood": d.get("neighborhood"),
+             "kashrut": d.get("kashrut"), "categories": d.get("categories") or [],
+             "lat": d["location"]["coordinates"][1], "lng": d["location"]["coordinates"][0]} for d in docs]
+
+
 @router.get("/restaurants/facets")
 async def restaurant_facets(city: Optional[str] = None):
     """Counts for the filters: regions -> cities, the chosen city's
@@ -177,7 +237,7 @@ async def restaurant_facets(city: Optional[str] = None):
         "neighborhoods": hoods,
         "categories": [{"key": k, "count": n} for k, n in
                        ((x["name"], x["count"]) for x in await count("categories", unwind=True)) if k in CATEGORIES],
-        "certifiers": await count("kosher_certification"),
+        "certifiers": _families(await count("kosher_certification")),
         "kashrut": await count("kashrut"),
         "total": await db.restaurants.count_documents(scope),
     }
