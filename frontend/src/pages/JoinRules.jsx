@@ -28,7 +28,7 @@ const JoinRules = () => {
     <div className="min-h-screen" style={{ background: 'var(--bg, #FFFFFF)' }}>
       <PageMeta title={t('joinRules.metaTitle')} description={t('joinRules.metaDescription')} path="/join-rules" />
 
-      <div className="mx-auto max-w-[760px] px-6 py-12 sm:py-16">
+      <div className="mx-auto max-w-[760px] px-6 pb-12 sm:pb-16" style={{ paddingTop: 'calc(var(--nav-h, 68px) + 28px)' }}>
         <BackLink />
 
         <header className="mt-6 mb-10">
