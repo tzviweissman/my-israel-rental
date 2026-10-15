@@ -714,6 +714,11 @@ const en = {
       },
       pageDesign: {
         look: 'The look',
+        previewBanner: "Preview of unpublished changes. Customers still see the live page.",
+        previewTitle2: "See your draft on your phone",
+        previewHint: "Scan with your phone, or send the link to someone to look at. Customers still see the live page. The link stops working once you publish.",
+        previewOpen: "Open",
+        previewStale: "The link shows your last saved draft. Save the draft again to include your latest changes.",
         publish: "Publish",
         saveDraft: "Save draft",
         discardDraft: "Discard draft",

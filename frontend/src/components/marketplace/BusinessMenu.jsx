@@ -14,6 +14,9 @@ export default function BusinessMenu({ business, current = null, preview = false
   const pages = business?.pages || [];
   if (!pages.length) return null;
   const slug = business.slug || business.id;
+  // A draft preview link keeps its key from page to page.
+  const draftKey = typeof window !== 'undefined' ? new URLSearchParams(window.location.search).get('draft') : null;
+  const href = (key) => businessPageHref(slug, key) + (draftKey ? `?draft=${encodeURIComponent(draftKey)}` : '');
   const items = [{ key: null, label: t('pagesMenu.home', 'Home') }, ...pages.map((p) => ({ key: p.slug, label: p.title }))];
   return (
     <nav aria-label={t('pagesMenu.label', 'Pages')} className="mb-6 -mx-4 px-4 overflow-x-auto" data-testid="business-menu">
@@ -28,7 +31,7 @@ export default function BusinessMenu({ business, current = null, preview = false
                 <button type="button" className={cls} style={style} aria-current={on ? 'page' : undefined}
                         onClick={() => onPick && onPick(it.key)} dir="auto">{it.label}</button>
               ) : (
-                <Link to={businessPageHref(slug, it.key)} className={cls} style={style} aria-current={on ? 'page' : undefined}
+                <Link to={href(it.key)} className={cls} style={style} aria-current={on ? 'page' : undefined}
                       data-testid={`business-menu-${it.key || 'home'}`} dir="auto">{it.label}</Link>
               )}
             </li>

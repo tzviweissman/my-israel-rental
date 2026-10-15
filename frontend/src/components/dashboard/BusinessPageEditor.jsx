@@ -51,6 +51,7 @@ import SectionsEditor from './SectionsEditor';
 import BrandStyleEditor from './BrandStyleEditor';
 import NoticeEditor from './NoticeEditor';
 import PagesEditor from './PagesEditor';
+import DraftPreviewLink from './DraftPreviewLink';
 import {
   DIAL_DEFAULTS, PRESETS, briefToTheme, composeDefault, normalizeTheme, themeDiff,
 } from '../../utils/pageComposition';
@@ -640,6 +641,18 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
     >
       {/* ---- Page builder v3: versions to choose from (shown once it is on) ---- */}
       {page && <PageVersions business={business} page={page} API={API} token={token} onLive={onSaved} />}
+
+      {/* ---- The saved draft, on a phone ---- */}
+      {draft && draft.preview_token && (
+        <div>
+          <DraftPreviewLink slug={(page && page.slug) || slug} token={draft.preview_token} />
+          {unsaved && (
+            <p className="text-xs mt-1" style={{ color: 'var(--brand-muted)' }} data-testid="draft-preview-stale">
+              {t('pageDesign.previewStale', 'The link shows your last saved draft. Save the draft again to include your latest changes.')}
+            </p>
+          )}
+        </div>
+      )}
 
       {/* ---- Sections: add, remove, reorder, edit ---- */}
       {/* ---- Pages and the menu ---- */}

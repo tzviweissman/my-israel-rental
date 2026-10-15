@@ -16,6 +16,7 @@ Two rules carried over from the earlier steps, both deliberate:
 from __future__ import annotations
 
 import re
+import secrets
 from datetime import UTC, datetime
 from typing import Any, Literal, Optional
 
@@ -562,7 +563,7 @@ async def get_page_draft(business_id: str, user=Depends(verify_token)):
 
 @router.put("/businesses/{business_id}/page-draft")
 async def put_page_draft(business_id: str, payload: BusinessPatch, user=Depends(verify_token)):
-    await _owned(business_id, user)
+    biz = await _owned(business_id, user)
     body = payload.model_dump(exclude_unset=True, mode="json")
     stray = set(body) - set(DRAFT_KEYS)
     if stray:
@@ -587,7 +588,12 @@ async def put_page_draft(business_id: str, payload: BusinessPatch, user=Depends(
             clean_payment_links(payload.payment_links)
         except PaymentLinkError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
-    draft = {"payload": body, "saved_at": datetime.now(UTC).isoformat(timespec="seconds")}
+    # The preview link's key (public_business ?draft=): kept for the life
+    # of the draft, so a link already sent to a phone keeps working through
+    # later saves, and gone with the draft when it is published or thrown
+    # away.
+    token = (biz.get("page_draft") or {}).get("preview_token") or secrets.token_urlsafe(16)
+    draft = {"payload": body, "saved_at": datetime.now(UTC).isoformat(timespec="seconds"), "preview_token": token}
     await db.businesses.update_one({"_id": business_id}, {"$set": {"page_draft": draft}})
     return draft
 
@@ -958,6 +964,7 @@ def _public_listing(gig: dict[str, Any]) -> dict[str, Any]:
 async def public_business(
     slug_or_id: str, request: Request, response: Response, viewer=Depends(optional_user),
     pv: Optional[str] = None,
+    draft: Optional[str] = None,
 ):
     """The public page for one business (spec M4).
 
@@ -985,6 +992,14 @@ async def public_business(
     owner_preview = bool(
         viewer and viewer.get("user_id") == biz.get("owner_user_id"),
     )
+    # The draft preview link (Design your page → Save draft): whoever holds
+    # it sees the unpublished design over the live page, like the owner
+    # does. A wrong or ended token just shows the live page.
+    saved_draft = biz.get("page_draft") or {}
+    draft_view = bool(draft and saved_draft.get("preview_token")
+                      and secrets.compare_digest(str(draft), saved_draft["preview_token"]))
+    if draft_view:
+        owner_preview = True
 
     # A hidden business is hidden from the public, exactly like its
     # listings. Its owner still reaches it from the dashboard.
@@ -1018,7 +1033,7 @@ async def public_business(
     # owner-preview responses added above cannot inflate anybody's numbers.
     # A page-version preview (?pv=) is the visual check rendering a page
     # that is not live, several times over: never a visit.
-    if not pv:
+    if not pv and not draft_view:
         view_tracking.spawn(view_tracking.record_view(
             view_tracking.ENTITY_BUSINESS, biz["_id"],
             owner_id=biz.get("owner_user_id"),
@@ -1164,6 +1179,19 @@ async def public_business(
         if version and preview_ok(version, pv, datetime.now(UTC)):
             preview = version["brief"]
             response.headers["Cache-Control"] = "no-store"
+    if draft_view:
+        d = saved_draft.get("payload") or {}
+        for key in ("page", "pages", "accent", "brand_color", "brand_fonts", "notice", "cover_url",
+                    "pinned_service_ids", "collections"):
+            if key in d:
+                out[key] = d[key]
+        if "brand_color" in d:
+            out["brand_color"] = d["brand_color"] or None
+        if "payment_links" in d:
+            out["payment_links"] = allowed_payment_links(d["payment_links"])
+        out["draft_preview"] = True
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Robots-Tag"] = "noindex"
     if preview or page_v3_on(biz, admin=admin_view):
         brief = dict(preview or biz["design_brief"])
         if not owner_preview:

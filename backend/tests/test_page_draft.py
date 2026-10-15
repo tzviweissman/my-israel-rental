@@ -48,3 +48,35 @@ def test_draft_is_separate_from_the_live_page():
     assert requests.delete(f"{url}/page-draft", headers=_auth(owner), timeout=30).status_code == 200
     assert live()["brand_color"] == "#123456"
     assert requests.get(f"{url}/page-draft", headers=_auth(owner), timeout=30).json() is None
+
+
+def test_draft_preview_link():
+    """The link from Save draft shows the draft to whoever holds it, keeps
+    working through later saves, and ends with the draft."""
+    owner = _owner("draftlink")
+    stamp = datetime.now(UTC).strftime("%H%M%S%f")
+    biz = requests.post(f"{BASE}/marketplace/businesses", json={"name": f"TEST_draftlink {stamp}"}, headers=_auth(owner), timeout=30).json()
+    url = f"{BASE}/marketplace/businesses/{biz['id']}"
+    # A page the public can see: one published listing.
+    requests.post(f"{BASE}/marketplace/gigs", json={
+        "title": "TEST_draftlink shop", "description": "for the preview", "category": "shops-products", "area": "Jerusalem",
+        "gig_type": "store", "budget_currency": "ILS", "booking_mode": "whatsapp", "whatsapp": "+972501234567", "gallery": [],
+        "products": [{"name": "Cake", "price": 100, "currency": "ILS", "images": ["https://example.com/c.jpg"]}],
+    }, headers=_auth(owner), timeout=30)
+    page = f"{BASE}/marketplace/business/{biz['slug']}"
+
+    d1 = requests.put(f"{url}/page-draft", json={"notice": {"text": "Draft notice"}}, headers=_auth(owner), timeout=30).json()
+    token = d1["preview_token"]
+    seen = requests.get(page, params={"draft": token}, timeout=30)
+    assert seen.status_code == 200 and seen.json()["notice"]["text"] == "Draft notice" and seen.json()["draft_preview"] is True
+    assert "noindex" in seen.headers.get("X-Robots-Tag", "")
+    public = requests.get(page, timeout=30).json()
+    assert public["notice"] is None and "draft_preview" not in public
+    assert "draft_preview" not in requests.get(page, params={"draft": "wrong-token-123"}, timeout=30).json()
+
+    d2 = requests.put(f"{url}/page-draft", json={"notice": {"text": "Second"}}, headers=_auth(owner), timeout=30).json()
+    assert d2["preview_token"] == token
+    assert requests.get(page, params={"draft": token}, timeout=30).json()["notice"]["text"] == "Second"
+
+    requests.delete(f"{url}/page-draft", headers=_auth(owner), timeout=30)
+    assert "draft_preview" not in requests.get(page, params={"draft": token}, timeout=30).json()

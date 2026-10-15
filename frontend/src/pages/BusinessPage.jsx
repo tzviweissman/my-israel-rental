@@ -114,11 +114,15 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
         // ?pv= is a page version's preview link (backend utils/page_versions):
         // the visual check renders a version here before it is live.
         const pv = new URLSearchParams(window.location.search).get('pv');
+        // ?draft= is the owner's draft preview link (Design your page →
+        // Save draft): the unpublished design, for whoever holds the link.
+        const draft = new URLSearchParams(window.location.search).get('draft');
+        const params = { ...(pv ? { pv } : {}), ...(draft ? { draft } : {}) };
         const { data } = await axios.get(
           `${API}/marketplace/business/${encodeURIComponent(slug)}`,
           {
             headers: { ...visitorHeaders(), ...(signedIn ? { Authorization: `Bearer ${signedIn}` } : {}) },
-            params: pv ? { pv } : undefined,
+            params: Object.keys(params).length ? params : undefined,
           },
         );
         if (!cancelled) setFetched(data);
@@ -429,6 +433,7 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
           the share tags of a page nobody is on. */}
       {!preview && (
         <PageMeta
+          noindex={!!biz.draft_preview}
           title={`${displayName} | MyIsraelRental`}
           description={shareDescription}
           image={shareImage}
@@ -437,6 +442,16 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
           // by default - see utils/businessHost.js.
           canonicalUrl={businessCanonicalUrl(biz.slug, biz.id)}
         />
+      )}
+
+      {/* A draft preview link: say so, so nobody takes it for the live page. */}
+      {biz.draft_preview && !preview && (
+        <div className="px-4 pt-3" data-testid="draft-preview-banner">
+          <p className={`${columnWidth} mx-auto rounded-xl px-4 py-2.5 text-sm font-semibold text-center`}
+             style={{ background: '#111827', color: '#FFFFFF' }}>
+            {t('pageDesign.previewBanner', 'Preview of unpublished changes. Customers still see the live page.')}
+          </p>
+        </div>
       )}
 
       {/* The notice bar, first thing on the page. The editor's preview shows
