@@ -3,7 +3,7 @@
  * routes/marketplace/discounts.py). The check here is a preview; the
  * server checks the code again when the form is sent.
  */
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Loader2, Check, X, Tag } from 'lucide-react';
@@ -16,10 +16,13 @@ export const discountOn = (applied, amount) => {
   return Math.round(Math.max(0, Math.min(off, amount)) * 100) / 100;
 };
 
-export default function DiscountCodeInput({ businessId, form, amount, phone, applied, onApplied }) {
+export default function DiscountCodeInput({ businessId, form, amount, phone, applied, onApplied, initialCode }) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState(false);
-  const [code, setCode] = useState('');
+  // A friend's link (?ref=CODE, backend referrals.py) opens the box with
+  // the code in it and checks it once.
+  const [open, setOpen] = useState(!!initialCode);
+  const [code, setCode] = useState((initialCode || '').toUpperCase());
+  const tried = useRef(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
 
@@ -33,6 +36,11 @@ export default function DiscountCodeInput({ businessId, form, amount, phone, app
       else setError(data.reason);
     } catch { setError(t('discounts.checkFailed', 'Could not check the code. Try again.')); } finally { setBusy(false); }
   };
+
+  useEffect(() => {
+    if (initialCode && !applied && !tried.current) { tried.current = true; apply(); }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [initialCode]);
 
   if (applied) {
     return (

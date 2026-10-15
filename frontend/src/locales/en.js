@@ -5265,6 +5265,27 @@ const en = {
         savedShort: 'Saved',
         help: 'Click text to select it, click again to type. Drag anything to move it. Click a photo to replace it. Moves on laptop and on phone are kept separately.',
       },
+      // Invite a friend (backend referrals.py).
+      referrals: {
+        title: "Invite a friend",
+        body: "They get {{friend}} off their first time. When they order or join, you get {{reward}} off.",
+        yourCode: "Your code:",
+        whatsapp: "Send on WhatsApp",
+        copy: "Copy link",
+        copied: "Link copied",
+        shareText: "Here is {{off}} off your first time: {{url}}",
+        yourRewards: "Your thank-you codes",
+        off: "{{off}} off",
+        used: "used",
+        shekels: "₪ off",
+        settingsTitle: "Referrals: customers invite friends",
+        isOn: "On",
+        settingsBody: "Each customer and member gets their own link on their order page or membership pass. A friend who uses it gets a discount on their first time, and the person who sent them gets a one-time thank-you code.",
+        turnOn: "Turn on referrals",
+        friendGets: "The friend gets",
+        senderGets: "The person who sent them gets",
+        stats: "{{friends}} friends came through {{senders}} customers",
+      },
       // Automatic messages to members (backend member_messages.py).
       auto: {
         title: "Automatic messages to members",

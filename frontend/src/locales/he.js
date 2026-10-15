@@ -5083,6 +5083,27 @@ const he = {
         savedShort: 'נשמר',
         help: 'לחצו על טקסט כדי לבחור אותו, ולחצו שוב כדי להקליד. גררו כל דבר כדי להזיז אותו. לחצו על תמונה כדי להחליף אותה. הזזות במחשב ובטלפון נשמרות בנפרד.',
       },
+      // Invite a friend (backend referrals.py).
+      referrals: {
+        title: "הזמינו חבר",
+        body: "החבר מקבל {{friend}} הנחה בפעם הראשונה. כשהוא מזמין או מצטרף, אתם מקבלים {{reward}} הנחה.",
+        yourCode: "הקוד שלכם:",
+        whatsapp: "שליחה בוואטסאפ",
+        copy: "העתקת הקישור",
+        copied: "הקישור הועתק",
+        shareText: "הנה {{off}} הנחה לפעם הראשונה: {{url}}",
+        yourRewards: "קודי התודה שלכם",
+        off: "{{off}} הנחה",
+        used: "נוצל",
+        shekels: "₪ הנחה",
+        settingsTitle: "חבר מביא חבר",
+        isOn: "פעיל",
+        settingsBody: "כל לקוח ומנוי מקבל קישור משלו בדף ההזמנה או בכרטיס המנוי. חבר שמשתמש בו מקבל הנחה בפעם הראשונה, ומי ששלח אותו מקבל קוד תודה חד־פעמי.",
+        turnOn: "הפעלת חבר מביא חבר",
+        friendGets: "החבר מקבל",
+        senderGets: "מי ששלח אותו מקבל",
+        stats: "{{friends}} חברים הגיעו דרך {{senders}} לקוחות",
+      },
       // Automatic messages to members (backend member_messages.py).
       auto: {
         title: "הודעות אוטומטיות למנויים",

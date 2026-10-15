@@ -20,6 +20,7 @@ import { StarInput } from '../components/reviews/ReviewsSection';
 import { Loader2, ClipboardList, Check, Bike, Store as StoreIcon, Clock, MapPin, Truck } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { money } from '../utils/currency';
+import ReferralCard from '../components/forms/ReferralCard';
 
 const REFRESH_MS = 30_000;
 
@@ -207,6 +208,7 @@ export default function OrderTrackPage() {
             {t('orders.track.phoneNotice', 'The delivery person will see your number to reach you.')}
           </p>
         )}
+        <ReferralCard kind="order" token={token} />
         <p className="text-[11px] mt-6 text-center" style={{ color: 'var(--brand-muted)' }}>
           {t('orders.track.footer', 'Questions about the order? Contact the store directly.')}
         </p>

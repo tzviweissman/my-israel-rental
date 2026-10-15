@@ -5,7 +5,7 @@
  * member the link to their pass.
  */
 import React, { useEffect, useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { Loader2, Check, Users } from 'lucide-react';
@@ -20,6 +20,8 @@ const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 
 export default function MembershipSignupPage() {
   const { slug } = useParams();
+  const [params] = useSearchParams();
+  const refCode = params.get('ref');
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const lang = String(i18n.language || 'en').split('-')[0];
@@ -131,7 +133,7 @@ export default function MembershipSignupPage() {
             const off = plan ? discountOn(code, Number(plan.price || 0)) : 0;
             return (
               <div>
-                <DiscountCodeInput businessId={biz.id} form="memberships" amount={plan ? Number(plan.price || 0) : 0} phone={form.phone} applied={code} onApplied={setCode} />
+                <DiscountCodeInput businessId={biz.id} form="memberships" amount={plan ? Number(plan.price || 0) : 0} phone={form.phone} applied={code} onApplied={setCode} initialCode={refCode} />
                 {plan && off > 0 && (
                   <p className="text-sm mt-1" style={{ color: 'var(--ink)' }} data-testid="signup-discount">
                     {t('discounts.memberPrice', '{{price}} instead of {{was}}', { price: money(Number(plan.price) - off, plan.currency || 'ILS'), was: money(plan.price, plan.currency || 'ILS') })}

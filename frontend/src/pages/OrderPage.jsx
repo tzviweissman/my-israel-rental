@@ -422,7 +422,7 @@ export default function OrderPage() {
         <div className="rounded-2xl border bg-white p-3" style={{ borderColor: 'var(--brand-border)' }}>
           {lines.length > 0 && (
             <div className="mb-2">
-              <DiscountCodeInput businessId={data.business.id} form="orders" amount={subtotal} phone={phone} applied={code} onApplied={setCode} />
+              <DiscountCodeInput businessId={data.business.id} form="orders" amount={subtotal} phone={phone} applied={code} onApplied={setCode} initialCode={params.get('ref')} />
             </div>
           )}
           {lines.length > 0 && (

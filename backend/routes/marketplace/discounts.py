@@ -95,7 +95,9 @@ def _doc_fields(b: CodeIn, code: str) -> dict[str, Any]:
 @router.get("/businesses/{business_id}/discount-codes")
 async def list_codes(business_id: str, user=Depends(verify_token)):
     await _owned(business_id, user)
-    rows = await db.discount_codes.find({"business_id": business_id, "deleted": {"$ne": True}}).sort("created_at", -1).to_list(200)
+    # Thank-you codes from referrals (referrals.py) are left out: one per
+    # friend sent, they would bury the business's own codes.
+    rows = await db.discount_codes.find({"business_id": business_id, "deleted": {"$ne": True}, "referral_reward": {"$ne": True}}).sort("created_at", -1).to_list(200)
     return [_out(d) for d in rows]
 
 
@@ -103,7 +105,7 @@ async def list_codes(business_id: str, user=Depends(verify_token)):
 async def create_code(business_id: str, body: CodeIn, user=Depends(verify_token)):
     await _owned(business_id, user)
     code = _check_in(body)
-    if await db.discount_codes.count_documents({"business_id": business_id, "deleted": {"$ne": True}}) >= 100:
+    if await db.discount_codes.count_documents({"business_id": business_id, "deleted": {"$ne": True}, "referral_reward": {"$ne": True}}) >= 100:
         raise HTTPException(status_code=400, detail="A business can have up to 100 codes")
     doc = {"_id": str(uuid.uuid4()), "business_id": business_id, **_doc_fields(body, code), "uses": 0, "discount_given": 0.0,
            "used_by": [], "created_at": datetime.now(IL).isoformat(timespec="seconds")}
@@ -165,6 +167,10 @@ async def evaluate(business_id: str, code: str, form: Literal["orders", "members
     """(code document, discount in shekels), or CodeRefused(reason) with a
     sentence the customer can read."""
     c = await db.discount_codes.find_one({"business_id": business_id, "code": norm_code(code), "deleted": {"$ne": True}})
+    if not c:
+        # Someone's personal referral code (referrals.py).
+        from .referrals import as_code
+        c = await as_code(business_id, norm_code(code))
     if not c or not c.get("active", True):
         raise CodeRefused("This code is not valid")
     if c.get("applies_to", "both") not in (form, "both"):
@@ -179,6 +185,8 @@ async def evaluate(business_id: str, code: str, form: Literal["orders", "members
     if form == "orders" and c.get("min_order") and amount < c["min_order"]:
         raise CodeRefused(f"This code needs an order of at least ₪{c['min_order']:g}")
     e164 = normalize_whatsapp_number(phone) if phone else None
+    if c.get("referral_of") and e164 == c["referral_of"]:
+        raise CodeRefused("This is your own code: send it to a friend")
     if c.get("once_per_customer", True) and e164 and e164 in (c.get("used_by") or []):
         raise CodeRefused("You have already used this code")
     if c.get("first_order_only") and await _is_returning(business_id, e164):
@@ -190,6 +198,9 @@ async def evaluate(business_id: str, code: str, form: Literal["orders", "members
 async def redeem(c: dict[str, Any], discount: float, phone: Optional[str]) -> bool:
     """Count one use, atomically: a code with max_uses=1 used by two people
     at the same moment goes to one of them."""
+    if c.get("referral_of"):
+        from . import referrals
+        return await referrals.redeem(c, discount, phone)
     q: dict[str, Any] = {"_id": c["_id"], "active": True, "deleted": {"$ne": True}}
     if c.get("max_uses"):
         q["uses"] = {"$lt": c["max_uses"]}

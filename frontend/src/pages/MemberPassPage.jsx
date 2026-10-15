@@ -14,6 +14,7 @@ import { API } from '../lib/apiBase';
 import { planPrice, planVisits, stateLabel } from '../components/members/memberText';
 import { money } from '../utils/currency';
 import MemberClasses from '../components/members/MemberClasses';
+import ReferralCard from '../components/forms/ReferralCard';
 
 export default function MemberPassPage() {
   const { token } = useParams();
@@ -113,6 +114,7 @@ export default function MemberPassPage() {
           </dl>
         </section>
         <MemberClasses token={token} />
+        <ReferralCard kind="member" token={token} />
       </main>
     </div>
   );

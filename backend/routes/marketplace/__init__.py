@@ -20,7 +20,7 @@ identical, endpoints just live in smaller modules now.
 """
 from fastapi import APIRouter
 
-from . import automations, businesses, classes, connections, custom_fields, customer_messages, customers, discounts, dropship, gigs, insights, jobs, member_messages, memberships, notification_prefs, orders, page_edits, page_versions, photo_match, providers, requests, sales_summary, staff, subscription
+from . import automations, businesses, classes, connections, custom_fields, customer_messages, customers, discounts, dropship, gigs, insights, jobs, member_messages, memberships, notification_prefs, orders, page_edits, page_versions, photo_match, providers, referrals, requests, sales_summary, staff, subscription
 
 # One router that owns every marketplace endpoint. All three sub-modules
 # use the same ``/marketplace`` prefix + ``["marketplace"]`` tag on their
@@ -39,6 +39,7 @@ router.include_router(custom_fields.router)
 router.include_router(customers.router)
 router.include_router(customer_messages.router)
 router.include_router(discounts.router)
+router.include_router(referrals.router)
 router.include_router(sales_summary.router)
 router.include_router(staff.router)
 router.include_router(insights.router)
