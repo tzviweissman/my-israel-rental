@@ -138,7 +138,7 @@ export default function BusinessInsights({ API, auth, businessId, onClose }) {
             <Tile label={t('insights.sales', 'Sales')} value={money(data.revenue, cur)} testid="insights-sales">
               <Change now={data.revenue} before={data.revenue_before} shown={money(data.revenue_before, cur)} compare={data.compare} t={t} />
             </Tile>
-            <Tile label={t('insights.average', 'Average order')} value={data.average != null ? money(data.average, cur) : '–'} testid="insights-average" />
+            <Tile label={t('insights.average', 'Average order')} value={data.average != null ? money(data.average, cur) : '-'} testid="insights-average" />
             <Tile label={t('insights.customers', 'Customers')} value={data.customers} testid="insights-customers">
               <p className="text-xs mt-1" style={{ color: 'var(--ink)' }}>
                 {t('insights.newBack', { defaultValue: '{{n}} new, {{b}} came back', n: data.new_customers, b: data.returning })}
