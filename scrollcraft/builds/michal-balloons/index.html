@@ -7,10 +7,10 @@
   list whose picture changes with the row, their photo station (their own
   photo, their price), a working booking card that writes the WhatsApp
   message, good to know, and their name as the closing signature.
-  Facts are all theirs (record and listing, 11 Oct 2026). Their own photo is
-  the photo station; the other formation pictures are generated in their
-  palette (Tzvi: "you can generate some balloon formation as well"), shown
-  until the owner sends more of her work. Hebrew first, with English.
+  Facts are all theirs (record and listing, 11 Oct 2026). Every photo of her
+  work is hers, from her WhatsApp catalogue (15 Oct 2026), grouped by
+  occasion; only the opening's arch is generated. A photo with a child's
+  face is left out. Hebrew first, with English.
 -->
 <html lang="he" dir="rtl">
 <head>
@@ -127,13 +127,13 @@
   .words span { display: block; max-width: 28rem; color: var(--soft); font-size: 1rem; height: 0; opacity: 0; overflow: hidden; transition: opacity 450ms var(--out), height 450ms var(--out); }
   .words li.lit b { color: var(--sage-ink); translate: 0 -2px; }
   .words li.lit span { opacity: 1; height: 1.7em; }
-  .words .pop { position: absolute; z-index: 2; inset-inline-end: 0; top: 50%; width: clamp(150px, 19vw, 250px); aspect-ratio: 3 / 4; border-radius: var(--r); overflow: hidden;
+  .words .pop { position: absolute; z-index: 2; inset-inline-end: 0; top: 50%; width: clamp(130px, 15vw, 210px); aspect-ratio: 1; border-radius: 26%; overflow: hidden;
     box-shadow: 0 24px 50px -24px rgb(36 48 44 / .6); opacity: 0; translate: 0 -40%; rotate: -6deg; scale: .7; pointer-events: none;
     transition: opacity 400ms var(--out), scale 600ms cubic-bezier(.2, 1.3, .3, 1), rotate 600ms var(--out), translate 600ms var(--out); }
   .words li:nth-child(even) .pop { rotate: 6deg; }
   .words li.lit .pop { opacity: 1; scale: 1; translate: 0 -50%; rotate: -3deg; }
   .words li:nth-child(even).lit .pop { rotate: 3deg; }
-  .words .pop img { width: 100%; height: 100%; object-fit: cover; }
+  .words .pop img { width: 100%; height: 100%; object-fit: cover; scale: 1.08; }
   @media (max-width: 820px) {
     .words .pop { width: 30vw; inset-inline-end: 0; }
     .words b { max-width: 60vw; }
@@ -154,27 +154,26 @@
   .incl svg { width: 20px; height: 20px; flex: none; margin-top: .25rem; stroke: var(--sage-ink); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
   @media (max-width: 820px) { .booth .grid { grid-template-columns: 1fr; } }
 
-  /* gallery, after 21st's "Parallax Floating": the pictures float at
-     different depths like balloons and drift with the pointer (a slow bob
-     on touch screens); nearer ones move more. */
-  .float { position: relative; height: clamp(560px, 70vw, 820px); margin-top: 1rem; }
-  .float figure { position: absolute; margin: 0; border-radius: var(--r); overflow: hidden; box-shadow: 0 28px 60px -30px rgb(36 48 44 / .55);
-    width: var(--w); aspect-ratio: 3 / 4; left: var(--x); top: var(--y); will-change: transform; transition: transform 900ms cubic-bezier(.2, .7, .2, 1); }
-  .float figure img { width: 100%; height: 100%; object-fit: cover; }
-  @media (prefers-reduced-motion: no-preference) {
-    .float figure { animation: bob var(--t, 7s) ease-in-out infinite alternate; }
-  }
-  @keyframes bob { from { translate: 0 -6px; } to { translate: 0 8px; } }
-  @media (max-width: 760px) {
-    .float { height: 150vw; }
-    .float figure { --w: 40vw !important; }
-    .float figure:nth-child(1) { --x: 4% !important; --y: 2% !important; }
-    .float figure:nth-child(2) { --x: 52% !important; --y: 6% !important; }
-    .float figure:nth-child(3) { --x: 6% !important; --y: 36% !important; }
-    .float figure:nth-child(4) { --x: 54% !important; --y: 40% !important; }
-    .float figure:nth-child(5) { --x: 4% !important; --y: 70% !important; }
-    .float figure:nth-child(6) { --x: 52% !important; --y: 72% !important; }
-  }
+  /* her work by occasion: Givingli's occasion browsing and Instrument's
+     filter chips (both Mobbin). Her own photos from her WhatsApp catalogue;
+     a chip picks an occasion and the tiles rearrange (FLIP), the rest fold
+     away. Photos are 230 px, so tiles stay small and many. */
+  .chips2 { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.6rem; }
+  .chip { min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1.5px solid var(--line); background: #fff; color: var(--ink);
+    font: 500 .95rem/1 var(--font); cursor: pointer; transition: background 180ms ease-out, border-color 180ms ease-out, color 180ms ease-out, transform 160ms ease-out; }
+  .chip:hover { border-color: var(--sage); }
+  .chip:active { transform: scale(.96); }
+  .chip.on { background: var(--sage-ink); border-color: var(--sage-ink); color: #fff; }
+  .work { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: clamp(.8rem, 1.6vw, 1.2rem); margin-top: 1.6rem; }
+  .work figure { margin: 0; will-change: transform; }
+  .work figure.out, .work figure.more { display: none; }
+  .showall { margin: 1.6rem auto 0; display: flex; }
+  .showall[hidden] { display: none; }
+  .work img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; scale: 1.07; border-radius: 26%; box-shadow: var(--shadow); background: var(--cream-2);
+    transition: scale 500ms var(--out); clip-path: inset(3.5% round 24%); }
+  .work figcaption { margin-top: .55rem; font-size: .9rem; line-height: 1.35; color: var(--ink); }
+  @media (hover: hover) { .work figure:hover img { scale: 1.12; } }
+  @media (max-width: 520px) { .work { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 
   /* booking card: a small working piece (3g.9) that writes the WhatsApp message */
   .book { background: var(--night); color: #fff; }
@@ -274,10 +273,10 @@
     <div class="wrap">
       <h2 id="h-make" data-rev data-en-html="What we <span class=&quot;acc&quot;>make</span>">מה אנחנו <span class="acc">עושים</span></h2>
       <ul class="words" id="rows">
-        <li><b data-en="Balloon arches">שערי בלונים</b><span data-en="An arch for the entrance, the stage or the photo corner, in your colours.">שער לכניסה, לבמה או לפינת הצילום, בצבעים שלכם.</span><i class="pop" aria-hidden="true"><img src="assets/arch.webp" alt="" width="900" height="1200" loading="lazy"></i></li>
-        <li><b data-en="Table centrepieces">מרכזי שולחן</b><span data-en="Balloon centrepieces that dress every table.">מרכזי שולחן מבלונים שמלבישים כל שולחן.</span><i class="pop" aria-hidden="true"><img src="assets/centre.webp" alt="" width="900" height="1200" loading="lazy"></i></li>
-        <li><b data-en="Photo stations">עמדות צילום</b><span data-en="A finished corner for photos, with a personal dedication.">פינה מוכנה לצילומים, עם הקדשה אישית.</span><i class="pop" aria-hidden="true"><img src="assets/booth.webp" alt="" width="800" height="800" loading="lazy"></i></li>
-        <li><b data-en="Custom balloons">בלונים בהתאמה אישית</b><span data-en="Made for your event, your colours and your idea.">לפי האירוע, הצבעים והרעיון שלכם.</span><i class="pop" aria-hidden="true"><img src="assets/bouquet.webp" alt="" width="900" height="1200" loading="lazy"></i></li>
+        <li><b data-en="Balloon arches">שערי בלונים</b><span data-en="An arch for the entrance, the stage or the photo corner, in your colours.">שער לכניסה, לבמה או לפינת הצילום, בצבעים שלכם.</span><i class="pop" aria-hidden="true"><img src="assets/work/gate.webp" alt="" width="230" height="230" loading="lazy"></i></li>
+        <li><b data-en="Table centrepieces">מרכזי שולחן</b><span data-en="Balloon centrepieces that dress every table.">מרכזי שולחן מבלונים שמלבישים כל שולחן.</span><i class="pop" aria-hidden="true"><img src="assets/work/kiddush-gold.webp" alt="" width="230" height="230" loading="lazy"></i></li>
+        <li><b data-en="Photo stations">עמדות צילום</b><span data-en="A finished corner for photos, with a personal dedication.">פינה מוכנה לצילומים, עם הקדשה אישית.</span><i class="pop" aria-hidden="true"><img src="assets/work/booth-yossi.webp" alt="" width="230" height="230" loading="lazy"></i></li>
+        <li><b data-en="Custom balloons">בלונים בהתאמה אישית</b><span data-en="Made for your event, your colours and your idea.">לפי האירוע, הצבעים והרעיון שלכם.</span><i class="pop" aria-hidden="true"><img src="assets/work/print-balloon.webp" alt="" width="230" height="230" loading="lazy"></i></li>
       </ul>
     </div>
   </section>
@@ -297,17 +296,66 @@
     </div>
   </section>
 
-  <section class="gal sec" aria-labelledby="h-gal" style="padding-top:0">
+  <section class="gal sec" id="work-sec" aria-labelledby="h-gal" style="padding-top:0">
     <div class="wrap sec" style="padding-bottom:0">
-      <h2 id="h-gal" data-rev data-en-html="Ideas in our <span class=&quot;acc&quot;>colours</span>">רעיונות <span class="acc">בצבעים שלנו</span></h2>
+      <h2 id="h-gal" data-rev data-en-html="Our work, <span class=&quot;acc&quot;>by occasion</span>">העבודות שלנו, <span class="acc">לפי אירוע</span></h2>
     </div>
-    <div class="float" id="float" aria-label="גלריה" data-en-label="Gallery">
-      <figure data-d="1" style="--x:4%;--y:10%;--w:clamp(150px,22vw,300px);--t:7s"><img src="assets/booth.webp" alt="עמדת צילום עם קשת בלונים" data-en-alt="A photo station with a balloon arch" width="800" height="800" loading="lazy"></figure>
-      <figure data-d=".5" style="--x:30%;--y:2%;--w:clamp(120px,15vw,210px);--t:8s"><img src="assets/columns.webp" alt="זוג עמודי בלונים בכניסה לאולם" data-en-alt="A pair of balloon columns at a hall entrance" width="900" height="1200" loading="lazy"></figure>
-      <figure data-d=".8" style="--x:52%;--y:16%;--w:clamp(150px,20vw,280px);--t:6.5s"><img src="assets/arch.webp" alt="קשת בלונים בירוק מרווה, ורוד וזהב" data-en-alt="A balloon arch in sage, pink and gold" width="900" height="1200" loading="lazy"></figure>
-      <figure data-d=".35" style="--x:78%;--y:4%;--w:clamp(110px,14vw,190px);--t:9s"><img src="assets/bouquet.webp" alt="זר בלונים בהתאמה אישית" data-en-alt="A custom balloon bouquet" width="900" height="1200" loading="lazy"></figure>
-      <figure data-d=".6" style="--x:22%;--y:52%;--w:clamp(130px,17vw,240px);--t:7.5s"><img src="assets/garland.webp" alt="שרשרת בלונים מעל שולחן קינוחים" data-en-alt="A balloon garland over a dessert table" width="900" height="1200" loading="lazy"></figure>
-      <figure data-d=".9" style="--x:66%;--y:50%;--w:clamp(140px,18vw,250px);--t:6s"><img src="assets/centre.webp" alt="מרכז שולחן מבלונים" data-en-alt="A balloon table centrepiece" width="900" height="1200" loading="lazy"></figure>
+    <div class="wrap">
+      <div class="chips2" role="group" aria-label="סינון לפי אירוע" data-en-label="Filter by occasion" id="chips">
+        <button type="button" class="chip on" data-f="all" aria-pressed="true" data-en="Everything">הכול</button>
+        <button type="button" class="chip" data-f="mitzvah" aria-pressed="false" data-en="Bar and bat mitzvahs">בר ובת מצווה</button>
+        <button type="button" class="chip" data-f="brit" aria-pressed="false" data-en="Brits and babies">ברית ותינוקות</button>
+        <button type="button" class="chip" data-f="birthday" aria-pressed="false" data-en="Birthdays">ימי הולדת</button>
+        <button type="button" class="chip" data-f="kiddush" aria-pressed="false" data-en="Kiddush and tables">קידוש ושולחנות</button>
+        <button type="button" class="chip" data-f="entry" aria-pressed="false" data-en="Arches and entrances">שערים וכניסות</button>
+        <button type="button" class="chip" data-f="fun" aria-pressed="false" data-en="Clowns and holidays">ליצנים וחגים</button>
+        <button type="button" class="chip" data-f="print" aria-pressed="false" data-en="Personal printing">הדפסה אישית</button>
+      </div>
+      <div class="work" id="work">
+        <figure data-k="mitzvah"><img src="assets/work/booth-yossi.webp" alt="עמדת צילום לבר מצווה" data-en-alt="A bar mitzvah photo station" width="230" height="230" loading="lazy"><figcaption data-en="A bar mitzvah photo station">עמדת צילום לבר מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="assets/work/booth-bat.webp" alt="עמדת צילום נשפכת מתוך שער בת מצווה" data-en-alt="A bat mitzvah photo station spilling from an arch" width="230" height="230" loading="lazy"><figcaption data-en="A bat mitzvah photo station spilling from an arch">עמדת צילום נשפכת מתוך שער בת מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="assets/work/booth-sara.webp" alt="עמדת צילום לבת מצווה" data-en-alt="A bat mitzvah photo station" width="230" height="230" loading="lazy"><figcaption data-en="A bat mitzvah photo station">עמדת צילום לבת מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="assets/work/booth-bar-black.webp" alt="עמדת צילום לבר מצווה" data-en-alt="A bar mitzvah photo station" width="230" height="230" loading="lazy"><figcaption data-en="A bar mitzvah photo station">עמדת צילום לבר מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="assets/work/booth-plain.webp" alt="עמדת צילום ללא בד" data-en-alt="A photo station" width="230" height="230" loading="lazy"><figcaption data-en="A photo station">עמדת צילום ללא בד</figcaption></figure>
+        <figure data-k="mitzvah"><img src="assets/work/num-12-pink.webp" alt="עמודי ספרות לבת מצווה" data-en-alt="Number columns for a bat mitzvah" width="230" height="230" loading="lazy"><figcaption data-en="Number columns for a bat mitzvah">עמודי ספרות לבת מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="assets/work/num-12-gold.webp" alt="בת מצווה" data-en-alt="Bat mitzvah" width="230" height="230" loading="lazy"><figcaption data-en="Bat mitzvah">בת מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="assets/work/bar-boy.webp" alt="ילד בר מצווה מחזיק בלון" data-en-alt="A bar mitzvah boy holding a balloon" width="230" height="230" loading="lazy"><figcaption data-en="A bar mitzvah boy holding a balloon">ילד בר מצווה מחזיק בלון</figcaption></figure>
+        <figure data-k="mitzvah"><img src="assets/work/table-bar.webp" alt="מרכז שולחן לבר מצווה" data-en-alt="A bar mitzvah centrepiece" width="230" height="230" loading="lazy"><figcaption data-en="A bar mitzvah centrepiece">מרכז שולחן לבר מצווה</figcaption></figure>
+        <figure data-k="brit"><img src="assets/work/booth-brit.webp" alt="עמדת צילום לברית" data-en-alt="A brit photo station" width="230" height="230" loading="lazy"><figcaption data-en="A brit photo station">עמדת צילום לברית</figcaption></figure>
+        <figure data-k="brit"><img src="assets/work/table-brit-bear.webp" alt="מרכז שולחן לברית" data-en-alt="A brit centrepiece" width="230" height="230" loading="lazy"><figcaption data-en="A brit centrepiece">מרכז שולחן לברית</figcaption></figure>
+        <figure data-k="brit"><img src="assets/work/table-brit-small.webp" alt="מרכז שולחן לברית" data-en-alt="A brit centrepiece" width="230" height="230" loading="lazy"><figcaption data-en="A brit centrepiece">מרכז שולחן לברית</figcaption></figure>
+        <figure data-k="brit"><img src="assets/work/table-brit-glass.webp" alt="מרכז שולחן לברית" data-en-alt="A brit centrepiece" width="230" height="230" loading="lazy"><figcaption data-en="A brit centrepiece">מרכז שולחן לברית</figcaption></figure>
+        <figure data-k="brit"><img src="assets/work/baby-balloon.webp" alt="תינוק מחזיק בלון בהקדשה אישית" data-en-alt="A baby holding a balloon with a dedication" width="230" height="230" loading="lazy"><figcaption data-en="A baby holding a balloon with a dedication">תינוק מחזיק בלון בהקדשה אישית</figcaption></figure>
+        <figure data-k="brit"><img src="assets/work/reveal.webp" alt="בלון לגילוי מין העובר" data-en-alt="A gender reveal balloon" width="230" height="230" loading="lazy"><figcaption data-en="A gender reveal balloon">בלון לגילוי מין העובר</figcaption></figure>
+        <figure data-k="birthday"><img src="assets/work/room-20.webp" alt="חדר יומולדת" data-en-alt="A birthday room" width="230" height="230" loading="lazy"><figcaption data-en="A birthday room">חדר יומולדת</figcaption></figure>
+        <figure data-k="birthday"><img src="assets/work/room-40.webp" alt="עיצוב חדר יומולדת" data-en-alt="A birthday room" width="230" height="230" loading="lazy"><figcaption data-en="A birthday room">עיצוב חדר יומולדת</figcaption></figure>
+        <figure data-k="birthday"><img src="assets/work/room-birthday.webp" alt="חדר יומולדת" data-en-alt="A birthday room" width="230" height="230" loading="lazy"><figcaption data-en="A birthday room">חדר יומולדת</figcaption></figure>
+        <figure data-k="birthday"><img src="assets/work/heart-40.webp" alt="מעמד לב גבוה" data-en-alt="A tall heart stand" width="230" height="230" loading="lazy"><figcaption data-en="A tall heart stand">מעמד לב גבוה</figcaption></figure>
+        <figure data-k="birthday"><img src="assets/work/num-18.webp" alt="בסיס עם ספרות" data-en-alt="A base with numbers" width="230" height="230" loading="lazy"><figcaption data-en="A base with numbers">בסיס עם ספרות</figcaption></figure>
+        <figure data-k="birthday"><img src="assets/work/num-62.webp" alt="עמודי ספרות" data-en-alt="Number columns" width="230" height="230" loading="lazy"><figcaption data-en="Number columns">עמודי ספרות</figcaption></figure>
+        <figure data-k="birthday"><img src="assets/work/led-balloon.webp" alt="בלון הקדשה בהליום עם לד" data-en-alt="A helium dedication balloon with LED" width="230" height="230" loading="lazy"><figcaption data-en="A helium dedication balloon with LED">בלון הקדשה בהליום עם לד</figcaption></figure>
+        <figure data-k="kiddush"><img src="assets/work/kiddush-gold.webp" alt="מרכזי שולחן לקידוש" data-en-alt="Kiddush centrepieces" width="230" height="230" loading="lazy"><figcaption data-en="Kiddush centrepieces">מרכזי שולחן לקידוש</figcaption></figure>
+        <figure data-k="kiddush"><img src="assets/work/kiddush-purple.webp" alt="מרכזי שולחן לקידוש" data-en-alt="Kiddush centrepieces" width="230" height="230" loading="lazy"><figcaption data-en="Kiddush centrepieces">מרכזי שולחן לקידוש</figcaption></figure>
+        <figure data-k="kiddush"><img src="assets/work/table-small.webp" alt="מרכז שולחן עם בלונים קטנים" data-en-alt="A centrepiece with small balloons" width="230" height="230" loading="lazy"><figcaption data-en="A centrepiece with small balloons">מרכז שולחן עם בלונים קטנים</figcaption></figure>
+        <figure data-k="kiddush"><img src="assets/work/table-bear.webp" alt="מרכז שולחן עם דובי" data-en-alt="A centrepiece with a teddy bear" width="230" height="230" loading="lazy"><figcaption data-en="A centrepiece with a teddy bear">מרכז שולחן עם דובי</figcaption></figure>
+        <figure data-k="entry"><img src="assets/work/gate.webp" alt="שער" data-en-alt="An arch" width="230" height="230" loading="lazy"><figcaption data-en="An arch">שער</figcaption></figure>
+        <figure data-k="entry"><img src="assets/work/columns-entry.webp" alt="עמודי כניסה אלגנטיים" data-en-alt="Elegant entrance columns" width="230" height="230" loading="lazy"><figcaption data-en="Elegant entrance columns">עמודי כניסה אלגנטיים</figcaption></figure>
+        <figure data-k="entry"><img src="assets/work/columns-2.webp" alt="שני עמודים ובלון זכוכית" data-en-alt="Two columns and a clear balloon" width="230" height="230" loading="lazy"><figcaption data-en="Two columns and a clear balloon">שני עמודים ובלון זכוכית</figcaption></figure>
+        <figure data-k="entry"><img src="assets/work/arch-school.webp" alt="קשת לפתיחת שנה" data-en-alt="An arch for the start of the school year" width="230" height="230" loading="lazy"><figcaption data-en="An arch for the start of the school year">קשת לפתיחת שנה</figcaption></figure>
+        <figure data-k="fun"><img src="assets/work/clowns.webp" alt="כמה סוגי ליצנים" data-en-alt="Clowns" width="230" height="230" loading="lazy"><figcaption data-en="Clowns">כמה סוגי ליצנים</figcaption></figure>
+        <figure data-k="fun"><img src="assets/work/clown-bubble.webp" alt="ליצן מחזיק בלון בועה" data-en-alt="A clown holding a bubble balloon" width="230" height="230" loading="lazy"><figcaption data-en="A clown holding a bubble balloon">ליצן מחזיק בלון בועה</figcaption></figure>
+        <figure data-k="fun"><img src="assets/work/clown-fair.webp" alt="ליצן ליריד" data-en-alt="A clown for a school fair" width="230" height="230" loading="lazy"><figcaption data-en="A clown for a school fair">ליצן ליריד</figcaption></figure>
+        <figure data-k="fun"><img src="assets/work/clown-gil.webp" alt="ליצן" data-en-alt="A clown" width="230" height="230" loading="lazy"><figcaption data-en="A clown">ליצן</figcaption></figure>
+        <figure data-k="fun"><img src="assets/work/chanukiah.webp" alt="חנוכיה בגן ילדים" data-en-alt="A balloon chanukiah for a kindergarten" width="230" height="230" loading="lazy"><figcaption data-en="A balloon chanukiah for a kindergarten">חנוכיה בגן ילדים</figcaption></figure>
+        <figure data-k="fun"><img src="assets/work/bride-groom.webp" alt="חתן כלה" data-en-alt="Bride and groom" width="230" height="230" loading="lazy"><figcaption data-en="Bride and groom">חתן כלה</figcaption></figure>
+        <figure data-k="fun"><img src="assets/work/room-anniv.webp" alt="חדר ליום נישואין" data-en-alt="An anniversary room" width="230" height="230" loading="lazy"><figcaption data-en="An anniversary room">חדר ליום נישואין</figcaption></figure>
+        <figure data-k="print"><img src="assets/work/print-balloon.webp" alt="הדפסה אישית על בלון" data-en-alt="Personal printing on a balloon" width="230" height="230" loading="lazy"><figcaption data-en="Personal printing on a balloon">הדפסה אישית על בלון</figcaption></figure>
+        <figure data-k="print"><img src="assets/work/glass-print.webp" alt="בלון זכוכית בהדפסה אישית" data-en-alt="A clear balloon with personal printing" width="230" height="230" loading="lazy"><figcaption data-en="A clear balloon with personal printing">בלון זכוכית בהדפסה אישית</figcaption></figure>
+        <figure data-k="print"><img src="assets/work/print-cup.webp" alt="הדפסה אישית על כוס" data-en-alt="Personal printing on a cup" width="230" height="230" loading="lazy"><figcaption data-en="Personal printing on a cup">הדפסה אישית על כוס</figcaption></figure>
+        <figure data-k="print"><img src="assets/work/print-bottle.webp" alt="בקבוק בהדפסה אישית" data-en-alt="A bottle with personal printing" width="230" height="230" loading="lazy"><figcaption data-en="A bottle with personal printing">בקבוק בהדפסה אישית</figcaption></figure>
+        <figure data-k="print"><img src="assets/work/print-jar.webp" alt="צנצנת עוגיות בהדפסה אישית" data-en-alt="A cookie jar with personal printing" width="230" height="230" loading="lazy"><figcaption data-en="A cookie jar with personal printing">צנצנת עוגיות בהדפסה אישית</figcaption></figure>
+      </div>
+      <button type="button" class="ghost showall" id="showall" data-en="Show all 42">להציג את כל 42</button>
     </div>
   </section>
 
@@ -455,16 +503,30 @@
     rows.forEach(function (li, i) { li.classList.toggle('lit', i === on); });
   }
 
-  // gallery: the pictures drift with the pointer, nearer ones (data-d) more
-  var floats = [].slice.call(document.querySelectorAll('#float figure'));
-  if (!still && window.matchMedia('(hover: hover)').matches) {
-    document.getElementById('float').addEventListener('pointermove', function (e) {
-      var r = this.getBoundingClientRect();
-      var dx = (e.clientX - r.left) / r.width - .5, dy = (e.clientY - r.top) / r.height - .5;
-      floats.forEach(function (f) { var d = +f.dataset.d; f.style.transform = 'translate(' + (-dx * 60 * d) + 'px,' + (-dy * 40 * d) + 'px)'; });
+  // her work: a chip filters by occasion; the tiles that stay slide to their
+  // new places (first, last, invert, play), the others fold away
+  var tiles = [].slice.call(document.querySelectorAll('#work figure'));
+  // "Everything" shows twelve first; the button shows the rest
+  var showall = document.getElementById('showall'), FIRST = 12;
+  function trim(on) { tiles.forEach(function (t, i) { t.classList.toggle('more', on && i >= FIRST); }); showall.hidden = !on; }
+  trim(true);
+  var expanded = false;
+  showall.addEventListener('click', function () { expanded = true; trim(false); });
+  document.getElementById('chips').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip'); if (!b) return;
+    document.querySelectorAll('#chips .chip').forEach(function (c) { var on = c === b; c.classList.toggle('on', on); c.setAttribute('aria-pressed', on); });
+    var f = b.dataset.f, first = new Map();
+    tiles.forEach(function (t) { if (!t.classList.contains('out')) first.set(t, t.getBoundingClientRect()); });
+    tiles.forEach(function (t) { t.classList.toggle('out', f !== 'all' && t.dataset.k !== f); });
+    trim(f === 'all' && !expanded);
+    if (still) return;
+    tiles.forEach(function (t) {
+      if (t.classList.contains('out')) return;
+      var a = first.get(t), z = t.getBoundingClientRect();
+      if (a) t.animate([{ transform: 'translate(' + (a.left - z.left) + 'px,' + (a.top - z.top) + 'px)' }, { transform: 'none' }], { duration: 450, easing: 'cubic-bezier(.2,.7,.2,1)' });
+      else t.animate([{ opacity: 0, transform: 'scale(.85)' }, { opacity: 1, transform: 'none' }], { duration: 400, easing: 'cubic-bezier(.2,.7,.2,1)' });
     });
-    document.getElementById('float').addEventListener('pointerleave', function () { floats.forEach(function (f) { f.style.transform = ''; }); });
-  }
+  });
 
   // the close: their name in balloons. Points are sampled from the name drawn
   // off screen; each balloon springs back to its point, is pushed away by the
