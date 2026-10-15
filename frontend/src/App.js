@@ -99,10 +99,7 @@ function BuildRefresh() {
 // ONLY split page components — small always-mounted chrome (Navigation,
 // banners, floating buttons, ThemePreviewOverride) stays static so we
 // don't ship a spinner where the chrome should already be visible.
-// The proposed home overhaul, on its own route until it is approved to
-// replace `/`. Not linked from anywhere and noindexed.
-const HomePreview = lazy(() => import('./pages/HomePreview'));
-// The next home page, judged on /home-preview before it replaces "/" (15 Oct 2026).
+// The home page (15 Oct 2026), also served at /home-preview as the lab copy.
 const HomeNext = lazy(() => import('./pages/HomeNext'));
 // Prefetch the top destinations users navigate to from Home during
 // idle browser time. Webpack emits `<link rel="prefetch">` for these
@@ -416,11 +413,12 @@ function App() {
                 and bookmarks). `/home` keeps working as an alias so any
                 external link juice already pointing there still lands
                 on the same hero. */}
-            {/* The redesigned page became the home page on 19 Sep 2026 (Tzvi).
-                /home-preview renders the same page as the lab, where palette
-                experiments are scoped and search engines are kept out. The
-                cinematic page it replaced is in git history, pages/Home.js. */}
-            <Route path="/" element={<HomePreview />} />
+            {/* The home page since 15 Oct 2026 (Tzvi): pages/HomeNext.jsx, the
+                Old City opening. /home-preview renders the same page as the
+                lab, where palette experiments are scoped and search engines
+                are kept out. The pages it replaced are pages/HomePreview.jsx
+                (19 Sep) and, in git history, pages/Home.js. */}
+            <Route path="/" element={<HomeNext />} />
             <Route path="/home" element={<Navigate to="/" replace />} />
             <Route path="/home-preview" element={<HomeNext />} />
             <Route path="/properties/:type" element={<Properties />} />

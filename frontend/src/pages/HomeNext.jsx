@@ -1,7 +1,7 @@
 /**
- * HomeNext — the next home page, judged on /home-preview before it goes near
- * "/" (Tzvi, 15 Oct 2026: "yes build it on the preview"). The live home page
- * is still pages/HomePreview.jsx.
+ * HomeNext — the home page, live at "/" since 15 Oct 2026 (Tzvi: "make it
+ * the real home page"), and at /home-preview as the lab copy. It replaced
+ * pages/HomePreview.jsx, kept in the repo for its history.
  *
  * Built to the page rules (docs/page-generation-rules.md §0b, §3g):
  *
@@ -27,7 +27,7 @@
  */
 import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import axios from 'axios';
 import { ArrowRight } from 'lucide-react';
 
@@ -156,21 +156,63 @@ export default function HomeNext() {
   const pages = useShowcase();
   const counts = useCounts();
   const { likedIds, toggleLike } = useFavorites();
+  // The same page serves "/" (live) and "/home-preview" (the lab). The lab
+  // class for palette experiments goes on /home-preview only, never on "/"
+  // (Tzvi's rule, 3 Sep 2026; scripts/test-theme-scope.mjs).
+  const isLab = useLocation().pathname.startsWith('/home-preview');
 
   useEffect(() => {
-    // the opening switches the light nav on once the light ground shows
+    if (!isLab) return undefined;
     document.body.classList.add('theme-preview');
     return () => document.body.classList.remove('theme-preview');
-  }, []);
+  }, [isLab]);
 
   const deals = dealCards.slice(0, 4);
   return (
     <div className="hn" data-testid="home-next">
+      {/* The home page's search title, description and structured data,
+          carried over verbatim from the page this replaced (pages/HomePreview.jsx,
+          15 Oct 2026) so the site's standing in search does not reset.
+          /home-preview is the lab copy and stays out of search. */}
       <PageMeta
-        title="MyIsraelRental - Stays, local businesses and restaurants in Israel"
-        description="Browse rentals, local businesses and restaurants across Israel. Free to search, free to list, no commission."
+        title="MyIsraelRental - Find your perfect rental in Israel | Free to search"
+        description="Browse long-term, short-term, and vacation rentals across Israel - free to search and contact owners directly. Listings in Jerusalem, Tel Aviv, Haifa and more, in English."
         path="/"
-        noindex
+        noindex={isLab}
+        jsonLd={[
+          // Organization — surfaces the brand name + logo in Google's
+          // knowledge-panel-style rich results.
+          {
+            '@context': 'https://schema.org',
+            '@type': 'Organization',
+            '@id': 'https://myisraelrental.com/#organization',
+            name: 'MyIsraelRental',
+            url: 'https://myisraelrental.com',
+            logo: 'https://myisraelrental.com/brand-logo.png',
+            description: 'Find long-term, short-term, and vacation rentals across Israel. Free for renters, free for owners.',
+            areaServed: { '@type': 'Country', name: 'Israel' },
+          },
+          // WebSite — lets Google show a sitelinks search box that
+          // points straight into the /stays results page, dramatically
+          // improving direct-from-SERP discoverability for brand searches.
+          {
+            '@context': 'https://schema.org',
+            '@type': 'WebSite',
+            '@id': 'https://myisraelrental.com/#website',
+            name: 'MyIsraelRental',
+            url: 'https://myisraelrental.com',
+            publisher: { '@id': 'https://myisraelrental.com/#organization' },
+            potentialAction: {
+              '@type': 'SearchAction',
+              target: {
+                '@type': 'EntryPoint',
+                urlTemplate: 'https://myisraelrental.com/stays?area={search_term_string}',
+              },
+              'query-input': 'required name=search_term_string',
+            },
+            inLanguage: ['en', 'he'],
+          },
+        ]}
       />
       {SHOWCASE_CARD_CSS && <style>{SHOWCASE_CARD_CSS}</style>}
 
