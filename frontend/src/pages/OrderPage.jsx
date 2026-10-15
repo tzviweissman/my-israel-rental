@@ -146,9 +146,17 @@ export default function OrderPage() {
   // A counted product (backend stock.py) caps the quantity across its options.
   const maxFor = (p, key) => (p.stock === null || p.stock === undefined ? 99
     : Math.max(0, p.stock - rowsOf(p).filter((r) => r.key !== key).reduce((s, r) => s + (qty[r.key] || 0), 0)));
-  const fee = fulfilment === 'delivery' ? Number(data.settings.delivery_fee || 0) : 0;
   // A code comes off the goods, never the delivery (backend discounts.py).
   const discount = lines.length ? discountOn(code, subtotal) : 0;
+  // The same rule as backend orders.delivery_fee_for: free from free_over
+  // (after the discount), else the city's own fee, else the store's.
+  const freeOver = Number(data.settings.free_over || 0);
+  const feeFor = (c) => {
+    if (freeOver > 0 && subtotal - discount >= freeOver) return 0;
+    const area = (data.settings.area_fees || {})[c];
+    return Number(area === undefined || area === null ? data.settings.delivery_fee || 0 : area);
+  };
+  const fee = fulfilment === 'delivery' ? feeFor(city) : 0;
   const total = lines.length ? subtotal - discount + fee : null;
   const minOrder = Number(data.settings.min_order || 0);
   const belowMin = fulfilment === 'delivery' && minOrder > 0 && subtotal < minOrder;
@@ -331,6 +339,13 @@ export default function OrderPage() {
                 <label className={label} style={labelStyle} htmlFor="order-address">{t('orders.address', 'Delivery address')}</label>
                 <input id="order-address" value={address} onChange={(e) => setAddress(e.target.value)} dir="auto" className={input} style={inputStyle} placeholder={t('orders.addressPh', 'Street, number, city - floor or entrance if it matters')} data-testid="order-address" />
               </div>
+              {freeOver > 0 && (
+                <p className="text-xs" style={{ color: 'var(--brand-muted)' }} data-testid="order-free-over">
+                  {fee === 0 && subtotal - discount >= freeOver
+                    ? t('order.freeDelivery', 'Free delivery on this order')
+                    : t('order.freeOver', 'Free delivery from {{n}}', { n: money(freeOver, currency) })}
+                </p>
+              )}
               {minOrder > 0 && (
                 <p className="text-xs" style={{ color: belowMin ? 'var(--ink)' : 'var(--brand-muted)' }} data-testid="order-min">
                   {t('order.minOrder', 'Delivery from {{n}}', { n: money(minOrder, currency) })}{belowMin ? ` · ${t('order.belowMin', 'add a little more, or choose pickup')}` : ''}

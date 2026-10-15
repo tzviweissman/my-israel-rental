@@ -1672,6 +1672,17 @@ class OrderSettingsIn(BaseModel):
     delivery_fee: Optional[float] = Field(None, ge=0, le=10_000)
     min_order: Optional[float] = Field(None, ge=0, le=100_000)
     default_courier_user_id: Optional[str] = None
+    # A different fee for some of the cities the store serves (location
+    # slug -> fee), and free delivery from an order of this much.
+    area_fees: dict[str, float] = Field(default_factory=dict)
+    free_over: Optional[float] = Field(None, ge=0, le=100_000)
+
+    @field_validator("area_fees")
+    @classmethod
+    def _area_fees(cls, v):
+        if len(v) > 100 or any(not (0 <= float(x) <= 10_000) for x in v.values()):
+            raise ValueError("Each area fee is between 0 and 10,000")
+        return {str(k)[:80]: float(x) for k, x in v.items()}
 
     @model_validator(mode="after")
     def _one_per_day(self):
@@ -1689,9 +1700,23 @@ async def _store_of(business_id: str) -> Optional[dict[str, Any]]:
     )
 
 
+def delivery_fee_for(st: dict[str, Any], city: Optional[str], goods: float) -> float:
+    """The fee a delivery pays: free from `free_over`, else the city's own
+    fee if the store set one, else the store's fee. `goods` is after any
+    discount, which is what the customer actually spends."""
+    if st.get("free_over") and goods >= float(st["free_over"]):
+        return 0.0
+    area = (st.get("area_fees") or {}).get(city or "")
+    return float(area if area is not None else (st.get("delivery_fee") or 0))
+
+
 def _settings_out(biz: dict[str, Any], store: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     st = biz.get("order_settings") or {}
     return {
+        "area_fees": st.get("area_fees") or {},
+        "free_over": st.get("free_over"),
+        "areas": _areas_out(biz),
+        "serves_nationwide": bool(biz.get("serves_nationwide")),
         "delivery_on": offers_delivery(st, biz, store),
         "cutoffs": biz.get("order_cutoffs") or [],
         "pickup_windows": (st.get("windows") or {}).get("pickup") or [],
@@ -1722,6 +1747,9 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         "delivery_fee": payload.delivery_fee,
         "min_order": payload.min_order,
         "default_courier_user_id": payload.default_courier_user_id,
+        # Only cities the store serves; a city it stops serving drops out.
+        "area_fees": {k: v for k, v in payload.area_fees.items() if k in (biz.get("areas") or [])},
+        "free_over": payload.free_over,
         # An older client that does not send the switch keeps the old
         # meaning: delivery times set means delivery offered.
         "delivery_on": payload.delivery_on if payload.delivery_on is not None else bool(payload.delivery_windows),
@@ -2063,6 +2091,8 @@ async def order_form(gig_id: str):
             "delivery_windows": (st.get("windows") or {}).get("delivery") or [],
             "delivery_fee": st.get("delivery_fee"),
             "min_order": st.get("min_order"),
+            "area_fees": st.get("area_fees") or {},
+            "free_over": st.get("free_over"),
         },
         "today": datetime.now(_IL_TZ).date().isoformat(),
     }
@@ -2135,7 +2165,6 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         min_order = st.get("min_order")
         if min_order and subtotal < float(min_order):
             raise HTTPException(status_code=400, detail=f"Delivery needs an order of at least {sym}{float(min_order):g}")
-        fee = float(st.get("delivery_fee") or 0)
         city_label = next((a["label"] for a in _areas_out(biz) if a["slug"] == payload.city), payload.city or "")
         address = f"{payload.address}, {city_label}".strip(", ") if city_label and city_label.lower() not in payload.address.lower() else payload.address
 
@@ -2180,6 +2209,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     if answers:
         notes = (notes + "\n" if notes else "") + answers_text(answers)
     needed_by = payload.date + (f"T{payload.window.start}" if payload.window else "")
+    if payload.fulfilment == "delivery":
+        fee = delivery_fee_for(st, payload.city, subtotal - (discount["amount"] if discount else 0))
     total = round(subtotal - (discount["amount"] if discount else 0) + fee, 2) if lines else None
     if discount:
         notes = (notes + "\n" if notes else "") + f"Discount {discount['code']}: -{sym}{discount['amount']:g}"

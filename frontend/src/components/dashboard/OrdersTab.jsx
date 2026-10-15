@@ -29,7 +29,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ClipboardPaste, Store as StoreIcon, Bike, X, Sparkles, ClipboardList,
-  LayoutList, Table2, TrendingUp, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Pause, Play, ListPlus,
+  LayoutList, Table2, TrendingUp, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Pause, Play, ListPlus, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { phoneError } from '../../utils/phoneValidation';
 import { money } from '../../utils/currency';
@@ -1343,6 +1343,10 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
   const [deliveryOn, setDeliveryOn] = useState(!!settings.delivery_on);
   const [fee, setFee] = useState(settings.delivery_fee == null ? '' : String(settings.delivery_fee));
   const [minOrder, setMinOrder] = useState(settings.min_order == null ? '' : String(settings.min_order));
+  const [freeOver, setFreeOver] = useState(settings.free_over == null ? '' : String(settings.free_over));
+  const [areaFees, setAreaFees] = useState(() => Object.fromEntries(Object.entries(settings.area_fees || {}).map(([k, v]) => [k, String(v)])));
+  const [areasOpen, setAreasOpen] = useState(Object.keys(settings.area_fees || {}).length > 0);
+  const areas = settings.serves_nationwide ? [] : (settings.areas || []);
   const [courier, setCourier] = useState(settings.default_courier_user_id || '');
   const [busy, setBusy] = useState(false);
   const dayName = (d) => t(`weekday.${d}`, String(d));
@@ -1354,6 +1358,8 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
       await axios.put(`${API}/marketplace/businesses/${businessId}/orders/settings`, {
         delivery_on: deliveryOn, cutoffs: rows, pickup_windows: pickup, delivery_windows: delivery,
         delivery_fee: fee === '' ? null : Number(fee), min_order: minOrder === '' ? null : Number(minOrder),
+        free_over: freeOver === '' ? null : Number(freeOver),
+        area_fees: Object.fromEntries(Object.entries(areaFees).filter(([, v]) => v !== '' && v !== null).map(([k, v]) => [k, Number(v)])),
         default_courier_user_id: courier || null,
       }, auth);
       await onSaved();
@@ -1445,7 +1451,30 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
           <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--brand-muted)' }} htmlFor="settings-min">{t('orders.minOrder', 'Minimum for delivery (₪)')}</label>
           <input id="settings-min" type="number" inputMode="decimal" min="0" step="1" value={minOrder} onChange={(e) => setMinOrder(e.target.value)} className={`${sel} w-full`} style={selStyle} placeholder="" data-testid="settings-min" />
         </div>
+        <div>
+          <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--brand-muted)' }} htmlFor="settings-free-over">{t('orders.freeOver', 'Free delivery from (₪, optional)')}</label>
+          <input id="settings-free-over" type="number" inputMode="decimal" min="0" step="1" value={freeOver} onChange={(e) => setFreeOver(e.target.value)} className={`${sel} w-full`} style={selStyle} data-testid="settings-free-over" />
+        </div>
       </div>
+      {areas.length > 1 && (
+        <div className="mt-2" data-testid="settings-area-fees">
+          <button type="button" onClick={() => setAreasOpen((v) => !v)} aria-expanded={areasOpen} className="inline-flex items-center gap-1 min-h-[40px] text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+            {areasOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {t('orders.areaFees', 'A different fee for some cities')}
+          </button>
+          {areasOpen && (
+            <div className="grid grid-cols-2 gap-2 mt-1">
+              {areas.map((a) => (
+                <label key={a.slug} className="flex items-center justify-between gap-2 text-sm" style={{ color: 'var(--ink)' }}>
+                  <span className="truncate">{(document.documentElement.dir === 'rtl' && a.label_he) || a.label}</span>
+                  <input type="number" inputMode="decimal" min="0" step="0.5" value={areaFees[a.slug] ?? ''} placeholder={fee || '0'}
+                         onChange={(e) => setAreaFees((m) => ({ ...m, [a.slug]: e.target.value }))} className={`${sel} w-20`} style={selStyle}
+                         aria-label={t('orders.areaFeeFor', 'Delivery fee to {{city}}', { city: a.label })} data-testid={`settings-area-fee-${a.slug}`} />
+                </label>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
       </>)}
 
       {h(t('orders.cutoffsTitle', 'Order cutoffs'))}
