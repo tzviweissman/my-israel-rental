@@ -34,8 +34,21 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] Test script: `editListing.extras` and `restaurants.more` still flagged by test-i18n-parity. First seen 15 Oct (site audit).
 - [Low] JobsBoard keys `jobsBoard.areaPh`, `jobsBoard.areaFreeText` missing from en.js. First seen 15 Oct (site audit).
 - [Low] Completeness checklist: "category" opens a form without a category control. Seen 15 Oct (dead-ends area).
+- [Low] Gift Boutique: a "Scroll to open" cue sat over the opening box (banned by page rules). Fixed 15 Oct, ee73f895 (2026-10-15-ui-audit.md).
+- [Low] Business insights: an en dash shown for an empty average. Fixed 15 Oct, a3bb67b5.
+- [Low] Restaurants search box: the hint is cut off at 375 wide ("...neighbourh"). First seen 15 Oct (2026-10-15-ui-audit.md).
+- [Low] Business insights: new hardcoded error colour #B42318 (BusinessInsights.jsx:~108). First seen 15 Oct.
+- [Low] Gift Boutique pages are English only, even for Hebrew visitors. First seen 14 Oct, still open.
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
 - [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
+
+- [Low] Tests: i18n parity fails on restaurants.more (count without plural); completeness script fails on the "category" checklist item. Since 8 Oct (site audit 13 Oct).
+- [Low] Gift Boutique: heading contrast flagged 2.73:1 by readable.mjs, probably mid-fade; re-measure. First seen 14 Oct (UI audit).
+
+- [Medium] Restaurants: the photo endpoint has no rate limit; anyone can use up the month's 4,000 Google photos. First seen 14 Oct (site audit 14 Oct).
+- [Low] Holidays: Sukkot fallback window ended 3 Oct; needs 5788 dates. First seen 14 Oct (site audit 14 Oct).
+- [Low] Memberships: sign-up emails any typed address (20 per 10 min per IP). First seen 14 Oct (site audit 14 Oct).
+- [Low] Jobs board area strings: fix 51649002 sits on an unmerged branch, so en.js still lacks them. Since 8 Oct.
 
 ## Fixed
 
