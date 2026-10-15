@@ -34,13 +34,17 @@ export default function EmailSwitches({ API, token }) {
 
   if (!on) return null;
 
+  // Moves at once and saves behind it; a failed save moves it back.
   const flip = async (key) => {
+    if (busy === key) return;
+    const next = !on[key];
     setBusy(key);
+    setOn((o) => ({ ...o, [key]: next }));
     try {
-      const { data } = await axios.patch(`${API}/marketplace/notification-preferences/emails`, { [key]: !on[key] }, auth);
+      const { data } = await axios.patch(`${API}/marketplace/notification-preferences/emails`, { [key]: next }, auth);
       setOn(data);
-      toast.success(t('emailSwitches.saved', 'Saved'));
     } catch {
+      setOn((o) => ({ ...o, [key]: !next }));
       toast.error(t('emailSwitches.failed', 'Could not save. Try again.'));
     } finally {
       setBusy(null);
@@ -70,10 +74,9 @@ export default function EmailSwitches({ API, token }) {
               aria-checked={!!on[key]}
               aria-labelledby={`sw-${key}`}
               onClick={() => flip(key)}
-              disabled={busy === key}
               // 44px to tap, 24px to see. The OFF track is the muted ink:
               // the border grey it used was 1.28:1 on white (audit 23 Sep).
-              className="shrink-0 -my-2.5 inline-flex min-h-[44px] min-w-[52px] items-center justify-center disabled:opacity-60"
+              className="shrink-0 -my-2.5 inline-flex min-h-[44px] min-w-[52px] items-center justify-center"
               data-testid={`email-switch-${key}`}
             >
               <span className={`inline-flex h-6 w-11 items-center rounded-full px-1 ${on[key] ? 'justify-end' : 'justify-start'}`}

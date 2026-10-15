@@ -9,10 +9,11 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Loader2, Search, Download, Users, X, Phone, MessageCircle, Tag, Mail } from 'lucide-react';
+import { Loader2, Search, Download, Upload, Users, X, Phone, MessageCircle, Tag, Mail } from 'lucide-react';
 import { money } from '../../utils/currency';
 import { stateLabel } from '../members/memberText';
 import MessageComposer from './MessageComposer';
+import { ImportCustomersPanel } from './OrdersTab';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
@@ -167,6 +168,7 @@ export default function CustomersTab({ API, token }) {
   const [sort, setSort] = useState('recent');
   const [open, setOpen] = useState(null);
   const [composing, setComposing] = useState(false);
+  const [importing, setImporting] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -226,6 +228,9 @@ export default function CustomersTab({ API, token }) {
           {(biz.permissions || []).includes('messages') && <button type="button" onClick={() => setComposing(true)} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-email">
             <Mail size={14} /> {t('messages.open', 'Email customers')}
           </button>}
+          <button type="button" onClick={() => setImporting(!importing)} aria-pressed={importing} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-import">
+            <Upload size={14} /> {t('customers.import', 'Import')}
+          </button>
           <button type="button" onClick={exportCsv} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-export">
             <Download size={14} /> {t('customers.export', 'Export')}
           </button>
@@ -234,6 +239,12 @@ export default function CustomersTab({ API, token }) {
       <p className="text-sm mb-4" style={{ color: 'var(--brand-muted)' }}>
         {t('customers.body', 'Everyone who ordered, joined or booked with you, in one place. Add a note or tags to remember who is who.')}
       </p>
+
+      {importing && (
+        <div className="mb-4">
+          <ImportCustomersPanel API={API} auth={auth} businessId={biz.id} onClose={() => { setImporting(false); load(); }} onDone={load} />
+        </div>
+      )}
 
       {composing && (
         <MessageComposer API={API} auth={auth} businessId={biz.id} tags={data?.tags || []}

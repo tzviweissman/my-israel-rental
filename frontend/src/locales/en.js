@@ -212,6 +212,7 @@ const en = {
         windowAdd: 'Add a window',
         windowsHint: 'No windows on a day means customers pick the day and you confirm the time.',
         feesTitle: 'Delivery fee and minimum',
+        standingMenu: "Weekly orders",
         freeOver: "Free delivery from (₪, optional)",
         areaFees: "A different fee for some cities",
         areaFeeFor: "Delivery fee to {{city}}",
@@ -3161,6 +3162,7 @@ const en = {
       },
       common: {
         clearDate: 'Clear date',
+        more: "More",
         networkError: 'We could not reach the server. Check your connection and try again.',
         // DateField calls t('common.pickDate'). There is a `pickDate` in
         // another block ("Pick a date first"), which is a different
@@ -5742,6 +5744,7 @@ const en = {
         needBusiness: "Add a business first. Customers belong to a business.",
         loadFailed: "Could not load your customers. Try again.",
         export: "Export",
+        import: "Import",
         exportFailed: "Could not export. Try again.",
         search: "Search customers",
         searchPh: "Search by name, phone, email, tag or note",
@@ -5796,6 +5799,7 @@ const en = {
         yes: "Yes",
         no: "No",
         ordersButton: "Questions",
+        ordersMenu: "Questions on the order form",
         titleMembership: "Your questions on the sign-up form",
         titleOrder: "Your questions on the order form",
         body: "Ask customers anything you need. Their answers show with the sign-up or order.",

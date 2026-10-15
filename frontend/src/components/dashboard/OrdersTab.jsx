@@ -29,14 +29,14 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ClipboardPaste, Store as StoreIcon, Bike, X, Sparkles, ClipboardList,
-  LayoutList, Table2, TrendingUp, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Pause, Play, ListPlus, ChevronDown, ChevronUp,
+  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Pause, Play, ListPlus, ChevronDown, ChevronUp,
 } from 'lucide-react';
 import { phoneError } from '../../utils/phoneValidation';
 import { money } from '../../utils/currency';
 import { pastCutoff } from '../../utils/orderCutoffs';
 import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
 import SendToSupplierDialog from './SendToSupplierDialog';
-import BusinessInsights from './BusinessInsights';
+import MoreMenu from './MoreMenu';
 import CustomFieldsEditor from './CustomFieldsEditor';
 
 
@@ -402,8 +402,11 @@ export default function OrdersTab({ API, token }) {
         />
       )}
 
-      {/* Toolbar: view, staff link, print, export, import. Small and
-          quiet - the black button on this screen is New order. */}
+      {/* Toolbar: the view, Print, and everything else under More (the
+          way Shopify's Orders page does it). Small and quiet - the black
+          button on this screen is New order. The order statistics that
+          were here ("How it's going") are in the sales summary on
+          Overview. */}
       <div className="flex flex-wrap items-center gap-1.5 mb-3" data-testid="orders-toolbar">
         <div className="inline-flex rounded-full border p-0.5 me-1" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('orders.view', 'View')}>
           {[['cards', LayoutList, t('orders.viewCards', 'Cards')], ['table', Table2, t('orders.viewTable', 'Table')]].map(([v, Icon, lbl]) => (
@@ -420,34 +423,37 @@ export default function OrdersTab({ API, token }) {
             </button>
           ))}
         </div>
-        {[
-          ['insights', TrendingUp, t('insights.open', "How it's going"), () => setPanel(panel === 'insights' ? null : 'insights')],
-          ['staff', Link2, t('orders.staffLink', 'Staff link'), () => setPanel(panel === 'staff' ? null : 'staff')],
-          ['print', Printer, t('orders.print.button', 'Print'), printOrders],
-          ['export', Download, t('orders.export', 'Export CSV'), exportCsv],
-          ['import', Upload, t('orders.import', 'Import customers'), () => setPanel(panel === 'import' ? null : 'import')],
-          ['couriers', Bike, t('orders.couriers', 'Couriers'), () => setPanel(panel === 'couriers' ? null : 'couriers')],
-          ['standing', Repeat, t('orders.standing', 'Weekly'), () => setPanel(panel === 'standing' ? null : 'standing')],
-          ['questions', ListPlus, t('fields.ordersButton', 'Questions'), () => setPanel(panel === 'questions' ? null : 'questions')],
-        ].filter(([key]) => biz.role !== 'staff' || !(['staff', 'couriers'].includes(key) || (key === 'insights' && !(biz.permissions || []).includes('summary')))).map(([key, Icon, lbl, fn]) => (
-          <button
-            key={key}
-            type="button"
-            onClick={fn}
-            aria-pressed={panel === key ? true : undefined}
-            className="inline-flex items-center gap-1 px-3 min-h-[36px] rounded-full text-xs font-semibold border"
-            style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)', background: panel === key ? 'var(--surface-muted)' : 'transparent' }}
-            data-testid={`orders-tool-${key}`}
-          >
-            <Icon size={13} /> {lbl}
-          </button>
-        ))}
+        <button
+          type="button"
+          onClick={printOrders}
+          className="inline-flex items-center gap-1 px-3 min-h-[36px] rounded-full text-xs font-semibold border"
+          style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+          data-testid="orders-tool-print"
+        >
+          <Printer size={13} /> {t('orders.print.button', 'Print')}
+        </button>
+        <MoreMenu
+          testid="orders-more"
+          items={[
+            ['standing', Repeat, t('orders.standingMenu', 'Weekly orders'), () => setPanel('standing')],
+            ['couriers', Bike, t('orders.couriers', 'Couriers'), () => setPanel('couriers')],
+            ['staff', Link2, t('orders.staffLink', 'Staff link'), () => setPanel('staff')],
+            ['questions', ListPlus, t('fields.ordersMenu', 'Questions on the order form'), () => setPanel('questions')],
+            ['export', Download, t('orders.export', 'Export CSV'), exportCsv],
+          ].filter(([key]) => biz.role !== 'staff' || !['staff', 'couriers'].includes(key))
+            .map(([key, Icon, label, onClick]) => ({ key, Icon, label, onClick, active: panel === key }))}
+        />
       </div>
 
-      {panel === 'questions' && <div className="mb-4"><CustomFieldsEditor API={API} auth={auth} businessId={biz.id} form="order" /></div>}
-      {panel === 'insights' && <BusinessInsights API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
+      {panel === 'questions' && (
+        <div className="mb-4">
+          <CustomFieldsEditor API={API} auth={auth} businessId={biz.id} form="order" />
+          <button type="button" onClick={() => setPanel(null)} className="mt-1 text-xs underline min-h-[36px]" style={{ color: 'var(--brand-muted)' }}>
+            {t('orders.close', 'Close')}
+          </button>
+        </div>
+      )}
       {panel === 'staff' && <StaffLinkPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
-      {panel === 'import' && <ImportCustomersPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'couriers' && <CouriersPanel API={API} auth={auth} businessId={biz.id} couriers={couriers} settings={settings} onChanged={() => Promise.all([loadCouriers(), loadSettings(), load()])} onClose={() => setPanel(null)} />}
       {panel === 'standing' && <StandingPanel API={API} auth={auth} standing={standing} onChanged={() => Promise.all([loadSettings(), load()])} onClose={() => setPanel(null)} />}
 
@@ -1116,7 +1122,9 @@ function StaffLinkPanel({ API, auth, businessId, onClose }) {
  * either language; nothing else is read. Day one with forty names in
  * the autocomplete, not zero.
  */
-function ImportCustomersPanel({ API, auth, businessId, onClose }) {
+// Lives on the Customers page (Tzvi, 15 Oct 2026: "import customers should be
+// under the customers tab"); kept here beside the order code it shares.
+export function ImportCustomersPanel({ API, auth, businessId, onClose, onDone }) {
   const { t } = useTranslation();
   const [text, setText] = useState('');
   const [busy, setBusy] = useState(false);
@@ -1136,6 +1144,7 @@ function ImportCustomersPanel({ API, auth, businessId, onClose }) {
     try {
       const { data } = await axios.post(`${API}/marketplace/businesses/${businessId}/customers/import`, { text }, auth);
       setResult(data);
+      onDone && onDone();
       toast.success(t('orders.importDone', '{{n}} customers imported', { n: data.imported }));
     } catch (err) {
       toast.error(err?.response?.data?.detail || t('orders.importFailed', 'Could not import'));

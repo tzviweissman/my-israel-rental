@@ -771,7 +771,8 @@ async def import_customers(business_id: str, payload: CustomersImportIn, user=De
     """Upsert by normalised phone (or lowercased name when there is no
     usable phone). Re-importing the same sheet changes nothing; a row
     with a new address updates the old one."""
-    await _owned_business(business_id, user)
+    # From the Customers page now: staff with the customers area may import.
+    await _owned_business(business_id, user, "customers")
     rows, used = parse_customers_csv(payload.text)
     if len(rows) > 5000:
         raise HTTPException(status_code=413, detail="Too many rows (max 5000)")

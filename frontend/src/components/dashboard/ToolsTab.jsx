@@ -35,13 +35,17 @@ export default function ToolsTab({ API, token, onChanged }) {
     network: [t('tools.network', 'Network'), t('tools.networkBody', 'Connect with other businesses: suppliers, partners and referrals.')],
   };
 
+  // The switch moves the moment it is tapped and saves behind it; only a
+  // failed save moves it back (Tzvi: "it takes too long for these to flip").
   const toggle = async (id, on) => {
     setBusy(id);
+    setData((d) => ({ ...d, tools: { ...d.tools, [id]: on } }));
     try {
       const { data: d } = await axios.put(`${API}/dashboard/tools`, { tools: { [id]: on } }, auth);
       setData(d);
       onChanged?.();
     } catch {
+      setData((d) => ({ ...d, tools: { ...d.tools, [id]: !on } }));
       toast.error(t('tools.saveFailed', 'Could not save. Try again.'));
     } finally { setBusy(null); }
   };
@@ -72,7 +76,7 @@ export default function ToolsTab({ API, token, onChanged }) {
               </div>
               <label className="shrink-0 inline-flex items-center min-h-[44px] cursor-pointer">
                 <span className="sr-only">{name}</span>
-                <input type="checkbox" className="sr-only peer" checked={on} disabled={busy === id} onChange={(e) => toggle(id, e.target.checked)} />
+                <input type="checkbox" className="sr-only peer" checked={on} onChange={(e) => { if (busy !== id) toggle(id, e.target.checked); }} />
                 <span className="relative w-11 h-6 rounded-full transition-colors peer-focus-visible:ring-2 peer-focus-visible:ring-offset-2"
                       style={{ background: on ? '#000' : '#D1D5DB' }} aria-hidden="true">
                   <span className="absolute top-0.5 w-5 h-5 rounded-full bg-white transition-all" style={{ insetInlineStart: on ? '22px' : '2px' }} />
