@@ -446,7 +446,6 @@
         data-sd="assets/open-last.webp" data-sm="assets/open-m-last.webp"></video>
       <div class="top">
         <h1 id="h1">Gifts for <em data-t="every occasion">every occasion</em></h1>
-        <p class="cue" id="cue" aria-hidden="true">Scroll to open</p>
       </div>
       <ul class="rise" id="rise">
         <li><img src="assets/gift-1.webp" alt="A welcome baby boy gift: a teddy bear, sweets in a ribboned tray and a bottle" width="300" height="300"></li>
@@ -635,7 +634,7 @@
     var hh = ease(seg(p, .45, .6));
     h1.style.setProperty('--h', hh.toFixed(3));
     if (hh > .98 && !glinted) { glinted = true; var em = h1.querySelector('em'); em.classList.add('glint'); em.addEventListener('animationend', function () { em.classList.remove('glint'); }, { once: true }); }
-    cue.style.setProperty('--cue', (1 - seg(p, .03, .12)).toFixed(3));
+    if (cue) cue.style.setProperty('--cue', (1 - seg(p, .03, .12)).toFixed(3));
     rise.forEach(function (li, i) {
       var k = ease(seg(p, .55 + i * .05, .72 + i * .05));
       var to = ARC[i];
