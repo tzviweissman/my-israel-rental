@@ -1,0 +1,67 @@
+/* The next home page (pages/HomeNext.jsx, on /home-preview only). Everything
+   is under .hn, so nothing here reaches another page. Colours are the flow
+   theme's tokens (styles/theme-flow.css). */
+
+.hn { color: var(--ink); overflow-x: clip;
+  /* golden hour, as in the opening film: pale sky into Jerusalem-stone sand
+     (Tzvi, 15 Oct 2026: "light and happy but before it was too white") */
+  background: linear-gradient(to bottom, #E6F2FB 0, #F7EBD7 100vh, #F7EBD7 55%, #F3E3C8 100%); }
+.hn-wrap { width: min(1200px, 100% - 32px); margin-inline: auto; }
+
+/* ── Sections ────────────────────────────────────────────────────────── */
+.hn-sec { padding: clamp(56px, 8vw, 104px) 0; border-top: 1px solid rgb(120 80 30 / .14); }
+.hn-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 32px; }
+.hn-eyebrow { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-text); font-weight: 600; margin-bottom: 10px; }
+.hn h2 { font-family: var(--font-head); font-weight: 600; letter-spacing: -.015em; font-size: clamp(1.7rem, 3.4vw, 2.6rem); line-height: 1.1; margin: 0; color: var(--ink); }
+.hn-head p { margin: 10px 0 0; color: var(--brand-muted); font-size: 1.02rem; }
+.hn-more { display: inline-flex; align-items: center; gap: 6px; flex: none; color: var(--ink); font-weight: 600; text-decoration: none; border-bottom: 1px solid var(--brand-border); padding-bottom: 3px; transition: border-color 180ms ease-out, gap 180ms ease-out; }
+.hn-more:hover { border-color: var(--ink); gap: 10px; }
+.hn-btn {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 52px; padding: 0 24px; border-radius: 999px;
+  background: #000; color: #fff; border: 0; font: 600 1rem/1 var(--font-body); cursor: pointer;
+  transition: background 180ms ease-out, transform 160ms ease-out, gap 180ms ease-out;
+}
+.hn-btn:hover { background: #1f2937; gap: 12px; }
+.hn-btn:active { transform: scale(.97); }
+.hn-btn:focus-visible, .hn-more:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+
+.hn-built { background: rgb(255 255 255 / .38); }
+.hn-built .sc-tile { background: var(--surface); }
+.hn-built-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 28px 24px; }
+.hn-built-cta { margin-top: 40px; display: flex; justify-content: center; }
+
+.hn-grid { display: grid; gap: 20px; }
+.hn-grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.hn-grid-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 1000px) { .hn-grid-3, .hn-grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 560px) {
+  .hn-grid-3, .hn-grid-4 { grid-template-columns: minmax(0, 1fr); }
+  .hn-head { flex-direction: column; align-items: flex-start; }
+}
+.hn-deal { display: flex; flex-direction: column; gap: 6px; text-align: start; background: none; border: 0; padding: 0; cursor: pointer; color: var(--ink); }
+.hn-deal img { width: 100%; aspect-ratio: 4 / 3; object-fit: cover; border-radius: 14px; }
+.hn-deal span { color: var(--gold-text); font-weight: 600; font-size: .9rem; }
+
+/* ── What we are building ────────────────────────────────────────────── */
+.hn-about .hn-line { max-width: 18em; }
+.hn-counts { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin-top: 40px; }
+.hn-counts > div { border-top: 2px solid var(--ink); padding-top: 14px; display: flex; flex-direction: column; gap: 4px; }
+.hn-counts b { font-family: var(--font-head); font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 600; line-height: 1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.hn-counts .hn-zero { font-family: var(--font-body); font-weight: 700; }
+.hn-counts span { color: var(--brand-muted); font-size: 1rem; }
+
+/* ── Closing: the name, cut by the bottom edge ───────────────────────── */
+.hn-close { border-top: 1px solid rgb(120 80 30 / .14); padding-top: clamp(48px, 7vw, 88px); overflow: hidden; }
+.hn-close-row { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
+.hn-close-row p { margin: 0; font-size: 1.15rem; color: var(--brand-muted); }
+.hn-name {
+  font-family: var(--font-head); font-weight: 700; letter-spacing: -.045em; white-space: nowrap; text-align: center;
+  font-size: 15.4vw; line-height: .8; margin: 32px 0 -.16em; color: var(--ink);
+  /* the cut is on purpose: the letters sink into the section's bottom edge,
+     the line where the footer starts. Clipping them anywhere above that
+     edge left them cut off in mid air (Tzvi: "is this on purpose"). */
+}
+.hn-name span { display: inline-block; transition: transform 380ms cubic-bezier(.2,.8,.2,1.15); will-change: transform; }
+/* the footer carries on the same ground, so the edge is one clean line */
+/* !important: the footer sets its own ground inline */
+.hn > footer { margin-top: 0 !important; background: #F3E3C8 !important; border-color: rgb(120 80 30 / .18) !important; }

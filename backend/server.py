@@ -38,6 +38,7 @@ from routes import (  # noqa: E402
     chat,
     contracts,
     geocode,
+    home_tiles,
     ical,
     marketplace,
     misc,
@@ -102,6 +103,7 @@ for mod in (
     weekly_insights,
     reviews,
     restaurants,
+    home_tiles,
 ):
     api_router.include_router(mod.router)
 

@@ -2233,6 +2233,30 @@ const en = {
           scroll: 'Scroll to see them',
           proofServices: '{{n}} local services',
         },
+        // The next home page (pages/HomeNext.jsx, on /home-preview only).
+        next: {
+          kick: 'Rentals · Businesses · Restaurants',
+          h1: 'Stays, local businesses and restaurants',
+          accent: 'across Israel',
+          restaurants: 'Restaurants',
+          proofStays: '{{n}} stays',
+          proofRest: '{{n}} restaurants',
+          noFees: 'no commission',
+          tilesLabel: 'On the site now',
+          built: {
+            eyebrow: 'Pages we built',
+            h2: 'Pages we built for local businesses',
+            p: 'Each with its own photos, prices and a button to order.',
+            all: 'See all pages',
+          },
+          about: {
+            line: 'One place for what you need to live in Israel',
+            stays: 'stays',
+            biz: 'local businesses',
+            rest: 'restaurants',
+            fees: 'commission',
+          },
+        },
         // The cinematic finale. These keys did not exist at all until now:
         // every string in that section was reaching the English default and
         // the whole ending rendered in English under Hebrew. Adding them is

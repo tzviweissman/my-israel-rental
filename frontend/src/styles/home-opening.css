@@ -1,0 +1,96 @@
+/* The home page's opening (components/home/HomeOpening.jsx). All under
+   .ho-open. Over the film the words are white; once the light ground shows,
+   the flow theme's ink, accent and black button. */
+
+.ho-open { height: 520vh; position: relative; }
+.ho-open.ho-still { height: 100vh; height: 100svh; }
+.ho-stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+.ho-shift { position: absolute; inset: 0; will-change: transform; }
+.ho-grid {
+  position: absolute; inset: 0; display: grid;
+  grid-template-columns: repeat(var(--cols), 1fr); grid-template-rows: repeat(var(--rows), 1fr);
+  gap: var(--gap, 0px); padding: var(--pad, 0px);
+}
+.ho-t { position: relative; display: block; perspective: 900px; color: inherit; text-decoration: none; }
+.ho-card { position: absolute; inset: 0; transform-style: preserve-3d; transform: rotateY(var(--turn, 0deg)); }
+.ho-face { position: absolute; inset: 0; backface-visibility: hidden; -webkit-backface-visibility: hidden; border-radius: var(--rad, 0px); overflow: hidden; }
+/* the picture is set from the component (a public file; CRA would try to
+   bundle a url() written here) */
+.ho-front { background-repeat: no-repeat; }
+.ho-back { transform: rotateY(180deg); background: #F1DFC2; box-shadow: 0 10px 28px -14px rgb(120 80 30 / .45); }
+.ho-back video, .ho-back img { width: 100%; height: 100%; object-fit: cover; object-position: top; display: block; }
+.ho-lab {
+  position: absolute; inset-inline: 0; bottom: 0; padding: 6px 10px; font-size: .78rem; font-weight: 700; color: #fff;
+  background: rgb(17 24 39 / .86); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+@media (hover: hover) { .ho-t:hover .ho-back img, .ho-t:hover .ho-back video { transform: scale(1.04); transition: transform 300ms ease-out; } }
+
+.ho-film { position: absolute; inset: 0; z-index: 2; }
+.ho-film video { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ho-film::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(100deg, rgb(10 18 32 / .72) 0%, rgb(10 18 32 / .28) 45%, rgb(10 18 32 / 0) 70%),
+              linear-gradient(to top, rgb(10 18 32 / .45), rgb(10 18 32 / 0) 40%),
+              linear-gradient(to bottom, rgb(10 18 32 / .45), rgb(10 18 32 / 0) 22%);
+}
+[dir="rtl"] .ho-film::after {
+  background: linear-gradient(260deg, rgb(10 18 32 / .72) 0%, rgb(10 18 32 / .28) 45%, rgb(10 18 32 / 0) 70%),
+              linear-gradient(to top, rgb(10 18 32 / .45), rgb(10 18 32 / 0) 40%),
+              linear-gradient(to bottom, rgb(10 18 32 / .45), rgb(10 18 32 / 0) 22%);
+}
+
+/* the counts over the film */
+.ho-scene { position: absolute; z-index: 4; inset: 0; display: flex; flex-direction: column; justify-content: center; padding: 120px clamp(16px, 6vw, 96px) 40px; pointer-events: none; color: #fff; }
+.ho-scene.on { pointer-events: auto; }
+.ho-kick, .ho-kick2 { font-size: .8rem; letter-spacing: .1em; text-transform: uppercase; font-weight: 700; margin-bottom: 14px; }
+.ho-kick { color: #FFD9A8; }
+.ho-nums { list-style: none; margin: 6px 0 0; padding: 0; display: grid; gap: 2px; }
+.ho-nums li {
+  font-family: var(--font-head); font-weight: 600; font-size: clamp(2.3rem, 6vw, 5.4rem); line-height: 1.04; letter-spacing: -.02em;
+  opacity: 0; transform: translateY(18px); transition: opacity 700ms ease-out, transform 700ms cubic-bezier(.2,.7,.2,1);
+  text-shadow: 0 2px 24px rgb(10 18 32 / .35);
+}
+.ho-nums li.in { opacity: 1; transform: none; }
+.ho-nums b { font-variant-numeric: tabular-nums; color: #FFD39B; font-weight: 600; }
+.ho-nums b.ho-zero { color: #fff; font-family: var(--font-body); font-weight: 700; letter-spacing: -.04em; }
+.ho-scene-foot { margin-top: 26px; display: flex; align-items: center; gap: 18px; flex-wrap: wrap; animation: ho-in 600ms ease-out 1.6s both; }
+@keyframes ho-in { from { opacity: 0; } to { opacity: 1; } }
+.ho-pill { min-height: 50px; padding: 0 22px; border-radius: 999px; border: 0; background: #fff; color: var(--ink); font: 700 1rem/1 var(--font-body); cursor: pointer; transition: transform 160ms ease-out; }
+.ho-pill:active { transform: scale(.97); }
+.ho-scene-foot span { color: #fff; font-size: .92rem; font-weight: 600; text-shadow: 0 1px 12px rgb(10 18 32 / .6); }
+
+/* the headline, on the light ground */
+.ho-copy {
+  position: absolute; z-index: 4; inset-block: 0; inset-inline-start: 0; width: calc(min(42vw, 560px) + clamp(16px, 5vw, 72px));
+  display: flex; flex-direction: column; justify-content: center; padding-block: 112px 32px; padding-inline-start: clamp(16px, 5vw, 72px);
+  opacity: 0; pointer-events: none; color: var(--ink);
+}
+.ho-copy.on { pointer-events: auto; }
+.ho-kick2 { color: var(--gold-text); }
+.ho-copy h1 { font-family: var(--font-head); font-weight: 600; letter-spacing: -.02em; font-size: clamp(1.9rem, 3.7vw, 3.9rem); line-height: 1.04; margin: 0 0 16px; color: var(--ink); }
+.ho-acc { color: var(--gold); }
+.ho-sub { color: #4B5563; font-size: clamp(.95rem, 1.2vw, 1.1rem); line-height: 1.55; margin: 0 0 22px; }
+.ho-doors { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; max-width: 480px; }
+.ho-door {
+  display: flex; align-items: center; gap: 10px; min-height: 50px; padding: 0 16px; border-radius: 14px; cursor: pointer; text-align: start;
+  border: 1px solid rgb(17 24 39 / .12); background: rgb(255 255 255 / .75); color: var(--ink); font: 700 .95rem/1.2 var(--font-body);
+  transition: background 180ms ease-out, transform 160ms ease-out;
+}
+.ho-door svg { color: var(--gold); flex: none; }
+.ho-door:hover { background: #fff; }
+.ho-door:active { transform: scale(.97); }
+.ho-door-solid { background: #000; border-color: #000; color: #fff; }
+.ho-door-solid svg { color: #fff; }
+.ho-door-solid:hover { background: #1f2937; }
+.ho-door:focus-visible, .ho-pill:focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+.ho-proof { margin: 14px 0 0; color: #4B5563; font-size: .92rem; }
+
+@media (max-width: 760px) {
+  .ho-scene { justify-content: flex-end; padding-bottom: 56px; }
+  /* on a phone the words sit low, over the bright wall: a deeper floor */
+  .ho-film::after, [dir="rtl"] .ho-film::after { background: linear-gradient(to top, rgb(10 18 32 / .82) 0%, rgb(10 18 32 / .55) 45%, rgb(10 18 32 / 0) 75%), linear-gradient(to bottom, rgb(10 18 32 / .45), rgb(10 18 32 / 0) 22%); }
+  .ho-copy { width: 100%; inset-block: 0 auto; padding: 120px 16px 0; justify-content: flex-start; }
+  .ho-sub { display: none; }
+  .ho-door { min-height: 46px; padding: 0 12px; font-size: .9rem; }
+  .ho-lab { font-size: .6rem; padding: 3px 5px; }
+}

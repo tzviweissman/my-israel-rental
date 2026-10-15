@@ -102,6 +102,8 @@ function BuildRefresh() {
 // The proposed home overhaul, on its own route until it is approved to
 // replace `/`. Not linked from anywhere and noindexed.
 const HomePreview = lazy(() => import('./pages/HomePreview'));
+// The next home page, judged on /home-preview before it replaces "/" (15 Oct 2026).
+const HomeNext = lazy(() => import('./pages/HomeNext'));
 // Prefetch the top destinations users navigate to from Home during
 // idle browser time. Webpack emits `<link rel="prefetch">` for these
 // chunks, so click-through from Home feels instant while still keeping
@@ -416,7 +418,7 @@ function App() {
                 cinematic page it replaced is in git history, pages/Home.js. */}
             <Route path="/" element={<HomePreview />} />
             <Route path="/home" element={<Navigate to="/" replace />} />
-            <Route path="/home-preview" element={<HomePreview />} />
+            <Route path="/home-preview" element={<HomeNext />} />
             <Route path="/properties/:type" element={<Properties />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/sublease/:id" element={<SubleaseDetail />} />

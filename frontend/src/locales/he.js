@@ -2201,6 +2201,30 @@ const he = {
           scroll: 'גללו כדי לראות',
           proofServices: '{{n}} שירותים מקומיים',
         },
+        // דף הבית הבא (pages/HomeNext.jsx, רק ב-/home-preview).
+        next: {
+          kick: 'דירות · עסקים · מסעדות',
+          h1: 'דירות, עסקים מקומיים ומסעדות',
+          accent: 'בכל הארץ',
+          restaurants: 'מסעדות',
+          proofStays: '{{n}} דירות',
+          proofRest: '{{n}} מסעדות',
+          noFees: 'בלי עמלות',
+          tilesLabel: 'עכשיו באתר',
+          built: {
+            eyebrow: 'דפים שבנינו',
+            h2: 'דפים שבנינו לעסקים מקומיים',
+            p: 'לכל אחד התמונות, המחירים וכפתור ההזמנה שלו.',
+            all: 'לכל הדפים',
+          },
+          about: {
+            line: 'מקום אחד לכל מה שצריך כדי לחיות בישראל',
+            stays: 'דירות',
+            biz: 'עסקים מקומיים',
+            rest: 'מסעדות',
+            fees: 'עמלה',
+          },
+        },
         // See the note on the English side — these were missing entirely,
         // so the finale rendered in English for Hebrew readers.
         // תצוגה מקדימה של דף הבית החדש (pages/HomePreview.jsx, נתיב /home-preview).
