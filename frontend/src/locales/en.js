@@ -5265,6 +5265,23 @@ const en = {
         savedShort: 'Saved',
         help: 'Click text to select it, click again to type. Drag anything to move it. Click a photo to replace it. Moves on laptop and on phone are kept separately.',
       },
+      // A business's own domain (backend custom_domains.py).
+      domain: {
+        title: "Use your own domain",
+        label: "Your domain",
+        save: "Save",
+        body: "If you own a web address, your page can open on it. Use the www form, like www.mybakery.co.il. You add two records where you bought the address; we do the rest.",
+        live: "Live: your page opens at {{d}}",
+        settingUp: "We are connecting {{d}} on our side. The two records to add will show here, usually within a day.",
+        addRecords: "Add these two records where you bought the address (the DNS settings):",
+        type: "Type",
+        name: "Name",
+        value: "Value",
+        wait: "Changes can take up to a few hours to reach everyone. Then press Check.",
+        check: "Check now",
+        remove: "Stop using this address",
+        notYet: "Not reaching your page yet. Check again after the records are in.",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "Invite a friend",

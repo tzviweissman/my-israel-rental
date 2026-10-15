@@ -10,6 +10,7 @@ import { uploadOneFile } from '../../utils/fastUpload';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import { apiErrorMessage } from '../../utils/apiError';
 import WebAddressField from './WebAddressField';
+import OwnDomainField from './OwnDomainField';
 
 /**
  * Edit the facts behind a business's "Good to know" band (spec C6).
@@ -244,6 +245,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
               an owner fixing a typo in their hours should never change it
               by accident. */}
           <WebAddressField business={b} API={API} token={token} onChanged={onSaved} />
+          {b.id && <OwnDomainField business={b} API={API} token={token} />}
 
           {/* Logo. First, because it is the first item on the checklist
               that sends people here, and the one they could not find. */}

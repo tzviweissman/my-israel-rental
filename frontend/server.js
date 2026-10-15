@@ -201,6 +201,54 @@ function serveConfig() {
 
 const CONFIG = serveConfig();
 
+/* A BUSINESS'S OWN DOMAIN (backend routes/marketplace/custom_domains.py).
+   www.mybakery.co.il is added to this service on Railway and answers like
+   <slug>.myisraelrental.com: the business page at "/", everything else on
+   the main site. Which business is asked of the backend and remembered for
+   a few minutes. Only for hosts that are not ours: the apex, its
+   subdomains, Railway's own hosts and local addresses never ask. Fails
+   closed to "not a business" (the normal site), never an error. */
+const DOMAIN_TTL_MS = 5 * 60 * 1000;
+const DOMAIN_MISS_TTL_MS = 60 * 1000;
+const domainCache = new Map();
+
+function isOwnHost(h) {
+  return !h || h === PUBLIC_SITE_HOST || h.endsWith(`.${PUBLIC_SITE_HOST}`)
+    || h.endsWith('.railway.app') || h.endsWith('.railway.internal') || h === 'localhost'
+    || /^[\d.]+$/.test(h) || h.startsWith('[') || !h.includes('.');
+}
+
+async function customDomainSlug(rawHost) {
+  const h = String(rawHost || '').trim().toLowerCase().replace(/:\d+$/, '').replace(/\.$/, '');
+  if (isOwnHost(h)) return null;
+  const hit = domainCache.get(h);
+  if (hit && Date.now() - hit.at < (hit.slug ? DOMAIN_TTL_MS : DOMAIN_MISS_TTL_MS)) return hit.slug;
+  const control = new AbortController();
+  const timer = setTimeout(() => control.abort(), 2000);
+  let slug = null;
+  try {
+    const res = await fetch(`${API_TARGET}/api/marketplace/domains/${encodeURIComponent(h)}`, { signal: control.signal });
+    if (res.ok) {
+      const body = await res.json();
+      if (typeof body.slug === 'string' && /^[a-z0-9-]{1,80}$/.test(body.slug)) slug = body.slug;
+    }
+  } catch { /* not a business: the normal site */ } finally {
+    clearTimeout(timer);
+  }
+  if (domainCache.size > 5000) domainCache.clear();
+  domainCache.set(h, { slug, at: Date.now() });
+  return slug;
+}
+
+/* The app's index.html, telling the browser which business this host is
+   (src/utils/businessHost.js reads window.__BIZ_HOST_SLUG): unlike a
+   subdomain, a custom host does not say it in its name. */
+let indexHtml = null;
+function indexFor(slug) {
+  if (indexHtml === null) indexHtml = fs.readFileSync(path.join(BUILD, 'index.html'), 'utf8');
+  return indexHtml.replace('<head>', `<head><script>window.__BIZ_HOST_SLUG=${JSON.stringify(slug)}</script>`);
+}
+
 // Businesses with a hand-built page (scripts/publish-page.mjs writes the list).
 const HAND_BUILT_FILE = /^\/pages\/([a-z0-9-]{2,60})\/([a-z0-9-]{1,40})\.html$/;
 const HAND_BUILT = (() => {
@@ -494,7 +542,8 @@ const server = http.createServer(async (req, res) => {
 
   // After the proxy, deliberately: /api on a business host is still the
   // API, never a redirect.
-  const hostSlug = slugFromHost(req.headers.host, PUBLIC_SITE_HOST);
+  const customSlug = slugFromHost(req.headers.host, PUBLIC_SITE_HOST) ? null : await customDomainSlug(req.headers.host);
+  const hostSlug = slugFromHost(req.headers.host, PUBLIC_SITE_HOST) || customSlug;
   const pathname = pathnameOf(req);
   if (hostSlug && pathname !== '/' && !isBuildFile(pathname)) {
     res.writeHead(302, {
@@ -561,6 +610,14 @@ const server = http.createServer(async (req, res) => {
     } catch {
       // Listed but missing from the build: the standard page, never an error.
     }
+  }
+  if (customSlug && pathname === '/') {
+    try {
+      const html = indexFor(customSlug);
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
+      res.end(html);
+      return;
+    } catch { /* fall through to the normal file */ }
   }
   return handler(req, res, CONFIG);
 });

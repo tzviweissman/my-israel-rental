@@ -55,8 +55,15 @@ export function slugFromHost(host, apex = SITE_HOST) {
 }
 
 /** The business this tab is on, when it was opened at <slug>.<apex>. */
-export const currentBusinessHostSlug = () =>
-  (typeof window === 'undefined' ? null : slugFromHost(window.location.host));
+// A business's own domain (www.mybakery.co.il) does not name the business,
+// so frontend/server.js writes it into the page as window.__BIZ_HOST_SLUG
+// (backend custom_domains.py).
+export const currentBusinessHostSlug = () => {
+  if (typeof window === 'undefined') return null;
+  const injected = window.__BIZ_HOST_SLUG;
+  if (typeof injected === 'string' && /^[a-z0-9-]{1,80}$/.test(injected)) return injected;
+  return slugFromHost(window.location.host);
+};
 
 /** An absolute URL on the main site. */
 export const apexUrl = (path = '/', apex = SITE_HOST) =>

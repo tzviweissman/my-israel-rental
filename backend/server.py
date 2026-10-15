@@ -546,6 +546,8 @@ async def startup_tasks() -> None:
         await ensure_discount_indexes()
         from routes.marketplace.referrals import ensure_referral_indexes
         await ensure_referral_indexes()
+        from routes.marketplace.custom_domains import ensure_domain_indexes
+        await ensure_domain_indexes()
         from routes.marketplace.staff import ensure_staff_indexes
         await ensure_staff_indexes()
         from routes.marketplace.classes import ensure_class_indexes
