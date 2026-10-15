@@ -16,7 +16,10 @@ import BusinessInsights, { Change, Tile, Section, Bars } from './BusinessInsight
 const PERIODS = [30, 90, 365];
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 
-export default function SummaryTab({ API, token }) {
+// `embedded`: shown inside Overview for anyone who runs a business (Tzvi,
+// 15 Oct 2026: "sales summary should be in the overview"); the tab of its
+// own remains only for staff whose one area is the summary.
+export default function SummaryTab({ API, token, embedded = false }) {
   const { t, i18n } = useTranslation();
   const lang = String(i18n.language || 'en').split('-')[0];
   const auth = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
@@ -45,7 +48,8 @@ export default function SummaryTab({ API, token }) {
     axios.get(`${API}/marketplace/businesses/${bizId}/summary`, { ...auth, params: { days } }).then(({ data }) => setD(data)).catch(() => setD(false));
   }, [ready, API, bizId, auth, days]);
 
-  if (businesses === null) return <div className="py-16 text-center"><Loader2 className="animate-spin inline" size={18} /></div>;
+  if (businesses === null) return embedded ? null : <div className="py-16 text-center"><Loader2 className="animate-spin inline" size={18} /></div>;
+  if (businesses.length === 0 && embedded) return null;
   if (businesses.length === 0) return <p className="rounded-2xl border p-8 text-center text-sm" style={{ ...fieldStyle, color: 'var(--brand-muted)' }}>{t('summary.needBusiness', 'Add a business first.')}</p>;
   const biz = businesses.find((b) => b.id === bizId) || businesses[0];
   const dayNames = lang === 'he' ? ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -56,14 +60,14 @@ export default function SummaryTab({ API, token }) {
   return (
     <div data-testid="summary-tab">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
-        <h2 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('summary.title', 'Sales summary')}</h2>
+        <h2 className={embedded ? 'text-base font-semibold' : 'text-lg font-bold'} style={{ color: 'var(--ink)' }}>{t('summary.title', 'Sales summary')}</h2>
         {businesses.length > 1 && (
           <select value={biz.id} onChange={(e) => setBizId(e.target.value)} className="px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]" style={fieldStyle} aria-label={t('orders.pickBusiness', 'Business')}>
             {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
           </select>
         )}
       </div>
-      <p className="text-sm mb-4" style={{ color: 'var(--brand-muted)' }}>{t('summary.body', 'How the business is doing across orders, memberships, visits and appointments. Every number is counted from your own records.')}</p>
+      <p className={`text-sm mb-4 ${embedded ? 'hidden sm:block' : ''}`} style={{ color: 'var(--brand-muted)' }}>{t('summary.body', 'How the business is doing across orders, memberships, visits and appointments. Every number is counted from your own records.')}</p>
       <div className="inline-flex rounded-full border p-1 mb-4" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('summary.period', 'Period')}>
         {PERIODS.map((p) => (
           <button key={p} type="button" onClick={() => setDays(p)} aria-pressed={days === p} className="px-3.5 min-h-[36px] rounded-full text-xs font-semibold"

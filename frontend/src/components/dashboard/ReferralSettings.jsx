@@ -71,7 +71,7 @@ export default function ReferralSettings({ API, auth, businessId }) {
               <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
                 {t('referrals.settingsBody', 'Each customer and member gets their own link on their order page or membership pass. A friend who uses it gets a discount on their first time, and the person who sent them gets a one-time thank-you code.')}
               </p>
-              <label className="inline-flex items-center gap-2 text-sm min-h-[44px]" style={{ color: 'var(--ink)' }}>
+              <label className="flex items-center gap-2 text-sm min-h-[44px]" style={{ color: 'var(--ink)' }}>
                 <input type="checkbox" checked={!!s.on} onChange={(e) => setS({ ...s, on: e.target.checked })} data-testid="referral-on" /> {t('referrals.turnOn', 'Turn on referrals')}
               </label>
               {s.on && (
@@ -87,7 +87,7 @@ export default function ReferralSettings({ API, auth, businessId }) {
                   {t('referrals.stats', '{{friends}} friends came through {{senders}} customers', { friends: s.friends, senders: s.senders })}
                 </p>
               )}
-              <button type="button" onClick={save} disabled={busy} className="inline-flex items-center gap-1.5 px-5 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-60"
+              <button type="button" onClick={save} disabled={busy} className="mt-2 flex items-center gap-1.5 px-5 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-60"
                       style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="referral-save">
                 {busy && <Loader2 size={14} className="animate-spin" />} {t('auto.save', 'Save')}
               </button>

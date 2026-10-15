@@ -63,7 +63,9 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       tabs: [
         { id: 'my-businesses', label: t('dashboard.myBusinesses', 'Businesses'), Icon: Store, show: runsBusiness },
         // Every business has customers, whatever it sells: not a tool to switch.
-        { id: 'summary', label: t('dashboard.summary', 'Sales summary'), Icon: BarChart3, show: runsBusiness || staff('summary') },
+        // The owner's sales summary is on Overview; the tab stays for staff
+        // whose area it is and who have no Overview of the business.
+        { id: 'summary', label: t('dashboard.summary', 'Sales summary'), Icon: BarChart3, show: !runsBusiness && staff('summary') },
         { id: 'customers', label: t('dashboard.customers', 'Customers'), Icon: Contact, show: runsBusiness || staff('customers') },
         { id: 'discounts', label: t('dashboard.discounts', 'Discounts'), Icon: TicketPercent, show: tool('orders') || tool('members') || staff('discounts') },
         { id: 'staff', label: t('dashboard.staff', 'Staff'), Icon: UserCog, show: runsBusiness },

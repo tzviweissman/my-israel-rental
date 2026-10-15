@@ -84,6 +84,9 @@ const Dashboard = () => {
   // "what do I have" when the question a person arrives with is "what
   // changed" - docs/dashboard-ux-spec.md, item 5.
   const [activeTab, setActiveTab] = useState('overview');
+  // The owner's sales summary moved into Overview (15 Oct 2026); an old
+  // link or bookmark to the tab lands there.
+  useEffect(() => { if (activeTab === 'summary' && showGigTabs) setActiveTab('overview'); }, [activeTab, showGigTabs]);
   // The setup checklist removes itself once complete; the offer that lived
   // inside its "complete" state - the one route to the feature library for
   // someone who has already taken the tour - is rendered here instead.

@@ -36,6 +36,7 @@ import { MessageCircle, Eye, QrCode, CalendarCheck, Bell, ArrowRight } from 'luc
 
 import ScanChart from '../common/ScanChart';
 import LookingForYou from './LookingForYou';
+import SummaryTab from './SummaryTab';
 import formatDate from '../../utils/formatDate';
 
 function StatCard({ Icon, label, value, sub, chart, testid, onClick, cta }) {
@@ -199,6 +200,15 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
           cta={t('overview.share', 'Share')}
         />
       </div>
+
+      {/* How the business is doing (sales_summary.py), here rather than
+          behind a tab of its own: it is what an owner opens the dashboard
+          to see. */}
+      {showGigTabs && (
+        <div className="rounded-xl border p-5 mb-6" style={{ borderColor: 'var(--brand-border)', background: 'var(--surface, #fff)' }} data-testid="overview-sales">
+          <SummaryTab API={API} token={token} embedded />
+        </div>
+      )}
 
       <LookingForYou API={API} token={token} className="mb-6" />
 
