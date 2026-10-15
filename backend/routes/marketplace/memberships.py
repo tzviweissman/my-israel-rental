@@ -464,7 +464,10 @@ async def _checkin(biz: dict[str, Any], m: Optional[dict[str, Any]], by: str) ->
         {"_id": m["_id"]}, {"$inc": inc, "$set": {"last_visit_at": _now_iso()}}, return_document=True)
     await db.member_checkins.insert_one({"_id": str(uuid.uuid4()), "business_id": biz["_id"], "member_id": m["_id"],
                                          "at": _now_iso(), "by": by})
-    return {**base, "ok": True, "reason": None, "visits_left": m.get("visits_left"), "visits": m.get("visits")}
+    # A class they booked around now is marked attended (classes.py).
+    from .classes import mark_attended
+    cls = await mark_attended(m["_id"])
+    return {**base, "ok": True, "reason": None, "visits_left": m.get("visits_left"), "visits": m.get("visits"), "class": cls}
 
 
 @router.get("/businesses/{business_id}/members-door-link")

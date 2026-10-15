@@ -28,6 +28,7 @@ export default function MembershipSignupPage() {
   const [form, setForm] = useState({ name: '', phone: '', email: '', note: '' });
   const [answers, setAnswers] = useState({});
   const [code, setCode] = useState(null);
+  const [timetable, setTimetable] = useState([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
 
@@ -35,6 +36,8 @@ export default function MembershipSignupPage() {
     axios.get(`${API}/marketplace/memberships/${encodeURIComponent(slug)}`)
       .then(({ data: d }) => { setData(d); if (d.plans.length === 1) setPick(d.plans[0].id); })
       .catch(() => setData(false));
+    // The week's classes, if the business runs any (backend classes.py).
+    axios.get(`${API}/marketplace/memberships/${encodeURIComponent(slug)}/timetable`).then(({ data: d }) => setTimetable(d || [])).catch(() => {});
   }, [slug]);
 
   if (data === null) return <div className="py-24 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 className="animate-spin inline" size={20} /></div>;
@@ -99,6 +102,20 @@ export default function MembershipSignupPage() {
               })}
             </div>
           </fieldset>
+
+          {timetable.length > 0 && (
+            <section data-testid="signup-timetable">
+              <h2 className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('classes.timetableTitle', "This week's classes")}</h2>
+              <ul className="rounded-2xl border bg-white divide-y" style={{ borderColor: 'var(--brand-border)' }}>
+                {timetable.slice(0, 20).map((c) => (
+                  <li key={c.id} className="flex justify-between gap-2 px-3 py-2 text-sm" style={{ color: 'var(--ink)', borderColor: 'var(--brand-border)' }}>
+                    <span>{new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'short' }).format(new Date(`${c.date}T00:00`))} {c.start} · {c.title}</span>
+                    <span className="text-xs shrink-0" style={{ color: 'var(--brand-muted)' }}>{c.spots_left > 0 ? t('classes.left', '{{n}} places left', { n: c.spots_left }) : t('classes.full', 'Full')}</span>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          )}
 
           <fieldset className="space-y-3">
             <legend className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('members.yourDetails', 'Your details')}</legend>

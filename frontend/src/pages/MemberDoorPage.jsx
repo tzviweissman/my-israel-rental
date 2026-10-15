@@ -34,6 +34,7 @@ function Result({ r, onNext }) {
       <p className="text-2xl font-bold mt-2">{ok ? t('members.welcome', 'Welcome') : t('members.notIn', 'Not checked in')}</p>
       {r.name && <p className="text-xl mt-1">{r.name}</p>}
       {r.plan && <p className="text-sm mt-1">{r.plan}</p>}
+      {r.class && <p className="text-base font-semibold mt-1" data-testid="door-class">{t('classes.forClass', 'For {{c}}', { c: r.class })}</p>}
       {!ok && <p className="text-base font-semibold mt-2">{stateLabel(t, r.reason)}</p>}
       {r.visits_left !== null && r.visits_left !== undefined && <p className="text-sm mt-1">{t('members.visitsLeft', '{{n}} visits left', { n: r.visits_left })}</p>}
       {onNext && (

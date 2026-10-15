@@ -13,6 +13,7 @@ import { Loader2, IdCard, CheckCircle2 } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { planPrice, planVisits, stateLabel } from '../components/members/memberText';
 import { money } from '../utils/currency';
+import MemberClasses from '../components/members/MemberClasses';
 
 export default function MemberPassPage() {
   const { token } = useParams();
@@ -95,6 +96,7 @@ export default function MemberPassPage() {
             {d.last_visit_at && <div><dt style={{ color: 'var(--brand-muted)' }}>{t('members.lastVisit', 'Last visit')}</dt><dd className="font-semibold" style={{ color: 'var(--ink)' }}>{fmt(d.last_visit_at)}</dd></div>}
           </dl>
         </section>
+        <MemberClasses token={token} />
       </main>
     </div>
   );

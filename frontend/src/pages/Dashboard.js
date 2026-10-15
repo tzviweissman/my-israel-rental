@@ -28,6 +28,7 @@ import DiscountsTab from '../components/dashboard/DiscountsTab';
 import SummaryTab from '../components/dashboard/SummaryTab';
 import StaffTab from '../components/dashboard/StaffTab';
 import CheckinTab from '../components/dashboard/CheckinTab';
+import ClassesTab from '../components/dashboard/ClassesTab';
 import DeliveriesTab from '../components/dashboard/DeliveriesTab';
 import NetworkTab from '../components/dashboard/NetworkTab';
 import MyOrdersTab from '../components/dashboard/MyOrdersTab';
@@ -292,7 +293,7 @@ const Dashboard = () => {
   const activeLabel = nav.groups.flatMap((g) => g.tabs).find((tab) => tab.id === activeTab)?.label;
   // Tabs that already open on their own heading (usually with their main
   // action beside it) get no second one from the shell.
-  const OWN_TITLE = ['properties', 'my-businesses', 'orders', 'members', 'tools', 'customers', 'discounts', 'summary', 'staff', 'checkin', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts', 'bookings', 'contracts'];
+  const OWN_TITLE = ['properties', 'my-businesses', 'orders', 'members', 'tools', 'customers', 'discounts', 'summary', 'staff', 'checkin', 'classes', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts', 'bookings', 'contracts'];
   const pageTitle = OWN_TITLE.includes(activeTab) ? null : (onOverview || !activeLabel ? t('dashboard.title') : activeLabel);
   const showListingActions = onOverview || activeTab === 'properties' || activeTab === 'bulk-manager';
 
@@ -594,6 +595,9 @@ const Dashboard = () => {
         )}
         {activeTab === 'summary' && (showGigTabs || staffIn('summary')) && (
           <SummaryTab API={API} token={token} />
+        )}
+        {activeTab === 'classes' && (showGigTabs || staffIn('members') || staffIn('checkin')) && (
+          <ClassesTab API={API} token={token} />
         )}
         {activeTab === 'checkin' && staffIn('checkin') && (
           <CheckinTab API={API} token={token} />
