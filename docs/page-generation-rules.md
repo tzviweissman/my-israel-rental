@@ -444,6 +444,44 @@ leaderboards, fake unread badges; slide-to-confirm on ordinary forms.
   unchanged: generated images are made from the owner's own photos, and never
   stand in for their premises or their people.
 
+## 0b. The build order, learned from the last builds (Tzvi, 15 Oct 2026)
+
+Tzvi: "i want you to learn from the mistakes that you make when creating
+pages so that you can create them faster". Each step below is a mistake from
+The Gift Boutique (13 to 14 Oct) or Michal Balloons (14 to 15 Oct) that cost
+a round with Tzvi. Done in this order, none of them happens.
+
+1. **Read the record, then the real address.** Use the business's actual
+   slug from the live record when publishing (Michal Balloons was first
+   published under a made-up slug the site would never serve).
+2. **Look at every photo first.** Flag duplicates, screenshots, small sizes
+   and overlays at once, and ask the owner for more in the same message
+   (Michal's only photo was uploaded twice and was a phone screenshot; the
+   Gift Boutique's were 300 px crops from a flyer).
+3. **List every live-site action the build needs and ask for all of them in
+   one go**: loading products, turning on delivery, settings. A blocked write
+   discovered after a push left the Gift Boutique page showing one ₪10 item.
+4. **Research before building**: Mobbin and 21st per section (§3g.17). Both
+   builds first reused the previous page's effects.
+5. **Plan the phone frame before generating.** A clip made at 16:9 had to be
+   re-cropped three times for phones (the box drifted off centre; the arch
+   came out tiny). Generate with the subject centred and a margin, and
+   decide the phone crop or layout from the first frames.
+6. **Run generation in the background while the page is written**, with a
+   script that saves the job number and retries a slow status check (a read
+   timeout lost a paid clip). Never wait idle on a clip.
+7. **Text over imagery gets its dark pool or card from the start**, measured
+   against the brightest frame (§3g.8). It was added after the check failed
+   three times.
+8. **The header and every main button go to the quickest way to order from
+   the first draft** (§3g Main buttons), not after Tzvi asks.
+9. **One idea per page, used once**: the Gift Boutique had three ribbons.
+10. **Run all three checks before any link, screenshot or video reaches
+    Tzvi**: the wow test (§3g.16), clipped.mjs (now also catches a pinned
+    block sliding under the header), readable.mjs. A link was sent before
+    the checks and showed a cut-off card.
+11. **The owner's video last**, from the live page, after the checks.
+
 ## 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
 
 From The Gift Boutique's first draft: "the ribbon is already gone by the time
@@ -605,6 +643,18 @@ make their sites so beautiful: the imagery first, and almost nothing else.
     of the two, it is not finished. The whole page passes the same test
     section by section (§3f.2: one held signature and at least three
     accents), so no page reads as a list of still sections.
+
+17. **Every page's effects are its own, found fresh on Mobbin and 21st**
+    (Tzvi, 15 Oct 2026: "make sure you are always making unique effects from
+    mobbin and 21st dev", after Michal Balloons was started with the Gift
+    Boutique's gold-filling rows and no research). Before any section or
+    effect is built: one Mobbin search and one 21st search for that piece,
+    for this business; pick from what they return and name the source in the
+    build's BRIEF.md and in the reply ("What we make: after Fiverr's services
+    list, Mobbin"). Never reuse an effect from the last two pages built; the
+    FINGERPRINTS file lists what each page used and a new page is checked
+    against it before anyone sees it. The effects library is a shelf of
+    tested extras, never the starting point.
 
 ## 4. What is reported to the owner instead (content gaps)
 

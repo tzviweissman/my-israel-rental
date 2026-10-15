@@ -95,6 +95,22 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   the looks already used, which a new page must differ from.
 - `scripts/`: `readable.mjs`, `cutoff.mjs`, `clipped.mjs`, `scroll-finish.mjs`, `cutout.py`, `overlay-truth.mjs`, `record.mjs`.
 
+## 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
+
+1. Real slug from the live record before publishing.
+2. Look at every photo; flag duplicates, screenshots, small sizes; ask the
+   owner for more in the first message.
+3. List every live-site write the build needs; ask for all at once.
+4. Mobbin and 21st per section before building (3g.17).
+5. Plan the phone frame before generating (subject centred, margin).
+6. Generate in the background while writing the page; scripts keep the job
+   number and retry slow status checks.
+7. Text over imagery gets its dark pool from the start (3g.8).
+8. Header and main buttons go to the quickest order path from draft one.
+9. One idea per page, used once.
+10. Wow test, clipped.mjs, readable.mjs BEFORE any link or video is sent.
+11. Owner video last, from the live page.
+
 ## 1. Facts: only theirs
 
 - **Never re-ask what they already told us.** Read the record, every
@@ -385,6 +401,10 @@ Full text, timestamps and frames: page rules §3g, `docs/ui-videos/notes/`.
     sentence what HAPPENS in the first five seconds and first scroll; "nothing",
     "the camera moves" or "it fades in" means redo. Beside the best reference,
     if ours is quieter it is not finished.
+
+17. **Unique effects from fresh Mobbin and 21st searches**: one of each
+    per section or effect, for this business, named in BRIEF.md and the
+    reply; nothing reused from the last two pages (check FINGERPRINTS).
 
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 

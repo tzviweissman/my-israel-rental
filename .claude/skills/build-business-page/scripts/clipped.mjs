@@ -82,6 +82,38 @@ for (const [w, h] of SIZES) {
           break;
         }
       }
+      // A pinned (sticky) block taller than the room under the header can
+      // never be seen whole, and a fixed or sticky header covers whatever
+      // slides under it (Michal Balloons, 15 Oct 2026: a pinned picture beside
+      // a list was cut off by the header at the last rows).
+      let headBottom = 0;
+      document.querySelectorAll('header, nav, [class*="bar"]').forEach((f) => {
+        const s = getComputedStyle(f), r = f.getBoundingClientRect();
+        if ((s.position === 'fixed' || s.position === 'sticky') && r.top <= 1 && r.height < innerHeight * 0.3) headBottom = Math.max(headBottom, r.bottom);
+      });
+      document.querySelectorAll('body *').forEach((el) => {
+        const s = getComputedStyle(el);
+        if (s.position !== 'sticky' || el.closest('header, nav, [class*="bar"]') === el) return;
+        const r = el.getBoundingClientRect();
+        if (r.height < 4 || r.bottom < 0 || r.top > innerHeight || !shown(el)) return;
+        const room = innerHeight - Math.max(headBottom, parseFloat(s.top) || 0);
+        if (r.height > room + 2 && !el.querySelector('video') && !el.closest('[data-sc-act]')) {
+          out.push('[pinned ' + el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + '] taller than the room under the header by ' + Math.round(r.height - room) + 'px');
+        }
+        // pinned but the tallest thing in its container: it can never hold,
+        // so it scrolls away under the header while what is beside it is read
+        const pc = el.parentElement && el.parentElement.getBoundingClientRect();
+        if (pc && r.height >= pc.height - 2 && r.height > innerHeight * 0.3 && el.parentElement.children.length > 1) {
+          out.push('[pinned ' + el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + '] cannot stay pinned: it is the tallest thing in its container');
+        }
+        // pinned yet sliding under the header while its section still goes on
+        // below it: it should be holding there (the normal exit, when the
+        // section's end reaches it, is not a fault)
+        const pr = el.parentElement && el.parentElement.getBoundingClientRect();
+        if (headBottom && pr && r.top < headBottom - 2 && r.bottom > headBottom && pr.bottom > r.bottom + 24) {
+          out.push('[pinned ' + el.tagName.toLowerCase() + (el.id ? '#' + el.id : '') + '] slid ' + Math.round(headBottom - r.top) + 'px under the header while its section continues');
+        }
+      });
       return out;
     });
     for (const x of bad) {
