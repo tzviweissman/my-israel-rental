@@ -49,6 +49,7 @@ import PageBriefForm from './PageBriefForm';
 import PageVersions from './PageVersions';
 import SectionsEditor from './SectionsEditor';
 import BrandStyleEditor from './BrandStyleEditor';
+import NoticeEditor from './NoticeEditor';
 import {
   DIAL_DEFAULTS, PRESETS, briefToTheme, composeDefault, normalizeTheme, themeDiff,
 } from '../../utils/pageComposition';
@@ -109,6 +110,11 @@ const newRow = (link = {}) => ({
   labelTouched: Boolean(link.label),
 });
 
+/** The notice as the API takes it: trimmed, dates or null, or null for none. */
+const cleanNotice = (n) => (n && (n.text || '').trim()
+  ? { text: n.text.trim(), starts_on: n.starts_on || null, ends_on: n.ends_on || null }
+  : null);
+
 export default function BusinessPageEditor({ business, API, token, onClose, onSaved }) {
   const { t, i18n } = useTranslation();
   const auth = useMemo(
@@ -120,6 +126,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
   // The owner's own colour and fonts (BrandStyleEditor.jsx).
   const [brandColor, setBrandColor] = useState(null);
   const [brandFonts, setBrandFonts] = useState({ heading: null, body: null });
+  const [notice, setNotice] = useState(null);
   const [failed, setFailed] = useState(false);
   const [providers, setProviders] = useState([]);
   // Served alongside the provider list rather than written down again
@@ -181,6 +188,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
         if (cancelled) return;
         setPage(data);
         setBrandColor(data.brand_color || null);
+        setNotice(data.notice || null);
         setBrandFonts({ heading: null, body: null, ...(data.brand_fonts || {}) });
         setAccent(ACCENTS[data.accent] ? data.accent : DEFAULT_ACCENT);
         setCoverUrl(data.cover_url || null);
@@ -207,6 +215,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
         setSaved({
           accent: ACCENTS[data.accent] ? data.accent : DEFAULT_ACCENT,
           brand_color: data.brand_color || null,
+          notice: data.notice || null,
           brand_fonts: { heading: null, body: null, ...(data.brand_fonts || {}) },
           cover_url: data.cover_url || null,
           payment_links: data.payment_links || [],
@@ -282,6 +291,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
     accent,
     brand_color: brandColor,
     brand_fonts: brandFonts,
+    notice: notice && notice.text ? notice : null,
     cover_url: coverUrl,
     payment_links: validLinks,
     page: { theme: fullTheme, blocks },
@@ -292,12 +302,13 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
     // which is also exactly when it would save.
     pinned_service_ids: pinned,
     collections: cleanCollections(collections),
-  } : null), [page, accent, brandColor, brandFonts, coverUrl, validLinks, pinned, collections, fullTheme, blocks]);
+  } : null), [page, accent, brandColor, brandFonts, notice, coverUrl, validLinks, pinned, collections, fullTheme, blocks]);
 
   const dirty = useMemo(() => {
     if (!saved) return false;
     if (editedBlocks && JSON.stringify(editedBlocks) !== JSON.stringify(loadedBlocks)) return true;
     if ((brandColor || null) !== (saved.brand_color || null)) return true;
+    if (JSON.stringify(cleanNotice(notice)) !== JSON.stringify(cleanNotice(saved.notice))) return true;
     if (JSON.stringify(brandFonts) !== JSON.stringify(saved.brand_fonts)) return true;
     if (JSON.stringify(pinned) !== JSON.stringify(saved.pinned_service_ids || [])) return true;
     if (JSON.stringify(cleanCollections(collections)) !== JSON.stringify(saved.collections || [])) return true;
@@ -312,7 +323,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       || JSON.stringify(validLinks) !== JSON.stringify(
         (saved.payment_links || []).map((p) => ({ label: p.label, url: p.url })),
       );
-  }, [saved, accent, coverUrl, validLinks, pinned, collections, brief, theme, touched, editedBlocks, loadedBlocks, brandColor, brandFonts]);
+  }, [saved, accent, coverUrl, validLinks, pinned, collections, brief, theme, touched, editedBlocks, loadedBlocks, brandColor, brandFonts, notice]);
 
   const close = useCallback(() => {
     if (dirty) {
@@ -421,6 +432,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
         {
           accent,
           brand_color: brandColor || '',
+          notice: cleanNotice(notice),
           brand_fonts: { heading: brandFonts.heading || null, body: brandFonts.body || null },
           cover_url: coverUrl,
           payment_links: validLinks,
@@ -437,7 +449,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       setPage((pg) => (pg ? { ...pg, page: { theme: fullTheme, blocks } } : pg));
       setBlocks(null);
       setSaved({
-        accent, brand_color: brandColor || null, brand_fonts: brandFonts, cover_url: coverUrl, payment_links: validLinks,
+        accent, brand_color: brandColor || null, brand_fonts: brandFonts, notice: cleanNotice(notice), cover_url: coverUrl, payment_links: validLinks,
         pinned_service_ids: pinned, collections: keptCollections,
         theme, brief: briefPayload, composed: true,
       });
@@ -534,6 +546,9 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
 
       {/* ---- Sections: add, remove, reorder, edit ---- */}
       {page && <SectionsEditor blocks={blocks} onChange={setBlocks} business={previewBusiness || page} />}
+
+      {/* ---- Notice at the top ---- */}
+      {page && <NoticeEditor notice={notice} onChange={setNotice} />}
 
       {/* ---- Accent (K1) ---- */}
       <section>

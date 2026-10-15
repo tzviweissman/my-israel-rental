@@ -30,6 +30,7 @@ import { money } from '../utils/currency';
 import DateField, { toISODate } from '../components/common/DateField';
 import CustomFieldInputs from '../components/forms/CustomFieldInputs';
 import DiscountCodeInput, { discountOn } from '../components/forms/DiscountCodeInput';
+import NoticeBar from '../components/marketplace/NoticeBar';
 
 // How far ahead a customer can order. The server sets no limit; this keeps
 // the calendar to a sensible reach.
@@ -255,6 +256,7 @@ export default function OrderPage() {
         <h1 className="text-xl font-bold" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{t('order.title', 'Order from {{name}}', { name: bizName })}</h1>
       </div>
 
+      <NoticeBar business={data.business} className="mb-4" />
       <form onSubmit={submit} className="space-y-5">
         {/* 1. What */}
         <section className="rounded-2xl border bg-white p-3" style={{ borderColor: 'var(--brand-border)' }}>

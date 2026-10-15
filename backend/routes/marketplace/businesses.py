@@ -177,6 +177,16 @@ class BrandFonts(BaseModel):
     body: Optional[str] = None
 
 
+class Notice(BaseModel):
+    """The notice bar at the top of the business page and its order page
+    (Tzvi, 15 Oct 2026: "Closed for Sukkot", "Free delivery this week").
+    Plain text. Optional dates, Israel time, both inclusive: it shows from
+    `starts_on` and disappears by itself after `ends_on`."""
+    text: str = Field(..., min_length=1, max_length=140)
+    starts_on: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    ends_on: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+
+
 # The four accents a business may choose (spec K1). NAMES only — the hex
 # values live in frontend/src/utils/businessAccent.js and nowhere else, so a
 # palette change is a code change and no business is left holding a colour
@@ -215,6 +225,8 @@ class BusinessPatch(BaseModel):
     brand_color: Optional[str] = None
     # Heading and body faces from BRAND_*_FONTS; null for the site's own.
     brand_fonts: Optional[BrandFonts] = None
+    # The notice bar; null removes it.
+    notice: Optional[Notice] = None
     # P1 — the owner's own payment links. Validated against a closed
     # allowlist in utils/payment_links: an arbitrary URL rendered as a
     # button on a page carrying our name is an open redirect.
@@ -309,6 +321,7 @@ def _public(
         "accent": doc.get("accent"),
         "brand_color": doc.get("brand_color"),
         "brand_fonts": doc.get("brand_fonts") or {"heading": None, "body": None},
+        "notice": doc.get("notice"),
         "payment_links": doc.get("payment_links") or [],
         # The composition, exactly as stored. Not re-validated on the way
         # out: a block type retired after this was saved would otherwise
@@ -661,6 +674,11 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         if f.body and f.body not in BRAND_BODY_FONTS:
             raise HTTPException(status_code=422, detail="Unknown text font")
         update["brand_fonts"] = {"heading": f.heading or None, "body": f.body or None}
+    if "notice" in provided:
+        n = payload.notice
+        if n and n.starts_on and n.ends_on and n.ends_on < n.starts_on:
+            raise HTTPException(status_code=422, detail="The notice ends before it starts")
+        update["notice"] = {"text": n.text.strip(), "starts_on": n.starts_on, "ends_on": n.ends_on} if n and n.text.strip() else None
     for key in ("hours", "delivery_note", "lead_time", "payment_note",
                 "founded_year", "kosher_certification", "cover_url",
                 "license_number"):
@@ -1017,6 +1035,9 @@ async def public_business(
         "accent": biz.get("accent") or "stone",
         "brand_color": biz.get("brand_color"),
         "brand_fonts": biz.get("brand_fonts") or {"heading": None, "body": None},
+        # With its dates: the page shows it only between them (Israel
+        # time), and the owner's editor needs them either way.
+        "notice": biz.get("notice"),
         "cover_url": biz.get("cover_url"),
         # Re-checked on the way OUT, not just on the way in. The allowlist
         # gated writes only, so taking a domain off it left every link

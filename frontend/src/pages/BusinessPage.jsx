@@ -53,6 +53,7 @@ import ConnectButton from '../components/marketplace/ConnectButton';
 import { prettyArea, areaLabel } from '../utils/areaNames';
 import { accentFor, accentColors, brandColors } from '../utils/businessAccent';
 import { useBrandFonts } from '../utils/brandFonts';
+import NoticeBar, { liveNotice } from '../components/marketplace/NoticeBar';
 import useCoverScrim from '../hooks/useCoverScrim';
 
 /**
@@ -430,6 +431,14 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
           // by default - see utils/businessHost.js.
           canonicalUrl={businessCanonicalUrl(biz.slug, biz.id)}
         />
+      )}
+
+      {/* The notice bar, first thing on the page. The editor's preview shows
+          it whatever its dates, so the owner can see one they scheduled. */}
+      {(preview ? biz.notice?.text : liveNotice(biz)) && (
+        <div className={`${columnWidth} mx-auto px-4 pt-4`} style={brandFontStyle}>
+          <NoticeBar business={biz} always={preview} />
+        </div>
       )}
 
       {v3 && (

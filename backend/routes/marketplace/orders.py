@@ -2081,6 +2081,8 @@ async def order_form(gig_id: str):
             "id": biz["_id"], "name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url"), "slug": biz.get("slug"),
             "areas": _areas_out(biz), "serves_nationwide": bool(biz.get("serves_nationwide")),
             "payment_links": allowed_payment_links(biz.get("payment_links")), "payment_note": biz.get("payment_note"),
+            # The notice bar and colour, so the order page carries them too.
+            "notice": biz.get("notice"), "brand_color": biz.get("brand_color"), "accent": biz.get("accent"),
         },
         "custom_fields": public_fields(biz, "order"),
         "products": _products_for_order(gig),

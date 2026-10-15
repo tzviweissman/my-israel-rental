@@ -5218,6 +5218,16 @@ const he = {
         siteFont: "הגופן של האתר",
         textSample: "טרי בכל יום שישי",
       },
+      // Design your page → Notice at the top (NoticeEditor.jsx).
+      notice: {
+        title: "הודעה בראש הדף",
+        hint: "שורה אחת שלקוחות רואים ראשונה, בדף שלכם ובדף ההזמנה. למשל: סגור בסוכות, חוזרים ב־20 באוקטובר.",
+        placeholder: "משלוח חינם השבוע",
+        from: "מתאריך (לא חובה)",
+        until: "עד תאריך (לא חובה)",
+        badDates: "תאריך הסיום לפני תאריך ההתחלה.",
+        remove: "הסרת ההודעה",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "הזמינו חבר",

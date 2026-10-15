@@ -5400,6 +5400,16 @@ const en = {
         siteFont: "The site’s font",
         textSample: "Fresh every Friday",
       },
+      // Design your page → Notice at the top (NoticeEditor.jsx).
+      notice: {
+        title: "Notice at the top",
+        hint: "One line customers see first, on your page and your order page. For example: Closed for Sukkot, back on 20 October.",
+        placeholder: "Free delivery this week",
+        from: "From (optional)",
+        until: "Until (optional)",
+        badDates: "The end date is before the start date.",
+        remove: "Remove the notice",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "Invite a friend",
