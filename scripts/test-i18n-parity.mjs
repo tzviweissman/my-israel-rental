@@ -80,7 +80,7 @@ const STATIC_CALL = /\bt\(\s*'([A-Za-z0-9_.]+)'/g;
 // `t(`a.b_${expr}`)` — the prefix is knowable, the whole key is not.
 const DYNAMIC_CALL = /\bt\(\s*`([A-Za-z0-9_.]*)\$\{/g;
 // Whether that same call passes a `count`, which is what selects a plural.
-const COUNT_ARG = /\bt\(\s*'([A-Za-z0-9_.]+)'[^)]*\bcount\s*[:,}]/g;
+const COUNT_ARG = /\bt\(\s*'([A-Za-z0-9_.]+)'[^)]*(?<![.\w])count\s*[:,}]/g;
 
 const usedStatic = new Map();   // key -> [file...]
 const usedWithCount = new Set();
