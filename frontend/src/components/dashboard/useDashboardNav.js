@@ -20,7 +20,7 @@
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Building2, Layers, Store, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
-  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users, SlidersHorizontal,
+  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users, SlidersHorizontal, Contact,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
 
@@ -59,6 +59,8 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       label: t('dashboard.groupBusiness', 'My business'),
       tabs: [
         { id: 'my-businesses', label: t('dashboard.myBusinesses', 'Businesses'), Icon: Store, show: runsBusiness },
+        // Every business has customers, whatever it sells: not a tool to switch.
+        { id: 'customers', label: t('dashboard.customers', 'Customers'), Icon: Contact, show: runsBusiness },
         { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: tool('orders') },
         { id: 'members', label: t('dashboard.members', 'Members'), Icon: Users, show: tool('members') },
         // Waiting appointments or network requests always show: a badge
@@ -140,6 +142,7 @@ export const ALL_TAB_IDS = [
   'orders',
   'members',
   'tools',
+  'customers',
   'network',
   'deliveries',
   'my-orders',
