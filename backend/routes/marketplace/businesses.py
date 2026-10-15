@@ -15,6 +15,7 @@ Two rules carried over from the earlier steps, both deliberate:
 """
 from __future__ import annotations
 
+import re
 from datetime import UTC, datetime
 from typing import Any, Literal, Optional
 
@@ -161,6 +162,21 @@ from utils.payment_links import (  # noqa: E402
     payment_providers,
 )
 
+# Brand fonts (Tzvi, 15 Oct 2026: "brand colours and fonts"). Keys only,
+# mirrored by frontend/src/utils/brandFonts.js, which holds the families.
+# Every one has Hebrew AND Latin letters, so a page never drops to a
+# fallback face halfway through a sentence in either language.
+BRAND_HEADING_FONTS = ("frank-ruhl", "david-libre", "suez-one", "secular-one", "rubik", "heebo",
+                       "varela-round", "amatic-sc", "karantina")
+BRAND_BODY_FONTS = ("assistant", "heebo", "rubik", "alef", "open-sans", "varela-round")
+_HEX = re.compile(r"^#[0-9a-fA-F]{6}$")
+
+
+class BrandFonts(BaseModel):
+    heading: Optional[str] = None
+    body: Optional[str] = None
+
+
 # The four accents a business may choose (spec K1). NAMES only — the hex
 # values live in frontend/src/utils/businessAccent.js and nowhere else, so a
 # palette change is a code change and no business is left holding a colour
@@ -193,6 +209,12 @@ class BusinessPatch(BaseModel):
     # rejected — an accent is decoration, and a stale client sending a
     # retired name should not cost the owner the rest of their save.
     accent: Optional[str] = None
+    # The business's own colour, #RRGGBB, over the accent when set ("" or
+    # null clears it). The page works out readable text on it itself
+    # (utils/businessAccent.js), so no colour can make the page unreadable.
+    brand_color: Optional[str] = None
+    # Heading and body faces from BRAND_*_FONTS; null for the site's own.
+    brand_fonts: Optional[BrandFonts] = None
     # P1 — the owner's own payment links. Validated against a closed
     # allowlist in utils/payment_links: an arbitrary URL rendered as a
     # button on a page carrying our name is an open redirect.
@@ -285,6 +307,8 @@ def _public(
         "license_number": doc.get("license_number"),
         "cover_url": doc.get("cover_url"),
         "accent": doc.get("accent"),
+        "brand_color": doc.get("brand_color"),
+        "brand_fonts": doc.get("brand_fonts") or {"heading": None, "body": None},
         "payment_links": doc.get("payment_links") or [],
         # The composition, exactly as stored. Not re-validated on the way
         # out: a block type retired after this was saved would otherwise
@@ -625,6 +649,18 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         # cleared both land on the default, which is what the page renders
         # for a business that has never chosen.
         update["accent"] = payload.accent if payload.accent in ACCENTS else "stone"
+    if "brand_color" in provided:
+        c = (payload.brand_color or "").strip()
+        if c and not _HEX.match(c):
+            raise HTTPException(status_code=422, detail="A colour is written like #1E5F8C")
+        update["brand_color"] = c.upper() or None
+    if "brand_fonts" in provided:
+        f = payload.brand_fonts or BrandFonts()
+        if f.heading and f.heading not in BRAND_HEADING_FONTS:
+            raise HTTPException(status_code=422, detail="Unknown heading font")
+        if f.body and f.body not in BRAND_BODY_FONTS:
+            raise HTTPException(status_code=422, detail="Unknown text font")
+        update["brand_fonts"] = {"heading": f.heading or None, "body": f.body or None}
     for key in ("hours", "delivery_note", "lead_time", "payment_note",
                 "founded_year", "kosher_certification", "cover_url",
                 "license_number"):
@@ -979,6 +1015,8 @@ async def public_business(
         # the client (utils/businessAccent.js) so the database never
         # holds a copy of the design system.
         "accent": biz.get("accent") or "stone",
+        "brand_color": biz.get("brand_color"),
+        "brand_fonts": biz.get("brand_fonts") or {"heading": None, "body": None},
         "cover_url": biz.get("cover_url"),
         # Re-checked on the way OUT, not just on the way in. The allowlist
         # gated writes only, so taking a domain off it left every link

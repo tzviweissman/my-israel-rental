@@ -5202,6 +5202,22 @@ const he = {
         add: "הוספת חלק",
         cancel: "ביטול",
       },
+      // Design your page → own colour and fonts (BrandStyleEditor.jsx).
+      brand: {
+        sample: "העסק שלכם",
+        ownColour: "או צבע משלכם",
+        pick: "בחירת צבע",
+        hex: "קוד צבע",
+        clear: "לחזור לצבע מוכן",
+        readable: "הטקסט עליו נשאר קריא",
+        colourHint: "למשל הצבע של הלוגו שלכם. אנחנו בוחרים טקסט לבן או כהה עליו כדי שתמיד יהיה קריא.",
+        fonts: "גופנים",
+        fontsHint: "לכל הגופנים כאן יש אותיות בעברית ובאנגלית, כך שהדף נראה אותו דבר בשתי השפות.",
+        headings: "כותרות והשם שלכם",
+        text: "טקסט",
+        siteFont: "הגופן של האתר",
+        textSample: "טרי בכל יום שישי",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "הזמינו חבר",

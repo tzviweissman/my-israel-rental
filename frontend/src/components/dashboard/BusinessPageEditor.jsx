@@ -48,6 +48,7 @@ import PageThemeDials, { dialLabel, dialValueLabel } from './PageThemeDials';
 import PageBriefForm from './PageBriefForm';
 import PageVersions from './PageVersions';
 import SectionsEditor from './SectionsEditor';
+import BrandStyleEditor from './BrandStyleEditor';
 import {
   DIAL_DEFAULTS, PRESETS, briefToTheme, composeDefault, normalizeTheme, themeDiff,
 } from '../../utils/pageComposition';
@@ -116,6 +117,9 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
   );
 
   const [page, setPage] = useState(null);        // the real public payload
+  // The owner's own colour and fonts (BrandStyleEditor.jsx).
+  const [brandColor, setBrandColor] = useState(null);
+  const [brandFonts, setBrandFonts] = useState({ heading: null, body: null });
   const [failed, setFailed] = useState(false);
   const [providers, setProviders] = useState([]);
   // Served alongside the provider list rather than written down again
@@ -176,6 +180,8 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
         );
         if (cancelled) return;
         setPage(data);
+        setBrandColor(data.brand_color || null);
+        setBrandFonts({ heading: null, body: null, ...(data.brand_fonts || {}) });
         setAccent(ACCENTS[data.accent] ? data.accent : DEFAULT_ACCENT);
         setCoverUrl(data.cover_url || null);
         setRows((data.payment_links || []).map(newRow));
@@ -200,6 +206,8 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
         ));
         setSaved({
           accent: ACCENTS[data.accent] ? data.accent : DEFAULT_ACCENT,
+          brand_color: data.brand_color || null,
+          brand_fonts: { heading: null, body: null, ...(data.brand_fonts || {}) },
           cover_url: data.cover_url || null,
           payment_links: data.payment_links || [],
           pinned_service_ids: (data.pinned_service_ids || []).slice(0, 3),
@@ -272,6 +280,8 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
   const previewBusiness = useMemo(() => (page ? {
     ...page,
     accent,
+    brand_color: brandColor,
+    brand_fonts: brandFonts,
     cover_url: coverUrl,
     payment_links: validLinks,
     page: { theme: fullTheme, blocks },
@@ -282,11 +292,13 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
     // which is also exactly when it would save.
     pinned_service_ids: pinned,
     collections: cleanCollections(collections),
-  } : null), [page, accent, coverUrl, validLinks, pinned, collections, fullTheme, blocks]);
+  } : null), [page, accent, brandColor, brandFonts, coverUrl, validLinks, pinned, collections, fullTheme, blocks]);
 
   const dirty = useMemo(() => {
     if (!saved) return false;
     if (editedBlocks && JSON.stringify(editedBlocks) !== JSON.stringify(loadedBlocks)) return true;
+    if ((brandColor || null) !== (saved.brand_color || null)) return true;
+    if (JSON.stringify(brandFonts) !== JSON.stringify(saved.brand_fonts)) return true;
     if (JSON.stringify(pinned) !== JSON.stringify(saved.pinned_service_ids || [])) return true;
     if (JSON.stringify(cleanCollections(collections)) !== JSON.stringify(saved.collections || [])) return true;
     if (JSON.stringify(brief) !== JSON.stringify(saved.brief || {})) return true;
@@ -300,7 +312,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       || JSON.stringify(validLinks) !== JSON.stringify(
         (saved.payment_links || []).map((p) => ({ label: p.label, url: p.url })),
       );
-  }, [saved, accent, coverUrl, validLinks, pinned, collections, brief, theme, touched, editedBlocks, loadedBlocks]);
+  }, [saved, accent, coverUrl, validLinks, pinned, collections, brief, theme, touched, editedBlocks, loadedBlocks, brandColor, brandFonts]);
 
   const close = useCallback(() => {
     if (dirty) {
@@ -408,6 +420,8 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
         `${API}/marketplace/businesses/${business.id}`,
         {
           accent,
+          brand_color: brandColor || '',
+          brand_fonts: { heading: brandFonts.heading || null, body: brandFonts.body || null },
           cover_url: coverUrl,
           payment_links: validLinks,
           pinned_service_ids: pinned,
@@ -423,7 +437,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       setPage((pg) => (pg ? { ...pg, page: { theme: fullTheme, blocks } } : pg));
       setBlocks(null);
       setSaved({
-        accent, cover_url: coverUrl, payment_links: validLinks,
+        accent, brand_color: brandColor || null, brand_fonts: brandFonts, cover_url: coverUrl, payment_links: validLinks,
         pinned_service_ids: pinned, collections: keptCollections,
         theme, brief: briefPayload, composed: true,
       });
@@ -536,21 +550,24 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
               key={name}
               type="button"
               role="radio"
-              aria-checked={accent === name}
+              aria-checked={accent === name && !brandColor}
               aria-label={t(`pageDesign.accent_${name}`, name)}
-              onClick={() => setAccent(name)}
+              onClick={() => { setAccent(name); setBrandColor(null); }}
               className="w-12 h-12 rounded-xl border-2 transition-transform hover:scale-105"
               style={{
                 background: ACCENTS[name].tint,
-                borderColor: accent === name ? 'var(--ink)' : 'var(--brand-border)',
+                borderColor: accent === name && !brandColor ? 'var(--ink)' : 'var(--brand-border)',
               }}
               data-testid={`page-design-accent-${name}`}
             />
           ))}
         </div>
-        <p className="text-xs mt-1.5" style={{ color: 'var(--brand-muted)' }}>
-          {t(`pageDesign.accent_${accent}`, accent)}
-        </p>
+        {!brandColor && (
+          <p className="text-xs mt-1.5" style={{ color: 'var(--brand-muted)' }}>
+            {t(`pageDesign.accent_${accent}`, accent)}
+          </p>
+        )}
+        <BrandStyleEditor color={brandColor} onColor={setBrandColor} fonts={brandFonts} onFonts={setBrandFonts} businessName={page && page.name} />
       </section>
 
       {/* ---- Cover photo (K2) ---- */}

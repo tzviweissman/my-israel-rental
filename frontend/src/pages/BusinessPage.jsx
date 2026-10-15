@@ -51,7 +51,8 @@ import BusinessCoverBand, { BusinessLogoMark } from '../components/marketplace/B
 import SafeImage from '../components/common/SafeImage';
 import ConnectButton from '../components/marketplace/ConnectButton';
 import { prettyArea, areaLabel } from '../utils/areaNames';
-import { accentFor, accentColors } from '../utils/businessAccent';
+import { accentFor, accentColors, brandColors } from '../utils/businessAccent';
+import { useBrandFonts } from '../utils/brandFonts';
 import useCoverScrim from '../hooks/useCoverScrim';
 
 /**
@@ -74,6 +75,8 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
      land after an edit and quietly put the saved value back on screen,
      which is the one thing an owner must never see a preview do. */
   const biz = injected || fetched;
+  // The owner's own fonts, on their content only (utils/brandFonts.js).
+  const brandFontStyle = useBrandFonts(biz);
   /* The route has a slug in the URL; the editor does not. Both need one for
      the stored layout choice below, and `undefined` in that key would give
      every previewed business the same entry. */
@@ -286,6 +289,10 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
      narrows, so a small catalogue reads as deliberate rather than as a
      page that failed to load the rest. */
   const columnWidth = listingCount < 4 ? 'max-w-[900px]' : 'max-w-5xl';
+  // The owner's own colour on their message buttons, with whichever text
+  // reads on it (utils/businessAccent.js); the site's own button otherwise.
+  const brand = brandColors(biz.brand_color);
+  const brandButton = brand ? { background: brand.tint, color: brand.on, borderColor: brand.tint } : undefined;
 
   /* Everything that used to be derived here - the search, the grouping,
      the pinned row, how many are on screen - moved into the `services`
@@ -478,7 +485,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         />
       )}
 
-      <div className={`${columnWidth} mx-auto px-4 py-8`}>
+      <div className={`${columnWidth} mx-auto px-4 py-8`} style={brandFontStyle} data-testid="business-content">
         {!v3 && (
         <div className="rounded-2xl border bg-white overflow-hidden mb-6"
           style={{ borderColor: 'var(--brand-border)' }}>
@@ -520,6 +527,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
               <BusinessCoverBand
                 name={displayName}
                 accent={accentFor(biz)}
+                brand={brandColors(biz.brand_color)}
                 className="w-full h-full"
               />
             )}
@@ -749,7 +757,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                     type="button"
                     onClick={messageBusiness}
                     className="btn-gold inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm"
-                    data-testid="business-message-header"
+                    data-testid="business-message-header" style={brandButton}
                   >
                     <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
                   </button>
@@ -886,7 +894,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
                     type="button"
                     onClick={messageBusiness}
                     className="btn-gold inline-flex items-center justify-center gap-2 px-5 py-2.5 text-sm"
-                    data-testid="business-message-bottom"
+                    data-testid="business-message-bottom" style={brandButton}
                   >
                     <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
                   </button>
@@ -983,7 +991,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             type="button"
             onClick={messageBusiness}
             className="btn-gold w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-sm"
-            data-testid="business-message-sticky"
+            data-testid="business-message-sticky" style={brandButton}
           >
             <MessageCircle size={16} aria-hidden="true" /> {messageLabel}
           </button>

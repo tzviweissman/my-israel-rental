@@ -57,11 +57,14 @@ export default function BusinessCoverBand({
   // the band keeps deriving its colour from the name, which is what every
   // business that never opens the editor continues to get.
   accent = null,
+  // The business's own colour (utils/businessAccent.js brandColors), over
+  // the named accent when set.
+  brand = null,
   className = '',
   testid = 'business-cover-empty',
 }) {
   const isRtl = useIsRtl();
-  const tint = (accent && ACCENTS[accent]) ? ACCENTS[accent].tint : tintForName(name);
+  const tint = brand ? brand.tint : ((accent && ACCENTS[accent]) ? ACCENTS[accent].tint : tintForName(name));
   const soft = towardWhite(tint, 0.45);
   // Perceived brightness, not the raw average: #1E5F8C and #C9A227 have
   // similar arithmetic means and read completely differently.
@@ -121,7 +124,7 @@ export default function BusinessCoverBand({
             // `sea` and `deep` are not: ink on #123B57 is invisible. Take
             // the readable colour from the accent itself rather than
             // assuming the band is light.
-            color: (accent && ACCENTS[accent]) ? ACCENTS[accent].on : 'var(--ink)',
+            color: brand ? brand.on : ((accent && ACCENTS[accent]) ? ACCENTS[accent].on : 'var(--ink)'),
             // Faint, but present. At 0.09 it disappeared and the band
             // read as empty; this is still a texture rather than a mark
             // that competes with the business's own name below it.

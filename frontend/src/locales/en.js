@@ -5384,6 +5384,22 @@ const en = {
         add: "Add a section",
         cancel: "Cancel",
       },
+      // Design your page → own colour and fonts (BrandStyleEditor.jsx).
+      brand: {
+        sample: "Your business",
+        ownColour: "Or your own colour",
+        pick: "Pick your colour",
+        hex: "Colour code",
+        clear: "Use a ready-made colour",
+        readable: "Text on it stays readable",
+        colourHint: "Your logo’s colour, for example. We pick white or dark text on it so it always reads.",
+        fonts: "Fonts",
+        fontsHint: "Every font here has Hebrew and English letters, so your page looks the same in both.",
+        headings: "Headings and your name",
+        text: "Text",
+        siteFont: "The site’s font",
+        textSample: "Fresh every Friday",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "Invite a friend",
