@@ -29,6 +29,7 @@ import { pastCutoff } from '../utils/orderCutoffs';
 import { money } from '../utils/currency';
 import DateField, { toISODate } from '../components/common/DateField';
 import CustomFieldInputs from '../components/forms/CustomFieldInputs';
+import DiscountCodeInput, { discountOn } from '../components/forms/DiscountCodeInput';
 
 // How far ahead a customer can order. The server sets no limit; this keeps
 // the calendar to a sensible reach.
@@ -49,6 +50,7 @@ export default function OrderPage() {
   const [notes, setNotes] = useState('');
   // The store's own questions (backend custom_fields.py).
   const [answers, setAnswers] = useState({});
+  const [code, setCode] = useState(null);         // a checked discount code
   const [fulfilment, setFulfilment] = useState('pickup');
   const [date, setDate] = useState('');
   const [windowKey, setWindowKey] = useState('');
@@ -134,7 +136,9 @@ export default function OrderPage() {
   const lines = products.filter((p) => (qty[p.id] || 0) > 0).map((p) => ({ product: p, qty: qty[p.id] }));
   const subtotal = lines.reduce((s, l) => s + Number(l.product.price || 0) * l.qty, 0);
   const fee = fulfilment === 'delivery' ? Number(data.settings.delivery_fee || 0) : 0;
-  const total = lines.length ? subtotal + fee : null;
+  // A code comes off the goods, never the delivery (backend discounts.py).
+  const discount = lines.length ? discountOn(code, subtotal) : 0;
+  const total = lines.length ? subtotal - discount + fee : null;
   const minOrder = Number(data.settings.min_order || 0);
   const belowMin = fulfilment === 'delivery' && minOrder > 0 && subtotal < minOrder;
   // Delivery only when the store has said it delivers (its own switch in
@@ -165,6 +169,7 @@ export default function OrderPage() {
         address: fulfilment === 'delivery' ? address.trim() : null,
         customer_name: name.trim(), customer_phone: phone.trim(), customer_email: email.trim() || null,
         answers,
+        discount_code: code ? code.code : null,
       };
       const { data: res } = await axios.post(`${API}/marketplace/order-form/${gigId}/orders`, body, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
       setDone(res);
@@ -364,8 +369,14 @@ export default function OrderPage() {
         {/* 4. Total + send */}
         <div className="rounded-2xl border bg-white p-3" style={{ borderColor: 'var(--brand-border)' }}>
           {lines.length > 0 && (
+            <div className="mb-2">
+              <DiscountCodeInput businessId={data.business.id} form="orders" amount={subtotal} phone={phone} applied={code} onApplied={setCode} />
+            </div>
+          )}
+          {lines.length > 0 && (
             <ul className="text-sm mb-2" style={{ color: 'var(--ink)' }} data-testid="order-summary">
               {lines.map((l) => <li key={l.product.id} className="flex justify-between"><span dir="auto">{l.qty} × {l.product.name}</span><span className="tabular-nums">{money(Number(l.product.price) * l.qty, currency)}</span></li>)}
+              {discount > 0 && <li className="flex justify-between" style={{ color: '#1F5F3A' }} data-testid="order-discount"><span>{t('discounts.line', 'Discount {{code}}', { code: code.code })}</span><span className="tabular-nums">−{money(discount, currency)}</span></li>}
               {fee > 0 && <li className="flex justify-between"><span>{t('order.deliveryFee', 'Delivery')}</span><span className="tabular-nums">{money(fee, currency)}</span></li>}
               <li className="flex justify-between font-bold border-t mt-1 pt-1" style={{ borderColor: 'var(--brand-border)' }}><span>{t('order.total', 'Total')}</span><span className="tabular-nums" data-testid="order-total">{money(total, currency)}</span></li>
             </ul>

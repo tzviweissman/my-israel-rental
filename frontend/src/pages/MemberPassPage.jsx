@@ -12,6 +12,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Loader2, IdCard, CheckCircle2 } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { planPrice, planVisits, stateLabel } from '../components/members/memberText';
+import { money } from '../utils/currency';
 
 export default function MemberPassPage() {
   const { token } = useParams();
@@ -68,6 +69,7 @@ export default function MemberPassPage() {
         <section className="rounded-2xl border bg-white p-5 text-center" style={{ borderColor: 'var(--brand-border)' }}>
           <p className="text-xl font-bold" style={{ color: 'var(--ink)' }}>{d.name}</p>
           <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>{d.plan.name} · {planPrice(t, d.plan)} · {planVisits(t, d.plan)}</p>
+          {d.discount && <p className="text-sm" style={{ color: '#1F5F3A' }}>{t('discounts.passLine', 'Code {{code}}: {{amount}} off', { code: d.discount.code, amount: money(d.discount.amount, 'ILS') })}</p>}
           <p className="mt-3 inline-block px-3 py-1 rounded-full text-sm font-semibold" data-testid="pass-state"
              style={ok ? { background: '#E6F4EA', color: '#2E7D4F' } : { background: '#F3F4F6', color: 'var(--ink)' }}>
             {ok ? t('members.okToEnter', 'Active') : stateLabel(t, d.state.reason)}

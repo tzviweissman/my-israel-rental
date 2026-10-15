@@ -386,7 +386,9 @@ export default function MembersTab({ API, token }) {
                   <div className="min-w-0">
                     <p className="font-semibold text-sm" style={{ color: 'var(--ink)' }}>{m.name} <span className="font-normal text-xs" style={{ color: 'var(--brand-muted)' }}>· {m.short_code}</span></p>
                     <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
-                      {m.plan.name} · {money(m.plan.price, m.plan.currency)} · <a href={`tel:${m.phone}`} dir="ltr">{m.phone}</a>
+                      {m.plan.name} · {money(m.plan.price, m.plan.currency)}
+                      {m.discount && <span style={{ color: '#1F5F3A' }}> · {t('discounts.memberLine', 'code {{code}}: {{price}} to pay', { code: m.discount.code, price: money(m.discount.price_after, m.plan.currency) })}</span>}
+                      {' · '}<a href={`tel:${m.phone}`} dir="ltr">{m.phone}</a>
                     </p>
                     <p className="text-xs mt-0.5" style={{ color: m.state.ok ? 'var(--status-open, #2E7D4F)' : 'var(--ink)' }}>
                       {m.state.ok ? t('members.okToEnter', 'Active') : stateLabel(t, m.state.reason)}

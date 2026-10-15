@@ -1979,6 +1979,8 @@ class WebsiteOrderIn(BaseModel):
     pay_by: Optional[str] = Field(None, max_length=60)
     # Answers to the store's own questions (custom_fields.py), by field id.
     answers: dict[str, Any] = Field(default_factory=dict)
+    # A discount code the store made (discounts.py).
+    discount_code: Optional[str] = Field(None, max_length=40)
 
     @field_validator("extra_items", "notes", "address", "customer_name", "customer_phone", "customer_email", "pay_by")
     @classmethod
@@ -2125,6 +2127,20 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
     answers = check_answers(biz, "order", payload.answers)
 
+    # A discount code: checked again here, whatever the form showed, and
+    # counted only if the order goes through. It comes off the goods,
+    # never the delivery fee.
+    discount = None
+    if payload.discount_code and payload.discount_code.strip() and lines:
+        from .discounts import CodeRefused, evaluate, redeem
+        try:
+            code_doc, off = await evaluate(biz["_id"], payload.discount_code, "orders", subtotal, payload.customer_phone)
+        except CodeRefused as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        if not await redeem(code_doc, off, payload.customer_phone):
+            raise HTTPException(status_code=400, detail="This code has been used up")
+        discount = {"code": code_doc["code"], "amount": off}
+
     items_text = "\n".join(f"{ln['qty']} × {ln['name']}" for ln in lines)
     if payload.extra_items:
         items_text = (items_text + "\n" if items_text else "") + payload.extra_items
@@ -2137,7 +2153,9 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     if answers:
         notes = (notes + "\n" if notes else "") + answers_text(answers)
     needed_by = payload.date + (f"T{payload.window.start}" if payload.window else "")
-    total = round(subtotal + fee, 2) if lines else None
+    total = round(subtotal - (discount["amount"] if discount else 0) + fee, 2) if lines else None
+    if discount:
+        notes = (notes + "\n" if notes else "") + f"Discount {discount['code']}: -{sym}{discount['amount']:g}"
 
     stamp = _now_iso()
     doc = {
@@ -2158,6 +2176,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         "currency": currency,
         "pay_by": payload.pay_by or None,
         "answers": answers,
+        "discount": discount,
         "needed_by": needed_by,
         "window": payload.window.model_dump() if payload.window else None,
         "fulfilment": payload.fulfilment,
@@ -2207,7 +2226,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         + (f"<p>Payment goes to the store directly. {_esc(pay)}</p>{links}" if (pay or links) else "<p>Payment goes to the store directly.</p>"),
         tag="order-confirmation", button=("Follow your order", track),
     )
-    return {"order_id": doc["_id"], "track_token": doc["track_token"], "track_url": track, "total": total, "currency": currency, "delivery_fee": doc["delivery_fee"]}
+    return {"order_id": doc["_id"], "track_token": doc["track_token"], "track_url": track, "total": total, "currency": currency,
+            "delivery_fee": doc["delivery_fee"], "discount": discount}
 
 
 @router.get("/orders/mine")

@@ -199,6 +199,8 @@ class JoinIn(BaseModel):
     lang: Literal["en", "he"] = "en"
     # Answers to the business's own questions (custom_fields.py).
     answers: dict[str, Any] = Field(default_factory=dict)
+    # A discount code the business made (discounts.py), off the plan price.
+    discount_code: Optional[str] = Field(None, max_length=40)
 
 
 async def _new_short_code(business_id: str) -> str:
@@ -226,6 +228,16 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
     if len(phone.lstrip("+")) < 9:
         raise HTTPException(status_code=422, detail="Please check the phone number")
     answers = check_answers(biz, "membership", body.answers)
+    discount = None
+    if body.discount_code and body.discount_code.strip():
+        from .discounts import CodeRefused, evaluate, redeem
+        try:
+            code_doc, off = await evaluate(biz["_id"], body.discount_code, "memberships", float(plan.get("price") or 0), phone)
+        except CodeRefused as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+        if not await redeem(code_doc, off, phone):
+            raise HTTPException(status_code=400, detail="This code has been used up")
+        discount = {"code": code_doc["code"], "amount": off, "price_after": round(float(plan.get("price") or 0) - off, 2)}
     start = body.start_date or _today()
     if start < _today():
         start = _today()
@@ -233,7 +245,7 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
         "_id": str(uuid.uuid4()), "business_id": biz["_id"], "owner_user_id": biz["owner_user_id"],
         "plan_id": plan["_id"], "plan": _plan_copy(plan),
         "name": body.name.strip(), "phone": phone, "email": (body.email or "").strip() or None,
-        "customer_user_id": (viewer or {}).get("user_id"), "note": body.note, "lang": body.lang, "answers": answers,
+        "customer_user_id": (viewer or {}).get("user_id"), "note": body.note, "lang": body.lang, "answers": answers, "discount": discount,
         # Pending until the business confirms payment: nothing is charged here.
         "status": "pending", "start_date": start.isoformat(), "renews_on": None, "visits_left": None,
         "manage_token": secrets.token_urlsafe(16), "checkin_code": secrets.token_urlsafe(12),
@@ -251,6 +263,7 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
     await _email((owner or {}).get("email"), f"New member: {doc['name']}, {plan['name']}",
                  f"<p><b>{_esc(doc['name'])}</b> signed up for <b>{_esc(plan['name'])}</b>, starting {_esc(start.isoformat())}.</p>"
                  f"<p>Phone: {_esc(phone)}</p>"
+                 + (f"<p>Discount code {_esc(discount['code'])}: ₪{discount['amount']:g} off, ₪{discount['price_after']:g} to pay.</p>" if discount else "")
                  + "".join(f"<p>{_esc(a['label'])}: {_esc('Yes' if a['value'] is True else 'No' if a['value'] is False else a['value'])}</p>" for a in answers)
                  + "<p>Once they have paid, mark them active in your member list.</p>",
                  tag="membership-join", button=("Open members", "/dashboard?tab=members"))
@@ -300,7 +313,7 @@ async def my_membership(token: str, request: Request):
         "start_date": m.get("start_date"), "renews_on": m.get("renews_on"), "visits_left": m.get("visits_left"),
         "visits": m.get("visits", 0), "last_visit_at": m.get("last_visit_at"),
         "checkin_url": f"{_frontend_url()}/members/checkin/{m['checkin_code']}",
-        "short_code": m["short_code"], "state": _member_state(m),
+        "short_code": m["short_code"], "state": _member_state(m), "discount": m.get("discount"),
     }
 
 
@@ -314,7 +327,7 @@ def _member_out(m: dict[str, Any]) -> dict[str, Any]:
             "renews_on": m.get("renews_on"), "visits_left": m.get("visits_left"), "visits": m.get("visits", 0),
             "last_visit_at": m.get("last_visit_at"), "short_code": m.get("short_code"),
             "state": _member_state(m), "created_at": m.get("created_at"), "source": m.get("source"),
-            "answers": m.get("answers") or []}
+            "answers": m.get("answers") or [], "discount": m.get("discount")}
 
 
 @router.get("/businesses/{business_id}/members")

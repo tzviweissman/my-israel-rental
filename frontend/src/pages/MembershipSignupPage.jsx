@@ -12,6 +12,8 @@ import { Loader2, Check, Users } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { planPrice, planVisits } from '../components/members/memberText';
 import CustomFieldInputs from '../components/forms/CustomFieldInputs';
+import DiscountCodeInput, { discountOn } from '../components/forms/DiscountCodeInput';
+import { money } from '../utils/currency';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-base bg-white min-h-[48px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
@@ -25,6 +27,7 @@ export default function MembershipSignupPage() {
   const [pick, setPick] = useState('');
   const [form, setForm] = useState({ name: '', phone: '', email: '', note: '' });
   const [answers, setAnswers] = useState({});
+  const [code, setCode] = useState(null);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
 
@@ -53,7 +56,7 @@ export default function MembershipSignupPage() {
     setSending(true);
     try {
       const { data: r } = await axios.post(`${API}/marketplace/memberships/plan/${pick}/join`, {
-        name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim() || null, note: form.note.trim() || null, lang: lang === 'he' ? 'he' : 'en', answers,
+        name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim() || null, note: form.note.trim() || null, lang: lang === 'he' ? 'he' : 'en', answers, discount_code: code ? code.code : null,
       });
       navigate(`/members/${r.manage_token}?joined=1`);
     } catch (err) {
@@ -106,6 +109,20 @@ export default function MembershipSignupPage() {
             <CustomFieldInputs fields={data.fields} values={answers} onChange={setAnswers} testid="signup-custom-fields" />
           </fieldset>
 
+          {(() => {
+            const plan = data.plans.find((p) => p.id === pick);
+            const off = plan ? discountOn(code, Number(plan.price || 0)) : 0;
+            return (
+              <div>
+                <DiscountCodeInput businessId={biz.id} form="memberships" amount={plan ? Number(plan.price || 0) : 0} phone={form.phone} applied={code} onApplied={setCode} />
+                {plan && off > 0 && (
+                  <p className="text-sm mt-1" style={{ color: 'var(--ink)' }} data-testid="signup-discount">
+                    {t('discounts.memberPrice', '{{price}} instead of {{was}}', { price: money(Number(plan.price) - off, plan.currency || 'ILS'), was: money(plan.price, plan.currency || 'ILS') })}
+                  </p>
+                )}
+              </div>
+            );
+          })()}
           {error && <p className="text-sm" role="alert" style={{ color: '#B42318' }}>{error}</p>}
           <button type="submit" disabled={!pick || sending} className="w-full inline-flex justify-center items-center gap-2 min-h-[52px] rounded-full text-base font-semibold disabled:opacity-60"
                   style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="signup-submit">
