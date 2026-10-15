@@ -5587,7 +5587,7 @@ const he = {
         bookingsN_two: "שני תורים",
         bookingsN_other: "{{n}} תורים",
         imported: "מהרשימה שייבאתם",
-        more: "מוצגים {{shown}} הראשונים מתוך {{count}}. חפשו כדי למצוא את השאר.",
+        more: "מוצגים {{shown}} הראשונים מתוך {{total}}. חפשו כדי למצוא את השאר.",
         close: "סגירה",
         noName: "ללא שם",
         call: "שיחה",

@@ -314,7 +314,7 @@ export default function CustomersTab({ API, token }) {
           </ul>
         )}
       {data && data.count > data.customers.length && (
-        <p className="text-xs mt-3" style={{ color: 'var(--brand-muted)' }}>{t('customers.more', 'Showing the first {{shown}} of {{count}}. Search to find the rest.', { shown: data.customers.length, count: data.count })}</p>
+        <p className="text-xs mt-3" style={{ color: 'var(--brand-muted)' }}>{t('customers.more', 'Showing the first {{shown}} of {{total}}. Search to find the rest.', { shown: data.customers.length, total: data.count })}</p>
       )}
 
       {open && (
