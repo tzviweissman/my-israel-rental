@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from fastapi import HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from routes.deps import db, logger
 
@@ -513,6 +513,15 @@ class PricingTier(BaseModel):
     images: list[str] = Field(default_factory=list)
 
 
+class ProductOption(BaseModel):
+    """A size, flavour or colour of one product ("Large", "Chocolate").
+    `price` None means the product's own price."""
+    id: str = Field(default_factory=lambda: uuid.uuid4().hex[:8])
+    name: str = Field(..., min_length=1, max_length=40)
+    price: Optional[float] = Field(None, ge=0, le=1_000_000)
+    in_stock: bool = True
+
+
 class ProductItem(BaseModel):
     """One product row on a Store-type gig.
 
@@ -554,6 +563,19 @@ class ProductItem(BaseModel):
     # to scale; absent means the ladder leaves this product out.
     width_cm: Optional[float] = Field(None, gt=0, le=500)
     length_cm: Optional[float] = Field(None, gt=0, le=500)
+    # How many the business has, if it counts (None: it does not). Orders
+    # on the website take from it (orders.py); at 0 the product is sold
+    # out. `low_stock_at`: email the owner when it falls to this.
+    stock: Optional[int] = Field(None, ge=0, le=100_000)
+    low_stock_at: Optional[int] = Field(None, ge=1, le=100_000)
+    # Sizes, flavours or colours the customer picks one of.
+    options: list[ProductOption] = Field(default_factory=list, max_length=20)
+
+    @model_validator(mode="after")
+    def _counted_stock(self):
+        if self.stock == 0:
+            self.in_stock = False
+        return self
 
 
 class WeeklyWindow(BaseModel):

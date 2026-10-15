@@ -53,6 +53,7 @@ import { useTranslation } from 'react-i18next';
 import { uploadFilesFast, reportUploadFailure } from '../../utils/fastUpload';
 import { productPhotos } from '../../utils/productPhotos';
 import SizeFields, { withSize } from '../marketplace/SizeFields';
+import ProductExtras, { cleanExtras } from './ProductExtras';
 import { SUBCATEGORIES, subcategoryLabel } from '../../lib/categories';
 import AvailabilityStep, { DAYS } from '../marketplace/AvailabilityStep';
 import CategoryPicker from '../marketplace/CategoryPicker';
@@ -318,6 +319,13 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
           base.image = null;
           base = withSize(base, o);
           base.in_stock = o.in_stock !== false;
+          // Only what the product uses, so an untouched product still
+          // compares equal to its original and is not re-sent.
+          Object.entries(cleanExtras(o)).forEach(([k, v]) => {
+            if ((v === null || (Array.isArray(v) && !v.length)) && !(k in o)) delete base[k];
+            else base[k] = v;
+          });
+          if (base.stock === 0) base.in_stock = false;
           const group = String(o.group || '').trim();
           base.group = group || null;
           const to = parseFloat(o.price_to);
@@ -847,6 +855,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 {isStore && (
                   <SizeFields option={o} onChange={(patch) => setOption(i, patch)} testid={`edit-listing-size-${i}`} />
                 )}
+                {isStore && <ProductExtras option={o} i={i} onChange={(patch) => setOption(i, patch)} />}
                 {isStore && (
                   <div className="flex flex-wrap items-center gap-2">
                     <label className="inline-flex items-center gap-2 min-h-[44px] pe-2 text-sm font-semibold text-gray-700 cursor-pointer">

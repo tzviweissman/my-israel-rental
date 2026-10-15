@@ -21,7 +21,7 @@ import AutoMessages from './AutoMessages';
 import { AnswersList } from '../forms/CustomFieldInputs';
 
 const FILTERS = ['pending', 'active', 'due', 'paused', 'cancelled'];
-const EMPTY_PLAN = { name: '', description: '', period: 'month', price: '', visits: '', valid_months: '', active: true };
+const EMPTY_PLAN = { name: '', description: '', period: 'month', price: '', visits: '', valid_months: '', reward: '', active: true };
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
@@ -57,9 +57,10 @@ function PlanForm({ initial, onCancel, onSave, saving }) {
       name: p.name.trim(),
       description: (p.description || '').trim() || null,
       period: p.period,
-      price: Number(p.price || 0),
+      price: p.period === 'card' ? 0 : Number(p.price || 0),
       visits: p.visits === '' || p.visits === null ? null : Number(p.visits),
       valid_months: p.period === 'pack' && p.valid_months ? Number(p.valid_months) : null,
+      reward: p.period === 'card' ? (p.reward || '').trim() : null,
       active: !!p.active,
     });
   };
@@ -77,16 +78,26 @@ function PlanForm({ initial, onCancel, onSave, saving }) {
             <option value="month">{t('members.period.month', 'Monthly')}</option>
             <option value="year">{t('members.period.year', 'Yearly')}</option>
             <option value="pack">{t('members.period.pack', 'Class pack')}</option>
+            <option value="card">{t('members.period.card', 'Punch card (free reward every few visits)')}</option>
           </select>
         </label>
+        {p.period === 'card' ? (
+          <label className="block text-sm" style={{ color: 'var(--ink)' }}>
+            {t('members.reward', 'The reward')}
+            <input required maxLength={80} value={p.reward || ''} onChange={set('reward')} className={`${field} mt-1`} style={fieldStyle}
+                   placeholder={t('members.rewardPh', 'e.g. a free coffee')} data-testid="plan-reward" />
+          </label>
+        ) : (
+          <label className="block text-sm" style={{ color: 'var(--ink)' }}>
+            {t('members.price', 'Price (₪)')}
+            <input required type="number" min="0" step="1" inputMode="numeric" value={p.price} onChange={set('price')}
+                   className={`${field} mt-1`} style={fieldStyle} data-testid="plan-price" />
+          </label>
+        )}
         <label className="block text-sm" style={{ color: 'var(--ink)' }}>
-          {t('members.price', 'Price (₪)')}
-          <input required type="number" min="0" step="1" inputMode="numeric" value={p.price} onChange={set('price')}
-                 className={`${field} mt-1`} style={fieldStyle} data-testid="plan-price" />
-        </label>
-        <label className="block text-sm" style={{ color: 'var(--ink)' }}>
-          {p.period === 'pack' ? t('members.visitsPack', 'Visits in the pack') : t('members.visitsPeriod', 'Visits included (leave empty for unlimited)')}
-          <input type="number" min="1" step="1" inputMode="numeric" required={p.period === 'pack'} value={p.visits ?? ''} onChange={set('visits')}
+          {p.period === 'card' ? t('members.visitsCard', 'Visits to earn it')
+            : p.period === 'pack' ? t('members.visitsPack', 'Visits in the pack') : t('members.visitsPeriod', 'Visits included (leave empty for unlimited)')}
+          <input type="number" min="1" step="1" inputMode="numeric" required={p.period === 'pack' || p.period === 'card'} value={p.visits ?? ''} onChange={set('visits')}
                  className={`${field} mt-1`} style={fieldStyle} data-testid="plan-visits" />
         </label>
         {p.period === 'pack' && (
@@ -308,7 +319,7 @@ export default function MembersTab({ API, token }) {
                   <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{planVisits(t, p)}</p>
                 </div>
                 <div className="flex shrink-0">
-                  <button type="button" className="grid place-content-center w-11 h-11" aria-label={t('members.editPlan', 'Edit plan')} onClick={() => setPlanForm({ ...p, visits: p.visits ?? '', valid_months: p.valid_months ?? '' })}><Pencil size={15} /></button>
+                  <button type="button" className="grid place-content-center w-11 h-11" aria-label={t('members.editPlan', 'Edit plan')} onClick={() => setPlanForm({ ...p, visits: p.visits ?? '', valid_months: p.valid_months ?? '', reward: p.reward ?? '' })}><Pencil size={15} /></button>
                   <button type="button" className="grid place-content-center w-11 h-11" aria-label={t('members.removePlan', 'Stop offering')} onClick={() => removePlan(p)}><Trash2 size={15} /></button>
                 </div>
               </li>
@@ -396,6 +407,7 @@ export default function MembersTab({ API, token }) {
                       {m.state.ok ? t('members.okToEnter', 'Active') : stateLabel(t, m.state.reason)}
                       {m.renews_on && ` · ${m.plan.period === 'pack' ? t('members.expires', 'Expires') : t('members.renews', 'Renews')} ${fmtDate(m.renews_on)}`}
                       {m.visits_left !== null && m.visits_left !== undefined && ` · ${t('members.visitsLeft', '{{n}} visits left', { n: m.visits_left })}`}
+                      {m.plan.period === 'card' && ` · ${t('members.stampsOf', '{{n}} of {{total}} stamps', { n: m.stamps || 0, total: m.plan.visits })}`}
                       {m.last_visit_at && ` · ${t('members.lastVisit', 'Last visit')} ${fmtDate(m.last_visit_at)}`}
                     </p>
                     <AnswersList answers={m.answers} t={t} />

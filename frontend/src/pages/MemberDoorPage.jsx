@@ -37,6 +37,8 @@ function Result({ r, onNext }) {
       {r.class && <p className="text-base font-semibold mt-1" data-testid="door-class">{t('classes.forClass', 'For {{c}}', { c: r.class })}</p>}
       {!ok && <p className="text-base font-semibold mt-2">{stateLabel(t, r.reason)}</p>}
       {r.visits_left !== null && r.visits_left !== undefined && <p className="text-sm mt-1">{t('members.visitsLeft', '{{n}} visits left', { n: r.visits_left })}</p>}
+      {r.reward && <p className="text-xl font-bold mt-2" data-testid="door-reward">{t('members.rewardEarned', 'Reward earned: {{reward}}', { reward: r.reward })}</p>}
+      {r.stamps_needed && !r.reward && <p className="text-sm mt-1">{t('members.stampsOf', '{{n}} of {{total}} stamps', { n: r.stamps, total: r.stamps_needed })}</p>}
       {onNext && (
         <button type="button" onClick={onNext} className="mt-5 inline-flex items-center justify-center min-h-[52px] px-8 rounded-full text-base font-semibold"
                 style={{ background: '#000', color: '#fff' }} data-testid="door-next">

@@ -133,8 +133,19 @@ export default function OrderPage() {
   // One currency per store, the server refuses a mixed basket; the fee and
   // the minimum are in that currency too.
   const currency = (products[0] || data.products[0] || {}).currency || 'ILS';
-  const lines = products.filter((p) => (qty[p.id] || 0) > 0).map((p) => ({ product: p, qty: qty[p.id] }));
-  const subtotal = lines.reduce((s, l) => s + Number(l.product.price || 0) * l.qty, 0);
+  // One row per thing a customer can pick: the product, or each of its
+  // sizes/flavours (backend ProductOption), keyed "product::option".
+  const rowsOf = (p) => ((p.options || []).length
+    ? p.options.filter((o) => o.in_stock !== false).map((o) => ({
+      key: `${p.id}::${o.id}`, product: p, option: o, name: `${p.name} (${o.name})`,
+      price: o.price === null || o.price === undefined ? p.price : o.price,
+    }))
+    : [{ key: p.id, product: p, option: null, name: p.name, price: p.price }]);
+  const lines = products.flatMap(rowsOf).filter((r) => (qty[r.key] || 0) > 0).map((r) => ({ ...r, qty: qty[r.key] }));
+  const subtotal = lines.reduce((s, l) => s + Number(l.price || 0) * l.qty, 0);
+  // A counted product (backend stock.py) caps the quantity across its options.
+  const maxFor = (p, key) => (p.stock === null || p.stock === undefined ? 99
+    : Math.max(0, p.stock - rowsOf(p).filter((r) => r.key !== key).reduce((s, r) => s + (qty[r.key] || 0), 0)));
   const fee = fulfilment === 'delivery' ? Number(data.settings.delivery_fee || 0) : 0;
   // A code comes off the goods, never the delivery (backend discounts.py).
   const discount = lines.length ? discountOn(code, subtotal) : 0;
@@ -153,7 +164,7 @@ export default function OrderPage() {
     && (data.custom_fields || []).every((f) => !f.required || (f.type === 'checkbox' ? answers[f.id] === true : String(answers[f.id] || '').trim()))
     && (fulfilment === 'pickup' || (address.trim() && (data.business.serves_nationwide || city) && !belowMin));
 
-  const setQ = (id, n) => setQty((q) => ({ ...q, [id]: Math.max(0, Math.min(99, n)) }));
+  const setQ = (id, n, max = 99) => setQty((q) => ({ ...q, [id]: Math.max(0, Math.min(max, 99, n)) }));
 
   const submit = async (e) => {
     e.preventDefault();
@@ -162,7 +173,7 @@ export default function OrderPage() {
     try {
       const w = windowsForDay.find((x) => `${x.start}-${x.end}` === windowKey);
       const body = {
-        lines: lines.map((l) => ({ product_id: l.product.id, qty: l.qty })),
+        lines: lines.map((l) => ({ product_id: l.product.id, qty: l.qty, option_id: l.option ? l.option.id : null })),
         extra_items: extra.trim(), notes: notes.trim(), fulfilment, date,
         window: w ? { weekday: w.weekday, start: w.start, end: w.end } : null,
         city: fulfilment === 'delivery' ? (city || null) : null,
@@ -242,20 +253,46 @@ export default function OrderPage() {
           <h2 className="text-sm font-bold mb-2" style={{ color: 'var(--ink)' }}>{t('order.what', 'What would you like?')}</h2>
           {products.length === 0 && <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('order.noProducts', 'This store has not listed products yet - write what you want below.')}</p>}
           <ul className="divide-y" style={{ borderColor: 'var(--brand-border)' }}>
-            {products.map((p) => (
-              <li key={p.id} className="py-2 flex items-center gap-3" data-testid={`order-product-${p.id}`}>
-                {p.image && <img src={p.image} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />}
-                <div className="min-w-0 flex-1">
-                  <div className="text-sm font-semibold" dir="auto" style={{ color: 'var(--ink)' }}>{p.name}</div>
-                  <div className="text-xs" style={{ color: 'var(--brand-muted)' }}>{money(p.price, p.currency || currency)}{p.description ? ` · ${p.description}` : ''}</div>
-                </div>
-                <div className="inline-flex items-center rounded-full border" style={{ borderColor: 'var(--brand-border)' }}>
-                  <button type="button" onClick={() => setQ(p.id, (qty[p.id] || 0) - 1)} className="w-11 h-11 grid place-content-center rounded-full" aria-label={t('order.less', 'Less')} style={{ color: 'var(--ink)' }}><Minus size={14} /></button>
-                  <span className="w-6 text-center text-sm font-semibold tabular-nums" style={{ color: 'var(--ink)' }} data-testid={`order-qty-${p.id}`}>{qty[p.id] || 0}</span>
-                  <button type="button" onClick={() => setQ(p.id, (qty[p.id] || 0) + 1)} className="w-11 h-11 grid place-content-center rounded-full" aria-label={t('order.more', 'More')} style={{ color: 'var(--ink)' }} data-testid={`order-add-${p.id}`}><Plus size={14} /></button>
-                </div>
-              </li>
-            ))}
+            {products.map((p) => {
+              const rows = rowsOf(p);
+              const stepper = (r) => {
+                const max = maxFor(p, r.key);
+                return (
+                  <div className="inline-flex items-center rounded-full border shrink-0" style={{ borderColor: 'var(--brand-border)' }}>
+                    <button type="button" onClick={() => setQ(r.key, (qty[r.key] || 0) - 1, max)} className="w-11 h-11 grid place-content-center rounded-full" aria-label={t('order.less', 'Less')} style={{ color: 'var(--ink)' }}><Minus size={14} /></button>
+                    <span className="w-6 text-center text-sm font-semibold tabular-nums" style={{ color: 'var(--ink)' }} data-testid={`order-qty-${r.key}`}>{qty[r.key] || 0}</span>
+                    <button type="button" disabled={(qty[r.key] || 0) >= max} onClick={() => setQ(r.key, (qty[r.key] || 0) + 1, max)} className="w-11 h-11 grid place-content-center rounded-full disabled:opacity-30" aria-label={t('order.more', 'More')} style={{ color: 'var(--ink)' }} data-testid={`order-add-${r.key}`}><Plus size={14} /></button>
+                  </div>
+                );
+              };
+              const few = p.stock !== null && p.stock !== undefined && p.stock <= 5;
+              return (
+                <li key={p.id} className="py-2" data-testid={`order-product-${p.id}`}>
+                  <div className="flex items-center gap-3">
+                    {p.image && <img src={p.image} alt="" className="w-12 h-12 rounded-lg object-cover shrink-0" />}
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm font-semibold" dir="auto" style={{ color: 'var(--ink)' }}>{p.name}</div>
+                      <div className="text-xs" style={{ color: 'var(--brand-muted)' }}>
+                        {rows[0].option ? '' : money(p.price, p.currency || currency)}{p.description ? `${rows[0].option ? '' : ' · '}${p.description}` : ''}
+                        {few && <span data-testid={`order-left-${p.id}`}> · {t('order.left', '{{count}} left', { count: p.stock })}</span>}
+                      </div>
+                    </div>
+                    {!rows[0].option && stepper(rows[0])}
+                  </div>
+                  {rows[0].option && (
+                    <ul className="mt-1 ps-3 space-y-1">
+                      {rows.map((r) => (
+                        <li key={r.key} className="flex items-center gap-3" data-testid={`order-option-${r.key}`}>
+                          <span className="flex-1 min-w-0 text-sm" dir="auto" style={{ color: 'var(--ink)' }}>{r.option.name}</span>
+                          <span className="text-xs tabular-nums" style={{ color: 'var(--brand-muted)' }}>{money(r.price, p.currency || currency)}</span>
+                          {stepper(r)}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </li>
+              );
+            })}
           </ul>
           {/* Items the list does not have. The store gets them with the
               items; "Notes" further down is for instructions. */}
@@ -375,7 +412,7 @@ export default function OrderPage() {
           )}
           {lines.length > 0 && (
             <ul className="text-sm mb-2" style={{ color: 'var(--ink)' }} data-testid="order-summary">
-              {lines.map((l) => <li key={l.product.id} className="flex justify-between"><span dir="auto">{l.qty} × {l.product.name}</span><span className="tabular-nums">{money(Number(l.product.price) * l.qty, currency)}</span></li>)}
+              {lines.map((l) => <li key={l.key} className="flex justify-between"><span dir="auto">{l.qty} × {l.name}</span><span className="tabular-nums">{money(Number(l.price) * l.qty, currency)}</span></li>)}
               {discount > 0 && <li className="flex justify-between" style={{ color: '#1F5F3A' }} data-testid="order-discount"><span>{t('discounts.line', 'Discount {{code}}', { code: code.code })}</span><span className="tabular-nums">−{money(discount, currency)}</span></li>}
               {fee > 0 && <li className="flex justify-between"><span>{t('order.deliveryFee', 'Delivery')}</span><span className="tabular-nums">{money(fee, currency)}</span></li>}
               <li className="flex justify-between font-bold border-t mt-1 pt-1" style={{ borderColor: 'var(--brand-border)' }}><span>{t('order.total', 'Total')}</span><span className="tabular-nums" data-testid="order-total">{money(total, currency)}</span></li>

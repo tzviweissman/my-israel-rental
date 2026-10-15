@@ -45,7 +45,7 @@ from .orders import _email, _esc, _frontend_url, _notify, _subject
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
 IL = ZoneInfo("Asia/Jerusalem")
-PERIODS = ("month", "year", "pack")
+PERIODS = ("month", "year", "pack", "card")
 STATUSES = ("pending", "active", "paused", "cancelled", "expired")
 # Letters and digits that cannot be misread when typed from a phone screen.
 _CODE_CHARS = "ABCDEFGHJKMNPQRSTUVWXYZ23456789"
@@ -71,7 +71,10 @@ def _period_end(start: date, period: str, months: Optional[int] = None) -> Optio
         return _add_months(start, 1)
     if period == "year":
         return _add_months(start, 12)
-    # A class pack runs out by visits; an expiry is optional.
+    # A class pack runs out by visits; an expiry is optional. A punch
+    # card never ends.
+    if period == "card":
+        return None
     return _add_months(start, months) if months else None
 
 
@@ -103,25 +106,31 @@ def _biz_public(biz: dict[str, Any]) -> dict[str, Any]:
 class PlanIn(BaseModel):
     name: str = Field(..., min_length=1, max_length=80)
     description: Optional[str] = Field(None, max_length=400)
-    period: Literal["month", "year", "pack"] = "month"
+    # "card" is a punch card: every `visits` visits earn `reward`.
+    period: Literal["month", "year", "pack", "card"] = "month"
     price: float = Field(..., ge=0, le=100000)
     # Visits included: per period for month/year, in total for a pack.
     # None = unlimited (a pack must say how many).
     visits: Optional[int] = Field(None, ge=1, le=1000)
     # A pack can expire this many months after it starts.
     valid_months: Optional[int] = Field(None, ge=1, le=36)
+    # A punch card's reward, in the business's words ("a free coffee").
+    reward: Optional[str] = Field(None, max_length=80)
     active: bool = True
 
 
 def _plan_out(p: dict[str, Any]) -> dict[str, Any]:
     return {"id": p["_id"], "business_id": p["business_id"], "name": p["name"], "description": p.get("description"),
             "period": p["period"], "price": p["price"], "currency": p.get("currency", "ILS"),
-            "visits": p.get("visits"), "valid_months": p.get("valid_months"), "active": p.get("active", True)}
+            "visits": p.get("visits"), "valid_months": p.get("valid_months"), "reward": p.get("reward"),
+            "active": p.get("active", True)}
 
 
 def _check_plan(body: PlanIn) -> None:
     if body.period == "pack" and not body.visits:
         raise HTTPException(status_code=422, detail="A class pack needs a number of visits")
+    if body.period == "card" and (not body.visits or not (body.reward or "").strip()):
+        raise HTTPException(status_code=422, detail="A punch card needs the number of visits and the reward")
 
 
 @router.get("/businesses/{business_id}/membership-plans")
@@ -209,7 +218,7 @@ async def _new_short_code(business_id: str) -> str:
 
 
 def _plan_copy(p: dict[str, Any]) -> dict[str, Any]:
-    return {k: p.get(k) for k in ("name", "period", "price", "currency", "visits", "valid_months")}
+    return {k: p.get(k) for k in ("name", "period", "price", "currency", "visits", "valid_months", "reward")}
 
 
 @router.post("/memberships/plan/{plan_id}/join")
@@ -250,8 +259,15 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
         "visits": 0, "last_visit_at": None, "source": "website",
         "created_at": _now_iso(), "history": [{"at": _now_iso(), "event": "joined"}],
     }
+    # A free punch card has nothing to pay for, so it starts at once.
+    free_card = plan["period"] == "card" and not float(plan.get("price") or 0)
+    if free_card:
+        doc.update(_activation(doc["plan"], start))
     await db.business_members.insert_one(doc)
     url = f"{_frontend_url()}/members/{doc['manage_token']}"
+    if free_card:
+        from .member_messages import on_activated
+        await on_activated(biz["_id"], doc)
     logger.info("[memberships] join business=%s plan=%s", biz["_id"], plan["_id"])
     await _notify(biz["owner_user_id"], type_="membership_join",
                   message=f"New member sign-up: {doc['name']} ({plan['name']})",
@@ -262,9 +278,9 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
                  f"<p>Phone: {_esc(phone)}</p>"
                  + (f"<p>Discount code {_esc(discount['code'])}: ₪{discount['amount']:g} off, ₪{discount['price_after']:g} to pay.</p>" if discount else "")
                  + "".join(f"<p>{_esc(a['label'])}: {_esc('Yes' if a['value'] is True else 'No' if a['value'] is False else a['value'])}</p>" for a in answers)
-                 + "<p>Once they have paid, mark them active in your member list.</p>",
+                 + ("<p>Their punch card is ready to use.</p>" if free_card else "<p>Once they have paid, mark them active in your member list.</p>"),
                  tag="membership-join", button=("Open members", "/dashboard?tab=members"))
-    if doc["email"]:
+    if doc["email"] and not free_card:   # a free card got its welcome above
         he = body.lang == "he"
         await _email(doc["email"],
                      _subject(f"{biz.get('name')}: {'ההרשמה התקבלה' if he else 'your membership sign-up'}"),
@@ -275,7 +291,7 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
                       f"has been received. The business will be in touch about payment and will then activate it.</p>"),
                      tag="membership-join-customer",
                      button=("לכרטיס המנוי" if he else "Your membership", url))
-    return {"member_id": doc["_id"], "manage_token": doc["manage_token"], "manage_url": url, "status": "pending"}
+    return {"member_id": doc["_id"], "manage_token": doc["manage_token"], "manage_url": url, "status": doc["status"]}
 
 
 def _member_state(m: dict[str, Any]) -> dict[str, Any]:
@@ -309,6 +325,7 @@ async def my_membership(token: str, request: Request):
         "business": _biz_public(biz), "name": m["name"], "plan": m["plan"], "status": m["status"],
         "start_date": m.get("start_date"), "renews_on": m.get("renews_on"), "visits_left": m.get("visits_left"),
         "visits": m.get("visits", 0), "last_visit_at": m.get("last_visit_at"),
+        "stamps": m.get("stamps", 0), "rewards": m.get("rewards", 0),
         "checkin_url": f"{_frontend_url()}/members/checkin/{m['checkin_code']}",
         "short_code": m["short_code"], "state": _member_state(m), "discount": m.get("discount"),
     }
@@ -324,7 +341,8 @@ def _member_out(m: dict[str, Any]) -> dict[str, Any]:
             "renews_on": m.get("renews_on"), "visits_left": m.get("visits_left"), "visits": m.get("visits", 0),
             "last_visit_at": m.get("last_visit_at"), "short_code": m.get("short_code"),
             "state": _member_state(m), "created_at": m.get("created_at"), "source": m.get("source"),
-            "answers": m.get("answers") or [], "discount": m.get("discount")}
+            "answers": m.get("answers") or [], "discount": m.get("discount"),
+            "stamps": m.get("stamps", 0), "rewards": m.get("rewards", 0)}
 
 
 @router.get("/businesses/{business_id}/members")
@@ -337,7 +355,7 @@ async def list_members(business_id: str, status: Optional[str] = Query(None, pat
     out = [_member_out(m) for m in rows]
     if not full:
         # Check-in only: who they are and whether they may come in.
-        keep = ("id", "name", "plan", "status", "renews_on", "visits_left", "visits", "last_visit_at", "short_code", "state")
+        keep = ("id", "name", "plan", "status", "renews_on", "visits_left", "visits", "last_visit_at", "short_code", "state", "stamps")
         out = [{k: m[k] for k in keep} for m in out]
     counts: dict[str, int] = {s: 0 for s in (*STATUSES, "due")}
     for m in out:
@@ -363,8 +381,10 @@ class MemberAddIn(BaseModel):
 
 def _activation(plan: dict[str, Any], start: date) -> dict[str, Any]:
     end = _period_end(start, plan["period"], plan.get("valid_months"))
+    # A punch card counts up to its reward instead of down.
+    card = plan["period"] == "card"
     return {"status": "active", "start_date": start.isoformat(), "renews_on": end.isoformat() if end else None,
-            "visits_left": plan.get("visits")}
+            "visits_left": None if card else plan.get("visits")}
 
 
 @router.post("/businesses/{business_id}/members")
@@ -456,16 +476,29 @@ async def _checkin(biz: dict[str, Any], m: Optional[dict[str, Any]], by: str) ->
     if not state["ok"]:
         return {**base, "ok": False, "reason": state["reason"], "visits_left": m.get("visits_left")}
     inc: dict[str, int] = {"visits": 1}
-    if m.get("visits_left") is not None:
+    card = m["plan"]["period"] == "card"
+    if card:
+        inc["stamps"] = 1
+    elif m.get("visits_left") is not None:
         inc["visits_left"] = -1
     m = await db.business_members.find_one_and_update(
         {"_id": m["_id"]}, {"$inc": inc, "$set": {"last_visit_at": _now_iso()}}, return_document=True)
+    reward = None
+    need = int(m["plan"].get("visits") or 0)
+    if card and need and m.get("stamps", 0) >= need:
+        # The visit that fills the card earns the reward and starts a new
+        # card. Conditional, so two scans at once cannot earn it twice.
+        r = await db.business_members.find_one_and_update(
+            {"_id": m["_id"], "stamps": {"$gte": need}}, {"$inc": {"stamps": -need, "rewards": 1}}, return_document=True)
+        if r:
+            m, reward = r, m["plan"].get("reward") or "reward"
     await db.member_checkins.insert_one({"_id": str(uuid.uuid4()), "business_id": biz["_id"], "member_id": m["_id"],
                                          "at": _now_iso(), "by": by})
     # A class they booked around now is marked attended (classes.py).
     from .classes import mark_attended
     cls = await mark_attended(m["_id"])
-    return {**base, "ok": True, "reason": None, "visits_left": m.get("visits_left"), "visits": m.get("visits"), "class": cls}
+    return {**base, "ok": True, "reason": None, "visits_left": m.get("visits_left"), "visits": m.get("visits"), "class": cls,
+            "stamps": m.get("stamps") if card else None, "stamps_needed": need if card else None, "reward": reward}
 
 
 @router.get("/businesses/{business_id}/members-door-link")

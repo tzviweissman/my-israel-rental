@@ -510,6 +510,10 @@ async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str, cont
     # and so the customer's tracking link (dropship.py). Never raises.
     from routes.marketplace.dropship import on_supplier_status
     await on_supplier_status(fresh)
+    if payload.status == "cancelled":
+        # A cancelled website order returns the stock it took (stock.py).
+        from .stock import give_back
+        await give_back(fresh)
     return _public(fresh, contact=contact)
 
 
@@ -1958,6 +1962,8 @@ async def standing_orders_daily_loop() -> None:
 class OrderLineIn(BaseModel):
     product_id: str = Field(..., min_length=1, max_length=64)
     qty: int = Field(..., ge=1, le=99)
+    # Which size, flavour or colour, when the product has options.
+    option_id: Optional[str] = Field(None, max_length=40)
 
 
 class WebsiteOrderIn(BaseModel):
@@ -2010,6 +2016,10 @@ def _products_for_order(gig: dict[str, Any]) -> list[dict[str, Any]]:
             "in_stock": p.get("in_stock", True),
             "group": p.get("group") or None,
             "serves": p.get("serves") or None,
+            # A counted product's number left (stock.py); None: not counted.
+            "stock": p.get("stock"),
+            "options": [{"id": o.get("id"), "name": o.get("name"), "price": o.get("price"), "in_stock": o.get("in_stock", True)}
+                        for o in p.get("options") or []],
         })
     return out
 
@@ -2096,8 +2106,16 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         prod = products.get(ln.product_id)
         if not prod or not prod.get("in_stock", True):
             raise HTTPException(status_code=400, detail="One of those items is no longer available")
-        price = float(prod.get("price") or 0)
-        lines.append({"product_id": prod["id"], "name": prod["name"], "price": price, "qty": ln.qty})
+        price, name, opt = float(prod.get("price") or 0), prod["name"], None
+        if prod.get("options"):
+            opt = next((o for o in prod["options"] if o["id"] == ln.option_id), None)
+            if not opt or not opt.get("in_stock", True):
+                raise HTTPException(status_code=400, detail=f"Pick a choice for {prod['name']}")
+            if opt.get("price") is not None:
+                price = float(opt["price"])
+            name = f"{prod['name']} ({opt['name']})"
+        lines.append({"product_id": prod["id"], "name": name, "price": price, "qty": ln.qty,
+                      **({"option_id": opt["id"], "option": opt["name"]} if opt else {})})
         subtotal += price * ln.qty
         currencies.add((prod.get("currency") or "ILS").upper())
     if len(currencies) > 1:
@@ -2126,6 +2144,14 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
     answers = check_answers(biz, "order", payload.answers)
 
+    # Counted stock is taken now, after every check of the form, and given
+    # back if the discount code is then refused (stock.py).
+    from .stock import OutOfStock, _put_back, take
+    try:
+        stock_taken = await take(gig["_id"], lines, products)
+    except OutOfStock as e:
+        raise HTTPException(status_code=400, detail=(f"{e.name} is sold out" if not e.left else f"Only {e.left} left of {e.name}")) from e
+
     # A discount code: checked again here, whatever the form showed, and
     # counted only if the order goes through. It comes off the goods,
     # never the delivery fee.
@@ -2135,8 +2161,10 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         try:
             code_doc, off = await evaluate(biz["_id"], payload.discount_code, "orders", subtotal, payload.customer_phone)
         except CodeRefused as e:
+            await _put_back(gig["_id"], stock_taken)
             raise HTTPException(status_code=400, detail=str(e)) from e
         if not await redeem(code_doc, off, payload.customer_phone):
+            await _put_back(gig["_id"], stock_taken)
             raise HTTPException(status_code=400, detail="This code has been used up")
         discount = {"code": code_doc["code"], "amount": off}
 
@@ -2176,6 +2204,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         "pay_by": payload.pay_by or None,
         "answers": answers,
         "discount": discount,
+        "stock_taken": stock_taken,
         "needed_by": needed_by,
         "window": payload.window.model_dump() if payload.window else None,
         "fulfilment": payload.fulfilment,

@@ -53,7 +53,9 @@ export default function MemberPassPage() {
             <CheckCircle2 size={22} className="shrink-0" style={{ color: 'var(--status-open, #2E7D4F)' }} />
             <div className="text-sm" style={{ color: 'var(--ink)' }}>
               <p className="font-semibold">{t('members.joinedTitle', 'You’re signed up')}</p>
-              <p>{t('members.joinedBody', '{{name}} will contact you about payment and then activate your membership. Save this page: it is your membership pass.', { name: bizName })}</p>
+              <p>{d.status === 'active'
+                ? t('members.joinedCard', 'Your card is ready. Show it at each visit. Save this page: it is your card.')
+                : t('members.joinedBody', '{{name}} will contact you about payment and then activate your membership. Save this page: it is your membership pass.', { name: bizName })}</p>
             </div>
           </div>
         )}
@@ -83,6 +85,20 @@ export default function MemberPassPage() {
               <p className="text-sm mt-3" style={{ color: 'var(--ink)' }}>
                 {t('members.showAtDoor', 'Show this at the door, or say your code:')} <b className="text-lg tracking-widest" dir="ltr">{d.short_code}</b>
               </p>
+            </div>
+          )}
+          {d.plan.period === 'card' && d.status === 'active' && (
+            <div className="mt-5" data-testid="pass-stamps">
+              <div className="flex flex-wrap justify-center gap-2" aria-label={t('members.stampsOf', '{{n}} of {{total}} stamps', { n: d.stamps || 0, total: d.plan.visits })}>
+                {Array.from({ length: Math.min(d.plan.visits || 0, 30) }, (_, i) => (
+                  <span key={i} className="w-8 h-8 rounded-full border-2 grid place-content-center text-xs font-bold"
+                        style={i < (d.stamps || 0) ? { background: 'var(--ink)', borderColor: 'var(--ink)', color: '#fff' } : { borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }}>
+                    {i < (d.stamps || 0) ? '✓' : i + 1}
+                  </span>
+                ))}
+              </div>
+              <p className="text-sm mt-2" style={{ color: 'var(--ink)' }}>{t('members.cardRule', 'Every {{n}} visits: {{reward}}', { n: d.plan.visits, reward: d.plan.reward })}</p>
+              {d.rewards > 0 && <p className="text-xs mt-1" style={{ color: 'var(--brand-muted)' }}>{t('members.rewardsSoFar', 'Rewards so far: {{n}}', { n: d.rewards })}</p>}
             </div>
           )}
           <dl className="mt-5 grid grid-cols-2 gap-3 text-start text-sm">

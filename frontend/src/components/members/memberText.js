@@ -5,10 +5,12 @@ export const planPrice = (t, p) => {
   const price = money(p.price, p.currency || 'ILS');
   if (p.period === 'month') return t('members.perMonth', '{{price}} a month', { price });
   if (p.period === 'year') return t('members.perYear', '{{price}} a year', { price });
+  if (p.period === 'card' && !Number(p.price)) return t('members.free', 'Free');
   return price;
 };
 
 export const planVisits = (t, p) => {
+  if (p.period === 'card') return t('members.cardRule', 'Every {{n}} visits: {{reward}}', { n: p.visits, reward: p.reward });
   if (p.period === 'pack') {
     const base = t('members.packVisits', '{{n}} visits', { n: p.visits });
     return p.valid_months ? `${base}, ${t('members.packValid', 'valid {{n}} months', { n: p.valid_months })}` : base;
