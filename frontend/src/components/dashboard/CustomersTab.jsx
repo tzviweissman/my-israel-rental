@@ -9,9 +9,10 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Loader2, Search, Download, Users, X, Phone, MessageCircle, Tag } from 'lucide-react';
+import { Loader2, Search, Download, Users, X, Phone, MessageCircle, Tag, Mail } from 'lucide-react';
 import { money } from '../../utils/currency';
 import { stateLabel } from '../members/memberText';
+import MessageComposer from './MessageComposer';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
@@ -165,6 +166,7 @@ export default function CustomersTab({ API, token }) {
   const [tag, setTag] = useState('');
   const [sort, setSort] = useState('recent');
   const [open, setOpen] = useState(null);
+  const [composing, setComposing] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -221,6 +223,9 @@ export default function CustomersTab({ API, token }) {
               {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
           )}
+          <button type="button" onClick={() => setComposing(true)} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-email">
+            <Mail size={14} /> {t('messages.open', 'Email customers')}
+          </button>
           <button type="button" onClick={exportCsv} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-export">
             <Download size={14} /> {t('customers.export', 'Export')}
           </button>
@@ -229,6 +234,11 @@ export default function CustomersTab({ API, token }) {
       <p className="text-sm mb-4" style={{ color: 'var(--brand-muted)' }}>
         {t('customers.body', 'Everyone who ordered, joined or booked with you, in one place. Add a note or tags to remember who is who.')}
       </p>
+
+      {composing && (
+        <MessageComposer API={API} auth={auth} businessId={biz.id} tags={data?.tags || []}
+                         initialKind={kind || 'all'} initialTag={tag} onClose={() => setComposing(false)} />
+      )}
 
       <div className="relative mb-3">
         <Search size={16} className="absolute top-1/2 -translate-y-1/2 start-3" style={{ color: 'var(--brand-muted)' }} aria-hidden="true" />

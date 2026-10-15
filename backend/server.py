@@ -536,6 +536,8 @@ async def startup_tasks() -> None:
         await ensure_dropship_indexes()
         from routes.marketplace.memberships import ensure_membership_indexes
         await ensure_membership_indexes()
+        from routes.marketplace.customer_messages import ensure_message_indexes
+        await ensure_message_indexes()
         from routes.marketplace.businesses import ensure_page_indexes
         from routes.marketplace.page_versions import ensure_version_indexes
         await ensure_page_indexes()

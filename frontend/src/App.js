@@ -149,6 +149,7 @@ const OrderPage = lazy(() => import('./pages/OrderPage'));
 const OrderTrackPage = lazy(() => import('./pages/OrderTrackPage'));
 const BookingTrackPage = lazy(() => import('./pages/BookingTrackPage'));
 const MembershipSignupPage = lazy(() => import('./pages/MembershipSignupPage'));
+const UnsubscribePage = lazy(() => import('./pages/UnsubscribePage'));
 const MemberPassPage = lazy(() => import('./pages/MemberPassPage'));
 const MemberDoorPage = lazy(() => import('./pages/MemberDoorPage'));
 const MemberCheckinPage = lazy(() => import('./pages/MemberDoorPage').then((m) => ({ default: m.MemberCheckinPage })));
@@ -534,6 +535,7 @@ function App() {
             {/* Memberships (routes/marketplace/memberships.py): sign-up with
                 no account, the member's pass, and the door. */}
             <Route path="/memberships/:slug" element={<MembershipSignupPage />} />
+            <Route path="/unsubscribe/:businessId/:e/:sig" element={<UnsubscribePage />} />
             <Route path="/members/door/:token" element={<MemberDoorPage />} />
             <Route path="/members/checkin/:code" element={<MemberCheckinPage />} />
             <Route path="/members/:token" element={<MemberPassPage />} />

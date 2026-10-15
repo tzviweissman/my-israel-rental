@@ -74,6 +74,9 @@ async def send_email(
     text_body: str | None = None,
     skip_suppression_check: bool = False,
     reply_to: str | None = None,
+    message_stream: str = "outbound",
+    from_name: str | None = None,
+    headers: dict[str, str] | None = None,
 ) -> bool:
     """Send an HTML email through Postmark. Non-blocking for callers via
     asyncio.to_thread. Returns True on success, False otherwise.
@@ -129,6 +132,11 @@ async def send_email(
         return False
 
     from_address = _from_address()
+    if from_name:
+        # A business's own messages (customer_messages.py) go out under its
+        # name, from our address: "Gym Name via MyIsraelRental".
+        safe = " ".join(from_name.replace('"', "").replace("<", "").replace(">", "").split())[:60]
+        from_address = f'"{safe}" <{os.environ.get("EMAIL_FROM") or EMAIL_FROM}>'
 
     def _send() -> dict:
         return client.emails.send(
@@ -137,9 +145,12 @@ async def send_email(
             Subject=subject,
             HtmlBody=html_body,
             TextBody=text_body or _strip_html(html_body),
-            MessageStream="outbound",
+            # "broadcast" for a business's messages to its customers: Postmark
+            # requires bulk mail on its own stream, away from order mail.
+            MessageStream=message_stream,
             Tag=tag or "transactional",
             ReplyTo=reply_to or EMAIL_REPLY_TO,
+            **({"Headers": headers} if headers else {}),
         )
 
     try:
