@@ -6,6 +6,9 @@ Areas (one permission each):
 
     orders      the order board and everything in Orders
     members     membership plans, the member list, check-in, the door link
+    checkin     check-in only: open the door screen, find a member and
+                check them in. Sees names and membership state, never
+                phone numbers, emails or answers. "members" includes it.
     customers   the customer list, notes and tags
     messages    emailing customers
     discounts   discount codes
@@ -21,7 +24,9 @@ from typing import Any, Optional
 
 from fastapi import HTTPException
 
-PERMS = ("orders", "members", "customers", "messages", "discounts", "summary")
+PERMS = ("orders", "members", "checkin", "customers", "messages", "discounts", "summary")
+# An area that includes another: whoever manages members can check them in.
+_INCLUDES = {"checkin": "members"}
 
 
 async def staff_perms(db: Any, business_id: str, user_id: str) -> list[str]:
@@ -37,6 +42,18 @@ async def business_access(db: Any, business_id: str, user: dict[str, Any], perm:
         raise HTTPException(status_code=404, detail="Business not found")
     if biz.get("owner_user_id") == user["user_id"] or user.get("role") == "admin":
         return biz
-    if perm and perm in await staff_perms(db, business_id, user["user_id"]):
+    if perm and has(perm, await staff_perms(db, business_id, user["user_id"])):
         return biz
     raise HTTPException(status_code=403, detail="Not your business")
+
+
+def has(perm: str, perms: list[str]) -> bool:
+    return perm in perms or (perm in _INCLUDES and _INCLUDES[perm] in perms)
+
+
+async def can(db: Any, business_id: str, user: dict[str, Any], perm: str) -> bool:
+    try:
+        await business_access(db, business_id, user, perm)
+        return True
+    except HTTPException:
+        return False

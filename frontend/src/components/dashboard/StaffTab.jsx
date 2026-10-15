@@ -8,8 +8,9 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, Plus, Trash2, Pencil, UserCog } from 'lucide-react';
 
-const AREAS = ['orders', 'members', 'customers', 'messages', 'discounts', 'summary'];
-const PRESETS = { manager: AREAS, front_desk: ['orders', 'members'] };
+const AREAS = ['orders', 'members', 'checkin', 'customers', 'messages', 'discounts', 'summary'];
+// Manager: everything (check-in is part of members).
+const PRESETS = { manager: AREAS.filter((a) => a !== 'checkin'), front_desk: ['orders', 'members'], checkin_only: ['checkin'] };
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 const btnOutline = 'inline-flex items-center gap-1.5 px-3 min-h-[44px] rounded-full border text-sm font-semibold';
@@ -21,12 +22,15 @@ function AreaPicker({ value, onChange }) {
     let next = value.includes(a) ? value.filter((x) => x !== a) : [...value, a];
     if (a === 'messages' && next.includes('messages') && !next.includes('customers')) next = [...next, 'customers'];
     if (a === 'customers' && !next.includes('customers')) next = next.filter((x) => x !== 'messages');
+    // Members already includes check-in.
+    if (a === 'members' && next.includes('members')) next = next.filter((x) => x !== 'checkin');
+    if (a === 'checkin' && next.includes('checkin')) next = next.filter((x) => x !== 'members');
     onChange(AREAS.filter((x) => next.includes(x)));
   };
   return (
     <div className="space-y-2">
       <div className="flex flex-wrap gap-2" role="group" aria-label={t('staff.role', 'Role')}>
-        {[['manager', t('staff.manager', 'Manager: everything')], ['front_desk', t('staff.frontDesk', 'Front desk: orders and members')], ['custom', t('staff.custom', 'Choose')]].map(([k, l]) => (
+        {[['manager', t('staff.manager', 'Manager: everything')], ['front_desk', t('staff.frontDesk', 'Front desk: orders and members')], ['checkin_only', t('staff.checkinOnly', 'Check-in only')], ['custom', t('staff.custom', 'Choose')]].map(([k, l]) => (
           <button key={k} type="button" aria-pressed={preset === k} onClick={() => k !== 'custom' && onChange(PRESETS[k])}
                   className="px-3 min-h-[36px] rounded-full border text-xs font-semibold"
                   style={preset === k ? { background: 'var(--ink)', color: '#fff', borderColor: 'var(--ink)' } : fieldStyle}>{l}</button>

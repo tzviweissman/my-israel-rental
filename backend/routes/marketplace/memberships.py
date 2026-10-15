@@ -84,10 +84,11 @@ async def ensure_membership_indexes() -> None:
     await db.businesses.create_index("members_door_token", unique=True, sparse=True)
 
 
-async def _owned_business(business_id: str, user: dict[str, Any]) -> dict[str, Any]:
-    """The owner, an admin, or staff with the Members area (utils/business_access.py)."""
+async def _owned_business(business_id: str, user: dict[str, Any], perm: str = "members") -> dict[str, Any]:
+    """The owner, an admin, or staff with the Members area (utils/business_access.py).
+    perm="checkin": also staff who only check people in at the door."""
     from utils.business_access import business_access
-    return await business_access(db, business_id, user, "members")
+    return await business_access(db, business_id, user, perm)
 
 
 def _biz_public(biz: dict[str, Any]) -> dict[str, Any]:
@@ -329,9 +330,15 @@ def _member_out(m: dict[str, Any]) -> dict[str, Any]:
 @router.get("/businesses/{business_id}/members")
 async def list_members(business_id: str, status: Optional[str] = Query(None, pattern="^(pending|active|paused|cancelled|expired|due)$"),
                        user=Depends(verify_token)):
-    await _owned_business(business_id, user)
+    from utils.business_access import can
+    await _owned_business(business_id, user, "checkin")
+    full = await can(db, business_id, user, "members")
     rows = await db.business_members.find({"business_id": business_id}).sort("created_at", -1).to_list(2000)
     out = [_member_out(m) for m in rows]
+    if not full:
+        # Check-in only: who they are and whether they may come in.
+        keep = ("id", "name", "plan", "status", "renews_on", "visits_left", "visits", "last_visit_at", "short_code", "state")
+        out = [{k: m[k] for k in keep} for m in out]
     counts: dict[str, int] = {s: 0 for s in (*STATUSES, "due")}
     for m in out:
         counts[m["status"]] = counts.get(m["status"], 0) + 1
@@ -462,7 +469,7 @@ async def _checkin(biz: dict[str, Any], m: Optional[dict[str, Any]], by: str) ->
 
 @router.get("/businesses/{business_id}/members-door-link")
 async def get_door_link(business_id: str, user=Depends(verify_token)):
-    biz = await _owned_business(business_id, user)
+    biz = await _owned_business(business_id, user, "checkin")
     t = biz.get("members_door_token")
     return {"token": t, "url": f"{_frontend_url()}/members/door/{t}" if t else None}
 
@@ -516,6 +523,6 @@ async def door_checkin(token: str, body: DoorCheckinIn, request: Request):
 
 @router.post("/businesses/{business_id}/members/{member_id}/checkin")
 async def owner_checkin(business_id: str, member_id: str, user=Depends(verify_token)):
-    biz = await _owned_business(business_id, user)
+    biz = await _owned_business(business_id, user, "checkin")
     m = await db.business_members.find_one({"_id": member_id, "business_id": business_id})
     return await _checkin(biz, m, user["user_id"])

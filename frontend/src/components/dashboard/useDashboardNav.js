@@ -20,7 +20,7 @@
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Building2, Layers, Store, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
-  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users, SlidersHorizontal, Contact, TicketPercent, BarChart3, UserCog,
+  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users, SlidersHorizontal, Contact, TicketPercent, BarChart3, UserCog, DoorOpen,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
 
@@ -69,6 +69,8 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
         { id: 'staff', label: t('dashboard.staff', 'Staff'), Icon: UserCog, show: runsBusiness },
         { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: tool('orders') || staff('orders') },
         { id: 'members', label: t('dashboard.members', 'Members'), Icon: Users, show: tool('members') || staff('members') },
+        // Staff who only check members in (backend business_access.py "checkin").
+        { id: 'checkin', label: t('dashboard.checkin', 'Check-in'), Icon: DoorOpen, show: staff('checkin') },
         // Waiting appointments or network requests always show: a badge
         // nobody can see is a customer nobody answers.
         { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: tool('appointments') || (runsBusiness && (summary.service_bookings_pending || 0) > 0) },
@@ -152,6 +154,7 @@ export const ALL_TAB_IDS = [
   'discounts',
   'summary',
   'staff',
+  'checkin',
   'network',
   'deliveries',
   'my-orders',

@@ -101,3 +101,39 @@ def test_owner_still_has_everything(setup):
     url = f"{BASE}/marketplace/businesses/{s['biz']}"
     for path in ("members", "orders", "customer-list", "summary", "staff", "discount-codes"):
         assert requests.get(f"{url}/{path}", headers=_auth(s["owner"]), timeout=30).status_code == 200, path
+
+
+def test_checkin_only_role(setup):
+    s = setup
+    url = f"{BASE}/marketplace/businesses/{s['biz']}"
+    plan = requests.post(f"{url}/membership-plans", json={"name": "Monthly", "price": 100}, headers=_auth(s["owner"]), timeout=30).json()
+    m = requests.post(f"{url}/members", json={"plan_id": plan["id"], "name": "Door Test", "phone": "0549990000", "email": "door@example.com"},
+                      headers=_auth(s["owner"]), timeout=30).json()
+    requests.post(f"{url}/members-door-link", headers=_auth(s["owner"]), timeout=30)
+    door, door_email = _account("staffdoor")
+    r = requests.post(f"{url}/staff", json={"email": door_email, "permissions": ["checkin"]}, headers=_auth(s["owner"]), timeout=30)
+    assert r.status_code == 200 and r.json()["permissions"] == ["checkin"]
+    requests.post(f"{BASE}/marketplace/staff/invite/{_token_for(r.json()['id'])}/accept", headers=_auth(door), timeout=30)
+
+    lst = requests.get(f"{url}/members", headers=_auth(door), timeout=30)
+    assert lst.status_code == 200
+    row = next(x for x in lst.json()["members"] if x["id"] == m["id"])
+    assert "phone" not in row and "email" not in row and "answers" not in row and row["name"] == "Door Test"
+    assert requests.get(f"{url}/members-door-link", headers=_auth(door), timeout=30).json()["token"]
+    c = requests.post(f"{url}/members/{m['id']}/checkin", headers=_auth(door), timeout=30).json()
+    assert c["ok"] is True
+    # Not the rest of Members.
+    assert requests.post(f"{url}/membership-plans", json={"name": "X", "price": 1}, headers=_auth(door), timeout=30).status_code == 403
+    assert requests.post(f"{url}/members/{m['id']}/action", json={"action": "cancel"}, headers=_auth(door), timeout=30).status_code == 403
+    assert requests.post(f"{url}/members-door-link", params={"rotate": True}, headers=_auth(door), timeout=30).status_code == 403
+    assert requests.get(f"{url}/membership-plans", headers=_auth(door), timeout=30).status_code == 403
+    places = requests.get(f"{BASE}/marketplace/my-workplaces", params={"perm": "checkin"}, headers=_auth(door), timeout=30).json()
+    assert [p["id"] for p in places] == [s["biz"]]
+    # A manager with Members gets check-in too, and the full list.
+    mgr, mgr_email = _account("staffmgr")
+    r = requests.post(f"{url}/staff", json={"email": mgr_email, "permissions": ["members", "checkin"]}, headers=_auth(s["owner"]), timeout=30)
+    assert r.json()["permissions"] == ["members"]
+    requests.post(f"{BASE}/marketplace/staff/invite/{_token_for(r.json()['id'])}/accept", headers=_auth(mgr), timeout=30)
+    row = next(x for x in requests.get(f"{url}/members", headers=_auth(mgr), timeout=30).json()["members"] if x["id"] == m["id"])
+    assert row["phone"]
+    assert requests.post(f"{url}/members/{m['id']}/checkin", headers=_auth(mgr), timeout=30).json()["ok"] is True

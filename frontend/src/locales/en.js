@@ -2103,6 +2103,7 @@ const en = {
         discounts: 'Discounts',
         summary: 'Sales summary',
         staff: 'Staff',
+        checkin: 'Check-in',
         appointments: 'Appointments',
         // D1 — these four tabs shared three words between them and no
         // user could predict what was behind any of them. Named now by
@@ -5245,8 +5246,19 @@ const en = {
         savedShort: 'Saved',
         help: 'Click text to select it, click again to type. Drag anything to move it. Click a photo to replace it. Moves on laptop and on phone are kept separately.',
       },
+      // Dashboard > Check-in (check-in-only staff).
+      checkin: {
+        title: "Check-in",
+        none: "You are not on a check-in team.",
+        openDoor: "Open the door screen",
+        noDoor: "The door screen is not set up yet. Ask the owner or a manager to make the door link in Members.",
+        doorHow: "On the device at the entrance: open the door screen once, then scan members’ passes with its camera.",
+        searchPh: "Find a member by name or code",
+        search: "Find a member",
+      },
       // Dashboard > Staff (backend routes/marketplace/staff.py).
       staff: {
+        checkinOnly: "Check-in only",
         title: "Staff",
         needBusiness: "Add a business first.",
         invite: "Invite someone",
@@ -5256,6 +5268,7 @@ const en = {
         frontDesk: "Front desk: orders and members",
         custom: "Choose",
         area: {
+          checkin: "Check-in only",
           orders: "Orders",
           members: "Members and check-in",
           customers: "Customer list",
@@ -5264,6 +5277,7 @@ const en = {
           summary: "Sales summary",
         },
         areaHelp: {
+          checkin: "The door and checking members in, no contact details",
           orders: "Take and update orders",
           members: "Plans, sign-ups, the door",
           customers: "Names, history, notes and tags",

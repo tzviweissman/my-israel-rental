@@ -40,6 +40,8 @@ def _clean_perms(perms: list[str]) -> list[str]:
     want = set(perms)
     if "messages" in want:
         want.add("customers")       # the email composer lives in the customer list
+    if "members" in want:
+        want.discard("checkin")     # already part of members
     out = [p for p in PERMS if p in want]
     if not out:
         raise HTTPException(status_code=422, detail="Choose at least one area they can open")
@@ -166,7 +168,8 @@ async def my_workplaces(perm: Optional[str] = Query(None, max_length=20), user=D
         out.append({"id": b["_id"], "name": b.get("name"), "name_he": b.get("name_he"), "slug": b.get("slug"),
                     "active": b.get("active", True), "role": "owner", "permissions": list(PERMS)})
     staff = await db.business_staff.find({"user_id": user["user_id"], "status": "active"}).to_list(100)
-    ids = [s["business_id"] for s in staff if not perm or perm in (s.get("permissions") or [])]
+    from utils.business_access import has
+    ids = [s["business_id"] for s in staff if not perm or has(perm, s.get("permissions") or [])]
     perms = {s["business_id"]: s.get("permissions") or [] for s in staff}
     async for b in db.businesses.find({"_id": {"$in": ids}, "active": {"$ne": False}}, {"name": 1, "name_he": 1, "slug": 1, "logo_url": 1}):
         out.append({"id": b["_id"], "name": b.get("name"), "name_he": b.get("name_he"), "slug": b.get("slug"),
