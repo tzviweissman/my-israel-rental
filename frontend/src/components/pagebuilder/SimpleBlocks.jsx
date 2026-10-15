@@ -109,7 +109,7 @@ export function TextBlock({ block, ctx }) {
   );
   return (
     <section data-testid={`pg-text-${block.id}`} className={`pt-6 ${image ? 'grid gap-5 md:grid-cols-2 md:items-center' : ''}`}>
-      {image && <img src={image} alt="" className="w-full rounded-2xl object-cover aspect-[4/3]" loading="lazy" />}
+      {image && <img src={image} alt="" className="w-full rounded-2xl object-cover aspect-[4/3]" loading="lazy" onError={(e) => { e.currentTarget.style.display = 'none'; }} />}
       {words}
     </section>
   );

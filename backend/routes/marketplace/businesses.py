@@ -37,7 +37,7 @@ from utils.businesses import (
     slug_change,
     unique_slug,
 )
-from utils.page_composition import PageBrief, PageComposition, dial_catalog
+from utils.page_composition import ExtraPage, PageBrief, PageComposition, check_pages, dial_catalog
 
 from .shared import (
     HAS_ANY_PHOTO,
@@ -269,6 +269,9 @@ class BusinessPatch(BaseModel):
     # exists, so BusinessIn does not take one and there is one fewer
     # surface a composition can arrive through.
     page: Optional[PageComposition] = None
+    # Extra pages with the menu that links them (utils/page_composition.py
+    # ExtraPage). The whole list each time; [] removes them all.
+    pages: Optional[list[ExtraPage]] = None
     # P7b - the six answers behind the page. Stored because "regenerating
     # never re-asks" and "editing the brief is free" are both promises the
     # spec makes, and neither is keepable if the answers are not kept.
@@ -334,6 +337,7 @@ def _public(
         # about who they sell to - is safe here and is NOT on the public
         # page payload.
         "page": doc.get("page"),
+        "pages": doc.get("pages") or [],
         "page_brief": doc.get("page_brief"),
         # The owner's own view: every testimonial, permission flag included.
         "testimonials": doc.get("testimonials") or [],
@@ -638,6 +642,12 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         update["featured_headline_translated"] = None
     if "collections" in provided:
         update["collections"] = [c.model_dump() for c in (payload.collections or [])]
+    if "pages" in provided:
+        try:
+            check_pages(payload.pages or [])
+        except ValueError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+        update["pages"] = [p.model_dump() for p in (payload.pages or [])]
     if "page" in provided:
         # Already validated by PageComposition on the way in - a bad
         # document never reaches here, it is a 422 naming the block. Null
@@ -1064,6 +1074,7 @@ async def public_business(
         # public endpoint. The owner gets it through their dashboard, and
         # through this endpoint only when it is their own page.
         "page": biz.get("page"),
+        "pages": biz.get("pages") or [],
         # Owner-sent testimonials: only named ones with permission.
         "testimonials": public_testimonials(biz.get("testimonials")),
         **({"page_brief": biz.get("page_brief")} if owner_preview else {}),

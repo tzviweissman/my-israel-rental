@@ -55,6 +55,14 @@ export function slugFromHost(host, apex = SITE_HOST) {
 }
 
 /** The business this tab is on, when it was opened at <slug>.<apex>. */
+/** The address of one of a business's extra pages (null for its main
+ *  page), on whichever host the visitor is on. */
+export function businessPageHref(slug, pageSlug) {
+  const onHost = !!currentBusinessHostSlug();
+  if (!pageSlug) return onHost ? '/' : `/business/${slug}`;
+  return onHost ? `/page/${pageSlug}` : `/business/${slug}/${pageSlug}`;
+}
+
 // A business's own domain (www.mybakery.co.il) does not name the business,
 // so frontend/server.js writes it into the page as window.__BIZ_HOST_SLUG
 // (backend custom_domains.py).

@@ -419,6 +419,43 @@ class PageBrief(BaseModel):
         return v
 
 
+MAX_PAGES = 8
+PAGE_SLUG = r"^[a-z0-9](?:[a-z0-9-]{0,38}[a-z0-9])?$"
+
+
+class ExtraPage(BaseModel):
+    """One of a business's extra pages (Tzvi, 15 Oct 2026: "extra pages and
+    menu", Shopify's About/FAQ/Contact pages). Its own title and address
+    and its own sections, from the same library and checked by the same
+    rules as the main page; the menu on the business page links them in
+    this order. Served at /business/<slug>/<page slug>, or /page/<page
+    slug> on the business's own address."""
+    model_config = ConfigDict(extra="forbid")
+
+    id: str = Field(..., pattern=BLOCK_ID)
+    slug: str = Field(..., pattern=PAGE_SLUG)
+    title: str = Field(..., min_length=1, max_length=40)
+    blocks: list[Block] = Field(..., min_length=1, max_length=MAX_BLOCKS)
+
+    @field_validator("blocks")
+    @classmethod
+    def _unique_blocks(cls, v: list[Block]) -> list[Block]:
+        ids = [b.id for b in v]
+        if len(set(ids)) != len(ids):
+            raise ValueError("duplicate block id on a page")
+        return v
+
+
+def check_pages(pages: list[ExtraPage]) -> None:
+    """Unique ids and addresses across the business's pages."""
+    if len(pages) > MAX_PAGES:
+        raise ValueError(f"at most {MAX_PAGES} pages")
+    for attr in ("id", "slug"):
+        vals = [getattr(p, attr) for p in pages]
+        if len(set(vals)) != len(vals):
+            raise ValueError(f"two pages share the same {attr}")
+
+
 # ------------------------------------------------------------ helpers
 
 

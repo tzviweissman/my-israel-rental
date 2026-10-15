@@ -224,13 +224,17 @@ const BUSINESS_HOST_SLUG = currentBusinessHostSlug();
 
 function HostAwareRoutes({ children }) {
   const location = useLocation();
-  const offPage = !!BUSINESS_HOST_SLUG && location.pathname !== '/';
+  // A business's extra pages live at /page/<slug> on its own address
+  // (backend utils/page_composition.py ExtraPage); everything else there is
+  // the main site's.
+  const extraPage = BUSINESS_HOST_SLUG && /^\/page\/([a-z0-9-]{1,40})\/?$/.exec(location.pathname);
+  const offPage = !!BUSINESS_HOST_SLUG && location.pathname !== '/' && !extraPage;
   useEffect(() => {
     if (offPage) window.location.replace(apexUrl(`${location.pathname}${location.search}${location.hash}`));
   }, [offPage, location]);
   if (offPage) return <RouteFallback />;
   const routed = BUSINESS_HOST_SLUG
-    ? { ...location, pathname: `/business/${BUSINESS_HOST_SLUG}` }
+    ? { ...location, pathname: `/business/${BUSINESS_HOST_SLUG}${extraPage ? `/${extraPage[1]}` : ''}` }
     : location;
   return <Routes location={routed}>{children}</Routes>;
 }
@@ -528,6 +532,7 @@ function App() {
                 Both resolve: the spec allows either as canonical and the
                 short-link table already points at /business/{id}. */}
             <Route path="/business/:slug" element={<BusinessPage />} />
+            <Route path="/business/:slug/:pageSlug" element={<BusinessPage />} />
             {/* Store orders (docs/orders-and-delivery-spec.md O3): the
                 counter's board, no login, one capability token per
                 business; and the owner's print view. */}

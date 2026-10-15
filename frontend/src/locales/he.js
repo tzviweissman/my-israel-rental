@@ -5228,6 +5228,30 @@ const he = {
         badDates: "תאריך הסיום לפני תאריך ההתחלה.",
         remove: "הסרת ההודעה",
       },
+      // Design your page → Pages (PagesEditor.jsx).
+      pages: {
+        title: "דפים",
+        hint: "הדף הראשי שלכם, ועוד דפים אם תרצו. כשיש יותר מאחד, תפריט בראש הדף מקשר ביניהם. בחרו דף כדי לשנות את החלקים שלו למטה.",
+        name: "שם הדף",
+        remove: "הסרת הדף",
+        confirmRemove: "להסיר את הדף? החלקים שלו יוסרו איתו.",
+        add: "הוספת דף",
+        untitled: "דף",
+        tpl: {
+          about: "עלינו",
+          faq: "שאלות",
+          contact: "יצירת קשר",
+          gallery: "גלריה",
+          blank: "דף ריק",
+          aboutHeading: "מי אנחנו",
+          faqHeading: "שאלות שלקוחות שואלים",
+        },
+      },
+      // The menu on a business page (BusinessMenu.jsx).
+      pagesMenu: {
+        home: "ראשי",
+        label: "דפים",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "הזמינו חבר",

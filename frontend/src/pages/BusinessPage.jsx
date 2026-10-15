@@ -54,6 +54,7 @@ import { prettyArea, areaLabel } from '../utils/areaNames';
 import { accentFor, accentColors, brandColors } from '../utils/businessAccent';
 import { useBrandFonts } from '../utils/brandFonts';
 import NoticeBar, { liveNotice } from '../components/marketplace/NoticeBar';
+import BusinessMenu from '../components/marketplace/BusinessMenu';
 import useCoverScrim from '../hooks/useCoverScrim';
 
 /**
@@ -64,8 +65,10 @@ import useCoverScrim from '../hooks/useCoverScrim';
  * @param {boolean} preview  true when this is being shown inside the editor
  *   rather than being visited.
  */
-const BusinessPage = ({ business: injected = null, preview = false }) => {
-  const { slug } = useParams();
+const BusinessPage = ({ business: injected = null, preview = false, pageSlug: previewPage = null, onPagePick = null }) => {
+  const { slug, pageSlug: routePage } = useParams();
+  // One of the business's extra pages (backend ExtraPage), or the main page.
+  const extraSlug = injected ? previewPage : routePage;
   const navigate = useNavigate();
   const { t, i18n } = useTranslation();
   const { token, user } = useContext(AuthContext);
@@ -179,7 +182,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
 
   // v3 pages thin the global nav (styles/page-v3.css). Above the early
   // returns for the same reason as the hook above: every render runs it.
-  const v3Shell = Boolean(biz && biz.page_v3 && biz.design_brief && biz.design_brief.palette);
+  const v3Shell = Boolean(!extraSlug && biz && biz.page_v3 && biz.design_brief && biz.design_brief.palette);
   const v3OfferRef = useRef(null);
   useEffect(() => {
     if (!v3Shell || preview) return undefined;
@@ -221,6 +224,8 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
       </div>
     );
   }
+  const extra = extraSlug ? (biz.pages || []).find((p) => p.slug === extraSlug) || null : null;
+  if (extraSlug && !extra) return <NotFound />;
 
   /* B1 — the page had no way to contact the business at all. A visitor
      who arrived from the owner's own flyer, liked what they saw and
@@ -327,7 +332,8 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
 
   // Page builder v3 (docs/page-builder-design-rules.md): the API sends the
   // design brief only when the site switch AND this business's switch are on.
-  const v3 = Boolean(biz.page_v3 && biz.design_brief && biz.design_brief.palette);
+  // An extra page is always the standard page with its own sections.
+  const v3 = !extra && Boolean(biz.page_v3 && biz.design_brief && biz.design_brief.palette);
   const v3Brief = v3 ? biz.design_brief : null;
   const v3Price = v3Brief?.primary_action?.price_anchor
     ? money(v3Brief.primary_action.price_anchor, v3Brief.primary_action.currency || 'ILS') : null;
@@ -778,10 +784,17 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         </div>
         )}
 
+        <BusinessMenu business={biz} current={extraSlug} preview={preview} onPick={onPagePick} />
+        {extra && (
+          <h2 className="text-2xl sm:text-3xl font-bold mb-4" dir="auto" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }} data-testid="business-extra-title">
+            {extra.title}
+          </h2>
+        )}
+
         {/* The paid page upgrade (backend utils/page_upgrade): the four
             questions answered above the body. Absent on every standard
             page; nothing else on the page changes for it. */}
-        {biz.page_upgrade && (() => {
+        {!extra && biz.page_upgrade && (() => {
           const view = biz.upgrade_view || {};
           const listings = biz.listings || [];
           const what = [...new Set([...(biz.categories || []), ...listings.map((g) => g.category)].filter(Boolean))]
@@ -845,11 +858,11 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
             travels in `ctx` and stays the reader's, because a document
             that could hold someone's search box open would be a document
             fighting the person reading it. */}
-        {biz.page_upgrade && <div id="business-body" className="scroll-mt-24" />}
+        {!extra && biz.page_upgrade && <div id="business-body" className="scroll-mt-24" />}
         {/* The owner's first featured item, large. Nothing featured: nothing. */}
-        <FeaturedHero business={biz} t={t} i18n={i18n} onOpen={(g) => navigate(`/businesses/${g.id}`)} />
+        {!extra && <FeaturedHero business={biz} t={t} i18n={i18n} onOpen={(g) => navigate(`/businesses/${g.id}`)} />}
         {(!v3 || v3Blocks.length > 0) && <BlockList
-          business={v3Body}
+          business={extra ? { ...biz, page: { theme: (biz.page || {}).theme, blocks: extra.blocks } } : v3Body}
           ctx={{
             t,
             i18n,
@@ -873,7 +886,7 @@ const BusinessPage = ({ business: injected = null, preview = false }) => {
         {/* Verified reviews across this business's listings, plus its
             own Google reviews (routes/reviews.py). Nothing while off. */}
         {/* On a v3 page the reviews are V3Reviews, above the offer. */}
-        {!v3 && <ReviewsSection
+        {!v3 && !extra && <ReviewsSection
           businessId={biz.id}
           kind="business"
           className="mt-10"

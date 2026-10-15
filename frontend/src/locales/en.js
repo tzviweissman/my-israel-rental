@@ -5410,6 +5410,30 @@ const en = {
         badDates: "The end date is before the start date.",
         remove: "Remove the notice",
       },
+      // Design your page → Pages (PagesEditor.jsx).
+      pages: {
+        title: "Pages",
+        hint: "Your main page, and more pages if you want them. With more than one, a menu at the top links them. Pick a page to change its sections below.",
+        name: "Page name",
+        remove: "Remove page",
+        confirmRemove: "Remove this page? Its sections go with it.",
+        add: "Add a page",
+        untitled: "Page",
+        tpl: {
+          about: "About us",
+          faq: "Questions",
+          contact: "Contact",
+          gallery: "Gallery",
+          blank: "Blank page",
+          aboutHeading: "Who we are",
+          faqHeading: "Questions customers ask",
+        },
+      },
+      // The menu on a business page (BusinessMenu.jsx).
+      pagesMenu: {
+        home: "Home",
+        label: "Pages",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "Invite a friend",

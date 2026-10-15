@@ -545,7 +545,9 @@ const server = http.createServer(async (req, res) => {
   const customSlug = slugFromHost(req.headers.host, PUBLIC_SITE_HOST) ? null : await customDomainSlug(req.headers.host);
   const hostSlug = slugFromHost(req.headers.host, PUBLIC_SITE_HOST) || customSlug;
   const pathname = pathnameOf(req);
-  if (hostSlug && pathname !== '/' && !isBuildFile(pathname)) {
+  // /page/<slug> on a business host is one of its extra pages (the app
+  // routes it), not a path of the main site.
+  if (hostSlug && pathname !== '/' && !isBuildFile(pathname) && !/^\/page\/[a-z0-9-]{1,40}\/?$/.test(pathname)) {
     res.writeHead(302, {
       Location: `https://${PUBLIC_SITE_HOST}${req.url}`,
       'Cache-Control': 'no-cache',
@@ -611,7 +613,7 @@ const server = http.createServer(async (req, res) => {
       // Listed but missing from the build: the standard page, never an error.
     }
   }
-  if (customSlug && pathname === '/') {
+  if (customSlug && (pathname === '/' || /^\/page\/[a-z0-9-]{1,40}\/?$/.test(pathname))) {
     try {
       const html = indexFor(customSlug);
       res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
