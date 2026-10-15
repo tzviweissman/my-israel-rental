@@ -10,10 +10,10 @@ def test_missing_and_photoless_listings_drop_out_and_order_is_kept():
         {'id': s0, 'images': ['https://x/clip.mp4', 'https://x/a.jpg'], 'area': ''},
         # s1 is gone (deleted or hidden): not in the list at all
     ]
-    g0, g1 = ht.GIG_IDS[:2]
+    g0, g1 = ht.GIG_IDS[:2]  # stored under _id, as in marketplace_gigs
     gigs = [
-        {'id': g0, 'title': 'Catering', 'gallery': [], 'products': [{'images': ['https://x/p.jpg']}]},
-        {'id': g1, 'title': 'No photos', 'gallery': [], 'products': [], 'tiers': [{'images': []}]},
+        {'_id': g0, 'title': 'Catering', 'gallery': [], 'products': [{'images': ['https://x/p.jpg']}]},
+        {'_id': g1, 'title': 'No photos', 'gallery': [], 'products': [], 'tiers': [{'images': []}]},
     ]
     out = ht.build(props, gigs)
     assert [t['href'] for t in out['stays']] == [f'/property/{s0}', f'/property/{s2}']

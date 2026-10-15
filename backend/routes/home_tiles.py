@@ -65,7 +65,8 @@ def gig_photo(g: dict):
 def build(props: list[dict], gigs: list[dict]) -> dict:
     """Keep the picked order; drop anything missing or without a photo."""
     by_p = {p['id']: p for p in props}
-    by_g = {g['id']: g for g in gigs}
+    # gigs are keyed by _id in the database; the public API calls it id
+    by_g = {g.get('id') or g.get('_id'): g for g in gigs}
     stays = []
     for i in STAY_IDS:
         p = by_p.get(i)
@@ -91,8 +92,8 @@ async def opening_tiles(response: Response) -> dict:
             {'id': {'$in': STAY_IDS}, 'is_hidden': {'$ne': True}},
             {'_id': 0, 'id': 1, 'images': 1, 'area': 1}).to_list(len(STAY_IDS))
         gigs = await db.marketplace_gigs.find(
-            {'id': {'$in': GIG_IDS}, 'status': 'published'},
-            {'_id': 0, 'id': 1, 'title': 1, 'title_he': 1, 'gallery': 1, 'products': 1, 'tiers': 1}).to_list(len(GIG_IDS))
+            {'_id': {'$in': GIG_IDS}, 'status': 'published'},
+            {'_id': 1, 'title': 1, 'title_he': 1, 'gallery': 1, 'products': 1, 'tiers': 1}).to_list(len(GIG_IDS))
         _CACHE["data"] = build(props, gigs)
         _CACHE["at"] = now
     response.headers["Cache-Control"] = "public, max-age=60"
