@@ -5064,6 +5064,33 @@ const he = {
         savedShort: 'נשמר',
         help: 'לחצו על טקסט כדי לבחור אותו, ולחצו שוב כדי להקליד. גררו כל דבר כדי להזיז אותו. לחצו על תמונה כדי להחליף אותה. הזזות במחשב ובטלפון נשמרות בנפרד.',
       },
+      // Automatic messages to members (backend member_messages.py).
+      auto: {
+        title: "הודעות אוטומטיות למנויים",
+        saved: "נשמר",
+        failed: "לא נשמר. נסו שוב.",
+        body: "נשלחות במייל מעצמן, בשפה של כל מנוי. רק למנויים שהשאירו אימייל. בנוסח שלכם אפשר להשתמש ב־{name}, {business}, {plan}, {date}, {class} ו־{time}.",
+        name: {
+          welcome: "ברוכים הבאים",
+          renewal: "תזכורת חידוש",
+          class: "תזכורת לשיעור",
+          winback: "מזמן לא ראינו אותך",
+        },
+        when: {
+          welcome: "כשמנוי מופעל",
+          renewal: "לפני שמנוי מתחדש",
+          class: "לפני שיעור שמישהו נרשם אליו",
+          winback: "כשמנוי פעיל לא הגיע כבר זמן מה",
+        },
+        on: "פעיל",
+        daysBefore: "ימים לפני",
+        hoursBefore: "שעות לפני",
+        after: "אחרי",
+        daysNoVisit: "ימים בלי ביקור",
+        winbackNote: "ההודעה הזו מזמינה לחזור, ולכן יש בה קישור להסרה והיא לא נשלחת למי שהסיר את עצמו.",
+        ownWords: "בנוסח שלי",
+        save: "שמירה",
+      },
       // Class timetable and booking (backend classes.py).
       classes: {
         title: "שיעורים",

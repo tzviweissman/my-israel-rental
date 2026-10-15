@@ -17,6 +17,7 @@ import { Loader2, Plus, Users, Copy, Check, DoorOpen, Link2, X, Pencil, Trash2 }
 import { money } from '../../utils/currency';
 import { planPrice, planVisits, stateLabel } from '../members/memberText';
 import CustomFieldsEditor from './CustomFieldsEditor';
+import AutoMessages from './AutoMessages';
 import { AnswersList } from '../forms/CustomFieldInputs';
 
 const FILTERS = ['pending', 'active', 'due', 'paused', 'cancelled'];
@@ -316,7 +317,8 @@ export default function MembersTab({ API, token }) {
         )}
       </section>
 
-      <div className="mb-6"><CustomFieldsEditor API={API} auth={auth} businessId={biz.id} form="membership" /></div>
+      <div className="mb-3"><CustomFieldsEditor API={API} auth={auth} businessId={biz.id} form="membership" /></div>
+      <div className="mb-6"><AutoMessages API={API} auth={auth} businessId={biz.id} /></div>
 
       {/* Links */}
       {plans.some((p) => p.active) && (

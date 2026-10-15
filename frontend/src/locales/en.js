@@ -5247,6 +5247,33 @@ const en = {
         savedShort: 'Saved',
         help: 'Click text to select it, click again to type. Drag anything to move it. Click a photo to replace it. Moves on laptop and on phone are kept separately.',
       },
+      // Automatic messages to members (backend member_messages.py).
+      auto: {
+        title: "Automatic messages to members",
+        saved: "Saved",
+        failed: "Could not save. Try again.",
+        body: "Sent by email on their own, in each member’s language. Only to members who gave an email. You can use {name}, {business}, {plan}, {date}, {class} and {time} in your own words.",
+        name: {
+          welcome: "Welcome",
+          renewal: "Renewal reminder",
+          class: "Class reminder",
+          winback: "We haven't seen you",
+        },
+        when: {
+          welcome: "When a membership is activated",
+          renewal: "Before a membership renews",
+          class: "Before a class someone booked",
+          winback: "When an active member has not come for a while",
+        },
+        on: "On",
+        daysBefore: "days before",
+        hoursBefore: "hours before",
+        after: "After",
+        daysNoVisit: "days without a visit",
+        winbackNote: "This one invites people back, so it carries an unsubscribe link and skips anyone who unsubscribed.",
+        ownWords: "Use my own words",
+        save: "Save",
+      },
       // Class timetable and booking (backend classes.py).
       classes: {
         title: "Classes",

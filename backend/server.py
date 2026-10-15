@@ -300,6 +300,10 @@ async def startup_tasks() -> None:
     # replicas cannot both fire. See routes/marketplace/automations.py.
     from routes.marketplace.automations import schedule_loop
     asyncio.create_task(schedule_loop())
+    # Automatic messages to members: welcome, renewal, class reminders,
+    # "we haven't seen you" (routes/marketplace/member_messages.py).
+    from routes.marketplace.member_messages import member_messages_loop
+    asyncio.create_task(member_messages_loop())
     # Requests board lifecycle — daily at 05:00 UTC. Flips open->expired
     # once a request's 30 days are up. A soft flip, not a TTL index, so
     # the seeker can still renew it. See the single-replica note in
@@ -544,6 +548,8 @@ async def startup_tasks() -> None:
         await ensure_staff_indexes()
         from routes.marketplace.classes import ensure_class_indexes
         await ensure_class_indexes()
+        from routes.marketplace.member_messages import ensure_member_message_indexes
+        await ensure_member_message_indexes()
         from routes.marketplace.businesses import ensure_page_indexes
         from routes.marketplace.page_versions import ensure_version_indexes
         await ensure_page_indexes()

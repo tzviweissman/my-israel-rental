@@ -386,6 +386,9 @@ async def add_member(business_id: str, body: MemberAddIn, user=Depends(verify_to
         "created_at": _now_iso(), "history": [{"at": _now_iso(), "event": "added"}],
     }
     await db.business_members.insert_one(doc)
+    if doc["status"] == "active":
+        from .member_messages import on_activated
+        await on_activated(business_id, doc)
     return {**_member_out(doc), "manage_url": f"{_frontend_url()}/members/{doc['manage_token']}"}
 
 
@@ -423,16 +426,11 @@ async def member_action(business_id: str, member_id: str, body: MemberActionIn, 
     m = await db.business_members.find_one_and_update(
         {"_id": member_id}, {"$set": {**sets, "updated_at": _now_iso()},
                              "$push": {"history": {"at": _now_iso(), "event": body.action}}}, return_document=True)
-    if body.action == "activate" and m.get("email"):
-        biz = await db.businesses.find_one({"_id": business_id}) or {}
-        he = m.get("lang") == "he"
-        await _email(m["email"], _subject(f"{biz.get('name')}: {'המנוי פעיל' if he else 'your membership is active'}"),
-                     (f"<p>שלום {_esc(m['name'])},</p><p>המנוי שלך ל{_esc(plan['name'])} פעיל. בכניסה הציגו את הקוד שבכרטיס המנוי.</p>"
-                      if he else
-                      f"<p>Hi {_esc(m['name'])},</p><p>Your {_esc(plan['name'])} membership is active. "
-                      f"Show the code on your membership pass at the door.</p>"),
-                     tag="membership-active", button=("לכרטיס המנוי" if he else "Your membership pass",
-                                                      f"/members/{m['manage_token']}"))
+    if body.action == "activate":
+        # The welcome message (member_messages.py): the business can switch
+        # it off or reword it; it carries the membership pass.
+        from .member_messages import on_activated
+        await on_activated(business_id, m)
     return _member_out(m)
 
 
