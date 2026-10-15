@@ -169,7 +169,7 @@ export default function OrdersTab({ API, token }) {
   // ---- businesses -------------------------------------------------------
   useEffect(() => {
     let alive = true;
-    axios.get(`${API}/marketplace/businesses`, auth)
+    axios.get(`${API}/marketplace/my-workplaces`, { ...auth, params: { perm: 'orders' } })
       .then(({ data }) => {
         if (!alive) return;
         const active = (data || []).filter((b) => b.active);
@@ -429,7 +429,7 @@ export default function OrdersTab({ API, token }) {
           ['couriers', Bike, t('orders.couriers', 'Couriers'), () => setPanel(panel === 'couriers' ? null : 'couriers')],
           ['standing', Repeat, t('orders.standing', 'Weekly'), () => setPanel(panel === 'standing' ? null : 'standing')],
           ['questions', ListPlus, t('fields.ordersButton', 'Questions'), () => setPanel(panel === 'questions' ? null : 'questions')],
-        ].map(([key, Icon, lbl, fn]) => (
+        ].filter(([key]) => biz.role !== 'staff' || !(['staff', 'couriers'].includes(key) || (key === 'insights' && !(biz.permissions || []).includes('summary')))).map(([key, Icon, lbl, fn]) => (
           <button
             key={key}
             type="button"

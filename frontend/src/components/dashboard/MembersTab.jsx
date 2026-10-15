@@ -161,7 +161,7 @@ export default function MembersTab({ API, token }) {
 
   useEffect(() => {
     let alive = true;
-    axios.get(`${API}/marketplace/businesses`, auth)
+    axios.get(`${API}/marketplace/my-workplaces`, { ...auth, params: { perm: 'members' } })
       .then(({ data }) => {
         if (!alive) return;
         const active = (data || []).filter((b) => b.active);

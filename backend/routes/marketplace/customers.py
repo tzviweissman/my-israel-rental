@@ -38,12 +38,9 @@ _TAG = re.compile(r"^[^\s,][^,]{0,29}$")
 
 
 async def _owned(business_id: str, user: dict[str, Any]) -> dict[str, Any]:
-    biz = await db.businesses.find_one({"_id": business_id})
-    if not biz:
-        raise HTTPException(status_code=404, detail="Business not found")
-    if biz.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Not your business")
-    return biz
+    """The owner, an admin, or staff with the Customers area (utils/business_access.py)."""
+    from utils.business_access import business_access
+    return await business_access(db, business_id, user, "customers")
 
 
 def customer_key(phone: Optional[str], email: Optional[str], name: Optional[str]) -> Optional[str]:

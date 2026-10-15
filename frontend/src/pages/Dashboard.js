@@ -26,6 +26,7 @@ import ToolsTab from '../components/dashboard/ToolsTab';
 import CustomersTab from '../components/dashboard/CustomersTab';
 import DiscountsTab from '../components/dashboard/DiscountsTab';
 import SummaryTab from '../components/dashboard/SummaryTab';
+import StaffTab from '../components/dashboard/StaffTab';
 import DeliveriesTab from '../components/dashboard/DeliveriesTab';
 import NetworkTab from '../components/dashboard/NetworkTab';
 import MyOrdersTab from '../components/dashboard/MyOrdersTab';
@@ -68,6 +69,7 @@ const Dashboard = () => {
   // D4/D5 — one call feeding both the tab badges and the attention strip,
   // so the two can never show different numbers for the same fact.
   const [summary, setSummary] = useState({});
+  const staffIn = (area) => (summary.staff_permissions || []).includes(area);
   // Show the service tabs to anyone who may publish OR who already owns a
   // service — an owner who added one had no way to manage it before.
   const showGigTabs = canPublishGigs(user) || (summary?.gigs_count || 0) > 0;
@@ -289,7 +291,7 @@ const Dashboard = () => {
   const activeLabel = nav.groups.flatMap((g) => g.tabs).find((tab) => tab.id === activeTab)?.label;
   // Tabs that already open on their own heading (usually with their main
   // action beside it) get no second one from the shell.
-  const OWN_TITLE = ['properties', 'my-businesses', 'orders', 'members', 'tools', 'customers', 'discounts', 'summary', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts', 'bookings', 'contracts'];
+  const OWN_TITLE = ['properties', 'my-businesses', 'orders', 'members', 'tools', 'customers', 'discounts', 'summary', 'staff', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts', 'bookings', 'contracts'];
   const pageTitle = OWN_TITLE.includes(activeTab) ? null : (onOverview || !activeLabel ? t('dashboard.title') : activeLabel);
   const showListingActions = onOverview || activeTab === 'properties' || activeTab === 'bulk-manager';
 
@@ -583,19 +585,22 @@ const Dashboard = () => {
           />
         )}
 
-        {activeTab === 'orders' && showGigTabs && (
+        {activeTab === 'orders' && (showGigTabs || staffIn('orders')) && (
           <OrdersTab API={API} token={token} />
         )}
-        {activeTab === 'members' && showGigTabs && (
+        {activeTab === 'members' && (showGigTabs || staffIn('members')) && (
           <MembersTab API={API} token={token} />
         )}
-        {activeTab === 'summary' && showGigTabs && (
+        {activeTab === 'summary' && (showGigTabs || staffIn('summary')) && (
           <SummaryTab API={API} token={token} />
         )}
-        {activeTab === 'discounts' && showGigTabs && (
+        {activeTab === 'staff' && showGigTabs && (
+          <StaffTab API={API} token={token} />
+        )}
+        {activeTab === 'discounts' && (showGigTabs || staffIn('discounts')) && (
           <DiscountsTab API={API} token={token} />
         )}
-        {activeTab === 'customers' && showGigTabs && (
+        {activeTab === 'customers' && (showGigTabs || staffIn('customers')) && (
           <CustomersTab API={API} token={token} />
         )}
         {activeTab === 'tools' && showGigTabs && (

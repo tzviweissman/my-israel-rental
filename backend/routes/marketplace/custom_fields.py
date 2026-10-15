@@ -189,24 +189,27 @@ def answers_text(answers: list[dict[str, Any]]) -> str:
     return "\n".join(lines)
 
 
-async def _owned(business_id: str, user: dict[str, Any]) -> dict[str, Any]:
-    biz = await db.businesses.find_one({"_id": business_id})
-    if not biz:
-        raise HTTPException(status_code=404, detail="Business not found")
-    if biz.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Not your business")
-    return biz
+async def _owned(business_id: str, user: dict[str, Any], perm: str | None = None) -> dict[str, Any]:
+    """The owner, an admin, or staff with the area the form belongs to."""
+    from utils.business_access import business_access
+    return await business_access(db, business_id, user, perm)
 
 
 @router.get("/businesses/{business_id}/custom-fields")
 async def get_fields(business_id: str, user=Depends(verify_token)):
-    biz = await _owned(business_id, user)
+    from utils.business_access import staff_perms
+    biz = await db.businesses.find_one({"_id": business_id})
+    if biz and biz.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
+        perms = await staff_perms(db, business_id, user["user_id"])
+        if not ({"orders", "members"} & set(perms)):
+            raise HTTPException(status_code=403, detail="Not your business")
+    biz = biz or await _owned(business_id, user)
     return {f: public_fields(biz, f) for f in FORMS}
 
 
 @router.put("/businesses/{business_id}/custom-fields/{form}")
 async def set_fields(business_id: str, form: Literal["membership", "order"], body: FieldsIn, user=Depends(verify_token)):
-    await _owned(business_id, user)
+    await _owned(business_id, user, "orders" if form == "order" else "members")
     fields = _clean(body.fields)
     await _fill_translations(fields)
     await db.businesses.update_one({"_id": business_id}, {"$set": {f"custom_fields.{form}": fields}})

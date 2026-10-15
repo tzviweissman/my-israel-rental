@@ -85,13 +85,9 @@ async def ensure_membership_indexes() -> None:
 
 
 async def _owned_business(business_id: str, user: dict[str, Any]) -> dict[str, Any]:
-    """Same rule as businesses.py and orders.py: the owner, or an admin."""
-    biz = await db.businesses.find_one({"_id": business_id})
-    if not biz:
-        raise HTTPException(status_code=404, detail="Business not found")
-    if biz.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Not your business")
-    return biz
+    """The owner, an admin, or staff with the Members area (utils/business_access.py)."""
+    from utils.business_access import business_access
+    return await business_access(db, business_id, user, "members")
 
 
 def _biz_public(biz: dict[str, Any]) -> dict[str, Any]:

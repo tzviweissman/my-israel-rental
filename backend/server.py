@@ -540,6 +540,8 @@ async def startup_tasks() -> None:
         await ensure_message_indexes()
         from routes.marketplace.discounts import ensure_discount_indexes
         await ensure_discount_indexes()
+        from routes.marketplace.staff import ensure_staff_indexes
+        await ensure_staff_indexes()
         from routes.marketplace.businesses import ensure_page_indexes
         from routes.marketplace.page_versions import ensure_version_indexes
         await ensure_page_indexes()

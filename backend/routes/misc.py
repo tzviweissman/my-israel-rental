@@ -28,6 +28,7 @@ from routes.deps import (
 from utils.llm import LlmChat, UserMessage
 from utils.rate_limit import check_rate
 from utils.business_tools import TOOLS, business_tools
+from routes.marketplace.staff import staff_summary
 from routes.marketplace.connections import incoming_request_count
 from utils.cloud_storage import (
     CLOUDINARY_ENABLED,
@@ -599,6 +600,9 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         # Which business tabs to show: by what the business sells, what is
         # in use, and what the person switched on or off (utils/business_tools).
         "business_tools": (await business_tools(db, uid))["tools"],
+        # Areas this person has as staff at someone else's business
+        # (routes/marketplace/staff.py): which business tabs to show them.
+        "staff_permissions": await staff_summary(uid),
     }
 
 

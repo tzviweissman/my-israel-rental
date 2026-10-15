@@ -20,7 +20,7 @@
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Building2, Layers, Store, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
-  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users, SlidersHorizontal, Contact, TicketPercent, BarChart3,
+  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users, SlidersHorizontal, Contact, TicketPercent, BarChart3, UserCog,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
 
@@ -47,6 +47,9 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
   // and their own choices (backend utils/business_tools.py, Tzvi 14 Oct
   // 2026). Until the summary arrives, everything shows, as before.
   const tool = (id) => runsBusiness && (!summary.business_tools || !!summary.business_tools[id]);
+  // Areas this person has as staff at someone else's business (backend
+  // routes/marketplace/staff.py): shown whether or not they run one.
+  const staff = (area) => (summary.staff_permissions || []).includes(area);
   const groups = [
     {
       key: 'overview',
@@ -60,11 +63,12 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       tabs: [
         { id: 'my-businesses', label: t('dashboard.myBusinesses', 'Businesses'), Icon: Store, show: runsBusiness },
         // Every business has customers, whatever it sells: not a tool to switch.
-        { id: 'summary', label: t('dashboard.summary', 'Sales summary'), Icon: BarChart3, show: runsBusiness },
-        { id: 'customers', label: t('dashboard.customers', 'Customers'), Icon: Contact, show: runsBusiness },
-        { id: 'discounts', label: t('dashboard.discounts', 'Discounts'), Icon: TicketPercent, show: tool('orders') || tool('members') },
-        { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: tool('orders') },
-        { id: 'members', label: t('dashboard.members', 'Members'), Icon: Users, show: tool('members') },
+        { id: 'summary', label: t('dashboard.summary', 'Sales summary'), Icon: BarChart3, show: runsBusiness || staff('summary') },
+        { id: 'customers', label: t('dashboard.customers', 'Customers'), Icon: Contact, show: runsBusiness || staff('customers') },
+        { id: 'discounts', label: t('dashboard.discounts', 'Discounts'), Icon: TicketPercent, show: tool('orders') || tool('members') || staff('discounts') },
+        { id: 'staff', label: t('dashboard.staff', 'Staff'), Icon: UserCog, show: runsBusiness },
+        { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: tool('orders') || staff('orders') },
+        { id: 'members', label: t('dashboard.members', 'Members'), Icon: Users, show: tool('members') || staff('members') },
         // Waiting appointments or network requests always show: a badge
         // nobody can see is a customer nobody answers.
         { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: tool('appointments') || (runsBusiness && (summary.service_bookings_pending || 0) > 0) },
@@ -147,6 +151,7 @@ export const ALL_TAB_IDS = [
   'customers',
   'discounts',
   'summary',
+  'staff',
   'network',
   'deliveries',
   'my-orders',

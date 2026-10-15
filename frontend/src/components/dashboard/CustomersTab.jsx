@@ -170,7 +170,7 @@ export default function CustomersTab({ API, token }) {
 
   useEffect(() => {
     let alive = true;
-    axios.get(`${API}/marketplace/businesses`, auth).then(({ data: d }) => {
+    axios.get(`${API}/marketplace/my-workplaces`, { ...auth, params: { perm: 'customers' } }).then(({ data: d }) => {
       if (!alive) return;
       const active = (d || []).filter((b) => b.active);
       setBusinesses(active);
@@ -223,9 +223,9 @@ export default function CustomersTab({ API, token }) {
               {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
           )}
-          <button type="button" onClick={() => setComposing(true)} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-email">
+          {(biz.permissions || []).includes('messages') && <button type="button" onClick={() => setComposing(true)} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-email">
             <Mail size={14} /> {t('messages.open', 'Email customers')}
-          </button>
+          </button>}
           <button type="button" onClick={exportCsv} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-export">
             <Download size={14} /> {t('customers.export', 'Export')}
           </button>

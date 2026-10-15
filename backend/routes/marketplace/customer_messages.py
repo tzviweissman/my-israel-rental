@@ -54,12 +54,9 @@ SENDS_PER_DAY = 3
 
 
 async def _owned(business_id: str, user: dict[str, Any]) -> dict[str, Any]:
-    biz = await db.businesses.find_one({"_id": business_id})
-    if not biz:
-        raise HTTPException(status_code=404, detail="Business not found")
-    if biz.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Not your business")
-    return biz
+    """The owner, an admin, or staff with the Messages area (utils/business_access.py)."""
+    from utils.business_access import business_access
+    return await business_access(db, business_id, user, "messages")
 
 
 # ---------------------------------------------------------------------------
@@ -223,7 +220,8 @@ async def _owner_email(biz: dict[str, Any]) -> Optional[str]:
 async def send_test(business_id: str, m: MessageIn, request: Request, user=Depends(verify_token)):
     check_rate(request, bucket="messages_test", limit=20, window_seconds=3600)
     biz = await _owned(business_id, user)
-    to = await _owner_email(biz)
+    # To whoever pressed the button: the owner, or the staff member.
+    to = ((await db.users.find_one({"id": user["user_id"]}, {"email": 1})) or {}).get("email")
     if not to:
         raise HTTPException(status_code=400, detail="Your account has no email to send the test to")
     from utils.email import send_email

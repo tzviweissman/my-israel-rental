@@ -79,7 +79,7 @@ export default function DiscountsTab({ API, token }) {
 
   useEffect(() => {
     let alive = true;
-    axios.get(`${API}/marketplace/businesses`, auth).then(({ data }) => {
+    axios.get(`${API}/marketplace/my-workplaces`, { ...auth, params: { perm: 'discounts' } }).then(({ data }) => {
       if (!alive) return;
       const active = (data || []).filter((b) => b.active);
       setBusinesses(active);

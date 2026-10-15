@@ -188,15 +188,12 @@ class ExtractIn(BaseModel):
 # helpers
 # ---------------------------------------------------------------------------
 
-async def _owned_business(business_id: str, user: dict[str, Any]) -> dict[str, Any]:
-    """Same rule as businesses.py: the owner, or an admin. Kept local so
-    this module does not import a sibling router's private helper."""
-    biz = await db.businesses.find_one({"_id": business_id})
-    if not biz:
-        raise HTTPException(status_code=404, detail="Business not found")
-    if biz.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Not your business")
-    return biz
+async def _owned_business(business_id: str, user: dict[str, Any], perm: str | None = "orders") -> dict[str, Any]:
+    """The owner, an admin, or staff with the Orders area
+    (utils/business_access.py). perm=None: the owner only, for the
+    settings, couriers and the counter link."""
+    from utils.business_access import business_access
+    return await business_access(db, business_id, user, perm)
 
 
 async def _owned_order(order_id: str, user: dict[str, Any]) -> dict[str, Any]:
@@ -204,7 +201,9 @@ async def _owned_order(order_id: str, user: dict[str, Any]) -> dict[str, Any]:
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
     if order.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Not your order")
+        from utils.business_access import staff_perms
+        if "orders" not in await staff_perms(db, order.get("business_id") or "", user["user_id"]):
+            raise HTTPException(status_code=403, detail="Not your order")
     return order
 
 
@@ -544,7 +543,7 @@ async def _business_by_staff_token(token: str) -> dict[str, Any]:
 
 @router.get("/businesses/{business_id}/orders/staff-link")
 async def get_staff_link(business_id: str, user=Depends(verify_token)):
-    biz = await _owned_business(business_id, user)
+    biz = await _owned_business(business_id, user, None)
     return {"token": biz.get("orders_staff_token")}
 
 
@@ -552,7 +551,7 @@ async def get_staff_link(business_id: str, user=Depends(verify_token)):
 async def create_staff_link(business_id: str, rotate: bool = False, user=Depends(verify_token)):
     """Create the link, or return the one that exists. `rotate=true`
     replaces it - the old link dies immediately."""
-    biz = await _owned_business(business_id, user)
+    biz = await _owned_business(business_id, user, None)
     token = biz.get("orders_staff_token")
     if token and not rotate:
         return {"token": token, "created": False}
@@ -567,7 +566,7 @@ async def create_staff_link(business_id: str, rotate: bool = False, user=Depends
 
 @router.delete("/businesses/{business_id}/orders/staff-link")
 async def revoke_staff_link(business_id: str, user=Depends(verify_token)):
-    await _owned_business(business_id, user)
+    await _owned_business(business_id, user, None)
     await db.businesses.update_one(
         {"_id": business_id},
         {"$unset": {"orders_staff_token": "", "orders_staff_token_at": ""}},
@@ -1200,7 +1199,7 @@ async def invite_courier(business_id: str, payload: CourierInviteIn, user=Depend
     """Invite by email. An account with that email gets the invite in
     their dashboard now; an email that has no account yet is held until
     someone signs up with it. Either way, one email goes out."""
-    biz = await _owned_business(business_id, user)
+    biz = await _owned_business(business_id, user, None)
     couriers = list(biz.get("couriers") or [])
     if any(c.get("email") == payload.email for c in couriers):
         raise HTTPException(status_code=400, detail="That person is already on your courier list")
@@ -1247,7 +1246,7 @@ async def remove_courier(business_id: str, key: str, user=Depends(verify_token))
     """Removing a courier takes them off every OPEN order, which then
     shows as unassigned. Closed orders keep the name for the record.
     `key` is the courier's user id, or their email for a pending invite."""
-    biz = await _owned_business(business_id, user)
+    biz = await _owned_business(business_id, user, None)
     couriers = [c for c in biz.get("couriers") or [] if c.get("user_id") != key and c.get("email") != key.lower()]
     sets: dict[str, Any] = {"couriers": couriers}
     settings = dict(biz.get("order_settings") or {})
@@ -1707,7 +1706,7 @@ async def get_order_settings(business_id: str, user=Depends(verify_token)):
 
 @router.put("/businesses/{business_id}/orders/settings")
 async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=Depends(verify_token)):
-    biz = await _owned_business(business_id, user)
+    biz = await _owned_business(business_id, user, None)
     cutoffs = [c.model_dump() for c in sorted(payload.cutoffs, key=lambda c: c.for_day)]
     if payload.default_courier_user_id and not await _courier_entry(biz, payload.default_courier_user_id):
         raise HTTPException(status_code=400, detail="That courier has not accepted your invite yet")

@@ -167,8 +167,8 @@ async def business_insights(business_id: str, days: int = Query(30, ge=7, le=366
     biz = await db.businesses.find_one({"_id": business_id}, {"owner_user_id": 1})
     if not biz:
         raise HTTPException(status_code=404, detail="Business not found")
-    if biz.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
-        raise HTTPException(status_code=403, detail="Not your business")
+    from utils.business_access import business_access
+    await business_access(db, business_id, user, "summary")
     fields = {"_id": 0, "status": 1, "created_at": 1, "total": 1, "subtotal": 1, "currency": 1, "lines": 1, "fulfilment": 1,
               "city": 1, "address": 1, "customer_phone_e164": 1, "customer_phone": 1, "customer_name": 1, "source": 1}
     orders = await db.store_orders.find({"business_id": business_id}, fields).to_list(20000)
