@@ -20,7 +20,7 @@
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Building2, Layers, Store, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
-  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users, SlidersHorizontal, Contact, TicketPercent,
+  Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users, SlidersHorizontal, Contact, TicketPercent, BarChart3,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
 
@@ -60,6 +60,7 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       tabs: [
         { id: 'my-businesses', label: t('dashboard.myBusinesses', 'Businesses'), Icon: Store, show: runsBusiness },
         // Every business has customers, whatever it sells: not a tool to switch.
+        { id: 'summary', label: t('dashboard.summary', 'Sales summary'), Icon: BarChart3, show: runsBusiness },
         { id: 'customers', label: t('dashboard.customers', 'Customers'), Icon: Contact, show: runsBusiness },
         { id: 'discounts', label: t('dashboard.discounts', 'Discounts'), Icon: TicketPercent, show: tool('orders') || tool('members') },
         { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: tool('orders') },
@@ -145,6 +146,7 @@ export const ALL_TAB_IDS = [
   'tools',
   'customers',
   'discounts',
+  'summary',
   'network',
   'deliveries',
   'my-orders',

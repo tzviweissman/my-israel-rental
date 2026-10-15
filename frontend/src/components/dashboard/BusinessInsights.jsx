@@ -18,7 +18,7 @@ import formatDate from '../../utils/formatDate';
 
 const PERIODS = [30, 90, 365];
 
-function Change({ now, before, shown, compare, t }) {
+export function Change({ now, before, shown, compare, t }) {
   if (!compare) return <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('insights.tooNew', 'Not enough history yet to compare.')}</p>;
   const Arrow = now > before ? ArrowUp : now < before ? ArrowDown : Minus;
   const word = now > before ? t('insights.up', 'up from') : now < before ? t('insights.down', 'down from') : t('insights.same', 'the same as');
@@ -30,7 +30,7 @@ function Change({ now, before, shown, compare, t }) {
   );
 }
 
-function Tile({ label, value, children, testid }) {
+export function Tile({ label, value, children, testid }) {
   return (
     <div className="rounded-xl border bg-white p-3.5 min-w-0" style={{ borderColor: 'var(--brand-border)' }} data-testid={testid}>
       <p className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>{label}</p>
@@ -40,7 +40,7 @@ function Tile({ label, value, children, testid }) {
   );
 }
 
-function Section({ title, children, testid }) {
+export function Section({ title, children, testid }) {
   return (
     <section className="rounded-xl border bg-white p-3.5 min-w-0" style={{ borderColor: 'var(--brand-border)' }} data-testid={testid}>
       <h4 className="text-sm font-bold mb-2.5" style={{ color: 'var(--ink)' }}>{title}</h4>
@@ -50,7 +50,7 @@ function Section({ title, children, testid }) {
 }
 
 /* Bars: one colour, the value written on each, the scale from zero. */
-function Bars({ rows, label, value, title }) {
+export function Bars({ rows, label, value, title }) {
   const max = Math.max(1, ...rows.map(value));
   return (
     <ul className="space-y-1.5" aria-label={title}>
