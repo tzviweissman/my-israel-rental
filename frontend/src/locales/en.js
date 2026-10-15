@@ -714,6 +714,13 @@ const en = {
       },
       pageDesign: {
         look: 'The look',
+        publish: "Publish",
+        saveDraft: "Save draft",
+        discardDraft: "Discard draft",
+        draftSaved: "Saved as a draft. Your live page has not changed.",
+        draftNote: "Draft saved, not published yet",
+        published: "Published. Your page is live with these changes.",
+        confirmDiscardDraft: "Throw away the draft and go back to your live page?",
         lookHint: 'Try one, then adjust anything. Nothing here costs you anything and you can always change it back.',
         optional: '(optional)',
         preset_quiet: 'Understated',

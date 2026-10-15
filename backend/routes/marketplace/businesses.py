@@ -542,6 +542,63 @@ async def create_business(payload: BusinessIn, user=Depends(verify_token)):
     return _public(doc, 0)
 
 
+# ---------------------------------------------------------------- drafts
+#
+# Design your page saves a draft without touching the live page (Tzvi,
+# 15 Oct 2026: "draft and publish"). The draft is the same body the
+# editor would PATCH, checked by the same model so a draft can always be
+# published, and kept on the business, owner-only. Publishing is that
+# PATCH, then deleting the draft: one path writes the live page.
+
+DRAFT_KEYS = ("accent", "brand_color", "brand_fonts", "notice", "pages", "cover_url", "payment_links",
+              "pinned_service_ids", "collections", "page", "page_brief")
+
+
+@router.get("/businesses/{business_id}/page-draft")
+async def get_page_draft(business_id: str, user=Depends(verify_token)):
+    biz = await _owned(business_id, user)
+    return biz.get("page_draft") or None
+
+
+@router.put("/businesses/{business_id}/page-draft")
+async def put_page_draft(business_id: str, payload: BusinessPatch, user=Depends(verify_token)):
+    await _owned(business_id, user)
+    body = payload.model_dump(exclude_unset=True, mode="json")
+    stray = set(body) - set(DRAFT_KEYS)
+    if stray:
+        raise HTTPException(status_code=422, detail=f"Not part of the page design: {', '.join(sorted(stray))}")
+    if "pages" in body:
+        try:
+            check_pages(payload.pages or [])
+        except ValueError as e:
+            raise HTTPException(status_code=422, detail=str(e)) from e
+    # The checks the save makes in its own body, so a draft can always be
+    # published.
+    if (payload.brand_color or "").strip() and not _HEX.match(payload.brand_color.strip()):
+        raise HTTPException(status_code=422, detail="A colour is written like #1E5F8C")
+    f = payload.brand_fonts
+    if f and ((f.heading and f.heading not in BRAND_HEADING_FONTS) or (f.body and f.body not in BRAND_BODY_FONTS)):
+        raise HTTPException(status_code=422, detail="Unknown font")
+    n = payload.notice
+    if n and n.starts_on and n.ends_on and n.ends_on < n.starts_on:
+        raise HTTPException(status_code=422, detail="The notice ends before it starts")
+    if payload.payment_links is not None:
+        try:
+            clean_payment_links(payload.payment_links)
+        except PaymentLinkError as e:
+            raise HTTPException(status_code=400, detail=str(e)) from e
+    draft = {"payload": body, "saved_at": datetime.now(UTC).isoformat(timespec="seconds")}
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"page_draft": draft}})
+    return draft
+
+
+@router.delete("/businesses/{business_id}/page-draft")
+async def delete_page_draft(business_id: str, user=Depends(verify_token)):
+    await _owned(business_id, user)
+    await db.businesses.update_one({"_id": business_id}, {"$unset": {"page_draft": ""}})
+    return {"ok": True}
+
+
 @router.patch("/businesses/{business_id}")
 async def update_business(business_id: str, payload: BusinessPatch, user=Depends(verify_token)):
     biz = await _owned(business_id, user)

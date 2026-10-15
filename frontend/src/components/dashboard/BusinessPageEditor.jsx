@@ -137,6 +137,12 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
   // Extra pages (PagesEditor.jsx), and which one the Sections panel edits.
   const [pages, setPages] = useState([]);
   const [editingPage, setEditingPage] = useState(null);
+  // Draft and publish: the saved draft ({payload, saved_at}) and the body
+  // it held, to tell "saved as a draft" from "changed since".
+  const [draft, setDraft] = useState(null);
+  const [draftJSON, setDraftJSON] = useState(null);
+  const [pendingDraft, setPendingDraft] = useState(null);
+  const [drafting, setDrafting] = useState(false);
   const [failed, setFailed] = useState(false);
   const [providers, setProviders] = useState([]);
   // Served alongside the provider list rather than written down again
@@ -223,6 +229,11 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
         setTouched(new Set(
           Object.keys(DIAL_DEFAULTS).filter((d) => loadedTheme[d] !== derived[d]),
         ));
+        // A saved draft is what the owner was last working on: it opens in
+        // place of the live page (applied once the live state is set).
+        axios.get(`${API}/marketplace/businesses/${data.id}/page-draft`, auth)
+          .then(({ data: d }) => { if (!cancelled && d && d.payload) { setDraft(d); setPendingDraft(d.payload); } })
+          .catch(() => {});
         setSaved({
           accent: ACCENTS[data.accent] ? data.accent : DEFAULT_ACCENT,
           brand_color: data.brand_color || null,
@@ -317,6 +328,52 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
     collections: cleanCollections(collections),
   } : null), [page, accent, brandColor, brandFonts, notice, pages, t, coverUrl, validLinks, pinned, collections, fullTheme, blocks]);
 
+  /* The body that Publish sends and Save draft stores: every key spelled
+     out, because the API refuses an unexpected one (`extra="forbid"`). */
+  const buildPayload = () => ({
+    accent,
+    brand_color: brandColor || '',
+    notice: cleanNotice(notice),
+    pages: cleanPages(pages, t),
+    brand_fonts: { heading: brandFonts.heading || null, body: brandFonts.body || null },
+    cover_url: coverUrl,
+    payment_links: validLinks,
+    pinned_service_ids: pinned,
+    collections: cleanCollections(collections),
+    page: { theme: fullTheme, blocks },
+    page_brief: {
+      showing: brief.showing || null,
+      action: brief.action || null,
+      audience: brief.audience || null,
+      pricing: brief.pricing || null,
+      strengths: brief.strengths || [],
+      note: (brief.note || '').trim(),
+    },
+  });
+
+  /* A saved draft, put into the editor's state. */
+  useEffect(() => {
+    if (!pendingDraft) return;
+    const p = pendingDraft;
+    if ('accent' in p) setAccent(ACCENTS[p.accent] ? p.accent : DEFAULT_ACCENT);
+    if ('brand_color' in p) setBrandColor(p.brand_color || null);
+    if ('brand_fonts' in p) setBrandFonts({ heading: null, body: null, ...(p.brand_fonts || {}) });
+    if ('notice' in p) setNotice(p.notice || null);
+    if ('pages' in p) setPages(p.pages || []);
+    if ('cover_url' in p) setCoverUrl(p.cover_url || null);
+    if ('payment_links' in p) setRows((p.payment_links || []).map(newRow));
+    if ('pinned_service_ids' in p) setPinned(p.pinned_service_ids || []);
+    if ('collections' in p) setCollections((p.collections || []).map((c) => ({ ...c, service_ids: c.service_ids || [] })));
+    if (p.page) { setTheme(normalizeTheme(p.page.theme)); setBlocks(p.page.blocks || null); }
+    if ('page_brief' in p) setBrief(p.page_brief || {});
+    setPendingDraft(null);
+    setDraftJSON('pending');
+  }, [pendingDraft]);
+  // Once the draft's state has rendered, remember the body it makes.
+  useEffect(() => {
+    if (draftJSON === 'pending') setDraftJSON(JSON.stringify(buildPayload()));
+  });
+
   const dirty = useMemo(() => {
     if (!saved) return false;
     if (editedBlocks && JSON.stringify(editedBlocks) !== JSON.stringify(loadedBlocks)) return true;
@@ -339,8 +396,12 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       );
   }, [saved, accent, coverUrl, validLinks, pinned, collections, brief, theme, touched, editedBlocks, loadedBlocks, brandColor, brandFonts, notice, pages]);
 
+  // Changed since the last draft (or, with no draft, since the live page):
+  // what closing would lose.
+  const unsaved = dirty && (!draftJSON || draftJSON === 'pending' || JSON.stringify(buildPayload()) !== draftJSON);
+
   const close = useCallback(() => {
-    if (dirty) {
+    if (unsaved) {
       // eslint-disable-next-line no-alert
       const ok = window.confirm(t(
         'pageDesign.confirmDiscard',
@@ -349,16 +410,41 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       if (!ok) return;
     }
     onClose && onClose();
-  }, [dirty, onClose, t]);
+  }, [unsaved, onClose, t]);
 
   // A reload with unsaved edits loses them silently otherwise. Same promise
   // as the confirm above, made to the browser's own leave-the-page path.
   useEffect(() => {
-    if (!dirty) return undefined;
+    if (!unsaved) return undefined;
     const warn = (e) => { e.preventDefault(); e.returnValue = ''; };
     window.addEventListener('beforeunload', warn);
     return () => window.removeEventListener('beforeunload', warn);
-  }, [dirty]);
+  }, [unsaved]);
+
+  const saveDraft = async () => {
+    setDrafting(true);
+    try {
+      const body = buildPayload();
+      const { data } = await axios.put(`${API}/marketplace/businesses/${business.id}/page-draft`, body, auth);
+      setDraft(data);
+      setDraftJSON(JSON.stringify(body));
+      toast.success(t('pageDesign.draftSaved', 'Saved as a draft. Your live page has not changed.'));
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('pageDesign.saveFailed', 'Could not save - try again'));
+    } finally {
+      setDrafting(false);
+    }
+  };
+
+  const discardDraft = async () => {
+    // eslint-disable-next-line no-alert
+    if (!window.confirm(t('pageDesign.confirmDiscardDraft', 'Throw away the draft and go back to your live page?'))) return;
+    await axios.delete(`${API}/marketplace/businesses/${business.id}/page-draft`, auth).catch(() => {});
+    setDraft(null);
+    setDraftJSON(null);
+    // Back to the live page: reopen the editor from scratch.
+    onClose && onClose();
+  };
 
   const setRow = (key, patch) => setRows(
     (list) => list.map((r) => (r.key === key ? { ...r, ...patch } : r)),
@@ -443,21 +529,15 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       };
       await axios.patch(
         `${API}/marketplace/businesses/${business.id}`,
-        {
-          accent,
-          brand_color: brandColor || '',
-          notice: cleanNotice(notice),
-          pages: cleanPages(pages, t),
-          brand_fonts: { heading: brandFonts.heading || null, body: brandFonts.body || null },
-          cover_url: coverUrl,
-          payment_links: validLinks,
-          pinned_service_ids: pinned,
-          collections: keptCollections,
-          page: { theme: fullTheme, blocks },
-          page_brief: briefPayload,
-        },
+        { ...buildPayload(), collections: keptCollections, page_brief: briefPayload },
         auth,
       );
+      // Published: the draft has done its job.
+      if (draft) {
+        await axios.delete(`${API}/marketplace/businesses/${business.id}/page-draft`, auth).catch(() => {});
+        setDraft(null);
+        setDraftJSON(null);
+      }
       setCollections(keptCollections);
       setBrief(briefPayload);
       // What was saved is now what the page has.
@@ -468,7 +548,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
         pinned_service_ids: pinned, collections: keptCollections,
         theme, brief: briefPayload, composed: true,
       });
-      toast.success(t('pageDesign.saved', 'Your page is updated'));
+      toast.success(t('pageDesign.published', 'Published. Your page is live with these changes.'));
       onSaved && onSaved();
     } catch (err) {
       // The API names what it accepts when it refuses a payment link, and
@@ -814,7 +894,8 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
           </h2>
           <p className="text-xs truncate" style={{ color: 'var(--brand-muted)' }}>
             {business?.name}
-            {dirty && ` · ${t('pageDesign.unsaved', 'Unsaved changes')}`}
+            {unsaved ? ` · ${t('pageDesign.unsaved', 'Unsaved changes')}`
+              : (draft && dirty ? ` · ${t('pageDesign.draftNote', 'Draft saved, not published yet')}` : '')}
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -828,6 +909,23 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
             <X size={16} className="inline me-1" />
             {t('common.cancel', 'Cancel')}
           </button>
+          {draft && (
+            <button type="button" onClick={discardDraft} className="px-3 py-2 rounded-lg text-sm font-semibold underline"
+                    style={{ color: 'var(--brand-muted)' }} data-testid="page-design-discard-draft">
+              {t('pageDesign.discardDraft', 'Discard draft')}
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={saveDraft}
+            disabled={drafting || saving || !unsaved}
+            className="px-4 py-2 rounded-lg text-sm font-semibold border inline-flex items-center gap-2 disabled:opacity-50"
+            style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+            data-testid="page-design-save-draft"
+          >
+            {drafting && <Loader2 size={14} className="animate-spin" />}
+            {t('pageDesign.saveDraft', 'Save draft')}
+          </button>
           <button
             type="button"
             onClick={save}
@@ -837,7 +935,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
             data-testid="page-design-save"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
-            {t('common.save', 'Save')}
+            {t('pageDesign.publish', 'Publish')}
           </button>
         </div>
       </div>

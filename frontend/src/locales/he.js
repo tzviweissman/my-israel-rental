@@ -698,6 +698,13 @@ const he = {
       },
       pageDesign: {
         look: 'המראה',
+        publish: "פרסום",
+        saveDraft: "שמירת טיוטה",
+        discardDraft: "מחיקת הטיוטה",
+        draftSaved: "נשמר כטיוטה. הדף החי שלכם לא השתנה.",
+        draftNote: "הטיוטה נשמרה, עוד לא פורסמה",
+        published: "פורסם. הדף שלכם חי עם השינויים.",
+        confirmDiscardDraft: "למחוק את הטיוטה ולחזור לדף החי?",
         lookHint: 'בחרו אחד ואז שנו מה שתרצו. שום דבר כאן לא עולה כסף ותמיד אפשר לחזור אחורה.',
         optional: '(לא חובה)',
         preset_quiet: 'מאופק',
