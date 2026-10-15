@@ -6745,7 +6745,7 @@ const en = {
         bookingsN_one: "{{n}} appointment",
         bookingsN_other: "{{n}} appointments",
         imported: "From your imported list",
-        more: "Showing the first {{shown}} of {{count}}. Search to find the rest.",
+        more: "Showing the first {{shown}} of {{total}}. Search to find the rest.",
         close: "Close",
         noName: "No name",
         call: "Call",
