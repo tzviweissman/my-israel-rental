@@ -259,6 +259,20 @@ class SizesProps(_Props):
     heading: str = Field("", max_length=60)
 
 
+class TextProps(_Props):
+    """pagebuilder/SimpleBlocks.jsx TextBlock - the owner's own words.
+
+    The section editor's first new block (Tzvi, 15 Oct 2026: "the section
+    editor", Shopify's text-and-picture section). A heading and a few
+    paragraphs, and with the `photo` variant one of the business's own
+    pictures beside them. Plain text only: line breaks are kept, nothing
+    is rendered as HTML.
+    """
+    heading: str = Field("", max_length=80)
+    body: str = Field("", max_length=1500)
+    image: Optional[str] = Field(None, pattern=IMAGE_REF)
+
+
 # The library. Order is the spec's own "least work first" ordering
 # (docs/ai-page-builder-spec.md, phase-1 block set), which is also the
 # order they were converted.
@@ -273,6 +287,8 @@ BLOCKS: dict[str, dict[str, Any]] = {
     "contact": {"variants": ("stack",), "props": ContactProps},
     # The first scroll section. Last because it is the newest, not the least work.
     "sizes": {"variants": ("ladder",), "props": SizesProps},
+    # The owner's own words, added by the section editor.
+    "text": {"variants": ("plain", "photo"), "props": TextProps},
 }
 
 
@@ -284,6 +300,10 @@ class Block(BaseModel):
     type: str = Field(..., max_length=32)
     variant: str = Field(..., max_length=32)
     props: dict[str, Any] = Field(default_factory=dict)
+    # Kept on the page but not shown (the section editor's eye switch), so
+    # an owner can take a section down for a while without losing what
+    # they wrote in it.
+    hidden: bool = False
 
     @field_validator("type")
     @classmethod

@@ -118,7 +118,7 @@ def test_the_vocabulary_is_served_rather_than_duplicated():
         "palette", "type", "density", "imagery", "price_prominence", "motion",
     }
     assert set(v["blocks"]) == {
-        "hero", "rule", "facts", "services", "providers", "cover", "gallery", "contact", "sizes",
+        "hero", "rule", "facts", "services", "providers", "cover", "gallery", "contact", "sizes", "text",
     }
     # Every default must itself be a legal value, or a business that
     # answers nothing gets a page the API would refuse.

@@ -47,6 +47,7 @@ import BusinessShelfEditor, { cleanCollections } from './BusinessShelfEditor';
 import PageThemeDials, { dialLabel, dialValueLabel } from './PageThemeDials';
 import PageBriefForm from './PageBriefForm';
 import PageVersions from './PageVersions';
+import SectionsEditor from './SectionsEditor';
 import {
   DIAL_DEFAULTS, PRESETS, briefToTheme, composeDefault, normalizeTheme, themeDiff,
 } from '../../utils/pageComposition';
@@ -248,18 +249,20 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
   /* The preview's business: the real payload with the pending edits over
      it. This object is the entire mechanism — there is no second renderer
      to keep in step, only a different value for three keys. */
-  /* The blocks. There is no block editor yet - phase 1 built the library
-     and the schema, not a canvas - so these are whatever the business
-     already has, or the document that describes the page it already had.
-     Saving a dial on a business that has never been designed therefore
-     writes a composition of its CURRENT page plus the new theme, rather
-     than inventing a layout nobody asked for. */
-  const blocks = useMemo(
+  /* The blocks: whatever the business already has, or the document that
+     describes the page it already had, until the owner changes them in
+     the Sections panel (SectionsEditor.jsx). Saving a dial on a business
+     that has never been designed therefore writes a composition of its
+     CURRENT page plus the new theme, rather than inventing a layout
+     nobody asked for. */
+  const loadedBlocks = useMemo(
     () => (page && page.page && (page.page.blocks || []).length
       ? page.page.blocks
       : composeDefault(page).blocks),
     [page],
   );
+  const [editedBlocks, setBlocks] = useState(null);
+  const blocks = editedBlocks || loadedBlocks;
 
   /* The palette dial IS the accent picker. One decision, one control: a
      second colour control in the same panel is two controls that can
@@ -283,6 +286,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
 
   const dirty = useMemo(() => {
     if (!saved) return false;
+    if (editedBlocks && JSON.stringify(editedBlocks) !== JSON.stringify(loadedBlocks)) return true;
     if (JSON.stringify(pinned) !== JSON.stringify(saved.pinned_service_ids || [])) return true;
     if (JSON.stringify(cleanCollections(collections)) !== JSON.stringify(saved.collections || [])) return true;
     if (JSON.stringify(brief) !== JSON.stringify(saved.brief || {})) return true;
@@ -296,7 +300,7 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       || JSON.stringify(validLinks) !== JSON.stringify(
         (saved.payment_links || []).map((p) => ({ label: p.label, url: p.url })),
       );
-  }, [saved, accent, coverUrl, validLinks, pinned, collections, brief, theme, touched]);
+  }, [saved, accent, coverUrl, validLinks, pinned, collections, brief, theme, touched, editedBlocks, loadedBlocks]);
 
   const close = useCallback(() => {
     if (dirty) {
@@ -415,6 +419,9 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
       );
       setCollections(keptCollections);
       setBrief(briefPayload);
+      // What was saved is now what the page has.
+      setPage((pg) => (pg ? { ...pg, page: { theme: fullTheme, blocks } } : pg));
+      setBlocks(null);
       setSaved({
         accent, cover_url: coverUrl, payment_links: validLinks,
         pinned_service_ids: pinned, collections: keptCollections,
@@ -510,6 +517,9 @@ export default function BusinessPageEditor({ business, API, token, onClose, onSa
     >
       {/* ---- Page builder v3: versions to choose from (shown once it is on) ---- */}
       {page && <PageVersions business={business} page={page} API={API} token={token} onLive={onSaved} />}
+
+      {/* ---- Sections: add, remove, reorder, edit ---- */}
+      {page && <SectionsEditor blocks={blocks} onChange={setBlocks} business={previewBusiness || page} />}
 
       {/* ---- Accent (K1) ---- */}
       <section>

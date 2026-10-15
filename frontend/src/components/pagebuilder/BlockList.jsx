@@ -34,7 +34,7 @@ import ServicesBlock from './ServicesBlock';
 import SizeLadderBlock from './SizeLadderBlock';
 import {
   BlockShell, HeroBlock, RuleBlock, FactsBlock,
-  ProvidersBlock, CoverBlock, GalleryBlock, ContactBlock,
+  ProvidersBlock, CoverBlock, GalleryBlock, ContactBlock, TextBlock,
 } from './SimpleBlocks';
 
 /** The closed vocabulary, on the drawing side. Mirrors BLOCKS in
@@ -50,6 +50,7 @@ export const REGISTRY = {
   gallery: GalleryBlock,
   contact: ContactBlock,
   sizes: SizeLadderBlock,
+  text: TextBlock,
 };
 
 export const BLOCK_NAMES = Object.keys(REGISTRY);

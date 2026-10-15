@@ -87,6 +87,34 @@ export function HeroBlock({ block, ctx }) {
   );
 }
 
+/* ---------------------------------------------------------------- text
+ *
+ * The owner's own words (backend TextProps), added from the section
+ * editor. Plain text with its line breaks; `photo` puts one of the
+ * business's own pictures beside it (below it on a phone). Draws nothing
+ * when there is nothing in it.
+ */
+export function TextBlock({ block, ctx }) {
+  const { business } = ctx;
+  const p = block.props || {};
+  const image = block.variant === 'photo' ? resolveImage(business, p.image, getGigCover) : null;
+  if (!p.heading && !p.body && !image) return null;
+  const words = (
+    <div className="min-w-0">
+      {p.heading && (
+        <h2 className="text-2xl font-bold mb-2 text-start" dir="auto" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{p.heading}</h2>
+      )}
+      {p.body && <p className="text-base leading-relaxed whitespace-pre-line text-start" dir="auto" style={{ color: 'var(--ink)' }}>{p.body}</p>}
+    </div>
+  );
+  return (
+    <section data-testid={`pg-text-${block.id}`} className={`pt-6 ${image ? 'grid gap-5 md:grid-cols-2 md:items-center' : ''}`}>
+      {image && <img src={image} alt="" className="w-full rounded-2xl object-cover aspect-[4/3]" loading="lazy" />}
+      {words}
+    </section>
+  );
+}
+
 /* ---------------------------------------------------------------- rule
  *
  * common/SkylineRule.jsx. Takes its colour from the caller and hardcodes

@@ -56,6 +56,7 @@ export const BLOCK_TYPES = {
   gallery: ['carousel'],
   contact: ['stack'],
   sizes: ['ladder'],
+  text: ['plain', 'photo'],
 };
 
 export const MAX_BLOCKS = 24;
@@ -194,8 +195,10 @@ export function readComposition(business) {
   if (!stored || !Array.isArray(stored.blocks) || stored.blocks.length === 0) {
     return composeDefault(business);
   }
-  const blocks = stored.blocks
-    .filter((x) => x && BLOCK_TYPES[x.type])
+  const known = stored.blocks.filter((x) => x && BLOCK_TYPES[x.type]);
+  const blocks = known
+    // Hidden by the owner in the section editor: kept, not drawn.
+    .filter((x) => !x.hidden)
     .map((x) => ({
       ...x,
       // An unknown variant is not a reason to lose the block. Falling
@@ -205,7 +208,9 @@ export function readComposition(business) {
       props: x.props || {},
     }))
     .slice(0, MAX_BLOCKS);
-  if (blocks.length === 0) return composeDefault(business);
+  // Nothing known at all is a page this build cannot draw: the default.
+  // Everything hidden is the owner's choice: nothing.
+  if (known.length === 0) return composeDefault(business);
   return { theme: normalizeTheme(stored.theme), blocks };
 }
 
