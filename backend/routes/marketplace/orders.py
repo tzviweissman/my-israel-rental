@@ -2015,6 +2015,8 @@ class WebsiteOrderIn(BaseModel):
     answers: dict[str, Any] = Field(default_factory=dict)
     # A discount code the store made (discounts.py).
     discount_code: Optional[str] = Field(None, max_length=40)
+    # "MM-DD", optional, for the birthday treat (birthdays.py).
+    birthday: Optional[str] = Field(None, pattern=r"^\d{2}-\d{2}$")
 
     @field_validator("extra_items", "notes", "address", "customer_name", "customer_phone", "customer_email", "pay_by")
     @classmethod
@@ -2080,6 +2082,7 @@ async def order_form(gig_id: str):
         "gig": {"id": gig["_id"], "title": gig.get("title"), "title_he": gig.get("title_he")},
         "business": {
             "id": biz["_id"], "name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url"), "slug": biz.get("slug"),
+            "birthday_on": bool((biz.get("birthday_settings") or {}).get("on")),
             "areas": _areas_out(biz), "serves_nationwide": bool(biz.get("serves_nationwide")),
             "payment_links": allowed_payment_links(biz.get("payment_links")), "payment_note": biz.get("payment_note"),
             # The notice bar and colour, so the order page carries them too.
@@ -2257,6 +2260,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         "track_token": secrets.token_urlsafe(16),
     }
     await db.store_orders.insert_one(doc)
+    from .birthdays import remember
+    await remember(biz["_id"], payload.customer_email, payload.customer_name, payload.birthday, None, "order")
     doc = await auto_assign(doc, biz)
     # Lines a partner supplies go to that partner as its own order
     # (dropship.py). Never raises: the customer's order is already placed.

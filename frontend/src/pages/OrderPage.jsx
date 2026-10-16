@@ -18,6 +18,8 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { parseItems } from '../utils/storeBasket';
+import BirthdayInput, { birthdayOrNull } from '../components/forms/BirthdayInput';
+import RestockNotify from '../components/forms/RestockNotify';
 
 // One id per store listing in this browser, for the left-behind basket
 // reminder (backend basket_reminders.py). A new one after each order.
@@ -75,6 +77,7 @@ export default function OrderPage() {
   const [name, setName] = useState(user?.name || '');
   const [phone, setPhone] = useState(user?.whatsapp_number || user?.phone || '');
   const [email, setEmail] = useState(user?.email || '');
+  const [birthday, setBirthday] = useState('');
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);       // {track_url, total}
 
@@ -162,7 +165,10 @@ export default function OrderPage() {
   }
 
   const bizName = (lang === 'he' && data.business.name_he) || data.business.name;
-  const products = data.products.filter((p) => p.in_stock);
+  // Counted down to 0 is sold out too (backend restock.available).
+  const onSale = (p) => p.in_stock && (p.stock === null || p.stock === undefined || p.stock > 0);
+  const products = data.products.filter(onSale);
+  const soldOut = data.products.filter((p) => !onSale(p));
   // One currency per store, the server refuses a mixed basket; the fee and
   // the minimum are in that currency too.
   const currency = (products[0] || data.products[0] || {}).currency || 'ILS';
@@ -222,6 +228,7 @@ export default function OrderPage() {
         customer_name: name.trim(), customer_phone: phone.trim(), customer_email: email.trim() || null,
         answers,
         discount_code: code ? code.code : null,
+        birthday: data.business.birthday_on ? birthdayOrNull(birthday) : null,
       };
       const { data: res } = await axios.post(`${API}/marketplace/order-form/${gigId}/orders`, body, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
       setDone(res);
@@ -340,6 +347,23 @@ export default function OrderPage() {
               );
             })}
           </ul>
+          {/* Sold out right now, with "Tell me when it's back" (backend restock.py). */}
+          {soldOut.length > 0 && (
+            <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--brand-border)' }} data-testid="order-sold-out">
+              <p className="text-xs font-semibold mb-1" style={{ color: 'var(--brand-muted)' }}>{t('restock.title', 'Sold out right now')}</p>
+              <ul className="space-y-2">
+                {soldOut.map((p) => (
+                  <li key={p.id} className="flex items-start gap-3" data-testid={`order-soldout-${p.id}`}>
+                    {p.image && <img src={p.image} alt="" className="w-10 h-10 rounded-lg object-cover shrink-0 opacity-60" />}
+                    <div className="min-w-0 flex-1">
+                      <div className="text-sm" dir="auto" style={{ color: 'var(--brand-muted)' }}>{p.name}</div>
+                      <RestockNotify gigId={gigId} productId={p.id} initialEmail={email.trim()} />
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {/* Items the list does not have. The store gets them with the
               items; "Notes" further down is for instructions. */}
           <label className={`${label} mt-3`} style={labelStyle} htmlFor="order-extra">{t('order.extraLabel', 'Something not on the list?')} · {t('orders.optional', 'optional')}</label>
@@ -444,6 +468,9 @@ export default function OrderPage() {
             <input id="order-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={input} style={inputStyle} placeholder="name@example.com" data-testid="order-email" />
             <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('order.emailWhy', 'For the confirmation, and the delivery photo when it arrives.')} {t('order.emailBasket', 'If you leave without ordering, we send one reminder of what you chose.')}</p>
           </div>
+          {data.business.birthday_on && (
+            <BirthdayInput value={birthday} onChange={setBirthday} businessName={bizName} testid="order-birthday" />
+          )}
           <div>
             <label className={label} style={labelStyle} htmlFor="order-notes">{t('orders.notes', 'Notes')} · {t('orders.optional', 'optional')}</label>
             <input id="order-notes" value={notes} onChange={(e) => setNotes(e.target.value)} dir="auto" className={input} style={inputStyle} placeholder={t('orders.notesPh', '"No nuts", "leave with the neighbour"')} data-testid="order-notes" />

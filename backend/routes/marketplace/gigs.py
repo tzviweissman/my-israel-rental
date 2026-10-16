@@ -664,6 +664,8 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
         if gig.get("business_id") else None
     )
     gig["discount"] = active_discount(gig)
+    # Whether the booking form asks for a birthday (birthdays.py).
+    gig["birthday_on"] = bool(((business or {}).get("birthday_settings") or {}).get("on"))
     gig["provider"] = {
         "user_id": gig["provider_user_id"],
         "name": _public_provider_name(business, user),
@@ -1348,6 +1350,8 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         "deposit": {"amount": float(gig["deposit"]), "status": "due"} if gig.get("deposit") else None,
     }
     await db.marketplace_bookings.insert_one(booking)
+    from .birthdays import remember
+    await remember(gig.get("business_id"), email, guest_name or (user or {}).get("name"), payload.birthday, payload.lang, "booking")
     # Hand the booking to the business's automations (automations.py):
     # "when an appointment is booked, notify me / message the customer".
     # In the background, and never able to fail this request.

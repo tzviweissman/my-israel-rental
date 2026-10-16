@@ -10,6 +10,7 @@ import { Loader2, Plus, Pencil, Trash2, Copy, TicketPercent } from 'lucide-react
 import { money } from '../../utils/currency';
 import ReferralSettings from './ReferralSettings';
 import GiftCardsPanel from './GiftCardsPanel';
+import BirthdayPanel from './BirthdayPanel';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
@@ -141,6 +142,7 @@ export default function DiscountsTab({ API, token }) {
       </p>
       {ready && <ReferralSettings key={bizId} API={API} auth={auth} businessId={bizId} />}
       {ready && <GiftCardsPanel key={`gift-${bizId}`} API={API} auth={auth} businessId={bizId} slug={biz.slug} />}
+      {ready && <BirthdayPanel key={`bday-${bizId}`} API={API} auth={auth} businessId={bizId} />}
       {editing && <CodeForm initial={editing} saving={saving} onCancel={() => setEditing(null)} onSave={save} />}
       {codes === null ? <Loader2 className="animate-spin" size={18} /> : codes.length === 0 && !editing ? (
         <div className="rounded-2xl border p-8 text-center text-sm" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }}>

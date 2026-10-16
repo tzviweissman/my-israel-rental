@@ -1249,7 +1249,7 @@ const en = {
           },
           b_orders: {
             title: 'Orders without the spreadsheet',
-            body: "Paste a WhatsApp order and the form fills itself. Your staff and your courier each see their own list, and the customer gets a link that says where the order is. Someone who fills a basket on your page and leaves gets one reminder to finish. No commission.",
+            body: "Paste a WhatsApp order and the form fills itself. Your staff and your courier each see their own list, and the customer gets a link that says where the order is. Someone who fills a basket on your page and leaves gets one reminder to finish, and people can ask to be told when a sold-out product is back. No commission.",
             doIt: 'Enter an order',
           },
           b_appointments: {
@@ -1259,7 +1259,7 @@ const en = {
           },
           b_giftcards: {
             title: "Gift cards and discount codes",
-            body: "Sell gift cards from your page: the customer pays you directly, you mark it paid, and the code is emailed to the person it is for. It works on your order form and at the counter. Discount codes and invite-a-friend rewards live here too.",
+            body: "Sell gift cards from your page: the customer pays you directly, you mark it paid, and the code is emailed to the person it is for. It works on your order form and at the counter. Discount codes, invite-a-friend rewards and a birthday treat for your customers live here too.",
             doIt: "Set up gift cards",
           },
           b_network: {
@@ -5772,6 +5772,36 @@ const en = {
         from: "from {{p}}",
         all: "See everything",
         ownerLabel: "Link for your Instagram or TikTok bio",
+      },
+      // Back-in-stock alerts and the birthday treat (16 Oct 2026).
+      birthday: {
+        label: "Your birthday",
+        day: "Day",
+        month: "Month",
+        why: "{{name}} sends a small birthday gift. No year needed.",
+      },
+      restock: {
+        title: "Sold out right now",
+        ask: "Tell me when it's back",
+        send: "Email me",
+        emailLabel: "Your email",
+        done: "We will email you once when it is back.",
+        badEmail: "Please check the email address",
+      },
+      birthdayBiz: {
+        title: "Birthday treat",
+        onShort: "On, {{n}} birthdays saved",
+        switch: "Send a birthday treat",
+        body: "Your order form, membership sign-up and booking form ask for a birthday (day and month, optional). Three days before it, the customer gets an email from you with a personal code, good once.",
+        gift: "The gift:",
+        percent: "% off",
+        amount: "₪ off",
+        for: "for",
+        counts: "{{saved}} birthdays saved · {{sent}} treats sent this year · {{used}} used",
+      },
+      restockBiz: {
+        title: "Waiting for sold-out products",
+        hint: "Put one back on sale and everyone waiting for it gets one email to order it.",
       },
       // Invite a friend (backend referrals.py).
       referrals: {

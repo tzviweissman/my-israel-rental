@@ -39,6 +39,7 @@ import SendToSupplierDialog from './SendToSupplierDialog';
 import MoreMenu from './MoreMenu';
 import CustomFieldsEditor from './CustomFieldsEditor';
 import BasketReminderSwitch from './BasketReminderSwitch';
+import RestockWaiting from './RestockWaiting';
 
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -445,6 +446,8 @@ export default function OrdersTab({ API, token }) {
             .map(([key, Icon, label, onClick]) => ({ key, Icon, label, onClick, active: panel === key }))}
         />
       </div>
+
+      <RestockWaiting API={API} auth={auth} businessId={biz.id} />
 
       {panel === 'questions' && (
         <div className="mb-4">

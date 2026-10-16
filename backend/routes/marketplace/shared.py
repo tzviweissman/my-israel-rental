@@ -794,6 +794,8 @@ class BookingIn(BaseModel):
     lang: Optional[str] = Field(None, pattern="^(en|he)$")
     # Who on the listing's team, or "any" / None for whoever is free.
     staff_id: Optional[str] = Field(None, max_length=32)
+    # "MM-DD", optional, for the birthday treat (birthdays.py).
+    birthday: Optional[str] = Field(None, pattern=r"^\d{2}-\d{2}$")
 
 
 class BookingPatch(BaseModel):

@@ -97,7 +97,7 @@ async def list_codes(business_id: str, user=Depends(verify_token)):
     await _owned(business_id, user)
     # Thank-you codes from referrals (referrals.py) are left out: one per
     # friend sent, they would bury the business's own codes.
-    rows = await db.discount_codes.find({"business_id": business_id, "deleted": {"$ne": True}, "referral_reward": {"$ne": True}}).sort("created_at", -1).to_list(200)
+    rows = await db.discount_codes.find({"business_id": business_id, "deleted": {"$ne": True}, "referral_reward": {"$ne": True}, "birthday_gift": {"$ne": True}}).sort("created_at", -1).to_list(200)
     return [_out(d) for d in rows]
 
 

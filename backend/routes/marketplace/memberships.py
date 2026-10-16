@@ -96,7 +96,8 @@ async def _owned_business(business_id: str, user: dict[str, Any], perm: str = "m
 
 def _biz_public(biz: dict[str, Any]) -> dict[str, Any]:
     return {"id": biz["_id"], "name": biz.get("name") or "", "name_he": biz.get("name_he"),
-            "logo_url": biz.get("logo_url"), "slug": biz.get("slug")}
+            "logo_url": biz.get("logo_url"), "slug": biz.get("slug"),
+            "birthday_on": bool((biz.get("birthday_settings") or {}).get("on"))}
 
 
 # ---------------------------------------------------------------------------
@@ -207,6 +208,8 @@ class JoinIn(BaseModel):
     answers: dict[str, Any] = Field(default_factory=dict)
     # A discount code the business made (discounts.py), off the plan price.
     discount_code: Optional[str] = Field(None, max_length=40)
+    # "MM-DD", optional, for the birthday treat (birthdays.py).
+    birthday: Optional[str] = Field(None, pattern=r"^\d{2}-\d{2}$")
 
 
 async def _new_short_code(business_id: str) -> str:
@@ -264,6 +267,8 @@ async def join(plan_id: str, body: JoinIn, request: Request, viewer=Depends(opti
     if free_card:
         doc.update(_activation(doc["plan"], start))
     await db.business_members.insert_one(doc)
+    from .birthdays import remember
+    await remember(biz["_id"], doc["email"], doc["name"], body.birthday, body.lang, "membership")
     url = f"{_frontend_url()}/members/{doc['manage_token']}"
     if free_card:
         from .member_messages import on_activated

@@ -44,6 +44,7 @@ import { useReturnDestination, saveReturnPath } from '../hooks/useBackNavigation
 import Breadcrumb from '../components/common/Breadcrumb';
 import ContactChannels from '../components/marketplace/ContactChannels';
 import { prettyArea } from '../utils/areaNames';
+import BirthdayInput, { birthdayOrNull } from '../components/forms/BirthdayInput';
 
 // BOTH spellings of the board. The primary nav's Services link is
 // `/businesses` (Navigation.js), `/services` is the permanent legacy alias
@@ -214,6 +215,7 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [phone, setPhone] = useState('');
+  const [birthday, setBirthday] = useState('');
   const [date, setDate] = useState(initialDate || '');
   const [saving, setSaving] = useState(false);
   const guest = !token;
@@ -238,6 +240,7 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
           // The customer's language, for their reminder email.
           lang: String(i18n.language || 'en').startsWith('he') ? 'he' : 'en',
           staff_id: staffId && staffId !== 'any' ? staffId : undefined,
+          birthday: gig.birthday_on ? birthdayOrNull(birthday) || undefined : undefined,
         },
         token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
       );
@@ -282,6 +285,7 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
         <input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} autoComplete="tel"
           placeholder={guest ? t('gigDetail.phone', 'Phone') : t('gigDetail.phoneOptional', 'Phone (optional)')} className={field} data-testid="gig-booking-phone" />
         {!slot && <DateField value={date} onChange={setDate} className={`${field} bg-white`} testid="gig-booking-date" />}
+        {gig.birthday_on && <BirthdayInput value={birthday} onChange={setBirthday} businessName={gig.provider?.name || ''} testid="gig-booking-birthday" />}
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('gigDetail.messagePh', 'Tell the provider what you need…')} rows={3} className={field} />
         {guest && <p className="text-xs text-gray-500">{t('gigDetail.guestNote', 'No account needed. You get a page that shows the reply.')}</p>}
         {Number(gig.deposit) > 0 && (

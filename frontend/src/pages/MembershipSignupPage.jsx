@@ -13,6 +13,7 @@ import { API } from '../lib/apiBase';
 import { planPrice, planVisits } from '../components/members/memberText';
 import CustomFieldInputs from '../components/forms/CustomFieldInputs';
 import DiscountCodeInput, { discountOn } from '../components/forms/DiscountCodeInput';
+import BirthdayInput, { birthdayOrNull } from '../components/forms/BirthdayInput';
 import { money } from '../utils/currency';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-base bg-white min-h-[48px]';
@@ -30,6 +31,7 @@ export default function MembershipSignupPage() {
   const [form, setForm] = useState({ name: '', phone: '', email: '', note: '' });
   const [answers, setAnswers] = useState({});
   const [code, setCode] = useState(null);
+  const [birthday, setBirthday] = useState('');
   const [timetable, setTimetable] = useState([]);
   const [sending, setSending] = useState(false);
   const [error, setError] = useState('');
@@ -62,6 +64,7 @@ export default function MembershipSignupPage() {
     try {
       const { data: r } = await axios.post(`${API}/marketplace/memberships/plan/${pick}/join`, {
         name: form.name.trim(), phone: form.phone.trim(), email: form.email.trim() || null, note: form.note.trim() || null, lang: lang === 'he' ? 'he' : 'en', answers, discount_code: code ? code.code : null,
+        birthday: biz.birthday_on ? birthdayOrNull(birthday) : null,
       });
       navigate(`/members/${r.manage_token}?joined=1`);
     } catch (err) {
@@ -126,6 +129,7 @@ export default function MembershipSignupPage() {
             <input type="email" maxLength={200} autoComplete="email" value={form.email} onChange={set('email')} className={field} style={fieldStyle} placeholder={t('members.emailForPass', 'Email, to get your membership pass (optional)')} />
             <textarea maxLength={500} rows={2} value={form.note} onChange={set('note')} className={field} style={fieldStyle} placeholder={t('members.noteOptional', 'Anything the business should know (optional)')} />
             <CustomFieldInputs fields={data.fields} values={answers} onChange={setAnswers} testid="signup-custom-fields" />
+            {biz.birthday_on && <BirthdayInput value={birthday} onChange={setBirthday} businessName={bizName} testid="signup-birthday" />}
           </fieldset>
 
           {(() => {
