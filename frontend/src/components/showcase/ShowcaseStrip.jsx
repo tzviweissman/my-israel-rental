@@ -6,7 +6,7 @@
  * rules §3e, 17). "See all" opens /showcase. Renders nothing until the list
  * has loaded, and nothing if it is empty.
  */
-import React, { useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -16,6 +16,27 @@ export default function ShowcaseStrip() {
   const { t } = useTranslation();
   const items = useShowcase();
   const row = useRef(null);
+  // When a swipe stops between cards, glide to the nearest whole card. CSS
+  // snapping alone left a card half off an iPhone's screen (Tzvi, 16 Oct
+  // 2026: "its still not centered").
+  useEffect(() => {
+    const el = row.current;
+    if (!el) return undefined;
+    let t = 0;
+    const settle = () => {
+      const box = el.getBoundingClientRect();
+      const rtl = getComputedStyle(el).direction === 'rtl';
+      const cards = [...el.querySelectorAll('li')];
+      if (!cards.length) return;
+      const edge = (c) => (rtl ? box.right - c.getBoundingClientRect().right : c.getBoundingClientRect().left - box.left);
+      const near = cards.reduce((a, c) => (Math.abs(edge(c)) < Math.abs(edge(a)) ? c : a), cards[0]);
+      const off = edge(near);
+      if (Math.abs(off) > 2) el.scrollTo({ left: el.scrollLeft + (rtl ? -1 : 1) * off, behavior: 'smooth' });
+    };
+    const onScroll = () => { clearTimeout(t); t = setTimeout(settle, 140); };
+    el.addEventListener('scroll', onScroll, { passive: true });
+    return () => { el.removeEventListener('scroll', onScroll); clearTimeout(t); };
+  }, [items]);
   if (!items || !items.length) return null;
 
   // The arrows go to the next whole card, by its own position, never by a
