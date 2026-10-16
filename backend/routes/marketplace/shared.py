@@ -756,6 +756,9 @@ class BookingIn(BaseModel):
     # Appointment-only. Provider-side time slot chosen by the buyer.
     # Format: ``HH:MM`` in the provider's local time (Israel).
     time_slot: Optional[str] = Field(None, pattern=r"^\d{2}:\d{2}$")
+    # The language the customer booked in, for their reminder email
+    # (appointment_reminders.py).
+    lang: Optional[str] = Field(None, pattern="^(en|he)$")
 
 
 class BookingPatch(BaseModel):

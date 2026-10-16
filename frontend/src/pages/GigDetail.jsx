@@ -232,6 +232,8 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
           guest_name: guest ? name : undefined,
           preferred_date: slot ? slotDate : (date || null),
           time_slot: slot || undefined,
+          // The customer's language, for their reminder email.
+          lang: String(i18n.language || 'en').startsWith('he') ? 'he' : 'en',
         },
         token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
       );

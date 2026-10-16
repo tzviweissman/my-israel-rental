@@ -13,6 +13,7 @@ import axios from 'axios';
 import { StarInput } from '../components/reviews/ReviewsSection';
 import { Loader2, CalendarCheck } from 'lucide-react';
 import { API } from '../lib/apiBase';
+import ChangeBooking from '../components/bookings/ChangeBooking';
 
 const REFRESH_MS = 30_000;
 
@@ -102,6 +103,8 @@ export default function BookingTrackPage() {
             </div>
           )}
         </section>
+
+        <ChangeBooking token={token} data={data} onChanged={load} />
 
         {reviewsOn && data.status === 'completed' && (
           <section className="mt-4 rounded-2xl border bg-white p-4 text-center" style={{ borderColor: 'var(--brand-border)' }} data-testid="booking-track-review">

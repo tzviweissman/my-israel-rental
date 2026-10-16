@@ -1291,6 +1291,7 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         "track_token": secrets.token_urlsafe(16),
         "preferred_date": payload.preferred_date,
         "time_slot": payload.time_slot,
+        "lang": payload.lang,
         # Frozen at creation — see _booking_duration.
         "duration_minutes": duration,
         "status": "pending",
@@ -1333,7 +1334,7 @@ async def track_booking(token: str, request: Request):
     b = await db.marketplace_bookings.find_one({"track_token": token})
     if not b:
         raise HTTPException(status_code=404, detail="This link is not valid")
-    gig = await db.marketplace_gigs.find_one({"_id": b.get("gig_id")}, {"title": 1, "title_he": 1, "business_id": 1}) or {}
+    gig = await db.marketplace_gigs.find_one({"_id": b.get("gig_id")}, {"title": 1, "title_he": 1, "business_id": 1, "weekly_availability": 1, "slot_duration_minutes": 1}) or {}
     biz = await db.businesses.find_one({"_id": gig.get("business_id")}, {"name": 1, "name_he": 1, "slug": 1, "logo_url": 1}) or {}
     status = b.get("status") or "pending"
     expires = b.get("hold_expires_at")
@@ -1344,7 +1345,23 @@ async def track_booking(token: str, request: Request):
         "gig_title": gig.get("title") or "", "gig_title_he": gig.get("title_he"),
         "tier_name": b.get("tier_name"), "preferred_date": b.get("preferred_date"), "time_slot": b.get("time_slot"),
         "status": status, "provider_reply": b.get("provider_reply") or "", "created_at": b.get("created_at"),
+        # For cancel or change from this link (appointment_reminders.py):
+        # whether it still can be, and what a new time is checked against.
+        "can_change": _customer_can_change(b, status),
+        "gig_id": b.get("gig_id"), "duration_minutes": b.get("duration_minutes") or 30,
+        "weekly_availability": gig.get("weekly_availability") or {},
+        "slot_minutes": int(gig.get("slot_duration_minutes") or 30),
     }
+
+
+def _customer_can_change(b: dict, status: str) -> bool:
+    if status not in ("pending", "accepted") or not b.get("time_slot") or not b.get("preferred_date"):
+        return False
+    try:
+        start = datetime.fromisoformat(f"{b['preferred_date']}T{b['time_slot']}").replace(tzinfo=_IL_TZ)
+    except ValueError:
+        return False
+    return start > datetime.now(_IL_TZ)
 
 
 

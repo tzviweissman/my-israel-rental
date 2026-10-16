@@ -38,6 +38,7 @@ from routes import (  # noqa: E402
     chat,
     contracts,
     geocode,
+    guest_messages,
     home_tiles,
     ical,
     marketplace,
@@ -91,6 +92,7 @@ for mod in (
     saved_searches,
     smart_pricing,
     availability_reminders,
+    guest_messages,
     ical,
     marketplace,
     misc,
@@ -306,6 +308,12 @@ async def startup_tasks() -> None:
     # "we haven't seen you" (routes/marketplace/member_messages.py).
     from routes.marketplace.member_messages import member_messages_loop
     asyncio.create_task(member_messages_loop())
+    # Appointment reminders to customers (appointment_reminders.py).
+    from routes.marketplace.appointment_reminders import appointment_reminders_loop
+    asyncio.create_task(appointment_reminders_loop())
+    # Automatic messages to guests of a stay (routes/guest_messages.py).
+    from routes.guest_messages import guest_messages_loop
+    asyncio.create_task(guest_messages_loop())
     # Requests board lifecycle — daily at 05:00 UTC. Flips open->expired
     # once a request's 30 days are up. A soft flip, not a TTL index, so
     # the seeker can still renew it. See the single-replica note in
@@ -550,6 +558,10 @@ async def startup_tasks() -> None:
         await ensure_referral_indexes()
         from routes.marketplace.custom_domains import ensure_domain_indexes
         await ensure_domain_indexes()
+        from routes.marketplace.appointment_reminders import ensure_appointment_reminder_indexes
+        await ensure_appointment_reminder_indexes()
+        from routes.guest_messages import ensure_guest_message_indexes
+        await ensure_guest_message_indexes()
         from routes.marketplace.staff import ensure_staff_indexes
         await ensure_staff_indexes()
         from routes.marketplace.classes import ensure_class_indexes

@@ -4,7 +4,7 @@ import ShareListingsPanel from './ShareListingsPanel';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon, Loader2, CalendarCheck, TrendingUp, Heart } from 'lucide-react';
+import { Edit, Eye, Trash2, Upload, FileText, CalendarSync, Link2, X, RefreshCw, Copy, Check, Sparkles, Image as ImageIcon, Loader2, CalendarCheck, TrendingUp, Heart, MailCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { getCoverImage } from '../../utils/coverImage';
 import openAuthedFile from '../../utils/openAuthedFile';
@@ -12,6 +12,7 @@ import { areaLabel } from '../../utils/areaNames';
 import DefaultImageBadge from '../property/DefaultImageBadge';
 import VideoCoverBadge from '../property/VideoCoverBadge';
 import SmartPricingModal from './SmartPricingModal';
+import GuestMessagesModal from './GuestMessagesModal';
 import PerformancePanel from './PerformancePanel';
 
 /**
@@ -79,6 +80,8 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
   // Smart Pricing modal — single instance, opened with whichever property's
   // button was clicked. Vacation-only (button is hidden on other types).
   const [smartPricingProperty, setSmartPricingProperty] = useState(null);
+  // Automatic messages to guests of a stay (GuestMessagesModal.jsx).
+  const [guestMsgProperty, setGuestMsgProperty] = useState(null);
   // How many people saved each listing, from the stats panel's own request
   // (onData) rather than a second one. Absent means nobody: no "saved by 0".
   const [saves, setSaves] = useState({});
@@ -665,6 +668,15 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
                 </div>
               </div>
 
+              {/* Automatic messages to guests: stays only. */}
+              {(property.rental_type === 'vacation' || property.rental_type === 'short-term') && (
+                <button type="button" onClick={() => setGuestMsgProperty(property)}
+                        className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium"
+                        style={{ backgroundColor: '#f5f5f0', color: 'var(--brand-primary)' }} data-testid={`guest-messages-btn-${property.id}`}>
+                  <MailCheck size={15} /> {t('guestMsg.title', 'Messages to guests')}
+                </button>
+              )}
+
               {/* Contract Upload for Long-Term/Short-Term */}
               {(property.rental_type === 'long-term' || property.rental_type === 'short-term') && (
                 <div className="mt-3 pt-3 border-t border-gray-100">
@@ -835,6 +847,9 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
           </div>
         ))}
       </div>
+      {guestMsgProperty && (
+        <GuestMessagesModal property={guestMsgProperty} API={API} token={token} onClose={() => setGuestMsgProperty(null)} />
+      )}
       <SmartPricingModal
         isOpen={!!smartPricingProperty}
         onClose={() => {
