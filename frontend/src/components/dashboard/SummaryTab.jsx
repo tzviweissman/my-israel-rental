@@ -59,7 +59,7 @@ export default function SummaryTab({ API, token, embedded = false }) {
   const nothing = d && !o.orders && !o.compare && !d.memberships.has_any && !d.appointments.has_any && !d.visits.count;
 
   return (
-    <div data-testid="summary-tab">
+    <div data-testid="summary-tab" data-tour="sales-summary">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
         <h2 className={embedded ? 'text-base font-semibold' : 'text-lg font-bold'} style={{ color: 'var(--ink)' }}>{t('summary.title', 'Sales summary')}</h2>
         {businesses.length > 1 && (

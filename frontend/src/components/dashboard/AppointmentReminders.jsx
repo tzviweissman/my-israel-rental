@@ -43,8 +43,8 @@ export default function AppointmentReminders({ API, token }) {
   };
 
   return (
-    <section className="rounded-2xl border bg-white mb-6" style={{ borderColor: 'var(--brand-border)' }} data-testid="appointment-reminders">
-      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="w-full flex items-center justify-between gap-2 p-4 text-start min-h-[44px]">
+    <section className="rounded-2xl border bg-white mb-6" style={{ borderColor: 'var(--brand-border)' }} data-testid="appointment-reminders" data-tour="appointment-settings">
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} data-tour="appointment-settings-open" className="w-full flex items-center justify-between gap-2 p-4 text-start min-h-[44px]">
         <span className="flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--ink)' }}>
           <BellRing size={16} aria-hidden="true" /> {t('apptRemind.title', 'Reminders to customers')}
           {s && <span className="text-xs font-normal" style={{ color: s.on ? '#2E7D4F' : 'var(--brand-muted)' }}>{s.on ? t('apptRemind.onShort', 'On, {{h}} hours before', { h: s.hours }) : t('apptRemind.off', 'Off')}</span>}

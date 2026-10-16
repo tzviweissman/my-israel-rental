@@ -249,7 +249,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           {b.id && <OwnDomainField business={b} API={API} token={token} />}
           {/* The one-screen page for an Instagram or TikTok bio (pages/LinkPage.jsx). */}
           {b.id && b.slug && (
-            <div data-testid="biz-details-bio-link">
+            <div data-testid="biz-details-bio-link" data-tour="bio-link">
               <ShareLinkRow link={`${window.location.origin}/link/${b.slug}`} label={t('linkPage.ownerLabel', 'Link for your Instagram or TikTok bio')} testidPrefix="bio-link" />
             </div>
           )}

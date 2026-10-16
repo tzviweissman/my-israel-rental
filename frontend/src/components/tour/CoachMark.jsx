@@ -68,13 +68,31 @@ export default function CoachMark({
     window.addEventListener('resize', onChange);
     window.addEventListener('scroll', onChange, true);
     window.addEventListener('orientationchange', onChange);
+    // The page can also move without a scroll: photos above the target
+    // finish loading and push it down. Found 16 Oct 2026 on the "messages to
+    // guests" stop, where listing photos pushed the button off the screen
+    // and the bubble pointed at nothing. Follow the shift, and in the first
+    // seconds (before the visitor has scrolled on their own) bring the
+    // target back into view if it was pushed out.
+    const shownAt = Date.now();
+    const onShift = () => {
+      onChange();
+      if (!targetEl || Date.now() - shownAt > 4000) return;
+      const r = targetEl.getBoundingClientRect();
+      if (r.bottom > window.innerHeight || r.top < 0) {
+        try { targetEl.scrollIntoView({ block: 'center', behavior: 'auto' }); } catch { /* older browsers */ }
+      }
+    };
+    const ro = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(onShift) : null;
+    ro?.observe(document.body);
     return () => {
       window.removeEventListener('resize', onChange);
       window.removeEventListener('scroll', onChange, true);
       window.removeEventListener('orientationchange', onChange);
+      ro?.disconnect();
       if (frame) cancelAnimationFrame(frame);
     };
-  }, [measure]);
+  }, [measure, targetEl]);
 
   // Focus into the tooltip, trapped while it is open, and Esc always exits.
   useEffect(() => {

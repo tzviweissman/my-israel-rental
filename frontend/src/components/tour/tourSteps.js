@@ -8,8 +8,11 @@
  * small bar brings it back when they are done. Nothing is required.
  *
  * Two walks, chosen by what the account has (TourProvider):
- *   business - 9 stops, in the order a new business uses them;
- *   host     - 8 stops for someone who rents out a place.
+ *   business - 13 stops, in the order a new business uses them;
+ *   host     - 9 stops for someone who rents out a place.
+ * The stops added on 16 Oct 2026 (Tzvi: "add all the new features to the
+ * walk through tour") cover link-in-bio, appointments, gift cards, the
+ * sales summary with private feedback, and messages to guests.
  * Someone who is both takes the business walk first and is offered the
  * host walk at the end.
  *
@@ -33,14 +36,20 @@ export const WALKS = {
       doIt: { href: '/businesses/add' } },
     { id: 'b.share', route: '/dashboard?tab=my-businesses', target: 'business-share',
       doIt: { click: 'business-share' } },
+    { id: 'b.biolink', route: '/dashboard?tab=my-businesses&details=1', target: 'bio-link' },
     { id: 'b.requests', route: '/requests', target: 'requests-board' },
     { id: 'b.orders', route: '/dashboard?tab=orders', target: 'orders-board',
       doIt: { click: 'orders-new' } },
+    { id: 'b.appointments', route: '/dashboard?tab=appointments', target: 'appointment-settings',
+      doIt: { click: 'appointment-settings-open' } },
+    { id: 'b.giftcards', route: '/dashboard?tab=discounts', target: 'gift-cards',
+      doIt: { click: 'gift-cards-open' } },
     { id: 'b.network', route: '/dashboard?tab=network&view=partners', target: ['network', 'network-no-business'],
       doIt: { href: '/businesses' } },
     { id: 'b.automations', route: '/dashboard?tab=network&view=automations', target: ['automation-recipes', 'network-no-business'],
       doIt: { click: ['automation-new', 'network-add-business'] } },
     { id: 'b.stats', route: '/dashboard?tab=overview', target: 'overview-stats' },
+    { id: 'b.summary', route: '/dashboard?tab=overview', target: 'sales-summary' },
     { id: 'b.messages', route: '/dashboard?tab=messages', target: ['messages-panel', 'messages-tab'] },
   ],
   host: [
@@ -49,6 +58,8 @@ export const WALKS = {
     { id: 'h.instant', route: '/dashboard?tab=properties', target: 'property-edit',
       doIt: { click: 'property-edit' } },
     { id: 'h.contracts', route: '/dashboard?tab=contracts', target: 'contracts' },
+    { id: 'h.guestmsg', route: '/dashboard?tab=properties', target: 'guest-messages',
+      doIt: { click: 'guest-messages' } },
     { id: 'h.share', route: '/dashboard?tab=properties', target: 'share-panel',
       doIt: { click: 'share-panel' } },
     { id: 'h.automations', route: '/dashboard?tab=network&view=automations', target: ['automation-recipes', 'network-no-business'],

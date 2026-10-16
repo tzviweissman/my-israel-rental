@@ -282,6 +282,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
   // The walk (components/tour) points at these on the first listing that
   // has them. iCal and Smart Pricing exist on vacation rentals only.
   const firstVacationId = properties.find((p) => p.rental_type === 'vacation')?.id;
+  const firstStayId = properties.find((p) => p.rental_type === 'vacation' || p.rental_type === 'short-term')?.id;
   const firstId = properties[0]?.id;
   const displayedProperties =
     activeFilter === 'bulk' ? properties.filter(isFreshBulkUpload)
@@ -672,7 +673,8 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
               {(property.rental_type === 'vacation' || property.rental_type === 'short-term') && (
                 <button type="button" onClick={() => setGuestMsgProperty(property)}
                         className="mt-3 w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm font-medium"
-                        style={{ backgroundColor: '#f5f5f0', color: 'var(--brand-primary)' }} data-testid={`guest-messages-btn-${property.id}`}>
+                        style={{ backgroundColor: '#f5f5f0', color: 'var(--brand-primary)' }} data-testid={`guest-messages-btn-${property.id}`}
+                        data-tour={property.id === firstStayId ? 'guest-messages' : undefined}>
                   <MailCheck size={15} /> {t('guestMsg.title', 'Messages to guests')}
                 </button>
               )}

@@ -97,8 +97,8 @@ export default function GiftCardsPanel({ API, auth, businessId, slug }) {
   };
 
   return (
-    <section className="rounded-2xl border bg-white mb-4" style={{ borderColor: 'var(--brand-border)' }} data-testid="gift-cards-panel">
-      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="w-full flex items-center justify-between gap-2 p-3 text-start">
+    <section className="rounded-2xl border bg-white mb-4" style={{ borderColor: 'var(--brand-border)' }} data-testid="gift-cards-panel" data-tour="gift-cards">
+      <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} data-tour="gift-cards-open" className="w-full flex items-center justify-between gap-2 p-3 text-start">
         <span className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--ink)' }}>
           <Gift size={16} /> {t('giftBiz.title', 'Gift cards')}
           <span className="font-normal text-xs" style={{ color: 'var(--brand-muted)' }}>

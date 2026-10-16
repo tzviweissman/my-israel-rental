@@ -1226,7 +1226,7 @@ const en = {
         step: {
           b_page: {
             title: 'Your page comes first',
-            body: 'This is what customers see when you send your link. A logo and a cover photo are the difference between a page that looks finished and one people close. Owners send it instead of building a website.',
+            body: "This is what customers see when you send your link. A logo and a cover photo are the difference between a page that looks finished and one people close. In Design your page you choose the sections and their order, your colours and fonts, a notice bar for news, and extra pages with a menu. Changes wait as a draft, with a private preview link, until you publish.",
             doIt: 'Add my logo and cover',
           },
           b_service: {
@@ -1239,14 +1239,28 @@ const en = {
             body: 'One short link, and a code to print on a flyer, a van or your packaging. You see how many people scanned it, so you know whether the flyer was worth printing.',
             doIt: 'Get my link and code',
           },
+          b_biolink: {
+            title: "A link for your Instagram bio",
+            body: "One page made for a phone: your logo, your main buttons and your first few services. Paste this link in your Instagram or TikTok bio. It builds itself from your page, so there is nothing to set up.",
+          },
           b_requests: {
             title: 'People who already need you',
             body: 'Customers post the job they need doing. Read what has been asked for in your line of work and reply to the ones you want, instead of chasing leads.',
           },
           b_orders: {
             title: 'Orders without the spreadsheet',
-            body: 'Paste a WhatsApp order and the form fills itself. Your staff and your courier each see their own list, and the customer gets a link that says where the order is. No commission.',
+            body: "Paste a WhatsApp order and the form fills itself. Your staff and your courier each see their own list, and the customer gets a link that says where the order is. Someone who fills a basket on your page and leaves gets one reminder to finish. No commission.",
             doIt: 'Enter an order',
+          },
+          b_appointments: {
+            title: "Appointments that run themselves",
+            body: "Customers get a reminder the day before, with a button to cancel or change, and can add the time to their calendar. A cancelled slot goes to your waiting list. You can also take quote requests with photos, sell tour and workshop dates with limited places, let customers pick who does it, ask for a deposit, and remind them to book again.",
+            doIt: "Set the reminders",
+          },
+          b_giftcards: {
+            title: "Gift cards and discount codes",
+            body: "Sell gift cards from your page: the customer pays you directly, you mark it paid, and the code is emailed to the person it is for. It works on your order form and at the counter. Discount codes and invite-a-friend rewards live here too.",
+            doIt: "Set up gift cards",
           },
           b_network: {
             title: 'Work with other businesses',
@@ -1261,6 +1275,10 @@ const en = {
           b_stats: {
             title: 'See what is working',
             body: 'How many people saw your page and how many tapped to message you. Real counts, never estimates, so you can tell a page nobody finds from one people look at and pass over.',
+          },
+          b_summary: {
+            title: "Your sales, and what customers say",
+            body: "Orders, members, visits and appointments against the period before, counted from your own records. The day after a visit, customers are asked how it went; their answers come only to you, so you can put things right. Once enough people visit, your page shows when you are usually busy.",
           },
           b_messages: {
             title: 'Messages translate themselves',
@@ -1279,6 +1297,11 @@ const en = {
           h_contracts: {
             title: 'Sign without printing',
             body: 'Upload your contract once. It is signed on screen by both sides and stored where only the two of you can open it. No printer, no scanner, no meeting up.',
+          },
+          h_guestmsg: {
+            title: "Messages that greet your guests",
+            body: "Write the check-in details once: the code, the wifi, where to park. They go to each guest the day before arrival, in the evening they arrive, and on the last morning, with no reminder needed from you.",
+            doIt: "Write the messages",
           },
           h_share: {
             title: 'Your link and QR code',
