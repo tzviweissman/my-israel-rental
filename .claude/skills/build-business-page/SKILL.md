@@ -93,7 +93,7 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   brief: the split-stage grammar, knob signature move, kosher band, phone
   order bar, every rule applied. `examples/FINGERPRINTS-myisraelrental.md`:
   the looks already used, which a new page must differ from.
-- `scripts/`: `readable.mjs`, `cutoff.mjs`, `clipped.mjs`, `scroll-finish.mjs`, `cutout.py`, `overlay-truth.mjs`, `record.mjs`.
+- `scripts/`: `brightness.py`, `readable.mjs`, `cutoff.mjs`, `clipped.mjs`, `scroll-finish.mjs`, `cutout.py`, `overlay-truth.mjs`, `record.mjs`.
 
 ## 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
 
@@ -416,8 +416,8 @@ bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
    when it is the story, never for its own sake).
 2. **Where it comes from to their product**, ending on their real product
    and the button; only their facts or what is plainly true.
-3. **Advert-grade frames**: macro, shallow focus, rim light, rich or dark
-   ground, detail in the air. Flat studio backdrops fail.
+3. **Advert-grade frames**: macro, shallow focus, warm light, a ground lit enough to pass 11,
+   detail in the air. Flat studio backdrops fail.
 4. **Crisp**: highest resolution; frames drawn on a canvas sized to the
    screen; never shrunk, masked or put in a column.
 5. **Chapter lines**: 2 to 6 words per scene over the film (small, at an edge, see 9), their words,
@@ -431,6 +431,11 @@ bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
    patches over the film; check each scene for what the words cover.
 10. **A choice changes what you see**: picking an option swaps its photo
    (one shoot, one photo per option, sharp at its size), words and button.
+11. **Light it bright from the start, then measure**: prompts ask for bright,
+   warm, soft light, subject fully lit, mid or light ground (never "dark" or
+   "moody" by default); run `scripts/brightness.py` on every film and still
+   set (middle 33+, whole 22+, average 30+ of 100) and grade up or regenerate
+   before building; view it on a phone in daylight.
 
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 

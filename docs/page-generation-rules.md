@@ -676,8 +676,8 @@ out to the jar, with a new line of huge words over each scene.
    on their real product and the button. Every step is a fact of theirs or
    plainly true of the ingredient; nothing invented ("picked at dawn" only if
    they said so).
-3. **Advert-grade frames.** Macro, shallow focus, warm rim light, a rich or
-   dark ground the colour can glow against, detail in the air (droplets,
+3. **Advert-grade frames.** Macro, shallow focus, warm light, a ground lit
+   enough to pass 11 that the colour can glow against, detail in the air (droplets,
    crumbs, steam). A flat, evenly lit studio backdrop fails.
 4. **Crisp.** Generate at the highest resolution the model gives; the page
    draws the film as a sequence of sharp frames on a canvas (or a near
@@ -712,6 +712,20 @@ out to the jar, with a new line of huge words over each scene.
    choosing a different bowl type"). One photo per option, all from one
    shoot, sharp at the size shown: never a small crop from a screenshot
    blown up.
+
+11. **Light it bright from the start, then measure** (Tzvi, 16 Oct 2026:
+   "at first it was too dark so i dont want similar issues by future builds").
+   The Brown Box film was prompted for "a rich deep brown-black background" and
+   came out averaging 19 out of 100; it had to be graded up afterwards. So:
+   prompts ask for bright, warm, soft light with the subject fully lit and a
+   mid-tone or light ground (golden, cream, sky), never "dark", "black" or
+   "moody" as the default; a dark ground only when the business's own look is
+   dark, and then the subject is still lit. Check every film and every set of
+   generated stills with `scripts/brightness.py` before it goes on a page:
+   middle third at least 33, whole frame at least 22, average at least 30
+   (out of 100); a product dark by nature (acai, chocolate) is lit and set on a
+   lighter ground rather than pushed until it turns milky. Under that, grade up (ffmpeg eq=gamma) or regenerate. Then
+   look at it on a phone screen in daylight, not only on a laptop.
 
 ## 4. What is reported to the owner instead (content gaps)
 
