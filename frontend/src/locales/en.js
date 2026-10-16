@@ -5728,7 +5728,7 @@ const en = {
           expired: "Expired",
         },
       },
-      basket: {
+      basketReminder: {
         title: "Remind people who leave without ordering",
         hint: "If someone chooses items and gives their email but does not order, they get one email about three hours later with a button back to their basket.",
         sent: "{{n}} sent so far.",

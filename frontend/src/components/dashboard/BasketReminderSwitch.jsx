@@ -25,10 +25,10 @@ export default function BasketReminderSwitch({ API, auth, businessId }) {
   return (
     <div className="mt-4 flex items-start justify-between gap-3 rounded-xl p-3" style={{ background: '#F9FAFB' }} data-testid="basket-reminder">
       <div className="text-sm">
-        <p className="font-semibold" style={{ color: 'var(--ink)' }}>{t('basket.title', 'Remind people who leave without ordering')}</p>
+        <p className="font-semibold" style={{ color: 'var(--ink)' }}>{t('basketReminder.title', 'Remind people who leave without ordering')}</p>
         <p className="text-xs mt-0.5" style={{ color: 'var(--brand-muted)' }}>
-          {t('basket.hint', 'If someone chooses items and gives their email but does not order, they get one email about three hours later with a button back to their basket.')}
-          {d.sent > 0 && ` ${t('basket.sent', '{{n}} sent so far.', { n: d.sent })}`}
+          {t('basketReminder.hint', 'If someone chooses items and gives their email but does not order, they get one email about three hours later with a button back to their basket.')}
+          {d.sent > 0 && ` ${t('basketReminder.sent', '{{n}} sent so far.', { n: d.sent })}`}
         </p>
       </div>
       <button type="button" role="switch" aria-checked={d.on} onClick={flip} data-testid="basket-switch"
