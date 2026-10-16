@@ -656,6 +656,63 @@ make their sites so beautiful: the imagery first, and almost nothing else.
     against it before anyone sees it. The effects library is a shelf of
     tested extras, never the starting point.
 
+## 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
+
+Tzvi: "it looks wow, much nicer than what you made for the brown box ... every
+detail is crisp and clear and makes a person want to try some." Side by side,
+The Brown Box's first opening was a locked camera on a small bowl against a
+flat studio wall, beside the text, encoded soft. PULP's was one full-screen
+film the scroll drives: a strawberry on the vine at sunrise falls, fruit
+tumbles through the dark, splashes, swirls into the blend and the camera pulls
+out to the jar, with a new line of huge words over each scene.
+
+1. **One unbroken shot, full screen, that travels.** The camera may move when
+   it follows the product's own journey (this amends 5a.2, "the product
+   performs, not the camera": a camera move is allowed when it IS the story,
+   never for its own sake). The film fills the screen; it is not a box beside
+   the text.
+2. **From where it comes from to their product.** The film tells the
+   product's path (the ingredient, how it is made, how it is served) and ends
+   on their real product and the button. Every step is a fact of theirs or
+   plainly true of the ingredient; nothing invented ("picked at dawn" only if
+   they said so).
+3. **Advert-grade frames.** Macro, shallow focus, warm rim light, a rich or
+   dark ground the colour can glow against, detail in the air (droplets,
+   crumbs, steam). A flat, evenly lit studio backdrop fails.
+4. **Crisp.** Generate at the highest resolution the model gives; the page
+   draws the film as a sequence of sharp frames on a canvas (or a near
+   lossless video) sized to the screen; never shrink it, mask its edges or
+   squeeze it into a column.
+5. **Chapter lines.** Two to six words, over the film (small and at an edge, see 9), a new line for
+   each scene, in the owner's words and facts; this amends "a clip behind
+   text holds still" (section 5 build rules) for the film opening only: the
+   line sits on a measured dark pool at the film's brightest frame.
+6. **Three concepts as stills first,** each a different film, before any clip
+   is paid for; the chosen one is challenged once (what is weak, what is
+   missing) before rendering.
+7. **Seams checked.** Every clip starts on the last frame of the one before
+   (one clip per physical step, as before); after rendering, compare the
+   frames either side of each join and regenerate a clip whose join jumps.
+8. **Contrast after the film.** The section after the opening changes the
+   mood boldly (bright colour blocks after a dark film, or the reverse) so the
+   page wakes up instead of continuing in one tone.
+
+9. **Bright enough to see, and the words never cover the action** (Tzvi,
+   16 Oct 2026 on The Brown Box film: "very dark and hard to see and the
+   words block a lot of what's going on"). A dark ground is a backdrop, never
+   the mood of the whole film: grade the frames up until the subject reads at
+   a glance on a phone in daylight. Chapter lines sit at the bottom edge (or
+   the side the subject is not on), at most a third of the screen's height,
+   on a soft shade along that edge only; no big dark patches or scrims over
+   the film. Check every scene's frame for what the words cover: if they sit
+   on the thing that is happening, move or shrink them.
+10. **A choice changes what you see.** When a visitor picks an option (a bowl,
+   a size, a flavour), its picture, words and button change with it; a
+   picture that stays the same reads as broken (Tzvi: "nothing changes when
+   choosing a different bowl type"). One photo per option, all from one
+   shoot, sharp at the size shown: never a small crop from a screenshot
+   blown up.
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews
@@ -719,7 +776,8 @@ What Blazin' Boards, Lechem Emek and Michal Simkin taught, in the order they mat
 1. **Find what the business actually has before choosing a look.** Their photos,
    their numbers, the one fact that is really theirs. Blazin' Boards sells boards in
    sizes; that became the page.
-2. **The product performs, not the camera.** Movement shows the thing they sell.
+2. **The product performs, not the camera.** Movement shows the thing they sell
+   (amended 16 Oct 2026, §3h: the camera may travel when it follows the product's journey).
    Zooming for its own sake "isn't doing anything" (Tzvi on Blazin' Boards rev 2);
    the jar rolling as the page scrolled was the part that worked.
 3. **Only their photographs of their work, people and place.** "A generated face

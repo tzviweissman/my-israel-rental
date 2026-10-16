@@ -406,6 +406,32 @@ Full text, timestamps and frames: page rules §3g, `docs/ui-videos/notes/`.
     per section or effect, for this business, named in BRIEF.md and the
     reply; nothing reused from the last two pages (check FINGERPRINTS).
 
+## 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
+
+Full text: page rules §3h. The Brown Box's first opening (locked camera, small
+bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
+
+1. **One unbroken full-screen shot that travels**, following the product's
+   journey (amends "the product performs, not the camera": a move is fine
+   when it is the story, never for its own sake).
+2. **Where it comes from to their product**, ending on their real product
+   and the button; only their facts or what is plainly true.
+3. **Advert-grade frames**: macro, shallow focus, rim light, rich or dark
+   ground, detail in the air. Flat studio backdrops fail.
+4. **Crisp**: highest resolution; frames drawn on a canvas sized to the
+   screen; never shrunk, masked or put in a column.
+5. **Chapter lines**: 2 to 6 words per scene over the film (small, at an edge, see 9), their words,
+   on a measured dark pool (amends "a clip behind text holds still" for the
+   film opening only).
+6. **Three concept stills before any clip**, the chosen one challenged once.
+7. **Seams checked** after rendering; a jumping join is regenerated.
+8. **A bold contrast section right after the film.**
+9. **Bright, and words off the action**: grade the film up until it reads at
+   a glance; lines small, at an edge, on a soft edge shade only; no big dark
+   patches over the film; check each scene for what the words cover.
+10. **A choice changes what you see**: picking an option swaps its photo
+   (one shoot, one photo per option, sharp at its size), words and button.
+
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
 Full text: `reference/design-rules.md`. The rules both builders share are
@@ -449,7 +475,7 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
   kosher-appropriate. Full text: `reference/full-rules.md` §8.
 - Find what the business actually has before choosing a look; the page is
   built around the one thing that is really theirs.
-- **The product performs, not the camera.** Motion shows what they sell; no zooming for its own sake.
+- **The product performs, not the camera.** Motion shows what they sell; no zooming for its own sake (a camera that follows the product's journey is fine, 3h).
 - **One signature idea per page**, describable in one sentence, never reused
   for the next business. **One peak**; the ending resolves on the action.
 - No blank screens, no scroll cues, no "01/06" counters, no label above every section.

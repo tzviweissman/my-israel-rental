@@ -1,0 +1,119 @@
+[
+ {
+  "slug": "acai-bowl",
+  "name": "Acai bowl",
+  "price": 60,
+  "group": "Acai bowls",
+  "description": "Classic, Tropical, Sunrise or Superfruit bowl, or build your own. Sugar free, almond milk based.",
+  "alt": "A clear bowl of acai topped with strawberries, green apple and granola",
+  "in_stock": true
+ },
+ {
+  "slug": "mini-bowls",
+  "name": "Mini acai bowls",
+  "price": 30,
+  "group": "Acai bowls",
+  "description": "Minimum 8.",
+  "alt": "Two mini acai bowls with fruit, granola and a peanut butter drizzle",
+  "in_stock": true
+ },
+ {
+  "slug": "large-board",
+  "name": "Large acai board",
+  "price": 390,
+  "group": "Acai boards",
+  "description": "",
+  "alt": "A large board of acai, granola and rows of blueberries, mango, pomegranate, kiwi and pineapple tied with twine",
+  "in_stock": true
+ },
+ {
+  "slug": "small-board",
+  "name": "Small acai board",
+  "price": 220,
+  "group": "Acai boards",
+  "description": "",
+  "alt": "A small board of acai, granola and rows of mango, pomegranate and blueberries tied with twine",
+  "in_stock": true
+ },
+ {
+  "slug": "small-gift-box",
+  "name": "Small gift box",
+  "price": 135,
+  "group": "Gifting",
+  "description": "An acai bowl, 2 muffins of your choice and an iced coffee.",
+  "alt": "A kraft gift box with a window: an acai bowl, two muffins and an iced coffee",
+  "in_stock": true
+ },
+ {
+  "slug": "large-gift-box",
+  "name": "Large gift box",
+  "price": 250,
+  "group": "Gifting",
+  "description": "2 acai bowls, 2 muffins of your choice, date snacks and an iced coffee.",
+  "alt": "A large kraft gift box with a window: two acai bowls, muffins, date snacks and an iced coffee",
+  "in_stock": true
+ },
+ {
+  "slug": "energy-bites",
+  "name": "Energy bites",
+  "price": 50,
+  "group": "Snacks",
+  "description": "Oats, natural peanut butter, coconut, honey, flax and chia seeds. Sugar free.",
+  "alt": "A kraft bag of energy bites",
+  "in_stock": true
+ },
+ {
+  "slug": "super-granola",
+  "name": "Super granola",
+  "price": 40,
+  "group": "Snacks",
+  "description": "Oats and seeds sweetened with maple syrup and honey. Sugar free.",
+  "alt": "A kraft bag of granola",
+  "in_stock": true
+ },
+ {
+  "slug": "date-snacks",
+  "name": "Date snacks",
+  "price": 55,
+  "group": "Snacks",
+  "description": "Medjool dates covered in natural peanut butter, pretzel, 70% cacao chocolate and pink Himalayan salt.",
+  "alt": "A tub of chocolate covered date snacks",
+  "in_stock": true
+ },
+ {
+  "slug": "oat-muffin",
+  "name": "Oatmeal chocolate chip muffin",
+  "price": 17,
+  "group": "Snacks",
+  "description": "Whole grain spelt. Sugar free.",
+  "alt": "An oatmeal chocolate chip muffin in a brown paper case",
+  "in_stock": true
+ },
+ {
+  "slug": "blueberry-muffin",
+  "name": "Blueberry sourdough muffin",
+  "price": 17,
+  "group": "Snacks",
+  "description": "Whole grain spelt.",
+  "alt": "A blueberry muffin in a brown paper case",
+  "in_stock": true
+ },
+ {
+  "slug": "iced-coffee",
+  "name": "Iced coffee",
+  "price": 20,
+  "group": "Drinks",
+  "description": "Dairy.",
+  "alt": "Two bottles of iced coffee",
+  "in_stock": true
+ },
+ {
+  "slug": "passion-tea",
+  "name": "Passion fruit iced tea",
+  "price": 20,
+  "group": "Drinks",
+  "description": "Sugar free.",
+  "alt": "A bottle of passion fruit iced tea",
+  "in_stock": true
+ }
+]

@@ -1,0 +1,491 @@
+<!doctype html>
+<!--
+  The Brown Box, Jerusalem (Tzvi, 15 Oct 2026: "make the acai page").
+  Facts are all theirs: the listing (Acai and More), their two printed menus,
+  their card and their WhatsApp catalogue (screenshots sent by Tzvi). Kosher:
+  Vaad HaKashrus of Rabbi Shmuel Weiner, home business (their seal).
+
+  One idea, one unbroken film (v2, 16 Oct 2026, page rules 3h, after the
+  PULP video): acai berries on the branch at sunrise fall into the purple
+  blend, it folds into their clear bowl, the Classic bowl's toppings fall in
+  slow motion and land, and the camera rises as the bowl sits in a kraft
+  brown box. Five generated clips (Higgsfield, MiniMax H3), each starting on
+  the last frame of the one before and ending on a keyframe still, drawn as
+  frames on a canvas, full screen, with a chapter line per scene. Then: pick your bowl (after Blue Apron's "choose an option" and
+  sweetgreen's bowl cards, Mobbin), the menu as a live price list from their
+  shop with their own photos (after sweetgreen's side list, Mobbin, and 21st
+  "Hover Image List" for the lifted row), the gift boxes on their brown,
+  good to know, and their own line as the close.
+  Every Order button goes to order.html, which saves the order and opens
+  WhatsApp with it written out.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Brown Box · Acai bowls delivered across Jerusalem</title>
+<meta name="description" content="Acai bowls, acai boards and brunch gift boxes from The Brown Box, sugar free and almond milk based, delivered across Jerusalem. Kosher, Vaad HaKashrus of Rabbi Shmuel Weiner.">
+<link rel="icon" href="assets/logo-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bona+Nova:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Style sheet (3g.1). Ground: their menu's cream. Ink: their brown.
+     Accent: the acai itself, one word or one object per screen. Faces:
+     Bona Nova (their card's old-style serif) and Heebo. One radius. */
+  :root {
+    --cream: #F3EADB; --cream-2: #EADCC4; --paper: #FBF6EE; --brown: #4A2E17; --brown-2: #3A230F;
+    --ink: #3A2513; --soft: #5C4431; --acai: #6E2A57; --acai-lt: #E9C9DE; --line: #D9C6A8;
+    --r: 18px; --shadow: 0 1px 2px rgb(58 37 19 / .08), 0 16px 34px -18px rgb(58 37 19 / .45);
+    --font-head: 'Bona Nova', Georgia, serif; --font-body: 'Heebo', system-ui, sans-serif;
+    --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--cream); color: var(--ink); font: 400 1.0625rem/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+  img, video { display: block; max-width: 100%; }
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 700; margin: 0; letter-spacing: -.01em; }
+  .wrap { max-width: 74rem; margin: 0 auto; padding-inline: var(--gutter); }
+  .acc { color: var(--acai); }
+  :focus-visible { outline: 3px solid var(--acai); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  /* one solid button: their brown; it fills from the press point */
+  .btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: .6rem; min-height: 52px; padding: 0 1.6rem;
+    border-radius: 999px; border: 0; background: var(--brown); color: var(--paper); font: 500 1.02rem/1 var(--font-body); text-decoration: none; cursor: pointer;
+    transition: transform 160ms ease-out, background 200ms ease-out; }
+  .btn:hover { background: var(--brown-2); }
+  .btn:active { transform: scale(.97); }
+  .btn b { font-weight: 700; }
+  .btn .arw { transition: transform 220ms var(--out); }
+  .btn:hover .arw { transform: translateX(4px); }
+  .ghost { display: inline-flex; align-items: center; min-height: 48px; padding: 0 1.2rem; border-radius: 999px; border: 1.5px solid var(--brown); color: var(--brown);
+    text-decoration: none; font-weight: 500; transition: background 180ms ease-out, color 180ms ease-out, transform 160ms ease-out; }
+  .ghost:hover { background: var(--brown); color: var(--paper); }
+  .ghost:active { transform: scale(.97); }
+
+  /* header */
+  .bar { position: fixed; inset: 0 0 auto; z-index: 50; height: var(--bar-h); background: rgb(243 234 219 / .92); backdrop-filter: blur(8px); border-bottom: 1px solid rgb(74 46 23 / .1); }
+  .bar .wrap { height: 100%; display: flex; align-items: center; gap: 1rem; }
+  .brand { display: flex; align-items: center; gap: .6rem; color: var(--brown); text-decoration: none; min-height: 44px; }
+  .brand img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; }
+  .brand span { font: 700 1.15rem/1 var(--font-head); letter-spacing: .04em; white-space: nowrap; }
+  .bar nav { margin-inline-start: auto; display: flex; align-items: center; gap: .3rem; }
+  .bar nav a.l { color: var(--soft); text-decoration: none; padding: 0 .7rem; min-height: 44px; display: inline-flex; align-items: center; font-size: .97rem; }
+  .bar nav a.l:hover { color: var(--brown); }
+  .bar .btn { min-height: 44px; padding: 0 1.2rem; font-size: .95rem; }
+  @media (max-width: 760px) { .bar nav a.l { display: none; } .brand span { font-size: 1rem; } }
+
+  /* ── 1. the film (held, full screen) ── */
+  .film { height: 620vh; position: relative; background: #120A05; }
+  .film .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; background: #120A05; }
+  .film canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  /* only a soft shade along the bottom edge, under the words; the film above
+     stays as bright as it was shot */
+  .film .pool { position: absolute; inset: auto 0 0 0; height: max(42%, 19rem); pointer-events: none;
+    background: linear-gradient(to top, rgb(18 10 5 / .93) 0%, rgb(18 10 5 / .88) 46%, rgb(18 10 5 / .5) 74%, rgb(18 10 5 / 0) 100%); }
+  .film .top { position: absolute; inset: 0 0 auto 0; height: 110px; pointer-events: none; background: linear-gradient(to bottom, rgb(18 10 5 / .7), rgb(18 10 5 / 0)); }
+  .chap { position: absolute; inset: auto var(--gutter) clamp(1.4rem, 5vh, 3rem) var(--gutter); max-width: 34rem; color: #FFF6EA;
+    opacity: 0; transform: translateY(18px); filter: blur(6px); transition: opacity 500ms var(--out), transform 600ms var(--out), filter 500ms var(--out); pointer-events: none; }
+  .chap.on { opacity: 1; transform: none; filter: none; pointer-events: auto; }
+  .chap .kick { color: #F1C9A0; }
+  @media (max-height: 700px) { .chap .kick { display: none; } }
+  .chap h1, .chap h2 { font-size: clamp(1.9rem, 1rem + 2.6vw, 3.6rem); line-height: 1.02; color: #FFF6EA; text-wrap: balance; text-shadow: 0 2px 18px rgb(18 10 5 / .55); }
+  .chap .acc { color: #F6CCE6; }
+  .chap p.line { margin: .6rem 0 1rem; color: #F4E8DA; font-size: clamp(.95rem, .9rem + .2vw, 1.1rem); max-width: 28rem; text-shadow: 0 1px 10px rgb(18 10 5 / .6); }
+  .chap .btn { background: #FFF6EA; color: var(--brown-2); }
+  .chap .btn:hover { background: #fff; }
+  .chap .proof { margin-top: .9rem; color: #D9C7B2; font-size: .92rem; }
+  .film .hint { position: absolute; right: var(--gutter); bottom: clamp(2rem, 9vh, 5.5rem); color: #D9C7B2; font-size: .85rem; letter-spacing: .1em; text-transform: uppercase; transition: opacity 300ms; }
+  .film .load { position: absolute; left: 0; bottom: 0; height: 2px; background: #E7A6D1; width: 0; transition: width 200ms linear, opacity 400ms; }
+  /* the bar sits on the film until the film is passed */
+  body.on-film .bar { background: rgb(18 10 5 / .6); border-color: transparent; backdrop-filter: blur(10px); }
+  body.on-film .bar .brand, body.on-film .bar nav a.l { color: #FFF6EA; }
+  body.on-film .bar .btn { background: #FFF6EA; color: var(--brown-2); }
+  @media (max-width: 760px) {
+    .film { height: 560vh; }
+    .film .pool { height: 40%; }
+    .chap { bottom: 1.2rem; }
+    .chap h1, .chap h2 { font-size: clamp(1.7rem, 7.6vw, 2.2rem); }
+    .chap p.line { margin: .5rem 0 .8rem; font-size: .95rem; }
+    .chap .kick { display: none; }
+    .chap .proof, .film .hint { display: none; }
+  }
+
+  /* kosher band */
+  .kosher { background: var(--paper); border-block: 1px solid var(--line); }
+  .kosher .wrap { display: flex; align-items: center; gap: 1rem; padding-block: .9rem; }
+  .kosher img { width: 56px; height: 56px; object-fit: contain; flex: none; }
+  .kosher p { margin: 0; font-size: .97rem; }
+  .kosher b { font-weight: 700; }
+
+  .sec { padding-block: clamp(3.5rem, 8vw, 6.5rem); }
+  .sec h2 { font-size: clamp(2rem, 1.3rem + 2.6vw, 3.4rem); line-height: 1.04; }
+  .sec .lede { margin: .8rem 0 0; color: var(--soft); max-width: 38rem; }
+
+  /* ── 2. pick your bowl ───────────────────────────────────────── */
+  .pick { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center; margin-top: 2.2rem; }
+  @media (max-width: 860px) { .pick { grid-template-columns: 1fr; } }
+  .opts { display: grid; gap: .6rem; }
+  /* bold colour blocks after the dark film (3h.8): each bowl in its fruit */
+  .opt { --c: #6E2A57; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1rem; text-align: start; padding: 1.05rem 1.2rem; border-radius: var(--r); border: 2px solid transparent; background: var(--c);
+    cursor: pointer; color: #fff; font: inherit; transition: transform 160ms ease-out, box-shadow 200ms ease-out; }
+  .opt[data-k="tropical"] { --c: #A0560A; } .opt[data-k="sunrise"] { --c: #44691A; } .opt[data-k="superfruit"] { --c: #2E4A9B; } .opt[data-k="own"] { --c: #4A2E17; }
+  .opt:hover { transform: translateY(-2px); box-shadow: var(--shadow); }
+  .opt:active { transform: scale(.985); }
+  .opt b { font: 700 1.25rem/1.2 var(--font-head); }
+  .opt .p { font-weight: 700; color: #fff; align-self: center; }
+  .opt span.t { grid-column: 1 / -1; color: rgb(255 255 255 / .92); font-size: .95rem; }
+  .opt[aria-pressed="true"] { border-color: #fff; box-shadow: 0 0 0 3px var(--c), var(--shadow); }
+  .card { background: var(--paper); border-radius: 28px; padding: clamp(1.2rem, 3vw, 2rem); box-shadow: var(--shadow); }
+  .card img { width: min(100%, 320px); aspect-ratio: 1; object-fit: cover; border-radius: 24px; margin: 0 auto 1.1rem; background: #F4E9D8; transition: opacity 220ms ease-out, transform 320ms var(--out); }
+  .card img.swap { opacity: 0; transform: scale(.96); }
+  .card h3 { font-size: 1.7rem; text-align: center; }
+  .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; margin: .9rem 0 1.2rem; padding: 0; }
+  .chips li { list-style: none; padding: .35rem .8rem; border-radius: 999px; background: var(--cream); font-size: .92rem; animation: chip 380ms var(--out) both; }
+  .chips li:nth-child(2) { animation-delay: 70ms; } .chips li:nth-child(3) { animation-delay: 140ms; } .chips li:nth-child(4) { animation-delay: 210ms; }
+  @keyframes chip { from { opacity: 0; transform: translateY(6px) scale(.96); } }
+  .card .base { text-align: center; color: var(--soft); font-size: .92rem; margin: 0 0 1.1rem; }
+  .card .btn { width: 100%; }
+  .card .extra { text-align: center; color: var(--soft); font-size: .9rem; margin: .9rem 0 0; }
+
+  /* ── 3. the menu: their shop, live ───────────────────────────── */
+  .menu { background: var(--paper); }
+  .cat-h { margin: 2.4rem 0 .4rem; font: 700 1.5rem/1.2 var(--font-head); color: var(--acai); }
+  .cat { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
+  .cat li { border-bottom: 1px solid var(--line); }
+  .cat a { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 1.1rem; align-items: center; padding: .75rem .5rem; color: var(--ink); text-decoration: none;
+    border-radius: 14px; transition: background 200ms ease-out; }
+  .cat .ph { width: 76px; height: 76px; border-radius: 50%; overflow: hidden; background: #fff; transition: transform 260ms var(--out); }
+  .cat .ph img { width: 100%; height: 100%; object-fit: cover; scale: 1.04; }
+  .cat b { font: 700 1.3rem/1.2 var(--font-head); }
+  .cat .d { display: block; color: var(--soft); font-size: .92rem; line-height: 1.4; margin-top: .15rem; }
+  .cat .pr { font-weight: 700; color: var(--brown); font-size: 1.05rem; white-space: nowrap; }
+  @media (hover: hover) { .cat a:hover { background: var(--cream); } .cat a:hover .ph { transform: scale(1.12) rotate(-4deg); } }
+  .cat li.is-out a, .cat li.is-out > span { opacity: .55; }
+  .cat li.is-out .pr { color: var(--soft); font-weight: 500; }
+  @media (max-width: 560px) { .cat a { grid-template-columns: 60px minmax(0, 1fr) auto; gap: .8rem; } .cat .ph { width: 60px; height: 60px; } .cat b { font-size: 1.12rem; } }
+  .menu .note { margin-top: 1.6rem; color: var(--soft); font-size: .95rem; }
+
+  /* ── 4. gift boxes, on their brown ───────────────────────────── */
+  .gifts { background: var(--brown); color: var(--paper); }
+  .gifts h2 { color: var(--paper); }
+  .gifts .lede { color: #E8D9C2; }
+  .boxes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: clamp(1rem, 3vw, 2rem); margin-top: 2.2rem; }
+  @media (max-width: 760px) { .boxes { grid-template-columns: 1fr; } }
+  .box { display: grid; grid-template-columns: 150px minmax(0, 1fr); gap: 1.2rem; align-items: center; background: rgb(255 255 255 / .06); border: 1px solid rgb(255 255 255 / .14); border-radius: var(--r); padding: 1.2rem; }
+  .box img { width: 150px; height: 150px; border-radius: 14px; object-fit: cover; background: #fff; }
+  .box h3 { font-size: 1.5rem; color: var(--paper); }
+  .box .p { font: 700 1.3rem/1 var(--font-body); color: #F3C9E2; margin: .4rem 0 .6rem; }
+  .box ul { margin: 0 0 .9rem; padding-inline-start: 1.1rem; color: #E8D9C2; font-size: .95rem; }
+  .box a { color: var(--paper); font-weight: 500; text-underline-offset: 3px; display: inline-flex; min-height: 44px; align-items: center; }
+  @media (max-width: 460px) { .box { grid-template-columns: 1fr; } .box img { width: 100%; height: auto; aspect-ratio: 1; } }
+
+  /* ── 5. good to know ─────────────────────────────────────────── */
+  .know { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 3vw, 2rem); margin-top: 2rem; }
+  @media (max-width: 860px) { .know { grid-template-columns: 1fr; } }
+  .know div { border-top: 2px solid var(--brown); padding-top: 1rem; }
+  .know h3 { font-size: 1.35rem; }
+  .know p { margin: .4rem 0 0; color: var(--soft); }
+  .know a { color: var(--brown); font-weight: 500; }
+
+  /* ── close: their own line ───────────────────────────────────── */
+  .close { background: var(--cream-2); text-align: center; padding-block: clamp(4rem, 10vw, 7rem); }
+  .close .q { font: 400 italic clamp(2.2rem, 1.2rem + 4vw, 4.6rem)/1.05 var(--font-head); color: var(--ink); margin: 0 auto 2rem; max-width: 16em; }
+  .close .q span { color: var(--acai); }
+  .close small { display: block; margin-top: 1rem; color: var(--soft); font-size: .92rem; }
+  footer { padding-block: 1.6rem 6rem; text-align: center; color: var(--soft); font-size: .9rem; }
+  footer a { color: var(--soft); }
+
+  /* phone: the order button pinned once the opening has passed */
+  .dock { display: none; }
+  @media (max-width: 760px) {
+    .dock { position: fixed; z-index: 60; inset: auto 0 0 0; display: flex; align-items: center; justify-content: space-between; gap: .8rem;
+      padding: .65rem var(--gutter) calc(.65rem + env(safe-area-inset-bottom)); background: rgb(251 246 238 / .97); border-top: 1px solid var(--line);
+      transform: translateY(110%); transition: transform 300ms var(--out); }
+    .dock.on { transform: none; }
+    .dock small { color: var(--soft); font-size: .85rem; line-height: 1.25; min-width: 0; }
+    .dock .btn { min-height: 46px; padding: 0 1.1rem; font-size: .95rem; flex: none; }
+  }
+  .rev { opacity: 0; transform: translateY(14px); transition: opacity 600ms var(--out), transform 600ms var(--out); }
+  .rev.in { opacity: 1; transform: none; }
+  @media (prefers-reduced-motion: reduce) { .rev { opacity: 1; transform: none; } .chips li { animation: none; } }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="The Brown Box, top"><img src="assets/logo.webp" alt="" width="40" height="40"><span>The Brown Box</span></a>
+    <nav aria-label="Sections">
+      <a class="l" href="#bowls">Bowls</a>
+      <a class="l" href="#menu">Menu</a>
+      <a class="l" href="#gifts">Gift boxes</a>
+      <a class="btn" href="order.html">Order <span class="arw" aria-hidden="true">→</span></a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="film" id="film" aria-label="A film of an acai bowl being made, from the berries to the box">
+    <div class="stage">
+      <canvas id="cv" aria-hidden="true"></canvas>
+      <div class="top" aria-hidden="true"></div>
+      <div class="pool" aria-hidden="true"></div>
+      <div class="chap on" data-from="0" data-to="0.14">
+        <h1>Acai bowls, <span class="acc">delivered</span> across Jerusalem</h1>
+        <p class="line">Sugar free and almond milk based.</p>
+        <a class="btn" href="order.html?add=Acai%20bowl">Order a bowl, <b>₪60</b> <span class="arw" aria-hidden="true">→</span></a>
+      </div>
+      <div class="chap" data-from="0.2" data-to="0.36" aria-hidden="true"><h2>Our signature <span class="acc">acai</span> base.</h2></div>
+      <div class="chap" data-from="0.4" data-to="0.55" aria-hidden="true"><h2>Sugar free. <span class="acc">Almond milk</span> based.</h2></div>
+      <div class="chap" data-from="0.59" data-to="0.76" aria-hidden="true"><h2>Topped <span class="acc">your way.</span></h2></div>
+      <div class="chap" data-from="0.86" data-to="1.01" aria-hidden="true">
+        <h2>A delicious &amp; healthy <span class="acc">brunch.</span></h2>
+        <p class="line">The Brown Box, delivered across Jerusalem.</p>
+        <a class="btn" href="order.html?add=Acai%20bowl" tabindex="-1">Order a bowl, <b>₪60</b> <span class="arw" aria-hidden="true">→</span></a>
+      </div>
+      <div class="hint" id="hint">Scroll</div>
+      <div class="load" id="load"></div>
+    </div>
+  </section>
+
+  <div class="kosher">
+    <div class="wrap">
+      <img src="assets/hechsher.webp" alt="Seal of the Vaad HaKashrus of Rabbi Shmuel Weiner, Rav of Khal Zichron Nosson Tzvi, home business" width="56" height="56">
+      <p><b>Kosher</b>, under the Vaad HaKashrus of Rabbi Shmuel Weiner, Rav of Khal Zichron Nosson Tzvi. A home business.</p>
+    </div>
+  </div>
+
+  <section class="sec" id="bowls" aria-labelledby="h-bowls">
+    <div class="wrap">
+      <h2 id="h-bowls" class="rev">Pick your <span class="acc">bowl</span></h2>
+      <p class="lede rev">Every bowl starts from our signature acai base, sugar free and almond milk based, and comes with two extras of your choice.</p>
+      <div class="pick">
+        <div class="opts" role="group" aria-label="Bowls" id="opts">
+          <button type="button" class="opt" data-k="classic" aria-pressed="true"><b>Classic bowl</b><span class="p">₪60</span><span class="t">Banana, frozen blueberries and super granola</span></button>
+          <button type="button" class="opt" data-k="tropical" aria-pressed="false"><b>Tropical bowl</b><span class="p">₪60</span><span class="t">Frozen mango, frozen pineapple and super granola</span></button>
+          <button type="button" class="opt" data-k="sunrise" aria-pressed="false"><b>Sunrise bowl</b><span class="p">₪60</span><span class="t">Green apple, frozen mango and super granola</span></button>
+          <button type="button" class="opt" data-k="superfruit" aria-pressed="false"><b>Superfruit bowl</b><span class="p">₪60</span><span class="t">Kiwi, frozen blueberries and banana</span></button>
+          <button type="button" class="opt" data-k="own" aria-pressed="false"><b>Build your own bowl</b><span class="p">₪66</span><span class="t">Four toppings of your choice</span></button>
+        </div>
+        <div class="card rev" aria-live="polite">
+          <img id="pick-img" src="assets/bowls/classic.webp" alt="" width="300" height="300" loading="lazy">
+          <h3 id="pick-name">Classic bowl</h3>
+          <ul class="chips" id="pick-chips"></ul>
+          <p class="base" id="pick-base">On our acai base, with two extras of your choice</p>
+          <a class="btn" id="pick-go" href="order.html?add=Acai%20bowl&amp;bowl=classic">Order a Classic bowl, <b>₪60</b> <span class="arw" aria-hidden="true">→</span></a>
+          <p class="extra">Extras: natural peanut butter, silan, honey, pareve or milchig chocolate spread, chia seeds, flax seeds, coconut flakes, almond butter (+₪5).</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec menu" id="menu" aria-labelledby="h-menu">
+    <div class="wrap">
+      <h2 id="h-menu" class="rev">The <span class="acc">menu</span></h2>
+      <p class="lede rev">Tap anything to add it to your order.</p>
+      <div data-mir-catalog data-href="order.html?add={name}" data-wa="972533452048" data-msg="Hi, I'd like to order the {name} ({price})." data-other="More from The Brown Box" data-out="Out of stock">
+      <div data-mir-list>
+        <h3 class="cat-h">Acai bowls</h3>
+        <ul class="cat">
+          <li><a href="order.html?add=Acai%20bowl"><span class="ph"><img src="assets/menu/acai-bowl.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Acai bowl</b><span class="d">Classic, Tropical, Sunrise or Superfruit bowl, or build your own</span></span><span class="pr">₪60</span></a></li>
+          <li><a href="order.html?add=Mini%20acai%20bowls"><span class="ph"><img src="assets/menu/mini-bowls.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Mini acai bowls</b><span class="d">Minimum 8</span></span><span class="pr">₪30</span></a></li>
+        </ul>
+        <h3 class="cat-h">Acai boards</h3>
+        <ul class="cat">
+          <li><a href="order.html?add=Large%20acai%20board"><span class="ph"><img src="assets/menu/large-board.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Large acai board</b></span><span class="pr">₪390</span></a></li>
+          <li><a href="order.html?add=Small%20acai%20board"><span class="ph"><img src="assets/menu/small-board.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Small acai board</b></span><span class="pr">₪220</span></a></li>
+        </ul>
+        <h3 class="cat-h">Gifting</h3>
+        <ul class="cat">
+          <li><a href="order.html?add=Small%20gift%20box"><span class="ph"><img src="assets/menu/small-gift-box.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Small gift box</b><span class="d">An acai bowl, 2 muffins of your choice and an iced coffee</span></span><span class="pr">₪135</span></a></li>
+          <li><a href="order.html?add=Large%20gift%20box"><span class="ph"><img src="assets/menu/large-gift-box.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Large gift box</b><span class="d">2 acai bowls, 2 muffins of your choice, date snacks and an iced coffee</span></span><span class="pr">₪250</span></a></li>
+        </ul>
+        <h3 class="cat-h">Snacks</h3>
+        <ul class="cat">
+          <li><a href="order.html?add=Energy%20bites"><span class="ph"><img src="assets/menu/energy-bites.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Energy bites</b><span class="d">Oats, natural peanut butter, coconut, honey, flax and chia seeds. Sugar free.</span></span><span class="pr">₪50</span></a></li>
+          <li><a href="order.html?add=Super%20granola"><span class="ph"><img src="assets/menu/super-granola.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Super granola</b><span class="d">Oats and seeds sweetened with maple syrup and honey. Sugar free.</span></span><span class="pr">₪40</span></a></li>
+          <li><a href="order.html?add=Date%20snacks"><span class="ph"><img src="assets/menu/date-snacks.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Date snacks</b><span class="d">Medjool dates covered in natural peanut butter, pretzel, 70% cacao chocolate and pink Himalayan salt.</span></span><span class="pr">₪55</span></a></li>
+          <li><a href="order.html?add=Oatmeal%20chocolate%20chip%20muffin"><span class="ph"><img src="assets/menu/oat-muffin.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Oatmeal chocolate chip muffin</b><span class="d">Whole grain spelt. Sugar free.</span></span><span class="pr">₪17</span></a></li>
+          <li><a href="order.html?add=Blueberry%20sourdough%20muffin"><span class="ph"><img src="assets/menu/blueberry-muffin.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Blueberry sourdough muffin</b><span class="d">Whole grain spelt.</span></span><span class="pr">₪17</span></a></li>
+        </ul>
+        <h3 class="cat-h">Drinks</h3>
+        <ul class="cat">
+          <li><a href="order.html?add=Iced%20coffee"><span class="ph"><img src="assets/menu/iced-coffee.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Iced coffee</b><span class="d">Dairy.</span></span><span class="pr">₪20</span></a></li>
+          <li><a href="order.html?add=Passion%20fruit%20iced%20tea"><span class="ph"><img src="assets/menu/passion-tea.webp" alt="" width="76" height="76" loading="lazy"></span><span><b>Passion fruit iced tea</b><span class="d">Sugar free.</span></span><span class="pr">₪20</span></a></li>
+        </ul>
+      </div>
+      <template data-mir-group><h3 class="cat-h" data-f="group"></h3><ul class="cat" data-f="items"></ul></template>
+      <template data-mir-item><li><a data-f="link"><span class="ph"><img data-f="img" alt="" width="76" height="76" loading="lazy"></span><span><b data-f="name"></b></span><span class="pr" data-f="price"></span></a></li></template>
+      </div>
+      <p class="note rev">Delivery is added on WhatsApp once we know where it is going.</p>
+    </div>
+  </section>
+
+  <section class="sec gifts" id="gifts" aria-labelledby="h-gifts">
+    <div class="wrap">
+      <h2 id="h-gifts" class="rev">A delicious and healthy brunch, <span style="color:#F3C9E2">gifted beautifully</span></h2>
+      <p class="lede rev">Our gift boxes, packed in a kraft box with a window.</p>
+      <div class="boxes">
+        <article class="box rev">
+          <img src="assets/menu/small-gift-box.webp" alt="The small gift box: an acai bowl, two muffins and an iced coffee in a kraft box with a window" width="150" height="150" loading="lazy">
+          <div>
+            <h3>Small gift box</h3>
+            <p class="p">₪135</p>
+            <ul><li>An acai bowl</li><li>2 muffins of your choice</li><li>An iced coffee</li></ul>
+            <a href="order.html?add=Small%20gift%20box">Order the small box →</a>
+          </div>
+        </article>
+        <article class="box rev">
+          <img src="assets/menu/large-gift-box.webp" alt="The large gift box: two acai bowls, muffins, date snacks and an iced coffee in a kraft box with a window" width="150" height="150" loading="lazy">
+          <div>
+            <h3>Large gift box</h3>
+            <p class="p">₪250</p>
+            <ul><li>2 acai bowls</li><li>2 muffins of your choice</li><li>Date snacks</li><li>An iced coffee</li></ul>
+            <a href="order.html?add=Large%20gift%20box">Order the large box →</a>
+          </div>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="know" aria-labelledby="h-know">
+    <div class="wrap">
+      <h2 id="h-know" class="rev">Good to <span class="acc">know</span></h2>
+      <div class="know">
+        <div class="rev"><h3>Delivery</h3><p>We deliver throughout Jerusalem. The delivery fee depends on your location, and we confirm it with you on WhatsApp.</p></div>
+        <div class="rev"><h3>Paying</h3><p>Cash, Zelle, Israeli bank transfer, or credit card with a 4% charge.</p></div>
+        <div class="rev"><h3>Get in touch</h3><p>WhatsApp or call <a href="https://wa.me/972533452048">+972 53-345-2048</a>, email <a href="mailto:thebrownboxjlm@gmail.com">thebrownboxjlm@gmail.com</a>, or find us on Instagram, <a href="https://www.instagram.com/thebrownbox_jlm/" rel="noopener" target="_blank">@thebrownbox_jlm</a>.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="close" aria-label="Order">
+    <div class="wrap">
+      <p class="q rev">A delicious <span>&amp;</span> healthy brunch</p>
+      <a class="btn rev" href="order.html">Order from The Brown Box <span class="arw" aria-hidden="true">→</span></a>
+      <small>Delivered across Jerusalem · Kosher, Vaad HaKashrus of Rabbi Shmuel Weiner</small>
+    </div>
+  </section>
+</main>
+
+<footer>
+  The Brown Box, artisanal superfoods, delivered · <a href="https://myisraelrental.com">MyIsraelRental</a><br>
+  The film of a bowl being made is generated for this page; the menu photos are our own.
+</footer>
+
+<div class="dock" id="dock" aria-hidden="true">
+  <small>Acai bowls from ₪60, delivered across Jerusalem</small>
+  <a class="btn" href="order.html" tabindex="-1">Order</a>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var phone = function () { return innerWidth <= 760; };
+
+  // ── the film ──
+  // assets/film/d/0001.webp ... (laptop, 16:9) and assets/film/m/ (phone,
+  // portrait crop): the five clips as one sequence of sharp frames, drawn on
+  // a canvas to cover the screen, chosen by scroll. Frames load in passes
+  // (every 8th, then every 4th, ...) so the whole film scrubs early and
+  // sharpens as the rest arrive; the nearest loaded frame is drawn.
+  var FILM = { d: 300, m: 300 };
+  var filmEl = document.getElementById('film'), cv = document.getElementById('cv'), cx = cv.getContext('2d');
+  var chaps = [].slice.call(document.querySelectorAll('.chap'));
+  var kind = phone() ? 'm' : 'd', N = FILM[kind], imgs = new Array(N), got = 0;
+  function url(i) { return 'assets/film/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; }
+  var order = [], seen = {};
+  [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });
+  var load = document.getElementById('load');
+  (function next(k) {
+    var batch = order.slice(k, k + 6); if (!batch.length) { load.style.opacity = 0; return; }
+    var left = batch.length;
+    batch.forEach(function (i) {
+      var im = new Image(); im.decoding = 'async';
+      im.onload = im.onerror = function () { if (im.naturalWidth) { imgs[i] = im; got++; } load.style.width = (got / N * 100) + '%'; if (--left === 0) { draw(); next(k + 6); } };
+      im.src = url(i);
+    });
+  })(0);
+  function size() { var d = Math.min(2, devicePixelRatio || 1); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; draw(); }
+  function frameAt(q) {
+    var f = Math.round(q * (N - 1));
+    for (var d = 0; d < N; d++) { if (imgs[f - d]) return imgs[f - d]; if (imgs[f + d]) return imgs[f + d]; }
+    return null;
+  }
+  var p = 0;
+  function draw() {
+    var im = frameAt(p); if (!im) return;
+    var W = cv.width, H = cv.height, sc = Math.max(W / im.naturalWidth, H / im.naturalHeight);
+    var w = im.naturalWidth * sc, h = im.naturalHeight * sc;
+    cx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
+  }
+  function progress() {
+    var r = filmEl.getBoundingClientRect(), span = filmEl.offsetHeight - innerHeight;
+    return Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
+  }
+  var hint = document.getElementById('hint');
+  function paint() {
+    p = still ? 1 : progress();
+    draw();
+    chaps.forEach(function (c) {
+      var on = p >= +c.dataset.from && p < +c.dataset.to;
+      c.classList.toggle('on', on); c.setAttribute('aria-hidden', on ? 'false' : 'true');
+      c.querySelectorAll('a').forEach(function (a) { a.tabIndex = on ? 0 : -1; });
+    });
+    hint.style.opacity = p > 0.02 ? 0 : 1;
+    document.body.classList.toggle('on-film', filmEl.getBoundingClientRect().bottom > 64);
+  }
+  var raf = 0;
+  addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(function () { raf = 0; paint(); }); }, { passive: true });
+  addEventListener('resize', size);
+  size(); paint();
+
+  // ── pick your bowl ──────────────────────────────────────────────
+  var BOWLS = {
+    classic: ['Classic bowl', 60, ['Banana', 'Frozen blueberries', 'Super granola']],
+    tropical: ['Tropical bowl', 60, ['Frozen mango', 'Frozen pineapple', 'Super granola']],
+    sunrise: ['Sunrise bowl', 60, ['Green apple', 'Frozen mango', 'Super granola']],
+    superfruit: ['Superfruit bowl', 60, ['Kiwi', 'Frozen blueberries', 'Banana']],
+    own: ['Build your own bowl', 66, ['Any 4 of: banana, green apple, kiwi, frozen blueberry, frozen mango, frozen pineapple, dates, chocolate chips, super granola']]
+  };
+  var opts = [].slice.call(document.querySelectorAll('#opts .opt'));
+  function pick(k) {
+    var b = BOWLS[k];
+    opts.forEach(function (o) { o.setAttribute('aria-pressed', o.dataset.k === k ? 'true' : 'false'); });
+    document.getElementById('pick-name').textContent = b[0];
+    var img = document.getElementById('pick-img');
+    if (img.dataset.k !== k) {
+      img.classList.add('swap');
+      setTimeout(function () { img.src = 'assets/bowls/' + k + '.webp'; img.alt = 'A ' + b[0].toLowerCase() + ': ' + b[2].join(', ').toLowerCase() + ' on our acai base'; img.dataset.k = k; img.onload = function () { img.classList.remove('swap'); }; }, still ? 0 : 160);
+    }
+    var ul = document.getElementById('pick-chips'); ul.textContent = '';
+    b[2].forEach(function (c) { var li = document.createElement('li'); li.textContent = c; ul.appendChild(li); });
+    var go = document.getElementById('pick-go');
+    go.href = 'order.html?add=' + encodeURIComponent('Acai bowl') + '&bowl=' + k;
+    go.innerHTML = 'Order ' + (k === 'own' ? 'your own bowl' : 'a ' + b[0]) + ', <b>₪' + b[1] + '</b> <span class="arw" aria-hidden="true">→</span>';
+  }
+  opts.forEach(function (o) { o.addEventListener('click', function () { pick(o.dataset.k); }); });
+  pick('classic');
+  // the other bowls' photos are fetched now, so a choice swaps at once
+  ['tropical', 'sunrise', 'superfruit', 'own'].forEach(function (k) { var i = new Image(); i.src = 'assets/bowls/' + k + '.webp'; });
+
+  // ── reveals, and the phone's order bar after the opening ────────
+  var dock = document.getElementById('dock');
+  if ('IntersectionObserver' in window && !still) {
+    var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { threshold: .12 });
+    document.querySelectorAll('.rev').forEach(function (el) { io.observe(el); });
+  } else document.querySelectorAll('.rev').forEach(function (el) { el.classList.add('in'); });
+  function dockOn() {
+    var past = filmEl.getBoundingClientRect().bottom < innerHeight * 0.6;
+    var close = document.querySelector('.close').getBoundingClientRect().top < innerHeight * 0.8;
+    dock.classList.toggle('on', past && !close);
+    dock.setAttribute('aria-hidden', past && !close ? 'false' : 'true');
+    dock.querySelector('a').tabIndex = past && !close ? 0 : -1;
+  }
+  addEventListener('scroll', dockOn, { passive: true }); dockOn();
+});
+</script>
+</body>
+</html>
