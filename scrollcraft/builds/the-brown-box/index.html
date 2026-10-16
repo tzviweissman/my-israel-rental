@@ -395,6 +395,9 @@ document.addEventListener('DOMContentLoaded', function () {
   var filmEl = document.getElementById('film'), cv = document.getElementById('cv'), cx = cv.getContext('2d');
   var chaps = [].slice.call(document.querySelectorAll('.chap'));
   var kind = phone() ? 'm' : 'd', N = FILM[kind], imgs = new Array(N), got = 0;
+  // never a black screen while the frames arrive: the first frame is the
+  // canvas's own background until it is drawn over
+  cv.style.background = '#120A05 url(assets/film/' + kind + '/0001.webp) center / cover no-repeat';
   function url(i) { return 'assets/film/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; }
   var order = [], seen = {};
   [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });

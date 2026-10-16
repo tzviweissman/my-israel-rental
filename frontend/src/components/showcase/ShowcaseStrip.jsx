@@ -18,17 +18,23 @@ export default function ShowcaseStrip() {
   const row = useRef(null);
   if (!items || !items.length) return null;
 
+  // The arrows go to the next whole card, by its own position, never by a
+  // distance: a relative scroll that ran twice on iOS Safari (smooth scroll
+  // starting late, then the fallback) left a card half off the screen (Tzvi,
+  // 16 Oct 2026: "on mobile it shows each page cut off").
   const move = (dir) => {
     const el = row.current;
     if (!el) return;
-    const card = el.querySelector('li');
-    const step = card ? card.getBoundingClientRect().width + 20 : el.clientWidth * 0.8;
+    const cards = [...el.querySelectorAll('li')];
+    const box = el.getBoundingClientRect();
     const rtl = getComputedStyle(el).direction === 'rtl';
-    const from = el.scrollLeft, by = dir * step * (rtl ? -1 : 1);
-    el.scrollBy({ left: by, behavior: 'smooth' });
-    // Where smooth scrolling never starts (a background tab, some webviews),
-    // the arrow must still move the row.
-    setTimeout(() => { if (el.scrollLeft === from) el.scrollBy({ left: by }); }, 450);
+    const edge = (c) => (rtl ? box.right - c.getBoundingClientRect().right : c.getBoundingClientRect().left - box.left);
+    const now = cards.reduce((best, c, i) => (Math.abs(edge(c)) < Math.abs(edge(cards[best])) ? i : best), 0);
+    const next = cards[Math.max(0, Math.min(cards.length - 1, now + dir))];
+    if (!next) return;
+    const target = el.scrollLeft + (rtl ? -1 : 1) * edge(next);
+    el.scrollTo({ left: target, behavior: 'smooth' });
+    setTimeout(() => { if (Math.abs(el.scrollLeft - target) > 2) el.scrollTo({ left: target }); }, 600);
   };
 
   return (
@@ -67,7 +73,9 @@ const CSS = `
 .scs-row { list-style: none; margin: 0; padding: 0 0 6px; display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 40px) / 3); gap: 20px;
   overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
 .scs-row::-webkit-scrollbar { display: none; }
-.scs-row > li { scroll-snap-align: start; min-width: 0; }
+.scs-row > li { scroll-snap-align: start; scroll-snap-stop: always; min-width: 0; }
 @media (max-width: 1024px) { .scs-row { grid-auto-columns: calc((100% - 20px) / 2.15); } }
-@media (max-width: 640px) { .scs-row { grid-auto-columns: 84%; gap: 14px; } }
+/* phones: one whole card at a time, never a card cut in half (Tzvi, 16 Oct
+   2026); the arrows and a swipe go card to card */
+@media (max-width: 640px) { .scs-row { grid-auto-columns: 100%; gap: 16px; } }
 `;
