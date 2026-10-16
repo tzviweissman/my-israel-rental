@@ -76,7 +76,7 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
         { id: 'checkin', label: t('dashboard.checkin', 'Check-in'), Icon: DoorOpen, show: staff('checkin') },
         // Waiting appointments or network requests always show: a badge
         // nobody can see is a customer nobody answers.
-        { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: tool('appointments') || (runsBusiness && (summary.service_bookings_pending || 0) > 0) },
+        { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: tool('appointments') || (runsBusiness && ((summary.service_bookings_pending || 0) > 0 || !!summary.has_sessions)) },
         { id: 'network', label: t('dashboard.network', 'Network'), Icon: Network, badge: summary.network_requests_in, show: tool('network') || (summary.network_requests_in || 0) > 0 },
         { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, badge: summary.work_offers_open, show: tool('job-requests') },
         { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, show: runsBusiness && (hasPostedJobs || !summary.business_tools) },

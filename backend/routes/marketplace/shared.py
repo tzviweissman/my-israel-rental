@@ -689,6 +689,16 @@ class GigIn(BaseModel):
     discount: Optional[GigDiscount] = None
 
 
+class SessionIn(BaseModel):
+    """One date with a limited number of places (sessions.py): a tour, a
+    workshop, a class that is not a membership."""
+    id: str = Field(..., pattern=r"^[a-z0-9][a-z0-9_-]{0,31}$")
+    date: str = Field(..., pattern=r"^\d{4}-\d{2}-\d{2}$")
+    time: Optional[str] = Field(None, pattern=r"^\d{2}:\d{2}$")
+    places: int = Field(..., ge=1, le=500)
+    note: str = Field("", max_length=120)
+
+
 class GigPatch(BaseModel):
     whatsapp_confirmed: Optional[bool] = None
     contact_email: Optional[str] = None
@@ -705,6 +715,10 @@ class GigPatch(BaseModel):
     slot_duration_minutes: Optional[int] = None
     team: Optional[list[TeamMember]] = Field(None, max_length=20)
     rebook_after_weeks: Optional[int] = Field(None, ge=1, le=52)
+    # Dates with limited places (sessions.py), and whether the listing
+    # takes quote requests (quotes.py; None: the default for its kind).
+    sessions: Optional[list[SessionIn]] = Field(None, max_length=60)
+    quotes_on: Optional[bool] = None
     enable_date_booking: Optional[bool] = None
     gallery: Optional[list[str]] = None
     booking_mode: Optional[str] = None

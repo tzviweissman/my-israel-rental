@@ -781,6 +781,11 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
         update["tiers"] = [t if isinstance(t, dict) else t.model_dump() for t in update["tiers"]]
     if "products" in update:
         update["products"] = [p if isinstance(p, dict) else p.model_dump() for p in update["products"]]
+    if "sessions" in update:
+        sids = [s["id"] if isinstance(s, dict) else s.id for s in update["sessions"]]
+        if len(set(sids)) != len(sids):
+            raise HTTPException(status_code=422, detail="Two dates share an id")
+        update["sessions"] = [s if isinstance(s, dict) else s.model_dump() for s in update["sessions"]]
     if "team" in update:
         ids = [m["id"] if isinstance(m, dict) else m.id for m in update["team"]]
         if len(set(ids)) != len(ids):

@@ -24,6 +24,7 @@
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import AppointmentReminders from './AppointmentReminders';
+import QuotesAndDates from './QuotesAndDates';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -304,6 +305,7 @@ const AppointmentsTab = ({ API, token }) => {
     return (
       <>
       <AppointmentReminders API={API} token={token} />
+      <QuotesAndDates API={API} token={token} />
       <div className="bg-white border border-gray-100 rounded-2xl p-8 text-center" data-testid="appointments-empty">
         <p className="text-gray-700 font-semibold mb-1">{t('appointments.empty', 'No booking requests yet.')}</p>
         <p className="text-sm text-gray-500">
@@ -317,6 +319,7 @@ const AppointmentsTab = ({ API, token }) => {
   return (
     <div className="space-y-8" data-testid="appointments-tab">
       <AppointmentReminders API={API} token={token} />
+      <QuotesAndDates API={API} token={token} />
       {incoming.length > 0 && (
         <section data-testid="appointments-incoming">
           <h2 className="text-lg font-bold text-gray-900 mb-1" style={{ fontFamily: 'var(--font-head)' }}>

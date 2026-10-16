@@ -14,6 +14,8 @@ import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPa
 import { money } from '../utils/currency';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import WaitlistForm from '../components/bookings/WaitlistForm';
+import QuoteRequest from '../components/bookings/QuoteRequest';
+import SessionDates from '../components/bookings/SessionDates';
 import { useTranslation } from 'react-i18next';
 import DateField from '../components/common/DateField';
 import FitImage from '../components/common/FitImage';
@@ -1082,6 +1084,9 @@ const GigDetail = () => {
               </div>
             )}
 
+            {/* Tours and workshops: dates with limited places (sessions.py). */}
+            {!isStore && <SessionDates gig={gig} />}
+
             {/* Verified reviews when switched on (routes/reviews.py);
                 until then the old section, exactly as before. */}
             <ReviewsSection
@@ -1213,6 +1218,8 @@ const GigDetail = () => {
                   <><Send size={14} /> {t('services.sendBookingRequest', 'Send booking request')}</>
                 )}
               </button>
+              {/* A job a fixed price cannot cover: ask for a quote (quotes.py). */}
+              {!isStore && <QuoteRequest gig={gig} />}
               {/* Part A: the proof beside the button. Stars are THIS
                   service's reviews, and tapping them goes to the list. */}
               <ProofLine

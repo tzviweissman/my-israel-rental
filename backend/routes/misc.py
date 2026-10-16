@@ -563,6 +563,11 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
     service_bookings_pending = await db.marketplace_bookings.count_documents({
         "provider_user_id": uid, "status": "pending",
     })
+    # Quote requests waiting for a price (quotes.py) count as requests
+    # waiting on them too, and show the same tab, where they are answered.
+    service_bookings_pending += await db.quote_requests.count_documents({"provider_user_id": uid, "status": "new"})
+    # Tours and workshops (sessions.py): their guest lists live in that tab.
+    has_sessions = await db.marketplace_gigs.count_documents({"provider_user_id": uid, "sessions.0": {"$exists": True}}, limit=1)
     my_service_bookings = await db.marketplace_bookings.count_documents({"client_user_id": uid})
 
     # The customer-side tabs are shown to a business or owner only when
@@ -593,6 +598,7 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "courier_deliveries_open": courier_deliveries_open,
         "customer_orders": customer_orders,
         "service_bookings_pending": service_bookings_pending,
+        "has_sessions": bool(has_sessions),
         "my_service_bookings": my_service_bookings,
         "my_rental_bookings": my_rental_bookings,
         "has_saved_searches": bool(saved_searches),

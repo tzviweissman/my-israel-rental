@@ -55,6 +55,7 @@ import { productPhotos } from '../../utils/productPhotos';
 import SizeFields, { withSize } from '../marketplace/SizeFields';
 import ProductExtras, { cleanExtras } from './ProductExtras';
 import TeamAndRebook, { cleanTeam } from './TeamAndRebook';
+import SessionsEditor, { cleanSessions } from './SessionsEditor';
 import { SUBCATEGORIES, subcategoryLabel } from '../../lib/categories';
 import AvailabilityStep, { DAYS } from '../marketplace/AvailabilityStep';
 import CategoryPicker from '../marketplace/CategoryPicker';
@@ -93,6 +94,11 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
   const [slotMinutes, setSlotMinutes] = useState(gig.slot_duration_minutes || 30);
   const [team, setTeam] = useState(gig.team || []);
   const [rebook, setRebook] = useState(gig.rebook_after_weeks || null);
+  // Tours and workshops (sessions.py), and quote requests (quotes.py; on by
+  // default for a service listing).
+  const [sessions, setSessions] = useState(gig.sessions || []);
+  const quotesDefault = gig.quotes_on === true || gig.quotes_on === false ? gig.quotes_on : (gig.gig_type || 'deliverable') === 'deliverable';
+  const [quotesOn, setQuotesOn] = useState(quotesDefault);
   const [dateBooking, setDateBooking] = useState(Boolean(gig.enable_date_booking));
   useEffect(() => {
     let live = true;
@@ -309,6 +315,10 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
         if ((rebook || null) !== (gig.rebook_after_weeks || null)) payload.rebook_after_weeks = rebook || null;
       }
       if (isDeliverable && dateBooking !== Boolean(gig.enable_date_booking)) payload.enable_date_booking = dateBooking;
+      if (!isStore) {
+        if (JSON.stringify(cleanSessions(sessions)) !== JSON.stringify(cleanSessions(gig.sessions || []))) payload.sessions = cleanSessions(sessions);
+        if (quotesOn !== quotesDefault) payload.quotes_on = quotesOn;
+      }
 
       // Rebuilt from the ORIGINAL objects so nothing this sheet does not
       // show — features, delivery_days, duration_minutes, in_stock — is
@@ -635,6 +645,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
               />
             )}
             {isAppointment && <TeamAndRebook team={team} onTeam={setTeam} rebook={rebook} onRebook={setRebook} />}
+            {!isStore && <SessionsEditor sessions={sessions} onSessions={setSessions} quotesOn={quotesOn} onQuotesOn={setQuotesOn} showQuotes />}
             {isDeliverable && (
               <label className="flex items-start gap-2 min-h-[44px] cursor-pointer text-sm">
                 <input
