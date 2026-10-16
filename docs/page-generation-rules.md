@@ -726,6 +726,50 @@ out to the jar, with a new line of huge words over each scene.
    (out of 100); a product dark by nature (acai, chocolate) is lit and set on a
    lighter ground rather than pushed until it turns milky. Under that, grade up (ffmpeg eq=gamma) or regenerate. Then
    look at it on a phone screen in daylight, not only on a laptop.
+   Seen in the Christian Peverelli video (16 Oct 2026): the sites that look
+   expensive light the subject itself, not just the room. A light-blue studio
+   ground with a fully lit orange car, or a pale ground with a glowing amber
+   object; where a section is dark, the photo inside it is bright and sharp, with
+   a neon or warm rim line on the floor. Dark never means the subject is dim.
+
+## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+
+Tzvi: "pull out other things from these professional websites ... watch the
+videos themselves". The finished sites in five videos were studied frame by
+frame; full notes in docs/ui-videos/notes/sites-2026-10-16.md.
+
+1. **The product is the brightest thing on screen.** Even the dark sites
+   (a coffee pour, a perfume, a car) light the subject and keep it brighter
+   than everything around it; shadows take the background's colour, never
+   black. (With 3h.11: light from the start, then measure.)
+2. **A choice changes the hero itself.** Picking a flavour, size or style
+   changes the main picture and the section's colour, not only a card below
+   (the matcha site's drink turns pink for Strawberry; the car site's tabs
+   open the hood). One picture per option from one shoot, a 300 to 500 ms
+   cross-fade, the section's ground easing to that option's colour.
+3. **A live readout tied to the scroll**, only when it shows a true fact of
+   their process (the coffee site's "PULL 12.2 s" counting with the pour):
+   small mono type at a corner, never a made-up number and never a "01/06"
+   section counter.
+4. **Words and object overlap.** A cut-out product sits partly in front of
+   (or behind) the headline so the two read as one picture; a product may
+   carry through several sections as the page scrolls.
+5. **One colour family per section, with one or two hard breaks**: each
+   section's ground matches its product (peach, red, cream) instead of one
+   tone all the way down; one or two bold bands reset attention.
+6. **Floating cut-out tiles**: rounded tiles holding their ingredients or
+   products, tilted 6 to 12 degrees around a heading or menu, drifting a
+   little with the scroll; all from one shoot.
+7. **Buttons that look pressable**: a darker bottom edge that sinks on
+   press; optionally a small floating pill menu at the bottom centre that
+   stays on screen.
+8. **One word or short line per scene with room around it**, on empty
+   ground beside the subject ("Amber." "Oud." "Smoke."), never on it.
+9. **Tap-able dots on the product** that open a short caption in their
+   words (what is in a gift box, which balloons make an arch), placed by
+   measurement as in section 5's overlay rule.
+10. **A glowing line along the floor under a lit product, and a giant
+    cropped wordmark to close the page** (the closing signature of 3g.7).
 
 ## 4. What is reported to the owner instead (content gaps)
 

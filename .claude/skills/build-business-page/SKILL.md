@@ -437,6 +437,26 @@ bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
    set (middle 33+, whole 22+, average 30+ of 100) and grade up or regenerate
    before building; view it on a phone in daylight.
 
+## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
+
+Full text: page rules 3i; notes docs/ui-videos/notes/sites-2026-10-16.md.
+
+1. **The product is the brightest thing on screen**; shadows take the
+   background's colour, never black.
+2. **A choice changes the hero itself**: picture and section colour change
+   with the option (one shoot, 300 to 500 ms cross-fade).
+3. **A live readout tied to the scroll**, only for a true process fact,
+   small mono at a corner; never invented, never a section counter.
+4. **Words and object overlap**; a product may carry through sections.
+5. **One colour family per section**, one or two hard breaks.
+6. **Floating cut-out tiles** of their ingredients or products, tilted,
+   drifting with the scroll, one shoot.
+7. **Pressable buttons** (darker bottom edge that sinks); optional floating
+   pill menu at the bottom centre.
+8. **One word or short line per scene**, beside the subject, never on it.
+9. **Tap-able dots on the product** with short captions, placed by measurement.
+10. **A glowing floor line under a lit product; a giant cropped wordmark close.**
+
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
 Full text: `reference/design-rules.md`. The rules both builders share are

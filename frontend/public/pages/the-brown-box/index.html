@@ -25,7 +25,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>The Brown Box · Acai bowls delivered across Jerusalem</title>
 <meta name="description" content="Acai bowls, acai boards and brunch gift boxes from The Brown Box, sugar free and almond milk based, delivered across Jerusalem. Kosher, Vaad HaKashrus of Rabbi Shmuel Weiner.">
-<link rel="icon" href="/pages/the-brown-box/assets/logo-192.png?v=mvayuv8y">
+<link rel="icon" href="/pages/the-brown-box/assets/logo-192.png?v=mvaznwa3">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bona+Nova:ital,wght@0,400;0,700;1,400&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
@@ -126,6 +126,21 @@
   /* ── 2. pick your bowl ───────────────────────────────────────── */
   .pick { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center; margin-top: 2.2rem; }
   @media (max-width: 860px) { .pick { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) {
+    .pick { gap: 1rem; margin-top: 1.2rem; }
+    .pick .card { order: -1; padding: 1rem; }
+    .card img { width: min(100%, 230px); margin-bottom: .6rem; }
+    .card h3 { font-size: 1.4rem; }
+    .chips { margin: .5rem 0 .8rem; }
+    .card .base, .card .extra { display: none; }
+    .opts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+    .opt { padding: .7rem .8rem; }
+    .opts .opt { grid-template-columns: 1fr; padding: .7rem .8rem; }
+    .opts .opt b { font-size: 1.02rem; }
+    .opts .opt .p { justify-self: start; font-size: .92rem; }
+    .opts .opt span.t { display: none; }
+    .opt[data-k="own"] { grid-column: 1 / -1; }
+  }
   .opts { display: grid; gap: .6rem; }
   /* bold colour blocks after the dark film (3h.8): each bowl in its fruit */
   .opt { --c: #6E2A57; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1rem; text-align: start; padding: 1.05rem 1.2rem; border-radius: var(--r); border: 2px solid transparent; background: var(--c);
@@ -137,9 +152,13 @@
   .opt .p { font-weight: 700; color: #fff; align-self: center; }
   .opt span.t { grid-column: 1 / -1; color: rgb(255 255 255 / .92); font-size: .95rem; }
   .opt[aria-pressed="true"] { border-color: #fff; box-shadow: 0 0 0 3px var(--c), var(--shadow); }
-  .card { background: var(--paper); border-radius: 28px; padding: clamp(1.2rem, 3vw, 2rem); box-shadow: var(--shadow); }
-  .card img { width: min(100%, 320px); aspect-ratio: 1; object-fit: cover; border-radius: 24px; margin: 0 auto 1.1rem; background: #F4E9D8; transition: opacity 220ms ease-out, transform 320ms var(--out); }
-  .card img.swap { opacity: 0; transform: scale(.96); }
+  /* the chosen bowl colours the whole section (3i.2): its ground eases to a
+     light wash of that bowl's colour, the heading's accent word takes it */
+  #bowls { --tint: #F1E2EC; --c: #6E2A57; background: var(--tint); transition: background-color 500ms var(--out); }
+  #bowls .acc { color: var(--c); transition: color 500ms var(--out); }
+  .card { background: rgb(255 255 255 / .55); border-radius: 28px; padding: clamp(1.2rem, 3vw, 2rem); box-shadow: var(--shadow); }
+  .card img { width: min(100%, 400px); aspect-ratio: 1; object-fit: cover; border-radius: 24px; margin: 0 auto 1.1rem; background: #F4E9D8; transition: opacity 260ms ease-out, transform 420ms var(--out); }
+  .card img.swap { opacity: 0; transform: scale(.94) translateY(8px); }
   .card h3 { font-size: 1.7rem; text-align: center; }
   .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; margin: .9rem 0 1.2rem; padding: 0; }
   .chips li { list-style: none; padding: .35rem .8rem; border-radius: 999px; background: var(--cream); font-size: .92rem; animation: chip 380ms var(--out) both; }
@@ -150,7 +169,19 @@
   .card .extra { text-align: center; color: var(--soft); font-size: .9rem; margin: .9rem 0 0; }
 
   /* ── 3. the menu: their shop, live ───────────────────────────── */
-  .menu { background: var(--paper); }
+  .menu { background: var(--paper); position: relative; overflow: hidden; }
+  /* their toppings as floating tiles beside the heading (3i.6), one shoot,
+     tilted, each drifting at its own pace as the menu scrolls past */
+  .menu-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 2rem; align-items: center; }
+  .tops { position: relative; height: 280px; pointer-events: none; }
+  .tops img { position: absolute; width: var(--w, 120px); height: auto; aspect-ratio: 1; border-radius: 22px; object-fit: cover; box-shadow: 0 2px 4px rgb(58 37 19 / .08), 0 18px 34px -16px rgb(58 37 19 / .4);
+    transform: translateY(calc(var(--k, 0) * var(--sp, 30px))) rotate(var(--r, 0deg)); will-change: transform; }
+  @media (max-width: 760px) {
+    .menu-head { grid-template-columns: 1fr; gap: .5rem; }
+    .tops { height: 170px; }
+    .tops img { --w: 82px !important; }
+  }
+  @media (prefers-reduced-motion: reduce) { .tops img { transform: rotate(var(--r, 0deg)); } }
   .cat-h { margin: 2.4rem 0 .4rem; font: 700 1.5rem/1.2 var(--font-head); color: var(--acai); }
   .cat { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
   .cat li { border-bottom: 1px solid var(--line); }
@@ -216,7 +247,7 @@
 
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="The Brown Box, top"><img src="/pages/the-brown-box/assets/logo.webp?v=mvayuv8y" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-d5dc6302-0">The Brown Box</span></a>
+    <a class="brand" href="#top" aria-label="The Brown Box, top"><img src="/pages/the-brown-box/assets/logo.webp?v=mvaznwa3" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-d5dc6302-0">The Brown Box</span></a>
     <nav aria-label="Sections">
       <a class="l" href="#bowls" data-mir-key="t-5b61f375-0">Bowls</a>
       <a class="l" href="#menu" data-mir-key="t-97f12060-0">Menu</a>
@@ -252,7 +283,7 @@
 
   <div class="kosher">
     <div class="wrap">
-      <img src="/pages/the-brown-box/assets/hechsher.webp?v=mvayuv8y" alt="Seal of the Vaad HaKashrus of Rabbi Shmuel Weiner, Rav of Khal Zichron Nosson Tzvi, home business" width="56" height="56" data-mir-key="i-76832ca2-0">
+      <img src="/pages/the-brown-box/assets/hechsher.webp?v=mvaznwa3" alt="Seal of the Vaad HaKashrus of Rabbi Shmuel Weiner, Rav of Khal Zichron Nosson Tzvi, home business" width="56" height="56" data-mir-key="i-76832ca2-0">
       <p data-mir-key="t-803b0295-0"><b>Kosher</b>, under the Vaad HaKashrus of Rabbi Shmuel Weiner, Rav of Khal Zichron Nosson Tzvi. A home business.</p>
     </div>
   </div>
@@ -270,7 +301,7 @@
           <button type="button" class="opt" data-k="own" aria-pressed="false"><b data-mir-key="t-a3af9702-0">Build your own bowl</b><span class="p" data-mir-key="t-e06830ba-0">₪66</span><span class="t" data-mir-key="t-4d8f2bcf-0">Four toppings of your choice</span></button>
         </div>
         <div class="card rev" aria-live="polite">
-          <img id="pick-img" src="/pages/the-brown-box/assets/bowls/classic.webp?v=mvayuv8y" alt="" width="300" height="300" loading="lazy">
+          <img id="pick-img" src="/pages/the-brown-box/assets/bowls/classic.webp?v=mvaznwa3" alt="" width="300" height="300" loading="lazy">
           <h3 id="pick-name">Classic bowl</h3>
           <ul class="chips" id="pick-chips"></ul>
           <p class="base" id="pick-base" data-mir-key="t-3385188a-0">On our acai base, with two extras of your choice</p>
@@ -283,37 +314,49 @@
 
   <section class="sec menu" id="menu" aria-labelledby="h-menu">
     <div class="wrap">
-      <h2 id="h-menu" class="rev" data-mir-key="t-1adb1107-0">The <span class="acc">menu</span></h2>
-      <p class="lede rev" data-mir-key="t-d7cb819b-0">Tap anything to add it to your order.</p>
+      <div class="menu-head">
+        <div>
+          <h2 id="h-menu" class="rev" data-mir-key="t-1adb1107-0">The <span class="acc">menu</span></h2>
+          <p class="lede rev" data-mir-key="t-d7cb819b-0">Tap anything to add it to your order.</p>
+        </div>
+        <div class="tops" id="tops" aria-hidden="true">
+          <img src="/pages/the-brown-box/assets/tops/banana.webp?v=mvaznwa3" alt="" width="240" height="240" loading="lazy" style="--w:140px;left:4%;top:8%;--r:-9deg;--sp:-26px" data-mir-key="i-823a754d-0">
+          <img src="/pages/the-brown-box/assets/tops/blueberry.webp?v=mvaznwa3" alt="" width="240" height="240" loading="lazy" style="--w:118px;left:30%;top:46%;--r:7deg;--sp:34px" data-mir-key="i-0cbfaad2-0">
+          <img src="/pages/the-brown-box/assets/tops/granola.webp?v=mvaznwa3" alt="" width="240" height="240" loading="lazy" style="--w:132px;left:54%;top:2%;--r:-5deg;--sp:-40px" data-mir-key="i-050827ad-0">
+          <img src="/pages/the-brown-box/assets/tops/mango.webp?v=mvaznwa3" alt="" width="240" height="240" loading="lazy" style="--w:110px;left:70%;top:40%;--r:11deg;--sp:28px" data-mir-key="i-587be2ec-0">
+          <img src="/pages/the-brown-box/assets/tops/kiwi.webp?v=mvaznwa3" alt="" width="240" height="240" loading="lazy" style="--w:104px;left:10%;top:62%;--r:6deg;--sp:44px" data-mir-key="i-8ea38e6a-0">
+          <img src="/pages/the-brown-box/assets/tops/pineapple.webp?v=mvaznwa3" alt="" width="240" height="240" loading="lazy" style="--w:100px;left:78%;top:-2%;--r:-12deg;--sp:-22px" data-mir-key="i-99ef7233-0">
+        </div>
+      </div>
       <div data-mir-catalog data-href="/business/the-brown-box/order?add={name}" data-wa="972533452048" data-msg="Hi, I'd like to order the {name} ({price})." data-other="More from The Brown Box" data-out="Out of stock">
       <div data-mir-list>
         <h3 class="cat-h" data-mir-key="t-9660b4c0-0">Acai bowls</h3>
         <ul class="cat">
-          <li><a href="/business/the-brown-box/order?add=Acai%20bowl"><span class="ph"><img src="/pages/the-brown-box/assets/menu/acai-bowl.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-5b1df7dc-0"></span><span><b data-mir-key="t-6dc1d8f0-0">Acai bowl</b><span class="d" data-mir-key="t-9e14f6b1-0">Classic, Tropical, Sunrise or Superfruit bowl, or build your own</span></span><span class="pr" data-mir-key="t-8b6bfaf8-4">₪60</span></a></li>
-          <li><a href="/business/the-brown-box/order?add=Mini%20acai%20bowls"><span class="ph"><img src="/pages/the-brown-box/assets/menu/mini-bowls.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-434df0f0-0"></span><span><b data-mir-key="t-81ea6602-0">Mini acai bowls</b><span class="d" data-mir-key="t-059ac4a8-0">Minimum 8</span></span><span class="pr" data-mir-key="t-5633ca7c-0">₪30</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Acai%20bowl"><span class="ph"><img src="/pages/the-brown-box/assets/menu/acai-bowl.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-5b1df7dc-0"></span><span><b data-mir-key="t-6dc1d8f0-0">Acai bowl</b><span class="d" data-mir-key="t-9e14f6b1-0">Classic, Tropical, Sunrise or Superfruit bowl, or build your own</span></span><span class="pr" data-mir-key="t-8b6bfaf8-4">₪60</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Mini%20acai%20bowls"><span class="ph"><img src="/pages/the-brown-box/assets/menu/mini-bowls.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-434df0f0-0"></span><span><b data-mir-key="t-81ea6602-0">Mini acai bowls</b><span class="d" data-mir-key="t-059ac4a8-0">Minimum 8</span></span><span class="pr" data-mir-key="t-5633ca7c-0">₪30</span></a></li>
         </ul>
         <h3 class="cat-h" data-mir-key="t-b8be2148-0">Acai boards</h3>
         <ul class="cat">
-          <li><a href="/business/the-brown-box/order?add=Large%20acai%20board"><span class="ph"><img src="/pages/the-brown-box/assets/menu/large-board.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-4eff3a53-0"></span><span><b data-mir-key="t-a8f11f81-0">Large acai board</b></span><span class="pr" data-mir-key="t-581c4ec3-0">₪390</span></a></li>
-          <li><a href="/business/the-brown-box/order?add=Small%20acai%20board"><span class="ph"><img src="/pages/the-brown-box/assets/menu/small-board.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-b918df28-0"></span><span><b data-mir-key="t-d883c73c-0">Small acai board</b></span><span class="pr" data-mir-key="t-928fce2d-0">₪220</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Large%20acai%20board"><span class="ph"><img src="/pages/the-brown-box/assets/menu/large-board.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-4eff3a53-0"></span><span><b data-mir-key="t-a8f11f81-0">Large acai board</b></span><span class="pr" data-mir-key="t-581c4ec3-0">₪390</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Small%20acai%20board"><span class="ph"><img src="/pages/the-brown-box/assets/menu/small-board.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-b918df28-0"></span><span><b data-mir-key="t-d883c73c-0">Small acai board</b></span><span class="pr" data-mir-key="t-928fce2d-0">₪220</span></a></li>
         </ul>
         <h3 class="cat-h" data-mir-key="t-eef16148-0">Gifting</h3>
         <ul class="cat">
-          <li><a href="/business/the-brown-box/order?add=Small%20gift%20box"><span class="ph"><img src="/pages/the-brown-box/assets/menu/small-gift-box.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-a55b8a12-0"></span><span><b data-mir-key="t-ff03e099-0">Small gift box</b><span class="d" data-mir-key="t-1a9d4afa-0">An acai bowl, 2 muffins of your choice and an iced coffee</span></span><span class="pr" data-mir-key="t-ab4e9238-0">₪135</span></a></li>
-          <li><a href="/business/the-brown-box/order?add=Large%20gift%20box"><span class="ph"><img src="/pages/the-brown-box/assets/menu/large-gift-box.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-fe086055-0"></span><span><b data-mir-key="t-6bde9896-0">Large gift box</b><span class="d" data-mir-key="t-83aabd46-0">2 acai bowls, 2 muffins of your choice, date snacks and an iced coffee</span></span><span class="pr" data-mir-key="t-23a80e8b-0">₪250</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Small%20gift%20box"><span class="ph"><img src="/pages/the-brown-box/assets/menu/small-gift-box.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-a55b8a12-0"></span><span><b data-mir-key="t-ff03e099-0">Small gift box</b><span class="d" data-mir-key="t-1a9d4afa-0">An acai bowl, 2 muffins of your choice and an iced coffee</span></span><span class="pr" data-mir-key="t-ab4e9238-0">₪135</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Large%20gift%20box"><span class="ph"><img src="/pages/the-brown-box/assets/menu/large-gift-box.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-fe086055-0"></span><span><b data-mir-key="t-6bde9896-0">Large gift box</b><span class="d" data-mir-key="t-83aabd46-0">2 acai bowls, 2 muffins of your choice, date snacks and an iced coffee</span></span><span class="pr" data-mir-key="t-23a80e8b-0">₪250</span></a></li>
         </ul>
         <h3 class="cat-h" data-mir-key="t-4535279d-0">Snacks</h3>
         <ul class="cat">
-          <li><a href="/business/the-brown-box/order?add=Energy%20bites"><span class="ph"><img src="/pages/the-brown-box/assets/menu/energy-bites.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-b6afa909-0"></span><span><b data-mir-key="t-4477f534-0">Energy bites</b><span class="d" data-mir-key="t-056272bf-0">Oats, natural peanut butter, coconut, honey, flax and chia seeds. Sugar free.</span></span><span class="pr" data-mir-key="t-3fcda988-0">₪50</span></a></li>
-          <li><a href="/business/the-brown-box/order?add=Super%20granola"><span class="ph"><img src="/pages/the-brown-box/assets/menu/super-granola.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-d764433a-0"></span><span><b data-mir-key="t-f6245bac-0">Super granola</b><span class="d" data-mir-key="t-1c2009b3-0">Oats and seeds sweetened with maple syrup and honey. Sugar free.</span></span><span class="pr" data-mir-key="t-e711de76-0">₪40</span></a></li>
-          <li><a href="/business/the-brown-box/order?add=Date%20snacks"><span class="ph"><img src="/pages/the-brown-box/assets/menu/date-snacks.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-0fe21351-0"></span><span><b data-mir-key="t-b1e07586-0">Date snacks</b><span class="d" data-mir-key="t-ca49814f-0">Medjool dates covered in natural peanut butter, pretzel, 70% cacao chocolate and pink Himalayan salt.</span></span><span class="pr" data-mir-key="t-f73b2b14-0">₪55</span></a></li>
-          <li><a href="/business/the-brown-box/order?add=Oatmeal%20chocolate%20chip%20muffin"><span class="ph"><img src="/pages/the-brown-box/assets/menu/oat-muffin.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-c992ac48-0"></span><span><b data-mir-key="t-f3b17e20-0">Oatmeal chocolate chip muffin</b><span class="d" data-mir-key="t-b499b71d-0">Whole grain spelt. Sugar free.</span></span><span class="pr" data-mir-key="t-d2cdd0d2-0">₪17</span></a></li>
-          <li><a href="/business/the-brown-box/order?add=Blueberry%20sourdough%20muffin"><span class="ph"><img src="/pages/the-brown-box/assets/menu/blueberry-muffin.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-56e04ef7-0"></span><span><b data-mir-key="t-8023400a-0">Blueberry sourdough muffin</b><span class="d" data-mir-key="t-ac0ea2c9-0">Whole grain spelt.</span></span><span class="pr" data-mir-key="t-d2cdd0d2-1">₪17</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Energy%20bites"><span class="ph"><img src="/pages/the-brown-box/assets/menu/energy-bites.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-b6afa909-0"></span><span><b data-mir-key="t-4477f534-0">Energy bites</b><span class="d" data-mir-key="t-056272bf-0">Oats, natural peanut butter, coconut, honey, flax and chia seeds. Sugar free.</span></span><span class="pr" data-mir-key="t-3fcda988-0">₪50</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Super%20granola"><span class="ph"><img src="/pages/the-brown-box/assets/menu/super-granola.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-d764433a-0"></span><span><b data-mir-key="t-f6245bac-0">Super granola</b><span class="d" data-mir-key="t-1c2009b3-0">Oats and seeds sweetened with maple syrup and honey. Sugar free.</span></span><span class="pr" data-mir-key="t-e711de76-0">₪40</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Date%20snacks"><span class="ph"><img src="/pages/the-brown-box/assets/menu/date-snacks.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-0fe21351-0"></span><span><b data-mir-key="t-b1e07586-0">Date snacks</b><span class="d" data-mir-key="t-ca49814f-0">Medjool dates covered in natural peanut butter, pretzel, 70% cacao chocolate and pink Himalayan salt.</span></span><span class="pr" data-mir-key="t-f73b2b14-0">₪55</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Oatmeal%20chocolate%20chip%20muffin"><span class="ph"><img src="/pages/the-brown-box/assets/menu/oat-muffin.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-c992ac48-0"></span><span><b data-mir-key="t-f3b17e20-0">Oatmeal chocolate chip muffin</b><span class="d" data-mir-key="t-b499b71d-0">Whole grain spelt. Sugar free.</span></span><span class="pr" data-mir-key="t-d2cdd0d2-0">₪17</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Blueberry%20sourdough%20muffin"><span class="ph"><img src="/pages/the-brown-box/assets/menu/blueberry-muffin.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-56e04ef7-0"></span><span><b data-mir-key="t-8023400a-0">Blueberry sourdough muffin</b><span class="d" data-mir-key="t-ac0ea2c9-0">Whole grain spelt.</span></span><span class="pr" data-mir-key="t-d2cdd0d2-1">₪17</span></a></li>
         </ul>
         <h3 class="cat-h" data-mir-key="t-10cdf450-0">Drinks</h3>
         <ul class="cat">
-          <li><a href="/business/the-brown-box/order?add=Iced%20coffee"><span class="ph"><img src="/pages/the-brown-box/assets/menu/iced-coffee.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-9277ea84-0"></span><span><b data-mir-key="t-d6b258d8-0">Iced coffee</b><span class="d" data-mir-key="t-83c57899-0">Dairy.</span></span><span class="pr" data-mir-key="t-1c8fca6b-0">₪20</span></a></li>
-          <li><a href="/business/the-brown-box/order?add=Passion%20fruit%20iced%20tea"><span class="ph"><img src="/pages/the-brown-box/assets/menu/passion-tea.webp?v=mvayuv8y" alt="" width="76" height="76" loading="lazy" data-mir-key="i-84cd16b7-0"></span><span><b data-mir-key="t-4e880e71-0">Passion fruit iced tea</b><span class="d" data-mir-key="t-b8658033-0">Sugar free.</span></span><span class="pr" data-mir-key="t-1c8fca6b-1">₪20</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Iced%20coffee"><span class="ph"><img src="/pages/the-brown-box/assets/menu/iced-coffee.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-9277ea84-0"></span><span><b data-mir-key="t-d6b258d8-0">Iced coffee</b><span class="d" data-mir-key="t-83c57899-0">Dairy.</span></span><span class="pr" data-mir-key="t-1c8fca6b-0">₪20</span></a></li>
+          <li><a href="/business/the-brown-box/order?add=Passion%20fruit%20iced%20tea"><span class="ph"><img src="/pages/the-brown-box/assets/menu/passion-tea.webp?v=mvaznwa3" alt="" width="76" height="76" loading="lazy" data-mir-key="i-84cd16b7-0"></span><span><b data-mir-key="t-4e880e71-0">Passion fruit iced tea</b><span class="d" data-mir-key="t-b8658033-0">Sugar free.</span></span><span class="pr" data-mir-key="t-1c8fca6b-1">₪20</span></a></li>
         </ul>
       </div>
       <template data-mir-group><h3 class="cat-h" data-f="group"></h3><ul class="cat" data-f="items"></ul></template>
@@ -329,7 +372,7 @@
       <p class="lede rev" data-mir-key="t-89ed5f4b-0">Our gift boxes, packed in a kraft box with a window.</p>
       <div class="boxes">
         <article class="box rev">
-          <img src="/pages/the-brown-box/assets/menu/small-gift-box.webp?v=mvayuv8y" alt="The small gift box: an acai bowl, two muffins and an iced coffee in a kraft box with a window" width="150" height="150" loading="lazy" data-mir-key="i-7bed2ff2-0">
+          <img src="/pages/the-brown-box/assets/menu/small-gift-box.webp?v=mvaznwa3" alt="The small gift box: an acai bowl, two muffins and an iced coffee in a kraft box with a window" width="150" height="150" loading="lazy" data-mir-key="i-7bed2ff2-0">
           <div>
             <h3 data-mir-key="t-db4b9c68-0">Small gift box</h3>
             <p class="p" data-mir-key="t-626c4e4e-0">₪135</p>
@@ -338,7 +381,7 @@
           </div>
         </article>
         <article class="box rev">
-          <img src="/pages/the-brown-box/assets/menu/large-gift-box.webp?v=mvayuv8y" alt="The large gift box: two acai bowls, muffins, date snacks and an iced coffee in a kraft box with a window" width="150" height="150" loading="lazy" data-mir-key="i-18779d6c-0">
+          <img src="/pages/the-brown-box/assets/menu/large-gift-box.webp?v=mvaznwa3" alt="The large gift box: two acai bowls, muffins, date snacks and an iced coffee in a kraft box with a window" width="150" height="150" loading="lazy" data-mir-key="i-18779d6c-0">
           <div>
             <h3 data-mir-key="t-f189577f-0">Large gift box</h3>
             <p class="p" data-mir-key="t-23bf654d-0">₪250</p>
@@ -398,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // never a black screen while the frames arrive: the first frame is the
   // canvas's own background until it is drawn over
   cv.style.background = '#120A05 url(assets/film/' + kind + '/0001.webp) center / cover no-repeat';
-  function url(/pages/the-brown-box/i?v=mvayuv8y) { return '/pages/the-brown-box/assets/film/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; }
+  function url(/pages/the-brown-box/i?v=mvaznwa3) { return '/pages/the-brown-box/assets/film/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; }
   var order = [], seen = {};
   [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });
   var load = document.getElementById('load');
@@ -408,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function () {
     batch.forEach(function (i) {
       var im = new Image(); im.decoding = 'async';
       im.onload = im.onerror = function () { if (im.naturalWidth) { imgs[i] = im; got++; } load.style.width = (got / N * 100) + '%'; if (--left === 0) { draw(); next(k + 6); } };
-      im.src = url(/pages/the-brown-box/i?v=mvayuv8y);
+      im.src = url(/pages/the-brown-box/i?v=mvaznwa3);
     });
   })(0);
   function size() { var d = Math.min(2, devicePixelRatio || 1); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; draw(); }
@@ -453,11 +496,15 @@ document.addEventListener('DOMContentLoaded', function () {
     superfruit: ['Superfruit bowl', 60, ['Kiwi', 'Frozen blueberries', 'Banana']],
     own: ['Build your own bowl', 66, ['Any 4 of: banana, green apple, kiwi, frozen blueberry, frozen mango, frozen pineapple, dates, chocolate chips, super granola']]
   };
+  // each bowl's colour: a light wash for the section, the deep one for words
+  var TINT = { classic: ['#F1E2EC', '#6E2A57'], tropical: ['#FBE6CC', '#8A4708'], sunrise: ['#E5EFD6', '#3A5C14'], superfruit: ['#E0E6F6', '#2E4A9B'], own: ['#EFE3D4', '#4A2E17'] };
   var opts = [].slice.call(document.querySelectorAll('#opts .opt'));
   function pick(k) {
     var b = BOWLS[k];
     opts.forEach(function (o) { o.setAttribute('aria-pressed', o.dataset.k === k ? 'true' : 'false'); });
     document.getElementById('pick-name').textContent = b[0];
+    var sec = document.getElementById('bowls');
+    sec.style.setProperty('--tint', TINT[k][0]); sec.style.setProperty('--c', TINT[k][1]);
     var img = document.getElementById('pick-img');
     if (img.dataset.k !== k) {
       img.classList.add('swap');
@@ -473,6 +520,21 @@ document.addEventListener('DOMContentLoaded', function () {
   pick('classic');
   // the other bowls' photos are fetched now, so a choice swaps at once
   ['tropical', 'sunrise', 'superfruit', 'own'].forEach(function (k) { var i = new Image(); i.src = '/pages/the-brown-box/assets/bowls/' + k + '.webp'; });
+
+  // ── the topping tiles drift as the menu scrolls past ──
+  var tops = document.getElementById('tops'), menuEl = document.getElementById('menu');
+  if (tops && !still) {
+    var tr = 0;
+    var drift = function () {
+      tr = 0;
+      var r = menuEl.getBoundingClientRect();
+      var k = Math.max(-1, Math.min(1, (innerHeight / 2 - r.top) / innerHeight - .4));
+      tops.style.setProperty('--k', k.toFixed(3));
+      [].forEach.call(tops.children, function (im) { im.style.setProperty('--k', k.toFixed(3)); });
+    };
+    addEventListener('scroll', function () { if (!tr) tr = requestAnimationFrame(drift); }, { passive: true });
+    drift();
+  }
 
   // ── reveals, and the phone's order bar after the opening ────────
   var dock = document.getElementById('dock');

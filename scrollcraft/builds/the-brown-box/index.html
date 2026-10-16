@@ -126,6 +126,21 @@
   /* ── 2. pick your bowl ───────────────────────────────────────── */
   .pick { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: center; margin-top: 2.2rem; }
   @media (max-width: 860px) { .pick { grid-template-columns: 1fr; } }
+  @media (max-width: 760px) {
+    .pick { gap: 1rem; margin-top: 1.2rem; }
+    .pick .card { order: -1; padding: 1rem; }
+    .card img { width: min(100%, 230px); margin-bottom: .6rem; }
+    .card h3 { font-size: 1.4rem; }
+    .chips { margin: .5rem 0 .8rem; }
+    .card .base, .card .extra { display: none; }
+    .opts { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+    .opt { padding: .7rem .8rem; }
+    .opts .opt { grid-template-columns: 1fr; padding: .7rem .8rem; }
+    .opts .opt b { font-size: 1.02rem; }
+    .opts .opt .p { justify-self: start; font-size: .92rem; }
+    .opts .opt span.t { display: none; }
+    .opt[data-k="own"] { grid-column: 1 / -1; }
+  }
   .opts { display: grid; gap: .6rem; }
   /* bold colour blocks after the dark film (3h.8): each bowl in its fruit */
   .opt { --c: #6E2A57; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: .2rem 1rem; text-align: start; padding: 1.05rem 1.2rem; border-radius: var(--r); border: 2px solid transparent; background: var(--c);
@@ -137,9 +152,13 @@
   .opt .p { font-weight: 700; color: #fff; align-self: center; }
   .opt span.t { grid-column: 1 / -1; color: rgb(255 255 255 / .92); font-size: .95rem; }
   .opt[aria-pressed="true"] { border-color: #fff; box-shadow: 0 0 0 3px var(--c), var(--shadow); }
-  .card { background: var(--paper); border-radius: 28px; padding: clamp(1.2rem, 3vw, 2rem); box-shadow: var(--shadow); }
-  .card img { width: min(100%, 320px); aspect-ratio: 1; object-fit: cover; border-radius: 24px; margin: 0 auto 1.1rem; background: #F4E9D8; transition: opacity 220ms ease-out, transform 320ms var(--out); }
-  .card img.swap { opacity: 0; transform: scale(.96); }
+  /* the chosen bowl colours the whole section (3i.2): its ground eases to a
+     light wash of that bowl's colour, the heading's accent word takes it */
+  #bowls { --tint: #F1E2EC; --c: #6E2A57; background: var(--tint); transition: background-color 500ms var(--out); }
+  #bowls .acc { color: var(--c); transition: color 500ms var(--out); }
+  .card { background: rgb(255 255 255 / .55); border-radius: 28px; padding: clamp(1.2rem, 3vw, 2rem); box-shadow: var(--shadow); }
+  .card img { width: min(100%, 400px); aspect-ratio: 1; object-fit: cover; border-radius: 24px; margin: 0 auto 1.1rem; background: #F4E9D8; transition: opacity 260ms ease-out, transform 420ms var(--out); }
+  .card img.swap { opacity: 0; transform: scale(.94) translateY(8px); }
   .card h3 { font-size: 1.7rem; text-align: center; }
   .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: .45rem; margin: .9rem 0 1.2rem; padding: 0; }
   .chips li { list-style: none; padding: .35rem .8rem; border-radius: 999px; background: var(--cream); font-size: .92rem; animation: chip 380ms var(--out) both; }
@@ -150,7 +169,19 @@
   .card .extra { text-align: center; color: var(--soft); font-size: .9rem; margin: .9rem 0 0; }
 
   /* ── 3. the menu: their shop, live ───────────────────────────── */
-  .menu { background: var(--paper); }
+  .menu { background: var(--paper); position: relative; overflow: hidden; }
+  /* their toppings as floating tiles beside the heading (3i.6), one shoot,
+     tilted, each drifting at its own pace as the menu scrolls past */
+  .menu-head { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: 2rem; align-items: center; }
+  .tops { position: relative; height: 280px; pointer-events: none; }
+  .tops img { position: absolute; width: var(--w, 120px); height: auto; aspect-ratio: 1; border-radius: 22px; object-fit: cover; box-shadow: 0 2px 4px rgb(58 37 19 / .08), 0 18px 34px -16px rgb(58 37 19 / .4);
+    transform: translateY(calc(var(--k, 0) * var(--sp, 30px))) rotate(var(--r, 0deg)); will-change: transform; }
+  @media (max-width: 760px) {
+    .menu-head { grid-template-columns: 1fr; gap: .5rem; }
+    .tops { height: 170px; }
+    .tops img { --w: 82px !important; }
+  }
+  @media (prefers-reduced-motion: reduce) { .tops img { transform: rotate(var(--r, 0deg)); } }
   .cat-h { margin: 2.4rem 0 .4rem; font: 700 1.5rem/1.2 var(--font-head); color: var(--acai); }
   .cat { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line); }
   .cat li { border-bottom: 1px solid var(--line); }
@@ -283,8 +314,20 @@
 
   <section class="sec menu" id="menu" aria-labelledby="h-menu">
     <div class="wrap">
-      <h2 id="h-menu" class="rev">The <span class="acc">menu</span></h2>
-      <p class="lede rev">Tap anything to add it to your order.</p>
+      <div class="menu-head">
+        <div>
+          <h2 id="h-menu" class="rev">The <span class="acc">menu</span></h2>
+          <p class="lede rev">Tap anything to add it to your order.</p>
+        </div>
+        <div class="tops" id="tops" aria-hidden="true">
+          <img src="assets/tops/banana.webp" alt="" width="240" height="240" loading="lazy" style="--w:140px;left:4%;top:8%;--r:-9deg;--sp:-26px">
+          <img src="assets/tops/blueberry.webp" alt="" width="240" height="240" loading="lazy" style="--w:118px;left:30%;top:46%;--r:7deg;--sp:34px">
+          <img src="assets/tops/granola.webp" alt="" width="240" height="240" loading="lazy" style="--w:132px;left:54%;top:2%;--r:-5deg;--sp:-40px">
+          <img src="assets/tops/mango.webp" alt="" width="240" height="240" loading="lazy" style="--w:110px;left:70%;top:40%;--r:11deg;--sp:28px">
+          <img src="assets/tops/kiwi.webp" alt="" width="240" height="240" loading="lazy" style="--w:104px;left:10%;top:62%;--r:6deg;--sp:44px">
+          <img src="assets/tops/pineapple.webp" alt="" width="240" height="240" loading="lazy" style="--w:100px;left:78%;top:-2%;--r:-12deg;--sp:-22px">
+        </div>
+      </div>
       <div data-mir-catalog data-href="order.html?add={name}" data-wa="972533452048" data-msg="Hi, I'd like to order the {name} ({price})." data-other="More from The Brown Box" data-out="Out of stock">
       <div data-mir-list>
         <h3 class="cat-h">Acai bowls</h3>
@@ -453,11 +496,15 @@ document.addEventListener('DOMContentLoaded', function () {
     superfruit: ['Superfruit bowl', 60, ['Kiwi', 'Frozen blueberries', 'Banana']],
     own: ['Build your own bowl', 66, ['Any 4 of: banana, green apple, kiwi, frozen blueberry, frozen mango, frozen pineapple, dates, chocolate chips, super granola']]
   };
+  // each bowl's colour: a light wash for the section, the deep one for words
+  var TINT = { classic: ['#F1E2EC', '#6E2A57'], tropical: ['#FBE6CC', '#8A4708'], sunrise: ['#E5EFD6', '#3A5C14'], superfruit: ['#E0E6F6', '#2E4A9B'], own: ['#EFE3D4', '#4A2E17'] };
   var opts = [].slice.call(document.querySelectorAll('#opts .opt'));
   function pick(k) {
     var b = BOWLS[k];
     opts.forEach(function (o) { o.setAttribute('aria-pressed', o.dataset.k === k ? 'true' : 'false'); });
     document.getElementById('pick-name').textContent = b[0];
+    var sec = document.getElementById('bowls');
+    sec.style.setProperty('--tint', TINT[k][0]); sec.style.setProperty('--c', TINT[k][1]);
     var img = document.getElementById('pick-img');
     if (img.dataset.k !== k) {
       img.classList.add('swap');
@@ -473,6 +520,21 @@ document.addEventListener('DOMContentLoaded', function () {
   pick('classic');
   // the other bowls' photos are fetched now, so a choice swaps at once
   ['tropical', 'sunrise', 'superfruit', 'own'].forEach(function (k) { var i = new Image(); i.src = 'assets/bowls/' + k + '.webp'; });
+
+  // ── the topping tiles drift as the menu scrolls past ──
+  var tops = document.getElementById('tops'), menuEl = document.getElementById('menu');
+  if (tops && !still) {
+    var tr = 0;
+    var drift = function () {
+      tr = 0;
+      var r = menuEl.getBoundingClientRect();
+      var k = Math.max(-1, Math.min(1, (innerHeight / 2 - r.top) / innerHeight - .4));
+      tops.style.setProperty('--k', k.toFixed(3));
+      [].forEach.call(tops.children, function (im) { im.style.setProperty('--k', k.toFixed(3)); });
+    };
+    addEventListener('scroll', function () { if (!tr) tr = requestAnimationFrame(drift); }, { passive: true });
+    drift();
+  }
 
   // ── reveals, and the phone's order bar after the opening ────────
   var dock = document.getElementById('dock');
