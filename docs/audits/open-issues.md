@@ -9,11 +9,15 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 ## Open
 
+- [Low] Gift-card order and "tell me when it's back" email any typed address without confirming it; gift-card order mail has no unsubscribe link. First seen 16 Oct (site audit).
+- [Low] Appointment reminder is marked sent before emailing; a failed send is never retried. First seen 16 Oct (site audit).
+- [Low] `jobsBoard.areaPh` / `areaFreeText` missing from en.js. First seen 15 Oct (site audit).
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
 - [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
 
 ## Fixed
 
+- [Medium] Basket card buttons (Book, Message, Add to order, Send order) lost their Hebrew text after a duplicate `basket` block in the language files. Fixed 16 Oct, d261160c.
 - [Low] KasherMyBnb: the "what we kasher" lists on the kitchen and pots pages are now a split price list (add-ons left, ticked parts right; on a phone the list first). 13 Oct.
 
 - [Medium] Subscriptions: a paying business can now see its plan and cancel it in Settings ("Your plan", shown only to a business with a paid plan). Fixed 13 Oct.
@@ -41,3 +45,4 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 - [Medium] Page editor: an owner could save a link to another site ("//evil.com"). Fixed 12 Oct, 8e2da7fb.
 - [Low] Hand-built pages: anyone could skip the cache with `?fresh` as often as they liked. Fixed 12 Oct, 8e2da7fb.
 - Not a bug: business page tab title (uses "|"), Deliveries links (phone, WhatsApp and Waze open outside the app), renter Contracts tab (shows where contracts are). Checked 13 Oct.
+- (info, audit tooling, 2026-10-16) Sandbox blocks MongoDB and Playwright downloads, so UI audits cannot run the API; see docs/audits/2026-10-16-ui-audit.md
