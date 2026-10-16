@@ -41,3 +41,4 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 - [Medium] Page editor: an owner could save a link to another site ("//evil.com"). Fixed 12 Oct, 8e2da7fb.
 - [Low] Hand-built pages: anyone could skip the cache with `?fresh` as often as they liked. Fixed 12 Oct, 8e2da7fb.
 - Not a bug: business page tab title (uses "|"), Deliveries links (phone, WhatsApp and Waze open outside the app), renter Contracts tab (shows where contracts are). Checked 13 Oct.
+- (info, audit tooling, 2026-10-16) Sandbox blocks MongoDB and Playwright downloads, so UI audits cannot run the API; see docs/audits/2026-10-16-ui-audit.md
