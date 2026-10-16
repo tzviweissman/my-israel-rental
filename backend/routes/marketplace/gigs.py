@@ -1221,6 +1221,12 @@ async def _email_guest_status(booking: dict, event: str, gig_title: str | None =
             f'<p style="color:#555;font-size:14px;line-height:1.7;margin:0 0 18px;">{line}</p>'
             + em._button("See your booking", link)
         )
+        if event == "accepted" and booking.get("preferred_date") and booking.get("time_slot"):
+            from utils.calendar_link import google_calendar_url
+            cal = google_calendar_url(gig_title or "Appointment", booking["preferred_date"], booking["time_slot"],
+                                      booking.get("duration_minutes") or 60, details=link)
+            if cal:
+                inner += f'<p style="margin:14px 0 0;font-size:14px;"><a href="{em._esc(cal)}" style="color:#167AB8;">Add to Google Calendar</a></p>'
         await em.send_email(to, head, em._wrap(inner, preheader=head), tag=f"guest_booking_{event}")
     except Exception:  # noqa: BLE001
         logger.exception("could not email booking status link for %s", booking.get("_id"))

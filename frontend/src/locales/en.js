@@ -5604,6 +5604,34 @@ const en = {
         notePh: "Note, e.g. meet at Jaffa Gate",
         addDate: "Add a date",
       },
+      // Add to calendar and private feedback (marketplace/feedback.py).
+      calendarAdd: {
+        google: "Google Calendar",
+        apple: "Apple / Outlook",
+      },
+      feedback: {
+        eyebrow: "Your feedback for",
+        ask: "How did we do?",
+        stars: "Your rating",
+        lowAsk: "What could have been better?",
+        commentAsk: "Anything you would like to tell them? (optional)",
+        send: "Send to {{b}}",
+        private: "Only the business sees this. It is not posted anywhere.",
+        thanks: "Thank you. {{b}} has your feedback.",
+        publicAsk: "Would you also like to leave a public review, to help other customers decide?",
+        publicBtn: "Write a public review",
+        alreadyReviewed: "You already left a review. Thank you.",
+        reviewClosed: "A public review is not possible for this one.",
+      },
+      feedbackBiz: {
+        title: "Private feedback",
+        counts: "from {{a}} answers, {{s}} asked",
+        noneYet: "{{s}} customers asked, no answers yet.",
+        explain: "The day after a visit or a finished order, customers get one email: \"How did we do?\". Answers come only to you.",
+        reply: "Reply to {{e}}",
+        switch: "Ask customers the day after",
+        ownerOnly: "Only the owner can change this.",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "Invite a friend",

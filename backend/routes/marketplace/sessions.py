@@ -148,6 +148,12 @@ async def _email_customer(r: dict[str, Any], gig: dict[str, Any], event: str) ->
     inner = (f'<h2 style="color:#222;font-size:22px;margin:0 0 8px;">{em._esc(head)}</h2>'
              f'<p style="color:#333;font-size:15px;line-height:1.7;margin:0 0 18px;">{line}</p>'
              + em._button("להזמנה שלך" if he else "Your reservation", link))
+    if event == "reserved" and r.get("session_time"):
+        from utils.calendar_link import google_calendar_url
+        cal = google_calendar_url(title, r["session_date"], r["session_time"], 60, details=link)
+        if cal:
+            inner += (f'<p style="margin:14px 0 0;font-size:14px;"><a href="{em._esc(cal)}" style="color:#167AB8;">'
+                      f'{"הוספה ליומן Google" if he else "Add to Google Calendar"}</a></p>')
     owner = await db.users.find_one({"id": gig.get("provider_user_id")}, {"email": 1}) or {}
     await em.send_email(r["email"], _subject(head), em._wrap(inner, preheader=head, lang="he" if he else "en"),
                         tag=f"session-{event}", from_name=business or None, reply_to=owner.get("email"))

@@ -12,6 +12,7 @@ import axios from 'axios';
 import { Loader2, BarChart3 } from 'lucide-react';
 import { money } from '../../utils/currency';
 import BusinessInsights, { Change, Tile, Section, Bars } from './BusinessInsights';
+import CustomerFeedback from './CustomerFeedback';
 
 const PERIODS = [30, 90, 365];
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
@@ -149,6 +150,7 @@ export default function SummaryTab({ API, token, embedded = false }) {
                     )}
                   </Section>
                 )}
+                <CustomerFeedback API={API} auth={auth} businessId={biz.id} days={days} show={d.appointments.has_any || o.orders > 0} />
               </div>
 
               {(o.orders > 0 || o.compare) && (

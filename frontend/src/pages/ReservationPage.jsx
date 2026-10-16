@@ -9,6 +9,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, CalendarDays } from 'lucide-react';
 import { API } from '../lib/apiBase';
+import AddToCalendar from '../components/bookings/AddToCalendar';
 
 export default function ReservationPage() {
   const { token } = useParams();
@@ -48,6 +49,7 @@ export default function ReservationPage() {
           </p>
           <p className="mt-3 text-sm" dir="auto" style={{ color: 'var(--ink)' }}>{title}</p>
           <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>{when}{d.time ? ` · ${d.time}` : ''} · {t('sessions.placesN', '{{n}} places', { n: d.seats })}</p>
+          {d.status === 'reserved' && d.can_cancel && <AddToCalendar uid={`reservation-${token}`} title={`${title}${biz ? ` · ${biz}` : ''}`} day={d.date} time={d.time} />}
           {d.can_cancel && (confirm ? (
             <div className="mt-4 flex gap-2">
               <button type="button" disabled={busy} onClick={cancel} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-60"

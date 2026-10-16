@@ -14,6 +14,7 @@ import { StarInput } from '../components/reviews/ReviewsSection';
 import { Loader2, CalendarCheck } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import ChangeBooking from '../components/bookings/ChangeBooking';
+import AddToCalendar from '../components/bookings/AddToCalendar';
 
 const REFRESH_MS = 30_000;
 
@@ -96,6 +97,9 @@ export default function BookingTrackPage() {
           </p>
           <p className="mt-3 text-sm" style={{ color: 'var(--ink)' }} dir="auto">{title}{data.tier_name ? ` · ${data.tier_name}` : ''}</p>
           {when && <p className="mt-1 text-sm" style={{ color: 'var(--brand-muted)' }}>{when}</p>}
+          {data.status === 'accepted' && (
+            <AddToCalendar uid={`booking-${token}`} title={`${title}${bizName ? ` · ${bizName}` : ''}`} day={data.preferred_date} time={data.time_slot} minutes={data.duration_minutes} />
+          )}
           {data.provider_reply && (
             <div className="mt-4 ps-3 border-s-2" style={{ borderColor: 'var(--gold)' }}>
               <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('bookingTrack.reply', 'Reply from the business')}</p>

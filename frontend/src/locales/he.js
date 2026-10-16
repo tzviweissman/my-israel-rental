@@ -5422,6 +5422,34 @@ const he = {
         notePh: "הערה, למשל מפגש בשער יפו",
         addDate: "הוספת תאריך",
       },
+      // Add to calendar and private feedback (marketplace/feedback.py).
+      calendarAdd: {
+        google: "יומן Google",
+        apple: "Apple / Outlook",
+      },
+      feedback: {
+        eyebrow: "המשוב שלכם ל",
+        ask: "איך היה?",
+        stars: "הדירוג שלכם",
+        lowAsk: "מה היה יכול להיות טוב יותר?",
+        commentAsk: "רוצים לכתוב להם משהו? (לא חובה)",
+        send: "שליחה ל{{b}}",
+        private: "רק העסק רואה את זה. זה לא מתפרסם בשום מקום.",
+        thanks: "תודה. המשוב שלכם הגיע ל{{b}}.",
+        publicAsk: "תרצו גם לכתוב ביקורת פומבית, כדי לעזור ללקוחות אחרים להחליט?",
+        publicBtn: "כתיבת ביקורת פומבית",
+        alreadyReviewed: "כבר כתבתם ביקורת. תודה.",
+        reviewClosed: "אי אפשר לכתוב ביקורת פומבית על זה.",
+      },
+      feedbackBiz: {
+        title: "משוב פרטי",
+        counts: "מתוך {{a}} תשובות, {{s}} נשאלו",
+        noneYet: "{{s}} לקוחות נשאלו, עדיין אין תשובות.",
+        explain: "יום אחרי ביקור או הזמנה שהושלמה, הלקוחות מקבלים מייל אחד: \"איך היה?\". התשובות מגיעות רק אליכם.",
+        reply: "לענות ל־{{e}}",
+        switch: "לשאול לקוחות למחרת",
+        ownerOnly: "רק הבעלים יכולים לשנות את זה.",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "הזמינו חבר",

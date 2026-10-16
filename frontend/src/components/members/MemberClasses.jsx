@@ -8,6 +8,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2 } from 'lucide-react';
 import { API } from '../../lib/apiBase';
+import AddToCalendar from '../bookings/AddToCalendar';
 
 export default function MemberClasses({ token }) {
   const { t, i18n } = useTranslation();
@@ -55,6 +56,9 @@ export default function MemberClasses({ token }) {
                             : s.spots_left > 0 ? t('classes.left', '{{n}} places left', { n: s.spots_left }) : t('classes.full', 'Full')}
                       {s.instructor && ` · ${s.instructor}`}
                     </span>
+                    {s.my_status === 'booked' && !s.cancelled && (
+                      <span className="block mt-1.5"><AddToCalendar compact uid={`class-${s.id}`} title={s.title} day={s.date} time={s.start} minutes={s.duration_min} location={s.location || ''} /></span>
+                    )}
                   </span>
                   {!s.cancelled && (s.my_status ? (
                     <button type="button" disabled={busy === s.id} onClick={() => act(s, true)} className="shrink-0 px-3 min-h-[40px] rounded-full border text-xs font-semibold" style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }} data-testid="class-unbook">

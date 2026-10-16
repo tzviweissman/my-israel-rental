@@ -320,6 +320,9 @@ async def startup_tasks() -> None:
     # Automatic messages to guests of a stay (routes/guest_messages.py).
     from routes.guest_messages import guest_messages_loop
     asyncio.create_task(guest_messages_loop())
+    # "How did we do?" the day after a visit (marketplace/feedback.py).
+    from routes.marketplace.feedback import feedback_loop
+    asyncio.create_task(feedback_loop())
     # Requests board lifecycle — daily at 05:00 UTC. Flips open->expired
     # once a request's 30 days are up. A soft flip, not a TTL index, so
     # the seeker can still renew it. See the single-replica note in
@@ -572,6 +575,8 @@ async def startup_tasks() -> None:
         await ensure_quote_indexes()
         from routes.marketplace.sessions import ensure_session_indexes
         await ensure_session_indexes()
+        from routes.marketplace.feedback import ensure_feedback_indexes
+        await ensure_feedback_indexes()
         from routes.guest_messages import ensure_guest_message_indexes
         await ensure_guest_message_indexes()
         from routes.marketplace.staff import ensure_staff_indexes
