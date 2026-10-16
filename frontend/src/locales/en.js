@@ -5697,6 +5697,7 @@ const en = {
         sellName: "Name (optional)",
         sellEmail: "Email it to (optional)",
         make: "Make the card",
+        counterSale: "Sold in person",
         st: {
           waiting: "Waiting for payment",
           active: "Active",

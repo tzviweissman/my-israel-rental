@@ -203,7 +203,7 @@ async def card_page(token: str, request: Request):
     paid = card["status"] in ("active", "used_up")
     return {"business": _biz_out(biz) if biz else None, "status": card["status"], "valid": _valid(card),
             "amount": card["amount"], "balance": card["balance"], "currency": card.get("currency", "ILS"),
-            "to_name": (card.get("to") or {}).get("name") or card["buyer"]["name"], "from_name": card["buyer"]["name"],
+            "to_name": (card.get("to") or {}).get("name") or card["buyer"]["name"], "from_name": card["buyer"]["name"] or "",
             "for_self": not card.get("to"), "message": card.get("message"),
             "code": card.get("code") if paid else None, "expires_on": card.get("expires_on"),
             "note": settings_of(biz).get("note") if card["status"] == "awaiting_payment" else None,
@@ -258,13 +258,14 @@ async def _send_card(card: dict[str, Any], biz: dict[str, Any]) -> None:
              + "</p>")
     if card.get("message"):
         lines += f"<p style='font-size:15px;line-height:1.7;color:#333;font-style:italic;margin:0 0 14px;' dir='auto'>“{_esc(card['message'])}”</p>"
+    until = date.fromisoformat(card["expires_on"]).strftime("%d.%m.%Y")
     box = (f"<div style='border:1px solid #E3E3E3;border-radius:14px;padding:18px;text-align:center;margin:0 0 16px;'>"
            f"<div style='font-size:13px;color:#666;'>{_esc(name)}</div>"
            f"<div style='font-size:30px;font-weight:700;color:#111827;margin:6px 0;'>₪{card['balance']:g}</div>"
            f"<div style='font-size:18px;letter-spacing:2px;font-weight:700;color:#111827;' dir='ltr'>{_esc(card['code'])}</div>"
            f"<div style='font-size:12px;color:#666;margin-top:6px;'>"
-           + (f"בתוקף עד {card['expires_on']}. מקלידים את הקוד בהזמנה או מציגים אותו בעסק." if he else
-              f"Valid until {card['expires_on']}. Type the code when you order, or show it at the business.")
+           + (f"בתוקף עד {until}. מקלידים את הקוד בהזמנה או מציגים אותו בעסק." if he else
+              f"Valid until {until}. Type the code when you order, or show it at the business.")
            + "</div></div>")
     inner = f"<h2 style='color:#222;font-size:22px;margin:0 0 10px;'>{_esc(head)}</h2>" + lines + box + em._button("לכרטיס" if he else "See your gift card", link)
     owner = await db.users.find_one({"id": biz.get("owner_user_id")}, {"email": 1}) or {}
@@ -313,7 +314,7 @@ async def sell_at_counter(business_id: str, body: SellIn, user=Depends(verify_to
     email = (body.email or "").strip().lower() or None
     card = {"_id": str(uuid.uuid4()), "business_id": business_id, "owner_user_id": biz.get("owner_user_id"),
             "amount": float(body.amount), "balance": float(body.amount), "currency": "ILS",
-            "buyer": {"name": (body.to_name or "").strip() or "Counter sale", "email": email, "phone": None},
+            "buyer": {"name": (body.to_name or "").strip() or None, "email": email, "phone": None},
             "to": None, "message": None, "lang": body.lang, "status": "awaiting_payment", "code": None,
             "token": secrets.token_urlsafe(16), "source": "counter", "created_at": _now(), "paid_at": None,
             "expires_on": None, "uses": []}

@@ -5515,6 +5515,7 @@ const he = {
         sellName: "שם (לא חובה)",
         sellEmail: "לשלוח למייל (לא חובה)",
         make: "יצירת הכרטיס",
+        counterSale: "נמכר בעסק",
         st: {
           waiting: "ממתין לתשלום",
           active: "פעיל",

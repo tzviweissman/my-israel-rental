@@ -28,7 +28,7 @@ function CardRow({ c, base, auth, onChanged }) {
       onChanged();
     } catch (err) { toast.error(err?.response?.data?.detail || t('auto.failed', 'Could not save. Try again.')); } finally { setBusy(''); }
   };
-  const who = c.to?.name ? t('giftBiz.forFrom', 'for {{to}}, from {{from}}', { to: c.to.name, from: c.buyer.name }) : c.buyer.name;
+  const who = c.to?.name ? t('giftBiz.forFrom', 'for {{to}}, from {{from}}', { to: c.to.name, from: c.buyer.name }) : (c.buyer.name || t('giftBiz.counterSale', 'Sold in person'));
   const st = { awaiting_payment: t('giftBiz.st.waiting', 'Waiting for payment'), active: t('giftBiz.st.active', 'Active'), used_up: t('giftBiz.st.usedUp', 'Used up'), expired: t('giftBiz.st.expired', 'Expired') }[c.status] || c.status;
   return (
     <li className="rounded-xl border bg-white p-3 text-sm" style={{ borderColor: c.status === 'awaiting_payment' ? 'var(--ink)' : 'var(--brand-border)', color: 'var(--ink)' }} data-testid="gift-row">
