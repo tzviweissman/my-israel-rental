@@ -311,6 +311,9 @@ async def startup_tasks() -> None:
     # Appointment reminders to customers (appointment_reminders.py).
     from routes.marketplace.appointment_reminders import appointment_reminders_loop
     asyncio.create_task(appointment_reminders_loop())
+    # "Time to book again" (appointment_extras.py).
+    from routes.marketplace.appointment_extras import rebook_loop
+    asyncio.create_task(rebook_loop())
     # Automatic messages to guests of a stay (routes/guest_messages.py).
     from routes.guest_messages import guest_messages_loop
     asyncio.create_task(guest_messages_loop())
@@ -560,6 +563,8 @@ async def startup_tasks() -> None:
         await ensure_domain_indexes()
         from routes.marketplace.appointment_reminders import ensure_appointment_reminder_indexes
         await ensure_appointment_reminder_indexes()
+        from routes.marketplace.appointment_extras import ensure_waitlist_indexes
+        await ensure_waitlist_indexes()
         from routes.guest_messages import ensure_guest_message_indexes
         await ensure_guest_message_indexes()
         from routes.marketplace.staff import ensure_staff_indexes

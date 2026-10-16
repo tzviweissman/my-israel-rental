@@ -97,7 +97,7 @@ const BookingCard = ({ booking, side, API, token, onChanged, highlighted }) => {
     }
   };
 
-  const when = [booking.preferred_date, booking.time_slot].filter(Boolean).join(' · ');
+  const when = [booking.preferred_date, booking.time_slot, booking.staff_name].filter(Boolean).join(' · ');
 
   return (
     <div

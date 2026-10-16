@@ -222,6 +222,8 @@ async def customer_cancel(token: str, request: Request):
                   f"{who} cancelled {gig.get('title') or 'an appointment'} on {b.get('preferred_date')} at {b.get('time_slot')}.", b["_id"])
     from routes.marketplace.automations import fire_in_background
     fire_in_background("appointment.cancelled", {"booking": {**b, "status": "cancelled"}, "gig": gig})
+    from .appointment_extras import on_slot_freed
+    await on_slot_freed(b.get("gig_id"), b.get("preferred_date"), b.get("staff_id"))
     return {"ok": True, "status": "cancelled"}
 
 
@@ -259,7 +261,11 @@ async def customer_move(token: str, body: MoveIn, request: Request):
     if not _within_hours(gig, start, duration):
         raise HTTPException(status_code=400, detail="That time is outside the business's hours")
     from .gigs import _busy_spans, _hold_hours, _minutes, _notify, _overlaps
-    taken = (await _busy_spans(b["gig_id"], gig.get("provider_user_id"), body.date)).get(body.date, [])
+    # With a team, the same person's calendar (TeamMember).
+    if gig.get("team"):
+        taken = (await _busy_spans(b["gig_id"], gig.get("provider_user_id"), body.date, b.get("staff_id"))).get(body.date, [])
+    else:
+        taken = (await _busy_spans(b["gig_id"], gig.get("provider_user_id"), body.date)).get(body.date, [])
     # Its own current slot does not count against it.
     own = _minutes(b.get("time_slot"))
     if b.get("preferred_date") == body.date and own is not None:
@@ -280,8 +286,10 @@ async def customer_move(token: str, body: MoveIn, request: Request):
         raise HTTPException(status_code=409, detail="That time has just been taken - please pick another.") from None
     if not r.modified_count:
         raise HTTPException(status_code=409, detail="This booking was just changed. Refresh to see it.")
-    # A new time means a new reminder.
+    # A new time means a new reminder, and the old time is free again.
     await db.appointment_reminder_log.delete_one({"_id": b["_id"]})
+    from .appointment_extras import on_slot_freed
+    await on_slot_freed(b.get("gig_id"), b.get("preferred_date"), b.get("staff_id"))
     who = b.get("guest_name") or "A customer"
     await _notify(b.get("provider_user_id"), "booking_request",
                   f"{who} asked to move {gig.get('title') or 'an appointment'} to {body.date} at {body.time}. Accept or decline the new time.",

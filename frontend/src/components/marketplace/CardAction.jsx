@@ -112,9 +112,10 @@ function BookSheet({ gig, title, onClose, t }) {
   const [tier, setTier] = useState(tiers.length === 1 ? tiers[0] : null);
   const [date, setDate] = useState(null);
   const [slot, setSlot] = useState(null);
+  const [staff, setStaff] = useState('any');
   const [form, setForm] = useState(false);
   if (form && tier && date && slot) {
-    return <BookingForm gig={gig} tier={tier} token={token} slotDate={date} slot={slot} onClose={onClose} />;
+    return <BookingForm gig={gig} tier={tier} token={token} slotDate={date} slot={slot} staffId={staff} onClose={onClose} />;
   }
   return (
     <Sheet title={title} onClose={onClose} testid="book-sheet">
@@ -125,7 +126,8 @@ function BookSheet({ gig, title, onClose, t }) {
       )}
       {tier && (
         <AppointmentPicker gig={gig} tier={tier} isWhatsApp={false} selectedDate={date} selectedSlot={slot}
-          onSelectDate={(d) => { setDate(d); setSlot(null); }} onSelectSlot={setSlot} />
+          onSelectDate={(d) => { setDate(d); setSlot(null); }} onSelectSlot={setSlot}
+          selectedStaff={staff} onSelectStaff={(sid) => { setStaff(sid); setSlot(null); }} />
       )}
       <button type="button" disabled={!tier || !date || !slot} onClick={() => setForm(true)}
         className="mt-4 w-full min-h-[48px] rounded-full font-bold disabled:opacity-40"

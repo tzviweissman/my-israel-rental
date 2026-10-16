@@ -13,6 +13,7 @@ import ReviewsSection from '../components/reviews/ReviewsSection';
 import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPanel';
 import { money } from '../utils/currency';
 import { Link, useNavigate, useParams } from 'react-router-dom';
+import WaitlistForm from '../components/bookings/WaitlistForm';
 import { useTranslation } from 'react-i18next';
 import DateField from '../components/common/DateField';
 import FitImage from '../components/common/FitImage';
@@ -204,7 +205,7 @@ const ReviewSection = ({ gig, token, user, onRatingChange }) => {
    status page the customer keeps. An appointment carries the day and time
    picked on the page; until 7 Oct this form dropped them, and the server
    refused every in-platform appointment for want of a time slot. */
-export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot = null, initialDate = '' }) => {
+export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot = null, initialDate = '', staffId = null }) => {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [message, setMessage] = useState('');
@@ -234,6 +235,7 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
           time_slot: slot || undefined,
           // The customer's language, for their reminder email.
           lang: String(i18n.language || 'en').startsWith('he') ? 'he' : 'en',
+          staff_id: staffId && staffId !== 'any' ? staffId : undefined,
         },
         token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
       );
@@ -329,8 +331,13 @@ const GigDetail = () => {
   // cropped" guarantee FitImage already gives.
   const [coverRatio, setCoverRatio] = useState(null);
   // Appointment-only: buyer-selected day (YYYY-MM-DD) + slot ("HH:MM").
-  const [appointmentDate, setAppointmentDate] = useState(null);
+  // ?date= from a waiting-list email opens on that day.
+  const [appointmentDate, setAppointmentDate] = useState(() => {
+    try { return new URLSearchParams(window.location.search).get('date') || null; } catch { return null; }
+  });
   const [appointmentSlot, setAppointmentSlot] = useState(null);
+  // Who does it, on a listing with a team: a member's id or 'any'.
+  const [appointmentStaff, setAppointmentStaff] = useState('any');
   // Deliverable-only: optional buyer-selected date (when the gig has
   // `enable_date_booking` on).
   const [deliverableDate, setDeliverableDate] = useState('');
@@ -1161,6 +1168,8 @@ const GigDetail = () => {
                   selectedSlot={appointmentSlot}
                   onSelectDate={(d) => { setAppointmentDate(d); setAppointmentSlot(null); }}
                   onSelectSlot={setAppointmentSlot}
+                  selectedStaff={appointmentStaff}
+                  onSelectStaff={(sid) => { setAppointmentStaff(sid); setAppointmentSlot(null); }}
                 />
               )}
 
@@ -1280,7 +1289,8 @@ const GigDetail = () => {
 
       {showBook && tier && (
         <BookingForm gig={gig} tier={tier} onClose={() => setShowBook(false)} token={token}
-          slotDate={isAppointment ? appointmentDate : null} slot={isAppointment ? appointmentSlot : null} initialDate={deliverableDate || ''} />
+          slotDate={isAppointment ? appointmentDate : null} slot={isAppointment ? appointmentSlot : null} initialDate={deliverableDate || ''}
+          staffId={isAppointment ? appointmentStaff : null} />
       )}
 
       {lightboxIndex !== null && activeGallery.length > 0 && (
@@ -1461,7 +1471,7 @@ const buildAppointmentSlots = (gig, tier, locale) => {
   return byDate;
 };
 
-export const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, onSelectDate, onSelectSlot }) => {
+export const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selectedSlot, onSelectDate, onSelectSlot, selectedStaff = 'any', onSelectStaff }) => {
   /* S0 — times already spoken for. The grid is generated in the browser
      from weekly_availability, so without asking the server it offers
      every slot to everybody and two customers can take the same one.
@@ -1489,18 +1499,25 @@ export const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selecte
     return () => { cancelled = true; };
   }, [gig?.id]);
 
+  const team = gig?.team || [];
+  const builtDays = useMemo(() => buildAppointmentSlots(gig, tier, isHebrew ? 'he-IL' : 'en-US'), [gig, tier, isHebrew]);
   const slotsByDate = useMemo(() => {
-    const built = buildAppointmentSlots(gig, tier, isHebrew ? 'he-IL' : 'en-US');
+    const built = builtDays;
     // Subtract the held times, and drop a day entirely once nothing is
     // left on it — a date that opens onto an empty grid reads as broken.
+    // With a team, one person's own taken times; "anyone" uses the times
+    // taken for everyone (backend taken-slots).
+    const source = team.length && selectedStaff !== 'any' ? ((taken._staff || {})[selectedStaff] || {}) : taken;
     const out = {};
     for (const [iso, day] of Object.entries(built)) {
-      const gone = new Set(taken[iso] || []);
+      const gone = new Set(source[iso] || []);
       const slots = day.slots.filter((sl) => !gone.has(sl));
       if (slots.length) out[iso] = { ...day, slots };
     }
     return out;
-  }, [gig, tier, taken, isHebrew]);
+  }, [builtDays, taken, team.length, selectedStaff]);
+  // Every coming day with opening hours, full or not, for the waiting list.
+  const waitDays = useMemo(() => Object.entries(builtDays).slice(0, 45).map(([iso, d]) => ({ iso, label: d.label })), [builtDays]);
   const availableIsoSet = useMemo(() => new Set(Object.keys(slotsByDate)), [slotsByDate]);
   const firstAvailableIso = useMemo(() => Object.keys(slotsByDate)[0] || null, [slotsByDate]);
 
@@ -1516,6 +1533,15 @@ export const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selecte
   }, [firstAvailableIso]);
 
   if (!availableIsoSet.size) {
+    // Hours set but every time taken: the waiting list, not "no hours".
+    if (waitDays.length && !isWhatsApp) {
+      return (
+        <div className="pt-2 border-t border-gray-100" data-testid="gig-appt-full">
+          <p className="text-xs text-gray-600">{t('waitlist.full', 'Every time is taken for now.')}</p>
+          <WaitlistForm gigId={gig.id} days={waitDays} staffId={selectedStaff} />
+        </div>
+      );
+    }
     return (
       <p className="text-xs text-gray-500 pt-2 border-t border-gray-100" data-testid="gig-appt-no-hours">
         {t('services.noOpenHoursYet', "This business hasn't set open hours yet - send them a message instead.")}
@@ -1544,6 +1570,18 @@ export const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selecte
 
   return (
     <div className="pt-3 border-t border-gray-100 space-y-2" data-testid="gig-appointment-picker">
+      {team.length > 0 && (
+        <div data-testid="gig-appt-team">
+          <p className="text-xs font-semibold text-gray-700 mb-1">{t('team.who', 'With who')}</p>
+          <div className="flex flex-wrap gap-1.5" role="radiogroup" aria-label={t('team.who', 'With who')}>
+            {[{ id: 'any', name: t('team.anyone', 'Anyone free') }, ...team].map((m) => (
+              <button key={m.id} type="button" role="radio" aria-checked={selectedStaff === m.id} onClick={() => onSelectStaff && onSelectStaff(m.id)}
+                      className={`px-3 min-h-[36px] rounded-full text-xs font-semibold border ${selectedStaff === m.id ? 'bg-[var(--brand-primary)] text-white border-[var(--brand-primary)]' : 'bg-white text-gray-700 border-gray-200'}`}
+                      data-testid={`gig-appt-staff-${m.id}`} dir="auto">{m.name}</button>
+            ))}
+          </div>
+        </div>
+      )}
       <label className="text-xs font-semibold text-gray-700 flex items-center gap-1">
         <Calendar size={12} /> {t('services.pickADay', 'Pick a day')}
       </label>
@@ -1600,6 +1638,7 @@ export const AppointmentPicker = ({ gig, tier, isWhatsApp, selectedDate, selecte
           above, which is why the grid is still worth showing.) Say what
           it is instead of implying a guarantee we cannot keep. Quiet on
           purpose — it informs, it should not scare anyone off. */}
+      {!isWhatsApp && <WaitlistForm gigId={gig.id} days={waitDays} defaultDay={effectiveIso} staffId={selectedStaff} />}
       {isWhatsApp && (
         <p className="text-[11px] text-gray-500 leading-snug pt-1" data-testid="gig-appt-wa-notice">
           {t('services.waHoursNotice', "Times shown are this business's opening hours - confirm with them directly.")}

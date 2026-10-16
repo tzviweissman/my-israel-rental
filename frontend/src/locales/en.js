@@ -5489,6 +5489,33 @@ const en = {
         checkoutWhen: "At 08:00 on the checkout day, with the checkout time",
         words: "You can use {name}, {property}, {address}, {checkin}, {checkout} and {instructions}.",
       },
+      // Appointments: who does it, and booking again (TeamAndRebook.jsx).
+      team: {
+        who: "With who",
+        anyone: "Anyone free",
+        title: "Who does it, and booking again",
+        people: "People customers can choose",
+        peopleHint: "Each one has their own calendar, so two people can each take the same time. Customers pick someone or “Anyone free”. Leave empty if it is just you.",
+        namePh: "Name, e.g. Avi",
+        remove: "Remove",
+        add: "Add a person",
+        rebook: "Remind customers to book again",
+        rebookHint: "After an appointment you mark done, the customer gets one email inviting them back, unless they already booked again. They can unsubscribe.",
+        rebookOff: "Off",
+        weeks: "After {{n}} weeks",
+      },
+      // Appointments: the waiting list (WaitlistForm.jsx).
+      waitlist: {
+        open: "None of these times work? Join the waiting list",
+        hint: "If someone cancels on that day, you get an email straight away.",
+        day: "Day",
+        name: "Your name",
+        email: "Your email",
+        join: "Tell me if a time opens",
+        done: "You're on the list. We'll email you if a time opens that day.",
+        failed: "Could not add you. Try again.",
+        full: "Every time is taken for now.",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "Invite a friend",

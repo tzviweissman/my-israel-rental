@@ -54,6 +54,7 @@ import { uploadFilesFast, reportUploadFailure } from '../../utils/fastUpload';
 import { productPhotos } from '../../utils/productPhotos';
 import SizeFields, { withSize } from '../marketplace/SizeFields';
 import ProductExtras, { cleanExtras } from './ProductExtras';
+import TeamAndRebook, { cleanTeam } from './TeamAndRebook';
 import { SUBCATEGORIES, subcategoryLabel } from '../../lib/categories';
 import AvailabilityStep, { DAYS } from '../marketplace/AvailabilityStep';
 import CategoryPicker from '../marketplace/CategoryPicker';
@@ -90,6 +91,8 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
     [d.k]: ((gig.weekly_availability || {})[d.k] || []).map((w) => ({ start: w.start, end: w.end })),
   }), {}));
   const [slotMinutes, setSlotMinutes] = useState(gig.slot_duration_minutes || 30);
+  const [team, setTeam] = useState(gig.team || []);
+  const [rebook, setRebook] = useState(gig.rebook_after_weeks || null);
   const [dateBooking, setDateBooking] = useState(Boolean(gig.enable_date_booking));
   useEffect(() => {
     let live = true;
@@ -302,6 +305,8 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
         }), {});
         if (JSON.stringify(weekly) !== JSON.stringify(before)) payload.weekly_availability = weekly;
         if (slotMinutes !== (gig.slot_duration_minutes || 30)) payload.slot_duration_minutes = slotMinutes;
+        if (JSON.stringify(cleanTeam(team)) !== JSON.stringify(cleanTeam(gig.team || []))) payload.team = cleanTeam(team);
+        if ((rebook || null) !== (gig.rebook_after_weeks || null)) payload.rebook_after_weeks = rebook || null;
       }
       if (isDeliverable && dateBooking !== Boolean(gig.enable_date_booking)) payload.enable_date_booking = dateBooking;
 
@@ -629,6 +634,7 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 testid="edit-listing-hours"
               />
             )}
+            {isAppointment && <TeamAndRebook team={team} onTeam={setTeam} rebook={rebook} onRebook={setRebook} />}
             {isDeliverable && (
               <label className="flex items-start gap-2 min-h-[44px] cursor-pointer text-sm">
                 <input

@@ -5307,6 +5307,33 @@ const he = {
         checkoutWhen: "בשעה 08:00 ביום היציאה, עם שעת היציאה",
         words: "אפשר להשתמש ב־{name}, {property}, {address}, {checkin}, {checkout} ו־{instructions}.",
       },
+      // Appointments: who does it, and booking again (TeamAndRebook.jsx).
+      team: {
+        who: "עם מי",
+        anyone: "מי שפנוי",
+        title: "מי מבצע, ותזכורת לקבוע שוב",
+        people: "אנשים שלקוחות יכולים לבחור",
+        peopleHint: "לכל אחד יומן משלו, כך ששניים יכולים לקבל את אותה שעה. הלקוח בוחר מישהו או “מי שפנוי”. השאירו ריק אם זה רק אתם.",
+        namePh: "שם, למשל אבי",
+        remove: "הסרה",
+        add: "הוספת אדם",
+        rebook: "תזכורת ללקוחות לקבוע שוב",
+        rebookHint: "אחרי תור שסימנתם כבוצע, הלקוח מקבל מייל אחד שמזמין אותו לחזור, אלא אם כבר קבע שוב. אפשר להסיר את עצמו מהרשימה.",
+        rebookOff: "כבוי",
+        weeks: "אחרי {{n}} שבועות",
+      },
+      // Appointments: the waiting list (WaitlistForm.jsx).
+      waitlist: {
+        open: "אף שעה לא מתאימה? הצטרפו לרשימת ההמתנה",
+        hint: "אם מישהו מבטל באותו יום, תקבלו מייל מיד.",
+        day: "יום",
+        name: "השם שלכם",
+        email: "האימייל שלכם",
+        join: "להודיע לי אם מתפנה שעה",
+        done: "אתם ברשימה. נשלח מייל אם מתפנה שעה באותו יום.",
+        failed: "לא הצלחנו להוסיף אתכם. נסו שוב.",
+        full: "כל השעות תפוסות כרגע.",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "הזמינו חבר",

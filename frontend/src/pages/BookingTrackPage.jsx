@@ -82,7 +82,7 @@ export default function BookingTrackPage() {
     expired: t('bookingTrack.expired', 'No reply in time, so the time is free again'),
     cancellation_requested: t('bookingTrack.cancelling', 'Cancellation requested'),
   };
-  const when = [data.preferred_date, data.time_slot].filter(Boolean).join(' · ');
+  const when = [data.preferred_date, data.time_slot, data.staff_name].filter(Boolean).join(' · ');
 
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }} data-testid="booking-track-page" data-status={data.status}>

@@ -621,6 +621,14 @@ class GigDiscount(BaseModel):
     ends_at: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
 
 
+class TeamMember(BaseModel):
+    """One person who does an appointment listing (Tzvi, 16 Oct 2026, from
+    Fresha: "choose who does it"). Each has their own calendar: two barbers
+    can each take 10:00. The listing's hours apply to everyone."""
+    id: str = Field(..., pattern=r"^[a-z0-9][a-z0-9_-]{0,31}$")
+    name: str = Field(..., min_length=1, max_length=40)
+
+
 class GigIn(BaseModel):
     title: str
     category: str
@@ -648,6 +656,11 @@ class GigIn(BaseModel):
     # is a dict keyed by weekday abbreviation → list of open windows.
     weekly_availability: Optional[dict[str, list[WeeklyWindow]]] = None
     slot_duration_minutes: Optional[int] = 30
+    # Appointment-only: who does it (empty: the business as one calendar),
+    # and the weeks after a done appointment to suggest booking again
+    # (appointment_extras.py; None: off).
+    team: list[TeamMember] = Field(default_factory=list, max_length=20)
+    rebook_after_weeks: Optional[int] = Field(None, ge=1, le=52)
     # Deliverable-only optional toggle: when true, buyer picks the target
     # service date on the booking form (cleaner arrives on Tuesday, etc.).
     enable_date_booking: bool = False
@@ -690,6 +703,8 @@ class GigPatch(BaseModel):
     products: Optional[list[ProductItem]] = None
     weekly_availability: Optional[dict[str, list[WeeklyWindow]]] = None
     slot_duration_minutes: Optional[int] = None
+    team: Optional[list[TeamMember]] = Field(None, max_length=20)
+    rebook_after_weeks: Optional[int] = Field(None, ge=1, le=52)
     enable_date_booking: Optional[bool] = None
     gallery: Optional[list[str]] = None
     booking_mode: Optional[str] = None
@@ -759,6 +774,8 @@ class BookingIn(BaseModel):
     # The language the customer booked in, for their reminder email
     # (appointment_reminders.py).
     lang: Optional[str] = Field(None, pattern="^(en|he)$")
+    # Who on the listing's team, or "any" / None for whoever is free.
+    staff_id: Optional[str] = Field(None, max_length=32)
 
 
 class BookingPatch(BaseModel):

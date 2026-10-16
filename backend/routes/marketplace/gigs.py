@@ -501,6 +501,8 @@ async def create_gig(payload: GigIn, user=Depends(verify_token)):
             if payload.weekly_availability else None
         ),
         "slot_duration_minutes": payload.slot_duration_minutes if payload.gig_type == "appointment" else None,
+        "team": [m.model_dump() for m in payload.team] if payload.gig_type == "appointment" else [],
+        "rebook_after_weeks": payload.rebook_after_weeks if payload.gig_type == "appointment" else None,
         "enable_date_booking": bool(payload.enable_date_booking) if payload.gig_type == "deliverable" else False,
         "gallery": payload.gallery,
         "booking_mode": payload.booking_mode,
@@ -779,6 +781,14 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
         update["tiers"] = [t if isinstance(t, dict) else t.model_dump() for t in update["tiers"]]
     if "products" in update:
         update["products"] = [p if isinstance(p, dict) else p.model_dump() for p in update["products"]]
+    if "team" in update:
+        ids = [m["id"] if isinstance(m, dict) else m.id for m in update["team"]]
+        if len(set(ids)) != len(ids):
+            raise HTTPException(status_code=422, detail="Two people on the team share an id")
+        update["team"] = [m if isinstance(m, dict) else m.model_dump() for m in update["team"]]
+    # Sending null switches "book again" off, as with `discount` below.
+    if "rebook_after_weeks" in payload.model_fields_set:
+        update["rebook_after_weeks"] = payload.rebook_after_weeks
     if "weekly_availability" in update and update["weekly_availability"] is not None:
         update["weekly_availability"] = {
             d: [w if isinstance(w, dict) else w.model_dump() for w in (wins or [])]
@@ -1265,7 +1275,24 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
             raise HTTPException(status_code=400, detail="Invalid date") from None
         if when <= datetime.now(_IL_TZ):
             raise HTTPException(status_code=400, detail="That time has passed - please pick a later one.")
-        taken = (await _busy_spans(gig_id, gig.get("provider_user_id"), payload.preferred_date)).get(payload.preferred_date, [])
+        team = gig.get("team") or []
+        if team:
+            # Who does it: the one asked for, or the first who is free.
+            wanted = [m for m in team if m.get("id") == payload.staff_id] if payload.staff_id not in (None, "", "any") else team
+            if not wanted:
+                raise HTTPException(status_code=400, detail="Pick someone from the list")
+            staff = None
+            for m in wanted:
+                spans = (await _busy_spans(gig_id, gig.get("provider_user_id"), payload.preferred_date, m["id"])).get(payload.preferred_date, [])
+                if not _overlaps(start, start + duration, spans):
+                    staff = m
+                    break
+            if not staff:
+                raise HTTPException(status_code=409, detail="That time has just been taken - please pick another.")
+            taken = []
+        else:
+            staff = None
+            taken = (await _busy_spans(gig_id, gig.get("provider_user_id"), payload.preferred_date)).get(payload.preferred_date, [])
         if _overlaps(start, start + duration, taken):
             # 409 rather than 400: the request was well formed, someone
             # else simply got there first, and the client should refresh
@@ -1292,6 +1319,8 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         "preferred_date": payload.preferred_date,
         "time_slot": payload.time_slot,
         "lang": payload.lang,
+        "staff_id": (staff or {}).get("id") if payload.time_slot and payload.preferred_date else None,
+        "staff_name": (staff or {}).get("name") if payload.time_slot and payload.preferred_date else None,
         # Frozen at creation — see _booking_duration.
         "duration_minutes": duration,
         "status": "pending",
@@ -1351,6 +1380,7 @@ async def track_booking(token: str, request: Request):
         "gig_id": b.get("gig_id"), "duration_minutes": b.get("duration_minutes") or 30,
         "weekly_availability": gig.get("weekly_availability") or {},
         "slot_minutes": int(gig.get("slot_duration_minutes") or 30),
+        "staff_id": b.get("staff_id"), "staff_name": b.get("staff_name"),
     }
 
 
@@ -1486,6 +1516,10 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
         update["responded_at"] = now.isoformat()
 
     await db.marketplace_bookings.update_one({"_id": booking_id}, {"$set": update})
+    # Declined or cancelled: the time is free again for the waiting list.
+    if payload.status in ("cancelled", "declined") and booking.get("status") in ("pending", "accepted"):
+        from .appointment_extras import on_slot_freed
+        await on_slot_freed(booking.get("gig_id"), booking.get("preferred_date"), booking.get("staff_id"))
     if payload.status == "cancelled" and booking.get("status") != "cancelled":
         from routes.marketplace.automations import fire_in_background
         gig_for_rule = await db.marketplace_gigs.find_one({"_id": booking.get("gig_id")})
@@ -1646,10 +1680,14 @@ def _booking_duration(gig: dict[str, Any], tier_name: Optional[str]) -> int:
     return int(gig.get("slot_duration_minutes") or 30)
 
 
+_ANY_STAFF = object()
+
+
 async def _busy_spans(
     gig_id: str,
     provider_user_id: Optional[str] = None,
     date_iso: Optional[str] = None,
+    staff_id: Any = _ANY_STAFF,
 ) -> dict[str, list[tuple[int, int]]]:
     """Every occupied [start, end) minute range per date.
 
@@ -1667,6 +1705,10 @@ async def _busy_spans(
     query: dict[str, Any] = {"gig_id": gig_id, **_live_hold_query()}
     if date_iso:
         query["preferred_date"] = date_iso
+    # One team member's calendar (TeamMember): their bookings only. Blocked
+    # time below still applies to everyone.
+    if staff_id is not _ANY_STAFF:
+        query["staff_id"] = staff_id
     spans: dict[str, list[tuple[int, int]]] = {}
     async for b in db.marketplace_bookings.find(
         query, {"preferred_date": 1, "time_slot": 1, "duration_minutes": 1, "_id": 0},
@@ -1892,7 +1934,7 @@ async def sweep_expired_holds() -> dict:
     async for b in db.marketplace_bookings.find(
         {"status": "pending", "hold_expires_at": {"$lte": now_iso}},
         {"_id": 1, "gig_id": 1, "provider_user_id": 1, "client_user_id": 1,
-         "preferred_date": 1, "time_slot": 1, "contact_email": 1, "track_token": 1},
+         "preferred_date": 1, "time_slot": 1, "contact_email": 1, "track_token": 1, "staff_id": 1},
     ):
         try:
             res = await db.marketplace_bookings.update_one(
@@ -1904,6 +1946,9 @@ async def sweep_expired_holds() -> dict:
             )
             if not res.modified_count:
                 continue
+            # The time is free again: tell anyone waiting for that day.
+            from .appointment_extras import on_slot_freed
+            await on_slot_freed(b.get("gig_id"), b.get("preferred_date"), b.get("staff_id"))
             expired += 1
             if not waking:
                 # Released, but not announced yet. The pass below picks it
@@ -2040,15 +2085,22 @@ async def ensure_booking_indexes() -> None:
     API from starting; the application-level check still holds, and a
     silent double-booking is a smaller emergency than an outage.
     """
+    # One held booking per slot PER PERSON (TeamMember): with a team, two
+    # people can each take 10:00. A listing with no team has staff_id null on
+    # every booking, so it is still one per slot. Replaces uniq_held_slot,
+    # which had no staff_id.
     try:
+        existing = await db.marketplace_bookings.index_information()
+        if "uniq_held_slot" in existing:
+            await db.marketplace_bookings.drop_index("uniq_held_slot")
         await db.marketplace_bookings.create_index(
-            [("gig_id", 1), ("preferred_date", 1), ("time_slot", 1)],
-            name="uniq_held_slot",
+            [("gig_id", 1), ("preferred_date", 1), ("time_slot", 1), ("staff_id", 1)],
+            name="uniq_held_slot_staff",
             unique=True,
             partialFilterExpression={"status": {"$in": list(HELD_STATUSES)}},
         )
     except Exception as e:  # noqa: BLE001
-        logger.warning("could not create uniq_held_slot index: %s", e)
+        logger.warning("could not create uniq_held_slot_staff index: %s", e)
 
 
 # --------------------------------------------------------------------------
@@ -2138,29 +2190,44 @@ async def taken_slots(gig_id: str):
     spoken for, so it offered every one of them to everybody.
     """
     gig = await db.marketplace_gigs.find_one(
-        {"_id": gig_id}, {"_id": 1, "slot_duration_minutes": 1, "provider_user_id": 1},
+        {"_id": gig_id}, {"_id": 1, "slot_duration_minutes": 1, "provider_user_id": 1, "team": 1},
     )
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
 
-    spans = await _busy_spans(gig_id, gig.get("provider_user_id"))
     # Returned as start times on the gig's own grid rather than raw
     # ranges, because that is what the picker compares against — doing
     # the arithmetic here keeps one implementation of it.
     step = int(gig.get("slot_duration_minutes") or 30)
-    out: dict[str, list[str]] = {}
-    for day, ranges in spans.items():
-        blocked = set()
-        for start, end in ranges:
-            # Every grid slot the booking touches, not just the one it
-            # starts on: a 90-minute service booked at 10:00 must take
-            # 10:30 and 11:00 with it.
-            first = (start // step) * step
-            t = first
-            while t < end:
-                blocked.add(f"{t // 60:02d}:{t % 60:02d}")
-                t += step
-        out[day] = sorted(blocked)
+
+    def grid(spans: dict[str, list[tuple[int, int]]]) -> dict[str, list[str]]:
+        out: dict[str, list[str]] = {}
+        for day, ranges in spans.items():
+            blocked = set()
+            for start, end in ranges:
+                # Every grid slot the booking touches, not just the one it
+                # starts on: a 90-minute service booked at 10:00 must take
+                # 10:30 and 11:00 with it.
+                t = (start // step) * step
+                while t < end:
+                    blocked.add(f"{t // 60:02d}:{t % 60:02d}")
+                    t += step
+            out[day] = sorted(blocked)
+        return out
+
+    team = gig.get("team") or []
+    if not team:
+        return grid(await _busy_spans(gig_id, gig.get("provider_user_id")))
+    # With a team (TeamMember): each person's own taken times under
+    # "_staff", and at the top level only the times taken for EVERYONE,
+    # which is what "anyone free" and an older page compare against.
+    per = {m["id"]: grid(await _busy_spans(gig_id, gig.get("provider_user_id"), None, m["id"])) for m in team}
+    days = set().union(*[set(g) for g in per.values()]) if per else set()
+    out: dict[str, Any] = {}
+    for day in days:
+        sets = [set(per[sid].get(day, [])) for sid in per]
+        out[day] = sorted(set.intersection(*sets)) if sets else []
+    out["_staff"] = per
     return out
 
 
