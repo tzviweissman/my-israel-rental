@@ -64,9 +64,8 @@ learned with. Check what is connected in this session first.
   to the price) is liked and kept for another business. Pick per business, never
   the same set twice in a row, and add every new 21st piece you rebuild here.
   **Search 21st fresh on every build first** (Tzvi: "look by each build so you
-  will have many more options"): the library is a shelf of tested extras, never
-  the menu. Each page's options come from a new search for that business, with
-  library pieces added only where they fit better.
+  will have many more options"): see 3g.17. The library is a shelf of tested
+  extras, never the menu.
 - **Browser pane / preview**: show the rendered page; never ask the owner to
   sign in to see it.
 
@@ -105,9 +104,10 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 5. Plan the phone frame before generating (subject centred, margin).
 6. Generate in the background while writing the page; scripts keep the job
    number and retry slow status checks.
-7. Text over imagery gets its dark pool from the start (3g.8).
+7. Text over imagery gets its edge shade (or small solid card) from the start
+   (section 4, 5b.3).
 8. Header and main buttons go to the quickest order path from draft one.
-9. One idea per page, used once.
+9. One idea per page, used once (section 4).
 10. Wow test, clipped.mjs, readable.mjs BEFORE any link or video is sent.
 11. Owner video last, from the live page.
 
@@ -138,7 +138,8 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   2026). Generate as little as possible: edit their own photo of a sibling
   item to show a missing flavour or size, so it stays their product. Only
   items they really sell. Never a generated person shown as their staff or
-  customer, never their premises made up, no text baked in. Respect
+  customer, never their real premises made up (a generated setting is never
+  presented as their premises), no text baked in. Respect
   the business (a kosher business: nothing non-kosher, no meat with dairy).
   Movement copied from a reference video is built in code, not generated.
 - **If it would look better as a generated clip, generate it** (Tzvi, 8 Oct
@@ -165,7 +166,7 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   reversed clip. **One clip per physical step**: list the steps first; any
   hard or key step (the knot unwinding) gets its own clip between a before
   frame and an after frame, joined end to start, or the model skips it.
-  Full text: page rules, generated-clip section.
+  Full text: `reference/full-rules.md` section 8.
   **Product lists read the shop**: wrap a priced list in `[data-mir-catalog]`
   (+ `data-mir-list`, `data-mir-skip`, item and group templates; example The
   Gift Boutique) so out-of-stock, new and removed items follow the dashboard.
@@ -179,10 +180,12 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 2. **Specific over generic.** "Sourdough and challah in Beit Shemesh", not
    "quality baked goods". Banned: welcome to, look no further, one-stop shop,
    passionate about, quality you can trust, world-class, top-notch.
-3. **Headline: what + where** (or what + for whom), at most 10 words. The name
-   is already on the page.
+3. **Headline: what + where** (or what + for whom), at most 10 words (a ceiling:
+   the first screen follows 3g.13, with where in the one short line or under
+   the button). The name is already on the page.
 4. **The line under it says what you get**, plainly (food: the food and how it
-   arrives, not a slogan). At most 20 words.
+   arrives, not a slogan). At most 20 words (a ceiling; 3g.13 allows one short line on the
+   first screen).
 5. **A professional voice, always.** Write the way a respected business would
    in print. Describe the customer's problem in neutral terms; never tease,
    scold or talk down ("You are nowhere near done" became "Thursday night,
@@ -214,9 +217,12 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 Every page passes all six before anyone sees it:
 
 1. **The first screen answers four questions:** what it is, where, why trust
-   it, what to do next.
+   it, what to do next. Within 3g.13: where and trust go in the one short line
+   or right under the button.
 2. **Proof touches the main button:** price, credential or rating right beside it.
-3. **One solid button per screen.** Everything else is outline, link or tile.
+3. **One solid ACTION per screen.** The header button and the phone bar repeat
+   the same action; over a hero that already shows a solid button the header
+   button is outline. Everything else is outline, link or tile.
 4. **With few photos, facts carry the page** (what they offer, key facts), never a padded gallery.
 5. **For a place, hours and where come before the description.**
 6. **On a phone the action is pinned to the bottom** with the price or proof,
@@ -234,7 +240,8 @@ what to avoid): `reference/playbooks.md`.
 ## 3b. The sections every page has (Tzvi, 6 Oct 2026)
 
 1. **A dramatic hero**: their product or setting full-bleed, the headline at
-   display scale, strong contrast; never a small card on a quiet picture.
+   display scale, strong contrast; never a small card on a quiet picture. The first screen follows 3g.13; a film
+   opening is 3h.
 2. **A features section**: one scannable item per service or product, price
    and what is included, in their words.
 3. **A CTA section** of its own near the end: the one action, proof beside it.
@@ -264,10 +271,7 @@ Full text and reasons: `reference/full-rules.md` §3c.
    press, a moving arrow, a lifting tile, how a price is set). **Choose it
    yourself** from that research and say in one line what you picked and why;
    an options page only when Tzvi asks for one.
-   **Search fresh for every piece on every build**: the button, the arrow, each
-   effect and section get their own Mobbin, 21st and Inspo search for that kind
-   of business before the library is opened; say for each pick whether it came
-   from a new search (name it) or the library.
+   **Search fresh for every piece on every build**: see 3g.17.
 2. **No AI default look**: no cream + serif + one italic word unless that is
    their brand. At least one section on a contrasting ground.
 3. **Proof where the worry is**: each worry the owner names is answered beside
@@ -286,7 +290,7 @@ Full text and reasons: `reference/full-rules.md` §3c.
    two-colour gradients, no decorative arrows or outlines; every button
    reacts when pressed and shows when it is working.
 10. **Come-back features only if they help the customer** (saved items,
-    reorder, order updates). Never fake urgency, endless feeds, random
+    reorder, order updates). Never fake urgency (section 1), endless feeds, random
     rewards or guilt streaks.
 11. **Video: draw it, then check it.** `scripts/record.mjs` renders each
     frame for its exact time (no stutter, same result every run) and writes a
@@ -303,7 +307,8 @@ Full text, sources and the rejected list: `reference/full-rules.md` §3e.
 
 1. **Order by the visitor's questions**: what is it, can I trust it, what does
    it cost, what do I do; prices before any enquiry form. A small label above
-   the headline says who and where. The headline is the customer's outcome.
+   the headline says who and where (a ceiling: on the first screen it is the
+   one short line of 3g.13). The headline is the customer's outcome.
 2. **One action, one label**: every section ends on the same action as the
    header button; the page's words match what sent the visitor.
 3. **Buttons say what happens, with real numbers** ("Order 4 buns, ₪55");
@@ -311,15 +316,17 @@ Full text, sources and the rejected list: `reference/full-rules.md` §3e.
 4. **Measured contrast**: button text 4.5:1 on its fill. Every button has
    rest, hover, pressed, disabled; fields have focus and error; every action
    confirms. Hover-only things get a phone version.
-5. **Cards**: one reading order (name largest, one accent fact, rest lighter),
+5. **Cards**: one reading order (name largest, one accent fact used nowhere else on the card, rest lighter),
    big photos, worst-case content handled (truncate; icons on a solid circle).
-   Text under owner photos on a plain strip, or on a dark gradient.
+   Text under owner photos on a plain strip; text on a photo follows section 4
+   (5b.3).
 6. **System**: 4 px spacing grid, related close and unrelated apart; one body
-   family, up to three weights, six sizes; one radius for images and buttons.
+   family, up to three weights, six sizes; headings tightened about -2% with 110-120% line height (test
+   Hebrew first); one radius for images and buttons.
 7. **Motion**: never linear, grows from the tap, under 0.5 s. Carousels show
    the next card's edge and have buttons or dots (mirrored in Hebrew); sheets
-   close by swipe AND a button. Background video: locked camera, ~6 s loop,
-   poster, reduced-motion still.
+   close by swipe AND a button. Ambient background video only (a film opening follows 3h): locked camera,
+   ~6 s loop, poster, reduced-motion still.
 8. **Flows end**: a "Done" screen, lists that end, "save and finish later".
    Progress and loyalty only with true numbers; a reminder only for a real
    unfinished thing, once, with an off switch. The owner stays a person.
@@ -329,13 +336,13 @@ Full text, sources and the rejected list: `reference/full-rules.md` §3e.
 
 ## 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
 
-Full text: `docs/page-generation-rules.md` §3f. From The Gift Boutique: the
+Full text: `reference/full-rules.md` §3f. From The Gift Boutique: the
 ribbon untied before the photos arrived, and the page had one effect.
 
 1. **A scroll effect plays while its subject is wholly on screen**: hold it
    on a stage that fits, or start once it is all in view. Never key it to the
    subject entering. Capture 0/25/50/75/100% on laptop, short laptop, phone.
-2. **Fill the effect budget**: one held signature moment in steps; at least
+2. **Fill the effect budget**: one held signature moment in steps (a 3h film opening is that signature); at least
    three accents (an arriving opening, a scroll-tied detail mid-page, a
    closing payoff that answers the signature); quiet touches (eased reveals,
    hover and press, tile lift). Listed in the brief, ticked on the frames.
@@ -359,24 +366,29 @@ ribbon untied before the photos arrived, and the page had one effect.
 
 ## 3g. From the six design videos (Tzvi, 14 Oct 2026)
 
-Full text, timestamps and frames: page rules §3g, `docs/ui-videos/notes/`.
+Full text, timestamps and frames: `reference/full-rules.md` §3g, `docs/ui-videos/notes/`.
 
-1. **Style sheet first**: accent, ink, ground, two faces, one radius, motion
-   limits, in BRIEF.md; every section follows it.
+1. **Style sheet first**: accent, ink, ground, two faces (headline and text; at most a third for one
+   label style), one radius, motion limits, in BRIEF.md; every section follows it.
 2. **AI-look tells banned**: default font, purple/two-colour gradient,
    exactly three identical cards, frosted glass everywhere, a headline a
    competitor could use.
-3. **One accent per screen** (one word or one object); cream + serif +
-   italic word together stays banned unless it is their brand.
+3. **One accent per screen: one word or one object, plus the primary button's
+   fill** (the single home of the accent rule; a word that matters, not
+   decoration); cream + serif + italic word together stays banned unless it is
+   their brand.
 4. **Every motion has one job** (guide, confirm, reveal); loops join
    invisibly; text settles soft to sharp, no bounce; list rows ~100 ms apart.
 5. **Chapters**: a scroll film or held section carries short labelled steps
    of their real process, ending on the finished thing and the button.
 6. **Index list** option for menus and price lists: big names on thin rules,
    price on the line, hovered row fills.
-7. **One closing signature**: the name huge and cropped at the bottom, or one
-   playful moment in the footer or 404. Never more than one.
-8. **Text over video** on a card; contrast measured on the brightest frame.
+7. **One closing signature** (the single home of the closing wordmark): the
+   name huge and cropped at the bottom, or one playful moment in the footer or
+   404. Never more than one.
+8. **Text over video or a busy photo** follows section 4 (5b.3): edge shade or
+   small solid card, never frosted glass; contrast measured on the brightest
+   frame.
 9. **A small working piece** (mini order card with the real price, date
    checker) only if it really works.
 10. **Problem first** in the owner's words; rewrite any line a competitor
@@ -387,12 +399,16 @@ Full text, timestamps and frames: page rules §3g, `docs/ui-videos/notes/`.
     business) before the owner sees it.
 
 13. **Opening screen: four things at most**: the picture, a two-to-five
-    word headline, one short line, one button.
+    word headline, one short line, one button. **This is the single rule for the first
+    screen, and it wins**: the 10 words and 20 words under it (2.3, 2.4), the
+    small label (3e.1), the 4 pieces of text (section 4) are ceilings, not
+    targets. Where and trust go in the one short line or right under the button.
 14. **One colour grade** across every image and clip on a page; the page's
     colours come from it.
-15. **A made-for-them cinematic opening** (their product or place in a lit,
-    generated setting, or their photo brought to life, made in Higgsfield);
-    never a flyer crop or low-resolution photo as the hero. Cost told to Tzvi
+15. **A made-for-them cinematic opening** (their product in a lit, generated
+    setting that fits it, never presented as their real premises, or their
+    photo brought to life, made in Higgsfield; generation rules in section 1);
+    never a flyer crop or low-resolution photo as the hero. The film itself is 3h. Cost told to Tzvi
     first; one made and checked before more.
 
 16. **The opening has a wow: something happens** (a box opens and light
@@ -400,54 +416,69 @@ Full text, timestamps and frames: page rules §3g, `docs/ui-videos/notes/`.
     their real product and the button. Test before showing: say in one
     sentence what HAPPENS in the first five seconds and first scroll; "nothing",
     "the camera moves" or "it fades in" means redo. Beside the best reference,
-    if ours is quieter it is not finished.
+    if ours is quieter it is not finished. The film that delivers it is 3h.
 
-17. **Unique effects from fresh Mobbin and 21st searches**: one of each
-    per section or effect, for this business, named in BRIEF.md and the
-    reply; nothing reused from the last two pages (check FINGERPRINTS).
+17. **Unique effects from fresh Mobbin, 21st and Inspo searches** (the single
+    home of the fresh-search rule): one of each for every piece (the button,
+    the arrow, each card or list effect, each section), for this business,
+    before the effects library is opened; say for each pick where it came from
+    (a new search, named, or the library) in BRIEF.md and the reply. An effect
+    needs its reason: one that says what a control does passes, one that only
+    decorates does not. Nothing reused from the last two pages (check
+    FINGERPRINTS).
 
 ## 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after the PULP video)
 
-Full text: page rules §3h. The Brown Box's first opening (locked camera, small
+Full text: `reference/full-rules.md` §3h. The Brown Box's first opening (locked camera, small
 bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
 
 1. **One unbroken full-screen shot that travels**, following the product's
    journey (amends "the product performs, not the camera": a move is fine
-   when it is the story, never for its own sake).
+   when it is the story, never for its own sake). **A 3h film opening IS the
+   page's one signature scroll section**; everything else is an accent (3f.2).
+   The film is a held stage and must pass the fit and cut-off checks (section 6).
 2. **Where it comes from to their product**, ending on their real product
    and the button; only their facts or what is plainly true.
-3. **Advert-grade frames**: macro, shallow focus, warm light, a ground lit enough to pass 11,
+3. **Advert-grade frames**: macro, shallow focus, warm light, a ground lit enough to pass 3h.11,
    detail in the air. Flat studio backdrops fail.
 4. **Crisp**: highest resolution; frames drawn on a canvas sized to the
    screen; never shrunk, masked or put in a column.
 5. **Chapter lines**: 2 to 6 words per scene over the film (small, at an edge, see 9), their words,
-   on a measured dark pool (amends "a clip behind text holds still" for the
-   film opening only).
+   per section 4 (5b.3), measured at the brightest frame (amends "Nothing moves
+   without a reason" for the film opening only).
 6. **Three concept stills before any clip**, the chosen one challenged once.
 7. **Seams checked** after rendering; a jumping join is regenerated.
-8. **A bold contrast section right after the film.**
-9. **Bright, and words off the action**: grade the film up until it reads at
-   a glance; lines small, at an edge, on a soft edge shade only; no big dark
-   patches over the film; check each scene for what the words cover.
+8. **After a lit film, a bold colour block** right after it.
+9. **Bright, and words off the action**: brightness is settled in 3h.11; lines
+   small, at an edge, at most a third of the screen's height, on a soft edge
+   shade only (section 4, 5b.3); no big dark patches over the film; check each
+   scene for what the words cover.
 10. **A choice changes what you see**: picking an option swaps its photo
    (one shoot, one photo per option, sharp at its size), words and button.
 11. **Light it bright from the start, then measure**: prompts ask for bright,
    warm, soft light, subject fully lit, mid or light ground (never "dark" or
    "moody" by default); run `scripts/brightness.py` on every film and still
    set (middle 33+, whole 22+, average 30+ of 100) and grade up or regenerate
-   before building; view it on a phone in daylight.
+   before building; view it on a phone in daylight. A dark ground only when the
+   business's own look is dark, and then the subject is still lit; a product
+   dark by nature (acai, chocolate) is lit and set on a lighter ground rather
+   than pushed until it turns milky. Even the dark sites in the videos keep the
+   subject brighter than everything around it. **Single home for brightness**
+   (3h.3, 3h.9, 3i.1 point here).
 
 ## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
 
-Full text: page rules 3i; notes docs/ui-videos/notes/sites-2026-10-16.md.
+Full text: `reference/full-rules.md` 3i; notes docs/ui-videos/notes/sites-2026-10-16.md.
 
 1. **The product is the brightest thing on screen**; shadows take the
-   background's colour, never black.
+   background's colour, never black. Brightness itself: 3h.11.
 2. **A choice changes the hero itself**: picture and section colour change
    with the option (one shoot, 300 to 500 ms cross-fade).
 3. **A live readout tied to the scroll**, only for a true process fact,
    small mono at a corner; never invented, never a section counter.
-4. **Words and object overlap**; a product may carry through sections.
+4. **Words and object overlap**; a product may carry through sections. Only if
+   `readable.mjs` still passes on the covered letters; never over the action
+   (3i.8).
 5. **One colour family per section**, one or two hard breaks.
 6. **Floating cut-out tiles** of their ingredients or products, tilted,
    drifting with the scroll, one shoot.
@@ -455,7 +486,7 @@ Full text: page rules 3i; notes docs/ui-videos/notes/sites-2026-10-16.md.
    pill menu at the bottom centre.
 8. **One word or short line per scene**, beside the subject, never on it.
 9. **Tap-able dots on the product** with short captions, placed by measurement.
-10. **A glowing floor line under a lit product; a giant cropped wordmark close.**
+10. **A glowing floor line under a lit product** (the closing wordmark is 3g.7).
 
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
@@ -468,14 +499,16 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
   weight everywhere. Each has its fix in Part 2.
 - **Identity from the business**: the accent from their logo; ground, text,
   muted, surface and rule built around it (5 to 6 colours, neutrals leaning
-  to the accent); the accent fills only the primary button. At most three
-  faces; hero headline 96 to 160px on a laptop, 56 to 72px on a phone.
+  to the accent); one accent per screen: one word or one object, plus the primary
+  button's fill (3g.3). Two faces (headline and text), at most a third for one
+  label style; hero headline 96 to 160px on a laptop, 56 to 72px on a phone.
 - **Six presets as starting points** (Candlelight, Bold Pantry, Jerusalem
   Stone, Studio, Field, Workshop), always with their accent swapped in and
   one more element changed.
 - **Hero tiers, highest the content allows**: 1 their real photo (graded,
-  never a flyer); 2 a brand film of the setting and props, never the product
-  as theirs, with a pause button and an invisible loop; 3 a typographic brand
+  never a flyer); 2 a film: a brand film of the setting and props, or a generated film of
+  their product or ingredients (3g.15, 3h, section 1), with a pause button and
+  an invisible loop, never a generated setting presented as their real premises; 3 a typographic brand
   panel. The footer says when tier 2 was used.
 - **Rhythm**: set piece, quiet, set piece; one showstopper (a signature scroll
   section takes the role from the hero); a palate cleanser with no text; one
@@ -483,8 +516,8 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
 - **Effects catalog**: one bold moment, up to three accents and four quiet
   touches; an effect only when the business has the material for it; held
   sections fit or are not held; the order section is never pinned; a page
-  differs from each of the ten newest live pages of its category on at least
-  2 of 7 axes; owners choose from up to three versions, and only a version
+  differs from each of the last ten live pages on at least 4 of the 6
+  FINGERPRINTS dimensions; owners choose from up to three versions, and only a version
   that passes the visual check goes live.
 - **Quality gate** (Part 9): score the page before returning it, list what
   is below the bar and give the owner a checklist of what would unlock more.
@@ -502,10 +535,16 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
   built around the one thing that is really theirs.
 - **The product performs, not the camera.** Motion shows what they sell; no zooming for its own sake (a camera that follows the product's journey is fine, 3h).
 - **One signature idea per page**, describable in one sentence, never reused
-  for the next business. **One peak**; the ending resolves on the action.
+  for the next business. **One peak**; the ending resolves on the action. This is the single home of
+  the one-idea, one-peak, one-signature rule. A 3h film opening IS the page's one
+  signature scroll section; everything else is an accent (3f.2).
 - No blank screens, no scroll cues, no "01/06" counters, no label above every section.
-- Top of the page: at most 4 pieces of text, headline at most 2 lines.
-- Text never sits straight on a photo: a band or shaded edge behind it.
+- Top of the page: a ceiling of 4 pieces of text, headline at most 2 lines; the
+  first screen itself follows 3g.13.
+- **Text over imagery** (5b.3 in the full rules, the single home of this rule).
+  On a photo or film: a soft shade along the edge the words sit on, contrast
+  measured on the brightest frame (`readable.mjs`); a small solid card is
+  allowed; big dark pools, full-frame darkening and frosted glass are not.
 - No default "premium" palette (cream with brass) and no AI purple; the
   palette comes from their logo and photos.
 - Honest persuasion only: repeat the promise that brought them, reassurance
@@ -518,10 +557,10 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
 | Anything placed on a spot in a photo or video is placed **by measurement** (a detector on the real frames), never by eye. | A knob landed beside the pot's dial. |
 | An overlay that must stay on moving media **lives inside the media's element**, in its own percentages. Never chase it with script on scroll. | The knob trailed the dial as the page scrolled. |
 | **If the camera moves, steady the clip** on the spot first; never key an overlay to video playback time. | The knob was right on one screen, off on another. |
-| **Nothing moves without a reason.** A clip behind text holds still except the subject (steam, a pour); no drift, breathing zoom or shifting in and out. Freeze the frame and mask the motion to where it belongs. | The pot screen "shifted in and out" while only numbers changed. |
+| **Nothing moves without a reason** (ambient background clips and ordinary sections; a 3h film opening follows 3h instead). A clip behind text holds still except the subject (steam, a pour); no drift, breathing zoom or shifting in and out. Freeze the frame and mask the motion to where it belongs. | The pot screen "shifted in and out" while only numbers changed. |
 | **Text never re-wraps while its container animates.** Fixed width for the narrowest state, or fade between states. | Words jumped lines as a panel widened. |
 | **No in-between state looks unfinished.** Check every transition at its middle; an emptied area goes to the page ground, never a bare panel. | An empty grey strip mid-scroll. |
-| **Text over imagery is checked at the brightest frame** and narrowest screen. | A line sat on bright steel. |
+| **Text over imagery follows section 4 (5b.3)**, and is checked at the brightest frame and the narrowest screen. | A line sat on bright steel. |
 | **A pinned section must fit at 650px tall**, or it is not pinned. The order section is never pinned. | The order controls were cut off on a 1536x753 laptop. |
 | **A line of items separated by dots never wraps.** Stack them if it might. | A stray dot started the second line. |
 | **A fixed bar never covers content.** Give content room for it. | The phone order bar hid two lines. |
