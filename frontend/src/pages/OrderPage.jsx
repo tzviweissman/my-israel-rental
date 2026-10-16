@@ -18,6 +18,21 @@
 import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { parseItems } from '../utils/storeBasket';
+
+// One id per store listing in this browser, for the left-behind basket
+// reminder (backend basket_reminders.py). A new one after each order.
+const basketKey = (gigId) => `orderBasketId:${gigId}`;
+function basketId(gigId, fresh = false) {
+  try {
+    let id = fresh ? null : window.localStorage.getItem(basketKey(gigId));
+    if (!id) {
+      id = (window.crypto?.randomUUID?.() || `${Date.now()}-${Math.random().toString(36).slice(2)}`).replace(/[^A-Za-z0-9_-]/g, '');
+      window.localStorage.setItem(basketKey(gigId), id);
+    }
+    return id;
+  } catch { return null; }
+}
+const EMAIL_OK = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -75,7 +90,7 @@ export default function OrderPage() {
         const add = params.get('add');
         if (add && d.products.some((p) => p.id === add)) setQty({ [add]: 1 });
         // From the storefront's basket: ?items=productId:qty,...
-        const fromBasket = parseItems(params.get('items'), d.products.map((p) => p.id));
+        const fromBasket = parseItems(params.get('items'), d.products.flatMap((p) => [p.id, ...(p.options || []).map((o) => `${p.id}::${o.id}`)]));
         if (Object.keys(fromBasket).length) setQty(fromBasket);
         if (d.business.areas.length === 1) setCity(d.business.areas[0].slug);
       })
@@ -113,6 +128,23 @@ export default function OrderPage() {
     const list = fulfilment === 'delivery' ? data.settings.delivery_windows : data.settings.pickup_windows;
     return (list || []).filter((w) => w.weekday === dow);
   }, [data, date, fulfilment]);
+
+  // The left-behind basket reminder (backend basket_reminders.py): saved a
+  // moment after typing stops, once there is an email and something chosen.
+  useEffect(() => {
+    if (!data || done) return undefined;
+    const chosen = Object.entries(qty).filter(([, n]) => n > 0).map(([key, n]) => ({ key, qty: n }));
+    const mail = email.trim();
+    if (!chosen.length || !EMAIL_OK.test(mail)) return undefined;
+    const id = basketId(gigId);
+    if (!id) return undefined;
+    const h = setTimeout(() => {
+      axios.post(`${API}/marketplace/order-form/${gigId}/basket`, {
+        basket_id: id, email: mail, name: name.trim() || null, lines: chosen.slice(0, 60), lang: lang === 'he' ? 'he' : 'en',
+      }).catch(() => {});
+    }, 1500);
+    return () => clearTimeout(h);
+  }, [data, done, qty, email, name, gigId, lang]);
 
   useEffect(() => {
     // Keep the chosen window valid for the chosen day.
@@ -194,6 +226,10 @@ export default function OrderPage() {
       const { data: res } = await axios.post(`${API}/marketplace/order-form/${gigId}/orders`, body, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
       setDone(res);
       window.scrollTo({ top: 0 });
+      // Ordered: nothing to remind about, and the next basket is a new one.
+      const bid = basketId(gigId);
+      if (bid) axios.post(`${API}/marketplace/order-form/${gigId}/basket/${bid}/ordered`).catch(() => {});
+      basketId(gigId, true);
     } catch (err) {
       const d = err?.response?.data?.detail;
       toast.error(typeof d === 'string' ? d : t('orders.saveFailed', 'Could not save'));
@@ -406,7 +442,7 @@ export default function OrderPage() {
           <div>
             <label className={label} style={labelStyle} htmlFor="order-email">{t('order.email', 'Email')} · {t('orders.optional', 'optional')}</label>
             <input id="order-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={input} style={inputStyle} placeholder="name@example.com" data-testid="order-email" />
-            <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('order.emailWhy', 'For the confirmation, and the delivery photo when it arrives.')}</p>
+            <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('order.emailWhy', 'For the confirmation, and the delivery photo when it arrives.')} {t('order.emailBasket', 'If you leave without ordering, we send one reminder of what you chose.')}</p>
           </div>
           <div>
             <label className={label} style={labelStyle} htmlFor="order-notes">{t('orders.notes', 'Notes')} · {t('orders.optional', 'optional')}</label>

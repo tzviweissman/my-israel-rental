@@ -222,6 +222,8 @@ async def customer_cancel(token: str, request: Request):
                   f"{who} cancelled {gig.get('title') or 'an appointment'} on {b.get('preferred_date')} at {b.get('time_slot')}.", b["_id"])
     from routes.marketplace.automations import fire_in_background
     fire_in_background("appointment.cancelled", {"booking": {**b, "status": "cancelled"}, "gig": gig})
+    from .deposits import owed_back
+    await owed_back(b, by_business=False)
     from .appointment_extras import on_slot_freed
     await on_slot_freed(b.get("gig_id"), b.get("preferred_date"), b.get("staff_id"))
     return {"ok": True, "status": "cancelled"}

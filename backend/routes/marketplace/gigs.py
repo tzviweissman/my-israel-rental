@@ -794,6 +794,8 @@ async def patch_gig(gig_id: str, payload: GigPatch, user=Depends(verify_token)):
     # Sending null switches "book again" off, as with `discount` below.
     if "rebook_after_weeks" in payload.model_fields_set:
         update["rebook_after_weeks"] = payload.rebook_after_weeks
+    if "deposit" in payload.model_fields_set:
+        update["deposit"] = round(payload.deposit, 2) if payload.deposit else None
     if "weekly_availability" in update and update["weekly_availability"] is not None:
         update["weekly_availability"] = {
             d: [w if isinstance(w, dict) else w.model_dump() for w in (wins or [])]
@@ -1341,6 +1343,9 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         # silently re-dated every hold already outstanding.
         "hold_expires_at": (_now + timedelta(hours=_hold_h)).isoformat(),
         "hold_hours": _hold_h,
+        # Frozen too: changing the deposit later does not change what this
+        # customer was asked for (deposits.py).
+        "deposit": {"amount": float(gig["deposit"]), "status": "due"} if gig.get("deposit") else None,
     }
     await db.marketplace_bookings.insert_one(booking)
     # Hand the booking to the business's automations (automations.py):
@@ -1374,8 +1379,8 @@ async def track_booking(token: str, request: Request):
     b = await db.marketplace_bookings.find_one({"track_token": token})
     if not b:
         raise HTTPException(status_code=404, detail="This link is not valid")
-    gig = await db.marketplace_gigs.find_one({"_id": b.get("gig_id")}, {"title": 1, "title_he": 1, "business_id": 1, "weekly_availability": 1, "slot_duration_minutes": 1}) or {}
-    biz = await db.businesses.find_one({"_id": gig.get("business_id")}, {"name": 1, "name_he": 1, "slug": 1, "logo_url": 1}) or {}
+    gig = await db.marketplace_gigs.find_one({"_id": b.get("gig_id")}, {"title": 1, "title_he": 1, "business_id": 1, "weekly_availability": 1, "slot_duration_minutes": 1, "deposit_note": 1}) or {}
+    biz = await db.businesses.find_one({"_id": gig.get("business_id")}, {"name": 1, "name_he": 1, "slug": 1, "logo_url": 1, "payment_links": 1}) or {}
     status = b.get("status") or "pending"
     expires = b.get("hold_expires_at")
     if status == "pending" and expires and expires <= datetime.now(UTC).isoformat():
@@ -1392,7 +1397,16 @@ async def track_booking(token: str, request: Request):
         "weekly_availability": gig.get("weekly_availability") or {},
         "slot_minutes": int(gig.get("slot_duration_minutes") or 30),
         "staff_id": b.get("staff_id"), "staff_name": b.get("staff_name"),
+        # A deposit to pay the business directly (deposits.py), and how.
+        "deposit": b.get("deposit"),
+        "deposit_note": gig.get("deposit_note") if (b.get("deposit") or {}).get("status") == "due" else None,
+        "payment_links": _allowed_links(biz.get("payment_links")) if (b.get("deposit") or {}).get("status") == "due" else [],
     }
+
+
+def _allowed_links(stored):
+    from utils.payment_links import allowed_payment_links
+    return allowed_payment_links(stored)
 
 
 def _customer_can_change(b: dict, status: str) -> bool:
@@ -1485,6 +1499,8 @@ async def list_bookings(
             "preferred_date": r.get("preferred_date"),
             "time_slot": r.get("time_slot"),
             "duration_minutes": r.get("duration_minutes"),
+            "deposit": r.get("deposit"),
+            "no_show": bool(r.get("no_show")),
             "created_at": r.get("created_at"),
             "responded_at": r.get("responded_at"),
             "hold_expires_at": r.get("hold_expires_at"),
@@ -1529,6 +1545,8 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
     await db.marketplace_bookings.update_one({"_id": booking_id}, {"$set": update})
     # Declined or cancelled: the time is free again for the waiting list.
     if payload.status in ("cancelled", "declined") and booking.get("status") in ("pending", "accepted"):
+        from .deposits import owed_back
+        await owed_back(booking, by_business=True)
         from .appointment_extras import on_slot_freed
         await on_slot_freed(booking.get("gig_id"), booking.get("preferred_date"), booking.get("staff_id"))
     if payload.status == "cancelled" and booking.get("status") != "cancelled":

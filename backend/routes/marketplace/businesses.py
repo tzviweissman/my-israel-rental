@@ -1071,6 +1071,8 @@ async def public_business(
         # (routes/marketplace/memberships.py).
         "has_memberships": bool(await db.membership_plans.find_one(
             {"business_id": biz["_id"], "active": True, "deleted": {"$ne": True}}, {"_id": 1})),
+        # Gift cards on sale: the page shows a Gift cards button (gift_cards.py).
+        "gift_cards_on": bool((biz.get("gift_card_settings") or {}).get("on")),
         "categories": biz.get("categories") or [],
         "areas": biz.get("areas") or [],
         "serves_nationwide": bool(biz.get("serves_nationwide")),

@@ -49,7 +49,7 @@ async def _candidates(now: datetime) -> list[dict[str, Any]]:
     from utils import reviews as rv
     native = rv.native_enabled()
     out: list[dict[str, Any]] = []
-    async for b in db.marketplace_bookings.find({"status": "completed", "contact_email": {"$nin": [None, ""]},
+    async for b in db.marketplace_bookings.find({"status": "completed", "no_show": {"$ne": True}, "contact_email": {"$nin": [None, ""]},
                                                  "completed_at": {"$gte": early, "$lte": late}}):
         if native and b.get("client_user_id"):
             continue

@@ -284,6 +284,11 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
         {!slot && <DateField value={date} onChange={setDate} className={`${field} bg-white`} testid="gig-booking-date" />}
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('gigDetail.messagePh', 'Tell the provider what you need…')} rows={3} className={field} />
         {guest && <p className="text-xs text-gray-500">{t('gigDetail.guestNote', 'No account needed. You get a page that shows the reply.')}</p>}
+        {Number(gig.deposit) > 0 && (
+          <p className="text-xs rounded-lg p-2.5" style={{ background: '#F9FAFB', color: 'var(--ink)' }} data-testid="gig-booking-deposit">
+            {t('deposit.onBook', 'A {{v}} deposit holds this time. You pay the business directly; your booking page shows how. Cancel at least 24 hours before and it is returned.', { v: money(gig.deposit, 'ILS') })}
+          </p>
+        )}
         <div className="flex justify-end gap-2">
           <button type="button" onClick={onClose} className="px-4 py-2 rounded-lg text-sm font-semibold text-gray-600">
             {t('common.cancel', 'Cancel')}

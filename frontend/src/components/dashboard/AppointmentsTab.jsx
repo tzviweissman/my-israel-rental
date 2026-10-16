@@ -29,6 +29,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { money } from '../../utils/currency';
 import {
   Loader2, CalendarCheck, Calendar, Clock, Mail, Phone, User, ExternalLink,
   Check, X, CheckCheck, Timer,
@@ -65,6 +66,40 @@ const hoursLeft = (iso) => {
   const ms = new Date(iso).getTime() - Date.now();
   if (!Number.isFinite(ms) || ms <= 0) return null;
   return Math.max(1, Math.floor(ms / 3600000));
+};
+
+/** The deposit on one booking (backend deposits.py): what state it is in,
+ *  and the one or two buttons that move it on. Provider side only. */
+const DepositLine = ({ booking, API, token, onChanged }) => {
+  const { t } = useTranslation();
+  const [busy, setBusy] = useState(false);
+  const dep = booking.deposit;
+  const set = async (status) => {
+    setBusy(true);
+    try {
+      await axios.post(`${API}/marketplace/bookings/${booking.id}/deposit`, { status }, { headers: { Authorization: `Bearer ${token}` } });
+      onChanged?.();
+    } catch (err) { toast.error(err.response?.data?.detail || t('appointments.updateFailed', 'Could not update that booking')); } finally { setBusy(false); }
+  };
+  const amount = money(dep.amount, 'ILS');
+  const label = {
+    due: t('deposit.st.due', 'Deposit {{v}}: not received yet', { v: amount }),
+    paid: t('deposit.st.paid', 'Deposit {{v}}: received', { v: amount }),
+    kept: t('deposit.st.kept', 'Deposit {{v}}: kept, they did not come', { v: amount }),
+    to_return: t('deposit.st.toReturn', 'Deposit {{v}}: give it back, cancelled in time', { v: amount }),
+    returned: t('deposit.st.returned', 'Deposit {{v}}: returned', { v: amount }),
+    waived: t('deposit.st.waived', 'Deposit {{v}}: not needed', { v: amount }),
+  }[dep.status] || amount;
+  const btn = 'inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold border border-gray-200 bg-white disabled:opacity-60';
+  const active = ['pending', 'accepted'].includes(booking.status);
+  return (
+    <div className="mt-3 flex flex-wrap items-center gap-2 text-xs" data-testid={`appointment-deposit-${booking.id}`}>
+      <span className="font-semibold" style={{ color: dep.status === 'due' || dep.status === 'to_return' ? '#B45309' : 'var(--ink)' }}>{label}</span>
+      {dep.status === 'due' && active && <button type="button" disabled={busy} onClick={() => set('paid')} className={btn} data-testid={`deposit-paid-${booking.id}`}>{t('deposit.markPaid', 'It arrived')}</button>}
+      {dep.status === 'paid' && booking.status === 'accepted' && <button type="button" disabled={busy} onClick={() => set('kept')} className={btn} data-testid={`deposit-kept-${booking.id}`}>{t('deposit.noShow', 'They did not come, keep it')}</button>}
+      {['paid', 'to_return', 'kept'].includes(dep.status) && !active && <button type="button" disabled={busy} onClick={() => set('returned')} className={btn}>{t('deposit.returned', 'I returned it')}</button>}
+    </div>
+  );
 };
 
 const BookingCard = ({ booking, side, API, token, onChanged, highlighted }) => {
@@ -194,6 +229,8 @@ const BookingCard = ({ booking, side, API, token, onChanged, highlighted }) => {
           <p className="text-sm text-gray-800 whitespace-pre-line" dir="auto">{booking.provider_reply}</p>
         </div>
       )}
+
+      {isProvider && booking.deposit && <DepositLine booking={booking} API={API} token={token} onChanged={onChanged} />}
 
       {isProvider && ['pending', 'accepted'].includes(booking.status) && (
         <div className="mt-4 border-t border-gray-100 pt-3">

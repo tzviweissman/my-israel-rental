@@ -9,6 +9,7 @@ import { toast } from 'sonner';
 import { Loader2, Plus, Pencil, Trash2, Copy, TicketPercent } from 'lucide-react';
 import { money } from '../../utils/currency';
 import ReferralSettings from './ReferralSettings';
+import GiftCardsPanel from './GiftCardsPanel';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
@@ -139,6 +140,7 @@ export default function DiscountsTab({ API, token }) {
         {t('discounts.body', 'Customers type the code on your order form or membership sign-up, and the discount shows on the order. An end date or “new customers only” works better than a discount that never ends.')}
       </p>
       {ready && <ReferralSettings key={bizId} API={API} auth={auth} businessId={bizId} />}
+      {ready && <GiftCardsPanel key={`gift-${bizId}`} API={API} auth={auth} businessId={bizId} slug={biz.slug} />}
       {editing && <CodeForm initial={editing} saving={saving} onCancel={() => setEditing(null)} onSave={save} />}
       {codes === null ? <Loader2 className="animate-spin" size={18} /> : codes.length === 0 && !editing ? (
         <div className="rounded-2xl border p-8 text-center text-sm" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }}>

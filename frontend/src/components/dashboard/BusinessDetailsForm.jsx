@@ -11,6 +11,7 @@ import CoverPlaceholder from '../common/CoverPlaceholder';
 import { apiErrorMessage } from '../../utils/apiError';
 import WebAddressField from './WebAddressField';
 import OwnDomainField from './OwnDomainField';
+import ShareLinkRow from './ShareLinkRow';
 
 /**
  * Edit the facts behind a business's "Good to know" band (spec C6).
@@ -246,6 +247,12 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
               by accident. */}
           <WebAddressField business={b} API={API} token={token} onChanged={onSaved} />
           {b.id && <OwnDomainField business={b} API={API} token={token} />}
+          {/* The one-screen page for an Instagram or TikTok bio (pages/LinkPage.jsx). */}
+          {b.id && b.slug && (
+            <div data-testid="biz-details-bio-link">
+              <ShareLinkRow link={`${window.location.origin}/link/${b.slug}`} label={t('linkPage.ownerLabel', 'Link for your Instagram or TikTok bio')} testidPrefix="bio-link" />
+            </div>
+          )}
 
           {/* Logo. First, because it is the first item on the checklist
               that sends people here, and the one they could not find. */}

@@ -21,7 +21,8 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useHandBuilt } from '../utils/handBuiltPages';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe, Users } from 'lucide-react';
+import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe, Users, Gift } from 'lucide-react';
+import BusyTimes from '../components/business/BusyTimes';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import NotFound from './NotFound';
@@ -717,6 +718,18 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
                   <Users size={15} aria-hidden="true" /> {t('members.joinButton', 'Join, see membership plans')}
                 </button>
               )}
+              {/* Gift cards on sale (backend gift_cards.py). Outline too. */}
+              {biz.gift_cards_on && !preview && (
+                <button
+                  type="button"
+                  onClick={() => navigate(`/gift-cards/${biz.slug || biz.id}`)}
+                  className="mt-3 ms-2 inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold border"
+                  style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }}
+                  data-testid="business-gift-cards"
+                >
+                  <Gift size={15} aria-hidden="true" /> {t('gift.button', 'Gift cards')}
+                </button>
+              )}
 
               {Array.isArray(biz.payment_links) && biz.payment_links.length > 0 && (
                 <div className="mt-3 flex flex-wrap items-center gap-2" data-testid="business-payment-links">
@@ -901,6 +914,9 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
         {/* Verified reviews across this business's listings, plus its
             own Google reviews (routes/reviews.py). Nothing while off. */}
         {/* On a v3 page the reviews are V3Reviews, above the offer. */}
+        {/* When it is usually busy, from its own visits (busy_times.py). */}
+        {!extra && <BusyTimes businessId={biz.id} />}
+
         {!v3 && !extra && <ReviewsSection
           businessId={biz.id}
           kind="business"

@@ -715,6 +715,10 @@ class GigPatch(BaseModel):
     slot_duration_minutes: Optional[int] = None
     team: Optional[list[TeamMember]] = Field(None, max_length=20)
     rebook_after_weeks: Optional[int] = Field(None, ge=1, le=52)
+    # A deposit that holds an appointment, paid to the business directly
+    # (deposits.py; 0 or null: none), and how to pay it.
+    deposit: Optional[float] = Field(None, ge=0, le=5000)
+    deposit_note: Optional[str] = Field(None, max_length=300)
     # Dates with limited places (sessions.py), and whether the listing
     # takes quote requests (quotes.py; None: the default for its kind).
     sessions: Optional[list[SessionIn]] = Field(None, max_length=60)

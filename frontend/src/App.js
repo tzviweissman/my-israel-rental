@@ -150,6 +150,9 @@ const BookingTrackPage = lazy(() => import('./pages/BookingTrackPage'));
 const QuoteTrackPage = lazy(() => import('./pages/QuoteTrackPage'));
 const ReservationPage = lazy(() => import('./pages/ReservationPage'));
 const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
+const GiftCardBuyPage = lazy(() => import('./pages/GiftCardBuyPage'));
+const GiftCardPage = lazy(() => import('./pages/GiftCardPage'));
+const LinkPage = lazy(() => import('./pages/LinkPage'));
 const MembershipSignupPage = lazy(() => import('./pages/MembershipSignupPage'));
 const UnsubscribePage = lazy(() => import('./pages/UnsubscribePage'));
 const StaffJoinPage = lazy(() => import('./pages/StaffJoinPage'));
@@ -544,6 +547,9 @@ function App() {
             <Route path="/quotes/:token" element={<QuoteTrackPage />} />
             <Route path="/reservations/:token" element={<ReservationPage />} />
             <Route path="/feedback/:token" element={<FeedbackPage />} />
+            <Route path="/gift-cards/:slug" element={<GiftCardBuyPage />} />
+            <Route path="/gift/:token" element={<GiftCardPage />} />
+            <Route path="/link/:slug" element={<LinkPage />} />
             {/* Memberships (routes/marketplace/memberships.py): sign-up with
                 no account, the member's pass, and the door. */}
             <Route path="/memberships/:slug" element={<MembershipSignupPage />} />

@@ -15,6 +15,8 @@ import { Loader2, CalendarCheck } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import ChangeBooking from '../components/bookings/ChangeBooking';
 import AddToCalendar from '../components/bookings/AddToCalendar';
+import PayLinks from '../components/forms/PayLinks';
+import { money } from '../utils/currency';
 
 const REFRESH_MS = 30_000;
 
@@ -107,6 +109,22 @@ export default function BookingTrackPage() {
             </div>
           )}
         </section>
+
+        {/* A deposit to pay the business directly (backend deposits.py). */}
+        {data.deposit && ['pending', 'accepted'].includes(data.status) && (
+          <section className="mt-4 rounded-2xl border bg-white p-4 text-sm" style={{ borderColor: data.deposit.status === 'due' ? 'var(--ink)' : 'var(--brand-border)', color: 'var(--ink)' }} data-testid="booking-track-deposit" data-deposit={data.deposit.status}>
+            {data.deposit.status === 'due' ? (
+              <>
+                <p className="font-semibold">{t('deposit.dueTitle', 'A {{v}} deposit holds this time', { v: money(data.deposit.amount, 'ILS') })}</p>
+                <p className="mt-1" style={{ color: 'var(--brand-muted)' }}>{t('deposit.dueBody', 'Pay the business directly. They confirm it here once it arrives. Cancel at least 24 hours before and it is returned.')}</p>
+                {data.deposit_note && <p className="mt-2 whitespace-pre-line" dir="auto">{data.deposit_note}</p>}
+                <div className="mt-3"><PayLinks links={data.payment_links} testid="booking-deposit-links" /></div>
+              </>
+            ) : data.deposit.status === 'paid' ? (
+              <p>{t('deposit.paidNote', 'Deposit of {{v}} received. Thank you.', { v: money(data.deposit.amount, 'ILS') })}</p>
+            ) : null}
+          </section>
+        )}
 
         <ChangeBooking token={token} data={data} onChanged={load} />
 

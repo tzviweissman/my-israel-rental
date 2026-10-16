@@ -38,6 +38,7 @@ import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
 import SendToSupplierDialog from './SendToSupplierDialog';
 import MoreMenu from './MoreMenu';
 import CustomFieldsEditor from './CustomFieldsEditor';
+import BasketReminderSwitch from './BasketReminderSwitch';
 
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -1412,6 +1413,8 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
         </div>
         <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}><X size={18} /></button>
       </div>
+
+      <BasketReminderSwitch API={API} auth={auth} businessId={businessId} />
 
       {h(t('orders.defaultCourier', 'Default courier'))}
       <select value={courier} onChange={(e) => setCourier(e.target.value)} className={sel} style={selStyle} data-testid="settings-courier">

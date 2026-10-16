@@ -144,7 +144,7 @@ async def run_rebook_once(now: Optional[datetime] = None) -> int:
         biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
         if not biz:
             continue
-        async for b in db.marketplace_bookings.find({"gig_id": gig["_id"], "status": "completed",
+        async for b in db.marketplace_bookings.find({"gig_id": gig["_id"], "status": "completed", "no_show": {"$ne": True},
                                                      "preferred_date": {"$gte": due_from, "$lte": due_to},
                                                      "contact_email": {"$nin": [None, ""]}}):
             email = b["contact_email"].strip().lower()

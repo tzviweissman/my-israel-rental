@@ -323,6 +323,9 @@ async def startup_tasks() -> None:
     # "How did we do?" the day after a visit (marketplace/feedback.py).
     from routes.marketplace.feedback import feedback_loop
     asyncio.create_task(feedback_loop())
+    # One reminder about a basket left on an order form (basket_reminders.py).
+    from routes.marketplace.basket_reminders import basket_reminder_loop
+    asyncio.create_task(basket_reminder_loop())
     # Requests board lifecycle — daily at 05:00 UTC. Flips open->expired
     # once a request's 30 days are up. A soft flip, not a TTL index, so
     # the seeker can still renew it. See the single-replica note in
@@ -577,6 +580,10 @@ async def startup_tasks() -> None:
         await ensure_session_indexes()
         from routes.marketplace.feedback import ensure_feedback_indexes
         await ensure_feedback_indexes()
+        from routes.marketplace.gift_cards import ensure_gift_card_indexes
+        await ensure_gift_card_indexes()
+        from routes.marketplace.basket_reminders import ensure_basket_indexes
+        await ensure_basket_indexes()
         from routes.guest_messages import ensure_guest_message_indexes
         await ensure_guest_message_indexes()
         from routes.marketplace.staff import ensure_staff_indexes

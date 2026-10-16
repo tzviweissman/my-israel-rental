@@ -171,6 +171,10 @@ async def evaluate(business_id: str, code: str, form: Literal["orders", "members
         # Someone's personal referral code (referrals.py).
         from .referrals import as_code
         c = await as_code(business_id, norm_code(code))
+    if not c:
+        # A gift card's code (gift_cards.py): up to its balance off.
+        from . import gift_cards
+        c = await gift_cards.as_code(business_id, norm_code(code))
     if not c or not c.get("active", True):
         raise CodeRefused("This code is not valid")
     if c.get("applies_to", "both") not in (form, "both"):
@@ -201,6 +205,9 @@ async def redeem(c: dict[str, Any], discount: float, phone: Optional[str]) -> bo
     if c.get("referral_of"):
         from . import referrals
         return await referrals.redeem(c, discount, phone)
+    if c.get("gift_card"):
+        from . import gift_cards
+        return await gift_cards.redeem(c, discount)
     q: dict[str, Any] = {"_id": c["_id"], "active": True, "deleted": {"$ne": True}}
     if c.get("max_uses"):
         q["uses"] = {"$lt": c["max_uses"]}

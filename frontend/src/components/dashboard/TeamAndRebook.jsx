@@ -17,9 +17,9 @@ export function cleanTeam(team) {
     .filter((m) => m.name && !seen.has(m.id) && seen.add(m.id));
 }
 
-export default function TeamAndRebook({ team, onTeam, rebook, onRebook }) {
+export default function TeamAndRebook({ team, onTeam, rebook, onRebook, deposit, onDeposit, depositNote, onDepositNote }) {
   const { t } = useTranslation();
-  const [open, setOpen] = useState((team || []).length > 0 || !!rebook);
+  const [open, setOpen] = useState((team || []).length > 0 || !!rebook || !!Number(deposit));
   const add = () => {
     let n = (team || []).length + 1;
     const ids = new Set((team || []).map((m) => m.id));
@@ -29,7 +29,7 @@ export default function TeamAndRebook({ team, onTeam, rebook, onRebook }) {
   return (
     <div className="rounded-lg border" style={boxStyle} data-testid="edit-listing-team">
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="w-full flex items-center justify-between gap-2 px-3 min-h-[44px] text-start text-sm font-semibold text-gray-700">
-        <span className="inline-flex items-center gap-2"><Users size={15} /> {t('team.title', 'Who does it, and booking again')}</span>
+        <span className="inline-flex items-center gap-2"><Users size={15} /> {t('team.titleDeposit', 'Who does it, booking again and deposit')}</span>
         {open ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
       </button>
       {open && (
@@ -62,6 +62,20 @@ export default function TeamAndRebook({ team, onTeam, rebook, onRebook }) {
               {[1, 2, 3, 4, 6, 8, 12, 26].map((w) => <option key={w} value={w}>{t('team.weeks', 'After {{n}} weeks', { n: w })}</option>)}
             </select>
           </div>
+          {onDeposit && (
+            <div>
+              <p className="font-semibold text-gray-700">{t('deposit.title', 'Deposit to hold the time')}</p>
+              <p className="text-xs text-gray-600 mb-2">{t('deposit.hint', 'Customers see it when they book and pay you directly. You tick it off when it arrives. If they cancel at least 24 hours before, it goes back; if they do not come, you can keep it. Leave empty for none.')}</p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span>₪</span>
+                <input type="number" min="0" max="5000" value={deposit} onChange={(e) => onDeposit(e.target.value)} className={`${box} w-28`} style={boxStyle} placeholder="0" data-testid="deposit-amount" />
+              </div>
+              {Number(deposit) > 0 && (
+                <textarea rows={2} maxLength={300} dir="auto" value={depositNote} onChange={(e) => onDepositNote(e.target.value)} className={`${box} w-full mt-2`} style={boxStyle}
+                          placeholder={t('deposit.notePh', 'How to pay, e.g. Bit to 050-1234567')} data-testid="deposit-note" />
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
