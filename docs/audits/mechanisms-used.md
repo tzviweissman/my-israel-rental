@@ -142,3 +142,4 @@ already spent per the task brief even though its entry could not be sourced here
 2026-09-15 - social proof (specific, countable) - attribution band on the business page
 2026-10-13 - information scent - Restaurants tile on /businesses (Services.jsx)
 2026-10-14 - endowed progress effect - Gift Boutique order page sticky bar
+2026-10-17 - default effect - restock email box (proposed)
