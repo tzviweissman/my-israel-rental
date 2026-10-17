@@ -30,12 +30,22 @@ let slugs = process.argv.slice(3);
 if (!slugs.length) {
   slugs = JSON.parse(fs.readFileSync(path.join(ROOT, 'frontend', 'public', 'pages', 'pages.json'), 'utf8'));
   // Every business with a live listing (the page takes a slug or an id).
-  try {
-    const res = await fetch(`${BASE}/api/marketplace/gigs?limit=200`);
-    if (res.ok) {
-      for (const g of await res.json()) if (g.business_id && !slugs.includes(g.business_id)) slugs.push(g.business_id);
-    }
-  } catch { /* the hand-built pages alone, then */ }
+  // Retried: right after a deploy the API can answer 502 for a minute, and
+  // a silent fallback once checked only the hand-built pages.
+  let found = 0;
+  for (let attempt = 0; attempt < 5 && !found; attempt += 1) {
+    try {
+      const res = await fetch(`${BASE}/api/marketplace/gigs?limit=200`);
+      if (res.ok) {
+        for (const g of await res.json()) {
+          if (g.business_id && !slugs.includes(g.business_id)) { slugs.push(g.business_id); found += 1; }
+        }
+      }
+    } catch { /* retried below */ }
+    if (!found) await new Promise((r) => setTimeout(r, 15000));
+  }
+  console.log(`${slugs.length} business pages to check (${found} from live listings)`);
+  if (!found) console.error('WARNING: could not load the live listings; only the hand-built pages are checked.');
 }
 
 const SIZES = [{ name: 'laptop', width: 1366, height: 768 }, { name: 'phone', width: 390, height: 844 }];
