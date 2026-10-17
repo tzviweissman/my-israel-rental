@@ -36,7 +36,7 @@ export default function ReferralSettings({ API, auth, businessId }) {
   const url = `${API}/marketplace/businesses/${businessId}/referrals`;
 
   useEffect(() => {
-    axios.get(url, auth).then(({ data }) => { setS(data); if (data.on) setOpen(true); }).catch(() => setS(false));
+    axios.get(url, auth).then(({ data }) => { setS(data); }).catch(() => setS(false));
   }, [url, auth]);
   if (s === false) return null;
 

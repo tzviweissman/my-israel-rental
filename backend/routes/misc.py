@@ -569,6 +569,14 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
     # Tours and workshops (sessions.py): their guest lists live in that tab.
     has_sessions = await db.marketplace_gigs.count_documents({"provider_user_id": uid, "sessions.0": {"$exists": True}}, limit=1)
     my_service_bookings = await db.marketplace_bookings.count_documents({"client_user_id": uid})
+    # More things waiting on the business, for "Needs your attention" on
+    # Overview (Tzvi, 17 Oct 2026: "the more commonly used things more
+    # easily accessible"): gift cards ordered but not marked paid, member
+    # sign-ups waiting for payment, deposits owed back after a cancellation.
+    owned_ids = [b["_id"] async for b in db.businesses.find({"owner_user_id": uid}, {"_id": 1})]
+    gift_cards_waiting = await db.gift_cards.count_documents({"business_id": {"$in": owned_ids}, "status": "awaiting_payment"}) if owned_ids else 0
+    members_waiting = await db.business_members.count_documents({"business_id": {"$in": owned_ids}, "status": "pending"}) if owned_ids else 0
+    deposits_to_return = await db.marketplace_bookings.count_documents({"provider_user_id": uid, "deposit.status": "to_return"})
 
     # The customer-side tabs are shown to a business or owner only when
     # they have used them (Tzvi, 22 Sep 2026: alerts and liked "is for
@@ -599,6 +607,9 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "customer_orders": customer_orders,
         "service_bookings_pending": service_bookings_pending,
         "has_sessions": bool(has_sessions),
+        "gift_cards_waiting": gift_cards_waiting,
+        "members_waiting": members_waiting,
+        "deposits_to_return": deposits_to_return,
         "my_service_bookings": my_service_bookings,
         "my_rental_bookings": my_rental_bookings,
         "has_saved_searches": bool(saved_searches),

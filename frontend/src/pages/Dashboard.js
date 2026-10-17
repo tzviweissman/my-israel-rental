@@ -298,7 +298,10 @@ const Dashboard = () => {
   // action beside it) get no second one from the shell.
   const OWN_TITLE = ['properties', 'my-businesses', 'orders', 'members', 'tools', 'customers', 'discounts', 'summary', 'staff', 'checkin', 'classes', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts', 'bookings', 'contracts'];
   const pageTitle = OWN_TITLE.includes(activeTab) ? null : (onOverview || !activeLabel ? t('dashboard.title') : activeLabel);
-  const showListingActions = onOverview || activeTab === 'properties' || activeTab === 'bulk-manager';
+  // "Add property" and "Bulk upload" on the rentals tabs, and on Overview
+  // only for someone who runs rentals and no business: a bakery owner who
+  // also lets one flat should not open their dashboard on property buttons.
+  const showListingActions = (onOverview && !showGigTabs) || activeTab === 'properties' || activeTab === 'bulk-manager';
 
   return (
     /* Wraps the WHOLE dashboard, not just the checklist: the tips live
@@ -418,15 +421,20 @@ const Dashboard = () => {
         {/* Overview only (20 Sep 2026). It sat above EVERY tab, so at laptop
             height Orders, Businesses and the rest all opened on the same
             two checklists with their own content below the fold. */}
-        {onOverview && <SetupChecklist />}
-        {onOverview && setupAllDone && (
-          <div className="mb-6 text-sm">
-            <ShowMeAroundOffer moment="complete" eligible={setupAllDone} inline />
-          </div>
-        )}
-
+        {/* Rendered inside Overview, under "Needs your attention" (17 Oct
+            2026): what is waiting on someone comes before setup tasks. */}
         {activeTab === 'overview' && (
           <OverviewTab
+            setup={(
+              <>
+                <SetupChecklist />
+                {setupAllDone && (
+                  <div className="mb-6 text-sm">
+                    <ShowMeAroundOffer moment="complete" eligible={setupAllDone} inline />
+                  </div>
+                )}
+              </>
+            )}
             API={API}
             token={token}
             user={user}

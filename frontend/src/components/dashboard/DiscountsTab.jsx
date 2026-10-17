@@ -140,9 +140,6 @@ export default function DiscountsTab({ API, token }) {
       <p className="text-sm mb-4" style={{ color: 'var(--brand-muted)' }}>
         {t('discounts.body', 'Customers type the code on your order form or membership sign-up, and the discount shows on the order. An end date or “new customers only” works better than a discount that never ends.')}
       </p>
-      {ready && <ReferralSettings key={bizId} API={API} auth={auth} businessId={bizId} />}
-      {ready && <GiftCardsPanel key={`gift-${bizId}`} API={API} auth={auth} businessId={bizId} slug={biz.slug} />}
-      {ready && <BirthdayPanel key={`bday-${bizId}`} API={API} auth={auth} businessId={bizId} />}
       {editing && <CodeForm initial={editing} saving={saving} onCancel={() => setEditing(null)} onSave={save} />}
       {codes === null ? <Loader2 className="animate-spin" size={18} /> : codes.length === 0 && !editing ? (
         <div className="rounded-2xl border p-8 text-center text-sm" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }}>
@@ -175,6 +172,17 @@ export default function DiscountsTab({ API, token }) {
             );
           })}
         </ul>
+      )}
+
+      {/* More ways to bring customers back, each folded to one line
+          (Tzvi, 17 Oct 2026: the codes the business makes come first). */}
+      {ready && (
+        <div className="mt-8" data-testid="discounts-more">
+          <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>{t('discounts.moreWays', 'Gift cards, birthdays and friends')}</h3>
+          <GiftCardsPanel key={`gift-${bizId}`} API={API} auth={auth} businessId={bizId} slug={biz.slug} />
+          <BirthdayPanel key={`bday-${bizId}`} API={API} auth={auth} businessId={bizId} />
+          <ReferralSettings key={bizId} API={API} auth={auth} businessId={bizId} />
+        </div>
       )}
     </div>
   );

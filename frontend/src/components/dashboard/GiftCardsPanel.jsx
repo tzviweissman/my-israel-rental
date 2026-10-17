@@ -67,7 +67,7 @@ export default function GiftCardsPanel({ API, auth, businessId, slug }) {
   const [saving, setSaving] = useState(false);
   const [sell, setSell] = useState({ amount: '', to_name: '', email: '' });
   const base = `${API}/marketplace/businesses/${businessId}/gift-cards`;
-  const load = useCallback(() => axios.get(base, auth).then(({ data }) => { setD(data); setSt((s) => s || { ...data.settings, amountsText: data.settings.amounts.join(', ') }); }).catch(() => setD(false)), [base, auth]);
+  const load = useCallback(() => axios.get(base, auth).then(({ data }) => { setD(data); if (data.cards.some((c) => c.status === 'awaiting_payment')) setOpen(true); setSt((s) => s || { ...data.settings, amountsText: data.settings.amounts.join(', ') }); }).catch(() => setD(false)), [base, auth]);
   useEffect(() => { setSt(null); load(); }, [load]);
   if (!d) return null;
   const waiting = d.cards.filter((c) => c.status === 'awaiting_payment').length;

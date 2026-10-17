@@ -50,39 +50,51 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
   // Areas this person has as staff at someone else's business (backend
   // routes/marketplace/staff.py): shown whether or not they run one.
   const staff = (area) => (summary.staff_permissions || []).includes(area);
+  // Ordered by how often each is opened (Tzvi, 17 Oct 2026: "the more
+  // commonly used things are more easily accessible"): Overview and
+  // Messages first, then the day-to-day work (orders, appointments,
+  // members), then setting the business up and growing it, then rentals,
+  // what the person ordered, and settings.
   const groups = [
     {
       key: 'overview',
       tabs: [
         { id: 'overview', label: t('dashboard.overview', 'Overview'), Icon: LayoutDashboard, show: true },
+        { id: 'messages', label: t('dashboard.messages'), Icon: MessageCircle, badge: unreadMessages, urgent: true, show: true },
+      ],
+    },
+    {
+      key: 'daily',
+      label: t('dashboard.groupDaily', 'Day to day'),
+      tabs: [
+        { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: tool('orders') || staff('orders') },
+        // Waiting appointments always show: a badge nobody can see is a
+        // customer nobody answers.
+        { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: tool('appointments') || (runsBusiness && ((summary.service_bookings_pending || 0) > 0 || !!summary.has_sessions)) },
+        { id: 'members', label: t('dashboard.members', 'Members'), Icon: Users, badge: summary.members_waiting, show: tool('members') || staff('members') },
+        { id: 'classes', label: t('dashboard.classes', 'Classes'), Icon: CalendarDays, show: tool('members') || staff('members') || staff('checkin') },
+        // Staff who only check members in (backend business_access.py "checkin").
+        { id: 'checkin', label: t('dashboard.checkin', 'Check-in'), Icon: DoorOpen, show: staff('checkin') },
+        // A courier's own deliveries: shown to anyone a business invited.
+        { id: 'deliveries', label: t('dashboard.deliveries', 'Deliveries'), Icon: Bike, badge: (summary.courier_deliveries_open || 0) + (summary.courier_invites || 0), show: (summary.courier_businesses || 0) > 0 || (summary.courier_invites || 0) > 0 },
       ],
     },
     {
       key: 'business',
       label: t('dashboard.groupBusiness', 'My business'),
       tabs: [
-        { id: 'my-businesses', label: t('dashboard.myBusinesses', 'Businesses'), Icon: Store, show: runsBusiness },
-        // Every business has customers, whatever it sells: not a tool to switch.
+        { id: 'my-businesses', label: t('dashboard.myBusinessesPage', 'My page and services'), Icon: Store, show: runsBusiness },
         // The owner's sales summary is on Overview; the tab stays for staff
         // whose area it is and who have no Overview of the business.
         { id: 'summary', label: t('dashboard.summary', 'Sales summary'), Icon: BarChart3, show: !runsBusiness && staff('summary') },
+        // Every business has customers, whatever it sells: not a tool to switch.
         { id: 'customers', label: t('dashboard.customers', 'Customers'), Icon: Contact, show: runsBusiness || staff('customers') },
-        { id: 'discounts', label: t('dashboard.discounts', 'Discounts'), Icon: TicketPercent, show: tool('orders') || tool('members') || staff('discounts') },
-        { id: 'staff', label: t('dashboard.staff', 'Staff'), Icon: UserCog, show: runsBusiness },
-        { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: tool('orders') || staff('orders') },
-        { id: 'members', label: t('dashboard.members', 'Members'), Icon: Users, show: tool('members') || staff('members') },
-        { id: 'classes', label: t('dashboard.classes', 'Classes'), Icon: CalendarDays, show: tool('members') || staff('members') || staff('checkin') },
-        // Staff who only check members in (backend business_access.py "checkin").
-        { id: 'checkin', label: t('dashboard.checkin', 'Check-in'), Icon: DoorOpen, show: staff('checkin') },
-        // Waiting appointments or network requests always show: a badge
-        // nobody can see is a customer nobody answers.
-        { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: tool('appointments') || (runsBusiness && ((summary.service_bookings_pending || 0) > 0 || !!summary.has_sessions)) },
+        { id: 'discounts', label: t('dashboard.discountsGifts', 'Discounts and gift cards'), Icon: TicketPercent, badge: summary.gift_cards_waiting, show: tool('orders') || tool('members') || staff('discounts') },
         { id: 'network', label: t('dashboard.network', 'Network'), Icon: Network, badge: summary.network_requests_in, show: tool('network') || (summary.network_requests_in || 0) > 0 },
         { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, badge: summary.work_offers_open, show: tool('job-requests') },
         { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, show: runsBusiness && (hasPostedJobs || !summary.business_tools) },
-        { id: 'tools', label: t('dashboard.tools', 'Tools'), Icon: SlidersHorizontal, show: runsBusiness },
-        // A courier's own deliveries: shown to anyone a business invited.
-        { id: 'deliveries', label: t('dashboard.deliveries', 'Deliveries'), Icon: Bike, badge: (summary.courier_deliveries_open || 0) + (summary.courier_invites || 0), show: (summary.courier_businesses || 0) > 0 || (summary.courier_invites || 0) > 0 },
+        { id: 'staff', label: t('dashboard.staff', 'Staff'), Icon: UserCog, show: runsBusiness },
+        { id: 'tools', label: t('dashboard.toolsOnOff', 'Turn tools on or off'), Icon: SlidersHorizontal, show: runsBusiness },
       ],
     },
     {
@@ -118,7 +130,6 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       key: 'account',
       label: t('dashboard.groupAccount', 'Account'),
       tabs: [
-        { id: 'messages', label: t('dashboard.messages'), Icon: MessageCircle, badge: unreadMessages, urgent: true, show: true },
         { id: 'settings', label: t('dashboard.settings'), Icon: KeyRound, show: true },
       ],
     },

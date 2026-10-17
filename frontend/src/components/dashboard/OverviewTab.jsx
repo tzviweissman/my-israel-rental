@@ -78,7 +78,7 @@ function addDaily(a, b) {
   return [...byDate.entries()].sort(([x], [y]) => (x < y ? -1 : 1)).map(([date, count]) => ({ date, count }));
 }
 
-export default function OverviewTab({ API, token, user, summary = {}, unreadMessages = 0, bookings = [], isPropertyLister, showGigTabs, onGoToTab }) {
+export default function OverviewTab({ setup = null, API, token, user, summary = {}, unreadMessages = 0, bookings = [], isPropertyLister, showGigTabs, onGoToTab }) {
   const { t } = useTranslation();
   const [services, setServices] = useState(null);   // /marketplace/leads/summary
   const [listings, setListings] = useState(null);   // /properties/performance/summary
@@ -133,7 +133,26 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
     };
   }, [services, listings]);
 
-  const waiting = (summary.bookings_awaiting_reply || 0) + (summary.work_offers_open || 0);
+  // Everything waiting on this person, most pressing first (Tzvi, 17 Oct
+  // 2026: "the more commonly used things more easily accessible"). One
+  // list, so the strip at the top and the first card cannot disagree.
+  const attention = [
+    unreadMessages > 0 && { key: 'messages', tab: 'messages', n: unreadMessages, text: t('dashboard.attentionMessages', '{{n}} unread messages', { n: unreadMessages }) },
+    summary.orders_new > 0 && { key: 'orders-new', tab: 'orders', n: summary.orders_new, text: t('dashboard.attentionOrdersNew', '{{n}} new orders not started', { n: summary.orders_new }) },
+    summary.orders_due_today > 0 && { key: 'orders-today', tab: 'orders', n: 0, text: t('dashboard.attentionOrdersToday', '{{n}} orders due today', { n: summary.orders_due_today }) },
+    summary.service_bookings_pending > 0 && { key: 'appointments', tab: 'appointments', n: summary.service_bookings_pending, text: t('dashboard.attentionAppointments', '{{n}} appointment or quote requests waiting for you', { n: summary.service_bookings_pending }) },
+    summary.bookings_awaiting_reply > 0 && { key: 'bookings', tab: 'bookings', n: summary.bookings_awaiting_reply, text: t('dashboard.attentionBookings', '{{n}} bookings awaiting your reply', { n: summary.bookings_awaiting_reply }) },
+    summary.members_waiting > 0 && { key: 'members', tab: 'members', n: summary.members_waiting, text: t('dashboard.attentionMembers', '{{n}} new members waiting for you to confirm payment', { n: summary.members_waiting }) },
+    summary.gift_cards_waiting > 0 && { key: 'gift-cards', tab: 'discounts', n: summary.gift_cards_waiting, text: t('dashboard.attentionGiftCards', '{{n}} gift cards waiting for you to mark them paid', { n: summary.gift_cards_waiting }) },
+    summary.deposits_to_return > 0 && { key: 'deposits', tab: 'appointments', n: summary.deposits_to_return, text: t('dashboard.attentionDeposits', '{{n}} deposits to give back', { n: summary.deposits_to_return }) },
+    summary.network_requests_in > 0 && { key: 'network', tab: 'network', n: summary.network_requests_in, text: t('dashboard.attentionNetwork', '{{n}} businesses asked to connect', { n: summary.network_requests_in }) },
+    summary.work_offers_open > 0 && { key: 'offers', tab: 'job-requests', n: summary.work_offers_open, text: t('dashboard.attentionOffers', '{{n}} work offers you have not answered', { n: summary.work_offers_open }) },
+    summary.requests_with_responses > 0 && { key: 'responses', tab: 'my-requests', n: 0, text: t('dashboard.attentionResponses', '{{n}} requests have replies', { n: summary.requests_with_responses }) },
+    summary.requests_expiring_soon > 0 && { key: 'expiring', tab: 'my-requests', n: 0, text: t('dashboard.attentionExpiring', '{{n}} requests expiring this week', { n: summary.requests_expiring_soon }) },
+  ].filter(Boolean);
+  // Messages have their own badge; the card counts what needs an answer.
+  const waitingRows = attention.filter((r) => r.n > 0 && r.key !== 'messages');
+  const waiting = waitingRows.reduce((sum, r) => sum + r.n, 0);
   // The denominator. `live_since` is the day the caller's oldest listing
   // went live; `since` is the day of the first recorded event, which is
   // not the same thing - a listing live since June with its first visitor
@@ -156,15 +175,37 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
 
   return (
     <div data-testid="overview-tab">
+      {/* ── what needs an answer, first: one tap to each ───────────── */}
+      {attention.length > 0 && (
+        <section className="rounded-xl border p-4 mb-6" style={{ borderColor: 'var(--ink)', background: 'var(--surface, #fff)' }} data-testid="overview-attention">
+          <h2 className="text-sm font-semibold mb-2 flex items-center gap-2" style={{ color: 'var(--ink)' }}>
+            <Bell size={15} aria-hidden="true" /> {t('overview.attention', 'Needs your attention')}
+          </h2>
+          <ul className="flex flex-wrap gap-2">
+            {attention.map((r) => (
+              <li key={r.key}>
+                <button type="button" onClick={() => onGoToTab(r.tab)} className="inline-flex items-center gap-1.5 px-3.5 min-h-[40px] rounded-full border text-sm font-medium bg-white hover:bg-[var(--surface-muted,#f9fafb)]"
+                        style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid={`overview-attention-${r.key}`}>
+                  {r.text} <ArrowRight size={13} className="rtl:rotate-180" aria-hidden="true" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
+
+      {/* Finishing setup: after what is waiting, before the numbers. */}
+      {setup}
+
       {/* ── the four cards ─────────────────────────────────────────── */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 mb-6" data-tour="overview-stats">
         <StatCard
           Icon={CalendarCheck}
           label={t('overview.waiting', 'Waiting on you')}
           value={waiting}
-          sub={waiting === 0 ? t('overview.waitingNone', 'Nothing needs a reply') : t('overview.waitingSub', { defaultValue: '{{b}} bookings · {{o}} work offers', b: summary.bookings_awaiting_reply || 0, o: summary.work_offers_open || 0 })}
+          sub={waiting === 0 ? t('overview.waitingNone', 'Nothing needs a reply') : t('overview.waitingAcross', { defaultValue: 'across {{n}} places, listed above', n: waitingRows.length })}
           testid="waiting"
-          onClick={() => onGoToTab(!summary.bookings_awaiting_reply && summary.work_offers_open ? 'job-requests' : 'bookings')}
+          onClick={waitingRows.length ? () => onGoToTab(waitingRows[0].tab) : undefined}
           cta={t('overview.open', 'Open')}
         />
         <StatCard
@@ -212,9 +253,10 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
 
       <LookingForYou API={API} token={token} className="mb-6" />
 
-      {/* ── activity on the left, needs-attention on the right ────── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 rounded-xl border p-5" style={{ borderColor: 'var(--brand-border)', background: 'var(--surface, #fff)' }} data-testid="overview-activity">
+      {/* ── recent activity, only when there is some ───────────────── */}
+      {(awaiting.length > 0 || pendingBookings.length > 0) && (
+      <div>
+        <div className="rounded-xl border p-5" style={{ borderColor: 'var(--brand-border)', background: 'var(--surface, #fff)' }} data-testid="overview-activity">
           <div className="flex items-center justify-between mb-4">
             <h3 className="text-base font-semibold" style={{ color: 'var(--ink)' }}>{t('overview.recent', 'Recent activity')}</h3>
           </div>
@@ -260,40 +302,8 @@ export default function OverviewTab({ API, token, user, summary = {}, unreadMess
             ))}
           </ul>
         </div>
-
-        <div className="rounded-xl border p-5" style={{ borderColor: 'var(--brand-border)', background: 'var(--surface, #fff)' }} data-testid="overview-attention">
-          <h3 className="text-base font-semibold mb-3 flex items-center gap-2" style={{ color: 'var(--ink)' }}>
-            <Bell size={16} aria-hidden="true" style={{ color: 'var(--brand-primary)' }} />
-            {t('overview.attention', 'Needs your attention')}
-          </h3>
-          {(() => {
-            const rows = [
-              unreadMessages > 0 && { key: 'messages', tab: 'messages', text: t('dashboard.attentionMessages', '{{n}} unread messages', { n: unreadMessages }) },
-              summary.bookings_awaiting_reply > 0 && { key: 'bookings', tab: 'bookings', text: t('dashboard.attentionBookings', '{{n}} bookings awaiting your reply', { n: summary.bookings_awaiting_reply }) },
-              summary.requests_expiring_soon > 0 && { key: 'expiring', tab: 'my-requests', text: t('dashboard.attentionExpiring', '{{n}} requests expiring this week', { n: summary.requests_expiring_soon }) },
-              summary.requests_with_responses > 0 && { key: 'responses', tab: 'my-requests', text: t('dashboard.attentionResponses', '{{n}} requests have replies', { n: summary.requests_with_responses }) },
-              summary.work_offers_open > 0 && { key: 'offers', tab: 'job-requests', text: t('dashboard.attentionOffers', '{{n}} work offers you have not answered', { n: summary.work_offers_open }) },
-              // Store orders: today's board, and anything nobody has started.
-              summary.orders_due_today > 0 && { key: 'orders-today', tab: 'orders', text: t('dashboard.attentionOrdersToday', '{{n}} orders due today', { n: summary.orders_due_today }) },
-              summary.orders_new > 0 && { key: 'orders-new', tab: 'orders', text: t('dashboard.attentionOrdersNew', '{{n}} new orders not started', { n: summary.orders_new }) },
-            ].filter(Boolean);
-            if (!rows.length) {
-              return <p className="text-sm" style={{ color: 'var(--brand-muted)' }} data-testid="overview-attention-empty">{t('overview.attentionNone', 'All clear.')}</p>;
-            }
-            return (
-              <ul className="space-y-2">
-                {rows.map((r) => (
-                  <li key={r.key}>
-                    <button type="button" onClick={() => onGoToTab(r.tab)} className="w-full text-start text-sm font-medium rounded-lg px-3 py-2 hover:bg-[var(--surface-muted,#f9fafb)]" style={{ color: 'var(--brand-primary)' }} data-testid={`overview-attention-${r.key}`}>
-                      {r.text}
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            );
-          })()}
-        </div>
       </div>
+      )}
     </div>
   );
 }
