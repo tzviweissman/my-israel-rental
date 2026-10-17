@@ -276,7 +276,6 @@
         <p class="line">The Brown Box, delivered across Jerusalem.</p>
         <a class="btn" href="order.html?add=Acai%20bowl" tabindex="-1">Order a bowl, <b>₪60</b> <span class="arw" aria-hidden="true">→</span></a>
       </div>
-      <div class="hint" id="hint">Scroll</div>
       <div class="load" id="load"></div>
     </div>
   </section>
@@ -471,7 +470,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var r = filmEl.getBoundingClientRect(), span = filmEl.offsetHeight - innerHeight;
     return Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
   }
-  var hint = document.getElementById('hint');
   function paint() {
     p = still ? 1 : progress();
     draw();
@@ -480,7 +478,6 @@ document.addEventListener('DOMContentLoaded', function () {
       c.classList.toggle('on', on); c.setAttribute('aria-hidden', on ? 'false' : 'true');
       c.querySelectorAll('a').forEach(function (a) { a.tabIndex = on ? 0 : -1; });
     });
-    hint.style.opacity = p > 0.02 ? 0 : 1;
     document.body.classList.toggle('on-film', filmEl.getBoundingClientRect().bottom > 64);
   }
   var raf = 0;
