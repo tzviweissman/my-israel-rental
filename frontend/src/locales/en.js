@@ -1262,7 +1262,7 @@ const en = {
           },
           b_orders: {
             title: 'Orders without the spreadsheet',
-            body: "Paste a WhatsApp order and the form fills itself. Your staff and your courier each see their own list, and the customer gets a link that says where the order is. Someone who fills a basket on your page and leaves gets one reminder to finish, and people can ask to be told when a sold-out product is back. The form suggests what goes with the order, which you choose per product, and a finished order has an "Order again" button. No commission.",
+            body: "Paste a WhatsApp order and the form fills itself. Your staff and your courier each see their own list, and the customer gets a link that says where the order is. Someone who fills a basket on your page and leaves gets one reminder to finish, and people can ask to be told when a sold-out product is back. The form suggests what goes with the order, which you choose per product, and a finished order has an \"Order again\" button. No commission.",
             doIt: 'Enter an order',
           },
           b_appointments: {
