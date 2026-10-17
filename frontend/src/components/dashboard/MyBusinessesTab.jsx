@@ -444,6 +444,7 @@ export default function MyBusinessesTab({ API, token }) {
                   className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
                   style={{ color: 'var(--brand-primary)' }}
                   data-testid={`business-hours-${b.id}`}
+                  data-tour={items[0]?.id === b.id ? 'business-hours' : undefined}
                 >
                   <Timer size={12} /> {t('businesses.hoursFees', 'Hours, delivery & fees')}
                 </button>

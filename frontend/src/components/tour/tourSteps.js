@@ -8,11 +8,12 @@
  * small bar brings it back when they are done. Nothing is required.
  *
  * Two walks, chosen by what the account has (TourProvider):
- *   business - 13 stops, in the order a new business uses them;
+ *   business - 14 stops, in the order a new business uses them;
  *   host     - 9 stops for someone who rents out a place.
  * The stops added on 16 Oct 2026 (Tzvi: "add all the new features to the
  * walk through tour") cover link-in-bio, appointments, gift cards, the
- * sales summary with private feedback, and messages to guests.
+ * sales summary with private feedback, and messages to guests; on 17 Oct
+ * hours and fees with table ordering (b.hours).
  * Someone who is both takes the business walk first and is offered the
  * host walk at the end.
  *
@@ -37,6 +38,8 @@ export const WALKS = {
     { id: 'b.share', route: '/dashboard?tab=my-businesses', target: 'business-share',
       doIt: { click: 'business-share' } },
     { id: 'b.biolink', route: '/dashboard?tab=my-businesses&details=1', target: 'bio-link' },
+    { id: 'b.hours', route: '/dashboard?tab=my-businesses', target: 'business-hours',
+      doIt: { click: 'business-hours' } },
     { id: 'b.requests', route: '/requests', target: 'requests-board' },
     { id: 'b.orders', route: '/dashboard?tab=orders', target: 'orders-board',
       doIt: { click: 'orders-new' } },

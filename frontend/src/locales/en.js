@@ -1246,13 +1246,18 @@ const en = {
             title: "A link for your Instagram bio",
             body: "One page made for a phone: your logo, your main buttons and your first few services. Paste this link in your Instagram or TikTok bio. It builds itself from your page, so there is nothing to set up.",
           },
+          b_hours: {
+            title: "Hours, delivery and ordering from the table",
+            body: "Set when people can pick up, where you deliver and what it costs. A restaurant or café can switch on ordering from the table: print a QR code for each table, and guests order from your menu straight to your board with the table number. Customers who leave a basket get one reminder here too.",
+            doIt: "Open hours and fees",
+          },
           b_requests: {
             title: 'People who already need you',
             body: 'Customers post the job they need doing. Read what has been asked for in your line of work and reply to the ones you want, instead of chasing leads.',
           },
           b_orders: {
             title: 'Orders without the spreadsheet',
-            body: "Paste a WhatsApp order and the form fills itself. Your staff and your courier each see their own list, and the customer gets a link that says where the order is. Someone who fills a basket on your page and leaves gets one reminder to finish, and people can ask to be told when a sold-out product is back. No commission.",
+            body: "Paste a WhatsApp order and the form fills itself. Your staff and your courier each see their own list, and the customer gets a link that says where the order is. Someone who fills a basket on your page and leaves gets one reminder to finish, and people can ask to be told when a sold-out product is back. The form suggests what goes with the order, which you choose per product. No commission.",
             doIt: 'Enter an order',
           },
           b_appointments: {
