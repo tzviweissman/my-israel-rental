@@ -40,6 +40,7 @@ import MoreMenu from './MoreMenu';
 import CustomFieldsEditor from './CustomFieldsEditor';
 import BasketReminderSwitch from './BasketReminderSwitch';
 import RestockWaiting from './RestockWaiting';
+import TableOrdering from './TableOrdering';
 
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -976,7 +977,7 @@ function OrdersTable({ orders, busyId, onStatus, onEdit, t }) {
                   {o.notes && <div className="text-[11px] italic" style={{ color: 'var(--brand-muted)' }}>{o.notes}</div>}
                 </td>
                 <td className="py-2 px-2" style={{ color: 'var(--ink)' }}>
-                  {o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
+                  {o.table ? t('tableOrder.table', 'Table {{n}}', { n: o.table }) : o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
                   {o.address && <div className="text-[11px]" dir="auto" style={{ color: 'var(--brand-muted)' }}>{o.address}</div>}
                 </td>
                 <td className="py-2 px-2 text-end tabular-nums whitespace-nowrap" style={{ color: 'var(--ink)' }}>{o.total != null ? `\u20aa${Number(o.total).toLocaleString()}` : ''}</td>
@@ -1418,6 +1419,7 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
       </div>
 
       <BasketReminderSwitch API={API} auth={auth} businessId={businessId} />
+      <TableOrdering API={API} auth={auth} businessId={businessId} />
 
       {h(t('orders.defaultCourier', 'Default courier'))}
       <select value={courier} onChange={(e) => setCourier(e.target.value)} className={sel} style={selStyle} data-testid="settings-courier">

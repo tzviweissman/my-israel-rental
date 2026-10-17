@@ -1556,6 +1556,7 @@ async def track_order(token: str, request: Request):
         "items": o.get("items"),
         "needed_by": o.get("needed_by"),
         "fulfilment": o.get("fulfilment"),
+        "table": o.get("table"),
         "address": o.get("address"),
         "total": o.get("total"),
         "currency": o.get("currency") or "ILS",
@@ -2004,9 +2005,13 @@ class WebsiteOrderIn(BaseModel):
     window: Optional[WindowIn] = None
     city: Optional[str] = Field(None, max_length=80)          # location slug
     address: Optional[str] = Field(None, max_length=400)
-    customer_name: str = Field(..., min_length=1, max_length=120)
-    customer_phone: str = Field(..., min_length=5, max_length=40)
+    customer_name: str = Field("", max_length=120)
+    customer_phone: str = Field("", max_length=40)
     customer_email: Optional[str] = Field(None, max_length=200)
+    # Ordering from a table in the restaurant (tables.py): the number on
+    # the table's QR code. A table order is for now, needs no phone, and
+    # is served at the table.
+    table: Optional[int] = Field(None, ge=1, le=500)
     # How the customer intends to pay, in the store's own terms (its
     # payment_note lists them). Recorded, never charged: the site does
     # not process payments.
@@ -2027,6 +2032,13 @@ class WebsiteOrderIn(BaseModel):
     def _shape(self):
         if not self.lines and not self.extra_items:
             raise ValueError("Pick something to order")
+        if self.table is None:
+            if not self.customer_name:
+                raise ValueError("Please add your name")
+            if len(self.customer_phone) < 5:
+                raise ValueError("Please add your phone number")
+        else:
+            self.fulfilment = "pickup"
         if self.customer_email and ("@" not in self.customer_email or "." not in self.customer_email.split("@")[-1]):
             raise ValueError("That does not look like an email address")
         return self
@@ -2049,6 +2061,8 @@ def _products_for_order(gig: dict[str, Any]) -> list[dict[str, Any]]:
             "serves": p.get("serves") or None,
             # A counted product's number left (stock.py); None: not counted.
             "stock": p.get("stock"),
+            # Products the business says go with this one (pairings.py).
+            "goes_with": [x for x in (p.get("goes_with") or []) if isinstance(x, str)][:4],
             "options": [{"id": o.get("id"), "name": o.get("name"), "price": o.get("price"), "in_stock": o.get("in_stock", True)}
                         for o in p.get("options") or []],
         })
@@ -2083,6 +2097,7 @@ async def order_form(gig_id: str):
         "business": {
             "id": biz["_id"], "name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url"), "slug": biz.get("slug"),
             "birthday_on": bool((biz.get("birthday_settings") or {}).get("on")),
+            "tables_on": bool((biz.get("table_ordering") or {}).get("on")),
             "areas": _areas_out(biz), "serves_nationwide": bool(biz.get("serves_nationwide")),
             "payment_links": allowed_payment_links(biz.get("payment_links")), "payment_note": biz.get("payment_note"),
             # The notice bar and colour, so the order page carries them too.
@@ -2110,6 +2125,14 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     gig, biz = await _store_for_ordering(gig_id)
     st = biz.get("order_settings") or {}
     now = datetime.now(_IL_TZ)
+    if payload.table is not None:
+        from .tables import table_ok
+        if not table_ok(biz, payload.table):
+            raise HTTPException(status_code=400, detail="This table cannot order here right now")
+        payload.date = now.date().isoformat()
+        payload.window = None
+        if not payload.customer_name:
+            payload.customer_name = f"Table {payload.table}"
 
     # The date: real, not past, not past its cutoff.
     try:
@@ -2118,7 +2141,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         raise HTTPException(status_code=400, detail="Pick a real date") from exc
     if day < now.date():
         raise HTTPException(status_code=400, detail="That day has passed")
-    if past_cutoff(payload.date, biz.get("order_cutoffs") or [], now):
+    if payload.table is None and past_cutoff(payload.date, biz.get("order_cutoffs") or [], now):
         raise HTTPException(status_code=400, detail="Orders for that day have closed")
 
     if payload.fulfilment == "delivery" and not offers_delivery(st, biz, gig):
@@ -2127,6 +2150,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     # The window: if the store has any for that weekday and kind, one of them.
     wd = _js_weekday(day)
     windows = [w for w in ((st.get("windows") or {}).get(payload.fulfilment) or []) if int(w.get("weekday", -1)) == wd]
+    if payload.table is not None:
+        windows = []
     if windows:
         if not payload.window or not any(w["start"] == payload.window.start and w["end"] == payload.window.end for w in windows):
             raise HTTPException(status_code=400, detail="Pick one of the store's time windows")
@@ -2174,8 +2199,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         city_label = next((a["label"] for a in _areas_out(biz) if a["slug"] == payload.city), payload.city or "")
         address = f"{payload.address}, {city_label}".strip(", ") if city_label and city_label.lower() not in payload.address.lower() else payload.address
 
-    phone_e164 = normalize_whatsapp_number(payload.customer_phone)
-    if not phone_e164:
+    phone_e164 = normalize_whatsapp_number(payload.customer_phone) if payload.customer_phone else None
+    if not phone_e164 and payload.table is None:
         raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
     answers = check_answers(biz, "order", payload.answers)
 
@@ -2215,6 +2240,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     if answers:
         notes = (notes + "\n" if notes else "") + answers_text(answers)
     needed_by = payload.date + (f"T{payload.window.start}" if payload.window else "")
+    if payload.table is not None:
+        needed_by = now.strftime("%Y-%m-%dT%H:%M")
     if payload.fulfilment == "delivery":
         fee = delivery_fee_for(st, payload.city, subtotal - (discount["amount"] if discount else 0))
     total = round(subtotal - (discount["amount"] if discount else 0) + fee, 2) if lines else None
@@ -2228,8 +2255,9 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         "owner_user_id": biz["owner_user_id"],
         "gig_id": gig["_id"],
         "customer_name": payload.customer_name,
-        "customer_phone": payload.customer_phone,
+        "customer_phone": payload.customer_phone or None,
         "customer_phone_e164": phone_e164,
+        "table": payload.table,
         "customer_email": payload.customer_email or None,
         "customer_user_id": (viewer or {}).get("user_id"),
         "items": items_text,
@@ -2270,12 +2298,12 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     track = f"{_frontend_url()}/orders/track/{doc['track_token']}"
 
     # Tell the store: badge, bell, email.
-    await _notify(biz["owner_user_id"], type_="order_new", message=f"New order: {_order_line(doc)}", action_url="/dashboard?tab=orders", order_id=doc["_id"])
+    await _notify(biz["owner_user_id"], type_="order_new", message=(f"Table {payload.table}: " if payload.table else "New order: ") + _order_line(doc), action_url="/dashboard?tab=orders", order_id=doc["_id"])
     owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"_id": 0, "email": 1})
     await _email(
-        (owner or {}).get("email"), f"New order from {payload.customer_name}",
+        (owner or {}).get("email"), f"New order from table {payload.table}" if payload.table else f"New order from {payload.customer_name}",
         f"<p><strong>{_esc(payload.customer_name)}</strong> ordered on your page:</p><p>{_esc_ml(items_text)}</p>"
-        f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else 'Pickup'} · {_esc(needed_by.replace('T', ' '))}"
+        f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else (f'Table {payload.table}' if payload.table else 'Pickup')} · {_esc(needed_by.replace('T', ' '))}"
         + (f" · {_esc(sym)}{total:g}" if total is not None else "") + "</p>",
         tag="order-new", button=("Open my orders", f"{_frontend_url()}/dashboard?tab=orders"),
     )
@@ -2288,7 +2316,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     await _email(
         payload.customer_email, f"Your order from {biz.get('name')}",
         f"<p>Thanks, {_esc(payload.customer_name)}. {_esc(biz.get('name'))} has your order:</p><p>{_esc_ml(items_text)}</p>"
-        f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else 'Pickup at the store'} · {_esc(needed_by.replace('T', ' '))}"
+        f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else (f'Served at table {payload.table}' if payload.table else 'Pickup at the store')} · {_esc(needed_by.replace('T', ' '))}"
         + (f" · {_esc(sym)}{total:g}" if total is not None else "") + "</p>"
         + (f"<p>Payment goes to the store directly. {_esc(pay)}</p>{links}" if (pay or links) else "<p>Payment goes to the store directly.</p>"),
         tag="order-confirmation", button=("Follow your order", track),

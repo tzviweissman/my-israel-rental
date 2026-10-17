@@ -57,7 +57,7 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
   const nextLabel = {
     preparing: t('orders.action.start', 'Start'),
     ready: t('orders.action.ready', 'Ready'),
-    done: o.fulfilment === 'delivery' ? t('orders.action.delivered', 'Delivered') : t('orders.action.collected', 'Collected'),
+    done: o.table ? t('tableOrder.served', 'Served') : o.fulfilment === 'delivery' ? t('orders.action.delivered', 'Delivered') : t('orders.action.collected', 'Collected'),
   }[next];
 
   return (
@@ -77,14 +77,16 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
             {/* dir="auto" on every free-text field: a Hebrew board full of
                 English item names (or the reverse) must not read "rolls 6". */}
             <span dir="auto" className="font-semibold truncate" style={{ color: 'var(--ink)', textDecoration: o.status === 'cancelled' ? 'line-through' : 'none' }}>
-              {o.customer_name}
+              {/* A table order with no name is stored as "Table N"; the table
+                  chip below already says it, in the board's language. */}
+              {o.table && o.customer_name === `Table ${o.table}` ? '' : o.customer_name}
             </span>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border" style={pillStyle(o.status, false)}>
               {t(`orders.status.${o.status}`, o.status)}
             </span>
             <span className="inline-flex items-center gap-1 text-[11px]" style={{ color: 'var(--brand-muted)' }}>
               {o.fulfilment === 'delivery' ? <Bike size={12} /> : <StoreIcon size={12} />}
-              {o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
+              {o.table ? t('tableOrder.table', 'Table {{n}}', { n: o.table }) : o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
             </span>
             {o.source === 'website' && (
               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: 'var(--surface-muted)', color: 'var(--brand-muted)' }} data-testid="order-website">{t('orders.fromWebsite', 'website')}</span>

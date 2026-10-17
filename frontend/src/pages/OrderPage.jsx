@@ -20,6 +20,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { parseItems } from '../utils/storeBasket';
 import BirthdayInput, { birthdayOrNull } from '../components/forms/BirthdayInput';
 import RestockNotify from '../components/forms/RestockNotify';
+import GoesWith from '../components/forms/GoesWith';
 
 // One id per store listing in this browser, for the left-behind basket
 // reminder (backend basket_reminders.py). A new one after each order.
@@ -78,6 +79,9 @@ export default function OrderPage() {
   const [phone, setPhone] = useState(user?.whatsapp_number || user?.phone || '');
   const [email, setEmail] = useState(user?.email || '');
   const [birthday, setBirthday] = useState('');
+  // ?table=5 from a table's QR code (backend tables.py): an order for now,
+  // served at the table, no phone or date asked.
+  const tableParam = parseInt(params.get('table') || '', 10);
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);       // {track_url, total}
 
@@ -165,6 +169,7 @@ export default function OrderPage() {
   }
 
   const bizName = (lang === 'he' && data.business.name_he) || data.business.name;
+  const table = data.business.tables_on && tableParam > 0 ? tableParam : null;
   // Counted down to 0 is sold out too (backend restock.available).
   const onSale = (p) => p.in_stock && (p.stock === null || p.stock === undefined || p.stock > 0);
   const products = data.products.filter(onSale);
@@ -205,11 +210,11 @@ export default function OrderPage() {
   const phoneErr = phoneError(phone, t);
   const closedDay = (d) => !!pastCutoff(toISODate(d), data.settings.cutoffs);
   const lastDay = (() => { const d = new Date(`${data.today}T00:00`); d.setDate(d.getDate() + ORDER_AHEAD_DAYS); return toISODate(d); })();
-  const canSubmit = (lines.length > 0 || extra.trim()) && date && !pastCutoff(date, data.settings.cutoffs)
-    && (windowsForDay.length === 0 || windowKey)
-    && name.trim() && phone.trim() && !phoneErr
+  const canSubmit = (lines.length > 0 || extra.trim())
+    && (table || (date && !pastCutoff(date, data.settings.cutoffs) && (windowsForDay.length === 0 || windowKey) && name.trim() && phone.trim()))
+    && !(phone.trim() && phoneErr)
     && (data.custom_fields || []).every((f) => !f.required || (f.type === 'checkbox' ? answers[f.id] === true : String(answers[f.id] || '').trim()))
-    && (fulfilment === 'pickup' || (address.trim() && (data.business.serves_nationwide || city) && !belowMin));
+    && (table || fulfilment === 'pickup' || (address.trim() && (data.business.serves_nationwide || city) && !belowMin));
 
   const setQ = (id, n, max = 99) => setQty((q) => ({ ...q, [id]: Math.max(0, Math.min(max, 99, n)) }));
 
@@ -221,10 +226,11 @@ export default function OrderPage() {
       const w = windowsForDay.find((x) => `${x.start}-${x.end}` === windowKey);
       const body = {
         lines: lines.map((l) => ({ product_id: l.product.id, qty: l.qty, option_id: l.option ? l.option.id : null })),
-        extra_items: extra.trim(), notes: notes.trim(), fulfilment, date,
-        window: w ? { weekday: w.weekday, start: w.start, end: w.end } : null,
-        city: fulfilment === 'delivery' ? (city || null) : null,
-        address: fulfilment === 'delivery' ? address.trim() : null,
+        extra_items: extra.trim(), notes: notes.trim(), fulfilment: table ? 'pickup' : fulfilment, date: table ? data.today : date,
+        window: !table && w ? { weekday: w.weekday, start: w.start, end: w.end } : null,
+        table,
+        city: !table && fulfilment === 'delivery' ? (city || null) : null,
+        address: !table && fulfilment === 'delivery' ? address.trim() : null,
         customer_name: name.trim(), customer_phone: phone.trim(), customer_email: email.trim() || null,
         answers,
         discount_code: code ? code.code : null,
@@ -298,6 +304,11 @@ export default function OrderPage() {
         {data.business.logo_url && <img src={data.business.logo_url} alt="" className="w-11 h-11 rounded-xl object-cover" />}
         <h1 className="text-xl font-bold" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{t('order.title', 'Order from {{name}}', { name: bizName })}</h1>
       </div>
+      {table && (
+        <p className="mb-4 rounded-2xl px-4 py-3 text-sm font-semibold" style={{ background: 'var(--ink)', color: 'var(--action-ink)' }} data-testid="order-table">
+          {t('tableOrder.banner', 'Table {{n}}: order here and it is brought to your table.', { n: table })}
+        </p>
+      )}
 
       <NoticeBar business={data.business} className="mb-4" />
       <form onSubmit={submit} className="space-y-5">
@@ -347,6 +358,7 @@ export default function OrderPage() {
               );
             })}
           </ul>
+          <GoesWith gigId={gigId} products={products} qty={qty} onAdd={(key) => setQ(key, (qty[key] || 0) + 1)} currency={currency} />
           {/* Sold out right now, with "Tell me when it's back" (backend restock.py). */}
           {soldOut.length > 0 && (
             <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--brand-border)' }} data-testid="order-sold-out">
@@ -370,7 +382,8 @@ export default function OrderPage() {
           <input id="order-extra" value={extra} onChange={(e) => setExtra(e.target.value)} dir="auto" placeholder={t('order.extraPh', 'e.g. 1 gluten-free challah')} className={input} style={inputStyle} data-testid="order-extra" />
         </section>
 
-        {/* 2. How */}
+        {/* 2. How (not for a table: it is now, at the table) */}
+        {!table && (
         <section className="rounded-2xl border bg-white p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }}>
           {!deliveryPossible && (
             <p className="inline-flex items-center gap-1.5 text-sm font-semibold" style={{ color: 'var(--ink)' }} data-testid="order-pickup-only">
@@ -450,19 +463,22 @@ export default function OrderPage() {
             {date && windowsForDay.length === 0 && <p className="text-xs mt-1" style={{ color: 'var(--brand-muted)' }}>{t('order.noWindows', 'The store will confirm the time with you.')}</p>}
           </div>
         </section>
+        )}
 
         {/* 3. Who */}
         <section className="rounded-2xl border bg-white p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }}>
           <div>
-            <label className={label} style={labelStyle} htmlFor="order-name">{t('order.name', 'Your name')}</label>
-            <input id="order-name" value={name} onChange={(e) => setName(e.target.value)} dir="auto" className={input} style={inputStyle} required data-testid="order-name" />
+            <label className={label} style={labelStyle} htmlFor="order-name">{t('order.name', 'Your name')}{table ? ` · ${t('orders.optional', 'optional')}` : ''}</label>
+            <input id="order-name" value={name} onChange={(e) => setName(e.target.value)} dir="auto" className={input} style={inputStyle} required={!table} data-testid="order-name" />
           </div>
+          {!table && (
           <div>
             <label className={label} style={labelStyle} htmlFor="order-phone">{t('order.phone', 'Mobile')}</label>
             <input id="order-phone" type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={input} style={{ ...inputStyle, borderColor: phoneErr ? 'var(--ink)' : 'var(--brand-border)' }} placeholder="050-123-4567" required data-testid="order-phone" />
             {phoneErr && <p className="text-[11px] mt-1" style={{ color: 'var(--ink)' }}>{phoneErr}</p>}
             {fulfilment === 'delivery' && <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.phoneNotice', 'The delivery person will see your number to reach you.')}</p>}
           </div>
+          )}
           <div>
             <label className={label} style={labelStyle} htmlFor="order-email">{t('order.email', 'Email')} · {t('orders.optional', 'optional')}</label>
             <input id="order-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={input} style={inputStyle} placeholder="name@example.com" data-testid="order-email" />

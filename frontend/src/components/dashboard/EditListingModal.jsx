@@ -877,7 +877,8 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 {isStore && (
                   <SizeFields option={o} onChange={(patch) => setOption(i, patch)} testid={`edit-listing-size-${i}`} />
                 )}
-                {isStore && <ProductExtras option={o} i={i} onChange={(patch) => setOption(i, patch)} />}
+                {isStore && <ProductExtras option={o} i={i} onChange={(patch) => setOption(i, patch)}
+                  others={options.filter((x, j) => j !== i && x.id && String(x.name || '').trim()).map((x) => ({ id: x.id, name: x.name }))} />}
                 {isStore && (
                   <div className="flex flex-wrap items-center gap-2">
                     <label className="inline-flex items-center gap-2 min-h-[44px] pe-2 text-sm font-semibold text-gray-700 cursor-pointer">

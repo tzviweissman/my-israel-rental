@@ -153,6 +153,7 @@ const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
 const GiftCardBuyPage = lazy(() => import('./pages/GiftCardBuyPage'));
 const GiftCardPage = lazy(() => import('./pages/GiftCardPage'));
 const LinkPage = lazy(() => import('./pages/LinkPage'));
+const TablesPrintPage = lazy(() => import('./pages/TablesPrintPage'));
 const MembershipSignupPage = lazy(() => import('./pages/MembershipSignupPage'));
 const UnsubscribePage = lazy(() => import('./pages/UnsubscribePage'));
 const StaffJoinPage = lazy(() => import('./pages/StaffJoinPage'));
@@ -561,6 +562,7 @@ function App() {
             <Route path="/review/booking/:bookingId" element={<WriteReview />} />
             <Route path="/review/:token" element={<WriteReview />} />
             <Route path="/orders/print" element={user ? <OrdersPrintPage /> : <ToAuth />} />
+            <Route path="/tables/print" element={user ? <TablesPrintPage /> : <ToAuth />} />
 
             {/* The old per-person pages keep working, as the spec requires,
                 by resolving to that person's first business. Kept for both

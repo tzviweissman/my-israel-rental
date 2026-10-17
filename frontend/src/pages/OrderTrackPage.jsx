@@ -83,7 +83,10 @@ export default function OrderTrackPage() {
 
   const bizName = (lang === 'he' && data.business?.name_he) || data.business?.name || '';
   const delivery = data.fulfilment === 'delivery';
-  const steps = delivery
+  // A table order (backend tables.py) is cooked and brought to the table.
+  const steps = data.table
+    ? [['preparing', t('orders.track.preparing', 'Preparing')], ['ready', t('tableOrder.onItsWay', 'On its way to your table')], ['done', t('tableOrder.served', 'Served')]]
+    : delivery
     ? [['preparing', t('orders.track.preparing', 'Preparing')], ['ready', t('orders.track.outForDelivery', 'Out for delivery')], ['done', t('orders.track.delivered', 'Delivered')]]
     : [['preparing', t('orders.track.preparing', 'Preparing')], ['ready', t('orders.track.readyToCollect', 'Ready to collect')], ['done', t('orders.track.collected', 'Collected')]];
   const rank = { new: 0, preparing: 1, ready: 2, done: 3 };
@@ -154,7 +157,7 @@ export default function OrderTrackPage() {
           {when && <p className="flex items-center gap-2" style={{ color: 'var(--ink)' }}><Clock size={14} /> {when}</p>}
           <p className="flex items-center gap-2" style={{ color: 'var(--ink)' }}>
             {delivery ? <Bike size={14} /> : <StoreIcon size={14} />}
-            {delivery ? t('orders.delivery', 'Delivery') : t('orders.track.pickupAtStore', 'Pickup at the store')}
+            {data.table ? t('tableOrder.table', 'Table {{n}}', { n: data.table }) : delivery ? t('orders.delivery', 'Delivery') : t('orders.track.pickupAtStore', 'Pickup at the store')}
           </p>
           {delivery && data.address && <p className="flex items-start gap-2" dir="auto" style={{ color: 'var(--ink)' }}><MapPin size={14} className="mt-0.5 shrink-0" /> <span>{data.address}</span></p>}
           <p className="whitespace-pre-line pt-1 border-t" dir="auto" style={{ color: 'var(--ink)', borderColor: 'var(--brand-border)' }}>{data.items}</p>

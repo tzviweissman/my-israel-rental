@@ -21,12 +21,13 @@ export function cleanExtras(o) {
       return { ...(x.id ? { id: x.id } : {}), name: String(x.name || '').trim().slice(0, 40), price: Number.isFinite(p) ? p : null, in_stock: x.in_stock !== false };
     })
     .filter((x) => x.name);
-  return { stock, low_stock_at: stock === null ? null : low, options };
+  const goesWith = (o.goes_with || []).filter(Boolean).slice(0, 4);
+  return { stock, low_stock_at: stock === null ? null : low, options, goes_with: goesWith };
 }
 
-export default function ProductExtras({ option: o, onChange, i }) {
+export default function ProductExtras({ option: o, onChange, i, others = [] }) {
   const { t } = useTranslation();
-  const has = (o.stock !== null && o.stock !== undefined && o.stock !== '') || (o.options || []).length > 0;
+  const has = (o.stock !== null && o.stock !== undefined && o.stock !== '') || (o.options || []).length > 0 || (o.goes_with || []).length > 0;
   const [open, setOpen] = useState(has);
   const opts = o.options || [];
   const setOpt = (k, patch) => onChange({ options: opts.map((x, j) => (j === k ? { ...x, ...patch } : x)) });
@@ -35,7 +36,7 @@ export default function ProductExtras({ option: o, onChange, i }) {
     <div className="text-sm" data-testid={`product-extras-${i}`}>
       <button type="button" onClick={() => setOpen(!open)} aria-expanded={open}
               className="inline-flex items-center gap-1 min-h-[44px] font-semibold text-gray-700" data-testid={`product-extras-toggle-${i}`}>
-        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {t('editListing.extras', 'Stock count, sizes and options')}
+        {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />} {t('editListing.extrasPairs', 'Stock count, sizes, and what goes with it')}
       </button>
       {open && (
         <div className="space-y-3 rounded-lg p-3" style={{ background: '#F9FAFB' }}>
@@ -81,6 +82,27 @@ export default function ProductExtras({ option: o, onChange, i }) {
               </button>
             )}
           </div>
+          {/* "Add to your order" on the order form (backend pairings.py). */}
+          {others.length > 0 && (
+            <div data-testid={`product-goes-with-${i}`}>
+              <p className="font-semibold text-gray-700">{t('editListing.goesWith', 'Goes well with')}</p>
+              <p className="text-xs text-gray-600 mb-2">{t('editListing.goesWithHelp', 'Customers who choose this see up to two of these as "add to your order". Without a choice, it learns from what people order together.')}</p>
+              <div className="flex flex-wrap gap-2">
+                {others.map((x) => {
+                  const on = (o.goes_with || []).includes(x.id);
+                  const full = !on && (o.goes_with || []).length >= 4;
+                  return (
+                    <button key={x.id} type="button" disabled={full} aria-pressed={on}
+                            onClick={() => onChange({ goes_with: on ? (o.goes_with || []).filter((y) => y !== x.id) : [...(o.goes_with || []), x.id] })}
+                            className="px-3 min-h-[36px] rounded-full border text-xs font-semibold disabled:opacity-40" dir="auto"
+                            style={on ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : { borderColor: 'var(--brand-border)', color: 'var(--ink)', background: '#fff' }}>
+                      {x.name}
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
         </div>
       )}
     </div>

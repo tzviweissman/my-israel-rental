@@ -549,6 +549,9 @@ const en = {
         needProduct: 'A shop needs at least one product.',
         inStock: 'In stock',
         extras: "Stock count, sizes and options",
+        extrasPairs: "Stock count, sizes, and what goes with it",
+        goesWith: "Goes well with",
+        goesWithHelp: "Customers who choose this see up to two of these as \"add to your order\". Without a choice, it learns from what people order together.",
         stock: "How many you have",
         stockPh: "Not counted",
         lowAt: "Email me when it falls to",
@@ -5802,6 +5805,24 @@ const en = {
       restockBiz: {
         title: "Waiting for sold-out products",
         hint: "Put one back on sale and everyone waiting for it gets one email to order it.",
+      },
+      // Table ordering and "add to your order" (16 Oct 2026).
+      tableOrder: {
+        banner: "Table {{n}}: order here and it is brought to your table.",
+        table: "Table {{n}}",
+        served: "Served",
+        onItsWay: "On its way to your table",
+        title: "Order from the table",
+        hint: "Each table gets a QR code. Guests scan it, order from your menu, and the order reaches your board marked with the table number. No phone or date needed.",
+        howMany: "Tables",
+        print: "Print the table codes",
+        scan: "Scan to order to your table",
+        noStore: "Add a shop listing with your menu first: the table codes open its order form.",
+        offNote: "Table ordering is switched off, so these codes will not take orders until you switch it on.",
+      },
+      goesWith: {
+        title: "Goes well with your order",
+        add: "Add",
       },
       // Invite a friend (backend referrals.py).
       referrals: {

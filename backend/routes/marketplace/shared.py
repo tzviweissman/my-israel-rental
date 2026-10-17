@@ -570,6 +570,9 @@ class ProductItem(BaseModel):
     low_stock_at: Optional[int] = Field(None, ge=1, le=100_000)
     # Sizes, flavours or colours the customer picks one of.
     options: list[ProductOption] = Field(default_factory=list, max_length=20)
+    # Other products of this listing that go with it, by id, for "Add to
+    # your order" on the order form (pairings.py).
+    goes_with: list[str] = Field(default_factory=list, max_length=4)
 
     @model_validator(mode="after")
     def _counted_stock(self):
