@@ -490,7 +490,6 @@
         <p class="line" data-mir-key="t-03fb6533-0">The Brown Box, delivered across Jerusalem.</p>
         <a class="btn" href="/business/the-brown-box/order?add=Acai%20bowl" tabindex="-1" data-mir-key="t-2249065d-2">Order a bowl, <b>₪60</b> <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
       </div>
-      <div class="hint" id="hint">Scroll</div>
       <div class="load" id="load"></div>
     </div>
   </section>
@@ -734,7 +733,6 @@ document.addEventListener('DOMContentLoaded', function () {
     var r = filmEl.getBoundingClientRect(), span = filmEl.offsetHeight - innerHeight;
     return Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
   }
-  var hint = document.getElementById('hint');
   function paint() {
     p = still ? 0 : progress();
     draw();
@@ -743,7 +741,6 @@ document.addEventListener('DOMContentLoaded', function () {
       c.classList.toggle('on', on); c.setAttribute('aria-hidden', on ? 'false' : 'true');
       c.querySelectorAll('a').forEach(function (a) { a.tabIndex = on ? 0 : -1; });
     });
-    hint.style.opacity = p > 0.02 ? 0 : 1;
     document.body.classList.toggle('on-film', filmEl.getBoundingClientRect().bottom > 64);
   }
   var raf = 0;
