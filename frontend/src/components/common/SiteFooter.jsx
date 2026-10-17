@@ -31,6 +31,10 @@ export default function SiteFooter() {
     // reachable from every page rather than only from the dashboard.
     { to: '/what-you-can-do', label: t('features.title', 'What you can do here') },
     { to: '/faq', label: t('footer.faq', 'Frequently Asked Questions') },
+    // Meta's WhatsApp Business review looks for these in the footer.
+    { to: '/contact', label: t('footer.contact', 'Contact Us') },
+    { to: '/privacy', label: t('footer.privacy', 'Privacy Policy') },
+    { to: '/terms', label: t('footer.terms', 'Terms of use') },
   ];
 
   return (

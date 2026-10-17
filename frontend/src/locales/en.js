@@ -3131,7 +3131,9 @@ const en = {
       footer: {
         contact: 'Contact Us',
         phone: 'Phone',
-        faq: 'Frequently Asked Questions'
+        faq: 'Frequently Asked Questions',
+        privacy: 'Privacy Policy',
+        terms: 'Terms of use'
       },
       tour3d: {
         title: '3D tour',
@@ -5862,6 +5864,48 @@ const en = {
       // "Order again" (17 Oct 2026).
       reorder: {
         button: "Order again",
+      },
+      privacy: {
+        metaTitle: "Privacy Policy | MyIsraelRental",
+        metaDescription: "What MyIsraelRental collects, why, who it is shared with, how WhatsApp and email messages are handled, and how to see or delete your information.",
+        title: "Privacy Policy",
+        updated: "Last updated 18 October 2026",
+        intro: "This page explains what information MyIsraelRental collects when you use myisraelrental.com, what we use it for, who else handles it, and what you can ask us to do with it. It applies to the website and to the emails and WhatsApp messages we send.",
+        contactCta: "Questions about your information, or a request to see or delete it:",
+        allWays: "All the ways to reach us",
+        p1Head: "Who we are",
+        p1Body: "MyIsraelRental is a website that connects people who have something to offer (places to rent, local services, shops and restaurants) with people who need them. It is run from Israel. In this policy “we” and “us” mean MyIsraelRental.\n\nYou can reach us at support@myisraelrental.com or on WhatsApp at +972 55-322-5141.",
+        p2Head: "What we collect",
+        p2Body: "Account details: your name and email address, and a phone number if you add one. If you sign in with Google, we receive your name, email address and profile picture from Google.\n\nWhat you post: listings, services, products, requests, photos, reviews and the messages you send through the site.\n\nOrders and bookings: when you order from a business or book a service, the name, phone number, address and notes you give so the business can fulfil it. You do not need an account to do this.\n\nTechnical information: your browser type, device, the pages you open and the time you opened them, which every website receives. We use it to keep the site working and to stop abuse.",
+        p3Head: "What we use it for",
+        p3Body: "To run your account and show what you post. To pass an order, booking or message to the person it is meant for. To send you the notifications described below. To answer you when you write to us. To find and stop fraud, spam and misuse. To understand which parts of the site are used, so we can improve them.\n\nWe do not sell your information, and we do not give it to advertisers.",
+        p4Head: "WhatsApp, email and text messages",
+        p4Body: "If you give us your phone number, we may send you WhatsApp messages about things that involve you directly: someone messaged you about your listing, a contract you are part of was signed, or an update on an order or booking you made. We do not send advertising on WhatsApp.\n\nThese messages are sent through Twilio, our messaging provider, and delivered by WhatsApp, which is owned by Meta. They receive your phone number and the text of the message in order to deliver it. Their own privacy policies apply to how WhatsApp itself handles messages.\n\nIf you write to our WhatsApp number, we see your number, your WhatsApp name and what you send, and use them only to answer you.\n\nTo stop WhatsApp messages from us, tell us in a reply on WhatsApp or by email and we will stop them. Emails work the same way: the regular ones can each be switched off in your settings or from the link at the bottom of the email.",
+        p5Head: "Who else handles your information",
+        p5Body: "We use a small number of service providers to run the site. Each receives only what it needs for its job and may not use it for anything else: our database host, our image and file host, our email sender, Twilio for WhatsApp and text messages, Google if you sign in with it, and an AI service that translates messages and listings between Hebrew and English when you ask it to.\n\nSome of these providers store information on servers outside Israel, including in the United States and the European Union.\n\nWe pass information to the police, a court or another authority only when the law requires it.",
+        p6Head: "What other people can see",
+        p6Body: "Your listings, your public business page, your posts on the Requests board and your reviews are visible to anyone. Your messages are visible to the person you send them to. Your email address is not shown on the site.\n\nYour phone number is shown only where you have chosen to show it, or to a business fulfilling an order you placed.",
+        p7Head: "Cookies and storage in your browser",
+        p7Body: "We store a small amount of information in your browser: that you are signed in, your language, and a few settings such as a basket you have not finished. We use it to make the site work. We do not use advertising cookies.",
+        p8Head: "How long we keep it",
+        p8Body: "We keep your account and what you posted until you delete them or ask us to. Messages, orders and bookings are kept so both sides can look back at them. When you delete your account we remove your personal details, except signed contracts, which belong to both parties, and the records the law requires us to keep.",
+        p9Head: "Your rights",
+        p9Body: "Under Israel’s Protection of Privacy Law you can ask to see the information we hold about you, and to correct it if it is wrong. You can also ask us to delete your account and your information, or to stop sending you messages.\n\nWrite to support@myisraelrental.com from the email address on your account. We answer within 30 days.",
+        p10Head: "Keeping it safe",
+        p10Body: "Information travels to and from the site encrypted. Passwords are stored in a form that cannot be read back. Rental contracts are kept away from the public parts of the site and shown only to the people party to them. No system is perfectly secure; if something goes wrong that affects your information, we will tell you.",
+        p11Head: "Children, and changes to this policy",
+        p11Body: "The site is for people aged 18 and over. We do not knowingly collect information from children.\n\nIf we change this policy in a way that matters, we will change the date at the top of this page and say what changed."
+      },
+      contactPage: {
+        metaTitle: "Contact us | MyIsraelRental",
+        metaDescription: "How to reach MyIsraelRental: email support@myisraelrental.com or WhatsApp +972 55-322-5141.",
+        title: "Contact us",
+        intro: "Questions about the site, a problem with a listing or an order, or a request about your information: write to us by email or on WhatsApp.",
+        email: "Email",
+        whatsapp: "WhatsApp",
+        website: "Website",
+        aboutHead: "About MyIsraelRental",
+        aboutBody: "MyIsraelRental connects people who have something to offer with people who need it: places to rent, local businesses and services, shops and restaurants, and a board for posting what you are looking for. It is run from Israel.\n\nListing a business or a property is free, with no commission."
       },
       // Invite a friend (backend referrals.py).
       referrals: {

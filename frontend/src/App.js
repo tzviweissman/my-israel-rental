@@ -170,6 +170,10 @@ const FAQ = lazy(() => import('./pages/FAQ'));
 // Policy" checkbox here. Without this route that link 404s and the consent
 // is to a page nobody can read. See pages/Terms.jsx.
 const Terms = lazy(() => import('./pages/Terms'));
+// Privacy policy and contact page at their own addresses: Meta's WhatsApp
+// Business review looks for both (17 Oct 2026).
+const Privacy = lazy(() => import('./pages/Privacy'));
+const Contact = lazy(() => import('./pages/Contact'));
 // What a business sends and agrees to before joining; the super admin's invite links here.
 const JoinRules = lazy(() => import('./pages/JoinRules'));
 const NotFound = lazy(() => import('./pages/NotFound'));
@@ -571,6 +575,8 @@ function App() {
             <Route path="/services/provider/:userId" element={<ProviderRedirect />} />
             <Route path="/faq" element={<FAQ />} />
             <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<Privacy />} />
+            <Route path="/contact" element={<Contact />} />
             <Route path="/join-rules" element={<JoinRules />} />
             {/* Catch-all — any URL no route above claims. Without it an
                 unknown URL rendered the nav shell over an empty content
