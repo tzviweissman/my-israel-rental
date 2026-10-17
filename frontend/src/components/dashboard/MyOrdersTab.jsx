@@ -112,6 +112,11 @@ export default function MyOrdersTab({ API, token }) {
                   {t('order.follow', 'Follow my order')} <ExternalLink size={11} />
                 </a>
               )}
+              {o.reorder_path && (
+                <a href={o.reorder_path} className="mt-2 ms-2 inline-flex items-center gap-1 px-3 min-h-[36px] rounded-full border text-xs font-semibold" style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }} data-testid="my-order-reorder">
+                  {t('reorder.button', 'Order again')}
+                </a>
+              )}
             </article>
           ))}
         </div>

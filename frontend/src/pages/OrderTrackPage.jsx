@@ -17,7 +17,7 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { StarInput } from '../components/reviews/ReviewsSection';
-import { Loader2, ClipboardList, Check, Bike, Store as StoreIcon, Clock, MapPin, Truck } from 'lucide-react';
+import { Loader2, ClipboardList, Check, Bike, Store as StoreIcon, Clock, MapPin, Truck, RotateCcw } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { money } from '../utils/currency';
 import ReferralCard from '../components/forms/ReferralCard';
@@ -192,6 +192,14 @@ export default function OrderTrackPage() {
             <a href={data.delivered_photo_url} target="_blank" rel="noopener noreferrer"><img src={data.delivered_photo_url} alt={t('orders.track.photoAlt', 'Photo of the delivery at your door')} className="w-full rounded-xl object-cover aspect-[4/3] max-h-72" /></a>
           </section>
         )}
+        {/* The same order again (backend orders.reorder_path). */}
+        {data.reorder_path && (
+          <a href={data.reorder_path} className="mt-4 flex items-center justify-center gap-2 w-full min-h-[48px] rounded-full text-sm font-semibold"
+             style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="track-reorder">
+            <RotateCcw size={15} aria-hidden="true" /> {t('reorder.button', 'Order again')}
+          </a>
+        )}
+
         {reviewsOn && data.status === 'done' && (
           <section className="mt-4 rounded-2xl border bg-white p-4 text-center" style={{ borderColor: 'var(--brand-border)' }} data-testid="track-review">
             <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orders.track.reviewAsk', 'How was your order?')}</p>

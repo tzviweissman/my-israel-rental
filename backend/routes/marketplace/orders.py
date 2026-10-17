@@ -1100,6 +1100,19 @@ def _esc_ml(v: Any) -> str:
     return _esc(v).replace("\n", "<br>")
 
 
+def reorder_path(order: dict[str, Any]) -> Optional[str]:
+    """'Order again' (Tzvi, 17 Oct 2026, from Wolt and Uber Eats): the order
+    form with the same items already chosen, from the lines of a website
+    order. None when there is nothing to repeat. Items no longer on sale are
+    dropped by the form itself (OrderPage parseItems)."""
+    from urllib.parse import quote
+    lines = [ln for ln in order.get("lines") or [] if ln.get("product_id") and ln.get("qty")]
+    if not order.get("gig_id") or not lines:
+        return None
+    keys = [quote(ln["product_id"] + (f"::{ln['option_id']}" if ln.get("option_id") else ""), safe="") + f"~{int(ln['qty'])}" for ln in lines]
+    return f"/order/{quote(order['gig_id'])}?items={','.join(keys)}"
+
+
 def _subject(s: str) -> str:
     """One line, always. A name carrying a newline splices a second line
     into the subject; what the mail provider does with that is its
@@ -1499,7 +1512,8 @@ async def courier_set_status(order_id: str, payload: CourierStatusIn, user=Depen
             order.get("customer_email"), f"Delivered: your order from {biz.get('name')}",
             f"<p>Your order from {_esc(biz.get('name'))} was delivered at {_esc(now[11:16])}.</p>"
             + (f"<p><img src=\"{_esc(payload.photo_url)}\" alt=\"Delivery photo\" style=\"max-width:100%;border-radius:12px\"></p>" if payload.photo_url else "")
-            + f"<p>{_esc_ml(order.get('items'))}</p>",
+            + f"<p>{_esc_ml(order.get('items'))}</p>"
+            + (f"<p><a href=\"{_esc(_frontend_url() + reorder_path(order))}\">Order the same again</a></p>" if reorder_path(order) else ""),
             tag="order-delivered", button=("See your order", track),
         )
         if order.get("customer_user_id"):
@@ -1570,6 +1584,8 @@ async def track_order(token: str, request: Request):
         "delivered_photo_url": (o.get("delivery") or {}).get("photo_url") if o.get("status") == "done" else None,
         "window": o.get("window"),
         "lines": o.get("lines"),
+        # The same order again, once this one is done (reorder_path).
+        "reorder_path": reorder_path(o) if o.get("status") == "done" else None,
         "delivery_fee": o.get("delivery_fee"),
         "paid": bool((o.get("payment") or {}).get("method")),
         # Parts a partner supplies and delivers separately, without its name.
@@ -2351,5 +2367,6 @@ async def my_orders(user=Depends(verify_token)):
             "delivered_photo_url": (o.get("delivery") or {}).get("photo_url") if o.get("status") == "done" else None,
             "paid": bool((o.get("payment") or {}).get("method")),
             "track_token": o.get("track_token"),
+            "reorder_path": reorder_path(o) if o.get("status") == "done" else None,
         })
     return out
