@@ -53,6 +53,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
     description: b.description || '',
     description_he: b.description_he || '',
     hours: b.hours || '',
+    by_appointment: !!b.by_appointment,
     // Kept as text while editing; split on save. A chip editor here means
     // the owner cannot type "Hebrew, English" the way they think of it.
     languages: (b.languages || []).join(', '),
@@ -139,6 +140,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
         // Empty string clears it, so a removed Hebrew text stops showing.
         description_he: form.description_he.trim(),
         hours: orNull(form.hours),
+        by_appointment: !!form.by_appointment,
         languages,
         founded_year: Number.isFinite(year) && year > 1800 ? year : null,
         delivery_note: orNull(form.delivery_note),
@@ -325,7 +327,15 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
             t('businesses.aboutPh', 'What you do, and what makes you worth choosing.'), { textarea: true })}
           {field('description_he', t('businesses.aboutHe', 'About your business, in Hebrew (optional)'),
             t('businesses.aboutHePh', 'Hebrew readers see this instead. Leave it empty and they see the text above.'), { textarea: true, dir: 'rtl' })}
-          {field('hours', t('businessPage.hours', 'Hours'), 'Sun–Thu 9:00–18:00 · Fri 9:00–13:00')}
+          {/* "By appointment only" replaces opening hours on the page, in
+              each visitor's language (Tzvi, 17 Oct 2026). */}
+          <div>
+            {!form.by_appointment && field('hours', t('businessPage.hours', 'Hours'), 'Sun–Thu 9:00–18:00 · Fri 9:00–13:00')}
+            <label className={`flex items-center gap-2 text-sm min-h-[40px] ${form.by_appointment ? '' : 'mt-1'}`} style={{ color: 'var(--ink)' }}>
+              <input type="checkbox" checked={!!form.by_appointment} onChange={(e) => set({ by_appointment: e.target.checked })} data-testid="biz-details-by-appointment" />
+              {t('businessPage.byAppointmentTick', 'By appointment only (no fixed opening hours)')}
+            </label>
+          </div>
           {field('languages', t('businessPage.languages', 'Languages'), 'Hebrew, English')}
           {field('founded_year', t('businesses.foundedYear', 'Year started'), '2011', { numeric: true })}
           {field('delivery_note', t('businessPage.delivery', 'Delivery'), 'Jerusalem and Beit Shemesh, same day')}

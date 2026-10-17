@@ -35,7 +35,8 @@ export default function GoodToKnow({ business }) {
   const years = yearsInBusiness(b.founded_year);
 
   const rows = [
-    b.hours && { key: 'hours', Icon: Clock, label: t('businessPage.hours', 'Hours'), value: b.hours },
+    b.by_appointment ? { key: 'hours', Icon: Clock, label: t('businessPage.hours', 'Hours'), value: t('businessPage.byAppointment', 'By appointment only') }
+      : b.hours && { key: 'hours', Icon: Clock, label: t('businessPage.hours', 'Hours'), value: b.hours },
     (b.languages || []).length > 0 && {
       key: 'languages', Icon: Languages,
       label: t('businessPage.languages', 'Languages'),

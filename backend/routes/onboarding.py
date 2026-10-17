@@ -114,7 +114,7 @@ async def _business_items(uid: str) -> list[dict[str, Any]]:
         b async for b in db.businesses.find(
             {"owner_user_id": uid},
             {"_id": 1, "name": 1, "description": 1, "logo_url": 1, "cover_url": 1,
-             "areas": 1, "serves_nationwide": 1, "hours": 1},
+             "areas": 1, "serves_nationwide": 1, "hours": 1, "by_appointment": 1},
         )
     ]
     any_of = lambda f: any(f(b) for b in businesses)  # noqa: E731
@@ -179,7 +179,7 @@ async def _business_items(uid: str) -> list[dict[str, Any]]:
         {
             "id": "biz.hours",
             "endowed": False,
-            "done": any_of(lambda b: bool((b.get("hours") or "").strip())),
+            "done": any_of(lambda b: bool((b.get("hours") or "").strip()) or bool(b.get("by_appointment"))),
             "href": "/dashboard?tab=my-businesses&details=1",
         },
         {

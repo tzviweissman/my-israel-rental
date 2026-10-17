@@ -595,6 +595,8 @@ const he = {
         failed: 'לא הצלחנו ליצור את הקוד',
       },
       businessPage: {
+        byAppointment: "בתיאום מראש בלבד",
+        byAppointmentTick: "בתיאום מראש בלבד (בלי שעות פתיחה קבועות)",
         hostedOn: 'הדף הזה מתארח ב-MyIsraelRental',
         listYours: 'רשמו את העסק שלכם, בחינם',
         payVia: 'תשלום לעסק דרך',

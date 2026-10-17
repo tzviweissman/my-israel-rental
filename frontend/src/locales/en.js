@@ -611,6 +611,8 @@ const en = {
         failed: 'Could not create that code',
       },
       businessPage: {
+        byAppointment: "By appointment only",
+        byAppointmentTick: "By appointment only (no fixed opening hours)",
         hostedOn: 'This page is on MyIsraelRental',
         listYours: 'List your business, free',
         payVia: 'Pay this business via',

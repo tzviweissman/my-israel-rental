@@ -376,7 +376,8 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
     biz.kosher_certification?.body && { key: 'kosher', label: t('pageV3.supervision', 'Kosher supervision'), value: biz.kosher_certification.body },
     (biz.areas || []).length > 0 && { key: 'area', label: t('pageV3.basedIn', 'Based in'), value: biz.areas.map((a) => prettyArea(a, t)).join(', ') },
     biz.serves_nationwide && { key: 'serving', label: t('pageV3.serving', 'Serving'), value: t('serviceArea.chipNationwide', 'All of Israel') },
-    biz.hours && { key: 'hours', label: t('businessPage.hours', 'Hours'), value: biz.hours },
+    biz.by_appointment ? { key: 'hours', label: t('businessPage.hours', 'Hours'), value: t('businessPage.byAppointment', 'By appointment only') }
+      : biz.hours && { key: 'hours', label: t('businessPage.hours', 'Hours'), value: biz.hours },
     biz.lead_time && { key: 'notice', label: t('businessPage.leadTime', 'Notice needed'), value: biz.lead_time },
     biz.delivery_note && { key: 'delivery', label: t('businessPage.delivery', 'Delivery'), value: biz.delivery_note },
   ].filter(Boolean);

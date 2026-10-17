@@ -136,6 +136,8 @@ class BusinessIn(BaseModel):
     # button on a page carrying our name is an open redirect.
     payment_links: Optional[list[PaymentLink]] = None
     hours: Optional[str] = Field(None, max_length=200)
+    # "By appointment only" instead of opening hours (Tzvi, 17 Oct 2026).
+    by_appointment: Optional[bool] = None
     languages: Optional[list[str]] = None
     founded_year: Optional[int] = Field(None, ge=1800, le=2100)
     delivery_note: Optional[str] = Field(None, max_length=300)
@@ -234,6 +236,8 @@ class BusinessPatch(BaseModel):
     payment_links: Optional[list[PaymentLink]] = None
     active: Optional[bool] = None
     hours: Optional[str] = Field(None, max_length=200)
+    # "By appointment only" instead of opening hours (Tzvi, 17 Oct 2026).
+    by_appointment: Optional[bool] = None
     languages: Optional[list[str]] = None
     founded_year: Optional[int] = Field(None, ge=1800, le=2100)
     delivery_note: Optional[str] = Field(None, max_length=300)
@@ -314,6 +318,7 @@ def _public(
         # "could not find where to change his hours" - he had found it; it
         # was showing him nothing.
         "hours": doc.get("hours"),
+        "by_appointment": bool(doc.get("by_appointment")),
         "languages": doc.get("languages") or [],
         "founded_year": doc.get("founded_year"),
         "delivery_note": doc.get("delivery_note"),
@@ -752,6 +757,8 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         if n and n.starts_on and n.ends_on and n.ends_on < n.starts_on:
             raise HTTPException(status_code=422, detail="The notice ends before it starts")
         update["notice"] = {"text": n.text.strip(), "starts_on": n.starts_on, "ends_on": n.ends_on} if n and n.text.strip() else None
+    if "by_appointment" in provided:
+        update["by_appointment"] = bool(payload.by_appointment)
     for key in ("hours", "delivery_note", "lead_time", "payment_note",
                 "founded_year", "kosher_certification", "cover_url",
                 "license_number"):
@@ -1100,6 +1107,7 @@ async def public_business(
         # C6 — passed through as stored. Absent fields stay absent; the
         # page renders a row only where there is something to say.
         "hours": biz.get("hours"),
+        "by_appointment": bool(biz.get("by_appointment")),
         "languages": biz.get("languages") or [],
         "founded_year": biz.get("founded_year"),
         "delivery_note": biz.get("delivery_note"),
