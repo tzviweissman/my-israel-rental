@@ -42,6 +42,9 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] Gift-card order and "tell me when it's back" email any typed address without confirming it; gift-card order mail has no unsubscribe link. First seen 16 Oct (site audit).
 - [Low] Appointment reminder is marked sent before emailing; a failed send is never retried. First seen 16 Oct (site audit).
 - [Low] `jobsBoard.areaPh` / `areaFreeText` missing from en.js. First seen 15 Oct (site audit).
+- [Medium] Order from the table: anyone who knows a restaurant's order link can place table orders with no name, phone or sign-in (20 per 10 minutes per address), and they land on the board as "Table N". Needs Tzvi's decision. First seen 17 Oct (site audit 2026-10-17).
+- [Low] Table orders show up as a returning customer named "Table 5" in the order-form name suggestions (customers list groups by name when there is no phone). First seen 17 Oct (site audit 2026-10-17).
+- [Low] Two script checks fail: test-i18n-parity (14 t() keys missing from en.js, e.g. basket.* in CardAction.jsx, plus 7 plural sets) and test-completeness-actions (business "category" has no control). Both failed before 16 Oct too. First seen 17 Oct (site audit 2026-10-17).
 - [Low] Restock box: buttons and field are 36 to 40px tall, under the 44px rule on phones (`RestockNotify.jsx`). First seen 17 Oct (UI audit).
 - [Low] i18n: 14 keys used in code but missing from `en.js` (`basket.*` in `CardAction.jsx`, `jobsBoard.areaFreeText`, `jobsBoard.areaPh`). First seen 17 Oct (UI audit).
 - [To check] The Brown Box home: pinned film reported 64px taller than the room under the header; check on a real phone. First seen 17 Oct (UI audit).
