@@ -12,6 +12,7 @@ import { apiErrorMessage } from '../../utils/apiError';
 import WebAddressField from './WebAddressField';
 import OwnDomainField from './OwnDomainField';
 import ShareLinkRow from './ShareLinkRow';
+import WebsiteButton from './WebsiteButton';
 
 /**
  * Edit the facts behind a business's "Good to know" band (spec C6).
@@ -253,6 +254,8 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
               <ShareLinkRow link={`${window.location.origin}/link/${b.slug}`} label={t('linkPage.ownerLabel', 'Link for your Instagram or TikTok bio')} testidPrefix="bio-link" />
             </div>
           )}
+          {/* A button for their own website, opening their page here (WebsiteButton.jsx). */}
+          {b.id && b.slug && <WebsiteButton business={b} API={API} />}
 
           {/* Logo. First, because it is the first item on the checklist
               that sends people here, and the one they could not find. */}

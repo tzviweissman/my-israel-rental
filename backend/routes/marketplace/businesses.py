@@ -956,6 +956,9 @@ def _public_listing(gig: dict[str, Any]) -> dict[str, Any]:
     clean = dict(_clean_gig(dict(gig)))
     for field in _CONTACT_FIELDS:
         clean.pop(field, None)
+    if clean.get("products"):
+        from .seasonal import public_products
+        clean["products"] = public_products(clean["products"])
     clean["contact_channels"] = ["in_platform"]
     return clean
 

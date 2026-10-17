@@ -573,6 +573,10 @@ class ProductItem(BaseModel):
     # Other products of this listing that go with it, by id, for "Add to
     # your order" on the order form (pairings.py).
     goes_with: list[str] = Field(default_factory=list, max_length=4)
+    # On sale only between these days, Israel time, inclusive (seasonal.py):
+    # a holiday item. `available_until` is the last day to order it.
+    available_from: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
+    available_until: Optional[str] = Field(None, pattern=r"^\d{4}-\d{2}-\d{2}$")
 
     @model_validator(mode="after")
     def _counted_stock(self):

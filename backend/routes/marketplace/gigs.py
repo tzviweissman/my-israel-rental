@@ -646,6 +646,9 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
     )
     if gig.get("status", "published") != "published" and not owner_preview:
         raise HTTPException(status_code=404, detail="Gig not found")
+    if not owner_preview and gig.get("products"):
+        from .seasonal import public_products
+        gig["products"] = public_products(gig["products"])
     # L2 — count the visit. Fire-and-forget: a metric must never slow down
     # or fail the page it is measuring. `viewer` is optional auth purely so
     # the provider's own visits can be skipped; it gates nothing.

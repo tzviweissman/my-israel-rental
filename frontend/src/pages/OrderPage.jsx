@@ -339,6 +339,7 @@ export default function OrderPage() {
                       <div className="text-xs" style={{ color: 'var(--brand-muted)' }}>
                         {rows[0].option ? '' : money(p.price, p.currency || currency)}{p.description ? `${rows[0].option ? '' : ' · '}${p.description}` : ''}
                         {few && <span data-testid={`order-left-${p.id}`}> · {t('order.left', '{{count}} left', { count: p.stock })}</span>}
+                        {p.available_until && <span data-testid={`order-until-${p.id}`}> · {t('season.until', 'Order by {{d}}', { d: new Date(`${p.available_until}T12:00:00`).toLocaleDateString(i18n.language, { day: 'numeric', month: 'short' }) })}</span>}
                       </div>
                     </div>
                     {!rows[0].option && stepper(rows[0])}

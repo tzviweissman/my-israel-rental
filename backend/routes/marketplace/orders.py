@@ -2048,7 +2048,11 @@ def _products_for_order(gig: dict[str, Any]) -> list[dict[str, Any]]:
     """Products with a stable id. Listings saved before ids existed are
     addressed by position (`idx:N`) until their next save."""
     out = []
+    from .seasonal import in_season, today_il
+    today = today_il()
     for i, p in enumerate(gig.get("products") or []):
+        if not in_season(p, today):
+            continue   # a holiday item outside its dates (seasonal.py)
         out.append({
             "id": p.get("id") or f"idx:{i}",
             "name": p.get("name"),
@@ -2063,6 +2067,7 @@ def _products_for_order(gig: dict[str, Any]) -> list[dict[str, Any]]:
             "stock": p.get("stock"),
             # Products the business says go with this one (pairings.py).
             "goes_with": [x for x in (p.get("goes_with") or []) if isinstance(x, str)][:4],
+            "available_until": p.get("available_until"),
             "options": [{"id": o.get("id"), "name": o.get("name"), "price": o.get("price"), "in_stock": o.get("in_stock", True)}
                         for o in p.get("options") or []],
         })

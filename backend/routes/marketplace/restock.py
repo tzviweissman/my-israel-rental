@@ -40,8 +40,10 @@ _EMAIL = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 def available(p: dict[str, Any]) -> bool:
-    """On sale and not counted down to nothing."""
-    return p.get("in_stock", True) is not False and (p.get("stock") is None or int(p.get("stock") or 0) > 0)
+    """On sale, in its dates (seasonal.py) and not counted down to nothing."""
+    from .seasonal import in_season
+    return (p.get("in_stock", True) is not False and (p.get("stock") is None or int(p.get("stock") or 0) > 0)
+            and in_season(p))
 
 
 def _product(gig: dict[str, Any], product_id: str) -> Optional[dict[str, Any]]:

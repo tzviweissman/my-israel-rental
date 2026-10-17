@@ -550,6 +550,11 @@ const en = {
         inStock: 'In stock',
         extras: "Stock count, sizes and options",
         extrasPairs: "Stock count, sizes, and what goes with it",
+        season: "Only on sale between",
+        seasonFrom: "From",
+        seasonUntil: "Last day to order",
+        seasonClear: "All year",
+        seasonHelp: "For holiday items: it appears on your page on the first day and disappears after the last day to order. Leave empty to sell it all year.",
         goesWith: "Goes well with",
         goesWithHelp: "Customers who choose this see up to two of these as \"add to your order\". Without a choice, it learns from what people order together.",
         stock: "How many you have",
@@ -1234,7 +1239,7 @@ const en = {
           },
           b_service: {
             title: 'Your services and prices',
-            body: 'People decide who to contact by the price they can see. Add what you do and what it costs, and you show up when people search for it.',
+            body: 'People decide who to contact by the price they can see. Add what you do and what it costs, and you show up when people search for it. Holiday items can be given dates, so they appear and disappear by themselves.',
             doIt: 'Add a service',
           },
           b_share: {
@@ -1244,7 +1249,7 @@ const en = {
           },
           b_biolink: {
             title: "A link for your Instagram bio",
-            body: "One page made for a phone: your logo, your main buttons and your first few services. Paste this link in your Instagram or TikTok bio. It builds itself from your page, so there is nothing to set up.",
+            body: "One page made for a phone: your logo, your main buttons and your first few services. Paste this link in your Instagram or TikTok bio. It builds itself from your page, so there is nothing to set up. Have your own website? Right below is a button to add to it, which brings its visitors to your page here.",
           },
           b_hours: {
             title: "Hours, delivery and ordering from the table",
@@ -5828,6 +5833,19 @@ const en = {
       goesWith: {
         title: "Goes well with your order",
         add: "Add",
+      },
+      // Website button and holiday items (17 Oct 2026).
+      siteButton: {
+        title: "A button for your own website",
+        body: "Have a website on Wix, WordPress or anywhere else? Paste this into an \"embed HTML\" box there. The button opens your page on MyIsraelRental in a new tab.",
+        order: "Order",
+        book: "Booking",
+        page: "My page",
+        preview: "How it looks",
+        copy: "Copy the code",
+      },
+      season: {
+        until: "Order by {{d}}",
       },
       // Invite a friend (backend referrals.py).
       referrals: {

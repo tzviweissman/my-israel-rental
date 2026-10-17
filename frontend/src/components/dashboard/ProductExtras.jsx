@@ -22,12 +22,14 @@ export function cleanExtras(o) {
     })
     .filter((x) => x.name);
   const goesWith = (o.goes_with || []).filter(Boolean).slice(0, 4);
-  return { stock, low_stock_at: stock === null ? null : low, options, goes_with: goesWith };
+  const date = (v) => (/^\d{4}-\d{2}-\d{2}$/.test(v || '') ? v : null);
+  return { stock, low_stock_at: stock === null ? null : low, options, goes_with: goesWith,
+    available_from: date(o.available_from), available_until: date(o.available_until) };
 }
 
 export default function ProductExtras({ option: o, onChange, i, others = [] }) {
   const { t } = useTranslation();
-  const has = (o.stock !== null && o.stock !== undefined && o.stock !== '') || (o.options || []).length > 0 || (o.goes_with || []).length > 0;
+  const has = (o.stock !== null && o.stock !== undefined && o.stock !== '') || (o.options || []).length > 0 || (o.goes_with || []).length > 0 || !!o.available_from || !!o.available_until;
   const [open, setOpen] = useState(has);
   const opts = o.options || [];
   const setOpt = (k, patch) => onChange({ options: opts.map((x, j) => (j === k ? { ...x, ...patch } : x)) });
@@ -56,6 +58,22 @@ export default function ProductExtras({ option: o, onChange, i, others = [] }) {
             )}
           </div>
           <p className="text-xs text-gray-600">{t('editListing.stockHelp', 'Orders on your page take from the count. At 0 it shows as sold out. Leave empty if you do not count.')}</p>
+
+          {/* A holiday or seasonal item (backend seasonal.py). */}
+          <div data-testid={`product-season-${i}`}>
+            <p className="font-semibold text-gray-700">{t('editListing.season', 'Only on sale between')}</p>
+            <div className="flex flex-wrap items-center gap-2 mt-1">
+              <input type="date" value={o.available_from || ''} onChange={(e) => onChange({ available_from: e.target.value })} className={box} style={boxStyle}
+                     aria-label={t('editListing.seasonFrom', 'From')} data-testid={`product-from-${i}`} />
+              <span className="text-gray-600">–</span>
+              <input type="date" value={o.available_until || ''} min={o.available_from || undefined} onChange={(e) => onChange({ available_until: e.target.value })} className={box} style={boxStyle}
+                     aria-label={t('editListing.seasonUntil', 'Last day to order')} data-testid={`product-until-${i}`} />
+              {(o.available_from || o.available_until) && (
+                <button type="button" onClick={() => onChange({ available_from: '', available_until: '' })} className="text-xs underline min-h-[36px] text-gray-600">{t('editListing.seasonClear', 'All year')}</button>
+              )}
+            </div>
+            <p className="text-xs text-gray-600 mt-1">{t('editListing.seasonHelp', 'For holiday items: it appears on your page on the first day and disappears after the last day to order. Leave empty to sell it all year.')}</p>
+          </div>
 
           <div>
             <p className="font-semibold text-gray-700">{t('editListing.choices', 'Sizes, flavours or colours')}</p>
