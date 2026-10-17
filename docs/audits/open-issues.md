@@ -9,11 +9,15 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 ## Open
 
+- [Low] Restock box: buttons and field are 36 to 40px tall, under the 44px rule on phones (`RestockNotify.jsx`). First seen 17 Oct (UI audit).
+- [Low] i18n: 14 keys used in code but missing from `en.js` (`basket.*` in `CardAction.jsx`, `jobsBoard.areaFreeText`, `jobsBoard.areaPh`). First seen 17 Oct (UI audit).
+- [To check] The Brown Box home: pinned film reported 64px taller than the room under the header; check on a real phone. First seen 17 Oct (UI audit).
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
 - [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
 
 ## Fixed
 
+- [Low] The Brown Box page: "Scroll" cue removed. Fixed 17 Oct (c67e586).
 - [Low] KasherMyBnb: the "what we kasher" lists on the kitchen and pots pages are now a split price list (add-ons left, ticked parts right; on a phone the list first). 13 Oct.
 
 - [Medium] Subscriptions: a paying business can now see its plan and cancel it in Settings ("Your plan", shown only to a business with a paid plan). Fixed 13 Oct.
