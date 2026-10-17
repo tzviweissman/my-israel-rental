@@ -441,7 +441,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // never a black screen while the frames arrive: the first frame is the
   // canvas's own background until it is drawn over
   cv.style.background = '#120A05 url(assets/film/' + kind + '/0001.webp) center / cover no-repeat';
-  function url(/pages/the-brown-box/i?v=mvaznwa3) { return '/pages/the-brown-box/assets/film/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; }
+  function url(i) { return '/pages/the-brown-box/assets/film/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; }
   var order = [], seen = {};
   [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });
   var load = document.getElementById('load');
@@ -451,7 +451,7 @@ document.addEventListener('DOMContentLoaded', function () {
     batch.forEach(function (i) {
       var im = new Image(); im.decoding = 'async';
       im.onload = im.onerror = function () { if (im.naturalWidth) { imgs[i] = im; got++; } load.style.width = (got / N * 100) + '%'; if (--left === 0) { draw(); next(k + 6); } };
-      im.src = url(/pages/the-brown-box/i?v=mvaznwa3);
+      im.src = url(i);
     });
   })(0);
   function size() { var d = Math.min(2, devicePixelRatio || 1); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; draw(); }

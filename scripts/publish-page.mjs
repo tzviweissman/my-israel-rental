@@ -69,7 +69,10 @@ function rewrite(html) {
     // A link back to the page itself goes to the business's address.
     .replace(/(\shref=")(?:\.\/)?index\.html(#[^"]*)?"/g, (m, a, h) => `${a}/business/${slug}${h || ''}"`)
     .replace(/(\s(?:src|href|poster)=")([^"]+)"/g, (m, a, u) => (relative(u) ? `${a}${BASE}${withStamp(u)}"` : m))
-    .replace(/url\((['"]?)([^)'"]+)\1\)/g, (m, q, u) => (relative(u) ? `url(${q}${BASE}${withStamp(u)}${q})` : m))
+    // Only a real file path (it has an extension): a script's own
+    // `function url(i)` matched this once and broke The Brown Box's film
+    // (17 Oct 2026).
+    .replace(/url\((['"]?)([^)'"]+)\1\)/g, (m, q, u) => (relative(u) && /\.\w{2,5}(?:[?#]|$)/.test(u) ? `url(${q}${BASE}${withStamp(u)}${q})` : m))
     // Addresses the page's own script builds, e.g. scrubber(el, 'assets/pot.mp4')
     // (La Cholent, 9 Oct 2026): relative strings broke at /business/<slug>.
     .replace(/(['"])(?:\.\/)?(assets\/[^'"\s]*)\1/g, (m, q, u) => `${q}${BASE}${/\.\w{2,5}$/.test(u) ? withStamp(u) : u}${q}`);
@@ -171,3 +174,15 @@ try { list = JSON.parse(fs.readFileSync(listFile, 'utf8')); } catch { /* first p
 if (!list.includes(slug)) list.push(slug);
 fs.writeFileSync(listFile, `${JSON.stringify(list.sort(), null, 2)}\n`);
 console.log(`published ${folder} as /business/${slug} (${files} files in frontend/public/pages/${slug}); pages: ${list.join(', ')}`);
+
+// Every script on every published page must still parse after the
+// rewriting above: one that does not stops the page and leaves a film-led
+// page dark (The Brown Box, 17 Oct 2026). Fails the publish loudly.
+{
+  const { spawnSync } = await import('node:child_process');
+  const check = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-pages-scripts.mjs')], { stdio: 'inherit' });
+  if (check.status !== 0) {
+    console.error('\nA page script is broken after publishing. Fix it before pushing: the page would show a blank or dark screen.');
+    process.exit(1);
+  }
+}
