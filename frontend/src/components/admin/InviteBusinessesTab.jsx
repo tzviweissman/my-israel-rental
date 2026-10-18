@@ -12,12 +12,25 @@
  * list, a page of their own made from what they fill in, customers reach them
  * on WhatsApp or through the site, the jobs board. You can edit it before
  * sending; changing the name or language writes it afresh.
+ *
+ * Under it, the other half of the same job: HANDING OVER a page that was
+ * built for a business that has not joined (18 Oct 2026). Most of the
+ * businesses worth approaching will never fill in a form, so the page is
+ * built here first and changes hands with a one-time link.
+ *
+ * The picker lists the ADMIN'S OWN businesses on purpose, because that is
+ * exactly what a page built for a prospect is: created under this account,
+ * waiting for its owner. The backend refuses to mint a link for anything
+ * that has started trading, so a real business of your own cannot be given
+ * away by a mis-click.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import i18n from 'i18next';
-import { Send, Copy, Mail, ExternalLink, FileText, Store } from 'lucide-react';
+import axios from 'axios';
+import { Send, Copy, Mail, ExternalLink, FileText, Store, Loader2, KeyRound } from 'lucide-react';
 import { toast } from 'sonner';
+import { API } from '../../App';
 import ShareLinkButtons from '../common/ShareLinkButtons';
 
 const WA_GREEN = '#25D366';
@@ -49,7 +62,7 @@ export function inviteMessage(lang, name, origin) {
   });
 }
 
-export default function InviteBusinessesTab() {
+export default function InviteBusinessesTab({ token }) {
   const { t } = useTranslation();
   const origin = typeof window !== 'undefined' ? window.location.origin : 'https://myisraelrental.com';
   const [name, setName] = useState('');
@@ -65,6 +78,37 @@ export default function InviteBusinessesTab() {
   const fresh = useMemo(() => (loaded === lang ? inviteMessage(lang, name, origin) : ''), [loaded, lang, name, origin]);
   const [message, setMessage] = useState(fresh);
   useEffect(() => { setMessage(fresh); }, [fresh]);
+
+  // --- handing a built page over -------------------------------------
+  const [mine, setMine] = useState([]);
+  const [pick, setPick] = useState('');
+  const [minting, setMinting] = useState(false);
+  // { url, name } once a link exists. One at a time: minting a second
+  // link for the same business REPLACES the first, which is also how a
+  // link sent to the wrong number is revoked.
+  const [handover, setHandover] = useState(null);
+
+  const loadMine = useCallback(() => {
+    if (!token) return;
+    axios.get(`${API}/marketplace/businesses`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(({ data }) => setMine(Array.isArray(data) ? data : (data?.businesses || [])))
+      .catch(() => setMine([]));
+  }, [token]);
+  useEffect(() => { loadMine(); }, [loadMine]);
+
+  const mint = async () => {
+    setMinting(true);
+    try {
+      const biz = mine.find((b) => b.id === pick);
+      const { data } = await axios.post(`${API}/marketplace/businesses/${pick}/claim-link`, {},
+        { headers: { Authorization: `Bearer ${token}` } });
+      setHandover({ url: data.url, name: biz?.name || '', days: data.expires_in_days });
+    } catch (err) {
+      // The API names what it refused - "this business already has store
+      // orders" - and that reason is the whole value of the message.
+      toast.error(err?.response?.data?.detail || t('handover.failed', 'Could not make a link.'), { duration: 8000 });
+    } finally { setMinting(false); }
+  };
 
   const subject = i18n.getFixedT(lang)('invite.emailSubject');
   const copy = async () => {
@@ -178,6 +222,69 @@ export default function InviteBusinessesTab() {
       <div className="mt-5 grid gap-4 sm:grid-cols-2">
         {linkCard(FileText, t('invite.rulesTitle', 'Joining rules'), t('invite.rulesBody', 'What a business sends us and agrees to before it joins.'), `${origin}/join-rules`, 'invite-rules')}
         {linkCard(Store, t('invite.startTitle', 'Where they start'), t('invite.startBody', 'What they get, and the button to list their business.'), `${origin}/why-list`, 'invite-start')}
+      </div>
+
+      {/* The other half of the job: a page you already built, handed to
+          the business it was built for. */}
+      <div className="mt-8 rounded-xl border p-4 sm:p-5" style={{ borderColor: 'var(--brand-border)', background: '#fff' }} data-testid="admin-handover">
+        <div className="flex items-center gap-2 mb-1">
+          <KeyRound size={18} style={{ color: 'var(--brand-primary)' }} aria-hidden="true" />
+          <h3 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('handover.title', 'Hand a page over')}</h3>
+        </div>
+        <p className="text-sm mb-4" style={{ color: 'var(--brand-muted)' }}>
+          {t('handover.lede', 'For a business that will never fill in a form: build the page here, then send this link. They tap it, sign in once, and the page is theirs. The link works once and lasts 30 days.')}
+        </p>
+
+        <div className="flex flex-wrap items-end gap-3">
+          <label className="flex-1 min-w-[220px] text-sm font-medium" style={{ color: 'var(--ink)' }}>
+            {t('handover.pickLabel', 'Which page')}
+            <select
+              value={pick}
+              onChange={(e) => { setPick(e.target.value); setHandover(null); }}
+              className="mt-1 block w-full rounded-lg border px-3 py-2 text-sm bg-white"
+              style={{ borderColor: 'var(--brand-border)' }}
+              data-testid="handover-pick"
+            >
+              <option value="">{t('handover.pickNone', 'Choose a page you built…')}</option>
+              {mine.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+            </select>
+          </label>
+          <button
+            type="button"
+            onClick={mint}
+            disabled={!pick || minting}
+            className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-lg text-sm font-semibold text-white disabled:opacity-50"
+            style={{ background: 'var(--brand-primary)' }}
+            data-testid="handover-make"
+          >
+            {minting && <Loader2 size={14} className="animate-spin" aria-hidden="true" />}
+            {t('handover.make', 'Make the link')}
+          </button>
+        </div>
+
+        {mine.length === 0 && (
+          <p className="mt-3 text-xs" style={{ color: 'var(--brand-muted)' }}>
+            {t('handover.empty', 'No pages here yet. Build one the usual way first, then come back to hand it over.')}
+          </p>
+        )}
+
+        {handover && (
+          <div className="mt-4 rounded-xl border p-3" style={{ borderColor: 'var(--brand-border)', background: 'var(--bg)' }} data-testid="handover-link">
+            <p className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>
+              {t('handover.ready', 'Send this to {{name}}. It works once.', { name: handover.name })}
+            </p>
+            <a href={handover.url} target="_blank" rel="noopener noreferrer"
+               className="mt-1 mb-3 inline-flex items-center gap-1 text-xs font-medium break-all underline"
+               style={{ color: 'var(--brand-primary)' }} dir="ltr">
+              {handover.url}
+              <ExternalLink size={12} aria-hidden="true" />
+            </a>
+            <ShareLinkButtons url={handover.url} testidPrefix="handover" />
+            <p className="mt-2 text-[11px]" style={{ color: 'var(--brand-muted)' }}>
+              {t('handover.replaceNote', 'Sent it to the wrong number? Make another link for the same page and the first one stops working.')}
+            </p>
+          </div>
+        )}
       </div>
     </div>
   );

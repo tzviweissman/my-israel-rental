@@ -205,7 +205,7 @@ const AdminDashboard = () => {
         {activeTab === 'listings' && <ListingsTab token={token} onStatsChange={fetchDashboard} />}
         {activeTab === 'services' && <ServicesTab token={token} initialFilter={servicesFilter} />}
         {activeTab === 'restaurants' && <RestaurantsTab token={token} />}
-        {activeTab === 'invite' && <InviteBusinessesTab />}
+        {activeTab === 'invite' && <InviteBusinessesTab token={token} />}
         {activeTab === 'requests' && <RequestReportsTab token={token} />}
         {activeTab === 'reviews' && <ReviewsModerationTab token={token} />}
         {activeTab === 'areas' && <AreaAliasManager token={token} />}

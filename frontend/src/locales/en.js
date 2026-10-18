@@ -610,6 +610,17 @@ const en = {
         defaultLabel: 'Main code',
         failed: 'Could not create that code',
       },
+      handover: {
+        title: 'Hand a page over',
+        lede: 'For a business that will never fill in a form: build the page here, then send this link. They tap it, sign in once, and the page is theirs. The link works once and lasts 30 days.',
+        pickLabel: 'Which page',
+        pickNone: 'Choose a page you built…',
+        make: 'Make the link',
+        empty: 'No pages here yet. Build one the usual way first, then come back to hand it over.',
+        ready: 'Send this to {{name}}. It works once.',
+        replaceNote: 'Sent it to the wrong number? Make another link for the same page and the first one stops working.',
+        failed: 'Could not make a link.',
+      },
       claim: {
         eyebrow: 'We made this for you',
         body: 'A page on MyIsraelRental, ready for you. Take it over and it is yours to change, free, with no commission.',
