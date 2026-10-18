@@ -11,6 +11,9 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
 - [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
+- [Low] Hebrew: 14 label keys (basket buttons in CardAction.jsx, Jobs board area box) are in neither en.js nor he.js, so Hebrew shows English. First seen 18 Oct (2026-10-18-site-audit).
+- [Low] Dead end: business checklist item "category" opens a form with no category control (test-completeness-actions fails). First seen 18 Oct (2026-10-18-site-audit; for the dead-ends audit).
+- [To check] Database tests (claim links, contract storage) could not run in the audit sandbox on 18 Oct: no MongoDB download allowed.
 
 ## Fixed
 
