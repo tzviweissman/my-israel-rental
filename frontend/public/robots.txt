@@ -2,7 +2,21 @@
 # Allow all reputable crawlers, surface the sitemap so they can index
 # every public page without depending on JS rendering.
 
+# AI assistants are welcome too (Tzvi, 18 Oct 2026): a business found by
+# ChatGPT, Claude or Perplexity is a business found. Named here so nobody
+# reading this file wonders; they share the rules below. A short guide for
+# them is at /llms.txt.
 User-agent: *
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Google-Extended
+User-agent: Applebot-Extended
 Allow: /
 
 # Keep crawlers out of authenticated dashboards and one-off admin /

@@ -82,6 +82,100 @@ const isPreviewBot = (req) => {
   return PREVIEW_BOTS.some((bot) => ua.includes(bot));
 };
 
+/* Search engines and AI assistants (Tzvi, 18 Oct 2026). None of them can
+   be relied on to run the app, and ChatGPT, Claude and Perplexity never do:
+   each read the standard page as "You need to enable JavaScript". For an
+   UPGRADED business or rental (the paid page upgrade, or a designed page)
+   they get the page's own content as plain HTML with schema.org data, from
+   backend routes/seo.py; anything else, or any failure, falls through to
+   what they always got. Free pages are deliberately left as they were. */
+const SEARCH_BOTS = [
+  'googlebot', 'google-inspectiontool', 'bingbot', 'applebot', 'duckduckbot', 'yandex',
+  'gptbot', 'oai-searchbot', 'chatgpt-user', 'claudebot', 'claude-user', 'claude-searchbot',
+  'anthropic-ai', 'perplexitybot', 'perplexity-user', 'ccbot', 'amazonbot',
+  'meta-externalagent', 'mistralai-user', 'cohere-ai', 'youbot',
+];
+
+const isSearchBot = (req) => {
+  const ua = (req.headers['user-agent'] || '').toLowerCase();
+  return SEARCH_BOTS.some((bot) => ua.includes(bot));
+};
+
+const PROPERTY_PATH = /^\/property\/([A-Za-z0-9-]{8,64})\/?$/;
+
+/** GET from the backend with the same short budget as a preview card. */
+async function fetchApi(apiPath, req, accept = 'text/html') {
+  const control = new AbortController();
+  const timer = setTimeout(() => control.abort(), OG_TIMEOUT_MS);
+  try {
+    const res = await fetch(`${API_ORIGIN}${apiPath}`, {
+      signal: control.signal,
+      // The crawler's own user agent, so the visit is not counted as a view.
+      headers: { accept, 'user-agent': (req && req.headers['user-agent']) || 'MyIsraelRental-seo' },
+    });
+    if (!res.ok) return null;
+    return await res.text();
+  } catch {
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+const langOf = (req) => (/[?&]lng=he/.test(req.url || '') ? 'he' : 'en');
+
+/* The schema.org block for a hand-built page, added to its head. Those
+   pages are plain HTML already; this is what lets Google and AI read the
+   business as a business (hours, area, prices, reviews). Cached ten minutes
+   per slug so a visitor never waits on it twice. */
+const jsonLdCache = new Map();
+async function handBuiltJsonLd(slug) {
+  const hit = jsonLdCache.get(slug);
+  // A miss is retried after a minute, a hit kept for ten.
+  if (hit && Date.now() - hit.at < (hit.value ? 10 * 60 * 1000 : 60 * 1000)) return hit.value;
+  const text = await fetchApi(`/api/seo/business/${encodeURIComponent(slug)}/jsonld`, null, 'application/json');
+  let value = null;
+  try {
+    const blocks = text ? JSON.parse(text) : null;
+    if (Array.isArray(blocks) && blocks.length) {
+      value = blocks.map((b) => `<script type="application/ld+json">${JSON.stringify(b).replace(/</g, '\\u003c')}</script>`).join('');
+    }
+  } catch { /* none */ }
+  jsonLdCache.set(slug, { at: Date.now(), value });
+  return value;
+}
+
+/* /sitemap.xml: the fixed pages in public/sitemap.xml, every hand-built
+   page, and every upgraded business and rental from the backend, each with
+   its Hebrew address beside it. Falls back to the static file. */
+let sitemapCache = null;
+async function sitemapXml() {
+  if (sitemapCache && Date.now() - sitemapCache.at < 30 * 60 * 1000) return sitemapCache.value;
+  const base = fs.readFileSync(path.join(BUILD, 'sitemap.xml'), 'utf8');
+  const origin = `https://${PUBLIC_SITE_HOST}`;
+  const entries = [...HAND_BUILT].map((slug) => ({ url: `${origin}/business/${slug}` }));
+  const text = await fetchApi('/api/seo/sitemap-entries', null, 'application/json');
+  try {
+    for (const e of (text && JSON.parse(text).entries) || []) {
+      if (!entries.some((x) => x.url === e.url)) entries.push(e);
+    }
+  } catch { /* the fixed and hand-built pages still go out */ }
+  const esc = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
+  const urls = entries.map((e) => {
+    const he = `${e.url}?lng=he`;
+    const alts = `<xhtml:link rel="alternate" hreflang="en" href="${esc(e.url)}"/>`
+      + `<xhtml:link rel="alternate" hreflang="he" href="${esc(he)}"/>`;
+    const lastmod = /^\d{4}-\d{2}-\d{2}$/.test(e.lastmod || '') ? `<lastmod>${e.lastmod}</lastmod>` : '';
+    return `<url><loc>${esc(e.url)}</loc>${lastmod}${alts}</url><url><loc>${esc(he)}</loc>${lastmod}${alts}</url>`;
+  }).join('\n');
+  let value = base.replace(/<urlset([^>]*)>/, (m, attrs) => (
+    /xmlns:xhtml/.test(attrs) ? m : `<urlset${attrs} xmlns:xhtml="http://www.w3.org/1999/xhtml">`
+  ));
+  value = value.replace(/<\/urlset>\s*$/, `${urls}\n</urlset>\n`);
+  sitemapCache = { at: Date.now(), value };
+  return value;
+}
+
 /* The paths worth answering for. /business/{slug} is the whole reason this
    exists — it is what an owner shares. Anchored and single-segment on
    purpose: /business/abc/photos is not a page, and matching it loosely
@@ -369,6 +463,10 @@ async function sendHandBuilt(req, res, slug, file) {
   const data = await pageEdits(slug, editor || /[?&]fresh(?:=|&|$)/.test(req.url || ''));
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
   let html = applyPrices(applyEdits(raw, data && data.edits, editor), slug, data && data.prices);
+  if (file === 'index.html' && !/application\/ld\+json/i.test(html)) {
+    const ld = await handBuiltJsonLd(slug);
+    if (ld) html = html.replace(/<\/head>/i, `${ld}</head>`);
+  }
   // The same prices for the page's own script (an order total), as data.
   if (data && data.prices && Object.keys(data.prices).length) {
     const json = JSON.stringify(data.prices).replace(/</g, '\\u003c');
@@ -574,6 +672,37 @@ const server = http.createServer(async (req, res) => {
     }
     // Fell through on purpose. The crawler gets what it would have got
     // before this file existed.
+  }
+  if (pathname === '/sitemap.xml') {
+    try {
+      const xml = await sitemapXml();
+      res.writeHead(200, { 'Content-Type': 'application/xml; charset=utf-8', 'Cache-Control': 'public, max-age=1800' });
+      res.end(xml);
+      return;
+    } catch { /* the static file */ }
+  }
+  if (pathname === '/llms.txt') {
+    const text = await fetchApi('/api/seo/llms.txt', null, 'text/plain');
+    if (text) {
+      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=1800' });
+      res.end(text);
+      return;
+    }
+  }
+  // Search engines and AI assistants: an upgraded page's content as HTML.
+  // Hand-built pages are skipped here, they are plain HTML already.
+  if (isSearchBot(req)) {
+    const bizSlug = hostSlug && pathname === '/' ? hostSlug : businessSlug(req);
+    const propMatch = PROPERTY_PATH.exec(pathname || '');
+    let apiPath = null;
+    if (bizSlug && !HAND_BUILT.has(bizSlug)) apiPath = `/api/seo/business/${encodeURIComponent(bizSlug)}`;
+    else if (propMatch) apiPath = `/api/seo/property/${encodeURIComponent(propMatch[1])}`;
+    const html = apiPath && await fetchApi(`${apiPath}?lng=${langOf(req)}`, req);
+    if (html) {
+      res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'public, max-age=600' });
+      res.end(html);
+      return;
+    }
   }
   // A hand-built page in place of the standard listing (Tzvi, 7 Oct 2026):
   // /business/<slug>, or the root of <slug>.myisraelrental.com, answers with

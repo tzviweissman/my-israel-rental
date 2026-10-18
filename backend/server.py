@@ -40,6 +40,7 @@ from routes import (  # noqa: E402
     geocode,
     guest_messages,
     home_tiles,
+    seo,
     ical,
     marketplace,
     misc,
@@ -106,6 +107,7 @@ for mod in (
     reviews,
     restaurants,
     home_tiles,
+    seo,
 ):
     api_router.include_router(mod.router)
 

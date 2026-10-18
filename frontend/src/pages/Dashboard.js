@@ -20,6 +20,8 @@ import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
 import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
 import GoogleReviewsCard from '../components/dashboard/GoogleReviewsCard';
+// Upgraded pages only; renders nothing for anyone else (backend routes/seo.py).
+import GetFoundCard from '../components/dashboard/GetFoundCard';
 import OrdersTab from '../components/dashboard/OrdersTab';
 import MembersTab from '../components/dashboard/MembersTab';
 import ToolsTab from '../components/dashboard/ToolsTab';
@@ -514,6 +516,7 @@ const Dashboard = () => {
             {/* Rentals-only people need a way in too; renders nothing
                 unless Google review import is switched on. */}
             <GoogleReviewsCard API={API} token={token} returnTab="properties" />
+            <GetFoundCard API={API} token={token} kind="rental" />
             <PropertyList
               properties={properties}
               bookings={bookings}
@@ -583,6 +586,7 @@ const Dashboard = () => {
           <>
             {/* Renders nothing unless Google review import is switched on. */}
             <GoogleReviewsCard API={API} token={token} />
+            <GetFoundCard API={API} token={token} kind="business" />
             <MyBusinessesTab API={API} token={token} />
           </>
         )}
