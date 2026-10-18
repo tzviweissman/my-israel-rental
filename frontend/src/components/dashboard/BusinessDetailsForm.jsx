@@ -368,7 +368,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           {/* "By appointment only" replaces opening hours on the page, in
               each visitor's language (Tzvi, 17 Oct 2026). */}
           <div>
-            {!form.by_appointment && field('hours', t('businessPage.hours', 'Hours'), 'Sun–Thu 9:00–18:00 · Fri 9:00–13:00')}
+            {!form.by_appointment && field('hours', t('businessPage.hours', 'Hours'), 'Sun to Thu 9:00 to 18:00, Fri 9:00 to 13:00')}
             <label className={`flex items-center gap-2 text-sm min-h-[40px] ${form.by_appointment ? '' : 'mt-1'}`} style={{ color: 'var(--ink)' }}>
               <input type="checkbox" checked={!!form.by_appointment} onChange={(e) => set({ by_appointment: e.target.checked })} data-testid="biz-details-by-appointment" />
               {t('businessPage.byAppointmentTick', 'By appointment only (no fixed opening hours)')}
