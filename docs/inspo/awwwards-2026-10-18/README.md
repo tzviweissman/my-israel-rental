@@ -137,6 +137,27 @@ The brand name huge at the floor of a warm landscape, with small live numbers
 above it (speed, distance). Build: generated landscape, code readouts. Only
 with true numbers (rule 3e: no invented counts).
 
+### Following the mouse (checked 18 Oct 2026, Tzvi: "the drone one ... looks where your mouse is pointing", "when the mouse hits the keys they jingle")
+
+Captured by holding the page still and moving the mouse to the four corners
+and the middle, then sweeping fast across a spot (`scripts/inspo-mouse.mjs`).
+
+**20. The product turns to look at the mouse** (drone-5-follows-mouse)
+The drone in the opening tilts and turns toward wherever the pointer is:
+mouse to the top left and it banks that way, to the bottom right and it
+dips the other way, eased so it drifts rather than snaps. Build: generated
+turntable frames (a few angles) blended in code by the pointer position, or
+a simple 3D tilt (CSS perspective) on a cut-out. Suits: any single hero
+product on a plain ground (a cake, a tray, a bottle). On phones there is no
+pointer: use the phone's tilt or a slow automatic sway instead.
+
+**21. Charms swing when the mouse brushes them** (butter-6-keys-jingle)
+A quick pass over the keyring knocks the keys and charms; they swing on the
+ring and settle with a small bounce, like real hanging objects. Build: code
+(each charm a cut-out with a pivot point, a spring that is pushed by the
+pointer's speed). Suits: playful brands, gifts, kids, anything that hangs
+(keys, ornaments, balloons). On phones: a tap gives the push.
+
 ## Patterns all five share
 
 1. **The page is one story told in scenes**, each scene with a small title
