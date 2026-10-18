@@ -30,7 +30,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Loader2, Plus, Trash2, ArrowLeft, ArrowRight, X,
-  Store, Package, CalendarClock, ImagePlus,
+  Store, Package, CalendarClock, ImagePlus, Copy, Camera, FileText,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -137,6 +137,9 @@ const CreateGig = () => {
   const [bizName, setBizName] = useState('');
   const [bizLogo, setBizLogo] = useState('');
   const [logoUploading, setLogoUploading] = useState(false);
+  // The two slow-path spinners in the products step.
+  const [bulkPhotos, setBulkPhotos] = useState(false);
+  const [extracting, setExtracting] = useState(false);
   useEffect(() => {
     let alive = true;
     axios.get(`${API}/marketplace/businesses`, { headers: { Authorization: `Bearer ${token}` } })
@@ -325,6 +328,96 @@ const CreateGig = () => {
 
   const removeProductImage = (i, url) => {
     updateProduct(i, { images: productPhotos(form.products[i]).filter((u) => u !== url), image: '' });
+  };
+
+  const MAX_PRODUCTS = 30;
+  // A row nobody has touched yet. The wizard opens with one, and dropping
+  // in photos should fill it rather than leave a blank above the pictures.
+  const productIsBlank = (p) => !p.name.trim() && !String(p.price).trim() && productPhotos(p).length === 0;
+
+  // ONE PHOTO, ONE PRODUCT. The slowest part of listing ten things was
+  // never the typing, it was ten separate trips to the camera roll. A
+  // business already has these pictures in one album; this takes the lot
+  // and gives back a row per picture, with the photo already on it.
+  const addProductsFromPhotos = async (files) => {
+    const chosen = Array.from(files || []).filter(Boolean);
+    if (!chosen.length) return;
+    const blanks = form.products.filter(productIsBlank).length;
+    const room = MAX_PRODUCTS - form.products.length + blanks;
+    if (room <= 0) {
+      toast.error(t('wizard.productLimit', { defaultValue: 'Up to {{n}} products', n: MAX_PRODUCTS }));
+      return;
+    }
+    setBulkPhotos(true);
+    try {
+      const results = await uploadFilesFast(chosen.slice(0, room), API, token, () => {});
+      const urls = results.map((r) => r?.url).filter(Boolean);
+      if (!urls.length) {
+        toast.error(results.find((r) => r?.error)?.error || t('wizard.uploadFailed', 'Upload failed'));
+        return;
+      }
+      const failed = results.length - urls.length;
+      if (failed > 0) toast.error(t('wizard.someFailed', { count: failed, defaultValue: '{{count}} photos did not upload' }));
+      const prev = form.products[form.products.length - 1]?.currency || 'ILS';
+      const queue = [...urls];
+      // Fill the untouched rows first, then add one row per photo left.
+      const filled = form.products.map((p) => (
+        queue.length && productIsBlank(p) ? { ...p, images: [queue.shift()], image: '' } : p
+      ));
+      const added = queue.map((u) => ({ ...emptyProduct(prev), images: [u] }));
+      set({ products: [...filled, ...added] });
+      toast.success(t('wizard.photosBecameProducts', { count: urls.length, defaultValue: '{{count}} products added. Now name them and set a price.' }));
+    } catch (err) {
+      toast.error(err.message || t('wizard.uploadFailed', 'Upload failed'));
+    } finally { setBulkPhotos(false); }
+  };
+
+  // Ten meat boards differ by two fields. Copying the one above and
+  // changing the size and the price is the whole job.
+  const duplicateProduct = (i) => {
+    if (form.products.length >= MAX_PRODUCTS) {
+      toast.error(t('wizard.productLimit', { defaultValue: 'Up to {{n}} products', n: MAX_PRODUCTS }));
+      return;
+    }
+    const src = form.products[i];
+    // Right below the original, which is where a copy is expected, and
+    // with its own copy of the photo list so editing one never touches
+    // the other.
+    const copy = { ...src, images: [...productPhotos(src)], image: '' };
+    set({ products: [...form.products.slice(0, i + 1), copy, ...form.products.slice(i + 1)] });
+  };
+
+  // Pasted list or a photographed price list -> rows the owner then checks.
+  // Nothing is saved: these land in the form exactly as a typed row would.
+  const extractProducts = async ({ text, file }) => {
+    setExtracting(true);
+    try {
+      const body = new FormData();
+      if (text) body.append('text', text);
+      if (file) body.append('file', file);
+      const { data } = await axios.post(`${API}/marketplace/products/extract`, body, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const rows = (data.products || []).slice(0, MAX_PRODUCTS - form.products.filter((p) => !productIsBlank(p)).length);
+      if (!rows.length) {
+        toast.error(t('wizard.extractNone', 'Nothing came back. Try a clearer picture, or type the list.'));
+        return false;
+      }
+      const prev = form.products[form.products.length - 1]?.currency || 'ILS';
+      const made = rows.map((r) => ({
+        ...emptyProduct(r.currency || prev),
+        name: r.name || '',
+        price: r.price == null ? '' : String(r.price),
+        description: r.description || '',
+      }));
+      // Replaces the untouched rows, keeps everything already filled in.
+      set({ products: [...form.products.filter((p) => !productIsBlank(p)), ...made] });
+      toast.success(t('wizard.extractDone', { count: made.length, defaultValue: '{{count}} products read. Check them, then add a photo to each.' }));
+      return true;
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('wizard.extractFailed', 'Could not read that.'), { duration: 8000 });
+      return false;
+    } finally { setExtracting(false); }
   };
 
   // ---- Availability helpers (appointment) -----------------------------------
@@ -787,6 +880,11 @@ const CreateGig = () => {
             onUpdate={updateProduct}
             onAdd={addProduct}
             onRemove={removeProduct}
+            onDuplicate={duplicateProduct}
+            onPhotosAsProducts={addProductsFromPhotos}
+            onExtract={extractProducts}
+            bulkPhotos={bulkPhotos}
+            extracting={extracting}
             productImageInputRef={productImageInputRef}
             onUploadImage={uploadProductImage}
             onRemoveImage={removeProductImage}
@@ -969,12 +1067,78 @@ const CreateGig = () => {
 };
 
 // ---------- Step 4A — Store products ----------
-const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageInputRef, onUploadImage, onRemoveImage }) => {
+const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, onDuplicate, onPhotosAsProducts, onExtract, bulkPhotos, extracting, productImageInputRef, onUploadImage, onRemoveImage }) => {
   const { t } = useTranslation();
+  // The paste box, closed until asked for. Open by default it would read
+  // as the main way in, and for a business with three products the rows
+  // below are quicker than any of this.
+  const [pasteOpen, setPasteOpen] = React.useState(false);
+  const [pasted, setPasted] = React.useState('');
+  const bulkRef = React.useRef(null);
+  const listShotRef = React.useRef(null);
+  const busy = bulkPhotos || extracting;
+
   return (
   <div className="space-y-4" data-testid="wizard-products-step">
     <div className="rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 p-3 text-xs text-[var(--brand-primary)] leading-snug">
       {t('wizard.productsIntro', 'Add each product you sell as its own row, with photos, a price and a short description. Customers browse them and message you to buy.')}
+    </div>
+
+    {/* THE QUICK WAYS IN, above the rows because a business with ten
+        things to sell gives up before it reaches the second row.
+        Photos first: that is where the time actually goes. */}
+    <div className="rounded-xl border border-gray-200 p-3 space-y-2" data-testid="wizard-products-quick">
+      <p className="text-[11px] font-semibold text-gray-600">
+        {t('wizard.quickTitle', 'Have a lot to add?')}
+      </p>
+      <div className="flex flex-wrap gap-2">
+        <button type="button" disabled={busy} onClick={() => bulkRef.current?.click()}
+          className="inline-flex items-center gap-1.5 px-3 min-h-[40px] rounded-lg border border-gray-300 bg-white text-sm font-semibold disabled:opacity-50"
+          data-testid="wizard-products-from-photos">
+          {bulkPhotos ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
+          {t('wizard.photosAsProducts', 'Add photos, one product each')}
+        </button>
+        <input ref={bulkRef} type="file" accept="image/*" multiple className="hidden"
+          onChange={(e) => { onPhotosAsProducts(e.target.files); e.target.value = ''; }}
+          data-testid="wizard-products-photos-input" />
+
+        <button type="button" disabled={busy} onClick={() => setPasteOpen(!pasteOpen)}
+          className="inline-flex items-center gap-1.5 px-3 min-h-[40px] rounded-lg border border-gray-300 bg-white text-sm font-semibold disabled:opacity-50"
+          aria-expanded={pasteOpen} data-testid="wizard-products-paste-toggle">
+          <FileText size={14} />
+          {t('wizard.pasteList', 'Paste your price list')}
+        </button>
+
+        <button type="button" disabled={busy} onClick={() => listShotRef.current?.click()}
+          className="inline-flex items-center gap-1.5 px-3 min-h-[40px] rounded-lg border border-gray-300 bg-white text-sm font-semibold disabled:opacity-50"
+          data-testid="wizard-products-from-shot">
+          {extracting ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
+          {t('wizard.shotOfList', 'Photo of your menu or price list')}
+        </button>
+        <input ref={listShotRef} type="file" accept="image/*" className="hidden"
+          onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onExtract({ file: f }); }}
+          data-testid="wizard-products-shot-input" />
+      </div>
+
+      {pasteOpen && (
+        <div className="pt-1 space-y-2">
+          <textarea rows={4} dir="auto" value={pasted} onChange={(e) => setPasted(e.target.value)}
+            placeholder={t('wizard.pastePh', 'One per line, or straight out of a WhatsApp message. Classic board 180, Family board 280, Kids board 90')}
+            className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
+            data-testid="wizard-products-paste" />
+          <button type="button" disabled={busy || !pasted.trim()}
+            onClick={async () => { if (await onExtract({ text: pasted.trim() })) { setPasted(''); setPasteOpen(false); } }}
+            className="inline-flex items-center gap-1.5 px-4 min-h-[40px] rounded-lg text-sm font-semibold text-white disabled:opacity-50"
+            style={{ background: 'var(--brand-primary)' }} data-testid="wizard-products-paste-read">
+            {extracting && <Loader2 size={14} className="animate-spin" />}
+            {t('wizard.readList', 'Turn this into products')}
+          </button>
+        </div>
+      )}
+
+      <p className="text-[11px] text-gray-500">
+        {t('wizard.quickNote', 'Reading a list gives you the names and prices. Photos still come from you, so the quickest order is photos first, then the list.')}
+      </p>
     </div>
     {products.map((p, i) => (
       <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid={`wizard-product-${i}`}>
@@ -1049,6 +1213,13 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
               <input type="number" value={p.price} onChange={(e) => onUpdate(i, { price: e.target.value })}
                 placeholder={t("sweep.price", "Price")} className="flex-1 min-w-0 px-3 py-2 rounded-lg border bg-white border-gray-300 focus:outline-none focus:border-[var(--brand-primary)] focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 text-sm"
                 data-testid={`wizard-product-price-${i}`} />
+              {/* Ten of these differ by two fields. */}
+              <button type="button" onClick={() => onDuplicate(i)} className="px-2 text-gray-400 hover:text-[var(--brand-primary)]"
+                title={t('wizard.duplicate', 'Make a copy of this one')}
+                aria-label={t('wizard.duplicate', 'Make a copy of this one')}
+                data-testid={`wizard-product-duplicate-${i}`}>
+                <Copy size={14} />
+              </button>
               {products.length > 1 && (
                 <button type="button" onClick={() => onRemove(i)} className="px-2 text-red-500" data-testid={`wizard-product-remove-${i}`}>
                   <Trash2 size={14} />
