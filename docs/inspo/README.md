@@ -8,12 +8,14 @@ rules (docs/page-generation-rules.md).
 
 | Date | Source | Notes |
 |---|---|---|
+| 18 Oct 2026 | Awwwards food and drink, the 62 newest sites | [awwwards-food-2026-10-18/](awwwards-food-2026-10-18/README.md): 113 effects with pictures, each part ends with picks for Chicken Munch |
+| 18 Oct 2026 | Awwwards, every category (170 sites) | [awwwards-categories-2026-10-18/](awwwards-categories-2026-10-18/README.md): 161 effects with pictures |
 | 18 Oct 2026 | Five Awwwards Sites of the Day (drone.riotters, butter.video, usavionix, unitedcarriers, seasats) | [awwwards-2026-10-18/](awwwards-2026-10-18/README.md): 21 effects, 25 pictures (2 follow the mouse) |
 | 16 Oct 2026 | The finished sites in five YouTube design videos | [../ui-videos/notes/sites-2026-10-16.md](../ui-videos/notes/sites-2026-10-16.md) (page rules 3i) |
 | 8 Oct 2026 | Twelve UI videos | [../ui-videos/notes/](../ui-videos/notes/) (page rules 3e) |
 | 7 Oct 2026 | 21st.dev pieces rebuilt in plain CSS | the build skill's `examples/effects-library/index.html` |
 
-To add a source: capture it frame by frame (scratchpad `aw-shoot.mjs`, or
+To add a source: capture it frame by frame (`scripts/inspo-shoot.mjs`, or
 `aw-wheel.mjs` for sites that take over the scroll), and `scripts/inspo-mouse.mjs` for effects that follow the mouse, save one picture per
 effect in a dated folder here, write its README in the same shape, and add a
 row above.
