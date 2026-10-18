@@ -18,7 +18,7 @@ from fastapi import APIRouter, Body, Depends, HTTPException
 from models_response import BookingSignContractResponse, BookingTranslationResponse
 from routes.deps import CONTRACT_DIR, db, logger, verify_token
 from utils.errors import api_error
-from utils.contract_files import contract_reference, resolve_private_contract_file
+from utils.contract_files import contract_reference, ensure_contract_file, keep_contract_file
 from utils.contract_signing import stamp_signature_on_contract
 from utils.files import extract_text_from_image, extract_text_from_pdf
 from utils.translate import translate_text as _translate_text
@@ -132,7 +132,9 @@ async def _stamp_contract_if_present(
     """
     if not property_data.get('contract_url'):
         return None
-    contract_path = resolve_private_contract_file(property_data['contract_url'])
+    contract_path = await ensure_contract_file(
+        property_data['contract_url'], public_id=property_data.get('contract_public_id'),
+    )
     if contract_path is None:
         raise HTTPException(status_code=404, detail="Contract file not found")
     contract_filename = contract_path.name
@@ -167,6 +169,9 @@ async def _stamp_contract_if_present(
             exc=e, logger=logger, context="stamp signature on contract",
             extra={"booking_id": booking_id},
         ) from e
+    # Durable before the booking points at it (utils/contract_files). A
+    # failure is the 503 the person sees, and they can sign again.
+    await keep_contract_file(signed_path)
     # Looks like a URL, is not one: the file is private and the only way to
     # read it is the permission-checked endpoint. Same shape the property
     # contract already stores, so both old and new rows resolve identically.
@@ -324,7 +329,9 @@ async def _resolve_contract_path(booking: dict):
     # so reading from `uploads/` found nothing for any contract uploaded
     # since that changed. Here it meant "Translate contract" answered 404
     # rather than translating.
-    contract_path = resolve_private_contract_file(property_data["contract_url"])
+    contract_path = await ensure_contract_file(
+        property_data["contract_url"], public_id=property_data.get("contract_public_id"),
+    )
     if contract_path is None:
         raise HTTPException(status_code=404, detail="Contract file not found on server")
     return contract_path

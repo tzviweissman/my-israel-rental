@@ -193,10 +193,15 @@ async def fetch_contract_from_cloudinary(public_id: str) -> bytes | None:
         return None
 
     def _do() -> bytes | None:
+        # The API-signed private download link. A signed DELIVERY url
+        # (cloudinary_url with sign_url=True) is refused with 401 for an
+        # authenticated raw asset on this account, so this function returned
+        # None for every contract and readers silently fell back to the disk
+        # (found 18 Oct 2026, moving contracts off the volume). Format "" keeps
+        # the public id as stored, extension included.
         try:
-            url, _opts = cloudinary.utils.cloudinary_url(
-                public_id, resource_type="raw", type="authenticated",
-                sign_url=True, secure=True,
+            url = cloudinary.utils.private_download_url(
+                public_id, "", resource_type="raw", type="authenticated",
             )
             with urllib.request.urlopen(url, timeout=30) as r:
                 return r.read()

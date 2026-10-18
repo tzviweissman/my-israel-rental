@@ -19,7 +19,7 @@ from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, db,
 from utils.area_filter import area_mongo_query
 from utils.property_rows import keep_valid_rows
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
-from utils.contract_files import load_contract_by_sign_token, sign_token_expiry
+from utils.contract_files import ensure_contract_file, keep_contract_file, load_contract_by_sign_token, sign_token_expiry
 from utils.signed_contract import build_signed_pdf
 from utils.rate_limit import check_rate
 
@@ -193,6 +193,13 @@ async def upload_sublease_contract(
                 raise HTTPException(status_code=413, detail="File too large. Max 50MB")
             f.write(chunk)
 
+    # Durable before the contract row exists (utils/contract_files).
+    try:
+        await keep_contract_file(file_path)
+    except HTTPException:
+        file_path.unlink(missing_ok=True)
+        raise
+
     extracted_text = ""
     if file_ext == "pdf":
         extracted_text = await asyncio.to_thread(extract_text_from_pdf, str(file_path))
@@ -358,8 +365,8 @@ async def sign_contract_public(sign_token: str, request: Request, body: dict = B
     # was saved. The other order round would trade a signature for a
     # rendering error.
     try:
-        source = CONTRACT_DIR / (contract.get("stored_filename") or "")
-        if source.exists():
+        source = await ensure_contract_file(contract.get("stored_filename") or "")
+        if source is not None:
             sublease_doc = await db.subleases.find_one(
                 {"id": contract.get("sublease_id")}, {"_id": 0, "title": 1},
             ) if contract.get("sublease_id") else None
@@ -379,6 +386,9 @@ async def sign_contract_public(sign_token: str, request: Request, body: dict = B
                 document_title=(sublease_doc or {}).get("title", ""),
                 original_filename=contract.get("original_filename") or "",
             )
+            # Kept in Cloudinary like every other contract file; a failure
+            # here is caught below, the signature itself is already saved.
+            await keep_contract_file(CONTRACT_DIR / signed_name)
             # PRIVATE, like every other contract file. Not `uploads/`, which
             # is the public static mount - a signed agreement served from
             # there bypasses every permission check, which is the bug this

@@ -25,6 +25,7 @@ endpoint. Do not build an `<a href>` from either.
 """
 from __future__ import annotations
 
+import asyncio
 from datetime import UTC, datetime, timedelta
 from pathlib import PurePosixPath
 
@@ -156,3 +157,132 @@ async def load_contract_by_sign_token(sign_token: str) -> dict:
                 ),
             )
     return contract
+
+
+# ---------------------------------------------------------------------------
+# Durable storage: private Cloudinary, with the server's disk as a cache
+# ---------------------------------------------------------------------------
+#
+# WHY (18 Oct 2026). Contracts used to live only on a Railway volume. A
+# service with a volume cannot run two deployments at once, so every backend
+# update had a gap of a minute or two where requests hung, and a person
+# saving their business got "Could not reach the server". With every
+# contract kept in Cloudinary as a private (`authenticated`) raw asset, the
+# disk is only a cache and the volume can go.
+#
+# THE RULE, for every route:
+#   * after writing a contract file to CONTRACT_DIR, `await keep_contract_file(path)`
+#     before the database points at it;
+#   * to read one, `await ensure_contract_file(stored, public_id=...)` instead
+#     of resolve_private_contract_file: it returns the local path, fetching
+#     the file back from Cloudinary into CONTRACT_DIR when this copy of the
+#     server has not seen it;
+#   * to delete one, `forget_contract_file(stored)`.
+# Each file's Cloudinary id is derived from its name, so no database field
+# is needed: myisraelrental/contracts/<filename>. Rows migrated in July carry
+# their own `*_public_id`, which ensure_contract_file takes as a fallback.
+#
+# Still never public: Cloudinary refuses an unsigned fetch of an
+# authenticated asset (401), and the bytes are fetched server-side and
+# served by the same permission-checked endpoints as before.
+
+from pathlib import Path  # noqa: E402
+
+from utils.cloud_storage import (  # noqa: E402
+    CLOUDINARY_ENABLED,
+    CONTRACT_FOLDER,
+    delete_contract_from_cloudinary,
+    fetch_contract_from_cloudinary,
+    upload_contract_to_cloudinary,
+)
+
+
+def _basename(stored: str) -> str:
+    name = PurePosixPath(str(stored or "").replace("\\", "/")).name
+    return "" if name in ("", ".", "..") else name
+
+
+def contract_cloud_id(stored: str) -> str:
+    """The Cloudinary public id a contract file is kept under."""
+    return f"{CONTRACT_FOLDER}/{_basename(stored)}"
+
+
+async def keep_contract_file(path: Path) -> None:
+    """Copy a just-written contract to Cloudinary, or refuse the request.
+
+    Refusing is the point: a file that exists only on this server's disk is
+    gone at the next update, so a save that cannot be made durable must fail
+    now, while the person is still there to try again. With Cloudinary not
+    configured (local development) the disk is all there is, and that is fine.
+    """
+    if not CLOUDINARY_ENABLED:
+        return
+    data = await asyncio.to_thread(path.read_bytes)
+    res = await upload_contract_to_cloudinary(data, public_id_hint=path.name)
+    if not res or not res.get("public_id"):
+        logger.error("contract %s could not be stored in Cloudinary", path.name)
+        raise HTTPException(status_code=503, detail="We couldn't save the contract just now. Please try again in a moment.")
+    await db.contract_cloud.update_one(
+        {"_id": path.name}, {"$set": {"public_id": res["public_id"], "at": datetime.now(UTC).isoformat()}}, upsert=True,
+    )
+
+
+async def ensure_contract_file(stored: str, *, public_id: str | None = None):
+    """The local path of a contract, fetched from Cloudinary if needed.
+
+    Same safety as resolve_private_contract_file (basename only, inside
+    CONTRACT_DIR). Returns None when the file exists nowhere.
+    """
+    local = resolve_private_contract_file(stored)
+    if local is not None:
+        return local
+    name = _basename(stored)
+    if not name or not CLOUDINARY_ENABLED:
+        return None
+    data = await fetch_contract_from_cloudinary(contract_cloud_id(name))
+    if data is None and public_id:
+        data = await fetch_contract_from_cloudinary(public_id)
+    if data is None:
+        return None
+    target = CONTRACT_DIR.resolve() / name
+    await asyncio.to_thread(target.write_bytes, data)
+    return target
+
+
+def forget_contract_file(stored: str) -> bool:
+    """Delete a contract from this disk and from Cloudinary."""
+    name = _basename(stored)
+    if not name:
+        return False
+    local = resolve_private_contract_file(name)
+    if local is not None:
+        local.unlink(missing_ok=True)
+    if CLOUDINARY_ENABLED:
+        delete_contract_from_cloudinary(contract_cloud_id(name))
+    return True
+
+
+async def mirror_local_contracts() -> dict:
+    """Copy every contract file on this disk that Cloudinary does not hold.
+
+    Run at startup. While the volume is still attached this is the
+    migration; afterwards it is a no-op, since every new file was kept as it
+    was written. `contract_cloud` records what is done, so a restart does not
+    upload everything again.
+    """
+    counts = {"copied": 0, "already": 0, "failed": 0}
+    if not CLOUDINARY_ENABLED:
+        return counts
+    for path in sorted(CONTRACT_DIR.iterdir()):
+        if not path.is_file() or path.name.startswith("."):
+            continue
+        if await db.contract_cloud.find_one({"_id": path.name}, {"_id": 1}):
+            counts["already"] += 1
+            continue
+        try:
+            await keep_contract_file(path)
+            counts["copied"] += 1
+        except Exception:  # noqa: BLE001 - one bad file must not stop the rest
+            counts["failed"] += 1
+    logger.info("[contracts] mirror to Cloudinary: %s", counts)
+    return counts

@@ -28,7 +28,7 @@ from models_response import (
 from routes.deps import db, logger, verify_token
 from utils import view_tracking
 from utils.auth import JWT_SECRET
-from utils.contract_files import resolve_private_contract_file
+from utils.contract_files import forget_contract_file, resolve_private_contract_file
 from routes.site_visits import site_summary
 from utils.events import publish
 
@@ -638,14 +638,16 @@ async def delete_user(user_id: str, payload: dict = Depends(verify_token)) -> di
     files_removed = 0
     for prop in snapshot.get("properties", []):
         for key in ("contract_url", "contract_path"):
-            path = resolve_private_contract_file(prop.get(key) or "")
-            if path is None:
+            # This disk and Cloudinary (utils/contract_files), since the
+            # disk is now only a cache.
+            if not prop.get(key):
                 continue
             try:
-                path.unlink()
-                files_removed += 1
+                had_local = resolve_private_contract_file(prop[key]) is not None
+                if forget_contract_file(prop[key]) and had_local:
+                    files_removed += 1
             except OSError as e:  # noqa: PERF203
-                logger.warning("could not remove contract file %s: %s", path.name, e)
+                logger.warning("could not remove contract file %s: %s", prop[key], e)
     if files_removed:
         logger.info("[admin] removed %d contract file(s) for user %s", files_removed, user_id)
 

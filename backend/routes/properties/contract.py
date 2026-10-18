@@ -12,6 +12,7 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 
 from models_response import ContractStatusResponse, MessageResponse, PropertyContractUploadResponse
 from routes.deps import CONTRACT_DIR, db, logger, verify_token
+from utils.contract_files import forget_contract_file, keep_contract_file
 from utils.email import send_email
 
 router = APIRouter()
@@ -29,20 +30,20 @@ async def upload_property_contract(
     property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
-    
+
     if property_data['owner_id'] != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
-    
+
     # Check if property is long-term or short-term
     rental_type = property_data.get('rental_type', '')
     if rental_type not in ['long-term', 'short-term']:
         raise HTTPException(status_code=400, detail="Contracts only available for long-term and short-term rentals")
-    
+
     # Validate file type (PDF and image formats)
     ALLOWED_TYPES = [
         'application/pdf',
         'image/jpeg',
-        'image/jpg', 
+        'image/jpg',
         'image/png',
         'image/webp',
         'image/heic',
@@ -50,12 +51,12 @@ async def upload_property_contract(
     ]
     if not file.content_type or file.content_type not in ALLOWED_TYPES:
         raise HTTPException(status_code=400, detail="Only PDF and image files (JPG, PNG, WEBP, HEIC) are allowed for contracts")
-    
+
     # Save file. CONTRACT_DIR is a private directory (never mounted as public
     # StaticFiles) — this used to write into the public uploads/ tree, which
     # meant any property contract was downloadable by URL with no auth check.
     file_id = str(uuid.uuid4())
-    
+
     # Get file extension from content type
     extension_map = {
         'application/pdf': 'pdf',
@@ -69,7 +70,7 @@ async def upload_property_contract(
     ext = extension_map.get(file.content_type, 'pdf')
     filename = f"contract_{file_id}.{ext}"
     file_path = CONTRACT_DIR / filename
-    
+
     size = 0
     MAX_CONTRACT_SIZE = 10 * 1024 * 1024  # 10MB
     with open(file_path, "wb") as f:
@@ -80,16 +81,25 @@ async def upload_property_contract(
                 file_path.unlink(missing_ok=True)
                 raise HTTPException(status_code=413, detail="Contract file too large. Max 10MB")
             f.write(chunk)
-    
+
+    # Durable before the property points at it (utils/contract_files).
+    try:
+        await keep_contract_file(file_path)
+    except HTTPException:
+        file_path.unlink(missing_ok=True)
+        raise
+
     contract_url = f"/api/uploads/{filename}"
-    
-    # Update property with contract URL
+
+    # Update property with contract URL. A contract_public_id left from the
+    # July migration named the OLD file, and the reader tried it first, so a
+    # replaced contract kept being served as the previous one; it goes.
     await db.properties.update_one(
         {"id": property_id},
         {"$set": {
             "contract_url": contract_url,
             "contract_uploaded_at": datetime.now(UTC).isoformat()
-        }}
+        }, "$unset": {"contract_public_id": ""}}
     )
 
     # Retroactively send the contract to any already-confirmed bookings that
@@ -175,7 +185,7 @@ async def get_property_contract(property_id: str, payload: dict = Depends(verify
         allowed = await db.bookings.find_one({"property_id": property_id, "renter_id": user_id}, {"_id": 1}) is not None
     if not allowed:
         raise HTTPException(status_code=403, detail="Not authorized to access this contract")
-    
+
     return {
         "has_contract": bool(property_data.get('contract_url')),
         "contract_url": property_data.get('contract_url'),
@@ -191,22 +201,20 @@ async def delete_property_contract(property_id: str, payload: dict = Depends(ver
     property_data = await db.properties.find_one({"id": property_id}, {"_id": 0})
     if not property_data:
         raise HTTPException(status_code=404, detail="Property not found")
-    
+
     if property_data['owner_id'] != payload['user_id']:
         raise HTTPException(status_code=403, detail="Not authorized")
-    
-    # Delete file from disk (private contracts dir — see upload handler above)
+
+    # Delete the file from disk and Cloudinary (utils/contract_files).
     if property_data.get('contract_url'):
-        filename = property_data['contract_url'].split('/')[-1]
-        file_path = CONTRACT_DIR / filename
-        file_path.unlink(missing_ok=True)
-    
+        forget_contract_file(property_data['contract_url'])
+
     # Remove from database
     await db.properties.update_one(
         {"id": property_id},
-        {"$unset": {"contract_url": "", "contract_uploaded_at": ""}}
+        {"$unset": {"contract_url": "", "contract_uploaded_at": "", "contract_public_id": ""}}
     )
-    
+
     return {"message": "Contract deleted successfully"}
 
 

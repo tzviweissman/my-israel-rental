@@ -1,12 +1,11 @@
 """Auto-extracted from server.py during the 2026-04 refactor."""
 import asyncio
-import io
 import uuid
 from datetime import UTC, datetime
 from pathlib import PurePosixPath
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, UploadFile
-from fastapi.responses import FileResponse, StreamingResponse
+from fastapi.responses import FileResponse
 
 from utils.rate_limit import check_rate
 
@@ -20,11 +19,13 @@ from models_response import (
 )
 from routes.deps import ALLOWED_CONTRACT_TYPES, CONTRACT_DIR, MAX_FILE_SIZE, ROOT_DIR, db, logger, verify_token
 from utils.errors import api_error
-from utils.cloud_storage import fetch_contract_from_cloudinary
 from utils.contract_files import (
     CONTRACT_MEDIA_TYPES,
     load_contract_by_sign_token,
     resolve_private_contract_file,
+    keep_contract_file,
+    ensure_contract_file,
+    forget_contract_file,
 )
 from utils.contract_template import ensure_templates as ensure_contract_templates
 from utils.files import extract_text_from_docx, extract_text_from_image, extract_text_from_pdf
@@ -98,6 +99,13 @@ async def upload_contract(
                 file_path.unlink(missing_ok=True)
                 raise HTTPException(status_code=413, detail="File too large. Max 50MB")
             f.write(chunk)
+
+    # Durable before anything points at it (utils/contract_files).
+    try:
+        await keep_contract_file(file_path)
+    except HTTPException:
+        file_path.unlink(missing_ok=True)
+        raise
 
     # Extract text based on file type
     extracted_text = ""
@@ -204,9 +212,9 @@ async def download_contract(
     # Same choice the signer's route makes, through the same helper: the
     # signed copy once there is one. Two routes deciding this separately is
     # how the owner and the signer end up holding different documents.
-    file_path, ext, download_name = _contract_file(contract)
+    file_path, ext, download_name = await _contract_file(contract)
     if file_path is None:
-        raise HTTPException(status_code=404, detail="Contract file not found on disk")
+        raise HTTPException(status_code=404, detail="Contract file not found")
 
     return FileResponse(
         path=str(file_path),
@@ -215,7 +223,7 @@ async def download_contract(
     )
 
 
-def _contract_file(contract: dict) -> tuple:
+async def _contract_file(contract: dict) -> tuple:
     """Which file to hand over, and what to call it.
 
     The SIGNED copy once one exists, because that is what a person asking
@@ -226,11 +234,11 @@ def _contract_file(contract: dict) -> tuple:
     Falls back to the original if the signed file has gone missing, rather
     than 404ing - a lost derived file must not take the document with it.
     """
-    signed = _resolve_private_contract_file(contract.get("signed_filename") or "")
+    signed = await ensure_contract_file(contract.get("signed_filename") or "")
     if signed is not None:
         stem = (contract.get("original_filename") or "contract").rsplit(".", 1)[0]
         return signed, "pdf", f"{stem} (signed).pdf"
-    original = _resolve_private_contract_file(contract.get("stored_filename") or "")
+    original = await ensure_contract_file(contract.get("stored_filename") or "")
     ext = (contract.get("file_type") or (original.suffix.lstrip(".") if original else "")).lower()
     name = contract.get("original_filename") or f"contract.{ext or 'pdf'}"
     return original, ext, name
@@ -274,7 +282,7 @@ async def download_contract_for_signing(sign_token: str, request: Request) -> Fi
     # wherever it is used.
     contract = await load_contract_by_sign_token(sign_token)
 
-    file_path, ext, download_name = _contract_file(contract)
+    file_path, ext, download_name = await _contract_file(contract)
     if file_path is None:
         raise HTTPException(status_code=404, detail="Contract file not found")
 
@@ -303,19 +311,9 @@ async def _serve_contract(doc: dict, url_field: str, pid_field: str, download_na
     fetchable — we pull the bytes server-side with a short-lived signed URL and
     stream them ourselves, so no signed URL ever reaches the browser.
     """
-    public_id = doc.get(pid_field)
-    if public_id:
-        data = await fetch_contract_from_cloudinary(public_id)
-        if data is not None:
-            ext = (doc.get(url_field) or "").rsplit(".", 1)[-1].lower()
-            return StreamingResponse(
-                io.BytesIO(data),
-                media_type=_CONTRACT_MEDIA_TYPES.get(ext, "application/octet-stream"),
-                headers={"Content-Disposition": f'attachment; filename="{download_name}.{ext or "pdf"}"'},
-            )
-        logger.warning(f"Cloudinary fetch failed for {public_id}; trying local disk")
-
-    file_path = _resolve_private_contract_file(doc.get(url_field) or "")
+    # The file the row names, from this disk or from Cloudinary; a row
+    # migrated in July also carries its own public id, tried after.
+    file_path = await ensure_contract_file(doc.get(url_field) or "", public_id=doc.get(pid_field))
     if file_path is None:
         return None
     ext = file_path.suffix.lstrip(".").lower()
@@ -485,10 +483,10 @@ async def delete_contract(contract_id: str, payload: dict = Depends(verify_token
     if contract['owner_id'] != payload['user_id'] and payload.get('role') != 'admin':
         raise HTTPException(status_code=403, detail="Not authorized")
 
-    # Delete file from disk
-    file_path = CONTRACT_DIR / contract.get('stored_filename', '')
-    if file_path.exists():
-        file_path.unlink()
+    # Delete the file, and its signed copy, from disk and Cloudinary.
+    for name in (contract.get('stored_filename'), contract.get('signed_filename')):
+        if name:
+            forget_contract_file(name)
 
     await db.contracts.delete_one({"id": contract_id})
     return {"message": "Contract deleted successfully"}
