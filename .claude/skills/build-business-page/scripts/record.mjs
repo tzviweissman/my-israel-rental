@@ -19,20 +19,32 @@
 // at the end are added. fps defaults to 30. It also writes <out>-sheet.jpg,
 // a contact sheet: look at it before sending the video.
 // Needs ffmpeg on PATH (a phone plays the mp4; WhatsApp takes ~10 MB).
+//
+// Re-record only what changed (Tzvi, 18 Oct 2026: "instead of rerecording
+// everything if you could only rerecord the part we changed"): every run
+// keeps its frames in <out>.frames/ with the plan they were drawn to. Run the
+// same command again with --redo "<selector>" (repeatable) and only the
+// frames where that element is on screen are drawn again; the rest come from
+// the last run. Every frame is a function of its time, so the new frames drop
+// into exactly the right places. If the plan changed (the page got taller or
+// shorter, a stop moved, another size or length), the timeline no longer
+// lines up and it says so and records everything.
+//   ... record.mjs http://localhost:4523/ 390 844 out.mp4 50 --stop ".picker|2" --redo "#open"
 import { createRequire } from 'node:module';
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
-import { tmpdir } from 'node:os';
 const { chromium } = createRequire(process.cwd() + '/')('playwright');
 const argv = process.argv.slice(2), STOPS = [];
 for (let i = argv.indexOf('--stop'); i >= 0; i = argv.indexOf('--stop')) { STOPS.push(argv[i + 1].split('|')); argv.splice(i, 2); }
+const REDO = [];
+for (let i = argv.indexOf('--redo'); i >= 0; i = argv.indexOf('--redo')) { REDO.push(argv[i + 1]); argv.splice(i, 2); }
 const [url, w, h, out] = [argv[0], Number(argv[1] || 390), Number(argv[2] || 844), argv[3] || 'preview.mp4'];
 const secs = Number(argv[4] || 40);
 // The old 7th argument was a speed-up (1.8); anything under 10 is that.
 const fps = Number(argv[5]) >= 10 ? Number(argv[5]) : 30;
 const HOLD = 2.5, dt = 1000 / fps;
-const dir = mkdtempSync(join(tmpdir(), 'rec-'));
+const dir = out.replace(/\.mp4$/i, '') + '.frames';
 
 const b = await chromium.launch();
 // A phone-sized video is recorded as a phone (touch, no hover), so what the
@@ -63,8 +75,9 @@ await p.evaluate(() => document.fonts.ready);
 
 // One step of the page's own time, then everything that runs on its own is
 // set for that moment, and we wait (in real time) until it is ready to draw.
-async function step(ms) {
+async function step(ms, extra = 0) {
   await p.clock.runFor(ms);
+  ms += extra;   // frames skipped by --redo moved the clock but not the page's own animations
   await p.evaluate(async (ms) => {
     const seen = (window.__rec ||= new WeakMap());
     for (const a of document.getAnimations()) {
@@ -103,42 +116,62 @@ await p.waitForLoadState('networkidle').catch(() => {});
 await step(0);
 const max = await p.evaluate(() => document.documentElement.scrollHeight - innerHeight);
 const holdN = Math.round(HOLD * fps), scrollN = Math.round(secs * fps);
-let n = 0;
-const shot = async () => writeFileSync(join(dir, `${String(n++).padStart(5, '0')}.jpg`), Buffer.from((await cdp.send('Page.captureScreenshot', { format: 'jpeg', quality: 92, optimizeForSpeed: true })).data, 'base64'));
-for (let i = 0; i < holdN; i++) { await step(dt); await shot(); }
+const legs = [];
+for (const [sel, hold, tap] of STOPS) {
+  const y = await p.evaluate((s) => { const e = document.querySelector(s), r = e.getBoundingClientRect(); return Math.max(0, Math.min(document.documentElement.scrollHeight - innerHeight, r.top + scrollY - (innerHeight - r.height) / 2)); }, sel);
+  legs.push({ y: Math.round(y), hold: Number(hold || 3), tap });
+}
+legs.push({ y: max, hold: 0 });
+const plan = JSON.stringify({ w, h, fps, secs, stops: STOPS, max, legs });
+const planFile = join(dir, 'plan.json');
+let partial = false;
+if (REDO.length) {
+  const old = existsSync(planFile) ? readFileSync(planFile, 'utf8') : '';
+  if (old === plan) partial = true;
+  else console.log(old ? 'the page or the plan changed since the last recording: recording everything' : 'no earlier recording to reuse: recording everything');
+}
+if (!partial) { rmSync(dir, { recursive: true, force: true }); mkdirSync(dir, { recursive: true }); }
+let n = 0, redrawn = 0, pend = 0, curY = 0, atY = 0;
+// Where the --redo elements sit on the page (the plan is unchanged, so the
+// layout is too): a reused frame is skipped without touching the page at all.
+const zones = REDO.length ? await p.evaluate((sels) => sels.flatMap((s) => [...document.querySelectorAll(s)].map((e) => { const r = e.getBoundingClientRect(); return [r.top + scrollY, r.bottom + scrollY]; })), REDO) : [];
+const inZone = (y) => zones.some(([t, b]) => t < y + h && b > y);
+const shot = async (y = curY) => {
+  curY = y;
+  const f = join(dir, `${String(n++).padStart(5, '0')}.jpg`);
+  if (partial && existsSync(f) && !inZone(y)) { pend += dt; return; }
+  if (y !== atY) { await p.evaluate((y) => scrollTo(0, y), y); atY = y; }
+  await step(dt + pend); pend = 0; redrawn++;
+  writeFileSync(f, Buffer.from((await cdp.send('Page.captureScreenshot', { format: 'jpeg', quality: 92, optimizeForSpeed: true })).data, 'base64'));
+};
+for (let i = 0; i < holdN; i++) await shot();
 const ease = (t) => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
 if (!STOPS.length) {
   for (let i = 1; i <= scrollN; i++) {
     const t = i / scrollN;
-    await p.evaluate((y) => scrollTo(0, y), Math.round(max * (0.15 * t + 0.85 * ease(t))));
-    await step(dt); await shot();
+    await shot(Math.round(max * (0.15 * t + 0.85 * ease(t))));
   }
 } else {
   // Glide from stop to stop (time shared by distance), hold at each.
   let y0 = 0;
-  const legs = [];
-  for (const [sel, hold, tap] of STOPS) {
-    const y = await p.evaluate((s) => { const e = document.querySelector(s), r = e.getBoundingClientRect(); return Math.max(0, Math.min(document.documentElement.scrollHeight - innerHeight, r.top + scrollY - (innerHeight - r.height) / 2)); }, sel);
-    legs.push({ y: Math.round(y), hold: Number(hold || 3), tap });
-  }
-  legs.push({ y: max, hold: 0 });
   const dist = legs.reduce((a, l, i) => a + Math.abs(l.y - (i ? legs[i - 1].y : 0)), 0) || 1;
   for (const l of legs) {
     const frames = Math.max(Math.round(fps * 0.8), Math.round(scrollN * Math.abs(l.y - y0) / dist));
-    for (let i = 1; i <= frames; i++) { await p.evaluate((y) => scrollTo(0, y), Math.round(y0 + (l.y - y0) * ease(i / frames))); await step(dt); await shot(); }
+    for (let i = 1; i <= frames; i++) await shot(Math.round(y0 + (l.y - y0) * ease(i / frames)));
     y0 = l.y;
-    if (l.tap) await p.evaluate((s) => document.querySelector(s)?.click(), l.tap);
-    for (let i = 0; i < Math.round(l.hold * fps); i++) { await step(dt); await shot(); }
+    if (l.tap) { if (atY !== l.y) { await p.evaluate((y) => scrollTo(0, y), l.y); atY = l.y; } await p.evaluate((s) => document.querySelector(s)?.click(), l.tap); }
+    for (let i = 0; i < Math.round(l.hold * fps); i++) await shot();
   }
 }
-for (let i = 0; i < holdN; i++) { await step(dt); await shot(); }
+for (let i = 0; i < holdN; i++) await shot();
 await ctx.close(); await b.close();
+writeFileSync(planFile, plan);
 
 execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-framerate', String(fps), '-i', join(dir, '%05d.jpg'),
-  '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', '-c:v', 'libx264', '-crf', '21', '-preset', 'slow',
+  '-vf', 'scale=trunc(iw/2)*2:trunc(ih/2)*2', '-c:v', 'libx264', '-crf', '21', '-preset', 'medium',
   '-pix_fmt', 'yuv420p', '-movflags', '+faststart', '-an', out]);
 const every = Math.max(1, Math.floor(n / 12));
 execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', out, '-vf', `select=not(mod(n\\,${every})),scale=-2:540,tile=6x2`,
   '-frames:v', '1', out.replace(/\.mp4$/i, '') + '-sheet.jpg']);
-rmSync(dir, { recursive: true, force: true });
-console.log(`wrote ${out} (${n} frames at ${fps} fps) and its contact sheet`);
+// The frames stay in <out>.frames/ for the next --redo.
+console.log(`wrote ${out} (${n} frames at ${fps} fps, ${partial ? redrawn + ' drawn again, ' + (n - redrawn) + ' reused' : 'all drawn'}) and its contact sheet`);

@@ -466,15 +466,34 @@ a round with Tzvi. Done in this order, none of them happens.
    and overlays at once, and ask the owner for more in the same message
    (Michal's only photo was uploaded twice and was a phone screenshot; the
    Gift Boutique's were 300 px crops from a flyer).
+   **Start building the moment the questions go out** (Tzvi, 17 Oct 2026,
+   on Chicken Munch: "start building the website so their wait is shorter
+   when they give you their answers"). Build from what the record and
+   photos already give; leave out the parts only their answers can fill (no
+   placeholders, no "coming soon"). Ask only for what is needed, or for what
+   would make the page significantly better, such as more photos. When the
+   answers arrive, they slot into a page that already passes its checks.
 3. **List every live-site action the build needs and ask for all of them in
    one go**: loading products, turning on delivery, settings. A blocked write
    discovered after a push left the Gift Boutique page showing one ₪10 item.
+   **Check the listing's prices and currency against their own menu first**
+   (Chicken Munch, 17 Oct 2026: one "premium chicken box" at 140 USD that was
+   not on his shekel menu card). Flag any mismatch in the first message, and
+   load the real menu into their shop with fixed product ids, so the page's
+   order form saves each order with a tracking link before it opens WhatsApp.
 4. **Research before building**: Mobbin and 21st per section (§3g.17). Both
    builds first reused the previous page's effects.
 5. **Plan the phone frame before generating.** A clip made at 16:9 had to be
    re-cropped three times for phones (the box drifted off centre; the arch
    came out tiny). Generate with the subject centred and a margin, and
    decide the phone crop or layout from the first frames.
+   **Confirm the motion in numbered steps before generating** (Tzvi, 18 Oct
+   2026: "if you arent 100% certain what i want then ask"). When the owner or
+   Tzvi describes an effect or sends a reference, write it back as steps
+   ("1 floats, 2 snaps, 3 blasts apart, 4 flies back together, 5 drops in the
+   box") and generate only once those steps are confirmed. "The pieces will
+   fly out" meant two different things on Chicken Munch and cost two rounds
+   of paid clips.
 6. **Run generation in the background while the page is written**, with a
    script that saves the job number and retries a slow status check (a read
    timeout lost a paid clip). Never wait idle on a clip.
@@ -767,6 +786,71 @@ out to the jar, with a new line of huge words over each scene.
    (a coffee pour, a perfume, a car) keep the subject brighter than everything
    around it (3i.1). **This item is the single home for brightness**: 3h.3,
    3h.9 and 3i.1 point here.
+12. **One look per product, everywhere on the page** (Tzvi, 17 Oct 2026, on
+   Chicken Munch: "the chicken types dont look accurate like the poppers for
+   example in the full box look different than when choosing each type",
+   then "make a rule so we dont have the same issue come up again"). The
+   film's box was generated once and the seven style close-ups separately,
+   each from its own text prompt, so the same item came out as two different
+   foods: glazed bites in the box, popcorn in red sauce in the picker. So:
+   - Every picture of the same item (film, close-up, picker, tile, card,
+     order form) shows the same object. Pick one master image per item
+     first: their own photo where there is one, otherwise the generated
+     frame the film ends on. Every other picture of it is cut or zoomed from
+     that master, or edited with the master as the reference image. Never
+     generate the same item twice from words alone.
+   - Before any picture is generated, write down which master each item's
+     pictures come from. Generate the film first and the item pictures from
+     its final frame, not the other way round.
+   - When the item names are theirs but their look is unknown (a menu with
+     no photos), only the names go on the page. Then ask the owner for one
+     photo of each, or to confirm which piece in a picture is which. Never
+     guess which generated piece is "Fruity Chicken".
+   - Check before showing: put every appearance of each item side by side
+     on one sheet (film frame, close-up, tile). If two could pass for
+     different foods, they fail.
+13. **One cause, one motion** (Tzvi, 18 Oct 2026, on Chicken Munch: "when its
+   pulled apart first crumbs fall down and they kind of look like blocks then
+   it afterwards explodes outward it doesnt look natural"). The snap clip
+   already broke the tender its own way (crumbs dropping as orange lumps
+   into a pile under it), then a second clip started an explosion from that
+   pile, and code crumbs joined later still: three kinds of physics for one
+   break. So:
+   - The thing that causes an effect and its result happen together, in one
+     clip: the force that splits the chicken is the force that throws the
+     flakes. Never let one clip finish an event one way and the next clip
+     start it again another way.
+   - Plan the cut before generating: end the lead-in clip on the last frame
+     before its event begins (the tender still whole) and generate the
+     event itself as a single clip from there, its peak pinned by an end
+     frame where needed.
+   - Pieces made in code start on the exact frame of the cause and travel
+     the same way as the generated pieces, never a beat later.
+   - Watch every effect at 4 frames a second or more, before anything is
+     shown, looking for: pieces that fall and then fly, a pause where nothing
+     moves in the middle of an action, debris that does not look like the real
+     material (blobs or blocks instead of flakes), a heap or floor that
+     appears from nowhere, and the same faults played backwards on the way
+     back. Any one of them is a fail.
+14. **The product stays recognisable through the whole effect** (Tzvi, 18 Oct
+   2026: "you dont see much of the chicken"). The burst version flew the camera
+   into the flakes until no chicken was left on screen. The effect happens to
+   the product with the product in view; a moving camera never loses it. On a
+   phone the frame widens during the effect if the pieces travel past the crop.
+15. **Pin the peak of a big motion with an end frame.** Generated clips play
+   motion down: Chicken Munch's first blast barely moved. For an explosion,
+   pour or splash, make a still of the peak moment first and give it to the
+   clip as its last frame, so the clip must travel all the way there.
+16. **A clip played backwards is a free second scene.** Explode, then fly back
+   together, is one clip played forwards and then backwards with the scroll,
+   so it returns exactly the way it broke. Consider it on every film; it
+   halves that scene's cost. The faults of 3h.13 played backwards are faults
+   too.
+17. **Words and film take turns.** A giant name sits on the plain ground and
+   the film appears as the letters part, never letters over the picture; at
+   the end the film moves aside first and the headline arrives once there is
+   room. The readability check failed both ways on Chicken Munch until they
+   took turns.
 
 ## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
 

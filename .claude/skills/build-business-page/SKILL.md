@@ -99,9 +99,20 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 1. Real slug from the live record before publishing.
 2. Look at every photo; flag duplicates, screenshots, small sizes; ask the
    owner for more in the first message.
-3. List every live-site write the build needs; ask for all at once.
+2a. Start building the moment the questions go out (Tzvi, 17 Oct 2026), so
+   the owner's wait after answering is short. Build from what is there and
+   leave out what only their answers can fill; no placeholders on the page.
+   Ask only for what is needed, or what would make the page significantly
+   better (more photos, a menu detail). When answers come, slot them in.
+3. List every live-site write the build needs; ask for all at once. Check the
+   listing's prices and currency against their menu first and flag mismatches;
+   load the real menu with fixed product ids so the page's order form saves
+   orders (tracking link) before WhatsApp.
 4. Mobbin and 21st per section before building (3g.17).
 5. Plan the phone frame before generating (subject centred, margin).
+   Confirm the motion as numbered steps ("1 floats, 2 snaps, 3 blasts apart,
+   4 flies back, 5 drops in") and generate only once they are confirmed; ask
+   whenever not 100% sure what is wanted.
 6. Generate in the background while writing the page; scripts keep the job
    number and retry slow status checks.
 7. Text over imagery gets its edge shade (or small solid card) from the start
@@ -294,7 +305,11 @@ Full text and reasons: `reference/full-rules.md` §3c.
     rewards or guilt streaks.
 11. **Video: draw it, then check it.** `scripts/record.mjs` renders each
     frame for its exact time (no stutter, same result every run) and writes a
-    contact sheet beside the video: look at it before sending. Paid
+    contact sheet beside the video: look at it before sending. After a small change,
+    rerun the same command with `--redo "<selector>"`: only the frames showing
+    that part are drawn again and the rest are reused (Tzvi, 18 Oct 2026; a full
+    take 4 min, a redo of one section 30 s). It records everything if the page's
+    length or the stops changed. Paid
     generation waits for the owner's yes on two or three style frames.
 12. **Everything fits on one screen** (from woodwrights.co.nz): wherever a
     visitor stops, each photo is seen whole with its words and price. No
@@ -465,6 +480,34 @@ bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
    than pushed until it turns milky. Even the dark sites in the videos keep the
    subject brighter than everything around it. **Single home for brightness**
    (3h.3, 3h.9, 3i.1 point here).
+12. **One look per product, everywhere on the page** (Chicken Munch, 17 Oct
+   2026: the glazed bites in the film's box were popcorn in red sauce in the
+   picker). Every picture of the same item (film, close-up, picker, tile,
+   card) is the same object. One master per item: their own photo, otherwise
+   the film's final frame. Every other picture of it is cut or zoomed from
+   the master, or edited with it as the reference; never generate the same
+   item twice from words. Film first, item pictures from its last frame.
+   Names whose look is unknown get no picture until the owner sends one or
+   says which piece is which. Before showing, put every appearance of each
+   item side by side; two that could pass for different foods fail.
+13. **One cause, one motion** (Chicken Munch, 18 Oct 2026: crumbs fell as
+   blocks into a pile, then a second clip exploded them outward). The cause and
+   its result happen together in one clip; never let one clip finish an event
+   and the next start it again. End the lead-in clip on the last frame before
+   its event and generate the event as one clip (peak pinned by an end frame).
+   Code pieces start on the exact frame of the cause. Watch every effect at 4+
+   frames a second before showing: fall-then-fly, a pause mid-action, debris
+   that is not the real material, a heap from nowhere, the same played back.
+14. **The product stays recognisable through the whole effect**; a moving
+   camera never loses it, and on a phone the frame widens if pieces travel past
+   the crop.
+15. **Pin the peak of a big motion with an end frame** (a still of the
+   exploded or poured moment): generated clips play motion down.
+16. **A clip played backwards is a free second scene** (explode, then fly back
+   together); consider it on every film.
+17. **Words and film take turns**: a giant name on the plain ground with the
+   film appearing as the letters part; at the end the film moves aside first,
+   then the headline arrives.
 
 ## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
 

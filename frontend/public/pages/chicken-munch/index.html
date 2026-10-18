@@ -1,0 +1,614 @@
+<!doctype html>
+<!--
+  Chicken Munch, Jerusalem (Tzvi, 17 Oct 2026: "lets build a page for this
+  business", then "use whats there for now").
+  Facts are all theirs: the listing (description, area, hechsher), their
+  flyer, their WhatsApp catalogue (the menu card with seven styles and four
+  prices, the box on yellow, the tray). Nothing else: no sauce list, no
+  serving sizes, no delivery terms, no FAQ until the owner answers (page
+  rules 0b step 2: built while the questions are out, gaps left out).
+
+  One idea: the name. Their giant two-word wordmark stamps in on the yellow
+  of their own photo, then splits like doors as you scroll and their box
+  pushes up through it (Inspo: dnco.com, the name as the whole first screen;
+  page rules 3i.4, words and object overlap). Then the seven styles on black
+  (their flyer's ground, the contrast section), trays and sides as tiles
+  (Mobbin: Square's option tiles with the price on each), the order form
+  that writes the order into WhatsApp, and the name again, cropped, as the
+  close (3i.10).
+
+  v3 (Tzvi, "I don't like your wow moment", chose "the crunch"): the opening
+  is a generated macro film (gen/crunch/): the name stamps in on yellow and
+  parts, a corn flake tender snaps in half and the halves blast apart in a
+  burst of flakes (after Tzvi's reference clip of a burst); the same clips
+  then play backwards so the flakes and halves fly back together into the
+  whole tender (built in code, gen/crunch/frames4.sh), and it drops into the
+  full box beside the headline. The picker zooms into that
+  same last frame (rules 3h.12). (v2's falling pieces were replaced.)
+  The seven styles are a picker with a generated close-up of each (one
+  shoot); the section takes the colour of the chosen photo. Their own photos
+  carry the trays. Orders are saved to their shop (gen/catalog) first.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chicken Munch · Kosher American fried chicken trays in Jerusalem</title>
+<meta name="description" content="Chicken Munch: premium American fried chicken by the tray in Jerusalem. Seven styles, 9x13 trays from ₪260. Hechsher of Rav Akiva Dershowitz; chicken Edah Chareidis or Rav Landau.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* Style sheet (3g.1). Ground: the yellow of their own box photo, so the
+     photo sits in the page with no edge. Ink near-black. Accent: their logo
+     red, one word or object per screen. Faces: Anton (their wordmark's heavy
+     condensed letters) and Archivo. One radius. */
+  :root {
+    --yellow: #FEEC5C; --yellow-2: #FFF5B0; --cream: #FFFBE6; --ink: #141210; --soft: #3D3830;
+    --red: #ED1B24; --red-dk: #C8141C; --black: #141210; --line: #E8D660;
+    --r: 20px; --shadow: 0 1px 2px rgb(20 18 16 / .1), 0 22px 40px -22px rgb(20 18 16 / .55);
+    --font-head: 'Anton', Impact, sans-serif; --font-body: 'Archivo', system-ui, sans-serif;
+    --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--yellow); color: var(--ink); font: 400 1.0625rem/1.55 var(--font-body); -webkit-font-smoothing: antialiased; }
+  img { display: block; max-width: 100%; }
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 400; margin: 0; line-height: .95; letter-spacing: .005em; text-transform: uppercase; }
+  .wrap { max-width: 76rem; margin: 0 auto; padding-inline: var(--gutter); }
+  .acc { color: var(--red-dk); }
+  :focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  /* one solid button: near-black with their yellow; it presses in */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; min-height: 54px; padding: 0 1.7rem; border-radius: 999px; border: 0;
+    background: var(--black); color: var(--yellow); font: 700 1.05rem/1 var(--font-body); text-decoration: none; cursor: pointer;
+    box-shadow: 0 4px 0 var(--red-dk); transition: transform 140ms ease-out, box-shadow 140ms ease-out; }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 5px 0 var(--red-dk); }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--red-dk); }
+  .btn .arw { transition: transform 220ms var(--out); }
+  .btn:hover .arw { transform: translateX(4px); }
+  .btn[aria-busy="true"] { opacity: .7; pointer-events: none; }
+  .btn-line { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1.2rem; border-radius: 999px; border: 2px solid var(--ink); color: var(--ink);
+    font: 700 .98rem/1 var(--font-body); text-decoration: none; background: transparent; transition: background 160ms ease-out, transform 140ms ease-out; }
+  .btn-line:hover { background: rgb(20 18 16 / .07); }
+  .btn-line:active { transform: scale(.97); }
+
+  /* header */
+  .top { position: fixed; inset: 0 0 auto; z-index: 30; height: 64px; background: var(--yellow); display: flex; align-items: center; justify-content: space-between; padding-inline: var(--gutter);
+    transition: background 240ms ease-out, box-shadow 240ms ease-out; }
+  .top.solid { box-shadow: 0 1px 0 var(--line); }
+  .mark { font: 400 1.5rem/1 var(--font-head); text-decoration: none; color: var(--ink); letter-spacing: .01em; }
+  .mark b { font-weight: 400; color: var(--red-dk); }
+
+  /* ── the opening: the name stamps in and parts like doors over the
+     empty box; the scroll drives the film as the styles drop in ── */
+  #open { position: relative; height: 620vh; }
+  .stage { position: sticky; top: 64px; height: calc(100vh - 64px); height: calc(100svh - 64px); overflow: hidden; background: var(--film, #FED801); }
+  .reel { position: absolute; inset: 0; overflow: hidden; border-radius: calc(var(--c, 0) * 28px); box-shadow: 0 30px 60px -30px rgb(90 60 0 / calc(var(--c, 0) * .6));
+    transform: translateX(calc(var(--c, 0) * -4vw)) scale(calc(1 - var(--c, 0) * .42)); transform-origin: 100% 50%; will-change: transform; }
+  #cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  .word { z-index: 2; }
+  /* one short line per scene, on a small solid card at the edge (5b.3) */
+  .chap { position: absolute; z-index: 3; left: var(--gutter); bottom: 22px; margin: 0; padding: .55rem .95rem; border-radius: 999px; background: var(--black); color: var(--yellow);
+    font: 700 .95rem/1.2 var(--font-body); opacity: 0; transform: translateY(8px); transition: opacity 260ms ease-out, transform 320ms var(--out); pointer-events: none; }
+  .chap.on { opacity: 1; transform: none; }
+  .copy { z-index: 3; }
+  .word { position: absolute; left: 50%; font: 400 min(25vw, 46svh)/.82 var(--font-head); text-transform: uppercase; white-space: nowrap; letter-spacing: -.01em;
+    will-change: transform; }
+  .w1 { top: 50%; color: var(--red); transform: translate(calc(-50% - var(--a, 0) * 62vw), calc(-100% + 1vh)); }
+  .w2 { top: 50%; color: var(--ink); transform: translate(calc(-50% + var(--a, 0) * 62vw), 1vh); }
+  .word span { display: inline-block; animation: stamp 520ms var(--out) both; }
+  @keyframes stamp { from { transform: translateY(-40%) scale(1.35); opacity: 0; } to { transform: none; opacity: 1; } }
+  .copy { position: absolute; left: var(--gutter); top: 50%; width: min(34vw, 30rem); transform: translateY(calc(-50% + (1 - var(--c, 0)) * 24px)); opacity: var(--c, 0);
+    pointer-events: none; }
+  .copy.on { pointer-events: auto; }
+  .label { font: 700 .875rem/1.25 var(--font-body); letter-spacing: .12em; text-transform: uppercase; margin: 0 0 1rem; }
+  .copy h1 { font-size: clamp(2.8rem, 5.6vw, 5.2rem); }
+  .copy p.lede { font-size: 1.12rem; color: var(--soft); margin: 1.1rem 0 1.6rem; max-width: 26rem; }
+  .act { display: flex; flex-wrap: wrap; align-items: center; gap: .9rem 1.2rem; }
+  .proof { font: 500 .95rem/1.35 var(--font-body); color: var(--soft); }
+  .proof b { color: var(--ink); }
+  .hint { position: absolute; left: 50%; bottom: 18px; transform: translateX(-50%); margin: 0; padding: .5rem .9rem; border-radius: 999px; background: var(--yellow); font: 700 .78rem/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase;
+    opacity: calc(1 - var(--a, 0) * 4); }
+  @media (max-width: 760px) {
+    #open { height: 540vh; }
+    .reel { transform: none; border-radius: 0; box-shadow: none; }
+    .chap { bottom: auto; top: var(--chap-y, 60%); }
+    .word { font-size: 27vw; }
+    .box { width: min(78vw, 46svh * .82); }
+    .copy { left: var(--gutter); right: var(--gutter); width: auto; top: auto; bottom: calc(18px + env(safe-area-inset-bottom)); transform: translateY(calc((1 - var(--c, 0)) * 24px)); }
+    .copy h1 { font-size: clamp(2.3rem, 10.5vw, 3.2rem); }
+    .copy p.lede { font-size: 1rem; margin: .7rem 0 1rem; }
+    .label { margin-bottom: .5rem; font-size: .875rem; letter-spacing: .08em; }
+  }
+
+  /* hechsher band */
+  .kosher { background: var(--red-dk); color: #fff; }
+  .kosher .wrap { display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; justify-content: center; align-items: center; padding-block: 1.05rem; text-align: center; font: 500 1rem/1.4 var(--font-body); }
+  .kosher b { font-weight: 700; }
+
+  section.sec { padding-block: clamp(4.5rem, 10vw, 8rem); }
+  .sec h2 { font-size: clamp(2.6rem, 7vw, 5.6rem); }
+  .sec .lede { font-size: 1.12rem; color: var(--soft); max-width: 34rem; margin: 1rem 0 0; }
+  .rev { opacity: 0; transform: translateY(18px); transition: opacity 600ms var(--out), transform 600ms var(--out); }
+  .rev.in { opacity: 1; transform: none; }
+  .no-js .rev { opacity: 1; transform: none; }
+
+  /* ── seven styles, on their flyer's black ── */
+  .styles { --tint: #FFDCD2; background: var(--tint); transition: background-color 500ms var(--out); }
+  .picker { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: center; margin-top: clamp(1.5rem, 3vw, 2.5rem); }
+  .opts { list-style: none; margin: 0; padding: 0; display: grid; gap: .1rem; }
+  .opt { all: unset; box-sizing: border-box; display: flex; align-items: center; gap: .8rem; width: 100%; min-height: 44px; padding: .15rem 0; cursor: pointer;
+    font: 400 clamp(1.6rem, min(3vw, 5.4svh), 2.6rem)/1.05 var(--font-head); text-transform: uppercase; color: #514A40; transition: color 200ms ease-out, transform 220ms var(--out); }
+  .opt::before { content: ''; flex: none; width: 0; height: .5em; border-radius: 99px; background: var(--red-dk); transition: width 260ms var(--out); }
+  .opt:hover { color: var(--ink); transform: translateX(4px); }
+  .opt[aria-pressed="true"] { color: var(--ink); }
+  .opt[aria-pressed="true"]::before { width: .9em; }
+  .opt:focus-visible { outline: 3px solid var(--ink); outline-offset: 4px; border-radius: 6px; }
+  .pic { position: relative; margin: 0; aspect-ratio: 1; justify-self: center; width: min(100%, 56svh); }
+  .pic { overflow: hidden; border-radius: var(--r); box-shadow: 0 30px 60px -30px rgb(20 18 16 / .5); background: #FED801; }
+  .pic img { position: absolute; left: 0; top: 0; width: auto; max-width: none; height: 100%; transform-origin: 0 0; transition: transform 700ms var(--out); will-change: transform; }
+  .also { margin: 1.4rem 0 0; color: var(--soft); font-size: 1rem; }
+  .pic figcaption { z-index: 1; position: absolute; left: 14px; bottom: 14px; padding: .45rem .85rem; border-radius: 999px; background: var(--black); color: var(--yellow); font: 700 .95rem/1.2 var(--font-body); }
+  @media (max-width: 860px) {
+    .picker { grid-template-columns: 1fr; }
+    .pic { order: -1; width: min(100%, 52svh); }
+    .opts { grid-template-columns: 1fr 1fr; gap: .2rem .9rem; }
+    .opt { font-size: clamp(1.15rem, 5vw, 1.6rem); }
+  }
+
+  /* ── trays and sides ── */
+  .trays { background: var(--black); color: #fff; }
+  .trays h2 .acc { color: var(--yellow); }
+  .trays .side-h { color: #CFC8B8; }
+  .trays .tile { color: var(--ink); }
+  .tray-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: center; margin-top: clamp(2rem, 4vw, 3rem); }
+  .tray-photo { border-radius: var(--r); overflow: hidden; box-shadow: var(--shadow); max-height: 70svh; }
+  .tray-photo img { width: 100%; height: 100%; max-height: 70svh; object-fit: cover; object-position: 50% 40%; }
+  .tiles { display: grid; gap: .9rem; }
+  .tile { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 1.15rem 1.3rem; border-radius: var(--r); background: #fff;
+    border: 2px solid transparent; box-shadow: 0 1px 2px rgb(20 18 16 / .06), 0 12px 26px -20px rgb(20 18 16 / .45);
+    transition: transform 200ms var(--out), border-color 200ms ease-out; }
+  .tile:hover { transform: translateY(-3px); border-color: var(--ink); }
+  .tile h3 { font-size: clamp(1.5rem, 2.6vw, 2rem); }
+  .tile p { margin: .25rem 0 0; color: var(--soft); font-size: .95rem; }
+  .tile .price { font: 400 clamp(1.7rem, 3vw, 2.3rem)/1 var(--font-head); white-space: nowrap; }
+  .tile.big .price { color: var(--red-dk); }
+  .tile .add { margin-inline-start: .8rem; }
+  .side-h { font: 700 .82rem/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; margin: 1.1rem 0 0; color: var(--soft); }
+  @media (max-width: 860px) { .tray-grid { grid-template-columns: 1fr; } .tray-photo, .tray-photo img { max-height: 46svh; } }
+
+  /* ── order ── */
+  .order { background: var(--yellow); }
+  .form { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: clamp(1.5rem, 4vw, 3rem); margin-top: clamp(2rem, 4vw, 3rem); align-items: start; }
+  .card { background: var(--cream); border-radius: var(--r); padding: clamp(1.2rem, 3vw, 1.8rem); box-shadow: var(--shadow); }
+  .card h3 { font-size: 1.6rem; margin-bottom: .9rem; }
+  .card + .card { margin-top: 1.1rem; }
+  .line { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem 0; border-top: 1px solid #EDE3B8; }
+  .line:first-of-type { border-top: 0; }
+  .line .nm { font-weight: 700; }
+  .line .pr { color: var(--soft); font-size: .95rem; }
+  .step { display: inline-flex; align-items: center; gap: .2rem; background: #fff; border-radius: 999px; padding: 3px; border: 1px solid #E3D79A; }
+  .step button { width: 40px; height: 40px; border-radius: 999px; border: 0; background: transparent; font: 700 1.25rem/1 var(--font-body); color: var(--ink); cursor: pointer; }
+  .step button:hover { background: var(--yellow-2); }
+  .step button:active { transform: scale(.92); }
+  .step output { min-width: 1.6rem; text-align: center; font-weight: 700; }
+  .chips { display: flex; flex-wrap: wrap; gap: .55rem; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .chip span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 2px solid var(--ink); font: 700 .95rem/1 var(--font-body);
+    background: #fff; transition: background 160ms ease-out, color 160ms ease-out, transform 140ms ease-out; }
+  .chip input:checked + span { background: var(--ink); color: var(--yellow); }
+  .chip input:focus-visible + span { outline: 3px solid var(--red-dk); outline-offset: 2px; }
+  .chip:active span { transform: scale(.96); }
+  label.f { display: block; font-weight: 700; font-size: .95rem; margin: .9rem 0 .35rem; }
+  .f + input, .f + textarea, input.in, textarea.in { width: 100%; min-height: 48px; padding: .7rem .9rem; border-radius: 12px; border: 1.5px solid #CFC27A; background: #fff;
+    font: 400 1rem/1.4 var(--font-body); color: var(--ink); }
+  textarea.in { min-height: 88px; resize: vertical; }
+  .in:focus { outline: 3px solid var(--ink); outline-offset: 1px; border-color: var(--ink); }
+  .bad .in { border-color: var(--red-dk); }
+  .err { color: var(--red-dk); font-size: .88rem; margin: .3rem 0 0; min-height: 1.1em; }
+  .sum { position: sticky; top: 84px; }
+  .sum .total { display: flex; justify-content: space-between; align-items: baseline; font: 400 2.2rem/1 var(--font-head); margin: .4rem 0 1.1rem; }
+  .sum ul { list-style: none; margin: 0 0 1rem; padding: 0; color: var(--soft); font-size: .95rem; }
+  .sum ul li { display: flex; justify-content: space-between; gap: 1rem; padding: .25rem 0; }
+  .sum .btn { width: 100%; }
+  .sum .note { font-size: .9rem; color: var(--soft); margin: .9rem 0 0; }
+  @media (max-width: 860px) { .form { grid-template-columns: 1fr; } .sum { position: static; } }
+
+  /* the close: their name, cropped at the floor */
+  .close { background: var(--red-dk); color: #fff; padding-top: clamp(3.5rem, 8vw, 6rem); }
+  .close .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.2rem; align-items: center; }
+  .close p { margin: 0; font-size: 1.08rem; }
+  .close a { color: #fff; font-weight: 700; }
+  .close .btn { background: var(--yellow); color: var(--ink); box-shadow: 0 4px 0 #7A0B10; }
+  .close .giant { font: 400 min(12vw, 40svh)/.95 var(--font-head); text-transform: uppercase; white-space: nowrap; text-align: center; margin: clamp(2rem, 5vw, 3rem) 0 0; padding-bottom: .08em; color: var(--yellow);
+    letter-spacing: -.01em; }
+  .foot { background: var(--black); color: #A9A294; font-size: .85rem; text-align: center; padding: 1.1rem var(--gutter) calc(1.1rem + var(--pad-bar, 0px)); }
+  .foot a { color: #E8E1D2; }
+
+  /* phone order bar, after the opening until the order section */
+  .bar { position: fixed; inset: auto 0 0; z-index: 25; display: none; align-items: center; justify-content: space-between; gap: .8rem; height: calc(var(--bar-h) + env(safe-area-inset-bottom));
+    padding: 0 var(--gutter) env(safe-area-inset-bottom); background: var(--black); color: #fff; transform: translateY(110%); transition: transform 300ms var(--out); }
+  .bar.on { transform: none; }
+  .bar .p { font-size: .92rem; line-height: 1.25; }
+  .bar .p b { color: var(--yellow); font: 400 1.25rem/1 var(--font-head); display: block; }
+  .bar .btn { min-height: 46px; padding: 0 1.2rem; background: var(--yellow); color: var(--ink); box-shadow: 0 3px 0 var(--red-dk); }
+  @media (max-width: 760px) { .bar { display: flex; } body { --pad-bar: var(--bar-h); } .top .btn-line { display: none; } }
+
+  @media (prefers-reduced-motion: reduce) {
+    #open { height: auto; }
+    .stage { position: relative; height: auto; min-height: 100svh; }
+    .word span { animation: none; }
+    .rev { opacity: 1; transform: none; transition: none; }
+  }
+</style>
+</head>
+<body class="no-js">
+<header class="top" id="top">
+  <a class="mark" href="#open" aria-label="Chicken Munch, top of the page" data-mir-key="t-7f69c791-0"><b>Chicken</b> Munch</a>
+  <a class="btn-line" href="#order" data-mir-key="t-e805733f-0">Order a tray</a>
+</header>
+
+<main>
+  <section id="open" aria-labelledby="h-open" data-sc-act>
+    <div class="stage" id="stage">
+      <div class="word w1" aria-hidden="true" data-clip-ok><span data-mir-key="t-25f8ef91-0">C</span><span data-mir-key="t-7a382cad-0">H</span><span data-mir-key="t-300dc040-0">I</span><span data-mir-key="t-25f8ef91-1">C</span><span data-mir-key="t-b996bf21-0">K</span><span data-mir-key="t-bf07063b-0">E</span><span data-mir-key="t-d91b8b44-0">N</span></div>
+      <div class="word w2" aria-hidden="true" data-clip-ok><span data-mir-key="t-f2969809-0">M</span><span data-mir-key="t-b55b102c-0">U</span><span data-mir-key="t-d91b8b44-1">N</span><span data-mir-key="t-25f8ef91-2">C</span><span data-mir-key="t-7a382cad-1">H</span></div>
+      <div class="reel" id="reel"><canvas id="cv" role="img" aria-label="A corn flake chicken tender snaps in half and the halves blast apart in a burst of corn flakes, then everything flies back together into the whole tender, and it drops into a kraft box full of Chicken Munch's styles"></canvas></div>
+      <p class="chap" data-from=".1" data-to=".33" data-mir-key="t-6a16ea52-0">Crispy Corn Flakes</p>
+      <p class="chap" data-from=".36" data-to=".58" data-mir-key="t-7b27d3d8-0">One of seven styles</p>
+      <p class="chap" data-from=".64" data-to=".84" data-mir-key="t-01559947-0">Your styles, one tray</p>
+      <div class="copy" id="copy">
+        <p class="label" data-mir-key="t-53dc8c7b-0">Kosher fried chicken trays · Jerusalem</p>
+        <h1 id="h-open" data-mir-key="t-7a7559f2-0">The taste of America, <span class="acc">now in Jerusalem</span></h1>
+        <p class="lede" data-mir-key="t-05b5147f-0">Premium fried chicken, made with the finest ingredients and crafted with care.</p>
+        <div class="act">
+          <a class="btn" href="#order" data-mir-key="t-a935e302-0">Order a tray <span class="arw" aria-hidden="true">→</span></a>
+          <p class="proof" data-mir-key="t-c4ad918b-0">9x13 trays from <b>₪260</b><br>Hechsher of Rav Akiva Dershowitz</p>
+        </div>
+      </div>
+      <p class="hint" aria-hidden="true" data-mir-key="t-ab512721-0">Scroll</p>
+    </div>
+  </section>
+
+  <div class="kosher">
+    <div class="wrap"><span data-mir-key="t-45b16c52-0"><b>Kosher</b>, hechsher of Rav Akiva Dershowitz</span><span data-mir-key="t-086f2dd0-0">The chicken is Edah Chareidis or Rav Landau</span></div>
+  </div>
+
+  <section class="sec styles" id="styles" aria-labelledby="h-styles">
+    <div class="wrap">
+      <h2 id="h-styles" class="rev" data-mir-key="t-7b8421b6-0">Seven <span class="acc">styles</span></h2>
+      <p class="lede rev" data-mir-key="t-34267822-0">Pick one to see it in the box. Choose your styles and sauces when you order.</p>
+      <div class="picker">
+        <ul class="opts" id="opts">
+          <li><button type="button" class="opt" data-k="hot" aria-pressed="true" data-mir-key="t-f8985ff4-0">Original Hot Poppers</button></li>
+          <li><button type="button" class="opt" data-k="cornflakes" aria-pressed="false" data-mir-key="t-d0a25371-0">Crispy Corn Flakes</button></li>
+          <li><button type="button" class="opt" data-k="pretzel" aria-pressed="false" data-mir-key="t-67bb09f6-0">Crunchy Pretzel</button></li>
+          <li><button type="button" class="opt" data-k="rice" aria-pressed="false" data-mir-key="t-775f5d24-0">Rice Crispy Fingers</button></li>
+          <li><button type="button" class="opt" data-k="shnitzel" aria-pressed="false" data-mir-key="t-9fbc6375-0">Shnitzel Bites</button></li>
+        </ul>
+        <figure class="pic" id="pic-frame"><img id="pic" src="/pages/chicken-munch/assets/box-full.webp?v=mvdyq20w" alt="A Chicken Munch box of fried chicken styles, close on the Original Hot Poppers" width="2000" height="1125" loading="lazy"><figcaption id="pic-name">Original Hot Poppers</figcaption></figure>
+      </div>
+      <p class="also rev" data-mir-key="t-cd61bbd1-0">Also on the menu: Classic American Crunch and Fruity Chicken.</p>
+    </div>
+  </section>
+
+  <section class="sec trays" id="trays" aria-labelledby="h-trays">
+    <div class="wrap">
+      <h2 id="h-trays" class="rev" data-mir-key="t-faa19212-0">By the <span class="acc">tray</span></h2>
+      <div class="tray-grid">
+        <div class="tray-photo rev"><img src="/pages/chicken-munch/assets/box-black.webp?v=mvdyq20w" alt="A Chicken Munch box of fried chicken styles with sauce pots, on a black table" width="1024" height="1536" loading="lazy" data-mir-key="i-e63425f9-0"></div>
+        <div class="tiles">
+          <div class="tile big rev"><div><h3 data-mir-key="t-b6617f62-0">9x13 tray</h3><p data-mir-key="t-597e7355-0">Your choice of styles</p></div><div style="display:flex;align-items:center"><span class="price" data-mir-key="t-64652930-0">₪260</span><a class="btn-line add" href="#order" data-add="t913" data-mir-key="t-083348d1-0">Add</a></div></div>
+          <div class="tile big rev"><div><h3 data-mir-key="t-a54fa715-0">Gastro tray</h3><p data-mir-key="t-1300ba62-0">The full-size tray</p></div><div style="display:flex;align-items:center"><span class="price" data-mir-key="t-6b8eea62-0">₪650</span><a class="btn-line add" href="#order" data-add="tgas" data-mir-key="t-083348d1-1">Add</a></div></div>
+          <p class="side-h rev" data-mir-key="t-bb39ba87-0">On the side</p>
+          <div class="tile rev"><div><h3 data-mir-key="t-9775bdb0-0">9x13 rice</h3></div><div style="display:flex;align-items:center"><span class="price" data-mir-key="t-8f344959-0">₪70</span><a class="btn-line add" href="#order" data-add="rice" data-mir-key="t-083348d1-2">Add</a></div></div>
+          <div class="tile rev"><div><h3 data-mir-key="t-e3f31ac2-0">Vegetable lo mein</h3></div><div style="display:flex;align-items:center"><span class="price" data-mir-key="t-e6c58c8e-0">₪95</span><a class="btn-line add" href="#order" data-add="lomein" data-mir-key="t-083348d1-3">Add</a></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec order" id="order" aria-labelledby="h-order">
+    <div class="wrap">
+      <h2 id="h-order" class="rev" data-mir-key="t-0be66db8-0">Your <span class="acc">order</span></h2>
+      <p class="lede rev" data-mir-key="t-1d1eca03-0">Pick your trays and styles. We get it on WhatsApp, written out.</p>
+      <form class="form" id="form" novalidate>
+        <div>
+          <div class="card" id="c-items">
+            <h3 data-mir-key="t-48cb4578-0">Trays and sides</h3>
+            <div class="line" data-k="t913"><div><div class="nm" data-mir-key="t-af4f82c3-0">9x13 tray</div><div class="pr" data-mir-key="t-42299953-0">₪260</div></div><div class="step"><button type="button" data-d="-1" aria-label="One fewer 9x13 tray" data-mir-key="t-a4fccb8c-0">−</button><output>0</output><button type="button" data-d="1" aria-label="One more 9x13 tray" data-mir-key="t-e67d47d4-0">+</button></div></div>
+            <div class="line" data-k="tgas"><div><div class="nm" data-mir-key="t-60ecb5ee-0">Gastro tray</div><div class="pr" data-mir-key="t-3ffc474d-0">₪650</div></div><div class="step"><button type="button" data-d="-1" aria-label="One fewer gastro tray" data-mir-key="t-a4fccb8c-1">−</button><output>0</output><button type="button" data-d="1" aria-label="One more gastro tray" data-mir-key="t-e67d47d4-1">+</button></div></div>
+            <div class="line" data-k="rice"><div><div class="nm" data-mir-key="t-86c741e8-0">9x13 rice</div><div class="pr" data-mir-key="t-baf4c82d-0">₪70</div></div><div class="step"><button type="button" data-d="-1" aria-label="One fewer rice" data-mir-key="t-a4fccb8c-2">−</button><output>0</output><button type="button" data-d="1" aria-label="One more rice" data-mir-key="t-e67d47d4-2">+</button></div></div>
+            <div class="line" data-k="lomein"><div><div class="nm" data-mir-key="t-3429887c-0">Vegetable lo mein</div><div class="pr" data-mir-key="t-4a384f41-0">₪95</div></div><div class="step"><button type="button" data-d="-1" aria-label="One fewer lo mein" data-mir-key="t-a4fccb8c-3">−</button><output>0</output><button type="button" data-d="1" aria-label="One more lo mein" data-mir-key="t-e67d47d4-3">+</button></div></div>
+            <p class="err" id="e-items"></p>
+          </div>
+          <div class="card" id="c-styles">
+            <h3 data-mir-key="t-f986984a-0">Styles</h3>
+            <div class="chips" id="chips"></div>
+            <label class="f" for="sauce" data-mir-key="t-2af51c24-0">Sauces, and anything else</label>
+            <textarea class="in" id="sauce" maxlength="500"></textarea>
+          </div>
+          <div class="card">
+            <h3 data-mir-key="t-93930347-0">For</h3>
+            <div id="w-when"><label class="f" for="when" data-mir-key="t-03e4ad07-0">Which day</label><input class="in" id="when" type="date"><p class="err" id="e-when"></p></div>
+            <div id="w-me"><label class="f" for="me" data-mir-key="t-5c263b1a-0">Your name</label><input class="in" id="me" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
+            <div id="w-ph"><label class="f" for="ph" data-mir-key="t-d93db2df-0">Your phone</label><input class="in" id="ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
+          </div>
+        </div>
+        <aside class="card sum" aria-live="polite">
+          <h3 data-mir-key="t-1b40ab81-0">So far</h3>
+          <ul id="sum-list"><li><span data-mir-key="t-b1bb775d-0">Nothing yet</span></li></ul>
+          <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><span id="total">₪0</span></div>
+          <button class="btn" id="send" type="submit"><span data-mir-key="t-568fb5eb-0">Send order on WhatsApp</span></button>
+          <p class="note" data-mir-key="t-5b8fb678-0">Opens WhatsApp with your order written out, to send to Chicken Munch.</p>
+        </aside>
+      </form>
+    </div>
+  </section>
+
+  <section class="close" aria-label="Chicken Munch">
+    <div class="wrap">
+      <p data-mir-key="t-a6bd1356-0">WhatsApp Chicken Munch: <a href="https://wa.me/972553316975" target="_blank" rel="noopener">055-331-6975</a></p>
+      <a class="btn" href="#order" data-mir-key="t-a935e302-1">Order a tray <span class="arw" aria-hidden="true">→</span></a>
+    </div>
+    <p class="giant" aria-hidden="true" data-mir-key="t-4ce48419-0">Chicken Munch</p>
+  </section>
+</main>
+<footer class="foot">Chicken Munch, Jerusalem · on <a href="/" data-mir-key="t-0384dae7-0">MyIsraelRental</a>, free to list, no commission</footer>
+
+<div class="bar" id="bar" aria-hidden="true">
+  <p class="p" data-mir-key="t-19ab0103-0"><b>From ₪260</b>9x13 tray, your styles</p>
+  <a class="btn" href="#order" tabindex="-1" data-mir-key="t-e805733f-1">Order a tray</a>
+</div>
+
+<script>
+document.body.classList.remove('no-js');
+(function () {
+  var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var root = document.documentElement;
+  var stage = document.getElementById('stage'), open = document.getElementById('open');
+  var w1 = document.querySelector('.w1'), w2 = document.querySelector('.w2'), copy = document.getElementById('copy');
+  var top = document.getElementById('top'), bar = document.getElementById('bar'), order = document.getElementById('order');
+
+  // the letters stamp in one after another on arrival
+  [].forEach.call(document.querySelectorAll('.word span'), function (s, i) { s.style.animationDelay = (120 + i * 55) + 'ms'; });
+
+  function clamp(v) { return Math.max(0, Math.min(1, v)); }
+  function ease(t) { return 1 - Math.pow(1 - t, 3); }
+  var phone = matchMedia('(max-width: 760px)');
+
+  // ── the film: frames on a canvas, loaded in passes (every 8th, 4th, all)
+  var N = 300, cv = document.getElementById('cv'), ctx = cv.getContext('2d'), reel = document.getElementById('reel');
+  var chaps = [].slice.call(document.querySelectorAll('.chap'));
+  var dir = phone.matches ? 'm' : 'd', imgs = [], drawn = -1, want = 0;
+  function src(i) { return '/pages/chicken-munch/assets/film/' + dir + '/' + String(i + 1).padStart(4, '0') + '.webp'; }
+  function load(i) { if (imgs[i]) return; var im = new Image(); im.decoding = 'async'; im.onload = function () { im.ok = 1; if (Math.abs(i - want) < 9) draw(want, true); }; im.src = src(i); imgs[i] = im; }
+  function nearest(i) { for (var d = 0; d < N; d++) { if (imgs[i - d] && imgs[i - d].ok) return i - d; if (imgs[i + d] && imgs[i + d].ok) return i + d; } return -1; }
+  var copyTop = 0;
+  function size() {
+    var dpr = Math.min(2, devicePixelRatio || 1);
+    cv.width = Math.round(cv.clientWidth * dpr); cv.height = Math.round(cv.clientHeight * dpr); drawn = -1;
+  }
+  function draw(i, force) {
+    var k = nearest(i); if (k < 0 || (k === drawn && !force)) return; drawn = k;
+    var im = imgs[k], W = cv.width, H = cv.height, iw = im.naturalWidth, ih = im.naturalHeight;
+    ctx.clearRect(0, 0, W, H);
+    if (!phone.matches) { var sc = Math.max(W / iw, H / ih); ctx.drawImage(im, (W - iw * sc) / 2, (H - ih * sc) / 2, iw * sc, ih * sc); crumbs(W / 2, (H - ih * sc) / 2 + ih * sc * .44, W, H); return; }
+    // phone: the box and its margin, full width, in the room above the words
+    var ff = want / (N - 1), wide = ff < .15 || ff > .53 ? 0 : ff < .2 ? (ff - .15) / .05 : ff > .48 ? (.53 - ff) / .05 : 1;
+    var z = 1.78 - .66 * (wide * wide * (3 - 2 * wide)), sw = iw / z, sx = (iw - sw) / 2; iw = sw;
+    var c = Math.min(1, (+copy.style.getPropertyValue('--c') || 0) * 1.6), fh0 = W * ih / iw;
+    var room = copyTop - 12 * (H / Math.max(1, cv.clientHeight)), k = 1 - (1 - Math.min(1, room / fh0)) * c;
+    var fw = W * k, fh = fh0 * k, y = ((H - fh0) / 2) * (1 - c) + Math.max(0, (room - fh) / 2) * c;
+    ctx.drawImage(im, sx, 0, sw, ih, (W - fw) / 2, y, fw, fh);
+    // melt the band's top and bottom edges into the table yellow around it
+    var fe = Math.min(70, fh * .12), g1 = ctx.createLinearGradient(0, y, 0, y + fe), g2 = ctx.createLinearGradient(0, y + fh, 0, y + fh - fe);
+    [g1, g2].forEach(function (g) { g.addColorStop(0, 'rgba(254,216,1,1)'); g.addColorStop(1, 'rgba(254,216,1,0)'); });
+    ctx.fillStyle = g1; ctx.fillRect(0, y - 1, W, fe + 1); ctx.fillStyle = g2; ctx.fillRect(0, y + fh - fe, W, fe + 1);
+    stage.style.setProperty('--chap-y', ((y + fh) / H * 100 + 2).toFixed(1) + '%');
+    crumbs(W / 2, y + fh * .44, W, H);
+  }
+  // ── the crumbs: real cut-out shards thrown at the viewer from the break.
+  // The film (gen/crunch/frames5.sh): the whole tender turns (0-.186), splits
+  // and explodes in one motion (.186-.341, the split itself at .207), the same
+  // backwards (to .496), the turn backwards (to .681), the drop. The crumbs
+  // leave on the exact frame of the split and are home when it rejoins (.474):
+  // one cause, one motion (page rules 3h.13).
+  var CR = [], CN = 29;
+  for (var ci = 0; ci < CN; ci++) { var ci_ = new Image(); ci_.src = '/pages/chicken-munch/assets/crumbs/c' + String(ci).padStart(2, '0') + '.webp'; CR.push(ci_); }
+  var seed = 7; function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
+  var PARTS = [];
+  for (var hi = 0; hi < 10; hi++) {
+    PARTS.push({ img: hi % CN, th: rnd() * Math.PI * 2, r: .08 + rnd() * .3, vz: 1.25 + rnd() * .3, s: .02 + rnd() * .02,
+      spin: (rnd() - .5) * 4, rot: rnd() * 6.3, lag: rnd() * .15 });
+  }
+  for (var pi = 0; pi < 60; pi++) {
+    var th = rnd() * Math.PI * 2, fly = rnd() < .72;
+    PARTS.push({ img: pi % CN, th: th, r: .25 + rnd() * .75, vz: fly ? .7 + rnd() * .5 : .1 + rnd() * .25,
+      s: .012 + rnd() * .03, spin: (rnd() - .5) * 7, rot: rnd() * 6.3, lag: rnd() * .12 });
+  }
+  function crumbs(ox, oy, W, H) {
+    var f = want / (N - 1), q = f < .207 || f > .474 ? 0 : f <= .341 ? (f - .207) / .134 : (.474 - f) / .133;
+    if (q <= .01 || still) return;
+    PARTS.forEach(function (pt) {
+      var t = Math.max(0, (q - pt.lag) / (1 - pt.lag)); if (t <= 0) return;
+      t = 1 - Math.pow(1 - t, 1.6);                       // a fast burst that eases
+      var d = Math.min(.96, t * pt.vz), k = 1 / (1 - d);   // nearer, bigger
+      var R = pt.r * t * Math.max(W, H) * .32 * k;
+      var x = ox + Math.cos(pt.th) * R, y = oy + Math.sin(pt.th) * R * .8;
+      var im = CR[pt.img]; if (!im.complete || !im.naturalWidth) return;
+      var w = pt.s * W * k, h = w * im.naturalHeight / im.naturalWidth;
+      if (x + w < 0 || x - w > W || y + h < 0 || y - h > H) return;
+      ctx.save(); ctx.globalAlpha = Math.min(1, t * 4) * (k > 16 ? Math.max(0, 1 - (k - 16) / 9) : 1);
+      // the nearest pieces rush past the lens: out of focus, like a real camera
+      if (k > 3) ctx.filter = 'blur(' + Math.min(22, (k - 3) * 1.3 * (W / 1600)).toFixed(1) + 'px)';
+      ctx.translate(x, y); ctx.rotate(pt.rot + pt.spin * t);
+      ctx.drawImage(im, -w / 2, -h / 2, w, h); ctx.restore();
+    });
+  }
+  function setOpen(p) {
+    open.style.setProperty('--sc-p', p.toFixed(3));
+    // 0 to .1: the doors part; .06 to .86: the film; .86 on: the words arrive
+    var a = ease(clamp(p / .1)), b = ease(clamp((p - .86) / .12));
+    stage.style.setProperty('--a', (a + .7 * b).toFixed(4));
+    var wo = Math.max(0, 1 - a * 1.15);
+    w1.style.opacity = w2.style.opacity = wo.toFixed(3);
+    w1.style.visibility = w2.style.visibility = wo < .02 ? 'hidden' : '';
+    // the film steps aside first; the words arrive once it has made room
+    var bc = clamp((b - .45) / .55);
+    copy.style.setProperty('--c', bc.toFixed(4)); reel.style.setProperty('--c', b.toFixed(4));
+    // the name stamps in on the plain yellow; the box is revealed as the doors part
+    reel.style.opacity = still ? 1 : Math.min(1, a * 1.25).toFixed(3);
+    copy.classList.toggle('on', bc > .5);
+    copyTop = H0 - (copy.offsetHeight + 30) * (cv.height / Math.max(1, cv.clientHeight));
+    want = Math.round(clamp((p - .06) / .8) * (N - 1)); draw(want, true);
+    chaps.forEach(function (el) { el.classList.toggle('on', p >= +el.dataset.from && p < +el.dataset.to); });
+  }
+  var H0 = 0;
+  function boot() {
+    size();
+    H0 = cv.height;
+    load(still ? N - 1 : 0);
+    [8, 4, 2, 1].forEach(function (step, n) { setTimeout(function () { for (var i = 0; i < N; i += step) load(i); }, 200 + n * 500); });
+  }
+
+
+  var tick = 0;
+  function frame() {
+    tick = 0;
+    var vh = innerHeight;
+    if (!still) {
+      var r = open.getBoundingClientRect();
+      setOpen(clamp(-r.top / (open.offsetHeight - vh)));
+    }
+    var past = open.getBoundingClientRect().bottom < vh * .6;
+    top.classList.toggle('solid', past);
+    var o = order.getBoundingClientRect();
+    bar.classList.toggle('on', past && o.top > vh * .75);
+  }
+  addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
+  addEventListener('resize', frame);
+  boot();
+  addEventListener('resize', function () { size(); H0 = cv.height; frame(); });
+  if (still) setOpen(1);
+  frame();
+
+  // ── the style picker: one picture, the film's last frame (page rules
+  // 3h.12); choosing a style zooms into that piece and tints the section
+  var PTS = { hot: [0.24, 0.64, '#FFDCD2', 'Original Hot Poppers'], cornflakes: [0.38, 0.33, '#FFF1C4', 'Crispy Corn Flakes'], pretzel: [0.16, 0.31, '#F3E1CC', 'Crunchy Pretzel'], rice: [0.79, 0.4, '#F7EBD3', 'Rice Crispy Fingers'], shnitzel: [0.57, 0.66, '#FFE4CC', 'Shnitzel Bites'] };
+  var pic = document.getElementById('pic'), picFrame = document.getElementById('pic-frame'), picName = document.getElementById('pic-name'), stylesEl = document.getElementById('styles');
+  var opts = [].slice.call(document.querySelectorAll('#opts .opt')), cur = 'hot';
+  function aim(k) {
+    var t = PTS[k], W = picFrame.clientWidth, H = picFrame.clientHeight, z = 2.3;
+    var iw = H * 2000 / 1125 * z, ih = H * z;
+    var x = Math.min(0, Math.max(W - iw, W / 2 - t[0] * iw)), y = Math.min(0, Math.max(H - ih, H / 2 - t[1] * ih));
+    pic.style.transform = 'translate(' + x.toFixed(1) + 'px,' + y.toFixed(1) + 'px) scale(' + z + ')';
+  }
+  opts.forEach(function (b) {
+    b.addEventListener('click', function () {
+      cur = b.dataset.k; var t = PTS[cur];
+      opts.forEach(function (o) { o.setAttribute('aria-pressed', o === b ? 'true' : 'false'); });
+      stylesEl.style.setProperty('--tint', t[2]);
+      picName.textContent = t[3]; pic.alt = 'A Chicken Munch box of fried chicken styles, close on the ' + t[3];
+      aim(cur);
+    });
+  });
+  pic.addEventListener('load', function () { aim(cur); });
+  addEventListener('resize', function () { aim(cur); });
+  if (pic.complete) aim(cur);
+
+  // sections ease in
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
+  [].forEach.call(document.querySelectorAll('.rev'), function (el) { io.observe(el); });
+
+  // ── the order ──
+  var WA = '972553316975';
+  // their shop on the site (gen/catalog/load_products.py): the order is saved
+  // there first, so it has a tracking link, then written out in WhatsApp
+  var GIG = 'd574d800-2e8a-41ce-ae28-f6f03fd6329a';
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var ITEMS = { t913: ['9x13 tray', 260, 'cm913tray001'], tgas: ['Gastro tray', 650, 'cmgastro0001'], rice: ['9x13 rice', 70, 'cm913rice001'], lomein: ['Vegetable lo mein', 95, 'cmlomein0001'] };
+  var STYLES = ['Classic American Crunch', 'Original Hot Poppers', 'Shnitzel Bites', 'Fruity Chicken', 'Crispy Corn Flakes', 'Crunchy Pretzel', 'Rice Crispy Fingers'];
+  var q = { t913: 0, tgas: 0, rice: 0, lomein: 0 };
+  var chips = document.getElementById('chips');
+  STYLES.forEach(function (n, i) {
+    var l = document.createElement('label'); l.className = 'chip';
+    l.innerHTML = '<input type="checkbox" value="' + n + '" id="st' + i + '"><span>' + n + '</span>';
+    chips.appendChild(l);
+  });
+  function fmt(n) { return '₪' + n.toLocaleString('en-US'); }
+  function total() { var t = 0; for (var k in q) t += q[k] * ITEMS[k][1]; return t; }
+  function picked() { return [].map.call(chips.querySelectorAll('input:checked'), function (i) { return i.value; }); }
+  var send = document.getElementById('send');
+  function update() {
+    [].forEach.call(document.querySelectorAll('.line'), function (l) { l.querySelector('output').textContent = q[l.dataset.k]; });
+    var list = document.getElementById('sum-list'), html = '';
+    for (var k in q) if (q[k]) html += '<li><span>' + q[k] + ' × ' + ITEMS[k][0] + '</span><span>' + fmt(q[k] * ITEMS[k][1]) + '</span></li>';
+    list.innerHTML = html || '<li><span>Nothing yet</span></li>';
+    document.getElementById('total').textContent = fmt(total());
+    send.firstElementChild.textContent = total() ? 'Send order on WhatsApp, ' + fmt(total()) : 'Send order on WhatsApp';
+  }
+  [].forEach.call(document.querySelectorAll('.line'), function (l) {
+    l.addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      q[l.dataset.k] = Math.max(0, Math.min(20, q[l.dataset.k] + (+b.dataset.d)));
+      update(); check(false);
+    });
+  });
+  [].forEach.call(document.querySelectorAll('[data-add]'), function (a) {
+    a.addEventListener('click', function () { var k = a.dataset.add; if (!q[k]) q[k] = 1; update(); });
+  });
+  function v(id) { return document.getElementById(id).value.trim(); }
+  function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }
+  function check(show) {
+    var ok = true, e;
+    e = total() ? '' : 'Add a tray or a side'; if (e) ok = false; if (show || !e) mark('items', e);
+    e = v('when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e);
+    e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
+    e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);
+    return ok;
+  }
+  ['when', 'me', 'ph'].forEach(function (id) { document.getElementById(id).addEventListener('input', function () { check(false); }); });
+  var when = document.getElementById('when');
+  when.min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  var sending = false;
+  function save(notes) {
+    var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: ITEMS[k][2], qty: q[k] });
+    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ lines: ls, fulfilment: 'pickup', date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    // if the site is slow, WhatsApp opens anyway: an order is never lost
+    return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
+  }
+  document.getElementById('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (sending) return;
+    if (!check(true)) { var bad = document.querySelector('.bad .in, .bad button'); if (bad) bad.focus(); return; }
+    var lines = ['Hi Chicken Munch, I would like to order:'];
+    for (var k in q) if (q[k]) lines.push('• ' + q[k] + ' × ' + ITEMS[k][0] + ' (' + fmt(q[k] * ITEMS[k][1]) + ')');
+    var st = picked(); if (st.length) lines.push('Styles: ' + st.join(', '));
+    if (v('sauce')) lines.push('Sauces and notes: ' + v('sauce'));
+    lines.push('Total: ' + fmt(total()));
+    lines.push('For: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
+    lines.push('Name: ' + v('me') + ', ' + v('ph'));
+    var notes = [st.length ? 'Styles: ' + st.join(', ') : '', v('sauce') ? 'Sauces and notes: ' + v('sauce') : '', 'Sent from the Chicken Munch page by WhatsApp'].filter(Boolean).join('\n');
+    sending = true; send.setAttribute('aria-busy', 'true');
+    var label = send.firstElementChild.textContent; send.firstElementChild.textContent = 'Sending';
+    // opened now, while this still counts as the tap, so no popup blocker stops it
+    var tab = window.open('', '_blank');
+    save(notes).then(function (saved) {
+      var text = lines.join('\n');
+      if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      sending = false; send.removeAttribute('aria-busy'); send.firstElementChild.textContent = label;
+    });
+  });
+  update();
+})();
+</script>
+</body>
+</html>
