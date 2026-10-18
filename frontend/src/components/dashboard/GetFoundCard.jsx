@@ -15,10 +15,62 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Check, ChevronDown, Circle, Copy, ExternalLink, Search } from 'lucide-react';
+import { Check, ChevronDown, Circle, Code, Copy, Download, ExternalLink, Search } from 'lucide-react';
 
 const BORDER = 'var(--brand-border)';
 const MUTED = 'var(--brand-muted)';
+
+const SITE = 'https://myisraelrental.com';
+
+/* The "Find us on MyIsraelRental" badge (scripts/make-badges.mjs makes the
+   images): code for the business's own website, and a picture for
+   Instagram or a flyer. Each placed badge is a link to their page. */
+function BadgeKit({ url }) {
+  const { t, i18n } = useTranslation();
+  const lang = (i18n.language || 'en').startsWith('he') ? 'he' : 'en';
+  const [theme, setTheme] = useState('dark');
+  const name = `find-us-${lang}-${theme}`;
+  const alt = lang === 'he' ? 'מצאו אותנו ב-MyIsraelRental' : 'Find us on MyIsraelRental';
+  const code = `<a href="${url}" target="_blank" rel="noopener"><img src="${SITE}/badge/${name}.svg" alt="${alt}" width="232" height="64"></a>`;
+  const copyCode = async () => {
+    try {
+      await navigator.clipboard.writeText(code);
+      toast.success(t('getFound.codeCopied', 'Code copied. Paste it into your website.'));
+    } catch {
+      toast.error(code);
+    }
+  };
+  const btn = 'inline-flex items-center gap-1.5 min-h-[36px] text-[13px] font-semibold underline underline-offset-4';
+  return (
+    <span className="mt-2 block">
+      <span className="flex flex-wrap items-center gap-2">
+        {['dark', 'light'].map((th) => (
+          <button
+            key={th}
+            type="button"
+            onClick={() => setTheme(th)}
+            aria-pressed={theme === th}
+            aria-label={t(`getFound.badge_${th}`, th)}
+            className="rounded-[16px] p-0.5"
+            style={{ outline: theme === th ? '2px solid var(--gold)' : '2px solid transparent', outlineOffset: 1, background: '#F3F4F6' }}
+          >
+            <img src={`/badge/find-us-${lang}-${th}.svg`} alt="" width="174" height="48" className="block" />
+          </button>
+        ))}
+      </span>
+      <span className="mt-1 flex flex-wrap gap-x-4">
+        <button type="button" onClick={copyCode} className={btn} style={{ color: 'var(--gold)' }}>
+          <Code size={14} aria-hidden="true" />
+          {t('getFound.copyCode', 'Copy the code for your website')}
+        </button>
+        <a href={`/badge/${name}.png`} download={`${name}.png`} className={btn} style={{ color: 'var(--gold)' }}>
+          <Download size={14} aria-hidden="true" />
+          {t('getFound.downloadBadge', 'Download the picture for Instagram or a flyer')}
+        </a>
+      </span>
+    </span>
+  );
+}
 
 export default function GetFoundCard({ API, token, kind }) {
   const { t } = useTranslation();
@@ -120,6 +172,7 @@ export default function GetFoundCard({ API, token, kind }) {
                           {t('getFound.copyLink', 'Copy your page link')}
                         </button>
                       )}
+                      {item.key === 'badge' && <BadgeKit url={page.url} />}
                       {item.key === 'google_profile' && (
                         <a href="https://www.google.com/business/" target="_blank" rel="noopener noreferrer" className="mt-1.5 inline-flex items-center gap-1.5 min-h-[36px] text-[13px] font-semibold underline underline-offset-4" style={{ color: 'var(--gold)' }}>
                           <ExternalLink size={14} aria-hidden="true" />

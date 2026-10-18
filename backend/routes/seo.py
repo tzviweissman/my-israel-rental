@@ -673,6 +673,7 @@ async def my_checklist(user=Depends(verify_token)):
                 _item("photos", photos >= 3, count=photos),
                 _item("reviews", reviews >= 3, count=reviews),
                 _item("share_link", False, reminder=True),
+                _item("badge", False, reminder=True),
                 _item("google_profile", False, reminder=True),
             ],
         })
@@ -687,6 +688,7 @@ async def my_checklist(user=Depends(verify_token)):
                 _item("amenities", len(p.get("amenities") or []) >= 3),
                 _item("reviews", reviews >= 3, count=reviews),
                 _item("share_link", False, reminder=True),
+                _item("badge", False, reminder=True),
             ],
         })
     return {"upgraded": True, "pages": pages}

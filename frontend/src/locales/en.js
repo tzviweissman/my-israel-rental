@@ -5935,6 +5935,13 @@ const en = {
         aboutBody: "MyIsraelRental connects people who have something to offer with people who need it: places to rent, local businesses and services, shops and restaurants, and a board for posting what you are looking for.\n\nListing a business or a property is free, with no commission."
       },
       getFound: {
+        badge: "Put the “Find us on MyIsraelRental” badge on your website or Instagram",
+        badgeWhy: "Each badge is a link to your page, and links from other places are what search engines and AI assistants count.",
+        badge_dark: "Dark badge",
+        badge_light: "Light badge",
+        copyCode: "Copy the code for your website",
+        codeCopied: "Code copied. Paste it into your website.",
+        downloadBadge: "Download the picture for Instagram or a flyer",
         whichPage: "Which page",
         title: "Get found on Google and AI",
         progress: "{{done}} of {{total}} done",
