@@ -1198,6 +1198,9 @@ const en = {
         serviceName: 'Service name',
         tierName: 'Service or package name',
         serviceNamePhAppt: 'e.g. Haircut',
+        serviceNamePhDriving: 'e.g. Ben Gurion to Jerusalem',
+        tiersIntroDriving: 'List each run at its fixed price. A driver might add Ben Gurion to Jerusalem (₪350), Jerusalem to the Dead Sea (₪600) and By the hour (₪180). These are what people search for.',
+        perVehicleHint: 'If a price is for the whole vehicle rather than per person, say so under “What is included”. It saves an argument at the kerb.',
         serviceNamePh: 'e.g. Basic package',
         min: 'min',
         daysTitle: 'Turnaround in days. Leave blank for on-the-spot services.',
@@ -4521,6 +4524,7 @@ const en = {
         licenceUnverified: 'As supplied by the business',
         licencePh: 'Optional - shown on your page as supplied',
         licenceHint: 'Currency services are licensed in Israel. Adding your number helps customers trust the listing - we show it as supplied by you and do not verify it.',
+        licenceHintTransport: 'Drivers and transport operators are licensed by the Ministry of Transport. Adding your number helps customers trust the listing - we show it as supplied by you and do not verify it.',
       },
       // The public jobs board (/businesses/jobs).
       jobsBoard: {
@@ -6321,6 +6325,7 @@ const en = {
         body: "Ask customers anything you need. Their answers show with the sign-up or order.",
         examplesMembership: "For example: “I have read and agree to the gym rules” (a tick-box), an emergency contact, or any injuries we should know about.",
         examplesOrder: "For example: allergies, a message for the card, or “Who is it for?”.",
+        examplesQuote: "For example: pick-up time, how many passengers, where from and where to, or a flight number.",
         type: {
           text: "Short answer",
           longtext: "Long answer",

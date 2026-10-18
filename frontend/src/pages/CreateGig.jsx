@@ -795,6 +795,7 @@ const CreateGig = () => {
         {step === 2 && form.gig_type !== 'store' && (
           <TiersStep
             gigType={form.gig_type}
+            category={form.category}
             tiers={form.tiers}
             onUpdate={updateTier}
             onAdd={addTier}
@@ -1070,17 +1071,33 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, productImageIn
 };
 
 // ---------- Step 4B — Deliverable + Appointment tiers ----------
-const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, onRemoveImage, enableDateBooking, onToggleDateBooking }) => {
+const TiersStep = ({ gigType, category, tiers, onUpdate, onAdd, onRemove, onUploadImages, onRemoveImage, enableDateBooking, onToggleDateBooking }) => {
   const { t } = useTranslation();
   const isAppt = gigType === 'appointment';
+  // Trades whose "packages" are really named runs at a fixed price.
+  const isDriving = category === 'transportation' || category === 'moving-relocation';
   const fileInputsRef = React.useRef({});
   return (
     <div className="space-y-4">
       <div className="rounded-xl bg-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/8 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20 p-3 text-xs text-[var(--brand-primary)] leading-snug">
         {isAppt
           ? t('wizard.tiersIntroAppt', 'List each service people can book. A barber might add Haircut (30 min · ₪60), Beard trim (15 min · ₪30) and Full grooming (45 min · ₪90). The length is what builds your booking times.')
-          : t('wizard.tiersIntro', 'List each service or package as its own option. A designer might add Basic (3 samples · 3 days · ₪250) and Premium (5 samples · 5 days · ₪450).')}
+          : isDriving
+            // A driver reading "Basic / Premium" has to translate it into
+            // their own trade before they can start. A fixed-price run is
+            // already exactly what a tier is, so say so and they fill the
+            // step in as fast as they would answer the phone.
+            ? t('wizard.tiersIntroDriving', 'List each run at its fixed price. A driver might add Ben Gurion to Jerusalem (₪350), Jerusalem to the Dead Sea (₪600) and By the hour (₪180). These are what people search for.')
+            : t('wizard.tiersIntro', 'List each service or package as its own option. A designer might add Basic (3 samples · 3 days · ₪250) and Premium (5 samples · 5 days · ₪450).')}
       </div>
+      {/* Fares are quoted per vehicle here and per person elsewhere, and
+          the gap is found at the kerb. Offered, never assumed: a minibus
+          operator who really does price per seat just leaves it. */}
+      {isDriving && (
+        <p className="text-[11px] px-1" style={{ color: 'var(--brand-muted)' }}>
+          {t('wizard.perVehicleHint', 'If a price is for the whole vehicle rather than per person, say so under “What is included”. It saves an argument at the kerb.')}
+        </p>
+      )}
       {tiers.map((tt, i) => {
         const missingName = !tt.name.trim();
         const missingPrice = !(parseFloat(tt.price) > 0);
@@ -1097,7 +1114,11 @@ const TiersStep = ({ gigType, tiers, onUpdate, onAdd, onRemove, onUploadImages, 
               </label>
               <input value={tt.name} onChange={(e) => onUpdate(i, { name: e.target.value })}
                 placeholder={i === 0
-                  ? (isAppt ? t('wizard.serviceNamePhAppt', 'e.g. Haircut') : t('wizard.serviceNamePh', 'e.g. Basic package'))
+                  ? (isAppt
+                    ? t('wizard.serviceNamePhAppt', 'e.g. Haircut')
+                    : isDriving
+                      ? t('wizard.serviceNamePhDriving', 'e.g. Ben Gurion to Jerusalem')
+                      : t('wizard.serviceNamePh', 'e.g. Basic package'))
                   : t('wizard.serviceName', 'Service name')}
                 className={`w-full px-3 py-2 rounded-lg border text-sm font-semibold placeholder:font-normal placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/30 ${
                   missingName ? 'border-red-200 bg-red-50/30' : 'border-gray-200 bg-white'

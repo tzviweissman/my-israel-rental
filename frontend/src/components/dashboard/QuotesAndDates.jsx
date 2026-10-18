@@ -9,6 +9,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, Calculator, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
 import { money } from '../../utils/currency';
+import CustomFieldsEditor from './CustomFieldsEditor';
 
 const box = 'px-3 py-2 rounded-lg border text-sm bg-white min-h-[40px]';
 const boxStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
@@ -48,6 +49,21 @@ function QuoteCard({ q, API, auth, onChanged }) {
           {q.photos.length > 0 && (
             <div className="flex flex-wrap gap-2">{q.photos.map((u) => <a key={u} href={u} target="_blank" rel="noopener noreferrer"><img src={u} alt="" className="w-20 h-20 rounded-lg object-cover" /></a>)}</div>
           )}
+          {/* The business's own questions and this customer's answers,
+              stored with a copy of the question so a later rename never
+              changes what they were asked. Above the contact line
+              because for a driver this IS the job: time, passengers,
+              where from and where to. */}
+          {(q.answers || []).length > 0 && (
+            <dl className="text-sm space-y-1" data-testid={`quote-answers-${q.id}`}>
+              {q.answers.map((a) => (
+                <div key={a.id} className="flex gap-2">
+                  <dt className="shrink-0 font-semibold" style={{ color: 'var(--brand-muted)' }} dir="auto">{a.label}</dt>
+                  <dd dir="auto">{a.type === 'checkbox' ? (a.value ? t('common.yes', 'Yes') : t('common.no', 'No')) : a.value}</dd>
+                </div>
+              ))}
+            </dl>
+          )}
           <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{[q.preferred_date, q.area].filter(Boolean).join(' · ')}</p>
           <p className="text-xs" dir="ltr">{[q.phone, q.email].filter(Boolean).join(' · ')}</p>
           {(q.status === 'new' || q.status === 'quoted') && (
@@ -85,19 +101,35 @@ export default function QuotesAndDates({ API, token }) {
   const [quotes, setQuotes] = useState([]);
   const [dates, setDates] = useState([]);
   const [openDate, setOpenDate] = useState(null);
+  // Whose enquiry questions to edit. ponytail: the first active
+  // business, not a switcher; add one if an owner with several ever asks
+  // for different questions per business.
+  const [bizId, setBizId] = useState(null);
   const load = useCallback(() => {
     axios.get(`${API}/marketplace/quote-requests`, auth).then(({ data }) => setQuotes(data.quotes || [])).catch(() => {});
     axios.get(`${API}/marketplace/session-reservations`, auth).then(({ data }) => setDates(data || [])).catch(() => {});
+    axios.get(`${API}/marketplace/businesses`, auth)
+      .then(({ data }) => {
+        const list = Array.isArray(data) ? data : (data?.businesses || []);
+        setBizId((list.find((b) => b.active !== false) || list[0] || {}).id || null);
+      })
+      .catch(() => {});
   }, [API, auth]);
   useEffect(() => { load(); }, [load]);
-  if (!quotes.length && !dates.length) return null;
+  // `bizId` keeps this mounted for a business with no quotes yet. Without
+  // it a new driver could never write the questions, because the only
+  // screen offering them appeared once the first enquiry had arrived.
+  if (!quotes.length && !dates.length && !bizId) return null;
   const label = (d) => new Date(`${d.date}T12:00:00`).toLocaleDateString(i18n.language, { weekday: 'short', day: 'numeric', month: 'short' });
   return (
     <div className="space-y-8 mb-8">
-      {quotes.length > 0 && (
+      {(quotes.length > 0 || bizId) && (
         <section data-testid="quotes-inbox">
           <h2 className="text-lg font-bold mb-1 inline-flex items-center gap-2" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}><Calculator size={18} /> {t('quotes.title', 'Quote requests')}</h2>
           <p className="text-sm mb-3" style={{ color: 'var(--brand-muted)' }}>{t('quotes.body', 'Customers describe a job and ask for your price. Send one, and they accept or decline with a tap.')}</p>
+          {/* Collapsed to one line until opened, so it never crowds the
+              inbox underneath it. */}
+          {bizId && <div className="mb-3"><CustomFieldsEditor API={API} auth={auth} businessId={bizId} form="quote" /></div>}
           <ul className="space-y-2">{quotes.map((q) => <QuoteCard key={q.id} q={q} API={API} auth={auth} onChanged={load} />)}</ul>
         </section>
       )}

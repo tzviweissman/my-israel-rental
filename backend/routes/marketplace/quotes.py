@@ -68,6 +68,12 @@ class QuoteIn(BaseModel):
     phone: Optional[str] = Field(None, max_length=40)
     email: Optional[str] = Field(None, max_length=200)
     lang: Optional[Literal["en", "he"]] = None
+    # Answers to the business's own questions (custom_fields.py), by
+    # field id. A driver asks for the pickup time and how many
+    # passengers; a mover asks which floor. Checked against the
+    # questions as stored, so a required one cannot be skipped and an
+    # answer to a question that no longer exists is dropped.
+    answers: dict[str, Any] = Field(default_factory=dict)
 
 
 def _public(q: dict[str, Any], gig: dict[str, Any], biz: dict[str, Any]) -> dict[str, Any]:
@@ -94,6 +100,10 @@ async def request_quote(gig_id: str, body: QuoteIn, request: Request, viewer=Dep
     if not gig or gig.get("status", "published") != "published" or not quotes_open(gig):
         raise HTTPException(status_code=404, detail="This listing is not taking quote requests")
     biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
+    # Raises 400 in the question's own wording when a required one is
+    # missing, so the customer is told which answer is needed.
+    from .custom_fields import answers_text, check_answers
+    answers = check_answers(biz, "quote", body.answers)
     now = datetime.now(UTC).isoformat()
     q = {
         "_id": str(uuid.uuid4()), "gig_id": gig_id, "business_id": gig.get("business_id"),
@@ -101,6 +111,9 @@ async def request_quote(gig_id: str, body: QuoteIn, request: Request, viewer=Dep
         "description": body.description.strip(), "photos": body.photos, "preferred_date": body.preferred_date,
         "area": (body.area or "").strip() or None, "name": body.name.strip(), "phone": phone, "email": email,
         "lang": body.lang or "en", "status": "new", "quote": None,
+        # Stored WITH a copy of each question, so renaming or removing one
+        # later never changes what this customer was actually asked.
+        "answers": answers,
         "track_token": secrets.token_urlsafe(16), "created_at": now, "updated_at": now,
     }
     await db.quote_requests.insert_one(q)
@@ -111,6 +124,10 @@ async def request_quote(gig_id: str, body: QuoteIn, request: Request, viewer=Dep
     owner = await db.users.find_one({"id": gig.get("provider_user_id")}, {"email": 1}) or {}
     await _email(owner.get("email"), f"Quote request: {gig.get('title') or ''}",
                  f"<p><b>{_esc(q['name'])}</b> asked for a price:</p><p>{_esc(q['description'])}</p>"
+                 # The business's own questions and what this customer
+                 # answered. Without them the email says "asked for a
+                 # price" and leaves the pickup time in the dashboard.
+                 + (f"<p>{_esc(answers_text(answers))}</p>".replace("\n", "<br>") if answers else "")
                  + (f"<p>{len(q['photos'])} photo(s) attached.</p>" if q["photos"] else ""),
                  tag="quote-request", button=("Answer with a price", "/dashboard?tab=appointments"))
     await _email_customer(q, gig, biz, "received")
@@ -209,6 +226,7 @@ def _row(q: dict[str, Any], titles: dict[str, str]) -> dict[str, Any]:
     return {"id": q["_id"], "gig_id": q["gig_id"], "gig_title": titles.get(q["gig_id"], ""), "description": q["description"],
             "photos": q.get("photos") or [], "preferred_date": q.get("preferred_date"), "area": q.get("area"),
             "name": q["name"], "phone": q.get("phone"), "email": q.get("email"), "status": q["status"],
+            "answers": q.get("answers") or [],
             "quote": q.get("quote"), "created_at": q.get("created_at")}
 
 

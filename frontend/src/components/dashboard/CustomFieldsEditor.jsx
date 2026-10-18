@@ -1,6 +1,6 @@
 /**
  * The business writes its own questions for one of its forms (backend
- * routes/marketplace/custom_fields.py): `membership` or `order`.
+ * routes/marketplace/custom_fields.py): `membership`, `order` or `quote`.
  * Collapsed to one line until opened, so it never crowds the tab it sits in.
  */
 import React, { useEffect, useState } from 'react';
@@ -36,9 +36,12 @@ export default function CustomFieldsEditor({ API, auth, businessId, form }) {
       .catch(() => setFields([]));
   }, [API, auth, businessId, form]);
 
-  const examples = form === 'membership'
-    ? t('fields.examplesMembership', 'For example: “I have read and agree to the gym rules” (a tick-box), an emergency contact, or any injuries we should know about.')
-    : t('fields.examplesOrder', 'For example: allergies, a message for the card, or “Who is it for?”.');
+  const examples = {
+    membership: t('fields.examplesMembership', 'For example: “I have read and agree to the gym rules” (a tick-box), an emergency contact, or any injuries we should know about.'),
+    order: t('fields.examplesOrder', 'For example: allergies, a message for the card, or “Who is it for?”.'),
+    // A driver's four, in the order Almaxpress asks for them on WhatsApp.
+    quote: t('fields.examplesQuote', 'For example: pick-up time, how many passengers, where from and where to, or a flight number.'),
+  }[form] || '';
   const types = [
     ['text', t('fields.type.text', 'Short answer')],
     ['longtext', t('fields.type.longtext', 'Long answer')],

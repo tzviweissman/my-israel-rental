@@ -11,6 +11,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, ImagePlus, X, Calculator } from 'lucide-react';
 import { API, AuthContext } from '../../App';
+import CustomFieldInputs from '../forms/CustomFieldInputs';
 
 const MAX = 6;
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
@@ -28,6 +29,12 @@ export default function QuoteRequest({ gig }) {
   const [photos, setPhotos] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [busy, setBusy] = useState(false);
+  // The business's own questions (custom_fields.py), keyed by field id.
+  // A driver asks the pick-up time and how many passengers; a mover asks
+  // which floor. Empty for a business that has written none, and
+  // CustomFieldInputs renders nothing at all in that case.
+  const [answers, setAnswers] = useState({});
+  const quoteFields = gig?.quote_fields || [];
   if (!quotesOpen(gig)) return null;
   const set = (k) => (e) => setF({ ...f, [k]: e.target.value });
 
@@ -56,6 +63,7 @@ export default function QuoteRequest({ gig }) {
         description: f.description.trim(), photos, preferred_date: f.preferred_date || null, area: f.area.trim() || null,
         name: f.name.trim(), phone: f.phone.trim() || null, email: f.email.trim() || null,
         lang: String(i18n.language || 'en').startsWith('he') ? 'he' : 'en',
+        answers,
       });
       toast.success(t('quote.sent', 'Sent. The business will reply with a price.'));
       navigate(data.track_path);
@@ -83,6 +91,12 @@ export default function QuoteRequest({ gig }) {
         <textarea required minLength={10} maxLength={2000} rows={4} dir="auto" value={f.description} onChange={set('description')}
                   placeholder={t('quote.whatPh', 'e.g. Move a 3-room flat from the 2nd floor, no lift, to Haifa')} className={`${field} mt-1`} style={fieldStyle} data-testid="quote-description" />
       </label>
+      {/* The business's own questions, straight after "what needs doing"
+          because for some trades they ARE the request: a driver needs the
+          pick-up time and the passenger count far more than a photo. */}
+      {quoteFields.length > 0 && (
+        <CustomFieldInputs fields={quoteFields} values={answers} onChange={setAnswers} testid="quote-custom-fields" />
+      )}
       <div>
         <p className="text-xs font-semibold mb-1" style={{ color: 'var(--brand-muted)' }}>{t('quote.photos', 'Photos (optional, up to 6)')}</p>
         <div className="flex flex-wrap gap-2">

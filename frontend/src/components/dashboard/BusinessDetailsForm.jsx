@@ -5,7 +5,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { X, Loader2, ImagePlus, Trash2 } from 'lucide-react';
 import { isFoodBusiness } from '../marketplace/GoodToKnow';
-import { needsDirectoryDisclaimer } from '../../lib/categories';
+import { needsDirectoryDisclaimer, showsLicence } from '../../lib/categories';
 import { uploadOneFile } from '../../utils/fastUpload';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import { apiErrorMessage } from '../../utils/apiError';
@@ -114,7 +114,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
   // the API. `categories` is hand-entered and empty for most businesses
   // — keying off it alone meant an owner in a regulated category could
   // never reach this field at all.
-  const showLicence = known.some(needsDirectoryDisclaimer);
+  const showLicence = known.some(showsLicence);
 
   const pickLogo = async (e) => {
     const file = e.target.files?.[0];
@@ -432,8 +432,14 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
                 t('directory.licence', 'Licence number'),
                 t('directory.licencePh', 'Optional - shown on your page as supplied'))}
               <p className="text-[11px]" style={{ color: 'var(--brand-muted)' }}>
-                {t('directory.licenceHint',
-                  'Currency services are licensed in Israel. Adding your number helps customers trust the listing - we show it as supplied by you and do not verify it.')}
+                {/* The reason a licence matters differs by trade, so the
+                    line does too. Both end the same way, because the
+                    thing we must never imply is that we checked it. */}
+                {known.some(needsDirectoryDisclaimer)
+                  ? t('directory.licenceHint',
+                    'Currency services are licensed in Israel. Adding your number helps customers trust the listing - we show it as supplied by you and do not verify it.')
+                  : t('directory.licenceHintTransport',
+                    'Drivers and transport operators are licensed by the Ministry of Transport. Adding your number helps customers trust the listing - we show it as supplied by you and do not verify it.')}
               </p>
             </div>
           )}

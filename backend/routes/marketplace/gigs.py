@@ -723,6 +723,12 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
         # Lets the listing page hand over to a hand-built business page
         # (frontend/public/pages/pages.json), the way /business/<slug> does.
         gig["business_slug"] = business.get("slug")
+        # The business's own questions on the enquiry form
+        # (custom_fields.py). Only where the form is actually offered, so
+        # a shop's page does not carry a driver's questions.
+        from .custom_fields import public_fields
+        from .quotes import quotes_open
+        gig["quote_fields"] = public_fields(business, "quote") if quotes_open(gig) else []
     gig["page_upgrade"] = await has_page_upgrade(gig.get("provider_user_id"))
     if gig["page_upgrade"]:
         # The upgraded page's leading action and backed strengths, judged

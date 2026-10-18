@@ -1,7 +1,7 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Clock, Languages, CalendarDays, Car, Truck, Timer, Wallet, BadgeCheck, ScrollText } from 'lucide-react';
-import { needsDirectoryDisclaimer } from '../../lib/categories';
+import { showsLicence } from '../../lib/categories';
 import { isFoodBusiness, yearsInBusiness, kosherBody } from '../../utils/businessProof';
 
 /**
@@ -134,8 +134,11 @@ export default function GoodToKnow({ business }) {
   // most businesses, and keying off it would have meant the licence
   // almost never appeared. Falls back to `categories` for a business
   // whose owner did fill it in but has no live listings yet.
-  const regulated = known.some(needsDirectoryDisclaimer);
-  const showLicence = !!(regulated && b.license_number);
+  // `showsLicence`, not `needsDirectoryDisclaimer`: the two were the same
+  // set until transport arrived, and sharing one gate meant a taxi's
+  // Ministry of Transport number saved and then never rendered. See the
+  // note on CATEGORIES_WITH_LICENCE.
+  const showLicence = !!(known.some(showsLicence) && b.license_number);
 
   if (!rows.length && !showCert && !showLicence) return null;
 

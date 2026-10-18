@@ -138,3 +138,25 @@ export const CATEGORIES_WITH_DISCLAIMER = new Set(['money-exchange']);
 
 export const needsDirectoryDisclaimer = (slug) =>
   CATEGORIES_WITH_DISCLAIMER.has(normalizeCategory(slug));
+
+/**
+ * Categories where a licence number is worth showing. A SUPERSET of the
+ * disclaimer set, and deliberately a separate list: the disclaimer is a
+ * statement about what WE do (we never handle money), while this is a
+ * fact the business volunteers about itself. Conflating them meant a
+ * taxi could type its Ministry of Transport number into the details
+ * form, have it saved, and never see it on the page, because the only
+ * gate on display asked whether we owed anyone a money-exchange
+ * disclaimer. Otto Israel advertises that licence as its main trust
+ * signal, so the field was being asked for and then swallowed.
+ *
+ * Shown as supplied, never verified, exactly as before. Adding a
+ * category here must never add a disclaimer, and vice versa.
+ */
+export const CATEGORIES_WITH_LICENCE = new Set([
+  'money-exchange',
+  'transportation',
+]);
+
+export const showsLicence = (slug) =>
+  CATEGORIES_WITH_LICENCE.has(normalizeCategory(slug));

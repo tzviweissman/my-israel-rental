@@ -46,7 +46,15 @@ logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
-FORMS = ("membership", "order")
+# `quote` added 18 Oct 2026, for the drivers. Almaxpress tells customers
+# on WhatsApp to send "date, time, destination, passenger count", and the
+# quote form asked for none of it. Rather than bolt four driver fields
+# onto QuoteIn, the business writes its own questions here: a driver asks
+# how many passengers, a mover asks which floor, and nobody has to
+# anticipate a trade before it signs up.
+FORMS = ("membership", "order", "quote")
+# Which staff permission may edit each form's questions.
+FORM_PERM = {"membership": "members", "order": "orders", "quote": "job-requests"}
 TYPES = ("text", "longtext", "checkbox", "choice", "number", "date")
 MAX_FIELDS = 12
 
@@ -201,15 +209,15 @@ async def get_fields(business_id: str, user=Depends(verify_token)):
     biz = await db.businesses.find_one({"_id": business_id})
     if biz and biz.get("owner_user_id") != user["user_id"] and user.get("role") != "admin":
         perms = await staff_perms(db, business_id, user["user_id"])
-        if not ({"orders", "members"} & set(perms)):
+        if not (set(FORM_PERM.values()) & set(perms)):
             raise HTTPException(status_code=403, detail="Not your business")
     biz = biz or await _owned(business_id, user)
     return {f: public_fields(biz, f) for f in FORMS}
 
 
 @router.put("/businesses/{business_id}/custom-fields/{form}")
-async def set_fields(business_id: str, form: Literal["membership", "order"], body: FieldsIn, user=Depends(verify_token)):
-    await _owned(business_id, user, "orders" if form == "order" else "members")
+async def set_fields(business_id: str, form: Literal["membership", "order", "quote"], body: FieldsIn, user=Depends(verify_token)):
+    await _owned(business_id, user, FORM_PERM[form])
     fields = _clean(body.fields)
     await _fill_translations(fields)
     await db.businesses.update_one({"_id": business_id}, {"$set": {f"custom_fields.{form}": fields}})
