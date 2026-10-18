@@ -676,6 +676,18 @@ const server = http.createServer(async (req, res) => {
     // Fell through on purpose. The crawler gets what it would have got
     // before this file existed.
   }
+  // Search engines' ownership files (Google Search Console's googleXXXX.html,
+  // 18 Oct 2026) must be answered at exactly that address. serve-handler's
+  // clean URLs 301 any .html to the bare path, which then gets the app.
+  const ownership = /^\/(google[a-z0-9]{6,40}\.html|BingSiteAuth\.xml)$/.exec(pathname || '');
+  if (ownership && fs.existsSync(path.join(BUILD, ownership[1]))) {
+    res.writeHead(200, {
+      'Content-Type': ownership[1].endsWith('.xml') ? 'application/xml; charset=utf-8' : 'text/html; charset=utf-8',
+      'Cache-Control': 'no-cache',
+    });
+    res.end(fs.readFileSync(path.join(BUILD, ownership[1])));
+    return;
+  }
   if (pathname === '/sitemap.xml') {
     try {
       const xml = await sitemapXml();
