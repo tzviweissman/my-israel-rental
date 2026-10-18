@@ -418,7 +418,7 @@ document.body.classList.remove('no-js');
   // leave on the exact frame of the split and are home when it rejoins (.474):
   // one cause, one motion (page rules 3h.13).
   var CR = [], CN = 29;
-  for (var ci = 0; ci < CN; ci++) { var ci_ = new Image(); ci_.src = 'assets/crumbs/c' + String(ci).padStart(2, '0') + '.webp'; CR.push(ci_); }
+  for (var ci = 0; ci < (CRUMBS_ON ? CN : 0); ci++) { var ci_ = new Image(); ci_.src = 'assets/crumbs/c' + String(ci).padStart(2, '0') + '.webp'; CR.push(ci_); }
   var seed = 7; function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
   var PARTS = [];
   for (var hi = 0; hi < 10; hi++) {
@@ -430,7 +430,13 @@ document.body.classList.remove('no-js');
     PARTS.push({ img: pi % CN, th: th, r: .25 + rnd() * .75, vz: fly ? .7 + rnd() * .5 : .1 + rnd() * .25,
       s: .012 + rnd() * .03, spin: (rnd() - .5) * 7, rot: rnd() * 6.3, lag: rnd() * .12 });
   }
+  // Off since 18 Oct 2026 (Tzvi: the cut-out shards "look a bit fake": a pale
+  // halo from their photo and flatter than the film's own flakes). The split
+  // clip (s2) now throws real flakes at the camera itself. Kept, unused, for a
+  // page whose clip cannot.
+  var CRUMBS_ON = false;
   function crumbs(ox, oy, W, H) {
+    if (!CRUMBS_ON) return;
     var f = want / (N - 1), q = f < .207 || f > .474 ? 0 : f <= .341 ? (f - .207) / .134 : (.474 - f) / .133;
     if (q <= .01 || still) return;
     PARTS.forEach(function (pt) {

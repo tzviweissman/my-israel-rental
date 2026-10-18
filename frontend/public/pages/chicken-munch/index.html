@@ -289,7 +289,7 @@
           <li><button type="button" class="opt" data-k="rice" aria-pressed="false" data-mir-key="t-775f5d24-0">Rice Crispy Fingers</button></li>
           <li><button type="button" class="opt" data-k="shnitzel" aria-pressed="false" data-mir-key="t-9fbc6375-0">Shnitzel Bites</button></li>
         </ul>
-        <figure class="pic" id="pic-frame"><img id="pic" src="/pages/chicken-munch/assets/box-full.webp?v=mvdyq20w" alt="A Chicken Munch box of fried chicken styles, close on the Original Hot Poppers" width="2000" height="1125" loading="lazy"><figcaption id="pic-name">Original Hot Poppers</figcaption></figure>
+        <figure class="pic" id="pic-frame"><img id="pic" src="/pages/chicken-munch/assets/box-full.webp?v=mvdz4pug" alt="A Chicken Munch box of fried chicken styles, close on the Original Hot Poppers" width="2000" height="1125" loading="lazy"><figcaption id="pic-name">Original Hot Poppers</figcaption></figure>
       </div>
       <p class="also rev" data-mir-key="t-cd61bbd1-0">Also on the menu: Classic American Crunch and Fruity Chicken.</p>
     </div>
@@ -299,7 +299,7 @@
     <div class="wrap">
       <h2 id="h-trays" class="rev" data-mir-key="t-faa19212-0">By the <span class="acc">tray</span></h2>
       <div class="tray-grid">
-        <div class="tray-photo rev"><img src="/pages/chicken-munch/assets/box-black.webp?v=mvdyq20w" alt="A Chicken Munch box of fried chicken styles with sauce pots, on a black table" width="1024" height="1536" loading="lazy" data-mir-key="i-e63425f9-0"></div>
+        <div class="tray-photo rev"><img src="/pages/chicken-munch/assets/box-black.webp?v=mvdz4pug" alt="A Chicken Munch box of fried chicken styles with sauce pots, on a black table" width="1024" height="1536" loading="lazy" data-mir-key="i-e63425f9-0"></div>
         <div class="tiles">
           <div class="tile big rev"><div><h3 data-mir-key="t-b6617f62-0">9x13 tray</h3><p data-mir-key="t-597e7355-0">Your choice of styles</p></div><div style="display:flex;align-items:center"><span class="price" data-mir-key="t-64652930-0">₪260</span><a class="btn-line add" href="#order" data-add="t913" data-mir-key="t-083348d1-0">Add</a></div></div>
           <div class="tile big rev"><div><h3 data-mir-key="t-a54fa715-0">Gastro tray</h3><p data-mir-key="t-1300ba62-0">The full-size tray</p></div><div style="display:flex;align-items:center"><span class="price" data-mir-key="t-6b8eea62-0">₪650</span><a class="btn-line add" href="#order" data-add="tgas" data-mir-key="t-083348d1-1">Add</a></div></div>
@@ -418,7 +418,7 @@ document.body.classList.remove('no-js');
   // leave on the exact frame of the split and are home when it rejoins (.474):
   // one cause, one motion (page rules 3h.13).
   var CR = [], CN = 29;
-  for (var ci = 0; ci < CN; ci++) { var ci_ = new Image(); ci_.src = '/pages/chicken-munch/assets/crumbs/c' + String(ci).padStart(2, '0') + '.webp'; CR.push(ci_); }
+  for (var ci = 0; ci < (CRUMBS_ON ? CN : 0); ci++) { var ci_ = new Image(); ci_.src = '/pages/chicken-munch/assets/crumbs/c' + String(ci).padStart(2, '0') + '.webp'; CR.push(ci_); }
   var seed = 7; function rnd() { seed = (seed * 16807) % 2147483647; return seed / 2147483647; }
   var PARTS = [];
   for (var hi = 0; hi < 10; hi++) {
@@ -430,7 +430,13 @@ document.body.classList.remove('no-js');
     PARTS.push({ img: pi % CN, th: th, r: .25 + rnd() * .75, vz: fly ? .7 + rnd() * .5 : .1 + rnd() * .25,
       s: .012 + rnd() * .03, spin: (rnd() - .5) * 7, rot: rnd() * 6.3, lag: rnd() * .12 });
   }
+  // Off since 18 Oct 2026 (Tzvi: the cut-out shards "look a bit fake": a pale
+  // halo from their photo and flatter than the film's own flakes). The split
+  // clip (s2) now throws real flakes at the camera itself. Kept, unused, for a
+  // page whose clip cannot.
+  var CRUMBS_ON = false;
   function crumbs(ox, oy, W, H) {
+    if (!CRUMBS_ON) return;
     var f = want / (N - 1), q = f < .207 || f > .474 ? 0 : f <= .341 ? (f - .207) / .134 : (.474 - f) / .133;
     if (q <= .01 || still) return;
     PARTS.forEach(function (pt) {

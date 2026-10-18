@@ -69,6 +69,10 @@ learned with. Check what is connected in this session first.
 - **Browser pane / preview**: show the rendered page; never ask the owner to
   sign in to see it.
 
+**Our own inspiration database**: `docs/inspo/` in the MyIsraelRental repo (studied
+award sites and videos, one picture per effect, how to build it, what it suits).
+Check it with Inspo, Mobbin and 21st before designing.
+
 **Local tools**: Playwright (the scripts here), ffmpeg (encoding, previews),
 Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 
@@ -495,7 +499,8 @@ bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
    its result happen together in one clip; never let one clip finish an event
    and the next start it again. End the lead-in clip on the last frame before
    its event and generate the event as one clip (peak pinned by an end frame).
-   Code pieces start on the exact frame of the cause. Watch every effect at 4+
+   Code pieces start on the exact frame of the cause and match the film's own
+   material and light (no halos, cut from the film's frames), or are left out. Watch every effect at 4+
    frames a second before showing: fall-then-fly, a pause mid-action, debris
    that is not the real material, a heap from nowhere, the same played back.
 14. **The product stays recognisable through the whole effect**; a moving

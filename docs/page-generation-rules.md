@@ -826,6 +826,12 @@ out to the jar, with a new line of huge words over each scene.
      frame where needed.
    - Pieces made in code start on the exact frame of the cause and travel
      the same way as the generated pieces, never a beat later.
+   - Pieces added in code must be the same material as the film's own, in the
+     same light: Chicken Munch's cut-out shards came from a separate photo,
+     paler, flat, with a white halo from that photo's background, and Tzvi
+     saw at once they "look a bit fake". Prefer a clip that throws the pieces
+     itself; if code pieces are needed, cut them from the film's own frames
+     and check one large, at full size, against the film before using them.
    - Watch every effect at 4 frames a second or more, before anything is
      shown, looking for: pieces that fall and then fly, a pause where nothing
      moves in the middle of an action, debris that does not look like the real

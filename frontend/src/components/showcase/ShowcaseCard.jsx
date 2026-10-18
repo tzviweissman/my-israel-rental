@@ -24,9 +24,9 @@ export function useShowcase() {
   return items;
 }
 
-// Small clips (~120 KB, 640 px) fetched at once and started as soon as they
-// can play, so a tile is moving when it is seen, not a still (Tzvi, 9 Oct
-// 2026). Paused while off screen; never plays for reduced motion. v busts the
+// Small clips (~120 KB, 640 px), each fetched and started when its tile comes
+// near the screen, so a tile is moving when it is seen, not a still (Tzvi, 9 Oct
+// 2026), and a list of 100 pages never downloads 100 clips at once (18 Oct). Paused while off screen; never plays for reduced motion. v busts the
 // year-long static cache when a clip is remade.
 // Reduced motion is read before the first paint, so a clip never starts
 // for a frame and then stops (UI audit, 10 Oct 2026).
@@ -41,14 +41,14 @@ function Preview({ slug, v }) {
     if (!('IntersectionObserver' in window)) return undefined;
     const io = new IntersectionObserver(([e]) => {
       if (e.isIntersecting) el.play().catch(() => {}); else el.pause();
-    }, { rootMargin: '200px 0px' });
+    }, { rootMargin: '200px 400px' });
     io.observe(el);
     return () => io.disconnect();
   }, []);
   const q = v ? `?v=${v}` : '';
   return (
     <video ref={ref} className="sc-frame" src={`/showcase/${slug}.mp4${q}`} poster={`/showcase/${slug}.webp${q}`}
-      muted loop playsInline autoPlay={!STILL} preload="auto" aria-hidden="true" tabIndex={-1} />
+      muted loop playsInline preload="none" aria-hidden="true" tabIndex={-1} />
   );
 }
 

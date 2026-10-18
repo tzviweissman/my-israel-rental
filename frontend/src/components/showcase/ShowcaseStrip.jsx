@@ -1,12 +1,19 @@
 /**
- * The business pages, as a row at the top of /businesses (Tzvi, 9 Oct 2026:
- * "add them at the top of the regular business page"). Three tiles across on
- * a laptop; on a phone a row you swipe, with the edge of the next tile
- * showing and arrow buttons beside the heading, mirrored in Hebrew (UI video
- * rules §3e, 17). "See all" opens /showcase. Renders nothing until the list
- * has loaded, and nothing if it is empty.
+ * The business pages, at the top of /businesses (Tzvi, 9 Oct 2026: "add them
+ * at the top of the regular business page"). Two rows you swipe through
+ * sideways (Tzvi, 18 Oct 2026: "the business pages should have more rows
+ * because if we eventually have 100 business pages ... each one would take
+ * too long"): eight tiles in view on a laptop, four on a phone, with the edge of
+ * the next column showing and arrow buttons beside the heading that move a
+ * whole screen, mirrored in Hebrew (UI video rules §3e, 17). "See all" opens
+ * /showcase. Renders nothing until the list has loaded, or if it is empty.
+ *
+ * A fast swipe glitched (Tzvi, 18 Oct 2026): the browser's mandatory snap,
+ * a forced stop at every card and a script gliding to the nearest card all
+ * fought each other. Now only the browser snaps, to a column, and a flick
+ * may pass several columns.
  */
-import React, { useEffect, useRef } from 'react';
+import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Link } from 'react-router-dom';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
@@ -16,42 +23,25 @@ export default function ShowcaseStrip() {
   const { t } = useTranslation();
   const items = useShowcase();
   const row = useRef(null);
-  // When a swipe stops between cards, glide to the nearest whole card. CSS
-  // snapping alone left a card half off an iPhone's screen (Tzvi, 16 Oct
-  // 2026: "its still not centered").
-  useEffect(() => {
-    const el = row.current;
-    if (!el) return undefined;
-    let t = 0;
-    const settle = () => {
-      const box = el.getBoundingClientRect();
-      const rtl = getComputedStyle(el).direction === 'rtl';
-      const cards = [...el.querySelectorAll('li')];
-      if (!cards.length) return;
-      const edge = (c) => (rtl ? box.right - c.getBoundingClientRect().right : c.getBoundingClientRect().left - box.left);
-      const near = cards.reduce((a, c) => (Math.abs(edge(c)) < Math.abs(edge(a)) ? c : a), cards[0]);
-      const off = edge(near);
-      if (Math.abs(off) > 2) el.scrollTo({ left: el.scrollLeft + (rtl ? -1 : 1) * off, behavior: 'smooth' });
-    };
-    const onScroll = () => { clearTimeout(t); t = setTimeout(settle, 140); };
-    el.addEventListener('scroll', onScroll, { passive: true });
-    return () => { el.removeEventListener('scroll', onScroll); clearTimeout(t); };
-  }, [items]);
   if (!items || !items.length) return null;
 
-  // The arrows go to the next whole card, by its own position, never by a
-  // distance: a relative scroll that ran twice on iOS Safari (smooth scroll
-  // starting late, then the fallback) left a card half off the screen (Tzvi,
-  // 16 Oct 2026: "on mobile it shows each page cut off").
+  // The arrows go a whole screen of columns, landing on a column's own
+  // position, never by a distance: a relative scroll that ran twice on iOS
+  // Safari left a card half off the screen (Tzvi, 16 Oct 2026).
   const move = (dir) => {
     const el = row.current;
     if (!el) return;
-    const cards = [...el.querySelectorAll('li')];
     const box = el.getBoundingClientRect();
     const rtl = getComputedStyle(el).direction === 'rtl';
     const edge = (c) => (rtl ? box.right - c.getBoundingClientRect().right : c.getBoundingClientRect().left - box.left);
-    const now = cards.reduce((best, c, i) => (Math.abs(edge(c)) < Math.abs(edge(cards[best])) ? i : best), 0);
-    const next = cards[Math.max(0, Math.min(cards.length - 1, now + dir))];
+    // one card per column: the first card of each column (the top row)
+    const cols = [...el.querySelectorAll('li')].filter((c, i, all) => i === 0 || Math.abs(edge(c) - edge(all[i - 1])) > 4)
+      .filter((c, i, all) => all.findIndex((d) => Math.abs(edge(d) - edge(c)) < 4) === i);
+    if (!cols.length) return;
+    const w = cols[0].getBoundingClientRect().width;
+    const perScreen = Math.max(1, Math.floor((box.width + 8) / (w + 8)));
+    const now = cols.reduce((best, c, i) => (Math.abs(edge(c)) < Math.abs(edge(cols[best])) ? i : best), 0);
+    const next = cols[Math.max(0, Math.min(cols.length - 1, now + dir * perScreen))];
     if (!next) return;
     const target = el.scrollLeft + (rtl ? -1 : 1) * edge(next);
     el.scrollTo({ left: target, behavior: 'smooth' });
@@ -73,7 +63,7 @@ export default function ShowcaseStrip() {
           </button>
         </div>
       </div>
-      <ul className="scs-row" ref={row}>
+      <ul className={`scs-row${items.length <= 3 ? ' scs-one' : ''}`} ref={row}>
         {items.map((item) => <li key={item.slug}><ShowcaseCard item={item} /></li>)}
       </ul>
     </section>
@@ -91,12 +81,27 @@ const CSS = `
 .scs-arrow:active { transform: scale(.94); }
 .scs-arrow:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
 [dir="rtl"] .scs-ico { transform: scaleX(-1); }
-.scs-row { list-style: none; margin: 0; padding: 0 0 6px; display: grid; grid-auto-flow: column; grid-auto-columns: calc((100% - 40px) / 3); gap: 20px;
-  overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; }
+/* two rows, filled column by column, swiped sideways; only the browser snaps,
+   to a column, and a fast flick can pass several (no forced stop per card) */
+.scs-row { list-style: none; margin: 0; padding: 0 0 6px; display: grid; grid-auto-flow: column; grid-template-rows: repeat(2, auto);
+  grid-auto-columns: calc((100% - 60px) / 4.15); gap: 24px 20px;
+  overflow-x: auto; scroll-snap-type: x mandatory; scrollbar-width: none; overscroll-behavior-x: contain; -webkit-overflow-scrolling: touch; }
+.scs-row.scs-one { grid-template-rows: auto; }
 .scs-row::-webkit-scrollbar { display: none; }
-.scs-row > li { scroll-snap-align: start; scroll-snap-stop: always; min-width: 0; }
-@media (max-width: 1024px) { .scs-row { grid-auto-columns: calc((100% - 20px) / 2.15); } }
-/* phones: one whole card at a time, never a card cut in half (Tzvi, 16 Oct
-   2026); the arrows and a swipe go card to card */
-@media (max-width: 640px) { .scs-row { grid-auto-columns: 100%; gap: 16px; } }
+.scs-row > li { scroll-snap-align: start; min-width: 0; }
+@media (max-width: 1024px) { .scs-row { grid-auto-columns: calc((100% - 40px) / 3.15); } }
+.scs .sc-meta { margin-top: 12px; gap: 10px; }
+.scs .sc-logo { width: 40px; height: 40px; border-radius: 10px; }
+.scs .sc-name { font-size: 1rem; }
+.scs .sc-line { font-size: .88rem; }
+/* phones: two smaller tiles across and the edge of the next column, so four
+   pages are in view at once; the line under the name wraps to two lines */
+@media (max-width: 640px) {
+  .scs-row { grid-auto-columns: calc((100% - 12px) / 2.12); gap: 20px 12px; }
+  .scs .sc-tile { padding: 7%; border-radius: 18px; }
+  .scs .sc-meta { gap: 8px; margin-top: 10px; align-items: flex-start; }
+  .scs .sc-logo { width: 32px; height: 32px; border-radius: 9px; font-size: .8rem; }
+  .scs .sc-name { font-size: .92rem; line-height: 1.2; }
+  .scs .sc-line { font-size: .8rem; line-height: 1.3; white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+}
 `;
