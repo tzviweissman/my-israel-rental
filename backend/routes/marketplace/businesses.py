@@ -87,6 +87,40 @@ class KosherCert(BaseModel):
     certificate_url: Optional[str] = None
 
 
+# What a business drives (Tzvi, 18 Oct 2026, before the taxi outreach).
+# One field rather than four on the business, because a driver with three
+# listings has the same car for all of them, and because the facts a
+# customer actually chooses on — can we all fit, do the cases fit, can it
+# take a wheelchair — are a single line on the page.
+#
+# `luggage` is free text for the reason `hours` is: "2 large cases and a
+# stroller" is worse data and far better information than a number of
+# litres nobody knows.
+class Vehicle(BaseModel):
+    seats: Optional[int] = Field(None, ge=1, le=60)
+    luggage: Optional[str] = Field(None, max_length=60)
+    accessible: bool = False
+    child_seat: bool = False
+
+    def is_empty(self) -> bool:
+        """Nothing said. Stored as null rather than as a row of falses, so
+        the page's "is there anything to show" test stays a presence test."""
+        return not (self.seats or (self.luggage or "").strip()
+                    or self.accessible or self.child_seat)
+
+
+# Whether they work on Shabbat. Three answers rather than a boolean,
+# because the third one is the real answer for most of this trade: a
+# driver who does not drive on Shabbat himself will book a non-Jewish
+# driver for you if you call before. That arrangement was in the first
+# line of nearly every taxi listing surveyed on 18 Oct 2026, and until
+# now it could only go in free text, where nothing can filter it.
+#
+# None means they have not said, which is NOT "closed" — showing a
+# business as shut on a day it works would cost it the booking.
+SHABBAT = ("closed", "open", "by_arrangement")
+
+
 class Testimonial(BaseModel):
     """A testimonial the owner sent us (docs/page-generation-rules.md §3:
     social proof only if real). Shown on the page only with the person's
@@ -139,6 +173,10 @@ class BusinessIn(BaseModel):
     # "By appointment only" instead of opening hours (Tzvi, 17 Oct 2026).
     by_appointment: Optional[bool] = None
     languages: Optional[list[str]] = None
+    # Businesses that drive people: transport, tours, movers. Null in
+    # either of these means "has not said" - see Vehicle and SHABBAT.
+    shabbat: Optional[Literal["closed", "open", "by_arrangement"]] = None
+    vehicle: Optional[Vehicle] = None
     founded_year: Optional[int] = Field(None, ge=1800, le=2100)
     delivery_note: Optional[str] = Field(None, max_length=300)
     lead_time: Optional[str] = Field(None, max_length=120)
@@ -239,6 +277,10 @@ class BusinessPatch(BaseModel):
     # "By appointment only" instead of opening hours (Tzvi, 17 Oct 2026).
     by_appointment: Optional[bool] = None
     languages: Optional[list[str]] = None
+    # Businesses that drive people: transport, tours, movers. Null in
+    # either of these means "has not said" - see Vehicle and SHABBAT.
+    shabbat: Optional[Literal["closed", "open", "by_arrangement"]] = None
+    vehicle: Optional[Vehicle] = None
     founded_year: Optional[int] = Field(None, ge=1800, le=2100)
     delivery_note: Optional[str] = Field(None, max_length=300)
     lead_time: Optional[str] = Field(None, max_length=120)
@@ -320,6 +362,12 @@ def _public(
         "hours": doc.get("hours"),
         "by_appointment": bool(doc.get("by_appointment")),
         "languages": doc.get("languages") or [],
+        # Both carried here for the reason the whole block above exists:
+        # the details form sends every field it knows on save, so a field
+        # missing from this payload opens blank and is then cleared by an
+        # owner who only came to fix a typo.
+        "shabbat": doc.get("shabbat"),
+        "vehicle": doc.get("vehicle"),
         "founded_year": doc.get("founded_year"),
         "delivery_note": doc.get("delivery_note"),
         "lead_time": doc.get("lead_time"),
@@ -771,6 +819,15 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
             update[key] = value
     if "languages" in provided:
         update["languages"] = payload.languages or []
+    if "shabbat" in provided:
+        # The model's Literal already refused anything else.
+        update["shabbat"] = payload.shabbat or None
+    if "vehicle" in provided:
+        v = payload.vehicle
+        update["vehicle"] = None if (v is None or v.is_empty()) else {
+            **v.model_dump(),
+            "luggage": (v.luggage or "").strip() or None,
+        }
     if "testimonials" in provided:
         update["testimonials"] = [t.model_dump() for t in (payload.testimonials or [])]
 
@@ -1109,6 +1166,8 @@ async def public_business(
         "hours": biz.get("hours"),
         "by_appointment": bool(biz.get("by_appointment")),
         "languages": biz.get("languages") or [],
+        "shabbat": biz.get("shabbat"),
+        "vehicle": biz.get("vehicle"),
         "founded_year": biz.get("founded_year"),
         "delivery_note": biz.get("delivery_note"),
         "lead_time": biz.get("lead_time"),

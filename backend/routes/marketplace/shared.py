@@ -283,6 +283,21 @@ SUBCATEGORIES: dict[str, list[dict[str, str]]] = {
         {"slug": "legal",          "label": "Legal"},
         {"slug": "consulting",     "label": "Consulting"},
     ],
+    # Added 2026-10-18, ahead of approaching taxi and driver businesses.
+    # The only entry here for a category that was never MERGED: the
+    # reason is the same anyway, which is that one slug was covering
+    # trades a customer would never substitute for each other. Someone
+    # who needs a 7-seater to the airport at 5am and someone who wants a
+    # chauffeur for a wedding were both searching "Transportation" and
+    # reading past each other's listings.
+    "transportation": [
+        {"slug": "taxi",             "label": "Taxi"},
+        {"slug": "airport-transfer", "label": "Airport Transfer"},
+        {"slug": "chauffeur",        "label": "Private Driver / Chauffeur"},
+        {"slug": "minibus-group",    "label": "Minibus / Group"},
+        {"slug": "accessible",       "label": "Accessible Transport"},
+        {"slug": "courier",          "label": "Courier / Delivery"},
+    ],
 }
 
 # Migration map from the pre-2026-07-15 category slugs to the new

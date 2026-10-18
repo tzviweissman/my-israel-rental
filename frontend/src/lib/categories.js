@@ -91,6 +91,14 @@ export const SUBCATEGORIES = {
     { slug: 'legal',       label: 'Legal' },
     { slug: 'consulting',  label: 'Consulting' },
   ],
+  transportation: [
+    { slug: 'taxi',             label: 'Taxi' },
+    { slug: 'airport-transfer', label: 'Airport Transfer' },
+    { slug: 'chauffeur',        label: 'Private Driver / Chauffeur' },
+    { slug: 'minibus-group',    label: 'Minibus / Group' },
+    { slug: 'accessible',       label: 'Accessible Transport' },
+    { slug: 'courier',          label: 'Courier / Delivery' },
+  ],
 };
 
 /**

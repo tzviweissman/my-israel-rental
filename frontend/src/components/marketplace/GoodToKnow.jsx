@@ -1,6 +1,6 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
-import { Clock, Languages, CalendarDays, Truck, Timer, Wallet, BadgeCheck, ScrollText } from 'lucide-react';
+import { Clock, Languages, CalendarDays, Car, Truck, Timer, Wallet, BadgeCheck, ScrollText } from 'lucide-react';
 import { needsDirectoryDisclaimer } from '../../lib/categories';
 import { isFoodBusiness, yearsInBusiness, kosherBody } from '../../utils/businessProof';
 
@@ -34,6 +34,33 @@ export default function GoodToKnow({ business }) {
 
   const years = yearsInBusiness(b.founded_year);
 
+  // Unknown value prints nothing rather than an empty row: this field is
+  // written by an API that may learn a fourth answer after this bundle
+  // shipped.
+  const shabbatLabel = {
+    open: t('businessPage.shabbatOpen', 'Available on Shabbat'),
+    closed: t('businessPage.shabbatClosed', 'Closed on Shabbat'),
+    by_arrangement: t('businessPage.shabbatArranged', 'Arranged in advance'),
+  }[b.shabbat] || null;
+
+  // One line of parts that are reliably mixed-direction: our own
+  // translated labels in the page's language, and the owner's free text
+  // in whichever language they typed. dir="auto" on the whole line is
+  // not enough - it resolves ONE direction from the first strong
+  // character, and an English run inside a Hebrew line then has its
+  // leading digit thrown to the far end ("2 large cases" became "large
+  // cases 2", seen 18 Oct 2026). Each part is wrapped in a first-strong
+  // isolate (U+2068 … U+2069) so it is laid out on its own terms and the
+  // separators stay put. Invisible characters: they affect ordering only.
+  const v = b.vehicle || {};
+  const isolate = (s) => `⁨${s}⁩`;
+  const vehicleLine = [
+    v.seats ? t('businessPage.seats', '{{n}} seats', { n: v.seats }) : null,
+    (v.luggage || '').trim() || null,
+    v.accessible ? t('businessPage.accessible', 'Wheelchair accessible') : null,
+    v.child_seat ? t('businessPage.childSeat', 'Child seat available') : null,
+  ].filter(Boolean).map(isolate).join(' · ') || null;
+
   const rows = [
     b.by_appointment ? { key: 'hours', Icon: Clock, label: t('businessPage.hours', 'Hours'), value: t('businessPage.byAppointment', 'By appointment only') }
       : b.hours && { key: 'hours', Icon: Clock, label: t('businessPage.hours', 'Hours'), value: b.hours },
@@ -41,6 +68,24 @@ export default function GoodToKnow({ business }) {
       key: 'languages', Icon: Languages,
       label: t('businessPage.languages', 'Languages'),
       value: b.languages.join(' · '),
+    },
+    // Shabbat gets its own row rather than being folded into Hours,
+    // because it is the first question asked of a driver here and the
+    // honest answer is often neither open nor closed. Absent means the
+    // business has not said, which prints nothing: guessing "closed"
+    // would cost a working business the booking.
+    shabbatLabel && {
+      key: 'shabbat', Icon: CalendarDays,
+      label: t('businessPage.shabbat', 'Shabbat'),
+      value: shabbatLabel,
+    },
+    // One row, not four. "6 seats · 2 large cases · wheelchair
+    // accessible" is how someone decides; four labelled rows of it push
+    // everything else out of the band.
+    vehicleLine && {
+      key: 'vehicle', Icon: Car,
+      label: t('businessPage.vehicle', 'Vehicle'),
+      value: vehicleLine,
     },
     // Only worth saying once it is a real number. "0 years in business"
     // is worse than silence for someone who started this year.
@@ -185,7 +230,13 @@ export default function GoodToKnow({ business }) {
               <Icon size={15} className="shrink-0 mt-0.5" style={{ color: 'var(--brand-muted)' }} aria-hidden="true" />
               <div className="min-w-0">
                 <dt className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>{label}</dt>
-                <dd className="text-sm" style={{ color: 'var(--ink)' }}>{value}</dd>
+                {/* Owner-written, so either language, and often mixed:
+                    "Sun-Thu 9:00-18:00", "6 seats · 2 large cases". On a
+                    Hebrew page these inherit RTL and a leading digit
+                    jumps to the far end of the line. The licence block
+                    above already carries dir="auto" for this reason;
+                    every other fact needed it too. */}
+                <dd className="text-sm" style={{ color: 'var(--ink)' }} dir="auto">{value}</dd>
               </div>
             </div>
           ))}

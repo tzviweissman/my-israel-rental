@@ -34,6 +34,11 @@ import WebsiteButton from './WebsiteButton';
  * plumber for a hechsher is noise, and a form that asks irrelevant
  * questions teaches people to skip the whole thing.
  */
+// Who gets asked about a vehicle and about Shabbat. Movers and tour
+// operators drive people and their things too, so the questions are not
+// scoped to taxis alone.
+const DRIVING_CATEGORIES = new Set(['transportation', 'travel-tourism', 'moving-relocation']);
+
 export default function BusinessDetailsForm({ business, API, token, onClose, onSaved }) {
   const { t } = useTranslation();
   const b = business || {};
@@ -57,6 +62,11 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
     // Kept as text while editing; split on save. A chip editor here means
     // the owner cannot type "Hebrew, English" the way they think of it.
     languages: (b.languages || []).join(', '),
+    shabbat: b.shabbat || '',
+    vehicle_seats: b.vehicle?.seats || '',
+    vehicle_luggage: b.vehicle?.luggage || '',
+    vehicle_accessible: !!b.vehicle?.accessible,
+    vehicle_child_seat: !!b.vehicle?.child_seat,
     founded_year: b.founded_year || '',
     delivery_note: b.delivery_note || '',
     lead_time: b.lead_time || '',
@@ -89,6 +99,12 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
   // reason given on showLicence below.
   const known = [...(b.listing_categories || []), ...(b.categories || [])];
   const showKosher = isFoodBusiness(known) || !!b.kosher_certification?.body;
+  // Asked only of businesses that drive. Same rule as the hechsher
+  // above: a form that asks a bookkeeper how many passenger seats it has
+  // teaches people to skip the whole thing. Shown anyway once answered,
+  // so a business that changes category does not silently lose it.
+  const showDriving = known.some((c) => DRIVING_CATEGORIES.has(c))
+    || !!b.vehicle || !!b.shabbat;
   // Same principle as the hechsher: asked only where it means something.
   // Money exchange is licensed and supervised, so a licence number is
   // the fact a careful customer looks for — and asking a plumber for one
@@ -130,6 +146,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
       // label with nothing after it.
       const orNull = (v) => (String(v || '').trim() ? String(v).trim() : null);
       const year = parseInt(form.founded_year, 10);
+      const seats = parseInt(form.vehicle_seats, 10);
 
       const payload = {
         // Sent every save. The API treats null as "leave alone" for this
@@ -142,6 +159,16 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
         hours: orNull(form.hours),
         by_appointment: !!form.by_appointment,
         languages,
+        // `undefined` leaves them alone for a business that is never
+        // asked these questions; an answered one sends them every save,
+        // null when cleared, the way `license_number` does.
+        shabbat: showDriving ? (form.shabbat || null) : undefined,
+        vehicle: showDriving ? {
+          seats: Number.isFinite(seats) && seats > 0 ? seats : null,
+          luggage: orNull(form.vehicle_luggage),
+          accessible: !!form.vehicle_accessible,
+          child_seat: !!form.vehicle_child_seat,
+        } : undefined,
         founded_year: Number.isFinite(year) && year > 1800 ? year : null,
         delivery_note: orNull(form.delivery_note),
         lead_time: orNull(form.lead_time),
@@ -206,6 +233,15 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
           inputMode={opts.numeric ? 'numeric' : undefined}
           className="mt-1 w-full px-3 py-2 rounded-lg border text-sm"
           style={{ borderColor: 'var(--brand-border)' }}
+          // Every input here can hold either language, and an owner
+          // working in Hebrew types plenty of English into them. Without
+          // this the field inherits the page's RTL and a line that
+          // STARTS with a digit has the digit thrown to the far end:
+          // "2 large cases and a stroller" rendered as "large cases and
+          // a stroller 2" (seen 18 Oct 2026). `auto` takes the direction
+          // from the text's own first strong character, which is the
+          // only thing that can be right for a bilingual field.
+          dir={opts.dir || 'auto'}
           data-testid={`biz-details-${key}`}
         />
       )}
@@ -350,6 +386,45 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
               set({ areas, serves_nationwide: nationwide })}
             disabled={saving}
           />
+
+          {showDriving && (
+            <div className="pt-2 border-t space-y-3" style={{ borderColor: 'var(--brand-border)' }}>
+              <label className="block">
+                <span className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>
+                  {t('businessPage.shabbat', 'Shabbat')}
+                </span>
+                <select
+                  value={form.shabbat}
+                  onChange={(e) => set({ shabbat: e.target.value })}
+                  className="mt-1 w-full px-3 py-2 rounded-lg border text-sm"
+                  style={{ borderColor: 'var(--brand-border)' }}
+                  data-testid="biz-details-shabbat"
+                >
+                  <option value="">{t('businesses.shabbatUnset', 'Rather not say')}</option>
+                  <option value="closed">{t('businessPage.shabbatClosed', 'Closed on Shabbat')}</option>
+                  <option value="open">{t('businessPage.shabbatOpen', 'Available on Shabbat')}</option>
+                  <option value="by_arrangement">{t('businessPage.shabbatArranged', 'Arranged in advance')}</option>
+                </select>
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {field('vehicle_seats', t('businesses.seatsLabel', 'Passenger seats'), '6', { numeric: true })}
+                {field('vehicle_luggage', t('businesses.luggageLabel', 'Luggage'),
+                  t('businesses.luggagePh', '2 large cases and a stroller'))}
+              </div>
+              <label className="flex items-center gap-2 text-sm min-h-[40px]" style={{ color: 'var(--ink)' }}>
+                <input type="checkbox" checked={!!form.vehicle_accessible}
+                  onChange={(e) => set({ vehicle_accessible: e.target.checked })}
+                  data-testid="biz-details-vehicle-accessible" />
+                {t('businessPage.accessible', 'Wheelchair accessible')}
+              </label>
+              <label className="flex items-center gap-2 text-sm min-h-[40px]" style={{ color: 'var(--ink)' }}>
+                <input type="checkbox" checked={!!form.vehicle_child_seat}
+                  onChange={(e) => set({ vehicle_child_seat: e.target.checked })}
+                  data-testid="biz-details-vehicle-child-seat" />
+                {t('businessPage.childSeat', 'Child seat available')}
+              </label>
+            </div>
+          )}
 
           {showLicence && (
             <div className="pt-2 border-t space-y-2" style={{ borderColor: 'var(--brand-border)' }}>
