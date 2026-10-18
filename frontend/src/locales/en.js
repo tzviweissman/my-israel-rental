@@ -610,6 +610,18 @@ const en = {
         defaultLabel: 'Main code',
         failed: 'Could not create that code',
       },
+      claim: {
+        eyebrow: 'We made this for you',
+        body: 'A page on MyIsraelRental, ready for you. Take it over and it is yours to change, free, with no commission.',
+        bodyWithListings: 'A page on MyIsraelRental with {{n}} of your services on it. Take it over and it is yours to change, free, with no commission.',
+        take: 'This is my business',
+        signIn: 'Sign in to take it',
+        signInWhy: 'Signing in is how the page becomes yours. Nothing happens until you press the button.',
+        done: 'It is yours. You can edit the page any time.',
+        failed: 'Could not do that. Try the link again.',
+        badLink: 'This link no longer works',
+        badLinkBody: 'It may have been used already, or it may have expired. Ask us for a new one.',
+      },
       businessPage: {
         byAppointment: "By appointment only",
         byAppointmentTick: "By appointment only (no fixed opening hours)",

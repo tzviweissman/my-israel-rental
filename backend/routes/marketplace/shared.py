@@ -1205,5 +1205,18 @@ def _search_clauses(q: str) -> list[dict[str, Any]]:
             # to an English search even though its English text exists.
             {"title_he": rx}, {"description_he": rx},
             {"title_en": rx}, {"description_en": rx},
+            # What the listing actually SELLS, by name. Added 18 Oct 2026,
+            # after telling drivers to list each run as a priced option:
+            # "Ben Gurion to Jerusalem" went in as a tier name and the one
+            # search most likely to find it matched nothing. The same hole
+            # was already costing every shop, because a product called
+            # "challah" is invisible unless the baker happened to repeat
+            # the word in the description.
+            #
+            # Names only, not tier descriptions: a description is a
+            # paragraph, and matching it would make most queries match most
+            # listings. Harmless on the requests board, which shares this
+            # helper and has neither field.
+            {"tiers.name": rx}, {"products.name": rx},
         ]})
     return clauses

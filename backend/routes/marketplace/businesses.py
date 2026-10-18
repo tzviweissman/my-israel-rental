@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import re
 import secrets
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from typing import Any, Literal, Optional
 
 from fastapi import APIRouter, Depends, File, Form, HTTPException, Request, Response, UploadFile
@@ -25,6 +25,7 @@ from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel, Field
 
 from utils.page_upgrade import has_page_upgrade
+from utils.rate_limit import check_rate
 from routes.deps import db, logger, optional_user, verify_token
 from utils.bg_tasks import spawn
 from utils import highlights as hl
@@ -41,6 +42,7 @@ from utils.businesses import (
 from utils.page_composition import ExtraPage, PageBrief, PageComposition, check_pages, dial_catalog
 
 from .shared import (
+    FRONTEND_URL,
     HAS_ANY_PHOTO,
     normalize_service_areas,
     TOP_RATED_MIN_AVG,
@@ -1551,3 +1553,159 @@ async def set_verified(business_id: str, payload: VerifyIn, user=Depends(verify_
         }},
     )
     return {"id": business_id, "verified": payload.verified}
+
+
+# ------------------------------------------------------- handing a page over
+#
+# Most of the businesses worth approaching will never fill in a sign-up
+# form. Of the 26 taxi companies surveyed on 18 Oct 2026, several had no
+# website at all and one had only a Facebook page; every one of them runs
+# on a phone. So the page gets built FOR them and handed over: a one-time
+# link they tap, sign in once, and own.
+#
+# WHY THIS IS DELIBERATELY NARROW. A full ownership transfer would have to
+# move every record that names the owner - orders, bookings, members,
+# memberships, quote requests, short links - and a half-finished sweep
+# across those is worse than no feature, because the business and its
+# history end up split between two accounts with no way to tell.
+#
+# It does not have to. At the moment a page is handed over it has never
+# traded: that is the whole situation. So the handover REFUSES a business
+# with any history and moves exactly two things, the business record and
+# its listings. Anything else is a manual job, and saying so is safer than
+# a sweep nobody will test again.
+
+CLAIM_TTL_DAYS = 30
+
+# Where a business's history would live. Each is (collection, owner field).
+# A hit on any of them means this is a working business, not a page waiting
+# for its owner.
+_TRADED_IN = (
+    ("store_orders", "owner_user_id"),
+    ("business_members", "owner_user_id"),
+    ("membership_plans", "owner_user_id"),
+    ("marketplace_bookings", "provider_user_id"),
+    ("quote_requests", "provider_user_id"),
+)
+
+
+def _claim_hash(token: str) -> str:
+    import hashlib
+    return hashlib.sha256(token.encode()).hexdigest()
+
+
+async def _has_traded(biz: dict[str, Any]) -> str | None:
+    """The name of the first collection holding history for this business,
+    or None when it has none. Checked by the business's OWNER rather than
+    by business id, because the older collections here predate
+    `business_id` and key off the person."""
+    owner = biz.get("owner_user_id")
+    for coll, field in _TRADED_IN:
+        if await db[coll].count_documents({field: owner}, limit=1):
+            return coll
+    return None
+
+
+@router.post("/businesses/{business_id}/claim-link")
+async def create_claim_link(business_id: str, user=Depends(verify_token)):
+    """Admin only. Mints a one-time link that hands this business to
+    whoever opens it and signs in.
+
+    The token is returned ONCE and stored only as a hash, so a leaked
+    database does not hand out businesses. Minting a second link replaces
+    the first, which is also how a link sent to the wrong number is
+    revoked."""
+    if user.get("role") != "admin":
+        raise HTTPException(status_code=403, detail="Admin only")
+    biz = await db.businesses.find_one({"_id": business_id})
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    traded = await _has_traded(biz)
+    if traded:
+        raise HTTPException(
+            status_code=400,
+            detail=f"This business already has {traded.replace('_', ' ')}. Hand it over by hand rather than with a link.",
+        )
+    token = secrets.token_urlsafe(32)
+    now = datetime.now(UTC)
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"claim": {
+        "token_hash": _claim_hash(token),
+        "created_by": user["user_id"],
+        "created_at": now.isoformat(),
+        "expires_at": (now + timedelta(days=CLAIM_TTL_DAYS)).isoformat(),
+        "claimed_at": None,
+        "claimed_by": None,
+    }}})
+    return {"url": f"{FRONTEND_URL}/claim/{token}", "expires_in_days": CLAIM_TTL_DAYS}
+
+
+async def _claimable(token: str) -> dict[str, Any]:
+    """The business this token hands over, or a refusal saying why not.
+    One place, so the preview and the claim itself can never disagree
+    about whether a link still works."""
+    biz = await db.businesses.find_one({"claim.token_hash": _claim_hash(token)})
+    claim = (biz or {}).get("claim") or {}
+    # Same answer for a token that never existed and one that was used, so
+    # the endpoint cannot be used to learn which tokens are real.
+    if not biz or claim.get("claimed_at"):
+        raise HTTPException(status_code=404, detail="This link is not valid any more")
+    if (claim.get("expires_at") or "") < datetime.now(UTC).isoformat():
+        raise HTTPException(status_code=404, detail="This link has expired")
+    return biz
+
+
+@router.get("/claim/{token}")
+async def preview_claim(token: str, request: Request):
+    """What is behind the link, before anyone signs in. Shown so the
+    person knows what they are about to put their name to, and carries
+    nothing but what the public page already shows."""
+    check_rate(request, bucket="claim_preview", limit=30, window_seconds=600)
+    biz = await _claimable(token)
+    return {
+        "name": biz.get("name") or "",
+        "logo_url": biz.get("logo_url"),
+        "slug": biz.get("slug"),
+        "listings": await db.marketplace_gigs.count_documents({"business_id": biz["_id"]}),
+    }
+
+
+@router.post("/claim/{token}")
+async def claim_business(token: str, request: Request, user=Depends(verify_token)):
+    """Hand the business to the signed-in caller.
+
+    Two writes and a guard, for the reason in the block at the top of this
+    section. The guard is re-run here rather than trusted from mint time,
+    because a link lives for 30 days and the business may have started
+    trading in between."""
+    check_rate(request, bucket="claim", limit=10, window_seconds=3600)
+    biz = await _claimable(token)
+    uid = user["user_id"]
+    if biz.get("owner_user_id") == uid:
+        return {"id": biz["_id"], "slug": biz.get("slug"), "already_yours": True}
+    traded = await _has_traded(biz)
+    if traded:
+        raise HTTPException(status_code=409, detail="This business has started trading and can no longer be claimed with a link.")
+    active_count = await db.businesses.count_documents({"owner_user_id": uid, "active": True})
+    if active_count >= MAX_BUSINESSES_PER_USER:
+        raise HTTPException(status_code=400, detail=f"You can have up to {MAX_BUSINESSES_PER_USER} active businesses.")
+    now = datetime.now(UTC).isoformat()
+    # The listings move with the business. Without this the page would be
+    # theirs and everything on it would still answer to the person who
+    # built it - including who gets told when a customer asks for a price.
+    await db.marketplace_gigs.update_many(
+        {"business_id": biz["_id"]}, {"$set": {"provider_user_id": uid, "updated_at": now}})
+    # Their own provider record, or the listings they just received stop
+    # showing publicly: browse hides a gig whose provider is not active.
+    from .shared import _ensure_provider_record
+    await _ensure_provider_record(uid)
+    await db.businesses.update_one({"_id": biz["_id"]}, {"$set": {
+        "owner_user_id": uid,
+        "updated_at": now,
+        # The token is spent. Kept rather than deleted so there is a record
+        # of who took it and when.
+        "claim.claimed_at": now,
+        "claim.claimed_by": uid,
+        "claim.token_hash": None,
+    }})
+    logger.info("[claim] business=%s -> user=%s", biz["_id"], uid)
+    return {"id": biz["_id"], "slug": biz.get("slug"), "name": biz.get("name") or ""}

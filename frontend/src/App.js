@@ -148,6 +148,7 @@ const OrderPage = lazy(() => import('./pages/OrderPage'));
 const OrderTrackPage = lazy(() => import('./pages/OrderTrackPage'));
 const BookingTrackPage = lazy(() => import('./pages/BookingTrackPage'));
 const QuoteTrackPage = lazy(() => import('./pages/QuoteTrackPage'));
+const ClaimBusinessPage = lazy(() => import('./pages/ClaimBusinessPage'));
 const ReservationPage = lazy(() => import('./pages/ReservationPage'));
 const FeedbackPage = lazy(() => import('./pages/FeedbackPage'));
 const GiftCardBuyPage = lazy(() => import('./pages/GiftCardBuyPage'));
@@ -550,6 +551,10 @@ function App() {
             <Route path="/orders/track/:token" element={<OrderTrackPage />} />
             <Route path="/bookings/track/:token" element={<BookingTrackPage />} />
             <Route path="/quotes/:token" element={<QuoteTrackPage />} />
+            {/* Handing a built page to the business it was built for. Public
+                on purpose: it must say what it is BEFORE asking anyone to
+                sign in, or it reads like a phishing link. */}
+            <Route path="/claim/:token" element={<ClaimBusinessPage />} />
             <Route path="/reservations/:token" element={<ReservationPage />} />
             <Route path="/feedback/:token" element={<FeedbackPage />} />
             <Route path="/gift-cards/:slug" element={<GiftCardBuyPage />} />
