@@ -598,8 +598,11 @@ function proxyApi(req, res) {
     if (res.headersSent) { res.destroy(); return; }
     res.writeHead(502, { 'Content-Type': 'application/json' });
     // Shaped like the backend's own errors so the client renders it
-    // rather than falling through to a generic message.
-    res.end(JSON.stringify({ detail: 'Could not reach the server. Please try again.' }));
+    // rather than falling through to a generic message. Almost always this
+    // is the backend restarting for an update: it keeps contracts on a
+    // volume, so Railway cannot overlap the old and new copies and there is
+    // a short gap (18 Oct 2026). Say so, so people wait and retry.
+    res.end(JSON.stringify({ detail: 'The site is updating. Please try again in a minute.' }));
   });
 
   // If the client hangs up mid-request, stop talking to the upstream.
