@@ -30,6 +30,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 from typing import Any, Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Request, Response
@@ -571,10 +572,21 @@ async def sitemap_entries():
 
 
 @router.get("/llms.txt", response_class=PlainTextResponse)
-async def llms_txt():
-    """The llmstxt.org format: what the site is, and where to read more."""
+async def llms_txt(extra: str = ""):
+    """The llmstxt.org format: what the site is, and where to read more.
+
+    `extra`: the hand-built (designed) pages' slugs, which only the web
+    server knows (its pages.json). Public businesses, listed like the rest."""
     site = _site()
     pages = await upgraded_pages()
+    wanted = [x for x in extra.split(",") if re.fullmatch(r"[a-z0-9-]{2,60}", x)][:50]
+    if wanted:
+        have = {b.get("slug") for b in pages["businesses"]}
+        async for b in db.businesses.find(
+            {"slug": {"$in": [w for w in wanted if w not in have]}, "active": {"$ne": False}},
+            {"name": 1, "slug": 1, "categories": 1, "areas": 1, "serves_nationwide": 1, "description": 1},
+        ):
+            pages["businesses"].append(b)
     lines = [
         "# MyIsraelRental",
         "",

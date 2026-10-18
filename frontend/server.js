@@ -153,7 +153,9 @@ async function sitemapXml() {
   if (sitemapCache && Date.now() - sitemapCache.at < 30 * 60 * 1000) return sitemapCache.value;
   const base = fs.readFileSync(path.join(BUILD, 'sitemap.xml'), 'utf8');
   const origin = `https://${PUBLIC_SITE_HOST}`;
-  const entries = [...HAND_BUILT].map((slug) => ({ url: `${origin}/business/${slug}` }));
+  // A hand-built page is one language (its own <html lang>), so it has no
+  // Hebrew twin; ?lng=he would only be a duplicate of the same page.
+  const entries = [...HAND_BUILT].map((slug) => ({ url: `${origin}/business/${slug}`, single: true }));
   const text = await fetchApi('/api/seo/sitemap-entries', null, 'application/json');
   try {
     for (const e of (text && JSON.parse(text).entries) || []) {
@@ -162,6 +164,7 @@ async function sitemapXml() {
   } catch { /* the fixed and hand-built pages still go out */ }
   const esc = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;');
   const urls = entries.map((e) => {
+    if (e.single) return `<url><loc>${esc(e.url)}</loc></url>`;
     const he = `${e.url}?lng=he`;
     const alts = `<xhtml:link rel="alternate" hreflang="en" href="${esc(e.url)}"/>`
       + `<xhtml:link rel="alternate" hreflang="he" href="${esc(he)}"/>`;
@@ -682,7 +685,9 @@ const server = http.createServer(async (req, res) => {
     } catch { /* the static file */ }
   }
   if (pathname === '/llms.txt') {
-    const text = await fetchApi('/api/seo/llms.txt', null, 'text/plain');
+    // The hand-built pages too: the backend cannot see pages.json.
+    const extra = encodeURIComponent([...HAND_BUILT].join(','));
+    const text = await fetchApi(`/api/seo/llms.txt?extra=${extra}`, null, 'text/plain');
     if (text) {
       res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=1800' });
       res.end(text);
