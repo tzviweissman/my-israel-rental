@@ -92,6 +92,29 @@ const Contact = () => {
               {para}
             </p>
           ))}
+          {/* The registered name and the registered agent's address, as on the
+              New York filing (DOS ID 7446100). Meta matches the site against
+              those papers. The owner's own name and home address stay off the
+              site at the owner's request; the agent's address is already public record. */}
+          <h3 className="mt-8 text-[17px] font-semibold" style={{ color: 'var(--ink)' }}>
+            {t('contactPage.companyHead')}
+          </h3>
+          <dl className="mt-3 grid gap-3 text-[15px]" style={{ color: 'var(--brand-muted, #666666)' }}>
+            <div>
+              <dt>{t('contactPage.legalName')}</dt>
+              <dd className="font-semibold" style={{ color: 'var(--ink)' }}><bdi dir="ltr">My Israel Rental LLC</bdi></dd>
+            </div>
+            <div>
+              <dt>{t('contactPage.registeredIn')}</dt>
+              <dd className="font-semibold" style={{ color: 'var(--ink)' }}>{t('contactPage.registeredInValue')}</dd>
+            </div>
+            <div>
+              <dt>{t('contactPage.registeredAddress')}</dt>
+              <dd className="font-semibold" style={{ color: 'var(--ink)' }}>
+                <bdi dir="ltr">ZenBusiness Inc., 41 State Street, Suite 112, Albany, NY 12207, USA</bdi>
+              </dd>
+            </div>
+          </dl>
           <p className="mt-6 text-[15px] flex flex-wrap gap-x-6 gap-y-2">
             <Link to="/privacy" className="underline underline-offset-4" style={{ color: 'var(--gold)' }}>
               {t('footer.privacy')}

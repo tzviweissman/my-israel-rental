@@ -5874,7 +5874,7 @@ const en = {
         contactCta: "Questions about your information, or a request to see or delete it:",
         allWays: "All the ways to reach us",
         p1Head: "Who we are",
-        p1Body: "MyIsraelRental is a website that connects people who have something to offer (places to rent, local services, shops and restaurants) with people who need them. It is run from Israel. In this policy “we” and “us” mean MyIsraelRental.\n\nYou can reach us at support@myisraelrental.com or on WhatsApp at +972 55-322-5141.",
+        p1Body: "MyIsraelRental is a website that connects people who have something to offer (places to rent, local services, shops and restaurants) with people who need them. It is operated by My Israel Rental LLC, a limited liability company registered in New York, USA. In this policy “we” and “us” mean My Israel Rental LLC.\n\nYou can reach us at support@myisraelrental.com or on WhatsApp at +972 55-322-5141.",
         p2Head: "What we collect",
         p2Body: "Account details: your name and email address, and a phone number if you add one. If you sign in with Google, we receive your name, email address and profile picture from Google.\n\nWhat you post: listings, services, products, requests, photos, reviews and the messages you send through the site.\n\nOrders and bookings: when you order from a business or book a service, the name, phone number, address and notes you give so the business can fulfil it. You do not need an account to do this.\n\nTechnical information: your browser type, device, the pages you open and the time you opened them, which every website receives. We use it to keep the site working and to stop abuse.",
         p3Head: "What we use it for",
@@ -5904,8 +5904,13 @@ const en = {
         email: "Email",
         whatsapp: "WhatsApp",
         website: "Website",
+        companyHead: "Company details",
+        legalName: "Registered name",
+        registeredIn: "Registered in",
+        registeredInValue: "New York, USA (DOS ID 7446100)",
+        registeredAddress: "Registered address (registered agent)",
         aboutHead: "About MyIsraelRental",
-        aboutBody: "MyIsraelRental connects people who have something to offer with people who need it: places to rent, local businesses and services, shops and restaurants, and a board for posting what you are looking for. It is run from Israel.\n\nListing a business or a property is free, with no commission."
+        aboutBody: "MyIsraelRental connects people who have something to offer with people who need it: places to rent, local businesses and services, shops and restaurants, and a board for posting what you are looking for.\n\nListing a business or a property is free, with no commission."
       },
       // Invite a friend (backend referrals.py).
       referrals: {

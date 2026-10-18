@@ -57,7 +57,7 @@ export default function SiteFooter() {
           ))}
         </nav>
         <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
-          © {year} MyIsraelRental
+          © {year} My Israel Rental LLC
         </p>
       </div>
     </footer>
