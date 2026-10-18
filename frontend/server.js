@@ -599,9 +599,9 @@ function proxyApi(req, res) {
     res.writeHead(502, { 'Content-Type': 'application/json' });
     // Shaped like the backend's own errors so the client renders it
     // rather than falling through to a generic message. Almost always this
-    // is the backend restarting for an update: it keeps contracts on a
-    // volume, so Railway cannot overlap the old and new copies and there is
-    // a short gap (18 Oct 2026). Say so, so people wait and retry.
+    // is the backend restarting for an update. (Until 18 Oct 2026 a volume
+    // stopped Railway overlapping the old and new copies; the volume is gone,
+    // so a gap should now be rare.) Say so, so people wait and retry.
     res.end(JSON.stringify({ detail: 'The site is updating. Please try again in a minute.' }));
   });
 
