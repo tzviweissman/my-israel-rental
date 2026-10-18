@@ -67,6 +67,21 @@
   .open-photo { position: relative; height: calc(100svh - 64px); min-height: 520px; order: 2; overflow: hidden; }
   .open-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 45% 40%; animation: ease-in 2200ms var(--out) both; }
   @keyframes ease-in { from { transform: scale(1.08); opacity: 0; } to { transform: none; opacity: 1; } }
+  /* the glint (owner's pick, 18 Oct 2026): a soft warm light, screened onto his
+     own photo only where the glaze shines (glaze-mask, made from the photo's
+     bright glossy ridges); it sweeps across on arrival, then follows the mouse. The food
+     is his photo throughout; only light moves. */
+  /* the photo leans gently toward the pointer, and a warm light wash
+     follows it; the sparkle on the glaze rides on top */
+  .open-photo .pp { position: absolute; inset: -3%; transform: translate(var(--px, 0px), var(--py, 0px)) scale(1.03); transition: transform 120ms linear; will-change: transform; }
+  .open-photo .pp img { width: 100%; height: 100%; object-fit: cover; object-position: 45% 40%; }
+  .open-photo .wash { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light;
+    background: radial-gradient(circle calc(var(--gr, 260px) * 1.9) at var(--gx, -30%) var(--gy, 35%), rgb(255 235 200 / .85), rgb(255 235 200 / 0) 70%); }
+  .open-photo .glint { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
+    background: radial-gradient(circle var(--gr, 260px) at var(--gx, -30%) var(--gy, 35%), rgb(255 253 245 / 1) 0%, rgb(255 240 210 / .6) 24%, rgb(255 225 180 / 0) 56%);
+    -webkit-mask-image: url(/pages/chicken-munch/assets/glaze-mask.webp?v=mve5ltnd); mask-image: url(/pages/chicken-munch/assets/glaze-mask.webp?v=mve5ltnd);
+    -webkit-mask-size: cover; mask-size: cover; -webkit-mask-position: 45% 40%; mask-position: 45% 40%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    animation: ease-in 2200ms var(--out) both; }
   /* the photo melts into the black on the side the words sit */
   .open-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--black) 0%, rgb(14 13 12 / 0) 28%), linear-gradient(0deg, var(--black) 0%, rgb(14 13 12 / 0) 18%); }
   .open-copy { position: relative; z-index: 2; padding: clamp(2rem, 5vw, 4rem) 0 clamp(2rem, 5vw, 4rem) var(--gutter); }
@@ -208,7 +223,7 @@
 
 <main>
   <section class="open" id="open" aria-labelledby="h-open">
-    <div class="open-photo"><img src="/pages/chicken-munch/assets/poppers.webp?v=mve41typ" alt="A kraft bowl of Original Hot Poppers, chicken bites in a glossy sweet and spicy glaze" width="1600" height="1323" fetchpriority="high" data-mir-key="i-cbc011d0-0"></div>
+    <div class="open-photo" id="open-photo"><div class="pp" id="pp"><img src="/pages/chicken-munch/assets/poppers.webp?v=mve5ltnd" alt="A kraft bowl of Original Hot Poppers, chicken bites in a glossy sweet and spicy glaze" width="1600" height="1323" fetchpriority="high" data-mir-key="i-cbc011d0-0"><div class="wash" id="wash" aria-hidden="true"></div><div class="glint" id="glint" aria-hidden="true"></div></div></div>
     <div class="open-copy">
       <p class="name" aria-hidden="true"><span class="n1" data-mir-key="t-885f27c5-0">Chicken</span><span class="n2" data-mir-key="t-294781d2-0">Munch</span></p>
       <p class="label" data-mir-key="t-3ac5f902-0">Kosher American fried chicken · Jerusalem</p>
@@ -229,7 +244,7 @@
       <h2 id="h-boxes" class="rev" data-mir-key="t-c9826296-0">Premium <span class="red">chicken boxes</span></h2>
       <p class="lede rev" data-mir-key="t-8f2c0f05-0">Pick your types of chicken and your sauces. Each box comes ready to share.</p>
       <div class="boxes-grid">
-        <div class="photo rev"><img src="/pages/chicken-munch/assets/box-dark.webp?v=mve41typ" alt="A Chicken Munch box: pretzel, rice krispie and cornflake chicken with sauce pots in the lid" width="700" height="890" loading="lazy" data-mir-key="i-031d98dd-0"></div>
+        <div class="photo rev"><img src="/pages/chicken-munch/assets/box-dark.webp?v=mve5ltnd" alt="A Chicken Munch box: pretzel, rice krispie and cornflake chicken with sauce pots in the lid" width="700" height="890" loading="lazy" data-mir-key="i-031d98dd-0"></div>
         <div class="tiles">
           <div class="tile rev"><div><h3 data-mir-key="t-d6c41156-0">Mini Munch Box</h3><p class="feeds" data-mir-key="t-cc45cee8-0">Feeds 3 to 4</p><p class="what" data-mir-key="t-eefc6735-0">Up to 4 types of chicken and 3 sauces</p></div>
             <div><div class="price" data-mir-key="t-edb25f32-0">$69</div><a class="btn-line add" href="#order" data-add="mini" data-mir-key="t-083348d1-0">Add</a></div></div>
@@ -257,9 +272,9 @@
           <li class="rev"><h3 data-mir-key="t-5bd19c37-0">Buffalo Wings</h3><p data-mir-key="t-72d5d86a-0">In-bone chicken bites coated in a hickory, hot and savory sauce.</p></li>
         </ul>
         <div class="shots">
-          <figure class="shot wide rev"><img src="/pages/chicken-munch/assets/hot-poppers.webp?v=mve41typ" alt="Original Hot Poppers in a kraft bowl" width="900" height="854" loading="lazy" data-mir-key="i-1a6b03ae-0"><figcaption data-mir-key="t-2adb90f4-0">Original Hot Poppers</figcaption></figure>
-          <figure class="shot rev"><img src="/pages/chicken-munch/assets/rice-krispie.webp?v=mve41typ" alt="Rice Krispie chicken in a kraft bowl with a sauce pot" width="900" height="791" loading="lazy" data-mir-key="i-b05fa24d-0"><figcaption data-mir-key="t-4e8faf75-0">Rice Krispie</figcaption></figure>
-          <figure class="shot rev"><img src="/pages/chicken-munch/assets/classic.webp?v=mve41typ" alt="Cornflake coated chicken on a black plate" width="900" height="616" loading="lazy" data-mir-key="i-f52764bd-0"><figcaption data-mir-key="t-3e456009-0">Classic American Crunch</figcaption></figure>
+          <figure class="shot wide rev"><img src="/pages/chicken-munch/assets/hot-poppers.webp?v=mve5ltnd" alt="Original Hot Poppers in a kraft bowl" width="900" height="854" loading="lazy" data-mir-key="i-1a6b03ae-0"><figcaption data-mir-key="t-2adb90f4-0">Original Hot Poppers</figcaption></figure>
+          <figure class="shot rev"><img src="/pages/chicken-munch/assets/rice-krispie.webp?v=mve5ltnd" alt="Rice Krispie chicken in a kraft bowl with a sauce pot" width="900" height="791" loading="lazy" data-mir-key="i-b05fa24d-0"><figcaption data-mir-key="t-4e8faf75-0">Rice Krispie</figcaption></figure>
+          <figure class="shot rev"><img src="/pages/chicken-munch/assets/classic.webp?v=mve5ltnd" alt="Cornflake coated chicken on a black plate" width="900" height="616" loading="lazy" data-mir-key="i-f52764bd-0"><figcaption data-mir-key="t-3e456009-0">Classic American Crunch</figcaption></figure>
         </div>
       </div>
       <div class="sauces rev">
@@ -274,7 +289,7 @@
       <h2 id="h-pans" class="rev" data-mir-key="t-9f003ddf-0">By the <span class="red">pan</span></h2>
       <p class="lede rev" data-mir-key="t-5b06c525-0">Priced by the pan, for a bigger table.</p>
       <div class="pan-grid">
-        <div class="photo rev"><img src="/pages/chicken-munch/assets/pan.webp?v=mve41typ" alt="A black pan full of rice krispie, schnitzel and cornflake chicken fingers" width="1010" height="520" loading="lazy" data-mir-key="i-ce0cd968-0"></div>
+        <div class="photo rev"><img src="/pages/chicken-munch/assets/pan.webp?v=mve5ltnd" alt="A black pan full of rice krispie, schnitzel and cornflake chicken fingers" width="1010" height="520" loading="lazy" data-mir-key="i-ce0cd968-0"></div>
         <div class="tiles">
           <div class="tile rev"><div><h3 data-mir-key="t-a39f8746-0">9x13 pan</h3><p class="feeds" data-mir-key="t-404c9216-0">Feeds 6 to 8</p></div><div><div class="price" data-mir-key="t-693b20fc-0">₪275</div><a class="btn-line add" href="#order" data-add="pan913" data-mir-key="t-083348d1-3">Add</a></div></div>
           <div class="tile rev"><div><h3 data-mir-key="t-8647f769-0">Roaster</h3><p class="feeds" data-mir-key="t-e6a335ce-0">Feeds 18 to 20</p></div><div><div class="price" data-mir-key="t-3ffc474d-0">₪650</div><a class="btn-line add" href="#order" data-add="roaster" data-mir-key="t-083348d1-4">Add</a></div></div>
@@ -352,6 +367,37 @@ document.body.classList.remove('no-js');
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();
+
+  // ── the glint on the glaze: sweeps across once, then follows the mouse;
+  // on a phone it follows the tilt where the phone allows it, otherwise it
+  // sweeps again every few seconds. Off for reduced motion.
+  var glint = document.getElementById('glint'), photo = document.getElementById('open-photo'), pp = document.getElementById('pp');
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var gx = -0.3, gy = 0.35, tx = gx, ty = gy, following = false, t0 = performance.now() + 900, sweep = 1800, lastSweep = t0;
+    glint.style.setProperty('--gr', Math.round(Math.max(170, photo.clientWidth * .24)) + 'px');
+    var loop = function (now) {
+      if (!following) {
+        var k = Math.min(1, Math.max(0, (now - lastSweep) / sweep)), e = k * k * (3 - 2 * k);
+        tx = -0.3 + 1.6 * e; ty = 0.3 + 0.15 * Math.sin(e * Math.PI);
+        if (k >= 1 && !matchMedia('(hover: hover)').matches && now - lastSweep > 5200) lastSweep = now;   // touch: sweep again
+      }
+      gx += (tx - gx) * (following ? .12 : 1); gy += (ty - gy) * (following ? .12 : 1);
+      ['glint', 'wash'].forEach(function (id) { var el = document.getElementById(id); el.style.setProperty('--gx', (gx * 100).toFixed(2) + '%'); el.style.setProperty('--gy', (gy * 100).toFixed(2) + '%'); el.style.setProperty('--gr', glint.style.getPropertyValue('--gr')); });
+      // the photo leans a few pixels toward the light
+      pp.style.setProperty('--px', ((gx - .5) * -18).toFixed(1) + 'px'); pp.style.setProperty('--py', ((gy - .45) * -14).toFixed(1) + 'px');
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+    document.getElementById('open').addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'mouse' || performance.now() < t0 + sweep) return;
+      var r = photo.getBoundingClientRect(); following = true;
+      tx = (e.clientX - r.left) / r.width; ty = (e.clientY - r.top) / r.height;
+    });
+    addEventListener('deviceorientation', function (e) {
+      if (e.gamma == null || performance.now() < t0 + sweep) return;
+      following = true; tx = .5 + Math.max(-1, Math.min(1, e.gamma / 30)) * .5; ty = .45 + Math.max(-1, Math.min(1, (e.beta - 45) / 40)) * .35;
+    });
+  }
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
   [].forEach.call(document.querySelectorAll('.rev'), function (el) { io.observe(el); });
 

@@ -67,6 +67,21 @@
   .open-photo { position: relative; height: calc(100svh - 64px); min-height: 520px; order: 2; overflow: hidden; }
   .open-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 45% 40%; animation: ease-in 2200ms var(--out) both; }
   @keyframes ease-in { from { transform: scale(1.08); opacity: 0; } to { transform: none; opacity: 1; } }
+  /* the glint (owner's pick, 18 Oct 2026): a soft warm light, screened onto his
+     own photo only where the glaze shines (glaze-mask, made from the photo's
+     bright glossy ridges); it sweeps across on arrival, then follows the mouse. The food
+     is his photo throughout; only light moves. */
+  /* the photo leans gently toward the pointer, and a warm light wash
+     follows it; the sparkle on the glaze rides on top */
+  .open-photo .pp { position: absolute; inset: -3%; transform: translate(var(--px, 0px), var(--py, 0px)) scale(1.03); transition: transform 120ms linear; will-change: transform; }
+  .open-photo .pp img { width: 100%; height: 100%; object-fit: cover; object-position: 45% 40%; }
+  .open-photo .wash { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light;
+    background: radial-gradient(circle calc(var(--gr, 260px) * 1.9) at var(--gx, -30%) var(--gy, 35%), rgb(255 235 200 / .85), rgb(255 235 200 / 0) 70%); }
+  .open-photo .glint { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
+    background: radial-gradient(circle var(--gr, 260px) at var(--gx, -30%) var(--gy, 35%), rgb(255 253 245 / 1) 0%, rgb(255 240 210 / .6) 24%, rgb(255 225 180 / 0) 56%);
+    -webkit-mask-image: url(assets/glaze-mask.webp); mask-image: url(assets/glaze-mask.webp);
+    -webkit-mask-size: cover; mask-size: cover; -webkit-mask-position: 45% 40%; mask-position: 45% 40%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
+    animation: ease-in 2200ms var(--out) both; }
   /* the photo melts into the black on the side the words sit */
   .open-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--black) 0%, rgb(14 13 12 / 0) 28%), linear-gradient(0deg, var(--black) 0%, rgb(14 13 12 / 0) 18%); }
   .open-copy { position: relative; z-index: 2; padding: clamp(2rem, 5vw, 4rem) 0 clamp(2rem, 5vw, 4rem) var(--gutter); }
@@ -208,7 +223,7 @@
 
 <main>
   <section class="open" id="open" aria-labelledby="h-open">
-    <div class="open-photo"><img src="assets/poppers.webp" alt="A kraft bowl of Original Hot Poppers, chicken bites in a glossy sweet and spicy glaze" width="1600" height="1323" fetchpriority="high"></div>
+    <div class="open-photo" id="open-photo"><div class="pp" id="pp"><img src="assets/poppers.webp" alt="A kraft bowl of Original Hot Poppers, chicken bites in a glossy sweet and spicy glaze" width="1600" height="1323" fetchpriority="high"><div class="wash" id="wash" aria-hidden="true"></div><div class="glint" id="glint" aria-hidden="true"></div></div></div>
     <div class="open-copy">
       <p class="name" aria-hidden="true"><span class="n1">Chicken</span><span class="n2">Munch</span></p>
       <p class="label">Kosher American fried chicken · Jerusalem</p>
@@ -352,6 +367,37 @@ document.body.classList.remove('no-js');
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();
+
+  // ── the glint on the glaze: sweeps across once, then follows the mouse;
+  // on a phone it follows the tilt where the phone allows it, otherwise it
+  // sweeps again every few seconds. Off for reduced motion.
+  var glint = document.getElementById('glint'), photo = document.getElementById('open-photo'), pp = document.getElementById('pp');
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var gx = -0.3, gy = 0.35, tx = gx, ty = gy, following = false, t0 = performance.now() + 900, sweep = 1800, lastSweep = t0;
+    glint.style.setProperty('--gr', Math.round(Math.max(170, photo.clientWidth * .24)) + 'px');
+    var loop = function (now) {
+      if (!following) {
+        var k = Math.min(1, Math.max(0, (now - lastSweep) / sweep)), e = k * k * (3 - 2 * k);
+        tx = -0.3 + 1.6 * e; ty = 0.3 + 0.15 * Math.sin(e * Math.PI);
+        if (k >= 1 && !matchMedia('(hover: hover)').matches && now - lastSweep > 5200) lastSweep = now;   // touch: sweep again
+      }
+      gx += (tx - gx) * (following ? .12 : 1); gy += (ty - gy) * (following ? .12 : 1);
+      ['glint', 'wash'].forEach(function (id) { var el = document.getElementById(id); el.style.setProperty('--gx', (gx * 100).toFixed(2) + '%'); el.style.setProperty('--gy', (gy * 100).toFixed(2) + '%'); el.style.setProperty('--gr', glint.style.getPropertyValue('--gr')); });
+      // the photo leans a few pixels toward the light
+      pp.style.setProperty('--px', ((gx - .5) * -18).toFixed(1) + 'px'); pp.style.setProperty('--py', ((gy - .45) * -14).toFixed(1) + 'px');
+      requestAnimationFrame(loop);
+    };
+    requestAnimationFrame(loop);
+    document.getElementById('open').addEventListener('pointermove', function (e) {
+      if (e.pointerType !== 'mouse' || performance.now() < t0 + sweep) return;
+      var r = photo.getBoundingClientRect(); following = true;
+      tx = (e.clientX - r.left) / r.width; ty = (e.clientY - r.top) / r.height;
+    });
+    addEventListener('deviceorientation', function (e) {
+      if (e.gamma == null || performance.now() < t0 + sweep) return;
+      following = true; tx = .5 + Math.max(-1, Math.min(1, e.gamma / 30)) * .5; ty = .45 + Math.max(-1, Math.min(1, (e.beta - 45) / 40)) * .35;
+    });
+  }
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
   [].forEach.call(document.querySelectorAll('.rev'), function (el) { io.observe(el); });
 

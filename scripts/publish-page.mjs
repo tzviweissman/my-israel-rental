@@ -186,3 +186,34 @@ console.log(`published ${folder} as /business/${slug} (${files} files in fronten
     process.exit(1);
   }
 }
+
+// A page on the business pages list gets its preview clip re-recorded from
+// what was just published, so the tile always shows the page as it is now
+// (Tzvi, 18 Oct 2026: "the gift boutiques preview on business pages doesnt
+// match their actual page"). Served from the build folder on a local port.
+// Skip with --no-preview (check-showcase-previews.mjs then fails until the
+// clip is made).
+{
+  let listed = false;
+  try { listed = JSON.parse(fs.readFileSync(path.join(ROOT, 'frontend', 'public', 'showcase', 'showcase.json'), 'utf8')).some((x) => x.slug === slug); } catch { /* no list */ }
+  if (listed && !process.argv.includes('--no-preview')) {
+    const http = await import('node:http');
+    const { spawn } = await import('node:child_process');
+    const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp',
+      '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.mp4': 'video/mp4', '.woff2': 'font/woff2' };
+    const server = http.createServer((req, res) => {
+      const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
+      const file = path.join(SRC, rel);
+      if (!file.startsWith(SRC) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
+      res.writeHead(200, { 'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream' });
+      fs.createReadStream(file).pipe(res);
+    });
+    await new Promise((r) => server.listen(0, '127.0.0.1', r));
+    const url = `http://127.0.0.1:${server.address().port}/`;
+    console.log(`\n${slug} is on the business pages list: re-recording its preview from ${url}`);
+    const code = await new Promise((r) => spawn(process.execPath, [path.join(ROOT, 'scripts', 'showcase-preview.mjs'), slug, url],
+      { cwd: path.join(ROOT, 'frontend'), stdio: 'inherit' }).on('exit', r));
+    server.close();
+    if (code !== 0) { console.error('The preview clip could not be re-recorded; run scripts/showcase-preview.mjs before pushing.'); process.exit(1); }
+  }
+}

@@ -10,7 +10,8 @@
 // frontend/public/showcase/showcase.json. url defaults to the live page.
 // Run from frontend/ (record.mjs uses that folder's Playwright).
 import { execFileSync } from 'node:child_process';
-import { mkdtempSync, rmSync } from 'node:fs';
+import { mkdtempSync, rmSync, readFileSync, writeFileSync, existsSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { join, resolve } from 'node:path';
 import { tmpdir, homedir } from 'node:os';
 
@@ -25,4 +26,20 @@ execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', raw, '-t', '10', '-vf'
   '-crf', '32', '-preset', 'veryslow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', join(OUT, `${slug}.mp4`)]);
 execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', raw, '-frames:v', '1', '-vf', 'scale=640:-2', '-q:v', '80', join(OUT, `${slug}.webp`)]);
 rmSync(tmp, { recursive: true, force: true });
+// Note which version of the page this clip shows (a hash of the published
+// page) and bump v so browsers fetch the new clip. check-showcase-previews.mjs
+// fails when a page has changed since its clip was made (Tzvi, 18 Oct 2026:
+// The Gift Boutique's tile showed an older version of its page).
+const ROOTDIR = resolve(OUT, '..', '..', '..');
+const pageFile = join(ROOTDIR, 'frontend', 'public', 'pages', slug, 'index.html');
+const listFile = join(OUT, 'showcase.json');
+if (existsSync(pageFile) && existsSync(listFile)) {
+  const list = JSON.parse(readFileSync(listFile, 'utf8'));
+  const item = list.find((x) => x.slug === slug);
+  if (item) {
+    item.page = createHash('sha1').update(readFileSync(pageFile)).digest('hex').slice(0, 12);
+    item.v = String((Number(item.v) || 0) + 1);
+    writeFileSync(listFile, `[\n${list.map((x) => `  ${JSON.stringify(x)}`).join(',\n')}\n]\n`);
+  }
+}
 console.log(`wrote frontend/public/showcase/${slug}.mp4 and .webp`);

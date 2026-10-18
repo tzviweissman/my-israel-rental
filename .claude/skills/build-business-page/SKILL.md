@@ -125,6 +125,9 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 9. One idea per page, used once (section 4).
 10. Wow test, clipped.mjs, readable.mjs BEFORE any link or video is sent.
 11. Owner video last, from the live page.
+12. A page on the business pages list: `publish-page.mjs` re-records its preview
+    clip automatically; `node scripts/check-showcase-previews.mjs` fails if any
+    tile shows an older version of its page (The Gift Boutique, 18 Oct 2026).
 
 ## 1. Facts: only theirs
 
