@@ -143,3 +143,25 @@ def test_a_crawler_visit_is_not_counted_as_a_view(pages):
     requests.get(f"{API}/seo/business/{PAID}", headers=BOT, timeout=10)
     after = db.view_events.count_documents({"entity_id": PAID}) if "view_events" in db.list_collection_names() else 0
     assert after == before
+
+
+@live
+def test_indexnow_sends_changed_upgraded_pages_only(pages):
+    import asyncio
+    from routes.seo import changed_urls
+    run = asyncio.get_event_loop().run_until_complete
+    first = run(changed_urls(""))
+    assert any(u.endswith(f"/business/{PAID}") for u in first) and any(u.endswith(f"/property/{RENT_PAID}") for u in first)
+    assert not any(FREE in u or RENT_FREE in u for u in first)
+    # Nothing changed since now: nothing to send. Then one listing changes.
+    assert not any(M in u for u in run(changed_urls("2999-01-01T00:00:00")))
+    _db().marketplace_gigs.update_one({"_id": f"{PAID}-gig"}, {"$set": {"updated_at": "2999-06-01T00:00:00"}})
+    later = run(changed_urls("2999-01-01T00:00:00"))
+    assert any(u.endswith(f"/business/{PAID}") for u in later) and not any(RENT_PAID in u for u in later)
+
+
+@live
+def test_indexnow_key_file_is_absent_without_a_key():
+    if os.environ.get("INDEXNOW_KEY"):
+        pytest.skip("a key is set locally")
+    assert requests.get(f"{API}/seo/indexnow-key.txt", timeout=10).status_code == 404

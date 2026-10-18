@@ -326,6 +326,8 @@ async def startup_tasks() -> None:
     from routes.marketplace.feedback import feedback_loop
     asyncio.create_task(feedback_loop())
     # One reminder about a basket left on an order form (basket_reminders.py).
+    # Tells Bing and the IndexNow engines when an upgraded page changes.
+    asyncio.create_task(seo.indexnow_loop())
     from routes.marketplace.basket_reminders import basket_reminder_loop
     asyncio.create_task(basket_reminder_loop())
     # "Tell me when it's back" (restock.py) and the birthday treat (birthdays.py).

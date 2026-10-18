@@ -696,6 +696,16 @@ const server = http.createServer(async (req, res) => {
       return;
     } catch { /* the static file */ }
   }
+  // IndexNow's proof key (backend routes/seo.py): change alerts to Bing and
+  // the other IndexNow engines are only accepted with it on this host.
+  if (pathname === '/indexnow-key.txt') {
+    const key = await fetchApi('/api/seo/indexnow-key.txt', null, 'text/plain');
+    if (key) {
+      res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8', 'Cache-Control': 'public, max-age=3600' });
+      res.end(key);
+      return;
+    }
+  }
   if (pathname === '/llms.txt') {
     // The hand-built pages too: the backend cannot see pages.json.
     const extra = encodeURIComponent([...HAND_BUILT].join(','));

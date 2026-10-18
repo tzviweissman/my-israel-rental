@@ -21,6 +21,9 @@ What this module gives the small server in front of the build
   * GET /seo/sitemap-entries        every upgraded page, in both languages.
   * GET /seo/llms.txt               a short guide for AI assistants.
   * GET /seo/my-checklist           the owner's "Get found" checklist.
+  * GET /seo/indexnow-key.txt       IndexNow's proof key; indexnow_loop()
+    tells Bing (and through it DuckDuckGo, Yandex and others) within half
+    an hour when an upgraded page changes, instead of waiting for a crawl.
 
 Content is exactly what a visitor sees: the business comes from the same
 public payload the page loads (public_business), so nothing private can
@@ -28,8 +31,11 @@ reach a crawler that the page does not already show.
 """
 from __future__ import annotations
 
+import asyncio
 import html
 import json
+import logging
+import os
 import re
 from typing import Any, Optional
 
@@ -684,3 +690,85 @@ async def my_checklist(user=Depends(verify_token)):
             ],
         })
     return {"upgraded": True, "pages": pages}
+
+
+# ---------------------------------------------------------------- IndexNow
+
+INDEXNOW_ENDPOINT = "https://api.indexnow.org/indexnow"
+INDEXNOW_SECONDS = 30 * 60
+_indexnow_log = logging.getLogger("seo.indexnow")
+
+
+def indexnow_key() -> str:
+    """Set on Railway only. Without it the loop does nothing, so local and
+    preview environments never announce their pages to search engines."""
+    key = (os.environ.get("INDEXNOW_KEY") or "").strip()
+    return key if re.fullmatch(r"[A-Za-z0-9-]{8,128}", key) else ""
+
+
+@router.get("/indexnow-key.txt", response_class=PlainTextResponse)
+async def indexnow_key_file():
+    """Served at https://myisraelrental.com/indexnow-key.txt by
+    frontend/server.js: IndexNow checks the key lives on the site's own host."""
+    key = indexnow_key()
+    if not key:
+        raise HTTPException(status_code=404, detail="Not set")
+    return PlainTextResponse(key)
+
+
+def _stamp(value: Any) -> str:
+    return value.isoformat() if hasattr(value, "isoformat") else str(value or "")
+
+
+async def changed_urls(since: str) -> list[str]:
+    """Upgraded pages changed after `since` (all of them when it is empty):
+    the business record, any of its listings, or the rental itself."""
+    pages = await upgraded_pages()
+    urls = []
+    for b in pages["businesses"]:
+        changed = not since or _stamp(b.get("updated_at")) > since or bool(await db.marketplace_gigs.find_one(
+            {"business_id": b["_id"], "status": "published", "updated_at": {"$gt": since}}, {"_id": 1}))
+        if changed:
+            urls.append(business_canonical_url(b.get("slug") or b["_id"]))
+    for p in pages["rentals"]:
+        if not since or _stamp(p.get("updated_at")) > since:
+            urls.append(property_url(p["id"]))
+    return urls
+
+
+async def indexnow_once() -> int:
+    """One pass. The first ever pass sends every upgraded page."""
+    key = indexnow_key()
+    if not key:
+        return 0
+    from datetime import UTC, datetime
+    import httpx
+    state = await db.seo_state.find_one({"_id": "indexnow"}) or {}
+    started = datetime.now(UTC).isoformat()
+    urls = await changed_urls(state.get("last_at") or "")
+    if urls:
+        host = public_site_host()
+        async with httpx.AsyncClient(timeout=20) as client:
+            r = await client.post(INDEXNOW_ENDPOINT, json={
+                "host": host, "key": key, "keyLocation": f"https://{host}/indexnow-key.txt",
+                "urlList": urls[:10000],
+            })
+        # 200 and 202 are both "received". Anything else: keep last_at, so
+        # the same pages go again next pass.
+        if r.status_code not in (200, 202):
+            _indexnow_log.warning("[indexnow] %s pages refused: HTTP %s", len(urls), r.status_code)
+            return 0
+    await db.seo_state.update_one({"_id": "indexnow"}, {"$set": {"last_at": started, "last_sent": len(urls)}}, upsert=True)
+    return len(urls)
+
+
+async def indexnow_loop() -> None:
+    await asyncio.sleep(600)
+    while True:
+        try:
+            n = await indexnow_once()
+            if n:
+                _indexnow_log.info("[indexnow] told search engines about %s changed pages", n)
+        except Exception as e:  # noqa: BLE001
+            _indexnow_log.warning("[indexnow] pass failed: %s", e)
+        await asyncio.sleep(INDEXNOW_SECONDS)
