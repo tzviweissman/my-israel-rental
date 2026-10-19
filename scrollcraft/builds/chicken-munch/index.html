@@ -388,7 +388,7 @@ document.body.classList.remove('no-js');
 
   // ── the opening: one span per letter; the letters rise, the bowl drops in,
   // the stickers stick on. Then the bowl leans toward the mouse (stickers
-  // drift the other way), and scrolling spreads CHICKEN apart as the bowl rises.
+  // drift the other way), and scrolling spreads CHICKEN and MUNCH apart as the bowl rises.
   ['w1', 'w2'].forEach(function (id) { var el = document.getElementById(id), t = el.textContent;
     el.innerHTML = t.split('').map(function (c, i) { return '<span class="ch" style="--i:' + i + '">' + c + '</span>'; }).join(''); });
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -398,14 +398,15 @@ document.body.classList.remove('no-js');
     var bimg = document.querySelector('#bowl img');
     (bimg.complete ? Promise.resolve() : new Promise(function (r) { bimg.onload = bimg.onerror = r; })).then(function () { return document.fonts ? document.fonts.ready : 0; }).then(go);
     setTimeout(go, 2500);
-    var bowl = document.getElementById('bowl'), letters = [].slice.call(document.querySelectorAll('#w1 .ch')), stk = [].slice.call(document.querySelectorAll('.stk'));
-    var mx = 0, my = 0, sx = 0, sy = 0, mid = (letters.length - 1) / 2;
+    var bowl = document.getElementById('bowl'), letters = [].slice.call(document.querySelectorAll('#w1 .ch')), letters2 = [].slice.call(document.querySelectorAll('#w2 .ch')), stk = [].slice.call(document.querySelectorAll('.stk'));
+    var mx = 0, my = 0, sx = 0, sy = 0, mid = (letters.length - 1) / 2, mid2 = (letters2.length - 1) / 2;
     addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse') { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; } }, { passive: true });
     var lean = function () {
       sx += (mx - sx) * .08; sy += (my - sy) * .08;
       var p = Math.min(1, Math.max(0, scrollY / (open.offsetHeight * .9))), e = 1 - (1 - p) * (1 - p);
       if (open.getBoundingClientRect().bottom > 0) {
         if (started && performance.now() - started > 2400) letters.forEach(function (c, i) { c.style.transition = 'none'; c.style.transform = 'translate(' + ((i - mid) * e * 3) + 'vw,' + (-e * 5) + 'vh)'; });
+        if (started && performance.now() - started > 2400) letters2.forEach(function (c, i) { c.style.transition = 'none'; c.style.transform = 'translateX(' + ((i - mid2) * e * 3) + 'vw)'; });   // MUNCH opens sideways only, so it never reaches the words under it
         bowl.style.transform = 'translate(' + (sx * 18) + 'px,' + (sy * 12 - e * 9 * innerHeight / 100) + 'px) rotate(' + (sx * 3) + 'deg) scale(' + (1 + e * .1) + ')';
         stk.forEach(function (st) { var m = +st.dataset.m; st.style.translate = (-sx * 26 * m) + 'px ' + (-sy * 18 * m) + 'px'; });
       }
