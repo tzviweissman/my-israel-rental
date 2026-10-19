@@ -29,7 +29,7 @@ ROWS = [
     ("cmgrandbox01", "Grand Munch Box", 140, "USD", "Premium chicken boxes", "Feeds 8 to 10. 5 types of chicken and 4 sauces.", [PAGE.format("box-dark.webp")]),
     ("cmsuprbox001", "Supreme Munch Box", 220, "USD", "Premium chicken boxes", "Feeds 16. Up to 6 types of chicken and 5 sauces.", [PAGE.format("box-dark.webp")]),
     ("cm913tray001", "9x13 pan", 275, "ILS", "By the pan", "Feeds 6 to 8. One kind of chicken, from: " + STYLES + ".", []),
-    ("cmgastro0001", "Roaster", 650, "ILS", "By the pan", "Feeds 18 to 20. Mix your kinds of chicken: " + STYLES + ".", []),
+    ("cmgastro0001", "Roaster", 650, "ILS", "By the pan", "Feeds 18 to 20. Up to 3 kinds of chicken, from: " + STYLES + ".", []),
     ("cm913rice001", "9x13 rice", 75, "ILS", "By the pan", "", []),
 ]
 

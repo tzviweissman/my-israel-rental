@@ -87,7 +87,7 @@
   // Boxes are in dollars and pans in shekels; the shop keeps one currency per
   // order, so an order with both is sent on WhatsApp without being saved.
   // The owner (19 Oct 2026): kinds of chicken are chosen per box (up to the
-  // box's number) and in the Roaster; a 9x13 pan is one kind; sauces come
+  // box's number) and in the Roaster (up to 3, the owner, 19 Oct 2026); a 9x13 pan is one kind; sauces come
   // with the boxes. Delivery in central Jerusalem is ₪30 to ₪50 by where.
   var WA = '972553316975', GIG = 'd574d800-2e8a-41ce-ae28-f6f03fd6329a';
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
@@ -100,10 +100,10 @@
     rice: ['9x13 rice', 75, 'ILS', 'cm913rice001', 'pan', '']
   };
   // [kinds of chicken allowed, sauces allowed]; 0 = none to choose
-  var CHOICE = { mini: [4, 3], grand: [5, 4], supreme: [6, 5], pan913: [1, 0], roaster: [8, 0], rice: [0, 0] };
+  var CHOICE = { mini: [4, 3], grand: [5, 4], supreme: [6, 5], pan913: [1, 0], roaster: [3, 0], rice: [0, 0] };
   // what each item lets you choose, said on the item before it is added (Tzvi, 19 Oct 2026: make it clearer)
   var ALLOWS = { mini: 'Up to 4 kinds of chicken · 3 sauces', grand: 'Up to 5 kinds of chicken · 4 sauces', supreme: 'Up to 6 kinds of chicken · 5 sauces',
-    pan913: '1 kind of chicken', roaster: 'Mix as many kinds as you like', rice: '' };
+    pan913: '1 kind of chicken', roaster: 'Up to 3 kinds of chicken', rice: '' };
   var STYLES = ['Classic American Crunch', 'Original Hot Poppers', 'Shnitzel Bites', 'Fruity Chicken', 'Crispy Cornflake', 'Rice Krispie', 'Pretzel', 'Buffalo Wings'];
   var SAUCES = ['Garlic Mayo', 'Sweet BBQ', 'Honey Mustard', 'Spicy Mayo', 'Buffalo'];
   var DELIVERY = 'Delivery ₪30 to ₪50';
