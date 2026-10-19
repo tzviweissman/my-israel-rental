@@ -9,8 +9,14 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 ## Open
 
+- [Low] Chicken Munch page: the sticky top bar is 92% opaque, so menu text shows faintly behind the logo while scrolling on a phone. First seen 19 Oct (UI audit). Decision: leave, or make it solid.
+- [Low] Chicken Munch page: English only (no Hebrew version) for a Jerusalem business. First seen 19 Oct (UI audit). Decision for Tzvi.
+
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
 - [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
+- [Low] Hebrew: 14 label keys (basket buttons in CardAction.jsx, Jobs board area box) are in neither en.js nor he.js, so Hebrew shows English. First seen 18 Oct (2026-10-18-site-audit).
+- [Low] Dead end: business checklist item "category" opens a form with no category control (test-completeness-actions fails). First seen 18 Oct (2026-10-18-site-audit; for the dead-ends audit).
+- [To check] Database tests (claim links, contract storage) could not run in the audit sandbox on 18 Oct: no MongoDB download allowed.
 
 ## Fixed
 
