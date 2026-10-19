@@ -1,0 +1,514 @@
+<!doctype html>
+<!--
+  Chicken Munch, Jerusalem. v6 (18 Oct 2026), rebuilt from the owner's own
+  notes after he saw v5: "the food should look as real as possible", "the over
+  all background to be darker maybe black, so the red and yellow should stick
+  out like my logo", the poppers photo as the opening, and two categories:
+  premium chicken boxes, then the price by the pan.
+
+  Every picture is his own photo (src/owner). No generated food anywhere; the
+  only motion is his name stamping in and the photo easing in (the earlier
+  generated film is kept in gen/index-v5-film.html). Facts: his new menu card
+  (styles, descriptions, boxes, sauces), his notes (feeds 8-10 for the Grand
+  box, pan sizes), Tzvi (rice 75 shekels), his flyer (Shabbos orders, phones,
+  email, hechsher). Orders go to his shop (gen/catalog) and open WhatsApp.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Chicken Munch · Kosher American fried chicken in Jerusalem</title>
+<meta name="description" content="Chicken Munch: premium American fried chicken in Jerusalem. Munch boxes from $69, pans from ₪275, eight styles and five sauces. Hechsher of Rav Akiva Dershowitz; chicken Edah Chareidis or Rav Landau. Now taking Shabbos orders.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  /* His logo: red and golden yellow on black. Ground near-black, cards a step
+     lighter; red for the word that matters, yellow for prices and the one
+     solid button. Anton (his logo's heavy condensed letters) and Archivo. */
+  :root {
+    --black: #0E0D0C; --card: #1A1817; --card-2: #24211F; --line: #34302C; --ink: #FFFFFF; --soft: #CFC8BD; --dim: #A39B90;
+    --red: #EF2B2B; --gold: #FAA519; --gold-dk: #D98A06;
+    --r: 20px; --font-head: 'Anton', Impact, sans-serif; --font-body: 'Archivo', system-ui, sans-serif;
+    --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--black); color: var(--ink); font: 400 1.0625rem/1.55 var(--font-body); -webkit-font-smoothing: antialiased; }
+  img { display: block; max-width: 100%; }
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 400; margin: 0; line-height: .98; text-transform: uppercase; letter-spacing: .005em; }
+  .wrap { max-width: 76rem; margin: 0 auto; padding-inline: var(--gutter); }
+  .red { color: var(--red); } .gold { color: var(--gold); }
+  :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
+  @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+  /* the one solid button: his yellow with black letters; it presses in */
+  .btn { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; min-height: 54px; padding: 0 1.7rem; border-radius: 999px; border: 0;
+    background: var(--gold); color: var(--black); font: 700 1.05rem/1 var(--font-body); text-decoration: none; cursor: pointer;
+    box-shadow: 0 4px 0 var(--gold-dk); transition: transform 140ms ease-out, box-shadow 140ms ease-out; }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 5px 0 var(--gold-dk); }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--gold-dk); }
+  .btn[aria-busy="true"] { opacity: .7; pointer-events: none; }
+  .btn .arw { transition: transform 220ms var(--out); }
+  .btn:hover .arw { transform: translateX(4px); }
+  .btn-line { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 1.15rem; border-radius: 999px; border: 2px solid var(--ink);
+    color: var(--ink); font: 700 .95rem/1 var(--font-body); text-decoration: none; background: transparent; cursor: pointer; transition: background 160ms ease-out, transform 140ms ease-out; }
+  .btn-line:hover { background: rgb(255 255 255 / .1); }
+  .btn-line:active { transform: scale(.97); }
+
+  .top { position: fixed; inset: 0 0 auto; z-index: 30; height: 64px; display: flex; align-items: center; justify-content: space-between; padding-inline: var(--gutter);
+    background: rgb(14 13 12 / .92); border-bottom: 1px solid transparent; transition: border-color 240ms ease-out; }
+  .top.solid { border-bottom-color: var(--line); }
+  .mark { font: 400 1.5rem/1 var(--font-head); text-decoration: none; color: var(--gold); text-transform: uppercase; }
+  .mark b { font-weight: 400; color: var(--red); }
+
+  /* ── opening (Tzvi's pick, 19 Oct 2026, after crav-burgers in
+     docs/inspo/awwwards-food-2026-10-18): a giant red CHICKEN, his real bowl
+     of Hot Poppers cut out of his photo and dropped across the letters, the
+     gold MUNCH in front of it, sticker labels with his real facts. The food
+     is his photo, only ever moved as one solid piece. ── */
+  .open { --f: min(24vw, 31svh); --f2: calc(var(--f) * .8);
+    position: relative; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 76px var(--gutter) 0; overflow: hidden; isolation: isolate; }
+  .open .glow { position: absolute; z-index: -1; left: 50%; top: 52%; width: min(120vw, 130svh); aspect-ratio: 1; translate: -50% -50%;
+    background: radial-gradient(closest-side, rgb(239 43 43 / .30), rgb(250 165 25 / .10) 55%, transparent 72%); pointer-events: none; }
+  .open .w1, .open .w2 { margin: 0; font-family: var(--font-head); font-weight: 400; text-transform: uppercase; line-height: .86; white-space: nowrap; display: flex; }
+  .open .w1 { font-size: var(--f); color: var(--red); position: relative; z-index: 1; letter-spacing: -.005em; }
+  .open .w2 { font-size: var(--f2); color: var(--gold); position: relative; z-index: 3; margin-top: calc(var(--f2) * -.64);
+    text-shadow: 0 .04em 0 var(--black), 0 .1em .25em rgb(0 0 0 / .45); }
+  .open .ch { display: inline-block; will-change: transform; }
+  .open .bowl { position: relative; z-index: 2; width: min(92vw, calc(var(--f) * 1.95)); margin-top: calc(var(--f) * -.56); will-change: transform; }
+  .open .bowl img { display: block; width: 100%; height: auto; filter: drop-shadow(0 30px 40px rgb(0 0 0 / .65)); }
+  .stk { position: absolute; z-index: 4; padding: .5em .85em .45em; border-radius: 14px; font: 800 clamp(.8rem, 1.25vw, 1.05rem)/1.05 var(--font-body);
+    text-transform: uppercase; letter-spacing: .02em; text-align: center; box-shadow: 0 0 0 3px var(--black), 0 8px 18px rgb(0 0 0 / .45); will-change: transform; }
+  .stk.k { background: var(--gold); color: var(--black); left: -4%; top: 24%; rotate: -11deg; }
+  .stk.s { background: #C8141C; color: #fff; right: -6%; top: 12%; rotate: 8deg; }
+  .stk.p { background: var(--ink); color: var(--black); right: 0; bottom: 40%; rotate: -6deg; }
+  .open-foot { position: relative; z-index: 5; width: 100%; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; padding: 18px 0 24px; }
+  .open-foot .l { max-width: 30rem; }
+  .label { margin: 0 0 .35rem; color: var(--gold); font: 700 .78rem/1.2 var(--font-body); letter-spacing: .18em; text-transform: uppercase; }
+  .open h1 { margin: 0 0 .3rem; font-size: clamp(1.5rem, 2.3vw, 2.1rem); line-height: 1; color: var(--ink); }
+  .open .lede { margin: 0; color: var(--soft); font-size: .95rem; }
+  .open-foot .r { display: flex; align-items: center; gap: 16px; text-align: right; }
+  .proof { font: 500 .9rem/1.35 var(--font-body); color: var(--soft); margin: 0; }
+  .proof b { color: var(--gold); font-weight: 700; }
+  .open .btn { white-space: nowrap; }
+  /* entrance: the letters rise, the bowl drops in and lands, the stickers stick on */
+  .js-in .open .w1 .ch { transform: translateY(70%); opacity: 0; }
+  .js-in .open .w2 .ch { transform: translateY(60%); opacity: 0; }
+  .js-in .open .bowl img { transform: translateY(-75svh) rotate(-8deg); }
+  .js-in .open .stk { transform: scale(0); }
+  .js-in .open-foot { opacity: 0; }
+  .go .open .w1 .ch, .go .open .w2 .ch { transform: none; opacity: 1; transition: transform 800ms var(--out), opacity 500ms var(--out); transition-delay: calc(var(--i) * 55ms + var(--d, 0ms)); }
+  .go .open .w2 .ch { --d: 820ms; }
+  .go .open .bowl img { transform: none; transition: transform 950ms cubic-bezier(.34, 1.5, .64, 1) 380ms; }
+  .go .open .stk { transform: none; transition: transform 520ms cubic-bezier(.34, 1.5, .64, 1); }
+  .go .stk.k { transition-delay: 1250ms; } .go .stk.s { transition-delay: 1380ms; } .go .stk.p { transition-delay: 1510ms; }
+  .go .open-foot { opacity: 1; transition: opacity 600ms var(--out) 1300ms; }
+  @media (max-width: 760px) {
+    .open { --f: 26vw; --f2: 26vw; padding-top: 84px; }
+    .open .bowl { width: 76vw; margin-top: calc(var(--f) * -.2); }
+    .open .w2 { margin-top: calc(var(--f2) * -.55); }
+    .stk { font-size: .72rem; border-radius: 10px; }
+    .stk.k { left: -8%; top: 22%; } .stk.s { right: -10%; top: 6%; } .stk.p { right: -8%; bottom: 34%; }
+    .label { font-size: .875rem; letter-spacing: .12em; }
+    .open-foot { flex-direction: column; align-items: flex-start; margin-top: 14px; }
+    .open-foot .r { width: 100%; justify-content: space-between; text-align: left; }
+  }
+  .kosher { background: #C8141C; color: #fff; }
+  .kosher .wrap { display: flex; flex-wrap: wrap; gap: .3rem 1.4rem; justify-content: center; padding-block: 1rem; text-align: center; font: 500 1rem/1.4 var(--font-body); }
+  .kosher b { font-weight: 700; }
+
+  section.sec { padding-block: clamp(4.5rem, 10vw, 7.5rem); }
+  .sec h2 { font-size: clamp(2.6rem, 6.5vw, 5rem); }
+  .sec .lede { color: var(--soft); font-size: 1.1rem; max-width: 36rem; margin: .9rem 0 0; }
+  .rev { opacity: 0; transform: translateY(16px); transition: opacity 600ms var(--out), transform 600ms var(--out); }
+  .rev.in { opacity: 1; transform: none; }
+  .no-js .rev { opacity: 1; transform: none; }
+
+  /* ── premium chicken boxes ── */
+  .boxes-grid { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: center; margin-top: clamp(2rem, 4vw, 3rem); }
+  .photo { border-radius: var(--r); overflow: hidden; background: var(--card); }
+  .photo img { width: 100%; height: 100%; object-fit: cover; }
+  .boxes-grid .photo { max-height: 72svh; }
+  .tiles { display: grid; gap: .9rem; }
+  .tile { display: grid; grid-template-columns: 1fr auto; gap: .3rem 1rem; align-items: center; padding: 1.2rem 1.35rem; border-radius: var(--r); background: var(--card);
+    border: 1px solid var(--line); transition: transform 200ms var(--out), border-color 200ms ease-out; }
+  .tile:hover { transform: translateY(-3px); border-color: var(--gold); }
+  .tile h3 { font-size: clamp(1.5rem, 2.4vw, 1.95rem); }
+  .tile .feeds { color: var(--gold); font: 700 .95rem/1.3 var(--font-body); margin: .2rem 0 0; }
+  .tile p.what { margin: 0; color: var(--soft); font-size: .95rem; }
+  .tile .price { font: 400 clamp(1.9rem, 3vw, 2.5rem)/1 var(--font-head); text-align: end; }
+  .tile .add { justify-self: end; margin-top: .7rem; }
+  @media (max-width: 860px) { .boxes-grid { grid-template-columns: 1fr; } .boxes-grid .photo { max-height: 48svh; } }
+
+  /* ── the styles ── */
+  .styles { background: var(--card); }
+  .styles-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 3rem); margin-top: clamp(2rem, 4vw, 3rem); align-items: start; }
+  .menu-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 1rem; }
+  .menu-list li { padding-bottom: 1rem; border-bottom: 1px solid var(--line); }
+  .menu-list h3 { font-size: 1.45rem; color: var(--gold); }
+  .menu-list p { margin: .25rem 0 0; color: var(--soft); font-size: .98rem; }
+  .shots { display: grid; grid-template-columns: 1fr 1fr; gap: .9rem; position: sticky; top: 88px; }
+  @media (max-height: 820px) { .shots { position: static; } }
+  .shot { position: relative; margin: 0; border-radius: var(--r); overflow: hidden; aspect-ratio: 1; background: var(--black); }
+  .shot.wide { grid-column: 1 / -1; aspect-ratio: 16 / 9; }
+  .shot img { width: 100%; height: 100%; object-fit: cover; transition: transform 500ms var(--out); }
+  .shot:hover img { transform: scale(1.04); }
+  .shot figcaption { position: absolute; left: 12px; bottom: 12px; padding: .4rem .8rem; border-radius: 999px; background: var(--black); color: var(--gold); font: 700 .88rem/1.2 var(--font-body); }
+  .sauces { margin-top: clamp(2.2rem, 4vw, 3rem); }
+  .sauces h3 { font-size: 1.6rem; }
+  .sauce-row { display: flex; flex-wrap: wrap; gap: .55rem; margin-top: .9rem; }
+  .sauce-row span { padding: .55rem 1rem; border-radius: 999px; background: var(--card-2); border: 1px solid var(--line); font-weight: 700; font-size: .95rem; }
+  @media (max-width: 860px) { .styles-grid { grid-template-columns: 1fr; } .shots { position: static; order: -1; } }
+
+  /* ── by the pan ── */
+  .pan-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: center; margin-top: clamp(2rem, 4vw, 3rem); }
+  .pan-grid .photo { background: #fff; }
+  .pan-grid .photo img { object-fit: contain; padding: 4%; }
+  @media (max-width: 860px) { .pan-grid { grid-template-columns: 1fr; } }
+
+  /* ── order ── */
+  .order { background: var(--card); }
+  .form { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: clamp(1.5rem, 4vw, 3rem); margin-top: clamp(2rem, 4vw, 3rem); align-items: start; }
+  .card { background: var(--black); border: 1px solid var(--line); border-radius: var(--r); padding: clamp(1.2rem, 3vw, 1.7rem); }
+  .card + .card { margin-top: 1.1rem; }
+  .card h3 { font-size: 1.55rem; margin-bottom: .8rem; }
+  .card h4 { margin: 1rem 0 .2rem; font: 700 .82rem/1.2 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--dim); }
+  .line { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .7rem 0; border-top: 1px solid var(--line); }
+  .line .nm { font-weight: 700; }
+  .line .pr { color: var(--soft); font-size: .92rem; }
+  .step { display: inline-flex; align-items: center; gap: .15rem; background: var(--card-2); border-radius: 999px; padding: 3px; border: 1px solid var(--line); }
+  .step button { width: 40px; height: 40px; border-radius: 999px; border: 0; background: transparent; font: 700 1.25rem/1 var(--font-body); color: var(--ink); cursor: pointer; }
+  .step button:hover { background: rgb(255 255 255 / .1); }
+  .step button:active { transform: scale(.92); }
+  .step output { min-width: 1.6rem; text-align: center; font-weight: 700; }
+  .chips { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .chip { position: relative; }
+  .chip input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
+  .chip span { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 2px solid var(--line); font: 700 .92rem/1 var(--font-body);
+    background: var(--card-2); transition: background 160ms ease-out, color 160ms ease-out, border-color 160ms ease-out, transform 140ms ease-out; }
+  .chip input:checked + span { background: var(--gold); border-color: var(--gold); color: var(--black); }
+  .chip input:focus-visible + span { outline: 3px solid var(--gold); outline-offset: 2px; }
+  .chip:active span { transform: scale(.96); }
+  label.f { display: block; font-weight: 700; font-size: .95rem; margin: .9rem 0 .35rem; }
+  .fld { width: 100%; min-height: 48px; padding: .7rem .9rem; border-radius: 12px; border: 1.5px solid var(--line); background: var(--card-2); color: var(--ink); font: 400 1rem/1.4 var(--font-body); }
+  textarea.fld { min-height: 88px; resize: vertical; }
+  .fld:focus { outline: 3px solid var(--gold); outline-offset: 1px; border-color: var(--gold); }
+  input[type=date].fld { color-scheme: dark; }
+  .bad .fld { border-color: var(--red); }
+  .err { color: #FF8A8A; font-size: .88rem; margin: .3rem 0 0; min-height: 1.1em; }
+  .sum { position: sticky; top: 84px; }
+  .sum ul { list-style: none; margin: 0 0 1rem; padding: 0; color: var(--soft); font-size: .95rem; }
+  .sum ul li { display: flex; justify-content: space-between; gap: 1rem; padding: .25rem 0; }
+  .sum .total { display: flex; justify-content: space-between; align-items: baseline; font: 400 2rem/1.1 var(--font-head); margin: .4rem 0 1.1rem; color: var(--gold); gap: .6rem; flex-wrap: wrap; }
+  .sum .btn { width: 100%; }
+  .sum .note { font-size: .9rem; color: var(--dim); margin: .9rem 0 0; }
+  @media (max-width: 860px) { .form { grid-template-columns: 1fr; } .sum { position: static; } }
+
+  .close { background: var(--black); padding-top: clamp(3.5rem, 8vw, 6rem); border-top: 1px solid var(--line); }
+  .close .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.2rem; align-items: center; }
+  .close p { margin: 0; color: var(--soft); line-height: 1.7; }
+  .close p a { color: var(--ink); font-weight: 700; }
+  .giant { font: 400 min(12vw, 40svh)/.95 var(--font-head); text-transform: uppercase; white-space: nowrap; text-align: center; margin: clamp(2rem, 5vw, 3rem) 0 0; padding-bottom: .08em; }
+  .giant .r { color: var(--red); } .giant .g { color: var(--gold); }
+  .foot { background: var(--black); color: var(--dim); font-size: .85rem; text-align: center; padding: 1.1rem var(--gutter) calc(1.1rem + var(--pad-bar, 0px)); border-top: 1px solid var(--line); }
+  .foot a { color: var(--soft); }
+
+  .bar { position: fixed; inset: auto 0 0; z-index: 25; display: none; align-items: center; justify-content: space-between; gap: .8rem; height: calc(var(--bar-h) + env(safe-area-inset-bottom));
+    padding: 0 var(--gutter) env(safe-area-inset-bottom); background: var(--card-2); border-top: 1px solid var(--line); transform: translateY(110%); transition: transform 300ms var(--out); }
+  .bar.on { transform: none; }
+  .bar .p { font-size: .9rem; line-height: 1.25; margin: 0; color: var(--soft); }
+  .bar .p b { color: var(--gold); font: 400 1.2rem/1 var(--font-head); display: block; }
+  .bar .btn { min-height: 46px; padding: 0 1.2rem; }
+  @media (max-width: 760px) { .bar { display: flex; } body { --pad-bar: var(--bar-h); } .top .btn-line { display: none; } }
+  @media (prefers-reduced-motion: reduce) { .rev { opacity: 1; transform: none; transition: none; } }
+</style>
+</head>
+<body class="no-js">
+<header class="top" id="top">
+  <a class="mark" href="#open" aria-label="Chicken Munch, top of the page"><b>Chicken</b> Munch</a>
+  <a class="btn-line" href="#order">Order now</a>
+</header>
+
+<main>
+  <section class="open" id="open" aria-labelledby="h-open">
+    <div class="glow" aria-hidden="true"></div>
+    <p class="w1" id="w1" aria-hidden="true">Chicken</p>
+    <div class="bowl" id="bowl">
+      <img src="assets/bowl.webp" alt="A kraft bowl of Original Hot Poppers, chicken bites in a glossy sweet and spicy glaze" width="1200" height="996" fetchpriority="high">
+      <span class="stk k" data-m="-1">Kosher</span>
+      <span class="stk s" data-m="1.3">Now taking<br>Shabbos orders</span>
+      <span class="stk p" data-m="-.8">Original<br>Hot Poppers</span>
+    </div>
+    <p class="w2" id="w2" aria-hidden="true">Munch</p>
+    <div class="open-foot">
+      <div class="l">
+        <p class="label">Kosher American fried chicken · Jerusalem</p>
+        <h1 id="h-open">The taste of America, now in Israel</h1>
+        <p class="lede">Premium fried chicken, made with the finest ingredients and crafted with care.</p>
+      </div>
+      <div class="r">
+        <p class="proof">Munch boxes from <b>$69</b><br>Pans from <b>₪275</b></p>
+        <a class="btn" href="#order">Order now <span class="arw" aria-hidden="true">→</span></a>
+      </div>
+    </div>
+  </section>
+
+  <div class="kosher"><div class="wrap"><span><b>Kosher</b>, hechsher of Rav Akiva Dershowitz</span><span>The chicken is Edah Chareidis or Rav Landau</span></div></div>
+
+  <section class="sec" id="boxes" aria-labelledby="h-boxes">
+    <div class="wrap">
+      <h2 id="h-boxes" class="rev">Premium <span class="red">chicken boxes</span></h2>
+      <p class="lede rev">Pick your types of chicken and your sauces. Each box comes ready to share.</p>
+      <div class="boxes-grid">
+        <div class="photo rev"><img src="assets/box-dark.webp" alt="A Chicken Munch box: pretzel, rice krispie and cornflake chicken with sauce pots in the lid" width="700" height="890" loading="lazy"></div>
+        <div class="tiles">
+          <div class="tile rev"><div><h3>Mini Munch Box</h3><p class="feeds">Feeds 3 to 4</p><p class="what">Up to 4 types of chicken and 3 sauces</p></div>
+            <div><div class="price">$69</div><a class="btn-line add" href="#order" data-add="mini">Add</a></div></div>
+          <div class="tile rev"><div><h3>Grand Munch Box</h3><p class="feeds">Feeds 8 to 10</p><p class="what">5 types of chicken and 4 sauces</p></div>
+            <div><div class="price">$140</div><a class="btn-line add" href="#order" data-add="grand">Add</a></div></div>
+          <div class="tile rev"><div><h3>Supreme Munch Box</h3><p class="feeds">Feeds 16</p><p class="what">Up to 6 types of chicken and 5 sauces</p></div>
+            <div><div class="price">$220</div><a class="btn-line add" href="#order" data-add="supreme">Add</a></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec styles" id="styles" aria-labelledby="h-styles">
+    <div class="wrap">
+      <h2 id="h-styles" class="rev">Choose your <span class="gold">chicken</span></h2>
+      <div class="styles-grid">
+        <ul class="menu-list">
+          <li class="rev"><h3>Classic American Crunch</h3><p>Handcrafted chicken soaked in our signature marinade, coated in cornflakes for the full Chicken Munch experience.</p></li>
+          <li class="rev"><h3>Original Hot Poppers</h3><p>Saucy bites that are the ultimate combination of sweet and spicy. Dangerously addicting.</p></li>
+          <li class="rev"><h3>Shnitzel Bites</h3><p>Signature chicken in finger form. Perfect for a party or sharing.</p></li>
+          <li class="rev"><h3>Fruity Chicken</h3><p>Chicken fingers coated in Fruity Pebbles, for those who love a hint of sweetness with their savory.</p></li>
+          <li class="rev"><h3>Crispy Cornflake</h3><p>Chicken fingers coated in cornflakes, for those who enjoy crazy texture with every bite.</p></li>
+          <li class="rev"><h3>Rice Krispie</h3><p>Chicken fried in a crispy Rice Krispie coating for that perfect crackle.</p></li>
+          <li class="rev"><h3>Pretzel</h3><p>Chicken fingers with hints of BBQ and bites of salty pretzel.</p></li>
+          <li class="rev"><h3>Buffalo Wings</h3><p>In-bone chicken bites coated in a hickory, hot and savory sauce.</p></li>
+        </ul>
+        <div class="shots">
+          <figure class="shot wide rev"><img src="assets/hot-poppers.webp" alt="Original Hot Poppers in a kraft bowl" width="900" height="854" loading="lazy"><figcaption>Original Hot Poppers</figcaption></figure>
+          <figure class="shot rev"><img src="assets/rice-krispie.webp" alt="Rice Krispie chicken in a kraft bowl with a sauce pot" width="900" height="791" loading="lazy"><figcaption>Rice Krispie</figcaption></figure>
+          <figure class="shot rev"><img src="assets/classic.webp" alt="Cornflake coated chicken on a black plate" width="900" height="616" loading="lazy"><figcaption>Classic American Crunch</figcaption></figure>
+        </div>
+      </div>
+      <div class="sauces rev">
+        <h3>Sauces</h3>
+        <div class="sauce-row"><span>Garlic Mayo</span><span>Sweet BBQ</span><span>Honey Mustard</span><span>Spicy Mayo</span><span>Buffalo</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="pans" aria-labelledby="h-pans">
+    <div class="wrap">
+      <h2 id="h-pans" class="rev">By the <span class="red">pan</span></h2>
+      <p class="lede rev">Priced by the pan, for a bigger table.</p>
+      <div class="pan-grid">
+        <div class="photo rev"><img src="assets/pan.webp" alt="A black pan full of rice krispie, schnitzel and cornflake chicken fingers" width="1010" height="520" loading="lazy"></div>
+        <div class="tiles">
+          <div class="tile rev"><div><h3>9x13 pan</h3><p class="feeds">Feeds 6 to 8</p></div><div><div class="price">₪275</div><a class="btn-line add" href="#order" data-add="pan913">Add</a></div></div>
+          <div class="tile rev"><div><h3>Roaster</h3><p class="feeds">Feeds 18 to 20</p></div><div><div class="price">₪650</div><a class="btn-line add" href="#order" data-add="roaster">Add</a></div></div>
+          <div class="tile rev"><div><h3>9x13 rice</h3></div><div><div class="price">₪75</div><a class="btn-line add" href="#order" data-add="rice">Add</a></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec order" id="order" aria-labelledby="h-order">
+    <div class="wrap">
+      <h2 id="h-order" class="rev">Your <span class="gold">order</span></h2>
+      <p class="lede rev">Pick a box or a pan, your chicken and your sauces. We get it on WhatsApp, written out.</p>
+      <form class="form" id="form" novalidate>
+        <div>
+          <div class="card" id="c-items">
+            <h3>Boxes and pans</h3>
+            <h4>Premium chicken boxes</h4>
+            <div id="lines-box"></div>
+            <h4>By the pan</h4>
+            <div id="lines-pan"></div>
+            <p class="err" id="e-items"></p>
+          </div>
+          <div class="card">
+            <h3>Your chicken</h3>
+            <div class="chips" id="chips-style"></div>
+            <h4>Sauces</h4>
+            <div class="chips" id="chips-sauce"></div>
+            <label class="f" for="note">Anything else</label>
+            <textarea class="fld" id="note" maxlength="500"></textarea>
+          </div>
+          <div class="card">
+            <h3>For</h3>
+            <div id="w-when"><label class="f" for="when">Which day</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p></div>
+            <div id="w-me"><label class="f" for="me">Your name</label><input class="fld" id="me" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
+            <div id="w-ph"><label class="f" for="ph">Your phone</label><input class="fld" id="ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
+          </div>
+        </div>
+        <aside class="card sum" aria-live="polite">
+          <h3>So far</h3>
+          <ul id="sum-list"><li><span>Nothing yet</span></li></ul>
+          <div class="total"><span>Total</span><span id="total">0</span></div>
+          <button class="btn" id="send" type="submit"><span>Send order on WhatsApp</span></button>
+          <p class="note">Opens WhatsApp with your order written out, to send to Chicken Munch.</p>
+        </aside>
+      </form>
+    </div>
+  </section>
+
+  <section class="close" aria-label="Chicken Munch">
+    <div class="wrap">
+      <p>Call or WhatsApp <a href="https://wa.me/972553316975" target="_blank" rel="noopener">055-331-6975</a> or <a href="tel:+19294748871">929-474-8871</a><br>Email <a href="mailto:chickenmunch26@gmail.com">chickenmunch26@gmail.com</a></p>
+      <a class="btn" href="#order">Order now <span class="arw" aria-hidden="true">→</span></a>
+    </div>
+    <p class="giant" aria-hidden="true"><span class="r">Chicken</span> <span class="g">Munch</span></p>
+  </section>
+</main>
+<footer class="foot">Chicken Munch, Jerusalem · on <a href="/">MyIsraelRental</a>, free to list, no commission</footer>
+
+<div class="bar" id="bar" aria-hidden="true">
+  <p class="p"><b>From $69</b>Boxes, or pans from ₪275</p>
+  <a class="btn" href="#order" tabindex="-1">Order now</a>
+</div>
+
+<script>
+document.body.classList.remove('no-js');
+(function () {
+  var top = document.getElementById('top'), bar = document.getElementById('bar'), order = document.getElementById('order'), open = document.getElementById('open');
+  var tick = 0;
+  function frame() {
+    tick = 0;
+    var vh = innerHeight, past = open.getBoundingClientRect().bottom < vh * .5;
+    top.classList.toggle('solid', past);
+    bar.classList.toggle('on', past && order.getBoundingClientRect().top > vh * .75);
+  }
+  addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
+  frame();
+
+  // ── the opening: one span per letter; the letters rise, the bowl drops in,
+  // the stickers stick on. Then the bowl leans toward the mouse (stickers
+  // drift the other way), and scrolling spreads CHICKEN and MUNCH apart as the bowl rises.
+  ['w1', 'w2'].forEach(function (id) { var el = document.getElementById(id), t = el.textContent;
+    el.innerHTML = t.split('').map(function (c, i) { return '<span class="ch" style="--i:' + i + '">' + c + '</span>'; }).join(''); });
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var root = document.documentElement, started = 0;
+    root.classList.add('js-in');
+    var go = function () { if (started) return; started = performance.now(); requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.add('go'); }); }); };
+    var bimg = document.querySelector('#bowl img');
+    (bimg.complete ? Promise.resolve() : new Promise(function (r) { bimg.onload = bimg.onerror = r; })).then(function () { return document.fonts ? document.fonts.ready : 0; }).then(go);
+    setTimeout(go, 2500);
+    var bowl = document.getElementById('bowl'), letters = [].slice.call(document.querySelectorAll('#w1 .ch')), letters2 = [].slice.call(document.querySelectorAll('#w2 .ch')), stk = [].slice.call(document.querySelectorAll('.stk'));
+    var mx = 0, my = 0, sx = 0, sy = 0, mid = (letters.length - 1) / 2, mid2 = (letters2.length - 1) / 2;
+    addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse') { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; } }, { passive: true });
+    var lean = function () {
+      sx += (mx - sx) * .08; sy += (my - sy) * .08;
+      var p = Math.min(1, Math.max(0, scrollY / (open.offsetHeight * .9))), e = 1 - (1 - p) * (1 - p);
+      if (open.getBoundingClientRect().bottom > 0) {
+        if (started && performance.now() - started > 2400) letters.forEach(function (c, i) { c.style.transition = 'none'; c.style.transform = 'translate(' + ((i - mid) * e * 3) + 'vw,' + (-e * 5) + 'vh)'; });
+        if (started && performance.now() - started > 2400) letters2.forEach(function (c, i) { c.style.transition = 'none'; c.style.transform = 'translateX(' + ((i - mid2) * e * 3) + 'vw)'; });   // MUNCH opens sideways only, so it never reaches the words under it
+        bowl.style.transform = 'translate(' + (sx * 18) + 'px,' + (sy * 12 - e * 9 * innerHeight / 100) + 'px) rotate(' + (sx * 3) + 'deg) scale(' + (1 + e * .1) + ')';
+        stk.forEach(function (st) { var m = +st.dataset.m; st.style.translate = (-sx * 26 * m) + 'px ' + (-sy * 18 * m) + 'px'; });
+      }
+      requestAnimationFrame(lean);
+    };
+    requestAnimationFrame(lean);
+  }
+  var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
+  [].forEach.call(document.querySelectorAll('.rev'), function (el) { io.observe(el); });
+
+  // ── the order: saved to his shop first (a tracking link), then WhatsApp.
+  // Boxes are in dollars and pans in shekels; the shop keeps one currency per
+  // order, so an order with both is sent on WhatsApp without being saved.
+  var WA = '972553316975', GIG = 'd574d800-2e8a-41ce-ae28-f6f03fd6329a';
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var ITEMS = {
+    mini: ['Mini Munch Box', 69, 'USD', 'cmminibox001', 'box', 'Feeds 3 to 4'],
+    grand: ['Grand Munch Box', 140, 'USD', 'cmgrandbox01', 'box', 'Feeds 8 to 10'],
+    supreme: ['Supreme Munch Box', 220, 'USD', 'cmsuprbox001', 'box', 'Feeds 16'],
+    pan913: ['9x13 pan', 275, 'ILS', 'cm913tray001', 'pan', 'Feeds 6 to 8'],
+    roaster: ['Roaster', 650, 'ILS', 'cmgastro0001', 'pan', 'Feeds 18 to 20'],
+    rice: ['9x13 rice', 75, 'ILS', 'cm913rice001', 'pan', '']
+  };
+  var STYLES = ['Classic American Crunch', 'Original Hot Poppers', 'Shnitzel Bites', 'Fruity Chicken', 'Crispy Cornflake', 'Rice Krispie', 'Pretzel', 'Buffalo Wings'];
+  var SAUCES = ['Garlic Mayo', 'Sweet BBQ', 'Honey Mustard', 'Spicy Mayo', 'Buffalo'];
+  var q = {}; Object.keys(ITEMS).forEach(function (k) { q[k] = 0; });
+  function money(n, cur) { return (cur === 'USD' ? '$' : '₪') + n.toLocaleString('en-US'); }
+  Object.keys(ITEMS).forEach(function (k) {
+    var it = ITEMS[k], d = document.createElement('div');
+    d.className = 'line'; d.dataset.k = k;
+    d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + money(it[1], it[2]) + (it[5] ? ' · ' + it[5] : '') + '</div></div>' +
+      '<div class="step"><button type="button" data-d="-1" aria-label="One fewer ' + it[0] + '">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + it[0] + '">+</button></div>';
+    document.getElementById(it[4] === 'box' ? 'lines-box' : 'lines-pan').appendChild(d);
+  });
+  function chips(id, list, name) {
+    var box = document.getElementById(id);
+    list.forEach(function (n, i) { var l = document.createElement('label'); l.className = 'chip'; l.innerHTML = '<input type="checkbox" value="' + n + '" id="' + name + i + '"><span>' + n + '</span>'; box.appendChild(l); });
+  }
+  chips('chips-style', STYLES, 'st'); chips('chips-sauce', SAUCES, 'sa');
+  function picked(id) { return [].map.call(document.querySelectorAll('#' + id + ' input:checked'), function (i) { return i.value; }); }
+  function totals() { var t = { USD: 0, ILS: 0 }; for (var k in q) t[ITEMS[k][2]] += q[k] * ITEMS[k][1]; return t; }
+  function totalText() { var t = totals(), p = []; if (t.USD) p.push(money(t.USD, 'USD')); if (t.ILS) p.push(money(t.ILS, 'ILS')); return p.join(' + ') || '0'; }
+  var send = document.getElementById('send');
+  function update() {
+    [].forEach.call(document.querySelectorAll('.line'), function (l) { l.querySelector('output').textContent = q[l.dataset.k]; });
+    var html = ''; for (var k in q) if (q[k]) html += '<li><span>' + q[k] + ' × ' + ITEMS[k][0] + '</span><span>' + money(q[k] * ITEMS[k][1], ITEMS[k][2]) + '</span></li>';
+    document.getElementById('sum-list').innerHTML = html || '<li><span>Nothing yet</span></li>';
+    document.getElementById('total').textContent = totalText();
+    send.firstElementChild.textContent = totalText() !== '0' ? 'Send order on WhatsApp, ' + totalText() : 'Send order on WhatsApp';
+  }
+  [].forEach.call(document.querySelectorAll('.line'), function (l) {
+    l.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; q[l.dataset.k] = Math.max(0, Math.min(20, q[l.dataset.k] + (+b.dataset.d))); update(); check(false); });
+  });
+  [].forEach.call(document.querySelectorAll('[data-add]'), function (a) { a.addEventListener('click', function () { var k = a.dataset.add; if (!q[k]) q[k] = 1; update(); }); });
+  function v(id) { return document.getElementById(id).value.trim(); }
+  function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }
+  function check(show) {
+    var ok = true, e, t = totals();
+    e = (t.USD || t.ILS) ? '' : 'Add a box or a pan'; if (e) ok = false; if (show || !e) mark('items', e);
+    e = v('when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e);
+    e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
+    e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);
+    return ok;
+  }
+  ['when', 'me', 'ph'].forEach(function (id) { document.getElementById(id).addEventListener('input', function () { check(false); }); });
+  document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  var sending = false;
+  function save(notes) {
+    var t = totals(); if (t.USD && t.ILS) return Promise.resolve(null);
+    var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: ITEMS[k][3], qty: q[k] });
+    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ lines: ls, fulfilment: 'pickup', date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
+  }
+  document.getElementById('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (sending) return;
+    if (!check(true)) { var bad = document.querySelector('.bad .fld, .bad button'); if (bad) bad.focus(); return; }
+    var lines = ['Hi Chicken Munch, I would like to order:'];
+    for (var k in q) if (q[k]) lines.push('• ' + q[k] + ' × ' + ITEMS[k][0] + ' (' + money(q[k] * ITEMS[k][1], ITEMS[k][2]) + ')');
+    var st = picked('chips-style'), sa = picked('chips-sauce');
+    if (st.length) lines.push('Chicken: ' + st.join(', '));
+    if (sa.length) lines.push('Sauces: ' + sa.join(', '));
+    if (v('note')) lines.push('Notes: ' + v('note'));
+    lines.push('Total: ' + totalText());
+    lines.push('For: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
+    lines.push('Name: ' + v('me') + ', ' + v('ph'));
+    var notes = [st.length ? 'Chicken: ' + st.join(', ') : '', sa.length ? 'Sauces: ' + sa.join(', ') : '', v('note'), 'Sent from the Chicken Munch page by WhatsApp'].filter(Boolean).join('\n');
+    sending = true; send.setAttribute('aria-busy', 'true');
+    var label = send.firstElementChild.textContent; send.firstElementChild.textContent = 'Sending';
+    var tab = window.open('', '_blank');
+    save(notes).then(function (saved) {
+      var text = lines.join('\n');
+      if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      sending = false; send.removeAttribute('aria-busy'); send.firstElementChild.textContent = label;
+    });
+  });
+  update();
+})();
+</script>
+</body>
+</html>

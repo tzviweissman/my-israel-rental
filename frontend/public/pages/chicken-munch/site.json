@@ -2,5 +2,17 @@
   {
     "page": "index",
     "title": "Home"
+  },
+  {
+    "page": "contact",
+    "title": "Contact"
+  },
+  {
+    "page": "menu",
+    "title": "Menu"
+  },
+  {
+    "page": "order",
+    "title": "Order"
   }
 ]

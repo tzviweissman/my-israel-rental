@@ -896,6 +896,78 @@ frame; full notes in docs/ui-videos/notes/sites-2026-10-16.md.
 10. **A glowing line along the floor under a lit product.** (The giant
     cropped wordmark to close the page is the closing signature of 3g.7.)
 
+## 3j. Buying psychology, only the honest kind (Tzvi, 19 Oct 2026)
+
+From "20 most powerful psychological tricks brands use to get you to buy"
+(attentioncurve.com), checked against these rules. Already covered elsewhere:
+social proof (real reviews only, 3b.5), colour (from their logo, 3d), the senses
+(big real photos, 3h), their story in their words, and bundles with the real
+saving (3c.5). Added:
+
+1. **A guarantee beside the button.** If the owner offers one (money back, "we
+   redo it free", free cancellation), it sits under or beside the main button,
+   in their words. People hesitate less when they know they cannot lose. Ask
+   every owner: "Do you offer any guarantee or promise?" None means none.
+2. **One add-on before ordering.** On the order page, one real, relevant
+   suggestion from their own menu ("Add a 9x13 rice? ₪75, goes well with a
+   pan"), with an Add button and a "No thanks". It shows only when it fits the
+   order, goes away once added or turned down, and is never pre-ticked.
+3. **Give first.** A free taster, sample, first consultation, quote or
+   inspection that the owner really offers becomes the headline offer, beside
+   the main button.
+4. **Discounts for a group** (students, soldiers, first order, olim) only when
+   the owner offers one, said once near the price.
+5. **Come back.** A real stamp card ("every 10th box free") or a "Reorder"
+   button, only when the owner runs it. Never streaks, points with no
+   value, or a reminder for something the customer did not start.
+6. **The middle option.** With three sizes or packages, the one most customers
+   should pick is shown as the natural pick ("Feeds 8 to 10" is the family
+   size). Never invent an option to make another look good, and "Most
+   popular" only when the owner says so (3c.5).
+
+Never: invented scarcity or countdowns ("only 3 left", "ends tonight"), a
+"was" price that was never charged, changing their prices to .90 or .99
+endings, or an endorsement they do not have. These break trust and the hard
+rules (section 3).
+
+## 3k. A website, not a page (Tzvi, 19 Oct 2026)
+
+Tzvi: "I want our pages to be used instead of websites so they need to look
+like websites and behave like websites with multiple pages." A paid build is a
+small website. A single page stays fine for a business with little to say
+(one service, one price, few photos).
+
+1. **Pages by kind of business**, from what the owner gave us (no page without
+   real content):
+   - food: Home, Menu, Order, Contact (About when they send their story)
+   - service: Home, Services, Prices, Our work, About, Contact
+   - rental: Home, The apartment, Photos, Availability, Contact
+   - shop or gifts: Home, Shop, Order, About, Contact
+   Each page is `<page>.html` in the build folder; publish-page.mjs serves it
+   at /business/<slug>/<page> and on the business's own host at /<page>.
+2. **One menu bar on every page**, identical markup: their name (to Home), the
+   pages, the one Order or Book button with a count of what is in the basket.
+   The current page is marked (`aria-current="page"`). On a phone the pages
+   fold into a Menu button that opens a panel with a Close button and closes
+   on Escape or a tap on a link.
+3. **One footer on every page**: how to reach them, the page links, the
+   MyIsraelRental line.
+4. **Shared files**: `site.css` (all styles) and `site.js` (menu bar, phone
+   bar, reveals, basket) used by every page; page-only code stays in that
+   page. A class name used by a page section (`.open`, `.in`) is never reused
+   for a state of a shared part: the phone menu once took the opening's
+   centring because both used `.open` (Chicken Munch, 19 Oct 2026).
+5. **Each page has its own title, description and link preview image**
+   (`og:title`, `og:description`, `og:image`), so a link to the Menu shows the
+   menu.
+6. **The basket lives between pages**: an Add button anywhere puts the item in
+   (localStorage, with `?add=<item>` on the link as a fallback) and opens the
+   order page with it already there. The browser back button works the normal
+   way: no page hijacks it.
+7. **Check every page**, not only the home page: clipped.mjs and readable.mjs
+   on each, the phone menu opened, and an Add on one page reaching the order
+   page.
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews
