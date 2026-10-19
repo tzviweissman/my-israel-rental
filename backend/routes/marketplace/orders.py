@@ -1008,7 +1008,7 @@ class AssignIn(BaseModel):
 
 class PaymentIn(BaseModel):
     # method None = "not paid" (clears the record)
-    method: Optional[str] = Field(None, pattern="^(cash|bit|other)$")
+    method: Optional[str] = Field(None, pattern="^(cash|card|bit|other)$")
     amount: Optional[float] = Field(None, ge=0, le=1_000_000)
 
 

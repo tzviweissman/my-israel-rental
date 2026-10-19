@@ -38,6 +38,8 @@ import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
 import SendToSupplierDialog from './SendToSupplierDialog';
 import MoreMenu from './MoreMenu';
 import CustomFieldsEditor from './CustomFieldsEditor';
+// Walk-in sales (backend counter_sales.py).
+import CounterSale from './CounterSale';
 import BasketReminderSwitch from './BasketReminderSwitch';
 import RestockWaiting from './RestockWaiting';
 import TableOrdering from './TableOrdering';
@@ -130,6 +132,7 @@ export default function OrdersTab({ API, token }) {
   const [counts, setCounts] = useState({});
   const [loading, setLoading] = useState(false);
   const [entryOpen, setEntryOpen] = useState(false);
+  const [counterOpen, setCounterOpen] = useState(false);
   const [editing, setEditing] = useState(null);       // order being edited, or null
   const [busyId, setBusyId] = useState(null);
   // Cards are the board; the table is for the owner who wants the sheet
@@ -265,6 +268,20 @@ export default function OrdersTab({ API, token }) {
     }
   };
 
+  // A counter sale recorded by mistake (counter_sales.py puts stock back).
+  const cancelSale = async (order) => {
+    if (!window.confirm(t('counter.confirmCancel', 'Cancel this sale of {{total}}?', { total: money(order.total, order.currency) }))) return;
+    setBusyId(order.id);
+    try {
+      const { data } = await axios.post(`${API}/marketplace/orders/${order.id}/cancel-sale`, null, auth);
+      setOrders((prev) => prev.map((o) => (o.id === data.id ? data : o)));
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('orders.saveFailed', 'Could not save'));
+    } finally {
+      setBusyId(null);
+    }
+  };
+
   const repeatWeekly = async (order) => {
     setBusyId(order.id);
     try {
@@ -374,7 +391,18 @@ export default function OrdersTab({ API, token }) {
               {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
           )}
-          {!entryOpen && !editing && (
+          {!entryOpen && !editing && !counterOpen && (
+            <button
+              type="button"
+              onClick={() => setCounterOpen(true)}
+              className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold border"
+              style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+              data-testid="orders-counter"
+            >
+              <StoreIcon size={15} /> {t('counter.open', 'Sale at the counter')}
+            </button>
+          )}
+          {!entryOpen && !editing && !counterOpen && (
             <button
               type="button"
               onClick={() => setEntryOpen(true)}
@@ -391,6 +419,10 @@ export default function OrdersTab({ API, token }) {
       <p className="text-sm mb-4" style={{ color: 'var(--brand-muted)' }}>
         {t('orders.body', 'Type what the customer asked for, or paste their message. No setup, no catalogue.')}
       </p>
+
+      {counterOpen && (
+        <CounterSale API={API} auth={auth} businessId={biz.id} onSaved={load} onClose={() => setCounterOpen(false)} />
+      )}
 
       {(entryOpen || editing) && (
         <OrderForm
@@ -554,6 +586,7 @@ export default function OrdersTab({ API, token }) {
                     onPayment={setPayment}
                     onRepeat={repeatWeekly}
                     onSendToSupplier={setSupplyOrder}
+                    onCancelSale={cancelSale}
                     couriers={couriers}
                     t={t}
                   />

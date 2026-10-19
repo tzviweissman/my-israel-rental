@@ -22,6 +22,7 @@ import BusinessDetailsForm from './BusinessDetailsForm';
 import BusinessPageEditor from './BusinessPageEditor';
 import BusinessCompleteness from './BusinessCompleteness';
 import BlockTimePanel from './BlockTimePanel';
+import CalendarSyncPanel from './CalendarSyncPanel';
 import MyGigsTab from './MyGigsTab';
 import { BusinessHoursPanel } from './OrdersTab';
 import LookingForYou from './LookingForYou';
@@ -222,6 +223,8 @@ export default function MyBusinessesTab({ API, token }) {
       {/* S3a — blocked time is per PERSON, not per business, so it sits
           above the list rather than inside one of the cards. */}
       <BlockTimePanel API={API} token={token} />
+      {/* Bookings into their own calendar, and its busy times back here. */}
+      <CalendarSyncPanel API={API} token={token} />
       <LookingForYou API={API} token={token} className="mb-5" />
 
       <div className="flex items-center justify-between gap-3 mb-1">

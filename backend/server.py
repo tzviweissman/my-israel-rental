@@ -332,6 +332,10 @@ async def startup_tasks() -> None:
     if os.environ.get("RAILWAY_ENVIRONMENT_NAME"):
         from utils.contract_files import mirror_local_contracts
         asyncio.create_task(mirror_local_contracts())
+    # Busy times from owners' own calendars (calendar_sync.py).
+    from routes.marketplace import calendar_sync
+    await calendar_sync.ensure_indexes()
+    asyncio.create_task(calendar_sync.calendar_sync_loop())
     # Tells Bing and the IndexNow engines when an upgraded page changes.
     asyncio.create_task(seo.indexnow_loop())
     from routes.marketplace.basket_reminders import basket_reminder_loop

@@ -47,7 +47,8 @@ export function pillStyle(status, on) {
  * owner's tab passes no `onReveal` because its orders already carry the
  * contact details; nothing about that view changes.
  */
-export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, onRepeat, onReveal, onSendToSupplier, couriers, t }) {
+export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, onPayment, onRepeat, onReveal, onSendToSupplier, onCancelSale, couriers, t }) {
+  const counter = o.source === 'counter';
   const [more, setMore] = useState(false);
   const time = (o.needed_by || '').includes('T') ? o.needed_by.slice(11, 16) : '';
   const closed = !OPEN.has(o.status);
@@ -79,14 +80,14 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
             <span dir="auto" className="font-semibold truncate" style={{ color: 'var(--ink)', textDecoration: o.status === 'cancelled' ? 'line-through' : 'none' }}>
               {/* A table order with no name is stored as "Table N"; the table
                   chip below already says it, in the board's language. */}
-              {o.table && o.customer_name === `Table ${o.table}` ? '' : o.customer_name}
+              {o.table && o.customer_name === `Table ${o.table}` ? '' : (o.customer_name || (counter ? t('counter.walkIn', 'Sale at the counter') : ''))}
             </span>
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border" style={pillStyle(o.status, false)}>
               {t(`orders.status.${o.status}`, o.status)}
             </span>
             <span className="inline-flex items-center gap-1 text-[11px]" style={{ color: 'var(--brand-muted)' }}>
               {o.fulfilment === 'delivery' ? <Bike size={12} /> : <StoreIcon size={12} />}
-              {o.table ? t('tableOrder.table', 'Table {{n}}', { n: o.table }) : o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
+              {o.table ? t('tableOrder.table', 'Table {{n}}', { n: o.table }) : counter ? t('counter.atCounter', 'At the counter') : o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
             </span>
             {o.source === 'website' && (
               <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold" style={{ background: 'var(--surface-muted)', color: 'var(--brand-muted)' }} data-testid="order-website">{t('orders.fromWebsite', 'website')}</span>
@@ -205,6 +206,18 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
             <Phone size={14} /> {t('orders.showContact', 'Show contact')}
           </button>
         )}
+        {counter && o.status === 'done' && onCancelSale && (
+          <button
+            type="button"
+            onClick={() => onCancelSale(o)}
+            disabled={busy}
+            className="inline-flex items-center gap-1.5 px-3 min-h-[44px] rounded-full text-xs font-semibold ms-auto"
+            style={{ color: 'var(--brand-muted)' }}
+            data-testid={`order-cancel-sale-${o.id}`}
+          >
+            {t('counter.cancel', 'Cancel sale')}
+          </button>
+        )}
         {!closed && (
           <button
             type="button"
@@ -242,7 +255,7 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
           {onPayment && (
             <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>{t('orders.paid', 'Paid')}</span>
-              {[['cash', t('orders.pay.cash', 'Cash')], ['bit', t('orders.pay.bit', 'Bit')], ['', t('orders.pay.none', 'Not yet')]].map(([m, lbl]) => {
+              {[['cash', t('orders.pay.cash', 'Cash')], ['card', t('orders.pay.card', 'Card')], ['bit', t('orders.pay.bit', 'Bit')], ['', t('orders.pay.none', 'Not yet')]].map(([m, lbl]) => {
                 const on = (o.payment?.method || '') === m;
                 return (
                   <button key={m || 'none'} type="button" disabled={busy} onClick={() => onPayment(o, m || null)} aria-pressed={on} className="px-3 min-h-[44px] rounded-full text-xs font-semibold border" style={on ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : { borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid={`order-pay-${m || 'none'}-${o.id}`}>{lbl}</button>

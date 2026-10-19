@@ -2177,7 +2177,10 @@ async def list_blocks(user=Depends(verify_token)):
     today = datetime.now(UTC).strftime("%Y-%m-%d")
     rows = [
         b async for b in db.marketplace_blocks.find(
-            {"provider_user_id": user["user_id"], "date": {"$gte": today}},
+            # Busy times copied from the person's own calendar
+            # (calendar_sync.py) are not listed: they come and go with that
+            # calendar, and deleting one here would only bring it back.
+            {"provider_user_id": user["user_id"], "date": {"$gte": today}, "source": {"$ne": "calendar"}},
         ).sort("date", 1)
     ]
     for r in rows:
