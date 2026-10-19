@@ -23,7 +23,9 @@ build that comes out too close to another.
    In `site.js` set `BASKET_KEY`. In `site.css` replace every CHANGE token
    with this business's brand, from its own logo, photos and menu.
 
-3. **Choose the look before writing any section**, and write it into
+3. **Write CONCEPT.md first** (page rules 3q): three ideas from saved effects in `docs/inspo` (cite the pictures), one from the business's own words, the choice, the wow gate. `node scripts/check-concept.mjs <folder>` checks it, and publishing a new page refuses without it.
+
+4. **Choose the look before writing any section**, and write it into
    `scrollcraft/fingerprints.json`: hero, signature, nav, close, layout,
    ground, and `own_colours` (colours from their logo or menu). Then run:
 
@@ -34,11 +36,11 @@ build that comes out too close to another.
    A clash means changing the new site's fonts, colours or design. Never
    change an existing site to make room. Run it again before publishing.
 
-4. **Build the business's own parts** below the marked line in `site.css`
+5. **Build the business's own parts** below the marked line in `site.css`
    and in `gen/build.py`: the opening, the signature moment (rules 3n), the
    sections, the order or booking page with each item's rules (3l).
 
-5. **Check in the background, all pages at once**, from the first draft:
+6. **Check in the background, all pages at once**, from the first draft:
    `clipped.mjs` and `readable.mjs` per page, run in parallel. Then the wow
    gate (3n) before anything is shown.
 

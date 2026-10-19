@@ -51,6 +51,21 @@ if (!fs.existsSync(path.join(SRC, 'index.html'))) {
   process.exit(1);
 }
 
+// A page going live for the first time needs its concept sheet (Tzvi, 19 Oct
+// 2026: bland pages were shipped although the rules said otherwise). Pages
+// already live republish as before.
+{
+  const live = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'frontend', 'public', 'pages', 'pages.json'), 'utf8')); } catch { return []; } })();
+  if (!live.includes(slug)) {
+    const { checkConcept } = await import('./check-concept.mjs');
+    const problems = checkConcept(SRC);
+    if (problems.length) {
+      console.error(`Not published: ${slug} is a new page and its concept is not ready.\n- ${problems.join('\n- ')}`);
+      process.exit(1);
+    }
+  }
+}
+
 fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
 

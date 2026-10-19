@@ -754,6 +754,24 @@ script, Jost), and Chicken Munch shares Anton with Michal Yodaiken.
    least 4 of 6. On a clash the new site changes; an existing site is never
    changed to make room.
 
+## 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
+
+Tzvi: "we need originality like this in our pages, you need to use our inspo
+sources better, why are you making bland websites and not following our
+rules." The originality that worked came from the business's own words (The
+Whipped Cup's "your cup, your cloud" became a walk on the clouds), and the
+bland versions were built without opening the saved inspiration at all.
+
+Before any section is built, the build folder gets `CONCEPT.md`: three or
+more opening ideas, each citing a saved effect from `docs/inspo` by its
+picture; one idea marked "Own:" from the business's own words or world (its
+tagline, its process, its place); which was chosen and why; the five wow-gate
+answers (3n); and the passing line from check-fingerprints (3p).
+`node scripts/check-concept.mjs <build>` checks it, and `publish-page.mjs`
+refuses to put a NEW page live without it. Read the saved effects for the
+kind of business (the part files' "For ..." sections and pictures) every
+time; never design from defaults.
+
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
 Full text: `reference/design-rules.md`. The rules both builders share are
