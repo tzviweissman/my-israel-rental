@@ -16,7 +16,7 @@ img { display: block; max-width: 100%; }
 h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-height: 1.04; }
 .wrap { max-width: 72rem; margin: 0 auto; padding-inline: var(--gutter); }
 .caps { font: 600 .9rem/1.3 var(--font-body); letter-spacing: .22em; text-transform: uppercase; color: var(--rose-dk); }
-.script { font-family: var(--font-script); font-weight: 400; color: var(--rose); }
+.script { font-family: var(--font-script); font-weight: 400; color: var(--rose-dk); }
 :focus-visible { outline: 3px solid var(--rose-dk); outline-offset: 3px; }
 [hidden] { display: none !important; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -187,10 +187,10 @@ textarea.fld { min-height: 80px; resize: vertical; }
    giant "Elisheva" in her script sits behind the photo in that colour */
 .hero { isolation: isolate; }
 .hero .tint { position: absolute; inset: 0; z-index: -2; background: var(--tint, #F4EFEE); opacity: .22; transition: background-color 900ms cubic-bezier(.65, 0, .35, 1); }
-.hero .ghost { position: absolute; z-index: -1; left: 50%; top: 56%; translate: 0 -50%; margin: 0; font: 400 min(17vw, 40svh)/1 var(--font-script); color: var(--tint, #F4EFEE);
+.hero .ghost { position: absolute; z-index: -1; left: 50%; top: 56%; translate: 0 -50%; margin: 0; font: 400 min(15vw, 38svh)/1 var(--font-script); color: var(--tint, #F4EFEE);
   opacity: .55; white-space: nowrap; pointer-events: none; transition: color 900ms cubic-bezier(.65, 0, .35, 1); filter: saturate(1.2) brightness(.92);
   animation: ghost-in 1600ms var(--out) both; }
 @keyframes ghost-in { from { opacity: 0; transform: translateX(6vw); } to { opacity: .55; transform: none; } }
 .hero .frame { max-width: min(560px, 76svh * .8); }
-@media (max-width: 860px) { .hero .ghost { font-size: 30vw; top: 30%; left: auto; right: -4vw; } }
+@media (max-width: 860px) { .hero .ghost { font-size: 22vw; top: 30%; left: auto; right: 2vw; } }
 @media (prefers-reduced-motion: reduce) { .hero .ghost { animation: none; } }

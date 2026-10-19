@@ -4,7 +4,7 @@
    the rest. One solid button: chocolate with cream letters. */
 :root {
   --cream: #FCF2F1; --paper: #FFF9F7; --choc: #33170C; --choc-2: #4A2618; --ink: #2A140B; --soft: #6B4A3E;
-  --kraft: #C8976F; --kraft-dk: #8A5A35; --blush: #F9DAE0; --pink: #F07DA4; --pink-ink: #B23A66; --line: #EED7D5;
+  --kraft: #C8976F; --kraft-dk: #8A5A35; --blush: #F9DAE0; --pink: #F07DA4; --pink-ink: #A1305A; --line: #EED7D5;
   --r: 22px; --font-head: 'Fraunces', Georgia, serif; --font-body: 'DM Sans', system-ui, sans-serif;
   --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
 }
@@ -239,7 +239,7 @@ textarea.fld { min-height: 88px; resize: vertical; }
 
 /* ── the pour: her three steps, scroll-driven ── */
 .pour { position: relative; height: 320svh; background: var(--blush); }
-.pour-stage { position: sticky; top: 0; height: 100svh; display: grid; align-items: center; padding-top: 68px; overflow: hidden; }
+.pour-stage { position: sticky; top: 68px; height: calc(100svh - 68px); display: grid; align-items: center; overflow: hidden; }
 .pour-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .9fr); gap: clamp(1.5rem, 5vw, 5rem); align-items: center; }
 .pour h2 { font-size: clamp(1.9rem, 3.4vw, 3rem); margin-top: .8rem; max-width: 18ch; }
 .pour-steps { list-style: none; margin: 1.8rem 0 0; padding: 0; display: grid; gap: .5rem; }
@@ -254,8 +254,9 @@ textarea.fld { min-height: 88px; resize: vertical; }
 .glass .cube { fill: rgb(255 255 255 / .55); stroke: rgb(51 23 12 / .25); stroke-width: 2; transform-box: fill-box; }
 @media (max-width: 860px) {
   .pour-grid { grid-template-columns: 1fr; gap: .5rem; }
-  .glass { order: -1; max-width: min(240px, 34svh); }
+  .glass { order: -1; max-width: min(240px, 30svh); }
   .pour h2 { font-size: 1.45rem; } .pour .kick { display: none; }
   .pour-steps { margin-top: .8rem; } .pour-steps li { padding: .55rem .8rem; font-size: 1rem; } .pour-note { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .hero2 .bg, .hero2 h1 .w { animation: none; } .pour { height: auto; } .pour-stage { position: static; height: auto; padding-block: 5rem; } }
+@media (max-height: 700px) and (max-width: 860px) { .pour h2 { display: none; } .pour-steps li { padding: .4rem .7rem; } .glass { max-width: min(200px, 34svh); } }
