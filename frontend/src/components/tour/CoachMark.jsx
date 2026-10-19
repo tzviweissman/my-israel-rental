@@ -36,6 +36,16 @@ export default function CoachMark({
   const tipRef = useRef(null);
   const [rect, setRect] = useState(null);
   const [pos, setPos] = useState(null);
+  // Faded in once it is in place (19 Oct 2026). It used to slide its
+  // top/left: from the off-screen parking spot that read as the bubble
+  // flying in from the corner on every stop, and while scrolling it trailed
+  // behind the highlight it points at.
+  const [shown, setShown] = useState(false);
+  useEffect(() => {
+    if (!pos || shown) return undefined;
+    const f = requestAnimationFrame(() => setShown(true));
+    return () => cancelAnimationFrame(f);
+  }, [pos, shown]);
 
   const dir = typeof document !== 'undefined'
     ? (document.documentElement.getAttribute('dir') || 'ltr') : 'ltr';
@@ -79,6 +89,10 @@ export default function CoachMark({
       onChange();
       if (!targetEl || Date.now() - shownAt > 4000) return;
       const r = targetEl.getBoundingClientRect();
+      // Not for a target taller than half the screen: it never fits, it was
+      // placed top-under-the-nav on purpose (TourProvider), and centring it
+      // here fought that placement.
+      if (r.height > window.innerHeight * 0.5) return;
       if (r.bottom > window.innerHeight || r.top < 0) {
         try { targetEl.scrollIntoView({ block: 'center', behavior: 'auto' }); } catch { /* older browsers */ }
       }
@@ -124,7 +138,7 @@ export default function CoachMark({
 
   const NextIcon = dir === 'rtl' ? ArrowLeft : ArrowRight;
   const BackIcon = dir === 'rtl' ? ArrowRight : ArrowLeft;
-  const motion = reducedMotion() ? 'none' : 'top .18s ease, left .18s ease';
+  const motion = reducedMotion() ? 'none' : 'opacity .16s ease';
 
   return (
     <div className="fixed inset-0 z-[100]" data-testid="tour-overlay">
@@ -159,6 +173,7 @@ export default function CoachMark({
         style={{
           top: pos ? pos.top : -9999,
           left: pos ? pos.left : -9999,
+          opacity: shown ? 1 : 0,
           background: 'var(--surface)',
           borderColor: 'var(--brand-border)',
           transition: motion,
@@ -169,7 +184,7 @@ export default function CoachMark({
         {/* The arrow. A rotated square tucked under the tooltip's edge, so
             it inherits the same border and background and cannot drift out
             of sync with them. */}
-        {pos && (
+        {pos && pos.arrow && (
           <span
             aria-hidden="true"
             className="absolute w-3 h-3 rotate-45"

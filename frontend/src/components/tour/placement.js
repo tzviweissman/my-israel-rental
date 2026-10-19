@@ -64,10 +64,25 @@ export function computePlacement({
     return t.left - gap - tw >= margin;   // 'left'
   };
 
-  // First that fits; otherwise the side with the most room, so a tooltip
-  // bigger than every gap still lands somewhere sensible rather than
-  // off-screen.
+  // First that fits.
   let chosen = ORDER.find(fits);
+
+  // A target taller than the room left (a whole panel of stats on a phone):
+  // no side fits, and "the side with the most room" put the box in the
+  // middle of the very thing it describes. Dock it to the bottom of the
+  // screen instead, with no arrow; the page scrolls the target's top into
+  // view above it (TourProvider). 19 Oct 2026.
+  if (!chosen && target.height > viewport.height * 0.5) {
+    return {
+      placement: 'docked',
+      top: Math.round(Math.max(margin, viewport.height - th - margin)),
+      left: Math.round(clamp((viewport.width - tw) / 2, margin, Math.max(margin, viewport.width - tw - margin))),
+      arrow: null,
+    };
+  }
+
+  // Otherwise the side with the most room, so a tooltip bigger than every
+  // gap still lands somewhere sensible rather than off-screen.
   if (!chosen) {
     const room = {
       bottom: viewport.height - t.bottom,

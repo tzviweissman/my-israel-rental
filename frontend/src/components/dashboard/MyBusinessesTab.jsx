@@ -86,7 +86,12 @@ export default function MyBusinessesTab({ API, token }) {
     const wantDetails = searchParams.get('details');
     const wantServices = searchParams.get('services');
     if (!wantDetails && !wantServices) return;
-    if (wantDetails) {
+    if (wantDetails === '0') {
+      // `0` closes it: the walk's stops on this page that are not about the
+      // details window ask for it shut, or the one opened by the bio-link
+      // stop stayed open over the next stops (19 Oct 2026).
+      setDetailsBiz(null);
+    } else if (wantDetails) {
       // `1` is the checklist's "any of mine" sentinel (the backend computes
       // that list across all businesses). A real id that matches nothing
       // opens NOTHING - the positional fallback would have opened, and let

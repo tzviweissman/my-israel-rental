@@ -14,7 +14,9 @@
  * walk through tour") cover link-in-bio, appointments, gift cards, the
  * sales summary with private feedback, and messages to guests; on 17 Oct
  * hours and fees with table ordering (b.hours); on 19 Oct calendar sync
- * (b.calendar) and sales at the counter (b.counter).
+ * (b.calendar) and sales at the counter (b.counter). Stops on My page that
+ * are not about the details window carry `details=0`, which closes it
+ * (MyBusinessesTab), so the one b.biolink opens is not left over them.
  * Someone who is both takes the business walk first and is offered the
  * host walk at the end.
  *
@@ -32,16 +34,16 @@
 
 export const WALKS = {
   business: [
-    { id: 'b.page', route: '/dashboard?tab=my-businesses', target: 'business-design',
+    { id: 'b.page', route: '/dashboard?tab=my-businesses&details=0', target: 'business-design',
       doIt: { href: '/dashboard?tab=my-businesses&details=1' } },
-    { id: 'b.service', route: '/dashboard?tab=my-businesses', target: 'business-services',
+    { id: 'b.service', route: '/dashboard?tab=my-businesses&details=0', target: 'business-services',
       doIt: { href: '/businesses/add' } },
-    { id: 'b.share', route: '/dashboard?tab=my-businesses', target: 'business-share',
+    { id: 'b.share', route: '/dashboard?tab=my-businesses&details=0', target: 'business-share',
       doIt: { click: 'business-share' } },
     { id: 'b.biolink', route: '/dashboard?tab=my-businesses&details=1', target: 'bio-link' },
-    { id: 'b.hours', route: '/dashboard?tab=my-businesses', target: 'business-hours',
+    { id: 'b.hours', route: '/dashboard?tab=my-businesses&details=0', target: 'business-hours',
       doIt: { click: 'business-hours' } },
-    { id: 'b.calendar', route: '/dashboard?tab=my-businesses', target: 'calendar-sync',
+    { id: 'b.calendar', route: '/dashboard?tab=my-businesses&details=0', target: 'calendar-sync',
       doIt: { click: 'calendar-sync' } },
     { id: 'b.requests', route: '/requests', target: 'requests-board' },
     { id: 'b.orders', route: '/dashboard?tab=orders', target: 'orders-board',

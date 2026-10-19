@@ -76,7 +76,15 @@ function waitForTarget(target, timeout = TARGET_TIMEOUT_MS) {
 function scrollAndSettle(el) {
   return new Promise((resolve) => {
     const behavior = prefersReducedMotion() ? 'auto' : 'smooth';
-    try { el.scrollIntoView({ block: 'center', inline: 'nearest', behavior }); } catch { /* older browsers */ }
+    const box = el.getBoundingClientRect();
+    if (box.height > window.innerHeight * 0.5) {
+      // Too tall to centre: its top just under the fixed nav, so its heading
+      // shows above the docked bubble (placement.js).
+      const nav = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--nav-h')) || 68;
+      try { window.scrollTo({ top: Math.max(0, box.top + window.scrollY - nav - 12), behavior }); } catch { /* older browsers */ }
+    } else {
+      try { el.scrollIntoView({ block: 'center', inline: 'nearest', behavior }); } catch { /* older browsers */ }
+    }
     const started = Date.now();
     let last = null;
     let stable = 0;
@@ -282,6 +290,13 @@ export default function TourProvider({ children }) {
           onBack={back}
           onExit={exit}
         />
+      )}
+      {/* Between stops (finding the next control, changing page, scrolling
+          to it) the backdrop stays: it used to vanish and come back on every
+          Next, a flash of the whole page (19 Oct 2026). Same colour as the
+          coach-mark's dim, and it swallows clicks the same way. */}
+      {active && !paused && step && !targetEl && (
+        <div className="fixed inset-0 z-[100]" style={{ background: 'rgba(35,32,27,.55)' }} data-testid="tour-between" aria-hidden="true" />
       )}
       {active && paused && (
         // z-40: under every dialog (z-50 and up), so the form "Do it now"

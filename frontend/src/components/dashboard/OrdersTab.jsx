@@ -378,12 +378,15 @@ export default function OrdersTab({ API, token }) {
       {/* Header: title, business picker (only when there is a choice), new-order button */}
       <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
         <h2 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('orders.title', 'Orders')}</h2>
-        <div className="flex items-center gap-2">
+        {/* Wraps on a phone: the picker on its own line, the two buttons
+            under it. Without wrap the counter button was squeezed to three
+            lines and New order was pushed off the screen (19 Oct 2026). */}
+        <div className="flex flex-wrap items-center gap-2 w-full sm:w-auto">
           {businesses.length > 1 && (
             <select
               value={biz.id}
               onChange={(e) => setBizId(e.target.value)}
-              className="px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]"
+              className="w-full sm:w-auto px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]"
               style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
               aria-label={t('orders.pickBusiness', 'Business')}
               data-testid="orders-business-select"
@@ -395,7 +398,7 @@ export default function OrdersTab({ API, token }) {
             <button
               type="button"
               onClick={() => setCounterOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold border"
+              className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold border whitespace-nowrap"
               style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
               data-testid="orders-counter"
               data-tour="orders-counter"
@@ -407,7 +410,7 @@ export default function OrdersTab({ API, token }) {
             <button
               type="button"
               onClick={() => setEntryOpen(true)}
-              className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold"
+              className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold whitespace-nowrap"
               style={{ background: 'var(--action)', color: 'var(--action-ink)' }}
               data-testid="orders-new"
               data-tour="orders-new"
