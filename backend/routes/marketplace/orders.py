@@ -56,6 +56,8 @@ from pydantic import BaseModel, Field, field_validator, model_validator
 from pymongo import ReturnDocument
 
 from routes.deps import db, logger, optional_user, verify_token
+
+from .shabbat import public_view as shabbat_public_view
 from utils.media_url import MAX_MEDIA_URL_LEN, is_allowed_media_url
 # Every payment link this module serves goes through allowed_payment_links.
 # The allowlist gates WRITES, so links saved while their provider was accepted
@@ -1694,6 +1696,12 @@ class OrderSettingsIn(BaseModel):
     # slug -> fee), and free delivery from an order of this much.
     area_fees: dict[str, float] = Field(default_factory=dict)
     free_over: Optional[float] = Field(None, ge=0, le=100_000)
+    # Order limits (19 Oct 2026, from Shopify's pickup apps and Toast): at
+    # most this many orders for one day, and for one pickup or delivery
+    # time. Empty: no limit. Website orders only; the owner can always
+    # type one in.
+    max_per_day: Optional[int] = Field(None, ge=1, le=10_000)
+    max_per_window: Optional[int] = Field(None, ge=1, le=10_000)
 
     @field_validator("area_fees")
     @classmethod
@@ -1742,6 +1750,8 @@ def _settings_out(biz: dict[str, Any], store: Optional[dict[str, Any]] = None) -
         "delivery_fee": st.get("delivery_fee"),
         "min_order": st.get("min_order"),
         "default_courier_user_id": st.get("default_courier_user_id"),
+        "max_per_day": st.get("max_per_day"),
+        "max_per_window": st.get("max_per_window"),
     }
 
 
@@ -1768,6 +1778,8 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         # Only cities the store serves; a city it stops serving drops out.
         "area_fees": {k: v for k, v in payload.area_fees.items() if k in (biz.get("areas") or [])},
         "free_over": payload.free_over,
+        "max_per_day": payload.max_per_day,
+        "max_per_window": payload.max_per_window,
         # An older client that does not send the switch keeps the old
         # meaning: delivery times set means delivery offered.
         "delivery_on": payload.delivery_on if payload.delivery_on is not None else bool(payload.delivery_windows),
@@ -2038,6 +2050,8 @@ class WebsiteOrderIn(BaseModel):
     discount_code: Optional[str] = Field(None, max_length=40)
     # "MM-DD", optional, for the birthday treat (birthdays.py).
     birthday: Optional[str] = Field(None, pattern=r"^\d{2}-\d{2}$")
+    # The page's language, for the words of a refusal (closed, full).
+    lang: Optional[str] = Field(None, max_length=5)
 
     @field_validator("extra_items", "notes", "address", "customer_name", "customer_phone", "customer_email", "pay_by")
     @classmethod
@@ -2123,6 +2137,8 @@ async def order_form(gig_id: str):
             "payment_links": allowed_payment_links(biz.get("payment_links")), "payment_note": biz.get("payment_note"),
             # The notice bar and colour, so the order page carries them too.
             "notice": biz.get("notice"), "brand_color": biz.get("brand_color"), "accent": biz.get("accent"),
+            # Closed for Shabbat and holidays (shabbat.py).
+            "shabbat_closing": shabbat_public_view(biz),
         },
         "custom_fields": public_fields(biz, "order"),
         "products": _products_for_order(gig),
@@ -2136,7 +2152,43 @@ async def order_form(gig_id: str):
             "area_fees": st.get("area_fees") or {},
             "free_over": st.get("free_over"),
         },
+        # Days and times already at the store's order limits.
+        "full": await _full(biz, datetime.now(_IL_TZ).date().isoformat()),
         "today": datetime.now(_IL_TZ).date().isoformat(),
+    }
+
+
+async def _load(business_id: str, first: str, last: str) -> tuple[dict[str, int], dict[str, int]]:
+    """Orders counted against the limits: by day, and by day + start time.
+    Every source counts (a typed order fills the kitchen too); cancelled and
+    failed ones do not."""
+    days: dict[str, int] = {}
+    slots: dict[str, int] = {}
+    async for o in db.store_orders.find(
+        {"business_id": business_id, "needed_by": {"$gte": first, "$lte": last + "T23:59"},
+         "status": {"$nin": ["cancelled", "failed"]}},
+        {"needed_by": 1, "window": 1},
+    ):
+        nb = str(o.get("needed_by") or "")
+        day = nb[:10]
+        days[day] = days.get(day, 0) + 1
+        start = (o.get("window") or {}).get("start") or (nb[11:16] if "T" in nb else "")
+        if start:
+            slots[f"{day}T{start}"] = slots.get(f"{day}T{start}", 0) + 1
+    return days, slots
+
+
+async def _full(biz: dict[str, Any], today: str, days_ahead: int = 21) -> dict[str, Any]:
+    """Days and times already at the store's limits, for the order form."""
+    st = biz.get("order_settings") or {}
+    per_day, per_window = st.get("max_per_day"), st.get("max_per_window")
+    if not per_day and not per_window:
+        return {"days": [], "windows": []}
+    last = (datetime.fromisoformat(today).date() + timedelta(days=days_ahead)).isoformat()
+    days, slots = await _load(biz["_id"], today, last)
+    return {
+        "days": sorted(d for d, n in days.items() if per_day and n >= per_day),
+        "windows": sorted(k for k, n in slots.items() if per_window and n >= per_window),
     }
 
 
@@ -2178,6 +2230,30 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
             raise HTTPException(status_code=400, detail="Pick one of the store's time windows")
     elif payload.window:
         payload.window = None
+
+    # Closed for Shabbat or a holiday (shabbat.py): no new order while it
+    # is closed, and no pickup or delivery time inside a closure. A day with
+    # no time windows is checked at midday.
+    if biz.get("shabbat_closing"):
+        from .shabbat import closed_at, refuse_reason
+        lang = "he" if (payload.lang or "").startswith("he") else "en"
+        now_closed = closed_at(biz, now)
+        if now_closed:
+            raise HTTPException(status_code=409, detail=refuse_reason("", now_closed[1], now_closed[2], lang))
+        at = datetime.fromisoformat(f"{payload.date}T{payload.window.start if payload.window else '12:00'}").replace(tzinfo=_IL_TZ)
+        if payload.table is None and closed_at(biz, at):
+            raise HTTPException(status_code=400, detail="הזמן הזה נופל בשבת או בחג. בחרו זמן אחר." if lang == "he"
+                                else "That time is during Shabbat or a holiday. Please pick another.")
+
+    # Order limits (OrderSettingsIn): a full day or a full time is refused,
+    # in the words the form shows for it.
+    if payload.table is None and (st.get("max_per_day") or st.get("max_per_window")):
+        days_n, slots_n = await _load(biz["_id"], payload.date, payload.date)
+        he = (payload.lang or "").startswith("he")
+        if st.get("max_per_day") and days_n.get(payload.date, 0) >= st["max_per_day"]:
+            raise HTTPException(status_code=409, detail="היום הזה מלא. בחרו יום אחר." if he else "That day is full. Please pick another day.")
+        if st.get("max_per_window") and payload.window and slots_n.get(f"{payload.date}T{payload.window.start}", 0) >= st["max_per_window"]:
+            raise HTTPException(status_code=409, detail="השעה הזו מלאה. בחרו שעה אחרת." if he else "That time is full. Please pick another time.")
 
     # The lines: products the store lists, in stock, with the store's price,
     # in the store's currency. One currency per order: a total is one number.

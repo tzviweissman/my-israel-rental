@@ -1779,6 +1779,17 @@ async def _busy_spans(
                 continue
             spans.setdefault(day, []).append((start, end))
 
+    # Closed for Shabbat and holidays (shabbat.py): candle lighting to
+    # havdalah, for a business that closes. One place, so the slot picker
+    # and the booking check can never disagree.
+    gig = await db.marketplace_gigs.find_one({"_id": gig_id}, {"business_id": 1})
+    if gig and gig.get("business_id"):
+        biz = await db.businesses.find_one({"_id": gig["business_id"]}, {"shabbat_closing": 1, "areas": 1, "serves_nationwide": 1})
+        if biz and biz.get("shabbat_closing"):
+            from .shabbat import busy_minutes
+            for day, rows in busy_minutes(biz, date_iso).items():
+                spans.setdefault(day, []).extend(rows)
+
     return spans
 
 

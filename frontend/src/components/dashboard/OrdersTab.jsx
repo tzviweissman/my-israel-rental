@@ -40,6 +40,8 @@ import MoreMenu from './MoreMenu';
 import CustomFieldsEditor from './CustomFieldsEditor';
 // Walk-in sales (backend counter_sales.py).
 import CounterSale from './CounterSale';
+// The kitchen's prep list and the delivery route (backend prep_route.py).
+import { DeliveryRoute, PrepList } from './PrepAndRoute';
 import BasketReminderSwitch from './BasketReminderSwitch';
 import RestockWaiting from './RestockWaiting';
 import TableOrdering from './TableOrdering';
@@ -474,6 +476,8 @@ export default function OrdersTab({ API, token }) {
         <MoreMenu
           testid="orders-more"
           items={[
+            ['prep', ClipboardList, t('prep.title', 'Prep list'), () => setPanel('prep')],
+            ['route', Bike, t('route.title', 'Delivery route'), () => setPanel('route')],
             ['standing', Repeat, t('orders.standingMenu', 'Weekly orders'), () => setPanel('standing')],
             ['couriers', Bike, t('orders.couriers', 'Couriers'), () => setPanel('couriers')],
             ['staff', Link2, t('orders.staffLink', 'Staff link'), () => setPanel('staff')],
@@ -494,6 +498,8 @@ export default function OrdersTab({ API, token }) {
           </button>
         </div>
       )}
+      {panel === 'prep' && <PrepList API={API} auth={auth} businessId={biz.id} businessName={biz.name} onClose={() => setPanel(null)} />}
+      {panel === 'route' && <DeliveryRoute API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'staff' && <StaffLinkPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'couriers' && <CouriersPanel API={API} auth={auth} businessId={biz.id} couriers={couriers} settings={settings} onChanged={() => Promise.all([loadCouriers(), loadSettings(), load()])} onClose={() => setPanel(null)} />}
       {panel === 'standing' && <StandingPanel API={API} auth={auth} standing={standing} onChanged={() => Promise.all([loadSettings(), load()])} onClose={() => setPanel(null)} />}
@@ -1395,6 +1401,9 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
   const [fee, setFee] = useState(settings.delivery_fee == null ? '' : String(settings.delivery_fee));
   const [minOrder, setMinOrder] = useState(settings.min_order == null ? '' : String(settings.min_order));
   const [freeOver, setFreeOver] = useState(settings.free_over == null ? '' : String(settings.free_over));
+  // Order limits (backend OrderSettingsIn): website orders only.
+  const [maxDay, setMaxDay] = useState(settings.max_per_day == null ? '' : String(settings.max_per_day));
+  const [maxWindow, setMaxWindow] = useState(settings.max_per_window == null ? '' : String(settings.max_per_window));
   const [areaFees, setAreaFees] = useState(() => Object.fromEntries(Object.entries(settings.area_fees || {}).map(([k, v]) => [k, String(v)])));
   const [areasOpen, setAreasOpen] = useState(Object.keys(settings.area_fees || {}).length > 0);
   const areas = settings.serves_nationwide ? [] : (settings.areas || []);
@@ -1410,6 +1419,8 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
         delivery_on: deliveryOn, cutoffs: rows, pickup_windows: pickup, delivery_windows: delivery,
         delivery_fee: fee === '' ? null : Number(fee), min_order: minOrder === '' ? null : Number(minOrder),
         free_over: freeOver === '' ? null : Number(freeOver),
+        max_per_day: maxDay === '' ? null : Math.max(1, Math.round(Number(maxDay))),
+        max_per_window: maxWindow === '' ? null : Math.max(1, Math.round(Number(maxWindow))),
         area_fees: Object.fromEntries(Object.entries(areaFees).filter(([, v]) => v !== '' && v !== null).map(([k, v]) => [k, Number(v)])),
         default_courier_user_id: courier || null,
       }, auth);
@@ -1531,6 +1542,21 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
       )}
       </>)}
 
+      {h(t('orderLimits.title', 'Order limits'))}
+      {/* So a small kitchen cannot be overbooked: when a day or a time fills,
+          the order page stops offering it. Orders you type in yourself are
+          never refused. */}
+      <div className="grid grid-cols-2 gap-3 mb-4" data-testid="settings-limits">
+        <div>
+          <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--brand-muted)' }} htmlFor="settings-max-day">{t('orderLimits.perDay', 'Most orders for one day')}</label>
+          <input id="settings-max-day" type="number" inputMode="numeric" min="1" step="1" value={maxDay} onChange={(e) => setMaxDay(e.target.value)} className={`${sel} w-full`} style={selStyle} placeholder={t('orderLimits.none', 'No limit')} data-testid="settings-max-day" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold mb-1" style={{ color: 'var(--brand-muted)' }} htmlFor="settings-max-window">{t('orderLimits.perWindow', 'Most orders for one pickup or delivery time')}</label>
+          <input id="settings-max-window" type="number" inputMode="numeric" min="1" step="1" value={maxWindow} onChange={(e) => setMaxWindow(e.target.value)} className={`${sel} w-full`} style={selStyle} placeholder={t('orderLimits.none', 'No limit')} data-testid="settings-max-window" />
+        </div>
+        <p className="col-span-2 text-[12px]" style={{ color: 'var(--brand-muted)' }}>{t('orderLimits.hint', 'When a day or a time is full, your order page stops offering it. Orders you enter yourself are always accepted.')}</p>
+      </div>
       {h(t('orders.cutoffsTitle', 'Order cutoffs'))}
       <div className="space-y-2">
         {rows.map((r, i) => (

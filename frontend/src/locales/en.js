@@ -6071,6 +6071,44 @@ const en = {
         busyCount: "{{n}} busy times blocked",
         remove: "Disconnect"
       },
+      shabbatClosing: {
+        tick: "Closed on Shabbat and holidays",
+        tickHint: "Orders and bookings close by themselves from candle lighting to havdalah, at your city’s times.",
+        closedShabbat: "Closed for Shabbat.",
+        closedHoliday: "Closed for the holiday.",
+        opensAt: "Orders open again {{day}} at {{time}}.",
+        opensMotzash: "Orders open again on Saturday night at {{time}}.",
+        formNote: "Closed on Shabbat and holidays, so those times are not offered."
+      },
+      orderLimits: {
+        title: "Order limits",
+        full: "Full",
+        perDay: "Most orders for one day",
+        perWindow: "Most orders for one pickup or delivery time",
+        none: "No limit",
+        hint: "When a day or a time is full, your order page stops offering it. Orders you enter yourself are always accepted."
+      },
+      prep: {
+        title: "Prep list",
+        body: "Everything to make for the day, added up across that day’s orders.",
+        tomorrow: "Tomorrow",
+        pickDate: "Another day",
+        orders_one: "1 order",
+        orders_other: "{{count}} orders",
+        byTime: "By pickup time",
+        typed: "Typed orders",
+        empty: "No orders for this day yet."
+      },
+      route: {
+        title: "Delivery route",
+        body: "The day’s open deliveries in driving order: earlier times first, then the nearest next stop.",
+        finding: "Finding the addresses…",
+        empty: "No open deliveries for this day.",
+        google: "Whole route in Google Maps",
+        googlePart: "Route in Google Maps, part {{n}}",
+        fromHere: "Start from where I am",
+        notFound: "not found on the map, Waze will search it"
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "Invite a friend",

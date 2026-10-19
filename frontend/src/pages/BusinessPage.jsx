@@ -55,6 +55,7 @@ import { prettyArea, areaLabel } from '../utils/areaNames';
 import { accentFor, accentColors, brandColors } from '../utils/businessAccent';
 import { useBrandFonts } from '../utils/brandFonts';
 import NoticeBar, { liveNotice } from '../components/marketplace/NoticeBar';
+import ShabbatClosedBar from '../components/marketplace/ShabbatClosedBar';
 import BusinessMenu from '../components/marketplace/BusinessMenu';
 import useCoverScrim from '../hooks/useCoverScrim';
 
@@ -461,6 +462,12 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
       {(preview ? biz.notice?.text : liveNotice(biz)) && (
         <div className={`${columnWidth} mx-auto px-4 pt-4`} style={brandFontStyle}>
           <NoticeBar business={biz} always={preview} />
+        </div>
+      )}
+      {/* Closed for Shabbat or a holiday right now (backend shabbat.py). */}
+      {biz.shabbat_closing?.closed_now && (
+        <div className={`${columnWidth} mx-auto px-4 pt-4`}>
+          <ShabbatClosedBar closedNow={biz.shabbat_closing.closed_now} />
         </div>
       )}
 

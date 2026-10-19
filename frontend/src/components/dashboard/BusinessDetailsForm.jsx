@@ -59,6 +59,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
     description_he: b.description_he || '',
     hours: b.hours || '',
     by_appointment: !!b.by_appointment,
+    shabbat_closing: !!b.shabbat_closing,
     // Kept as text while editing; split on save. A chip editor here means
     // the owner cannot type "Hebrew, English" the way they think of it.
     languages: (b.languages || []).join(', '),
@@ -158,6 +159,7 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
         description_he: form.description_he.trim(),
         hours: orNull(form.hours),
         by_appointment: !!form.by_appointment,
+        shabbat_closing: !!form.shabbat_closing,
         languages,
         // `undefined` leaves them alone for a business that is never
         // asked these questions; an answered one sends them every save,
@@ -370,6 +372,17 @@ export default function BusinessDetailsForm({ business, API, token, onClose, onS
             <label className={`flex items-center gap-2 text-sm min-h-[40px] ${form.by_appointment ? '' : 'mt-1'}`} style={{ color: 'var(--ink)' }}>
               <input type="checkbox" checked={!!form.by_appointment} onChange={(e) => set({ by_appointment: e.target.checked })} data-testid="biz-details-by-appointment" />
               {t('businessPage.byAppointmentTick', 'By appointment only (no fixed opening hours)')}
+            </label>
+            {/* Ordering and booking close by themselves from candle lighting
+                to havdalah (backend shabbat.py, 19 Oct 2026). */}
+            <label className="flex items-start gap-2 text-sm min-h-[40px] pt-2" style={{ color: 'var(--ink)' }}>
+              <input type="checkbox" className="mt-1" checked={!!form.shabbat_closing} onChange={(e) => set({ shabbat_closing: e.target.checked })} data-testid="biz-details-shabbat" />
+              <span>
+                {t('shabbatClosing.tick', 'Closed on Shabbat and holidays')}
+                <span className="block text-[13px]" style={{ color: 'var(--brand-muted)' }}>
+                  {t('shabbatClosing.tickHint', 'Orders and bookings close by themselves from candle lighting to havdalah, at your city’s times.')}
+                </span>
+              </span>
             </label>
           </div>
           {field('languages', t('businessPage.languages', 'Languages'), 'Hebrew, English')}

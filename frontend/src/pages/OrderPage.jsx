@@ -16,6 +16,7 @@
  * minimum, the fee is shown before the button.
  */
 import React, { useContext, useEffect, useMemo, useState } from 'react';
+import ShabbatClosedBar from '../components/marketplace/ShabbatClosedBar';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import { parseItems } from '../utils/storeBasket';
 import BirthdayInput, { birthdayOrNull } from '../components/forms/BirthdayInput';
@@ -129,12 +130,19 @@ export default function OrderPage() {
     return out;
   }, [data]);
 
+  // Closed for Shabbat and holidays (backend shabbat.py). Each closure
+  // arrives in Israel time with its offset; its first 16 characters are the
+  // Israel clock, which is what a pickup time is, wherever the phone is.
+  const closures = useMemo(() => (data?.business?.shabbat_closing?.closures || [])
+    .map((c) => [String(c.start).slice(0, 16), String(c.end).slice(0, 16)]), [data]);
   const windowsForDay = useMemo(() => {
     if (!data || !date) return [];
     const dow = new Date(`${date}T00:00`).getDay();
     const list = fulfilment === 'delivery' ? data.settings.delivery_windows : data.settings.pickup_windows;
-    return (list || []).filter((w) => w.weekday === dow);
-  }, [data, date, fulfilment]);
+    // A window that touches a closure is not offered at all.
+    return (list || []).filter((w) => w.weekday === dow
+      && !closures.some(([a, b]) => a < `${date}T${w.end}` && `${date}T${w.start}` < b));
+  }, [data, date, fulfilment, closures]);
 
   // The left-behind basket reminder (backend basket_reminders.py): saved a
   // moment after typing stops, once there is an email and something chosen.
@@ -208,9 +216,23 @@ export default function OrderPage() {
   // Orders settings) and there is somewhere to deliver to.
   const deliveryPossible = !!data.settings.delivery_on && (data.business.serves_nationwide || data.business.areas.length > 0);
   const phoneErr = phoneError(phone, t);
-  const closedDay = (d) => !!pastCutoff(toISODate(d), data.settings.cutoffs);
+  // Days and times already at the store's order limits (orders._full).
+  const full = data.full || { days: [], windows: [] };
+  const windowFull = (day, w) => full.windows.includes(`${day}T${w.start}`);
+  const closedNow = data.business.shabbat_closing?.closed_now || null;
+  const closedAt = (day, hhmm) => closures.some(([a, b]) => a <= `${day}T${hhmm}` && `${day}T${hhmm}` < b);
+  // A day is closed by its cutoff, by being full, or by Shabbat: every
+  // window gone, or (a store without windows) closed through the working day.
+  const shutDay = (key) => {
+    const dow = new Date(`${key}T00:00`).getDay();
+    const all = ((fulfilment === 'delivery' ? data.settings.delivery_windows : data.settings.pickup_windows) || []).filter((w) => w.weekday === dow);
+    if (all.length) return all.every((w) => windowFull(key, w) || closures.some(([a, b]) => a < `${key}T${w.end}` && `${key}T${w.start}` < b));
+    return closedAt(key, '09:00') && closedAt(key, '16:59');
+  };
+  const closedDay = (d) => { const k = toISODate(d); return !!pastCutoff(k, data.settings.cutoffs) || full.days.includes(k) || shutDay(k); };
   const lastDay = (() => { const d = new Date(`${data.today}T00:00`); d.setDate(d.getDate() + ORDER_AHEAD_DAYS); return toISODate(d); })();
-  const canSubmit = (lines.length > 0 || extra.trim())
+  const chosenFull = !!date && windowsForDay.some((w) => `${w.start}-${w.end}` === windowKey && windowFull(date, w));
+  const canSubmit = !closedNow && !chosenFull && (lines.length > 0 || extra.trim())
     && (table || (date && !pastCutoff(date, data.settings.cutoffs) && (windowsForDay.length === 0 || windowKey) && name.trim() && phone.trim()))
     && !(phone.trim() && phoneErr)
     && (data.custom_fields || []).every((f) => !f.required || (f.type === 'checkbox' ? answers[f.id] === true : String(answers[f.id] || '').trim()))
@@ -235,6 +257,7 @@ export default function OrderPage() {
         answers,
         discount_code: code ? code.code : null,
         birthday: data.business.birthday_on ? birthdayOrNull(birthday) : null,
+        lang: lang === 'he' ? 'he' : 'en',
       };
       const { data: res } = await axios.post(`${API}/marketplace/order-form/${gigId}/orders`, body, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
       setDone(res);
@@ -311,6 +334,7 @@ export default function OrderPage() {
       )}
 
       <NoticeBar business={data.business} className="mb-4" />
+      {closedNow && <ShabbatClosedBar closedNow={closedNow} className="mb-4" />}
       <form onSubmit={submit} className="space-y-5">
         {/* 1. What */}
         <section className="rounded-2xl border bg-white p-3" style={{ borderColor: 'var(--brand-border)' }}>
@@ -453,15 +477,21 @@ export default function OrderPage() {
               <div className="flex flex-wrap gap-1.5 mt-2" role="radiogroup" data-testid="order-windows">
                 {windowsForDay.map((w) => {
                   const k = `${w.start}-${w.end}`;
+                  const isFull = windowFull(date, w);
                   return (
-                    <button key={k} type="button" role="radio" aria-checked={windowKey === k} onClick={() => setWindowKey(k)} className="px-3 min-h-[44px] rounded-full text-xs font-semibold border tabular-nums" style={windowKey === k ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : inputStyle}>
-                      {w.start}–{w.end}
+                    <button key={k} type="button" role="radio" aria-checked={windowKey === k} disabled={isFull} onClick={() => setWindowKey(k)} className="px-3 min-h-[44px] rounded-full text-xs font-semibold border tabular-nums disabled:opacity-50" style={windowKey === k && !isFull ? { background: 'var(--ink)', color: 'var(--action-ink)', borderColor: 'var(--ink)' } : inputStyle}>
+                      {w.start}–{w.end}{isFull ? ` · ${t('orderLimits.full', 'Full')}` : ''}
                     </button>
                   );
                 })}
               </div>
             )}
             {date && windowsForDay.length === 0 && <p className="text-xs mt-1" style={{ color: 'var(--brand-muted)' }}>{t('order.noWindows', 'The store will confirm the time with you.')}</p>}
+            {data.business.shabbat_closing && (
+              <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }} data-testid="order-shabbat-note">
+                {t('shabbatClosing.formNote', 'Closed on Shabbat and holidays, so those times are not offered.')}
+              </p>
+            )}
           </div>
         </section>
         )}

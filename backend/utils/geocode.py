@@ -17,6 +17,7 @@ so callers can fall back gracefully to city-center coords.
 from __future__ import annotations
 
 import asyncio
+import re
 import logging
 import time
 from typing import Optional
@@ -437,3 +438,54 @@ async def geocode_property_bg(
         await db.properties.update_one({"id": property_id}, {"$set": patch})
     except Exception as e:  # noqa: BLE001
         logger.error("geocode_property_bg(%s) failed: %s", property_id, e)
+
+
+async def geocode_address(address: str) -> Optional[tuple[float, float]]:
+    """A delivery address to (lat, lng) (prep_route.py, 19 Oct 2026).
+
+    Not geocode_area: that reorders "Street 10, City" into "city, street 10"
+    and joins with spaces, which suits area names and loses street
+    addresses ("Jaffa Road 100, Jerusalem" found nothing). Here the address
+    goes as typed, commas kept; Israeli streets are found best in Hebrew,
+    the way most customers type them. On a miss, once more without the
+    house number, which still lands on the right street. Same rate limit
+    and cache as above, under its own keys.
+    """
+    text = " ".join((address or "").split())
+    if not text:
+        return None
+    tries = [text]
+    no_number = re.sub(r"\s*\b\d+[a-zA-Zא-ת]?\b", "", text, count=1).strip(" ,")
+    if no_number and no_number != text:
+        tries.append(no_number)
+    global _last_request_ts
+    for q in tries:
+        key = "addr:" + q.lower()
+        doc = await db.geocode_cache.find_one({"_id": key}, {"_id": 0})
+        if doc:
+            if doc.get("miss"):
+                continue
+            return (doc["lat"], doc["lng"])
+        async with _rate_lock:
+            elapsed = time.monotonic() - _last_request_ts
+            if elapsed < _MIN_REQUEST_INTERVAL_SEC:
+                await asyncio.sleep(_MIN_REQUEST_INTERVAL_SEC - elapsed)
+            _last_request_ts = time.monotonic()
+        try:
+            async with httpx.AsyncClient(timeout=6.0) as client:
+                r = await client.get(_NOMINATIM_URL, params={"q": f"{q}, Israel", "format": "json", "limit": 1, "countrycodes": "il"},
+                                     headers={"User-Agent": _USER_AGENT, "Accept-Language": "he,en"})
+            data = r.json() if r.status_code == 200 else None
+        except Exception as e:  # noqa: BLE001
+            logger.warning("Nominatim network error for an address: %s", e)
+            return None   # not cached: a network blip is not a miss
+        if data:
+            try:
+                lat, lng = float(data[0]["lat"]), float(data[0]["lon"])
+            except (KeyError, ValueError, TypeError):
+                data = None
+            else:
+                await db.geocode_cache.update_one({"_id": key}, {"$set": {"lat": lat, "lng": lng, "miss": False}}, upsert=True)
+                return (lat, lng)
+        await db.geocode_cache.update_one({"_id": key}, {"$set": {"miss": True}}, upsert=True)
+    return None

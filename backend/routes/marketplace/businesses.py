@@ -25,6 +25,8 @@ from pymongo.errors import DuplicateKeyError
 from pydantic import BaseModel, Field
 
 from utils.page_upgrade import has_page_upgrade
+
+from .shabbat import public_view as shabbat_public_view
 from utils.rate_limit import check_rate
 from routes.deps import db, logger, optional_user, verify_token
 from utils.bg_tasks import spawn
@@ -174,6 +176,8 @@ class BusinessIn(BaseModel):
     hours: Optional[str] = Field(None, max_length=200)
     # "By appointment only" instead of opening hours (Tzvi, 17 Oct 2026).
     by_appointment: Optional[bool] = None
+    # Ordering and booking close from candle lighting to havdalah (shabbat.py).
+    shabbat_closing: Optional[bool] = None
     languages: Optional[list[str]] = None
     # Businesses that drive people: transport, tours, movers. Null in
     # either of these means "has not said" - see Vehicle and SHABBAT.
@@ -278,6 +282,8 @@ class BusinessPatch(BaseModel):
     hours: Optional[str] = Field(None, max_length=200)
     # "By appointment only" instead of opening hours (Tzvi, 17 Oct 2026).
     by_appointment: Optional[bool] = None
+    # Ordering and booking close from candle lighting to havdalah (shabbat.py).
+    shabbat_closing: Optional[bool] = None
     languages: Optional[list[str]] = None
     # Businesses that drive people: transport, tours, movers. Null in
     # either of these means "has not said" - see Vehicle and SHABBAT.
@@ -363,6 +369,7 @@ def _public(
         # was showing him nothing.
         "hours": doc.get("hours"),
         "by_appointment": bool(doc.get("by_appointment")),
+        "shabbat_closing": bool(doc.get("shabbat_closing")),
         "languages": doc.get("languages") or [],
         # Both carried here for the reason the whole block above exists:
         # the details form sends every field it knows on save, so a field
@@ -809,6 +816,8 @@ async def update_business(business_id: str, payload: BusinessPatch, user=Depends
         update["notice"] = {"text": n.text.strip(), "starts_on": n.starts_on, "ends_on": n.ends_on} if n and n.text.strip() else None
     if "by_appointment" in provided:
         update["by_appointment"] = bool(payload.by_appointment)
+    if "shabbat_closing" in provided:
+        update["shabbat_closing"] = bool(payload.shabbat_closing)
     for key in ("hours", "delivery_note", "lead_time", "payment_note",
                 "founded_year", "kosher_certification", "cover_url",
                 "license_number"):
@@ -1169,6 +1178,10 @@ async def public_business(
         "by_appointment": bool(biz.get("by_appointment")),
         "languages": biz.get("languages") or [],
         "shabbat": biz.get("shabbat"),
+        # Closed for Shabbat and holidays: whether it is closed now, and the
+        # closures ahead (shabbat.py). Not the "shabbat" above, which is a
+        # driver's own answer about driving on Shabbat.
+        "shabbat_closing": shabbat_public_view(biz),
         "vehicle": biz.get("vehicle"),
         "founded_year": biz.get("founded_year"),
         "delivery_note": biz.get("delivery_note"),
