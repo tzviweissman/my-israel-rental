@@ -148,3 +148,91 @@ CSS = '''
 }
 @media (prefers-reduced-motion: reduce) { .hero2 .bg, .hero2 h1 .w { animation: none; } .pour { height: auto; } .pour-stage { position: static; height: auto; padding-block: 5rem; } }
 '''
+
+# 3. SKY (19 Oct 2026, Tzvi's idea from her tagline; CONCEPT.md): a walk on
+#    the clouds (generated scenery film) with one big line; as you scroll a
+#    cloud-shaped window opens holding HER real photo of the whipped cloud on
+#    her iced coffee, the line becomes "Your cup, your cloud.", and the window
+#    grows until her coffee fills the screen with the Order button.
+SKY = '''  <section class="sky" id="open" aria-labelledby="h-open">
+    <div class="sky-stage">
+      <video class="sky-v" id="sky-v" muted loop playsinline preload="auto" poster="assets/clouds-wide.webp" aria-hidden="true"></video>
+      <div class="sky-shade" aria-hidden="true"></div>
+      <div class="sky-line"><h1 id="h-open" class="l1">Ever wanted to take a walk in the clouds?</h1></div>
+      <svg class="sky-win" id="sky-win" aria-hidden="true">
+        <defs><clipPath id="skyclip"></clipPath></defs>
+        <image id="skyimg" href="assets/iced.webp" preserveAspectRatio="none" clip-path="url(#skyclip)"/>
+      </svg>
+      <div class="sky-end" id="sky-end">
+        <p class="kick">Ramat Eshkol · Jerusalem</p>
+        <h2>Your cup, <span class="soft">your cloud.</span></h2>
+        <p class="lede">Whipped coffee in a jar, hand-whipped to order and delivered to your door. Each jar makes 3 to 4 coffees.</p>
+        <div class="act"><a class="btn light" href="order.html">Order your jars <span class="arw" aria-hidden="true">→</span></a><p class="proof"><b>From ₪40</b> a jar<br>Kosher certified</p></div>
+      </div>
+      <span class="scroll-hint" id="sky-hint" aria-hidden="true">Scroll</span>
+    </div>
+  </section>
+'''
+
+SKY_JS = '''<script>
+(function () {
+  var sec = document.getElementById('open'); if (!sec) return;
+  var v = document.getElementById('sky-v'), svg = document.getElementById('sky-win'), g = document.getElementById('skyclip'), img = document.getElementById('skyimg');
+  var line = sec.querySelector('.sky-line'), end = document.getElementById('sky-end'), hint = document.getElementById('sky-hint');
+  var tall = matchMedia('(max-aspect-ratio: 3/4)').matches;
+  v.poster = tall ? 'assets/clouds-tall.webp' : 'assets/clouds-wide.webp';
+  v.src = tall ? 'assets/clouds-tall.mp4' : 'assets/clouds-wide.mp4';
+  var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (!reduce) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+  // one cloud of puffs around the centre, in units of the shorter side
+  var PUFFS = [[-.30, .06, .22], [-.08, -.10, .30], [.20, -.02, .25], [.36, .12, .16], [-.16, .16, .22], [.10, .18, .23], [-.42, .18, .14]];
+  var circles = PUFFS.map(function () { var c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); g.appendChild(c); return c; });
+  var W = 0, H = 0, stage = sec.querySelector('.sky-stage');
+  var IW = 0, IH = 0;
+  function size() { W = stage.clientWidth; H = stage.clientHeight; svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); IW = Math.max(W, H * 1170 / 1213); IH = IW * 1213 / 1170; img.setAttribute('width', IW); img.setAttribute('height', IH); img.setAttribute('x', (W - IW) / 2); }
+  var clamp = function (x) { return Math.max(0, Math.min(1, x)); }, ease = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
+  function draw(p) {
+    // 0 to .12 the walk and the question; .12 to .55 the window opens; .55 to .85 it grows to fill; .85 on the end words
+    var open = ease(clamp((p - .12) / .43)), fill = ease(clamp((p - .55) / .3));
+    var s = Math.min(W, H), k = s * (open * .75 + fill * 3.2), cx = W / 2, cy = H * (.55 - fill * .05);
+    // the whipped cloud on top of her coffee (about 36% down and 56% across the photo) sits in the window, then the photo settles to fill
+    img.setAttribute('y', ((cy - .36 * IH) * (1 - fill) + (H - IH) * .3 * fill).toFixed(1));
+    img.setAttribute('x', ((W / 2 - .56 * IW) * (1 - fill) + (W - IW) / 2 * fill).toFixed(1));
+    circles.forEach(function (c, i) { var q = PUFFS[i]; c.setAttribute('cx', cx + q[0] * k); c.setAttribute('cy', cy + q[1] * k); c.setAttribute('r', Math.max(0, q[2] * k * (1 + .04 * Math.sin(performance.now() / 900 + i)))); });
+    line.style.opacity = 1 - clamp((p - .1) / .15);
+    line.style.transform = 'translateY(' + (-clamp(p / .25) * 40) + 'px)';
+    end.style.opacity = clamp((p - .62) / .2);
+    end.style.transform = 'translateY(' + ((1 - clamp((p - .62) / .2)) * 24) + 'px)';
+    end.style.pointerEvents = p > .7 ? 'auto' : 'none';
+    hint.style.opacity = 1 - clamp(p / .08);
+  }
+  size(); addEventListener('resize', function () { size(); frame(); });
+  if (reduce) { draw(1); return; }
+  var tick = 0;
+  function frame() { tick = 0; var r = sec.getBoundingClientRect(), span = sec.offsetHeight - innerHeight; draw(clamp(-r.top / Math.max(1, span))); }
+  addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
+  (function loop() { frame(); requestAnimationFrame(loop); })();
+})();
+</script>
+'''
+
+SKY_CSS = '''
+/* ── the walk in the clouds (CONCEPT.md) ── */
+.sky { position: relative; height: 300svh; background: #E9D7E4; }
+.sky-stage { position: sticky; top: 68px; height: calc(100svh - 68px); overflow: hidden; isolation: isolate; color: #fff; }
+.sky-v { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
+.sky-shade { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at 50% 30%, rgb(42 20 11 / .28), transparent 65%); }
+.sky-line { position: absolute; left: 0; right: 0; top: 18%; margin: 0 auto; padding: 0 var(--gutter); max-width: min(980px, 100%); text-align: center; }
+.sky-line h1 { margin: 0; font: 500 clamp(2.4rem, 5.6vw, 5.4rem)/1.02 var(--font-head); font-variation-settings: 'SOFT' 100; color: #fff; text-shadow: 0 2px 30px rgb(60 20 40 / .35); animation: rise 1200ms var(--out) both; }
+.sky-win { position: absolute; inset: 0; width: 100%; height: 100%; }
+.sky-end { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 var(--gutter) clamp(2rem, 7vh, 4.5rem); max-width: 74rem; margin: 0 auto; opacity: 0; }
+.sky-end::before { content: ''; position: absolute; inset: -40vh -50vw 0; z-index: -1; background: linear-gradient(0deg, rgb(42 20 11 / .92), rgb(42 20 11 / .55) 55%, transparent); }
+.sky-end h2 { font-size: clamp(2.8rem, 6.5vw, 6rem); color: #fff; line-height: .98; }
+.sky-end h2 .soft { font-style: italic; font-weight: 500; color: #F9C9D6; }
+.sky-end .kick { background: rgb(42 20 11 / .62); color: var(--cream); }
+.sky-end .lede { margin: 1rem 0 1.6rem; max-width: 32rem; color: #F4E6E1; font-size: 1.12rem; }
+.sky-end .proof { color: #F4E6E1; } .sky-end .proof b { color: #fff; }
+.sky .scroll-hint { color: #fff; padding: .8rem .45rem; border-radius: 999px; background: rgb(42 20 11 / .55); }
+@media (max-width: 760px) { .sky-line { top: 14%; } }
+@media (prefers-reduced-motion: reduce) { .sky { height: auto; } .sky-stage { position: relative; } .sky-end { position: relative; opacity: 1; padding-top: 50svh; } }
+'''

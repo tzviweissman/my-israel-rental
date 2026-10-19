@@ -195,7 +195,7 @@ def write(name, title, desc, img, body, tail=''):
 
 import sys; sys.path.insert(0, 'gen'); import wow
 write('index', 'The Whipped Cup · Whipped coffee in a jar, Jerusalem', DESC, 'caramel-window.webp',
-      wow.HERO2 + KOSHER + FLAVOURS + wow.POUR + PACKAGES, wow.POUR_JS)
+      wow.SKY + KOSHER + FLAVOURS + wow.POUR + PACKAGES, wow.SKY_JS + wow.POUR_JS)
 
 write('menu', 'Menu · The Whipped Cup', 'Classic Cloud ₪40, Caramel Cloud and Vanilla Cloud ₪48. Weekly packages: Try It Duo ₪75, One Flavour ₪148, Assorted ₪155, Cloud Bundle ₪220.', 'bottles.webp',
       '''  <header class="page-head"><div class="wrap">
