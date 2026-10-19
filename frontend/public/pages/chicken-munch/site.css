@@ -256,3 +256,12 @@
   .gallery .gal-grid[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .gallery .gal-grid[data-count="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .close p a { white-space: nowrap; }
+  /* questions in the owner's words (page rules 3m), filled by mir-faq.js */
+  .faq-list { margin-top: clamp(1.5rem, 3vw, 2.2rem); max-width: 50rem; }
+  .faq-q { border-top: 1px solid var(--line); }
+  .faq-q:last-child { border-bottom: 1px solid var(--line); }
+  .faq-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 1rem; padding: 1.1rem 0; font: 700 1.1rem/1.35 var(--font-body); }
+  .faq-q summary::-webkit-details-marker { display: none; }
+  .faq-q summary::after { content: '+'; color: var(--gold); font: 400 1.6rem/1 var(--font-head); transition: transform 200ms var(--out); }
+  .faq-q[open] summary::after { transform: rotate(45deg); }
+  .faq-q p { margin: 0 0 1.2rem; color: var(--soft); max-width: 42rem; }

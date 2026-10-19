@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { ArrowLeft, Laptop, Smartphone, Undo2, Redo2, ExternalLink, Loader2, RotateCcw, Images, X, ChevronLeft, ChevronRight, Trash2, Plus } from 'lucide-react';
+import { ArrowLeft, Laptop, Smartphone, Undo2, Redo2, ExternalLink, Loader2, RotateCcw, Images, X, ChevronLeft, ChevronRight, Trash2, Plus, Wand2 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { uploadOneFile } from '../utils/fastUpload';
 
@@ -43,6 +43,7 @@ export default function PageEditor() {
   const stage = useRef(null);
   const fileInput = useRef(null);
   const [photosOpen, setPhotosOpen] = useState(false);
+  const [askOpen, setAskOpen] = useState(false);
   const picking = useRef(null);
   const auth = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
   const dirty = !same(hist.now, saved);
@@ -230,7 +231,10 @@ export default function PageEditor() {
           <button type="button" className="pe-icon" onClick={redo} disabled={!hist.future.length} aria-label={t('pageEditor.redo', 'Redo')} title={t('pageEditor.redo', 'Redo')}><Redo2 size={17} className="pe-flip" /></button>
         </div>
         <div className="pe-end">
-          <button type="button" className={`pe-btn pe-ghost${photosOpen ? ' on' : ''}`} onClick={() => setPhotosOpen((o) => !o)} aria-expanded={photosOpen}>
+          <button type="button" className={`pe-btn pe-ghost${askOpen ? ' on' : ''}`} onClick={() => { setAskOpen((o) => !o); setPhotosOpen(false); }} aria-expanded={askOpen}>
+            <Wand2 size={15} /> <span className="pe-hide-sm">{t('pageEditor.ask', 'Ask for a change')}</span>
+          </button>
+          <button type="button" className={`pe-btn pe-ghost${photosOpen ? ' on' : ''}`} onClick={() => { setPhotosOpen((o) => !o); setAskOpen(false); }} aria-expanded={photosOpen}>
             <Images size={15} /> <span className="pe-hide-sm">{t('pageEditor.photos', 'Photos')}</span>
           </button>
           <button type="button" className="pe-btn pe-ghost" onClick={resetAll} title={t('pageEditor.reset', 'Original design')}>
@@ -260,6 +264,10 @@ export default function PageEditor() {
         </div>
       </div>
       <input ref={fileInput} type="file" accept="image/*" hidden onChange={onFile} />
+      {askOpen && (
+        <RequestPanel businessId={businessId} token={token} auth={auth} t={t} dirty={dirty}
+          onClose={() => setAskOpen(false)} onApplied={() => { setReady(false); setSaved(EMPTY); setHist({ past: [], now: EMPTY, future: [] }); setFrameKey((k) => k + 1); }} />
+      )}
       {photosOpen && (
         <GalleryPanel slug={slug} businessId={businessId} token={token} auth={auth} t={t}
           onClose={() => setPhotosOpen(false)} onSaved={() => { setReady(false); setFrameKey((k) => k + 1); }} />
@@ -391,6 +399,166 @@ function GalleryPanel({ slug, businessId, token, auth, t, onClose, onSaved }) {
   );
 }
 
+
+/**
+ * "Ask for a change" (Tzvi, 19 Oct 2026: pages should update without us
+ * building them by hand). The owner writes what they want and can attach
+ * photos; the AI proposes changes to the page's fixed places only (wording,
+ * a photo swap, the gallery, questions), shown here as a list. Nothing
+ * changes until Apply, and an applied change can be undone. Anything else
+ * becomes a design request for us. Backend: routes/marketplace/page_requests.py.
+ */
+function RequestPanel({ businessId, token, auth, t, dirty, onClose, onApplied }) {
+  const [message, setMessage] = useState('');
+  const [photos, setPhotos] = useState([]);
+  const [busy, setBusy] = useState('');
+  const [result, setResult] = useState(null);
+  const [applied, setApplied] = useState(null);
+  const input = useRef(null);
+  const base = `${API}/marketplace/businesses/${businessId}/page-requests`;
+  const addPhotos = async (e) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (!files.length) return;
+    setBusy('photos');
+    for (const file of files.slice(0, 8 - photos.length)) {
+      // eslint-disable-next-line no-await-in-loop
+      if ((await widthOf(file)) < MIN_WIDTH) {
+        toast.error(t('pageEditor.photoSmall', '{{name}} is too small to look sharp. Use a photo at least 1000 pixels wide.', { name: file.name }));
+        continue;
+      }
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const url = await uploadOneFile(file, API, token);
+        setPhotos((l) => [...l, url]);
+      } catch (err) {
+        toast.error(err.message || t('pageEditor.uploadFailed', 'The photo did not upload. Try again.'));
+      }
+    }
+    setBusy('');
+  };
+  const send = async () => {
+    setBusy('send');
+    try {
+      const r = await axios.post(base, { message, photos }, auth);
+      setResult(r.data);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || t('pageEditor.askFailed', 'That did not go through. Try again in a minute.'));
+    } finally {
+      setBusy('');
+    }
+  };
+  const apply = async () => {
+    if (dirty && !window.confirm(t('pageEditor.unsavedLost', 'You have changes you have not saved. Applying this replaces them. Go ahead?'))) return;
+    setBusy('apply');
+    try {
+      await axios.post(`${base}/${result.id}/apply`, {}, auth);
+      setApplied(result.id);
+      setResult(null);
+      setMessage('');
+      setPhotos([]);
+      toast.success(t('pageEditor.applied', 'Done. Your page shows the changes now.'));
+      onApplied();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || t('pageEditor.saveFailed', 'Could not save. Try again.'));
+    } finally {
+      setBusy('');
+    }
+  };
+  const discard = async () => {
+    if (result?.id) axios.post(`${base}/${result.id}/discard`, {}, auth).catch(() => {});
+    setResult(null);
+  };
+  const undo = async () => {
+    setBusy('undo');
+    try {
+      await axios.post(`${base}/${applied}/undo`, {}, auth);
+      setApplied(null);
+      toast.success(t('pageEditor.undone', 'Undone. Your page is back as it was.'));
+      onApplied();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || t('pageEditor.saveFailed', 'Could not save. Try again.'));
+    } finally {
+      setBusy('');
+    }
+  };
+  const plan = result?.plan;
+  const count = plan ? plan.text.length + plan.img.length + plan.gallery.length + plan.faq.length + (plan.faq_remove || []).length : 0;
+  return (
+    <aside className="pe-gal" aria-label={t('pageEditor.ask', 'Ask for a change')}>
+      <div className="pe-gal-head">
+        <strong>{t('pageEditor.ask', 'Ask for a change')}</strong>
+        <button type="button" className="pe-icon" onClick={onClose} aria-label={t('pageEditor.close', 'Close')}><X size={18} /></button>
+      </div>
+      {!plan && (
+        <>
+          <p className="pe-gal-help">{t('pageEditor.askHelp', 'Tell us what to add or change, in your own words, and attach photos if they go with it. You see every change before it goes on your page.')}</p>
+          <textarea className="pe-ask" value={message} onChange={(e) => setMessage(e.target.value)} maxLength={1500} rows={6}
+            placeholder={t('pageEditor.askPlaceholder', 'For example: add these photos of our new box, and add a question: Do you deliver on Friday? Yes, until 1pm.')} />
+          {!!photos.length && (
+            <ul className="pe-gal-list">
+              {photos.map((u) => (
+                <li key={u}>
+                  <div className="pe-gal-pic"><img src={u} alt="" /></div>
+                  <div className="pe-gal-acts"><button type="button" className="pe-icon" onClick={() => setPhotos((l) => l.filter((x) => x !== u))} aria-label={t('pageEditor.remove', 'Remove')}><Trash2 size={16} /></button></div>
+                </li>
+              ))}
+            </ul>
+          )}
+          <div className="pe-gal-foot">
+            <button type="button" className="pe-btn pe-ghost" onClick={() => input.current?.click()} disabled={!!busy || photos.length >= 8}>
+              {busy === 'photos' ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />} {t('pageEditor.attach', 'Attach photos')}
+            </button>
+            <button type="button" className="pe-btn pe-save" onClick={send} disabled={!!busy || (!message.trim() && !photos.length)}>
+              {busy === 'send' ? <><Loader2 size={15} className="animate-spin" /> {t('pageEditor.reading', 'Reading…')}</> : t('pageEditor.send', 'Send')}
+            </button>
+          </div>
+          {applied && (
+            <button type="button" className="pe-btn pe-ghost" onClick={undo} disabled={!!busy}>
+              <Undo2 size={15} className="pe-flip" /> {t('pageEditor.undoLast', 'Undo the last change')}
+            </button>
+          )}
+        </>
+      )}
+      {plan && (
+        <div className="pe-plan">
+          {plan.reply && <p className="pe-plan-reply">{plan.reply}</p>}
+          {!count && !plan.design_request && <p className="pe-gal-help">{t('pageEditor.nothing', 'Nothing on the page needs to change for that.')}</p>}
+          {plan.text.map((c) => (
+            <div key={c.key} className="pe-plan-row"><span className="pe-plan-k">{t('pageEditor.wording', 'Wording')}</span><s>{c.old}</s><b>{c.new.replace(/<[^>]+>/g, ' ')}</b></div>
+          ))}
+          {plan.img.map((c) => (
+            <div key={c.key} className="pe-plan-row"><span className="pe-plan-k">{t('pageEditor.photoSwap', 'Photo swapped')}</span><span>{c.alt}</span><img src={c.url} alt="" /></div>
+          ))}
+          {!!plan.gallery.length && (
+            <div className="pe-plan-row"><span className="pe-plan-k">{t('pageEditor.toGallery', 'Added to your photos')}</span>
+              <div className="pe-plan-pics">{plan.gallery.map((g) => <img key={g.url} src={g.url} alt="" />)}</div></div>
+          )}
+          {plan.faq.map((f) => (
+            <div key={f.q} className="pe-plan-row"><span className="pe-plan-k">{t('pageEditor.newQuestion', 'New question')}</span><b>{f.q}</b><span>{f.a}</span></div>
+          ))}
+          {(plan.faq_remove || []).map((q) => (
+            <div key={q} className="pe-plan-row"><span className="pe-plan-k">{t('pageEditor.removeQuestion', 'Question removed')}</span><s>{q}</s></div>
+          ))}
+          {plan.design_request && (
+            <div className="pe-plan-row pe-plan-design"><span className="pe-plan-k">{t('pageEditor.forDesigners', 'For our designers')}</span><span>{plan.design_request}</span>
+              <span className="pe-gal-help">{t('pageEditor.designNote', 'This needs a designer, so it is passed on to us. We will be in touch.')}</span></div>
+          )}
+          <div className="pe-gal-foot">
+            <button type="button" className="pe-btn pe-ghost" onClick={discard} disabled={!!busy}>{t('pageEditor.discard', 'Discard')}</button>
+            {!!count && (
+              <button type="button" className="pe-btn pe-save" onClick={apply} disabled={!!busy}>
+                {busy === 'apply' ? <Loader2 size={15} className="animate-spin" /> : null} {t('pageEditor.apply', 'Apply to my page')}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+      <input ref={input} type="file" accept="image/*" multiple hidden onChange={addPhotos} />
+    </aside>
+  );
+}
+
 const CSS = `
 .pe { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; background: var(--surface-muted); }
 .pe-loading { min-height: 100vh; display: grid; place-items: center; color: var(--brand-muted); }
@@ -432,6 +600,17 @@ const CSS = `
 .pe-gal-dot { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 3px solid #fff; background: var(--gold); box-shadow: 0 0 0 1px rgb(17 24 39 / .4); pointer-events: none; }
 .pe-gal-acts { display: flex; justify-content: center; gap: 2px; margin-top: 4px; }
 .pe-gal-acts .pe-icon { min-height: 36px; min-width: 36px; }
+.pe-ask { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid var(--brand-border); font: inherit; resize: vertical; background: var(--surface); color: var(--ink); }
+.pe-ask:focus-visible { outline: 3px solid var(--gold); outline-offset: 1px; }
+.pe-plan { display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.pe-plan-reply { margin: 0; font-weight: 600; color: var(--ink); }
+.pe-plan-row { display: flex; flex-direction: column; gap: 4px; padding: 10px 12px; border-radius: 12px; background: var(--surface-muted); font-size: .9rem; }
+.pe-plan-row s { color: var(--brand-muted); }
+.pe-plan-row img { width: 100%; max-height: 140px; object-fit: cover; border-radius: 8px; }
+.pe-plan-k { font-size: .75rem; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--brand-muted); }
+.pe-plan-pics { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.pe-plan-pics img { aspect-ratio: 4 / 3; height: auto; }
+.pe-plan-design { background: var(--surface); box-shadow: inset 0 0 0 1px var(--brand-border); }
 .pe-gal-foot { margin-top: auto; display: flex; justify-content: space-between; gap: 8px; position: sticky; bottom: 0; background: var(--surface); padding-top: 8px; }
 @media (max-width: 760px) { .pe-hide-sm { display: none; } .pe-title { width: 100%; order: -1; } }
 `;

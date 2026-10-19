@@ -208,6 +208,8 @@ async def get_page_edits(slug_or_id: str):
         "prices": prices,
         "products": products,
         "gallery": doc.get("gallery") or [],
+        # questions and answers added through "Ask for a change" (page_requests.py)
+        "faq": doc.get("faq") or [],
     }
 
 

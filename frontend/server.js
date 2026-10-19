@@ -489,6 +489,12 @@ async function sendHandBuilt(req, res, slug, file) {
     const json = JSON.stringify(data.gallery).replace(/</g, '\\u003c');
     html = html.replace(/<\/body>/i, `<script id="mir-live-gallery" type="application/json">${json}</script><script src="/pages/mir-gallery.js?v=${EDITOR_STAMP}"></script></body>`);
   }
+  // And its questions ([data-mir-faq], public/pages/mir-faq.js), added by the
+  // owner through "Ask for a change". With none, the section stays hidden.
+  if (data && Array.isArray(data.faq) && data.faq.length && /data-mir-faq/.test(html)) {
+    const json = JSON.stringify(data.faq).replace(/</g, '\\u003c');
+    html = html.replace(/<\/body>/i, `<script id="mir-live-faq" type="application/json">${json}</script><script src="/pages/mir-faq.js?v=${EDITOR_STAMP}"></script></body>`);
+  }
   res.end(html);
 }
 
