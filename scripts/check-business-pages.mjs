@@ -5,6 +5,10 @@
  * Brown Box showed only a dark screen: "make sure all the business pages
  * are working properly ... how can we make sure this won't happen again").
  *
+ * A hand-built page can be a small website (page rules 3k): every page its
+ * site.json lists (Menu, Order, Contact...) is checked too, at
+ * /business/<slug>/<page> (Tzvi, 19 Oct 2026: "extend it to check every page").
+ *
  * For each page: a laptop and a phone size, five scroll positions down the
  * page. At each, a screenshot is reduced to its brightness spread: a screen
  * that is almost one flat colour (dark or white) with no text on it counts
@@ -48,17 +52,33 @@ if (!slugs.length) {
   if (!found) console.error('WARNING: could not load the live listings; only the hand-built pages are checked.');
 }
 
+// Every page to open: a business's home, then the other pages of a hand-built site.
+const targets = [];
+for (const slug of slugs) {
+  targets.push({ label: slug, url: `${BASE}/business/${slug}` });
+  try {
+    const site = JSON.parse(fs.readFileSync(path.join(ROOT, 'frontend', 'public', 'pages', slug, 'site.json'), 'utf8'));
+    for (const { page } of site) if (page !== 'index') targets.push({ label: `${slug}/${page}`, url: `${BASE}/business/${slug}/${page}`, sub: true });
+  } catch { /* not hand-built, or a single page */ }
+}
+if (targets.length > slugs.length) console.log(`${targets.length - slugs.length} more pages from hand-built sites`);
+
 const SIZES = [{ name: 'laptop', width: 1366, height: 768 }, { name: 'phone', width: 390, height: 844 }];
 const browser = await chromium.launch();
 const problems = [];
 
-for (const slug of slugs) {
+for (const { label: slug, url, sub } of targets) {
   for (const size of SIZES) {
     const page = await browser.newPage({ viewport: { width: size.width, height: size.height } });
     const errors = [];
     page.on('pageerror', (e) => errors.push(e.message));
     try {
-      await page.goto(`${BASE}/business/${slug}`, { waitUntil: 'networkidle', timeout: 45000 });
+      const res = await page.goto(url, { waitUntil: 'networkidle', timeout: 45000 });
+      if (res && res.status() >= 400) throw new Error(`answered ${res.status()}`);
+      // A page missing from the build is answered by the app (200), which then
+      // reloads into the business's home, so the title looks right. The first
+      // answer tells: the app's shell has its root element, a built page never does.
+      if (sub && (await (await fetch(url)).text()).includes('id="root"')) throw new Error('the app answered instead of the page (missing from the build?)');
     } catch (e) {
       problems.push(`${slug} (${size.name}): did not load: ${e.message.split('\n')[0]}`);
       await page.close();
@@ -106,4 +126,4 @@ if (problems.length) {
   console.error(`\n${problems.length} problem(s):\n- ${problems.join('\n- ')}`);
   process.exit(1);
 }
-console.log(`\nAll ${slugs.length} business pages show content at every scroll position, with no page errors.`);
+console.log(`\nAll ${targets.length} business pages show content at every scroll position, with no page errors.`);
