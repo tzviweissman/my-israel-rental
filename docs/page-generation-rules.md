@@ -968,6 +968,38 @@ small website. A single page stays fine for a business with little to say
    on each, the phone menu opened, and an Add on one page reaching the order
    page.
 
+## 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
+
+Chicken Munch's order page let a customer choose kinds of chicken for every
+box and pan alike, while the owner allows several kinds only in the boxes and
+the large Roaster, and one kind in a 9x13 pan. Tzvi: "make a rule for similar
+products, we need to make sure everything is clear."
+
+1. **Ask before building the order form.** For every family of similar items
+   (sizes, boxes, pans, packages, sessions), ask the owner: what can the
+   customer choose in each one, and how many? (kinds, flavours, sauces,
+   colours, extras, what is included and what is not). Never assume one item's
+   rules apply to its siblings.
+2. **Say it on the item, before it is added.** Each item carries its own
+   short line of what it allows ("Up to 4 kinds of chicken · 3 sauces",
+   "1 kind of chicken", "Mix as many kinds as you like"), in the same words on
+   the menu tile, the order line and the order message. A one-choice item is
+   marked differently from the many-choice ones.
+3. **Choices belong to the item, not the form.** Options appear under the item
+   once it is added, only for items that allow them. One choice is a radio
+   set; a limit greys out the rest when it is reached; an item that needs a
+   choice cannot be sent without it, with the reason beside it. Never one
+   shared set of options for items with different rules.
+4. **Three or more alike: compare at a glance.** Show what differs side by
+   side (feeds, kinds, sauces, price), and nothing that is the same for all.
+5. **The order reaches the owner itemised**: each item with its own choices
+   under it, so nothing is left to guess.
+6. **A picture is of that item as it is sold now.** If the owner no longer
+   makes it that way, no picture is better than a misleading one (Chicken
+   Munch's platter photo, 19 Oct 2026).
+7. **Check**: read each item alone. Could a customer tell what they get and
+   what they can choose, without reading any other item?
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews
