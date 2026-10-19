@@ -66,3 +66,27 @@ def test_links_stay_safe():
     out = clean_html(r'<a href="//evil.com/x">a</a><a href="/\evil.com">b</a><a href="/business/x">c</a><a href="tel:055">d</a>')
     assert 'evil' not in out
     assert 'href="/business/x"' in out and 'href="tel:055"' in out
+
+
+# The page gallery (19 Oct 2026): only our own uploads, bounded, focus kept in 0-100.
+from routes.marketplace.page_edits import GalleryPhoto, clean_gallery  # noqa: E402
+
+CLD = 'https://res.cloudinary.com/dirvyboe9/image/upload/v1/myisraelrental/abc.jpg'
+
+
+def test_gallery_keeps_our_uploads_with_focus_in_bounds():
+    out = clean_gallery([GalleryPhoto(url=CLD, fx=140, fy=-5, alt='<b>Box</b>')])
+    assert out == [{'url': CLD, 'fx': 100, 'fy': 0, 'alt': '&lt;b&gt;Box&lt;/b&gt;'}]
+
+
+@pytest.mark.parametrize('url', ['http://res.cloudinary.com/x/y.jpg', 'https://evil.example/x.jpg', 'javascript:alert(1)'])
+def test_gallery_refuses_other_urls(url):
+    with pytest.raises(HTTPException):
+        clean_gallery([GalleryPhoto(url=url)])
+
+
+def test_gallery_refuses_duplicates_and_too_many():
+    with pytest.raises(HTTPException):
+        clean_gallery([GalleryPhoto(url=CLD), GalleryPhoto(url=CLD)])
+    with pytest.raises(HTTPException):
+        clean_gallery([GalleryPhoto(url=CLD.replace('abc', f'p{i}')) for i in range(25)])

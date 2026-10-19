@@ -16,7 +16,7 @@ import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { ArrowLeft, Laptop, Smartphone, Undo2, Redo2, ExternalLink, Loader2, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Laptop, Smartphone, Undo2, Redo2, ExternalLink, Loader2, RotateCcw, Images, X, ChevronLeft, ChevronRight, Trash2, Plus } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { uploadOneFile } from '../utils/fastUpload';
 
@@ -42,6 +42,7 @@ export default function PageEditor() {
   const frame = useRef(null);
   const stage = useRef(null);
   const fileInput = useRef(null);
+  const [photosOpen, setPhotosOpen] = useState(false);
   const picking = useRef(null);
   const auth = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
   const dirty = !same(hist.now, saved);
@@ -229,6 +230,9 @@ export default function PageEditor() {
           <button type="button" className="pe-icon" onClick={redo} disabled={!hist.future.length} aria-label={t('pageEditor.redo', 'Redo')} title={t('pageEditor.redo', 'Redo')}><Redo2 size={17} className="pe-flip" /></button>
         </div>
         <div className="pe-end">
+          <button type="button" className={`pe-btn pe-ghost${photosOpen ? ' on' : ''}`} onClick={() => setPhotosOpen((o) => !o)} aria-expanded={photosOpen}>
+            <Images size={15} /> <span className="pe-hide-sm">{t('pageEditor.photos', 'Photos')}</span>
+          </button>
           <button type="button" className="pe-btn pe-ghost" onClick={resetAll} title={t('pageEditor.reset', 'Original design')}>
             <RotateCcw size={15} /> <span className="pe-hide-sm">{t('pageEditor.reset', 'Original design')}</span>
           </button>
@@ -256,7 +260,134 @@ export default function PageEditor() {
         </div>
       </div>
       <input ref={fileInput} type="file" accept="image/*" hidden onChange={onFile} />
+      {photosOpen && (
+        <GalleryPanel slug={slug} businessId={businessId} token={token} auth={auth} t={t}
+          onClose={() => setPhotosOpen(false)} onSaved={() => { setReady(false); setFrameKey((k) => k + 1); }} />
+      )}
     </div>
+  );
+}
+
+/**
+ * The owner's own photos for the page's gallery (Tzvi, 19 Oct 2026: owners
+ * add pictures without ruining the page's look). The page decides how they
+ * look ([data-mir-gallery], public/pages/mir-gallery.js); here the owner only
+ * adds, orders, removes, and taps the part of each photo that matters most,
+ * which the crop keeps in view. Photos too small to look sharp are refused.
+ */
+const MIN_WIDTH = 1000;
+const MAX_PHOTOS = 24;
+function widthOf(file) {
+  return new Promise((resolve) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => { resolve(img.naturalWidth); URL.revokeObjectURL(url); };
+    img.onerror = () => { resolve(0); URL.revokeObjectURL(url); };
+    img.src = url;
+  });
+}
+function GalleryPanel({ slug, businessId, token, auth, t, onClose, onSaved }) {
+  const [items, setItems] = useState(null);
+  const [savedItems, setSavedItems] = useState([]);
+  const [hasPlace, setHasPlace] = useState(true);
+  const [busy, setBusy] = useState(false);
+  const input = useRef(null);
+  useEffect(() => {
+    axios.get(`${API}/marketplace/business/${slug}/page-edits`)
+      .then((r) => { const g = r.data.gallery || []; setItems(g); setSavedItems(g); })
+      .catch(() => setItems([]));
+    fetch(`/business/${slug}`, { cache: 'no-cache' }).then((r) => r.text())
+      .then((html) => setHasPlace(/data-mir-gallery/.test(html))).catch(() => {});
+  }, [slug]);
+  const changed = items && !same(items, savedItems);
+  const move = (i, d) => setItems((l) => {
+    const j = i + d;
+    if (j < 0 || j >= l.length) return l;
+    const n = [...l];
+    [n[i], n[j]] = [n[j], n[i]];
+    return n;
+  });
+  const focus = (i, e) => {
+    const r = e.currentTarget.getBoundingClientRect();
+    const fx = Math.round(((e.clientX - r.left) / r.width) * 100);
+    const fy = Math.round(((e.clientY - r.top) / r.height) * 100);
+    setItems((l) => l.map((p, k) => (k === i ? { ...p, fx, fy } : p)));
+  };
+  const add = async (e) => {
+    const files = Array.from(e.target.files || []);
+    e.target.value = '';
+    if (!files.length) return;
+    const room = MAX_PHOTOS - items.length;
+    if (room <= 0) { toast.error(t('pageEditor.galleryFull', 'Up to 24 photos.')); return; }
+    setBusy(true);
+    const added = [];
+    for (const file of files.slice(0, room)) {
+      // eslint-disable-next-line no-await-in-loop
+      if ((await widthOf(file)) < MIN_WIDTH) {
+        toast.error(t('pageEditor.photoSmall', '{{name}} is too small to look sharp. Use a photo at least 1000 pixels wide.', { name: file.name }));
+        continue;
+      }
+      try {
+        // eslint-disable-next-line no-await-in-loop
+        const url = await uploadOneFile(file, API, token);
+        added.push({ url, fx: 50, fy: 50, alt: '' });
+      } catch (err) {
+        toast.error(err.message || t('pageEditor.uploadFailed', 'The photo did not upload. Try again.'));
+      }
+    }
+    setItems((l) => [...l, ...added]);
+    setBusy(false);
+  };
+  const save = async () => {
+    setBusy(true);
+    try {
+      const r = await axios.put(`${API}/marketplace/businesses/${businessId}/page-gallery`, { gallery: items }, auth);
+      setItems(r.data.gallery);
+      setSavedItems(r.data.gallery);
+      toast.success(t('pageEditor.gallerySaved', 'Saved. Your photos are on your page now.'));
+      onSaved();
+    } catch (err) {
+      toast.error(err.response?.data?.detail || t('pageEditor.saveFailed', 'Could not save. Try again.'));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <aside className="pe-gal" aria-label={t('pageEditor.photos', 'Photos')}>
+      <div className="pe-gal-head">
+        <strong>{t('pageEditor.galleryTitle', 'Your photos')}</strong>
+        <button type="button" className="pe-icon" onClick={onClose} aria-label={t('pageEditor.close', 'Close')}><X size={18} /></button>
+      </div>
+      <p className="pe-gal-help">{hasPlace
+        ? t('pageEditor.galleryHelp', "Photos you add here show in your page's gallery, in your page's own style. Tap each photo on the part that matters most: the crop keeps it in view.")
+        : t('pageEditor.galleryNoPlace', 'Your page does not have a gallery yet. Your photos are kept here, and show once a gallery is added to your page.')}</p>
+      {items === null ? <Loader2 className="animate-spin" size={20} /> : (
+        <ul className="pe-gal-list">
+          {items.map((p, i) => (
+            <li key={p.url}>
+              <button type="button" className="pe-gal-pic" onClick={(e) => focus(i, e)} aria-label={t('pageEditor.setFocus', 'Set the part of the photo to keep in view')}>
+                <img src={p.url} alt="" />
+                <span className="pe-gal-dot" style={{ left: `${p.fx}%`, top: `${p.fy}%` }} />
+              </button>
+              <div className="pe-gal-acts">
+                <button type="button" className="pe-icon" onClick={() => move(i, -1)} disabled={!i} aria-label={t('pageEditor.earlier', 'Earlier')}><ChevronLeft size={16} className="pe-flip" /></button>
+                <button type="button" className="pe-icon" onClick={() => move(i, 1)} disabled={i === items.length - 1} aria-label={t('pageEditor.later', 'Later')}><ChevronRight size={16} className="pe-flip" /></button>
+                <button type="button" className="pe-icon" onClick={() => setItems((l) => l.filter((_, k) => k !== i))} aria-label={t('pageEditor.remove', 'Remove')}><Trash2 size={16} /></button>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="pe-gal-foot">
+        <button type="button" className="pe-btn pe-ghost" onClick={() => input.current?.click()} disabled={busy || !items}>
+          {busy ? <Loader2 size={15} className="animate-spin" /> : <Plus size={15} />} {t('pageEditor.addPhotos', 'Add photos')}
+        </button>
+        <button type="button" className="pe-btn pe-save" onClick={save} disabled={!changed || busy}>
+          {changed ? t('pageEditor.save', 'Save') : t('pageEditor.savedShort', 'Saved')}
+        </button>
+      </div>
+      <input ref={input} type="file" accept="image/*" multiple hidden onChange={add} />
+    </aside>
   );
 }
 
@@ -291,5 +422,16 @@ const CSS = `
 .pe-frame.phone { border-radius: 28px; }
 .pe-cover { position: absolute; inset: 0; display: grid; place-items: center; background: rgb(249 250 251 / .85); color: var(--brand-muted); }
 [dir="rtl"] .pe-flip { transform: scaleX(-1); }
+.pe-ghost.on { background: var(--surface-muted); }
+.pe-gal { position: fixed; z-index: 61; top: 0; bottom: 0; inset-inline-end: 0; width: min(380px, 100vw); display: flex; flex-direction: column; gap: 12px; padding: 16px; background: var(--surface); border-inline-start: 1px solid var(--brand-border); box-shadow: -18px 0 40px -24px rgb(17 24 39 / .35); overflow: auto; }
+.pe-gal-head { display: flex; align-items: center; justify-content: space-between; }
+.pe-gal-help { margin: 0; font-size: .88rem; color: var(--brand-muted); }
+.pe-gal-list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pe-gal-pic { position: relative; display: block; width: 100%; aspect-ratio: 4 / 3; padding: 0; border: 0; border-radius: 10px; overflow: hidden; cursor: crosshair; background: var(--surface-muted); }
+.pe-gal-pic img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.pe-gal-dot { position: absolute; width: 18px; height: 18px; margin: -9px 0 0 -9px; border-radius: 50%; border: 3px solid #fff; background: var(--gold); box-shadow: 0 0 0 1px rgb(17 24 39 / .4); pointer-events: none; }
+.pe-gal-acts { display: flex; justify-content: center; gap: 2px; margin-top: 4px; }
+.pe-gal-acts .pe-icon { min-height: 36px; min-width: 36px; }
+.pe-gal-foot { margin-top: auto; display: flex; justify-content: space-between; gap: 8px; position: sticky; bottom: 0; background: var(--surface); padding-top: 8px; }
 @media (max-width: 760px) { .pe-hide-sm { display: none; } .pe-title { width: 100%; order: -1; } }
 `;

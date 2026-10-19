@@ -482,6 +482,13 @@ async function sendHandBuilt(req, res, slug, file) {
     const json = JSON.stringify(data.products).replace(/</g, '\\u003c');
     html = html.replace(/<\/body>/i, `<script id="mir-live-products" type="application/json">${json}</script><script src="/pages/mir-catalog.js?v=${EDITOR_STAMP}"></script></body>`);
   }
+  // A page with a gallery ([data-mir-gallery]) shows the photos its owner
+  // added in the dashboard, laid out in the page's own style
+  // (public/pages/mir-gallery.js). With none, the gallery stays hidden.
+  if (data && Array.isArray(data.gallery) && data.gallery.length && /data-mir-gallery/.test(html)) {
+    const json = JSON.stringify(data.gallery).replace(/</g, '\\u003c');
+    html = html.replace(/<\/body>/i, `<script id="mir-live-gallery" type="application/json">${json}</script><script src="/pages/mir-gallery.js?v=${EDITOR_STAMP}"></script></body>`);
+  }
   res.end(html);
 }
 

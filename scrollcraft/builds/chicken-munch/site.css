@@ -246,3 +246,13 @@
   .deliv { margin: 0 0 .4rem; color: var(--soft); }
   .line .allows { display: inline-block; margin-top: .4rem; padding: .3rem .7rem; border-radius: 999px; background: rgb(250 165 25 / .14); color: var(--gold); font: 700 .82rem/1.2 var(--font-body); }
   .line .allows.one { background: rgb(239 43 43 / .16); color: #FF8A8A; }
+  /* the owner's own photos (page rules 3m): one frame for all, laid out by mir-gallery.js */
+  .gallery .gal-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; margin-top: clamp(2rem, 4vw, 3rem); }
+  .gal-ph { margin: 0; border-radius: var(--r); overflow: hidden; aspect-ratio: 4 / 3; background: var(--card); }
+  .gal-ph img { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 500ms var(--out); }
+  .gal-ph:hover img { transform: scale(1.04); }
+  @media (max-width: 760px) { .gallery .gal-grid { grid-template-columns: 1fr 1fr; } }
+  .gallery .gal-grid[data-count="1"] { grid-template-columns: minmax(0, 46rem); }
+  .gallery .gal-grid[data-count="2"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .gallery .gal-grid[data-count="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .close p a { white-space: nowrap; }

@@ -207,6 +207,7 @@ async def get_page_edits(slug_or_id: str):
         "updated_at": doc.get("updated_at"),
         "prices": prices,
         "products": products,
+        "gallery": doc.get("gallery") or [],
     }
 
 
@@ -223,9 +224,58 @@ async def put_page_edits(business_id: str, body: EditsBody, user=Depends(verify_
     return {"edits": edits, "updated_at": now}
 
 
+# The page's gallery (Tzvi, 19 Oct 2026: "if Chicken Munch wants to add more
+# pictures, how would he do that without ruining the page's look"). A
+# designed page keeps a place for photos ([data-mir-gallery]); the owner
+# adds, removes, orders and sets the focus of photos in the dashboard, and
+# frontend/public/pages/mir-gallery.js lays them out in the page's own style,
+# each cropped to the same frame around its focus. Nothing else on the page
+# moves. A fixed place like this is also what an automated update can fill.
+MAX_GALLERY = 24
+PHOTO_URL = re.compile(r"^https://res\.cloudinary\.com/[^\s\"'<>]{8,600}$")
+
+
+class GalleryPhoto(BaseModel):
+    url: str
+    fx: int = 50
+    fy: int = 50
+    alt: str = ""
+
+
+class GalleryBody(BaseModel):
+    gallery: list[GalleryPhoto]
+
+
+def clean_gallery(items: list[GalleryPhoto]) -> list[dict[str, Any]]:
+    if len(items) > MAX_GALLERY:
+        raise HTTPException(status_code=422, detail=f"Up to {MAX_GALLERY} photos")
+    out, seen = [], set()
+    for it in items:
+        if not PHOTO_URL.match(it.url) or it.url in seen:
+            raise HTTPException(status_code=422, detail="Photos must be uploaded here")
+        seen.add(it.url)
+        out.append({"url": it.url, "fx": max(0, min(100, it.fx)), "fy": max(0, min(100, it.fy)),
+                    "alt": escape(it.alt.strip())[:140]})
+    return out
+
+
+@router.put("/businesses/{business_id}/page-gallery")
+async def put_page_gallery(business_id: str, body: GalleryBody, user=Depends(verify_token)):
+    biz = await _owned(business_id, user)
+    gallery = clean_gallery(body.gallery)
+    now = datetime.now(UTC).isoformat()
+    await db.page_edits.update_one(
+        {"_id": biz["_id"]},
+        {"$set": {"gallery": gallery, "slug": biz.get("slug"), "gallery_updated_at": now, "updated_by": user["user_id"]}},
+        upsert=True,
+    )
+    return {"gallery": gallery, "updated_at": now}
+
+
 @router.delete("/businesses/{business_id}/page-edits")
 async def delete_page_edits(business_id: str, user=Depends(verify_token)):
-    """Back to the page as it was designed."""
+    """Back to the page as it was designed. The gallery is the owner's own
+    photos, not a change to the design, so it stays."""
     biz = await _owned(business_id, user)
-    await db.page_edits.delete_one({"_id": biz["_id"]})
+    await db.page_edits.update_one({"_id": biz["_id"]}, {"$unset": {"edits": "", "updated_at": ""}})
     return {"ok": True}

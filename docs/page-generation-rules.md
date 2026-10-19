@@ -1000,6 +1000,33 @@ products, we need to make sure everything is clear."
 7. **Check**: read each item alone. Could a customer tell what they get and
    what they can choose, without reading any other item?
 
+## 3m. Places the owner fills, so the page grows without breaking (Tzvi, 19 Oct 2026)
+
+Tzvi: "if Chicken Munch wants to add more pictures, how would he do that
+without it ruining the page look or layout?", and then: "I don't want to keep
+personally building pages, I want it to be automated." An owner never adds by
+dragging things around; every designed page has fixed places that grow by
+themselves, in the page's own style. The same places are what an automated
+update will fill.
+
+1. **A gallery on every designed page**: a section with `data-mir-gallery`
+   (and `data-max`), a `[data-mir-photos]` list and a
+   `<template data-mir-photo>` holding one `<img data-f="img">` in a frame of
+   one shape, `hidden` until filled. The owner adds, orders, removes and sets
+   the focus of photos in the dashboard (Edit your page, Photos);
+   `frontend/public/pages/mir-gallery.js` lays them out, crops each around its
+   focus, leaves out photos under 640px wide, and sets `data-count` so the page
+   can lay out one, two or four photos well. Chicken Munch's "From our
+   kitchen" is the worked example.
+2. **Items they sell come from their shop** wherever the page lists products:
+   `data-mir-catalog` (`mir-catalog.js`), so a new item, a price change or out
+   of stock shows in the page's own tile design. Where an order form has
+   per-item rules (3l), those rules are part of the item's data.
+3. **Fixed places for details, never free text boxes**: hours, delivery areas
+   and fees, a guarantee, FAQ, reviews, each with its spot and a length limit.
+4. **Bigger changes** (a new section, a new look) are a design job, not an
+   owner edit.
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews
