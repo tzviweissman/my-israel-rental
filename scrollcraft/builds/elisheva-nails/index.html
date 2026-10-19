@@ -10,7 +10,7 @@
 <meta property="og:image" content="https://myisraelrental.com/pages/elisheva-brandeis/assets/milky.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;1,6..96,500&family=Outfit:wght@400;500;600&family=Parisienne&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site.css">
 </head>
 <body class="no-js" data-page="index">
@@ -24,6 +24,8 @@
 </header>
 <main>
   <section class="hero" id="open" aria-labelledby="h-open">
+    <div class="tint" aria-hidden="true"></div>
+    <p class="ghost" aria-hidden="true">Elisheva</p>
     <div class="wrap">
       <div class="h-text">
         <p class="caps">Luxe Nail Studio · Romema, Jerusalem</p>
@@ -95,12 +97,13 @@
 </div>
 <script src="site.js"></script>
 <script>
-var SHADES = [{"k": "milky", "n": "Milky white", "f": "milky.webp", "a": "Milky white gel nails on a client"}, {"k": "bubblegum", "n": "Bubblegum pink", "f": "bubblegum.webp", "a": "Bubblegum pink gel nails"}, {"k": "sheer", "n": "Sheer pink", "f": "sheer.webp", "a": "Sheer pink gel nails on a client"}, {"k": "nude", "n": "Soft nude", "f": "nude-2.webp", "a": "Soft nude gel nails on a client"}, {"k": "ruby", "n": "Ruby red", "f": "ruby.webp", "a": "Ruby red gel nails holding two gel polish bottles"}, {"k": "blue", "n": "With a touch of blue", "f": "blue.webp", "a": "Nude gel nails with light blue accent nails"}];
+var SHADES = [{"k": "milky", "n": "Milky white", "f": "milky.webp", "a": "Milky white gel nails on a client", "c": "#F4EFEE"}, {"k": "bubblegum", "n": "Bubblegum pink", "f": "bubblegum.webp", "a": "Bubblegum pink gel nails", "c": "#F3A9C6"}, {"k": "sheer", "n": "Sheer pink", "f": "sheer.webp", "a": "Sheer pink gel nails on a client", "c": "#EDBDB6"}, {"k": "nude", "n": "Soft nude", "f": "nude-2.webp", "a": "Soft nude gel nails on a client", "c": "#E7C4B5"}, {"k": "ruby", "n": "Ruby red", "f": "ruby.webp", "a": "Ruby red gel nails holding two gel polish bottles", "c": "#8F1D2B"}, {"k": "blue", "n": "With a touch of blue", "f": "blue.webp", "a": "Nude gel nails with light blue accent nails", "c": "#AFCBE8"}];
 // The opening: tap a shade and her photo of nails in that colour opens out
 // from the chip as a circle. Untouched, it moves to the next shade every few
 // seconds until the visitor chooses. Photos are hers; only the reveal moves.
 (function () {
-  var frame = document.getElementById('frame'), name = document.getElementById('shade-name'), book = document.getElementById('book-shade');
+  var frame = document.getElementById('frame'), name = document.getElementById('shade-name'), book = document.getElementById('book-shade'), hero = document.getElementById('open');
+  hero.style.setProperty('--tint', SHADES[0].c);
   var chips = [].slice.call(document.querySelectorAll('#chips .shade')), at = 0, busy = false, auto = true, timer = 0;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   SHADES.forEach(function (s) { var i = new Image(); i.src = 'assets/' + s.f; });
@@ -109,6 +112,7 @@ var SHADES = [{"k": "milky", "n": "Milky white", "f": "milky.webp", "a": "Milky 
     busy = true; at = i;
     chips.forEach(function (c, j) { c.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
     name.textContent = SHADES[i].n;
+    hero.style.setProperty('--tint', SHADES[i].c);
     book.href = 'book.html?shade=' + SHADES[i].k;
     var r = frame.getBoundingClientRect(), cx = 50, cy = 100;
     if (from) { var c = from.getBoundingClientRect(); cx = ((c.left + c.width / 2 - r.left) / r.width) * 100; cy = ((c.top + c.height / 2 - r.top) / r.height) * 100; }

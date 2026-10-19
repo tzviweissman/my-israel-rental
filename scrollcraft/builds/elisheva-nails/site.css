@@ -1,11 +1,12 @@
 /* Nails by Elisheva, Luxe Nail Studio. Her flyer is the brand: blush pink,
    rose gold, an EB monogram, spaced serif capitals and a script line.
-   Cormorant Garamond (capitals and headings), Pinyon Script (one line only),
-   Jost for everything else. One solid button: deep rose with white letters. */
+   Bodoni Moda (capitals and headings), Parisienne (one line only), Outfit
+   for everything else: chosen apart from Aidy Yaniv's Cormorant, Allura and
+   Jost (scripts/check-fingerprints.mjs). One solid button: deep rose with white letters. */
 :root {
-  --blush: #F6E1DE; --blush-2: #F3D4D1; --paper: #FFF8F6; --rose: #B76E66; --rose-dk: #84423C; --gold: #C08A6E;
+  --blush: #F6E1DE; --blush-2: #F3D4D1; --paper: #FFF8F6; --rose: #B76E66; --rose-dk: #84423C; --gold: #C28E8A;
   --ink: #3A2523; --soft: #6E5450; --line: #EBCFCB;
-  --r: 18px; --font-head: 'Cormorant Garamond', Georgia, serif; --font-script: 'Pinyon Script', cursive; --font-body: 'Jost', system-ui, sans-serif;
+  --r: 18px; --font-head: 'Bodoni Moda', Georgia, serif; --font-script: 'Parisienne', cursive; --font-body: 'Outfit', system-ui, sans-serif;
   --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
 }
 *, *::before, *::after { box-sizing: border-box; }
@@ -61,7 +62,7 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
 .hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); grid-template-areas: "text frame" "pick frame"; column-gap: clamp(1.5rem, 4vw, 4rem); row-gap: 0; align-items: center; }
 .h-text { grid-area: text; align-self: end; } .h-pick { grid-area: pick; align-self: start; } .hero .frame { grid-area: frame; }
 .sym { font-family: var(--font-body); font-weight: 500; font-size: .62em; margin-right: .08em; vertical-align: .18em; }
-.hero h1 { font-size: clamp(2.8rem, 5.4vw, 5rem); font-weight: 600; letter-spacing: .01em; }
+.hero h1 { font-size: clamp(2.6rem, 4.8vw, 4.4rem); font-weight: 500; letter-spacing: .01em; }
 .hero h1 .script { display: block; font-size: .78em; margin-top: .15em; line-height: 1.1; }
 .hero .lede { margin: 1.1rem 0 1.4rem; max-width: 30rem; color: var(--soft); font-size: 1.12rem; }
 .shades { margin: 0 0 1.6rem; }
@@ -181,3 +182,15 @@ textarea.fld { min-height: 80px; resize: vertical; }
 .bar .btn { min-height: 46px; padding: 0 1.3rem; }
 @media (max-width: 760px) { .bar { display: flex; } body { --pad-bar: var(--bar-h); } }
 @media (prefers-reduced-motion: reduce) { .rev { opacity: 1; transform: none; transition: none; } .frame img.next { transition: none; } }
+
+/* wow pass (19 Oct 2026): the shade you tap colours the whole opening, and a
+   giant "Elisheva" in her script sits behind the photo in that colour */
+.hero { isolation: isolate; }
+.hero .tint { position: absolute; inset: 0; z-index: -2; background: var(--tint, #F4EFEE); opacity: .22; transition: background-color 900ms cubic-bezier(.65, 0, .35, 1); }
+.hero .ghost { position: absolute; z-index: -1; left: 50%; top: 56%; translate: 0 -50%; margin: 0; font: 400 min(17vw, 40svh)/1 var(--font-script); color: var(--tint, #F4EFEE);
+  opacity: .55; white-space: nowrap; pointer-events: none; transition: color 900ms cubic-bezier(.65, 0, .35, 1); filter: saturate(1.2) brightness(.92);
+  animation: ghost-in 1600ms var(--out) both; }
+@keyframes ghost-in { from { opacity: 0; transform: translateX(6vw); } to { opacity: .55; transform: none; } }
+.hero .frame { max-width: min(560px, 76svh * .8); }
+@media (max-width: 860px) { .hero .ghost { font-size: 30vw; top: 30%; left: auto; right: -4vw; } }
+@media (prefers-reduced-motion: reduce) { .hero .ghost { animation: none; } }

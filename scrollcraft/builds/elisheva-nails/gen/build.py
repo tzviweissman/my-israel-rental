@@ -41,7 +41,7 @@ def head(page, title, desc, img):
 <meta property="og:image" content="{OG}{img}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Jost:wght@400;500;600&family=Pinyon+Script&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;1,6..96,500&family=Outfit:wght@400;500;600&family=Parisienne&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site.css">
 </head>
 <body class="no-js" data-page="{page}">
@@ -86,6 +86,8 @@ FOOTER = f'''  <section class="close" aria-label="Book with Elisheva">
 
 chips = ''.join(f'<button class="shade" type="button" data-k="{k}" style="--c:{c}" aria-pressed="{"true" if i == 0 else "false"}" aria-label="{n}"></button>' for i, (k, n, c, f, a) in enumerate(SHADES))
 HERO = f'''  <section class="hero" id="open" aria-labelledby="h-open">
+    <div class="tint" aria-hidden="true"></div>
+    <p class="ghost" aria-hidden="true">Elisheva</p>
     <div class="wrap">
       <div class="h-text">
         <p class="caps">Luxe Nail Studio · Romema, Jerusalem</p>
@@ -110,12 +112,13 @@ HERO = f'''  <section class="hero" id="open" aria-labelledby="h-open">
     </div>
   </section>
 '''
-HERO_JS = '<script>\nvar SHADES = ' + json.dumps([{'k': k, 'n': n, 'f': f, 'a': a} for k, n, c, f, a in SHADES]) + ''';
+HERO_JS = '<script>\nvar SHADES = ' + json.dumps([{'k': k, 'n': n, 'f': f, 'a': a, 'c': c} for k, n, c, f, a in SHADES]) + ''';
 // The opening: tap a shade and her photo of nails in that colour opens out
 // from the chip as a circle. Untouched, it moves to the next shade every few
 // seconds until the visitor chooses. Photos are hers; only the reveal moves.
 (function () {
-  var frame = document.getElementById('frame'), name = document.getElementById('shade-name'), book = document.getElementById('book-shade');
+  var frame = document.getElementById('frame'), name = document.getElementById('shade-name'), book = document.getElementById('book-shade'), hero = document.getElementById('open');
+  hero.style.setProperty('--tint', SHADES[0].c);
   var chips = [].slice.call(document.querySelectorAll('#chips .shade')), at = 0, busy = false, auto = true, timer = 0;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   SHADES.forEach(function (s) { var i = new Image(); i.src = 'assets/' + s.f; });
@@ -124,6 +127,7 @@ HERO_JS = '<script>\nvar SHADES = ' + json.dumps([{'k': k, 'n': n, 'f': f, 'a': 
     busy = true; at = i;
     chips.forEach(function (c, j) { c.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
     name.textContent = SHADES[i].n;
+    hero.style.setProperty('--tint', SHADES[i].c);
     book.href = 'book.html?shade=' + SHADES[i].k;
     var r = frame.getBoundingClientRect(), cx = 50, cy = 100;
     if (from) { var c = from.getBoundingClientRect(); cx = ((c.left + c.width / 2 - r.left) / r.width) * 100; cy = ((c.top + c.height / 2 - r.top) / r.height) * 100; }

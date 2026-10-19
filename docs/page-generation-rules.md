@@ -1027,6 +1027,87 @@ update will fill.
 4. **Bigger changes** (a new section, a new look) are a design job, not an
    owner edit.
 
+## 3n. The wow gate, scored before anyone sees the page (Tzvi, 19 Oct 2026)
+
+The Whipped Cup and Nails by Elisheva were shown with openings that moved (a
+cloud puffing, a photo swapping) and Tzvi found both bland: "I thought we have
+rules to prevent this, why was it bland?" The rules said "open on an event"
+and "one signature moment", and a small animation passed them on paper. The
+gap: nothing measured whether it was strong, so the builder graded its own
+work by the letter. From now on a page is not shown until it scores all five,
+written into the build notes with one line of proof each:
+
+1. **Their strongest real photo, big.** The best photo the owner has fills at
+   least half of the first screen on a laptop and on a phone. Not a small
+   card, not a shape cut out of it.
+2. **One signature moment that only this business could have**, built from
+   their own thing (their steps, their range, their product), that the
+   visitor drives: a scroll scene or a choice. Chicken Munch: his bowl dropped
+   across CHICKEN. The Whipped Cup: her three steps filling a glass as you
+   scroll. Elisheva: tap a shade and the whole opening takes that colour.
+3. **The visitor's choice changes the page**, not just one picture (the
+   colour, the hero, the order).
+4. **Side by side with a reference.** A screenshot of the first screen next to
+   the closest Awwwards reference in docs/inspo for that kind of business; if
+   ours is plainly weaker, it is not shown.
+5. **The one-sentence test, told to someone else**: "you land and ___
+   happens". If the sentence is about a decoration ("a cloud puffs"), it
+   fails; it must be about them ("you pick a shade and her real work fills the
+   screen in it").
+
+A page that fails any of the five goes back to the build, not to Tzvi.
+
+## 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
+
+1. **Food stays the owner's real photo.** Generated food motion (a split
+   piece, crumbs flying, a sauce splash, a toss, a drop into a bowl) looked
+   fake every time: the model invents the food between the frames and makes
+   it smooth, shiny and watery. The wow comes from their real photo moved as
+   one solid piece (Chicken Munch's bowl dropped across CHICKEN), big type, and
+   the visitor's own choices. Generate only scenery, light or steam, or a
+   drawing that is plainly a drawing (The Whipped Cup's glass).
+2. **If a liquid must be generated**, prompt the material, not the advert:
+   opaque, satin, specks and bubbles, a gentle pour that folds and piles up.
+   "High-speed advert splash, glossy, rim light" gives glass or neon. Check the
+   still for see-through or glowing edges before showing.
+3. **Check product colours look true.** A coloured cloth can cast onto the
+   product (Chicken Munch's kraft bowl came out blue-grey). Fix only that
+   object's cast (gen/kraft.py is the worked example), never the food.
+4. **Label every contact by what it does**: "WhatsApp or call", "Call only,
+   no WhatsApp", "Text". Ask the owner which number takes what; never assume a
+   number has WhatsApp.
+5. **Check the currency sign renders in the heading font.** Some display faces
+   have no ₪ and fall back to a broken glyph: set the sign in the body face
+   (`<span class="sym">`, Elisheva's page).
+6. **One photo per kind, from everything the owner sent.** Look at all of
+   them on one numbered sheet, skip duplicates (the same photo sent three
+   times), and ask about any photo whose kind is not clear before naming it.
+7. **Screenshots as photos**: crop at the screenshot's real resolution (scale
+   the boxes by its width), take only the photo area, and ask the owner for
+   the originals in the first message.
+
+## 3p. No two businesses look alike, and builds start from the starter (Tzvi, 19 Oct 2026)
+
+Tzvi: "make sure that businesses don't come out too similar." Nails by
+Elisheva first came out with nearly Aidy Yaniv's fonts (Cormorant Garamond, a
+script, Jost), and Chicken Munch shares Anton with Michal Yodaiken.
+
+1. **Start from `scrollcraft/starter`** (README there): `fetch_business.py`
+   pulls the record and every photo onto one numbered sheet in one command;
+   `sitekit.py`, `site.css` and `site.js` give the menu bar, phone menu,
+   footer, phone bar, contacts labelled by what they do, owner-filled gallery
+   and questions. The starter is how the site works, never how it looks.
+2. **The look is chosen fresh for each business** from its own logo, photos
+   and menu, and written into `scrollcraft/fingerprints.json` (hero,
+   signature, nav, close, layout, ground, own_colours) before any section is
+   built.
+3. **`node scripts/check-fingerprints.mjs <build>` must pass** before the
+   page is shown and again before it is published: no heading face shared
+   with another site, no shared body face plus script, no two brand colours
+   alike (unless they are the business's own), and the design different on at
+   least 4 of 6. On a clash the new site changes; an existing site is never
+   changed to make room.
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews
