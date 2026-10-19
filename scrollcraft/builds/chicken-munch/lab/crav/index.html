@@ -1,0 +1,154 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chicken Munch, big type opening</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<style>
+  /* After crav-burgers (docs/inspo/awwwards-food-2026-10-18, crav-burgers-2):
+     a giant red word, his real bowl cut out and sitting across it, the gold
+     name in front of the bowl, sticker labels with real facts only. The food
+     is his photo, moved only as one solid piece. */
+  :root { --black: #0E0D0C; --ink: #F6F1E7; --muted: #B9B0A2; --red: #EF2B2B; --gold: #FAA519; --gold-dk: #B9740A;
+    --out: cubic-bezier(.22,1,.36,1); --pop: cubic-bezier(.34,1.5,.64,1);
+    --font-head: 'Anton', Impact, sans-serif; --font-body: 'Archivo', system-ui, sans-serif; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; background: var(--black); color: var(--ink); font: 400 1.0625rem/1.55 var(--font-body); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  .top { position: absolute; inset: 0 0 auto; z-index: 10; display: flex; align-items: center; justify-content: space-between; padding: 18px max(16px, 3vw); }
+  .logo { font: 400 1.35rem/.9 var(--font-head); text-transform: uppercase; text-decoration: none; letter-spacing: .01em; }
+  .logo .a { color: var(--red); } .logo .b { color: var(--gold); display: block; padding-left: .9em; }
+  .pill { display: inline-flex; align-items: center; min-height: 44px; padding: 0 1.2rem; border-radius: 999px; border: 2px solid var(--ink);
+    color: var(--ink); font: 700 .95rem/1 var(--font-body); text-decoration: none; transition: background 160ms var(--out), transform 160ms var(--out); }
+  .pill:hover { background: rgb(255 255 255 / .1); } .pill:active { transform: scale(.97); }
+
+  .hero { --f: min(24vw, 31svh); --f2: calc(var(--f) * .8);
+    position: relative; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 76px max(16px, 3vw) 0; overflow: hidden; isolation: isolate; }
+  .glow { position: absolute; z-index: -1; left: 50%; top: 52%; width: min(120vw, 130svh); aspect-ratio: 1; translate: -50% -50%;
+    background: radial-gradient(closest-side, rgb(239 43 43 / .30), rgb(250 165 25 / .10) 55%, transparent 72%); pointer-events: none; }
+  .w1, .w2 { margin: 0; font-family: var(--font-head); font-weight: 400; text-transform: uppercase; line-height: .86; white-space: nowrap; display: flex; }
+  .w1 { font-size: var(--f); color: var(--red); position: relative; z-index: 1; letter-spacing: -.005em; }
+  .w2 { font-size: var(--f2); color: var(--gold); position: relative; z-index: 3; margin-top: calc(var(--f2) * -.64);
+    text-shadow: 0 .04em 0 var(--black), 0 .1em .25em rgb(0 0 0 / .45); }
+  .ch { display: inline-block; will-change: transform; }
+  .bowl { position: relative; z-index: 2; width: min(92vw, calc(var(--f) * 1.95)); margin-top: calc(var(--f) * -.56); will-change: transform; }
+  .bowl img { display: block; width: 100%; height: auto; filter: drop-shadow(0 30px 40px rgb(0 0 0 / .65)); }
+  .stk { position: absolute; z-index: 4; padding: .5em .85em .45em; border-radius: 14px; font: 800 clamp(.8rem, 1.25vw, 1.05rem)/1.05 var(--font-body);
+    text-transform: uppercase; letter-spacing: .02em; text-align: center; box-shadow: 0 0 0 3px var(--black), 0 8px 18px rgb(0 0 0 / .45); will-change: transform; }
+  .stk.k { background: var(--gold); color: var(--black); left: -4%; top: 24%; rotate: -11deg; }
+  .stk.s { background: #C8141C; color: #fff; right: -6%; top: 12%; rotate: 8deg; }
+  .stk.p { background: var(--ink); color: var(--black); right: 2%; bottom: 30%; rotate: -6deg; }
+  .foot { position: relative; z-index: 5; width: 100%; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px;
+    padding: 18px 0 24px; }
+  .foot .l { max-width: 30rem; }
+  .label { margin: 0 0 .35rem; color: var(--gold); font: 700 .78rem/1.2 var(--font-body); letter-spacing: .18em; text-transform: uppercase; }
+  h1 { margin: 0 0 .3rem; font: 400 clamp(1.5rem, 2.3vw, 2.1rem)/1 var(--font-head); text-transform: uppercase; }
+  .lede { margin: 0; color: var(--muted); font-size: .95rem; }
+  .foot .r { display: flex; align-items: center; gap: 16px; text-align: right; }
+  .proof { margin: 0; color: var(--muted); font-size: .9rem; line-height: 1.35; }
+  .proof b { color: var(--ink); }
+  .btn { display: inline-flex; align-items: center; gap: .6rem; min-height: 54px; padding: 0 1.7rem; border-radius: 999px; background: var(--gold);
+    color: var(--black); font: 700 1.05rem/1 var(--font-body); text-decoration: none; box-shadow: 0 4px 0 var(--gold-dk);
+    transition: transform 160ms var(--out), box-shadow 160ms var(--out); white-space: nowrap; }
+  .btn:hover { transform: translateY(-1px); box-shadow: 0 5px 0 var(--gold-dk); }
+  .btn:active { transform: translateY(3px); box-shadow: 0 1px 0 var(--gold-dk); }
+  .btn .arw { transition: transform 220ms var(--out); } .btn:hover .arw { transform: translateX(4px); }
+  .kosher { background: #C8141C; color: #fff; text-align: center; padding: 14px 16px; font-size: .95rem; }
+  .after { padding: 16svh 6vw; color: var(--muted); text-align: center; }
+
+  /* entrance: letters rise, the bowl drops in and lands, stickers stick on */
+  .js .w1 .ch { transform: translateY(70%); opacity: 0; }
+  .js .w2 .ch { transform: translateY(60%); opacity: 0; }
+  .js .bowl img { transform: translateY(-75svh) rotate(-8deg); }
+  .js .stk { transform: scale(0); }
+  .js .foot, .js .top { opacity: 0; }
+  .go .w1 .ch, .go .w2 .ch { transform: none; opacity: 1; transition: transform 800ms var(--out), opacity 500ms var(--out); transition-delay: calc(var(--i) * 55ms + var(--d, 0ms)); }
+  .go .w2 .ch { --d: 820ms; }
+  .go .bowl img { transform: none; transition: transform 950ms var(--pop) 380ms; }
+  .go .stk { transform: none; transition: transform 520ms var(--pop); }
+  .go .stk.k { transition-delay: 1250ms; } .go .stk.s { transition-delay: 1380ms; } .go .stk.p { transition-delay: 1510ms; }
+  .go .foot, .go .top { opacity: 1; transition: opacity 600ms var(--out) 1300ms; }
+
+  @media (max-width: 760px) {
+    .hero { --f: 26vw; --f2: 26vw; padding-top: 84px; }
+    .bowl { width: 76vw; margin-top: calc(var(--f) * -.2); }
+    .w2 { margin-top: calc(var(--f2) * -.55); }
+    .stk { font-size: .72rem; border-radius: 10px; }
+    .label { font-size: .875rem; letter-spacing: .12em; }
+    .stk.k { left: -8%; top: 22%; } .stk.s { right: -10%; top: 6%; } .stk.p { right: -8%; bottom: 26%; }
+    .foot { flex-direction: column; align-items: flex-start; margin-top: 14px; }
+    .foot .r { width: 100%; justify-content: space-between; text-align: left; }
+    .top .pill { display: none; }
+  }
+  @media (prefers-reduced-motion: reduce) { .js .w1 .ch, .js .w2 .ch, .js .bowl img, .js .stk, .js .foot, .js .top { transform: none !important; opacity: 1 !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="logo" href="#" aria-label="Chicken Munch"><span class="a">Chicken</span><span class="b">Munch</span></a>
+  <a class="pill" href="#order">Order now</a>
+</header>
+<section class="hero" id="hero" aria-labelledby="h-open">
+  <div class="glow" aria-hidden="true"></div>
+  <p class="w1" aria-hidden="true" id="w1">Chicken</p>
+  <div class="bowl" id="bowl">
+    <img src="bowl.webp" alt="A kraft bowl of Original Hot Poppers, chicken bites in a glossy sweet and spicy glaze" width="1548" height="1285" fetchpriority="high">
+    <span class="stk k" data-m="-1">Kosher</span>
+    <span class="stk s" data-m="1.3">Now taking<br>Shabbos orders</span>
+    <span class="stk p" data-m="-.8">Original<br>Hot Poppers</span>
+  </div>
+  <p class="w2" aria-hidden="true" id="w2">Munch</p>
+  <div class="foot">
+    <div class="l">
+      <p class="label">Kosher American fried chicken · Jerusalem</p>
+      <h1 id="h-open">The taste of America, now in Israel</h1>
+      <p class="lede">Premium fried chicken, made with the finest ingredients and crafted with care.</p>
+    </div>
+    <div class="r">
+      <p class="proof">Munch boxes from <b>$69</b><br>Pans from <b>₪275</b></p>
+      <a class="btn" href="#order">Order now <span class="arw" aria-hidden="true">→</span></a>
+    </div>
+  </div>
+</section>
+<div class="kosher"><b>Kosher</b>, hechsher of Rav Akiva Dershowitz</div>
+<div class="after" id="order">The rest of the page continues here.</div>
+<script>
+(() => {
+  const root = document.documentElement, reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // one span per letter, so the letters can rise in and spread apart
+  for (const id of ['w1', 'w2']) { const el = document.getElementById(id), t = el.textContent;
+    el.innerHTML = [...t].map((c, i) => `<span class="ch" style="--i:${i}">${c}</span>`).join(''); }
+  if (reduce) return;
+  root.classList.add('js');
+  const start = () => requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('go')));
+  const img = document.querySelector('.bowl img');
+  (img.complete ? Promise.resolve() : new Promise(r => { img.onload = img.onerror = r; }))
+    .then(() => document.fonts.ready).then(start);
+  setTimeout(start, 2500);
+
+  const hero = document.getElementById('hero'), bowl = document.getElementById('bowl');
+  const w1 = [...document.querySelectorAll('#w1 .ch')];
+  const stk = [...document.querySelectorAll('.stk')];
+  let mx = 0, my = 0, tx = 0, ty = 0, p = 0;
+  // scroll: the letters spread apart, the bowl rises and grows a little, MUNCH sinks
+  // mouse: the bowl leans toward the pointer, the stickers drift the other way
+  addEventListener('pointermove', e => { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; }, { passive: true });
+  function frame() {
+    tx += (mx - tx) * .08; ty += (my - ty) * .08;
+    p = Math.min(1, Math.max(0, scrollY / (hero.offsetHeight * .9)));
+    const e = 1 - Math.pow(1 - p, 2), mid = (w1.length - 1) / 2;
+    if (root.classList.contains('go') && performance.now() > 2600) {
+      w1.forEach((c, i) => { c.style.transition = 'none'; c.style.transform = `translate(${(i - mid) * e * 3}vw, ${-e * 5}vh)`; });
+    }
+    bowl.style.transform = `translate(${tx * 18}px, ${ty * 12 - e * 9}vh) rotate(${tx * 3}deg) scale(${1 + e * .1})`;
+    stk.forEach(s => { const m = +s.dataset.m; s.style.translate = `${-tx * 26 * m}px ${-ty * 18 * m}px`; });
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+</script>
+</body>
+</html>

@@ -62,49 +62,59 @@
   .mark { font: 400 1.5rem/1 var(--font-head); text-decoration: none; color: var(--gold); text-transform: uppercase; }
   .mark b { font-weight: 400; color: var(--red); }
 
-  /* ── opening: his poppers, real, big; his name stamps in beside them ── */
-  .open { position: relative; min-height: 100svh; padding-top: 64px; display: grid; grid-template-columns: minmax(0, .95fr) minmax(0, 1.05fr); align-items: center; overflow: hidden; }
-  .open-photo { position: relative; height: calc(100svh - 64px); min-height: 520px; order: 2; overflow: hidden; }
-  .open-photo img { width: 100%; height: 100%; object-fit: cover; object-position: 45% 40%; animation: ease-in 2200ms var(--out) both; }
-  @keyframes ease-in { from { transform: scale(1.08); opacity: 0; } to { transform: none; opacity: 1; } }
-  /* the glint (owner's pick, 18 Oct 2026): a soft warm light, screened onto his
-     own photo only where the glaze shines (glaze-mask, made from the photo's
-     bright glossy ridges); it sweeps across on arrival, then follows the mouse. The food
-     is his photo throughout; only light moves. */
-  /* the photo leans gently toward the pointer, and a warm light wash
-     follows it; the sparkle on the glaze rides on top */
-  .open-photo .pp { position: absolute; inset: -3%; transform: translate(var(--px, 0px), var(--py, 0px)) scale(1.03); transition: transform 120ms linear; will-change: transform; }
-  .open-photo .pp img { width: 100%; height: 100%; object-fit: cover; object-position: 45% 40%; }
-  .open-photo .wash { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: soft-light;
-    background: radial-gradient(circle calc(var(--gr, 260px) * 1.9) at var(--gx, -30%) var(--gy, 35%), rgb(255 235 200 / .85), rgb(255 235 200 / 0) 70%); }
-  .open-photo .glint { position: absolute; inset: 0; pointer-events: none; mix-blend-mode: screen;
-    background: radial-gradient(circle var(--gr, 260px) at var(--gx, -30%) var(--gy, 35%), rgb(255 253 245 / 1) 0%, rgb(255 240 210 / .6) 24%, rgb(255 225 180 / 0) 56%);
-    -webkit-mask-image: url(/pages/chicken-munch/assets/glaze-mask.webp?v=mve5ltnd); mask-image: url(/pages/chicken-munch/assets/glaze-mask.webp?v=mve5ltnd);
-    -webkit-mask-size: cover; mask-size: cover; -webkit-mask-position: 45% 40%; mask-position: 45% 40%; -webkit-mask-repeat: no-repeat; mask-repeat: no-repeat;
-    animation: ease-in 2200ms var(--out) both; }
-  /* the photo melts into the black on the side the words sit */
-  .open-photo::after { content: ''; position: absolute; inset: 0; background: linear-gradient(90deg, var(--black) 0%, rgb(14 13 12 / 0) 28%), linear-gradient(0deg, var(--black) 0%, rgb(14 13 12 / 0) 18%); }
-  .open-copy { position: relative; z-index: 2; padding: clamp(2rem, 5vw, 4rem) 0 clamp(2rem, 5vw, 4rem) var(--gutter); }
-  .name { font: 400 clamp(4.2rem, 10vw, 9.5rem)/.86 var(--font-head); text-transform: uppercase; margin: 0 0 1.4rem; }
-  .name span { display: block; animation: stamp 560ms var(--out) both; }
-  .name .n1 { color: var(--red); animation-delay: 150ms; }
-  .name .n2 { color: var(--gold); animation-delay: 380ms; }
-  @keyframes stamp { from { transform: translateY(-30%) scale(1.25); opacity: 0; } to { transform: none; opacity: 1; } }
-  .label { font: 700 .875rem/1.25 var(--font-body); letter-spacing: .1em; text-transform: uppercase; color: var(--soft); margin: 0 0 .8rem; }
-  .open h1 { font-size: clamp(1.9rem, 3.2vw, 2.8rem); color: var(--ink); max-width: 30rem; }
-  .open .lede { color: var(--soft); font-size: 1.1rem; margin: .9rem 0 1.6rem; max-width: 28rem; }
-  .act { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem 1.3rem; }
-  .proof { font: 500 .95rem/1.4 var(--font-body); color: var(--soft); margin: 0; }
+  /* ── opening (Tzvi's pick, 19 Oct 2026, after crav-burgers in
+     docs/inspo/awwwards-food-2026-10-18): a giant red CHICKEN, his real bowl
+     of Hot Poppers cut out of his photo and dropped across the letters, the
+     gold MUNCH in front of it, sticker labels with his real facts. The food
+     is his photo, only ever moved as one solid piece. ── */
+  .open { --f: min(24vw, 31svh); --f2: calc(var(--f) * .8);
+    position: relative; min-height: 100svh; display: flex; flex-direction: column; align-items: center; justify-content: center;
+    padding: 76px var(--gutter) 0; overflow: hidden; isolation: isolate; }
+  .open .glow { position: absolute; z-index: -1; left: 50%; top: 52%; width: min(120vw, 130svh); aspect-ratio: 1; translate: -50% -50%;
+    background: radial-gradient(closest-side, rgb(239 43 43 / .30), rgb(250 165 25 / .10) 55%, transparent 72%); pointer-events: none; }
+  .open .w1, .open .w2 { margin: 0; font-family: var(--font-head); font-weight: 400; text-transform: uppercase; line-height: .86; white-space: nowrap; display: flex; }
+  .open .w1 { font-size: var(--f); color: var(--red); position: relative; z-index: 1; letter-spacing: -.005em; }
+  .open .w2 { font-size: var(--f2); color: var(--gold); position: relative; z-index: 3; margin-top: calc(var(--f2) * -.64);
+    text-shadow: 0 .04em 0 var(--black), 0 .1em .25em rgb(0 0 0 / .45); }
+  .open .ch { display: inline-block; will-change: transform; }
+  .open .bowl { position: relative; z-index: 2; width: min(92vw, calc(var(--f) * 1.95)); margin-top: calc(var(--f) * -.56); will-change: transform; }
+  .open .bowl img { display: block; width: 100%; height: auto; filter: drop-shadow(0 30px 40px rgb(0 0 0 / .65)); }
+  .stk { position: absolute; z-index: 4; padding: .5em .85em .45em; border-radius: 14px; font: 800 clamp(.8rem, 1.25vw, 1.05rem)/1.05 var(--font-body);
+    text-transform: uppercase; letter-spacing: .02em; text-align: center; box-shadow: 0 0 0 3px var(--black), 0 8px 18px rgb(0 0 0 / .45); will-change: transform; }
+  .stk.k { background: var(--gold); color: var(--black); left: -4%; top: 24%; rotate: -11deg; }
+  .stk.s { background: #C8141C; color: #fff; right: -6%; top: 12%; rotate: 8deg; }
+  .stk.p { background: var(--ink); color: var(--black); right: 0; bottom: 40%; rotate: -6deg; }
+  .open-foot { position: relative; z-index: 5; width: 100%; display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; padding: 18px 0 24px; }
+  .open-foot .l { max-width: 30rem; }
+  .label { margin: 0 0 .35rem; color: var(--gold); font: 700 .78rem/1.2 var(--font-body); letter-spacing: .18em; text-transform: uppercase; }
+  .open h1 { margin: 0 0 .3rem; font-size: clamp(1.5rem, 2.3vw, 2.1rem); line-height: 1; color: var(--ink); }
+  .open .lede { margin: 0; color: var(--soft); font-size: .95rem; }
+  .open-foot .r { display: flex; align-items: center; gap: 16px; text-align: right; }
+  .proof { font: 500 .9rem/1.35 var(--font-body); color: var(--soft); margin: 0; }
   .proof b { color: var(--gold); font-weight: 700; }
-  .shabbos { display: inline-block; margin-top: 1.4rem; padding: .45rem .9rem; border: 1px solid var(--red); border-radius: 999px; color: var(--ink); font: 700 .9rem/1.2 var(--font-body); }
-  @media (max-width: 860px) {
-    .open { grid-template-columns: 1fr; min-height: 0; }
-    .open-photo { order: 0; height: 52svh; min-height: 300px; }
-    .open-photo::after { background: linear-gradient(0deg, var(--black) 0%, rgb(14 13 12 / 0) 35%); }
-    .open-copy { padding: 0 var(--gutter) 2.4rem; margin-top: -4.5rem; }
-    .name { font-size: clamp(3.6rem, 19vw, 5.4rem); margin-bottom: 1rem; }
+  .open .btn { white-space: nowrap; }
+  /* entrance: the letters rise, the bowl drops in and lands, the stickers stick on */
+  .js-in .open .w1 .ch { transform: translateY(70%); opacity: 0; }
+  .js-in .open .w2 .ch { transform: translateY(60%); opacity: 0; }
+  .js-in .open .bowl img { transform: translateY(-75svh) rotate(-8deg); }
+  .js-in .open .stk { transform: scale(0); }
+  .js-in .open-foot { opacity: 0; }
+  .go .open .w1 .ch, .go .open .w2 .ch { transform: none; opacity: 1; transition: transform 800ms var(--out), opacity 500ms var(--out); transition-delay: calc(var(--i) * 55ms + var(--d, 0ms)); }
+  .go .open .w2 .ch { --d: 820ms; }
+  .go .open .bowl img { transform: none; transition: transform 950ms cubic-bezier(.34, 1.5, .64, 1) 380ms; }
+  .go .open .stk { transform: none; transition: transform 520ms cubic-bezier(.34, 1.5, .64, 1); }
+  .go .stk.k { transition-delay: 1250ms; } .go .stk.s { transition-delay: 1380ms; } .go .stk.p { transition-delay: 1510ms; }
+  .go .open-foot { opacity: 1; transition: opacity 600ms var(--out) 1300ms; }
+  @media (max-width: 760px) {
+    .open { --f: 26vw; --f2: 26vw; padding-top: 84px; }
+    .open .bowl { width: 76vw; margin-top: calc(var(--f) * -.2); }
+    .open .w2 { margin-top: calc(var(--f2) * -.55); }
+    .stk { font-size: .72rem; border-radius: 10px; }
+    .stk.k { left: -8%; top: 22%; } .stk.s { right: -10%; top: 6%; } .stk.p { right: -8%; bottom: 34%; }
+    .label { font-size: .875rem; letter-spacing: .12em; }
+    .open-foot { flex-direction: column; align-items: flex-start; margin-top: 14px; }
+    .open-foot .r { width: 100%; justify-content: space-between; text-align: left; }
   }
-
   .kosher { background: #C8141C; color: #fff; }
   .kosher .wrap { display: flex; flex-wrap: wrap; gap: .3rem 1.4rem; justify-content: center; padding-block: 1rem; text-align: center; font: 500 1rem/1.4 var(--font-body); }
   .kosher b { font-weight: 700; }
@@ -212,7 +222,7 @@
   .bar .p b { color: var(--gold); font: 400 1.2rem/1 var(--font-head); display: block; }
   .bar .btn { min-height: 46px; padding: 0 1.2rem; }
   @media (max-width: 760px) { .bar { display: flex; } body { --pad-bar: var(--bar-h); } .top .btn-line { display: none; } }
-  @media (prefers-reduced-motion: reduce) { .open-photo img, .name span { animation: none; } .rev { opacity: 1; transform: none; transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .rev { opacity: 1; transform: none; transition: none; } }
 </style>
 </head>
 <body class="no-js">
@@ -223,17 +233,25 @@
 
 <main>
   <section class="open" id="open" aria-labelledby="h-open">
-    <div class="open-photo" id="open-photo"><div class="pp" id="pp"><img src="/pages/chicken-munch/assets/poppers.webp?v=mve5ltnd" alt="A kraft bowl of Original Hot Poppers, chicken bites in a glossy sweet and spicy glaze" width="1600" height="1323" fetchpriority="high" data-mir-key="i-cbc011d0-0"><div class="wash" id="wash" aria-hidden="true"></div><div class="glint" id="glint" aria-hidden="true"></div></div></div>
-    <div class="open-copy">
-      <p class="name" aria-hidden="true"><span class="n1" data-mir-key="t-885f27c5-0">Chicken</span><span class="n2" data-mir-key="t-294781d2-0">Munch</span></p>
-      <p class="label" data-mir-key="t-3ac5f902-0">Kosher American fried chicken · Jerusalem</p>
-      <h1 id="h-open" data-mir-key="t-60d34e1e-0">The taste of America, now in Israel</h1>
-      <p class="lede" data-mir-key="t-05b5147f-0">Premium fried chicken, made with the finest ingredients and crafted with care.</p>
-      <div class="act">
-        <a class="btn" href="#order" data-mir-key="t-0d9d8eec-0">Order now <span class="arw" aria-hidden="true">→</span></a>
-        <p class="proof" data-mir-key="t-d83b20f7-0">Munch boxes from <b>$69</b><br>Pans from <b>₪275</b></p>
+    <div class="glow" aria-hidden="true"></div>
+    <p class="w1" id="w1" aria-hidden="true" data-mir-key="t-8a54300c-0">Chicken</p>
+    <div class="bowl" id="bowl">
+      <img src="/pages/chicken-munch/assets/bowl.webp?v=mvevndy5" alt="A kraft bowl of Original Hot Poppers, chicken bites in a glossy sweet and spicy glaze" width="1200" height="996" fetchpriority="high" data-mir-key="i-8db2e088-0">
+      <span class="stk k" data-m="-1" data-mir-key="t-26c0ed2c-0">Kosher</span>
+      <span class="stk s" data-m="1.3" data-mir-key="t-1e8d5bee-0">Now taking<br>Shabbos orders</span>
+      <span class="stk p" data-m="-.8" data-mir-key="t-4ceb98e4-0">Original<br>Hot Poppers</span>
+    </div>
+    <p class="w2" id="w2" aria-hidden="true" data-mir-key="t-22c37554-0">Munch</p>
+    <div class="open-foot">
+      <div class="l">
+        <p class="label" data-mir-key="t-3ac5f902-0">Kosher American fried chicken · Jerusalem</p>
+        <h1 id="h-open" data-mir-key="t-60d34e1e-0">The taste of America, now in Israel</h1>
+        <p class="lede" data-mir-key="t-05b5147f-0">Premium fried chicken, made with the finest ingredients and crafted with care.</p>
       </div>
-      <span class="shabbos" data-mir-key="t-3170f9ad-0">Now taking Shabbos orders</span>
+      <div class="r">
+        <p class="proof" data-mir-key="t-d83b20f7-0">Munch boxes from <b>$69</b><br>Pans from <b>₪275</b></p>
+        <a class="btn" href="#order" data-mir-key="t-0d9d8eec-0">Order now <span class="arw" aria-hidden="true">→</span></a>
+      </div>
     </div>
   </section>
 
@@ -244,7 +262,7 @@
       <h2 id="h-boxes" class="rev" data-mir-key="t-c9826296-0">Premium <span class="red">chicken boxes</span></h2>
       <p class="lede rev" data-mir-key="t-8f2c0f05-0">Pick your types of chicken and your sauces. Each box comes ready to share.</p>
       <div class="boxes-grid">
-        <div class="photo rev"><img src="/pages/chicken-munch/assets/box-dark.webp?v=mve5ltnd" alt="A Chicken Munch box: pretzel, rice krispie and cornflake chicken with sauce pots in the lid" width="700" height="890" loading="lazy" data-mir-key="i-031d98dd-0"></div>
+        <div class="photo rev"><img src="/pages/chicken-munch/assets/box-dark.webp?v=mvevndy5" alt="A Chicken Munch box: pretzel, rice krispie and cornflake chicken with sauce pots in the lid" width="700" height="890" loading="lazy" data-mir-key="i-031d98dd-0"></div>
         <div class="tiles">
           <div class="tile rev"><div><h3 data-mir-key="t-d6c41156-0">Mini Munch Box</h3><p class="feeds" data-mir-key="t-cc45cee8-0">Feeds 3 to 4</p><p class="what" data-mir-key="t-eefc6735-0">Up to 4 types of chicken and 3 sauces</p></div>
             <div><div class="price" data-mir-key="t-edb25f32-0">$69</div><a class="btn-line add" href="#order" data-add="mini" data-mir-key="t-083348d1-0">Add</a></div></div>
@@ -272,9 +290,9 @@
           <li class="rev"><h3 data-mir-key="t-5bd19c37-0">Buffalo Wings</h3><p data-mir-key="t-72d5d86a-0">In-bone chicken bites coated in a hickory, hot and savory sauce.</p></li>
         </ul>
         <div class="shots">
-          <figure class="shot wide rev"><img src="/pages/chicken-munch/assets/hot-poppers.webp?v=mve5ltnd" alt="Original Hot Poppers in a kraft bowl" width="900" height="854" loading="lazy" data-mir-key="i-1a6b03ae-0"><figcaption data-mir-key="t-2adb90f4-0">Original Hot Poppers</figcaption></figure>
-          <figure class="shot rev"><img src="/pages/chicken-munch/assets/rice-krispie.webp?v=mve5ltnd" alt="Rice Krispie chicken in a kraft bowl with a sauce pot" width="900" height="791" loading="lazy" data-mir-key="i-b05fa24d-0"><figcaption data-mir-key="t-4e8faf75-0">Rice Krispie</figcaption></figure>
-          <figure class="shot rev"><img src="/pages/chicken-munch/assets/classic.webp?v=mve5ltnd" alt="Cornflake coated chicken on a black plate" width="900" height="616" loading="lazy" data-mir-key="i-f52764bd-0"><figcaption data-mir-key="t-3e456009-0">Classic American Crunch</figcaption></figure>
+          <figure class="shot wide rev"><img src="/pages/chicken-munch/assets/hot-poppers.webp?v=mvevndy5" alt="Original Hot Poppers in a kraft bowl" width="900" height="854" loading="lazy" data-mir-key="i-1a6b03ae-0"><figcaption data-mir-key="t-2adb90f4-0">Original Hot Poppers</figcaption></figure>
+          <figure class="shot rev"><img src="/pages/chicken-munch/assets/rice-krispie.webp?v=mvevndy5" alt="Rice Krispie chicken in a kraft bowl with a sauce pot" width="900" height="791" loading="lazy" data-mir-key="i-b05fa24d-0"><figcaption data-mir-key="t-4e8faf75-0">Rice Krispie</figcaption></figure>
+          <figure class="shot rev"><img src="/pages/chicken-munch/assets/classic.webp?v=mvevndy5" alt="Cornflake coated chicken on a black plate" width="900" height="616" loading="lazy" data-mir-key="i-f52764bd-0"><figcaption data-mir-key="t-3e456009-0">Classic American Crunch</figcaption></figure>
         </div>
       </div>
       <div class="sauces rev">
@@ -289,7 +307,7 @@
       <h2 id="h-pans" class="rev" data-mir-key="t-9f003ddf-0">By the <span class="red">pan</span></h2>
       <p class="lede rev" data-mir-key="t-5b06c525-0">Priced by the pan, for a bigger table.</p>
       <div class="pan-grid">
-        <div class="photo rev"><img src="/pages/chicken-munch/assets/pan.webp?v=mve5ltnd" alt="A black pan full of rice krispie, schnitzel and cornflake chicken fingers" width="1010" height="520" loading="lazy" data-mir-key="i-ce0cd968-0"></div>
+        <div class="photo rev"><img src="/pages/chicken-munch/assets/pan.webp?v=mvevndy5" alt="A black pan full of rice krispie, schnitzel and cornflake chicken fingers" width="1010" height="520" loading="lazy" data-mir-key="i-ce0cd968-0"></div>
         <div class="tiles">
           <div class="tile rev"><div><h3 data-mir-key="t-a39f8746-0">9x13 pan</h3><p class="feeds" data-mir-key="t-404c9216-0">Feeds 6 to 8</p></div><div><div class="price" data-mir-key="t-693b20fc-0">₪275</div><a class="btn-line add" href="#order" data-add="pan913" data-mir-key="t-083348d1-3">Add</a></div></div>
           <div class="tile rev"><div><h3 data-mir-key="t-8647f769-0">Roaster</h3><p class="feeds" data-mir-key="t-e6a335ce-0">Feeds 18 to 20</p></div><div><div class="price" data-mir-key="t-3ffc474d-0">₪650</div><a class="btn-line add" href="#order" data-add="roaster" data-mir-key="t-083348d1-4">Add</a></div></div>
@@ -344,7 +362,7 @@
       <p data-mir-key="t-c6e62854-0">Call or WhatsApp <a href="https://wa.me/972553316975" target="_blank" rel="noopener">055-331-6975</a> or <a href="tel:+19294748871">929-474-8871</a><br>Email <a href="mailto:chickenmunch26@gmail.com">chickenmunch26@gmail.com</a></p>
       <a class="btn" href="#order" data-mir-key="t-0d9d8eec-1">Order now <span class="arw" aria-hidden="true">→</span></a>
     </div>
-    <p class="giant" aria-hidden="true"><span class="r" data-mir-key="t-885f27c5-1">Chicken</span> <span class="g" data-mir-key="t-294781d2-1">Munch</span></p>
+    <p class="giant" aria-hidden="true"><span class="r" data-mir-key="t-885f27c5-0">Chicken</span> <span class="g" data-mir-key="t-294781d2-0">Munch</span></p>
   </section>
 </main>
 <footer class="foot">Chicken Munch, Jerusalem · on <a href="/" data-mir-key="t-0384dae7-0">MyIsraelRental</a>, free to list, no commission</footer>
@@ -368,35 +386,32 @@ document.body.classList.remove('no-js');
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();
 
-  // ── the glint on the glaze: sweeps across once, then follows the mouse;
-  // on a phone it follows the tilt where the phone allows it, otherwise it
-  // sweeps again every few seconds. Off for reduced motion.
-  var glint = document.getElementById('glint'), photo = document.getElementById('open-photo'), pp = document.getElementById('pp');
+  // ── the opening: one span per letter; the letters rise, the bowl drops in,
+  // the stickers stick on. Then the bowl leans toward the mouse (stickers
+  // drift the other way), and scrolling spreads CHICKEN apart as the bowl rises.
+  ['w1', 'w2'].forEach(function (id) { var el = document.getElementById(id), t = el.textContent;
+    el.innerHTML = t.split('').map(function (c, i) { return '<span class="ch" style="--i:' + i + '">' + c + '</span>'; }).join(''); });
   if (!matchMedia('(prefers-reduced-motion: reduce)').matches) {
-    var gx = -0.3, gy = 0.35, tx = gx, ty = gy, following = false, t0 = performance.now() + 900, sweep = 1800, lastSweep = t0;
-    glint.style.setProperty('--gr', Math.round(Math.max(170, photo.clientWidth * .24)) + 'px');
-    var loop = function (now) {
-      if (!following) {
-        var k = Math.min(1, Math.max(0, (now - lastSweep) / sweep)), e = k * k * (3 - 2 * k);
-        tx = -0.3 + 1.6 * e; ty = 0.3 + 0.15 * Math.sin(e * Math.PI);
-        if (k >= 1 && !matchMedia('(hover: hover)').matches && now - lastSweep > 5200) lastSweep = now;   // touch: sweep again
+    var root = document.documentElement, started = 0;
+    root.classList.add('js-in');
+    var go = function () { if (started) return; started = performance.now(); requestAnimationFrame(function () { requestAnimationFrame(function () { root.classList.add('go'); }); }); };
+    var bimg = document.querySelector('#bowl img');
+    (bimg.complete ? Promise.resolve() : new Promise(function (r) { bimg.onload = bimg.onerror = r; })).then(function () { return document.fonts ? document.fonts.ready : 0; }).then(go);
+    setTimeout(go, 2500);
+    var bowl = document.getElementById('bowl'), letters = [].slice.call(document.querySelectorAll('#w1 .ch')), stk = [].slice.call(document.querySelectorAll('.stk'));
+    var mx = 0, my = 0, sx = 0, sy = 0, mid = (letters.length - 1) / 2;
+    addEventListener('pointermove', function (e) { if (e.pointerType === 'mouse') { mx = e.clientX / innerWidth - .5; my = e.clientY / innerHeight - .5; } }, { passive: true });
+    var lean = function () {
+      sx += (mx - sx) * .08; sy += (my - sy) * .08;
+      var p = Math.min(1, Math.max(0, scrollY / (open.offsetHeight * .9))), e = 1 - (1 - p) * (1 - p);
+      if (open.getBoundingClientRect().bottom > 0) {
+        if (started && performance.now() - started > 2400) letters.forEach(function (c, i) { c.style.transition = 'none'; c.style.transform = 'translate(' + ((i - mid) * e * 3) + 'vw,' + (-e * 5) + 'vh)'; });
+        bowl.style.transform = 'translate(' + (sx * 18) + 'px,' + (sy * 12 - e * 9 * innerHeight / 100) + 'px) rotate(' + (sx * 3) + 'deg) scale(' + (1 + e * .1) + ')';
+        stk.forEach(function (st) { var m = +st.dataset.m; st.style.translate = (-sx * 26 * m) + 'px ' + (-sy * 18 * m) + 'px'; });
       }
-      gx += (tx - gx) * (following ? .12 : 1); gy += (ty - gy) * (following ? .12 : 1);
-      ['glint', 'wash'].forEach(function (id) { var el = document.getElementById(id); el.style.setProperty('--gx', (gx * 100).toFixed(2) + '%'); el.style.setProperty('--gy', (gy * 100).toFixed(2) + '%'); el.style.setProperty('--gr', glint.style.getPropertyValue('--gr')); });
-      // the photo leans a few pixels toward the light
-      pp.style.setProperty('--px', ((gx - .5) * -18).toFixed(1) + 'px'); pp.style.setProperty('--py', ((gy - .45) * -14).toFixed(1) + 'px');
-      requestAnimationFrame(loop);
+      requestAnimationFrame(lean);
     };
-    requestAnimationFrame(loop);
-    document.getElementById('open').addEventListener('pointermove', function (e) {
-      if (e.pointerType !== 'mouse' || performance.now() < t0 + sweep) return;
-      var r = photo.getBoundingClientRect(); following = true;
-      tx = (e.clientX - r.left) / r.width; ty = (e.clientY - r.top) / r.height;
-    });
-    addEventListener('deviceorientation', function (e) {
-      if (e.gamma == null || performance.now() < t0 + sweep) return;
-      following = true; tx = .5 + Math.max(-1, Math.min(1, e.gamma / 30)) * .5; ty = .45 + Math.max(-1, Math.min(1, (e.beta - 45) / 40)) * .35;
-    });
+    requestAnimationFrame(lean);
   }
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
   [].forEach.call(document.querySelectorAll('.rev'), function (el) { io.observe(el); });

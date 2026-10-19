@@ -24,7 +24,10 @@ execFileSync('node', [join(homedir(), '.claude/skills/build-business-page/script
 // The first 10 s, 640 px, 20 fps: ~120 KB, so it plays as soon as it is seen.
 execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', raw, '-t', '10', '-vf', 'scale=640:-2,fps=20', '-an', '-c:v', 'libx264',
   '-crf', '32', '-preset', 'veryslow', '-pix_fmt', 'yuv420p', '-movflags', '+faststart', join(OUT, `${slug}.mp4`)]);
-execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', raw, '-frames:v', '1', '-vf', 'scale=640:-2', '-q:v', '80', join(OUT, `${slug}.webp`)]);
+// The still comes from 2.3 s in, not the first frame: record.mjs holds the
+// opening for 2.5 s, and an opening that builds in (Chicken Munch's letters
+// rise and the bowl drops) is only a dark frame at 0 s (19 Oct 2026).
+execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-ss', '2.3', '-i', raw, '-frames:v', '1', '-vf', 'scale=640:-2', '-q:v', '80', join(OUT, `${slug}.webp`)]);
 rmSync(tmp, { recursive: true, force: true });
 // Note which version of the page this clip shows (a hash of the published
 // page) and bump v so browsers fetch the new clip. check-showcase-previews.mjs
