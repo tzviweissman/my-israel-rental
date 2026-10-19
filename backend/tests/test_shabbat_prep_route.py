@@ -181,3 +181,15 @@ def test_appointments_cannot_be_booked_on_shabbat(shop):
     taken = requests.get(f"{API}/marketplace/gigs/{appt}/taken-slots", timeout=30).json()
     sat = _next(5).isoformat()
     assert "12:00" in str(taken.get(sat, taken))
+
+
+def test_shortest_beats_nearest_next():
+    """Nearest-next from here goes to B first and then has to double back;
+    the shortest drive takes A, then B, then C along the line."""
+    from routes.marketplace.prep_route import _length, _shortest
+    start = (31.0, 35.0)
+    a, b, c = ({"id": k, "geo": {"lat": 31.0, "lng": lng}} for k, lng in (("A", 34.99), ("B", 35.008), ("C", 35.03)))
+    path = _shortest(start, [a, b, c])
+    nearest_next = [a, b, c]
+    assert _length(start, path) <= _length(start, [b, a, c]) and _length(start, path) <= _length(start, nearest_next) + 1e-9
+    assert [s["id"] for s in path] == ["A", "B", "C"]

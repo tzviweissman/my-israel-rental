@@ -17,7 +17,7 @@ import axios from 'axios';
 import { Link, useSearchParams } from 'react-router-dom';
 import { toast } from 'sonner';
 import {
-  Loader2, ClipboardList, RefreshCw, Navigation as NavIcon, Phone, MessageCircle, Camera, Check, X, MapPin, Clock, Store as StoreIcon,
+  Loader2, ClipboardList, RefreshCw, Navigation as NavIcon, Phone, MessageCircle, Camera, Check, X, MapPin, Clock, Store as StoreIcon, ExternalLink,
 } from 'lucide-react';
 import { pillStyle } from './OrderCard';
 import { buildWhatsAppLink } from '../../utils/whatsappLink';
@@ -34,21 +34,26 @@ export default function DeliveriesTab({ API, token, onChanged }) {
   const [stops, setStops] = useState(null);
   const [lastLoaded, setLastLoaded] = useState(null);
   const [busy, setBusy] = useState(null);
+  // The open stops arrive in driving order (backend orders._in_route_order),
+  // from where the courier is once they share it, else from the shop's city.
+  const [route, setRoute] = useState(null);
+  const [here, setHere] = useState(null);
 
   const load = useCallback(async () => {
     try {
       const [{ data: m }, { data: d }] = await Promise.all([
         axios.get(`${API}/marketplace/courier/me`, auth),
-        axios.get(`${API}/marketplace/courier/deliveries`, auth),
+        axios.get(`${API}/marketplace/courier/deliveries`, { ...auth, params: here ? { from_lat: here[0], from_lng: here[1] } : undefined }),
       ]);
       setMe(m);
       setStops(d.stops || []);
+      setRoute(d.route || null);
       setLastLoaded(new Date());
     } catch (err) {
       toast.error(err?.response?.data?.detail || t('orders.loadFailed', 'Could not load orders'));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [API, token, t]);
+  }, [API, token, t, here]);
 
   useEffect(() => { load(); }, [load]);
   useEffect(() => {
@@ -172,6 +177,35 @@ export default function DeliveriesTab({ API, token, onChanged }) {
         </div>
       ) : (
         <>
+          {open.length > 0 && route && (
+            <div className="rounded-2xl border bg-white p-3 mb-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="courier-route">
+              <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+                {t('route.courierTitle', 'Your route, in driving order')}
+              </p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--brand-muted)' }}>
+                {here
+                  ? t('route.courierFromYou', 'From where you are: earlier delivery times first, then the shortest way.')
+                  : t('route.courierBody', 'Earlier delivery times first, then the shortest way. Share where you are to start the route from you.')}
+              </p>
+              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                {(route.google || []).map((url, i) => (
+                  <a key={url} href={url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 min-h-[40px] text-[13px] font-semibold underline underline-offset-4" style={{ color: 'var(--gold)' }}>
+                    <ExternalLink size={13} aria-hidden="true" />
+                    {route.google.length > 1 ? t('route.googlePart', 'Route in Google Maps, part {{n}}', { n: i + 1 }) : t('route.google', 'Whole route in Google Maps')}
+                  </a>
+                ))}
+                {!here && (
+                  <button type="button" onClick={() => navigator.geolocation?.getCurrentPosition((p) => setHere([p.coords.latitude, p.coords.longitude]), () => toast.error(t('route.noLocation', 'Your location is off. Allow it in your browser to start from where you are.')))}
+                    className="inline-flex items-center gap-1.5 min-h-[40px] text-[13px] font-semibold underline underline-offset-4" style={{ color: 'var(--gold)' }} data-testid="courier-route-here">
+                    <NavIcon size={13} aria-hidden="true" /> {t('route.fromHere', 'Start from where I am')}
+                  </button>
+                )}
+              </div>
+              {route.not_found > 0 && (
+                <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('route.someNotFound', '{{count}} addresses were not found on the map; they are last, and Waze searches them.', { count: route.not_found })}</p>
+              )}
+            </div>
+          )}
           <div className="space-y-3">
             {open.map((s, i) => <Stop key={s.id} stop={s} index={i + 1} API={API} token={token} onChanged={load} t={t} />)}
           </div>
@@ -217,7 +251,8 @@ function Stop({ stop: s, index, API, token, onChanged, t }) {
   const time = (s.needed_by || '').includes('T') ? s.needed_by.slice(11, 16) : '';
   const dayIso = (s.needed_by || '').slice(0, 10);
   const day = dayIso ? new Intl.DateTimeFormat(document.documentElement.lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'short', day: 'numeric', month: 'short' }).format(new Date(`${dayIso}T00:00`)) : '';
-  const waze = s.address ? `https://waze.com/ul?q=${encodeURIComponent(s.address)}&navigate=yes` : null;
+  // The server's link uses the stop's place on the map when it found it.
+  const waze = s.waze || (s.address ? `https://waze.com/ul?q=${encodeURIComponent(s.address)}&navigate=yes` : null);
   const wa = s.customer_phone_e164 ? buildWhatsAppLink(s.customer_phone_e164) : null;
   const biz = s.business || {};
 

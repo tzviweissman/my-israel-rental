@@ -6100,6 +6100,12 @@ const en = {
         empty: "No orders for this day yet."
       },
       route: {
+        courierTitle: "Your route, in driving order",
+        courierFromYou: "From where you are: earlier delivery times first, then the shortest way.",
+        courierBody: "Earlier delivery times first, then the shortest way. Share where you are to start the route from you.",
+        noLocation: "Your location is off. Allow it in your browser to start from where you are.",
+        someNotFound_one: "1 address was not found on the map; it is last, and Waze searches it.",
+        someNotFound_other: "{{count}} addresses were not found on the map; they are last, and Waze searches them.",
         title: "Delivery route",
         body: "The day’s open deliveries in driving order: earlier times first, then the nearest next stop.",
         finding: "Finding the addresses…",

@@ -1441,10 +1441,16 @@ def _stop(order: dict[str, Any], biz: dict[str, Any], *, reveal_phone: bool) -> 
 
 
 @router.get("/courier/deliveries")
-async def courier_deliveries(user=Depends(verify_token)):
+async def courier_deliveries(user=Depends(verify_token), from_lat: Optional[float] = None, from_lng: Optional[float] = None):
     """One ordered list across every business this person delivers for:
     open stops plus today's closed ones. Phone only on `ready`, reveal
-    written once."""
+    written once.
+
+    The open stops come in driving order (prep_route.order_stops, 19 Oct
+    2026: "couriers should see the quickest route"): day by day, earlier
+    delivery times first, and within a time the shortest drive, from where
+    the courier is when the page sends it, else from the first shop's city.
+    Each carries a Waze link; `route.google` opens the first day's drive."""
     today = datetime.now(_IL_TZ).date().isoformat()
     active, _, _ = await _my_courier_businesses(user)
     if not active:
@@ -1470,8 +1476,49 @@ async def courier_deliveries(user=Depends(verify_token)):
                 {"_id": o["_id"]},
                 {"$push": {"phone_reveals": {"at": _now_iso(), "courier_id": user["user_id"], "courier": (o.get("courier") or {}).get("name")}}},
             )
-        stops.append(_stop(o, biz, reveal_phone=reveal))
-    return {"stops": stops}
+        stop = _stop(o, biz, reveal_phone=reveal)
+        stop["_order"], stop["_biz"] = o, biz
+        stops.append(stop)
+    return await _in_route_order(stops, from_lat, from_lng)
+
+
+async def _in_route_order(stops: list[dict[str, Any]], from_lat: Optional[float], from_lng: Optional[float]) -> dict[str, Any]:
+    from .prep_route import MAX_LOOKUPS, _geo, _time_of, google_routes, order_stops, waze_link
+    from .shabbat import _city
+    budget = [MAX_LOOKUPS]
+    open_by_day: dict[str, list[dict[str, Any]]] = {}
+    closed = []
+    for s in stops:
+        o = s.pop("_order")
+        biz = s.pop("_biz")
+        if s["status"] in OPEN_STATUSES:
+            s["geo"] = await _geo(o, budget)
+            s["time"] = _time_of(o)
+            s["_city"] = biz
+            open_by_day.setdefault(str(o.get("needed_by") or "")[:10], []).append(s)
+        else:
+            closed.append(s)
+    ordered: list[dict[str, Any]] = []
+    first_day: list[dict[str, Any]] = []
+    for day in sorted(open_by_day, key=lambda d: (d == "", d)):
+        day_stops = open_by_day[day]
+        if from_lat is not None and from_lng is not None and not ordered:
+            start = (from_lat, from_lng)
+        elif ordered and ordered[-1].get("geo"):
+            start = (ordered[-1]["geo"]["lat"], ordered[-1]["geo"]["lng"])
+        else:
+            _slug, lat, lng = _city(day_stops[0]["_city"])
+            start = (lat, lng)
+        path = order_stops(day_stops, start)
+        if not first_day:
+            first_day = path
+        ordered.extend(path)
+    for s in ordered:
+        s.pop("_city", None)
+        s["waze"] = waze_link(s)
+    return {"stops": ordered + closed,
+            "route": {"google": google_routes(first_day), "from": "you" if from_lat is not None else "city",
+                      "not_found": sum(1 for s in ordered if not s.get("geo"))}}
 
 
 @router.patch("/courier/deliveries/{order_id}/status")

@@ -9,7 +9,7 @@ under the totals with their own words. Cancelled and failed orders do not
 count.
 
 ROUTE: the day's open deliveries in a sensible driving order. Earlier
-delivery times first; within a time, the nearest next stop (straight-line
+delivery times first; within a time, the shortest drive (straight-line
 distance, starting from the business's city, or from where the driver is
 when the page sends it). Each stop has a Waze button, and the whole route
 opens in Google Maps in parts of ten (Google's limit). Addresses are found
@@ -100,20 +100,55 @@ def _km(a: tuple[float, float], b: tuple[float, float]) -> float:
     return 6371 * 2 * math.asin(math.sqrt(h))
 
 
+def _pt(s: dict[str, Any]) -> tuple[float, float]:
+    return (s["geo"]["lat"], s["geo"]["lng"])
+
+
+def _length(start: tuple[float, float], path: list[dict[str, Any]]) -> float:
+    total, here = 0.0, start
+    for s in path:
+        total += _km(here, _pt(s))
+        here = _pt(s)
+    return total
+
+
+def _shortest(start: tuple[float, float], stops: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    """The shortest order through `stops` from `start` (an open path: no
+    return). Nearest-next to begin, then 2-opt: reverse any stretch that
+    makes the whole drive shorter, until nothing does. Exact for the handful
+    of stops a courier has in one time window; close for more."""
+    left, path, here = list(stops), [], start
+    while left:
+        nxt = min(left, key=lambda s: _km(here, _pt(s)))
+        left.remove(nxt)
+        path.append(nxt)
+        here = _pt(nxt)
+    improved = True
+    while improved and len(path) > 2:
+        improved = False
+        best = _length(start, path)
+        for i in range(len(path) - 1):
+            for j in range(i + 1, len(path)):
+                cand = path[:i] + path[i:j + 1][::-1] + path[j + 1:]
+                if _length(start, cand) < best - 1e-9:
+                    path, best, improved = cand, _length(start, cand), True
+    return path
+
+
 def order_stops(stops: list[dict[str, Any]], start: tuple[float, float]) -> list[dict[str, Any]]:
-    """Earlier times first; within a time, nearest next. Pure, for tests."""
+    """Earlier times first; within a time, the shortest drive (_shortest),
+    continuing from where the previous time's last stop ended. Stops whose
+    address was not found keep their time and go last in it. Pure, for tests."""
     groups: dict[str, list[dict[str, Any]]] = {}
     for s in stops:
         groups.setdefault(s.get("time") or "", []).append(s)
     out: list[dict[str, Any]] = []
     here = start
     for key in sorted(groups, key=lambda k: (k == "", k)):
-        left = [s for s in groups[key] if s.get("geo")]
-        while left:
-            nxt = min(left, key=lambda s: _km(here, (s["geo"]["lat"], s["geo"]["lng"])))
-            left.remove(nxt)
-            out.append(nxt)
-            here = (nxt["geo"]["lat"], nxt["geo"]["lng"])
+        path = _shortest(here, [s for s in groups[key] if s.get("geo")])
+        out.extend(path)
+        if path:
+            here = _pt(path[-1])
         out.extend(s for s in groups[key] if not s.get("geo"))
     return out
 
