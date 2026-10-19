@@ -95,12 +95,15 @@
     mini: ['Mini Munch Box', 69, 'USD', 'cmminibox001', 'box', 'Feeds 3 to 4'],
     grand: ['Grand Munch Box', 140, 'USD', 'cmgrandbox01', 'box', 'Feeds 8 to 10'],
     supreme: ['Supreme Munch Box', 220, 'USD', 'cmsuprbox001', 'box', 'Feeds 16'],
-    pan913: ['9x13 pan', 275, 'ILS', 'cm913tray001', 'pan', 'Feeds 6 to 8, one kind of chicken'],
-    roaster: ['Roaster', 650, 'ILS', 'cmgastro0001', 'pan', 'Feeds 18 to 20, mix your kinds of chicken'],
+    pan913: ['9x13 pan', 275, 'ILS', 'cm913tray001', 'pan', 'Feeds 6 to 8'],
+    roaster: ['Roaster', 650, 'ILS', 'cmgastro0001', 'pan', 'Feeds 18 to 20'],
     rice: ['9x13 rice', 75, 'ILS', 'cm913rice001', 'pan', '']
   };
   // [kinds of chicken allowed, sauces allowed]; 0 = none to choose
   var CHOICE = { mini: [4, 3], grand: [5, 4], supreme: [6, 5], pan913: [1, 0], roaster: [8, 0], rice: [0, 0] };
+  // what each item lets you choose, said on the item before it is added (Tzvi, 19 Oct 2026: make it clearer)
+  var ALLOWS = { mini: 'Up to 4 kinds of chicken · 3 sauces', grand: 'Up to 5 kinds of chicken · 4 sauces', supreme: 'Up to 6 kinds of chicken · 5 sauces',
+    pan913: '1 kind of chicken', roaster: 'Mix as many kinds as you like', rice: '' };
   var STYLES = ['Classic American Crunch', 'Original Hot Poppers', 'Shnitzel Bites', 'Fruity Chicken', 'Crispy Cornflake', 'Rice Krispie', 'Pretzel', 'Buffalo Wings'];
   var SAUCES = ['Garlic Mayo', 'Sweet BBQ', 'Honey Mustard', 'Spicy Mayo', 'Buffalo'];
   var DELIVERY = 'Delivery ₪30 to ₪50';
@@ -119,7 +122,7 @@
   Object.keys(ITEMS).forEach(function (k) {
     var it = ITEMS[k], c = CHOICE[k], d = document.createElement('div');
     d.className = 'line'; d.dataset.k = k;
-    d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + money(it[1], it[2]) + (it[5] ? ' · ' + it[5] : '') + '</div></div>' +
+    d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + money(it[1], it[2]) + (it[5] ? ' · ' + it[5] : '') + '</div>' + (ALLOWS[k] ? '<div class="allows' + (CHOICE[k][0] === 1 ? ' one' : '') + '">' + ALLOWS[k] + '</div>' : '') + '</div>' +
       '<div class="step"><button type="button" data-d="-1" aria-label="One fewer ' + it[0] + '">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + it[0] + '">+</button></div>';
     var host = document.getElementById(it[4] === 'box' ? 'lines-box' : 'lines-pan');
     host.appendChild(d);

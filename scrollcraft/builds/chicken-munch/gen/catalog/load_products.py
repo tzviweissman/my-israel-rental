@@ -22,12 +22,14 @@ PAGE = "https://myisraelrental.com/pages/chicken-munch/assets/{}"
 STYLES = ("Classic American Crunch, Original Hot Poppers, Shnitzel Bites, Fruity Chicken, "
           "Crispy Cornflake, Rice Krispie, Pretzel, Buffalo Wings")
 ROWS = [
-    # his new menu card and notes (18 Oct 2026); boxes in dollars, pans in shekels
+    # his new menu card and notes (18 Oct 2026); boxes in dollars, pans in shekels.
+    # 19 Oct 2026, the owner: no platter photo on the pans (he no longer makes it),
+    # a 9x13 pan is one kind of chicken, the Roaster mixes kinds.
     ("cmminibox001", "Mini Munch Box", 69, "USD", "Premium chicken boxes", "Feeds 3 to 4. Up to 4 types of chicken and 3 sauces.", [PAGE.format("box-dark.webp")]),
     ("cmgrandbox01", "Grand Munch Box", 140, "USD", "Premium chicken boxes", "Feeds 8 to 10. 5 types of chicken and 4 sauces.", [PAGE.format("box-dark.webp")]),
     ("cmsuprbox001", "Supreme Munch Box", 220, "USD", "Premium chicken boxes", "Feeds 16. Up to 6 types of chicken and 5 sauces.", [PAGE.format("box-dark.webp")]),
-    ("cm913tray001", "9x13 pan", 275, "ILS", "By the pan", "Feeds 6 to 8. Choose your types of chicken: " + STYLES + ".", [PAGE.format("pan.webp")]),
-    ("cmgastro0001", "Roaster", 650, "ILS", "By the pan", "Feeds 18 to 20. Choose your types of chicken: " + STYLES + ".", [PAGE.format("pan.webp")]),
+    ("cm913tray001", "9x13 pan", 275, "ILS", "By the pan", "Feeds 6 to 8. One kind of chicken, from: " + STYLES + ".", []),
+    ("cmgastro0001", "Roaster", 650, "ILS", "By the pan", "Feeds 18 to 20. Mix your kinds of chicken: " + STYLES + ".", []),
     ("cm913rice001", "9x13 rice", 75, "ILS", "By the pan", "", []),
 ]
 
@@ -43,11 +45,16 @@ async def main(apply: bool) -> None:
     print(f"{biz.get('name')} ({biz.get('slug')}): replacing {[(p.get('name'), p.get('price'), p.get('currency')) for p in gig.get('products') or []]}")
     for p in products:
         print(f"  {p['group']:<6} {p['name']:<20} {p['price']:g} {p['currency']}  photos {len(p['images'])}")
+    print("  delivery_on now:", (biz.get("order_settings") or {}).get("delivery_on"), "-> True")
     if not apply:
         print("dry run: nothing written (add --apply)")
         return
     r = await db.marketplace_gigs.update_one({"_id": GIG}, {"$set": {"products": products, "updated_at": datetime.now(UTC).isoformat()}})
     print("products written:", r.modified_count)
+    # He delivers in central Jerusalem (30 to 50 shekels by where, confirmed on
+    # WhatsApp), so delivery orders from his page save to his shop (Tzvi, 19 Oct 2026).
+    r = await db.businesses.update_one({"_id": BIZ}, {"$set": {"order_settings.delivery_on": True}})
+    print("delivery switched on:", r.modified_count)
 
 
 asyncio.run(main("--apply" in sys.argv))
