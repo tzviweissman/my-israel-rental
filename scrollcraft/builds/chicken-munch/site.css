@@ -238,3 +238,9 @@
   .foot nav { margin-bottom: .55rem; font-weight: 700; }
   .foot nav a { margin: 0 .35rem; }
   [hidden] { display: none !important; }
+  .pan-grid { grid-template-columns: minmax(0, 46rem); }
+  .opts { padding: .2rem 0 1.1rem; }
+  .opts h5 { margin: .7rem 0 .5rem; font: 700 .85rem/1.2 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--gold); }
+  .opts .chip span { min-height: 40px; font-size: .88rem; padding: 0 .85rem; }
+  .chip input:disabled + span { opacity: .38; cursor: not-allowed; }
+  .deliv { margin: 0 0 .4rem; color: var(--soft); }

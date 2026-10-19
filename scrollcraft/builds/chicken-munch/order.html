@@ -26,7 +26,7 @@
 <main>
   <header class="page-head"><div class="wrap">
     <h1>Your <span class="gold">order</span></h1>
-    <p class="lede">Pick a box or a pan, your chicken and your sauces. We get it on WhatsApp, written out.</p>
+    <p class="lede">Pick a box or a pan, then your chicken and sauces for each. We get it on WhatsApp, written out.</p>
   </div></header>
   <section class="sec order" id="order" aria-label="Order form" style="padding-top:clamp(2rem,5vw,3rem)">
     <div class="wrap">
@@ -42,18 +42,17 @@
             <p class="err" id="e-items"></p>
           </div>
           <div class="card">
-            <h3>Your chicken</h3>
-            <div class="chips" id="chips-style"></div>
-            <h4>Sauces</h4>
-            <div class="chips" id="chips-sauce"></div>
-            <label class="f" for="note">Anything else</label>
-            <textarea class="fld" id="note" maxlength="500"></textarea>
+            <h3>Delivery</h3>
+            <p class="deliv">Delivery in central Jerusalem is ₪30 to ₪50, depending on where. We confirm it with you on WhatsApp.</p>
+            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p></div>
+            <div id="w-when"><label class="f" for="when">Which day</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p></div>
           </div>
           <div class="card">
-            <h3>For</h3>
-            <div id="w-when"><label class="f" for="when">Which day</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p></div>
+            <h3>Your details</h3>
             <div id="w-me"><label class="f" for="me">Your name</label><input class="fld" id="me" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
             <div id="w-ph"><label class="f" for="ph">Your phone</label><input class="fld" id="ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
+            <label class="f" for="note">Anything else</label>
+            <textarea class="fld" id="note" maxlength="500" placeholder="For example, different chicken in each box"></textarea>
           </div>
         </div>
         <aside class="card sum" aria-live="polite">
@@ -87,36 +86,62 @@
   // ── the order: saved to his shop first (a tracking link), then WhatsApp.
   // Boxes are in dollars and pans in shekels; the shop keeps one currency per
   // order, so an order with both is sent on WhatsApp without being saved.
+  // The owner (19 Oct 2026): kinds of chicken are chosen per box (up to the
+  // box's number) and in the Roaster; a 9x13 pan is one kind; sauces come
+  // with the boxes. Delivery in central Jerusalem is ₪30 to ₪50 by where.
   var WA = '972553316975', GIG = 'd574d800-2e8a-41ce-ae28-f6f03fd6329a';
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
   var ITEMS = {
     mini: ['Mini Munch Box', 69, 'USD', 'cmminibox001', 'box', 'Feeds 3 to 4'],
     grand: ['Grand Munch Box', 140, 'USD', 'cmgrandbox01', 'box', 'Feeds 8 to 10'],
     supreme: ['Supreme Munch Box', 220, 'USD', 'cmsuprbox001', 'box', 'Feeds 16'],
-    pan913: ['9x13 pan', 275, 'ILS', 'cm913tray001', 'pan', 'Feeds 6 to 8'],
-    roaster: ['Roaster', 650, 'ILS', 'cmgastro0001', 'pan', 'Feeds 18 to 20'],
+    pan913: ['9x13 pan', 275, 'ILS', 'cm913tray001', 'pan', 'Feeds 6 to 8, one kind of chicken'],
+    roaster: ['Roaster', 650, 'ILS', 'cmgastro0001', 'pan', 'Feeds 18 to 20, mix your kinds of chicken'],
     rice: ['9x13 rice', 75, 'ILS', 'cm913rice001', 'pan', '']
   };
+  // [kinds of chicken allowed, sauces allowed]; 0 = none to choose
+  var CHOICE = { mini: [4, 3], grand: [5, 4], supreme: [6, 5], pan913: [1, 0], roaster: [8, 0], rice: [0, 0] };
   var STYLES = ['Classic American Crunch', 'Original Hot Poppers', 'Shnitzel Bites', 'Fruity Chicken', 'Crispy Cornflake', 'Rice Krispie', 'Pretzel', 'Buffalo Wings'];
   var SAUCES = ['Garlic Mayo', 'Sweet BBQ', 'Honey Mustard', 'Spicy Mayo', 'Buffalo'];
+  var DELIVERY = 'Delivery ₪30 to ₪50';
   var q = {}, saved = window.cmBasket.get(), want = new URLSearchParams(location.search).get('add');
   Object.keys(ITEMS).forEach(function (k) { q[k] = Math.max(0, Math.min(20, +saved[k] || 0)); });
   if (want && ITEMS[want] && !q[want]) q[want] = 1;
   if (want) history.replaceState(null, '', location.pathname);
   function money(n, cur) { return (cur === 'USD' ? '$' : '₪') + n.toLocaleString('en-US'); }
+
+  function chipSet(k, list, max, kind) {
+    var single = max === 1, name = k + '-' + kind;
+    return '<div class="chips" data-max="' + max + '" data-kind="' + kind + '">' + list.map(function (n, i) {
+      return '<label class="chip"><input type="' + (single ? 'radio' : 'checkbox') + '" name="' + name + '" value="' + n + '" id="' + name + i + '"><span>' + n + '</span></label>';
+    }).join('') + '</div>';
+  }
   Object.keys(ITEMS).forEach(function (k) {
-    var it = ITEMS[k], d = document.createElement('div');
+    var it = ITEMS[k], c = CHOICE[k], d = document.createElement('div');
     d.className = 'line'; d.dataset.k = k;
     d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + money(it[1], it[2]) + (it[5] ? ' · ' + it[5] : '') + '</div></div>' +
       '<div class="step"><button type="button" data-d="-1" aria-label="One fewer ' + it[0] + '">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + it[0] + '">+</button></div>';
-    document.getElementById(it[4] === 'box' ? 'lines-box' : 'lines-pan').appendChild(d);
+    var host = document.getElementById(it[4] === 'box' ? 'lines-box' : 'lines-pan');
+    host.appendChild(d);
+    if (c[0]) {
+      var o = document.createElement('div');
+      o.className = 'opts'; o.dataset.k = k; o.hidden = true; o.id = 'w-o-' + k;
+      o.innerHTML = '<h5>' + (c[0] === 1 ? 'Kind of chicken, pick one' : c[0] >= STYLES.length ? 'Kinds of chicken, mix as you like' : 'Kinds of chicken, up to ' + c[0]) + '</h5>' + chipSet(k, STYLES, c[0], 'kind') +
+        (c[1] ? '<h5>Sauces, up to ' + c[1] + '</h5>' + chipSet(k, SAUCES, c[1], 'sauce') : '') +
+        '<p class="err" id="e-o-' + k + '"></p>';
+      host.appendChild(o);
+    }
   });
-  function chips(id, list, name) {
-    var box = document.getElementById(id);
-    list.forEach(function (n, i) { var l = document.createElement('label'); l.className = 'chip'; l.innerHTML = '<input type="checkbox" value="' + n + '" id="' + name + i + '"><span>' + n + '</span>'; box.appendChild(l); });
-  }
-  chips('chips-style', STYLES, 'st'); chips('chips-sauce', SAUCES, 'sa');
-  function picked(id) { return [].map.call(document.querySelectorAll('#' + id + ' input:checked'), function (i) { return i.value; }); }
+  function picked(k, kind) { return [].map.call(document.querySelectorAll('.opts[data-k="' + k + '"] [data-kind="' + kind + '"] input:checked'), function (i) { return i.value; }); }
+  // a set at its limit greys out the rest
+  [].forEach.call(document.querySelectorAll('.opts .chips'), function (set) {
+    set.addEventListener('change', function () {
+      var max = +set.dataset.max; if (max === 1) return;
+      var n = set.querySelectorAll('input:checked').length;
+      [].forEach.call(set.querySelectorAll('input'), function (i) { i.disabled = !i.checked && n >= max; });
+      check(false);
+    });
+  });
   function totals() { var t = { USD: 0, ILS: 0 }; for (var k in q) t[ITEMS[k][2]] += q[k] * ITEMS[k][1]; return t; }
   function totalText() { var t = totals(), p = []; if (t.USD) p.push(money(t.USD, 'USD')); if (t.ILS) p.push(money(t.ILS, 'ILS')); return p.join(' + ') || '0'; }
   var send = document.getElementById('send'), noRice = false;
@@ -124,9 +149,11 @@
   document.getElementById('sug-no').addEventListener('click', function () { noRice = true; update(); });
   function update() {
     [].forEach.call(document.querySelectorAll('.line'), function (l) { l.querySelector('output').textContent = q[l.dataset.k]; });
+    [].forEach.call(document.querySelectorAll('.opts'), function (o) { o.hidden = !q[o.dataset.k]; });
     var html = ''; for (var k in q) if (q[k]) html += '<li><span>' + q[k] + ' × ' + ITEMS[k][0] + '</span><span>' + money(q[k] * ITEMS[k][1], ITEMS[k][2]) + '</span></li>';
+    if (html) html += '<li><span>' + DELIVERY + '</span><span>by where</span></li>';
     document.getElementById('sum-list').innerHTML = html || '<li><span>Nothing yet</span></li>';
-    document.getElementById('total').textContent = totalText();
+    document.getElementById('total').textContent = totalText() !== '0' ? totalText() + ' + delivery' : '0';
     send.firstElementChild.textContent = totalText() !== '0' ? 'Send order on WhatsApp, ' + totalText() : 'Send order on WhatsApp';
     var b = {}; for (var k2 in q) if (q[k2]) b[k2] = q[k2]; window.cmBasket.set(b);
     // one real add-on, only with a pan, and only until it is added or turned down
@@ -135,42 +162,55 @@
   [].forEach.call(document.querySelectorAll('.line'), function (l) {
     l.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; q[l.dataset.k] = Math.max(0, Math.min(20, q[l.dataset.k] + (+b.dataset.d))); update(); check(false); });
   });
-  [].forEach.call(document.querySelectorAll('[data-add]'), function (a) { a.addEventListener('click', function () { var k = a.dataset.add; if (!q[k]) q[k] = 1; update(); }); });
   function v(id) { return document.getElementById(id).value.trim(); }
   function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }
   function check(show) {
     var ok = true, e, t = totals();
     e = (t.USD || t.ILS) ? '' : 'Add a box or a pan'; if (e) ok = false; if (show || !e) mark('items', e);
+    Object.keys(CHOICE).forEach(function (k) {
+      if (!CHOICE[k][0]) return;
+      e = q[k] && !picked(k, 'kind').length ? (CHOICE[k][0] === 1 ? 'Pick the kind of chicken for the ' : 'Pick your kinds of chicken for the ') + ITEMS[k][0] : '';
+      if (e) ok = false; if (show || !e) mark('o-' + k, e);
+    });
+    e = v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
     e = v('when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e);
     e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
     e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);
     return ok;
   }
-  ['when', 'me', 'ph'].forEach(function (id) { document.getElementById(id).addEventListener('input', function () { check(false); }); });
+  ['addr', 'when', 'me', 'ph'].forEach(function (id) { document.getElementById(id).addEventListener('input', function () { check(false); }); });
   document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  function described(k) {
+    var bits = [], kinds = picked(k, 'kind'), sauces = picked(k, 'sauce');
+    if (kinds.length) bits.push('Chicken: ' + kinds.join(', '));
+    if (sauces.length) bits.push('Sauces: ' + sauces.join(', '));
+    return bits;
+  }
   var sending = false;
   function save(notes) {
     var t = totals(); if (t.USD && t.ILS) return Promise.resolve(null);
     var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: ITEMS[k][3], qty: q[k] });
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: ls, fulfilment: 'pickup', date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
     return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
     if (sending) return;
-    if (!check(true)) { var bad = document.querySelector('.bad .fld, .bad button'); if (bad) bad.focus(); return; }
-    var lines = ['Hi Chicken Munch, I would like to order:'];
-    for (var k in q) if (q[k]) lines.push('• ' + q[k] + ' × ' + ITEMS[k][0] + ' (' + money(q[k] * ITEMS[k][1], ITEMS[k][2]) + ')');
-    var st = picked('chips-style'), sa = picked('chips-sauce');
-    if (st.length) lines.push('Chicken: ' + st.join(', '));
-    if (sa.length) lines.push('Sauces: ' + sa.join(', '));
+    if (!check(true)) { var bad = document.querySelector('.bad .fld, .bad input, .bad button'); if (bad) bad.focus(); return; }
+    var lines = ['Hi Chicken Munch, I would like to order:'], notesOut = [];
+    for (var k in q) if (q[k]) {
+      lines.push('• ' + q[k] + ' × ' + ITEMS[k][0] + ' (' + money(q[k] * ITEMS[k][1], ITEMS[k][2]) + ')');
+      described(k).forEach(function (s) { lines.push('   ' + s); });
+      if (described(k).length) notesOut.push(ITEMS[k][0] + ': ' + described(k).join('; '));
+    }
     if (v('note')) lines.push('Notes: ' + v('note'));
-    lines.push('Total: ' + totalText());
+    lines.push('Total: ' + totalText() + ' + delivery (₪30 to ₪50, by where)');
+    lines.push('Deliver to: ' + v('addr'));
     lines.push('For: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
     lines.push('Name: ' + v('me') + ', ' + v('ph'));
-    var notes = [st.length ? 'Chicken: ' + st.join(', ') : '', sa.length ? 'Sauces: ' + sa.join(', ') : '', v('note'), 'Sent from the Chicken Munch page by WhatsApp'].filter(Boolean).join('\n');
+    var notes = notesOut.concat([v('note'), 'Delivery fee ₪30 to ₪50, confirmed on WhatsApp', 'Sent from the Chicken Munch page by WhatsApp']).filter(Boolean).join('\n');
     sending = true; send.setAttribute('aria-busy', 'true');
     var label = send.firstElementChild.textContent; send.firstElementChild.textContent = 'Sending';
     var tab = window.open('', '_blank');
