@@ -12,6 +12,11 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
 - [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
 
+- [Medium] Hebrew: 14 texts (`basket.*` in CardAction, 2 in JobsBoard) are in neither language file, so Hebrew readers see English on shop basket buttons. First seen 19 Oct (2026-10-19-site-audit).
+- [Low] Dashboard setup checklist: "category" opens a form with no category control. First seen 19 Oct (2026-10-19-site-audit).
+- [Low] Calendar import downloads the whole file before checking its size. First seen 19 Oct (2026-10-19-site-audit).
+- [To decide] Business calendar feed lists customer phone and delivery address behind a private link. First seen 19 Oct (2026-10-19-site-audit).
+
 ## Fixed
 
 - [Low] KasherMyBnb: the "what we kasher" lists on the kitchen and pots pages are now a split price list (add-ons left, ticked parts right; on a phone the list first). 13 Oct.
