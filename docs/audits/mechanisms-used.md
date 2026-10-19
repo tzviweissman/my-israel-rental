@@ -144,3 +144,4 @@ already spent per the task brief even though its entry could not be sourced here
 2026-10-14 - endowed progress effect - Gift Boutique order page sticky bar
 2026-10-17 - default effect - restock email box (proposed)
 2026-10-18 - peak-end rule - the order tracking page's finished state (`OrderTrackPage.jsx`, steps list and reorder button)
+2026-10-19 - loss aversion avoided; commitment/consistency (progress shown after first item) - Chicken Munch order bar
