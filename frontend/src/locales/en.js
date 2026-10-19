@@ -1311,6 +1311,16 @@ const en = {
             title: 'People who already need you',
             body: 'Customers post the job they need doing. Read what has been asked for in your line of work and reply to the ones you want, instead of chasing leads.',
           },
+          b_calendar: {
+            title: "Your bookings in your own calendar",
+            body: "Add your appointments, classes and orders due to Google, Apple or Outlook calendar, with a separate link for each person on your team. Paste your own calendar's address too, and the times you are busy there can't be booked here.",
+            doIt: "Connect my calendar",
+          },
+          b_counter: {
+            title: "Sales at the counter",
+            body: "Someone buying in person? Tap what they took, choose cash, card or Bit, and record it. It counts in today's totals, your sales summary and your stock, and “Cancel sale” undoes a mistake.",
+            doIt: "Record a sale",
+          },
           b_orders: {
             title: 'Orders without the spreadsheet',
             body: "Paste a WhatsApp order and the form fills itself. Your staff and your courier each see their own list, and the customer gets a link that says where the order is. Someone who fills a basket on your page and leaves gets one reminder to finish, and people can ask to be told when a sold-out product is back. The form suggests what goes with the order, which you choose per product, and a finished order has an \"Order again\" button. No commission.",

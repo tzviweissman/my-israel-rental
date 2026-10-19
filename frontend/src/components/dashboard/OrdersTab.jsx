@@ -398,6 +398,7 @@ export default function OrdersTab({ API, token }) {
               className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold border"
               style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
               data-testid="orders-counter"
+              data-tour="orders-counter"
             >
               <StoreIcon size={15} /> {t('counter.open', 'Sale at the counter')}
             </button>

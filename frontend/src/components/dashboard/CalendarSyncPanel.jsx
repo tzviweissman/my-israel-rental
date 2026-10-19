@@ -68,7 +68,7 @@ export default function CalendarSyncPanel({ API, token }) {
 
   return (
     <div className="mb-4 rounded-2xl border bg-white" style={{ borderColor: BORDER }} data-testid="calendar-sync-panel">
-      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open}
+      <button type="button" onClick={() => setOpen((o) => !o)} aria-expanded={open} data-tour="calendar-sync"
         className="w-full flex items-center justify-between gap-3 px-4 py-3 text-start">
         <span className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--ink)' }}>
           <CalendarSync size={15} style={{ color: MUTED }} aria-hidden="true" />

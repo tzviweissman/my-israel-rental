@@ -13,7 +13,8 @@
  * The stops added on 16 Oct 2026 (Tzvi: "add all the new features to the
  * walk through tour") cover link-in-bio, appointments, gift cards, the
  * sales summary with private feedback, and messages to guests; on 17 Oct
- * hours and fees with table ordering (b.hours).
+ * hours and fees with table ordering (b.hours); on 19 Oct calendar sync
+ * (b.calendar) and sales at the counter (b.counter).
  * Someone who is both takes the business walk first and is offered the
  * host walk at the end.
  *
@@ -40,9 +41,13 @@ export const WALKS = {
     { id: 'b.biolink', route: '/dashboard?tab=my-businesses&details=1', target: 'bio-link' },
     { id: 'b.hours', route: '/dashboard?tab=my-businesses', target: 'business-hours',
       doIt: { click: 'business-hours' } },
+    { id: 'b.calendar', route: '/dashboard?tab=my-businesses', target: 'calendar-sync',
+      doIt: { click: 'calendar-sync' } },
     { id: 'b.requests', route: '/requests', target: 'requests-board' },
     { id: 'b.orders', route: '/dashboard?tab=orders', target: 'orders-board',
       doIt: { click: 'orders-new' } },
+    { id: 'b.counter', route: '/dashboard?tab=orders', target: 'orders-counter',
+      doIt: { click: 'orders-counter' } },
     { id: 'b.appointments', route: '/dashboard?tab=appointments', target: 'appointment-settings',
       doIt: { click: 'appointment-settings-open' } },
     { id: 'b.giftcards', route: '/dashboard?tab=discounts', target: 'gift-cards',
