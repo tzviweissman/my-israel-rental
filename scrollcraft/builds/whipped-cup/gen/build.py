@@ -71,10 +71,10 @@ FOOTER = f'''  <section class="close" aria-label="Order from The Whipped Cup">
 # One master photo per flavour, all the same: one jar standing on coffee beans (her own photos; the
 # caramel and vanilla jars lay on the beans, shot from above, so their photos are turned upright).
 # The thumbnail is cut from the same master (rules 3o, one look per product).
-FLAVS = [('classic', 'Classic Cloud', 'Original whipped coffee', 40, 'jar-classic-t.webp', '50% 50%', 'jar-classic.webp', 'A jar of Classic Cloud on coffee beans'),
-         ('caramel', 'Caramel Cloud', 'Whipped coffee and caramel', 48, 'jar-caramel-t.webp', '50% 50%', 'jar-caramel.webp', 'A jar of Caramel Cloud on coffee beans'),
-         ('vanilla', 'Vanilla Cloud', 'Whipped coffee and vanilla', 48, 'jar-vanilla-t.webp', '50% 50%', 'jar-vanilla.webp', 'A jar of Vanilla Cloud on coffee beans')]
-FLAV_HTML = ''.join(f'''          <div class="flav rev{' on' if i == 0 else ''}" data-flav="{k}" tabindex="0" aria-label="{n}, show the photo"><img class="thumb" src="assets/{c}" alt="A jar of {n}" width="120" height="120" loading="lazy" style="object-position:{pos}"><h3>{n}</h3><div class="price">₪{p}<small>a jar</small></div><p>{d}</p><a class="btn-line add" href="order.html?jar={k}" data-jar="{k}">Add</a></div>
+FLAVS = [('classic', 'Classic Cloud', 'Original whipped coffee', 40, 'jar-classic.webp', '50% 50%', 'jar-classic.webp', 'A jar of Classic Cloud on coffee beans'),
+         ('caramel', 'Caramel Cloud', 'Whipped coffee and caramel', 48, 'jar-caramel.webp', '50% 50%', 'jar-caramel.webp', 'A jar of Caramel Cloud on coffee beans'),
+         ('vanilla', 'Vanilla Cloud', 'Whipped coffee and vanilla', 48, 'jar-vanilla.webp', '50% 50%', 'jar-vanilla.webp', 'A jar of Vanilla Cloud on coffee beans')]
+FLAV_HTML = ''.join(f'''          <div class="flav rev{' on' if i == 0 else ''}" data-flav="{k}" tabindex="0" aria-label="{n}, show the photo"><img class="thumb" src="assets/{c}" alt="A jar of {n}" width="500" height="1111" loading="lazy"><h3>{n}</h3><div class="price">₪{p}<small>a jar</small></div><p>{d}</p><a class="btn-line add" href="order.html?jar={k}" data-jar="{k}">Add</a></div>
 ''' for i, (k, n, d, p, c, pos, big, alt) in enumerate(FLAVS))
 BIG_HTML = ''.join(f'''          <img class="big{' on' if i == 0 else ''}" data-flav="{k}" src="assets/{big}" alt="{alt}" width="500" height="1111" loading="lazy">
 ''' for i, (k, n, d, p, c, pos, big, alt) in enumerate(FLAVS))
@@ -244,7 +244,7 @@ ORDER_FORM = '''  <header class="page-head"><div class="wrap">
           </div>
           <div class="card">
             <h3>Delivery</h3>
-            <p class="deliv">Delivered locally in Jerusalem. We confirm the day and time with you on WhatsApp.</p>
+            <p class="deliv">Delivered fresh to your door. Your order opens on WhatsApp, written out, for The Whipped Cup to confirm.</p>
             <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p></div>
             <div id="w-when"><label class="f" for="when">First delivery day</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p></div>
           </div>
@@ -280,7 +280,7 @@ write('contact', 'Contact · The Whipped Cup', 'WhatsApp +1 929 993 6768 or emai
       <div class="contact-grid">
         <div class="card rev"><h3>WhatsApp</h3><p><a href="https://wa.me/{WA}" target="_blank" rel="noopener">+1 929 993 6768</a></p><p>The quickest way to order.</p><a class="btn" href="order.html">Order your jars <span class="arw" aria-hidden="true">→</span></a></div>
         <div class="card rev"><h3>Email</h3><p><a href="mailto:thewhippedcup@gmail.com">thewhippedcup@gmail.com</a></p></div>
-        <div class="card rev"><h3>Where</h3><p>Ramat Eshkol, Jerusalem.</p><p>Delivered locally in Jerusalem.</p><p>Kosher certified.</p></div>
+        <div class="card rev"><h3>Where</h3><p>Ramat Eshkol, Jerusalem.</p><p>Delivered fresh to your door.</p><p>Kosher certified.</p></div>
       </div>
     </div>
   </section>

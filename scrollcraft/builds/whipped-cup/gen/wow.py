@@ -247,7 +247,7 @@ SKY_CSS = '''
 .sky-end { position: absolute; z-index: 1; isolation: isolate; left: 0; right: 0; bottom: 0; padding: 0 var(--gutter) clamp(2rem, 7vh, 4.5rem); max-width: 74rem; margin: 0 auto; }  /* its shade sits over the photo */
 .sky-end > * { opacity: 0; }
 .sky-end::before { content: ''; position: absolute; inset: -40vh -50vw 0; z-index: -1; opacity: var(--dim, 0); background: linear-gradient(0deg, rgb(42 20 11 / .94), rgb(42 20 11 / .86) 48%, transparent 68%); }
-.sky.wide .sky-end::before { inset: -100vh -10vw -100vh -10vw; background: linear-gradient(90deg, rgb(42 20 11 / .85), rgb(42 20 11 / .55) 60%, transparent 95%); }
+.sky.wide .sky-end::before { inset: -100vh -10vw -100vh -10vw; background: linear-gradient(90deg, rgb(42 20 11 / .9), rgb(42 20 11 / .82) 84%, transparent 100%); }
 .sky-end h2 { font-size: clamp(2.8rem, 6.5vw, 6rem); color: #fff; line-height: .98; }
 .sky-end h2 .soft { font-style: italic; font-weight: 500; color: #FFE3EC; }
 .sky-end .kick { background: rgb(42 20 11 / .62); color: var(--cream); }
