@@ -18,6 +18,10 @@
  *   which idea and why, in a few lines
  *   ## Wow gate
  *   the five answers of page rules 3n, numbered 1 to 5
+ *   ## Effects
+ *   - button: B7, from 21st search "button hover" for bakeries
+ *   one line per kind (button, link, tile, reveal, steps, price, heading),
+ *   the id from fingerprints.json _effects and where it came from; "none" allowed
  *   ## Not alike
  *   the line printed by scripts/check-fingerprints.mjs for this build
  *
@@ -47,6 +51,14 @@ export function checkConcept(dir) {
   const gate = part('Wow gate');
   const answers = [1, 2, 3, 4, 5].filter((n) => new RegExp(`^\\s*${n}[.)]\\s*\\S{3,}`, 'm').test(gate));
   if (answers.length < 5) problems.push(`Wow gate: ${answers.length} of the 5 answers (page rules 3n)`);
+  // each effect says where it came from, so a habit carried over from the last
+  // build shows (Tzvi, 20 Oct 2026: "why do you keep making everything so similar")
+  const fx = part('Effects').split('\n').filter((l) => /^\s*[-*]\s*\w+:/.test(l));
+  const kinds = ['button', 'link', 'tile', 'reveal', 'steps', 'price', 'heading'];
+  const lacking = kinds.filter((k) => !fx.some((l) => new RegExp(`^\\s*[-*]\\s*${k}:`, 'i').test(l)));
+  if (lacking.length) problems.push(`Effects: no line for ${lacking.join(', ')} (one "- kind: id, from <the search or inspo picture>" each, "none" allowed)`);
+  const unsourced = fx.filter((l) => !/:\s*none\b/i.test(l) && !/\bfrom\b/i.test(l));
+  if (unsourced.length) problems.push(`Effects: say where each came from ("from" a named 21st, Mobbin or Inspo search, or a docs/inspo picture): ${unsourced.map((l) => l.trim()).join(' | ')}`);
   if (!/different from all \d+ other pages/.test(part('Not alike'))) problems.push('Not alike: paste the passing line from scripts/check-fingerprints.mjs');
   return problems;
 }

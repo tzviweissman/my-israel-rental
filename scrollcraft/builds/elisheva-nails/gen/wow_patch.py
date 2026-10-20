@@ -3,8 +3,8 @@ rep = [
     ("json.dumps([{'k': k, 'n': n, 'f': f, 'a': a} for k, n, c, f, a in SHADES])",
      "json.dumps([{'k': k, 'n': n, 'f': f, 'a': a, 'c': c} for k, n, c, f, a in SHADES])"),
     ("  var frame = document.getElementById('frame'), name = document.getElementById('shade-name'), book = document.getElementById('book-shade');",
-     "  var frame = document.getElementById('frame'), name = document.getElementById('shade-name'), book = document.getElementById('book-shade'), hero = document.getElementById('open');\n  hero.style.setProperty('--tint', SHADES[0].c);"),
-    ("    name.textContent = SHADES[i].n;", "    name.textContent = SHADES[i].n;\n    hero.style.setProperty('--tint', SHADES[i].c);"),
+     "  var frame = document.getElementById('frame'), name = document.getElementById('shade-name'), book = document.getElementById('book-shade'), hero = document.getElementById('open');\n  document.body.style.setProperty('--tint', SHADES[0].c);"),
+    ("    name.textContent = SHADES[i].n;", "    name.textContent = SHADES[i].n;\n    document.body.style.setProperty('--tint', SHADES[i].c);"),
     ('''  <section class="hero" id="open" aria-labelledby="h-open">
     <div class="wrap">''', '''  <section class="hero" id="open" aria-labelledby="h-open">
     <div class="tint" aria-hidden="true"></div>

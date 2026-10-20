@@ -1107,6 +1107,22 @@ script, Jost), and Chicken Munch shares Anton with Michal Yodaiken.
    alike (unless they are the business's own), and the design different on at
    least 4 of 6. On a clash the new site changes; an existing site is never
    changed to make room.
+4. **Effects are checked too** (Tzvi, 20 Oct 2026: "we already have rules to
+   make effects different, like buttons and arrow effects, so why do you keep
+   making everything so similar"). Rule 3c said to search fresh for every
+   effect, but nothing checked it, and all nine live pages faded their
+   sections in the same way, most with the same hover lift and arrows; The
+   Whipped Cup's steps then lit up one by one as you scroll, as on other
+   pages. Each site lists its effects in `fingerprints.json` under `effects`,
+   one id per kind (button, link, tile, reveal, steps, price, heading, plus
+   any `other`), ids from `_effects` (the effects library's B, L, T, P, H codes
+   and ours). Two sites may share effects worth 2 points (Tzvi: "it's ok if 2
+   effects match"); an obvious effect, one a visitor sees without hunting for
+   it (marked `loud`: how sections appear, how steps are shown, heading
+   animations, scenes), counts 2, a quiet one (a hover, an arrow, how a price
+   is set) counts 1. So two quiet effects may match, or one loud one, never
+   more. A new effect gets a new id in `_effects`. CONCEPT.md's `## Effects`
+   says where each one came from (3q).
 
 ## 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
 
@@ -1120,7 +1136,9 @@ Before any section is built, the build folder gets `CONCEPT.md`: three or
 more opening ideas, each citing a saved effect from `docs/inspo` by its
 picture; one idea marked "Own:" from the business's own words or world (its
 tagline, its process, its place); which was chosen and why; the five wow-gate
-answers (3n); and the passing line from check-fingerprints (3p).
+answers (3n); a `## Effects` line per kind with its id and where it came from
+(a named 21st, Mobbin or Inspo search, or a `docs/inspo` picture); and the
+passing line from check-fingerprints (3p).
 `node scripts/check-concept.mjs <build>` checks it, and `publish-page.mjs`
 refuses to put a NEW page live without it. Read the saved effects for the
 kind of business (the part files' "For ..." sections and pictures) every

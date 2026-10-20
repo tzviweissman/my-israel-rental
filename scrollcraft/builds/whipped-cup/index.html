@@ -56,49 +56,26 @@
       </div>
     </div>
   </section>
-  <section class="pour" id="pour" aria-labelledby="h-how">
-    <div class="pour-stage">
-      <div class="wrap pour-grid">
-        <div class="pour-copy">
-          <p class="kick">How do you use it?</p>
-          <h2 id="h-how">Instant coffee whipped into a thick, creamy <span class="pink">cloud</span>, ready in your fridge.</h2>
-          <ol class="pour-steps">
-            <li data-s="0"><span class="n">1</span>Fill your glass with ice</li>
-            <li data-s="1"><span class="n">2</span>Pour in cold milk</li>
-            <li data-s="2"><span class="n">3</span>Add whipped coffee as desired</li>
-          </ol>
-          <p class="pour-note">Each jar makes 3 to 4 coffees.</p>
+  <section class="sec cups" id="coffees" aria-labelledby="h-cups">
+    <div class="wrap cups-grid">
+      <div class="ph rev"><img src="assets/bottles.webp" alt="Two jars of The Whipped Cup tied with ribbon on pink linen" width="1023" height="1537" loading="lazy"></div>
+      <div class="card-r rev">
+        <h2 id="h-cups">How many <span class="pink">coffees?</span></h2>
+        <div class="serve" role="group" aria-label="How many coffees">
+          <span class="glide" aria-hidden="true"></span>
+          <button type="button" data-c="4" aria-pressed="false"><b>4</b>coffees</button>
+          <button type="button" data-c="7" aria-pressed="true"><b>7</b>one a day</button>
+          <button type="button" data-c="14" aria-pressed="false"><b>14</b>two a day</button>
+          <button type="button" data-c="21" aria-pressed="false"><b>21</b>three a day</button>
         </div>
-        <svg class="glass" viewBox="0 0 300 420" role="img" aria-label="Drawing of an iced whipped coffee being made: ice, then milk, then the whipped coffee on top">
-          <defs>
-            <clipPath id="inside"><path d="M62 70 L238 70 L218 384 Q216 398 202 398 L98 398 Q84 398 82 384 Z"/></clipPath>
-            <linearGradient id="milk" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF8F2"/><stop offset="1" stop-color="#F3E3D8"/></linearGradient>
-            <linearGradient id="cof" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#C98E5E"/><stop offset="1" stop-color="#8A5530"/></linearGradient>
-          </defs>
-          <ellipse cx="150" cy="404" rx="96" ry="9" fill="#33170C" opacity=".12"/>
-          <g clip-path="url(#inside)">
-            <rect id="milk-fill" x="40" y="400" width="220" height="340" fill="url(#milk)"/>
-            <g id="swirl" opacity="0">
-              <path d="M80 0 C 120 30, 70 60, 120 90 S 150 150, 110 190" stroke="#B9875E" stroke-width="10" fill="none" stroke-linecap="round" opacity=".55"/>
-              <path d="M170 0 C 200 40, 150 80, 190 120 S 210 170, 170 220" stroke="#A8744A" stroke-width="8" fill="none" stroke-linecap="round" opacity=".5"/>
-              <path d="M130 0 C 150 30, 120 70, 150 110" stroke="#C99569" stroke-width="7" fill="none" stroke-linecap="round" opacity=".45"/>
-            </g>
-            <g id="ice">
-              <rect class="cube" x="86" y="300" width="58" height="54" rx="12"/>
-              <rect class="cube" x="150" y="296" width="60" height="56" rx="12" transform="rotate(8 180 324)"/>
-              <rect class="cube" x="110" y="244" width="56" height="52" rx="12" transform="rotate(-10 138 270)"/>
-              <rect class="cube" x="164" y="236" width="52" height="50" rx="11" transform="rotate(14 190 261)"/>
-              <rect class="cube" x="96" y="190" width="54" height="50" rx="11" transform="rotate(6 123 215)"/>
-            </g>
-          </g>
-          <g id="cloud" transform="translate(0 -260)">
-            <path d="M84 92 C 70 62, 104 40, 124 56 C 132 30, 176 28, 186 54 C 208 40, 236 62, 220 90 C 240 98, 232 122, 210 118 L 92 118 C 66 122, 62 98, 84 92 Z" fill="url(#cof)"/>
-            <path d="M104 74 C 118 62, 140 70, 150 62 C 164 70, 184 60, 196 74" stroke="#E6B98C" stroke-width="5" fill="none" stroke-linecap="round" opacity=".7"/>
-          </g>
-          <path d="M60 66 L240 66 L219 386 Q217 402 201 402 L99 402 Q83 402 81 386 Z" fill="none" stroke="#33170C" stroke-width="5" stroke-linejoin="round"/>
-          <path d="M74 86 L90 360" stroke="#fff" stroke-width="6" stroke-linecap="round" opacity=".7"/>
-          <rect x="182" y="10" width="12" height="150" rx="6" fill="#F07DA4" transform="rotate(14 188 85)" id="straw" opacity="0"/>
-        </svg>
+        <p class="need" aria-live="polite"><span class="n" id="cups-n">2 to 3</span><span class="u" id="cups-u">jars</span></p>
+        <p class="fits" id="cups-fit">Each jar makes 3 to 4 coffees. The Try It Duo has 2 jars, ₪75.</p>
+        <a class="btn" id="cups-go" href="order.html?pack=duo">Order the Try It Duo, ₪75</a>
+        <ol class="recipe" aria-label="How to make it">
+          <li>Fill your glass with ice</li>
+          <li>Pour in cold milk</li>
+          <li>Add whipped coffee as desired</li>
+        </ol>
       </div>
     </div>
   </section>
@@ -177,35 +154,29 @@
 })();
 </script>
 <script>
-// The pour: scroll drives three beats, one per step of her card. Reduced
-// motion shows the finished glass and all three steps.
 (function () {
-  var sec = document.getElementById('pour'); if (!sec) return;
-  var cubes = [].slice.call(sec.querySelectorAll('.cube')), milk = document.getElementById('milk-fill'), cloud = document.getElementById('cloud');
-  var swirl = document.getElementById('swirl'), straw = document.getElementById('straw'), steps = [].slice.call(sec.querySelectorAll('.pour-steps li'));
-  var clamp = function (v) { return Math.max(0, Math.min(1, v)); }, ease = function (t) { return 1 - Math.pow(1 - t, 3); };
-  var bounce = function (t) { t = clamp(t); var s = 1.4; return 1 + (s + 1) * Math.pow(t - 1, 3) + s * Math.pow(t - 1, 2); };
-  function draw(p) {
-    cubes.forEach(function (c, i) {
-      var t = bounce((p - i * .05) / .16);
-      c.style.transform = 'translateY(' + ((1 - t) * -360) + 'px)'; c.style.opacity = t > 0 ? 1 : 0;
-    });
-    var m = ease(clamp((p - .36) / .26));
-    milk.setAttribute('y', (400 - m * 250).toFixed(1));
-    var c = bounce((p - .68) / .16);
-    cloud.setAttribute('transform', 'translate(0 ' + ((1 - c) * -260 + c * 30).toFixed(1) + ')');
-    var s = ease(clamp((p - .82) / .16));
-    swirl.setAttribute('opacity', (s * .95).toFixed(2));
-    swirl.setAttribute('transform', 'translate(0 ' + (150 + s * 40).toFixed(1) + ')');
-    straw.setAttribute('opacity', ease(clamp((p - .9) / .08)).toFixed(2));
-    var on = p < .34 ? 0 : p < .66 ? 1 : 2;
-    steps.forEach(function (li, i) { li.classList.toggle('on', i === on); li.classList.toggle('done', i < on); });
+  var box = document.querySelector('.serve'); if (!box) return;
+  var btns = [].slice.call(box.querySelectorAll('button')), glide = box.querySelector('.glide');
+  var n = document.getElementById('cups-n'), u = document.getElementById('cups-u'), fit = document.getElementById('cups-fit'), go = document.getElementById('cups-go');
+  // her packages, smallest that covers the most jars needed
+  var PACKS = [
+    [1, 'order.html?jar=classic', 'Order a jar, from ₪40', 'A single jar is ₪40, or ₪48 for Caramel and Vanilla.'],
+    [2, 'order.html?pack=duo', 'Order the Try It Duo, ₪75', 'The Try It Duo has 2 jars, ₪75.'],
+    [4, 'order.html?pack=one', 'Order 4 jars, from ₪148', 'One Flavour has 4 jars for ₪148, Assorted mixes all three for ₪155.'],
+    [6, 'order.html?pack=bundle', 'Order the Cloud Bundle, ₪220', 'The Cloud Bundle has any 6 jars, ₪220.']
+  ];
+  function pick(b) {
+    var c = +b.dataset.c, lo = Math.ceil(c / 4), hi = Math.ceil(c / 3), i = btns.indexOf(b);
+    btns.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
+    glide.style.transform = 'translateX(' + (i * 100) + '%)';
+    n.textContent = lo === hi ? lo : lo + ' to ' + hi; u.textContent = hi === 1 ? 'jar' : 'jars';
+    var p = PACKS.filter(function (x) { return x[0] >= hi; })[0], extra = '';
+    if (!p) { p = PACKS[PACKS.length - 1]; extra = ' Add ' + (hi - 6 === 1 ? 'a jar' : (hi - 6) + ' jars') + ' to it if you like them strong.'; }
+    fit.textContent = 'Each jar makes 3 to 4 coffees. ' + p[3] + extra;
+    go.href = p[1]; go.textContent = p[2];
   }
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { draw(1); steps.forEach(function (li) { li.classList.add('done'); }); return; }
-  var tick = 0;
-  function frame() { tick = 0; var r = sec.getBoundingClientRect(), span = sec.offsetHeight - innerHeight; draw(clamp(-r.top / Math.max(1, span))); }
-  addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
-  addEventListener('resize', frame); frame();
+  btns.forEach(function (b) { b.addEventListener('click', function () { pick(b); }); });
+  pick(btns[1]);
 })();
 </script>
 </body>

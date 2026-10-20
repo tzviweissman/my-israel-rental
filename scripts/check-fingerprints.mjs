@@ -13,6 +13,10 @@
  *   design   the hand-written fingerprint (scrollcraft/fingerprints.json:
  *            hero, signature, nav, close, layout, ground): fewer than 4 of
  *            6 different is a clash (the scroll-craft uniqueness gate)
+ *   effects  each site's effects by id (fingerprints.json "effects", ids
+ *            from "_effects"): shared effects worth more than 2 points is a
+ *            clash, a loud (obvious) one worth 2 and a quiet one 1. A site
+ *            being checked must list them.
  *
  *   node scripts/check-fingerprints.mjs <build-folder-or-slug> [more ...]
  *   node scripts/check-fingerprints.mjs --all     every published page against the rest
@@ -51,6 +55,43 @@ function brand(h) {
 }
 function near(a, b) { const [x, y] = [rgb(a), rgb(b)]; return Math.hypot(x[0] - y[0], x[1] - y[1], x[2] - y[2]) < 26; }
 
+// Effects (Tzvi, 20 Oct 2026: "we already have rules to make effects different,
+// like buttons and arrow effects, so why do you keep making everything so
+// similar"). The rules said "search fresh for every effect" but nothing checked
+// it, and all nine live pages faded their sections in the same way. Each site
+// lists its effects in fingerprints.json by an id from _effects (the effects
+// library's B/L/T/P/H codes plus ours). Two pages may share effects worth 2
+// points between them ("it's ok if 2 effects match"); an obvious effect, one a
+// visitor notices without hunting (marked loud), is worth 2, a quiet one 1.
+// So two quiet ones may match, or one loud one alone, never more.
+const VOCAB = manual._effects || {};
+const EFFECTS_ALLOWED = 2;
+const EFFECT_KINDS = ['button', 'link', 'tile', 'reveal', 'steps', 'price', 'heading', 'other'];
+const list = (v) => (Array.isArray(v) ? v : v ? [v] : []).filter((x) => x && x !== 'none');
+function effectsAlike(ea, eb) {
+  const same = [];
+  for (const kind of EFFECT_KINDS) {
+    for (const id of list(ea[kind])) {
+      if (!list(eb[kind]).includes(id)) continue;
+      const v = VOCAB[id] || {};
+      same.push({ kind, id, name: v.name || '', weight: v.loud ? 2 : 1 });
+    }
+  }
+  return same;
+}
+// a site being checked must list its effects, every one a known id
+function effectsProblems(name) {
+  const e = manual[name]?.effects;
+  if (!e) return [`no effects listed for ${name} in scrollcraft/fingerprints.json (one id per kind: ${EFFECT_KINDS.join(', ')}; "none" where it has none)`];
+  const out = [];
+  for (const kind of EFFECT_KINDS.filter((k) => k !== 'other')) if (!(kind in e)) out.push(`${name}: effects.${kind} missing (write "none" if the site has none)`);
+  for (const kind of EFFECT_KINDS) for (const id of list(e[kind])) {
+    if (!VOCAB[id]) out.push(`${name}: effects.${kind} "${id}" is not in _effects (add it there with kind, name and loud)`);
+    else if (VOCAB[id].kind !== kind) out.push(`${name}: "${id}" is a ${VOCAB[id].kind} effect, listed under ${kind}`);
+  }
+  return out;
+}
+
 function compare(aName, a, bName, b) {
   const out = [];
   const sa = a.fams.filter((f) => SCRIPTS.test(f)), sb = b.fams.filter((f) => SCRIPTS.test(f));
@@ -64,6 +105,11 @@ function compare(aName, a, bName, b) {
   const shared = ba.filter((c) => bb.some((d) => near(c, d)));
   if (shared.length >= 2) out.push(`${shared.length} brand colours alike (${shared.slice(0, 4).map((c) => '#' + c).join(' ')})`);
   const ma = manual[aName], mb = manual[bName];
+  if (ma?.effects && mb?.effects) {
+    const same = effectsAlike(ma.effects, mb.effects);
+    const score = same.reduce((n, e) => n + e.weight, 0);
+    if (score > EFFECTS_ALLOWED) out.push(`effects alike (${same.map((e) => `${e.kind} ${e.id} ${e.name}${e.weight > 1 ? ', noticeable' : ''}`).join('; ')}): ${score} points, ${EFFECTS_ALLOWED} allowed`);
+  }
   if (ma && mb) {
     const dims = ['hero', 'signature', 'nav', 'close', 'layout', 'ground'];
     const diff = dims.filter((d) => ma[d] && mb[d] && ma[d] !== mb[d]).length;
@@ -88,6 +134,8 @@ const mine = targets.map(load);
 for (const [n, s] of mine) if (!pool.has(n)) pool.set(n, s);
 let clashes = 0;
 const seen = new Set();
+const missing = mine.flatMap(([n]) => effectsProblems(n));
+if (missing.length) { console.log(missing.map((m) => `EFFECTS ${m}`).join('\n')); clashes += missing.length; }
 for (const [name, site] of mine) {
   for (const [other, os] of pool) {
     if (other === name) continue;

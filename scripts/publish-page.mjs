@@ -63,6 +63,14 @@ if (!fs.existsSync(path.join(SRC, 'index.html'))) {
       console.error(`Not published: ${slug} is a new page and its concept is not ready.\n- ${problems.join('\n- ')}`);
       process.exit(1);
     }
+    // and it must not come out like a live page: fonts, colours, design and
+    // effects (rules 3p; Tzvi, 20 Oct 2026: "why do you keep making everything so similar")
+    const { spawnSync } = await import('node:child_process');
+    const fp = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-fingerprints.mjs'), SRC], { encoding: 'utf8' });
+    if (fp.status !== 0) {
+      console.error(`Not published: ${slug} is too like a live page.\n${fp.stdout}${fp.stderr}`);
+      process.exit(1);
+    }
   }
 }
 

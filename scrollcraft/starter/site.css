@@ -27,14 +27,14 @@ h1, h2, h3 { font-family: var(--font-head); margin: 0; line-height: 1.04; }
 /* the one solid button and the outline one; every button reacts when pressed */
 .btn { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; min-height: 54px; padding: 0 1.7rem; border-radius: 999px; border: 0;
   background: var(--accent); color: var(--accent-ink); font: 600 1.02rem/1 var(--font-body); text-decoration: none; cursor: pointer; transition: transform 160ms var(--out), filter 160ms; }
-.btn:hover { transform: translateY(-2px); filter: brightness(1.08); }
-.btn:active { transform: translateY(1px) scale(.98); }
 .btn[aria-busy="true"] { opacity: .7; pointer-events: none; }
-.btn .arw { transition: transform 220ms var(--out); } .btn:hover .arw { transform: translateX(4px); }
+/* CHANGE: the button's hover and press (effects.button in fingerprints.json),
+   found by a fresh 21st search for this business, never copied from the last
+   site. The starter used to hold a lift, press and travelling arrow here, and
+   every site built from it came out with the same button (rules 3p.4). */
 .btn-line { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 1.15rem; border-radius: 999px; border: 2px solid var(--ink);
   color: var(--ink); font: 600 .95rem/1 var(--font-body); text-decoration: none; background: transparent; cursor: pointer; transition: background 160ms, color 160ms, transform 140ms; }
-.btn-line:hover { background: var(--ink); color: var(--ground); }
-.btn-line:active { transform: scale(.97); }
+/* CHANGE: the outline button's hover and press, chosen with the main one */
 
 /* the menu bar: the same on every page; on a phone the pages fold into Menu */
 .top { position: fixed; inset: 0 0 auto; z-index: 30; height: var(--top-h); display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-inline: var(--gutter);
@@ -61,8 +61,10 @@ h1, h2, h3 { font-family: var(--font-head); margin: 0; line-height: 1.04; }
 section.sec { padding-block: clamp(4.5rem, 10vw, 7.5rem); }
 .sec h2 { font-size: clamp(2.3rem, 5vw, 4rem); }
 .sec .lede { color: var(--soft); font-size: 1.1rem; max-width: 36rem; margin: .9rem 0 0; }
-.rev { opacity: 0; transform: translateY(16px); transition: opacity 650ms var(--out), transform 650ms var(--out); }
-.rev.in { opacity: 1; transform: none; }
+/* CHANGE: how sections appear (effects.reveal). site.js adds .in to each .rev
+   as it comes into view; the look is chosen per site (fade up was on all nine
+   live pages, 20 Oct 2026). Write .rev and .rev.in below the marked line, and
+   keep .no-js .rev and reduced motion visible. */
 .no-js .rev { opacity: 1; transform: none; }
 .page-head { padding: calc(var(--top-h) + clamp(3rem, 8vw, 5rem)) 0 0; }
 .page-head h1 { font-size: clamp(3rem, 8vw, 6rem); }
@@ -112,7 +114,7 @@ textarea.fld { min-height: 88px; resize: vertical; }
 .bar .p b { color: var(--ink); font: 700 1.15rem/1 var(--font-head); display: block; }
 .bar .btn { min-height: 46px; padding: 0 1.2rem; }
 @media (max-width: 760px) { .bar { display: flex; } body { --pad-bar: var(--bar-h); } }
-@media (prefers-reduced-motion: reduce) { .rev { opacity: 1; transform: none; transition: none; } }
+@media (prefers-reduced-motion: reduce) { .rev, .rev.in { opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important; transition: none !important; } }
 
 /* ── BELOW HERE: this business only. Its opening, its signature moment, its
    sections. Nothing here is copied from another site. ── */

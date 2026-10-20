@@ -27,7 +27,8 @@ build that comes out too close to another.
 
 4. **Choose the look before writing any section**, and write it into
    `scrollcraft/fingerprints.json`: hero, signature, nav, close, layout,
-   ground, and `own_colours` (colours from their logo or menu). Then run:
+   ground, `own_colours` (colours from their logo or menu), and `effects`
+   (one id per kind from `_effects`, each found by a fresh search, rules 3p.4). Then run:
 
    ```bash
    node scripts/check-fingerprints.mjs scrollcraft/builds/<folder>
