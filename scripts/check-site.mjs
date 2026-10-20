@@ -79,6 +79,8 @@ for (const url of urls) {
         for (const ch of new Set(chars)) {
           const key = stack + '|' + ch; if (seen.has(key)) continue;
           const c = document.createElement('canvas').getContext('2d');
+          // a canvas only uses faces already loaded; a face loaded on demand (Google's &text= subsets) may not be yet
+          await document.fonts.load(`${cs.fontWeight} 40px ${stack}`, ch).catch(() => {});
           c.font = `${cs.fontWeight} 40px ${stack}, serif`; const a = c.measureText(ch).width;
           c.font = `${cs.fontWeight} 40px ${stack}, monospace`; const b = c.measureText(ch).width;
           const missing = stack && Math.abs(a - b) > 0.5; seen.set(key, missing);

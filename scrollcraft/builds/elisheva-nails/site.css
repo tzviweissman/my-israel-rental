@@ -267,7 +267,9 @@ body[data-tone="dark"] .hero .btn, body[data-tone="dark"] .hero .btn * { color: 
 .close .btn:hover { background: var(--blush); }
 
 .arw svg { display: block; } .arw { display: inline-flex; }  /* the arrow is drawn, not a character the fonts lack */
-.stage .st-save { min-height: 2.9em; } .stage .shade-name { min-height: 1.7em; }
+.stage .st-save { height: 1.6em; min-height: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.st-price .was { font: 500 .5em/1 var(--font-body); color: var(--soft); text-decoration-thickness: 1.5px; margin-right: .35em; vertical-align: .25em; }
+.stage .st-price { height: 1.1em; } .stage .shade-name { min-height: 1.7em; }
 /* the sweeps come from different sides, like strokes of polish, not one machine direction
    (Tzvi, 20 Oct 2026: "maybe some should go in other directions"). site.js gives each block a side. */
 body:not(.no-js) .rev[data-dir="r"] { clip-path: inset(-100px -100px -100px 100%); }
