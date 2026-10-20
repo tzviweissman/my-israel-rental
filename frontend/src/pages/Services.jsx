@@ -25,6 +25,7 @@ import CoverPlaceholder from '../components/common/CoverPlaceholder';
 import LocationChipsRow from '../components/marketplace/LocationChipsRow';
 import ServicesFiltersModal from '../components/marketplace/ServicesFiltersModal';
 import ServicesMapView from '../components/marketplace/ServicesMapView';
+import { resolveGigCoords } from '../utils/servicesGeo';
 import PeekableResultsSheet from '../components/common/PeekableResultsSheet';
 import NearbyDensityBar from '../components/common/NearbyDensityBar';
 import { localizedTitle } from '../utils/gigLocale';
@@ -796,6 +797,17 @@ const Services = () => {
                 </div>
               )}
             </div>
+            {/* Businesses with no city to pin (they serve everywhere, or
+                work online) are said, not silently left off the map. */}
+            {(() => {
+              const off = displayGigs.filter((g) => !resolveGigCoords(g));
+              if (!off.length) return null;
+              return (
+                <p className="mt-2 text-[13px]" style={{ color: 'var(--brand-muted)' }} data-testid="services-map-unplaced">
+                  {t('services.mapUnplaced', { count: off.length, defaultValue: '{{count}} more serve all of Israel or work online, so they have no pin. They are in the list view.' })}
+                </p>
+              );
+            })()}
             {/* Mobile-only peekable sheet — mirrors the Stays pattern
                 so renters can glance at gig cards without leaving the
                 map. Reuses the shared GigCard component in the full

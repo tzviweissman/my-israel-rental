@@ -42,6 +42,24 @@ const gigIcon = () => new L.DivIcon({
     </svg>`,
 });
 
+// A pin that stands for several businesses in one place says how many
+// (20 Oct 2026: 38 businesses sat under one Jerusalem pin that looked like
+// one). Same pin, a white number badge on its shoulder.
+const countIcon = (n) => new L.DivIcon({
+  className: 'gig-pin',
+  iconSize: [30, 40],
+  iconAnchor: [15, 38],
+  popupAnchor: [0, -34],
+  html: `
+    <div style="position:relative;width:30px;height:40px;">
+      <svg xmlns="http://www.w3.org/2000/svg" width="30" height="40" viewBox="0 0 30 40" fill="none"
+           style="filter: drop-shadow(0 3px 6px rgba(15,58,58,0.35));">
+        <path d="M15 0C6.72 0 0 6.72 0 15c0 10.5 13.16 23.15 14.34 24.32a.94.94 0 0 0 1.32 0C16.84 38.15 30 25.5 30 15 30 6.72 23.28 0 15 0Z" fill="${TEAL}"/>
+      </svg>
+      <span style="position:absolute;top:4px;left:0;width:30px;text-align:center;font:700 12px/22px system-ui,sans-serif;color:#fff;">${n > 99 ? '99+' : n}</span>
+    </div>`,
+});
+
 const userIcon = () => new L.DivIcon({
   className: '',
   iconSize: [22, 22],
@@ -169,8 +187,10 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm, activeId, onPinClick
 
     const points = [];
     for (const cluster of clusters.values()) {
-      const items = cluster.items.slice(0, 4);
-      const extra = cluster.items.length - items.length;
+      // Every business at this spot, in a list that scrolls; it used to
+      // stop at four with "+ 34 more" and no way to reach the rest.
+      const items = cluster.items;
+      const extra = 0;
       const rows = items.map((g) => {
         const title = esc(localizedTitle(g, i18n));
         const provider = esc(g.provider?.name || '');
@@ -189,9 +209,12 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm, activeId, onPinClick
       const more = extra > 0
         ? `<div style="font-size:11px;color:#6b7280;padding-top:4px;">+ ${extra} more</div>`
         : '';
-      const html = `<div data-testid="services-map-popup" style="min-width:220px;max-width:280px;">${rows}${more}</div>`;
+      const head = items.length > 1
+        ? `<div style="font-size:12px;font-weight:700;color:#111827;padding:0 4px 6px;">${esc(t('services.mapCount', { count: items.length, defaultValue: '{{count}} businesses here' }))}</div>`
+        : '';
+      const html = `<div data-testid="services-map-popup" style="min-width:220px;max-width:280px;">${head}<div style="max-height:260px;overflow-y:auto;">${rows}${more}</div></div>`;
 
-      const marker = L.marker([cluster.lat, cluster.lng], { icon: gigIcon() }).addTo(group);
+      const marker = L.marker([cluster.lat, cluster.lng], { icon: items.length > 1 ? countIcon(items.length) : gigIcon() }).addTo(group);
       marker.bindPopup(html);
       // Bounce the first gig's id up to the parent so the peek-strip
       // scrolls its card into view. For city-cluster pins we take the

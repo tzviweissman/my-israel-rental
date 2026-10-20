@@ -4761,6 +4761,10 @@ const en = {
         more:           'More',
       },
       services: {
+        mapCount_one: "1 business here",
+        mapCount_other: "{{count}} businesses here",
+        mapUnplaced_one: "1 more serves all of Israel or works online, so it has no pin. It is in the list view.",
+        mapUnplaced_other: "{{count}} more serve all of Israel or work online, so they have no pin. They are in the list view.",
         // Rentals → services cross-sell strip (property detail + post-booking).
         crossSell: {
           title: 'Moving in? Find movers, cleaners & handymen',
