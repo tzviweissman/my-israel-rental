@@ -92,3 +92,30 @@ For us: their real dish photo cut out (cutout.py), the owner as the maker.
 ## For our builds
 Proposed (Tzvi, 20 Oct 2026: "they can probably be merged into 1"): Menu and
 Order become one page, the shop, built from techniques 1, 2, 7, 8 and 10.
+
+## Two store home pages Tzvi sent after (PureGlow before and after, AURA skincare)
+
+Pictures not saved (sent in chat). What they teach:
+
+14. **A thin bar of real promises above everything**: "Free shipping on
+    orders over $75", "Complimentary samples with every order". Psychology:
+    a free-delivery threshold makes people add one more item; a free sample
+    is reciprocity. Only with the owner's real terms.
+15. **A row of four promise icons right under the hero** (free shipping,
+    natural ingredients, secure payment, support). Answers "can I trust
+    this" before the products start. For us: kosher, made where, delivery,
+    how to pay, from the owner.
+16. **Category icons in one row** (cleansers, serums, masks...): one tap to
+    the part of the shop you want. For a shop with several kinds of item.
+17. **Two promo tiles side by side** (two collections, each photo, line and
+    button) before the best sellers.
+18. **Best sellers with a round "+" on every card**: add without opening the
+    product, price and stars on the card. "Best seller" only from real
+    orders or the owner's word.
+19. **"As seen in" logos** (authority) and an **Instagram row** (real
+    customers' photos): only real press and their own feed.
+20. **"10% off your first order" for an email**: only an offer the owner
+    really gives.
+21. **The before and after itself**: the same sections in both; what made
+    "after" better is one palette, one card size, every section a clear
+    job, real photos big, and the promise strip. Consistency again.

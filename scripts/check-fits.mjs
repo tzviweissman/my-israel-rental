@@ -44,7 +44,10 @@ for (const url of urls) {
       if (laptop) {
         for (const el of document.querySelectorAll('section, header.page-head')) {
           if (pinned(el) || el.closest('footer') || getComputedStyle(el).display === 'none') continue;
-          const hh = el.getBoundingClientRect().height;
+          // a first section that runs under the fixed menu bar (its padding makes room for it) is
+          // measured from below the bar
+          const topH = top ? top.getBoundingClientRect().height : 0, at = el.getBoundingClientRect().top + scrollY;
+          const hh = el.getBoundingClientRect().height - Math.max(0, topH - at);
           if (hh > room + 2) out.push(`section ${name(el)} is ${Math.round(hh)}px, the screen has ${Math.round(room)}px`);
         }
       }

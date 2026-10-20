@@ -150,6 +150,11 @@
   .hero .land h1 b { font-style: normal; font-weight: 500; color: var(--sc-accent); }
   .hero .land p { margin: var(--sc-2) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
 
+  /* the deal, only where the numbers make it true (Tzvi, 20 Oct 2026: "a board double the size
+     should technically be double the price, if it's not they are getting a deal"). From their own
+     sizes: the Large (33x47 cm) at the Medium's price per centimetre (24x35 cm) would cost more than
+     it does; the line says only the dollars saved (Tzvi: "don't say how much more it costs"). */
+  .deal { display: block; margin-top: .3rem; font-style: normal; font-weight: 700; font-size: .85rem; color: #7FD39A; }
   /* --------------------------------------------------------------- sizes --
      The peak. One plank, five real sizes, one pixels-per-centimetre. */
   .sizes .sc-copy--lead { bottom: auto; top: clamp(4.5rem, 11vh, 7rem); max-width: 34rem; }
@@ -406,8 +411,8 @@
         <div class="tier" data-sc-cue="0.6 0.8 0.3 0.3">
           <p class="tier__size"><span class="num">33 × 47</span><small>cm</small></p>
           <ul>
-            <li><span><b>Large Premium Steak Board</b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$485</span></li>
-            <li><span><b>Large Blazin' Board</b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef jerky.</small></span><span class="price">$385</span></li>
+            <li><span><b>Large Premium Steak Board</b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small><em class="deal">You save $161 against the Medium, size for size</em></span><span class="price">$485</span></li>
+            <li><span><b>Large Blazin' Board</b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef jerky.</small><em class="deal">You save $77 against the Medium, size for size</em></span><span class="price">$385</span></li>
           </ul>
         </div>
         <div class="tier" data-sc-cue="0.8 1 0.3 0">
@@ -436,8 +441,8 @@
         <li><span><b>Small Premium Steak Board <i>20 × 30 cm</i></b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$250</span></li>
         <li><span><b>Medium Blazin' Board <i>24 × 35 cm</i></b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, brisket, London broil, beef jerky.</small></span><span class="price">$250</span></li>
         <li><span><b>Medium Premium Steak Board <i>24 × 35 cm</i></b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$350</span></li>
-        <li><span><b>Large Blazin' Board <i>33 × 47 cm</i></b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef jerky.</small></span><span class="price">$385</span></li>
-        <li><span><b>Large Premium Steak Board <i>33 × 47 cm</i></b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$485</span></li>
+        <li><span><b>Large Blazin' Board <i>33 × 47 cm</i></b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef jerky.</small><em class="deal">You save $77 against the Medium, size for size</em></span><span class="price">$385</span></li>
+        <li><span><b>Large Premium Steak Board <i>33 × 47 cm</i></b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small><em class="deal">You save $161 against the Medium, size for size</em></span><span class="price">$485</span></li>
         <li><span><b>Extra Large VIP Board <i>37 × 57 cm</i></b><small>Rib steak, oyster steak, sliced entrecote, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef facon, beef jerky.</small></span><span class="price">$700</span></li>
         <li><span><b>The Party Board</b><small>Two rib steaks, oyster steak, entrecote, candied pastrami, brisket, London broil, skirt or hanger steak, beef jerky.</small></span><span class="price">$750</span></li>
         <li><span><b>The All Jerky Board <i>20 × 30 cm</i></b></span><span class="price">$149</span></li>

@@ -28,6 +28,9 @@ For each item answer PASS or FAIL with where and what you saw.
    belongs to, the moment they pick it (rules 3l). Order each package or
    option once and check you can choose everything it allows.
 7. The order or booking message comes out complete and correct.
+7a. Every saving shown is true from the owner's prices (work it out), and
+    a real one is not missing: packs against singles, bigger sizes against
+    smaller, combined services against their parts (rules 3j).
 
 ## Photos
 8. No photo looks soft, stretched or zoomed in; each shows its subject whole

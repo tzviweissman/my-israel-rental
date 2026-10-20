@@ -12,7 +12,8 @@ document.body.classList.remove('no-js');
     tick = 0;
     var vh = innerHeight;
     top.classList.toggle('solid', scrollY > 10);
-    if (bar) bar.classList.toggle('on', scrollY > vh * .5 && (!book || book.getBoundingClientRect().top > vh * .75));
+    // on the booking page the page itself is the booking: no bar with a fixed price over it (the review)
+    if (bar) bar.classList.toggle('on', document.body.dataset.page !== 'book' && scrollY > vh * .5 && (!book || book.getBoundingClientRect().top > vh * .75));
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();

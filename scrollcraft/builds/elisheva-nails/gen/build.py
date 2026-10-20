@@ -176,7 +176,7 @@ VISIT = f'''  <section class="sec" id="visit" aria-labelledby="h-visit">
       <h2 id="h-visit" class="rev">Where and when</h2>
       <div class="visit">
         <div class="card rev"><h3>Opening hours</h3><ul class="hours">{hours_li}</ul></div>
-        <div class="card rev"><h3>The studio</h3><p>Romema, Jerusalem. I send the address when you book.</p><p>WhatsApp or call <a href="https://wa.me/{WA}" target="_blank" rel="noopener">+44 7871 822590</a></p><p>Text <a href="sms:+972533484521">+972 53 348 4521</a></p><a class="btn" href="book.html" style="margin-top:1rem;color:#fff">Book a time <span class="arw" aria-hidden="true">→</span></a></div>
+        <div class="card rev"><h3>The studio</h3><p>Romema, Jerusalem.</p><p>WhatsApp or call <a href="https://wa.me/{WA}" target="_blank" rel="noopener">+44 7871 822590</a></p><p>Text <a href="sms:+972533484521">+972 53 348 4521</a></p><a class="btn" href="book.html" style="margin-top:1rem;color:#fff">Book a time <span class="arw" aria-hidden="true">→</span></a></div>
       </div>
     </div>
   </section>
@@ -194,21 +194,30 @@ write('index', 'Nails by Elisheva · Gel nails and nail art in Romema, Jerusalem
 
 svc_opts = ''.join(f'<label class="opt"><input type="radio" name="svc" value="{k}"><span class="box"><span><b>{n}</b><br><small>about {m} minutes</small></span><span class="p"><span class="sym">₪</span>{p}</span></span></label>' for k, n, p, m, d in SERVICES)
 shade_opts = ''.join(f'<button class="shade" type="button" data-k="{k}" style="--c:{c}" aria-pressed="false" aria-label="{n}"></button>' for k, n, c, f, a in SHADES)
-BOOK = f'''  <header class="page-head"><div class="wrap">
-    <h1>Book your <span class="script">nails</span></h1>
-    <p class="lede">Choose what you would like and a time that suits you. It comes to me on WhatsApp, and I confirm the time and send you the address.</p>
-  </div></header>
-  <section class="sec" id="book" aria-label="Book a time" style="padding-top:clamp(1.5rem,4vw,2.5rem)">
+# The booking page as a product page (Tzvi, 20 Oct 2026: "use the new product page rules for ... the
+# nails one"; docs/inspo/product-pages-2026-10-20): her work big on a stage that takes the shade you
+# pick, the service, price and time beside it with "+" facts, the saving shown where there is one,
+# then the day, time and details on the same page.
+stage_imgs = ''.join(f'<img class="{"on" if i == 0 else ""}" data-k="{k}" src="assets/{f}" alt="{a}" width="1000" height="1250"{" fetchpriority=\"high\"" if i == 0 else " loading=\"lazy\""}>' for i, (k, n, c, f, a) in enumerate(SHADES))
+BOOK = f'''  <form id="form" novalidate>
+  <section class="stage" id="pick" aria-labelledby="h-book">
+    <div class="wrap st-grid">
+      <div class="st-ph">{stage_imgs}<span class="st-cap" id="st-cap">Milky white, my work</span></div>
+      <div class="st-info">
+        <p class="caps">Book · Romema, Jerusalem</p>
+        <h1 id="h-book"><span id="st-name">Book your nails</span></h1>
+        <p class="st-facts">More than four years of experience · Sunday to Friday</p>
+        <p class="st-price" id="st-price" hidden></p>
+        <p class="st-save" id="st-save" hidden></p>
+        <div class="card-in" id="w-svc"><p class="f">What would you like?</p><div class="opts" id="svcs">{svc_opts}</div><p class="err" id="e-svc"></p></div>
+        <div class="card-in"><p class="f">Colour <span class="hint">(optional)</span></p><div class="chips small" id="bshades">{shade_opts}</div><p class="shade-name" id="bshade-name"></p></div>
+      </div>
+    </div>
+  </section>
+  <section class="sec" id="book" aria-label="Day, time and your details" style="padding-top:clamp(1.5rem,4vw,2.5rem)">
     <div class="wrap">
-      <form class="form" id="form" novalidate>
+      <div class="form">
         <div>
-          <div class="card" id="w-svc"><h3>What would you like?</h3><div class="opts" id="svcs">{svc_opts}</div><p class="err" id="e-svc"></p></div>
-          <div class="card">
-            <h3>Colour</h3>
-            <p class="hint">Pick a shade you liked, or tell me in the note. Optional.</p>
-            <div class="chips small" id="bshades">{shade_opts}</div>
-            <p class="shade-name" id="bshade-name"></p>
-          </div>
           <div class="card">
             <h3>When</h3>
             <div id="w-day"><label class="f" for="day">Day</label><input class="fld" id="day" type="date"><p class="err" id="e-day"></p></div>
@@ -228,11 +237,12 @@ BOOK = f'''  <header class="page-head"><div class="wrap">
           <button class="btn" id="send" type="submit"><span>Send on WhatsApp</span></button>
           <p class="note">Opens WhatsApp with your booking written out. The time is yours once I confirm it.</p>
         </aside>
-      </form>
+      </div>
     </div>
   </section>
+  </form>
 '''
-BOOK_JS = '<script>\nvar SERVICES = ' + json.dumps({k: {'n': n, 'p': p, 'm': m} for k, n, p, m, d in SERVICES}) + ';\nvar SHADES = ' + json.dumps({k: n for k, n, c, f, a in SHADES}) + ';\n' + open('gen/book.js', encoding='utf8').read() + '</script>\n'
+BOOK_JS = '<script>\nvar SERVICES = ' + json.dumps({k: {'n': n, 'p': p, 'm': m} for k, n, p, m, d in SERVICES}) + ';\nvar SHADES = ' + json.dumps({k: n for k, n, c, f, a in SHADES}) + ';\nvar SHADE_C = ' + json.dumps({k: c for k, n, c, f, a in SHADES}) + ';\n' + open('gen/book.js', encoding='utf8').read() + '</script>\n'
 write('book', 'Book · Nails by Elisheva', 'Book gel nails, nail art or gel removal with Elisheva in Romema, Jerusalem. Sent on WhatsApp.', 'milky.webp', BOOK, BOOK_JS)
 
 write('contact', 'Contact · Nails by Elisheva', 'WhatsApp or call +44 7871 822590, text +972 53 348 4521. Luxe Nail Studio, Romema, Jerusalem.', 'studio.webp', f'''  <header class="page-head"><div class="wrap">
@@ -244,7 +254,7 @@ write('contact', 'Contact · Nails by Elisheva', 'WhatsApp or call +44 7871 8225
       <div class="contact-grid">
         <div class="card rev"><h3>WhatsApp or call</h3><p><a href="https://wa.me/{WA}" target="_blank" rel="noopener">+44 7871 822590</a></p><a class="btn" href="book.html">Book a time <span class="arw" aria-hidden="true">→</span></a></div>
         <div class="card rev"><h3>Text and email</h3><p>Text <a href="sms:+972533484521">+972 53 348 4521</a></p><p><a href="mailto:elishevaberlinger@gmail.com">elishevaberlinger@gmail.com</a></p></div>
-        <div class="card rev"><h3>Where</h3><p>Luxe Nail Studio, Romema, Jerusalem. I send the address when you book.</p></div>
+        <div class="card rev"><h3>Where</h3><p>Luxe Nail Studio, Romema, Jerusalem.</p></div>
       </div>
     </div>
   </section>

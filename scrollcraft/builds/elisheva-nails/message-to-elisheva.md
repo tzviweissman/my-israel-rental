@@ -17,3 +17,5 @@ We're building a website for Nails by Elisheva from your listing, your flyer and
 7. **Reviews.** If clients have said nice things, send them with each person's name and their OK to show it.
 
 8. **Questions clients ask you**, with your answers, for a short FAQ.
+
+- **Your address.** Do you send the studio's address once you confirm a booking, or should the page show the street? We left it as "Romema, Jerusalem" for now.

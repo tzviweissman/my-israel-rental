@@ -320,3 +320,54 @@ textarea.fld { min-height: 88px; resize: vertical; }
   input[type="text"], input[type="tel"], input[type="email"], input[type="date"], textarea { cursor: text !important; }
   button:disabled { cursor: not-allowed !important; }
 }
+
+/* ── the shop: menu and order on one page (rules 3k; inspo product-pages-2026-10-20) ── */
+/* effects.other X21: the stage takes the colour of the flavour you are looking at */
+.stage { --tint: #EBDDD3; background: var(--tint); transition: background-color 600ms var(--out); padding: calc(68px + clamp(1.2rem, 4svh, 2.6rem)) 0 clamp(1.2rem, 4svh, 2.6rem); }
+.stage[data-flav="caramel"] { --tint: #F3D9B8; } .stage[data-flav="vanilla"] { --tint: #F9E7EC; }
+.st-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(1.5rem, 5vw, 4.5rem); align-items: center; }
+.st-ph { position: relative; height: min(calc(100svh - 68px - 2 * clamp(1.2rem, 4svh, 2.6rem)), 680px); aspect-ratio: 500 / 1111; border-radius: var(--r); overflow: hidden; box-shadow: 0 30px 60px -30px rgb(51 23 12 / .5); }
+.st-ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.04); transition: opacity 500ms var(--out), transform 700ms var(--out); }
+.st-ph img.on { opacity: 1; transform: none; }
+.st-info .kick { margin: 0 0 .6rem; }
+.st-info h1 { font-size: min(clamp(2.8rem, 6vw, 5.6rem), 11svh); line-height: 1; }
+.st-desc { margin: .5rem 0 0; color: var(--soft); font-size: 1.1rem; }
+.st-price { margin: .6rem 0 0; font: 700 min(clamp(2.2rem, 4vw, 3.2rem), 7svh)/1 var(--font-head); color: var(--choc); }
+.st-price small { font: 500 1rem/1 var(--font-body); color: var(--soft); }
+/* the facts as small "+" labels beside the product (inspo: hotspot labels) */
+.facts { list-style: none; display: flex; flex-wrap: wrap; gap: .45rem; margin: 1rem 0 0; padding: 0; }
+.facts li { padding: .4rem .8rem; border-radius: 999px; background: rgb(255 255 255 / .6); font: 700 .9rem/1.2 var(--font-body); color: var(--choc); }
+.facts li::before { content: '+ '; color: var(--pink-ink); }
+.st-buy { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; margin-top: 1.2rem; }
+.st-buy .step { background: var(--paper); }
+#st-add.added { background: var(--pink-ink); }
+.st-in { min-height: 1.4em; margin: .5rem 0 0; font-weight: 700; color: var(--pink-ink); }
+.st-pick { display: flex; flex-wrap: wrap; gap: .6rem; margin-top: .8rem; }
+.st-pick button { display: flex; align-items: center; gap: .6rem; padding: .35rem .9rem .35rem .35rem; border-radius: 16px; border: 2px solid transparent; background: rgb(255 255 255 / .55); color: var(--ink); font: 500 .85rem/1.2 var(--font-body); text-align: left; cursor: pointer; transition: border-color 200ms, background 200ms; }
+.st-pick button b { display: block; font: 700 1rem/1.2 var(--font-head); }
+.st-pick img { width: 26px; height: 58px; object-fit: cover; border-radius: 8px; }
+.st-pick button[aria-pressed="true"] { border-color: var(--choc); background: var(--paper); }
+@media (hover: hover) { .st-pick button:hover { background: var(--paper); } }
+.step.sm { margin-left: .6rem; vertical-align: middle; } .step.sm button { width: 30px; height: 30px; font-size: 1rem; }
+.sum li.bl { align-items: center; }
+.shop-packs .plans { grid-template-columns: repeat(2, minmax(0, 1fr)); margin-top: 1.2rem; }
+.shop-packs .plan-none { margin-top: 0; }
+#order h2 { margin-bottom: .2rem; }
+@media (max-width: 860px) {
+  .st-grid { grid-template-columns: 1fr; }
+  .st-ph { height: 44svh; justify-self: center; }
+  .st-info { text-align: left; }
+  .shop-packs .plans { grid-template-columns: 1fr; }
+}
+@media (prefers-reduced-motion: reduce) { .stage, .st-ph img { transition: none; } }
+/* the deal, shown honestly: what a package saves against single jars (Tzvi, 20 Oct 2026) */
+.save-l { display: block; grid-column: 1 / -1; margin-top: .45rem; font-size: .9rem; color: var(--soft); }
+.save-l b { color: #1F7A4A; }
+.pack .save-l { color: #E8CFC7; } .pack .save-l b { color: #9FE0B8; }
+.pack.lead .save-l { color: var(--soft); } .pack.lead .save-l b { color: #1F7A4A; }
+.deal { display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin: .6rem 0 0; padding: .7rem .9rem; border-radius: 14px; background: #E6F4EA; color: #1F5C3A; font-weight: 700; font-size: .92rem; }
+.deal[hidden] { display: none; }
+.shop-packs { padding-block: clamp(2rem, 6svh, 4rem); }
+.shop-packs .plan .box { padding: .8rem 1rem; }
+@media (max-width: 480px) { .st-pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); } .st-pick button { flex-direction: column; padding: .4rem; text-align: center; } }
+.pack:not(.lead) { padding: .7rem 1.1rem; } .pack:not(.lead) .meta { margin-bottom: .1rem; } .pack:not(.lead) .allows { margin-top: .25rem; padding: .2rem .65rem; } .pack .save-l { margin-top: .3rem; font-size: .85rem; }

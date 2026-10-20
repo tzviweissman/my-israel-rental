@@ -8,7 +8,7 @@ Use from a build's gen/build.py (see scrollcraft/starter/README.md):
     import sys; sys.path.insert(0, '../../starter'); import sitekit as kit
     SITE = kit.Site(name=..., short=..., slug=..., pages=[('index', 'Home'), ...],
                     contacts=[kit.Contact('whatsapp', '+972 55 331 6975'), ...],
-                    fonts='family=...', cta=('order.html', 'Order'), bar=('From ₪40', 'Each jar ...'))
+                    fonts='family=...', cta=('shop.html#order', 'Basket'), bar=('From ₪40', 'Each jar ...'))
     SITE.write('index', title, description, og_image, body_html, tail_html)
 
 What it writes around the body: the head (title, description, og tags,
@@ -56,10 +56,10 @@ class Site:
     name: str                     # "The Whipped Cup"
     short: str                    # the name in the menu bar
     slug: str                     # the live slug: og image URLs use it
-    pages: list[tuple[str, str]]  # [('index', 'Home'), ('menu', 'Menu'), ...]
+    pages: list[tuple[str, str]]  # [('index', 'Home'), ('shop', 'Shop'), ('contact', 'Contact')]: menu and order are one page (rules 3k)
     contacts: list[Contact]
     fonts: str                    # the Google Fonts css2 query after "?"
-    cta: tuple[str, str]          # ('order.html', 'Order'): the one action
+    cta: tuple[str, str]          # ('shop.html#order', 'Basket'): the one action
     bar: tuple[str, str]          # phone bar: (bold line, small line)
     place: str = 'Jerusalem'      # footer: "<name>, <place>"
     close_title: str = 'Order now'

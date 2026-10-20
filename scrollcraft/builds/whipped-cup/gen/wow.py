@@ -14,7 +14,7 @@ HERO2 = '''  <section class="hero2" id="open" aria-labelledby="h-open">
       <h1 id="h-open"><span class="w">Whipped coffee</span> <span class="w">in a jar,</span> <span class="w soft">made fresh in Jerusalem</span></h1>
       <p class="lede">Cloud-like Dalgona coffee, hand-whipped to order and delivered to your door. Each jar makes 3 to 4 coffees.</p>
       <div class="act">
-        <a class="btn light" href="order.html">Order your jars <span class="arw" aria-hidden="true">→</span></a>
+        <a class="btn light" href="shop.html">Order your jars <span class="arw" aria-hidden="true">→</span></a>
         <p class="proof"><b>From ₪40</b> a jar<br>Kosher certified</p>
       </div>
     </div>
@@ -167,7 +167,7 @@ SKY = '''  <section class="sky" id="open" aria-labelledby="h-open">
         <p class="kick">Ramat Eshkol · Jerusalem</p>
         <h2>Your cup, <span class="soft">your cloud.</span></h2>
         <p class="lede">Whipped coffee in a jar, handcrafted, fresh and delivered to your door. Each jar makes 3 to 4 coffees.</p>
-        <div class="act"><a class="btn light" href="order.html">Order your jars <span class="arw" aria-hidden="true">→</span></a><p class="proof"><b>From ₪40</b> a jar<br>Kosher certified</p></div>
+        <div class="act"><a class="btn light" href="shop.html">Order your jars <span class="arw" aria-hidden="true">→</span></a><p class="proof"><b>From ₪40</b> a jar<br>Kosher certified</p></div>
       </div>
       <span class="scroll-hint" id="sky-hint" aria-hidden="true">Scroll</span>
     </div>

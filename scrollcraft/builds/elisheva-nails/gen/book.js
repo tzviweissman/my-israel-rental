@@ -9,10 +9,26 @@
   var $ = function (id) { return document.getElementById(id); };
   [].forEach.call(document.querySelectorAll('#svcs input'), function (i) {
     i.checked = i.value === svc;
-    i.addEventListener('change', function () { svc = i.value; time = ''; drawTimes(); update(); check(false); });
+    i.addEventListener('change', function () { svc = i.value; time = ''; drawSvc(); drawTimes(); update(); check(false); });
   });
   var chips = [].slice.call(document.querySelectorAll('#bshades .shade'));
-  function drawShade() { chips.forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.k === shade ? 'true' : 'false'); }); $('bshade-name').textContent = shade ? SHADES[shade] : ''; }
+  // the stage shows her work in the shade you pick, and takes its colour (the product-page rules)
+  var stage = $('pick');
+  function drawShade() {
+    chips.forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.k === shade ? 'true' : 'false'); }); $('bshade-name').textContent = shade ? SHADES[shade] : '';
+    var k = shade || 'milky';
+    [].forEach.call(stage.querySelectorAll('.st-ph img'), function (i) { i.classList.toggle('on', i.dataset.k === k); });
+    stage.style.setProperty('--st', SHADE_C[k]); $('st-cap').textContent = SHADES[k] + ', my work';
+  }
+  // the service, its price and time beside her work; a saving where there is one (Tzvi, 20 Oct 2026:
+  // show the deal): gel with removal is ₪110, removal and new gel booked apart are ₪40 + ₪90
+  function drawSvc() {
+    var s = SERVICES[svc];
+    $('st-name').textContent = s ? s.n : 'Book your nails';
+    $('st-price').hidden = !s; if (s) $('st-price').innerHTML = '<span class="sym">₪</span>' + s.p + ' <small>about ' + s.m + ' minutes</small>';
+    var sv = svc === 'gel-removal' ? (SERVICES.removal.p + SERVICES.gel.p) - s.p : 0;
+    $('st-save').hidden = !sv; if (sv) $('st-save').innerHTML = '<b>Save ₪' + sv + '</b> against removal (₪' + SERVICES.removal.p + ') and new gel (₪' + SERVICES.gel.p + ') booked apart';
+  }
   chips.forEach(function (c) { c.addEventListener('click', function () { shade = shade === c.dataset.k ? '' : c.dataset.k; drawShade(); update(); }); });
   var today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   $('day').min = today;
@@ -66,5 +82,5 @@
     var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(lines.join('\n'));
     var tab = window.open(url, '_blank'); if (!tab) location.href = url;
   });
-  drawShade(); drawTimes(); update();
+  drawShade(); drawSvc(); drawTimes(); update();
 })();

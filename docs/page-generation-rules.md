@@ -930,6 +930,30 @@ Never: invented scarcity or countdowns ("only 3 left", "ends tonight"), a
 endings, or an endorsement they do not have. These break trust and the hard
 rules (section 3).
 
+**Show the deal, when it is real** (Tzvi, 20 Oct 2026: "a strong psychology
+technique is when people feel like they are getting a deal ... it should show
+what they save when purchasing a 4 pack rather than a single ... a board
+double the size should technically be double the price, if it's not they are
+getting a deal"). Work it out from the owner's own prices, never invent it:
+- a pack or bundle shows what it saves against the same items bought one by
+  one ("Save up to ₪44 · ₪37 a jar, single jars are ₪40 to ₪48"), "up to"
+  only for the true top of the range;
+- a bigger size shows what you save against the smaller size's price for
+  the same amount ("You save $77 against the Medium, size for size": the
+  Large at the Medium's price per centimetre would be $462, it is $385), from
+  the real sizes, and only where it is true (on Blazin' Boards the Small is
+  twice the Mini for twice the price, so it says nothing);
+- **say only the saving, in money** ("You save $77", "Save up to ₪44"), never
+  how much more the bigger one costs or a percentage (Tzvi, 20 Oct 2026:
+  "don't say how much more it costs, only mention how much they will save in
+  dollar terms, make it a rule");
+- a combined service against its parts booked apart (Elisheva: gel with
+  removal ₪110 against removal ₪40 and gel ₪90);
+- in the basket, single items a package would make cheaper get one line with
+  the saving and a Switch button;
+- an owner's own savings claim the prices contradict is not printed: ask
+  them (The Whipped Cup's "save 30+" is ₪20 for six Classic jars).
+
 ## 3k. A website, not a page (Tzvi, 19 Oct 2026)
 
 Tzvi: "I want our pages to be used instead of websites so they need to look
@@ -939,10 +963,21 @@ small website. A single page stays fine for a business with little to say
 
 1. **Pages by kind of business**, from what the owner gave us (no page without
    real content):
-   - food: Home, Menu, Order, Contact (About when they send their story)
-   - service: Home, Services, Prices, Our work, About, Contact
+   - food: Home, Shop, Contact (About when they send their story)
+   - service: Home, Book, Our work, Contact (About when they send it)
    - rental: Home, The apartment, Photos, Availability, Contact
-   - shop or gifts: Home, Shop, Order, About, Contact
+   - shop or gifts: Home, Shop, About, Contact
+   **The menu and the order are ONE page, the Shop** (Book for a service;
+   Tzvi, 20 Oct 2026: "merge them and make it the standard"). A separate
+   Menu page made the visitor read the items, then find them again on the
+   Order page. The Shop is built as a product page (docs/inspo/
+   product-pages-2026-10-20): one item at a time on a stage, its real photo
+   big, name, price and "+" facts beside it, the stage taking the item's
+   colour, quantity and the total in the button; switching items crossfades;
+   packages below with their choices under them (3l); the basket, delivery
+   and details at the end of the same page; the phone bar shows the basket.
+   Old Menu and Order addresses forward to the Shop. The Whipped Cup's
+   shop.html and Nails by Elisheva's book.html are the worked examples.
    Each page is `<page>.html` in the build folder; publish-page.mjs serves it
    at /business/<slug>/<page> and on the business's own host at /<page>.
 2. **One menu bar on every page**, identical markup: their name (to Home), the

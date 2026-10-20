@@ -6,7 +6,7 @@
 :root {
   --blush: #F6E1DE; --blush-2: #F3D4D1; --paper: #FFF8F6; --rose: #B76E66; --rose-dk: #84423C; --gold: #C28E8A;
   --ink: #3A2523; --soft: #6E5450; --line: #EBCFCB;
-  --r: 18px; --font-head: 'Bodoni Moda', Georgia, serif; --font-script: 'Parisienne', cursive; --font-body: 'Outfit', system-ui, sans-serif;
+  --r: 18px; --font-head: 'Bodoni Moda', Georgia, serif; --font-script: 'Parisienne', cursive; --font-body: 'Outfit', 'Bodoni Moda', system-ui, sans-serif;  /* Outfit has no ₪ */
   --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
 }
 *, *::before, *::after { box-sizing: border-box; }
@@ -208,3 +208,30 @@ textarea.fld { min-height: 80px; resize: vertical; }
 .hero .frame { max-width: min(560px, 76svh * .8); }
 @media (max-width: 860px) { .hero .ghost { font-size: 22vw; top: 30%; left: auto; right: 2vw; } }
 @media (prefers-reduced-motion: reduce) { .hero .ghost { animation: none; } }
+
+/* ── booking as a product page (rules 3k; inspo product-pages-2026-10-20) ── */
+.stage { --st: #F4EFEE; background: color-mix(in srgb, var(--st) 32%, var(--paper)); transition: background-color 700ms cubic-bezier(.65, 0, .35, 1); padding: calc(70px + clamp(1.2rem, 4svh, 2.6rem)) 0 clamp(1.2rem, 4svh, 2.6rem); }
+.st-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(1.5rem, 5vw, 4.5rem); align-items: center; }
+.st-ph { position: relative; height: min(calc(100svh - 70px - 2 * clamp(1.2rem, 4svh, 2.6rem)), 720px); aspect-ratio: 1000 / 1250; border-radius: 260px 260px var(--r) var(--r); overflow: hidden; background: var(--blush); box-shadow: 0 40px 70px -40px rgb(142 74 68 / .55); }
+.st-ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 600ms var(--out); }
+.st-ph img.on { opacity: 1; }
+.st-cap { position: absolute; left: 1rem; bottom: 1rem; padding: .35rem .8rem; border-radius: 999px; background: rgb(255 248 246 / .9); font-size: .85rem; font-weight: 500; }
+.st-info h1 { font-size: min(clamp(2.4rem, 4.6vw, 4.2rem), 9svh); margin-top: .4rem; }
+.st-price { margin: .6rem 0 0; font: 600 min(clamp(2rem, 3.4vw, 2.8rem), 6.5svh)/1 var(--font-head); color: var(--rose-dk); }
+.st-price small { font: 400 1rem/1 var(--font-body); color: var(--soft); }
+.st-save { margin: .4rem 0 0; font-size: .95rem; color: var(--soft); } .st-save b { color: #1F7A4A; }
+.facts { list-style: none; display: flex; flex-wrap: wrap; gap: .4rem; margin: .9rem 0 0; padding: 0; }
+.facts li { padding: .35rem .75rem; border-radius: 999px; background: rgb(255 255 255 / .65); font-size: .85rem; font-weight: 500; }
+.facts li::before { content: '+ '; color: var(--rose-dk); font-weight: 700; }
+.card-in { margin-top: 1rem; } .card-in .f { margin: 0 0 .45rem; font-weight: 600; }
+.stage .opts { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .5rem; }
+.stage .shade { width: 40px; height: 40px; }
+.stage .shade-name { margin-top: .4rem; min-height: 1.3em; }
+@media (max-width: 860px) { .st-grid { grid-template-columns: 1fr; } .st-ph { height: 52svh; justify-self: center; } .stage .opts { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: reduce) { .stage, .st-ph img { transition: none; } }
+.stage .opt .box { padding: .55rem .8rem; } .stage .opt .box b { font-size: 1.02rem; } .stage .opt .box .p { font-size: 1.1rem; }
+.stage .facts { margin-top: .6rem; } .stage .card-in { margin-top: .7rem; }
+/* the facts sit on her photo as small "+" labels (inspo: hotspot labels around the product) */
+.st-ph .facts { position: absolute; left: 1rem; right: 1rem; top: 32%; flex-direction: column; align-items: flex-start; margin: 0; }
+.st-ph .facts li { background: rgb(255 248 246 / .92); box-shadow: 0 6px 16px -10px rgb(0 0 0 / .4); }
+.st-facts { margin: .5rem 0 0; color: var(--soft); font-size: .95rem; }

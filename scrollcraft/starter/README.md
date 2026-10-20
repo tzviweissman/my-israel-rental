@@ -39,7 +39,10 @@ build that comes out too close to another.
 
 5. **Build the business's own parts** below the marked line in `site.css`
    and in `gen/build.py`: the opening, the signature moment (rules 3n), the
-   sections, the order or booking page with each item's rules (3l).
+   sections, the Shop (or Book) page: menu and order on ONE page, built as a
+   product page (rules 3k; copy the shape of builds/whipped-cup/gen/shop.py and
+   shop.js), each item's rules (3l), and the deal shown where the owner's
+   prices make it real (3j).
 
 6. **Check in the background, all pages at once**, from the first draft:
    `clipped.mjs` and `readable.mjs` per page, run in parallel. Then the wow
@@ -52,10 +55,10 @@ import sys; sys.path.insert(0, '../../starter'); import sitekit as kit
 
 SITE = kit.Site(
     name='The Whipped Cup', short='The Whipped Cup', slug='rena-lipschitz',
-    pages=[('index', 'Home'), ('menu', 'Menu'), ('order', 'Order'), ('contact', 'Contact')],
+    pages=[('index', 'Home'), ('shop', 'Shop'), ('contact', 'Contact')],  # menu and order are one page (rules 3k)
     contacts=[kit.Contact('whatsapp', '+1 929 993 6768'), kit.Contact('email', 'thewhippedcup@gmail.com')],
     fonts='family=Fraunces:wght@500;700&family=DM+Sans:wght@400;700',
-    cta=('order.html', 'Order'), bar=('From ₪40 a jar', 'Each jar makes 3 to 4 coffees'),
+    cta=('shop.html#order', 'Basket'), bar=('From ₪40 a jar', 'Each jar makes 3 to 4 coffees'),
     place='Ramat Eshkol, Jerusalem', close_title='Your cup, your cloud.')
 
 SITE.write('index', 'The Whipped Cup · ...', 'description', 'og.webp', OPENING + SECTIONS + kit.gallery('From our kitchen'), OPENING_JS)
