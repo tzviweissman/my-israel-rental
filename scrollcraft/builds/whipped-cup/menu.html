@@ -29,25 +29,31 @@
   </div></header>
   <section class="sec" id="flavours" style="padding-top:clamp(2rem,5vw,3rem)" aria-labelledby="h-flav">
     <div class="wrap">
-      <h2 id="h-flav" class="rev">Three <span class="pink">flavours</span>, whipped to order</h2>
-      <p class="lede rev">Each jar is hand-whipped fresh and makes 3 to 4 coffees.</p>
       <div class="flav-grid">
-        <div class="photo rev"><img src="assets/trio-flowers.webp" alt="Jars of Classic, Vanilla and Caramel Cloud with pink flowers" width="934" height="1122" loading="lazy"></div>
-        <div class="flavs">
-          <div class="flav rev"><img class="thumb" src="assets/classic.webp" alt="A jar of Classic Cloud on coffee beans" width="120" height="120" loading="lazy"><h3>Classic Cloud</h3><div class="price">₪40<small>a jar</small></div><p>Original whipped coffee</p><a class="btn-line add" href="order.html?jar=classic" data-jar="classic">Add</a></div>
-          <div class="flav rev"><img class="thumb" src="assets/caramel-window.webp" alt="Four jars of Caramel Cloud on a sunny windowsill" width="120" height="120" loading="lazy"><h3>Caramel Cloud</h3><div class="price">₪48<small>a jar</small></div><p>Whipped coffee and caramel</p><a class="btn-line add" href="order.html?jar=caramel" data-jar="caramel">Add</a></div>
-          <div class="flav rev"><img class="thumb" src="assets/vanilla-window.webp" alt="Four jars of Vanilla Cloud by a window in Jerusalem" width="120" height="120" loading="lazy"><h3>Vanilla Cloud</h3><div class="price">₪48<small>a jar</small></div><p>Whipped coffee and vanilla</p><a class="btn-line add" href="order.html?jar=vanilla" data-jar="vanilla">Add</a></div>
+        <div class="photo rev">
+          <img class="big on" data-flav="classic" src="assets/jar-classic.webp" alt="A jar of Classic Cloud on coffee beans" width="500" height="1111" loading="lazy">
+          <img class="big" data-flav="caramel" src="assets/jar-caramel.webp" alt="A jar of Caramel Cloud on coffee beans" width="500" height="1111" loading="lazy">
+          <img class="big" data-flav="vanilla" src="assets/jar-vanilla.webp" alt="A jar of Vanilla Cloud on coffee beans" width="500" height="1111" loading="lazy">
+        </div>
+        <div class="flav-side">
+          <h2 id="h-flav" class="rev">Three <span class="pink">flavours</span> of whipped coffee</h2>
+          <p class="lede rev">Handcrafted and fresh. Each jar makes 3 to 4 coffees.</p>
+          <div class="flavs">
+          <div class="flav rev on" data-flav="classic" tabindex="0" aria-label="Classic Cloud, show the photo"><img class="thumb" src="assets/jar-classic-t.webp" alt="A jar of Classic Cloud" width="120" height="120" loading="lazy" style="object-position:50% 50%"><h3>Classic Cloud</h3><div class="price">₪40<small>a jar</small></div><p>Original whipped coffee</p><a class="btn-line add" href="order.html?jar=classic" data-jar="classic">Add</a></div>
+          <div class="flav rev" data-flav="caramel" tabindex="0" aria-label="Caramel Cloud, show the photo"><img class="thumb" src="assets/jar-caramel-t.webp" alt="A jar of Caramel Cloud" width="120" height="120" loading="lazy" style="object-position:50% 50%"><h3>Caramel Cloud</h3><div class="price">₪48<small>a jar</small></div><p>Whipped coffee and caramel</p><a class="btn-line add" href="order.html?jar=caramel" data-jar="caramel">Add</a></div>
+          <div class="flav rev" data-flav="vanilla" tabindex="0" aria-label="Vanilla Cloud, show the photo"><img class="thumb" src="assets/jar-vanilla-t.webp" alt="A jar of Vanilla Cloud" width="120" height="120" loading="lazy" style="object-position:50% 50%"><h3>Vanilla Cloud</h3><div class="price">₪48<small>a jar</small></div><p>Whipped coffee and vanilla</p><a class="btn-line add" href="order.html?jar=vanilla" data-jar="vanilla">Add</a></div>
+          </div>
         </div>
       </div>
     </div>
   </section>
   <section class="sec packs" id="packages" aria-labelledby="h-packs">
     <div class="wrap">
-      <h2 id="h-packs" class="rev">Weekly packages</h2>
-      <p class="lede rev">Delivered fresh to your door every week.</p>
+      <div class="packs-head"><h2 id="h-packs" class="rev">Weekly packages</h2>
+      <p class="lede rev">Delivered fresh to your door every week.</p></div>
       <div class="bento">
         <article class="pack lead rev"><div><p class="meta">6 jars · Monthly · Best value</p><h3>Cloud Bundle</h3><span class="allows">Any 6 jars, mix and match</span></div><img class="pic" src="assets/iced.webp" alt="" width="1170" height="1213" loading="lazy">
-          <div class="row"><span class="price">₪220<span class="save">Save 30+ ₪</span></span><a class="btn-line" href="order.html?pack=bundle" data-pack="bundle">Choose</a></div></article>
+          <div class="row"><span class="price">₪220</span><a class="btn-line" href="order.html?pack=bundle" data-pack="bundle">Choose</a></div></article>
         <article class="pack rev"><div><p class="meta">4 jars · Weekly</p><h3>Assorted</h3><span class="allows">A mix of all three flavours</span></div>
           <div class="row"><span class="price">₪155</span><a class="btn-line" href="order.html?pack=assorted" data-pack="assorted">Choose</a></div></article>
         <article class="pack rev"><div><p class="meta">4 jars · Weekly</p><h3>One Flavour</h3><span class="allows">One flavour, 4 jars</span></div>
@@ -57,7 +63,7 @@
       </div>
     </div>
   </section>
-  <div class="kosher"><div class="wrap"><span><b>Kosher certified</b></span><span>Made in small batches in Ramat Eshkol, Jerusalem</span></div></div>
+  <div class="kosher"><div class="wrap"><span><b>Kosher certified</b></span><span>Handcrafted and fresh in Ramat Eshkol, Jerusalem</span></div></div>
   <section class="close" aria-label="Order from The Whipped Cup">
     <div class="wrap">
       <div>
@@ -76,5 +82,16 @@
   <a class="btn" href="order.html" tabindex="-1">Order</a>
 </div>
 <script src="site.js"></script>
+<script>
+(function () {
+  var rows = [].slice.call(document.querySelectorAll('.flav[data-flav]')), bigs = [].slice.call(document.querySelectorAll('.flav-grid .big'));
+  function show(k) { rows.forEach(function (r) { r.classList.toggle('on', r.dataset.flav === k); }); bigs.forEach(function (b) { b.classList.toggle('on', b.dataset.flav === k); }); }
+  rows.forEach(function (r) {
+    r.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') show(r.dataset.flav); });
+    r.addEventListener('focusin', function () { show(r.dataset.flav); });
+    r.addEventListener('click', function (e) { if (!e.target.closest('a')) show(r.dataset.flav); });
+  });
+})();
+</script>
 </body>
 </html>

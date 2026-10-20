@@ -71,6 +71,29 @@ if (!fs.existsSync(path.join(SRC, 'index.html'))) {
       console.error(`Not published: ${slug} is too like a live page.\n${fp.stdout}${fp.stderr}`);
       process.exit(1);
     }
+    // and every page of it fits the screen, with no photo blown up past its size (rules 3c.12,
+    // 3p.6; Tzvi, 20 Oct 2026: "make sure the rules will prevent this in the future")
+    const http = await import('node:http');
+    const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp',
+      '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.mp4': 'video/mp4', '.woff2': 'font/woff2' };
+    const server = http.createServer((req, res) => {
+      const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
+      const file = path.join(SRC, rel);
+      if (!file.startsWith(SRC) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
+      res.writeHead(200, { 'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream' });
+      fs.createReadStream(file).pipe(res);
+    });
+    await new Promise((r) => server.listen(0, '127.0.0.1', r));
+    const base = `http://127.0.0.1:${server.address().port}/`;
+    const pages = fs.readdirSync(SRC).filter((f) => f.endsWith('.html')).map((f) => base + f);
+    const { spawn } = await import('node:child_process');
+    let fitsOut = '';
+    const fitsCode = await new Promise((r) => { const c = spawn(process.execPath, [path.join(ROOT, 'scripts', 'check-fits.mjs'), ...pages], { cwd: ROOT }); c.stdout.on('data', (d) => { fitsOut += d; }); c.stderr.on('data', (d) => { fitsOut += d; }); c.on('exit', r); });
+    server.close();
+    if (fitsCode !== 0) {
+      console.error(`Not published: ${slug} does not fit the screen.\n${fitsOut}`);
+      process.exit(1);
+    }
   }
 }
 

@@ -114,7 +114,7 @@ CSS = '''
 .hero2 h1 { font-size: clamp(3rem, 7vw, 6.6rem); max-width: 12ch; color: var(--cream); line-height: .98; }
 .hero2 h1 .w { display: inline-block; animation: rise 900ms var(--out) both; }
 .hero2 h1 .w:nth-child(2) { animation-delay: 140ms; } .hero2 h1 .w:nth-child(3) { animation-delay: 280ms; }
-.hero2 h1 .soft { font-style: italic; font-weight: 500; color: #F9C9D6; font-size: .62em; display: block; margin-top: .25em; }
+.hero2 h1 .soft { font-style: italic; font-weight: 500; color: #FFE3EC; font-size: .62em; display: block; margin-top: .25em; }
 @keyframes rise { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
 .hero2 .lede { margin: 1.2rem 0 1.8rem; max-width: 30rem; color: #F4E6E1; font-size: 1.15rem; }
 .hero2 .proof { color: #F4E6E1; } .hero2 .proof b { color: #fff; }
@@ -166,7 +166,7 @@ SKY = '''  <section class="sky" id="open" aria-labelledby="h-open">
       <div class="sky-end" id="sky-end">
         <p class="kick">Ramat Eshkol · Jerusalem</p>
         <h2>Your cup, <span class="soft">your cloud.</span></h2>
-        <p class="lede">Whipped coffee in a jar, hand-whipped to order and delivered to your door. Each jar makes 3 to 4 coffees.</p>
+        <p class="lede">Whipped coffee in a jar, handcrafted, fresh and delivered to your door. Each jar makes 3 to 4 coffees.</p>
         <div class="act"><a class="btn light" href="order.html">Order your jars <span class="arw" aria-hidden="true">→</span></a><p class="proof"><b>From ₪40</b> a jar<br>Kosher certified</p></div>
       </div>
       <span class="scroll-hint" id="sky-hint" aria-hidden="true">Scroll</span>
@@ -189,20 +189,39 @@ SKY_JS = '''<script>
   var circles = PUFFS.map(function () { var c = document.createElementNS('http://www.w3.org/2000/svg', 'circle'); g.appendChild(c); return c; });
   var W = 0, H = 0, stage = sec.querySelector('.sky-stage');
   var IW = 0, IH = 0;
-  function size() { W = stage.clientWidth; H = stage.clientHeight; svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H); IW = Math.max(W, H * 1170 / 1213); IH = IW * 1213 / 1170; img.setAttribute('width', IW); img.setAttribute('height', IH); img.setAttribute('x', (W - IW) / 2); }
+  // On a wide screen her photo (1170 x 1213, a phone photo) is never blown up to the screen's width
+  // (Tzvi, 20 Oct 2026: "the picture here is too zoomed in"): it ends as a big cloud-shaped photo
+  // beside the words, at most 90% of the screen's height. A tall screen still fills, as before.
+  var WIDE = false, FX = 0, FY = 0;
+  function size() {
+    W = stage.clientWidth; H = stage.clientHeight; svg.setAttribute('viewBox', '0 0 ' + W + ' ' + H);
+    WIDE = W > H * 1.15; sec.classList.toggle('wide', WIDE);
+    if (WIDE) { IH = Math.min(H * .9, 1213); IW = IH * 1170 / 1213; FX = W - IW - Math.max(24, W * .05); FY = (H - IH) / 2; }
+    // a tall screen: her photo, whole, near the top, the words under it (the review: on a phone it filled the screen, zoomed in and cropped)
+    else { IW = Math.min(W * .9, 1170, H * .5 * 1170 / 1213); IH = IW * 1213 / 1170; FX = (W - IW) / 2; FY = Math.max(12, H * .04); }
+    img.setAttribute('width', IW); img.setAttribute('height', IH);
+  }
   var clamp = function (x) { return Math.max(0, Math.min(1, x)); }, ease = function (t) { return t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; };
   function draw(p) {
     // 0 to .12 the walk and the question; .12 to .55 the window opens; .55 to .85 it grows to fill; .85 on the end words
     var open = ease(clamp((p - .12) / .43)), fill = ease(clamp((p - .55) / .3));
-    var s = Math.min(W, H), k = s * (open * .75 + fill * 3.2), cx = W / 2, cy = H * (.55 - fill * .05);
-    // the whipped cloud on top of her coffee (about 36% down and 56% across the photo) sits in the window, then the photo settles to fill
-    img.setAttribute('y', ((cy - .36 * IH) * (1 - fill) + (H - IH) * .3 * fill).toFixed(1));
-    img.setAttribute('x', ((W / 2 - .56 * IW) * (1 - fill) + (W - IW) / 2 * fill).toFixed(1));
+    var s = Math.min(W, H), cx, cy, k;
+    if (WIDE) {
+      // the window travels to the right and grows into a cloud the size of her photo
+      cx = W / 2 + (FX + IW * .5 - W / 2) * fill; cy = H * .55 + (FY + IH * .46 - H * .55) * fill;
+      k = s * open * .75 * (1 - fill) + IW * 1.02 * fill;
+    } else { cx = W / 2 + (FX + IW * .5 - W / 2) * fill; cy = H * .55 + (FY + IH * .46 - H * .55) * fill; k = s * open * .75 * (1 - fill) + IW * 1.02 * fill; }
+    // the whipped cloud on top of her coffee (about 36% down and 56% across the photo) sits in the window, then the photo settles
+    img.setAttribute('y', ((cy - .36 * IH) * (1 - fill) + FY * fill).toFixed(1));
+    img.setAttribute('x', ((cx - .56 * IW) * (1 - fill) + FX * fill).toFixed(1));
     circles.forEach(function (c, i) { var q = PUFFS[i]; c.setAttribute('cx', cx + q[0] * k); c.setAttribute('cy', cy + q[1] * k); c.setAttribute('r', Math.max(0, q[2] * k * (1 + .04 * Math.sin(performance.now() / 900 + i)))); });
     line.style.opacity = 1 - clamp((p - .1) / .15);
     line.style.transform = 'translateY(' + (-clamp(p / .25) * 40) + 'px)';
-    end.style.opacity = clamp((p - .62) / .2);
-    end.style.transform = 'translateY(' + ((1 - clamp((p - .62) / .2)) * 24) + 'px)';
+    // the dark shade comes first, then the words on it, so they are never light on a light sky
+    // (the shade is the block's own ::before, so it reads as the words' background to the contrast check)
+    end.style.setProperty('--dim', clamp((p - .55) / .1));
+    var t = clamp((p - .66) / .08);
+    [].forEach.call(end.children, function (c) { c.style.opacity = t; c.style.transform = 'translateY(' + ((1 - t) * 24) + 'px)'; });
     end.style.pointerEvents = p > .7 ? 'auto' : 'none';
     hint.style.opacity = 1 - clamp(p / .08);
   }
@@ -225,14 +244,18 @@ SKY_CSS = '''
 .sky-line { position: absolute; left: 0; right: 0; top: 18%; margin: 0 auto; padding: 0 var(--gutter); max-width: min(980px, 100%); text-align: center; }
 .sky-line h1 { margin: 0; font: 500 clamp(2.4rem, 5.6vw, 5.4rem)/1.02 var(--font-head); font-variation-settings: 'SOFT' 100; color: #fff; text-shadow: 0 2px 30px rgb(60 20 40 / .35); animation: rise 1200ms var(--out) both; }
 .sky-win { position: absolute; inset: 0; width: 100%; height: 100%; }
-.sky-end { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 var(--gutter) clamp(2rem, 7vh, 4.5rem); max-width: 74rem; margin: 0 auto; opacity: 0; }
-.sky-end::before { content: ''; position: absolute; inset: -40vh -50vw 0; z-index: -1; background: linear-gradient(0deg, rgb(42 20 11 / .92), rgb(42 20 11 / .55) 55%, transparent); }
+.sky-end { position: absolute; z-index: 1; isolation: isolate; left: 0; right: 0; bottom: 0; padding: 0 var(--gutter) clamp(2rem, 7vh, 4.5rem); max-width: 74rem; margin: 0 auto; }  /* its shade sits over the photo */
+.sky-end > * { opacity: 0; }
+.sky-end::before { content: ''; position: absolute; inset: -40vh -50vw 0; z-index: -1; opacity: var(--dim, 0); background: linear-gradient(0deg, rgb(42 20 11 / .94), rgb(42 20 11 / .86) 48%, transparent 68%); }
+.sky.wide .sky-end::before { inset: -100vh -10vw -100vh -10vw; background: linear-gradient(90deg, rgb(42 20 11 / .85), rgb(42 20 11 / .55) 60%, transparent 95%); }
 .sky-end h2 { font-size: clamp(2.8rem, 6.5vw, 6rem); color: #fff; line-height: .98; }
-.sky-end h2 .soft { font-style: italic; font-weight: 500; color: #F9C9D6; }
+.sky-end h2 .soft { font-style: italic; font-weight: 500; color: #FFE3EC; }
 .sky-end .kick { background: rgb(42 20 11 / .62); color: var(--cream); }
 .sky-end .lede { margin: 1rem 0 1.6rem; max-width: 32rem; color: #F4E6E1; font-size: 1.12rem; }
 .sky-end .proof { color: #F4E6E1; } .sky-end .proof b { color: #fff; }
 .sky .scroll-hint { color: #fff; padding: .8rem .45rem; border-radius: 999px; background: rgb(42 20 11 / .55); }
 @media (max-width: 760px) { .sky-line { top: 14%; } }
-@media (prefers-reduced-motion: reduce) { .sky { height: auto; } .sky-stage { position: relative; } .sky-end { position: relative; opacity: 1; padding-top: 50svh; } }
+/* wide screens: the words on the left of her cloud-shaped photo */
+.sky.wide .sky-end { right: auto; left: 0; margin: 0; width: min(46rem, 52%); padding-left: max(var(--gutter), 5vw); padding-bottom: 0; top: 50%; bottom: auto; translate: 0 -50%; }
+@media (prefers-reduced-motion: reduce) { .sky { height: auto; } .sky-stage { position: relative; } .sky-end { position: relative; padding-top: 50svh; --dim: 1; } .sky-end > * { opacity: 1; } }
 '''

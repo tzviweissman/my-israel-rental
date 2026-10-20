@@ -57,7 +57,8 @@ for (const [w, h] of sizes) {
           if (fr.top <= 1) topCover = Math.max(topCover, fr.bottom);
           else if (fr.bottom >= innerHeight - 1 && fr.top < innerHeight) barTop = Math.min(barTop, fr.top);
         }
-        if (!inBar && (rects[0].top < Math.max(4, topCover) - 2 || rects[rects.length - 1].bottom > Math.min(innerHeight - 4, barTop))) continue;
+        // text touching the menu bar is scrolling under it, not being read (it was judged against the bar)
+        if (!inBar && (rects[0].top < Math.max(4, topCover) + 6 || rects[rects.length - 1].bottom > Math.min(innerHeight - 4, barTop))) continue;
         // is it actually on top (not under a clipped side or another layer)?
         const r0 = rects[0];
         const hit = document.elementFromPoint(Math.min(innerWidth - 1, Math.max(0, r0.left + r0.width / 2)), Math.min(innerHeight - 1, Math.max(0, r0.top + r0.height / 2)));

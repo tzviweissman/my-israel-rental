@@ -1123,6 +1123,23 @@ script, Jost), and Chicken Munch shares Anton with Michal Yodaiken.
    is set) counts 1. So two quiet effects may match, or one loud one, never
    more. A new effect gets a new id in `_effects`. CONCEPT.md's `## Effects`
    says where each one came from (3q).
+5. **One small touch only this business would have** (Tzvi, 20 Oct 2026, on
+   The Whipped Cup's cloud for a mouse pointer and Elisheva's sweep in the
+   chosen polish shade: "we need to do more unique things like that"). Taken
+   from their product, tagline or craft, never a stock effect: CONCEPT.md's
+   `## Effects` has a `- touch:` line, and check-concept refuses it missing.
+6. **Fits on one screen is measured** (Tzvi, 20 Oct 2026: "not everything is
+   fitting on one screen, wasn't that already a rule"). Rule 3c.12 had no
+   check, and The Whipped Cup's sections came out up to twice a laptop
+   screen's height. `node scripts/check-fits.mjs <urls>` must pass for every
+   page: each section fits below the menu bar at 1280x650, 1440x900 and
+   1536x753, and no photo is taller than the screen there or on a phone.
+   A photo from a phone is never blown up past its own size to fill a wide
+   screen (her 1170px photo filled 1920px and looked zoomed in).
+7. **Similar items look the same way** (Tzvi: "part of a great website is
+   consistency"): if one flavour's thumbnail is one jar, every flavour's is
+   one jar; a list where pointing at an item changes a big photo changes it
+   for every item.
 
 ## 3q. The concept sheet, checked at publish (Tzvi, 19 Oct 2026)
 
@@ -1143,6 +1160,34 @@ passing line from check-fingerprints (3p).
 refuses to put a NEW page live without it. Read the saved effects for the
 kind of business (the part files' "For ..." sections and pictures) every
 time; never design from defaults.
+
+
+## 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
+
+Tzvi: "make sure the rules will prevent this in the future, why didn't the
+existing rules prevent this." On The Whipped Cup he found a photo blown up
+until it looked zoomed in, sections twice a laptop screen's height, one
+flavour shown as one jar and the others as four, a big photo that did not
+change with the flavour, and package choices he could not find. Fits on one
+screen (3c.12), one photo per kind (3o.6) and choices under their item (3l)
+were already rules. They did not prevent it because rules held in the
+builder's head drift, and the builder then graded its own work (the same
+cause as 3n and 3q). So every rule that can be measured is a script, and
+the rest is looked at by someone who did not build it:
+
+1. **Scripts, all of them, on every page of the site**: `clipped.mjs`,
+   `readable.mjs`, `scripts/check-fits.mjs` (fits the screen at four laptop
+   sizes and on phones; no photo shown past 1.35 times its size),
+   `scripts/check-fingerprints.mjs`, `scripts/check-concept.mjs`.
+   `publish-page.mjs` refuses a new page that fails check-fits,
+   check-fingerprints or check-concept.
+2. **An independent review**: a Sonnet subagent that did not build the page
+   uses it at laptop and phone size against `docs/page-review-checklist.md`
+   (consistency, things respond the way they look, every choice under its
+   item, photos, the screen, their facts, the one touch). The builder fixes
+   every FAIL and the reviewer looks again.
+3. **Only then** is it shown to Tzvi. A rule Tzvi has to point out twice gets
+   a script or a checklist line the same day.
 
 ## 4. What is reported to the owner instead (content gaps)
 

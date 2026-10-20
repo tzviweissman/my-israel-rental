@@ -26,7 +26,11 @@ document.body.classList.remove('no-js');
     tick = 0;
     var vh = innerHeight, past = scrollY > vh * .5;
     top.classList.toggle('solid', scrollY > 10);
-    if (bar) bar.classList.toggle('on', past && (!order || order.getBoundingClientRect().top > vh * .75));
+    // the bar steps aside while the page itself shows an Order button: the opening's end, the
+    // closing band, and the order form (the review, 20 Oct 2026: it sat over "Order your jars")
+    var open = document.getElementById('open'), close = document.querySelector('.close'), ob = open && open.getBoundingClientRect(), cb = close && close.getBoundingClientRect();
+    var busy = (ob && ob.bottom > vh * .4) || (cb && cb.top < vh) || (order && order.getBoundingClientRect().top < vh * .75);
+    if (bar) bar.classList.toggle('on', past && !busy);
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();

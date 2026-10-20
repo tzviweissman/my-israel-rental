@@ -21,7 +21,8 @@
  *   ## Effects
  *   - button: B7, from 21st search "button hover" for bakeries
  *   one line per kind (button, link, tile, reveal, steps, price, heading),
- *   the id from fingerprints.json _effects and where it came from; "none" allowed
+ *   the id from fingerprints.json _effects and where it came from; "none" allowed;
+ *   plus "- touch:", one small detail only this business would have (never none)
  *   ## Not alike
  *   the line printed by scripts/check-fingerprints.mjs for this build
  *
@@ -59,6 +60,9 @@ export function checkConcept(dir) {
   if (lacking.length) problems.push(`Effects: no line for ${lacking.join(', ')} (one "- kind: id, from <the search or inspo picture>" each, "none" allowed)`);
   const unsourced = fx.filter((l) => !/:\s*none\b/i.test(l) && !/\bfrom\b/i.test(l));
   if (unsourced.length) problems.push(`Effects: say where each came from ("from" a named 21st, Mobbin or Inspo search, or a docs/inspo picture): ${unsourced.map((l) => l.trim()).join(' | ')}`);
+  // and one small touch only this business would have (Tzvi, 20 Oct 2026, on the cloud pointer and
+  // the polish-shade sweep: "we need to do more unique things like that")
+  if (!fx.some((l) => /^\s*[-*]\s*touch:\s*(?!none)\S/i.test(l))) problems.push('Effects: no "- touch:" line, a small detail only this business would have (The Whipped Cup: a cloud for a mouse pointer; Elisheva: the sweep in the chosen shade)');
   if (!/different from all \d+ other pages/.test(part('Not alike'))) problems.push('Not alike: paste the passing line from scripts/check-fingerprints.mjs');
   return problems;
 }

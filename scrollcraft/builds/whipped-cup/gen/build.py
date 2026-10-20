@@ -65,23 +65,45 @@ FOOTER = f'''  <section class="close" aria-label="Order from The Whipped Cup">
 <script src="site.js"></script>
 '''
 
-# her photos of each flavour (her listing's product photos, 19 Oct 2026)
-FLAVS = [('classic', 'Classic Cloud', 'Original whipped coffee', 40, 'classic.webp', 'A jar of Classic Cloud on coffee beans'),
-         ('caramel', 'Caramel Cloud', 'Whipped coffee and caramel', 48, 'caramel-window.webp', 'Four jars of Caramel Cloud on a sunny windowsill'),
-         ('vanilla', 'Vanilla Cloud', 'Whipped coffee and vanilla', 48, 'vanilla-window.webp', 'Four jars of Vanilla Cloud by a window in Jerusalem')]
-FLAV_HTML = ''.join(f'''          <div class="flav rev"><img class="thumb" src="assets/{c}" alt="{alt}" width="120" height="120" loading="lazy"><h3>{n}</h3><div class="price">₪{p}<small>a jar</small></div><p>{d}</p><a class="btn-line add" href="order.html?jar={k}" data-jar="{k}">Add</a></div>
-''' for k, n, d, p, c, alt in FLAVS)
+# her photos of each flavour (her listing's product photos, 19 Oct 2026). Every thumbnail is ONE jar of
+# that flavour, and each flavour has its own big photo, which shows when you point at or tap its row
+# (Tzvi, 20 Oct 2026: Classic showed one jar and the others four; pointing at Caramel changed nothing).
+# One master photo per flavour, all the same: one jar standing on coffee beans (her own photos; the
+# caramel and vanilla jars lay on the beans, shot from above, so their photos are turned upright).
+# The thumbnail is cut from the same master (rules 3o, one look per product).
+FLAVS = [('classic', 'Classic Cloud', 'Original whipped coffee', 40, 'jar-classic-t.webp', '50% 50%', 'jar-classic.webp', 'A jar of Classic Cloud on coffee beans'),
+         ('caramel', 'Caramel Cloud', 'Whipped coffee and caramel', 48, 'jar-caramel-t.webp', '50% 50%', 'jar-caramel.webp', 'A jar of Caramel Cloud on coffee beans'),
+         ('vanilla', 'Vanilla Cloud', 'Whipped coffee and vanilla', 48, 'jar-vanilla-t.webp', '50% 50%', 'jar-vanilla.webp', 'A jar of Vanilla Cloud on coffee beans')]
+FLAV_HTML = ''.join(f'''          <div class="flav rev{' on' if i == 0 else ''}" data-flav="{k}" tabindex="0" aria-label="{n}, show the photo"><img class="thumb" src="assets/{c}" alt="A jar of {n}" width="120" height="120" loading="lazy" style="object-position:{pos}"><h3>{n}</h3><div class="price">₪{p}<small>a jar</small></div><p>{d}</p><a class="btn-line add" href="order.html?jar={k}" data-jar="{k}">Add</a></div>
+''' for i, (k, n, d, p, c, pos, big, alt) in enumerate(FLAVS))
+BIG_HTML = ''.join(f'''          <img class="big{' on' if i == 0 else ''}" data-flav="{k}" src="assets/{big}" alt="{alt}" width="500" height="1111" loading="lazy">
+''' for i, (k, n, d, p, c, pos, big, alt) in enumerate(FLAVS))
 FLAVOURS = f'''  <section class="sec" id="flavours" aria-labelledby="h-flav">
     <div class="wrap">
-      <h2 id="h-flav" class="rev">Three <span class="pink">flavours</span>, whipped to order</h2>
-      <p class="lede rev">Each jar is hand-whipped fresh and makes 3 to 4 coffees.</p>
       <div class="flav-grid">
-        <div class="photo rev"><img src="assets/trio-flowers.webp" alt="Jars of Classic, Vanilla and Caramel Cloud with pink flowers" width="934" height="1122" loading="lazy"></div>
-        <div class="flavs">
-{FLAV_HTML}        </div>
+        <div class="photo rev">
+{BIG_HTML}        </div>
+        <div class="flav-side">
+          <h2 id="h-flav" class="rev">Three <span class="pink">flavours</span> of whipped coffee</h2>
+          <p class="lede rev">Handcrafted and fresh. Each jar makes 3 to 4 coffees.</p>
+          <div class="flavs">
+{FLAV_HTML}          </div>
+        </div>
       </div>
     </div>
   </section>
+'''
+FLAV_JS = '''<script>
+(function () {
+  var rows = [].slice.call(document.querySelectorAll('.flav[data-flav]')), bigs = [].slice.call(document.querySelectorAll('.flav-grid .big'));
+  function show(k) { rows.forEach(function (r) { r.classList.toggle('on', r.dataset.flav === k); }); bigs.forEach(function (b) { b.classList.toggle('on', b.dataset.flav === k); }); }
+  rows.forEach(function (r) {
+    r.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') show(r.dataset.flav); });
+    r.addEventListener('focusin', function () { show(r.dataset.flav); });
+    r.addEventListener('click', function (e) { if (!e.target.closest('a')) show(r.dataset.flav); });
+  });
+})();
+</script>
 '''
 
 PACKS = [('bundle', 'Cloud Bundle', '6 jars · Monthly · Best value', 'Any 6 jars, mix and match', 220, True),
@@ -91,7 +113,7 @@ PACKS = [('bundle', 'Cloud Bundle', '6 jars · Monthly · Best value', 'Any 6 ja
 
 
 def pack_html(k, n, meta, allows, p, lead):
-    save = '<span class="save">Save 30+ ₪</span>' if lead else ''
+    save = ''  # her menu says "save 30+ ₪", but six Classic jars are ₪240: asked her (message-to-rena.md)
     pic = '<img class="pic" src="assets/iced.webp" alt="" width="1170" height="1213" loading="lazy">' if lead else ''
     return f'''        <article class="pack{' lead' if lead else ''} rev"><div><p class="meta">{meta}</p><h3>{n}</h3><span class="allows">{allows}</span></div>{pic}
           <div class="row"><span class="price">₪{p}{save}</span><a class="btn-line" href="order.html?pack={k}" data-pack="{k}">Choose</a></div></article>
@@ -100,14 +122,14 @@ def pack_html(k, n, meta, allows, p, lead):
 
 PACKAGES = '''  <section class="sec packs" id="packages" aria-labelledby="h-packs">
     <div class="wrap">
-      <h2 id="h-packs" class="rev">Weekly packages</h2>
-      <p class="lede rev">Delivered fresh to your door every week.</p>
+      <div class="packs-head"><h2 id="h-packs" class="rev">Weekly packages</h2>
+      <p class="lede rev">Delivered fresh to your door every week.</p></div>
       <div class="bento">
 ''' + ''.join(pack_html(*x) for x in PACKS) + '''      </div>
     </div>
   </section>
 '''
-KOSHER = '''  <div class="kosher"><div class="wrap"><span><b>Kosher certified</b></span><span>Made in small batches in Ramat Eshkol, Jerusalem</span></div></div>
+KOSHER = '''  <div class="kosher"><div class="wrap"><span><b>Kosher certified</b></span><span>Handcrafted and fresh in Ramat Eshkol, Jerusalem</span></div></div>
 '''
 STEPS = '''  <section class="sec" aria-labelledby="h-how">
     <div class="wrap">
@@ -185,7 +207,7 @@ HERO_JS = '''<script>
 </script>
 '''
 
-DESC = 'Hand-whipped Dalgona coffee in a jar, made to order in Ramat Eshkol, Jerusalem. Classic, Caramel and Vanilla Cloud from ₪40, weekly packages from ₪75. Kosher certified, delivered to your door.'
+DESC = 'Handcrafted whipped coffee in a jar, made fresh in Ramat Eshkol, Jerusalem. Classic, Caramel and Vanilla Cloud from ₪40, weekly packages from ₪75. Kosher certified, delivered to your door.'
 
 
 def write(name, title, desc, img, body, tail=''):
@@ -195,14 +217,14 @@ def write(name, title, desc, img, body, tail=''):
 
 import sys; sys.path.insert(0, 'gen'); import wow, cups
 write('index', 'The Whipped Cup · Whipped coffee in a jar, Jerusalem', DESC, 'caramel-window.webp',
-      wow.SKY + KOSHER + FLAVOURS + cups.CUPS + PACKAGES, wow.SKY_JS + cups.CUPS_JS)
+      wow.SKY + KOSHER + FLAVOURS + cups.CUPS + PACKAGES, wow.SKY_JS + FLAV_JS + cups.CUPS_JS)
 
 write('menu', 'Menu · The Whipped Cup', 'Classic Cloud ₪40, Caramel Cloud and Vanilla Cloud ₪48. Weekly packages: Try It Duo ₪75, One Flavour ₪148, Assorted ₪155, Cloud Bundle ₪220.', 'bottles.webp',
       '''  <header class="page-head"><div class="wrap">
     <h1>Our <span class="pink">menu</span></h1>
     <p class="lede">Three flavours by the jar, or a package delivered every week. Each jar makes 3 to 4 coffees.</p>
   </div></header>
-''' + FLAVOURS.replace('<section class="sec" id="flavours"', '<section class="sec" id="flavours" style="padding-top:clamp(2rem,5vw,3rem)"') + PACKAGES + KOSHER)
+''' + FLAVOURS.replace('<section class="sec" id="flavours"', '<section class="sec" id="flavours" style="padding-top:clamp(2rem,5vw,3rem)"') + PACKAGES + KOSHER, FLAV_JS)
 
 ORDER_FORM = '''  <header class="page-head"><div class="wrap">
     <h1>Your <span class="pink">order</span></h1>

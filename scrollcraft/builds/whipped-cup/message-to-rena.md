@@ -10,6 +10,7 @@ We're building a website for The Whipped Cup from your menu and photos, and it's
    - Assorted (4 jars a week, a mix of all flavours): which flavour comes twice, or does the customer choose?
    - Try It Duo: can both jars be the same flavour?
    - Cloud Bundle (6 jars a month): do all 6 jars come at once, or spread over the month?
+   - Your menu says the Cloud Bundle saves 30+ ₪. Six Classic Cloud jars on their own are ₪240, so the bundle saves ₪20 there (₪68 with Caramel or Vanilla). Should we say "save up to ₪68", or is the bundle priced differently?
 
 4. **Sending to family.** Your description mentions sending a taste of Jerusalem to family across the world. Do you ship abroad, or do people abroad order for their family here in Jerusalem?
 

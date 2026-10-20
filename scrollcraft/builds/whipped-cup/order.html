@@ -98,7 +98,7 @@
   var saved = window.twcBasket.get(), qs = new URLSearchParams(location.search);
   var q = {}; Object.keys(JARS).forEach(function (k) { q[k] = Math.max(0, Math.min(20, +((saved.jars || {})[k]) || 0)); });
   var pack = PACKS[saved.pack] ? saved.pack : '';
-  if (JARS[qs.get('jar')] && !q[qs.get('jar')]) q[qs.get('jar')] = 1;
+  if (JARS[qs.get('jar')]) q[qs.get('jar')] = Math.max(q[qs.get('jar')], Math.min(20, +qs.get('n') || 1));  // ?jar=classic&n=3 from "How many coffees?"
   if (PACKS[qs.get('pack')]) pack = qs.get('pack');
   if (qs.toString()) history.replaceState(null, '', location.pathname);
   var mixQ = { classic: 0, caramel: 0, vanilla: 0 }, oneFlav = '';
@@ -116,13 +116,17 @@
     var p = PACKS[k];
     return '<label class="plan"><input type="radio" name="pack" value="' + k + '"><span class="box"><span><b>' + p.name + '</b><br><span class="pr">' + p.meta + '</span></span><span class="p">₪' + p.price + '</span><span class="allows">' + p.allows + '</span></span></label>';
   }).join('') + '<label class="plan plan-none"><input type="radio" name="pack" value=""><span class="box"><span><b>No package</b><br><span class="pr">Jars only</span></span></span></label>';
-  plans.addEventListener('change', function (e) { pack = e.target.value; mixQ = { classic: 0, caramel: 0, vanilla: 0 }; oneFlav = ''; drawMix(); update(); check(false); });
+  plans.addEventListener('change', function (e) { if (e.target.name !== 'pack') return; pack = e.target.value; mixQ = { classic: 0, caramel: 0, vanilla: 0 }; oneFlav = ''; drawMix(); update(); check(false);
+    if (!mix.hidden) mix.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); });
 
   var mix = document.getElementById('mix'), mixH = document.getElementById('mix-h'), mixLeft = document.getElementById('mix-left'), mixBody = document.getElementById('mix-body');
   function mixSum() { return mixQ.classic + mixQ.caramel + mixQ.vanilla; }
   function drawMix() {
     var p = PACKS[pack]; mix.hidden = !p; if (!p) return;
-    mixH.textContent = p.name + ': ' + p.allows;
+    // the choices sit right under the package they belong to (page rules 3l; Tzvi, 20 Oct 2026:
+    // "it doesn't let me choose which flavours I want", the choices were below every package)
+    var lab = plans.querySelector('input[value="' + pack + '"]'); if (lab) lab.closest('label').after(mix);
+    mixH.textContent = p.mode === 'mix' ? 'Choose your ' + p.jars + ' jars' : p.mode === 'one' ? 'Choose your flavour' : p.name + ': ' + p.allows;
     if (p.mode === 'mix') {
       mixBody.innerHTML = Object.keys(JARS).map(function (k) {
         return '<div class="line" data-m="' + k + '"><div class="nm">' + JARS[k][0] + '</div><div class="step"><button type="button" data-d="-1" aria-label="One fewer ' + JARS[k][0] + ' in the package">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + JARS[k][0] + ' in the package">+</button></div></div>';
