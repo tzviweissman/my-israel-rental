@@ -869,6 +869,81 @@ the rest is looked at by someone who did not build it:
 3. **Only then** is it shown to Tzvi. A rule Tzvi has to point out twice gets
    a script or a checklist line the same day.
 
+
+## 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
+
+From nine design videos Tzvi sent ("learn and tell me how we can apply them to our pages to make them
+feel like real websites that are professional, modern, high end and beautiful"; notes in
+docs/ui-videos/notes/2026-10-20-nine-videos.md). He approved all of them ("yes add them all").
+
+**It feels finished (the craft)
+1. Everything you can press answers within 100 ms: a pressed state (slightly
+   smaller or darker) and a hover state, cancelled if you scroll away.
+2. Nothing jumps: late photos and content fade in over 200 to 400 ms into
+   space already kept for them; choosing something never moves the layout.
+3. One shadow, the soft kind: light, about 3 px down, about 30 px blur, no
+   spread, tinted with the brand colour, never a dark default.
+4. One left edge: headings, text and buttons line up on the same margin.
+5. A name is at least 1.25 times the size of the line under it, and heavier.
+6. Controls that do the same job look the same (height, corner, style).
+7. Buttons in sentence case; dividers pale; no "Price:" style labels; body
+   lines 1.5 to 1.6 apart; contrast never lowered to look soft.
+8. Buttons over a photo sit in a soft container, checked on a light and a
+   dark photo.
+9. One colour per meaning, everywhere (the kosher tag looks the same on
+   every item).
+10. The picture appears the moment a thing is named.
+
+**It sells like a premium brand (honestly)
+11. One true sentence beside the price says why it costs that (handmade,
+    the ingredient, the time it takes), not hidden on an About page.
+12. The maker and their real work right after the opening; at least one
+    real photo of the product in use or a real setting.
+13. Proof sorted by worry: it works, people like me buy it, they will
+    deliver; each beside the worry it answers. A guarantee states its limit
+    (the limit makes it believable).
+14. Real numbers big (three times the body size) with a one-line label, only
+    numbers the owner gives.
+15. A choice changes the big photo to that choice, with one line about it
+    ("light, not too sweet") that also works on a tap.
+16. Fewer choices first: a plain question ("How many coffees?", "How many
+    people?") before a long list; the first or middle option is the sensible
+    one, chosen on purpose.
+17. Every option shows its consequence (price, time, slot) and the button
+    names it ("Book Sat 11:30", "Add 2 jars, ₪96").
+18. Not available shows the nearest real alternative; every choice list has
+    a way out ("None", "Other", "I'm not sure").
+19. The same promise line and photos on the link preview, the home page and
+    the shop.
+
+**Never (the videos' sales tricks)
+Invented reviews or counts ("4.9 from 221", "500+ sold this week"), fake
+scarcity or countdowns, percentage savings, logo walls, slogans that promise
+a journey. Already banned (3j); these videos are full of them.
+
+**Prices, the way shops show them** (Tzvi, the same day: "instead of writing 20% off discount it should
+just say 20% off, and it shows the original price with a slash through it next to the current price;
+on The Whipped Cup by the prices there's too many words"): a real saving is the old price struck
+through beside the price and a two-word badge ("Save ₪12"), never a sentence; the button carries the
+offer and its price, so no line explains it again; badges two or three words.
+
+**Checked, not remembered.** `node scripts/check-site.mjs <every page>` fails: BROKEN (script or
+console error, a 404, a dead link between pages), SHIFT (layout moves after loading or when a choice is
+tapped), GLYPH (a character the fonts lack, like ₪ or →: load a face that has it, or draw it), STATE
+(a button with no hover or pressed state), TAP (under 40 px on a phone, or overlapping), ALIGN (text
+2 to 12 px off its section's edge, same-kind buttons of different sizes, a card name under 1.25x its
+line), PHONE (sideways scroll, the bottom bar over a button at the end), MEDIA (a photo over 600 KB,
+an image without its size, a video without a poster, words left hidden with motion off) and FLOW (an
+empty form that sends or says nothing, a filled one that sends no message or not the shown total).
+`node scripts/check-motion.mjs <pages>` fails a choice that jumps, flashes a blank or old frame
+(also on two quick taps), or does not take its colour. Both run with the other checks (3r) before
+anything is shown, and publish-page refuses a new page that fails them.
+
+**Studying a video** (Tzvi: "how can you go through videos better to catch everything"): see
+docs/ui-videos/HOW-TO-WATCH.md. Every change a video shows becomes a line in a before-and-after
+table, and every line is then checked against every page we are building, fixed or marked not
+relevant, the same day.
+
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
 Full text: `reference/design-rules.md`. The rules both builders share are

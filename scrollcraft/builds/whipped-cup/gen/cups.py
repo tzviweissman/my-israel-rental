@@ -14,7 +14,7 @@ CUPS = '''  <section class="sec cups" id="coffees" aria-labelledby="h-cups">
           <button type="button" data-c="21" aria-pressed="false"><b>21</b>three a day</button>
         </div>
         <p class="need" aria-live="polite"><span class="n" id="cups-n">2 to 3</span><span class="u" id="cups-u">jars</span></p>
-        <p class="fits" id="cups-fit">Each jar makes 3 to 4 coffees. The Try It Duo has 2 jars, ₪75.</p>
+        <p class="fits" id="cups-fit">Each jar makes 3 to 4 coffees.</p>
         <a class="btn" id="cups-go" href="shop.html?pack=duo">Order the Try It Duo, ₪75</a>
         <ol class="recipe" aria-label="How to make it">
           <li>Fill your glass with ice</li>
@@ -48,7 +48,7 @@ CUPS_JS = '''<script>
     glide.style.transform = 'translateX(' + (i * 100) + '%)';
     n.textContent = lo === hi ? lo : lo + ' to ' + hi; u.textContent = hi === 1 ? 'jar' : 'jars';
     var o = offer(hi);
-    fit.textContent = 'Each jar makes 3 to 4 coffees. ' + o[2];
+    fit.textContent = 'Each jar makes 3 to 4 coffees.';  // the button carries the offer and its price; no sentence about it (Tzvi: "too many words")
     go.href = o[0]; go.textContent = o[1];
   }
   btns.forEach(function (b) { b.addEventListener('click', function () { pick(b); }); });

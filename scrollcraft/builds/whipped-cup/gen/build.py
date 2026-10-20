@@ -23,6 +23,7 @@ def head(page, title, desc, img):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,500..700,100;1,9..144,500,100&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700&display=swap&text=%E2%82%AA" rel="stylesheet">  <!-- only ₪, which the site's own fonts do not have (scripts/check-site.mjs GLYPH) -->
 <link rel="stylesheet" href="site.css">
 </head>
 <body class="no-js" data-page="{page}">
@@ -51,7 +52,7 @@ FOOTER = f'''  <section class="close" aria-label="Order from The Whipped Cup">
         <h2>Your cup, your cloud.</h2>
         <p>WhatsApp <a href="https://wa.me/{WA}" target="_blank" rel="noopener">+1 929 993 6768</a> · <a href="mailto:thewhippedcup@gmail.com">thewhippedcup@gmail.com</a></p>
       </div>
-      <a class="btn" href="shop.html">Order your jars <span class="arw" aria-hidden="true">→</span></a>
+      <a class="btn" href="shop.html">Order your jars <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>
     </div>
     <p class="giant" aria-hidden="true">The Whipped Cup</p>
   </section>
@@ -112,19 +113,16 @@ PACKS = [('bundle', 'Cloud Bundle', '6 jars · Monthly · Best value', 'Any 6 ja
          ('duo', 'Try It Duo', '2 jars · Starter', '2 jars, any flavours', 75, False)]
 
 
-def save_line(k, p):
-    # the same honest saving as the shop: against the same jars bought one by one, her prices
-    jars = {'duo': 2, 'one': 4, 'assorted': 4, 'bundle': 6}[k]
-    hi = 40 + 48 + 48 + 48 if k == 'assorted' else jars * 48
-    per = round(p / jars, 1)
-    return f'<span class="save-l"><b>Save up to ₪{hi - p}</b> · ₪{per:g} a jar</span>'
+def was(k):
+    # the same jars bought one by one at the lowest single price (₪40), so the saving is always true
+    return {'duo': 2 * 40, 'one': 4 * 40, 'assorted': 40 + 48 + 48 + 40, 'bundle': 6 * 40}[k]
 
 
 def pack_html(k, n, meta, allows, p, lead):
     save = ''  # her menu says "save 30+ ₪", but six Classic jars are ₪240: asked her (message-to-rena.md)
     pic = '<img class="pic" src="assets/iced.webp" alt="" width="1170" height="1213" loading="lazy">' if lead else ''
-    return f'''        <article class="pack{' lead' if lead else ''} rev"><div><p class="meta">{meta}</p><h3>{n}</h3><span class="allows">{allows}</span>{save_line(k, p)}</div>{pic}
-          <div class="row"><span class="price">₪{p}{save}</span><a class="btn-line" href="shop.html?pack={k}" data-pack="{k}">Choose</a></div></article>
+    return f'''        <article class="pack{' lead' if lead else ''} rev"><div><p class="meta">{meta}</p><h3>{n}</h3><span class="allows">{allows}</span><span class="save-b">Save ₪{was(k) - p}</span></div>{pic}
+          <div class="row"><span class="price"><s class="was" aria-label="instead of ₪{was(k)}">₪{was(k)}</s> ₪{p}{save}</span><a class="btn-line" href="shop.html?pack={k}" data-pack="{k}">Choose</a></div></article>
 '''
 
 
@@ -159,7 +157,7 @@ HERO = f'''  <section class="hero" id="open" aria-labelledby="h-open">
         <h1 id="h-open">Whipped coffee <span class="pink">in a jar</span>, made fresh in Jerusalem</h1>
         <p class="lede">Cloud-like Dalgona coffee, hand-whipped to order in small batches and delivered to your door.</p>
         <div class="act">
-          <a class="btn" href="shop.html">Order your jars <span class="arw" aria-hidden="true">→</span></a>
+          <a class="btn" href="shop.html">Order your jars <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>
           <p class="proof"><b>From ₪40</b> a jar<br>Kosher certified</p>
         </div>
       </div>
@@ -240,7 +238,7 @@ write('contact', 'Contact · The Whipped Cup', 'WhatsApp +1 929 993 6768 or emai
   <section class="sec" style="padding-top:clamp(2rem,5vw,3rem)" aria-label="How to reach us">
     <div class="wrap">
       <div class="contact-grid">
-        <div class="card rev"><h3>WhatsApp</h3><p><a href="https://wa.me/{WA}" target="_blank" rel="noopener">+1 929 993 6768</a></p><p>The quickest way to order.</p><a class="btn" href="shop.html">Order your jars <span class="arw" aria-hidden="true">→</span></a></div>
+        <div class="card rev"><h3>WhatsApp</h3><p><a href="https://wa.me/{WA}" target="_blank" rel="noopener">+1 929 993 6768</a></p><p>The quickest way to order.</p><a class="btn" href="shop.html">Order your jars <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
         <div class="card rev"><h3>Email</h3><p><a href="mailto:thewhippedcup@gmail.com">thewhippedcup@gmail.com</a></p></div>
         <div class="card rev"><h3>Where</h3><p>Ramat Eshkol, Jerusalem.</p><p>Delivered fresh to your door.</p><p>Kosher certified.</p></div>
       </div>

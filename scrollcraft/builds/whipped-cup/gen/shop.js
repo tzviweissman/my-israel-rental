@@ -46,11 +46,13 @@
   // 2026: "people feel like they are getting a deal ... it should show what they save"). Honest: the
   // range is real, "up to" is its top, and the price a jar is the package price divided by its jars.
   function singles(k) { var p = PACKS[k]; if (p.mode === 'fixed') return [40 + 48 + 48 + 40, 40 + 48 + 48 + 48]; return [p.jars * 40, p.jars * 48]; }
-  function saveLine(k) { var p = PACKS[k], s = singles(k), per = Math.round(p.price / p.jars * 10) / 10;
-    return '<span class="save-l"><b>Save up to ₪' + (s[1] - p.price) + '</b> · ₪' + (per % 1 ? per.toFixed(1) : per) + ' a jar, single jars are ₪40 to ₪48</span>'; }
+  // shown the way shops show a deal (Tzvi, 20 Oct 2026, from the strawberry video: the original price
+  // with a slash through it next to the price, and a short badge, not a sentence). The jars bought one
+  // by one at the lowest single price, so the saving is always true whatever the flavours.
+  function was(k) { return singles(k)[0]; }
   plans.innerHTML = Object.keys(PACKS).map(function (k) {
     var p = PACKS[k];
-    return '<label class="plan"><input type="radio" name="pack" value="' + k + '"><span class="box"><span><b>' + p.name + '</b><br><span class="pr">' + p.meta + '</span></span><span class="p">₪' + p.price + '</span><span class="allows">' + p.allows + '</span>' + saveLine(k) + '</span></label>';
+    return '<label class="plan"><input type="radio" name="pack" value="' + k + '"><span class="box"><span><b>' + p.name + '</b><br><span class="pr">' + p.meta + '</span></span><span class="p"><s class="was" aria-label="instead of ₪' + was(k) + '">₪' + was(k) + '</s> ₪' + p.price + '</span><span class="allows">' + p.allows + '</span><span class="save-b">Save ₪' + (was(k) - p.price) + '</span></span></label>';
   }).join('') + '<label class="plan plan-none"><input type="radio" name="pack" value=""><span class="box"><span><b>No package</b><br><span class="pr">Jars only</span></span></span></label>';
   plans.addEventListener('change', function (e) { if (e.target.name !== 'pack') return; pack = e.target.value; mixQ = { classic: 0, caramel: 0, vanilla: 0 }; oneFlav = ''; drawMix(); update(); check(false);
     if (!mix.hidden) mix.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); });
@@ -111,7 +113,8 @@
       else if (jn === 5 && cost > 220) { sw = 'bundle'; extra = ' and a 6th jar'; }  // one more jar, for less
     }
     deal.hidden = !sw;
-    if (sw) { deal.dataset.pack = sw; deal.querySelector('span').textContent = extra ? 'Make it 6 with the Cloud Bundle for ₪220: you save ₪' + (cost - 220) + ' and get a 6th jar.' : 'Your ' + jn + ' jars as the ' + PACKS[sw].name + ' are ₪' + PACKS[sw].price + ': you save ₪' + (cost - PACKS[sw].price) + '.'; }
+    // the deal shown, not described (old price struck through)
+    if (sw) { deal.dataset.pack = sw; deal.querySelector('span').innerHTML = extra ? 'Make it 6 jars: Cloud Bundle <s>₪' + cost + '</s> ₪220' : 'As the ' + PACKS[sw].name + ': <s>₪' + cost + '</s> ₪' + PACKS[sw].price; }
     document.getElementById('total').textContent = '₪' + total();
     send.firstElementChild.textContent = total() ? 'Send order on WhatsApp, ₪' + total() : 'Send order on WhatsApp';
     var b = { jars: {} }; for (var k2 in q) if (q[k2]) b.jars[k2] = q[k2]; if (pack) b.pack = pack; window.twcBasket.set(b);

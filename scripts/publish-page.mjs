@@ -87,13 +87,13 @@ if (!fs.existsSync(path.join(SRC, 'index.html'))) {
     const base = `http://127.0.0.1:${server.address().port}/`;
     const pages = fs.readdirSync(SRC).filter((f) => f.endsWith('.html')).map((f) => base + f);
     const { spawn } = await import('node:child_process');
-    let fitsOut = '';
-    const fitsCode = await new Promise((r) => { const c = spawn(process.execPath, [path.join(ROOT, 'scripts', 'check-fits.mjs'), ...pages], { cwd: ROOT }); c.stdout.on('data', (d) => { fitsOut += d; }); c.stderr.on('data', (d) => { fitsOut += d; }); c.on('exit', r); });
-    server.close();
-    if (fitsCode !== 0) {
-      console.error(`Not published: ${slug} does not fit the screen.\n${fitsOut}`);
-      process.exit(1);
+    // fits the screen (3c.12), no glitches (3s: check-site), choices switch smoothly (3s: check-motion)
+    for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly']]) {
+      let out = '';
+      const code = await new Promise((r) => { const c = spawn(process.execPath, [path.join(ROOT, 'scripts', script), ...pages], { cwd: ROOT }); c.stdout.on('data', (d) => { out += d; }); c.stderr.on('data', (d) => { out += d; }); c.on('exit', r); });
+      if (code !== 0) { server.close(); console.error(`Not published: ${slug} ${why}.\n${out}`); process.exit(1); }
     }
+    server.close();
   }
 }
 

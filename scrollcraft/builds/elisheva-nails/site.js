@@ -18,7 +18,13 @@ document.body.classList.remove('no-js');
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
-  [].forEach.call(document.querySelectorAll('.rev'), function (el) { io.observe(el); });
+  // each block's sweep comes from its own side: words from the left or right, photos and cards from
+  // above or below, varied so no two neighbours match
+  var DIRS = { text: ['l', 'r'], box: ['d', 'u', 'r', 'l'] }, k = 0;
+  [].forEach.call(document.querySelectorAll('.rev'), function (el) {
+    var text = /^(H1|H2|H3|P)$/.test(el.tagName), set = text ? DIRS.text : DIRS.box;
+    el.dataset.dir = set[k++ % set.length]; io.observe(el);
+  });
   // the label that rolls up on hover (effects B7)
   [].forEach.call(document.querySelectorAll('.btn'), function (b) {
     var t = b.firstChild; if (!t || t.nodeType !== 3 || !t.nodeValue.trim()) return;

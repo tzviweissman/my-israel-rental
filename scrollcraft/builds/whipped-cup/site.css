@@ -5,7 +5,7 @@
 :root {
   --cream: #FCF2F1; --paper: #FFF9F7; --choc: #33170C; --choc-2: #4A2618; --ink: #2A140B; --soft: #6B4A3E;
   --kraft: #C8976F; --kraft-dk: #8A5A35; --blush: #F9DAE0; --pink: #F07DA4; --pink-ink: #A1305A; --line: #EED7D5;
-  --r: 22px; --font-head: 'Fraunces', Georgia, serif; --font-body: 'DM Sans', 'Fraunces', system-ui, sans-serif;  /* DM Sans has no ₪: it comes from Fraunces, not a tiny fallback */
+  --r: 22px; --font-head: 'Fraunces', 'Frank Ruhl Libre', Georgia, serif; --font-body: 'DM Sans', 'Heebo', system-ui, sans-serif;  /* ₪ and → come from Frank Ruhl Libre and Heebo, loaded for those two only */
   --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
 }
 *, *::before, *::after { box-sizing: border-box; }
@@ -375,3 +375,11 @@ textarea.fld { min-height: 88px; resize: vertical; }
    there underneath, and only then goes (scripts/check-motion.mjs) */
 .st-ph img { transition: opacity 500ms var(--out) 520ms, transform 700ms var(--out); z-index: 1; }
 .st-ph img.on { transition: opacity 500ms var(--out), transform 700ms var(--out); z-index: 2; }
+
+.arw svg { display: block; } .arw { display: inline-flex; }  /* the arrow is drawn, not a character the fonts lack */
+/* the deal, short: old price struck through beside the price, and a two-word badge (rules 3j, 3s) */
+.was { font: 500 .55em/1 var(--font-body); color: var(--soft); text-decoration-thickness: 1.5px; margin-right: .3em; vertical-align: .2em; }
+.pack .was { color: #E8CFC7; } .pack.lead .was { color: var(--soft); }
+.save-b { display: inline-block; justify-self: start; margin-top: .45rem; padding: .25rem .6rem; border-radius: 999px; background: #E3F3EA; color: #1F5C3A; font: 700 .85rem/1.2 var(--font-body); width: max-content; grid-column: 1 / -1; }
+.pack .save-b { background: rgb(159 224 184 / .18); color: #BFF0CF; } .pack.lead .save-b { background: #E3F3EA; color: #1F5C3A; }
+.deal s { font-weight: 500; opacity: .7; margin: 0 .2em; }

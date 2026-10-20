@@ -25,9 +25,9 @@
   function drawSvc() {
     var s = SERVICES[svc];
     $('st-name').textContent = s ? s.n : 'Book your nails';
-    $('st-price').hidden = !s; if (s) $('st-price').innerHTML = '<span class="sym">₪</span>' + s.p + ' <small>about ' + s.m + ' minutes</small>';
+    $('st-price').style.visibility = s ? 'visible' : 'hidden'; if (s) $('st-price').innerHTML = '<span class="sym">₪</span>' + s.p + ' <small>about ' + s.m + ' minutes</small>';
     var sv = svc === 'gel-removal' ? (SERVICES.removal.p + SERVICES.gel.p) - s.p : 0;
-    $('st-save').hidden = !sv; if (sv) $('st-save').innerHTML = '<b>Save ₪' + sv + '</b> against removal (₪' + SERVICES.removal.p + ') and new gel (₪' + SERVICES.gel.p + ') booked apart';
+    $('st-save').style.visibility = sv ? 'visible' : 'hidden'; if (sv) $('st-save').innerHTML = '<b>Save ₪' + sv + '</b> against removal (₪' + SERVICES.removal.p + ') and new gel (₪' + SERVICES.gel.p + ') booked apart';
   }
   chips.forEach(function (c) { c.addEventListener('click', function () { shade = shade === c.dataset.k ? '' : c.dataset.k; drawShade(); update(); }); });
   var today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);

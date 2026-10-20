@@ -42,6 +42,7 @@ def head(page, title, desc, img):
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,500;0,6..96,600;1,6..96,500&family=Outfit:wght@400;500;600&family=Parisienne&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700&display=swap&text=%E2%82%AA" rel="stylesheet">  <!-- only ₪, which the site's own fonts do not have (scripts/check-site.mjs GLYPH) -->
 <link rel="stylesheet" href="site.css">
 </head>
 <body class="no-js" data-page="{page}">
@@ -70,7 +71,7 @@ FOOTER = f'''  <section class="close" aria-label="Book with Elisheva">
         <h2>Book your nails</h2>
         <p>WhatsApp or call <a href="https://wa.me/{WA}" target="_blank" rel="noopener">+44 7871 822590</a><br>Text <a href="sms:+972533484521">+972 53 348 4521</a></p>
       </div>
-      <a class="btn" href="book.html">Book a time <span class="arw" aria-hidden="true">→</span></a>
+      <a class="btn" href="book.html">Book a time <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>
     </div>
     <p class="giant" aria-hidden="true">Nails by Elisheva</p>
   </section>
@@ -101,7 +102,7 @@ HERO = f'''  <section class="hero" id="open" aria-labelledby="h-open">
           <p class="shade-name" id="shade-name" aria-live="polite">{SHADES[0][1]}</p>
         </div>
         <div class="act">
-          <a class="btn" href="book.html" id="book-shade">Book this shade <span class="arw" aria-hidden="true">→</span></a>
+          <a class="btn" href="book.html" id="book-shade">Book this shade <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>
           <p class="proof"><b>From ₪90</b><br>Sunday to Friday</p>
         </div>
       </div>
@@ -186,7 +187,7 @@ VISIT = f'''  <section class="sec" id="visit" aria-labelledby="h-visit">
       <h2 id="h-visit" class="rev">Where and when</h2>
       <div class="visit">
         <div class="card rev"><h3>Opening hours</h3><ul class="hours">{hours_li}</ul></div>
-        <div class="card rev"><h3>The studio</h3><p>Romema, Jerusalem.</p><p>WhatsApp or call <a href="https://wa.me/{WA}" target="_blank" rel="noopener">+44 7871 822590</a></p><p>Text <a href="sms:+972533484521">+972 53 348 4521</a></p><a class="btn" href="book.html" style="margin-top:1rem;color:#fff">Book a time <span class="arw" aria-hidden="true">→</span></a></div>
+        <div class="card rev"><h3>The studio</h3><p>Romema, Jerusalem.</p><p>WhatsApp or call <a href="https://wa.me/{WA}" target="_blank" rel="noopener">+44 7871 822590</a></p><p>Text <a href="sms:+972533484521">+972 53 348 4521</a></p><a class="btn" href="book.html" style="margin-top:1rem;color:#fff">Book a time <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
       </div>
     </div>
   </section>
@@ -217,8 +218,8 @@ BOOK = f'''  <form id="form" novalidate>
         <p class="caps">Book · Romema, Jerusalem</p>
         <h1 id="h-book"><span id="st-name">Book your nails</span></h1>
         <p class="st-facts">More than four years of experience · Sunday to Friday</p>
-        <p class="st-price" id="st-price" hidden></p>
-        <p class="st-save" id="st-save" hidden></p>
+        <p class="st-price" id="st-price" style="visibility:hidden">&nbsp;</p>
+        <p class="st-save" id="st-save" style="visibility:hidden">&nbsp;</p>
         <div class="card-in" id="w-svc"><p class="f">What would you like?</p><div class="opts" id="svcs">{svc_opts}</div><p class="err" id="e-svc"></p></div>
         <div class="card-in"><p class="f">Colour <span class="hint">(optional)</span></p><div class="chips small" id="bshades">{shade_opts}</div><p class="shade-name" id="bshade-name"></p></div>
       </div>
@@ -262,7 +263,7 @@ write('contact', 'Contact · Nails by Elisheva', 'WhatsApp or call +44 7871 8225
   <section class="sec" style="padding-top:clamp(2rem,5vw,3rem)" aria-label="How to reach me">
     <div class="wrap">
       <div class="contact-grid">
-        <div class="card rev"><h3>WhatsApp or call</h3><p><a href="https://wa.me/{WA}" target="_blank" rel="noopener">+44 7871 822590</a></p><a class="btn" href="book.html">Book a time <span class="arw" aria-hidden="true">→</span></a></div>
+        <div class="card rev"><h3>WhatsApp or call</h3><p><a href="https://wa.me/{WA}" target="_blank" rel="noopener">+44 7871 822590</a></p><a class="btn" href="book.html">Book a time <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
         <div class="card rev"><h3>Text and email</h3><p>Text <a href="sms:+972533484521">+972 53 348 4521</a></p><p><a href="mailto:elishevaberlinger@gmail.com">elishevaberlinger@gmail.com</a></p></div>
         <div class="card rev"><h3>Where</h3><p>Luxe Nail Studio, Romema, Jerusalem.</p></div>
       </div>

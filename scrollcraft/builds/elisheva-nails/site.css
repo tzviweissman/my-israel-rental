@@ -6,7 +6,7 @@
 :root {
   --blush: #F6E1DE; --blush-2: #F3D4D1; --paper: #FFF8F6; --rose: #B76E66; --rose-dk: #84423C; --gold: #C28E8A;
   --ink: #3A2523; --soft: #6E5450; --line: #EBCFCB;
-  --r: 18px; --font-head: 'Bodoni Moda', Georgia, serif; --font-script: 'Parisienne', cursive; --font-body: 'Outfit', 'Bodoni Moda', system-ui, sans-serif;  /* Outfit has no ₪ */
+  --r: 18px; --font-head: 'Bodoni Moda', 'Frank Ruhl Libre', Georgia, serif; --font-script: 'Parisienne', cursive; --font-body: 'Outfit', 'Heebo', system-ui, sans-serif;  /* ₪ and → from Heebo, loaded for those two only */
   --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
 }
 *, *::before, *::after { box-sizing: border-box; }
@@ -260,3 +260,25 @@ body[data-tone="dark"] .hero .shade[aria-pressed="true"] { box-shadow: inset 0 -
 .stage[data-tone="dark"] :is(h1, .st-price, .st-price small, .st-facts, .st-save, .caps, .f, .shade-name, .hint) { color: #FFF4F2; }
 .stage[data-tone="dark"] .st-save b { color: #BFF0CF; }
 body[data-tone="dark"] .hero .btn, body[data-tone="dark"] .hero .btn * { color: var(--rose-dk); }
+
+/* choosing a service never moves the page: the title keeps room for two lines, price and saving keep theirs */
+.stage .st-info h1 { font-size: min(clamp(2.1rem, 3.4vw, 3.3rem), 7.5svh); min-height: 2.1em; text-wrap: balance; }
+.stage .st-price, .stage .st-save { min-height: 1.5em; }
+.close .btn:hover { background: var(--blush); }
+
+.arw svg { display: block; } .arw { display: inline-flex; }  /* the arrow is drawn, not a character the fonts lack */
+.stage .st-save { min-height: 2.9em; } .stage .shade-name { min-height: 1.7em; }
+/* the sweeps come from different sides, like strokes of polish, not one machine direction
+   (Tzvi, 20 Oct 2026: "maybe some should go in other directions"). site.js gives each block a side. */
+body:not(.no-js) .rev[data-dir="r"] { clip-path: inset(-100px -100px -100px 100%); }
+body:not(.no-js) .rev[data-dir="r"]::after { transform-origin: right; }
+body:not(.no-js) .rev[data-dir="r"].in::after { animation-name: sweep-r; }
+body:not(.no-js) .rev[data-dir="d"] { clip-path: inset(-100px -100px 100% -100px); }
+body:not(.no-js) .rev[data-dir="d"]::after { transform: scaleY(0); transform-origin: top; }
+body:not(.no-js) .rev[data-dir="d"].in::after { animation-name: sweep-d; }
+body:not(.no-js) .rev[data-dir="u"] { clip-path: inset(100% -100px -100px -100px); }
+body:not(.no-js) .rev[data-dir="u"]::after { transform: scaleY(0); transform-origin: bottom; }
+body:not(.no-js) .rev[data-dir="u"].in::after { animation-name: sweep-u; }
+@keyframes sweep-r { 0% { transform: scaleX(0); transform-origin: right; } 50% { transform: scaleX(1); transform-origin: right; } 50.1% { transform: scaleX(1); transform-origin: left; } 100% { transform: scaleX(0); transform-origin: left; } }
+@keyframes sweep-d { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 50.1% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
+@keyframes sweep-u { 0% { transform: scaleY(0); transform-origin: bottom; } 50% { transform: scaleY(1); transform-origin: bottom; } 50.1% { transform: scaleY(1); transform-origin: top; } 100% { transform: scaleY(0); transform-origin: top; } }
