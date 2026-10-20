@@ -1,0 +1,82 @@
+OKOingYdtVw - The psychology of the most addictive apps (variable reward, stopping cues, Zeigarnik, social reinforcement, loss aversion, the addiction loop). Title inferred from the content; no title text on screen. Watcher A.
+
+Note: this is a talking-head psychology video, not a UI build. Almost nothing is a before/after of a page. Rows list every technique said or shown, and the designed screens (dialog, app cards, loop diagram) shown on screen. "Before" is "-" unless the video contrasts two states.
+
+| Time | Before | After | Exact detail (words, sizes, colours, spacing, values shown) | Said (short paraphrase of the narration, or "-") |
+|---|---|---|---|---|
+| 0:00-0:04 | - | Cold open: app icons appear in a row (Snapchat + Instagram, then X, Snapchat, Instagram, TikTok, Facebook) on a dark charcoal ground | Icons ~75 px, even gaps, centred | Why do some apps feel impossible to put down; every quick check costs you hours |
+| 0:04 | - | Real Instagram lock-screen notification card: urgency + named account + "before it ends" | Text: "passengershaming started a live video. Watch it before it ends!"; grey rounded card, small white text, "now" at right | - (shown as the example of a trigger) |
+| 0:09 | - | Framing: it is not entirely your fault, it is psychology | - | The truth is it is not entirely your fault; much of why we cannot put phones down is rooted in human psychology |
+| 0:26 | - | Principles are stacked, not used one at a time | - | Apps stack several psychological principles together to maximise time on the phone |
+| 0:34-0:42 | - | Chapter title card: charcoal (~#1F211F) ground, white geometric sans (Poppins-like, lowercase) "variable ratio reinforcement"; thin white lines with small diamond end caps draw in above it (2, then 4 lines) | Lines ~240 px wide, ~1 px, diamond end caps; text ~26 px bold, centred, lowercase | Variable ratio reinforcement |
+| 0:41 | - | Variable ratio reinforcement defined | - | You never know what you are going to get; addictive apps keep switching content to keep users guessing and keep information fresh |
+| 0:58 | - | Example: open TikTok/Instagram, you never know what the next video will be | Vertical video frame on black bars, caption "That one homeboy with bad posture:" top-centre, white small text | You never know what the video, the post or the new message will be |
+| 1:17 | - | Reaction meme "STOP STOP I'm gonna pee!" as comic relief | Impact-style white caps with black outline, square frame | - |
+| 1:22 | - | Part of the thrill is that not everything is good; a good one may be a few swipes away | - | Not every video resonates; within a couple of swipes or clicks you could find something relevant, so you keep consuming |
+| 1:33-1:37 | - | B-roll: hand scrolling a phone feed, feed items change under the thumb | Phone held at ~20 deg, shallow depth of field | - |
+| 1:36 | - | If every item were amazing you would get bored | - | If every video was amazing and super relevant you would get bored very easily |
+| 1:43 | - | Chapter: stopping cues (spoken only, no card) | - | The most addictive apps remove moments where you would naturally stop |
+| 1:55 | - | Buffet analogy: nobody asks "would you like more food / a refill / dessert", so you keep returning | B-roll: waiter pouring wine at a table (vertical clip), then buffet trays and a plate being filled | Instead you return to the buffet over and over, because it is there and you can |
+| 2:13 | - | Endless scroll has no pause moments | - | This is why endless scrolls are so effective; you have no moment to pause and think; you are just consuming |
+| 2:15 | - | Pinterest masonry feed shown scrolling (pins with sponsored pins mixed in) | Two-column masonry, white cards, rounded corners | - |
+| 2:17-2:21 | - | B-roll: man in the dark lit only by his phone screen, glasses reflecting green | Very low-key lighting | - |
+| 2:23-2:27 | - | Three vertical feeds side by side (TikTok For You, YouTube Shorts, Instagram Reels) | Each ~190 px wide, full-bleed video, right-hand like/comment/save/share rail, bottom nav | TikTok, Instagram and YouTube all have endless video feeds that keep you swiping |
+| 2:33 | Endless feed (no pause) | Imagined stopping-cue dialog: iOS-style alert, light grey (~#C8CAC8) rounded rectangle ~346 x 258 px, radius ~16 px, centred on charcoal | Title bold black ~20 px "It's been 60min. Would you like to continue."; body ~15 px black "We recommend you take a break for swiping."; hairline divider; two blue text buttons stacked, each ~56 px tall, centred: "Keep Swiping" then "Stop Swiping" | If they asked "are you sure you want to keep swiping?" these apps would be much less addictive |
+| 2:31 | - | The dialog fades in at low opacity then to full | Fade ~0.3 s (estimated) | - |
+| 2:35 | - | Plug for the presenter's own app "Block Walk" (locks addictive apps until you hit your steps); QR code bottom-right | QR: white tile, black modules, dinosaur glyph in centre, ~165 px square, beside a phone screenshot | Created Block Walk to lock addictive apps until you hit your steps, to help us move more and feel better; scan the QR code |
+| 2:44 | - | Block list screen: "Blocks - Your Block List (4)": Chrome, TikTok, X, Instagram, each with a small red "Blocked" tag | Dark UI, rows ~24 px tall, rounded dark-grey (~#1C1C1E) bars | - |
+| 2:46-2:50 | - | App home screen "blockw*lk" (the o is a green ring): Today view, then Week view | Today: "3,179 / 5,000" with green progress ring. Week: "14,500" in green ~22 px bold, 7 vertical pill bars (Sun-Sat), done days solid green, future days dark grey; "AVG 2,071"; label "4 apps unlock at 5k steps" with 4 app icons right; header "July 5-11" with a "Week" dropdown | - |
+| 2:48 | - | Stats list below the chart | Rows: "5 Day Streak" (orange flame), "7.2 Miles Walked" (green footprints), "652 Calories Burned" (green bolt); each a dark-grey rounded bar ~30 px, icon right-aligned; top-right "5" with a flame in orange as streak counter | - |
+| 2:50 | - | Bottom tab bar | 4 tabs: Home (green when active), Blocks, Profile, Refer; icons ~16 px above tiny labels | - |
+| 2:52-2:54 | - | Month calendar view: "39,541" total, "AVG 5,648"; circles per day | Done days filled green with dark number; today ringed in white; missed/future days grey | - |
+| 2:57 | - | Chapter: Zeigarnik effect (spoken only) | - | Our brains hate unfinished things; the brain gives priority to unfinished tasks |
+| 3:07 | - | Examples of open loops: 12 chores, overwhelm | B-roll: half-mown lawn (3:12), sink full of dishes (3:15) | Twelve chores to complete and you cannot focus on anything else |
+| 3:18 | - | Red unread-count badge on app icon (WhatsApp "1"; TikTok "1" at 1:19) | Red circle ~38 px, white bold numeral, top-right corner of icon | Unread messages make you instinctively go back in and check |
+| 3:20 | - | Facebook-style notification row: pale blue-white (~#E7F3FF) row, round avatar with small green speech-bubble badge, bold names, "4h" grey timestamp, "..." menu | Text ~16 px; names bold; "mentioned you in their comments." regular; avatar ~60 px with green badge ~36 px at lower right | Someone mentions you on social media and you want to go check it |
+| 3:24-3:26 | - | B-roll: man reading a book with phone on table; picks up the phone | Shallow focus | Trapped mental energy; the reward system gets dopamine from closing the loop |
+| 3:36 | - | Closing the loop gives dopamine, which fuels the addiction | - | Dopamine and addiction come from closing the loop |
+| 3:42 | - | Chapter: social reinforcement (spoken only) | - | Human nature craves validation and attention; people worship celebrities with status; "good job" or a high five feels good |
+| 4:02 | - | Group-text screenshot as social proof from a client, grey bubbles on white | Grey bubbles (~#E9E9EB), ~14 px black text, radius ~18 px. Text: "Bro, they loved all of it!" / "One founder said 'this is the best I've seen since we started the rebrand effort.'" / "She meant the logo, the photoshoot, the new website.. of all the things, this was the best she has seen." / "One more.. "WOW!! Wyatt knocked it out of the park!! All of them look SO good!"" | It feels good when someone praises you |
+| 4:04-4:06 | - | B-roll: two women at a counter high-fiving | - | A high five feels good |
+| 4:06 | - | Apps leverage likes, comments, reactions, messages, matches, followers | Spoken as a list | Addictive apps leverage liking and commenting, reactions, messages, matches, followers; a non-stop feed of dopamine from validating what we think is cool |
+| 4:08 | - | "Community" feed card with a full-bleed photo (dog looking out a car window), caption, emoji reaction pill "8.8k" and a heart | Right rail: "Send", "Vibe 232"; bottom tab bar Chat / Camera (red dot) / Feed (active, white) / Profile avatar | - |
+| 4:10 | - | Instagram story from dwellmagazine with "Love it" reaction and a clapping-hands emoji sticker | White bold ~24 px text over photo; red heart and send icon bottom-right; "Send message..." pill bottom-left; segmented progress bar at top | - |
+| 4:12 | - | Story reaction picker opens: grid of reaction emojis (laugh, shock, heart-eyes, cry, clap, fire) above the keyboard | 6 emojis in two rows, ~28 px; dark translucent panel | - |
+| 4:14 | - | Live reaction screen: "time to party" message from "Alex 2m" with floating fire emojis rising from the bottom | Message bar "Send message..." with quick-react emojis (fire, yellow heart, heart-eyes, add-reaction); bottom bar: grid, shutter (yellow ring), share | - |
+| 4:17 | - | "PEOPLE TO FOLLOW" list | Condensed heavy sans heading ~22 px; 10 rows each ~44 px: round avatar ~26 px, name ~12 px, grey ~9 px bio; solid red "Follow" pill on the right, white bold ~10 px; "Back" bar at bottom on black | - |
+| 4:19 | - | "Fans" list with a pink-outlined "add friend" icon button per row | Rows ~24 px, avatar ~20 px left; pink outlined square icons right | - |
+| 4:32 | - | Hard cut through black to the next chapter | ~0.3 s black | - |
+| 4:33 | - | Chapter: loss aversion (spoken only) | - | Losing something you put time and energy into hurts more than what it took to get there |
+| 4:48 | - | Examples: staying in bad relationships because of time invested; levelling up a game character | B-roll (5:00-5:10): World of Warcraft gameplay (quest log, minimap, character walking) with "KVG" watermark | Deleting the app you spent so long in feels like losing a part of you |
+| 5:11 | - | Snap streak example | Screenshot (5:24): TikTok green-screen video by "Brooke" over a Snapchat "Snapstreak!" modal: flame icon, "3,140 days" in orange, chips "Jan 26", "Best Friends", "3,140" flame, "213,084" | Breaking a snap streak feels painful; Snapchat is regarded as one of the most addictive apps because breaking the streak feels like breaking a friendship |
+| 5:27 | - | Loss aversion summary | - | Apps trick your brain into feeling that by leaving or deleting you lose social connection, status and time, so you stay longer |
+| 5:40 | - | Bridge: the five principles combine into "the addiction loop" | - | All five are leveraged differently per app; together they make the addiction loop |
+| 5:50 | - | Loop diagram: hand-drawn chalk-style white circular arrow on charcoal, centre label "the addiction loop"; four small white labels around it: Trigger (top-right), Action (bottom-right), Reward (bottom-left), Investment (top-left) | Labels ~13 px bold; stroke ~8 px rough chalk texture; arrow head top-left; draws on as an animation | - |
+| 5:59 | - | Four example breakdowns follow (TikTok, Instagram, Snapchat, Duolingo) | - | Cover four examples so you can see it in action |
+| 6:00 | - | TikTok loop (spoken; card not captured in frames) | - | Trigger: you feel bored; action: open the app and swipe; reward: randomly a great video; investment: the feed gets better the more you use it; endless loop |
+| 6:24 | - | Instagram card: dark (~#16171A) rounded rectangle with ~3 px hot-pink (~#FF3D9A) outline; title "Instagram" in pink heavy serif (~40 px); top-right "HABIT" label + pill "Post something -> keep checking" | Four quadrants split by thin cross lines (1 px, dark grey); centre: pink ellipse with two arrow heads and 4 round icons (lightbulb, hand, database stack, award medal) in dark-grey circles ~40 px | - |
+| 6:24 | - | Instagram quadrant 1, TRIGGER (top-left) | "1 - TRIGGER" small grey caps ~15 px; bold white ~25 px "A like notification"; grey italic serif quote "Did anyone like my post?" | A trigger like a notification gets you into the app |
+| 6:24 | - | Instagram quadrant 2, ACTION (top-right, right-aligned) | "Pull to refresh" / "Let me check real quick." + yellow pill "Variable-ratio" (black text) | You pull to refresh to see updates |
+| 6:24 | - | Instagram quadrant 3, REWARD (bottom-right) | "Likes and comments" / "Oh nice, she commented." + green pill "Social reinforcement" | Likes and comments give reinforcement |
+| 6:24 | - | Instagram quadrant 4, INVESTMENT (bottom-left) | "Unwatched stories" / "I still haven't watched those." + blue pill "Zeigarnik" | Unwatched stories keep you engaged |
+| 6:45 | - | Snapchat card: same layout, yellow (~#FFF200) outline and title; HABIT "Every single day -> Snapchat" | Trigger "Streak warning" / "Wait, our streak's about to end."; Action "Send a snap" / "I'll just send a quick one."; Reward "Friends reply" / "Oh, they snapped back." + green "Social reinforcement"; Investment "A growing streak" / "300 days. Can't lose that now." + orange "Loss aversion" | A warning that the streak is about to end; you send a snap; a friend replies; a longer streak you do not want to lose |
+| 7:03 | - | Duolingo card: lime-green (~#6DE04A) outline and title; HABIT "Before bed -> Duolingo" | Trigger "Daily reminder" / "Ugh, I haven't practiced today."; Action "One short lesson" / "It's only five minutes."; Reward "Random prizes" / "Ooh, a treasure chest." + yellow "Variable-ratio"; Investment "Streak + unfinished unit" / "Can't stop now, I'm almost done." + orange "Loss aversion" + blue "Zeigarnik" | Daily reminder; one short lesson; a random prize keeps it interesting; streaks and unfinished units, you cannot stop because of sunk cost |
+| 7:24 | - | Card fades to a dim, warm-brown vignette as the outro starts | Opacity drops to ~45%, soft radial glow behind | - |
+| 7:25 | - | Ethical close: the principles are not harmful when used properly | - | Used properly they can serve user retention and better recommendations, in ways that help the business without hurting users |
+| 7:45 | - | Sign-off: like and subscribe | - | Thanks for watching |
+| all cards | - | Consistent card system: one brand colour per app used for the outline, the title and the loop ring; pill colours fixed per principle | Pills: yellow = variable-ratio, blue = Zeigarnik, green = social reinforcement, orange = loss aversion; pill height ~28 px, fully rounded, black bold ~17 px text | - |
+| all cards | - | Type pairing on cards: heavy serif title, bold grotesque body, italic serif quotes in muted grey, tiny grey tracked caps for step labels | Titles ~40 px, step labels ~15 px caps, quotes ~22 px italic | - |
+| all cards | - | Each stage is written as a feeling the user would say aloud, in quotes | e.g. "It's only five minutes." | - |
+
+## Easy to miss
+
+| Time | Detail |
+|---|---|
+| 2:33 | The imagined stopping-cue dialog: title "It's been 60min. Would you like to continue.", two stacked blue buttons "Keep Swiping" / "Stop Swiping". One honest pause would cut use; an honest shop can add a pause (e.g. a plain "Ready to book?") instead of hiding the step. |
+| 6:24-7:03 | Pill colours are fixed per principle across all four cards, so repeat viewers learn the code. |
+| 6:24-7:03 | Each loop stage carries a first-person quote that names the user's feeling, not the feature. |
+| 4:02 | Client praise shown as a real group-text screenshot with the exact words (honest social proof only when real). |
+| 3:20 / 3:18 | Red count badge and "4h" timestamp rows are the trigger devices; the time stamp makes the missed item feel recent. |
+| 2:44-2:54 | The presenter's own app uses the same loop: a daily progress ring "3,179 / 5,000", a streak flame "5", and "4 apps unlock at 5k steps" (goal gradient plus streak). |
+| 5:50 | The loop diagram is drawn on with a chalk-like stroke animation; labels run clockwise Trigger, Action, Reward, Investment. |
+| 7:25 | The closing line says these principles are fine for retention when they do not hurt users. |

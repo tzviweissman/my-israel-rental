@@ -207,9 +207,11 @@ for (const url of urls) {
       const empty = await page.evaluate(() => ({ sent: window.__sent, errors: [...document.querySelectorAll('.err, [role=alert]')].filter((e) => e.textContent.trim()).length }));
       if (empty.sent) fail(url, 'FLOW', 'the form sends with nothing filled in');
       else if (!empty.errors) fail(url, 'FLOW', 'sending an empty form shows no message saying what is missing');
-      await page.evaluate(() => {
+      // an order in steps (page rules 3k.1): fill what each step shows, press its button, up to 4 steps
+      for (let stepN = 0; stepN < 4; stepN++) {
+      await page.evaluate((first) => {
         const clickFirst = (sel) => { const e = document.querySelector(sel); if (e) e.click(); };
-        clickFirst('#st-add'); clickFirst('#svcs input');
+        if (first) { clickFirst('#st-add'); clickFirst('#svcs input'); }
         const groups = {}; for (const r of document.querySelectorAll('form input[type=radio]')) if (!groups[r.name] && r.offsetParent !== null && r.name !== 'pack') { groups[r.name] = 1; r.click(); }
         const d = new Date(Date.now() + 5 * 864e5); while (d.getDay() === 6 || d.getDay() === 5) d.setDate(d.getDate() + 1);
         for (const i of document.querySelectorAll('form input, form textarea')) {
@@ -217,12 +219,14 @@ for (const url of urls) {
           const v = i.type === 'tel' ? '0501234567' : i.type === 'date' ? d.toISOString().slice(0, 10) : i.type === 'email' ? 'test@example.com' : i.tagName === 'TEXTAREA' ? '' : 'Test 1';
           i.value = v; i.dispatchEvent(new Event('input', { bubbles: true })); i.dispatchEvent(new Event('change', { bubbles: true }));
         }
-      });
+      }, stepN === 0);
       await page.waitForTimeout(400);
-      await page.evaluate(() => { for (const r of document.querySelectorAll('#times input')) { r.click(); break; } });
+      await page.evaluate(() => { const t = [...document.querySelectorAll('#times input')].find((r) => r.offsetParent !== null); if (t && !document.querySelector('#times input:checked')) t.click(); });
       await page.waitForTimeout(200);
       await page.evaluate(() => { const s = document.querySelector('form button[type=submit]') || document.querySelector('#send'); s && s.click(); });
-      await page.waitForTimeout(400);
+      await page.waitForTimeout(500);
+      if (await page.evaluate(() => !!window.__sent)) break;
+      }
       const res = await page.evaluate(() => ({ sent: decodeURIComponent((window.__sent.split('text=')[1] || '')), total: (document.querySelector('#total') || {}).textContent || '', errs: [...document.querySelectorAll('.err')].map((e) => e.textContent.trim()).filter(Boolean) }));
       if (!res.sent) fail(url, 'FLOW', `filled in, the form sends nothing${res.errs.length ? ` (it says: ${res.errs.join('; ')})` : ''}`);
       else if (res.total && !res.sent.includes(res.total.replace(/\s/g, '').replace(/^₪/, '₪'))) fail(url, 'FLOW', `the message does not carry the total the page shows (${res.total})`);

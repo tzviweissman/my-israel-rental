@@ -1,4 +1,5 @@
 (function () {
+  var BIN = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   // ── the order: written out on WhatsApp to +1 929 993 6768 (her menu card).
   // Each package says what it allows, and its choices sit under it (page
   // rules 3l): the Duo and the Cloud Bundle mix any flavours to exactly 2 or
@@ -98,9 +99,12 @@
   var send = document.getElementById('send');
   function update() {
     [].forEach.call(plans.querySelectorAll('input'), function (i) { i.checked = i.value === pack; });
-    var html = ''; for (var k in q) if (q[k]) html += '<li class="bl"><span>' + JARS[k][0] + '<span class="step sm"><button type="button" data-k="' + k + '" data-d="-1" aria-label="One fewer ' + JARS[k][0] + '">−</button><output>' + q[k] + '</output><button type="button" data-k="' + k + '" data-d="1" aria-label="One more ' + JARS[k][0] + '">+</button></span></span><span>₪' + q[k] * JARS[k][1] + '</span></li>';
-    if (PACKS[pack]) html += '<li><span>' + PACKS[pack].name + (packDesc() ? ': ' + packDesc() : '') + '</span><span>₪' + PACKS[pack].price + '</span></li>';
-    document.getElementById('sum-list').innerHTML = html || '<li><span>Nothing yet</span></li>';
+    var html = ''; for (var k in q) if (q[k]) html += '<li class="bl"><span>' + JARS[k][0] + '<span class="step sm"><button type="button" data-k="' + k + '" data-d="-1" aria-label="One fewer ' + JARS[k][0] + '">−</button><output>' + q[k] + '</output><button type="button" data-k="' + k + '" data-d="1" aria-label="One more ' + JARS[k][0] + '">+</button></span></span><span class="bl-r">₪' + q[k] * JARS[k][1] + '<button type="button" class="rm" data-rm="' + k + '" aria-label="Remove ' + JARS[k][0] + ' from the basket">' + BIN + '</button></span></li>';
+    if (PACKS[pack]) html += '<li class="bl"><span>' + PACKS[pack].name + (packDesc() ? ': ' + packDesc() : '') + '</span><span class="bl-r">₪' + PACKS[pack].price + '<button type="button" class="rm" data-rm="pack" aria-label="Remove the ' + PACKS[pack].name + ' from the basket">' + BIN + '</button></span></li>';
+    document.getElementById('sum-list').innerHTML = html || '<li><span>Nothing yet. Choose a jar or a package above.</span></li>';
+    var mini = ''; for (var km in q) if (q[km]) mini += '<li><span>' + q[km] + ' × ' + JARS[km][0] + '</span><span>₪' + q[km] * JARS[km][1] + '</span></li>';
+    if (PACKS[pack]) mini += '<li><span>' + PACKS[pack].name + '</span><span>₪' + PACKS[pack].price + '</span></li>';
+    document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
     // single jars a package would make cheaper: say so, with one tap to switch (the deal, shown honestly)
     var deal = document.getElementById('deal'), jn = 0, cost = 0, kinds = []; for (var kq in q) if (q[kq]) { jn += q[kq]; cost += q[kq] * JARS[kq][1]; kinds.push(kq); }
     var sw = '';
@@ -116,7 +120,7 @@
     // the deal shown, not described (old price struck through)
     if (sw) { deal.dataset.pack = sw; deal.querySelector('span').innerHTML = extra ? 'Make it 6 jars: Cloud Bundle <s>₪' + cost + '</s> ₪220' : 'As the ' + PACKS[sw].name + ': <s>₪' + cost + '</s> ₪' + PACKS[sw].price; }
     document.getElementById('total').textContent = '₪' + total();
-    send.firstElementChild.textContent = total() ? 'Send order on WhatsApp, ₪' + total() : 'Send order on WhatsApp';
+    drawStep();
     var b = { jars: {} }; for (var k2 in q) if (q[k2]) b.jars[k2] = q[k2]; if (pack) b.pack = pack; window.twcBasket.set(b);
     var bar = document.querySelector('#bar .p'), jarsN = 0; for (var k3 in q) jarsN += q[k3];
     var barBtn = document.querySelector('#bar .btn'); if (barBtn) { barBtn.textContent = 'Basket'; barBtn.setAttribute('href', '#order'); }
@@ -124,14 +128,16 @@
   }
   function v(id) { return document.getElementById(id).value.trim(); }
   function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }
-  function check(show) {
-    var ok = true, e, p = PACKS[pack];
+  function check(show, upto) {
+    var ok = true, e, p = PACKS[pack]; upto = upto || 3;
     e = total() ? '' : 'Add a jar or choose a package';
     if (!e && p && p.mode === 'mix' && mixSum() !== p.jars) e = 'Choose ' + (p.jars - mixSum()) + ' more jar' + (p.jars - mixSum() > 1 ? 's' : '') + ' for the ' + p.name;
     if (!e && p && p.mode === 'one' && !oneFlav) e = 'Pick the flavour for One Flavour';
     if (e) ok = false; if (show || !e) mark('items', e);
+    if (upto < 2) return ok;
     e = v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
     e = v('when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e);
+    if (upto < 3) return ok;
     e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
     e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);
     return ok;
@@ -140,7 +146,9 @@
   document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
-    if (!check(true)) { var bad = document.querySelector('.bad .fld'); if (bad) bad.focus(); else document.getElementById('c-items').scrollIntoView({ block: 'center' }); return; }
+    // steps 1 and 2: check this step, then on to the next
+    if (step < 3) { if (!check(true, step)) { var bad1 = document.querySelector('.ostep:not([hidden]) .bad .fld'); if (bad1) bad1.focus(); return; } go(step + 1, true); return; }
+    if (!check(true)) { for (var s1 = 1; s1 <= 3; s1++) if (!check(false, s1)) { check(true, s1); go(s1, true); break; } var bad = document.querySelector('.ostep:not([hidden]) .bad .fld'); if (bad) bad.focus(); return; }
     var out = ['Hi The Whipped Cup, I would like to order:'];
     for (var k in q) if (q[k]) out.push('• ' + q[k] + ' × ' + JARS[k][0] + ' (₪' + q[k] * JARS[k][1] + ')');
     if (PACKS[pack]) { var pk = PACKS[pack], every = /Weekly/.test(pk.meta) ? ', weekly' : /Monthly/.test(pk.meta) ? ', monthly' : ''; out.push('• ' + pk.name + ', ' + pk.jars + ' jars' + every + ' (₪' + pk.price + ')'); out.push('   ' + packDesc()); }
@@ -159,8 +167,32 @@
     if (oneFlav) { var r = document.querySelector('input[name=oneflav][value="' + oneFlav + '"]'); if (r) r.checked = true; }
     drawMixState(); update(); check(false); label();
   });
+  // every line can be taken out of the basket in one tap (Tzvi, 20 Oct 2026: "there needs to be a way to remove items")
+  document.getElementById('sum-list').addEventListener('click', function (e) { var r = e.target.closest('button[data-rm]'); if (!r) return;
+    if (r.dataset.rm === 'pack') { pack = ''; mixQ = { classic: 0, caramel: 0, vanilla: 0 }; oneFlav = ''; drawMix(); } else q[r.dataset.rm] = 0;
+    update(); check(false); label(); });
   document.getElementById('sum-list').addEventListener('click', function (e) { var b = e.target.closest('button[data-k]'); if (!b) return; q[b.dataset.k] = Math.max(0, Math.min(20, q[b.dataset.k] + (+b.dataset.d))); update(); check(false); label(); });
+  // ── the steps: one screen each, the browser's back button goes back a step (#order, #order-2, #order-3)
+  var step = 1, STEP_BTN = ['', 'Continue to delivery', 'Continue to your details', ''], STEP_NOTE = ['', 'Next: where and when we deliver.', 'Next: your name and phone.', 'Opens WhatsApp with your order written out, to send to The Whipped Cup.'];
+  function drawStep() {
+    [].forEach.call(document.querySelectorAll('.ostep'), function (el) { el.hidden = +el.dataset.s !== step; });
+    [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
+    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? 'Send order on WhatsApp, ₪' + total() : 'Send order on WhatsApp');
+    document.getElementById('send-note').textContent = STEP_NOTE[step];
+    document.getElementById('back').hidden = step === 1;
+    var where = document.getElementById('sum-where'); where.hidden = step < 3 || !v('addr');
+    if (!where.hidden) where.textContent = 'To ' + v('addr') + (v('when') ? ', from ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : '');
+  }
+  function go(s, push) {
+    if (s > 1 && !check(false, s - 1)) s = 1; if (s > 2 && !check(false, 2)) s = 2;
+    step = s; drawStep();
+    if (push) { history.pushState({ step: s }, '', s === 1 ? '#order' : '#order-' + s); document.getElementById('order').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); var f = document.querySelector('.ostep:not([hidden]) .fld'); if (f && s > 1) setTimeout(function () { f.focus({ preventScroll: true }); }, 350); }
+  }
+  addEventListener('popstate', function () { var m = /#order-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
+  document.getElementById('back').addEventListener('click', function () { history.back(); });
+  document.getElementById('steps').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
   show(JARS[qs.get('jar')] ? qs.get('jar') : 'classic');
   drawMix(); update();
+  var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
   if (PACKS[qs.get('pack')]) setTimeout(function () { var l = plans.querySelector('input[value="' + pack + '"]'); if (l) l.closest('label').scrollIntoView({ block: 'center' }); }, 60);
 })();

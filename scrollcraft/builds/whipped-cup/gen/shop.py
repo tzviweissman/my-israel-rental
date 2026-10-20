@@ -45,17 +45,30 @@ SHOP = f'''  <form id="form" novalidate>
 
   <section class="sec" id="order" aria-labelledby="h-basket">
     <div class="wrap">
-      <h2 id="h-basket">Your <span class="pink">basket</span></h2>
+      <!-- the order in steps (Tzvi, 20 Oct 2026: "make steps the rule for order pages", like Blazin
+           Boards): one question per screen, the order and its total beside every step -->
+      <ol class="osteps" id="steps" aria-label="Order steps">
+        <li class="is-now" aria-current="step"><button type="button" data-go="1">Step 1: Your basket</button></li>
+        <li><button type="button" data-go="2">Step 2: Delivery</button></li>
+        <li><button type="button" data-go="3">Step 3: Your details</button></li>
+      </ol>
       <div class="form">
         <div>
-          <div class="card">
-            <h3>Delivery</h3>
-            <p class="deliv">Delivered fresh to your door. Your order opens on WhatsApp, written out, for The Whipped Cup to confirm.</p>
+          <div class="card ostep" data-s="1">
+            <h2 id="h-basket">Your <span class="pink">basket</span></h2>
+            <ul class="blist" id="sum-list"><li><span>Nothing yet</span></li></ul>
+            <p class="deal" id="deal" hidden><span></span> <button type="button" class="btn-line">Switch</button></p>
+            <p class="err" id="e-items"></p>
+            <a class="more" href="#jars">Add more jars</a>
+          </div>
+          <div class="card ostep" data-s="2" hidden>
+            <h2>Delivery</h2>
+            <p class="deliv">Delivered fresh to your door.</p>
             <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p></div>
             <div id="w-when"><label class="f" for="when">First delivery day</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p></div>
           </div>
-          <div class="card">
-            <h3>Your details</h3>
+          <div class="card ostep" data-s="3" hidden>
+            <h2>Your details</h2>
             <div id="w-me"><label class="f" for="me">Your name</label><input class="fld" id="me" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
             <div id="w-ph"><label class="f" for="ph">Your phone</label><input class="fld" id="ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
             <label class="f" for="note">Anything else</label>
@@ -63,13 +76,13 @@ SHOP = f'''  <form id="form" novalidate>
           </div>
         </div>
         <aside class="card sum" id="c-items" aria-live="polite">
-          <h3>So far</h3>
-          <ul id="sum-list"><li><span>Nothing yet</span></li></ul>
-          <p class="deal" id="deal" hidden><span></span> <button type="button" class="btn-line">Switch</button></p>
-          <p class="err" id="e-items"></p>
+          <h3>Your order</h3>
+          <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
+          <p class="sum-where" id="sum-where" hidden></p>
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
-          <button class="btn" id="send" type="submit"><span>Send order on WhatsApp</span></button>
-          <p class="note">Opens WhatsApp with your order written out, to send to The Whipped Cup.</p>
+          <button class="btn" id="send" type="submit"><span>Continue to delivery</span></button>
+          <button class="back" id="back" type="button" hidden>Back</button>
+          <p class="note" id="send-note">Next: where and when we deliver.</p>
         </aside>
       </div>
     </div>

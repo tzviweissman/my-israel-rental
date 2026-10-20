@@ -215,27 +215,29 @@ BOOK = f'''  <form id="form" novalidate>
     <div class="wrap st-grid">
       <div class="st-ph">{stage_imgs}<span class="st-cap" id="st-cap">Milky white, my work</span></div>
       <div class="st-info">
-        <p class="caps">Book · Romema, Jerusalem</p>
+        <ol class="osteps" aria-hidden="true"><li class="is-now"></li><li></li><li></li></ol>
+        <p class="caps">Step 1 of 3 · Romema, Jerusalem</p>
         <h1 id="h-book"><span id="st-name">Book your nails</span></h1>
         <p class="st-facts">More than four years of experience · Sunday to Friday</p>
-        <p class="st-price" id="st-price" style="visibility:hidden">&nbsp;</p>
-        <p class="st-save" id="st-save" style="visibility:hidden">&nbsp;</p>
+        <div class="st-pr"><p class="st-price" id="st-price" style="visibility:hidden">&nbsp;</p><p class="st-save" id="st-save" style="visibility:hidden">&nbsp;</p></div>
         <div class="card-in" id="w-svc"><p class="f">What would you like?</p><div class="opts" id="svcs">{svc_opts}</div><p class="err" id="e-svc"></p></div>
-        <div class="card-in"><p class="f">Colour <span class="hint">(optional)</span></p><div class="chips small" id="bshades">{shade_opts}</div><p class="shade-name" id="bshade-name"></p></div>
+        <div class="st-end"><div class="card-in"><p class="f">Colour <span class="hint">(optional)</span><span class="shade-name" id="bshade-name"></span></p><div class="chips small" id="bshades">{shade_opts}</div></div>
+        <button class="btn st-next" type="submit"><span>Continue to day and time</span></button></div>
       </div>
     </div>
   </section>
-  <section class="sec" id="book" aria-label="Day, time and your details" style="padding-top:clamp(1.5rem,4vw,2.5rem)">
+  <section class="sec" id="book" aria-label="Day, time and your details" style="padding-top:calc(70px + clamp(1.5rem,4vw,2.5rem))" hidden>
     <div class="wrap">
+      <ol class="osteps" aria-label="Booking steps"><li class="is-now" aria-current="step"><button type="button" data-go="1">Step 1: Your nails</button></li><li><button type="button" data-go="2">Step 2: Day and time</button></li><li><button type="button" data-go="3">Step 3: Your details</button></li></ol>
       <div class="form">
         <div>
-          <div class="card">
-            <h3>When</h3>
+          <div class="card ostep" data-s="2">
+            <h2>Day and time</h2>
             <div id="w-day"><label class="f" for="day">Day</label><input class="fld" id="day" type="date"><p class="err" id="e-day"></p></div>
             <div id="w-time"><p class="f" id="time-l">Time</p><div class="times" id="times" role="radiogroup" aria-labelledby="time-l"><p class="hint">Choose a day first.</p></div><p class="err" id="e-time"></p></div>
           </div>
-          <div class="card">
-            <h3>Your details</h3>
+          <div class="card ostep" data-s="3" hidden>
+            <h2>Your details</h2>
             <div id="w-me"><label class="f" for="me">Your name</label><input class="fld" id="me" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
             <div id="w-ph"><label class="f" for="ph">Your phone</label><input class="fld" id="ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
             <label class="f" for="note">Anything else</label><textarea class="fld" id="note" maxlength="400"></textarea>
@@ -245,8 +247,9 @@ BOOK = f'''  <form id="form" novalidate>
           <h3>Your booking</h3>
           <ul id="sum"><li><span>Nothing chosen yet</span></li></ul>
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
-          <button class="btn" id="send" type="submit"><span>Send on WhatsApp</span></button>
-          <p class="note">Opens WhatsApp with your booking written out. The time is yours once I confirm it.</p>
+          <button class="btn" id="send" type="submit"><span>Continue to your details</span></button>
+          <button class="back" id="back" type="button">Back</button>
+          <p class="note" id="send-note">Next: your name and phone.</p>
         </aside>
       </div>
     </div>

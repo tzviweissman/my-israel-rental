@@ -24,11 +24,11 @@
   // show the deal): gel with removal is ₪110, removal and new gel booked apart are ₪40 + ₪90
   function drawSvc() {
     var s = SERVICES[svc];
-    $('st-name').textContent = s ? s.n : 'Book your nails';
+    // the heading stays put (one line, nothing below it moves); the chosen service is named beside its price
     // the way shops show a saving (GGg61sdEjeI): the price apart struck through beside hers, and "Save ₪20"
     var sv = s && svc === 'gel-removal' ? (SERVICES.removal.p + SERVICES.gel.p) - s.p : 0;
-    $('st-price').style.visibility = s ? 'visible' : 'hidden'; if (s) $('st-price').innerHTML = (sv ? '<s class="was">₪' + (s.p + sv) + '</s>' : '') + '<span class="sym">₪</span>' + s.p + ' <small>about ' + s.m + ' minutes</small>';
-    $('st-save').style.visibility = sv ? 'visible' : 'hidden'; if (sv) $('st-save').innerHTML = '<b>Save ₪' + sv + '</b> against booking removal and new gel apart';
+    $('st-price').style.visibility = s ? 'visible' : 'hidden'; if (s) $('st-price').innerHTML = (sv ? '<s class="was">₪' + (s.p + sv) + '</s>' : '') + '<span class="sym">₪</span>' + s.p + ' <small>' + s.n + ', about ' + s.m + ' minutes</small>';
+    $('st-save').style.visibility = sv ? 'visible' : 'hidden'; if (sv) $('st-save').innerHTML = 'Save ₪' + sv;
   }
   chips.forEach(function (c) { c.addEventListener('click', function () { shade = shade === c.dataset.k ? '' : c.dataset.k; drawShade(); update(); }); });
   var today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
@@ -62,11 +62,13 @@
   }
   function v(id) { return $(id).value.trim(); }
   function mark(id, msg) { var w = $('w-' + id); if (w) w.classList.toggle('bad', !!msg); $('e-' + id).textContent = msg || ''; }
-  function check(show) {
-    var ok = true, e;
+  function check(show, upto) {
+    var ok = true, e; upto = upto || 3;
     e = svc ? '' : 'Choose what you would like'; if (e) ok = false; if (show || !e) mark('svc', e);
+    if (upto < 2) return ok;
     e = v('day') ? '' : 'Choose a day'; if (e) ok = false; if (show || !e) mark('day', e);
     e = time ? '' : 'Choose a time'; if (e) ok = false; if (show || !e) mark('time', e);
+    if (upto < 3) return ok;
     e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
     e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number I can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);
     return ok;
@@ -74,7 +76,9 @@
   ['me', 'ph'].forEach(function (id) { $(id).addEventListener('input', function () { check(false); }); });
   $('form').addEventListener('submit', function (e) {
     e.preventDefault();
-    if (!check(true)) { var bad = document.querySelector('.bad .fld, .bad input'); if (bad) bad.focus(); return; }
+    // steps 1 and 2: check this step, then on to the next (page rules 3k: the order in steps)
+    if (step < 3) { if (!check(true, step)) { var bad1 = document.querySelector('.bad .fld, .bad input'); if (bad1) bad1.focus(); return; } go(step + 1, true); return; }
+    if (!check(true)) { for (var s1 = 1; s1 <= 3; s1++) if (!check(false, s1)) { check(true, s1); go(s1, true); break; } var bad = document.querySelector('.bad .fld, .bad input'); if (bad) bad.focus(); return; }
     var s = SERVICES[svc], lines = ['Hi Elisheva, I would like to book:', '• ' + s.n + ' (₪' + s.p + ', about ' + s.m + ' minutes)'];
     if (shade) lines.push('Shade: ' + SHADES[shade]);
     lines.push('When: ' + nice(v('day')) + ' at ' + time);
@@ -83,5 +87,24 @@
     var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(lines.join('\n'));
     var tab = window.open(url, '_blank'); if (!tab) location.href = url;
   });
+  // ── the steps: 1 her work and the service, 2 day and time, 3 your details; back goes back a step
+  var step = 1, pick = $('pick'), book = $('book');
+  function drawStep() {
+    pick.hidden = step !== 1; book.hidden = step === 1;
+    [].forEach.call(document.querySelectorAll('.ostep'), function (el) { el.hidden = +el.dataset.s !== step; });
+    [].forEach.call(document.querySelectorAll('.osteps'), function (ol) { [].forEach.call(ol.children, function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); }); });
+    var s = SERVICES[svc];
+    $('send').firstElementChild.textContent = step === 2 ? 'Continue to your details' : 'Send booking on WhatsApp' + (s ? ', ₪' + s.p : '');
+    $('send-note').textContent = step === 2 ? 'Next: your name and phone.' : 'Opens WhatsApp with your booking written out. The time is yours once I confirm it.';
+  }
+  function go(n, push) {
+    if (n > 1 && !check(false, 1)) n = 1; if (n > 2 && !check(false, 2)) n = 2;
+    step = n; drawStep();
+    if (push) { history.pushState({ step: n }, '', n === 1 ? '#pick' : '#book-' + n); scrollTo({ top: 0, behavior: 'auto' }); var f = document.querySelector('.ostep:not([hidden]) .fld'); if (f && n > 1) setTimeout(function () { f.focus({ preventScroll: true }); }, 200); }
+  }
+  addEventListener('popstate', function () { var m = /#book-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
+  $('back').addEventListener('click', function () { history.back(); });
+  [].forEach.call(document.querySelectorAll('.osteps'), function (ol) { ol.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); }); });
   drawShade(); drawSvc(); drawTimes(); update();
+  var m0 = /#book-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
 })();

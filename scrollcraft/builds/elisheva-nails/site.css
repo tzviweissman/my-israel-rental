@@ -284,3 +284,50 @@ body:not(.no-js) .rev[data-dir="u"].in::after { animation-name: sweep-u; }
 @keyframes sweep-r { 0% { transform: scaleX(0); transform-origin: right; } 50% { transform: scaleX(1); transform-origin: right; } 50.1% { transform: scaleX(1); transform-origin: left; } 100% { transform: scaleX(0); transform-origin: left; } }
 @keyframes sweep-d { 0% { transform: scaleY(0); transform-origin: top; } 50% { transform: scaleY(1); transform-origin: top; } 50.1% { transform: scaleY(1); transform-origin: bottom; } 100% { transform: scaleY(0); transform-origin: bottom; } }
 @keyframes sweep-u { 0% { transform: scaleY(0); transform-origin: bottom; } 50% { transform: scaleY(1); transform-origin: bottom; } 50.1% { transform: scaleY(1); transform-origin: top; } 100% { transform: scaleY(0); transform-origin: top; } }
+
+/* ---------- the booking in steps (page rules 3k: the order in steps) ---------- */
+.osteps { display: flex; gap: .5rem; margin: 0 0 .9rem; padding: 0; list-style: none; }
+.osteps li { flex: 1; display: grid; gap: .35rem; }
+.osteps li::before { content: ""; height: 3px; border-radius: 3px; background: var(--line); transition: background 300ms var(--out); }
+.osteps li.is-done::before, .osteps li.is-now::before { background: var(--rose-dk); }
+.osteps button { padding: 0; border: 0; background: none; text-align: left; font: 600 .78rem/1.2 var(--font-body); color: var(--soft); cursor: pointer; min-height: 24px; }
+.osteps li.is-now button { color: var(--ink); }
+.osteps li:not(.is-done):not(.is-now) button { cursor: default; }
+@media (hover: hover) { .osteps li.is-done button:hover { color: var(--rose-dk); text-decoration: underline; text-underline-offset: 3px; } }
+.stage .osteps li:not(.is-now) button, #book .osteps li:not(.is-now):not(.is-done) button { visibility: hidden; }
+#book .osteps { margin-bottom: 1.4rem; } #book .osteps button { font-size: .85rem; min-height: 40px; }
+.stage[data-tone="dark"] .osteps li.is-now button { color: #FFF4F2; } .stage[data-tone="dark"] .osteps li.is-now::before { background: #FFF4F2; }
+.st-next { margin-top: 1rem; width: 100%; }
+.ostep h2 { margin: 0 0 .9rem; font-size: clamp(1.7rem, 3vw, 2.3rem); }
+.ostep:not([hidden]) { animation: ostep-in 320ms var(--out); }
+@keyframes ostep-in { from { opacity: 0; transform: translateY(8px); } }
+@media (prefers-reduced-motion: reduce) { .ostep:not([hidden]) { animation: none; } }
+.sum .back { display: block; width: 100%; margin-top: .5rem; min-height: 44px; border: 0; background: none; font: 600 .95rem/1 var(--font-body); color: var(--soft); cursor: pointer; border-radius: 999px; transition: background 160ms, color 160ms; }
+@media (hover: hover) { .sum .back:hover { background: var(--blush); color: var(--rose-dk); } }
+.sum .back:active { transform: scale(.97); }
+@media (max-width: 860px) { #book .osteps li:not(.is-now) button { display: none; } }
+.stage .osteps { margin-bottom: .5rem; } .stage .osteps .caps { margin: 0; }
+/* the price and its saving on one row; the saving a small pill, the way shops show it */
+.st-pr { display: flex; align-items: center; gap: .7rem; flex-wrap: wrap; min-height: 1.1em; }
+.stage .st-pr .st-save { height: auto; min-height: 0; margin: .6rem 0 0; padding: .25rem .65rem; border-radius: 999px; background: #E3F3EA; color: #1F5C3A; font: 700 .85rem/1.2 var(--font-body); }
+.stage[data-tone="dark"] .st-pr .st-save { background: rgb(191 240 207 / .18); color: #BFF0CF; }
+.stage .st-info h1 { min-height: 0; white-space: nowrap; }
+.stage .st-price small { display: inline-block; max-width: 22ch; vertical-align: middle; line-height: 1.25; }
+@media (min-width: 861px) and (max-height: 820px) {
+  .st-info h1 { font-size: min(clamp(2.2rem, 4vw, 3.4rem), 7.5svh); }
+  .stage .opt .box { padding: .45rem .75rem; } .stage .opt .box b { font-size: .98rem; }
+  .stage .card-in { margin-top: .5rem; } .st-next { margin-top: .7rem; }
+}
+.card-in .f .shade-name { display: inline; min-height: 0; margin: 0 0 0 .6rem; font-weight: 400; }
+.card-in .f .shade-name:not(:empty)::before { content: "· "; }
+@media (min-width: 861px) and (max-height: 820px) {
+  .stage { padding-top: calc(70px + 1rem); padding-bottom: 1rem; }
+  .stage .opt .box small { font-size: .8rem; } .stage .opts { gap: .4rem; }
+  .stage .chips.small > * { transform: scale(.9); }
+}
+@media (min-width: 861px) and (max-height: 720px) {
+  .st-end { display: flex; align-items: flex-end; gap: 1rem; }
+  .st-end .card-in { flex: none; } .st-end .st-next { flex: 1; margin-top: 0; }
+}
+.stage[data-tone="dark"] .st-next { background: #FFF4F2; color: var(--rose-dk); }
+.card-in .f .shade-name { margin-left: .3rem; }

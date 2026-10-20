@@ -978,6 +978,20 @@ small website. A single page stays fine for a business with little to say
    and details at the end of the same page; the phone bar shows the basket.
    Old Menu and Order addresses forward to the Shop. The Whipped Cup's
    shop.html and Nails by Elisheva's book.html are the worked examples.
+   **The order itself is in steps** (Tzvi, 20 Oct 2026: "make steps the rule
+   for order pages", from Blazin Boards' order): choosing stays on the Shop
+   (or the first screen of Book); the order after it is one question per
+   screen: Step 1 Your basket (or Your nails, Your board), Step 2 When and
+   where (delivery or pickup, the day, the time), Step 3 Your details, then
+   the message. A bar of three lines above says "Step N: name"; the order and
+   its total stay beside every step (under it on a phone); the main button
+   names the next step ("Continue to delivery") and on the last step what
+   happens with the total ("Send order on WhatsApp, ₪163"); a Back button;
+   the browser's back button goes back one step (#order-2); each step checks
+   only its own fields before moving on. **Every line in the basket has a
+   remove button** (a bin, 40 px, "Remove X from the basket"), packages
+   included, beside its stepper (Tzvi, 20 Oct 2026). scripts/check-site.mjs
+   FLOW walks the steps; The Whipped Cup's shop.html is the worked example.
    Each page is `<page>.html` in the build folder; publish-page.mjs serves it
    at /business/<slug>/<page> and on the business's own host at /<page>.
 2. **One menu bar on every page**, identical markup: their name (to Home), the
