@@ -7,8 +7,10 @@
  *   stars      only with at least one review. Never "0 reviews", never
  *              placeholder stars. The average is the honest one.
  *   verified   the business was verified by us.
- *   years      derived from the founding year; or "New on MyIsraelRental"
- *              for a business that joined this year; else nothing.
+ *   years      derived from the founding year; else nothing. Not "New on
+ *              MyIsraelRental": beside the order button it read as
+ *              "untested", the opposite of what this line is for (Tzvi,
+ *              20 Oct 2026). With nothing else true, there is no line.
  *   kosher     a certifying body on a food business.
  * With nothing true, it renders nothing at all.
  *
@@ -22,7 +24,7 @@ import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { BadgeCheck } from 'lucide-react';
 import { StarRating } from './StarRating';
-import { yearsInBusiness, isNewHere, kosherBody } from '../../utils/businessProof';
+import { yearsInBusiness, kosherBody } from '../../utils/businessProof';
 
 export default function ProofLine({
   ratingAvg, ratingCount, verified, foundedYear, memberSince, kosher, categories,
@@ -31,7 +33,6 @@ export default function ProofLine({
   const { t } = useTranslation();
   const count = Number(ratingCount) || 0;
   const years = yearsInBusiness(foundedYear);
-  const newHere = !years && isNewHere(memberSince);
   const body = kosherBody(kosher, categories);
 
   const items = [];
@@ -56,9 +57,6 @@ export default function ProofLine({
   }
   if (!compact && years) {
     items.push(<span key="years" data-testid={`${testid}-years`}>{t('proof.years', { count: years, defaultValue: '{{count}} years in business' })}</span>);
-  }
-  if (!compact && newHere) {
-    items.push(<span key="new" data-testid={`${testid}-new`}>{t('businessPage.newHere', 'New on MyIsraelRental')}</span>);
   }
   if (!compact && body) {
     items.push(<span key="kosher" dir="auto" data-testid={`${testid}-kosher`}>{t('proof.kosher', { defaultValue: 'Kosher: {{body}}', body })}</span>);

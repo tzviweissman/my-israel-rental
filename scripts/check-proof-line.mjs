@@ -40,12 +40,13 @@ const b = await chromium.launch();
 const page = await b.newPage({ viewport: { width: 1280, height: 900 } });
 const texts = async (sel) => page.$$eval(sel, (els) => els.map((e) => e.innerText));
 
-// Business page: joined today -> "New on MyIsraelRental" beside the button,
-// nothing else (no reviews, no founding year, not verified, not food).
+// Business page: joined today, nothing true yet (no reviews, no founding
+// year, not verified, not food) -> no proof line. It used to say "New on
+// MyIsraelRental", which beside the button read as "untested" (20 Oct 2026).
 await page.goto(`${WEB}/business/${slug}`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(1200);
 const bizLine = (await texts('[data-testid=business-proof-header]')).join(' ');
-expect(/New on MyIsraelRental/.test(bizLine), `business: expected "New on MyIsraelRental" beside the button, got "${bizLine}"`);
+expect(!/New on MyIsraelRental/.test(bizLine), `business: "New on MyIsraelRental" still beside the button: "${bizLine}"`);
 for (const id of ['rating', 'verified', 'years', 'kosher']) {
   expect(!(await page.$(`[data-testid=business-proof-header-${id}]`)), `business: "${id}" shown but not true`);
 }
@@ -53,7 +54,9 @@ for (const id of ['rating', 'verified', 'years', 'kosher']) {
 // Service page: same business facts, no rating yet.
 await page.goto(`${WEB}/services/gig/${gig.id}`, { waitUntil: 'networkidle' });
 await page.waitForTimeout(1200);
-expect(!!(await page.$('[data-testid=gig-proof-new]')), 'service: "New on MyIsraelRental" missing beside the button');
+// No "New on MyIsraelRental" beside the button (Tzvi, 20 Oct 2026): with
+// nothing true yet, there is no line at all.
+expect(!(await page.$('[data-testid=gig-proof-new]')) && !(await page.$('[data-testid=gig-proof]')), 'service: a proof line with nothing true in it');
 for (const id of ['rating', 'verified', 'years', 'kosher']) {
   expect(!(await page.$(`[data-testid=gig-proof-${id}]`)), `service: "${id}" shown but not true`);
 }
@@ -74,4 +77,4 @@ expect(!(await page.$('[data-testid=property-proof]')), 'property: a proof line 
 
 await b.close();
 if (failures.length) { console.error('FAIL\n  ' + failures.join('\n  ')); process.exit(1); }
-console.log('PASS  new business, service and property get the proof line with no setup; untrue credentials never show');
+console.log('PASS  the proof line shows only what is true, and nothing when nothing is');
