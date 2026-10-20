@@ -63,7 +63,7 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
 
 /* the opening: pick a shade, and her own photo of nails in it fills the frame */
 .hero { position: relative; min-height: 100svh; padding: calc(70px + clamp(1rem, 4vh, 2.5rem)) 0 clamp(2rem, 5vh, 3rem); display: grid; align-items: center;
-  background: linear-gradient(180deg, var(--blush-2), var(--paper) 85%); overflow: hidden; }
+  background: var(--paper); overflow: hidden; }
 .hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); grid-template-areas: "text frame" "pick frame"; column-gap: clamp(1.5rem, 4vw, 4rem); row-gap: 0; align-items: center; }
 .h-text { grid-area: text; align-self: end; } .h-pick { grid-area: pick; align-self: start; } .hero .frame { grid-area: frame; }
 .sym { font-family: var(--font-body); font-weight: 500; font-size: .62em; margin-right: .08em; vertical-align: .18em; }
@@ -85,8 +85,15 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
 .frame { position: relative; width: 100%; max-width: min(520px, 72svh * .8); margin-inline: auto; aspect-ratio: 4 / 5; border-radius: 260px 260px var(--r) var(--r); overflow: hidden;
   background: var(--blush); box-shadow: 0 40px 70px -40px rgb(142 74 68 / .55); }
 .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.frame img.next { clip-path: circle(0% at var(--cx, 50%) var(--cy, 100%)); transition: clip-path 900ms cubic-bezier(.65, 0, .35, 1); }
-.frame img.next.on { clip-path: circle(150% at var(--cx, 50%) var(--cy, 100%)); }
+/* the new shade spreads out from the tapped chip like polish: a soft edge, easing out, never a hard
+   line rushing across (Tzvi, 20 Oct 2026: "it's not switching smoothly"). --r is animatable through
+   @property; where it is not, the photo simply crossfades. */
+@property --r { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
+.frame img.next { --r: 0%; opacity: 0; transform: scale(1.03);
+  -webkit-mask-image: radial-gradient(circle farthest-corner at var(--cx, 50%) var(--cy, 100%), #000 calc(var(--r) - 22%), transparent var(--r));
+  mask-image: radial-gradient(circle farthest-corner at var(--cx, 50%) var(--cy, 100%), #000 calc(var(--r) - 22%), transparent var(--r));
+  transition: --r 1300ms cubic-bezier(.4, 0, .2, 1), opacity 250ms ease-out, transform 1300ms cubic-bezier(.4, 0, .2, 1); }
+.frame img.next.on { --r: 125%; opacity: 1; transform: none; }
 .frame .tag { position: absolute; z-index: 2; left: 14px; bottom: 14px; padding: .45rem .9rem; border-radius: 999px; background: rgb(255 248 246 / .92); color: var(--ink); font: 500 .9rem/1.2 var(--font-body); }
 @media (max-width: 860px) {
   .hero { min-height: 0; }
@@ -200,7 +207,10 @@ textarea.fld { min-height: 80px; resize: vertical; }
 /* wow pass (19 Oct 2026): the shade you tap colours the whole opening, and a
    giant "Elisheva" in her script sits behind the photo in that colour */
 .hero { isolation: isolate; }
-.hero .tint { position: absolute; inset: 0; z-index: -2; background: var(--tint, #F4EFEE); opacity: .22; transition: background-color 900ms cubic-bezier(.65, 0, .35, 1); }
+/* the whole opening takes the colour of the nails on show, not a faint wash over her pink (Tzvi, 20 Oct
+   2026: "the page doesn't match the nail colour"): the shade itself, softened with white, top to bottom */
+.hero .tint { position: absolute; inset: 0; z-index: -2; background-color: color-mix(in srgb, var(--tint, #F4EFEE) var(--tmix, 52%), #fff); transition: background-color 900ms cubic-bezier(.65, 0, .35, 1); }
+.hero .tint::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgb(255 255 255 / .55)); }
 .hero .ghost { position: absolute; z-index: -1; left: 50%; top: 56%; translate: 0 -50%; margin: 0; font: 400 min(15vw, 38svh)/1 var(--font-script); color: var(--tint, #F4EFEE);
   opacity: .55; white-space: nowrap; pointer-events: none; transition: color 900ms cubic-bezier(.65, 0, .35, 1); filter: saturate(1.2) brightness(.92);
   animation: ghost-in 1600ms var(--out) both; }
@@ -210,7 +220,7 @@ textarea.fld { min-height: 80px; resize: vertical; }
 @media (prefers-reduced-motion: reduce) { .hero .ghost { animation: none; } }
 
 /* ── booking as a product page (rules 3k; inspo product-pages-2026-10-20) ── */
-.stage { --st: #F4EFEE; background: color-mix(in srgb, var(--st) 32%, var(--paper)); transition: background-color 700ms cubic-bezier(.65, 0, .35, 1); padding: calc(70px + clamp(1.2rem, 4svh, 2.6rem)) 0 clamp(1.2rem, 4svh, 2.6rem); }
+.stage { --st: #F4EFEE; background: color-mix(in srgb, var(--st) var(--tmix, 50%), #fff); transition: background-color 700ms cubic-bezier(.65, 0, .35, 1); padding: calc(70px + clamp(1.2rem, 4svh, 2.6rem)) 0 clamp(1.2rem, 4svh, 2.6rem); }
 .st-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(1.5rem, 5vw, 4.5rem); align-items: center; }
 .st-ph { position: relative; height: min(calc(100svh - 70px - 2 * clamp(1.2rem, 4svh, 2.6rem)), 720px); aspect-ratio: 1000 / 1250; border-radius: 260px 260px var(--r) var(--r); overflow: hidden; background: var(--blush); box-shadow: 0 40px 70px -40px rgb(142 74 68 / .55); }
 .st-ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 600ms var(--out); }

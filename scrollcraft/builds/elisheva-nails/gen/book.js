@@ -18,7 +18,7 @@
     chips.forEach(function (c) { c.setAttribute('aria-pressed', c.dataset.k === shade ? 'true' : 'false'); }); $('bshade-name').textContent = shade ? SHADES[shade] : '';
     var k = shade || 'milky';
     [].forEach.call(stage.querySelectorAll('.st-ph img'), function (i) { i.classList.toggle('on', i.dataset.k === k); });
-    stage.style.setProperty('--st', SHADE_C[k]); $('st-cap').textContent = SHADES[k] + ', my work';
+    stage.style.setProperty('--st', SHADE_C[k]); stage.style.setProperty('--tmix', /^#[0-9a-c]/i.test(SHADE_C[k]) ? '30%' : '50%'); $('st-cap').textContent = SHADES[k] + ', my work';
   }
   // the service, its price and time beside her work; a saving where there is one (Tzvi, 20 Oct 2026:
   // show the deal): gel with removal is ₪110, removal and new gel booked apart are ₪40 + ₪90

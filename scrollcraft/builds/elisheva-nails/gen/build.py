@@ -118,27 +118,37 @@ HERO_JS = '<script>\nvar SHADES = ' + json.dumps([{'k': k, 'n': n, 'f': f, 'a': 
 // seconds until the visitor chooses. Photos are hers; only the reveal moves.
 (function () {
   var frame = document.getElementById('frame'), name = document.getElementById('shade-name'), book = document.getElementById('book-shade'), hero = document.getElementById('open');
-  document.body.style.setProperty('--tint', SHADES[0].c); document.body.style.setProperty('--sweep', /^#[ef]/i.test(SHADES[0].c) ? '' : SHADES[0].c);
-  var chips = [].slice.call(document.querySelectorAll('#chips .shade')), at = 0, busy = false, auto = true, timer = 0;
+  document.body.style.setProperty('--tint', SHADES[0].c); document.body.style.setProperty('--tmix', '52%'); document.body.style.setProperty('--sweep', /^#[ef]/i.test(SHADES[0].c) ? '' : SHADES[0].c);
+  var chips = [].slice.call(document.querySelectorAll('#chips .shade')), at = 0, auto = true, timer = 0, seq = 0, lastDone = 0;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  SHADES.forEach(function (s) { var i = new Image(); i.src = 'assets/' + s.f; });
+  // every photo loaded and decoded up front, so a switch never waits or pops in half-drawn
+  var ready = {}; SHADES.forEach(function (s) { var i = new Image(); i.src = 'assets/' + s.f; ready[s.f] = i.decode ? i.decode().catch(function () {}) : Promise.resolve(); });
   function show(i, from) {
-    if (i === at || busy) return;
-    busy = true; at = i;
+    if (i === at) return;
+    at = i; var me = ++seq;
     chips.forEach(function (c, j) { c.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
     name.textContent = SHADES[i].n;
-    document.body.style.setProperty('--tint', SHADES[i].c); document.body.style.setProperty('--sweep', /^#[ef]/i.test(SHADES[i].c) ? '' : SHADES[i].c);
+    document.body.style.setProperty('--tint', SHADES[i].c); document.body.style.setProperty('--tmix', /^#[0-9a-c]/i.test(SHADES[i].c) ? '30%' : '52%');  /* a deep shade washes lighter, so small text stays readable */ document.body.style.setProperty('--sweep', /^#[ef]/i.test(SHADES[i].c) ? '' : SHADES[i].c);
     book.href = 'book.html?shade=' + SHADES[i].k;
+    // one photo stays underneath (cur); each switch spreads a new photo over it. A tap during a switch
+    // spreads over the one still spreading, never ignored and never a flash; when a spread ends the
+    // photo underneath takes its picture (already decoded) and the spread layer goes.
+    var cur = frame.querySelector('img.cur');
     var r = frame.getBoundingClientRect(), cx = 50, cy = 100;
     if (from) { var c = from.getBoundingClientRect(); cx = ((c.left + c.width / 2 - r.left) / r.width) * 100; cy = ((c.top + c.height / 2 - r.top) / r.height) * 100; }
+    // start the spread on the photo's edge nearest the chip, so the whole reveal is seen, not its last instant
+    cx = Math.max(0, Math.min(100, cx)); cy = Math.max(0, Math.min(100, cy));
     var img = document.createElement('img');
-    img.className = 'next'; img.src = 'assets/' + SHADES[i].f; img.alt = SHADES[i].a; img.width = 1000; img.height = 1250;
+    img.className = 'next'; img.src = 'assets/' + SHADES[i].f; img.alt = ''; img.width = 1000; img.height = 1250; img.dataset.seq = me;
     img.style.setProperty('--cx', cx + '%'); img.style.setProperty('--cy', cy + '%');
     frame.insertBefore(img, frame.querySelector('.tag'));
-    var done = function () { [].forEach.call(frame.querySelectorAll('img.cur'), function (o) { o.remove(); }); img.className = 'cur'; busy = false; };
-    if (reduce) return done();
-    requestAnimationFrame(function () { requestAnimationFrame(function () { img.classList.add('on'); }); });
-    setTimeout(done, 950);
+    var done = function () {
+      // the photo underneath becomes this one, so taking the layer away changes nothing on screen
+      if (cur && me > lastDone) { lastDone = me; cur.src = img.src; cur.alt = SHADES[i].a; }
+      requestAnimationFrame(function () { img.remove(); });
+    };
+    if (reduce) { if (cur) { cur.src = img.src; cur.alt = SHADES[i].a; } img.remove(); return; }
+    ready[SHADES[i].f].then(function () { requestAnimationFrame(function () { requestAnimationFrame(function () { img.classList.add('on'); setTimeout(done, 1350); }); }); });
   }
   chips.forEach(function (c, i) { c.addEventListener('click', function () { auto = false; clearInterval(timer); show(i, c); }); });
   if (!reduce) timer = setInterval(function () { if (auto && !document.hidden) show((at + 1) % SHADES.length, chips[(at + 1) % SHADES.length]); }, 3200);
