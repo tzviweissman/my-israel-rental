@@ -18,11 +18,11 @@ document.body.classList.remove('no-js');
   frame();
   var io = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } }); }, { rootMargin: '0px 0px -8% 0px' });
   [].forEach.call(document.querySelectorAll('.rev'), function (el) { io.observe(el); });
-  // the label that rolls up on hover (effects B7): two copies of the button's own words
+  // the label that rolls up on hover (effects B7)
   [].forEach.call(document.querySelectorAll('.btn'), function (b) {
     var t = b.firstChild; if (!t || t.nodeType !== 3 || !t.nodeValue.trim()) return;
     var w = t.nodeValue.trim(), s = document.createElement('span'); s.className = 'lbl';
-    s.innerHTML = '<i></i><i aria-hidden="true"></i>'; s.firstChild.textContent = w; s.lastChild.textContent = w;
+    s.innerHTML = '<i></i>'; s.firstChild.textContent = w;  // the copy that rolls in is a text-shadow
     b.replaceChild(s, t); if (/\s$/.test(t.nodeValue)) b.insertBefore(document.createTextNode(' '), s.nextSibling);
   });
 })();

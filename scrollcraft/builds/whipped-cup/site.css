@@ -146,9 +146,9 @@ section.sec { padding-block: clamp(4.5rem, 10vw, 7.5rem); }
 .serve { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); margin: 1.4rem 0 0; padding: 4px; border-radius: 999px; background: var(--cream); border: 1px solid var(--line); }
 .serve button { position: relative; z-index: 1; min-height: 52px; border: 0; background: none; border-radius: 999px; cursor: pointer; color: var(--soft); font: 600 .95rem/1.15 var(--font-body); transition: color 200ms; }
 .serve button b { display: block; font: 700 1.35rem/1 var(--font-head); color: inherit; }
-.serve button[aria-pressed="true"] { color: var(--cream); }
+.serve button[aria-pressed="true"] { color: var(--choc); }
 /* effects.tile T7: the choice highlight glides between the options */
-.serve .glide { position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 4); border-radius: 999px; background: var(--choc); transition: transform 420ms cubic-bezier(.34, 1.4, .5, 1); }
+.serve .glide { position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 4); border-radius: 999px; background: var(--kraft); transition: transform 420ms cubic-bezier(.34, 1.4, .5, 1); }
 .need { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; margin: 1.5rem 0 .3rem; }
 .need .n { font: 700 clamp(3rem, 7vw, 4.6rem)/1 var(--font-head); color: var(--choc); }
 .need .u { font-weight: 700; color: var(--choc); font-size: 1.15rem; }
@@ -281,10 +281,19 @@ textarea.fld { min-height: 88px; resize: vertical; }
 .sky-end { position: absolute; left: 0; right: 0; bottom: 0; padding: 0 var(--gutter) clamp(2rem, 7vh, 4.5rem); max-width: 74rem; margin: 0 auto; opacity: 0; }
 .sky-end::before { content: ''; position: absolute; inset: -40vh -50vw 0; z-index: -1; background: linear-gradient(0deg, rgb(42 20 11 / .92), rgb(42 20 11 / .55) 55%, transparent); }
 .sky-end h2 { font-size: clamp(2.8rem, 6.5vw, 6rem); color: #fff; line-height: .98; }
-.sky-end h2 .soft { font-style: italic; font-weight: 500; color: #F9C9D6; }
+.sky-end h2 .soft { font-style: italic; font-weight: 500; color: #FCDDE6; }
 .sky-end .kick { background: rgb(42 20 11 / .62); color: var(--cream); }
 .sky-end .lede { margin: 1rem 0 1.6rem; max-width: 32rem; color: #F4E6E1; font-size: 1.12rem; }
 .sky-end .proof { color: #F4E6E1; } .sky-end .proof b { color: #fff; }
 .sky .scroll-hint { color: #fff; padding: .8rem .45rem; border-radius: 999px; background: rgb(42 20 11 / .55); }
 @media (max-width: 760px) { .sky-line { top: 14%; } }
 @media (prefers-reduced-motion: reduce) { .sky { height: auto; } .sky-stage { position: relative; } .sky-end { position: relative; opacity: 1; padding-top: 50svh; } }
+
+/* effects.other X20: the pointer is a small cloud ("your cup, your cloud"; Tzvi, 20 Oct 2026),
+   pink over anything you can press. Mouse only; phones never see a pointer. */
+@media (hover: hover) and (pointer: fine) {
+  html, body { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2236%22%20height%3D%2225%22%20viewBox%3D%220%200%2050%2036%22%3E%3Cpath%20d%3D%22M13%2031c-5.5%200-9.5-3.6-9.5-8.3%200-4.3%203.3-7.7%207.6-8.2C12.3%208.6%2017%204.5%2023%204.5c5.4%200%209.8%203.3%2011.3%208.1%201-.3%202-.5%203.1-.5%205.3%200%209.1%204.1%209.1%209.4%200%205.4-4%209.5-9.4%209.5z%22%20fill%3D%22%23FFFFFF%22%20stroke%3D%22%2333170C%22%20stroke-width%3D%222.4%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E") 18 13, auto; }
+  a, button, label, [role="button"], .btn, .btn-line, .menu-btn, .plan input, .chip input { cursor: url("data:image/svg+xml,%3Csvg%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%20width%3D%2242%22%20height%3D%2230%22%20viewBox%3D%220%200%2050%2036%22%3E%3Cpath%20d%3D%22M13%2031c-5.5%200-9.5-3.6-9.5-8.3%200-4.3%203.3-7.7%207.6-8.2C12.3%208.6%2017%204.5%2023%204.5c5.4%200%209.8%203.3%2011.3%208.1%201-.3%202-.5%203.1-.5%205.3%200%209.1%204.1%209.1%209.4%200%205.4-4%209.5-9.4%209.5z%22%20fill%3D%22%23F9DAE0%22%20stroke%3D%22%23A1305A%22%20stroke-width%3D%222.4%22%20stroke-linejoin%3D%22round%22/%3E%3C/svg%3E") 21 15, pointer !important; }
+  input[type="text"], input[type="tel"], input[type="email"], input[type="date"], textarea { cursor: text !important; }
+  button:disabled { cursor: not-allowed !important; }
+}
