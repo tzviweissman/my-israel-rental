@@ -371,3 +371,7 @@ textarea.fld { min-height: 88px; resize: vertical; }
 .shop-packs .plan .box { padding: .8rem 1rem; }
 @media (max-width: 480px) { .st-pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); } .st-pick button { flex-direction: column; padding: .4rem; text-align: center; } }
 .pack:not(.lead) { padding: .7rem 1.1rem; } .pack:not(.lead) .meta { margin-bottom: .1rem; } .pack:not(.lead) .allows { margin-top: .25rem; padding: .2rem .65rem; } .pack .save-l { margin-top: .3rem; font-size: .85rem; }
+/* a quick second tap never shows a blank: the new jar fades in on top while the old one stays fully
+   there underneath, and only then goes (scripts/check-motion.mjs) */
+.st-ph img { transition: opacity 500ms var(--out) 520ms, transform 700ms var(--out); z-index: 1; }
+.st-ph img.on { transition: opacity 500ms var(--out), transform 700ms var(--out); z-index: 2; }

@@ -89,11 +89,11 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
    line rushing across (Tzvi, 20 Oct 2026: "it's not switching smoothly"). --r is animatable through
    @property; where it is not, the photo simply crossfades. */
 @property --r { syntax: '<percentage>'; inherits: false; initial-value: 0%; }
-.frame img.next { --r: 0%; opacity: 0; transform: scale(1.03);
+.frame img.next { --r: 0%; opacity: 0;
   -webkit-mask-image: radial-gradient(circle farthest-corner at var(--cx, 50%) var(--cy, 100%), #000 calc(var(--r) - 22%), transparent var(--r));
   mask-image: radial-gradient(circle farthest-corner at var(--cx, 50%) var(--cy, 100%), #000 calc(var(--r) - 22%), transparent var(--r));
-  transition: --r 1300ms cubic-bezier(.4, 0, .2, 1), opacity 250ms ease-out, transform 1300ms cubic-bezier(.4, 0, .2, 1); }
-.frame img.next.on { --r: 125%; opacity: 1; transform: none; }
+  transition: --r 1300ms cubic-bezier(.4, 0, .2, 1), opacity 250ms ease-out; }
+.frame img.next.on { --r: 125%; opacity: 1; }
 .frame .tag { position: absolute; z-index: 2; left: 14px; bottom: 14px; padding: .45rem .9rem; border-radius: 999px; background: rgb(255 248 246 / .92); color: var(--ink); font: 500 .9rem/1.2 var(--font-body); }
 @media (max-width: 860px) {
   .hero { min-height: 0; }
@@ -245,3 +245,18 @@ textarea.fld { min-height: 80px; resize: vertical; }
 .st-ph .facts { position: absolute; left: 1rem; right: 1rem; top: 32%; flex-direction: column; align-items: flex-start; margin: 0; }
 .st-ph .facts li { background: rgb(255 248 246 / .92); box-shadow: 0 6px 16px -10px rgb(0 0 0 / .4); }
 .st-facts { margin: .5rem 0 0; color: var(--soft); font-size: .95rem; }
+/* a quick second tap never shows a blank: the new photo fades in on top, the old stays underneath until it has */
+.stage .st-ph img { transition: opacity 600ms var(--out) 620ms; z-index: 1; }
+.stage .st-ph img.on { transition: opacity 600ms var(--out); z-index: 2; }
+.st-ph .st-cap { z-index: 3; }
+/* a deep shade (ruby) is shown deep, and the words on it turn light (Tzvi, 20 Oct 2026) */
+.hero :is(h1, .lede, .caps, .script, .shade-name, .pick-l, p, small, b) { transition: color 900ms cubic-bezier(.65, 0, .35, 1); }
+body[data-tone="dark"] .hero :is(h1, .script, .shade-name, b) { color: #FFF4F2; }
+body[data-tone="dark"] .hero :is(.lede, .caps, p, small, span:not(.tag)) { color: #F6DADC; }
+body[data-tone="dark"] .hero .frame .tag, body[data-tone="dark"] .hero .frame .tag * { color: var(--ink); }
+body[data-tone="dark"] .hero .tint::after { background: linear-gradient(180deg, transparent 70%, rgb(255 255 255 / .18)); }
+body[data-tone="dark"] .hero .btn { background: #FFF4F2; color: var(--rose-dk); }
+body[data-tone="dark"] .hero .shade[aria-pressed="true"] { box-shadow: inset 0 -6px 10px rgb(0 0 0 / .12), inset 0 4px 8px rgb(255 255 255 / .45), 0 0 0 3px var(--rose-dk), 0 0 0 5px #FFF4F2; }
+.stage[data-tone="dark"] :is(h1, .st-price, .st-price small, .st-facts, .st-save, .caps, .f, .shade-name, .hint) { color: #FFF4F2; }
+.stage[data-tone="dark"] .st-save b { color: #BFF0CF; }
+body[data-tone="dark"] .hero .btn, body[data-tone="dark"] .hero .btn * { color: var(--rose-dk); }

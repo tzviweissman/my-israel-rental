@@ -128,7 +128,7 @@ HERO_JS = '<script>\nvar SHADES = ' + json.dumps([{'k': k, 'n': n, 'f': f, 'a': 
     at = i; var me = ++seq;
     chips.forEach(function (c, j) { c.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
     name.textContent = SHADES[i].n;
-    document.body.style.setProperty('--tint', SHADES[i].c); document.body.style.setProperty('--tmix', /^#[0-9a-c]/i.test(SHADES[i].c) ? '30%' : '52%');  /* a deep shade washes lighter, so small text stays readable */ document.body.style.setProperty('--sweep', /^#[ef]/i.test(SHADES[i].c) ? '' : SHADES[i].c);
+    document.body.style.setProperty('--tint', SHADES[i].c); var deep = /^#[0-9a-c]/i.test(SHADES[i].c); document.body.style.setProperty('--tmix', deep ? '80%' : '52%'); document.body.dataset.tone = deep ? 'dark' : '';  /* a deep shade (ruby) is shown deep, with light words on it (Tzvi: "the ruby red still isn't very dark, but don't make it too dark") */ document.body.style.setProperty('--sweep', /^#[ef]/i.test(SHADES[i].c) ? '' : SHADES[i].c);
     book.href = 'book.html?shade=' + SHADES[i].k;
     // one photo stays underneath (cur); each switch spreads a new photo over it. A tap during a switch
     // spreads over the one still spreading, never ignored and never a flash; when a spread ends the
