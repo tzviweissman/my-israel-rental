@@ -1,7 +1,7 @@
 # The Whipped Cup, concept
 
 ## Ideas
-- **Film with one big line** (docs/inspo/awwwards-food-2026-10-18/morpho-water-1-film-chapters-big-type.webp): Morpho opens on a full-screen film with one huge light serif line ("Follow the feeling"). For her: a sea of clouds at sunrise, with "Ever wanted to take a walk in the clouds?"
+- **Film with one big line** (docs/inspo/awwwards-food-2026-10-18/morpho-water-1-film-chapters-big-type.webp): Morpho opens on a full-screen film with one huge light serif line ("Follow the feeling"). For her: a sea of clouds at sunrise, with "Ever wanted to feel the clouds?"
 - **A window that holds while the world moves behind it** (docs/inspo/awwwards-food-2026-10-18/ballena-fine-dining-1-floating-video-window.webp): Ballena keeps one window still in the centre while scenes slide behind it. For her: a cloud-shaped window opens in the middle of the sky film, holding her real photo of the whipped cloud on her iced coffee, while the sky keeps drifting around it.
 - **Calm sky, very little on screen** (docs/inspo/awwwards-categories-2026-10-18/wafer-1-sky-hero.webp): Wafer's sky photo with one short line and one small button. Rejected alone: too quiet, no event.
 - **Product floating in a coloured room** (docs/inspo/awwwards-food-2026-10-18/ciao-energy-2-zero-cloud-can.webp): Ciao's can floats with words around it. Rejected: her jars are only in screenshots, too soft to cut out cleanly.

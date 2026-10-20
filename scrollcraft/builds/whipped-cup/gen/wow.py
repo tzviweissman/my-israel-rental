@@ -158,7 +158,7 @@ SKY = '''  <section class="sky" id="open" aria-labelledby="h-open">
     <div class="sky-stage">
       <video class="sky-v" id="sky-v" muted loop playsinline preload="auto" poster="assets/clouds-wide.webp" aria-hidden="true"></video>
       <div class="sky-shade" aria-hidden="true"></div>
-      <div class="sky-line"><h1 id="h-open" class="l1">Ever wanted to take a walk in the clouds?</h1></div>
+      <div class="sky-line"><h1 id="h-open" class="l1">Ever wanted to feel the clouds?</h1></div>
       <svg class="sky-win" id="sky-win" aria-hidden="true">
         <defs><clipPath id="skyclip"></clipPath></defs>
         <image id="skyimg" href="assets/iced.webp" preserveAspectRatio="none" clip-path="url(#skyclip)"/>
