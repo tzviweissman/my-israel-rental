@@ -1204,6 +1204,23 @@ const GigDetail = () => {
                   brand teal. */}
               {/* Every store takes orders on the site (Tzvi, 2026-09-08):
                   the black button is Order; messaging stays below it. */}
+              {/* Part A: the proof beside the button. Stars are THIS
+                  service's reviews, and tapping them goes to the list.
+                  ABOVE the buttons, not between them: after the main
+                  button it split them from WhatsApp, Email and Message,
+                  one set of ways to reach the business (Tzvi, 20 Oct 2026). */}
+              <ProofLine
+                ratingAvg={gig.rating_avg}
+                ratingCount={gig.rating_count}
+                verified={gig.business_proof?.verified}
+                foundedYear={gig.business_proof?.founded_year}
+                memberSince={gig.business_proof?.member_since}
+                kosher={gig.business_proof?.kosher_certification}
+                categories={[gig.category, ...(gig.business_proof?.categories || [])]}
+                onRatingClick={() => document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
+                className="justify-center mb-2"
+                testid="gig-proof"
+              />
               {isStore && (
                 <Link to={`/order/${gig.id}`} className="w-full flex items-center justify-center gap-2 py-3 mb-2 rounded-lg text-sm font-bold" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="gig-order-btn">
                   <ShoppingBag size={14} /> {t('gigDetail.orderNow', 'Order now')}
@@ -1229,20 +1246,6 @@ const GigDetail = () => {
               </button>
               {/* A job a fixed price cannot cover: ask for a quote (quotes.py). */}
               {!isStore && <QuoteRequest gig={gig} />}
-              {/* Part A: the proof beside the button. Stars are THIS
-                  service's reviews, and tapping them goes to the list. */}
-              <ProofLine
-                ratingAvg={gig.rating_avg}
-                ratingCount={gig.rating_count}
-                verified={gig.business_proof?.verified}
-                foundedYear={gig.business_proof?.founded_year}
-                memberSince={gig.business_proof?.member_since}
-                kosher={gig.business_proof?.kosher_certification}
-                categories={[gig.category, ...(gig.business_proof?.categories || [])]}
-                onRatingClick={() => document.getElementById('reviews')?.scrollIntoView({ behavior: 'smooth', block: 'start' })}
-                className="justify-center"
-                testid="gig-proof"
-              />
               {/* Present tense on purpose: "never" was a forever-promise
                   the business has not made (Tzvi, 2026-08-18 — a commission
                   may exist one day). Say what is true today, and say it in
