@@ -49,7 +49,7 @@ const _ALIASES = [
 const _wordAt = (text, word) => {
   // ASCII words must stand alone ("rbs" not inside "herbs"); Hebrew as is.
   if (!/^[a-z' -]+$/.test(word)) return text.indexOf(word);
-  const m = new RegExp(`(^|[^a-z])${word.replace(/[-']/g, (c) => `\${c}`)}($|[^a-z])`).exec(text);
+  const m = new RegExp(`(^|[^a-z])${word.replace(/[-']/g, (c) => `\\${c}`)}($|[^a-z])`).exec(text);
   return m ? m.index + m[1].length : -1;
 };
 /** The city an area text names first, or null. */
