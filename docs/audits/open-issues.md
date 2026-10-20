@@ -70,6 +70,11 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] Calendar import downloads the whole file before checking its size. First seen 19 Oct (2026-10-19-site-audit).
 - [To decide] Business calendar feed lists customer phone and delivery address behind a private link. First seen 19 Oct (2026-10-19-site-audit).
 
+- [Medium] Hebrew: 14 texts (`basket.*` in CardAction, 2 in JobsBoard) are in neither language file, so Hebrew readers see English on shop basket buttons. First seen 19 Oct (2026-10-19-site-audit).
+- [Low] Dashboard setup checklist: "category" opens a form with no category control. First seen 19 Oct (2026-10-19-site-audit).
+- [Low] Calendar import downloads the whole file before checking its size. First seen 19 Oct (2026-10-19-site-audit).
+- [To decide] Business calendar feed lists customer phone and delivery address behind a private link. First seen 19 Oct (2026-10-19-site-audit).
+
 ## Fixed
 
 - [Low] Two status colours have no design token, so they stay fixed: amber "waiting" (#B45309: payment requests, automations, deposits) and red error text (#B42318: restock box). Adding --attention and --danger tokens is a design-system choice for Tzvi. 23 Oct.
