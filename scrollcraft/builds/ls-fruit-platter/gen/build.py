@@ -36,14 +36,21 @@ SITE = kit.Site(
     name='Ls Fruit Platter', short='Ls Fruit Platter', slug='ls-fruit-platter',
     pages=[('index', 'Home'), ('shop', 'Shop'), ('contact', 'Contact')],
     contacts=[kit.Contact('whatsapp-only', '+972 58 729 8718'), kit.Contact('phone', '+972 52 714 6952')],
-    fonts='family=Amatic+SC:wght@700&family=Open+Sans:wght@400;600;700',
-    cta=('shop.html#sizes', 'Order'), bar=('From ₪300', 'Four platter sizes'),
+    fonts='family=Amatic+SC:wght@700&family=DM+Serif+Display&family=Open+Sans:wght@400;600;700',
+    cta=('shop.html#sizes', 'Order a platter'), bar=('From ₪300', 'Four platter sizes'),
     place='Jerusalem', close_title='Order a platter', close_extra='Ls Fruit Platter',
     mark_html='<img src="assets/mark.webp" width="38" height="38" alt="">')
 
 # the closing band's arrow is drawn (Open Sans has no arrow glyph)
 _orig_footer = SITE.footer
 SITE.footer = lambda: _orig_footer().replace('<span class="arw" aria-hidden="true">→</span>', ARROW.replace('class="go"', 'class="go arw"'))
+_f2 = SITE.footer
+def _cols():
+    pg = ''.join(f'<a href="{p}.html">{t}</a>' for p, t in SITE.pages)
+    return ('<div class="wrap fcols"><div><h3>Pages</h3>' + pg + '<a href="shop.html#sizes">Sizes and prices</a></div>'
+            '<div><h3>Order</h3><a href="shop.html#sizes">Order a platter</a><a href="https://wa.me/972587298718" target="_blank" rel="noopener">WhatsApp</a></div>'
+            '<div><h3>Contact</h3><a href="https://wa.me/972587298718" target="_blank" rel="noopener">WhatsApp +972 58 729 8718</a><a href="tel:+972527146952">Call +972 52 714 6952</a></div></div>')
+SITE.footer = lambda: _f2().replace('<p class="giant"', _cols() + '<p class="giant"', 1)
 # the owner's gallery waits as a div, not a section, so it is not counted as a page section while it is empty
 GALLERY = kit.gallery('From our <span class="hl">kitchen</span>').replace('<section class="sec gallery"', '<div class="sec gallery"').replace('</section>', '</div>')
 
@@ -52,16 +59,20 @@ imgs = ''.join(stage_img(i, k) for i, (k, _, _) in enumerate(SIZES, 1))
 pills = ''.join(
     f'<button type="button" data-i="{i}" aria-pressed="{"true" if i == 0 else "false"}" aria-label="{n}">{SHORT[k]}</button>'
     for i, (k, n, _) in enumerate(SIZES))
-OPENING = f'''  <section class="hero" aria-label="Fruit platters">
-    <div class="hero-stage">
-      <div class="hero-copy">
-        <h1>Fresh, beautiful fruit platters</h1>
-        <p class="lede">For your home and events in Jerusalem. Kosher.</p>
-        <a class="btn" href="shop.html#sizes"><span>Order a platter, from {kit.price(300)}</span></a>
-      </div>
-      <figure class="hero-photo" id="hp" style="background:linear-gradient(90deg,#3A2347 0 14.28%,#D9483A 14.28% 28.57%,#F2C340 28.57% 42.85%,#8DB83A 42.85% 57.14%,#7A3B2A 57.14% 71.42%,#C62B45 71.42% 85.71%,#5FA24A 85.71%)">
-{imgs}        <div class="cap"><p class="cap-t" aria-live="polite"><b id="cap-n">Small</b><span id="cap-p">{kit.price(300)}</span></p><div class="pills" role="group" aria-label="Platter size">{pills}</div></div>
-      </figure>
+# the opening (page rules 3h; Tzvi, 21 Oct 2026: "what happened to the opening wow moment"): one full-screen film.
+# Her Large board on a watermelon-red ground; the fruit bursts up off the board and hangs there, and the page
+# holds on that frame (the burst still Tzvi chose). Generated from her own Large photo (lab/film/).
+OPENING = f'''  <section class="film" aria-label="Fruit platters">
+    <video class="film-v" id="film" muted playsinline preload="auto" poster="assets/opening-poster.webp" aria-hidden="true">
+      <source src="assets/opening-sm.mp4" type="video/mp4" media="(max-width: 860px)">
+      <source src="assets/opening.mp4" type="video/mp4">
+    </video>
+    <img class="film-end" src="assets/opening-end.webp" width="1920" height="1080" alt="Our Large platter on a red ground, its fruit bursting up into the air: watermelon, grapes, pomegranate, lychees, melon and walnuts">
+    <div class="film-copy">
+      <p class="eyebrow">Jerusalem · Kosher</p>
+      <h1>Fresh, beautiful fruit platters</h1>
+      <p class="lede">For your home and events, in four sizes.</p>
+      <a class="btn btn-light" href="shop.html#sizes"><span>Order a platter</span></a>
     </div>
   </section>
   <div class="kosher"><div class="wrap">{CHECK}<span>{K}</span></div></div>
@@ -69,15 +80,24 @@ OPENING = f'''  <section class="hero" aria-label="Fruit platters">
 rows = ''.join(
     f'''      <a class="row rev" href="shop.html?size={k}#sizes"><span class="th">{thumb_img(i, k, 520, 520)}</span><span class="nm">{n}</span><span class="dots" aria-hidden="true"></span><span class="pr">{kit.price(p)}</span>{ARROW}</a>
 ''' for i, (k, n, p) in enumerate(SIZES, 1))
-SECTIONS = f'''  <section class="sec" id="sizes" aria-labelledby="h-sizes">
+ORDER = '<a class="btn btn-light" href="shop.html#sizes"><span>Order a platter</span></a>'
+def world(cls, hid, h2, line, img, mob, alt, w, h, mw, mh, shut=''):
+    return f'''  <section class="world {cls}" aria-labelledby="{hid}">
+    <picture><source media="(max-width: 760px)" srcset="assets/{mob}" width="{mw}" height="{mh}"><img class="{shut}" src="assets/{img}" width="{w}" height="{h}" alt="{alt}" loading="lazy"></picture>
+    <div class="world-copy"><h2 id="{hid}" class="rev">{h2}</h2><p class="rev">{line}</p>{ORDER}</div>
+  </section>
+'''
+SECTIONS = world('w-love', 'h-love', 'Made with love', 'Fresh, beautiful fruit platters for your home and events.',
+                 'w-large.webp', 'w-large-m.webp', ALT['large'], 2000, 1250, 900, 931, 'shut') + f'''  <section class="sec rest" id="sizes" aria-labelledby="h-sizes">
     <div class="wrap">
-      <h2 id="h-sizes" class="rev">Four <span class="hl">sizes{STROKE}</span></h2>
+      <div class="rest-head"><h2 id="h-sizes" class="rev">Four <span class="hl">sizes{STROKE}</span></h2>
+      <a class="btn" href="shop.html#sizes"><span>Order a platter</span></a></div>
       <div class="rows">
 {rows}      </div>
     </div>
   </section>
-  <div class="band"><img class="shut" src="assets/band.webp" width="2400" height="610" alt="The Extra large platter laid on its side: dark grapes, watermelon, melon, dates, pomegranate, kiwi and green grapes in rows" loading="lazy"></div>
-  <section class="sec" id="how" aria-labelledby="h-how">
+''' + world('w-xl', 'h-xl', 'Extra large', f'Rows of dark grapes, watermelon, melon, dates, pomegranate, kiwi and green grapes. {kit.price(850)}.',
+               'w-xl.webp', 'w-xl-m.webp', ALT['xl'], 2000, 1000, 700, 1353, 'shut') + f'''  <section class="sec dark" id="how" aria-labelledby="h-how">
     <div class="wrap">
       <h2 id="h-how" class="rev">Order in three steps</h2>
       <ol class="how">
@@ -88,32 +108,18 @@ SECTIONS = f'''  <section class="sec" id="sizes" aria-labelledby="h-sizes">
       <p class="how-cta"><a class="btn" href="shop.html#sizes"><span>Order a platter</span></a></p>
     </div>
   </section>
-'''
+''' + world('w-small', 'h-order', 'Order a platter', f'From {kit.price(300)}. Your order opens in WhatsApp, ready to send.',
+               'w-small.webp', 'w-small-m.webp', ALT['small'], 1800, 1125, 900, 1200)
 HERO_JS = '''<script>
 (function () {
-  var S = [['Small', 300], ['Medium', 400], ['Large', 500], ['Extra large', 850]];
-  var hero = document.querySelector('.hero'), fr = document.getElementById('hp'), bl = window.lsBlinds(fr);
-  var pills = [].slice.call(document.querySelectorAll('.pills button')), capN = document.getElementById('cap-n'), capP = document.getElementById('cap-p');
-  var AT = [.04, .33, .6, .88], CUT = [.2, .46, .72];
-  function ui(i) {
-    pills.forEach(function (b, k) { b.setAttribute('aria-pressed', k === i ? 'true' : 'false'); });
-    capN.textContent = S[i][0]; capP.innerHTML = '<span class="sym">₪</span>' + S[i][1];
-  }
-  function idx() {
-    var span = hero.offsetHeight - innerHeight, p = Math.max(0, Math.min(1, -hero.getBoundingClientRect().top / span));
-    return p < CUT[0] ? 0 : p < CUT[1] ? 1 : p < CUT[2] ? 2 : 3;
-  }
-  var last = 0;
-  function sync() { var i = idx(); if (i !== last) { last = i; ui(i); bl.go(i); } }
-  addEventListener('scroll', sync, { passive: true });
-  pills.forEach(function (b) {
-    b.addEventListener('click', function () {
-      var i = +b.dataset.i, span = hero.offsetHeight - innerHeight;
-      last = i; ui(i); bl.go(i);
-      scrollTo({ top: hero.getBoundingClientRect().top + scrollY + span * AT[i], behavior: 'auto' });
-    });
-  });
-  bl.first(1400); sync();
+  // play the burst once, then hold its last frame; with motion switched off, only the held frame shows
+  var v = document.getElementById('film'), film = document.querySelector('.film');
+  if (!v) return;
+  function end() { film.classList.add('done'); }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { end(); return; }
+  v.addEventListener('ended', end); v.addEventListener('error', end);
+  var p = v.play(); if (p && p.catch) p.catch(end);
+  setTimeout(function () { if (!film.classList.contains('done') && v.paused) end(); }, 2500);
 })();
 </script>
 '''

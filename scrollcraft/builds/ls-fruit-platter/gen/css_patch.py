@@ -7,13 +7,13 @@ s = s[:a] + """:root {
   /* the brand, from her logo (gold monogram, leaf green, strawberry) and her fruit */
   --ground: #FFFBF3; --surface: #EFF3E4; --ink: #17261C; --soft: #4F5B50; --accent: #C62B45; --accent-ink: #FFFFFF; --line: #DDE3D0;
   --leaf: #3F6B3A; --gold: #B8925A; --melon: #FFE9C9;
-  --font-head: 'Amatic SC', 'Segoe Print', cursive; --font-body: 'Open Sans', system-ui, sans-serif;
+  --font-head: 'DM Serif Display', 'Frank Ruhl Libre', Georgia, serif; --font-mark: 'Amatic SC', 'Segoe Print', cursive; --font-body: 'Open Sans', system-ui, sans-serif;
   --r: 14px;
   --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --top-h: 68px; --out: cubic-bezier(.2, .7, .2, 1);
 }
 """ + s[b:]
 s = s.replace("h1, h2, h3 { font-family: var(--font-head); margin: 0; line-height: 1.04; }",
-              "h1, h2, h3 { font-family: var(--font-head); font-weight: 700; margin: 0; line-height: .95; letter-spacing: .005em; }")
+              "h1, h2, h3 { font-family: var(--font-head); font-weight: 400; margin: 0; line-height: 1; letter-spacing: -.01em; }")
 s = s.replace('.btn[aria-busy="true"]', """.btn { position: relative; box-shadow: 0 0 0 0 rgba(198,43,69,0); transition: box-shadow 220ms var(--out), transform 120ms var(--out), width 260ms var(--out), padding 260ms var(--out), background 160ms; }
 @media (hover: hover) { .btn:hover { box-shadow: 0 0 0 5px rgba(198,43,69,.2); } }
 .btn:active { transform: scale(.97); box-shadow: 0 0 0 2px rgba(198,43,69,.3); }

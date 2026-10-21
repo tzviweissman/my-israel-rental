@@ -59,3 +59,12 @@ og = Image.new('RGB', (1200, 630)); lg = p06.crop((0, 280, 2400, 1300)); bgc = p
 # the wrapped one
 p08 = Image.open(O + 'p08.jpg').convert('RGB')
 save(p08.crop((100, 0, 1500, 1400)), 'wrapped.webp', (900, 900), 76)
+
+# the home page's full-bleed pictures (rule 3t): her own photos, cropped, nothing added
+save(p06.crop((0, 180, 2400, 1680)), 'w-large.webp', (2000, 1250), 80)                       # the Large board, the table below it for the words
+save(p06.crop((330, 0, 2070, 1800)), 'w-large-m.webp', (900, 931), 78)                       # phone: the board's middle, tall
+xr = p07.rotate(-90, expand=True)                                                              # the Extra large board on its side
+save(xr.crop((0, 40, 2400, 1240)), 'w-xl.webp', (2000, 1000), 80)
+save(p07.crop((0, 0, 1242, 2400)), 'w-xl-m.webp', (700, 1353), 78)                           # phone: upright, as she photographed it
+save(p04.crop((0, 430, 1800, 1555)), 'w-small.webp', (1800, 1125), 80)                       # the Small platter, close
+save(p04, 'w-small-m.webp', (900, 1200), 78)
