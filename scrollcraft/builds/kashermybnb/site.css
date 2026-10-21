@@ -165,6 +165,7 @@ a.extra:hover { border-color: var(--sc-accent); }
 .opt:hover { border-color: #B6C6D5; }
 .opt:active { transform: scale(0.99); }
 .opt[aria-pressed="true"] { border-color: var(--sc-accent); box-shadow: 0 0 0 3px rgb(48 96 144 / 0.14); }
+.opt[aria-pressed="true"]:hover { box-shadow: 0 0 0 4px rgb(48 96 144 / 0.22); }
 .opt:focus-visible { outline: 3px solid var(--roof); outline-offset: 2px; }
 .opt .top { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
 .opt b { font: 600 1.15rem/1.2 var(--sc-font-display); }
@@ -230,7 +231,7 @@ a.extra:hover { border-color: var(--sc-accent); }
   .steps li:not(.is-now) .st { display: none; }
   .steps li.is-now { flex: 2.2; }
   .order { padding-bottom: 7rem; }
-  .cols > .sum { display: none; }
+  .cols > .sum { margin-top: 0.5rem; }
   .dock { position: fixed; inset: auto 0 0 0; z-index: 70; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
     padding: 0.75rem 16px calc(0.75rem + env(safe-area-inset-bottom)); background: rgb(255 255 255 / 0.97); border-top: 1px solid var(--line); }
   .dock small { display: block; color: var(--sc-ink-soft); font-size: 0.82rem; }
@@ -239,3 +240,36 @@ a.extra:hover { border-color: var(--sc-accent); }
   .pane .next .btn { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 1ms !important; animation: none !important; } }
+
+/* ---- proposed: photo on each choice, removable summary lines, pressed states ---- */
+.opt .ph { height: 112px; width: calc(100% + 2.4rem); margin: -1.15rem -1.2rem 0.2rem; object-fit: cover; border-radius: calc(var(--r) - 2px) calc(var(--r) - 2px) 0 0; display: block; }
+.opt.row .ph { display: none; }
+.lines li { align-items: center; gap: 0.7rem; justify-content: flex-start; }
+.lines li .th { width: 44px; height: 44px; border-radius: 10px; object-fit: contain; background: #fff; border: 1px solid var(--line); flex: none; }
+.lines li .th--none { border-style: dashed; }
+.lines li .nm { flex: 1; min-width: 0; }
+.lines li .pr { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.lines .rm { width: 40px; height: 40px; flex: none; display: grid; place-items: center; border: 0; border-radius: 50%; background: transparent; color: var(--sc-ink-soft); cursor: pointer; transition: background 120ms ease-out, color 120ms ease-out, transform 90ms ease-out; }
+.lines .rm svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.lines .rm:hover { background: #FBEAE8; color: var(--roof); }
+.lines .rm:active { transform: scale(0.92); }
+.lines .rm:focus-visible { outline: 3px solid var(--roof); outline-offset: 2px; }
+.btn:hover .lb, .btn:hover .ab { background: #24507a; }
+.btn:active .lb, .btn:active .ab { background: #1d4166; transform: scale(0.97); transition-duration: 90ms; }
+.btn[aria-disabled="true"]:hover .lb, .btn[aria-disabled="true"]:hover .ab { background: var(--line); }
+.link { display: inline-flex; align-items: center; min-height: 44px; }
+
+.btn:hover { filter: drop-shadow(0 8px 16px rgb(48 96 144 / 0.38)); }
+.btn:active { transform: scale(0.97); transition: transform 90ms ease-out; }
+
+/* proposed: the sub-pages fit one short laptop screen */
+.hero { padding-block: clamp(1.5rem, 5svh, 4rem) clamp(1.5rem, 5svh, 4.5rem); }
+.hero h1 { font-size: min(clamp(2.6rem, 1.2rem + 4.4vw, 5rem), 9.5svh); }
+.hero .lede { margin-top: clamp(0.5rem, 1.6svh, 1.1rem); font-size: min(1.15rem, 2.6svh); }
+.hero .shot img { max-height: 52svh; object-fit: cover; }
+.sec { padding-block: clamp(2rem, 6svh, 6rem); }
+@media (max-width: 760px) { .hero .shot img { max-height: none; } }
+
+/* a line added to the summary fades in instead of appearing in one frame */
+@keyframes lineIn { from { opacity: 0; translate: 0 6px; } to { opacity: 1; translate: 0 0; } }
+.lines li.is-new { animation: lineIn 320ms ease-out both; }

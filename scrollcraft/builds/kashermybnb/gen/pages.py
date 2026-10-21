@@ -44,7 +44,7 @@ def page(name, title, desc, body, scripts='', order=False):
 </head>
 <body>
 <header class="bar">
-  <a class="brand" href="index.html"><img src="assets/logo.png" alt="">KasherMyBnb</a>{menu}
+  <a class="brand" href="index.html"><img src="assets/logo.png" alt="" width="30" height="30">KasherMyBnb</a>{menu}
   {cta}
 </header>
 {body}
@@ -216,7 +216,7 @@ page('pots.html', 'Pots, cutlery and utensils · KasherMyBnb',
 
 # ------------------------------------------------------------ the order pages
 SUM = '''<aside class="sum" aria-label="Your order">
-        <div class="who"><img src="assets/logo.png" alt=""><div><b>KasherMyBnb</b><small>Kitchen kashering since 2019</small></div></div>
+        <div class="who"><img src="assets/logo.png" alt="" width="30" height="30"><div><b>KasherMyBnb</b><small>Kitchen kashering since 2019</small></div></div>
         <ul class="lines" data-lines></ul>
         <div class="total"><span>Total</span><b data-total>$0</b></div>
         <p class="fine" data-fee hidden>Outside Jerusalem there may be a fee for the distance. We tell you before the day.</p>
@@ -254,13 +254,13 @@ page('book.html', 'Book · KasherMyBnb', 'Choose what we kasher: the whole kitch
           <div class="pick">
             <button type="button" class="opt" data-svc="kitchen" aria-pressed="false">
               <span class="chk">{OK}</span>
-              <span class="top"><b>Whole kitchen</b><span class="amt">$350</span></span>
+              <img class="ph" src="assets/kitchen.webp" alt="" width="600" height="338"><span class="top"><b>Whole kitchen</b><span class="amt">$350</span></span>
               <small>About 2 hours</small>
               <ul><li>{OK}Oven with racks, stovetop</li><li>{OK}Microwave, hot plate</li><li>{OK}Countertops, sinks and faucets</li></ul>
             </button>
             <button type="button" class="opt" data-svc="pots" aria-pressed="false">
               <span class="chk">{OK}</span>
-              <span class="top"><b>Pots, cutlery and utensils</b><span class="amt">$180</span></span>
+              <img class="ph" src="assets/pots.webp" alt="" width="600" height="338" style="object-fit:contain;background:#fff"><span class="top"><b>Pots, cutlery and utensils</b><span class="amt">$180</span></span>
               <small>About 1 hour</small>
               <ul><li>{OK}Stainless steel pots</li><li>{OK}Cutlery</li><li>{OK}Kitchen utensils</li></ul>
             </button>
@@ -280,7 +280,7 @@ page('book.html', 'Book · KasherMyBnb', 'Choose what we kasher: the whole kitch
           </div>
         </div>
         <div class="next">
-          {btn('Continue', 'book-details.html', ' id="go"')}
+          {btn('Continue to when and where', 'book-details.html', ' id="go"')}
           <span class="sub" id="why" style="margin:0">Choose what we kasher to continue.</span>
         </div>
       </section>
@@ -288,7 +288,7 @@ page('book.html', 'Book · KasherMyBnb', 'Choose what we kasher: the whole kitch
     </div>
   </div>
 </main>
-{dock('Continue', 'book-details.html', 'go2')}''', '''<script>
+{dock('When and where', 'book-details.html', 'go2')}''', '''<script>
 (function () {
   var o = KMB.load();
   var s = new URLSearchParams(location.search).get('s');
@@ -308,6 +308,7 @@ page('book.html', 'Book · KasherMyBnb', 'Choose what we kasher: the whole kitch
   document.querySelectorAll('[data-svc]').forEach(function (b) { b.addEventListener('click', function () { o[b.dataset.svc] = !o[b.dataset.svc]; paint(); }); });
   document.querySelector('[data-add="oven"]').addEventListener('click', function () { o.oven = !o.oven; paint(); });
   document.querySelector('[data-add="pan"]').addEventListener('click', function () { o.pans = o.pans > 0 ? 0 : 1; paint(); });
+  document.addEventListener('kmb-change', function () { var n = KMB.load(); Object.keys(n).forEach(function (k) { o[k] = n[k]; }); paint(); });
   paint();
 })();
 </script>''', order=True)
@@ -417,7 +418,7 @@ page('book-review.html', 'Review and send · KasherMyBnb', 'Check your booking a
         <p class="sub">Your booking goes to KasherMyBnb on WhatsApp, written out. Press send there.</p>
         <dl class="facts" id="rev"></dl>
         <div class="next">
-          {btn('Send on WhatsApp', '#', ' id="send" target="_blank" rel="noopener"')}
+          {btn('Send on WhatsApp,&nbsp;<span data-total>$0</span>', '#', ' id="send" target="_blank" rel="noopener"')}
           <a class="back" href="book-details.html">Back</a>
         </div>
         <div class="q">
@@ -433,7 +434,7 @@ page('book-review.html', 'Review and send · KasherMyBnb', 'Check your booking a
     </div>
   </div>
 </main>
-{dock('Send', '#', 'send2', ' target="_blank" rel="noopener"')}''', '''<script>
+{dock('Send,&nbsp;<span data-total>$0</span>', '#', 'send2', ' target="_blank" rel="noopener"')}''', '''<script>
 (function () {
   var o = KMB.load();
   if (!o.kitchen && !o.pots) { location.replace('book.html'); return; }

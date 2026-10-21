@@ -14,7 +14,7 @@
 </head>
 <body>
 <header class="bar">
-  <a class="brand" href="index.html"><img src="assets/logo.png" alt="">KasherMyBnb</a>
+  <a class="brand" href="index.html"><img src="assets/logo.png" alt="" width="30" height="30">KasherMyBnb</a>
   
 </header>
 
@@ -29,13 +29,13 @@
           <div class="pick">
             <button type="button" class="opt" data-svc="kitchen" aria-pressed="false">
               <span class="chk"><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
-              <span class="top"><b>Whole kitchen</b><span class="amt">$350</span></span>
+              <img class="ph" src="assets/kitchen.webp" alt="" width="600" height="338"><span class="top"><b>Whole kitchen</b><span class="amt">$350</span></span>
               <small>About 2 hours</small>
               <ul><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Oven with racks, stovetop</li><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Microwave, hot plate</li><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Countertops, sinks and faucets</li></ul>
             </button>
             <button type="button" class="opt" data-svc="pots" aria-pressed="false">
               <span class="chk"><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></span>
-              <span class="top"><b>Pots, cutlery and utensils</b><span class="amt">$180</span></span>
+              <img class="ph" src="assets/pots.webp" alt="" width="600" height="338" style="object-fit:contain;background:#fff"><span class="top"><b>Pots, cutlery and utensils</b><span class="amt">$180</span></span>
               <small>About 1 hour</small>
               <ul><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Stainless steel pots</li><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Cutlery</li><li><svg class="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>Kitchen utensils</li></ul>
             </button>
@@ -55,12 +55,12 @@
           </div>
         </div>
         <div class="next">
-          <a class="btn" href="book-details.html" id="go"><span class="lb">Continue</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+          <a class="btn" href="book-details.html" id="go"><span class="lb">Continue to when and where</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
           <span class="sub" id="why" style="margin:0">Choose what we kasher to continue.</span>
         </div>
       </section>
       <aside class="sum" aria-label="Your order">
-        <div class="who"><img src="assets/logo.png" alt=""><div><b>KasherMyBnb</b><small>Kitchen kashering since 2019</small></div></div>
+        <div class="who"><img src="assets/logo.png" alt="" width="30" height="30"><div><b>KasherMyBnb</b><small>Kitchen kashering since 2019</small></div></div>
         <ul class="lines" data-lines></ul>
         <div class="total"><span>Total</span><b data-total>$0</b></div>
         <p class="fine" data-fee hidden>Outside Jerusalem there may be a fee for the distance. We tell you before the day.</p>
@@ -73,7 +73,7 @@
     </div>
   </div>
 </main>
-<div class="dock"><div><small>Total</small><b data-total>$0</b></div><a class="btn" href="book-details.html" id="go2"><span class="lb">Continue</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a></div>
+<div class="dock"><div><small>Total</small><b data-total>$0</b></div><a class="btn" href="book-details.html" id="go2"><span class="lb">When and where</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a></div>
 
 <script src="site.js"></script>
 <script>
@@ -96,6 +96,7 @@
   document.querySelectorAll('[data-svc]').forEach(function (b) { b.addEventListener('click', function () { o[b.dataset.svc] = !o[b.dataset.svc]; paint(); }); });
   document.querySelector('[data-add="oven"]').addEventListener('click', function () { o.oven = !o.oven; paint(); });
   document.querySelector('[data-add="pan"]').addEventListener('click', function () { o.pans = o.pans > 0 ? 0 : 1; paint(); });
+  document.addEventListener('kmb-change', function () { var n = KMB.load(); Object.keys(n).forEach(function (k) { o[k] = n[k]; }); paint(); });
   paint();
 })();
 </script>
