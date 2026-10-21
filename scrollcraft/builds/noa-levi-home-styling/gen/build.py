@@ -41,11 +41,12 @@ SITE = kit.Site(
 # ---------- home ----------
 OPENING = f'''  <section class="scene" id="scene" aria-label="Noa Levi, home styling and organizing">
     <div class="pin">
+      <img class="hs-bg" src="assets/drawer-before.webp" alt="" width="565" height="565" aria-hidden="true">
       <div class="hs-copy">
         <p class="caps">Jerusalem and Beit Shemesh</p>
         <h1><span class="l1">We organize your home.</span><span class="l2">You gain <span class="acc">peace of mind.</span></span></h1>
         <p class="sub">We sort, tidy and set up storage, so the result is easy to keep.</p>
-        <div class="hs-actions"><a class="btn" href="book.html">Book a session, {P(160)} an hour</a></div>
+        <div class="hs-actions"><a class="btn" href="book.html">Book a session</a></div>
       </div>
       <div class="hs-photo" data-clip-ok>
         <img src="assets/drawer-before.webp" alt="A clothes drawer packed with loose, crumpled clothes before the session" width="565" height="565" fetchpriority="high">
@@ -197,9 +198,23 @@ OPENING_JS = '''<script>
 </script>
 '''
 
+def pic(id_, src, w, h, alt, caps, h2, line, pos=''):
+    return f'''  <section class="pic" id="{id_}" aria-labelledby="h-{id_}">
+    <img src="{src}" alt="{alt}" width="{w}" height="{h}" loading="lazy" style="object-position:{pos or '50% 50%'}">
+    <div class="wrap pic-in"><div>
+      <p class="caps">{caps}</p>
+      <h2 id="h-{id_}" class="hd rev">{h2}</h2>
+      <p class="pic-line">{line}</p>
+      <a class="btn" href="book.html">Book a session</a>
+    </div></div>
+  </section>
+'''
+PIC_A = pic('start', 'assets/pantry-before.webp', 1536, 485, 'A kitchen cupboard shelf with loose bags of food', 'Where we start', 'It starts here.', 'A kitchen cupboard, as we found it.', '100% 50%')
+PIC_B = pic('after', 'assets/pantry-after.webp', 1536, 527, 'The same shelf with labelled jars in rows', 'Where we finish', 'And ends like this.', 'The same shelf, with boxes and jars that keep it tidy.', '100% 50%')
+
 SITE.write('index', 'Noa Levi · Home styling and organizing in Jerusalem and Beit Shemesh',
            'Closet organizing, home organizing, home styling and personal shopping with Noa Levi in Jerusalem and Beit Shemesh. ₪160 an hour, accessories not included.',
-           'og.webp', OPENING + BAND + WORK + PRICING + kit.gallery('From our sessions'), OPENING_JS)
+           'og.webp', OPENING + PIC_A + BAND + PIC_B + WORK + PRICING + kit.gallery('From our sessions'), OPENING_JS)
 
 # ---------- book ----------
 svc_opts = ''.join(f'<label class="opt"><input type="radio" name="svc" value="{k}"><span class="box">{n}</span></label>' for k, n in SERVICES)
