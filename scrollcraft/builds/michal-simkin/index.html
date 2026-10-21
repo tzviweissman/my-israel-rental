@@ -262,8 +262,55 @@
     .deck { width: min(44vw, 360px); inset-inline-end: calc(var(--sc-gutter) + 3vw); }
     .hero .sc-copy--lead { max-width: 34rem; }
   }
+
+  .hero { min-height: 280svh; } .same { min-height: 340svh; }
+  .hero__bg { position: absolute; inset: 0; z-index: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; background: var(--navy); }
+  .hero__bg img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; filter: saturate(.75); }
+  .hero__bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(14,31,57,.94) 0%, rgba(14,31,57,.82) 45%, rgba(14,31,57,.66) 100%); }
+  .hero .sc-copy--lead { z-index: 2; }
+  @media (max-width: 860px) { .hero__bg { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; } }
+  /* ---- worlds (rule 3t): pictures edge to edge, plain rests between ---- */
+  .wall { position: relative; min-height: 84svh; background: var(--navy); color: #FFFFFF; overflow: hidden; display: flex; align-items: flex-end; }
+  .wall__grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; background: var(--navy); }
+  .wall__grid img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; display: block; }
+  .wall::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: linear-gradient(to top, rgba(14,31,57,.92) 0%, rgba(14,31,57,.7) 28%, rgba(14,31,57,0) 62%); }
+  .wall__copy { position: relative; z-index: 2; padding: 0 var(--sc-gutter) clamp(3rem, 8vh, 5.5rem); max-width: 56rem; }
+  .wall__copy h2 { margin: 0 0 var(--sc-3); font-size: clamp(2.2rem, min(6vw, 11svh), 5.6rem); line-height: 1.02; letter-spacing: var(--sc-track-tight); color: #FFFFFF; }
+  .wall__copy h2 .accent { color: var(--rose-gold); }
+  .wall__copy p { margin: 0 0 var(--sc-5); color: #E6E9EF; font-size: var(--sc-t-base); }
+  .wall__copy .cta { background: var(--rose-gold); color: var(--navy); }
+  .meet { display: grid; grid-template-columns: 58fr 42fr; min-height: 84svh; background: var(--ivory); }
+  .meet__pic { position: relative; min-height: 70svh; }
+  .meet__pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 30%; }
+  .meet__text { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: clamp(1.5rem, 4vw, 4rem); }
+  .meet h2 { margin: 0 0 var(--sc-3); font-size: clamp(2.2rem, min(5vw, 8svh), 4.6rem); line-height: 1.02; letter-spacing: var(--sc-track-tight); }
+  .meet .body { margin: 0 0 var(--sc-5); color: var(--muted); font-size: var(--sc-t-lg); line-height: 1.55; max-width: 30rem; }
+  .meet .sign { display: flex; align-items: center; gap: var(--sc-4); margin: 0 0 var(--sc-6); }
+  .meet .sign img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
+  .meet .sign p { margin: 0; font-family: var(--font-head); font-style: italic; font-size: var(--sc-t-lg); }
+  .meet .sign p small { display: block; font-family: var(--font-body); font-style: normal; font-size: var(--sc-t-xs); color: var(--muted); font-weight: 600; }
+  .meet .facts { margin: var(--sc-4) 0 0; color: var(--muted); font-size: var(--sc-t-sm); }
+  .foot { background: var(--navy); color: #FFFFFF; padding: clamp(4rem, 10vw, 8rem) var(--sc-gutter) var(--sc-6); }
+  .foot__big { margin: 0 0 var(--sc-5); font-family: var(--font-head); font-size: clamp(2.2rem, 5vw, 4.4rem); line-height: 1.05; }
+  .foot .cta { background: var(--rose-gold); color: var(--navy); }
+  .foot__cols { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sc-6); margin-top: clamp(3rem, 7vw, 5rem); padding-top: var(--sc-6); border-top: 1px solid rgba(255,255,255,.16); }
+  .foot__cols h3 { margin: 0 0 var(--sc-3); font-family: var(--font-head); font-size: var(--sc-t-xl); color: var(--rose-gold); font-weight: 500; }
+  .foot__cols a, .foot__cols p { display: block; margin: 0 0 var(--sc-2); color: #D5DAE3; font-size: var(--sc-t-sm); text-decoration: none; }
+  .foot__cols a:hover { color: #FFFFFF; }
+  .foot__small { margin: var(--sc-7) 0 0; color: #AEB6C4; font-size: var(--sc-t-xs); }
+  @media (max-width: 860px) {
+    .wall__grid { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; }
+    .wall { padding-block-end: var(--bar-h); }
+    .meet { grid-template-columns: 1fr; }
+    .meet__pic { min-height: 80svh; }
+    .foot__cols { grid-template-columns: 1fr; }
+    .foot { padding-block-end: calc(var(--bar-h) + var(--sc-6)); }
+  }
+  @media (max-width: 860px) and (max-height: 700px) { .hero .who { display: none; } .deck { width: min(44vw, 160px); } }
+  @media (max-width: 860px) { .wall::after { background: linear-gradient(to top, rgba(14,31,57,.96) 0%, rgba(14,31,57,.88) 40%, rgba(14,31,57,.2) 75%, rgba(14,31,57,0) 100%); } .wall__copy p { color: #FFFFFF; } }
+  .foot__small { font-size: 14px; }
   @media (prefers-reduced-motion: reduce) {
-    .card { opacity: 1 !important; }
+    .card, .voice, .pair .after { opacity: 1 !important; transform: none !important; }
     .pair .before { --t: 1 !important; }
   }
 </style>
@@ -278,7 +325,7 @@
     <a href="#consult">The consult</a>
     <a href="#same">In their words</a>
     <a href="#academy">Academy</a>
-    <a href="#close">Get in touch</a>
+    <a href="#meet">Michal</a>
   </nav>
   <a class="cta top__cta" href="book.html">Book a consultation</a>
 </header>
@@ -292,6 +339,7 @@
   <!-- 1  Recognition: her headline, her clients dealt one by one -->
   <section class="hero on-navy" id="hero" data-sc-act="pin" data-sc-span="2.8" data-sc-dwell="0.2" aria-label="Michal Simkin, boutique wig salon">
     <div data-sc-stage>
+      <div class="hero__bg" aria-hidden="true"><img src="assets/client-8.jpg" alt="" width="720" height="960"><img src="assets/client-6.jpg" alt="" width="720" height="960"><img src="assets/client-4.jpg" alt="" width="720" height="960"><img src="assets/client-2.jpg" alt="" width="720" height="960"></div>
       <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
         <p class="who">Michal Simkin, boutique wig salon and academy</p>
         <h1 data-sc-kinetic="lines">The difference between a wig that works and <em>a wig you love.</em></h1>
@@ -362,6 +410,18 @@
     </div>
   </section>
 
+  <!-- 5  Meet Michal: her photograph, her letter -->
+  <section class="meet" id="meet" aria-labelledby="meetTitle">
+    <div class="meet__pic"><img src="assets/michal.jpg" width="900" height="1125" alt="Michal Simkin, smiling, long wavy hair" loading="lazy"></div>
+    <div class="meet__text on-ivory">
+      <h2 id="meetTitle">Meet <span class="accent">Michal.</span></h2>
+      <p class="body">I'd be honored to get to know you and create the wig that makes you look and feel your best. I can't wait to meet you.</p>
+      <div class="sign"><img src="assets/michal-small.jpg" width="160" height="160" alt=""><p>Michal<small>Bet Shemesh</small></p></div>
+      <a class="cta" href="book.html">Book a consultation</a>
+      <p class="facts">Consultation &#8362;100. Sunday to Thursday, 10 to 2, by appointment. English and Hebrew.</p>
+    </div>
+  </section>
+
   <!-- 4  Ambition: the academy -->
   <section class="academy on-navy" id="academy" data-sc-act="flow" aria-labelledby="academyTitle">
     <div class="sc-wrap">
@@ -388,23 +448,28 @@
     </div>
   </section>
 
-  <!-- 5  Welcome: her sign-off -->
-  <section class="close on-ivory" id="close" data-sc-act="pin" data-sc-span="1.2" aria-label="Get in touch">
-    <div data-sc-stage>
-      <div class="letter" data-sc-cue="0.06">
-        <h2 data-sc-kinetic="lines">You deserve to love <span class="accent">your wig, too.</span></h2>
-        <p class="body">I'd be honored to get to know you and create the wig that makes you look and feel your best. I can't wait to meet you.</p>
-        <div class="sign">
-          <img src="assets/michal-small.jpg" width="160" height="160" alt="Michal Simkin">
-          <p>Michal<small>Bet Shemesh</small></p>
-        </div>
-        <a class="cta" href="book.html">Book a consultation</a>
-        <p class="facts">Send a message with what you're looking for. Appointments are arranged in reply. Consultation ₪100. Sunday to Thursday, 10 to 2, by appointment. English and Hebrew. Custom wigs, cuts and transformations, wash and sets, handwork, repairs, cap adjustments, baby hairs, colour.</p>
-      </div>
-      <p class="foot">Michal Simkin, Bet Shemesh, on MyIsraelRental. Also on WhatsApp, 054-682-6258. Every photograph on this page is from her website.</p>
+  <!-- 6  Last picture, the one button -->
+  <section class="wall wall--end" id="close" aria-labelledby="closeTitle">
+    <div class="wall__grid">
+      <img src="assets/client-7.jpg" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" loading="lazy">
+      <img src="assets/client-5.jpg" width="720" height="960" alt="A client with glasses in a dark shoulder-length wig" loading="lazy">
+      <img src="assets/client-3.jpg" width="720" height="960" alt="A client in a long wavy light-brown wig" loading="lazy">
+      <img src="assets/client-1.jpg" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" loading="lazy">
     </div>
+    <div class="wall__copy"><h2 id="closeTitle">You deserve to love <span class="accent">your wig, too.</span></h2><p>Consultation &#8362;100, by appointment.</p><a class="cta" href="book.html">Book a consultation</a></div>
   </section>
 </main>
+
+<footer class="foot on-navy">
+  <p class="foot__big">A wig you love, in <span class="accent">Bet Shemesh.</span></p>
+  <a class="cta" href="book.html">Book a consultation</a>
+  <div class="foot__cols">
+    <div><h3>On this page</h3><a href="#hero">Clients</a><a href="#consult">The consult</a><a href="#same">In their words</a><a href="#academy">Academy</a></div>
+    <div><h3>Book</h3><a href="book.html">Book a consultation</a><a href="book.html#academy">Enrol in the Academy</a></div>
+    <div><h3>Contact</h3><p>Bet Shemesh</p><p>Sunday to Thursday, 10 to 2, by appointment</p><p>WhatsApp 054-682-6258</p><p>English and Hebrew</p></div>
+  </div>
+  <p class="foot__small">Michal Simkin, on MyIsraelRental. Every photograph on this page is from her website.</p>
+</footer>
 
 
 <script src="scrollcraft.js"></script>

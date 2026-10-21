@@ -32,6 +32,7 @@ def post(page: str, shop_link: bool = True) -> None:
         s = s.replace(f'<a class="btn" href="shop.html">Shop the skirt {ARW}</a>', f'<a class="btn" href="#skirt">Back to the skirt <span class="arw" aria-hidden="true">' + UP_SVG + '</span></a>')
     if page != 'shop':
         s = s.replace('<a class="btn" href="shop.html#order" tabindex="-1">Basket</a>', '<a class="btn" href="shop.html" tabindex="-1">Shop the skirt</a>')
+    s = s.replace('Shop the skirt <span class="arw"', 'Shop the skirt, <span class="sym">₪</span>320 <span class="arw"')
     s = s.replace('<span class="arw" aria-hidden="true">→</span>', '<span class="arw" aria-hidden="true">' + ARW_SVG + '</span>')
     # the phone bar's price is set in the body face so the shekel sign has a glyph
     s = s.replace('<p class="p"><b>₪320</b>', '<p class="p"><b><span class="sym">₪</span>320</b>')
@@ -101,17 +102,26 @@ SPOT = f'''  <section class="sec spot" id="skirt" aria-labelledby="h-skirt">
   </section>
 '''
 
-VISIT = f'''  <section class="sec visit" id="visit" aria-labelledby="h-visit">
+STORE = f'''  <section class="shotsec store" id="store" aria-labelledby="h-store">
+    <img src="assets/shop.webp" alt="Inside the RS store: a rail of skirts beside the counter" width="1800" height="2400" loading="lazy">
     <div class="wrap">
-      <div>
-        <p class="caps rev">Our store</p>
-        <h2 id="h-visit" class="rev">Visit our store</h2>
-        <p class="addr rev">31 King George Street, Jerusalem</p>
-        <a class="lnk rev" href="{MAPS}" target="_blank" rel="noopener">Get directions</a>
+      <div class="said">
+        <h2 id="h-store" class="rev">Visit our store</h2>
+        <p class="lede rev">Skirts and activewear designed for movement and everyday wear.</p>
+        <a class="btn rev" href="shop.html">Shop the skirt, {kit.price(320)}</a>
       </div>
-      <div class="pair rev">
-        <figure class="a"><img src="assets/shop.webp" alt="Inside the RS store: a rail of skirts beside the counter" width="1800" height="2400" loading="lazy"></figure>
-        <figure class="b"><img src="assets/bag.webp" alt="The white RS shopping bag with black ribbon handles" width="1109" height="1330" loading="lazy"></figure>
+    </div>
+  </section>
+'''
+
+DIPTYCH = f'''  <section class="shotsec dip2" id="visit" aria-labelledby="h-visit">
+    <figure class="ph1"><img src="assets/sign.webp" alt="The RS sign in a green window frame" width="1109" height="1478" loading="lazy"></figure>
+    <figure class="ph2"><img src="assets/bag.webp" alt="The white RS shopping bag with black ribbon handles" width="1109" height="1330" loading="lazy"></figure>
+    <div class="wrap">
+      <div class="said mid">
+        <h2 id="h-visit" class="rev">31 King George Street</h2>
+        <p class="lede rev">Jerusalem</p>
+        <div class="acts rev"><a class="btn" href="shop.html">Shop the skirt, {kit.price(320)}</a><a class="lnk" href="{MAPS}" target="_blank" rel="noopener">Get directions</a></div>
       </div>
     </div>
   </section>
@@ -150,7 +160,7 @@ OPEN_JS = '''<script>
 
 SITE.write('index', 'RS Modest Activewear, women\'s clothing store on King George, Jerusalem',
            'Premium modest activewear for women. Sports skirts with built-in leggings, at 31 King George Street, Jerusalem.',
-           'og.webp', OPENING + PILLARS + SPOT + VISIT + kit.gallery('From the store'), OPEN_JS)
+           'og.webp', OPENING + PILLARS + STORE + SPOT + DIPTYCH + kit.gallery('From the store'), OPEN_JS)
 post('index')
 
 # ── CONTACT ───────────────────────────────────────────────────────────────
