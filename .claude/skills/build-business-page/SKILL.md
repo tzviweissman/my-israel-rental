@@ -1083,3 +1083,16 @@ The owner never sees a first draft. Before showing anything:
    was fixed and what could not be (needs their content, a decision, or a real
    device). For a shareable preview:
    `node <skill>/scripts/record.mjs <url> 390 844 preview-phone.mp4`.
+
+## 3t. Sections change worlds (Tzvi, 21 Oct 2026, after moto-card.com)
+
+Tzvi: "go through this website and you'll see that there are different sections and it changes to pictures, not everything is just one colour ... this looks like a real website, ours do not." Study: docs/inspo/moto-card-2026-10-21/.
+
+1. **The home page is a sequence of worlds, not one colour.** After the opening, the ground changes from section to section: a full-bleed photo or film, then a calm section on a contrasting plain ground (white or the brand's dark), then a picture again. Never three sections in a row on the same plain ground.
+2. **Pictures carry the page.** At least a third of the home page's sections are mostly picture or film edge to edge (the owner's real photos first; generated scenes of their real products only under rule 1's limits), with the words on the picture, not in a box beside it. Words over a picture follow 5b.3 (a soft edge shade, never a scrim).
+3. **One big line per section,** short, with at most one short line under it; small calm body text; lots of space.
+4. **One action, identical everywhere:** the same button, same words, in the bar, in the sections that sell, and in the footer.
+5. **Their own details as texture:** a true detail of the business (their prices, sizes, hours, street, fruit, cuts of meat) used as the moving or background detail, instead of decoration.
+6. **Plain sections are rests:** numbered lists, prices, FAQ and contact sit on a calm plain ground with hairlines, between the pictures.
+7. **A real footer:** a last big line, the button, link columns, contact.
+scripts/check-site.mjs WORLDS checks 1 and 2 on every home page (and OPENING checks 3h.1); publish-page refuses a page that fails.

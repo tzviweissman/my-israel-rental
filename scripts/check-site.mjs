@@ -204,6 +204,36 @@ for (const url of urls) {
     if (differ(a, b) < .05 && differ(b, c) < .05) fail(url, 'OPENING', 'nothing happens on the first screen, on its own or when you start to scroll: the opening must be an event (3h)');
     await ctx.close();
   }
+  // ── sections change worlds (page rules 3t; Tzvi, 21 Oct 2026, after moto-card.com: "it changes to pictures,
+  // not everything is just one colour"): on the home page, no three sections in a row on the same plain ground,
+  // and at least a third of the sections mostly picture or film ──
+  if (/\/(index\.html)?$/.test(new URL(url).pathname)) {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await ctx.newPage(); await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(800);
+    const secs = await page.evaluate(async () => {
+      const top = [...document.querySelectorAll('main > section, main > div, body > section, main > article')].filter((e) => e.getBoundingClientRect().height > innerHeight * .4);
+      const out = [];
+      for (const e of top) {
+        e.scrollIntoView({ block: 'start', behavior: 'instant' }); await new Promise((r) => setTimeout(r, 500));
+        const r = e.getBoundingClientRect(); let hit = 0, n = 0;
+        for (let x = 40; x < innerWidth; x += 90) for (let y = Math.max(r.top, 80); y < Math.min(r.bottom, innerHeight); y += 90) {
+          n++; for (const el of document.elementsFromPoint(x, y)) { if (el === document.body || el === document.documentElement) break;
+            const cs = getComputedStyle(el); if (+cs.opacity > .2 && (/^(VIDEO|CANVAS|IMG|PICTURE)$/.test(el.tagName) || (cs.backgroundImage !== 'none' && !/gradient/.test(cs.backgroundImage)))) { hit++; break; } } }
+        let bg = 'transparent'; for (let el = e; el && bg === 'transparent'; el = el.parentElement) { const c = getComputedStyle(el).backgroundColor; if (c && !/rgba\(0, 0, 0, 0\)|transparent/.test(c)) bg = c; }
+        out.push({ id: e.id || e.className.toString().split(' ')[0] || e.tagName, pic: n ? hit / n : 0, bg });
+      }
+      return out;
+    });
+    if (secs.length >= 4) {
+      const picture = secs.filter((x) => x.pic >= .5).length;
+      if (picture < Math.ceil(secs.length / 3)) fail(url, 'WORLDS', `only ${picture} of ${secs.length} sections are mostly picture or film: at least a third should be (3t)`);
+      for (let i = 2; i < secs.length; i++) {
+        const [a, b, c] = [secs[i - 2], secs[i - 1], secs[i]];
+        if (a.pic < .3 && b.pic < .3 && c.pic < .3 && a.bg === b.bg && b.bg === c.bg) { fail(url, 'WORLDS', `three sections in a row on the same plain ground (${a.id}, ${b.id}, ${c.id}): change the ground or put a picture between them (3t)`); break; }
+      }
+    }
+    await ctx.close();
+  }
   // ── motion switched off: nothing stays hidden ──
   {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
