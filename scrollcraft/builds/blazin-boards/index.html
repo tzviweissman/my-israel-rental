@@ -87,7 +87,7 @@
     position: fixed; inset-block-start: 0; inset-inline: 0; z-index: var(--sc-z-chrome);
     display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
     padding: var(--sc-3) var(--sc-gutter); pointer-events: none;
-    background: linear-gradient(rgba(58, 8, 18, 0.72), rgba(58, 8, 18, 0));
+    background: linear-gradient(rgba(58, 8, 18, 0.96) 0%, rgba(58, 8, 18, 0.9) 70%, rgba(58, 8, 18, 0.6) 100%);
   }
   .bar > * { pointer-events: auto; }
   .bar__mark { min-height: 40px; display: inline-flex; align-items: center; gap: var(--sc-3); font-family: var(--font-body); font-weight: 800; letter-spacing: -0.02em; font-size: var(--sc-t-lg); color: var(--sc-ink); text-decoration: none; text-transform: uppercase; }
@@ -290,6 +290,56 @@
     font-size: var(--sc-t-xs); color: var(--sc-ink-soft); letter-spacing: 0.02em; line-height: 1.5; max-width: 60rem;
   }
 
+
+  /* ------------------------------------------------ worlds (rule 3t) --
+     Opening on their own photograph, edge to edge; a picture band; a light
+     price list; a picture band; the dark facts; the closing photograph. */
+  /* reserve each pinned act's height before the engine mounts, so nothing below jumps when it does */
+  .hero { min-height: 320svh; } .sizes { min-height: 360svh; } .close { min-height: 120svh; }
+  .hero__bg { position: absolute; inset: 0; z-index: 0; }
+  .hero__bg img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 55%; display: block; }
+  .hero__shade { position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background: linear-gradient(90deg, rgba(58, 8, 18, .92) 0%, rgba(58, 8, 18, .78) 45%, rgba(58, 8, 18, 0) 88%),
+                linear-gradient(180deg, rgba(58, 8, 18, .7) 0%, rgba(58, 8, 18, 0) 22%); }
+  .band { position: relative; min-height: calc(100svh - 64px); overflow: hidden; display: flex; align-items: flex-end; background: var(--ox-0); }
+  .band__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .band--jars .band__img { object-position: 50% 40%; }
+  .band__shade { position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(90deg, rgba(58, 8, 18, .92) 0%, rgba(58, 8, 18, .8) 42%, rgba(58, 8, 18, 0) 82%),
+                linear-gradient(0deg, rgba(58, 8, 18, .8) 0%, rgba(58, 8, 18, 0) 45%); }
+  .band__copy { position: relative; z-index: 1; width: 100%; max-width: var(--sc-maxw); margin-inline: auto; padding: 0 var(--sc-gutter) clamp(3rem, 10vh, 6rem); display: grid; gap: var(--sc-4); justify-items: start; }
+  .band__title { margin: 0; font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.04em; line-height: .92; font-size: clamp(3rem, 9vw, 8.5rem); max-width: 11ch; color: var(--sc-ink); text-wrap: balance; }
+  .band__copy p { margin: 0; color: var(--sc-ink); font-size: var(--sc-t-base); max-width: 28rem; }
+  .menu { background: #F4EADB; --sc-ink: #2A0A10; --sc-ink-soft: #5E3F45; color: #2A0A10; }
+  .menu .price, .menu .addons span em { color: var(--crimson); }
+  .menu .addons b { color: #2A0A10; }
+  .menu .list li .go { color: var(--crimson); border-color: color-mix(in oklab, var(--crimson) 55%, transparent); }
+  .menu .list li:hover .go { background: var(--crimson); color: #F4EADB; }
+  .menu .list li::before { background: color-mix(in oklab, var(--crimson) 8%, transparent); }
+  .menu .shots figure { box-shadow: 0 10px 30px rgba(42, 10, 16, .18); }
+  .facts { background: var(--ox-1); }
+  /* closing photograph: words bottom left on a soft edge shade, no card */
+  .close__light { background: linear-gradient(90deg, rgba(58, 8, 18, .88) 0%, rgba(58, 8, 18, .5) 40%, rgba(58, 8, 18, 0) 70%), linear-gradient(0deg, rgba(58, 8, 18, .7) 0%, rgba(58, 8, 18, 0) 40%); }
+  .close .sc-copy--center { left: var(--sc-gutter); inset-inline-end: auto; top: auto; bottom: clamp(3rem, 12vh, 7rem); translate: none; text-align: start; max-width: 36rem; padding: 0; background: none; backdrop-filter: none; border-radius: 0; }
+  .close .sc-display--lg { font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.04em; line-height: .92; font-size: clamp(3rem, 8vw, 7rem); }
+  .foot { background: var(--ox-0); color: var(--sc-ink); padding: clamp(3.5rem, 9vw, 7rem) var(--sc-gutter) var(--sc-6); position: relative; z-index: 1; }
+  .foot > * { max-width: var(--sc-maxw); margin-inline: auto; }
+  .foot__big { margin-block: 0 var(--sc-7); font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.04em; line-height: .95; font-size: clamp(2.2rem, 6vw, 5rem); }
+  .foot__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-6); padding-block: var(--sc-6); border-top: 1px solid color-mix(in oklab, var(--sc-ink) 18%, transparent); }
+  .foot__cols > * { display: grid; gap: var(--sc-2); align-content: start; font-size: var(--sc-t-sm); }
+  .foot__cols b { color: var(--gold); font-weight: 700; }
+  .foot__cols a { color: var(--sc-ink); text-decoration: none; min-height: 32px; display: inline-flex; align-items: center; }
+  .foot__cols a:hover { color: var(--gold); }
+  .foot__cols span { color: var(--sc-ink-soft); }
+  .foot__small { margin-block: var(--sc-5) 0; font-size: .875rem; color: var(--sc-ink-soft); line-height: 1.5; }
+  @media (max-width: 860px) {
+    .band__shade { background: linear-gradient(0deg, rgba(58, 8, 18, .94) 0%, rgba(58, 8, 18, .8) 50%, rgba(58, 8, 18, .25) 85%); }
+    .hero__shade { background: linear-gradient(180deg, rgba(58, 8, 18, .9) 0%, rgba(58, 8, 18, .72) 45%, rgba(58, 8, 18, .4) 100%); }
+    .close__light { background: linear-gradient(0deg, rgba(58, 8, 18, .94) 0%, rgba(58, 8, 18, .8) 50%, rgba(58, 8, 18, .2) 85%); }
+    .foot__cols { grid-template-columns: 1fr; }
+    .band { min-height: calc(100svh - 96px); }
+    .close .sc-copy--center { inset-inline-end: var(--sc-gutter); bottom: clamp(2rem, 8vh, 4rem); }
+  }
   /* -------------------------------------------------------------- mobile -- */
   @media (max-width: 860px) {
     .bar { flex-wrap: wrap; row-gap: 0; padding-block: var(--sc-2); }
@@ -334,7 +384,12 @@
   }
   /* short phones: the sizes heading keeps its line and the photo keeps clear of text */
   @media (max-width: 860px) and (max-height: 700px) { .sizes .sc-copy--lead p { display: none; } }
-  @media (prefers-reduced-motion: reduce) { .heat { display: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .heat { display: none; }
+    /* motion off: the big name and the growing plank are motion; the bar carries the name and the full price list is below */
+    .hero .name, .scale, .ruler, .tiers, .sizes .sc-copy--lead p { display: none; }
+    .close .sc-copy, .close .sc-copy h2, .close .sc-copy a, .close .sc-copy p { opacity: 1 !important; }
+  }
 </style>
 </head>
 <body id="top">
@@ -361,6 +416,8 @@
   <!-- 1  The tumble -->
   <section class="hero" id="hero" data-sc-act="pin" data-sc-span="3.2" data-sc-drift="#4B0C19" aria-label="Blazin' Boards">
     <div data-sc-stage>
+      <picture class="hero__bg" aria-hidden="true"><source media="(max-width: 860px)" srcset="assets/their-rustic-m.jpg"><img src="assets/their-rustic.jpg" alt="" width="1600" height="1031" fetchpriority="high"></picture>
+      <div class="hero__shade" aria-hidden="true"></div>
       <div class="stage3d">
         <p class="name" data-sc-cue="0 0.44 0 0.38" aria-hidden="true"><span>Blazin’</span><span class="b">Boards</span></p>
         <div class="tumble__shadow" id="tumbleShadow" aria-hidden="true"></div>
@@ -414,7 +471,7 @@
         <div class="tier" data-sc-cue="0.6 0.8 0.3 0.3">
           <p class="tier__size"><span class="num">33 × 47</span><small>cm</small></p>
           <ul>
-            <li><span><b>Large Premium Steak Board</b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small><em class="deal" title="$161 less than the Small or Medium Premium at the same price per square centimetre">Save $161</em></span><span class="price">$485</span></li>
+            <li><span><b>Large Premium Steak Board</b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$485</span></li>
             <li><span><b>Large Blazin' Board</b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef jerky.</small></span><span class="price">$385</span></li>
           </ul>
         </div>
@@ -428,7 +485,18 @@
     </div>
   </section>
 
-  <!-- 3  The full list -->
+  <!-- 3  A picture: the price range, on their own jars-and-board photograph -->
+  <section class="band band--jars" id="range" aria-labelledby="rangeTitle">
+    <img class="band__img" src="assets/their-jars.jpg" alt="A board of sliced steaks, pastrami and jerky with two jars of sauce and a bottle of wine" width="1600" height="942">
+    <div class="band__shade" aria-hidden="true"></div>
+    <div class="band__copy">
+      <h2 class="band__title" id="rangeTitle">From $75 to $750.</h2>
+      <p>From the Mini Board to the Party Board.</p>
+      <a class="cta flip" href="order.html" aria-label="Order a board, from $75 to $750"><span class="f">Order a board</span><span class="k"><b>From $75</b>to $750<svg class="draw" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+    </div>
+  </section>
+
+  <!-- 4  The full list, on a plain light ground -->
   <section class="menu" id="menu" data-sc-act="flow" data-sc-drift="#5A1222" aria-labelledby="menuTitle">
     <div class="sc-wrap">
       <h2 class="sc-display sc-display--md" id="menuTitle">Every board.</h2>
@@ -445,7 +513,7 @@
         <li><span><b>Medium Blazin' Board <i>24 × 35 cm</i></b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, brisket, London broil, beef jerky.</small></span><span class="price">$250</span></li>
         <li><span><b>Medium Premium Steak Board <i>24 × 35 cm</i></b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$350</span></li>
         <li><span><b>Large Blazin' Board <i>33 × 47 cm</i></b><small>Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef jerky.</small></span><span class="price">$385</span></li>
-        <li><span><b>Large Premium Steak Board <i>33 × 47 cm</i></b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small><em class="deal" title="$161 less than the Small or Medium Premium at the same price per square centimetre">Save $161</em></span><span class="price">$485</span></li>
+        <li><span><b>Large Premium Steak Board <i>33 × 47 cm</i></b><small>Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.</small></span><span class="price">$485</span></li>
         <li><span><b>Extra Large VIP Board <i>37 × 57 cm</i></b><small>Rib steak, oyster steak, sliced entrecote, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef facon, beef jerky.</small></span><span class="price">$700</span></li>
         <li><span><b>The Party Board</b><small>Two rib steaks, oyster steak, entrecote, candied pastrami, brisket, London broil, skirt or hanger steak, beef jerky.</small></span><span class="price">$750</span></li>
         <li><span><b>The All Jerky Board <i>20 × 30 cm</i></b></span><span class="price">$149</span></li>
@@ -457,7 +525,7 @@
     </div>
   </section>
 
-  <!-- 4  The facts and how it goes -->
+  <!-- 5  The facts and how it goes -->
   <section class="facts" id="facts" data-sc-act="flow" data-sc-drift="#4B0C19" aria-label="The facts">
     <div class="sc-wrap">
       <dl class="facts__list" data-sc-in data-sc-stagger="80">
@@ -483,16 +551,23 @@
     <div data-sc-stage>
       <img class="close__img" src="assets/their-square.jpg" alt="" width="2000" height="1333">
       <div class="close__light" aria-hidden="true"></div>
-      <div class="sc-scrim sc-scrim--vignette"></div>
       <div class="sc-copy sc-copy--center" data-sc-cue="0.06">
         <h2 class="sc-display sc-display--lg" data-sc-kinetic="lines">Ready when you are.</h2>
         <a class="cta flip" href="order.html" data-sc-magnet="0.26" aria-label="Order a board, from $75 to $750"><span class="f">Order a board</span><span class="k"><b>From $75</b>to $750<svg class="draw" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
         <p class="close__assure">Order in three steps. Nothing is paid on this page: you pay us directly by card, Zelle or bank transfer. Orders 48 hours ahead.</p>
       </div>
-      <p class="close__foot">Blazin' Boards, Farn 5, Jerusalem. Listed on MyIsraelRental. Every photograph on this page is our own.</p>
     </div>
   </section>
 </main>
+<footer class="foot">
+  <p class="foot__big">Premium meat boards, grilled to perfection.</p>
+  <div class="foot__cols">
+    <nav aria-label="Pages"><b>The site</b><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Your order</a></nav>
+    <nav aria-label="On this page"><b>On this page</b><a href="#sizes">Sizes</a><a href="#menu">Prices</a><a href="#facts">How it goes</a></nav>
+    <div><b>Find us</b><span>Farn 5, Jerusalem</span><span>Orders 48 hours ahead</span><span>Delivery throughout Israel</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+  </div>
+  <p class="foot__small">Blazin' Boards. Every photograph on this page is our own. Nothing is paid on this page: you pay us directly by card, Zelle or bank transfer.</p>
+</footer>
 
 <script src="scrollcraft.js"></script>
 <script>

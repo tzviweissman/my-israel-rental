@@ -143,28 +143,6 @@
   .knob .lamp { fill: #3A140F; transition: fill 200ms var(--sc-ease-out); }
   .knob.is-on .lamp { fill: #FF5A2E; }
 
-  /* ---------- belonging (flow) ----------------------------------------- */
-  .belong { position: relative; padding-block: clamp(3rem, 6vw, 6rem) var(--sc-section); }
-  .belong figure { margin: 0 0 clamp(2.5rem, 5vw, 4.5rem); }
-  .kosher-band { margin: 0 0 clamp(2rem, 4vw, 3.5rem); padding: var(--sc-3) 0; border-block: 1px solid var(--sc-hairline-strong);
-    display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--sc-2) var(--sc-4); color: var(--sc-ink); font-size: var(--sc-t-base); }
-  .kosher-band span { font: 700 var(--sc-t-xs)/1 var(--sc-font-text); letter-spacing: 0.18em; text-transform: uppercase; color: var(--sc-accent); }
-  .belong figure .table-clip { width: 100%; height: clamp(18rem, 48vw, 40rem); object-fit: cover; object-position: 50% 35%; border-radius: var(--sc-r-md); display: block; }
-  .belong h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.96; margin: 0; max-width: 14ch; }
-  .occasions { list-style: none; margin: var(--sc-6) 0 0; padding: 0; display: flex; flex-wrap: wrap; align-items: baseline; row-gap: 0.1em;
-    font-family: var(--sc-font-display); font-weight: 200; text-transform: uppercase; font-size: clamp(1.8rem, 1rem + 3.4vw, 4.4rem); line-height: 1.08; }
-  .occasions li { white-space: nowrap; }
-  .occasions li:not(:last-child)::after { content: ""; display: inline-block; width: 0.16em; height: 0.16em; border-radius: 50%; background: var(--sc-accent); margin-inline: 0.36em; vertical-align: middle; }
-  .proof { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(2rem, 5vw, 5rem); margin-top: clamp(3rem, 6vw, 6rem); align-items: start; }
-  .quote { margin: 0; display: grid; grid-template-columns: 5.5rem 1fr; gap: var(--sc-5); align-items: start; }
-  .quote img { width: 5.5rem; height: 5.5rem; border-radius: 50%; box-shadow: var(--sc-e2); }
-  .quote p { margin: 0; font-size: var(--sc-t-xl); line-height: 1.35; color: var(--sc-ink); }
-  .quote cite { display: block; margin-top: var(--sc-3); font: 500 var(--sc-t-sm)/1.4 var(--sc-font-text); color: var(--sc-ink-soft); font-style: normal; }
-  .facts { margin: 0; display: grid; gap: var(--sc-4); border-top: 1px solid var(--sc-hairline-strong); padding-top: var(--sc-5); }
-  .facts div { display: grid; grid-template-columns: 8.5rem 1fr; gap: var(--sc-4); }
-  .facts dt { font: 600 var(--sc-t-xs)/1.6 var(--sc-font-text); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sc-ink-soft); }
-  .facts dd { margin: 0; color: var(--sc-ink); }
-
   /* ---------- the close: the knob becomes the order ---------------------- */
   /* Not pinned: a held screen cuts off whatever is taller than it, and on a
      short laptop the dial, the price and the menu are. A plain section at
@@ -319,23 +297,6 @@
   .reassure { display: flex; align-items: center; gap: 0.5rem; margin: var(--sc-5) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink); }
   .reassure svg { width: 18px; height: 18px; fill: none; stroke: var(--sc-accent); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
   .act { margin-top: var(--sc-3); }
-  @media (min-width: 861px) {
-    .belong { padding-block: 4.5rem 2rem; }
-    .belong .sc-wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); column-gap: clamp(2rem, 4vw, 4rem); align-items: center; }
-    .kosher-band { grid-column: 1 / -1; margin-bottom: var(--sc-4); }
-    .belong figure { margin: 0; }
-    .belong figure .table-clip { height: clamp(12rem, 36svh, 22rem); }
-    .belong h2 { font-size: clamp(2rem, 3.4vw, 3rem); max-width: none; }
-    .occasions { margin-top: var(--sc-4); gap: 0.45rem; font: 500 var(--sc-t-sm)/1 var(--sc-font-text); text-transform: none; }
-    .occasions li { white-space: nowrap; padding: 0.5rem 0.9rem; border: 1px solid var(--sc-hairline-strong); border-radius: var(--sc-r-pill); }
-    .occasions li:not(:last-child)::after { display: none; }
-    .proof { grid-column: 1 / -1; margin-top: var(--sc-5); }
-    .quote p { font-size: var(--sc-t-lg); }
-    .quote img { width: 4.2rem; height: 4.2rem; }
-    .quote { grid-template-columns: 4.2rem 1fr; }
-    .facts { gap: var(--sc-2); padding-top: var(--sc-3); }
-  }
-
   /* the opening's height is set by script after load; this holds the same space from the first paint so nothing below jumps */
   #split { height: 700vh; }
   .pick { display: none; }
@@ -356,6 +317,74 @@
     .menu div { justify-content: space-between; }
     .order h2 { white-space: normal; }
   }
+
+  /* ---------- the worlds after the opening (page rules 3t) ------------------
+     Picture, then a calm rest on marble, then a picture, then the dark order,
+     then the footer. Words sit on the picture with a soft edge shade. */
+  .world { position: relative; isolation: isolate; overflow: hidden; height: calc(100svh - 64px); min-height: 30rem; display: grid; align-items: end; background: var(--sc-canvas); }
+  .world-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; display: block; }
+  .world-shade { position: absolute; inset: 0; z-index: -1; pointer-events: none;
+    background:
+      linear-gradient(0deg, rgb(15 12 10 / 0.82) 0%, rgb(15 12 10 / 0.5) 30%, rgb(15 12 10 / 0) 62%),
+      linear-gradient(90deg, rgb(15 12 10 / 0.5) 0%, rgb(15 12 10 / 0) 55%); }
+  .world-copy { padding-block: clamp(5rem, 14svh, 9rem) clamp(3rem, 9svh, 6rem); display: grid; justify-items: start; gap: var(--sc-5); }
+  .world-copy h2 { margin: 0; max-width: 12ch; font-family: var(--sc-font-display); font-weight: 200; text-transform: uppercase; letter-spacing: 0.01em;
+    font-size: clamp(3rem, min(1.6rem + 7.4vw, 15svh), 8.6rem); line-height: 0.92; color: var(--sc-ink); text-shadow: 0 2px 28px rgb(0 0 0 / 0.35); }
+  .world-line { margin: 0; max-width: 34rem; font-size: var(--sc-t-lg); line-height: 1.5; color: var(--sc-ink); text-shadow: 0 1px 18px rgb(0 0 0 / 0.5); }
+  .world .occasions { margin: 0; padding: 0; gap: 0.5rem; display: flex; flex-wrap: wrap; list-style: none; max-width: 44rem;
+    font: 600 var(--sc-t-xs)/1 var(--sc-font-text); letter-spacing: 0.14em; text-transform: uppercase; color: var(--sc-ink); }
+  .world .occasions li { white-space: nowrap; padding: 0.6rem 0.9rem; border: 1px solid rgb(242 235 223 / 0.45); border-radius: var(--sc-r-pill);
+    background: rgb(15 12 10 / 0.35); backdrop-filter: blur(6px); }
+  .world .occasions li::after { display: none; }
+  .world--tubs .world-bg { object-position: 50% 20%; }
+  .world--tubs .world-shade { background:
+      linear-gradient(0deg, rgb(15 12 10 / 0.88) 0%, rgb(15 12 10 / 0.6) 34%, rgb(15 12 10 / 0) 66%),
+      linear-gradient(90deg, rgb(15 12 10 / 0.45) 0%, rgb(15 12 10 / 0) 50%); }
+  .world--table .world-bg { object-position: 50% 40%; }
+
+  /* the rest on marble: the page turns light, the facts sit in numbered rows */
+  .rest { --sc-ink: #1B1612; --sc-ink-soft: #5A4F43; --sc-accent-text: #7A530F;
+    --sc-hairline: color-mix(in oklab, #1B1612 14%, transparent); --sc-hairline-strong: color-mix(in oklab, #1B1612 28%, transparent);
+    background: #F3EFE7; color: var(--sc-ink); padding-block: clamp(3rem, 9svh, 8rem); }
+  .rest-grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(2.5rem, 7vw, 8rem); align-items: start; }
+  .rest h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: clamp(2.4rem, min(1.4rem + 4.4vw, 11svh), 6rem); line-height: 0.96; color: var(--sc-ink); max-width: 14ch; }
+  .rest .quote { margin: clamp(1.5rem, 4svh, 3rem) 0 0; display: grid; grid-template-columns: 4.5rem 1fr; gap: var(--sc-5); align-items: start; max-width: 34rem; }
+  .rest .quote img { width: 4.5rem; height: 4.5rem; border-radius: 50%; box-shadow: 0 2px 10px rgb(27 22 18 / 0.2); }
+  .rest .quote p { margin: 0; font-size: var(--sc-t-base); line-height: 1.55; color: var(--sc-ink); }
+  .rest .quote cite { display: block; margin-top: var(--sc-3); font: 500 var(--sc-t-sm)/1.4 var(--sc-font-text); font-style: normal; color: var(--sc-ink-soft); }
+  .rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--sc-hairline-strong); }
+  .rows li { display: grid; grid-template-columns: 3rem minmax(5.5rem, 8rem) 1fr; gap: var(--sc-4); align-items: baseline; padding-block: clamp(1.1rem, 2.4vw, 1.8rem); border-bottom: 1px solid var(--sc-hairline-strong); }
+  .rows b { font: 300 var(--sc-t-lg)/1 var(--sc-font-display); letter-spacing: 0.06em; color: var(--sc-accent-text); }
+  .rows span { font: 700 var(--sc-t-xs)/1.4 var(--sc-font-text); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sc-ink-soft); }
+  .rows p { margin: 0; font-size: var(--sc-t-base); color: var(--sc-ink); }
+
+  /* the footer: a last line, the button, columns */
+  .closing { position: relative; background: #0A0806; color: var(--sc-ink); padding-block: clamp(5rem, 11vw, 9rem) var(--sc-6); border-top: 1px solid var(--sc-hairline-strong); }
+  .closing-line { margin: 0 0 var(--sc-6); font-family: var(--sc-font-display); font-weight: 200; text-transform: uppercase; letter-spacing: 0.01em;
+    font-size: clamp(2.2rem, 1.2rem + 4.4vw, 6rem); line-height: 0.98; max-width: 22ch; color: var(--sc-ink); }
+  .closing-line .script { display: block; font-size: 1.15em; line-height: 1.05; margin-bottom: 0.1em; text-transform: none; }
+  .closing-cols { margin-top: clamp(3.5rem, 8vw, 6.5rem); padding-top: var(--sc-6); border-top: 1px solid var(--sc-hairline-strong);
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-6) var(--sc-7); }
+  .closing h3 { margin: 0 0 var(--sc-3); font: 300 var(--sc-t-xl)/1 var(--sc-font-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-accent); }
+  .closing-cols a, .closing-cols p { display: block; margin: 0 0 0.55rem; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.5; text-decoration: none; }
+  .closing-cols a:hover { color: var(--sc-ink); }
+  .closing-base { margin: var(--sc-7) 0 0; padding-top: var(--sc-4); border-top: 1px solid var(--sc-hairline); display: flex; justify-content: space-between; gap: var(--sc-4); flex-wrap: wrap; font-size: var(--sc-t-xs); color: var(--sc-ink-soft); }
+  .closing-base a { display: inline; margin: 0; text-decoration: underline; text-underline-offset: 3px; }
+
+  @media (max-width: 860px) {
+    .world { height: auto; min-height: 82svh; }
+    .world--tubs { min-height: 76svh; }
+    .world-copy { padding-block: 5rem 4.5rem; gap: var(--sc-4); }
+    .world-copy h2 { font-size: clamp(3rem, 15vw, 4.6rem); }
+    .world--table .world-bg { object-position: 50% 45%; }
+    .world--tubs .world-bg { object-position: 28% 45%; }
+    .rest-grid { grid-template-columns: 1fr; }
+    .rows li { grid-template-columns: 2.4rem 1fr; }
+    .rows li p { grid-column: 2; }
+    .closing-cols { grid-template-columns: 1fr; }
+    .closing { padding-bottom: 6.5rem; }
+  }
+
 </style>
 </head>
 <body>
@@ -405,7 +434,7 @@
             <li><b>2</b><span>Place raw LA Cholent kit in your crock pot and add water.</span></li>
             <li><b>3</b><span>Cook on low for about 20 hours.</span></li>
           </ol>
-          <a class="btn" href="#order">Choose your size<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
+          <a class="btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
           <p class="proofline"><span>From ₪100</span><span>Kosher, hechsher from Rabbi Weiner</span><span>Made in Jerusalem, delivered across Israel</span></p>
         </div>
 
@@ -452,19 +481,24 @@
     </div>
   </section>
 
-  <section class="belong" id="occasions">
-    <div class="sc-wrap">
-      <p class="kosher-band" data-sc-in><span>Kosher</span>Vaad HaKashrus, Rabbi Shmuel Weiner</p>
-      <figure data-sc-reveal="up" data-sc-reveal-at="0.05 0.45">
-        <video class="table-clip" muted loop playsinline preload="none" poster="assets/table.webp" aria-label="A long Shabbos table at night, candles lit, challah under its cover, places set and waiting."></video>
-      </figure>
-      <div data-sc-in data-sc-stagger="60" class="sc-stack">
-        <h2>Any size. Any occasion.</h2>
-        <ul class="occasions" aria-label="What people order it for">
-          <li>Shabbos meals</li><li>Yom Tov</li><li>Thursday nights</li><li>Kiddushim</li><li>Shalom zachors</li><li>Bar mitzvahs</li><li>Family visiting</li><li>Simchos of any size</li>
-        </ul>
-      </div>
-      <div class="proof" data-sc-in data-sc-stagger="70">
+  <!-- WORLD 2: their Shabbos table, edge to edge (rule 3t). -->
+  <section class="world world--table" id="occasions" aria-labelledby="occ-h">
+    <video class="table-clip world-bg" muted loop playsinline preload="none" poster="assets/table.webp" aria-label="A long Shabbos table at night, candles lit, challah under its cover, places set and waiting."></video>
+    <div class="world-shade" aria-hidden="true"></div>
+    <div class="sc-wrap world-copy" data-sc-in data-sc-stagger="70">
+      <h2 id="occ-h">Any size.<br>Any occasion.</h2>
+      <ul class="occasions" aria-label="What people order it for">
+        <li>Shabbos meals</li><li>Yom Tov</li><li>Thursday nights</li><li>Kiddushim</li><li>Shalom zachors</li><li>Bar mitzvahs</li><li>Family visiting</li><li>Simchos of any size</li>
+      </ul>
+      <a class="btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
+    </div>
+  </section>
+
+  <!-- WORLD 3: a calm rest on marble, their facts as numbered rows. -->
+  <section class="rest" id="proof" aria-labelledby="proof-h">
+    <div class="sc-wrap rest-grid">
+      <div class="rest-head" data-sc-in data-sc-stagger="70">
+        <h2 id="proof-h">Made in Jerusalem. Delivered across Israel.</h2>
         <blockquote class="quote">
           <img src="assets/seal.webp" width="480" height="480" alt="The L.A. Cholent seal: convenient and consistent, a higher standard of flavor.">
           <div>
@@ -472,12 +506,25 @@
             <cite>Rabbi Samuels, on L.A. Cholent</cite>
           </div>
         </blockquote>
-        <dl class="facts">
-          <div><dt>Recipes</dt><dd>Original and Spicy</dd></div>
-          <div><dt>From</dt><dd>Made in Jerusalem, delivered across Israel</dd></div>
-          <div><dt>Each tub</dt><dd>Yields about 3 to 4 pounds</dd></div>
-        </dl>
       </div>
+      <ol class="rows" data-sc-in data-sc-stagger="80" aria-label="The facts">
+        <li><b>01</b><span>Kosher</span><p>Vaad HaKashrus, Rabbi Shmuel Weiner</p></li>
+        <li><b>02</b><span>Recipes</span><p>Original and Spicy</p></li>
+        <li><b>03</b><span>Each tub</span><p>Yields about 3 to 4 pounds</p></li>
+        <li><b>04</b><span>Delivery</span><p>Free local delivery on your first order</p></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- WORLD 4: their own tubs, edge to edge. -->
+  <section class="world world--tubs" id="kit" aria-labelledby="kit-h">
+    <img class="world-bg" src="assets/tubs.webp" width="1600" height="1066" loading="lazy"
+         alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps.">
+    <div class="world-shade" aria-hidden="true"></div>
+    <div class="sc-wrap world-copy" data-sc-in data-sc-stagger="70">
+      <h2 id="kit-h">Add water. It cooks itself.</h2>
+      <p class="world-line">Our raw ingredients, ready for your crock pot. Cook on low for about 20 hours.</p>
+      <a class="btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
     </div>
   </section>
 
@@ -512,18 +559,27 @@
           </div>
         </div>
       </div>
-      <footer class="foot">
-        <span>L.A. Cholent by Rabbi Samuels · Made in Jerusalem · delivered across Israel</span>
-        <a href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Listed on MyIsraelRental</a>
-      </footer>
     </div>
   </section>
 
 </main>
 
+<footer class="closing" id="closing">
+  <div class="sc-wrap">
+    <p class="closing-line"><span class="script">Convenient and consistent.</span>A higher standard of flavor.</p>
+    <a class="btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
+    <div class="closing-cols">
+      <nav aria-label="On this page"><h3>This page</h3><a href="#occasions">Occasions</a><a href="#proof">Kosher and delivery</a><a href="#kit">The kit</a><a href="#order">Sizes and prices</a></nav>
+      <div><h3>Sizes</h3><a href="#order">Medium, feeds 4 to 6, &#8362;100</a><a href="#order">Large, feeds 8 to 12, &#8362;180</a><a href="#order">Kiddush, sized to your guests, &#8362;250</a></div>
+      <div><h3>Find us</h3><p>Made in Jerusalem, delivered across Israel.</p><p>Kosher: Vaad HaKashrus, Rabbi Shmuel Weiner.</p><a href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message us on MyIsraelRental</a></div>
+    </div>
+    <p class="closing-base"><span>L.A. Cholent by Rabbi Samuels</span><a href="#top">Back to the top</a></p>
+  </div>
+</footer>
+
 <header class="topbar" id="topbar"><nav class="tb-nav" aria-label="Site menu">
   <a class="tb-brand" href="#top"><img src="assets/seal.webp" width="40" height="40" alt=""><span>L.A. Cholent</span></a>
-  <div class="tb-links"><a href="#occasions" tabindex="-1">Occasions</a><a href="#order" tabindex="-1">Sizes and prices</a></div>
+  <div class="tb-links"><a href="#occasions" tabindex="-1">Occasions</a><a href="#proof" tabindex="-1">Kosher</a><a href="#order" tabindex="-1">Sizes and prices</a></div>
   <a class="btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels" tabindex="-1">Message to order</a>
 </nav></header>
 

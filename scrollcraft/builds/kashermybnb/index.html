@@ -66,6 +66,7 @@
   .is-here a { color: var(--sc-ink); background: var(--sc-surface); }
 
   /* ---------- the walk ---------------------------------------------------- */
+  #walk { height: 600vh; }
   #walk [data-sc-stage] { overflow: hidden; background: var(--sc-canvas); }
   /* The camera: the whole photo and its marks move as one, so a mark can
      never leave the thing it marks. Positioned and scaled in script. */
@@ -152,7 +153,7 @@
   .asks li small { display: block; margin-top: var(--sc-2); font: 400 var(--sc-t-sm)/1.5 var(--sc-font-text); color: var(--sc-ink-soft); }
 
   /* the close: an inquiry plate, set like the station labels */
-  #book { background: var(--sc-surface); }
+
   .plate { background: #fff; border-radius: var(--sc-r-lg); padding: clamp(1.5rem, 4vw, 3rem); box-shadow: 0 30px 70px -40px rgb(19 32 44 / 0.45);
     display: grid; grid-template-columns: 1fr auto; gap: var(--sc-6); align-items: end; }
   .plate img { width: 64px; height: 64px; object-fit: contain; }
@@ -166,7 +167,7 @@
 
   .buybar { display: none; }
   /* the rest of the site (12 Oct 2026): a Book pill in the bar, links on the cards */
-  .bar-book { margin-left: 0.5rem; display: inline-flex; align-items: center; min-height: 40px; padding: 0 1.1rem; border-radius: 999px; background: var(--sc-accent); color: #fff;
+  .bar-book { white-space: nowrap; min-width: 9.6rem; justify-content: center; margin-left: 0.5rem; display: inline-flex; align-items: center; min-height: 40px; padding: 0 1.1rem; border-radius: 999px; background: var(--sc-accent); color: #fff;
     font: 600 var(--sc-t-sm)/1 var(--sc-font-text); text-decoration: none; box-shadow: 0 6px 14px -6px rgb(48 96 144 / 0.5); transition: background 160ms; }
   .bar-book:hover { background: #24507a; }
   .bar-book:focus-visible { outline: 3px solid var(--roof); outline-offset: 3px; }
@@ -219,6 +220,67 @@
     .cards.is-flip .card { bottom: auto; top: 0; }
   }
 
+
+  /* ---- worlds (rule 3t, 21 Oct 2026): picture, rest, picture ---- */
+  .pic { position: relative; height: calc(100svh - 72px); min-height: 30rem; overflow: hidden; background: #BCD0E4; display: flex; align-items: center; }
+  .pic > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+  .pic--kitchen > img { object-position: 66% 100%; }
+  .pic--pots { background: #C9D9EA; }
+  .pic--pots > img { left: auto; right: 0; width: auto; max-width: 100%; aspect-ratio: 1; object-fit: contain; mix-blend-mode: multiply; }
+  .pic .shade { position: absolute; inset: 0; pointer-events: none; }
+  .shade--l { background: linear-gradient(90deg, rgb(255 255 255 / 0.96) 0%, rgb(255 255 255 / 0.82) 30%, rgb(255 255 255 / 0) 62%); }
+  .pic--pots .shade--l { background: linear-gradient(90deg, #C9D9EA 0%, rgb(201 217 234 / 0.88) 34%, rgb(201 217 234 / 0) 64%); }
+  .pic-copy { position: relative; z-index: 2; padding: calc(var(--bar-h) + 2rem) var(--sc-gutter) 3rem; max-width: 40rem; }
+  .pic-copy .kick { margin: 0 0 var(--sc-3); font: 600 0.875rem/1 var(--sc-font-text); letter-spacing: 0.12em; text-transform: uppercase; color: #801B16; }
+  .pic-copy h2 { margin: 0; font-size: min(clamp(2.8rem, 1.4rem + 4.6vw, 6rem), 11svh); line-height: 0.98; letter-spacing: -0.035em; font-weight: 700; max-width: 9ch; }
+  .pic-copy h2 em { font-style: normal; color: var(--sc-accent); }
+  .pic-copy .line { margin: var(--sc-4) 0 var(--sc-5); max-width: 26rem; font-size: var(--sc-t-base); line-height: 1.5; color: var(--sc-ink); }
+  .rest { padding-block: clamp(2.5rem, 7svh, 6rem); }
+  .rest--white { background: #fff; }
+  .rest--grey { background: var(--sc-surface); }
+  .rest h2 { margin: 0; font-size: min(clamp(2.4rem, 1.3rem + 3.6vw, 5rem), 8svh); line-height: 1; letter-spacing: -0.03em; max-width: 20ch; font-weight: 700; }
+  .rows { margin: var(--sc-4) 0 0; padding: 0; list-style: none; border-top: 1px solid var(--sc-hairline-strong); }
+  .rows li { display: grid; grid-template-columns: 4rem minmax(10rem, 20rem) 1fr; gap: var(--sc-4); align-items: baseline; padding: min(var(--sc-3), 0.9svh) 0; border-bottom: 1px solid var(--sc-hairline); }
+  .rows i { font: 500 var(--sc-t-sm)/1 var(--sc-font-text); font-style: normal; color: var(--sc-ink-soft); letter-spacing: 0.1em; }
+  .rows b { font: 600 var(--sc-t-xl)/1.1 var(--sc-font-display); letter-spacing: -0.01em; }
+  .rows span { color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  .rest .strip { margin-top: var(--sc-3); }
+  .rest .more { margin: var(--sc-3) 0 0; } .rest .more a { font-weight: 600; text-decoration: none; border-bottom: 1.5px solid rgb(48 96 144 / 0.35); }
+  @media (min-width: 861px) and (max-height: 760px) { .rows b { font-size: 1.1rem; } .rest .strip b { font-size: 1.1rem; } .rest h2 { font-size: min(2.6rem, 7svh); } .rows li { padding: 0.5svh 0; } }
+  .rest--grey .asks li { background: #fff; }
+  .rest--blue { background: var(--sc-accent); color: #fff; }
+  .rest--blue .close { display: grid; justify-items: start; gap: min(var(--sc-4), 1.6svh); }
+  .rest--blue .close img { background: #fff; border-radius: 14px; padding: 6px; width: 56px; height: 56px; }
+  .rest--blue h2 { max-width: 10ch; }
+  .rest--blue .label { border-color: rgb(255 255 255 / 0.4); width: min(34rem, 100%); margin: var(--sc-2) 0 var(--sc-3); }
+  .rest--blue .label > div { border-color: rgb(255 255 255 / 0.25); }
+  .rest--blue .label dt { color: rgb(255 255 255 / 0.8); }
+  .rest--blue .fine { margin: 0; max-width: 28rem; font-size: var(--sc-t-sm); line-height: 1.5; color: rgb(255 255 255 / 0.9); }
+  .rest--blue .btn { filter: none; }
+  .rest--blue .btn .lb, .rest--blue .btn .ab { background: #fff; color: var(--sc-ink); }
+  .rest--blue .btn:hover .lb, .rest--blue .btn:hover .ab { background: #E8EEF5; }
+  .rest--blue .btn:focus-visible { outline-color: #fff; }
+  .foot { display: block; background: #0F1A24; color: rgb(255 255 255 / 0.78); padding: clamp(4rem, 9vw, 7rem) var(--sc-gutter) 3rem; }
+  .foot .last { margin: 0 0 var(--sc-6); font: 700 clamp(2.4rem, 1.2rem + 4.4vw, 5.4rem)/1 var(--sc-font-display); letter-spacing: -0.035em; color: #fff; max-width: 14ch; }
+  .foot-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-5); border-top: 1px solid rgb(255 255 255 / 0.2); padding-top: var(--sc-5); }
+  .foot-nav { display: grid; gap: 0.5rem; align-content: start; font-size: var(--sc-t-sm); }
+  .foot-nav b { color: #fff; font-weight: 600; margin-bottom: 0.2rem; }
+  .foot a { color: rgb(255 255 255 / 0.9); }
+  @media (max-width: 860px) {
+    .pic { align-items: flex-end; height: calc(100svh - 60px); }
+    .shade--l { background: linear-gradient(0deg, rgb(255 255 255 / 0.96) 0%, rgb(255 255 255 / 0.85) 42%, rgb(255 255 255 / 0) 72%); }
+    .pic--pots .shade--l { background: linear-gradient(0deg, #C9D9EA 0%, rgb(201 217 234 / 0.9) 42%, rgb(201 217 234 / 0) 72%); }
+    .pic-copy { padding: 2rem 16px 2.2rem; }
+    .rest h2 { font-size: clamp(2.2rem, 10vw, 3rem); }
+    .rest { padding-block: 2.5rem; }
+    .pic--kitchen > img { object-position: 47% 50%; transform: none; height: 70%; }
+    .pic--pots > img { left: 0; right: auto; width: 100%; height: auto; max-height: 66%; object-position: 50% 0; }
+    .rows li { grid-template-columns: 2.5rem 1fr; } .rows li span { grid-column: 2; }
+    .foot-cols { grid-template-columns: 1fr; }
+    .after { padding-bottom: 6rem; }
+    .bar-book { font-size: 0.8rem; padding: 0 0.8rem; white-space: nowrap; }
+  }
+
   /* ---- proposed ---- */
   .feat--photo { grid-template-columns: 0.9fr 1.1fr; background: var(--sc-surface); border: 0; padding: clamp(1rem, 2vw, 1.5rem); }
   .feat--photo img { height: clamp(150px, 26svh, 260px); object-fit: cover; border-radius: var(--sc-r-md); background: #fff; }
@@ -236,7 +298,7 @@
   .who-line a { color: var(--sc-accent); font-weight: 600; }
   #features.sec, #who.sec { padding-block: clamp(2.5rem, 6svh, 4.5rem); }
   .asks li { padding: var(--sc-4) var(--sc-5); }
-  .bar-menu { margin-left: 0.5rem; min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--sc-hairline-strong); background: #fff; color: var(--sc-ink); font: 600 var(--sc-t-sm)/1 var(--sc-font-text); cursor: pointer; transition: background 120ms; }
+  .bar-menu { margin-left: 0.5rem; min-width: 5.2rem; text-align: center; min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--sc-hairline-strong); background: #fff; color: var(--sc-ink); font: 600 var(--sc-t-sm)/1 var(--sc-font-text); cursor: pointer; transition: background 120ms; }
   .bar-menu:hover { background: var(--sc-surface); } .bar-menu:active { transform: scale(0.97); }
   .bar-panel { position: fixed; top: calc(var(--bar-h) + 6px); right: var(--sc-gutter); z-index: 80; background: #fff; border-radius: 16px; padding: 0.5rem; box-shadow: 0 12px 30px rgb(19 32 44 / 0.16); display: grid; min-width: 14rem; }
   .bar-panel[hidden] { display: none; }
@@ -247,7 +309,8 @@
   .btn:active .lb, .btn:active .ab { background: #1d4166; }
   .btn:hover { filter: drop-shadow(0 8px 16px rgb(48 96 144 / 0.38)); } .btn:active { transform: scale(0.97); transition: transform 90ms ease-out; }
   .bar-book:active { transform: scale(0.97); background: #1d4166; }
-  .brand { min-height: 44px; }
+  .brand { min-height: 44px; flex: none; }
+  .bar nav { flex: 1; min-width: 0; }
   @media (max-width: 860px) {
     .index a { min-width: 40px; min-height: 40px; justify-content: center; padding: 0.3rem; }
     .index { gap: 0; }
@@ -274,7 +337,7 @@
     <ol class="index" id="index"></ol>
   </nav>
   <button type="button" class="bar-menu" id="menuBtn" aria-expanded="false" aria-controls="menuPanel">Pages</button>
-  <a class="bar-book" href="book.html">Book</a>
+  <a class="bar-book" href="book.html">Book a kashering</a>
   <div class="bar-panel" id="menuPanel" hidden><a href="index.html">Home</a><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book</a><button type="button" id="menuClose">Close</button></div>
 </header>
 
@@ -317,80 +380,87 @@
     </div>
   </section>
 
-  <div class="after">
-    <section class="sec" id="features">
-      <div class="wrap">
-        <h2 data-sc-in>What we kasher.</h2>
-        <div class="feats">
-          <article class="feat feat--photo" data-sc-in>
-            <img src="assets/kitchen.webp" alt="A rental kitchen: oven, stovetop, sink and countertops" width="1600" height="900" loading="lazy">
-            <div>
-              <h3>Whole kitchen</h3>
-              <p class="price"><b>$350</b><span>about 2 hours</span></p>
-              <p>Oven with racks, stovetop (electric or gas), microwave, countertops, sinks and faucets, hot plate.</p>
-              <p class="more"><a href="kitchen.html">See the whole kitchen</a></p>
-            </div>
-          </article>
-          <article class="feat feat--photo" id="pots" data-sc-in>
-            <img src="assets/pots.webp" alt="Stainless steel pots, a colander and cutlery" width="1200" height="1200" loading="lazy">
-            <div>
-              <h3>Pots, cutlery and utensils</h3>
-              <p class="price"><b>$180</b><span>about 1 hour</span></p>
-              <p>Pots (stainless steel only), cutlery and kitchen utensils. Frying pans cannot be kashered; a new one is $15.</p>
-              <p class="more"><a href="pots.html">See pots and cutlery</a></p>
-            </div>
-          </article>
-        </div>
-        <ul class="strip" data-sc-in>
-          <li><b>+$40</b><span>Extra oven cleaning and kashering, with a whole kitchen</span></li>
-          <li><b>Rental</b><span>We also help guests find a suitable vacation rental</span></li>
-          <li><b>Jerusalem</b><span>Prices are for Jerusalem; elsewhere in Israel there may be a fee by distance</span></li>
-        </ul>
-      </div>
-    </section>
+  <section class="pic pic--kitchen" id="features">
+    <img src="assets/kitchen.webp" alt="" width="2048" height="1152" loading="lazy">
+    <div class="shade shade--l"></div>
+    <div class="pic-copy" data-sc-in>
+      <p class="kick">Whole kitchen</p>
+      <h2>A whole kitchen, <em>$350.</em></h2>
+      <p class="line">About 2 hours, oven to hot plate.</p>
+      <a class="btn" href="book.html"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+    </div>
+  </section>
 
-    <section class="sec" id="who">
-      <div class="wrap">
-        <h2 data-sc-in>For guests in vacation rentals, and for Pesach.</h2>
-        <ul class="asks" data-sc-in>
-          <li>Staying in a vacation rental?<small>We kasher the kitchen of the apartment you are staying in, for guests who keep kosher.</small></li>
-          <li>Preparing for Pesach?<small>Your kitchen kashered and ready before Yom Tov.</small></li>
-          <li>Moving into a new home?<small>For homeowners and property managers too.</small></li>
-        </ul>
-        <ul class="nums" data-sc-in>
-          <li><b>2019</b><span>the year we started</span></li>
-          <li><b>6</b><span>parts of the kitchen, one price</span></li>
-          <li><b>2 hrs</b><span>about, for a whole kitchen</span></li>
-          <li><b>2</b><span>languages: English and Hebrew</span></li>
-        </ul>
-        <p class="who-line" data-sc-in><b>Done by expert mashgichim, following cRc guidelines.</b> <a href="book.html">Book here</a> in three short steps; we confirm the day and time with you on WhatsApp.</p>
-      </div>
-    </section>
+  <section class="rest rest--white" id="what">
+    <div class="wrap">
+      <h2 data-sc-in>Six parts, one price.</h2>
+      <ol class="rows" data-sc-in>
+        <li><i>01</i><b>Oven, with racks</b><span>Extra oven cleaning and kashering, $40</span></li>
+        <li><i>02</i><b>Stovetop</b><span>Electric or gas</span></li>
+        <li><i>03</i><b>Microwave</b><span>Included in the whole kitchen</span></li>
+        <li><i>04</i><b>Countertops</b><span>Included in the whole kitchen</span></li>
+        <li><i>05</i><b>Sinks and faucets</b><span>Included in the whole kitchen</span></li>
+        <li><i>06</i><b>Hot plate</b><span>Included in the whole kitchen</span></li>
+      </ol>
+      <ul class="strip" data-sc-in>
+        <li><b>+$40</b><span>Extra oven cleaning and kashering, with a whole kitchen</span></li>
+        <li><b>Jerusalem</b><span>Prices are for Jerusalem; elsewhere in Israel there may be a fee by distance</span></li>
+        <li><b>Rentals</b><span>We also help guests find a suitable vacation rental</span></li>
+      </ul>
+      <p class="more"><a href="kitchen.html">See the whole kitchen</a></p>
+    </div>
+  </section>
 
-    <section class="sec" id="book">
-      <div class="wrap">
-        <div class="plate" data-sc-in>
-          <div>
-            <img src="assets/logo.png" alt="KasherMyBnb" width="64" height="64">
-            <h2>Book your kashering.</h2>
-            <dl class="label">
-              <div><dt>Whole kitchen</dt><dd>$350, about 2 hours. Oven and racks, stovetop, microwave, countertops, sink and faucet, hot plate.</dd></div>
-              <div><dt>Pots and cutlery</dt><dd>$180, about 1 hour.</dd></div>
-              <div><dt>Extra oven cleaning</dt><dd>$40.</dd></div>
-            </dl>
-          </div>
-          <div class="side">
-            <a class="btn" href="book.html"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
-            <p><b>Expert mashgichim, following cRc guidelines. Since 2019.</b><br>Choose what you need and a day. We confirm the time with you on WhatsApp. Nothing to pay on this site.</p>
-          </div>
-        </div>
-      </div>
-    </section>
-    <footer class="foot">
-      <span>KasherMyBnb · kitchen kashering in Jerusalem and across Israel, since 2019</span>
-      <nav class="foot-nav"><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book</a><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></nav>
-    </footer>
-  </div>
+  <section class="pic pic--pots" id="pots">
+    <img src="assets/pots.webp" alt="Stainless steel pots, a colander and cutlery" width="1200" height="1200" loading="lazy">
+    <div class="shade shade--l"></div>
+    <div class="pic-copy" data-sc-in>
+      <p class="kick">Pots, cutlery and utensils</p>
+      <h2>Pots and cutlery, <em>$180.</em></h2>
+      <p class="line">About 1 hour. Stainless steel pots only; frying pans cannot be kashered, a new one is $15.</p>
+      <a class="btn" href="book.html"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+    </div>
+  </section>
+
+  <section class="rest rest--grey" id="who">
+    <div class="wrap">
+      <h2 data-sc-in>For guests in rentals, and for Pesach.</h2>
+      <ul class="asks" data-sc-in>
+        <li>Staying in a vacation rental?<small>We kasher the kitchen of the apartment you are staying in, for guests who keep kosher.</small></li>
+        <li>Preparing for Pesach?<small>Your kitchen kashered and ready before Yom Tov.</small></li>
+        <li>Moving into a new home?<small>For homeowners and property managers too.</small></li>
+      </ul>
+      <ul class="nums" data-sc-in>
+        <li><b>2019</b><span>the year we started</span></li>
+        <li><b>6</b><span>parts of the kitchen, one price</span></li>
+        <li><b>2 hrs</b><span>about, for a whole kitchen</span></li>
+        <li><b>2</b><span>languages: English and Hebrew</span></li>
+      </ul>
+      <p class="who-line" data-sc-in><b>Done by expert mashgichim, following cRc guidelines.</b> We confirm the day and time with you on WhatsApp.</p>
+    </div>
+  </section>
+
+  <section class="rest rest--blue" id="book">
+    <div class="wrap close">
+      <img src="assets/logo.png" alt="KasherMyBnb" width="64" height="64">
+      <h2 data-sc-in>Book your kashering.</h2>
+      <dl class="label" data-sc-in>
+        <div><dt>Whole kitchen</dt><dd>$350, about 2 hours</dd></div>
+        <div><dt>Pots and cutlery</dt><dd>$180, about 1 hour</dd></div>
+        <div><dt>Extra oven cleaning</dt><dd>$40</dd></div>
+      </dl>
+      <a class="btn" href="book.html"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+      <p class="fine">Choose what you need and a day. We confirm the time with you on WhatsApp. Nothing to pay on this site.</p>
+    </div>
+  </section>
+  <footer class="foot after">
+    <p class="last">Settle in, ready to use.</p>
+    <div class="foot-cols">
+      <nav class="foot-nav" aria-label="Pages"><b>Pages</b><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book a kashering</a></nav>
+      <div class="foot-nav"><b>Where</b><span>Jerusalem and across Israel</span><span>English and Hebrew</span><span>Since 2019</span></div>
+      <div class="foot-nav"><b>Contact</b><span>Message us on WhatsApp</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+    </div>
+  </footer>
 </main>
 
 <div class="buybar" id="buybar" aria-hidden="true">

@@ -604,13 +604,17 @@ getting a deal"). Work it out from the owner's own prices, never invent it:
      and the Small: it saved nothing);
   4. where options differ in more than amount (different contents, extras,
      quality), there is no saving to show;
-  5. if only ONE option on the page would show a saving, show none (Tzvi,
-     21 Oct 2026: "if there will only be one savings then everything else
-     looks overpriced so don't write the savings"); a saving is shown only
-     where two or more options of the page carry one (The Whipped Cup's four
-     packs), never one lone badge (Blazin' Boards' Large Premium, Bun
-     Intended's 8 piece box, Michal Simkin's bundle, Elisheva's gel with
-     removal); the lower price still speaks for itself;
+  5. a lone saving among many products shows none (Tzvi, 21 Oct 2026: "if
+     there will only be one savings then everything else looks overpriced so
+     don't write the savings"), but judge it by the group it belongs to, so it
+     makes sense ("if a store only has 2 products like a single pack and a
+     double pack ... it won't look bad"): compare each small group of sizes of
+     one thing within itself (a single and a double pack, a 4 and an 8 box,
+     a 9x13 pan and a roaster, the Munch boxes against each other, two
+     programmes and their bundle, a service and the same service with its
+     add-on) and its saving is shown; only where the site sells many things
+     and one item alone carries a badge (Blazin' Boards' Large Premium among
+     a dozen boards) is it left off, and the lower price speaks for itself;
 - **say only the saving, in money** ("You save $77", "Save up to ₪44"), never
   how much more the bigger one costs or a percentage (Tzvi, 20 Oct 2026:
   "don't say how much more it costs, only mention how much they will save in

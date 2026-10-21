@@ -287,6 +287,59 @@
   .foot .cols3 a:hover { color: var(--gold-hi); }
   .foot .fine { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
   @media (max-width: 760px) { .foot .cols3 { grid-template-columns: 1fr; } }
+
+  /* WORLDS (page rules 3t, Tzvi 21 Oct 2026): after the opening the page
+     changes ground: a wall of their photographs, a calm ivory rest, the
+     box again as a full-bleed picture, ivory, dark, ivory, the open box
+     to close. Photographs only from their own set; the box stills are the
+     opening's own. */
+  .pic { position: relative; overflow: hidden; background: var(--night); color: #fff; isolation: isolate; }
+  .pic .words { position: relative; z-index: 3; text-align: center; padding-inline: var(--gutter); }
+  .pic h2 { font-size: clamp(2.4rem, 1rem + 4.6vw, 5.2rem); line-height: 1.02; color: #fff; text-shadow: 0 2px 30px rgb(14 12 9 / .9), 0 0 3px rgb(14 12 9 / .6); }
+  .pic h2 em { font-style: normal; color: var(--gold-hi); }
+  .pic .sub { margin: 1rem auto 0; max-width: 30rem; color: #fff; font-size: 1.05rem; text-shadow: 0 1px 14px rgb(14 12 9 / .9); }
+  .pic .act { display: flex; justify-content: center; margin-top: clamp(1.4rem, 3vw, 2.2rem); }
+  .wall { min-height: 88svh; display: grid; place-items: center; }
+  .wall .tiles { position: absolute; inset: 0; z-index: 0; display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); grid-auto-rows: 1fr; gap: 3px; margin: 0; padding: 0; list-style: none; background: var(--night); }
+  .wall .tiles li { overflow: hidden; }
+  .wall .tiles img { width: 100%; height: 100%; object-fit: cover; scale: 1.14; }
+  .wall::before { content: ""; position: absolute; inset: 0; z-index: 2; pointer-events: none;
+    background: radial-gradient(ellipse 62% 58% at 50% 50%, rgb(14 12 9 / .93), rgb(14 12 9 / .82) 50%, rgb(14 12 9 / 0) 100%),
+                linear-gradient(180deg, rgb(14 12 9 / .35), rgb(14 12 9 / 0) 18%, rgb(14 12 9 / 0) 82%, rgb(14 12 9 / .35)); }
+  .wall .words { padding-block: clamp(4rem, 9vw, 7rem); }
+  @media (max-width: 760px) {
+    .wall { min-height: 150vw; }
+    .wall .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .wall::before { background: radial-gradient(ellipse 95% 44% at 50% 50%, rgb(14 12 9 / .92), rgb(14 12 9 / .78) 60%, rgb(14 12 9 / 0) 100%); }
+  }
+  .scene { min-height: max(86svh, 44vw); display: flex; align-items: center; }
+  .scene > picture { position: absolute; inset: 0; z-index: 0; width: 100%; height: 100%; }
+  .scene img.bg { width: 100%; height: 100%; object-fit: cover; }
+  .scene::after { content: ""; position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .scene.deliver::after { background: linear-gradient(90deg, rgb(14 12 9 / .94) 0%, rgb(14 12 9 / .86) 32%, rgb(14 12 9 / .5) 46%, rgb(14 12 9 / 0) 64%); }
+  .scene.deliver img.bg { object-position: 62% 50%; }
+  .scene.deliver .words { text-align: left; max-width: 72rem; margin: 0 auto; width: 100%; }
+  .scene.deliver .words > * { max-width: 30rem; margin-inline: 0; }
+  .scene.deliver .act { justify-content: flex-start; }
+  .scene.deliver .hrs { margin: 1.4rem 0 0; color: var(--on-night-soft); font-size: .95rem; text-shadow: 0 1px 12px rgb(14 12 9 / .9); }
+  @media (max-width: 760px) {
+    .scene { align-items: flex-start; min-height: max(92svh, 150vw); }
+    .scene.deliver::after { background: linear-gradient(180deg, rgb(14 12 9 / .92) 0%, rgb(14 12 9 / .84) 42%, rgb(14 12 9 / 0) 72%); }
+    .scene.deliver .words { padding-top: 4rem; }
+    .scene.deliver .hrs { display: none; }
+    .scene.deliver img.bg { object-position: 50% 50%; }
+  }
+  .scene.last { min-height: max(80svh, 40vw); align-items: center; padding-bottom: 0; }
+  .scene.last img.bg { object-position: 50% 62%; }
+  .scene.last::after { background: radial-gradient(ellipse 60% 55% at 50% 42%, rgb(14 12 9 / .88), rgb(14 12 9 / .6) 60%, rgb(14 12 9 / .25) 100%),
+                                   linear-gradient(0deg, rgb(14 12 9 / .92), rgb(14 12 9 / .7) 22%, rgb(14 12 9 / 0) 55%); }
+  .scene.last .words { padding-block: clamp(4rem, 8vw, 6rem) 0; width: 100%; }
+  .scene.last .sign { margin-top: clamp(2rem, 6vw, 4.5rem); }
+  .scene.last h2 { max-width: 13em; margin-inline: auto; }
+  .foot .cta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 2rem; padding-bottom: 1.25rem; margin-bottom: .25rem; border-bottom: 1px solid var(--line-night); }
+  .foot .cta b { font: 600 clamp(1.5rem, 1rem + 2vw, 2.4rem)/1.1 var(--font-head); color: #fff; letter-spacing: .01em; }
+  .foot .cta .btn { color: var(--night); }
+  .sec.know { background: var(--ivory-2); }
 </style>
 <script>document.documentElement.classList.add('js');</script>
 </head>
@@ -334,6 +387,34 @@
     </div>
   </section>
 
+  <section class="pic wall" id="wall" aria-labelledby="h-wall">
+    <ul class="tiles" aria-hidden="true">
+      <li><img src="assets/cat/gold-wine.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/gift-1.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/cat/silver-chain.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/cat/tablecloth.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/gift-2.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/cat/white-vase.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/gift-3.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/cat/self-care.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/cat/marble-bowl.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/cat/washing-cup.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/gift-4.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/cat/wooden-board.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/cat/cream-bag.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/gift-5.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/cat/apple-board.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/cat/napkin-rings.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/cat/glass-jar.webp" alt="" width="300" height="300" loading="lazy"></li>
+      <li><img src="assets/gift-6.webp" alt="" width="300" height="300" loading="lazy"></li>
+    </ul>
+    <div class="words">
+      <h2 id="h-wall" data-rev>Wrapped by hand <em>in Jerusalem</em></h2>
+      <p class="sub" data-rev>Gifts for every occasion, delivered across Israel.</p>
+      <div class="act" data-rev><a class="btn" href="order.html"><span style="position:relative">Order a gift</span></a></div>
+    </div>
+  </section>
+
 
   <section class="sec make" aria-labelledby="h-make">
     <div class="wrap">
@@ -344,6 +425,16 @@
         <li><b>Elegant add-ons</b><span>Added to any gift, and personalised further if you ask. <a class="go" href="https://wa.me/972535386042?text=Hi%2C%20I%27d%20like%20to%20ask%20about%20add-ons." target="_blank" rel="noopener">Ask about add-ons</a></span></li>
         <li><b>Delivered across Israel</b><span>Sent from Jerusalem to wherever the gift is going. <a class="go" href="#order">How ordering works</a></span></li>
       </ol>
+    </div>
+  </section>
+
+  <section class="pic scene deliver" id="deliver" aria-labelledby="h-deliver">
+    <picture><source media="(max-width: 760px)" srcset="assets/open-m-first.webp"><img class="bg" src="assets/open-first.webp" alt="" width="1920" height="1080" loading="lazy"></picture>
+    <div class="words">
+      <h2 id="h-deliver" data-rev>Delivered <em>across Israel</em></h2>
+      <p class="sub" data-rev>Sent from Jerusalem to wherever the gift is going.</p>
+      <div class="act" data-rev><a class="btn" href="order.html"><span style="position:relative">Order a gift</span></a></div>
+      <p class="hrs" data-rev>Sunday to Thursday, 8:00 to midnight. Friday, 8:00 to 12:00.</p>
     </div>
   </section>
 
@@ -420,7 +511,7 @@
     </div>
   </section>
 
-  <section class="sec" aria-labelledby="h-know">
+  <section class="sec know" aria-labelledby="h-know">
     <div class="wrap">
       <h2 id="h-know" data-rev>Good to know</h2>
       <dl class="facts">
@@ -434,20 +525,20 @@
     </div>
   </section>
 
-  <section class="sec dark close" id="close" aria-labelledby="h-close">
-    <div class="wrap">
-      <h2 id="h-close">Send love across Israel with a <em class="acc">meaningful gift</em></h2>
-      <div class="act">
-        <a class="btn" href="order.html"><span style="position:relative">Order a gift</span></a>
-      </div>
+  <section class="pic scene last close" id="close" aria-labelledby="h-close">
+    <picture><source media="(max-width: 760px)" srcset="assets/open-m-last.webp"><img class="bg" src="assets/open-last.webp" alt="" width="1920" height="1080" loading="lazy"></picture>
+    <div class="words">
+      <h2 id="h-close">Send love across Israel with a <em>meaningful gift</em></h2>
+      <div class="act"><a class="btn" href="order.html"><span style="position:relative">Order a gift</span></a></div>
+      <div class="sign" aria-hidden="true" data-sc-act data-clip-ok><b id="sign" data-t="THE GIFT BOUTIQUE">THE GIFT BOUTIQUE</b></div>
     </div>
-    <div class="sign" aria-hidden="true" data-sc-act data-clip-ok><b id="sign" data-t="THE GIFT BOUTIQUE">THE GIFT BOUTIQUE</b></div>
   </section>
 </main>
 
 <footer class="foot">
   <div class="wrap">
     <div class="cols3">
+      <div class="cta"><b>Gifts for every occasion</b><a class="btn" href="order.html"><span style="position:relative">Order a gift</span></a></div>
       <div><h4>The Gift Boutique</h4><p>Jerusalem, with delivery across Israel.</p><p>Hand wrapped gifts for every occasion.</p></div>
       <div><h4>Pages</h4><p><a href="index.html">Home</a></p><p><a href="#prices">The collection</a></p><p><a href="order.html">Order a gift</a></p></div>
       <div><h4>Reach us</h4><p><a href="https://wa.me/972535386042" target="_blank" rel="noopener">WhatsApp +972 53-538-6042</a></p><p><a href="mailto:thegiftboutiqueisrael@gmail.com">thegiftboutiqueisrael@gmail.com</a></p><p>Sunday to Thursday, 8:00 to midnight. Friday, 8:00 to 12:00.</p></div>
