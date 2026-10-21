@@ -199,9 +199,11 @@
   .menu { padding-block: clamp(4rem, 9vw, 8rem); }
   .menu h2 { margin: 0 0 var(--sc-2); }
   .menu .lede { margin: 0 0 var(--sc-7); color: var(--sc-ink-soft); max-width: 40rem; }
-  .shots { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--sc-4); margin: 0 0 var(--sc-8); }
-  .shots figure { margin: 0; border-radius: var(--sc-r-lg); overflow: hidden; box-shadow: var(--sc-shadow-md); aspect-ratio: 3 / 2; }
-  .shots img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* each board whole (Tzvi, 21 Oct 2026: "the boards are a little cut off"): columns in the photos' own proportions, so all three
+     are the same height with nothing cropped; no zoom on hover */
+  .shots { display: grid; grid-template-columns: 1.5fr 1.5fr 1.552fr; gap: var(--sc-4); margin: 0 0 var(--sc-8); align-items: start; }
+  .shots figure { margin: 0; border-radius: var(--sc-r-lg); overflow: hidden; box-shadow: var(--sc-shadow-md); }
+  .shots img { display: block; width: 100%; height: auto; }
   .shots figcaption { position: absolute; }
   .list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 var(--sc-8); }
   .list li { display: grid; grid-template-columns: 1fr auto; gap: var(--sc-3); align-items: baseline; padding-block: var(--sc-4); border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 14%, transparent); }
@@ -273,7 +275,7 @@
   .shots img { transition: scale 700ms var(--sc-ease-out); }
   @media (hover: hover) {
     .list li:hover::before { transform: scaleX(1); } .list li:hover .price { scale: 1.12; }
-    .shots figure:hover img { scale: 1.06; }
+
   }
   /* every board is a link: to WhatsApp with that board named, or to the order page with it chosen */
   .list li > a.board-link, .tier li > a.board-link { display: contents; color: inherit; text-decoration: none; }
@@ -307,7 +309,7 @@
     .tiers { inset-inline: var(--sc-gutter); width: auto; height: auto; inset-block-end: clamp(1.5rem, 5vh, 3rem); }
     .tier__size { font-size: clamp(2.2rem, 11vw, 3.6rem); }
     .tier li small { display: none; }
-    .shots { grid-template-columns: 1fr 1fr; } .shots figure:first-child { grid-column: 1 / -1; }
+    .shots { grid-template-columns: 1fr 1fr; } .shots figure:first-child { grid-column: 1 / -1; }  /* phone: the long board full width, the other two side by side */
     .list { grid-template-columns: 1fr; }
     .facts .sc-wrap { grid-template-columns: 1fr; gap: var(--sc-7); }
     .facts__list > div { grid-template-columns: 1fr; gap: var(--sc-1); }
@@ -432,9 +434,9 @@
       <h2 class="sc-display sc-display--md" id="menuTitle">Every board.</h2>
       <p class="lede">Our full price list, in US dollars. Tell us how many people are coming and what they like.</p>
       <div class="shots">
-        <figure data-sc-reveal="right" data-sc-reveal-at="0.06 0.42"><img src="assets/their-long.jpg" width="1024" height="683" alt="Our long board on marble: pastrami, brisket, salami and a bone-in rib, with olives and parsley" loading="lazy"></figure>
-        <figure data-sc-reveal="up" data-sc-reveal-at="0.1 0.46"><img src="assets/their-salami.jpg" width="1024" height="683" alt="A square board of sliced meats and salami rounds, with pistachios and olives" loading="lazy"></figure>
-        <figure data-sc-reveal="up" data-sc-reveal-at="0.14 0.5"><img src="assets/their-rustic.jpg" width="1600" height="1031" alt="Sliced steak and candied pastrami piled on a wooden board" loading="lazy"></figure>
+        <figure data-sc-reveal="right" data-sc-reveal-at="0 0.12"><img src="assets/their-long.jpg" width="1024" height="683" alt="Our long board on marble: pastrami, brisket, salami and a bone-in rib, with olives and parsley" loading="lazy"></figure>
+        <figure data-sc-reveal="up" data-sc-reveal-at="0.02 0.14"><img src="assets/their-salami.jpg" width="1024" height="683" alt="A square board of sliced meats and salami rounds, with pistachios and olives" loading="lazy"></figure>
+        <figure data-sc-reveal="up" data-sc-reveal-at="0.04 0.16"><img src="assets/their-rustic.jpg" width="1600" height="1031" alt="Sliced steak and candied pastrami piled on a wooden board" loading="lazy"></figure>
       </div>
       <ul class="list" data-sc-in data-sc-stagger="60">
         <li><span><b>Mini Board <i>15 × 20 cm</i></b><small>Entrecote steak, candied pastrami, salami chips, sometimes brisket or London broil, beef jerky.</small></span><span class="price">$75</span></li>
