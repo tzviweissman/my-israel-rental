@@ -938,16 +938,26 @@ getting a deal"). Work it out from the owner's own prices, never invent it:
 - a pack or bundle shows what it saves against the same items bought one by
   one ("Save up to ₪44 · ₪37 a jar, single jars are ₪40 to ₪48"), "up to"
   only for the true top of the range;
-- a bigger size shows what you save only when it is cheaper for the amount
-  than EVERY smaller size of the same line (the same contents in another size:
-  Large Premium against Small and Medium Premium, never against the regular
-  Medium; Tzvi, 21 Oct 2026), measured against the cheapest of
-  them (Tzvi, 21 Oct 2026, with the arithmetic: Blazin' Boards' Large Blazin'
-  is $0.248 a square centimetre, the same as the Mini and the Small, so it
-  saves nothing; the earlier "Save $77" was measured against the Medium, the
-  one dearer board, which is cherry-picking). Work it out in a table of every
-  size's price per unit before printing any saving; on Blazin' Boards only the
-  Large Premium saves ($485 against $646 at the Small and Medium Premium rate);
+- **any saving, for anything** (a bigger size, a pack, a bundle, a package,
+  a monthly plan, a longer session, more of the same; Tzvi, 21 Oct 2026: "it
+  should work for any comparisons") is shown only when it is true like for
+  like:
+  1. compare only the same thing in a different amount: the same contents,
+     the same service, the same product line (a Large Premium board against
+     the Small and Medium Premium, never the regular Medium; a 6-jar bundle
+     against six single jars of those flavours; a 2-hour session against two
+     1-hour sessions of the same service);
+  2. work it out per unit first, in a table of every option (per jar, per
+     square centimetre, per person, per hour, per kilo, whatever the owner
+     sells by);
+  3. the bigger option shows a saving only if its unit price is lower than
+     EVERY smaller option of the same thing, and the saving is measured
+     against the cheapest of them, never against one dearer outlier
+     (Blazin' Boards' "Save $77" was measured against the one overpriced
+     Medium, while the Large cost the same per square centimetre as the Mini
+     and the Small: it saved nothing);
+  4. where options differ in more than amount (different contents, extras,
+     quality), there is no saving to show;
 - **say only the saving, in money** ("You save $77", "Save up to ₪44"), never
   how much more the bigger one costs or a percentage (Tzvi, 20 Oct 2026:
   "don't say how much more it costs, only mention how much they will save in
