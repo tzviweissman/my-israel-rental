@@ -4628,8 +4628,10 @@ const he = {
       },
       services: {
         mapCount_one: "עסק אחד כאן",
+        mapCount_two: "שני עסקים כאן",
         mapCount_other: "{{count}} עסקים כאן",
         mapUnplaced_one: "עוד עסק אחד משרת את כל הארץ או עובד אונליין, ולכן אין לו סיכה. הוא מופיע בתצוגת הרשימה.",
+        mapUnplaced_two: "עוד שני עסקים משרתים את כל הארץ או עובדים אונליין, ולכן אין להם סיכה. הם מופיעים בתצוגת הרשימה.",
         mapUnplaced_other: "עוד {{count}} עסקים משרתים את כל הארץ או עובדים אונליין, ולכן אין להם סיכה. הם מופיעים בתצוגת הרשימה.",
         // Rentals → services cross-sell strip (property detail + post-booking).
         crossSell: {
