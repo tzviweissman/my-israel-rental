@@ -63,14 +63,7 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
 }
 
 /* the opening: pick a shade, and her own photo of nails in it fills the frame */
-.hero { position: relative; min-height: 100svh; padding: calc(70px + clamp(1rem, 4vh, 2.5rem)) 0 clamp(2rem, 5vh, 3rem); display: grid; align-items: center;
-  background: var(--paper); overflow: hidden; }
-.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .95fr); grid-template-areas: "text frame" "pick frame"; column-gap: clamp(1.5rem, 4vw, 4rem); row-gap: 0; align-items: center; }
-.h-text { grid-area: text; align-self: end; } .h-pick { grid-area: pick; align-self: start; } .hero .frame { grid-area: frame; }
 .sym { font-family: var(--font-body); font-weight: 500; font-size: .62em; margin-right: .08em; vertical-align: .18em; }
-.hero h1 { font-size: clamp(2.6rem, 4.8vw, 4.4rem); font-weight: 500; letter-spacing: .01em; }
-.hero h1 .script { display: block; font-size: .78em; margin-top: .15em; line-height: 1.1; }
-.hero .lede { margin: 1.1rem 0 1.4rem; max-width: 30rem; color: var(--soft); font-size: 1.12rem; }
 .shades { margin: 0 0 1.6rem; }
 .shades .caps { margin: 0 0 .7rem; }
 .chips { display: flex; flex-wrap: wrap; gap: .7rem; }
@@ -84,8 +77,6 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
 .act { display: flex; flex-wrap: wrap; align-items: center; gap: .9rem 1.4rem; }
 .proof { margin: 0; color: var(--soft); font-size: .95rem; line-height: 1.45; }
 .proof b { color: var(--ink); font-weight: 600; }
-.frame { position: relative; width: 100%; max-width: min(520px, 72svh * .8); margin-inline: auto; aspect-ratio: 4 / 5; border-radius: 260px 260px var(--r) var(--r); overflow: hidden;
-  background: var(--blush); box-shadow: 0 40px 70px -40px rgb(142 74 68 / .55); }
 .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 /* the new shade spreads out from the tapped chip like polish: a soft edge, easing out, never a hard
    line rushing across (Tzvi, 20 Oct 2026: "it's not switching smoothly"). --r is animatable through
@@ -96,15 +87,6 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
   mask-image: radial-gradient(circle farthest-corner at var(--cx, 50%) var(--cy, 100%), #000 calc(var(--r) - 22%), transparent var(--r));
   transition: --r 1300ms cubic-bezier(.4, 0, .2, 1), opacity 250ms ease-out; }
 .frame img.next.on { --r: 125%; opacity: 1; }
-.frame .tag { position: absolute; z-index: 2; left: 14px; bottom: 14px; padding: .45rem .9rem; border-radius: 999px; background: rgb(255 248 246 / .92); color: var(--ink); font: 500 .9rem/1.2 var(--font-body); }
-@media (max-width: 860px) {
-  .hero { min-height: 0; }
-  .hero .wrap { grid-template-columns: 1fr; grid-template-areas: "frame" "pick" "text"; row-gap: 1.2rem; }
-  .hero .frame { max-width: 340px; max-height: 52svh; aspect-ratio: auto; height: 52svh; }
-  .h-pick .act { margin-top: 1rem; }
-  .shades { margin-bottom: 0; } .shade-name { margin-top: .5rem; }
-  .chips { gap: .55rem; } .shade { width: 44px; height: 44px; }
-}
 
 section.sec { padding-block: clamp(4.5rem, 10vw, 7rem); }
 .sec h2 { font-size: clamp(2.3rem, 4.6vw, 3.6rem); }
@@ -208,20 +190,6 @@ textarea.fld { min-height: 48px; max-height: 115px; resize: none; overflow-y: au
 @media (max-width: 760px) { .bar { display: flex; } body { --pad-bar: var(--bar-h); } }
 @media (prefers-reduced-motion: reduce) { body:not(.no-js) .rev { clip-path: none; animation: none; } body:not(.no-js) .rev::after { display: none; } .btn .lbl i { transition: none; } .frame img.next { transition: none; } }
 
-/* wow pass (19 Oct 2026): the shade you tap colours the whole opening, and a
-   giant "Elisheva" in her script sits behind the photo in that colour */
-.hero { isolation: isolate; }
-/* the whole opening takes the colour of the nails on show, not a faint wash over her pink (Tzvi, 20 Oct
-   2026: "the page doesn't match the nail colour"): the shade itself, softened with white, top to bottom */
-.hero .tint { position: absolute; inset: 0; z-index: -2; background-color: color-mix(in srgb, var(--tint, #F4EFEE) var(--tmix, 52%), #fff); transition: background-color 900ms cubic-bezier(.65, 0, .35, 1); }
-.hero .tint::after { content: ''; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 55%, rgb(255 255 255 / .55)); }
-.hero .ghost { position: absolute; z-index: -1; left: 50%; top: 56%; translate: 0 -50%; margin: 0; font: 400 min(15vw, 38svh)/1 var(--font-script); color: var(--tint, #F4EFEE);
-  opacity: .55; white-space: nowrap; pointer-events: none; transition: color 900ms cubic-bezier(.65, 0, .35, 1); filter: saturate(1.2) brightness(.92);
-  animation: ghost-in 1600ms var(--out) both; }
-@keyframes ghost-in { from { opacity: 0; transform: translateX(6vw); } to { opacity: .55; transform: none; } }
-.hero .frame { max-width: min(560px, 76svh * .8); }
-@media (max-width: 860px) { .hero .ghost { font-size: 22vw; top: 30%; left: auto; right: 2vw; } }
-@media (prefers-reduced-motion: reduce) { .hero .ghost { animation: none; } }
 
 /* ── booking as a product page (rules 3k; inspo product-pages-2026-10-20) ── */
 .stage { --st: #F4EFEE; background: color-mix(in srgb, var(--st) var(--tmix, 50%), #fff); transition: background-color 400ms cubic-bezier(.65, 0, .35, 1); padding: calc(70px + clamp(1.2rem, 4svh, 2.6rem)) 0 clamp(1.2rem, 4svh, 2.6rem); }
@@ -254,16 +222,8 @@ textarea.fld { min-height: 48px; max-height: 115px; resize: none; overflow-y: au
 .stage .st-ph img.on { transition: opacity 300ms var(--out); z-index: 2; }
 .st-ph .st-cap { z-index: 3; }
 /* a deep shade (ruby) is shown deep, and the words on it turn light (Tzvi, 20 Oct 2026) */
-.hero :is(h1, .lede, .caps, .script, .shade-name, .pick-l, p, small, b) { transition: color 900ms cubic-bezier(.65, 0, .35, 1); }
-body[data-tone="dark"] .hero :is(h1, .script, .shade-name, b) { color: #FFF4F2; }
-body[data-tone="dark"] .hero :is(.lede, .caps, p, small, span:not(.tag)) { color: #F6DADC; }
-body[data-tone="dark"] .hero .frame .tag, body[data-tone="dark"] .hero .frame .tag * { color: var(--ink); }
-body[data-tone="dark"] .hero .tint::after { background: linear-gradient(180deg, transparent 70%, rgb(255 255 255 / .18)); }
-body[data-tone="dark"] .hero .btn { background: #FFF4F2; color: var(--rose-dk); }
-body[data-tone="dark"] .hero .shade[aria-pressed="true"] { box-shadow: inset 0 -6px 10px rgb(0 0 0 / .12), inset 0 4px 8px rgb(255 255 255 / .45), 0 0 0 3px var(--rose-dk), 0 0 0 5px #FFF4F2; }
 .stage[data-tone="dark"] :is(h1, .st-price, .st-price small, .st-facts, .st-save, .caps, .f, .shade-name, .hint) { color: #FFF4F2; }
 .stage[data-tone="dark"] .st-save b { color: #BFF0CF; }
-body[data-tone="dark"] .hero .btn, body[data-tone="dark"] .hero .btn * { color: var(--rose-dk); }
 
 /* choosing a service never moves the page: the title keeps room for two lines, price and saving keep theirs */
 .stage .st-info h1 { font-size: min(clamp(2.1rem, 3.4vw, 3.3rem), 7.5svh); min-height: 2.1em; text-wrap: balance; }
@@ -399,8 +359,6 @@ body:not(.no-js) .rev[data-dir="u"].in::after { animation-name: sweep-u; }
   .hours li { padding: clamp(.15rem, .8svh, .45rem) 0; }
   .visit { margin-top: clamp(1rem, 3svh, 2.5rem); }
   .visit .card { padding-block: clamp(.9rem, 2.4svh, 1.8rem); }
-  .hero h1 { font-size: clamp(2.2rem, min(4.8vw, 8svh), 4.4rem); }
-  .hero .frame { max-width: min(560px, 68svh * .8); }
 }
 
 /* the booking steps 2 and 3 also fit one screen on a laptop: spacing follows the screen height */
@@ -428,3 +386,69 @@ body:not(.no-js) .rev[data-dir="u"].in::after { animation-name: sweep-u; }
 .st-flow { white-space: nowrap; }
 @media (max-width: 860px) { .st-flow { white-space: normal; } }
 @media (min-width: 861px) { .st-flow { display: flex; flex-wrap: nowrap; } .st-flow li { flex: none; } }
+
+/* ── worlds (page rules 3t): a full-screen photo, a calm white page, a photo, a dark page, a photo, a white page, rose ── */
+/* the opening: the shade you tap spreads over her photo, edge to edge. The soft shade along the bottom takes the
+   colour of the nails on show; the words sit on it (5b.3), never in a box. */
+.hero { position: relative; isolation: isolate; margin-top: 70px; min-height: calc(100svh - 70px); display: grid; align-items: end; overflow: hidden; background: #E9E2E0; color: #fff; padding: 40px 0 clamp(1.4rem, 5svh, 3rem); }
+.hero .frame { position: absolute; inset: 0; z-index: -2; }
+.hero .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.edge { position: absolute; inset: auto 0 0; height: 78%; z-index: -1; pointer-events: none; background-color: color-mix(in srgb, var(--tint, #F4EFEE) 16%, #2A1513);
+  -webkit-mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 64%, rgb(0 0 0 / .5) 86%, transparent); mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 64%, rgb(0 0 0 / .5) 86%, transparent);
+  transition: background-color 900ms cubic-bezier(.65, 0, .35, 1); }
+.hero .wrap { width: 100%; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: end; }
+.hero .caps { color: #F6E1DE; text-shadow: 0 1px 12px rgb(30 12 10 / .5); }
+.hero h1 { color: #fff; font-size: clamp(2.3rem, min(5.2vw, 9svh), 4.6rem); font-weight: 500; letter-spacing: .01em; text-shadow: 0 2px 24px rgb(30 12 10 / .45); }
+.hero h1 .script { display: block; color: #FFE9E6; font-size: .78em; margin-top: .1em; line-height: 1.1; }
+.hero .lede { margin: .9rem 0 0; max-width: 28rem; color: #FBEDEA; font-size: 1.05rem; text-shadow: 0 1px 14px rgb(30 12 10 / .5); }
+.h-pick { display: grid; justify-items: start; gap: .7rem; justify-self: end; width: min(100%, 24rem); }
+.h-pick .chips { gap: .7rem; }
+.hero .shade-name { margin: 0; color: #fff; font-weight: 500; min-height: 1.5em; text-shadow: 0 1px 12px rgb(30 12 10 / .5); }
+.hero .shade[aria-pressed="true"] { box-shadow: inset 0 -6px 10px rgb(0 0 0 / .12), inset 0 4px 8px rgb(255 255 255 / .45), 0 0 0 3px rgb(42 21 19 / .6), 0 0 0 5px #fff; }
+.hero .shade { box-shadow: 0 0 0 2px rgb(255 255 255 / .55); }
+.hero .btn, .pic .btn { background: #fff; color: var(--rose-dk); box-shadow: 0 10px 28px -12px rgb(0 0 0 / .5); }
+.hero .btn:hover, .pic .btn:hover { background: var(--blush); }
+@media (max-width: 860px) {
+  .hero { padding-top: 20px; }
+  .hero .wrap { grid-template-columns: 1fr; gap: 1.1rem; }
+  .hero h1 { font-size: clamp(2rem, 9vw, 2.6rem); }
+  .hero .lede { font-size: 1rem; margin-top: .6rem; }
+  .h-pick { justify-self: start; width: 100%; gap: .5rem; }
+  .h-pick .caps { display: none; }
+  .chips { gap: .5rem; } .hero .shade { width: 42px; height: 42px; }
+  .edge { height: 84%; }
+}
+/* the rest sections: white and dark, hairlines, small calm words */
+.rest { background: #fff; }
+.work.dark { background: #2A1513; color: #fff; }
+.work.dark h2 { color: #fff; }
+.work.dark .work-grid figure { background: #3A2523; }
+.work-grid figure:hover img { transform: none; }
+.rest h2, .work h2 { font-size: clamp(2.4rem, min(6vw, 10svh), 4.6rem); font-weight: 500; }
+/* a picture section: her photo edge to edge, one line and the button on its soft edge shade */
+.pic { position: relative; isolation: isolate; height: min(calc(100svh - 70px), 56vw); display: grid; align-items: end; overflow: hidden; color: #fff; padding: clamp(5rem, 14svh, 9rem) 0 clamp(2rem, 7svh, 4rem); background: #3A2523; }
+.pic picture, .pic img { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -2; }
+.pic img { object-fit: cover; }
+.pic .edge { height: 76%; background-color: #2A1513; }
+.pic .wrap { width: 100%; }
+.pic h2 { color: #fff; font-size: clamp(2.6rem, min(7vw, 12svh), 5.6rem); font-weight: 500; max-width: 14ch; text-shadow: 0 2px 28px rgb(30 12 10 / .45); }
+.pic p { margin: .8rem 0 1.6rem; max-width: 26rem; color: #FBEDEA; font-size: 1.05rem; text-shadow: 0 1px 14px rgb(30 12 10 / .5); }
+.pic.right .wrap { text-align: right; } .pic.right h2, .pic.right p { margin-inline-start: auto; }
+.pic.right h2 { max-width: 12ch; }
+@media (max-width: 760px) { .pic { height: calc(86svh - 70px); } .pic.right .wrap { text-align: left; } .pic.right h2, .pic.right p { margin-inline-start: 0; } .pic h2 { font-size: clamp(2.3rem, 11vw, 3rem); } }
+@media (prefers-reduced-motion: reduce) { .edge { transition: none; } }
+
+/* the work, edge to edge on the dark page: five of her photos side by side */
+.work.dark .wrap:has(.work-grid) { max-width: none; padding-inline: 0; }
+.work.dark h2 { padding-inline: var(--gutter); max-width: 72rem; margin-inline: auto; }
+.work.dark .work-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 6px; margin-top: clamp(1rem, 4svh, 2.5rem); }
+.work.dark .work-grid figure, .work.dark .work-grid figure:first-child { grid-column: auto; grid-row: auto; aspect-ratio: auto; height: clamp(240px, 56svh, 680px); border-radius: 0; }
+@media (max-width: 760px) { .work.dark .work-grid { grid-template-columns: 1fr 1fr; } .work.dark .work-grid figure, .work.dark .work-grid figure:first-child { height: 40svh; } .work.dark .work-grid figure:last-child { grid-column: 1 / -1; } }
+.top { background: rgb(255 248 246 / .97); }
+@media (max-width: 860px) and (max-height: 700px) { .hero .h-text .caps { display: none; } }
+.pic .edge { height: 62%; -webkit-mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 52%, rgb(0 0 0 / .5) 76%, transparent); mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 52%, rgb(0 0 0 / .5) 76%, transparent); }
+.pic { padding-top: clamp(3rem, 8svh, 6rem); }
+@media (max-width: 760px) { .pic .edge { height: 70%; } }
+.pic .edge { height: 70%; -webkit-mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 60%, rgb(0 0 0 / .5) 82%, transparent); mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 60%, rgb(0 0 0 / .5) 82%, transparent); }
+@media (max-width: 760px) { .pic .edge { height: 76%; } }
+.pic.right .edge { height: 80%; }

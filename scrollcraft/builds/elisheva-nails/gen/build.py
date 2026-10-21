@@ -58,7 +58,7 @@ def header(page):
   <a class="mark" href="index.html" aria-label="Nails by Elisheva, home"><img src="assets/logo.webp" alt="" width="240" height="287"><span>Nails by Elisheva</span></a>
   <nav class="nav" id="nav" aria-label="Nails by Elisheva">{links}</nav>
   <div class="top-r">
-    <a class="btn-line" href="book.html">Book</a>
+    <a class="btn-line" href="book.html">Book a time</a>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
   </div>
 </header>
@@ -82,42 +82,37 @@ FOOTER = f'''  <section class="close" aria-label="Book with Elisheva">
 
 <div class="bar" id="bar" aria-hidden="true">
   <p class="p"><b>Gel nails ₪90</b>Romema, Jerusalem</p>
-  <a class="btn" href="book.html" tabindex="-1">Book</a>
+  <a class="btn" href="book.html" tabindex="-1">Book a time</a>
 </div>
 <script src="site.js"></script>
 '''
 
 chips = ''.join(f'<button class="shade" type="button" data-k="{k}" style="--c:{c}" aria-pressed="{"true" if i == 0 else "false"}" aria-label="{n}"></button>' for i, (k, n, c, f, a) in enumerate(SHADES))
+BTN = '<a class="btn" href="book.html"{x}>Book a time <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>'
 HERO = f'''  <section class="hero" id="open" aria-labelledby="h-open">
-    <div class="tint" aria-hidden="true"></div>
-    <p class="ghost" aria-hidden="true">Elisheva</p>
+    <div class="frame" id="frame">
+      <img class="cur" id="cur" src="assets/hero-{SHADES[0][0]}-l.webp" alt="{SHADES[0][4]}" width="1920" height="1200" fetchpriority="high">
+      <script>if (matchMedia('(max-width:760px)').matches) document.getElementById('cur').src = 'assets/hero-{SHADES[0][0]}-p.webp';</script>
+    </div>
+    <div class="edge" aria-hidden="true"></div>
     <div class="wrap">
       <div class="h-text">
         <p class="caps">Luxe Nail Studio · Romema, Jerusalem</p>
         <h1 id="h-open">Gel nails, French nails and nail art<span class="script">by Elisheva</span></h1>
-        <p class="lede">More than four years of experience. Gel from ₪90, in about 45 minutes. For gel, French and nail art on your natural nails.</p>
+        <p class="lede">More than four years of experience. Gel from ₪90, in about 45 minutes.</p>
       </div>
       <div class="h-pick">
-        <div class="shades">
-          <p class="caps">Tap a shade</p>
-          <div class="chips" id="chips">{chips}</div>
-          <p class="shade-name" id="shade-name" aria-live="polite">{SHADES[0][1]}</p>
-        </div>
-        <div class="act">
-          <a class="btn" href="book.html" id="book-shade">Book this shade <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>
-          <p class="proof"><b>From ₪90</b><br>Sunday to Friday</p>
-        </div>
-      </div>
-      <div class="frame" id="frame">
-        <img class="cur" src="assets/{SHADES[0][3]}" alt="{SHADES[0][4]}" width="1000" height="1250" fetchpriority="high">
-        <span class="tag">My work, on a client</span>
+        <p class="caps">Tap a shade</p>
+        <div class="chips" id="chips">{chips}</div>
+        <p class="shade-name" id="shade-name" aria-live="polite">{SHADES[0][1]}</p>
+        {BTN.format(x=' id="book-shade"')}
       </div>
     </div>
   </section>
 '''
 HERO_JS = '<script>\nvar SHADES = ' + json.dumps([{'k': k, 'n': n, 'f': f, 'a': a, 'c': c} for k, n, c, f, a in SHADES]) + ''';
 // The opening: tap a shade and her photo of nails in that colour opens out
-// from the chip as a circle. Untouched, it moves to the next shade every few
+// from the chip, over the whole first screen. Untouched, it moves to the next shade every few
 // seconds until the visitor chooses. Photos are hers; only the reveal moves.
 (function () {
   var frame = document.getElementById('frame'), name = document.getElementById('shade-name'), book = document.getElementById('book-shade'), hero = document.getElementById('open');
@@ -125,7 +120,8 @@ HERO_JS = '<script>\nvar SHADES = ' + json.dumps([{'k': k, 'n': n, 'f': f, 'a': 
   var chips = [].slice.call(document.querySelectorAll('#chips .shade')), at = 0, auto = true, timer = 0, seq = 0, lastDone = 0;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   // every photo loaded and decoded up front, so a switch never waits or pops in half-drawn
-  var ready = {}; SHADES.forEach(function (s) { var i = new Image(); i.src = 'assets/' + s.f; ready[s.f] = i.decode ? i.decode().catch(function () {}) : Promise.resolve(); });
+  var phone = matchMedia('(max-width:760px)').matches, pic = function (s) { return 'assets/hero-' + s.k + (phone ? '-p' : '-l') + '.webp'; };
+  var ready = {}; SHADES.forEach(function (s) { var i = new Image(); i.src = pic(s); ready[s.k] = i.decode ? i.decode().catch(function () {}) : Promise.resolve(); });
   function show(i, from) {
     if (i === at) return;
     at = i; var me = ++seq;
@@ -142,16 +138,16 @@ HERO_JS = '<script>\nvar SHADES = ' + json.dumps([{'k': k, 'n': n, 'f': f, 'a': 
     // start the spread on the photo's edge nearest the chip, so the whole reveal is seen, not its last instant
     cx = Math.max(0, Math.min(100, cx)); cy = Math.max(0, Math.min(100, cy));
     var img = document.createElement('img');
-    img.className = 'next'; img.src = 'assets/' + SHADES[i].f; img.alt = ''; img.width = 1000; img.height = 1250; img.dataset.seq = me;
+    img.className = 'next'; img.src = pic(SHADES[i]); img.alt = ''; img.width = 1920; img.height = 1200; img.dataset.seq = me;
     img.style.setProperty('--cx', cx + '%'); img.style.setProperty('--cy', cy + '%');
-    frame.insertBefore(img, frame.querySelector('.tag'));
+    frame.appendChild(img);
     var done = function () {
       // the photo underneath becomes this one, so taking the layer away changes nothing on screen
       if (cur && me > lastDone) { lastDone = me; cur.src = img.src; cur.alt = SHADES[i].a; }
       requestAnimationFrame(function () { img.remove(); });
     };
     if (reduce) { if (cur) { cur.src = img.src; cur.alt = SHADES[i].a; } img.remove(); return; }
-    ready[SHADES[i].f].then(function () { requestAnimationFrame(function () { requestAnimationFrame(function () { img.classList.add('on'); setTimeout(done, 1350); }); }); });
+    ready[SHADES[i].k].then(function () { requestAnimationFrame(function () { requestAnimationFrame(function () { img.classList.add('on'); setTimeout(done, 1350); }); }); });
   }
   chips.forEach(function (c, i) { c.addEventListener('click', function () { auto = false; clearInterval(timer); show(i, c); }); });
   if (!reduce) timer = setInterval(function () { if (auto && !document.hidden) show((at + 1) % SHADES.length, chips[(at + 1) % SHADES.length]); }, 3200);
@@ -168,9 +164,9 @@ def price_html(k, p, m):
     return f'<div class="price">{was}<span class="sym">₪</span>{p}<small>about {m} minutes</small></div>'
 
 
-svc_rows = ''.join(f'''        <div class="svc-row rev"><div><h3>{n}{f' <span class="tag">Save ₪{SAVE}</span>' if k == 'gel-removal' else ''}</h3><p>{d}{f' <a class="ask" href="{ASK}" target="_blank" rel="noopener">Ask about a design</a>' if k == 'art' else ''}</p></div>{price_html(k, p, m)}<a class="btn-line" href="book.html?service={k}">Book</a></div>
+svc_rows = ''.join(f'''        <div class="svc-row rev"><div><h3>{n}{f' <span class="tag">Save ₪{SAVE}</span>' if k == 'gel-removal' else ''}</h3><p>{d}{f' <a class="ask" href="{ASK}" target="_blank" rel="noopener">Ask about a design</a>' if k == 'art' else ''}</p></div>{price_html(k, p, m)}<a class="btn-line" href="book.html?service={k}">Book a time</a></div>
 ''' for k, n, p, m, d in SERVICES)
-SERVICES_SEC = f'''  <section class="sec" id="services" aria-labelledby="h-svc">
+SERVICES_SEC = f'''  <section class="sec rest" id="services" aria-labelledby="h-svc">
     <div class="wrap">
       <p class="caps rev">Services and prices</p>
       <h2 id="h-svc" class="rev">What I do</h2>
@@ -180,20 +176,34 @@ SERVICES_SEC = f'''  <section class="sec" id="services" aria-labelledby="h-svc">
   </section>
 '''
 WORK = [('white.webp', 'White gel nails on a client, hands on a towel'), ('pink-2.webp', 'Pale pink gel nails on a client'),
-        ('white-2.webp', 'White gel nails on a client'), ('bubblegum.webp', 'Bubblegum pink gel nails'), ('studio.webp', 'The studio: a gel lamp and a row of gel colours')]
+        ('white-2.webp', 'White gel nails on a client'), ('bubblegum.webp', 'Bubblegum pink gel nails'), ('sheer.webp', 'Sheer pink gel nails on a client')]
 work_figs = ''.join(f'<figure class="rev"><img src="assets/{f}" alt="{a}" width="1000" height="1250" loading="lazy"></figure>' for f, a in WORK)
-WORK_SEC = f'''  <section class="sec work" id="work" aria-labelledby="h-work" data-mir-gallery data-max="12">
+WORK_SEC = f'''  <section class="sec work dark" id="work" aria-labelledby="h-work" data-mir-gallery data-max="12">
     <div class="wrap">
-      <p class="caps rev">Recent work</p>
-      <h2 id="h-work" class="rev">Nails done in the studio</h2>
+      <h2 id="h-work" class="rev">Recent work</h2>
       <div class="work-grid" data-mir-photos>{work_figs}</div>
       <template data-mir-photo><figure><img data-f="img" alt=""></figure></template>
     </div>
   </section>
 '''
+def pic(k, alt, cls, h2, line, hid):
+    return f'''  <section class="pic {cls}" id="{hid}" aria-labelledby="h-{hid}">
+    <picture><source media="(max-width:760px)" srcset="assets/pic-{k}-p.webp"><img src="assets/pic-{k}-l.webp" alt="{alt}" width="1920" height="1200" loading="lazy"></picture>
+    <div class="edge" aria-hidden="true"></div>
+    <div class="wrap">
+      <h2 id="h-{hid}" class="rev">{h2}</h2>
+      <p class="rev">{line}</p>
+      {BTN.format(x='')}
+    </div>
+  </section>
+'''
+
+
+STUDIO_PIC = pic('studio', 'The studio: a gel lamp and a row of gel colours on the table', 'left', 'Gel colours, ready for you', 'Gel, French nails and nail art in Romema, Jerusalem.', 'studio')
+VISIT_PIC = pic('visit', 'Pale pink gel nails on a client, hands on a towel', 'right', 'Come to the studio', 'Luxe Nail Studio, Romema, Jerusalem. Open Sunday to Friday.', 'come')
 CLOSED = ' class="closed"'
 hours_li = ''.join(f'<li{CLOSED if h == "Closed" else ""}><span>{d}</span><span>{h}</span></li>' for d, h in HOURS)
-VISIT = f'''  <section class="sec" id="visit" aria-labelledby="h-visit">
+VISIT = f'''  <section class="sec rest" id="visit" aria-labelledby="h-visit">
     <div class="wrap">
       <h2 id="h-visit" class="rev">Where and when</h2>
       <div class="visit">
@@ -212,7 +222,7 @@ def write(name, title, desc, img, body, tail=''):
     open(f'{name}.html', 'w', encoding='utf8').write(html)
 
 
-write('index', 'Nails by Elisheva · Gel nails and nail art in Romema, Jerusalem', DESC, 'milky.webp', HERO + SERVICES_SEC + WORK_SEC + VISIT, HERO_JS)
+write('index', 'Nails by Elisheva · Gel nails and nail art in Romema, Jerusalem', DESC, 'milky.webp', HERO + SERVICES_SEC + STUDIO_PIC + WORK_SEC + VISIT_PIC + VISIT, HERO_JS)
 
 svc_opts = ''.join(f'<label class="opt"><input type="radio" name="svc" value="{k}"><span class="box"><span><b>{n}</b><br><small>about {m} minutes</small></span><span class="p"><span class="sym">₪</span>{p}</span></span>{f'<span class="tag"><i class="t-save">Save ₪{SAVE}</i><i class="t-sel">Selected</i></span>' if k == 'gel-removal' else ''}</label>' for k, n, p, m, d in SERVICES)
 shade_opts = ''.join(f'<button class="shade" type="button" data-k="{k}" style="--c:{c}" aria-pressed="false" aria-label="{n}"></button>' for k, n, c, f, a in SHADES)
