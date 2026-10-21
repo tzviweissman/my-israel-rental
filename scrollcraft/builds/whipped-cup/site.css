@@ -166,7 +166,7 @@ section.sec { padding-block: clamp(2.5rem, min(10vw, 8svh), 7.5rem); }
 .serve button b { display: block; font: 700 1.35rem/1 var(--font-head); color: inherit; }
 .serve button[aria-pressed="true"] { color: var(--choc); }
 /* effects.tile T7: the choice highlight glides between the options */
-.serve .glide { position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 4); border-radius: 999px; background: var(--kraft); transition: transform 400ms cubic-bezier(.34, 1.4, .5, 1); }
+.serve .glide { position: absolute; z-index: 0; top: 4px; bottom: 4px; left: 4px; width: calc((100% - 8px) / 4); border-radius: 999px; background: var(--kraft); transition: transform 240ms var(--out); }  /* no overshoot: a spring passes its target, so fast taps showed a frame matching no choice (check-motion) */
 .need { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; margin: .7rem 0 .2rem; }
 .need .n { font: 700 min(clamp(3rem, 7vw, 4.6rem), 10svh)/1 var(--font-head); color: var(--choc); }
 .need .u { font-weight: 700; color: var(--choc); font-size: 1.15rem; }

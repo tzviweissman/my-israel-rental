@@ -51,11 +51,15 @@ for (const url of urls) {
   const t0 = Date.now();
   await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(1500);
   const n = await page.evaluate(() => {
-    const bs = [...document.querySelectorAll('button[aria-pressed]')].filter((b) => { const r = b.getBoundingClientRect(); return r.width && r.top < innerHeight * 3; });
+    // every group of choices on the page, wherever it sits (a long pinned opening once hid Noa Levi's rooms
+    // below the first three screens): up to three choices from each group (one may already be chosen), nine at most
+    const seen = new Map(), bs = [];
+    for (const b of document.querySelectorAll('button[aria-pressed]')) { const r = b.getBoundingClientRect(); if (!r.width) continue;
+      const g = b.parentElement, c = seen.get(g) || 0; if (c < 3 && bs.length < 9) { seen.set(g, c + 1); bs.push(b); } }
     bs.forEach((b, i) => b.setAttribute('data-motion-i', i)); return bs.length;
   });
   const taps = [];
-  const order = [...Array(Math.min(n, 4)).keys()].reverse();
+  const order = [...Array(n).keys()].reverse();
   for (const i of order) {
     const pressed = await page.evaluate((i) => document.querySelector(`[data-motion-i="${i}"]`).getAttribute('aria-pressed'), i);
     if (pressed === 'true') continue;
@@ -70,7 +74,8 @@ for (const url of urls) {
   }
   // two taps in quick succession
   let rapid = null;
-  const free = order.filter((i) => taps.every((t) => t.i !== i) || true).slice(0, 2);
+  // the two quick taps use choices tapped above, so the first one's settled look (B) is known
+  const free = taps.map((t) => t.i).slice(-2);  // now on the last one: tap the one before it, then the last again
   if (free.length === 2) {
     const at = Date.now() - t0;
     await page.evaluate(([a, b]) => { document.querySelector(`[data-motion-i="${a}"]`).click(); setTimeout(() => document.querySelector(`[data-motion-i="${b}"]`).click(), 250); }, free);
