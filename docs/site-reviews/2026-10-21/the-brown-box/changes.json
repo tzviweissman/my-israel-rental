@@ -1,0 +1,53 @@
+{
+ "site": "The Brown Box",
+ "changes": [
+  {
+   "img": "01.jpg",
+   "title": "Menu shows one section at a time, each row with an Add button",
+   "why": "The menu is a very long list where nothing says it can be added; sections plus a clear Add button make it fit one screen and look pressable (rules 3c, 3s)."
+  },
+  {
+   "img": "02.jpg",
+   "title": "Pick your bowl fits one screen, photo beside the choices",
+   "why": "The heading, five bowls and the photo ran well past one screen, so the photo and button were out of sight; they now sit together (rule 3c)."
+  },
+  {
+   "img": "03.jpg",
+   "title": "Order page: three-step bar, section tabs, and a bin on every basket line",
+   "why": "Orders run in steps with a visible progress bar and a remove button on each line, instead of one long form with a hidden basket (rules 3k, videos on booking steps)."
+  },
+  {
+   "img": "04.jpg",
+   "title": "Order steps: Back button, and the last button names the total",
+   "why": "The button should say what happens next and its price (\"Send order on WhatsApp, ₪50\"), and every step needs a way back (rules 3k, 3s.17)."
+  },
+  {
+   "img": "05.jpg",
+   "title": "Gift boxes get a real button that names the price",
+   "why": "A small underlined link with an arrow was the only way to order a gift box; a button saying \"Order the small box, ₪135\" shows the consequence at the moment of choice, and the box names are now larger than their prices (rule 3s.5 and 3s.17)."
+  },
+  {
+   "img": "06.jpg",
+   "title": "Phone: menu sections as tabs, Add button on each row",
+   "why": "On a phone the menu was a very long scroll with no sign you can tap to add; sections and an Add button make it quick (rules 3c, 3s)."
+  },
+  {
+   "img": "07.jpg",
+   "title": "Phone order: bottom bar names the next step, menu in tabs",
+   "why": "The phone order page was one very long list with a bar saying only \"Send on WhatsApp\"; section tabs and a bar that says \"To delivery\" show what happens next (rules 3k, 3s.17)."
+  },
+  {
+   "img": "08.jpg",
+   "title": "Phone order: each step has its own screen and a Back button",
+   "why": "One question per screen keeps each step short and thumb-friendly (rules 3k, qualities from the booking-step videos)."
+  }
+ ],
+ "questions": [
+  "Do the gift boxes cost more than the items inside because of the kraft box and packaging? If you offer any real saving on a box, tell us the amount and we will show it as money saved.",
+  "Can customers cancel or change an order, and until when? A true line on this under the order button would reassure people.",
+  "Which item sells most, and do you want it marked? We will only add a label if you say so.",
+  "Do you have a photo of yourself or the kitchen where the bowls are made? A short \"made at home in Jerusalem\" photo would add a personal touch beside the menu.",
+  "What delivery fee range and delivery days can we state on the page, instead of \"depends on your location\"?"
+ ],
+ "checks_now": "Home page: arrow glyph missing in the font, gift box names barely bigger than their lines, a 24 px jump when Build your own is chosen, hero words hidden with motion off, bowls and menu sections taller than one screen. Order page: no hover on the send button, the form section taller than one screen. After the changes all checks pass."
+}

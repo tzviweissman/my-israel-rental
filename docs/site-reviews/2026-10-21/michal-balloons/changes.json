@@ -1,0 +1,21 @@
+{"site":"Michal's balloons (מיכל בלונס)","changes":[
+{"img":"01.jpg","title":"Booking becomes three short steps with a progress bar","why":"Six fields at once is a lot and the section is taller than a laptop screen; one question per screen, a button that names the next step, and a way out for people who are not sure yet (rule 3k and the order-steps rule)."},
+{"img":"02.jpg","title":"Last booking step shows a summary before sending","why":"People see exactly what will be sent, Back works, and a missing date is covered by a tick for no date yet instead of an empty field (3s.17, 3s.18)."},
+{"img":"03.jpg","title":"What we make: one big photo beside the list that follows each row","why":"Now the photo is a small tilted thumb and the rows jump open and shut as you scroll; a list beside a photo should change the photo, and the section must fit one screen (3s.2, 3s.15, checklist 5)."},
+{"img":"04.jpg","title":"On a phone the list and its photo fit together and stay still","why":"Now the unlit words are too pale to read comfortably and the photo sits sideways at the edge; the proposed words are dark enough and every line is always shown."},
+{"img":"05.jpg","title":"Our work fits one screen with the filters and photos together","why":"Now the gallery is taller than a laptop screen so you scroll past half of it; two tidy rows with a show-all button keep it on one screen (3c.12)."},
+{"img":"06.jpg","title":"Choosing an occasion no longer pushes the page up or down","why":"Now picking an occasion moves everything below it by up to 210 px; the grid keeps its space so nothing jumps (3s.2). The chosen filter also reacts when you point at it."},
+{"img":"07.jpg","title":"Phone: filters become one swipeable row, gallery is much shorter","why":"Now the seven filters stack into four rows and the gallery is almost two screens tall; one row and six tiles first get people to the booking sooner."},
+{"img":"08.jpg","title":"Photo station fits one screen and uses the same booking words","why":"Now the section is taller than a laptop screen and the button says a different word for booking than the rest of the page (one wording per purpose, checklist 3)."},
+{"img":"09.jpg","title":"Closing screen fits one screen, soft shadows everywhere","why":"The closing section and the booking card were taller than a laptop screen; buttons, cards and photos now share one light shadow instead of several dark ones (3s.3). The balloon name and popping stay as they are."}
+],
+"questions":[
+"Can you send the original, uncropped photos of your work? The ones we have are small, already cut into rounded shapes, and cannot be shown whole or larger.",
+"Is 052-764-4973 on WhatsApp and also takes calls? We would label it that way next to the button.",
+"How quickly do you usually reply to a booking message, and do you want a line about it?",
+"Do you take a deposit or have a cancellation rule? If so we will say it beside the send button.",
+"Do you want a short note of your story and a photo of you after the opening, so people meet the person behind the balloons?",
+"You asked for no price on the page. Would you like a line such as 'price depends on the size, we reply with a quote' instead?",
+"Is there one sentence about how you work (for example how long an arch takes) that you would like beside what we make?"
+],
+"checks_now":"Real site: 8 sections taller than a laptop screen, 7 filter choices that move the page 19 to 210 px, one pressed state missing, the word list too pale to read comfortably; no motion problems."}

@@ -1,0 +1,54 @@
+{
+ "site": "Lechem Emek",
+ "changes": [
+  {
+   "img": "01.jpg",
+   "title": "A real menu bar and two clear buttons at the top",
+   "why": "Now there is no way to move around or order from the top, and the only link is a tiny underlined line; a site needs a menu with an Order button and a basket count (website, not a page)."
+  },
+  {
+   "img": "02.jpg",
+   "title": "Every loaf gets an Add button with its price",
+   "why": "Now the counter is only a gallery, so a customer cannot pick anything; each item gets one clear button, and bigger prices and notes so they read at a glance."
+  },
+  {
+   "img": "03.jpg",
+   "title": "A basket where each line can be changed or removed",
+   "why": "Now nothing can be chosen at all; the basket shows each item with plus, minus and a bin, the total, and how much more is needed for delivery (from your own 120 shekel rule)."
+  },
+  {
+   "img": "08.jpg",
+   "title": "Ordering in three short steps: basket, when and where, details",
+   "why": "Now the order button goes nowhere; one question per screen, a button that names the next step, and a Back button, as the page rules ask for every order."
+  },
+  {
+   "img": "04.jpg",
+   "title": "The top bar stays readable on a phone, with a basket bar below",
+   "why": "Now the page words run through the name and clock when you scroll; a solid bar fixes it, and a bottom bar shows what is in the basket."
+  },
+  {
+   "img": "05.jpg",
+   "title": "A phone menu panel with pages, and bigger buttons on the opening",
+   "why": "Now the phone shows only a clock and a language button; a Menu button opens the pages, and the opening gets two easy-to-press buttons instead of a small link."
+  },
+  {
+   "img": "07.jpg",
+   "title": "The last button finally works, and the footer has links",
+   "why": "Now Message the bakery points back to the top of the page and the footer text is tiny; the button starts the order and the footer links to the sections."
+  },
+  {
+   "img": "06.jpg",
+   "title": "Visit details bigger, with an Open in Maps link",
+   "why": "Now the labels and facts are small and the address cannot be tapped; bigger text and a map link make the visit step easy."
+  }
+ ],
+ "questions": [
+  "What WhatsApp number or phone should orders go to? Right now the order opens WhatsApp so the customer picks the chat.",
+  "Can the customer choose a pickup day and time freely, or are there limits (for example no same-day orders, or different times on Friday)?",
+  "Is there a delivery fee, or is delivery free above 120 shekels?",
+  "Do you want the page in Hebrew as well? The Hebrew button only flips the direction today and the words stay English.",
+  "Is Batya the name you want on the page, and may we use Batya's photo or a photo of the real shopfront?",
+  "Are the four items the full range, and can a customer order more than one challah or box in a single order, or is there a limit?"
+ ],
+ "checks_now": "Real site: no broken links or layout shifts, but tiny tap targets (name, counter link) on a phone, and with motion switched off the headline and opening text stay hidden; no order path at all."
+}

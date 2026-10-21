@@ -1,0 +1,622 @@
+<!doctype html>
+<!--
+  The Gift Boutique. Signature: the opening, held while you scroll: a black
+  gift box unties, the lid lifts, golden light pours out, and their six
+  gifts rise out of it (a Higgsfield still and clip of a generated box;
+  every gift shown is their own photograph). Then: what we make as a
+  lit index, the collection with prices from their shop, how to order with
+  a filling gold line, good to know, and their name as the closing
+  signature. Rebuilt 14 Oct 2026 against page rules 3g (Tzvi: "there isnt
+  enough of a wow factor", then "do the whole page"). Every line is theirs
+  (record, listing, flyer, WhatsApp catalogue).
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Gift Boutique, hand-wrapped gifts delivered across Israel</title>
+<meta name="description" content="Hand-wrapped gifts and bespoke arrangements for simchas, occasions or just because. From Jerusalem, delivered across Israel. Choose your gifts online and send the order to us on WhatsApp.">
+<link rel="icon" href="assets/logo-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  /* From their logo (gold foil on black) and their flyer (ivory, gold). */
+  :root {
+    --night: #0E0C09;
+    --ivory: #F6F0E4;
+    --ivory-2: #EDE4D2;
+    --ink: #1D1912;
+    --soft: #5B5244;
+    --gold: #D4AA40;          /* sampled from the logo foil */
+    --gold-hi: #F2CD6A;
+    --gold-ink: #7A5A10;      /* gold for words on ivory */
+    --on-night-soft: #CFC6B5;
+    --line-ivory: #DCCFB6;
+    --line-night: #3A3226;
+    --r: 14px;
+    --shadow: 0 1px 2px rgb(14 12 9 / .08), 0 14px 34px -18px rgb(14 12 9 / .45);
+    --font-head: 'Cinzel', 'Times New Roman', serif;
+    --font-body: 'Jost', system-ui, sans-serif;
+    --gutter: clamp(18px, 4vw, 40px);
+    --bar-h: 64px;
+    --out: cubic-bezier(.2, .7, .2, 1);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--ivory); color: var(--ink); font: 400 1.0625rem/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+  img { display: block; max-width: 100%; }
+  a { color: inherit; }
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 600; letter-spacing: .01em; margin: 0; }
+  .wrap { max-width: 72rem; margin: 0 auto; padding-inline: var(--gutter); }
+  .label { font: 500 .8rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; }
+  @media (max-width: 760px) { .hero .label { font-size: .9rem; letter-spacing: .12em; } }
+
+  /* buttons: one solid gold per screen, everything else outline.
+     The sheen is the travelling reflection of 21st's "Metallic Button",
+     rebuilt in CSS on their own gold. */
+  .btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; gap: .6rem; min-height: 52px; padding: 0 1.5rem; border-radius: 999px; border: 0;
+    background: var(--gold); color: var(--night); font: 600 1rem/1 var(--font-body); text-decoration: none; cursor: pointer;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / .25); transition: background 180ms ease-out, transform 160ms ease-out; }
+  .btn::after { content: ""; position: absolute; inset: 0; background: linear-gradient(100deg, transparent 35%, rgb(255 255 255 / .55) 50%, transparent 65%); translate: -120% 0; }
+  .btn:hover { background: var(--gold-hi); }
+  .btn:hover::after { translate: 120% 0; transition: translate 650ms var(--out); }
+  .btn:active { transform: scale(.97); }
+  .btn:focus-visible, .ghost:focus-visible, .nav a:focus-visible { outline: 3px solid var(--gold-hi); outline-offset: 3px; }
+  .btn svg, .ghost svg { width: 20px; height: 20px; flex: none; position: relative; }
+  .ghost { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid currentColor;
+    color: var(--gold); font: 500 .95rem/1 var(--font-body); text-decoration: none; transition: background 180ms ease-out, color 180ms ease-out; }
+  .ghost:hover { background: var(--gold); color: var(--night); }
+  .ghost:active { transform: scale(.97); }
+
+  /* header */
+  .bar { position: sticky; top: 0; z-index: 50; height: var(--bar-h); background: rgb(14 12 9 / .94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line-night); }
+  .bar .wrap { height: 100%; display: flex; align-items: center; gap: 1rem; }
+  .brand { display: flex; align-items: center; gap: .65rem; text-decoration: none; color: var(--gold); min-height: 44px; }
+  .brand img { width: 40px; height: 40px; }
+  .brand span { font: 600 1rem/1 var(--font-head); letter-spacing: .08em; }
+  .brand span, .ghost { white-space: nowrap; }
+  .nav { margin-inline-start: auto; display: flex; align-items: center; gap: .25rem; }
+  .nav a.link { color: var(--on-night-soft); text-decoration: none; font-size: .95rem; padding: 0 .8rem; min-height: 44px; display: inline-flex; align-items: center; border-radius: 999px; }
+  .nav a.link:hover { color: var(--gold-hi); }
+  @media (max-width: 760px) { .nav a.link { display: none; } .brand span { font-size: .78rem; letter-spacing: .06em; } .brand img { width: 34px; height: 34px; } .nav .ghost { padding: 0 .9rem; font-size: .9rem; } }
+
+  /* THE OPENING (Tzvi, 14 Oct 2026: "there isnt enough of a wow factor",
+     then "the gift opens"). Held while you scroll: the bow loosens, the
+     ribbon slides off, the lid lifts, golden light pours out (a Higgsfield
+     clip made in steps, scrubbed by the scroll), the headline arrives in
+     the light, and their six gifts rise out of the box one by one. The
+     box and the light are generated; every gift that rises is their own
+     photograph. Page rules 3g.13 to 3g.16. */
+  .hero { position: relative; height: calc(100svh + 230vh); background: var(--night); color: #fff; }
+  .hero .stage { position: sticky; top: var(--bar-h); height: calc(100svh - var(--bar-h)); overflow: hidden; }
+  .hero .film { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 55% 50%; }
+  .hero .stage::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(180deg, rgb(14 12 9 / .9) 0%, rgb(14 12 9 / .7) 22%, rgb(14 12 9 / .25) 40%, rgb(14 12 9 / 0) 54%),
+                linear-gradient(0deg, rgb(14 12 9 / .92) 0%, rgb(14 12 9 / .6) 18%, rgb(14 12 9 / 0) 36%),
+                radial-gradient(ellipse at 50% 60%, rgb(14 12 9 / 0) 45%, rgb(14 12 9 / .45) 100%); }
+  .hero .top { position: absolute; z-index: 3; inset: 0 0 auto 0; text-align: center; padding: clamp(1.5rem, 6svh, 3.5rem) var(--gutter) 0; }
+  .hero h1 { font-size: clamp(2.6rem, 1.2rem + 4.2vw, 5.6rem); line-height: 1; color: #fff; margin: 0 auto; max-width: 12em;
+    opacity: var(--h, 0); translate: 0 calc((1 - var(--h, 0)) * 16px); filter: blur(calc((1 - var(--h, 0)) * 6px)); }
+  .hero h1 em { font-style: normal; color: var(--gold-hi); }
+  .hero h1 { text-shadow: 0 2px 28px rgb(14 12 9 / .85), 0 0 2px rgb(14 12 9 / .6); }
+  /* the light pours up behind the headline: a soft dark pool keeps the gold
+     words readable against the brightest frame (page rules 3g.8) */
+  .hero .top::before { content: ""; position: absolute; z-index: -1; left: 50%; top: 0; width: min(110%, 64rem); height: 100%;
+    translate: -50% 0; background: radial-gradient(ellipse 50% 60% at 50% 45%, rgb(14 12 9 / .62), rgb(14 12 9 / 0) 100%); pointer-events: none; }
+  /* one foil glint as the headline lands; plain gold before and after */
+  .hero h1 em { position: relative; }
+  .hero h1 em::after { content: attr(data-t); position: absolute; inset: 0; color: #FFF6D8; pointer-events: none; opacity: 0;
+    -webkit-mask: linear-gradient(100deg, transparent 38%, #000 50%, transparent 62%) 160% 0 / 260% 100% no-repeat;
+            mask: linear-gradient(100deg, transparent 38%, #000 50%, transparent 62%) 160% 0 / 260% 100% no-repeat; }
+  .hero h1 em.glint::after { opacity: 1; animation: glintm 1600ms ease-in-out forwards; }
+  .hero .cue { display: inline-block; margin: 1rem 0 0; padding: .45rem .95rem; border-radius: 999px; background: rgb(14 12 9 / .62); color: #fff; font-size: .95rem; letter-spacing: .14em; text-transform: uppercase; opacity: var(--cue, 1); }
+  /* their gifts, rising out of the light */
+  .hero .rise { position: absolute; z-index: 2; inset: 0; list-style: none; margin: 0; padding: 0; pointer-events: none; }
+  .hero .rise li { position: absolute; left: 50%; top: 60%; width: clamp(90px, min(10vw, 15svh), 160px); aspect-ratio: 1; translate: -50% -50%;
+    border-radius: 22%; overflow: hidden; opacity: 0; will-change: transform, opacity;
+    box-shadow: 0 0 0 1px rgb(242 205 106 / .5), 0 0 46px 6px rgb(242 205 106 / .35), 0 24px 40px -18px rgb(0 0 0 / .7); }
+  .hero .rise img { width: 100%; height: 100%; object-fit: cover; }
+  .hero .act { position: absolute; z-index: 3; inset: auto 0 0 0; display: flex; flex-direction: column; align-items: center; gap: .7rem;
+    padding: 0 var(--gutter) clamp(1.5rem, 6svh, 3rem); opacity: var(--a, 0); translate: 0 calc((1 - var(--a, 0)) * 14px); }
+  .hero .act .btn { pointer-events: auto; }
+  .hero .line { margin: 0; color: #fff; font-size: 1rem; text-shadow: 0 1px 10px rgb(0 0 0 / .6); }
+  @media (max-width: 760px) {
+    .hero { height: calc(100svh + 200vh); }
+    .hero .stage { height: calc(100svh - var(--bar-h)); }
+    .hero .film { object-position: 50% 50%; }
+    .hero h1 { font-size: clamp(2.4rem, 1rem + 8vw, 3.4rem); }
+    .hero .rise li { width: 25vw; top: 66%; }
+  }
+  /* reduced motion: no hold, the box already open, the gifts in place */
+  @media (prefers-reduced-motion: reduce) {
+    .hero { height: auto; }
+    .hero .stage { position: relative; top: 0; height: calc(100svh - var(--bar-h)); }
+    .hero h1, .hero .act { opacity: 1; translate: 0 0; filter: none; }
+    .hero .cue { display: none; }
+  }
+  @keyframes fade { to { opacity: 1; } }
+  @keyframes settle { to { opacity: 1; translate: 0 0; filter: blur(0); } }
+  @keyframes rise { to { opacity: 1; translate: 0 0; } }
+  @keyframes reveal { to { clip-path: inset(0 0 0 0 round 999px 999px 14px 14px); } }
+  @keyframes fade { to { opacity: 1; } }
+  @keyframes pop { to { opacity: 1; scale: 1; } }
+  @keyframes glintm { from { -webkit-mask-position: 160% 0; mask-position: 160% 0; } to { -webkit-mask-position: -60% 0; mask-position: -60% 0; } }
+
+  /* sections */
+  .sec { padding-block: clamp(4rem, 9vw, 7rem); }
+  .sec h2 { font-size: clamp(1.9rem, 1.2rem + 2.2vw, 3rem); line-height: 1.08; }
+  .sec h2 em.acc, .close h2 em.acc { font-style: normal; color: var(--gold-ink); }
+  .dark h2 em.acc { color: var(--gold); }
+  .sec .lede { margin: .9rem 0 0; color: var(--soft); max-width: 40rem; }
+
+  /* reveal on scroll, fail-safe: visible unless the script runs */
+  @media (prefers-reduced-motion: no-preference) {
+    .js [data-rev] { opacity: 0; translate: 0 22px; transition: opacity 700ms var(--out), translate 700ms var(--out); transition-delay: calc(var(--i, 0) * 90ms); }
+    .js [data-rev].in { opacity: 1; translate: 0 0; }
+  }
+
+  /* what we make: an index. Large names on thin rules; the row crossing
+     the middle of the screen fills gold (page rules 3g.6). */
+  .index { list-style: none; margin: 2.25rem 0 0; padding: 0; border-top: 1px solid var(--line-ivory); counter-reset: ix; }
+  .index li { counter-increment: ix; display: grid; grid-template-columns: 3.5rem minmax(0, 1fr) minmax(0, 18rem); gap: .3rem 1.5rem; align-items: baseline;
+    padding: clamp(1.1rem, 2.6vw, 1.7rem) 0; border-bottom: 1px solid var(--line-ivory); position: relative; transition: color 400ms var(--out); }
+  .index li::before { content: "0" counter(ix); font: 500 .85rem/1 var(--font-body); letter-spacing: .14em; color: var(--soft); }
+  .index li::after { content: ""; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(212 170 64 / .22), rgb(212 170 64 / .06));
+    transform: scaleX(var(--f, 0)); transform-origin: 0 50%; transition: transform 500ms var(--out); }
+  [dir="rtl"] .index li::after { transform-origin: 100% 50%; }
+  .index b { font: 600 clamp(1.6rem, 1rem + 2.6vw, 3rem)/1.05 var(--font-head); letter-spacing: .01em; color: var(--ink); }
+  .index span { color: var(--soft); font-size: 1rem; }
+  .index li.lit b { color: var(--gold-ink); }
+  .index { position: relative; z-index: 0; }
+  @media (max-width: 760px) { .index li { grid-template-columns: 2.4rem minmax(0, 1fr); } .index span { grid-column: 2; } }
+
+  /* the collection with prices: their WhatsApp catalogue, in stock items only */
+  .cat-h { margin: 2.5rem 0 1rem; font: 600 1.2rem/1.25 var(--font-head); letter-spacing: .02em; color: var(--gold-ink); }
+  .cat { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 11.5rem), 1fr)); gap: clamp(1rem, 2.4vw, 1.75rem) clamp(.9rem, 2vw, 1.5rem); }
+  .cat a, .cat li > div { display: block; color: inherit; text-decoration: none; border-radius: var(--r); outline-offset: 4px; }
+  .cat .ph { display: block; aspect-ratio: 1; border-radius: 26%; overflow: hidden; background: var(--ivory-2); box-shadow: var(--shadow); transition: translate 300ms var(--out), box-shadow 300ms ease-out; }
+  /* their photos come with black rounded corners: scale past them */
+  .cat img { width: 100%; height: 100%; object-fit: cover; scale: 1.08; transition: scale 400ms var(--out); }
+  .cat b { display: block; margin-top: .8rem; font: 500 1rem/1.3 var(--font-body); }
+  .cat .pr { display: block; margin-top: .2rem; color: var(--gold-ink); font-weight: 600; }
+  @media (hover: hover) { .cat a:hover .ph { translate: 0 -4px; box-shadow: 0 2px 4px rgb(14 12 9 / .1), 0 22px 40px -18px rgb(14 12 9 / .55); } .cat a:hover img { scale: 1.13; } }
+  .cat a:active .ph { translate: 0 1px; }
+  /* out of stock (set by the owner in the dashboard): kept on show, quietly */
+  .cat .is-out .ph { box-shadow: none; }
+  .cat .is-out img { filter: grayscale(.85) opacity(.55); }
+  .cat .is-out .pr { color: var(--soft); font-weight: 500; }
+  .cat .is-out > div { cursor: default; }
+  .cat-more { margin: 2.5rem 0 0; color: var(--soft); }
+  .cat-more a { color: var(--gold-ink); font-weight: 600; }
+  @media (max-width: 520px) { .cat { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cat b { font-size: .95rem; } }
+
+  /* how to order: a gold ribbon fills down the steps */
+  .dark { background: var(--night); color: #fff; }
+  .dark .lede { color: var(--on-night-soft); }
+  .split { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 2rem clamp(2rem, 6vw, 5rem); align-items: start; }
+  .steps { list-style: none; margin: 0; padding: 0 0 0 .25rem; counter-reset: s; position: relative; }
+  .steps::before, .steps::after { content: ""; position: absolute; left: calc(1.4rem - 2px); top: 1.6rem; bottom: 1.6rem; width: 4px; border-radius: 2px; background: var(--line-night); }
+  .steps::after { background: var(--gold); transform-origin: 50% 0; transform: scaleY(var(--p, 1)); box-shadow: 0 0 12px rgb(212 170 64 / .35); }
+  .steps li { counter-increment: s; position: relative; display: grid; grid-template-columns: 2.3rem minmax(0, 1fr); gap: 1.1rem; padding: 1.15rem 0; align-items: start; }
+  .steps li::before { content: counter(s); position: relative; z-index: 2; width: 2.3rem; height: 2.3rem; border-radius: 50%; display: grid; place-items: center;
+    font: 600 1.05rem/1 var(--font-head); color: var(--night); background: var(--gold); transition: background 300ms ease-out, color 300ms ease-out, scale 300ms var(--out); }
+  .js .steps li:not(.lit)::before { background: var(--night); color: var(--gold); box-shadow: inset 0 0 0 2px var(--line-night); }
+  .steps li.lit::before { scale: 1.06; }
+  .steps b { display: block; font: 600 1.15rem/1.3 var(--font-body); color: #fff; margin-top: .3rem; }
+  .steps span { color: var(--on-night-soft); }
+  .split .act { margin-top: 1.75rem; }
+  .wa-line { margin: 1rem 0 0; color: var(--on-night-soft); }
+  .wa-line a { color: var(--gold); text-decoration: none; border-bottom: 1px solid currentColor; }
+  @media (max-width: 860px) { .split { grid-template-columns: 1fr; } }
+
+  /* good to know */
+  .facts { margin: 2.25rem 0 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0 clamp(1.5rem, 4vw, 3rem); }
+  .facts div { padding: 1.2rem 0; border-top: 1px solid var(--line-ivory); }
+  .facts dt { font: 500 .8rem/1.2 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--gold-ink); }
+  .facts dd { margin: .5rem 0 0; }
+  .facts dd a { color: var(--ink); }
+  @media (max-width: 860px) { .facts { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 520px) { .facts { grid-template-columns: 1fr; } }
+
+  /* the close: their name, huge, cropped by the bottom edge (page rules
+     3g.7), with one foil glint crossing it as it arrives */
+  .close { text-align: center; overflow: hidden; padding-bottom: 0; }
+  .close h2 { max-width: 15em; margin: 0 auto; color: #fff; }
+  .close .act { justify-content: center; margin-top: clamp(1.5rem, 3vw, 2.25rem); }
+  /* the whole name fits the width; only its foot is cut by the edge */
+  .sign { position: relative; margin: clamp(3rem, 8vw, 6rem) 0 0; height: 5.2vw; overflow: hidden; }
+  .sign b { position: absolute; left: 50%; top: 0; translate: -50% 0; white-space: nowrap; font: 700 7.1vw/1 var(--font-head);
+    letter-spacing: .01em; color: var(--gold); opacity: .92; }
+  .sign b::after { content: attr(data-t); position: absolute; inset: 0; color: #FFF1C2; opacity: 0;
+    -webkit-mask: linear-gradient(100deg, transparent 40%, #000 50%, transparent 60%) 160% 0 / 260% 100% no-repeat;
+            mask: linear-gradient(100deg, transparent 40%, #000 50%, transparent 60%) 160% 0 / 260% 100% no-repeat; }
+  .sign b.glint::after { opacity: 1; animation: glintm 1800ms ease-in-out forwards; }
+  .foot { background: var(--night); color: var(--on-night-soft); border-top: 1px solid var(--line-night); padding-block: 1.75rem calc(1.75rem + var(--pad-bottom, 0px)); font-size: .9rem; }
+  .foot .wrap { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; justify-content: space-between; }
+  .foot a { color: var(--on-night-soft); }
+
+  /* phone: the action pinned to the bottom once past the first screen */
+  .dock { display: none; }
+  @media (max-width: 760px) {
+    .dock { display: flex; position: fixed; inset-inline: 0; bottom: 0; z-index: 60; align-items: center; justify-content: space-between; gap: .75rem;
+      padding: .65rem var(--gutter) calc(.65rem + env(safe-area-inset-bottom)); background: rgb(14 12 9 / .96); border-top: 1px solid var(--line-night);
+      transform: translateY(110%); transition: transform 240ms ease-out; }
+    .dock.on { transform: none; }
+    .dock > span { flex: 1 1 auto; min-width: 0; color: var(--on-night-soft); font-size: .88rem; line-height: 1.3; }
+    .dock .btn { flex: none; min-height: 46px; padding: 0 1rem; white-space: nowrap; font-size: .92rem; }
+    body { --pad-bottom: 76px; }
+  }
+  @media (prefers-reduced-motion: reduce) { .dock { transition: none; } html { scroll-behavior: auto; } }
+
+  /* PROPOSED: one group of gifts at a time (pills), an Add chip on every tile,
+     rows in "what we make" that go somewhere, a footer with ways to reach us */
+  #prices.sec { padding-block: clamp(2rem, 4vw, 3rem); }
+  #prices .lede { margin-top: .5rem; }
+  .pills { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1.1rem 0 1.1rem; }
+  .pills button { min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid var(--line-ivory); background: #fff; color: var(--ink);
+    font: 500 .95rem/1 var(--font-body); cursor: pointer; transition: background 160ms ease-out, color 160ms ease-out, border-color 160ms ease-out, transform 100ms ease-out; }
+  .pills button small { margin-inline-start: .45rem; color: var(--soft); font-size: .85rem; }
+  .pills button:hover { border-color: var(--gold-ink); }
+  .pills button:active { transform: scale(.97); }
+  .pills button[aria-pressed="true"] { background: var(--night); border-color: var(--night); color: #fff; }
+  .pills button[aria-pressed="true"]:hover { background: #2B2518; }
+  .pills button[aria-pressed="true"] small { color: var(--gold-hi); }
+  .js .cat-h { display: none; }
+  [data-mir-list] > [hidden] { display: none !important; }
+  .cat { grid-template-columns: repeat(auto-fill, minmax(min(100%, max(7.4rem, 15.5svh)), 1fr)); gap: 1rem 1.1rem; }
+  @media (max-width: 520px) { .cat { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  .cat b { margin-top: .6rem; font-size: .95rem; }
+  .cat .rowp { display: flex; align-items: center; justify-content: space-between; gap: .5rem; margin-top: .3rem; }
+  .cat .rowp .pr { margin: 0; font-size: 1.05rem; }
+  .cat .addchip { display: inline-flex; align-items: center; justify-content: center; width: 32px; height: 32px; flex: none; border-radius: 50%; font-size: 1.2rem; line-height: 1; border: 1px solid var(--gold-ink);
+    color: var(--gold-ink); font: 600 .85rem/1 var(--font-body); transition: background 160ms ease-out, color 160ms ease-out; }
+  .cat a:hover .addchip { background: var(--gold); border-color: var(--gold); color: var(--night); }
+  .cat .is-out .rowp .pr { padding: .3rem .7rem; border-radius: 999px; background: var(--ivory-2); font-size: .85rem; }
+  .cat a:active { transform: scale(.98); }
+  .sec.make { padding-block: clamp(1.5rem, 3vw, 2.5rem); }
+  .sec.make .index { margin-top: 1.25rem; }
+  .sec.make .index li { padding-block: .8rem; }
+  .sec.make .index b { font-size: clamp(1.4rem, 1rem + 1.8vw, 2.4rem); }
+  .index .go { display: inline-flex; align-items: center; min-height: 44px; margin-inline-start: .35rem; color: var(--gold-ink); font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor; }
+  .index .go:hover { color: var(--ink); }
+  .foot .cols3 { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr; gap: 1.5rem 2.5rem; width: 100%; }
+  .foot h4 { margin: 0 0 .6rem; font: 500 .8rem/1.2 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  .foot .cols3 p { margin: 0 0 .35rem; }
+  .foot .cols3 a { text-decoration: none; }
+  .foot .cols3 a:hover { color: var(--gold-hi); }
+  .foot .fine { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
+  @media (max-width: 760px) { .foot .cols3 { grid-template-columns: 1fr; } }
+</style>
+<script>document.documentElement.classList.add('js');</script>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="#top" aria-label="The Gift Boutique, back to the top"><img src="assets/logo.webp" alt="" width="40" height="40"><span>THE GIFT BOUTIQUE</span></a>
+    <nav class="nav" aria-label="On this page">
+      <a class="link" href="#make">What we make</a>
+      <a class="link" href="#prices">Prices</a>
+      <a class="link" href="#order">How to order</a>
+      <a class="link" href="https://wa.me/message/7TFTC4CVOY2MG1" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="ghost" href="order.html">Order a gift</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="hero" id="open" aria-labelledby="h1">
+    <div class="stage">
+      <video class="film" id="film" muted playsinline preload="auto" aria-hidden="true"
+        data-d="assets/open.mp4" data-m="assets/open-m.mp4"
+        data-pd="assets/open-first.webp" data-pm="assets/open-m-first.webp"
+        data-sd="assets/open-last.webp" data-sm="assets/open-m-last.webp"></video>
+      <div class="top">
+        <h1 id="h1">Gifts for <em data-t="every occasion">every occasion</em></h1>
+        <p class="cue" id="cue" aria-hidden="true">Scroll to open</p>
+      </div>
+      <ul class="rise" id="rise">
+        <li><img src="assets/gift-1.webp" alt="A welcome baby boy gift: a teddy bear, sweets in a ribboned tray and a bottle" width="300" height="300"></li>
+        <li><img src="assets/gift-2.webp" alt="Rolled linens in a black box, tied with a wide gold ribbon" width="300" height="300"></li>
+        <li><img src="assets/gift-3.webp" alt="A white towel set with pink embroidery in a black box" width="300" height="300"></li>
+        <li><img src="assets/gift-4.webp" alt="A soft pink knitted set in a clear box, tied with a silver ribbon" width="300" height="300"></li>
+        <li><img src="assets/gift-5.webp" alt="Rolled white towels and a mug of sweets on a wooden board" width="300" height="300"></li>
+        <li><img src="assets/gift-6.webp" alt="A glass bowl and spoon on a silver board with white hydrangeas" width="300" height="300"></li>
+      </ul>
+      <div class="act">
+        <a class="btn" href="order.html">
+          <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Zm0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>
+          <span style="position:relative">Order a gift</span>
+        </a>
+        <p class="line">Wrapped by hand in Jerusalem, delivered across Israel</p>
+      </div>
+    </div>
+  </section>
+
+
+  <section class="sec make" aria-labelledby="h-make">
+    <div class="wrap">
+      <h2 id="h-make" data-rev>What we <em class="acc">make</em></h2>
+      <ol class="index" id="make">
+        <li><b>Gifts from our collection</b><span>Wrapped by hand in Jerusalem, for a simcha, an occasion or just because. <a class="go" href="#prices">See the collection</a></span></li>
+        <li><b>Bespoke arrangements</b><span>Made for the person and the occasion you tell us about. <a class="go" href="https://wa.me/972535386042?text=Hi%2C%20I%27d%20like%20a%20bespoke%20arrangement." target="_blank" rel="noopener">Tell us what you have in mind</a></span></li>
+        <li><b>Elegant add-ons</b><span>Added to any gift, and personalised further if you ask. <a class="go" href="https://wa.me/972535386042?text=Hi%2C%20I%27d%20like%20to%20ask%20about%20add-ons." target="_blank" rel="noopener">Ask about add-ons</a></span></li>
+        <li><b>Delivered across Israel</b><span>Sent from Jerusalem to wherever the gift is going. <a class="go" href="#order">How ordering works</a></span></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" id="prices" aria-labelledby="h-prices">
+    <div class="wrap">
+      <h2 id="h-prices" data-rev>The collection, <em class="acc">with prices</em></h2>
+      <p class="lede" data-rev>Tap a gift to add it to your order, then send the whole order to us on WhatsApp. Items and wrapping may differ because of hashgacha or availability.</p>
+      <!-- Live from their shop when the site serves this page (mir-catalog.js):
+           the typed-in list below is what shows if that data is missing. -->
+      <div data-mir-catalog data-mir-skip data-href="order.html?add={name}" data-wa="972535386042" data-msg="Hi, I'd like to order the {name} ({price})." data-other="More gifts" data-out="Out of stock">
+      <div data-mir-list>
+      <h3 class="cat-h" data-rev>Wine and bottle gifts</h3>
+      <ul class="cat">
+        <li data-rev style="--i:0"><a href="order.html?add=Gold%20Luxurious%20Wine%20Holder%20and%20Wine%20Glasses" aria-label="Gold Luxurious Wine Holder and Wine Glasses, $150. Add it to your order"><span class="ph"><img src="assets/cat/gold-wine.webp" alt="Gold wine holder with wine glasses, a bottle and flowers, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Gold Luxurious Wine Holder and Wine Glasses</b><span class="rowp"><span class="pr">$150</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:1"><a href="order.html?add=Silver%20Chain%20Wine%20Holder" aria-label="Silver Chain Wine Holder, $52. Add it to your order"><span class="ph"><img src="assets/cat/silver-chain.webp" alt="A silver chain wine holder with a bottle and a mask, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Silver Chain Wine Holder</b><span class="rowp"><span class="pr">$52</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:2"><a href="order.html?add=Electric%20Bottle%20Opener" aria-label="Electric Bottle Opener, $47. Add it to your order"><span class="ph"><img src="assets/cat/electric-opener.webp" alt="An electric bottle opener and a bottle in a gold-edged box tied with a blue ribbon" width="238" height="240" loading="lazy"></span><b>Electric Bottle Opener</b><span class="rowp"><span class="pr">$47</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:3"><a href="order.html?add=Bottle%20Opener" aria-label="Bottle Opener, $45 to $80. Add it to your order"><span class="ph"><img src="assets/cat/bottle-opener.webp" alt="A bottle opener with a bottle and red roses in a black box with our gold logo" width="238" height="240" loading="lazy"></span><b>Bottle Opener</b><span class="rowp"><span class="pr">$45 to $80</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:0"><a href="order.html?add=Bottle%20Opener%20Gift%20Set" aria-label="Bottle Opener Gift Set, $40. Add it to your order"><span class="ph"><img src="assets/cat/opener-set.webp" alt="A bottle opener set and a bottle in a black box with a gold ribbon" width="238" height="240" loading="lazy"></span><b>Bottle Opener Gift Set</b><span class="rowp"><span class="pr">$40</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:1"><a href="order.html?add=Bottle%20Opener" aria-label="Bottle Opener, $25. Add it to your order"><span class="ph"><img src="assets/cat/opener-snacks.webp" alt="A bottle opener with a bottle and snacks, wrapped in cellophane with a green ribbon" width="238" height="240" loading="lazy"></span><b>Bottle Opener</b><span class="rowp"><span class="pr">$25</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li class="is-out" data-rev style="--i:2"><div><span class="ph"><img src="assets/cat/lchaim-cups.webp" alt="L&#x27;Chaim cups and a bottle in a clear box tied with a ribbon" width="238" height="240" loading="lazy"></span><b>L&#x27;Chaim Cups</b><span class="rowp"><span class="pr">Out of stock</span></span></div></li>
+        <li class="is-out" data-rev style="--i:3"><div><span class="ph"><img src="assets/cat/bicycle-wine.webp" alt="A gold bicycle wine holder with a bottle and a rose, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Gold Bicycle Wine Holder</b><span class="rowp"><span class="pr">Out of stock</span></span></div></li>
+      </ul>
+      <h3 class="cat-h" data-rev>For the table</h3>
+      <ul class="cat">
+        <li data-rev style="--i:0"><a href="order.html?add=Table%20Cloth%20and%20Napkins" aria-label="Table Cloth and Napkins, $45. Add it to your order"><span class="ph"><img src="assets/cat/tablecloth.webp" alt="A white tablecloth and napkins with pink embroidery in a black box" width="238" height="240" loading="lazy"></span><b>Table Cloth and Napkins</b><span class="rowp"><span class="pr">$45</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:1"><a href="order.html?add=Napkins%20%26%20Gold%20Flower%20Napkin%20Rings" aria-label="Napkins &amp; Gold Flower Napkin Rings, $30. Add it to your order"><span class="ph"><img src="assets/cat/napkin-rings.webp" alt="Rolled napkins with gold flower napkin rings in a black box tied with gold organza" width="238" height="240" loading="lazy"></span><b>Napkins &amp; Gold Flower Napkin Rings</b><span class="rowp"><span class="pr">$30</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:2"><a href="order.html?add=Set%20of%204%20Rosh%20Hashana%20Napkins" aria-label="Set of 4 Rosh Hashana Napkins, $30. Add it to your order"><span class="ph"><img src="assets/cat/rh-napkins.webp" alt="Four white napkins with gold apple rings in a box" width="238" height="240" loading="lazy"></span><b>Set of 4 Rosh Hashana Napkins</b><span class="rowp"><span class="pr">$30</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:3"><a href="order.html?add=Porcelain%20Napkin%20Holder" aria-label="Porcelain Napkin Holder, $30. Add it to your order"><span class="ph"><img src="assets/cat/napkin-holder.webp" alt="A white porcelain napkin holder with red roses" width="238" height="240" loading="lazy"></span><b>Porcelain Napkin Holder</b><span class="rowp"><span class="pr">$30</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:0"><a href="order.html?add=Glass%20Salt%20Shaker" aria-label="Glass Salt Shaker, $34. Add it to your order"><span class="ph"><img src="assets/cat/salt-shaker.webp" alt="Two glass salt shakers and a bottle in a black box" width="238" height="240" loading="lazy"></span><b>Glass Salt Shaker</b><span class="rowp"><span class="pr">$34</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:1"><a href="order.html?add=Wooden%20serving%20board" aria-label="Wooden serving board, $50. Add it to your order"><span class="ph"><img src="assets/cat/wooden-board.webp" alt="A wooden serving board with cheese knives and a bottle in a box" width="238" height="240" loading="lazy"></span><b>Wooden serving board</b><span class="rowp"><span class="pr">$50</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:2"><a href="order.html?add=Apple%20Shaped%20serving%20board" aria-label="Apple Shaped serving board, $40. Add it to your order"><span class="ph"><img src="assets/cat/apple-board.webp" alt="An apple-shaped wooden serving board with honey and a bottle in a black box" width="238" height="240" loading="lazy"></span><b>Apple Shaped serving board</b><span class="rowp"><span class="pr">$40</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+      </ul>
+      <h3 class="cat-h" data-rev>Bowls, vases and washing cups</h3>
+      <ul class="cat">
+        <li data-rev style="--i:3"><a href="order.html?add=White%20Vase" aria-label="White Vase, $55. Add it to your order"><span class="ph"><img src="assets/cat/white-vase.webp" alt="A white ribbed vase of white roses on a grey board" width="238" height="240" loading="lazy"></span><b>White Vase</b><span class="rowp"><span class="pr">$55</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:0"><a href="order.html?add=Gold%20Edged%20Bowl" aria-label="Gold Edged Bowl, $35 to $38. Add it to your order"><span class="ph"><img src="assets/cat/gold-bowl.webp" alt="A gold-edged glass bowl with a gold spoon and red roses" width="238" height="240" loading="lazy"></span><b>Gold Edged Bowl</b><span class="rowp"><span class="pr">$35 to $38</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:1"><a href="order.html?add=White%20Marble%20Glass%20Bowl" aria-label="White Marble Glass Bowl, $35. Add it to your order"><span class="ph"><img src="assets/cat/marble-bowl.webp" alt="A white marble glass bowl with spoons and white hydrangeas" width="238" height="240" loading="lazy"></span><b>White Marble Glass Bowl</b><span class="rowp"><span class="pr">$35</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:2"><a href="order.html?add=Washing%20Cup%20and%20Hand%20Towels" aria-label="Washing Cup and Hand Towels, $40. Add it to your order"><span class="ph"><img src="assets/cat/washing-cup.webp" alt="A washing cup and rolled hand towels on a wooden board with pink flowers" width="238" height="240" loading="lazy"></span><b>Washing Cup and Hand Towels</b><span class="rowp"><span class="pr">$40</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:3"><a href="order.html?add=Small%20Glass%20Jar" aria-label="Small Glass Jar, $33. Add it to your order"><span class="ph"><img src="assets/cat/glass-jar.webp" alt="A small glass jar with candles and a bottle, wrapped with a purple ribbon" width="238" height="240" loading="lazy"></span><b>Small Glass Jar</b><span class="rowp"><span class="pr">$33</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li class="is-out" data-rev style="--i:0"><div><span class="ph"><img src="assets/cat/gold-rim-bowls.webp" alt="Two small gold-rimmed glass bowls in a black box tied with a green ribbon" width="238" height="240" loading="lazy"></span><b>Small Glass, Gold Rimmed Bowls</b><span class="rowp"><span class="pr">Out of stock</span></span></div></li>
+        <li class="is-out" data-rev style="--i:1"><div><span class="ph"><img src="assets/cat/black-gold-vase.webp" alt="A black and gold vase with a bottle and towels on a gold board" width="238" height="240" loading="lazy"></span><b>Black/Gold Vase</b><span class="rowp"><span class="pr">Out of stock</span></span></div></li>
+      </ul>
+      <h3 class="cat-h" data-rev>Treats, self-care and keepsakes</h3>
+      <ul class="cat">
+        <li data-rev style="--i:2"><a href="order.html?add=Self-Care%20Gift" aria-label="Self-Care Gift, $35. Add it to your order"><span class="ph"><img src="assets/cat/self-care.webp" alt="A pink silk eye mask, bath flower and body scrub in a box" width="238" height="240" loading="lazy"></span><b>Self-Care Gift</b><span class="rowp"><span class="pr">$35</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:3"><a href="order.html?add=Cream%20and%20Gold%20Cosmetic%20Bag" aria-label="Cream and Gold Cosmetic Bag, $26. Add it to your order"><span class="ph"><img src="assets/cat/cream-bag.webp" alt="A cream and gold cosmetic bag filled with treats, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Cream and Gold Cosmetic Bag</b><span class="rowp"><span class="pr">$26</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:0"><a href="order.html?add=Black%20and%20Gold%20Cosmetic%20Bag" aria-label="Black and Gold Cosmetic Bag, $26. Add it to your order"><span class="ph"><img src="assets/cat/black-bag.webp" alt="A black and gold cosmetic bag filled with treats, wrapped in cellophane" width="238" height="240" loading="lazy"></span><b>Black and Gold Cosmetic Bag</b><span class="rowp"><span class="pr">$26</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li data-rev style="--i:1"><a href="order.html?add=Small%20Jewellery%20Organiser" aria-label="Small Jewellery Organiser, $25. Add it to your order"><span class="ph"><img src="assets/cat/jewellery.webp" alt="A pink jewellery organiser with treats, wrapped in cellophane with a pink ribbon" width="238" height="240" loading="lazy"></span><b>Small Jewellery Organiser</b><span class="rowp"><span class="pr">$25</span><span class="addchip" aria-hidden="true">+</span></span></a></li>
+        <li class="is-out" data-rev style="--i:2"><div><span class="ph"><img src="assets/cat/cookie-jar.webp" alt="A glass cookie jar of sweets wrapped in cellophane with a red ribbon" width="238" height="240" loading="lazy"></span><b>Glass Cookie Jar</b><span class="rowp"><span class="pr">Out of stock</span></span></div></li>
+      </ul>
+      </div>
+      <template data-mir-group><h3 class="cat-h" data-f="group"></h3><ul class="cat" data-f="items"></ul></template>
+      <template data-mir-item><li><a data-f="link"><span class="ph"><img data-f="img" alt="" width="238" height="240" loading="lazy"></span><b data-f="name"></b><span class="rowp"><span class="pr" data-f="price"></span><span class="addchip" aria-hidden="true">+</span></span></a></li></template>
+      </div>
+      <p class="cat-more" data-rev>Looking for something else? <a href="https://wa.me/972535386042" target="_blank" rel="noopener">Message us on WhatsApp</a>.</p>
+    </div>
+  </section>
+
+  <section class="sec dark" id="order" aria-labelledby="h-order">
+    <div class="wrap split">
+      <div data-rev>
+        <h2 id="h-order">How to <em class="acc">order</em></h2>
+        <p class="lede">Choose online, and we arrange the rest with you on WhatsApp, in English or Hebrew.</p>
+        <div class="act">
+          <a class="btn" href="order.html"><span style="position:relative">Order a gift</span></a>
+        </div>
+        <p class="wa-line">WhatsApp: <a href="https://wa.me/972535386042" target="_blank" rel="noopener">+972 53-538-6042</a></p>
+      </div>
+      <ol class="steps" id="steps">
+        <li><div><b>Choose your gifts</b><span>On our order page, with prices.</span></div></li>
+        <li><div><b>Send it to us on WhatsApp</b><span>Who it is for, where it is going, and the message for the card. We confirm the order and the delivery fee.</span></div></li>
+        <li><div><b>We wrap it and deliver it</b><span>Hand wrapped in Jerusalem, delivered across Israel.</span></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="sec" aria-labelledby="h-know">
+    <div class="wrap">
+      <h2 id="h-know" data-rev>Good to know</h2>
+      <dl class="facts">
+        <div data-rev style="--i:0"><dt>Hours</dt><dd>Sunday to Thursday, 8:00 to midnight<br>Friday, 8:00 to 12:00</dd></div>
+        <div data-rev style="--i:1"><dt>Where</dt><dd>Jerusalem, with delivery across Israel</dd></div>
+        <div data-rev style="--i:2"><dt>Kosher</dt><dd>All food items and drinks are store-bought and pre-packaged, Badatz Eida Hachareidis or Badatz HaRav Rubin only</dd></div>
+        <div data-rev style="--i:0"><dt>Payment</dt><dd>Bit, bank transfer, PayPal or Revolut</dd></div>
+        <div data-rev style="--i:1"><dt>Languages</dt><dd>English and Hebrew</dd></div>
+        <div data-rev style="--i:2"><dt>Email</dt><dd><a href="mailto:thegiftboutiqueisrael@gmail.com">thegiftboutiqueisrael@gmail.com</a></dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <section class="sec dark close" id="close" aria-labelledby="h-close">
+    <div class="wrap">
+      <h2 id="h-close">Send love across Israel with a <em class="acc">meaningful gift</em></h2>
+      <div class="act">
+        <a class="btn" href="order.html"><span style="position:relative">Order a gift</span></a>
+      </div>
+    </div>
+    <div class="sign" aria-hidden="true" data-sc-act data-clip-ok><b id="sign" data-t="THE GIFT BOUTIQUE">THE GIFT BOUTIQUE</b></div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols3">
+      <div><h4>The Gift Boutique</h4><p>Jerusalem, with delivery across Israel.</p><p>Hand wrapped gifts for every occasion.</p></div>
+      <div><h4>Pages</h4><p><a href="index.html">Home</a></p><p><a href="#prices">The collection</a></p><p><a href="order.html">Order a gift</a></p></div>
+      <div><h4>Reach us</h4><p><a href="https://wa.me/972535386042" target="_blank" rel="noopener">WhatsApp +972 53-538-6042</a></p><p><a href="mailto:thegiftboutiqueisrael@gmail.com">thegiftboutiqueisrael@gmail.com</a></p><p>Sunday to Thursday, 8:00 to midnight. Friday, 8:00 to 12:00.</p></div>
+      <div class="fine"><span>The Gift Boutique, Jerusalem. Gifts for every occasion since 2025.</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+    </div>
+  </div>
+</footer>
+
+<div class="dock order-bar" id="dock" aria-hidden="true">
+  <span>Hand wrapped, delivered across Israel</span>
+  <a class="btn" href="order.html" tabindex="-1"><span style="position:relative">Order a gift</span></a>
+</div>
+
+<script>
+(function () {
+  var still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var clamp = function (x) { return x < 0 ? 0 : x > 1 ? 1 : x; };
+  var seg = function (p, a, b) { return clamp((p - a) / (b - a)); };
+  var ease = function (x) { return 1 - Math.pow(1 - x, 3); };
+
+  // THE OPENING. p runs 0 to 1 while the stage is held. 0 to .55: the clip
+  // (bow, ribbon, lid, light), scrubbed. .45 to .6: the headline lands in
+  // the light. .55 to .9: their gifts rise out of the box, one by one, into
+  // an arc. .82 to .95: the button. The scroll sets the time, never plays it.
+  var open = document.getElementById('open'), film = document.getElementById('film');
+  var small = window.matchMedia('(max-width: 760px)').matches;
+  var h1 = document.getElementById('h1'), cue = document.getElementById('cue');
+  var rise = [].slice.call(document.querySelectorAll('#rise li'));
+  film.poster = film.dataset[still ? (small ? 'sm' : 'sd') : (small ? 'pm' : 'pd')];
+  if (!still) { film.src = film.dataset[small ? 'm' : 'd']; film.load(); }
+  var fWant = 0, fBusy = false;
+  function fSeek() {
+    if (!film.duration) return;
+    var t = fWant * (film.duration - .05);
+    if (Math.abs(film.currentTime - t) < .02) { fBusy = false; return; }
+    fBusy = true; film.currentTime = t;
+  }
+  film.addEventListener('seeked', function () { fBusy = false; fSeek(); });
+  film.addEventListener('loadedmetadata', fSeek);
+  // where each gift ends: an arc above the open box (laptop), two rows of three (phone)
+  var ARC = small
+    ? [[-31, -27], [0, -30], [31, -27], [-31, -5], [0, -8], [31, -5]]
+    : [[-38, -1], [-25, -11], [-8.5, -15], [8.5, -15], [25, -11], [38, -1]];
+  var glinted = false;
+  function openAt(p) {
+    fWant = seg(p, 0, .55);
+    if (!fBusy) fSeek();
+    var hh = ease(seg(p, .45, .6));
+    h1.style.setProperty('--h', hh.toFixed(3));
+    if (hh > .98 && !glinted) { glinted = true; var em = h1.querySelector('em'); em.classList.add('glint'); em.addEventListener('animationend', function () { em.classList.remove('glint'); }, { once: true }); }
+    cue.style.setProperty('--cue', (1 - seg(p, .03, .12)).toFixed(3));
+    rise.forEach(function (li, i) {
+      var k = ease(seg(p, .55 + i * .05, .72 + i * .05));
+      var to = ARC[i];
+      var x = to[0] * k, y = to[1] * k;
+      li.style.opacity = String(Math.min(1, k * 2.2));
+      li.style.transform = 'translate(' + x + (small ? 'vw' : 'vw') + ',' + y + 'svh) scale(' + (.35 + .65 * k) + ') rotate(' + ((1 - k) * (i % 2 ? 8 : -8)) + 'deg)';
+    });
+    open.querySelector('.act').style.setProperty('--a', ease(seg(p, .82, .95)).toFixed(3));
+  }
+  function onOpen() {
+    var r = open.getBoundingClientRect();
+    var stageH = window.innerHeight - 64;
+    var travel = r.height - stageH;
+    openAt(travel > 0 ? clamp((64 - r.top) / travel) : 1);
+  }
+
+  // the steps: a gold line fills as you read down, each number lights
+  var steps = document.getElementById('steps');
+  var lis = [].slice.call(steps.querySelectorAll('li'));
+  function onSteps() {
+    var r = steps.getBoundingClientRect(), vh = window.innerHeight;
+    var p = clamp((vh * .75 - r.top) / (r.height));
+    steps.style.setProperty('--p', p.toFixed(3));
+    lis.forEach(function (li, i) { li.classList.toggle('lit', p >= (i + .2) / lis.length || p > .97); });
+  }
+
+  // what we make: the row crossing the middle of the screen lights gold
+  var rows = [].slice.call(document.querySelectorAll('#make li'));
+  function onMake() {
+    // only the one row nearest the middle of the screen, and only while
+    // the list is on screen
+    var mid = window.innerHeight * .5, best = -1, dist = 1e9;
+    rows.forEach(function (li, i) {
+      var r = li.getBoundingClientRect(), d = Math.abs((r.top + r.bottom) / 2 - mid);
+      if (r.bottom > 0 && r.top < window.innerHeight && d < dist) { dist = d; best = i; }
+    });
+    rows.forEach(function (li, i) {
+      var on = i === best && dist < window.innerHeight * .3;
+      li.classList.toggle('lit', on);
+      li.style.setProperty('--f', on ? 1 : 0);
+    });
+  }
+
+  // the close: one foil glint across their name as it comes into view
+  var sign = document.getElementById('sign'), signed = false;
+  function onSign() {
+    if (signed) return;
+    var r = sign.getBoundingClientRect();
+    if (r.top < window.innerHeight * .9) { signed = true; sign.classList.add('glint'); }
+  }
+
+  if (still) {
+    openAt(1); steps.style.setProperty('--p', 1); lis.forEach(function (li) { li.classList.add('lit'); });
+  } else {
+    var raf = 0;
+    var frame = function () { raf = 0; onOpen(); onMake(); onSteps(); onSign(); };
+    window.addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(frame); }, { passive: true });
+    window.addEventListener('resize', frame);
+    frame();
+    // sections ease in as they arrive (content stays visible without script)
+    var io = new IntersectionObserver(function (es) {
+      es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+    }, { rootMargin: '0px 0px -10% 0px' });
+    document.querySelectorAll('[data-rev]').forEach(function (el) { io.observe(el); });
+  }
+
+  // phone: the WhatsApp bar from the end of the first screen to the close
+  var dock = document.getElementById('dock');
+  var hero = document.querySelector('.hero');
+  var close = document.getElementById('close');
+  function dockPaint() {
+    var on = hero.getBoundingClientRect().bottom < 0 && close.getBoundingClientRect().top > window.innerHeight * .8;
+    dock.classList.toggle('on', on);
+    dock.setAttribute('aria-hidden', on ? 'false' : 'true');
+    dock.querySelector('a').tabIndex = on ? 0 : -1;
+  }
+  window.addEventListener('scroll', dockPaint, { passive: true });
+  dockPaint();
+})();
+
+// PROPOSED: one group of gifts at a time. Rebuilds if the live catalogue replaces the list.
+(function () {
+  var host = document.querySelector('[data-mir-list]');
+  if (!host) return;
+  var bar = document.createElement('div'); bar.className = 'pills'; bar.setAttribute('role', 'group'); bar.setAttribute('aria-label', 'Choose a group of gifts');
+  host.parentNode.insertBefore(bar, host);
+  var cur = 0, building = false;
+  function show(i) {
+    cur = i;
+    var kids = [].slice.call(host.children);
+    kids.forEach(function (el, k) { el.hidden = Math.floor(k / 2) !== i; });
+    [].forEach.call(bar.children, function (b, j) { b.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
+  }
+  function build() {
+    if (building) return; building = true;
+    var kids = [].slice.call(host.children);
+    bar.textContent = '';
+    for (var k = 0; k + 1 < kids.length; k += 2) {
+      (function (h, ul, idx) {
+        var n = ul.querySelectorAll('li:not(.is-out)').length;
+        var b = document.createElement('button'); b.type = 'button';
+        b.appendChild(document.createTextNode(h.textContent));
+        var sm = document.createElement('small'); sm.textContent = n; b.appendChild(sm);
+        b.addEventListener('click', function () { show(idx); });
+        bar.appendChild(b);
+      })(kids[k], kids[k + 1], k / 2);
+    }
+    host.style.minHeight = '';
+    var keep = cur, tall = 0;
+    for (var k2 = 0; k2 + 1 < kids.length; k2 += 2) { show(k2 / 2); tall = Math.max(tall, host.offsetHeight); }
+    host.style.minHeight = tall + 'px';
+    show(Math.min(keep, Math.max(0, bar.children.length - 1)));
+    building = false;
+  }
+  window.addEventListener('resize', function () { if (!building) { build(); } });
+  build();
+  new MutationObserver(function () { if (!building) { build(); } }).observe(host, { childList: true });
+})();
+</script>
+</body>
+</html>

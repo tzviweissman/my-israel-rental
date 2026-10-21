@@ -1,0 +1,127 @@
+<!doctype html>
+<!-- Blazin' Boards, order.html. Written by gen/pages.py. -->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Your order · Blazin' Boards</title>
+<meta name="description" content="Order a Blazin' Boards meat board: pick the size, add a bottle, say when and where. Orders 48 hours ahead. You pay the business directly.">
+<link rel="icon" href="assets/their-logo-small.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<nav class="nav" aria-label="Blazin' Boards">
+  <a class="nav__mark" href="index.html"><img src="assets/their-logo-small.png" alt="" width="120" height="120"> Blazin' Boards</a>
+  <ul class="menu">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="boards.html">Every board</a></li>
+    <li><a href="order.html">Your order</a></li>
+  </ul>
+  <a class="cart" href="order.html" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span>Order</span><b data-count hidden>0</b></a>
+</nav>
+
+<main class="order">
+  <div class="wrap">
+    <ol class="steps" aria-label="Order steps"><li class="is-now" aria-current="step"><span class="st">Step 1: Your boards</span></li><li class=""><span class="st">Step 2: When and where</span></li><li class=""><span class="st">Step 3: Your details</span></li></ol>
+    <div class="cols">
+      <section class="pane">
+        <h1>Your <em>boards.</em></h1>
+        <p class="sub">Add as many as you need. Prices in US dollars.</p>
+        <ul class="cartlines" id="cartlines"></ul>
+        <div class="q">
+          <h2 id="pickTitle">Choose a board</h2>
+          <button type="button" class="ghost" id="more" hidden aria-expanded="false" aria-controls="picks">Add another board</button>
+          <table class="picks" id="picks" aria-label="Boards by size and line"></table>
+          <p style="margin:.6rem 0 0"><a class="back" href="boards.html">See every board drawn to size</a></p>
+        </div>
+        <div class="q" id="bottlesQ" hidden>
+          <h2>Add a bottle</h2>
+          <ul class="bottles" id="bottles" style="grid-template-columns:repeat(2,minmax(0,1fr))"></ul>
+        </div>
+        <p class="errline" id="err"></p>
+        <div class="next"><a class="cta" id="go" href="order-when.html">Continue</a><a class="back" href="boards.html">Keep looking</a></div>
+      </section>
+      <aside class="summary" aria-label="Your order" aria-live="polite">
+        <div class="who"><img src="assets/their-logo-small.png" alt="" width="44" height="44"><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
+        <ul class="lines" data-lines></ul>
+        <div class="total"><span>Total</span><b data-total>$0</b></div>
+        <ul class="promise">
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>You pay us directly, by <span data-ways>card, Zelle or bank transfer</span>. Nothing is paid on this site.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>We confirm your order with you first.</span></li>
+          <li><svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span>Orders 48 hours ahead.</span></li>
+        </ul>
+      </aside>
+    </div>
+  </div>
+</main>
+<div class="dock"><div><small>Total</small><b data-total>$0</b></div><a class="cta" id="go2" href="order-when.html">Continue</a></div>
+
+<script src="site.js"></script>
+<script>
+(function () {
+  var o = BB.load(), F = null, open = false;
+  var area = function (p) { return p.cm ? p.cm[0] * p.cm[1] : 1e9; };
+  document.getElementById('more').addEventListener('click', function () { open = true; paint(); document.getElementById('picks').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
+  function paint() {
+    var ls = BB.lines(F, o);
+    document.getElementById('cartlines').innerHTML = ls.map(function (l) {
+      return '<li><span class="thumb"><img src="assets/board-cut-m.webp" alt="" width="1000" height="815"></span><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
+        + '<span class="stepper"><button type="button" data-dec="' + l.p.id + '" aria-label="One fewer">−</button><output>' + l.qty + '</output><button type="button" data-inc="' + l.p.id + '" aria-label="One more">+</button></span>'
+        + '<span class="amt">' + BB.money(l.p.price * l.qty, l.p.currency) + '</span><button type="button" class="rm" data-rm="' + l.p.id + '" aria-label="Remove ' + BB.esc(l.p.short) + ' from the order"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button></li>';
+    }).join('');
+    var boards = F.products.filter(function (p) { return p.board; });
+    var rows = {};
+    boards.forEach(function (p) { var k = p.cm ? p.cm.join('x') : p.short; (rows[k] = rows[k] || { a: area(p), cells: [] }).cells.push(p); });
+    var keys = Object.keys(rows).sort(function (x, y) { return rows[x].a - rows[y].a; });
+    var h = '<thead><tr><th>Size</th><th colspan="2">Boards</th></tr></thead><tbody>';
+    keys.forEach(function (k) {
+      var c = rows[k].cells.sort(function (a, b) { return (a.line === 'premium') - (b.line === 'premium'); });
+      for (var i = 0; i < c.length; i += 2) {
+        h += '<tr><td class="size">' + (i === 0 && c[0].cm ? c[0].cm[0] + ' × ' + c[0].cm[1] + ' cm' : '') + '</td>';
+        [c[i], c[i + 1]].forEach(function (p) {
+          if (!p) { h += '<td></td>'; return; }
+          var on = (o.cart[p.id] || 0) > 0;
+          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + (BB.saving(p) ? '<span class="save-b">Save $' + BB.saving(p) + '</span>' : '') + '</button></td>';
+        });
+        h += '</tr>';
+      }
+    });
+    document.getElementById('picks').innerHTML = h + '</tbody>';
+    var hasBoard = ls.some(function (l) { return l.p.board; });
+    document.getElementById('pickTitle').hidden = hasBoard;
+    document.getElementById('more').hidden = !hasBoard || open;
+    document.getElementById('picks').hidden = hasBoard && !open;
+    var bottles = F.products.filter(function (p) { return !p.board; });
+    document.getElementById('bottlesQ').hidden = !bottles.length || !hasBoard;
+    document.getElementById('bottles').innerHTML = bottles.map(function (p) {
+      var on = (o.cart[p.id] || 0) > 0;
+      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add') + '</button></li>';
+    }).join('');
+    var ok = ls.some(function (l) { return l.p.board; });
+    ['go', 'go2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', String(!ok)); });
+    BB.paint(F, o);
+  }
+  document.addEventListener('click', function (e) {
+    var t = e.target.closest('[data-inc],[data-dec],[data-toggle],[data-bottle],[data-rm]'); if (!t || !F) return;
+    var id = t.dataset.inc || t.dataset.dec || t.dataset.toggle || t.dataset.bottle || t.dataset.rm, was = o.cart[id] || 0;
+    if (t.dataset.inc) o.cart[id] = Math.min(20, was + 1);
+    if (t.dataset.dec) o.cart[id] = Math.max(0, was - 1);
+    if (t.dataset.toggle || t.dataset.bottle) o.cart[id] = was ? 0 : 1;
+    if (t.dataset.rm) o.cart[id] = 0;
+    if (!o.cart[id]) delete o.cart[id];
+    BB.save(o); paint();
+  });
+  BB.form().then(function (f) {
+    F = f;
+    // Arrived from a board on the home page: that board, in the order.
+    var want = new URLSearchParams(location.search).get('board');
+    if (want) { var w = F.products.filter(function (p) { return p.short === want; })[0]; if (w && !o.cart[w.id]) { o.cart[w.id] = 1; BB.save(o); } }
+    paint();
+  }).catch(function () { document.getElementById('err').textContent = 'Could not load the boards. Please refresh the page.'; });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,58 @@
+{
+ "site": "Chicken Munch",
+ "changes": [
+  {
+   "img": "01.jpg",
+   "title": "Shekel prices drawn properly, and the pan section sits on one screen",
+   "why": "The sign beside every pan price was a broken glyph from the heading font; shop pages must show the true sign (page rules 3s, glyph check)."
+  },
+  {
+   "img": "02.jpg",
+   "title": "Boxes section fits one screen, with the Grand box marked Family size",
+   "why": "The section ran taller than the screen (rule 3c); the middle size, which feeds 8 to 10, is shown as the natural pick (3j.6)."
+  },
+  {
+   "img": "03.jpg",
+   "title": "On the menu, the photo changes to the chicken you point at",
+   "why": "A list beside a photo must change the photo to the item you are on, also on a tap (checklist 5, video lesson on choices changing the picture)."
+  },
+  {
+   "img": "04.jpg",
+   "title": "The order becomes three steps: basket, when and where, details",
+   "why": "One long form with everything at once is tiring; one question per screen, a step bar and a button that names the next step (rules 3k)."
+  },
+  {
+   "img": "05.jpg",
+   "title": "Every basket line gets a remove button, also on a phone",
+   "why": "Now the only way to remove something is to press minus until zero; every line needs a 40 px bin (rules 3k)."
+  },
+  {
+   "img": "06.jpg",
+   "title": "The kinds of chicken on Home fit one screen in a single row",
+   "why": "The photo block was taller than a laptop screen (rule 3c); three photos in a row show the same food at half the height."
+  },
+  {
+   "img": "07.jpg",
+   "title": "On a phone the chosen chicken stays pinned above the list",
+   "why": "The photo scrolled away so a tap on a later item showed nothing; a pinned photo keeps the picture and the words together (3s.15)."
+  },
+  {
+   "img": "08.jpg",
+   "title": "Boxes on a phone: shorter photo so the first box shows beside it",
+   "why": "The photo filled the screen and pushed the prices below the fold (rules 3c, 3s.10)."
+  },
+  {
+   "img": "09.jpg",
+   "title": "Arrows on buttons drawn as icons, name tap area made full size",
+   "why": "The arrow was another missing character in the font, and the name in the menu bar was too small to tap on a phone (check-site TAP and GLYPH)."
+  }
+ ],
+ "questions": [
+  "Which of your photos is the Classic American Crunch, the Shnitzel Bites, the Pretzel and the Buffalo Wings? Four kinds have no photo yet, so tapping them cannot show their own picture.",
+  "Do you offer any promise or guarantee we can state beside the Order button, for example about late or wrong orders?",
+  "Is there one true sentence about why the chicken costs what it does (for example how it is marinated or fried) that you want beside the prices?",
+  "Do you want Menu and Order merged into one Shop page, so the food and the basket are on the same page?",
+  "What is the last day and time to order for Shabbos, and is delivery only in central Jerusalem?"
+ ],
+ "checks_now": "Real site: check-site finds missing shekel sign and arrow glyphs on every page and a logo link too small to tap on phones; check-fits finds Home and Menu sections taller than a laptop screen (boxes, pans, styles); check-motion finds nothing; the order form check cannot add a box by itself."
+}

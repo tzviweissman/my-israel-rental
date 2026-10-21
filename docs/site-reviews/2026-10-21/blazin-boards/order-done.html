@@ -1,0 +1,55 @@
+<!doctype html>
+<!-- Blazin' Boards, order-done.html. Written by gen/pages.py. -->
+<html lang="en" dir="ltr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Order placed · Blazin' Boards</title>
+<meta name="description" content="Your order is with Blazin&#39; Boards.">
+<link rel="icon" href="assets/their-logo-small.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<nav class="nav" aria-label="Blazin' Boards">
+  <a class="nav__mark" href="index.html"><img src="assets/their-logo-small.png" alt="" width="120" height="120"> Blazin' Boards</a>
+  <ul class="menu">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="boards.html">Every board</a></li>
+    <li><a href="order.html">Your order</a></li>
+  </ul>
+  <a class="cart" href="order.html" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span>Order</span><b data-count hidden>0</b></a>
+</nav>
+
+<main class="order">
+  <div class="wrap" style="max-width:46rem">
+    <section class="pane" style="text-align:center;padding:clamp(2rem,5vw,3.5rem)">
+      <div style="width:64px;height:64px;border-radius:50%;background:var(--ox-1);display:grid;place-items:center;margin:0 auto"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
+      <h1 style="margin-top:1.2rem">Your order is with <em>Blazin' Boards.</em></h1>
+      <p class="sub" style="max-width:32rem;margin-inline:auto">We confirm your order with you before the day. You pay us directly, by <span id="pay">the way you chose</span>.</p>
+      <ul class="lines" id="doneLines" style="text-align:left;margin-top:1.5rem;border-top:1px solid var(--line)"></ul>
+      <div class="total"><span>Total</span><b id="doneTotal"></b></div>
+      <p style="margin-top:1.5rem"><a class="cta" id="track" href="#" target="_blank" rel="noopener">Follow your order</a></p>
+      <p class="sub" style="margin-top:1rem">Keep that link: it shows where your order is.</p>
+      <p style="margin-top:1.5rem"><a class="back" href="index.html">Back to Blazin' Boards</a></p>
+    </section>
+  </div>
+</main>
+
+<script src="site.js"></script>
+<script>
+(function () {
+  var d = null;
+  try { d = JSON.parse(sessionStorage.getItem('bb-done') || 'null'); } catch (e) { d = null; }
+  if (!d) { location.replace('index.html'); return; }
+  document.getElementById('doneLines').innerHTML = d.lines.map(function (l) { return '<li><span>' + BB.esc(l[0]) + '</span><span>' + BB.esc(l[1]) + '</span></li>'; }).join('')
+    + '<li class="meta"><span>When</span><span>' + BB.esc(d.when) + '</span></li><li class="meta"><span>How</span><span>' + BB.esc(d.how) + '</span></li>';
+  document.getElementById('doneTotal').textContent = d.total;
+  document.getElementById('pay').textContent = d.pay || 'the way you chose';
+  document.getElementById('track').href = d.track;
+})();
+</script>
+</body>
+</html>

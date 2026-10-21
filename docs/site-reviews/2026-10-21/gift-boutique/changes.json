@@ -1,0 +1,59 @@
+{
+ "site": "The Gift Boutique",
+ "changes": [
+  {
+   "img": "01.jpg",
+   "title": "Gifts shown one group at a time, with group buttons",
+   "why": "All the gifts sit in one very long scroll; one group per screen keeps each view complete and fits a laptop (rules 3c, 3s, video on filter chips)."
+  },
+  {
+   "img": "02.jpg",
+   "title": "Each gift gets a clear price line and a plus button",
+   "why": "Tiles give no hint they can be added; a price beside a round add button says it (shop-page videos, rule 3s.17)."
+  },
+  {
+   "img": "03.jpg",
+   "title": "Each line under What we make now leads somewhere",
+   "why": "Bespoke arrangements and add-ons promised something with no way to ask; each row now has a link, and the section fits one screen."
+  },
+  {
+   "img": "04.jpg",
+   "title": "Order page gets the same menu bar and a three step bar",
+   "why": "The order page had a different bar and one 2700 pixel page; rule 3k asks for one menu everywhere and orders in steps."
+  },
+  {
+   "img": "06.jpg",
+   "title": "Order list: search, group buttons, bigger photos, no sold-out items",
+   "why": "A very long list with tiny photos and gifts you cannot order; now find a gift fast and see it clearly (rule 3s, search video)."
+  },
+  {
+   "img": "07.jpg",
+   "title": "Every line in your order has a remove button",
+   "why": "A wrong gift could only be removed by tapping minus down to zero; rule 3k asks for a bin on every line. The menu shows the count."
+  },
+  {
+   "img": "08.jpg",
+   "title": "Last step names what happens, with the total",
+   "why": "The button always read the same; now it says Continue, then Send order on WhatsApp, $202, with a tick line that nothing is paid here (3j, 3s.17)."
+  },
+  {
+   "img": "09.jpg",
+   "title": "A short confirmation appears when a gift is added",
+   "why": "Adding gave no feedback beyond a small number change; a dark bar says what was added and leaves by itself (rule 3s, button-feedback video)."
+  },
+  {
+   "img": "10.jpg",
+   "title": "A real footer with pages, WhatsApp, email and hours",
+   "why": "The footer only said where we are; visitors now find the pages and every way to reach us on both pages (rule 3k.3)."
+  }
+ ],
+ "questions": [
+  "Can you send a short story about the shop and who wraps the gifts, so we can add an About page and a photo of you at work?",
+  "Do you also want prices in shekels, since most buyers are in Israel and the catalogue is in dollars?",
+  "What does delivery cost and which areas do you deliver to, and how many days ahead should someone order?",
+  "Three gifts are all called Bottle Opener at different prices: can you give each a clearer name or one line saying what is in it?",
+  "Do you offer any promise such as a redo or refund if a gift arrives damaged, to show beside the order button?",
+  "Is any gift set cheaper than its parts bought separately, so we can show the saving in money?"
+ ],
+ "checks_now": "Real site: no glitches on the home page; the collection section is 2755px and the order page section 2736px (too tall for one screen), What we make is 851px; the order button has no hover state while disabled; order-page photo 404s only occur because the local server lacks the /pages/ path."
+}

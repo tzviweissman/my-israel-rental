@@ -1,0 +1,21 @@
+{"site":"Bun Intended","changes":[
+{"img":"01.jpg","title":"A menu bar with the name, Prices, Find us and a Build button","why":"The page has no menu, so a visitor cannot jump to prices or contact; real websites keep one bar on every screen (rule 3k)."},
+{"img":"02.jpg","title":"The 8 piece box shows what you save, in shekels","why":"Two boxes of 4 cost 10 shekels more than one box of 8 on your own price list, but the page never says so; savings are shown as money with the old price struck through (rule 3j)."},
+{"img":"02.jpg","title":"The order button carries the price, with the price of one bun","why":"A button should name what happens and what it costs, and an option should show its consequence (rule 3s, points 16 and 17)."},
+{"img":"04.jpg","title":"Choose pick-up or delivery, and how many boxes","why":"The message always said pick-up even though you also deliver, and nobody could order two boxes; every choice should reach you written out (rule 3l)."},
+{"img":"03.jpg","title":"Flavour names no longer break in two, and nothing jumps","why":"Choosing the 8 piece box wrapped Classic cinnamon onto two lines and moved the page below by 89 pixels; choosing must never move the layout (rule 3s, point 2). The mix option now always shows, greyed on the 4 box."},
+{"img":"05.jpg","title":"Price list lines can be tapped to start that box","why":"The price list repeated the builder without doing anything; now each line starts a box with it and the 8 piece lines show the saving."},
+{"img":"06.jpg","title":"A proper footer with call, text, WhatsApp and pick-up","why":"The only phone number sat in a small line under the builder; a footer on every site gives ways to reach you in one place (rule 3k)."},
+{"img":"07.jpg","title":"On a phone, a Menu button opens the pages and your number","why":"Phones need the same bar folded into a Menu button that closes on Close or Escape (rule 3k)."},
+{"img":"02.jpg","title":"Every move now takes under half a second","why":"The button fill, the bun drop and the box fill ran 0.52 to 0.56 seconds; the rule is under 0.5 (video lesson on fast, purposeful motion)."}
+],
+"questions":[
+"Is the 2 flavour mix at 120 shekels meant to cost the same for every pair? Classic and Espresso would be 110 as two boxes of 4, so that mix costs more.",
+"Can a customer order more than one box with different flavours in one order, or should each be a separate message?",
+"For delivery: which areas do you deliver to, is there a fee, and how many days ahead should people order? Then we can say it next to the Delivery choice.",
+"Seminary deliveries on 5 or more orders: does that mean 5 boxes or 5 buns, and is delivery free?",
+"One true sentence about each flavour (for example how it tastes) so choosing a flavour can also show a line about it.",
+"Do you have a photo of someone enjoying a bun, or of the baking at home?",
+"Is the WhatsApp number +1 848 221 6022 the one orders should go to?"
+],
+"checks_now":"On the real page check-site stops with an error and reports that choosing the 8 piece box moves the page by 89 px; check-fits passes; check-motion stops with an error because the choice buttons are rebuilt on every tap. On the proposed copy all three pass."}

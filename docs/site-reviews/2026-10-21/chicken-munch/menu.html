@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Menu · Chicken Munch</title>
+<meta name="description" content="Eight kinds of chicken and five sauces, in Munch boxes from $69 or by the pan from ₪275. Kosher American fried chicken in Jerusalem.">
+<meta property="og:title" content="Menu · Chicken Munch">
+<meta property="og:description" content="Eight kinds of chicken and five sauces, in Munch boxes from $69 or by the pan from ₪275. Kosher American fried chicken in Jerusalem.">
+<meta property="og:image" content="https://myisraelrental.com/pages/chicken-munch/assets/hot-poppers.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700;800&family=Heebo:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body class="no-js" data-page="menu">
+<header class="top" id="top">
+  <a class="mark" href="index.html" aria-label="Chicken Munch, home"><b>Chicken</b> Munch</a>
+  <nav class="nav" id="nav" aria-label="Chicken Munch"><a href="index.html">Home</a><a href="menu.html" aria-current="page">Menu</a><a href="order.html">Order</a><a href="contact.html">Contact</a></nav>
+  <div class="top-r">
+    <a class="btn-line" href="order.html">Order now<span class="count" id="count" hidden></span></a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+  </div>
+</header>
+
+<main>
+  <header class="page-head"><div class="wrap">
+    <h1>The <span class="red">menu</span></h1>
+    <p class="lede">Eight kinds of chicken and five sauces, in a Munch box or by the pan.</p>
+  </div></header>
+  <section class="sec styles" id="styles" aria-labelledby="h-styles">
+    <div class="wrap">
+      <h2 id="h-styles" class="rev">Choose your <span class="gold">chicken</span></h2>
+      <div class="styles-grid">
+        <ul class="menu-list">
+          <li class="rev"><h3>Classic American Crunch</h3><p>Handcrafted chicken soaked in our signature marinade, coated in cornflakes for the full Chicken Munch experience.</p></li>
+          <li class="rev has" tabindex="0" data-show="Original Hot Poppers"><h3>Original Hot Poppers</h3><p>Saucy bites that are the ultimate combination of sweet and spicy. Dangerously addicting.</p></li>
+          <li class="rev"><h3>Shnitzel Bites</h3><p>Signature chicken in finger form. Perfect for a party or sharing.</p></li>
+          <li class="rev has" tabindex="0" data-show="Fruity Chicken"><h3>Fruity Chicken</h3><p>Chicken fingers coated in Fruity Pebbles, for those who love a hint of sweetness with their savory.</p></li>
+          <li class="rev has" tabindex="0" data-show="Crispy Cornflake"><h3>Crispy Cornflake</h3><p>Chicken fingers coated in cornflakes, for those who enjoy crazy texture with every bite.</p></li>
+          <li class="rev has" tabindex="0" data-show="Rice Krispie"><h3>Rice Krispie</h3><p>Chicken fried in a crispy Rice Krispie coating for that perfect crackle.</p></li>
+          <li class="rev"><h3>Pretzel</h3><p>Chicken fingers with hints of BBQ and bites of salty pretzel.</p></li>
+          <li class="rev"><h3>Buffalo Wings</h3><p>In-bone chicken bites coated in a hickory, hot and savory sauce.</p></li>
+        </ul>
+        <figure class="stage" id="stage" aria-live="polite">
+          <img class="on" src="assets/hot-poppers.webp" alt="Original Hot Poppers in a kraft bowl" width="900" height="854" data-for="Original Hot Poppers">
+          <img src="assets/fruity.webp" alt="Fruity Chicken, coated in Fruity Pebbles, in a kraft bowl" width="900" height="900" loading="lazy" data-for="Fruity Chicken">
+          <img src="assets/cornflake.webp" alt="Crispy Cornflake chicken in a kraft bowl with a sauce pot" width="900" height="900" loading="lazy" data-for="Crispy Cornflake">
+          <img src="assets/rice-krispie-2.webp" alt="Rice Krispie chicken in a kraft bowl with a sauce pot" width="900" height="900" loading="lazy" data-for="Rice Krispie">
+          <figcaption id="stage-cap">Original Hot Poppers</figcaption>
+        </figure>
+      </div>
+      <div class="sauces rev">
+        <h3>Sauces</h3>
+        <div class="sauce-row"><span>Garlic Mayo</span><span>Sweet BBQ</span><span>Honey Mustard</span><span>Spicy Mayo</span><span>Buffalo</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="boxes" aria-labelledby="h-boxes">
+    <div class="wrap">
+      <h2 id="h-boxes" class="rev">Premium <span class="red">chicken boxes</span></h2>
+      <p class="lede rev">Pick your types of chicken and your sauces. Each box comes ready to share.</p>
+      <div class="boxes-grid">
+        <div class="photo rev"><img src="assets/box-dark.webp" alt="A Chicken Munch box: pretzel, rice krispie and cornflake chicken with sauce pots in the lid" width="700" height="890" loading="lazy"></div>
+        <div class="tiles">
+          <div class="tile rev"><div><h3>Mini Munch Box</h3><p class="feeds">Feeds 3 to 4</p><p class="what">Up to 4 types of chicken and 3 sauces</p></div>
+            <div><div class="price">$69</div><a class="btn-line add" href="order.html?add=mini" data-add="mini">Add</a></div></div>
+          <div class="tile pick rev"><div><span class="tag">Family size</span><h3>Grand Munch Box</h3><p class="feeds">Feeds 8 to 10</p><p class="what">5 types of chicken and 4 sauces</p></div>
+            <div><div class="price">$140</div><a class="btn-line add" href="order.html?add=grand" data-add="grand">Add</a></div></div>
+          <div class="tile rev"><div><h3>Supreme Munch Box</h3><p class="feeds">Feeds 16</p><p class="what">Up to 6 types of chicken and 5 sauces</p></div>
+            <div><div class="price">$220</div><a class="btn-line add" href="order.html?add=supreme" data-add="supreme">Add</a></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="pans" aria-labelledby="h-pans">
+    <div class="wrap">
+      <h2 id="h-pans" class="rev">By the <span class="red">pan</span></h2>
+      <p class="lede rev">Priced by the pan, for a bigger table.</p>
+      <div class="pan-grid">
+        <div class="tiles">
+          <div class="tile rev"><div><h3>9x13 pan</h3><p class="feeds">Feeds 6 to 8</p><p class="what">One kind of chicken</p></div><div><div class="price">₪275</div><a class="btn-line add" href="order.html?add=pan913" data-add="pan913">Add</a></div></div>
+          <div class="tile rev"><div><h3>Roaster</h3><p class="feeds">Feeds 18 to 20</p><p class="what">Up to 3 kinds of chicken</p></div><div><div class="price">₪650</div><a class="btn-line add" href="order.html?add=roaster" data-add="roaster">Add</a></div></div>
+          <div class="tile rev"><div><h3>9x13 rice</h3></div><div><div class="price">₪75</div><a class="btn-line add" href="order.html?add=rice" data-add="rice">Add</a></div></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="kosher"><div class="wrap"><span><b>Kosher</b>, hechsher of Rav Akiva Dershowitz</span><span>The chicken is Edah Chareidis or Rav Landau</span></div></div>
+  <section class="close" aria-label="Chicken Munch">
+    <div class="wrap">
+      <p>WhatsApp or call <a href="https://wa.me/972553316975" target="_blank" rel="noopener">055-331-6975</a><br>From the US, call (no WhatsApp) <a href="tel:+19294748871">929-474-8871</a><br>Email <a href="mailto:chickenmunch26@gmail.com">chickenmunch26@gmail.com</a></p>
+      <a class="btn" href="order.html">Order now <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+    </div>
+    <p class="giant" aria-hidden="true"><span class="r">Chicken</span> <span class="g">Munch</span></p>
+  </section>
+</main>
+<footer class="foot"><nav aria-label="Pages"><a href="index.html">Home</a> · <a href="menu.html">Menu</a> · <a href="order.html">Order</a> · <a href="contact.html">Contact</a></nav>Chicken Munch, Jerusalem · on <a href="/">MyIsraelRental</a>, free to list, no commission</footer>
+
+<div class="bar" id="bar" aria-hidden="true">
+  <p class="p"><b>From $69</b>Boxes, or pans from ₪275</p>
+  <a class="btn" href="order.html" tabindex="-1">Order now</a>
+</div>
+
+<script src="site.js"></script>
+<script>
+(function () {
+  var imgs = [].slice.call(document.querySelectorAll('#stage img')), cap = document.getElementById('stage-cap'), items = [].slice.call(document.querySelectorAll('.menu-list li.has'));
+  function show(li) { var n = li.dataset.show; imgs.forEach(function (i) { i.classList.toggle('on', i.dataset.for === n); }); items.forEach(function (x) { x.classList.toggle('cur', x === li); }); cap.textContent = n; }
+  items[0].classList.add('cur');
+  items.forEach(function (li) { li.addEventListener('mouseenter', function () { show(li); }); li.addEventListener('click', function () { show(li); }); li.addEventListener('focus', function () { show(li); }); });
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{"site":"Michal Yodaiken","changes":[
+{"img":"01.jpg","title":"The shekel sign and the ₪60 price now show properly and big","why":"The shekel sign was drawn tiny from a stray font; the price is the main number, so it is now clear and about three times the text size (rule 3s, real numbers big)."},
+{"img":"02.jpg","title":"All five ways to train now fit one screen, in equal cards","why":"The section was nearly two screens tall and one card was huge while the rest were cut off; equal cards with prices lined up at the bottom keep it consistent (rules 3c and 3s)."},
+{"img":"03.jpg","title":"Michal's real gym photo is labelled as a photo of her gym","why":"Every other picture is a generated setting, so the one real photo is marked as real, which builds trust honestly (rule 3s, real photos of real work)."},
+{"img":"04.jpg","title":"The 'what we work on' list is shorter, in two columns, on one screen","why":"It was over a whole screen of huge lines, with odd indents; now it reads in her flyer's order and fits (rule 3c, one screen)."},
+{"img":"05.jpg","title":"On phones the empty pink gaps around the list are gone","why":"The pink band left large blank space above and below the words; tighter spacing means the next section is in view sooner."},
+{"img":"06.jpg","title":"A WhatsApp option sits under the book button, with a ready message","why":"Women who would rather just message have a one-tap route using the number Michal gave; people should always have a second way to act (rule 3k)."},
+{"img":"07.jpg","title":"The same WhatsApp option on a phone, above the session card","why":"On a phone the number was only in the card at the bottom; now it is next to the button where the decision is made."},
+{"img":"08.jpg","title":"On phones the price is large and the first screen fits exactly","why":"The price was a small line; as a big pink number it is the first thing seen, and the hero no longer sits under the top bar (rule 3s)."}
+],
+"questions":[
+"Do you have a photo of yourself training, or a photo with a client's permission, to show the person behind the page?",
+"Do you want to show prices for training at the client's gym, online and small groups, or keep 'Message for a price'?",
+"Would you like a short 'how it works' (message, we choose a time, first session)? If so, what really happens, and where do you travel to in Jerusalem?",
+"Is there a cancellation or rescheduling rule you want shown?"
+],
+"checks_now":"Real site: 2 glyph problems (the shekel sign missing from both fonts); 14 sections or photos taller than the screen (services, work-on list, booking, hero photo); motion fine, no choices to test."}

@@ -1,0 +1,20 @@
+{
+  "site": "Blazin' Boards",
+  "changes": [
+    {"img": "01.jpg", "title": "Every board page opens on the same deep red as the home page", "why": "The home page is oxblood and the shop pages are plain white, so it feels like two different sites; a site should look like one (website rule 3k, consistency)."},
+    {"img": "02.jpg", "title": "A green \"Save $77\" tag on the two Large boards", "why": "The saving is real (size for size against the Medium) but was only on the home page, in a sentence; shops show it as a short tag where you choose (rules 3j and 3s)."},
+    {"img": "03.jpg", "title": "Each basket line gets a photo and a remove button", "why": "There was no way to take a board out of the order except pressing minus; every basket line needs a bin button and the picture appears with the name (rule 3k and 3s)."},
+    {"img": "04.jpg", "title": "Step 1 fits one screen; no stray \"Add another board\" button", "why": "The board choice ran to 1,447 px tall with wine listed before any board was chosen, and an \"Add another board\" button showed on an empty order; now one slim line per board, wine only after a board (rules 3c.12, 3j.2)."},
+    {"img": "05.jpg", "title": "On a phone, the wine Add buttons stay inside their boxes", "why": "On a phone the Add button poked out past the edge of the box and cut the names in two; one wine per row fixes it (checklist: consistency, nothing cut off)."},
+    {"img": "06.jpg", "title": "Home price list: real \"Order this board\" buttons and a \"Save\" tag", "why": "The order link was tiny 11 px text and the saving a long sentence; a pressable thing should look pressable, and badges are two or three words (rules 3s.1 and the prices rule)."},
+    {"img": "07.jpg", "title": "Step 2 offers the next four available days as one tap", "why": "A plain date box asks the visitor to work out the earliest day themselves, and an empty Time box showed before any day was chosen; fewer choices first, each showing its consequence (rule 3s.16 and 3s.17)."}
+  ],
+  "questions": [
+    "The home page lists The All Jerky Board at $149 but your order system has it at $139. Which price is right?",
+    "Does a board ever come with a choice (for example which meats or gluten-free), so we can say it on each board? We would then show it before the board is added.",
+    "Do you have a photo of a board at a party or being delivered, and one of you making the boards? We would add them after the opening.",
+    "Is there a guarantee or promise you want beside the order button, for example a remake if something is wrong?",
+    "The Party Board has no size on the site. What is its size in centimetres, so it can be drawn to scale like the others?"
+  ],
+  "checks_now": "check-site: tiny tap targets and the opening words hidden with motion off on the home page; Add and filter buttons with no hover or press state, and the filter jumping the page by up to 1,579 px on the boards page; check-fits: boards page and order steps taller than the screen (up to 2,125 px); check-motion: the filter switches with a jump; the order pages crash check-site's own tap test (checker limit)."
+}

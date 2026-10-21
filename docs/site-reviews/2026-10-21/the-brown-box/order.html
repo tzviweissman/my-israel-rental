@@ -1,0 +1,569 @@
+<!doctype html>
+<!--
+  The Brown Box, order.html (from The Gift Boutique's order page, 15 Oct
+  2026). Pick from their menu, choose each bowl and its two extras and each
+  box's muffins, say where it goes, and one button saves the order on their
+  board and opens WhatsApp with it all written out. Nothing is paid here.
+  The menu comes from their shop when the site serves the page
+  (#mir-live-products, frontend/server.js), else from the list below.
+  Written from order-src.html by gen/catalog/build_order.py.
+-->
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Order · The Brown Box</title>
+<meta name="description" content="Order acai bowls, acai boards, brunch gift boxes, snacks and drinks from The Brown Box, delivered across Jerusalem. Kosher.">
+<link rel="icon" href="assets/logo-192.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bona+Nova:wght@400;700&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    /* The Brown Box: their brown for the dark ground, their menu's cream, the
+       acai for the accent (names kept from the page this was made from) */
+    --night: #4A2E17; --ivory: #F3EADB; --ivory-2: #EADCC4; --ink: #3A2513; --soft: #5C4431;
+    --gold: #FBF6EE; --gold-hi: #FFFFFF; --gold-ink: #6E2A57; --on-night-soft: #E8D9C2;
+    --line-ivory: #D9C6A8; --line-night: #6A4A2E; --err: #9B2C1F;
+    --r: 14px; --shadow: 0 1px 2px rgb(14 12 9 / .08), 0 14px 34px -18px rgb(14 12 9 / .45);
+    --font-head: 'Bona Nova', Georgia, serif; --font-body: 'Heebo', system-ui, sans-serif;
+    --gutter: clamp(18px, 4vw, 40px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
+  }
+  *, *::before, *::after { box-sizing: border-box; }
+  body { margin: 0; background: var(--ivory); color: var(--ink); font: 400 1.0625rem/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+  img { display: block; max-width: 100%; }
+  h1, h2, h3 { font-family: var(--font-head); font-weight: 600; letter-spacing: .01em; margin: 0; }
+  .wrap { max-width: 72rem; margin: 0 auto; padding-inline: var(--gutter); }
+
+  .btn { position: relative; overflow: hidden; display: inline-flex; align-items: center; justify-content: center; gap: .6rem; min-height: 52px; padding: 0 1.5rem; border-radius: 999px; border: 0;
+    background: var(--gold); color: var(--night); font: 600 1rem/1 var(--font-body); text-decoration: none; cursor: pointer; flex: none;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / .25); transition: background 180ms ease-out, transform 160ms ease-out, opacity 180ms ease-out; }
+  .btn::after { display: none; }
+  .btn:hover { background: var(--gold-hi); }
+  .btn:active { transform: scale(.97); }
+  .btn[aria-disabled="true"] { background: var(--line-ivory); color: var(--soft); cursor: not-allowed; }
+  .btn[aria-disabled="true"]::after { display: none; }
+  .btn svg { width: 20px; height: 20px; flex: none; position: relative; }
+  :focus-visible { outline: 3px solid var(--gold-ink); outline-offset: 3px; }
+
+  .bar { position: sticky; top: 0; z-index: 50; height: var(--bar-h); background: rgb(74 46 23 / .97); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line-night); }
+  .bar .wrap { height: 100%; display: flex; align-items: center; gap: 1rem; }
+  .brand { display: flex; align-items: center; gap: .65rem; text-decoration: none; color: #fff; min-height: 44px; }
+  .brand img { width: 40px; height: 40px; border-radius: 50%; }
+  .brand span { font: 700 1.1rem/1 var(--font-head); letter-spacing: .03em; white-space: nowrap; }
+  .bar .back { margin-inline-start: auto; color: var(--on-night-soft); text-decoration: none; font-size: .95rem; min-height: 44px; display: inline-flex; align-items: center; padding: 0 .5rem; }
+  .bar .back:hover { color: #fff; }
+  .bar .back { white-space: nowrap; } .bar .back .sm { display: none; }
+  @media (max-width: 560px) { .bar .back .lg { display: none; } .bar .back .sm { display: inline; } }
+  @media (max-width: 760px) { .brand span { font-size: .78rem; letter-spacing: .06em; } .brand img { width: 34px; height: 34px; } }
+
+  .head { padding-block: clamp(2rem, 5vw, 3.5rem) 0; }
+  .head h1 { font-size: clamp(1.9rem, 1.2rem + 2.2vw, 3rem); line-height: 1.08; }
+  .head p { margin: .7rem 0 0; color: var(--soft); max-width: 40rem; }
+
+  .cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(18rem, 23rem); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: start; padding-block: 2rem clamp(4rem, 8vw, 6rem); }
+  @media (max-width: 900px) { .cols { grid-template-columns: 1fr; } }
+  .step { margin-bottom: 2.5rem; }
+  .step > h2 { font-size: 1.35rem; display: flex; align-items: center; gap: .7rem; }
+  .step > h2 .n { width: 2rem; height: 2rem; border-radius: 50%; display: grid; place-items: center; background: var(--night); color: #fff; font: 700 1rem/1 var(--font-head); flex: none; }
+  .step > p.hint { margin: .4rem 0 0; color: var(--soft); font-size: .95rem; }
+
+  /* gifts: a list with quantities, grouped by their sections */
+  .grp { margin: 1.6rem 0 .6rem; font: 600 1rem/1.25 var(--font-head); letter-spacing: .02em; color: var(--gold-ink); }
+  .items { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--line-ivory); }
+  .items li { display: grid; grid-template-columns: 64px minmax(0, 1fr) auto; gap: .9rem; align-items: center; padding: .8rem 0; border-bottom: 1px solid var(--line-ivory); }
+  .items .ph { width: 64px; height: 64px; border-radius: 50%; overflow: hidden; background: #fff; }
+  .items .ph img { width: 100%; height: 100%; object-fit: cover; }
+  /* each bowl and box gets its own choices, under its row */
+  .cfg { grid-column: 1 / -1; display: grid; gap: .7rem; padding: .2rem 0 .3rem; }
+  .cfg:empty { display: none; }
+  .cfg .one { background: #fff; border: 1px solid var(--line-ivory); border-radius: 14px; padding: .8rem .9rem; }
+  .cfg .one > b { display: block; font-weight: 700; font-size: .95rem; margin-bottom: .2rem; }
+  .cfg .lbl { font-size: .85rem; color: var(--soft); margin: .5rem 0 .35rem; }
+  .cfg .row { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .cfg button.c { min-height: 40px; padding: 0 .85rem; border-radius: 999px; border: 1px solid var(--line-ivory); background: var(--ivory); color: var(--ink); font: 400 .92rem/1 var(--font-body); cursor: pointer; }
+  .cfg button.c[aria-pressed="true"] { background: var(--gold-ink); border-color: var(--gold-ink); color: #fff; }
+  .cfg button.c:disabled { opacity: .45; cursor: not-allowed; }
+  .cfg button.c:active:not(:disabled) { transform: scale(.96); }
+  .items b { display: block; font-weight: 500; line-height: 1.3; }
+  .items .pr { color: var(--gold-ink); font-weight: 600; font-size: .95rem; }
+  .items li.is-out .ph img { filter: grayscale(.85) opacity(.55); }
+  .items li.is-out .pr { color: var(--soft); font-weight: 500; }
+  .items li.has { background: rgb(110 42 87 / .06); }
+  .qty { display: inline-flex; align-items: center; border: 1px solid var(--line-ivory); border-radius: 999px; background: #fff; }
+  .qty button { width: 44px; height: 44px; border: 0; background: none; color: var(--ink); font: 500 1.3rem/1 var(--font-body); cursor: pointer; border-radius: 999px; }
+  .qty button:hover:not(:disabled) { background: var(--ivory-2); }
+  .qty button:active:not(:disabled) { transform: scale(.92); }
+  .qty button:disabled { color: var(--line-ivory); cursor: not-allowed; }
+  .qty output { min-width: 1.6rem; text-align: center; font-weight: 600; }
+  .add { min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid var(--gold-ink); background: none; color: var(--gold-ink); font: 600 .95rem/1 var(--font-body); cursor: pointer; }
+  .add:hover { background: var(--gold-ink); border-color: var(--gold-ink); color: #fff; }
+  .add:active { transform: scale(.96); }
+  .outlbl { color: var(--soft); font-size: .9rem; }
+
+  /* fields */
+  .fields { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem 1.1rem; margin-top: 1.1rem; }
+  .fields .full { grid-column: 1 / -1; }
+  @media (max-width: 560px) { .fields { grid-template-columns: 1fr; } }
+  label { display: block; font-weight: 500; font-size: .95rem; margin-bottom: .35rem; }
+  label small { color: var(--soft); font-weight: 400; }
+  input, textarea { width: 100%; min-height: 48px; padding: .7rem .9rem; border: 1px solid var(--line-ivory); border-radius: 12px; background: #fff; color: var(--ink); font: 400 1rem/1.4 var(--font-body); transition: border-color 150ms ease-out, box-shadow 150ms ease-out; }
+  textarea { min-height: 96px; resize: vertical; }
+  input:focus, textarea:focus { outline: none; border-color: var(--gold-ink); box-shadow: 0 0 0 3px rgb(110 42 87 / .2); }
+  .bad input, .bad textarea { border-color: var(--err); }
+  .msg { display: none; margin-top: .3rem; color: var(--err); font-size: .875rem; }
+  .bad .msg { display: block; }
+
+  /* summary */
+  .sum { position: sticky; top: calc(var(--bar-h) + 1.25rem); background: var(--night); color: #fff; border-radius: 20px; padding: 1.5rem; box-shadow: var(--shadow); }
+  .sum h2 { font-size: 1.15rem; color: #fff; }
+  .sum ul { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .55rem; }
+  .sum li { display: flex; justify-content: space-between; gap: 1rem; color: var(--on-night-soft); font-size: .95rem; }
+  .sum li span:last-child { color: #fff; white-space: nowrap; }
+  .sum .empty { color: var(--on-night-soft); margin: 1rem 0 0; font-size: .95rem; }
+  .sum .tot { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
+  .sum .tot b { font: 700 1.5rem/1 var(--font-body); color: #fff; }
+  .sum .note { margin: .8rem 0 1.25rem; color: var(--on-night-soft); font-size: .9rem; }
+  .sum .btn { width: 100%; background: #fff; color: var(--night); }
+  .sum .why { margin: .8rem 0 0; color: #F3C9E2; font-size: .9rem; min-height: 1.4em; }
+  .sum .saved { margin: .8rem 0 0; color: var(--on-night-soft); font-size: .9rem; }
+  .sum .wa-line { margin: 1rem 0 0; font-size: .875rem; color: var(--on-night-soft); }
+  .sum .wa-line a { color: #fff; }
+
+  /* phones: total and the button pinned to the bottom */
+  .dock { display: none; }
+  @media (max-width: 900px) {
+    .sum .btn, .sum .why { display: none; }
+    .dock { position: fixed; z-index: 60; inset: auto 0 0 0; display: flex; align-items: center; justify-content: space-between; gap: .75rem;
+      padding: .7rem var(--gutter) calc(.7rem + env(safe-area-inset-bottom)); background: rgb(74 46 23 / .97); border-top: 1px solid var(--line-night); color: #fff; }
+    .dock small { display: block; color: var(--on-night-soft); font-size: .8rem; line-height: 1.2; }
+    .dock b { font: 700 1.2rem/1.2 var(--font-body); color: #fff; }
+    .dock .btn { background: #fff; color: var(--night); }
+    .dock .btn { min-height: 48px; padding: 0 1.1rem; font-size: .95rem; }
+    main { padding-bottom: 5rem; }
+  }
+
+  /* review changes: order in three steps, a bin on every basket line */
+  .stepbar { margin: 1.4rem 0 1.6rem; }
+  .stepbar p { margin: 0 0 .5rem; font: 600 .95rem/1.3 var(--font-body); color: var(--soft); }
+  .stepbar ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .stepbar li { height: 4px; border-radius: 4px; background: var(--line-ivory); transition: background 200ms ease-out; }
+  .stepbar li.on { background: var(--gold-ink); }
+  .backstep { min-height: 48px; padding: 0 1.3rem; border-radius: 999px; border: 1px solid var(--night); background: none; color: var(--night); font: 500 1rem/1 var(--font-body); cursor: pointer; transition: background 120ms ease-out, color 120ms ease-out, transform 100ms ease-out; }
+  .backstep:hover { background: var(--night); color: #fff; } .backstep:active { transform: scale(.97); }
+  .step[hidden] { display: none; } .step > h2:focus { outline: none; }
+  .cats { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 .2rem; }
+  .cats button { min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid var(--line-ivory); background: #fff; color: var(--ink); font: 500 .95rem/1 var(--font-body); cursor: pointer; transition: background 120ms ease-out, color 120ms ease-out, transform 100ms ease-out; }
+  .cats button:hover { background: var(--ivory-2); } .cats button:active { transform: scale(.97); }
+  .cats button[aria-pressed="true"] { background: var(--night); border-color: var(--night); color: #fff; }
+  .cats button[aria-pressed="true"]:hover { background: var(--ink); }
+  .cats button .n { margin-inline-start: .45rem; display: inline-grid; place-items: center; min-width: 1.4rem; height: 1.4rem; padding: 0 .3rem; border-radius: 99px; background: var(--gold-ink); color: #fff; font-size: .8rem; }
+  #gifts .grp { display: none; } #gifts .items { margin-top: 1rem; }
+  #gifts .items[hidden] { display: none; }
+  .sum li { align-items: center; }
+  .sum li .l { display: flex; justify-content: space-between; gap: 1rem; flex: 1; }
+  .sum li .rm { width: 40px; height: 40px; flex: none; border: 0; border-radius: 99px; background: none; color: var(--on-night-soft); cursor: pointer; display: grid; place-items: center; transition: background 120ms ease-out, color 120ms ease-out, transform 100ms ease-out; }
+  .sum li .rm:hover { background: rgb(255 255 255 / .14); color: #fff; } .sum li .rm:active { transform: scale(.92); }
+  .sum .btn:hover, .dock .btn:hover { background: var(--ivory-2); }
+</style>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="The Brown Box, home"><img src="assets/logo.webp" alt="" width="40" height="40"><span>The Brown Box</span></a>
+    <a class="back" href="index.html#menu"><span class="lg">Back to the menu</span><span class="sm">Menu</span></a>
+  </div>
+</header>
+
+<main data-mir-catalog>
+  <div class="wrap head">
+    <h1>Order</h1>
+    <p>Choose from the menu and tell us where it is going. The button sends it all to us on WhatsApp, and we confirm the order and the delivery fee with you there.</p>
+  </div>
+
+  <div class="wrap cols">
+    <form id="f" novalidate>
+      <div class="stepbar"><p id="stepnow" aria-live="polite">Step 1 of 3: Your order</p><ol aria-hidden="true"><li class="on"></li><li></li><li></li></ol></div>
+      <section class="step" aria-labelledby="s1" data-s="1">
+        <h2 id="s1"><span class="n">1</span>Your order</h2>
+        <p class="hint">Every bowl comes with two extras of your choice.</p>
+        <div class="cats" id="cats" role="group" aria-label="Menu sections"></div>
+        <div id="gifts"></div>
+      </section>
+
+      <section class="step" aria-labelledby="s2" data-s="2" hidden>
+        <h2 id="s2"><span class="n">2</span>Where it is going</h2>
+        <p class="hint">We deliver throughout Jerusalem. The fee depends on the location.</p>
+        <div class="fields">
+          <div data-need><label for="city">Neighbourhood</label><input id="city" name="city" autocomplete="off"><p class="msg">Which neighbourhood of Jerusalem?</p></div>
+          <div><label for="to">Who is it for? <small>(if it is a gift)</small></label><input id="to" name="to" autocomplete="off"></div>
+          <div class="full" data-need><label for="addr">Address</label><input id="addr" name="addr" autocomplete="street-address"><p class="msg">Add the street and number.</p></div>
+          <div data-need><label for="when">Delivery date</label><input id="when" name="when" type="date"><p class="msg">Pick the day it should arrive.</p></div>
+          <div><label for="tophone">Their phone <small>(if it is a gift)</small></label><input id="tophone" name="tophone" type="tel" inputmode="tel" autocomplete="off"></div>
+          <div class="full"><label for="card">Message for the card <small>(optional, for a gift)</small></label><textarea id="card" name="card" maxlength="400"></textarea></div>
+        </div>
+      </section>
+
+      <section class="step" aria-labelledby="s3" data-s="3" hidden>
+        <h2 id="s3"><span class="n">3</span>Your details</h2>
+        <div class="fields">
+          <div data-need><label for="me">Your name</label><input id="me" name="me" autocomplete="name"><p class="msg">Add your name.</p></div>
+          <div data-need><label for="myphone">Your phone</label><input id="myphone" name="myphone" type="tel" inputmode="tel" autocomplete="tel"><p class="msg">Add your phone, so we can reach you about the order.</p></div>
+          <div class="full"><label for="note">Anything else? <small>(optional)</small></label><input id="note" name="note" autocomplete="off"></div>
+        </div>
+      </section>
+      <button type="button" class="backstep" id="stepback" hidden>Back</button>
+    </form>
+
+    <aside class="sum" aria-labelledby="sumh">
+      <h2 id="sumh">Your order</h2>
+      <p class="empty" id="empty">Nothing chosen yet.</p>
+      <ul id="lines" aria-live="polite"></ul>
+      <div class="tot"><span>Before delivery</span><b id="total">₪0</b></div>
+      <p class="note">Delivery is added on WhatsApp once we know the neighbourhood. You pay us directly, by cash, Zelle, Israeli bank transfer, or credit card with a 4% charge; nothing is paid on this page.</p>
+      <a class="btn" id="send" href="#" aria-disabled="true">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
+        <span style="position:relative">Continue to delivery</span>
+      </a>
+      <p class="why" id="why" aria-live="polite"></p>
+      <p class="saved">Your order is also saved with The Brown Box on MyIsraelRental, with a link to follow it.</p>
+      <p class="wa-line">Or message us: <a href="https://wa.me/972533452048" target="_blank" rel="noopener">+972 53-345-2048</a></p>
+    </aside>
+  </div>
+</main>
+
+<div class="dock order-bar" id="dock">
+  <div><small>Before delivery</small><b id="dtotal">₪0</b></div>
+  <a class="btn" id="send2" href="#" aria-disabled="true"><span style="position:relative">To delivery</span></a>
+</div>
+
+<script id="fallback-products" type="application/json">[{"name":"Acai bowl","price":60,"price_to":null,"currency":"ILS","image":"assets/menu/acai-bowl.webp","group":"Acai bowls","in_stock":true},{"name":"Mini acai bowls","price":30,"price_to":null,"currency":"ILS","image":"assets/menu/mini-bowls.webp","group":"Acai bowls","in_stock":true},{"name":"Large acai board","price":390,"price_to":null,"currency":"ILS","image":"assets/menu/large-board.webp","group":"Acai boards","in_stock":true},{"name":"Small acai board","price":220,"price_to":null,"currency":"ILS","image":"assets/menu/small-board.webp","group":"Acai boards","in_stock":true},{"name":"Small gift box","price":135,"price_to":null,"currency":"ILS","image":"assets/menu/small-gift-box.webp","group":"Gifting","in_stock":true},{"name":"Large gift box","price":250,"price_to":null,"currency":"ILS","image":"assets/menu/large-gift-box.webp","group":"Gifting","in_stock":true},{"name":"Energy bites","price":50,"price_to":null,"currency":"ILS","image":"assets/menu/energy-bites.webp","group":"Snacks","in_stock":true},{"name":"Super granola","price":40,"price_to":null,"currency":"ILS","image":"assets/menu/super-granola.webp","group":"Snacks","in_stock":true},{"name":"Date snacks","price":55,"price_to":null,"currency":"ILS","image":"assets/menu/date-snacks.webp","group":"Snacks","in_stock":true},{"name":"Oatmeal chocolate chip muffin","price":17,"price_to":null,"currency":"ILS","image":"assets/menu/oat-muffin.webp","group":"Snacks","in_stock":true},{"name":"Blueberry sourdough muffin","price":17,"price_to":null,"currency":"ILS","image":"assets/menu/blueberry-muffin.webp","group":"Snacks","in_stock":true},{"name":"Iced coffee","price":20,"price_to":null,"currency":"ILS","image":"assets/menu/iced-coffee.webp","group":"Drinks","in_stock":true},{"name":"Passion fruit iced tea","price":20,"price_to":null,"currency":"ILS","image":"assets/menu/passion-tea.webp","group":"Drinks","in_stock":true}]</script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  var WA = '972533452048';
+  function read(id) { var e = document.getElementById(id); if (!e) return null; try { return JSON.parse(e.textContent); } catch (x) { return null; } }
+  var live = read('mir-live-products');
+  var products = (Array.isArray(live) && live.length ? live : read('fallback-products')) || [];
+
+  var SYM = { USD: '$', ILS: '₪', EUR: '€', GBP: '£' };
+  function money(n, cur) { var v = Number(n); return (SYM[cur] || '') + (Number.isInteger(v) ? v : v.toFixed(2)); }
+  function priced(p) { return Number(p.price) > 0; }
+  function priceText(p) {
+    if (!priced(p)) return 'Price on request';
+    var t = money(p.price, p.currency);
+    if (p.price_to != null && Number(p.price_to) > Number(p.price)) t += ' to ' + money(p.price_to, p.currency);
+    return t;
+  }
+
+  // ?add=<name> from a gift on the home page puts one in the order
+  var q = {};
+  var add = new URLSearchParams(location.search).get('add');
+  products.forEach(function (p, i) { p._k = i; if (add && p.in_stock && p.name.toLowerCase() === add.toLowerCase() && q[i] == null) q[i] = /mini/i.test(p.name) ? 8 : 1; });
+
+  // the list, in their sections
+  var host = document.getElementById('gifts');
+  var order = [], groups = {};
+  products.forEach(function (p) { var g = p.group || 'More from The Brown Box'; if (!groups[g]) { groups[g] = []; order.push(g); } groups[g].push(p); });
+  order.forEach(function (g) {
+    var h = document.createElement('h3'); h.className = 'grp'; h.textContent = g; host.appendChild(h);
+    var ul = document.createElement('ul'); ul.className = 'items'; host.appendChild(ul);
+    groups[g].forEach(function (p) {
+      var li = document.createElement('li'); li.dataset.k = p._k;
+      var ph = document.createElement('span'); ph.className = 'ph';
+      if (p.image) { var im = document.createElement('img'); im.src = p.image; im.alt = ''; im.loading = 'lazy'; im.width = 64; im.height = 64; ph.appendChild(im); }
+      var mid = document.createElement('div');
+      var b = document.createElement('b'); b.textContent = p.name;
+      var pr = document.createElement('span'); pr.className = 'pr'; pr.textContent = p.in_stock ? priceText(p) : 'Out of stock';
+      mid.appendChild(b); mid.appendChild(pr);
+      var ctl = document.createElement('div');
+      if (!p.in_stock) { li.classList.add('is-out'); }
+      li.appendChild(ph); li.appendChild(mid); li.appendChild(ctl);
+      if (kindOf(p)) { var cf = document.createElement('div'); cf.className = 'cfg'; li.appendChild(cf); p._cfg = cf; }
+      ul.appendChild(li);
+      p._li = li; p._ctl = ctl;
+    });
+  });
+
+  // Bowls and gift boxes: one set of choices per unit, kept when the count
+  // changes. Bowl: flavour (build your own +6) and exactly two extras
+  // (almond butter +5). Gift box: two muffins.
+  var BOWLS = { classic: 'Classic', tropical: 'Tropical', sunrise: 'Sunrise', superfruit: 'Superfruit', own: 'Build your own (+₪6)' };
+  var EXTRAS = ['Natural peanut butter', 'Silan', 'Honey', 'Pareve chocolate spread', 'Milchig chocolate spread', 'Chia seeds', 'Flax seeds', 'Coconut flakes', 'Almond butter (+₪5)'];
+  var MUFFINS = ['Oatmeal chocolate chip', 'Blueberry sourdough'];
+  var TOPPINGS = ['Banana', 'Green apple', 'Kiwi', 'Frozen blueberry', 'Frozen mango', 'Frozen pineapple', 'Dates', 'Chocolate chips', 'Super granola'];
+  var cfg = {};
+  function kindOf(p) { var n = (p.name || '').toLowerCase(); return n === 'acai bowl' ? 'bowl' : /gift box/.test(n) ? 'box' : null; }
+  function bowlsIn(p) { return /large gift box/i.test(p.name) ? 2 : /gift box/i.test(p.name) ? 1 : 0; }
+  function sync(p) {
+    var k = kindOf(p), n = q[p._k] || 0;
+    if (!k) return;
+    var a = cfg[p._k] || (cfg[p._k] = []);
+    while (a.length < n) a.push(k === 'bowl' ? { kind: 'bowl', bowl: 'classic', ex: [], top: [] } : { kind: 'box', muf: [], bowls: Array.from({ length: bowlsIn(p) }, function () { return 'classic'; }) });
+    a.length = n;
+  }
+  function extraCost() {
+    var c = 0;
+    products.forEach(function (p) { (cfg[p._k] || []).forEach(function (u) { if (u.kind === 'bowl') { if (u.bowl === 'own') c += 6; if (u.ex.indexOf('Almond butter (+₪5)') >= 0) c += 5; } }); });
+    return c;
+  }
+  function choices() {
+    var out = [];
+    products.forEach(function (p) {
+      (cfg[p._k] || []).forEach(function (u, i) {
+        if (u.kind === 'bowl') out.push(p.name + ' ' + (i + 1) + ': ' + BOWLS[u.bowl].replace(' (+₪6)', '') + ' bowl' + (u.bowl === 'own' ? ' (' + (u.top.length === 4 ? u.top.join(', ') : 'toppings not chosen yet') + ')' : '') + (u.ex.length ? ', extras: ' + u.ex.join(' and ').replace(/ \(\+₪5\)/, '') : ', extras: not chosen yet'));
+        else out.push(p.name + ' ' + (i + 1) + ': ' + (u.bowls.length ? u.bowls.map(function (b) { return BOWLS[b].replace(' (+₪6)', '') + ' bowl'; }).join(' and ') + ', ' : '') + 'muffins: ' + (u.muf.length ? u.muf.join(' and ') : 'not chosen yet'));
+      });
+    });
+    return out;
+  }
+  function chip(label, on, dis, fn) {
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'c'; b.textContent = label;
+    b.setAttribute('aria-pressed', on ? 'true' : 'false'); b.disabled = !!dis; b.onclick = fn; return b;
+  }
+  function drawCfg(p) {
+    var box = p._cfg; if (!box) return; box.textContent = '';
+    (cfg[p._k] || []).forEach(function (u, i) {
+      var one = document.createElement('div'); one.className = 'one';
+      var t = document.createElement('b'); t.textContent = (u.kind === 'bowl' ? 'Bowl ' : (p.name.replace(/^./, function (c) { return c.toUpperCase(); }) + ' ')) + (i + 1); one.appendChild(t);
+      function row(label, items, isOn, dis, fn) {
+        var l = document.createElement('p'); l.className = 'lbl'; l.textContent = label; one.appendChild(l);
+        var r = document.createElement('div'); r.className = 'row'; r.setAttribute('role', 'group'); r.setAttribute('aria-label', label);
+        items.forEach(function (it) { r.appendChild(chip(it[1], isOn(it[0]), dis(it[0]), function () { fn(it[0]); update(); })); });
+        one.appendChild(r);
+      }
+      var bowlItems = Object.keys(BOWLS).map(function (k) { return [k, BOWLS[k]]; });
+      if (u.kind === 'bowl') {
+        row('Which bowl', bowlItems, function (k) { return u.bowl === k; }, function () { return false; }, function (k) { u.bowl = k; });
+        if (u.bowl === 'own') row('Four toppings', TOPPINGS.map(function (e) { return [e, e]; }), function (e) { return u.top.indexOf(e) >= 0; },
+          function (e) { return u.top.length >= 4 && u.top.indexOf(e) < 0; },
+          function (e) { var j = u.top.indexOf(e); if (j >= 0) u.top.splice(j, 1); else if (u.top.length < 4) u.top.push(e); });
+        row('Two extras', EXTRAS.map(function (e) { return [e, e]; }), function (e) { return u.ex.indexOf(e) >= 0; },
+          function (e) { return u.ex.length >= 2 && u.ex.indexOf(e) < 0; },
+          function (e) { var j = u.ex.indexOf(e); if (j >= 0) u.ex.splice(j, 1); else if (u.ex.length < 2) u.ex.push(e); });
+      } else {
+        u.bowls.forEach(function (b, j) {
+          row(u.bowls.length > 1 ? 'Bowl ' + (j + 1) : 'Which bowl', bowlItems.filter(function (x) { return x[0] !== 'own'; }), function (k) { return u.bowls[j] === k; }, function () { return false; }, function (k) { u.bowls[j] = k; });
+        });
+        row('Two muffins', [[0, MUFFINS[0] + ' ×2'], [1, MUFFINS[1] + ' ×2'], [2, 'One of each']],
+          function (m) { return u.m === m; }, function () { return false; },
+          function (m) { u.m = m; u.muf = m === 2 ? [MUFFINS[0], MUFFINS[1]] : [MUFFINS[m], MUFFINS[m]]; });
+      }
+      box.appendChild(one);
+    });
+  }
+
+  function drawCtl(p) {
+    sync(p); drawCfg(p);
+    var ctl = p._ctl; ctl.textContent = '';
+    if (!p.in_stock) return;
+    var n = q[p._k] || 0;
+    p._li.classList.toggle('has', n > 0);
+    if (!n) {
+      var a = document.createElement('button'); a.type = 'button'; a.className = 'add'; a.textContent = 'Add';
+      a.setAttribute('aria-label', 'Add ' + p.name);
+      a.onclick = function () { q[p._k] = min(p); update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
+      ctl.appendChild(a); return;
+    }
+    var box = document.createElement('div'); box.className = 'qty';
+    var minus = document.createElement('button'); minus.type = 'button'; minus.textContent = '−'; minus.setAttribute('aria-label', 'One fewer ' + p.name);
+    var out = document.createElement('output'); out.textContent = n; out.setAttribute('aria-label', n + ' of ' + p.name);
+    var plus = document.createElement('button'); plus.type = 'button'; plus.textContent = '+'; plus.dataset.plus = ''; plus.setAttribute('aria-label', 'One more ' + p.name);
+    plus.disabled = n >= 40;
+    minus.onclick = function () { q[p._k] = n - 1 < min(p) ? 0 : n - 1; if (!q[p._k]) delete q[p._k]; update(); };
+    plus.onclick = function () { q[p._k] = n + 1; update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
+    box.appendChild(minus); box.appendChild(out); box.appendChild(plus); ctl.appendChild(box);
+  }
+
+  function min(p) { return /mini/i.test(p.name) ? 8 : 1; }
+  var chosen = function () { return products.filter(function (p) { return q[p._k] > 0; }); };
+  function totals() {
+    var low = 0, ranged = false, ask = false, cur = 'ILS';
+    chosen().forEach(function (p) {
+      var n = q[p._k]; cur = p.currency || cur;
+      if (!priced(p)) { ask = true; return; }
+      low += n * Number(p.price);
+      if (p.price_to != null && Number(p.price_to) > Number(p.price)) ranged = true;
+    });
+    low += extraCost();
+    return { text: (ranged ? 'from ' : '') + money(low, cur) + (ask ? ' + price on request' : ''), low: low, cur: cur };
+  }
+
+  var lines = document.getElementById('lines'), empty = document.getElementById('empty');
+  function update() {
+    products.forEach(drawCtl);
+    lines.textContent = '';
+    var c = chosen();
+    empty.hidden = c.length > 0;
+    c.forEach(function (p) {
+      var li = document.createElement('li');
+      var l = document.createElement('div'); l.className = 'l';
+      var a = document.createElement('span'); a.textContent = q[p._k] + ' × ' + p.name;
+      var b = document.createElement('span');
+      b.textContent = priced(p) ? (p.price_to != null && Number(p.price_to) > Number(p.price) ? 'from ' : '') + money(q[p._k] * Number(p.price), p.currency) : 'on request';
+      l.appendChild(a); l.appendChild(b); li.appendChild(l);
+      var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.setAttribute('aria-label', 'Remove ' + p.name + ' from the order');
+      rm.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
+      rm.onclick = function () { delete q[p._k]; cfg[p._k] = []; update(); };
+      li.appendChild(rm); lines.appendChild(li);
+    });
+    if (extraCost() > 0) {
+      var xl = document.createElement('li'); var xa = document.createElement('span'); xa.textContent = 'Build your own and almond butter';
+      var xb = document.createElement('span'); xb.textContent = '+' + money(extraCost(), 'ILS'); xl.appendChild(xa); xl.appendChild(xb); lines.appendChild(xl);
+    }
+    var t = totals().text;
+    document.getElementById('total').textContent = t;
+    document.getElementById('dtotal').textContent = t;
+    if (typeof drawCats === 'function') drawCats();
+    check(false);
+  }
+
+  // what is still missing, said plainly; nothing is red until they try to move on
+  var why = document.getElementById('why');
+  var step = 1, NAMES = ['Your order', 'Where it is going', 'Your details'];
+  function label(id) {
+    return step === 1 ? (id === 'send' ? 'Continue to delivery' : 'To delivery')
+      : step === 2 ? (id === 'send' ? 'Continue to your details' : 'To details')
+      : (id === 'send' ? 'Send order on WhatsApp, ' + totals().text : 'Send on WhatsApp');
+  }
+  function labels() { ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); if (!b.hasAttribute('aria-busy')) b.lastElementChild.textContent = label(id); }); }
+  function missingFor(upTo, only) {
+    var missing = [];
+    if (!only || only === 1) {
+      if (!chosen().length) missing.push('choose from the menu');
+      if (choices().some(function (c) { return /not chosen yet/.test(c); })) missing.push('the toppings, extras and muffins for each bowl and box');
+    }
+    document.querySelectorAll('[data-need]').forEach(function (box) {
+      var st = +box.closest('[data-s]').dataset.s;
+      if (st > upTo || (only && st !== only)) return;
+      if (box.querySelector('input,textarea').value.trim().length === 0) missing.push(box.querySelector('label').textContent.toLowerCase().replace(/\?$/, ''));
+    });
+    return missing;
+  }
+  function check(show) {
+    var missing = step === 3 ? missingFor(3) : missingFor(step, step);
+    if (show) document.querySelectorAll('[data-need]').forEach(function (box) {
+      var st = +box.closest('[data-s]').dataset.s;
+      if (st <= step) box.classList.toggle('bad', box.querySelector('input,textarea').value.trim().length === 0);
+    });
+    var ready = !missing.length;
+    ['send', 'send2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', ready ? 'false' : 'true'); });
+    labels();
+    why.textContent = ready ? '' : (show || (step === 1 && chosen().length) ? 'Still needed: ' + missing.join(', ') + '.' : '');
+    return ready;
+  }
+  function setStep(n, fromPop) {
+    step = n;
+    document.querySelectorAll('section.step').forEach(function (s) { s.hidden = +s.dataset.s !== n; });
+    document.querySelectorAll('.stepbar li').forEach(function (li, i) { li.classList.toggle('on', i < n); });
+    document.getElementById('stepnow').textContent = 'Step ' + n + ' of 3: ' + NAMES[n - 1];
+    document.getElementById('stepback').hidden = n === 1;
+    check(false);
+    if (!fromPop) { history.pushState({ s: n }, '', '#order-' + n); window.scrollTo(0, 0); }
+    var h = document.getElementById('s' + n); h.tabIndex = -1; h.focus({ preventScroll: true });
+  }
+  document.getElementById('stepback').addEventListener('click', function () { history.back(); });
+  addEventListener('popstate', function (e) { var n = (e.state && e.state.s) || 1; if (n > 1 && !chosen().length) n = 1; setStep(n, true); });
+  history.replaceState({ s: 1 }, '', location.pathname + location.search);
+  // the menu, one section at a time
+  var cats = document.getElementById('cats'), heads = [].slice.call(document.querySelectorAll('#gifts .grp'));
+  function drawCats() {
+    [].forEach.call(cats.children, function (b) {
+      var n = 0; products.forEach(function (p) { if (q[p._k] > 0 && (p.group || 'More from The Brown Box') === b.dataset.g) n += 1; });
+      var c = b.querySelector('.n'); if (c) c.remove();
+      if (n) { c = document.createElement('span'); c.className = 'n'; c.textContent = n; b.appendChild(c); }
+    });
+  }
+  function showCat(i) { heads.forEach(function (h, j) { h.nextElementSibling.hidden = j !== i; }); [].forEach.call(cats.children, function (b, j) { b.setAttribute('aria-pressed', j === i ? 'true' : 'false'); }); }
+  heads.forEach(function (h, i) { var b = document.createElement('button'); b.type = 'button'; b.dataset.g = h.textContent; b.appendChild(document.createTextNode(h.textContent)); b.onclick = function () { showCat(i); }; cats.appendChild(b); });
+  var firstCat = 0;
+  products.forEach(function (p) { if (add && q[p._k] > 0) heads.forEach(function (h, i) { if (h.textContent === (p.group || 'More from The Brown Box')) firstCat = i; }); });
+  showCat(firstCat);
+  document.querySelectorAll('[data-need] input').forEach(function (i) {
+    i.addEventListener('input', function () { i.closest('[data-need]').classList.remove('bad'); check(false); });
+  });
+
+  function v(id) { return document.getElementById(id).value.trim(); }
+  function message() {
+    var L = ['Hi, I would like to order:'];
+    chosen().forEach(function (p) { L.push('• ' + q[p._k] + ' × ' + p.name + ' (' + priceText(p) + ')'); });
+    choices().forEach(function (c) { L.push('   ' + c); });
+    L.push('Total: ' + totals().text + ', plus delivery');
+    L.push('');
+    if (v('to')) L.push('For: ' + v('to') + (v('tophone') ? ', ' + v('tophone') : ''));
+    L.push('Address: ' + v('addr') + ', ' + v('city') + ', Jerusalem');
+    if (v('when')) {
+      var d = new Date(v('when') + 'T12:00:00');
+      L.push('Delivery date: ' + d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
+    }
+    if (v('card')) L.push('Card message: "' + v('card') + '"');
+    if (v('note')) L.push('Also: ' + v('note'));
+    L.push('');
+    L.push('From: ' + v('me') + ', ' + v('myphone'));
+    return L.join('\n');
+  }
+  // Saved first as a real order on their board (with a tracking link),
+  // then WhatsApp opens with everything written out. If saving fails or
+  // takes too long, WhatsApp opens anyway: an order is never lost.
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var sending = false;
+  function save() {
+    var c = chosen();
+    var gig = c.length && c.every(function (p) { return p.gig_id && p.id && p.gig_id === c[0].gig_id; }) ? c[0].gig_id : null;
+    if (!gig) return Promise.resolve(null);
+    var notes = choices().slice();
+    if (v('to')) notes.push('For: ' + v('to') + (v('tophone') ? ', ' + v('tophone') : ''));
+    if (v('card')) notes.push('Card message: "' + v('card') + '"');
+    if (v('note')) notes.push(v('note'));
+    notes.push('Sent from the order page by WhatsApp');
+    var body = {
+      lines: c.map(function (p) { return { product_id: p.id, qty: q[p._k] }; }),
+      fulfilment: 'delivery', date: v('when'), city: v('city').slice(0, 80), address: v('addr'),
+      customer_name: v('me'), customer_phone: v('myphone'), notes: notes.join('\n')
+    };
+    var post = fetch(API + '/marketplace/order-form/' + gig + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });
+    var late = new Promise(function (res) { setTimeout(function () { res(null); }, 5000); });
+    return Promise.race([post, late]);
+  }
+  function send(e) {
+    e.preventDefault();
+    if (sending) return;
+    if (!check(true)) {
+      var first = document.querySelector('.bad input, .bad textarea');
+      if (first) first.focus();
+      return;
+    }
+    if (step < 3) { setStep(step + 1); return; }
+    sending = true;
+    // opened now, while this still counts as the tap, so no popup blocker stops it
+    var tab = window.open('', '_blank');
+    ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.setAttribute('aria-busy', 'true'); b.lastElementChild.textContent = 'Sending'; });
+    save().then(function (saved) {
+      var text = message();
+      if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      sending = false;
+      ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.removeAttribute('aria-busy'); }); labels();
+      why.textContent = saved ? 'Sent. Your order is saved, and the tracking link is in the message.' : '';
+    });
+  }
+  document.getElementById('send').addEventListener('click', send);
+  document.getElementById('send2').addEventListener('click', send);
+
+  var when = document.getElementById('when');
+  when.min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+
+  update();
+  var bowl = new URLSearchParams(location.search).get('bowl');
+  if (bowl && BOWLS[bowl]) products.forEach(function (p) { if (cfg[p._k]) cfg[p._k].forEach(function (c) { if (c.kind === 'bowl') c.bowl = bowl; }); });
+  update();
+  if (add && chosen().length) {
+    var p = chosen()[0];
+    p._li.scrollIntoView({ block: 'center' });
+  }
+});
+</script>
+</body>
+</html>

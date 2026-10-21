@@ -1,0 +1,18 @@
+{"site":"Michal Simkin","changes":[
+{"img":"01.jpg","title":"On a phone, the clients' words no longer pile on top of each other","why":"Now the long quotes print over the crossed-out words and nothing can be read; the page has to show one clear thing at a time on a phone (one screen rule)."},
+{"img":"02.jpg","title":"Academy facts become big numbers: 3 November, 10:00, 10 students","why":"Now the date, time and class size are buried in a paragraph; real numbers go big with a one-line label (craft rule 14)."},
+{"img":"03.jpg","title":"The bundle shows the old price struck through and Save ₪4,000","why":"Now the saving is a sentence you have to work out; a real saving is shown as the old price crossed out beside the price, with a two-word badge (rules 3j and 3s)."},
+{"img":"04.jpg","title":"The Salon Hub gets a small label instead of a giant price-sized line","why":"Now 'Part of the programme' is as big as a price and makes the three cards look uneven; things of one kind must look alike (consistency)."},
+{"img":"05.jpg","title":"One Book button on a laptop, and the bottom bar no longer covers the words","why":"Now there are two identical Book buttons and the bottom bar hides the text under it; one job, one button (page rules 3c)."},
+{"img":"06.jpg","title":"Booking page: the bundle shows its old price struck through with Save ₪4,000","why":"Now the bundle's old price is tiny grey print with no saving shown; savings are shown as money, the way shops show them (rule 3s)."},
+{"img":"07.jpg","title":"Booking page opens on step 1 only, with a menu like the main page","why":"Now it says three steps but shows every question at once and has no site menu; the order is one question per screen with a bar of steps (rule 3k)."},
+{"img":"08.jpg","title":"On a phone, the menu links are big enough to tap and the booking steps are real","why":"Now the page links are too small to hit with a thumb and the step chips are already all done; links must be at least 40 px and steps must show where you are (rules 3s and 3k)."},
+{"img":"09.jpg","title":"Step 2 shows only the day and time, with a Back button","why":"Now the day, time and details are all on one long page; each step checks only its own part and the button names the next step (rule 3k)."}
+],
+"questions":[
+"Do you offer any guarantee or promise to a client, for example a redo if the wig is not right? We will only show one if you do.",
+"Is the free toolkit for signing up before chag still running, and until what date?",
+"Do you have prices for the other services (cut and style, wash and set, repairs) so clients can book them too?",
+"Can you send a few new, sharper photos of wigs you made? The ones on the booking page are small and look soft when enlarged."
+],
+"checks_now":"Real site: the phone menu links are too small to tap, the booking page photos have no set size so the page jumps as they load, and with motion switched off four headings stay hidden (in the shared scrolling engine, not fixed here); every section fits one screen."}
