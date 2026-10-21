@@ -263,6 +263,60 @@
     .dock .btn { min-height: 46px; padding: 0 1.1rem; font-size: .95rem; white-space: nowrap; }
     body { --pad-bottom: 72px; }
   }
+
+  /* WORLDS (page rules 3t, 21 Oct 2026): the page changes ground and picture from section to section.
+     cream (what we make) > blush + photo (station) > night wall of her photos > white (booking) > cream (facts) > the arch (close) > night footer */
+  .sec h2 { font-size: clamp(2.4rem, 1rem + 4.6vw, 5rem); line-height: 1; }
+  .sec .lede { font-size: 1rem; }
+  #make.sec { padding-block: clamp(1rem, 4svh, 4rem); }
+  .mkact { margin-top: clamp(.6rem, 2svh, 1.4rem); } .mstage { width: min(100%, 42svh); } #make.sec .mk { margin-top: 0; }
+  .booth.sec { padding: 0; background: var(--blush); }
+  .booth .grid { max-width: none; padding: 0; gap: 0; grid-template-columns: minmax(0, min(46vw, 860px)) minmax(0, 1fr); align-items: stretch; height: min(86svh, 56rem); }
+  .booth figure { width: 100%; height: 100%; aspect-ratio: auto; border-radius: 0; box-shadow: none; justify-self: stretch; }
+  .booth figure img { object-position: 50% 40%; }
+  .booth .txt { display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: clamp(1.5rem, 5vw, 4rem); }
+  .booth .incl { margin-bottom: 2rem; }
+  @media (max-width: 820px) { .booth .grid { grid-template-columns: 1fr; height: auto; } .booth figure { height: auto; aspect-ratio: 1; } }
+  .gal { background: var(--night); color: #fff; padding-bottom: 0; }
+  .gal h2 { color: #fff; } .gal h2 .acc { color: var(--gold); }
+  .gal .wrap.sec { padding-top: clamp(1.5rem, 5svh, 3rem); padding-bottom: 0 !important; }
+  .gal .chip { background: transparent; color: #fff; border-color: rgb(255 255 255 / .35); }
+  .gal .chip:hover { border-color: var(--gold); }
+  .gal .chip.on { background: #fff; color: var(--night); border-color: #fff; }
+  .gal .chip.on:hover { background: var(--gold); border-color: var(--gold); }
+  .gal .work { max-width: none; margin: 1.6rem 0 0; padding: 0; gap: 2px; grid-template-columns: repeat(auto-fill, minmax(clamp(110px, 11vw, 170px), 1fr)); }
+  .gal .work figure { position: relative; overflow: hidden; }
+  .gal .work img { border-radius: 0; box-shadow: none; clip-path: none; scale: 1.14; background: #2b3a35; }
+  .gal .work figcaption { position: absolute; inset: auto 0 0 0; margin: 0; padding: 1.6rem .7rem .55rem; color: #fff; font-size: .8rem;
+    background: linear-gradient(0deg, rgb(20 30 26 / .72), transparent); opacity: 0; transition: opacity 200ms ease-out; }
+  .gal .work figure:hover figcaption, .gal .work figure:focus-within figcaption { opacity: 1; }
+  .gal .showall { margin: 0; width: 100%; border-radius: 0; border: 0; min-height: 64px; justify-content: center; background: #fff; color: var(--night); }
+  .gal .showall:hover { background: var(--gold); color: var(--night); }
+  .gal .showall[hidden] { display: flex; visibility: hidden; }
+  .book { background: #fff; color: var(--ink); }
+  .book h2 { color: var(--ink); } .book h2 .acc { color: var(--gold-ink); } .book .lede { color: var(--soft); }
+  .book .card { background: var(--cream); box-shadow: none; border: 1px solid var(--line); }
+  .book .card input[type=date], .book .card input[type=text] { background: #fff; }
+  .book .sum { background: #fff; }
+  .book.sec { padding-block: clamp(3rem, 9svh, 6rem); }
+  .know { background: var(--cream); }
+  .close { position: relative; min-height: min(100svh, 56rem); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: clamp(4rem, 10svh, 7rem) 0; background: var(--cream) url(assets/arrive-last.webp) 50% 50% / cover no-repeat; }
+  .close .wrap { position: relative; }
+  .close h2, .close h2 .acc { color: var(--sage-ink); }
+  @media (max-width: 760px) { .close { background-image: url(assets/arrive-m-last.webp); background-size: 190% auto; background-position: 50% 35%; min-height: 80svh; } }
+  .signsec { background: var(--cream-2); text-align: center; padding-block: clamp(2rem, 6svh, 4rem) clamp(1.5rem, 4svh, 2.5rem); overflow: hidden; }
+  .signsec .sign { margin-top: 0; }
+  .foot { background: var(--night); color: #C9D3CF; border-top: 0; padding-block: clamp(3rem, 8svh, 5rem) calc(1.6rem + var(--pad-bottom, 0px)); font-size: .95rem; }
+  .foot .wrap { display: block; }
+  .foot .last { margin: 0; color: #fff; font-weight: 700; font-size: clamp(2.2rem, 1rem + 4.4vw, 4.8rem); line-height: 1; letter-spacing: -.02em; max-width: 12em; }
+  .foot .last .acc { color: var(--gold); }
+  .foot .act { margin: 1.8rem 0 clamp(2rem, 6svh, 3.5rem); }
+  .foot .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem 2rem; padding-top: 2rem; border-top: 1px solid rgb(255 255 255 / .18); }
+  .foot h3 { font-size: .8rem; letter-spacing: .1em; color: var(--gold); font-weight: 600; margin-bottom: .6rem; }
+  .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
+  .foot a { text-decoration: none; color: #fff; } .foot a:hover { text-decoration: underline; }
+  .foot .legal { margin-top: 2.2rem; display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; justify-content: space-between; font-size: .95rem; color: #9FB0A9; }
+  @media (max-width: 640px) { .foot .cols { grid-template-columns: 1fr 1fr; } }
 </style>
 <script>document.documentElement.classList.add('js');</script>
 </head>
@@ -311,19 +365,20 @@
         <li><b data-en="Custom balloons">בלונים בהתאמה אישית</b><span data-en="Made for your event, your colours and your idea.">לפי האירוע, הצבעים והרעיון שלכם.</span><i class="pop" aria-hidden="true"><img src="assets/work/print-balloon.webp" alt="" width="230" height="230" loading="lazy"></i></li>
       </ul>
       <figure class="mstage" aria-hidden="true" id="mstage"><img class="on" src="assets/work/gate.webp" alt="" width="230" height="230"><img src="assets/work/kiddush-gold.webp" alt="" width="230" height="230"><img src="assets/booth.webp" alt="" width="800" height="800"><img src="assets/work/print-balloon.webp" alt="" width="230" height="230"></figure></div>
+      <div class="mkact" data-rev><a class="btn" href="#book"><span data-en="Book a date">לתיאום אירוע</span></a></div>
     </div>
   </section>
 
   <section class="sec booth" id="booth" aria-labelledby="h-booth">
     <div class="wrap grid">
-      <figure data-rev><img src="assets/booth.webp" alt="עמדת צילום של מיכל בלונס: קשת בלונים ורודה, ירוקה וזהובה סביב קשת לבנה עם הקדשה אישית ועמודים עם עציצים" data-en-alt="A Michal Balloons photo station: a pink, green and gold balloon arch around a white arch with a personal dedication, and plant stands" width="800" height="800" loading="lazy"></figure>
-      <div>
+      <figure><img src="assets/booth.webp" alt="עמדת צילום של מיכל בלונס: קשת בלונים ורודה, ירוקה וזהובה סביב קשת לבנה עם הקדשה אישית ועמודים עם עציצים" data-en-alt="A Michal Balloons photo station: a pink, green and gold balloon arch around a white arch with a personal dedication, and plant stands" width="800" height="800" loading="lazy"></figure>
+      <div class="txt">
         <h2 id="h-booth" data-rev data-en-html="The photo <span class=&quot;acc&quot;>station</span>">עמדת <span class="acc">צילום</span></h2>
         <ul class="incl" data-rev style="--i:2">
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-en="A personal dedication">הקדשה אישית</span></li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><span data-en="Stands with plants">עמדות עם עציצים</span></li>
         </ul>
-        <a class="ghost" href="#book" data-rev style="--i:3" data-en="Book a photo station" id="boothBtn">לתיאום עמדת צילום</a>
+        <a class="btn" href="#book" data-rev style="--i:3" id="boothBtn"><span data-en="Book a date">לתיאום אירוע</span></a>
       </div>
     </div>
   </section>
@@ -343,7 +398,8 @@
         <button type="button" class="chip" data-f="fun" aria-pressed="false" data-en="Clowns and holidays">ליצנים וחגים</button>
         <button type="button" class="chip" data-f="print" aria-pressed="false" data-en="Personal printing">הדפסה אישית</button>
       </div>
-      <div class="work" id="work">
+    </div>
+    <div class="work" id="work">
         <figure data-k="mitzvah"><img src="assets/work/booth-yossi.webp" alt="עמדת צילום לבר מצווה" data-en-alt="A bar mitzvah photo station" width="230" height="230" loading="lazy"><figcaption data-en="A bar mitzvah photo station">עמדת צילום לבר מצווה</figcaption></figure>
         <figure data-k="mitzvah"><img src="assets/work/booth-bat.webp" alt="עמדת צילום נשפכת מתוך שער בת מצווה" data-en-alt="A bat mitzvah photo station spilling from an arch" width="230" height="230" loading="lazy"><figcaption data-en="A bat mitzvah photo station spilling from an arch">עמדת צילום נשפכת מתוך שער בת מצווה</figcaption></figure>
         <figure data-k="mitzvah"><img src="assets/work/booth-sara.webp" alt="עמדת צילום לבת מצווה" data-en-alt="A bat mitzvah photo station" width="230" height="230" loading="lazy"><figcaption data-en="A bat mitzvah photo station">עמדת צילום לבת מצווה</figcaption></figure>
@@ -386,9 +442,8 @@
         <figure data-k="print"><img src="assets/work/print-cup.webp" alt="הדפסה אישית על כוס" data-en-alt="Personal printing on a cup" width="230" height="230" loading="lazy"><figcaption data-en="Personal printing on a cup">הדפסה אישית על כוס</figcaption></figure>
         <figure data-k="print"><img src="assets/work/print-bottle.webp" alt="בקבוק בהדפסה אישית" data-en-alt="A bottle with personal printing" width="230" height="230" loading="lazy"><figcaption data-en="A bottle with personal printing">בקבוק בהדפסה אישית</figcaption></figure>
         <figure data-k="print"><img src="assets/work/print-jar.webp" alt="צנצנת עוגיות בהדפסה אישית" data-en-alt="A cookie jar with personal printing" width="230" height="230" loading="lazy"><figcaption data-en="A cookie jar with personal printing">צנצנת עוגיות בהדפסה אישית</figcaption></figure>
-      </div>
-      <button type="button" class="ghost showall" id="showall" >להציג את כל 42</button>
     </div>
+    <button type="button" class="ghost showall" id="showall" >להציג את כל 42</button>
   </section>
 
   <section class="sec book" id="book" aria-labelledby="h-book">
@@ -439,7 +494,7 @@
     </div>
   </section>
 
-  <section class="sec" aria-labelledby="h-know">
+  <section class="sec know" aria-labelledby="h-know">
     <div class="wrap">
       <h2 id="h-know" data-rev data-en="Good to know">טוב לדעת</h2>
       <dl class="facts">
@@ -458,14 +513,32 @@
       <h2 id="h-close" data-rev data-en-html="Your event, <span class=&quot;acc&quot;>lifted</span>">האירוע שלכם, <span class="acc">באוויר</span></h2>
       <div class="act" data-rev style="--i:1"><a class="btn" href="#book"><span data-en="Book a date">לתיאום אירוע</span></a></div>
     </div>
+  </section>
+
+  <section class="signsec" aria-label="מיכל בלונס" data-en-label="Michal Balloons">
     <div class="sign" id="sign" aria-hidden="true"><canvas id="bub"></canvas><p class="hint" data-en="Tap a balloon">נסו לפוצץ בלון</p></div>
   </section>
 </main>
 
 <footer class="foot">
   <div class="wrap">
-    <span data-en="Michal Balloons, Jerusalem. Balloon design since 2024.">מיכל בלונס, ירושלים. עיצוב בלונים מאז 2024.</span>
-    <a href="https://myisraelrental.com/businesses" data-en="Listed on MyIsraelRental">רשומים ב-MyIsraelRental</a>
+    <p class="last" data-en-html="Your event, <span class=&quot;acc&quot;>lifted</span>">האירוע שלכם, <span class="acc">באוויר</span></p>
+    <div class="act"><a class="btn" href="#book"><span data-en="Book a date">לתיאום אירוע</span></a></div>
+    <div class="cols">
+      <div><h3 data-en="ON THIS PAGE">בעמוד</h3><ul>
+        <li><a href="#make" data-en="What we make">מה אנחנו עושים</a></li>
+        <li><a href="#booth" data-en="Photo station">עמדת צילום</a></li>
+        <li><a href="#work-sec" data-en="Our work">העבודות שלנו</a></li>
+        <li><a href="#book" data-en="Book a date">לתיאום אירוע</a></li></ul></div>
+      <div><h3 data-en="CONTACT">יצירת קשר</h3><ul>
+        <li><a href="tel:+972527644973" dir="ltr">052-764-4973</a></li>
+        <li><a href="https://wa.me/972527644973" target="_blank" rel="noopener">WhatsApp</a></li></ul></div>
+      <div><h3 data-en="AREA">אזור</h3><ul>
+        <li data-en="Jerusalem and the area">ירושלים והסביבה</li>
+        <li data-en="By appointment">בתיאום מראש</li></ul></div>
+    </div>
+    <div class="legal"><span data-en="Michal Balloons, Jerusalem. Balloon design since 2024.">מיכל בלונס, ירושלים. עיצוב בלונים מאז 2024.</span>
+      <a href="https://myisraelrental.com/businesses" data-en="Listed on MyIsraelRental">רשומים ב-MyIsraelRental</a></div>
   </div>
 </footer>
 
@@ -566,7 +639,7 @@
   // new places (first, last, invert, play), the others fold away
   var tiles = [].slice.call(document.querySelectorAll('#work figure'));
   // "Everything" shows twelve first; the button shows the rest
-  var showall = document.getElementById('showall'), workEl = document.getElementById('work'), FIRST = 12, expanded = false, filt = 'all';
+  var showall = document.getElementById('showall'), workEl = document.getElementById('work'), FIRST = 18, expanded = false, filt = 'all';
   function cols() { return getComputedStyle(workEl).gridTemplateColumns.split(' ').length; }
   function trim() {
     FIRST = Math.max(4, cols() * 2);
