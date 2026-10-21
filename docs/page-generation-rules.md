@@ -939,7 +939,9 @@ getting a deal"). Work it out from the owner's own prices, never invent it:
   one ("Save up to ₪44 · ₪37 a jar, single jars are ₪40 to ₪48"), "up to"
   only for the true top of the range;
 - a bigger size shows what you save only when it is cheaper for the amount
-  than EVERY smaller size of the same line, measured against the cheapest of
+  than EVERY smaller size of the same line (the same contents in another size:
+  Large Premium against Small and Medium Premium, never against the regular
+  Medium; Tzvi, 21 Oct 2026), measured against the cheapest of
   them (Tzvi, 21 Oct 2026, with the arithmetic: Blazin' Boards' Large Blazin'
   is $0.248 a square centimetre, the same as the Mini and the Small, so it
   saves nothing; the earlier "Save $77" was measured against the Medium, the
