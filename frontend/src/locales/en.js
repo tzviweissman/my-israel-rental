@@ -621,6 +621,13 @@ const en = {
         replaceNote: 'Sent it to the wrong number? Make another link for the same page and the first one stops working.',
         failed: 'Could not make a link.',
       },
+      afterOrder: {
+        whatsapp: 'Message them on WhatsApp about this',
+        orderWhatsapp: 'Message them on WhatsApp about this order',
+        orderText: 'Hi, I just ordered from you on MyIsraelRental:\n{{items}}\nMy order: {{link}}',
+        bookingWhatsapp: 'Message them on WhatsApp about this booking',
+        bookingText: 'Hi, I just booked with you on MyIsraelRental: {{what}}{{when}}\nMy booking: {{link}}',
+      },
       claim: {
         eyebrow: 'We made this for you',
         body: 'A page on MyIsraelRental, ready for you. Take it over and it is yours to change, free, with no commission.',
@@ -6442,6 +6449,68 @@ const en = {
         unsubDoneBody: "Order confirmations and anything you ask for still reach you.",
         resubscribe: "I changed my mind, keep me on the list",
         unsubButton: "Unsubscribe",
+        lapsedKind: "Not back in a while",
+        lapsedFor: "Last came more than",
+        daysAgo_one: "{{count}} day ago",
+        daysAgo_other: "{{count}} days ago",
+        unfilled: "Replace the parts in [square brackets] with your own words, or delete them. Then you can send.",
+        holiday: {
+          rosh_hashana: "Rosh Hashanah",
+          sukkot: "Sukkot",
+          chanukah: "Chanukah",
+          tu_bishvat: "Tu BiShvat",
+          purim: "Purim",
+          pesach: "Pesach",
+          yom_haatzmaut: "Independence Day",
+          shavuot: "Shavuot",
+        },
+        occasion: {
+          today: "{{holiday}} is today",
+          soon_one: "{{holiday}} is tomorrow",
+          soon_other: "{{holiday}} is in {{count}} days",
+          holidayHint: "Tell your customers your holiday hours and what you offer for it.",
+          writeHoliday: "Write a holiday message",
+          lapsed_one: "1 customer has not been back in 90 days",
+          lapsed_other: "{{count}} customers have not been back in 90 days",
+          lapsedHint: "A short note about what is new often brings people back.",
+          writeWinBack: "Write a message to bring them back",
+          winBack: {
+            subject: "What is new at {{name}}",
+            body: "Hello,\n\nIt has been a while since your last visit to {{name}}, so here is what is new.\n\n[What is new: a product, a service, a menu or new hours.]\n\n[An offer for coming back, if you have one, and when it ends.]\n\n{{name}}",
+          },
+          rosh_hashana: {
+            subject: "Shana tova from {{name}}",
+            body: "Rosh Hashanah is on {{date}}.\n\n[What you offer for the holiday, and how to order or book it.]\n\n[Your opening hours over the holiday.]\n\nShana tova,\n{{name}}",
+          },
+          sukkot: {
+            subject: "Chag sameach from {{name}}",
+            body: "Sukkot is on {{date}}.\n\n[What you offer for the holiday, and how to order or book it.]\n\n[Your opening hours over the holiday.]\n\nChag sameach,\n{{name}}",
+          },
+          chanukah: {
+            subject: "Happy Chanukah from {{name}}",
+            body: "Chanukah is on {{date}}.\n\n[What you offer for the holiday, and how to order or book it.]\n\n[Your opening hours over the holiday.]\n\nHappy Chanukah,\n{{name}}",
+          },
+          tu_bishvat: {
+            subject: "Happy Tu BiShvat from {{name}}",
+            body: "Tu BiShvat is on {{date}}.\n\n[What you offer for the holiday, and how to order or book it.]\n\n[Your opening hours over the holiday.]\n\nHappy Tu BiShvat,\n{{name}}",
+          },
+          purim: {
+            subject: "Happy Purim from {{name}}",
+            body: "Purim is on {{date}}.\n\n[What you offer for the holiday, and how to order or book it.]\n\n[Your opening hours over the holiday.]\n\nHappy Purim,\n{{name}}",
+          },
+          pesach: {
+            subject: "Chag Pesach sameach from {{name}}",
+            body: "Pesach is on {{date}}.\n\n[What you offer for the holiday, and how to order or book it.]\n\n[Your opening hours over the holiday.]\n\nChag Pesach sameach,\n{{name}}",
+          },
+          yom_haatzmaut: {
+            subject: "Happy Independence Day from {{name}}",
+            body: "Independence Day is on {{date}}.\n\n[What you offer for the holiday, and how to order or book it.]\n\n[Your opening hours over the holiday.]\n\nHappy Independence Day,\n{{name}}",
+          },
+          shavuot: {
+            subject: "Chag Shavuot sameach from {{name}}",
+            body: "Shavuot is on {{date}}.\n\n[What you offer for the holiday, and how to order or book it.]\n\n[Your opening hours over the holiday.]\n\nChag Shavuot sameach,\n{{name}}",
+          },
+        },
       },
       // Dashboard > Customers (backend routes/marketplace/customers.py).
       customers: {
