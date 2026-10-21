@@ -51,6 +51,8 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] Chicken Munch page: the sticky top bar is 92% opaque, so menu text shows faintly behind the logo while scrolling on a phone. First seen 19 Oct (UI audit). Decision: leave, or make it solid.
 - [Low] Chicken Munch page: English only (no Hebrew version) for a Jerusalem business. First seen 19 Oct (UI audit). Decision for Tzvi.
 
+- [Low] Services map popup: hardcoded `#fff`/`#111827` and `system-ui` font in new pin and header code. First seen 21 Oct (2026-10-21-ui-audit).
+- [To check] UI audit cannot render: sandbox blocks the Playwright download (cdn.playwright.dev 403) and the API did not start. First seen 21 Oct.
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
 - [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
 - [Low] Hebrew: 14 label keys (basket buttons in CardAction.jsx, Jobs board area box) are in neither en.js nor he.js, so Hebrew shows English. First seen 18 Oct (2026-10-18-site-audit).
@@ -110,6 +112,7 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] The Brown Box page: "Scroll" cue removed. Fixed 17 Oct (c67e586).
 - [Low] Services map: city names with a hyphen or apostrophe (Tel-Aviv, Modi'in, Ra'anana, Be'er Sheva) never matched, so those businesses had no pin. Fixed 20 Oct (0492ea0, 2026-10-20-site-audit).
 
+- [Low] Hebrew map texts showed English for exactly two businesses (no `_two` plural). Fixed 21 Oct (d9603292, 2026-10-21-ui-audit).
 - [Low] KasherMyBnb: the "what we kasher" lists on the kitchen and pots pages are now a split price list (add-ons left, ticked parts right; on a phone the list first). 13 Oct.
 
 - [Medium] Subscriptions: a paying business can now see its plan and cancel it in Settings ("Your plan", shown only to a business with a paid plan). Fixed 13 Oct.
