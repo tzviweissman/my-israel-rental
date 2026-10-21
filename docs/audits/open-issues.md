@@ -53,6 +53,9 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 
 - [Low] Services map popup: hardcoded `#fff`/`#111827` and `system-ui` font in new pin and header code. First seen 21 Oct (2026-10-21-ui-audit).
 - [To check] UI audit cannot render: sandbox blocks the Playwright download (cdn.playwright.dev 403) and the API did not start. First seen 21 Oct.
+- [Medium] Hebrew: 14 texts (order basket buttons, jobs board area box) exist in neither language file, so Hebrew shows English. First seen 21 Oct (2026-10-21-site-audit).
+- [Medium] Dead end: the "category" item of the completeness list opens a form with no category control. First seen 21 Oct (2026-10-21-site-audit).
+- [Low] Customer messages: any "[text]" in a message blocks sending, even when the owner meant it. First seen 21 Oct (2026-10-21-site-audit).
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
 - [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
 - [Low] Hebrew: 14 label keys (basket buttons in CardAction.jsx, Jobs board area box) are in neither en.js nor he.js, so Hebrew shows English. First seen 18 Oct (2026-10-18-site-audit).
