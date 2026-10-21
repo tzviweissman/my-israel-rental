@@ -584,11 +584,14 @@ getting a deal"). Work it out from the owner's own prices, never invent it:
 - a pack or bundle shows what it saves against the same items bought one by
   one ("Save up to ₪44 · ₪37 a jar, single jars are ₪40 to ₪48"), "up to"
   only for the true top of the range;
-- a bigger size shows what you save against the smaller size's price for
-  the same amount ("You save $77 against the Medium, size for size": the
-  Large at the Medium's price per centimetre would be $462, it is $385), from
-  the real sizes, and only where it is true (on Blazin' Boards the Small is
-  twice the Mini for twice the price, so it says nothing);
+- a bigger size shows what you save only when it is cheaper for the amount
+  than EVERY smaller size of the same line, measured against the cheapest of
+  them (Tzvi, 21 Oct 2026, with the arithmetic: Blazin' Boards' Large Blazin'
+  is $0.248 a square centimetre, the same as the Mini and the Small, so it
+  saves nothing; the earlier "Save $77" was measured against the Medium, the
+  one dearer board, which is cherry-picking). Work it out in a table of every
+  size's price per unit before printing any saving; on Blazin' Boards only the
+  Large Premium saves ($485 against $646 at the Small and Medium Premium rate);
 - **say only the saving, in money** ("You save $77", "Save up to ₪44"), never
   how much more the bigger one costs or a percentage (Tzvi, 20 Oct 2026:
   "don't say how much more it costs, only mention how much they will save in
