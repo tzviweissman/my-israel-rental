@@ -101,27 +101,43 @@
   .mpanel a:active { background: var(--paper-2); }
   .topbar.is-open .mpanel { display: block; }
 
-  /* ---------- hero: their logo, their promise, their photo -------------- */
-  .hero { min-height: calc(min(100svh, 900px) - 64px); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: center; gap: clamp(24px, 5vw, 72px);
-    padding-block: clamp(24px, 5vh, 56px); }
-  .hero .logo { width: clamp(96px, 11vw, 132px); height: auto; border-radius: 50%; box-shadow: 0 10px 30px -18px rgb(58 34 22 / .5); }
-  .hero h1 { margin-top: clamp(14px, 2.4vh, 26px); font-size: min(clamp(2.4rem, 1.2rem + 3vw, 4.2rem), 7.4svh); max-width: 15ch; }
-  .hero h1 .script { display: block; color: var(--caramel-deep); font-size: 1.12em; line-height: 0.9; margin-top: 0.08em; }
-  .hero .lede { margin: clamp(12px, 2.2vh, 22px) 0 0; max-width: 31rem; font-size: clamp(1.02rem, 0.95rem + 0.3vw, 1.18rem); color: var(--ink-soft); }
-  .hero .act { margin-top: clamp(18px, 3.4vh, 34px); display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
-  .proof { margin: 0; padding: 0; list-style: none; font-size: 0.95rem; color: var(--ink-soft); line-height: 1.5; }
-  .proof b { color: var(--ink); font-weight: 600; }
-  .hero figure { margin: 0; position: relative; justify-self: center; width: min(100%, 470px); }
-  .hero figure img { width: 100%; height: min(78svh, 627px); object-fit: cover; border-radius: 240px 240px var(--r) var(--r); box-shadow: 0 30px 60px -36px rgb(58 34 22 / .6); }
-  .hero figure figcaption { position: absolute; left: -18px; bottom: 26px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px;
-    font-size: 0.86rem; box-shadow: 0 10px 24px -16px rgb(58 34 22 / .5); }
+  /* ---------- the opening: their own photograph, edge to edge ------------ */
+  /* The one photo they sent, in panels that rise on load and then drift. Each panel
+     is the photo covering the panel (object-position picks the part), zoomed a little
+     (--z) about a point (--tx, --ty); the zoom stays small so the photo is never
+     enlarged much past its own size. */
+  .pics { position: relative; overflow: hidden; background: var(--cocoa); color: #FFF7EF; }
+  .pn { position: relative; overflow: hidden; height: 100%; }
+  .pn .ph { position: absolute; inset: 0; background: url("assets/boxes.webp") var(--ox, 50%) var(--oy, 50%) / cover no-repeat; transform: scale(var(--z, 1)); transform-origin: var(--tx, 50%) var(--ty, 50%); }
+  .open { height: max(560px, calc(100svh - 64px)); display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 3px; }
+  .open .pn { animation: rise 1.1s var(--ease) both; }
+  .open .pn:nth-child(2) { animation-delay: .14s; } .open .pn:nth-child(3) { animation-delay: .28s; }
+  .open .pn .ph { animation: drift 18s ease-in-out 1s infinite alternate; }
+  .open .pn:nth-child(2) .ph { animation-duration: 22s; animation-direction: alternate-reverse; }
+  @keyframes rise { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+  @keyframes drift { from { transform: scale(var(--z, 1)); } to { transform: scale(calc(var(--z, 1) * 1.07)); } }
+  /* the words sit on a soft shade along the bottom edge (5b.3), never over the middle of the photo */
+  .open::after, .close::after { content: ""; position: absolute; inset: 0; pointer-events: none;
+    background: linear-gradient(to top, rgb(33 17 9 / .95) 0%, rgb(33 17 9 / .9) 30%, rgb(33 17 9 / .7) 50%, rgb(33 17 9 / .28) 66%, rgb(33 17 9 / 0) 80%); }
+  .open .copy, .close .copy { position: absolute; z-index: 2; left: 0; right: 0; bottom: 0; padding-block: 0 clamp(26px, 5.5vh, 60px); }
+  .open .logo { width: clamp(64px, 7vw, 92px); height: auto; border-radius: 50%; box-shadow: 0 10px 30px -14px rgb(0 0 0 / .6); }
+  .pn.cut { background: var(--g); }
+  .pn.cut img { inset: auto; left: 0; right: 0; top: var(--t, 8%); width: 100%; height: 64%; object-fit: contain; object-position: 50% 50%; transform: scale(var(--s)) rotate(-8deg); animation: none; }
+  .open .pn.cut img { animation: drift2 20s ease-in-out 1s infinite alternate; }
+  @keyframes drift2 { from { transform: scale(var(--s)) rotate(-8deg); } to { transform: scale(calc(var(--s) * 1.06)) rotate(-3deg); } }
+  .open h1 { margin-top: clamp(10px, 1.6vh, 18px); font-size: min(clamp(2.3rem, 1.2rem + 3.4vw, 4.6rem), 9svh); max-width: 17ch; color: #FFF7EF; text-shadow: 0 2px 22px rgb(33 17 9 / .5); }
+  .open h1 .script { display: block; color: #F2C79B; font-size: 1.1em; line-height: .9; margin-top: .06em; }
+  .open .lede { margin: clamp(10px, 1.8vh, 18px) 0 0; max-width: 30rem; font-size: clamp(1rem, .95rem + .25vw, 1.15rem); color: #F6E9DE; }
+  .open .act { margin-top: clamp(16px, 3vh, 30px); display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; }
+  .pics .proof { color: #F6E9DE; } .pics .proof b { color: #fff; }
+  .pics .send { border-color: var(--paper); }
 
   /* ---------- build your box: the signature ----------------------------- */
-  .build { padding-block: clamp(56px, 9vh, 96px); border-top: 1px solid var(--line); }
+  .build { padding-block: clamp(56px, 9vh, 96px); }
   .build-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); align-items: center; }
   .build h2 { font-size: min(clamp(2.2rem, 1.2rem + 3vw, 3.8rem), 9svh); }
   .build .sub { margin: 8px 0 0; color: var(--ink-soft); }
-  .step-label { margin: clamp(16px, 2.6vh, 26px) 0 10px; font-size: 0.78rem; }
+  .step-label { margin: clamp(16px, 2.6vh, 26px) 0 10px; font-size: 0.82rem; }
   .choices { display: grid; gap: 10px; margin-top: clamp(14px, 2.2vh, 22px); }
   .choices.size, .choices.flav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* 21st "Choice Cards": bordered, lit when chosen */
@@ -189,34 +205,56 @@
   /* prices in lining figures: Cormorant's old-style 1 reads as an I */
   .choice .pr, .total .sum, .pricecard .p, .bar .pr b, .proof b { font-variant-numeric: lining-nums tabular-nums; }
 
-  /* ---------- the price list (theirs) ------------------------------------ */
-  .menu { padding-block: clamp(56px, 9vh, 96px); border-top: 1px solid var(--line); }
-  .menu h2 { font-size: min(clamp(2rem, 1.2rem + 2.4vw, 3.2rem), 8svh); }
-  .menu h2 .script { color: var(--caramel-deep); font-size: 1.15em; }
-  .boxes { margin-top: clamp(18px, 3vh, 30px); display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 2.4vw, 26px); }
-  .pricecard { border: 1.5px solid var(--line); border-radius: var(--r); background: #fff; padding: clamp(18px, 2.4vw, 28px); }
+  /* ---------- the four flavours: a wall of their buns, edge to edge ------ */
+  .flavours { background: var(--cocoa); color: #FFF7EF; }
+  .flavours .top { padding-block: clamp(24px, 4.5vh, 52px) clamp(12px, 2.2vh, 24px); }
+  .flavours h2 { font-size: min(clamp(2.4rem, 1.3rem + 3.6vw, 4.6rem), 8.5svh); color: #FFF7EF; max-width: 16ch; }
+  .flavours h2 .script { display: block; color: #F2C79B; font-size: 1.1em; line-height: .95; }
+  .flavours .sub { margin: 10px 0 0; max-width: 30rem; color: #E6D2C2; }
+  .wall { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; height: clamp(340px, calc(100svh - 300px), 720px); }
+  .wall .fl { all: unset; box-sizing: border-box; position: relative; overflow: hidden; display: block; cursor: pointer; background: var(--g); color: var(--t); isolation: isolate; }
+  .wall .fl { transition: box-shadow 250ms var(--ease), scale 120ms; }
+  .wall .fl:hover { box-shadow: inset 0 0 0 7px rgb(255 247 239 / .6); } .wall .fl:active { scale: .985; }
+  .wall .fl:focus-visible { outline: 3px solid #fff; outline-offset: -6px; }
+  .wall .fl img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; object-position: 50% 62%; transform: scale(1.18) rotate(-6deg); transition: transform 900ms var(--ease); z-index: 1; }
+  @media (hover: hover) { .wall .fl:hover img { transform: scale(1.26) rotate(2deg); } }
+  /* their price, as texture: the box-of-4 price, huge, behind the bun */
+  .wall .fl .big { position: absolute; z-index: 0; left: -4%; top: 2%; font: 600 clamp(8rem, 18vw, 17rem)/.9 var(--display); letter-spacing: -.04em; opacity: .13; font-variant-numeric: lining-nums; pointer-events: none; }
+  .wall .fl .cap { position: absolute; z-index: 2; left: clamp(14px, 1.6vw, 24px); right: 14px; top: clamp(14px, 1.8vw, 26px); }
+  .wall .fl .nm { display: block; font: 600 clamp(1.5rem, 1rem + 1.2vw, 2.2rem)/1.05 var(--display); }
+  .wall .fl .pp { display: block; margin-top: 6px; font: 600 .95rem/1.2 var(--body); font-variant-numeric: lining-nums tabular-nums; }
+  .wall .fl .pp small { font-weight: 400; opacity: .85; }
+  .wall .f-cin { --g: #F3E6DC; --t: #3A2216; } .wall .f-esp { --g: #6B4430; --t: #FFF7EF; }
+  .wall .f-lot { --g: #C8894B; --t: #2B180F; } .wall .f-cho { --g: #4A2A1D; --t: #FFF7EF; }
+
+  /* ---------- the price list (theirs): a calm rest, on white -------------- */
+  .menu { background: #fff; padding-block: clamp(64px, 11vh, 120px); }
+  .menu h2 { font-size: min(clamp(2.4rem, 1.2rem + 3.6vw, 4.6rem), 10svh); max-width: 16ch; }
+  .menu h2 .script { color: var(--caramel-deep); font-size: 1.12em; }
+  .boxes { margin-top: clamp(24px, 4vh, 44px); display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 6vw, 96px); }
+  .pricecard { border: 0; border-top: 1.5px solid var(--ink); padding: 14px 0 0; background: none; }
   .pricecard h3 { margin: 0 0 8px; font-size: 0.9rem; color: var(--caramel-deep); }
   .pricecard ul { margin: 0; padding: 0; list-style: none; }
-  .pricecard li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--paper-2); }
+  .pricecard li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .pricecard li:last-child { border-bottom: 0; }
   .pricecard li span:first-child { display: flex; align-items: center; gap: 10px; }
   .pricecard li i { font-style: normal; font-family: var(--script); font-size: 1.25rem; color: var(--ink-soft); margin-left: 4px; }
   .pricecard .p { font-family: var(--body); font-weight: 600; font-size: 1.15rem; }
-  .pricecard .p small { font-family: var(--body); font-size: 0.75rem; font-weight: 500; color: var(--ink-soft); margin-left: 3px; letter-spacing: 0.06em; }
+  .pricecard .p small { font-family: var(--body); font-size: 0.82rem; font-weight: 500; color: var(--ink-soft); margin-left: 3px; letter-spacing: 0.06em; }
 
   /* ---------- the facts, on a contrasting band --------------------------- */
-  .facts { background: var(--cocoa); color: #F6E9DE; padding-block: clamp(48px, 8vh, 84px); }
+  .facts { background: var(--cocoa); color: #F6E9DE; padding-block: clamp(64px, 11vh, 120px); }
   .facts .row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(16px, 3vw, 36px); }
-  .facts .k { font-size: 0.74rem; color: #D9B48E; }
+  .facts .row > div { border-top: 1px solid rgb(246 233 222 / .28); padding-top: 18px; }
+  .facts .k { font-size: 0.82rem; color: #D9B48E; }
   .facts .v { margin-top: 6px; font-family: var(--display); font-size: clamp(1.3rem, 1rem + 0.9vw, 1.7rem); font-weight: 600; line-height: 1.15; }
   .facts .v small { display: block; font-family: var(--body); font-size: 0.92rem; font-weight: 400; color: #E6D2C2; margin-top: 4px; line-height: 1.45; }
 
-  /* ---------- close -------------------------------------------------------- */
-  .close { padding-block: clamp(64px, 11vh, 120px); text-align: center; }
-  .close h2 { font-size: min(clamp(2.6rem, 1.4rem + 4vw, 5rem), 11svh); }
-  .close h2 .script { display: block; color: var(--caramel-deep); font-size: 1.15em; line-height: 0.95; }
-  .close .act { margin-top: 26px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-
+  /* ---------- close: the photo again, in four crops ---------------------- */
+  .close { height: max(520px, 78svh); display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; }
+  .close h2 { font-size: min(clamp(2.4rem, 1.4rem + 3.6vw, 4.8rem), 9svh); max-width: 16ch; color: #FFF7EF; text-shadow: 0 2px 22px rgb(33 17 9 / .5); }
+  .close h2 .script { display: block; color: #F2C79B; font-size: 1.1em; line-height: .95; }
+  .close .act { margin-top: clamp(16px, 3vh, 28px); display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; }
 
   /* pick-up or delivery, boxes, and the saving */
   .choices.ful { margin-top: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -246,27 +284,26 @@
   .pricecard .row:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
   .pricecard .p s { font-weight: 500; font-size: 0.85rem; color: var(--ink-soft); margin-right: 6px; }
   .menu .tip { margin: 10px 0 0; color: var(--ink-soft); font-size: 0.95rem; }
-  .foot { display: block; padding: 0 0 var(--bar-pad, 0px); font-size: 0.95rem; color: var(--ink-soft); }
-  .foot-grid { display: grid; grid-template-columns: 1.3fr 1fr 1.2fr; gap: 28px; padding-block: 40px 28px; }
-  .foot h3 { margin: 0 0 10px; font-size: 0.78rem; color: var(--caramel-deep); }
-  .foot a { display: block; width: fit-content; padding: 6px 0; color: var(--ink); text-decoration: none; }
-  .foot a:hover { color: var(--caramel-deep); text-decoration: underline; }
-  .foot .nm2 { font: 600 1.5rem/1.1 var(--display); color: var(--ink); }
+  .foot { display: block; padding: 0 0 var(--bar-pad, 0px); font-size: 0.95rem; background: var(--cocoa); color: #E6D2C2; }
+  .foot-grid { display: grid; grid-template-columns: 1.3fr 1fr 1.2fr; gap: 28px; padding-block: clamp(48px, 8vh, 80px) 32px; }
+  .foot h3 { margin: 0 0 10px; font-size: 0.82rem; color: #D9B48E; }
+  .foot a { display: block; width: fit-content; padding: 6px 0; color: #FFF7EF; text-decoration: none; }
+  .foot a:hover { color: #F2C79B; text-decoration: underline; }
+  .foot .nm2 { font: 600 clamp(1.8rem, 1.2rem + 1.6vw, 2.6rem)/1.1 var(--display); color: #FFF7EF; }
+  .foot .nm2 .script { display: block; color: #F2C79B; font-size: 1.1em; }
   .foot p { margin: 6px 0 0; max-width: 22rem; }
-  .foot .legal { border-top: 1px solid var(--line); padding-block: 14px 18px; font-size: 0.85rem; }
-  .foot .legal a { display: inline; padding: 0; color: var(--ink-soft); }
+  .foot a.send { display: inline-flex; margin-top: 16px; padding: 0 26px; border-color: var(--paper); color: var(--ink); }
+  .foot a.send:hover { color: var(--ink); text-decoration: none; }
+  .foot .legal { border-top: 1px solid rgb(246 233 222 / .22); padding-block: 14px 18px; font-size: 0.85rem; }
+  .foot .legal a { display: inline; padding: 0; color: #E6D2C2; }
 
   /* ---------- phone bar --------------------------------------------------- */
   .bar { display: none; }
   @media (max-width: 860px) {
     :root { --bar-pad: 76px; }
-    .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 20px; gap: 22px; }
-    .hero .head { display: flex; align-items: center; gap: 14px; }
-    .hero .logo { width: 76px; }
-    /* the words and the button first on a phone, then their photo */
-    .hero figure { width: 100%; }
-    .hero figure img { height: min(46svh, 420px); border-radius: 180px 180px var(--r) var(--r); }
-    .hero figure figcaption { left: 12px; bottom: 12px; }
+    .open { grid-template-columns: repeat(2, minmax(0, 1fr)); } .open .pn:nth-child(2) { display: none; }
+   
+    .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); height: auto; } .wall .fl { height: min(58svh, 420px); } .wall .fl img { transform: scale(1.02) rotate(-6deg); object-position: 50% 70%; }
     .build-grid { grid-template-columns: minmax(0, 1fr); }
     .box { order: -1; width: min(78%, 330px); }
     /* while choosing on a phone, the price and the order button stay under the thumb */
@@ -311,6 +348,8 @@
     .choices.flav .choice:not(.mix) .pr { padding-left: 25px; font-size: 0.95rem; color: var(--ink-soft); }
   }
   @media (max-width: 380px) { .facts .row { grid-template-columns: 1fr; } .send { min-width: 0; } }
+  @media (max-height: 780px) { .open .logo, .open .lede { display: none; } .open h1 { font-size: min(clamp(2.3rem, 1.2rem + 3.4vw, 4.6rem), 8svh); } }
+  @media (prefers-reduced-motion: reduce) { .open .pn, .open .pn .ph, .open .pn.cut img { animation: none; } }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: 1ms !important; animation: none !important; }
     html { scroll-behavior: auto; }
@@ -344,11 +383,14 @@
 </header>
 
 <main>
-  <section class="hero wrap" aria-labelledby="h1">
-    <div>
-      <div class="head"><img class="logo" src="assets/logo.webp" alt="Bun Intended, sweet things ahead, pareve" width="1254" height="1254"></div>
+  <section class="open pics" aria-labelledby="h1">
+    <div class="pn" style="--ox:0%;--oy:60%;--z:1.25;--tx:10%;--ty:70%"><i class="ph" role="img" aria-label="Two boxes of Bun Intended buns: classic cinnamon with icing, a caramel-topped bun, and Lotus buns with cream and biscuit crumbs"></i></div>
+    <div class="pn cut" style="--g:#5A3828;--s:1.15;--t:6%"><img src="assets/bun-lotus.webp" alt="" width="720" height="720"></div>
+    <div class="pn" style="--ox:100%;--oy:60%;--z:1.25;--tx:90%;--ty:75%"><i class="ph" aria-hidden="true"></i></div>
+    <div class="copy wrap">
+      <img class="logo" src="assets/logo.webp" alt="Bun Intended, sweet things ahead, pareve" width="1254" height="1254">
       <h1 id="h1">Cinnamon buns, baked at home in Ramat Eshkol<span class="script">Made with love.</span></h1>
-      <p class="lede">Boxes of 4 or 8 in classic cinnamon, espresso, Lotus and chocolate. Pareve, and freshly baked for Shabbos, a gift, or a treat for yourself.</p>
+      <p class="lede">Pareve, and freshly baked for Shabbos, a gift, or a treat for yourself.</p>
       <div class="act">
         <a class="send" href="#build" data-send="scroll">
           <span class="dot" aria-hidden="true"></span>
@@ -356,15 +398,11 @@
           <span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span>
         </a>
         <ul class="proof">
-          <li><b>From ₪55</b> for a box of 4</li>
+          <li><b>Boxes of 4 or 8, from ₪55</b></li>
           <li>Pick-up in Ramat Eshkol</li>
         </ul>
       </div>
     </div>
-    <figure>
-      <img src="assets/boxes.webp" alt="Two boxes of Bun Intended buns: classic cinnamon with icing, a caramel-topped bun, and Lotus buns with cream and biscuit crumbs" width="768" height="1024">
-      <figcaption>Freshly baked</figcaption>
-    </figure>
   </section>
 
   <section class="build" id="build" aria-labelledby="bh">
@@ -408,6 +446,19 @@
     </div>
   </section>
 
+  <section class="flavours" id="flavours-wall" aria-labelledby="fh">
+    <div class="wrap top">
+      <h2 id="fh">Four flavours.<span class="script">Pick your favourite.</span></h2>
+      <p class="sub">Tap one to start your box with it.</p>
+    </div>
+    <div class="wall">
+      <button type="button" class="fl f-cin" data-pick="4:cinnamon" aria-label="Start a box with Classic cinnamon"><span class="big" aria-hidden="true">55</span><span class="cap"><span class="nm">Classic cinnamon</span><span class="pp">₪55 <small>for 4</small></span></span><img src="assets/bun-cinnamon.webp" alt="" width="720" height="720" loading="lazy" decoding="async"></button>
+      <button type="button" class="fl f-esp" data-pick="4:espresso" aria-label="Start a box with Espresso"><span class="big" aria-hidden="true">55</span><span class="cap"><span class="nm">Espresso</span><span class="pp">₪55 <small>for 4</small></span></span><img src="assets/bun-espresso.webp" alt="" width="720" height="720" loading="lazy" decoding="async"></button>
+      <button type="button" class="fl f-lot" data-pick="4:lotus" aria-label="Start a box with Lotus"><span class="big" aria-hidden="true">65</span><span class="cap"><span class="nm">Lotus</span><span class="pp">₪65 <small>for 4</small></span></span><img src="assets/bun-lotus.webp" alt="" width="720" height="720" loading="lazy" decoding="async"></button>
+      <button type="button" class="fl f-cho" data-pick="4:chocolate" aria-label="Start a box with Chocolate"><span class="big" aria-hidden="true">65</span><span class="cap"><span class="nm">Chocolate</span><span class="pp">₪65 <small>for 4</small></span></span><img src="assets/bun-choc.webp" alt="" width="720" height="720" loading="lazy" decoding="async"></button>
+    </div>
+  </section>
+
   <section class="menu" id="prices" aria-labelledby="mh">
     <div class="wrap">
       <h2 id="mh">Freshly baked. <span class="script">Made with love.</span></h2>
@@ -428,8 +479,10 @@
     </div>
   </section>
 
-  <section class="close" aria-labelledby="ch">
-    <div class="wrap">
+  <section class="close pics" aria-labelledby="ch">
+    <div class="pn" style="--ox:50%;--oy:22%;--z:1"><i class="ph" aria-hidden="true"></i></div>
+    <div class="pn cut" style="--g:#C8894B;--s:1.2;--t:4%"><img src="assets/bun-choc.webp" alt="" width="720" height="720" loading="lazy" decoding="async"></div>
+    <div class="copy wrap">
       <h2 id="ch">Your box is ready when you are.<span class="script">Sweet things ahead</span></h2>
       <div class="act">
         <a class="send" href="#build" data-send="scroll">
@@ -444,7 +497,8 @@
 </main>
 <footer class="foot" id="contact">
   <div class="wrap foot-grid">
-    <div><div class="nm2">Bun Intended</div><p>Homemade cinnamon buns, baked in Ramat Eshkol, Jerusalem. All pareve.</p></div>
+    <div><div class="nm2">Bun Intended<span class="script">Sweet things ahead</span></div><p>Homemade cinnamon buns, baked in Ramat Eshkol, Jerusalem. All pareve.</p>
+      <a class="send" href="#build" data-send="scroll"><span class="dot" aria-hidden="true"></span><span class="a">Build your box</span><span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span></a></div>
     <div><h3 class="caps">Pages</h3><a href="#build">Build your box</a><a href="#prices">Prices</a><a href="#top">Back to the top</a></div>
     <div><h3 class="caps">Find us</h3><a href="tel:+972553321956">Call or text 055-332-1956</a><a href="https://wa.me/18482216022" target="_blank" rel="noopener">WhatsApp +1 848 221 6022</a><span>Pick-up from Ramat Eshkol</span></div>
   </div>
@@ -646,7 +700,7 @@
   addEventListener('keydown', function (e) { if (e.key === 'Escape') menu(false); });
 
   // Phones: the bar from after the first screen until the box builder's own button is on screen.
-  var bar = $('#bar'), hero = $('.hero .send'), build = $('#order'), close = $('.close .send');
+  var bar = $('#bar'), hero = $('.open .send'), build = $('#order'), close = $('.close .send');
   function barState() {
     var phone = matchMedia('(max-width: 860px)').matches;
     var inView = function (el) { var r = el.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; };
