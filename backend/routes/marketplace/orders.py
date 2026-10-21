@@ -2462,6 +2462,13 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
 
     # Tell the store: badge, bell, email.
     await _notify(biz["owner_user_id"], type_="order_new", message=(f"Table {payload.table}: " if payload.table else "New order: ") + _order_line(doc), action_url="/dashboard?tab=orders", order_id=doc["_id"])
+    # And on WhatsApp, where these owners actually look. Two real orders
+    # sat at "new" for three days in October with the email and the bell
+    # both unopened. In the background: a slow Twilio call must never
+    # hold up the customer's confirmation.
+    from utils.bg_tasks import spawn
+    spawn(alert_business_on_whatsapp(gig, biz.get("owner_user_id"), payload.customer_name,
+                                     items_text, "/dashboard?tab=orders", "order"))
     owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"_id": 0, "email": 1})
     await _email(
         (owner or {}).get("email"), f"New order from table {payload.table}" if payload.table else f"New order from {payload.customer_name}",
@@ -2512,3 +2519,24 @@ async def my_orders(user=Depends(verify_token)):
             "reorder_path": reorder_path(o) if o.get("status") == "done" else None,
         })
     return out
+
+
+
+async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optional[str], customer_name: str,
+                                     summary: str, path: str, kind: str) -> None:
+    """A new order or booking, to the business's own WhatsApp (the number
+    on the listing). Never raises: the order is already saved, and the
+    email and the bell have already gone out."""
+    try:
+        from .gigs import gig_whatsapp_number
+        from utils.whatsapp import send_new_order_notification
+        number = await gig_whatsapp_number(gig)
+        if not number:
+            return
+        owner = await db.users.find_one({"id": owner_user_id}, {"preferred_language": 1}) or {}
+        await send_new_order_notification(
+            recipient_phone=number, customer_name=customer_name or "", summary=summary or "",
+            path=path, kind=kind, language=owner.get("preferred_language") or "en",
+        )
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("WhatsApp new-%s alert failed: %s", kind, type(exc).__name__)

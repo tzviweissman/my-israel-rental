@@ -1381,6 +1381,15 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         booking["_id"],
     )
     await _email_guest_status(booking, "created", gig.get("title"))
+    # And on WhatsApp, where the business actually looks (orders.py
+    # alert_business_on_whatsapp). In the background, never blocking.
+    from utils.bg_tasks import spawn
+    from .orders import alert_business_on_whatsapp
+    _when = " ".join(x for x in (payload.preferred_date, payload.time_slot) if x)
+    spawn(alert_business_on_whatsapp(
+        gig, gig.get("provider_user_id"), guest_name or (user or {}).get("name") or "",
+        f"{gig.get('title') or ''} - {payload.tier_name or ''}" + (f" ({_when})" if _when else ""),
+        "/dashboard?tab=appointments", "booking"))
     logger.info("[marketplace] booking created: gig=%s client=%s tier=%s", gig_id, (user or {}).get("user_id") or "guest", payload.tier_name)
     return {"ok": True, "booking_id": booking["_id"], "track_path": f"/bookings/track/{booking['track_token']}"}
 

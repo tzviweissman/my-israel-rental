@@ -71,6 +71,11 @@ def _config() -> Optional[dict]:
         "public_url": (os.environ.get("PLATFORM_PUBLIC_URL") or "").rstrip("/"),
         "tpl_renter_message": os.environ.get("TWILIO_CONTENT_SID_RENTER_MESSAGE"),
         "tpl_contract_signed": os.environ.get("TWILIO_CONTENT_SID_CONTRACT_SIGNED"),
+        # New order or booking, one template per language (Meta approves
+        # wording per language). Variables: 1 = "order"/"booking" word,
+        # 2 = customer name, 3 = what they want, 4 = link.
+        "tpl_new_order": os.environ.get("TWILIO_CONTENT_SID_NEW_ORDER"),
+        "tpl_new_order_he": os.environ.get("TWILIO_CONTENT_SID_NEW_ORDER_HE"),
     }
 
 
@@ -218,4 +223,44 @@ async def send_contract_signed_notification(
         free_form_body=body,
         content_sid_env_key="tpl_contract_signed",
         content_variables={"1": name, "2": tenant, "3": link},
+    )
+
+
+async def send_new_order_notification(
+    *, recipient_phone: str, customer_name: str, summary: str,
+    path: str, kind: str = "order", language: str = "he",
+) -> bool:
+    """Tell a business on WhatsApp that an order or booking came in on the
+    site (Tzvi, 22 Oct 2026).
+
+    Why: production had two real orders sitting at "new" for three days.
+    The owner was told by email and by the bell on the site, and opened
+    neither. These owners live in WhatsApp, so the order goes there too.
+
+    Business-initiated, so in production it needs an approved template
+    (TWILIO_CONTENT_SID_NEW_ORDER, and _HE for Hebrew). Until one is set,
+    Twilio refuses the free-form body outside a 24-hour window and this
+    returns False quietly; the email and the bell still go out.
+    `summary` is cut short because a template variable over ~1000
+    characters is refused, and a long basket reads better on the page.
+    """
+    cfg = _config()
+    if not cfg:
+        return False
+    link = _build_deep_link(cfg, path)
+    he = language == "he"
+    word = ("הזמנה" if kind == "order" else "בקשת תור") if he else kind
+    who = customer_name or ("לקוח" if he else "a customer")
+    what = (summary or "").replace("\n", ", ")[:300]
+    body = (
+        f"{word} חדשה ב-MyIsraelRental מ{who}: {what}\nלצפייה ולמענה: {link}"
+        if he else
+        f"New {word} on MyIsraelRental from {who}: {what}\nSee it and reply: {link}"
+    )
+    key = "tpl_new_order_he" if he and cfg.get("tpl_new_order_he") else "tpl_new_order"
+    return await _send(
+        recipient_phone=recipient_phone,
+        free_form_body=body,
+        content_sid_env_key=key,
+        content_variables={"1": word, "2": who, "3": what, "4": link},
     )
