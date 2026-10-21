@@ -2,8 +2,7 @@
 # replacing the drawn glass that Tzvi found fake (20 Oct 2026). Every number is hers:
 # "each jar makes 3 to 4 coffees", and her jar and package prices.
 CUPS = '''  <section class="sec cups" id="coffees" aria-labelledby="h-cups">
-    <div class="wrap cups-grid">
-      <div class="ph rev"><img src="assets/bottles.webp" alt="Two jars of The Whipped Cup tied with ribbon on pink linen" width="1023" height="1537" loading="lazy"></div>
+    <div class="wrap cups-solo">
       <div class="card-r rev">
         <h2 id="h-cups">How many <span class="pink">coffees?</span></h2>
         <div class="serve" role="group" aria-label="How many coffees">
@@ -46,10 +45,12 @@ CUPS_JS = '''<script>
     var c = +b.dataset.c, lo = Math.ceil(c / 4), hi = Math.ceil(c / 3), i = btns.indexOf(b);
     btns.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
     glide.style.transform = 'translateX(' + (i * 100) + '%)';
-    n.textContent = lo === hi ? lo : lo + ' to ' + hi; u.textContent = hi === 1 ? 'jar' : 'jars';
     var o = offer(hi);
+    n.textContent = lo === hi ? lo : lo + ' to ' + hi; u.textContent = hi === 1 ? 'jar' : 'jars';
     fit.textContent = 'Each jar makes 3 to 4 coffees.';  // the button carries the offer and its price; no sentence about it (Tzvi: "too many words")
     go.href = o[0]; go.textContent = o[1];
+    // the new number slides up into place, so a choice is spread over several frames
+    [n, go].forEach(function (e) { e.classList.remove('slide'); void e.offsetWidth; e.classList.add('slide'); });
   }
   btns.forEach(function (b) { b.addEventListener('click', function () { pick(b); }); });
   pick(btns[1]);

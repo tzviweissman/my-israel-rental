@@ -467,3 +467,83 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 .st-pick button { padding-right: 1.9rem; }
 .st-pick button::after { bottom: auto; top: 50%; margin-top: -8px; right: .6rem; }
 @media (max-width: 480px) { .st-pick button { padding-right: .4rem; } .st-pick button::after { top: .4rem; margin-top: 0; right: .4rem; } .facts li { font-size: .875rem; } }
+
+/* ── home page worlds (page rules 3t, 21 Oct 2026): picture, calm rest, picture, dark rest, picture, dark footer ── */
+.top-order { min-height: 44px; padding: 0 1.2rem; font-size: .95rem; }
+@media (max-width: 800px) { .top-order { display: none; } }
+.world { position: relative; isolation: isolate; overflow: hidden; color: #fff; background: var(--choc); }
+.world h2 { font: 600 clamp(2.6rem, 6.2vw, 6rem)/.98 var(--font-head); font-variation-settings: 'SOFT' 100, 'opsz' 144; letter-spacing: -.02em; color: #fff; text-shadow: 0 2px 28px rgb(42 20 11 / .45); }
+.world img { display: block; width: 100%; height: 100%; object-fit: cover; }
+
+/* the three flavours: three of her jar photos edge to edge, each with its name, price and Add at the foot */
+.flavpic { height: min(calc(100svh - 68px), 62vw, 960px); min-height: 0; display: block; }
+.flavpic .wtitle { position: absolute; z-index: 3; top: 0; left: 0; right: 0; margin: 0; padding: clamp(1.4rem, 4vw, 2.6rem) var(--gutter) clamp(2.5rem, 6vw, 4.5rem); font-size: min(clamp(2.2rem, 5.2vw, 5rem), 9svh); text-align: center;
+  background: linear-gradient(180deg, rgb(42 20 11 / .62), rgb(42 20 11 / 0)); }
+.fpanels { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); height: 100%; gap: 3px; background: var(--choc); }
+.fpanel { position: relative; overflow: hidden; }
+.fpanel img { position: absolute; inset: 0; transition: transform 900ms var(--out); }
+@media (hover: hover) { .fpanel:hover img { transform: scale(1.03); } }
+.fpanel .cap { position: absolute; left: 0; right: 0; bottom: 0; z-index: 2; padding: clamp(3.5rem, 9vw, 7rem) clamp(1rem, 2.6vw, 2rem) clamp(1.1rem, 3vw, 2rem); background: linear-gradient(0deg, rgb(42 20 11 / .82), rgb(42 20 11 / .5) 55%, rgb(42 20 11 / 0)); }
+.fpanel h3 { font: 600 clamp(1.5rem, 2.6vw, 2.4rem)/1.05 var(--font-head); color: #fff; }
+.fpanel p { margin: .35rem 0 0; color: #F3E3DC; font-size: .98rem; }
+.cap-r { display: flex; align-items: center; justify-content: space-between; gap: .8rem; margin-top: .9rem; }
+.fpanel .price { font: 700 clamp(1.7rem, 2.8vw, 2.4rem)/1 var(--font-head); color: #fff; }
+.fpanel .price small { display: block; margin-top: .3rem; font: 500 .8rem/1 var(--font-body); color: #F3E3DC; }
+.fpanel .btn-line { border-color: #fff; color: #fff; }
+.fpanel .btn-line:hover { background: #fff; color: var(--choc); }
+@media (max-width: 760px) {
+  .flavpic { height: auto; min-height: 0; }
+  .flavpic .wtitle { position: relative; background: var(--choc); padding-bottom: 1.4rem; text-shadow: none; }
+  .fpanels { grid-template-columns: 1fr; height: auto; }
+  .fpanel { height: min(78svh, 560px); }
+}
+
+/* the calm rest: her coffee counter on a plain white ground */
+.cups { background: #fff; }
+.cups-solo { max-width: 52rem; }
+.cups .card-r { background: transparent; border: 0; padding: 0; text-align: center; }
+.cups .card-r h2 { font-size: min(clamp(2.4rem, 5.4vw, 4.6rem), 9svh); }
+.cups .need { justify-content: center; }
+.cups .recipe { justify-content: center; }
+
+/* two of her photos side by side, edge to edge, the words at the foot on a soft shade */
+.duo { height: min(calc(100svh - 68px), 62vw, 960px); min-height: 0; }
+.duo-pics { position: absolute; inset: 0; z-index: -1; display: grid; grid-template-columns: 1fr 1fr; gap: 3px; background: var(--choc); }
+.duo-pics img { position: static; }
+.duo::after { content: ""; position: absolute; inset: auto 0 0; height: 62%; z-index: 0; background: linear-gradient(0deg, rgb(42 20 11 / .84), rgb(42 20 11 / .5) 55%, rgb(42 20 11 / 0)); pointer-events: none; }
+.duo-words { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; max-width: 74rem; margin: 0 auto; padding: 0 var(--gutter) clamp(2rem, 6vw, 4.2rem); }
+.duo-words p { margin: .9rem 0 1.5rem; max-width: 30rem; color: #F3E3DC; font-size: 1.1rem; }
+.duo .btn { background: #fff; color: var(--choc); }
+.duo .btn:hover { background: var(--blush); }
+.duo-end .duo-words { text-align: center; }
+.duo-end .duo-words p { margin-inline: auto; }
+@media (max-width: 760px) {
+  .duo { height: calc(100svh - 68px); min-height: 0; }
+  .duo-pics { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; }
+  .duo-words { padding-bottom: calc(1.6rem + var(--pad-bar, 0px)); }
+  .duo h2 { font-size: clamp(2.3rem, 11vw, 3.2rem); }
+}
+
+/* the footer: columns, then one quiet line */
+.foot { text-align: left; padding: clamp(2rem, 5vw, 3.2rem) var(--gutter) calc(1.2rem + var(--pad-bar, 0px)); }
+.foot-cols { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6rem 2rem; }
+.foot-cols h3 { font: 700 .8rem/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--kraft); margin: 0 0 .9rem; }
+.foot-cols a, .foot-cols span { display: block; margin: 0 0 .5rem; font-size: .98rem; font-weight: 500; color: var(--cream); text-decoration: none; }
+.foot-cols a:hover { text-decoration: underline; }
+.foot-cols span { color: #E8CFC7; }
+.foot-legal { max-width: 74rem; margin: 2rem auto 0; padding-top: 1rem; border-top: 1px solid #4A2618; font-size: .85rem; color: #E8CFC7; }
+@media (max-width: 760px) { .foot-cols { grid-template-columns: 1fr; } }
+.duo-pics { grid-template-rows: minmax(0, 1fr); } .duo-pics img { min-height: 0; }
+@media (max-width: 760px) { .duo-pics { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr); } }
+.serve .glide { transition-duration: 420ms; }
+.need .n { display: inline-block; }
+.slide { animation: slidein 300ms var(--out); }
+@keyframes slidein { from { transform: translateY(.18em); opacity: .35; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { .slide { animation: none; } }
+/* stronger soft shades under the words (readable.mjs: contrast on the brightest part of each photo) */
+.flavpic .wtitle { background: linear-gradient(180deg, rgb(42 20 11 / .86), rgb(42 20 11 / .55) 55%, rgb(42 20 11 / 0)); }
+.fpanel .cap { background: linear-gradient(0deg, rgb(42 20 11 / .92), rgb(42 20 11 / .72) 55%, rgb(42 20 11 / 0)); }
+.duo::after { height: 80%; background: linear-gradient(0deg, rgb(42 20 11 / .93), rgb(42 20 11 / .78) 50%, rgb(42 20 11 / 0)); }
+.duo-words p { color: #fff; }
+.foot-legal { font-size: .95rem; }
+@media (max-width: 760px) { .flavpic .wtitle { background: var(--choc); } }

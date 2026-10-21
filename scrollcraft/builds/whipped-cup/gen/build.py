@@ -38,6 +38,7 @@ def header(page):
   <nav class="nav" id="nav" aria-label="The Whipped Cup">{links}</nav>
   <div class="top-r">
     <a class="btn-line" href="shop.html#order">Basket<span class="count" id="count" hidden></span></a>
+    <a class="btn top-order" href="shop.html">Order your jars</a>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
   </div>
 </header>
@@ -45,7 +46,7 @@ def header(page):
 '''
 
 
-FOOT_LINKS = ' · '.join(f'<a href="{p}.html">{t}</a>' for p, t in PAGES)
+FOOT_LINKS_COL = ''.join(f'<a href="{p}.html">{t}</a>' for p, t in PAGES)
 FOOTER = f'''  <section class="close" aria-label="Order from The Whipped Cup">
     <div class="wrap">
       <div>
@@ -57,11 +58,18 @@ FOOTER = f'''  <section class="close" aria-label="Order from The Whipped Cup">
     <p class="giant" aria-hidden="true">The Whipped Cup</p>
   </section>
 </main>
-<footer class="foot"><nav aria-label="Pages">{FOOT_LINKS}</nav>The Whipped Cup, Ramat Eshkol, Jerusalem · on <a href="/">MyIsraelRental</a>, free to list, no commission</footer>
+<footer class="foot">
+  <div class="foot-cols">
+    <nav aria-label="Pages"><h3>Pages</h3>{FOOT_LINKS_COL}</nav>
+    <div><h3>Contact</h3><a href="https://wa.me/{WA}" target="_blank" rel="noopener">WhatsApp +1 929 993 6768</a><a href="mailto:thewhippedcup@gmail.com">thewhippedcup@gmail.com</a></div>
+    <div><h3>Where</h3><span>Ramat Eshkol, Jerusalem</span><span>Kosher certified</span><span>Delivered fresh to your door</span></div>
+  </div>
+  <p class="foot-legal">The Whipped Cup, on <a href="/">MyIsraelRental</a>, free to list, no commission</p>
+</footer>
 
 <div class="bar" id="bar" aria-hidden="true">
   <p class="p"><b>From ₪40 a jar</b>Each jar makes 3 to 4 coffees</p>
-  <a class="btn" href="shop.html" tabindex="-1">Order</a>
+  <a class="btn" href="shop.html" tabindex="-1">Order your jars</a>
 </div>
 <script src="site.js"></script>
 '''
@@ -224,9 +232,40 @@ def write(name, title, desc, img, body, tail=''):
     open(f'{name}.html', 'w', encoding='utf8').write(html)
 
 
+def panel(k, n, d, p, img, alt):
+    return f'''      <article class="fpanel" data-flav="{k}"><img src="assets/{img}" alt="{alt}" width="500" height="1111" loading="lazy">
+        <div class="cap"><h3>{n}</h3><p>{d}</p><div class="cap-r"><span class="price">&#8362;{p}<small>a jar</small></span><a class="btn-line add" href="shop.html?jar={k}" data-jar="{k}">Add</a></div></div></article>
+'''
+FPANELS = ''.join(panel(k, n, d, p, c, alt) for (k, n, d, p, c, pos, big, alt) in FLAVS)
+BTN = '''<a class="btn" href="shop.html">Order your jars <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>'''
+WORLD_FLAV = f'''  <section class="world flavpic" id="flavours" aria-labelledby="h-flav">
+    <h2 id="h-flav" class="wtitle">Three flavours of whipped coffee</h2>
+    <div class="fpanels">
+{FPANELS}    </div>
+  </section>
+'''
+WORLD_WINDOWS = f'''  <section class="world duo" id="fresh" aria-labelledby="h-fresh">
+    <div class="duo-pics"><img src="assets/caramel-window.webp" alt="Four jars of Caramel Cloud on a sunny window sill in Jerusalem" width="1160" height="1122" loading="lazy"><img src="assets/vanilla-window.webp" alt="Four jars of The Whipped Cup on a table by a window" width="986" height="1122" loading="lazy"></div>
+    <div class="duo-words">
+      <h2 id="h-fresh">Made fresh in Ramat Eshkol</h2>
+      <p>Handcrafted and fresh. Kosher certified.</p>
+      {BTN}
+    </div>
+  </section>
+'''
+WORLD_CLOSE = f'''  <section class="world duo duo-end" id="door" aria-labelledby="h-door">
+    <div class="duo-pics"><img src="assets/bottles.webp" alt="Two jars of The Whipped Cup tied with ribbon on pink linen" width="1023" height="1537" loading="lazy"><img src="assets/trio-flowers.webp" alt="Jars of Vanilla Cloud and Classic Cloud among roses" width="934" height="1122" loading="lazy"></div>
+    <div class="duo-words">
+      <h2 id="h-door">Delivered fresh to your door</h2>
+      <p>Weekly packages from &#8362;75.</p>
+      {BTN}
+    </div>
+  </section>
+'''
+
 import sys; sys.path.insert(0, 'gen'); import wow, cups
 write('index', 'The Whipped Cup · Whipped coffee in a jar, Jerusalem', DESC, 'caramel-window.webp',
-      wow.SKY + KOSHER + FLAVOURS + cups.CUPS + PACKAGES, wow.SKY_JS + FLAV_JS + cups.CUPS_JS)
+      wow.SKY + WORLD_FLAV + cups.CUPS + WORLD_WINDOWS + PACKAGES + WORLD_CLOSE, wow.SKY_JS + cups.CUPS_JS)
 
 import shop
 write('shop', 'Shop · The Whipped Cup', 'Classic Cloud ₪40, Caramel Cloud and Vanilla Cloud ₪48 a jar; weekly packages from ₪75. Order on WhatsApp from The Whipped Cup, Ramat Eshkol, Jerusalem.', 'jar-caramel.webp', shop.SHOP, shop.SHOP_JS)

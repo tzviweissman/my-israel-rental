@@ -20,6 +20,7 @@
   <nav class="nav" id="nav" aria-label="The Whipped Cup"><a href="index.html" aria-current="page">Home</a><a href="shop.html">Shop</a><a href="contact.html">Contact</a></nav>
   <div class="top-r">
     <a class="btn-line" href="shop.html#order">Basket<span class="count" id="count" hidden></span></a>
+    <a class="btn top-order" href="shop.html">Order your jars</a>
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
   </div>
 </header>
@@ -42,30 +43,19 @@
       <span class="scroll-hint" id="sky-hint" aria-hidden="true">Scroll</span>
     </div>
   </section>
-  <div class="kosher"><div class="wrap"><span><b>Kosher certified</b></span><span>Handcrafted and fresh in Ramat Eshkol, Jerusalem</span></div></div>
-  <section class="sec" id="flavours" aria-labelledby="h-flav">
-    <div class="wrap">
-      <div class="flav-grid">
-        <div class="photo rev">
-          <img class="big on" data-flav="classic" src="assets/jar-classic.webp" alt="A jar of Classic Cloud on coffee beans" width="500" height="1111" loading="lazy">
-          <img class="big" data-flav="caramel" src="assets/jar-caramel.webp" alt="A jar of Caramel Cloud on coffee beans" width="500" height="1111" loading="lazy">
-          <img class="big" data-flav="vanilla" src="assets/jar-vanilla.webp" alt="A jar of Vanilla Cloud on coffee beans" width="500" height="1111" loading="lazy">
-        </div>
-        <div class="flav-side">
-          <h2 id="h-flav" class="rev">Three <span class="pink">flavours</span> of whipped coffee</h2>
-          <p class="lede rev">Handcrafted and fresh. Each jar makes 3 to 4 coffees.</p>
-          <div class="flavs">
-          <div class="flav rev on" data-flav="classic" tabindex="0" aria-label="Classic Cloud, show the photo"><img class="thumb" src="assets/jar-classic.webp" alt="A jar of Classic Cloud" width="500" height="1111" loading="lazy"><h3>Classic Cloud</h3><div class="price">₪40<small>a jar</small></div><p>Original whipped coffee</p><a class="btn-line add" href="shop.html?jar=classic" data-jar="classic">Add</a></div>
-          <div class="flav rev" data-flav="caramel" tabindex="0" aria-label="Caramel Cloud, show the photo"><img class="thumb" src="assets/jar-caramel.webp" alt="A jar of Caramel Cloud" width="500" height="1111" loading="lazy"><h3>Caramel Cloud</h3><div class="price">₪48<small>a jar</small></div><p>Whipped coffee and caramel</p><a class="btn-line add" href="shop.html?jar=caramel" data-jar="caramel">Add</a></div>
-          <div class="flav rev" data-flav="vanilla" tabindex="0" aria-label="Vanilla Cloud, show the photo"><img class="thumb" src="assets/jar-vanilla.webp" alt="A jar of Vanilla Cloud" width="500" height="1111" loading="lazy"><h3>Vanilla Cloud</h3><div class="price">₪48<small>a jar</small></div><p>Whipped coffee and vanilla</p><a class="btn-line add" href="shop.html?jar=vanilla" data-jar="vanilla">Add</a></div>
-          </div>
-        </div>
-      </div>
+  <section class="world flavpic" id="flavours" aria-labelledby="h-flav">
+    <h2 id="h-flav" class="wtitle">Three flavours of whipped coffee</h2>
+    <div class="fpanels">
+      <article class="fpanel" data-flav="classic"><img src="assets/jar-classic.webp" alt="A jar of Classic Cloud on coffee beans" width="500" height="1111" loading="lazy">
+        <div class="cap"><h3>Classic Cloud</h3><p>Original whipped coffee</p><div class="cap-r"><span class="price">&#8362;40<small>a jar</small></span><a class="btn-line add" href="shop.html?jar=classic" data-jar="classic">Add</a></div></div></article>
+      <article class="fpanel" data-flav="caramel"><img src="assets/jar-caramel.webp" alt="A jar of Caramel Cloud on coffee beans" width="500" height="1111" loading="lazy">
+        <div class="cap"><h3>Caramel Cloud</h3><p>Whipped coffee and caramel</p><div class="cap-r"><span class="price">&#8362;48<small>a jar</small></span><a class="btn-line add" href="shop.html?jar=caramel" data-jar="caramel">Add</a></div></div></article>
+      <article class="fpanel" data-flav="vanilla"><img src="assets/jar-vanilla.webp" alt="A jar of Vanilla Cloud on coffee beans" width="500" height="1111" loading="lazy">
+        <div class="cap"><h3>Vanilla Cloud</h3><p>Whipped coffee and vanilla</p><div class="cap-r"><span class="price">&#8362;48<small>a jar</small></span><a class="btn-line add" href="shop.html?jar=vanilla" data-jar="vanilla">Add</a></div></div></article>
     </div>
   </section>
   <section class="sec cups" id="coffees" aria-labelledby="h-cups">
-    <div class="wrap cups-grid">
-      <div class="ph rev"><img src="assets/bottles.webp" alt="Two jars of The Whipped Cup tied with ribbon on pink linen" width="1023" height="1537" loading="lazy"></div>
+    <div class="wrap cups-solo">
       <div class="card-r rev">
         <h2 id="h-cups">How many <span class="pink">coffees?</span></h2>
         <div class="serve" role="group" aria-label="How many coffees">
@@ -86,6 +76,14 @@
       </div>
     </div>
   </section>
+  <section class="world duo" id="fresh" aria-labelledby="h-fresh">
+    <div class="duo-pics"><img src="assets/caramel-window.webp" alt="Four jars of Caramel Cloud on a sunny window sill in Jerusalem" width="1160" height="1122" loading="lazy"><img src="assets/vanilla-window.webp" alt="Four jars of The Whipped Cup on a table by a window" width="986" height="1122" loading="lazy"></div>
+    <div class="duo-words">
+      <h2 id="h-fresh">Made fresh in Ramat Eshkol</h2>
+      <p>Handcrafted and fresh. Kosher certified.</p>
+      <a class="btn" href="shop.html">Order your jars <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>
+    </div>
+  </section>
   <section class="sec packs" id="packages" aria-labelledby="h-packs">
     <div class="wrap">
       <div class="packs-head"><h2 id="h-packs" class="rev">Weekly packages</h2>
@@ -102,6 +100,14 @@
       </div>
     </div>
   </section>
+  <section class="world duo duo-end" id="door" aria-labelledby="h-door">
+    <div class="duo-pics"><img src="assets/bottles.webp" alt="Two jars of The Whipped Cup tied with ribbon on pink linen" width="1023" height="1537" loading="lazy"><img src="assets/trio-flowers.webp" alt="Jars of Vanilla Cloud and Classic Cloud among roses" width="934" height="1122" loading="lazy"></div>
+    <div class="duo-words">
+      <h2 id="h-door">Delivered fresh to your door</h2>
+      <p>Weekly packages from &#8362;75.</p>
+      <a class="btn" href="shop.html">Order your jars <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>
+    </div>
+  </section>
   <section class="close" aria-label="Order from The Whipped Cup">
     <div class="wrap">
       <div>
@@ -113,11 +119,18 @@
     <p class="giant" aria-hidden="true">The Whipped Cup</p>
   </section>
 </main>
-<footer class="foot"><nav aria-label="Pages"><a href="index.html">Home</a> · <a href="shop.html">Shop</a> · <a href="contact.html">Contact</a></nav>The Whipped Cup, Ramat Eshkol, Jerusalem · on <a href="/">MyIsraelRental</a>, free to list, no commission</footer>
+<footer class="foot">
+  <div class="foot-cols">
+    <nav aria-label="Pages"><h3>Pages</h3><a href="index.html">Home</a><a href="shop.html">Shop</a><a href="contact.html">Contact</a></nav>
+    <div><h3>Contact</h3><a href="https://wa.me/19299936768" target="_blank" rel="noopener">WhatsApp +1 929 993 6768</a><a href="mailto:thewhippedcup@gmail.com">thewhippedcup@gmail.com</a></div>
+    <div><h3>Where</h3><span>Ramat Eshkol, Jerusalem</span><span>Kosher certified</span><span>Delivered fresh to your door</span></div>
+  </div>
+  <p class="foot-legal">The Whipped Cup, on <a href="/">MyIsraelRental</a>, free to list, no commission</p>
+</footer>
 
 <div class="bar" id="bar" aria-hidden="true">
   <p class="p"><b>From ₪40 a jar</b>Each jar makes 3 to 4 coffees</p>
-  <a class="btn" href="shop.html" tabindex="-1">Order</a>
+  <a class="btn" href="shop.html" tabindex="-1">Order your jars</a>
 </div>
 <script src="site.js"></script>
 <script>
@@ -181,17 +194,6 @@
 </script>
 <script>
 (function () {
-  var rows = [].slice.call(document.querySelectorAll('.flav[data-flav]')), bigs = [].slice.call(document.querySelectorAll('.flav-grid .big'));
-  function show(k) { rows.forEach(function (r) { r.classList.toggle('on', r.dataset.flav === k); }); bigs.forEach(function (b) { b.classList.toggle('on', b.dataset.flav === k); }); }
-  rows.forEach(function (r) {
-    r.addEventListener('pointerenter', function (e) { if (e.pointerType === 'mouse') show(r.dataset.flav); });
-    r.addEventListener('focusin', function () { show(r.dataset.flav); });
-    r.addEventListener('click', function (e) { if (!e.target.closest('a')) show(r.dataset.flav); });
-  });
-})();
-</script>
-<script>
-(function () {
   var box = document.querySelector('.serve'); if (!box) return;
   var btns = [].slice.call(box.querySelectorAll('button')), glide = box.querySelector('.glide');
   var n = document.getElementById('cups-n'), u = document.getElementById('cups-u'), fit = document.getElementById('cups-fit'), go = document.getElementById('cups-go');
@@ -210,10 +212,12 @@
     var c = +b.dataset.c, lo = Math.ceil(c / 4), hi = Math.ceil(c / 3), i = btns.indexOf(b);
     btns.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
     glide.style.transform = 'translateX(' + (i * 100) + '%)';
-    n.textContent = lo === hi ? lo : lo + ' to ' + hi; u.textContent = hi === 1 ? 'jar' : 'jars';
     var o = offer(hi);
+    n.textContent = lo === hi ? lo : lo + ' to ' + hi; u.textContent = hi === 1 ? 'jar' : 'jars';
     fit.textContent = 'Each jar makes 3 to 4 coffees.';  // the button carries the offer and its price; no sentence about it (Tzvi: "too many words")
     go.href = o[0]; go.textContent = o[1];
+    // the new number slides up into place, so a choice is spread over several frames
+    [n, go].forEach(function (e) { e.classList.remove('slide'); void e.offsetWidth; e.classList.add('slide'); });
   }
   btns.forEach(function (b) { b.addEventListener('click', function () { pick(b); }); });
   pick(btns[1]);
