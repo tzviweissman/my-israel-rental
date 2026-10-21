@@ -13,6 +13,7 @@ import { Loader2, Search, Download, Upload, Users, X, Phone, MessageCircle, Tag,
 import { money } from '../../utils/currency';
 import { stateLabel } from '../members/memberText';
 import MessageComposer from './MessageComposer';
+import OccasionsCard from './OccasionsCard';
 import { ImportCustomersPanel } from './OrdersTab';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
@@ -246,9 +247,14 @@ export default function CustomersTab({ API, token }) {
         </div>
       )}
 
+      {!composing && (biz.permissions || []).includes('messages') && (
+        <OccasionsCard API={API} auth={auth} biz={biz} onCompose={(m) => setComposing(m)} />
+      )}
+
       {composing && (
-        <MessageComposer API={API} auth={auth} businessId={biz.id} tags={data?.tags || []}
-                         initialKind={kind || 'all'} initialTag={tag} onClose={() => setComposing(false)} />
+        <MessageComposer key={composing === true ? 'blank' : composing.subject} API={API} auth={auth} businessId={biz.id} tags={data?.tags || []}
+                         initialKind={kind || 'all'} initialTag={tag} initial={composing === true ? null : composing}
+                         onClose={() => setComposing(false)} />
       )}
 
       <div className="relative mb-3">

@@ -32,6 +32,7 @@ import base64
 import hashlib
 import hmac
 import html
+import re
 import uuid
 from datetime import datetime, timedelta, timezone
 from typing import Any, Literal, Optional
@@ -44,6 +45,7 @@ from utils.bg_tasks import spawn
 from utils.rate_limit import check_rate
 
 from .customers import build_customers
+from .occasions import is_lapsed
 from .orders import _frontend_url, _subject
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
@@ -118,8 +120,10 @@ async def unsubscribe(business_id: str, e: str, sig: str, request: Request, resu
 # ---------------------------------------------------------------------------
 
 class Audience(BaseModel):
-    kind: Literal["all", "orders", "members", "active_members", "bookings"] = "all"
+    kind: Literal["all", "orders", "members", "active_members", "bookings", "lapsed"] = "all"
     tag: Optional[str] = Field(None, max_length=30)
+    # "lapsed" (occasions.py): not back for this many days.
+    days: int = Field(90, ge=30, le=730)
 
 
 async def _recipients(business_id: str, aud: Audience) -> dict[str, Any]:
@@ -137,6 +141,8 @@ async def _recipients(business_id: str, aud: Audience) -> dict[str, Any]:
         if aud.kind == "active_members" and m.get("status") != "active":
             continue
         if aud.kind == "bookings" and not c["bookings"]:
+            continue
+        if aud.kind == "lapsed" and not is_lapsed(c, aud.days):
             continue
         email = (c["email"] or "").strip().lower()
         if not email or "@" not in email:
@@ -173,6 +179,11 @@ async def preview(business_id: str, aud: Audience, user=Depends(verify_token)):
 # ---------------------------------------------------------------------------
 # composing and sending
 # ---------------------------------------------------------------------------
+
+# A ready-made message (occasions) marks the parts the business must write
+# itself in square brackets. Nothing is sent while one is left.
+_UNFILLED = re.compile(r"\[[^\]\n]{3,}\]")
+
 
 class MessageIn(BaseModel):
     subject: str = Field(..., min_length=2, max_length=120)
@@ -216,6 +227,11 @@ async def _owner_email(biz: dict[str, Any]) -> Optional[str]:
     return (u or {}).get("email")
 
 
+def _check_filled(m: MessageIn) -> None:
+    if _UNFILLED.search(m.subject) or _UNFILLED.search(m.body):
+        raise HTTPException(status_code=400, detail="Replace the parts in square brackets with your own words first")
+
+
 @router.post("/businesses/{business_id}/messages/test")
 async def send_test(business_id: str, m: MessageIn, request: Request, user=Depends(verify_token)):
     check_rate(request, bucket="messages_test", limit=20, window_seconds=3600)
@@ -255,6 +271,7 @@ async def _deliver(msg_id: str, biz: dict[str, Any], m: MessageIn, recipients: l
 @router.post("/businesses/{business_id}/messages")
 async def send_message(business_id: str, m: MessageIn, user=Depends(verify_token)):
     biz = await _owned(business_id, user)
+    _check_filled(m)
     day_ago = (datetime.now(timezone.utc) - timedelta(days=1)).isoformat()
     if await db.business_messages.count_documents({"business_id": business_id, "created_at": {"$gte": day_ago}}) >= SENDS_PER_DAY:
         raise HTTPException(status_code=429, detail=f"You can send up to {SENDS_PER_DAY} messages a day. Try again tomorrow.")

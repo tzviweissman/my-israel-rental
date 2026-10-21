@@ -13,18 +13,20 @@ const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]'
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 const btnOutline = 'inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full border text-sm font-semibold disabled:opacity-50';
 
-export default function MessageComposer({ API, auth, businessId, tags, initialKind, initialTag, onClose }) {
+export default function MessageComposer({ API, auth, businessId, tags, initialKind, initialTag, initial, onClose }) {
   const { t, i18n } = useTranslation();
-  const [kind, setKind] = useState(initialKind || 'all');
+  const [kind, setKind] = useState(initial?.kind || initialKind || 'all');
+  const [days, setDays] = useState(initial?.days || 90);
   const [tag, setTag] = useState(initialTag || '');
-  const [subject, setSubject] = useState('');
-  const [body, setBody] = useState('');
-  const [promo, setPromo] = useState(false);
-  const [lang, setLang] = useState(String(i18n.language || 'en').startsWith('he') ? 'he' : 'en');
+  const [subject, setSubject] = useState(initial?.subject || '');
+  const [body, setBody] = useState(initial?.body || '');
+  // A ready-made message is about the business, so it is marked as one; the owner can untick it.
+  const [promo, setPromo] = useState(!!initial);
+  const [lang, setLang] = useState(initial?.lang || (String(i18n.language || 'en').startsWith('he') ? 'he' : 'en'));
   const [pv, setPv] = useState(null);
   const [busy, setBusy] = useState('');
   const [history, setHistory] = useState([]);
-  const audience = useMemo(() => ({ kind, tag: tag || null }), [kind, tag]);
+  const audience = useMemo(() => ({ kind, tag: tag || null, days }), [kind, tag, days]);
   const base = `${API}/marketplace/businesses/${businessId}/messages`;
 
   useEffect(() => {
@@ -35,7 +37,20 @@ export default function MessageComposer({ API, auth, businessId, tags, initialKi
   useEffect(() => { loadHistory(); }, [base]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const msg = { subject: subject.trim(), body: body.trim(), promo, lang, audience };
+  // The parts of a ready-made message only the business can write (backend: _UNFILLED).
+  const unfilled = /\[[^\]\n]{3,}\]/.test(`${msg.subject}\n${msg.body}`);
   const ready = msg.subject.length >= 2 && msg.body.length >= 2;
+  // A ready-made message still as we wrote it follows the language picked.
+  const changeLang = (next) => {
+    if (initial?.make) {
+      const was = initial.make(lang);
+      if (subject === was.subject && body === was.body) {
+        const now = initial.make(next);
+        setSubject(now.subject); setBody(now.body);
+      }
+    }
+    setLang(next);
+  };
   const err = (e) => toast.error(e?.response?.data?.detail || t('messages.failed', 'Could not send. Try again.'));
 
   const test = async () => {
@@ -59,7 +74,8 @@ export default function MessageComposer({ API, auth, businessId, tags, initialKi
 
   const kinds = [['all', t('customers.kind.all', 'Everyone')], ['orders', t('customers.kind.orders', 'Ordered')],
     ['active_members', t('customers.kind.activeMembers', 'Active members')], ['members', t('messages.allMembers', 'All members, past and present')],
-    ['bookings', t('customers.kind.bookings', 'Booked')]];
+    ['bookings', t('customers.kind.bookings', 'Booked')],
+    ['lapsed', t('messages.lapsedKind', 'Not back in a while')]];
   const fmt = (s) => (s ? new Intl.DateTimeFormat(i18n.language?.startsWith('he') ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }).format(new Date(s)) : '');
 
   return (
@@ -75,6 +91,13 @@ export default function MessageComposer({ API, auth, businessId, tags, initialKi
             {kinds.map(([k, l]) => <option key={k} value={k}>{l}</option>)}
           </select>
         </label>
+        {kind === 'lapsed' && (
+          <label className="text-sm" style={{ color: 'var(--ink)' }}>{t('messages.lapsedFor', 'Last came more than')}
+            <select value={days} onChange={(e) => setDays(Number(e.target.value))} className={`${field} mt-1`} style={fieldStyle} data-testid="message-days">
+              {[60, 90, 180, 365].map((d) => <option key={d} value={d}>{t('messages.daysAgo', '{{count}} days ago', { count: d })}</option>)}
+            </select>
+          </label>
+        )}
         {tags.length > 0 && (
           <label className="text-sm" style={{ color: 'var(--ink)' }}>{t('messages.withTag', 'With the tag')}
             <select value={tag} onChange={(e) => setTag(e.target.value)} className={`${field} mt-1`} style={fieldStyle}>
@@ -102,7 +125,7 @@ export default function MessageComposer({ API, auth, businessId, tags, initialKi
 
       <input value={subject} maxLength={120} onChange={(e) => setSubject(e.target.value)} className={field} style={fieldStyle}
              placeholder={t('messages.subject', 'Subject')} aria-label={t('messages.subject', 'Subject')} dir="auto" data-testid="message-subject" />
-      <textarea rows={7} maxLength={5000} value={body} onChange={(e) => setBody(e.target.value)} className={field} style={fieldStyle}
+      <textarea rows={initial ? 10 : 7} maxLength={5000} value={body} onChange={(e) => setBody(e.target.value)} className={field} style={fieldStyle}
                 placeholder={t('messages.bodyPh', 'Your message. For example: the new class schedule, holiday opening hours, or a new menu.')}
                 aria-label={t('messages.body', 'Message')} dir="auto" data-testid="message-body" />
       <div className="flex flex-wrap gap-4 text-sm" style={{ color: 'var(--ink)' }}>
@@ -114,12 +137,17 @@ export default function MessageComposer({ API, auth, businessId, tags, initialKi
         </label>
         <label className="inline-flex items-center gap-2 min-h-[44px]">
           {t('messages.lang', 'Written in')}
-          <select value={lang} onChange={(e) => setLang(e.target.value)} className="px-2 py-1 rounded-lg border text-sm bg-white" style={fieldStyle}>
+          <select value={lang} onChange={(e) => changeLang(e.target.value)} className="px-2 py-1 rounded-lg border text-sm bg-white" style={fieldStyle}>
             <option value="he">עברית</option>
             <option value="en">English</option>
           </select>
         </label>
       </div>
+      {unfilled && (
+        <p className="text-sm rounded-lg px-3 py-2" style={{ background: 'var(--gold-soft, rgba(36,175,235,.12))', color: 'var(--ink)' }} data-testid="message-unfilled">
+          {t('messages.unfilled', 'Replace the parts in [square brackets] with your own words. Sending is possible once they are gone.')}
+        </p>
+      )}
       <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>
         {t('messages.rules', 'Sent from your business name. Replies come to your email. Every email has an unsubscribe link, and anyone who unsubscribes is never emailed by you again. Only email people who bought from you or agreed to hear from you.')}
       </p>
@@ -127,7 +155,7 @@ export default function MessageComposer({ API, auth, businessId, tags, initialKi
         <button type="button" disabled={!ready || !!busy} onClick={test} className={btnOutline} style={fieldStyle} data-testid="message-test">
           {busy === 'test' && <Loader2 size={14} className="animate-spin" />} {t('messages.test', 'Send me a test')}
         </button>
-        <button type="button" disabled={!ready || !!busy || !pv || !pv.will_receive} onClick={send}
+        <button type="button" disabled={!ready || unfilled || !!busy || !pv || !pv.will_receive} onClick={send}
                 className="inline-flex items-center gap-1.5 px-5 min-h-[44px] rounded-full text-sm font-semibold disabled:opacity-50"
                 style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="message-send">
           {busy === 'send' ? <Loader2 size={14} className="animate-spin" /> : <Send size={14} />} {t('messages.send', 'Send')}
