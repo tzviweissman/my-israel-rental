@@ -77,6 +77,9 @@ for (const url of urls) {
   // the two quick taps use choices tapped above, so the first one's settled look (B) is known
   const free = taps.map((t) => t.i).slice(-2);  // now on the last one: tap the one before it, then the last again
   if (free.length === 2) {
+    // the same scroll as when the first choice was measured, so its settled look (B) lines up with these frames
+    await page.evaluate((i) => document.querySelector(`[data-motion-i="${i}"]`).scrollIntoView({ block: 'center', behavior: 'instant' }), free[0]);
+    await page.waitForTimeout(700);
     const at = Date.now() - t0;
     await page.evaluate(([a, b]) => { document.querySelector(`[data-motion-i="${a}"]`).click(); setTimeout(() => document.querySelector(`[data-motion-i="${b}"]`).click(), 250); }, free);
     await page.waitForTimeout(2200); rapid = { at };
