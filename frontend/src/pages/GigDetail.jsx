@@ -43,6 +43,7 @@ import { productPhotos, productCover } from '../utils/productPhotos';
 import { useReturnDestination, saveReturnPath } from '../hooks/useBackNavigation';
 import Breadcrumb from '../components/common/Breadcrumb';
 import ContactChannels from '../components/marketplace/ContactChannels';
+import { whatsAppHref, bookingMessage, reserveWhatsAppTab } from '../components/marketplace/WhatsAppAboutThis';
 import { prettyArea } from '../utils/areaNames';
 import BirthdayInput, { birthdayOrNull } from '../components/forms/BirthdayInput';
 
@@ -226,6 +227,8 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
       return toast.error(guest ? t('gigDetail.reachRequired', 'Add an email or a phone number so the business can reach you') : t('gigDetail.emailRequired', 'Email required'));
     }
     setSaving(true);
+    // Opened inside the tap or the browser blocks it (WhatsAppAboutThis.jsx).
+    const handoff = (gig.contact_channels || []).includes('whatsapp') ? reserveWhatsAppTab() : null;
     try {
       const { data } = await axios.post(
         `${API}/marketplace/gigs/${gig.id}/book`,
@@ -245,9 +248,20 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
         token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
       );
       toast.success(t('gigDetail.requestSent', 'Booking request sent!'));
+      // Booked on the site; now WhatsApp with the booking written in
+      // (Tzvi, 22 Oct 2026). The link is their booking page.
+      if (handoff && data?.track_path) {
+        const when = [slot ? slotDate : date, slot].filter(Boolean).join(' ');
+        handoff.go(whatsAppHref(gig.id, 'booking', bookingMessage(
+          t, `${gig.title}${tier.name ? ` - ${tier.name}` : ''}`, when, `${window.location.origin}${data.track_path}`,
+        )));
+      } else if (handoff) {
+        handoff.close();
+      }
       onClose();
       if (guest && data?.track_path) navigate(data.track_path);
     } catch (err) {
+      if (handoff) handoff.close();
       const d = err.response?.data?.detail;
       toast.error(typeof d === 'string' ? d : t('gigDetail.requestFailed', 'Failed to send request'));
     } finally {

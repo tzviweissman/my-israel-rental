@@ -50,6 +50,7 @@ import DateField, { toISODate } from '../components/common/DateField';
 import CustomFieldInputs from '../components/forms/CustomFieldInputs';
 import DiscountCodeInput, { discountOn } from '../components/forms/DiscountCodeInput';
 import NoticeBar from '../components/marketplace/NoticeBar';
+import WhatsAppAboutThis, { whatsAppHref, orderMessage, reserveWhatsAppTab } from '../components/marketplace/WhatsAppAboutThis';
 
 // How far ahead a customer can order. The server sets no limit; this keeps
 // the calendar to a sensible reach.
@@ -244,6 +245,9 @@ export default function OrderPage() {
     e.preventDefault();
     if (!canSubmit || busy) return;
     setBusy(true);
+    // Opened inside the tap, before the save, or the browser blocks it
+    // (WhatsAppAboutThis.jsx). Only when the business has WhatsApp.
+    const handoff = data.gig?.whatsapp ? reserveWhatsAppTab() : null;
     try {
       const w = windowsForDay.find((x) => `${x.start}-${x.end}` === windowKey);
       const body = {
@@ -260,13 +264,29 @@ export default function OrderPage() {
         lang: lang === 'he' ? 'he' : 'en',
       };
       const { data: res } = await axios.post(`${API}/marketplace/order-form/${gigId}/orders`, body, token ? { headers: { Authorization: `Bearer ${token}` } } : {});
-      setDone(res);
+      // Then straight to WhatsApp with the order written in, exactly as the
+      // site saved it (Tzvi, 22 Oct 2026). The order already exists here;
+      // this is the conversation about it, and the business sees it even
+      // if they never open their dashboard.
+      let waText = '';
+      if (handoff) {
+        const link = `${window.location.origin}/orders/track/${res.track_token}`;
+        try {
+          const { data: tr } = await axios.get(`${API}/marketplace/orders/track/${encodeURIComponent(res.track_token)}`);
+          waText = orderMessage(t, tr.items, link);
+        } catch {
+          waText = orderMessage(t, '', link);
+        }
+        handoff.go(whatsAppHref(gigId, 'order', waText));
+      }
+      setDone({ ...res, waText });
       window.scrollTo({ top: 0 });
       // Ordered: nothing to remind about, and the next basket is a new one.
       const bid = basketId(gigId);
       if (bid) axios.post(`${API}/marketplace/order-form/${gigId}/basket/${bid}/ordered`).catch(() => {});
       basketId(gigId, true);
     } catch (err) {
+      if (handoff) handoff.close();
       const d = err?.response?.data?.detail;
       toast.error(typeof d === 'string' ? d : t('orders.saveFailed', 'Could not save'));
     } finally {
@@ -303,6 +323,12 @@ export default function OrderPage() {
           <a href={`/orders/track/${done.track_token}`} className="inline-flex items-center gap-1.5 mt-3 px-4 min-h-[44px] rounded-full text-sm font-semibold" style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="order-track-link">
             {t('order.follow', 'Follow my order')} <ExternalLink size={14} />
           </a>
+          {/* The same message again, for when the automatic one was
+              blocked or they came back from WhatsApp without sending. */}
+          {data.gig?.whatsapp && done.waText && (
+            <WhatsAppAboutThis gigId={gigId} after="order" text={done.waText} testid="order-done-whatsapp"
+              label={t('afterOrder.orderWhatsapp', 'Message them on WhatsApp about this order')} />
+          )}
           {done.total != null && <p className="text-sm mt-4" style={{ color: 'var(--ink)' }}>{t('order.totalDue', 'Total: {{n}}', { n: money(done.total, done.currency || currency) })}</p>}
           <p className="text-xs mt-2" style={{ color: 'var(--brand-muted)' }}>
             {t('order.payNote', 'Payment goes to the store directly, not through MyIsraelRental.')}

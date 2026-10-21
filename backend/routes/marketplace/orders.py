@@ -2190,7 +2190,11 @@ async def order_form(gig_id: str):
     gig, biz = await _store_for_ordering(gig_id)
     st = biz.get("order_settings") or {}
     return {
-        "gig": {"id": gig["_id"], "title": gig.get("title"), "title_he": gig.get("title_he")},
+        "gig": {"id": gig["_id"], "title": gig.get("title"), "title_he": gig.get("title_he"),
+                # Whether placing the order should hand the customer to the
+                # business on WhatsApp with the order written in (yes or no
+                # only; the number stays behind the counting redirect).
+                "whatsapp": await _order_has_whatsapp({"gig_id": gig["_id"]})},
         "business": {
             "id": biz["_id"], "name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url"), "slug": biz.get("slug"),
             "birthday_on": bool((biz.get("birthday_settings") or {}).get("on")),
