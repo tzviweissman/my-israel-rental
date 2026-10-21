@@ -473,6 +473,48 @@
   .chrome__mark { display: inline-flex; align-items: center; min-height: 40px; }
   .maplink { display: inline-flex; align-items: center; min-height: 40px; }
 
+
+  /* ====== WORLDS (rule 3t): full-bleed picture scenes, plain rests, a real footer ====== */
+  .scene { position: relative; min-height: 100svh; display: grid; align-items: center; overflow: clip; }
+  .scene__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
+  .scene > .ember { z-index: 0; }
+  .scene__shade { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+  .scene__shade--left { background: linear-gradient(to right, rgba(20,16,12,.92) 0%, rgba(20,16,12,.80) 34%, rgba(20,16,12,.34) 62%, transparent 82%); }
+  .scene__shade--bottom { background: linear-gradient(to top, rgba(20,16,12,.96) 0%, rgba(20,16,12,.90) 38%, rgba(20,16,12,.62) 62%, rgba(20,16,12,.2) 82%, transparent 100%); }
+  .scene > .scene__copy { position: relative; z-index: 2; }
+  .scene .sc-stack { max-width: 34rem; }
+  .scene .sc-lede { margin-block-start: var(--sc-4); }
+  .scene .sc-body { margin-block-start: var(--sc-4); color: #D8CEBC; font-size: var(--sc-t-base); max-width: 40ch; }
+  .scene--shop { color: #EFE9DC; --sc-ink: #EFE9DC; --sc-ink-soft: #CFC4B2; --sc-accent: #C9A227; background: var(--night); align-items: end; }
+  .scene__copy--end { padding-block-end: clamp(3rem, 10vh, 7rem); }
+  .scene--shop .sc-lede { color: #EFE9DC; }
+  .scene__row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sc-5); margin-block-start: var(--sc-5); }
+  .scene__row .cta { margin-block-start: 0; }
+  .maplink--light { color: #EFE9DC; font-weight: 600; text-underline-offset: .22em; }
+  .making { padding: 0; }
+  .details { padding-block: var(--sc-section); background: #fff; --sc-canvas: #fff; }
+  .details__grid { display: grid; gap: var(--sc-7); align-items: start; }
+  @media (min-width: 880px) { .details__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: var(--sc-9); } }
+  .details .facts { margin-block-start: 0; }
+  .chrome:not(.is-solid) { background: linear-gradient(to bottom, rgba(20,16,12,.78), rgba(20,16,12,.4) 70%, transparent); }
+  main .cta { --sc-accent: #C9A227; --sc-accent-ink: #23201B; }
+  .counter .rail__end .cta { margin-block-start: var(--sc-5); }
+  .sitefoot { padding-block: var(--sc-section) var(--sc-6); background: var(--night); color: #EFE9DC; --sc-ink: #EFE9DC; --sc-ink-soft: #CFC4B2; }
+  .sitefoot .sitefoot__big { font-family: var(--font-head); font-size: clamp(2.4rem, 6.4vw, 5.6rem); line-height: 1.04; letter-spacing: var(--sc-track-snug); margin: 0; max-width: 14ch; text-wrap: balance; }
+  .sitefoot .sitefoot__big em { font-style: italic; color: #C9A227; }
+  .sitefoot__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--sc-6); margin-block-start: var(--sc-8, 5rem); padding-block-start: var(--sc-6); border-block-start: 1px solid rgba(239,233,220,.22); }
+  .sitefoot h3 { font-family: var(--font-head); font-size: var(--sc-t-xl); font-weight: 500; color: #EFE9DC; margin: 0 0 var(--sc-3); }
+  .sitefoot p { margin: 0 0 var(--sc-1); color: #EFE9DC; font-size: var(--sc-t-base); }
+  .sitefoot a { display: block; color: #EFE9DC; padding-block: .35rem; text-underline-offset: .22em; }
+  .sitefoot__small { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--sc-3); margin-block-start: var(--sc-7); font-size: var(--sc-t-sm); }
+  .sitefoot .sitefoot__small, .sitefoot .sitefoot__small span { color: #CFC4B2; }
+  .sitefoot__small a { display: inline; padding: 0; }
+  @media (max-width: 700px) {
+    .scene { min-height: 92svh; }
+    .scene__shade--left { background: linear-gradient(to top, rgba(20,16,12,.94) 0%, rgba(20,16,12,.84) 38%, rgba(20,16,12,.3) 70%, transparent 88%); }
+    .making.scene { align-items: end; padding-block-end: var(--sc-7); }
+    .making .sc-display { font-size: var(--sc-t-2xl); }
+  }
 </style>
 </head>
 <body>
@@ -489,7 +531,7 @@
   </nav>
   <div class="chrome__right">
     <time class="clock" id="clock" datetime="04:00" aria-label="Time of morning">04:00</time>
-    <button class="bag" id="bagBtn" type="button" aria-haspopup="dialog">Order <span class="bag__n" id="bagN" aria-label="items in the basket">0</span></button>
+    <button class="bag" id="bagBtn" type="button" aria-haspopup="dialog">Start your order <span class="bag__n" id="bagN" aria-label="items in the basket">0</span></button>
     <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menuPanel">Menu</button>
     <button class="dir-toggle dir-toggle--bar" id="dirToggle" type="button" data-dir>עברית</button>
   </div>
@@ -515,18 +557,17 @@
     </div>
   </section>
 
-  <!-- 2 · INTIMACY · the making -->
-  <section class="making sc-section night" data-sc-act="flow" aria-label="How it is made">
-    <div class="sc-wrap split">
+  <!-- 2 · INTIMACY · the making. A full-bleed picture of the hands, words on it. -->
+  <section class="making scene night" data-sc-act="flow" aria-label="How it is made">
+    <img class="scene__img" src="assets/hands.jpg" width="1000" height="1241" alt="Flour-dusted hands shaping a round of dough on a worn wooden bench">
+    <div class="ember" aria-hidden="true"></div>
+    <div class="scene__shade scene__shade--left" aria-hidden="true"></div>
+    <div class="sc-wrap scene__copy">
       <div class="sc-stack" data-sc-in data-sc-stagger="70">
-        <h2 class="sc-display sc-display--md">Four things go in.</h2>
-        <p class="sc-body">Flour, water, salt, and a starter that has been fed every day since the year the shop opened. Nothing else, which is why the list on the wall has never needed a second page.</p>
-        <p class="sc-body">Batya opened with one oven and her mother's proportions. The proportions have not changed. The oven has, twice.</p>
+        <h2 class="sc-display sc-display--lg">Four things go in.</h2>
+        <p class="sc-lede">Flour, water, salt, and a starter fed every day since the year the shop opened.</p>
+        <p class="sc-body">Nothing else, which is why the list on the wall has never needed a second page. Batya opened with one oven and her mother's proportions. The proportions have not changed. The oven has, twice.</p>
       </div>
-      <figure class="frame" data-sc-reveal="up" data-sc-reveal-at="0.14 0.52">
-        <img src="assets/hands.jpg" width="1000" height="1241" alt="Flour-dusted hands shaping a round of dough on a worn wooden bench">
-        <div class="ember" aria-hidden="true"></div>
-      </figure>
     </div>
   </section>
 
@@ -544,7 +585,6 @@
 
   <!-- 4 · HELD BREATH · 06:40 · authored silence -->
   <section class="bake night" id="bake" data-sc-act="flow" aria-label="The bake">
-    <img class="bake__img" src="assets/rack.jpg" width="1600" height="1073" alt="" aria-hidden="true">
     <div class="sc-wrap" data-sc-in>
       <p class="sc-lede">Steam for the first ten minutes. Then you wait.</p>
     </div>
@@ -609,31 +649,45 @@
 
         <div class="rail__end">
           <p class="sc-lede">Shabbos orders close Thursday at two.</p>
+          <button class="cta" type="button" data-open-basket>Start your order</button>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- 7 · WARMTH · come in -->
-  <section class="visit sc-section day" id="visit" data-sc-act="flow" aria-label="Visit">
-    <div class="sc-wrap split split--photo-first">
-      <figure class="frame" data-sc-reveal="left" data-sc-reveal-at="0.12 0.5">
-        <img src="assets/shopfront.jpg" width="1400" height="1128" alt="The bakery's stone shopfront on Emek Refaim, loaves in the window">
-      </figure>
+  <!-- 7 · WARMTH · come in. The shopfront, edge to edge, the address on it. -->
+  <section class="visit scene scene--shop" id="visit" data-sc-act="flow" aria-label="Visit">
+    <img class="scene__img" src="assets/shopfront.jpg" width="1400" height="1128" alt="The bakery's stone shopfront on Emek Refaim, loaves in the window">
+    <div class="scene__shade scene__shade--bottom" aria-hidden="true"></div>
+    <div class="sc-wrap scene__copy scene__copy--end">
       <div class="sc-stack" data-sc-in data-sc-stagger="70">
-        <h2 class="sc-display sc-display--md">Come in.</h2>
-        <dl class="facts">
-          <div><dt>Hours</dt><dd>Sunday to Thursday, 07:00 to 19:00<br>Friday, 07:00 to 14:00</dd></div>
-          <div><dt>Address</dt><dd>Emek Refaim 41, Jerusalem<br><a class="maplink" href="https://www.google.com/maps/search/?api=1&amp;query=Emek+Refaim+41+Jerusalem" target="_blank" rel="noopener">Open in Maps</a></dd></div>
-          <div><dt>Languages</dt><dd>Hebrew, English</dd></div>
-          <div><dt>Delivery</dt><dd>Across Jerusalem on orders over ₪120</dd></div>
-          <div><dt>Notice</dt><dd>Two days for platters and large orders</dd></div>
-        </dl>
+        <h2 class="sc-display sc-display--xl">Come in.</h2>
+        <p class="sc-lede">Emek Refaim 41, Jerusalem. Open from 07:00.</p>
+        <div class="scene__row">
+          <button class="cta" type="button" data-open-basket>Start your order</button>
+          <a class="maplink maplink--light" href="https://www.google.com/maps/search/?api=1&amp;query=Emek+Refaim+41+Jerusalem" target="_blank" rel="noopener">Open in Maps</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 7b · REST · the plain facts, on a calm ground between two pictures -->
+  <section class="details sc-section day" id="details" data-sc-act="flow" aria-label="Good to know">
+    <div class="sc-wrap details__grid">
+      <div class="sc-stack" data-sc-in data-sc-stagger="70">
+        <h2 class="sc-display sc-display--md">Good to know.</h2>
         <p class="hechsher">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z"/><path d="m9 12 2 2 4-4"/></svg>
           Kosher, Rabbanut Yerushalayim
         </p>
       </div>
+      <dl class="facts" data-sc-in>
+        <div><dt>Hours</dt><dd>Sunday to Thursday, 07:00 to 19:00<br>Friday, 07:00 to 14:00</dd></div>
+        <div><dt>Address</dt><dd>Emek Refaim 41, Jerusalem</dd></div>
+        <div><dt>Languages</dt><dd>Hebrew, English</dd></div>
+        <div><dt>Delivery</dt><dd>Across Jerusalem on orders over ₪120</dd></div>
+        <div><dt>Notice</dt><dd>Two days for platters and large orders</dd></div>
+      </dl>
     </div>
   </section>
 
@@ -648,13 +702,22 @@
         <p class="sc-lede">Tell us what you want and when you are coming. It will be wrapped and waiting with your name on it.</p>
         <button class="cta" type="button" data-open-basket data-sc-magnet="0.26" data-sc-cue="0.06" data-sc-rise="0">Start your order</button>
       </div>
-      <footer class="foot">
-        <span>Lechem Emek, Emek Refaim 41, Jerusalem</span>
-        <span class="foot__links"><a href="#counter">The counter</a><a href="#visit">Visit</a><a href="#top">Back to the top</a></span>
-        <span>Powered by <a href="#top">MyIsraelRental</a></span>
-      </footer>
     </div>
   </section>
+
+  <footer class="sitefoot night" aria-label="Lechem Emek">
+    <div class="sc-wrap">
+      <p class="sitefoot__big">Flour at four. <em>Bread by seven.</em></p>
+      <button class="cta" type="button" data-open-basket>Start your order</button>
+      <div class="sitefoot__cols">
+        <div><h3>The shop</h3><a href="#counter">The counter</a><a href="#visit">Come in</a><a href="#details">Good to know</a></div>
+        <div><h3>Find us</h3><p>Emek Refaim 41, Jerusalem</p><a href="https://www.google.com/maps/search/?api=1&amp;query=Emek+Refaim+41+Jerusalem" target="_blank" rel="noopener">Open in Maps</a></div>
+        <div><h3>Hours</h3><p>Sunday to Thursday, 07:00 to 19:00</p><p>Friday, 07:00 to 14:00</p></div>
+        <div><h3>Kosher</h3><p>Rabbanut Yerushalayim</p></div>
+      </div>
+      <p class="sitefoot__small"><span>Lechem Emek, since 1998</span><span>Powered by <a href="#top">MyIsraelRental</a></span></p>
+    </div>
+  </footer>
 
 </main>
 
