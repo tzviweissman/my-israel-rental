@@ -1,0 +1,223 @@
+{
+ "business": {
+  "_id": "b6c83b18-f01f-41b7-af91-bf2a4c84febd",
+  "owner_user_id": "08ab3d98-bbf8-4a43-856e-0d99dd4d88fd",
+  "name": "Ls Fruit Platter",
+  "name_he": null,
+  "name_en": null,
+  "source_lang": null,
+  "slug": "ls-fruit-platter",
+  "logo_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1792422503/myisraelrental/mq19ri3i7yoqmqhjdgkc.jpg",
+  "description": "Fruit platters for your home and events",
+  "description_he": "",
+  "description_en": null,
+  "categories": [],
+  "areas": [
+   "jerusalem"
+  ],
+  "serves_nationwide": false,
+  "verified": false,
+  "verified_at": null,
+  "hours": null,
+  "languages": [],
+  "founded_year": null,
+  "delivery_note": null,
+  "lead_time": null,
+  "payment_note": "Cash,  zelle, israli bank transfer",
+  "kosher_certification": {
+   "body": "בד\"ץ העדה החרדית או שארית",
+   "logo_url": null,
+   "certificate_url": null
+  },
+  "license_number": null,
+  "cover_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1792434306/myisraelrental/uy5ljcbylw9devplv6wg.jpg",
+  "accent": "stone",
+  "payment_links": [],
+  "active": true,
+  "created_at": "2026-10-19T15:14:52.666681+00:00",
+  "updated_at": "2026-10-19T18:26:36.039120+00:00",
+  "brand_color": "#B8925A",
+  "brand_fonts": {
+   "heading": "amatic-sc",
+   "body": "open-sans"
+  },
+  "collections": [],
+  "notice": null,
+  "page": {
+   "theme": {
+    "palette": "stone",
+    "type": "serif",
+    "density": "balanced",
+    "imagery": "grid",
+    "price_prominence": "normal",
+    "motion": "subtle"
+   },
+   "blocks": [
+    {
+     "id": "catalog",
+     "type": "services",
+     "variant": "grid",
+     "props": {
+      "heading": "",
+      "source": "all",
+      "collection_id": null,
+      "ids": [],
+      "limit": 12
+     },
+     "hidden": false
+    },
+    {
+     "id": "facts",
+     "type": "facts",
+     "variant": "list",
+     "props": {},
+     "hidden": false
+    }
+   ]
+  },
+  "page_brief": {
+   "showing": null,
+   "action": null,
+   "audience": null,
+   "pricing": null,
+   "strengths": [],
+   "note": ""
+  },
+  "pages": [
+   {
+    "id": "page-1",
+    "slug": "gallery",
+    "title": "Gallery",
+    "blocks": [
+     {
+      "id": "gallery-1",
+      "type": "gallery",
+      "variant": "carousel",
+      "props": {
+       "images": [
+        "listing:cbf66136-5504-4bf9-9c41-837cc9bd2d37"
+       ]
+      },
+      "hidden": false
+     },
+     {
+      "id": "hero-1",
+      "type": "hero",
+      "variant": "band",
+      "props": {
+       "image": null,
+       "title": "Fruit Platters by LS",
+       "accent_word": "",
+       "lede": ""
+      },
+      "hidden": false
+     },
+     {
+      "id": "services-1",
+      "type": "services",
+      "variant": "grid",
+      "props": {
+       "heading": "",
+       "source": "all",
+       "collection_id": null,
+       "ids": [],
+       "limit": 12
+      },
+      "hidden": false
+     }
+    ]
+   }
+  ],
+  "pinned_service_ids": [
+   "cbf66136-5504-4bf9-9c41-837cc9bd2d37"
+  ],
+  "by_appointment": false
+ },
+ "listings": [
+  {
+   "_id": "cbf66136-5504-4bf9-9c41-837cc9bd2d37",
+   "provider_user_id": "08ab3d98-bbf8-4a43-856e-0d99dd4d88fd",
+   "provider_id": "953190f7-ef04-432d-b5ab-0d4140b2dfca",
+   "business_id": "b6c83b18-f01f-41b7-af91-bf2a4c84febd",
+   "title": "Fruit platter",
+   "title_he": "מגש פירות",
+   "title_en": null,
+   "source_lang": "en",
+   "category": "events-catering",
+   "subcategory": null,
+   "description": "Fruit platters for your home and events",
+   "description_he": "מגשי פירות לבית ולאירועים שלכם",
+   "description_en": null,
+   "gig_type": "deliverable",
+   "tiers": [
+    {
+     "name": "Small",
+     "price": 300.0,
+     "currency": "ILS",
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1792434514/myisraelrental/hrbtnkvpghmbcuv12a1a.jpg"
+     ]
+    },
+    {
+     "name": "Medium",
+     "price": 400.0,
+     "currency": "ILS",
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1792422695/myisraelrental/cd2pwav56eukxtzucaso.jpg"
+     ]
+    },
+    {
+     "name": "Large",
+     "price": 500.0,
+     "currency": "ILS",
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1792422765/myisraelrental/zxnbqlb9tyg0z82jzyej.jpg"
+     ]
+    },
+    {
+     "name": "Extra large",
+     "price": 850.0,
+     "currency": "ILS",
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1792422812/myisraelrental/uhhpgwjozadmyi8w9zfx.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1792422849/myisraelrental/byowsanyyqnwuj0qsomz.jpg"
+     ]
+    }
+   ],
+   "products": [],
+   "weekly_availability": null,
+   "slot_duration_minutes": null,
+   "team": [],
+   "rebook_after_weeks": null,
+   "enable_date_booking": true,
+   "gallery": [
+    "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1792434603/myisraelrental/zzxm4ymscawtakiffv0e.jpg"
+   ],
+   "booking_mode": "whatsapp",
+   "whatsapp_confirmed": true,
+   "contact_email": null,
+   "whatsapp": "+972587298718",
+   "area": "Jerusalem",
+   "faqs": [],
+   "discount": null,
+   "status": "published",
+   "created_at": "2026-10-19T15:14:53.785029+00:00",
+   "updated_at": "2026-10-19T18:30:36.742310+00:00",
+   "geocode_miss": false,
+   "geocoded_at": 1792422894.243902,
+   "lat": 31.7788472,
+   "lng": 35.2257856,
+   "highlights": [
+    "kosher"
+   ]
+  }
+ ]
+}

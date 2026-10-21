@@ -1,0 +1,91 @@
+{
+ "business": {
+  "_id": "db9cba64-5a2f-4da3-a2f3-19fd0c88fc32",
+  "owner_user_id": "520b8454-7dc1-4e2e-9913-c89bc2fbbd16",
+  "name": "Ravit hen",
+  "name_he": null,
+  "name_en": null,
+  "source_lang": null,
+  "slug": "ravit-hen",
+  "logo_url": null,
+  "description": "RS is a premium modest activewear brand for women, combining elegance, comfort, and functionality. We offer stylish sports skirts and activewear designed for movement and everyday wear. Visit our store at 31 King George Street, Jerusalem.",
+  "description_he": "RS היא מותג בגדי ספורט צנועים פרימיום לנשים, המשלב אלגנטיות, נוחות ותפקודיות. אנו מציעים חצאיות ספורט ובגדי אקטיבוור מעוצבים לתנועה ולשימוש יומיומי. בקרו בחנות שלנו ברחוב King George 31, ירושלים.",
+  "description_en": null,
+  "categories": [],
+  "areas": [
+   "jerusalem"
+  ],
+  "serves_nationwide": false,
+  "verified": false,
+  "verified_at": null,
+  "hours": null,
+  "languages": [],
+  "founded_year": null,
+  "delivery_note": null,
+  "lead_time": null,
+  "payment_note": null,
+  "kosher_certification": null,
+  "license_number": null,
+  "cover_url": null,
+  "accent": "stone",
+  "payment_links": [],
+  "active": true,
+  "created_at": "2026-09-08T14:11:48.398925+00:00",
+  "updated_at": "2026-09-08T14:11:48.398925+00:00"
+ },
+ "listings": [
+  {
+   "_id": "ffb66390-ee89-48c0-9b8d-f707057d64e4",
+   "provider_user_id": "520b8454-7dc1-4e2e-9913-c89bc2fbbd16",
+   "provider_id": "9aaa9121-6b57-4ea4-a7f9-e0406d39c641",
+   "business_id": "db9cba64-5a2f-4da3-a2f3-19fd0c88fc32",
+   "title": "RS Modest Activewear – Women’s Clothing Store",
+   "title_he": "RS Modest Activewear – חנות ביגוד נשים",
+   "title_en": null,
+   "source_lang": "en",
+   "category": "shops-products",
+   "subcategory": null,
+   "description": "RS is a premium modest activewear brand for women, combining elegance, comfort, and functionality. We offer stylish sports skirts and activewear designed for movement and everyday wear. Visit our store at 31 King George Street, Jerusalem.",
+   "description_he": "RS היא מותג בגדי ספורט צנועים פרימיום לנשים, המשלב אלגנטיות, נוחות ותפקודיות. אנו מציעים חצאיות ספורט ובגדי אקטיבוור מעוצבים לתנועה ולשימוש יומיומי. בקרו בחנות שלנו ברחוב King George 31, ירושלים.",
+   "description_en": null,
+   "gig_type": "deliverable",
+   "tiers": [
+    {
+     "name": "Premium Modest Sports Skirt",
+     "price": 320.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "    Premium sports skirt with built-in leggings",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1788876535/myisraelrental/cg9d4bakqlw1gpo6b8cl.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1788876548/myisraelrental/xhf5mr9schfgapcpexdr.png",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1788876572/myisraelrental/insrufnos55zr0cpgfnd.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1788876573/myisraelrental/fr5wmlznxpxvopnxbbdg.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1788876574/myisraelrental/hocnnnjxwvbnzicpivqc.jpg"
+     ]
+    }
+   ],
+   "products": [],
+   "weekly_availability": null,
+   "slot_duration_minutes": null,
+   "enable_date_booking": true,
+   "gallery": [],
+   "booking_mode": "whatsapp",
+   "whatsapp_confirmed": true,
+   "contact_email": "ravitandshifra@gmail.com",
+   "whatsapp": "+972546152968",
+   "area": "King George 31 Jerusalem",
+   "faqs": [],
+   "discount": null,
+   "status": "published",
+   "created_at": "2026-09-08T14:11:48.563887+00:00",
+   "updated_at": "2026-09-08T14:11:48.563887+00:00",
+   "geocode_miss": false,
+   "geocoded_at": 1788876709.890041,
+   "lat": 31.7798706,
+   "lng": 35.2158167
+  }
+ ]
+}

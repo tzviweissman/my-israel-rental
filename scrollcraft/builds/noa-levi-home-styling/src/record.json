@@ -1,0 +1,135 @@
+{
+ "business": {
+  "_id": "6981e93f-73ba-4f4c-b2d9-c5374994f9fe",
+  "owner_user_id": "2c8fe854-f0ef-4917-b182-40d36ab85979",
+  "name": "NOA LEVI",
+  "name_he": null,
+  "name_en": null,
+  "source_lang": null,
+  "slug": "noa-levi",
+  "logo_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1791746802/myisraelrental/tooiwh0mxaagx4mdgmj5.jpg",
+  "description": "Hi, I’m Noa Levy.\nLet me tell you a little about how I work.\nWhen I come in to sort and organize, it is very important to me to focus on practicality and ensure the result is clean, tidy, and easy to use.\nDuring the session itself, I bring along storage solutions and boxes tailored to your needs—\nones that will help maintain the order over time.\nSee you soon.",
+  "description_he": "התחום שלי  הוא הום סטיילינג  ולהביא פתרונות סדר וארגון לכל חלל בבית: \nארונות בגדים , חדרי משחקים , ספריות , מטבח , סלון ופשוט כל מה שצריך סדר!\nאני מביאה פתרונות אחסון פרקטים , נוחים ובעיקר הכי חשוב! מלמדת אתכם איך אפשר בקלות לשמור על זה לאורך זמן.",
+  "description_en": null,
+  "categories": [],
+  "areas": [
+   "jerusalem",
+   "bet-shemesh",
+   "tel-aviv",
+   "modiin",
+   "herzliya"
+  ],
+  "serves_nationwide": true,
+  "verified": false,
+  "verified_at": null,
+  "hours": "09:00-23:00",
+  "languages": [],
+  "founded_year": null,
+  "delivery_note": null,
+  "lead_time": null,
+  "payment_note": null,
+  "kosher_certification": null,
+  "license_number": null,
+  "cover_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1791747857/myisraelrental/yei8sqibt3xzrwtmigwg.jpg",
+  "accent": "stone",
+  "payment_links": [],
+  "active": true,
+  "created_at": "2026-10-11T19:38:29.764765+00:00",
+  "updated_at": "2026-10-11T19:45:33.117774+00:00",
+  "collections": [],
+  "page": {
+   "theme": {
+    "palette": "stone",
+    "type": "serif",
+    "density": "balanced",
+    "imagery": "grid",
+    "price_prominence": "normal",
+    "motion": "subtle"
+   },
+   "blocks": [
+    {
+     "id": "facts",
+     "type": "facts",
+     "variant": "list",
+     "props": {}
+    },
+    {
+     "id": "catalog",
+     "type": "services",
+     "variant": "grid",
+     "props": {
+      "heading": "",
+      "source": "all",
+      "collection_id": null,
+      "ids": [],
+      "limit": 12
+     }
+    }
+   ]
+  },
+  "page_brief": {
+   "showing": "one-thing",
+   "action": "message",
+   "audience": "everyone",
+   "pricing": "value",
+   "strengths": [
+    "quality"
+   ],
+   "note": ""
+  },
+  "pinned_service_ids": []
+ },
+ "listings": [
+  {
+   "_id": "5885df8d-7bd6-43d9-af01-273ec2108a0b",
+   "provider_user_id": "2c8fe854-f0ef-4917-b182-40d36ab85979",
+   "provider_id": "3fcec38b-4a86-42d4-9321-10d999624e2b",
+   "business_id": "6981e93f-73ba-4f4c-b2d9-c5374994f9fe",
+   "title": "HOME STYLING & ORGANIZING",
+   "title_he": "עיצוב וארגון הבית",
+   "title_en": null,
+   "source_lang": "en",
+   "category": "home-services-repair",
+   "subcategory": "interior-design",
+   "description": "Hi, I’m Noa Levy.\nLet me tell you a little about how I work.\nWhen I come in to sort and organize, it is very important to me to focus on practicality and ensure the result is clean, tidy, and easy to use.\nDuring the session itself, I bring along storage solutions and boxes tailored to your needs—\nones that will help maintain the order over time.\nSee you soon.",
+   "description_he": "היי, אני נועה לוי.\nאספר לכם קצת על שיטת העבודה שלי.\nכשאני מגיעה למיין ולארגן, חשוב לי מאוד להתמקד בפרקטיות ולהבטיח שהתוצאה תהיה נקייה, מסודרת ונוחה לשימוש.\nבמהלך הפגישה עצמה, אני מביאה איתי פתרונות אחסון וקופסאות המותאמים לצרכים שלכם—\nכאלה שיעזרו לשמור על הסדר לאורך זמן.\nנתראה בקרוב.",
+   "description_en": null,
+   "gig_type": "deliverable",
+   "tiers": [
+    {
+     "name": "The price is 160 per hour [excluding accessories].",
+     "price": 160.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1791747349/myisraelrental/rxhjymyp0kijj8sevmlk.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1791747349/myisraelrental/bhyhdjz1l7wc0eydzso5.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1791747370/myisraelrental/kh1x3pnh0tzgvel9i01p.jpg"
+     ]
+    }
+   ],
+   "products": [],
+   "weekly_availability": null,
+   "slot_duration_minutes": null,
+   "enable_date_booking": false,
+   "gallery": [],
+   "booking_mode": "whatsapp",
+   "whatsapp_confirmed": true,
+   "contact_email": null,
+   "whatsapp": "+972556730875",
+   "area": "Jerusalem - BET SHEMESH ",
+   "faqs": [],
+   "discount": null,
+   "status": "published",
+   "created_at": "2026-10-11T19:38:30.670305+00:00",
+   "updated_at": "2026-10-11T19:38:30.670305+00:00",
+   "geocode_miss": false,
+   "geocoded_at": 1791747511.7606182,
+   "lat": 31.746214,
+   "lng": 34.9886825
+  }
+ ]
+}

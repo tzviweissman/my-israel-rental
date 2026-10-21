@@ -1,0 +1,224 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Book a session · Noa Levi, home styling and organizing</title>
+<meta name="description" content="Choose closet organizing, home organizing, home styling or personal shopping, how many hours, then a day and time. ₪160 an hour with Noa Levi.">
+<meta property="og:title" content="Book a session · Noa Levi, home styling and organizing">
+<meta property="og:description" content="Choose closet organizing, home organizing, home styling or personal shopping, how many hours, then a day and time. ₪160 an hour with Noa Levi.">
+<meta property="og:image" content="https://myisraelrental.com/pages/noa-levi-home-styling/assets/og.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=Hanken+Grotesk:wght@400;500;600;700&family=Heebo:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body class="no-js" data-page="book">
+<header class="top" id="top">
+  <a class="mark" href="index.html" aria-label="Noa Levi, home"><img src="assets/logo-mark.webp" alt="" width="46" height="38"><span>Noa Levi</span></a>
+  <nav class="nav" id="nav" aria-label="Noa Levi"><a href="index.html">Home</a><a href="book.html" aria-current="page">Book</a><a href="contact.html">Contact</a></nav>
+  <div class="top-r">
+    <a class="btn-line" href="book.html">Book a session</a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+  </div>
+</header>
+<main>
+  <form id="form" novalidate>
+  <section class="stage" id="pick" aria-labelledby="h-book">
+    <div class="wrap st-grid">
+      <div class="st-ph" id="stph" aria-label="Our work, before and after">
+        <figure><p class="chip">Before</p><img class="on" data-k="drawer" src="assets/drawer-before.webp" alt="A clothes drawer packed with loose clothes" width="565" height="565"><img data-k="linen" src="assets/linen-before.webp" alt="A linen cupboard with towels and bedding stacked unevenly" width="560" height="630" loading="lazy"></figure>
+        <figure><p class="chip">After</p><img class="on" data-k="drawer" src="assets/drawer-after.webp" alt="The same drawer with clothes rolled in separate compartments" width="565" height="565"><img data-k="linen" src="assets/linen-after.webp" alt="The same cupboard with towels and sheets folded in neat stacks" width="640" height="950" loading="lazy"></figure>
+        <p class="st-cap" id="st-cap">Our work: a clothes drawer</p>
+      </div>
+      <div class="st-info">
+        <ol class="osteps" aria-label="Booking steps"><li class="is-now" aria-current="step"><button type="button" data-go="1">Step 1: Your session</button></li><li><button type="button" data-go="2">Step 2: Day and time</button></li><li><button type="button" data-go="3">Step 3: Your details</button></li></ol>
+        <h1 id="h-book">Book a session</h1>
+        <p class="st-pr"><b><span class="sym">₪</span>160</b> an hour, accessories not included</p>
+        <div id="w-svc"><p class="f" id="svc-l">What would you like?</p><div class="opts" id="svcs" role="radiogroup" aria-labelledby="svc-l"><label class="opt"><input type="radio" name="svc" value="closet"><span class="box">Closet organizing</span></label><label class="opt"><input type="radio" name="svc" value="home"><span class="box">Home organizing</span></label><label class="opt"><input type="radio" name="svc" value="styling"><span class="box">Home styling</span></label><label class="opt"><input type="radio" name="svc" value="shopping"><span class="box">Personal shopping</span></label></div><p class="err" id="e-svc"></p></div>
+        <p class="f" id="hrs-l">How many hours?</p>
+        <div class="hrs">
+          <div class="stepper" role="group" aria-labelledby="hrs-l"><button type="button" id="h-dn" aria-label="One hour less">&minus;</button><div class="rollwin" aria-live="polite" aria-label="Hours"><div class="roll" id="roll"><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span></div></div><button type="button" id="h-up" aria-label="One hour more">+</button></div>
+          <div class="tray" id="tray" aria-hidden="true"><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i><i><b></b></i></div>
+        </div>
+        <div class="st-end"><button class="btn st-next" type="submit"><span id="next1">Continue to day and time</span></button></div>
+      </div>
+    </div>
+  </section>
+  <section class="sec after" id="book" aria-label="Day, time and your details" hidden>
+    <div class="wrap">
+      <ol class="osteps" aria-label="Booking steps"><li class="is-done"><button type="button" data-go="1">Step 1: Your session</button></li><li class="is-now" aria-current="step"><button type="button" data-go="2">Step 2: Day and time</button></li><li><button type="button" data-go="3">Step 3: Your details</button></li></ol>
+      <div class="form">
+        <div>
+          <div class="card ostep" data-s="2">
+            <h2>Day and time</h2>
+            <p class="f" id="city-l">Where</p>
+            <div class="opts" id="cities" role="radiogroup" aria-labelledby="city-l"><label class="opt"><input type="radio" name="city" value="Jerusalem"><span class="box">Jerusalem</span></label><label class="opt"><input type="radio" name="city" value="Beit Shemesh"><span class="box">Beit Shemesh</span></label></div><p class="err" id="e-city"></p>
+            <div id="w-day"><label class="f" for="day" style="display:block;font-weight:600;font-size:.95rem;margin:.9rem 0 .35rem">Day</label><input class="fld" id="day" type="date"><p class="err" id="e-day"></p></div>
+            <div id="w-time"><p class="f" id="time-l">Start time</p><div class="times" id="times" role="radiogroup" aria-labelledby="time-l"><p class="hint">Choose a day first.</p></div><p class="err" id="e-time"></p></div>
+          </div>
+          <div class="card ostep" data-s="3" hidden>
+            <h2>Your details</h2>
+            <div id="w-me"><label class="f" for="me" style="display:block;font-weight:600;font-size:.95rem;margin:.9rem 0 .35rem">Your name</label><input class="fld" id="me" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
+            <div id="w-ph"><label class="f" for="ph" style="display:block;font-weight:600;font-size:.95rem;margin:.9rem 0 .35rem">Your phone</label><input class="fld" id="ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
+            <label class="f" for="note" style="display:block;font-weight:600;font-size:.95rem;margin:.9rem 0 .35rem">What needs organizing? (optional)</label><textarea class="fld" id="note" rows="1" maxlength="400"></textarea>
+          </div>
+        </div>
+        <aside class="card sum" aria-live="polite">
+          <h3 id="sum-h">Your session</h3>
+          <ul id="sum"><li><span>Nothing chosen yet</span></li></ul>
+          <div class="total"><span>Total</span><span id="total">₪0</span></div>
+          <p class="assure">Nothing to pay on this page. We confirm your time on WhatsApp.</p>
+          <button class="btn" id="send" type="submit" style="width:100%"><span id="send-l">Continue to your details</span></button>
+          <button class="back" id="back" type="button">Back</button>
+          <p class="note" id="send-note">Next: your name and phone.</p>
+        </aside>
+      </div>
+    </div>
+  </section>
+  </form>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg><p><b>Session written out</b>Press send in WhatsApp and we will confirm your time.</p></div>
+  <section class="close" aria-label="A home you love, in order.">
+    <div class="wrap">
+      <div>
+        <h2>A home you love, in order.</h2>
+        <p>WhatsApp or call <a href="https://wa.me/972556730875" target="_blank" rel="noopener">+972 55 673 0875</a><br>Email <a href="mailto:noare2133@gmail.com">noare2133@gmail.com</a></p>
+      </div>
+      <a class="btn" href="book.html">Book a session <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>
+    </div>
+    <p class="giant" aria-hidden="true">Noa Levi</p>
+  </section>
+</main>
+<footer class="foot"><nav aria-label="Pages"><a href="index.html">Home</a> · <a href="book.html">Book</a> · <a href="contact.html">Contact</a></nav>Noa Levi, Home Styling &amp; Organizing, Jerusalem and Beit Shemesh · on <a href="/">MyIsraelRental</a>, free to list, no commission</footer>
+
+<div class="bar" id="bar" aria-hidden="true">
+  <p class="p"><b>₪160 an hour</b>Jerusalem and Beit Shemesh</p>
+  <a class="btn" href="book.html" tabindex="-1">Book a session</a>
+</div>
+<script src="site.js"></script>
+<script>
+(function () {
+  var WA = '972556730875', RATE = 160, MAXH = 8;
+  var SERVICES = { closet: 'Closet organizing', home: 'Home organizing', styling: 'Home styling', shopping: 'Personal shopping' };
+  var STAGE = { closet: 'drawer', home: 'linen', styling: null, shopping: null };
+  var CAP = { drawer: "Our work: a clothes drawer", linen: "Our work: a linen cupboard" };
+  var qs = new URLSearchParams(location.search), svc = SERVICES[qs.get('svc')] ? qs.get('svc') : '', hrs = 2, time = '', step = 1, phase = '';
+  if (qs.toString()) history.replaceState(null, '', location.pathname);
+  var $ = function (id) { return document.getElementById(id); };
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function hhmm(m) { return pad(Math.floor(m / 60)) + ':' + pad(m % 60); }
+  var today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  $('day').min = today;
+  function nice(d) { return new Date(d + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }); }
+  function v(id) { return ($(id).value || '').trim(); }
+  function city() { var c = document.querySelector('input[name=city]:checked'); return c ? c.value : ''; }
+  function hrLabel() { return hrs + (hrs === 1 ? ' hour' : ' hours'); }
+
+  // the stage shows her work for the chosen service
+  function drawStage() {
+    var k = STAGE[svc]; if (!k) return;
+    [].forEach.call(document.querySelectorAll('#stph img'), function (i) { i.classList.toggle('on', i.dataset.k === k); });
+    $('st-cap').textContent = CAP[k];
+  }
+  // the hours: the digit rolls and the tray fills one compartment per hour
+  function drawHours() {
+    $('roll').style.transform = 'translateY(' + (-(hrs - 1) * 52) + 'px)'; [].forEach.call($('roll').children, function (s, i) { s.classList.toggle('on', i === hrs - 1); });
+    [].forEach.call($('tray').children, function (c, i) { setTimeout(function () { c.classList.toggle('on', i < hrs); }, Math.abs(i - hrs) * 30); });
+    $('h-dn').disabled = hrs <= 1; $('h-up').disabled = hrs >= MAXH;
+    $('next1').textContent = 'Continue to day and time, ₪' + (RATE * hrs);
+  }
+  $('h-dn').addEventListener('click', function () { if (hrs > 1) { hrs--; time = ''; drawHours(); drawTimes(); update(); } });
+  $('h-up').addEventListener('click', function () { if (hrs < MAXH) { hrs++; time = ''; drawHours(); drawTimes(); update(); } });
+  [].forEach.call(document.querySelectorAll('#svcs input'), function (i) {
+    i.checked = i.value === svc;
+    i.addEventListener('change', function () { svc = i.value; drawStage(); update(); check(false); });
+  });
+  [].forEach.call(document.querySelectorAll('#cities input'), function (i) { i.addEventListener('change', function () { update(); check(false); }); });
+
+  // start times in her hours, 09:00 to 23:00, so the session ends by 23:00
+  function drawTimes() {
+    var box = $('times'), d = $('day').value;
+    if (!d) { box.innerHTML = '<p class="hint">Choose a day first.</p>'; return; }
+    var out = [], len = hrs * 60;
+    for (var m = 540; m + len <= 1380; m += 30) {
+      if (d === today) { var now = new Date(); if (m <= now.getHours() * 60 + now.getMinutes() + 60) continue; }
+      out.push(m);
+    }
+    if (!out.length) { box.innerHTML = '<p class="hint">No start times left that day. Choose another day.</p>'; time = ''; return; }
+    if (out.map(hhmm).indexOf(time) < 0) time = '';
+    box.innerHTML = out.map(function (m) { var t = hhmm(m); return '<label class="opt"><input type="radio" name="time" value="' + t + '"' + (t === time ? ' checked' : '') + '><span class="box">' + t + '</span></label>'; }).join('');
+    [].forEach.call(box.querySelectorAll('input'), function (i) { i.addEventListener('change', function () { time = i.value; update(); check(false); }); });
+  }
+  $('day').addEventListener('change', function () { drawTimes(); update(); check(false); });
+
+  function endOf(t) { var p = t.split(':'); return hhmm(+p[0] * 60 + +p[1] + hrs * 60); }
+  function chg(n, what) { return step > n ? ' <button type="button" class="chg" data-go="' + n + '" aria-label="Change ' + what + '">Change</button>' : ''; }
+  function update() {
+    var rows = [], total = RATE * hrs;
+    if (svc) rows.push('<li><span>' + SERVICES[svc] + chg(1, 'service') + '</span><span></span></li>');
+    rows.push('<li><span>' + hrLabel() + ' at ₪' + RATE + chg(1, 'hours') + '</span><span>₪' + total + '</span></li>');
+    if (city()) rows.push('<li><span>' + city() + chg(2, 'place') + '</span><span></span></li>');
+    if (v('day') && time) rows.push('<li><span>' + nice(v('day')) + ', ' + time + ' to ' + endOf(time) + chg(2, 'day and time') + '</span><span></span></li>');
+    $('sum').innerHTML = rows.join('');
+    $('total').textContent = '₪' + total;
+    if (step === 1) $('next1').textContent = 'Continue to day and time, ₪' + total;
+    else if (step === 2) $('send-l').textContent = 'Continue to your details';
+    else $('send-l').textContent = 'Send on WhatsApp, ₪' + total;
+  }
+  function mark(id, msg) { var w = $('w-' + id); if (w) w.classList.toggle('bad', !!msg); $('e-' + id).textContent = msg || ''; }
+  function check(show, upto) {
+    var ok = true, e; upto = upto || 3;
+    e = svc ? '' : 'Choose what you would like'; if (e) ok = false; if (show || !e) mark('svc', e);
+    if (upto < 2) return ok;
+    e = city() ? '' : 'Choose where'; if (e) ok = false; if (show || !e) mark('city', e);
+    e = v('day') ? '' : 'Choose a day'; if (e) ok = false; if (show || !e) mark('day', e);
+    e = time ? '' : 'Choose a start time'; if (e) ok = false; if (show || !e) mark('time', e);
+    if (upto < 3) return ok;
+    e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
+    e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);
+    return ok;
+  }
+  ['me', 'ph'].forEach(function (id) { $(id).addEventListener('input', function () { check(false); update(); }); });
+  var note = $('note');
+  note.addEventListener('input', function () { note.style.height = 'auto'; note.style.height = Math.min(note.scrollHeight + 3, 115) + 'px'; });
+  var toastT = 0;
+  function toast() { var t = $('toast'); clearTimeout(toastT); t.hidden = false; requestAnimationFrame(function () { requestAnimationFrame(function () { t.classList.add('in'); }); }); toastT = setTimeout(function () { t.classList.remove('in'); setTimeout(function () { t.hidden = true; }, 220); }, 2600); }
+  function setSend() { var b = $('send'); b.disabled = phase === 'open'; b.setAttribute('aria-busy', phase === 'open' ? 'true' : 'false'); }
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (phase) return;
+    if (step < 3) { if (!check(true, step)) { var bad1 = document.querySelector('.bad .fld, .bad input'); if (bad1) bad1.focus(); return; } go(step + 1, true); return; }
+    if (!check(true)) { for (var s1 = 1; s1 <= 3; s1++) if (!check(false, s1)) { check(true, s1); go(s1, true); break; } var bad = document.querySelector('.bad .fld, .bad input'); if (bad) bad.focus(); return; }
+    var total = RATE * hrs, lines = ['Hi Noa, I would like to book:', '• ' + SERVICES[svc] + ', ' + hrLabel() + ' at ₪' + RATE + ' an hour', 'Where: ' + city(), 'When: ' + nice(v('day')) + ', ' + time + ' to ' + endOf(time)];
+    if (v('note')) lines.push('To organize: ' + v('note'));
+    lines.push('Total: ₪' + total + ' (accessories not included)', 'Name: ' + v('me') + ', ' + v('ph'));
+    var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(lines.join('\n'));
+    phase = 'open'; setSend();
+    var tab = window.open(url, '_blank'); if (!tab) location.href = url;
+    toast();
+    setTimeout(function () { phase = ''; setSend(); }, 1400);
+  });
+
+  var pick = $('pick'), book = $('book');
+  function drawStep() {
+    pick.hidden = step !== 1; book.hidden = step === 1;
+    [].forEach.call(document.querySelectorAll('.ostep'), function (el) { el.hidden = +el.dataset.s !== step; });
+    [].forEach.call(document.querySelectorAll('.osteps'), function (ol) { [].forEach.call(ol.children, function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); }); });
+    $('send-note').textContent = step === 2 ? 'Next: your name and phone.' : 'Opens WhatsApp with your session written out.';
+    update();
+  }
+  function go(n, push) {
+    if (n > 1 && !check(false, 1)) n = 1; if (n > 2 && !check(false, 2)) n = 2;
+    step = n; drawStep();
+    if (push) { history.pushState({ step: n }, '', n === 1 ? '#pick' : '#book-' + n); scrollTo({ top: 0, behavior: 'auto' }); var f = n === 1 ? document.querySelector('#svcs input:checked') : document.querySelector('.ostep:not([hidden]) .fld, .ostep:not([hidden]) input'); if (f) setTimeout(function () { f.focus({ preventScroll: true }); }, 200); }
+  }
+  addEventListener('popstate', function () { var m = /#book-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
+  $('back').addEventListener('click', function () { history.back(); });
+  document.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
+  drawHours(); drawStage(); drawTimes(); update();
+  var m0 = /#book-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
+})();
+</script>
+</body>
+</html>
