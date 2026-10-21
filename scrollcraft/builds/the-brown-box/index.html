@@ -238,6 +238,66 @@
     .dock small { color: var(--soft); font-size: .85rem; line-height: 1.25; min-width: 0; }
     .dock .btn { min-height: 46px; padding: 0 1.1rem; font-size: .95rem; flex: none; }
   }
+  /* review changes */
+  @media (prefers-reduced-motion: reduce) { .film { height: 100vh; height: 100svh; } .film .hint { display: none; } }
+  .arw { display: inline-flex; } .arw svg { display: block; }
+  .btn.dark-on { background: var(--paper); }
+  /* menu: section chips, two columns, an Add pill on every row */
+  .cats { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.2rem 0 .6rem; }
+  .cats button { min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--ink); font: 500 .97rem/1 var(--font-body); cursor: pointer;
+    transition: background 150ms ease-out, color 150ms ease-out, transform 100ms ease-out; }
+  .cats button:hover { background: var(--cream); }
+  .cats button:active { transform: scale(.97); }
+  .cats button[aria-pressed="true"] { background: var(--brown); border-color: var(--brown); color: var(--paper); }
+  .cats button[aria-pressed="true"]:hover { background: var(--brown-2); }
+  .cat[hidden] { display: none; }
+  [data-mir-list] { min-height: 12rem; }
+  @media (min-width: 900px) { .cat { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2rem; } .cat[hidden] { display: none; } }
+  .cat .pr { display: inline-flex; align-items: center; gap: .7rem; }
+  .cat .pr::after { content: 'Add'; display: inline-flex; align-items: center; min-height: 36px; padding: 0 .9rem; border-radius: 999px; border: 1px solid var(--brown); color: var(--brown); font-size: .9rem; font-weight: 500; transition: background 120ms ease-out, color 120ms ease-out; }
+  .cat a:hover .pr::after { background: var(--brown); color: var(--paper); }
+  .cat a:active .pr::after { transform: scale(.96); }
+  .cat li.is-out .pr::after { display: none; }
+  .cat a { padding-block: .55rem; } .cat .ph { width: 64px; height: 64px; } .cat a { grid-template-columns: 64px minmax(0, 1fr) auto; }
+  .menu.sec { padding-block: clamp(1.6rem, 3vw, 3rem); }
+  .tops { height: 120px; } .tops img { --w: 80px !important; } .menu-head { gap: 1rem; } .menu .lede { margin-top: .3rem; } .cats { margin-block: .6rem .2rem; }
+  @media (max-width: 760px) { .tops { height: 120px; } .cat { display: block; } }
+  /* bowls: fit one screen at laptop heights, nothing jumps when a bowl is picked */
+  .chips { min-height: 4.3rem; align-content: center; }
+  .sec#bowls { padding-block: clamp(1.6rem, 3vw, 3rem); } #bowls .card h3 { font-size: 1.45rem; }
+  #bowls .pick { margin-top: 1.2rem; }
+  @media (min-width: 861px) {
+    .card img { width: min(100%, 38svh); }
+    .card { padding: 1rem 1.4rem; }
+    .chips { margin: .5rem 0 .7rem; }
+    .opt { padding: .7rem 1.1rem; }
+    .opt span.t { display: none; }
+    .card .extra { font-size: .85rem; margin-top: .6rem; }
+    .card .btn { min-height: 48px; }
+  }
+  /* gift boxes */
+  .sec.gifts { padding-block: clamp(2rem, 4vw, 3.5rem); } .boxes { margin-top: 1.4rem; }
+  .box { grid-template-columns: 120px minmax(0, 1fr); padding: 1rem; } .box img { width: 120px; height: 120px; }
+  .box h3 { font-size: 1.75rem; } .box .p { font-size: 1.1rem; margin: .3rem 0 .4rem; }
+  .box ul { margin-bottom: .7rem; }
+  .box .btn { background: var(--paper); color: var(--brown-2); min-height: 48px; padding: 0 1.2rem; font-weight: 500; }
+  .box .btn:hover { background: #fff; }
+  @media (max-width: 460px) { .box { grid-template-columns: 1fr; } .box img { width: 100%; height: auto; aspect-ratio: 1; } }
+
+  @media (min-width: 861px) {
+    #bowls > .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); column-gap: clamp(1.5rem, 4vw, 4rem); grid-template-rows: auto auto 1fr; align-content: center; }
+    #bowls > .wrap > h2, #bowls > .wrap > .lede { grid-column: 1; }
+    #bowls .pick { display: contents; }
+    #bowls .opts { grid-column: 1; grid-row: 3; margin-top: 1.1rem; }
+    #bowls .card { grid-column: 2; grid-row: 1 / span 3; align-self: center; }
+    .card img { width: min(100%, 24svh); height: auto; margin-bottom: .5rem; }
+    .opt b { font-size: 1.15rem; }
+    .opt { padding: .6rem 1.1rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .film { height: auto; } .film .stage { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: flex-end; padding-block: 5rem 2rem; }
+    .chap { position: relative; inset: auto; opacity: 1; transform: none; filter: none; margin: 1.2rem var(--gutter); pointer-events: auto; transition: none; }
+  }
   .rev { opacity: 0; transform: translateY(14px); transition: opacity 600ms var(--out), transform 600ms var(--out); }
   .rev.in { opacity: 1; transform: none; }
   @media (prefers-reduced-motion: reduce) { .rev { opacity: 1; transform: none; } .chips li { animation: none; } }
@@ -252,7 +312,7 @@
       <a class="l" href="#bowls">Bowls</a>
       <a class="l" href="#menu">Menu</a>
       <a class="l" href="#gifts">Gift boxes</a>
-      <a class="btn" href="order.html">Order <span class="arw" aria-hidden="true">→</span></a>
+      <a class="btn" href="order.html">Order <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
     </nav>
   </div>
 </header>
@@ -266,7 +326,7 @@
       <div class="chap on" data-from="0" data-to="0.14">
         <h1>Acai bowls, <span class="acc">delivered</span> across Jerusalem</h1>
         <p class="line">Sugar free and almond milk based.</p>
-        <a class="btn" href="order.html?add=Acai%20bowl">Order a bowl, <b>₪60</b> <span class="arw" aria-hidden="true">→</span></a>
+        <a class="btn" href="order.html?add=Acai%20bowl">Order a bowl, <b>₪60</b> <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
       </div>
       <div class="chap" data-from="0.2" data-to="0.36" aria-hidden="true"><h2>Our signature <span class="acc">acai</span> base.</h2></div>
       <div class="chap" data-from="0.4" data-to="0.55" aria-hidden="true"><h2>Sugar free. <span class="acc">Almond milk</span> based.</h2></div>
@@ -274,7 +334,7 @@
       <div class="chap" data-from="0.86" data-to="1.01" aria-hidden="true">
         <h2>A delicious &amp; healthy <span class="acc">brunch.</span></h2>
         <p class="line">The Brown Box, delivered across Jerusalem.</p>
-        <a class="btn" href="order.html?add=Acai%20bowl" tabindex="-1">Order a bowl, <b>₪60</b> <span class="arw" aria-hidden="true">→</span></a>
+        <a class="btn" href="order.html?add=Acai%20bowl" tabindex="-1">Order a bowl, <b>₪60</b> <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
       </div>
       <div class="hint" id="hint">Scroll</div>
       <div class="load" id="load"></div>
@@ -305,7 +365,7 @@
           <h3 id="pick-name">Classic bowl</h3>
           <ul class="chips" id="pick-chips"></ul>
           <p class="base" id="pick-base">On our acai base, with two extras of your choice</p>
-          <a class="btn" id="pick-go" href="order.html?add=Acai%20bowl&amp;bowl=classic">Order a Classic bowl, <b>₪60</b> <span class="arw" aria-hidden="true">→</span></a>
+          <a class="btn" id="pick-go" href="order.html?add=Acai%20bowl&amp;bowl=classic">Order a Classic bowl, <b>₪60</b> <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
           <p class="extra">Extras: natural peanut butter, silan, honey, pareve or milchig chocolate spread, chia seeds, flax seeds, coconut flakes, almond butter (+₪5).</p>
         </div>
       </div>
@@ -328,6 +388,7 @@
           <img src="assets/tops/pineapple.webp" alt="" width="240" height="240" loading="lazy" style="--w:100px;left:78%;top:-2%;--r:-12deg;--sp:-22px">
         </div>
       </div>
+      <div class="cats" id="cats" role="group" aria-label="Menu sections"></div>
       <div data-mir-catalog data-href="order.html?add={name}" data-wa="972533452048" data-msg="Hi, I'd like to order the {name} ({price})." data-other="More from The Brown Box" data-out="Out of stock">
       <div data-mir-list>
         <h3 class="cat-h">Acai bowls</h3>
@@ -377,7 +438,7 @@
             <h3>Small gift box</h3>
             <p class="p">₪135</p>
             <ul><li>An acai bowl</li><li>2 muffins of your choice</li><li>An iced coffee</li></ul>
-            <a href="order.html?add=Small%20gift%20box">Order the small box →</a>
+            <a class="btn" href="order.html?add=Small%20gift%20box">Order the small box, <b>₪135</b></a>
           </div>
         </article>
         <article class="box rev">
@@ -386,7 +447,7 @@
             <h3>Large gift box</h3>
             <p class="p">₪250</p>
             <ul><li>2 acai bowls</li><li>2 muffins of your choice</li><li>Date snacks</li><li>An iced coffee</li></ul>
-            <a href="order.html?add=Large%20gift%20box">Order the large box →</a>
+            <a class="btn" href="order.html?add=Large%20gift%20box">Order the large box, <b>₪250</b></a>
           </div>
         </article>
       </div>
@@ -407,7 +468,7 @@
   <section class="close" aria-label="Order">
     <div class="wrap">
       <p class="q rev">A delicious <span>&amp;</span> healthy brunch</p>
-      <a class="btn rev" href="order.html">Order from The Brown Box <span class="arw" aria-hidden="true">→</span></a>
+      <a class="btn rev" href="order.html">Order from The Brown Box <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
       <small>Delivered across Jerusalem · Kosher, Vaad HaKashrus of Rabbi Shmuel Weiner</small>
     </div>
   </section>
@@ -473,7 +534,7 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   var hint = document.getElementById('hint');
   function paint() {
-    p = still ? 1 : progress();
+    p = still ? 0 : progress();
     draw();
     chaps.forEach(function (c) {
       var on = p >= +c.dataset.from && p < +c.dataset.to;
@@ -498,6 +559,7 @@ document.addEventListener('DOMContentLoaded', function () {
   };
   // each bowl's colour: a light wash for the section, the deep one for words
   var TINT = { classic: ['#F1E2EC', '#6E2A57'], tropical: ['#FBE6CC', '#8A4708'], sunrise: ['#E5EFD6', '#3A5C14'], superfruit: ['#E0E6F6', '#2E4A9B'], own: ['#EFE3D4', '#4A2E17'] };
+  var ARW = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
   var opts = [].slice.call(document.querySelectorAll('#opts .opt'));
   function pick(k) {
     var b = BOWLS[k];
@@ -514,7 +576,7 @@ document.addEventListener('DOMContentLoaded', function () {
     b[2].forEach(function (c) { var li = document.createElement('li'); li.textContent = c; ul.appendChild(li); });
     var go = document.getElementById('pick-go');
     go.href = 'order.html?add=' + encodeURIComponent('Acai bowl') + '&bowl=' + k;
-    go.innerHTML = 'Order ' + (k === 'own' ? 'your own bowl' : 'a ' + b[0]) + ', <b>₪' + b[1] + '</b> <span class="arw" aria-hidden="true">→</span>';
+    go.innerHTML = 'Order ' + (k === 'own' ? 'your own bowl' : 'a ' + b[0]) + ', <b>₪' + b[1] + '</b> <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span>';
   }
   opts.forEach(function (o) { o.addEventListener('click', function () { pick(o.dataset.k); }); });
   pick('classic');
@@ -535,6 +597,23 @@ document.addEventListener('DOMContentLoaded', function () {
     addEventListener('scroll', function () { if (!tr) tr = requestAnimationFrame(drift); }, { passive: true });
     drift();
   }
+
+  // ── menu: one section at a time, so the menu fits a screen ──
+  (function () {
+    var host = document.getElementById('cats'), list = document.querySelector('[data-mir-list]');
+    if (!host || !list) return;
+    var heads = [].slice.call(list.querySelectorAll('.cat-h'));
+    if (heads.length < 2) return;
+    function show(i) {
+      heads.forEach(function (h, j) { h.hidden = true; h.nextElementSibling.hidden = j !== i; });
+      [].forEach.call(host.children, function (b, j) { b.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
+    }
+    heads.forEach(function (h, i) {
+      var b = document.createElement('button'); b.type = 'button'; b.textContent = h.textContent;
+      b.onclick = function () { show(i); }; host.appendChild(b);
+    });
+    show(0);
+  })();
 
   // ── reveals, and the phone's order bar after the opening ────────
   var dock = document.getElementById('dock');

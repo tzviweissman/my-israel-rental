@@ -1,4 +1,4 @@
-"""Writes gen/order-src.html for The Brown Box from The Gift Boutique's order
+"""(Since 21 Oct 2026 order-src.html is edited by hand, with the site review changes; do not rerun make_order_src.py over it.) Writes gen/order-src.html for The Brown Box from The Gift Boutique's order
 page: their colours and words, shekels, Jerusalem delivery, and the bowl and
 gift-box choices (each bowl's flavour and two extras, each box's muffins)."""
 import io

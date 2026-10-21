@@ -128,5 +128,7 @@
   });
   paintCart(load());
 
-  window.BB = { API: API, APP: APP, form: form, load: load, save: save, lines: lines, total: total, money: money, cur: cur, count: count, when: when, where: where, paint: paint, toast: toast, esc: esc, LINES: LINES, NOTICE_DAYS: 2 };
+  var DEAL = { "Large Blazin' Board": 77, 'Large Premium Steak Board': 161 };
+  function saving(p) { return DEAL[p.short] || 0; }
+  window.BB = { DEAL: DEAL, saving: saving, API: API, APP: APP, form: form, load: load, save: save, lines: lines, total: total, money: money, cur: cur, count: count, when: when, where: where, paint: paint, toast: toast, esc: esc, LINES: LINES, NOTICE_DAYS: 2 };
 })();

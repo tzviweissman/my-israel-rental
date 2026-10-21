@@ -61,7 +61,7 @@ PROMISE = f'''<ul class="promise">
 
 def summary(full=False):
     return f'''<aside class="summary" aria-label="Your order" aria-live="polite">
-        <div class="who"><img src="assets/their-logo-small.png" alt=""><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
+        <div class="who"><img src="assets/their-logo-small.png" alt="" width="44" height="44"><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines{' data-full' if full else ''}></ul>
         <div class="total"><span>Total</span><b data-total>$0</b></div>
         {PROMISE}
@@ -132,7 +132,7 @@ page('boards.html', "Every board · Blazin' Boards",
     var stage = p.cm
       ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815" loading="lazy" style="width:' + (p.cm[1] * PX / 0.98).toFixed(0) + 'px"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
       : '<div class="stage"><span style="font-weight:700;color:var(--gold-text)">Size on request</span></div>';
-    return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + stage
+    return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + (BB.saving(p) ? '<span class="save-b">Save $' + BB.saving(p) + '</span>' : '') + stage
       + '<div class="body"><span class="line">' + BB.LINES[p.line] + '</span><h3>' + BB.esc(p.short) + '</h3>'
       + '<span class="price">' + BB.money(p.price, p.currency) + '</span>'
       + (p.what ? '<p class="what">' + BB.esc(p.what) + '</p>' : '')
@@ -156,7 +156,10 @@ page('boards.html', "Every board · Blazin' Boards",
   }
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-inc],[data-dec],[data-bottle],[data-show]'); if (!t || !F) return;
-    if (t.dataset.show) { show = t.dataset.show; document.querySelectorAll('[data-show]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); }); paint(); return; }
+    if (t.dataset.show) {
+      var g = document.getElementById('boards'); g.style.minHeight = g.offsetHeight + 'px';
+      show = t.dataset.show; document.querySelectorAll('[data-show]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); });
+      paint(); if (g.animate) g.animate([{ opacity: 0.85 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' }); return; }
     var id = t.dataset.inc || t.dataset.dec || t.dataset.bottle;
     var p = F.products.filter(function (x) { return x.id === id; })[0];
     var was = o.cart[id] || 0;
@@ -181,7 +184,7 @@ page('order.html', "Your order · Blazin' Boards",
     <div class="cols">
       <section class="pane">
         <h1>Your <em>boards.</em></h1>
-        <p class="sub">Two lines at each size, side by side. Add as many as you need. Prices in US dollars.</p>
+        <p class="sub">Add as many as you need. Prices in US dollars.</p>
         <ul class="cartlines" id="cartlines"></ul>
         <div class="q">
           <h2 id="pickTitle">Choose a board</h2>
@@ -208,9 +211,9 @@ page('order.html', "Your order · Blazin' Boards",
   function paint() {
     var ls = BB.lines(F, o);
     document.getElementById('cartlines').innerHTML = ls.map(function (l) {
-      return '<li><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
+      return '<li><span class="thumb"><img src="assets/board-cut-m.webp" alt="" width="1000" height="815"></span><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
         + '<span class="stepper"><button type="button" data-dec="' + l.p.id + '" aria-label="One fewer">−</button><output>' + l.qty + '</output><button type="button" data-inc="' + l.p.id + '" aria-label="One more">+</button></span>'
-        + '<span class="amt">' + BB.money(l.p.price * l.qty, l.p.currency) + '</span></li>';
+        + '<span class="amt">' + BB.money(l.p.price * l.qty, l.p.currency) + '</span><button type="button" class="rm" data-rm="' + l.p.id + '" aria-label="Remove ' + BB.esc(l.p.short) + ' from the order"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button></li>';
     }).join('');
     var boards = F.products.filter(function (p) { return p.board; });
     var rows = {};
@@ -224,7 +227,7 @@ page('order.html', "Your order · Blazin' Boards",
         [c[i], c[i + 1]].forEach(function (p) {
           if (!p) { h += '<td></td>'; return; }
           var on = (o.cart[p.id] || 0) > 0;
-          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + '</button></td>';
+          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + (BB.saving(p) ? '<span class="save-b">Save $' + BB.saving(p) + '</span>' : '') + '</button></td>';
         });
         h += '</tr>';
       }
@@ -235,7 +238,7 @@ page('order.html', "Your order · Blazin' Boards",
     document.getElementById('more').hidden = !hasBoard || open;
     document.getElementById('picks').hidden = hasBoard && !open;
     var bottles = F.products.filter(function (p) { return !p.board; });
-    document.getElementById('bottlesQ').hidden = !bottles.length;
+    document.getElementById('bottlesQ').hidden = !bottles.length || !hasBoard;
     document.getElementById('bottles').innerHTML = bottles.map(function (p) {
       var on = (o.cart[p.id] || 0) > 0;
       return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add') + '</button></li>';
@@ -245,11 +248,12 @@ page('order.html', "Your order · Blazin' Boards",
     BB.paint(F, o);
   }
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-inc],[data-dec],[data-toggle],[data-bottle]'); if (!t || !F) return;
-    var id = t.dataset.inc || t.dataset.dec || t.dataset.toggle || t.dataset.bottle, was = o.cart[id] || 0;
+    var t = e.target.closest('[data-inc],[data-dec],[data-toggle],[data-bottle],[data-rm]'); if (!t || !F) return;
+    var id = t.dataset.inc || t.dataset.dec || t.dataset.toggle || t.dataset.bottle || t.dataset.rm, was = o.cart[id] || 0;
     if (t.dataset.inc) o.cart[id] = Math.min(20, was + 1);
     if (t.dataset.dec) o.cart[id] = Math.max(0, was - 1);
     if (t.dataset.toggle || t.dataset.bottle) o.cart[id] = was ? 0 : 1;
+    if (t.dataset.rm) o.cart[id] = 0;
     if (!o.cart[id]) delete o.cart[id];
     BB.save(o); paint();
   });
@@ -281,6 +285,7 @@ page('order-when.html', "When and where · Blazin' Boards", 'Collect in Jerusale
         </div>
         <div class="q">
           <h2>Which day?</h2>
+          <div class="chips daychips" id="dayChips" role="group" aria-label="Earliest days"></div>
           <div class="two">
             <div class="field" id="f-date"><label for="date">Needed on</label><input type="date" id="date"><span class="hint">The earliest day is two days from today.</span><span class="err">Choose a day, two days from today or later, not Shabbos.</span></div>
             <div class="field" id="f-window" hidden><label for="window">Time</label><select id="window"></select></div>
@@ -324,6 +329,13 @@ page('order-when.html', "When and where · Blazin' Boards", 'Collect in Jerusale
     windows(); BB.save(o); if (F) BB.paint(F, o);
   }
   document.querySelectorAll('[data-ful]').forEach(function (b) { b.addEventListener('click', function () { o.ful = b.dataset.ful; paint(); }); });
+  (function () {
+    var box = $('dayChips'), d = new Date(min), n = 0, h = '';
+    while (n < 4) { if (d.getDay() !== 6) { var v = d.toISOString().slice(0, 10); h += '<button type="button" class="chip" data-day="' + v + '" aria-pressed="false">' + d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + '</button>'; n++; } d.setDate(d.getDate() + 1); }
+    box.innerHTML = h;
+    box.addEventListener('click', function (e) { var t = e.target.closest('[data-day]'); if (!t) return; $('date').value = t.dataset.day; $('date').dispatchEvent(new Event('change')); });
+    $('date').addEventListener('change', function () { box.querySelectorAll('[data-day]').forEach(function (c) { c.setAttribute('aria-pressed', String(c.dataset.day === $('date').value)); }); });
+  })();
   $('date').addEventListener('change', function () { o.date = $('date').value; $('f-date').classList.remove('is-bad'); paint(); });
   $('window').addEventListener('change', function () { o.window = $('window').value; BB.save(o); BB.paint(F, o); });
   $('address').addEventListener('input', function () { o.address = $('address').value.trim(); $('f-address').classList.remove('is-bad'); BB.save(o); if (F) BB.paint(F, o); });

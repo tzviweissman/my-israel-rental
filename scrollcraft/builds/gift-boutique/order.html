@@ -129,6 +129,84 @@
     .dock .btn { min-height: 48px; padding: 0 1.1rem; font-size: .95rem; }
     main { padding-bottom: 5rem; }
   }
+
+  /* PROPOSED: same menu bar as the home page, three steps, find-a-gift, remove buttons, a toast */
+  .nav { margin-inline-start: auto; display: flex; align-items: center; gap: .25rem; }
+  .nav a.link { color: var(--on-night-soft); text-decoration: none; font-size: .95rem; padding: 0 .8rem; min-height: 44px; display: inline-flex; align-items: center; border-radius: 999px; }
+  .nav a.link:hover { color: var(--gold-hi); }
+  .ghost { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid currentColor; color: var(--gold); font: 500 .95rem/1 var(--font-body); text-decoration: none; white-space: nowrap; }
+  .ghost[aria-current="page"] { background: var(--gold); border-color: var(--gold); color: var(--night); }
+  .ghost .cnt { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 999px; background: var(--night); color: var(--gold-hi); font-size: .8rem; font-weight: 600; }
+  .ghost .cnt[hidden] { display: none; }
+  @media (max-width: 760px) { .nav a.link { display: none; } }
+
+  .prog { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; margin: 0 0 1.5rem; padding: 0; }
+  .prog li { padding-top: .55rem; border-top: 4px solid var(--line-ivory); font-size: .9rem; color: var(--soft); transition: border-color 300ms ease-out, color 300ms ease-out; }
+  .prog li.on { border-color: var(--gold); color: var(--ink); font-weight: 600; }
+  .prog li.done { border-color: var(--gold-ink); color: var(--ink); }
+  .step[hidden] { display: none; }
+  .step { margin-bottom: 0; }
+  .items li.is-out { display: none; }
+  .step > p.hint { margin-top: .1rem; }
+  .items li { min-height: 0; }
+  .items b { line-height: 1.2; }
+  .find input[type=search], .pills button { min-height: 40px; }
+
+  .find { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: .7rem 0 .7rem; }
+  .find input[type=search] { flex: 1 1 14rem; min-height: 44px; border-radius: 999px; padding-inline: 1rem; }
+  .pills { display: flex; flex-wrap: wrap; gap: .5rem; width: 100%; }
+  .pills button { min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--line-ivory); background: #fff; color: var(--ink); font: 500 .92rem/1 var(--font-body); cursor: pointer; transition: background 160ms ease-out, color 160ms ease-out, transform 100ms ease-out; }
+  .pills button:hover { border-color: var(--gold-ink); }
+  .pills button:active { transform: scale(.97); }
+  .pills button[aria-pressed="true"] { background: var(--night); border-color: var(--night); color: #fff; }
+  .pills button[aria-pressed="true"]:hover { background: #2B2518; }
+  .grp { display: none; }
+  .items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; border-top: 0; }
+  .items[hidden], .items li[hidden] { display: none; }
+  @media (max-width: 560px) { .items { grid-template-columns: 1fr; } }
+  .items li { grid-template-columns: 68px minmax(0, 1fr); gap: 0 .8rem; padding: .45rem .6rem; border: 1px solid var(--line-ivory); border-radius: var(--r); background: #fff; align-items: center; }
+  .items li > div:last-child { grid-column: 2; }
+  .items li.has { border-color: var(--gold-ink); background: #fff; }
+  .items .ph { width: 68px; height: 68px; grid-row: span 2; }
+  .items .nopick { grid-column: 1 / -1; }
+  .items .ph img { scale: 1.08; }
+  .qty button { width: 40px; height: 40px; }
+  .qty { margin-top: 0; }
+  .items b { font-size: .95rem; }
+  .step > h2 { font-size: 1.2rem; }
+  .add { min-height: 40px; }
+  .none { margin: 1rem 0 0; color: var(--soft); }
+
+  .sum li { align-items: center; }
+  .sum li .lt { display: flex; align-items: center; gap: .5rem; min-width: 0; flex: 1; }
+  .sum li .lt span { min-width: 0; white-space: normal; color: var(--on-night-soft); }
+  .sum li > span:last-child { flex: none; }
+  .rm { width: 40px; height: 40px; flex: none; border: 0; border-radius: 50%; background: transparent; color: var(--on-night-soft); cursor: pointer; display: grid; place-items: center; transition: background 160ms ease-out, color 160ms ease-out, transform 100ms ease-out; }
+  .rm:hover { background: rgb(255 255 255 / .12); color: #fff; }
+  .rm:active { transform: scale(.92); }
+  .rm svg { width: 18px; height: 18px; }
+  .sum .reassure { display: flex; gap: .5rem; align-items: flex-start; margin: .8rem 0 .9rem; color: #fff; font-size: .9rem; font-weight: 500; }
+  .sum .reassure svg { width: 18px; height: 18px; flex: none; color: #7CD39A; margin-top: 2px; }
+  .sum .note { display: none; }
+  .btn[aria-disabled="true"]:hover { background: #CDBFA4; }
+  .sum .back { display: block; width: 100%; margin-top: .6rem; min-height: 44px; border: 0; background: none; color: var(--on-night-soft); font: 500 .95rem/1 var(--font-body); cursor: pointer; border-radius: 999px; transition: color 160ms ease-out, background 160ms ease-out; }
+  .sum .back:hover { color: #fff; background: rgb(255 255 255 / .08); }
+  .sum .back[hidden] { display: none; }
+  .dock .back2 { display: none; }
+  input:focus, textarea:focus { border-color: var(--gold-ink); box-shadow: 0 0 8px 2px rgb(212 170 64 / .35); }
+
+  .toast { position: fixed; z-index: 80; top: calc(var(--bar-h) + .75rem); left: 50%; translate: -50% -140%; display: flex; align-items: center; gap: .6rem; padding: .7rem 1.1rem .7rem .8rem; border-radius: 12px; background: var(--night); color: #fff; font-size: .95rem; box-shadow: 0 3px 30px rgb(14 12 9 / .3); opacity: 0; transition: translate 240ms var(--out), opacity 240ms ease-out; pointer-events: none; }
+  .toast.on { translate: -50% 0; opacity: 1; }
+  .toast i { width: 22px; height: 22px; border-radius: 50%; background: var(--gold); color: var(--night); display: grid; place-items: center; font-style: normal; }
+  .toast svg { width: 13px; height: 13px; }
+  .foot { background: var(--night); color: var(--on-night-soft); border-top: 1px solid var(--line-night); padding-block: 1.75rem 6rem; font-size: .9rem; }
+  .foot .cols3 { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr; gap: 1.5rem 2.5rem; }
+  .foot h4 { margin: 0 0 .6rem; font: 500 .8rem/1.2 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  .foot p { margin: 0 0 .35rem; }
+  .foot a { color: var(--on-night-soft); text-decoration: none; }
+  .foot a:hover { color: var(--gold-hi); }
+  .foot .fine { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
+  @media (max-width: 760px) { .foot .cols3 { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -136,7 +214,13 @@
 <header class="bar">
   <div class="wrap">
     <a class="brand" href="index.html" aria-label="The Gift Boutique, home"><img src="assets/logo.webp" alt="" width="40" height="40"><span>THE GIFT BOUTIQUE</span></a>
-    <a class="back" href="index.html#prices"><span class="lg">Back to the collection</span><span class="sm">Collection</span></a>
+    <nav class="nav" aria-label="Pages">
+      <a class="link" href="index.html#make">What we make</a>
+      <a class="link" href="index.html#prices">Prices</a>
+      <a class="link" href="index.html#order">How to order</a>
+      <a class="link" href="https://wa.me/message/7TFTC4CVOY2MG1" target="_blank" rel="noopener">WhatsApp</a>
+      <a class="ghost" href="order.html" aria-current="page">Your order <span class="cnt" id="ncount" hidden>0</span></a>
+    </nav>
   </div>
 </header>
 
@@ -148,13 +232,15 @@
 
   <div class="wrap cols">
     <form id="f" novalidate>
-      <section class="step" aria-labelledby="s1">
+      <ol class="prog" id="prog" aria-label="Order steps"><li>Step 1: Your gifts</li><li>Step 2: Where it is going</li><li>Step 3: Your details</li></ol>
+      <section class="step" data-step="1" aria-labelledby="s1">
         <h2 id="s1"><span class="n">1</span>Your gifts</h2>
         <p class="hint">Prices in US dollars, as in our catalogue.</p>
-        <div id="gifts"></div>
+        <div class="find"><input type="search" id="q" placeholder="Search gifts" aria-label="Search gifts" autocomplete="off"><div class="pills" id="pills" role="group" aria-label="Choose a group of gifts"></div></div>
+        <div id="gifts"></div><p class="none" id="none" hidden>No gift matches that. Message us on WhatsApp and we will help.</p>
       </section>
 
-      <section class="step" aria-labelledby="s2">
+      <section class="step" data-step="2" aria-labelledby="s2">
         <h2 id="s2"><span class="n">2</span>Where it is going</h2>
         <p class="hint">We deliver across Israel.</p>
         <div class="fields">
@@ -167,7 +253,7 @@
         </div>
       </section>
 
-      <section class="step" aria-labelledby="s3">
+      <section class="step" data-step="3" aria-labelledby="s3">
         <h2 id="s3"><span class="n">3</span>Your details</h2>
         <div class="fields">
           <div data-need><label for="me">Your name</label><input id="me" name="me" autocomplete="name"><p class="msg">Add your name.</p></div>
@@ -183,16 +269,30 @@
       <ul id="lines" aria-live="polite"></ul>
       <div class="tot"><span>Gifts</span><b id="total">$0</b></div>
       <p class="note">Delivery is added on WhatsApp once we know the city. You pay us directly; nothing is paid on this page.</p>
+      <p class="reassure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Nothing is paid on this page. We confirm the delivery fee with you on WhatsApp first.</span></p>
       <a class="btn" id="send" href="#" aria-disabled="true">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
         <span style="position:relative">Send order on WhatsApp</span>
       </a>
+      <button type="button" class="back" id="back" hidden>Back</button>
       <p class="why" id="why" aria-live="polite"></p>
       <p class="saved">Your order is also saved with The Gift Boutique on MyIsraelRental, with a link to follow it.</p>
       <p class="wa-line">Or message us: <a href="https://wa.me/972535386042" target="_blank" rel="noopener">+972 53-538-6042</a></p>
     </aside>
   </div>
 </main>
+
+<div class="toast" id="toast" role="status" aria-live="polite"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></i><span id="toastt"></span></div>
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols3">
+      <div><h4>The Gift Boutique</h4><p>Jerusalem, with delivery across Israel.</p><p>Hand wrapped gifts for every occasion.</p></div>
+      <div><h4>Pages</h4><p><a href="index.html">Home</a></p><p><a href="index.html#prices">The collection</a></p><p><a href="order.html">Order a gift</a></p></div>
+      <div><h4>Reach us</h4><p><a href="https://wa.me/972535386042" target="_blank" rel="noopener">WhatsApp +972 53-538-6042</a></p><p><a href="mailto:thegiftboutiqueisrael@gmail.com">thegiftboutiqueisrael@gmail.com</a></p><p>Sunday to Thursday, 8:00 to midnight. Friday, 8:00 to 12:00.</p></div>
+      <div class="fine"><span>The Gift Boutique, Jerusalem. Gifts for every occasion since 2025.</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+    </div>
+  </div>
+</footer>
 
 <div class="dock order-bar" id="dock">
   <div><small>Gifts, before delivery</small><b id="dtotal">$0</b></div>
@@ -245,6 +345,33 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // find a gift: one group at a time, or search across all of them
+  var pills = document.getElementById('pills'), qin = document.getElementById('q'), curG = 0;
+  var gh = [].slice.call(host.querySelectorAll('h3.grp')), gl = [].slice.call(host.querySelectorAll('ul.items'));
+  function applyFilter() {
+    var term = qin.value.trim().toLowerCase(), any = false;
+    gl.forEach(function (ul, i) {
+      var vis = 0;
+      [].forEach.call(ul.children, function (li) {
+        var p = products[li.dataset.k];
+        var ok = term ? p.name.toLowerCase().indexOf(term) > -1 : true;
+        li.hidden = !ok; if (ok) vis++;
+      });
+      ul.hidden = term ? !vis : i !== curG;
+      if (!ul.hidden) any = true;
+    });
+    [].forEach.call(pills.children, function (b, i) { b.setAttribute('aria-pressed', !term && i === curG ? 'true' : 'false'); });
+    document.getElementById('none').hidden = any;
+  }
+  order.forEach(function (g, i) {
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = g;
+    b.addEventListener('click', function () { qin.value = ''; curG = i; applyFilter(); });
+    pills.appendChild(b);
+  });
+  qin.addEventListener('input', applyFilter);
+  if (add) { products.forEach(function (p) { if (q[p._k] != null) curG = order.indexOf(p.group || 'More gifts'); }); }
+  applyFilter();
+
   function drawCtl(p) {
     var ctl = p._ctl; ctl.textContent = '';
     if (!p.in_stock) return;
@@ -253,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (!n) {
       var a = document.createElement('button'); a.type = 'button'; a.className = 'add'; a.textContent = 'Add';
       a.setAttribute('aria-label', 'Add ' + p.name);
-      a.onclick = function () { q[p._k] = 1; update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
+      a.onclick = function () { q[p._k] = 1; toast('Added: ' + p.name); update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
       ctl.appendChild(a); return;
     }
     var box = document.createElement('div'); box.className = 'qty';
@@ -286,32 +413,62 @@ document.addEventListener('DOMContentLoaded', function () {
     empty.hidden = c.length > 0;
     c.forEach(function (p) {
       var li = document.createElement('li');
-      var a = document.createElement('span'); a.textContent = q[p._k] + ' × ' + p.name;
+      var a = document.createElement('span'); a.className = 'lt';
+      var rmb = document.createElement('button'); rmb.type = 'button'; rmb.className = 'rm'; rmb.setAttribute('aria-label', 'Remove ' + p.name + ' from your order');
+      rmb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>';
+      rmb.onclick = function () { delete q[p._k]; update(); };
+      var at = document.createElement('span'); at.textContent = q[p._k] + ' × ' + p.name; a.appendChild(rmb); a.appendChild(at);
       var b = document.createElement('span');
       b.textContent = priced(p) ? (p.price_to != null && Number(p.price_to) > Number(p.price) ? 'from ' : '') + money(q[p._k] * Number(p.price), p.currency) : 'on request';
       li.appendChild(a); li.appendChild(b); lines.appendChild(li);
     });
     var t = totals().text;
+    var nn = c.reduce(function (a, p) { return a + q[p._k]; }, 0), cn = document.getElementById('ncount'); cn.textContent = nn; cn.hidden = !nn;
     document.getElementById('total').textContent = t;
     document.getElementById('dtotal').textContent = t;
-    check(false);
+    check(false); paintBtn();
   }
 
   // what is still missing, said plainly; nothing is red until they try to send
   var why = document.getElementById('why');
-  function check(show) {
-    var missing = [];
-    if (!chosen().length) missing.push('choose a gift');
-    document.querySelectorAll('[data-need]').forEach(function (box) {
+  var stepNo = 1;
+  function stepMissing(n, show) {
+    var m = [];
+    if (n === 1) { if (!chosen().length) m.push('choose a gift'); return m; }
+    document.querySelectorAll('.step[data-step="' + n + '"] [data-need]').forEach(function (box) {
       var ok = box.querySelector('input,textarea').value.trim().length > 0;
       if (show) box.classList.toggle('bad', !ok);
-      if (!ok) missing.push(box.querySelector('label').textContent.toLowerCase().replace(/\?$/, ''));
+      if (!ok) m.push(box.querySelector('label').textContent.toLowerCase().replace(/\?$/, ''));
     });
+    return m;
+  }
+  function check(show) {
+    var missing = stepMissing(stepNo, show);
     var ready = !missing.length;
     ['send', 'send2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', ready ? 'false' : 'true'); });
-    why.textContent = ready ? '' : (show || chosen().length ? 'Still needed: ' + missing.join(', ') + '.' : '');
+    why.textContent = ready ? '' : (show ? 'Still needed: ' + missing.join(', ') + '.' : '');
     return ready;
   }
+  var LAB = { 1: 'Continue to delivery', 2: 'Continue to your details' };
+  function paintBtn() {
+    var t = totals().text;
+    var l = stepNo < 3 ? LAB[stepNo] : 'Send order on WhatsApp, ' + t;
+    var l2 = stepNo < 3 ? 'Continue' : 'Send on WhatsApp';
+    if (!sending) { document.getElementById('send').lastElementChild.textContent = l; document.getElementById('send2').lastElementChild.textContent = l2; }
+    document.getElementById('back').hidden = stepNo === 1;
+    document.querySelector('#send svg').style.display = stepNo < 3 ? 'none' : '';
+  }
+  function setStep(n, push) {
+    stepNo = n;
+    document.querySelectorAll('.step').forEach(function (e) { e.hidden = Number(e.dataset.step) !== n; });
+    [].forEach.call(document.getElementById('prog').children, function (li, i) { li.className = i + 1 === n ? 'on' : i + 1 < n ? 'done' : ''; if (i + 1 === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
+    if (push) { history.pushState({ s: n }, '', '#order-' + n); window.scrollTo({ top: 0 }); }
+    check(false); paintBtn();
+  }
+  window.addEventListener('popstate', function () { var m = /order-(\d)/.exec(location.hash); setStep(m ? Number(m[1]) : 1, false); });
+  document.getElementById('back').addEventListener('click', function () { history.back(); });
+  var tt = 0;
+  function toast(msg) { var t = document.getElementById('toast'); document.getElementById('toastt').textContent = msg; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(function () { t.classList.remove('on'); }, 2200); }
   document.querySelectorAll('[data-need] input').forEach(function (i) {
     i.addEventListener('input', function () { i.closest('[data-need]').classList.remove('bad'); check(false); });
   });
@@ -362,10 +519,11 @@ document.addEventListener('DOMContentLoaded', function () {
     if (sending) return;
     if (!check(true)) {
       var first = document.querySelector('.bad input, .bad textarea');
-      if (!chosen().length) document.getElementById('s1').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      else if (first) first.focus();
+      if (first) first.focus();
       return;
     }
+    if (stepNo < 3) { setStep(stepNo + 1, true); return; }
+    for (var n = 1; n < 3; n++) { if (stepMissing(n, true).length) { setStep(n, true); return; } }
     sending = true;
     // opened now, while this still counts as the tap, so no popup blocker stops it
     var tab = window.open('', '_blank');
@@ -376,7 +534,8 @@ document.addEventListener('DOMContentLoaded', function () {
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
       sending = false;
-      ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.removeAttribute('aria-busy'); b.lastElementChild.textContent = id === 'send' ? 'Send order on WhatsApp' : 'Send on WhatsApp'; });
+      ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.removeAttribute('aria-busy'); });
+      paintBtn();
       why.textContent = saved ? 'Sent. Your order is saved, and the tracking link is in the message.' : '';
     });
   }
@@ -386,10 +545,11 @@ document.addEventListener('DOMContentLoaded', function () {
   var when = document.getElementById('when');
   when.min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
+  var m0 = /order-(\d)/.exec(location.hash); setStep(1, false);
   update();
   if (add && chosen().length) {
     var p = chosen()[0];
-    p._li.scrollIntoView({ block: 'center' });
+    toast('Added: ' + p.name);
   }
 });
 </script>

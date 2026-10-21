@@ -39,6 +39,7 @@
         </div>
         <div class="q">
           <h2>Which day?</h2>
+          <div class="chips daychips" id="dayChips" role="group" aria-label="Earliest days"></div>
           <div class="two">
             <div class="field" id="f-date"><label for="date">Needed on</label><input type="date" id="date"><span class="hint">The earliest day is two days from today.</span><span class="err">Choose a day, two days from today or later, not Shabbos.</span></div>
             <div class="field" id="f-window" hidden><label for="window">Time</label><select id="window"></select></div>
@@ -52,7 +53,7 @@
         <div class="next"><a class="cta" id="go" href="order-details.html">Continue</a><a class="back" href="order.html">Back</a></div>
       </section>
       <aside class="summary" aria-label="Your order" aria-live="polite">
-        <div class="who"><img src="assets/their-logo-small.png" alt=""><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
+        <div class="who"><img src="assets/their-logo-small.png" alt="" width="44" height="44"><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines data-full></ul>
         <div class="total"><span>Total</span><b data-total>$0</b></div>
         <ul class="promise">
@@ -94,6 +95,13 @@
     windows(); BB.save(o); if (F) BB.paint(F, o);
   }
   document.querySelectorAll('[data-ful]').forEach(function (b) { b.addEventListener('click', function () { o.ful = b.dataset.ful; paint(); }); });
+  (function () {
+    var box = $('dayChips'), d = new Date(min), n = 0, h = '';
+    while (n < 4) { if (d.getDay() !== 6) { var v = d.toISOString().slice(0, 10); h += '<button type="button" class="chip" data-day="' + v + '" aria-pressed="false">' + d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + '</button>'; n++; } d.setDate(d.getDate() + 1); }
+    box.innerHTML = h;
+    box.addEventListener('click', function (e) { var t = e.target.closest('[data-day]'); if (!t) return; $('date').value = t.dataset.day; $('date').dispatchEvent(new Event('change')); });
+    $('date').addEventListener('change', function () { box.querySelectorAll('[data-day]').forEach(function (c) { c.setAttribute('aria-pressed', String(c.dataset.day === $('date').value)); }); });
+  })();
   $('date').addEventListener('change', function () { o.date = $('date').value; $('f-date').classList.remove('is-bad'); paint(); });
   $('window').addEventListener('change', function () { o.window = $('window').value; BB.save(o); BB.paint(F, o); });
   $('address').addEventListener('input', function () { o.address = $('address').value.trim(); $('f-address').classList.remove('is-bad'); BB.save(o); if (F) BB.paint(F, o); });

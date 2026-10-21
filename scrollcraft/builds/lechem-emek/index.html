@@ -371,6 +371,108 @@
         rgba(26, 20, 16, 0.40) 80%, transparent 100%);
     }
   }
+
+  /* ====== PROPOSED: menu bar, basket, order in steps ====== */
+  .chrome > * { pointer-events: auto; }
+  .chrome { transition: background .25s ease, box-shadow .25s ease; gap: var(--sc-5); }
+  .chrome.is-solid { background: color-mix(in oklab, var(--sc-canvas) 92%, transparent); backdrop-filter: blur(14px);
+    box-shadow: 0 1px 0 color-mix(in oklab, currentColor 14%, transparent); }
+  .chrome__nav { display: flex; align-items: center; gap: var(--sc-5); margin-inline-start: auto; }
+  .chrome__nav a { display: inline-flex; align-items: center; min-height: 40px; color: inherit; text-decoration: none; font-weight: 600; font-size: var(--sc-t-sm); }
+  .chrome__nav a:hover { color: var(--sc-accent); }
+  .chrome__nav a:active { transform: translateY(1px); }
+  .dir-toggle--panel { display: none; }
+  .bag { min-height: 40px; display: inline-flex; align-items: center; gap: var(--sc-2); padding: 0 var(--sc-4); border: 0; border-radius: var(--sc-r-pill); cursor: pointer;
+    background: #C9A227; color: #23201B; font: 700 var(--sc-t-sm) var(--font-body); transition: filter .15s ease, transform .1s ease; }
+  .bag:hover { filter: brightness(1.06); } .bag:active { transform: scale(.97); }
+  .bag__n { min-width: 1.5rem; height: 1.5rem; display: inline-grid; place-items: center; border-radius: 99px; background: #23201B; color: #F7F3EA; font-size: .78rem; padding: 0 .35rem; }
+  .menu-btn { display: none; min-height: 40px; padding: 0 var(--sc-4); border-radius: var(--sc-r-pill); cursor: pointer; font: 600 var(--sc-t-xs) var(--font-body);
+    color: inherit; background: color-mix(in oklab, var(--sc-canvas) 55%, transparent); border: 1px solid color-mix(in oklab, currentColor 28%, transparent); }
+  .hero__actions { display: flex; flex-wrap: wrap; gap: var(--sc-3); margin-block-start: var(--sc-5); }
+  .hero__actions .cta { margin-block-start: 0; --sc-accent: #C9A227; --sc-accent-ink: #23201B; }
+  .cta { border: 0; cursor: pointer; font-family: var(--font-body); font-size: var(--sc-t-base); }
+  .cta--ghost { background: color-mix(in oklab, #14100C 55%, transparent) !important; color: #EFE9DC !important; border: 1px solid rgba(239,233,220,.55) !important; backdrop-filter: blur(8px); }
+  .cta--dark { --sc-accent: #23201B; --sc-accent-ink: #F7F3EA; margin-block-start: var(--sc-5); }
+  .cta--full { width: 100%; justify-content: center; margin: 0; }
+  .item__price { font-size: var(--sc-t-lg); }
+  .item__note { font-size: var(--sc-t-base); max-width: 30ch; }
+  .item__add { width: 100%; min-height: 48px; margin-block-start: var(--sc-4); border: 0; border-radius: var(--sc-r-pill); cursor: pointer;
+    background: #23201B; color: #F7F3EA; font: 700 var(--sc-t-base) var(--font-body); transition: background .15s ease, transform .1s ease; }
+  .item__add:hover { background: #3A332A; } .item__add:active { transform: scale(.98); }
+  .item__add.is-in { background: #1B6B40; }
+  .facts dt { font-size: var(--sc-t-sm); }
+  .facts dd { font-size: var(--sc-t-base); }
+  .maplink { display: inline-block; margin-block-start: var(--sc-1); font-weight: 600; color: #6B5210; text-underline-offset: .22em; }
+  .foot { font-size: var(--sc-t-sm); align-items: center; }
+  .foot__links { display: inline-flex; gap: var(--sc-5); }
+  .foot a { display: inline-block; padding-block: .5rem; }
+
+  .veil { position: fixed; inset: 0; z-index: 90; background: rgba(20,16,12,.55); }
+  .sheet { position: fixed; z-index: 91; inset-block: 0; inset-inline-end: 0; width: min(440px, 100vw); display: flex; flex-direction: column;
+    background: #F7F3EA; color: #23201B; box-shadow: 0 0 40px rgba(35,25,15,.25); padding: var(--sc-5) var(--sc-5) 0; font-family: var(--font-body); }
+  .sheet[hidden], .veil[hidden], .bar[hidden], .step[hidden], .sheet [hidden] { display: none !important; }
+  .sheet__head { display: flex; justify-content: space-between; align-items: center; }
+  .sheet__title { font-family: var(--font-head); font-size: 1.7rem; margin: 0; font-weight: 500; }
+  .sheet__x, .btn-back, .stepper button, .rm { min-height: 40px; min-width: 40px; border: 1px solid #CFC4B2; background: #fff; border-radius: 10px; cursor: pointer; font: 600 .95rem var(--font-body); color: #23201B; transition: background .12s ease, transform .1s ease; }
+  .sheet__x:hover, .btn-back:hover, .stepper button:hover, .rm:hover { background: #EFE9DC; } .sheet__x:active, .btn-back:active, .stepper button:active, .rm:active { transform: scale(.95); }
+  .sheet__x { padding: 0 var(--sc-4); }
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-block-start: var(--sc-4); }
+  .steps i { height: 4px; border-radius: 4px; background: #D9CFBD; } .steps i.on { background: #A9831C; }
+  .steps__say { margin: var(--sc-2) 0 0; font-size: var(--sc-t-sm); color: #5B534A; font-weight: 600; }
+  .sheet__body { flex: 1; overflow-y: auto; padding-block: var(--sc-4); }
+  .lines { list-style: none; margin: 0; padding: 0; }
+  .lines li { display: grid; grid-template-columns: 1fr auto; gap: 6px var(--sc-3); padding-block: var(--sc-4); border-block-end: 1px solid #E3DAC8; align-items: center; }
+  .lines .ln { font-family: var(--font-head); font-size: 1.15rem; } .lines .lp { font-weight: 700; font-variant-numeric: tabular-nums; }
+  .lines .ctl { grid-column: 1 / -1; display: flex; align-items: center; gap: var(--sc-3); }
+  .stepper { display: inline-flex; align-items: center; gap: 6px; } .stepper output { min-width: 2rem; text-align: center; font-weight: 700; }
+  .rm { margin-inline-start: auto; display: inline-grid; place-items: center; padding: 0; } .rm svg { width: 20px; height: 20px; }
+  .empty { color: #5B534A; } .empty a { color: #6B5210; font-weight: 600; }
+  .note { font-size: var(--sc-t-sm); color: #5B534A; margin: var(--sc-3) 0 0; }
+  .note b { color: #23201B; }
+  .opts { border: 0; padding: 0; margin: 0 0 var(--sc-4); display: grid; gap: var(--sc-2); } .opts legend { font-weight: 700; margin-block-end: var(--sc-2); }
+  .opt { display: flex; gap: var(--sc-3); align-items: center; min-height: 48px; padding: 0 var(--sc-4); border: 1px solid #CFC4B2; border-radius: 12px; background: #fff; cursor: pointer; }
+  .opt:has(input:checked) { border-color: #A9831C; box-shadow: 0 0 0 2px rgba(169,131,28,.25); } .opt:has(input:disabled) { opacity: .6; cursor: not-allowed; }
+  .opt small { display: block; color: #5B534A; }
+  .fld { display: grid; gap: 6px; margin-block-end: var(--sc-4); font-weight: 600; font-size: var(--sc-t-sm); }
+  .fld input, .fld textarea { min-height: 46px; padding: 8px 12px; border: 1px solid #BFB39D; border-radius: 10px; font: 500 1rem var(--font-body); background: #fff; color: #23201B; }
+  .fld small { font-weight: 500; color: #5B534A; }
+  .err { color: #9B2C1F; font-weight: 600; min-height: 1.2em; margin: 0; font-size: var(--sc-t-sm); }
+  .sheet__foot { border-block-start: 1px solid #E3DAC8; padding-block: var(--sc-4) calc(var(--sc-4) + env(safe-area-inset-bottom)); background: #F7F3EA; }
+  .sum { display: flex; justify-content: space-between; align-items: baseline; margin-block-end: var(--sc-3); font-size: 1.1rem; } .sum strong { font-size: 1.5rem; }
+  .sheet__btns { display: flex; gap: var(--sc-3); } .btn-back { padding: 0 var(--sc-4); min-height: 52px; }
+  .sheet .cta { --sc-accent: #23201B; --sc-accent-ink: #F7F3EA; }
+  .sheet .cta:disabled { opacity: .45; cursor: not-allowed; }
+  .bar { position: fixed; inset-inline: 0; bottom: 0; z-index: 70; padding: 10px var(--sc-gutter) calc(10px + env(safe-area-inset-bottom)); background: rgba(247,243,234,.96); box-shadow: 0 -1px 0 #E3DAC8; display: none; }
+  .bar button { width: 100%; min-height: 52px; display: flex; justify-content: space-between; align-items: center; padding: 0 var(--sc-5); border: 0; border-radius: 99px; background: #23201B; color: #F7F3EA; font: 700 1rem var(--font-body); cursor: pointer; }
+  .toast { position: fixed; z-index: 95; inset-inline: 0; margin-inline: auto; bottom: 28px; width: max-content; max-width: 90vw; padding: 12px 18px; border-radius: 99px; background: #23201B; color: #F7F3EA; font-weight: 600; font-size: var(--sc-t-sm); opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
+  .toast.on { opacity: 1; transform: none; }
+  @media (max-width: 860px) {
+    .chrome__nav { display: none; position: fixed; inset-block-start: 64px; inset-inline: var(--sc-gutter); flex-direction: column; align-items: stretch; gap: 0; padding: var(--sc-3) var(--sc-5);
+      background: #F7F3EA; color: #23201B; border-radius: 16px; box-shadow: 0 12px 40px rgba(20,16,12,.3); margin: 0; }
+    .chrome__nav.open { display: flex; }
+    .chrome__nav a { min-height: 48px; border-block-end: 1px solid #E3DAC8; font-size: 1rem; }
+    .dir-toggle--panel { display: inline-flex; align-items: center; margin-block-start: var(--sc-3); align-self: flex-start; color: #23201B; background: #fff; }
+    .dir-toggle--bar { display: none; }
+    .menu-btn { display: inline-flex; align-items: center; }
+    .chrome__mark { font-size: 1.1rem; }
+    .clock { display: none; }
+    .sheet { width: 100vw; padding-inline: var(--sc-4); }
+    .bar.show { display: block; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-sc-cue], .sc-split__i, .sc-copy { opacity: 1 !important; transform: none !important; translate: none; }
+    .shaping .sc-stage, .shaping [data-sc-stage] { display: flex; flex-direction: column; justify-content: center; gap: var(--sc-5); }
+    .shaping .line { position: static; translate: none; inset-inline: auto; }
+  }
+
+  .cta { transition: background-color .12s ease, filter .12s ease, box-shadow .12s ease, transform .1s ease; }
+  .cta:hover { background-color: #D9B536; }
+  .cta--ghost:hover { background-color: rgba(239,233,220,.22) !important; }
+  .cta--dark:hover, .sheet .cta:hover { background-color: #3A332A; color: #F7F3EA; }
+  .cta:active { transform: scale(.97) !important; filter: brightness(.92); }
+  .chrome__mark { display: inline-flex; align-items: center; min-height: 40px; }
+  .maplink { display: inline-flex; align-items: center; min-height: 40px; }
+
 </style>
 </head>
 <body>
@@ -379,9 +481,17 @@
 
 <header class="chrome" id="chrome">
   <a class="chrome__mark" href="#top">Lechem Emek</a>
+  <nav class="chrome__nav" id="menuPanel" aria-label="Pages">
+    <a href="#counter">The counter</a>
+    <a href="#visit">Visit</a>
+    <a href="#order">Order</a>
+    <button class="dir-toggle dir-toggle--panel" type="button" data-dir>עברית</button>
+  </nav>
   <div class="chrome__right">
     <time class="clock" id="clock" datetime="04:00" aria-label="Time of morning">04:00</time>
-    <button class="dir-toggle" id="dirToggle" type="button">עברית</button>
+    <button class="bag" id="bagBtn" type="button" aria-haspopup="dialog">Order <span class="bag__n" id="bagN" aria-label="items in the basket">0</span></button>
+    <button class="menu-btn" id="menuBtn" type="button" aria-expanded="false" aria-controls="menuPanel">Menu</button>
+    <button class="dir-toggle dir-toggle--bar" id="dirToggle" type="button" data-dir>עברית</button>
   </div>
 </header>
 
@@ -397,7 +507,10 @@
         <span class="sc-label">Emek Refaim, Jerusalem</span>
         <h1 class="sc-display sc-display--xl" data-sc-kinetic="lines">Flour at four. <em>Bread by seven.</em></h1>
         <p class="sc-lede">A small bakery on Emek Refaim since 1998. Everything on the shelf was baked in this room today.</p>
-        <a class="hero__link" href="#counter">See what is on the counter</a>
+        <div class="hero__actions">
+          <button class="cta" type="button" data-open-basket>Start your order</button>
+          <a class="cta cta--ghost" href="#counter">See the counter</a>
+        </div>
       </div>
     </div>
   </section>
@@ -466,28 +579,32 @@
           <p class="sc-body">Baked in one batch each morning. When a shelf is empty, that is the day.</p>
         </div>
 
-        <article class="item">
+        <article class="item" data-id="challah" data-name="Challah, plain" data-price="18">
           <div class="item__shot" data-sc-tilt="5"><img src="assets/item-challah.jpg" width="900" height="1117" alt="A plain braided challah"></div>
           <div class="item__meta"><h3 class="item__name">Challah, <em>plain</em></h3><span class="item__price">₪18</span></div>
           <p class="item__note">Six strands. A long cold prove, brushed twice.</p>
+          <button class="item__add" type="button" data-add="challah"><span class="item__add-label">Add, ₪18</span></button>
         </article>
 
-        <article class="item">
+        <article class="item" data-id="babka" data-name="Babka, chocolate" data-price="46">
           <div class="item__shot" data-sc-tilt="5"><img src="assets/item-babka.jpg" width="900" height="1117" alt="A chocolate babka, two slices cut"></div>
           <div class="item__meta"><h3 class="item__name">Babka, <em>chocolate</em></h3><span class="item__price">₪46</span></div>
           <p class="item__note">Laminated Thursday night, baked Friday morning.</p>
+          <button class="item__add" type="button" data-add="babka"><span class="item__add-label">Add, ₪46</span></button>
         </article>
 
-        <article class="item">
+        <article class="item" data-id="rugelach" data-name="Rugelach, a box" data-price="38">
           <div class="item__shot" data-sc-tilt="5"><img src="assets/item-rugelach.jpg" width="900" height="1117" alt="An open box of chocolate rugelach"></div>
           <div class="item__meta"><h3 class="item__name">Rugelach, <em>a box</em></h3><span class="item__price">₪38</span></div>
           <p class="item__note">Twelve. Still warm if you are here before nine.</p>
+          <button class="item__add" type="button" data-add="rugelach"><span class="item__add-label">Add, ₪38</span></button>
         </article>
 
-        <article class="item">
+        <article class="item" data-id="sourdough" data-name="Sourdough boule" data-price="32">
           <div class="item__shot" data-sc-tilt="5"><img src="assets/item-sourdough.jpg" width="900" height="1117" alt="A round sourdough boule with a scored crust"></div>
           <div class="item__meta"><h3 class="item__name">Sourdough <em>boule</em></h3><span class="item__price">₪32</span></div>
           <p class="item__note">One starter, fed since the year we opened.</p>
+          <button class="item__add" type="button" data-add="sourdough"><span class="item__add-label">Add, ₪32</span></button>
         </article>
 
         <div class="rail__end">
@@ -507,7 +624,7 @@
         <h2 class="sc-display sc-display--md">Come in.</h2>
         <dl class="facts">
           <div><dt>Hours</dt><dd>Sunday to Thursday, 07:00 to 19:00<br>Friday, 07:00 to 14:00</dd></div>
-          <div><dt>Address</dt><dd>Emek Refaim 41, Jerusalem</dd></div>
+          <div><dt>Address</dt><dd>Emek Refaim 41, Jerusalem<br><a class="maplink" href="https://www.google.com/maps/search/?api=1&amp;query=Emek+Refaim+41+Jerusalem" target="_blank" rel="noopener">Open in Maps</a></dd></div>
           <div><dt>Languages</dt><dd>Hebrew, English</dd></div>
           <div><dt>Delivery</dt><dd>Across Jerusalem on orders over ₪120</dd></div>
           <div><dt>Notice</dt><dd>Two days for platters and large orders</dd></div>
@@ -529,16 +646,61 @@
       <div class="sc-copy sc-copy--center" data-sc-cue="0.06">
         <h2 class="sc-display sc-display--lg" data-sc-kinetic="lines">Order for Shabbos before Thursday at two.</h2>
         <p class="sc-lede">Tell us what you want and when you are coming. It will be wrapped and waiting with your name on it.</p>
-        <a class="cta" href="#top" data-sc-magnet="0.26" data-sc-cue="0.06" data-sc-rise="0">Message the bakery</a>
+        <button class="cta" type="button" data-open-basket data-sc-magnet="0.26" data-sc-cue="0.06" data-sc-rise="0">Start your order</button>
       </div>
       <footer class="foot">
         <span>Lechem Emek, Emek Refaim 41, Jerusalem</span>
+        <span class="foot__links"><a href="#counter">The counter</a><a href="#visit">Visit</a><a href="#top">Back to the top</a></span>
         <span>Powered by <a href="#top">MyIsraelRental</a></span>
       </footer>
     </div>
   </section>
 
 </main>
+
+
+<div class="veil" id="veil" hidden></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="sheetTitle" hidden>
+  <div class="sheet__head">
+    <h2 id="sheetTitle" class="sheet__title">Your basket</h2>
+    <button class="sheet__x" type="button" id="sheetX" aria-label="Close">Close</button>
+  </div>
+  <div class="steps" aria-hidden="true"><i></i><i></i><i></i></div>
+  <p class="steps__say" id="stepSay">Step 1 of 3: your basket</p>
+  <div class="sheet__body">
+    <section class="step" data-step="1">
+      <ul class="lines" id="lines"></ul>
+      <p class="empty" id="empty">Your basket is empty. <a href="#counter" id="emptyLink">See the counter</a></p>
+      <p class="note" id="deliveryNote"></p>
+      <p class="note">Shabbos orders close Thursday at two.</p>
+    </section>
+    <section class="step" data-step="2" hidden>
+      <fieldset class="opts"><legend>How do you want it</legend>
+        <label class="opt"><input type="radio" name="how" value="Pickup" checked><span>Pickup, Emek Refaim 41</span></label>
+        <label class="opt" id="optDel"><input type="radio" name="how" value="Delivery"><span>Delivery across Jerusalem <small id="delWhy"></small></span></label>
+      </fieldset>
+      <label class="fld">Day<input type="date" id="fDay" required></label>
+      <label class="fld">Time<input type="time" id="fTime" min="07:00" max="19:00" required><small>We are open 07:00 to 19:00, Friday to 14:00</small></label>
+      <label class="fld" id="fAddrWrap" hidden>Delivery address<input type="text" id="fAddr" autocomplete="street-address"></label>
+      <p class="err" id="err2" role="alert"></p>
+    </section>
+    <section class="step" data-step="3" hidden>
+      <label class="fld">Name for the bag<input type="text" id="fName" autocomplete="name" required></label>
+      <label class="fld">Phone<input type="tel" id="fPhone" autocomplete="tel" required></label>
+      <label class="fld">Anything we should know <small>(optional)</small><textarea id="fNote" rows="2"></textarea></label>
+      <p class="err" id="err3" role="alert"></p>
+    </section>
+  </div>
+  <div class="sheet__foot">
+    <div class="sum"><span>Total</span><strong id="sumTotal">₪0</strong></div>
+    <div class="sheet__btns">
+      <button class="btn-back" type="button" id="btnBack" hidden>Back</button>
+      <button class="cta cta--full" type="button" id="btnNext">Continue to pickup or delivery</button>
+    </div>
+  </div>
+</aside>
+<div class="bar" id="phoneBar" hidden><button type="button" data-open-basket><span id="barTxt">View basket</span><strong id="barTot">₪0</strong></button></div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="scrollcraft.js"></script>
 <script>
@@ -604,6 +766,117 @@
       ScrollCraft.instances.forEach(function (i) { i.layout(); });
     });
   })();
+
+  /* ====== PROPOSED: basket, menu, steps ====== */
+  (function () {
+    var $ = function (s, r) { return (r || document).querySelector(s); };
+    var chrome = $('#chrome'), sheet = $('#sheet'), veil = $('#veil');
+    var cart = {}; var step = 1; var KEY = 'lechem-cart'; var atEnd = false;
+    try { cart = JSON.parse(localStorage.getItem(KEY) || '{}') || {}; } catch (e) { cart = {}; }
+    var prices = {}, names = {};
+    document.querySelectorAll('.item').forEach(function (a) { prices[a.dataset.id] = +a.dataset.price; names[a.dataset.id] = a.dataset.name; });
+    Object.keys(cart).forEach(function (k) { if (!prices[k]) delete cart[k]; });
+    function save() { try { localStorage.setItem(KEY, JSON.stringify(cart)); } catch (e) {} }
+    function count() { return Object.keys(cart).reduce(function (n, k) { return n + cart[k]; }, 0); }
+    function total() { return Object.keys(cart).reduce(function (n, k) { return n + cart[k] * prices[k]; }, 0); }
+    var bin = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v6M14 10v6"/></svg>';
+    var SH = '₪';
+    function render() {
+      var n = count(), t = total();
+      $('#bagN').textContent = n; $('#sumTotal').textContent = SH + t;
+      var ul = $('#lines'); ul.innerHTML = '';
+      Object.keys(cart).forEach(function (k) {
+        var li = document.createElement('li');
+        li.innerHTML = '<span class="ln">' + names[k] + '</span><span class="lp">' + SH + cart[k] * prices[k] + '</span>' +
+          '<div class="ctl"><span class="stepper"><button type="button" data-dec="' + k + '" aria-label="One less ' + names[k] + '">−</button><output>' + cart[k] + '</output><button type="button" data-inc="' + k + '" aria-label="One more ' + names[k] + '">+</button></span>' +
+          '<button class="rm" type="button" data-rm="' + k + '" aria-label="Remove ' + names[k] + ' from the basket">' + bin + '</button></div>';
+        ul.appendChild(li);
+      });
+      $('#empty').hidden = n > 0;
+      var dn = $('#deliveryNote');
+      dn.hidden = n === 0;
+      dn.innerHTML = t >= 120 ? 'Delivery across Jerusalem is open for this order.' : 'Add <b>' + SH + (120 - t) + '</b> more to have it delivered across Jerusalem.';
+      var del = document.querySelector('input[name=how][value=Delivery]');
+      del.disabled = t < 120; $('#delWhy').textContent = t < 120 ? 'on orders over ' + SH + '120' : '';
+      if (del.disabled && del.checked) document.querySelector('input[name=how][value=Pickup]').checked = true;
+      syncAddr();
+      document.querySelectorAll('.item').forEach(function (a) {
+        var q = cart[a.dataset.id] || 0, b = $('.item__add', a), l = $('.item__add-label', b);
+        b.classList.toggle('is-in', q > 0);
+        l.textContent = q > 0 ? q + ' in the basket, add another, ' + SH + a.dataset.price : 'Add, ' + SH + a.dataset.price;
+      });
+      var bar = $('#phoneBar'); $('#barTxt').textContent = n === 1 ? '1 item in your basket' : n + ' items in your basket'; $('#barTot').textContent = SH + t;
+      bar.hidden = n === 0 || atEnd; bar.classList.toggle('show', n > 0 && !atEnd);
+      $('#btnNext').disabled = (n === 0 && step === 1);
+      if (step === 3) $('#btnNext').textContent = 'Send order on WhatsApp, ' + SH + t;
+    }
+    new IntersectionObserver(function (e) { atEnd = e[0].isIntersecting; render(); }, { threshold: 0.4 }).observe($('#order'));
+    function toast(m) { var t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toast.t); toast.t = setTimeout(function () { t.classList.remove('on'); }, 1800); }
+    function setStep(n, push) {
+      step = n;
+      document.querySelectorAll('.step').forEach(function (s) { s.hidden = +s.dataset.step !== n; });
+      document.querySelectorAll('.steps i').forEach(function (i, ix) { i.classList.toggle('on', ix < n); });
+      $('#stepSay').textContent = 'Step ' + n + ' of 3: ' + ['your basket', 'pickup or delivery', 'your details'][n - 1];
+      $('#sheetTitle').textContent = ['Your basket', 'When and where', 'Your details'][n - 1];
+      $('#btnBack').hidden = n === 1;
+      $('#btnNext').textContent = n === 1 ? 'Continue to pickup or delivery' : n === 2 ? 'Continue to your details' : 'Send order on WhatsApp, ' + SH + total();
+      if (push) history.pushState(null, '', '#order-' + n);
+      render();
+    }
+    function openSheet() {
+      if (count() === 0) { toast('Pick something from the counter first'); document.getElementById('counter').scrollIntoView(); return; }
+      sheet.hidden = false; veil.hidden = false; document.body.style.overflow = 'hidden';
+      setStep(1, false); history.pushState(null, '', '#order-1'); $('#sheetX').focus();
+    }
+    function closeSheet(fromPop) {
+      if (sheet.hidden) return;
+      sheet.hidden = true; veil.hidden = true; document.body.style.overflow = '';
+      if (!fromPop && /^#order-/.test(location.hash)) history.back();
+    }
+    addEventListener('popstate', function () {
+      var m = /^#order-(\d)$/.exec(location.hash);
+      if (m && !sheet.hidden) setStep(+m[1], false); else if (!m) closeSheet(true);
+    });
+    document.addEventListener('click', function (e) {
+      var t = e.target.closest('button,a'); if (!t) return;
+      if (t.dataset.add) { cart[t.dataset.add] = (cart[t.dataset.add] || 0) + 1; save(); render(); toast(names[t.dataset.add] + ' added'); }
+      else if (t.dataset.inc) { cart[t.dataset.inc]++; save(); render(); }
+      else if (t.dataset.dec) { cart[t.dataset.dec]--; if (cart[t.dataset.dec] < 1) delete cart[t.dataset.dec]; save(); render(); }
+      else if (t.dataset.rm) { delete cart[t.dataset.rm]; save(); render(); }
+      else if (t.id === 'bagBtn' || t.hasAttribute('data-open-basket')) { openSheet(); }
+      else if (t.id === 'sheetX' || t.id === 'emptyLink') { closeSheet(); }
+      else if (t.id === 'menuBtn') { var o = $('#menuPanel').classList.toggle('open'); t.setAttribute('aria-expanded', o); }
+      else if (t.closest('#menuPanel') && t.tagName === 'A') { $('#menuPanel').classList.remove('open'); $('#menuBtn').setAttribute('aria-expanded', 'false'); }
+    });
+    veil.addEventListener('click', function () { closeSheet(); });
+    addEventListener('keydown', function (e) { if (e.key === 'Escape') { closeSheet(); $('#menuPanel').classList.remove('open'); } });
+    function syncAddr() { $('#fAddrWrap').hidden = document.querySelector('input[name=how]:checked').value !== 'Delivery'; }
+    document.querySelectorAll('input[name=how]').forEach(function (r) { r.addEventListener('change', syncAddr); });
+    $('#btnBack').addEventListener('click', function () { history.back(); });
+    $('#btnNext').addEventListener('click', function () {
+      if (step === 1) { if (count()) setStep(2, true); return; }
+      if (step === 2) {
+        var how = document.querySelector('input[name=how]:checked').value;
+        var miss = !$('#fDay').value ? 'Choose the day.' : !$('#fTime').value ? 'Choose the time.' : (how === 'Delivery' && !$('#fAddr').value.trim()) ? 'Add the delivery address.' : '';
+        $('#err2').textContent = miss; if (!miss) setStep(3, true); return;
+      }
+      var miss3 = !$('#fName').value.trim() ? 'Add a name for the bag.' : !$('#fPhone').value.trim() ? 'Add a phone number.' : '';
+      $('#err3').textContent = miss3; if (miss3) return;
+      var how2 = document.querySelector('input[name=how]:checked').value;
+      var L = ['Order for Lechem Emek', ''];
+      Object.keys(cart).forEach(function (k) { L.push(cart[k] + ' x ' + names[k] + ', ' + SH + cart[k] * prices[k]); });
+      L.push('', 'Total: ' + SH + total(), how2 + ': ' + $('#fDay').value + ' at ' + $('#fTime').value);
+      if (how2 === 'Delivery') L.push('Address: ' + $('#fAddr').value.trim());
+      L.push('Name: ' + $('#fName').value.trim(), 'Phone: ' + $('#fPhone').value.trim());
+      if ($('#fNote').value.trim()) L.push('Note: ' + $('#fNote').value.trim());
+      window.open('https://wa.me/?text=' + encodeURIComponent(L.join('\n')), '_blank', 'noopener');
+    });
+    function solid() { chrome.classList.toggle('is-solid', scrollY > 60); }
+    addEventListener('scroll', solid, { passive: true }); solid();
+    document.querySelectorAll('[data-dir]').forEach(function (b) { if (b.id !== 'dirToggle') b.addEventListener('click', function () { $('#dirToggle').click(); document.querySelectorAll('[data-dir]').forEach(function (x) { x.textContent = document.documentElement.dir === 'rtl' ? 'English' : 'עברית'; }); }); });
+    render(); setStep(1, false);
+  })();
+
 </script>
 </body>
 </html>

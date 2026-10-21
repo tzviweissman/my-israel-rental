@@ -10,7 +10,7 @@
 <meta property="og:image" content="https://myisraelrental.com/pages/chicken-munch/assets/hot-poppers.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700;800&family=Heebo:wght@400;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site.css">
 </head>
 <body class="no-js" data-page="menu">
@@ -34,21 +34,21 @@
       <div class="styles-grid">
         <ul class="menu-list">
           <li class="rev"><h3>Classic American Crunch</h3><p>Handcrafted chicken soaked in our signature marinade, coated in cornflakes for the full Chicken Munch experience.</p></li>
-          <li class="rev"><h3>Original Hot Poppers</h3><p>Saucy bites that are the ultimate combination of sweet and spicy. Dangerously addicting.</p></li>
+          <li class="rev has" tabindex="0" data-show="Original Hot Poppers"><h3>Original Hot Poppers</h3><p>Saucy bites that are the ultimate combination of sweet and spicy. Dangerously addicting.</p></li>
           <li class="rev"><h3>Shnitzel Bites</h3><p>Signature chicken in finger form. Perfect for a party or sharing.</p></li>
-          <li class="rev"><h3>Fruity Chicken</h3><p>Chicken fingers coated in Fruity Pebbles, for those who love a hint of sweetness with their savory.</p></li>
-          <li class="rev"><h3>Crispy Cornflake</h3><p>Chicken fingers coated in cornflakes, for those who enjoy crazy texture with every bite.</p></li>
-          <li class="rev"><h3>Rice Krispie</h3><p>Chicken fried in a crispy Rice Krispie coating for that perfect crackle.</p></li>
+          <li class="rev has" tabindex="0" data-show="Fruity Chicken"><h3>Fruity Chicken</h3><p>Chicken fingers coated in Fruity Pebbles, for those who love a hint of sweetness with their savory.</p></li>
+          <li class="rev has" tabindex="0" data-show="Crispy Cornflake"><h3>Crispy Cornflake</h3><p>Chicken fingers coated in cornflakes, for those who enjoy crazy texture with every bite.</p></li>
+          <li class="rev has" tabindex="0" data-show="Rice Krispie"><h3>Rice Krispie</h3><p>Chicken fried in a crispy Rice Krispie coating for that perfect crackle.</p></li>
           <li class="rev"><h3>Pretzel</h3><p>Chicken fingers with hints of BBQ and bites of salty pretzel.</p></li>
           <li class="rev"><h3>Buffalo Wings</h3><p>In-bone chicken bites coated in a hickory, hot and savory sauce.</p></li>
         </ul>
-        <div class="shots">
-          <figure class="shot wide rev"><img src="assets/hot-poppers.webp" alt="Original Hot Poppers in a kraft bowl" width="900" height="854" loading="lazy"><figcaption>Original Hot Poppers</figcaption></figure>
-          <figure class="shot rev"><img src="assets/cornflake.webp" alt="Crispy Cornflake chicken in a kraft bowl with a sauce pot" width="900" height="900" loading="lazy"><figcaption>Crispy Cornflake</figcaption></figure>
-          <figure class="shot rev"><img src="assets/fruity.webp" alt="Fruity Chicken, coated in Fruity Pebbles, in a kraft bowl" width="900" height="900" loading="lazy"><figcaption>Fruity Chicken</figcaption></figure>
-          <figure class="shot rev"><img src="assets/rice-krispie-2.webp" alt="Rice Krispie chicken in a kraft bowl with a sauce pot" width="900" height="900" loading="lazy"><figcaption>Rice Krispie</figcaption></figure>
-          <figure class="shot rev"><img src="assets/tenders.webp" alt="Crumbed chicken fingers in a kraft bowl with a sauce pot, from above" width="900" height="900" loading="lazy"></figure>
-        </div>
+        <figure class="stage" id="stage" aria-live="polite">
+          <img class="on" src="assets/hot-poppers.webp" alt="Original Hot Poppers in a kraft bowl" width="900" height="854" data-for="Original Hot Poppers">
+          <img src="assets/fruity.webp" alt="Fruity Chicken, coated in Fruity Pebbles, in a kraft bowl" width="900" height="900" loading="lazy" data-for="Fruity Chicken">
+          <img src="assets/cornflake.webp" alt="Crispy Cornflake chicken in a kraft bowl with a sauce pot" width="900" height="900" loading="lazy" data-for="Crispy Cornflake">
+          <img src="assets/rice-krispie-2.webp" alt="Rice Krispie chicken in a kraft bowl with a sauce pot" width="900" height="900" loading="lazy" data-for="Rice Krispie">
+          <figcaption id="stage-cap">Original Hot Poppers</figcaption>
+        </figure>
       </div>
       <div class="sauces rev">
         <h3>Sauces</h3>
@@ -66,7 +66,7 @@
         <div class="tiles">
           <div class="tile rev"><div><h3>Mini Munch Box</h3><p class="feeds">Feeds 3 to 4</p><p class="what">Up to 4 types of chicken and 3 sauces</p></div>
             <div><div class="price">$69</div><a class="btn-line add" href="order.html?add=mini" data-add="mini">Add</a></div></div>
-          <div class="tile rev"><div><h3>Grand Munch Box</h3><p class="feeds">Feeds 8 to 10</p><p class="what">5 types of chicken and 4 sauces</p></div>
+          <div class="tile pick rev"><div><span class="tag">Family size</span><h3>Grand Munch Box</h3><p class="feeds">Feeds 8 to 10</p><p class="what">5 types of chicken and 4 sauces</p></div>
             <div><div class="price">$140</div><a class="btn-line add" href="order.html?add=grand" data-add="grand">Add</a></div></div>
           <div class="tile rev"><div><h3>Supreme Munch Box</h3><p class="feeds">Feeds 16</p><p class="what">Up to 6 types of chicken and 5 sauces</p></div>
             <div><div class="price">$220</div><a class="btn-line add" href="order.html?add=supreme" data-add="supreme">Add</a></div></div>
@@ -93,7 +93,7 @@
   <section class="close" aria-label="Chicken Munch">
     <div class="wrap">
       <p>WhatsApp or call <a href="https://wa.me/972553316975" target="_blank" rel="noopener">055-331-6975</a><br>From the US, call (no WhatsApp) <a href="tel:+19294748871">929-474-8871</a><br>Email <a href="mailto:chickenmunch26@gmail.com">chickenmunch26@gmail.com</a></p>
-      <a class="btn" href="order.html">Order now <span class="arw" aria-hidden="true">→</span></a>
+      <a class="btn" href="order.html">Order now <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
     </div>
     <p class="giant" aria-hidden="true"><span class="r">Chicken</span> <span class="g">Munch</span></p>
   </section>
@@ -106,5 +106,13 @@
 </div>
 
 <script src="site.js"></script>
+<script>
+(function () {
+  var imgs = [].slice.call(document.querySelectorAll('#stage img')), cap = document.getElementById('stage-cap'), items = [].slice.call(document.querySelectorAll('.menu-list li.has'));
+  function show(li) { var n = li.dataset.show; imgs.forEach(function (i) { i.classList.toggle('on', i.dataset.for === n); }); items.forEach(function (x) { x.classList.toggle('cur', x === li); }); cap.textContent = n; }
+  items[0].classList.add('cur');
+  items.forEach(function (li) { li.addEventListener('mouseenter', function () { show(li); }); li.addEventListener('click', function () { show(li); }); li.addEventListener('focus', function () { show(li); }); });
+})();
+</script>
 </body>
 </html>

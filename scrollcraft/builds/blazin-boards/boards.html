@@ -76,7 +76,7 @@
     var stage = p.cm
       ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815" loading="lazy" style="width:' + (p.cm[1] * PX / 0.98).toFixed(0) + 'px"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
       : '<div class="stage"><span style="font-weight:700;color:var(--gold-text)">Size on request</span></div>';
-    return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + stage
+    return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + (BB.saving(p) ? '<span class="save-b">Save $' + BB.saving(p) + '</span>' : '') + stage
       + '<div class="body"><span class="line">' + BB.LINES[p.line] + '</span><h3>' + BB.esc(p.short) + '</h3>'
       + '<span class="price">' + BB.money(p.price, p.currency) + '</span>'
       + (p.what ? '<p class="what">' + BB.esc(p.what) + '</p>' : '')
@@ -100,7 +100,10 @@
   }
   document.addEventListener('click', function (e) {
     var t = e.target.closest('[data-inc],[data-dec],[data-bottle],[data-show]'); if (!t || !F) return;
-    if (t.dataset.show) { show = t.dataset.show; document.querySelectorAll('[data-show]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); }); paint(); return; }
+    if (t.dataset.show) {
+      var g = document.getElementById('boards'); g.style.minHeight = g.offsetHeight + 'px';
+      show = t.dataset.show; document.querySelectorAll('[data-show]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); });
+      paint(); if (g.animate) g.animate([{ opacity: 0.85 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' }); return; }
     var id = t.dataset.inc || t.dataset.dec || t.dataset.bottle;
     var p = F.products.filter(function (x) { return x.id === id; })[0];
     var was = o.cart[id] || 0;

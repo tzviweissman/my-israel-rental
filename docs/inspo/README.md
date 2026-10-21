@@ -9,6 +9,7 @@ rules (docs/page-generation-rules.md).
 | Date | Source | Notes |
 |---|---|---|
 | 20 Oct 2026 | Product and order pages Tzvi sent (7 recordings, 9 stills) | [product-pages-2026-10-20/](product-pages-2026-10-20/README.md): 13 techniques and the buying psychology behind them, 17 pictures |
+| 21 Oct 2026 | Product films Tzvi liked: Olipop can in its ingredients, an overhead platter build | [product-films-2026-10-21/](product-films-2026-10-21/README.md): the film idea for food openings, 10 stills |
 | 18 Oct 2026 | Awwwards food and drink, the 62 newest sites | [awwwards-food-2026-10-18/](awwwards-food-2026-10-18/README.md): 113 effects with pictures, each part ends with picks for Chicken Munch |
 | 18 Oct 2026 | Awwwards, every category (170 sites) | [awwwards-categories-2026-10-18/](awwwards-categories-2026-10-18/README.md): 161 effects with pictures |
 | 18 Oct 2026 | Five Awwwards Sites of the Day (drone.riotters, butter.video, usavionix, unitedcarriers, seasats) | [awwwards-2026-10-18/](awwwards-2026-10-18/README.md): 21 effects, 25 pictures (2 follow the mouse) |

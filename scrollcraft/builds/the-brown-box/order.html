@@ -142,6 +142,29 @@
     .dock .btn { min-height: 48px; padding: 0 1.1rem; font-size: .95rem; }
     main { padding-bottom: 5rem; }
   }
+
+  /* review changes: order in three steps, a bin on every basket line */
+  .stepbar { margin: 1.4rem 0 1.6rem; }
+  .stepbar p { margin: 0 0 .5rem; font: 600 .95rem/1.3 var(--font-body); color: var(--soft); }
+  .stepbar ol { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: .5rem; }
+  .stepbar li { height: 4px; border-radius: 4px; background: var(--line-ivory); transition: background 200ms ease-out; }
+  .stepbar li.on { background: var(--gold-ink); }
+  .backstep { min-height: 48px; padding: 0 1.3rem; border-radius: 999px; border: 1px solid var(--night); background: none; color: var(--night); font: 500 1rem/1 var(--font-body); cursor: pointer; transition: background 120ms ease-out, color 120ms ease-out, transform 100ms ease-out; }
+  .backstep:hover { background: var(--night); color: #fff; } .backstep:active { transform: scale(.97); }
+  .step[hidden] { display: none; } .step > h2:focus { outline: none; }
+  .cats { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1rem 0 .2rem; }
+  .cats button { min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid var(--line-ivory); background: #fff; color: var(--ink); font: 500 .95rem/1 var(--font-body); cursor: pointer; transition: background 120ms ease-out, color 120ms ease-out, transform 100ms ease-out; }
+  .cats button:hover { background: var(--ivory-2); } .cats button:active { transform: scale(.97); }
+  .cats button[aria-pressed="true"] { background: var(--night); border-color: var(--night); color: #fff; }
+  .cats button[aria-pressed="true"]:hover { background: var(--ink); }
+  .cats button .n { margin-inline-start: .45rem; display: inline-grid; place-items: center; min-width: 1.4rem; height: 1.4rem; padding: 0 .3rem; border-radius: 99px; background: var(--gold-ink); color: #fff; font-size: .8rem; }
+  #gifts .grp { display: none; } #gifts .items { margin-top: 1rem; }
+  #gifts .items[hidden] { display: none; }
+  .sum li { align-items: center; }
+  .sum li .l { display: flex; justify-content: space-between; gap: 1rem; flex: 1; }
+  .sum li .rm { width: 40px; height: 40px; flex: none; border: 0; border-radius: 99px; background: none; color: var(--on-night-soft); cursor: pointer; display: grid; place-items: center; transition: background 120ms ease-out, color 120ms ease-out, transform 100ms ease-out; }
+  .sum li .rm:hover { background: rgb(255 255 255 / .14); color: #fff; } .sum li .rm:active { transform: scale(.92); }
+  .sum .btn:hover, .dock .btn:hover { background: var(--ivory-2); }
 </style>
 </head>
 <body>
@@ -161,13 +184,15 @@
 
   <div class="wrap cols">
     <form id="f" novalidate>
-      <section class="step" aria-labelledby="s1">
+      <div class="stepbar"><p id="stepnow" aria-live="polite">Step 1 of 3: Your order</p><ol aria-hidden="true"><li class="on"></li><li></li><li></li></ol></div>
+      <section class="step" aria-labelledby="s1" data-s="1">
         <h2 id="s1"><span class="n">1</span>Your order</h2>
         <p class="hint">Every bowl comes with two extras of your choice.</p>
+        <div class="cats" id="cats" role="group" aria-label="Menu sections"></div>
         <div id="gifts"></div>
       </section>
 
-      <section class="step" aria-labelledby="s2">
+      <section class="step" aria-labelledby="s2" data-s="2" hidden>
         <h2 id="s2"><span class="n">2</span>Where it is going</h2>
         <p class="hint">We deliver throughout Jerusalem. The fee depends on the location.</p>
         <div class="fields">
@@ -180,7 +205,7 @@
         </div>
       </section>
 
-      <section class="step" aria-labelledby="s3">
+      <section class="step" aria-labelledby="s3" data-s="3" hidden>
         <h2 id="s3"><span class="n">3</span>Your details</h2>
         <div class="fields">
           <div data-need><label for="me">Your name</label><input id="me" name="me" autocomplete="name"><p class="msg">Add your name.</p></div>
@@ -188,6 +213,7 @@
           <div class="full"><label for="note">Anything else? <small>(optional)</small></label><input id="note" name="note" autocomplete="off"></div>
         </div>
       </section>
+      <button type="button" class="backstep" id="stepback" hidden>Back</button>
     </form>
 
     <aside class="sum" aria-labelledby="sumh">
@@ -198,7 +224,7 @@
       <p class="note">Delivery is added on WhatsApp once we know the neighbourhood. You pay us directly, by cash, Zelle, Israeli bank transfer, or credit card with a 4% charge; nothing is paid on this page.</p>
       <a class="btn" id="send" href="#" aria-disabled="true">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
-        <span style="position:relative">Send order on WhatsApp</span>
+        <span style="position:relative">Continue to delivery</span>
       </a>
       <p class="why" id="why" aria-live="polite"></p>
       <p class="saved">Your order is also saved with The Brown Box on MyIsraelRental, with a link to follow it.</p>
@@ -209,7 +235,7 @@
 
 <div class="dock order-bar" id="dock">
   <div><small>Before delivery</small><b id="dtotal">₪0</b></div>
-  <a class="btn" id="send2" href="#" aria-disabled="true"><span style="position:relative">Send on WhatsApp</span></a>
+  <a class="btn" id="send2" href="#" aria-disabled="true"><span style="position:relative">To delivery</span></a>
 </div>
 
 <script id="fallback-products" type="application/json">[{"name":"Acai bowl","price":60,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/acai-bowl.webp","group":"Acai bowls","in_stock":true},{"name":"Mini acai bowls","price":30,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/mini-bowls.webp","group":"Acai bowls","in_stock":true},{"name":"Large acai board","price":390,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/large-board.webp","group":"Acai boards","in_stock":true},{"name":"Small acai board","price":220,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/small-board.webp","group":"Acai boards","in_stock":true},{"name":"Small gift box","price":135,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/small-gift-box.webp","group":"Gifting","in_stock":true},{"name":"Large gift box","price":250,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/large-gift-box.webp","group":"Gifting","in_stock":true},{"name":"Energy bites","price":50,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/energy-bites.webp","group":"Snacks","in_stock":true},{"name":"Super granola","price":40,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/super-granola.webp","group":"Snacks","in_stock":true},{"name":"Date snacks","price":55,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/date-snacks.webp","group":"Snacks","in_stock":true},{"name":"Oatmeal chocolate chip muffin","price":17,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/oat-muffin.webp","group":"Snacks","in_stock":true},{"name":"Blueberry sourdough muffin","price":17,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/blueberry-muffin.webp","group":"Snacks","in_stock":true},{"name":"Iced coffee","price":20,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/iced-coffee.webp","group":"Drinks","in_stock":true},{"name":"Passion fruit iced tea","price":20,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/passion-tea.webp","group":"Drinks","in_stock":true}]</script>
@@ -371,10 +397,15 @@ document.addEventListener('DOMContentLoaded', function () {
     empty.hidden = c.length > 0;
     c.forEach(function (p) {
       var li = document.createElement('li');
+      var l = document.createElement('div'); l.className = 'l';
       var a = document.createElement('span'); a.textContent = q[p._k] + ' × ' + p.name;
       var b = document.createElement('span');
       b.textContent = priced(p) ? (p.price_to != null && Number(p.price_to) > Number(p.price) ? 'from ' : '') + money(q[p._k] * Number(p.price), p.currency) : 'on request';
-      li.appendChild(a); li.appendChild(b); lines.appendChild(li);
+      l.appendChild(a); l.appendChild(b); li.appendChild(l);
+      var rm = document.createElement('button'); rm.type = 'button'; rm.className = 'rm'; rm.setAttribute('aria-label', 'Remove ' + p.name + ' from the order');
+      rm.innerHTML = '<svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg>';
+      rm.onclick = function () { delete q[p._k]; cfg[p._k] = []; update(); };
+      li.appendChild(rm); lines.appendChild(li);
     });
     if (extraCost() > 0) {
       var xl = document.createElement('li'); var xa = document.createElement('span'); xa.textContent = 'Build your own and almond butter';
@@ -383,25 +414,71 @@ document.addEventListener('DOMContentLoaded', function () {
     var t = totals().text;
     document.getElementById('total').textContent = t;
     document.getElementById('dtotal').textContent = t;
+    if (typeof drawCats === 'function') drawCats();
     check(false);
   }
 
-  // what is still missing, said plainly; nothing is red until they try to send
+  // what is still missing, said plainly; nothing is red until they try to move on
   var why = document.getElementById('why');
-  function check(show) {
+  var step = 1, NAMES = ['Your order', 'Where it is going', 'Your details'];
+  function label(id) {
+    return step === 1 ? (id === 'send' ? 'Continue to delivery' : 'To delivery')
+      : step === 2 ? (id === 'send' ? 'Continue to your details' : 'To details')
+      : (id === 'send' ? 'Send order on WhatsApp, ' + totals().text : 'Send on WhatsApp');
+  }
+  function labels() { ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); if (!b.hasAttribute('aria-busy')) b.lastElementChild.textContent = label(id); }); }
+  function missingFor(upTo, only) {
     var missing = [];
-    if (!chosen().length) missing.push('choose from the menu');
-    if (choices().some(function (c) { return /not chosen yet/.test(c); })) missing.push('the toppings, extras and muffins for each bowl and box');
+    if (!only || only === 1) {
+      if (!chosen().length) missing.push('choose from the menu');
+      if (choices().some(function (c) { return /not chosen yet/.test(c); })) missing.push('the toppings, extras and muffins for each bowl and box');
+    }
     document.querySelectorAll('[data-need]').forEach(function (box) {
-      var ok = box.querySelector('input,textarea').value.trim().length > 0;
-      if (show) box.classList.toggle('bad', !ok);
-      if (!ok) missing.push(box.querySelector('label').textContent.toLowerCase().replace(/\?$/, ''));
+      var st = +box.closest('[data-s]').dataset.s;
+      if (st > upTo || (only && st !== only)) return;
+      if (box.querySelector('input,textarea').value.trim().length === 0) missing.push(box.querySelector('label').textContent.toLowerCase().replace(/\?$/, ''));
+    });
+    return missing;
+  }
+  function check(show) {
+    var missing = step === 3 ? missingFor(3) : missingFor(step, step);
+    if (show) document.querySelectorAll('[data-need]').forEach(function (box) {
+      var st = +box.closest('[data-s]').dataset.s;
+      if (st <= step) box.classList.toggle('bad', box.querySelector('input,textarea').value.trim().length === 0);
     });
     var ready = !missing.length;
     ['send', 'send2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', ready ? 'false' : 'true'); });
-    why.textContent = ready ? '' : (show || chosen().length ? 'Still needed: ' + missing.join(', ') + '.' : '');
+    labels();
+    why.textContent = ready ? '' : (show || (step === 1 && chosen().length) ? 'Still needed: ' + missing.join(', ') + '.' : '');
     return ready;
   }
+  function setStep(n, fromPop) {
+    step = n;
+    document.querySelectorAll('section.step').forEach(function (s) { s.hidden = +s.dataset.s !== n; });
+    document.querySelectorAll('.stepbar li').forEach(function (li, i) { li.classList.toggle('on', i < n); });
+    document.getElementById('stepnow').textContent = 'Step ' + n + ' of 3: ' + NAMES[n - 1];
+    document.getElementById('stepback').hidden = n === 1;
+    check(false);
+    if (!fromPop) { history.pushState({ s: n }, '', '#order-' + n); window.scrollTo(0, 0); }
+    var h = document.getElementById('s' + n); h.tabIndex = -1; h.focus({ preventScroll: true });
+  }
+  document.getElementById('stepback').addEventListener('click', function () { history.back(); });
+  addEventListener('popstate', function (e) { var n = (e.state && e.state.s) || 1; if (n > 1 && !chosen().length) n = 1; setStep(n, true); });
+  history.replaceState({ s: 1 }, '', location.pathname + location.search);
+  // the menu, one section at a time
+  var cats = document.getElementById('cats'), heads = [].slice.call(document.querySelectorAll('#gifts .grp'));
+  function drawCats() {
+    [].forEach.call(cats.children, function (b) {
+      var n = 0; products.forEach(function (p) { if (q[p._k] > 0 && (p.group || 'More from The Brown Box') === b.dataset.g) n += 1; });
+      var c = b.querySelector('.n'); if (c) c.remove();
+      if (n) { c = document.createElement('span'); c.className = 'n'; c.textContent = n; b.appendChild(c); }
+    });
+  }
+  function showCat(i) { heads.forEach(function (h, j) { h.nextElementSibling.hidden = j !== i; }); [].forEach.call(cats.children, function (b, j) { b.setAttribute('aria-pressed', j === i ? 'true' : 'false'); }); }
+  heads.forEach(function (h, i) { var b = document.createElement('button'); b.type = 'button'; b.dataset.g = h.textContent; b.appendChild(document.createTextNode(h.textContent)); b.onclick = function () { showCat(i); }; cats.appendChild(b); });
+  var firstCat = 0;
+  products.forEach(function (p) { if (add && q[p._k] > 0) heads.forEach(function (h, i) { if (h.textContent === (p.group || 'More from The Brown Box')) firstCat = i; }); });
+  showCat(firstCat);
   document.querySelectorAll('[data-need] input').forEach(function (i) {
     i.addEventListener('input', function () { i.closest('[data-need]').classList.remove('bad'); check(false); });
   });
@@ -454,10 +531,10 @@ document.addEventListener('DOMContentLoaded', function () {
     if (sending) return;
     if (!check(true)) {
       var first = document.querySelector('.bad input, .bad textarea');
-      if (!chosen().length) document.getElementById('s1').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      else if (first) first.focus();
+      if (first) first.focus();
       return;
     }
+    if (step < 3) { setStep(step + 1); return; }
     sending = true;
     // opened now, while this still counts as the tap, so no popup blocker stops it
     var tab = window.open('', '_blank');
@@ -468,7 +545,7 @@ document.addEventListener('DOMContentLoaded', function () {
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
       sending = false;
-      ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.removeAttribute('aria-busy'); b.lastElementChild.textContent = id === 'send' ? 'Send order on WhatsApp' : 'Send on WhatsApp'; });
+      ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.removeAttribute('aria-busy'); }); labels();
       why.textContent = saved ? 'Sent. Your order is saved, and the tracking link is in the message.' : '';
     });
   }

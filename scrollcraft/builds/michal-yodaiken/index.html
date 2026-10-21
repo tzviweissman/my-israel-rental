@@ -13,7 +13,7 @@
 <meta name="description" content="Personal training for women that comes to you, in Jerusalem: at your home, at your gym, online, or at my private gym. ₪60 for a 30-minute session. Training in English.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="scrollcraft.css">
 <style>
   /* Her flyer: black, hot pink, condensed caps. */
@@ -24,8 +24,8 @@
     --sc-ink-soft:   #C9C3CC;
     --sc-accent:     #FF3D9A;
     --sc-accent-ink: #0B0A0C;
-    --sc-font-display: "Anton", Impact, sans-serif;
-    --sc-font-text:    "DM Sans", system-ui, sans-serif;
+    --sc-font-display: "Anton", "Heebo", Impact, sans-serif;
+    --sc-font-text:    "DM Sans", "Heebo", system-ui, sans-serif;
     --bar-h: 68px;
     --book: "https://myisraelrental.com/business/michal-yodaiken";
   }
@@ -80,7 +80,10 @@
   .shade-r::after { background: linear-gradient(270deg, rgb(0 0 0 / 0.86) 0%, rgb(0 0 0 / 0.66) 42%, rgb(0 0 0 / 0) 70%); }
 
   /* hero */
-  .hero { min-height: 100svh; }
+  html { scroll-padding-top: var(--bar-h); }
+  main { padding-top: var(--bar-h); }
+  .hero { min-height: calc(100svh - var(--bar-h)); }
+  .hero .in { padding-top: var(--sc-6); padding-bottom: var(--sc-6); }
   .hero .photo { object-position: 30% 60%; }
   .hero .in { display: grid; justify-items: end; text-align: right; }
   .hero .kick { font: 400 var(--sc-t-lg)/1 var(--sc-font-display); letter-spacing: 0.08em; color: var(--sc-accent); text-transform: uppercase; }
@@ -88,30 +91,30 @@
   .hero h1 em { font-style: normal; color: var(--sc-accent); }
   .hero .lede { margin: var(--sc-4) 0 0; max-width: 30rem; font-size: var(--sc-t-lg); line-height: 1.45; }
   .hero .proof { color: var(--sc-ink); }
+  .hero .proof li:first-child { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.3rem; }
+  .hero .proof li:first-child b { font: 400 3rem/1 var(--sc-font-display); color: var(--sc-accent); }
   .hero .act { margin-top: var(--sc-6); display: flex; flex-direction: row-reverse; flex-wrap: wrap; align-items: center; gap: var(--sc-5); text-align: left; }
 
   /* where and how, one section. Fits the screen (Tzvi, 7 Oct 2026, from
      woodwrights.co.nz): wherever you stop, each photo is seen whole with its
      words, so nothing here is taller than a short laptop's screen. */
-  .places { background: #000; min-height: auto; padding-block: clamp(3.5rem, 8vh, 6rem); }
+  .places { background: #000; min-height: auto; padding-block: clamp(1rem, 3vh, 3rem); }
   .places .in { padding-block: 0; }
-  .places h2 { margin: 0; font-size: min(clamp(2.4rem, 1rem + 4vw, 5rem), 11svh); line-height: 0.9; max-width: 14ch; }
+  .places h2 { margin: 0; font-size: min(clamp(2.2rem, 1rem + 3vw, 3.6rem), 8svh); line-height: 0.9; max-width: 24ch; }
   .places h2 span { color: var(--sc-accent); }
-  .tiles { margin-top: var(--sc-5); display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sc-4); }
-  .tile { background: var(--sc-surface); border-radius: 4px; overflow: hidden; display: grid; align-content: start; }
-  .tile img { width: 100%; height: min(26svh, 15rem); object-fit: cover; display: block; }
-  .tile h3 { margin: var(--sc-4) var(--sc-4) 0; font-size: clamp(1.4rem, 1rem + 0.8vw, 2rem); line-height: 1; }
-  .tile p { margin: var(--sc-2) var(--sc-4) 0; color: var(--sc-ink-soft); line-height: 1.5; }
-  .tile .price { margin: var(--sc-3) var(--sc-4) var(--sc-5); color: var(--sc-ink); font-weight: 700; }
-  .tile .price b { font: 400 2.2rem/1 var(--sc-font-display); color: var(--sc-accent); margin-right: 0.35rem; }
+  .tiles { margin-top: var(--sc-4); display: grid; grid-template-columns: repeat(6, 1fr); gap: var(--sc-3); }
+  .tile { grid-column: span 2; }
+  .tile:nth-child(n+4) { grid-column: span 3; }
+  .tile { background: var(--sc-surface); border-radius: 4px; overflow: hidden; display: grid; grid-template-rows: auto auto 1fr auto; align-content: start; position: relative; }
+  .tile img { width: 100%; height: min(12svh, 9rem); object-fit: cover; display: block; }
+  .tile .real { position: absolute; top: 0.6rem; left: 0.6rem; background: rgb(0 0 0 / 0.72); color: #fff; font-size: 0.78rem; font-weight: 700; padding: 0.25rem 0.55rem; border-radius: 3px; }
+  .tile h3 { margin: var(--sc-3) var(--sc-4) 0; font-size: clamp(1.3rem, 1rem + 0.6vw, 1.7rem); line-height: 1; }
+  .tile p { margin: var(--sc-1) var(--sc-4) 0; color: var(--sc-ink-soft); line-height: 1.45; font-size: 0.95rem; }
+  .tile .price { margin: var(--sc-2) var(--sc-4) var(--sc-3); color: var(--sc-ink); font-weight: 700; align-self: end; font-size: 0.95rem; }
+  .tile .price.ask { color: var(--sc-accent); }
+  .tile .price b { font: 400 2rem/1 var(--sc-font-display); color: var(--sc-accent); margin-right: 0.35rem; }
   /* the main tile: its photo beside its words, one row, never taller than the screen */
-  .tile--main { grid-column: 1 / -1; grid-template-columns: 3fr 2fr; align-items: center; }
-  .tile--main img { height: min(52svh, 30rem); }
-  .tile--main .tile-text { padding: var(--sc-5) var(--sc-5) var(--sc-5) var(--sc-3); }
-  .tile--main h3 { margin: 0; font-size: min(clamp(2rem, 1rem + 2.2vw, 3.4rem), 7svh); }
-  .tile--main p { margin-inline: 0; color: var(--sc-ink); max-width: 30rem; }
-  .tile--main .price { margin-inline: 0; margin-bottom: 0; }
-  .tile--main .price b { font-size: 3rem; }
+  .tile--main .tile-text { display: contents; }
   /* a tile lifts when pointed at, and its price steps forward */
   .tile { transition: translate 260ms var(--sc-ease-out), box-shadow 260ms var(--sc-ease-out); }
   .tile .price b { display: inline-block; transition: scale 260ms var(--sc-ease-out); transform-origin: left bottom; }
@@ -119,20 +122,21 @@
     .tile:hover { translate: 0 -4px; box-shadow: 0 14px 30px -18px rgb(255 61 154 / 0.55); }
     .tile:hover .price b { scale: 1.12; }
   }
-  .tile--plain { align-content: center; border: 2px solid #2A262D; background: var(--sc-canvas); }
+  .tile--plain { align-content: start; border: 2px solid #2A262D; background: var(--sc-canvas); }
   .tile--pink { background: var(--sc-accent); color: #000; align-content: center; padding: var(--sc-4) var(--sc-1); }
   .tile--pink h3 { font-size: clamp(2rem, 1rem + 1.8vw, 3rem); line-height: 0.92; }
   .tile--pink p { color: #000; font-size: var(--sc-t-lg); font-weight: 500; }
 
   /* what she trains: one line per beat */
   .trains { background: var(--sc-accent); color: #000; }
-  .trains ul { margin: 0; padding: 0; list-style: none; }
-  .trains li { font: 400 min(clamp(2.6rem, 1rem + 6.4vw, 7.6rem), 11svh)/0.98 var(--sc-font-display); text-transform: uppercase; }
-  .trains li:nth-child(even) { padding-left: 0.6em; }
+  .trains { min-height: auto; padding-block: clamp(2rem, 6vh, 5rem); }
+  .trains .in { padding-block: 0; }
+  .trains ul { margin: 0; padding: 0; list-style: none; display: grid; grid-template-rows: repeat(3, auto); grid-auto-flow: column; column-gap: var(--sc-6); }
+  .trains li { font: 400 min(clamp(2.2rem, 1rem + 3.4vw, 4.4rem), 8.5svh)/1.02 var(--sc-font-display); text-transform: uppercase; }
   .trains .n { font: 700 var(--sc-t-sm)/1 var(--sc-font-text); letter-spacing: 0.16em; text-transform: uppercase; margin: 0 0 var(--sc-4); }
 
   /* the close: abrupt, full bleed */
-  .book { background: #000; min-height: 92svh; border-top: 2px solid var(--sc-accent); }
+  .book { background: #000; min-height: calc(88svh - var(--bar-h)); border-top: 2px solid var(--sc-accent); }
   .book h2 { margin: 0; font-size: min(clamp(3.2rem, 1rem + 5.6vw, 7.5rem), 14svh); line-height: 0.86; }
   .book h2 span { color: var(--sc-accent); }
   .book .act { margin-top: var(--sc-6); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sc-5); }
@@ -147,6 +151,8 @@
   .facts dd { margin: 0; color: var(--sc-ink); font-weight: 500; line-height: 1.45; }
   .facts dd a { color: var(--sc-accent); font-weight: 700; }
   .book .price small { font: 500 var(--sc-t-base)/1 var(--sc-font-text); color: var(--sc-ink-soft); margin-left: 0.4rem; }
+  .book .alt { margin: var(--sc-4) 0 0; color: var(--sc-ink-soft); }
+  .book .alt a { color: var(--sc-accent); font-weight: 700; }
   .foot { padding: var(--sc-5) var(--sc-gutter) calc(var(--sc-5) + var(--bar-pad, 0px)); display: flex; flex-wrap: wrap; gap: var(--sc-2) var(--sc-5); justify-content: space-between;
     background: #000; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); border-top: 1px solid #2A262D; }
   .foot a { color: var(--sc-accent); }
@@ -187,10 +193,10 @@
     .hero .in { align-self: end; }
     .tiles { grid-template-columns: 1fr; }
     .facts dl > div { grid-template-columns: 22px 5.5rem 1fr; }
-    .tile img, .tile--main img { height: auto; aspect-ratio: 16 / 9; }
-    .tile--main { grid-template-columns: 1fr; }
-    .tile--main .tile-text { padding: var(--sc-4); }
-    .trains li:nth-child(even) { padding-left: 0.3em; }
+    .tile img { height: auto; aspect-ratio: 16 / 9; }
+    .trains ul { grid-template-rows: none; grid-auto-flow: row; }
+    .tile, .tile:nth-child(n+4) { grid-column: auto; }
+    .trains li { font-size: 2.3rem; }
   }
   /* short phones (360x640): the hero's words and button still fit the first screen */
   @media (max-width: 860px) and (max-height: 700px) {
@@ -246,24 +252,25 @@
           <img src="assets/gym.webp" alt="An empty gym with a dumbbell rack and pink dumbbells on the floor" width="2048" height="1152" loading="lazy">
           <h3>At your gym</h3>
           <p>I come with you to your gym, with guidance, motivation and support throughout your workout.</p>
-          <p class="price">Message for a price</p>
+          <p class="price ask">Message for a price</p>
         </article>
         <article class="tile">
           <img src="assets/online.webp" alt="A laptop beside a yoga mat and a pink resistance band" width="2048" height="1152" loading="lazy">
           <h3>Online</h3>
           <p>Virtual sessions from the comfort of your home.</p>
-          <p class="price">Message for a price</p>
+          <p class="price ask">Message for a price</p>
         </article>
         <article class="tile tile--plain">
           <h3>Small group circuits</h3>
           <p>Fun, motivating circuit sessions for groups of 3 or more.</p>
-          <p class="price">Message for a price</p>
+          <p class="price ask">Message for a price</p>
         </article>
         <article class="tile">
           <img src="assets/private-gym.webp" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy">
+          <span class="real">Photo of my gym</span>
           <h3>At my private gym</h3>
           <p>Or come to me: one to one in my private gym in Jerusalem, with a squat rack, free weights, a treadmill and a rowing machine.</p>
-          <p class="price">Message for a price</p>
+          <p class="price ask">Message for a price</p>
         </article>
       </div>
     </div>
@@ -290,6 +297,7 @@
           <span class="price">₪60<small>for 30 minutes</small></span>
           <a class="btn" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         </div>
+        <p class="alt">Prefer WhatsApp? <a href="https://wa.me/447563299474?text=Hi%20Michal%2C%20I%27d%20like%20to%20book%20a%20session">Message Michal on 07563 299474</a></p>
       </div>
       <!-- The session's facts in one card (from Mobbin, HoneyBook's "Reserve
            your spot"; Tzvi, 7 Oct 2026). Every row is something she told us. -->

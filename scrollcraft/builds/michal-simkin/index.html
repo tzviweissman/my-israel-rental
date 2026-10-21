@@ -91,6 +91,8 @@
   .top__cta { min-height: 42px; padding: 0 var(--sc-5); font-size: var(--sc-t-sm); }
   .bar { display: none; }
   body { padding-block-end: 0; }
+  .bar { display: none !important; }
+  @media (max-width: 860px) { .bar { display: flex !important; } }
 
   /* ----------------------------------------------------------------- bar --
      Fixed at the bottom, the booking pattern a phone already knows. Her
@@ -197,6 +199,13 @@
   .bundle p { margin: 0; color: #C9CFDA; line-height: 1.5; }
   .bundle .big { font-family: var(--font-body); font-weight: 800; font-size: clamp(2.4rem, 5vw, 4rem); color: var(--rose-gold); line-height: 1; }
   .bundle .big small { display: block; font-weight: 500; font-size: var(--sc-t-sm); color: #C9CFDA; }
+  .facts3 { display: flex; gap: var(--sc-7); margin: 0 0 var(--sc-7); flex-wrap: wrap; }
+  .facts3 div { display: flex; flex-direction: column-reverse; }
+  .facts3 dt { color: #C9CFDA; font-size: var(--sc-t-sm); }
+  .facts3 dd { margin: 0; font-family: var(--font-head); font-size: clamp(2.2rem, 4.4vw, 3.6rem); line-height: 1.05; color: var(--rose-gold); }
+  .course .note { display: inline-block; margin-top: var(--sc-4); padding: 0.3rem 0.8rem; border: 1px solid rgba(233,196,176,0.5); border-radius: 999px; color: var(--rose-gold); font-size: var(--sc-t-sm); font-weight: 600; }
+  .bundle .big .was { display: block; font-size: var(--sc-t-lg); font-weight: 500; color: #C9CFDA; text-decoration: line-through; text-decoration-thickness: 2px; }
+  .bundle .big small.save { display: block; width: fit-content; margin-inline-start: auto; margin-top: var(--sc-2); padding: 0.25rem 0.7rem; border-radius: 999px; background: var(--rose-gold); color: var(--navy); font-weight: 700; }
   .grad { margin: var(--sc-6) 0 0; padding-inline-start: var(--sc-5); border-inline-start: 3px solid var(--rose-gold); color: #FFFFFF; font-size: var(--sc-t-lg); line-height: 1.4; max-width: 40rem; }
   .enrol { margin: var(--sc-6) 0 0; color: #C9CFDA; font-size: var(--sc-t-base); }
   .grad b { display: block; margin-top: var(--sc-2); font-family: var(--font-body); font-size: var(--sc-t-sm); font-weight: 600; color: var(--rose-gold); }
@@ -220,7 +229,9 @@
     .top__cta { display: none; }
     .top__nav { order: 3; flex-basis: 100%; margin: 0; overflow-x: auto; scrollbar-width: none; gap: 0; }
     .top__nav::-webkit-scrollbar { display: none; }
-    .top__nav a { white-space: nowrap; padding: 0.45rem 0.6rem; }
+    .top__nav a { white-space: nowrap; padding: 0 0.7rem; min-height: 40px; display: inline-flex; align-items: center; }
+    .top__nav a[aria-current="true"]::after { bottom: 0.3rem; inset-inline: 0.7rem; }
+    .top__mark { min-height: 40px; }
     .bar { display: flex; }
     body { padding-block-end: var(--bar-h); }
     .hero .sc-copy--lead { top: clamp(6rem, 14vh, 8rem) !important; }
@@ -240,7 +251,7 @@
     .pair .before { font-size: 1rem; } .pair .after { font-size: 1.1rem; } .pair .after small { font-size: 0.7rem; }
     .voices { width: auto; inset-inline: var(--sc-gutter); top: auto; bottom: calc(var(--bar-h) + 1rem); translate: none; gap: var(--sc-3); }
     .voice { grid-template-columns: 40px 1fr; } .voice img { width: 40px; height: 40px; } .voice p { font-size: var(--sc-t-xs); }
-    .voice:nth-child(3) { display: none; }
+    .voice:nth-child(1), .voice:nth-child(2) { display: none; }
     .courses { grid-template-columns: 1fr; }
     .bundle { grid-template-columns: 1fr; }
     .close .letter { top: 46%; }
@@ -356,19 +367,20 @@
     <div class="sc-wrap">
       <div data-sc-in data-sc-stagger="80">
         <h2 id="academyTitle">The Michal Simkin <span class="accent">Academy.</span></h2>
-        <p class="lede">Professional wig styling and cutting, taught in person: demonstrations, then hands-on practice. Starts 3 November 2026, Sunday and Tuesday mornings at 10:00. Ten students at most.</p>
+        <p class="lede">Professional wig styling and cutting, taught in person: demonstrations, then hands-on practice. </p>
+        <dl class="facts3"><div><dt>Starts</dt><dd>3 November</dd></div><div><dt>Sunday and Tuesday</dt><dd>10:00</dd></div><div><dt>Students at most</dt><dd>10</dd></div></dl>
       </div>
       <div class="courses" data-sc-in data-sc-stagger="120">
         <article class="course"><h3>Styling Mastery</h3><p>Ten in-depth lessons: curls, blow-dry techniques, volume, tool control.</p><span class="price">₪8,000<small>course fee</small></span></article>
         <article class="course"><h3>Cutting Mastery</h3><p>Nine advanced lessons: wig construction, weight, balance, natural flow.</p><span class="price">₪8,000<small>course fee</small></span></article>
-        <article class="course"><h3>The Salon Hub</h3><p>A private group for ongoing support: pricing questions, real-world guidance.</p><span class="price">Part of the programme</span></article>
+        <article class="course"><h3>The Salon Hub</h3><p>A private group for ongoing support: pricing questions, real-world guidance.</p><span class="note">Part of the programme</span></article>
       </div>
       <div class="bundle" data-sc-reveal="right" data-sc-reveal-at="0.1 0.5">
         <div>
           <h3>Both courses, one place in the class.</h3>
-          <p>₪16,000 separately. Sign up before chag and the toolkit, worth ₪3,000, is free.</p>
+          <p>Sign up before chag and the toolkit, worth ₪3,000, is free.</p>
         </div>
-        <span class="big">₪12,000<small>the full bundle</small></span>
+        <span class="big"><s class="was">₪16,000</s>₪12,000<small class="save">Save ₪4,000</small></span>
       </div>
       <p class="grad" data-sc-in>Chaya Basya took the course. She now runs her own salon in Ramat Beit Shemesh Daled, with a clientele of her own.<b>Chaya Basya, graduate of the academy</b></p>
       <p class="enrol">Enrolment is a request: pick a course, say when suits you, and she confirms your place.</p>

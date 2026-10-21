@@ -1,0 +1,37 @@
+"""v5 (Tzvi, 21 Oct 2026, site review of 21 Oct): the menu one section at a time
+with an Add pill on each row, bowls on one screen, real buttons on the gift
+boxes naming their price, an arrow drawn as an icon (the font has no glyph),
+and no hidden hero words with motion off. Patches index.html in place, like
+v2 to v4; run once from the build folder after v4."""
+import io
+
+s = io.open('index.html', encoding='utf8', newline='').read()
+
+
+def sub(a, b, n=1):
+    global s
+    assert s.count(a) == n, (s.count(a), a[:70])
+    s = s.replace(a, b)
+
+
+ARW = '<svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>'
+
+CSS = '\n  /* review changes */\n  @media (prefers-reduced-motion: reduce) { .film { height: 100vh; height: 100svh; } .film .hint { display: none; } }\n  .arw { display: inline-flex; } .arw svg { display: block; }\n  .btn.dark-on { background: var(--paper); }\n  /* menu: section chips, two columns, an Add pill on every row */\n  .cats { display: flex; flex-wrap: wrap; gap: .5rem; margin: 1.2rem 0 .6rem; }\n  .cats button { min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--ink); font: 500 .97rem/1 var(--font-body); cursor: pointer;\n    transition: background 150ms ease-out, color 150ms ease-out, transform 100ms ease-out; }\n  .cats button:hover { background: var(--cream); }\n  .cats button:active { transform: scale(.97); }\n  .cats button[aria-pressed="true"] { background: var(--brown); border-color: var(--brown); color: var(--paper); }\n  .cats button[aria-pressed="true"]:hover { background: var(--brown-2); }\n  .cat[hidden] { display: none; }\n  [data-mir-list] { min-height: 12rem; }\n  @media (min-width: 900px) { .cat { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 2rem; } .cat[hidden] { display: none; } }\n  .cat .pr { display: inline-flex; align-items: center; gap: .7rem; }\n  .cat .pr::after { content: \'Add\'; display: inline-flex; align-items: center; min-height: 36px; padding: 0 .9rem; border-radius: 999px; border: 1px solid var(--brown); color: var(--brown); font-size: .9rem; font-weight: 500; transition: background 120ms ease-out, color 120ms ease-out; }\n  .cat a:hover .pr::after { background: var(--brown); color: var(--paper); }\n  .cat a:active .pr::after { transform: scale(.96); }\n  .cat li.is-out .pr::after { display: none; }\n  .cat a { padding-block: .55rem; } .cat .ph { width: 64px; height: 64px; } .cat a { grid-template-columns: 64px minmax(0, 1fr) auto; }\n  .menu.sec { padding-block: clamp(1.6rem, 3vw, 3rem); }\n  .tops { height: 120px; } .tops img { --w: 80px !important; } .menu-head { gap: 1rem; } .menu .lede { margin-top: .3rem; } .cats { margin-block: .6rem .2rem; }\n  @media (max-width: 760px) { .tops { height: 120px; } .cat { display: block; } }\n  /* bowls: fit one screen at laptop heights, nothing jumps when a bowl is picked */\n  .chips { min-height: 4.3rem; align-content: center; }\n  .sec#bowls { padding-block: clamp(1.6rem, 3vw, 3rem); } #bowls .card h3 { font-size: 1.45rem; }\n  #bowls .pick { margin-top: 1.2rem; }\n  @media (min-width: 861px) {\n    .card img { width: min(100%, 38svh); }\n    .card { padding: 1rem 1.4rem; }\n    .chips { margin: .5rem 0 .7rem; }\n    .opt { padding: .7rem 1.1rem; }\n    .opt span.t { display: none; }\n    .card .extra { font-size: .85rem; margin-top: .6rem; }\n    .card .btn { min-height: 48px; }\n  }\n  /* gift boxes */\n  .sec.gifts { padding-block: clamp(2rem, 4vw, 3.5rem); } .boxes { margin-top: 1.4rem; }\n  .box { grid-template-columns: 120px minmax(0, 1fr); padding: 1rem; } .box img { width: 120px; height: 120px; }\n  .box h3 { font-size: 1.75rem; } .box .p { font-size: 1.1rem; margin: .3rem 0 .4rem; }\n  .box ul { margin-bottom: .7rem; }\n  .box .btn { background: var(--paper); color: var(--brown-2); min-height: 48px; padding: 0 1.2rem; font-weight: 500; }\n  .box .btn:hover { background: #fff; }\n  @media (max-width: 460px) { .box { grid-template-columns: 1fr; } .box img { width: 100%; height: auto; aspect-ratio: 1; } }\n\n  @media (min-width: 861px) {\n    #bowls > .wrap { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); column-gap: clamp(1.5rem, 4vw, 4rem); grid-template-rows: auto auto 1fr; align-content: center; }\n    #bowls > .wrap > h2, #bowls > .wrap > .lede { grid-column: 1; }\n    #bowls .pick { display: contents; }\n    #bowls .opts { grid-column: 1; grid-row: 3; margin-top: 1.1rem; }\n    #bowls .card { grid-column: 2; grid-row: 1 / span 3; align-self: center; }\n    .card img { width: min(100%, 24svh); height: auto; margin-bottom: .5rem; }\n    .opt b { font-size: 1.15rem; }\n    .opt { padding: .6rem 1.1rem; }\n  }\n  @media (prefers-reduced-motion: reduce) {\n    .film { height: auto; } .film .stage { position: relative; height: auto; min-height: 100svh; display: flex; flex-direction: column; justify-content: flex-end; padding-block: 5rem 2rem; }\n    .chap { position: relative; inset: auto; opacity: 1; transform: none; filter: none; margin: 1.2rem var(--gutter); pointer-events: auto; transition: none; }\n  }'
+
+CATS_JS = "  // ── menu: one section at a time, so the menu fits a screen ──\n  (function () {\n    var host = document.getElementById('cats'), list = document.querySelector('[data-mir-list]');\n    if (!host || !list) return;\n    var heads = [].slice.call(list.querySelectorAll('.cat-h'));\n    if (heads.length < 2) return;\n    function show(i) {\n      heads.forEach(function (h, j) { h.hidden = true; h.nextElementSibling.hidden = j !== i; });\n      [].forEach.call(host.children, function (b, j) { b.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });\n    }\n    heads.forEach(function (h, i) {\n      var b = document.createElement('button'); b.type = 'button'; b.textContent = h.textContent;\n      b.onclick = function () { show(i); }; host.appendChild(b);\n    });\n    show(0);\n  })();\n\n"
+
+sub('\n  .rev { opacity: 0;', CSS + '\n  .rev { opacity: 0;')
+# arrow glyph -> icon (hero, bowls button, closing button, nav, and the JS that rewrites the bowls button)
+sub('<span class="arw" aria-hidden="true">→</span>', '<span class="arw" aria-hidden="true">' + ARW + '</span>', 6)
+sub("  var opts = [].slice.call(document.querySelectorAll('#opts .opt'));", "  var ARW = '" + ARW + "';\n  var opts = [].slice.call(document.querySelectorAll('#opts .opt'));")
+# reduced motion: show the film's first frame, not the last, so the hero words show
+sub('p = still ? 1 : progress();', 'p = still ? 0 : progress();')
+# gift boxes: a real button naming the price
+sub('<a href="order.html?add=Small%20gift%20box">Order the small box →</a>', '<a class="btn" href="order.html?add=Small%20gift%20box">Order the small box, <b>₪135</b></a>')
+sub('<a href="order.html?add=Large%20gift%20box">Order the large box →</a>', '<a class="btn" href="order.html?add=Large%20gift%20box">Order the large box, <b>₪250</b></a>')
+# menu sections
+sub('      <div data-mir-catalog ', '      <div class="cats" id="cats" role="group" aria-label="Menu sections"></div>\n      <div data-mir-catalog ')
+sub("  // ── reveals, and the phone's order bar after the opening", CATS_JS + "  // ── reveals, and the phone's order bar after the opening")
+
+io.open('index.html', 'w', encoding='utf8', newline='').write(s)
+print('index.html patched')

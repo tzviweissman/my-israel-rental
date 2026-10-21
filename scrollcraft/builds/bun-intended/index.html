@@ -27,6 +27,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bun Intended · Cinnamon buns, Ramat Eshkol</title>
 <meta name="description" content="Homemade cinnamon buns in Ramat Eshkol, Jerusalem: classic cinnamon, espresso, Lotus and chocolate, in boxes of 4 or 8. Pareve. Order on WhatsApp.">
+<meta property="og:title" content="Bun Intended · Cinnamon buns, Ramat Eshkol">
+<meta property="og:description" content="Homemade cinnamon buns in Ramat Eshkol, Jerusalem. Pareve. Build your box and order on WhatsApp.">
+<meta property="og:image" content="assets/boxes.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Allura&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
@@ -41,7 +44,7 @@
     --ease: cubic-bezier(.22,1,.36,1); --r: 18px; --gutter: clamp(16px, 5vw, 64px);
   }
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; }
   body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.55 var(--body); -webkit-font-smoothing: antialiased; }
   img { max-width: 100%; display: block; }
   a { color: inherit; }
@@ -55,8 +58,8 @@
     border-radius: 999px; border: 1.5px solid var(--caramel-deep); background: var(--paper); color: var(--ink); font: 600 16px/1 var(--body);
     text-decoration: none; cursor: pointer; overflow: hidden; isolation: isolate; -webkit-tap-highlight-color: transparent; }
   .send .dot { position: absolute; left: 22px; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%; background: var(--caramel-deep); z-index: -1;
-    transition: transform 520ms var(--ease); }
-  .send .a, .send .b { display: inline-flex; align-items: center; gap: 10px; transition: transform 460ms var(--ease), opacity 360ms; }
+    transition: transform 400ms var(--ease); }
+  .send .a, .send .b { display: inline-flex; align-items: center; gap: 10px; transition: transform 400ms var(--ease), opacity 300ms; }
   .send .a { padding-left: 16px; }
   .send .b { position: absolute; inset: 0; justify-content: center; color: var(--on-caramel); opacity: 0; transform: translateX(-46px); }
   .send svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
@@ -80,8 +83,26 @@
   @keyframes wiggle { 0%,100% { rotate: 0deg; } 40% { rotate: 8deg; } 60% { rotate: -8deg; } 80% { rotate: 2deg; } }
   @keyframes beat { 0%,100% { scale: 1; } 30% { scale: .7; } 60% { scale: 1.15; } }
 
+
+  /* ---------- the menu bar ---------------------------------------------- */
+  .topbar { position: sticky; top: 0; z-index: 30; background: rgb(251 245 240 / .95); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .topbar .in { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; }
+  .topbar .nm { display: inline-flex; align-items: center; min-height: 44px; font: 600 1.5rem/1 var(--display); letter-spacing: -0.01em; text-decoration: none; color: var(--ink); }
+  .topbar nav { display: flex; align-items: center; gap: 28px; }
+  .topbar nav a:not(.send) { text-decoration: none; font-weight: 500; font-size: 0.95rem; padding: 10px 2px; border-bottom: 1.5px solid transparent; transition: border-color 150ms, opacity 150ms; }
+  .topbar nav a:not(.send):hover { border-bottom-color: var(--caramel-deep); }
+  .topbar nav a:not(.send):active { opacity: .6; }
+  .topbar .send { min-height: 44px; min-width: 0; padding: 0 22px; }
+  .topbar .send .a { padding-left: 14px; }
+  .mbtn { display: none; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--caramel-deep); background: var(--paper); color: var(--ink); font: 600 15px/1 var(--body); cursor: pointer; transition: scale 100ms, background 150ms; }
+  .mbtn:active { scale: .97; }
+  .mpanel { display: none; border-top: 1px solid var(--line); background: var(--paper); }
+  .mpanel a { display: flex; align-items: center; min-height: 52px; padding: 0 var(--gutter); text-decoration: none; font-size: 1.05rem; border-bottom: 1px solid var(--paper-2); }
+  .mpanel a:active { background: var(--paper-2); }
+  .topbar.is-open .mpanel { display: block; }
+
   /* ---------- hero: their logo, their promise, their photo -------------- */
-  .hero { min-height: min(100svh, 900px); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: center; gap: clamp(24px, 5vw, 72px);
+  .hero { min-height: calc(min(100svh, 900px) - 64px); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: center; gap: clamp(24px, 5vw, 72px);
     padding-block: clamp(24px, 5vh, 56px); }
   .hero .logo { width: clamp(96px, 11vw, 132px); height: auto; border-radius: 50%; box-shadow: 0 10px 30px -18px rgb(58 34 22 / .5); }
   .hero h1 { margin-top: clamp(14px, 2.4vh, 26px); font-size: min(clamp(2.4rem, 1.2rem + 3vw, 4.2rem), 7.4svh); max-width: 15ch; }
@@ -101,7 +122,7 @@
   .build h2 { font-size: min(clamp(2.2rem, 1.2rem + 3vw, 3.8rem), 9svh); }
   .build .sub { margin: 8px 0 0; color: var(--ink-soft); }
   .step-label { margin: clamp(16px, 2.6vh, 26px) 0 10px; font-size: 0.78rem; }
-  .choices { display: grid; gap: 10px; }
+  .choices { display: grid; gap: 10px; margin-top: clamp(14px, 2.2vh, 22px); }
   .choices.size, .choices.flav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* 21st "Choice Cards": bordered, lit when chosen */
   .choice { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; padding: 13px 16px; min-height: 52px;
@@ -109,7 +130,8 @@
     transition: border-color 200ms, background 200ms, transform 200ms var(--ease); }
   .choice small { display: block; color: var(--ink-soft); font-size: 0.82rem; margin-top: 2px; }
   .choice .pr { font-family: var(--body); font-weight: 600; font-size: 1.05rem; white-space: nowrap; flex: none; }
-  .choice .nm { min-width: 0; }
+  .choice .nm { min-width: 0; white-space: nowrap; }
+  .choices.flav .choice { padding-inline: 12px; }
   .choice .sw { width: 16px; height: 16px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12); margin-right: 2px; }
   .choice .nm { display: flex; align-items: center; gap: 9px; }
   .choice[aria-pressed="true"] { border-color: var(--caramel-deep); background: var(--paper-2); }
@@ -142,6 +164,10 @@
      touching. Its four walls slope in (each border side is one wall, lit from
      the top left), a pale cut edge runs round the rim, the floor is in shade. */
   .box .trays { width: min(100%, 470px); display: grid; gap: 18px; }
+  .trayw { transition: transform 400ms var(--ease), opacity 300ms; }
+  .trayw.off { opacity: 0; }
+  /* a box of 4 sits in the middle of the space kept for two trays, so choosing 8 moves nothing below */
+  .box[data-size="4"] .trayw:first-child { transform: translateY(calc(50% + 9px)); }
   .tray { position: relative; border-style: solid; border-width: 13px 15px 15px; border-radius: 5px;
     border-color: #C2A47B #B4956C #DCC5A0 #CDB088;
     background: radial-gradient(120% 160% at 45% 25%, #A88B66, #85694A 80%),
@@ -157,7 +183,7 @@
   .box .slots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0 6%; }
   .slot { aspect-ratio: 1; display: grid; place-items: center; margin: -10% -9%; }
   .slot:nth-child(odd) { --r: -8deg; } .slot:nth-child(even) { --r: 7deg; } .slot:nth-child(3n) { --r: 14deg; }
-  .slot img { width: 128%; height: 128%; max-width: none; opacity: 0; transform: translateY(-30px) scale(.86) rotate(calc(var(--r) - 14deg)); transition: opacity 360ms, transform 560ms var(--ease); transition-delay: calc(var(--i) * 70ms); filter: drop-shadow(0 4px 4px rgb(30 15 5 / .35)); }
+  .slot img { width: 128%; height: 128%; max-width: none; opacity: 0; transform: translateY(-30px) scale(.86) rotate(calc(var(--r) - 14deg)); transition: opacity 300ms, transform 420ms var(--ease); transition-delay: calc(var(--i) * 50ms); filter: drop-shadow(0 4px 4px rgb(30 15 5 / .35)); }
   .slot.in img { opacity: 1; transform: rotate(var(--r)); }
   .box .label { white-space: nowrap; font-family: var(--script); font-size: 2.1rem; line-height: 1.1; color: var(--caramel-deep); }
   /* prices in lining figures: Cormorant's old-style 1 reads as an I */
@@ -190,8 +216,45 @@
   .close h2 { font-size: min(clamp(2.6rem, 1.4rem + 4vw, 5rem), 11svh); }
   .close h2 .script { display: block; color: var(--caramel-deep); font-size: 1.15em; line-height: 0.95; }
   .close .act { margin-top: 26px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .foot { border-top: 1px solid var(--line); padding: 22px var(--gutter) calc(22px + var(--bar-pad, 0px)); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px;
-    font-size: 0.85rem; color: var(--ink-soft); }
+
+
+  /* pick-up or delivery, boxes, and the saving */
+  .choices.ful { margin-top: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .choice.dim { background: transparent; color: var(--ink-soft); border-style: dashed; }
+  .chip { flex: none; display: inline-block; padding: 4px 10px; border-radius: 999px; background: #E3F3EA; color: #1F5C3A; font: 600 0.8rem/1.2 var(--body); white-space: nowrap; }
+  .choice .chip { margin-left: auto; }
+  .when { margin-top: 10px; justify-content: space-between; }
+  .qty { display: inline-flex; align-items: center; gap: 6px; }
+  .qty button { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; color: var(--ink); font: 500 22px/1 var(--body); cursor: pointer; transition: border-color 150ms, scale 100ms; }
+  .qty button:hover { border-color: var(--caramel); } .qty button:active { scale: .94; }
+  .qty button:disabled { opacity: .4; cursor: default; }
+  .qty output { min-width: 2.2ch; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: lining-nums tabular-nums; }
+  .total .sum s { font-family: var(--body); font-size: 1.05rem; font-weight: 500; color: var(--ink-soft); margin-left: 8px; text-decoration-thickness: 1.5px; }
+  .total .sum { display: grid; justify-items: start; gap: 4px 0; }
+  .total .sum small.u, .total .sum small.n { margin: 0; display: flex; align-items: center; white-space: nowrap; }
+  .total .sum small .chip { margin-right: 8px; }
+  .total .sum small.n { display: none; }
+  .total { flex-wrap: nowrap; } .total .send { min-width: 0; padding: 0 20px; }
+  
+  .total .px { font-variant-numeric: lining-nums tabular-nums; }
+  .send .px { margin-left: -10px; } .send { white-space: nowrap; }
+  .total .sum { flex: 0 0 auto; } .total .send.send { flex: 0 0 auto; min-width: max-content; }
+  @media (max-width: 430px) { .total span.mini { display: none; } .total .send.send { flex: 1 1 auto; } }
+  .pricecard li { padding: 0; }
+  .pricecard .row { all: unset; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; gap: 12px; width: calc(100% + 16px); min-height: 48px; padding: 6px 8px; margin: 0 -8px; border-radius: 10px; cursor: pointer; transition: background 150ms, scale 100ms; }
+  .pricecard .row:hover { background: var(--paper-2); } .pricecard .row:active { scale: .98; }
+  .pricecard .row:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+  .pricecard .p s { font-weight: 500; font-size: 0.85rem; color: var(--ink-soft); margin-right: 6px; }
+  .menu .tip { margin: 10px 0 0; color: var(--ink-soft); font-size: 0.95rem; }
+  .foot { display: block; padding: 0 0 var(--bar-pad, 0px); font-size: 0.95rem; color: var(--ink-soft); }
+  .foot-grid { display: grid; grid-template-columns: 1.3fr 1fr 1.2fr; gap: 28px; padding-block: 40px 28px; }
+  .foot h3 { margin: 0 0 10px; font-size: 0.78rem; color: var(--caramel-deep); }
+  .foot a { display: block; width: fit-content; padding: 6px 0; color: var(--ink); text-decoration: none; }
+  .foot a:hover { color: var(--caramel-deep); text-decoration: underline; }
+  .foot .nm2 { font: 600 1.5rem/1.1 var(--display); color: var(--ink); }
+  .foot p { margin: 6px 0 0; max-width: 22rem; }
+  .foot .legal { border-top: 1px solid var(--line); padding-block: 14px 18px; font-size: 0.85rem; }
+  .foot .legal a { display: inline; padding: 0; color: var(--ink-soft); }
 
   /* ---------- phone bar --------------------------------------------------- */
   .bar { display: none; }
@@ -209,13 +272,18 @@
     /* while choosing on a phone, the price and the order button stay under the thumb */
     .total { position: sticky; bottom: 0; z-index: 5; margin-inline: calc(var(--gutter) * -1); padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom));
       background: var(--paper); border-top: 1px solid var(--line); justify-content: space-between; }
-    .total .send { min-width: 0; padding: 0 18px; }
+    .total .send { min-width: 0; padding: 0 14px; font-size: 15px; }
     .total { flex-wrap: nowrap; gap: 10px; }
     .total .sum { font-size: 1.55rem; } .total .sum small { display: block; margin: 2px 0 0; font-size: 0.78rem; }
     /* a small bun in the bar takes each pour while the big one is scrolled away */
     .total .mini { display: block; width: 58px; height: 58px; flex: none; margin: -14px -4px -6px -6px; }
     .total .mini svg, .total .mini img { width: 100%; height: 100%; overflow: visible; }
     .boxes { grid-template-columns: 1fr; }
+    .topbar nav { display: none; } .mbtn { display: inline-flex; align-items: center; }
+    .total .sum small.u { display: none; } .total .sum small.n { display: flex; }
+    .total .sum s { font-size: .9rem; margin-left: 6px; } .total .px { display: none; }
+    .foot-grid { grid-template-columns: 1fr; gap: 20px; padding-block: 32px 20px; }
+    .when { gap: 10px 14px; }
     .facts .row { grid-template-columns: 1fr 1fr; }
     .bar { position: fixed; inset: auto 0 0 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 12px;
       padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgb(251 245 240 / .97); border-top: 1px solid var(--line);
@@ -231,13 +299,14 @@
   }
   /* a short laptop: the whole builder, button included, on one screen */
   @media (min-width: 861px) and (max-height: 760px) {
-    .build { padding-block: 40px; }
+    .build { padding-block: 24px; } .build .sub { display: none; } .choices { margin-top: 10px; }
     .step-label { margin: 12px 0 8px; }
     .choice { min-height: 46px; padding: 10px 14px; }
     .when { margin-top: 10px; } .total { margin-top: 12px; } .note { margin-top: 6px; }
   }
   /* narrow phones: a flavour's price sits under its name, never against it */
   @media (max-width: 440px) {
+    .choices.size .choice { flex-direction: column; align-items: flex-start; gap: 6px; } .choice .chip { margin-left: 0; }
     .choices.flav .choice:not(.mix) { flex-direction: column; align-items: flex-start; gap: 4px; }
     .choices.flav .choice:not(.mix) .pr { padding-left: 25px; font-size: 0.95rem; color: var(--ink-soft); }
   }
@@ -254,6 +323,25 @@
   <symbol id="arr" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
   <symbol id="tick" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 </svg>
+
+<header class="topbar" id="top">
+  <div class="wrap in">
+    <a class="nm" href="#top">Bun Intended</a>
+    <nav aria-label="Pages">
+      <a href="#prices">Prices</a>
+      <a href="#contact">Find us</a>
+      <a class="send" href="#build" data-send="scroll">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="a">Build your box</span>
+        <span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span>
+      </a>
+    </nav>
+    <button type="button" class="mbtn" id="mbtn" aria-expanded="false" aria-controls="mpanel">Menu</button>
+  </div>
+  <div class="mpanel" id="mpanel">
+    <a href="#build">Build your box</a><a href="#prices">Prices</a><a href="#contact">Find us</a><a href="tel:+972553321956">Call or text 055-332-1956</a>
+  </div>
+</header>
 
 <main>
   <section class="hero wrap" aria-labelledby="h1">
@@ -283,29 +371,34 @@
     <div class="wrap build-grid">
       <div>
         <h2 id="bh">Build your box</h2>
-        <p class="sub">Choose a box and a flavour. We'll get your order on WhatsApp, written out.</p>
+        <p class="sub">Choose a box and a flavour.</p>
 
-        <p class="step-label caps">Box</p>
         <div class="choices size" role="group" aria-label="Box size">
           <button type="button" class="choice" data-size="4" aria-pressed="true"><span>4 piece box<small>from ₪55</small></span></button>
-          <button type="button" class="choice" data-size="8" aria-pressed="false"><span>8 piece box<small>from ₪100</small></span></button>
+          <button type="button" class="choice" data-size="8" aria-pressed="false"><span>8 piece box<small>from ₪100</small></span><span class="chip">Save ₪10</span></button>
         </div>
 
-        <p class="step-label caps">Flavour</p>
         <div class="choices flav" role="group" aria-label="Flavour" id="flavours"></div>
         <p class="note" id="note" aria-live="polite"></p>
 
-        <label class="when">Needed on <input type="date" id="date" aria-describedby="when-hint"> <span id="when-hint" style="color:var(--ink-soft)">(optional)</span></label>
+        <div class="choices ful" role="group" aria-label="Pick-up or delivery">
+          <button type="button" class="choice" data-ful="pickup" aria-pressed="true"><span>Pick-up in Ramat Eshkol</span></button>
+          <button type="button" class="choice" data-ful="delivery" aria-pressed="false"><span>Delivery</span></button>
+        </div>
+
+        <div class="when">
+          <label>Needed on <input type="date" id="date" aria-describedby="when-hint"> <span id="when-hint" style="color:var(--ink-soft)">(optional)</span></label>
+          <span class="qty" role="group" aria-label="Number of boxes"><button type="button" data-q="-1" id="qm" aria-label="One box fewer">&minus;</button><output id="qty" aria-live="polite">1</output><button type="button" data-q="1" id="qp" aria-label="One box more">+</button><span style="margin-left:4px">box</span></span>
+        </div>
 
         <div class="total">
           <span class="mini" id="mini" aria-hidden="true"></span><span class="sum" id="sum" aria-live="polite">₪55<small>4 buns</small></span>
           <a class="send" id="order" href="#" target="_blank" rel="noopener">
             <span class="dot" aria-hidden="true"></span>
-            <span class="a">Order on WhatsApp</span>
-            <span class="b"><span class="go">Order on WhatsApp</span><span class="busy"><span class="spin" aria-hidden="true"></span>Opening WhatsApp</span><span class="done"><svg><use href="#tick"/></svg>Sent to WhatsApp</span><svg class="go"><use href="#wa"/></svg></span>
+            <span class="a">Order on WhatsApp<span class="px" data-px></span></span>
+            <span class="b"><span class="go">Order on WhatsApp<span class="px" data-px></span></span><span class="busy"><span class="spin" aria-hidden="true"></span>Opening WhatsApp</span><span class="done"><svg><use href="#tick"/></svg>Sent to WhatsApp</span><svg class="go"><use href="#wa"/></svg></span>
           </a>
         </div>
-        <p class="alt">Prefer to talk? Call or text <a href="tel:+972553321956">055-332-1956</a>.</p>
       </div>
       <div class="box" id="box" data-size="4" aria-hidden="true">
         <div class="stage" id="stage"></div>
@@ -315,9 +408,10 @@
     </div>
   </section>
 
-  <section class="menu" aria-labelledby="mh">
+  <section class="menu" id="prices" aria-labelledby="mh">
     <div class="wrap">
       <h2 id="mh">Freshly baked. <span class="script">Made with love.</span></h2>
+      <p class="tip">Tap a line to start your box with it.</p>
       <div class="boxes">
         <div class="pricecard"><h3 class="caps">4 piece box</h3><ul id="m4"></ul></div>
         <div class="pricecard"><h3 class="caps">8 piece box</h3><ul id="m8"></ul></div>
@@ -348,7 +442,14 @@
     </div>
   </section>
 </main>
-<footer class="foot"><span>Bun Intended · homemade cinnamon buns, Ramat Eshkol, Jerusalem</span><a href="https://myisraelrental.com/business/aidy-yaniv">Listed on MyIsraelRental</a></footer>
+<footer class="foot" id="contact">
+  <div class="wrap foot-grid">
+    <div><div class="nm2">Bun Intended</div><p>Homemade cinnamon buns, baked in Ramat Eshkol, Jerusalem. All pareve.</p></div>
+    <div><h3 class="caps">Pages</h3><a href="#build">Build your box</a><a href="#prices">Prices</a><a href="#top">Back to the top</a></div>
+    <div><h3 class="caps">Find us</h3><a href="tel:+972553321956">Call or text 055-332-1956</a><a href="https://wa.me/18482216022" target="_blank" rel="noopener">WhatsApp +1 848 221 6022</a><span>Pick-up from Ramat Eshkol</span></div>
+  </div>
+  <div class="wrap legal"><a href="https://myisraelrental.com/business/aidy-yaniv">Listed on MyIsraelRental</a></div>
+</footer>
 
 <div class="bar" id="bar" aria-hidden="true">
   <span class="pr">From<b>₪55</b></span>
@@ -370,7 +471,7 @@
   ];
   var MIX8 = 120;
   var SW = { cinnamon: 'var(--icing)', espresso: 'var(--espresso)', lotus: 'var(--lotus)', choc: 'var(--choc)' };
-  var state = { size: 4, mix: false, picks: ['cinnamon'] };
+  var state = { size: 4, mix: false, picks: ['cinnamon'], qty: 1, ful: 'pickup' };
   var $ = function (s) { return document.querySelector(s); };
 
   // The bun, drawn as their buns are: a golden swirl, its topping poured on.
@@ -411,50 +512,78 @@
     setTimeout(function () { ['cinnamon', 'espresso', 'choc', 'lotus'].forEach(function (c) { var l = document.createElement('link'); l.rel = 'prefetch'; l.href = stage(c, true).match(/src="([^"]+)"/)[1]; document.head.appendChild(l); }); }, 1200);
   });
 
+  function fl(id) { return F.filter(function (x) { return x.id === id; })[0]; }
   function price() {
     if (state.size === 8 && state.mix) return MIX8;
-    var f = F.filter(function (x) { return x.id === state.picks[0]; })[0];
+    var f = fl(state.picks[0]);
     return state.size === 4 ? f.p4 : f.p8;
   }
-  function names() { return state.picks.map(function (id) { return F.filter(function (x) { return x.id === id; })[0].name; }); }
+  // What the same buns cost as boxes of 4 (two of them), from their own price list.
+  function was() {
+    if (state.size !== 8) return 0;
+    if (state.mix) { if (state.picks.length < 2) return 0; return fl(state.picks[0]).p4 + fl(state.picks[1]).p4; }
+    return 2 * fl(state.picks[0]).p4;
+  }
+  function names() { return state.picks.map(function (id) { return fl(id).name; }); }
 
+  // The choice cards are built once and only updated, so a tap never rebuilds the
+  // button you are on (focus stays, nothing under it moves).
+  var fHost = $('#flavours');
+  fHost.innerHTML = F.map(function (f) {
+    return '<button type="button" class="choice" data-f="' + f.id + '" aria-pressed="false"><span class="nm"><span class="sw" style="background:' + SW[f.c] + '"></span>' + f.name + '</span><span class="pr"></span></button>';
+  }).join('') + '<button type="button" class="choice mix" data-mix aria-pressed="false"><span>2 flavour mix<small></small></span><span class="pr">\u20aa' + MIX8 + '</span></button>';
   function renderFlavours() {
-    var html = F.map(function (f) {
-      var on = state.picks.indexOf(f.id) > -1;
-      return '<button type="button" class="choice" data-f="' + f.id + '" aria-pressed="' + on + '"><span class="nm"><span class="sw" style="background:' + SW[f.c] + '"></span>' + f.name + '</span><span class="pr">₪' + (state.size === 4 ? f.p4 : f.p8) + '</span></button>';
-    }).join('');
-    html += '<button type="button" class="choice mix" data-mix aria-pressed="' + state.mix + '"' + (state.size === 8 ? '' : ' hidden') + '><span>2 flavour mix<small>Your choice of any 2 flavours</small></span><span class="pr">₪' + MIX8 + '</span></button>';
-    $('#flavours').innerHTML = html;
+    fHost.querySelectorAll('[data-f]').forEach(function (b) {
+      var f = fl(b.getAttribute('data-f'));
+      b.setAttribute('aria-pressed', String(state.picks.indexOf(f.id) > -1));
+      b.querySelector('.pr').textContent = '\u20aa' + (state.size === 4 ? f.p4 : f.p8);
+    });
+    var m = fHost.querySelector('[data-mix]'), on8 = state.size === 8;
+    m.setAttribute('aria-pressed', String(on8 && state.mix)); m.classList.toggle('dim', !on8);
+    m.querySelector('small').textContent = on8 ? 'Your choice of any 2 flavours' : '8 piece boxes only, tap to switch';
   }
 
   function paint() {
     document.querySelectorAll('[data-size]').forEach(function (b) { if (b.classList.contains('choice')) b.setAttribute('aria-pressed', String(+b.getAttribute('data-size') === state.size)); });
     renderFlavours();
-    var p = price(), n = names();
-    $('#sum').innerHTML = '₪' + p + '<small>' + state.size + ' buns</small>';
+    var p = price(), n = names(), q = state.qty, w = was(), save = w > p ? (w - p) * q : 0, tot = p * q, buns = state.size * q;
+    var each = (tot / buns); each = each % 1 ? each.toFixed(2) : String(each);
+    var chip = save ? '<span class="chip">Save ₪' + save + '</span>' : '';
+    $('#sum').innerHTML = '<span class="pp">₪' + tot + (save ? '<s>₪' + (w * q) + '</s>' : '') + '</span><small class="u">' + chip + '₪' + each + ' a bun</small><small class="n">' + (save ? chip : buns + ' buns') + '</small>';
+    document.querySelectorAll('[data-px]').forEach(function (x) { x.textContent = ', ₪' + tot; });
+    $('#qty').textContent = q; $('#qm').disabled = q <= 1; $('#qp').disabled = q >= 9;
+    document.querySelectorAll('[data-ful]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-ful') === state.ful)); });
     var need = state.size === 8 && state.mix && state.picks.length < 2;
     $('#note').textContent = state.size === 8 && state.mix ? (need ? 'Pick a second flavour for your mix.' : 'Half ' + n[0] + ', half ' + n[1] + '.') : '';
     // The box fills slot by slot in the chosen flavours.
-    var slots = '';
-    for (var i = 0; i < state.size; i++) {
-      var id = state.mix && state.picks.length === 2 ? state.picks[i < state.size / 2 ? 0 : 1] : state.picks[0];
-      var f = F.filter(function (x) { return x.id === id; })[0];
-      if (i % 4 === 0) slots += (i ? '</div></div>' : '') + '<div class="tray"><div class="slots">';
-      slots += '<div class="slot" style="--i:' + i + '">' + bun(f.c) + '</div>';
+    var host = $('#slots');
+    if (!host.firstChild) {
+      var h = '';
+      for (var t = 0; t < 2; t++) { h += '<div class="trayw"><div class="tray"><div class="slots">'; for (var k = 0; k < 4; k++) h += '<div class="slot" style="--i:' + (t * 4 + k) + '"></div>'; h += '</div></div></div>'; }
+      host.innerHTML = h;
     }
-    slots += '</div></div>';
-    $('#slots').innerHTML = slots; $('#box').setAttribute('data-size', state.size);
+    $('#box').setAttribute('data-size', state.size);
+    host.querySelectorAll('.trayw').forEach(function (tw, t) { tw.classList.toggle('off', t * 4 >= state.size); });
+    host.querySelectorAll('.slot').forEach(function (el, i) {
+      var live = i < state.size;
+      var id = state.mix && state.picks.length === 2 ? state.picks[i < state.size / 2 ? 0 : 1] : state.picks[0];
+      var f = fl(id), fresh = false;
+      // every slot keeps its photo (hidden ones too) so the box's height never changes
+      if (el.getAttribute('data-c') !== f.c) { el.setAttribute('data-c', f.c); el.innerHTML = bun(f.c); fresh = true; if (live) el.classList.remove('in'); }
+      if (!live) { el.classList.remove('in'); return; }
+      if (fresh || !el.classList.contains('in')) requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add('in'); }); });
+    });
     // The big bun takes the latest flavour, poured on as it is chosen.
     var latest = F.filter(function (x) { return x.id === state.picks[state.picks.length - 1]; })[0];
     if (latest.c !== lastPour) { var pour = !still && lastPour !== null; $('#stage').innerHTML = stage(latest.c, pour); $('#mini').innerHTML = bun(latest.c); lastPour = latest.c; }
     $('#boxlabel').textContent = state.mix ? (n.length === 2 ? n[0] + ' & ' + n[1] : n[0] + ' & …') : n[0];
-    requestAnimationFrame(function () { requestAnimationFrame(function () { document.querySelectorAll('.slot').forEach(function (s) { s.classList.add('in'); }); }); });
     // The order, written out for their WhatsApp.
     var d = $('#date').value;
     var when = d ? new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
-    var text = 'Hi Bun Intended, I\'d like to order ' + (state.size === 8 ? 'an ' : 'a ') + state.size + ' piece box: '
-      + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + p + ').'
-      + (when ? ' For ' + when + '.' : '') + ' Pick-up in Ramat Eshkol.';
+    var what = q > 1 ? q + ' x ' + state.size + ' piece boxes' : (state.size === 8 ? 'an ' : 'a ') + state.size + ' piece box';
+    var text = 'Hi Bun Intended, I\'d like to order ' + what + ': '
+      + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + tot + (q > 1 ? ' for ' + q : '') + ').'
+      + (when ? ' For ' + when + '.' : '') + (state.ful === 'delivery' ? ' Delivery please: what do you need from me?' : ' Pick-up in Ramat Eshkol.');
     var a = $('#order');
     a.href = need ? '#build' : 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
     a.setAttribute('aria-disabled', String(need));
@@ -463,7 +592,19 @@
   document.addEventListener('click', function (e) {
     var s = e.target.closest('.choice[data-size]');
     if (s) { state.size = +s.getAttribute('data-size'); if (state.size === 4) { state.mix = false; state.picks = state.picks.slice(0, 1); } paint(); return; }
+    var q = e.target.closest('[data-q]');
+    if (q) { state.qty = Math.max(1, Math.min(9, state.qty + +q.getAttribute('data-q'))); paint(); return; }
+    var fu = e.target.closest('[data-ful]');
+    if (fu) { state.ful = fu.getAttribute('data-ful'); paint(); return; }
+    var pk = e.target.closest('[data-pick]');
+    if (pk) {
+      var pp = pk.getAttribute('data-pick').split(':'); state.size = +pp[0];
+      if (pp[1] === 'mix') { state.mix = true; if (state.picks.length < 2) state.picks = [state.picks[0], F.filter(function (x) { return x.id !== state.picks[0]; })[0].id]; }
+      else { state.mix = false; state.picks = [pp[1]]; }
+      paint(); $('#build').scrollIntoView({ behavior: still ? 'auto' : 'smooth' }); return;
+    }
     var m = e.target.closest('[data-mix]');
+    if (m && state.size === 4) { state.size = 8; state.mix = true; if (state.picks.length < 2) state.picks = [state.picks[0], F.filter(function (x) { return x.id !== state.picks[0]; })[0].id]; paint(); return; }
     if (m) { state.mix = !state.mix; if (!state.mix) state.picks = state.picks.slice(0, 1); paint(); return; }
     var f = e.target.closest('[data-f]');
     if (f) {
@@ -489,9 +630,20 @@
   });
 
   // Their price list, from the same numbers the builder uses.
-  $('#m4').innerHTML = F.map(function (f) { return '<li><span><span class="sw" style="width:14px;height:14px;border-radius:50%;background:' + SW[f.c] + ';box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)"></span>' + f.name + '</span><span class="p">' + f.p4 + '<small>NIS</small></span></li>'; }).join('');
-  $('#m8').innerHTML = F.map(function (f) { return '<li><span><span class="sw" style="width:14px;height:14px;border-radius:50%;background:' + SW[f.c] + ';box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)"></span>' + f.name + '</span><span class="p">' + f.p8 + '<small>NIS</small></span></li>'; }).join('')
-    + '<li><span>2 flavour mix<i>any 2 flavours</i></span><span class="p">' + MIX8 + '<small>NIS</small></span></li>';
+  function row(sz, id, nm, sw, p, wasP) {
+    return '<li><button type="button" class="row" data-pick="' + sz + ':' + id + '"><span>' + sw + nm + '</span><span class="p">' + (wasP ? '<s>' + wasP + '</s>' : '') + p + '<small>NIS</small></span></button></li>';
+  }
+  function dot(c) { return '<span class="sw" style="width:14px;height:14px;border-radius:50%;background:' + SW[c] + ';box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)"></span>'; }
+  $('#m4').innerHTML = F.map(function (f) { return row(4, f.id, f.name, dot(f.c), f.p4, 0); }).join('');
+  $('#m8').innerHTML = F.map(function (f) { return row(8, f.id, f.name, dot(f.c), f.p8, f.p4 * 2); }).join('')
+    + '<li><button type="button" class="row" data-pick="8:mix"><span>2 flavour mix<i>any 2 flavours</i></span><span class="p">' + MIX8 + '<small>NIS</small></span></button></li>';
+
+  // The phone menu: opens a panel, closes on Escape or a tap on a link.
+  var tb = $('#top'), mb = $('#mbtn');
+  function menu(o) { tb.classList.toggle('is-open', o); mb.setAttribute('aria-expanded', String(o)); mb.textContent = o ? 'Close' : 'Menu'; }
+  mb.addEventListener('click', function () { menu(!tb.classList.contains('is-open')); });
+  tb.querySelectorAll('.mpanel a').forEach(function (a) { a.addEventListener('click', function () { menu(false); }); });
+  addEventListener('keydown', function (e) { if (e.key === 'Escape') menu(false); });
 
   // Phones: the bar from after the first screen until the box builder's own button is on screen.
   var bar = $('#bar'), hero = $('.hero .send'), build = $('#order'), close = $('.close .send');

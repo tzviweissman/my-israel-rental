@@ -182,6 +182,28 @@ for (const url of urls) {
     for (const [k, m] of r) fail(url, k, `${m} at ${w}x${h}`);
     await page.close();
   }
+  // ── the home page opens on a full-screen film or event (page rules 3h; Tzvi, 21 Oct 2026: "why do you keep
+  // making bland websites"): the picture fills the first screen, and the first screen changes on its own or as you scroll ──
+  if (/\/(index\.html)?(\?.*)?$/.test(new URL(url).pathname + new URL(url).search)) {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await ctx.newPage(); await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(600);
+    const cover = await page.evaluate(() => {
+      // how much of the first screen is picture (video, canvas, image or a background image), sampled on a grid
+      let hit = 0, n = 0;
+      for (let x = 40; x < innerWidth; x += 80) for (let y = 90; y < innerHeight; y += 80) {
+        n++; for (const e of document.elementsFromPoint(x, y)) {  // every layer at that point: a film often sits under the words
+          if (e === document.body || e === document.documentElement) break;
+          const cs = getComputedStyle(e); if (+cs.opacity > .2 && (/^(VIDEO|CANVAS|IMG|PICTURE)$/.test(e.tagName) || (cs.backgroundImage !== 'none' && !/gradient/.test(cs.backgroundImage)))) { hit++; break; } }
+      }
+      return hit / n;
+    });
+    const a = await page.screenshot(); await page.waitForTimeout(2500); const b = await page.screenshot();
+    await page.mouse.wheel(0, 500); await page.waitForTimeout(900); const c = await page.screenshot();
+    const differ = (x, y) => { let d = 0; for (let i = 0; i < x.length && i < y.length; i += 997) d += x[i] !== y[i] ? 1 : 0; return d / (Math.min(x.length, y.length) / 997); };
+    if (cover < .7) fail(url, 'OPENING', `the first screen is only ${Math.round(cover * 100)}% picture: the opening must be a full-screen film or photo, not a box beside the words (3h.1)`);
+    if (differ(a, b) < .05 && differ(b, c) < .05) fail(url, 'OPENING', 'nothing happens on the first screen, on its own or when you start to scroll: the opening must be an event (3h)');
+    await ctx.close();
+  }
   // ── motion switched off: nothing stays hidden ──
   {
     const ctx = await browser.newContext({ viewport: { width: 1280, height: 800 }, reducedMotion: 'reduce' });
@@ -189,8 +211,11 @@ for (const url of urls) {
     const hidden = await page.evaluate(async () => {
       document.documentElement.style.scrollBehavior = 'auto';
       for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight * .8) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 120)); }
-      const out = []; for (const e of document.querySelectorAll('main h1, main h2, main h3, main p, main .btn')) { let o = 1; for (let n = e; n; n = n.parentElement) o *= +getComputedStyle(n).opacity; if (e.getBoundingClientRect().height && o < .3 && e.textContent.trim()) out.push(e.textContent.trim().slice(0, 30)); }
-      return out.slice(0, 4);
+      // judge each item while it is on screen: a scroll engine may fade things out again once they are scrolled past
+      const out = [], els = [...document.querySelectorAll('main h1, main h2, main h3, main p, main .btn')].filter((e) => e.getBoundingClientRect().height && e.textContent.trim()).slice(0, 60);
+      for (const e of els) { e.scrollIntoView({ block: 'center', behavior: 'instant' }); await new Promise((r) => setTimeout(r, 450));
+        let o = 1; for (let n = e; n; n = n.parentElement) o *= +getComputedStyle(n).opacity; if (o < .3) out.push(e.textContent.trim().slice(0, 30)); if (out.length >= 4) break; }
+      return out;
     });
     for (const t of hidden) fail(url, 'MEDIA', `with motion switched off, "${t}" stays hidden`);
     await ctx.close();
@@ -198,7 +223,7 @@ for (const url of urls) {
   // ── the order or booking flow, if the page has one ──
   {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-    await page.addInitScript(() => { window.__sent = ''; window.open = (u) => { window.__sent = String(u); return {}; }; try { localStorage.clear(); } catch (e) { /* none */ } });
+    await page.addInitScript(() => { window.__sent = ''; window.open = (u) => { if (u) window.__sent = String(u); const tab = { closed: false, close() {}, focus() {}, document: { write() {}, title: '' }, location: { set href(x) { window.__sent = String(x); }, get href() { return window.__sent; }, replace(x) { window.__sent = String(x); }, assign(x) { window.__sent = String(x); } } }; return tab; }; try { localStorage.clear(); } catch (e) { /* none */ } });
     await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(900);
     const hasForm = await page.$('form button[type=submit], form#form');
     if (hasForm) {
@@ -227,7 +252,7 @@ for (const url of urls) {
       await page.evaluate(() => { const t = [...document.querySelectorAll('#times input')].find((r) => r.offsetParent !== null); if (t && !document.querySelector('#times input:checked')) t.click(); });
       await page.waitForTimeout(200);
       await page.evaluate(() => { const s = document.querySelector('form button[type=submit]') || document.querySelector('#send'); s && s.click(); });
-      await page.waitForTimeout(500);
+      for (let w = 0; w < 14 && !(await page.evaluate(() => !!window.__sent)); w++) await page.waitForTimeout(500);  // a page may save the order first (up to a few seconds)
       if (await page.evaluate(() => !!window.__sent)) break;
       }
       const res = await page.evaluate(() => ({ sent: decodeURIComponent((window.__sent.split('text=')[1] || '')), total: (document.querySelector('#total') || {}).textContent || '', errs: [...document.querySelectorAll('.err')].map((e) => e.textContent.trim()).filter(Boolean) }));
