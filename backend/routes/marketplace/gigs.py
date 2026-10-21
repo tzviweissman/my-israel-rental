@@ -1277,8 +1277,12 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
     # Store gigs use direct messaging only — no calendar / no tier booking.
     if (gig.get("gig_type") or "deliverable") == "store":
         raise HTTPException(status_code=400, detail="Store gigs do not accept bookings - message the seller directly")
-    if gig.get("booking_mode") != "in_platform":
-        raise HTTPException(status_code=400, detail="This gig only accepts WhatsApp bookings")
+    # `booking_mode` is the owner's PREFERRED channel, not the only one
+    # (shared.py GigIn). This line used to refuse every on-site booking on
+    # a WhatsApp-preferring listing, which is nearly all of them: production
+    # had 68 WhatsApp taps and 0 bookings ever (21 Oct 2026). Booking on the
+    # site now always works; WhatsApp is offered after it, with the booking
+    # written into the message (Tzvi: "order here, then talk on WhatsApp").
     # Appointment gigs require an explicit time slot so the calendar can
     # be enforced. Deliverable gigs may optionally include a preferred
     # date if the provider enabled `enable_date_booking`.
@@ -1392,7 +1396,7 @@ async def track_booking(token: str, request: Request):
     b = await db.marketplace_bookings.find_one({"track_token": token})
     if not b:
         raise HTTPException(status_code=404, detail="This link is not valid")
-    gig = await db.marketplace_gigs.find_one({"_id": b.get("gig_id")}, {"title": 1, "title_he": 1, "business_id": 1, "weekly_availability": 1, "slot_duration_minutes": 1, "deposit_note": 1}) or {}
+    gig = await db.marketplace_gigs.find_one({"_id": b.get("gig_id")}, {"title": 1, "title_he": 1, "business_id": 1, "weekly_availability": 1, "slot_duration_minutes": 1, "deposit_note": 1, "whatsapp": 1}) or {}
     biz = await db.businesses.find_one({"_id": gig.get("business_id")}, {"name": 1, "name_he": 1, "slug": 1, "logo_url": 1, "payment_links": 1}) or {}
     status = b.get("status") or "pending"
     expires = b.get("hold_expires_at")
@@ -1414,6 +1418,9 @@ async def track_booking(token: str, request: Request):
         "deposit": b.get("deposit"),
         "deposit_note": gig.get("deposit_note") if (b.get("deposit") or {}).get("status") == "due" else None,
         "payment_links": _allowed_links(biz.get("payment_links")) if (b.get("deposit") or {}).get("status") == "due" else [],
+        # Whether to offer "message them on WhatsApp about this booking".
+        # Yes or no only: the number stays behind the counting redirect.
+        "whatsapp": bool(await gig_whatsapp_number({**gig, "provider_user_id": b.get("provider_user_id")})) if gig else False,
     }
 
 
@@ -2287,11 +2294,29 @@ async def taken_slots(gig_id: str):
     return out
 
 
+async def gig_whatsapp_number(gig: dict) -> str:
+    """The number a listing's WhatsApp goes to, or "". Same precedence as
+    the detail payload: the listing's own, then the provider record, then
+    the account. Shared by the redirect below and by the order and booking
+    pages, which only ever learn WHETHER there is one, never the number."""
+    provider_user_id = gig.get("provider_user_id")
+    number = (gig.get("whatsapp") or "").strip()
+    if not number:
+        prov = await db.marketplace_providers.find_one({"user_id": provider_user_id})
+        number = ((prov or {}).get("whatsapp") or "").strip()
+    if not number:
+        user = await db.users.find_one({"_id": provider_user_id}) \
+            or await db.users.find_one({"id": provider_user_id})
+        number = user_whatsapp(user)
+    return number if build_whatsapp_link(number, "") else ""
+
+
 @router.get("/gigs/{gig_id}/contact")
 async def contact_gig_on_whatsapp(
     gig_id: str,
     request: Request,
     text: str = Query("", max_length=1000),
+    after: Optional[str] = Query(None, pattern="^(order|booking)$"),
 ) -> RedirectResponse:
     """Count a WhatsApp lead, then hand the visitor to WhatsApp.
 
@@ -2318,17 +2343,8 @@ async def contact_gig_on_whatsapp(
     if not gig:
         raise HTTPException(status_code=404, detail="Gig not found")
 
-    # Same precedence the gig detail payload uses: per-gig number first,
-    # then the provider record, then the account-level number.
     provider_user_id = gig.get("provider_user_id")
-    number = (gig.get("whatsapp") or "").strip()
-    if not number:
-        prov = await db.marketplace_providers.find_one({"user_id": provider_user_id})
-        number = ((prov or {}).get("whatsapp") or "").strip()
-    if not number:
-        user = await db.users.find_one({"_id": provider_user_id}) \
-            or await db.users.find_one({"id": provider_user_id})
-        number = user_whatsapp(user)
+    number = await gig_whatsapp_number(gig)
 
     target = build_whatsapp_link(number, text)
     if not target:
@@ -2349,6 +2365,11 @@ async def contact_gig_on_whatsapp(
             # "clicked through from a listing", with no new PII. The full
             # user-agent and IP are deliberately not stored.
             "referrer_host": _referrer_host(request.headers.get("referer")),
+            # Set when the tap came from an order or booking confirmation.
+            # Those are not leaks: the order is already on the site. Without
+            # this mark they would count against the very change that
+            # produced them (the 68-taps-to-2-orders measure, 21 Oct 2026).
+            **({"after": after} if after else {}),
         })
     except Exception:  # noqa: BLE001 — the lead matters more than the metric
         logger.exception("lead_events insert failed for gig %s", gig_id)

@@ -32,6 +32,10 @@ export default function ContactChannels({
   onMessage,
   busy = false,
   testidPrefix = 'contact',
+  // Secondary styling for WhatsApp, for pages where the main action is
+  // on the site (an order or a booking). A solid green bar beside the
+  // site's own button won every time: 68 taps to 2 orders (21 Oct 2026).
+  quiet = false,
 }) {
   const { t } = useTranslation();
   const has = (c) => channels.includes(c);
@@ -47,11 +51,11 @@ export default function ContactChannels({
           type="button"
           onClick={onWhatsApp}
           disabled={busy}
-          className="w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold text-white disabled:opacity-60"
-          style={{ background: WA_GREEN }}
+          className={`w-full inline-flex items-center justify-center gap-2 py-2.5 rounded-xl text-sm font-semibold disabled:opacity-60 ${quiet ? 'border bg-white' : 'text-white'}`}
+          style={quiet ? { borderColor: 'var(--brand-border)', color: 'var(--ink)' } : { background: WA_GREEN }}
           data-testid={`${testidPrefix}-whatsapp`}
         >
-          <MessageCircle size={15} aria-hidden="true" />
+          <MessageCircle size={15} aria-hidden="true" style={quiet ? { color: WA_GREEN } : undefined} />
           {t('contact.whatsapp', 'WhatsApp')}
         </button>
       )}

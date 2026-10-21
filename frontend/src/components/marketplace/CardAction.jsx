@@ -29,7 +29,9 @@ export function actionKind(gig) {
   }
   const week = gig.weekly_availability || {};
   const hasSlots = Object.values(week).some((w) => (w || []).length);
-  if (gig.gig_type === 'appointment' && gig.booking_mode === 'in_platform' && hasSlots && (gig.tiers || []).length) return 'book';
+  // Any listing with slots books on the site now, whatever channel the
+  // owner prefers (gigs.py book_gig, 21 Oct 2026).
+  if (gig.gig_type === 'appointment' && hasSlots && (gig.tiers || []).length) return 'book';
   return 'message';
 }
 

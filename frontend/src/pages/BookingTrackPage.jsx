@@ -17,6 +17,7 @@ import ChangeBooking from '../components/bookings/ChangeBooking';
 import AddToCalendar from '../components/bookings/AddToCalendar';
 import PayLinks from '../components/forms/PayLinks';
 import { money } from '../utils/currency';
+import WhatsAppAboutThis from '../components/marketplace/WhatsAppAboutThis';
 
 const REFRESH_MS = 30_000;
 
@@ -110,6 +111,23 @@ export default function BookingTrackPage() {
           )}
         </section>
 
+        {/* Book here, then talk on WhatsApp: the booking is already on the
+            site, so this is the conversation, not a customer leaving. */}
+        {data.whatsapp && ['pending', 'accepted'].includes(data.status) && (
+          <WhatsAppAboutThis
+            gigId={data.gig_id}
+            after="booking"
+            testid="booking-track-whatsapp"
+            label={t('afterOrder.bookingWhatsapp', 'Message them on WhatsApp about this booking')}
+            text={t('afterOrder.bookingText', {
+              defaultValue: 'Hi, I just booked with you on MyIsraelRental: {{what}}{{when}}\nMy booking: {{link}}',
+              what: `${title}${data.tier_name ? ` - ${data.tier_name}` : ''}`,
+              when: when ? ` (${when})` : '',
+              link: window.location.href,
+              interpolation: { escapeValue: false },
+            })}
+          />
+        )}
         {/* A deposit to pay the business directly (backend deposits.py). */}
         {data.deposit && ['pending', 'accepted'].includes(data.status) && (
           <section className="mt-4 rounded-2xl border bg-white p-4 text-sm" style={{ borderColor: data.deposit.status === 'due' ? 'var(--ink)' : 'var(--brand-border)', color: 'var(--ink)' }} data-testid="booking-track-deposit" data-deposit={data.deposit.status}>

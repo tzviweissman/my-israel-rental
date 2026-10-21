@@ -661,23 +661,16 @@ const GigDetail = () => {
       messageOnSite();
       return;
     }
-    if (isAppointment) {
-      if (!appointmentDate || !appointmentSlot) {
-        return toast.error(t('services.pickDayAndTimeFirst', 'Pick a day and time slot first'));
-      }
-      if (useWhatsApp) {
-        const msg = `Hi! I'd like to book your "${displayTitle}" - ${tier.name} on ${appointmentDate} at ${appointmentSlot} (${sym}${tier.price}) from MyIsraelRental.`;
-        if (openWhatsApp(msg)) return;
-      }
-      setShowBook(true);
-      return;
+    if (isAppointment && (!appointmentDate || !appointmentSlot)) {
+      return toast.error(t('services.pickDayAndTimeFirst', 'Pick a day and time slot first'));
     }
-    // Deliverable
-    if (useWhatsApp) {
-      const datePart = gig.enable_date_booking && deliverableDate ? ` on ${deliverableDate}` : '';
-      const msg = `Hi! I'd like to book your "${displayTitle}" - ${tier.name} (${sym}${tier.price})${datePart} from MyIsraelRental.`;
-      if (openWhatsApp(msg)) return;
-    }
+    // ORDER HERE, THEN TALK ON WHATSAPP (Tzvi, 21 Oct 2026). This button
+    // used to open WhatsApp directly whenever the owner preferred it, and
+    // production showed what that meant: 68 WhatsApp taps, 0 bookings, and
+    // the site knew nothing about any of them. The booking is made here
+    // now; its confirmation page offers WhatsApp with the booking written
+    // into the message, so the conversation still happens where Israelis
+    // expect it, and the site keeps the customer and the record.
     setShowBook(true);
   };
 
@@ -1177,7 +1170,7 @@ const GigDetail = () => {
                 <AppointmentPicker
                   gig={gig}
                   tier={tier}
-                  isWhatsApp={useWhatsApp}
+                  isWhatsApp={false}
                   selectedDate={appointmentDate}
                   selectedSlot={appointmentSlot}
                   onSelectDate={(d) => { setAppointmentDate(d); setAppointmentSlot(null); }}
@@ -1226,24 +1219,19 @@ const GigDetail = () => {
                   <ShoppingBag size={14} /> {t('gigDetail.orderNow', 'Order now')}
                 </Link>
               )}
-              <button onClick={handleBookClick}
-                disabled={isAppointment && (!appointmentDate || !appointmentSlot)}
-                className={`w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold text-white disabled:opacity-40 transition-colors ${
-                  useWhatsApp
-                    ? 'bg-[#25D366] hover:bg-[#1DA851] disabled:hover:bg-[#25D366]'
-                    : 'bg-[var(--brand-primary)] hover:bg-[#0F3A3A] disabled:hover:bg-[var(--brand-primary)]'
-                }`}
-                data-testid="gig-book-btn">
-                {isStore ? (
-                  useWhatsApp
-                    ? <><MessageCircle size={14} /> {t('services.messageSellerWhatsApp', 'Message the seller on WhatsApp')}</>
-                    : <><Send size={14} /> {t('services.sendInquiry', 'Send an inquiry')}</>
-                ) : useWhatsApp ? (
-                  <><MessageCircle size={14} /> {t('services.bookOnWhatsApp', 'Book on WhatsApp')}</>
-                ) : (
-                  <><Send size={14} /> {t('services.sendBookingRequest', 'Send booking request')}</>
-                )}
-              </button>
+              {/* One main button, and it stays on the site. A store's is
+                  Order (above); WhatsApp is offered quietly below with the
+                  other ways to reach them, and again after the order with
+                  the order written into the message. */}
+              {!isStore && (
+                <button onClick={handleBookClick}
+                  disabled={isAppointment && (!appointmentDate || !appointmentSlot)}
+                  className="w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold disabled:opacity-40"
+                  style={{ background: 'var(--action)', color: 'var(--action-ink)' }}
+                  data-testid="gig-book-btn">
+                  <Send size={14} /> {t('services.sendBookingRequest', 'Send booking request')}
+                </button>
+              )}
               {/* A job a fixed price cannot cover: ask for a quote (quotes.py). */}
               {!isStore && <QuoteRequest gig={gig} />}
               {/* Present tense on purpose: "never" was a forever-promise
@@ -1257,7 +1245,8 @@ const GigDetail = () => {
                   for them. On-site messaging is always among them. */}
               <div className="mt-3">
                 <ContactChannels
-                  channels={channels.filter((c) => !(useWhatsApp && c === 'whatsapp'))}
+                  quiet
+                  channels={channels}
                   email={gig.contact_email}
                   onWhatsApp={() => {
                     const msg = t('services.waGeneric', {

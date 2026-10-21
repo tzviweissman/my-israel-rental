@@ -124,5 +124,10 @@ else {
 # --- Start the API server --------------------------------------------
 
 Write-Host '[dev] Starting the API server on 8001...'
+# --reload-dir: without it the reloader watches the WHOLE repo (the working
+# directory), so saving a page build under scrollcraft/ or any frontend
+# file restarted the API, often mid-startup, where it died on its first
+# database call with a CancelledError that looks like a Mongo fault. With
+# several sessions editing at once it never stayed up (21 Oct 2026).
 & (Join-Path $Backend '.venv\Scripts\python.exe') `
-    -m uvicorn server:app --app-dir $Backend --host 0.0.0.0 --port 8001 --reload
+    -m uvicorn server:app --app-dir $Backend --host 0.0.0.0 --port 8001 --reload --reload-dir $Backend

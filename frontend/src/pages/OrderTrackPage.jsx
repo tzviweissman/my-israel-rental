@@ -21,6 +21,7 @@ import { Loader2, ClipboardList, Check, Bike, Store as StoreIcon, Clock, MapPin,
 import { API } from '../lib/apiBase';
 import { money } from '../utils/currency';
 import ReferralCard from '../components/forms/ReferralCard';
+import WhatsAppAboutThis from '../components/marketplace/WhatsAppAboutThis';
 
 const REFRESH_MS = 30_000;
 
@@ -186,6 +187,22 @@ export default function OrderTrackPage() {
           )}
         </section>
 
+        {/* Order here, then talk on WhatsApp: the order is already on the
+            site, so this is the conversation, not a customer leaving. */}
+        {data.whatsapp && !closedBad && (
+          <WhatsAppAboutThis
+            gigId={data.gig_id}
+            after="order"
+            testid="track-whatsapp"
+            label={t('afterOrder.orderWhatsapp', 'Message them on WhatsApp about this order')}
+            text={t('afterOrder.orderText', {
+              defaultValue: 'Hi, I just ordered from you on MyIsraelRental:\n{{items}}\nMy order: {{link}}',
+              items: data.items || '',
+              link: window.location.href,
+              interpolation: { escapeValue: false },
+            })}
+          />
+        )}
         {data.delivered_photo_url && (
           <section className="rounded-2xl border bg-white p-4 mt-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="track-photo">
             <p className="text-xs font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.photoTitle', 'Delivered {{time}}', { time: String(data.delivered_at || '').slice(11, 16) })}</p>

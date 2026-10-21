@@ -1639,7 +1639,22 @@ async def track_order(token: str, request: Request):
         "paid": bool((o.get("payment") or {}).get("method")),
         # Parts a partner supplies and delivers separately, without its name.
         "parts": parts,
+        # For "message them on WhatsApp about this order": the listing to
+        # route through (gigs.py /contact counts the tap and holds the
+        # number), and whether there is a number at all.
+        "gig_id": o.get("gig_id"),
+        "whatsapp": await _order_has_whatsapp(o),
     }
+
+
+async def _order_has_whatsapp(o: dict[str, Any]) -> bool:
+    if not o.get("gig_id"):
+        return False
+    gig = await db.marketplace_gigs.find_one({"_id": o["gig_id"]}, {"whatsapp": 1, "provider_user_id": 1})
+    if not gig:
+        return False
+    from .gigs import gig_whatsapp_number
+    return bool(await gig_whatsapp_number(gig))
 
 
 # ---------------------------------------------------------------------------
