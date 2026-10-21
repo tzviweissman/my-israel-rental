@@ -257,7 +257,7 @@ for (const url of urls) {
       }
       const res = await page.evaluate(() => ({ sent: decodeURIComponent((window.__sent.split('text=')[1] || '')), total: (document.querySelector('#total') || {}).textContent || '', errs: [...document.querySelectorAll('.err')].map((e) => e.textContent.trim()).filter(Boolean) }));
       if (!res.sent) fail(url, 'FLOW', `filled in, the form sends nothing${res.errs.length ? ` (it says: ${res.errs.join('; ')})` : ''}`);
-      else if (res.total && !res.sent.includes(res.total.replace(/\s/g, '').replace(/^₪/, '₪'))) fail(url, 'FLOW', `the message does not carry the total the page shows (${res.total})`);
+      else if (res.total && !res.sent.replace(/\s/g, '').includes(res.total.replace(/\s/g, ''))) fail(url, 'FLOW', `the message does not carry the total the page shows (${res.total})`);
       else if (!/wa\.me|whatsapp/i.test(res.sent + '') && !res.sent) fail(url, 'FLOW', 'no WhatsApp message');
     }
     await page.close();

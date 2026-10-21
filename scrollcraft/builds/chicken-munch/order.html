@@ -4,9 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Order · Chicken Munch</title>
-<meta name="description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275. Pick your chicken and sauces and send it on WhatsApp.">
+<meta name="description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275 ($85). Pick your chicken and sauces and send it on WhatsApp.">
 <meta property="og:title" content="Order · Chicken Munch">
-<meta property="og:description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275. Pick your chicken and sauces and send it on WhatsApp.">
+<meta property="og:description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275 ($85). Pick your chicken and sauces and send it on WhatsApp.">
 <meta property="og:image" content="https://myisraelrental.com/pages/chicken-munch/assets/box-dark.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -78,7 +78,7 @@
 <footer class="foot"><nav aria-label="Pages"><a href="index.html">Home</a> · <a href="menu.html">Menu</a> · <a href="order.html">Order</a> · <a href="contact.html">Contact</a></nav>Chicken Munch, Jerusalem · on <a href="/">MyIsraelRental</a>, free to list, no commission</footer>
 
 <div class="bar" id="bar" aria-hidden="true">
-  <p class="p"><b>From $69</b>Boxes, or pans from ₪275</p>
+  <p class="p"><b>From $69</b>Boxes, or pans from ₪275 ($85)</p>
   <a class="btn" href="order.html" tabindex="-1">Order now</a>
 </div>
 
@@ -97,8 +97,8 @@
     mini: ['Mini Munch Box', 69, 'USD', 'cmminibox001', 'box', 'Feeds 3 to 4'],
     grand: ['Grand Munch Box', 140, 'USD', 'cmgrandbox01', 'box', 'Feeds 8 to 10'],
     supreme: ['Supreme Munch Box', 220, 'USD', 'cmsuprbox001', 'box', 'Feeds 16'],
-    pan913: ['9x13 pan', 275, 'ILS', 'cm913tray001', 'pan', 'Feeds 6 to 8'],
-    roaster: ['Roaster', 650, 'ILS', 'cmgastro0001', 'pan', 'Feeds 18 to 20'],
+    pan913: ['9x13 pan', 275, 'ILS', 'cm913tray001', 'pan', 'Feeds 6 to 8', 85],  // the owner's dollar price too (21 Oct 2026)
+    roaster: ['Roaster', 650, 'ILS', 'cmgastro0001', 'pan', 'Feeds 18 to 20', 210],
     rice: ['9x13 rice', 75, 'ILS', 'cm913rice001', 'pan', '']
   };
   // [kinds of chicken allowed, sauces allowed]; 0 = none to choose
@@ -114,6 +114,8 @@
   if (want && ITEMS[want] && !q[want]) q[want] = 1;
   if (want) history.replaceState(null, '', location.pathname);
   function money(n, cur) { return (cur === 'USD' ? '$' : '₪') + n.toLocaleString('en-US'); }
+  // a pan shows its dollar price beside the shekel one: ₪275 ($85)
+  function priceOf(k, n) { var it = ITEMS[k]; return money(n * it[1], it[2]) + (it[6] ? ' ($' + (n * it[6]).toLocaleString('en-US') + ')' : ''); }
 
   function chipSet(k, list, max, kind) {
     var single = max === 1, name = k + '-' + kind;
@@ -124,7 +126,7 @@
   Object.keys(ITEMS).forEach(function (k) {
     var it = ITEMS[k], c = CHOICE[k], d = document.createElement('div');
     d.className = 'line'; d.dataset.k = k;
-    d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + money(it[1], it[2]) + (it[5] ? ' · ' + it[5] : '') + '</div>' + (ALLOWS[k] ? '<div class="allows' + (CHOICE[k][0] === 1 ? ' one' : '') + '">' + ALLOWS[k] + '</div>' : '') + '</div>' +
+    d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + priceOf(k, 1) + (it[5] ? ' · ' + it[5] : '') + '</div>' + (ALLOWS[k] ? '<div class="allows' + (CHOICE[k][0] === 1 ? ' one' : '') + '">' + ALLOWS[k] + '</div>' : '') + '</div>' +
       '<div class="ctl"><div class="step"><button type="button" data-d="-1" aria-label="One fewer ' + it[0] + '">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + it[0] + '">+</button></div><button type="button" class="rm" data-rm="1" aria-label="Remove ' + it[0] + ' from the basket" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v6M14 10v6"/></svg></button></div>';
     var host = document.getElementById(it[4] === 'box' ? 'lines-box' : 'lines-pan');
     host.appendChild(d);
@@ -149,14 +151,16 @@
     });
   });
   function totals() { var t = { USD: 0, ILS: 0 }; for (var k in q) t[ITEMS[k][2]] += q[k] * ITEMS[k][1]; return t; }
-  function totalText() { var t = totals(), p = []; if (t.USD) p.push(money(t.USD, 'USD')); if (t.ILS) p.push(money(t.ILS, 'ILS')); return p.join(' + ') || '0'; }
+  function totalText() { var t = totals(), p = []; if (t.USD) p.push(money(t.USD, 'USD')); if (t.ILS) p.push(money(t.ILS, 'ILS')); var s = p.join(' + ') || '0';
+    if (t.ILS) { var d = 0; for (var k in q) if (q[k]) d += q[k] * (ITEMS[k][6] || (ITEMS[k][2] === 'USD' ? ITEMS[k][1] : 0)); s += ' (or $' + d.toLocaleString('en-US') + ' all in dollars)'; }
+    return s; }
   var send = document.getElementById('send'), noRice = false;
   document.getElementById('sug-add').addEventListener('click', function () { q.rice = 1; update(); check(false); });
   document.getElementById('sug-no').addEventListener('click', function () { noRice = true; update(); });
   function update() {
     [].forEach.call(document.querySelectorAll('.line'), function (l) { l.querySelector('output').textContent = q[l.dataset.k]; l.querySelector('.rm').hidden = !q[l.dataset.k]; });
     [].forEach.call(document.querySelectorAll('.opts'), function (o) { o.hidden = !q[o.dataset.k]; });
-    var html = ''; for (var k in q) if (q[k]) html += '<li><span>' + q[k] + ' × ' + ITEMS[k][0] + '</span><span>' + money(q[k] * ITEMS[k][1], ITEMS[k][2]) + '</span></li>';
+    var html = ''; for (var k in q) if (q[k]) html += '<li><span>' + q[k] + ' × ' + ITEMS[k][0] + '</span><span>' + priceOf(k, q[k]) + '</span></li>';
     if (html) html += '<li><span>' + DELIVERY + '</span><span>by where</span></li>';
     document.getElementById('sum-list').innerHTML = html || '<li><span>Nothing yet</span></li>';
     document.getElementById('total').textContent = totalText() !== '0' ? totalText() + ' + delivery' : '0';
@@ -219,7 +223,7 @@
     if (!check(true)) { var bad = document.querySelector('.bad .fld, .bad input, .bad button'); if (bad) bad.focus(); return; }
     var lines = ['Hi Chicken Munch, I would like to order:'], notesOut = [];
     for (var k in q) if (q[k]) {
-      lines.push('• ' + q[k] + ' × ' + ITEMS[k][0] + ' (' + money(q[k] * ITEMS[k][1], ITEMS[k][2]) + ')');
+      lines.push('• ' + q[k] + ' × ' + ITEMS[k][0] + ' (' + priceOf(k, q[k]) + ')');
       described(k).forEach(function (s) { lines.push('   ' + s); });
       if (described(k).length) notesOut.push(ITEMS[k][0] + ': ' + described(k).join('; '));
     }

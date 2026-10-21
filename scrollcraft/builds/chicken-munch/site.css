@@ -294,3 +294,4 @@
   .sec .lede { margin-top: .5rem; }
 
   @media (min-width: 861px) { .teaser .shots { grid-template-columns: repeat(3, 1fr); } .teaser .shot.wide { grid-column: auto; aspect-ratio: 1; } .teaser .shot { max-height: 40svh; } }
+.price .alt { display: inline-block; font: 600 1rem/1 var(--font-body); opacity: .85; margin-left: .35rem; vertical-align: .35em; }
