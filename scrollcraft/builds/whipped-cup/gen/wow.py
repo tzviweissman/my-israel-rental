@@ -226,7 +226,7 @@ SKY_JS = '''<script>
     hint.style.opacity = 1 - clamp(p / .08);
   }
   size(); addEventListener('resize', function () { size(); frame(); });
-  if (reduce) { draw(1); return; }
+  if (reduce) { draw(1); line.style.opacity = 1; line.style.transform = 'none'; return; }  // motion off: the question stays in the page for readers, out of sight (the end card is the whole page)
   var tick = 0;
   function frame() { tick = 0; var r = sec.getBoundingClientRect(), span = sec.offsetHeight - innerHeight; draw(clamp(-r.top / Math.max(1, span))); }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });

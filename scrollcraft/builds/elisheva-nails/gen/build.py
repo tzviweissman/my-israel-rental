@@ -19,11 +19,13 @@ SHADES = [
     ('blue', 'With a touch of blue', '#AFCBE8', 'blue.webp', 'Nude gel nails with light blue accent nails'),
 ]
 SERVICES = [
-    ('gel', 'Gel Nails', 90, 45, 'Gel colour on your natural nails.'),
+    ('gel', 'Gel nails', 90, 45, 'Gel colour on your natural nails.'),
     ('gel-removal', 'Gel nails with removal', 110, 60, 'Your old gel taken off, then a new gel colour.'),
     ('art', 'Nail art, French or gradient nails', 110, 60, 'French tips, a gradient, or nail art.'),
     ('removal', 'Gel removal', 40, 25, 'Gel taken off, nothing new put on.'),
 ]
+_P = {k: p for k, n, p, m, d in SERVICES}
+SAVE = _P['removal'] + _P['gel'] - _P['gel-removal']  # removal + new gel booked apart, minus booked together
 HOURS = [('Sunday', '10:00 to 13:00'), ('Monday', '10:00 to 19:00'), ('Tuesday', '10:00 to 19:00'), ('Wednesday', '10:00 to 19:00'),
          ('Thursday', '10:00 to 19:00'), ('Friday', '10:00 to 13:00'), ('Shabbat', 'Closed')]
 
@@ -93,7 +95,7 @@ HERO = f'''  <section class="hero" id="open" aria-labelledby="h-open">
       <div class="h-text">
         <p class="caps">Luxe Nail Studio · Romema, Jerusalem</p>
         <h1 id="h-open">Gel nails, French nails and nail art<span class="script">by Elisheva</span></h1>
-        <p class="lede">More than four years of experience. Gel from ₪90, in about 45 minutes.</p>
+        <p class="lede">More than four years of experience. Gel from ₪90, in about 45 minutes. For gel, French and nail art on your natural nails.</p>
       </div>
       <div class="h-pick">
         <div class="shades">
@@ -157,7 +159,16 @@ HERO_JS = '<script>\nvar SHADES = ' + json.dumps([{'k': k, 'n': n, 'f': f, 'a': 
 </script>
 '''
 
-svc_rows = ''.join(f'''        <div class="svc-row rev"><div><h3>{n}</h3><p>{d}</p></div><div class="price"><span class="sym">₪</span>{p}<small>about {m} minutes</small></div><a class="btn-line" href="book.html?service={k}">Book</a></div>
+ASK = f'https://wa.me/{WA}?text=Hi%20Elisheva%2C%20I%20would%20like%20to%20ask%20about%20a%20nail%20art%20design'
+
+
+def price_html(k, p, m):
+    # the one real saving the way shops show it: the price apart struck through, then the price, and a two-word tag
+    was = f'<s class="was"><span class="sym">₪</span>{p + SAVE}</s>' if k == 'gel-removal' else ''
+    return f'<div class="price">{was}<span class="sym">₪</span>{p}<small>about {m} minutes</small></div>'
+
+
+svc_rows = ''.join(f'''        <div class="svc-row rev"><div><h3>{n}{f' <span class="tag">Save ₪{SAVE}</span>' if k == 'gel-removal' else ''}</h3><p>{d}{f' <a class="ask" href="{ASK}" target="_blank" rel="noopener">Ask about a design</a>' if k == 'art' else ''}</p></div>{price_html(k, p, m)}<a class="btn-line" href="book.html?service={k}">Book</a></div>
 ''' for k, n, p, m, d in SERVICES)
 SERVICES_SEC = f'''  <section class="sec" id="services" aria-labelledby="h-svc">
     <div class="wrap">
@@ -203,7 +214,7 @@ def write(name, title, desc, img, body, tail=''):
 
 write('index', 'Nails by Elisheva · Gel nails and nail art in Romema, Jerusalem', DESC, 'milky.webp', HERO + SERVICES_SEC + WORK_SEC + VISIT, HERO_JS)
 
-svc_opts = ''.join(f'<label class="opt"><input type="radio" name="svc" value="{k}"><span class="box"><span><b>{n}</b><br><small>about {m} minutes</small></span><span class="p"><span class="sym">₪</span>{p}</span></span></label>' for k, n, p, m, d in SERVICES)
+svc_opts = ''.join(f'<label class="opt"><input type="radio" name="svc" value="{k}"><span class="box"><span><b>{n}</b><br><small>about {m} minutes</small></span><span class="p"><span class="sym">₪</span>{p}</span></span>{f'<span class="tag"><i class="t-save">Save ₪{SAVE}</i><i class="t-sel">Selected</i></span>' if k == 'gel-removal' else ''}</label>' for k, n, p, m, d in SERVICES)
 shade_opts = ''.join(f'<button class="shade" type="button" data-k="{k}" style="--c:{c}" aria-pressed="false" aria-label="{n}"></button>' for k, n, c, f, a in SHADES)
 # The booking page as a product page (Tzvi, 20 Oct 2026: "use the new product page rules for ... the
 # nails one"; docs/inspo/product-pages-2026-10-20): her work big on a stage that takes the shade you
@@ -218,7 +229,7 @@ BOOK = f'''  <form id="form" novalidate>
         <ol class="osteps" aria-hidden="true"><li class="is-now"></li><li></li><li></li></ol>
         <p class="caps">Step 1 of 3 · Romema, Jerusalem</p>
         <h1 id="h-book"><span id="st-name">Book your nails</span></h1>
-        <p class="st-facts">More than four years of experience · Sunday to Friday</p>
+        <ol class="st-flow" aria-label="How booking works"><li>You send it on WhatsApp</li><li>I confirm your time</li><li>You come in</li></ol>
         <div class="st-pr"><p class="st-price" id="st-price" style="visibility:hidden">&nbsp;</p><p class="st-save" id="st-save" style="visibility:hidden">&nbsp;</p></div>
         <div class="card-in" id="w-svc"><p class="f">What would you like?</p><div class="opts" id="svcs">{svc_opts}</div><p class="err" id="e-svc"></p></div>
         <div class="st-end"><div class="card-in"><p class="f">Colour <span class="hint">(optional)</span><span class="shade-name" id="bshade-name"></span></p><div class="chips small" id="bshades">{shade_opts}</div></div>
@@ -226,7 +237,7 @@ BOOK = f'''  <form id="form" novalidate>
       </div>
     </div>
   </section>
-  <section class="sec" id="book" aria-label="Day, time and your details" style="padding-top:calc(70px + clamp(1.5rem,4vw,2.5rem))" hidden>
+  <section class="sec" id="book" aria-label="Day, time and your details" style="padding-top:calc(70px + clamp(.8rem,3svh,2.5rem))" hidden>
     <div class="wrap">
       <ol class="osteps" aria-label="Booking steps"><li class="is-now" aria-current="step"><button type="button" data-go="1">Step 1: Your nails</button></li><li><button type="button" data-go="2">Step 2: Day and time</button></li><li><button type="button" data-go="3">Step 3: Your details</button></li></ol>
       <div class="form">
@@ -240,23 +251,30 @@ BOOK = f'''  <form id="form" novalidate>
             <h2>Your details</h2>
             <div id="w-me"><label class="f" for="me">Your name</label><input class="fld" id="me" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
             <div id="w-ph"><label class="f" for="ph">Your phone</label><input class="fld" id="ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
-            <label class="f" for="note">Anything else</label><textarea class="fld" id="note" maxlength="400"></textarea>
+            <label class="f" for="note">Anything else</label><textarea class="fld" id="note" rows="1" maxlength="400"></textarea>
           </div>
         </div>
         <aside class="card sum" aria-live="polite">
-          <h3>Your booking</h3>
+          <h3 id="sum-h">Your booking</h3>
           <ul id="sum"><li><span>Nothing chosen yet</span></li></ul>
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
+          <p class="assure"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>Nothing to pay on this page. Your time is yours once I confirm it on WhatsApp.</p>
           <button class="btn" id="send" type="submit"><span>Continue to your details</span></button>
           <button class="back" id="back" type="button">Back</button>
           <p class="note" id="send-note">Next: your name and phone.</p>
+          <ul class="perks">
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2.5 13.5l.9-3A5.8 5.8 0 1 1 6 13l-3.5.5z"/></svg>I confirm on WhatsApp</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2.5" y="3.5" width="11" height="10" rx="2"/><path d="M2.5 6.5h11M5.5 2v3M10.5 2v3"/></svg>Sunday to Friday, closed Shabbat</li>
+            <li><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3.2l2 1.3"/></svg>About 25 to 60 minutes, by service</li>
+          </ul>
         </aside>
       </div>
     </div>
   </section>
   </form>
+  <div class="toast" id="toast" role="status" aria-live="polite" hidden><svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="8" cy="8" r="6.5"/><path d="M5 8.3l2 2L11 6"/></svg><p><b>Booking written out</b>Press send in WhatsApp and I will confirm your time.</p></div>
 '''
-BOOK_JS = '<script>\nvar SERVICES = ' + json.dumps({k: {'n': n, 'p': p, 'm': m} for k, n, p, m, d in SERVICES}) + ';\nvar SHADES = ' + json.dumps({k: n for k, n, c, f, a in SHADES}) + ';\nvar SHADE_C = ' + json.dumps({k: c for k, n, c, f, a in SHADES}) + ';\n' + open('gen/book.js', encoding='utf8').read() + '</script>\n'
+BOOK_JS = '<script>\nvar SAVE = ' + str(SAVE) + ';\nvar SERVICES = ' + json.dumps({k: {'n': n, 'p': p, 'm': m} for k, n, p, m, d in SERVICES}) + ';\nvar SHADES = ' + json.dumps({k: n for k, n, c, f, a in SHADES}) + ';\nvar SHADE_C = ' + json.dumps({k: c for k, n, c, f, a in SHADES}) + ';\n' + open('gen/book.js', encoding='utf8').read() + '</script>\n'
 write('book', 'Book · Nails by Elisheva', 'Book gel nails, nail art or gel removal with Elisheva in Romema, Jerusalem. Sent on WhatsApp.', 'milky.webp', BOOK, BOOK_JS)
 
 write('contact', 'Contact · Nails by Elisheva', 'WhatsApp or call +44 7871 822590, text +972 53 348 4521. Luxe Nail Studio, Romema, Jerusalem.', 'studio.webp', f'''  <header class="page-head"><div class="wrap">

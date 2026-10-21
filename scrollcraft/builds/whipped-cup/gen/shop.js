@@ -7,10 +7,10 @@
   var WA = '19299936768';
   var JARS = { classic: ['Classic Cloud', 40], caramel: ['Caramel Cloud', 48], vanilla: ['Vanilla Cloud', 48] };
   var PACKS = {
-    duo: { name: 'Try It Duo', price: 75, jars: 2, mode: 'mix', meta: '2 jars · Starter', allows: '2 jars, any flavours' },
-    one: { name: 'One Flavour', price: 148, jars: 4, mode: 'one', meta: '4 jars · Weekly', allows: 'One flavour, 4 jars every week' },
+    bundle: { name: 'Cloud Bundle', price: 220, jars: 6, mode: 'mix', meta: '6 jars · Monthly', allows: 'Any 6 jars, mix and match' },
     assorted: { name: 'Assorted', price: 155, jars: 4, mode: 'fixed', meta: '4 jars · Weekly', allows: 'A mix of all three flavours, every week' },
-    bundle: { name: 'Cloud Bundle', price: 220, jars: 6, mode: 'mix', meta: '6 jars · Monthly · Best value', allows: 'Any 6 jars, mix and match' }
+    one: { name: 'One Flavour', price: 148, jars: 4, mode: 'one', meta: '4 jars · Weekly', allows: 'One flavour, 4 jars every week' },
+    duo: { name: 'Try It Duo', price: 75, jars: 2, mode: 'mix', meta: '2 jars · Starter', allows: '2 jars, any flavours' }
   };
   var saved = window.twcBasket.get(), qs = new URLSearchParams(location.search);
   var q = {}; Object.keys(JARS).forEach(function (k) { q[k] = Math.max(0, Math.min(20, +((saved.jars || {})[k]) || 0)); });
@@ -30,7 +30,8 @@
     stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' ' + JARS[sel][0] : ''; }
   function show(k) {
     sel = k; stage.dataset.flav = k;
-    [].forEach.call(stage.querySelectorAll('.st-ph img'), function (i) { i.classList.toggle('on', i.dataset.flav === k); });
+    [].forEach.call(stage.querySelectorAll('.st-ph > img'), function (i) { i.classList.toggle('on', i.dataset.flav === k); });
+    useBtn.setAttribute('aria-pressed', 'false'); stage.querySelector('.st-ph').classList.remove('use'); useBtn.setAttribute('aria-label', 'Show the whipped coffee in a glass'); useBtn.firstElementChild.src = 'assets/iced.webp';
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.flav === k ? 'true' : 'false'); });
     document.getElementById('st-name').textContent = JARS[k][0]; document.getElementById('st-desc').textContent = DESC[k];
     document.getElementById('st-price').textContent = '₪' + JARS[k][1];
@@ -39,9 +40,23 @@
   stage.querySelector('.st-pick').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.flav); });
   stage.querySelector('.st-buy .step').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; n = Math.max(1, Math.min(20, n + (+b.dataset.d))); label(); });
   stAdd.addEventListener('click', function () {
-    q[sel] = Math.min(20, q[sel] + n); n = 1; update(); check(false); label();
-    stAdd.classList.add('added'); setTimeout(function () { stAdd.classList.remove('added'); }, 900);
+    var addedN = n; q[sel] = Math.min(20, q[sel] + n); n = 1; update(); check(false); label();
+    say('Added: ' + addedN + ' ' + JARS[sel][0]); stAdd.classList.add('added'); setTimeout(function () { stAdd.classList.remove('added'); }, 900);
   });
+  // a short note that slides in at the top and leaves by itself (page rules 3s, polish stack)
+  var toast = document.createElement('div'), toastT = 0; toast.className = 'toast'; toast.setAttribute('role', 'status');
+  toast.innerHTML = '<span class="tk" aria-hidden="true"></span><span class="tt"></span>'; document.body.appendChild(toast);
+  function say(msg) { toast.lastChild.textContent = msg; toast.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function () { toast.classList.remove('show'); }, 2200); }
+  // her photo of the coffee in use, beside the jar (a second frame on the stage)
+  var useBtn = document.getElementById('st-use'), useImg = stage.querySelector('.st-ph img[data-flav="use"]');
+  function setUse(on) {
+    useBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); stage.querySelector('.st-ph').classList.toggle('use', on);
+    [].forEach.call(stage.querySelectorAll('.st-ph > img'), function (i) { i.classList.toggle('on', on ? i === useImg : i.dataset.flav === sel); });
+    useBtn.setAttribute('aria-label', on ? 'Show the jar' : 'Show the whipped coffee in a glass');
+    useBtn.firstElementChild.src = on ? 'assets/jar-' + sel + '.webp' : 'assets/iced.webp';
+  }
+  useBtn.addEventListener('click', function () { setUse(useBtn.getAttribute('aria-pressed') !== 'true'); });
+  function perJar(p) { var u = p.price / p.jars; return '₪' + (u % 1 ? u.toFixed(2) : u) + ' a jar'; }
   var plans = document.getElementById('plans');
   // what a package saves against the same jars bought one by one, from her own prices (Tzvi, 20 Oct
   // 2026: "people feel like they are getting a deal ... it should show what they save"). Honest: the
@@ -53,10 +68,13 @@
   function was(k) { return singles(k)[0]; }
   plans.innerHTML = Object.keys(PACKS).map(function (k) {
     var p = PACKS[k];
-    return '<label class="plan"><input type="radio" name="pack" value="' + k + '"><span class="box"><span><b>' + p.name + '</b><br><span class="pr">' + p.meta + '</span></span><span class="p"><s class="was" aria-label="instead of ₪' + was(k) + '">₪' + was(k) + '</s> ₪' + p.price + '</span><span class="allows">' + p.allows + '</span><span class="save-b">Save ₪' + (was(k) - p.price) + '</span></span></label>';
-  }).join('') + '<label class="plan plan-none"><input type="radio" name="pack" value=""><span class="box"><span><b>No package</b><br><span class="pr">Jars only</span></span></span></label>';
-  plans.addEventListener('change', function (e) { if (e.target.name !== 'pack') return; pack = e.target.value; mixQ = { classic: 0, caramel: 0, vanilla: 0 }; oneFlav = ''; drawMix(); update(); check(false);
-    if (!mix.hidden) mix.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); });
+    return '<label class="plan' + (k === 'bundle' ? ' lead' : '') + '"><input type="radio" name="pack" value="' + k + '"><span class="box">' + (k === 'bundle' ? '<span class="tab">Best value</span>' : '') + '<span><b>' + p.name + '</b><br><span class="pr">' + p.meta + ' · ' + perJar(p) + '</span></span><span class="p"><s class="was" aria-label="instead of ₪' + was(k) + '">₪' + was(k) + '</s> ₪' + p.price + '</span><span class="allows">' + p.allows + '</span><span class="save-b" data-save="Save ₪' + (was(k) - p.price) + '">Save ₪' + (was(k) - p.price) + '</span></span></label>';
+  }).join('');
+  function choosePack(v) { pack = v; mixQ = { classic: 0, caramel: 0, vanilla: 0 }; oneFlav = ''; drawMix(); update(); check(false);
+    if (v) say(PACKS[v].name + ' in your basket');
+    if (!mix.hidden) mix.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+  plans.addEventListener('change', function (e) { if (e.target.name === 'pack') choosePack(e.target.value); });
+  document.getElementById('nopack').addEventListener('click', function () { if (pack) choosePack(''); });
 
   var mix = document.getElementById('mix'), mixH = document.getElementById('mix-h'), mixLeft = document.getElementById('mix-left'), mixBody = document.getElementById('mix-body');
   function mixSum() { return mixQ.classic + mixQ.caramel + mixQ.vanilla; }
@@ -101,7 +119,8 @@
     [].forEach.call(plans.querySelectorAll('input'), function (i) { i.checked = i.value === pack; });
     var html = ''; for (var k in q) if (q[k]) html += '<li class="bl"><span>' + JARS[k][0] + '<span class="step sm"><button type="button" data-k="' + k + '" data-d="-1" aria-label="One fewer ' + JARS[k][0] + '">−</button><output>' + q[k] + '</output><button type="button" data-k="' + k + '" data-d="1" aria-label="One more ' + JARS[k][0] + '">+</button></span></span><span class="bl-r">₪' + q[k] * JARS[k][1] + '<button type="button" class="rm" data-rm="' + k + '" aria-label="Remove ' + JARS[k][0] + ' from the basket">' + BIN + '</button></span></li>';
     if (PACKS[pack]) html += '<li class="bl"><span>' + PACKS[pack].name + (packDesc() ? ': ' + packDesc() : '') + '</span><span class="bl-r">₪' + PACKS[pack].price + '<button type="button" class="rm" data-rm="pack" aria-label="Remove the ' + PACKS[pack].name + ' from the basket">' + BIN + '</button></span></li>';
-    document.getElementById('sum-list').innerHTML = html || '<li><span>Nothing yet. Choose a jar or a package above.</span></li>';
+    document.getElementById('sum-list').innerHTML = html || '<li><span>Your basket is empty. Pick a jar or a package above.</span></li>';
+    [].forEach.call(plans.querySelectorAll('.plan'), function (l) { var sb = l.querySelector('.save-b'); sb.textContent = l.querySelector('input').value === pack ? 'In your basket' : sb.dataset.save; });
     var mini = ''; for (var km in q) if (q[km]) mini += '<li><span>' + q[km] + ' × ' + JARS[km][0] + '</span><span>₪' + q[km] * JARS[km][1] + '</span></li>';
     if (PACKS[pack]) mini += '<li><span>' + PACKS[pack].name + '</span><span>₪' + PACKS[pack].price + '</span></li>';
     document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
@@ -142,7 +161,11 @@
     e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);
     return ok;
   }
-  ['addr', 'when', 'me', 'ph'].forEach(function (id) { document.getElementById(id).addEventListener('input', function () { check(false); }); });
+  ['addr', 'when', 'me', 'ph'].forEach(function (id) { document.getElementById(id).addEventListener('input', function () { check(false); drawStep(); }); });
+  // the notes box grows to four lines, then scrolls
+  var note = document.getElementById('note');
+  note.addEventListener('input', function () { var cs = getComputedStyle(note), lh = parseFloat(cs.lineHeight) || 22, bd = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth), ex = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + bd;
+    note.style.height = 'auto'; note.style.height = Math.min(note.scrollHeight + bd, 4 * lh + ex) + 'px'; });
   document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -159,6 +182,7 @@
     out.push('Name: ' + v('me') + ', ' + v('ph'));
     var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(out.join('\n'));
     var tab = window.open(url, '_blank'); if (!tab) location.href = url;
+    var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
   });
   document.getElementById('deal').querySelector('button').addEventListener('click', function () {
     var k = document.getElementById('deal').dataset.pack; pack = k; oneFlav = ''; mixQ = { classic: 0, caramel: 0, vanilla: 0 };
@@ -177,7 +201,9 @@
   function drawStep() {
     [].forEach.call(document.querySelectorAll('.ostep'), function (el) { el.hidden = +el.dataset.s !== step; });
     [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
-    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? 'Send order on WhatsApp, ₪' + total() : 'Send order on WhatsApp');
+    var day = v('when') ? new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long' }) : '';
+    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? (day ? 'Send for ' + day : 'Send order on WhatsApp') + ', ₪' + total() : 'Send order on WhatsApp');
+    send.classList.toggle('idle', !check(false, step));
     document.getElementById('send-note').textContent = STEP_NOTE[step];
     document.getElementById('back').hidden = step === 1;
     var where = document.getElementById('sum-where'); where.hidden = step < 3 || !v('addr');

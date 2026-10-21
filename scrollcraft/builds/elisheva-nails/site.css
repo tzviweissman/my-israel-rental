@@ -25,7 +25,7 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
   background: var(--rose-dk); color: #fff; font: 500 1.02rem/1 var(--font-body); letter-spacing: .04em; text-decoration: none; cursor: pointer;
   box-shadow: 0 10px 24px -12px rgb(142 74 68 / .7); transition: transform 160ms var(--out), box-shadow 160ms var(--out), background 160ms; }
 .btn:hover { background: #7A3F3A; }
-.btn:active { transform: scale(.97); }
+.btn:active { transform: scale(.97); opacity: .9; }
 /* effects.button B7: the label rolls up to a fresh copy of itself (effects library B7, 21st "Animated Button"
    family; chosen over the shimmer buttons a fresh 21st search for beauty salons returned, since gold
    shimmer is The Gift Boutique's). site.js wraps each button's label. */
@@ -36,7 +36,7 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
 .btn-line { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 1.2rem; border-radius: 999px; border: 1.5px solid var(--rose-dk);
   color: var(--rose-dk); font: 500 .95rem/1 var(--font-body); text-decoration: none; background: transparent; cursor: pointer; transition: background 160ms, color 160ms, transform 140ms; }
 .btn-line:hover { background: var(--rose-dk); color: #fff; }
-.btn-line:active { transform: scale(.97); }
+.btn-line:active { transform: scale(.97); opacity: .85; }
 
 /* the menu bar, the same on every page (page rules 3k) */
 .top { position: fixed; inset: 0 0 auto; z-index: 30; height: 70px; display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-inline: var(--gutter);
@@ -46,8 +46,9 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
 .mark img { width: 34px; height: auto; border-radius: 6px; }
 .mark span { font: 600 1.05rem/1 var(--font-head); letter-spacing: .18em; text-transform: uppercase; }
 .nav { display: flex; gap: .2rem; }
-.nav a { padding: .55rem .95rem; border-radius: 999px; color: var(--soft); font: 500 .97rem/1 var(--font-body); text-decoration: none; transition: color 160ms, background 160ms; }
+.nav a { padding: .55rem .95rem; border-radius: 999px; color: var(--soft); font: 500 .97rem/1 var(--font-body); text-decoration: none; transition: color 160ms, background 160ms, transform 120ms var(--out), opacity 120ms var(--out); }
 .nav a:hover, .nav a[aria-current="page"] { color: var(--ink); background: var(--blush); }
+.nav a:active, .menu-btn:active { transform: scale(.97); opacity: .85; }
 .top-r { display: flex; align-items: center; gap: .6rem; }
 .menu-btn { display: none; min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); font: 500 .95rem/1 var(--font-body); cursor: pointer; }
 @media (max-width: 800px) {
@@ -77,6 +78,7 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
   box-shadow: inset 0 -6px 10px rgb(0 0 0 / .12), inset 0 4px 8px rgb(255 255 255 / .45), 0 0 0 3px var(--paper), 0 0 0 4px var(--line);
   transition: transform 200ms var(--out), box-shadow 200ms var(--out); }
 .shade:hover { transform: translateY(-3px); }
+.shade:active { transform: scale(.97); opacity: .85; transition-duration: 120ms; }
 .shade[aria-pressed="true"] { box-shadow: inset 0 -6px 10px rgb(0 0 0 / .12), inset 0 4px 8px rgb(255 255 255 / .45), 0 0 0 3px var(--paper), 0 0 0 5px var(--rose-dk); transform: scale(1.08); }
 .shade-name { margin: .8rem 0 0; color: var(--ink); font-weight: 500; min-height: 1.6em; }
 .act { display: flex; flex-wrap: wrap; align-items: center; gap: .9rem 1.4rem; }
@@ -133,7 +135,8 @@ body:not(.no-js) .rev.in::after { animation: sweep 840ms cubic-bezier(.7, 0, .3,
 .work { background: var(--blush); }
 .work-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: .9rem; margin-top: clamp(2rem, 4vw, 3rem); }
 .work-grid figure { margin: 0; border-radius: var(--r); overflow: hidden; aspect-ratio: 4 / 5; background: var(--paper); }
-.work-grid img { width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--out); }
+.work-grid img { width: 100%; height: 100%; object-fit: cover; transition: transform 300ms var(--out), opacity 200ms ease-out; }
+body:not(.no-js) .work-grid img:not(.ld) { opacity: 0; }
 .work-grid figure:hover img { transform: scale(1.05); }
 .work-grid figure:first-child { grid-column: span 2; grid-row: span 2; }
 @media (max-width: 760px) { .work-grid { grid-template-columns: 1fr 1fr; } }
@@ -160,17 +163,18 @@ body:not(.no-js) .rev.in::after { animation: sweep 840ms cubic-bezier(.7, 0, .3,
 .opts { display: grid; gap: .6rem; }
 .opt { position: relative; display: block; cursor: pointer; }
 .opt input { position: absolute; opacity: 0; inset: 0; cursor: pointer; }
-.opt .box { display: grid; grid-template-columns: 1fr auto; gap: .1rem 1rem; padding: .9rem 1.1rem; border-radius: 14px; border: 1.5px solid var(--line); background: var(--paper); transition: border-color 160ms, background 160ms; }
+.opt .box { display: grid; grid-template-columns: 1fr auto; gap: .1rem 1rem; padding: .9rem 1.1rem; border-radius: 14px; border: 1.5px solid var(--line); background: var(--paper); transition: border-color 160ms, background 160ms, box-shadow 160ms, opacity 160ms, transform 120ms var(--out); }
+.opt .box:active { transform: scale(.97); opacity: .85; }
 .opt .box b { font: 600 1.2rem/1.2 var(--font-head); } .opt .box .p { font: 600 1.3rem/1 var(--font-head); color: var(--rose-dk); }
 .opt .box small { color: var(--soft); }
-.opt input:checked + .box { border-color: var(--rose-dk); background: var(--blush); }
+.opt input:checked + .box { border-color: var(--rose-dk); background: var(--blush); box-shadow: 0 0 0 .5px var(--rose-dk); }
 .opt input:focus-visible + .box { outline: 3px solid var(--rose-dk); outline-offset: 2px; }
 .times { display: flex; flex-wrap: wrap; gap: .5rem; }
 .times .opt .box { display: inline-flex; padding: .6rem 1rem; }
 label.f { display: block; font-weight: 500; font-size: .95rem; margin: .9rem 0 .35rem; }
-.fld { width: 100%; min-height: 48px; padding: .7rem .9rem; border-radius: 12px; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); font: 400 1rem/1.4 var(--font-body); }
-textarea.fld { min-height: 80px; resize: vertical; }
-.fld:focus { outline: 3px solid var(--rose-dk); outline-offset: 1px; border-color: var(--rose-dk); }
+.fld { width: 100%; min-height: 48px; padding: .7rem .9rem; border-radius: 14px; transition: border-color 160ms, box-shadow 160ms; border: 1.5px solid var(--line); background: var(--paper); color: var(--ink); font: 400 1rem/1.4 var(--font-body); }
+textarea.fld { min-height: 48px; max-height: 115px; resize: none; overflow-y: auto; display: block; }
+.fld:focus { outline: 2px solid transparent; border-color: var(--rose-dk); box-shadow: 0 0 8px rgb(142 74 68 / .3); }
 .bad .fld, .bad .box { border-color: #B3261E; }
 .err { color: #A3221B; font-size: .88rem; margin: .3rem 0 0; min-height: 1.1em; }
 .hint { color: var(--soft); font-size: .92rem; margin: .2rem 0 .4rem; }
@@ -220,12 +224,12 @@ textarea.fld { min-height: 80px; resize: vertical; }
 @media (prefers-reduced-motion: reduce) { .hero .ghost { animation: none; } }
 
 /* ── booking as a product page (rules 3k; inspo product-pages-2026-10-20) ── */
-.stage { --st: #F4EFEE; background: color-mix(in srgb, var(--st) var(--tmix, 50%), #fff); transition: background-color 700ms cubic-bezier(.65, 0, .35, 1); padding: calc(70px + clamp(1.2rem, 4svh, 2.6rem)) 0 clamp(1.2rem, 4svh, 2.6rem); }
+.stage { --st: #F4EFEE; background: color-mix(in srgb, var(--st) var(--tmix, 50%), #fff); transition: background-color 400ms cubic-bezier(.65, 0, .35, 1); padding: calc(70px + clamp(1.2rem, 4svh, 2.6rem)) 0 clamp(1.2rem, 4svh, 2.6rem); }
 .st-grid { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: clamp(1.5rem, 5vw, 4.5rem); align-items: center; }
 .st-ph { position: relative; height: min(calc(100svh - 70px - 2 * clamp(1.2rem, 4svh, 2.6rem)), 720px); aspect-ratio: 1000 / 1250; border-radius: 260px 260px var(--r) var(--r); overflow: hidden; background: var(--blush); box-shadow: 0 40px 70px -40px rgb(142 74 68 / .55); }
-.st-ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 600ms var(--out); }
+.st-ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 300ms var(--out); }
 .st-ph img.on { opacity: 1; }
-.st-cap { position: absolute; left: 1rem; bottom: 1rem; padding: .35rem .8rem; border-radius: 999px; background: rgb(255 248 246 / .9); font-size: .85rem; font-weight: 500; }
+.st-cap { position: absolute; left: 1rem; bottom: 1rem; padding: .35rem .8rem; border-radius: 999px; background: rgb(255 248 246 / .9); font-size: .9rem; font-weight: 500; }
 .st-info h1 { font-size: min(clamp(2.4rem, 4.6vw, 4.2rem), 9svh); margin-top: .4rem; }
 .st-price { margin: .6rem 0 0; font: 600 min(clamp(2rem, 3.4vw, 2.8rem), 6.5svh)/1 var(--font-head); color: var(--rose-dk); }
 .st-price small { font: 400 1rem/1 var(--font-body); color: var(--soft); }
@@ -246,8 +250,8 @@ textarea.fld { min-height: 80px; resize: vertical; }
 .st-ph .facts li { background: rgb(255 248 246 / .92); box-shadow: 0 6px 16px -10px rgb(0 0 0 / .4); }
 .st-facts { margin: .5rem 0 0; color: var(--soft); font-size: .95rem; }
 /* a quick second tap never shows a blank: the new photo fades in on top, the old stays underneath until it has */
-.stage .st-ph img { transition: opacity 600ms var(--out) 620ms; z-index: 1; }
-.stage .st-ph img.on { transition: opacity 600ms var(--out); z-index: 2; }
+.stage .st-ph img { transition: opacity 300ms var(--out) 320ms; z-index: 1; }
+.stage .st-ph img.on { transition: opacity 300ms var(--out); z-index: 2; }
 .st-ph .st-cap { z-index: 3; }
 /* a deep shade (ruby) is shown deep, and the words on it turn light (Tzvi, 20 Oct 2026) */
 .hero :is(h1, .lede, .caps, .script, .shade-name, .pick-l, p, small, b) { transition: color 900ms cubic-bezier(.65, 0, .35, 1); }
@@ -331,3 +335,96 @@ body:not(.no-js) .rev[data-dir="u"].in::after { animation-name: sweep-u; }
 }
 .stage[data-tone="dark"] .st-next { background: #FFF4F2; color: var(--rose-dk); }
 .card-in .f .shade-name { margin-left: .3rem; }
+
+/* ---------- the audit's fixes (21 Oct 2026) ---------- */
+/* the one real saving, the way shops show it: the price apart struck through, and a two-word tag */
+.tag { display: inline-block; vertical-align: middle; padding: .2rem .6rem; border-radius: 999px; background: #E6F4EA; color: #1F5C3A; font: 600 .8rem/1.2 var(--font-body); letter-spacing: 0; text-transform: none; }
+.svc-row h3 .tag { margin-left: .5rem; position: relative; top: -.2em; }
+.svc-row .price .was { margin-right: .5rem; font: 500 .95rem/1 var(--font-body); color: var(--soft); text-decoration-thickness: 1.5px; vertical-align: middle; }
+.svc-row .price .was .sym { margin-right: 0; vertical-align: baseline; font-size: 1em; }
+.svc-row .ask { margin-left: .4rem; color: var(--rose-dk); font-weight: 500; text-decoration: underline; text-underline-offset: 3px; white-space: nowrap; }
+.svc-row .ask:hover { color: var(--ink); } .svc-row .ask:active { opacity: .7; }
+/* the booking option cards: a ring that fills with a tick, the others dim, the tag on the border */
+#svcs .opt .box { grid-template-columns: 1fr auto 22px; align-items: center; }
+#svcs .opt .box::before, #svcs .opt .box::after { content: ""; grid-area: 1 / 3 / 3 / 4; width: 20px; height: 20px; border-radius: 50%; align-self: center; justify-self: end; }
+#svcs .opt .box::before { border: 1.5px solid var(--line); background: #fff; }
+#svcs .opt .box::after { background: var(--rose-dk) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='none' stroke='%23fff' stroke-width='1.8' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M4.2 8.4l2.4 2.4 5-5.2'/%3E%3C/svg%3E") center / 14px no-repeat; opacity: 0; transition: opacity 160ms ease-out; }
+#svcs .opt input:checked + .box::after { opacity: 1; }
+#svcs:has(input:checked) .opt input:not(:checked) + .box { background: transparent; }
+#svcs:has(input:checked) .opt:hover input:not(:checked) + .box { opacity: .85; }
+.opt .tag { position: absolute; top: -9px; right: 14px; z-index: 1; pointer-events: none; padding: .1rem .55rem; font-size: .8rem; }
+.opt .tag i { font-style: normal; } .opt .tag .t-sel { display: none; }
+.opt input:checked ~ .tag { background: var(--rose-dk); color: #fff; }
+.opt input:checked ~ .tag .t-save { display: none; } .opt input:checked ~ .tag .t-sel { display: inline; }
+.stage .opts { gap: .6rem; }
+/* the three steps of how booking works, thin pale dividers between */
+.st-flow { display: flex; flex-wrap: wrap; list-style: none; margin: .5rem 0 0; padding: 0; color: var(--soft); font-size: .95rem; line-height: 1.3; }
+.st-flow li { padding: 0 .8rem; border-left: 1px solid var(--line); } .st-flow li:first-child { padding-left: 0; border-left: 0; }
+.stage[data-tone="dark"] .st-flow { color: #FFF4F2; }
+/* the summary card: the honest pause */
+.sum .assure { display: flex; gap: .5rem; align-items: flex-start; margin: 0 0 .8rem; font: 600 .82rem/1.4 var(--font-body); color: var(--ink); }
+.sum .assure svg { flex: none; margin-top: 1px; color: var(--rose-dk); }
+.sum .btn[aria-disabled="true"] { background: #C9B9B6; color: #fff; box-shadow: none; }
+.sum .btn[aria-disabled="true"]:hover { background: #C9B9B6; }
+.sum .btn.is-done svg { display: block; }
+.sum .note { margin: .5rem 0 0; text-align: center; font-size: .85rem; }
+.sum .perks { list-style: none; margin: .8rem 0 0; padding: .8rem 0 0; border-top: 1px solid var(--line); display: grid; gap: .45rem; color: var(--soft); }
+.sum .perks li { justify-content: flex-start; display: flex; gap: .55rem; align-items: center; font-size: .82rem; line-height: 1.3; }
+.sum .perks svg { flex: none; color: var(--rose-dk); }
+.chg { margin-left: .35rem; padding: 0; border: 0; background: none; color: var(--rose-dk); font: 500 .85rem/1 var(--font-body); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+.chg:hover { color: var(--ink); } .chg:active { opacity: .7; }
+/* the note after sending: slides in from the top, leaves itself */
+.toast { position: fixed; z-index: 40; top: 82px; left: 50%; display: flex; gap: .7rem; align-items: flex-start; width: min(92vw, 26rem); padding: .9rem 1.1rem; border-radius: 16px; background: #fff; border: 1px solid var(--line);
+  box-shadow: 0 6px 30px -10px rgb(142 74 68 / .45); color: var(--rose-dk); transform: translate(-50%, -12px); opacity: 0; transition: transform 200ms var(--out), opacity 200ms var(--out); }
+.toast.in { transform: translate(-50%, 0); opacity: 1; }
+.toast svg { flex: none; margin-top: 2px; }
+.toast p { margin: 0; color: var(--soft); font-size: .9rem; line-height: 1.4; } .toast b { display: block; color: var(--ink); font-size: 1rem; }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } }
+
+/* one column of option cards, so no name wraps to three lines (a shorter label would have done the same) */
+.stage .opts { grid-template-columns: 1fr; }
+@media (min-width: 1100px) { .stage .st-price small { max-width: none; white-space: nowrap; } .stage .st-pr .st-save { margin-top: 0; } }
+.stage .st-price { min-height: 0; margin-top: .4rem; }
+.stage .opt .box br { display: none; }
+.stage .opt .box small { margin-left: .5rem; }
+
+/* every section of the home page fits one screen on a laptop (page rules 3c.12) */
+@media (min-width: 861px) {
+  section.sec { padding-block: clamp(1.5rem, 7svh, 6rem); }
+  .svc { margin-top: clamp(1rem, 3svh, 2.5rem); }
+  .svc-row { padding: clamp(.5rem, 1.6svh, 1.3rem) 0; }
+  .sec h2 { font-size: clamp(1.9rem, min(4.6vw, 7svh), 3.6rem); }
+  .work-grid { grid-template-columns: 1.6fr repeat(4, minmax(0, 1fr)); margin-top: clamp(1rem, 3svh, 2.5rem); }
+  .work-grid figure, .work-grid figure:first-child { grid-column: auto; grid-row: auto; aspect-ratio: auto; height: clamp(170px, 46svh, 560px); }
+  .hours li { padding: clamp(.15rem, .8svh, .45rem) 0; }
+  .visit { margin-top: clamp(1rem, 3svh, 2.5rem); }
+  .visit .card { padding-block: clamp(.9rem, 2.4svh, 1.8rem); }
+  .hero h1 { font-size: clamp(2.2rem, min(4.8vw, 8svh), 4.4rem); }
+  .hero .frame { max-width: min(560px, 68svh * .8); }
+}
+
+/* the booking steps 2 and 3 also fit one screen on a laptop: spacing follows the screen height */
+@media (min-width: 861px) {
+  #book { padding-bottom: clamp(1rem, 3svh, 4rem); }
+  #book .osteps { margin-bottom: clamp(.4rem, 1.6svh, 1.4rem); }
+  #book .form { margin-top: clamp(.6rem, 2svh, 2.4rem); }
+  .ostep h2 { font-size: clamp(1.6rem, min(3vw, 5.5svh), 2.3rem); margin-bottom: clamp(.4rem, 1.6svh, .9rem); }
+  .sum, .card.ostep { padding-block: clamp(1rem, 2.4svh, 1.8rem); }
+  .form .ostep + .ostep { margin-top: 0; }
+  .sum h3 { font-size: clamp(1.3rem, 3.6svh, 1.7rem); margin-bottom: .3rem; }
+  .sum ul li { padding: clamp(.1rem, .5svh, .3rem) 0; }
+  .sum ul { margin-bottom: clamp(.3rem, 1svh, 1rem); }
+  .sum .total { font-size: clamp(1.4rem, 4.2svh, 2rem); margin: .2rem 0 clamp(.5rem, 1.4svh, 1.1rem); }
+  .sum .assure { margin-bottom: clamp(.4rem, 1.2svh, .8rem); }
+  .sum .back { min-height: 40px; margin-top: .2rem; }
+  .sum .note { margin-top: .1rem; }
+  .sum .perks { margin-top: clamp(.3rem, 1svh, .8rem); padding-top: clamp(.4rem, 1.2svh, .8rem); gap: clamp(.2rem, .7svh, .45rem); }
+}
+
+@media (max-width: 560px) { .st-flow { display: grid; gap: .1rem; } .st-flow li, .st-flow li:first-child { padding: 0; border: 0; } }
+@media (hover: hover) { .menu-btn:hover { background: var(--blush); } }
+/* the price row: price and its saving only (the service is named on its selected card) */
+.stage .st-price small { display: none; }
+.st-flow { white-space: nowrap; }
+@media (max-width: 860px) { .st-flow { white-space: normal; } }
+@media (min-width: 861px) { .st-flow { display: flex; flex-wrap: nowrap; } .st-flow li { flex: none; } }

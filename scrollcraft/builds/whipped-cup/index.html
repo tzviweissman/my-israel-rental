@@ -91,13 +91,13 @@
       <div class="packs-head"><h2 id="h-packs" class="rev">Weekly packages</h2>
       <p class="lede rev">Delivered fresh to your door every week.</p></div>
       <div class="bento">
-        <article class="pack lead rev"><div><p class="meta">6 jars · Monthly · Best value</p><h3>Cloud Bundle</h3><span class="allows">Any 6 jars, mix and match</span><span class="save-b">Save ₪20</span></div><img class="pic" src="assets/iced.webp" alt="" width="1170" height="1213" loading="lazy">
+        <article class="pack lead rev"><span class="tab">Best value</span><div><p class="meta">6 jars · Monthly</p><h3>Cloud Bundle</h3><span class="allows">Any 6 jars, mix and match</span><span class="save-b">Save ₪20</span></div><img class="pic" src="assets/iced.webp" alt="" width="1170" height="1213" loading="lazy">
           <div class="row"><span class="price"><s class="was" aria-label="instead of ₪240">₪240</s> ₪220</span><a class="btn-line" href="shop.html?pack=bundle" data-pack="bundle">Choose</a></div></article>
         <article class="pack rev"><div><p class="meta">4 jars · Weekly</p><h3>Assorted</h3><span class="allows">A mix of all three flavours</span><span class="save-b">Save ₪21</span></div>
           <div class="row"><span class="price"><s class="was" aria-label="instead of ₪176">₪176</s> ₪155</span><a class="btn-line" href="shop.html?pack=assorted" data-pack="assorted">Choose</a></div></article>
-        <article class="pack rev"><div><p class="meta">4 jars · Weekly</p><h3>One Flavour</h3><span class="allows">One flavour, 4 jars</span><span class="save-b">Save ₪12</span></div>
+        <article class="pack has-pic rev"><img class="pic" src="assets/jar-classic.webp" alt="" width="500" height="1111" loading="lazy"><div><p class="meta">4 jars · Weekly</p><h3>One Flavour</h3><span class="allows">One flavour, 4 jars</span><span class="save-b">Save ₪12</span></div>
           <div class="row"><span class="price"><s class="was" aria-label="instead of ₪160">₪160</s> ₪148</span><a class="btn-line" href="shop.html?pack=one" data-pack="one">Choose</a></div></article>
-        <article class="pack rev"><div><p class="meta">2 jars · Starter</p><h3>Try It Duo</h3><span class="allows">2 jars, any flavours</span><span class="save-b">Save ₪5</span></div>
+        <article class="pack has-pic rev"><img class="pic" src="assets/bottles.webp" alt="" width="1023" height="1537" loading="lazy"><div><p class="meta">2 jars · Starter</p><h3>Try It Duo</h3><span class="allows">2 jars, any flavours</span><span class="save-b">Save ₪5</span></div>
           <div class="row"><span class="price"><s class="was" aria-label="instead of ₪80">₪80</s> ₪75</span><a class="btn-line" href="shop.html?pack=duo" data-pack="duo">Choose</a></div></article>
       </div>
     </div>
@@ -172,7 +172,7 @@
     hint.style.opacity = 1 - clamp(p / .08);
   }
   size(); addEventListener('resize', function () { size(); frame(); });
-  if (reduce) { draw(1); return; }
+  if (reduce) { draw(1); line.style.opacity = 1; line.style.transform = 'none'; return; }  // motion off: the question stays in the page for readers, out of sight (the end card is the whole page)
   var tick = 0;
   function frame() { tick = 0; var r = sec.getBoundingClientRect(), span = sec.offsetHeight - innerHeight; draw(clamp(-r.top / Math.max(1, span))); }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });

@@ -33,3 +33,9 @@ document.body.classList.remove('no-js');
     b.replaceChild(s, t); if (/\s$/.test(t.nodeValue)) b.insertBefore(document.createTextNode(' '), s.nextSibling);
   });
 })();
+// photos fade in over 200 ms once loaded, into space already kept for them
+(function () {
+  function ld(i) { i.classList.add('ld'); }
+  document.addEventListener('load', function (e) { if (e.target.tagName === 'IMG') ld(e.target); }, true);
+  [].forEach.call(document.images, function (i) { if (i.complete) ld(i); });
+})();

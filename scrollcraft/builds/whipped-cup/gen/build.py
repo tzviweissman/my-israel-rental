@@ -107,7 +107,7 @@ FLAV_JS = '''<script>
 </script>
 '''
 
-PACKS = [('bundle', 'Cloud Bundle', '6 jars · Monthly · Best value', 'Any 6 jars, mix and match', 220, True),
+PACKS = [('bundle', 'Cloud Bundle', '6 jars · Monthly', 'Any 6 jars, mix and match', 220, True),
          ('assorted', 'Assorted', '4 jars · Weekly', 'A mix of all three flavours', 155, False),
          ('one', 'One Flavour', '4 jars · Weekly', 'One flavour, 4 jars', 148, False),
          ('duo', 'Try It Duo', '2 jars · Starter', '2 jars, any flavours', 75, False)]
@@ -121,7 +121,10 @@ def was(k):
 def pack_html(k, n, meta, allows, p, lead):
     save = ''  # her menu says "save 30+ ₪", but six Classic jars are ₪240: asked her (message-to-rena.md)
     pic = '<img class="pic" src="assets/iced.webp" alt="" width="1170" height="1213" loading="lazy">' if lead else ''
-    return f'''        <article class="pack{' lead' if lead else ''} rev"><div><p class="meta">{meta}</p><h3>{n}</h3><span class="allows">{allows}</span><span class="save-b">Save ₪{was(k) - p}</span></div>{pic}
+    own = {'duo': ('bottles.webp', 1023, 1537), 'one': ('jar-classic.webp', 500, 1111)}.get(k)  # her own photos, one in each tile
+    if own: pic = f'<img class="pic" src="assets/{own[0]}" alt="" width="{own[1]}" height="{own[2]}" loading="lazy">'
+    tab = '<span class="tab">Best value</span>' if lead else ''
+    return f'''        <article class="pack{' lead' if lead else ''}{' has-pic' if own else ''} rev">{tab}{pic if own else ''}<div><p class="meta">{meta}</p><h3>{n}</h3><span class="allows">{allows}</span><span class="save-b">Save ₪{was(k) - p}</span></div>{'' if own else pic}
           <div class="row"><span class="price"><s class="was" aria-label="instead of ₪{was(k)}">₪{was(k)}</s> ₪{p}{save}</span><a class="btn-line" href="shop.html?pack={k}" data-pack="{k}">Choose</a></div></article>
 '''
 

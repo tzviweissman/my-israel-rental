@@ -92,7 +92,7 @@ for (const url of urls) {
     for (const g of glyphs) fail(url, 'GLYPH', `the fonts have no ${g}: add a face that has it to the stack`);
     // hover and pressed states on buttons and button-like links
     const targets = await page.evaluate(() => {
-      const els = [...document.querySelectorAll('a.btn, a.btn-line, button, .btn, [role="button"]')].filter((e) => { const r = e.getBoundingClientRect(), cs = getComputedStyle(e); return r.width > 20 && r.height > 20 && cs.visibility !== 'hidden' && cs.display !== 'none' && !e.disabled; });
+      const els = [...document.querySelectorAll('a.btn, a.btn-line, button, .btn, [role="button"]')].filter((e) => { const r = e.getBoundingClientRect(), cs = getComputedStyle(e); return r.width > 20 && r.height > 20 && cs.visibility !== 'hidden' && cs.display !== 'none' && cs.pointerEvents !== 'none' && !e.disabled; });
       const kinds = new Map(); els.forEach((e, i) => { const k = e.className.trim().split(/\s+/).sort().join('.') + e.tagName; if (!kinds.has(k)) { kinds.set(k, i); e.setAttribute('data-site-i', i); } });
       return [...kinds.values()];
     });
@@ -213,6 +213,9 @@ for (const url of urls) {
         const clickFirst = (sel) => { const e = document.querySelector(sel); if (e) e.click(); };
         if (first) { clickFirst('#st-add'); clickFirst('#svcs input'); }
         const groups = {}; for (const r of document.querySelectorAll('form input[type=radio]')) if (!groups[r.name] && r.offsetParent !== null && r.name !== 'pack') { groups[r.name] = 1; r.click(); }
+        // choices made with checkboxes (Chicken Munch's kinds of chicken): tick the first visible one of each group none of which is ticked
+        const boxes = {}; for (const c of document.querySelectorAll('form input[type=checkbox]')) { if (c.offsetParent === null) continue; const g = c.name || (c.closest('fieldset, [role=group]') || {}).id || 'x'; (boxes[g] = boxes[g] || []).push(c); }
+        for (const g of Object.values(boxes)) if (!g.some((c) => c.checked)) g[0].click();
         const d = new Date(Date.now() + 5 * 864e5); while (d.getDay() === 6 || d.getDay() === 5) d.setDate(d.getDate() + 1);
         for (const i of document.querySelectorAll('form input, form textarea')) {
           if (i.type === 'radio' || i.type === 'checkbox' || i.offsetParent === null) continue;
