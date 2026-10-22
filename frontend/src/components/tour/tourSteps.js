@@ -8,7 +8,7 @@
  * small bar brings it back when they are done. Nothing is required.
  *
  * Two walks, chosen by what the account has (TourProvider):
- *   business - 21 stops, in the order a new business uses them;
+ *   business - 22 stops, in the order a new business uses them;
  *   host     - 9 stops for someone who rents out a place.
  * The stops added on 16 Oct 2026 (Tzvi: "add all the new features to the
  * walk through tour") cover link-in-bio, appointments, gift cards, the
@@ -17,7 +17,7 @@
  * (b.calendar) and sales at the counter (b.counter); on 22 Oct the rating
  * badge (b.badge), sending a price first (b.quotes), payment requests
  * (b.payreq), holiday and win-back messages (b.occasions) and the leads
- * board (b.leads). Stops on My page that
+ * board (b.leads); then the reorder when stock runs low (b.reorder). Stops on My page that
  * are not about the details window carry `details=0`, which closes it
  * (MyBusinessesTab), so the one b.biolink opens is not left over them.
  * Someone who is both takes the business walk first and is offered the
@@ -71,6 +71,10 @@ export const WALKS = {
       doIt: { href: '/businesses' } },
     { id: 'b.automations', route: '/dashboard?tab=network&view=automations', target: ['automation-recipes', 'network-no-business'],
       doIt: { click: ['automation-new', 'network-add-business'] } },
+    // The card is disabled for a business with no shop products yet; then
+    // the stop points at it all the same and "Do it now" adds products.
+    { id: 'b.reorder', route: '/dashboard?tab=network&view=automations', target: ['recipe-lowStockReorder', 'recipe-lowStockReorder-off', 'network-no-business'],
+      doIt: { click: ['recipe-lowStockReorder', 'recipe-add-products', 'network-add-business'] } },
     { id: 'b.stats', route: '/dashboard?tab=overview', target: 'overview-stats' },
     { id: 'b.summary', route: '/dashboard?tab=overview', target: 'sales-summary' },
     { id: 'b.messages', route: '/dashboard?tab=messages', target: ['messages-panel', 'messages-tab'] },

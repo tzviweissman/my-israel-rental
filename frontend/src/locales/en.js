@@ -1378,6 +1378,11 @@ const en = {
             body: 'When this happens, do that, in your own words: send ready orders to your courier, thank people who book, reorder from your supplier every week. You are told when a supplier changes a price.',
             doIt: 'Create an automation',
           },
+          b_reorder: {
+            title: "Reorder before you run out",
+            body: "Choose a product and a number. When it drops that low, or after every so many sold, the order to your supplier is written for you: to a supplier here, by email, or as a WhatsApp you send with one tap. It asks you first, and when the delivery arrives it goes back into your count.",
+            doIt: "Set up a reorder",
+          },
           b_stats: {
             title: 'See what is working',
             body: 'How many people saw your page and how many tapped to message you. Real counts, never estimates, so you can tell a page nobody finds from one people look at and pass over.',
@@ -4992,6 +4997,7 @@ const en = {
       },
       // Business-to-business connections (docs/business-network-spec.md).
       automations: {
+        addProducts: "Add products",
         recipe_lowStockReorder: "Reorder from my supplier when stock runs low",
         aProduct: "a product",
         whenLow: "When {{product}} drops to {{n}}",

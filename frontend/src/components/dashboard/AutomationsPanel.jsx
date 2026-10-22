@@ -713,13 +713,19 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                     <li key={r.key}>
                       <button type="button" disabled={off} onClick={() => startForm(r)}
                         className="w-full text-start rounded-xl border p-3 flex items-start gap-2 transition-colors hover:bg-[var(--surface-muted,#f9fafb)] disabled:opacity-50"
-                        style={{ borderColor: 'var(--brand-border)' }} data-testid={`recipe-${r.key}`}>
+                        style={{ borderColor: 'var(--brand-border)' }} data-testid={`recipe-${r.key}`} data-tour={off ? `recipe-${r.key}-off` : `recipe-${r.key}`}>
                         <r.Icon size={16} className="mt-0.5 shrink-0" style={{ color: 'var(--brand-primary)' }} aria-hidden="true" />
                         <span>
                           <span className="block text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t(`automations.recipe_${r.key}`, r.key)}</span>
                           {off && <span className="block text-xs" style={{ color: 'var(--brand-muted)' }}>{r.needsProducts ? t('automations.needsProducts', 'Add products to a shop listing first') : t('automations.needsPartner', 'Connect with a business first')}</span>}
                         </span>
                       </button>
+                      {/* No products yet: a way to add them, which the walk's
+                          "Set up a reorder" presses instead of a dead card. */}
+                      {off && r.needsProducts && (
+                        <a href="/dashboard?tab=my-businesses&services=1" className="inline-block mt-1 text-xs font-semibold underline underline-offset-4 min-h-[32px]"
+                          style={{ color: 'var(--gold)' }} data-tour="recipe-add-products">{t('automations.addProducts', 'Add products')}</a>
+                      )}
                     </li>
                   );
                 })}
