@@ -1051,6 +1051,9 @@ small website. A single page stays fine for a business with little to say
    on each, the phone menu opened, and an Add on one page reaching the order
    page.
 
+
+**Every order is saved before WhatsApp opens** (Tzvi, 22 Oct 2026: "when someone clicks order it saves all the information to the site and then redirects them to WhatsApp with a pre typed message"). The order or booking button first POSTs the order to MyIsraelRental through the business's order form (`/api/marketplace/order-form/<gig>/orders`, the way Chicken Munch's order.html does; bookings and quotes through their own endpoints), so it reaches the owner's dashboard, the customer gets a tracking link and the review request follows; only then does it open WhatsApp with the order written out. Every product on the site exists as a product of that business's listing (same name and price), so the saved order names real products. If saving fails, WhatsApp still opens (the customer is never stuck), and the failure is logged. check-site SAVE fails a page whose order reaches WhatsApp without that POST first.
+
 ## 3l. Similar products: every difference is said on the item (Tzvi, 19 Oct 2026)
 
 Chicken Munch's order page let a customer choose kinds of chicken for every
