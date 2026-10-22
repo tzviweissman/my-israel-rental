@@ -8,6 +8,8 @@ rules (docs/page-generation-rules.md).
 
 | Date | Source | Notes |
 |---|---|---|
+| 22 Oct 2026 | Awwwards Sites of the Day by business category: how whole sites are built (page anatomy, not effects) | [awwwards-anatomy-2026-10-22/](awwwards-anatomy-2026-10-22/): food, shops, events-sports-homes, services; the source of rule 3t (each site looks like its category) |
+| 22 Oct 2026 | 16 advertising product photos Tzvi sent | [product-shots-2026-10-22/](product-shots-2026-10-22/): the product hero shot (rules section 8) |
 | 20 Oct 2026 | Product and order pages Tzvi sent (7 recordings, 9 stills) | [product-pages-2026-10-20/](product-pages-2026-10-20/README.md): 13 techniques and the buying psychology behind them, 17 pictures |
 | 21 Oct 2026 | Product films Tzvi liked: Olipop can in its ingredients, an overhead platter build | [product-films-2026-10-21/](product-films-2026-10-21/README.md): the film idea for food openings, 10 stills |
 | 21 Oct 2026 | Moto Card (moto-card.com), Awwwards site of the day Tzvi sent | [moto-card-2026-10-21/](moto-card-2026-10-21/README.md): sections that change worlds, pictures carrying the page, rule 3t |
