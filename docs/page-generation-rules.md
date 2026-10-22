@@ -731,9 +731,12 @@ out to the jar, with a new line of huge words over each scene.
 6. **Three concepts as stills first,** each a different film, before any clip
    is paid for; the chosen one is challenged once (what is weak, what is
    missing) before rendering. They go to Tzvi in the message that starts the
-   build, never after it, and no site is shown without its film unless FILM.md
-   records his no (22 Oct 2026, "why do i keep needing to tell you to make the
-   wow moment"; check-site OPENING, every category).
+   build, never after it, unless the opening is already an event built from
+   their own thing (Chicken Munch's bowl drop, KasherMyBnB's kitchen walk): a
+   full-screen event in code counts as the wow, a photo or type beside the
+   cards does not (22 Oct 2026, "why do i keep needing to tell you to make the
+   wow moment", then "these have a wow moment already"; check-site OPENING,
+   every category).
 7. **Seams checked.** Every clip starts on the last frame of the one before
    (one clip per physical step, as before); after rendering, compare the
    frames either side of each join and regenerate a clip whose join jumps.
