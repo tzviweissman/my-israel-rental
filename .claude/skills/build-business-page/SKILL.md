@@ -1024,18 +1024,9 @@ docs/ui-videos/HOW-TO-WATCH.md. Every change a video shows becomes a line in a b
 table, and every line is then checked against every page we are building, fixed or marked not
 relevant, the same day.
 
-## 3t. Sections change worlds (Tzvi, 21 Oct 2026, after moto-card.com)
+## 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
 
-Tzvi: "go through this website and you'll see that there are different sections and it changes to pictures, not everything is just one colour ... this looks like a real website, ours do not." Study: docs/inspo/moto-card-2026-10-21/.
-
-1. **The home page is a sequence of worlds, not one colour.** After the opening, the ground changes from section to section: a full-bleed photo or film, then a calm section on a contrasting plain ground (white or the brand's dark), then a picture again. Never three sections in a row on the same plain ground.
-2. **Pictures carry the page.** At least a third of the home page's sections are mostly picture or film edge to edge (the owner's real photos first; generated scenes follow the policy in 1 and 3o.1), with the words on the picture, not in a box beside it. Words over a picture follow 5b.3 (a soft edge shade, never a scrim).
-3. **One big line per section,** short, with at most one short line under it; small calm body text; lots of space. On the first screen the big line is the headline of 3g.13.
-4. **One action, identical everywhere:** see 2.9.
-5. **Their own details as texture:** a true detail of the business (their prices, sizes, hours, street, fruit, cuts of meat) used as the moving or background detail, instead of decoration.
-6. **Plain sections are rests:** numbered lists, prices, FAQ and contact sit on a calm plain ground with hairlines, between the pictures.
-7. **A real footer:** a last big line, the button, link columns, contact.
-scripts/check-site.mjs WORLDS checks 1 and 2 on every home page (and OPENING checks 3h.1); publish-page refuses a page that fails.
+Replaces "sections change worlds" (Moto Card's dark full-bleed look given to every site). Every site declares one category in CONCEPT.md and `<meta name="site-category">`: `food-shop` (bright, colour per product, buy from the first screen, price and Add on every card), `place` (one ground, hours and map near the top, menu as a text list), `fashion-shop` (white or beige, product grid near the top, name and price under each), `beauty` (cream, thin serif, close-ups, Book fixed in the bar, "from" price and duration), `events` (open on real past events, short, packages with "from" prices), `trainer` (black and white, action photos, booking on the first screen, offer cards, proof block), `service` (real people and work, steps, one button to a quote), `rental` (calendar on every listing, numbered facts). Full table and which of our sites is which: rules doc 3t; studies in docs/inspo/awwwards-anatomy-2026-10-22/. check-site checks CATEGORY, BUY, WORLDS (trainer) and OPENING by category.
 
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 

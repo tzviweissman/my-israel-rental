@@ -25,10 +25,10 @@
   function drawSvc() {
     var s = SERVICES[svc];
     // the heading stays put (one line, nothing below it moves); the chosen service is named beside its price
-    // the way shops show a saving (GGg61sdEjeI): the price apart struck through beside hers, and "Save ₪20"
+    // the way shops show a saving (GGg61sdEjeI): the price apart struck through beside hers, and "15% off"
     var sv = s && svc === 'gel-removal' ? (SERVICES.removal.p + SERVICES.gel.p) - s.p : 0;
     $('st-price').style.visibility = s ? 'visible' : 'hidden'; if (s) $('st-price').innerHTML = (sv ? '<s class="was">₪' + (s.p + sv) + '</s>' : '') + '<span class="sym">₪</span>' + s.p + ' <small>' + s.n + ', about ' + s.m + ' minutes</small>';
-    $('st-save').style.visibility = sv ? 'visible' : 'hidden'; if (sv) $('st-save').innerHTML = 'Save ₪' + sv;
+    $('st-save').style.visibility = sv ? 'visible' : 'hidden'; if (sv) $('st-save').innerHTML = Math.floor(sv * 100 / (s.p + sv)) + '% off';
   }
   chips.forEach(function (c) { c.addEventListener('click', function () { shade = shade === c.dataset.k ? '' : c.dataset.k; drawShade(); update(); }); });
   var today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
