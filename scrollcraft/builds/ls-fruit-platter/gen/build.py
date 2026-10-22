@@ -10,9 +10,10 @@ kit.KINDS['phone'] = ('Call', 'tel:+{d}', False)  # her logo shows a phone icon 
 K = 'Kosher, hechsher: <span lang="he" dir="rtl">בד"ץ העדה החרדית או שארית</span>'
 SIZES = [('small', 'Small', 300), ('medium', 'Medium', 400), ('large', 'Large', 500), ('xl', 'Extra large', 850)]
 SHORT = {'small': 'S', 'medium': 'M', 'large': 'L', 'xl': 'XL'}
-NOPH = 'medium'  # no photo of the Medium platter is shown (see gen/prep.py): its tile is plain and says so
+NOPH = None  # every size has its photo since 22 Oct 2026 (the Medium's stray engraving removed, see gen/prep.py)
 ALT = {
     'small': 'The Small platter: a round board with watermelon, red grapes, dates and pineapple',
+    'medium': 'The Medium platter: a wooden board with a pineapple crown, dark grapes, lychees, watermelon, melon and pomegranate',
     'large': 'The Large platter: a long wooden board of watermelon, grapes, lychees, pomegranate and melon',
     'xl': 'The Extra large platter: a very long board in rows of green grapes, watermelon, dates, pomegranate, dark grapes and kiwi',
 }
@@ -97,7 +98,7 @@ SECTIONS = world('w-love', 'h-love', 'Made with love', 'Fresh, beautiful fruit p
     </div>
   </section>
 ''' + world('w-xl', 'h-xl', 'Extra large', f'Rows of dark grapes, watermelon, melon, dates, pomegranate, kiwi and green grapes. {kit.price(850)}.',
-               'w-xl.webp', 'w-xl-m.webp', ALT['xl'], 2000, 1000, 700, 1353, 'shut') + f'''  <section class="sec dark" id="how" aria-labelledby="h-how">
+               'w-xl.webp', 'w-xl-m.webp', ALT['xl'], 2000, 1000, 700, 1187, 'shut') + f'''  <section class="sec dark" id="how" aria-labelledby="h-how">
     <div class="wrap">
       <h2 id="h-how" class="rev">Order in three steps</h2>
       <ol class="how">

@@ -13,8 +13,10 @@
   // ── the stage: one size at a time, its own photo through shutter slats; quantity and the price in the button
   var stage = document.getElementById('sizes'), ph = stage.querySelector('.st-ph'), bl = window.lsBlinds(ph), sel = 'small', n = 1;
   var stAdd = document.getElementById('st-add'), stN = document.getElementById('st-n'), stIn = document.getElementById('st-in');
-  function label() { stAdd.firstElementChild.innerHTML = 'Add ' + (n === 1 ? 'a ' + BY[sel].name : n + ' × ' + BY[sel].name) + ', ' + P(n * BY[sel].price); stN.textContent = n;
+  function label() { stAdd.firstElementChild.innerHTML = 'Add ' + (n === 1 ? (/^[AEIOU]/i.test(BY[sel].name) ? 'an ' : 'a ') + BY[sel].name : n + ' × ' + BY[sel].name) + ', ' + P(n * BY[sel].price); stN.textContent = n;
     stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' × ' + BY[sel].name : ''; stage.querySelector('[data-d="-1"]').disabled = n <= 1; }
+  // decode every size photo up front, so a wipe never starts on an undecoded picture (check-motion JUMP, 22 Oct 2026)
+  [].forEach.call(ph.querySelectorAll('img.sl'), function (i) { if (i.decode) i.decode().catch(function () {}); });
   function show(k) {
     sel = k; bl.go(BY[k].i);
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.k === k ? 'true' : 'false'); });

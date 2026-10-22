@@ -28,7 +28,7 @@
     <div class="wrap st-grid">
       <div class="st-ph">
 <img class="sl" src="assets/size-1.webp" width="1200" height="1200" alt="The Small platter: a round board with watermelon, red grapes, dates and pineapple" fetchpriority="high">
-<div class="sl noph" role="img" aria-label="No photo of the Medium platter yet"><img src="assets/mark.webp" width="200" height="200" alt=""><b>Photo to come</b></div>
+<img class="sl" src="assets/size-2.webp" width="1200" height="1200" alt="The Medium platter: a wooden board with a pineapple crown, dark grapes, lychees, watermelon, melon and pomegranate">
 <img class="sl" src="assets/size-3.webp" width="1200" height="1200" alt="The Large platter: a long wooden board of watermelon, grapes, lychees, pomegranate and melon">
 <img class="sl" src="assets/size-4.webp" width="1200" height="1200" alt="The Extra large platter: a very long board in rows of green grapes, watermelon, dates, pomegranate, dark grapes and kiwi">
       </div>
@@ -48,7 +48,7 @@
         </ul>
         <div class="st-pick" aria-label="Sizes">
           <button type="button" data-k="small" aria-pressed="true"><img src="assets/size-1-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Small</b><i><span class="sym">₪</span>300</i></span></button>
-          <button type="button" data-k="medium" aria-pressed="false"><span class="noph-t" aria-hidden="true"><img src="assets/mark.webp" width="200" height="200" alt=""></span><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Medium</b><i><span class="sym">₪</span>400</i></span></button>
+          <button type="button" data-k="medium" aria-pressed="false"><img src="assets/size-2-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Medium</b><i><span class="sym">₪</span>400</i></span></button>
           <button type="button" data-k="large" aria-pressed="false"><img src="assets/size-3-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Large</b><i><span class="sym">₪</span>500</i></span></button>
           <button type="button" data-k="xl" aria-pressed="false"><img src="assets/size-4-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Extra large</b><i><span class="sym">₪</span>850</i></span></button>
         </div>
@@ -134,8 +134,10 @@
   // ── the stage: one size at a time, its own photo through shutter slats; quantity and the price in the button
   var stage = document.getElementById('sizes'), ph = stage.querySelector('.st-ph'), bl = window.lsBlinds(ph), sel = 'small', n = 1;
   var stAdd = document.getElementById('st-add'), stN = document.getElementById('st-n'), stIn = document.getElementById('st-in');
-  function label() { stAdd.firstElementChild.innerHTML = 'Add ' + (n === 1 ? 'a ' + BY[sel].name : n + ' × ' + BY[sel].name) + ', ' + P(n * BY[sel].price); stN.textContent = n;
+  function label() { stAdd.firstElementChild.innerHTML = 'Add ' + (n === 1 ? (/^[AEIOU]/i.test(BY[sel].name) ? 'an ' : 'a ') + BY[sel].name : n + ' × ' + BY[sel].name) + ', ' + P(n * BY[sel].price); stN.textContent = n;
     stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' × ' + BY[sel].name : ''; stage.querySelector('[data-d="-1"]').disabled = n <= 1; }
+  // decode every size photo up front, so a wipe never starts on an undecoded picture (check-motion JUMP, 22 Oct 2026)
+  [].forEach.call(ph.querySelectorAll('img.sl'), function (i) { if (i.decode) i.decode().catch(function () {}); });
   function show(k) {
     sel = k; bl.go(BY[k].i);
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.k === k ? 'true' : 'false'); });
