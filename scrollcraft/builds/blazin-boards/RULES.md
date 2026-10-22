@@ -8,7 +8,7 @@ Replace every `todo`. `node scripts/check-rules.mjs scrollcraft/builds/blazin-bo
 R0b.1 pass: slug blazin-boards, the business record answers at /api/marketplace/business/blazin-boards (HTTP 200, slug and name match); site.js reads that slug
 R0b.3 pass: the nine boards and the six bottles are read live from their store listing (site.js, order-form), sizes and contents come from their price list transcribed in index.html; the prices on boards.html and in the text menu on index.html ($75 to $750) match the listing screen
 R2.1 pass: read every sentence of index.html and the five shop pages again after the rework; sizes, contents, prices, 48 hours notice, delivery across Israel, Farn 5, payment ways all trace to their price list and listing; the new facts strip repeats those five facts and adds nothing
-R2.2 pass: read message-to-owner.md, every question is about their kitchen, photos, kosher certificate, phone, guarantee and reviews, none about how we build
+R2.2 pass: read message-to-owner.md: questions 1 to 6 as before, and 7 to 10 added on 22 Oct (which photograph is which board, the six bottle prices, the delivery wording, what "special boards" means); every one is about their business
 R2.3 pass: message-to-owner.md lists seven example visitor questions written from their real details (sizes, notice, delivery, gluten-free, changing a board, payment, cancelling) plus the photo-in-use question
 R3.1 pass: searched index.html and the shop pages for kosher, licensed, verified, since, years, best, guarantee, fresh daily, 24/7: none appear; the only claims are the price list facts
 R3.2 pass: searched every page for hurry, only N left, today only, limited, countdown, booked: none (the 48 hours notice is a fact, not pressure)
@@ -24,9 +24,9 @@ R5.1 pass: read every line aloud on index and boards; every line names a board, 
 R5.2 pass: read every line as the owner printing it on a menu; no teasing, slang or jokes
 R5.3 pass: labels read as phrases: "Pay us by: Card, Zelle or bank transfer", "Delivery: Throughout Israel", "Kitchen: Farn 5, Jerusalem"
 R5.4 pass: _bb-txt.mjs searched the visible text and alt text of every shop page for they, them, their: the one hit on index.html is "what they like", about the visitor's own guests
-R5b.2 pass: the main button reads "Order a board" and goes to order.html in the bar (home bar, shop bar), hero, sizes, range band, close, phone bar and both footers; changed the shop bar from "Order" to "Order a board" and added the button to the footer
+R5b.2 pass: the main button reads "Order a board" and goes to order.html in the bar (home bar, shop bar), hero, sizes, range band, close, phone bar, both footers and the shop page; the add-to-basket control reads "Add to order" on the home list, the shop cards, the bottles and the order page
 R5b.8 pass: closing line is "Ready when you are." with "Order a board"; contact lines start with no "or"
-R3.11 pass: read top to bottom: what it is (the board and sizes), what it costs ($75 to $750, then the full list), trust (facts strip, how it goes), then order
+R3.11 pass: read top to bottom: what it is (the board and sizes), what it costs ($75 to $750, then the full list), trust (facts strip, how it goes: you place your order here in three steps, we confirm, you pay us), then order
 R3o.4 n/a: the page shows no phone number; orders go through the site with a tracking link and the owner has not said which number takes what (asked in message-to-owner.md question 1)
 R3e.22 n/a: the owner has not sent a photo or name for the page; asked for in message-to-owner.md question 3
 R3s.19 pass: viewed the head of index and the shop pages: each has its own title and description; the og tags are added when the page is published on the platform, not in this local build
@@ -40,7 +40,7 @@ R3b.2 pass: price touches the button in the bar of the phone ("From $75" beside 
 R3b.3 pass: gold solid "Order a board" is the one solid action on each screen; the bar button repeats it
 R3h.1 pass: check-site OPENING passed on index; the first screen is a full-screen photograph and their board tumbles in as you scroll
 R3n.1 pass: their square-board photograph fills the whole first screen at 1440x900 and 390x844
-R3n.2 pass: "Five sizes, to scale": one board grows through the real sizes beside a 10 cm ruler and lights the boards of each size with their price; no other business has these boards and sizes
+R3n.2 pass: "Five sizes, to scale": one board grows through the real sizes beside a 10 cm ruler and lights the boards of each size with their price; the board is a crop of their own square photograph (assets/board-top.jpg) that keeps the board edge at every size; no other business has these boards and sizes
 R3n.3 pass: the size reached changes the tier shown (boards and prices) and the board itself; check-motion passed on boards.html
 R3n.4 pass: put the first screens next to Qissa (docs/inspo/awwwards-anatomy-2026-10-22/food/qissa.webp): same one dark ground and one gold button; ours opens bigger on the product photograph
 R3n.5 pass: "you land and their board tumbles in, then grows to real size with the price"
@@ -92,13 +92,13 @@ R3s.11 pass: the price sits beside contents on every board row and the one true 
 R5b.6 pass: no scroll cue, no counters, no label above each section on index; the facts strip labels are facts
 R3.13 pass: no doubled contact; the facts strip and "How it goes" repeat none of the same line twice on one screen
 R3a.1 pass: rendered index, boards, order, order-when, order-details, order-done at 1440x900 and 390x844 in a screenshot of every screen, the six sizes by check-fits and readable, reduced motion by check-site MEDIA
-R3r.1 pass: check-site, check-fits and check-rules ran on index, boards, order, order-when, order-details, order-done; readable on index, boards, order; cutoff and clipped on index and boards; check-motion on boards; the only check-site reports are the local CORS block (named in R3s.21)
-R3r.2 n/a: the coordinator reviews after this pass; no second reviewer has used the page yet
+R3r.1 pass: review pass of 22 Oct: check-site, check-fits and check-motion ran on index, boards, order, order-when, order-details (order-done by check-fits and the flow walk), the order pages with a basket in place and the API answered from a stub; readable on index, boards, order, order-when, order-details; cutoff and clipped on index; stepped screenshots every 100 px at 1440x900, 390x844 and 360x640 on every page with scrollWidth equal to the viewport at every stop; the order flow walked to the last step (order-done) at 390, 360 and 1440 with external requests blocked
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; findings fixed and re-checked
 R3g.12 pass: a test order was added to the basket on boards.html and carried to order.html and the date step (screenshots); the final send is not made in this local pass
 R0b.12 n/a: the site is not published by this pass
 
 ## 4. Photos and media
-R8.1 pass: put the three board photographs and the five size photographs on one sheet: they are their own marble-and-wood board photographs shot the same way; the plank cut-outs share one cut
+R8.1 pass: put the three board photographs, the plank crop and the cut-out on one sheet: all their own marble-and-wood board photographs; the plank uses a crop of their square photograph that shows the board edge at every size; boards.html and the home list show the one cut-out the same way on every board because none of their five photographs is named by size or line (owner question 7 asks which board each one shows)
 R8.6 n/a: no new product picture was made in this pass; their own board photographs stay in place. Product hero shots of each board size are listed in the reply for the owner or a later pass
 R8.2 pass: every picture is their own photograph or a cut-out of it
 R3p.7 pass: every board row is the same text row; the three photographs have the same height; no pointing changes a photo
@@ -111,17 +111,17 @@ R3o.3 pass: the meat colours look true on both the dark and the marble photograp
 R3o.6 pass: one photo per kind from what their website and flyer have; the rework added none
 R8.3 pass: no generated media on this site
 R8.4 n/a: no moving real material
-R3c.13 pass: clipped passed on boards.html; on index.html it reports only held stages sliding under the fixed bar at scroll 0 and at pin entry, the same lines as before the rework (checker limit for a held section under a fixed bar); cutoff passed at nine sizes
+R3c.13 pass: clipped on index.html reports only held stages sliding under the fixed bar at scroll 0 and at pin entries and exits (24 px at 2040 and 23 px at 7345 at 1280x650; 59 px and 76 px at 360x640), the same kind of lines as before the review (checker limit for a held section under a fixed bar); cutoff clean at nine sizes
 R3c.14 n/a: the cut-outs (board-cut.webp) are not new; checked on dark and light in the earlier build; no cutout.py run in this pass because nothing was cut
 R5b.3 pass: readable passed on index, boards and order; the hero words sit on the soft edge shade and no card or frosted glass is used
-R3e.8 pass: readable passed ("every word clear at every size checked") on index.html, boards.html and order.html after raising the facts labels to 12.8 px, the plank and size labels to 15 px, and giving the hero name and headings the cream text colour; order-when and order-details send an empty basket back to the start, so their classes are read through order.html
+R3e.8 pass: readable ran on index, boards, order, order-when and order-details (the last three with a basket in place): every word clear at every size except one report on index.html, the "24 × 35" size readout at 360x640 stop 5, which is mid-handoff between two sizes at opacity near 0 and reads fine at rest; fixed in this review: labels under 12px, the "start here" line and the bottle prices that had the same colour as their card, hints under 14px on a phone
 R3s.24 pass: check-site MEDIA passed on every page; no photo over 600 KB (the largest is 530 KB)
 R3p.6 pass: check-fits passed on all six pages at the six sizes
 R3o.5 pass: check-site GLYPH passed on every page
 
 ## 5. Prices and savings
 R3c.5 pass: grep finds two selects in order-when.html (date and time) which are not product choices; sizes are tiles
-R3c.6 pass: buttons read "Order a board", "Add to order", "Order this board"; none says Submit
+R3c.6 pass: one wording each: "Order a board" is the main button everywhere (bar, hero, shop cards once a board is in, footer, toast), "Add to order" is the add-to-basket control (home list, shop cards, bottles, order page), "Continue" moves between order steps and "Place order" sends it; none says Submit
 R3c.7 n/a: no offer is shown on this site
 R3j.1 n/a: no guarantee, add-on offer, taster, discount, saving, struck price or come-back feature is shown on any page (prices.json holds list prices only; the bottle add-ons are a plain list the order page offers with Add)
 R3j.2 pass: bottles are offered on the order page with Add, not pre-ticked (order.html screenshot); Continue is the way past without one
@@ -149,7 +149,7 @@ R3l.1 pass: message-to-owner.md asks what a customer can choose per board
 R3l.2 n/a: boards allow no choices, each is sold as listed; nothing to state
 R3l.3 n/a: no item has options
 R3l.4 pass: the ten boards are compared in a text list by name, size and price; the sizes screen shows them side by side per size
-R3l.6 pass: pictures are of boards as sold; the Party Board has no picture
+R3l.6 pass: one cut-out of their board stands in for every board in the shop and in the home list, shown the same way at the same size so it implies no different boards; the ten boards that need their own photograph are listed in message-to-owner.md question 7; the Party Board shows "Size on request"
 R3l.7 pass: each row names its contents and price
 R3e.9 pass: check-site STATE and FLOW passed on index and (flows) order pages; focus ring is gold
 R3e.19 pass: the flow ends on order-done.html with "Your order is with Blazin' Boards" (page read)
@@ -169,21 +169,21 @@ R3e.17 n/a: no carousel
 R3e.18 n/a: no ambient background video
 R3a.2 pass: looked at mid-transition frames of the tumble and sizes in the earlier build; the rework left them
 R3a.3 pass: the ruler and size label sit inside the plank frame by the earlier overlay build; unchanged
-R3a.4 pass: cutoff passed at all nine sizes on index.html after the sizes copy cue was changed to start after the stage is held
+R3a.4 pass: cutoff clean at all nine sizes after the 22 Oct review changes: the sizes heading and first size show as soon as each is whole on screen while the stage arrives (so no blank band follows the hero), and are never shown partly below the screen
 R3a.5 pass: reduced motion shows the sizes copy (check-site MEDIA passed after the fix); no parallax on phone
-R3s.2 pass: check-site SHIFT passed; check-motion passed on boards (two quick taps)
+R3s.2 pass: check-motion clean on index, boards, order-when and order-details; on order.html with a basket it is clean on most runs and now and then reports a JUMP on the bottle "Add to order" tap (the button label and one summary row change at the 96 x 60 pixel size the checker compares; the basket line fades in over 480 ms), named here as a checker limit
 R3s.1 pass: check-site STATE passed
 R3s.8 pass: the nav and buttons over the hero sit on a soft container or solid fill
 R3s.10 n/a: no item is named before its picture; every picture is shown with its name
 R3i.3 n/a: no live readout
-R3s.21 pass: check-site BROKEN found no 404 or dead link; the only console errors are the local CORS block on the boards and order pages (the page asks the platform API at localhost:8001 from 127.0.0.1:8990, which only works from the platform origin)
+R3s.21 pass: check-site BROKEN found no 404 or dead link; the platform API (localhost:8001) is not running here, so the checks answered it from a stub of their price list (prices.json) so the shop and order pages could be exercised
 
 ## 8. Phone
 R3b.6 pass: the phone bar shows "From $75" and "Order a board" from after the first screen to the close (390x844 screenshots)
 R3f.7 pass: the bar button label fits at 360 px
 R3a.6 pass: check-site PHONE passed; room kept for the bar
 R3s.22 pass: check-site TAP passed
-R3s.23 pass: check-site PHONE passed: no sideways scroll
+R3s.23 pass: check-site PHONE clean; document scrollWidth equals the viewport at every 100 px stop of every page at 1440x900, 390x844 and 360x640 (order pages with a basket and a long delivery address); the order pages were 535 to 795 px wide on a phone before this review
 R3t.1 pass: site-category food-shop on every page and in CONCEPT.md; compared the home and shop pages with Qissa, Delice and Theobroma contact sheets: one dark ground, framed photos, text menu, facts strip, shop cards with price and Add
 R3t.2 pass: check-site BUY: price and an Order control show in the first two screens; every board card on boards.html shows size, name, price and Add to order
 R3t.3 n/a: the category is food-shop, not trainer
@@ -192,5 +192,5 @@ R3a.7 pass: phones checked with touch emulation (hasTouch and isMobile) in the s
 R3a.8 n/a: no line of dot-separated items
 
 ## 9. Finish
-R3r.3 pass: check-rules passed after the last edit; scripts re-run after the footer and cue fixes on every page
+R3r.3 pass: check-rules passed after the last edit; every script was re-run after the last change to the pages
 R3r.4 pass: the corrections from Tzvi on 22 Oct (percent savings, accent on the button, one look per category) are in rules-checklist.md

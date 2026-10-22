@@ -250,8 +250,9 @@ section.sec { padding-block: clamp(2.4rem, 7svh, 4.5rem); }
 .osteps li::before { content: ""; height: 4px; border-radius: 4px; background: var(--line); transition: background 300ms var(--out); }
 .osteps li.is-done::before, .osteps li.is-now::before { background: var(--accent); }
 .osteps button { padding: .2rem 0; border: 0; background: none; text-align: left; font: 700 .85rem/1.25 var(--font-body); color: var(--soft); cursor: pointer; min-height: 40px; }
-.osteps li.is-now button { color: var(--ink); } .osteps li:not(.is-done):not(.is-now) button { cursor: default; }
-@media (hover: hover) { .osteps li.is-done button:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; } }
+.osteps li.is-now button { color: var(--ink); } .osteps button { cursor: pointer; transition: color 160ms, transform 120ms; }
+@media (hover: hover) { .osteps button:hover { color: var(--accent); text-decoration: underline; text-underline-offset: 3px; } }
+.osteps button:active { transform: scale(.97); } .osteps button:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 6px; }
 @media (max-width: 860px) { .osteps li:not(.is-now) button { display: none; } .osteps li.is-now { flex: 2.4; } }
 .ostep h2, .sum h3 { font-size: 2.8rem; margin-bottom: .4rem; }
 .blist { list-style: none; margin: 0 0 .6rem; padding: 0; }
@@ -428,3 +429,14 @@ section.rest { padding-block: clamp(1.6rem, 6svh, 3.5rem); }
 @media (max-width: 600px) { .st-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 /* the accent is for the main button only: the stroke under the key word and the step numerals are in the text colour */
 .hl path { stroke: var(--ink); } .how .n { color: var(--ink); } .kick { color: var(--soft); }
+
+/* a size name never changes the row it sits in: one line, sized to fit, so the prices line up (review 22 Oct 2026) */
+.pc-b h3 { white-space: nowrap; }
+@media (max-width: 900px) { .pc-b h3 { font-size: clamp(1.45rem, 6.2vw, 2.2rem); } }
+.st-pick b { white-space: nowrap; }
+@media (max-width: 600px) { .st-pick b { font-size: clamp(1rem, 4.4vw, 1.3rem); } }
+
+/* the card shows the whole platter (card-N.webp is 5:4, the card's own shape): no crop, no zoom on hover */
+.pc-ph img { object-position: 50% 50%; }
+@media (hover: hover) { .pc:hover .pc-ph img { transform: none; } }
+@media (min-width: 601px) { .st-pick b { font-size: clamp(.8rem, 1.2vw, 1rem); } }

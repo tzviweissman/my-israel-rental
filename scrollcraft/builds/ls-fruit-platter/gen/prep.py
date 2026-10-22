@@ -74,3 +74,19 @@ save(fit(M['xl'], (2000, 1000)), 'w-xl.webp', None, 80)
 save(fit(M['xl'], (700, 1187)), 'w-xl-m.webp', None, 78)
 save(fit(M['small'], (1800, 1125)), 'w-small.webp', None, 80)
 save(fit(M['small'], (900, 1200)), 'w-small-m.webp', None, 78)
+
+# the home cards (review 22 Oct 2026): each platter whole on its card, nothing sliced by the card edge. The whole shot sits
+# inside the frame at 92% with its own picture, enlarged and blurred, carrying on at the sides (the same trick as stage()).
+def card(im, size=(1000, 800), scale=.92, feather=22):
+    W, H = size
+    bg = im.copy(); s = max(W / bg.width, H / bg.height)
+    bg = bg.resize((round(bg.width * s), round(bg.height * s)), Image.LANCZOS)
+    x0, y0 = (bg.width - W) // 2, (bg.height - H) // 2
+    bg = bg.crop((x0, y0, x0 + W, y0 + H)).filter(ImageFilter.GaussianBlur(26))
+    f = min(W * scale / im.width, H * scale / im.height)
+    fg = im.resize((round(im.width * f), round(im.height * f)), Image.LANCZOS)
+    m = Image.new('L', fg.size, 0); m.paste(255, (feather, feather, fg.width - feather, fg.height - feather)); m = m.filter(ImageFilter.GaussianBlur(feather / 2.2))
+    bg.paste(fg, ((W - fg.width) // 2, (H - fg.height) // 2), m)
+    return bg
+for i, k in ((1, 'small'), (2, 'medium'), (3, 'large'), (4, 'xl')):
+    save(card(M[k]), f'card-{i}.webp', None, 78)

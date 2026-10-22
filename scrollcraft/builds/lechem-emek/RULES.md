@@ -10,7 +10,7 @@ R0b.3 n/a: Lechem Emek is a practice page (BRIEF.md: no owner, photos generated 
 R2.1 n/a: Lechem Emek is a practice page (BRIEF.md: no owner, photos generated mockups); there is no owner, record, flyer or listing to trace this to, and nothing is published; no sentence was added in the rework beyond labels (Bread, Pastry, Open, Address, Kosher) reusing the existing hours, address and hechsher lines
 R2.2 n/a: Lechem Emek has no owner (practice page), so there is no message-to-owner.md
 R2.3 n/a: no owner and so no message to the owner (practice page)
-R3.1 n/a: Lechem Emek is a practice page (BRIEF.md: no owner, photos generated mockups); there is no owner, record, flyer or listing to trace this to, and nothing is published; the "since 1998" and "Rabbanut Yerushalayim" lines are part of the original practice copy and need real proof before any owner is shown this
+R3.1 n/a: Lechem Emek is a practice page (BRIEF.md: no owner, photos generated mockups); there is no owner, record, flyer or listing to trace this to, and nothing is published; the "since 1998" and "Rabbanut Yerushalayim" lines and, since the 22 Oct review, the phone number in the trust strip (02-555-0141) are invented for the demo and need real proof before any owner is shown this (noted in CONCEPT.md)
 R3.2 pass: searched the page for hurry, only N left, limited, countdown: none; "Shabbos orders close Thursday at two" is a standing cut-off, not a counter
 R3.3 pass: searched the page for welcome to, look no further, passionate, world-class, top-notch: none
 R3.4 pass: scanned the visible text and alt text of the page for exclamation marks and long dashes: none
@@ -92,8 +92,8 @@ R3s.11 pass: each item has its one line (six strands, laminated Thursday, twelve
 R5b.6 pass: no scroll cue or counters; the clock is a true readout (R3i.3)
 R3.13 pass: hours and address appear in the trust strip, Good to know and the footer; the same fact in three standard places, no doubled block
 R3a.1 pass: rendered at 1440x900 and 390x844 (every section), RTL once, the six sizes by check-fits and cutoff, reduced motion by check-site MEDIA
-R3r.1 pass: check-site, check-fits, check-motion, readable, cutoff and clipped ran on the only page; the clipped reports are named in R3c.13
-R3r.2 n/a: the coordinator reviews after this pass; no second reviewer has used the page yet
+R3r.1 pass: review pass of 22 Oct: check-site, check-fits, check-motion, readable, cutoff and clipped ran on the only page; stepped screenshots every 100 px at 1440x900, 390x844 and 360x640 with document scrollWidth equal to the viewport at every stop; the basket walked to the WhatsApp message at 390 and 1440 with external requests blocked; the clipped reports are named in R3c.13
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; findings fixed and re-checked
 R3g.12 pass: Add on the counter fills the basket sheet and total (tested through check-site STATE); the WhatsApp send is not made
 R0b.12 n/a: the site is not published
 
@@ -111,10 +111,10 @@ R3o.3 pass: bread and pastry colours look true on cream
 R3o.6 pass: one photo per item from the generated set
 R8.3 pass: the generated bakery set shows items the practice bakery lists, no person shown as staff, no text baked in; hands photograph is a stand-in and is labelled so in BRIEF.md
 R8.4 n/a: no moving real material (steam is baked into the still)
-R3c.13 pass: check-fits and cutoff passed at the sizes; clipped reports only held stages sliding under the fixed bar at scroll 0 and at pin entries, the same code as before the rework (checker limit)
+R3c.13 pass: check-fits and cutoff passed at the sizes (cutoff at nine sizes, 22 Oct); clipped reports only held stages sliding under the fixed bar at scroll 0 and at a pin entry (1000x700 at 2148), the same code as before the rework (checker limit)
 R3c.14 n/a: the page has no cut-outs
 R5b.3 pass: the hero and door words sit on the soft edge scrims; readable passes except the mid-fade sample named in R3e.8
-R3e.8 pass: readable ran on the page; the ghost button text (1.01:1, caused by an !important colour the script cannot blank) was fixed; one report remains, the hero "Start your order" at 3.84:1 at one scroll stop of 1440x900 where the hero copy is fading out (measured opacity 0.71 there); at every other stop it passes
+R3e.8 pass: readable ran on the page: one report remains, the hero "Start your order" at 3.5:1 at 1280x650 and 390x844 stop 1, where the hero copy is fading out (opacity near 0.7); at every other stop it passes
 R3s.24 pass: check-site MEDIA passed; the largest asset is 507 KB
 R3p.6 pass: check-fits passed at the six sizes
 R3o.5 pass: check-site GLYPH passed (the shekel sign renders)
@@ -152,13 +152,13 @@ R3l.4 pass: four items in two groups, each row the same fields
 R3l.6 pass: the practice photos show the items as listed
 R3l.7 pass: each row says what it is, how, and the price
 R3e.9 pass: check-site STATE and FLOW passed
-R3e.19 pass: the sheet ends after the WhatsApp send with a toast
+R3e.19 pass: the sheet ends after the WhatsApp send with a toast; the "added" toast now sits at the top of a phone screen, under the bar, so it no longer covers the order bar text (checked at 390x844); the WhatsApp message gives the day as "Sunday 25 October at 10:00"
 R3s.16 pass: the order starts with the basket then pickup or delivery
 R3s.18 n/a: there is no unavailable state
 R3s.25 pass: the sheet sends nothing empty and says what is missing (check-site FLOW)
 
 ## 7. Motion
-R3f.1 pass: the sunrise runs under the pinned hero, shaping and door; the rework only removed the hands section from the night run
+R3f.1 pass: the sunrise runs under the pinned hero, the night lines and the door; the night lines are now one flow section (#bake) of four stacked lines instead of a pinned act and a separate silent section, so no stop is blank
 R3f.8 n/a: no scroll-tied effect outside the held acts
 R3f.9 n/a: no such list
 R3f.5 pass: replaced the 12 ch widths in index.html with em; grep finds no ch and no background-clip
@@ -169,7 +169,7 @@ R3e.17 n/a: no carousel (the horizontal counter rail was replaced by a list)
 R3e.18 n/a: no ambient background video
 R3a.2 pass: looked at mid-transition frames of the door iris
 R3a.3 n/a: no label placed on a spot in a photo
-R3a.4 pass: cutoff passed at all nine sizes after the "Every loaf" cue was changed to start after the stage is held
+R3a.4 pass: cutoff clean at all nine sizes after the night lines became one flow section (22 Oct review): every line is on screen as it is passed, none is cued
 R3a.5 pass: reduced motion shows every line (check-site MEDIA passed)
 R3s.2 pass: check-site SHIFT passed; check-motion passed
 R3s.1 pass: check-site STATE passed
@@ -192,5 +192,5 @@ R3a.7 pass: same touch emulation at 390x844
 R3a.8 n/a: no line of dot-separated items
 
 ## 9. Finish
-R3r.3 pass: check-rules passed after the last edit; scripts re-run after the ch and cue fixes
+R3r.3 pass: check-rules passed after the last edit; every script was re-run after the last change to the page
 R3r.4 pass: the same corrections are in rules-checklist.md

@@ -230,7 +230,15 @@
   }
   addEventListener('popstate', function () { var m = /#order-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
   document.getElementById('back').addEventListener('click', function () { history.back(); });
-  document.getElementById('steps').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
+  document.getElementById('steps').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-go]'); if (!b) return; var t = +b.dataset.go;
+    if (t < step) { go(t, true); return; }
+    if (t === step) return;
+    // forward: as far as the filled-in steps allow; the first step with something missing shows what
+    var s = step; while (s < t && check(false, s)) s++;
+    if (s < t) { check(true, s); go(s, s !== step); var bad = document.querySelector('.ostep:not([hidden]) .bad .fld'); if (bad) bad.focus(); return; }
+    go(s, true);
+  });
   show(BY[qs.get('size')] ? qs.get('size') : 'small');
   // "Add" on a home page card arrives here with the size and add=1: it is already in the basket
   if (qs.get('add') === '1' && BY[qs.get('size')]) { q[sel] = Math.min(20, q[sel] + 1); label(); say('Added: 1 × ' + BY[sel].name); }

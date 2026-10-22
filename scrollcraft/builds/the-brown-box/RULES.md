@@ -8,7 +8,7 @@ Replace every `todo`. `node scripts/check-rules.mjs scrollcraft/builds/the-brown
 R0b.1 pass: address /pages/the-brown-box/ in gen/build_order.py and the fingerprints slug are the same
 R0b.3 pass: every price on the page matches gen/catalog/products.json made from their printed menu; the order page loads it with fixed ids
 R2.1 pass: read every sentence on both pages; each fact is from their listing, printed menus, card or WhatsApp catalogue (header comment of index.html)
-R2.2 n/a: no owner message is written or changed in this pass; no owner question is added by this rework
+R2.2 pass: message-to-owner.md added on 22 Oct: the two acai board prices, the Mini bowls minimum, the Instagram handle and the notice they need; all about their business
 R2.3 n/a: no owner message is written in this pass; the FAQ stays out until they send questions
 R3.1 pass: kosher is their seal and Vaad HaKashrus line; "sugar free and almond milk based" is their own menu wording; no best, award or guarantee
 R3.2 pass: searched every page for hurry, only N left, today only, countdowns: none
@@ -92,8 +92,8 @@ R3s.11 n/a: the owner gave no reason for the price to state
 R5b.6 pass: no scroll cues beyond the film hint, no counters, no label above every section
 R3.13 pass: no doubled contact, facts or gallery; no two dividers in a row; no ending on a divider
 R3a.1 pass: rendered every page at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844, 360x640 (check-fits), scrolled the home page at 1440x900 and 390x844 and looked at every screen; English only; reduced motion shows the held frame
-R3r.1 pass: ran check-site, check-fits, check-motion, readable and clipped on every page of the site on 22 Oct 2026; every html file in the folder
-R3r.2 n/a: the reviewer must not be the builder; the coordinator answers docs/page-review-checklist.md for this site
+R3r.1 pass: review pass of 22 Oct: check-site, check-fits, check-motion and readable ran on index and order; stepped screenshots every 100 px at 1440x900, 390x844 and 360x640 with document scrollWidth equal to the viewport at every stop and at each of the three order steps; the order walked to the WhatsApp message at 390 and 1440 with external requests blocked
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; findings fixed and re-checked
 R3g.12 pass: check-site FLOW built the order message with the total and opened the WhatsApp link without sending it; nothing reached the owner
 R0b.12 n/a: the site is not published, so there is no pages-list preview yet
 
@@ -114,7 +114,7 @@ R8.4 n/a: no moving real material beyond the opening film
 R3c.13 pass: clipped clean on order.html; on index.html the only remaining line is the full-screen film stage at 768, 390 and 360 wide (64 px under the translucent bar by design, rule 3h), a checker limit for a canvas film
 R3c.14 n/a: no cut-out image: every picture is a whole photo
 R5b.3 pass: film words sit on a soft edge shade; readable: see R3h.5 and R3e.8
-R3e.8 pass: readable clean on order.html; on index.html the remaining lines are checker limits: the opening line fading out (R3h.5) and three spots under the phone dock whose colours at rest are white on #6E2A57, cream on brown and ink on tan, all above 7:1
+R3e.8 pass: readable clean on order.html; on index.html the remaining lines are checker limits: the opening line fading out (R3h.5) and two spots under the phone dock whose colours at rest are ink on tan and ink on cream; the "Acai bowls" tab that a floating kiwi covered at phone width is fixed (the chips sit above the fruit)
 R3s.24 pass: check-site MEDIA clean; every img has width and height (the empty gallery template placeholder aside)
 R3p.6 pass: check-fits clean at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844, 360x640 on every page
 R3o.5 pass: check-site GLYPH clean; the shekel sign sits in the body face
@@ -155,7 +155,7 @@ R3e.9 pass: check-site STATE and FLOW clean; buttons have hover, pressed and dis
 R3e.19 pass: finishing an order shows the sent message
 R3s.16 pass: size or bowl first, then when and where, then details
 R3s.18 n/a: every size or item is always available; nothing unavailable to replace
-R3s.25 pass: check-site FLOW clean: an empty form sends nothing, a filled one builds the WhatsApp message with the total
+R3s.25 pass: check-site FLOW clean: an empty form sends nothing, a filled one builds the WhatsApp message with the total; each message line carries its bowl extras (+6, +5) so the lines add up to the total, two muffins of one kind read "2 x name", and the order summary names the extras actually picked ("Build your own bowl +6")
 
 ## 7. Motion
 R3f.1 pass: the film plays under the scroll while the stage holds; checked at 1280x650 and 390x844
@@ -167,11 +167,11 @@ R3g.4 pass: each motion has one job (confirm, reveal, guide); no linear easing; 
 R3e.16 pass: grepped css and js: no linear easing outside the loading bar; transitions under 0.5 s
 R3e.17 n/a: no carousel and no bottom sheet on this site
 R3e.18 n/a: no ambient background video
-R3a.2 pass: mid-transition frames of the menu tabs looked at; nothing unfinished
+R3a.2 pass: mid-transition frames of the menu tabs looked at; nothing unfinished; each section is one row of cards of the same height, so a short section (the two acai bowls) is not followed by a hole
 R3a.3 n/a: no label is placed on a spot in a photo
 R3a.4 pass: cutoff clean at the six sizes on both pages; the film stage is held and fits; the order page is never held
 R3a.5 pass: no parallax on phones; reduced motion shows a still
-R3s.2 pass: check-site SHIFT clean and check-motion has no JUMP or FLASH, including two quick taps
+R3s.2 pass: check-site SHIFT clean (the document keeps the same height under every menu tab, measured at 390 and 1440 wide) and check-motion has no JUMP or FLASH, including two quick taps
 R3s.1 pass: check-site STATE clean
 R3s.8 pass: over the opening photo the buttons are solid cream on a soft edge shade; looked at on the light and dark frames
 R3s.10 pass: every item is named beside its photo
@@ -192,5 +192,5 @@ R3a.7 pass: phones were emulated with touch (hasTouch, isMobile) at 390x844 for 
 R3a.8 pass: no dotted line wraps at 360x640
 
 ## 9. Finish
-R3r.3 pass: every script was rerun after the last edit; three check-site lines seen once under machine load did not repeat on the rerun
+R3r.3 pass: check-rules passed after the last edit; every script was re-run after the last change to the pages
 R3r.4 pass: no new correction from Tzvi since the last build is missing from this file

@@ -308,17 +308,20 @@ document.addEventListener('DOMContentLoaded', function () {
     while (a.length < n) a.push(k === 'bowl' ? { kind: 'bowl', bowl: 'classic', ex: [], top: [] } : { kind: 'box', muf: [], bowls: Array.from({ length: bowlsIn(p) }, function () { return 'classic'; }) });
     a.length = n;
   }
-  function extraCost() {
+  // what the bowl choices add: build your own +6, almond butter +5, counted per product so each line of the message carries its own
+  function extraFor(p) {
     var c = 0;
-    products.forEach(function (p) { (cfg[p._k] || []).forEach(function (u) { if (u.kind === 'bowl') { if (u.bowl === 'own') c += 6; if (u.ex.indexOf('Almond butter (+₪5)') >= 0) c += 5; } }); });
+    (cfg[p._k] || []).forEach(function (u) { if (u.kind === 'bowl') { if (u.bowl === 'own') c += 6; if (u.ex.indexOf('Almond butter (+₪5)') >= 0) c += 5; } });
     return c;
   }
+  function extraCost() { var c = 0; products.forEach(function (p) { c += extraFor(p); }); return c; }
+  function extraCount(test) { var n = 0; products.forEach(function (p) { (cfg[p._k] || []).forEach(function (u) { if (u.kind === 'bowl' && test(u)) n += 1; }); }); return n; }
   function choices() {
     var out = [];
     products.forEach(function (p) {
       (cfg[p._k] || []).forEach(function (u, i) {
         if (u.kind === 'bowl') out.push(p.name + ' ' + (i + 1) + ': ' + BOWLS[u.bowl].replace(' (+₪6)', '') + ' bowl' + (u.bowl === 'own' ? ' (' + (u.top.length === 4 ? u.top.join(', ') : 'toppings not chosen yet') + ')' : '') + (u.ex.length ? ', extras: ' + u.ex.join(' and ').replace(/ \(\+₪5\)/, '') : ', extras: not chosen yet'));
-        else out.push(p.name + ' ' + (i + 1) + ': ' + (u.bowls.length ? u.bowls.map(function (b) { return BOWLS[b].replace(' (+₪6)', '') + ' bowl'; }).join(' and ') + ', ' : '') + 'muffins: ' + (u.muf.length ? u.muf.join(' and ') : 'not chosen yet'));
+        else out.push(p.name + ' ' + (i + 1) + ': ' + (u.bowls.length ? u.bowls.map(function (b) { return BOWLS[b].replace(' (+₪6)', '') + ' bowl'; }).join(' and ') + ', ' : '') + 'muffins: ' + (u.muf.length ? (u.muf.length === 2 && u.muf[0] === u.muf[1] ? '2 x ' + u.muf[0] : u.muf.join(' and ')) : 'not chosen yet'));
       });
     });
     return out;
@@ -413,10 +416,12 @@ document.addEventListener('DOMContentLoaded', function () {
       rm.onclick = function () { delete q[p._k]; cfg[p._k] = []; update(); };
       li.appendChild(rm); lines.appendChild(li);
     });
-    if (extraCost() > 0) {
-      var xl = document.createElement('li'); var xa = document.createElement('span'); xa.textContent = 'Build your own and almond butter';
-      var xb = document.createElement('span'); xb.textContent = '+' + money(extraCost(), 'ILS'); xl.appendChild(xa); xl.appendChild(xb); lines.appendChild(xl);
-    }
+    // one line for each extra that was actually picked, so the label says what was chosen
+    [['Build your own bowl', 6, function (u) { return u.bowl === 'own'; }], ['Almond butter', 5, function (u) { return u.ex.indexOf('Almond butter (+₪5)') >= 0; }]].forEach(function (x) {
+      var n = extraCount(x[2]); if (!n) return;
+      var xl = document.createElement('li'); var xa = document.createElement('span'); xa.textContent = (n > 1 ? n + ' × ' : '') + x[0];
+      var xb = document.createElement('span'); xb.textContent = '+' + money(n * x[1], 'ILS'); xl.appendChild(xa); xl.appendChild(xb); lines.appendChild(xl);
+    });
     var t = totals().text;
     document.getElementById('total').textContent = t;
     document.getElementById('dtotal').textContent = t;
@@ -492,7 +497,11 @@ document.addEventListener('DOMContentLoaded', function () {
   function v(id) { return document.getElementById(id).value.trim(); }
   function message() {
     var L = ['Hi, I would like to order:'];
-    chosen().forEach(function (p) { L.push('• ' + q[p._k] + ' × ' + p.name + ' (' + priceText(p) + ')'); });
+    chosen().forEach(function (p) {
+      // the line price carries the bowl extras (+6, +5), so the lines add up to the total
+      var ranged = p.price_to != null && Number(p.price_to) > Number(p.price);
+      L.push('• ' + q[p._k] + ' × ' + p.name + ' (' + (priced(p) && !ranged ? money(q[p._k] * Number(p.price) + extraFor(p), p.currency) : priceText(p)) + ')');
+    });
     choices().forEach(function (c) { L.push('   ' + c); });
     L.push('Total: ' + totals().text + ', plus delivery');
     L.push('');

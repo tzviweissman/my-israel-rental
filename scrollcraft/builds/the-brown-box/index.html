@@ -437,6 +437,24 @@
   /* accent colour is for the main button only (Tzvi, 22 Oct 2026): the one emphasised word per heading is set apart by style, in the text colour */
   .acc, .chap .acc, .close .q span { color: inherit; font-style: italic; }
   .cat-h { color: var(--ink); }
+  /* the fruit above the menu never covers a section chip (readable: "Acai bowls" was under a kiwi) */
+  .cats { position: relative; z-index: 3; margin-top: 1.6rem; }
+  /* the menu as one row of cards (review 22 Oct 2026): every section is one row tall, so a short section (the two acai bowls) is not
+     followed by a hole the height of the longest one, and choosing a section still moves nothing below it */
+  .cat { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .9rem; border-top: 0; }
+  .cat[hidden] { display: none; }
+  .cat li { display: flex; border: 1px solid var(--line); border-radius: 18px; background: #fff; overflow: hidden; }
+  .cat a { display: flex; flex-direction: column; align-items: flex-start; gap: .5rem; width: 100%; padding: .9rem; }
+  .cat .ph { width: 88px; height: 88px; flex: none; }
+  .cat a > span:nth-child(2) { flex: 1; min-width: 0; min-height: 7.9rem; }
+  .cat b { display: block; font-size: 1.12rem; min-height: 2.4em; }
+  .cat .d { min-height: 5.6em; display: -webkit-box; -webkit-line-clamp: 4; line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+  .cat .pr { margin-top: auto; width: 100%; justify-content: space-between; }
+  @media (max-width: 760px) {
+    .cat { display: flex; overflow-x: auto; gap: .7rem; padding-bottom: .5rem; scroll-snap-type: x proximity; scrollbar-width: thin; }
+    .cat[hidden] { display: none; }
+    .cat li { flex: 0 0 min(210px, 58vw); scroll-snap-align: start; }
+  }
 </style>
 </head>
 <body>

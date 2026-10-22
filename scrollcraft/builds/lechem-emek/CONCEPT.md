@@ -30,3 +30,9 @@ The night opening and the door at seven stay as the event; after the door everyt
 
 ## Not alike
 check-fingerprints (22 Oct 2026): lechem-emek is not listed in scrollcraft/fingerprints.json (that file was not to be edited in this pass) and shares the Playfair Display heading face with blazin-boards; fonts are unchanged from the earlier build.
+
+## Invented facts (practice page)
+Lechem Emek is a practice page with no owner. The address (Emek Refaim 41), the hours, "since 1998", "Rabbanut Yerushalayim" and, since the 22 Oct 2026 review, the phone number in the trust strip (02-555-0141) are invented for the demo and need real proof before any owner is shown this.
+
+## Night section (22 Oct 2026 review)
+The old pinned "shaping" act and the separate "bake" section were mostly blank screens. They are one flow section, `#bake`: four lines stacked, each seen as you pass (Every loaf is shaped by hand. / By whoever is in that morning. / It is the slowest part of the day... / Steam for the first ten minutes. Then you wait.).

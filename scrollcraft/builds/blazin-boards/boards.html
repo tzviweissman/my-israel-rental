@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Every board · Blazin' Boards</title>
 <meta name="site-category" content="food-shop">
-<meta name="description" content="Every Blazin' Boards meat board, drawn to its real size, with its price and what is on it. Wine and whisky to add. Orders 48 hours ahead.">
+<meta name="description" content="Every Blazin' Boards meat board, with its size, price and what is on it. Wine and whisky to add. Orders 48 hours ahead.">
 <link rel="icon" href="assets/their-logo-small.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,9 +27,9 @@
 <main>
   <header class="wrap shop-head">
     <p class="eyebrow">Every board</p>
-    <h1>Every board, <em>drawn to its real size.</em></h1>
+    <h1>Every board, <em>with its size and price.</em></h1>
     <p>Premium meats, cooked and grilled to perfection. Two lines at each size: the Blazin' line adds chicken and sticky beef bites, the Premium Steak line is all steak. Prices in US dollars.</p>
-    <p class="scale-note">Every board below is our own board, shown at its true size against the others. What goes on each one is listed under it.</p>
+    <p class="scale-note">The picture shows our board style. The size and what goes on each board are written under it.</p>
     <div class="chips filters" role="group" aria-label="Show">
       <button type="button" class="chip" data-show="all" aria-pressed="true">All boards</button>
       <button type="button" class="chip" data-show="blazin" aria-pressed="false">Blazin' line</button>
@@ -37,10 +37,10 @@
       <button type="button" class="chip" data-show="special" aria-pressed="false">Specials</button>
     </div>
   </header>
-  <section class="wrap" aria-label="The boards">
+  <div class="wrap" role="region" aria-label="The boards"><!-- a shop grid of ten boards scrolls like any shop; it is not one screen-sized scene -->
     <ul class="grid-boards" id="boards"><li class="bcard" style="padding:2rem;color:var(--soft)">Loading the boards…</li></ul>
     <p class="errline" id="err"></p>
-  </section>
+  </div>
   <section class="sec" id="bottles-sec" hidden>
     <div class="wrap">
       <p class="eyebrow">Add a bottle</p>
@@ -58,7 +58,7 @@
         <div><dt>On request</dt><dd>Gluten-free and soy-free boards.</dd></div>
         <div><dt>Paying</dt><dd>You pay us directly, by <span data-ways>card, Zelle or bank transfer</span>.</dd></div>
       </dl>
-      <p style="margin-top:2rem"><a class="cta" href="order.html">Go to your order</a></p>
+      <p style="margin-top:2rem"><a class="cta" href="order.html">Order a board</a></p>
     </div>
   </section>
 </main>
@@ -77,11 +77,10 @@
 <script>
 (function () {
   var o = BB.load(), F = null, show = 'all';
-  var PX = 4.6; /* one pixels-per-centimetre for every card, so the sizes compare */
   function card(p) {
     var q = o.cart[p.id] || 0;
     var stage = p.cm
-      ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815" loading="lazy" style="width:' + (p.cm[1] * PX / 0.98).toFixed(0) + 'px"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
+      ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815" loading="lazy"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
       : '<div class="stage"><span style="font-weight:700;color:var(--gold-text)">Size on request</span></div>';
     return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + BB.dealHtml(p) + stage
       + '<div class="body"><span class="line">' + BB.LINES[p.line] + '</span><h3>' + BB.esc(p.short) + '</h3>'
@@ -89,7 +88,7 @@
       + (p.what ? '<p class="what">' + BB.esc(p.what) + '</p>' : '')
       + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '')
       + '<div class="add">' + (q
-        ? '<span class="stepper"><button type="button" data-dec="' + p.id + '" aria-label="One fewer">−</button><output>' + q + '</output><button type="button" data-inc="' + p.id + '" aria-label="One more">+</button></span><a class="ghost" href="order.html">Order</a>'
+        ? '<span class="stepper"><button type="button" data-dec="' + p.id + '" aria-label="One fewer">−</button><output>' + q + '</output><button type="button" data-inc="' + p.id + '" aria-label="One more">+</button></span><a class="ghost" href="order.html">Order a board</a>'
         : '<button type="button" class="cta" data-inc="' + p.id + '">Add to order</button>')
       + '</div></div></li>';
   }
@@ -101,7 +100,7 @@
     document.getElementById('bottles-sec').hidden = !bottles.length;
     document.getElementById('bottles').innerHTML = bottles.map(function (p) {
       var on = (o.cart[p.id] || 0) > 0;
-      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add') + '</button></li>';
+      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add to order') + '</button></li>';
     }).join('');
     BB.paint(F, o);
   }
@@ -118,8 +117,10 @@
     if (t.dataset.dec) o.cart[id] = Math.max(0, was - 1);
     if (t.dataset.bottle) o.cart[id] = was ? 0 : 1;
     if (!o.cart[id]) delete o.cart[id];
+    // a bottle toggles in place: the button changes, nothing around it is rebuilt
+    if (t.dataset.bottle) { var on = !!o.cart[id]; t.setAttribute('aria-pressed', String(on)); t.textContent = on ? 'Added' : 'Add to order'; BB.save(o); BB.paint(F, o); return; }
     BB.save(o); paint();
-    if ((o.cart[id] || 0) > was) BB.toast((p ? p.short : 'Added') + ' added. Total ' + BB.money(BB.total(F, o), BB.cur(F)), 'order.html', 'Go to order');
+    if ((o.cart[id] || 0) > was) BB.toast((p ? p.short : 'Added') + ' added. Total ' + BB.money(BB.total(F, o), BB.cur(F)), 'order.html', 'Order a board');
   });
   BB.form().then(function (f) { F = f; paint(); }).catch(function () { document.getElementById('err').textContent = 'Could not load the boards. Please refresh the page.'; });
 })();

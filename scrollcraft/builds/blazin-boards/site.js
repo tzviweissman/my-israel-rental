@@ -92,8 +92,11 @@
   function paint(f, o) {
     var ls = lines(f, o), c = cur(f), t = total(f, o);
     document.querySelectorAll('[data-lines]').forEach(function (ul) {
-      var h = ls.length ? ls.map(function (l) { return '<li><span>' + (l.qty > 1 ? l.qty + ' × ' : '') + esc(l.p.short) + '</span><span>' + money(l.p.price * l.qty, c) + '</span></li>'; }).join('')
+      var seen = ul.__seen, now = {};
+      // a line that has just come in fades in; the others stay as they are
+      var h = ls.length ? ls.map(function (l) { now[l.p.id] = 1; return '<li' + (seen && !seen[l.p.id] ? ' class="fresh"' : '') + '><span>' + (l.qty > 1 ? l.qty + ' × ' : '') + esc(l.p.short) + '</span><span>' + money(l.p.price * l.qty, c) + '</span></li>'; }).join('')
         : '<li class="empty">Nothing chosen yet</li>';
+      ul.__seen = now;
       if (o.date || ul.hasAttribute('data-full')) {
         if (o.date) h += '<li class="meta"><span>When</span><span>' + esc(when(o)) + '</span></li>';
         h += '<li class="meta"><span>How</span><span>' + esc(where(o)) + '</span></li>';
