@@ -39,7 +39,13 @@
     --cold-ink: #1E2421;
     --cold-soft: #46504A;
     --order: "https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels";
+    /* the six text sizes (page rules 3e.14); the engine's eight --sc-t-* sizes are folded into them */
+    --s1: .8125rem; --s2: .9375rem; --s3: clamp(1rem, .96rem + .22vw, 1.125rem);
+    --s4: clamp(1.5rem, 1.2rem + 1.2vw, 2.1rem); --s5: clamp(2.2rem, 1.2rem + 3.2vw, 3.6rem); --s6: clamp(3.4rem, 2rem + 5vw, 7rem);
+    --sc-t-xs: var(--s1); --sc-t-sm: var(--s2); --sc-t-base: var(--s3); --sc-t-lg: var(--s4); --sc-t-xl: var(--s4);
+    --sc-t-2xl: var(--s5); --sc-t-3xl: var(--s5); --sc-t-4xl: var(--s6);
   }
+  @media (min-width: 861px) and (max-height: 820px) { :root { --s5: min(clamp(2.2rem, 1.2rem + 3.2vw, 3.6rem), 7vh); --s6: min(clamp(3.4rem, 2rem + 5vw, 7rem), 11vh); } }
   body { background: var(--sc-canvas); color: var(--sc-ink); }
   .script { font-family: var(--script); font-weight: 400; color: var(--sc-accent); letter-spacing: 0; text-transform: none; }
   .caps { font-family: var(--sc-font-display); text-transform: uppercase; letter-spacing: 0.04em; }
@@ -84,11 +90,11 @@
     width: calc(var(--dd, 0.0834) * 100% / 0.477); height: auto; translate: -50% -50%; --face: 0; opacity: var(--landed, 0); }
 
   .theirs-copy { position: absolute; right: var(--sc-gutter); top: clamp(5.5rem, 14vh, 9rem); width: min(30rem, 30vw); text-align: right; }
-  .lockup .script { display: block; font-size: clamp(1.9rem, 1.4rem + 1.6vw, 3rem); line-height: 1; margin-bottom: -0.2em; }
+  .lockup .script { display: block; font-size: var(--s4); line-height: 1; margin-bottom: -0.2em; }
   .lockup h1 { font-family: var(--sc-font-display); font-weight: 200; text-transform: uppercase; letter-spacing: 0.02em;
-    font-size: clamp(3.4rem, 2rem + 5vw, 7rem); line-height: 0.9; margin: 0; color: var(--sc-ink); }
+    font-size: var(--s6); line-height: 0.9; margin: 0; color: var(--sc-ink); }
   .lockup h1 .dot { color: var(--sc-accent); }
-  .lockup .tag { margin: var(--sc-4) 0 0 auto; color: var(--sc-ink); font-size: var(--sc-t-lg); max-width: 24ch; }
+  .lockup .tag { margin: var(--sc-4) 0 0 auto; color: var(--sc-ink); font-size: var(--s3); max-width: 24ch; }
   .steps { list-style: none; margin: var(--sc-6) 0 0 auto; padding: 0; display: grid; gap: var(--sc-3); max-width: 24rem; }
   .steps li { display: grid; grid-template-columns: 2.4rem 1fr; gap: var(--sc-3); align-items: baseline; text-align: left; font-size: var(--sc-t-base); color: var(--sc-ink); }
   .steps b { font-family: var(--sc-font-display); font-weight: 300; font-size: var(--sc-t-xl); color: var(--sc-accent); }
@@ -119,11 +125,11 @@
   /* the peak copy, left, over the dark side of the frame */
   .peak { position: absolute; left: var(--sc-gutter); bottom: clamp(3rem, 12vh, 8rem); width: min(36rem, 46vw); }
   .hours { display: flex; align-items: baseline; gap: var(--sc-3); margin: 0; color: var(--sc-accent); }
-  .hours .sc-nums { font-family: var(--sc-font-display); font-weight: 200; font-size: clamp(5rem, 3rem + 7vw, 10rem); line-height: 0.85; font-variant-numeric: tabular-nums; }
+  .hours .sc-nums { font-family: var(--sc-font-display); font-weight: 200; font-size: var(--s6); line-height: 0.85; font-variant-numeric: tabular-nums; }
   .hours span:last-child { font: 600 var(--sc-t-base)/1.3 var(--sc-font-text); color: var(--sc-ink-soft); text-transform: uppercase; letter-spacing: 0.14em; }
   .peak h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.98; margin: var(--sc-5) 0 0; }
   .peak .seal-words { margin: var(--sc-5) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-lg); }
-  .peak .seal-words .script { font-size: 1.5em; }
+  .peak .seal-words .script { font-size: var(--s4); }
 
   /* the divider: labels for both sides, and the knob */
   .divider { position: absolute; top: 0; bottom: 0; left: calc(var(--x) * 1%); width: 0; z-index: 5; pointer-events: none; }
@@ -143,7 +149,7 @@
   .knob .pointer { stroke: var(--sc-ink); stroke-width: 5; stroke-linecap: round; }
   .knob .rot { transform-origin: 100px 100px; transform: rotate(var(--a, -100deg)); transition: transform 90ms ease-out; }
   .knob .tick { stroke: var(--sc-ink-soft); stroke-width: 2; }
-  .knob text { font: 600 13px var(--sc-font-text); fill: var(--sc-ink); letter-spacing: 0.06em; }
+  .knob text { font: 600 var(--s1) var(--sc-font-text); fill: var(--sc-ink); letter-spacing: 0.06em; }
   .knob .lamp { fill: #3A140F; transition: fill 200ms var(--sc-ease-out); }
   .knob.is-on .lamp { fill: #FF5A2E; }
 
@@ -154,7 +160,7 @@
   #order { min-height: 100svh; display: grid; background: radial-gradient(70% 80% at 30% 45%, #231B15 0%, var(--sc-canvas) 70%); }
   .order-stage { display: grid; grid-template-rows: 1fr auto; padding-top: var(--sc-8); }
   .order-stage > .order { align-self: center; padding-bottom: var(--sc-7); }
-  .order-tag { margin: 0 0 var(--sc-2); font-size: clamp(1.4rem, 1rem + 1.2vw, 2.2rem); line-height: 1.1; }
+  .order-tag { margin: 0 0 var(--sc-2); font-size: var(--s4); line-height: 1.1; }
   .order { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(2rem, 6vw, 6rem); align-items: center; }
   .dial-col { display: grid; justify-items: center; gap: var(--sc-5); }
   .dial { width: min(24rem, 34vw); touch-action: none; cursor: grab; border-radius: 50%; }
@@ -168,8 +174,8 @@
   .pick .size-name { font-family: var(--sc-font-display); font-weight: 400; text-transform: uppercase; font-size: var(--sc-t-xl); letter-spacing: 0.04em; }
   .pick .feeds { color: var(--sc-ink-soft); }
   .price { margin: var(--sc-2) 0 0; display: flex; align-items: baseline; gap: var(--sc-4); flex-wrap: wrap; }
-  .price .now { font-family: var(--sc-font-display); font-weight: 200; font-size: clamp(4rem, 2.6rem + 5vw, 7.5rem); line-height: 0.9; color: var(--sc-ink); font-variant-numeric: tabular-nums; }
-  .price .now small { font-size: 0.5em; vertical-align: 0.6em; margin-inline-end: 0.06em; }
+  .price .now { font-family: var(--sc-font-display); font-weight: 200; font-size: var(--s6); line-height: 0.9; color: var(--sc-ink); font-variant-numeric: tabular-nums; }
+  .price .now small { font-size: var(--s2); vertical-align: 0.6em; margin-inline-end: 0.06em; }
   .price .alt { color: var(--sc-ink-soft); max-width: 18rem; }
   .menu { margin: var(--sc-5) 0 0; display: grid; gap: var(--sc-2); border-top: 1px solid var(--sc-hairline); padding-top: var(--sc-4); color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
   .menu div { display: flex; justify-content: space-between; gap: var(--sc-4); }
@@ -184,19 +190,19 @@
   /* ---------- short laptop screens: the split fits the height ----------------- */
   @media (min-width: 861px) and (max-height: 820px) {
     .scratch-copy, .theirs-copy { top: clamp(3.6rem, 9vh, 6rem); }
-    .scratch-copy h2 { font-size: min(var(--sc-t-3xl), 7vh); }
+    .scratch-copy h2 { font-size: var(--s5); }
     .scratch-copy .lede { font-size: var(--sc-t-base); margin-top: var(--sc-2); }
     .chores { grid-template-columns: 1fr 1fr; margin-top: var(--sc-4); gap: 0.25rem 0.5rem; }
     .chores li { font-size: var(--sc-t-sm); }
-    .lockup .script { font-size: min(clamp(1.9rem, 1.4rem + 1.6vw, 3rem), 5vh); }
-    .lockup h1 { font-size: min(clamp(3.4rem, 2rem + 5vw, 7rem), 11vh); }
+    .lockup .script { font-size: var(--s4); }
+    .lockup h1 { font-size: var(--s6); }
     .lockup .tag { font-size: var(--sc-t-base); margin-top: var(--sc-2); }
     .steps { margin-top: var(--sc-3); gap: var(--sc-1); }
     .steps li { font-size: var(--sc-t-sm); }
     .steps b { font-size: var(--sc-t-lg); }
     .theirs-copy .btn { margin-top: var(--sc-4); }
-    .peak h2 { font-size: min(var(--sc-t-3xl), 7vh); }
-    .hours .sc-nums { font-size: min(clamp(5rem, 3rem + 7vw, 10rem), 15vh); }
+    .peak h2 { font-size: var(--s5); }
+    .hours .sc-nums { font-size: var(--s6); }
   }
 
   /* ---------- phones: the split runs top and bottom ------------------------ */
@@ -219,7 +225,7 @@
     .theirs-copy .steps { display: none; }
     .proofline { align-items: flex-start; font-size: var(--sc-t-sm); letter-spacing: 0.05em; }
     .foot { font-size: var(--sc-t-sm); }
-    .lockup h1 { font-size: clamp(3rem, 14vw, 4.2rem); }
+    .lockup h1 { font-size: var(--s6); }
     .lockup .tag { font-size: var(--sc-t-base); }
     .steps { margin-top: var(--sc-3); gap: var(--sc-1); }
     .steps li { font-size: var(--sc-t-sm); grid-template-columns: 1.8rem 1fr; }
@@ -236,14 +242,14 @@
        stays 16:9 so the knob's fractions hold, and ends above the words. */
     .pot-frame { top: 0; translate: none;
       -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%); mask-image: linear-gradient(180deg, #000 70%, transparent 100%); }
-    .hours .sc-nums { font-size: 4.4rem; }
+    .hours .sc-nums { font-size: var(--s6); }
     .peak h2 { font-size: var(--sc-t-2xl); margin-top: var(--sc-3); }
     .peak .seal-words { margin-top: var(--sc-3); font-size: var(--sc-t-base); }
     .peak { width: auto; right: var(--sc-gutter); bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
     .proof { grid-template-columns: 1fr; }
     .order { grid-template-columns: 1fr; gap: var(--sc-5); }
     .dial { width: min(15rem, 62vw); }
-    .price .now { font-size: 4rem; }
+    .price .now { font-size: var(--s6); }
     .order-stage { padding-top: var(--sc-7); }
   }
   .buybar { display: none; }
@@ -253,7 +259,7 @@
       border-top: 1px solid var(--sc-hairline-strong); transform: translateY(110%); transition: transform 240ms var(--sc-ease-out); }
     .buybar.is-on { transform: none; }
     .buybar__price { color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
-    .buybar__price b { color: var(--sc-ink); font: 300 1.6rem/1 var(--sc-font-display); margin-inline-start: 0.25rem; }
+    .buybar__price b { color: var(--sc-ink); font: 300 var(--s4)/1 var(--sc-font-display); margin-inline-start: 0.25rem; }
     #order { padding-bottom: 5rem; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -267,7 +273,7 @@
     padding: 0.5rem var(--sc-gutter); background: color-mix(in oklab, var(--sc-canvas) 88%, transparent); backdrop-filter: blur(10px);
     border-bottom: 1px solid var(--sc-hairline); transform: translateY(-100%); opacity: 0; transition: transform 300ms var(--sc-ease-out), opacity 300ms var(--sc-ease-out); }
   .topbar.is-on { transform: none; opacity: 1; }
-  .tb-brand { display: flex; align-items: center; gap: 0.7rem; color: var(--sc-ink); text-decoration: none; font: 300 1.5rem/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: 0.05em; }
+  .tb-brand { display: flex; align-items: center; gap: 0.7rem; color: var(--sc-ink); text-decoration: none; font: 300 var(--s4)/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: 0.05em; }
   .tb-brand img { width: 40px; height: 40px; border-radius: 50%; }
   .topbar .tb-links { display: flex; gap: var(--sc-6); margin-inline-start: auto; }
   .topbar .tb-links a { color: var(--sc-ink); text-decoration: none; font: 500 var(--sc-t-sm)/1 var(--sc-font-text); padding: 0.6rem 0; border-bottom: 1px solid transparent; transition: border-color 160ms; }
@@ -280,23 +286,23 @@
   .order-stage > .order { padding-bottom: var(--sc-5); }
   .dial { width: min(22rem, 32vw, 46svh); }
   .dial-col { gap: 0; }
-  .order h2 { font-size: clamp(2.2rem, 4.2vw, 3.6rem); }
+  .order h2 { font-size: var(--s5); }
   .size-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sc-3); margin-top: var(--sc-4); justify-content: stretch; }
   .size-pick button { position: relative; display: grid; gap: 0.25rem; text-align: left; align-content: start; min-height: 5.4rem; padding: 0.8rem 1rem; border-radius: var(--sc-r-md); cursor: pointer;
     transition: border-color 120ms, background 120ms, transform 100ms; }
-  .size-pick button b { font: 400 1.35rem/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: 0.04em; }
-  .size-pick button em s { font-size: 0.7em; color: var(--sc-ink-soft); margin-right: 0.3em; text-decoration-thickness: 1.5px; }
+  .size-pick button b { font: 400 var(--s4)/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: 0.04em; }
+  .size-pick button em s { font-size: var(--s2); color: var(--sc-ink-soft); margin-right: 0.3em; text-decoration-thickness: 1.5px; }
   .size-pick button span { color: var(--sc-ink-soft); font-size: var(--sc-t-xs); }
-  .size-pick button em { font: 300 1.5rem/1 var(--sc-font-display); font-style: normal; color: var(--sc-ink); }
+  .size-pick button em { font: 300 var(--s4)/1 var(--sc-font-display); font-style: normal; color: var(--sc-ink); }
   .size-pick button:hover { border-color: var(--sc-accent); }
   .size-pick button:active { transform: scale(0.97); }
-  .size-pick .tab { position: absolute; top: -0.65rem; right: 0.7rem; font: 700 0.72rem/1 var(--sc-font-text); font-style: normal; letter-spacing: 0.06em; text-transform: uppercase; background: #E6F4EA; color: #1E5E3A; padding: 0.28rem 0.5rem; border-radius: 3px; }
+  .size-pick .tab { position: absolute; top: -0.65rem; right: 0.7rem; font: 700 var(--s1)/1 var(--sc-font-text); font-style: normal; letter-spacing: 0.06em; text-transform: uppercase; background: #E6F4EA; color: #1E5E3A; padding: 0.28rem 0.5rem; border-radius: 3px; }
   .pick { margin-top: var(--sc-4); }
   .pick .size-name { font-size: var(--sc-t-lg); }
-  .price .now { font-size: clamp(3.6rem, 2rem + 3.6vw, 5.6rem); }
+  .price .now { font-size: var(--s6); }
   .price .was { transition: opacity 240ms var(--sc-ease-out); display: inline-flex; align-items: center; gap: 0.6rem; font: 400 var(--sc-t-base)/1 var(--sc-font-text); }
-  .price .was s { color: var(--sc-ink-soft); text-decoration-thickness: 2px; font-size: 1.3rem; }
-  .price .was b { background: #E6F4EA; color: #1E5E3A; padding: 0.28rem 0.55rem; border-radius: 4px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.04em; }
+  .price .was s { color: var(--sc-ink-soft); text-decoration-thickness: 2px; font-size: var(--s4); }
+  .price .was b { background: #E6F4EA; color: #1E5E3A; padding: 0.28rem 0.55rem; border-radius: 4px; font-size: var(--s1); text-transform: uppercase; letter-spacing: 0.04em; }
   .menu { grid-template-columns: repeat(3, auto); justify-content: space-between; margin-top: var(--sc-4); padding-top: var(--sc-3); }
   .menu div { gap: 0.5rem; }
   .reassure { display: flex; align-items: center; gap: 0.5rem; margin: var(--sc-5) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink); }
@@ -306,12 +312,12 @@
   #split { height: 700vh; }
   .pick { display: none; }
   .order-stage { padding-top: clamp(3.5rem, 8svh, 5rem); }
-  .order h2 { font-size: clamp(2rem, 3.4vw, 3rem); white-space: nowrap; }
-  .order-tag { font-size: clamp(1.2rem, 1rem + .8vw, 1.8rem); }
+  .order h2 { font-size: var(--s5); white-space: nowrap; }
+  .order-tag { font-size: var(--s4); }
   .size-pick { margin-top: var(--sc-3); }
   .size-pick button { min-height: 4.6rem; padding: 0.7rem 0.9rem; }
   .price { margin-top: var(--sc-3); }
-  .price .now { font-size: clamp(3.2rem, 2rem + 2.6vw, 4.6rem); }
+  .price .now { font-size: var(--s5); }
   .menu { margin-top: var(--sc-3); }
   .reassure { margin-top: var(--sc-4); }
   .dial { width: min(20rem, 30vw, 42svh); }
@@ -332,7 +338,7 @@
     --sc-hairline: color-mix(in oklab, #1B1612 14%, transparent); --sc-hairline-strong: color-mix(in oklab, #1B1612 28%, transparent);
     background: #F3EFE7; color: var(--sc-ink); padding-block: clamp(3rem, 9svh, 8rem); }
   .rest-grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(2.5rem, 7vw, 8rem); align-items: start; }
-  .rest h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: clamp(2.4rem, min(1.4rem + 4.4vw, 11svh), 6rem); line-height: 0.96; color: var(--sc-ink); max-width: 14ch; }
+  .rest h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--s5); line-height: 0.96; color: var(--sc-ink); max-width: 14ch; }
   .rest .quote { margin: clamp(1.5rem, 4svh, 3rem) 0 0; display: grid; grid-template-columns: 4.5rem 1fr; gap: var(--sc-5); align-items: start; max-width: 34rem; }
   .rest .quote img { width: 4.5rem; height: 4.5rem; border-radius: 50%; box-shadow: 0 2px 10px rgb(27 22 18 / 0.2); }
   .rest .quote p { margin: 0; font-size: var(--sc-t-base); line-height: 1.55; color: var(--sc-ink); }
@@ -346,8 +352,8 @@
   /* the footer: a last line, the button, columns */
   .closing { position: relative; background: #0A0806; color: var(--sc-ink); padding-block: clamp(5rem, 11vw, 9rem) var(--sc-6); border-top: 1px solid var(--sc-hairline-strong); }
   .closing-line { margin: 0 0 var(--sc-6); font-family: var(--sc-font-display); font-weight: 200; text-transform: uppercase; letter-spacing: 0.01em;
-    font-size: clamp(2.2rem, 1.2rem + 4.4vw, 6rem); line-height: 0.98; max-width: 22ch; color: var(--sc-ink); }
-  .closing-line .script { display: block; font-size: 1.15em; line-height: 1.05; margin-bottom: 0.1em; text-transform: none; }
+    font-size: var(--s5); line-height: 0.98; max-width: 22ch; color: var(--sc-ink); }
+  .closing-line .script { display: block; font-size: var(--s4); line-height: 1.05; margin-bottom: 0.1em; text-transform: none; }
   .closing-cols { margin-top: clamp(3.5rem, 8vw, 6.5rem); padding-top: var(--sc-6); border-top: 1px solid var(--sc-hairline-strong);
     display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-6) var(--sc-7); }
   .closing h3 { margin: 0 0 var(--sc-3); font: 300 var(--sc-t-xl)/1 var(--sc-font-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-accent); }
@@ -386,7 +392,7 @@
 
   .shop-head { padding-block: clamp(1.6rem, 4svh, 3rem) clamp(.8rem, 2svh, 1.4rem); }
   .shop h2, .how h2, .occ h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; letter-spacing: .01em;
-    font-size: clamp(2.2rem, min(1.2rem + 3.6vw, 8svh), 4.6rem); line-height: .98; color: var(--lt-ink); }
+    font-size: var(--s5); line-height: .98; color: var(--lt-ink); }
   .shop-head p { margin: .6rem 0 0; color: var(--lt-soft); font-size: var(--sc-t-base); max-width: 40rem; }
   .rooms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .room { --c: #D9A54A; --t: #1B1612; display: flex; flex-direction: column; justify-content: space-between; gap: .7rem; background: var(--c); color: var(--t);
@@ -394,15 +400,15 @@
   .room.plum { --c: var(--plum); --t: #fff; } .room.steel { --c: var(--steel); --t: #fff; }
   .room .ph { position: relative; border-radius: 16px; overflow: hidden; height: min(28svh, 16rem); background: rgb(255 255 255 / .16); }
   .room .ph img { width: 100%; height: 100%; object-fit: cover; }
-  .room .ph .tag { position: absolute; left: 10px; top: 10px; padding: .3rem .7rem; border-radius: 999px; background: #fff; color: #1B1612; font: 700 .8rem/1.2 var(--sc-font-text); letter-spacing: .05em; text-transform: uppercase; }
-  .room h3 { margin: 0; font: 300 clamp(1.6rem, min(2.4vw, 5svh), 2.2rem)/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: .03em; }
-  .room .feeds { margin: .3rem 0 0; font: 700 1rem/1.3 var(--sc-font-text); }
-  .room .what { margin: .2rem 0 0; font-size: .95rem; line-height: 1.4; }
+  .room .ph .tag { position: absolute; left: 10px; top: 10px; padding: .3rem .7rem; border-radius: 999px; background: #fff; color: #1B1612; font: 700 var(--s1)/1.2 var(--sc-font-text); letter-spacing: .05em; text-transform: uppercase; }
+  .room h3 { margin: 0; font: 300 var(--s4)/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: .03em; }
+  .room .feeds { margin: .3rem 0 0; font: 700 var(--s3)/1.3 var(--sc-font-text); }
+  .room .what { margin: .2rem 0 0; font-size: var(--s2); line-height: 1.4; }
   .room .rf { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; }
-  .room .price { font: 300 clamp(2.4rem, min(3.6vw, 7svh), 3.4rem)/1 var(--sc-font-display); font-variant-numeric: tabular-nums; }
-  .room .price .was { display: block; margin-bottom: .2rem; font: 400 1rem/1 var(--sc-font-text); text-decoration: line-through; }
+  .room .price { font: 300 var(--s5)/1 var(--sc-font-display); font-variant-numeric: tabular-nums; }
+  .room .price .was { display: block; margin-bottom: .2rem; font: 400 var(--s3)/1 var(--sc-font-text); text-decoration: line-through; }
   .btn-line { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 2px solid currentColor;
-    background: transparent; color: inherit; font: 700 .95rem/1 var(--sc-font-text); text-decoration: none; cursor: pointer; transition: background 160ms ease-out, color 160ms ease-out, transform 140ms ease-out; }
+    background: transparent; color: inherit; font: 700 var(--s2)/1 var(--sc-font-text); text-decoration: none; cursor: pointer; transition: background 160ms ease-out, color 160ms ease-out, transform 140ms ease-out; }
   .room .btn-line:hover { background: var(--t); color: var(--c); }
   .btn-line:active { transform: scale(.97); }
 
@@ -412,7 +418,7 @@
   .how .ph img { width: 100%; height: 100%; object-fit: cover; }
   .steps { list-style: none; margin: clamp(.8rem, 2svh, 1.4rem) 0 0; padding: 0; display: grid; gap: .6rem; }
   .steps li { display: grid; grid-template-columns: 2.4rem 1fr; gap: .8rem; align-items: baseline; padding-block: .6rem; border-top: 1px solid var(--sc-hairline-strong); font-size: var(--sc-t-base); line-height: 1.4; }
-  .steps b { font: 300 1.6rem/1 var(--sc-font-display); }
+  .steps b { font: 300 var(--s4)/1 var(--sc-font-display); }
   .fine { margin: .9rem 0 0; font-size: var(--sc-t-sm); color: var(--lt-soft); }
 
   .occ { padding-block: clamp(1.6rem, 5svh, 3.6rem); }
@@ -431,6 +437,36 @@
     .how .ph { height: 30svh; } .occ .ph { height: 30svh; order: -1; }
   }
 
+  @media (max-width: 860px) { .price .now { font-size: var(--s6); } }
+  /* ---------- review fixes, 22 Oct 2026 ---------- */
+  html, body { overflow-x: clip; }
+  /* the quiet moment keeps the kitchen (dimmed) on the left, never a plain black half */
+  .scratch-photo { opacity: calc(0.92 - var(--dim) * 0.5); }
+  .scratch-photo { filter: saturate(calc(0.85 - var(--dim) * 0.5)) brightness(calc(1 - var(--dim) * 0.45)); }
+  /* the gap under the rest, before the dial */
+  .rest { padding-block: clamp(1.6rem, 5svh, 3.4rem) clamp(1rem, 3svh, 2.2rem); }
+  #order { min-height: 0; }
+  .order-stage { padding-top: clamp(1rem, 3svh, 2rem); }
+  .order-stage > .order { align-self: start; padding-bottom: var(--sc-6); }
+  /* a size that costs less than two of the one below says what it is measured against */
+  .room .price .was { display: flex; align-items: baseline; gap: .6rem; margin-bottom: .3rem; text-decoration: none; }
+  .room .price .was s { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+  .room .price .was small, .price .was small { font: 600 var(--s2)/1.2 var(--sc-font-text); opacity: .9; }
+  .size-pick .tab { position: static; justify-self: start; margin-top: .25rem; font-size: var(--s1); }
+  .price .was { flex-wrap: wrap; }
+  .room .ph { height: min(25svh, 16rem); }
+  .room { justify-content: flex-start; }
+  .room .rb { flex: 1; }
+  .room .rf { flex-wrap: nowrap; min-height: 5.6rem; }
+  .room .price { display: flex; flex-direction: column; }
+  @media (max-height: 700px) and (min-width: 861px) { .room .ph { height: 21svh; } .room .rf { min-height: 0; } }
+  @media (max-width: 860px) {
+    .size-pick { gap: .4rem; }
+    .size-pick button { min-height: 0; padding: .6rem .5rem; }
+    .size-pick button b { font-size: var(--s3); }
+    .size-pick button em { font-size: var(--s4); }
+    .size-pick .tab { padding: .2rem .35rem; letter-spacing: .02em; }
+  }
 </style>
 </head>
 <body>
@@ -533,13 +569,13 @@
     <div class="rooms">
       <article class="room gold"><div class="ph"><img src="assets/tubs.webp" alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps." width="1600" height="1066" loading="lazy" style="object-position:20% 50%"></div>
         <div class="rb"><h3>Medium</h3><p class="feeds">Feeds 4 to 6</p><p class="what">Add your own meat or keep it parve: &#8362;55</p></div>
-        <div class="rf"><div class="price">&#8362;100</div><a class="btn-line add" href="#order" data-size="0" aria-label="Order Medium, see the price and send your order">Order this size</a></div></article>
+        <div class="rf"><div class="price">&#8362;100</div><a class="btn-line add" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels" data-size="0" aria-label="Message to order Medium">Message to order</a></div></article>
       <article class="room plum"><div class="ph"><img src="assets/tubs.webp" alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps." width="1600" height="1066" loading="lazy" style="object-position:50% 50%"><span class="tag">10% off</span></div>
         <div class="rb"><h3>Large</h3><p class="feeds">Feeds 8 to 12</p><p class="what">Add your own meat or keep it parve: &#8362;85</p></div>
-        <div class="rf"><div class="price"><s class="was">&#8362;200</s> &#8362;180</div><a class="btn-line add" href="#order" data-size="1" aria-label="Order Large, see the price and send your order">Order this size</a></div></article>
+        <div class="rf"><div class="price"><span class="was"><s>&#8362;200</s><small>2 Mediums, &#8362;200</small></span> &#8362;180</div><a class="btn-line add" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels" data-size="1" aria-label="Message to order Large">Message to order</a></div></article>
       <article class="room steel"><div class="ph"><img src="assets/tubs.webp" alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps." width="1600" height="1066" loading="lazy" style="object-position:80% 50%"></div>
         <div class="rb"><h3>Extra Large / Kiddush</h3><p class="feeds">Sized to your guest list</p><p class="what">Sizes are customizable depending on the number of guests</p></div>
-        <div class="rf"><div class="price">&#8362;250</div><a class="btn-line add" href="#order" data-size="2" aria-label="Order Extra Large / Kiddush, see the price and send your order">Order this size</a></div></article>
+        <div class="rf"><div class="price">&#8362;250</div><a class="btn-line add" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels" data-size="2" aria-label="Message to order Extra Large / Kiddush">Message to order</a></div></article>
     </div>
   </section>
 
@@ -606,11 +642,11 @@
           <h2>Turn it to your size.</h2>
           <div class="size-pick" role="group" aria-label="Pick a size">
             <button type="button" data-i="0" aria-pressed="false"><b>Medium</b><span>Feeds 4 to 6</span><em>&#8362;100</em></button>
-            <button type="button" data-i="1" aria-pressed="true"><b>Large</b><span>Feeds 8 to 12</span><em><s>&#8362;200</s> &#8362;180</em><i class="tab">10% off</i></button>
+            <button type="button" data-i="1" aria-pressed="true"><b>Large</b><span>Feeds 8 to 12</span><em>&#8362;180</em><i class="tab">10% off</i></button>
             <button type="button" data-i="2" aria-pressed="false"><b>Kiddush</b><span>Sized to your guests</span><em>&#8362;250</em></button>
           </div>
           <p class="pick"><span class="size-name" id="size-name">Large</span><span class="feeds" id="feeds">Feeds 8 to 12</span></p>
-          <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="was" id="was"><s>&#8362;200</s><b>10% off</b></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
+          <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="was" id="was"><s>&#8362;200</s><b>10% off</b><small>2 Mediums, &#8362;200</small></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
           <div class="menu">
             <div><span>Slow cooker liner</span><b>Free</b></div>
             <div><span>Extra meat</span><b>₪50 / lb</b></div>
@@ -635,7 +671,7 @@
     <div class="closing-cols">
       <nav aria-label="On this page"><h3>This page</h3><a href="#occasions">Occasions</a><a href="#proof">Kosher and delivery</a><a href="#kit">The kit</a><a href="#order">Sizes and prices</a></nav>
       <div><h3>Sizes</h3><a href="#order">Medium, feeds 4 to 6, &#8362;100</a><a href="#order">Large, feeds 8 to 12, &#8362;180</a><a href="#order">Kiddush, sized to your guests, &#8362;250</a></div>
-      <div><h3>Find us</h3><p>Made in Jerusalem, delivered across Israel.</p><p>Kosher: Vaad HaKashrus, Rabbi Shmuel Weiner.</p><a href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message us on MyIsraelRental</a></div>
+      <div><h3>Find us</h3><p>Made in Jerusalem, delivered across Israel.</p><p>Kosher: Vaad HaKashrus, Rabbi Shmuel Weiner.</p><a href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message to order</a></div>
     </div>
     <p class="closing-base"><span>L.A. Cholent by Rabbi Samuels</span><a href="#top">Back to the top</a></p>
   </div>
@@ -742,6 +778,23 @@
   var DIAL_AT = [0.6547, 0.7463, 0.0834];
   function dialAt() { return DIAL_AT; }
   var knobPot = document.getElementById('knob-pot');
+  // The phone bar steps aside while a price or button of the page sits in the strip it covers.
+  var BAR_THINGS = '.room .price, .room .btn-line, .size-pick button, .price .now, .btn, .btn-line';
+  function shown(el) {
+    for (var n = el; n && n !== document.body; n = n.parentElement) {
+      var cs = getComputedStyle(n);
+      if (parseFloat(cs.opacity) < 0.1 || cs.visibility === 'hidden' || cs.display === 'none') return false;
+    }
+    return true;
+  }
+  function underBar() {
+    var edge = innerHeight - buybar.offsetHeight;
+    return [].some.call(document.querySelectorAll(BAR_THINGS), function (el) {
+      if (el.closest('#buybar, #topbar')) return false;
+      var r = el.getBoundingClientRect();
+      return r.height > 0 && r.bottom > edge && r.top < innerHeight && shown(el);
+    });
+  }
   function frame() {
     var p = parseFloat(act.style.getPropertyValue('--sc-p')) || 0;
     if (true) {
@@ -799,7 +852,7 @@
     pot.step(); kitchen.step();
     // The phone bar: on once the opening button has faded, off over the close.
     var orderTop = orderSec.getBoundingClientRect().top;
-    var barOn = phone.matches && p > 0.43 && orderTop > innerHeight * 0.6;
+    var barOn = phone.matches && p > 0.43 && orderTop > innerHeight * 0.6 && !underBar();
     if (barOn !== buybar.classList.contains('is-on')) {
       buybar.classList.toggle('is-on', barOn);
       buybar.setAttribute('aria-hidden', barOn ? 'false' : 'true');
