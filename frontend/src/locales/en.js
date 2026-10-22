@@ -6160,6 +6160,18 @@ const en = {
         fromHere: "Start from where I am",
         notFound: "not found on the map, Waze will search it"
       },
+      ratingBadge: {
+        open: "Rating badge for your website",
+        title: "Show your rating on your own website",
+        body: "Your stars and number of reviews here, kept up to date by itself. Clicking it opens your page. With fewer than 3 reviews it shows how many you have, not stars.",
+        light: "Light",
+        dark: "Dark",
+        copy: "Copy the code for your website",
+        copied: "Code copied. Paste it into your website.",
+        download: "Download the picture for Instagram or a flyer",
+        downloadFailed: "Could not make the picture. Try again.",
+        how: "Wix, WordPress and most site builders have an “Embed code” or “HTML” box: paste the code there.",
+      },
       // Invite a friend (backend referrals.py).
       referrals: {
         title: "Invite a friend",

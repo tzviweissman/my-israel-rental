@@ -27,6 +27,7 @@ import MyGigsTab from './MyGigsTab';
 import { BusinessHoursPanel } from './OrdersTab';
 import LookingForYou from './LookingForYou';
 import ShareListingsPanel from './ShareListingsPanel';
+import ReviewBadgePanel from './ReviewBadgePanel';
 import { businessPublicUrl } from '../../utils/businessHost';
 import { handBuiltList } from '../../utils/handBuiltPages';
 
@@ -425,6 +426,7 @@ export default function MyBusinessesTab({ API, token }) {
                     testidPrefix={`business-share-${b.id}`}
                     tour={items[0]?.id === b.id ? 'business-share' : undefined}
                   />
+                  <ReviewBadgePanel API={API} business={b} pageUrl={businessPublicUrl(b.slug, b.id, { origin: 'https://myisraelrental.com' })} />
                   {!b.active && (
                     <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>
                       {t('businesses.hidden', 'hidden')}
