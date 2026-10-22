@@ -4,7 +4,7 @@
 # WhatsApp +44 7871 822590, email) and her flyer (Luxe Nail Studio, Nails by
 # Elisheva, gel nails, French nails, nail art, located in Romema, 4+ years
 # experience, text +972 53 348 4521, the EB monogram). Photos: her own.
-import json
+import json, re
 
 PAGES = [('index', 'Home'), ('book', 'Book'), ('contact', 'Contact')]
 WA = '447871822590'
@@ -38,6 +38,7 @@ def head(page, title, desc, img):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
+<meta name="site-category" content="beauty">
 <meta name="description" content="{desc}">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
@@ -99,8 +100,8 @@ HERO = f'''  <section class="hero" id="open" aria-labelledby="h-open">
     <div class="wrap">
       <div class="h-text">
         <p class="caps">Luxe Nail Studio · Romema, Jerusalem</p>
-        <h1 id="h-open">Gel nails, French nails and nail art<span class="script">by Elisheva</span></h1>
-        <p class="lede">More than four years of experience. Gel from ₪90, in about 45 minutes.</p>
+        <h1 id="h-open">Gel nails and nail art<span class="script">by Elisheva</span></h1>
+        <p class="lede">Gel from ₪90. More than four years of experience.</p>
       </div>
       <div class="h-pick">
         <p class="caps">Tap a shade</p>
@@ -179,7 +180,7 @@ SERVICES_SEC = f'''  <section class="sec rest" id="services" aria-labelledby="h-
 WORK = [('white.webp', 'White gel nails on a client, hands on a towel'), ('pink-2.webp', 'Pale pink gel nails on a client'),
         ('white-2.webp', 'White gel nails on a client'), ('bubblegum.webp', 'Bubblegum pink gel nails'), ('sheer.webp', 'Sheer pink gel nails on a client')]
 work_figs = ''.join(f'<figure class="rev"><img src="assets/{f}" alt="{a}" width="1000" height="1250" loading="lazy"></figure>' for f, a in WORK)
-WORK_SEC = f'''  <section class="sec work dark" id="work" aria-labelledby="h-work" data-mir-gallery data-max="12">
+WORK_SEC = f'''  <section class="sec work" id="work" aria-labelledby="h-work" data-mir-gallery data-max="12">
     <div class="wrap">
       <h2 id="h-work" class="rev">Recent work</h2>
       <div class="work-grid" data-mir-photos>{work_figs}</div>
@@ -188,20 +189,22 @@ WORK_SEC = f'''  <section class="sec work dark" id="work" aria-labelledby="h-wor
   </section>
 '''
 def pic(k, alt, cls, h2, line, hid):
-    return f'''  <section class="pic {cls}" id="{hid}" aria-labelledby="h-{hid}">
-    <picture><source media="(max-width:760px)" srcset="assets/pic-{k}-p.webp"><img src="assets/pic-{k}-l.webp" alt="{alt}" width="1920" height="1200" loading="lazy"></picture>
-    <div class="edge" aria-hidden="true"></div>
+    # beauty pattern (rule 3t): her photo sits inside the cream beside her words, not as a full dark screen
+    return f'''  <section class="pair {cls}" id="{hid}" aria-labelledby="h-{hid}">
     <div class="wrap">
-      <h2 id="h-{hid}" class="rev">{h2}</h2>
-      <p class="rev">{line}</p>
-      {BTN.format(x='')}
+      <figure class="rev"><picture><source media="(max-width:760px)" srcset="assets/pic-{k}-p.webp"><img src="assets/pic-{k}-l.webp" alt="{alt}" width="1920" height="1200" loading="lazy"></picture></figure>
+      <div class="txt">
+        <h2 id="h-{hid}" class="rev">{h2}</h2>
+        <p class="rev">{line}</p>
+        {BTN.format(x='')}
+      </div>
     </div>
   </section>
 '''
 
 
 STUDIO_PIC = pic('studio', 'The studio: a gel lamp and a row of gel colours on the table', 'left', 'Gel colours, ready for you', 'Gel, French nails and nail art in Romema, Jerusalem.', 'studio')
-VISIT_PIC = pic('visit', 'Pale pink gel nails on a client, hands on a towel', 'right', 'Come to the studio', 'Luxe Nail Studio, Romema, Jerusalem. Open Sunday to Friday.', 'come')
+VISIT_PIC = pic('visit', 'Pale pink gel nails on a client, hands on a towel', 'right', 'Come to the studio', 'Luxe Nail Studio, Romema, Jerusalem.', 'come')
 CLOSED = ' class="closed"'
 hours_li = ''.join(f'<li{CLOSED if h == "Closed" else ""}><span>{d}</span><span>{h}</span></li>' for d, h in HOURS)
 VISIT = f'''  <section class="sec rest" id="visit" aria-labelledby="h-visit">
@@ -209,7 +212,7 @@ VISIT = f'''  <section class="sec rest" id="visit" aria-labelledby="h-visit">
       <h2 id="h-visit" class="rev">Where and when</h2>
       <div class="visit">
         <div class="card rev"><h3>Opening hours</h3><ul class="hours">{hours_li}</ul></div>
-        <div class="card rev"><h3>The studio</h3><p>Romema, Jerusalem.</p><p>WhatsApp or call <a href="https://wa.me/{WA}" target="_blank" rel="noopener">+44 7871 822590</a></p><p>Text <a href="sms:+972533484521">+972 53 348 4521</a></p><a class="btn" href="book.html" style="margin-top:1rem;color:#fff">Book a time <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
+        <div class="card rev"><h3>The studio</h3><p>Luxe Nail Studio, Romema, Jerusalem.</p><p>More than four years of experience.</p><a class="btn" href="book.html" style="margin-top:1rem;color:#fff">Book a time <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
       </div>
     </div>
   </section>
@@ -223,7 +226,7 @@ def write(name, title, desc, img, body, tail=''):
     open(f'{name}.html', 'w', encoding='utf8').write(html)
 
 
-write('index', 'Nails by Elisheva · Gel nails and nail art in Romema, Jerusalem', DESC, 'milky.webp', HERO + SERVICES_SEC + STUDIO_PIC + WORK_SEC + VISIT_PIC + VISIT, HERO_JS)
+write('index', 'Nails by Elisheva · Gel nails and nail art in Romema, Jerusalem', DESC, 'milky.webp', HERO + WORK_SEC + SERVICES_SEC + STUDIO_PIC + VISIT_PIC + VISIT, HERO_JS)
 
 svc_opts = ''.join(f'<label class="opt"><input type="radio" name="svc" value="{k}"><span class="box"><span><b>{n}</b><br><small>about {m} minutes</small></span><span class="p">{f'<s class="was"><span class="sym">₪</span>{p + SAVE}</s>' if k == 'gel-removal' else ''}<span class="sym">₪</span>{p}</span></span>{f'<span class="tag"><i class="t-save">{PCT}% off</i><i class="t-sel">Selected</i></span>' if k == 'gel-removal' else ''}</label>' for k, n, p, m, d in SERVICES)
 shade_opts = ''.join(f'<button class="shade" type="button" data-k="{k}" style="--c:{c}" aria-pressed="false" aria-label="{n}"></button>' for k, n, c, f, a in SHADES)
@@ -290,16 +293,16 @@ write('book', 'Book · Nails by Elisheva', 'Book gel nails, nail art or gel remo
 
 write('contact', 'Contact · Nails by Elisheva', 'WhatsApp or call +44 7871 822590, text +972 53 348 4521. Luxe Nail Studio, Romema, Jerusalem.', 'studio.webp', f'''  <header class="page-head"><div class="wrap">
     <h1>Say <span class="script">hello</span></h1>
-    <p class="lede">Bookings and questions on WhatsApp, by phone or by email.</p>
+    <p class="lede">Bookings and questions by WhatsApp, phone, text or email: the numbers are at the foot of the page.</p>
   </div></header>
   <section class="sec" style="padding-top:clamp(2rem,5vw,3rem)" aria-label="How to reach me">
     <div class="wrap">
       <div class="contact-grid">
-        <div class="card rev"><h3>WhatsApp or call</h3><p><a href="https://wa.me/{WA}" target="_blank" rel="noopener">+44 7871 822590</a></p><a class="btn" href="book.html">Book a time <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
-        <div class="card rev"><h3>Text and email</h3><p>Text <a href="sms:+972533484521">+972 53 348 4521</a></p><p><a href="mailto:elishevaberlinger@gmail.com">elishevaberlinger@gmail.com</a></p></div>
+        <div class="card rev"><h3>Book</h3><p>Pick a service and a time.</p><a class="btn" href="book.html">Book a time <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
+        <div class="card rev"><h3>Email</h3><p><a href="mailto:elishevaberlinger@gmail.com">elishevaberlinger@gmail.com</a></p></div>
         <div class="card rev"><h3>Where</h3><p>Luxe Nail Studio, Romema, Jerusalem.</p></div>
       </div>
     </div>
   </section>
-''' + VISIT.replace('<h2 id="h-visit" class="rev">Where and when</h2>', '<h2 id="h-visit" class="rev">Opening hours</h2>'))
+''' + re.sub(r'<div class="card rev"><h3>The studio</h3>.*?</div>\n', '', VISIT.replace('<h2 id="h-visit" class="rev">Where and when</h2>', '<h2 id="h-visit" class="rev">Opening hours</h2>'), flags=re.S).replace('<h3>Opening hours</h3>', '<h3>Sunday to Friday</h3>'))
 print('written')

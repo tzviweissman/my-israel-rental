@@ -11,7 +11,7 @@
 }
 *, *::before, *::after { box-sizing: border-box; }
 html { scroll-behavior: smooth; }
-body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.0625rem/1.65 var(--font-body); -webkit-font-smoothing: antialiased; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 400 1.0625rem/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
 img { display: block; max-width: 100%; }
 h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-height: 1.04; }
 .wrap { max-width: 72rem; margin: 0 auto; padding-inline: var(--gutter); }
@@ -276,7 +276,7 @@ body:not(.no-js) .rev[data-dir="u"].in::after { animation-name: sweep-u; }
 .stage .st-pr .st-save { height: auto; min-height: 0; margin: .6rem 0 0; padding: .25rem .65rem; border-radius: 999px; background: var(--blush); color: var(--ink); font: 700 .85rem/1.2 var(--font-body); }
 .stage[data-tone="dark"] .st-pr .st-save { background: rgb(255 255 255 / .2); color: #FFF4F2; }
 .stage .st-info h1 { min-height: 0; white-space: nowrap; }
-.stage .st-price small { display: inline-block; max-width: 22ch; vertical-align: middle; line-height: 1.25; }
+.stage .st-price small { display: inline-block; max-width: 15rem; vertical-align: middle; line-height: 1.25; }
 @media (min-width: 861px) and (max-height: 820px) {
   .st-info h1 { font-size: min(clamp(2.2rem, 4vw, 3.4rem), 7.5svh); }
   .stage .opt .box { padding: .45rem .75rem; } .stage .opt .box b { font-size: .98rem; }
@@ -431,10 +431,10 @@ body:not(.no-js) .rev[data-dir="u"].in::after { animation-name: sweep-u; }
 .pic img { object-fit: cover; }
 .pic .edge { height: 76%; background-color: #2A1513; }
 .pic .wrap { width: 100%; }
-.pic h2 { color: #fff; font-size: clamp(2.6rem, min(7vw, 12svh), 5.6rem); font-weight: 500; max-width: 14ch; text-shadow: 0 2px 28px rgb(30 12 10 / .45); }
+.pic h2 { color: #fff; font-size: clamp(2.6rem, min(7vw, 12svh), 5.6rem); font-weight: 500; max-width: 9em; text-shadow: 0 2px 28px rgb(30 12 10 / .45); }
 .pic p { margin: .8rem 0 1.6rem; max-width: 26rem; color: #FBEDEA; font-size: 1.05rem; text-shadow: 0 1px 14px rgb(30 12 10 / .5); }
 .pic.right .wrap { text-align: right; } .pic.right h2, .pic.right p { margin-inline-start: auto; }
-.pic.right h2 { max-width: 12ch; }
+.pic.right h2 { max-width: 8em; }
 @media (max-width: 760px) { .pic { height: calc(86svh - 70px); } .pic.right .wrap { text-align: left; } .pic.right h2, .pic.right p { margin-inline-start: 0; } .pic h2 { font-size: clamp(2.3rem, 11vw, 3rem); } }
 @media (prefers-reduced-motion: reduce) { .edge { transition: none; } }
 
@@ -452,3 +452,36 @@ body:not(.no-js) .rev[data-dir="u"].in::after { animation-name: sweep-u; }
 .pic .edge { height: 70%; -webkit-mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 60%, rgb(0 0 0 / .5) 82%, transparent); mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 60%, rgb(0 0 0 / .5) 82%, transparent); }
 @media (max-width: 760px) { .pic .edge { height: 76%; } }
 .pic.right .edge { height: 80%; }
+
+/* category beauty (rule 3t, 22 Oct 2026): one warm cream ground after the opening, photos inside the cream beside her words,
+   hairlines between sections instead of dark or white blocks (Odyssee Clinic pattern) */
+.rest, .work, section.pair { background: var(--paper); }
+section.sec + section.pair, section.pair + section.sec, section.pair + section.pair, section.rest + section.work, section.work + section.pair { border-top: 1px solid var(--line); }
+.pair { padding-block: clamp(3.5rem, 8vw, 6rem); }
+.pair .wrap { display: grid; grid-template-columns: 1.1fr 1fr; gap: clamp(2rem, 6vw, 5rem); align-items: center; }
+.pair.right .wrap { grid-template-columns: 1fr 1.1fr; } .pair.right figure { order: 2; }
+.pair figure { margin: 0; border-radius: 18px; overflow: hidden; aspect-ratio: 5 / 4; background: var(--blush); }
+.pair figure img, .pair figure picture { width: 100%; height: 100%; object-fit: cover; }
+.pair h2 { font-size: clamp(2.2rem, min(4.6vw, 8svh), 3.6rem); font-weight: 500; max-width: 9em; }
+.pair p { color: var(--soft); max-width: 26rem; margin: .9rem 0 1.6rem; }
+.work.work h2, .work h2 { color: var(--ink); }
+.work .wrap:has(.work-grid) { max-width: 72rem; padding-inline: var(--gutter); }
+.work h2 { padding-inline: 0; margin-inline: 0; max-width: none; }
+.work .work-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: .9rem; margin-top: clamp(1.5rem, 4svh, 2.5rem); }
+.work .work-grid figure, .work .work-grid figure:first-child { grid-column: auto; grid-row: auto; aspect-ratio: 4 / 5; height: auto; border-radius: 18px; background: var(--blush); }
+@media (max-width: 760px) { .pair .wrap, .pair.right .wrap { grid-template-columns: 1fr; } .pair.right figure { order: 0; } .pair figure { aspect-ratio: 4 / 5; }
+  .work .work-grid { grid-template-columns: 1fr 1fr; } .work .work-grid figure:last-child { grid-column: 1 / -1; aspect-ratio: 16 / 10; } }
+@media (min-width: 761px) and (max-height: 760px) { .work .work-grid figure, .work .work-grid figure:first-child { aspect-ratio: auto; height: clamp(170px, 46svh, 560px); } }
+@media (min-width: 761px) { .pair { padding-block: clamp(1.5rem, 8svh, 6rem); } .pair figure { aspect-ratio: auto; height: clamp(220px, 56svh, 560px); } }
+.card a.btn, .contact-grid a.btn { color: #fff; }
+
+/* rule 3g.3: the accent (rose) is the main button only. Labels, the script name, links, icons and the closing grounds are in the ink colour. */
+.caps, .script, .card a, .facts li::before, .svc-row .ask, .chg, .sum .assure svg, .sum .perks svg, .nav a[aria-current="page"] { color: var(--ink); }
+.hero .caps { color: #F6E1DE; } .hero h1 .script { color: #FFE9E6; }
+.close, .foot { background: var(--ink); }
+.close .btn { color: var(--ink); } .card a.btn, .contact-grid a.btn { color: #fff; }
+@media (hover: hover) { .osteps li.is-done button:hover, .sum .back:hover { color: var(--ink); } }
+
+/* sections after the opening are told apart by a hairline, never by a different block of colour */
+main > section.sec + section, main > section.pair + section { border-top: 1px solid var(--line); }
+.top { background: rgb(255 248 246); -webkit-backdrop-filter: none; backdrop-filter: none; }

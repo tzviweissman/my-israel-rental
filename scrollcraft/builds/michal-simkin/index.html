@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Michal Simkin. A wig you love, Bet Shemesh.</title>
+<meta name="site-category" content="beauty">
+<meta property="og:title" content="Michal Simkin, a wig you love, Bet Shemesh"><meta property="og:description" content="Boutique wig salon and academy in Bet Shemesh. Consultation ₪100, by appointment.">
+<meta property="og:image" content="https://myisraelrental.com/pages/michal-simkin/assets/michal.jpg">
 <meta name="description" content="Boutique wig salon and academy in Bet Shemesh. Custom wigs, cuts, transformations and repairs, made to fit your face, your lifestyle and you. Consultation ₪100, by appointment.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230E1F39'/><circle cx='16' cy='16' r='8' fill='%23E9C4B0'/></svg>">
 <!--
@@ -30,12 +33,12 @@
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="scrollcraft.css">
 <style>
   :root {
-    --font-head: 'Playfair Display', Georgia, serif;
-    --font-body: 'Manrope', system-ui, sans-serif;
+    --font-head: 'Playfair Display', 'Frank Ruhl Libre', Georgia, serif;  /* Hebrew page: Frank Ruhl Libre (3g.11) */
+    --font-body: 'Manrope', 'Assistant', system-ui, sans-serif;  /* Hebrew page: Assistant (3g.11) */
 
     /* Hers: navy and blush from her site, rose-gold from her logo. */
     --navy: #0E1F39;
@@ -44,7 +47,7 @@
     --blush: #DBB3B1;
     --blush-pale: #F3E4E0;
     --rose-gold: #E9C4B0;     /* display accent on navy, 10.2:1 */
-    --rose-text: #9E4560;     /* small accent text on ivory, 5.67:1 */
+    --rose-text: #0E1F39;  /* 3g.3: the accent is the main button only; emphasised words stand out by italic and weight in the ink colour */     /* small accent text on ivory, 5.67:1 */
     --muted: #5B6577;         /* 5.5:1 on ivory */
 
     --sc-canvas: var(--ivory);
@@ -207,7 +210,7 @@
   .bundle .big .was { display: block; font-size: var(--sc-t-lg); font-weight: 500; color: #C9CFDA; text-decoration: line-through; text-decoration-thickness: 2px; }
   .bundle .big small.save { display: block; width: fit-content; margin-inline-start: auto; margin-top: var(--sc-2); padding: 0.25rem 0.7rem; border-radius: 999px; background: rgba(255, 255, 255, 0.16); color: #FFFFFF; font-weight: 700; }
   .grad { margin: var(--sc-6) 0 0; padding-inline-start: var(--sc-5); border-inline-start: 3px solid var(--rose-gold); color: #FFFFFF; font-size: var(--sc-t-lg); line-height: 1.4; max-width: 40rem; }
-  .enrol { margin: var(--sc-6) 0 0; color: #C9CFDA; font-size: var(--sc-t-base); }
+  .enrol { margin: var(--sc-6) 0 0; color: var(--muted); font-size: var(--sc-t-base); }
   .grad b { display: block; margin-top: var(--sc-2); font-family: var(--font-body); font-size: var(--sc-t-sm); font-weight: 600; color: var(--rose-gold); }
 
   /* --------------------------------------------------------------- close --
@@ -313,6 +316,49 @@
     .card, .voice, .pair .after { opacity: 1 !important; transform: none !important; }
     .pair .before { --t: 1 !important; }
   }
+
+  /* category beauty (rule 3t, 22 Oct 2026): after the navy opening the page is warm ivory and blush throughout,
+     her photos sit framed inside it, courses read as rows with their price (Odyssee Clinic pattern) */
+  .academy.on-ivory { background: var(--ivory); border-top: 1px solid var(--blush); --sc-ink: var(--navy); --sc-ink-soft: var(--muted); --sc-accent: var(--rose-text); }
+  .academy .lede, .course p, .bundle p, .facts3 dt, .course .price small, .bundle .big small, .bundle .big .was { color: var(--muted); }
+  .facts3 dd, .academy h2 .accent { color: var(--rose-text); }
+  .courses { grid-template-columns: 1fr; gap: 0; border-top: 1px solid var(--blush); }
+  .course { display: grid; grid-template-columns: 1fr auto; gap: var(--sc-2) var(--sc-6); align-items: center; padding: var(--sc-5) 0; border: 0; border-bottom: 1px solid var(--blush); border-radius: 0; }
+  .course h3 { color: var(--navy); font-size: var(--sc-t-xl); } .course p { grid-column: 1; max-width: 40rem; }
+  .course .price { grid-row: 1 / span 2; grid-column: 2; margin: 0; color: var(--navy); font-size: var(--sc-t-xl); text-align: end; }
+  .course .note { grid-row: 1 / span 2; grid-column: 2; margin: 0; color: var(--rose-text); border-color: var(--blush); }
+  .bundle { background: var(--blush-pale); } .bundle .big { color: var(--navy); }
+  .bundle .big small.save { background: var(--navy); color: #FFFFFF; }
+  .grad { color: var(--navy); border-inline-start-color: var(--blush); } .grad b { color: var(--rose-text); }
+  .academy .cta, .academy.on-ivory .cta { background: var(--navy); color: #FFFFFF; }
+  .meet { grid-template-columns: 1fr 1fr; min-height: 0; padding: clamp(3rem, 7vw, 6rem) var(--sc-gutter); gap: clamp(2rem, 6vw, 5rem); align-items: center; border-top: 1px solid var(--blush); }
+  .meet__pic { min-height: 0; aspect-ratio: 4 / 5; max-height: 78svh; border-radius: 18px; overflow: hidden; }
+  .wall, .wall.wall--end { min-height: 0; display: block; background: var(--ivory); color: var(--navy); padding: clamp(3rem, 7vw, 6rem) var(--sc-gutter); border-top: 1px solid var(--blush); }
+  .wall::after { display: none; }
+  .wall__copy { padding: 0 0 clamp(1.5rem, 4vw, 2.5rem); max-width: 56rem; }
+  .wall__copy h2 { color: var(--navy); } .wall__copy h2 .accent { color: var(--rose-text); } .wall__copy p { color: var(--muted); }
+  .wall__copy .cta { background: var(--navy); color: #FFFFFF; }
+  .wall__grid { position: static; inset: auto; display: grid; grid-template-columns: repeat(4, 1fr); gap: .9rem; background: none; }
+  .wall__grid img { aspect-ratio: 4 / 5; height: auto; border-radius: 18px; }
+  .foot.on-blush { background: var(--blush-pale); color: var(--navy); border-top: 1px solid var(--blush); }
+  .foot.on-blush .cta { background: var(--navy); color: #FFFFFF; }
+  .foot__cols { border-top-color: var(--blush); } .foot__cols h3 { color: var(--rose-text); }
+  .foot__cols a, .foot__cols p, .foot__small { color: var(--muted); } .foot__cols a:hover { color: var(--navy); }
+  .foot__big .accent { color: var(--rose-text); }
+  @media (max-width: 860px) { .meet { grid-template-columns: 1fr; } .meet__pic { aspect-ratio: 4 / 5; max-height: none; }
+    .wall__grid { grid-template-columns: 1fr 1fr; grid-template-rows: none; } .wall { padding-block-end: calc(var(--bar-h) + var(--sc-6)); }
+    .course { grid-template-columns: 1fr; } .course .price, .course .note { grid-row: auto; grid-column: 1; text-align: start; } }
+  @media (min-width: 861px) {
+    .meet { padding-block: clamp(1.25rem, 6svh, 6rem); } .meet__text { padding-block: 0; } .meet h2 { font-size: clamp(2rem, min(5vw, 7svh), 4.2rem); } .meet .body { margin-bottom: var(--sc-3); } .meet .sign { margin-bottom: var(--sc-4); } .meet__pic { aspect-ratio: auto; height: clamp(240px, 60svh, 640px); max-height: none; }
+    .wall, .wall.wall--end { padding-block: clamp(1.5rem, 8svh, 6rem); display: grid; grid-template-columns: 1fr 1.3fr; gap: clamp(1.5rem, 5vw, 4rem); align-items: center; }
+    .wall__copy { padding: 0; } .wall__grid { gap: .6rem; }
+    .wall__grid img { aspect-ratio: auto; height: clamp(200px, 56svh, 520px); }
+  }
+  .top__nav a { color: #4A5466; } .top__nav a[aria-current="true"] { color: var(--navy); }
+  .voice b, .pair .after small { font-size: 12px; }
+  .bar__assure { color: #4A5466; }
+  @media (max-width: 860px) { .voice p, .bar__assure { font-size: 14px; } }
+  .hero h1 em { color: #FFFFFF; } .hero .who { color: #D5DAE3; }
 </style>
 </head>
 <body id="top">
@@ -323,9 +369,9 @@
   <nav class="top__nav" aria-label="On this page" data-spy>
     <a href="#hero">Clients</a>
     <a href="#consult">The consult</a>
-    <a href="#same">In their words</a>
-    <a href="#academy">Academy</a>
     <a href="#meet">Michal</a>
+    <a href="#same">In their words</a>
+    <a href="#academy">Courses</a>
   </nav>
   <a class="cta top__cta" href="book.html">Book a consultation</a>
 </header>
@@ -342,7 +388,7 @@
       <div class="hero__bg" aria-hidden="true"><img src="assets/client-8.jpg" alt="" width="720" height="960"><img src="assets/client-6.jpg" alt="" width="720" height="960"><img src="assets/client-4.jpg" alt="" width="720" height="960"><img src="assets/client-2.jpg" alt="" width="720" height="960"></div>
       <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
         <p class="who">Michal Simkin, boutique wig salon and academy</p>
-        <h1 data-sc-kinetic="lines">The difference between a wig that works and <em>a wig you love.</em></h1>
+        <h1 data-sc-kinetic="lines">A wig <em>you love.</em></h1>
         <p class="lede">We create wigs that are a joy to wear, because when your wig feels right, you feel right.</p>
       </div>
       <div class="deck" id="deck" aria-label="Clients in the salon">
@@ -379,6 +425,17 @@
     </div>
   </section>
 
+  <!-- 5  Meet Michal: her photograph, her letter -->
+  <section class="meet" id="meet" aria-labelledby="meetTitle">
+    <div class="meet__pic"><img src="assets/michal.jpg" width="900" height="1125" alt="Michal Simkin, smiling, long wavy hair" loading="lazy"></div>
+    <div class="meet__text on-ivory">
+      <h2 id="meetTitle">Meet <span class="accent">Michal.</span></h2>
+      <p class="body">I'd be honored to get to know you and create the wig that makes you look and feel your best. I can't wait to meet you.</p>
+      <div class="sign"><img src="assets/michal-small.jpg" width="160" height="160" alt=""><p>Michal<small>Bet Shemesh</small></p></div>
+      <a class="cta" href="book.html">Book a consultation</a>
+    </div>
+  </section>
+
   <!-- 3  Relief, the peak: the same wig -->
   <section class="same on-blush" id="same" data-sc-act="pin" data-sc-span="3.4" aria-labelledby="sameTitle">
     <div data-sc-stage>
@@ -396,7 +453,7 @@
       <div class="voices">
         <figure class="voice" data-sc-cue="0.12 1 0.3 0">
           <img src="assets/debbie.jpg" width="160" height="160" alt="">
-          <figcaption><p>"I had a sheitl that I wore regularly, but every time I put it on I was frustrated by how it looked. Instead of throwing it out, I brought it to Michal. Immediately, she saw the problems and brought the sheitl back to life! Now, I love it, and I can't believe that my new &amp; improved look is actually from the same sheitl I used to dread wearing!"<b>Debbie Burack</b></p></figcaption>
+          <figcaption><p>"I had a sheitl that I wore regularly, but every time I put it on I was frustrated by how it looked. Instead of throwing it out, I brought it to Michal. Immediately, she saw the problems and brought the sheitl back to life. Now, I love it, and I can't believe that my new &amp; improved look is actually from the same sheitl I used to dread wearing."<b>Debbie Burack</b></p></figcaption>
         </figure>
         <figure class="voice" data-sc-cue="0.30 1 0.3 0">
           <img src="assets/yael.jpg" width="160" height="160" alt="">
@@ -404,26 +461,14 @@
         </figure>
         <figure class="voice" data-sc-cue="0.50 1 0.3 0">
           <img src="assets/miriam.jpg" width="160" height="160" alt="">
-          <figcaption><p>"I cannot thank Michal enough for transforming my 'its fine' wig that I got as a hand-me down from my aunt, into something I actually think is cute, light, and works AMAZINGLY for me!"<b>Miriam Campbell</b></p></figcaption>
+          <figcaption><p>"I cannot thank Michal enough for transforming my 'its fine' wig that I got as a hand-me down from my aunt, into something I actually think is cute, light, and works amazingly for me."<b>Miriam Campbell</b></p></figcaption>
         </figure>
       </div>
     </div>
   </section>
 
-  <!-- 5  Meet Michal: her photograph, her letter -->
-  <section class="meet" id="meet" aria-labelledby="meetTitle">
-    <div class="meet__pic"><img src="assets/michal.jpg" width="900" height="1125" alt="Michal Simkin, smiling, long wavy hair" loading="lazy"></div>
-    <div class="meet__text on-ivory">
-      <h2 id="meetTitle">Meet <span class="accent">Michal.</span></h2>
-      <p class="body">I'd be honored to get to know you and create the wig that makes you look and feel your best. I can't wait to meet you.</p>
-      <div class="sign"><img src="assets/michal-small.jpg" width="160" height="160" alt=""><p>Michal<small>Bet Shemesh</small></p></div>
-      <a class="cta" href="book.html">Book a consultation</a>
-      <p class="facts">Consultation &#8362;100. Sunday to Thursday, 10 to 2, by appointment. English and Hebrew.</p>
-    </div>
-  </section>
-
   <!-- 4  Ambition: the academy -->
-  <section class="academy on-navy" id="academy" data-sc-act="flow" aria-labelledby="academyTitle">
+  <section class="academy on-ivory" id="academy" data-sc-act="flow" aria-labelledby="academyTitle">
     <div class="sc-wrap">
       <div data-sc-in data-sc-stagger="80">
         <h2 id="academyTitle">The Michal Simkin <span class="accent">Academy.</span></h2>
@@ -443,32 +488,32 @@
         <span class="big"><s class="was">₪16,000</s>₪12,000<small class="save">25% off</small></span>
       </div>
       <p class="grad" data-sc-in>Chaya Basya took the course. She now runs her own salon in Ramat Beit Shemesh Daled, with a clientele of her own.<b>Chaya Basya, graduate of the academy</b></p>
-      <p class="enrol">Enrolment is a request: pick a course, say when suits you, and she confirms your place.</p>
+      <p class="enrol">Enrolment is a request: pick a course, say when suits you, and we confirm your place.</p>
       <p style="margin: var(--sc-4) 0 0"><a class="cta" href="book.html#academy">Enrol in the Academy</a></p>
     </div>
   </section>
 
   <!-- 6  Last picture, the one button -->
   <section class="wall wall--end" id="close" aria-labelledby="closeTitle">
+    <div class="wall__copy"><h2 id="closeTitle">You deserve to love <span class="accent">your wig, too.</span></h2><p>Consultation &#8362;100, by appointment.</p><a class="cta" href="book.html">Book a consultation</a></div>
     <div class="wall__grid">
       <img src="assets/client-7.jpg" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" loading="lazy">
       <img src="assets/client-5.jpg" width="720" height="960" alt="A client with glasses in a dark shoulder-length wig" loading="lazy">
       <img src="assets/client-3.jpg" width="720" height="960" alt="A client in a long wavy light-brown wig" loading="lazy">
       <img src="assets/client-1.jpg" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" loading="lazy">
     </div>
-    <div class="wall__copy"><h2 id="closeTitle">You deserve to love <span class="accent">your wig, too.</span></h2><p>Consultation &#8362;100, by appointment.</p><a class="cta" href="book.html">Book a consultation</a></div>
   </section>
 </main>
 
-<footer class="foot on-navy">
+<footer class="foot on-blush">
   <p class="foot__big">A wig you love, in <span class="accent">Bet Shemesh.</span></p>
   <a class="cta" href="book.html">Book a consultation</a>
   <div class="foot__cols">
-    <div><h3>On this page</h3><a href="#hero">Clients</a><a href="#consult">The consult</a><a href="#same">In their words</a><a href="#academy">Academy</a></div>
+    <div><h3>On this page</h3><a href="#hero">Clients</a><a href="#consult">The consult</a><a href="#same">In their words</a><a href="#academy">Courses</a></div>
     <div><h3>Book</h3><a href="book.html">Book a consultation</a><a href="book.html#academy">Enrol in the Academy</a></div>
     <div><h3>Contact</h3><p>Bet Shemesh</p><p>Sunday to Thursday, 10 to 2, by appointment</p><p>WhatsApp 054-682-6258</p><p>English and Hebrew</p></div>
   </div>
-  <p class="foot__small">Michal Simkin, on MyIsraelRental. Every photograph on this page is from her website.</p>
+  <p class="foot__small">Michal Simkin, on MyIsraelRental. Every photograph on this page is from our website.</p>
 </footer>
 
 
