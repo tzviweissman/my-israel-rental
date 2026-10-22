@@ -28,27 +28,28 @@ def stage(im, bgsrc, size=(1200, 1200), feather=26):
     bg.paste(fg, ((W - fg.width) // 2, (H - fg.height) // 2), m)
     return bg
 
-# One shoot (rules 8.1, Tzvi 22 Oct 2026): every size on the same white marble, in the same light.
-# m-small, m-large and m-xl are her own platters cut out of p04, p06 and p07 and placed on one generated
-# empty marble (m-ground, made from her Medium photo's setting); the fruit is hers, untouched. m-medium is
-# her Medium photo (p05) with the stray engraving on the board removed (Tzvi sent it as her Medium, 22 Oct).
-G = Image.open(O + 'm-ground.jpg').convert('RGB').crop((0, 620, 1500, 1792))   # plain marble, away from the vase
-M = {k: Image.open(O + f'm-{k}.jpg').convert('RGB') for k in ('small', 'medium', 'large', 'xl')}
+# The product hero shot (rules section 8, Tzvi 22 Oct 2026) and one shoot (8.1): her four platters, each
+# re-shot by Higgsfield from her own photo (p04, p05 cleaned, p06, p07) into one scene: a pale travertine slab,
+# a few whole fruits from the platter, a blush-to-cream gradient, one warm light from the left, the same
+# angle. Every fruit was checked against her photo. h-*.jpg are those shots, 4:3.
+M = {k: Image.open(O + f'h-{k}.jpg').convert('RGB') for k in ('small', 'medium', 'large', 'xl')}
 
-def on_marble(im, size, feather=40):
-    """The whole photo, fitted inside the frame; the rest of the frame is the same marble, so nothing is cut."""
+def fit(im, size):
+    """The whole shot, fitted to the width; above and below it the shot's own top and bottom edges carry on
+    (a plain gradient and a plain table), so a square or tall frame never cuts the platter."""
     W, H = size
-    s = max(W / G.width, H / G.height); bg = G.resize((round(G.width * s), round(G.height * s)), Image.LANCZOS)
-    x0, y0 = (bg.width - W) // 2, (bg.height - H) // 2; bg = bg.crop((x0, y0, x0 + W, y0 + H))
-    f = min(W / im.width, H / im.height); fg = im.resize((round(im.width * f), round(im.height * f)), Image.LANCZOS)
-    fe = round(feather * W / 1200)
-    m = Image.new('L', fg.size, 0); m.paste(255, (fe, fe, fg.width - fe, fg.height - fe)); m = m.filter(ImageFilter.GaussianBlur(fe / 2))
-    bg.paste(fg, ((W - fg.width) // 2, (H - fg.height) // 2), m)
-    return bg
+    s = W / im.width; fg = im.resize((W, round(im.height * s)), Image.LANCZOS)
+    if fg.height >= H:
+        y = (fg.height - H) // 2; return fg.crop((0, y, W, y + H))
+    out = Image.new('RGB', (W, H)); y0 = (H - fg.height) // 2
+    top = fg.crop((0, 0, W, 2)).resize((W, y0 + 1)).filter(ImageFilter.GaussianBlur(8))
+    bot = fg.crop((0, fg.height - 2, W, fg.height)).resize((W, H - y0 - fg.height + 1)).filter(ImageFilter.GaussianBlur(8))
+    out.paste(top, (0, 0)); out.paste(bot, (0, y0 + fg.height - 1)); out.paste(fg, (0, y0))
+    return out
 
 for i, k in ((1, 'small'), (2, 'medium'), (3, 'large'), (4, 'xl')):
-    save(on_marble(M[k], (1200, 1200)), f'size-{i}.webp', None, 78)
-    save(on_marble(M[k], (520, 390)), f'size-{i}-t.webp', None, 76)   # 4:3 thumbnails, the whole platter each
+    save(fit(M[k], (1200, 1200)), f'size-{i}.webp', None, 78)
+    save(fit(M[k], (520, 390)), f'size-{i}-t.webp', None, 76)   # 4:3 thumbnails, the whole platter each
 p04 = Image.open(O + 'p04.jpg').convert('RGB')
 p06 = Image.open(O + 'p06.jpg').convert('RGB')
 p07 = Image.open(O + 'p07.jpg').convert('RGB')
@@ -66,10 +67,10 @@ og = Image.new('RGB', (1200, 630)); lg = p06.crop((0, 280, 2400, 1300)); bgc = p
 p08 = Image.open(O + 'p08.jpg').convert('RGB')
 save(p08.crop((100, 0, 1500, 1400)), 'wrapped.webp', (900, 900), 76)
 
-# the home page's full-bleed pictures (rule 3t): her platters on the one marble (see above)
-save(M['large'].crop((0, 200, 2400, 1700)), 'w-large.webp', (2000, 1250), 80)
-save(M['large'].crop((600, 300, 1800, 1541)), 'w-large-m.webp', (900, 931), 78)
-save(M['xl'].crop((0, 300, 2400, 1500)), 'w-xl.webp', (2000, 1000), 80)
-save(M['xl'].crop((760, 300, 1640, 1792)), 'w-xl-m.webp', (700, 1187), 78)
-save(M['small'].crop((0, 420, 1344, 1260)), 'w-small.webp', (1800, 1125), 80)
-save(M['small'], 'w-small-m.webp', (900, 1200), 78)
+# the home page's full-bleed pictures (rule 3t): the same hero shots
+save(fit(M['large'], (2000, 1250)), 'w-large.webp', None, 80)
+save(fit(M['large'], (900, 931)), 'w-large-m.webp', None, 78)
+save(fit(M['xl'], (2000, 1000)), 'w-xl.webp', None, 80)
+save(fit(M['xl'], (700, 1187)), 'w-xl-m.webp', None, 78)
+save(fit(M['small'], (1800, 1125)), 'w-small.webp', None, 80)
+save(fit(M['small'], (900, 1200)), 'w-small-m.webp', None, 78)
