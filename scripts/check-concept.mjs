@@ -62,6 +62,9 @@ export function checkConcept(dir) {
   if (unsourced.length) problems.push(`Effects: say where each came from ("from" a named 21st, Mobbin or Inspo search, or a docs/inspo picture): ${unsourced.map((l) => l.trim()).join(' | ')}`);
   // and one small touch only this business would have (Tzvi, 20 Oct 2026, on the cloud pointer and
   // the polish-shade sweep: "we need to do more unique things like that")
+  // all three sources on every build (Tzvi, 22 Oct 2026: "have you been using mobbin and 21st for your builds"; 12 of 17 sites had no Mobbin search)
+  if (!/mobbin\.com\//i.test(s)) problems.push('Sources: no Mobbin search named with a mobbin.com link (search Mobbin for this category on every build, rule 3c.1)');
+  if (!/21st[^\n]{0,40}("[^"]+"|search)/i.test(s)) problems.push('Sources: no 21st search named (search 21st fresh for this business on every build, name the component, rule 3c.1)');
   if (!fx.some((l) => /^\s*[-*]\s*touch:\s*(?!none)\S/i.test(l))) problems.push('Effects: no "- touch:" line, a small detail only this business would have (The Whipped Cup: a cloud for a mouse pointer; Elisheva: the sweep in the chosen shade)');
   if (!/different from all \d+ other pages/.test(part('Not alike'))) problems.push('Not alike: paste the passing line from scripts/check-fingerprints.mjs');
   return problems;
