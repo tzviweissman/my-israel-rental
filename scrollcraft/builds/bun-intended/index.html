@@ -162,9 +162,13 @@
   .total .mini { display: none; }
   .note { margin: 10px 0 0; font-size: 0.9rem; color: var(--ink-soft); min-height: 1.4em; }
   .when { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 0.95rem; }
+  .when[hidden] { display: none; }
+  .who label { flex: 1 1 11rem; display: flex; flex-direction: column; gap: 4px; }
+  .who input { width: 100%; box-sizing: border-box; }
+  .who { margin-top: 8px; } .who input { padding: 7px 12px; } #oerr:empty { display: none; }  /* three plain fields must still leave the builder on one screen (check-fits) */
   .when input { font: inherit; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); }
   .total { margin-top: clamp(14px, 2.4vh, 22px); display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; }
-  .total .sum { font-family: var(--body); font-size: 2rem; font-weight: 600; line-height: 1; }
+  .total .sum { font-family: var(--body); font-size: 2rem; font-weight: 600; line-height: 1; min-height: 60px; }  /* the height it has with a saving shown, so choosing a size never moves what is below */
   .total .sum small { font-family: var(--body); font-size: 0.9rem; font-weight: 500; color: var(--ink-soft); margin-left: 6px; }
   .alt { margin: 12px 0 0; font-size: 0.92rem; color: var(--ink-soft); }
   .alt a { color: var(--caramel-deep); font-weight: 600; }
@@ -457,9 +461,18 @@
         </div>
 
         <div class="when">
-          <label>Needed on <input type="date" id="date" aria-describedby="when-hint"> <span id="when-hint" style="color:var(--ink-soft)">(optional)</span></label>
+          <label>Needed on <input type="date" id="date" required></label>
           <span class="qty" role="group" aria-label="Number of boxes"><button type="button" data-q="-1" id="qm" aria-label="One box fewer">&minus;</button><output id="qty" aria-live="polite">1</output><button type="button" data-q="1" id="qp" aria-label="One box more">+</button><span style="margin-left:4px">box</span></span>
         </div>
+
+        <div class="when who">
+          <label><input id="me" autocomplete="name" maxlength="80" aria-label="Your name" placeholder="Your name"></label>
+          <label><input id="ph" type="tel" autocomplete="tel" maxlength="30" aria-label="Your phone" placeholder="Your phone"></label>
+        </div>
+        <div class="when who" id="addrw" hidden>
+          <label><input id="addr" autocomplete="street-address" maxlength="160" aria-label="Delivery address" placeholder="Delivery address: street, number, neighbourhood"></label>
+        </div>
+        <p class="note" id="oerr" role="alert" style="color:#9b2c1d"></p>
 
         <div class="total">
           <span class="mini" id="mini" aria-hidden="true"></span><span class="sum" id="sum" aria-live="polite">₪55<small>4 buns</small></span>
@@ -535,7 +548,13 @@
 <script>
 (function () {
   // Their price list, as printed on it.
-  var WA = '18482216022';
+  var WA = '18482216022', GIG = 'c42107a6-615e-45dc-8e87-7164a1cd6a87';
+  // Every order is saved to MyIsraelRental before WhatsApp opens (page rules 3k). These are the nine products
+  // added to the listing on 22 Oct 2026 (add_site_products.py), named "<flavour>, <4|8> piece box".
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var PID = { cinnamon: { 4: '3e8fc7b11ba5', 8: '496133c34c8d' }, espresso: { 4: 'a2411e518cfd', 8: 'add54923e23e' },
+    lotus: { 4: '1fe757edcd3c', 8: '14b2e1b51020' }, chocolate: { 4: '1a0afd77ecca', 8: 'a9f847b52153' }, mix: { 8: '0b0622aa4198' } };
+  var waText = '', waNotes = '';
   var F = [
     { id: 'cinnamon', name: 'Classic cinnamon', p4: 55, p8: 100, c: 'cinnamon' },
     { id: 'espresso', name: 'Espresso', p4: 55, p8: 100, c: 'espresso' },
@@ -619,7 +638,11 @@
     });
     var m = fHost.querySelector('[data-mix]'), on8 = state.size === 8;
     m.setAttribute('aria-pressed', String(on8 && state.mix)); m.classList.toggle('dim', !on8);
-    var cp = cheaperPair(); m.querySelector('small').textContent = on8 ? 'Your choice of any 2 flavours' + (cp ? '. Two 4 piece boxes can cost less: ' + cp.a + ' and ' + cp.b + ' is ₪' + cp.t : '') : '8 piece boxes only, tap to switch';
+    var cp = cheaperPair(), sm = m.querySelector('small');
+    var longT = 'Your choice of any 2 flavours' + (cp ? '. Two 4 piece boxes can cost less: ' + cp.a + ' and ' + cp.b + ' is ₪' + cp.t : '');
+    // the line keeps the height of its longer wording, so choosing a box size never moves what is below (check-site SHIFT)
+    sm.style.minHeight = ''; sm.textContent = longT; sm.style.minHeight = sm.offsetHeight + 'px';
+    sm.textContent = on8 ? longT : '8 piece boxes only, tap to switch';
   }
 
   function paint() {
@@ -662,7 +685,11 @@
     var what = q > 1 ? q + ' x ' + state.size + ' piece boxes' : (state.size === 8 ? 'an ' : 'a ') + state.size + ' piece box';
     var text = 'Hi Bun Intended, I\'d like to order ' + what + ': '
       + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + tot + (q > 1 ? ' for ' + q : '') + ').'
-      + (when ? ' For ' + when + '.' : '') + (state.ful === 'delivery' ? ' Delivery please: what do you need from me?' : ' Pick-up in Ramat Eshkol.');
+      + (when ? ' For ' + when + '.' : '') + (state.ful === 'delivery' ? ' Delivery to ' + ($('#addr').value.trim() || '(address)') + '.' : ' Pick-up in Ramat Eshkol.')
+      + ($('#me').value.trim() ? ' Name: ' + $('#me').value.trim() + ', ' + $('#ph').value.trim() + '.' : '');
+    waText = text;
+    waNotes = (state.mix ? '2 flavour mix: ' + n.join(' and ') + '\n' : '') + 'Sent from the Bun Intended page by WhatsApp';
+    $('#addrw').hidden = state.ful !== 'delivery';
     var a = $('#order');
     a.href = need ? '#build' : 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
     a.setAttribute('aria-disabled', String(need));
@@ -697,15 +724,38 @@
     }
   });
   $('#date').addEventListener('change', paint);
+  ['me', 'ph', 'addr'].forEach(function (id) { $('#' + id).addEventListener('input', function () { $('#oerr').textContent = ''; paint(); }); });
   var today = new Date(); $('#date').min = today.toISOString().slice(0, 10);
 
   // The send button: "Opening WhatsApp", then a tick (21st Interactive Hover Button).
   $('#order').addEventListener('click', function (e) {
     var a = e.currentTarget;
     if (a.getAttribute('aria-disabled') === 'true') { e.preventDefault(); $('#note').textContent = 'Pick a second flavour for your mix.'; return; }
+    e.preventDefault();
+    if (a.classList.contains('is-busy')) return;
+    var v = function (id) { return $('#' + id).value.trim(); }, err = '', bad = '';
+    if (!$('#date').value) { err = 'Choose the day you need it.'; bad = 'date'; }
+    else if (!v('me')) { err = 'Your name, please.'; bad = 'me'; }
+    else if (!/\d{9,}/.test(v('ph').replace(/\D/g, ''))) { err = 'A phone number we can reach you on.'; bad = 'ph'; }
+    else if (state.ful === 'delivery' && !v('addr')) { err = 'Where should we deliver?'; bad = 'addr'; }
+    $('#oerr').textContent = err;
+    if (err) { $('#' + bad).focus(); return; }
     a.classList.add('is-busy');
-    setTimeout(function () { a.classList.remove('is-busy'); a.classList.add('is-done'); }, 700);
-    setTimeout(function () { a.classList.remove('is-done'); }, 3200);
+    // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
+    var tab = window.open('', '_blank');
+    var pid = (state.mix ? PID.mix : PID[state.picks[0]])[state.size];
+    var body = { lines: [{ product_id: pid, qty: state.qty }], fulfilment: state.ful, date: v('date'), customer_name: v('me'), customer_phone: v('ph'), notes: waNotes };
+    if (state.ful === 'delivery') { body.city = 'jerusalem'; body.address = v('addr'); }
+    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })
+      .catch(function (er) { console.warn('Order not saved', er); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var text = waText + (saved && saved.track_url ? '\n\nFollow the order: ' + saved.track_url : '');
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      a.classList.remove('is-busy'); a.classList.add('is-done');
+      setTimeout(function () { a.classList.remove('is-done'); }, 2500);
+    });
   });
 
   // Their price list, from the same numbers the builder uses.

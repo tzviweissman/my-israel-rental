@@ -140,11 +140,12 @@ R3.14 pass: prices are large but the business has fixed public prices
 ## 6. Order and booking flow
 R3k.7 pass: check-site FLOW walks the shop steps: basket, delivery, details; total in the message
 R3k.8 pass: basket lines have a remove button; check-site TAP clean on shop
+R3k.9 pass: the Send button POSTs to /api/marketplace/order-form/cbf185df-.../orders (product ids a7be8afd6138 etc. from the 22 Oct add_site_products run, jars and the package as lines, the package's flavours in notes) while a blank WhatsApp tab is already open, then fills the tab with the message and the tracking link; a failed POST still opens WhatsApp. Intercepted a full order in Playwright (lines, delivery, city jerusalem, address, date, name, phone, notes all match WebsiteOrderIn); check-site SAVE and FLOW pass; nothing sent to the live site. Live saving also needs the listing converted to a store (convert_to_store in site_products_plan.json) and its areas to include jerusalem: owner/Tzvi decision, listed in the reply
 R3k.6 pass: Add on the home page opens shop.html with the item (shop.js reads ?jar= and ?pack=)
 R3.15 pass: order has the shop; contact has WhatsApp and email; delivery area and hours asked, not shown
 R7.1 pass: CONCEPT.md names the chosen direction; no options page
 R8.5 pass: the main button goes to the shop page, her order page; WhatsApp is the link in the close band
-R0b.13 n/a: the tracking link needs the business live shop record and product ids, which exist only after publishing; this local build has no shop to save an order into yet. Listed in the reply
+R0b.13 pass: the order is saved with a tracking link before WhatsApp opens (see R3k.9); the live save waits for the listing to be a store
 R3l.1 pass: message-to-rena.md asks which flavour comes twice in the assorted pack and whether the duo can be one flavour
 R3l.2 pass: each package states what it allows (Any 6 jars, A mix of all three flavours, One flavour, 2 jars any flavours) on the card, in the basket and in the message
 R3l.3 pass: shop options appear once a package is added; check-site FLOW passed
