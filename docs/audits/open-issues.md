@@ -56,6 +56,10 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Medium] Hebrew: 14 texts (order basket buttons, jobs board area box) exist in neither language file, so Hebrew shows English. First seen 21 Oct (2026-10-21-site-audit).
 - [Medium] Dead end: the "category" item of the completeness list opens a form with no category control. First seen 21 Oct (2026-10-21-site-audit).
 - [Low] Customer messages: any "[text]" in a message blocks sending, even when the owner meant it. First seen 21 Oct (2026-10-21-site-audit).
+- [Medium] Holidays: Sukkot fallback dates ended 3 Oct; if Hebcal is down the Sukkot booking calendar is all greyed out. First seen 22 Oct (site audit).
+- [Medium] Leads board shows customers' profile phone numbers to the business; decision needed. First seen 22 Oct (site audit).
+- [Low] Reorder: a send that errors leaves the run stuck on "sending" (suspected, needs database). First seen 22 Oct (site audit).
+- [Low] Dashboard checklist: "category" item points at a form with no category control (test-completeness-actions fails). First seen 22 Oct (site audit).
 - [Medium] Services marketplace: 14 basket.* strings missing from en.js and he.js, so Hebrew visitors see English on card quantity buttons. First seen 22 Oct (UI audit).
 - [Low] New dashboard panels use hardcoded hexes (#B45309 amber) instead of tokens. First seen 22 Oct (UI audit).
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
@@ -118,6 +122,8 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] Services map: city names with a hyphen or apostrophe (Tel-Aviv, Modi'in, Ra'anana, Be'er Sheva) never matched, so those businesses had no pin. Fixed 20 Oct (0492ea0, 2026-10-20-site-audit).
 
 - [Low] Hebrew map texts showed English for exactly two businesses (no `_two` plural). Fixed 21 Oct (d9603292, 2026-10-21-ui-audit).
+- [Medium] Payment request page sent the business's phone to link holders. Fixed 22 Oct, d718eeed.
+- [Low] Jobs board area box was English for Hebrew visitors. Fixed 22 Oct, da0754f6.
 - [Low] KasherMyBnb: the "what we kasher" lists on the kitchen and pots pages are now a split price list (add-ons left, ticked parts right; on a phone the list first). 13 Oct.
 
 - [Medium] Subscriptions: a paying business can now see its plan and cancel it in Settings ("Your plan", shown only to a business with a paid plan). Fixed 13 Oct.
