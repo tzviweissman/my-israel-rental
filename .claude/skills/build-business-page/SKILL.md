@@ -152,21 +152,27 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   Ratings and "customers love" need real reviews. Only the owner's own words
   can back best, #1, award, guarantee, insured, 24/7, emergency, fresh daily,
   delivery, or anything medical.
-- No fake urgency, ever: "only 3 left", "hurry", "today only", countdowns,
-  invented counts. "Open only on Fridays" is a fact, not urgency.
-- Generated images and video: allowed anywhere they make the page look
-  better, product cards and choice tiles included, no label (Tzvi, 8 Oct
-  2026). Generate as little as possible: edit their own photo of a sibling
-  item to show a missing flavour or size, so it stays their product. Only
-  items they really sell. Never a generated person shown as their staff or
-  customer, never their real premises made up (a generated setting is never
-  presented as their premises), no text baked in. Respect
-  the business (a kosher business: nothing non-kosher, no meat with dairy).
-  Movement copied from a reference video is built in code, not generated.
+- No fake urgency, ever (the single home is the `urgency` rule in the full
+  rules): "only 3 left", "hurry", "today only", "ends soon", countdowns or
+  invented counts. "Open only on Fridays" is a fact, not urgency. An offer that
+  really ends on a date shows that date; standing discounts (students,
+  soldiers, olim) are not time-limited and need none (Tzvi, 22 Oct 2026).
+- Generated images and video follow the policy at the top of section 8 of the
+  full rules: allowed anywhere they make the page look better, product cards
+  and choice tiles included, no label (Tzvi, 8 Oct 2026), as little as
+  possible and edited from their own photo (a missing flavour or size).
+  **Food in motion is generated only in the full-screen opening film, advert
+  style, checked frame by frame (nothing from nowhere, no glass or neon look,
+  pieces never fade or vanish); everywhere else food is the owner's real
+  photo** (Tzvi, 22 Oct 2026, 3o.1). Never a generated person shown as their
+  staff or customer, never their premises made up, no text baked in, a kosher
+  business's images respect it. **The generator is Higgsfield, every time**;
+  kie.ai only if Higgsfield cannot do it. Movement copied from a reference
+  video is built in code, not generated.
 - **If it would look better as a generated clip, generate it** (Tzvi, 8 Oct
   2026): any moving piece a filmed clip would do better than code (a pour,
-  drizzle, cream, sauce, steam, melt, food cut or served, a product opened or
-  used) is a generated clip, never SVG/CSS. Code keeps text, interface, layout,
+  drizzle, cream, sauce, steam, melt, a product opened or used; food in motion
+  only in the opening film, 3o.1) is a generated clip, never SVG/CSS. Code keeps text, interface, layout,
   scroll-tied motion and exact choreography copied from a reference.
   Start frame = their item before, end frame = their item after (edited from
   their photo), both on the page's background colour; a start/end-frame model
@@ -174,7 +180,8 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   the still at the end. Preflight cost, generate one, check it, then the rest.
   **Always in Higgsfield** (Tzvi, 13 Oct 2026): a ribbon untying, a drizzle, a
   pour, fabric or steam is generated there (MCP while building, API if it
-  refuses), never drawn in code first and never another generator. CSS
+  refuses), never drawn in code first and never another generator unless
+  Higgsfield cannot do it (then kie.ai). CSS
   ribbon bars and a drawn bow read as fake on The Gift Boutique.
   **Any generated motion shows the real physical process and flows**
   (a ribbon, lid, pour, spread, unfold, steam): every step from cause to
@@ -192,7 +199,7 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
   (+ `data-mir-list`, `data-mir-skip`, item and group templates; example The
   Gift Boutique) so out-of-stock, new and removed items follow the dashboard.
   **Main buttons go to the quickest way to order**: the order page if there
-  is one, else the price list, only then WhatsApp; one label everywhere;
+  is one, else the price list, only then WhatsApp (one label everywhere: 2.9);
   WhatsApp is the secondary link. Adding an order page changes them all.
 
 ## 2. How to write
@@ -201,12 +208,13 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 2. **Specific over generic.** "Sourdough and challah in Beit Shemesh", not
    "quality baked goods". Banned: welcome to, look no further, one-stop shop,
    passionate about, quality you can trust, world-class, top-notch.
-3. **Headline: what + where** (or what + for whom), at most 10 words (a ceiling:
-   the first screen follows 3g.13, with where in the one short line or under
-   the button). The name is already on the page.
+3. **Headline: what the customer gets**, their result in the owner's words
+   (Tzvi, 22 Oct 2026), at most 10 words (a ceiling: the first screen is 3g.13,
+   with where the business is in the one short line or the small label). The
+   name is already on the page.
 4. **The line under it says what you get**, plainly (food: the food and how it
-   arrives, not a slogan). At most 20 words (a ceiling; 3g.13 allows one short line on the
-   first screen).
+   arrives, not a slogan). At most 20 words (a ceiling; 3g.13 allows one short
+   line on the first screen).
 5. **A professional voice, always.** Write the way a respected business would
    in print. Describe the customer's problem in neutral terms; never tease,
    scold or talk down ("You are nowhere near done" became "Thursday night,
@@ -223,7 +231,11 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
    not "They confirm the board"), in labels, errors, captions and alt text too.
    Search the visible text for they/them/their before showing a page, and read
    every line aloud as the owner would say it: it must make sense in English.
-9. **One wording per purpose.** If the button says "Order", it says "Order" everywhere.
+9. **One button, one label** (the single home; 3.3, 3e.2, 3t.4 point here).
+   The main button has the same words and the same destination everywhere:
+   header bar, sections that sell, phone bar, footer. Over a photo the bar's
+   version may be the outline style. If it says "Order", it says "Order"
+   everywhere. The same one-wording rule covers every other purpose.
    - **End on what the customer gains**: a closing moment names their result
      in the owner's words ("A stronger, healthier you"), never "done" or "complete".
    - **Every line makes sense where it sits**: it must not read as the next item
@@ -238,12 +250,11 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 Every page passes all six before anyone sees it:
 
 1. **The first screen answers four questions:** what it is, where, why trust
-   it, what to do next. Within 3g.13: where and trust go in the one short line
-   or right under the button.
+   it, what to do next. What it may hold is 3g.13, the single home.
 2. **Proof touches the main button:** price, credential or rating right beside it.
 3. **One solid ACTION per screen.** The header button and the phone bar repeat
    the same action; over a hero that already shows a solid button the header
-   button is outline. Everything else is outline, link or tile.
+   button is outline. Everything else is outline, link or tile. Wording and destination: 2.9.
 4. **With few photos, facts carry the page** (what they offer, key facts), never a padded gallery.
 5. **For a place, hours and where come before the description.**
 6. **On a phone the action is pinned to the bottom** with the price or proof,
@@ -253,7 +264,9 @@ Every page passes all six before anyone sees it:
    start to its finish, never late and never gone early.
 
 Food: a certificate is a small labelled band just after the opening, never
-crowding the button, said at most twice on the page.
+crowding the button. The certificate is stated at most twice on the page, as
+a sentence or a band; a small identical kosher tag on items does not count
+toward the two (Tzvi, 22 Oct 2026).
 
 Per-category guidance (what a visitor decides, what leads, proof, action,
 what to avoid): `reference/playbooks.md`.
@@ -287,24 +300,24 @@ Full text and reasons: `reference/full-rules.md` §3c.
 
 1. **References first, from every source**: Inspo, Mobbin and 21st on every
    build, starting with how businesses of the same kind built their sites;
-   keep 3 to 5 real screens, named in the brief. Copy structure, never looks; colours and type are theirs.
-   **Plus 21st on every page**, for sections and for effects (button hover and
-   press, a moving arrow, a lifting tile, how a price is set). **Choose it
-   yourself** from that research and say in one line what you picked and why;
-   an options page only when Tzvi asks for one.
-   **Search fresh for every piece on every build**: see 3g.17.
+   keep 3 to 5 real screens, named in CONCEPT.md. Copy structure, never looks;
+   colours and type are theirs. **Choose it yourself** from that research and
+   say in one line what you picked and why; an options page only when Tzvi
+   asks for one. **Search fresh for every piece on every build, 21st
+   included**: see 3g.17.
 2. **No AI default look**: no cream + serif + one italic word unless that is
    their brand. At least one section on a contrasting ground.
 3. **Proof where the worry is**: each worry the owner names is answered beside
    the button or price it belongs to. No wall of one-line reviews.
 4. **Show it in use**: their photo of it used, served or delivered leads;
    generated images fill the gaps, best made by editing their own photo.
-5. **Choices are tiles**, never a dropdown. "Most popular" only if the owner
-   marks it or orders show it. Bundles show the real saving.
+5. **Choices are tiles**, never a dropdown. "Most popular" only when the
+   owner says so (22 Oct 2026). Bundles show their saving as 3j says.
 6. **The button says what happens next** ("Order, delivered Friday"); under
    it up to three icons of their real guarantees.
-7. **Offers are contained**: an end date or first order only; free delivery
-   over an amount or a bundle before a percentage off; no permanent sale.
+7. **Offers are contained**: a time-limited offer shows its real end date, a
+   first-order offer says so, standing discounts need no date (3j.4), "ends
+   soon" without a real date is banned; no permanent sale.
 8. **Name the first days**: if the owner tells you what happens after the
    order, the page and the tracking page say it first.
 9. **One quiet system**: one radius, one icon set, one soft shadow, no
@@ -321,10 +334,9 @@ Full text and reasons: `reference/full-rules.md` §3c.
     take 4 min, a redo of one section 30 s). It records everything if the page's
     length or the stops changed. Paid
     generation waits for the owner's yes on two or three style frames.
-12. **Everything fits on one screen** (from woodwrights.co.nz): wherever a
-    visitor stops, each photo is seen whole with its words and price. No
-    block taller than the screen at 1280x650, 1440x900 or a phone; cap
-    photos and big type by `svh`; a main tile puts its photo beside its words.
+12. **Everything fits on one screen**: each photo seen whole with its words
+    and price, no block taller than the screen. Held screens: section 5 (pinned
+    row); the measured check and the six screen sizes: 3p.6.
 
 ## 3e. From the twelve UI videos (Tzvi, 8 Oct 2026)
 
@@ -332,18 +344,20 @@ Full text, sources and the rejected list: `reference/full-rules.md` §3e.
 
 1. **Order by the visitor's questions**: what is it, can I trust it, what does
    it cost, what do I do; prices before any enquiry form. A small label above
-   the headline says who and where (a ceiling: on the first screen it is the
-   one short line of 3g.13). The headline is the customer's outcome.
-2. **One action, one label**: every section ends on the same action as the
-   header button; the page's words match what sent the visitor.
+   the headline says who and where (on the first screen it counts as the one
+   short line of 3g.13). The headline is the customer's outcome.
+2. **One action, one label** (2.9): every section ends on the same action as
+   the header button; the page's words match what sent the visitor.
 3. **Buttons say what happens, with real numbers** ("Order 4 buns, ₪55");
    price, unit and action together; packages as tiles.
 4. **Measured contrast**: button text 4.5:1 on its fill. Every button has
    rest, hover, pressed, disabled; fields have focus and error; every action
    confirms. Hover-only things get a phone version.
-5. **Cards**: one reading order (name largest, one accent fact used nowhere else on the card, rest lighter),
-   big photos, worst-case content handled (truncate; icons on a solid circle).
-   Text under owner photos on a plain strip; text on a photo follows section 4
+5. **Cards**: one reading order (name largest, one emphasised fact, usually
+   the price in the main text colour, bold and large, rest lighter), big photos,
+   worst-case content handled (truncate; icons on a solid circle). Words sit
+   on the picture with a soft edge shade (section 4, 5b.3); a plain strip under
+   the photo only where the picture is too busy.
    (5b.3).
 6. **System**: 4 px spacing grid, related close and unrelated apart; one body
    family, up to three weights, six sizes; headings tightened about -2% with 110-120% line height (test
@@ -367,10 +381,10 @@ ribbon untied before the photos arrived, and the page had one effect.
 1. **A scroll effect plays while its subject is wholly on screen**: hold it
    on a stage that fits, or start once it is all in view. Never key it to the
    subject entering. Capture 0/25/50/75/100% on laptop, short laptop, phone.
-2. **Fill the effect budget**: one held signature moment in steps (a 3h film opening is that signature); at least
+2. **Fill the effect budget**: one signature moment in steps, held where it fits 1280x650, otherwise playing as the page scrolls (a 3h film opening is that signature); at least
    three accents (an arriving opening, a scroll-tied detail mid-page, a
    closing payoff that answers the signature); quiet touches (eased reveals,
-   hover and press, tile lift). Listed in the brief, ticked on the frames.
+   hover and press, tile lift). Listed in CONCEPT.md, ticked on the frames.
 3. **A held stage** is the screen minus the header and the phone bar;
    anything that travels out of it sits outside clipping frames.
 4. **A logo motif is never doubled** on the logo that already has it.
@@ -394,14 +408,15 @@ ribbon untied before the photos arrived, and the page had one effect.
 Full text, timestamps and frames: `reference/full-rules.md` §3g, `docs/ui-videos/notes/`.
 
 1. **Style sheet first**: accent, ink, ground, two faces (headline and text; at most a third for one
-   label style), one radius, motion limits, in BRIEF.md; every section follows it.
+   label style), one radius, motion limits, in CONCEPT.md; every section follows it.
 2. **AI-look tells banned**: default font, purple/two-colour gradient,
    exactly three identical cards, frosted glass everywhere, a headline a
    competitor could use.
-3. **One accent per screen: one word or one object, plus the primary button's
-   fill** (the single home of the accent rule; a word that matters, not
-   decoration); cream + serif + italic word together stays banned unless it is
-   their brand.
+3. **The accent colour is for the main button only** (Tzvi, 22 Oct 2026; the
+   single home of the accent rule). The rest is ink and grey. **Prices are in
+   the main text colour, bold and large.** A word that matters may be set apart
+   by weight or style in the text colour, at most one per screen; cream +
+   serif + italic word together stays banned unless it is their brand.
 4. **Every motion has one job** (guide, confirm, reveal); loops join
    invisibly; text settles soft to sharp, no bounce; list rows ~100 ms apart.
 5. **Chapters**: a scroll film or held section carries short labelled steps
@@ -411,9 +426,7 @@ Full text, timestamps and frames: `reference/full-rules.md` §3g, `docs/ui-video
 7. **One closing signature** (the single home of the closing wordmark): the
    name huge and cropped at the bottom, or one playful moment in the footer or
    404. Never more than one.
-8. **Text over video or a busy photo** follows section 4 (5b.3): edge shade or
-   small solid card, never frosted glass; contrast measured on the brightest
-   frame.
+8. **Text over video or a busy photo**: section 4 (5b.3), the single home.
 9. **A small working piece** (mini order card with the real price, date
    checker) only if it really works.
 10. **Problem first** in the owner's words; rewrite any line a competitor
@@ -424,10 +437,12 @@ Full text, timestamps and frames: `reference/full-rules.md` §3g, `docs/ui-video
     business) before the owner sees it.
 
 13. **Opening screen: four things at most**: the picture, a two-to-five
-    word headline, one short line, one button. **This is the single rule for the first
-    screen, and it wins**: the 10 words and 20 words under it (2.3, 2.4), the
-    small label (3e.1), the 4 pieces of text (section 4) are ceilings, not
-    targets. Where and trust go in the one short line or right under the button.
+    word headline that says what the customer gets, one short line, one button.
+    **This is the single rule for the first screen, and it wins**: the 10 words
+    and 20 words under it (2.3, 2.4) and the 4 pieces of text (section 4) are
+    ceilings, not targets. Where the business is goes in the one short line or
+    the small label of 3e.1 (the label counts as the one short line); trust
+    goes there or right under the button; 3t.3's big line is the headline.
 14. **One colour grade** across every image and clip on a page; the page's
     colours come from it.
 15. **A made-for-them cinematic opening** (their product in a lit, generated
@@ -436,18 +451,14 @@ Full text, timestamps and frames: `reference/full-rules.md` §3g, `docs/ui-video
     never a flyer crop or low-resolution photo as the hero. The film itself is 3h. Cost told to Tzvi
     first; one made and checked before more.
 
-16. **The opening has a wow: something happens** (a box opens and light
-    pours out, honey pours, dough rises), tied to what they do, ending on
-    their real product and the button. Test before showing: say in one
-    sentence what HAPPENS in the first five seconds and first scroll; "nothing",
-    "the camera moves" or "it fades in" means redo. Beside the best reference,
-    if ours is quieter it is not finished. The film that delivers it is 3h.
+16. **The opening has a wow: something happens**: the rule, the test and the
+    gate are 3n, the single home. The film that delivers it is 3h.
 
 17. **Unique effects from fresh Mobbin, 21st and Inspo searches** (the single
     home of the fresh-search rule): one of each for every piece (the button,
     the arrow, each card or list effect, each section), for this business,
     before the effects library is opened; say for each pick where it came from
-    (a new search, named, or the library) in BRIEF.md and the reply. An effect
+    (a new search, named, or the library) in CONCEPT.md and the reply. An effect
     needs its reason: one that says what a control does passes, one that only
     decorates does not. Nothing reused from the last two pages (check
     FINGERPRINTS).
@@ -460,8 +471,7 @@ bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
 1. **One unbroken full-screen shot that travels**, following the product's
    journey (amends "the product performs, not the camera": a move is fine
    when it is the story, never for its own sake). **A 3h film opening IS the
-   page's one signature scroll section**; everything else is an accent (3f.2).
-   The film is a held stage and must pass the fit and cut-off checks (section 6).
+   page's one signature scroll section** (see section 4). The film is a held stage and must pass the fit and cut-off checks (section 6).
 2. **Where it comes from to their product**, ending on their real product
    and the button; only their facts or what is plainly true.
 3. **Advert-grade frames**: macro, shallow focus, warm light, a ground lit enough to pass 3h.11,
@@ -500,6 +510,9 @@ bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
    Names whose look is unknown get no picture until the owner sends one or
    says which piece is which. Before showing, put every appearance of each
    item side by side; two that could pass for different foods fail.
+*13 to 16 are about generated food in motion, allowed only in this opening film
+under the checks of 3o.1.*
+
 13. **One cause, one motion** (Chicken Munch, 18 Oct 2026: crumbs fell as
    blocks into a pile, then a second clip exploded them outward). The cause and
    its result happen together in one clip; never let one clip finish an event
@@ -524,8 +537,8 @@ bowl, flat wall, soft) lost to a site whose film fills the screen and travels.
 
 Full text: `reference/full-rules.md` 3i; notes docs/ui-videos/notes/sites-2026-10-16.md.
 
-1. **The product is the brightest thing on screen**; shadows take the
-   background's colour, never black. Brightness itself: 3h.11.
+1. **The product is the brightest thing on screen** (brightness: 3h.11;
+   shadows: 3s.3).
 2. **A choice changes the hero itself**: picture and section colour change
    with the option (one shoot, 300 to 500 ms cross-fade).
 3. **A live readout tied to the scroll**, only for a true process fact,
@@ -546,9 +559,9 @@ Full text: `reference/full-rules.md` 3i; notes docs/ui-videos/notes/sites-2026-1
 
 From "20 most powerful psychological tricks brands use to get you to buy"
 (attentioncurve.com), checked against these rules. Already covered elsewhere:
-social proof (real reviews only, 3b.5), colour (from their logo, 3d), the senses
-(big real photos, 3h), their story in their words, and bundles with the real
-saving (3c.5). Added:
+social proof (real reviews only, 3b.5 here), colour (from their logo and
+photos), the senses (big real photos, 3h), their story in their words, and
+bundles with the real saving (below). Added:
 
 1. **A guarantee beside the button.** If the owner offers one (money back, "we
    redo it free", free cancellation), it sits under or beside the main button,
@@ -562,14 +575,14 @@ saving (3c.5). Added:
    inspection that the owner really offers becomes the headline offer, beside
    the main button.
 4. **Discounts for a group** (students, soldiers, first order, olim) only when
-   the owner offers one, said once near the price.
+   the owner offers one, said once near the price (standing, so no end date).
 5. **Come back.** A real stamp card ("every 10th box free") or a "Reorder"
    button, only when the owner runs it. Never streaks, points with no
    value, or a reminder for something the customer did not start.
 6. **The middle option.** With three sizes or packages, the one most customers
    should pick is shown as the natural pick ("Feeds 8 to 10" is the family
    size). Never invent an option to make another look good, and "Most
-   popular" only when the owner says so (3c.5).
+   popular" only when the owner says so.
 
 Never: invented scarcity or countdowns ("only 3 left", "ends tonight"), a
 "was" price that was never charged, changing their prices to .90 or .99
@@ -581,9 +594,15 @@ technique is when people feel like they are getting a deal ... it should show
 what they save when purchasing a 4 pack rather than a single ... a board
 double the size should technically be double the price, if it's not they are
 getting a deal"). Work it out from the owner's own prices, never invent it:
-- a pack or bundle shows what it saves against the same items bought one by
-  one ("Save up to ₪44 · ₪37 a jar, single jars are ₪40 to ₪48"), "up to"
-  only for the true top of the range;
+- **the saving is shown as a percentage, with the real separate price struck
+  through beside the new price** (Tzvi, 22 Oct 2026; replaces the 20 Oct
+  money-only rule). Example: a 4-pack is $15 and single packs are $5 each, so
+  the badge says "25% off", $20 is struck through, $15 beside it. The
+  struck-through price must be real: the same items bought separately at the
+  business's real prices, or a price really charged before; never invented.
+  Percentage = (separate minus new) divided by separate, rounded DOWN to a
+  whole number. Badge two or three words. "Up to" only for the true top of a
+  range;
 - **any saving, for anything** (a bigger size, a pack, a bundle, a package,
   a monthly plan, a longer session, more of the same; Tzvi, 21 Oct 2026: "it
   should work for any comparisons") is shown only when it is true like for
@@ -615,12 +634,10 @@ getting a deal"). Work it out from the owner's own prices, never invent it:
      add-on) and its saving is shown; only where the site sells many things
      and one item alone carries a badge (Blazin' Boards' Large Premium among
      a dozen boards) is it left off, and the lower price speaks for itself;
-- **say only the saving, in money** ("You save $77", "Save up to ₪44"), never
-  how much more the bigger one costs or a percentage (Tzvi, 20 Oct 2026:
-  "don't say how much more it costs, only mention how much they will save in
-  dollar terms, make it a rule");
-- a combined service against its parts booked apart (Elisheva: gel with
-  removal ₪110 against removal ₪40 and gel ₪90);
+- **never say how much more the bigger one costs**; the only thing said is the
+  saving, as the percentage badge and the struck-through price;
+- a combined service against its parts booked apart, shown the same way
+  (Elisheva: gel with removal ₪110 against ₪130 booked apart, "15% off");
 - in the basket, single items a package would make cheaper get one line with
   the saving and a Switch button;
 - an owner's own savings claim the prices contradict is not printed: ask
@@ -778,19 +795,33 @@ written into the build notes with one line of proof each:
 
 A page that fails any of the five goes back to the build, not to Tzvi.
 
+**The opening must have a wow: something happens** (Tzvi, 14 Oct 2026). A
+beautiful picture that only drifts is not enough: show an event, a real
+material changing in front of the visitor, tied to what the business does (a
+gift box opening and light pouring out, dough rising, a cake sliced, clouds
+parting), driven by the scroll or playing as the page arrives, ending on their
+real product and the button. Run test 5 on the first five seconds and the
+first full scroll: "nothing", "the camera moves" or "it fades in" means redo.
+Generated food in motion follows 3o.1. The whole page passes the same test
+section by section (3f.2). The film that delivers it is 3h.
+
 ## 3o. Lessons from the Chicken Munch, Whipped Cup and Elisheva builds (Tzvi, 19 Oct 2026)
 
-1. **Food stays the owner's real photo.** Generated food motion (a split
-   piece, crumbs flying, a sauce splash, a toss, a drop into a bowl) looked
-   fake every time: the model invents the food between the frames and makes
-   it smooth, shiny and watery. The wow comes from their real photo moved as
-   one solid piece (Chicken Munch's bowl dropped across CHICKEN), big type, and
-   the visitor's own choices. Generate only scenery, light or steam, or a
-   drawing that is plainly a drawing (The Whipped Cup's glass).
-2. **If a liquid must be generated**, prompt the material, not the advert:
-   opaque, satin, specks and bubbles, a gentle pour that folds and piles up.
-   "High-speed advert splash, glossy, rim light" gives glass or neon. Check the
-   still for see-through or glowing edges before showing.
+1. **Generated food in motion is allowed only in the full-screen opening film
+   (3h)** (Tzvi, 22 Oct 2026), advert style, checked frame by frame at 4
+   frames a second or more: no food appearing from nowhere, no glass or neon
+   look, pieces never fade or vanish. **Everywhere else, food stays the
+   owner's real photo.** In the page body generated food motion looked fake
+   every time (the model invents the food between frames and makes it smooth,
+   shiny and watery); there the wow comes from their real photo moved as one
+   solid piece (Chicken Munch's bowl dropped across CHICKEN), big type and the
+   visitor's own choices. Outside the film, generate only scenery, light or
+   steam, or a drawing that is plainly a drawing (The Whipped Cup's glass).
+2. **If a liquid must be generated** (in the opening film), prompt the
+   material as well as the advert look: opaque, satin, specks and bubbles, a
+   gentle pour that folds and piles up. "High-speed advert splash, glossy, rim
+   light" on its own gives glass or neon. Check the still for see-through or
+   glowing edges before showing.
 3. **Check product colours look true.** A coloured cloth can cast onto the
    product (Chicken Munch's kraft bowl came out blue-grey). Fix only that
    object's cast (gen/kraft.py is the worked example), never the food.
@@ -849,14 +880,17 @@ script, Jost), and Chicken Munch shares Anton with Michal Yodaiken.
    chosen polish shade: "we need to do more unique things like that"). Taken
    from their product, tagline or craft, never a stock effect: CONCEPT.md's
    `## Effects` has a `- touch:` line, and check-concept refuses it missing.
-6. **Fits on one screen is measured** (Tzvi, 20 Oct 2026: "not everything is
-   fitting on one screen, wasn't that already a rule"). Rule 3c.12 had no
-   check, and The Whipped Cup's sections came out up to twice a laptop
-   screen's height. `node scripts/check-fits.mjs <urls>` must pass for every
-   page: each section fits below the menu bar at 1280x650, 1440x900 and
-   1536x753, and no photo is taller than the screen there or on a phone.
-   A photo from a phone is never blown up past its own size to fill a wide
-   screen (her 1170px photo filled 1920px and looked zoomed in).
+6. **Fits on one screen is measured, at six sizes** (Tzvi, 20 Oct 2026: "not
+   everything is fitting on one screen, wasn't that already a rule").
+   **The six screen sizes, the one list every rule and script points to:**
+   laptops 1280x650, 1440x900, 1536x753 and 1920x1080, phones 390x844 and
+   360x640 (the sizes `scripts/check-fits.mjs` uses; other scripts may add
+   more). `node scripts/check-fits.mjs <urls>` must pass for every page: each
+   section fits below the menu bar at the laptop sizes, and no photo is taller
+   than the screen at any of the six. Cap photos and big type by `svh`; a main
+   tile puts its photo beside its words. A photo from a phone is never blown
+   up past its own size to fill a wide screen (her 1170px photo filled 1920px
+   and looked zoomed in).
 7. **Similar items look the same way** (Tzvi: "part of a great website is
    consistency"): if one flavour's thumbnail is one jar, every flavour's is
    one jar; a list where pointing at an item changes a big photo changes it
@@ -882,6 +916,10 @@ refuses to put a NEW page live without it. Read the saved effects for the
 kind of business (the part files' "For ..." sections and pictures) every
 time; never design from defaults.
 
+CONCEPT.md is also where the style sheet (3g.1), the effect budget (3f.2) and
+the effect sources (3g.17) are written. `BRIEF.md` is retired: CONCEPT.md
+replaces it everywhere (Tzvi, 22 Oct 2026).
+
 ## 3r. Checked by the scripts, then by someone else, before anyone sees it (Tzvi, 20 Oct 2026)
 
 Tzvi: "make sure the rules will prevent this in the future, why didn't the
@@ -896,8 +934,8 @@ cause as 3n and 3q). So every rule that can be measured is a script, and
 the rest is looked at by someone who did not build it:
 
 1. **Scripts, all of them, on every page of the site**: `clipped.mjs`,
-   `readable.mjs`, `scripts/check-fits.mjs` (fits the screen at four laptop
-   sizes and on phones; no photo shown past 1.35 times its size),
+   `readable.mjs`, `scripts/check-fits.mjs` (fits the screen at the six sizes
+   of 3p.6; no photo shown past 1.35 times its size),
    `scripts/check-fingerprints.mjs`, `scripts/check-concept.mjs`.
    `publish-page.mjs` refuses a new page that fails check-fits,
    check-fingerprints or check-concept.
@@ -921,8 +959,9 @@ docs/ui-videos/notes/2026-10-20-nine-videos.md). He approved all of them ("yes a
    smaller or darker) and a hover state, cancelled if you scroll away.
 2. Nothing jumps: late photos and content fade in over 200 to 400 ms into
    space already kept for them; choosing something never moves the layout.
-3. One shadow, the soft kind: light, about 3 px down, about 30 px blur, no
-   spread, tinted with the brand colour, never a dark default.
+3. One shadow, the soft kind (the single home of the shadow rule): light,
+   about 3 px down, about 30 px blur, no spread, tinted with the background or
+   brand colour, never black or a dark default.
 4. One left edge: headings, text and buttons line up on the same margin.
 5. A name is at least 1.25 times the size of the line under it, and heavier.
 6. Controls that do the same job look the same (height, corner, style).
@@ -958,14 +997,15 @@ docs/ui-videos/notes/2026-10-20-nine-videos.md). He approved all of them ("yes a
 
 **Never (the videos' sales tricks)
 Invented reviews or counts ("4.9 from 221", "500+ sold this week"), fake
-scarcity or countdowns, percentage savings, logo walls, slogans that promise
+scarcity or countdowns, logo walls, slogans that promise
 a journey. Already banned (3j); these videos are full of them.
 
-**Prices, the way shops show them** (Tzvi, the same day: "instead of writing 20% off discount it should
-just say 20% off, and it shows the original price with a slash through it next to the current price;
-on The Whipped Cup by the prices there's too many words"): a real saving is the old price struck
-through beside the price and a two-word badge ("Save ₪12"), never a sentence; the button carries the
-offer and its price, so no line explains it again; badges two or three words.
+**Prices, the way shops show them** (Tzvi, 20 Oct 2026: "on The Whipped Cup by
+the prices there's too many words"): a real saving is the real separate price
+struck through beside the price and a two or three word percentage badge
+("25% off"), as 3j says, never a sentence; the button carries the offer and its
+price, so no line explains it again. Prices are in the main text colour, bold
+and large.
 
 **Checked, not remembered.** `node scripts/check-site.mjs <every page>` fails: BROKEN (script or
 console error, a 404, a dead link between pages), SHIFT (layout moves after loading or when a choice is
@@ -984,6 +1024,19 @@ docs/ui-videos/HOW-TO-WATCH.md. Every change a video shows becomes a line in a b
 table, and every line is then checked against every page we are building, fixed or marked not
 relevant, the same day.
 
+## 3t. Sections change worlds (Tzvi, 21 Oct 2026, after moto-card.com)
+
+Tzvi: "go through this website and you'll see that there are different sections and it changes to pictures, not everything is just one colour ... this looks like a real website, ours do not." Study: docs/inspo/moto-card-2026-10-21/.
+
+1. **The home page is a sequence of worlds, not one colour.** After the opening, the ground changes from section to section: a full-bleed photo or film, then a calm section on a contrasting plain ground (white or the brand's dark), then a picture again. Never three sections in a row on the same plain ground.
+2. **Pictures carry the page.** At least a third of the home page's sections are mostly picture or film edge to edge (the owner's real photos first; generated scenes follow the policy in 1 and 3o.1), with the words on the picture, not in a box beside it. Words over a picture follow 5b.3 (a soft edge shade, never a scrim).
+3. **One big line per section,** short, with at most one short line under it; small calm body text; lots of space. On the first screen the big line is the headline of 3g.13.
+4. **One action, identical everywhere:** see 2.9.
+5. **Their own details as texture:** a true detail of the business (their prices, sizes, hours, street, fruit, cuts of meat) used as the moving or background detail, instead of decoration.
+6. **Plain sections are rests:** numbered lists, prices, FAQ and contact sit on a calm plain ground with hairlines, between the pictures.
+7. **A real footer:** a last big line, the button, link columns, contact.
+scripts/check-site.mjs WORLDS checks 1 and 2 on every home page (and OPENING checks 3h.1); publish-page refuses a page that fails.
+
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 
 Full text: `reference/design-rules.md`. The rules both builders share are
@@ -995,8 +1048,7 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
   weight everywhere. Each has its fix in Part 2.
 - **Identity from the business**: the accent from their logo; ground, text,
   muted, surface and rule built around it (5 to 6 colours, neutrals leaning
-  to the accent); one accent per screen: one word or one object, plus the primary
-  button's fill (3g.3). Two faces (headline and text), at most a third for one
+  to the accent); the accent colour for the main button only (3g.3). Two faces (headline and text), at most a third for one
   label style; hero headline 96 to 160px on a laptop, 56 to 72px on a phone.
 - **Six presets as starting points** (Candlelight, Bold Pantry, Jerusalem
   Stone, Studio, Field, Workshop), always with their accent swapped in and
@@ -1013,8 +1065,9 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
   touches; an effect only when the business has the material for it; held
   sections fit or are not held; the order section is never pinned; a page
   differs from each of the last ten live pages on at least 4 of the 6
-  FINGERPRINTS dimensions; owners choose from up to three versions, and only a version
-  that passes the visual check goes live.
+  FINGERPRINTS dimensions; the automatic page builder (not hand builds, which pick one
+  direction themselves) lets owners choose from up to three versions, and only
+  a version that passes the visual check goes live.
 - **Quality gate** (Part 9): score the page before returning it, list what
   is below the bar and give the owner a checklist of what would unlock more.
 
@@ -1035,12 +1088,13 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
   the one-idea, one-peak, one-signature rule. A 3h film opening IS the page's one
   signature scroll section; everything else is an accent (3f.2).
 - No blank screens, no scroll cues, no "01/06" counters, no label above every section.
-- Top of the page: a ceiling of 4 pieces of text, headline at most 2 lines; the
-  first screen itself follows 3g.13.
+- Elsewhere at the top of a page: a ceiling of 4 pieces of text, headline at
+  most 2 lines; the first screen is 3g.13.
 - **Text over imagery** (5b.3 in the full rules, the single home of this rule).
   On a photo or film: a soft shade along the edge the words sit on, contrast
   measured on the brightest frame (`readable.mjs`); a small solid card is
-  allowed; big dark pools, full-frame darkening and frosted glass are not.
+  allowed; big dark pools, full-frame darkening and frosted glass are not. A
+  plain strip under the photo only where the picture is too busy for words.
 - No default "premium" palette (cream with brass) and no AI purple; the
   palette comes from their logo and photos.
 - Honest persuasion only: repeat the promise that brought them, reassurance
@@ -1057,13 +1111,13 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
 | **Text never re-wraps while its container animates.** Fixed width for the narrowest state, or fade between states. | Words jumped lines as a panel widened. |
 | **No in-between state looks unfinished.** Check every transition at its middle; an emptied area goes to the page ground, never a bare panel. | An empty grey strip mid-scroll. |
 | **Text over imagery follows section 4 (5b.3)**, and is checked at the brightest frame and the narrowest screen. | A line sat on bright steel. |
-| **A pinned section must fit at 650px tall**, or it is not pinned. The order section is never pinned. | The order controls were cut off on a 1536x753 laptop. |
+| **A held (pinned) section is designed to fit at 1280x650.** If it truly cannot, it plays as the page scrolls without holding the screen and is still the page's signature. The order section is never held. | The order controls were cut off on a 1536x753 laptop. |
 | **A line of items separated by dots never wraps.** Stack them if it might. | A stray dot started the second line. |
 | **A fixed bar never covers content.** Give content room for it. | The phone order bar hid two lines. |
 | **Nothing is cut off by the box it sits in.** Every label, number, ruler and photo sits wholly inside the section that holds it, at every screen size, laptop, short laptop and phone. Something that flies in from off-screen (mark it `data-clip-ok`) may be cut while it travels, never once it has landed. Run `scripts/clipped.mjs`. | "10 cm" under Blazin' Boards' growing board was sliced in half, and the landed board ran 42px off a short laptop (12 Oct 2026). |
 | **A cut-out is one subject, cleanly.** No stray pieces (a garnish sliced off at the photo's edge, specks), no pale fringe from the old background. Clean it with `scripts/cutout.py`, then `cutout.py --check`, and look at it on a dark and a light ground. | Blazin' Boards' board kept a cut-off olive and white specks (12 Oct 2026). |
 | **A label never covers the thing it labels.** Compute where the spot lands once the camera settles; if the card would sit on it, the card takes the other side for that spot. | The oven card sat on the oven on a phone. |
-| **No block is taller than the screen**: a hero's copy and button, a tile, a list, the offer, each seen whole at 1280x650, 1440x900 and a phone. Measure the heights. | A 1-to-1 tile was 940px tall: you saw the dumbbells, not the price. |
+| **No block is taller than the screen** (3p.6): measure the heights at the six sizes. | A 1-to-1 tile was 940px tall: you saw the dumbbells, not the price. |
 | **A caption stays up until the next one replaces it**, including while the camera travels. | Bare kitchen between stations. |
 | **A payoff is seen where it happens, on every device**: a counter, clock or progress line is checked at its finish on a phone and a laptop; hiding a bar or button never hides it. | Michal's 30:00 clock slid away on phones just before reaching it. |
 | **Check every state as the device that shows it**: hover-only and touch-only looks, short screens, the phone bar on and off; phones with touch emulation, never a narrow desktop window. | The preview video showed outline buttons no phone draws. |
@@ -1075,8 +1129,8 @@ The owner never sees a first draft. Before showing anything:
 
 1. **Render it** as a visitor meets it: laptop and phone, each language, normal
    and reduced motion. Walk a scroll page top to bottom at several positions
-   per section, never one screenshot. Include a short laptop (1536x753 or
-   1280x650); the default 900px-tall test hides the worst bugs.
+   per section, never one screenshot. Use the six sizes of 3p.6; the short laptop
+   (1280x650) is the one that hides the worst bugs.
    Phones as phones (touch emulation, a short one like 360x640 too), and
    every moment the page builds to (a counter's finish, the bar turning, the
    last section) looked at on each device, not only the start.
@@ -1095,7 +1149,8 @@ The owner never sees a first draft. Before showing anything:
    - `python ~/.claude/skills/build-business-page/scripts/cutout.py --check <img>`:
      a cut-out has one piece and no pale fringe (and `cutout.py in out` cleans it).
    - `node ~/.claude/skills/build-business-page/scripts/cutoff.mjs <url>`:
-     anything cut off by a pinned or full-screen section at nine sizes.
+     anything cut off by a pinned or full-screen section at the six sizes of
+     3p.6 (and more).
    - `scripts/overlay-truth.mjs <url> <overlay> <section>`: for anything
      placed on a spot in a picture; hides it, finds the real spot with
      OpenCV, measures the miss at six sizes; over 4px fails.
@@ -1106,19 +1161,6 @@ The owner never sees a first draft. Before showing anything:
    was fixed and what could not be (needs their content, a decision, or a real
    device). For a shareable preview:
    `node <skill>/scripts/record.mjs <url> 390 844 preview-phone.mp4`.
-
-## 3t. Sections change worlds (Tzvi, 21 Oct 2026, after moto-card.com)
-
-Tzvi: "go through this website and you'll see that there are different sections and it changes to pictures, not everything is just one colour ... this looks like a real website, ours do not." Study: docs/inspo/moto-card-2026-10-21/.
-
-1. **The home page is a sequence of worlds, not one colour.** After the opening, the ground changes from section to section: a full-bleed photo or film, then a calm section on a contrasting plain ground (white or the brand's dark), then a picture again. Never three sections in a row on the same plain ground.
-2. **Pictures carry the page.** At least a third of the home page's sections are mostly picture or film edge to edge (the owner's real photos first; generated scenes of their real products only under rule 1's limits), with the words on the picture, not in a box beside it. Words over a picture follow 5b.3 (a soft edge shade, never a scrim).
-3. **One big line per section,** short, with at most one short line under it; small calm body text; lots of space.
-4. **One action, identical everywhere:** the same button, same words, in the bar, in the sections that sell, and in the footer.
-5. **Their own details as texture:** a true detail of the business (their prices, sizes, hours, street, fruit, cuts of meat) used as the moving or background detail, instead of decoration.
-6. **Plain sections are rests:** numbered lists, prices, FAQ and contact sit on a calm plain ground with hairlines, between the pictures.
-7. **A real footer:** a last big line, the button, link columns, contact.
-scripts/check-site.mjs WORLDS checks 1 and 2 on every home page (and OPENING checks 3h.1); publish-page refuses a page that fails.
 
 **Every rule, every site, before anyone sees it (Tzvi, 22 Oct 2026: "why do we keep skipping rules").**
 `docs/rules-checklist.md` lists every rule that can be judged on a finished site, each with how it is
