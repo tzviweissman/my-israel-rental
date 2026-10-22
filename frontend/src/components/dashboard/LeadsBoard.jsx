@@ -132,7 +132,7 @@ export default function LeadsBoard({ API, auth, businessId }) {
                         {c.link && <Link to={c.link} className="px-3 min-h-[36px] inline-flex items-center rounded-lg border text-xs font-semibold" style={fieldStyle}>{t('leads.open', 'Open')}</Link>}
                         {c.phone && <a href={`tel:${c.phone}`} className="px-3 min-h-[36px] inline-flex items-center rounded-lg border text-xs font-semibold" style={fieldStyle} dir="ltr">{t('leads.call', 'Call')}</a>}
                         {c.source === 'manual' && (
-                          <button type="button" onClick={() => remove(c)} className="grid place-content-center w-9 h-9" aria-label={t('leads.delete', 'Delete')}><Trash2 size={14} /></button>
+                          <button type="button" onClick={() => remove(c)} className="grid place-content-center w-11 h-11" aria-label={t('leads.delete', 'Delete')}><Trash2 size={14} /></button>
                         )}
                       </div>
                     </li>
