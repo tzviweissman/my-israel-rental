@@ -16,7 +16,7 @@ SITE = kit.Site(
 SITE.fonts = 'family=League+Gothic&family=Barlow:wght@400;600;700&family=Heebo:wght@500;700'
 
 TITLE = 'American Crust · American bagel and pizza dough, Jerusalem'
-DESC = "The American bagel and pizza dough that you've been missing. Bagel dough ₪30, pizza dough ₪27, delivered in Ramat Eshkol and surrounding areas."
+DESC = "The American bagel and pizza dough that you've been missing. Bagel dough ₪30, pizza dough ₪27, delivered in Ramat Eshkol and surrounding areas for ₪25."
 OG = 'og.webp'
 
 def finish(page):
@@ -35,7 +35,7 @@ ICON = {
 CARDS = f'''  <section class="buy" id="buy" aria-label="Our doughs">
     <div class="pcs">
       <article class="pc" data-tilt>
-        <div class="ph"><img src="assets/bagel-dough.webp" alt="American style bagel dough: six pre shaped bagels in their tray" width="582" height="465" fetchpriority="high"></div>
+        <div class="ph"><img src="assets/bagel-dough.webp" alt="American style bagel dough: six pre shaped bagels in their tray" width="590" height="443" fetchpriority="high"></div>
         <div class="info">
           <h3>American style bagel dough</h3>
           <p class="sub">6 pre shaped bagels</p>
@@ -44,7 +44,7 @@ CARDS = f'''  <section class="buy" id="buy" aria-label="Our doughs">
         </div>
       </article>
       <article class="pc night" data-tilt>
-        <div class="ph"><img src="assets/pizza-dough.webp" alt="Classic American pizza dough in its tub with the American Crust label" width="420" height="335" fetchpriority="high"></div>
+        <div class="ph"><img src="assets/pizza-dough.webp" alt="Classic American pizza dough in its tub with the American Crust label" width="480" height="360" fetchpriority="high"></div>
         <div class="info">
           <h3>Classic American pizza dough</h3>
           <p class="sub">100% parve</p>
@@ -60,19 +60,19 @@ HOME = f'''  <section class="open" aria-labelledby="h-open">
     <div class="wrap">
       <div>
         <h1 id="h-open"><span class="w w1">Boil.</span><span class="w w2">Bake.</span><span class="w w3">Brag.</span></h1>
-        <p class="lede">The American bagel and pizza dough that you've been missing, delivered in Ramat Eshkol, Jerusalem.</p>
+        <p class="lede">The American bagel and pizza dough that you've been missing, delivered in Ramat Eshkol, Jerusalem, for ₪25.</p>
       </div>
-      <div class="ring" aria-hidden="true"><div class="disc"><img class="raw" src="assets/bagel-dough.webp" alt="" width="582" height="465"><img class="baked" src="assets/baked-bagels.webp" alt="" width="760" height="760"></div></div>
+      <div class="ring" aria-hidden="true"><div class="disc"><img class="raw" src="assets/bagel-dough.webp" alt="" width="590" height="443"><img class="baked" src="assets/baked-bagels.webp" alt="" width="760" height="760"></div></div>
     </div>
   </section>
 {CARDS}
   <section class="stores" aria-labelledby="h-stores">
     <div class="wrap">
-      <h2 id="h-stores" class="rev">Find us in</h2>
+      <h2 id="h-stores" class="rev">Now available in</h2>
       <ul class="st-list rev">
-        <li><b>Express Market</b><span>in Geula</span></li>
-        <li><b>Arzai Makolets</b><span></span></li>
-        <li><b>Good Market</b><span>on Paran</span></li>
+        <li>Express Market in Geula</li>
+        <li>Arzai Makolets</li>
+        <li>Good Market on Paran</li>
       </ul>
     </div>
   </section>
@@ -84,7 +84,7 @@ HOME = f'''  <section class="open" aria-labelledby="h-open">
         <h2 id="h-bake">America Just Landed in Your <span class="u">Kitchen</span>.</h2>
         <p class="t">Make fresh American tasting bagels straight from your home. Just follow our simple instructions and enjoy. For pizza, meat pizza or classic American pie, this dough is sure to impress.</p>
         <ul class="facts" aria-label="About our dough">
-          <li>{ICON['quality']}Premium quality</li><li>{ICON['fresh']}Fresh and ready to use</li><li>{ICON['pareve']}Pareve</li>
+          <li>{ICON['pareve']}Pareve</li>
         </ul>
       </div>
     </div>
@@ -94,7 +94,7 @@ HOME = f'''  <section class="open" aria-labelledby="h-open">
     <div class="wrap">
       <h2 id="h-get" class="rev">Delivery, payment and kosher</h2>
       <div class="tiles rev">
-        <div class="tile"><h3>Delivery</h3><p>We deliver in Ramat Eshkol and surrounding areas. Message us for Ramot, RBS and others.</p></div>
+        <div class="tile"><h3>Delivery</h3><p>Delivery ₪25 in Ramat Eshkol and surrounding areas. Further away, the fee depends on where: we confirm it on WhatsApp.</p></div>
         <div class="tile"><h3>Payment</h3><p>Cash or Zelle.</p></div>
         <div class="tile"><h3>Kosher</h3><p>Pareve, with the hechsher of Rabbi Akiva Dershowitz.</p></div>
       </div>
@@ -137,8 +137,8 @@ SHOP = f'''  <form id="form" novalidate>
   <section class="stage" id="doughs" data-room="bagel" aria-labelledby="h-shop">
     <div class="wrap st-grid">
       <div class="st-ph">
-        <img class="on" data-p="bagel" src="assets/bagel-dough.webp" alt="American style bagel dough: six pre shaped bagels in their tray" width="582" height="465" fetchpriority="high">
-        <img data-p="pizza" src="assets/pizza-dough.webp" alt="Classic American pizza dough in its tub with the American Crust label" width="420" height="335">
+        <img class="on" data-p="bagel" src="assets/bagel-dough.webp" alt="American style bagel dough: six pre shaped bagels in their tray" width="590" height="443" fetchpriority="high">
+        <img data-p="pizza" src="assets/pizza-dough.webp" alt="Classic American pizza dough in its tub with the American Crust label" width="480" height="360">
         <img data-p="bagel-use" src="assets/baked-bagels.webp" alt="Everything bagels" width="760" height="760" loading="lazy">
         <img data-p="pizza-use" src="assets/pizza-tubs.webp" alt="Tubs of American Crust pizza dough in rows" width="1024" height="890" loading="lazy">
         <button type="button" class="st-use" id="st-use" aria-label="Show everything bagels"><img id="st-use-img" src="assets/baked-bagels.webp" alt="" width="64" height="64"></button>
@@ -156,7 +156,7 @@ SHOP = f'''  <form id="form" novalidate>
         </div>
         <p class="st-in" id="st-in" aria-live="polite"></p>
         <ul class="facts st-facts" aria-label="About this dough">
-          <li>{ICON['quality']}Premium quality</li><li>{ICON['fresh']}Fresh and ready to use</li><li>{ICON['pareve']}Pareve, hechsher from Rabbi Akiva Dershowitz</li>
+          <li>{ICON['pareve']}Pareve, hechsher from Rabbi Akiva Dershowitz</li><li data-for="pizza">{ICON['quality']}Premium quality</li><li data-for="pizza">{ICON['fresh']}Fresh and ready to use</li>
         </ul>
         <div class="st-pick" aria-label="Our doughs">
           <button type="button" data-p="bagel" aria-pressed="true"><img src="assets/bagel-dough.webp" alt="" width="44" height="44"><span>Bagel dough<br>₪30</span></button>
@@ -170,7 +170,7 @@ SHOP = f'''  <form id="form" novalidate>
     <div class="wrap">
       <ol class="osteps" id="steps" aria-label="Order steps">
         <li class="is-now" aria-current="step"><button type="button" data-go="1">Step 1: Your basket</button></li>
-        <li><button type="button" data-go="2">Step 2: Delivery or pick-up</button></li>
+        <li><button type="button" data-go="2">Step 2: Delivery</button></li>
         <li><button type="button" data-go="3">Step 3: Your details</button></li>
       </ol>
       <div class="form">
@@ -183,17 +183,9 @@ SHOP = f'''  <form id="form" novalidate>
             <a class="more lnk" href="#doughs">Add more dough</a>
           </div>
           <div class="card ostep" data-s="2" hidden>
-            <h2>Delivery or pick-up</h2>
-            <div class="how" role="radiogroup" aria-label="How you get it">
-              <label class="opt"><input type="radio" name="how" value="delivery" checked>Delivery</label>
-              <label class="opt"><input type="radio" name="how" value="pickup">Pick up from a store</label>
-            </div>
-            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p><p class="hint">We deliver in Ramat Eshkol and surrounding areas. Message us for Ramot, RBS and others.</p></div>
-            <div id="w-store" hidden><p class="f" style="margin:.9rem 0 .35rem;font-weight:600">Which store</p><div class="stores-pick" role="radiogroup" aria-label="Which store">
-              <label class="opt"><input type="radio" name="store" value="Express Market (in Geula)">Express Market (in Geula)</label>
-              <label class="opt"><input type="radio" name="store" value="Arzai Makolets">Arzai Makolets</label>
-              <label class="opt"><input type="radio" name="store" value="Good Market (on Paran)">Good Market (on Paran)</label></div><p class="err" id="e-store"></p></div>
-            <div id="w-when"><label class="f" for="when" id="when-l">Delivery day</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p></div>
+            <h2>Delivery</h2>
+            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p><label class="opt far"><input type="checkbox" id="far">My address is further away (Ramot, RBS or elsewhere)</label><p class="hint">Delivery ₪25 in Ramat Eshkol and surrounding areas. Further away, the fee depends on where: we confirm it on WhatsApp.</p></div>
+            <div id="w-when"><label class="f" for="when" id="when-l">Delivery day</label><input class="fld" id="when" type="date"><p class="hint" id="h-when">Closed for Shabbat and holidays: those days cannot be chosen.</p><p class="err" id="e-when"></p></div>
           </div>
           <div class="card ostep" data-s="3" hidden>
             <h2>Your details</h2>
@@ -209,7 +201,7 @@ SHOP = f'''  <form id="form" novalidate>
           <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
-          <button class="btn" id="send" type="submit"><span>Continue to delivery or pick-up</span></button>
+          <button class="btn" id="send" type="submit"><span>Continue to delivery</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
           <p class="note" id="send-note">Next: how you get it and the day.</p>
           <p class="sent" id="sent" role="status" hidden></p>
@@ -221,7 +213,7 @@ SHOP = f'''  <form id="form" novalidate>
   </form>
 '''
 SHOP_JS = '<script>\n' + open('gen/shop.js', encoding='utf8').read() + '</script>\n'
-SITE.write('shop', 'Shop · American Crust bagel and pizza dough', 'Order American style bagel dough, 6 pre shaped bagels, ₪30, and classic American pizza dough, 100% parve, ₪27. Delivery in Ramat Eshkol or pick-up from three stores.', OG, SHOP, SHOP_JS); finish('shop')
+SITE.write('shop', 'Shop · American Crust bagel and pizza dough', 'Order American style bagel dough, 6 pre shaped bagels, ₪30, and classic American pizza dough, 100% parve, ₪27. Delivery ₪25 in Ramat Eshkol and surrounding areas.', OG, SHOP, SHOP_JS); finish('shop')
 
 # ---- contact ----
 CONTACT = SITE.page_head('Contact', 'Order, ask a question, or tell us where to deliver.') + f'''  <section class="sec" style="padding-block: 1.5rem 2.5rem" aria-label="How to reach us">
@@ -236,9 +228,9 @@ CONTACT = SITE.page_head('Contact', 'Order, ask a question, or tell us where to 
     <div class="wrap">
       <h2 id="h-get2">Delivery and payment</h2>
       <div class="tiles">
-        <div class="tile"><h3>Delivery</h3><p>We deliver in Ramat Eshkol and surrounding areas. Message us for Ramot, RBS and others.</p></div>
+        <div class="tile"><h3>Delivery</h3><p>Delivery ₪25 in Ramat Eshkol and surrounding areas. Further away, the fee depends on where: we confirm it on WhatsApp.</p></div>
         <div class="tile"><h3>Payment</h3><p>Cash or Zelle.</p></div>
-        <div class="tile"><h3>Find us in</h3><p>Express Market (in Geula), Arzai Makolets and Good Market (on Paran).</p></div>
+        <div class="tile"><h3>Now available in</h3><p>Express Market in Geula, Arzai Makolets and Good Market on Paran.</p></div>
       </div>
     </div>
   </section>
@@ -252,4 +244,5 @@ CONTACT = SITE.page_head('Contact', 'Order, ask a question, or tell us where to 
 # the contact page shows the numbers once, in its tiles: its closing band keeps only the line and the button
 import dataclasses
 dataclasses.replace(SITE, contacts=[]).write('contact', 'Contact · American Crust', 'WhatsApp +1 732 503 1703, text or call 055 336 2730. American Crust bagel and pizza dough, Jerusalem.', OG, CONTACT); finish('contact')
+_c = open('contact.html', encoding='utf8').read(); open('contact.html', 'w', encoding='utf8').write(_c.replace('\n        <p></p>', ''))   # the contact close band has no numbers: no empty paragraph
 print('built')
