@@ -1,3 +1,5 @@
+# RETIRED 22 Oct 2026: the owner now enters her own products and photos in her
+# dashboard. --apply REPLACES her shop's products and would wipe her work. Do not run.
 """Put The Gift Boutique's WhatsApp catalogue into their shop on MyIsraelRental,
 so their designed page's price list follows what they change in the dashboard
 (frontend/public/pages/mir-catalog.js).
