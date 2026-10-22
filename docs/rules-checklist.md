@@ -94,12 +94,6 @@ R3h.17 | Words and film take turns: a giant name sits on plain ground, the film 
 
 ## 3. Sections and worlds
 
-R3t.1 | Home page sections change ground: a full-bleed photo/film, then a calm plain ground, then a picture again; never three sections in a row on the same plain ground | 3t.1 | script: site WORLDS (home page)
-R3t.2 | At least a third of the home page's sections are mostly picture or film edge to edge, with the words on the picture | 3t.2 | script: site WORLDS (home page)
-R3t.3 | One big short line per section (on the first screen it is the headline of 3g.13), at most one short line under it, small calm body text, lots of space | 3t.3 | LOOK: every section of the home page
-R3t.5 | A true detail of the business (prices, sizes, hours, street, fruit, cuts) is used as texture instead of decoration | 3t.5 | LOOK: name the detail
-R3t.6 | Plain sections (numbered lists, prices, FAQ, contact) are calm rests on a plain ground with hairlines, between the pictures | 3t.6 | LOOK
-R3t.7 | A real footer: a last big line, the button, link columns, contact, the MyIsraelRental line | 3t.7, 3k.3 | LOOK: footer of every page; identical on every page
 R3.12 | Sections every page has: a dramatic hero, a features section (one scannable item per product or service with price and what is included), a call-to-action section of its own near the end with the proof beside the button | 3 (cont.) 1 to 3 | LOOK
 R3c.1 | References came first: 3 to 5 real screens of businesses of the same kind kept, each with its source link in CONCEPT.md; the builder chose and said in one line what was picked and why (fresh searches per piece: R3g.17) | 3c.1, 3e.24 | script: concept (needs cited pictures) plus LOOK that named searches are real
 R3g.17 | Every piece (button, arrow, each card or list effect, each section) came from a fresh Mobbin, 21st and Inspo search for this business, with the source named; nothing reused from the last two pages; each effect has a reason (says what a control does) | 3g.17, 3c.1, 0b.4 | script: concept (every effect has "from") and prints (effects), plus LOOK at the sources
@@ -233,6 +227,10 @@ R3f.7 | The bottom bar fits at 360 px: its label shrinks or wraps, its button ne
 R3a.6 | A fixed bar never covers content (room is kept for it, including the last line and the end of the page) | 3a table | script: site PHONE
 R3s.22 | Everything to tap is at least 40 px on a phone and no two taps overlap | 3s TAP | script: site TAP
 R3s.23 | The page never scrolls sideways on a phone | 3s PHONE | script: site PHONE
+R3t.1 | The site declares its category (CONCEPT.md and a site-category meta on every page) and follows that category's row of the 3t table: ground and colour, pictures, how it sells, type | 3t | check-site CATEGORY; LOOK: compare the home and shop pages with the category's screenshots in docs/inspo/awwwards-anatomy-2026-10-22/
+R3t.2 | food-shop and fashion-shop: a price and an Add or Order control within the first two screens; every product card has photo, name, size or servings, price and a button | 3t | check-site BUY; LOOK: every card
+R3t.3 | trainer: at least a third of sections are picture, never three plain sections in a row | 3t | check-site WORLDS
+R3t.4 | A real footer on every page, identical: a last big line, the button, link columns, contact, the MyIsraelRental line | 3t, 3k.3 | LOOK: footer of every page
 R3a.7 | Every state is checked on the device that shows it (touch emulation for phones, never a narrow desktop window; hover-only looks have a touch version) | 3a table, 3e.9 | LOOK: record which emulation was used
 R3a.8 | A line of items separated by dots never wraps | 3a table | LOOK at 360x640
 

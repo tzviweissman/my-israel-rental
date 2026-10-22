@@ -26,6 +26,7 @@ SERVICES = [
 ]
 _P = {k: p for k, n, p, m, d in SERVICES}
 SAVE = _P['removal'] + _P['gel'] - _P['gel-removal']  # removal + new gel booked apart, minus booked together
+PCT = (SAVE * 100) // (_P['gel-removal'] + SAVE)  # percent off the separate price, rounded down
 HOURS = [('Sunday', '10:00 to 13:00'), ('Monday', '10:00 to 19:00'), ('Tuesday', '10:00 to 19:00'), ('Wednesday', '10:00 to 19:00'),
          ('Thursday', '10:00 to 19:00'), ('Friday', '10:00 to 13:00'), ('Shabbat', 'Closed')]
 
@@ -164,7 +165,7 @@ def price_html(k, p, m):
     return f'<div class="price">{was}<span class="sym">₪</span>{p}<small>about {m} minutes</small></div>'
 
 
-svc_rows = ''.join(f'''        <div class="svc-row rev"><div><h3>{n}{f' <span class="tag">Save ₪{SAVE}</span>' if k == 'gel-removal' else ''}</h3><p>{d}{f' <a class="ask" href="{ASK}" target="_blank" rel="noopener">Ask about a design</a>' if k == 'art' else ''}</p></div>{price_html(k, p, m)}<a class="btn-line" href="book.html?service={k}">Book a time</a></div>
+svc_rows = ''.join(f'''        <div class="svc-row rev"><div><h3>{n}{f' <span class="tag">{PCT}% off</span>' if k == 'gel-removal' else ''}</h3><p>{d}{f' <a class="ask" href="{ASK}" target="_blank" rel="noopener">Ask about a design</a>' if k == 'art' else ''}</p></div>{price_html(k, p, m)}<a class="btn-line" href="book.html?service={k}">Book a time</a></div>
 ''' for k, n, p, m, d in SERVICES)
 SERVICES_SEC = f'''  <section class="sec rest" id="services" aria-labelledby="h-svc">
     <div class="wrap">
@@ -224,7 +225,7 @@ def write(name, title, desc, img, body, tail=''):
 
 write('index', 'Nails by Elisheva · Gel nails and nail art in Romema, Jerusalem', DESC, 'milky.webp', HERO + SERVICES_SEC + STUDIO_PIC + WORK_SEC + VISIT_PIC + VISIT, HERO_JS)
 
-svc_opts = ''.join(f'<label class="opt"><input type="radio" name="svc" value="{k}"><span class="box"><span><b>{n}</b><br><small>about {m} minutes</small></span><span class="p"><span class="sym">₪</span>{p}</span></span>{f'<span class="tag"><i class="t-save">Save ₪{SAVE}</i><i class="t-sel">Selected</i></span>' if k == 'gel-removal' else ''}</label>' for k, n, p, m, d in SERVICES)
+svc_opts = ''.join(f'<label class="opt"><input type="radio" name="svc" value="{k}"><span class="box"><span><b>{n}</b><br><small>about {m} minutes</small></span><span class="p">{f'<s class="was"><span class="sym">₪</span>{p + SAVE}</s>' if k == 'gel-removal' else ''}<span class="sym">₪</span>{p}</span></span>{f'<span class="tag"><i class="t-save">{PCT}% off</i><i class="t-sel">Selected</i></span>' if k == 'gel-removal' else ''}</label>' for k, n, p, m, d in SERVICES)
 shade_opts = ''.join(f'<button class="shade" type="button" data-k="{k}" style="--c:{c}" aria-pressed="false" aria-label="{n}"></button>' for k, n, c, f, a in SHADES)
 # The booking page as a product page (Tzvi, 20 Oct 2026: "use the new product page rules for ... the
 # nails one"; docs/inspo/product-pages-2026-10-20): her work big on a stage that takes the shade you
