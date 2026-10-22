@@ -25,7 +25,7 @@ SHOP = f'''  <form id="form" novalidate>
           <span class="step" role="group" aria-label="How many skirts"><button type="button" data-d="-1" aria-label="One fewer">−</button><output id="st-n">1</output><button type="button" data-d="1" aria-label="One more">+</button></span>
           <button class="btn" type="button" id="st-add"><span>Add to basket, ₪320</span></button>
         </div>
-        <p class="st-in" id="st-in" aria-live="polite">You choose the size and colour in your basket.</p>
+        <p class="st-in" id="st-in" aria-live="polite">You write your size and colour in the note in your basket.</p>
         <ul class="facts" aria-label="About the skirt">
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10l1.5 18h-5L12 10l-1.5 11h-5z"/></svg>Built-in leggings</li>
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><path d="M12 8v6M12 14l-4 6M12 14l4 6M6 11l6-3 6 3"/></svg>Designed for movement and everyday wear</li>
@@ -46,7 +46,7 @@ SHOP = f'''  <form id="form" novalidate>
           <div class="card ostep" data-s="1">
             <h2 id="h-basket">Your basket</h2>
             <ul class="blist" id="sum-list"><li class="bl"><span>Your basket is empty. Add the skirt above.</span></li></ul>
-            <div id="w-sc"><label class="f" for="sc">Size and colour</label><input class="fld" id="sc" maxlength="120" placeholder="Tell us which size and colour you want" autocomplete="off"><p class="err" id="e-sc"></p></div>
+            <div id="w-sc"><label class="f" for="sc">Note: your size and colour</label><input class="fld" id="sc" maxlength="120" placeholder="Write your size and colour" autocomplete="off"><p class="err" id="e-sc"></p></div>
             <p class="err" id="e-items"></p>
             <a class="lnk more" href="#skirt">Back to the skirt</a>
           </div>

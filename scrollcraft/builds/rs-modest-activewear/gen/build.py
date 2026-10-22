@@ -45,6 +45,11 @@ def post(page: str, shop_link: bool = True) -> None:
     s = s.replace('<span class="arw" aria-hidden="true">→</span>', '<span class="arw" aria-hidden="true">' + ARW_SVG + '</span>')
     # the phone bar's price is set in the body face so the shekel sign has a glyph
     s = s.replace('<p class="p"><b>₪320</b>', '<p class="p"><b><span class="sym">₪</span>320</b>')
+    if page != 'shop':
+        s = re.sub(r'(<div class="bar" id="bar"[^>]*>)\s*<p class="p">.*?</p>', lambda m: m.group(1).replace('class="bar"', 'class="bar solo"'), s, flags=re.S)
+        s = s.replace('tabindex="-1">Shop the skirt</a>', 'tabindex="-1">Shop the skirt, <span class="sym">₪</span>320</a>')
+    s = re.sub(r'>(Shop the skirt, <span class="sym">₪</span>\d+)', r'><span>\1</span>', s)
+    s = re.sub(r'>(Add to basket, <span class="sym">₪</span>\d+)</a>', r'><span>\1</span></a>', s)
     s = re.sub(r'<footer class="foot">.*?</footer>', lambda m: FOOT, s, flags=re.S)
     open(f'{page}.html', 'w', encoding='utf8').write(s)
 
@@ -91,24 +96,24 @@ PILLARS = '''  <section class="sec pillars" id="about" aria-labelledby="h-about"
   </section>
 '''
 
-def card(colour, alt, cls):
+def card():
     return f'''        <li class="pcard rev">
-          <a class="pph {cls}" href="shop.html" tabindex="-1" aria-hidden="true"><img src="assets/skirts.webp" alt="" width="1023" height="1209" loading="lazy"></a>
+          <a class="pph full" href="shop.html" tabindex="-1" aria-hidden="true"><img src="assets/skirts.webp" alt="" width="1023" height="1209" loading="lazy"></a>
           <div class="pinfo">
             <h3><a href="shop.html">Premium Modest Sports Skirt</a></h3>
-            <p class="pmeta">{colour}, built-in leggings</p>
+            <p class="pmeta">With built-in leggings</p>
             <p class="pprice" aria-label="320 shekels">{kit.price(320)}</p>
-            <a class="btn-line padd" href="shop.html#order" data-add="skirt" aria-label="Add the {colour.lower()} skirt to the basket, 320 shekels">Add to basket</a>
+            <a class="btn-line padd" href="shop.html#order" data-add="skirt" aria-label="Add the skirt to the basket, 320 shekels">Add to basket, {kit.price(320)}</a>
           </div>
         </li>
 '''
 
 SHOP_ROW = f'''  <section class="sec shoprow" id="skirt" aria-labelledby="h-skirt">
     <div class="wrap">
-      <div class="rowhead"><h2 id="h-skirt" class="rev">Sports skirts with built-in leggings</h2><a class="lnk" href="shop.html">See the skirt</a></div>
+      <div class="rowhead"><h2 id="h-skirt" class="rev">The sports skirt with built-in leggings</h2><a class="lnk" href="shop.html">See the skirt</a></div>
       <ul class="pgrid">
-{card('Black', '', 'blk')}{card('White', '', 'wht')}        <li class="pcard ptile rev">
-          <a class="pph str" href="{MAPS}" target="_blank" rel="noopener" aria-label="Get directions to the store at 31 King George Street"><img src="assets/shop.webp" alt="Inside the RS store: a rail of skirts beside the counter" width="1800" height="2400" loading="lazy"></a>
+{card()}        <li class="pcard ptile rev">
+          <a class="pph full" href="{MAPS}" target="_blank" rel="noopener" aria-label="Get directions to the store at 31 King George Street"><img src="assets/shop.webp" alt="Inside the RS store: a rail of skirts beside the counter" width="1800" height="2400" loading="lazy"></a>
           <div class="pinfo">
             <h3>Visit our store</h3>
             <p class="pmeta">See the skirts on the rail</p>
@@ -125,7 +130,7 @@ HOW = '''  <section class="sec how" id="how" aria-labelledby="h-how">
       <h2 id="h-how" class="rev">How to order</h2>
       <ol class="hsteps">
         <li class="rev"><b>1</b><h3>Add the skirt</h3><p>Put the Premium Modest Sports Skirt in your basket.</p></li>
-        <li class="rev"><b>2</b><h3>Tell us your size and colour</h3><p>Write them in your basket, then your name and phone.</p></li>
+        <li class="rev"><b>2</b><h3>Tell us your size</h3><p>Write your size and colour in the note, then your name and phone.</p></li>
         <li class="rev"><b>3</b><h3>Collect at King George 31</h3><p>Your order reaches us on WhatsApp and you collect it from the store.</p></li>
       </ol>
     </div>

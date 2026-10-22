@@ -7,7 +7,7 @@ Replace every `todo`. `node scripts/check-rules.mjs scrollcraft/builds/rs-modest
 ## 1. Facts and words
 R0b.1 n/a: a local build, not published yet; the slug rs-modest-activewear is set in gen/build.py and there is no live record to compare with
 R0b.3 pass: the one price on every page (cards, opening button, closing band, phone bar, shop, basket) is 320 shekels, the Premium Modest Sports Skirt price in her listing
-R2.1 pass: read every sentence on index, shop and contact: skirts with built-in leggings, King George 31, the three words and the brand line are from her listing and flyer; the black and white cards are the two skirts on her flyer photo; collect from the store is the order form's only option; no count, year or claim added
+R2.1 pass: read every sentence on index, shop and contact: skirts with built-in leggings, King George 31, the three words and the brand line are from her listing and flyer; the single product card is her one listed skirt at 320 shekels shown with her flyer photo; no colour products are shown because her files list none; collect from the store is the order form's only option; no count, year or claim added
 R2.2 pass: read message-to-ravit.md: it asks only about her skirts, hours, delivery, payment, photos and name
 R2.3 pass: message-to-ravit.md now ends with six example FAQ questions written from her details (sizes, trying on, exchange, delivery, hours, washing) and the worry, first days and photo-in-use questions
 R3.1 pass: searched all three pages for best, number one, award, guarantee, delivery, fresh, insured, 24/7: none; premium appears only in her own product name and brand line
@@ -22,9 +22,9 @@ R3.9 pass: her flyer says visit the store at 31 King George Street and shows the
 R3.10 pass: the only strength stated is built-in leggings, from her own listing
 R5.1 pass: read every line as Ravit; each names this shop's skirt, street or order steps
 R5.2 pass: read every line; no teasing or slang
-R5.3 pass: labels are full phrases: Black, built-in leggings; See the skirts on the rail; Collect at King George 31
+R5.3 pass: labels are full phrases: With built-in leggings; See the skirts on the rail; Collect at King George 31
 R5.4 pass: searched visible text of every page for they, them, their: one hit, in Write them in your basket, where them is the size and colour
-R5b.2 pass: the main button reads Shop the skirt with the price and goes to shop.html in the opening, the visit section, the closing band and the phone bar; the header Basket button is the basket link with its count, not a second main button
+R5b.2 pass: going to the shop is always Shop the skirt, 320 shekels (opening, visit section, closing band and phone bar, which holds only that button); adding is always Add to basket with the price on the card and the shop; the header Basket button is the basket link, not a second main button
 R5b.8 pass: closing lines read Visit us at King George 31 and Back to the skirt on the shop; no done or complete
 R3.11 pass: read index top to bottom: opening (what), product row with price, how to order, the brand words, the store; no enquiry form before prices
 R3o.4 pass: contacts labelled WhatsApp and Email on the contact page, closing band and footer; whether she takes calls is asked in message-to-ravit.md question 7
@@ -59,7 +59,7 @@ R3h.17 n/a: the page does not use letters parting over film
 R3.12 pass: hero (doors), a features section (the product row with price and what is included), a closing band with the button and contacts beside it
 R3c.1 pass: CONCEPT.md cites saved inspo pictures; check-concept says ready
 R3g.17 pass: CONCEPT.md Effects names the source of each effect; this rework used the 3t fashion study (Outfit, Odd Ritual) for the product row and strip
-R3c.2 pass: viewed the whole page at 1440: beige with a green opening and a white band, not cream plus an italic serif word; contrast comes from the green opening and the white hang-tag band
+R3c.2 pass: viewed the whole page at 1440: beige throughout with a green opening, the about band is beige with white hang tags; not cream plus an italic serif word
 R3g.1 pass: CONCEPT.md now holds a Style sheet block (ground, ink, accent, faces, radius, motion) and the computed styles match it
 R3g.3 pass: computed colour of every price (card prices, shop tag, basket total) is the ink colour; the accent is the black main button only; no emphasised accent word
 R3g.7 pass: one closing signature, the giant RS under the closing band, away from the order path
@@ -93,7 +93,7 @@ R5b.6 pass: no scroll cues, counters or label above each section
 R3.13 pass: each place the address appears carries it once (opening, visit section, closing band, footer); no doubled gallery block; no two dividers in a row
 R3a.1 pass: rendered index at 1440x900 and 390x844 and walked every screen, shop at 1440, the add-to-basket route from the home page, contact; the six sizes of 3p.6 by check-fits and readable; reduced motion shows the opened store
 R3r.1 pass: pages index, shop, contact: check-site, check-fits, check-motion, readable, clipped, cutoff each run on all three
-R3r.2 n/a: nobody besides the builder has used the page yet; the reviewer answers docs/page-review-checklist.md when the build is handed over
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; findings fixed and re-checked
 R3g.12 pass: check-site FLOW walked the three steps of the shop, an empty form says what is missing and the WhatsApp message carries the total; the home page Add button was clicked and arrived in the basket
 R0b.12 n/a: not published, so there is no pages-list preview clip to compare
 
@@ -101,8 +101,8 @@ R0b.12 n/a: not published, so there is no pages-list preview clip to compare
 R8.1 pass: the two product cards are crops of the one flyer photo (same light, ground, scale); the third tile is the store, a visit tile and not a product
 R8.6 n/a: her photos are the flyer shot, not product hero shots, and generating them is outside this task; the current photo stays and the hero shots needed are listed in the report
 R8.2 pass: every picture is one of her own five photos; nothing generated or stock
-R3p.7 pass: both colour cards use the same crop style and each of the three shop thumbnails changes the stage photo; tapped all three
-R3h.12 pass: the black and white cards come from one master photo, the same one shown on the shop stage
+R3p.7 pass: the one product card and each of the three shop thumbnails change the stage photo; tapped all three
+R3h.12 pass: the product card comes from the same master photo shown on the shop stage
 R3h.10 n/a: no option on this site changes a picture; colour and size are written in the basket
 R3g.14 pass: all images are her own photos, viewed together on the screenshot sheet
 R3o.1 n/a: not a food business
@@ -150,7 +150,7 @@ R3l.2 n/a: no item has a limit on what it allows
 R3l.3 n/a: no item has options that appear once added
 R3l.4 n/a: only one item, nothing to compare
 R3l.6 pass: the pictures are her own photo of the skirts as she sells them
-R3l.7 pass: each card says name, colour, built-in leggings and price without reading another
+R3l.7 pass: the card says name, built-in leggings and price without reading another
 R3e.9 pass: check-site STATE and FLOW: hover and pressed answer, focus and error messages show, Sent confirms
 R3e.19 pass: finished a test order through check-site FLOW: the Sent message appears and the lists end
 R3s.16 pass: the order opens with the basket, then collecting, then details
@@ -185,7 +185,7 @@ R3a.6 pass: check-site PHONE reports the bar covers nothing at the end of the pa
 R3s.22 pass: check-site TAP reports no tap under 40px
 R3s.23 pass: check-site PHONE reports no sideways scroll at 390 and 360
 R3t.1 pass: category fashion-shop in CONCEPT.md and on every page; compared to the fashion study sheets (Outfit, Odd Ritual): light ground, product row under the first screen, price under each, how-it-works strip
-R3t.2 pass: check-site BUY passes; each product card has photo, name, colour, price and an Add button (size is written in the basket because she has sent none)
+R3t.2 pass: check-site BUY passes; the product card has photo, name, price and an Add to basket button (size and colour are written in the note in the basket because she has sent none)
 R3t.3 n/a: this is a fashion-shop, not a trainer
 R3t.4 pass: all three pages end with the same closing band (last big RS, the button, contact) and a footer of Pages, Visit and Reach us columns with the MyIsraelRental line
 R3a.7 pass: check-site phone passes use isMobile and hasTouch emulation at 390x844 and 360x640

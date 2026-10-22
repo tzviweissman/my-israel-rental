@@ -1,245 +1,245 @@
 [
- {
-  "slug": "gold-wine",
-  "name": "Gold Luxurious Wine Holder and Wine Glasses",
-  "price": 150,
-  "price_to": null,
-  "group": "Wine and bottle gifts",
-  "in_stock": true,
-  "alt": "Gold wine holder with wine glasses, a bottle and flowers, wrapped in cellophane"
- },
- {
-  "slug": "silver-chain",
-  "name": "Silver Chain Wine Holder",
-  "price": 52,
-  "price_to": null,
-  "group": "Wine and bottle gifts",
-  "in_stock": true,
-  "alt": "A silver chain wine holder with a bottle and a mask, wrapped in cellophane"
- },
- {
-  "slug": "electric-opener",
-  "name": "Electric Bottle Opener",
-  "price": 47,
-  "price_to": null,
-  "group": "Wine and bottle gifts",
-  "in_stock": true,
-  "alt": "An electric bottle opener and a bottle in a gold-edged box tied with a blue ribbon"
- },
- {
-  "slug": "bottle-opener",
-  "name": "Bottle Opener",
-  "price": 45,
-  "price_to": 80,
-  "group": "Wine and bottle gifts",
-  "in_stock": true,
-  "alt": "A bottle opener with a bottle and red roses in a black box with our gold logo"
- },
- {
-  "slug": "opener-set",
-  "name": "Bottle Opener Gift Set",
-  "price": 40,
-  "price_to": null,
-  "group": "Wine and bottle gifts",
-  "in_stock": true,
-  "alt": "A bottle opener set and a bottle in a black box with a gold ribbon"
- },
- {
-  "slug": "opener-snacks",
-  "name": "Bottle Opener",
-  "price": 25,
-  "price_to": null,
-  "group": "Wine and bottle gifts",
-  "in_stock": true,
-  "alt": "A bottle opener with a bottle and snacks, wrapped in cellophane with a green ribbon"
- },
- {
-  "slug": "lchaim-cups",
-  "name": "L'Chaim Cups",
-  "price": 0,
-  "price_to": null,
-  "group": "Wine and bottle gifts",
-  "in_stock": false,
-  "alt": "L'Chaim cups and a bottle in a clear box tied with a ribbon"
- },
- {
-  "slug": "bicycle-wine",
-  "name": "Gold Bicycle Wine Holder",
-  "price": 0,
-  "price_to": null,
-  "group": "Wine and bottle gifts",
-  "in_stock": false,
-  "alt": "A gold bicycle wine holder with a bottle and a rose, wrapped in cellophane"
- },
- {
-  "slug": "tablecloth",
-  "name": "Table Cloth and Napkins",
-  "price": 45,
-  "price_to": null,
-  "group": "For the table",
-  "in_stock": true,
-  "alt": "A white tablecloth and napkins with pink embroidery in a black box"
- },
- {
-  "slug": "napkin-rings",
-  "name": "Napkins & Gold Flower Napkin Rings",
-  "price": 30,
-  "price_to": null,
-  "group": "For the table",
-  "in_stock": true,
-  "alt": "Rolled napkins with gold flower napkin rings in a black box tied with gold organza"
- },
- {
-  "slug": "rh-napkins",
-  "name": "Set of 4 Rosh Hashana Napkins",
-  "price": 30,
-  "price_to": null,
-  "group": "For the table",
-  "in_stock": true,
-  "alt": "Four white napkins with gold apple rings in a box"
- },
- {
-  "slug": "napkin-holder",
-  "name": "Porcelain Napkin Holder",
-  "price": 30,
-  "price_to": null,
-  "group": "For the table",
-  "in_stock": true,
-  "alt": "A white porcelain napkin holder with red roses"
- },
- {
-  "slug": "salt-shaker",
-  "name": "Glass Salt Shaker",
-  "price": 34,
-  "price_to": null,
-  "group": "For the table",
-  "in_stock": true,
-  "alt": "Two glass salt shakers and a bottle in a black box"
- },
- {
-  "slug": "wooden-board",
-  "name": "Wooden serving board",
-  "price": 50,
-  "price_to": null,
-  "group": "For the table",
-  "in_stock": true,
-  "alt": "A wooden serving board with cheese knives and a bottle in a box"
- },
- {
-  "slug": "apple-board",
-  "name": "Apple Shaped serving board",
-  "price": 40,
-  "price_to": null,
-  "group": "For the table",
-  "in_stock": true,
-  "alt": "An apple-shaped wooden serving board with honey and a bottle in a black box"
- },
- {
-  "slug": "white-vase",
-  "name": "White Vase",
-  "price": 55,
-  "price_to": null,
-  "group": "Bowls, vases and washing cups",
-  "in_stock": true,
-  "alt": "A white ribbed vase of white roses on a grey board"
- },
- {
-  "slug": "gold-bowl",
-  "name": "Gold Edged Bowl",
-  "price": 35,
-  "price_to": 38,
-  "group": "Bowls, vases and washing cups",
-  "in_stock": true,
-  "alt": "A gold-edged glass bowl with a gold spoon and red roses"
- },
- {
-  "slug": "marble-bowl",
-  "name": "White Marble Glass Bowl",
-  "price": 35,
-  "price_to": null,
-  "group": "Bowls, vases and washing cups",
-  "in_stock": true,
-  "alt": "A white marble glass bowl with spoons and white hydrangeas"
- },
- {
-  "slug": "washing-cup",
-  "name": "Washing Cup and Hand Towels",
-  "price": 40,
-  "price_to": null,
-  "group": "Bowls, vases and washing cups",
-  "in_stock": true,
-  "alt": "A washing cup and rolled hand towels on a wooden board with pink flowers"
- },
- {
-  "slug": "glass-jar",
-  "name": "Small Glass Jar",
-  "price": 33,
-  "price_to": null,
-  "group": "Bowls, vases and washing cups",
-  "in_stock": true,
-  "alt": "A small glass jar with candles and a bottle, wrapped with a purple ribbon"
- },
- {
-  "slug": "gold-rim-bowls",
-  "name": "Small Glass, Gold Rimmed Bowls",
-  "price": 0,
-  "price_to": null,
-  "group": "Bowls, vases and washing cups",
-  "in_stock": false,
-  "alt": "Two small gold-rimmed glass bowls in a black box tied with a green ribbon"
- },
- {
-  "slug": "black-gold-vase",
-  "name": "Black/Gold Vase",
-  "price": 0,
-  "price_to": null,
-  "group": "Bowls, vases and washing cups",
-  "in_stock": false,
-  "alt": "A black and gold vase with a bottle and towels on a gold board"
- },
- {
-  "slug": "self-care",
-  "name": "Self-Care Gift",
-  "price": 35,
-  "price_to": null,
-  "group": "Treats, self-care and keepsakes",
-  "in_stock": true,
-  "alt": "A pink silk eye mask, bath flower and body scrub in a box"
- },
- {
-  "slug": "cream-bag",
-  "name": "Cream and Gold Cosmetic Bag",
-  "price": 26,
-  "price_to": null,
-  "group": "Treats, self-care and keepsakes",
-  "in_stock": true,
-  "alt": "A cream and gold cosmetic bag filled with treats, wrapped in cellophane"
- },
- {
-  "slug": "black-bag",
-  "name": "Black and Gold Cosmetic Bag",
-  "price": 26,
-  "price_to": null,
-  "group": "Treats, self-care and keepsakes",
-  "in_stock": true,
-  "alt": "A black and gold cosmetic bag filled with treats, wrapped in cellophane"
- },
- {
-  "slug": "jewellery",
-  "name": "Small Jewellery Organiser",
-  "price": 25,
-  "price_to": null,
-  "group": "Treats, self-care and keepsakes",
-  "in_stock": true,
-  "alt": "A pink jewellery organiser with treats, wrapped in cellophane with a pink ribbon"
- },
- {
-  "slug": "cookie-jar",
-  "name": "Glass Cookie Jar",
-  "price": 0,
-  "price_to": null,
-  "group": "Treats, self-care and keepsakes",
-  "in_stock": false,
-  "alt": "A glass cookie jar of sweets wrapped in cellophane with a red ribbon"
- }
+  {
+    "slug": "gold-wine",
+    "name": "Gold Luxurious Wine Holder and Wine Glasses",
+    "price": 150,
+    "price_to": null,
+    "group": "Wine and bottle gifts",
+    "in_stock": true,
+    "alt": "Gold wine holder with wine glasses, a bottle and flowers, wrapped in cellophane"
+  },
+  {
+    "slug": "silver-chain",
+    "name": "Silver Chain Wine Holder",
+    "price": 52,
+    "price_to": null,
+    "group": "Wine and bottle gifts",
+    "in_stock": true,
+    "alt": "A silver chain wine holder with a bottle and a mask, wrapped in cellophane"
+  },
+  {
+    "slug": "electric-opener",
+    "name": "Electric Bottle Opener",
+    "price": 47,
+    "price_to": null,
+    "group": "Wine and bottle gifts",
+    "in_stock": true,
+    "alt": "An electric bottle opener and a bottle in a gold-edged box tied with a blue ribbon"
+  },
+  {
+    "slug": "bottle-opener",
+    "name": "Bottle Opener with Roses",
+    "price": 45,
+    "price_to": 80,
+    "group": "Wine and bottle gifts",
+    "in_stock": true,
+    "alt": "A bottle opener with a bottle and red roses in a black box with our gold logo"
+  },
+  {
+    "slug": "opener-set",
+    "name": "Bottle Opener Gift Set",
+    "price": 40,
+    "price_to": null,
+    "group": "Wine and bottle gifts",
+    "in_stock": true,
+    "alt": "A bottle opener set and a bottle in a black box with a gold ribbon"
+  },
+  {
+    "slug": "opener-snacks",
+    "name": "Bottle Opener with Snacks",
+    "price": 25,
+    "price_to": null,
+    "group": "Wine and bottle gifts",
+    "in_stock": true,
+    "alt": "A bottle opener with a bottle and snacks, wrapped in cellophane with a green ribbon"
+  },
+  {
+    "slug": "lchaim-cups",
+    "name": "L'Chaim Cups",
+    "price": 0,
+    "price_to": null,
+    "group": "Wine and bottle gifts",
+    "in_stock": false,
+    "alt": "L'Chaim cups and a bottle in a clear box tied with a ribbon"
+  },
+  {
+    "slug": "bicycle-wine",
+    "name": "Gold Bicycle Wine Holder",
+    "price": 0,
+    "price_to": null,
+    "group": "Wine and bottle gifts",
+    "in_stock": false,
+    "alt": "A gold bicycle wine holder with a bottle and a rose, wrapped in cellophane"
+  },
+  {
+    "slug": "tablecloth",
+    "name": "Table Cloth and Napkins",
+    "price": 45,
+    "price_to": null,
+    "group": "For the table",
+    "in_stock": true,
+    "alt": "A white tablecloth and napkins with pink embroidery in a black box"
+  },
+  {
+    "slug": "napkin-rings",
+    "name": "Napkins & Gold Flower Napkin Rings",
+    "price": 30,
+    "price_to": null,
+    "group": "For the table",
+    "in_stock": true,
+    "alt": "Rolled napkins with gold flower napkin rings in a black box tied with gold organza"
+  },
+  {
+    "slug": "rh-napkins",
+    "name": "Set of 4 Rosh Hashana Napkins",
+    "price": 30,
+    "price_to": null,
+    "group": "For the table",
+    "in_stock": true,
+    "alt": "Four white napkins with gold apple rings in a box"
+  },
+  {
+    "slug": "napkin-holder",
+    "name": "Porcelain Napkin Holder",
+    "price": 30,
+    "price_to": null,
+    "group": "For the table",
+    "in_stock": true,
+    "alt": "A white porcelain napkin holder with red roses"
+  },
+  {
+    "slug": "salt-shaker",
+    "name": "Glass Salt Shaker",
+    "price": 34,
+    "price_to": null,
+    "group": "For the table",
+    "in_stock": true,
+    "alt": "Two glass salt shakers and a bottle in a black box"
+  },
+  {
+    "slug": "wooden-board",
+    "name": "Wooden serving board",
+    "price": 50,
+    "price_to": null,
+    "group": "For the table",
+    "in_stock": true,
+    "alt": "A wooden serving board with cheese knives and a bottle in a box"
+  },
+  {
+    "slug": "apple-board",
+    "name": "Apple Shaped serving board",
+    "price": 40,
+    "price_to": null,
+    "group": "For the table",
+    "in_stock": true,
+    "alt": "An apple-shaped wooden serving board with honey and a bottle in a black box"
+  },
+  {
+    "slug": "white-vase",
+    "name": "White Vase",
+    "price": 55,
+    "price_to": null,
+    "group": "Bowls, vases and washing cups",
+    "in_stock": true,
+    "alt": "A white ribbed vase of white roses on a grey board"
+  },
+  {
+    "slug": "gold-bowl",
+    "name": "Gold Edged Bowl",
+    "price": 35,
+    "price_to": 38,
+    "group": "Bowls, vases and washing cups",
+    "in_stock": true,
+    "alt": "A gold-edged glass bowl with a gold spoon and red roses"
+  },
+  {
+    "slug": "marble-bowl",
+    "name": "White Marble Glass Bowl",
+    "price": 35,
+    "price_to": null,
+    "group": "Bowls, vases and washing cups",
+    "in_stock": true,
+    "alt": "A white marble glass bowl with spoons and white hydrangeas"
+  },
+  {
+    "slug": "washing-cup",
+    "name": "Washing Cup and Hand Towels",
+    "price": 40,
+    "price_to": null,
+    "group": "Bowls, vases and washing cups",
+    "in_stock": true,
+    "alt": "A washing cup and rolled hand towels on a wooden board with pink flowers"
+  },
+  {
+    "slug": "glass-jar",
+    "name": "Small Glass Jar",
+    "price": 33,
+    "price_to": null,
+    "group": "Bowls, vases and washing cups",
+    "in_stock": true,
+    "alt": "A small glass jar with candles and a bottle, wrapped with a purple ribbon"
+  },
+  {
+    "slug": "gold-rim-bowls",
+    "name": "Small Glass, Gold Rimmed Bowls",
+    "price": 0,
+    "price_to": null,
+    "group": "Bowls, vases and washing cups",
+    "in_stock": false,
+    "alt": "Two small gold-rimmed glass bowls in a black box tied with a green ribbon"
+  },
+  {
+    "slug": "black-gold-vase",
+    "name": "Black/Gold Vase",
+    "price": 0,
+    "price_to": null,
+    "group": "Bowls, vases and washing cups",
+    "in_stock": false,
+    "alt": "A black and gold vase with a bottle and towels on a gold board"
+  },
+  {
+    "slug": "self-care",
+    "name": "Self-Care Gift",
+    "price": 35,
+    "price_to": null,
+    "group": "Treats, self-care and keepsakes",
+    "in_stock": true,
+    "alt": "A pink silk eye mask, bath flower and body scrub in a box"
+  },
+  {
+    "slug": "cream-bag",
+    "name": "Cream and Gold Cosmetic Bag",
+    "price": 26,
+    "price_to": null,
+    "group": "Treats, self-care and keepsakes",
+    "in_stock": true,
+    "alt": "A cream and gold cosmetic bag filled with treats, wrapped in cellophane"
+  },
+  {
+    "slug": "black-bag",
+    "name": "Black and Gold Cosmetic Bag",
+    "price": 26,
+    "price_to": null,
+    "group": "Treats, self-care and keepsakes",
+    "in_stock": true,
+    "alt": "A black and gold cosmetic bag filled with treats, wrapped in cellophane"
+  },
+  {
+    "slug": "jewellery",
+    "name": "Small Jewellery Organiser",
+    "price": 25,
+    "price_to": null,
+    "group": "Treats, self-care and keepsakes",
+    "in_stock": true,
+    "alt": "A pink jewellery organiser with treats, wrapped in cellophane with a pink ribbon"
+  },
+  {
+    "slug": "cookie-jar",
+    "name": "Glass Cookie Jar",
+    "price": 0,
+    "price_to": null,
+    "group": "Treats, self-care and keepsakes",
+    "in_stock": false,
+    "alt": "A glass cookie jar of sweets wrapped in cellophane with a red ribbon"
+  }
 ]

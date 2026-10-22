@@ -24,7 +24,7 @@ R5.1 pass: read every line as the owner; each names a gift, a step or her servic
 R5.2 pass: read every line; no teasing or slang
 R5.3 pass: labels are full phrases such as Wrapped by hand in Jerusalem, gifts from 25 dollars and Out of stock
 R5.4 pass: searched visible text of both pages for they, them, their: the hits are about gifts and recipients (say who they are for), not about the business
-R5b.2 pass: the main button reads Order a gift and goes to order.html in the header, the opening, how-to-order, the closing, the footer and the phone bar
+R5b.2 pass: going to the order page is always Order a gift (header, opening, how-to-order, closing, phone bar, footer); adding is always Add (tile chips and the order page list, each labelled Add to order with the gift name); moving on is always Continue on steps 1 and 2 on the desktop button and the phone bar, and Send on WhatsApp on step 3 in both
 R5b.8 pass: the closing line reads Send love across Israel with a meaningful gift; no done or complete
 R3.11 pass: read index top to bottom: opening (what), collection with prices, how to order, what we make, good to know, close; no form before prices
 R3o.4 pass: WhatsApp and email are labelled by what they do in the footer and the order page; whether she takes calls is not shown, only WhatsApp is offered
@@ -62,7 +62,7 @@ R3g.17 pass: CONCEPT.md Effects names the source of each effect; the shop rework
 R3c.2 pass: viewed the whole page at 1440: a dark film opening, ivory throughout and a sand band; not cream plus an italic word; Cinzel capitals and gold from their logo
 R3g.1 pass: the :root block in index.html holds ground, ink, gold, two faces, radius and motion, and the computed styles match
 R3g.3 pass: prices are in the ink colour; gold is the main button only; the gold-ink is used for small labels and group headings, which is a label colour, not the accent button
-R3g.7 pass: one closing signature, their name cropped by the bottom of the closing section, away from the order path
+R3g.7 pass: one closing signature, their name shown whole under the closing button, away from the order path
 R3g.11 pass: Cinzel for headings and Jost for text, faces already in use on the site and licensed Google Fonts
 R3p.3 n/a: scrollcraft/fingerprints.json lists this business under the slug the-gift-boutique while the folder is gift-boutique, so check-fingerprints finds no entry for the folder; that file is outside this task and unchanged
 R3p.5 pass: the foil glint runs once across the closing name when it enters (onSign in index.html), like the foil on their logo; the name rendered at 1440 and 390
@@ -77,7 +77,7 @@ R3k.2 pass: both pages share the same bar: brand, links, the one order button; o
 R3k.4 n/a: the site is two self-contained html files with inline css and js, not a shared site.css and site.js set
 R8a.1 pass: viewed source of both pages: no external script hosts except Google Fonts; no demo text
 R3b.4 pass: the page carries facts: price per gift, hours, kosher, payment; nothing padded
-R3c.3 pass: the worry that gifts and wrapping may differ because of hashgacha sits above the grid; delivery fee confirmation sits in the order steps beside the button
+R3c.3 pass: the hashgacha line is removed from the page because it is not in their files; asked in message-to-owner.md question 13; delivery fee confirmation sits in the order steps beside the button
 R3c.8 pass: the order steps say what happens after: we confirm the order and the delivery fee on WhatsApp, then wrap and deliver
 R3e.10 pass: name 17px bold against price 17px bold and group heading 20px; check-site ALIGN passes
 R3e.14 pass: computed font sizes at 1440 and 390 on both pages: six on the home page (14, 17, 20, one heading, the opening heading, the closing name), five on the order page; family Jost with weights 400 to 700
@@ -93,7 +93,7 @@ R5b.6 pass: no scroll cues except Scroll to open in the opening, which tells the
 R3.13 pass: contact appears in the order how-to, Good to know and the footer once each as different facts; no doubled gallery; no two dividers in a row
 R3a.1 pass: rendered index at 1440x900 and 390x844 and walked every screen, order at 1440; the six sizes of 3p.6 by check-fits and readable; reduced motion shows the opened box
 R3r.1 pass: pages index and order: check-site, check-fits, check-motion, readable, clipped, cutoff each run on both
-R3r.2 n/a: nobody besides the builder has used the page yet; the reviewer answers docs/page-review-checklist.md when the build is handed over
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; findings fixed and re-checked
 R3g.12 pass: check-site FLOW walked the order steps, an empty form says what is missing and the WhatsApp message carries the total
 R0b.12 n/a: not published, so there is no pages-list preview clip to compare
 
@@ -121,7 +121,7 @@ R3o.5 pass: check-site GLYPH passes
 
 ## 5. Prices and savings
 R3c.5 pass: grepped: no select element; the group choice is tiles (pills)
-R3c.6 pass: the buttons say Order a gift and Continue to delivery; each tile's Add chip names the gift and price in its label
+R3c.6 pass: the buttons say Order a gift, Continue and Send on WhatsApp; each tile Add chip names the gift and price in its label; the two bottle openers are named Bottle Opener with Roses and with Snacks and the ranged one asks Which one? before Continue and carries the answer into the WhatsApp message
 R3c.7 n/a: no offer on this site
 R3j.1 n/a: no guarantee is offered
 R3j.2 n/a: no add-on can be added before ordering; add-ons are asked about on WhatsApp
@@ -179,7 +179,7 @@ R3i.3 n/a: no live readout on this site
 R3s.21 pass: check-site BROKEN reports no errors or dead links on either page
 
 ## 8. Phone
-R3b.6 pass: the phone bar appears after the first screen with the delivery line, until the close; walked 390x844 with touch emulation
+R3b.6 pass: the phone bar appears after the first screen until the close and steps aside while a price, Add chip or button sits in its strip; walked 390x844 and 360x640 with touch emulation in 100px stops
 R3f.7 pass: 360x640 touch emulation: the bar fits (check-site PHONE)
 R3a.6 pass: check-site PHONE reports the bar covers nothing at the end of the page
 R3s.22 pass: check-site TAP reports no tap under 40px

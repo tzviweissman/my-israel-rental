@@ -322,3 +322,44 @@ body .pinfo h3 { font-size: var(--t-m) !important; }
 body .st-info h1, body .page-head h1 { font-size: var(--t-h2) !important; }
 body h4 { font-size: var(--t-s) !important; }
 body .hsteps p { font-size: var(--t-s) !important; }
+
+/* ── 22 Oct 2026, independent review fixes ── */
+/* header: brand and Menu fit at 360 */
+.mark { min-width: 0; }
+@media (max-width: 420px) { .top { gap: .5rem; } .mark { font-size: .78rem !important; letter-spacing: .08em; } .menu-btn { padding: 0 .8rem; flex: none; } }
+/* nothing in the opening may widen the page */
+html, body { overflow-x: clip; }
+.open { overflow: clip; }
+/* the opening: the flyer is framed whole at its own proportions (no crop, never larger than its pixels), plain green ground */
+.open-stage::before { display: none; }
+.doorway { -webkit-mask-image: none !important; mask-image: none !important; width: auto; height: 100%; max-height: 1209px; aspect-ratio: 1023 / 1209; justify-self: end; margin-right: var(--gutter); }
+.door img { object-position: 50% 50%; }
+.words { max-width: min(40rem, 46vw); z-index: 2; }
+@media (max-width: 860px) {
+  .open-stage { grid-template-rows: minmax(0, 1fr) auto; }
+  .doorway { grid-area: 1 / 1; height: auto; max-height: none; width: min(100%, calc((100svh - var(--top-h) - 20.5rem) * .846)); justify-self: center; margin: .6rem 0 0; }
+  .words { grid-area: 2 / 1; max-width: none; align-self: start; }
+}
+/* room around buttons: their corner brackets sit 9px outside */
+.lede + .acts, .addr + .lede + .acts { margin-top: 0; }
+.visit .lede, .words .lede { margin-bottom: 2.1rem; }
+.acts { gap: 1.9rem 2.2rem !important; }
+.acts .lnk { margin-left: .2rem; }
+/* one product card, then the store tile */
+.pgrid { grid-template-columns: repeat(2, minmax(0, max(11rem, min(26rem, calc((100svh - 25rem) * .846))))); justify-content: start; }
+.pph, .pph.full { width: 100%; aspect-ratio: 1023 / 1209; }
+.pph.full img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; max-width: none; }
+.pcard.ptile .pph { aspect-ratio: 1023 / 1209; }
+@media (max-width: 760px) { .pgrid { grid-template-columns: minmax(0, 1fr); } .pcard.ptile .pph { aspect-ratio: 16 / 10; } }
+.pillars { background: var(--ground); }
+.tag .card-t { background: #fff; }
+section.shoprow { padding-bottom: clamp(1rem, 3svh, 2rem); }
+section.how { padding-top: clamp(1rem, 3svh, 2rem); }
+/* the shekel sign is set at the digits' size */
+body .sym { font-size: 1.16em !important; font-weight: 600; margin-right: 0; }
+.btn .sym { margin-right: 0; }
+/* the phone bar's one action */
+.bar.solo { justify-content: center; }
+.bar.solo .btn { flex: 1; max-width: 26rem; justify-content: center; }
+@media (max-width: 860px) { .words .w2 .lede { display: none; } .words h2 { margin-bottom: 1.4rem; } }
+.visit .acts, .close .acts { display: flex; flex-wrap: wrap; align-items: center; }
