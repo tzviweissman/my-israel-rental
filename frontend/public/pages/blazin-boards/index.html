@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Blazin' Boards. Premium meat boards, Jerusalem.</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="Premium meat boards in Jerusalem, in five sizes from the Mini to the Extra Large VIP. Orders 48 hours ahead. Delivery throughout Israel.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2315110F'/><rect x='7' y='10' width='18' height='12' rx='2' fill='%23C9A227'/></svg>">
 <!--
@@ -31,7 +32,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/blazin-boards/scrollcraft.css?v=mv6aycwz">
+<link rel="stylesheet" href="/pages/blazin-boards/scrollcraft.css?v=mvjvyedj">
 <style>
   :root {
     --font-head: 'Playfair Display', Georgia, serif;
@@ -68,7 +69,7 @@
   h1, h2, h3 { font-family: var(--font-head); font-weight: 500; }
   section { position: relative; color: var(--sc-ink); }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .sc-display em, .accent { font-style: italic; color: var(--sc-accent); }
+  .sc-display em, .accent { font-style: italic; color: var(--sc-ink); }
   .num { font-family: var(--font-body); font-variant-numeric: tabular-nums; }
 
   /* ---------------------------------------------------------------- heat -- */
@@ -87,10 +88,10 @@
     position: fixed; inset-block-start: 0; inset-inline: 0; z-index: var(--sc-z-chrome);
     display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
     padding: var(--sc-3) var(--sc-gutter); pointer-events: none;
-    background: linear-gradient(rgba(58, 8, 18, 0.72), rgba(58, 8, 18, 0));
+    background: linear-gradient(rgba(58, 8, 18, 0.96) 0%, rgba(58, 8, 18, 0.9) 70%, rgba(58, 8, 18, 0.6) 100%);
   }
   .bar > * { pointer-events: auto; }
-  .bar__mark { display: inline-flex; align-items: center; gap: var(--sc-3); font-family: var(--font-body); font-weight: 800; letter-spacing: -0.02em; font-size: var(--sc-t-lg); color: var(--sc-ink); text-decoration: none; text-transform: uppercase; }
+  .bar__mark { min-height: 40px; display: inline-flex; align-items: center; gap: var(--sc-3); font-family: var(--font-body); font-weight: 800; letter-spacing: -0.02em; font-size: var(--sc-t-lg); color: var(--sc-ink); text-decoration: none; text-transform: uppercase; }
   .bar__mark img { height: 34px; width: 34px; border-radius: 50%; object-fit: cover; }
   .bar__end { display: flex; align-items: center; gap: var(--sc-3); }
   .bar__cta {
@@ -120,7 +121,7 @@
   .hero .name {
     position: absolute; inset-inline-start: var(--sc-gutter); inset-block-start: clamp(5rem, 14vh, 9rem); z-index: 1; margin: 0;
     font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.045em; line-height: 0.86;
-    font-size: clamp(4.2rem, 17vw, 15rem); color: var(--gold);
+    font-size: clamp(4.2rem, 17vw, 15rem); color: var(--sc-ink);
     direction: ltr; unicode-bidi: isolate;
   }
   .hero .name span { display: block; }
@@ -147,9 +148,14 @@
     display: grid; gap: var(--sc-5); max-width: 24rem; justify-items: start;
   }
   .hero .land h1 { margin: 0; font-size: var(--sc-t-xl); font-style: italic; line-height: 1.15; }
-  .hero .land h1 b { font-style: normal; font-weight: 500; color: var(--sc-accent); }
+  .hero .land h1 b { font-style: normal; font-weight: 500; color: var(--sc-ink); }
   .hero .land p { margin: var(--sc-2) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
 
+  /* the deal, only where the numbers make it true (Tzvi, 20 Oct 2026: "a board double the size
+     should technically be double the price, if it's not they are getting a deal"). From their own
+     sizes: the Large (33x47 cm) at the Medium's price per centimetre (24x35 cm) would cost more than
+     it does; the line says only the dollars saved (Tzvi: "don't say how much more it costs"). */
+  .deal { display: inline-block; margin-top: .35rem; padding: .2rem .6rem; border-radius: 999px; font-style: normal; font-weight: 800; font-size: .8rem; line-height: 1.3; color: #0F3A22; background: #7FD39A; }
   /* --------------------------------------------------------------- sizes --
      The peak. One plank, five real sizes, one pixels-per-centimetre. */
   .sizes .sc-copy--lead { bottom: auto; top: clamp(4.5rem, 11vh, 7rem); max-width: 34rem; }
@@ -162,14 +168,14 @@
   }
   .plank {
     position: relative; width: 200px; height: 150px; border-radius: 6px; overflow: hidden;
-    background: #7A5230 url(/pages/blazin-boards/assets/board-flat.jpg?v=mv6aycwz) center / cover no-repeat;
+    background: #7A5230 url(/pages/blazin-boards/assets/board-top.jpg?v=mvjvyedj) center / cover no-repeat;
     box-shadow: var(--sc-shadow-lg), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
     will-change: width, height;
   }
   .plank__dims {
     position: absolute; inset-inline-end: var(--sc-2); inset-block-end: var(--sc-2);
     padding: 2px 8px; border-radius: var(--sc-r-sm);
-    background: rgba(58, 8, 18, 0.78); color: var(--sc-ink); font-family: var(--font-body); font-size: var(--sc-t-xs); font-weight: 700; letter-spacing: 0.06em;
+    background: rgba(58, 8, 18, 0.78); color: var(--sc-ink); font-family: var(--font-body); font-size: max(var(--sc-t-xs), 15px); font-weight: 700; letter-spacing: 0.06em;
   }
   .ruler {
     position: absolute; inset-inline-start: var(--sc-gutter); inset-block-end: calc(clamp(2rem, 7vh, 4rem) - 1.6rem);
@@ -183,31 +189,33 @@
   .tiers { position: absolute; inset-inline-end: var(--sc-gutter); inset-block-end: clamp(2rem, 7vh, 4rem); width: min(40vw, 30rem); height: 58vh; }
   .tier { position: absolute; inset-inline: 0; inset-block-end: 0; margin: 0; }
   .tier__size { margin: 0; font-family: var(--font-body); font-weight: 800; font-size: clamp(2.6rem, 6vw, 5rem); letter-spacing: -0.03em; line-height: 1; }
-  .tier__size small { font-size: 0.42em; font-weight: 600; letter-spacing: 0.04em; color: var(--sc-ink-soft); margin-inline-start: 0.2em; }
+  .tier__size small { font-size: max(0.42em, 14px); font-weight: 600; letter-spacing: 0.04em; color: var(--sc-ink-soft); margin-inline-start: 0.2em; }
   .tier ul { list-style: none; margin: var(--sc-4) 0 0; padding: 0; display: grid; gap: var(--sc-3); }
   .tier li { display: grid; grid-template-columns: 1fr auto; gap: var(--sc-3); align-items: baseline; padding-block-end: var(--sc-3); border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 16%, transparent); }
   .tier li b { display: block; font-family: var(--font-head); font-weight: 500; font-size: var(--sc-t-lg); }
   .tier li small { display: block; margin-top: 2px; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.4; }
-  .tier li .price { font-family: var(--font-body); font-weight: 800; font-size: var(--sc-t-lg); color: var(--sc-accent); white-space: nowrap; }
+  .tier li .price { font-family: var(--font-body); font-weight: 800; font-size: var(--sc-t-lg); color: var(--sc-ink); white-space: nowrap; }
 
   /* ---------------------------------------------------------------- menu -- */
   .menu { padding-block: clamp(4rem, 9vw, 8rem); }
   .menu h2 { margin: 0 0 var(--sc-2); }
   .menu .lede { margin: 0 0 var(--sc-7); color: var(--sc-ink-soft); max-width: 40rem; }
-  .shots { display: grid; grid-template-columns: 1.4fr 1fr 1fr; gap: var(--sc-4); margin: 0 0 var(--sc-8); }
-  .shots figure { margin: 0; border-radius: var(--sc-r-lg); overflow: hidden; box-shadow: var(--sc-shadow-md); aspect-ratio: 3 / 2; }
-  .shots img { display: block; width: 100%; height: 100%; object-fit: cover; }
+  /* each board whole (Tzvi, 21 Oct 2026: "the boards are a little cut off"): columns in the photos' own proportions, so all three
+     are the same height with nothing cropped; no zoom on hover */
+  .shots { display: grid; grid-template-columns: 1.5fr 1.5fr 1.552fr; gap: var(--sc-4); margin: 0 0 var(--sc-8); align-items: start; }
+  .shots figure { margin: 0; border-radius: var(--sc-r-lg); overflow: hidden; box-shadow: var(--sc-shadow-md); }
+  .shots img { display: block; width: 100%; height: auto; }
   .shots figcaption { position: absolute; }
   .list { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 var(--sc-8); }
   .list li { display: grid; grid-template-columns: 1fr auto; gap: var(--sc-3); align-items: baseline; padding-block: var(--sc-4); border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 14%, transparent); }
   .list li b { display: block; font-family: var(--font-head); font-weight: 500; font-size: var(--sc-t-lg); }
   .list li i { font-style: normal; color: var(--sc-ink-soft); font-size: var(--sc-t-xs); letter-spacing: 0.08em; text-transform: uppercase; margin-inline-start: 0.5em; }
   .list li small { display: block; margin-top: 3px; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.45; }
-  .list li .price { font-family: var(--font-body); font-weight: 800; font-size: var(--sc-t-lg); color: var(--sc-accent); white-space: nowrap; }
+  .list li .price { font-family: var(--font-body); font-weight: 800; font-size: var(--sc-t-lg); color: var(--sc-ink); white-space: nowrap; }
   .addons { margin: var(--sc-7) 0 0; display: flex; flex-wrap: wrap; gap: var(--sc-2) var(--sc-4); align-items: baseline; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
   .addons b { color: var(--sc-ink); font-weight: 600; margin-inline-end: var(--sc-2); }
   .addons span { white-space: nowrap; }
-  .addons span em { font-style: normal; color: var(--sc-accent); font-weight: 700; }
+  .addons span em { font-style: normal; color: var(--sc-ink); font-weight: 700; }
 
   /* --------------------------------------------------------------- facts -- */
   .facts { padding-block: clamp(3.5rem, 8vw, 7rem); }
@@ -268,12 +276,13 @@
   .shots img { transition: scale 700ms var(--sc-ease-out); }
   @media (hover: hover) {
     .list li:hover::before { transform: scaleX(1); } .list li:hover .price { scale: 1.12; }
-    .shots figure:hover img { scale: 1.06; }
+
   }
   /* every board is a link: to WhatsApp with that board named, or to the order page with it chosen */
   .list li > a.board-link, .tier li > a.board-link { display: contents; color: inherit; text-decoration: none; }
   .list li:has(> a.board-link) { cursor: pointer; }
-  .list li .go { grid-column: 1 / -1; font-size: var(--sc-t-xs); font-weight: 700; color: var(--gold); letter-spacing: 0.02em; }
+  .list li .go { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; min-height: 40px; padding: 0 1rem; margin-top: .2rem; border: 1px solid color-mix(in oklab, var(--gold) 60%, transparent); border-radius: 999px; font-size: .9rem; font-weight: 700; color: var(--gold); letter-spacing: 0.01em; transition: background 160ms ease-out, color 160ms ease-out, transform 100ms ease-out; }
+  .list li:hover .go { background: var(--gold); color: var(--sc-accent-ink); } .list li .go:active { transform: scale(.97); }
   .list li:has(> a.board-link:focus-visible) { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 10px; }
   @media (prefers-reduced-motion: reduce) { .cta.flip > span, .cta.flip .draw, .list li::before, .list li .price, .shots img { transition: none; } }
   .close__assure { margin: var(--sc-5) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink); line-height: 1.5; }
@@ -282,15 +291,66 @@
     font-size: var(--sc-t-xs); color: var(--sc-ink-soft); letter-spacing: 0.02em; line-height: 1.5; max-width: 60rem;
   }
 
+
+  /* ------------------------------------------------ worlds (rule 3t) --
+     Opening on their own photograph, edge to edge; a picture band; a light
+     price list; a picture band; the dark facts; the closing photograph. */
+  /* reserve each pinned act's height before the engine mounts, so nothing below jumps when it does */
+  .hero { min-height: 320svh; } .sizes { min-height: 360svh; } .close { min-height: 120svh; }
+  .hero__bg { position: absolute; inset: 0; z-index: 0; }
+  .hero__bg img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 55%; display: block; }
+  .hero__shade { position: absolute; inset: 0; z-index: 0; pointer-events: none;
+    background: linear-gradient(90deg, rgba(58, 8, 18, .92) 0%, rgba(58, 8, 18, .78) 45%, rgba(58, 8, 18, 0) 88%),
+                linear-gradient(180deg, rgba(58, 8, 18, .7) 0%, rgba(58, 8, 18, 0) 22%); }
+  /* category food-shop, premium dark brand (rule 3t, Qissa pattern): one warm dark ground, pictures framed not full-bleed */
+  .band { position: relative; display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; max-width: var(--sc-maxw); margin-inline: auto; padding: clamp(4rem, 9vw, 8rem) var(--sc-gutter); }
+  .band__img { position: static; width: 100%; height: auto; aspect-ratio: 1600 / 942; object-fit: cover; display: block; border-radius: var(--sc-r-lg); border: 1px solid rgba(233, 178, 59, .45); box-shadow: 0 24px 60px rgba(0, 0, 0, .35); }
+  .band--jars .band__img { object-position: 50% 40%; }
+  .band__shade { display: none; }
+  .band__copy { display: grid; gap: var(--sc-4); justify-items: start; order: 2; padding: 0; margin: 0; }
+  .band__title { margin: 0; font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.04em; line-height: .92; font-size: clamp(2.6rem, 6vw, 5.5rem); color: var(--sc-ink); text-wrap: balance; }
+  .band__copy p { margin: 0; color: var(--sc-ink); font-size: var(--sc-t-base); max-width: 28rem; }
+  .trust { background: var(--ox-0); border-block: 1px solid rgba(233, 178, 59, .35); }
+  .trust ul { list-style: none; margin: 0 auto; padding: var(--sc-5) var(--sc-gutter); max-width: var(--sc-maxw); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sc-5); }
+  .trust li { display: grid; gap: 4px; font-size: var(--sc-t-sm); color: var(--sc-ink); line-height: 1.35; }
+  .trust li b { font: 700 .8rem/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  .menu { background: var(--ox-0); }
+  .menu .list li .go { color: var(--gold); border-color: color-mix(in oklab, var(--gold) 55%, transparent); }
+  .menu .list li:hover .go { background: var(--gold); color: var(--ox-0); }
+  .menu .shots figure { border: 1px solid rgba(233, 178, 59, .45); padding: 0; box-shadow: 0 18px 44px rgba(0, 0, 0, .35); }
+  .facts { background: var(--ox-1); }
+  /* closing photograph: words bottom left on a soft edge shade, no card */
+  .close__light { background: linear-gradient(90deg, rgba(58, 8, 18, .88) 0%, rgba(58, 8, 18, .5) 40%, rgba(58, 8, 18, 0) 70%), linear-gradient(0deg, rgba(58, 8, 18, .7) 0%, rgba(58, 8, 18, 0) 40%); }
+  .close .sc-copy--center { left: var(--sc-gutter); inset-inline-end: auto; top: auto; bottom: clamp(3rem, 12vh, 7rem); translate: none; text-align: start; max-width: 36rem; padding: 0; background: none; backdrop-filter: none; border-radius: 0; }
+  .close .sc-display--lg { font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.04em; line-height: .92; font-size: clamp(3rem, 8vw, 7rem); }
+  .foot { background: var(--ox-0); color: var(--sc-ink); padding: clamp(3.5rem, 9vw, 7rem) var(--sc-gutter) var(--sc-6); position: relative; z-index: 1; }
+  .foot > * { max-width: var(--sc-maxw); margin-inline: auto; }
+  .foot__big { margin-block: 0 var(--sc-7); font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.04em; line-height: .95; font-size: clamp(2.2rem, 6vw, 5rem); }
+  .foot__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-6); padding-block: var(--sc-6); border-top: 1px solid color-mix(in oklab, var(--sc-ink) 18%, transparent); }
+  .foot__cols > * { display: grid; gap: var(--sc-2); align-content: start; font-size: var(--sc-t-sm); }
+  .foot__cols b { color: var(--gold); font-weight: 700; }
+  .foot__cols a { color: var(--sc-ink); text-decoration: none; min-height: 32px; display: inline-flex; align-items: center; }
+  .foot__cols a:hover { color: var(--gold); }
+  .foot__cols span { color: var(--sc-ink-soft); }
+  .foot__small { margin-block: var(--sc-5) 0; font-size: .875rem; color: var(--sc-ink-soft); line-height: 1.5; }
+  @media (max-width: 860px) {
+    .band { grid-template-columns: 1fr; padding-block: 3rem; }
+    .band__copy { order: 0; }
+    .trust ul { grid-template-columns: 1fr 1fr; }
+    .hero__shade { background: linear-gradient(180deg, rgba(58, 8, 18, .9) 0%, rgba(58, 8, 18, .72) 45%, rgba(58, 8, 18, .4) 100%); }
+    .close__light { background: linear-gradient(0deg, rgba(58, 8, 18, .94) 0%, rgba(58, 8, 18, .8) 50%, rgba(58, 8, 18, .2) 85%); }
+    .foot__cols { grid-template-columns: 1fr; }
+    .close .sc-copy--center { inset-inline-end: var(--sc-gutter); bottom: clamp(2rem, 8vh, 4rem); }
+  }
   /* -------------------------------------------------------------- mobile -- */
   @media (max-width: 860px) {
     .bar { flex-wrap: wrap; row-gap: 0; padding-block: var(--sc-2); }
     .bar__mark { font-size: var(--sc-t-base); } .bar__mark img { height: 28px; }
     .bar__end { margin-inline-start: auto; }
-    .bar__cta { min-height: 36px; padding-inline: var(--sc-3); }
+    .bar__cta { min-height: 40px; padding-inline: var(--sc-3); }
     .bar__nav { order: 3; flex-basis: 100%; margin: 0; overflow-x: auto; scrollbar-width: none; gap: 0; }
     .bar__nav::-webkit-scrollbar { display: none; }
-    .bar__nav a { white-space: nowrap; padding: 0.45rem 0.6rem; }
+    .bar__nav a { white-space: nowrap; padding: 0 0.6rem; min-height: 40px; display: inline-flex; align-items: center; }
     .hero .name { font-size: clamp(3.6rem, 21vw, 8rem); inset-block-start: clamp(4.5rem, 12vh, 7rem); }
     .tumble, .tumble__shadow { width: 90vw; margin-left: -45vw; }
     .tumble { margin-top: calc(90vw * -0.407); } .tumble__shadow { margin-top: calc(90vw * -0.30); }
@@ -301,13 +361,26 @@
     .tiers { inset-inline: var(--sc-gutter); width: auto; height: auto; inset-block-end: clamp(1.5rem, 5vh, 3rem); }
     .tier__size { font-size: clamp(2.2rem, 11vw, 3.6rem); }
     .tier li small { display: none; }
-    .shots { grid-template-columns: 1fr 1fr; } .shots figure:first-child { grid-column: 1 / -1; }
+    .shots { grid-template-columns: 1fr 1fr; } .shots figure:first-child { grid-column: 1 / -1; }  /* phone: the long board full width, the other two side by side */
     .list { grid-template-columns: 1fr; }
     .facts .sc-wrap { grid-template-columns: 1fr; gap: var(--sc-7); }
     .facts__list > div { grid-template-columns: 1fr; gap: var(--sc-1); }
     .close .sc-copy--center { inset-inline: var(--sc-gutter); left: auto; translate: 0 -56%; max-width: none; text-align: center; padding: var(--sc-6) var(--sc-5); }
     .close__foot { bottom: var(--sc-3); }
   }
+  @media (prefers-reduced-motion: reduce) { .sizes .sc-copy--lead { opacity: 1 !important; transform: none !important; translate: none !important; } }
+  /* no blank band between sections (review 22 Oct 2026): the wine line runs straight into the facts */
+  .menu { padding-bottom: clamp(2rem, 4vw, 3.5rem); } .facts { padding-top: clamp(2.5rem, 5vw, 4rem); }
+  /* one look for a board picture, the same for every row (no photo of each board yet: owner question) */
+  .list li { grid-template-columns: 64px 1fr auto; }
+  .list li .thumb { grid-row: 1 / span 2; width: 64px; height: 52px; object-fit: contain; align-self: start; filter: drop-shadow(0 4px 5px rgb(0 0 0 / .4)); }
+  .list li .go { grid-column: 2 / -1; }
+  /* numbers never break in the middle (review 22 Oct 2026) */
+  .num, .tier__size, .plank__dims, .list li i, .ruler span { white-space: nowrap; }
+  /* the sizes heading and first size show as soon as each is whole on screen, while the stage is still arriving, so no blank band
+     follows the hero (review 22 Oct 2026); a line is never shown partly below the screen (cutoff) */
+  .sizes .arrive { opacity: 0; transition: opacity 240ms ease-out; }
+  @media (prefers-reduced-motion: reduce) { .sizes .arrive { opacity: 1 !important; transition: none; } }
   .buybar { display: none; }
   @media (max-width: 860px) {
     .buybar { position: fixed; inset-inline: 0; inset-block-end: 0; z-index: var(--sc-z-chrome); display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
@@ -326,12 +399,17 @@
   }
   /* short phones: the sizes heading keeps its line and the photo keeps clear of text */
   @media (max-width: 860px) and (max-height: 700px) { .sizes .sc-copy--lead p { display: none; } }
-  @media (prefers-reduced-motion: reduce) { .heat { display: none; } }
+  @media (prefers-reduced-motion: reduce) {
+    .heat { display: none; }
+    /* motion off: the big name and the growing plank are motion; the bar carries the name and the full price list is below */
+    .hero .name, .scale, .ruler, .tiers, .sizes .sc-copy--lead p { display: none; }
+    .close .sc-copy, .close .sc-copy h2, .close .sc-copy a, .close .sc-copy p { opacity: 1 !important; }
+  }
 </style>
 </head>
 <body id="top">
 <header class="bar">
-  <a class="bar__mark" href="#top"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv6aycwz" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
+  <a class="bar__mark" href="#top"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mvjvyedj" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
   <nav class="bar__nav" aria-label="On this page" data-spy>
     <a href="#hero" data-mir-key="t-5a2acc5c-0">The board</a>
     <a href="#sizes" data-mir-key="t-a778b034-0">Sizes</a>
@@ -353,11 +431,13 @@
   <!-- 1  The tumble -->
   <section class="hero" id="hero" data-sc-act="pin" data-sc-span="3.2" data-sc-drift="#4B0C19" aria-label="Blazin' Boards">
     <div data-sc-stage>
+      <picture class="hero__bg" aria-hidden="true"><img src="/pages/blazin-boards/assets/their-rustic.jpg?v=mvjvyedj" alt="" width="1600" height="1031" fetchpriority="high" data-mir-key="i-429a7e9c-0"></picture>
+      <div class="hero__shade" aria-hidden="true"></div>
       <div class="stage3d">
         <p class="name" data-sc-cue="0 0.44 0 0.38" aria-hidden="true"><span data-mir-key="t-8c108b7e-0">Blazin’</span><span class="b" data-mir-key="t-068288a7-0">Boards</span></p>
         <div class="tumble__shadow" id="tumbleShadow" aria-hidden="true"></div>
         <div class="tumble" id="tumble" data-clip-ok>
-          <img src="/pages/blazin-boards/assets/board-cut.webp?v=mv6aycwz" width="1510" height="1230" alt="A Blazin' Boards meat board: rows of sliced steak, candied pastrami, jerky and a bone-in rib, on a wooden board" fetchpriority="high" data-mir-key="i-e3148533-0">
+          <img src="/pages/blazin-boards/assets/board-cut.webp?v=mvjvyedj" width="1510" height="1230" alt="A Blazin' Boards meat board: rows of sliced steak, candied pastrami, jerky and a bone-in rib, on a wooden board" fetchpriority="high" data-mir-key="i-e3148533-0">
         </div>
       </div>
       <div class="land" data-sc-cue="0.6 1 0.3 0">
@@ -373,21 +453,21 @@
   <!-- 2  The board grows to scale: the peak -->
   <section class="sizes" id="sizes" data-sc-act="pin" data-sc-span="3.6" data-sc-drift="#3A0812" aria-labelledby="sizesTitle">
     <div data-sc-stage>
-      <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0"><div class="arrive">
         <h2 class="sc-display sc-display--md" id="sizesTitle" data-mir-key="t-83209b99-0">Five sizes, <em>to scale.</em></h2>
         <p data-mir-key="t-0f5ac7fb-0">As you scroll, the board grows through our five sizes at true scale, from the Mini to the Extra Large VIP. Under it, every board we make in that size, with its price.</p>
-      </div>
+      </div></div>
       <div class="scale" aria-hidden="true">
-        <div class="plank" id="plank"><span class="plank__dims" id="plankDims">20 × 15 cm</span></div>
+        <div class="plank" id="plank"><span class="plank__dims" id="plankDims">15 × 20 cm</span></div>
       </div>
       <div class="ruler" id="ruler" aria-hidden="true"><span data-mir-key="t-1c39f7e8-0">10 cm</span></div>
       <div class="tiers">
-        <div class="tier" data-sc-cue="0 0.2 0.1 0.3">
+        <div class="tier" data-sc-cue="0 0.2 0 0.3"><div class="arrive">
           <p class="tier__size"><span class="num" data-mir-key="t-ba47f5b9-0">15 × 20</span><small data-mir-key="t-05237f06-0">cm</small></p>
           <ul>
             <li><span><b data-mir-key="t-37e6c133-0">Mini Board</b><small data-mir-key="t-a9b12242-0">Entrecote steak, candied pastrami, salami chips, sometimes brisket or London broil, beef jerky.</small></span><span class="price" data-mir-key="t-f36c13db-0">$75</span></li>
           </ul>
-        </div>
+        </div></div>
         <div class="tier" data-sc-cue="0.2 0.4 0.3 0.3">
           <p class="tier__size"><span class="num" data-mir-key="t-583d692c-0">20 × 30</span><small data-mir-key="t-05237f06-1">cm</small></p>
           <ul>
@@ -420,15 +500,36 @@
     </div>
   </section>
 
-  <!-- 3  The full list -->
+  <!-- trust block: where, when, how (Qissa-style facts near the top) -->
+  <section class="trust" aria-label="Where, when and how">
+    <ul>
+      <li data-mir-key="t-624405a1-0"><b>Kitchen</b>Farn 5, Jerusalem</li>
+      <li data-mir-key="t-6fa5fd39-0"><b>Notice</b>Orders 48 hours ahead</li>
+      <li data-mir-key="t-d3a25680-0"><b>Delivery</b>Throughout Israel</li>
+      <li data-mir-key="t-6c0555a8-0"><b>Pay us by</b>Card, Zelle or bank transfer</li>
+    </ul>
+  </section>
+
+  <!-- 3  A picture: the price range, on their own jars-and-board photograph -->
+  <section class="band band--jars" id="range" aria-labelledby="rangeTitle">
+    <img class="band__img" src="/pages/blazin-boards/assets/their-jars.jpg?v=mvjvyedj" alt="A board of sliced steaks, pastrami and jerky with two jars of sauce and a bottle of wine" width="1600" height="942" data-mir-key="i-bcc7f5c5-0">
+    <div class="band__shade" aria-hidden="true"></div>
+    <div class="band__copy">
+      <h2 class="band__title" id="rangeTitle" data-mir-key="t-a52063f6-0">From $75 to $750.</h2>
+      <p data-mir-key="t-a10aaac8-0">From the Mini Board to the Party Board.</p>
+      <a class="cta flip" href="/business/blazin-boards/order" aria-label="Order a board, from $75 to $750"><span class="f" data-mir-key="t-c011198d-1">Order a board</span><span class="k" data-mir-key="t-8931a642-1"><b>From $75</b>to $750<svg class="draw" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+    </div>
+  </section>
+
+  <!-- 4  The full list, on a plain light ground -->
   <section class="menu" id="menu" data-sc-act="flow" data-sc-drift="#5A1222" aria-labelledby="menuTitle">
     <div class="sc-wrap">
       <h2 class="sc-display sc-display--md" id="menuTitle" data-mir-key="t-ab1c0aa9-0">Every board.</h2>
       <p class="lede" data-mir-key="t-32adf8d1-0">Our full price list, in US dollars. Tell us how many people are coming and what they like.</p>
       <div class="shots">
-        <figure data-sc-reveal="right" data-sc-reveal-at="0.06 0.42"><img src="/pages/blazin-boards/assets/their-long.jpg?v=mv6aycwz" width="1024" height="683" alt="Our long board on marble: pastrami, brisket, salami and a bone-in rib, with olives and parsley" loading="lazy" data-mir-key="i-8958052b-0"></figure>
-        <figure data-sc-reveal="up" data-sc-reveal-at="0.1 0.46"><img src="/pages/blazin-boards/assets/their-salami.jpg?v=mv6aycwz" width="1024" height="683" alt="A square board of sliced meats and salami rounds, with pistachios and olives" loading="lazy" data-mir-key="i-ffd7802c-0"></figure>
-        <figure data-sc-reveal="up" data-sc-reveal-at="0.14 0.5"><img src="/pages/blazin-boards/assets/their-rustic.jpg?v=mv6aycwz" width="1600" height="1031" alt="Sliced steak and candied pastrami piled on a wooden board" loading="lazy" data-mir-key="i-bc05e418-0"></figure>
+        <figure data-sc-reveal="right" data-sc-reveal-at="0 0.12"><img src="/pages/blazin-boards/assets/their-long.jpg?v=mvjvyedj" width="1024" height="683" alt="Our long board on marble: pastrami, brisket, salami and a bone-in rib, with olives and parsley" loading="lazy" data-mir-key="i-8958052b-0"></figure>
+        <figure data-sc-reveal="up" data-sc-reveal-at="0.02 0.14"><img src="/pages/blazin-boards/assets/their-salami.jpg?v=mvjvyedj" width="1024" height="683" alt="A square board of sliced meats and salami rounds, with pistachios and olives" loading="lazy" data-mir-key="i-ffd7802c-0"></figure>
+        <figure data-sc-reveal="up" data-sc-reveal-at="0.04 0.16"><img src="/pages/blazin-boards/assets/their-rustic.jpg?v=mvjvyedj" width="1600" height="1031" alt="Sliced steak and candied pastrami piled on a wooden board" loading="lazy" data-mir-key="i-bc05e418-0"></figure>
       </div>
       <ul class="list" data-sc-in data-sc-stagger="60">
         <li><span><b data-mir-key="t-2d16910d-0">Mini Board <i>15 × 20 cm</i></b><small data-mir-key="t-a9b12242-1">Entrecote steak, candied pastrami, salami chips, sometimes brisket or London broil, beef jerky.</small></span><span class="price" data-mir-key="t-f36c13db-1">$75</span></li>
@@ -449,7 +550,7 @@
     </div>
   </section>
 
-  <!-- 4  The facts and how it goes -->
+  <!-- 5  The facts and how it goes -->
   <section class="facts" id="facts" data-sc-act="flow" data-sc-drift="#4B0C19" aria-label="The facts">
     <div class="sc-wrap">
       <dl class="facts__list" data-sc-in data-sc-stagger="80">
@@ -462,8 +563,8 @@
       <div class="how" data-sc-in data-sc-stagger="120">
         <h2 data-mir-key="t-f6c045fc-0">How it goes.</h2>
         <ol class="steps">
-          <li data-mir-key="t-65f68307-0">You send a message.<small>Use the button on this page. Tell us the size, the date and how many people are coming.</small></li>
-          <li data-mir-key="t-b5c5ddc4-0">We confirm your board and the day.<small>We need at least two days' notice. Special boards on request.</small></li>
+          <li data-mir-key="t-77daf5e3-0">You place your order here.<small>Choose your boards and any bottles, then the day and where, in three short steps. No sign-in.</small></li>
+          <li data-mir-key="t-46ec34fc-0">We confirm your board and the day.<small>We need at least two days' notice.</small></li>
           <li data-mir-key="t-3cf19525-0">You pay us directly.<small>By card, Zelle or bank transfer.</small></li>
         </ol>
       </div>
@@ -473,20 +574,28 @@
   <!-- 5  Resolve -->
   <section class="close" id="order" data-sc-act="pin" data-sc-span="1.2" data-sc-drift="#3A0812" data-sc-spotlight aria-label="Order">
     <div data-sc-stage>
-      <img class="close__img" src="/pages/blazin-boards/assets/their-square.jpg?v=mv6aycwz" alt="" width="2000" height="1333" data-mir-key="i-0825e0f4-0">
+      <img class="close__img" src="/pages/blazin-boards/assets/their-square.jpg?v=mvjvyedj" alt="" width="2000" height="1333" data-mir-key="i-0825e0f4-0">
       <div class="close__light" aria-hidden="true"></div>
-      <div class="sc-scrim sc-scrim--vignette"></div>
       <div class="sc-copy sc-copy--center" data-sc-cue="0.06">
         <h2 class="sc-display sc-display--lg" data-sc-kinetic="lines" data-mir-key="t-85588ae0-0">Ready when you are.</h2>
-        <a class="cta flip" href="/business/blazin-boards/order" data-sc-magnet="0.26" aria-label="Order a board, from $75 to $750"><span class="f" data-mir-key="t-c011198d-1">Order a board</span><span class="k" data-mir-key="t-8931a642-1"><b>From $75</b>to $750<svg class="draw" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+        <a class="cta flip" href="/business/blazin-boards/order" data-sc-magnet="0.26" aria-label="Order a board, from $75 to $750"><span class="f" data-mir-key="t-c011198d-2">Order a board</span><span class="k" data-mir-key="t-8931a642-2"><b>From $75</b>to $750<svg class="draw" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
         <p class="close__assure" data-mir-key="t-76792492-0">Order in three steps. Nothing is paid on this page: you pay us directly by card, Zelle or bank transfer. Orders 48 hours ahead.</p>
       </div>
-      <p class="close__foot" data-mir-key="t-5c810d7c-0">Blazin' Boards, Farn 5, Jerusalem. Listed on MyIsraelRental. Every photograph on this page is our own.</p>
     </div>
   </section>
 </main>
+<footer class="foot">
+  <p class="foot__big" data-mir-key="t-8ebd5195-0">Premium meat boards, grilled to perfection.</p>
+  <a class="cta" href="/business/blazin-boards/order" data-mir-key="t-4877b309-2">Order a board</a>
+  <div class="foot__cols">
+    <nav aria-label="Pages"><b data-mir-key="t-cb9f0644-0">The site</b><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-0">Home</a><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-1">Every board</a><a href="/business/blazin-boards/order" data-mir-key="t-c5c09523-0">Your order</a></nav>
+    <div><b data-mir-key="t-451f29f2-0">Find us</b><span data-mir-key="t-d4c056e4-0">Farn 5, Jerusalem</span><span data-mir-key="t-257193b7-0">Orders 48 hours ahead</span><span data-mir-key="t-3b7b3887-0">Delivery throughout Israel</span></div>
+    <div><b data-mir-key="t-bd7247f5-0">Pay us by</b><span data-mir-key="t-1fe87945-0">Card, Zelle or bank transfer</span><a href="https://myisraelrental.com/businesses" data-mir-key="t-6fde72b8-0">Listed on MyIsraelRental</a></div>
+  </div>
+  <p class="foot__small" data-mir-key="t-906a2884-0">Blazin' Boards. Every photograph on this site is our own. Nothing is paid on this site: you pay us directly.</p>
+</footer>
 
-<script src="/pages/blazin-boards/scrollcraft.js?v=mv6aycwz"></script>
+<script src="/pages/blazin-boards/scrollcraft.js?v=mvjvyedj"></script>
 <script>
   ScrollCraft.mount(document.body);
   /* Each board on the page is a link (Tzvi, 7 Oct 2026). With their WhatsApp
@@ -505,9 +614,9 @@
                     : ORDER + '?board=' + encodeURIComponent(name);
       var a = document.createElement('a'); a.className = 'board-link'; a.href = href;
       if (WA) { a.target = '_blank'; a.rel = 'noopener'; }
-      a.setAttribute('aria-label', (WA ? 'Order on WhatsApp: ' : 'Order: ') + name + ', ' + price);
+      a.setAttribute('aria-label', (WA ? 'Order on WhatsApp: ' : 'Add to order: ') + name + ', ' + price);
       while (li.firstChild) a.appendChild(li.firstChild);
-      if (li.closest('.list')) { var go = document.createElement('span'); go.className = 'go'; go.textContent = WA ? 'Order this board on WhatsApp' : 'Order this board'; a.appendChild(go); }
+      if (li.closest('.list')) { var th = document.createElement('img'); th.className = 'thumb'; th.src = '/pages/blazin-boards/assets/board-cut-m.webp?v=mvjvyedj'; th.alt = ''; th.width = 1000; th.height = 815; th.loading = 'lazy'; a.insertBefore(th, a.firstChild); var go = document.createElement('span'); go.className = 'go'; go.textContent = 'Add to order'; a.appendChild(go); }
       li.appendChild(a);
     });
   })();
@@ -645,6 +754,11 @@
       // Short side first, the way the menu and the size readout write it (15 × 20 cm).
       dims.textContent = Math.round(s[1]) + ' × ' + Math.round(s[0]) + ' cm';
     }
+    (function () {
+      var els = [].slice.call(document.querySelectorAll('.sizes .arrive'));
+      function arrive() { var vh = innerHeight; els.forEach(function (e) { var r = e.getBoundingClientRect(); e.style.opacity = (r.bottom <= vh - 8 && r.top >= 0) ? '1' : '0'; }); }
+      addEventListener('scroll', arrive, { passive: true }); addEventListener('resize', arrive); arrive();
+    })();
     var lastP = 0;
     if (plank) {
       fitScale(); paintPlank(0);

@@ -30,7 +30,7 @@ img { display: block; max-width: 100%; }
 /* ---------- the bar, the same on every page -------------------------------- */
 .nav { position: sticky; top: 0; z-index: 40; display: flex; align-items: center; gap: 1.25rem; padding: 0.75rem clamp(1.25rem, 5vw, 3rem);
   background: rgb(255 255 255 / 0.92); backdrop-filter: blur(12px); border-bottom: 1px solid var(--line); }
-.nav__mark { display: inline-flex; align-items: center; gap: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; text-decoration: none; }
+.nav__mark { min-height: 40px; display: inline-flex; align-items: center; gap: 0.6rem; font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em; text-decoration: none; }
 .nav__mark img { width: 34px; height: 34px; border-radius: 50%; object-fit: cover; }
 .menu { display: flex; gap: 0.2rem; margin: 0 0 0 auto; padding: 0; list-style: none; }
 .menu a { display: flex; align-items: center; min-height: 44px; padding: 0.55rem 0.85rem; border-radius: 999px; color: var(--soft); font-weight: 600; font-size: 0.95rem; text-decoration: none; transition: background 160ms ease-out, color 160ms ease-out; }
@@ -64,7 +64,7 @@ img { display: block; max-width: 100%; }
 .cta--gold:hover { background: #F1C25A; }
 .ghost { display: inline-flex; align-items: center; min-height: 48px; padding: 0 1.2rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; font-weight: 700; text-decoration: none; transition: border-color 160ms; }
 .ghost:hover { border-color: var(--ox-1); }
-.back { color: var(--soft); font-weight: 600; text-decoration: none; }
+.back { display: inline-flex; align-items: center; min-height: 40px; color: var(--soft); font-weight: 600; text-decoration: none; }
 .back:hover { color: var(--ink); }
 
 /* ---------- the shop: every board ----------------------------------------- */
@@ -93,7 +93,7 @@ img { display: block; max-width: 100%; }
 .bcard .body { padding: 1.1rem 1.2rem 1.25rem; display: grid; gap: 0.55rem; align-content: start; }
 .bcard .line { font: 700 0.72rem/1 var(--font-body); letter-spacing: 0.1em; text-transform: uppercase; color: var(--gold-text); }
 .bcard h3 { font-size: 1.35rem; line-height: 1.15; }
-.bcard .price { font: 800 1.35rem/1 var(--font-body); color: var(--ox-1); font-variant-numeric: tabular-nums; }
+.bcard .price { font: 800 1.35rem/1 var(--font-body); color: var(--ink); font-variant-numeric: tabular-nums; }
 .bcard .what { margin: 0; color: var(--soft); font-size: 0.92rem; line-height: 1.45; }
 .bcard .start { font: 700 0.72rem/1 var(--font-body); letter-spacing: 0.08em; text-transform: uppercase; color: var(--ox-1); }
 .add { margin-top: 0.4rem; display: flex; align-items: center; gap: 0.6rem; }
@@ -147,7 +147,7 @@ img { display: block; max-width: 100%; }
 .pick:hover { border-color: rgb(75 12 25 / 0.5); }
 .pick[aria-pressed="true"] { border-color: var(--ox-1); background: var(--wash); box-shadow: 0 0 0 1px var(--ox-1) inset; }
 .pick .name { font-family: var(--font-head); font-size: 1.05rem; line-height: 1.2; }
-.pick .price { font-weight: 800; color: var(--ox-1); }
+.pick .price { font-weight: 800; color: var(--ink); }
 .pick .start { font: 700 0.7rem/1 var(--font-body); letter-spacing: 0.06em; text-transform: uppercase; color: var(--gold-text); }
 .field { display: grid; gap: 0.35rem; }
 .field label, .field .lab { font: 700 0.88rem/1.2 var(--font-body); }
@@ -169,7 +169,7 @@ img { display: block; max-width: 100%; }
 .cartlines li { display: grid; grid-template-columns: 1fr auto auto; gap: 0.8rem; align-items: center; padding: 0.8rem 0.9rem; border-radius: 14px; background: var(--paper-2); }
 .cartlines b { font-family: var(--font-head); font-weight: 500; font-size: 1.05rem; }
 .cartlines small { display: block; color: var(--soft); font-size: 0.85rem; }
-.cartlines .amt { font-weight: 800; color: var(--ox-1); font-variant-numeric: tabular-nums; }
+.cartlines .amt { font-weight: 800; color: var(--ink); font-variant-numeric: tabular-nums; }
 /* the summary */
 .summary { position: sticky; top: 86px; padding: 1.3rem; border-radius: 24px; background: #fff; box-shadow: var(--shadow); }
 .summary .who { display: flex; gap: 0.75rem; align-items: center; padding-bottom: 0.9rem; border-bottom: 1px solid var(--line); }
@@ -184,7 +184,7 @@ img { display: block; max-width: 100%; }
 .lines .meta span:last-child { font-weight: 500; }
 .total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 0.9rem; }
 .total span { font-weight: 700; }
-.total b { font: 800 1.8rem/1 var(--font-body); color: var(--ox-1); font-variant-numeric: tabular-nums; }
+.total b { font: 800 1.8rem/1 var(--font-body); color: var(--ink); font-variant-numeric: tabular-nums; }
 .promise { margin: 1rem 0 0; padding: 0.9rem 0 0; border-top: 1px solid var(--line); list-style: none; display: grid; gap: 0.5rem; font-size: 0.9rem; color: var(--soft); }
 .promise li { display: flex; gap: 0.5rem; align-items: flex-start; }
 .promise svg { width: 17px; height: 17px; flex: none; margin-top: 2px; stroke: var(--ox-1); stroke-width: 2.4; fill: none; stroke-linecap: round; stroke-linejoin: round; }
@@ -213,8 +213,166 @@ img { display: block; max-width: 100%; }
   .dock { position: fixed; inset: auto 0 0 0; z-index: 50; display: flex; align-items: center; justify-content: space-between; gap: 1rem;
     padding: 0.75rem 16px calc(0.75rem + env(safe-area-inset-bottom)); background: rgb(255 255 255 / 0.97); border-top: 1px solid var(--line); }
   .dock small { display: block; color: var(--soft); font-size: 0.8rem; }
-  .dock b { font: 800 1.4rem/1 var(--font-body); color: var(--ox-1); font-variant-numeric: tabular-nums; }
+  .dock b { font: 800 1.4rem/1 var(--font-body); color: var(--ink); font-variant-numeric: tabular-nums; }
   .dock .cta { min-height: 48px; padding: 0 1.3rem; }
   .toast { bottom: 16px; width: calc(100% - 32px); justify-content: space-between; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: 1ms !important; animation: none !important; } }
+
+
+/* ---- proposed ---- */
+.save-b { display: inline-flex; align-items: center; padding: .22rem .65rem; border-radius: 999px; background: #F4E9D6; color: var(--ink); font: 800 .78rem/1.3 var(--font-body); }
+.shop-head { background: var(--ox-1); color: #F4EADB; box-shadow: 0 0 0 100vmax var(--ox-1); clip-path: inset(0 -100vmax); padding-inline: clamp(1.25rem, 5vw, 3rem); padding-bottom: 2rem; margin-bottom: 0; }
+.shop-head .eyebrow { color: var(--gold); }
+.shop-head h1 { color: #F4EADB; } .shop-head h1 em { color: var(--gold); }
+.shop-head p { color: #E8D9D5; }
+.shop-head .chip { background: transparent; color: #F4EADB; border-color: rgb(244 234 219 / .35); }
+.shop-head .chip[aria-pressed="true"] { background: var(--gold); color: var(--ox-0); border-color: transparent; }
+.shop-head .chip:hover:not([aria-pressed="true"]) { border-color: var(--gold); }
+.chip:active, .cta:active, .stepper button:active, .bottle .tg:active, .pick:active, .ghost:active { transform: scale(.97); transition-duration: 90ms; }
+.chip:hover { border-color: var(--ox-1); }
+.stepper button:hover, .bottle .tg:hover { background: var(--wash); }
+.bottle .tg[aria-pressed="true"]:hover { background: var(--ox-2); }
+.bcard { position: relative; }
+.bcard .body { grid-template-rows: auto auto auto auto 1fr; }
+.bcard .add { align-self: end; }
+.bcard .save-b { position: absolute; top: 14px; right: 14px; z-index: 2; }
+#boards { transition: opacity 180ms ease-out; } #boards.is-swap { opacity: 0; }
+.pick .save-b { justify-self: start; }
+.cartlines li { grid-template-columns: 56px 1fr auto auto 40px; }
+.cartlines .thumb { width: 56px; height: 44px; border-radius: 10px; background: var(--wash); display: grid; place-items: center; overflow: hidden; }
+.cartlines .thumb img { width: 48px; height: auto; filter: drop-shadow(0 3px 3px rgb(58 8 18 / .3)); }
+.cartlines .rm { width: 40px; height: 40px; border-radius: 50%; border: 0; background: transparent; display: grid; place-items: center; color: var(--soft); transition: background 120ms, color 120ms, transform 90ms; }
+.cartlines .rm:hover { background: #F6DCDC; color: #8B1A1A; } .cartlines .rm:active { transform: scale(.92); }
+.cartlines .rm svg { width: 20px; height: 20px; stroke: currentColor; stroke-width: 2; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.steps li { font-size: .95rem; }
+.steps li.is-now { font-weight: 800; }
+.pick { padding: .6rem .85rem; gap: .15rem; }
+.picks td { padding: .22rem; }
+.picks td.size { padding-top: .7rem; }
+.bottle .tg { flex: none; }
+.bottle > span:first-child { min-width: 0; }
+@media (max-width: 640px) {
+  .bottle { flex-wrap: wrap; }
+  .bottles { grid-template-columns: 1fr !important; }
+  .cartlines li { grid-template-columns: 1fr auto 40px; }
+  .cartlines .thumb { display: none; }
+  .cartlines li > span:nth-child(2) { grid-column: 1 / -1; }
+}
+.chip[aria-pressed="true"]:hover { filter: brightness(1.1); }
+/* order step 1: each board one slim line, so the choice fits one screen */
+.pick { display: grid; grid-template-columns: 1fr auto; align-items: center; column-gap: .6rem; padding: .5rem .8rem; min-height: 46px; }
+.pick .name { font-size: 1rem; }
+.pick .start, .pick .save-b { grid-column: 1 / -1; justify-self: start; }
+.pick .start { font-size: .62rem; }
+.pick .save-b { grid-column: 1; margin-top: .1rem; }
+.picks td.size { padding-top: .6rem; }
+.pane .sub { margin-top: .3rem; }
+.q { margin-top: 1.1rem; }
+.ghost[hidden] { display: none; }
+.pick .name { font-size: .92rem; }
+.pane h1 { font-size: clamp(1.7rem, 1.2rem + 1.4vw, 2.3rem); }
+.pane { padding-block: 1.5rem; }
+.pick { min-height: 40px; padding: .35rem .8rem; }
+.picks td { padding: .15rem; } .picks td.size { padding-top: .45rem; }
+.pick .name { white-space: nowrap; font-size: .88rem; }
+.pick .price { font-size: .95rem; }
+.steps { margin-bottom: 1rem; }
+.order { padding-top: 1.1rem; }
+.q > h2 { margin-bottom: .45rem; }
+.picks thead { display: none; }
+.pane { padding-block: 1.1rem; }
+.next { margin-top: 1.2rem; }
+.daychips { margin: 0 0 .9rem; }
+.daychips .chip { min-height: 44px; }
+@media (max-width: 640px) { .daychips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; } .daychips .chip { white-space: nowrap; } }
+[hidden] { display: none !important; }
+
+.was { color: var(--soft); font-weight: 600; margin-inline-end: .35rem; }
+
+/* category food-shop, premium dark brand (rule 3t, 22 Oct 2026): the shop and order pages share the home page's one warm dark
+   ground, as Qissa does. Forms stay on light panels so they read. */
+:root { --paper: #3A0812; --paper-2: #4B0C19; --wash: #4B0C19; --ink: #F4EADB; --soft: #E0C4BA; --line: rgba(244, 234, 219, 0.18); --gold-text: #E9B23B; }
+:focus-visible { outline-color: var(--gold); }
+.nav { background: rgb(58 8 18 / 0.94); }
+.menu a:hover, .menu a[aria-current="page"] { background: var(--ox-2); color: var(--ink); }
+.cart { background: var(--gold); color: var(--ox-0); }
+.cart:hover { background: #F1C25A; }
+.cart b { background: var(--ox-0); color: var(--gold); }
+.bcard, .bottle { background: var(--paper-2); }
+.bottle .tg { background: transparent; color: var(--gold); border-color: var(--gold); }
+.bottle .tg[aria-pressed="true"] { background: var(--gold); color: var(--ox-0); }
+.ghost, .chip { background: transparent; color: var(--ink); }
+.chip[aria-pressed="true"] { background: var(--gold); color: var(--ox-0); }
+.cta { background: var(--gold); color: var(--ox-0); }
+.cta:hover { background: #F1C25A; }
+.pane, .summary, .field, .dock, .picks { --ink: #2B1017; --soft: #6B5A5E; --line: rgba(58, 8, 18, 0.14); --gold-text: #7A5A10; --paper: #FFFFFF; --paper-2: #FBF6F3; --wash: #FBF1E4; }
+.pane .bottle .tg, .summary .bottle .tg { color: var(--ox-1); border-color: var(--ox-1); }
+.pane .bottle .tg[aria-pressed="true"] { background: var(--ox-1); color: #fff; }
+.pane, .summary { color: var(--ink); }
+.errline { color: #FFB4AB; }
+
+/* the same real footer as the home page: a last big line, the button, link columns, contact (rule 3t) */
+.foot2 { margin-top: 3rem; padding: clamp(3rem, 8vw, 6rem) clamp(1.25rem, 5vw, 3rem) 2rem; background: var(--ox-0); color: var(--ink); }
+.foot2 > * { max-width: 1180px; margin-inline: auto; }
+.foot2__big { margin-block: 0 1.5rem; font: 800 clamp(2rem, 5.5vw, 4.5rem)/.95 var(--font-body); text-transform: uppercase; letter-spacing: -0.04em; }
+.foot2 .cta { display: flex; width: fit-content; margin-inline: 0 auto; margin-left: max(0px, calc((100% - 1180px) / 2)); }
+.foot2__cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2rem; padding-block: 2rem; margin-top: 2.5rem; border-top: 1px solid var(--line); }
+.foot2__cols > * { display: grid; gap: .5rem; align-content: start; font-size: .92rem; }
+.foot2__cols b { color: var(--gold); }
+.foot2__cols a { text-decoration: none; min-height: 32px; display: inline-flex; align-items: center; }
+.foot2__cols a:hover { color: var(--gold); }
+.foot2__cols span { color: var(--soft); }
+.foot2__small { margin-block: 1rem 0; font-size: .875rem; color: var(--soft); }
+@media (max-width: 760px) { .foot2__cols { grid-template-columns: 1fr; } }
+.pane .errline, .summary .errline { color: #B3261E; }
+@media (max-width: 860px) { .foot2 { padding-bottom: calc(2rem + 110px); } }
+
+/* nothing is wider than the screen (independent review, 22 Oct 2026): grid columns may shrink, long rows wrap inside their card */
+.cols > *, .pane, .summary { min-width: 0; }
+.lines li { min-width: 0; }
+.lines li > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.lines .meta > span:last-child { white-space: normal; text-align: end; overflow-wrap: anywhere; }
+@media (max-width: 960px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) {
+  .picks, .picks tbody { display: block; }
+  .picks td { display: block; min-width: 0; padding: 0; }
+  .picks td:empty { display: none; }
+  .pick .name { white-space: normal; }
+  .pick { min-width: 0; }
+}
+
+/* numbers never break in the middle; one picture look for every board (no photo of each board yet) */
+.stage .dims, .pick .name::before, .picks td.size, .cartlines small, .pick .name[data-size]::before { white-space: nowrap; }
+.stage .board { width: min(72%, 250px); }
+@media (hover: hover) { .bcard:hover .stage .board { transform: none; } }
+.bottle .tg { white-space: nowrap; }
+@media (max-width: 640px) { .picks tr { grid-template-columns: minmax(0, 1fr); } }
+
+/* a line that has just come in fades in (check-motion: a choice changes the page smoothly) */
+.lines li.fresh, .cartlines li.fresh { animation: fresh 480ms ease-out; }
+@keyframes fresh { from { opacity: 0; max-height: 0; padding-block: 0; overflow: hidden; } to { max-height: 8rem; } }
+.bottle .tg { transition: background 180ms ease-out, color 180ms ease-out, border-color 180ms; }
+/* the delivery address opens and closes smoothly */
+#addrQ { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 260ms ease-out, opacity 260ms ease-out, margin 260ms; }
+#addrQ > * { min-height: 0; overflow: hidden; }
+#addrQ.is-shut { grid-template-rows: 0fr; opacity: 0; margin-top: 0; pointer-events: none; }
+.lines .meta > span:first-child { flex: none; overflow-wrap: normal; }
+
+/* touch targets and states found on the seeded order pages (review 22 Oct 2026) */
+.stepper button { width: 44px; height: 44px; }
+.back { min-height: 44px; min-width: 44px; padding-inline: .6rem; }
+.pane .bottle .tg[aria-pressed="true"]:hover { background: var(--ox-2); }
+
+/* readable (review 22 Oct 2026): nothing under 12px, prices and the "start here" line visible on the dark cards, the basket badge square enough for its number */
+.bcard .line, .bcard .start { font-size: .78rem; }
+.bcard .start { color: var(--gold); }
+.pick .start { font-size: .75rem; }
+.bottle .p { color: var(--gold); }
+.pane .bottle .p, .summary .bottle .p { color: var(--ox-1); }
+.stage .dims { font-size: .8rem; }
+@media (max-width: 640px) { .stage .dims { font-size: .9rem; } }
+.cart b { border-radius: 8px; }
+.field .hint { font-size: .9rem; }
+@media (max-width: 640px) { .daychips { flex-wrap: wrap; overflow: visible; } }
+@media (max-width: 640px) { .bcard .start { font-size: .88rem; } }
