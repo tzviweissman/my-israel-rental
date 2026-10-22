@@ -155,6 +155,36 @@
   .close .alt { margin: var(--sc-3) 0 0; color: #fff; }
   .close .alt a { color: var(--sc-accent); font-weight: 700; }
 
+  /* the booking request (page rules 3k): saved to MyIsraelRental, then WhatsApp */
+  .reqsec { background: var(--sc-canvas); padding: var(--sc-7) var(--sc-gutter); }
+  .reqsec .wrap { max-width: 80rem; margin: 0 auto; }
+  @media (min-width: 900px) { .reqsec .wrap { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--sc-7); align-items: center; } .reqsec .req { margin-top: 0; } }
+  .reqsec .sub { margin: var(--sc-3) 0 0; color: var(--sc-ink-soft); }
+  .req { margin-top: var(--sc-5); max-width: 34rem; display: grid; gap: var(--sc-3); }
+  .req { grid-template-columns: 1fr 1fr; align-items: start; }
+  .req .full { grid-column: 1 / -1; }
+  .req .act { align-self: end; }
+  .req .opt .box { min-height: 40px; }
+  .req .lab { display: block; margin-bottom: 0.4rem; font: 600 var(--sc-t-sm)/1.2 var(--sc-font-text); color: #fff; }
+  .req .opts { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .req .opt { position: relative; margin: 0; }
+  .req .opt input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; cursor: pointer; }
+  .req .opt .box { display: inline-flex; align-items: center; min-height: 44px; padding: 0 0.95rem; border-radius: 4px; border: 1.5px solid rgb(255 255 255 / 0.45); background: rgb(11 10 12 / 0.72); color: #fff; font: 600 var(--sc-t-sm)/1 var(--sc-font-text); transition: background 160ms, color 160ms, border-color 160ms; }
+  .req .opt:hover .box { border-color: var(--sc-accent); }
+  .req .opt input:checked + .box { background: var(--sc-accent); border-color: var(--sc-accent); color: var(--sc-accent-ink); }
+  .req .opt input:focus-visible + .box { outline: 3px solid #fff; outline-offset: 2px; }
+  .req .bad .box { border-color: var(--sc-accent); }
+  .req .hint { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  .req label { display: block; margin-bottom: 0.3rem; font: 600 var(--sc-t-sm)/1.2 var(--sc-font-text); color: #fff; }
+  .req input, .req select { width: 100%; min-height: 48px; padding: 0 0.85rem; border-radius: 4px; border: 1.5px solid rgb(255 255 255 / 0.45); background: rgb(11 10 12 / 0.72); color: #fff; font: 500 var(--sc-t-base)/1.2 var(--sc-font-text); color-scheme: dark; }
+  .req input:focus-visible, .req select:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+  .req .bad input[type="text"], .req .bad input:not([type="radio"]) { border-color: var(--sc-accent); }
+  .req .err { display: block; min-height: 1.1em; margin-top: 0.25rem; color: #FF8FC4; font: 600 var(--sc-t-xs)/1.2 var(--sc-font-text); }
+  .req .act { margin-top: var(--sc-2); display: block; }
+  .req .btn[aria-busy="true"] { opacity: 0.7; pointer-events: none; }
+  .req .fine { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  @media (max-width: 560px) { .req { grid-template-columns: 1fr; } }
+
   /* the footer: a last line, the button, columns, contact */
   .foot { background: #000; border-top: 2px solid var(--sc-accent); padding: clamp(3.5rem, 10vh, 6rem) var(--sc-gutter) calc(var(--sc-6) + var(--bar-pad, 0px)); color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
   .foot .wrap { max-width: 80rem; margin: 0 auto; }
@@ -276,7 +306,7 @@
 <header class="bar" id="bar">
   <a class="who" href="#top">Michal Yodaiken <span>· Let's workout</span></a>
   <div class="clock" aria-hidden="true"><b id="clock">00:00</b><span>of a 30-minute session</span><span class="tag">₪60 · 30 min</span><span class="done">A stronger, healthier you</span></div>
-  <a class="btn" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <a class="btn" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
 </header>
 
 <main id="top">
@@ -287,7 +317,7 @@
       <h1>Personal training for women that <em>comes to you</em>, in Jerusalem</h1>
       <p class="lede">Helping women feel stronger, healthier and more confident through personalised fitness training.</p>
       <div class="act">
-        <a class="btn" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <ul class="proof">
           <li><b>₪60</b> for a 30-minute session</li>
           <li>Sessions tailored to your goals and fitness level</li>
@@ -299,7 +329,7 @@
 
   <section class="paper" id="ways">
     <div class="wrap">
-      <div class="head"><h2 class="big" data-sc-in>Five ways <span>to train.</span></h2><a class="btn on-light" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="head"><h2 class="big" data-sc-in>Five ways <span>to train.</span></h2><a class="btn on-light" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
       <ol class="offers" data-sc-in>
         <li><img src="assets/home.webp" alt="Pink dumbbells and an exercise mat on a sunlit living-room floor" width="2048" height="1152" loading="lazy"><div class="ob"><span class="n">01</span><h3>At your home</h3><p>1-to-1 training tailored to your goals and fitness level. I come to your home, or any place you prefer.</p><span class="amt">&#8362;60<small>for 30 minutes</small></span></div></li>
         <li id="gym"><img src="assets/gym.webp" alt="An empty gym with a dumbbell rack, a bench and pink dumbbells on the floor" width="2048" height="1152" loading="lazy"><div class="ob"><span class="n">02</span><h3>At your gym</h3><p>I come with you to your gym, with guidance, motivation and support throughout your workout.</p><span class="amt ask">Message for a price</span></div></li>
@@ -364,15 +394,33 @@
       <h2 class="big" data-sc-in>Book your <span>first session.</span></h2>
       <p class="sub">At your home, in my private gym, or online.</p>
       <p class="price">&#8362;60<small>for 30 minutes</small></p>
-      <div class="act"><a class="btn" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-      <p class="alt">Prefer WhatsApp? <a href="https://wa.me/447563299474?text=Hi%20Michal%2C%20I%27d%20like%20to%20book%20a%20session">Message Michal on <span class="nb">07563 299474</span></a></p>
+      <div class="act"><a class="btn" href="#request">Choose a day and time<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <p class="alt">Prefer WhatsApp? <a href="https://wa.me/447563299474?text=Hi%20Michal%2C%20I%27d%20like%20to%20book%20a%20session">Message Michal on <span class="nb">07563 299474</span></a> &#183; <a href="https://myisraelrental.com/business/michal-yodaiken">Her page on MyIsraelRental</a></p>
+    </div>
+  </section>
+
+  <section class="reqsec" id="request" aria-labelledby="h-req">
+    <div class="wrap">
+      <div class="lead"><h2 class="big" id="h-req" data-sc-in>Your <span>request.</span></h2>
+      <p class="sub">Choose what you would like, and when.</p></div>
+        <form class="req" id="req" novalidate>
+          <div class="fld full" id="w-way" role="group" aria-labelledby="l-way"><span class="lab" id="l-way">What would you like</span>
+            <div class="opts"><label class="opt"><input type="radio" name="way" value="At your home"><span class="box">At your home</span></label><label class="opt"><input type="radio" name="way" value="At your gym"><span class="box">At your gym</span></label><label class="opt"><input type="radio" name="way" value="Online"><span class="box">Online</span></label><label class="opt"><input type="radio" name="way" value="My private gym, Jerusalem"><span class="box">My private gym, Jerusalem</span></label><label class="opt"><input type="radio" name="way" value="Small group circuits (3 or more)"><span class="box">Small group circuits (3 or more)</span></label></div>
+            <span class="err" id="e-way"></span></div>
+          <div class="fld" id="w-day"><label for="day">Day</label><input id="day" type="date"><span class="err" id="e-day"></span></div>
+          <div class="fld" id="w-me"><label for="me">Your name</label><input id="me" autocomplete="name"><span class="err" id="e-me"></span></div>
+          <div class="fld full" id="w-time" role="group" aria-labelledby="l-time"><span class="lab" id="l-time">Start time</span><div class="opts" id="times"><p class="hint">Choose a day first.</p></div><span class="err" id="e-time"></span></div>
+          <div class="fld" id="w-ph"><label for="ph">Phone</label><input id="ph" type="tel" inputmode="tel" autocomplete="tel"><span class="err" id="e-ph"></span></div>
+          <div class="act"><button class="btn" type="submit" id="send"><span id="send-l">Send on WhatsApp</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+          <p class="fine full" id="fine">Saved with Michal on MyIsraelRental, then WhatsApp opens with your request written out.</p>
+        </form>
     </div>
   </section>
 
   <footer class="foot">
     <div class="wrap">
       <p class="last">A stronger, healthier <span>you.</span></p>
-      <div class="act"><a class="btn" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="act"><a class="btn" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
       <div class="cols">
         <div><h4>Train</h4><ul><li><a href="#ways">At your home</a></li><li><a href="#gym">At your gym</a></li><li><a href="#ways">Online</a></li><li><a href="#private">My private gym</a></li></ul></div>
         <div><h4>The session</h4><ul><li><a href="#session">30 minutes, &#8362;60</a></li><li><a href="#faq">Women only</a></li><li><a href="#faq">Training in English</a></li></ul></div>
@@ -411,6 +459,63 @@
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
+})();
+</script>
+<script>
+(function () {
+  // The request is saved with Michal on MyIsraelRental first (page rules 3k), then WhatsApp opens with it typed.
+  // Her start times are the ones in her listing: Sunday to Friday, 09:00 to 21:00; offered on the hour.
+  var WA = '447563299474', GIG = '135e7aac-13fa-4a1e-a0b8-822cfbd2c111', TIER = 'Personal Training';
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var $ = function (id) { return document.getElementById(id); };
+  var v = function (id) { return $(id).value.trim(); };
+  var today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  $('day').min = today;
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function drawTimes() {
+    var box = $('times'), d = v('day'), keep = (document.querySelector('#times input:checked') || {}).value;
+    if (!d) { box.innerHTML = '<p class="hint">Choose a day first.</p>'; return; }
+    if (new Date(d + 'T12:00').getDay() === 6) { box.innerHTML = '<p class="hint">Closed on Shabbat. Choose another day.</p>'; return; }
+    var out = [];
+    for (var m = 540; m + 30 <= 1260; m += 60) {
+      if (d === today) { var n = new Date(); if (m <= n.getHours() * 60 + n.getMinutes() + 60) continue; }
+      var t = pad(Math.floor(m / 60)) + ':' + pad(m % 60); out.push('<label class="opt"><input type="radio" name="time" value="' + t + '"' + (t === keep ? ' checked' : '') + '><span class="box">' + t + '</span></label>');
+    }
+    box.innerHTML = out.length ? out.join('') : '<p class="hint">No times left that day. Choose another day.</p>';
+  }
+  function val(name) { var r = document.querySelector('#req input[name=' + name + ']:checked'); return r ? r.value : ''; }
+  $('day').addEventListener('change', drawTimes);
+  function mark(id, msg) { $('w-' + id).classList.toggle('bad', !!msg); $('e-' + id).textContent = msg || ''; }
+  function check() {
+    var ok = true, e;
+    e = val('way') ? '' : 'Choose what you would like'; if (e) ok = false; mark('way', e);
+    e = v('day') && new Date(v('day') + 'T12:00').getDay() !== 6 ? '' : 'Choose a day, not Shabbat'; if (e) ok = false; mark('day', e);
+    e = val('time') ? '' : 'Choose a start time'; if (e) ok = false; mark('time', e);
+    e = v('me') ? '' : 'Your name, please'; if (e) ok = false; mark('me', e);
+    e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number Michal can reach you on'; if (e) ok = false; mark('ph', e);
+    return ok;
+  }
+  var sending = false;
+  $('req').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (sending) return;
+    if (!check()) { var b = document.querySelector('#req .bad input'); if (b) b.focus(); return; }
+    var day = new Date(v('day') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    var lines = ['Hi Michal, I would like to book a session:', 'What: ' + val('way'), 'When: ' + day + ' at ' + val('time'), 'Name: ' + v('me') + ', ' + v('ph')];
+    var text = lines.join('\n'), msg = lines.slice(1, 3).join('; ');
+    sending = true; $('send').setAttribute('aria-busy', 'true'); var l = $('send-l'), label = l.textContent; l.textContent = 'Sending';
+    var tab = window.open('', '_blank');
+    var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ tier_name: TIER, preferred_date: v('day'), time_slot: val('time'), guest_name: v('me'), contact_phone: v('ph'), message: msg, lang: 'en' }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
+      .catch(function (err) { console.warn('booking not saved', err); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      if (saved && saved.track_path) text += '\n\nFollow the booking: https://myisraelrental.com' + saved.track_path;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      sending = false; $('send').removeAttribute('aria-busy'); l.textContent = label;
+    });
+  });
 })();
 </script>
 </body>

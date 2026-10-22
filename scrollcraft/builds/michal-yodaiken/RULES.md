@@ -128,10 +128,11 @@ R3.14 n/a: the page shows no loud prices as a selling device
 R3k.7 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3k.8 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3k.6 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
+R3k.9 pass: check-site SAVE passes: the new request section POSTs to /api/marketplace/gigs/135e7aac-.../book with tier_name Personal Training, preferred_date, time_slot on the hour from her listing hours (09:00 to 20:00, Sunday to Friday), guest_name, contact_phone, message (what and when); WhatsApp opens first and carries the tracking link; a failed save still opens WhatsApp
 R3.15 pass: the action is booking by message and the button and WhatsApp number are on the page
 R7.1 pass: hand build; one direction (her flyer look, trainer pattern) in CONCEPT.md, no options put to anyone
 R8.5 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
-R0b.13 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
+R0b.13 pass: the request is saved with a tracking link (/bookings/track/...) before WhatsApp opens, and the message carries that link (see R3k.9)
 R3l.1 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3l.2 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3l.3 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food

@@ -141,10 +141,11 @@ R3.14 pass: prices are loud only where the owner has real prices; both sites hav
 R3k.7 pass: the booking is four steps with a Step bar, total, Back and browser back; script FLOW passed
 R3k.8 n/a: no basket: one booking, no multiple lines
 R3k.6 n/a: no basket between pages
+R3k.9 pass: check-site SAVE passes on the order pages and the review step POSTs to /api/marketplace/gigs/d2a374fd-.../book with tier_name Kashering Kitchen (or Kashering of Pots, Cutlery & Utensils when only pots), preferred_date, time_slot, guest_name, contact_phone, message (every line and add-on as text); the time of day chips were replaced by the start times of the listing (18:00 to 23:00, Sunday to Friday), because /book needs HH:MM and a quote request is refused (404) on an appointment listing; WhatsApp opens first, carries the tracking link; a failed save still opens WhatsApp
 R3.15 pass: booking is the action and Book has the services; contact has hours and area
 R7.1 pass: hand build, one direction chosen: the category pattern in CONCEPT.md
 R8.5 pass: the main button goes to the booking page, the quickest route; WhatsApp is where it ends
-R0b.13 n/a: no tracking link: the booking is sent as a written WhatsApp message
+R0b.13 pass: the booking is saved with a tracking link (/bookings/track/...) before WhatsApp opens, and the message carries that link (see R3k.9)
 R3l.1 n/a: no family of similar items
 R3l.2 n/a: no family of similar items
 R3l.3 n/a: no family of similar items

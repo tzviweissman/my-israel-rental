@@ -72,7 +72,7 @@
 (function () {
   var o = KMB.load();
   if (!o.kitchen && !o.pots) { location.replace('book.html'); return; }
-  if (!o.name || !o.phone || !o.date || !o.place) { location.replace('book-details.html'); return; }
+  if (!o.name || !o.phone || !o.date || !o.time || !o.place) { location.replace('book-details.html'); return; }
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var rows = [
     ['What', KMB.lines(o).map(function (x) { return esc(x[0]); }).join('<br>') + '<br><a class="link" href="book.html">Change</a>'],
@@ -86,7 +86,18 @@
   ['send', 'send2'].forEach(function (id) {
     var a = document.getElementById(id);
     a.href = href;
-    a.addEventListener('click', function () { setTimeout(function () { location.href = 'book-sent.html'; }, 600); });
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (a.dataset.busy) return; a.dataset.busy = '1';
+      // the WhatsApp tab opens first so the pop-up blocker allows it; it is filled once the booking is saved
+      var tab = window.open('', '_blank');
+      KMB.submit(o).then(function (track) {
+        if (track) { o.track = track; KMB.save(o); }
+        var url = KMB.waLink(o);
+        if (tab) tab.location.href = url; else location.href = url;
+        setTimeout(function () { location.href = 'book-sent.html'; }, 600);
+      });
+    });
   });
   KMB.paint(o);
 })();

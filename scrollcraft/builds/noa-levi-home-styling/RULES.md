@@ -141,10 +141,11 @@ R3.14 pass: prices are loud only where the owner has real prices; both sites hav
 R3k.7 pass: the booking has steps with a total beside them; script FLOW passed
 R3k.8 n/a: no basket: one booking, no multiple lines
 R3k.6 n/a: no basket between pages
+R3k.9 pass: check-site SAVE passes: the Send step POSTs to /api/marketplace/gigs/5885df8d-.../book (service listing) with tier_name one of Closet organizing, Home organizing, Home styling, Personal shopping, preferred_date, time_slot, guest_name, contact_phone; the hours, place, note and total go in message; WhatsApp opens first and is filled after the save, with the tracking link; a failed save still opens WhatsApp and logs it
 R3.15 pass: booking is the action and Book has the services; contact has hours and area
 R7.1 pass: hand build, one direction chosen: the category pattern in CONCEPT.md
 R8.5 pass: the main button goes to the booking page; WhatsApp is the quiet alternative
-R0b.13 n/a: no tracking link: the booking is sent as a written WhatsApp message
+R0b.13 pass: the booking is saved with a tracking link (/bookings/track/...) before WhatsApp opens, and the message carries that link (see R3k.9)
 R3l.1 n/a: no family of similar items
 R3l.2 n/a: no family of similar items
 R3l.3 n/a: no family of similar items

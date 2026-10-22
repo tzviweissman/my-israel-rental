@@ -216,7 +216,7 @@
   .row2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
   @media (max-width: 560px) { .row2 { grid-template-columns: 1fr; } }
   .card label.f { display: block; font-weight: 600; margin-bottom: .35rem; }
-  .card input[type=date], .card input[type=text] { width: 100%; min-height: 48px; padding: .7rem .9rem; border: 1.5px solid var(--line); border-radius: 12px; font: 400 1rem var(--font); color: var(--ink); background: #fff; }
+  .card input[type=date], .card input[type=text], .card input[type=tel] { width: 100%; min-height: 48px; padding: .7rem .9rem; border: 1.5px solid var(--line); border-radius: 12px; font: 400 1rem var(--font); color: var(--ink); background: #fff; }
   .card input:focus { outline: none; border-color: var(--sage-ink); box-shadow: 0 0 0 3px rgb(119 155 142 / .3); }
   .card .send { margin-top: 1.4rem; display: flex; flex-wrap: wrap; align-items: center; gap: .8rem 1.2rem; }
   .card .note { color: var(--soft); font-size: .9rem; margin: 0; }
@@ -542,6 +542,11 @@
         </div>
         <div class="st" data-s="3" hidden>
           <div class="row2">
+            <div><label class="f" for="nm" data-en="Your name">השם שלכם</label><input id="nm" type="text" autocomplete="name"></div>
+            <div><label class="f" for="ph" data-en="Phone">טלפון</label><input id="ph" type="tel" inputmode="tel" autocomplete="tel" dir="ltr"></div>
+          </div>
+          <p class="err" id="e3" hidden></p>
+          <div class="row2" style="margin-top:1rem">
             <div><label class="f" for="occ" data-en="The occasion (optional)">סוג האירוע (לא חובה)</label><input id="occ" type="text" autocomplete="off"></div>
             <div><label class="f" for="cols" data-en="Colours (optional)">צבעים (לא חובה)</label><input id="cols" type="text" autocomplete="off"></div>
           </div>
@@ -819,6 +824,7 @@
     if (v('where')) L.push((EN ? 'Where: ' : 'איפה: ') + v('where'));
     if (v('occ')) L.push((EN ? 'Occasion: ' : 'אירוע: ') + v('occ'));
     if (v('cols')) L.push((EN ? 'Colours: ' : 'צבעים: ') + v('cols'));
+    if (v('nm') || v('ph')) L.push((EN ? 'Name: ' : 'שם: ') + v('nm') + (v('ph') ? ', ' + v('ph') : ''));
     send.href = 'https://wa.me/972527644973?text=' + encodeURIComponent(L.join('\n'));
     var sum = document.getElementById('sum'); sum.textContent = '';
     L.slice(1).forEach(function (t) { var d = document.createElement('div'); d.textContent = t; sum.appendChild(d); });
@@ -826,10 +832,12 @@
   // the booking in three steps: what, when and where, details; each checks only its own part
   var cur = 1, nextB = document.getElementById('next'), backB = document.getElementById('back');
   var TX = {
-    he: { n: ['שלב 1: מה צריך', 'שלב 2: מתי ואיפה', 'שלב 3: פרטים נוספים'], nx: ['המשך: מתי ואיפה', 'המשך: פרטים נוספים'], back: 'חזרה',
-      e1: 'בחרו לפחות אפשרות אחת, או "עוד לא בטוחים".', e2: 'כתבו איפה האירוע, ובחרו תאריך או סמנו שעוד אין תאריך.' },
-    en: { n: ['Step 1: What you need', 'Step 2: When and where', 'Step 3: A few more details'], nx: ['Continue: when and where', 'Continue: more details'], back: 'Back',
-      e1: 'Choose at least one, or "Not sure yet".', e2: 'Say where the event is, and pick a date or tick that you have no date yet.' }
+    he: { n: ['שלב 1: מה צריך', 'שלב 2: מתי ואיפה', 'שלב 3: הפרטים שלכם'], nx: ['המשך: מתי ואיפה', 'המשך: הפרטים שלכם'], back: 'חזרה',
+      e1: 'בחרו לפחות אפשרות אחת, או "עוד לא בטוחים".', e2: 'כתבו איפה האירוע, ובחרו תאריך או סמנו שעוד אין תאריך.',
+      e3: 'כתבו שם ומספר טלפון שאפשר לחזור אליו.' },
+    en: { n: ['Step 1: What you need', 'Step 2: When and where', 'Step 3: Your details'], nx: ['Continue: when and where', 'Continue: your details'], back: 'Back',
+      e1: 'Choose at least one, or "Not sure yet".', e2: 'Say where the event is, and pick a date or tick that you have no date yet.',
+      e3: 'Add your name and a phone number we can reach you on.' }
   };
   function steps() {
     var t = TX[EN ? 'en' : 'he'];
@@ -839,7 +847,7 @@
     nextB.hidden = cur === 3; send.hidden = cur !== 3; backB.hidden = cur === 1;
     if (cur < 3) nextB.textContent = t.nx[cur - 1];
     backB.textContent = t.back;
-    ['e1', 'e2'].forEach(function (k) { var e = document.getElementById(k); if (!e.hidden) e.textContent = t[k]; });
+    ['e1', 'e2', 'e3'].forEach(function (k) { var e = document.getElementById(k); if (!e.hidden) e.textContent = t[k]; });
   }
   function go(n, push) { cur = n; steps(); if (push) history.pushState({ b: n }, '', n > 1 ? '#book-' + n : '#book'); }
   nextB.addEventListener('click', function () {
@@ -853,6 +861,30 @@
   document.getElementById('nodate').addEventListener('change', function () { document.getElementById('when').disabled = this.checked; write(); });
   f.addEventListener('input', write); f.addEventListener('change', write);
   document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the request is saved with Michal on MyIsraelRental first (page rules 3k), then WhatsApp opens with it typed
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api', GIG = '4db9f8d5-038f-4b83-b0a4-f1adf988aa26';
+  var sending = false;
+  send.addEventListener('click', function (ev) {
+    ev.preventDefault();
+    if (sending) return;
+    if (cur < 3) { nextB.click(); return; }
+    var ok = !!v('nm') && /\d{9,}/.test(v('ph').replace(/\D/g, ''));
+    var e3 = document.getElementById('e3'); e3.hidden = ok; if (!ok) { e3.textContent = TX[EN ? 'en' : 'he'].e3; return; }
+    write();
+    var text = decodeURIComponent(send.href.split('text=')[1] || ''), desc = text.split('\n').slice(1).join('\n');
+    sending = true; send.setAttribute('aria-busy', 'true');
+    var tab = window.open('', '_blank');
+    var post = fetch(API + '/marketplace/gigs/' + GIG + '/quote-requests', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ description: desc, preferred_date: document.getElementById('nodate').checked ? null : (v('when') || null), area: v('where') || null, name: v('nm'), phone: v('ph'), lang: EN ? 'en' : 'he' }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('request not saved', r.status, t); return null; }); })
+      .catch(function (err) { console.warn('request not saved', err); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      if (saved && saved.track_path) text += '\n\n' + (EN ? 'Follow the request: ' : 'מעקב אחר הבקשה: ') + 'https://myisraelrental.com' + saved.track_path;
+      var url = 'https://wa.me/972527644973?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      sending = false; send.removeAttribute('aria-busy');
+    });
+  });
   // "Book a photo station" ticks it in the card
   document.getElementById('boothBtn').addEventListener('click', function () {
     var b = document.querySelector('#what input[value=booth]'); b.checked = true; write();
