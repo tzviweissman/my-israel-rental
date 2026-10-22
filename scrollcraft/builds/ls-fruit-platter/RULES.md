@@ -8,7 +8,7 @@ Replace every `todo`. `node scripts/check-rules.mjs scrollcraft/builds/ls-fruit-
 R0b.1 pass: slug ls-fruit-platter equals the slug in src/record.json
 R0b.3 n/a: her listing holds the sizes as tiers, not shop products with fixed ids; loading products writes to the production database and needs Tzvi's go-ahead. Prices on the page match her record and flyer: 300, 400, 500, 850
 R2.1 pass: read every sentence on the three pages; each fact is from the record, her logo line or her flyer
-R2.2 pass: read message-to-owner.md: only about her business, nothing about our tools
+R2.2 pass: read message-to-owner.md: only about her business, nothing about our tools; questions 13 to 15 added on 22 Oct (the Party Platter on her flyer, same-day orders, "from our kitchen")
 R2.3 pass: message-to-owner.md question 12 asks for her questions and answers; the FAQ stays hidden until she sends them
 R3.1 pass: searched for kosher, best, guarantee, fresh daily and delivery: kosher is her listing's hechsher in her own words; none of the others appear
 R3.2 pass: searched every page for hurry, only N left, today only, countdowns: none
@@ -92,16 +92,16 @@ R3s.11 n/a: the owner gave no reason for the price to state
 R5b.6 pass: no scroll cues beyond the film hint, no counters, no label above every section
 R3.13 pass: no doubled contact, facts or gallery; no two dividers in a row; no ending on a divider
 R3a.1 pass: rendered every page at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844, 360x640 (check-fits), scrolled the home page at 1440x900 and 390x844 and looked at every screen; English only; reduced motion shows the held frame
-R3r.1 pass: ran check-site, check-fits, check-motion, readable and clipped on every page of the site on 22 Oct 2026; every html file in the folder
-R3r.2 n/a: the reviewer must not be the builder; the coordinator answers docs/page-review-checklist.md for this site
+R3r.1 pass: review pass of 22 Oct: check-site, check-fits, check-motion and readable ran on index, shop and contact; stepped screenshots every 100 px at 1440x900, 390x844 and 360x640 with document scrollWidth equal to the viewport at every stop and at each of the three order steps; the order walked to the WhatsApp message at 390 and 1440 with external requests blocked
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; findings fixed and re-checked
 R3g.12 pass: check-site FLOW built the order message with the total and opened the WhatsApp link without sending it; nothing reached the owner
 R0b.12 n/a: the site is not published, so there is no pages-list preview yet
 
 ## 4. Photos and media
-R8.1 pass: put the four size photos (assets/size-1 to 4) on one contact sheet: same slab, angle, blush ground, light from the left and crop; one shoot
+R8.1 pass: put the four size photos (assets/size-1 to 4) and the four card pictures (assets/card-1 to 4) on one contact sheet: same slab, angle, blush ground, light from the left and crop; one shoot; each card shows the whole shot, nothing sliced by the card edge
 R8.6 pass: each size photo is a product hero shot on a travertine plinth with its own fruit round it, from her own photo, checked fruit by fruit on 22 Oct
 R8.2 pass: all four were edited from her own photos in one pass (gen/prep.py); no stock
-R3p.7 pass: all four sizes are shown the same way on the home cards, the shop stage and the pick tiles
+R3p.7 pass: all four sizes are shown the same way on the home cards, the shop stage and the pick tiles; the size name stays on one line so the prices sit in the same row whatever the name length (checked at 390, 360 and from 900 to 1920 px)
 R3h.12 pass: each size looks the same on the card, the stage and the tile: all come from one h-*.jpg master
 R3h.10 pass: tapping a size changes its photo, name, price and button on the shop; check-motion clean
 R3g.14 pass: all images share the blush slab grade; the film is a red scene by design
@@ -114,7 +114,7 @@ R8.4 n/a: no moving real material beyond the opening film
 R3c.13 pass: clipped clean at 1440x900, 1536x753, 1280x650, 1000x700, 768x1024, 390x844, 360x640 on every page
 R3c.14 n/a: no cut-out image: every picture is a whole photo
 R5b.3 pass: words over the film sit on a soft edge shade; readable clean on every page
-R3e.8 pass: readable: every word clear at every size on all three pages
+R3e.8 pass: readable: every word clear at every size on all three pages (re-run on 22 Oct after the changes)
 R3s.24 pass: check-site MEDIA clean; every img has width and height (the empty gallery template placeholder aside)
 R3p.6 pass: check-fits clean at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844, 360x640 on every page
 R3o.5 pass: check-site GLYPH clean; the shekel sign sits in the body face
@@ -138,7 +138,7 @@ R3j.12 n/a: no owner savings claim is printed
 R3.14 pass: prices are loud because prices exist; this is a priced shop
 
 ## 6. Order and booking flow
-R3k.7 pass: check-site FLOW: Step 1 basket, Step 2 when and where, Step 3 details; Back button; browser back goes back a step; total beside each step
+R3k.7 pass: check-site FLOW: Step 1 basket, Step 2 when and where, Step 3 details; the three step buttons have a pointer cursor, hover, pressed and focus states and a later step can be tapped (it goes as far as the filled-in steps allow and shows what is missing); Back button; browser back goes back a step; total beside each step
 R3k.8 pass: every basket line has a 40 px remove button
 R3k.6 pass: Add on a home card opens shop.html#order with that size already in the basket (add=1)
 R3.15 pass: ordering has the shop; messaging has contact
@@ -192,5 +192,5 @@ R3a.7 pass: phones were emulated with touch (hasTouch, isMobile) at 390x844 for 
 R3a.8 pass: no dotted line of items wraps at 360x640
 
 ## 9. Finish
-R3r.3 pass: every script was rerun after the last edit; three check-site lines seen once under machine load did not repeat on the rerun
+R3r.3 pass: check-rules passed after the last edit; every script was re-run after the last change to the pages
 R3r.4 pass: no new correction from Tzvi since the last build is missing from this file

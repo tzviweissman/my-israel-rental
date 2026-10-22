@@ -25,3 +25,9 @@ We're building a website for Ls Fruit Platter from your listing, your flyer and 
 11. **Reviews.** If customers have said nice things, send them with each person's name and their OK to show it.
 
 12. **Questions customers ask you**, with your answers, for a short FAQ.
+
+13. **The Party Platter on your flyer.** Your flyer shows a Party Platter with no price. Do you want it on the site? If yes, what does it cost and how many does it feed? Until we hear, the site shows only Small, Medium, Large and Extra large.
+
+14. **Same-day orders.** The order form lets a customer choose today as the day. Can you make a platter the same day, or do you need a day or more? Tell us the notice you need and we will set the earliest day to match.
+
+15. **"From our kitchen".** The gallery on the home page is headed "From our kitchen". Is it your own kitchen, or a shared or rented one? If you would rather it said something else, tell us the words.

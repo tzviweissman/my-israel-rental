@@ -28,7 +28,7 @@
   <div class="wrap">
     <ol class="steps" aria-label="Order steps"><li class="is-done"><a class="st" href="order.html">Step 1: Your boards</a></li><li class="is-now" aria-current="step"><span class="st">Step 2: When and where</span></li><li class=""><span class="st">Step 3: Your details</span></li></ol>
     <div class="cols">
-      <section class="pane">
+      <div class="pane"><!-- an order form scrolls like any form; it is not a one-screen scene -->
         <h1>When and <em>where?</em></h1>
         <p class="sub">We need 48 hours' notice.</p>
         <div class="q">
@@ -46,13 +46,13 @@
             <div class="field" id="f-window" hidden><label for="window">Time</label><select id="window"></select></div>
           </div>
         </div>
-        <div class="q" id="addrQ" hidden>
+        <div class="q is-shut" id="addrQ" inert><div>
           <div class="field" id="f-address"><label for="address">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, number, city, plus floor or entrance" maxlength="400"><span class="hint">The delivery fee depends on the city. We confirm it with you on WhatsApp before the day.</span><span class="err">Where should it go?</span></div>
           <div class="field" id="f-city" hidden><label for="city">City</label><select id="city"></select><span class="err">Choose the city it goes to.</span></div>
-        </div>
+        </div></div>
         <p class="errline" id="err"></p>
         <div class="next"><a class="cta" id="go" href="order-details.html">Continue</a><a class="back" href="order.html">Back</a></div>
-      </section>
+      </div>
       <aside class="summary" aria-label="Your order" aria-live="polite">
         <div class="who"><img src="assets/their-logo-small.png" alt="" width="44" height="44"><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines data-full></ul>
@@ -98,7 +98,7 @@
   }
   function paint() {
     document.querySelectorAll('[data-ful]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.ful === b.dataset.ful)); });
-    $('addrQ').hidden = o.ful !== 'delivery';
+    $('addrQ').classList.toggle('is-shut', o.ful !== 'delivery'); $('addrQ').inert = o.ful !== 'delivery';
     // A store that is not nationwide delivers only to its own cities, and the
     // order is refused without one (dead-ends audit, 12 Oct 2026).
     var B = (F && F.business) || {};

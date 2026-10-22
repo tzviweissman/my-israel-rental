@@ -87,7 +87,7 @@ OPENING = f'''  <section class="film" aria-label="Fruit platters">
 '''
 ROOM = {'small': '#F8D4D0', 'medium': '#FCE2B4', 'large': '#EAD6E4', 'xl': '#DBE8BF'}  # one colour room per size, from its own fruit
 def pcard(i, k, n, p):
-    img = f'<img src="assets/size-{i}.webp" width="1200" height="1200" alt="{ALT[k]}" loading="lazy">'
+    img = f'<img src="assets/card-{i}.webp" width="1000" height="800" alt="{ALT[k]}" loading="lazy">'
     ind = f'<span class="n">{i}</span>'
     return f"""        <article class="pc" style="--room:{ROOM[k]}">
           <div class="pc-ph">{img}</div>

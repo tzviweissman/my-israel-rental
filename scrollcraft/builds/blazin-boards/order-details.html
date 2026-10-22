@@ -28,7 +28,7 @@
   <div class="wrap">
     <ol class="steps" aria-label="Order steps"><li class="is-done"><a class="st" href="order.html">Step 1: Your boards</a></li><li class="is-done"><a class="st" href="order-when.html">Step 2: When and where</a></li><li class="is-now" aria-current="step"><span class="st">Step 3: Your details</span></li></ol>
     <div class="cols">
-      <section class="pane">
+      <div class="pane"><!-- an order form scrolls like any form; it is not a one-screen scene -->
         <h1>Your <em>details.</em></h1>
         <p class="sub">So we can confirm your order with you. We share it with no one else.</p>
         <div class="q two">
@@ -49,7 +49,7 @@
         <dl class="rev" id="rev"></dl>
         <p class="errline" id="err"></p>
         <div class="next"><button type="button" class="cta" id="place">Place order</button><a class="back" href="order-when.html">Back</a></div>
-      </section>
+      </div>
       <aside class="summary" aria-label="Your order" aria-live="polite">
         <div class="who"><img src="assets/their-logo-small.png" alt="" width="44" height="44"><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines data-full></ul>
@@ -95,7 +95,7 @@
     $('place').textContent = label; $('place2').textContent = 'Place order';
     BB.paint(F, o);
   }
-  $('payBy').addEventListener('click', function (e) { var b = e.target.closest('[data-pay]'); if (!b) return; o.payBy = b.dataset.pay; $('payErr').hidden = true; BB.save(o); paint(); });
+  $('payBy').addEventListener('click', function (e) { var b = e.target.closest('[data-pay]'); if (!b) return; o.payBy = b.dataset.pay; $('payErr').hidden = true; BB.save(o); [].forEach.call($('payBy').children, function (c) { c.setAttribute('aria-pressed', String(c.dataset.pay === o.payBy)); }); BB.paint(F, o); });
   function place() {
     var bad = [];
     if (!o.name || o.name.length < 2) bad.push('f-name');

@@ -327,3 +327,52 @@ img { display: block; max-width: 100%; }
 @media (max-width: 760px) { .foot2__cols { grid-template-columns: 1fr; } }
 .pane .errline, .summary .errline { color: #B3261E; }
 @media (max-width: 860px) { .foot2 { padding-bottom: calc(2rem + 110px); } }
+
+/* nothing is wider than the screen (independent review, 22 Oct 2026): grid columns may shrink, long rows wrap inside their card */
+.cols > *, .pane, .summary { min-width: 0; }
+.lines li { min-width: 0; }
+.lines li > span:first-child { min-width: 0; overflow-wrap: anywhere; }
+.lines .meta > span:last-child { white-space: normal; text-align: end; overflow-wrap: anywhere; }
+@media (max-width: 960px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) {
+  .picks, .picks tbody { display: block; }
+  .picks td { display: block; min-width: 0; padding: 0; }
+  .picks td:empty { display: none; }
+  .pick .name { white-space: normal; }
+  .pick { min-width: 0; }
+}
+
+/* numbers never break in the middle; one picture look for every board (no photo of each board yet) */
+.stage .dims, .pick .name::before, .picks td.size, .cartlines small, .pick .name[data-size]::before { white-space: nowrap; }
+.stage .board { width: min(72%, 250px); }
+@media (hover: hover) { .bcard:hover .stage .board { transform: none; } }
+.bottle .tg { white-space: nowrap; }
+@media (max-width: 640px) { .picks tr { grid-template-columns: minmax(0, 1fr); } }
+
+/* a line that has just come in fades in (check-motion: a choice changes the page smoothly) */
+.lines li.fresh, .cartlines li.fresh { animation: fresh 480ms ease-out; }
+@keyframes fresh { from { opacity: 0; max-height: 0; padding-block: 0; overflow: hidden; } to { max-height: 8rem; } }
+.bottle .tg { transition: background 180ms ease-out, color 180ms ease-out, border-color 180ms; }
+/* the delivery address opens and closes smoothly */
+#addrQ { display: grid; grid-template-rows: 1fr; transition: grid-template-rows 260ms ease-out, opacity 260ms ease-out, margin 260ms; }
+#addrQ > * { min-height: 0; overflow: hidden; }
+#addrQ.is-shut { grid-template-rows: 0fr; opacity: 0; margin-top: 0; pointer-events: none; }
+.lines .meta > span:first-child { flex: none; overflow-wrap: normal; }
+
+/* touch targets and states found on the seeded order pages (review 22 Oct 2026) */
+.stepper button { width: 44px; height: 44px; }
+.back { min-height: 44px; min-width: 44px; padding-inline: .6rem; }
+.pane .bottle .tg[aria-pressed="true"]:hover { background: var(--ox-2); }
+
+/* readable (review 22 Oct 2026): nothing under 12px, prices and the "start here" line visible on the dark cards, the basket badge square enough for its number */
+.bcard .line, .bcard .start { font-size: .78rem; }
+.bcard .start { color: var(--gold); }
+.pick .start { font-size: .75rem; }
+.bottle .p { color: var(--gold); }
+.pane .bottle .p, .summary .bottle .p { color: var(--ox-1); }
+.stage .dims { font-size: .8rem; }
+@media (max-width: 640px) { .stage .dims { font-size: .9rem; } }
+.cart b { border-radius: 8px; }
+.field .hint { font-size: .9rem; }
+@media (max-width: 640px) { .daychips { flex-wrap: wrap; overflow: visible; } }
+@media (max-width: 640px) { .bcard .start { font-size: .88rem; } }

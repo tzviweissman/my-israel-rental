@@ -28,15 +28,15 @@
   <div class="wrap">
     <ol class="steps" aria-label="Order steps"><li class="is-now" aria-current="step"><span class="st">Step 1: Your boards</span></li><li class=""><span class="st">Step 2: When and where</span></li><li class=""><span class="st">Step 3: Your details</span></li></ol>
     <div class="cols">
-      <section class="pane">
+      <div class="pane"><!-- an order form scrolls like any form; it is not a one-screen scene -->
         <h1>Your <em>boards.</em></h1>
         <p class="sub">Add as many as you need. Prices in US dollars.</p>
         <ul class="cartlines" id="cartlines"></ul>
         <div class="q">
           <h2 id="pickTitle">Choose a board</h2>
-          <button type="button" class="ghost" id="more" hidden aria-expanded="false" aria-controls="picks">Add another board</button>
+          <button type="button" class="ghost" id="more" hidden aria-expanded="false" aria-controls="picks">Add to order</button>
           <table class="picks" id="picks" aria-label="Boards by size and line"></table>
-          <p style="margin:.6rem 0 0"><a class="back" href="boards.html">See every board drawn to size</a></p>
+          <p style="margin:.6rem 0 0"><a class="back" href="boards.html">See every board with its size and price</a></p>
         </div>
         <div class="q" id="bottlesQ" hidden>
           <h2>Add a bottle</h2>
@@ -44,7 +44,7 @@
         </div>
         <p class="errline" id="err"></p>
         <div class="next"><a class="cta" id="go" href="order-when.html">Continue</a><a class="back" href="boards.html">Keep looking</a></div>
-      </section>
+      </div>
       <aside class="summary" aria-label="Your order" aria-live="polite">
         <div class="who"><img src="assets/their-logo-small.png" alt="" width="44" height="44"><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines></ul>
@@ -76,13 +76,21 @@
   var o = BB.load(), F = null, open = false;
   var area = function (p) { return p.cm ? p.cm[0] * p.cm[1] : 1e9; };
   document.getElementById('more').addEventListener('click', function () { open = true; paint(); document.getElementById('picks').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
-  function paint() {
-    var ls = BB.lines(F, o);
+  var seenLines = null;
+  // the basket lines; one that has just come in fades in, the others stay as they are
+  function paintLines() {
+    var ls = BB.lines(F, o), now = {};
     document.getElementById('cartlines').innerHTML = ls.map(function (l) {
-      return '<li><span class="thumb"><img src="assets/board-cut-m.webp" alt="" width="1000" height="815"></span><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
+      now[l.p.id] = 1;
+      return '<li' + (seenLines && !seenLines[l.p.id] ? ' class="fresh"' : '') + '><span class="thumb"><img src="assets/board-cut-m.webp" alt="" width="1000" height="815"></span><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
         + '<span class="stepper"><button type="button" data-dec="' + l.p.id + '" aria-label="One fewer">−</button><output>' + l.qty + '</output><button type="button" data-inc="' + l.p.id + '" aria-label="One more">+</button></span>'
         + '<span class="amt">' + BB.money(l.p.price * l.qty, l.p.currency) + '</span><button type="button" class="rm" data-rm="' + l.p.id + '" aria-label="Remove ' + BB.esc(l.p.short) + ' from the order"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button></li>';
     }).join('');
+    seenLines = now;
+    return ls;
+  }
+  function paint() {
+    var ls = paintLines();
     var boards = F.products.filter(function (p) { return p.board; });
     var rows = {};
     boards.forEach(function (p) { var k = p.cm ? p.cm.join('x') : p.short; (rows[k] = rows[k] || { a: area(p), cells: [] }).cells.push(p); });
@@ -109,7 +117,7 @@
     document.getElementById('bottlesQ').hidden = !bottles.length || !hasBoard;
     document.getElementById('bottles').innerHTML = bottles.map(function (p) {
       var on = (o.cart[p.id] || 0) > 0;
-      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add') + '</button></li>';
+      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add to order') + '</button></li>';
     }).join('');
     var ok = ls.some(function (l) { return l.p.board; });
     ['go', 'go2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', String(!ok)); });
@@ -123,6 +131,7 @@
     if (t.dataset.toggle || t.dataset.bottle) o.cart[id] = was ? 0 : 1;
     if (t.dataset.rm) o.cart[id] = 0;
     if (!o.cart[id]) delete o.cart[id];
+    if (t.dataset.bottle) { var on = !!o.cart[id]; t.setAttribute('aria-pressed', String(on)); t.textContent = on ? 'Added' : 'Add to order'; BB.save(o); paintLines(); BB.paint(F, o); return; }
     BB.save(o); paint();
   });
   BB.form().then(function (f) {

@@ -447,6 +447,12 @@
   .bar button { width: 100%; min-height: 52px; display: flex; justify-content: space-between; align-items: center; padding: 0 var(--sc-5); border: 0; border-radius: 99px; background: #23201B; color: #F7F3EA; font: 700 1rem var(--font-body); cursor: pointer; }
   .toast { position: fixed; z-index: 95; inset-inline: 0; margin-inline: auto; bottom: 28px; width: max-content; max-width: 90vw; padding: 12px 18px; border-radius: 99px; background: #23201B; color: #F7F3EA; font-weight: 600; font-size: var(--sc-t-sm); opacity: 0; transform: translateY(10px); pointer-events: none; transition: opacity .2s ease, transform .2s ease; }
   .toast.on { opacity: 1; transform: none; }
+  /* the night lines stack in one flow section: every viewport holds a line */
+  .shaping { padding-block: clamp(4.5rem, 14svh, 8rem); }
+  .shaping__stack { display: grid; gap: clamp(2.75rem, 12svh, 6rem); }
+  .shaping .line { position: static; translate: none; inset-inline: auto; margin: 0 auto; }
+  .trust__row a:not(.maplink) { color: inherit; text-underline-offset: 3px; }
+  @media (max-width: 860px) { .trust__row { grid-template-columns: 1fr 1fr; } .toast { bottom: auto; inset-block-start: 76px; transform: translateY(-10px); } .toast.on { transform: none; } }
   @media (max-width: 860px) {
     .chrome__nav { display: none; position: fixed; inset-block-start: 64px; inset-inline: var(--sc-gutter); flex-direction: column; align-items: stretch; gap: 0; padding: var(--sc-3) var(--sc-5);
       background: #F7F3EA; color: #23201B; border-radius: 16px; box-shadow: 0 12px 40px rgba(20,16,12,.3); margin: 0; }
@@ -519,7 +525,7 @@
 
   /* ====== CATEGORY place (rule 3t, 22 Oct 2026): night opening that cuts to one warm ground, pictures framed, menu as a priced list ====== */
   .trust { padding-block: var(--sc-6); border-block-end: 1px solid var(--sc-hairline); }
-  .trust__row { display: grid; gap: var(--sc-5); grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; }
+  .trust__row { display: grid; gap: var(--sc-5); grid-template-columns: 1.5fr 1.2fr 1fr 1fr auto; align-items: start; }
   .trust__row > div { font-size: var(--sc-t-base); line-height: 1.5; }
   .trust__row b { display: block; margin-block-end: var(--sc-1); font-size: var(--sc-t-xs); font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--sc-ink-soft); }
   .trust__cta { justify-self: end; }
@@ -598,22 +604,13 @@
     </div>
   </section>
 
-  <!-- 3 · PATIENCE · 05:15 -->
-  <section class="shaping night" data-sc-act="pin" data-sc-span="1.8" aria-label="Shaping">
-    <div data-sc-stage>
-      <p class="line" data-sc-cue="0.05 0.36 0">Every loaf is shaped by hand.</p>
-      <p class="line" data-sc-cue="0.30 0.64">By whoever is in that morning.</p>
-<!-- Ends at 1, not 0.92: a middle act's last cue closes at the end of the
-           pin so the line is still lit when the stage starts to slide, and the
-           fade lands on the exit rather than leaving two empty screens. -->
-      <p class="line line--small" data-sc-cue="0.58 1">It is the slowest part of the day, and nobody has agreed to speed it up.</p>
-    </div>
-  </section>
-
-  <!-- 4 · HELD BREATH · 06:40 · authored silence -->
-  <section class="bake night" id="bake" data-sc-act="flow" aria-label="The bake">
-    <div class="sc-wrap" data-sc-in>
-      <p class="sc-lede">Steam for the first ten minutes. Then you wait.</p>
+  <!-- 3 · PATIENCE · 05:15 to 06:40. One quiet section, four lines, each on screen as you pass; no pinned dead scroll (review 22 Oct 2026) -->
+  <section class="shaping night" id="bake" data-sc-act="flow" aria-label="Shaping and baking">
+    <div class="sc-wrap shaping__stack">
+      <p class="line" data-sc-in>Every loaf is shaped by hand.</p>
+      <p class="line" data-sc-in>By whoever is in that morning.</p>
+      <p class="line line--small" data-sc-in>It is the slowest part of the day, and nobody has agreed to speed it up.</p>
+      <p class="line line--small" data-sc-in>Steam for the first ten minutes. Then you wait.</p>
     </div>
   </section>
 
@@ -642,6 +639,7 @@
     <div class="sc-wrap trust__row">
       <div><b>Open</b>Sunday to Thursday, 07:00 to 19:00<br>Friday, 07:00 to 14:00</div>
       <div><b>Address</b>Emek Refaim 41, Jerusalem<br><a class="maplink" href="https://www.google.com/maps/search/?api=1&amp;query=Emek+Refaim+41+Jerusalem" target="_blank" rel="noopener">Open in Maps</a></div>
+      <div><b>Phone</b><a href="tel:+97225550141">02-555-0141</a></div>
       <div><b>Kosher</b>Rabbanut Yerushalayim</div>
       <div class="trust__cta"><button class="cta" type="button" data-open-basket>Start your order</button></div>
     </div>
@@ -973,12 +971,13 @@
       var how2 = document.querySelector('input[name=how]:checked').value;
       var L = ['Order for Lechem Emek', ''];
       Object.keys(cart).forEach(function (k) { L.push(cart[k] + ' x ' + names[k] + ', ' + SH + cart[k] * prices[k]); });
-      L.push('', 'Total: ' + SH + total(), how2 + ': ' + $('#fDay').value + ' at ' + $('#fTime').value);
+      L.push('', 'Total: ' + SH + total(), how2 + ': ' + dayText($('#fDay').value) + ' at ' + $('#fTime').value);
       if (how2 === 'Delivery') L.push('Address: ' + $('#fAddr').value.trim());
       L.push('Name: ' + $('#fName').value.trim(), 'Phone: ' + $('#fPhone').value.trim());
       if ($('#fNote').value.trim()) L.push('Note: ' + $('#fNote').value.trim());
       window.open('https://wa.me/?text=' + encodeURIComponent(L.join('\n')), '_blank', 'noopener');
     });
+    function dayText(v) { var d = new Date(v + 'T12:00:00'); if (isNaN(d)) return v; return ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'][d.getDay()] + ' ' + d.getDate() + ' ' + ['January','February','March','April','May','June','July','August','September','October','November','December'][d.getMonth()]; }
     function solid() { chrome.classList.toggle('is-solid', scrollY > 60); }
     addEventListener('scroll', solid, { passive: true }); solid();
     document.querySelectorAll('[data-dir]').forEach(function (b) { if (b.id !== 'dirToggle') b.addEventListener('click', function () { $('#dirToggle').click(); document.querySelectorAll('[data-dir]').forEach(function (x) { x.textContent = document.documentElement.dir === 'rtl' ? 'English' : 'עברית'; }); }); });

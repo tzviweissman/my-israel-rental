@@ -168,7 +168,7 @@
   }
   .plank {
     position: relative; width: 200px; height: 150px; border-radius: 6px; overflow: hidden;
-    background: #7A5230 url(assets/board-flat.jpg) center / cover no-repeat;
+    background: #7A5230 url(assets/board-top.jpg) center / cover no-repeat;
     box-shadow: var(--sc-shadow-lg), inset 0 0 0 1px rgba(255, 255, 255, 0.08);
     will-change: width, height;
   }
@@ -369,6 +369,18 @@
     .close__foot { bottom: var(--sc-3); }
   }
   @media (prefers-reduced-motion: reduce) { .sizes .sc-copy--lead { opacity: 1 !important; transform: none !important; translate: none !important; } }
+  /* no blank band between sections (review 22 Oct 2026): the wine line runs straight into the facts */
+  .menu { padding-bottom: clamp(2rem, 4vw, 3.5rem); } .facts { padding-top: clamp(2.5rem, 5vw, 4rem); }
+  /* one look for a board picture, the same for every row (no photo of each board yet: owner question) */
+  .list li { grid-template-columns: 64px 1fr auto; }
+  .list li .thumb { grid-row: 1 / span 2; width: 64px; height: 52px; object-fit: contain; align-self: start; filter: drop-shadow(0 4px 5px rgb(0 0 0 / .4)); }
+  .list li .go { grid-column: 2 / -1; }
+  /* numbers never break in the middle (review 22 Oct 2026) */
+  .num, .tier__size, .plank__dims, .list li i, .ruler span { white-space: nowrap; }
+  /* the sizes heading and first size show as soon as each is whole on screen, while the stage is still arriving, so no blank band
+     follows the hero (review 22 Oct 2026); a line is never shown partly below the screen (cutoff) */
+  .sizes .arrive { opacity: 0; transition: opacity 240ms ease-out; }
+  @media (prefers-reduced-motion: reduce) { .sizes .arrive { opacity: 1 !important; transition: none; } }
   .buybar { display: none; }
   @media (max-width: 860px) {
     .buybar { position: fixed; inset-inline: 0; inset-block-end: 0; z-index: var(--sc-z-chrome); display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
@@ -419,7 +431,7 @@
   <!-- 1  The tumble -->
   <section class="hero" id="hero" data-sc-act="pin" data-sc-span="3.2" data-sc-drift="#4B0C19" aria-label="Blazin' Boards">
     <div data-sc-stage>
-      <picture class="hero__bg" aria-hidden="true"><source media="(max-width: 860px)" srcset="assets/their-rustic-m.jpg"><img src="assets/their-rustic.jpg" alt="" width="1600" height="1031" fetchpriority="high"></picture>
+      <picture class="hero__bg" aria-hidden="true"><img src="assets/their-rustic.jpg" alt="" width="1600" height="1031" fetchpriority="high"></picture>
       <div class="hero__shade" aria-hidden="true"></div>
       <div class="stage3d">
         <p class="name" data-sc-cue="0 0.44 0 0.38" aria-hidden="true"><span>Blazin’</span><span class="b">Boards</span></p>
@@ -441,21 +453,21 @@
   <!-- 2  The board grows to scale: the peak -->
   <section class="sizes" id="sizes" data-sc-act="pin" data-sc-span="3.6" data-sc-drift="#3A0812" aria-labelledby="sizesTitle">
     <div data-sc-stage>
-      <div class="sc-copy sc-copy--lead" data-sc-cue="0.04 1 0.04 0">
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0"><div class="arrive">
         <h2 class="sc-display sc-display--md" id="sizesTitle">Five sizes, <em>to scale.</em></h2>
         <p>As you scroll, the board grows through our five sizes at true scale, from the Mini to the Extra Large VIP. Under it, every board we make in that size, with its price.</p>
-      </div>
+      </div></div>
       <div class="scale" aria-hidden="true">
-        <div class="plank" id="plank"><span class="plank__dims" id="plankDims">20 × 15 cm</span></div>
+        <div class="plank" id="plank"><span class="plank__dims" id="plankDims">15 × 20 cm</span></div>
       </div>
       <div class="ruler" id="ruler" aria-hidden="true"><span>10 cm</span></div>
       <div class="tiers">
-        <div class="tier" data-sc-cue="0 0.2 0.1 0.3">
+        <div class="tier" data-sc-cue="0 0.2 0 0.3"><div class="arrive">
           <p class="tier__size"><span class="num">15 × 20</span><small>cm</small></p>
           <ul>
             <li><span><b>Mini Board</b><small>Entrecote steak, candied pastrami, salami chips, sometimes brisket or London broil, beef jerky.</small></span><span class="price">$75</span></li>
           </ul>
-        </div>
+        </div></div>
         <div class="tier" data-sc-cue="0.2 0.4 0.3 0.3">
           <p class="tier__size"><span class="num">20 × 30</span><small>cm</small></p>
           <ul>
@@ -551,8 +563,8 @@
       <div class="how" data-sc-in data-sc-stagger="120">
         <h2>How it goes.</h2>
         <ol class="steps">
-          <li>You send a message.<small>Use the button on this page. Tell us the size, the date and how many people are coming.</small></li>
-          <li>We confirm your board and the day.<small>We need at least two days' notice. Special boards on request.</small></li>
+          <li>You place your order here.<small>Choose your boards and any bottles, then the day and where, in three short steps. No sign-in.</small></li>
+          <li>We confirm your board and the day.<small>We need at least two days' notice.</small></li>
           <li>You pay us directly.<small>By card, Zelle or bank transfer.</small></li>
         </ol>
       </div>
@@ -602,9 +614,9 @@
                     : ORDER + '?board=' + encodeURIComponent(name);
       var a = document.createElement('a'); a.className = 'board-link'; a.href = href;
       if (WA) { a.target = '_blank'; a.rel = 'noopener'; }
-      a.setAttribute('aria-label', (WA ? 'Order on WhatsApp: ' : 'Order: ') + name + ', ' + price);
+      a.setAttribute('aria-label', (WA ? 'Order on WhatsApp: ' : 'Add to order: ') + name + ', ' + price);
       while (li.firstChild) a.appendChild(li.firstChild);
-      if (li.closest('.list')) { var go = document.createElement('span'); go.className = 'go'; go.textContent = WA ? 'Order this board on WhatsApp' : 'Order this board'; a.appendChild(go); }
+      if (li.closest('.list')) { var th = document.createElement('img'); th.className = 'thumb'; th.src = 'assets/board-cut-m.webp'; th.alt = ''; th.width = 1000; th.height = 815; th.loading = 'lazy'; a.insertBefore(th, a.firstChild); var go = document.createElement('span'); go.className = 'go'; go.textContent = 'Add to order'; a.appendChild(go); }
       li.appendChild(a);
     });
   })();
@@ -742,6 +754,11 @@
       // Short side first, the way the menu and the size readout write it (15 × 20 cm).
       dims.textContent = Math.round(s[1]) + ' × ' + Math.round(s[0]) + ' cm';
     }
+    (function () {
+      var els = [].slice.call(document.querySelectorAll('.sizes .arrive'));
+      function arrive() { var vh = innerHeight; els.forEach(function (e) { var r = e.getBoundingClientRect(); e.style.opacity = (r.bottom <= vh - 8 && r.top >= 0) ? '1' : '0'; }); }
+      addEventListener('scroll', arrive, { passive: true }); addEventListener('resize', arrive); arrive();
+    })();
     var lastP = 0;
     if (plank) {
       fitScale(); paintPlank(0);
