@@ -18,10 +18,16 @@ def page(name, title, desc, body, script='', order=False):
     <li><a href="boards.html">Every board</a></li>
     <li><a href="order.html">Your order</a></li>
   </ul>'''
-    foot = '' if order else '''
-<footer class="foot">
-  <span>Blazin' Boards, premium meat boards in Jerusalem. Orders 48 hours ahead</span>
-  <nav><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Order</a><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></nav>
+    foot = '''
+<footer class="foot2">
+  <p class="foot2__big">Premium meat boards, grilled to perfection.</p>
+  <a class="cta" href="order.html">Order a board</a>
+  <div class="foot2__cols">
+    <nav aria-label="Pages"><b>The site</b><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Your order</a></nav>
+    <div><b>Find us</b><span>Farn 5, Jerusalem</span><span>Orders 48 hours ahead</span><span>Delivery throughout Israel</span></div>
+    <div><b>Pay us by</b><span>Card, Zelle or bank transfer</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+  </div>
+  <p class="foot2__small">Blazin' Boards. Every photograph on this site is our own. Nothing is paid on this site: you pay us directly.</p>
 </footer>'''
     html = f'''<!doctype html>
 <!-- Blazin' Boards, {name}. Written by gen/pages.py. -->
@@ -30,6 +36,7 @@ def page(name, title, desc, body, script='', order=False):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="{desc}">
 <link rel="icon" href="assets/their-logo-small.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,7 +47,7 @@ def page(name, title, desc, body, script='', order=False):
 <body>
 <nav class="nav" aria-label="Blazin' Boards">
   <a class="nav__mark" href="index.html"><img src="assets/their-logo-small.png" alt="" width="120" height="120"> Blazin' Boards</a>{menu}
-  <a class="cart" href="order.html" aria-label="Your order">{BAG}<span>Order</span><b data-count hidden>0</b></a>
+  <a class="cart" href="order.html" aria-label="Your order">{BAG}<span>Order a board</span><b data-count hidden>0</b></a>
 </nav>
 {body}
 {foot}
@@ -79,7 +86,7 @@ def steps(n):
 
 
 def dock(label, id_, href='#'):
-    return f'<div class="dock"><div><small>Total</small><b data-total>$0</b></div><a class="cta" id="{id_}" href="{href}">{label}</a></div>'
+    return f'<div class="dock dockbar"><div><small>Total</small><b data-total>$0</b></div><a class="cta" id="{id_}" href="{href}">{label}</a></div>'
 
 
 # --------------------------------------------------------------- the shop
@@ -395,7 +402,7 @@ page('order-details.html', "Your details · Blazin' Boards", 'Your name, how to 
     </div>
   </div>
 </main>
-<div class="dock"><div><small>Total</small><b data-total>$0</b></div><button type="button" class="cta" id="place2">Place order</button></div>''', '''<script>
+<div class="dock dockbar"><div><small>Total</small><b data-total>$0</b></div><button type="button" class="cta" id="place2">Place order</button></div>''', '''<script>
 (function () {
   var o = BB.load(), F = null, $ = function (id) { return document.getElementById(id); };
   if (!BB.count(o)) { location.replace('order.html'); return; }

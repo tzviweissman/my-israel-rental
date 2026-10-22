@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Blazin' Boards. Premium meat boards, Jerusalem.</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="Premium meat boards in Jerusalem, in five sizes from the Mini to the Extra Large VIP. Orders 48 hours ahead. Delivery throughout Israel.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2315110F'/><rect x='7' y='10' width='18' height='12' rx='2' fill='%23C9A227'/></svg>">
 <!--
@@ -68,7 +69,7 @@
   h1, h2, h3 { font-family: var(--font-head); font-weight: 500; }
   section { position: relative; color: var(--sc-ink); }
   .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
-  .sc-display em, .accent { font-style: italic; color: var(--sc-accent); }
+  .sc-display em, .accent { font-style: italic; color: var(--sc-ink); }
   .num { font-family: var(--font-body); font-variant-numeric: tabular-nums; }
 
   /* ---------------------------------------------------------------- heat -- */
@@ -120,7 +121,7 @@
   .hero .name {
     position: absolute; inset-inline-start: var(--sc-gutter); inset-block-start: clamp(5rem, 14vh, 9rem); z-index: 1; margin: 0;
     font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.045em; line-height: 0.86;
-    font-size: clamp(4.2rem, 17vw, 15rem); color: var(--gold);
+    font-size: clamp(4.2rem, 17vw, 15rem); color: var(--sc-ink);
     direction: ltr; unicode-bidi: isolate;
   }
   .hero .name span { display: block; }
@@ -147,7 +148,7 @@
     display: grid; gap: var(--sc-5); max-width: 24rem; justify-items: start;
   }
   .hero .land h1 { margin: 0; font-size: var(--sc-t-xl); font-style: italic; line-height: 1.15; }
-  .hero .land h1 b { font-style: normal; font-weight: 500; color: var(--sc-accent); }
+  .hero .land h1 b { font-style: normal; font-weight: 500; color: var(--sc-ink); }
   .hero .land p { margin: var(--sc-2) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
 
   /* the deal, only where the numbers make it true (Tzvi, 20 Oct 2026: "a board double the size
@@ -174,7 +175,7 @@
   .plank__dims {
     position: absolute; inset-inline-end: var(--sc-2); inset-block-end: var(--sc-2);
     padding: 2px 8px; border-radius: var(--sc-r-sm);
-    background: rgba(58, 8, 18, 0.78); color: var(--sc-ink); font-family: var(--font-body); font-size: var(--sc-t-xs); font-weight: 700; letter-spacing: 0.06em;
+    background: rgba(58, 8, 18, 0.78); color: var(--sc-ink); font-family: var(--font-body); font-size: max(var(--sc-t-xs), 15px); font-weight: 700; letter-spacing: 0.06em;
   }
   .ruler {
     position: absolute; inset-inline-start: var(--sc-gutter); inset-block-end: calc(clamp(2rem, 7vh, 4rem) - 1.6rem);
@@ -188,7 +189,7 @@
   .tiers { position: absolute; inset-inline-end: var(--sc-gutter); inset-block-end: clamp(2rem, 7vh, 4rem); width: min(40vw, 30rem); height: 58vh; }
   .tier { position: absolute; inset-inline: 0; inset-block-end: 0; margin: 0; }
   .tier__size { margin: 0; font-family: var(--font-body); font-weight: 800; font-size: clamp(2.6rem, 6vw, 5rem); letter-spacing: -0.03em; line-height: 1; }
-  .tier__size small { font-size: 0.42em; font-weight: 600; letter-spacing: 0.04em; color: var(--sc-ink-soft); margin-inline-start: 0.2em; }
+  .tier__size small { font-size: max(0.42em, 14px); font-weight: 600; letter-spacing: 0.04em; color: var(--sc-ink-soft); margin-inline-start: 0.2em; }
   .tier ul { list-style: none; margin: var(--sc-4) 0 0; padding: 0; display: grid; gap: var(--sc-3); }
   .tier li { display: grid; grid-template-columns: 1fr auto; gap: var(--sc-3); align-items: baseline; padding-block-end: var(--sc-3); border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 16%, transparent); }
   .tier li b { display: block; font-family: var(--font-head); font-weight: 500; font-size: var(--sc-t-lg); }
@@ -301,22 +302,22 @@
   .hero__shade { position: absolute; inset: 0; z-index: 0; pointer-events: none;
     background: linear-gradient(90deg, rgba(58, 8, 18, .92) 0%, rgba(58, 8, 18, .78) 45%, rgba(58, 8, 18, 0) 88%),
                 linear-gradient(180deg, rgba(58, 8, 18, .7) 0%, rgba(58, 8, 18, 0) 22%); }
-  .band { position: relative; min-height: calc(100svh - 64px); overflow: hidden; display: flex; align-items: flex-end; background: var(--ox-0); }
-  .band__img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  /* category food-shop, premium dark brand (rule 3t, Qissa pattern): one warm dark ground, pictures framed not full-bleed */
+  .band { position: relative; display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; max-width: var(--sc-maxw); margin-inline: auto; padding: clamp(4rem, 9vw, 8rem) var(--sc-gutter); }
+  .band__img { position: static; width: 100%; height: auto; aspect-ratio: 1600 / 942; object-fit: cover; display: block; border-radius: var(--sc-r-lg); border: 1px solid rgba(233, 178, 59, .45); box-shadow: 0 24px 60px rgba(0, 0, 0, .35); }
   .band--jars .band__img { object-position: 50% 40%; }
-  .band__shade { position: absolute; inset: 0; pointer-events: none;
-    background: linear-gradient(90deg, rgba(58, 8, 18, .92) 0%, rgba(58, 8, 18, .8) 42%, rgba(58, 8, 18, 0) 82%),
-                linear-gradient(0deg, rgba(58, 8, 18, .8) 0%, rgba(58, 8, 18, 0) 45%); }
-  .band__copy { position: relative; z-index: 1; width: 100%; max-width: var(--sc-maxw); margin-inline: auto; padding: 0 var(--sc-gutter) clamp(3rem, 10vh, 6rem); display: grid; gap: var(--sc-4); justify-items: start; }
-  .band__title { margin: 0; font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.04em; line-height: .92; font-size: clamp(3rem, 9vw, 8.5rem); max-width: 11ch; color: var(--sc-ink); text-wrap: balance; }
+  .band__shade { display: none; }
+  .band__copy { display: grid; gap: var(--sc-4); justify-items: start; order: 2; padding: 0; margin: 0; }
+  .band__title { margin: 0; font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.04em; line-height: .92; font-size: clamp(2.6rem, 6vw, 5.5rem); color: var(--sc-ink); text-wrap: balance; }
   .band__copy p { margin: 0; color: var(--sc-ink); font-size: var(--sc-t-base); max-width: 28rem; }
-  .menu { background: #F4EADB; --sc-ink: #2A0A10; --sc-ink-soft: #5E3F45; color: #2A0A10; }
-  .menu .price, .menu .addons span em { color: var(--sc-ink); }
-  .menu .addons b { color: #2A0A10; }
-  .menu .list li .go { color: var(--crimson); border-color: color-mix(in oklab, var(--crimson) 55%, transparent); }
-  .menu .list li:hover .go { background: var(--crimson); color: #F4EADB; }
-  .menu .list li::before { background: color-mix(in oklab, var(--crimson) 8%, transparent); }
-  .menu .shots figure { box-shadow: 0 10px 30px rgba(42, 10, 16, .18); }
+  .trust { background: var(--ox-0); border-block: 1px solid rgba(233, 178, 59, .35); }
+  .trust ul { list-style: none; margin: 0 auto; padding: var(--sc-5) var(--sc-gutter); max-width: var(--sc-maxw); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sc-5); }
+  .trust li { display: grid; gap: 4px; font-size: var(--sc-t-sm); color: var(--sc-ink); line-height: 1.35; }
+  .trust li b { font: 700 .8rem/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  .menu { background: var(--ox-0); }
+  .menu .list li .go { color: var(--gold); border-color: color-mix(in oklab, var(--gold) 55%, transparent); }
+  .menu .list li:hover .go { background: var(--gold); color: var(--ox-0); }
+  .menu .shots figure { border: 1px solid rgba(233, 178, 59, .45); padding: 0; box-shadow: 0 18px 44px rgba(0, 0, 0, .35); }
   .facts { background: var(--ox-1); }
   /* closing photograph: words bottom left on a soft edge shade, no card */
   .close__light { background: linear-gradient(90deg, rgba(58, 8, 18, .88) 0%, rgba(58, 8, 18, .5) 40%, rgba(58, 8, 18, 0) 70%), linear-gradient(0deg, rgba(58, 8, 18, .7) 0%, rgba(58, 8, 18, 0) 40%); }
@@ -333,11 +334,12 @@
   .foot__cols span { color: var(--sc-ink-soft); }
   .foot__small { margin-block: var(--sc-5) 0; font-size: .875rem; color: var(--sc-ink-soft); line-height: 1.5; }
   @media (max-width: 860px) {
-    .band__shade { background: linear-gradient(0deg, rgba(58, 8, 18, .94) 0%, rgba(58, 8, 18, .8) 50%, rgba(58, 8, 18, .25) 85%); }
+    .band { grid-template-columns: 1fr; padding-block: 3rem; }
+    .band__copy { order: 0; }
+    .trust ul { grid-template-columns: 1fr 1fr; }
     .hero__shade { background: linear-gradient(180deg, rgba(58, 8, 18, .9) 0%, rgba(58, 8, 18, .72) 45%, rgba(58, 8, 18, .4) 100%); }
     .close__light { background: linear-gradient(0deg, rgba(58, 8, 18, .94) 0%, rgba(58, 8, 18, .8) 50%, rgba(58, 8, 18, .2) 85%); }
     .foot__cols { grid-template-columns: 1fr; }
-    .band { min-height: calc(100svh - 96px); }
     .close .sc-copy--center { inset-inline-end: var(--sc-gutter); bottom: clamp(2rem, 8vh, 4rem); }
   }
   /* -------------------------------------------------------------- mobile -- */
@@ -366,6 +368,7 @@
     .close .sc-copy--center { inset-inline: var(--sc-gutter); left: auto; translate: 0 -56%; max-width: none; text-align: center; padding: var(--sc-6) var(--sc-5); }
     .close__foot { bottom: var(--sc-3); }
   }
+  @media (prefers-reduced-motion: reduce) { .sizes .sc-copy--lead { opacity: 1 !important; transform: none !important; translate: none !important; } }
   .buybar { display: none; }
   @media (max-width: 860px) {
     .buybar { position: fixed; inset-inline: 0; inset-block-end: 0; z-index: var(--sc-z-chrome); display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
@@ -438,7 +441,7 @@
   <!-- 2  The board grows to scale: the peak -->
   <section class="sizes" id="sizes" data-sc-act="pin" data-sc-span="3.6" data-sc-drift="#3A0812" aria-labelledby="sizesTitle">
     <div data-sc-stage>
-      <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0.04 1 0.04 0">
         <h2 class="sc-display sc-display--md" id="sizesTitle">Five sizes, <em>to scale.</em></h2>
         <p>As you scroll, the board grows through our five sizes at true scale, from the Mini to the Extra Large VIP. Under it, every board we make in that size, with its price.</p>
       </div>
@@ -483,6 +486,16 @@
         </div>
       </div>
     </div>
+  </section>
+
+  <!-- trust block: where, when, how (Qissa-style facts near the top) -->
+  <section class="trust" aria-label="Where, when and how">
+    <ul>
+      <li><b>Kitchen</b>Farn 5, Jerusalem</li>
+      <li><b>Notice</b>Orders 48 hours ahead</li>
+      <li><b>Delivery</b>Throughout Israel</li>
+      <li><b>Pay us by</b>Card, Zelle or bank transfer</li>
+    </ul>
   </section>
 
   <!-- 3  A picture: the price range, on their own jars-and-board photograph -->
@@ -561,12 +574,13 @@
 </main>
 <footer class="foot">
   <p class="foot__big">Premium meat boards, grilled to perfection.</p>
+  <a class="cta" href="order.html">Order a board</a>
   <div class="foot__cols">
     <nav aria-label="Pages"><b>The site</b><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Your order</a></nav>
-    <nav aria-label="On this page"><b>On this page</b><a href="#sizes">Sizes</a><a href="#menu">Prices</a><a href="#facts">How it goes</a></nav>
-    <div><b>Find us</b><span>Farn 5, Jerusalem</span><span>Orders 48 hours ahead</span><span>Delivery throughout Israel</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+    <div><b>Find us</b><span>Farn 5, Jerusalem</span><span>Orders 48 hours ahead</span><span>Delivery throughout Israel</span></div>
+    <div><b>Pay us by</b><span>Card, Zelle or bank transfer</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
   </div>
-  <p class="foot__small">Blazin' Boards. Every photograph on this page is our own. Nothing is paid on this page: you pay us directly by card, Zelle or bank transfer.</p>
+  <p class="foot__small">Blazin' Boards. Every photograph on this site is our own. Nothing is paid on this site: you pay us directly.</p>
 </footer>
 
 <script src="scrollcraft.js"></script>
