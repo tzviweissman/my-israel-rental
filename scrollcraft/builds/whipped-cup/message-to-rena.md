@@ -20,4 +20,4 @@ We're building a website for The Whipped Cup from your menu and photos, and it's
 
 7. **WhatsApp.** We're using +1 929 993 6768 from your menu card for orders. Is that right?
 
-8. **Questions customers ask you**, with your answers, for a short FAQ. For example: how long does a jar keep in the fridge, does it contain dairy, is there a decaf option?
+8. **Questions customers ask you**, with your answers, for a short FAQ. For example: how long does a jar keep in the fridge, does it contain dairy, is there a decaf option, how far ahead should I order, can I pause my weekly package for a week?

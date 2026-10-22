@@ -16,6 +16,7 @@ def head(page, title, desc, img):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="{desc}">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
@@ -242,33 +243,50 @@ def write(name, title, desc, img, body, tail=''):
     open(f'{name}.html', 'w', encoding='utf8').write(html)
 
 
+ROOM = {'classic': '#E6D2BE', 'caramel': '#F0C48C', 'vanilla': '#F8DDE4'}  # one colour room per flavour, from the jar's own label and filling
+
+
 def panel(k, n, d, p, img, alt):
-    return f'''      <article class="fpanel" data-flav="{k}"><img src="assets/{img}" alt="{alt}" width="500" height="1111" loading="lazy">
-        <div class="cap"><h3>{n}</h3><p>{d}</p><div class="cap-r"><span class="price">&#8362;{p}<small>a jar</small></span><a class="btn-line add" href="shop.html?jar={k}" data-jar="{k}">Add</a></div></div></article>
+    return f'''      <article class="room" data-flav="{k}" style="--rc:{ROOM[k]}"><div class="room-pic"><img src="assets/{img}" alt="{alt}" width="500" height="1111" loading="lazy"></div>
+        <div class="room-cap"><h3>{n}</h3><p>{d}</p><div class="cap-r"><span class="price">&#8362;{p}<small>a jar</small></span><a class="btn-line add" href="shop.html?jar={k}" data-jar="{k}">Add</a></div></div></article>
 '''
 FPANELS = ''.join(panel(k, n, d, p, c, alt) for (k, n, d, p, c, pos, big, alt) in FLAVS)
 BTN = '''<a class="btn" href="shop.html">Order your jars <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>'''
-WORLD_FLAV = f'''  <section class="world flavpic" id="flavours" aria-labelledby="h-flav">
-    <h2 id="h-flav" class="wtitle">Three flavours of whipped coffee</h2>
-    <div class="fpanels">
-{FPANELS}    </div>
-  </section>
-'''
-WORLD_WINDOWS = f'''  <section class="world duo" id="fresh" aria-labelledby="h-fresh">
-    <div class="duo-pics"><img src="assets/caramel-window.webp" alt="Four jars of Caramel Cloud on a sunny window sill in Jerusalem" width="1160" height="1122" loading="lazy"><img src="assets/vanilla-window.webp" alt="Four jars of The Whipped Cup on a table by a window" width="986" height="1122" loading="lazy"></div>
-    <div class="duo-words">
-      <h2 id="h-fresh">Made fresh in Ramat Eshkol</h2>
-      <p>Handcrafted and fresh. Kosher certified.</p>
-      {BTN}
+WORLD_FLAV = f'''  <section class="rooms" id="flavours" aria-labelledby="h-flav">
+    <div class="wrap">
+      <h2 id="h-flav" class="wtitle">Three flavours of whipped coffee</h2>
+      <div class="room-row">
+{FPANELS}      </div>
     </div>
   </section>
 '''
-WORLD_CLOSE = f'''  <section class="world duo duo-end" id="door" aria-labelledby="h-door">
-    <div class="duo-pics"><img src="assets/bottles.webp" alt="Two jars of The Whipped Cup tied with ribbon on pink linen" width="1023" height="1537" loading="lazy"><img src="assets/trio-flowers.webp" alt="Jars of Vanilla Cloud and Classic Cloud among roses" width="934" height="1122" loading="lazy"></div>
-    <div class="duo-words">
-      <h2 id="h-door">Delivered fresh to your door</h2>
-      <p>Weekly packages from &#8362;75.</p>
-      {BTN}
+WORLD_WINDOWS = f'''  <section class="story" id="fresh" aria-labelledby="h-fresh">
+    <div class="wrap story-in">
+      <div class="story-words">
+        <h2 id="h-fresh">Made fresh in Ramat Eshkol</h2>
+        <p>Handcrafted and fresh. Kosher certified.</p>
+        {BTN}
+      </div>
+      <div class="story-pics"><img src="assets/caramel-window.webp" alt="Four jars of Caramel Cloud on a sunny window sill in Jerusalem" width="1160" height="1122" loading="lazy"><img src="assets/vanilla-window.webp" alt="Four jars of The Whipped Cup on a table by a window" width="986" height="1122" loading="lazy"></div>
+    </div>
+  </section>
+'''
+WORLD_CLOSE = f'''  <section class="door" id="door" aria-labelledby="h-door">
+    <div class="wrap">
+      <div class="door-top">
+        <div class="story-pics"><img src="assets/bottles.webp" alt="Two jars of The Whipped Cup tied with ribbon on pink linen" width="1023" height="1537" loading="lazy"><img src="assets/trio-flowers.webp" alt="Jars of Vanilla Cloud and Classic Cloud among roses" width="934" height="1122" loading="lazy"></div>
+        <div class="story-words">
+          <h2 id="h-door">Delivered fresh to your door</h2>
+          <p>Weekly packages from &#8362;75.</p>
+          {BTN}
+        </div>
+      </div>
+      <dl class="trust">
+        <div><dt>Where</dt><dd>Ramat Eshkol, Jerusalem</dd></div>
+        <div><dt>Delivery</dt><dd>Delivered fresh to your door every week</dd></div>
+        <div><dt>Kosher</dt><dd>Certified</dd></div>
+        <div><dt>Each jar</dt><dd>Makes 3 to 4 coffees</dd></div>
+      </dl>
     </div>
   </section>
 '''
