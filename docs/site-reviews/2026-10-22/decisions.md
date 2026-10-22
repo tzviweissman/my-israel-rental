@@ -1,6 +1,6 @@
 # Tzvi's decisions, 22 Oct 2026 (the four open questions from the category rework)
 
-1. **Look-alike sites:** change the newer site in each pair. Add the missing fingerprint entries (kashermybnb, lechem-emek) and fix the `the-gift-boutique` key in `scrollcraft/fingerprints.json`.
+1. **Look-alike sites (revised after seeing the pairs, `look-alike-pairs.jpg`):** fix only three live pairs: Michal Yodaiken's headline font is now Big Shoulders Display (was Anton, shared with Chicken Munch); L.A. Cholent's plum panel is now olive #34452A (it was wine red with gold, like Blazin'); Gift Boutique's headline now draws together instead of coming into focus (H9, was H2), and its photos no longer zoom on hover (T2). Before and after: `look-alike-fixes.jpg`. The fade-in on scroll (R1) now scores 0 in check-fingerprints. The three remaining colour pairs (Bun Intended~Blazin', Bun Intended~Brown Box, Blazin'~Gift Boutique) are accepted as they are. The original rule still applies to new sites: change the newer site in each pair. Add the missing fingerprint entries (kashermybnb, lechem-emek) and fix the `the-gift-boutique` key in `scrollcraft/fingerprints.json`.
 2. **L.A. Cholent films:** keep them dark. Answer R3h.11 with this decision.
 3. **Blazin' Boards name:** keep it cream (accent colour only on the main button).
 4. **Product hero shots, all approved:**

@@ -63,7 +63,8 @@ function near(a, b) { const [x, y] = [rgb(a), rgb(b)]; return Math.hypot(x[0] - 
 // library's B/L/T/P/H codes plus ours). Two pages may share effects worth 2
 // points between them ("it's ok if 2 effects match"); an obvious effect, one a
 // visitor notices without hunting (marked loud), is worth 2, a quiet one 1.
-// So two quiet ones may match, or one loud one alone, never more.
+// So two quiet ones may match, or one loud one alone, never more. An effect marked
+// common (R1, the fade-in nearly every site has) scores 0 (Tzvi, 22 Oct 2026).
 const VOCAB = manual._effects || {};
 const EFFECTS_ALLOWED = 2;
 const EFFECT_KINDS = ['button', 'link', 'tile', 'reveal', 'steps', 'price', 'heading', 'other'];
@@ -74,7 +75,7 @@ function effectsAlike(ea, eb) {
     for (const id of list(ea[kind])) {
       if (!list(eb[kind]).includes(id)) continue;
       const v = VOCAB[id] || {};
-      same.push({ kind, id, name: v.name || '', weight: v.loud ? 2 : 1 });
+      same.push({ kind, id, name: v.name || '', weight: v.common ? 0 : v.loud ? 2 : 1 });
     }
   }
   return same;
