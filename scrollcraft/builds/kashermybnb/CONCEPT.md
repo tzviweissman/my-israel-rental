@@ -33,3 +33,11 @@ The walk as the opening event (their own promise, kept from the first build) and
 
 ## Not alike
 node scripts/check-fingerprints.mjs kashermybnb: "EFFECTS no effects listed for kashermybnb in scrollcraft/fingerprints.json" and a CLASH with kashermybnb-kashering-services (same heading face and colours: the same business's live page). scrollcraft/fingerprints.json was not touched (instruction), so there is no "different from all N other pages" line yet; the lines for this build need adding there.
+
+## Where the WhatsApp number comes from (22 Oct 2026 review)
+
+The number in site.js (972584031989) is not in the owner's flyer notes or BRIEF.md, but it is in their own
+MyIsraelRental listing record: `whatsapp: "+972584031989"` with `whatsapp_confirmed: true` and
+`booking_mode: "whatsapp"` (seen in scrollcraft/builds/home-openings/data/gigs.json, a copy of the
+listing data, created 1 Sep 2026). The booking message goes to the number the listing already books on;
+the page does not print it. The owner is still asked in message-to-owner.md which number takes WhatsApp.

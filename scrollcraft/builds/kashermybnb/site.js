@@ -125,3 +125,13 @@
   if (!f || !d || !('IntersectionObserver' in window)) return;
   new IntersectionObserver(function (e) { d.style.visibility = e[0].isIntersecting ? 'hidden' : ''; }, { threshold: 0.05 }).observe(f);
 })();
+// the Pages menu on phones (kitchen and pots pages)
+(function () {
+  var b = document.getElementById('menuBtn'), p = document.getElementById('menuPanel');
+  if (!b || !p) return;
+  function set(o) { p.hidden = !o; b.setAttribute('aria-expanded', String(o)); }
+  b.addEventListener('click', function () { set(p.hidden); });
+  document.getElementById('menuClose').addEventListener('click', function () { set(false); b.focus(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') set(false); });
+  p.addEventListener('click', function (e) { if (e.target.closest('a')) set(false); });
+})();

@@ -39,12 +39,12 @@ R3b.1 pass: first screen says what and the button; the place is in the phone bar
 R3b.2 pass: price 160 shekels an hour sits in the bar beside the button
 R3b.3 pass: one solid action per screen: the bar button and phone bar repeat the same action
 R3h.1 pass: site OPENING passed: the drawer pieces slide into place as you scroll
-R3n.1 pass: her drawer photo is the largest picture of the first screen at both sizes, at most 1.2x its size
+R3n.1 pass: her drawer photo is the largest picture of the first screen at both sizes, at most 1.2x its size; on phones the words fill the space above it and the photo sits at the bottom, so no empty dark band is left under it as the opening scrolls away
 R3n.2 pass: her tidy drawer pieces fall into her messy drawer
 R3n.3 pass: room choice swaps both photos; hours on the book page fill the tray and set the total; check-motion passed
 R3n.4 pass: next to Studio Dado and LPAS: ours opens on her own real before photo, plainer than a film but real
 R3n.5 pass: "you land on a messy drawer and its tidy pieces slide into place as you scroll"
-R3g.15 pass: check-fits passed; her photos are real, used at most 1.2x
+R3g.15 pass: check-fits passed; her photos are real, used at most 1.2x; on the book page choosing home styling or personal shopping labels the drawer photos "Our organizing work: a clothes drawer" (also on phones), as she has no photo of those two
 R3h.2 n/a: no film in this site: the opening is built in code from their own photos
 R3h.3 n/a: no film in this site: the opening is built in code from their own photos
 R3h.5 n/a: no film in this site: the opening is built in code from their own photos
@@ -91,9 +91,9 @@ R3s.14 pass: one number shown big: 160 shekels an hour
 R3s.11 n/a: the owner gave no reason for the price to print; asked in the owner questions, nothing invented
 R5b.6 pass: numbered steps are real steps; no scroll cues
 R3.13 pass: no doubled contact or facts, no two dividers in a row, own photos only
-R3a.1 pass: rendered at 1440x900, 1280x650 and 390x844, normal and reduced motion (check-site), every new screen looked at
+R3a.1 pass: 22 Oct review fixes rendered at 1440x900 and 390x844 touch: the opening in 150 px stops, the service rows, the book page with each service, the service rows with their Book buttons, and the "Session written out" message, which now sits in the summary card
 R3r.1 pass: check-site, check-fits and check-motion run on every page of the site after the last edit; readable crashed (see R3e.8)
-R3r.2 n/a: the independent review of 3r.2 is the coordinator's second pass; this builder did not review its own work against page-review-checklist.md
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; all findings fixed and re-checked, owner gaps listed in message-to-owner
 R3g.12 pass: check-site FLOW: an empty form sends nothing and shows what is missing; a filled form builds the wa.me message with the shown total; sending opens WhatsApp, so nothing reached the owner
 R0b.12 n/a: not published, no pages-list preview yet
 

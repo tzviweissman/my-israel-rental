@@ -21,7 +21,7 @@ R5.1 pass: read every line
 R5.2 pass: read every line
 R5.3 pass: labels are phrases
 R5.4 pass: searched for they, them, their in English: none
-R5b.2 pass: every main button reads "Ask for a quote" (Hebrew: לבקש הצעת מחיר) and goes to #book: bar, hero, what we make, photo station, close, footer, phone bar
+R5b.2 pass: every main button reads "Ask for a quote" (Hebrew: לבקש הצעת מחיר) and goes to #book; the section it opens is now titled the same ("Ask for a quote" / "לבקש הצעת מחיר"), no longer "Book your event"
 R5b.8 pass: closing line "Your event, lifted" names the gain
 R3.11 pass: order: opening, her events, occasions, what we make, photo station, her work, quote card, good to know
 R3o.4 pass: 052-764-4973 is labelled as phone and WhatsApp
@@ -29,17 +29,17 @@ R3e.22 n/a: no photo of Michal sent; asked in the reply
 R3s.19 pass: head tags unchanged except the category meta
 R6.1 pass: events playbook: past work, occasions, how to ask for a quote, area
 R4.1 pass: no price is shown by her request; the card says the price is given on contact
-R3g.13 pass: 1440x900 and 390x844 after the film: picture, headline, one line, one button
+R3g.13 pass: 22 Oct review fix: headline, one line and "Ask for a quote" show on the first screen from the first pixel at 1440x900, 390x844 and 360x640 while the arch builds behind them (film kept)
 R3b.1 pass: what (balloon design), where (Jerusalem and the area), what next (quote)
 R3b.2 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3b.3 pass: header button is outline while the hero shows the solid one
 R3h.1 pass: held film opening of balloons gathering into an arch
-R3n.1 pass: the arch film fills the first screen
+R3n.1 pass: the arch film fills the first screen; the words sit on it from the start
 R3n.2 pass: balloons rise into an empty cream room and gather into the arch round her line; the closing name made of balloons you can pop
 R3n.3 pass: an occasion chip rearranges her work and the quote card writes the message; check-motion passes (3 choices, quick taps)
 R3n.4 pass: compared with docs/inspo/awwwards-anatomy-2026-10-22/events-sports-homes/monarque-sheet.webp: same shape, short page, ground per section, small photos, giant name; ours opens on a generated arch while Monarque opens on real events, so her real photos follow straight after in the strip
 R3n.5 pass: you land in an empty cream room and balloons float up and gather into an arch round her line
-R3g.15 pass: the opening is generated at screen size and not presented as her premises; fits shows no photo over 1.35x
+R3g.15 pass: the generated arch opening is not presented as her premises; her 230 px catalogue photos are no longer enlarged (the "what we make" picture is capped at 230 px); fits shows no photo over 1.35x
 R3h.2 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.3 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.5 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
@@ -82,11 +82,11 @@ R3s.9 pass: sage means action, gold means emphasis
 R3s.12 pass: her real events strip comes right after the opening
 R3s.14 n/a: no numbers sent to show big
 R3s.11 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
-R5b.6 pass: one "scroll" cue on the held opening which is the opening itself; no counters, no label above every section
+R5b.6 pass: one "scroll" cue on the held opening (hidden on short phones where it met the button); on phones the filter chips fade at the edge to show they scroll, and the fade goes at the end
 R3.13 pass: the contact appears in the footer and card as one number; the gallery has 42 photos
-R3a.1 pass: screenshots walked at 1440x900 and 390x844 touch after the rework; both languages opened; check-fits six sizes
+R3a.1 pass: 22 Oct review fixes walked at 1440x900 and 390x844 touch in 300 to 500 px stops (opening, make, gallery, quote, close) in Hebrew; English opening checked at 390x844 (logo not clipped); check-fits six sizes
 R3r.1 pass: single page; check-site, check-fits, check-motion, cutoff ran clean; readable.mjs hung past 5 minutes and clipped.mjs timed out on the held film page (checker limits, named in reply)
-R3r.2 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; all findings fixed and re-checked, owner gaps listed in message-to-owner
 R3g.12 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
 R0b.12 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
 R8.1 pass: her catalogue photos are shown in one rounded tile style; they are her WhatsApp photos, not one shoot, which is why the strip uses cropped squares
@@ -157,7 +157,7 @@ R3a.3 n/a: nothing is placed on a spot in a photo
 R3a.4 pass: cutoff.mjs ran clean at nine sizes
 R3a.5 pass: reduced motion shows the still opening (css)
 R3s.2 pass: check-site SHIFT passes
-R3s.1 pass: check-site STATE passes
+R3s.1 pass: check-site STATE passes; the filter chips, the quote chips and the show-all button have a hand cursor, hover, pressed and focus states
 R3s.8 pass: buttons sit in sage pills on cream
 R3s.10 n/a: the make list shows a picture when a name is pointed at and was not changed in this rework
 R3i.3 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)

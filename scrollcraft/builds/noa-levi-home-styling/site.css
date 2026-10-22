@@ -275,10 +275,10 @@ section.after { padding: calc(var(--top-h) + clamp(.8rem, 3svh, 2rem)) 0 3rem; }
 .assure { font-size: .88rem; color: var(--soft); margin: 0 0 1rem; }
 .back { display: block; width: 100%; margin-top: .6rem; min-height: 44px; border: 0; background: transparent; color: var(--soft); font: 600 .95rem/1 var(--font-body); cursor: pointer; text-decoration: underline; }
 .note { font-size: .85rem; color: var(--soft); margin: .6rem 0 0; text-align: center; }
-.toast { position: fixed; z-index: 40; left: 50%; bottom: calc(var(--bar-h) + 16px); transform: translate(-50%, 20px); opacity: 0; display: flex; gap: .7rem; align-items: center; padding: .8rem 1.1rem; border-radius: var(--r); background: var(--ink); color: var(--ground); transition: opacity 200ms, transform 200ms var(--out); max-width: min(92vw, 28rem); }
+.toast { position: fixed; z-index: 40; left: 50%; top: calc(var(--top-h) + 12px); transform: translate(-50%, -20px); opacity: 0; display: flex; gap: .7rem; align-items: center; padding: .8rem 1.1rem; border-radius: var(--r); background: var(--ink); color: var(--ground); transition: opacity 200ms, transform 200ms var(--out); max-width: min(92vw, 28rem); }
 .toast.in { opacity: 1; transform: translate(-50%, 0); } .toast p { margin: 0; font-size: .9rem; } .toast b { display: block; }
 .card h2 { font: 500 1.7rem/1.1 var(--font-head); }
-@media (max-width: 860px) { .st-grid { grid-template-columns: 1fr; } .st-ph figure { aspect-ratio: 1; max-height: none; } .st-cap { display: none; } .opts { grid-template-columns: 1fr; } .hrs { grid-template-columns: 1fr; } .osteps li button { font-size: .8rem; padding: 0 .5rem; } }
+@media (max-width: 860px) { .st-grid { grid-template-columns: 1fr; } .st-ph figure { aspect-ratio: 1; max-height: none; } .st-cap { position: static; margin: .5rem 0 0; } .opts { grid-template-columns: 1fr; } .hrs { grid-template-columns: 1fr; } .osteps li button { font-size: .8rem; padding: 0 .5rem; } }
 @media (max-width: 800px) { .band .sec-in, .work-grid, .price-grid { grid-template-columns: 1fr; } .cmp { height: min(380px, 56svh); } .lay[data-k="pantry"] { align-content: center; grid-template-rows: none; grid-auto-rows: auto; } .lay[data-k="pantry"] .pn { aspect-ratio: 2.6 / 1; } .lay[data-k="pantry"] .pn img { object-position: 10% 0; } .rooms { grid-template-columns: repeat(3, 1fr); } .room { padding: 0 .5rem; font-size: .9rem; text-align: center; } .tape { justify-self: start; } }
 
 /* contact */
@@ -335,3 +335,18 @@ section.after { padding: calc(var(--top-h) + clamp(.8rem, 3svh, 2rem)) 0 3rem; }
 .foot.foot-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.4rem 2rem; text-align: left; padding: 1.6rem var(--gutter) calc(1.6rem + var(--pad-bar, 0px)); border-top: 1px solid rgba(255, 255, 255, .18); font-size: .9rem; }
 .foot-cols .fc { display: grid; gap: .35rem; align-content: start; } .foot-cols .fc b { font-weight: 600; margin-bottom: .15rem; }
 @media (max-width: 800px) { .foot.foot-cols { grid-template-columns: 1fr; } }
+
+/* review fixes, 22 Oct 2026 */
+/* phone opening: the words fill the space above the photo, so no empty dark band is left under it as the opening scrolls away */
+@media (max-width: 800px) {
+  .pin { align-content: end; padding-top: 0; padding-bottom: 14px; }
+  .hs-copy h1 { font-size: clamp(2.4rem, 11.5vw, 3.2rem); margin: .4rem 0 .7rem; }
+  .hs-copy .sub { display: block; margin: 0 0 1rem; font-size: 1rem; max-width: none; color: rgba(247, 242, 236, .9); }
+}
+/* the Book link at the end of each service row reads as a small button */
+.svc-list a small { opacity: 1; min-height: 40px; padding: 0 1rem; border: 1.5px solid currentColor; border-radius: 999px; font-size: .95rem; letter-spacing: .02em; white-space: nowrap; transition: background 180ms, color 180ms; }
+.svc-list a:hover small, .svc-list a:focus-visible small { background: var(--ink); color: var(--ground); border-color: var(--ink); }
+/* "Session written out" sits in the summary card, above the send button, so it never covers the page or the footer */
+.toast { position: static; transform: translateY(-6px); max-width: none; width: 100%; margin: 0 0 .8rem; }
+.toast.in { transform: none; }
+.toast[hidden] { display: none; }
