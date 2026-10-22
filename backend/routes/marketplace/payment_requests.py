@@ -160,7 +160,7 @@ async def public_request(token: str, request: Request):
             "customer_first_name": first, "lang": r.get("lang", "en"), "status": r["status"],
             "created_at": r["created_at"],
             "business": {"name": biz.get("name"), "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url"),
-                         "slug": biz.get("slug") or biz["_id"], "phone": biz.get("phone"),
+                         "slug": biz.get("slug") or biz["_id"],
                          "payment_links": allowed_payment_links(biz.get("payment_links")),
                          "payment_note": biz.get("payment_note")}}
 
