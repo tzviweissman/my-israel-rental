@@ -65,7 +65,11 @@
   // shown the way shops show a deal (Tzvi, 20 Oct 2026, from the strawberry video: the original price
   // with a slash through it next to the price, and a short badge, not a sentence). The jars bought one
   // by one at the lowest single price, so the saving is always true whatever the flavours.
-  function was(k) { return k === 'assorted' ? 0 : singles(k)[0]; }  // Assorted shows no saving (22 Oct 2026): dearer a jar than the Duo
+  // Assorted shows NO saving (rule 3j unit-price test, 22 Oct 2026). Its separate price is 4 single jars of
+  // the flavours it holds, the cheapest four: one Classic 40 + one Caramel 48 + one Vanilla 48 + a second
+  // Classic 40 = 176, so on paper 155 is 12% off. But 155 / 4 = 38.75 a jar is above the Try It Duo's
+  // 75 / 2 = 37.50 a jar, a smaller pack, so a % off here would be false against a cheaper way to buy.
+  function was(k) { return k === 'assorted' ? 0 : singles(k)[0]; }
   function pct(k) { return Math.floor((was(k) - PACKS[k].price) * 100 / was(k)); }  // percent off, rounded down
   plans.innerHTML = Object.keys(PACKS).map(function (k) {
     var p = PACKS[k];

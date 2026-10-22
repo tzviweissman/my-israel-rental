@@ -110,8 +110,9 @@
   .pics { position: relative; overflow: hidden; }
   .pn { position: relative; overflow: hidden; height: 100%; }
   .pn .ph { position: absolute; inset: 0; background: url("assets/boxes.webp") var(--ox, 50%) var(--oy, 50%) / cover no-repeat; transform: scale(var(--z, 1)); transform-origin: var(--tx, 50%) var(--ty, 50%); }
-  .open { height: max(560px, calc(100svh - 64px)); display: grid; grid-template-columns: minmax(0, 1.45fr) repeat(3, minmax(0, .8fr)); gap: 12px; padding: 12px; background: var(--paper); color: var(--ink); }
+  .open { height: max(560px, calc(100svh - 64px)); display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, .95fr) minmax(0, .7fr) minmax(0, .95fr); gap: 12px; padding: 12px; background: var(--paper); color: var(--ink); }
   .open .pn { border-radius: 22px; }
+  .open .pn.cut { display: grid; place-items: center; } .open .pn.cut img { position: relative; inset: auto; width: 100%; height: auto; aspect-ratio: 1; }
   .open .pn { animation: rise 1.1s var(--ease) both; }
   .open .pn:nth-child(2) { animation-delay: .14s; } .open .pn:nth-child(3) { animation-delay: .28s; }
   .open .pn .ph { animation: drift 18s ease-in-out 1s infinite alternate; }
@@ -258,6 +259,8 @@
   /* ---------- close: the photo again, in four crops ---------------------- */
   .close { min-height: min(72svh, 620px); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 12px; padding: 12px; background: var(--dough); color: var(--ink); }
   .close .pn { border-radius: 22px; min-height: 340px; }
+  /* bun-choc.webp is 720px: shown at most 340px wide so it stays sharp on a 2x phone (22 Oct review) */
+  .close .pn.cut { display: grid; place-items: center; } .close .pn.cut img { --s: 1; position: relative; inset: auto; width: min(340px, 100%); height: auto; aspect-ratio: 1; }
   .close h2 { font-size: min(clamp(2.4rem, 1.4rem + 3.6vw, 4.8rem), 9svh); max-width: 8.8em; color: var(--ink); }
   .close h2 .script { display: block; color: var(--cocoa); font-size: 1.1em; line-height: .95; }
   .close .act { margin-top: clamp(16px, 3vh, 28px); display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; }
@@ -291,6 +294,8 @@
   .pricecard .row:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
   .pricecard .p { white-space: nowrap; } .pricecard li .p .chip { display: inline-block; margin-right: 8px; vertical-align: middle; }
   .pricecard .p s { font-weight: 500; font-size: 0.85rem; color: var(--ink-soft); margin-right: 6px; }
+  @media (min-width: 861px) and (max-height: 760px) { .menu { padding-block: 28px; } .menu .tip { margin-top: 4px; } .mixnote { margin-top: 2px; font-size: .85rem; } }
+  .mixnote { list-style: none; margin: 6px 0 0; padding: 0 2px; font-size: .9rem; color: var(--ink-soft); }
   .menu .tip { margin: 10px 0 0; color: var(--ink-soft); font-size: 0.95rem; }
   .foot { display: block; padding: 0 0 var(--bar-pad, 0px); font-size: 0.95rem; background: var(--cocoa); color: #E6D2C2; }
   .foot-grid { display: grid; grid-template-columns: 1.3fr 1fr 1.2fr; gap: 28px; padding-block: clamp(48px, 8vh, 80px) 32px; }
@@ -317,6 +322,9 @@
     .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); height: auto; } .wall .fl { height: min(58svh, 420px); } .wall .fl img { transform: scale(1.02) rotate(-6deg); object-position: 50% 60%; height: calc(100% - 240px); }
     .build-grid { grid-template-columns: minmax(0, 1fr); }
     .box { order: -1; width: min(78%, 330px); }
+    .box .stage { margin: -17% 0 -9%; }
+    .flavours { padding-bottom: 8px; } .build { padding-block: 4px 24px; }
+    .menu { padding-block: 40px 28px; } .facts { padding-block: 28px 40px; }
     /* while choosing on a phone, the price and the order button stay under the thumb */
     .total { position: sticky; bottom: 0; z-index: 5; margin-inline: calc(var(--gutter) * -1); padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom));
       background: var(--paper); border-top: 1px solid var(--line); justify-content: space-between; }
@@ -395,9 +403,9 @@
 
 <main>
   <section class="open pics" aria-labelledby="h1">
-    <div class="pn" style="--ox:0%;--oy:60%;--z:1.25;--tx:10%;--ty:70%"><i class="ph" role="img" aria-label="Two boxes of Bun Intended buns: classic cinnamon with icing, a caramel-topped bun, and Lotus buns with cream and biscuit crumbs"></i></div>
-    <div class="pn cut" style="--g:#5A3828;--s:1.15;--t:6%"><img src="assets/bun-lotus.webp" alt="" width="720" height="720"></div>
-    <div class="pn" style="--ox:100%;--oy:60%;--z:1.25;--tx:90%;--ty:75%"><i class="ph" aria-hidden="true"></i></div>
+    <div class="pn" style="--ox:0%;--oy:50%;--z:1;--tx:0%;--ty:50%"><i class="ph" role="img" aria-label="Two boxes of Bun Intended buns: classic cinnamon with icing, a caramel-topped bun, and Lotus buns with cream and biscuit crumbs"></i></div>
+    <div class="pn cut" style="--g:#5A3828;--s:1;--t:18%"><img src="assets/bun-lotus.webp" alt="" width="720" height="720"></div>
+    <div class="pn" style="--ox:82%;--oy:50%;--z:1;--tx:82%;--ty:50%"><i class="ph" aria-hidden="true"></i></div>
     <div class="copy wrap">
       <img class="logo" src="assets/logo.webp" alt="Bun Intended, sweet things ahead, pareve" width="1254" height="1254">
       <h1 id="h1">Cinnamon buns, baked at home in Ramat Eshkol<span class="script">Made with love.</span></h1>
@@ -593,6 +601,12 @@
 
   // The choice cards are built once and only updated, so a tap never rebuilds the
   // button you are on (focus stays, nothing under it moves).
+  // Two boxes of 4 beat the mix only for some pairs; say so, from the price list's own numbers.
+  function cheaperPair() {
+    var best = null;
+    for (var i = 0; i < F.length; i++) for (var j = i + 1; j < F.length; j++) { var t = F[i].p4 + F[j].p4; if (t < MIX8 && (!best || t < best.t)) best = { t: t, a: F[i].name, b: F[j].name }; }
+    return best;
+  }
   var fHost = $('#flavours');
   fHost.innerHTML = F.map(function (f) {
     return '<button type="button" class="choice" data-f="' + f.id + '" aria-pressed="false"><span class="nm"><span class="sw" style="background:' + SW[f.c] + '"></span>' + f.name + '</span><span class="pr"></span></button>';
@@ -605,7 +619,7 @@
     });
     var m = fHost.querySelector('[data-mix]'), on8 = state.size === 8;
     m.setAttribute('aria-pressed', String(on8 && state.mix)); m.classList.toggle('dim', !on8);
-    m.querySelector('small').textContent = on8 ? 'Your choice of any 2 flavours' : '8 piece boxes only, tap to switch';
+    var cp = cheaperPair(); m.querySelector('small').textContent = on8 ? 'Your choice of any 2 flavours' + (cp ? '. Two 4 piece boxes can cost less: ' + cp.a + ' and ' + cp.b + ' is ₪' + cp.t : '') : '8 piece boxes only, tap to switch';
   }
 
   function paint() {
@@ -701,7 +715,8 @@
   function dot(c) { return '<span class="sw" style="width:14px;height:14px;border-radius:50%;background:' + SW[c] + ';box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)"></span>'; }
   $('#m4').innerHTML = F.map(function (f) { return row(4, f.id, f.name, dot(f.c), f.p4, 0); }).join('');
   $('#m8').innerHTML = F.map(function (f) { return row(8, f.id, f.name, dot(f.c), f.p8, f.p4 * 2); }).join('')
-    + '<li><button type="button" class="row" data-pick="8:mix"><span>2 flavour mix<i>any 2 flavours</i></span><span class="p">' + MIX8 + '<small>NIS</small></span></button></li>';
+    + '<li><button type="button" class="row" data-pick="8:mix"><span>2 flavour mix<i>any 2 flavours</i></span><span class="p">' + MIX8 + '<small>NIS</small></span></button></li>'
+    + (cheaperPair() ? '<li class="mixnote">Two boxes of 4 can cost less than the mix: ' + cheaperPair().a + ' and ' + cheaperPair().b + ' is ₪' + cheaperPair().t + '.</li>' : '');
 
   // The phone menu: opens a panel, closes on Escape or a tap on a link.
   var tb = $('#top'), mb = $('#mbtn');

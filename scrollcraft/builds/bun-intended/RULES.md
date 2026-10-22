@@ -8,8 +8,8 @@ Replace every `todo`. `node scripts/check-rules.mjs scrollcraft/builds/bun-inten
 R0b.1 n/a: local files only, nothing published by this task; the slug is set at publish
 R0b.3 pass: looked at src/pricelist.jpg: 4-box 55, 55, 65, 65; 8-box 100, 100, 120, 120; two-flavour mix 120; the page lists, cards and builder match
 R2.1 pass: read every new line of the home page (see site notes); each fact traces to the existing page, the owner menu or price list
-R2.2 n/a: no message-to-owner.md exists in this build folder; the owner has to be asked (listed in the reply)
-R2.3 n/a: no message-to-owner.md exists in this build folder; the owner has to be asked (listed in the reply)
+R2.2 pass: message-to-owner.md written (22 Oct): asks for a real Chocolate bun photo (the current one is generated), the Espresso photo, Shabbos days, delivery, the mix price
+R2.3 pass: every question in message-to-owner.md is one the page cannot answer by itself
 R3.1 pass: pareve and baked at home are the owner own words (listing and price list); no kosher, stars, years or awards claimed
 R3.2 pass: searched the visible text of every page for only, hurry, left, limited, today, ends: none
 R3.3 pass: searched for welcome to, passionate, quality, best, trusted, #1, award: none on any page
@@ -91,16 +91,16 @@ R3s.14 n/a: no number block; the only numbers are prices
 R3s.11 n/a: no sentence on why it costs that was given by the owner
 R5b.6 pass: no scroll counters or labels above every section
 R3.13 pass: one contact set in the footer; no doubled facts
-R3a.1 pass: walked 1440x900 and 390x844 at every section; reduced motion not separately captured
+R3a.1 pass: walked 1440x900 and 390x844 at every section in 100 px stops; 22 Oct: removed the two blank bands on phones (under the flavour cards, above the facts tiles), hero panels re-cropped to whole buns, closing bun shown at most 340 px wide; reduced motion not separately captured
 R3r.1 pass: check-site, check-fits, check-motion and readable run on every page (see the reply)
-R3r.2 n/a: the second reader is the coordinator, who did not build these pages, working from the reply and the screenshots; that review cannot be recorded before the reply exists
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; findings fixed and re-checked
 R3g.12 pass: check-site FLOW walked the order form empty (it says what is missing) and filled, and read the WhatsApp message with the total; nothing was sent to the owner
 R0b.12 n/a: nothing published, so no pages-list preview clip to refresh
 
 ## 4. Photos and media
 R8.1 pass: the four flavour cut-outs on the cards are one shoot (same angle, light and size), as are the builder buns
 R8.6 n/a: the buns are their own cut-outs on flat colour, not hero shots on a plinth with ingredients; hero shots listed in the reply
-R8.2 pass: every image is their own photo or a cut-out or pour made earlier from it; none generated in this task
+R8.2 pass: every image is their own photo or a cut-out or pour made earlier from it, except the Chocolate bun (assets/bun-choc.webp, from gen/chocolate.png), which is not in the owner's sources and looks generated: kept, and asked in message-to-owner.md (question 1)
 R3p.7 pass: every flavour card shows one bun; every list item picks a flavour
 R3h.12 pass: the bun on the card, the builder and the box come from one master per flavour
 R3h.10 pass: choosing a flavour changes the bun, pour, label and the button price (check-motion)
@@ -131,7 +131,7 @@ R3j.5 n/a: no stamp card or reorder feature offered
 R3j.6 pass: no invented option; only their own sizes and packages
 R3j.7 pass: struck prices 110 and 130 equal two 4-boxes at their own prices
 R3j.8 pass: per bun: 4-box Classic 13.75, 8-box Classic 12.50; Lotus 16.25 and 15.00: the 8-box is lower than the 4-box for every flavour
-R3j.9 pass: the 4/8 box group shows its saving; the two-flavour mix shows none
+R3j.9 pass: the 4/8 box group shows its saving; the two-flavour mix shows none, and a note beside it says two boxes of 4 can cost less (Classic and Espresso 55 + 55 = 110 against 120), computed from the price list
 R3j.10 pass: recomputed: 9% (100 of 110 = 9.09), 7% (120 of 130 = 7.69, rounded down)
 R3j.11 n/a: no combined service or basket-package switch on this page
 R3j.12 n/a: no owner savings claim contradicts the prices

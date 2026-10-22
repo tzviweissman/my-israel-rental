@@ -9,14 +9,14 @@ import json, re
 PAGES = [('index', 'Home'), ('book', 'Book'), ('contact', 'Contact')]
 WA = '447871822590'
 OG = 'https://myisraelrental.com/pages/elisheva-brandeis/assets/'
-# shades named by what they look like; each is her own photo of that colour
+# shades named by what they look like; each is her own photo of that colour. Only shades with a photo of
+# their own that shows that colour (22 Oct review): Sheer pink was a near twin of Soft nude, and the Blue photo
+# is nude nails with two light blue accent nails, not blue nails, so both were dropped.
 SHADES = [
     ('milky', 'Milky white', '#F4EFEE', 'milky.webp', 'Milky white gel nails on a client'),
     ('bubblegum', 'Bubblegum pink', '#F3A9C6', 'bubblegum.webp', 'Bubblegum pink gel nails'),
-    ('sheer', 'Sheer pink', '#EDBDB6', 'sheer.webp', 'Sheer pink gel nails on a client'),
     ('nude', 'Soft nude', '#E7C4B5', 'nude-2.webp', 'Soft nude gel nails on a client'),
     ('ruby', 'Ruby red', '#8F1D2B', 'ruby.webp', 'Ruby red gel nails holding two gel polish bottles'),
-    ('blue', 'With a touch of blue', '#AFCBE8', 'blue.webp', 'Nude gel nails with light blue accent nails'),
 ]
 SERVICES = [
     ('gel', 'Gel nails', 90, 45, 'Gel colour on your natural nails.'),
@@ -203,8 +203,8 @@ def pic(k, alt, cls, h2, line, hid):
 '''
 
 
-STUDIO_PIC = pic('studio', 'The studio: a gel lamp and a row of gel colours on the table', 'left', 'Gel colours, ready for you', 'Gel, French nails and nail art in Romema, Jerusalem.', 'studio')
-VISIT_PIC = pic('visit', 'Pale pink gel nails on a client, hands on a towel', 'right', 'Come to the studio', 'Luxe Nail Studio, Romema, Jerusalem.', 'come')
+STUDIO_PIC = pic('studio', 'A hand holding two bottles of ruby red gel polish, with ruby red gel nails', 'left', 'Gel colours, ready for you', 'Gel, French nails and nail art in Romema, Jerusalem.', 'studio')
+VISIT_PIC = pic('visit', 'Pale pink gel nails on a client, hands on a towel', 'right', 'Gel nails, done in Romema', 'Luxe Nail Studio, Romema, Jerusalem.', 'come')
 CLOSED = ' class="closed"'
 hours_li = ''.join(f'<li{CLOSED if h == "Closed" else ""}><span>{d}</span><span>{h}</span></li>' for d, h in HOURS)
 VISIT = f'''  <section class="sec rest" id="visit" aria-labelledby="h-visit">
@@ -229,6 +229,7 @@ def write(name, title, desc, img, body, tail=''):
 write('index', 'Nails by Elisheva · Gel nails and nail art in Romema, Jerusalem', DESC, 'milky.webp', HERO + WORK_SEC + SERVICES_SEC + STUDIO_PIC + VISIT_PIC + VISIT, HERO_JS)
 
 svc_opts = ''.join(f'<label class="opt"><input type="radio" name="svc" value="{k}"><span class="box"><span><b>{n}</b><br><small>about {m} minutes</small></span><span class="p">{f'<s class="was"><span class="sym">₪</span>{p + SAVE}</s>' if k == 'gel-removal' else ''}<span class="sym">₪</span>{p}</span></span>{f'<span class="tag"><i class="t-save">{PCT}% off</i><i class="t-sel">Selected</i></span>' if k == 'gel-removal' else ''}</label>' for k, n, p, m, d in SERVICES)
+art_opts = ''.join(f'<button class="artopt" type="button" data-k="{k}" role="radio" aria-checked="false">{n}</button>' for k, n in [('french', 'French'), ('gradient', 'Gradient'), ('art', 'Nail art')])
 shade_opts = ''.join(f'<button class="shade" type="button" data-k="{k}" style="--c:{c}" aria-pressed="false" aria-label="{n}"></button>' for k, n, c, f, a in SHADES)
 # The booking page as a product page (Tzvi, 20 Oct 2026: "use the new product page rules for ... the
 # nails one"; docs/inspo/product-pages-2026-10-20): her work big on a stage that takes the shade you
@@ -246,7 +247,8 @@ BOOK = f'''  <form id="form" novalidate>
         <ol class="st-flow" aria-label="How booking works"><li>You send it on WhatsApp</li><li>I confirm your time</li><li>You come in</li></ol>
         <div class="st-pr"><p class="st-price" id="st-price" style="visibility:hidden">&nbsp;</p><p class="st-save" id="st-save" style="visibility:hidden">&nbsp;</p></div>
         <div class="card-in" id="w-svc"><p class="f">What would you like?</p><div class="opts" id="svcs">{svc_opts}</div><p class="err" id="e-svc"></p></div>
-        <div class="st-end"><div class="card-in"><p class="f">Colour <span class="hint">(optional)</span><span class="shade-name" id="bshade-name"></span></p><div class="chips small" id="bshades">{shade_opts}</div></div>
+        <div class="card-in" id="w-art" style="visibility:hidden"><p class="f">Style</p><div class="chips arts" id="arts" role="radiogroup" aria-label="Style">{art_opts}</div><p class="err" id="e-art"></p></div>
+        <div class="st-end"><div class="card-in" id="w-shade"><p class="f">Colour <span class="hint">(optional)</span><span class="shade-name" id="bshade-name"></span></p><div class="chips small" id="bshades">{shade_opts}</div></div>
         <button class="btn st-next" type="submit"><span>Continue to day and time</span></button></div>
       </div>
     </div>

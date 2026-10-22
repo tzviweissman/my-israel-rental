@@ -6,7 +6,7 @@
 # email. Photos: her own two (src/owner).
 PAGES = [('index', 'Home'), ('shop', 'Shop'), ('contact', 'Contact')]  # one shop page: menu and order together (rules 3k)
 WA = '19299936768'
-OG = 'https://myisraelrental.com/pages/rena-lipschitz/assets/'
+OG = 'assets/'  # relative: publish-page.mjs rewrites it to the business's own /pages/<slug>/assets/ (22 Oct review: a stale owner path was here)
 
 
 def head(page, title, desc, img):
@@ -136,14 +136,16 @@ def pct(k, p):
 
 def pack_html(k, n, meta, allows, p, lead):
     save = ''  # her menu says "save 30+ ₪", but six Classic jars are ₪240: asked her (message-to-rena.md)
-    pic = '<img class="pic" src="assets/iced.webp" alt="" width="1170" height="1213" loading="lazy">' if lead else ''
-    own = {'duo': ('bottles.webp', 1023, 1537), 'one': ('jar-classic.webp', 500, 1111)}.get(k)  # her own photos, one in each tile
-    if own: pic = f'<img class="pic" src="assets/{own[0]}" alt="" width="{own[1]}" height="{own[2]}" loading="lazy">'
+    # one layout for all four (22 Oct review): the same square photo on the left, the name and what it allows
+    # in the middle, the price and Choose in one column on the right; only the tab and the % badge differ
+    own = {'bundle': ('iced.webp', 1170, 1213), 'assorted': ('trio-flowers.webp', 934, 1122),
+           'one': ('jar-classic.webp', 500, 1111), 'duo': ('bottles.webp', 1023, 1537)}[k]  # her own photos, one in each tile
+    pic = f'<img class="pic" src="assets/{own[0]}" alt="" width="{own[1]}" height="{own[2]}" loading="lazy">'
     tab = '<span class="tab">Best value</span>' if lead else ''
     w = was(k)
     badge = f'<span class="save-b">{pct(k, p)}% off</span>' if w else ''
     wasp = f'<s class="was" aria-label="instead of ₪{w}">₪{w}</s> ' if w else ''
-    return f'''        <article class="pack{' lead' if lead else ''}{' has-pic' if own else ''} rev">{tab}{pic if own else ''}<div><p class="meta">{meta}</p><h3>{n}</h3><span class="allows">{allows}</span>{badge}</div>{'' if own else pic}
+    return f'''        <article class="pack has-pic{' best' if lead else ''} rev">{tab}{pic}<div><p class="meta">{meta}</p><h3>{n}</h3><span class="allows">{allows}</span>{badge}</div>
           <div class="row"><span class="price">{wasp}₪{p}{save}</span><a class="btn-line" href="shop.html?pack={k}" data-pack="{k}">Choose</a></div></article>
 '''
 
@@ -238,8 +240,13 @@ HERO_JS = '''<script>
 DESC = 'Handcrafted whipped coffee in a jar, made fresh in Ramat Eshkol, Jerusalem. Classic, Caramel and Vanilla Cloud from ₪40, weekly packages from ₪75. Kosher certified, delivered to your door.'
 
 
+# the contact page already shows the contact cards, so its footer is only the page links (22 Oct review)
+_c = FOOTER.index('<div><h3>Contact</h3>'); _e = FOOTER.index('  </div>' + chr(10) + '  <p class="foot-legal">')
+FOOTER_LITE = FOOTER[:FOOTER.index('  <section class="close"')] + '</main>' + chr(10) + FOOTER[FOOTER.index('<footer class="foot">'):_c] + FOOTER[_e:]
+
+
 def write(name, title, desc, img, body, tail=''):
-    html = head(name, title, desc, img) + header(name) + body + FOOTER + tail + '</body>\n</html>\n'
+    html = head(name, title, desc, img) + header(name) + body + (FOOTER_LITE if name == 'contact' else FOOTER) + tail + '</body>\n</html>\n'
     open(f'{name}.html', 'w', encoding='utf8').write(html)
 
 

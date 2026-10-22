@@ -4,7 +4,8 @@
   var WA = '447871822590';
   // her hours (listing): 0 Sunday ... 6 Shabbat; [open, close] in minutes
   var HOURS = { 0: [600, 780], 1: [600, 1140], 2: [600, 1140], 3: [600, 1140], 4: [600, 1140], 5: [600, 780] };
-  var qs = new URLSearchParams(location.search), svc = SERVICES[qs.get('service')] ? qs.get('service') : '', shade = SHADES[qs.get('shade')] ? qs.get('shade') : '', time = '';
+  var qs = new URLSearchParams(location.search), svc = SERVICES[qs.get('service')] ? qs.get('service') : '', shade = SHADES[qs.get('shade')] ? qs.get('shade') : '', time = '', art = '';
+  var ARTS = { french: 'French', gradient: 'Gradient', art: 'Nail art' };
   if (qs.toString()) history.replaceState(null, '', location.pathname);
   var $ = function (id) { return document.getElementById(id); };
   [].forEach.call(document.querySelectorAll('#svcs input'), function (i) {
@@ -24,12 +25,17 @@
   // show the deal): gel with removal is ₪110, removal and new gel booked apart are ₪40 + ₪90
   function drawSvc() {
     var s = SERVICES[svc];
+    // Gel removal puts nothing on, so there is no colour to choose; the art service asks which style (22 Oct review)
+    var noShade = svc === 'removal'; $('w-shade').style.visibility = noShade ? 'hidden' : ''; if (noShade && shade) { shade = ''; drawShade(); }
+    $('w-art').style.visibility = svc === 'art' ? '' : 'hidden'; if (svc !== 'art') art = '';
+    [].forEach.call(document.querySelectorAll('#arts .artopt'), function (b) { b.setAttribute('aria-checked', b.dataset.k === art ? 'true' : 'false'); });
     // the heading stays put (one line, nothing below it moves); the chosen service is named beside its price
     // the way shops show a saving (GGg61sdEjeI): the price apart struck through beside hers, and "15% off"
     var sv = s && svc === 'gel-removal' ? (SERVICES.removal.p + SERVICES.gel.p) - s.p : 0;
     $('st-price').style.visibility = s ? 'visible' : 'hidden'; if (s) $('st-price').innerHTML = (sv ? '<s class="was">₪' + (s.p + sv) + '</s>' : '') + '<span class="sym">₪</span>' + s.p + ' <small>' + s.n + ', about ' + s.m + ' minutes</small>';
     $('st-save').style.visibility = sv ? 'visible' : 'hidden'; if (sv) $('st-save').innerHTML = Math.floor(sv * 100 / (s.p + sv)) + '% off';
   }
+  [].forEach.call(document.querySelectorAll('#arts .artopt'), function (b) { b.addEventListener('click', function () { art = b.dataset.k; drawSvc(); update(); check(false); }); });
   chips.forEach(function (c) { c.addEventListener('click', function () { shade = shade === c.dataset.k ? '' : c.dataset.k; drawShade(); update(); }); });
   var today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   $('day').min = today;
@@ -57,6 +63,7 @@
   function update() {
     var s = SERVICES[svc], rows = [];
     if (s) rows.push('<li><span>' + s.n + chg(1, 'service') + '</span><span>₪' + s.p + '</span></li>');
+    if (svc === 'art' && art) rows.push('<li><span>Style' + chg(1, 'style') + '</span><span>' + ARTS[art] + '</span></li>');
     if (shade) rows.push('<li><span>Shade' + chg(1, 'shade') + '</span><span>' + SHADES[shade] + '</span></li>');
     if ($('day').value && time) rows.push('<li><span>' + nice($('day').value) + chg(2, 'day and time') + '</span><span>' + time + '</span></li>');
     $('sum').innerHTML = rows.join('') || '<li><span>Nothing chosen yet</span></li>';
@@ -67,7 +74,7 @@
     setSend();
   }
   // everything needed to send: a service, a day, a time, a name and a phone (no marks, no messages)
-  function valid() { return !!(svc && v('day') && time && v('me') && /\d{9,}/.test(v('ph').replace(/\D/g, ''))); }
+  function valid() { return !!(svc && (svc !== 'art' || art) && v('day') && time && v('me') && /\d{9,}/.test(v('ph').replace(/\D/g, ''))); }
   // the send button tells the truth: grey until it can go, the label says what happens, and it is still
   // pressable when grey so the messages show what is missing. Steps 1 and 2 keep their "Continue" buttons.
   var phase = '';
@@ -76,18 +83,19 @@
     var b = $('send'), s = SERVICES[svc], l = b.firstElementChild, grey = false, html = '';
     if (step === 2) html = 'Continue to your details';
     else if (phase === 'open') { html = 'Opening WhatsApp'; grey = true; }
-    else if (phase === 'done') { html = CHECK; }
+    else if (phase === 'done') { html = CHECK + ' Opened in WhatsApp'; }
     else if (valid()) { var d = new Date($('day').value + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short' }); html = 'Send ' + d + ' ' + time + ' on WhatsApp · ₪' + s.p; }
     else { html = 'Send on WhatsApp' + (s ? ' · ₪' + s.p : ''); grey = true; }
     if (l.dataset.h !== html) { l.innerHTML = html; l.dataset.h = html; }
     b.setAttribute('aria-disabled', grey ? 'true' : 'false'); b.classList.toggle('is-done', phase === 'done');
-    if (phase === 'done') b.setAttribute('aria-label', 'Booking written out'); else b.removeAttribute('aria-label');
+    b.removeAttribute('aria-label');
   }
   function v(id) { return $(id).value.trim(); }
   function mark(id, msg) { var w = $('w-' + id); if (w) w.classList.toggle('bad', !!msg); $('e-' + id).textContent = msg || ''; }
   function check(show, upto) {
     var ok = true, e; upto = upto || 3;
     e = svc ? '' : 'Choose what you would like'; if (e) ok = false; if (show || !e) mark('svc', e);
+    e = svc === 'art' && !art ? 'Choose French, gradient or nail art' : ''; if (e) ok = false; if (show || !e) mark('art', e);
     if (upto < 2) return ok;
     e = v('day') ? '' : 'Choose a day'; if (e) ok = false; if (show || !e) mark('day', e);
     e = time ? '' : 'Choose a time'; if (e) ok = false; if (show || !e) mark('time', e);
@@ -112,7 +120,8 @@
     if (step < 3) { if (!check(true, step)) { var bad1 = document.querySelector('.bad .fld, .bad input'); if (bad1) bad1.focus(); return; } go(step + 1, true); return; }
     if (!check(true)) { for (var s1 = 1; s1 <= 3; s1++) if (!check(false, s1)) { check(true, s1); go(s1, true); break; } var bad = document.querySelector('.bad .fld, .bad input'); if (bad) bad.focus(); return; }
     var s = SERVICES[svc], lines = ['Hi Elisheva, I would like to book:', '• ' + s.n + ' (₪' + s.p + ', about ' + s.m + ' minutes)'];
-    if (shade) lines.push('Shade: ' + SHADES[shade]);
+    if (svc === 'art' && art) lines.push('Style: ' + ARTS[art]);
+    if (shade && svc !== 'removal') lines.push('Shade: ' + SHADES[shade]);
     lines.push('When: ' + nice(v('day')) + ' at ' + time);
     if (v('note')) lines.push('Note: ' + v('note'));
     lines.push('Name: ' + v('me') + ', ' + v('ph'));
