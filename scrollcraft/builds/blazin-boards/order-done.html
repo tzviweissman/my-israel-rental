@@ -5,6 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Order placed · Blazin' Boards</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="Your order is with Blazin&#39; Boards.">
 <link rel="icon" href="assets/their-logo-small.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -20,12 +21,12 @@
     <li><a href="boards.html">Every board</a></li>
     <li><a href="order.html">Your order</a></li>
   </ul>
-  <a class="cart" href="order.html" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span>Order</span><b data-count hidden>0</b></a>
+  <a class="cart" href="order.html" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span>Order a board</span><b data-count hidden>0</b></a>
 </nav>
 
 <main class="order">
   <div class="wrap" style="max-width:46rem">
-    <section class="pane" style="text-align:center;padding:clamp(2rem,5vw,3.5rem)">
+    <div class="pane" style="text-align:center;padding:clamp(2rem,5vw,3.5rem)">
       <div style="width:64px;height:64px;border-radius:50%;background:var(--ox-1);display:grid;place-items:center;margin:0 auto"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
       <h1 style="margin-top:1.2rem">Your order is with <em>Blazin' Boards.</em></h1>
       <p class="sub" style="max-width:32rem;margin-inline:auto">We confirm your order with you before the day. You pay us directly, by <span id="pay">the way you chose</span>.</p>
@@ -34,10 +35,20 @@
       <p style="margin-top:1.5rem"><a class="cta" id="track" href="#" target="_blank" rel="noopener">Follow your order</a></p>
       <p class="sub" style="margin-top:1rem">Keep that link: it shows where your order is.</p>
       <p style="margin-top:1.5rem"><a class="back" href="index.html">Back to Blazin' Boards</a></p>
-    </section>
+    </div>
   </div>
 </main>
 
+<footer class="foot2">
+  <p class="foot2__big">Premium meat boards, grilled to perfection.</p>
+  <a class="cta" href="order.html">Order a board</a>
+  <div class="foot2__cols">
+    <nav aria-label="Pages"><b>The site</b><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Your order</a></nav>
+    <div><b>Find us</b><span>Farn 5, Jerusalem</span><span>Orders 48 hours ahead</span><span>Delivery throughout Israel</span></div>
+    <div><b>Pay us by</b><span>Card, Zelle or bank transfer</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+  </div>
+  <p class="foot2__small">Blazin' Boards. Every photograph on this site is our own. Nothing is paid on this site: you pay us directly.</p>
+</footer>
 <script src="site.js"></script>
 <script>
 (function () {

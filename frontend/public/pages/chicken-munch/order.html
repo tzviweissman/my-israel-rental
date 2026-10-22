@@ -2,16 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="site-category" content="food-shop">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Order · Chicken Munch</title>
-<meta name="description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275. Pick your chicken and sauces and send it on WhatsApp.">
+<meta name="description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275 ($85). Pick your chicken and sauces and send it on WhatsApp.">
 <meta property="og:title" content="Order · Chicken Munch">
-<meta property="og:description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275. Pick your chicken and sauces and send it on WhatsApp.">
+<meta property="og:description" content="Order Chicken Munch: Munch boxes from $69, pans from ₪275 ($85). Pick your chicken and sauces and send it on WhatsApp.">
 <meta property="og:image" content="https://myisraelrental.com/pages/chicken-munch/assets/box-dark.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/chicken-munch/site.css?v=mvflpw9o">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700;800&family=Heebo:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/pages/chicken-munch/site.css?v=mvjw1dcb">
 </head>
 <body class="no-js" data-page="order">
 <header class="top" id="top">
@@ -32,8 +33,9 @@
     <div class="wrap">
       <form class="form" id="form" novalidate>
         <div>
+          <ol class="steps" id="steps" aria-label="Order steps"><li class="on" data-mir-key="t-2f05da50-0">Step 1: Your basket</li><li data-mir-key="t-117a3ecd-0">Step 2: When and where</li><li data-mir-key="t-f0729679-0">Step 3: Your details</li></ol>
           <div class="card" id="c-items">
-            <h3 data-mir-key="t-3509ebb6-0">Boxes and pans</h3>
+            <h3 data-mir-key="t-2a4b1a43-0">Your basket</h3>
             <h4 data-mir-key="t-33056ea2-0">Premium chicken boxes</h4>
             <div id="lines-box"></div>
             <h4 data-mir-key="t-fb968f85-0">By the pan</h4>
@@ -41,19 +43,20 @@
             <div class="suggest" id="suggest" hidden><p data-mir-key="t-60e29fc8-0">Add a 9x13 rice? <span>₪75, goes well with a pan</span></p><div class="acts"><button class="btn-line" type="button" id="sug-add">Add rice</button><button class="linkish" type="button" id="sug-no">No thanks</button></div></div>
             <p class="err" id="e-items"></p>
           </div>
-          <div class="card">
-            <h3 data-mir-key="t-65a87dcd-0">Delivery</h3>
+          <div class="card" id="c-2" hidden>
+            <h3 data-mir-key="t-1d9f0a36-0">When and where</h3>
             <p class="deliv" data-mir-key="t-c593cb8e-0">Delivery in central Jerusalem is ₪30 to ₪50, depending on where. We confirm it with you on WhatsApp.</p>
             <div id="w-addr"><label class="f" for="addr" data-mir-key="t-438c5cbe-0">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p></div>
             <div id="w-when"><label class="f" for="when" data-mir-key="t-03e4ad07-0">Which day</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p></div>
           </div>
-          <div class="card">
+          <div class="card" id="c-3" hidden>
             <h3 data-mir-key="t-97d2355f-0">Your details</h3>
             <div id="w-me"><label class="f" for="me" data-mir-key="t-5c263b1a-0">Your name</label><input class="fld" id="me" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
             <div id="w-ph"><label class="f" for="ph" data-mir-key="t-d93db2df-0">Your phone</label><input class="fld" id="ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
             <label class="f" for="note" data-mir-key="t-2629cf27-0">Anything else</label>
             <textarea class="fld" id="note" maxlength="500" placeholder="For example, different chicken in each box"></textarea>
           </div>
+          <div class="stepnav"><button class="btn-line back" type="button" id="back" hidden>Back</button></div>
         </div>
         <aside class="card sum" aria-live="polite">
           <h3 data-mir-key="t-1b40ab81-0">So far</h3>
@@ -68,7 +71,7 @@
   <section class="close" aria-label="Chicken Munch">
     <div class="wrap">
       <p data-mir-key="t-829a1ef6-0">WhatsApp or call <a href="https://wa.me/972553316975" target="_blank" rel="noopener">055-331-6975</a><br>From the US, call (no WhatsApp) <a href="tel:+19294748871">929-474-8871</a><br>Email <a href="mailto:chickenmunch26@gmail.com">chickenmunch26@gmail.com</a></p>
-      <a class="btn" href="/business/chicken-munch/order" data-mir-key="t-0d9d8eec-0">Order now <span class="arw" aria-hidden="true">→</span></a>
+      <a class="btn" href="/business/chicken-munch/order" data-mir-key="t-6a348caa-1">Order now <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
     </div>
     <p class="giant" aria-hidden="true"><span class="r" data-mir-key="t-885f27c5-0">Chicken</span> <span class="g" data-mir-key="t-294781d2-0">Munch</span></p>
   </section>
@@ -76,11 +79,11 @@
 <footer class="foot"><nav aria-label="Pages"><a href="/business/chicken-munch" data-mir-key="t-fc43c37b-1">Home</a> · <a href="/business/chicken-munch/menu" data-mir-key="t-97f12060-1">Menu</a> · <a href="/business/chicken-munch/order" data-mir-key="t-af6f86d3-1">Order</a> · <a href="/business/chicken-munch/contact" data-mir-key="t-e3e78835-1">Contact</a></nav>Chicken Munch, Jerusalem · on <a href="/" data-mir-key="t-0384dae7-0">MyIsraelRental</a>, free to list, no commission</footer>
 
 <div class="bar" id="bar" aria-hidden="true">
-  <p class="p" data-mir-key="t-e952086c-0"><b>From $69</b>Boxes, or pans from ₪275</p>
-  <a class="btn" href="/business/chicken-munch/order" tabindex="-1" data-mir-key="t-6a348caa-1">Order now</a>
+  <p class="p" data-mir-key="t-697e03d0-0"><b>From $69</b>Boxes, or pans from ₪275 ($85)</p>
+  <a class="btn" href="/business/chicken-munch/order" tabindex="-1" data-mir-key="t-6a348caa-2">Order now</a>
 </div>
 
-<script src="/pages/chicken-munch/site.js?v=mvflpw9o"></script>
+<script src="/pages/chicken-munch/site.js?v=mvjw1dcb"></script>
 <script>
 (function () {
   // ── the order: saved to his shop first (a tracking link), then WhatsApp.
@@ -95,8 +98,8 @@
     mini: ['Mini Munch Box', 69, 'USD', 'cmminibox001', 'box', 'Feeds 3 to 4'],
     grand: ['Grand Munch Box', 140, 'USD', 'cmgrandbox01', 'box', 'Feeds 8 to 10'],
     supreme: ['Supreme Munch Box', 220, 'USD', 'cmsuprbox001', 'box', 'Feeds 16'],
-    pan913: ['9x13 pan', 275, 'ILS', 'cm913tray001', 'pan', 'Feeds 6 to 8'],
-    roaster: ['Roaster', 650, 'ILS', 'cmgastro0001', 'pan', 'Feeds 18 to 20'],
+    pan913: ['9x13 pan', 275, 'ILS', 'cm913tray001', 'pan', 'Feeds 6 to 8', 85],  // the owner's dollar price too (21 Oct 2026)
+    roaster: ['Roaster', 650, 'ILS', 'cmgastro0001', 'pan', 'Feeds 18 to 20', 210],
     rice: ['9x13 rice', 75, 'ILS', 'cm913rice001', 'pan', '']
   };
   // [kinds of chicken allowed, sauces allowed]; 0 = none to choose
@@ -112,6 +115,8 @@
   if (want && ITEMS[want] && !q[want]) q[want] = 1;
   if (want) history.replaceState(null, '', location.pathname);
   function money(n, cur) { return (cur === 'USD' ? '$' : '₪') + n.toLocaleString('en-US'); }
+  // a pan shows its dollar price beside the shekel one: ₪275 ($85)
+  function priceOf(k, n) { var it = ITEMS[k]; return money(n * it[1], it[2]) + (it[6] ? ' ($' + (n * it[6]).toLocaleString('en-US') + ')' : ''); }
 
   function chipSet(k, list, max, kind) {
     var single = max === 1, name = k + '-' + kind;
@@ -122,8 +127,8 @@
   Object.keys(ITEMS).forEach(function (k) {
     var it = ITEMS[k], c = CHOICE[k], d = document.createElement('div');
     d.className = 'line'; d.dataset.k = k;
-    d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + money(it[1], it[2]) + (it[5] ? ' · ' + it[5] : '') + '</div>' + (ALLOWS[k] ? '<div class="allows' + (CHOICE[k][0] === 1 ? ' one' : '') + '">' + ALLOWS[k] + '</div>' : '') + '</div>' +
-      '<div class="step"><button type="button" data-d="-1" aria-label="One fewer ' + it[0] + '">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + it[0] + '">+</button></div>';
+    d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + priceOf(k, 1) + (it[5] ? ' · ' + it[5] : '') + '</div>' + (ALLOWS[k] ? '<div class="allows' + (CHOICE[k][0] === 1 ? ' one' : '') + '">' + ALLOWS[k] + '</div>' : '') + '</div>' +
+      '<div class="ctl"><div class="step"><button type="button" data-d="-1" aria-label="One fewer ' + it[0] + '">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + it[0] + '">+</button></div><button type="button" class="rm" data-rm="1" aria-label="Remove ' + it[0] + ' from the basket" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v6M14 10v6"/></svg></button></div>';
     var host = document.getElementById(it[4] === 'box' ? 'lines-box' : 'lines-pan');
     host.appendChild(d);
     if (c[0]) {
@@ -135,6 +140,7 @@
       host.appendChild(o);
     }
   });
+  document.querySelector('.line .step button[data-d="1"]').id = 'st-add';
   function picked(k, kind) { return [].map.call(document.querySelectorAll('.opts[data-k="' + k + '"] [data-kind="' + kind + '"] input:checked'), function (i) { return i.value; }); }
   // a set at its limit greys out the rest
   [].forEach.call(document.querySelectorAll('.opts .chips'), function (set) {
@@ -146,39 +152,41 @@
     });
   });
   function totals() { var t = { USD: 0, ILS: 0 }; for (var k in q) t[ITEMS[k][2]] += q[k] * ITEMS[k][1]; return t; }
-  function totalText() { var t = totals(), p = []; if (t.USD) p.push(money(t.USD, 'USD')); if (t.ILS) p.push(money(t.ILS, 'ILS')); return p.join(' + ') || '0'; }
+  function totalText() { var t = totals(), p = []; if (t.USD) p.push(money(t.USD, 'USD')); if (t.ILS) p.push(money(t.ILS, 'ILS')); var s = p.join(' + ') || '0';
+    if (t.ILS) { var d = 0; for (var k in q) if (q[k]) d += q[k] * (ITEMS[k][6] || (ITEMS[k][2] === 'USD' ? ITEMS[k][1] : 0)); s += ' (or $' + d.toLocaleString('en-US') + ' all in dollars)'; }
+    return s; }
   var send = document.getElementById('send'), noRice = false;
   document.getElementById('sug-add').addEventListener('click', function () { q.rice = 1; update(); check(false); });
   document.getElementById('sug-no').addEventListener('click', function () { noRice = true; update(); });
   function update() {
-    [].forEach.call(document.querySelectorAll('.line'), function (l) { l.querySelector('output').textContent = q[l.dataset.k]; });
+    [].forEach.call(document.querySelectorAll('.line'), function (l) { l.querySelector('output').textContent = q[l.dataset.k]; l.querySelector('.rm').hidden = !q[l.dataset.k]; });
     [].forEach.call(document.querySelectorAll('.opts'), function (o) { o.hidden = !q[o.dataset.k]; });
-    var html = ''; for (var k in q) if (q[k]) html += '<li><span>' + q[k] + ' × ' + ITEMS[k][0] + '</span><span>' + money(q[k] * ITEMS[k][1], ITEMS[k][2]) + '</span></li>';
+    var html = ''; for (var k in q) if (q[k]) html += '<li><span>' + q[k] + ' × ' + ITEMS[k][0] + '</span><span>' + priceOf(k, q[k]) + '</span></li>';
     if (html) html += '<li><span>' + DELIVERY + '</span><span>by where</span></li>';
     document.getElementById('sum-list').innerHTML = html || '<li><span>Nothing yet</span></li>';
     document.getElementById('total').textContent = totalText() !== '0' ? totalText() + ' + delivery' : '0';
-    send.firstElementChild.textContent = totalText() !== '0' ? 'Send order on WhatsApp, ' + totalText() : 'Send order on WhatsApp';
+    send.firstElementChild.textContent = step < 3 ? NEXT[step] : totalText() !== '0' ? 'Send order on WhatsApp, ' + totalText() : 'Send order on WhatsApp';
     var b = {}; for (var k2 in q) if (q[k2]) b[k2] = q[k2]; window.cmBasket.set(b);
     // one real add-on, only with a pan, and only until it is added or turned down
     document.getElementById('suggest').hidden = !((q.pan913 || q.roaster) && !q.rice && !noRice);
   }
   [].forEach.call(document.querySelectorAll('.line'), function (l) {
-    l.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; q[l.dataset.k] = Math.max(0, Math.min(20, q[l.dataset.k] + (+b.dataset.d))); update(); check(false); });
+    l.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; q[l.dataset.k] = b.dataset.rm ? 0 : Math.max(0, Math.min(20, q[l.dataset.k] + (+b.dataset.d))); update(); check(false); });
   });
   function v(id) { return document.getElementById(id).value.trim(); }
   function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }
-  function check(show) {
-    var ok = true, e, t = totals();
-    e = (t.USD || t.ILS) ? '' : 'Add a box or a pan'; if (e) ok = false; if (show || !e) mark('items', e);
+  function check(show, only) {
+    var ok = true, e, t = totals(); function on(n) { return !only || only === n; }
+    if (on(1)) { e = (t.USD || t.ILS) ? '' : 'Add a box or a pan'; if (e) ok = false; if (show || !e) mark('items', e); }
     Object.keys(CHOICE).forEach(function (k) {
-      if (!CHOICE[k][0]) return;
+      if (!CHOICE[k][0] || !on(1)) return;
       e = q[k] && !picked(k, 'kind').length ? (CHOICE[k][0] === 1 ? 'Pick the kind of chicken for the ' : 'Pick your kinds of chicken for the ') + ITEMS[k][0] : '';
       if (e) ok = false; if (show || !e) mark('o-' + k, e);
     });
-    e = v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
-    e = v('when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e);
-    e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
-    e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);
+    if (on(2)) { e = v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
+    e = v('when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e); }
+    if (on(3)) { e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
+    e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e); }
     return ok;
   }
   ['addr', 'when', 'me', 'ph'].forEach(function (id) { document.getElementById(id).addEventListener('input', function () { check(false); }); });
@@ -189,6 +197,17 @@
     if (sauces.length) bits.push('Sauces: ' + sauces.join(', '));
     return bits;
   }
+  var step = 1, NEXT = ['', 'Continue to delivery', 'Continue to your details'];
+  function go(n, push) {
+    step = n;
+    [1, 2, 3].forEach(function (i) { document.getElementById(i === 1 ? 'c-items' : 'c-' + i).hidden = i !== n; });
+    [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 === n ? 'on' : i + 1 < n ? 'done' : ''; if (i + 1 === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
+    document.getElementById('back').hidden = n === 1;
+    update();
+    if (push) { history.pushState({ s: n }, '', '#order-' + n); var h = document.querySelector('.steps'); if (h) h.scrollIntoView({ block: 'start', behavior: 'smooth' }); }
+  }
+  addEventListener('popstate', function () { var m = /order-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
+  document.getElementById('back').addEventListener('click', function () { history.back(); });
   var sending = false;
   function save(notes) {
     var t = totals(); if (t.USD && t.ILS) return Promise.resolve(null);
@@ -201,10 +220,11 @@
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
     if (sending) return;
+    if (step < 3) { if (check(true, step)) go(step + 1, true); else { var b1 = document.querySelector('.bad .fld, .bad input, .bad button'); if (b1) b1.focus(); } return; }
     if (!check(true)) { var bad = document.querySelector('.bad .fld, .bad input, .bad button'); if (bad) bad.focus(); return; }
     var lines = ['Hi Chicken Munch, I would like to order:'], notesOut = [];
     for (var k in q) if (q[k]) {
-      lines.push('• ' + q[k] + ' × ' + ITEMS[k][0] + ' (' + money(q[k] * ITEMS[k][1], ITEMS[k][2]) + ')');
+      lines.push('• ' + q[k] + ' × ' + ITEMS[k][0] + ' (' + priceOf(k, q[k]) + ')');
       described(k).forEach(function (s) { lines.push('   ' + s); });
       if (described(k).length) notesOut.push(ITEMS[k][0] + ': ' + described(k).join('; '));
     }
@@ -225,7 +245,7 @@
       sending = false; send.removeAttribute('aria-busy'); send.firstElementChild.textContent = label;
     });
   });
-  update();
+  go(1, false);
 })();
 </script>
 </body>

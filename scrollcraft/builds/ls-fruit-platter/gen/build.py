@@ -10,9 +10,10 @@ kit.KINDS['phone'] = ('Call', 'tel:+{d}', False)  # her logo shows a phone icon 
 K = 'Kosher, hechsher: <span lang="he" dir="rtl">בד"ץ העדה החרדית או שארית</span>'
 SIZES = [('small', 'Small', 300), ('medium', 'Medium', 400), ('large', 'Large', 500), ('xl', 'Extra large', 850)]
 SHORT = {'small': 'S', 'medium': 'M', 'large': 'L', 'xl': 'XL'}
-NOPH = 'medium'  # no photo of the Medium platter is shown (see gen/prep.py): its tile is plain and says so
+NOPH = None  # every size has its photo since 22 Oct 2026 (the Medium's stray engraving removed, see gen/prep.py)
 ALT = {
     'small': 'The Small platter: a round board with watermelon, red grapes, dates and pineapple',
+    'medium': 'The Medium platter: a wooden board with a pineapple crown, dark grapes, lychees, watermelon, melon and pomegranate',
     'large': 'The Large platter: a long wooden board of watermelon, grapes, lychees, pomegranate and melon',
     'xl': 'The Extra large platter: a very long board in rows of green grapes, watermelon, dates, pomegranate, dark grapes and kiwi',
 }
@@ -41,6 +42,13 @@ SITE = kit.Site(
     place='Jerusalem', close_title='Order a platter', close_extra='Ls Fruit Platter',
     mark_html='<img src="assets/mark.webp" width="38" height="38" alt="">')
 
+_w = SITE.write
+def _write(page, title, desc, og, body, tail=''):
+    _h = SITE.head
+    SITE.head = lambda *a, **k: _h(*a, **k).replace('<meta name="description"', '<meta name="site-category" content="food-shop">' + chr(10) + '<meta name="description"', 1)
+    try: _w(page, title, desc, og, body, tail)
+    finally: SITE.head = _h
+SITE.write = _write
 # the closing band's arrow is drawn (Open Sans has no arrow glyph)
 _orig_footer = SITE.footer
 SITE.footer = lambda: _orig_footer().replace('<span class="arw" aria-hidden="true">→</span>', ARROW.replace('class="go"', 'class="go arw"'))
@@ -77,27 +85,35 @@ OPENING = f'''  <section class="film" aria-label="Fruit platters">
   </section>
   <div class="kosher"><div class="wrap">{CHECK}<span>{K}</span></div></div>
 '''
-rows = ''.join(
-    f'''      <a class="row rev" href="shop.html?size={k}#sizes"><span class="th">{thumb_img(i, k, 520, 520)}</span><span class="nm">{n}</span><span class="dots" aria-hidden="true"></span><span class="pr">{kit.price(p)}</span>{ARROW}</a>
-''' for i, (k, n, p) in enumerate(SIZES, 1))
-ORDER = '<a class="btn btn-light" href="shop.html#sizes"><span>Order a platter</span></a>'
-def world(cls, hid, h2, line, img, mob, alt, w, h, mw, mh, shut=''):
-    return f'''  <section class="world {cls}" aria-labelledby="{hid}">
-    <picture><source media="(max-width: 760px)" srcset="assets/{mob}" width="{mw}" height="{mh}"><img class="{shut}" src="assets/{img}" width="{w}" height="{h}" alt="{alt}" loading="lazy"></picture>
-    <div class="world-copy"><h2 id="{hid}" class="rev">{h2}</h2><p class="rev">{line}</p>{ORDER}</div>
-  </section>
-'''
-SECTIONS = world('w-love', 'h-love', 'Made with love', 'Fresh, beautiful fruit platters for your home and events.',
-                 'w-large.webp', 'w-large-m.webp', ALT['large'], 2000, 1250, 900, 931, 'shut') + f'''  <section class="sec rest" id="sizes" aria-labelledby="h-sizes">
+ROOM = {'small': '#F8D4D0', 'medium': '#FCE2B4', 'large': '#EAD6E4', 'xl': '#DBE8BF'}  # one colour room per size, from its own fruit
+def pcard(i, k, n, p):
+    img = f'<img src="assets/card-{i}.webp" width="1000" height="800" alt="{ALT[k]}" loading="lazy">'
+    ind = f'<span class="n">{i}</span>'
+    return f"""        <article class="pc" style="--room:{ROOM[k]}">
+          <div class="pc-ph">{img}</div>
+          <div class="pc-b"><h3>{n}</h3><p class="pc-pr">{kit.price(p)}</p>
+          <a class="btn" href="shop.html?size={k}&amp;add=1#order" aria-label="Add a {n} platter, ₪{p}"><span>Add, {kit.price(p)}</span></a></div>
+        </article>
+"""
+cards = ''.join(pcard(i, k, n, p) for i, (k, n, p) in enumerate(SIZES, 1))
+SECTIONS = f"""  <section class="sec rest" id="sizes" aria-labelledby="h-sizes">
     <div class="wrap">
       <div class="rest-head"><h2 id="h-sizes" class="rev">Four <span class="hl">sizes{STROKE}</span></h2>
-      <a class="btn" href="shop.html#sizes"><span>Order a platter</span></a></div>
-      <div class="rows">
-{rows}      </div>
+      <p class="rest-note rev">For your home and events. Pick one, add it, and your order opens in WhatsApp.</p></div>
+      <div class="pcs">
+{cards}      </div>
     </div>
   </section>
-''' + world('w-xl', 'h-xl', 'Extra large', f'Rows of dark grapes, watermelon, melon, dates, pomegranate, kiwi and green grapes. {kit.price(850)}.',
-               'w-xl.webp', 'w-xl-m.webp', ALT['xl'], 2000, 1000, 700, 1353, 'shut') + f'''  <section class="sec dark" id="how" aria-labelledby="h-how">
+  <section class="sec story" id="story" aria-labelledby="h-love">
+    <div class="wrap story-g">
+      <picture class="story-ph"><source media="(max-width: 760px)" srcset="assets/w-large-m.webp" width="900" height="931"><img class="shut" src="assets/w-large.webp" width="2000" height="1250" alt="{ALT['large']}" loading="lazy"></picture>
+      <div class="story-t"><img class="story-mark" src="assets/mark.webp" width="64" height="64" alt="">
+        <h2 id="h-love" class="rev">Made with love</h2>
+        <p class="rev">Fresh, beautiful fruit platters for your home and events, in Jerusalem.</p>
+        <a class="btn" href="shop.html#sizes"><span>Order a platter</span></a></div>
+    </div>
+  </section>
+  <section class="sec" id="how" aria-labelledby="h-how">
     <div class="wrap">
       <h2 id="h-how" class="rev">Order in three steps</h2>
       <ol class="how">
@@ -105,11 +121,16 @@ SECTIONS = world('w-love', 'h-love', 'Made with love', 'Fresh, beautiful fruit p
         <li class="rev"><span class="n" aria-hidden="true">2</span><h3>Say when and where</h3><p>The day, the time and the address.</p></li>
         <li class="rev"><span class="n" aria-hidden="true">3</span><h3>Add your details</h3><p>Your name and phone. Your order opens in WhatsApp, ready to send.</p></li>
       </ol>
-      <p class="how-cta"><a class="btn" href="shop.html#sizes"><span>Order a platter</span></a></p>
     </div>
   </section>
-''' + world('w-small', 'h-order', 'Order a platter', f'From {kit.price(300)}. Your order opens in WhatsApp, ready to send.',
-               'w-small.webp', 'w-small-m.webp', ALT['small'], 1800, 1125, 900, 1200)
+  <section class="sec trust" aria-label="Good to know">
+    <div class="wrap trust-g">
+      <div>{CHECK}<h3>Kosher</h3><p>{K}</p></div>
+      <div>{LEAF}<h3>Where</h3><p>Jerusalem</p></div>
+      <div>{CHAT}<h3>Paying</h3><p>Cash, Zelle or an Israeli bank transfer.</p></div>
+    </div>
+  </section>
+"""
 HERO_JS = '''<script>
 (function () {
   // play the burst once, then hold its last frame; with motion switched off, only the held frame shows
@@ -130,7 +151,7 @@ SITE.write('index', 'Ls Fruit Platter · Fruit platters in Jerusalem',
 # ───────────────────────── Shop
 IMGS = ''.join(stage_img(i, k) for i, (k, _, _) in enumerate(SIZES, 1))
 PICKS = ''.join(
-    f'''          <button type="button" data-k="{k}" aria-pressed="{"true" if i == 1 else "false"}">{thumb_img(i, k, 520, 520)}<span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>{n}</b><i>{kit.price(p)}</i></span></button>
+    f'''          <button type="button" data-k="{k}" style="--c:{ROOM[k]}" aria-pressed="{"true" if i == 1 else "false"}">{thumb_img(i, k, 520, 520)}<span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>{n}</b><i>{kit.price(p)}</i></span></button>
 ''' for i, (k, n, p) in enumerate(SIZES, 1))
 SHOP = f'''  <form id="form" novalidate>
   <section class="stage" id="sizes" aria-labelledby="h-shop">

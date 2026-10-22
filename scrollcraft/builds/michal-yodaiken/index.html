@@ -8,6 +8,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="site-category" content="trainer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Michal Yodaiken · Personal training for women in Jerusalem</title>
 <meta name="description" content="Personal training for women that comes to you, in Jerusalem: at your home, at your gym, online, or at my private gym. ₪60 for a 30-minute session. Training in English.">
@@ -92,7 +93,7 @@
   .hero .lede { margin: var(--sc-4) 0 0; max-width: 30rem; font-size: var(--sc-t-lg); line-height: 1.45; }
   .hero .proof { color: var(--sc-ink); }
   .hero .proof li:first-child { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.3rem; }
-  .hero .proof li:first-child b { font: 400 3rem/1 var(--sc-font-display); color: var(--sc-accent); }
+  .hero .proof li:first-child b { font: 400 3rem/1 var(--sc-font-display); color: var(--sc-ink); }
   .hero .act { margin-top: var(--sc-6); display: flex; flex-direction: row-reverse; flex-wrap: wrap; align-items: center; gap: var(--sc-5); text-align: left; }
 
   /* ---------- sections change worlds (rule 3t, Tzvi 21 Oct 2026) --------
@@ -104,13 +105,13 @@
   .pic .in { padding: var(--sc-6) var(--sc-gutter) clamp(1.5rem, 7vh, 4.5rem); }
   .pic.shade-b::after { content: ""; position: absolute; inset: 0; z-index: 1; background: linear-gradient(0deg, rgb(0 0 0 / 0.82) 0%, rgb(0 0 0 / 0.5) 30%, rgb(0 0 0 / 0) 62%), linear-gradient(90deg, rgb(0 0 0 / 0.6) 0%, rgb(0 0 0 / 0) 55%); }
   .pic .tag { display: inline-block; margin-bottom: var(--sc-4); font: 700 var(--sc-t-sm)/1 var(--sc-font-text); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sc-accent); }
-  .pic .price { margin: var(--sc-3) 0 0; font: 400 clamp(2.4rem, 1.4rem + 2.4vw, 3.6rem)/1 var(--sc-font-display); color: var(--sc-accent); }
+  .pic .price { margin: var(--sc-3) 0 0; font: 400 clamp(2.4rem, 1.4rem + 2.4vw, 3.6rem)/1 var(--sc-font-display); color: var(--sc-ink); }
   .pic .price small { font: 500 var(--sc-t-base)/1 var(--sc-font-text); color: #fff; margin-left: 0.5rem; }
   .gym .photo { object-position: 70% 60%; }
-  .close .photo { object-position: 60% 62%; }
+  .close .photo { object-position: 90% 75%; }
   .close { align-items: start; }
   .close .in { padding-top: clamp(2rem, 9vh, 5rem); }
-  .close.shade-b::after { background: linear-gradient(180deg, rgb(0 0 0 / 0.8) 0%, rgb(0 0 0 / 0.5) 38%, rgb(0 0 0 / 0) 66%); }
+  .close.shade-b::after { background: linear-gradient(180deg, rgb(0 0 0 / 0.86) 0%, rgb(0 0 0 / 0.74) 50%, rgb(0 0 0 / 0.5) 74%, rgb(0 0 0 / 0.2) 100%); }
 
   /* white rest: the five ways to train, numbered rows, hairlines */
   .paper { background: #fff; color: #0B0A0C; padding: clamp(2rem, 6vh, 4rem) var(--sc-gutter); }
@@ -153,6 +154,36 @@
   .close .act { margin-top: var(--sc-4); display: flex; flex-wrap: wrap; align-items: center; gap: var(--sc-5); }
   .close .alt { margin: var(--sc-3) 0 0; color: #fff; }
   .close .alt a { color: var(--sc-accent); font-weight: 700; }
+
+  /* the booking request (page rules 3k): saved to MyIsraelRental, then WhatsApp */
+  .reqsec { background: var(--sc-canvas); padding: var(--sc-7) var(--sc-gutter); }
+  .reqsec .wrap { max-width: 80rem; margin: 0 auto; }
+  @media (min-width: 900px) { .reqsec .wrap { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: var(--sc-7); align-items: center; } .reqsec .req { margin-top: 0; } }
+  .reqsec .sub { margin: var(--sc-3) 0 0; color: var(--sc-ink-soft); }
+  .req { margin-top: var(--sc-5); max-width: 34rem; display: grid; gap: var(--sc-3); }
+  .req { grid-template-columns: 1fr 1fr; align-items: start; }
+  .req .full { grid-column: 1 / -1; }
+  .req .act { align-self: end; }
+  .req .opt .box { min-height: 40px; }
+  .req .lab { display: block; margin-bottom: 0.4rem; font: 600 var(--sc-t-sm)/1.2 var(--sc-font-text); color: #fff; }
+  .req .opts { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+  .req .opt { position: relative; margin: 0; }
+  .req .opt input { position: absolute; opacity: 0; inset: 0; width: 100%; height: 100%; min-height: 0; margin: 0; cursor: pointer; }
+  .req .opt .box { display: inline-flex; align-items: center; min-height: 44px; padding: 0 0.95rem; border-radius: 4px; border: 1.5px solid rgb(255 255 255 / 0.45); background: rgb(11 10 12 / 0.72); color: #fff; font: 600 var(--sc-t-sm)/1 var(--sc-font-text); transition: background 160ms, color 160ms, border-color 160ms; }
+  .req .opt:hover .box { border-color: var(--sc-accent); }
+  .req .opt input:checked + .box { background: var(--sc-accent); border-color: var(--sc-accent); color: var(--sc-accent-ink); }
+  .req .opt input:focus-visible + .box { outline: 3px solid #fff; outline-offset: 2px; }
+  .req .bad .box { border-color: var(--sc-accent); }
+  .req .hint { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  .req label { display: block; margin-bottom: 0.3rem; font: 600 var(--sc-t-sm)/1.2 var(--sc-font-text); color: #fff; }
+  .req input, .req select { width: 100%; min-height: 48px; padding: 0 0.85rem; border-radius: 4px; border: 1.5px solid rgb(255 255 255 / 0.45); background: rgb(11 10 12 / 0.72); color: #fff; font: 500 var(--sc-t-base)/1.2 var(--sc-font-text); color-scheme: dark; }
+  .req input:focus-visible, .req select:focus-visible { outline: 3px solid #fff; outline-offset: 2px; }
+  .req .bad input[type="text"], .req .bad input:not([type="radio"]) { border-color: var(--sc-accent); }
+  .req .err { display: block; min-height: 1.1em; margin-top: 0.25rem; color: #FF8FC4; font: 600 var(--sc-t-xs)/1.2 var(--sc-font-text); }
+  .req .act { margin-top: var(--sc-2); display: block; }
+  .req .btn[aria-busy="true"] { opacity: 0.7; pointer-events: none; }
+  .req .fine { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  @media (max-width: 560px) { .req { grid-template-columns: 1fr; } }
 
   /* the footer: a last line, the button, columns, contact */
   .foot { background: #000; border-top: 2px solid var(--sc-accent); padding: clamp(3.5rem, 10vh, 6rem) var(--sc-gutter) calc(var(--sc-6) + var(--bar-pad, 0px)); color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
@@ -220,9 +251,54 @@
     .hero .lede { font-size: var(--sc-t-base); margin-top: var(--sc-3); }
     .hero .act { margin-top: var(--sc-4); gap: var(--sc-3); }
   }
+  /* the number never breaks across lines; on a phone the bar steps away at the footer, whose last line says the same words */
+  .nb { white-space: nowrap; }
+  @media (max-width: 860px) {
+    .bar.is-foot { transform: translateY(110%); }
+    .close .photo { object-position: 88% 80%; }
+  }
   /* the narrowest phones: the bar's button drops its arrow to keep the price in view */
   @media (max-width: 380px) { .bar .btn svg { display: none; } .bar { padding-inline: 12px; } .clock b { min-width: 4.4ch; } }
   @media (prefers-reduced-motion: reduce) { .btn, .btn::before, .btn svg, .bar { transition: none; } }
+
+  /* CATEGORY trainer (rule 3t, 22 Oct 2026; after The Performance Lab, Nick Ho and Reel Motion): black and white alternate, one accent,
+     the offer as cards with a price each, side by side; the numbers on black; a short FAQ. */
+  .offers { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(.8rem, 1.6vw, 1.4rem); }
+  .paper .wrap:has(.offers) { grid-template-columns: 1fr; row-gap: var(--sc-5); }
+  .paper .wrap:has(.offers) .head { grid-template-columns: 1fr auto; align-items: end; justify-items: stretch; }
+  .offers li { display: flex; flex-direction: column; border: 1px solid #0B0A0C; background: #fff; }
+  .offers img { width: 100%; height: clamp(90px, 17svh, 230px); object-fit: cover; }
+  .offers .ob { padding: 1.1rem; display: flex; flex-direction: column; gap: .5rem; flex: 1; }
+  .offers .n, .group .n { font: 700 var(--sc-t-sm)/1 var(--sc-font-text); letter-spacing: 0.14em; color: #6B6470; }
+  .offers h3, .group h3 { margin: 0; font-size: clamp(1.5rem, 1.1rem + 1vw, 2.1rem); line-height: 1; }
+  .offers p, .group p { margin: 0; font: 400 var(--sc-t-sm)/1.45 var(--sc-font-text); color: #4A444F; text-transform: none; letter-spacing: 0; }
+  .offers .amt, .group .amt { margin-top: auto; padding-top: .8rem; border-top: 1px solid #D9D5DB; font: 400 clamp(1.7rem, 1.2rem + 1vw, 2.3rem)/1 var(--sc-font-display); color: #0B0A0C; }
+  .offers .amt.ask, .group .amt.ask { font: 700 var(--sc-t-sm)/1.3 var(--sc-font-text); color: #4A444F; }
+  .offers .amt small, .group .amt small { display: block; margin-top: .3rem; font: 500 var(--sc-t-sm)/1.3 var(--sc-font-text); color: #4A444F; }
+  .group { display: grid; grid-template-columns: 2.4rem auto 1fr auto; gap: var(--sc-4); align-items: baseline; padding: 1rem 0; border-top: 1px solid #0B0A0C; border-bottom: 1px solid #D9D5DB; }
+  .group .amt { margin: 0; padding: 0; border: 0; }
+  @media (max-width: 1000px) { .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .offers { grid-template-columns: 1fr; } .group { grid-template-columns: 2.4rem 1fr; } .group p, .group .amt { grid-column: 2; } .paper .wrap:has(.offers) .head { grid-template-columns: 1fr; } }
+  @media (max-height: 760px) and (min-width: 1001px) { #ways.paper { padding-block: 1rem; } #ways .wrap { row-gap: .8rem; } .offers .ob { padding: .7rem; gap: .3rem; } .offers p { line-height: 1.35; } .offers .amt { padding-top: .5rem; } .offers img { height: 13svh; } .group { padding: .6rem 0; } #ways .big { font-size: 3rem; } }
+  .proof-blk { background: #000; padding: clamp(3.5rem, 10vh, 7rem) var(--sc-gutter); }
+  .proof-blk .wrap { max-width: 80rem; margin: 0 auto; }
+  .stats { margin: clamp(1.5rem, 5vh, 3rem) 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #3A353D; }
+  .stats > div { padding: 1.4rem 1rem 0 0; border-right: 1px solid #3A353D; margin-right: 1rem; }
+  .stats > div:last-child { border-right: 0; margin-right: 0; }
+  .stats dt { color: var(--sc-ink-soft); font-size: var(--sc-t-sm); letter-spacing: 0.1em; text-transform: uppercase; }
+  .stats dd { margin: .5rem 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-base); }
+  .stats b { display: block; color: #fff; font: 400 clamp(3rem, 1rem + 6vw, 7rem)/0.95 var(--sc-font-display); text-transform: uppercase; }
+  .proof-blk .wa { margin: clamp(1.5rem, 4vh, 2.5rem) 0 0; color: var(--sc-ink-soft); }
+  .proof-blk .wa a { color: var(--sc-accent); font-weight: 700; }
+  @media (max-width: 760px) { .stats { grid-template-columns: 1fr 1fr; } .stats > div:nth-child(2) { border-right: 0; margin-right: 0; } .stats > div:nth-child(n+3) { margin-top: 1.4rem; border-top: 1px solid #3A353D; } }
+  .faq .qa { border-top: 1px solid #0B0A0C; }
+  .faq details { border-bottom: 1px solid #D9D5DB; }
+  .faq summary { cursor: pointer; padding: 1rem 0; min-height: 44px; font: 700 var(--sc-t-base)/1.3 var(--sc-font-text); list-style: none; display: flex; justify-content: space-between; gap: 1rem; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; font: 400 1.6rem/1 var(--sc-font-display); }
+  .faq details[open] summary::after { content: "\2212"; }
+  .faq details p { margin: 0 0 1rem; max-width: 40rem; color: #4A444F; line-height: 1.5; }
+  .faq .wrap { align-items: start; }
 </style>
 </head>
 <body>
@@ -230,7 +306,7 @@
 <header class="bar" id="bar">
   <a class="who" href="#top">Michal Yodaiken <span>· Let's workout</span></a>
   <div class="clock" aria-hidden="true"><b id="clock">00:00</b><span>of a 30-minute session</span><span class="tag">₪60 · 30 min</span><span class="done">A stronger, healthier you</span></div>
-  <a class="btn" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+  <a class="btn" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
 </header>
 
 <main id="top">
@@ -241,7 +317,7 @@
       <h1>Personal training for women that <em>comes to you</em>, in Jerusalem</h1>
       <p class="lede">Helping women feel stronger, healthier and more confident through personalised fitness training.</p>
       <div class="act">
-        <a class="btn" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <ul class="proof">
           <li><b>₪60</b> for a 30-minute session</li>
           <li>Sessions tailored to your goals and fitness level</li>
@@ -253,23 +329,23 @@
 
   <section class="paper" id="ways">
     <div class="wrap">
-      <div class="head"><h2 class="big" data-sc-in>Five ways <span>to train.</span></h2><a class="btn on-light" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-      <ol class="rows" data-sc-in>
-        <li><span class="n">01</span><div><h3>At your home</h3><p>1-to-1 training tailored to your goals and fitness level. I come to your home, or any place you prefer.</p></div><span class="amt">&#8362;60<small>for 30 minutes</small></span></li>
-        <li><span class="n">02</span><div><h3>At your gym</h3><p>I come with you to your gym, with guidance, motivation and support throughout your workout.</p></div><span class="amt ask">Message for a price</span></li>
-        <li><span class="n">03</span><div><h3>Online</h3><p>Virtual sessions from the comfort of your home.</p></div><span class="amt ask">Message for a price</span></li>
-        <li><span class="n">04</span><div><h3>Small group circuits</h3><p>Fun, motivating circuit sessions for groups of 3 or more.</p></div><span class="amt ask">Message for a price</span></li>
-        <li><span class="n">05</span><div><h3>My private gym</h3><p>One to one in my private gym in Jerusalem, with a squat rack, free weights, a treadmill and a rowing machine.</p></div><span class="amt ask">Message for a price</span></li>
+      <div class="head"><h2 class="big" data-sc-in>Five ways <span>to train.</span></h2><a class="btn on-light" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <ol class="offers" data-sc-in>
+        <li><img src="assets/home.webp" alt="Pink dumbbells and an exercise mat on a sunlit living-room floor" width="2048" height="1152" loading="lazy"><div class="ob"><span class="n">01</span><h3>At your home</h3><p>1-to-1 training tailored to your goals and fitness level. I come to your home, or any place you prefer.</p><span class="amt">&#8362;60<small>for 30 minutes</small></span></div></li>
+        <li id="gym"><img src="assets/gym.webp" alt="An empty gym with a dumbbell rack, a bench and pink dumbbells on the floor" width="2048" height="1152" loading="lazy"><div class="ob"><span class="n">02</span><h3>At your gym</h3><p>I come with you to your gym, with guidance, motivation and support throughout your workout.</p><span class="amt ask">Message for a price</span></div></li>
+        <li><img src="assets/online.webp" alt="A laptop beside a yoga mat and a pink resistance band" width="2048" height="1152" loading="lazy"><div class="ob"><span class="n">03</span><h3>Online</h3><p>Virtual sessions from the comfort of your home.</p><span class="amt ask">Message for a price</span></div></li>
+        <li><img src="assets/private-gym.webp" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy"><div class="ob"><span class="n">04</span><h3>My private gym</h3><p>One to one in my private gym in Jerusalem, with a squat rack, free weights, a treadmill and a rowing machine.</p><span class="amt ask">Message for a price</span></div></li>
       </ol>
+      <div class="group" data-sc-in><span class="n">05</span><h3>Small group circuits</h3><p>Fun, motivating circuit sessions for groups of 3 or more.</p><span class="amt ask">Message for a price</span></div>
     </div>
   </section>
 
-  <section class="cut pic gym shade-b" id="gym">
-    <img class="photo" src="assets/gym.webp" alt="An empty gym with a dumbbell rack, a bench and pink dumbbells on the floor" width="2048" height="1152" loading="lazy">
+  <section class="cut pic private shade-b" id="private">
+    <img class="photo" src="assets/private-gym.webp" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy">
     <div class="in">
-      <span class="tag">At your gym</span>
-      <h2 class="big" data-sc-in>I come <span>with you.</span></h2>
-      <p class="sub">Guidance, motivation and support throughout your workout.</p>
+      <span class="tag">My private gym</span>
+      <h2 class="big" data-sc-in>Or come <span>to me.</span></h2>
+      <p class="sub">One to one in my private gym in Jerusalem.</p>
     </div>
   </section>
 
@@ -286,47 +362,69 @@
     </div>
   </section>
 
-  <section class="cut pic private shade-b" id="private">
-    <img class="photo" src="assets/private-gym.webp" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy">
-    <div class="in">
-      <span class="tag">Photo of my gym</span>
-      <h2 class="big" data-sc-in>Or come <span>to me.</span></h2>
-      <p class="sub">One to one in my private gym in Jerusalem.</p>
+  <section class="proof-blk" id="session">
+    <div class="wrap">
+      <h2 class="big" data-sc-in>Your <span>session.</span></h2>
+      <dl class="stats" data-sc-in>
+        <div><dt>Length</dt><dd><b>30</b> minutes</dd></div>
+        <div><dt>One&#8209;to&#8209;one</dt><dd><b>&#8362;60</b> at your home</dd></div>
+        <div><dt>Ways to train</dt><dd><b>5</b> to choose from</dd></div>
+        <div><dt>Who</dt><dd><b>Women</b> only</dd></div>
+      </dl>
+      <p class="wa">Training in English. WhatsApp <a href="https://wa.me/447563299474"><span class="nb">07563 299474</span></a></p>
     </div>
   </section>
 
-  <section class="glance" id="session">
+  <section class="paper faq" id="faq">
     <div class="wrap">
-      <h2 class="big" data-sc-in>Your <span>session.</span></h2>
-      <dl data-sc-in>
-        <div><dt>Length</dt><dd>30 minutes, &#8362;60 one&#8209;to&#8209;one</dd></div>
-        <div><dt>Who</dt><dd>Women only</dd></div>
-        <div><dt>Where</dt><dd>At your home, your gym, online, or at my private gym, in Jerusalem</dd></div>
-        <div><dt>Language</dt><dd>English</dd></div>
-        <div><dt>WhatsApp</dt><dd><a href="https://wa.me/447563299474">07563 299474</a></dd></div>
-      </dl>
+      <div class="head"><h2 class="big" data-sc-in>Good <span>to know.</span></h2></div>
+      <div class="qa" data-sc-in>
+        <details><summary>Where do we train?</summary><p>At your home or any place you prefer, at your gym, online, or one to one in my private gym in Jerusalem.</p></details>
+        <details><summary>How long is a session, and what does it cost?</summary><p>A session is 30 minutes, and one to one at your home is &#8362;60. For the gym, online, circuits and my private gym, message me for a price.</p></details>
+        <details><summary>Who is it for?</summary><p>Women only. Sessions are tailored to your goals and fitness level.</p></details>
+        <details><summary>What do we work on?</summary><p>Aerobic fitness, core, strength, balance, and pre and post natal training.</p></details>
+        <details><summary>Which language?</summary><p>Training is in English.</p></details>
+      </div>
     </div>
   </section>
 
   <section class="cut pic close shade-b" id="book">
-    <img class="photo" src="assets/online.webp" alt="A laptop beside a yoga mat and a pink resistance band" width="2048" height="1152" loading="lazy">
+    <img class="photo" src="assets/private-gym.webp" alt="The rowing machine, the wall slogan and the dumbbells in Michal's private gym" width="1600" height="1200" loading="lazy">
     <div class="in">
       <h2 class="big" data-sc-in>Book your <span>first session.</span></h2>
-      <p class="sub">Or train online, from the comfort of your home.</p>
+      <p class="sub">At your home, in my private gym, or online.</p>
       <p class="price">&#8362;60<small>for 30 minutes</small></p>
-      <div class="act"><a class="btn" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-      <p class="alt">Prefer WhatsApp? <a href="https://wa.me/447563299474?text=Hi%20Michal%2C%20I%27d%20like%20to%20book%20a%20session">Message Michal on 07563 299474</a></p>
+      <div class="act"><a class="btn" href="#request">Choose a day and time<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <p class="alt">Prefer WhatsApp? <a href="https://wa.me/447563299474?text=Hi%20Michal%2C%20I%27d%20like%20to%20book%20a%20session">Message Michal on <span class="nb">07563 299474</span></a> &#183; <a href="https://myisraelrental.com/business/michal-yodaiken">Her page on MyIsraelRental</a></p>
+    </div>
+  </section>
+
+  <section class="reqsec" id="request" aria-labelledby="h-req">
+    <div class="wrap">
+      <div class="lead"><h2 class="big" id="h-req" data-sc-in>Your <span>request.</span></h2>
+      <p class="sub">Choose what you would like, and when.</p></div>
+        <form class="req" id="req" novalidate>
+          <div class="fld full" id="w-way" role="group" aria-labelledby="l-way"><span class="lab" id="l-way">What would you like</span>
+            <div class="opts"><label class="opt"><input type="radio" name="way" value="At your home"><span class="box">At your home</span></label><label class="opt"><input type="radio" name="way" value="At your gym"><span class="box">At your gym</span></label><label class="opt"><input type="radio" name="way" value="Online"><span class="box">Online</span></label><label class="opt"><input type="radio" name="way" value="My private gym, Jerusalem"><span class="box">My private gym, Jerusalem</span></label><label class="opt"><input type="radio" name="way" value="Small group circuits (3 or more)"><span class="box">Small group circuits (3 or more)</span></label></div>
+            <span class="err" id="e-way"></span></div>
+          <div class="fld" id="w-day"><label for="day">Day</label><input id="day" type="date"><span class="err" id="e-day"></span></div>
+          <div class="fld" id="w-me"><label for="me">Your name</label><input id="me" autocomplete="name"><span class="err" id="e-me"></span></div>
+          <div class="fld full" id="w-time" role="group" aria-labelledby="l-time"><span class="lab" id="l-time">Start time</span><div class="opts" id="times"><p class="hint">Choose a day first.</p></div><span class="err" id="e-time"></span></div>
+          <div class="fld" id="w-ph"><label for="ph">Phone</label><input id="ph" type="tel" inputmode="tel" autocomplete="tel"><span class="err" id="e-ph"></span></div>
+          <div class="act"><button class="btn" type="submit" id="send"><span id="send-l">Send on WhatsApp</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
+          <p class="fine full" id="fine">Saved with Michal on MyIsraelRental, then WhatsApp opens with your request written out.</p>
+        </form>
     </div>
   </section>
 
   <footer class="foot">
     <div class="wrap">
       <p class="last">A stronger, healthier <span>you.</span></p>
-      <div class="act"><a class="btn" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+      <div class="act"><a class="btn" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
       <div class="cols">
         <div><h4>Train</h4><ul><li><a href="#ways">At your home</a></li><li><a href="#gym">At your gym</a></li><li><a href="#ways">Online</a></li><li><a href="#private">My private gym</a></li></ul></div>
-        <div><h4>The session</h4><ul><li><a href="#session">30 minutes, &#8362;60</a></li><li><a href="#session">Women only</a></li><li><a href="#session">Training in English</a></li></ul></div>
-        <div><h4>Contact</h4><ul><li><a href="https://wa.me/447563299474">WhatsApp 07563 299474</a></li><li><a href="https://myisraelrental.com/business/michal-yodaiken">Message to book</a></li></ul></div>
+        <div><h4>The session</h4><ul><li><a href="#session">30 minutes, &#8362;60</a></li><li><a href="#faq">Women only</a></li><li><a href="#faq">Training in English</a></li></ul></div>
+        <div><h4>Contact</h4><ul><li><a href="https://wa.me/447563299474">WhatsApp <span class="nb">07563 299474</span></a></li><li><a href="https://myisraelrental.com/business/michal-yodaiken">Message to book</a></li></ul></div>
       </div>
       <p class="legal">Michal Yodaiken, personal training for women in Jerusalem. <a href="https://myisraelrental.com/business/michal-yodaiken">Listed on MyIsraelRental</a></p>
     </div>
@@ -341,12 +439,14 @@
   // reaching 30:00 as the booking section arrives. Then the bar turns pink.
   var heroBtn = document.querySelector('.hero .btn'), bookBtn = document.querySelector('#book .btn'), bar = document.getElementById('bar'), clock = document.getElementById('clock'), book = document.getElementById('book');
   var last = '';
+  function phoneNow() { return matchMedia('(max-width: 860px)').matches; }
   function tick() {
     var end = book.offsetTop - innerHeight * 0.35;
     var f = Math.max(0, Math.min(1, scrollY / Math.max(1, end)));
     var s = Math.round(f * 1800), txt = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
     if (txt !== last) { clock.textContent = txt; last = txt; }
     bar.classList.toggle('is-done', f >= 1);
+    bar.classList.toggle('is-foot', phoneNow() && document.querySelector('.foot .last').getBoundingClientRect().top < innerHeight - 40);
     // phones: the pinned bar shows from after the first screen until the booking button is in view
     // phones: the bar is always there. Once the booking
     // button is on screen the bar's own button steps aside (never two
@@ -359,6 +459,63 @@
     requestAnimationFrame(tick);
   }
   requestAnimationFrame(tick);
+})();
+</script>
+<script>
+(function () {
+  // The request is saved with Michal on MyIsraelRental first (page rules 3k), then WhatsApp opens with it typed.
+  // Her start times are the ones in her listing: Sunday to Friday, 09:00 to 21:00; offered every half hour (Tzvi, 22 Oct 2026).
+  var WA = '447563299474', GIG = '135e7aac-13fa-4a1e-a0b8-822cfbd2c111', TIER = 'Personal Training';
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var $ = function (id) { return document.getElementById(id); };
+  var v = function (id) { return $(id).value.trim(); };
+  var today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  $('day').min = today;
+  function pad(n) { return (n < 10 ? '0' : '') + n; }
+  function drawTimes() {
+    var box = $('times'), d = v('day'), keep = (document.querySelector('#times input:checked') || {}).value;
+    if (!d) { box.innerHTML = '<p class="hint">Choose a day first.</p>'; return; }
+    if (new Date(d + 'T12:00').getDay() === 6) { box.innerHTML = '<p class="hint">Closed on Shabbat. Choose another day.</p>'; return; }
+    var out = [];
+    for (var m = 540; m + 30 <= 1260; m += 30) {
+      if (d === today) { var n = new Date(); if (m <= n.getHours() * 60 + n.getMinutes() + 60) continue; }
+      var t = pad(Math.floor(m / 60)) + ':' + pad(m % 60); out.push('<label class="opt"><input type="radio" name="time" value="' + t + '"' + (t === keep ? ' checked' : '') + '><span class="box">' + t + '</span></label>');
+    }
+    box.innerHTML = out.length ? out.join('') : '<p class="hint">No times left that day. Choose another day.</p>';
+  }
+  function val(name) { var r = document.querySelector('#req input[name=' + name + ']:checked'); return r ? r.value : ''; }
+  $('day').addEventListener('change', drawTimes);
+  function mark(id, msg) { $('w-' + id).classList.toggle('bad', !!msg); $('e-' + id).textContent = msg || ''; }
+  function check() {
+    var ok = true, e;
+    e = val('way') ? '' : 'Choose what you would like'; if (e) ok = false; mark('way', e);
+    e = v('day') && new Date(v('day') + 'T12:00').getDay() !== 6 ? '' : 'Choose a day, not Shabbat'; if (e) ok = false; mark('day', e);
+    e = val('time') ? '' : 'Choose a start time'; if (e) ok = false; mark('time', e);
+    e = v('me') ? '' : 'Your name, please'; if (e) ok = false; mark('me', e);
+    e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number Michal can reach you on'; if (e) ok = false; mark('ph', e);
+    return ok;
+  }
+  var sending = false;
+  $('req').addEventListener('submit', function (ev) {
+    ev.preventDefault();
+    if (sending) return;
+    if (!check()) { var b = document.querySelector('#req .bad input'); if (b) b.focus(); return; }
+    var day = new Date(v('day') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
+    var lines = ['Hi Michal, I would like to book a session:', 'What: ' + val('way'), 'When: ' + day + ' at ' + val('time'), 'Name: ' + v('me') + ', ' + v('ph')];
+    var text = lines.join('\n'), msg = lines.slice(1, 3).join('; ');
+    sending = true; $('send').setAttribute('aria-busy', 'true'); var l = $('send-l'), label = l.textContent; l.textContent = 'Sending';
+    var tab = window.open('', '_blank');
+    var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ tier_name: TIER, preferred_date: v('day'), time_slot: val('time'), guest_name: v('me'), contact_phone: v('ph'), message: msg, lang: 'en' }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
+      .catch(function (err) { console.warn('booking not saved', err); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      if (saved && saved.track_path) text += '\n\nFollow the booking: https://myisraelrental.com' + saved.track_path;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      sending = false; $('send').removeAttribute('aria-busy'); l.textContent = label;
+    });
+  });
 })();
 </script>
 </body>

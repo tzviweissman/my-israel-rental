@@ -121,23 +121,23 @@ section.sec { padding-block: clamp(2.5rem, min(10vw, 8svh), 7.5rem); }
 @media (max-width: 860px) { .flav-grid { grid-template-columns: 1fr; } .flav-grid .photo { height: 52svh; justify-self: center; } }
 
 /* packages: a tiered bento, the best-value bundle as the big tile (Inspo, tier-bento) */
-.packs { background: var(--choc); color: var(--cream); }
-.packs h2 { color: var(--cream); } .packs .lede { color: #E8CFC7; }
+.packs { background: var(--cream); color: var(--ink); }
+.packs h2 { color: var(--ink); } .packs .lede { color: var(--soft); }
 .packs-head { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem 2rem; flex-wrap: wrap; }
 .packs-head .lede { margin: 0; }
 .bento { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: .75rem; margin-top: clamp(1rem, 3svh, 2rem); }
-.pack { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; padding: 1.4rem var(--card-pad); border-radius: var(--r); background: #4A2618; color: var(--cream);
+.pack { position: relative; display: flex; flex-direction: column; justify-content: space-between; gap: 1rem; padding: 1.4rem var(--card-pad); border-radius: var(--r); background: #fff; color: var(--ink); border: 1px solid var(--line);
   transition: transform 220ms var(--out); }
 .pack { isolation: isolate; overflow: hidden; }
-.pack::before { content: ""; position: absolute; inset: 0; z-index: -1; background: rgb(255 255 255 / .07); transform: scaleY(0); transform-origin: bottom; transition: transform 380ms var(--out); }
+.pack::before { content: ""; position: absolute; inset: 0; z-index: -1; background: rgb(240 125 164 / .12); transform: scaleY(0); transform-origin: bottom; transition: transform 380ms var(--out); }
 @media (hover: hover) { .pack:hover::before { transform: none; } }
-.pack .meta { margin: 0 0 .5rem; font: 700 .875rem/1.2 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: #E8CFC7; }
+.pack .meta { margin: 0 0 .5rem; font: 700 .875rem/1.2 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--soft); }
 .pack h3 { font-size: clamp(1.6rem, 2.4vw, 2.1rem); color: inherit; }
-.pack .allows { display: inline-block; margin-top: .6rem; padding: .3rem .75rem; border-radius: 999px; background: rgb(255 255 255 / .12); font: 700 .9rem/1.3 var(--font-body); }
+.pack .allows { display: inline-block; margin-top: .6rem; padding: .3rem .75rem; border-radius: 999px; background: rgb(51 23 12 / .07); font: 700 .9rem/1.3 var(--font-body); }
 .pack .row { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
 .pack .price { font: 700 2.4rem/1 var(--font-head); }
-.pack .btn-line { border-color: var(--cream); color: var(--cream); }
-.pack .btn-line:hover { background: var(--cream); color: var(--choc); }
+.pack .btn-line { border-color: var(--choc); color: var(--choc); }
+.pack .btn-line:hover { background: var(--choc); color: var(--cream); }
 .pack.lead { grid-row: span 3; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1fr); align-content: stretch; background: var(--blush); color: var(--choc); }
 .pack.lead .pic { grid-row: 1 / 3; grid-column: 1; height: 100%; min-height: 0; }
 .pack.lead > div:first-child { grid-column: 2; } .pack.lead .row { grid-column: 2; flex-direction: column; align-items: flex-start; }
@@ -150,7 +150,7 @@ section.sec { padding-block: clamp(2.5rem, min(10vw, 8svh), 7.5rem); }
 .pack.lead .btn-line { border-color: var(--choc); color: var(--choc); }
 .pack.lead .btn-line:hover { background: var(--choc); color: var(--cream); }
 .pack.lead .save { display: inline-block; margin-left: .6rem; padding: .3rem .7rem; border-radius: 999px; background: var(--choc); color: var(--cream); font: 700 .85rem/1 var(--font-body); vertical-align: middle; }
-.packs .fine { margin: 1.4rem 0 0; color: #E8CFC7; }
+.packs .fine { margin: 1.4rem 0 0; color: var(--soft); }
 @media (max-width: 860px) { .bento { grid-template-columns: 1fr; } .pack.lead { grid-row: auto; grid-template-columns: 1fr; } .pack.lead .pic, .pack.lead > div:first-child, .pack.lead .row { grid-column: 1; grid-row: auto; } .pack.lead .pic { max-height: 220px; } }
 
 /* how many coffees: her recipe with a servings switch (S6; docs/inspo/awwwards-food-2026-10-18/mam-com-3-recipe-servings.webp) */
@@ -174,7 +174,7 @@ section.sec { padding-block: clamp(2.5rem, min(10vw, 8svh), 7.5rem); }
 .card-r .btn { margin-top: .9rem; }
 .recipe { list-style: none; counter-reset: r; margin: 1.1rem 0 0; padding: .9rem 0 0; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; gap: .4rem 1.4rem; }
 .recipe li { counter-increment: r; display: flex; gap: .8rem; align-items: baseline; font-weight: 600; }
-.recipe li::before { content: counter(r); font: 700 1.2rem/1 var(--font-head); color: var(--pink-ink); min-width: 1ch; }
+.recipe li::before { content: counter(r); font: 700 1.2rem/1 var(--font-head); color: var(--pink-ink); min-width: 0.55em; }
 @media (max-width: 860px) { .cups-grid { grid-template-columns: 1fr; } .cups .ph { height: 40svh; } }
 @media (max-width: 420px) { .serve button { font-size: .85rem; } }
 @media (prefers-reduced-motion: reduce) { .serve .glide { transition: none; } }
@@ -234,7 +234,7 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 .bad .fld { border-color: #C0392B; }
 .err { color: #A8281B; font-size: .88rem; margin: .3rem 0 0; min-height: 1.1em; }
 .deliv { margin: 0 0 .3rem; color: var(--soft); }
-.sum { position: sticky; top: 90px; }
+.sum { position: static; }  /* it was sticky, but it is taller than the basket beside it in step 1, so it could never stay pinned (clipped.mjs) */
 .sum ul { list-style: none; margin: 0 0 1rem; padding: 0; color: var(--soft); font-size: .95rem; }
 .sum ul li { display: flex; justify-content: space-between; gap: 1rem; padding: .25rem 0; }
 .sum .total { display: flex; justify-content: space-between; align-items: baseline; font: 700 2rem/1.1 var(--font-head); margin: .4rem 0 1.1rem; color: var(--choc); }
@@ -279,7 +279,7 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 .hero2::before { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(90deg, rgb(42 20 11 / .82) 0%, rgb(42 20 11 / .55) 42%, rgb(42 20 11 / .05) 75%), linear-gradient(0deg, rgb(42 20 11 / .6), transparent 45%); }
 @keyframes settle { from { transform: scale(1.12); filter: saturate(.7) brightness(.85); } to { transform: none; filter: none; } }
 .hero2 .kick { background: rgb(42 20 11 / .62); color: var(--cream); backdrop-filter: blur(6px); }
-.hero2 h1 { font-size: clamp(3rem, 7vw, 6.6rem); max-width: 12ch; color: var(--cream); line-height: .98; }
+.hero2 h1 { font-size: clamp(3rem, 7vw, 6.6rem); max-width: 6.6em; color: var(--cream); line-height: .98; }
 .hero2 h1 .w { display: inline-block; animation: rise 900ms var(--out) both; }
 .hero2 h1 .w:nth-child(2) { animation-delay: 140ms; } .hero2 h1 .w:nth-child(3) { animation-delay: 280ms; }
 .hero2 h1 .soft { font-style: italic; font-weight: 500; color: #F9C9D6; font-size: .62em; display: block; margin-top: .25em; }
@@ -382,12 +382,12 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 .arw svg { display: block; } .arw { display: inline-flex; }  /* the arrow is drawn, not a character the fonts lack */
 /* the deal, short: old price struck through beside the price, and a two-word badge (rules 3j, 3s) */
 .was { font: 500 .7em/1 var(--font-body); color: var(--soft); text-decoration-thickness: 1.5px; margin-right: .3em; vertical-align: .2em; }
-.pack .was { color: #E8CFC7; } .pack.lead .was { color: var(--soft); }
+.pack .was { color: var(--soft); }
 .plan .save-b { position: absolute; top: -.7rem; right: 1rem; margin: 0; z-index: 1; }
 .plan.lead .box { border-color: var(--pink-ink); }
 .plan .tab { position: absolute; top: -.7rem; left: 1rem; z-index: 1; padding: .2rem .6rem; border-radius: 999px; background: var(--pink-ink); color: #fff; font: 700 .8125rem/1.2 var(--font-body); letter-spacing: .05em; }
 .save-b { display: inline-block; justify-self: start; margin-top: .45rem; padding: .25rem .6rem; border-radius: 999px; background: #E3F3EA; color: #1F5C3A; font: 700 .85rem/1.2 var(--font-body); width: max-content; grid-column: 1 / -1; }
-.pack .save-b { background: rgb(159 224 184 / .18); color: #BFF0CF; } .pack.lead .save-b { background: #E3F3EA; color: #1F5C3A; }
+.pack .save-b { background: #E3F3EA; color: #1F5C3A; }
 .deal s { font-weight: 500; opacity: .7; margin: 0 .2em; }
 .pack.lead .was { display: block; font-size: 1.3rem; margin: 0 0 .2rem; }
 
@@ -547,3 +547,68 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 .duo-words p { color: #fff; }
 .foot-legal { font-size: .95rem; }
 @media (max-width: 760px) { .flavpic .wtitle { background: var(--choc); } }
+.deal .save-b { margin: 0 0 0 .4em; background: #fff; color: #1F5C3A; }
+
+
+/* ── food-shop pattern (page rules 3t, 22 Oct 2026): light grounds, one colour room per flavour, framed photos,
+   price and Add on every card. The full-bleed photo screens of 21 Oct are gone; the opening film stays. ── */
+.rooms { background: var(--cream); padding-block: clamp(1.2rem, 4svh, 4rem); }
+.rooms .wtitle { font: 600 min(clamp(2.2rem, 4.4vw, 3.8rem), 7svh)/1 var(--font-head); font-variation-settings: 'SOFT' 100, 'opsz' 144; letter-spacing: -.02em; color: var(--ink); margin: 0 0 clamp(.8rem, 2.4svh, 1.6rem); }
+.room-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(.7rem, 1.6vw, 1.2rem); }
+.room { display: flex; flex-direction: column; gap: 1rem; padding: clamp(.8rem, 1.4vw, 1.2rem); border-radius: 28px; background: var(--rc); color: var(--ink); transition: transform 300ms var(--out); }
+@media (hover: hover) { .room:hover { transform: translateY(-4px); } }
+.room-pic { height: clamp(160px, calc(100svh - 390px), 430px); border-radius: 20px; overflow: hidden; background: rgb(255 255 255 / .4); }
+.room-pic img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; }
+.room-cap h3 { font: 600 clamp(1.5rem, 2.4vw, 2.1rem)/1.05 var(--font-head); color: var(--ink); }
+.room-cap p { margin: .3rem 0 0; color: var(--ink); opacity: .78; }
+.room-cap .cap-r { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; margin-top: .9rem; }
+.room-cap .price { font: 700 clamp(1.8rem, 2.8vw, 2.4rem)/1 var(--font-head); color: var(--ink); }
+.room-cap .price small { display: block; margin-top: .3rem; font: 500 .8rem/1 var(--font-body); color: var(--ink); opacity: .78; }
+.room .btn-line { min-height: 46px; padding: 0 1.4rem; }
+.room .btn-line:hover { background: var(--choc); color: var(--cream); }
+@media (max-width: 860px) { .room-row { grid-template-columns: 1fr; } .room { flex-direction: row; align-items: stretch; } .room-pic { flex: 0 0 38%; height: auto; min-height: 190px; } .room-cap { flex: 1; display: flex; flex-direction: column; justify-content: center; } }
+@media (max-width: 460px) { .room { flex-direction: column; } .room-pic { flex: none; height: 38svh; } }
+
+.cups { background: var(--paper); }
+.story { background: var(--blush); color: var(--ink); padding-block: clamp(1.6rem, 6svh, 6rem); }
+.story-in, .door-top { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); gap: clamp(1.5rem, 5vw, 4rem); align-items: center; }
+.door-top { grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); }
+.story h2, .door h2 { font: 600 min(clamp(2.3rem, 4.8vw, 4.2rem), 8.5svh)/1 var(--font-head); font-variation-settings: 'SOFT' 100, 'opsz' 144; letter-spacing: -.02em; color: var(--ink); }
+.story-words p { margin: .9rem 0 1.5rem; max-width: 30rem; color: var(--soft); font-size: 1.1rem; }
+.story-pics { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(.6rem, 1.4vw, 1rem); }
+.story-pics img { width: 100%; height: min(42svh, 480px); object-fit: cover; border-radius: 24px; }
+.story-pics img:nth-child(2) { margin-top: clamp(.6rem, 3svh, 2rem); height: min(38svh, 440px); }
+.door { background: #fff; color: var(--ink); padding-block: clamp(1.6rem, 6svh, 6rem); }
+.trust { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(1rem, 3vw, 2.2rem); margin: clamp(1.1rem, 4svh, 3rem) 0 0; }
+.trust > div { border-top: 1.5px solid var(--ink); padding-top: .9rem; }
+.trust dt { font: 700 .8rem/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--pink-ink); }
+.trust dd { margin: .5rem 0 0; font: 600 clamp(1.15rem, 1.8vw, 1.5rem)/1.2 var(--font-head); }
+@media (max-width: 860px) { .story-in, .door-top { grid-template-columns: 1fr; } .story-pics img, .story-pics img:nth-child(2) { height: 34svh; } .trust { grid-template-columns: 1fr 1fr; } }
+
+@media (max-width: 860px) { .pack .meta { font-size: .9rem; letter-spacing: .08em; white-space: nowrap; } }
+
+/* 22 Oct review: the four packages share one layout. Square photo, name and what it allows, price and Choose in one column. */
+.bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.bento .pack.has-pic { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; align-items: center; gap: 0 1rem; padding: .9rem 1.1rem; }
+.bento .pack.has-pic .pic { grid-column: 1; grid-row: 1; flex: none; width: 104px; height: 104px; min-height: 0; max-height: none; flex: none; border-radius: var(--r-sm); object-fit: cover; object-position: 50% 40%; }
+.bento .pack.has-pic > div:not(.row) { grid-column: 2; } .bento .pack.has-pic .row { grid-column: 3; flex-direction: column; align-items: flex-end; gap: .5rem; }
+.bento .pack.has-pic h3 { font-size: 1.45rem; } .bento .pack.has-pic .price { font-size: 2rem; }
+.bento .pack.has-pic .was { display: inline; font-size: .7em; margin: 0 .3em 0 0; }
+.bento .pack.best { background: var(--blush); border-color: var(--pink-ink); }
+.bento .pack.best .meta { color: var(--pink-ink); }
+@media (max-width: 860px) { .bento { grid-template-columns: 1fr; } }
+@media (max-width: 460px) { .bento .pack.has-pic { grid-template-columns: 76px minmax(0, 1fr); } .bento .pack.has-pic .pic { width: 76px; height: 76px; }
+  .bento .pack.has-pic .row { grid-column: 1 / -1; grid-row: 2; flex-direction: row; align-items: center; justify-content: space-between; margin-top: .6rem; } }
+/* the flavour cards on the home page: the whole jar, the same frame for all three */
+.room-pic img { object-fit: contain; object-position: 50% 50%; }
+
+/* 22 Oct review: the opening question over bright sky gets a soft shade round it (5b.3), and the wide
+   panel's dark fades out over a long, eased run so there is no vertical edge at the middle of the screen. */
+.sky-line { isolation: isolate; }
+.sky-line::before { content: ''; position: absolute; inset: -70% -25%; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse closest-side at 50% 50%, rgb(60 20 40 / .5), rgb(60 20 40 / .34) 30%, rgb(60 20 40 / .16) 62%, transparent 100%); }
+.sky-line h1 { text-shadow: 0 1px 3px rgb(40 15 30 / .45), 0 2px 26px rgb(60 20 40 / .6); }
+.sky.wide .sky-end::before { inset: -100vh -34vw -100vh -10vw;
+  background: linear-gradient(90deg, rgb(42 20 11 / .9) 0%, rgb(42 20 11 / .88) 36%, rgb(42 20 11 / .8) 46%, rgb(42 20 11 / .66) 54%, rgb(42 20 11 / .5) 62%, rgb(42 20 11 / .34) 70%, rgb(42 20 11 / .2) 79%, rgb(42 20 11 / .09) 90%, transparent 100%); }
+@media (max-width: 560px) { .bento .pack.best { padding-top: 1.7rem; } .bento .pack.best .tab { right: 1rem; } }
+.bento .pack.best { padding-top: 1.7rem; } .bento .pack.best .tab { right: 1rem; }

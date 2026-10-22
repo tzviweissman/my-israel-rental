@@ -25,6 +25,7 @@
  *              video without a poster; with motion switched off, words still
  *              hidden after scrolling
  *   FLOW       the order or booking form sends with nothing filled in, or,
+ *   SAVE       an order or booking reaches WhatsApp without first being POSTed to MyIsraelRental (rules 3k)
  *              filled in, sends no WhatsApp message, or a message without the
  *              total the page shows
  * Run from the repo (it uses its Playwright).
@@ -184,6 +185,31 @@ for (const url of urls) {
   }
   // ── the home page opens on a full-screen film or event (page rules 3h; Tzvi, 21 Oct 2026: "why do you keep
   // making bland websites"): the picture fills the first screen, and the first screen changes on its own or as you scroll ──
+  // ── each site follows real sites of its own category (page rules 3t; Tzvi, 22 Oct 2026: "not all websites look
+  // like the moto one"): the page names its category, and the checks below follow it ──
+  const CATS = ['food-shop', 'place', 'fashion-shop', 'beauty', 'events', 'trainer', 'service', 'rental'];
+  let category = '';
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await ctx.newPage(); await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(800);
+    category = await page.evaluate(() => (document.querySelector('meta[name="site-category"]') || {}).content || '');
+    if (!CATS.includes(category)) fail(url, 'CATEGORY', `the page names no known category (${category || 'none'}): add <meta name="site-category" content="one of ${CATS.join(', ')}"> and follow that row of 3t`);
+    if (['food-shop', 'fashion-shop'].includes(category) && /\/(index\.html)?$/.test(new URL(url).pathname)) {
+      // BUY: a price and an Add or Order control visible within the first two screens
+      const seen = await page.evaluate(async () => {
+        const vis = (e) => { const r = e.getBoundingClientRect(), cs = getComputedStyle(e); return r.width > 4 && r.height > 4 && r.bottom > 0 && r.top < innerHeight && cs.visibility !== 'hidden' && +cs.opacity > .2; };
+        const look = () => {
+          const price = [...document.querySelectorAll('body *')].some((e) => e.children.length < 3 && /(₪|\$)\s?\d|\d\s?(₪|\$)/.test(e.textContent) && e.textContent.length < 60 && vis(e));
+          const buy = [...document.querySelectorAll('a, button')].some((e) => /\b(add|order|buy|shop|basket)\b/i.test(e.textContent + ' ' + (e.getAttribute('aria-label') || '')) && vis(e));
+          return { price, buy };
+        };
+        const a = look(); scrollTo(0, innerHeight); await new Promise((r) => setTimeout(r, 900)); const b = look();
+        return { price: a.price || b.price, buy: a.buy || b.buy };
+      });
+      if (!seen.price || !seen.buy) fail(url, 'BUY', `within the first two screens there is ${seen.price ? '' : 'no price'}${!seen.price && !seen.buy ? ' and ' : ''}${seen.buy ? '' : 'no Add or Order control'}: a ${category} sells from the top (3t)`);
+    }
+    await ctx.close();
+  }
   if (/\/(index\.html)?(\?.*)?$/.test(new URL(url).pathname + new URL(url).search)) {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage(); await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(600);
@@ -200,14 +226,20 @@ for (const url of urls) {
     const a = await page.screenshot(); await page.waitForTimeout(2500); const b = await page.screenshot();
     await page.mouse.wheel(0, 500); await page.waitForTimeout(900); const c = await page.screenshot();
     const differ = (x, y) => { let d = 0; for (let i = 0; i < x.length && i < y.length; i += 997) d += x[i] !== y[i] ? 1 : 0; return d / (Math.min(x.length, y.length) / 997); };
+    // every category (Tzvi, 22 Oct 2026, "why do i keep needing to tell you to make the wow moment": limiting this
+    // to four categories let American Crust open at 13% picture; a shop's price and Add fit on the second screen, BUY allows it)
     if (cover < .7) fail(url, 'OPENING', `the first screen is only ${Math.round(cover * 100)}% picture: the opening must be a full-screen film or photo, not a box beside the words (3h.1)`);
+    // and it is a film: a playing video on the first screen, unless FILM.md beside the page records Tzvi's no to a film (3h)
+    const film = await page.evaluate(() => [...document.querySelectorAll('video, canvas')].some((v) => { const r = v.getBoundingClientRect(); return r.top < innerHeight && r.width * r.height > innerWidth * innerHeight * .5; }));
+    const declined = url.startsWith('file:') ? false : await fetch(new URL('FILM.md', url)).then((r) => r.ok ? r.text() : '').then((t) => /declined by Tzvi/i.test(t)).catch(() => false);
+    if (!film && !declined) fail(url, 'OPENING', 'no film on the first screen: every site opens on a generated advert film from their own product (3h); bring the numbered steps and the cost, or write FILM.md "declined by Tzvi" with his words');
     if (differ(a, b) < .05 && differ(b, c) < .05) fail(url, 'OPENING', 'nothing happens on the first screen, on its own or when you start to scroll: the opening must be an event (3h)');
     await ctx.close();
   }
   // ── sections change worlds (page rules 3t; Tzvi, 21 Oct 2026, after moto-card.com: "it changes to pictures,
   // not everything is just one colour"): on the home page, no three sections in a row on the same plain ground,
   // and at least a third of the sections mostly picture or film ──
-  if (/\/(index\.html)?$/.test(new URL(url).pathname)) {
+  if (category === 'trainer' && /\/(index\.html)?$/.test(new URL(url).pathname)) {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage(); await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(800);
     const secs = await page.evaluate(async () => {
@@ -253,7 +285,10 @@ for (const url of urls) {
   // ── the order or booking flow, if the page has one ──
   {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-    await page.addInitScript(() => { window.__sent = ''; window.open = (u) => { if (u) window.__sent = String(u); const tab = { closed: false, close() {}, focus() {}, document: { write() {}, title: '' }, location: { set href(x) { window.__sent = String(x); }, get href() { return window.__sent; }, replace(x) { window.__sent = String(x); }, assign(x) { window.__sent = String(x); } } }; return tab; }; try { localStorage.clear(); } catch (e) { /* none */ } });
+    // SAVE (page rules 3k; Tzvi, 22 Oct 2026): every order is saved to MyIsraelRental before WhatsApp opens.
+    // Record every POST the page makes, and when the WhatsApp tab is opened.
+    await page.addInitScript(() => { window.__posts = []; const f0 = window.fetch; window.fetch = function (u, o) { try { if (o && /post/i.test(o.method || '')) window.__posts.push({ u: String(u && u.url || u), t: performance.now() }); } catch (e) { /* none */ } return f0.apply(this, arguments); }; const x0 = XMLHttpRequest.prototype.open; XMLHttpRequest.prototype.open = function (m, u) { if (/post/i.test(m)) window.__posts.push({ u: String(u), t: performance.now() }); return x0.apply(this, arguments); }; });
+    await page.addInitScript(() => { window.__sent = ''; window.open = (u) => { if (u) { window.__sent = String(u); window.__sentAt = window.__sentAt || performance.now(); } const tab = { closed: false, close() {}, focus() {}, document: { write() {}, title: '' }, location: { set href(x) { window.__sent = String(x); window.__sentAt = window.__sentAt || performance.now(); }, get href() { return window.__sent; }, replace(x) { window.__sent = String(x); }, assign(x) { window.__sent = String(x); } } }; return tab; }; try { localStorage.clear(); } catch (e) { /* none */ } });
     await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(900);
     const hasForm = await page.$('form button[type=submit], form#form');
     if (hasForm) {
@@ -289,6 +324,10 @@ for (const url of urls) {
       if (!res.sent) fail(url, 'FLOW', `filled in, the form sends nothing${res.errs.length ? ` (it says: ${res.errs.join('; ')})` : ''}`);
       else if (res.total && !res.sent.replace(/\s/g, '').includes(res.total.replace(/\s/g, ''))) fail(url, 'FLOW', `the message does not carry the total the page shows (${res.total})`);
       else if (!/wa\.me|whatsapp/i.test(res.sent + '') && !res.sent) fail(url, 'FLOW', 'no WhatsApp message');
+      if (res.sent) {
+        const saved = await page.evaluate(() => (window.__posts || []).some((p) => /\/api\//.test(p.u) && /order|book|quote|enquir|request/i.test(p.u) && p.t <= (window.__sentAt || Infinity)));
+        if (!saved) fail(url, 'SAVE', 'the order goes straight to WhatsApp without being saved to MyIsraelRental first (POST it through the order form, then open WhatsApp; rules 3k)');
+      }
     }
     await page.close();
   }

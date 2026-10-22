@@ -22,11 +22,20 @@ document.body.classList.remove('no-js');
   nav.addEventListener('click', function (e) { if (e.target.closest('a')) setMenu(false); });
 
   var top = document.getElementById('top'), bar = document.getElementById('bar'), order = document.getElementById('order'), tick = 0;
+  function underBar(vh) {
+    var edge = vh - (bar ? bar.offsetHeight : 0);
+    return [].some.call(document.querySelectorAll('.price, .add, .rice, .btn, .btn-line'), function (el) {
+      if (el.closest('#bar, #top, #nav')) return false;
+      var r = el.getBoundingClientRect();
+      return r.height > 0 && r.bottom > edge && r.top < vh;
+    });
+  }
   function frame() {
     tick = 0;
     var vh = innerHeight, past = scrollY > vh * .5;
     top.classList.toggle('solid', past);
-    if (bar) bar.classList.toggle('on', past && (!order || order.getBoundingClientRect().top > vh * .75));
+    // the phone bar steps aside while a price or button of the page is in the strip it covers
+    if (bar) bar.classList.toggle('on', past && (!order || order.getBoundingClientRect().top > vh * .75) && !underBar(vh));
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();

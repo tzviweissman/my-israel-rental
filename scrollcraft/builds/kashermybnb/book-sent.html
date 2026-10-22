@@ -4,8 +4,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-category" content="service">
 <title>Booking sent · KasherMyBnb</title>
 <meta name="description" content="Your booking request is on its way to KasherMyBnb.">
+<meta property="og:title" content="Booking sent · KasherMyBnb">
+<meta property="og:description" content="Your booking request is on its way to KasherMyBnb.">
+<meta property="og:image" content="assets/kitchen.webp">
 <link rel="icon" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -24,7 +28,7 @@
       <div style="width:64px;height:64px;border-radius:50%;background:var(--sc-accent);display:grid;place-items:center;margin:0 auto"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
       <h1 style="margin-top:1.25rem">Thank you</h1>
       <p class="sub" style="margin-inline:auto;max-width:30rem">Once you press send in WhatsApp, your booking reaches us. We confirm the day and time with you there.</p>
-      <ul class="lines" data-lines style="text-align:left;margin-top:1.5rem;border-top:1px solid var(--line)"></ul>
+      <ul class="lines is-sent" data-lines style="text-align:left;margin-top:1.5rem;border-top:1px solid var(--line)"></ul>
       <div class="total" style="max-width:100%"><span>Total</span><b data-total>$0</b></div>
       <p class="sub" style="margin-top:1.5rem">WhatsApp did not open? <a class="link" id="again" href="#" target="_blank" rel="noopener">Send it again</a></p>
       <p style="margin-top:1.5rem"><a class="back" href="index.html">Back to KasherMyBnb</a></p>
@@ -32,6 +36,14 @@
   </div>
 </main>
 
+<footer class="foot after big">
+  <p class="last">Settle in, ready to use.</p>
+  <div class="foot-cols">
+    <nav class="foot-nav" aria-label="Pages"><b>Pages</b><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book a kashering</a></nav>
+    <div class="foot-nav"><b>Where</b><span>Jerusalem and across Israel</span><span>English and Hebrew</span><span>Since 2019</span></div>
+    <div class="foot-nav"><b>Contact</b><span>Message us on WhatsApp</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+  </div>
+</footer>
 <script src="site.js"></script>
 <script>
 (function () {

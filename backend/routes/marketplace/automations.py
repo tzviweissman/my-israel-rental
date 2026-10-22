@@ -19,7 +19,12 @@ two lists are (Tzvi: never pre-write automations, grow the vocabulary):
                                  (Asia/Jerusalem; see schedule_loop)
         `booking.confirmed`      a guest stay on my listing is confirmed
         `booking.cancelled`      ...or cancelled (its jobs are withdrawn)
+        `stock.low`              a counted product drops to a number
+        `product.sold`           every N of a product sold
+                                 (these two: reorder.py, 22 Oct 2026)
   DO    `send_order`             an order appears at a partner (below)
+        `order_supplier`         an order to a supplier who is NOT on the
+                                 site: emailed, or a WhatsApp ready to send
         `notify_me`              a bell and an email to me
         `message_customer`       my words to the order's / booking's
                                  customer, by email and bell
@@ -112,9 +117,15 @@ class ScheduleIn(BaseModel):
 class TriggerIn(BaseModel):
     type: Literal["order.status_changed", "manual.reorder", "appointment.booked",
                   "appointment.cancelled", "lead.received", "schedule",
-                  "booking.confirmed", "booking.cancelled"]
+                  "booking.confirmed", "booking.cancelled", "stock.low", "product.sold"]
     status: Optional[str] = None
     schedule: Optional[ScheduleIn] = None
+    # stock.low / product.sold: which product (on which of my shop
+    # listings), and the number: "drops to 10" or "every 50 sold".
+    gig_id: Optional[str] = Field(None, max_length=100)
+    product_id: Optional[str] = Field(None, max_length=100)
+    threshold: Optional[int] = Field(None, ge=0, le=100_000)
+    every_n: Optional[int] = Field(None, ge=1, le=100_000)
     # A guest booking on ONE of my listings; None means any of them. The
     # host with three flats and two cleaners needs this; everyone else
     # leaves it empty.
@@ -136,13 +147,26 @@ class TriggerIn(BaseModel):
         # plumber checks Flat 3" sends the job to Flat 3's door.
         if not (self.type.startswith("booking.") or self.type == "schedule"):
             self.property_id = None
+        if self.type in ("stock.low", "product.sold"):
+            if not (self.gig_id and self.product_id):
+                raise ValueError("Pick the product")
+            if self.type == "stock.low" and self.threshold is None:
+                raise ValueError("Say at what number to reorder")
+            if self.type == "product.sold" and not self.every_n:
+                raise ValueError("Say after how many sold to reorder")
+        else:
+            self.gig_id = self.product_id = self.threshold = self.every_n = None
+        if self.type != "stock.low":
+            self.threshold = None
+        if self.type != "product.sold":
+            self.every_n = None
         return self
 
 
 class ActionIn(BaseModel):
     """What happens. `send_order` is the original (and the default, so
     every rule saved before actions existed still reads the same)."""
-    type: Literal["send_order", "notify_me", "message_customer"] = "send_order"
+    type: Literal["send_order", "notify_me", "message_customer", "order_supplier"] = "send_order"
     text: str = Field("", max_length=1000)
 
     @field_validator("text")
@@ -167,6 +191,25 @@ class TemplateIn(BaseModel):
         return v.strip() if isinstance(v, str) else v
 
 
+class SupplierIn(BaseModel):
+    """A supplier who is not on the site: the order goes by email, or as a
+    WhatsApp message the owner sends with one tap (we send no WhatsApp)."""
+    name: str = Field(min_length=1, max_length=120)
+    email: Optional[str] = Field(None, max_length=200)
+    phone: Optional[str] = Field(None, max_length=40)
+
+    @model_validator(mode="after")
+    def _reachable(self):
+        self.name = self.name.strip()
+        self.email = (self.email or "").strip().lower() or None
+        self.phone = (self.phone or "").strip() or None
+        if self.email and ("@" not in self.email or "." not in self.email.split("@")[-1]):
+            raise ValueError("That supplier email does not look right")
+        if not (self.email or self.phone):
+            raise ValueError("Add the supplier's email or WhatsApp number")
+        return self
+
+
 class AutomationIn(BaseModel):
     partner_business_id: Optional[str] = Field(None, max_length=100)
     name: str = Field(min_length=1, max_length=120)
@@ -174,10 +217,31 @@ class AutomationIn(BaseModel):
     trigger: TriggerIn
     action: ActionIn = Field(default_factory=ActionIn)
     template: Optional[TemplateIn] = None
+    supplier: Optional[SupplierIn] = None
+    # Reorders (reorder.py): "ask me first" holds the order until the owner
+    # taps Send; on by default. `refill_qty` is added back to the product's
+    # count when the delivery arrives.
+    ask_first: bool = True
+    refill_qty: Optional[int] = Field(None, ge=1, le=100_000)
 
     @model_validator(mode="after")
     def _coherent(self):
         t, a = self.trigger.type, self.action.type
+        if t not in ("stock.low", "product.sold"):
+            self.ask_first, self.refill_qty = False, None
+        if a == "order_supplier":
+            if not self.supplier:
+                raise ValueError("Add the supplier")
+            if not self.template or not self.template.items:
+                raise ValueError("Say what to order")
+            if t not in ("stock.low", "product.sold", "schedule", "manual.reorder"):
+                raise ValueError("Only a reorder can go to a supplier who is not on the site")
+            self.template.copy_from_source = False
+            self.partner_business_id = None
+            if self.template.fulfilment == "delivery" and not self.template.address:
+                raise ValueError("A delivery needs an address")
+            return self
+        self.supplier = None
         if a == "send_order":
             if not self.partner_business_id:
                 raise ValueError("Pick a partner business")
@@ -275,6 +339,9 @@ def _rule_out(rule: dict[str, Any], partner: Optional[dict[str, Any]] = None) ->
         "trigger": rule.get("trigger") or {},
         "action": rule.get("action") or {"type": "send_order", "text": ""},
         "template": rule.get("template") or {},
+        "supplier": rule.get("supplier"),
+        "ask_first": bool(rule.get("ask_first")),
+        "refill_qty": rule.get("refill_qty"),
         "run_count": rule.get("run_count", 0),
         "last_run_at": rule.get("last_run_at"),
         "next_run_at": rule.get("next_run_at"),
@@ -309,7 +376,7 @@ def next_run(schedule: dict[str, Any], after: Optional[datetime] = None) -> str:
     raise ValueError("schedule never fires")   # the model forbids this
 
 
-DID_SOMETHING = ("created", "auto_accepted", "notified", "messaged")
+DID_SOMETHING = ("created", "auto_accepted", "notified", "messaged", "emailed", "sent_whatsapp")
 
 
 def _default_needed_by() -> str:
@@ -319,7 +386,8 @@ def _default_needed_by() -> str:
 
 
 async def _record(rule: dict[str, Any], *, result: str, event: dict[str, Any],
-                  order_id: Optional[str] = None, error: Optional[str] = None) -> dict[str, Any]:
+                  order_id: Optional[str] = None, error: Optional[str] = None,
+                  extra: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     run = {
         "_id": str(uuid.uuid4()),
         "automation_id": rule["_id"],
@@ -331,6 +399,7 @@ async def _record(rule: dict[str, Any], *, result: str, event: dict[str, Any],
         "created_order_id": order_id,
         "error": error,
         "created_at": _now(),
+        **(extra or {}),
     }
     await db.automation_runs.insert_one(run)
     if result in DID_SOMETHING:
@@ -602,6 +671,9 @@ async def _run(rule: dict[str, Any], ctx: dict[str, Any], event: dict[str, Any])
         return await _notify_me(rule, ctx, event)
     if kind == "message_customer":
         return await _message_customer(rule, ctx, event)
+    if kind == "order_supplier":
+        from .reorder import order_supplier
+        return await order_supplier(rule, event)
     return await _create_partner_order(rule, source=ctx.get("order"), needed_by=None, event=event, ctx=ctx)
 
 
@@ -628,6 +700,9 @@ async def fire(trigger_type: str, event: dict[str, Any]) -> list[dict[str, Any]]
         q: dict[str, Any] = {"enabled": True, "trigger.type": trigger_type}
         if trigger_type == "order.status_changed":
             order = event.get("order") or {}
+            if event.get("status") == "done" and (order.get("automation") or {}).get("run_id"):
+                from .reorder import refill_for_run
+                await refill_for_run(order["automation"]["run_id"])
             ctx = {"order": order}
             q["business_id"] = order.get("business_id")
             q["trigger.status"] = event.get("status")
@@ -798,6 +873,9 @@ async def list_automations(business_id: str, user=Depends(verify_token)):
 async def create_automation(business_id: str, payload: AutomationIn, user=Depends(verify_token)):
     await _owned(business_id, user)
     sends = payload.action.type == "send_order"
+    if payload.trigger.type in ("stock.low", "product.sold"):
+        from .reorder import check_product
+        await check_product(business_id, payload.trigger.gig_id, payload.trigger.product_id)
     if sends:
         if payload.partner_business_id == business_id:
             raise HTTPException(status_code=400, detail="Pick a partner business")
@@ -816,6 +894,10 @@ async def create_automation(business_id: str, payload: AutomationIn, user=Depend
         "trigger": trigger,
         "action": payload.action.model_dump(),
         "template": payload.template.model_dump() if payload.template else None,
+        "supplier": payload.supplier.model_dump() if payload.supplier else None,
+        "ask_first": payload.ask_first,
+        "refill_qty": payload.refill_qty,
+        "sold_since": 0,
         "next_run_at": next_run(trigger["schedule"]) if trigger["type"] == "schedule" else None,
         "run_count": 0, "last_run_at": None,
         "created_at": now, "updated_at": now,
@@ -870,7 +952,10 @@ async def run_automation(rule_id: str, payload: RunIn = RunIn(), user=Depends(ve
         except ValueError as e:
             raise HTTPException(status_code=400, detail=str(e)) from e
     ev = {"type": "manual.reorder", "by": user["user_id"]}
-    if (rule.get("action") or {}).get("type", "send_order") == "send_order":
+    if (rule.get("action") or {}).get("type") == "order_supplier":
+        from .reorder import order_supplier
+        run = await order_supplier(rule, ev, needed_by=needed_by)
+    elif (rule.get("action") or {}).get("type", "send_order") == "send_order":
         run = await _create_partner_order(rule, source=None, needed_by=needed_by, event=ev,
                                           ctx=await _schedule_ctx(rule))
     else:
@@ -900,6 +985,11 @@ async def list_runs(business_id: str, limit: int = Query(50, ge=1, le=200), user
         "created_order_id": r.get("created_order_id"),
         "error": r.get("error") if r["business_id"] == business_id else None,
         "created_at": r["created_at"],
+        # reorder.py: a reorder waiting for the owner's Send, why it fired,
+        # the supplier's WhatsApp, and whether the delivery was counted in.
+        **({"why": r.get("why"), "supplier_name": r.get("supplier_name"), "whatsapp": r.get("whatsapp"),
+            "can_refill": bool(r.get("refill")) and not r.get("refilled_at") and r["result"] in DID_SOMETHING,
+            "refilled_at": r.get("refilled_at")} if r["business_id"] == business_id else {}),
     } for r in rows]}
 
 

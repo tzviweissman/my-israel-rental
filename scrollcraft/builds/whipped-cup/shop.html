@@ -4,10 +4,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Shop · The Whipped Cup</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="Classic Cloud ₪40, Caramel Cloud and Vanilla Cloud ₪48 a jar; weekly packages from ₪75. Order on WhatsApp from The Whipped Cup, Ramat Eshkol, Jerusalem.">
 <meta property="og:title" content="Shop · The Whipped Cup">
 <meta property="og:description" content="Classic Cloud ₪40, Caramel Cloud and Vanilla Cloud ₪48 a jar; weekly packages from ₪75. Order on WhatsApp from The Whipped Cup, Ramat Eshkol, Jerusalem.">
-<meta property="og:image" content="https://myisraelrental.com/pages/rena-lipschitz/assets/jar-caramel.webp">
+<meta property="og:image" content="assets/jar-caramel.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,500..700,100;1,9..144,500,100&display=swap" rel="stylesheet">
@@ -147,7 +148,12 @@
   // Each package says what it allows, and its choices sit under it (page
   // rules 3l): the Duo and the Cloud Bundle mix any flavours to exactly 2 or
   // 6 jars, One Flavour is one flavour, Assorted is a mix of all three.
-  var WA = '19299936768';
+  var WA = '19299936768', GIG = 'cbf185df-6652-4fc4-bd2d-0954b4d13731';
+  // Every order is saved to MyIsraelRental before WhatsApp opens (page rules 3k). The ids are the listing's
+  // own products, named exactly as the listing names them (added 22 Oct 2026 by add_site_products.py).
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var PID = { classic: 'a7be8afd6138', caramel: '30dbd6bc98ac', vanilla: '02af21299635',
+    bundle: 'd465aae6e291', assorted: '430c01b7727b', one: '565d11aa4f12', duo: '404ecb4855c1' };
   var JARS = { classic: ['Classic Cloud', 40], caramel: ['Caramel Cloud', 48], vanilla: ['Vanilla Cloud', 48] };
   var PACKS = {
     bundle: { name: 'Cloud Bundle', price: 220, jars: 6, mode: 'mix', meta: '6 jars · Monthly', allows: 'Any 6 jars, mix and match' },
@@ -208,10 +214,15 @@
   // shown the way shops show a deal (Tzvi, 20 Oct 2026, from the strawberry video: the original price
   // with a slash through it next to the price, and a short badge, not a sentence). The jars bought one
   // by one at the lowest single price, so the saving is always true whatever the flavours.
-  function was(k) { return singles(k)[0]; }
+  // Assorted shows NO saving (rule 3j unit-price test, 22 Oct 2026). Its separate price is 4 single jars of
+  // the flavours it holds, the cheapest four: one Classic 40 + one Caramel 48 + one Vanilla 48 + a second
+  // Classic 40 = 176, so on paper 155 is 12% off. But 155 / 4 = 38.75 a jar is above the Try It Duo's
+  // 75 / 2 = 37.50 a jar, a smaller pack, so a % off here would be false against a cheaper way to buy.
+  function was(k) { return k === 'assorted' ? 0 : singles(k)[0]; }
+  function pct(k) { return Math.floor((was(k) - PACKS[k].price) * 100 / was(k)); }  // percent off, rounded down
   plans.innerHTML = Object.keys(PACKS).map(function (k) {
     var p = PACKS[k];
-    return '<label class="plan' + (k === 'bundle' ? ' lead' : '') + '"><input type="radio" name="pack" value="' + k + '"><span class="box">' + (k === 'bundle' ? '<span class="tab">Best value</span>' : '') + '<span><b>' + p.name + '</b><br><span class="pr">' + p.meta + ' · ' + perJar(p) + '</span></span><span class="p"><s class="was" aria-label="instead of ₪' + was(k) + '">₪' + was(k) + '</s> ₪' + p.price + '</span><span class="allows">' + p.allows + '</span><span class="save-b" data-save="Save ₪' + (was(k) - p.price) + '">Save ₪' + (was(k) - p.price) + '</span></span></label>';
+    return '<label class="plan' + (k === 'bundle' ? ' lead' : '') + '"><input type="radio" name="pack" value="' + k + '"><span class="box">' + (k === 'bundle' ? '<span class="tab">Best value</span>' : '') + '<span><b>' + p.name + '</b><br><span class="pr">' + p.meta + ' · ' + perJar(p) + '</span></span><span class="p">' + (was(k) ? '<s class="was" aria-label="instead of ₪' + was(k) + '">₪' + was(k) + '</s> ' : '') + '₪' + p.price + '</span><span class="allows">' + p.allows + '</span>' + (was(k) ? '<span class="save-b" data-save="' + pct(k) + '% off">' + pct(k) + '% off</span>' : '') + '</span></label>';
   }).join('');
   function choosePack(v) { pack = v; mixQ = { classic: 0, caramel: 0, vanilla: 0 }; oneFlav = ''; drawMix(); update(); check(false);
     if (v) say(PACKS[v].name + ' in your basket');
@@ -263,7 +274,7 @@
     var html = ''; for (var k in q) if (q[k]) html += '<li class="bl"><span>' + JARS[k][0] + '<span class="step sm"><button type="button" data-k="' + k + '" data-d="-1" aria-label="One fewer ' + JARS[k][0] + '">−</button><output>' + q[k] + '</output><button type="button" data-k="' + k + '" data-d="1" aria-label="One more ' + JARS[k][0] + '">+</button></span></span><span class="bl-r">₪' + q[k] * JARS[k][1] + '<button type="button" class="rm" data-rm="' + k + '" aria-label="Remove ' + JARS[k][0] + ' from the basket">' + BIN + '</button></span></li>';
     if (PACKS[pack]) html += '<li class="bl"><span>' + PACKS[pack].name + (packDesc() ? ': ' + packDesc() : '') + '</span><span class="bl-r">₪' + PACKS[pack].price + '<button type="button" class="rm" data-rm="pack" aria-label="Remove the ' + PACKS[pack].name + ' from the basket">' + BIN + '</button></span></li>';
     document.getElementById('sum-list').innerHTML = html || '<li><span>Your basket is empty. Pick a jar or a package above.</span></li>';
-    [].forEach.call(plans.querySelectorAll('.plan'), function (l) { var sb = l.querySelector('.save-b'); sb.textContent = l.querySelector('input').value === pack ? 'In your basket' : sb.dataset.save; });
+    [].forEach.call(plans.querySelectorAll('.plan'), function (l) { var sb = l.querySelector('.save-b'); if (!sb) return; sb.textContent = l.querySelector('input').value === pack ? 'In your basket' : sb.dataset.save; });
     var mini = ''; for (var km in q) if (q[km]) mini += '<li><span>' + q[km] + ' × ' + JARS[km][0] + '</span><span>₪' + q[km] * JARS[km][1] + '</span></li>';
     if (PACKS[pack]) mini += '<li><span>' + PACKS[pack].name + '</span><span>₪' + PACKS[pack].price + '</span></li>';
     document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
@@ -280,7 +291,7 @@
     }
     deal.hidden = !sw;
     // the deal shown, not described (old price struck through)
-    if (sw) { deal.dataset.pack = sw; deal.querySelector('span').innerHTML = extra ? 'Make it 6 jars: Cloud Bundle <s>₪' + cost + '</s> ₪220' : 'As the ' + PACKS[sw].name + ': <s>₪' + cost + '</s> ₪' + PACKS[sw].price; }
+    if (sw) { deal.dataset.pack = sw; deal.querySelector('span').innerHTML = extra ? 'Make it 6 jars: Cloud Bundle <s>₪' + cost + '</s> ₪220' : 'As the ' + PACKS[sw].name + ': <s>₪' + cost + '</s> ₪' + PACKS[sw].price + ' <span class="save-b">' + Math.floor((cost - PACKS[sw].price) * 100 / cost) + '% off</span>'; }  // same jars, so a true percent; the 6th-jar case adds a jar, so it names no percent
     document.getElementById('total').textContent = '₪' + total();
     drawStep();
     var b = { jars: {} }; for (var k2 in q) if (q[k2]) b.jars[k2] = q[k2]; if (pack) b.pack = pack; window.twcBasket.set(b);
@@ -323,9 +334,26 @@
     out.push('Deliver to: ' + v('addr'));
     out.push('First delivery: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
     out.push('Name: ' + v('me') + ', ' + v('ph'));
-    var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(out.join('\n'));
-    var tab = window.open(url, '_blank'); if (!tab) location.href = url;
-    var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+    var ls = []; for (var k5 in q) if (q[k5]) ls.push({ product_id: PID[k5], qty: q[k5] });
+    if (PACKS[pack]) ls.push({ product_id: PID[pack], qty: 1 });
+    var notes = [PACKS[pack] ? PACKS[pack].name + ': ' + packDesc() : '', v('note'), 'Sent from The Whipped Cup page by WhatsApp'].filter(Boolean).join('\n');
+    var sending = send.getAttribute('aria-busy') === 'true'; if (sending) return;
+    send.setAttribute('aria-busy', 'true');
+    var label = send.firstElementChild.textContent; send.firstElementChild.textContent = 'Sending';
+    // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
+    var tab = window.open('', '_blank');
+    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })
+      .catch(function (err) { console.warn('Order not saved', err); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var text = out.join('\n');
+      if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      send.removeAttribute('aria-busy'); send.firstElementChild.textContent = label;
+      var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+    });
   });
   document.getElementById('deal').querySelector('button').addEventListener('click', function () {
     var k = document.getElementById('deal').dataset.pack; pack = k; oneFlav = ''; mixQ = { classic: 0, caramel: 0, vanilla: 0 };

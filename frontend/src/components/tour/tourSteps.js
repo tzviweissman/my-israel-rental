@@ -8,13 +8,16 @@
  * small bar brings it back when they are done. Nothing is required.
  *
  * Two walks, chosen by what the account has (TourProvider):
- *   business - 14 stops, in the order a new business uses them;
+ *   business - 21 stops, in the order a new business uses them;
  *   host     - 9 stops for someone who rents out a place.
  * The stops added on 16 Oct 2026 (Tzvi: "add all the new features to the
  * walk through tour") cover link-in-bio, appointments, gift cards, the
  * sales summary with private feedback, and messages to guests; on 17 Oct
  * hours and fees with table ordering (b.hours); on 19 Oct calendar sync
- * (b.calendar) and sales at the counter (b.counter). Stops on My page that
+ * (b.calendar) and sales at the counter (b.counter); on 22 Oct the rating
+ * badge (b.badge), sending a price first (b.quotes), payment requests
+ * (b.payreq), holiday and win-back messages (b.occasions) and the leads
+ * board (b.leads). Stops on My page that
  * are not about the details window carry `details=0`, which closes it
  * (MyBusinessesTab), so the one b.biolink opens is not left over them.
  * Someone who is both takes the business walk first and is offered the
@@ -40,6 +43,8 @@ export const WALKS = {
       doIt: { href: '/businesses/add' } },
     { id: 'b.share', route: '/dashboard?tab=my-businesses&details=0', target: 'business-share',
       doIt: { click: 'business-share' } },
+    { id: 'b.badge', route: '/dashboard?tab=my-businesses&details=0', target: 'rating-badge',
+      doIt: { click: 'rating-badge' } },
     { id: 'b.biolink', route: '/dashboard?tab=my-businesses&details=1', target: 'bio-link' },
     { id: 'b.hours', route: '/dashboard?tab=my-businesses&details=0', target: 'business-hours',
       doIt: { click: 'business-hours' } },
@@ -52,6 +57,14 @@ export const WALKS = {
       doIt: { click: 'orders-counter' } },
     { id: 'b.appointments', route: '/dashboard?tab=appointments', target: 'appointment-settings',
       doIt: { click: 'appointment-settings-open' } },
+    { id: 'b.quotes', route: '/dashboard?tab=appointments', target: 'quote-new-open',
+      doIt: { click: 'quote-new-open' } },
+    { id: 'b.payreq', route: '/dashboard?tab=customers&view=list', target: 'customers-payreq',
+      doIt: { click: 'customers-payreq' } },
+    { id: 'b.occasions', route: '/dashboard?tab=customers&view=list', target: ['occasions-card', 'customers-email'],
+      doIt: { click: ['occasion-holiday', 'customers-email'] } },
+    { id: 'b.leads', route: '/dashboard?tab=customers&view=leads', target: 'leads-board',
+      doIt: { click: 'leads-add-open' } },
     { id: 'b.giftcards', route: '/dashboard?tab=discounts', target: 'gift-cards',
       doIt: { click: 'gift-cards-open' } },
     { id: 'b.network', route: '/dashboard?tab=network&view=partners', target: ['network', 'network-no-business'],

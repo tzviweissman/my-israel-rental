@@ -47,7 +47,7 @@ export default function OccasionsCard({ API, auth, biz, onCompose }) {
   const writeWinBack = () => open('lapsed', ready('messages.occasion.winBack', () => ({})), { days: 90 });
 
   return (
-    <section className="rounded-2xl border p-4 mb-4 grid gap-3 sm:grid-cols-2" style={{ borderColor: 'var(--brand-border)', background: 'var(--surface, #F9FAFB)' }} data-testid="occasions-card">
+    <section className="rounded-2xl border p-4 mb-4 grid gap-3 sm:grid-cols-2" style={{ borderColor: 'var(--brand-border)', background: 'var(--surface, #F9FAFB)' }} data-testid="occasions-card" data-tour="occasions-card">
       {holiday && (
         <div className="flex gap-3 items-start">
           <CalendarHeart size={20} className="shrink-0 mt-0.5" style={{ color: 'var(--gold)' }} aria-hidden="true" />
@@ -60,7 +60,7 @@ export default function OccasionsCard({ API, auth, biz, onCompose }) {
             <p className="text-xs mb-2" style={{ color: 'var(--brand-muted)' }}>
               {t('messages.occasion.holidayHint', 'Tell your customers your holiday hours and what you offer for it.')}
             </p>
-            <button type="button" onClick={writeHoliday} className={btn} style={line} data-testid="occasion-holiday">
+            <button type="button" onClick={writeHoliday} className={btn} style={line} data-testid="occasion-holiday" data-tour="occasion-holiday">
               {t('messages.occasion.writeHoliday', 'Write a holiday message')}
             </button>
           </div>

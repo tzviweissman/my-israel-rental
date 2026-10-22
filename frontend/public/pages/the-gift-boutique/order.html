@@ -13,8 +13,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Order a gift · The Gift Boutique</title>
+<meta name="site-category" content="fashion-shop">
 <meta name="description" content="Choose your gifts, say who they are for and where they are going, and send the order to The Gift Boutique on WhatsApp. Delivered across Israel.">
-<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mv8fwl1w">
+<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mvjwlfh4">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
@@ -74,7 +75,7 @@
   .items .ph { width: 64px; height: 64px; border-radius: 26%; overflow: hidden; background: var(--ivory-2); }
   .items .ph img { width: 100%; height: 100%; object-fit: cover; scale: 1.08; }
   .items b { display: block; font-weight: 500; line-height: 1.3; }
-  .items .pr { color: var(--gold-ink); font-weight: 600; font-size: .95rem; }
+  .items .pr { color: var(--ink); font-weight: 600; font-size: .95rem; }
   .items li.is-out .ph img { filter: grayscale(.85) opacity(.55); }
   .items li.is-out .pr { color: var(--soft); font-weight: 500; }
   .items li.has { background: linear-gradient(90deg, rgb(212 170 64 / .12), transparent 70%); }
@@ -110,7 +111,7 @@
   .sum li span:last-child { color: #fff; white-space: nowrap; }
   .sum .empty { color: var(--on-night-soft); margin: 1rem 0 0; font-size: .95rem; }
   .sum .tot { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
-  .sum .tot b { font: 600 1.5rem/1 var(--font-body); color: var(--gold); }
+  .sum .tot b { font: 600 1.5rem/1 var(--font-body); color: #fff; }
   .sum .note { margin: .8rem 0 1.25rem; color: var(--on-night-soft); font-size: .9rem; }
   .sum .btn { width: 100%; }
   .sum .why { margin: .8rem 0 0; color: var(--gold-hi); font-size: .9rem; min-height: 1.4em; }
@@ -125,18 +126,138 @@
     .dock { position: fixed; z-index: 60; inset: auto 0 0 0; display: flex; align-items: center; justify-content: space-between; gap: .75rem;
       padding: .7rem var(--gutter) calc(.7rem + env(safe-area-inset-bottom)); background: rgb(14 12 9 / .96); border-top: 1px solid var(--line-night); color: #fff; }
     .dock small { display: block; color: var(--on-night-soft); font-size: .8rem; line-height: 1.2; }
-    .dock b { font: 600 1.2rem/1.2 var(--font-body); color: var(--gold); }
+    .dock b { font: 600 1.2rem/1.2 var(--font-body); color: #fff; }
     .dock .btn { min-height: 48px; padding: 0 1.1rem; font-size: .95rem; }
     main { padding-bottom: 5rem; }
   }
+
+  /* PROPOSED: same menu bar as the home page, three steps, find-a-gift, remove buttons, a toast */
+  .nav { margin-inline-start: auto; display: flex; align-items: center; gap: .25rem; }
+  .nav a.link { color: var(--on-night-soft); text-decoration: none; font-size: .95rem; padding: 0 .8rem; min-height: 44px; display: inline-flex; align-items: center; border-radius: 999px; }
+  .nav a.link:hover { color: var(--gold-hi); }
+  .ghost { display: inline-flex; align-items: center; gap: .5rem; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 1px solid currentColor; color: var(--gold); font: 500 .95rem/1 var(--font-body); text-decoration: none; white-space: nowrap; }
+  .ghost[aria-current="page"] { background: var(--gold); border-color: var(--gold); color: var(--night); }
+  .ghost .cnt { display: inline-grid; place-items: center; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 999px; background: var(--night); color: var(--gold-hi); font-size: .8rem; font-weight: 600; }
+  .ghost .cnt[hidden] { display: none; }
+  @media (max-width: 760px) { .nav a.link { display: none; } }
+
+  .prog { list-style: none; display: grid; grid-template-columns: repeat(3, 1fr); gap: .6rem; margin: 0 0 1.5rem; padding: 0; }
+  .prog li { padding-top: .55rem; border-top: 4px solid var(--line-ivory); font-size: .9rem; color: var(--soft); transition: border-color 300ms ease-out, color 300ms ease-out; }
+  .prog li.on { border-color: var(--gold); color: var(--ink); font-weight: 600; }
+  .prog li.done { border-color: var(--gold-ink); color: var(--ink); }
+  .step[hidden] { display: none; }
+  .step { margin-bottom: 0; }
+  .items li.is-out { display: none; }
+  .step > p.hint { margin-top: .1rem; }
+  .items li { min-height: 0; }
+  .items b { line-height: 1.2; }
+  .find input[type=search], .pills button { min-height: 40px; }
+
+  .find { display: flex; flex-wrap: wrap; gap: .6rem; align-items: center; margin: .7rem 0 .7rem; }
+  .find input[type=search] { flex: 1 1 14rem; min-height: 44px; border-radius: 999px; padding-inline: 1rem; }
+  .pills { display: flex; flex-wrap: wrap; gap: .5rem; width: 100%; }
+  .pills button { min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 1px solid var(--line-ivory); background: #fff; color: var(--ink); font: 500 .92rem/1 var(--font-body); cursor: pointer; transition: background 160ms ease-out, color 160ms ease-out, transform 100ms ease-out; }
+  .pills button:hover { border-color: var(--gold-ink); }
+  .pills button:active { transform: scale(.97); }
+  .pills button[aria-pressed="true"] { background: var(--night); border-color: var(--night); color: #fff; }
+  .pills button[aria-pressed="true"]:hover { background: #2B2518; }
+  .grp { display: none; }
+  .items { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .55rem; border-top: 0; }
+  .items[hidden], .items li[hidden] { display: none; }
+  @media (max-width: 560px) { .items { grid-template-columns: 1fr; } }
+  .items li { grid-template-columns: 68px minmax(0, 1fr); gap: 0 .8rem; padding: .45rem .6rem; border: 1px solid var(--line-ivory); border-radius: var(--r); background: #fff; align-items: center; }
+  .items li > div:last-child { grid-column: 2; }
+  .items li.has { border-color: var(--gold-ink); background: #fff; }
+  .items .ph { width: 68px; height: 68px; grid-row: span 2; }
+  .items .nopick { grid-column: 1 / -1; }
+  .items .ph img { scale: 1.08; }
+  .qty button { width: 40px; height: 40px; }
+  .qty { margin-top: 0; }
+  .items b { font-size: .95rem; }
+  .step > h2 { font-size: 1.2rem; }
+  .add { min-height: 40px; }
+  .none { margin: 1rem 0 0; color: var(--soft); }
+
+  .sum li { align-items: center; }
+  .sum li .lt { display: flex; align-items: center; gap: .5rem; min-width: 0; flex: 1; }
+  .sum li .lt span { min-width: 0; white-space: normal; color: var(--on-night-soft); }
+  .sum li > span:last-child { flex: none; }
+  .rm { width: 40px; height: 40px; flex: none; border: 0; border-radius: 50%; background: transparent; color: var(--on-night-soft); cursor: pointer; display: grid; place-items: center; transition: background 160ms ease-out, color 160ms ease-out, transform 100ms ease-out; }
+  .rm:hover { background: rgb(255 255 255 / .12); color: #fff; }
+  .rm:active { transform: scale(.92); }
+  .rm svg { width: 18px; height: 18px; }
+  .sum .reassure { display: flex; gap: .5rem; align-items: flex-start; margin: .8rem 0 .9rem; color: #fff; font-size: .9rem; font-weight: 500; }
+  .sum .reassure svg { width: 18px; height: 18px; flex: none; color: #7CD39A; margin-top: 2px; }
+  .sum .note { display: none; }
+  .btn[aria-disabled="true"]:hover { background: #CDBFA4; }
+  .sum .back { display: block; width: 100%; margin-top: .6rem; min-height: 44px; border: 0; background: none; color: var(--on-night-soft); font: 500 .95rem/1 var(--font-body); cursor: pointer; border-radius: 999px; transition: color 160ms ease-out, background 160ms ease-out; }
+  .sum .back:hover { color: #fff; background: rgb(255 255 255 / .08); }
+  .sum .back[hidden] { display: none; }
+  .dock .back2 { display: none; }
+  input:focus, textarea:focus { border-color: var(--gold-ink); box-shadow: 0 0 8px 2px rgb(212 170 64 / .35); }
+
+  .toast { position: fixed; z-index: 80; top: calc(var(--bar-h) + .75rem); left: 50%; translate: -50% -140%; display: flex; align-items: center; gap: .6rem; padding: .7rem 1.1rem .7rem .8rem; border-radius: 12px; background: var(--night); color: #fff; font-size: .95rem; box-shadow: 0 3px 30px rgb(14 12 9 / .3); opacity: 0; transition: translate 240ms var(--out), opacity 240ms ease-out; pointer-events: none; }
+  .toast.on { translate: -50% 0; opacity: 1; }
+  .toast i { width: 22px; height: 22px; border-radius: 50%; background: var(--gold); color: var(--night); display: grid; place-items: center; font-style: normal; }
+  .toast svg { width: 13px; height: 13px; }
+  .foot { background: var(--night); color: var(--on-night-soft); border-top: 1px solid var(--line-night); padding-block: 1.75rem 6rem; font-size: .9rem; }
+  .foot .cols3 { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr; gap: 1.5rem 2.5rem; }
+  .foot h4 { margin: 0 0 .6rem; font: 500 .8rem/1.2 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
+  .foot p { margin: 0 0 .35rem; }
+  .foot a { color: var(--on-night-soft); text-decoration: none; }
+  .foot a:hover { color: var(--gold-hi); }
+  .foot .fine { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
+  @media (max-width: 760px) { .foot .cols3 { grid-template-columns: 1fr; } }
+
+  /* RULE 3t, fashion-shop (22 Oct 2026): one ivory ground; the bar and footer follow the home page. The order summary stays dark as the one solid block. */
+  .bar { background: rgb(246 240 228 / .95); border-bottom: 1px solid var(--line-ivory); }
+  .brand, .brand span { color: var(--ink); }
+  .bar .back, .nav a.link { color: var(--soft); }
+  .bar .back:hover, .nav a.link:hover { color: var(--ink); }
+  .nav .ghost { color: var(--ink); border-color: var(--ink); }
+  .nav .ghost:hover { background: var(--ink); color: var(--ivory); }
+  .nav .ghost[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--ivory); }
+  .nav .ghost .cnt { background: var(--ivory); color: var(--ink); }
+  .foot { background: var(--ivory-2); color: var(--soft); border-top: 1px solid var(--line-ivory); }
+  .foot a { color: var(--ink); }
+  .foot h4 { color: var(--gold-ink); }
+  .foot .fine { border-color: var(--line-ivory); }
+  .prog li { color: var(--ink); }
+  /* one corner radius (rule 3c.9): 14px for buttons, tiles, photos and cards; circles only for the round Add chip and step numbers */
+  body .btn, body .ghost, body .pills button, body .cat .ph, body .hero .rise li, body .cat .is-out .rowp .pr, body .brand img { border-radius: 14px !important; }
+  body .btn { box-shadow: none !important; }
+  body .nav a.link, body .cnt, body input, body textarea, body button.add, body button.back, body .back, body .ph, body .toast, body .sum { border-radius: 14px !important; }
+  body .brand span { font-size: var(--t-s) !important; }
+  @media (max-width: 1000px), (max-height: 760px) { .sum { position: static; } }
+  /* type scale (rule 3e.14): five sizes */
+  :root { --t-s: .875rem; --t-b: 1.0625rem; --t-m: 1.25rem; --t-h2: clamp(1.9rem, 1.2rem + 2.2vw, 3rem); --t-h1: clamp(2.6rem, 1.2rem + 4.2vw, 5.6rem); }
+  @media (max-width: 760px) { :root { --t-h1: clamp(2.4rem, 1rem + 8vw, 3.4rem); } }
+  body :not(h1):not(h2):not(h3):not(h4):not(dt):not(small):not(em):not(script):not(style) { font-size: var(--t-b) !important; }
+  body dt, body h4, body small, body .addchip, body .cue, body .fine, body .hrs, body .cnt, body .dock > span, body .dock small, body .label { font-size: var(--t-s) !important; }
+  body h3, body .cat-h, body .steps b, body .sum .tot b, body .dock b { font-size: var(--t-m) !important; }
+  body h1 { font-size: var(--t-h2) !important; }
+  body h2 { font-size: var(--t-m) !important; }
+  body .foot .cta b { font-size: var(--t-h2) !important; }
+  body .sign b { font-size: 7.1vw !important; }
+  .sum .saved { font-size: .9rem; }
+
+  /* ── 22 Oct 2026, independent review fixes ── */
+  .which { margin-top: 1.2rem; }
+  @media (max-width: 420px) { .bar .wrap { gap: .5rem; } .brand { min-width: 0; gap: .4rem; } body .brand span { font-size: .76rem !important; letter-spacing: .02em; white-space: nowrap; } .nav .ghost { padding-inline: .7rem; white-space: nowrap; flex: none; } }
 </style>
 </head>
 <body>
 
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="/business/the-gift-boutique" aria-label="The Gift Boutique, home"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mv8fwl1w" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
-    <a class="back" href="/business/the-gift-boutique#prices"><span class="lg" data-mir-key="t-ce287b8e-0">Back to the collection</span><span class="sm" data-mir-key="t-4949ccb5-0">Collection</span></a>
+    <a class="brand" href="/business/the-gift-boutique" aria-label="The Gift Boutique, home"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mvjwlfh4" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
+    <nav class="nav" aria-label="Pages">
+      <a class="link" href="/business/the-gift-boutique#make" data-mir-key="t-4dac8cb1-0">What we make</a>
+      <a class="link" href="/business/the-gift-boutique#prices" data-mir-key="t-53b2fbd0-0">Prices</a>
+      <a class="link" href="/business/the-gift-boutique#order" data-mir-key="t-bbb11a07-0">How to order</a>
+      <a class="link" href="https://wa.me/message/7TFTC4CVOY2MG1" target="_blank" rel="noopener" data-mir-key="t-aa883ea7-0">WhatsApp</a>
+      <a class="ghost" href="/business/the-gift-boutique/order" aria-current="page" data-mir-key="t-d7fd7ab0-0">Your order <span class="cnt" id="ncount" hidden>0</span></a>
+    </nav>
   </div>
 </header>
 
@@ -148,13 +269,16 @@
 
   <div class="wrap cols">
     <form id="f" novalidate>
-      <section class="step" aria-labelledby="s1">
-        <h2 id="s1"><span class="n" data-mir-key="t-4083c9f5-0">1</span>Your gifts</h2>
+      <ol class="prog" id="prog" aria-label="Order steps"><li data-mir-key="t-225fd494-0">Step 1: Your gifts</li><li data-mir-key="t-9d720bd0-0">Step 2: Where it is going</li><li data-mir-key="t-f0729679-0">Step 3: Your details</li></ol>
+      <section class="step" data-step="1" aria-labelledby="s1">
+        <h2 id="s1" data-mir-key="t-1033bef0-0"><span class="n">1</span>Your gifts</h2>
         <p class="hint" data-mir-key="t-414b7f7e-0">Prices in US dollars, as in our catalogue.</p>
+        <div class="find"><input type="search" id="q" placeholder="Search gifts" aria-label="Search gifts" autocomplete="off"><div class="pills" id="pills" role="group" aria-label="Choose a group of gifts"></div></div>
         <div id="gifts"></div>
+        <div id="which" class="which" hidden data-need><label for="whichin" id="whichl"></label><input id="whichin" name="which" autocomplete="off" maxlength="120"><p class="msg" data-mir-key="t-0e808155-0">Tell us which one you want.</p></div><p class="none" id="none" hidden>No gift matches that. Message us on WhatsApp and we will help.</p>
       </section>
 
-      <section class="step" aria-labelledby="s2">
+      <section class="step" data-step="2" aria-labelledby="s2">
         <h2 id="s2" data-mir-key="t-fad6f635-0"><span class="n">2</span>Where it is going</h2>
         <p class="hint" data-mir-key="t-b3d55a20-0">We deliver across Israel.</p>
         <div class="fields">
@@ -167,7 +291,7 @@
         </div>
       </section>
 
-      <section class="step" aria-labelledby="s3">
+      <section class="step" data-step="3" aria-labelledby="s3">
         <h2 id="s3" data-mir-key="t-56a49003-0"><span class="n">3</span>Your details</h2>
         <div class="fields">
           <div data-need><label for="me" data-mir-key="t-5c263b1a-0">Your name</label><input id="me" name="me" autocomplete="name"><p class="msg" data-mir-key="t-7317fdc7-0">Add your name.</p></div>
@@ -183,10 +307,12 @@
       <ul id="lines" aria-live="polite"></ul>
       <div class="tot"><span data-mir-key="t-08a3f96c-0">Gifts</span><b id="total">$0</b></div>
       <p class="note" data-mir-key="t-b73ddd1c-0">Delivery is added on WhatsApp once we know the city. You pay us directly; nothing is paid on this page.</p>
+      <p class="reassure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span data-mir-key="t-7b950b37-0">Nothing is paid on this page. We confirm the delivery fee with you on WhatsApp first.</span></p>
       <a class="btn" id="send" href="#" aria-disabled="true">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
-        <span style="position:relative" data-mir-key="t-568fb5eb-0">Send order on WhatsApp</span>
+        <span style="position:relative" data-mir-key="t-180df985-0">Send on WhatsApp</span>
       </a>
+      <button type="button" class="back" id="back" hidden>Back</button>
       <p class="why" id="why" aria-live="polite"></p>
       <p class="saved" data-mir-key="t-d64b031c-0">Your order is also saved with The Gift Boutique on MyIsraelRental, with a link to follow it.</p>
       <p class="wa-line" data-mir-key="t-2c558479-0">Or message us: <a href="https://wa.me/972535386042" target="_blank" rel="noopener">+972 53-538-6042</a></p>
@@ -194,12 +320,24 @@
   </div>
 </main>
 
+<div class="toast" id="toast" role="status" aria-live="polite"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></i><span id="toastt"></span></div>
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols3">
+      <div><h4 data-mir-key="t-1fac1ce0-0">The Gift Boutique</h4><p data-mir-key="t-0b3b6d5b-0">Jerusalem, with delivery across Israel.</p><p data-mir-key="t-032b4551-0">Hand wrapped gifts for every occasion.</p></div>
+      <div><h4 data-mir-key="t-b22a94f3-0">Pages</h4><p><a href="/business/the-gift-boutique" data-mir-key="t-fc43c37b-0">Home</a></p><p><a href="/business/the-gift-boutique#prices" data-mir-key="t-dd2e2019-0">The collection</a></p><p><a href="/business/the-gift-boutique/order" data-mir-key="t-f78aa345-0">Order a gift</a></p></div>
+      <div><h4 data-mir-key="t-49e826dc-0">Reach us</h4><p><a href="https://wa.me/972535386042" target="_blank" rel="noopener" data-mir-key="t-2aae7521-0">WhatsApp +972 53-538-6042</a></p><p><a href="mailto:thegiftboutiqueisrael@gmail.com" data-mir-key="t-27a92240-0">thegiftboutiqueisrael@gmail.com</a></p><p data-mir-key="t-a858a79d-0">Sunday to Thursday, 8:00 to midnight. Friday, 8:00 to 12:00.</p></div>
+      <div class="fine"><span data-mir-key="t-48dbb1b8-0">The Gift Boutique, Jerusalem. Gifts for every occasion since 2025.</span><a href="https://myisraelrental.com/businesses" data-mir-key="t-6fde72b8-0">Listed on MyIsraelRental</a></div>
+    </div>
+  </div>
+</footer>
+
 <div class="dock order-bar" id="dock">
   <div><small data-mir-key="t-7c8e924e-0">Gifts, before delivery</small><b id="dtotal">$0</b></div>
-  <a class="btn" id="send2" href="#" aria-disabled="true"><span style="position:relative" data-mir-key="t-180df985-0">Send on WhatsApp</span></a>
+  <a class="btn" id="send2" href="#" aria-disabled="true"><span style="position:relative" data-mir-key="t-180df985-1">Send on WhatsApp</span></a>
 </div>
 
-<script id="fallback-products" type="application/json">[{"name":"Gold Luxurious Wine Holder and Wine Glasses","price":150,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-wine.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Silver Chain Wine Holder","price":52,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/silver-chain.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Electric Bottle Opener","price":47,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/electric-opener.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener","price":45,"price_to":80,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/bottle-opener.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener Gift Set","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/opener-set.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener","price":25,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/opener-snacks.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"L'Chaim Cups","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/lchaim-cups.webp","group":"Wine and bottle gifts","in_stock":false},{"name":"Gold Bicycle Wine Holder","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/bicycle-wine.webp","group":"Wine and bottle gifts","in_stock":false},{"name":"Table Cloth and Napkins","price":45,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/tablecloth.webp","group":"For the table","in_stock":true},{"name":"Napkins & Gold Flower Napkin Rings","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/napkin-rings.webp","group":"For the table","in_stock":true},{"name":"Set of 4 Rosh Hashana Napkins","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/rh-napkins.webp","group":"For the table","in_stock":true},{"name":"Porcelain Napkin Holder","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/napkin-holder.webp","group":"For the table","in_stock":true},{"name":"Glass Salt Shaker","price":34,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/salt-shaker.webp","group":"For the table","in_stock":true},{"name":"Wooden serving board","price":50,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/wooden-board.webp","group":"For the table","in_stock":true},{"name":"Apple Shaped serving board","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/apple-board.webp","group":"For the table","in_stock":true},{"name":"White Vase","price":55,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/white-vase.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Gold Edged Bowl","price":35,"price_to":38,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-bowl.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"White Marble Glass Bowl","price":35,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/marble-bowl.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Washing Cup and Hand Towels","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/washing-cup.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Small Glass Jar","price":33,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/glass-jar.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Small Glass, Gold Rimmed Bowls","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-rim-bowls.webp","group":"Bowls, vases and washing cups","in_stock":false},{"name":"Black/Gold Vase","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/black-gold-vase.webp","group":"Bowls, vases and washing cups","in_stock":false},{"name":"Self-Care Gift","price":35,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/self-care.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Cream and Gold Cosmetic Bag","price":26,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/cream-bag.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Black and Gold Cosmetic Bag","price":26,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/black-bag.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Small Jewellery Organiser","price":25,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/jewellery.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Glass Cookie Jar","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/cookie-jar.webp","group":"Treats, self-care and keepsakes","in_stock":false}]</script>
+<script id="fallback-products" type="application/json">[{"name":"Gold Luxurious Wine Holder and Wine Glasses","price":150,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-wine.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Silver Chain Wine Holder","price":52,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/silver-chain.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Electric Bottle Opener","price":47,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/electric-opener.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener with Roses","price":45,"price_to":80,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/bottle-opener.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener Gift Set","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/opener-set.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"Bottle Opener with Snacks","price":25,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/opener-snacks.webp","group":"Wine and bottle gifts","in_stock":true},{"name":"L'Chaim Cups","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/lchaim-cups.webp","group":"Wine and bottle gifts","in_stock":false},{"name":"Gold Bicycle Wine Holder","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/bicycle-wine.webp","group":"Wine and bottle gifts","in_stock":false},{"name":"Table Cloth and Napkins","price":45,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/tablecloth.webp","group":"For the table","in_stock":true},{"name":"Napkins & Gold Flower Napkin Rings","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/napkin-rings.webp","group":"For the table","in_stock":true},{"name":"Set of 4 Rosh Hashana Napkins","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/rh-napkins.webp","group":"For the table","in_stock":true},{"name":"Porcelain Napkin Holder","price":30,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/napkin-holder.webp","group":"For the table","in_stock":true},{"name":"Glass Salt Shaker","price":34,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/salt-shaker.webp","group":"For the table","in_stock":true},{"name":"Wooden serving board","price":50,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/wooden-board.webp","group":"For the table","in_stock":true},{"name":"Apple Shaped serving board","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/apple-board.webp","group":"For the table","in_stock":true},{"name":"White Vase","price":55,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/white-vase.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Gold Edged Bowl","price":35,"price_to":38,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-bowl.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"White Marble Glass Bowl","price":35,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/marble-bowl.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Washing Cup and Hand Towels","price":40,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/washing-cup.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Small Glass Jar","price":33,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/glass-jar.webp","group":"Bowls, vases and washing cups","in_stock":true},{"name":"Small Glass, Gold Rimmed Bowls","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/gold-rim-bowls.webp","group":"Bowls, vases and washing cups","in_stock":false},{"name":"Black/Gold Vase","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/black-gold-vase.webp","group":"Bowls, vases and washing cups","in_stock":false},{"name":"Self-Care Gift","price":35,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/self-care.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Cream and Gold Cosmetic Bag","price":26,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/cream-bag.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Black and Gold Cosmetic Bag","price":26,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/black-bag.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Small Jewellery Organiser","price":25,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/jewellery.webp","group":"Treats, self-care and keepsakes","in_stock":true},{"name":"Glass Cookie Jar","price":0,"price_to":null,"currency":"USD","image":"/pages/the-gift-boutique/assets/cat/cookie-jar.webp","group":"Treats, self-care and keepsakes","in_stock":false}]</script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   var WA = '972535386042';
@@ -245,6 +383,33 @@ document.addEventListener('DOMContentLoaded', function () {
     });
   });
 
+  // find a gift: one group at a time, or search across all of them
+  var pills = document.getElementById('pills'), qin = document.getElementById('q'), curG = 0;
+  var gh = [].slice.call(host.querySelectorAll('h3.grp')), gl = [].slice.call(host.querySelectorAll('ul.items'));
+  function applyFilter() {
+    var term = qin.value.trim().toLowerCase(), any = false;
+    gl.forEach(function (ul, i) {
+      var vis = 0;
+      [].forEach.call(ul.children, function (li) {
+        var p = products[li.dataset.k];
+        var ok = term ? p.name.toLowerCase().indexOf(term) > -1 : true;
+        li.hidden = !ok; if (ok) vis++;
+      });
+      ul.hidden = term ? !vis : i !== curG;
+      if (!ul.hidden) any = true;
+    });
+    [].forEach.call(pills.children, function (b, i) { b.setAttribute('aria-pressed', !term && i === curG ? 'true' : 'false'); });
+    document.getElementById('none').hidden = any;
+  }
+  order.forEach(function (g, i) {
+    var b = document.createElement('button'); b.type = 'button'; b.textContent = g;
+    b.addEventListener('click', function () { qin.value = ''; curG = i; applyFilter(); });
+    pills.appendChild(b);
+  });
+  qin.addEventListener('input', applyFilter);
+  if (add) { products.forEach(function (p) { if (q[p._k] != null) curG = order.indexOf(p.group || 'More gifts'); }); }
+  applyFilter();
+
   function drawCtl(p) {
     var ctl = p._ctl; ctl.textContent = '';
     if (!p.in_stock) return;
@@ -252,8 +417,8 @@ document.addEventListener('DOMContentLoaded', function () {
     p._li.classList.toggle('has', n > 0);
     if (!n) {
       var a = document.createElement('button'); a.type = 'button'; a.className = 'add'; a.textContent = 'Add';
-      a.setAttribute('aria-label', 'Add ' + p.name);
-      a.onclick = function () { q[p._k] = 1; update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
+      a.setAttribute('aria-label', 'Add to order, ' + p.name);
+      a.onclick = function () { q[p._k] = 1; toast('Added: ' + p.name); update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
       ctl.appendChild(a); return;
     }
     var box = document.createElement('div'); box.className = 'qty';
@@ -284,34 +449,72 @@ document.addEventListener('DOMContentLoaded', function () {
     lines.textContent = '';
     var c = chosen();
     empty.hidden = c.length > 0;
+    var rg = c.filter(function (p) { return p.price_to != null && Number(p.price_to) > Number(p.price); });
+    document.getElementById('which').hidden = !rg.length;
+    if (rg.length) document.getElementById('whichl').textContent = 'Which one? ' + rg.map(function (p) { return p.name + ' is ' + priceText(p); }).join('; ') + '. Write which one you want.';
     c.forEach(function (p) {
       var li = document.createElement('li');
-      var a = document.createElement('span'); a.textContent = q[p._k] + ' × ' + p.name;
+      var a = document.createElement('span'); a.className = 'lt';
+      var rmb = document.createElement('button'); rmb.type = 'button'; rmb.className = 'rm'; rmb.setAttribute('aria-label', 'Remove ' + p.name + ' from your order');
+      rmb.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4h8v2"/><path d="M6 6l1 14h10l1-14"/></svg>';
+      rmb.onclick = function () { delete q[p._k]; update(); };
+      var at = document.createElement('span'); at.textContent = q[p._k] + ' × ' + p.name; a.appendChild(rmb); a.appendChild(at);
       var b = document.createElement('span');
       b.textContent = priced(p) ? (p.price_to != null && Number(p.price_to) > Number(p.price) ? 'from ' : '') + money(q[p._k] * Number(p.price), p.currency) : 'on request';
       li.appendChild(a); li.appendChild(b); lines.appendChild(li);
     });
     var t = totals().text;
+    var nn = c.reduce(function (a, p) { return a + q[p._k]; }, 0), cn = document.getElementById('ncount'); cn.textContent = nn; cn.hidden = !nn;
     document.getElementById('total').textContent = t;
     document.getElementById('dtotal').textContent = t;
-    check(false);
+    check(false); paintBtn();
   }
 
   // what is still missing, said plainly; nothing is red until they try to send
   var why = document.getElementById('why');
-  function check(show) {
-    var missing = [];
-    if (!chosen().length) missing.push('choose a gift');
-    document.querySelectorAll('[data-need]').forEach(function (box) {
+  var stepNo = 1;
+  function stepMissing(n, show) {
+    var m = [];
+    if (n === 1) {
+      if (!chosen().length) m.push('choose a gift');
+      var wb = document.getElementById('which');
+      if (!wb.hidden) { var wok = document.getElementById('whichin').value.trim().length > 0; if (show) wb.classList.toggle('bad', !wok); if (!wok) m.push('which one'); }
+      return m;
+    }
+    document.querySelectorAll('.step[data-step="' + n + '"] [data-need]').forEach(function (box) {
       var ok = box.querySelector('input,textarea').value.trim().length > 0;
       if (show) box.classList.toggle('bad', !ok);
-      if (!ok) missing.push(box.querySelector('label').textContent.toLowerCase().replace(/\?$/, ''));
+      if (!ok) m.push(box.querySelector('label').textContent.toLowerCase().replace(/\?$/, ''));
     });
+    return m;
+  }
+  function check(show) {
+    var missing = stepMissing(stepNo, show);
     var ready = !missing.length;
     ['send', 'send2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', ready ? 'false' : 'true'); });
-    why.textContent = ready ? '' : (show || chosen().length ? 'Still needed: ' + missing.join(', ') + '.' : '');
+    why.textContent = ready ? '' : (show ? 'Still needed: ' + missing.join(', ') + '.' : '');
     return ready;
   }
+  var LAB = { 1: 'Continue', 2: 'Continue' };
+  function paintBtn() {
+    var t = totals().text;
+    var l = stepNo < 3 ? LAB[stepNo] : 'Send on WhatsApp';
+    var l2 = stepNo < 3 ? 'Continue' : 'Send on WhatsApp';
+    if (!sending) { document.getElementById('send').lastElementChild.textContent = l; document.getElementById('send2').lastElementChild.textContent = l2; }
+    document.getElementById('back').hidden = stepNo === 1;
+    document.querySelector('#send svg').style.display = stepNo < 3 ? 'none' : '';
+  }
+  function setStep(n, push) {
+    stepNo = n;
+    document.querySelectorAll('.step').forEach(function (e) { e.hidden = Number(e.dataset.step) !== n; });
+    [].forEach.call(document.getElementById('prog').children, function (li, i) { li.className = i + 1 === n ? 'on' : i + 1 < n ? 'done' : ''; if (i + 1 === n) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
+    if (push) { history.pushState({ s: n }, '', '#order-' + n); window.scrollTo({ top: 0 }); }
+    check(false); paintBtn();
+  }
+  window.addEventListener('popstate', function () { var m = /order-(\d)/.exec(location.hash); setStep(m ? Number(m[1]) : 1, false); });
+  document.getElementById('back').addEventListener('click', function () { history.back(); });
+  var tt = 0;
+  function toast(msg) { var t = document.getElementById('toast'); document.getElementById('toastt').textContent = msg; t.classList.add('on'); clearTimeout(tt); tt = setTimeout(function () { t.classList.remove('on'); }, 2200); }
   document.querySelectorAll('[data-need] input').forEach(function (i) {
     i.addEventListener('input', function () { i.closest('[data-need]').classList.remove('bad'); check(false); });
   });
@@ -320,6 +523,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function message() {
     var L = ['Hi, I would like to order:'];
     chosen().forEach(function (p) { L.push('• ' + q[p._k] + ' × ' + p.name + ' (' + priceText(p) + ')'); });
+    if (v('whichin') && !document.getElementById('which').hidden) L.push('Which one: ' + v('whichin'));
     L.push('Gifts total: ' + totals().text + ', plus delivery');
     L.push('');
     L.push('For: ' + v('to') + (v('tophone') ? ', ' + v('tophone') : ''));
@@ -362,10 +566,11 @@ document.addEventListener('DOMContentLoaded', function () {
     if (sending) return;
     if (!check(true)) {
       var first = document.querySelector('.bad input, .bad textarea');
-      if (!chosen().length) document.getElementById('s1').scrollIntoView({ behavior: 'smooth', block: 'start' });
-      else if (first) first.focus();
+      if (first) first.focus();
       return;
     }
+    if (stepNo < 3) { setStep(stepNo + 1, true); return; }
+    for (var n = 1; n < 3; n++) { if (stepMissing(n, true).length) { setStep(n, true); return; } }
     sending = true;
     // opened now, while this still counts as the tap, so no popup blocker stops it
     var tab = window.open('', '_blank');
@@ -376,7 +581,8 @@ document.addEventListener('DOMContentLoaded', function () {
       var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
       if (tab) tab.location.href = url; else location.href = url;
       sending = false;
-      ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.removeAttribute('aria-busy'); b.lastElementChild.textContent = id === 'send' ? 'Send order on WhatsApp' : 'Send on WhatsApp'; });
+      ['send', 'send2'].forEach(function (id) { var b = document.getElementById(id); b.removeAttribute('aria-busy'); });
+      paintBtn();
       why.textContent = saved ? 'Sent. Your order is saved, and the tracking link is in the message.' : '';
     });
   }
@@ -386,10 +592,11 @@ document.addEventListener('DOMContentLoaded', function () {
   var when = document.getElementById('when');
   when.min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
 
+  var m0 = /order-(\d)/.exec(location.hash); setStep(1, false);
   update();
   if (add && chosen().length) {
     var p = chosen()[0];
-    p._li.scrollIntoView({ block: 'center' });
+    toast('Added: ' + p.name);
   }
 });
 </script>

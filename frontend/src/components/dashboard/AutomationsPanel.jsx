@@ -12,6 +12,12 @@
  *          week on given days at a time
  *   Then:  an order appears at a partner · notify me · message the customer
  *
+ * Reorders (22 Oct 2026, backend reorder.py): WHEN a product runs low or
+ * every N of it are sold, an order to a partner or to a supplier who is not
+ * on the site (emailed, or a WhatsApp the owner sends). "Ask me first"
+ * holds it under What automations did with Send and Skip; "Arrived" adds
+ * the delivery back to the count.
+ *
  * Three things live on this screen because they are one idea: the rules,
  * which partners' automated orders skip the waiting step (auto-accept,
  * which only the RECEIVING business can grant), and what actually
@@ -25,7 +31,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { Zap, Plus, Send, Trash2, History, CheckCircle2, AlertTriangle, Loader2, Bell, MessageSquare, Truck, CalendarClock, Sparkles, KeyRound } from 'lucide-react';
+import { Zap, Plus, Send, Trash2, History, CheckCircle2, AlertTriangle, Loader2, Bell, MessageSquare, Truck, CalendarClock, Sparkles, KeyRound, PackageMinus, MessageCircle, Clock } from 'lucide-react';
 
 const FIRES_ON = ['preparing', 'ready', 'done'];
 // Python weekdays, Sunday first because the week does here.
@@ -37,12 +43,19 @@ const EMPTY = {
   trigger: { type: 'order.status_changed', status: 'ready', schedule: { every: 'week', weekdays: [6], day: 1, month: 1, time: '08:00' }, property_id: '' },
   action: { type: 'send_order', text: '' },
   template: { copy_from_source: true, items: '', notes: '', fulfilment: 'pickup', address: '', total: '' },
+  stock: { product: '', threshold: '10', every_n: '50' },
+  supplier: { name: '', email: '', phone: '' },
+  ask_first: true,
+  refill_qty: '',
 };
+const REORDER = ['stock.low', 'product.sold'];
 
 /* The starter cards. Each is a filled-in form, nothing more: the owner
    can change every word before saving, and the list is not what the
    feature can do - the two selects are. */
 const RECIPES = [
+  { key: 'lowStockReorder', Icon: PackageMinus, needsProducts: true,
+    form: { trigger: { type: 'stock.low' }, action: { type: 'order_supplier', text: '' }, template: { copy_from_source: false } } },
   { key: 'courierReady', Icon: Truck, needsPartner: true,
     form: { trigger: { type: 'order.status_changed', status: 'ready' }, action: { type: 'send_order', text: '' }, template: { copy_from_source: true } } },
   { key: 'weeklyReorder', Icon: CalendarClock, needsPartner: true,
@@ -84,6 +97,18 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
   const [busy, setBusy] = useState(null);
   const [form, setForm] = useState(null);
   const [tips, setTips] = useState(true);
+  // The business's shop products, for "a product runs low" (counter_sales.py lists them with their count).
+  const [products, setProducts] = useState([]);
+  useEffect(() => {
+    if (!bizId) return;
+    axios.get(`${API}/marketplace/businesses/${bizId}/counter`, auth)
+      .then(({ data }) => setProducts((data.stores || []).flatMap((st) => (st.products || []).map((pr) => ({
+        key: `${st.id}::${pr.id}`, gig_id: st.id, product_id: pr.id, name: pr.name, stock: pr.stock,
+        label: (data.stores.length > 1 ? `${st.title} · ` : '') + pr.name,
+      })))))
+      .catch(() => setProducts([]));
+  }, [API, auth, bizId]);
+  const productName = (trig) => products.find((x) => x.gig_id === trig?.gig_id && x.product_id === trig?.product_id)?.name || t('automations.aProduct', 'a product');
 
   const load = useCallback(async () => {
     if (!bizId) return;
@@ -134,6 +159,8 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
       'lead.received': t('automations.whenLead', 'When a customer taps to message me'),
       'booking.confirmed': t('automations.whenStay', 'When guests book {{where}}', { where: listingName(trigger?.property_id) }),
       'booking.cancelled': t('automations.whenStayCancelled', 'When guests cancel {{where}}', { where: listingName(trigger?.property_id) }),
+      'stock.low': t('automations.whenLow', 'When {{product}} drops to {{n}}', { product: productName(trigger), n: trigger?.threshold }),
+      'product.sold': t('automations.whenSold', 'Every {{n}} {{product}} sold', { product: productName(trigger), n: trigger?.every_n }),
       schedule: !s ? '' : s.every === 'month'
         ? t('automations.whenMonthly', 'Every month on the {{day}}, at {{time}}', { day: s.day, time: s.time })
         : s.every === 'year'
@@ -146,14 +173,17 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
     send_order: t('automations.orderFor', 'order for {{name}}', { name: rule.partner_name || partnerName(rule.partner_business_id) }),
     notify_me: t('automations.doNotify', 'notify me'),
     message_customer: t('automations.doMessage', 'message the customer'),
-  }[rule.action?.type || 'send_order']);
+    order_supplier: t('automations.orderForSupplier', 'order from {{name}}', { name: rule.supplier?.name || '' }),
+  }[rule.action?.type || 'send_order'] + (rule.ask_first ? ` (${t('automations.askFirstShort', 'asks you first')})` : ''));
 
   // What the form can say, given what it already says.
   const canMessage = (tt) => ['order.status_changed', 'appointment.booked', 'appointment.cancelled', 'booking.confirmed', 'booking.cancelled'].includes(tt);
   const canSendOrder = partners.length > 0;
+  const canSupplier = (tt) => [...REORDER, 'schedule', 'manual.reorder'].includes(tt);
 
   const startForm = (recipe) => {
-    const base = { ...EMPTY, partner_business_id: partners[0]?.id || '', template: { ...EMPTY.template }, trigger: { ...EMPTY.trigger, schedule: { ...EMPTY.trigger.schedule } } };
+    const base = { ...EMPTY, partner_business_id: partners[0]?.id || '', template: { ...EMPTY.template }, trigger: { ...EMPTY.trigger, schedule: { ...EMPTY.trigger.schedule } },
+      stock: { ...EMPTY.stock, product: products[0]?.key || '' }, supplier: { ...EMPTY.supplier } };
     if (!recipe) {
       if (!canSendOrder) base.action = { type: 'notify_me', text: '' };
       return setForm(base);
@@ -182,6 +212,14 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
       }
     }
     if (at === 'message_customer' && !f.action.text.trim()) return toast.error(t('automations.writeIt', 'Write the message'));
+    const prod = products.find((x) => x.key === f.stock.product);
+    if (REORDER.includes(tt) && !prod) return toast.error(t('automations.pickProduct', 'Pick the product'));
+    if (at === 'order_supplier') {
+      if (!f.supplier.name.trim()) return toast.error(t('automations.supplierName', "Add the supplier's name"));
+      if (!f.supplier.email.trim() && !f.supplier.phone.trim()) return toast.error(t('automations.supplierReach', "Add the supplier's email or WhatsApp number"));
+      if (!f.template.items.trim()) return toast.error(t('automations.sayWhat', 'Say what to order'));
+      if (f.template.fulfilment === 'delivery' && !f.template.address.trim()) return toast.error(t('automations.needAddress', 'A delivery needs an address'));
+    }
     if (tt === 'schedule' && (f.trigger.schedule.every || 'week') === 'week' && !f.trigger.schedule.weekdays.length) return toast.error(t('automations.pickDays', 'Pick at least one day'));
     setBusy('new');
     try {
@@ -199,9 +237,16 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                 ...(f.trigger.schedule.every === 'year' ? { month: f.trigger.schedule.month || 1 } : {}),
                 time: f.trigger.schedule.time },
           }
-          : { type: tt, status: tt === 'order.status_changed' ? f.trigger.status : null, property_id: tt.startsWith('booking.') ? (f.trigger.property_id || null) : null },
+          : REORDER.includes(tt)
+            ? { type: tt, gig_id: prod.gig_id, product_id: prod.product_id,
+              threshold: tt === 'stock.low' ? Number(f.stock.threshold || 0) : null,
+              every_n: tt === 'product.sold' ? Number(f.stock.every_n || 1) : null }
+            : { type: tt, status: tt === 'order.status_changed' ? f.trigger.status : null, property_id: tt.startsWith('booking.') ? (f.trigger.property_id || null) : null },
         action: { type: at, text: f.action.text },
-        template: at !== 'send_order' ? null : copy
+        supplier: at === 'order_supplier' ? { name: f.supplier.name.trim(), email: f.supplier.email.trim() || null, phone: f.supplier.phone.trim() || null } : null,
+        ask_first: REORDER.includes(tt) ? !!f.ask_first : false,
+        refill_qty: REORDER.includes(tt) && f.refill_qty ? Number(f.refill_qty) : null,
+        template: !['send_order', 'order_supplier'].includes(at) ? null : copy
           ? { copy_from_source: true, notes: f.template.notes, fulfilment: 'delivery', items: '' }
           : {
             copy_from_source: false,
@@ -279,6 +324,19 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
     }
   };
 
+  const runAct = async (r, what, via) => {
+    setBusy(r.id);
+    try {
+      const q = via ? `?via=${via}` : '';
+      const { data } = await axios.post(`${API}/marketplace/automation-runs/${r.id}/${what}${q}`, {}, auth);
+      toast.success(what === 'skip' ? t('automations.skipped', 'Skipped') : what === 'arrived' ? t('automations.counted', 'Added to your count')
+        : data.result === 'emailed' ? t('automations.emailedToast', 'Emailed to {{name}}', { name: r.supplier_name }) : t('automations.sentToast', 'Sent'));
+      load();
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('automations.sendFailed', 'That could not be sent'));
+    } finally { setBusy(null); }
+  };
+
   const entryFor = (id) => autoAccept.find((e) => e.business_id === id);
 
   const setAuto = (id, on) => saveAutoAccept(on
@@ -300,6 +358,7 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
     else next.trigger = { ...form.trigger, type: value, status: null };
     // An action the new trigger cannot carry falls back to one it can.
     if (next.action.type === 'message_customer' && !canMessage(next.trigger.type)) next.action = { ...next.action, type: 'notify_me' };
+    if (next.action.type === 'order_supplier' && !canSupplier(next.trigger.type)) next.action = { ...next.action, type: canSendOrder ? 'send_order' : 'notify_me' };
     if (next.trigger.type !== 'order.status_changed') next.template = { ...next.template, copy_from_source: false };
     setForm(next);
   };
@@ -395,6 +454,8 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                     <option value="lead.received">{t('automations.whenLead', 'When a customer taps to message me')}</option>
                     {isHost && <option value="booking.confirmed">{t('automations.whenStayOption', 'When guests book one of my listings')}</option>}
                     {isHost && <option value="booking.cancelled">{t('automations.whenStayCancelledOption', 'When guests cancel a stay')}</option>}
+                    {products.length > 0 && <option value="stock.low">{t('automations.whenLowOption', 'When a product runs low')}</option>}
+                    {products.length > 0 && <option value="product.sold">{t('automations.whenSoldOption', 'Every so many of a product sold')}</option>}
                     <option value="schedule">{t('automations.whenOnSchedule', 'On a schedule I set')}</option>
                     <option value="manual">{t('automations.whenManual', 'When you tap Send')}</option>
                   </select>
@@ -405,6 +466,7 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                   <select className={field} style={{ borderColor: 'var(--brand-border)' }} value={form.action.type}
                     onChange={(e) => setForm({ ...form, action: { ...form.action, type: e.target.value } })} data-testid="automation-action">
                     {canSendOrder && <option value="send_order">{t('automations.doSendOrder', 'An order appears at a partner')}</option>}
+                    {canSupplier(form.trigger.type) && <option value="order_supplier">{t('automations.doOrderSupplier', 'An order to a supplier not on the site')}</option>}
                     <option value="notify_me">{t('automations.doNotifyMe', 'Notify me')}</option>
                     {canMessage(form.trigger.type) && <option value="message_customer">{t('automations.doMessageCustomer', 'Message the customer')}</option>}
                   </select>
@@ -473,6 +535,53 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                   </div>
                 )}
 
+                {REORDER.includes(form.trigger.type) && (() => {
+                  const prod = products.find((x) => x.key === form.stock.product);
+                  const setStock = (k, v) => setForm({ ...form, stock: { ...form.stock, [k]: v } });
+                  return (
+                    <div className="sm:col-span-2 grid gap-3 sm:grid-cols-2" data-testid="automation-reorder">
+                      <label className="text-sm">
+                        <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.product', 'Product')}</span>
+                        <select className={field} style={{ borderColor: 'var(--brand-border)' }} value={form.stock.product}
+                          onChange={(e) => setStock('product', e.target.value)} data-testid="automation-product">
+                          {products.map((x) => <option key={x.key} value={x.key}>{x.label}{x.stock != null ? ` (${t('automations.left', '{{n}} left', { n: x.stock })})` : ''}</option>)}
+                        </select>
+                      </label>
+                      {form.trigger.type === 'stock.low' ? (
+                        <label className="text-sm">
+                          <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.threshold', 'Reorder when it drops to')}</span>
+                          <input type="number" min="0" className={field} style={{ borderColor: 'var(--brand-border)' }} value={form.stock.threshold}
+                            onChange={(e) => setStock('threshold', e.target.value)} data-testid="automation-threshold" />
+                        </label>
+                      ) : (
+                        <label className="text-sm">
+                          <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.everyN', 'Reorder after every')}</span>
+                          <input type="number" min="1" className={field} style={{ borderColor: 'var(--brand-border)' }} value={form.stock.every_n}
+                            onChange={(e) => setStock('every_n', e.target.value)} data-testid="automation-every-n" />
+                        </label>
+                      )}
+                      {form.trigger.type === 'stock.low' && prod && prod.stock == null && (
+                        <p className="text-xs sm:col-span-2 rounded-lg px-3 py-2" style={{ background: 'rgba(36,175,235,.12)', color: 'var(--ink)' }} data-testid="automation-not-counted">
+                          {t('automations.notCounted', "This product does not count stock yet. Add how many you have to it in your listing, or choose \"Every so many of a product sold\" instead.")}
+                        </p>
+                      )}
+                      <label className="text-sm inline-flex items-start gap-2 sm:col-span-2">
+                        <input type="checkbox" className="mt-1" checked={!!form.ask_first} onChange={(e) => setForm({ ...form, ask_first: e.target.checked })} data-testid="automation-ask-first" />
+                        <span style={{ color: 'var(--ink)' }}>{t('automations.askFirst', 'Ask me first')}
+                          <span className="block text-xs" style={{ color: 'var(--brand-muted)' }}>{t('automations.askFirstHint', 'You get a message with the order ready, and it goes out when you tap Send. Untick to send it by itself.')}</span>
+                        </span>
+                      </label>
+                      {prod && prod.stock != null && (
+                        <label className="text-sm sm:col-span-2">
+                          <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.refill', 'When it arrives, add this many to my count (optional)')}</span>
+                          <input type="number" min="1" className={`${field} max-w-[160px]`} style={{ borderColor: 'var(--brand-border)' }} value={form.refill_qty}
+                            onChange={(e) => setForm({ ...form, refill_qty: e.target.value })} data-testid="automation-refill" />
+                        </label>
+                      )}
+                    </div>
+                  );
+                })()}
+
                 {(form.trigger.type.startsWith('booking.') || (form.trigger.type === 'schedule' && isHost)) && (
                   <label className="text-sm sm:col-span-2">
                     <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.whichListing', 'Which listing')}</span>
@@ -486,17 +595,37 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                   </label>
                 )}
 
-                {form.action.type === 'send_order' && (
-                  <>
+                {form.action.type === 'order_supplier' && (
+                  <div className="sm:col-span-2 grid gap-3 sm:grid-cols-3" data-testid="automation-supplier">
                     <label className="text-sm">
+                      <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.supplier', 'Supplier')}</span>
+                      <input className={field} style={{ borderColor: 'var(--brand-border)' }} dir="auto" value={form.supplier.name}
+                        onChange={(e) => setForm({ ...form, supplier: { ...form.supplier, name: e.target.value } })} data-testid="automation-supplier-name" />
+                    </label>
+                    <label className="text-sm">
+                      <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.supplierEmail', 'Their email (sent by itself)')}</span>
+                      <input type="email" className={field} style={{ borderColor: 'var(--brand-border)' }} dir="ltr" value={form.supplier.email}
+                        onChange={(e) => setForm({ ...form, supplier: { ...form.supplier, email: e.target.value } })} data-testid="automation-supplier-email" />
+                    </label>
+                    <label className="text-sm">
+                      <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.supplierPhone', 'Their WhatsApp (you tap to send)')}</span>
+                      <input type="tel" className={field} style={{ borderColor: 'var(--brand-border)' }} dir="ltr" value={form.supplier.phone}
+                        onChange={(e) => setForm({ ...form, supplier: { ...form.supplier, phone: e.target.value } })} data-testid="automation-supplier-phone" />
+                    </label>
+                  </div>
+                )}
+
+                {['send_order', 'order_supplier'].includes(form.action.type) && (
+                  <>
+                    {form.action.type === 'send_order' && <label className="text-sm">
                       <span className={labelCls} style={{ color: 'var(--ink)' }}>{t('automations.partner', 'Partner')}</span>
                       <select className={field} style={{ borderColor: 'var(--brand-border)' }} value={form.partner_business_id}
                         onChange={(e) => setForm({ ...form, partner_business_id: e.target.value })} data-testid="automation-partner">
                         <option value="">{t('automations.choose', 'Choose…')}</option>
                         {partners.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
                       </select>
-                    </label>
-                    {form.trigger.type === 'order.status_changed' && (
+                    </label>}
+                    {form.trigger.type === 'order.status_changed' && form.action.type === 'send_order' && (
                       <label className="text-sm flex items-end gap-2">
                         <input type="checkbox" checked={form.template.copy_from_source} className="mb-2.5"
                           onChange={(e) => setForm({ ...form, template: { ...form.template, copy_from_source: e.target.checked } })}
@@ -550,7 +679,7 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                   </>
                 )}
 
-                {form.action.type !== 'send_order' && (
+                {!['send_order', 'order_supplier'].includes(form.action.type) && (
                   <label className="text-sm sm:col-span-2">
                     <span className={labelCls} style={{ color: 'var(--ink)' }}>
                       {form.action.type === 'message_customer' ? t('automations.messageText', 'The message') : t('automations.notifyText', 'What to tell me (optional)')}
@@ -579,7 +708,7 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
               <h3 className="text-xs font-semibold uppercase mb-2" style={{ color: 'var(--brand-muted)' }}>{t('automations.starters', 'Or start from one of these')}</h3>
               <ul className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 mb-5" data-testid="automation-recipes" data-tour="automation-recipes">
                 {RECIPES.filter((r) => !r.forHosts || isHost).map((r) => {
-                  const off = r.needsPartner && !canSendOrder;
+                  const off = (r.needsPartner && !canSendOrder) || (r.needsProducts && !products.length);
                   return (
                     <li key={r.key}>
                       <button type="button" disabled={off} onClick={() => startForm(r)}
@@ -588,7 +717,7 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                         <r.Icon size={16} className="mt-0.5 shrink-0" style={{ color: 'var(--brand-primary)' }} aria-hidden="true" />
                         <span>
                           <span className="block text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t(`automations.recipe_${r.key}`, r.key)}</span>
-                          {off && <span className="block text-xs" style={{ color: 'var(--brand-muted)' }}>{t('automations.needsPartner', 'Connect with a business first')}</span>}
+                          {off && <span className="block text-xs" style={{ color: 'var(--brand-muted)' }}>{r.needsProducts ? t('automations.needsProducts', 'Add products to a shop listing first') : t('automations.needsPartner', 'Connect with a business first')}</span>}
                         </span>
                       </button>
                     </li>
@@ -675,12 +804,19 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                     notified: t('automations.runNotified', '{{name}} told you', { name: r.automation_name }),
                     messaged: t('automations.runMessaged', '{{name}} messaged the customer', { name: r.automation_name }),
                     skipped: t('automations.runSkipped', '{{name}} did nothing', { name: r.automation_name }),
+                    awaiting: t('automations.runAwaiting', '{{name}} is ready to send', { name: r.automation_name }),
+                    emailed: t('automations.runEmailed', '{{name}} emailed the order to {{to}}', { name: r.automation_name, to: r.supplier_name }),
+                    sent_whatsapp: t('automations.runWhatsapp', '{{name}} sent the order to {{to}} on WhatsApp', { name: r.automation_name, to: r.supplier_name }),
+                    dismissed: t('automations.runDismissed', '{{name}}: you skipped it', { name: r.automation_name }),
+                    sent_on: t('automations.runSentOn', '{{name}}: you tapped Send', { name: r.automation_name }),
                   }[r.result] || (r.direction === 'sent'
                     ? t('automations.runSent', '{{name}} sent an order to {{to}}', { name: r.automation_name, to: r.to_business })
                     : t('automations.runReceived', '{{from}} sent you an order', { from: r.from_business }));
                   return (
                     <li key={r.id} className="py-2 border-t first:border-t-0 flex items-start gap-2" style={{ borderColor: 'var(--brand-border)' }} data-testid="automation-run">
-                      {bad || r.result === 'skipped'
+                      {r.result === 'awaiting'
+                        ? <Clock size={14} className="mt-0.5 shrink-0" style={{ color: '#B45309' }} aria-hidden="true" />
+                        : bad || r.result === 'skipped' || r.result === 'dismissed'
                         ? <AlertTriangle size={14} className="mt-0.5 shrink-0" style={{ color: bad ? 'var(--destructive-solid, #DC2626)' : 'var(--brand-muted)' }} aria-hidden="true" />
                         : <CheckCircle2 size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--success, #1F8A50)' }} aria-hidden="true" />}
                       <span style={{ color: 'var(--ink)' }}>
@@ -688,6 +824,35 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                         {r.result === 'auto_accepted' && ` · ${t('automations.runAccepted', 'accepted automatically')}`}
                         {(bad || r.result === 'skipped') && r.error && ` · ${r.error}`}
                         <span className="ms-2 text-xs" style={{ color: 'var(--brand-muted)' }}>{String(r.created_at || '').slice(0, 16).replace('T', ' ')}</span>
+                        {r.why && <span className="block text-xs" style={{ color: 'var(--brand-muted)' }} dir="auto">{r.why}</span>}
+                        {(r.result === 'awaiting' || r.can_refill) && (
+                          <span className="flex flex-wrap gap-2 mt-1.5" data-testid="automation-run-actions">
+                            {r.result === 'awaiting' && r.whatsapp && (
+                              <a href={r.whatsapp} target="_blank" rel="noopener noreferrer" onClick={() => runAct(r, 'send', 'whatsapp')}
+                                className={`${btn} btn-primary border-transparent`} data-testid="automation-run-whatsapp">
+                                <MessageCircle size={13} aria-hidden="true" /> {t('automations.sendWhatsapp', 'Send on WhatsApp')}
+                              </a>
+                            )}
+                            {r.result === 'awaiting' && !r.whatsapp && (
+                              <button type="button" disabled={busy === r.id} onClick={() => runAct(r, 'send')}
+                                className={`${btn} btn-primary border-transparent`} data-testid="automation-run-send">
+                                <Send size={13} aria-hidden="true" /> {t('automations.sendNow', 'Send now')}
+                              </button>
+                            )}
+                            {r.result === 'awaiting' && (
+                              <button type="button" disabled={busy === r.id} onClick={() => runAct(r, 'skip')} className={btn}
+                                style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }} data-testid="automation-run-skip">
+                                {t('automations.skip', 'Skip')}
+                              </button>
+                            )}
+                            {r.can_refill && (
+                              <button type="button" disabled={busy === r.id} onClick={() => runAct(r, 'arrived')} className={btn}
+                                style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="automation-run-arrived">
+                                {t('automations.arrived', 'It arrived: add to my count')}
+                              </button>
+                            )}
+                          </span>
+                        )}
                       </span>
                     </li>
                   );

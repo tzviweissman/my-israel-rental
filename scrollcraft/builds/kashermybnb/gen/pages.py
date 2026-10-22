@@ -22,11 +22,17 @@ def page(name, title, desc, body, scripts='', order=False):
       <li><a href="kitchen.html">Whole kitchen</a></li>
       <li><a href="pots.html">Pots and cutlery</a></li>
     </ul>'''
-    cta = '' if order else btn('Book', 'book.html')
-    foot = '' if order else f'''
-<footer class="foot">
-  <span>KasherMyBnb, kitchen kashering in Jerusalem and across Israel, since 2019</span>
-  <nav><a href="index.html">Home</a><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book</a><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></nav>
+    cta = '' if order else btn('Book a kashering', 'book.html') + '''
+  <button type="button" class="bar-menu" id="menuBtn" aria-expanded="false" aria-controls="menuPanel">Pages</button>
+  <div class="bar-panel" id="menuPanel" hidden><a href="index.html">Home</a><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book</a><button type="button" id="menuClose">Close</button></div>'''
+    foot = '''
+<footer class="foot after big">
+  <p class="last">Settle in, ready to use.</p>
+  <div class="foot-cols">
+    <nav class="foot-nav" aria-label="Pages"><b>Pages</b><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book a kashering</a></nav>
+    <div class="foot-nav"><b>Where</b><span>Jerusalem and across Israel</span><span>English and Hebrew</span><span>Since 2019</span></div>
+    <div class="foot-nav"><b>Contact</b><span>Message us on WhatsApp</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+  </div>
 </footer>'''
     html = f'''<!doctype html>
 <!-- KasherMyBnb, {name}. Written by gen/pages.py; facts from BRIEF.md only. -->
@@ -34,8 +40,12 @@ def page(name, title, desc, body, scripts='', order=False):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-category" content="service">
 <title>{title}</title>
 <meta name="description" content="{desc}">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{desc}">
+<meta property="og:image" content="assets/kitchen.webp">
 <link rel="icon" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,7 +98,7 @@ page('kitchen.html', 'Whole kitchen kashering · KasherMyBnb',
         <p class="lede">We kasher your kitchen so you can settle in with confidence, knowing it is fully prepared, strictly kosher, and ready to use.</p>
         <div class="tag"><b>$350</b><span>about 2 hours, Jerusalem price</span></div>
         <div class="act">
-          {btn('Book a kitchen', 'book.html?s=kitchen')}
+          {btn('Book a kashering', 'book.html?s=kitchen')}
           <a class="link" href="#included">See what is included</a>
         </div>
         <ul class="sure">
@@ -144,7 +154,7 @@ page('kitchen.html', 'Whole kitchen kashering · KasherMyBnb',
     <div class="wrap">
       <div class="close">
         <div><h2>Your kitchen, ready to use.</h2><p>$350, about 2 hours. You choose a day; we confirm it with you on WhatsApp.</p></div>
-        {btn('Book a kitchen', 'book.html?s=kitchen')}
+        {btn('Book a kashering', 'book.html?s=kitchen')}
       </div>
     </div>
   </section>
@@ -160,10 +170,10 @@ page('pots.html', 'Pots, cutlery and utensils · KasherMyBnb',
       <div>
         <p class="eyebrow">Pots, cutlery and utensils</p>
         <h1>Your pots and cutlery, <em>kashered.</em></h1>
-        <p class="lede">Bring your own pots, cutlery and kitchen utensils into a kosher kitchen. We kasher them in one visit, with the kitchen or on their own.</p>
+        <p class="lede">We kasher your pots, cutlery and kitchen utensils so you can settle in with confidence, strictly kosher and ready to use. Stainless steel pots only.</p>
         <div class="tag"><b>$180</b><span>about 1 hour, Jerusalem price</span></div>
         <div class="act">
-          {btn('Book pots and cutlery', 'book.html?s=pots')}
+          {btn('Book a kashering', 'book.html?s=pots')}
           <a class="link" href="#can">What we can kasher</a>
         </div>
         <ul class="sure">
@@ -208,7 +218,7 @@ page('pots.html', 'Pots, cutlery and utensils · KasherMyBnb',
     <div class="wrap">
       <div class="close">
         <div><h2>Pots and cutlery, ready to use.</h2><p>$180, about 1 hour. Add the kitchen on the next step if you need it.</p></div>
-        {btn('Book pots and cutlery', 'book.html?s=pots')}
+        {btn('Book a kashering', 'book.html?s=pots')}
       </div>
     </div>
   </section>
@@ -260,7 +270,7 @@ page('book.html', 'Book · KasherMyBnb', 'Choose what we kasher: the whole kitch
             </button>
             <button type="button" class="opt" data-svc="pots" aria-pressed="false">
               <span class="chk">{OK}</span>
-              <img class="ph" src="assets/pots.webp" alt="" width="600" height="338" style="object-fit:contain;background:#fff"><span class="top"><b>Pots, cutlery and utensils</b><span class="amt">$180</span></span>
+              <img class="ph" src="assets/pots.webp" alt="" width="600" height="338"><span class="top"><b>Pots, cutlery and utensils</b><span class="amt">$180</span></span>
               <small>About 1 hour</small>
               <ul><li>{OK}Stainless steel pots</li><li>{OK}Cutlery</li><li>{OK}Kitchen utensils</li></ul>
             </button>
@@ -326,14 +336,12 @@ page('book-details.html', 'When and where · KasherMyBnb', 'When and where we ka
           <div class="two">
             <div class="field" id="f-date"><label for="date">Day</label><input id="date" type="date" required><span class="err" id="dateErr">Choose a day (not Shabbos).</span></div>
           </div>
+          <span class="err" id="timeErr" style="color:var(--roof);font-size:.88rem" hidden>Choose a start time.</span>
         </div>
         <div class="q">
-          <h2>What time of day?</h2>
-          <div class="chips" role="group" aria-label="Time of day">
-            <button type="button" class="chip" data-time="any" aria-pressed="false">Any time</button>
-            <button type="button" class="chip" data-time="morning" aria-pressed="false">Morning</button>
-            <button type="button" class="chip" data-time="afternoon" aria-pressed="false">Afternoon</button>
-            <button type="button" class="chip" data-time="evening" aria-pressed="false">Evening</button>
+          <h2>What time should we start?</h2>
+          <div class="chips" role="group" aria-label="Start time" id="times">
+            <p class="hint" id="timesHint">Choose what you need first.</p>
           </div>
         </div>
         <div class="q">
@@ -380,13 +388,17 @@ page('book-details.html', 'When and where · KasherMyBnb', 'When and where we ka
     $(k).addEventListener('input', function () { o[k] = $(k).value.trim(); var f = $('f-' + k); if (f) f.classList.remove('is-bad'); KMB.save(o); KMB.paint(o); });
   });
   function paint() {
-    document.querySelectorAll('[data-time]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.time === b.dataset.time)); });
+    // start times from their listing: evenings Sunday to Friday, 18:00 to 23:00, so the work ends by 23:00
+    var len = o.kitchen && o.pots ? 180 : o.kitchen ? 120 : 60, out = [];
+    for (var m = 1080; m + len <= 1380; m += 30) out.push(('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + m % 60).slice(-2));
+    if (out.indexOf(o.time) < 0) o.time = '';
+    $('times').innerHTML = out.map(function (t) { return '<button type="button" class="chip" data-time="' + t + '" aria-pressed="' + (o.time === t) + '">' + t + '</button>'; }).join('');
     document.querySelectorAll('[data-place]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.place === b.dataset.place)); });
     $('f-city').hidden = o.place !== 'elsewhere';
     $('feeNote').hidden = o.place !== 'elsewhere';
     KMB.save(o); KMB.paint(o);
   }
-  document.querySelectorAll('[data-time]').forEach(function (b) { b.addEventListener('click', function () { o.time = b.dataset.time; paint(); }); });
+  $('times').addEventListener('click', function (e) { var b = e.target.closest('[data-time]'); if (b) { o.time = b.dataset.time; $('timeErr').hidden = true; paint(); } });
   document.querySelectorAll('[data-place]').forEach(function (b) { b.addEventListener('click', function () { o.place = b.dataset.place; $('placeErr').hidden = true; paint(); }); });
   function check(e) {
     var bad = [];
@@ -397,9 +409,10 @@ page('book-details.html', 'When and where · KasherMyBnb', 'When and where we ka
     if (o.place === 'elsewhere' && !o.city) bad.push('f-city');
     bad.forEach(function (id) { $(id).classList.add('is-bad'); });
     $('placeErr').hidden = !!o.place;
-    if (bad.length || !o.place) {
+    $('timeErr').hidden = !!o.time;
+    if (bad.length || !o.place || !o.time) {
       e.preventDefault();
-      var first = bad.length ? $(bad[0]).querySelector('input') : document.querySelector('[data-place]');
+      var first = bad.length ? $(bad[0]).querySelector('input') : !o.time ? document.querySelector('[data-time]') : document.querySelector('[data-place]');
       first.focus({ preventScroll: true }); first.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
   }
@@ -438,7 +451,7 @@ page('book-review.html', 'Review and send · KasherMyBnb', 'Check your booking a
 (function () {
   var o = KMB.load();
   if (!o.kitchen && !o.pots) { location.replace('book.html'); return; }
-  if (!o.name || !o.phone || !o.date || !o.place) { location.replace('book-details.html'); return; }
+  if (!o.name || !o.phone || !o.date || !o.time || !o.place) { location.replace('book-details.html'); return; }
   var esc = function (s) { return String(s).replace(/[&<>"]/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); };
   var rows = [
     ['What', KMB.lines(o).map(function (x) { return esc(x[0]); }).join('<br>') + '<br><a class="link" href="book.html">Change</a>'],
@@ -452,7 +465,18 @@ page('book-review.html', 'Review and send · KasherMyBnb', 'Check your booking a
   ['send', 'send2'].forEach(function (id) {
     var a = document.getElementById(id);
     a.href = href;
-    a.addEventListener('click', function () { setTimeout(function () { location.href = 'book-sent.html'; }, 600); });
+    a.addEventListener('click', function (e) {
+      e.preventDefault();
+      if (a.dataset.busy) return; a.dataset.busy = '1';
+      // the WhatsApp tab opens first so the pop-up blocker allows it; it is filled once the booking is saved
+      var tab = window.open('', '_blank');
+      KMB.submit(o).then(function (track) {
+        if (track) { o.track = track; KMB.save(o); }
+        var url = KMB.waLink(o);
+        if (tab) tab.location.href = url; else location.href = url;
+        setTimeout(function () { location.href = 'book-sent.html'; }, 600);
+      });
+    });
   });
   KMB.paint(o);
 })();
@@ -465,7 +489,7 @@ page('book-sent.html', 'Booking sent · KasherMyBnb', 'Your booking request is o
       <div style="width:64px;height:64px;border-radius:50%;background:var(--sc-accent);display:grid;place-items:center;margin:0 auto"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
       <h1 style="margin-top:1.25rem">Thank you</h1>
       <p class="sub" style="margin-inline:auto;max-width:30rem">Once you press send in WhatsApp, your booking reaches us. We confirm the day and time with you there.</p>
-      <ul class="lines" data-lines style="text-align:left;margin-top:1.5rem;border-top:1px solid var(--line)"></ul>
+      <ul class="lines is-sent" data-lines style="text-align:left;margin-top:1.5rem;border-top:1px solid var(--line)"></ul>
       <div class="total" style="max-width:100%"><span>Total</span><b data-total>$0</b></div>
       <p class="sub" style="margin-top:1.5rem">WhatsApp did not open? <a class="link" id="again" href="#" target="_blank" rel="noopener">Send it again</a></p>
       <p style="margin-top:1.5rem"><a class="back" href="index.html">Back to KasherMyBnb</a></p>

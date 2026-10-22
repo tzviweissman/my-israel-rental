@@ -1,7 +1,11 @@
 (function () {
   var BIN = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
   // the order is written out on WhatsApp to +972 58 729 8718 (the number on her listing)
-  var WA = '972587298718';
+  var WA = '972587298718', GIG = 'cbf66136-5504-4bf9-9c41-837cc9bd2d37';
+  // Every order is saved to MyIsraelRental before WhatsApp opens (page rules 3k). The ids are the listing's own
+  // products, named exactly as the listing names them (added 22 Oct 2026 by add_site_products.py).
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var PID = { small: '55113012e889', medium: 'c94a66979f24', large: 'a549851e62aa', xl: '7d53c8ac348a' };
   var SIZES = [['small', 'Small', 300], ['medium', 'Medium', 400], ['large', 'Large', 500], ['xl', 'Extra large', 850]];
   var BY = {}; SIZES.forEach(function (s, i) { BY[s[0]] = { i: i, name: s[1], price: s[2] }; });
   function P(n) { return '<span class="sym">₪</span>' + n; }
@@ -13,10 +17,13 @@
   // ── the stage: one size at a time, its own photo through shutter slats; quantity and the price in the button
   var stage = document.getElementById('sizes'), ph = stage.querySelector('.st-ph'), bl = window.lsBlinds(ph), sel = 'small', n = 1;
   var stAdd = document.getElementById('st-add'), stN = document.getElementById('st-n'), stIn = document.getElementById('st-in');
-  function label() { stAdd.firstElementChild.innerHTML = 'Add ' + (n === 1 ? 'a ' + BY[sel].name : n + ' × ' + BY[sel].name) + ', ' + P(n * BY[sel].price); stN.textContent = n;
+  function label() { stAdd.firstElementChild.innerHTML = 'Add ' + (n === 1 ? (/^[AEIOU]/i.test(BY[sel].name) ? 'an ' : 'a ') + BY[sel].name : n + ' × ' + BY[sel].name) + ', ' + P(n * BY[sel].price); stN.textContent = n;
     stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' × ' + BY[sel].name : ''; stage.querySelector('[data-d="-1"]').disabled = n <= 1; }
+  // decode every size photo up front, so a wipe never starts on an undecoded picture (check-motion JUMP, 22 Oct 2026)
+  [].forEach.call(ph.querySelectorAll('img.sl'), function (i) { if (i.decode) i.decode().catch(function () {}); });
+  var ROOM = { small: '#F8D4D0', medium: '#FCE2B4', large: '#EAD6E4', xl: '#DBE8BF' };
   function show(k) {
-    sel = k; bl.go(BY[k].i);
+    sel = k; stage.style.setProperty('--room', ROOM[k]); bl.go(BY[k].i);
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.k === k ? 'true' : 'false'); });
     document.getElementById('st-name').textContent = BY[k].name; document.getElementById('st-price').innerHTML = P(BY[k].price);
     n = 1; label();
@@ -78,9 +85,25 @@
     out.push('Day: ' + day(true)); out.push('Time: ' + v('time')); out.push('Where: ' + v('addr'));
     if (v('note')) out.push('Notes: ' + v('note'));
     out.push('Name: ' + v('me') + ', ' + v('ph'));
-    var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(out.join('\n'));
-    var tab = window.open(url, '_blank'); if (!tab) location.href = url;
-    var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = 'Thank you, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+    var ls = []; SIZES.forEach(function (s) { if (q[s[0]]) ls.push({ product_id: PID[s[0]], qty: q[s[0]] }); });
+    var notes = ['Time: ' + v('time'), v('note'), 'Sent from the Ls Fruit Platter page by WhatsApp'].filter(Boolean).join('\n');
+    if (send.getAttribute('aria-busy') === 'true') return;
+    send.setAttribute('aria-busy', 'true');
+    var label = send.firstElementChild.innerHTML; send.firstElementChild.textContent = 'Sending';
+    // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
+    var tab = window.open('', '_blank');
+    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })
+      .catch(function (err) { console.warn('Order not saved', err); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var text = out.join('\n');
+      if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      send.removeAttribute('aria-busy'); send.firstElementChild.innerHTML = label;
+      var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = 'Thank you, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+    });
   });
   document.getElementById('sum-list').addEventListener('click', function (e) {
     var r = e.target.closest('button[data-rm]'); if (r) { q[r.dataset.rm] = 0; update(); check(false); label(); return; }
@@ -105,8 +128,18 @@
   }
   addEventListener('popstate', function () { var m = /#order-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
   document.getElementById('back').addEventListener('click', function () { history.back(); });
-  document.getElementById('steps').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
+  document.getElementById('steps').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-go]'); if (!b) return; var t = +b.dataset.go;
+    if (t < step) { go(t, true); return; }
+    if (t === step) return;
+    // forward: as far as the filled-in steps allow; the first step with something missing shows what
+    var s = step; while (s < t && check(false, s)) s++;
+    if (s < t) { check(true, s); go(s, s !== step); var bad = document.querySelector('.ostep:not([hidden]) .bad .fld'); if (bad) bad.focus(); return; }
+    go(s, true);
+  });
   show(BY[qs.get('size')] ? qs.get('size') : 'small');
+  // "Add" on a home page card arrives here with the size and add=1: it is already in the basket
+  if (qs.get('add') === '1' && BY[qs.get('size')]) { q[sel] = Math.min(20, q[sel] + 1); label(); say('Added: 1 × ' + BY[sel].name); }
   update();
   var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
 })();

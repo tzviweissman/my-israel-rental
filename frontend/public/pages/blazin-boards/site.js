@@ -92,8 +92,11 @@
   function paint(f, o) {
     var ls = lines(f, o), c = cur(f), t = total(f, o);
     document.querySelectorAll('[data-lines]').forEach(function (ul) {
-      var h = ls.length ? ls.map(function (l) { return '<li><span>' + (l.qty > 1 ? l.qty + ' × ' : '') + esc(l.p.short) + '</span><span>' + money(l.p.price * l.qty, c) + '</span></li>'; }).join('')
+      var seen = ul.__seen, now = {};
+      // a line that has just come in fades in; the others stay as they are
+      var h = ls.length ? ls.map(function (l) { now[l.p.id] = 1; return '<li' + (seen && !seen[l.p.id] ? ' class="fresh"' : '') + '><span>' + (l.qty > 1 ? l.qty + ' × ' : '') + esc(l.p.short) + '</span><span>' + money(l.p.price * l.qty, c) + '</span></li>'; }).join('')
         : '<li class="empty">Nothing chosen yet</li>';
+      ul.__seen = now;
       if (o.date || ul.hasAttribute('data-full')) {
         if (o.date) h += '<li class="meta"><span>When</span><span>' + esc(when(o)) + '</span></li>';
         h += '<li class="meta"><span>How</span><span>' + esc(where(o)) + '</span></li>';
@@ -128,5 +131,12 @@
   });
   paintCart(load());
 
-  window.BB = { API: API, APP: APP, form: form, load: load, save: save, lines: lines, total: total, money: money, cur: cur, count: count, when: when, where: where, paint: paint, toast: toast, esc: esc, LINES: LINES, NOTICE_DAYS: 2 };
+  // a saving only where the bigger board is cheaper per square centimetre than EVERY smaller board of its line (Tzvi,
+  // 21 Oct 2026: the Large Blazin' is the same rate as the Mini and the Small, so it saves nothing; the old $77 was
+  // measured against the Medium, the one dearer board). Large Premium: $485 against $646 at the Small/Medium rate.
+  var DEAL = {};  /* Tzvi, 21 Oct 2026: one lone saving makes every other board look overpriced, so none is shown */
+  /* DEAL[short] = the REAL separate price (same boards bought apart at their own listed prices). Shown as struck price + "N% off". */
+  function saving(p) { var w = DEAL[p.short] || 0; return w > p.price ? Math.floor((w - p.price) / w * 100) : 0; }
+  function dealHtml(p) { var n = saving(p); return n ? '<s class="was">' + money(DEAL[p.short], p.currency) + '</s><span class="save-b">' + n + '% off</span>' : ''; }
+  window.BB = { DEAL: DEAL, saving: saving, dealHtml: dealHtml, API: API, APP: APP, form: form, load: load, save: save, lines: lines, total: total, money: money, cur: cur, count: count, when: when, where: where, paint: paint, toast: toast, esc: esc, LINES: LINES, NOTICE_DAYS: 2 };
 })();

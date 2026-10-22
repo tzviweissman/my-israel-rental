@@ -4,8 +4,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-category" content="service">
 <title>Pots, cutlery and utensils · KasherMyBnb</title>
 <meta name="description" content="Kashering pots (stainless steel), cutlery and kitchen utensils in Jerusalem and across Israel, $180, about 1 hour. A new frying pan on request, $15.">
+<meta property="og:title" content="Pots, cutlery and utensils · KasherMyBnb">
+<meta property="og:description" content="Kashering pots (stainless steel), cutlery and kitchen utensils in Jerusalem and across Israel, $180, about 1 hour. A new frying pan on request, $15.">
+<meta property="og:image" content="assets/kitchen.webp">
 <link rel="icon" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -20,7 +24,9 @@
       <li><a href="kitchen.html">Whole kitchen</a></li>
       <li><a href="pots.html">Pots and cutlery</a></li>
     </ul>
-  <a class="btn" href="book.html"><span class="lb">Book</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+  <a class="btn" href="book.html"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+  <button type="button" class="bar-menu" id="menuBtn" aria-expanded="false" aria-controls="menuPanel">Pages</button>
+  <div class="bar-panel" id="menuPanel" hidden><a href="index.html">Home</a><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book</a><button type="button" id="menuClose">Close</button></div>
 </header>
 
 <main>
@@ -29,10 +35,10 @@
       <div>
         <p class="eyebrow">Pots, cutlery and utensils</p>
         <h1>Your pots and cutlery, <em>kashered.</em></h1>
-        <p class="lede">Bring your own pots, cutlery and kitchen utensils into a kosher kitchen. We kasher them in one visit, with the kitchen or on their own.</p>
+        <p class="lede">We kasher your pots, cutlery and kitchen utensils so you can settle in with confidence, strictly kosher and ready to use. Stainless steel pots only.</p>
         <div class="tag"><b>$180</b><span>about 1 hour, Jerusalem price</span></div>
         <div class="act">
-          <a class="btn" href="book.html?s=pots"><span class="lb">Book pots and cutlery</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+          <a class="btn" href="book.html?s=pots"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
           <a class="link" href="#can">What we can kasher</a>
         </div>
         <ul class="sure">
@@ -77,15 +83,19 @@
     <div class="wrap">
       <div class="close">
         <div><h2>Pots and cutlery, ready to use.</h2><p>$180, about 1 hour. Add the kitchen on the next step if you need it.</p></div>
-        <a class="btn" href="book.html?s=pots"><span class="lb">Book pots and cutlery</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+        <a class="btn" href="book.html?s=pots"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
       </div>
     </div>
   </section>
 </main>
 
-<footer class="foot">
-  <span>KasherMyBnb, kitchen kashering in Jerusalem and across Israel, since 2019</span>
-  <nav><a href="index.html">Home</a><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book</a><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></nav>
+<footer class="foot after big">
+  <p class="last">Settle in, ready to use.</p>
+  <div class="foot-cols">
+    <nav class="foot-nav" aria-label="Pages"><b>Pages</b><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book a kashering</a></nav>
+    <div class="foot-nav"><b>Where</b><span>Jerusalem and across Israel</span><span>English and Hebrew</span><span>Since 2019</span></div>
+    <div class="foot-nav"><b>Contact</b><span>Message us on WhatsApp</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+  </div>
 </footer>
 <script src="site.js"></script>
 

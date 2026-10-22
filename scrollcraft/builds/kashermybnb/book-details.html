@@ -4,8 +4,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-category" content="service">
 <title>When and where · KasherMyBnb</title>
 <meta name="description" content="When and where we kasher, and how we reach you.">
+<meta property="og:title" content="When and where · KasherMyBnb">
+<meta property="og:description" content="When and where we kasher, and how we reach you.">
+<meta property="og:image" content="assets/kitchen.webp">
 <link rel="icon" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -30,14 +34,12 @@
           <div class="two">
             <div class="field" id="f-date"><label for="date">Day</label><input id="date" type="date" required><span class="err" id="dateErr">Choose a day (not Shabbos).</span></div>
           </div>
+          <span class="err" id="timeErr" style="color:var(--roof);font-size:.88rem" hidden>Choose a start time.</span>
         </div>
         <div class="q">
-          <h2>What time of day?</h2>
-          <div class="chips" role="group" aria-label="Time of day">
-            <button type="button" class="chip" data-time="any" aria-pressed="false">Any time</button>
-            <button type="button" class="chip" data-time="morning" aria-pressed="false">Morning</button>
-            <button type="button" class="chip" data-time="afternoon" aria-pressed="false">Afternoon</button>
-            <button type="button" class="chip" data-time="evening" aria-pressed="false">Evening</button>
+          <h2>What time should we start?</h2>
+          <div class="chips" role="group" aria-label="Start time" id="times">
+            <p class="hint" id="timesHint">Choose what you need first.</p>
           </div>
         </div>
         <div class="q">
@@ -84,6 +86,14 @@
 </main>
 <div class="dock"><div><small>Total</small><b data-total>$0</b></div><a class="btn" href="book-review.html" id="go2"><span class="lb">Review</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a></div>
 
+<footer class="foot after big">
+  <p class="last">Settle in, ready to use.</p>
+  <div class="foot-cols">
+    <nav class="foot-nav" aria-label="Pages"><b>Pages</b><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book a kashering</a></nav>
+    <div class="foot-nav"><b>Where</b><span>Jerusalem and across Israel</span><span>English and Hebrew</span><span>Since 2019</span></div>
+    <div class="foot-nav"><b>Contact</b><span>Message us on WhatsApp</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+  </div>
+</footer>
 <script src="site.js"></script>
 <script>
 (function () {
@@ -97,13 +107,17 @@
     $(k).addEventListener('input', function () { o[k] = $(k).value.trim(); var f = $('f-' + k); if (f) f.classList.remove('is-bad'); KMB.save(o); KMB.paint(o); });
   });
   function paint() {
-    document.querySelectorAll('[data-time]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.time === b.dataset.time)); });
+    // start times from their listing: evenings Sunday to Friday, 18:00 to 23:00, so the work ends by 23:00
+    var len = o.kitchen && o.pots ? 180 : o.kitchen ? 120 : 60, out = [];
+    for (var m = 1080; m + len <= 1380; m += 30) out.push(('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + m % 60).slice(-2));
+    if (out.indexOf(o.time) < 0) o.time = '';
+    $('times').innerHTML = out.map(function (t) { return '<button type="button" class="chip" data-time="' + t + '" aria-pressed="' + (o.time === t) + '">' + t + '</button>'; }).join('');
     document.querySelectorAll('[data-place]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.place === b.dataset.place)); });
     $('f-city').hidden = o.place !== 'elsewhere';
     $('feeNote').hidden = o.place !== 'elsewhere';
     KMB.save(o); KMB.paint(o);
   }
-  document.querySelectorAll('[data-time]').forEach(function (b) { b.addEventListener('click', function () { o.time = b.dataset.time; paint(); }); });
+  $('times').addEventListener('click', function (e) { var b = e.target.closest('[data-time]'); if (b) { o.time = b.dataset.time; $('timeErr').hidden = true; paint(); } });
   document.querySelectorAll('[data-place]').forEach(function (b) { b.addEventListener('click', function () { o.place = b.dataset.place; $('placeErr').hidden = true; paint(); }); });
   function check(e) {
     var bad = [];
@@ -114,9 +128,10 @@
     if (o.place === 'elsewhere' && !o.city) bad.push('f-city');
     bad.forEach(function (id) { $(id).classList.add('is-bad'); });
     $('placeErr').hidden = !!o.place;
-    if (bad.length || !o.place) {
+    $('timeErr').hidden = !!o.time;
+    if (bad.length || !o.place || !o.time) {
       e.preventDefault();
-      var first = bad.length ? $(bad[0]).querySelector('input') : document.querySelector('[data-place]');
+      var first = bad.length ? $(bad[0]).querySelector('input') : !o.time ? document.querySelector('[data-time]') : document.querySelector('[data-place]');
       first.focus({ preventScroll: true }); first.scrollIntoView({ block: 'center', behavior: 'smooth' });
     }
   }

@@ -4,6 +4,9 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Book with Michal Simkin, Bet Shemesh.</title>
+<meta name="site-category" content="beauty">
+<meta property="og:title" content="Book with Michal Simkin, Bet Shemesh"><meta property="og:description" content="Book a wig consultation (₪100) or enrol in the Michal Simkin Academy.">
+<meta property="og:image" content="https://myisraelrental.com/pages/michal-simkin/assets/michal.jpg">
 <meta name="description" content="Book a wig consultation (₪100) or enrol in the Michal Simkin Academy. Sunday to Thursday, 10 to 2, by appointment, Bet Shemesh.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%230E1F39'/><circle cx='16' cy='16' r='8' fill='%23E9C4B0'/></svg>">
 <!--
@@ -19,13 +22,13 @@
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;700&display=swap" rel="stylesheet">
 <style>
   :root {
-    --font-head: 'Playfair Display', Georgia, serif;
-    --font-body: 'Manrope', system-ui, sans-serif;
+    --font-head: 'Playfair Display', 'Frank Ruhl Libre', Georgia, serif;  /* Hebrew page: Frank Ruhl Libre (3g.11) */
+    --font-body: 'Manrope', 'Assistant', system-ui, sans-serif;  /* Hebrew page: Assistant (3g.11) */
     --navy: #0E1F39; --navy-2: #16294A; --ivory: #FBF7F4; --blush: #DBB3B1; --blush-pale: #F3E4E0;
-    --rose-gold: #E9C4B0; --rose-text: #9E4560; --muted: #5B6577; --line: rgba(14, 31, 57, 0.14); --ok: #2E7D4F;
+    --rose-gold: #E9C4B0; --rose-text: #0E1F39;  /* 3g.3: the accent is the main button only; emphasised words stand out by italic and weight in the ink colour */ --muted: #5B6577; --line: rgba(14, 31, 57, 0.14); --ok: #2E7D4F;
     --bar-h: 84px; --pill: 45px 10px; --wash: var(--blush-pale); --soft: var(--muted);
   }
   * { box-sizing: border-box; }
@@ -85,9 +88,9 @@
   .pick.bundle { grid-column: 1 / -1; grid-template-columns: 1fr auto; align-items: center; column-gap: 1rem; border-color: var(--rose-gold); }
   .pick.bundle .what { grid-column: 1; }
   .pick .name { font-family: var(--font-head); font-size: 1.15rem; line-height: 1.2; }
-  .pick .price { font-weight: 800; font-size: 1.15rem; color: var(--rose-text); }
+  .pick .price { font-weight: 800; font-size: 1.15rem; color: var(--navy); }
   .pick .price small { font-weight: 500; font-size: 0.75rem; color: var(--muted); margin-inline-start: 0.35rem; text-decoration: line-through; }
-  .pick .savebadge { display: inline-block; margin-inline-start: 0.5rem; padding: 0.1rem 0.6rem; border-radius: 999px; background: var(--navy); color: #fff; font-style: normal; font-size: 0.75rem; font-weight: 700; }
+  .pick .savebadge { display: inline-block; margin-inline-start: 0.5rem; padding: 0.1rem 0.6rem; border-radius: 999px; background: #E4E8F0; color: var(--navy); font-style: normal; font-size: 0.75rem; font-weight: 700; }
   .pick .what { font-size: 0.85rem; color: var(--muted); line-height: 1.4; }
   .pick .start { display: inline-block; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--rose-text); }
   .fields { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem 1rem; }
@@ -109,9 +112,17 @@
   .lines .amt { font-variant-numeric: tabular-nums; font-weight: 600; }
   .contents { margin: 0.8rem 0 0; padding: 0.8rem 0 0; border-top: 1px solid var(--line); font-size: 0.9rem; color: var(--muted); line-height: 1.45; }
   .total { display: flex; justify-content: space-between; align-items: baseline; margin-top: 1rem; padding-top: 0.8rem; border-top: 1px solid var(--line); }
-  .total b { font-weight: 800; font-size: 1.6rem; color: var(--rose-text); font-variant-numeric: tabular-nums; }
+  .total b { font-weight: 800; font-size: 1.6rem; color: var(--navy); font-variant-numeric: tabular-nums; }
   .cta { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 54px; margin-top: 1rem; border: 0; border-radius: var(--pill); background: var(--navy); color: #fff; font-weight: 700; font-size: 1.05rem; }
   .cta:hover { background: var(--navy-2); }
+  @media (max-width: 560px) { .head { padding-block: 1.2rem .2rem; } .head h1 { font-size: 1.9rem; } .head p { font-size: .95rem; } .steps { margin-top: .9rem; } section.step { padding-top: 1rem; } }
+  .cta:active:not(:disabled) { transform: scale(.98); background: #060F1F; }
+  .pick:active { transform: scale(.985); background: var(--blush-pale); }
+  .pick:focus-visible, .choice:focus-visible { outline: 2px solid var(--rose-text); outline-offset: 2px; }
+  .choice:hover { border-color: var(--blush); }
+  .choice:active { transform: scale(.97); }
+  .backbtn:hover { text-decoration: underline; } .backbtn:active { opacity: .7; }
+  .nav__links a:active { color: var(--rose-text); }
   .cta:disabled { opacity: 0.55; cursor: not-allowed; }
   .assure { margin: 0.8rem 0 0; color: var(--muted); font-size: 0.85rem; line-height: 1.45; }
   .assure b { color: var(--navy); font-weight: 600; }
@@ -120,7 +131,7 @@
   .voice p { margin: 0; font-size: 0.85rem; line-height: 1.45; }
   .voice b { display: block; margin-top: 2px; font-size: 0.75rem; color: var(--rose-text); }
   .bar { position: fixed; inset-inline: 0; bottom: 0; z-index: 30; display: none; align-items: center; gap: 0.8rem; padding: 0.7rem clamp(1.25rem, 5vw, 3rem) calc(0.7rem + env(safe-area-inset-bottom)); background: rgba(251, 247, 244, 0.92); backdrop-filter: blur(12px); border-top: 1px solid var(--line); }
-  .bar .t { display: grid; } .bar .t small { color: var(--muted); font-size: 0.75rem; } .bar .t b { font-weight: 800; font-size: 1.25rem; color: var(--rose-text); }
+  .bar .t { display: grid; } .bar .t small { color: var(--muted); font-size: 0.75rem; } .bar .t b { font-weight: 800; font-size: 1.25rem; color: var(--navy); }
   .bar .cta { width: auto; margin: 0; flex: 1; min-height: 48px; }
   body[data-step="1"] #step-when, body[data-step="1"] #step-you, body[data-step="2"] #step-what, body[data-step="2"] #step-you, body[data-step="3"] #step-what, body[data-step="3"] #step-when { display: none; }
   body:not([data-step="1"]) .gallery { display: none; }
@@ -136,18 +147,19 @@
     .grid { grid-template-columns: 1fr; } .summary { position: static; } .bar { display: flex; } .fields { grid-template-columns: 1fr; }
   }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+  @media (max-width: 760px) { .assure, .voice p, .badge, .err, .f .hint, #errWhat, .pick .what, .contents { font-size: 14px; } }
 </style>
 </head>
 <body data-step="1">
 <nav class="nav" aria-label="Book">
   <a class="nav__mark" href="index.html"><img src="assets/mark.jpg" alt="" width="96" height="96"> Michal Simkin</a>
-  <div class="nav__links"><a href="index.html#consult">The consult</a><a href="index.html#same">In their words</a><a href="index.html#academy">Academy</a><a href="book.html" aria-current="page">Book</a></div>
+  <div class="nav__links"><a href="index.html#consult">The consult</a><a href="index.html#same">In their words</a><a href="index.html#academy">Courses</a><a href="book.html" aria-current="page">Book</a></div>
 </nav>
 
 <main class="wrap">
   <header class="head">
-    <h1>Book with Michal, <em>in three steps.</em></h1>
-    <p>A consultation at the salon, or a place in the academy. Say when suits you; she confirms the time in reply. Sunday to Thursday, 10 to 2, Bet Shemesh.</p>
+    <h1>Book with us, <em>in three steps.</em></h1>
+    <p>A consultation at the salon, or a place in the academy. Say when suits you; we confirm the time in reply. Sunday to Thursday, 10 to 2, Bet Shemesh.</p>
     <ol class="steps" id="steps" aria-label="Progress">
       <li class="now" data-step="1"><i>1</i> What</li>
       <li data-step="2"><i>2</i> When</li>
@@ -157,6 +169,12 @@
 
   <div class="grid">
     <div>
+      <section class="step" id="step-what">
+        <h2>What would you like?</h2>
+        <p class="lead">Our prices, as we publish them.</p>
+        <div id="groups"></div>
+        <p class="err" id="errWhat"></p>
+      </section>
       <div class="gallery" aria-label="Her clients">
         <figure class="lead"><img src="assets/client-1.jpg" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" style="object-fit: cover"></figure>
         <div class="more">
@@ -165,19 +183,13 @@
           <figure><img src="assets/client-6.jpg" width="720" height="960" alt="A client in a long wavy honey-brown wig" loading="lazy"></figure>
           <figure><img src="assets/client-7.jpg" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" loading="lazy"></figure>
         </div>
-        <figcaption>Her clients, from her website.</figcaption>
+        <figcaption>Our clients, from our website.</figcaption>
       </div>
-      <section class="step" id="step-what">
-        <h2>What would you like?</h2>
-        <p class="lead">Her prices, as she publishes them.</p>
-        <div id="groups"></div>
-        <p class="err" id="errWhat"></p>
-      </section>
 
       <section class="step" id="step-when">
         <button type="button" class="backbtn" data-back>Back</button>
         <h2>When suits you?</h2>
-        <p class="lead">Sunday to Thursday, between 10 and 2. She confirms the exact time with you.</p>
+        <p class="lead">Sunday to Thursday, between 10 and 2. We confirm the exact time with you.</p>
         <div class="fields">
           <label class="f">Preferred day<input type="date" id="date" required><span class="hint" id="dateHint">Sunday to Thursday.</span></label>
           <label class="f">Preferred time<select id="time"><option>10:00</option><option>11:00</option><option>12:00</option><option>13:00</option><option>Any time between 10 and 2</option></select></label>
@@ -188,12 +200,12 @@
       <section class="step" id="step-you">
         <button type="button" class="backbtn" data-back>Back</button>
         <h2>Your details.</h2>
-        <p class="lead">So she can confirm with you. Nothing is stored for anyone else.</p>
+        <p class="lead">So we can confirm with you. Nothing is stored for anyone else.</p>
         <div class="fields">
           <label class="f">Your name<input type="text" id="name" autocomplete="name" required maxlength="120"></label>
           <label class="f">Mobile<input type="tel" id="phone" autocomplete="tel" inputmode="tel" required placeholder="05x-xxx-xxxx" maxlength="40"></label>
           <label class="f full">Email, for your confirmation <span class="hint">(optional)</span><input type="email" id="email" autocomplete="email" maxlength="200"></label>
-          <label class="f full">Anything she should know? <span class="hint">(optional) A wig you already own, what you're hoping for, past experiences.</span><textarea id="notes" maxlength="1000"></textarea></label>
+          <label class="f full">Anything we should know? <span class="hint">(optional) A wig you already own, what you're hoping for, past experiences.</span><textarea id="notes" maxlength="1000"></textarea></label>
         </div>
         <p class="err" id="errYou"></p>
       </section>
@@ -207,14 +219,14 @@
         <p class="contents" id="contents" hidden></p>
         <div class="total"><span>Total</span><b id="total">₪0</b></div>
         <button type="button" class="cta" id="place" disabled>Request the time</button>
-        <p class="assure"><b>Nothing is paid here.</b> Michal confirms the time with you, and payment is between you and her.</p>
+        <p class="assure"><b>Nothing is paid here.</b> We confirm the time with you, and you pay us directly.</p>
       </div>
       <div class="card" aria-label="What clients say">
         <h2>In their words</h2>
         <div style="display:grid;gap:.9rem">
           <figure class="voice"><img src="assets/yael.jpg" width="88" height="88" alt=""><figcaption><p>"She had a ton of options and she tried so many on me, giving her honest opinion, with no pressure to buy. Its not surprising that 2 years later I still love the wig I got."<b>Yael Stoolback</b></p></figcaption></figure>
-          <figure class="voice"><img src="assets/debbie.jpg" width="88" height="88" alt=""><figcaption><p>"Immediately, she saw the problems and brought the sheitl back to life! Now, I love it."<b>Debbie Burack</b></p></figcaption></figure>
-          <figure class="voice"><img src="assets/miriam.jpg" width="88" height="88" alt=""><figcaption><p>"Something I actually think is cute, light, and works AMAZINGLY for me!"<b>Miriam Campbell</b></p></figcaption></figure>
+          <figure class="voice"><img src="assets/debbie.jpg" width="88" height="88" alt=""><figcaption><p>"Immediately, she saw the problems and brought the sheitl back to life. Now, I love it."<b>Debbie Burack</b></p></figcaption></figure>
+          <figure class="voice"><img src="assets/miriam.jpg" width="88" height="88" alt=""><figcaption><p>"Something I actually think is cute, light, and works amazingly for me."<b>Miriam Campbell</b></p></figcaption></figure>
         </div>
       </div>
     </aside>
@@ -225,7 +237,7 @@
     <div class="card">
       <p id="doneWhat"></p>
       <p id="doneWhen"></p>
-      <p>She confirms the time with you. Nothing is paid here; payment is between you and her.</p>
+      <p>We confirm the time with you. Nothing is paid here; you pay us directly.</p>
       <a class="track" id="track" href="#" target="_blank" rel="noopener">Follow your request</a>
     </div>
     <p style="margin-top:1.2rem;color:var(--muted)"><a href="index.html">Back to the page</a></p>
@@ -239,22 +251,20 @@
 
 <script>
 (function () {
-  var API = 'http://localhost:8001/api';
-  var APP = 'http://localhost:3210';
-  var SLUG = 'michal-simkin';
+  /* A LOCAL test (the dev API on 8001) only on localhost; on the real host the page's own /api and origin. */
+  var LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /\.html$/.test(location.pathname);
+  var API = LOCAL ? 'http://localhost:8001/api' : '/api';
+  var APP = LOCAL ? 'http://localhost:3210' : location.origin;
+  var GIG = '8d16bfc0-9da6-4e5d-8c94-a0057cdf247c', WA = '972546826258';   /* her listing and its WhatsApp number */
   var SYM = { USD: '$', ILS: '₪', EUR: '€', GBP: '£' };
   var $ = function (s) { return document.querySelector(s); };
   var state = { gig: null, products: [], chosen: null };
   function money(n, cur) { return (SYM[cur] || cur + ' ') + (Math.round(n * 100) / 100).toLocaleString('en-US'); }
 
-  fetch(API + '/marketplace/business/' + SLUG).then(function (r) { return r.json(); }).then(function (d) {
-    var gigs = d.listings || d.gigs || [];
-    var store = gigs.filter(function (g) { return g.gig_type === 'store'; })[0] || gigs[0];
-    return fetch(API + '/marketplace/order-form/' + store.id).then(function (r) { return r.json(); });
-  }).then(function (form) {
+  fetch(API + '/marketplace/order-form/' + GIG).then(function (r) { return r.json(); }).then(function (form) {
     state.gig = form.gig; state.products = form.products;
     render(); initDate();
-    var want = location.hash === '#academy' ? /both courses/ : /consultation/i;
+    var want = location.hash === '#academy' ? /both courses/i : /consultation/i;
     var def = state.products.filter(function (p) { return want.test(p.name); })[0];
     if (def) choose(def.id);
   }).catch(function (e) { $('#errWhat').textContent = 'Could not load. Is the local API running on 8001? (' + e.message + ')'; });
@@ -264,10 +274,10 @@
     state.products.forEach(function (p) { var g = p.group || 'Other'; if (!groups[g]) { groups[g] = []; order.push(g); } groups[g].push(p); });
     $('#groups').innerHTML = order.map(function (g) {
       return '<div class="group"><h3>' + g + '</h3><div class="picks">' + groups[g].map(function (p) {
-        var bundle = /both courses/.test(p.name);
+        var bundle = /both courses/i.test(p.name);
         return '<button type="button" class="pick' + (bundle ? ' bundle' : '') + '" data-id="' + p.id + '" aria-pressed="false">'
           + '<span class="name">' + p.name.replace('Academy · ', '') + '</span>'
-          + '<span class="price">' + money(p.price, p.currency) + (bundle ? '<small>₪16,000</small><em class="savebadge">Save ₪4,000</em>' : '') + '</span>'
+          + '<span class="price">' + money(p.price, p.currency) + (bundle ? '<small>₪16,000</small><em class="savebadge">25% off</em>' : '') + '</span>'
           + (p.description ? '<span class="what">' + p.description + '</span>' : '')
           + (/consultation/i.test(p.name) ? '<span class="start">The usual first step</span>' : '')
           + '</button>';
@@ -329,20 +339,32 @@
     if (!state.chosen) { $('#errWhat').textContent = 'Choose one.'; return; }
     var wd = new Date($('#date').value + 'T12:00:00').getDay();
     if (!$('#date').value || wd === 5 || wd === 6) { $('#errWhen').textContent = 'Pick a day, Sunday to Thursday.'; $('#step-when').scrollIntoView(); return; }
-    if (!$('#name').value.trim() || $('#phone').value.trim().length < 9) { $('#errYou').textContent = 'Your name and a mobile number, so she can confirm.'; $('#step-you').scrollIntoView(); return; }
+    if (!$('#name').value.trim() || $('#phone').value.trim().length < 9) { $('#errYou').textContent = 'Your name and a mobile number, so we can confirm.'; $('#step-you').scrollIntoView(); return; }
     var notes = ('Preferred time: ' + $('#time').value + ($('#notes').value.trim() ? '\n' + $('#notes').value.trim() : ''));
     var body = { lines: [{ product_id: state.chosen.id, qty: 1 }], fulfilment: 'pickup', date: $('#date').value, window: null, address: null,
       customer_name: $('#name').value.trim(), customer_phone: $('#phone').value.trim(), customer_email: $('#email').value.trim() || null, notes: notes };
     $('#place').disabled = true; $('#placeBar').disabled = true; $('#place').textContent = 'Sending…';
-    fetch(API + '/marketplace/order-form/' + state.gig.id + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+    /* saved to her board first, then WhatsApp with the request typed (rule 3k). The tab opens now so a pop-up blocker allows it. */
+    var what = state.chosen.name.replace('Academy · ', 'Academy: ');
+    var out = ['Hi Michal, I would like to book:', '\u2022 ' + what + ' (' + money(state.chosen.price, state.chosen.currency) + ')',
+      'Day: ' + new Date($('#date').value + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + ', ' + $('#time').value];
+    if ($('#notes').value.trim()) out.push('Notes: ' + $('#notes').value.trim());
+    out.push('Name: ' + $('#name').value.trim() + ', ' + $('#phone').value.trim());
+    var tab = window.open('', '_blank');
+    function wa(track) {
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(out.join('\n') + (track ? '\n\nFollow the request: ' + track : ''));
+      if (tab) tab.location.href = url; else window.open(url, '_blank');
+    }
+    fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.detail || 'Could not send the request'); return j; }); })
       .then(function (j) {
-        $('#doneWhat').textContent = state.chosen.name.replace('Academy · ', 'Academy: ') + ' · ' + money(j.total || 0, j.currency || 'ILS') + '.';
+        $('#doneWhat').textContent = what + ' \u00b7 ' + money(j.total || 0, j.currency || 'ILS') + '.';
         $('#doneWhen').textContent = 'Preferred: ' + $('#date').value + ', ' + $('#time').value + '.';
         $('#track').href = APP + '/orders/track/' + j.track_token;
+        wa(APP + '/orders/track/' + j.track_token);
         document.body.classList.add('is-done'); window.scrollTo(0, 0);
       })
-      .catch(function (e) { $('#errYou').textContent = e.message; $('#place').disabled = false; $('#placeBar').disabled = false; paint(); });
+      .catch(function (e) { console.error(e); wa(''); $('#errYou').textContent = e.message + '. WhatsApp is open with your request: send it there.'; $('#place').disabled = false; $('#placeBar').disabled = false; paint(); });
   }
   $('#place').addEventListener('click', next); $('#placeBar').addEventListener('click', next);
 })();

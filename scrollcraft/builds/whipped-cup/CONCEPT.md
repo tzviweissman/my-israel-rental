@@ -1,5 +1,7 @@
 # The Whipped Cup, concept
 
+Category: food-shop
+
 ## Ideas
 - **Film with one big line** (docs/inspo/awwwards-food-2026-10-18/morpho-water-1-film-chapters-big-type.webp): Morpho opens on a full-screen film with one huge light serif line ("Follow the feeling"). For her: a sea of clouds at sunrise, with "Ever wanted to feel the clouds?"
 - **A window that holds while the world moves behind it** (docs/inspo/awwwards-food-2026-10-18/ballena-fine-dining-1-floating-video-window.webp): Ballena keeps one window still in the centre while scenes slide behind it. For her: a cloud-shaped window opens in the middle of the sky film, holding her real photo of the whipped cloud on her iced coffee, while the sky keeps drifting around it.
@@ -24,8 +26,14 @@ The first two together, driven by her own tagline. The page opens full screen on
 - reveal: R9, from 21st search "scroll reveal mask wipe" ("Dual Wipe Reveal"), made round to echo the cloud window
 - steps: S6, from docs/inspo/awwwards-food-2026-10-18/mam-com-3-recipe-servings.webp
 - price: P9, from her own menu card (price over "a jar")
-- touch: X20, the mouse pointer is a cloud, from Tzvi's idea (20 Oct 2026) and her tagline "your cup, your cloud"
+- touch: X20, the mouse pointer is a cloud (site.css, the last block before .toast; desktop mouse only via hover:hover and pointer:fine; a still image, so nothing moves), from Tzvi's idea (20 Oct 2026) and her tagline "your cup, your cloud"
 - heading: H6, from docs/inspo/awwwards-food-2026-10-18/morpho-water-1-film-chapters-big-type.webp
 
 ## Not alike
 rena-lipschitz, elisheva-brandeis: different from all 10 other pages
+
+## Category pass (22 Oct 2026, rule 3t)
+Bright ground throughout (cream, paper, blush, white); the full-bleed photo screens became framed photos. One colour room per flavour (Classic latte, Caramel amber, Vanilla blush) with photo, name, line, price and Add on every card (Best Bean Best Cup, docs/inspo/awwwards-anatomy-2026-10-22/food/bestbean-colour-per-product.webp; Agrumea). Story band and delivery facts as plain light blocks. The opening film, the cloud window, the servings card and the cloud pointer are kept. The jar photos still carry their coffee-bean background: product hero shots (rule 8) are on the owner list.
+
+## Style sheet
+accent pink-ink #A1305A (small headline words only); ink #2A140B; button chocolate #33170C; grounds cream #FCF2F1, paper #FFF9F7, blush #F9DAE0, white; one colour room per flavour (latte #E6D2BE, caramel #F0C48C, blush #F8DDE4); faces Fraunces (headings) and DM Sans (body), plus Frank Ruhl Libre and Heebo for the shekel sign only; radius 22 px cards, 28 px rooms, 999 px buttons; motion: hover under 300 ms, no linear easing.

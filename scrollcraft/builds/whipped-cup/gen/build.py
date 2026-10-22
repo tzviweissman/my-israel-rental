@@ -6,7 +6,7 @@
 # email. Photos: her own two (src/owner).
 PAGES = [('index', 'Home'), ('shop', 'Shop'), ('contact', 'Contact')]  # one shop page: menu and order together (rules 3k)
 WA = '19299936768'
-OG = 'https://myisraelrental.com/pages/rena-lipschitz/assets/'
+OG = 'assets/'  # relative: publish-page.mjs rewrites it to the business's own /pages/<slug>/assets/ (22 Oct review: a stale owner path was here)
 
 
 def head(page, title, desc, img):
@@ -16,6 +16,7 @@ def head(page, title, desc, img):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="{desc}">
 <meta property="og:title" content="{title}">
 <meta property="og:description" content="{desc}">
@@ -122,18 +123,30 @@ PACKS = [('bundle', 'Cloud Bundle', '6 jars · Monthly', 'Any 6 jars, mix and ma
 
 
 def was(k):
-    # the same jars bought one by one at the lowest single price (₪40), so the saving is always true
-    return {'duo': 2 * 40, 'one': 4 * 40, 'assorted': 40 + 48 + 48 + 40, 'bundle': 6 * 40}[k]
+    # the same jars bought one by one at the lowest single price (₪40), so the saving is always true.
+    # Assorted shows none (22 Oct 2026): at ₪38.75 a jar it is dearer a jar than the Duo (₪37.50), and a
+    # bigger option only shows a saving when it beats every smaller one.
+    return {'duo': 2 * 40, 'one': 4 * 40, 'assorted': 0, 'bundle': 6 * 40}[k]
+
+
+def pct(k, p):
+    # percent off, rounded DOWN to a whole number (Tzvi, 22 Oct 2026)
+    return (was(k) - p) * 100 // was(k)
 
 
 def pack_html(k, n, meta, allows, p, lead):
     save = ''  # her menu says "save 30+ ₪", but six Classic jars are ₪240: asked her (message-to-rena.md)
-    pic = '<img class="pic" src="assets/iced.webp" alt="" width="1170" height="1213" loading="lazy">' if lead else ''
-    own = {'duo': ('bottles.webp', 1023, 1537), 'one': ('jar-classic.webp', 500, 1111)}.get(k)  # her own photos, one in each tile
-    if own: pic = f'<img class="pic" src="assets/{own[0]}" alt="" width="{own[1]}" height="{own[2]}" loading="lazy">'
+    # one layout for all four (22 Oct review): the same square photo on the left, the name and what it allows
+    # in the middle, the price and Choose in one column on the right; only the tab and the % badge differ
+    own = {'bundle': ('iced.webp', 1170, 1213), 'assorted': ('trio-flowers.webp', 934, 1122),
+           'one': ('jar-classic.webp', 500, 1111), 'duo': ('bottles.webp', 1023, 1537)}[k]  # her own photos, one in each tile
+    pic = f'<img class="pic" src="assets/{own[0]}" alt="" width="{own[1]}" height="{own[2]}" loading="lazy">'
     tab = '<span class="tab">Best value</span>' if lead else ''
-    return f'''        <article class="pack{' lead' if lead else ''}{' has-pic' if own else ''} rev">{tab}{pic if own else ''}<div><p class="meta">{meta}</p><h3>{n}</h3><span class="allows">{allows}</span><span class="save-b">Save ₪{was(k) - p}</span></div>{'' if own else pic}
-          <div class="row"><span class="price"><s class="was" aria-label="instead of ₪{was(k)}">₪{was(k)}</s> ₪{p}{save}</span><a class="btn-line" href="shop.html?pack={k}" data-pack="{k}">Choose</a></div></article>
+    w = was(k)
+    badge = f'<span class="save-b">{pct(k, p)}% off</span>' if w else ''
+    wasp = f'<s class="was" aria-label="instead of ₪{w}">₪{w}</s> ' if w else ''
+    return f'''        <article class="pack has-pic{' best' if lead else ''} rev">{tab}{pic}<div><p class="meta">{meta}</p><h3>{n}</h3><span class="allows">{allows}</span>{badge}</div>
+          <div class="row"><span class="price">{wasp}₪{p}{save}</span><a class="btn-line" href="shop.html?pack={k}" data-pack="{k}">Choose</a></div></article>
 '''
 
 
@@ -227,38 +240,60 @@ HERO_JS = '''<script>
 DESC = 'Handcrafted whipped coffee in a jar, made fresh in Ramat Eshkol, Jerusalem. Classic, Caramel and Vanilla Cloud from ₪40, weekly packages from ₪75. Kosher certified, delivered to your door.'
 
 
+# the contact page already shows the contact cards, so its footer is only the page links (22 Oct review)
+_c = FOOTER.index('<div><h3>Contact</h3>'); _e = FOOTER.index('  </div>' + chr(10) + '  <p class="foot-legal">')
+FOOTER_LITE = FOOTER[:FOOTER.index('  <section class="close"')] + '</main>' + chr(10) + FOOTER[FOOTER.index('<footer class="foot">'):_c] + FOOTER[_e:]
+
+
 def write(name, title, desc, img, body, tail=''):
-    html = head(name, title, desc, img) + header(name) + body + FOOTER + tail + '</body>\n</html>\n'
+    html = head(name, title, desc, img) + header(name) + body + (FOOTER_LITE if name == 'contact' else FOOTER) + tail + '</body>\n</html>\n'
     open(f'{name}.html', 'w', encoding='utf8').write(html)
 
 
+ROOM = {'classic': '#E6D2BE', 'caramel': '#F0C48C', 'vanilla': '#F8DDE4'}  # one colour room per flavour, from the jar's own label and filling
+
+
 def panel(k, n, d, p, img, alt):
-    return f'''      <article class="fpanel" data-flav="{k}"><img src="assets/{img}" alt="{alt}" width="500" height="1111" loading="lazy">
-        <div class="cap"><h3>{n}</h3><p>{d}</p><div class="cap-r"><span class="price">&#8362;{p}<small>a jar</small></span><a class="btn-line add" href="shop.html?jar={k}" data-jar="{k}">Add</a></div></div></article>
+    return f'''      <article class="room" data-flav="{k}" style="--rc:{ROOM[k]}"><div class="room-pic"><img src="assets/{img}" alt="{alt}" width="500" height="1111" loading="lazy"></div>
+        <div class="room-cap"><h3>{n}</h3><p>{d}</p><div class="cap-r"><span class="price">&#8362;{p}<small>a jar</small></span><a class="btn-line add" href="shop.html?jar={k}" data-jar="{k}">Add</a></div></div></article>
 '''
 FPANELS = ''.join(panel(k, n, d, p, c, alt) for (k, n, d, p, c, pos, big, alt) in FLAVS)
 BTN = '''<a class="btn" href="shop.html">Order your jars <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>'''
-WORLD_FLAV = f'''  <section class="world flavpic" id="flavours" aria-labelledby="h-flav">
-    <h2 id="h-flav" class="wtitle">Three flavours of whipped coffee</h2>
-    <div class="fpanels">
-{FPANELS}    </div>
-  </section>
-'''
-WORLD_WINDOWS = f'''  <section class="world duo" id="fresh" aria-labelledby="h-fresh">
-    <div class="duo-pics"><img src="assets/caramel-window.webp" alt="Four jars of Caramel Cloud on a sunny window sill in Jerusalem" width="1160" height="1122" loading="lazy"><img src="assets/vanilla-window.webp" alt="Four jars of The Whipped Cup on a table by a window" width="986" height="1122" loading="lazy"></div>
-    <div class="duo-words">
-      <h2 id="h-fresh">Made fresh in Ramat Eshkol</h2>
-      <p>Handcrafted and fresh. Kosher certified.</p>
-      {BTN}
+WORLD_FLAV = f'''  <section class="rooms" id="flavours" aria-labelledby="h-flav">
+    <div class="wrap">
+      <h2 id="h-flav" class="wtitle">Three flavours of whipped coffee</h2>
+      <div class="room-row">
+{FPANELS}      </div>
     </div>
   </section>
 '''
-WORLD_CLOSE = f'''  <section class="world duo duo-end" id="door" aria-labelledby="h-door">
-    <div class="duo-pics"><img src="assets/bottles.webp" alt="Two jars of The Whipped Cup tied with ribbon on pink linen" width="1023" height="1537" loading="lazy"><img src="assets/trio-flowers.webp" alt="Jars of Vanilla Cloud and Classic Cloud among roses" width="934" height="1122" loading="lazy"></div>
-    <div class="duo-words">
-      <h2 id="h-door">Delivered fresh to your door</h2>
-      <p>Weekly packages from &#8362;75.</p>
-      {BTN}
+WORLD_WINDOWS = f'''  <section class="story" id="fresh" aria-labelledby="h-fresh">
+    <div class="wrap story-in">
+      <div class="story-words">
+        <h2 id="h-fresh">Made fresh in Ramat Eshkol</h2>
+        <p>Handcrafted and fresh. Kosher certified.</p>
+        {BTN}
+      </div>
+      <div class="story-pics"><img src="assets/caramel-window.webp" alt="Four jars of Caramel Cloud on a sunny window sill in Jerusalem" width="1160" height="1122" loading="lazy"><img src="assets/vanilla-window.webp" alt="Four jars of The Whipped Cup on a table by a window" width="986" height="1122" loading="lazy"></div>
+    </div>
+  </section>
+'''
+WORLD_CLOSE = f'''  <section class="door" id="door" aria-labelledby="h-door">
+    <div class="wrap">
+      <div class="door-top">
+        <div class="story-pics"><img src="assets/bottles.webp" alt="Two jars of The Whipped Cup tied with ribbon on pink linen" width="1023" height="1537" loading="lazy"><img src="assets/trio-flowers.webp" alt="Jars of Vanilla Cloud and Classic Cloud among roses" width="934" height="1122" loading="lazy"></div>
+        <div class="story-words">
+          <h2 id="h-door">Delivered fresh to your door</h2>
+          <p>Weekly packages from &#8362;75.</p>
+          {BTN}
+        </div>
+      </div>
+      <dl class="trust">
+        <div><dt>Where</dt><dd>Ramat Eshkol, Jerusalem</dd></div>
+        <div><dt>Delivery</dt><dd>Delivered fresh to your door every week</dd></div>
+        <div><dt>Kosher</dt><dd>Certified</dd></div>
+        <div><dt>Each jar</dt><dd>Makes 3 to 4 coffees</dd></div>
+      </dl>
     </div>
   </section>
 '''

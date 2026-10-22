@@ -1,4 +1,5 @@
 # Noa Levi, Home Styling & Organizing, concept
+Category: service
 
 ## Ideas
 - **Scattered photos that settle** (docs/inspo/awwwards-categories-2026-10-18/tengile-malamala-2-scattered-photo-cluster.webp): Tengile MalaMala scatters photos like prints on a table. For her: pieces of her tidy drawer are strewn at angles over her messy drawer.
@@ -32,3 +33,6 @@ Not needed: the opening is built in code from her own photos. A generated film c
 
 ## Not alike
 noa-levi-home-styling: different from all 9 other pages
+
+## Rework 22 Oct 2026 (rule 3t, category service)
+References for the rework, from the services study (docs/inspo/awwwards-anatomy-2026-10-22/services/): LPAS's row of flat colour tiles with one photo each (lpas-d-sheet.webp) became the three room tiles; Studio Dado's light page with a photo grid of finished rooms (dado-featured-projects.webp) set the white ground; Kononenko's plain text with small data (kononenko-text-led.webp) set the numbered Sort, Tidy, Set up storage list. The two full-bleed dark photo screens ("It starts here", "And ends like this") were removed; the dark band became light; the home page keeps the opening, the close and one dark section.

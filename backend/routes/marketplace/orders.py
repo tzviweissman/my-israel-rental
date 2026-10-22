@@ -1728,6 +1728,12 @@ def says_delivery(biz: Optional[dict[str, Any]], gig: Optional[dict[str, Any]] =
     ))
     if _SAYS_NO_DELIVERY.search(text):
         return False
+    # Where the owner fills in delivery on the dashboard: the delivery note
+    # ("Ramat eshkol and surrounding ...") and the listing's "delivery"
+    # highlight. American Crust set both and still had delivery off, because
+    # only the descriptions were read (Tzvi, 22 Oct 2026).
+    if str(biz.get("delivery_note") or "").strip() or "delivery" in ((gig or {}).get("highlights") or []):
+        return True
     return bool(_SAYS_DELIVERY.search(text)) or (bool(biz.get("serves_nationwide")) and (gig or {}).get("gig_type") == "store")
 
 
@@ -2458,6 +2464,9 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         "track_token": secrets.token_urlsafe(16),
     }
     await db.store_orders.insert_one(doc)
+    # "Every N sold" reorders (reorder.py), in the background.
+    from .reorder import in_background, products_sold
+    in_background(products_sold(biz["_id"], doc.get("gig_id"), doc.get("lines") or []))
     from .birthdays import remember
     await remember(biz["_id"], payload.customer_email, payload.customer_name, payload.birthday, None, "order")
     doc = await auto_assign(doc, biz)

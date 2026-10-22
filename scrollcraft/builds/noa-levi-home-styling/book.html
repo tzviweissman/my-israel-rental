@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="site-category" content="service">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Book a session · Noa Levi, home styling and organizing</title>
 <meta name="description" content="Choose closet organizing, home organizing, home styling or personal shopping, how many hours, then a day and time. ₪160 an hour with Noa Levi.">
@@ -69,6 +70,7 @@
           <ul id="sum"><li><span>Nothing chosen yet</span></li></ul>
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
           <p class="assure">Nothing to pay on this page. We confirm your time on WhatsApp.</p>
+          <div class="toast" id="toast" role="status" aria-live="polite" hidden><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg><p><b>Session written out</b>Press send in WhatsApp and we will confirm your time.</p></div>
           <button class="btn" id="send" type="submit" style="width:100%"><span id="send-l">Continue to your details</span></button>
           <button class="back" id="back" type="button">Back</button>
           <p class="note" id="send-note">Next: your name and phone.</p>
@@ -77,7 +79,6 @@
     </div>
   </section>
   </form>
-  <div class="toast" id="toast" role="status" aria-live="polite" hidden><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg><p><b>Session written out</b>Press send in WhatsApp and we will confirm your time.</p></div>
   <section class="close" aria-label="A home you love, in order.">
     <div class="wrap">
       <div>
@@ -89,7 +90,7 @@
     <p class="giant" aria-hidden="true">Noa Levi</p>
   </section>
 </main>
-<footer class="foot"><nav aria-label="Pages"><a href="index.html">Home</a> · <a href="book.html">Book</a> · <a href="contact.html">Contact</a></nav>Noa Levi, Home Styling &amp; Organizing, Jerusalem and Beit Shemesh · on <a href="/">MyIsraelRental</a>, free to list, no commission</footer>
+<footer class="foot foot-cols"><div class="fc"><b>Pages</b><a href="index.html">Home</a><a href="book.html">Book a session</a><a href="contact.html">Contact</a></div><div class="fc"><b>Where</b><span>Jerusalem and Beit Shemesh</span><span>09:00 to 23:00</span></div><div class="fc"><b>Contact</b><a href="https://wa.me/972556730875" target="_blank" rel="noopener">WhatsApp or call +972 55 673 0875</a><a href="mailto:noare2133@gmail.com">Email</a><span>Noa Levi, Home Styling &amp; Organizing &middot; on <a href="/">MyIsraelRental</a>, free to list, no commission</span></div></footer>
 
 <div class="bar" id="bar" aria-hidden="true">
   <p class="p"><b>₪160 an hour</b>Jerusalem and Beit Shemesh</p>
@@ -99,6 +100,7 @@
 <script>
 (function () {
   var WA = '972556730875', RATE = 160, MAXH = 8;
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api', GIG = '5885df8d-7bd6-43d9-af01-273ec2108a0b';
   var SERVICES = { closet: 'Closet organizing', home: 'Home organizing', styling: 'Home styling', shopping: 'Personal shopping' };
   var STAGE = { closet: 'drawer', home: 'linen', styling: null, shopping: null };
   var CAP = { drawer: "Our work: a clothes drawer", linen: "Our work: a linen cupboard" };
@@ -116,9 +118,11 @@
 
   // the stage shows her work for the chosen service
   function drawStage() {
-    var k = STAGE[svc]; if (!k) return;
+    if (!svc) return;
+    // styling and shopping have no photos of their own: the drawer stays, and says it is our organizing work
+    var k = STAGE[svc] || 'drawer';
     [].forEach.call(document.querySelectorAll('#stph img'), function (i) { i.classList.toggle('on', i.dataset.k === k); });
-    $('st-cap').textContent = CAP[k];
+    $('st-cap').textContent = STAGE[svc] ? CAP[k] : 'Our organizing work: a clothes drawer';
   }
   // the hours: the digit rolls and the tray fills one compartment per hour
   function drawHours() {
@@ -193,9 +197,19 @@
     var total = RATE * hrs, lines = ['Hi Noa, I would like to book:', '• ' + SERVICES[svc] + ', ' + hrLabel() + ' at ₪' + RATE + ' an hour', 'Where: ' + city(), 'When: ' + nice(v('day')) + ', ' + time + ' to ' + endOf(time)];
     if (v('note')) lines.push('To organize: ' + v('note'));
     lines.push('Total: ₪' + total + ' (accessories not included)', 'Name: ' + v('me') + ', ' + v('ph'));
-    var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(lines.join('\n'));
+    var text = lines.join('\n'), msg = lines.slice(1, -1).join('; ');
     phase = 'open'; setSend();
-    var tab = window.open(url, '_blank'); if (!tab) location.href = url;
+    // saved on MyIsraelRental first (page rules 3k); the WhatsApp tab opens first so the pop-up blocker allows it
+    var tab = window.open('', '_blank');
+    var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ tier_name: SERVICES[svc], preferred_date: v('day'), time_slot: time, guest_name: v('me'), contact_phone: v('ph'), message: msg, lang: 'en' }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
+      .catch(function (err) { console.warn('booking not saved', err); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      if (saved && saved.track_path) text += '\n\nFollow the booking: https://myisraelrental.com' + saved.track_path;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+    });
     toast();
     setTimeout(function () { phase = ''; setSend(); }, 1400);
   });

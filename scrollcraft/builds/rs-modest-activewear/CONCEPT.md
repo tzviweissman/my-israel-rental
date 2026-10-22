@@ -2,6 +2,11 @@
 
 Business: women's modest activewear store at King George 31, Jerusalem (listing owner name: Ravit Hen). One listed item: Premium Modest Sports Skirt, ₪320, "with built-in leggings". Photos: the flyer with two skirts (black, white) and the RS bag, the shop interior, the RS sign on the shopfront, the bag, a LinkedIn screenshot (not used).
 
+Category: fashion-shop (rule 3t, 22 Oct 2026): beige ground after the opening, a product row straight after it, a how-to-order strip, no full-screen photo bands.
+
+## Style sheet
+Ground #F4ECE1 (beige), surface #EBDFD0, ink #171512, soft text #5C5348, line #D8C9B5; the accent is the ink itself (the solid button is black on beige) and shop green #1F3A31 only on the opening and the closing detail. Faces: Marcellus for headings, Hanken Grotesk for text, Heebo only for the shekel sign. One radius, 3px. Motion: hang-in reveal 560ms ease-out, hang tags swing, doors scrubbed by scroll, no looping effects.
+
 ## Ideas
 - **Split two-product opening** (docs/inspo/awwwards-categories-2026-10-18/deadly-ponies-1-split-product-hero.webp): Deadly Ponies cuts the first screen into two halves, each a photo, with the shop one scroll away. For her: the first screen is her skirts photo cut down the middle. Rejected as a still: two halves that do nothing are only a layout.
 - **One product per screen, in its place** (docs/inspo/product-pages-2026-10-20/closca-1-one-product-per-screen-in-its-place.webp): the product framed in a window with its name and price beside it. For her: the doorway frame in her shopfront green holding the photo, the one skirt and its price beside it.

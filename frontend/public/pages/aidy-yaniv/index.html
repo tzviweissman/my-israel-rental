@@ -26,7 +26,11 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Bun Intended · Cinnamon buns, Ramat Eshkol</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="Homemade cinnamon buns in Ramat Eshkol, Jerusalem: classic cinnamon, espresso, Lotus and chocolate, in boxes of 4 or 8. Pareve. Order on WhatsApp.">
+<meta property="og:title" content="Bun Intended · Cinnamon buns, Ramat Eshkol">
+<meta property="og:description" content="Homemade cinnamon buns in Ramat Eshkol, Jerusalem. Pareve. Build your box and order on WhatsApp.">
+<meta property="og:image" content="/pages/aidy-yaniv/assets/boxes.webp?v=mvjvut0t">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Allura&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
@@ -41,7 +45,7 @@
     --ease: cubic-bezier(.22,1,.36,1); --r: 18px; --gutter: clamp(16px, 5vw, 64px);
   }
   * { box-sizing: border-box; }
-  html { scroll-behavior: smooth; }
+  html { scroll-behavior: smooth; scroll-padding-top: 76px; }
   body { margin: 0; background: var(--paper); color: var(--ink); font: 17px/1.55 var(--body); -webkit-font-smoothing: antialiased; }
   img { max-width: 100%; display: block; }
   a { color: inherit; }
@@ -55,8 +59,8 @@
     border-radius: 999px; border: 1.5px solid var(--caramel-deep); background: var(--paper); color: var(--ink); font: 600 16px/1 var(--body);
     text-decoration: none; cursor: pointer; overflow: hidden; isolation: isolate; -webkit-tap-highlight-color: transparent; }
   .send .dot { position: absolute; left: 22px; top: 50%; width: 9px; height: 9px; margin-top: -4.5px; border-radius: 50%; background: var(--caramel-deep); z-index: -1;
-    transition: transform 520ms var(--ease); }
-  .send .a, .send .b { display: inline-flex; align-items: center; gap: 10px; transition: transform 460ms var(--ease), opacity 360ms; }
+    transition: transform 400ms var(--ease); }
+  .send .a, .send .b { display: inline-flex; align-items: center; gap: 10px; transition: transform 400ms var(--ease), opacity 300ms; }
   .send .a { padding-left: 16px; }
   .send .b { position: absolute; inset: 0; justify-content: center; color: var(--on-caramel); opacity: 0; transform: translateX(-46px); }
   .send svg { width: 20px; height: 20px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; flex: none; }
@@ -80,28 +84,63 @@
   @keyframes wiggle { 0%,100% { rotate: 0deg; } 40% { rotate: 8deg; } 60% { rotate: -8deg; } 80% { rotate: 2deg; } }
   @keyframes beat { 0%,100% { scale: 1; } 30% { scale: .7; } 60% { scale: 1.15; } }
 
-  /* ---------- hero: their logo, their promise, their photo -------------- */
-  .hero { min-height: min(100svh, 900px); display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 0.95fr); align-items: center; gap: clamp(24px, 5vw, 72px);
-    padding-block: clamp(24px, 5vh, 56px); }
-  .hero .logo { width: clamp(96px, 11vw, 132px); height: auto; border-radius: 50%; box-shadow: 0 10px 30px -18px rgb(58 34 22 / .5); }
-  .hero h1 { margin-top: clamp(14px, 2.4vh, 26px); font-size: min(clamp(2.4rem, 1.2rem + 3vw, 4.2rem), 7.4svh); max-width: 15ch; }
-  .hero h1 .script { display: block; color: var(--caramel-deep); font-size: 1.12em; line-height: 0.9; margin-top: 0.08em; }
-  .hero .lede { margin: clamp(12px, 2.2vh, 22px) 0 0; max-width: 31rem; font-size: clamp(1.02rem, 0.95rem + 0.3vw, 1.18rem); color: var(--ink-soft); }
-  .hero .act { margin-top: clamp(18px, 3.4vh, 34px); display: flex; flex-wrap: wrap; align-items: center; gap: 14px 22px; }
-  .proof { margin: 0; padding: 0; list-style: none; font-size: 0.95rem; color: var(--ink-soft); line-height: 1.5; }
-  .proof b { color: var(--ink); font-weight: 600; }
-  .hero figure { margin: 0; position: relative; justify-self: center; width: min(100%, 470px); }
-  .hero figure img { width: 100%; height: min(78svh, 627px); object-fit: cover; border-radius: 240px 240px var(--r) var(--r); box-shadow: 0 30px 60px -36px rgb(58 34 22 / .6); }
-  .hero figure figcaption { position: absolute; left: -18px; bottom: 26px; background: var(--paper); border: 1px solid var(--line); border-radius: 999px; padding: 8px 16px;
-    font-size: 0.86rem; box-shadow: 0 10px 24px -16px rgb(58 34 22 / .5); }
+
+  /* ---------- the menu bar ---------------------------------------------- */
+  .topbar { position: sticky; top: 0; z-index: 30; background: rgb(251 245 240 / .95); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .topbar .in { display: flex; align-items: center; justify-content: space-between; gap: 16px; min-height: 64px; }
+  .topbar .nm { display: inline-flex; align-items: center; min-height: 44px; font: 600 1.5rem/1 var(--display); letter-spacing: -0.01em; text-decoration: none; color: var(--ink); }
+  .topbar nav { display: flex; align-items: center; gap: 28px; }
+  .topbar nav a:not(.send) { text-decoration: none; font-weight: 500; font-size: 0.95rem; padding: 10px 2px; border-bottom: 1.5px solid transparent; transition: border-color 150ms, opacity 150ms; }
+  .topbar nav a:not(.send):hover { border-bottom-color: var(--caramel-deep); }
+  .topbar nav a:not(.send):active { opacity: .6; }
+  .topbar .send { min-height: 44px; min-width: 0; padding: 0 22px; }
+  .topbar .send .a { padding-left: 14px; }
+  .mbtn { display: none; min-height: 44px; padding: 0 18px; border-radius: 999px; border: 1.5px solid var(--caramel-deep); background: var(--paper); color: var(--ink); font: 600 15px/1 var(--body); cursor: pointer; transition: scale 100ms, background 150ms; }
+  .mbtn:active { scale: .97; }
+  .mpanel { display: none; border-top: 1px solid var(--line); background: var(--paper); }
+  .mpanel a { display: flex; align-items: center; min-height: 52px; padding: 0 var(--gutter); text-decoration: none; font-size: 1.05rem; border-bottom: 1px solid var(--paper-2); }
+  .mpanel a:active { background: var(--paper-2); }
+  .topbar.is-open .mpanel { display: block; }
+
+  /* ---------- the opening: their own photograph, edge to edge ------------ */
+  /* The one photo they sent, in panels that rise on load and then drift. Each panel
+     is the photo covering the panel (object-position picks the part), zoomed a little
+     (--z) about a point (--tx, --ty); the zoom stays small so the photo is never
+     enlarged much past its own size. */
+  .pics { position: relative; overflow: hidden; }
+  .pn { position: relative; overflow: hidden; height: 100%; }
+  .pn .ph { position: absolute; inset: 0; background: url("/pages/aidy-yaniv/assets/boxes.webp?v=mvjvut0t") var(--ox, 50%) var(--oy, 50%) / cover no-repeat; transform: scale(var(--z, 1)); transform-origin: var(--tx, 50%) var(--ty, 50%); }
+  .open { height: max(560px, calc(100svh - 64px)); display: grid; grid-template-columns: minmax(0, 1.45fr) minmax(0, .95fr) minmax(0, .7fr) minmax(0, .95fr); gap: 12px; padding: 12px; background: var(--paper); color: var(--ink); }
+  .open .pn { border-radius: 22px; }
+  .open .pn.cut { display: grid; place-items: center; } .open .pn.cut img { position: relative; inset: auto; width: 100%; height: auto; aspect-ratio: 1; }
+  .open .pn { animation: rise 1.1s var(--ease) both; }
+  .open .pn:nth-child(2) { animation-delay: .14s; } .open .pn:nth-child(3) { animation-delay: .28s; }
+  .open .pn .ph { animation: drift 18s ease-in-out 1s infinite alternate; }
+  .open .pn:nth-child(2) .ph { animation-duration: 22s; animation-direction: alternate-reverse; }
+  @keyframes rise { from { clip-path: inset(100% 0 0 0); } to { clip-path: inset(0); } }
+  @keyframes drift { from { transform: scale(var(--z, 1)); } to { transform: scale(calc(var(--z, 1) * 1.07)); } }
+  /* the words sit on the warm paper beside the photos, not on a shade over them */
+  .open .copy, .close .copy { order: -1; max-width: none; margin: 0; display: flex; flex-direction: column; justify-content: center; padding: 8px clamp(8px, 2vw, 28px) 8px var(--gutter); }
+  .open .copy { align-items: flex-start; }
+  .open .logo { width: clamp(64px, 7vw, 92px); height: auto; border-radius: 50%; box-shadow: 0 10px 30px -14px rgb(0 0 0 / .6); }
+  .pn.cut { background: var(--g); }
+  .pn.cut img { inset: auto; left: 0; right: 0; top: var(--t, 8%); width: 100%; height: 64%; object-fit: contain; object-position: 50% 50%; transform: scale(var(--s)) rotate(-8deg); animation: none; }
+  .open .pn.cut img { animation: drift2 20s ease-in-out 1s infinite alternate; }
+  @keyframes drift2 { from { transform: scale(var(--s)) rotate(-8deg); } to { transform: scale(calc(var(--s) * 1.06)) rotate(-3deg); } }
+  .open h1 { margin-top: clamp(10px, 1.6vh, 18px); font-size: min(clamp(2.3rem, 1rem + 2.9vw, 4rem), 8.5svh); max-width: 9.35em; color: var(--ink); }
+  .open h1 .script { display: block; color: var(--caramel-deep); font-size: 1.1em; line-height: .9; margin-top: .06em; }
+  .open .lede { margin: clamp(10px, 1.8vh, 18px) 0 0; max-width: 30rem; font-size: clamp(1rem, .95rem + .25vw, 1.15rem); color: var(--ink-soft); }
+  .open .act { margin-top: clamp(16px, 3vh, 30px); display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; }
+  .proof { color: var(--ink-soft); } .proof b { color: var(--ink); }
+  .close .proof { color: var(--ink); }
 
   /* ---------- build your box: the signature ----------------------------- */
-  .build { padding-block: clamp(56px, 9vh, 96px); border-top: 1px solid var(--line); }
+  .build { padding-block: clamp(56px, 9vh, 96px); }
   .build-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(24px, 5vw, 64px); align-items: center; }
   .build h2 { font-size: min(clamp(2.2rem, 1.2rem + 3vw, 3.8rem), 9svh); }
   .build .sub { margin: 8px 0 0; color: var(--ink-soft); }
-  .step-label { margin: clamp(16px, 2.6vh, 26px) 0 10px; font-size: 0.78rem; }
-  .choices { display: grid; gap: 10px; }
+  .step-label { margin: clamp(16px, 2.6vh, 26px) 0 10px; font-size: 0.82rem; }
+  .choices { display: grid; gap: 10px; margin-top: clamp(14px, 2.2vh, 22px); }
   .choices.size, .choices.flav { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   /* 21st "Choice Cards": bordered, lit when chosen */
   .choice { position: relative; display: flex; align-items: center; justify-content: space-between; gap: 10px; text-align: left; padding: 13px 16px; min-height: 52px;
@@ -109,7 +148,8 @@
     transition: border-color 200ms, background 200ms, transform 200ms var(--ease); }
   .choice small { display: block; color: var(--ink-soft); font-size: 0.82rem; margin-top: 2px; }
   .choice .pr { font-family: var(--body); font-weight: 600; font-size: 1.05rem; white-space: nowrap; flex: none; }
-  .choice .nm { min-width: 0; }
+  .choice .nm { min-width: 0; white-space: nowrap; }
+  .choices.flav .choice { padding-inline: 12px; }
   .choice .sw { width: 16px; height: 16px; border-radius: 50%; flex: none; box-shadow: inset 0 0 0 1px rgb(0 0 0 / .12); margin-right: 2px; }
   .choice .nm { display: flex; align-items: center; gap: 9px; }
   .choice[aria-pressed="true"] { border-color: var(--caramel-deep); background: var(--paper-2); }
@@ -122,9 +162,13 @@
   .total .mini { display: none; }
   .note { margin: 10px 0 0; font-size: 0.9rem; color: var(--ink-soft); min-height: 1.4em; }
   .when { margin-top: 14px; display: flex; flex-wrap: wrap; align-items: center; gap: 10px; font-size: 0.95rem; }
+  .when[hidden] { display: none; }
+  .who label { flex: 1 1 11rem; display: flex; flex-direction: column; gap: 4px; }
+  .who input { width: 100%; box-sizing: border-box; }
+  .who { margin-top: 8px; } .who input { padding: 7px 12px; } #oerr:empty { display: none; }  /* three plain fields must still leave the builder on one screen (check-fits) */
   .when input { font: inherit; padding: 9px 12px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); }
   .total { margin-top: clamp(14px, 2.4vh, 22px); display: flex; flex-wrap: wrap; align-items: center; gap: 12px 22px; }
-  .total .sum { font-family: var(--body); font-size: 2rem; font-weight: 600; line-height: 1; }
+  .total .sum { font-family: var(--body); font-size: 2rem; font-weight: 600; line-height: 1; min-height: 60px; }  /* the height it has with a saving shown, so choosing a size never moves what is below */
   .total .sum small { font-family: var(--body); font-size: 0.9rem; font-weight: 500; color: var(--ink-soft); margin-left: 6px; }
   .alt { margin: 12px 0 0; font-size: 0.92rem; color: var(--ink-soft); }
   .alt a { color: var(--caramel-deep); font-weight: 600; }
@@ -142,6 +186,10 @@
      touching. Its four walls slope in (each border side is one wall, lit from
      the top left), a pale cut edge runs round the rim, the floor is in shade. */
   .box .trays { width: min(100%, 470px); display: grid; gap: 18px; }
+  .trayw { transition: transform 400ms var(--ease), opacity 300ms; }
+  .trayw.off { opacity: 0; }
+  /* a box of 4 sits in the middle of the space kept for two trays, so choosing 8 moves nothing below */
+  .box[data-size="4"] .trayw:first-child { transform: translateY(calc(50% + 9px)); }
   .tray { position: relative; border-style: solid; border-width: 13px 15px 15px; border-radius: 5px;
     border-color: #C2A47B #B4956C #DCC5A0 #CDB088;
     background: radial-gradient(120% 160% at 45% 25%, #A88B66, #85694A 80%),
@@ -157,65 +205,145 @@
   .box .slots { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 0 6%; }
   .slot { aspect-ratio: 1; display: grid; place-items: center; margin: -10% -9%; }
   .slot:nth-child(odd) { --r: -8deg; } .slot:nth-child(even) { --r: 7deg; } .slot:nth-child(3n) { --r: 14deg; }
-  .slot img { width: 128%; height: 128%; max-width: none; opacity: 0; transform: translateY(-30px) scale(.86) rotate(calc(var(--r) - 14deg)); transition: opacity 360ms, transform 560ms var(--ease); transition-delay: calc(var(--i) * 70ms); filter: drop-shadow(0 4px 4px rgb(30 15 5 / .35)); }
+  .slot img { width: 128%; height: 128%; max-width: none; opacity: 0; transform: translateY(-30px) scale(.86) rotate(calc(var(--r) - 14deg)); transition: opacity 300ms, transform 420ms var(--ease); transition-delay: calc(var(--i) * 50ms); filter: drop-shadow(0 4px 4px rgb(30 15 5 / .35)); }
   .slot.in img { opacity: 1; transform: rotate(var(--r)); }
   .box .label { white-space: nowrap; font-family: var(--script); font-size: 2.1rem; line-height: 1.1; color: var(--caramel-deep); }
   /* prices in lining figures: Cormorant's old-style 1 reads as an I */
   .choice .pr, .total .sum, .pricecard .p, .bar .pr b, .proof b { font-variant-numeric: lining-nums tabular-nums; }
 
-  /* ---------- the price list (theirs) ------------------------------------ */
-  .menu { padding-block: clamp(56px, 9vh, 96px); border-top: 1px solid var(--line); }
-  .menu h2 { font-size: min(clamp(2rem, 1.2rem + 2.4vw, 3.2rem), 8svh); }
-  .menu h2 .script { color: var(--caramel-deep); font-size: 1.15em; }
-  .boxes { margin-top: clamp(18px, 3vh, 30px); display: grid; grid-template-columns: 1fr 1fr; gap: clamp(14px, 2.4vw, 26px); }
-  .pricecard { border: 1.5px solid var(--line); border-radius: var(--r); background: #fff; padding: clamp(18px, 2.4vw, 28px); }
+  /* ---------- the four flavours: a wall of their buns, edge to edge ------ */
+  .flavours { background: var(--paper); color: var(--ink); padding-bottom: clamp(20px, 3vh, 36px); }
+  .flavours .top { padding-block: clamp(24px, 4.5vh, 52px) clamp(12px, 2.2vh, 24px); }
+  .flavours h2 { font-size: min(clamp(2.4rem, 1.3rem + 3.6vw, 4.6rem), 8.5svh); color: var(--ink); max-width: 8.8em; }
+  .flavours h2 .script { display: block; color: var(--caramel-deep); font-size: 1.1em; line-height: .95; }
+  .flavours .sub { margin: 10px 0 0; max-width: 30rem; color: var(--ink-soft); }
+  .wall { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; max-width: 1160px; margin: 0 auto; padding: 0 var(--gutter); height: clamp(340px, calc(100svh - 340px), 640px); }
+  .wall .fl { all: unset; box-sizing: border-box; position: relative; overflow: hidden; display: block; cursor: pointer; background: var(--g); color: var(--t); isolation: isolate; border-radius: 22px; }
+  .wall .fl { transition: box-shadow 250ms var(--ease), scale 120ms; }
+  .wall .fl:hover { box-shadow: inset 0 0 0 7px rgb(255 247 239 / .6); } .wall .fl:active { scale: .985; }
+  .wall .fl:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
+  .wall .fl img { position: absolute; inset: auto 0 68px 0; width: 100%; height: calc(100% - 220px); object-fit: contain; object-position: 50% 60%; transform: scale(1.08) rotate(-6deg); transition: transform 900ms var(--ease); z-index: 1; }
+  @media (hover: hover) { .wall .fl:hover img { transform: scale(1.26) rotate(2deg); } }
+  /* their price, as texture: the box-of-4 price, huge, behind the bun */
+  .wall .fl .big { position: absolute; z-index: 0; right: 6%; bottom: 76px; font: 600 clamp(4.5rem, 8vw, 8rem)/1 var(--display); letter-spacing: -.04em; opacity: .07; font-variant-numeric: lining-nums; pointer-events: none; }
+  .wall .fl .cap { position: absolute; z-index: 2; left: clamp(14px, 1.6vw, 24px); right: 14px; top: clamp(14px, 1.8vw, 26px); }
+  .wall .fl .nm { display: block; font: 600 clamp(1.5rem, 1rem + 1.2vw, 2.2rem)/1.05 var(--display); }
+  .wall .fl .pp { display: block; margin-top: 6px; font: 600 1.2rem/1.2 var(--body); font-variant-numeric: lining-nums tabular-nums; }
+  .wall .fl .pp small { font-weight: 500; }
+  .wall .fl .eight { display: block; margin-top: 2px; font: 500 .9rem/1.3 var(--body); font-variant-numeric: lining-nums tabular-nums; }
+  /* the Add control on every card: inverted from the card's own colours, so it reads on all four */
+  .wall .fl .addb { position: absolute; z-index: 2; left: clamp(14px, 1.6vw, 24px); bottom: clamp(14px, 1.8vw, 24px); display: inline-flex; align-items: center; min-height: 44px; padding: 0 22px; border-radius: 999px; border: 2px solid var(--t); color: var(--t); font: 600 .95rem/1 var(--body); transition: transform 250ms var(--ease), background 200ms, color 200ms; }
+  .wall .fl:hover .addb { transform: translateY(-2px); background: var(--t); color: var(--g); }
+  .wall .f-cin { --g: #F3E6DC; --t: #3A2216; } .wall .f-esp { --g: #6B4430; --t: #FFF7EF; }
+  .wall .f-lot { --g: #C8894B; --t: #2B180F; } .wall .f-cho { --g: #4A2A1D; --t: #FFF7EF; }
+
+  /* ---------- the price list (theirs): a calm rest, on white -------------- */
+  .menu { background: #fff; padding-block: clamp(64px, 11vh, 120px); }
+  .menu h2 { font-size: min(clamp(2.4rem, 1.2rem + 3.6vw, 4.6rem), 10svh); max-width: 8.8em; }
+  .menu h2 .script { color: var(--caramel-deep); font-size: 1.12em; }
+  .boxes { margin-top: clamp(24px, 4vh, 44px); display: grid; grid-template-columns: 1fr 1fr; gap: clamp(28px, 6vw, 96px); }
+  .pricecard { border: 0; border-top: 1.5px solid var(--ink); padding: 14px 0 0; background: none; }
   .pricecard h3 { margin: 0 0 8px; font-size: 0.9rem; color: var(--caramel-deep); }
   .pricecard ul { margin: 0; padding: 0; list-style: none; }
-  .pricecard li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--paper-2); }
+  .pricecard li { display: flex; justify-content: space-between; gap: 12px; padding: 10px 0; border-bottom: 1px solid var(--line); }
   .pricecard li:last-child { border-bottom: 0; }
   .pricecard li span:first-child { display: flex; align-items: center; gap: 10px; }
   .pricecard li i { font-style: normal; font-family: var(--script); font-size: 1.25rem; color: var(--ink-soft); margin-left: 4px; }
   .pricecard .p { font-family: var(--body); font-weight: 600; font-size: 1.15rem; }
-  .pricecard .p small { font-family: var(--body); font-size: 0.75rem; font-weight: 500; color: var(--ink-soft); margin-left: 3px; letter-spacing: 0.06em; }
+  .pricecard .p small { font-family: var(--body); font-size: 0.82rem; font-weight: 500; color: var(--ink-soft); margin-left: 3px; letter-spacing: 0.06em; }
 
   /* ---------- the facts, on a contrasting band --------------------------- */
-  .facts { background: var(--cocoa); color: #F6E9DE; padding-block: clamp(48px, 8vh, 84px); }
+  .facts { background: var(--paper-2); color: var(--ink); padding-block: clamp(64px, 11vh, 120px); }
   .facts .row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(16px, 3vw, 36px); }
-  .facts .k { font-size: 0.74rem; color: #D9B48E; }
+  .facts .row > div { border-top: 1.5px solid var(--ink); padding-top: 18px; }
+  .facts .k { font-size: 0.82rem; color: var(--caramel-deep); }
   .facts .v { margin-top: 6px; font-family: var(--display); font-size: clamp(1.3rem, 1rem + 0.9vw, 1.7rem); font-weight: 600; line-height: 1.15; }
-  .facts .v small { display: block; font-family: var(--body); font-size: 0.92rem; font-weight: 400; color: #E6D2C2; margin-top: 4px; line-height: 1.45; }
+  .facts .v small { display: block; font-family: var(--body); font-size: 0.92rem; font-weight: 400; color: var(--ink-soft); margin-top: 4px; line-height: 1.45; }
 
-  /* ---------- close -------------------------------------------------------- */
-  .close { padding-block: clamp(64px, 11vh, 120px); text-align: center; }
-  .close h2 { font-size: min(clamp(2.6rem, 1.4rem + 4vw, 5rem), 11svh); }
-  .close h2 .script { display: block; color: var(--caramel-deep); font-size: 1.15em; line-height: 0.95; }
-  .close .act { margin-top: 26px; display: flex; flex-direction: column; align-items: center; gap: 12px; }
-  .foot { border-top: 1px solid var(--line); padding: 22px var(--gutter) calc(22px + var(--bar-pad, 0px)); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px 20px;
-    font-size: 0.85rem; color: var(--ink-soft); }
+  /* ---------- close: the photo again, in four crops ---------------------- */
+  .close { min-height: min(72svh, 620px); display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: 12px; padding: 12px; background: var(--dough); color: var(--ink); }
+  .close .pn { border-radius: 22px; min-height: 340px; }
+  /* bun-choc.webp is 720px: shown at most 340px wide so it stays sharp on a 2x phone (22 Oct review) */
+  .close .pn.cut { display: grid; place-items: center; } .close .pn.cut img { --s: 1; position: relative; inset: auto; width: min(340px, 100%); height: auto; aspect-ratio: 1; }
+  .close h2 { font-size: min(clamp(2.4rem, 1.4rem + 3.6vw, 4.8rem), 9svh); max-width: 8.8em; color: var(--ink); }
+  .close h2 .script { display: block; color: var(--cocoa); font-size: 1.1em; line-height: .95; }
+  .close .act { margin-top: clamp(16px, 3vh, 28px); display: flex; flex-wrap: wrap; align-items: center; gap: 14px 24px; }
+
+  /* pick-up or delivery, boxes, and the saving */
+  .choices.ful { margin-top: 10px; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .choice.dim { background: transparent; color: var(--ink-soft); border-style: dashed; }
+  .chip { flex: none; display: inline-block; padding: 4px 10px; border-radius: 999px; background: #E3F3EA; color: #1F5C3A; font: 600 0.8rem/1.2 var(--body); white-space: nowrap; }
+  .choice .chip { margin-left: auto; }
+  .choice small s { margin-right: 4px; } .choices.size .choice small { white-space: nowrap; }
+  .when { margin-top: 10px; justify-content: space-between; }
+  .qty { display: inline-flex; align-items: center; gap: 6px; }
+  .qty button { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; color: var(--ink); font: 500 22px/1 var(--body); cursor: pointer; transition: border-color 150ms, scale 100ms; }
+  .qty button:hover { border-color: var(--caramel); } .qty button:active { scale: .94; }
+  .qty button:disabled { opacity: .4; cursor: default; }
+  .qty output { min-width: 1.21em; text-align: center; font-weight: 600; font-size: 1.1rem; font-variant-numeric: lining-nums tabular-nums; }
+  .total .sum s { font-family: var(--body); font-size: 1.05rem; font-weight: 500; color: var(--ink-soft); margin-left: 8px; text-decoration-thickness: 1.5px; }
+  .total .sum { display: grid; justify-items: start; gap: 4px 0; }
+  .total .sum small.u, .total .sum small.n { margin: 0; display: flex; align-items: center; white-space: nowrap; }
+  .total .sum small .chip { margin-right: 8px; }
+  .total .sum small.n { display: none; }
+  .total { flex-wrap: nowrap; } .total .send { min-width: 0; padding: 0 20px; }
+  
+  .total .px { font-variant-numeric: lining-nums tabular-nums; }
+  .send .px { margin-left: -10px; } .send { white-space: nowrap; }
+  .total .sum { flex: 0 0 auto; } .total .send.send { flex: 0 0 auto; min-width: max-content; }
+  @media (max-width: 430px) { .total span.mini { display: none; } .total .send.send { flex: 1 1 auto; } }
+  .pricecard li { padding: 0; }
+  .pricecard .row { all: unset; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; gap: 12px; width: calc(100% + 16px); min-height: 48px; padding: 6px 8px; margin: 0 -8px; border-radius: 10px; cursor: pointer; transition: background 150ms, scale 100ms; }
+  .pricecard .row:hover { background: var(--paper-2); } .pricecard .row:active { scale: .98; }
+  .pricecard .row:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+  .pricecard .p { white-space: nowrap; } .pricecard li .p .chip { display: inline-block; margin-right: 8px; vertical-align: middle; }
+  .pricecard .p s { font-weight: 500; font-size: 0.85rem; color: var(--ink-soft); margin-right: 6px; }
+  @media (min-width: 861px) and (max-height: 760px) { .menu { padding-block: 28px; } .menu .tip { margin-top: 4px; } .mixnote { margin-top: 2px; font-size: .85rem; } }
+  .mixnote { list-style: none; margin: 6px 0 0; padding: 0 2px; font-size: .9rem; color: var(--ink-soft); }
+  .menu .tip { margin: 10px 0 0; color: var(--ink-soft); font-size: 0.95rem; }
+  .foot { display: block; padding: 0 0 var(--bar-pad, 0px); font-size: 0.95rem; background: var(--cocoa); color: #E6D2C2; }
+  .foot-grid { display: grid; grid-template-columns: 1.3fr 1fr 1.2fr; gap: 28px; padding-block: clamp(48px, 8vh, 80px) 32px; }
+  .foot h3 { margin: 0 0 10px; font-size: 0.82rem; color: #D9B48E; }
+  .foot a { display: block; width: fit-content; padding: 6px 0; color: #FFF7EF; text-decoration: none; }
+  .foot a:hover { color: #F2C79B; text-decoration: underline; }
+  .foot .nm2 { font: 600 clamp(1.8rem, 1.2rem + 1.6vw, 2.6rem)/1.1 var(--display); color: #FFF7EF; }
+  .foot .nm2 .script { display: block; color: #F2C79B; font-size: 1.1em; }
+  .foot p { margin: 6px 0 0; max-width: 22rem; }
+  .foot a.send { display: inline-flex; margin-top: 16px; padding: 0 26px; border-color: var(--paper); color: var(--ink); }
+  .foot a.send:hover { color: var(--ink); text-decoration: none; }
+  .foot .giant { margin: 0; padding: 0 var(--gutter); text-align: center; font: 600 clamp(2.6rem, 12vw, 11rem)/.95 var(--display); letter-spacing: -.03em; color: #FFF7EF; opacity: .14; white-space: nowrap; overflow: hidden; }
+  .foot .legal { border-top: 1px solid rgb(246 233 222 / .22); padding-block: 14px 18px; font-size: 0.85rem; }
+  .foot .legal a { display: inline; padding: 0; color: #E6D2C2; }
 
   /* ---------- phone bar --------------------------------------------------- */
   .bar { display: none; }
   @media (max-width: 860px) {
     :root { --bar-pad: 76px; }
-    .hero { grid-template-columns: 1fr; min-height: auto; padding-top: 20px; gap: 22px; }
-    .hero .head { display: flex; align-items: center; gap: 14px; }
-    .hero .logo { width: 76px; }
-    /* the words and the button first on a phone, then their photo */
-    .hero figure { width: 100%; }
-    .hero figure img { height: min(46svh, 420px); border-radius: 180px 180px var(--r) var(--r); }
-    .hero figure figcaption { left: 12px; bottom: 12px; }
+    .open { grid-template-columns: repeat(2, minmax(0, 1fr)); height: auto; } .open .pn:nth-child(2) { display: none; } .open .pn { height: 34svh; } .open .copy { grid-column: 1 / -1; padding: 12px 6px 6px; }
+    .chip, .choice .chip { font-size: .875rem; }
+    .close { grid-template-columns: 1fr; } .close .copy { padding: 18px 8px 8px; } .wall { gap: 10px; }
+   
+    .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); height: auto; } .wall .fl { height: min(58svh, 420px); } .wall .fl img { transform: scale(1.02) rotate(-6deg); object-position: 50% 60%; height: calc(100% - 240px); }
     .build-grid { grid-template-columns: minmax(0, 1fr); }
     .box { order: -1; width: min(78%, 330px); }
+    .box .stage { margin: -17% 0 -9%; }
+    .flavours { padding-bottom: 8px; } .build { padding-block: 4px 24px; }
+    .menu { padding-block: 40px 28px; } .facts { padding-block: 28px 40px; }
     /* while choosing on a phone, the price and the order button stay under the thumb */
     .total { position: sticky; bottom: 0; z-index: 5; margin-inline: calc(var(--gutter) * -1); padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom));
       background: var(--paper); border-top: 1px solid var(--line); justify-content: space-between; }
-    .total .send { min-width: 0; padding: 0 18px; }
+    .total .send { min-width: 0; padding: 0 14px; font-size: 15px; }
     .total { flex-wrap: nowrap; gap: 10px; }
     .total .sum { font-size: 1.55rem; } .total .sum small { display: block; margin: 2px 0 0; font-size: 0.78rem; }
     /* a small bun in the bar takes each pour while the big one is scrolled away */
     .total .mini { display: block; width: 58px; height: 58px; flex: none; margin: -14px -4px -6px -6px; }
     .total .mini svg, .total .mini img { width: 100%; height: 100%; overflow: visible; }
     .boxes { grid-template-columns: 1fr; }
+    .topbar nav { display: none; } .mbtn { display: inline-flex; align-items: center; }
+    .total .sum small.u { display: none; } .total .sum small.n { display: flex; }
+    .total .sum s { font-size: .9rem; margin-left: 6px; } .total .px { display: none; }
+    .foot-grid { grid-template-columns: 1fr; gap: 20px; padding-block: 32px 20px; }
+    .when { gap: 10px 14px; }
     .facts .row { grid-template-columns: 1fr 1fr; }
     .bar { position: fixed; inset: auto 0 0 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 12px;
       padding: 10px 16px calc(10px + env(safe-area-inset-bottom)); background: rgb(251 245 240 / .97); border-top: 1px solid var(--line);
@@ -231,17 +359,20 @@
   }
   /* a short laptop: the whole builder, button included, on one screen */
   @media (min-width: 861px) and (max-height: 760px) {
-    .build { padding-block: 40px; }
+    .build { padding-block: 24px; } .build .sub { display: none; } .choices { margin-top: 10px; }
     .step-label { margin: 12px 0 8px; }
     .choice { min-height: 46px; padding: 10px 14px; }
     .when { margin-top: 10px; } .total { margin-top: 12px; } .note { margin-top: 6px; }
   }
   /* narrow phones: a flavour's price sits under its name, never against it */
   @media (max-width: 440px) {
+    .choices.size .choice { flex-direction: column; align-items: flex-start; gap: 6px; } .choice .chip { margin-left: 0; }
     .choices.flav .choice:not(.mix) { flex-direction: column; align-items: flex-start; gap: 4px; }
     .choices.flav .choice:not(.mix) .pr { padding-left: 25px; font-size: 0.95rem; color: var(--ink-soft); }
   }
   @media (max-width: 380px) { .facts .row { grid-template-columns: 1fr; } .send { min-width: 0; } }
+  @media (max-height: 780px) { .open .logo, .open .lede { display: none; } .open h1 { font-size: min(clamp(2.3rem, 1.2rem + 3.4vw, 4.6rem), 8svh); } }
+  @media (prefers-reduced-motion: reduce) { .open .pn, .open .pn .ph, .open .pn.cut img { animation: none; } }
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after { transition-duration: 1ms !important; animation: none !important; }
     html { scroll-behavior: auto; }
@@ -255,57 +386,102 @@
   <symbol id="tick" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
 </svg>
 
+<header class="topbar" id="top">
+  <div class="wrap in">
+    <a class="nm" href="#top" data-mir-key="t-aae07a27-0">Bun Intended</a>
+    <nav aria-label="Pages">
+      <a href="#prices" data-mir-key="t-53b2fbd0-0">Prices</a>
+      <a href="#contact" data-mir-key="t-0ef5f467-0">Find us</a>
+      <a class="send" href="#build" data-send="scroll">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="a" data-mir-key="t-7eebab51-0">Build your box</span>
+        <span class="b"><span class="go" data-mir-key="t-7eebab51-1">Build your box</span><svg><use href="#arr"/></svg></span>
+      </a>
+    </nav>
+    <button type="button" class="mbtn" id="mbtn" aria-expanded="false" aria-controls="mpanel">Menu</button>
+  </div>
+  <div class="mpanel" id="mpanel">
+    <a href="#build" data-mir-key="t-ca372025-0">Build your box</a><a href="#prices" data-mir-key="t-53b2fbd0-1">Prices</a><a href="#contact" data-mir-key="t-0ef5f467-1">Find us</a><a href="tel:+972553321956" data-mir-key="t-915e736b-0">Call or text 055-332-1956</a>
+  </div>
+</header>
+
 <main>
-  <section class="hero wrap" aria-labelledby="h1">
-    <div>
-      <div class="head"><img class="logo" src="/pages/aidy-yaniv/assets/logo.webp?v=mv1fqft7" alt="Bun Intended, sweet things ahead, pareve" width="1254" height="1254" data-mir-key="i-ef5094af-0"></div>
+  <section class="open pics" aria-labelledby="h1">
+    <div class="pn" style="--ox:0%;--oy:50%;--z:1;--tx:0%;--ty:50%"><i class="ph" role="img" aria-label="Two boxes of Bun Intended buns: classic cinnamon with icing, a caramel-topped bun, and Lotus buns with cream and biscuit crumbs"></i></div>
+    <div class="pn cut" style="--g:#5A3828;--s:1;--t:18%"><img src="/pages/aidy-yaniv/assets/bun-lotus.webp?v=mvjvut0t" alt="" width="720" height="720" data-mir-key="i-f7357916-0"></div>
+    <div class="pn" style="--ox:82%;--oy:50%;--z:1;--tx:82%;--ty:50%"><i class="ph" aria-hidden="true"></i></div>
+    <div class="copy wrap">
+      <img class="logo" src="/pages/aidy-yaniv/assets/logo.webp?v=mvjvut0t" alt="Bun Intended, sweet things ahead, pareve" width="1254" height="1254" data-mir-key="i-ef5094af-0">
       <h1 id="h1" data-mir-key="t-5e99174c-0">Cinnamon buns, baked at home in Ramat Eshkol<span class="script">Made with love.</span></h1>
-      <p class="lede" data-mir-key="t-3196bd5c-0">Boxes of 4 or 8 in classic cinnamon, espresso, Lotus and chocolate. Pareve, and freshly baked for Shabbos, a gift, or a treat for yourself.</p>
+      <p class="lede" data-mir-key="t-9dcb3373-0">Pareve, and freshly baked for Shabbos, a gift, or a treat for yourself.</p>
       <div class="act">
         <a class="send" href="#build" data-send="scroll">
           <span class="dot" aria-hidden="true"></span>
-          <span class="a" data-mir-key="t-7eebab51-0">Build your box</span>
-          <span class="b"><span class="go" data-mir-key="t-7eebab51-1">Build your box</span><svg><use href="#arr"/></svg></span>
+          <span class="a" data-mir-key="t-7eebab51-2">Build your box</span>
+          <span class="b"><span class="go" data-mir-key="t-7eebab51-3">Build your box</span><svg><use href="#arr"/></svg></span>
         </a>
         <ul class="proof">
-          <li data-mir-key="t-264166be-0"><b>From ₪55</b> for a box of 4</li>
+          <li><b data-mir-key="t-f4c71489-0">Boxes of 4 or 8, from ₪55</b></li>
           <li data-mir-key="t-3e027935-0">Pick-up in Ramat Eshkol</li>
         </ul>
       </div>
     </div>
-    <figure>
-      <img src="/pages/aidy-yaniv/assets/boxes.webp?v=mv1fqft7" alt="Two boxes of Bun Intended buns: classic cinnamon with icing, a caramel-topped bun, and Lotus buns with cream and biscuit crumbs" width="768" height="1024" data-mir-key="i-c63c759c-0">
-      <figcaption data-mir-key="t-bc44aab4-0">Freshly baked</figcaption>
-    </figure>
+  </section>
+
+  <section class="flavours" id="flavours-wall" aria-labelledby="fh">
+    <div class="wrap top">
+      <h2 id="fh" data-mir-key="t-031d1e2f-0">Four flavours.<span class="script">Pick your favourite.</span></h2>
+      <p class="sub" data-mir-key="t-2ea8f608-0">Tap one to start your box with it.</p>
+    </div>
+    <div class="wall">
+      <button type="button" class="fl f-cin" data-pick="4:cinnamon" aria-label="Start a box with Classic cinnamon"><span class="big" aria-hidden="true" data-mir-key="t-26bb0cae-0">55</span><span class="cap"><span class="nm" data-mir-key="t-6fae4ef6-0">Classic cinnamon</span><span class="pp" data-mir-key="t-0ddd8710-0">₪55 <small>for 4</small></span><span class="eight">Box of 8: <s>₪110</s> ₪100</span></span> <span class="addb" aria-hidden="true" data-mir-key="t-c15046ba-0">Add a box</span><img src="/pages/aidy-yaniv/assets/bun-cinnamon.webp?v=mvjvut0t" alt="" width="720" height="720" loading="lazy" decoding="async" data-mir-key="i-70013fe0-0"></button>
+      <button type="button" class="fl f-esp" data-pick="4:espresso" aria-label="Start a box with Espresso"><span class="big" aria-hidden="true" data-mir-key="t-26bb0cae-1">55</span><span class="cap"><span class="nm" data-mir-key="t-2e6db614-0">Espresso</span><span class="pp" data-mir-key="t-0ddd8710-1">₪55 <small>for 4</small></span><span class="eight">Box of 8: <s>₪110</s> ₪100</span></span> <span class="addb" aria-hidden="true" data-mir-key="t-c15046ba-1">Add a box</span><img src="/pages/aidy-yaniv/assets/bun-espresso.webp?v=mvjvut0t" alt="" width="720" height="720" loading="lazy" decoding="async" data-mir-key="i-364063d4-0"></button>
+      <button type="button" class="fl f-lot" data-pick="4:lotus" aria-label="Start a box with Lotus"><span class="big" aria-hidden="true" data-mir-key="t-a1d1fd40-0">65</span><span class="cap"><span class="nm" data-mir-key="t-39903191-0">Lotus</span><span class="pp" data-mir-key="t-5c8a7601-0">₪65 <small>for 4</small></span><span class="eight">Box of 8: <s>₪130</s> ₪120</span></span> <span class="addb" aria-hidden="true" data-mir-key="t-c15046ba-2">Add a box</span><img src="/pages/aidy-yaniv/assets/bun-lotus.webp?v=mvjvut0t" alt="" width="720" height="720" loading="lazy" decoding="async" data-mir-key="i-f7357916-1"></button>
+      <button type="button" class="fl f-cho" data-pick="4:chocolate" aria-label="Start a box with Chocolate"><span class="big" aria-hidden="true" data-mir-key="t-a1d1fd40-1">65</span><span class="cap"><span class="nm" data-mir-key="t-7b89ee1d-0">Chocolate</span><span class="pp" data-mir-key="t-5c8a7601-1">₪65 <small>for 4</small></span><span class="eight">Box of 8: <s>₪130</s> ₪120</span></span> <span class="addb" aria-hidden="true" data-mir-key="t-c15046ba-3">Add a box</span><img src="/pages/aidy-yaniv/assets/bun-choc.webp?v=mvjvut0t" alt="" width="720" height="720" loading="lazy" decoding="async" data-mir-key="i-6e6457db-0"></button>
+    </div>
   </section>
 
   <section class="build" id="build" aria-labelledby="bh">
     <div class="wrap build-grid">
       <div>
         <h2 id="bh" data-mir-key="t-549a331c-0">Build your box</h2>
-        <p class="sub" data-mir-key="t-6c56406c-0">Choose a box and a flavour. We'll get your order on WhatsApp, written out.</p>
+        <p class="sub" data-mir-key="t-94f13d36-0">Choose a box and a flavour.</p>
 
-        <p class="step-label caps" data-mir-key="t-862e9005-0">Box</p>
         <div class="choices size" role="group" aria-label="Box size">
           <button type="button" class="choice" data-size="4" aria-pressed="true"><span data-mir-key="t-9be94f2c-0">4 piece box<small>from ₪55</small></span></button>
-          <button type="button" class="choice" data-size="8" aria-pressed="false"><span data-mir-key="t-76ce5d67-0">8 piece box<small>from ₪100</small></span></button>
+          <button type="button" class="choice" data-size="8" aria-pressed="false"><span>8 piece box<small><s>₪110</s> from ₪100</small></span><span class="chip" data-mir-key="t-d1ba20c6-0">Up to 9% off</span></button>
         </div>
 
-        <p class="step-label caps" data-mir-key="t-77b5a0e5-0">Flavour</p>
         <div class="choices flav" role="group" aria-label="Flavour" id="flavours"></div>
         <p class="note" id="note" aria-live="polite"></p>
 
-        <label class="when">Needed on <input type="date" id="date" aria-describedby="when-hint"> <span id="when-hint" style="color:var(--ink-soft)" data-mir-key="t-6672aee6-0">(optional)</span></label>
+        <div class="choices ful" role="group" aria-label="Pick-up or delivery">
+          <button type="button" class="choice" data-ful="pickup" aria-pressed="true"><span data-mir-key="t-79457e60-0">Pick-up in Ramat Eshkol</span></button>
+          <button type="button" class="choice" data-ful="delivery" aria-pressed="false"><span data-mir-key="t-8c0f8a96-0">Delivery</span></button>
+        </div>
+
+        <div class="when">
+          <label>Needed on <input type="date" id="date" required></label>
+          <span class="qty" role="group" aria-label="Number of boxes"><button type="button" data-q="-1" id="qm" aria-label="One box fewer">&minus;</button><output id="qty" aria-live="polite">1</output><button type="button" data-q="1" id="qp" aria-label="One box more">+</button><span style="margin-left:4px" data-mir-key="t-3dfb1efe-0">box</span></span>
+        </div>
+
+        <div class="when who">
+          <label><input id="me" autocomplete="name" maxlength="80" aria-label="Your name" placeholder="Your name"></label>
+          <label><input id="ph" type="tel" autocomplete="tel" maxlength="30" aria-label="Your phone" placeholder="Your phone"></label>
+        </div>
+        <div class="when who" id="addrw" hidden>
+          <label><input id="addr" autocomplete="street-address" maxlength="160" aria-label="Delivery address" placeholder="Delivery address: street, number, neighbourhood"></label>
+        </div>
+        <p class="note" id="oerr" role="alert" style="color:#9b2c1d"></p>
 
         <div class="total">
           <span class="mini" id="mini" aria-hidden="true"></span><span class="sum" id="sum" aria-live="polite">₪55<small data-mir-key="t-f6d5e7cd-0">4 buns</small></span>
           <a class="send" id="order" href="#" target="_blank" rel="noopener">
             <span class="dot" aria-hidden="true"></span>
-            <span class="a" data-mir-key="t-8b6b4844-0">Order on WhatsApp</span>
-            <span class="b"><span class="go" data-mir-key="t-8b6b4844-1">Order on WhatsApp</span><span class="busy"><span class="spin" aria-hidden="true"></span>Opening WhatsApp</span><span class="done" data-mir-key="t-7a8ba38c-0"><svg><use href="#tick"/></svg>Sent to WhatsApp</span><svg class="go"><use href="#wa"/></svg></span>
+            <span class="a">Order on WhatsApp<span class="px" data-px></span></span>
+            <span class="b"><span class="go">Order on WhatsApp<span class="px" data-px></span></span><span class="busy"><span class="spin" aria-hidden="true"></span>Opening WhatsApp</span><span class="done" data-mir-key="t-7a8ba38c-0"><svg><use href="#tick"/></svg>Sent to WhatsApp</span><svg class="go"><use href="#wa"/></svg></span>
           </a>
         </div>
-        <p class="alt" data-mir-key="t-c0638071-0">Prefer to talk? Call or text <a href="tel:+972553321956">055-332-1956</a>.</p>
       </div>
       <div class="box" id="box" data-size="4" aria-hidden="true">
         <div class="stage" id="stage"></div>
@@ -315,9 +491,10 @@
     </div>
   </section>
 
-  <section class="menu" aria-labelledby="mh">
+  <section class="menu" id="prices" aria-labelledby="mh">
     <div class="wrap">
       <h2 id="mh" data-mir-key="t-5f4945d1-0">Freshly baked. <span class="script">Made with love.</span></h2>
+      <p class="tip" data-mir-key="t-d3f0f11e-0">Tap a line to start your box with it.</p>
       <div class="boxes">
         <div class="pricecard"><h3 class="caps" data-mir-key="t-de5e5ac3-0">4 piece box</h3><ul id="m4"></ul></div>
         <div class="pricecard"><h3 class="caps" data-mir-key="t-42d7536e-0">8 piece box</h3><ul id="m8"></ul></div>
@@ -335,33 +512,49 @@
   </section>
 
   <section class="close" aria-labelledby="ch">
-    <div class="wrap">
+    <div class="pn cut" style="--g:#4A2A1D;--s:1.1;--t:10%"><img src="/pages/aidy-yaniv/assets/bun-choc.webp?v=mvjvut0t" alt="" width="720" height="720" loading="lazy" decoding="async" data-mir-key="i-6e6457db-1"></div>
+    <div class="copy wrap">
       <h2 id="ch" data-mir-key="t-ebfdfdbe-0">Your box is ready when you are.<span class="script">Sweet things ahead</span></h2>
       <div class="act">
         <a class="send" href="#build" data-send="scroll">
           <span class="dot" aria-hidden="true"></span>
-          <span class="a" data-mir-key="t-7eebab51-2">Build your box</span>
-          <span class="b"><span class="go" data-mir-key="t-7eebab51-3">Build your box</span><svg><use href="#arr"/></svg></span>
+          <span class="a" data-mir-key="t-7eebab51-4">Build your box</span>
+          <span class="b"><span class="go" data-mir-key="t-7eebab51-5">Build your box</span><svg><use href="#arr"/></svg></span>
         </a>
         <ul class="proof"><li data-mir-key="t-2bc17c1a-0"><b>From ₪55</b> · Pick-up in Ramat Eshkol</li></ul>
       </div>
     </div>
   </section>
 </main>
-<footer class="foot"><span data-mir-key="t-4c6c930f-0">Bun Intended · homemade cinnamon buns, Ramat Eshkol, Jerusalem</span><a href="https://myisraelrental.com/business/aidy-yaniv" data-mir-key="t-6fde72b8-0">Listed on MyIsraelRental</a></footer>
+<footer class="foot" id="contact">
+  <div class="wrap foot-grid">
+    <div><div class="nm2" data-mir-key="t-d047f54d-0">Bun Intended<span class="script">Sweet things ahead</span></div><p data-mir-key="t-d97a7dcb-0">Homemade cinnamon buns, baked in Ramat Eshkol, Jerusalem. All pareve.</p>
+      <a class="send" href="#build" data-send="scroll"><span class="dot" aria-hidden="true"></span><span class="a" data-mir-key="t-7eebab51-6">Build your box</span><span class="b"><span class="go" data-mir-key="t-7eebab51-7">Build your box</span><svg><use href="#arr"/></svg></span></a></div>
+    <div><h3 class="caps" data-mir-key="t-87163e4e-0">Pages</h3><a href="#build" data-mir-key="t-ca372025-1">Build your box</a><a href="#prices" data-mir-key="t-53b2fbd0-2">Prices</a><a href="#top" data-mir-key="t-6acc4a2a-0">Back to the top</a></div>
+    <div><h3 class="caps" data-mir-key="t-4ae206ed-0">Find us</h3><a href="tel:+972553321956" data-mir-key="t-915e736b-1">Call or text 055-332-1956</a><a href="https://wa.me/18482216022" target="_blank" rel="noopener" data-mir-key="t-22b39689-0">WhatsApp +1 848 221 6022</a><span data-mir-key="t-41445dfb-0">Pick-up from Ramat Eshkol</span></div>
+  </div>
+  <p class="giant" aria-hidden="true" data-mir-key="t-a921f2a4-0">Bun Intended</p>
+  <div class="wrap legal"><a href="https://myisraelrental.com/business/aidy-yaniv" data-mir-key="t-6fde72b8-0">Listed on MyIsraelRental</a></div>
+</footer>
 
 <div class="bar" id="bar" aria-hidden="true">
   <span class="pr" data-mir-key="t-a3e2ac98-0">From<b>₪55</b></span>
   <a class="send" href="#build" data-send="scroll" tabindex="-1">
-    <span class="dot" aria-hidden="true"></span><span class="a" data-mir-key="t-7eebab51-4">Build your box</span>
-    <span class="b"><span class="go" data-mir-key="t-7eebab51-5">Build your box</span><svg><use href="#arr"/></svg></span>
+    <span class="dot" aria-hidden="true"></span><span class="a" data-mir-key="t-7eebab51-8">Build your box</span>
+    <span class="b"><span class="go" data-mir-key="t-7eebab51-9">Build your box</span><svg><use href="#arr"/></svg></span>
   </a>
 </div>
 
 <script>
 (function () {
   // Their price list, as printed on it.
-  var WA = '18482216022';
+  var WA = '18482216022', GIG = 'c42107a6-615e-45dc-8e87-7164a1cd6a87';
+  // Every order is saved to MyIsraelRental before WhatsApp opens (page rules 3k). These are the nine products
+  // added to the listing on 22 Oct 2026 (add_site_products.py), named "<flavour>, <4|8> piece box".
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var PID = { cinnamon: { 4: '3e8fc7b11ba5', 8: '496133c34c8d' }, espresso: { 4: 'a2411e518cfd', 8: 'add54923e23e' },
+    lotus: { 4: '1fe757edcd3c', 8: '14b2e1b51020' }, chocolate: { 4: '1a0afd77ecca', 8: 'a9f847b52153' }, mix: { 8: '0b0622aa4198' } };
+  var waText = '', waNotes = '';
   var F = [
     { id: 'cinnamon', name: 'Classic cinnamon', p4: 55, p8: 100, c: 'cinnamon' },
     { id: 'espresso', name: 'Espresso', p4: 55, p8: 100, c: 'espresso' },
@@ -370,7 +563,7 @@
   ];
   var MIX8 = 120;
   var SW = { cinnamon: 'var(--icing)', espresso: 'var(--espresso)', lotus: 'var(--lotus)', choc: 'var(--choc)' };
-  var state = { size: 4, mix: false, picks: ['cinnamon'] };
+  var state = { size: 4, mix: false, picks: ['cinnamon'], qty: 1, ful: 'pickup' };
   var $ = function (s) { return document.querySelector(s); };
 
   // The bun, drawn as their buns are: a golden swirl, its topping poured on.
@@ -388,11 +581,11 @@
   // faded at the edges so it sits on the paper with no box. The jug that dips
   // into the top of some clips fades out with the top edge.
   function bun(c) {
-    return '<img class="bunimg" src="/pages/aidy-yaniv/assets/bun-' + c + '.webp?v=mv1fqft7" alt="" width="720" height="720" loading="lazy" decoding="async">';
+    return '<img class="bunimg" src="/pages/aidy-yaniv/assets/bun-' + c + '.webp?v=mvjvut0t" alt="" width="720" height="720" loading="lazy" decoding="async">';
   }
   function stage(c, anim) {
-    if (!anim) return '<img class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '-end.webp?v=mv1fqft7" alt="" width="640" height="640" decoding="async">';
-    return '<video class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '.mp4?v=mv1fqft7" poster="/pages/aidy-yaniv/assets/pour-bare.webp?v=mv1fqft7" width="640" height="640" muted playsinline autoplay preload="auto" aria-hidden="true"></video>';
+    if (!anim) return '<img class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '-end.webp?v=mvjvut0t" alt="" width="640" height="640" decoding="async">';
+    return '<video class="pour" src="/pages/aidy-yaniv/assets/pour-' + c + '.mp4?v=mvjvut0t" poster="/pages/aidy-yaniv/assets/pour-bare.webp?v=mvjvut0t" width="640" height="640" muted playsinline autoplay preload="auto" aria-hidden="true"></video>';
   }
   // The first time the box comes into view, the chosen flavour is poured on,
   // so the pour is seen without having to pick anything first.
@@ -411,50 +604,92 @@
     setTimeout(function () { ['cinnamon', 'espresso', 'choc', 'lotus'].forEach(function (c) { var l = document.createElement('link'); l.rel = 'prefetch'; l.href = stage(c, true).match(/src="([^"]+)"/)[1]; document.head.appendChild(l); }); }, 1200);
   });
 
+  function fl(id) { return F.filter(function (x) { return x.id === id; })[0]; }
   function price() {
     if (state.size === 8 && state.mix) return MIX8;
-    var f = F.filter(function (x) { return x.id === state.picks[0]; })[0];
+    var f = fl(state.picks[0]);
     return state.size === 4 ? f.p4 : f.p8;
   }
-  function names() { return state.picks.map(function (id) { return F.filter(function (x) { return x.id === id; })[0].name; }); }
+  // What the same buns cost as boxes of 4 (two of them), from their own price list.
+  function was() {
+    if (state.size !== 8) return 0;
+    if (state.mix) { if (state.picks.length < 2) return 0; return fl(state.picks[0]).p4 + fl(state.picks[1]).p4; }
+    return 2 * fl(state.picks[0]).p4;
+  }
+  function names() { return state.picks.map(function (id) { return fl(id).name; }); }
 
+  // The choice cards are built once and only updated, so a tap never rebuilds the
+  // button you are on (focus stays, nothing under it moves).
+  // Two boxes of 4 beat the mix only for some pairs; say so, from the price list's own numbers.
+  function cheaperPair() {
+    var best = null;
+    for (var i = 0; i < F.length; i++) for (var j = i + 1; j < F.length; j++) { var t = F[i].p4 + F[j].p4; if (t < MIX8 && (!best || t < best.t)) best = { t: t, a: F[i].name, b: F[j].name }; }
+    return best;
+  }
+  var fHost = $('#flavours');
+  fHost.innerHTML = F.map(function (f) {
+    return '<button type="button" class="choice" data-f="' + f.id + '" aria-pressed="false"><span class="nm"><span class="sw" style="background:' + SW[f.c] + '"></span>' + f.name + '</span><span class="pr"></span></button>';
+  }).join('') + '<button type="button" class="choice mix" data-mix aria-pressed="false"><span>2 flavour mix<small></small></span><span class="pr">\u20aa' + MIX8 + '</span></button>';
   function renderFlavours() {
-    var html = F.map(function (f) {
-      var on = state.picks.indexOf(f.id) > -1;
-      return '<button type="button" class="choice" data-f="' + f.id + '" aria-pressed="' + on + '"><span class="nm"><span class="sw" style="background:' + SW[f.c] + '"></span>' + f.name + '</span><span class="pr">₪' + (state.size === 4 ? f.p4 : f.p8) + '</span></button>';
-    }).join('');
-    html += '<button type="button" class="choice mix" data-mix aria-pressed="' + state.mix + '"' + (state.size === 8 ? '' : ' hidden') + '><span>2 flavour mix<small>Your choice of any 2 flavours</small></span><span class="pr">₪' + MIX8 + '</span></button>';
-    $('#flavours').innerHTML = html;
+    fHost.querySelectorAll('[data-f]').forEach(function (b) {
+      var f = fl(b.getAttribute('data-f'));
+      b.setAttribute('aria-pressed', String(state.picks.indexOf(f.id) > -1));
+      b.querySelector('.pr').textContent = '\u20aa' + (state.size === 4 ? f.p4 : f.p8);
+    });
+    var m = fHost.querySelector('[data-mix]'), on8 = state.size === 8;
+    m.setAttribute('aria-pressed', String(on8 && state.mix)); m.classList.toggle('dim', !on8);
+    var cp = cheaperPair(), sm = m.querySelector('small');
+    var longT = 'Your choice of any 2 flavours' + (cp ? '. Two 4 piece boxes can cost less: ' + cp.a + ' and ' + cp.b + ' is ₪' + cp.t : '');
+    // the line keeps the height of its longer wording, so choosing a box size never moves what is below (check-site SHIFT)
+    sm.style.minHeight = ''; sm.textContent = longT; sm.style.minHeight = sm.offsetHeight + 'px';
+    sm.textContent = on8 ? longT : '8 piece boxes only, tap to switch';
   }
 
   function paint() {
     document.querySelectorAll('[data-size]').forEach(function (b) { if (b.classList.contains('choice')) b.setAttribute('aria-pressed', String(+b.getAttribute('data-size') === state.size)); });
     renderFlavours();
-    var p = price(), n = names();
-    $('#sum').innerHTML = '₪' + p + '<small>' + state.size + ' buns</small>';
+    var p = price(), n = names(), q = state.qty, w = was(), save = w > p ? (w - p) * q : 0, tot = p * q, buns = state.size * q;
+    var each = (tot / buns); each = each % 1 ? each.toFixed(2) : String(each);
+    var chip = save ? '<span class="chip">' + Math.floor(save * 100 / (w * q)) + '% off</span>' : '';  /* percent off, rounded down (Tzvi, 22 Oct 2026) */
+    $('#sum').innerHTML = '<span class="pp">₪' + tot + (save ? '<s>₪' + (w * q) + '</s>' : '') + '</span><small class="u">' + chip + '₪' + each + ' a bun</small><small class="n">' + (save ? chip : buns + ' buns') + '</small>';
+    document.querySelectorAll('[data-px]').forEach(function (x) { x.textContent = ', ₪' + tot; });
+    $('#qty').textContent = q; $('#qm').disabled = q <= 1; $('#qp').disabled = q >= 9;
+    document.querySelectorAll('[data-ful]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-ful') === state.ful)); });
     var need = state.size === 8 && state.mix && state.picks.length < 2;
     $('#note').textContent = state.size === 8 && state.mix ? (need ? 'Pick a second flavour for your mix.' : 'Half ' + n[0] + ', half ' + n[1] + '.') : '';
     // The box fills slot by slot in the chosen flavours.
-    var slots = '';
-    for (var i = 0; i < state.size; i++) {
-      var id = state.mix && state.picks.length === 2 ? state.picks[i < state.size / 2 ? 0 : 1] : state.picks[0];
-      var f = F.filter(function (x) { return x.id === id; })[0];
-      if (i % 4 === 0) slots += (i ? '</div></div>' : '') + '<div class="tray"><div class="slots">';
-      slots += '<div class="slot" style="--i:' + i + '">' + bun(f.c) + '</div>';
+    var host = $('#slots');
+    if (!host.firstChild) {
+      var h = '';
+      for (var t = 0; t < 2; t++) { h += '<div class="trayw"><div class="tray"><div class="slots">'; for (var k = 0; k < 4; k++) h += '<div class="slot" style="--i:' + (t * 4 + k) + '"></div>'; h += '</div></div></div>'; }
+      host.innerHTML = h;
     }
-    slots += '</div></div>';
-    $('#slots').innerHTML = slots; $('#box').setAttribute('data-size', state.size);
+    $('#box').setAttribute('data-size', state.size);
+    host.querySelectorAll('.trayw').forEach(function (tw, t) { tw.classList.toggle('off', t * 4 >= state.size); });
+    host.querySelectorAll('.slot').forEach(function (el, i) {
+      var live = i < state.size;
+      var id = state.mix && state.picks.length === 2 ? state.picks[i < state.size / 2 ? 0 : 1] : state.picks[0];
+      var f = fl(id), fresh = false;
+      // every slot keeps its photo (hidden ones too) so the box's height never changes
+      if (el.getAttribute('data-c') !== f.c) { el.setAttribute('data-c', f.c); el.innerHTML = bun(f.c); fresh = true; if (live) el.classList.remove('in'); }
+      if (!live) { el.classList.remove('in'); return; }
+      if (fresh || !el.classList.contains('in')) requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add('in'); }); });
+    });
     // The big bun takes the latest flavour, poured on as it is chosen.
     var latest = F.filter(function (x) { return x.id === state.picks[state.picks.length - 1]; })[0];
     if (latest.c !== lastPour) { var pour = !still && lastPour !== null; $('#stage').innerHTML = stage(latest.c, pour); $('#mini').innerHTML = bun(latest.c); lastPour = latest.c; }
     $('#boxlabel').textContent = state.mix ? (n.length === 2 ? n[0] + ' & ' + n[1] : n[0] + ' & …') : n[0];
-    requestAnimationFrame(function () { requestAnimationFrame(function () { document.querySelectorAll('.slot').forEach(function (s) { s.classList.add('in'); }); }); });
     // The order, written out for their WhatsApp.
     var d = $('#date').value;
     var when = d ? new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
-    var text = 'Hi Bun Intended, I\'d like to order ' + (state.size === 8 ? 'an ' : 'a ') + state.size + ' piece box: '
-      + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + p + ').'
-      + (when ? ' For ' + when + '.' : '') + ' Pick-up in Ramat Eshkol.';
+    var what = q > 1 ? q + ' x ' + state.size + ' piece boxes' : (state.size === 8 ? 'an ' : 'a ') + state.size + ' piece box';
+    var text = 'Hi Bun Intended, I\'d like to order ' + what + ': '
+      + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + tot + (q > 1 ? ' for ' + q : '') + ').'
+      + (when ? ' For ' + when + '.' : '') + (state.ful === 'delivery' ? ' Delivery to ' + ($('#addr').value.trim() || '(address)') + '.' : ' Pick-up in Ramat Eshkol.')
+      + ($('#me').value.trim() ? ' Name: ' + $('#me').value.trim() + ', ' + $('#ph').value.trim() + '.' : '');
+    waText = text;
+    waNotes = (state.mix ? '2 flavour mix: ' + n.join(' and ') + '\n' : '') + 'Sent from the Bun Intended page by WhatsApp';
+    $('#addrw').hidden = state.ful !== 'delivery';
     var a = $('#order');
     a.href = need ? '#build' : 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
     a.setAttribute('aria-disabled', String(need));
@@ -463,7 +698,19 @@
   document.addEventListener('click', function (e) {
     var s = e.target.closest('.choice[data-size]');
     if (s) { state.size = +s.getAttribute('data-size'); if (state.size === 4) { state.mix = false; state.picks = state.picks.slice(0, 1); } paint(); return; }
+    var q = e.target.closest('[data-q]');
+    if (q) { state.qty = Math.max(1, Math.min(9, state.qty + +q.getAttribute('data-q'))); paint(); return; }
+    var fu = e.target.closest('[data-ful]');
+    if (fu) { state.ful = fu.getAttribute('data-ful'); paint(); return; }
+    var pk = e.target.closest('[data-pick]');
+    if (pk) {
+      var pp = pk.getAttribute('data-pick').split(':'); state.size = +pp[0];
+      if (pp[1] === 'mix') { state.mix = true; if (state.picks.length < 2) state.picks = [state.picks[0], F.filter(function (x) { return x.id !== state.picks[0]; })[0].id]; }
+      else { state.mix = false; state.picks = [pp[1]]; }
+      paint(); $('#build').scrollIntoView({ behavior: still ? 'auto' : 'smooth' }); return;
+    }
     var m = e.target.closest('[data-mix]');
+    if (m && state.size === 4) { state.size = 8; state.mix = true; if (state.picks.length < 2) state.picks = [state.picks[0], F.filter(function (x) { return x.id !== state.picks[0]; })[0].id]; paint(); return; }
     if (m) { state.mix = !state.mix; if (!state.mix) state.picks = state.picks.slice(0, 1); paint(); return; }
     var f = e.target.closest('[data-f]');
     if (f) {
@@ -477,24 +724,59 @@
     }
   });
   $('#date').addEventListener('change', paint);
+  ['me', 'ph', 'addr'].forEach(function (id) { $('#' + id).addEventListener('input', function () { $('#oerr').textContent = ''; paint(); }); });
   var today = new Date(); $('#date').min = today.toISOString().slice(0, 10);
 
   // The send button: "Opening WhatsApp", then a tick (21st Interactive Hover Button).
   $('#order').addEventListener('click', function (e) {
     var a = e.currentTarget;
     if (a.getAttribute('aria-disabled') === 'true') { e.preventDefault(); $('#note').textContent = 'Pick a second flavour for your mix.'; return; }
+    e.preventDefault();
+    if (a.classList.contains('is-busy')) return;
+    var v = function (id) { return $('#' + id).value.trim(); }, err = '', bad = '';
+    if (!$('#date').value) { err = 'Choose the day you need it.'; bad = 'date'; }
+    else if (!v('me')) { err = 'Your name, please.'; bad = 'me'; }
+    else if (!/\d{9,}/.test(v('ph').replace(/\D/g, ''))) { err = 'A phone number we can reach you on.'; bad = 'ph'; }
+    else if (state.ful === 'delivery' && !v('addr')) { err = 'Where should we deliver?'; bad = 'addr'; }
+    $('#oerr').textContent = err;
+    if (err) { $('#' + bad).focus(); return; }
     a.classList.add('is-busy');
-    setTimeout(function () { a.classList.remove('is-busy'); a.classList.add('is-done'); }, 700);
-    setTimeout(function () { a.classList.remove('is-done'); }, 3200);
+    // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
+    var tab = window.open('', '_blank');
+    var pid = (state.mix ? PID.mix : PID[state.picks[0]])[state.size];
+    var body = { lines: [{ product_id: pid, qty: state.qty }], fulfilment: state.ful, date: v('date'), customer_name: v('me'), customer_phone: v('ph'), notes: waNotes };
+    if (state.ful === 'delivery') { body.city = 'jerusalem'; body.address = v('addr'); }
+    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })
+      .catch(function (er) { console.warn('Order not saved', er); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var text = waText + (saved && saved.track_url ? '\n\nFollow the order: ' + saved.track_url : '');
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      a.classList.remove('is-busy'); a.classList.add('is-done');
+      setTimeout(function () { a.classList.remove('is-done'); }, 2500);
+    });
   });
 
   // Their price list, from the same numbers the builder uses.
-  $('#m4').innerHTML = F.map(function (f) { return '<li><span><span class="sw" style="width:14px;height:14px;border-radius:50%;background:' + SW[f.c] + ';box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)"></span>' + f.name + '</span><span class="p">' + f.p4 + '<small>NIS</small></span></li>'; }).join('');
-  $('#m8').innerHTML = F.map(function (f) { return '<li><span><span class="sw" style="width:14px;height:14px;border-radius:50%;background:' + SW[f.c] + ';box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)"></span>' + f.name + '</span><span class="p">' + f.p8 + '<small>NIS</small></span></li>'; }).join('')
-    + '<li><span>2 flavour mix<i>any 2 flavours</i></span><span class="p">' + MIX8 + '<small>NIS</small></span></li>';
+  function row(sz, id, nm, sw, p, wasP) {
+    return '<li><button type="button" class="row" data-pick="' + sz + ':' + id + '"><span>' + sw + nm + '</span><span class="p">' + (wasP ? '<span class="chip">' + Math.floor((wasP - p) * 100 / wasP) + '% off</span><s>' + wasP + '</s>' : '') + p + '<small>NIS</small></span></button></li>';
+  }
+  function dot(c) { return '<span class="sw" style="width:14px;height:14px;border-radius:50%;background:' + SW[c] + ';box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)"></span>'; }
+  $('#m4').innerHTML = F.map(function (f) { return row(4, f.id, f.name, dot(f.c), f.p4, 0); }).join('');
+  $('#m8').innerHTML = F.map(function (f) { return row(8, f.id, f.name, dot(f.c), f.p8, f.p4 * 2); }).join('')
+    + '<li><button type="button" class="row" data-pick="8:mix"><span>2 flavour mix<i>any 2 flavours</i></span><span class="p">' + MIX8 + '<small>NIS</small></span></button></li>'
+    + (cheaperPair() ? '<li class="mixnote">Two boxes of 4 can cost less than the mix: ' + cheaperPair().a + ' and ' + cheaperPair().b + ' is ₪' + cheaperPair().t + '.</li>' : '');
+
+  // The phone menu: opens a panel, closes on Escape or a tap on a link.
+  var tb = $('#top'), mb = $('#mbtn');
+  function menu(o) { tb.classList.toggle('is-open', o); mb.setAttribute('aria-expanded', String(o)); mb.textContent = o ? 'Close' : 'Menu'; }
+  mb.addEventListener('click', function () { menu(!tb.classList.contains('is-open')); });
+  tb.querySelectorAll('.mpanel a').forEach(function (a) { a.addEventListener('click', function () { menu(false); }); });
+  addEventListener('keydown', function (e) { if (e.key === 'Escape') menu(false); });
 
   // Phones: the bar from after the first screen until the box builder's own button is on screen.
-  var bar = $('#bar'), hero = $('.hero .send'), build = $('#order'), close = $('.close .send');
+  var bar = $('#bar'), hero = $('.open .send'), build = $('#order'), close = $('.close .send');
   function barState() {
     var phone = matchMedia('(max-width: 860px)').matches;
     var inView = function (el) { var r = el.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; };

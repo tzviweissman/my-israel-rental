@@ -59,7 +59,7 @@ export default function ReviewBadgePanel({ API, business, pageUrl }) {
   const chip = (on) => ({ borderColor: on ? 'var(--ink)' : 'var(--brand-border)', background: on ? 'var(--ink)' : '#fff', color: on ? '#fff' : 'var(--ink)' });
 
   const opener = (
-      <button type="button" onClick={() => setOpen(true)} data-testid={`rating-badge-open-${business.id}`}
+      <button type="button" onClick={() => setOpen(true)} data-testid={`rating-badge-open-${business.id}`} data-tour="rating-badge"
               className="inline-flex items-center gap-1 px-3 py-2 rounded-lg border text-xs font-semibold"
               style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}>
         <Star size={13} /> {t('ratingBadge.open', 'Rating badge for your website')}

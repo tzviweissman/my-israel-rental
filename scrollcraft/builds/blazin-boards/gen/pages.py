@@ -18,10 +18,16 @@ def page(name, title, desc, body, script='', order=False):
     <li><a href="boards.html">Every board</a></li>
     <li><a href="order.html">Your order</a></li>
   </ul>'''
-    foot = '' if order else '''
-<footer class="foot">
-  <span>Blazin' Boards, premium meat boards in Jerusalem. Orders 48 hours ahead</span>
-  <nav><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Order</a><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></nav>
+    foot = '''
+<footer class="foot2">
+  <p class="foot2__big">Premium meat boards, grilled to perfection.</p>
+  <a class="cta" href="order.html">Order a board</a>
+  <div class="foot2__cols">
+    <nav aria-label="Pages"><b>The site</b><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Your order</a></nav>
+    <div><b>Find us</b><span>Farn 5, Jerusalem</span><span>Orders 48 hours ahead</span><span>Delivery throughout Israel</span></div>
+    <div><b>Pay us by</b><span>Card, Zelle or bank transfer</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+  </div>
+  <p class="foot2__small">Blazin' Boards. Every photograph on this site is our own. Nothing is paid on this site: you pay us directly.</p>
 </footer>'''
     html = f'''<!doctype html>
 <!-- Blazin' Boards, {name}. Written by gen/pages.py. -->
@@ -30,6 +36,7 @@ def page(name, title, desc, body, script='', order=False):
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>{title}</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="{desc}">
 <link rel="icon" href="assets/their-logo-small.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -40,7 +47,7 @@ def page(name, title, desc, body, script='', order=False):
 <body>
 <nav class="nav" aria-label="Blazin' Boards">
   <a class="nav__mark" href="index.html"><img src="assets/their-logo-small.png" alt="" width="120" height="120"> Blazin' Boards</a>{menu}
-  <a class="cart" href="order.html" aria-label="Your order">{BAG}<span>Order</span><b data-count hidden>0</b></a>
+  <a class="cart" href="order.html" aria-label="Your order">{BAG}<span>Order a board</span><b data-count hidden>0</b></a>
 </nav>
 {body}
 {foot}
@@ -79,19 +86,19 @@ def steps(n):
 
 
 def dock(label, id_, href='#'):
-    return f'<div class="dock"><div><small>Total</small><b data-total>$0</b></div><a class="cta" id="{id_}" href="{href}">{label}</a></div>'
+    return f'<div class="dock dockbar"><div><small>Total</small><b data-total>$0</b></div><a class="cta" id="{id_}" href="{href}">{label}</a></div>'
 
 
 # --------------------------------------------------------------- the shop
 page('boards.html', "Every board · Blazin' Boards",
-     "Every Blazin' Boards meat board, drawn to its real size, with its price and what is on it. Wine and whisky to add. Orders 48 hours ahead.",
+     "Every Blazin' Boards meat board, with its size, price and what is on it. Wine and whisky to add. Orders 48 hours ahead.",
      '''
 <main>
   <header class="wrap shop-head">
     <p class="eyebrow">Every board</p>
-    <h1>Every board, <em>drawn to its real size.</em></h1>
+    <h1>Every board, <em>with its size and price.</em></h1>
     <p>Premium meats, cooked and grilled to perfection. Two lines at each size: the Blazin' line adds chicken and sticky beef bites, the Premium Steak line is all steak. Prices in US dollars.</p>
-    <p class="scale-note">Every board below is our own board, shown at its true size against the others. What goes on each one is listed under it.</p>
+    <p class="scale-note">The picture shows our board style. The size and what goes on each board are written under it.</p>
     <div class="chips filters" role="group" aria-label="Show">
       <button type="button" class="chip" data-show="all" aria-pressed="true">All boards</button>
       <button type="button" class="chip" data-show="blazin" aria-pressed="false">Blazin' line</button>
@@ -99,10 +106,10 @@ page('boards.html', "Every board · Blazin' Boards",
       <button type="button" class="chip" data-show="special" aria-pressed="false">Specials</button>
     </div>
   </header>
-  <section class="wrap" aria-label="The boards">
+  <div class="wrap" role="region" aria-label="The boards"><!-- a shop grid of ten boards scrolls like any shop; it is not one screen-sized scene -->
     <ul class="grid-boards" id="boards"><li class="bcard" style="padding:2rem;color:var(--soft)">Loading the boards…</li></ul>
     <p class="errline" id="err"></p>
-  </section>
+  </div>
   <section class="sec" id="bottles-sec" hidden>
     <div class="wrap">
       <p class="eyebrow">Add a bottle</p>
@@ -120,25 +127,24 @@ page('boards.html', "Every board · Blazin' Boards",
         <div><dt>On request</dt><dd>Gluten-free and soy-free boards.</dd></div>
         <div><dt>Paying</dt><dd>You pay us directly, by <span data-ways>card, Zelle or bank transfer</span>.</dd></div>
       </dl>
-      <p style="margin-top:2rem"><a class="cta" href="order.html">Go to your order</a></p>
+      <p style="margin-top:2rem"><a class="cta" href="order.html">Order a board</a></p>
     </div>
   </section>
 </main>''', '''<script>
 (function () {
   var o = BB.load(), F = null, show = 'all';
-  var PX = 4.6; /* one pixels-per-centimetre for every card, so the sizes compare */
   function card(p) {
     var q = o.cart[p.id] || 0;
     var stage = p.cm
-      ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815" loading="lazy" style="width:' + (p.cm[1] * PX / 0.98).toFixed(0) + 'px"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
+      ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815" loading="lazy"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
       : '<div class="stage"><span style="font-weight:700;color:var(--gold-text)">Size on request</span></div>';
-    return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + (BB.saving(p) ? '<span class="save-b">Save $' + BB.saving(p) + '</span>' : '') + stage
+    return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + BB.dealHtml(p) + stage
       + '<div class="body"><span class="line">' + BB.LINES[p.line] + '</span><h3>' + BB.esc(p.short) + '</h3>'
       + '<span class="price">' + BB.money(p.price, p.currency) + '</span>'
       + (p.what ? '<p class="what">' + BB.esc(p.what) + '</p>' : '')
       + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '')
       + '<div class="add">' + (q
-        ? '<span class="stepper"><button type="button" data-dec="' + p.id + '" aria-label="One fewer">−</button><output>' + q + '</output><button type="button" data-inc="' + p.id + '" aria-label="One more">+</button></span><a class="ghost" href="order.html">Order</a>'
+        ? '<span class="stepper"><button type="button" data-dec="' + p.id + '" aria-label="One fewer">−</button><output>' + q + '</output><button type="button" data-inc="' + p.id + '" aria-label="One more">+</button></span><a class="ghost" href="order.html">Order a board</a>'
         : '<button type="button" class="cta" data-inc="' + p.id + '">Add to order</button>')
       + '</div></div></li>';
   }
@@ -150,7 +156,7 @@ page('boards.html', "Every board · Blazin' Boards",
     document.getElementById('bottles-sec').hidden = !bottles.length;
     document.getElementById('bottles').innerHTML = bottles.map(function (p) {
       var on = (o.cart[p.id] || 0) > 0;
-      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add') + '</button></li>';
+      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add to order') + '</button></li>';
     }).join('');
     BB.paint(F, o);
   }
@@ -167,8 +173,10 @@ page('boards.html', "Every board · Blazin' Boards",
     if (t.dataset.dec) o.cart[id] = Math.max(0, was - 1);
     if (t.dataset.bottle) o.cart[id] = was ? 0 : 1;
     if (!o.cart[id]) delete o.cart[id];
+    // a bottle toggles in place: the button changes, nothing around it is rebuilt
+    if (t.dataset.bottle) { var on = !!o.cart[id]; t.setAttribute('aria-pressed', String(on)); t.textContent = on ? 'Added' : 'Add to order'; BB.save(o); BB.paint(F, o); return; }
     BB.save(o); paint();
-    if ((o.cart[id] || 0) > was) BB.toast((p ? p.short : 'Added') + ' added. Total ' + BB.money(BB.total(F, o), BB.cur(F)), 'order.html', 'Go to order');
+    if ((o.cart[id] || 0) > was) BB.toast((p ? p.short : 'Added') + ' added. Total ' + BB.money(BB.total(F, o), BB.cur(F)), 'order.html', 'Order a board');
   });
   BB.form().then(function (f) { F = f; paint(); }).catch(function () { document.getElementById('err').textContent = 'Could not load the boards. Please refresh the page.'; });
 })();
@@ -182,15 +190,15 @@ page('order.html', "Your order · Blazin' Boards",
   <div class="wrap">
     {steps(1)}
     <div class="cols">
-      <section class="pane">
+      <div class="pane"><!-- an order form scrolls like any form; it is not a one-screen scene -->
         <h1>Your <em>boards.</em></h1>
         <p class="sub">Add as many as you need. Prices in US dollars.</p>
         <ul class="cartlines" id="cartlines"></ul>
         <div class="q">
           <h2 id="pickTitle">Choose a board</h2>
-          <button type="button" class="ghost" id="more" hidden aria-expanded="false" aria-controls="picks">Add another board</button>
+          <button type="button" class="ghost" id="more" hidden aria-expanded="false" aria-controls="picks">Add to order</button>
           <table class="picks" id="picks" aria-label="Boards by size and line"></table>
-          <p style="margin:.6rem 0 0"><a class="back" href="boards.html">See every board drawn to size</a></p>
+          <p style="margin:.6rem 0 0"><a class="back" href="boards.html">See every board with its size and price</a></p>
         </div>
         <div class="q" id="bottlesQ" hidden>
           <h2>Add a bottle</h2>
@@ -198,7 +206,7 @@ page('order.html', "Your order · Blazin' Boards",
         </div>
         <p class="errline" id="err"></p>
         <div class="next"><a class="cta" id="go" href="order-when.html">Continue</a><a class="back" href="boards.html">Keep looking</a></div>
-      </section>
+      </div>
       {summary()}
     </div>
   </div>
@@ -208,13 +216,21 @@ page('order.html', "Your order · Blazin' Boards",
   var o = BB.load(), F = null, open = false;
   var area = function (p) { return p.cm ? p.cm[0] * p.cm[1] : 1e9; };
   document.getElementById('more').addEventListener('click', function () { open = true; paint(); document.getElementById('picks').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
-  function paint() {
-    var ls = BB.lines(F, o);
+  var seenLines = null;
+  // the basket lines; one that has just come in fades in, the others stay as they are
+  function paintLines() {
+    var ls = BB.lines(F, o), now = {};
     document.getElementById('cartlines').innerHTML = ls.map(function (l) {
-      return '<li><span class="thumb"><img src="assets/board-cut-m.webp" alt="" width="1000" height="815"></span><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
+      now[l.p.id] = 1;
+      return '<li' + (seenLines && !seenLines[l.p.id] ? ' class="fresh"' : '') + '><span class="thumb"><img src="assets/board-cut-m.webp" alt="" width="1000" height="815"></span><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
         + '<span class="stepper"><button type="button" data-dec="' + l.p.id + '" aria-label="One fewer">−</button><output>' + l.qty + '</output><button type="button" data-inc="' + l.p.id + '" aria-label="One more">+</button></span>'
         + '<span class="amt">' + BB.money(l.p.price * l.qty, l.p.currency) + '</span><button type="button" class="rm" data-rm="' + l.p.id + '" aria-label="Remove ' + BB.esc(l.p.short) + ' from the order"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button></li>';
     }).join('');
+    seenLines = now;
+    return ls;
+  }
+  function paint() {
+    var ls = paintLines();
     var boards = F.products.filter(function (p) { return p.board; });
     var rows = {};
     boards.forEach(function (p) { var k = p.cm ? p.cm.join('x') : p.short; (rows[k] = rows[k] || { a: area(p), cells: [] }).cells.push(p); });
@@ -227,7 +243,7 @@ page('order.html', "Your order · Blazin' Boards",
         [c[i], c[i + 1]].forEach(function (p) {
           if (!p) { h += '<td></td>'; return; }
           var on = (o.cart[p.id] || 0) > 0;
-          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + (BB.saving(p) ? '<span class="save-b">Save $' + BB.saving(p) + '</span>' : '') + '</button></td>';
+          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + BB.dealHtml(p) + '</button></td>';
         });
         h += '</tr>';
       }
@@ -241,7 +257,7 @@ page('order.html', "Your order · Blazin' Boards",
     document.getElementById('bottlesQ').hidden = !bottles.length || !hasBoard;
     document.getElementById('bottles').innerHTML = bottles.map(function (p) {
       var on = (o.cart[p.id] || 0) > 0;
-      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add') + '</button></li>';
+      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add to order') + '</button></li>';
     }).join('');
     var ok = ls.some(function (l) { return l.p.board; });
     ['go', 'go2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', String(!ok)); });
@@ -255,6 +271,7 @@ page('order.html', "Your order · Blazin' Boards",
     if (t.dataset.toggle || t.dataset.bottle) o.cart[id] = was ? 0 : 1;
     if (t.dataset.rm) o.cart[id] = 0;
     if (!o.cart[id]) delete o.cart[id];
+    if (t.dataset.bottle) { var on = !!o.cart[id]; t.setAttribute('aria-pressed', String(on)); t.textContent = on ? 'Added' : 'Add to order'; BB.save(o); paintLines(); BB.paint(F, o); return; }
     BB.save(o); paint();
   });
   BB.form().then(function (f) {
@@ -273,7 +290,7 @@ page('order-when.html', "When and where · Blazin' Boards", 'Collect in Jerusale
   <div class="wrap">
     {steps(2)}
     <div class="cols">
-      <section class="pane">
+      <div class="pane"><!-- an order form scrolls like any form; it is not a one-screen scene -->
         <h1>When and <em>where?</em></h1>
         <p class="sub">We need 48 hours' notice.</p>
         <div class="q">
@@ -291,13 +308,13 @@ page('order-when.html', "When and where · Blazin' Boards", 'Collect in Jerusale
             <div class="field" id="f-window" hidden><label for="window">Time</label><select id="window"></select></div>
           </div>
         </div>
-        <div class="q" id="addrQ" hidden>
+        <div class="q is-shut" id="addrQ" inert><div>
           <div class="field" id="f-address"><label for="address">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, number, city, plus floor or entrance" maxlength="400"><span class="hint">The delivery fee depends on the city. We confirm it with you on WhatsApp before the day.</span><span class="err">Where should it go?</span></div>
           <div class="field" id="f-city" hidden><label for="city">City</label><select id="city"></select><span class="err">Choose the city it goes to.</span></div>
-        </div>
+        </div></div>
         <p class="errline" id="err"></p>
         <div class="next"><a class="cta" id="go" href="order-details.html">Continue</a><a class="back" href="order.html">Back</a></div>
-      </section>
+      </div>
       {summary(True)}
     </div>
   </div>
@@ -321,7 +338,7 @@ page('order-when.html', "When and where · Blazin' Boards", 'Collect in Jerusale
   }
   function paint() {
     document.querySelectorAll('[data-ful]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.ful === b.dataset.ful)); });
-    $('addrQ').hidden = o.ful !== 'delivery';
+    $('addrQ').classList.toggle('is-shut', o.ful !== 'delivery'); $('addrQ').inert = o.ful !== 'delivery';
     // A store that is not nationwide delivers only to its own cities, and the
     // order is refused without one (dead-ends audit, 12 Oct 2026).
     var B = (F && F.business) || {};
@@ -369,7 +386,7 @@ page('order-details.html', "Your details · Blazin' Boards", 'Your name, how to 
   <div class="wrap">
     {steps(3)}
     <div class="cols">
-      <section class="pane">
+      <div class="pane"><!-- an order form scrolls like any form; it is not a one-screen scene -->
         <h1>Your <em>details.</em></h1>
         <p class="sub">So we can confirm your order with you. We share it with no one else.</p>
         <div class="q two">
@@ -390,12 +407,12 @@ page('order-details.html', "Your details · Blazin' Boards", 'Your name, how to 
         <dl class="rev" id="rev"></dl>
         <p class="errline" id="err"></p>
         <div class="next"><button type="button" class="cta" id="place">Place order</button><a class="back" href="order-when.html">Back</a></div>
-      </section>
+      </div>
       {summary(True)}
     </div>
   </div>
 </main>
-<div class="dock"><div><small>Total</small><b data-total>$0</b></div><button type="button" class="cta" id="place2">Place order</button></div>''', '''<script>
+<div class="dock dockbar"><div><small>Total</small><b data-total>$0</b></div><button type="button" class="cta" id="place2">Place order</button></div>''', '''<script>
 (function () {
   var o = BB.load(), F = null, $ = function (id) { return document.getElementById(id); };
   if (!BB.count(o)) { location.replace('order.html'); return; }
@@ -414,7 +431,7 @@ page('order-details.html', "Your details · Blazin' Boards", 'Your name, how to 
     $('place').textContent = label; $('place2').textContent = 'Place order';
     BB.paint(F, o);
   }
-  $('payBy').addEventListener('click', function (e) { var b = e.target.closest('[data-pay]'); if (!b) return; o.payBy = b.dataset.pay; $('payErr').hidden = true; BB.save(o); paint(); });
+  $('payBy').addEventListener('click', function (e) { var b = e.target.closest('[data-pay]'); if (!b) return; o.payBy = b.dataset.pay; $('payErr').hidden = true; BB.save(o); [].forEach.call($('payBy').children, function (c) { c.setAttribute('aria-pressed', String(c.dataset.pay === o.payBy)); }); BB.paint(F, o); });
   function place() {
     var bad = [];
     if (!o.name || o.name.length < 2) bad.push('f-name');
@@ -453,7 +470,7 @@ page('order-details.html', "Your details · Blazin' Boards", 'Your name, how to 
 page('order-done.html', "Order placed · Blazin' Boards", "Your order is with Blazin&#39; Boards.", f'''
 <main class="order">
   <div class="wrap" style="max-width:46rem">
-    <section class="pane" style="text-align:center;padding:clamp(2rem,5vw,3.5rem)">
+    <div class="pane" style="text-align:center;padding:clamp(2rem,5vw,3.5rem)">
       <div style="width:64px;height:64px;border-radius:50%;background:var(--ox-1);display:grid;place-items:center;margin:0 auto"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
       <h1 style="margin-top:1.2rem">Your order is with <em>Blazin' Boards.</em></h1>
       <p class="sub" style="max-width:32rem;margin-inline:auto">We confirm your order with you before the day. You pay us directly, by <span id="pay">the way you chose</span>.</p>
@@ -462,7 +479,7 @@ page('order-done.html', "Order placed · Blazin' Boards", "Your order is with Bl
       <p style="margin-top:1.5rem"><a class="cta" id="track" href="#" target="_blank" rel="noopener">Follow your order</a></p>
       <p class="sub" style="margin-top:1rem">Keep that link: it shows where your order is.</p>
       <p style="margin-top:1.5rem"><a class="back" href="index.html">Back to Blazin' Boards</a></p>
-    </section>
+    </div>
   </div>
 </main>''', '''<script>
 (function () {

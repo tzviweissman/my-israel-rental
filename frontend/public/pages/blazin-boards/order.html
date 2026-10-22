@@ -5,37 +5,38 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Your order · Blazin' Boards</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="Order a Blazin' Boards meat board: pick the size, add a bottle, say when and where. Orders 48 hours ahead. You pay the business directly.">
-<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mv6aycwz">
+<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mvjvyedj">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mv6aycwz">
+<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mvjvyedj">
 </head>
 <body>
 <nav class="nav" aria-label="Blazin' Boards">
-  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv6aycwz" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
+  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mvjvyedj" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
   <ul class="menu">
     <li><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-0">Home</a></li>
     <li><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-0">Every board</a></li>
     <li><a href="/business/blazin-boards/order" data-mir-key="t-c5c09523-0">Your order</a></li>
   </ul>
-  <a class="cart" href="/business/blazin-boards/order" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span data-mir-key="t-d988a500-0">Order</span><b data-count hidden data-mir-key="t-266f6835-0">0</b></a>
+  <a class="cart" href="/business/blazin-boards/order" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span data-mir-key="t-c011198d-0">Order a board</span><b data-count hidden data-mir-key="t-266f6835-0">0</b></a>
 </nav>
 
 <main class="order">
   <div class="wrap">
     <ol class="steps" aria-label="Order steps"><li class="is-now" aria-current="step"><span class="st" data-mir-key="t-f9b98036-0">Step 1: Your boards</span></li><li class=""><span class="st" data-mir-key="t-bb888e95-0">Step 2: When and where</span></li><li class=""><span class="st" data-mir-key="t-e03c9d03-0">Step 3: Your details</span></li></ol>
     <div class="cols">
-      <section class="pane">
+      <div class="pane"><!-- an order form scrolls like any form; it is not a one-screen scene -->
         <h1 data-mir-key="t-d51055e9-0">Your <em>boards.</em></h1>
-        <p class="sub" data-mir-key="t-70e3491e-0">Two lines at each size, side by side. Add as many as you need. Prices in US dollars.</p>
+        <p class="sub" data-mir-key="t-ec3d7a8e-0">Add as many as you need. Prices in US dollars.</p>
         <ul class="cartlines" id="cartlines"></ul>
         <div class="q">
           <h2 id="pickTitle">Choose a board</h2>
-          <button type="button" class="ghost" id="more" hidden aria-expanded="false" aria-controls="picks">Add another board</button>
+          <button type="button" class="ghost" id="more" hidden aria-expanded="false" aria-controls="picks">Add to order</button>
           <table class="picks" id="picks" aria-label="Boards by size and line"></table>
-          <p style="margin:.6rem 0 0"><a class="back" href="/business/blazin-boards/boards" data-mir-key="t-1899531c-0">See every board drawn to size</a></p>
+          <p style="margin:.6rem 0 0"><a class="back" href="/business/blazin-boards/boards" data-mir-key="t-a11c429a-0">See every board with its size and price</a></p>
         </div>
         <div class="q" id="bottlesQ" hidden>
           <h2 data-mir-key="t-4ce88f33-0">Add a bottle</h2>
@@ -43,9 +44,9 @@
         </div>
         <p class="errline" id="err"></p>
         <div class="next"><a class="cta" id="go" href="/business/blazin-boards/order-when" data-mir-key="t-f78a4fc0-0">Continue</a><a class="back" href="/business/blazin-boards/boards" data-mir-key="t-e3e389c9-0">Keep looking</a></div>
-      </section>
+      </div>
       <aside class="summary" aria-label="Your order" aria-live="polite">
-        <div class="who"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv6aycwz" alt="" data-mir-key="i-0746f29b-1"><div><b data-mir-key="t-ba61b3de-0">Your order</b><small data-mir-key="t-645d4e11-0">Blazin' Boards, Jerusalem</small></div></div>
+        <div class="who"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mvjvyedj" alt="" width="44" height="44" data-mir-key="i-0746f29b-1"><div><b data-mir-key="t-ba61b3de-0">Your order</b><small data-mir-key="t-645d4e11-0">Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines></ul>
         <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><b data-total data-mir-key="t-e2b2a704-0">$0</b></div>
         <ul class="promise">
@@ -57,21 +58,39 @@
     </div>
   </div>
 </main>
-<div class="dock"><div><small data-mir-key="t-9263db8f-0">Total</small><b data-total data-mir-key="t-e2b2a704-1">$0</b></div><a class="cta" id="go2" href="/business/blazin-boards/order-when" data-mir-key="t-f78a4fc0-1">Continue</a></div>
+<div class="dock dockbar"><div><small data-mir-key="t-9263db8f-0">Total</small><b data-total data-mir-key="t-e2b2a704-1">$0</b></div><a class="cta" id="go2" href="/business/blazin-boards/order-when" data-mir-key="t-f78a4fc0-1">Continue</a></div>
 
-<script src="/pages/blazin-boards/site.js?v=mv6aycwz"></script>
+<footer class="foot2">
+  <p class="foot2__big" data-mir-key="t-8ebd5195-0">Premium meat boards, grilled to perfection.</p>
+  <a class="cta" href="/business/blazin-boards/order" data-mir-key="t-4877b309-0">Order a board</a>
+  <div class="foot2__cols">
+    <nav aria-label="Pages"><b data-mir-key="t-cb9f0644-0">The site</b><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-1">Home</a><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-1">Every board</a><a href="/business/blazin-boards/order" data-mir-key="t-c5c09523-1">Your order</a></nav>
+    <div><b data-mir-key="t-451f29f2-0">Find us</b><span data-mir-key="t-d4c056e4-0">Farn 5, Jerusalem</span><span data-mir-key="t-257193b7-0">Orders 48 hours ahead</span><span data-mir-key="t-3b7b3887-0">Delivery throughout Israel</span></div>
+    <div><b data-mir-key="t-bd7247f5-0">Pay us by</b><span data-mir-key="t-1fe87945-0">Card, Zelle or bank transfer</span><a href="https://myisraelrental.com/businesses" data-mir-key="t-6fde72b8-0">Listed on MyIsraelRental</a></div>
+  </div>
+  <p class="foot2__small" data-mir-key="t-906a2884-0">Blazin' Boards. Every photograph on this site is our own. Nothing is paid on this site: you pay us directly.</p>
+</footer>
+<script src="/pages/blazin-boards/site.js?v=mvjvyedj"></script>
 <script>
 (function () {
   var o = BB.load(), F = null, open = false;
   var area = function (p) { return p.cm ? p.cm[0] * p.cm[1] : 1e9; };
   document.getElementById('more').addEventListener('click', function () { open = true; paint(); document.getElementById('picks').scrollIntoView({ block: 'nearest', behavior: 'smooth' }); });
-  function paint() {
-    var ls = BB.lines(F, o);
+  var seenLines = null;
+  // the basket lines; one that has just come in fades in, the others stay as they are
+  function paintLines() {
+    var ls = BB.lines(F, o), now = {};
     document.getElementById('cartlines').innerHTML = ls.map(function (l) {
-      return '<li><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
+      now[l.p.id] = 1;
+      return '<li' + (seenLines && !seenLines[l.p.id] ? ' class="fresh"' : '') + '><span class="thumb"><img src="/pages/blazin-boards/assets/board-cut-m.webp?v=mvjvyedj" alt="" width="1000" height="815"></span><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
         + '<span class="stepper"><button type="button" data-dec="' + l.p.id + '" aria-label="One fewer">−</button><output>' + l.qty + '</output><button type="button" data-inc="' + l.p.id + '" aria-label="One more">+</button></span>'
-        + '<span class="amt">' + BB.money(l.p.price * l.qty, l.p.currency) + '</span></li>';
+        + '<span class="amt">' + BB.money(l.p.price * l.qty, l.p.currency) + '</span><button type="button" class="rm" data-rm="' + l.p.id + '" aria-label="Remove ' + BB.esc(l.p.short) + ' from the order"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button></li>';
     }).join('');
+    seenLines = now;
+    return ls;
+  }
+  function paint() {
+    var ls = paintLines();
     var boards = F.products.filter(function (p) { return p.board; });
     var rows = {};
     boards.forEach(function (p) { var k = p.cm ? p.cm.join('x') : p.short; (rows[k] = rows[k] || { a: area(p), cells: [] }).cells.push(p); });
@@ -84,7 +103,7 @@
         [c[i], c[i + 1]].forEach(function (p) {
           if (!p) { h += '<td></td>'; return; }
           var on = (o.cart[p.id] || 0) > 0;
-          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + '</button></td>';
+          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + BB.dealHtml(p) + '</button></td>';
         });
         h += '</tr>';
       }
@@ -95,22 +114,24 @@
     document.getElementById('more').hidden = !hasBoard || open;
     document.getElementById('picks').hidden = hasBoard && !open;
     var bottles = F.products.filter(function (p) { return !p.board; });
-    document.getElementById('bottlesQ').hidden = !bottles.length;
+    document.getElementById('bottlesQ').hidden = !bottles.length || !hasBoard;
     document.getElementById('bottles').innerHTML = bottles.map(function (p) {
       var on = (o.cart[p.id] || 0) > 0;
-      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add') + '</button></li>';
+      return '<li class="bottle"><span><b>' + BB.esc(p.name) + '</b><span class="p">' + BB.money(p.price, p.currency) + '</span></span><button type="button" class="tg" data-bottle="' + p.id + '" aria-pressed="' + on + '">' + (on ? 'Added' : 'Add to order') + '</button></li>';
     }).join('');
     var ok = ls.some(function (l) { return l.p.board; });
     ['go', 'go2'].forEach(function (id) { document.getElementById(id).setAttribute('aria-disabled', String(!ok)); });
     BB.paint(F, o);
   }
   document.addEventListener('click', function (e) {
-    var t = e.target.closest('[data-inc],[data-dec],[data-toggle],[data-bottle]'); if (!t || !F) return;
-    var id = t.dataset.inc || t.dataset.dec || t.dataset.toggle || t.dataset.bottle, was = o.cart[id] || 0;
+    var t = e.target.closest('[data-inc],[data-dec],[data-toggle],[data-bottle],[data-rm]'); if (!t || !F) return;
+    var id = t.dataset.inc || t.dataset.dec || t.dataset.toggle || t.dataset.bottle || t.dataset.rm, was = o.cart[id] || 0;
     if (t.dataset.inc) o.cart[id] = Math.min(20, was + 1);
     if (t.dataset.dec) o.cart[id] = Math.max(0, was - 1);
     if (t.dataset.toggle || t.dataset.bottle) o.cart[id] = was ? 0 : 1;
+    if (t.dataset.rm) o.cart[id] = 0;
     if (!o.cart[id]) delete o.cart[id];
+    if (t.dataset.bottle) { var on = !!o.cart[id]; t.setAttribute('aria-pressed', String(on)); t.textContent = on ? 'Added' : 'Add to order'; BB.save(o); paintLines(); BB.paint(F, o); return; }
     BB.save(o); paint();
   });
   BB.form().then(function (f) {

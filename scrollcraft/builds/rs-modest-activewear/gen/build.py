@@ -1,5 +1,5 @@
 # RS Modest Activewear: Home, Shop, Contact. Run from the build folder:  python gen/build.py
-import sys, os
+import sys, os, re
 sys.path.insert(0, '../../starter'); sys.path.insert(0, 'gen')
 import sitekit as kit
 
@@ -23,9 +23,18 @@ ARW_SVG = '<svg viewBox="0 0 24 24"><path d="M4 12h15M13 6l6 6-6 6"/></svg>'
 UP_SVG = '<svg viewBox="0 0 24 24"><path d="M12 20V5M6 11l6-6 6 6"/></svg>'
 
 
+FOOT = f'''<footer class="foot"><div class="fcols">
+  <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="shop.html">Shop</a><a href="contact.html">Contact</a></nav>
+  <div><h4>Visit</h4><p>31 King George Street, Jerusalem</p><a href="{MAPS}" target="_blank" rel="noopener">Get directions</a></div>
+  <div><h4>Reach us</h4><a href="https://wa.me/972546152968" target="_blank" rel="noopener">WhatsApp +972 54 615 2968</a><a href="mailto:ravitandshifra@gmail.com">ravitandshifra@gmail.com</a></div>
+  <p class="fine">RS Modest Activewear, King George 31, Jerusalem, on <a href="/">MyIsraelRental</a>, free to list, no commission</p>
+</div></footer>'''
+
+
 def post(page: str, shop_link: bool = True) -> None:
     """The bag in the menu bar (the touch), and the main action's own wording on the closing band and phone bar."""
     s = open(f'{page}.html', encoding='utf8').read()
+    s = s.replace('<meta name="description"', '<meta name="site-category" content="fashion-shop">' + chr(10) + '<meta name="description"', 1)
     s = s.replace('<a class="btn-line" href="shop.html#order">Basket', '<a class="btn-line" href="shop.html#order">' + BAG + 'Basket')
     s = s.replace(f'<a class="btn" href="shop.html#order">Basket {ARW}</a>', f'<a class="btn" href="shop.html">Shop the skirt {ARW}</a>')
     if page == 'shop':
@@ -36,6 +45,12 @@ def post(page: str, shop_link: bool = True) -> None:
     s = s.replace('<span class="arw" aria-hidden="true">→</span>', '<span class="arw" aria-hidden="true">' + ARW_SVG + '</span>')
     # the phone bar's price is set in the body face so the shekel sign has a glyph
     s = s.replace('<p class="p"><b>₪320</b>', '<p class="p"><b><span class="sym">₪</span>320</b>')
+    if page != 'shop':
+        s = re.sub(r'(<div class="bar" id="bar"[^>]*>)\s*<p class="p">.*?</p>', lambda m: m.group(1).replace('class="bar"', 'class="bar solo"'), s, flags=re.S)
+        s = s.replace('tabindex="-1">Shop the skirt</a>', 'tabindex="-1">Shop the skirt, <span class="sym">₪</span>320</a>')
+    s = re.sub(r'>(Shop the skirt, <span class="sym">₪</span>\d+)', r'><span>\1</span>', s)
+    s = re.sub(r'>(Add to basket, <span class="sym">₪</span>\d+)</a>', r'><span>\1</span></a>', s)
+    s = re.sub(r'<footer class="foot">.*?</footer>', lambda m: FOOT, s, flags=re.S)
     open(f'{page}.html', 'w', encoding='utf8').write(s)
 
 
@@ -64,7 +79,7 @@ OPENING = f'''  <section class="open" id="open" aria-label="RS Modest Activewear
   </section>
 '''
 
-PILLARS = '''  <section class="sec green pillars" id="about" aria-labelledby="h-about">
+PILLARS = '''  <section class="sec pillars" id="about" aria-labelledby="h-about">
     <div class="wrap">
       <div>
         <h2 id="h-about" class="rev">Elegance, comfort and functionality</h2>
@@ -81,47 +96,58 @@ PILLARS = '''  <section class="sec green pillars" id="about" aria-labelledby="h-
   </section>
 '''
 
-SPOT = f'''  <section class="sec spot" id="skirt" aria-labelledby="h-skirt">
+def card():
+    return f'''        <li class="pcard rev">
+          <a class="pph full" href="shop.html" tabindex="-1" aria-hidden="true"><img src="assets/skirts.webp" alt="" width="1023" height="1209" loading="lazy"></a>
+          <div class="pinfo">
+            <h3><a href="shop.html">Premium Modest Sports Skirt</a></h3>
+            <p class="pmeta">With built-in leggings</p>
+            <p class="pprice" aria-label="320 shekels">{kit.price(320)}</p>
+            <a class="btn-line padd" href="shop.html#order" data-add="skirt" aria-label="Add the skirt to the basket, 320 shekels">Add to basket, {kit.price(320)}</a>
+          </div>
+        </li>
+'''
+
+SHOP_ROW = f'''  <section class="sec shoprow" id="skirt" aria-labelledby="h-skirt">
     <div class="wrap">
-      <figure class="figure rev">
-        <img src="assets/skirts.webp" alt="A black and a white RS sports skirt on a stone plinth beside an RS bag" width="1023" height="1209" loading="lazy">
-        <button class="hot" type="button" style="left:55%;top:88%" aria-expanded="false" aria-label="Built-in leggings"><span>Built-in leggings</span></button>
-      </figure>
+      <div class="rowhead"><h2 id="h-skirt" class="rev">The sports skirt with built-in leggings</h2><a class="lnk" href="shop.html">See the skirt</a></div>
+      <ul class="pgrid">
+{card()}        <li class="pcard ptile rev">
+          <a class="pph full" href="{MAPS}" target="_blank" rel="noopener" aria-label="Get directions to the store at 31 King George Street"><img src="assets/shop.webp" alt="Inside the RS store: a rail of skirts beside the counter" width="1800" height="2400" loading="lazy"></a>
+          <div class="pinfo">
+            <h3>Visit our store</h3>
+            <p class="pmeta">See the skirts on the rail</p>
+            <a class="lnk" href="{MAPS}" target="_blank" rel="noopener">Get directions</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </section>
+'''
+
+HOW = '''  <section class="sec how" id="how" aria-labelledby="h-how">
+    <div class="wrap">
+      <h2 id="h-how" class="rev">How to order</h2>
+      <ol class="hsteps">
+        <li class="rev"><b>1</b><h3>Add the skirt</h3><p>Put the Premium Modest Sports Skirt in your basket.</p></li>
+        <li class="rev"><b>2</b><h3>Tell us your size</h3><p>Write your size and colour in the note, then your name and phone.</p></li>
+        <li class="rev"><b>3</b><h3>Collect at King George 31</h3><p>Your order reaches us on WhatsApp and you collect it from the store.</p></li>
+      </ol>
+    </div>
+  </section>
+'''
+
+VISIT = f'''  <section class="sec visit" id="visit" aria-labelledby="h-visit">
+    <div class="wrap">
       <div>
-        <p class="caps rev">The skirt</p>
-        <h2 id="h-skirt" class="rev">Premium Modest Sports Skirt</h2>
-        <p class="lede rev">Premium sports skirt with built-in leggings.</p>
-        <div class="ptag rev" aria-label="320 shekels">{kit.price(320)}</div>
-        <ul class="facts rev">
-          <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 3h10l1.5 18h-5L12 10l-1.5 11h-5z"/></svg>Built-in leggings</li>
-          <li><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="5" r="2"/><path d="M12 8v6M12 14l-4 6M12 14l4 6M6 11l6-3 6 3"/></svg>Designed for movement and everyday wear</li>
-        </ul>
-        <a class="btn rev" href="shop.html">Shop the skirt, {kit.price(320)}</a>
-      </div>
-    </div>
-  </section>
-'''
-
-STORE = f'''  <section class="shotsec store" id="store" aria-labelledby="h-store">
-    <img src="assets/shop.webp" alt="Inside the RS store: a rail of skirts beside the counter" width="1800" height="2400" loading="lazy">
-    <div class="wrap">
-      <div class="said">
-        <h2 id="h-store" class="rev">Visit our store</h2>
-        <p class="lede rev">Skirts and activewear designed for movement and everyday wear.</p>
-        <a class="btn rev" href="shop.html">Shop the skirt, {kit.price(320)}</a>
-      </div>
-    </div>
-  </section>
-'''
-
-DIPTYCH = f'''  <section class="shotsec dip2" id="visit" aria-labelledby="h-visit">
-    <figure class="ph1"><img src="assets/sign.webp" alt="The RS sign in a green window frame" width="1109" height="1478" loading="lazy"></figure>
-    <figure class="ph2"><img src="assets/bag.webp" alt="The white RS shopping bag with black ribbon handles" width="1109" height="1330" loading="lazy"></figure>
-    <div class="wrap">
-      <div class="said mid">
         <h2 id="h-visit" class="rev">31 King George Street</h2>
-        <p class="lede rev">Jerusalem</p>
+        <p class="addr rev">Jerusalem</p>
+        <p class="lede rev">Skirts and activewear designed for movement and everyday wear.</p>
         <div class="acts rev"><a class="btn" href="shop.html">Shop the skirt, {kit.price(320)}</a><a class="lnk" href="{MAPS}" target="_blank" rel="noopener">Get directions</a></div>
+      </div>
+      <div class="pair rev">
+        <figure class="a"><img src="assets/sign.webp" alt="The RS sign in a green window frame" width="1109" height="1478" loading="lazy"></figure>
+        <figure class="b"><img src="assets/bag.webp" alt="The white RS shopping bag with black ribbon handles" width="1109" height="1330" loading="lazy"></figure>
       </div>
     </div>
   </section>
@@ -150,17 +176,14 @@ OPEN_JS = '''<script>
   function swing(el) { el.classList.remove('sw'); void el.offsetWidth; el.classList.add('sw'); }
   tags.forEach(function (t) { t.addEventListener('pointerenter', function () { swing(t); }); t.addEventListener('click', function () { swing(t); }); });
 
-  // the dot on the leggings
-  var hot = document.querySelector('.hot');
-  hot.addEventListener('click', function () { hot.setAttribute('aria-expanded', hot.getAttribute('aria-expanded') !== 'true'); });
-  document.addEventListener('click', function (e) { if (!e.target.closest('.hot')) hot.setAttribute('aria-expanded', 'false'); });
+  
 })();
 </script>
 '''
 
 SITE.write('index', 'RS Modest Activewear, women\'s clothing store on King George, Jerusalem',
            'Premium modest activewear for women. Sports skirts with built-in leggings, at 31 King George Street, Jerusalem.',
-           'og.webp', OPENING + PILLARS + STORE + SPOT + DIPTYCH + kit.gallery('From the store'), OPEN_JS)
+           'og.webp', OPENING + SHOP_ROW + HOW + PILLARS + VISIT + kit.gallery('From the store'), OPEN_JS)
 post('index')
 
 # ── CONTACT ───────────────────────────────────────────────────────────────

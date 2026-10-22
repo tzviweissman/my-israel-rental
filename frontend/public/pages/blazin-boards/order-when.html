@@ -5,29 +5,30 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>When and where · Blazin' Boards</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="Collect in Jerusalem or have it delivered, and the day you need it.">
-<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mv6aycwz">
+<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mvjvyedj">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mv6aycwz">
+<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mvjvyedj">
 </head>
 <body>
 <nav class="nav" aria-label="Blazin' Boards">
-  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv6aycwz" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
+  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mvjvyedj" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
   <ul class="menu">
     <li><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-0">Home</a></li>
     <li><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-0">Every board</a></li>
     <li><a href="/business/blazin-boards/order" data-mir-key="t-c5c09523-0">Your order</a></li>
   </ul>
-  <a class="cart" href="/business/blazin-boards/order" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span data-mir-key="t-d988a500-0">Order</span><b data-count hidden data-mir-key="t-266f6835-0">0</b></a>
+  <a class="cart" href="/business/blazin-boards/order" aria-label="Your order"><svg viewBox="0 0 24 24"><path d="M6 7h12l-1 13H7z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg><span data-mir-key="t-c011198d-0">Order a board</span><b data-count hidden data-mir-key="t-266f6835-0">0</b></a>
 </nav>
 
 <main class="order">
   <div class="wrap">
     <ol class="steps" aria-label="Order steps"><li class="is-done"><a class="st" href="/business/blazin-boards/order" data-mir-key="t-0891850f-0">Step 1: Your boards</a></li><li class="is-now" aria-current="step"><span class="st" data-mir-key="t-bb888e95-0">Step 2: When and where</span></li><li class=""><span class="st" data-mir-key="t-e03c9d03-0">Step 3: Your details</span></li></ol>
     <div class="cols">
-      <section class="pane">
+      <div class="pane"><!-- an order form scrolls like any form; it is not a one-screen scene -->
         <h1 data-mir-key="t-55e42266-0">When and <em>where?</em></h1>
         <p class="sub" data-mir-key="t-5f9355d1-0">We need 48 hours' notice.</p>
         <div class="q">
@@ -39,20 +40,21 @@
         </div>
         <div class="q">
           <h2 data-mir-key="t-90e6ca1e-0">Which day?</h2>
+          <div class="chips daychips" id="dayChips" role="group" aria-label="Earliest days"></div>
           <div class="two">
             <div class="field" id="f-date"><label for="date" data-mir-key="t-00eaa718-0">Needed on</label><input type="date" id="date"><span class="hint" data-mir-key="t-285bbcd5-0">The earliest day is two days from today.</span><span class="err" data-mir-key="t-7c3bcad9-0">Choose a day, two days from today or later, not Shabbos.</span></div>
             <div class="field" id="f-window" hidden><label for="window" data-mir-key="t-2eda6e35-0">Time</label><select id="window"></select></div>
           </div>
         </div>
-        <div class="q" id="addrQ" hidden>
+        <div class="q is-shut" id="addrQ" inert><div>
           <div class="field" id="f-address"><label for="address" data-mir-key="t-438c5cbe-0">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, number, city, plus floor or entrance" maxlength="400"><span class="hint" data-mir-key="t-2c1e89bf-0">The delivery fee depends on the city. We confirm it with you on WhatsApp before the day.</span><span class="err" data-mir-key="t-def80760-0">Where should it go?</span></div>
           <div class="field" id="f-city" hidden><label for="city" data-mir-key="t-59b7e1af-0">City</label><select id="city"></select><span class="err" data-mir-key="t-2e9e7fd0-0">Choose the city it goes to.</span></div>
-        </div>
+        </div></div>
         <p class="errline" id="err"></p>
         <div class="next"><a class="cta" id="go" href="/business/blazin-boards/order-details">Continue</a><a class="back" href="/business/blazin-boards/order" data-mir-key="t-fa767fba-0">Back</a></div>
-      </section>
+      </div>
       <aside class="summary" aria-label="Your order" aria-live="polite">
-        <div class="who"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mv6aycwz" alt="" data-mir-key="i-0746f29b-1"><div><b data-mir-key="t-ba61b3de-0">Your order</b><small data-mir-key="t-645d4e11-0">Blazin' Boards, Jerusalem</small></div></div>
+        <div class="who"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mvjvyedj" alt="" width="44" height="44" data-mir-key="i-0746f29b-1"><div><b data-mir-key="t-ba61b3de-0">Your order</b><small data-mir-key="t-645d4e11-0">Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines data-full></ul>
         <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><b data-total data-mir-key="t-e2b2a704-0">$0</b></div>
         <ul class="promise">
@@ -64,9 +66,19 @@
     </div>
   </div>
 </main>
-<div class="dock"><div><small data-mir-key="t-9263db8f-0">Total</small><b data-total data-mir-key="t-e2b2a704-1">$0</b></div><a class="cta" id="go2" href="/business/blazin-boards/order-details">Continue</a></div>
+<div class="dock dockbar"><div><small data-mir-key="t-9263db8f-0">Total</small><b data-total data-mir-key="t-e2b2a704-1">$0</b></div><a class="cta" id="go2" href="/business/blazin-boards/order-details">Continue</a></div>
 
-<script src="/pages/blazin-boards/site.js?v=mv6aycwz"></script>
+<footer class="foot2">
+  <p class="foot2__big" data-mir-key="t-8ebd5195-0">Premium meat boards, grilled to perfection.</p>
+  <a class="cta" href="/business/blazin-boards/order" data-mir-key="t-4877b309-0">Order a board</a>
+  <div class="foot2__cols">
+    <nav aria-label="Pages"><b data-mir-key="t-cb9f0644-0">The site</b><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-1">Home</a><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-1">Every board</a><a href="/business/blazin-boards/order" data-mir-key="t-c5c09523-1">Your order</a></nav>
+    <div><b data-mir-key="t-451f29f2-0">Find us</b><span data-mir-key="t-d4c056e4-0">Farn 5, Jerusalem</span><span data-mir-key="t-257193b7-0">Orders 48 hours ahead</span><span data-mir-key="t-3b7b3887-0">Delivery throughout Israel</span></div>
+    <div><b data-mir-key="t-bd7247f5-0">Pay us by</b><span data-mir-key="t-1fe87945-0">Card, Zelle or bank transfer</span><a href="https://myisraelrental.com/businesses" data-mir-key="t-6fde72b8-0">Listed on MyIsraelRental</a></div>
+  </div>
+  <p class="foot2__small" data-mir-key="t-906a2884-0">Blazin' Boards. Every photograph on this site is our own. Nothing is paid on this site: you pay us directly.</p>
+</footer>
+<script src="/pages/blazin-boards/site.js?v=mvjvyedj"></script>
 <script>
 (function () {
   var o = BB.load(), F = null, $ = function (id) { return document.getElementById(id); };
@@ -86,7 +98,7 @@
   }
   function paint() {
     document.querySelectorAll('[data-ful]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.ful === b.dataset.ful)); });
-    $('addrQ').hidden = o.ful !== 'delivery';
+    $('addrQ').classList.toggle('is-shut', o.ful !== 'delivery'); $('addrQ').inert = o.ful !== 'delivery';
     // A store that is not nationwide delivers only to its own cities, and the
     // order is refused without one (dead-ends audit, 12 Oct 2026).
     var B = (F && F.business) || {};
@@ -94,6 +106,13 @@
     windows(); BB.save(o); if (F) BB.paint(F, o);
   }
   document.querySelectorAll('[data-ful]').forEach(function (b) { b.addEventListener('click', function () { o.ful = b.dataset.ful; paint(); }); });
+  (function () {
+    var box = $('dayChips'), d = new Date(min), n = 0, h = '';
+    while (n < 4) { if (d.getDay() !== 6) { var v = d.toISOString().slice(0, 10); h += '<button type="button" class="chip" data-day="' + v + '" aria-pressed="false">' + d.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) + '</button>'; n++; } d.setDate(d.getDate() + 1); }
+    box.innerHTML = h;
+    box.addEventListener('click', function (e) { var t = e.target.closest('[data-day]'); if (!t) return; $('date').value = t.dataset.day; $('date').dispatchEvent(new Event('change')); });
+    $('date').addEventListener('change', function () { box.querySelectorAll('[data-day]').forEach(function (c) { c.setAttribute('aria-pressed', String(c.dataset.day === $('date').value)); }); });
+  })();
   $('date').addEventListener('change', function () { o.date = $('date').value; $('f-date').classList.remove('is-bad'); paint(); });
   $('window').addEventListener('change', function () { o.window = $('window').value; BB.save(o); BB.paint(F, o); });
   $('address').addEventListener('input', function () { o.address = $('address').value.trim(); $('f-address').classList.remove('is-bad'); BB.save(o); if (F) BB.paint(F, o); });

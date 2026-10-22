@@ -28,24 +28,31 @@ def stage(im, bgsrc, size=(1200, 1200), feather=26):
     bg.paste(fg, ((W - fg.width) // 2, (H - fg.height) // 2), m)
     return bg
 
-# Small: the round platter, whole (its board's lower rim included); the photo is her own, top to bottom
+# The product hero shot (rules section 8, Tzvi 22 Oct 2026) and one shoot (8.1): her four platters, each
+# re-shot by Higgsfield from her own photo (p04, p05 cleaned, p06, p07) into one scene: a pale travertine slab,
+# a few whole fruits from the platter, a blush-to-cream gradient, one warm light from the left, the same
+# angle. Every fruit was checked against her photo. h-*.jpg are those shots, 4:3.
+M = {k: Image.open(O + f'h-{k}.jpg').convert('RGB') for k in ('small', 'medium', 'large', 'xl')}
+
+def fit(im, size):
+    """The whole shot, fitted to the width; above and below it the shot's own top and bottom edges carry on
+    (a plain gradient and a plain table), so a square or tall frame never cuts the platter."""
+    W, H = size
+    s = W / im.width; fg = im.resize((W, round(im.height * s)), Image.LANCZOS)
+    if fg.height >= H:
+        y = (fg.height - H) // 2; return fg.crop((0, y, W, y + H))
+    out = Image.new('RGB', (W, H)); y0 = (H - fg.height) // 2
+    top = fg.crop((0, 0, W, 2)).resize((W, y0 + 1)).filter(ImageFilter.GaussianBlur(8))
+    bot = fg.crop((0, fg.height - 2, W, fg.height)).resize((W, H - y0 - fg.height + 1)).filter(ImageFilter.GaussianBlur(8))
+    out.paste(top, (0, 0)); out.paste(bot, (0, y0 + fg.height - 1)); out.paste(fg, (0, y0))
+    return out
+
+for i, k in ((1, 'small'), (2, 'medium'), (3, 'large'), (4, 'xl')):
+    save(fit(M[k], (1200, 1200)), f'size-{i}.webp', None, 78)
+    save(fit(M[k], (520, 390)), f'size-{i}-t.webp', None, 76)   # 4:3 thumbnails, the whole platter each
 p04 = Image.open(O + 'p04.jpg').convert('RGB')
-sq1 = p04.crop((0, 60, 1800, 1860))
-# Medium: NO photo. The one photo supplied for it (a studio shot on marble) has another business's placeholder
-# words ("logo" and a Hebrew name) engraved on the board, which means it may not be her platter. It is not shown,
-# not even with the words covered; the site shows a plain tile and asks her (message-to-owner.md, question 4).
-# Large: the whole board, from the handle to the lychees, and its shadow
 p06 = Image.open(O + 'p06.jpg').convert('RGB')
-lg_crop, lg_bg = p06.crop((0, 220, 2400, 1340)), p06.crop((0, 1360, 2400, 1800))
-# Extra large: the whole long board, top to bottom
 p07 = Image.open(O + 'p07.jpg').convert('RGB')
-xl_bg = p07.crop((830, 180, 1080, 1200))
-sm_bg = p04.crop((0, 1900, 1800, 2400))
-for i, (im, bgp, fe) in ((1, (sq1, sm_bg, 26)), (3, (lg_crop, lg_bg, 26)), (4, (p07, xl_bg, 70))):
-    save(stage(im, bgp, (1200, 1200), fe), f'size-{i}.webp', None, 78)
-    save(stage(im, bgp, (520, 390), fe), f'size-{i}-t.webp', None, 76)   # 4:3 thumbnails, the whole platter each
-for f in ('size-2.webp', 'size-2-t.webp'):
-    if os.path.exists(A + f): os.remove(A + f)
 # the long band: the extra large platter turned on its side, cut to the platter
 band = p07.rotate(-90, expand=True).crop((0, 190, 2400, 800))
 save(band, 'band.webp', (2400, 610), 78)
@@ -60,11 +67,26 @@ og = Image.new('RGB', (1200, 630)); lg = p06.crop((0, 280, 2400, 1300)); bgc = p
 p08 = Image.open(O + 'p08.jpg').convert('RGB')
 save(p08.crop((100, 0, 1500, 1400)), 'wrapped.webp', (900, 900), 76)
 
-# the home page's full-bleed pictures (rule 3t): her own photos, cropped, nothing added
-save(p06.crop((0, 180, 2400, 1680)), 'w-large.webp', (2000, 1250), 80)                       # the Large board, the table below it for the words
-save(p06.crop((330, 0, 2070, 1800)), 'w-large-m.webp', (900, 931), 78)                       # phone: the board's middle, tall
-xr = p07.rotate(-90, expand=True)                                                              # the Extra large board on its side
-save(xr.crop((0, 40, 2400, 1240)), 'w-xl.webp', (2000, 1000), 80)
-save(p07.crop((0, 0, 1242, 2400)), 'w-xl-m.webp', (700, 1353), 78)                           # phone: upright, as she photographed it
-save(p04.crop((0, 430, 1800, 1555)), 'w-small.webp', (1800, 1125), 80)                       # the Small platter, close
-save(p04, 'w-small-m.webp', (900, 1200), 78)
+# the home page's full-bleed pictures (rule 3t): the same hero shots
+save(fit(M['large'], (2000, 1250)), 'w-large.webp', None, 80)
+save(fit(M['large'], (900, 931)), 'w-large-m.webp', None, 78)
+save(fit(M['xl'], (2000, 1000)), 'w-xl.webp', None, 80)
+save(fit(M['xl'], (700, 1187)), 'w-xl-m.webp', None, 78)
+save(fit(M['small'], (1800, 1125)), 'w-small.webp', None, 80)
+save(fit(M['small'], (900, 1200)), 'w-small-m.webp', None, 78)
+
+# the home cards (review 22 Oct 2026): each platter whole on its card, nothing sliced by the card edge. The whole shot sits
+# inside the frame at 92% with its own picture, enlarged and blurred, carrying on at the sides (the same trick as stage()).
+def card(im, size=(1000, 800), scale=.92, feather=22):
+    W, H = size
+    bg = im.copy(); s = max(W / bg.width, H / bg.height)
+    bg = bg.resize((round(bg.width * s), round(bg.height * s)), Image.LANCZOS)
+    x0, y0 = (bg.width - W) // 2, (bg.height - H) // 2
+    bg = bg.crop((x0, y0, x0 + W, y0 + H)).filter(ImageFilter.GaussianBlur(26))
+    f = min(W * scale / im.width, H * scale / im.height)
+    fg = im.resize((round(im.width * f), round(im.height * f)), Image.LANCZOS)
+    m = Image.new('L', fg.size, 0); m.paste(255, (feather, feather, fg.width - feather, fg.height - feather)); m = m.filter(ImageFilter.GaussianBlur(feather / 2.2))
+    bg.paste(fg, ((W - fg.width) // 2, (H - fg.height) // 2), m)
+    return bg
+for i, k in ((1, 'small'), (2, 'medium'), (3, 'large'), (4, 'xl')):
+    save(card(M[k]), f'card-{i}.webp', None, 78)
