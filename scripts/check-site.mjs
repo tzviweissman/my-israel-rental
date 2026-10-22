@@ -184,6 +184,31 @@ for (const url of urls) {
   }
   // ── the home page opens on a full-screen film or event (page rules 3h; Tzvi, 21 Oct 2026: "why do you keep
   // making bland websites"): the picture fills the first screen, and the first screen changes on its own or as you scroll ──
+  // ── each site follows real sites of its own category (page rules 3t; Tzvi, 22 Oct 2026: "not all websites look
+  // like the moto one"): the page names its category, and the checks below follow it ──
+  const CATS = ['food-shop', 'place', 'fashion-shop', 'beauty', 'events', 'trainer', 'service', 'rental'];
+  let category = '';
+  {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
+    const page = await ctx.newPage(); await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(800);
+    category = await page.evaluate(() => (document.querySelector('meta[name="site-category"]') || {}).content || '');
+    if (!CATS.includes(category)) fail(url, 'CATEGORY', `the page names no known category (${category || 'none'}): add <meta name="site-category" content="one of ${CATS.join(', ')}"> and follow that row of 3t`);
+    if (['food-shop', 'fashion-shop'].includes(category) && /\/(index\.html)?$/.test(new URL(url).pathname)) {
+      // BUY: a price and an Add or Order control visible within the first two screens
+      const seen = await page.evaluate(async () => {
+        const vis = (e) => { const r = e.getBoundingClientRect(), cs = getComputedStyle(e); return r.width > 4 && r.height > 4 && r.bottom > 0 && r.top < innerHeight && cs.visibility !== 'hidden' && +cs.opacity > .2; };
+        const look = () => {
+          const price = [...document.querySelectorAll('body *')].some((e) => e.children.length < 3 && /(₪|\$)\s?\d|\d\s?(₪|\$)/.test(e.textContent) && e.textContent.length < 60 && vis(e));
+          const buy = [...document.querySelectorAll('a, button')].some((e) => /\b(add|order|buy|shop|basket)\b/i.test(e.textContent + ' ' + (e.getAttribute('aria-label') || '')) && vis(e));
+          return { price, buy };
+        };
+        const a = look(); scrollTo(0, innerHeight); await new Promise((r) => setTimeout(r, 900)); const b = look();
+        return { price: a.price || b.price, buy: a.buy || b.buy };
+      });
+      if (!seen.price || !seen.buy) fail(url, 'BUY', `within the first two screens there is ${seen.price ? '' : 'no price'}${!seen.price && !seen.buy ? ' and ' : ''}${seen.buy ? '' : 'no Add or Order control'}: a ${category} sells from the top (3t)`);
+    }
+    await ctx.close();
+  }
   if (/\/(index\.html)?(\?.*)?$/.test(new URL(url).pathname + new URL(url).search)) {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage(); await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(600);
@@ -200,14 +225,14 @@ for (const url of urls) {
     const a = await page.screenshot(); await page.waitForTimeout(2500); const b = await page.screenshot();
     await page.mouse.wheel(0, 500); await page.waitForTimeout(900); const c = await page.screenshot();
     const differ = (x, y) => { let d = 0; for (let i = 0; i < x.length && i < y.length; i += 997) d += x[i] !== y[i] ? 1 : 0; return d / (Math.min(x.length, y.length) / 997); };
-    if (cover < .7) fail(url, 'OPENING', `the first screen is only ${Math.round(cover * 100)}% picture: the opening must be a full-screen film or photo, not a box beside the words (3h.1)`);
+    if (cover < .7 && ['events', 'beauty', 'place', 'trainer'].includes(category)) fail(url, 'OPENING', `the first screen is only ${Math.round(cover * 100)}% picture: the opening must be a full-screen film or photo, not a box beside the words (3h.1)`);
     if (differ(a, b) < .05 && differ(b, c) < .05) fail(url, 'OPENING', 'nothing happens on the first screen, on its own or when you start to scroll: the opening must be an event (3h)');
     await ctx.close();
   }
   // ── sections change worlds (page rules 3t; Tzvi, 21 Oct 2026, after moto-card.com: "it changes to pictures,
   // not everything is just one colour"): on the home page, no three sections in a row on the same plain ground,
   // and at least a third of the sections mostly picture or film ──
-  if (/\/(index\.html)?$/.test(new URL(url).pathname)) {
+  if (category === 'trainer' && /\/(index\.html)?$/.test(new URL(url).pathname)) {
     const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 } });
     const page = await ctx.newPage(); await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(800);
     const secs = await page.evaluate(async () => {
