@@ -251,3 +251,52 @@ section.rest { padding-block: clamp(2.2rem, 8svh, 6rem); }
 /* the chosen size's name stays on one line and the buy row keeps one shape, so choosing a size never moves the page (check-site SHIFT, 22 Oct 2026) */
 .st-info h1 { font-size: clamp(3.4rem, 5.2vw, 5.6rem); white-space: nowrap; }
 @media (max-width: 600px) { .st-buy { flex-direction: column; align-items: stretch; } .st-buy .step { align-self: flex-start; } }
+
+/* ---------- food-shop (rule 3t): a light ground, one colour room per size, a card with photo, name, price and Add ---------- */
+.stage { background: var(--room, #F8D4D0); transition: background 500ms var(--out); }
+.pcs { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(.7rem, 1.6vw, 1.4rem); margin-top: clamp(1.4rem, 4svh, 2.6rem); }
+.pc { display: flex; flex-direction: column; border-radius: calc(var(--r) + 6px); overflow: hidden; background: var(--room); }
+.pc-ph { aspect-ratio: 1; overflow: hidden; } .pc-ph img { width: 100%; height: 100%; object-fit: cover; transition: transform 600ms var(--out); }
+@media (hover: hover) { .pc:hover .pc-ph img { transform: scale(1.04); } }
+.pc-b { display: flex; flex-direction: column; gap: .4rem; padding: 1rem 1.1rem 1.2rem; flex: 1; }
+.pc-b h3 { font-size: clamp(2rem, 2.6vw, 2.6rem); }
+.pc-pr { margin: 0 0 .7rem; font: 700 clamp(1.8rem, 2.3vw, 2.3rem)/1 var(--font-head); color: var(--ink); }
+.pc-b .btn { margin-top: auto; align-self: stretch; text-align: center; justify-content: center; }
+.rest-note { margin: 0; max-width: 24rem; color: var(--soft); }
+section.rest { padding-block: clamp(2.6rem, 8svh, 5rem); }
+.story { background: var(--surface); border-block: 1px solid var(--line); }
+.story-g { display: grid; grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: clamp(1.4rem, 4vw, 4rem); align-items: center; }
+.story-ph, .story-ph img { display: block; width: 100%; height: auto; border-radius: calc(var(--r) + 6px); }
+.story-ph { overflow: hidden; }
+.story-mark { width: 64px; height: 64px; border-radius: 50%; box-shadow: 0 0 0 1px var(--line); margin-bottom: 1rem; }
+.story-t h2 { font-size: clamp(3rem, 5.4vw, 5.2rem); }
+.story-t p { margin: 1rem 0 1.6rem; color: var(--soft); max-width: 26rem; font-size: 1.1rem; }
+.trust { border-top: 1px solid var(--line); }
+.trust-g { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.6rem; }
+.trust-g svg { width: 26px; height: 26px; stroke: var(--leaf); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.trust-g h3 { font: 700 .8rem/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; margin: .6rem 0 .4rem; color: var(--soft); }
+.trust-g p { margin: 0; font-weight: 600; }
+section.sec:not(.rest):not(.story):not(.trust) { padding-block: clamp(2.6rem, 8svh, 5rem); }
+section.trust { padding-block: clamp(1.8rem, 5svh, 3rem); }
+.how .n { color: #8F6C2E; }
+@media (max-width: 900px) { .pcs { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 760px) { .story-g { grid-template-columns: 1fr; } .trust-g { grid-template-columns: 1fr; gap: 1.2rem; } }
+@media (max-width: 440px) { .pc-b { padding: .8rem .8rem 1rem; } .pc-b .btn { padding-inline: .5rem; font-size: .9rem; } }
+.pc-ph { aspect-ratio: 5 / 4; } .pc-ph img { object-position: 50% 62%; }
+.pc-b h3 { font-size: clamp(2.2rem, 3vw, 3rem); }
+.pc-pr { font-size: clamp(1.4rem, 1.7vw, 1.7rem); margin-bottom: .5rem; }
+.pc-b { padding: .8rem 1rem 1rem; }
+.trust-g h3 { font: 400 1.5rem/1 var(--font-head); letter-spacing: 0; text-transform: none; color: var(--ink); margin: .5rem 0 .35rem; }
+.trust-g p { font-size: .98rem; }
+section.rest { padding-block: clamp(1.6rem, 6svh, 3.5rem); }
+.rest h2 { font-size: clamp(2.8rem, min(6vw, 11svh), 6rem); }
+@media (max-height: 700px) { .rest-note { display: none; } .pcs { margin-top: .9rem; } }
+.st-pick b { font-size: clamp(1.15rem, 1.5vw, 1.45rem); } .st-pick span.t { padding-inline: .45rem; }
+.st-pick button { background: var(--c, var(--ground)); }
+@media (max-width: 760px) { .close .fcols { grid-template-columns: 1fr; gap: 1.2rem; } }
+.film::after { background: linear-gradient(90deg, rgba(60,6,14,.72) 0%, rgba(60,6,14,.5) 36%, rgba(60,6,14,0) 62%); }
+@media (max-width: 860px) { .film::after { background: linear-gradient(0deg, rgba(60,6,14,.8) 0%, rgba(60,6,14,.55) 48%, rgba(60,6,14,0) 72%); } }
+.st-pick b { white-space: normal; line-height: 1; font-size: clamp(1.05rem, 1.3vw, 1.3rem); }
+@media (max-width: 600px) { .st-pick { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+/* the accent is for the main button only: the stroke under the key word and the step numerals are in the text colour */
+.hl path { stroke: var(--ink); } .how .n { color: var(--ink); } .kick { color: var(--soft); }

@@ -13,7 +13,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Order · The Brown Box</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="Order acai bowls, acai boards, brunch gift boxes, snacks and drinks from The Brown Box, delivered across Jerusalem. Kosher.">
+<meta property="og:title" content="Order · The Brown Box">
+<meta property="og:description" content="Order acai bowls, acai boards, brunch gift boxes, snacks and drinks from The Brown Box, delivered across Jerusalem. Kosher.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/og.webp">
 <link rel="icon" href="assets/logo-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -115,6 +120,7 @@
   .bad .msg { display: block; }
 
   /* summary */
+  @media (max-height: 760px) { .sum { position: static !important; } }
   .sum { position: sticky; top: calc(var(--bar-h) + 1.25rem); background: var(--night); color: #fff; border-radius: 20px; padding: 1.5rem; box-shadow: var(--shadow); }
   .sum h2 { font-size: 1.15rem; color: #fff; }
   .sum ul { list-style: none; margin: 1rem 0 0; padding: 0; display: grid; gap: .55rem; }

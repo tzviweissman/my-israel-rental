@@ -1,5 +1,9 @@
 # Ls Fruit Platter, concept
 
+Category: food-shop
+
+Reworked 22 Oct 2026 to the food-shop pattern of page rules 3t: after the opening film, a light ground, four cards in a row (one colour room per size) with photo, name, price and Add, then her story band, the order in three steps and a trust row. The pinned slat stage described below is now the shop page's stage (shop.html); the home page no longer pins.
+
 ## Ideas
 - **One product per screen, the next one crossfades in** (docs/inspo/product-pages-2026-10-20/closca-2-crossfade-to-next-product.webp): Closca shows one bottle large with its name and price, and the next one arrives in the same place. For her: the four platter sizes, one at a time on a big photo, each with its name and price.
 - **Photos in a strip, one row** (docs/inspo/awwwards-food-2026-10-18/sunbeam-bagels-2-orange-gradient-photo-strip.webp): Sunbeam runs its photos in one band across the page. For her: her Extra large platter laid on its side is already a band of colour, so it runs full width as the palate cleanser, no words.
