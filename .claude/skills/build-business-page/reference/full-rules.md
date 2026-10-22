@@ -950,6 +950,13 @@ getting a deal"). Work it out from the owner's own prices, never invent it:
   2. work it out per unit first, in a table of every option (per jar, per
      square centimetre, per person, per hour, per kilo, whatever the owner
      sells by);
+     For anything sold by how many it feeds or serves, the unit is one person,
+     compared at the same end of each range (most people against most people,
+     fewest against fewest), never by counting whole smaller items needed to
+     feed one end of the bigger one's range: Chicken Munch's Grand ($140,
+     feeds 8 to 10) was wrongly left without a saving because two Minis
+     ($138) feed 8, while per person it is $14 against the Mini's $17.25
+     (Tzvi, 22 Oct 2026: "why didn't you catch the Grand's savings");
   3. the bigger option shows a saving only if its unit price is lower than
      EVERY smaller option of the same thing, and the saving is measured
      against the cheapest of them, never against one dearer outlier
