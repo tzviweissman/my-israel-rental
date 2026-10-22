@@ -695,6 +695,15 @@ make their sites so beautiful: the imagery first, and almost nothing else.
 
 ## 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
 
+**The film comes with the first build, never after (Tzvi, 22 Oct 2026: "why do i keep
+needing to tell you to make the wow moment").** Every new site or rework starts with the
+film: three numbered steps and the cost go to Tzvi in the same message that starts the
+build, the three stills follow his yes, and the site is never shown without its film or
+a FILM.md that records his no in his words. A type-only or photo-only opening is not a
+placeholder to improve later; it is the defect. check-site OPENING enforces it on every
+category (at least 70% picture and a playing film on the first screen); a shop's price
+and Add go on the second screen, which BUY allows.
+
 Tzvi: "it looks wow, much nicer than what you made for the brown box ... every
 detail is crisp and clear and makes a person want to try some." Side by side,
 The Brown Box's first opening was a locked camera on a small bowl against a
