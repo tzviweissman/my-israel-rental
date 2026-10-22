@@ -105,7 +105,7 @@ for (const it of items) {
   if (why.length < 4) { note(it, `${kind === 'pass' ? 'pass' : 'n/a'} needs a reason (what was looked at, which script passed, or why it does not apply)`, 'bad'); continue; }
   // n/a means the site has no such thing, never "I did not look" (22 Oct 2026: a rework marked 136 of 173 rules
   // "not judged in this pass", which passed the gate without checking anything)
-  if (/not (judged|checked|looked|re-?judged|verified|reviewed)|unchanged|earlier build|this pass|skipped|no time|later|assumed|probably/i.test(why)) { note(it, `"${why.slice(0, 50)}" is not a reason: n/a and pass are only for a rule that was looked at (pass) or that the site has nothing for (n/a)`, 'bad'); continue; }
+  if (/not (been )?(judged|checked|looked at|re-?judged|verified|reviewed)|not judged in|earlier build unchanged|was not (run|looked)|skipped|no time|assumed|probably fine/i.test(why)) { note(it, `"${why.slice(0, 50)}" is not a reason: n/a and pass are only for a rule that was looked at (pass) or that the site has nothing for (n/a)`, 'bad'); continue; }
   counts[kind === 'pass' ? 'pass' : 'na']++;
 }
 for (const id of answers.keys()) if (!seen.has(id)) { problems.push(`${id}: not in docs/rules-checklist.md (typo, or the rule was removed)`); counts.bad++; }
