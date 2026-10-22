@@ -18,6 +18,8 @@ export default function OccasionsCard({ API, auth, biz, onCompose }) {
   const [data, setData] = useState(null);
   const he = String(i18n.language || '').startsWith('he');
 
+  // Both languages, so "Written in" can switch a ready message (Hebrew loads on demand, i18n.js).
+  useEffect(() => { i18n.loadLanguages(['en', 'he']).catch(() => {}); }, [i18n]);
   useEffect(() => {
     setData(null);
     axios.get(`${API}/marketplace/businesses/${biz.id}/messages/occasions`, auth)

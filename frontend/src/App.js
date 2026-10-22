@@ -157,6 +157,7 @@ const LinkPage = lazy(() => import('./pages/LinkPage'));
 const TablesPrintPage = lazy(() => import('./pages/TablesPrintPage'));
 const MembershipSignupPage = lazy(() => import('./pages/MembershipSignupPage'));
 const UnsubscribePage = lazy(() => import('./pages/UnsubscribePage'));
+const PaymentRequestPage = lazy(() => import('./pages/PaymentRequestPage'));
 const StaffJoinPage = lazy(() => import('./pages/StaffJoinPage'));
 const MemberPassPage = lazy(() => import('./pages/MemberPassPage'));
 const MemberDoorPage = lazy(() => import('./pages/MemberDoorPage'));
@@ -564,6 +565,7 @@ function App() {
                 no account, the member's pass, and the door. */}
             <Route path="/memberships/:slug" element={<MembershipSignupPage />} />
             <Route path="/unsubscribe/:businessId/:e/:sig" element={<UnsubscribePage />} />
+            <Route path="/pay/:token" element={<PaymentRequestPage />} />
             <Route path="/staff/join/:token" element={<StaffJoinPage />} />
             <Route path="/members/door/:token" element={<MemberDoorPage />} />
             <Route path="/members/checkin/:code" element={<MemberCheckinPage />} />

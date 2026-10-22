@@ -20,7 +20,7 @@ identical, endpoints just live in smaller modules now.
 """
 from fastapi import APIRouter
 
-from . import calendar_sync, occasions, rating_badge, counter_sales, prep_route, pairings, tables, birthdays, restock, basket_reminders, busy_times, deposits, gift_cards, feedback, quotes, sessions, appointment_extras, appointment_reminders, automations, businesses, classes, connections, custom_domains, custom_fields, customer_messages, customers, discounts, dropship, gigs, insights, jobs, member_messages, memberships, notification_prefs, orders, page_edits, page_requests, page_versions, photo_match, product_extract, providers, referrals, requests, sales_summary, staff, subscription
+from . import calendar_sync, occasions, rating_badge, payment_requests, counter_sales, prep_route, pairings, tables, birthdays, restock, basket_reminders, busy_times, deposits, gift_cards, feedback, quotes, sessions, appointment_extras, appointment_reminders, automations, businesses, classes, connections, custom_domains, custom_fields, customer_messages, customers, discounts, dropship, gigs, insights, jobs, member_messages, memberships, notification_prefs, orders, page_edits, page_requests, page_versions, photo_match, product_extract, providers, referrals, requests, sales_summary, staff, subscription
 
 # One router that owns every marketplace endpoint. All three sub-modules
 # use the same ``/marketplace`` prefix + ``["marketplace"]`` tag on their
@@ -45,6 +45,7 @@ router.include_router(customers.router)
 router.include_router(customer_messages.router)
 router.include_router(occasions.router)
 router.include_router(rating_badge.router)
+router.include_router(payment_requests.router)
 router.include_router(discounts.router)
 router.include_router(referrals.router)
 router.include_router(appointment_reminders.router)

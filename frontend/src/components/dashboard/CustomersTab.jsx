@@ -9,11 +9,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Loader2, Search, Download, Upload, Users, X, Phone, MessageCircle, Tag, Mail } from 'lucide-react';
+import { Loader2, Search, Download, Upload, Users, X, Phone, MessageCircle, Tag, Mail, Banknote } from 'lucide-react';
 import { money } from '../../utils/currency';
 import { stateLabel } from '../members/memberText';
 import MessageComposer from './MessageComposer';
 import OccasionsCard from './OccasionsCard';
+import PaymentRequestsPanel from './PaymentRequestsPanel';
 import { ImportCustomersPanel } from './OrdersTab';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
@@ -170,6 +171,8 @@ export default function CustomersTab({ API, token }) {
   const [open, setOpen] = useState(null);
   const [composing, setComposing] = useState(false);
   const [importing, setImporting] = useState(false);
+  // ?pay=1: the notification "a customer says they paid" opens the requests.
+  const [paying, setPaying] = useState(() => { try { return new URLSearchParams(window.location.search).get('pay') === '1'; } catch { return false; } });
 
   useEffect(() => {
     let alive = true;
@@ -229,6 +232,9 @@ export default function CustomersTab({ API, token }) {
           {(biz.permissions || []).includes('messages') && <button type="button" onClick={() => setComposing(true)} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-email">
             <Mail size={14} /> {t('messages.open', 'Email customers')}
           </button>}
+          {(biz.permissions || []).includes('orders') && <button type="button" onClick={() => setPaying(!paying)} aria-pressed={paying} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-payreq">
+            <Banknote size={14} /> {t('payReq.open', 'Request a payment')}
+          </button>}
           <button type="button" onClick={() => setImporting(!importing)} aria-pressed={importing} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-import">
             <Upload size={14} /> {t('customers.import', 'Import')}
           </button>
@@ -245,6 +251,10 @@ export default function CustomersTab({ API, token }) {
         <div className="mb-4">
           <ImportCustomersPanel API={API} auth={auth} businessId={biz.id} onClose={() => { setImporting(false); load(); }} onDone={load} />
         </div>
+      )}
+
+      {paying && (biz.permissions || []).includes('orders') && (
+        <PaymentRequestsPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPaying(false)} />
       )}
 
       {!composing && (biz.permissions || []).includes('messages') && (
