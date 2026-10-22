@@ -20,7 +20,11 @@ import PageMeta from '../components/PageMeta';
 import BackLink from '../components/common/BackLink';
 import SiteFooter from '../components/common/SiteFooter';
 
-const SECTIONS = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p10', 'p11'];
+const SECTIONS = ['p1', 'p2', 'p3', 'p4', 'p5', 'p6', 'p7', 'p8', 'p9', 'p12', 'p10', 'p11'];
+
+// Meta's app settings link here as the "data deletion instructions URL"
+// (https://myisraelrental.com/privacy#delete-your-data), 22 Oct 2026.
+const ANCHORS = { p12: 'delete-your-data' };
 
 export const SUPPORT_EMAIL = 'support@myisraelrental.com';
 
@@ -55,7 +59,7 @@ const Privacy = () => {
 
         <div className="space-y-10">
           {SECTIONS.map((id) => (
-            <section key={id}>
+            <section key={id} id={ANCHORS[id]} style={{ scrollMarginTop: 24 }}>
               <h2
                 className="text-[22px] sm:text-[24px] leading-snug font-semibold"
                 style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}
