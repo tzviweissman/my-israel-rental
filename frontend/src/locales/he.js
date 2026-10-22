@@ -4436,6 +4436,8 @@ const he = {
       },
       // לוח העבודות הציבורי (/businesses/jobs).
       jobsBoard: {
+        areaPh: 'כל אזור, התחילו להקליד עיר',
+        areaFreeText: 'לא ברשימה? כתבו בכל זאת.',
         metaTitle: 'עבודות פתוחות · MyIsraelRental',
         metaDescription: 'עבודות שפרסמו שוכרים ובעלי דירות ב-MyIsraelRental - פנו ישירות והגיעו ללקוחות חדשים.',
         title: 'עבודות פתוחות',
