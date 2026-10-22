@@ -22,7 +22,9 @@ def page(name, title, desc, body, scripts='', order=False):
       <li><a href="kitchen.html">Whole kitchen</a></li>
       <li><a href="pots.html">Pots and cutlery</a></li>
     </ul>'''
-    cta = '' if order else btn('Book a kashering', 'book.html')
+    cta = '' if order else btn('Book a kashering', 'book.html') + '''
+  <button type="button" class="bar-menu" id="menuBtn" aria-expanded="false" aria-controls="menuPanel">Pages</button>
+  <div class="bar-panel" id="menuPanel" hidden><a href="index.html">Home</a><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book</a><button type="button" id="menuClose">Close</button></div>'''
     foot = '''
 <footer class="foot after big">
   <p class="last">Settle in, ready to use.</p>
@@ -168,7 +170,7 @@ page('pots.html', 'Pots, cutlery and utensils · KasherMyBnb',
       <div>
         <p class="eyebrow">Pots, cutlery and utensils</p>
         <h1>Your pots and cutlery, <em>kashered.</em></h1>
-        <p class="lede">Bring your own pots, cutlery and kitchen utensils into a kosher kitchen. We kasher them in one visit, with the kitchen or on their own.</p>
+        <p class="lede">We kasher your pots, cutlery and kitchen utensils so you can settle in with confidence, strictly kosher and ready to use. Stainless steel pots only.</p>
         <div class="tag"><b>$180</b><span>about 1 hour, Jerusalem price</span></div>
         <div class="act">
           {btn('Book a kashering', 'book.html?s=pots')}
@@ -268,7 +270,7 @@ page('book.html', 'Book · KasherMyBnb', 'Choose what we kasher: the whole kitch
             </button>
             <button type="button" class="opt" data-svc="pots" aria-pressed="false">
               <span class="chk">{OK}</span>
-              <img class="ph" src="assets/pots.webp" alt="" width="600" height="338" style="object-fit:contain;background:#fff"><span class="top"><b>Pots, cutlery and utensils</b><span class="amt">$180</span></span>
+              <img class="ph" src="assets/pots.webp" alt="" width="600" height="338"><span class="top"><b>Pots, cutlery and utensils</b><span class="amt">$180</span></span>
               <small>About 1 hour</small>
               <ul><li>{OK}Stainless steel pots</li><li>{OK}Cutlery</li><li>{OK}Kitchen utensils</li></ul>
             </button>
@@ -473,7 +475,7 @@ page('book-sent.html', 'Booking sent · KasherMyBnb', 'Your booking request is o
       <div style="width:64px;height:64px;border-radius:50%;background:var(--sc-accent);display:grid;place-items:center;margin:0 auto"><svg viewBox="0 0 24 24" style="width:30px;height:30px;stroke:#fff;stroke-width:3;fill:none;stroke-linecap:round;stroke-linejoin:round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg></div>
       <h1 style="margin-top:1.25rem">Thank you</h1>
       <p class="sub" style="margin-inline:auto;max-width:30rem">Once you press send in WhatsApp, your booking reaches us. We confirm the day and time with you there.</p>
-      <ul class="lines" data-lines style="text-align:left;margin-top:1.5rem;border-top:1px solid var(--line)"></ul>
+      <ul class="lines is-sent" data-lines style="text-align:left;margin-top:1.5rem;border-top:1px solid var(--line)"></ul>
       <div class="total" style="max-width:100%"><span>Total</span><b data-total>$0</b></div>
       <p class="sub" style="margin-top:1.5rem">WhatsApp did not open? <a class="link" id="again" href="#" target="_blank" rel="noopener">Send it again</a></p>
       <p style="margin-top:1.5rem"><a class="back" href="index.html">Back to KasherMyBnb</a></p>

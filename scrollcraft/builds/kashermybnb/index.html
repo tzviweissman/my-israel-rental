@@ -219,7 +219,10 @@
     .after { padding-bottom: 5rem; }
     .cards { bottom: calc(12px + 4.6rem); }
     /* the peak's panel sits right under the whole-wall strip */
-    .ready { top: calc(var(--bar-h) + 56.25vw + 22px); bottom: auto; }
+    .ready { top: calc(var(--bar-h) + 56.25vw + 22px); bottom: 12px; display: flex; flex-direction: column; justify-content: space-between; padding-block: 1.4rem 1.5rem; }
+    .ready h2 { font-size: 3.1rem; }
+    #ready-list { font-size: 1rem; gap: 0.7rem var(--sc-4); }
+    .ready .act { margin-top: 0; }
     .cards.is-flip { bottom: auto; top: calc(var(--bar-h) + 12px); }
     .cards.is-flip .card { bottom: auto; top: 0; }
   }
@@ -337,7 +340,7 @@
   .svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sc-4); margin-top: var(--sc-5); }
   .svc-card { background: var(--sc-surface); border-radius: 14px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
   .svc-card img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: 60% 80%; display: block; }
-  .svc-card img.cut { height: auto; object-fit: contain; background: #C9D9EA; mix-blend-mode: normal; object-position: 50% 50%; }
+  .svc-card img.cut { height: auto; object-fit: cover; object-position: 50% 52%; }
   .svc-body { padding: 1.4rem 1.5rem 1.6rem; display: grid; gap: 0.6rem; align-content: start; justify-items: start; }
   .svc-body p { margin: 0; line-height: 1.5; }
   .svc-n { font: 600 0.8rem/1 var(--sc-font-text); letter-spacing: 0.12em; color: var(--sc-ink-soft); }
@@ -517,6 +520,7 @@
   <a class="btn" href="book.html" tabindex="-1"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
 </div>
 
+<script>if (matchMedia("(max-width: 860px)").matches) document.getElementById("walk").setAttribute("data-sc-span", "4.2");</script>
 <script src="scrollcraft.js"></script>
 <script>ScrollCraft.mount(document.body);</script>
 <script>

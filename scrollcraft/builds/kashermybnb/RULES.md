@@ -8,7 +8,7 @@ Replace every `todo`. `node scripts/check-rules.mjs scrollcraft/builds/kashermyb
 R0b.1 n/a: not published: local build only; the slug is set at publish from the live record
 R0b.3 pass: every price against the listing: $350 whole kitchen, $180 pots and cutlery, +$40 oven, $15 new frying pan
 R2.1 pass: read every sentence of every page and traced each fact to the record, listing or flyer; no counts or reviews were invented
-R2.2 pass: read message-to-owner.md: asks only about their own business (photos, phone, lead time, cities, preparation, pots, payment)
+R2.2 pass: read message-to-owner.md: asks only about their own business; the WhatsApp number in site.js comes from their own MyIsraelRental listing (whatsapp +972584031989, confirmed), noted in CONCEPT.md; the pots words now come from BRIEF.md (their listing and flyer)
 R2.3 pass: message-to-owner.md has 7 example FAQ questions from their real details and asks the photo, phone and preparation questions
 R3.1 pass: searched every page for kosher, best, guarantee, insured, licensed, 24/7, delivery: only claims from their own flyer and listing
 R3.2 pass: searched every page for hurry, only N left, today only, limited, countdown: none
@@ -24,7 +24,7 @@ R5.1 pass: read every line as the owner: each is only about their own work
 R5.2 pass: read every line: plain, no jokes or slang
 R5.3 pass: short labels read as full phrases
 R5.4 pass: searched visible text of every page for they, them, their: none about the business itself
-R5b.2 pass: the main button is "Book a kashering" to book.html in the bar, the opening, both service panels, the closing block, the phone bar and the footer; product pages only preselect the service in the address
+R5b.2 pass: the main button is "Book a kashering" to book.html in the bar, the opening, both service panels, the closing block, the phone bar and the footer; product pages only preselect the service it names
 R5b.8 pass: closing lines "Settle in, ready to use." and the fine print name what the customer gets
 R3.11 pass: home page order: what it is, the two services with prices, how it works, who it is for and where, then book; prices come before the booking form
 R3o.4 n/a: no phone number or email shown, contact is the chat and WhatsApp only (BRIEF.md)
@@ -73,7 +73,7 @@ R3f.2 pass: effect budget unchanged by this rework; no new motion added
 R3m.1 n/a: the gallery and catalog template markers belong to the automatic page builder; this is a hand build
 R3m.3 n/a: no owner-editable places in this hand build
 R3k.1 pass: pages: home, whole kitchen, pots and cutlery, and Book as one flow of four steps
-R3k.2 pass: home and product pages share one bar with the Book a kashering button; the four booking steps keep a bare bar on purpose
+R3k.2 pass: home and product pages share one bar with the Book a kashering button; on phones the bar is one row with a Pages menu; the four booking steps keep a bare bar on purpose
 R3k.4 pass: shared site.css and site.js serve the pages
 R8a.1 pass: no 21st components were added in this rework; no external scripts, only Google fonts
 R3b.4 pass: few photos (kitchen, pots), so facts carry the page: prices, steps, places
@@ -91,14 +91,14 @@ R3s.14 pass: real numbers shown: 2019, 6 parts, 2 hrs, all from their listing an
 R3s.11 n/a: the owner gave no reason for the price to print; asked in the owner questions, nothing invented
 R5b.6 pass: numbered steps 01 to 04 are real steps with a sentence each, not scroll counters; no scroll cues
 R3.13 pass: no doubled contact or facts, no two dividers in a row, own photos only
-R3a.1 pass: rendered at 1440x900, 1280x650 and 390x844, normal and reduced motion (check-site), every new screen looked at
+R3a.1 pass: 22 Oct review fixes rendered at 1440x900 and 390x844 touch: the walk in 100 to 130 px stops, kitchen, pots, book, sent page and the phone bar; the walk is 4.2 screens on phones and ends on a full Ready to use panel, no blank band; check-site, fits and motion run
 R3r.1 pass: check-site, check-fits and check-motion run on every page of the site after the last edit; readable crashed (see R3e.8)
-R3r.2 n/a: the independent review of 3r.2 is the coordinator's second pass; this builder did not review its own work against page-review-checklist.md
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; all findings fixed and re-checked, owner gaps listed in message-to-owner
 R3g.12 pass: check-site FLOW: an empty form sends nothing and shows what is missing; a filled form builds the wa.me message with the shown total; sending opens WhatsApp, so nothing reached the owner
 R0b.12 n/a: not published, no pages-list preview yet
 
 ## 4. Photos and media
-R8.1 pass: the two service pictures (kitchen wall, pots on a blue ground) are from different shoots and shown at different treatments on purpose; they are two services, not a set of one product
+R8.1 pass: the two service pictures (kitchen wall, pots) are from different shoots but now framed the same way (same crop, no blue bands) on the home cards and the order page; they are two services, not a set of one product
 R8.6 n/a: not a food business: no food, liquid or product hero shots
 R8.2 pass: the set is the owner's own photos; no generated or stock images were added
 R3p.7 pass: both service panels are shown the same way: a picture, name, price, time, text, button

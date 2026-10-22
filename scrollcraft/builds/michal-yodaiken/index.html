@@ -108,10 +108,10 @@
   .pic .price { margin: var(--sc-3) 0 0; font: 400 clamp(2.4rem, 1.4rem + 2.4vw, 3.6rem)/1 var(--sc-font-display); color: var(--sc-ink); }
   .pic .price small { font: 500 var(--sc-t-base)/1 var(--sc-font-text); color: #fff; margin-left: 0.5rem; }
   .gym .photo { object-position: 70% 60%; }
-  .close .photo { object-position: 60% 62%; }
+  .close .photo { object-position: 90% 75%; }
   .close { align-items: start; }
   .close .in { padding-top: clamp(2rem, 9vh, 5rem); }
-  .close.shade-b::after { background: linear-gradient(180deg, rgb(0 0 0 / 0.8) 0%, rgb(0 0 0 / 0.5) 38%, rgb(0 0 0 / 0) 66%); }
+  .close.shade-b::after { background: linear-gradient(180deg, rgb(0 0 0 / 0.86) 0%, rgb(0 0 0 / 0.74) 50%, rgb(0 0 0 / 0.5) 74%, rgb(0 0 0 / 0.2) 100%); }
 
   /* white rest: the five ways to train, numbered rows, hairlines */
   .paper { background: #fff; color: #0B0A0C; padding: clamp(2rem, 6vh, 4rem) var(--sc-gutter); }
@@ -221,6 +221,12 @@
     .hero .lede { font-size: var(--sc-t-base); margin-top: var(--sc-3); }
     .hero .act { margin-top: var(--sc-4); gap: var(--sc-3); }
   }
+  /* the number never breaks across lines; on a phone the bar steps away at the footer, whose last line says the same words */
+  .nb { white-space: nowrap; }
+  @media (max-width: 860px) {
+    .bar.is-foot { transform: translateY(110%); }
+    .close .photo { object-position: 88% 80%; }
+  }
   /* the narrowest phones: the bar's button drops its arrow to keep the price in view */
   @media (max-width: 380px) { .bar .btn svg { display: none; } .bar { padding-inline: 12px; } .clock b { min-width: 4.4ch; } }
   @media (prefers-reduced-motion: reduce) { .btn, .btn::before, .btn svg, .bar { transition: none; } }
@@ -307,7 +313,7 @@
   <section class="cut pic private shade-b" id="private">
     <img class="photo" src="assets/private-gym.webp" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy">
     <div class="in">
-      <span class="tag">Photo of my gym</span>
+      <span class="tag">My private gym</span>
       <h2 class="big" data-sc-in>Or come <span>to me.</span></h2>
       <p class="sub">One to one in my private gym in Jerusalem.</p>
     </div>
@@ -335,7 +341,7 @@
         <div><dt>Ways to train</dt><dd><b>5</b> to choose from</dd></div>
         <div><dt>Who</dt><dd><b>Women</b> only</dd></div>
       </dl>
-      <p class="wa">Training in English. WhatsApp <a href="https://wa.me/447563299474">07563 299474</a></p>
+      <p class="wa">Training in English. WhatsApp <a href="https://wa.me/447563299474"><span class="nb">07563 299474</span></a></p>
     </div>
   </section>
 
@@ -353,13 +359,13 @@
   </section>
 
   <section class="cut pic close shade-b" id="book">
-    <img class="photo" src="assets/online.webp" alt="A laptop beside a yoga mat and a pink resistance band" width="2048" height="1152" loading="lazy">
+    <img class="photo" src="assets/private-gym.webp" alt="The rowing machine, the wall slogan and the dumbbells in Michal's private gym" width="1600" height="1200" loading="lazy">
     <div class="in">
       <h2 class="big" data-sc-in>Book your <span>first session.</span></h2>
-      <p class="sub">Or train online, from the comfort of your home.</p>
+      <p class="sub">At your home, in my private gym, or online.</p>
       <p class="price">&#8362;60<small>for 30 minutes</small></p>
       <div class="act"><a class="btn" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-      <p class="alt">Prefer WhatsApp? <a href="https://wa.me/447563299474?text=Hi%20Michal%2C%20I%27d%20like%20to%20book%20a%20session">Message Michal on 07563 299474</a></p>
+      <p class="alt">Prefer WhatsApp? <a href="https://wa.me/447563299474?text=Hi%20Michal%2C%20I%27d%20like%20to%20book%20a%20session">Message Michal on <span class="nb">07563 299474</span></a></p>
     </div>
   </section>
 
@@ -370,7 +376,7 @@
       <div class="cols">
         <div><h4>Train</h4><ul><li><a href="#ways">At your home</a></li><li><a href="#gym">At your gym</a></li><li><a href="#ways">Online</a></li><li><a href="#private">My private gym</a></li></ul></div>
         <div><h4>The session</h4><ul><li><a href="#session">30 minutes, &#8362;60</a></li><li><a href="#faq">Women only</a></li><li><a href="#faq">Training in English</a></li></ul></div>
-        <div><h4>Contact</h4><ul><li><a href="https://wa.me/447563299474">WhatsApp 07563 299474</a></li><li><a href="https://myisraelrental.com/business/michal-yodaiken">Message to book</a></li></ul></div>
+        <div><h4>Contact</h4><ul><li><a href="https://wa.me/447563299474">WhatsApp <span class="nb">07563 299474</span></a></li><li><a href="https://myisraelrental.com/business/michal-yodaiken">Message to book</a></li></ul></div>
       </div>
       <p class="legal">Michal Yodaiken, personal training for women in Jerusalem. <a href="https://myisraelrental.com/business/michal-yodaiken">Listed on MyIsraelRental</a></p>
     </div>
@@ -385,12 +391,14 @@
   // reaching 30:00 as the booking section arrives. Then the bar turns pink.
   var heroBtn = document.querySelector('.hero .btn'), bookBtn = document.querySelector('#book .btn'), bar = document.getElementById('bar'), clock = document.getElementById('clock'), book = document.getElementById('book');
   var last = '';
+  function phoneNow() { return matchMedia('(max-width: 860px)').matches; }
   function tick() {
     var end = book.offsetTop - innerHeight * 0.35;
     var f = Math.max(0, Math.min(1, scrollY / Math.max(1, end)));
     var s = Math.round(f * 1800), txt = String(Math.floor(s / 60)).padStart(2, '0') + ':' + String(s % 60).padStart(2, '0');
     if (txt !== last) { clock.textContent = txt; last = txt; }
     bar.classList.toggle('is-done', f >= 1);
+    bar.classList.toggle('is-foot', phoneNow() && document.querySelector('.foot .last').getBoundingClientRect().top < innerHeight - 40);
     // phones: the pinned bar shows from after the first screen until the booking button is in view
     // phones: the bar is always there. Once the booking
     // button is on screen the bar's own button steps aside (never two

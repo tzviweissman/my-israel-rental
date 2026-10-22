@@ -279,6 +279,7 @@ BOOK = f'''  <form id="form" novalidate>
           <ul id="sum"><li><span>Nothing chosen yet</span></li></ul>
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
           <p class="assure">Nothing to pay on this page. We confirm your time on WhatsApp.</p>
+          <div class="toast" id="toast" role="status" aria-live="polite" hidden>{CHECK}<p><b>Session written out</b>Press send in WhatsApp and we will confirm your time.</p></div>
           <button class="btn" id="send" type="submit" style="width:100%"><span id="send-l">Continue to your details</span></button>
           <button class="back" id="back" type="button">Back</button>
           <p class="note" id="send-note">Next: your name and phone.</p>
@@ -287,7 +288,6 @@ BOOK = f'''  <form id="form" novalidate>
     </div>
   </section>
   </form>
-  <div class="toast" id="toast" role="status" aria-live="polite" hidden>{CHECK}<p><b>Session written out</b>Press send in WhatsApp and we will confirm your time.</p></div>
 '''
 
 BOOK_JS = r'''<script>
@@ -310,9 +310,11 @@ BOOK_JS = r'''<script>
 
   // the stage shows her work for the chosen service
   function drawStage() {
-    var k = STAGE[svc]; if (!k) return;
+    if (!svc) return;
+    // styling and shopping have no photos of their own: the drawer stays, and says it is our organizing work
+    var k = STAGE[svc] || 'drawer';
     [].forEach.call(document.querySelectorAll('#stph img'), function (i) { i.classList.toggle('on', i.dataset.k === k); });
-    $('st-cap').textContent = CAP[k];
+    $('st-cap').textContent = STAGE[svc] ? CAP[k] : 'Our organizing work: a clothes drawer';
   }
   // the hours: the digit rolls and the tray fills one compartment per hour
   function drawHours() {

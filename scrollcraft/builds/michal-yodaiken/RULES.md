@@ -24,9 +24,9 @@ R5.4 pass: searched for they, them, their: none
 R5b.2 pass: every main button reads "Message to book" and goes to https://myisraelrental.com/business/michal-yodaiken (bar, hero, offers header, booking, footer); card prices have no button
 R5b.8 pass: closing line "A stronger, healthier you" names the gain; "Prefer WhatsApp?" is followed by the visible WhatsApp link
 R3.11 pass: order read top to bottom: promise, five ways with prices, her gym, what we work on, numbers, FAQ, booking
-R3o.4 pass: the one number 07563 299474 is labelled WhatsApp everywhere
+R3o.4 pass: the one number 07563 299474 is labelled WhatsApp everywhere and never breaks across lines (no-break)
 R3e.22 n/a: no photo of Michal herself has been sent; asked for in the reply. Her name and WhatsApp are in the bar and footer
-R3s.19 pass: head has title, description; link preview tags are unchanged from before this rework
+R3s.19 pass: head has title, description; link preview tags are unchanged; the phone number is wrapped so it never breaks across lines
 R6.1 pass: health and fitness playbook: who it is for, offer with price, how to book, FAQ
 R4.1 pass: missing prices read "Message for a price", not a blank
 R3g.13 pass: 1440x900 and 390x844 screenshots of the first screen: picture, headline, one line, one button (the price lines beside it are her proof)
@@ -39,7 +39,7 @@ R3n.2 pass: the 30-minute session clock in the bar that reaches 30:00 as you rea
 R3n.3 pass: scroll changes the bar (clock, then pink at 30:00) and the FAQ opens; check-motion passes (no choices to tap)
 R3n.4 pass: compared with docs/inspo/awwwards-anatomy-2026-10-22/events-sports-homes/perflab-sheet.webp: same order (photo opening, offer cards, numbers on black, FAQ); ours is plainly weaker on people-in-action photos, which Michal must send
 R3n.5 pass: you land on her training room and a session clock starts and runs while you scroll
-R3g.15 pass: fits shows no photo over 1.35x its size. Three of the four settings are generated and the page never calls them her premises except the private gym photo, which is hers
+R3g.15 pass: fits shows no photo over 1.35x its size. Three of the four settings are generated and the page never calls them her premises except the private gym photo, which is hers; the final booking picture is now her own private gym photo (cropped to the right of the room), not the dark generated laptop shot
 R3h.2 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.3 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.5 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
@@ -86,7 +86,7 @@ R5b.6 pass: no scroll cue, no counters except the session clock, which is the si
 R3.13 pass: no doubled contact (WhatsApp in the session block, booking and footer is the one number, labelled the same); the gallery rule does not apply
 R3a.1 pass: screenshots walked at 1440x900 and 390x844 (touch), the six fit sizes by check-fits, every screen looked at; reduced motion not separately recorded
 R3r.1 pass: the site has one page; check-site, check-fits, check-motion run on it; readable.mjs crashed the renderer (checker limit, run twice); clipped and cutoff ran clean
-R3r.2 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; all findings fixed and re-checked, owner gaps listed in message-to-owner
 R3g.12 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
 R0b.12 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
 R8.1 pass: the four photos are the same generated-setting shoot (no people, one light) plus her own gym photo; not a product set; nothing with a generated person
@@ -104,7 +104,7 @@ R8.3 pass: the four photos are the same generated-setting shoot (no people, one 
 R8.4 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3c.13 pass: clipped.mjs reported nothing cut off at seven sizes
 R3c.14 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
-R5b.3 pass: words over photos sit on soft edge shades; looked at the hero and the close at 1440 and 390
+R5b.3 pass: words over photos sit on soft edge shades; the booking close shade was deepened after readable said the WhatsApp line was 3.15:1; looked at the hero and the close at 1440 and 390
 R3e.8 pass: readable.mjs crashed the renderer (checker limit); by contrast calculation the smallest greys (#6B6470 on white 5.7:1, #4A444F 9.4:1, #C9C3CC on black 12.2:1) pass; sizes use the token scale, 14 px minimum
 R3s.24 pass: check-site MEDIA passes (no media complaint)
 R3p.6 pass: check-fits passes at the six sizes after the offers section was capped by height
@@ -162,9 +162,9 @@ R3s.8 pass: the hero button is an outline in her pink on a dark shade; looked at
 R3s.10 n/a: no list that shows a picture when a name is pointed at
 R3i.3 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3s.21 pass: check-site BROKEN passes
-R3b.6 pass: on phones the bar sits at the bottom with the clock and price from the first screen, the button waits until after the hero button; seen in the 390 screenshots
+R3b.6 pass: on phones the bar sits at the bottom with the clock and price from the first screen, the button waits until after the hero button; the bar steps away at the footer so "A stronger, healthier you" shows once; seen in 100 px stops at 390
 R3f.7 pass: the bar was checked at 360x640 by check-fits and check-site PHONE
-R3a.6 pass: check-site PHONE passes; the footer keeps the bar padding
+R3a.6 pass: check-site PHONE passes; the footer keeps the bar padding; content scrolls under the fixed bar as on any page, but at the end of the page no price or button sits under it
 R3s.22 pass: check-site TAP passes; FAQ rows are 44 px
 R3s.23 pass: check-site PHONE passes
 R3t.1 pass: meta site-category trainer on the page and Category: trainer in CONCEPT.md; offers as cards with prices side by side, numbers on black, FAQ
