@@ -56,16 +56,18 @@ CARDS = f'''  <section class="buy" id="buy" aria-label="Our doughs">
   </section>
 '''
 
-HOME = f'''  <section class="open" aria-labelledby="h-open">
-    <video class="film" id="film" muted playsinline preload="auto" poster="assets/film-poster.webp" aria-hidden="true"><source src="assets/opening.mp4" type="video/mp4"></video>
-    <div class="wrap">
-      <h1 id="h-open"><span class="w w1">Boil.</span><span class="w w2">Bake.</span><span class="w w3">Brag.</span></h1>
-      <div class="end">
-        <p class="lede">The American bagel and pizza dough that you've been missing, delivered in Ramat Eshkol, Jerusalem, for ₪25.</p>
-        <a class="btn" href="#buy">Order your dough</a>
+HOME = f'''  <section class="open" id="film" aria-labelledby="h-open">
+    <div class="stage">
+      <canvas id="cv" aria-hidden="true"></canvas>
+      <div class="wrap">
+        <h1 id="h-open"><span class="w w1">Boil.</span><span class="w w2">Bake.</span><span class="w w3">Brag.</span></h1>
+        <div class="end">
+          <p class="lede">The American bagel and pizza dough that you've been missing, delivered in Ramat Eshkol, Jerusalem, for ₪25.</p>
+          <div class="go"><a class="btn" href="#buy">Order your dough</a><p class="from">Bagel dough ₪30<br>Pizza dough ₪27</p></div>
+        </div>
       </div>
+      <div class="hint" id="hint" aria-hidden="true">Scroll</div>
     </div>
-    <button class="pause" type="button" id="film-pause" aria-label="Pause the film">Pause</button>
   </section>
 {CARDS}
   <section class="stores" aria-labelledby="h-stores">
@@ -120,20 +122,41 @@ HOME_JS = '''<script>
       window.siteToast('Added: ' + NAMES[k]); b.classList.add('added'); b.querySelector('span').textContent = 'Added'; setTimeout(function () { b.classList.remove('added'); b.querySelector('span').textContent = 'Add'; }, 1100);
     });
   });
-  // the opening film (rule 3h): each word lands on its own chapter, the line and the button when the bagels are out
-  var v = document.getElementById('film'), op = v && v.closest('.open'), pb = document.getElementById('film-pause');
-  if (v) {
-    var marks = [[.2, 'c1'], [4.8, 'c2'], [7.0, 'c3'], [8.2, 'c4']];
-    var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    function at(t) { marks.forEach(function (m) { op.classList.toggle(m[1], t >= m[0]); }); }
-    if (still) { at(99); pb.hidden = true; }
-    else {
-      op.classList.add('playing');
-      v.addEventListener('timeupdate', function () { at(v.currentTime); });
-      v.addEventListener('ended', function () { at(99); pb.hidden = true; });
-      var go = v.play(); if (go && go.catch) go.catch(function () { at(99); pb.hidden = true; });
-      pb.addEventListener('click', function () { if (v.paused) { v.play(); pb.textContent = 'Pause'; pb.setAttribute('aria-label', 'Pause the film'); } else { v.pause(); pb.textContent = 'Play'; pb.setAttribute('aria-label', 'Play the film'); } });
-    }
+  // the opening film (rule 3h), chosen by scroll as on The Brown Box (Tzvi: "once the video ends they cant see it again"):
+  // 150 frames on a canvas, loaded in passes (every 8th, then 4th, 2nd, all) so it scrubs early and sharpens; each word
+  // lights on its chapter (Boil from the start, Bake at 0.40, Brag at 0.59: the joins of gen/film.sh)
+  var film = document.getElementById('film'), cv = document.getElementById('cv');
+  if (film && cv) {
+    var cx = cv.getContext('2d'), still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    var kind = innerWidth <= 760 ? 'm' : 'd', N = 150, imgs = new Array(N), p = 0;
+    var url = function (i) { return 'assets/film/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; };
+    cv.style.background = '#141414 url(' + url(still ? N - 1 : 0) + ') center / cover no-repeat';
+    var order = [], seen = {};
+    [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });
+    if (still) order = [N - 1];
+    (function next(k) {
+      var batch = order.slice(k, k + 6), left = batch.length; if (!left) return;
+      batch.forEach(function (i) { var im = new Image(); im.decoding = 'async'; im.onload = im.onerror = function () { if (im.naturalWidth) imgs[i] = im; if (--left === 0) { draw(); next(k + 6); } }; im.src = url(i); });
+    })(0);
+    var frameAt = function (q) { var f = Math.round(q * (N - 1)); for (var d = 0; d < N; d++) { if (imgs[f - d]) return imgs[f - d]; if (imgs[f + d]) return imgs[f + d]; } return null; };
+    var draw = function () {
+      var im = frameAt(still ? 1 : p); if (!im) return;
+      var W = cv.width, H = cv.height, sc = Math.max(W / im.naturalWidth, H / im.naturalHeight), w = im.naturalWidth * sc, h = im.naturalHeight * sc;
+      cx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
+    };
+    var size = function () { var d = Math.min(2, devicePixelRatio || 1); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; draw(); };
+    var hint = document.getElementById('hint'), raf = 0;
+    var paint = function () {
+      raf = 0;
+      var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight;
+      p = still ? 1 : Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
+      film.classList.toggle('c2', p >= .4); film.classList.toggle('c3', p >= .59);
+      hint.style.opacity = p > .02 ? 0 : 1;
+      draw();
+    };
+    addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });
+    addEventListener('resize', size);
+    size(); paint();
   }
   // tile T4: a product card tilts a few degrees toward the pointer (mouse only, never with reduced motion)
   if (matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {

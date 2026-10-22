@@ -9,5 +9,12 @@ ffmpeg -v error -y -i c1-boil.mp4 -ss 0.5 -t 2.5 -i c2-bake.mp4 -i c3-brag.mp4 -
 [2:v]trim=0:5,setpts=PTS-STARTPTS,scale=1920:1080,fps=24,format=yuv420p[c];\
 [a][b]xfade=transition=fade:duration=0.35:offset=4.65[ab];\
 [ab][c]xfade=transition=fade:duration=0.35:offset=6.8[v]" \
-  -map "[v]" -an -c:v libx264 -preset slow -crf 24 -movflags +faststart ../../assets/opening.mp4
+  -map "[v]" -an -c:v libx264 -preset slow -crf 24 -movflags +faststart opening.mp4
 ffmpeg -v error -y -sseof -0.1 -i c3-brag.mp4 -frames:v 1 -vf scale=1920:1080 -q:v 82 ../../assets/film-poster.webp
+# The film follows the scroll (Tzvi, 22 Oct 2026: "once the video ends they cant see it again"): 150 frames drawn on a
+# canvas, chosen by scroll, as on The Brown Box. Laptop 1680 wide 16:9; phone a 9:16 crop at 720x1280, centred a little
+# right of the middle so the pot, the tray and the pile of bagels stay in frame.
+cd ../../assets && rm -rf film && mkdir -p film/d film/m
+ffmpeg -v error -y -i ../gen/film/opening.mp4 -vf "fps=150/11.79,scale=1680:-2:flags=lanczos" -frames:v 150 -c:v libwebp -quality 70 film/d/%04d.webp
+ffmpeg -v error -y -i ../gen/film/opening.mp4 -vf "fps=150/11.79,crop=ih*9/16:ih:(iw-ih*9/16)*0.56:0,scale=720:1280:flags=lanczos" -frames:v 150 -c:v libwebp -quality 66 film/m/%04d.webp
+ls film/d | wc -l; du -sh film/d film/m
