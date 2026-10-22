@@ -19,3 +19,6 @@ We're building a website for Nails by Elisheva from your listing, your flyer and
 8. **Questions clients ask you**, with your answers, for a short FAQ.
 
 - **Your address.** Do you send the studio's address once you confirm a booking, or should the page show the street? We left it as "Romema, Jerusalem" for now.
+
+- **Why each price is what it is.** One true sentence beside each price helps (the products, the time, what is included). Tell us in your own words.
+- **Questions clients ask you.** For example: How long does gel last? Do I need to come with clean nails? What if I am late or need to cancel? Can I bring a photo of the design I want? How do I pay? Do you remove gel from another salon? We will answer them on the page in your words once you send the answers.

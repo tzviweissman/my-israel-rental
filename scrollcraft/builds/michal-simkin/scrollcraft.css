@@ -50,9 +50,9 @@
 
   --sc-leading-none: 0.94;
   --sc-leading-tight: 1.06;
-  --sc-leading-body: 1.62;
+  --sc-leading-body: 1.6;
 
-  --sc-measure: 62ch;
+  --sc-measure: 36rem;
 
   /* --- space. 4px base: the useful middle steps an 8-only scale misses. --- */
   --sc-1: 0.25rem;  --sc-2: 0.5rem;   --sc-3: 0.75rem;  --sc-4: 1rem;
@@ -148,7 +148,7 @@ button, input, select, textarea { font: inherit; color: inherit; }
   line-height: 1.44;
   letter-spacing: var(--sc-track-snug);
   color: var(--sc-ink);
-  max-width: 46ch;
+  max-width: 28rem;
   text-wrap: pretty;
   margin: 0;
 }
