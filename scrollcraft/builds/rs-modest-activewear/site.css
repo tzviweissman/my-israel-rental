@@ -346,7 +346,7 @@ section.sec { padding-block: clamp(1.6rem, 6.5svh, 4.8rem); }
 .shotsec::after { content: ''; position: absolute; inset: 0; z-index: -1; background: linear-gradient(0deg, rgba(23, 21, 18, .78) 0%, rgba(23, 21, 18, .5) 30%, rgba(23, 21, 18, 0) 62%); pointer-events: none; }
 .shotsec > img { z-index: -2; }
 .shotsec .wrap { width: 100%; padding-block: clamp(2.5rem, 9svh, 6rem); }
-.shotsec h2 { font-size: clamp(2.6rem, min(7.4vw, 11svh), 6.4rem); letter-spacing: -.012em; max-width: 14ch; }
+.shotsec h2 { font-size: clamp(2.6rem, min(7.4vw, 11svh), 6.4rem); letter-spacing: -.012em; max-width: 14em; }
 .shotsec .lede { color: #F1EBE0; font-size: clamp(1rem, 1.4vw, 1.2rem); max-width: 28rem; margin: 1.1rem 0 1.8rem; }
 .shotsec .acts { display: flex; flex-wrap: wrap; gap: 1.3rem 1.2rem; align-items: center; }
 .shotsec .btn { background: var(--ground); color: var(--ink); --brk: var(--ground); }
@@ -358,7 +358,7 @@ section.sec { padding-block: clamp(1.6rem, 6.5svh, 4.8rem); }
 .dip2 .ph1 { grid-column: 1; } .dip2 .ph2 { grid-column: 2; }
 .dip2 .wrap { grid-area: 1 / 1 / 2 / 3; }
 .dip2 .said.mid { text-align: center; justify-items: center; display: grid; }
-.dip2 .said.mid h2 { max-width: 18ch; } .dip2 .acts { justify-content: center; }
+.dip2 .said.mid h2 { max-width: 18em; } .dip2 .acts { justify-content: center; }
 .dip2 .ph1 img { object-position: 50% 40%; } .dip2 .ph2 img { object-position: 50% 50%; }
 @media (max-width: 860px) { .dip2 { grid-template-columns: 1fr; grid-template-rows: 1fr 1fr; } .dip2 .ph1, .dip2 .ph2 { grid-column: 1; } .dip2 .ph1 { grid-row: 1; } .dip2 .ph2 { grid-row: 2; } .dip2 .wrap { grid-area: 1 / 1 / 3 / 2; } .shotsec h2 { font-size: clamp(2.3rem, 11vw, 3.2rem); } .shotsec { min-height: 100svh; } .shotsec .wrap { padding-bottom: calc(var(--bar-h) + 1.5rem); } }
 .dip2 figure { align-self: stretch; } .dip2 .wrap { align-self: end; }
@@ -388,3 +388,70 @@ section.sec { padding-block: clamp(1.6rem, 6.5svh, 4.8rem); }
   .open-stage::before { background: linear-gradient(0deg, rgba(31, 58, 49, .98) 0%, rgba(31, 58, 49, .94) 40%, rgba(31, 58, 49, .5) 62%, rgba(31, 58, 49, 0) 80%); }
   .shotsec::after { background: linear-gradient(0deg, rgba(23, 21, 18, .92) 0%, rgba(23, 21, 18, .8) 45%, rgba(23, 21, 18, 0) 85%); }
 }
+
+/* ── 22 Oct 2026, rule 3t (fashion-shop): one light ground, the product row right after the opening, no full-screen photo bands ── */
+.open { height: 220svh; }
+.close { background: var(--surface); color: var(--ink); border-top: 1px solid var(--line); }
+.close .btn { background: var(--ink); color: var(--ground); --brk: var(--ink); }
+.close .lnk, .close a { color: var(--ink); }
+.close .giant { color: var(--ink); opacity: .9; }
+.foot { background: var(--ground); color: var(--soft); border-top: 1px solid var(--line); }
+.foot a { color: var(--ink); }
+.shoprow .rowhead { display: flex; justify-content: space-between; align-items: baseline; gap: 1rem; margin-bottom: clamp(1rem, 3svh, 1.8rem); }
+.shoprow h2, .how h2 { font-size: clamp(1.7rem, 3vw, 2.5rem); }
+.pgrid { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(.8rem, 2vw, 1.6rem); }
+.pph { display: block; position: relative; aspect-ratio: 5 / 7; width: min(100%, calc((100svh - 27rem) * .714)); overflow: hidden; border-radius: var(--r); background: var(--surface); }
+.pph img { position: absolute; max-width: none; height: auto; }
+.pph.blk img { width: 179.5%; left: 0; top: 0; }
+.pph.wht img { width: 196.7%; left: -70.2%; top: -54.3%; }
+.pph.str img { width: 100%; height: 100%; object-fit: cover; object-position: 30% 62%; }
+.pinfo { display: grid; gap: .3rem; padding-top: .8rem; justify-items: start; }
+.pinfo h3 { font: 600 1.2rem/1.3 var(--font-body); margin: 0; }
+.pinfo h3 a { color: inherit; text-decoration: none; }
+.pmeta { margin: 0; font-size: .9rem; line-height: 1.4; color: var(--soft); }
+.pprice { margin: .2rem 0 .4rem; font: 700 1.35rem/1 var(--font-body); color: var(--ink); }
+.padd { min-height: 44px; }
+.hsteps { list-style: none; margin: clamp(1rem, 3svh, 1.8rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: clamp(1rem, 3vw, 2.4rem); border-top: 1px solid var(--line); }
+.hsteps li { padding-top: 1.1rem; }
+.hsteps b { font: 400 1.6rem/1 var(--font-head); }
+.hsteps h3 { font: 600 1.3rem/1.3 var(--font-body); margin: .6rem 0 .3rem; }
+.hsteps p { margin: 0; color: var(--soft); font-size: .98rem; line-height: 1.5; }
+.pillars { background: #fff; }
+.pillars .lede { color: var(--soft); }
+.rail::before { background: var(--ink); box-shadow: none; }
+.tag .card-t { background: var(--ground); }
+@media (max-width: 760px) {
+  .pgrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pcard.ptile { grid-column: 1 / -1; }
+  .pcard.ptile .pph { aspect-ratio: 16 / 9; }
+  .pph { width: 100%; }
+  .hsteps { grid-template-columns: 1fr; }
+  .shoprow .rowhead { flex-direction: column; align-items: flex-start; gap: .4rem; }
+}
+@media (max-width: 760px) { .tag .card-t b { font-size: 1.02rem; } }
+.ptag { background: var(--surface); color: var(--ink); }
+.ptag::before { background: var(--ink); }
+.foot { padding: 2.2rem var(--gutter) calc(2.2rem + var(--pad-bar, 0px)); text-align: left; }
+.fcols { max-width: 72rem; margin: 0 auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem 2.5rem; }
+.fcols h4 { margin: 0 0 .6rem; font: 600 .85rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--soft); }
+.fcols nav, .fcols > div { display: grid; gap: .35rem; align-content: start; }
+.fcols p { margin: 0; }
+.fcols .fine { grid-column: 1 / -1; padding-top: 1rem; border-top: 1px solid var(--line); font-size: .9rem; }
+@media (max-width: 760px) { .fcols { grid-template-columns: 1fr; } }
+
+/* ── type scale (rule 3e.14): six sizes on the whole site: 14 labels, 17 text and buttons, 20 lead lines and prices,
+   one section heading, one page heading, the giant RS mark. ── */
+:root { --t-s: .875rem; --t-b: 1.0625rem; --t-m: 1.25rem; --t-h2: clamp(1.8rem, min(3.4vw, 6svh), 2.9rem); --t-h1: clamp(2.2rem, min(5.4vw, 8.2svh), 4.6rem); }
+body :not(h1):not(h2):not(h3):not(h4):not(em):not(script):not(style) { font-size: var(--t-b) !important; }
+body h1 { font-size: var(--t-h1) !important; }
+body h2 { font-size: var(--t-h2) !important; }
+body .giant { font-size: clamp(5rem, 15vw, 13.5rem) !important; }
+body .sym, body .arw, body .step output { font-size: inherit !important; }
+body .count, body .tag i, body .pmeta, body .fine, body .fcols h4, body .caps, body small, body .err, body .note, body .p, body .p b { font-size: var(--t-s) !important; }
+body .p b { font-size: var(--t-m) !important; }
+body .lede, body h3, body .pprice, body .addr, body .tag .card-t b, body .hsteps b, body .st-desc, body .total, body .total span, body .sum h3 { font-size: var(--t-m) !important; }
+body .ptag { font-size: var(--t-h2) !important; }
+body .pinfo h3 { font-size: var(--t-m) !important; }
+body .st-info h1, body .page-head h1 { font-size: var(--t-h2) !important; }
+body h4 { font-size: var(--t-s) !important; }
+body .hsteps p { font-size: var(--t-s) !important; }

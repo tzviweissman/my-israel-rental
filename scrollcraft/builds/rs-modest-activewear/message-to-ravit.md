@@ -23,3 +23,13 @@ We're building a website for RS Modest Activewear from your listing, your flyer 
 10. **What makes it premium.** One true sentence for beside the price: the fabric, the cut, or how it is made.
 
 11. **Questions customers ask you**, with your answers, for a short FAQ.
+
+Example questions for the FAQ, to answer in your own words:
+- Which sizes do you carry, and what are the measurements?
+- Can I try the skirt on in the store?
+- Can a skirt be exchanged, and within how many days?
+- Do you deliver, and what does it cost?
+- Which days and hours are you open?
+- How do I wash the skirt?
+
+Three more, in your own words: What do customers worry about before buying a skirt? What happens in the first days after someone orders? Is it all right to show customers' photos of the skirt in use?
