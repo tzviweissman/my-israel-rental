@@ -45,7 +45,7 @@ import FaqEditor, { cleanFaqs } from '../marketplace/FaqEditor';
 import { HighlightChip } from '../marketplace/Highlights';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { X, Trash2, ImagePlus, Loader2, Wand2, Plus } from 'lucide-react';
+import { X, Trash2, ImagePlus, Loader2, Wand2, Plus, Copy } from 'lucide-react';
 import PhotoMatch from './PhotoMatch';
 import ProductSuppliers from './ProductSuppliers';
 import WholesaleOffers from './WholesaleOffers';
@@ -54,6 +54,7 @@ import { uploadFilesFast, reportUploadFailure } from '../../utils/fastUpload';
 import { productPhotos } from '../../utils/productPhotos';
 import SizeFields, { withSize } from '../marketplace/SizeFields';
 import ProductExtras, { cleanExtras } from './ProductExtras';
+import QuickProductAdd from '../marketplace/QuickProductAdd';
 import TeamAndRebook, { cleanTeam } from './TeamAndRebook';
 import SessionsEditor, { cleanSessions } from './SessionsEditor';
 import { SUBCATEGORIES, subcategoryLabel } from '../../lib/categories';
@@ -178,6 +179,77 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
     group: prev[prev.length - 1]?.group || '', photos: [],
   }]);
   const removeProduct = (i) => setOptions((prev) => prev.filter((_, k) => k !== i));
+  // A copy right below the original, with its own photo list, so changing
+  // the size and price is the whole job for the next variant.
+  const duplicateProduct = (i) => setOptions((prev) => [
+    ...prev.slice(0, i + 1), { ...prev[i], photos: [...(prev[i].photos || [])] }, ...prev.slice(i + 1),
+  ]);
+
+  // MANY AT ONCE (QuickProductAdd): a photo per product, a pasted list or a
+  // photo of the menu. New rows go at the bottom and the window scrolls to
+  // the first of them; nothing is saved until Save, as with a typed row.
+  const [bulkPhotos, setBulkPhotos] = useState(false);
+  const [extracting, setExtracting] = useState(false);
+  const newProduct = (prev, patch) => ({
+    name: '', price: '', currency: prev[prev.length - 1]?.currency || 'ILS', in_stock: true,
+    group: prev[prev.length - 1]?.group || '', photos: [], ...patch,
+  });
+  const showFrom = (i) => setTimeout(() => {
+    document.querySelector(`[data-testid="edit-listing-option-${i}"]`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }, 50);
+  const addProductsFromPhotos = async (files) => {
+    const chosen = Array.from(files || []).filter((f) => f.type.startsWith('image/'));
+    if (!chosen.length) return;
+    setBulkPhotos(true);
+    try {
+      const results = await uploadFilesFast(chosen, API, token, () => {});
+      const urls = results.map((r) => r?.url).filter(Boolean);
+      const failed = results.filter((r) => !r?.url || r?.error);
+      if (failed.length) {
+        const why = failed.find((r) => r?.error)?.error;
+        toast.error(why
+          ? t('sweep.uploadFailedWhy', { defaultValue: 'Photo upload failed - {{reason}}', reason: why })
+          : t('sweep.uploadFailed', 'Photo upload failed. Please try a different photo.'));
+        reportUploadFailure({ where: 'edit-listing-bulk', count: failed.length, reason: why, API, token });
+      }
+      if (!urls.length) return;
+      const at = options.length;
+      setOptions((prev) => [...prev, ...urls.map((u) => newProduct(prev, { photos: [u] }))]);
+      showFrom(at);
+      toast.success(t('wizard.photosBecameProducts', { count: urls.length, defaultValue: '{{count}} products added. Now name them and set a price.' }));
+    } catch (err) {
+      toast.error(err.message || t('wizard.uploadFailed', 'Upload failed'));
+    } finally { setBulkPhotos(false); }
+  };
+  const extractProducts = async ({ text, file }) => {
+    setExtracting(true);
+    try {
+      const body = new FormData();
+      if (text) body.append('text', text);
+      if (file) body.append('file', file);
+      const { data } = await axios.post(`${API}/marketplace/products/extract`, body, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const rows = data.products || [];
+      if (!rows.length) {
+        toast.error(t('wizard.extractNone', 'Nothing came back. Try a clearer picture, or type the list.'));
+        return false;
+      }
+      const at = options.length;
+      setOptions((prev) => [...prev, ...rows.map((r) => newProduct(prev, {
+        name: r.name || '',
+        price: r.price == null ? '' : String(r.price),
+        description: r.description || '',
+        ...(r.currency ? { currency: r.currency } : {}),
+      }))]);
+      showFrom(at);
+      toast.success(t('wizard.extractDone', { count: rows.length, defaultValue: '{{count}} products read. Check them, then add a photo to each.' }));
+      return true;
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('wizard.extractFailed', 'Could not read that.'), { duration: 8000 });
+      return false;
+    } finally { setExtracting(false); }
+  };
 
   const addPhotos = async (i, files) => {
     const chosen = Array.from(files || []).filter((f) => f.type.startsWith('image/'));
@@ -774,6 +846,10 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                 ? t('editListing.products', 'Products')
                 : t('editListing.options', 'Services and prices')}
             </p>
+            {isStore && (
+              <QuickProductAdd onPhotos={addProductsFromPhotos} onExtract={extractProducts}
+                bulkPhotos={bulkPhotos} extracting={extracting} testid="edit-listing-products" />
+            )}
 
             {options.map((o, i) => (
               <div key={i} className="rounded-xl border p-3 space-y-3" style={{ borderColor: 'var(--brand-border)' }} data-testid={`edit-listing-option-${i}`}>
@@ -912,6 +988,14 @@ export default function EditListingModal({ gig, API, token, onClose, onSaved }) 
                       aria-label={t('editListing.priceToLabel', 'Highest price, for a price range')}
                       data-testid={`edit-listing-price-to-${i}`}
                     />
+                    <button
+                      type="button"
+                      onClick={() => duplicateProduct(i)}
+                      className="inline-flex items-center gap-1 px-3 min-h-[44px] rounded-lg text-xs font-semibold text-gray-700 hover:bg-gray-50"
+                      data-testid={`edit-listing-duplicate-product-${i}`}
+                    >
+                      <Copy size={12} /> {t('wizard.duplicate', 'Duplicate')}
+                    </button>
                     <button
                       type="button"
                       onClick={() => removeProduct(i)}

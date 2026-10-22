@@ -24,13 +24,14 @@
  * All state is local; we POST once on the final "Publish" click.
  */
 import React, { useContext, useEffect, useMemo, useRef, useState } from 'react';
+import QuickProductAdd from '../components/marketplace/QuickProductAdd';
 import FaqEditor, { cleanFaqs } from '../components/marketplace/FaqEditor';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Loader2, Plus, Trash2, ArrowLeft, ArrowRight, X,
-  Store, Package, CalendarClock, ImagePlus, Copy, Camera, FileText,
+  Store, Package, CalendarClock, ImagePlus, Copy,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -1069,14 +1070,6 @@ const CreateGig = () => {
 // ---------- Step 4A — Store products ----------
 const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, onDuplicate, onPhotosAsProducts, onExtract, bulkPhotos, extracting, productImageInputRef, onUploadImage, onRemoveImage }) => {
   const { t } = useTranslation();
-  // The paste box, closed until asked for. Open by default it would read
-  // as the main way in, and for a business with three products the rows
-  // below are quicker than any of this.
-  const [pasteOpen, setPasteOpen] = React.useState(false);
-  const [pasted, setPasted] = React.useState('');
-  const bulkRef = React.useRef(null);
-  const listShotRef = React.useRef(null);
-  const busy = bulkPhotos || extracting;
 
   return (
   <div className="space-y-4" data-testid="wizard-products-step">
@@ -1085,61 +1078,9 @@ const StoreProductsStep = ({ products, onUpdate, onAdd, onRemove, onDuplicate, o
     </div>
 
     {/* THE QUICK WAYS IN, above the rows because a business with ten
-        things to sell gives up before it reaches the second row.
-        Photos first: that is where the time actually goes. */}
-    <div className="rounded-xl border border-gray-200 p-3 space-y-2" data-testid="wizard-products-quick">
-      <p className="text-[11px] font-semibold text-gray-600">
-        {t('wizard.quickTitle', 'Have a lot to add?')}
-      </p>
-      <div className="flex flex-wrap gap-2">
-        <button type="button" disabled={busy} onClick={() => bulkRef.current?.click()}
-          className="inline-flex items-center gap-1.5 px-3 min-h-[40px] rounded-lg border border-gray-300 bg-white text-sm font-semibold disabled:opacity-50"
-          data-testid="wizard-products-from-photos">
-          {bulkPhotos ? <Loader2 size={14} className="animate-spin" /> : <ImagePlus size={14} />}
-          {t('wizard.photosAsProducts', 'Add photos, one product each')}
-        </button>
-        <input ref={bulkRef} type="file" accept="image/*" multiple className="hidden"
-          onChange={(e) => { onPhotosAsProducts(e.target.files); e.target.value = ''; }}
-          data-testid="wizard-products-photos-input" />
-
-        <button type="button" disabled={busy} onClick={() => setPasteOpen(!pasteOpen)}
-          className="inline-flex items-center gap-1.5 px-3 min-h-[40px] rounded-lg border border-gray-300 bg-white text-sm font-semibold disabled:opacity-50"
-          aria-expanded={pasteOpen} data-testid="wizard-products-paste-toggle">
-          <FileText size={14} />
-          {t('wizard.pasteList', 'Paste your price list')}
-        </button>
-
-        <button type="button" disabled={busy} onClick={() => listShotRef.current?.click()}
-          className="inline-flex items-center gap-1.5 px-3 min-h-[40px] rounded-lg border border-gray-300 bg-white text-sm font-semibold disabled:opacity-50"
-          data-testid="wizard-products-from-shot">
-          {extracting ? <Loader2 size={14} className="animate-spin" /> : <Camera size={14} />}
-          {t('wizard.shotOfList', 'Photo of your menu or price list')}
-        </button>
-        <input ref={listShotRef} type="file" accept="image/*" className="hidden"
-          onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; if (f) onExtract({ file: f }); }}
-          data-testid="wizard-products-shot-input" />
-      </div>
-
-      {pasteOpen && (
-        <div className="pt-1 space-y-2">
-          <textarea rows={4} dir="auto" value={pasted} onChange={(e) => setPasted(e.target.value)}
-            placeholder={t('wizard.pastePh', 'One per line, or straight out of a WhatsApp message. Classic board 180, Family board 280, Kids board 90')}
-            className="w-full px-3 py-2 rounded-lg border border-gray-300 text-sm"
-            data-testid="wizard-products-paste" />
-          <button type="button" disabled={busy || !pasted.trim()}
-            onClick={async () => { if (await onExtract({ text: pasted.trim() })) { setPasted(''); setPasteOpen(false); } }}
-            className="inline-flex items-center gap-1.5 px-4 min-h-[40px] rounded-lg text-sm font-semibold text-white disabled:opacity-50"
-            style={{ background: 'var(--brand-primary)' }} data-testid="wizard-products-paste-read">
-            {extracting && <Loader2 size={14} className="animate-spin" />}
-            {t('wizard.readList', 'Turn this into products')}
-          </button>
-        </div>
-      )}
-
-      <p className="text-[11px] text-gray-500">
-        {t('wizard.quickNote', 'Reading a list gives you the names and prices. Photos still come from you, so the quickest order is photos first, then the list.')}
-      </p>
-    </div>
+        things to sell gives up before it reaches the second row. */}
+    <QuickProductAdd onPhotos={onPhotosAsProducts} onExtract={onExtract}
+      bulkPhotos={bulkPhotos} extracting={extracting} />
     {products.map((p, i) => (
       <div key={i} className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid={`wizard-product-${i}`}>
         <div className="flex gap-3">
