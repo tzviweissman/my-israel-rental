@@ -270,7 +270,7 @@
   .topbar .tb-links a:hover { border-color: var(--sc-accent); }
   .topbar .btn { min-height: 42px; padding-right: 1.6rem; }
   @media (max-width: 860px) { .topbar { display: none; } }
-  .proofline span:first-child { font-size: var(--sc-t-base); color: var(--sc-accent); letter-spacing: 0.04em; }
+  .proofline span:first-child { font-size: var(--sc-t-base); color: var(--sc-ink); font-weight: 700; letter-spacing: 0.04em; }  /* a price is text colour, not the accent (22 Oct 2026) */
   #order { min-height: calc(100svh - 4rem); }
   .order-stage { padding-top: clamp(4.5rem, 10svh, 6rem); }
   .order-stage > .order { padding-bottom: var(--sc-5); }
@@ -281,11 +281,12 @@
   .size-pick button { position: relative; display: grid; gap: 0.25rem; text-align: left; align-content: start; min-height: 5.4rem; padding: 0.8rem 1rem; border-radius: var(--sc-r-md); cursor: pointer;
     transition: border-color 120ms, background 120ms, transform 100ms; }
   .size-pick button b { font: 400 1.35rem/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: 0.04em; }
+  .size-pick button em s { font-size: 0.7em; color: var(--sc-ink-soft); margin-right: 0.3em; text-decoration-thickness: 1.5px; }
   .size-pick button span { color: var(--sc-ink-soft); font-size: var(--sc-t-xs); }
   .size-pick button em { font: 300 1.5rem/1 var(--sc-font-display); font-style: normal; color: var(--sc-ink); }
   .size-pick button:hover { border-color: var(--sc-accent); }
   .size-pick button:active { transform: scale(0.97); }
-  .size-pick .tab { position: absolute; top: -0.65rem; right: 0.7rem; font: 700 0.72rem/1 var(--sc-font-text); font-style: normal; letter-spacing: 0.06em; text-transform: uppercase; background: var(--sc-accent); color: var(--sc-accent-ink); padding: 0.28rem 0.5rem; border-radius: 3px; }
+  .size-pick .tab { position: absolute; top: -0.65rem; right: 0.7rem; font: 700 0.72rem/1 var(--sc-font-text); font-style: normal; letter-spacing: 0.06em; text-transform: uppercase; background: #E6F4EA; color: #1E5E3A; padding: 0.28rem 0.5rem; border-radius: 3px; }
   .pick { margin-top: var(--sc-4); }
   .pick .size-name { font-size: var(--sc-t-lg); }
   .price .now { font-size: clamp(3.6rem, 2rem + 3.6vw, 5.6rem); }
@@ -542,11 +543,11 @@
           <h2>Turn it to your size.</h2>
           <div class="size-pick" role="group" aria-label="Pick a size">
             <button type="button" data-i="0" aria-pressed="false"><b>Medium</b><span>Feeds 4 to 6</span><em>&#8362;100</em></button>
-            <button type="button" data-i="1" aria-pressed="true"><b>Large</b><span>Feeds 8 to 12</span><em>&#8362;180</em><i class="tab">Save &#8362;20</i></button>
+            <button type="button" data-i="1" aria-pressed="true"><b>Large</b><span>Feeds 8 to 12</span><em><s>&#8362;200</s> &#8362;180</em><i class="tab">10% off</i></button>
             <button type="button" data-i="2" aria-pressed="false"><b>Kiddush</b><span>Sized to your guests</span><em>&#8362;250</em></button>
           </div>
           <p class="pick"><span class="size-name" id="size-name">Large</span><span class="feeds" id="feeds">Feeds 8 to 12</span></p>
-          <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="was" id="was"><s>&#8362;200</s><b>Save &#8362;20</b></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
+          <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="was" id="was"><s>&#8362;200</s><b>10% off</b></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
           <div class="menu">
             <div><span>Slow cooker liner</span><b>Free</b></div>
             <div><span>Extra meat</span><b>₪50 / lb</b></div>

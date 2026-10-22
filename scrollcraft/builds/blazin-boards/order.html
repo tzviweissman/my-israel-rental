@@ -84,7 +84,7 @@
         [c[i], c[i + 1]].forEach(function (p) {
           if (!p) { h += '<td></td>'; return; }
           var on = (o.cart[p.id] || 0) > 0;
-          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + (BB.saving(p) ? '<span class="save-b">Save $' + BB.saving(p) + '</span>' : '') + '</button></td>';
+          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + BB.dealHtml(p) + '</button></td>';
         });
         h += '</tr>';
       }

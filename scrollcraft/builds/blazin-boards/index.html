@@ -193,7 +193,7 @@
   .tier li { display: grid; grid-template-columns: 1fr auto; gap: var(--sc-3); align-items: baseline; padding-block-end: var(--sc-3); border-bottom: 1px solid color-mix(in oklab, var(--sc-ink) 16%, transparent); }
   .tier li b { display: block; font-family: var(--font-head); font-weight: 500; font-size: var(--sc-t-lg); }
   .tier li small { display: block; margin-top: 2px; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.4; }
-  .tier li .price { font-family: var(--font-body); font-weight: 800; font-size: var(--sc-t-lg); color: var(--sc-accent); white-space: nowrap; }
+  .tier li .price { font-family: var(--font-body); font-weight: 800; font-size: var(--sc-t-lg); color: var(--sc-ink); white-space: nowrap; }
 
   /* ---------------------------------------------------------------- menu -- */
   .menu { padding-block: clamp(4rem, 9vw, 8rem); }
@@ -210,11 +210,11 @@
   .list li b { display: block; font-family: var(--font-head); font-weight: 500; font-size: var(--sc-t-lg); }
   .list li i { font-style: normal; color: var(--sc-ink-soft); font-size: var(--sc-t-xs); letter-spacing: 0.08em; text-transform: uppercase; margin-inline-start: 0.5em; }
   .list li small { display: block; margin-top: 3px; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.45; }
-  .list li .price { font-family: var(--font-body); font-weight: 800; font-size: var(--sc-t-lg); color: var(--sc-accent); white-space: nowrap; }
+  .list li .price { font-family: var(--font-body); font-weight: 800; font-size: var(--sc-t-lg); color: var(--sc-ink); white-space: nowrap; }
   .addons { margin: var(--sc-7) 0 0; display: flex; flex-wrap: wrap; gap: var(--sc-2) var(--sc-4); align-items: baseline; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
   .addons b { color: var(--sc-ink); font-weight: 600; margin-inline-end: var(--sc-2); }
   .addons span { white-space: nowrap; }
-  .addons span em { font-style: normal; color: var(--sc-accent); font-weight: 700; }
+  .addons span em { font-style: normal; color: var(--sc-ink); font-weight: 700; }
 
   /* --------------------------------------------------------------- facts -- */
   .facts { padding-block: clamp(3.5rem, 8vw, 7rem); }
@@ -311,7 +311,7 @@
   .band__title { margin: 0; font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.04em; line-height: .92; font-size: clamp(3rem, 9vw, 8.5rem); max-width: 11ch; color: var(--sc-ink); text-wrap: balance; }
   .band__copy p { margin: 0; color: var(--sc-ink); font-size: var(--sc-t-base); max-width: 28rem; }
   .menu { background: #F4EADB; --sc-ink: #2A0A10; --sc-ink-soft: #5E3F45; color: #2A0A10; }
-  .menu .price, .menu .addons span em { color: var(--crimson); }
+  .menu .price, .menu .addons span em { color: var(--sc-ink); }
   .menu .addons b { color: #2A0A10; }
   .menu .list li .go { color: var(--crimson); border-color: color-mix(in oklab, var(--crimson) 55%, transparent); }
   .menu .list li:hover .go { background: var(--crimson); color: #F4EADB; }

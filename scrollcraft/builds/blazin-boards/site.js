@@ -132,6 +132,8 @@
   // 21 Oct 2026: the Large Blazin' is the same rate as the Mini and the Small, so it saves nothing; the old $77 was
   // measured against the Medium, the one dearer board). Large Premium: $485 against $646 at the Small/Medium rate.
   var DEAL = {};  /* Tzvi, 21 Oct 2026: one lone saving makes every other board look overpriced, so none is shown */
-  function saving(p) { return DEAL[p.short] || 0; }
-  window.BB = { DEAL: DEAL, saving: saving, API: API, APP: APP, form: form, load: load, save: save, lines: lines, total: total, money: money, cur: cur, count: count, when: when, where: where, paint: paint, toast: toast, esc: esc, LINES: LINES, NOTICE_DAYS: 2 };
+  /* DEAL[short] = the REAL separate price (same boards bought apart at their own listed prices). Shown as struck price + "N% off". */
+  function saving(p) { var w = DEAL[p.short] || 0; return w > p.price ? Math.floor((w - p.price) / w * 100) : 0; }
+  function dealHtml(p) { var n = saving(p); return n ? '<s class="was">' + money(DEAL[p.short], p.currency) + '</s><span class="save-b">' + n + '% off</span>' : ''; }
+  window.BB = { DEAL: DEAL, saving: saving, dealHtml: dealHtml, API: API, APP: APP, form: form, load: load, save: save, lines: lines, total: total, money: money, cur: cur, count: count, when: when, where: where, paint: paint, toast: toast, esc: esc, LINES: LINES, NOTICE_DAYS: 2 };
 })();

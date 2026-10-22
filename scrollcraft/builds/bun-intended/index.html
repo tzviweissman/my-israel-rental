@@ -261,6 +261,7 @@
   .choice.dim { background: transparent; color: var(--ink-soft); border-style: dashed; }
   .chip { flex: none; display: inline-block; padding: 4px 10px; border-radius: 999px; background: #E3F3EA; color: #1F5C3A; font: 600 0.8rem/1.2 var(--body); white-space: nowrap; }
   .choice .chip { margin-left: auto; }
+  .choice small s { margin-right: 4px; } .choices.size .choice small { white-space: nowrap; }
   .when { margin-top: 10px; justify-content: space-between; }
   .qty { display: inline-flex; align-items: center; gap: 6px; }
   .qty button { width: 44px; height: 44px; border-radius: 50%; border: 1.5px solid var(--line); background: #fff; color: var(--ink); font: 500 22px/1 var(--body); cursor: pointer; transition: border-color 150ms, scale 100ms; }
@@ -282,6 +283,7 @@
   .pricecard .row { all: unset; box-sizing: border-box; display: flex; justify-content: space-between; align-items: center; gap: 12px; width: calc(100% + 16px); min-height: 48px; padding: 6px 8px; margin: 0 -8px; border-radius: 10px; cursor: pointer; transition: background 150ms, scale 100ms; }
   .pricecard .row:hover { background: var(--paper-2); } .pricecard .row:active { scale: .98; }
   .pricecard .row:focus-visible { outline: 3px solid var(--ink); outline-offset: 1px; }
+  .pricecard .p { white-space: nowrap; } .pricecard li .p .chip { display: inline-block; margin-right: 8px; vertical-align: middle; }
   .pricecard .p s { font-weight: 500; font-size: 0.85rem; color: var(--ink-soft); margin-right: 6px; }
   .menu .tip { margin: 10px 0 0; color: var(--ink-soft); font-size: 0.95rem; }
   .foot { display: block; padding: 0 0 var(--bar-pad, 0px); font-size: 0.95rem; background: var(--cocoa); color: #E6D2C2; }
@@ -413,7 +415,7 @@
 
         <div class="choices size" role="group" aria-label="Box size">
           <button type="button" class="choice" data-size="4" aria-pressed="true"><span>4 piece box<small>from ₪55</small></span></button>
-          <button type="button" class="choice" data-size="8" aria-pressed="false"><span>8 piece box<small>from ₪100</small></span><span class="chip">Save ₪10</span></button>
+          <button type="button" class="choice" data-size="8" aria-pressed="false"><span>8 piece box<small><s>₪110</s> from ₪100</small></span><span class="chip">Up to 9% off</span></button>
         </div>
 
         <div class="choices flav" role="group" aria-label="Flavour" id="flavours"></div>
@@ -602,7 +604,7 @@
     renderFlavours();
     var p = price(), n = names(), q = state.qty, w = was(), save = w > p ? (w - p) * q : 0, tot = p * q, buns = state.size * q;
     var each = (tot / buns); each = each % 1 ? each.toFixed(2) : String(each);
-    var chip = save ? '<span class="chip">Save ₪' + save + '</span>' : '';
+    var chip = save ? '<span class="chip">' + Math.floor(save * 100 / (w * q)) + '% off</span>' : '';  /* percent off, rounded down (Tzvi, 22 Oct 2026) */
     $('#sum').innerHTML = '<span class="pp">₪' + tot + (save ? '<s>₪' + (w * q) + '</s>' : '') + '</span><small class="u">' + chip + '₪' + each + ' a bun</small><small class="n">' + (save ? chip : buns + ' buns') + '</small>';
     document.querySelectorAll('[data-px]').forEach(function (x) { x.textContent = ', ₪' + tot; });
     $('#qty').textContent = q; $('#qm').disabled = q <= 1; $('#qp').disabled = q >= 9;
@@ -685,7 +687,7 @@
 
   // Their price list, from the same numbers the builder uses.
   function row(sz, id, nm, sw, p, wasP) {
-    return '<li><button type="button" class="row" data-pick="' + sz + ':' + id + '"><span>' + sw + nm + '</span><span class="p">' + (wasP ? '<s>' + wasP + '</s>' : '') + p + '<small>NIS</small></span></button></li>';
+    return '<li><button type="button" class="row" data-pick="' + sz + ':' + id + '"><span>' + sw + nm + '</span><span class="p">' + (wasP ? '<span class="chip">' + Math.floor((wasP - p) * 100 / wasP) + '% off</span><s>' + wasP + '</s>' : '') + p + '<small>NIS</small></span></button></li>';
   }
   function dot(c) { return '<span class="sw" style="width:14px;height:14px;border-radius:50%;background:' + SW[c] + ';box-shadow:inset 0 0 0 1px rgb(0 0 0/.12)"></span>'; }
   $('#m4').innerHTML = F.map(function (f) { return row(4, f.id, f.name, dot(f.c), f.p4, 0); }).join('');
