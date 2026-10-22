@@ -24,7 +24,7 @@ R5.1 pass: read aloud as Rabbi Samuels
 R5.2 pass: calm voice, no jokes
 R5.3 pass: "Kosher, hechsher from Rabbi Weiner", "Made in Jerusalem, delivered across Israel"
 R5.4 pass: facts script found no they, them or their in visible text
-R5b.2 pass: the one main button reads "Message to order" with the same destination (his MyIsraelRental page) in the bar, opening, order section, footer and phone bar; the card buttons are secondary outline "Order this size" that turn the dial
+R5b.2 pass: the one main button reads "Message to order" with the same destination (his MyIsraelRental page) in the bar, opening, order section, footer, phone bar and on the three size cards (the dial version is "Message to order Large, ₪180", the same words with the size); the footer link that said "Message us" now says it too
 R5b.8 pass: the closing line is "A higher standard of flavor." then the button
 R3.11 pass: order of the page: the pitch, the film, then sizes with prices, how it works, occasions, the facts, then the dial order
 R3o.4 n/a: the page shows no phone or email by the owner choice (chat only)
@@ -48,7 +48,7 @@ R3g.15 pass: the generated stills are scenery and props only (kitchen, closed sl
 R3h.2 pass: frames at 0, 20, 40, 55, 70, 85 and 100 percent of the opening at three sizes: scratch kitchen, then their side wins to the dark, then their pot and the counter, every step true
 R3h.3 pass: the pot film and the kitchen clip fill the screen at 1440x900 and 1280x650, crisp, not in a column; on a phone the film shows full width
 R3h.5 pass: the chapter lines (Lid on. Low. Go light the candles.) sit at the left edge on the dark ground, small beside the pot, not over the action
-R3h.7 pass: looked at the frames either side of the kitchen-to-pot join (40 to 55 percent): the scratch side drains to the dark, then the pot appears; no jump
+R3h.7 pass: looked at the frames either side of the kitchen-to-pot join (40 to 55 percent): the scratch side dims to a dark kitchen (never plain black), then the pot appears; no jump
 R3h.8 pass: the section after the film changes boldly: a bright cream shop of three colour rooms
 R3h.11 fix: brightness.py fails on the generated films: pot.mp4 whole 9 middle 14, scratch.mp4 middle 29, table.mp4 whole 17; a gamma of 2 makes the pot film milky grey, so the candlelit mood is a decision for Tzvi
 R3h.13 pass: the pot film is one clip showing the lid, steam and the dial together; frames viewed at 20 hours show no heap or vanish
@@ -79,8 +79,8 @@ R8a.1 pass: no 21st components or external script hosts; only the Google Fonts s
 R3b.4 pass: facts rows carry the page
 R3c.3 pass: the kosher worry is answered in the opening proofline and the facts rows
 R3c.8 n/a: the owner has not told us what happens after the message (asked in message-to-owner.md question 5)
-R3e.10 pass: each card has name, feeds, what is in it and the price large; check-site ALIGN passed
-R3e.14 fix: the page uses about 25 different text sizes (fluid display type); a six-size scale is a sweep of the engine stylesheet, not done in this rework
+R3e.10 pass: each card has name, feeds, what is in it and the price large, built as photo, text, price row so the three cards line up (looked at at 1440x900 and 390x844); check-site ALIGN passed
+R3e.14 pass: six text sizes as CSS variables on :root (--s1 13px, --s2 15px, --s3 body, --s4 titles and prices, --s5 section headings, --s6 the opening name, the hours and the big price); the eight --sc-t-* sizes of the scroll engine are folded into them and every font-size in the page reads one of them; computed sizes counted at 1440x900, 1280x650 and 390x844: six each. Cost: section headings and card prices top out smaller than before (3.6rem against 4.6 and 3.4), and the price beside the dial is one size on a phone
 R3c.9 pass: radii 16 and 22px photos and 999px pills; one icon style; no two-colour gradients
 R3s.4 pass: check-site ALIGN passed
 R3s.6 pass: check-site ALIGN passed; Add buttons are all the same outline pill
@@ -91,10 +91,10 @@ R3s.14 n/a: the owner has given no counts; only prices are shown big
 R3s.11 n/a: owner must tell us why a kit costs what it costs (asked in message-to-owner.md, question 4)
 R5b.6 pass: no scroll cues, no 01/06 counters, no label above each section
 R3.13 pass: no doubled contact, no two dividers in a row
-R3a.1 pass: rendered at 1440x900, 390x844 with touch emulation, and the six sizes through check-fits; every screen of the home page looked at
-R3r.1 pass: check-site, check-fits and check-motion run on every page of the site after the last edit (see the lists in the report)
-R3r.2 pending
-R3g.12 pass: there is no form; both main buttons and the card buttons were checked in the DOM: Message to order goes to his MyIsraelRental page, Order this size sets the dial; nothing sent
+R3a.1 pass: rendered at 1440x900, 390x844 with touch emulation, and the six sizes through check-fits; every screen of the home page looked at; every place changed in the review looked at at 1440x900 and 390x844
+R3r.1 pass: check-site, check-fits and check-motion run on the page after the last edit (check-site reports only the four MEDIA lines of R3s.24, the same four as before this review); readable.mjs hung again after 300 s (R3e.8)
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer, all its findings fixed and re-checked
+R3g.12 pass: there is no form; the main buttons and the three card buttons were checked in the DOM: all go to his MyIsraelRental page; nothing sent
 R0b.12 n/a: not published, so there is no pages-list preview clip yet
 
 ## 4. Photos and media
@@ -114,7 +114,7 @@ R8.4 pass: the clips (kitchen scratch, pot, table) are generated clips in the ea
 R3c.13 pass: check-fits found nothing cut; check-site found nothing cut
 R3c.14 n/a: there are no cut-outs on the page
 R5b.3 pass: words on pictures sit on a darkened photo with white or gold letters (the opening) and cards put words on solid colour; looked at in the 1440x900 and 390x844 screenshots; no frosted glass
-R3e.8 pass: readable.mjs hung on this scroll page after 250 s, so a contrast script over every text on a solid ground (sizes, steps, occasions, facts, order) passed at 1440x900 and 390x844 (no word under 4.5:1, or 3:1 for large); the opening and film words were looked at in the frames at three sizes
+R3e.8 pass: readable.mjs hung on this scroll page after 300 s again, so the earlier contrast script over every text on a solid ground (sizes, steps, occasions, facts, order; no word under 4.5:1, or 3:1 for large) is carried over and was not re-run after the type sizes changed (colours did not change); the opening and film words were looked at in the frames at 1440x900
 R3s.24 pass: photos are light and sized, every img has width and height, the clip has a poster; check-site MEDIA reports four opening texts hidden with motion off, but that is a limit of the check: they are visible at the top with motion off (opacity 1, checked) and are cued out on purpose when scrolling hands the stage to the pot
 R3p.6 pass: check-fits passed at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844 and 360x640
 R3o.5 pass: check-site GLYPH found no unrendered character
@@ -129,7 +129,7 @@ R3j.3 pass: no taster is shown because none is offered
 R3j.4 n/a: no group discounts; free local delivery on the first order is shown once beside the button (his flyer)
 R3j.5 pass: no come-back feature is shown
 R3j.6 pass: the Large is the default on the dial; no invented option
-R3j.7 pass: the struck ₪200 is two Medium kits at ₪100 each, which feed 8 to 12 like one Large; no .99 endings
+R3j.7 pass: the struck ₪200 is two Medium kits at ₪100 each, which feed 8 to 12 like one Large; the card and the dial now say so beside it ("2 Mediums, ₪200"); no .99 endings
 R3j.8 pass: per unit: Medium ₪100 feeds 4 to 6; Large ₪180 feeds 8 to 12 against two Mediums at ₪200 (same servings); the Kiddush is custom
 R3j.9 pass: the one saving is in the Medium and Large group; the Kiddush has none
 R3j.10 pass: 10% off = (200-180)/200 = 10, struck price beside the new price
@@ -167,7 +167,7 @@ R3g.4 pass: one job per motion; ease-out only (the dial rotation was linear and 
 R3e.16 pass: grepped css and js for linear easing: none left
 R3e.17 pass: the page has no carousel or bottom sheet
 R3e.18 pass: the clips are scrubbed by scroll or loop inside a picture, not an ambient background
-R3a.2 pass: viewed the frames at the middle of the kitchen-to-pot transition: no half state looks unfinished
+R3a.2 pass: viewed the frames at the middle of the kitchen-to-pot transition at 1440x900 every 100 to 200px: the quiet moment keeps the dimmed kitchen on the left instead of a black half, and no step looks unfinished
 R3a.3 pass: the dial on the pot is placed on the clip frame by measurement (BRIEF round 2) and the frames at 70 to 100 percent show it on the pot dial at three sizes
 R3a.4 pass: the opening is designed to fit 1280x650 (frames viewed at that size); the order section is not held
 R3a.5 pass: reduced motion shows stills (the page checks matchMedia); no parallax on phones
@@ -179,13 +179,13 @@ R3i.3 pass: the hours counter on the pot clip is the true 20 hours of cooking
 R3s.21 pass: check-site BROKEN found no script errors, console errors, 404s or dead links
 
 ## 8. Phone
-R3b.6 pass: phone buy bar pinned with "From ₪100" and the button once the opening button is gone
+R3b.6 pass: phone buy bar pinned with "From ₪100" and the button once the opening button is gone, stepping aside while a price or button is in its strip
 R3f.7 pass: the bar fits at 360 wide (check-fits passed)
-R3a.6 pass: check-site PHONE passed (the bar never covers content)
+R3a.6 pass: the phone bar steps aside while any price or button is in the strip it covers; stepped the scroll in 100px stops on touch-emulated 390x844 and 360x640 over the whole page: no price or button was ever under the bar
 R3s.22 pass: check-site TAP passed
-R3s.23 pass: check-site PHONE passed (no sideways scroll)
+R3s.23 pass: no sideways scroll at 390x844 or 360x640 (scrollWidth equals the screen at every 100px stop; overflow-x is clipped on html and body); the three size buttons by the dial fit at 360 with "Feeds 8 to 12" on one line and the 10% tag inside the Large button
 R3t.1 pass: site-category food-shop on every page and in CONCEPT.md; home and shop compared with docs/inspo/awwwards-anatomy-2026-10-22/food (Best Bean Best Cup, Theobroma, La Joya)
-R3t.2 pass: BUY: price and "Message to order" are on the first screen; every size card has photo, name, feeds, price and Order this size
+R3t.2 pass: BUY: price and "Message to order" are on the first screen; every size card has photo, name, feeds, price and Message to order
 R3t.3 n/a: not a trainer site
 R3t.4 pass: footer on every page has a last big line, the order button, link columns and contact
 R3a.7 pass: phone checks used a touch-emulated mobile context (hasTouch, isMobile), not a narrow desktop window

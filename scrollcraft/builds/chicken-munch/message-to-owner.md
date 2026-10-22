@@ -9,6 +9,7 @@ Hi, the new look of your site is ready for you to see: bright, one colour per bo
 5. Why do your boxes cost what they cost? One true sentence (the cut of chicken, the marinade, the time) goes next to the price.
 6. Do you offer anything free, like a taster or a sauce with the first order, or a guarantee if something is wrong?
 7. Can a customer pick a different kind of chicken for each place in a box? How many kinds and sauces does each size allow?
+8. How many people does the Grand Munch Box feed? Our page says "Feeds 8 to 10" (from your notes), but your menu picture (menu-new.jpg) says "Feeds 7/8". Which is right?
 
 Questions we can show on the site once you answer (we only publish what you say):
 - How far ahead should I order for Shabbos?

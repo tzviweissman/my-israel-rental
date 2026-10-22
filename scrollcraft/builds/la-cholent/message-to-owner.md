@@ -9,6 +9,7 @@ Hi, the new look of your page is ready for you to see: bright, one colour per si
 5. What happens after someone sends the message: who answers, how soon, how is the kit delivered or collected?
 6. Which days and what last hour for Shabbos and Yom Tov orders? Does delivery to the whole country cost anything beyond the first free local order?
 7. The Heimish recipe is "coming soon" on your flyer. When it is ready, should it be added?
+8. The Large is ₪180 and two Mediums are ₪200, so the page shows ₪200 struck through and "10% off", with the words "2 Mediums, ₪200" beside it. Is that how you want it said?
 
 Questions we can show on the site once you answer (we only publish what you say):
 - Which size do I need for my guests?

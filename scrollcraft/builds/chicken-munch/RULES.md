@@ -79,31 +79,31 @@ R8a.1 pass: no 21st components or external script hosts; only the Google Fonts s
 R3b.4 pass: facts carry the page, nothing padded
 R3c.3 pass: the kosher worry is answered by the band under the opening and in the footer
 R3c.8 n/a: the owner has not told us what happens after the order (asked in message-to-owner.md questions 3 and 4)
-R3e.10 pass: each card has the name largest, feeds line, one line of what is in it and the price large in the card colour; check-site ALIGN passed
-R3e.14 fix: the page uses about 25 different text sizes (fluid display type); a six-size scale is a sweep of the whole legacy stylesheet, not done in this rework
+R3e.10 pass: each card has the name largest, feeds line, one line of what is in it and the price in the card colour; the cards of a row are built as photo, text, price row so titles and prices sit at the same height (looked at at 1440x900 and 390x844); check-site ALIGN passed
+R3e.14 pass: six text sizes as CSS variables in site.css: --t1 14px small, --t2 17px body, --t3 titles and prices, --t4 headings, and --f and --f2, the two sizes of his logo name (opening CHICKEN and MUNCH; MUNCH and the footer name share --f2); every font-size in the file reads one of them; computed sizes counted on every page: home 6, menu 5, order 5, contact 5 at 1440x900 and 1280x650, and 5 on every page at 390x844. Cost: prices are now the same size as card titles (they were larger), headings top out at 4.4rem, the footer name is one line on a laptop and two on a phone
 R3c.9 pass: radii 999px pills and 14 to 22px photos; one icon (the arrow, lucide shape); no two-colour gradients; one shadow style on the opening bowl
 R3s.4 pass: check-site ALIGN passed
 R3s.6 pass: check-site ALIGN passed; Add buttons are all the same outline pill
 R3s.7 pass: buttons in sentence case, pale dividers, body line height 1.5 or more
-R3s.9 pass: the kosher band is one red band, the savings tag is one style everywhere
+R3s.9 pass: the kosher band is one red band, the savings tag is one style everywhere (a white pill on a photo, black on the white pan photos)
 R3s.12 n/a: owner must send a photo of himself or his kitchen; his real product photos come right after the opening
 R3s.14 n/a: the owner has given no counts or numbers; only prices are shown big
 R3s.11 n/a: owner must tell us why the boxes cost what they cost (asked in message-to-owner.md, question 5)
 R5b.6 pass: no scroll cues, no 01/06 counters, no label above each section
 R3.13 pass: no doubled contact (the footer holds it once), no two dividers in a row
-R3a.1 pass: rendered at 1440x900, 390x844 with touch emulation, and the six sizes through check-fits; every screen of the home page looked at
-R3r.1 pass: check-site, check-fits and check-motion run on every page of the site after the last edit (see the lists in the report)
-R3r.2 pending
+R3a.1 pass: rendered at 1440x900, 390x844 with touch emulation, and the six sizes through check-fits; every screen of the home page looked at; every place changed in the review looked at at 1440x900 and 390x844
+R3r.1 pass: check-site (clean on all four pages), check-fits (clean at the six sizes) and check-motion run on every page of the site after the last edit; readable.mjs on every page (see R3e.8)
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer, all its findings fixed and re-checked
 R3g.12 pass: check-site FLOW filled the order form and followed it to the written WhatsApp message with the total (nothing sent to the owner); every Order now button is a link to order.html, checked in the DOM
 R0b.12 n/a: not published, so there is no pages-list preview clip yet
 
 ## 4. Photos and media
-R8.1 n/a: owner must send a matching set (one photo per box and per pan, same angle and ground); today the three box photos come from three shoots and the two pan photos from one white-ground shoot: listed in the report
+R8.1 n/a: owner must send a matching set (one photo per box and per pan, same angle and ground); today the three box photos come from three shoots (Mini and Grand are one box photo at two crops, the Supreme is a pile of chicken on yellow) and the 9x13 pan photo is cut flat at its bottom edge in the file the owner sent, so it runs off the bottom of its frame; no uncut copy exists in src/owner: listed for the owner
 R8.6 n/a: owner must send a clean photo of each box and pan so hero shots can be made from them (the brief forbids generating now); the list is in the report
 R8.2 pass: only his own photos are used; no stock, no cut-outs mixed from many photos
-R3p.7 pass: every kind of chicken is a tile; the six with his photo show one bowl, the three without are plain colour tiles
+R3p.7 pass: every kind of chicken is a tile; five show his photo, the three without (Shnitzel Bites, Pretzel, Buffalo Wings) are plain colour tiles
 R3h.12 pass: each item looks the same everywhere (the same photo file on home, menu and order)
-R3h.10 pass: the menu page list swaps the stage photo and caption for each kind that has a photo; the home page has no option picker
+R3h.10 pass: the menu page list swaps the stage and caption for every one of the eight kinds: five with his photo (Classic added), three on their own colour tile (Shnitzel Bites, Pretzel, Buffalo Wings); the home page has no option picker
 R3g.14 n/a: owner must send a matching photo set; the photos now on the page come from different shoots and grounds: listed in the report
 R3o.1 pass: no generated food anywhere on the page; every food picture is his own photo
 R3o.2 pass: no generated liquid exists on the page
@@ -114,7 +114,7 @@ R8.4 pass: nothing generated or moving as real material exists on the page
 R3c.13 pass: check-fits found nothing cut; check-site found nothing cut
 R3c.14 pass: the only cut-out is the opening bowl; looked at on the dark opening and on the red Shabbos band with no fringe
 R5b.3 pass: words on pictures sit on a darkened photo with white or gold letters (the opening) and cards put words on solid colour; looked at in the 1440x900 and 390x844 screenshots; no frosted glass
-R3e.8 pass: readable.mjs is clean on the order and contact pages; on the menu page its two hits are list lines passing under the sticky photo at 360x640; it hung on the home page after 280 s, so a contrast script over every text on a solid ground passed at 1440x900 and 390x844 (no word under 4.5:1, or 3:1 for large), and words on the opening photo were looked at in the screenshots
+R3e.8 pass: readable.mjs is clean on the order and contact pages; on the menu page its two hits are list lines passing under the sticky photo at 390x844 (the photo covers them); on the home page its hits are the opening animation (the letters of MUNCH over the golden glaze of the bowl, the Kosher sticker scaling in) and are the same on the file before this review; the label under the opening name was lightened to #FFC24D (it measured 4.32:1)
 R3s.24 pass: check-site MEDIA (photos light and sized, every img has width and height, checked in the page facts script)
 R3p.6 pass: check-fits passed at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844 and 360x640
 R3o.5 pass: check-site GLYPH found no unrendered character
@@ -129,10 +129,10 @@ R3j.3 pass: no taster is shown because none is offered
 R3j.4 pass: no group discount is shown because none is offered
 R3j.5 pass: no come-back feature is shown
 R3j.6 pass: the Grand box is tagged Family size; no invented option
-R3j.7 pass: every struck price is the real price of the same items bought separately: $276 is four Mini boxes, ₪825 is three 9x13 pans; no .99 endings
+R3j.7 pass: every struck price is the real price of the same items bought separately: $276 is four Mini boxes, ₪825 is three 9x13 pans (the tag title says so); no .99 endings
 R3j.8 pass: per unit: Mini $69 feeds 3 to 4; Supreme $220 for 16 against four Minis $276; pans: three 9x13 pans ₪825 for 18 to 20 against the Roaster ₪650
 R3j.9 pass: each small group (the boxes, the pans) shows its own saving, not a lone saving
-R3j.10 pass: 20% off: (276-220)/276 = 20.3 rounded down to 20; 17% off: (255-210)/255 = 17.6 rounded down to 17 (the lower of the shekel 21 and dollar 17 figures); struck price beside the new price
+R3j.10 pass: Supreme 20% off: (276-220)/276 = 20.3 rounded down to 20, $276 struck beside $220; Roaster 21% off: (825-650)/825 = 21.2 rounded down to 21 in shekels, ₪825 struck beside ₪650, with $210 as a plain second line (no struck dollar figure); the earlier 17% was the dollar pair
 R3j.11 pass: no combined service or package exists to compare; the basket offers no switch lines
 R3j.12 pass: the owner made no savings claim; the savings shown were derived from his prices
 R3.14 pass: loud prices only because prices exist (boxes, pans, sizes), none invented
@@ -149,7 +149,7 @@ R3l.1 pass: message-to-owner.md question 7 asks what a customer can choose per s
 R3l.2 pass: each item says what it allows ("Up to 4 types of chicken and 3 sauces") on the card, the order line and the message
 R3l.3 pass: unchanged order code: choices appear once added; check-site FLOW passed
 R3l.4 pass: three boxes compared side by side, only what differs shown
-R3l.6 pass: the box photos are his own boxes; the three box cards use three of his box photos (not a photo per size): flagged in the report
+R3l.6 pass: the box photos are his own boxes; all three cards use one frame and one crop style, but no box shot of the Supreme exists (only a pile of chicken in a box on yellow), so the three read as one set by crop and not by subject: flagged for the owner
 R3l.7 pass: each card reads alone: name, feeds, what is in it, price
 R3e.9 pass: check-site STATE and FLOW passed; buttons have rest, hover and pressed states; fields have focus and error states
 R3e.19 pass: the order ends with WhatsApp opening with the written order; unchanged
@@ -167,7 +167,7 @@ R3g.4 pass: motions: letters rise, bowl drops, stickers stick, reveal fade; ease
 R3e.16 pass: grepped css and js for linear easing: none left
 R3e.17 pass: the page has no carousel or bottom sheet (the grid wraps to two columns on a phone)
 R3e.18 pass: the page has no ambient background video
-R3a.2 pass: no in-between states looked unfinished at the middle of the opening and the menu photo swap
+R3a.2 pass: no in-between states looked unfinished at the middle of the opening and the menu photo swap; on the menu page every kind now has a state of its own (his photo, or its own colour tile) and the caption always names the item shown (hover checked for Shnitzel Bites, Classic American Crunch and Buffalo Wings; tap and focus use the same handler)
 R3a.3 pass: nothing is placed on a spot in a photo; the stickers belong to the bowl element and move with it
 R3a.4 pass: no section is held; every section fits one screen (check-fits)
 R3a.5 pass: no scroll hijack; reduced motion shows the finished page (the page checks matchMedia)
@@ -179,11 +179,11 @@ R3i.3 pass: no live readout exists on the page
 R3s.21 pass: check-site BROKEN found no script errors, console errors, 404s or dead links
 
 ## 8. Phone
-R3b.6 pass: phone bar pinned at the bottom with "From $69" and Order now after the first screen; seen at 390x844
+R3b.6 pass: phone bar pinned at the bottom with "From $69" and Order now after the first screen, stepping aside while a card price or button is in its strip; seen at 390x844
 R3f.7 pass: bar fits at 360 wide (check-fits and check-site PHONE passed)
-R3a.6 pass: check-site PHONE passed (the bar never covers content)
+R3a.6 pass: the phone bar steps aside while any price or button is in the strip it covers; stepped the scroll in 100px stops on touch-emulated 390x844 and 360x640 over the whole home page: no price or button was ever under the bar
 R3s.22 pass: check-site TAP passed
-R3s.23 pass: check-site PHONE passed (no sideways scroll)
+R3s.23 pass: check-site PHONE passed (no sideways scroll); the section headings and their lines now take the same side gutter as the other pages
 R3t.1 pass: site-category food-shop on every page and in CONCEPT.md; home and shop compared with docs/inspo/awwwards-anatomy-2026-10-22/food (Best Bean Best Cup, Theobroma, La Joya)
 R3t.2 pass: BUY passed (price and Order now within the first two screens); every box and pan card has photo, name, feeds, price and Add; the kinds tiles are not for sale
 R3t.3 n/a: not a trainer site
