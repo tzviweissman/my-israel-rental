@@ -6,7 +6,7 @@ Your page is built: a home page with both doughs and their prices at the top, a 
 
 1. How far ahead should customers order (the same day, one day, two days)? Which days do you deliver?
 2. Is there a delivery fee, or is delivery in Ramat Eshkol free? What about Ramot and RBS?
-3. Can a customer order on the page and pick the dough up from Express Market (in Geula), Arzai Makolets or Good Market (on Paran)? If yes, do you drop it at the store for them, and from what time can they collect it? If not, we will take pick-up off the order form.
+3. Your flyers say the dough is now available in Express Market (in Geula), Arzai Makolets and Good Market (on Paran), so we show them as shops that stock it. Can a customer also order on the page and collect the order from one of them? If yes, from which shop, and from what time? Until you tell us, the order form offers delivery only.
 4. Which other areas do you deliver to besides Ramot and RBS, so we can name them?
 5. Is there a street address or a closing day for Arzai Makolets that we can show beside the name?
 

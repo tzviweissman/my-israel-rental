@@ -28,9 +28,9 @@ document.body.classList.remove('no-js');
     tick = 0;
     var vh = innerHeight;
     top.classList.toggle('solid', scrollY > 10);
-    // the bar waits for the first screen and is gone while the order form, the closing band or the shop stage's own buttons are on screen, so it never covers a price or button
-    var cl = document.querySelector('.close'), st = document.getElementById('doughs');
-    if (bar) bar.classList.toggle('on', scrollY > vh * .5 && (!form || form.getBoundingClientRect().top > vh) && (!cl || cl.getBoundingClientRect().top > vh) && (!st || st.getBoundingClientRect().bottom < vh * .35));
+    // the bar waits for the first screen and is gone while the order form, the closing band or the shop stage's own buttons or the home page's two dough cards are on screen, so it never covers a price or button
+    var cl = document.querySelector('.close'), st = document.getElementById('doughs'), by = document.getElementById('buy'), br = by && by.getBoundingClientRect();
+    if (bar) bar.classList.toggle('on', scrollY > vh * .5 && (!form || form.getBoundingClientRect().top > vh) && (!cl || cl.getBoundingClientRect().top > vh) && (!st || st.getBoundingClientRect().bottom < vh * .35) && (!br || br.top > vh || br.bottom < 0));
   }
   addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
   frame();

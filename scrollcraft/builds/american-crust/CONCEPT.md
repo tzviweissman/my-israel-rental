@@ -43,3 +43,6 @@ accent: the button is solid black (cream label) on light grounds and mustard (bl
 
 ## Product hero shots
 The two main product pictures are crops of their own flyer render (bagel pack) and their own photo of the tub; a plinth, ingredients and one-light hero shot (rules doc section 8) would need generation and is on the list in the reply.
+
+## Sources of words
+ESTD 5786 (in the footer and the phone bar place line) is printed on the owner's own logo (src/owner/p01.jpg), so it is theirs, not an invented year or claim. The three shops are shown as "Now available in" (their flyer words): the flyers say the dough is on their shelves, not that orders are collected there, so the order form offers delivery only until the owner answers message item 3.

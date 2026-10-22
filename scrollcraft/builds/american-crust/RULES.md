@@ -7,10 +7,10 @@ Replace every `todo`. `node scripts/check-rules.mjs scrollcraft/builds/american-
 ## 1. Facts and words
 R0b.1 n/a: local build only, nothing published; the slug is american-crust from the live record (src/record.json) and is set at publish
 R0b.3 pass: listed every price: bagel dough 30 and pizza dough 27 on index, shop and bar against the record products (ids c071ddf18cff and f0651cac7342) and the flyers; names tidied only by comma and capital (see R3k.9)
-R2.1 pass: read every sentence of the three pages; each traces to the record, the flyers (p02, p04, p05, p06) or the task facts: Boil. Bake. Brag., 6 bagels, 2 personal pies (500 g), Premium quality, Fresh and ready to use, Pareve, three stores, Ramat Eshkol, cash or Zelle, the one FAQ
-R2.2 pass: read message-to-owner.md: lead time, delivery fee and days, store pick-up, shelf life, instructions, flavours, certificate, FAQ, photos and name; nothing about tools, and nothing the record already answers
-R2.3 pass: message-to-owner.md has seven example questions written from their details (shelf life and freezer, Friday and Shabbat, delivery fee, pick-up, boil and bake, what one order makes, events), plus the first-days and photo-in-use questions
-R3.1 pass: searched every page: Premium quality, Fresh and ready to use and delivery are their own flyer words; no stars, years or awards; the hechsher is the record kosher_certification body Rabbi Akiva Dershowitz and the certificate image is asked for in message item 11; ESTD 5786 is on their logo and in the footer from the record founded year
+R2.1 pass: read every sentence of the three pages; each traces to the record, the flyers (p02, p04, p05, p06) or the task facts: Boil. Bake. Brag., 6 bagels, 2 personal pies (500 g), Premium quality and Fresh and ready to use (pizza flyer, shown for the pizza dough only), Pareve, "Now available in" the three shops, delivery in Ramat Eshkol for 25 shekels (owner fact, Tzvi 22 Oct), cash or Zelle, the one FAQ
+R2.2 pass: read message-to-owner.md: lead time, delivery days, whether orders can also be collected from the shops (item 3), shelf life, instructions, flavours, certificate, FAQ, photos and name; nothing about tools, and nothing the record already answers
+R2.3 pass: message-to-owner.md has seven example questions written from their details (shelf life and freezer, Friday and Shabbat, delivery fee, collecting from a shop, boil and bake, what one order makes, events), plus the first-days and photo-in-use questions
+R3.1 pass: searched every page: Premium quality and Fresh and ready to use (pizza flyer only, so shown for the pizza dough only) and delivery are their own flyer words; no stars, years or awards; the hechsher is the record kosher_certification body Rabbi Akiva Dershowitz and the certificate image is asked for in message item 11; ESTD 5786 is printed on their own logo (src/owner/p01.jpg), so it is theirs and is kept in the footer and bar (noted in CONCEPT.md)
 R3.2 pass: searched for only, hurry, left, limited, ends, countdown: none; Get yours today is their own closing line and offers no deadline
 R3.3 pass: searched for welcome to, look no further, one-stop, passionate, world-class, top-notch, trusted: none
 R3.4 pass: searched visible text and alt text: no exclamation marks (their flyer ones became full stops), no long dashes; capitals only in their name and ESTD from their logo; the one small shop label is sentence case, set in capitals by CSS
@@ -19,10 +19,10 @@ R3.6 n/a: English only site, the record languages are English and no Hebrew vers
 R3.7 pass: scrolled every page: the FAQ holds only their one question and answer; no reviews, no founder block, no placeholder; the owner gallery place is hidden until they add photos
 R3.8 pass: scanned every page: no logo wall, laurels, stars, counts or popular badges
 R3.9 pass: first screen against the flyers: Boil. Bake. Brag., the American dough, delivery in Ramat Eshkol, both prices; the page repeats the flyer promise
-R3.10 pass: two strengths shown, both their own words: Premium quality and Fresh and ready to use; Pareve (their word) with the hechsher named
+R3.10 pass: strengths shown are their own words: Premium quality and Fresh and ready to use only on the pizza dough (they are on the pizza flyer only); Pareve (their word) with the hechsher named for both doughs
 R5.1 pass: read every line as the owner: each names the dough, the stores, the price or the delivery; none could be printed by a competitor
 R5.2 pass: read every line: plain and direct, no jokes or teasing
-R5.3 pass: labels are full phrases: Pareve, hechsher from Rabbi Akiva Dershowitz; Find us in; Makes 2 personal pies (500 g); delivered in Ramat Eshkol, Jerusalem
+R5.3 pass: labels are full phrases: Pareve, hechsher from Rabbi Akiva Dershowitz; Now available in; Makes 2 personal pies (500 g); delivered in Ramat Eshkol, Jerusalem
 R5.4 pass: searched visible text of every page for they, them, their: none; the page speaks as we and our
 R5b.2 pass: Order goes to shop.html#order in the header bar, phone bar and closing band on every page (outline in the header, solid in the bar and band); the Add buttons are the cards add action, a different job, labelled Add
 R5b.8 pass: closing line is Get yours today from their own flyer, what the customer gets; no line starts with or or prefer; the contact lines say what each number does
@@ -56,7 +56,7 @@ R3h.14 n/a: no film: the opening is built in code from their own photos (no gene
 R3h.17 n/a: no film: the opening is built in code from their own photos (no generation allowed on this task)
 
 ## 3. Sections and worlds
-R3.12 pass: hero (opening), features (the two cards and the kitchen section with Premium quality, Fresh and ready to use, Pareve), a closing call-to-action band with Order, the phone numbers and the giant name
+R3.12 pass: hero (opening), features (the two cards and the kitchen section with Pareve; Premium quality and Fresh and ready to use show on the pizza stage in the shop), a closing call-to-action band with Order, the phone numbers and the giant name
 R3c.1 pass: CONCEPT.md cites five saved inspo pictures plus two Mobbin searches and an Inspo recommend of 22 Oct; check-concept passes; the pick and reason are in Chosen
 R3g.17 pass: CONCEPT.md names where each effect came from: effects library entries B9, L6, R5 and H4 and inspo pictures for T4 and P6, and fresh Mobbin and Inspo searches for the cards; the 21st search failed three times with a catalog error and is said so; nothing reused from the last two pages (check-fingerprints passes)
 R3c.2 pass: whole page at 1440 wide: mustard, black and cream from their brand with condensed type, not cream with a serif and an italic word; the black stores and closing bands and the black pizza card are contrasting grounds
@@ -76,7 +76,7 @@ R3k.1 pass: pages are index, shop and contact; the menu and the order are one pa
 R3k.2 pass: identical bar on all three pages: name to Home, Home Shop Contact with aria-current, the one Order button with the basket count; on a phone it folds into Menu and Close and closes on Escape or a link tap (kit site.js)
 R3k.4 pass: one site.css and one site.js serve every page; the card info block is .info, the opening is .open, the reveal state is .in only on .rev, no shared state reuses a page class
 R8a.1 pass: viewed the source: no 21st or generated component code was used (the search failed); no external script or image hosts except Google Fonts css
-R3b.4 pass: few photos: facts carry the page (two cards, three stores, delivery and payment tiles); nothing padded
+R3b.4 pass: few photos: facts carry the page (two cards, the three shops that stock the dough as plain text, delivery and payment tiles); nothing padded
 R3c.3 pass: worries answered where they arise: parve answered in the cards and the FAQ, delivery area and payment in the tiles and under the address field
 R3c.8 n/a: the owner has not said what happens after the order; asked in message items 1 to 3
 R3e.10 pass: cards read name (32 px), what it is, makes line, then the price big with Add; site ALIGN passes; the longest name wraps to two lines
@@ -93,8 +93,8 @@ R5b.6 pass: no scroll cue, no counters; the only label above a heading is the sm
 R3.13 pass: no doubled contact: the close band holds the numbers on the home and shop pages and the contact page shows them once in its tiles with a close band that has only the line and button; no empty dividers; the gallery is hidden, not under 3 photos
 R3a.1 pass: walked 1440x900 and 1280x650 laptops plus 390x844 and 360x640 touch phones, all three pages, normal and reduced motion (check-site MEDIA), top to bottom in 100 px stops on phones; English only
 R3r.1 pass: run on index, shop and contact after the last edit: check-site, check-fits, check-motion, readable, clipped, check-fingerprints, check-concept; cutoff is n/a (no held section)
-R3r.2 fix: waiting for the independent reviewer
-R3g.12 pass: walked the whole order with external requests blocked on a local page: basket from the home Add buttons, pizza stage, pick-up from Good Market, name and phone, and the WhatsApp message was read (items, total 84, pick-up store, day); the order POST fails here because no local API runs, and WhatsApp still opens; nothing was sent to the owner
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; findings fixed and re-checked (ESTD 5786 kept: on their logo)
+R3g.12 pass: walked the whole order at 390x844 with external requests blocked and the order POST intercepted: basket from the home Add buttons, delivery address, a Saturday refused in the picker with a message, the next Monday accepted, name and phone; the POST carried fulfilment delivery, product ids c071ddf18cff x1 and f0651cac7342 x2; the WhatsApp message listed items, Delivery: 25, Total 109, address, day and the tracking link; a refused save shows a short message and WhatsApp still opens; nothing was sent to the owner
 R0b.12 n/a: nothing published yet
 
 ## 4. Photos and media
@@ -120,7 +120,7 @@ R3p.6 pass: check-fits.mjs: every section and photo fits at 1280x650, 1440x900, 
 R3o.5 pass: check-site GLYPH passes: the shekel sign comes from Heebo, the arrow is drawn in CSS
 
 ## 5. Prices and savings
-R3c.5 pass: choices are tiles (the two dough pickers, delivery or pick-up, the three stores); no select element; no popular badge
+R3c.5 pass: choices are tiles (the two dough pickers, the far-address tick); no select element; no popular badge
 R3c.6 pass: Add on the stage says Add, with the number (Add, 30 shekels); the cards say Add beside the price; the step button names the next step and the last one names the day and the total
 R3c.7 n/a: no offers
 R3j.1 pass: no guarantee shown because none is offered; asked in message item 10
@@ -138,7 +138,7 @@ R3j.12 n/a: the owner made no savings claim
 R3.14 pass: loud prices on a two-product food shop with fixed prices; both prices come from the record
 
 ## 6. Order and booking flow
-R3k.7 pass: site FLOW passes: Step 1 basket, Step 2 delivery or pick-up and the day, Step 3 details, three-step bar, order and total beside every step, button names the next step then the total, Back, browser back goes back one step, each step checks only its fields
+R3k.7 pass: site FLOW passes: Step 1 basket, Step 2 delivery address and the day (delivery only until the owner answers message item 3), Step 3 details, three-step bar, order and total beside every step with the 25 shekel delivery line, button names the next step then the total, Back, browser back goes back one step, each step checks only its fields
 R3k.8 pass: every basket line has a 40 px bin button labelled Remove X from the basket beside its stepper; check-site TAP passes
 R3k.6 pass: home Add buttons put the dough in the basket (localStorage) and the shop shows it with the total (walked: one bagel and two pizza gave 84)
 R3k.9 pass: check-site SAVE passes: the order is POSTed through the order form of the listing 4ed30fc8 before WhatsApp opens, with the product ids c071ddf18cff (30) and f0651cac7342 (27), and WhatsApp still opens if the POST fails; the page names match the listing except the comma, the capital and the exclamation mark tidied; the saved copy in the owner dashboard can only be read after publishing because no local API runs
