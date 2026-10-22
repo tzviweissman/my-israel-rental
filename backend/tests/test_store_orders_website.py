@@ -223,3 +223,23 @@ def test_mixed_currencies_are_refused(dollar_store):
         "fulfilment": "pickup", "date": day, "customer_name": "Mixed", "customer_phone": "054-1234567",
     }, timeout=30)
     assert r.status_code == 400 and "currenc" in r.text
+
+
+def test_any_listing_with_products_takes_website_orders(owner):
+    """Tzvi, 22 Oct 2026: a business site saves its order through the order
+    form before WhatsApp opens, and some of those businesses are service
+    listings that also sell products. A listing with products is orderable
+    whatever its type; one without products still is not."""
+    biz = requests.post(f"{BASE}/marketplace/businesses", json={"name": "TEST_web platters"}, headers=_auth(owner), timeout=30).json()
+    def listing(products):
+        r = requests.post(f"{BASE}/marketplace/gigs", json={
+            "title": "TEST_web platters", "description": "service listing", "category": "events-catering", "area": "Jerusalem",
+            "gig_type": "deliverable", "budget_currency": "ILS", "booking_mode": "whatsapp", "whatsapp": "+972501234567",
+            "gallery": ["https://example.com/g.jpg"], "products": products,
+        }, headers=_auth(owner), timeout=30)
+        assert r.status_code in (200, 201), r.text
+        return r.json()["id"]
+    with_products = listing([{"name": "Small platter", "price": 300, "currency": "ILS", "images": ["https://example.com/p.jpg"]}])
+    without = listing([])
+    assert requests.get(f"{BASE}/marketplace/order-form/{with_products}", timeout=30).status_code == 200
+    assert requests.get(f"{BASE}/marketplace/order-form/{without}", timeout=30).status_code == 404
