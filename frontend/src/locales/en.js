@@ -1328,6 +1328,31 @@ const en = {
             body: "Someone buying in person? Tap what they took, choose cash, card or Bit, and record it. It counts in today's totals, your sales summary and your stock, and “Cancel sale” undoes a mistake.",
             doIt: "Record a sale",
           },
+          b_badge: {
+            title: "Your stars on your own website",
+            body: "A small badge with your rating and number of reviews here, for your website or link-in-bio page. It keeps itself up to date, and clicking it opens your page. Download it as a picture for Instagram or a flyer too.",
+            doIt: "Get my badge",
+          },
+          b_quotes: {
+            title: "Send a price, get a yes",
+            body: "After a call or a visit, send the price as a link on WhatsApp, broken into lines if you like. The customer sees the details and accepts with one tap, and an accepted price becomes a payment request in one more.",
+            doIt: "Send a price",
+          },
+          b_payreq: {
+            title: "Get paid by message",
+            body: "Type an amount and what it is for, and send the customer a link on WhatsApp. They pay with your own Bit, PayBox or Grow link and press “I have paid”; you mark it paid once the money is in. We never touch the money.",
+            doIt: "Request a payment",
+          },
+          b_occasions: {
+            title: "Holidays and customers you miss",
+            body: "Before each holiday we remind you and write the message for you to finish: your holiday hours and what you offer. Customers who have not been back in a while get a “what’s new” note. Every email has an unsubscribe link.",
+            doIt: "Write a message",
+          },
+          b_leads: {
+            title: "No enquiry forgotten",
+            body: "Every chat, quote request and price you sent, in columns: new, replied, price sent, won, lost. Add a phone call yourself and move a card when it changes, so you always know who is waiting for you.",
+            doIt: "Add a lead",
+          },
           b_orders: {
             title: 'Orders without the spreadsheet',
             body: "Paste a WhatsApp order and the form fills itself. Your staff and your courier each see their own list, and the customer gets a link that says where the order is. Someone who fills a basket on your page and leaves gets one reminder to finish, and people can ask to be told when a sold-out product is back. The form suggests what goes with the order, which you choose per product, and a finished order has an \"Order again\" button. No commission.",

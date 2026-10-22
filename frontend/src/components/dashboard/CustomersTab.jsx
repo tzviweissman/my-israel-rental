@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
+import { useSearchParams } from 'react-router-dom';
 import { Loader2, Search, Download, Upload, Users, X, Phone, MessageCircle, Tag, Mail, Banknote } from 'lucide-react';
 import { money } from '../../utils/currency';
 import { stateLabel } from '../members/memberText';
@@ -175,6 +176,15 @@ export default function CustomersTab({ API, token }) {
   // The customer list, or the leads board (leads.py). ?view=leads opens the board.
   const [view, setView] = useState(() => { try { return new URLSearchParams(window.location.search).get('view') === 'leads' ? 'leads' : 'list'; } catch { return 'list'; } });
   // ?pay=1: the notification "a customer says they paid" opens the requests.
+  const [searchParams, setSearchParams] = useSearchParams();
+  useEffect(() => {
+    const v = searchParams.get('view');
+    if (v !== 'leads' && v !== 'list') return;
+    setView(v);
+    const next = new URLSearchParams(searchParams);
+    next.delete('view');
+    setSearchParams(next, { replace: true });
+  }, [searchParams, setSearchParams]);
   const [paying, setPaying] = useState(() => { try { return new URLSearchParams(window.location.search).get('pay') === '1'; } catch { return false; } });
 
   useEffect(() => {
@@ -232,10 +242,10 @@ export default function CustomersTab({ API, token }) {
               {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
           )}
-          {(biz.permissions || []).includes('messages') && <button type="button" onClick={() => setComposing(true)} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-email">
+          {(biz.permissions || []).includes('messages') && <button type="button" onClick={() => setComposing(true)} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-email" data-tour="customers-email">
             <Mail size={14} /> {t('messages.open', 'Email customers')}
           </button>}
-          {(biz.permissions || []).includes('orders') && <button type="button" onClick={() => setPaying(!paying)} aria-pressed={paying} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-payreq">
+          {(biz.permissions || []).includes('orders') && <button type="button" onClick={() => setPaying(!paying)} aria-pressed={paying} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-payreq" data-tour="customers-payreq">
             <Banknote size={14} /> {t('payReq.open', 'Request a payment')}
           </button>}
           <button type="button" onClick={() => setImporting(!importing)} aria-pressed={importing} className={`${chip} inline-flex items-center gap-1.5 min-h-[44px]`} style={fieldStyle} data-testid="customers-import">

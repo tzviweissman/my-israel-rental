@@ -41,9 +41,12 @@ export default function LeadsBoard({ API, auth, businessId }) {
     const mins = Math.max(1, Math.round((Date.now() - new Date(iso).getTime()) / 60000));
     if (mins < 2) return t('leads.justNow', 'Just now');
     const rtf = new Intl.RelativeTimeFormat(String(i18n.language || '').startsWith('he') ? 'he' : 'en', { numeric: 'auto' });
-    if (mins < 60) return rtf.format(-mins, 'minute');
-    if (mins < 60 * 24) return rtf.format(-Math.round(mins / 60), 'hour');
-    return rtf.format(-Math.round(mins / 1440), 'day');
+    // Chrome's Hebrew adds the number in brackets to the singular and the
+    // dual ("לפני שעתיים (2)"); the word already says it.
+    const f = (n, unit) => rtf.format(-n, unit).replace(/\s*\(\d+\)/, '');
+    if (mins < 60) return f(mins, 'minute');
+    if (mins < 60 * 24) return f(Math.round(mins / 60), 'hour');
+    return f(Math.round(mins / 1440), 'day');
   };
 
   const move = async (c, stage) => {
@@ -67,14 +70,14 @@ export default function LeadsBoard({ API, auth, businessId }) {
   if (data === false) return <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>{t('leads.loadFailed', 'Could not load your leads. Refresh to try again.')}</p>;
 
   return (
-    <div data-testid="leads-board">
+    <div data-testid="leads-board" data-tour="leads-board">
       <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
         <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>
           {t('leads.body', 'Every enquiry in one place: chats about your listings, quote requests and the prices you sent. Add a phone call yourself, and move a card when it changes.')}
         </p>
         {!adding && (
           <button type="button" onClick={() => setAdding(true)} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold"
-                  style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="leads-add-open">
+                  style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="leads-add-open" data-tour="leads-add-open">
             <Plus size={14} /> {t('leads.add', 'Add a lead')}
           </button>
         )}

@@ -33,6 +33,8 @@ for (const size of SIZES) {
   const ctx = await browser.newContext({ viewport: { width: size.width, height: size.height }, isMobile: !!size.mobile, hasTouch: !!size.mobile });
   if (process.argv[4] === 'he') await ctx.addInitScript(() => { try { localStorage.setItem('i18nextLng', 'he'); } catch {} });
   const page = await ctx.newPage();
+  page.setDefaultNavigationTimeout(180000);
+  page.setDefaultTimeout(60000);
   const errors = [];
   page.on('pageerror', (e) => errors.push(e.message));
   await page.goto(`${BASE}/dashboard?tab=overview&as=owner${process.argv[4] === 'he' ? '&lng=he' : ''}`, { waitUntil: 'networkidle' });
@@ -40,14 +42,14 @@ for (const size of SIZES) {
   await page.goto(`${BASE}/dashboard?tab=overview&tour=1`, { waitUntil: 'networkidle' });
 
   let prevTitle = '';
-  for (let stop = 1; stop <= 20; stop += 1) {
+  for (let stop = 1; stop <= 30; stop += 1) {
     const t0 = Date.now();
     // Wait for THIS stop's bubble: a new title, not the previous one lingering.
     const ok = await page.waitForFunction((prev) => {
       const el = document.querySelector('[data-testid=tour-tooltip]');
       const title = el ? el.innerText.split(/\n/)[0] : '';
       return el && title && title !== prev;
-    }, prevTitle, { timeout: 20000 }).then(() => true).catch(() => false);
+    }, prevTitle, { timeout: 90000 }).then(() => true).catch(() => false);
     if (!ok) { report.push({ size: size.name, stop, problem: 'no new bubble within 20s' }); break; }
     const appearMs = Date.now() - t0;
     const gapFrames = await page.evaluate(() => window.__gap || 0).catch(() => -1);

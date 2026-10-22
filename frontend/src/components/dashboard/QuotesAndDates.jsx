@@ -143,7 +143,7 @@ export default function QuotesAndDates({ API, token }) {
               inbox underneath it. */}
           {bizId && !writing && (
             <button type="button" onClick={() => setWriting(true)} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold mb-3"
-                    style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="quote-new-open">
+                    style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="quote-new-open" data-tour="quote-new-open">
               {t('quoteSend.open', 'Send a price')}
             </button>
           )}
