@@ -43,7 +43,6 @@ OPENING = f'''  <section class="scene" id="scene" aria-label="Noa Levi, home sty
     <div class="pin">
       <img class="hs-bg" src="assets/drawer-before.webp" alt="" width="565" height="565" aria-hidden="true">
       <div class="hs-copy">
-        <p class="caps">Jerusalem and Beit Shemesh</p>
         <h1><span class="l1">We organize your home.</span><span class="l2">You gain <span class="acc">peace of mind.</span></span></h1>
         <p class="sub">We sort, tidy and set up storage, so the result is easy to keep.</p>
         <div class="hs-actions"><a class="btn" href="book.html">Book a session</a></div>
@@ -69,11 +68,25 @@ BAND = f'''  <section class="band sec" id="what" aria-labelledby="h-what">
           <p>When we come in to sort and organize, it is very important to us to focus on practicality and make sure the result is clean, tidy and easy to use.</p>
           <p>During the session itself, we bring along storage solutions and boxes tailored to your needs, ones that will help maintain the order over time.</p>
         </div>
+        <ol class="steps3 rev"><li><i>01</i><b>Sort</b><span>Everything out, what stays and what goes.</span></li><li><i>02</i><b>Tidy</b><span>Clean and in order.</span></li><li><i>03</i><b>Set up storage</b><span>Boxes tailored to you, so it is easy to keep.</span></li></ol>
       </div>
       <div class="rev">
         <p class="caps">What we do</p>
         <ul class="svc-list">{svc_rows}</ul>
       </div>
+    </div>
+  </section>
+'''
+
+TILES = '''  <section class="sec tiles" id="rooms" aria-labelledby="h-rooms">
+    <div class="wrap">
+      <p class="caps">Rooms we sort</p>
+      <h2 id="h-rooms" class="hd rev">Real rooms, sorted.</h2>
+      <ul class="tile-row rev">
+        <li class="t1"><a href="#work"><span class="t-n">01</span><img src="assets/pantry-after.webp" alt="A kitchen cupboard shelf with labelled jars in rows" width="1536" height="527" loading="lazy" style="object-position:70% 50%"><b>Kitchen cupboard</b><small>Loose bags into labelled jars</small></a></li>
+        <li class="t2"><a href="#work"><span class="t-n">02</span><img src="assets/linen-after.webp" alt="A linen cupboard with towels and sheets folded in neat stacks" width="565" height="565" loading="lazy"><b>Linen cupboard</b><small>Towels and sheets in neat stacks</small></a></li>
+        <li class="t3"><a href="#work"><span class="t-n">03</span><img src="assets/drawer-after.webp" alt="A clothes drawer with clothes rolled in separate compartments" width="565" height="565" loading="lazy"><b>Clothes drawer</b><small>Clothes rolled into compartments</small></a></li>
+      </ul>
     </div>
   </section>
 '''
@@ -214,7 +227,7 @@ PIC_B = pic('after', 'assets/pantry-after.webp', 1536, 527, 'The same shelf with
 
 SITE.write('index', 'Noa Levi · Home styling and organizing in Jerusalem and Beit Shemesh',
            'Closet organizing, home organizing, home styling and personal shopping with Noa Levi in Jerusalem and Beit Shemesh. ₪160 an hour, accessories not included.',
-           'og.webp', OPENING + PIC_A + BAND + PIC_B + WORK + PRICING + kit.gallery('From our sessions'), OPENING_JS)
+           'og.webp', OPENING + TILES + BAND + WORK + PRICING + kit.gallery('From our sessions'), OPENING_JS)
 
 # ---------- book ----------
 svc_opts = ''.join(f'<label class="opt"><input type="radio" name="svc" value="{k}"><span class="box">{n}</span></label>' for k, n in SERVICES)
@@ -420,3 +433,19 @@ for pg in ('index','book','contact'):
     t=open(pg+'.html',encoding='utf8').read().replace('<span class="arw" aria-hidden="true">→</span>','<span class="arw" aria-hidden="true">'+ARW+'</span>')
     open(pg+'.html','w',encoding='utf8').write(t)
 print('built')
+
+# every page declares its category (rule 3t)
+for _f in ('index.html', 'book.html', 'contact.html'):
+    _h = open(_f, encoding='utf8').read()
+    if 'site-category' not in _h:
+        _h = _h.replace('<meta name="viewport"', '<meta name="site-category" content="service">\n<meta name="viewport"', 1)
+        open(_f, 'w', encoding='utf8').write(_h)
+
+# one footer with link columns on every page (rule 3t.4)
+_FOOT = ('<footer class="foot foot-cols"><div class="fc"><b>Pages</b><a href="index.html">Home</a><a href="book.html">Book a session</a><a href="contact.html">Contact</a></div>'
+         '<div class="fc"><b>Where</b><span>Jerusalem and Beit Shemesh</span><span>09:00 to 23:00</span></div>'
+         '<div class="fc"><b>Contact</b><a href="https://wa.me/972556730875" target="_blank" rel="noopener">WhatsApp or call +972 55 673 0875</a><a href="mailto:noare2133@gmail.com">Email</a><span>Noa Levi, Home Styling &amp; Organizing &middot; on <a href="/">MyIsraelRental</a>, free to list, no commission</span></div></footer>')
+for _f in ('index.html', 'book.html', 'contact.html'):
+    _h = open(_f, encoding='utf8').read()
+    _h = re.sub(r'<footer class="foot">.*?</footer>', lambda m: _FOOT, _h, count=1, flags=re.S)
+    open(_f, 'w', encoding='utf8').write(_h)

@@ -22,11 +22,15 @@ def page(name, title, desc, body, scripts='', order=False):
       <li><a href="kitchen.html">Whole kitchen</a></li>
       <li><a href="pots.html">Pots and cutlery</a></li>
     </ul>'''
-    cta = '' if order else btn('Book', 'book.html')
-    foot = '' if order else f'''
-<footer class="foot">
-  <span>KasherMyBnb, kitchen kashering in Jerusalem and across Israel, since 2019</span>
-  <nav><a href="index.html">Home</a><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book</a><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></nav>
+    cta = '' if order else btn('Book a kashering', 'book.html')
+    foot = '''
+<footer class="foot after big">
+  <p class="last">Settle in, ready to use.</p>
+  <div class="foot-cols">
+    <nav class="foot-nav" aria-label="Pages"><b>Pages</b><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book a kashering</a></nav>
+    <div class="foot-nav"><b>Where</b><span>Jerusalem and across Israel</span><span>English and Hebrew</span><span>Since 2019</span></div>
+    <div class="foot-nav"><b>Contact</b><span>Message us on WhatsApp</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+  </div>
 </footer>'''
     html = f'''<!doctype html>
 <!-- KasherMyBnb, {name}. Written by gen/pages.py; facts from BRIEF.md only. -->
@@ -34,8 +38,12 @@ def page(name, title, desc, body, scripts='', order=False):
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="site-category" content="service">
 <title>{title}</title>
 <meta name="description" content="{desc}">
+<meta property="og:title" content="{title}">
+<meta property="og:description" content="{desc}">
+<meta property="og:image" content="assets/kitchen.webp">
 <link rel="icon" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -88,7 +96,7 @@ page('kitchen.html', 'Whole kitchen kashering · KasherMyBnb',
         <p class="lede">We kasher your kitchen so you can settle in with confidence, knowing it is fully prepared, strictly kosher, and ready to use.</p>
         <div class="tag"><b>$350</b><span>about 2 hours, Jerusalem price</span></div>
         <div class="act">
-          {btn('Book a kitchen', 'book.html?s=kitchen')}
+          {btn('Book a kashering', 'book.html?s=kitchen')}
           <a class="link" href="#included">See what is included</a>
         </div>
         <ul class="sure">
@@ -144,7 +152,7 @@ page('kitchen.html', 'Whole kitchen kashering · KasherMyBnb',
     <div class="wrap">
       <div class="close">
         <div><h2>Your kitchen, ready to use.</h2><p>$350, about 2 hours. You choose a day; we confirm it with you on WhatsApp.</p></div>
-        {btn('Book a kitchen', 'book.html?s=kitchen')}
+        {btn('Book a kashering', 'book.html?s=kitchen')}
       </div>
     </div>
   </section>
@@ -163,7 +171,7 @@ page('pots.html', 'Pots, cutlery and utensils · KasherMyBnb',
         <p class="lede">Bring your own pots, cutlery and kitchen utensils into a kosher kitchen. We kasher them in one visit, with the kitchen or on their own.</p>
         <div class="tag"><b>$180</b><span>about 1 hour, Jerusalem price</span></div>
         <div class="act">
-          {btn('Book pots and cutlery', 'book.html?s=pots')}
+          {btn('Book a kashering', 'book.html?s=pots')}
           <a class="link" href="#can">What we can kasher</a>
         </div>
         <ul class="sure">
@@ -208,7 +216,7 @@ page('pots.html', 'Pots, cutlery and utensils · KasherMyBnb',
     <div class="wrap">
       <div class="close">
         <div><h2>Pots and cutlery, ready to use.</h2><p>$180, about 1 hour. Add the kitchen on the next step if you need it.</p></div>
-        {btn('Book pots and cutlery', 'book.html?s=pots')}
+        {btn('Book a kashering', 'book.html?s=pots')}
       </div>
     </div>
   </section>
