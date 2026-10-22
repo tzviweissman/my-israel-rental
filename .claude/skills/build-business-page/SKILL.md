@@ -1169,3 +1169,5 @@ pass before a site is shown to Tzvi or the owner or published. It fails when a l
 unanswered, when a fix is open, or when the site changed after RULES.md was written. Briefs to helpers
 point at the whole checklist, never at chosen sections. A rule added here is added to the checklist the
 same day, with its check.
+
+- **Every order is saved before WhatsApp opens** (Tzvi, 22 Oct 2026): the order button POSTs the order to MyIsraelRental first (order form endpoint, as Chicken Munch does), then opens WhatsApp with the message typed; every product on the site exists in the listing; check-site SAVE enforces it. Rules doc 3k.
