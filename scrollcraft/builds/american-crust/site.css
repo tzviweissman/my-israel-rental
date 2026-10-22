@@ -152,34 +152,32 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
 .pr::after { content: ''; position: absolute; left: 0; right: 0; bottom: -.2em; height: .09em; background: var(--mustard); }
 .sym { font-size: .55em; }
 
-/* the opening: Boil. Bake. Brag. land word by word while their raw dough drops into the ring and the baked bagels wipe over it */
-.open { background: var(--mustard); padding-top: var(--top-h); height: clamp(398px, calc(100svh - 262px), 760px); overflow: hidden; }
-.open .wrap { height: 100%; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, .85fr); align-items: center; gap: 1rem; padding-block: 1rem 1.4rem; }
-.open .kick { margin-bottom: .2rem; }
-.open h1 { font-size: clamp(3.4rem, min(calc((100svh - 460px) / 2.7), 22vw), 9.5rem); line-height: .9; }
-.open h1 .w { display: block; animation: land 760ms var(--out) both; }
-.open h1 .w1 { animation-delay: 150ms; } .open h1 .w2 { animation-delay: 1500ms; } .open h1 .w3 { animation-delay: 2700ms; }
+/* the opening (rule 3h): a full-screen film, their dough boiled, baked and bragged about; each word lands on its chapter */
+.open { position: relative; height: 100svh; min-height: 520px; overflow: hidden; background: var(--night); color: var(--cream); }
+.film { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.open::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgba(20, 20, 20, .88) 0%, rgba(20, 20, 20, .72) 34%, rgba(20, 20, 20, .3) 52%, rgba(20, 20, 20, 0) 68%), linear-gradient(0deg, rgba(20, 20, 20, .6), rgba(20, 20, 20, 0) 35%); }
+.open .wrap { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 1.4rem; padding-top: var(--top-h); }
+.open h1 { font-size: clamp(3rem, min(10vw, 10svh), 6.5rem); line-height: .9; color: var(--cream); }
+.open h1 .w { display: block; }
+.open .lede { margin: 0; font-size: 1.2rem; max-width: 24rem; color: var(--cream); }
+.open .end { display: grid; gap: 1.1rem; justify-items: start; }
+.open .btn { background: var(--mustard); color: var(--ink); }
+.open.playing h1 .w, .open.playing .end { opacity: 0; }
+.open.c1 .w1, .open.c2 .w2, .open.c3 .w3 { animation: land 760ms var(--out) both; }
+.open.c4 .end { animation: fadein 700ms var(--out) both; }
+.open.c1 .w1 { color: var(--mustard); } .open.c2 .w1 { color: var(--cream); } .open.c2 .w2 { color: var(--mustard); } .open.c3 .w2 { color: var(--cream); } .open.c3 .w3 { color: var(--mustard); }
 @keyframes land { from { opacity: 0; transform: translateY(-.35em) scale(1.12); filter: blur(7px); } to { opacity: 1; transform: none; filter: none; } }
-.open .lede { margin: 1rem 0 0; font-size: 1.125rem; max-width: 26rem; color: var(--night); animation: fadein 700ms var(--out) 3200ms both; }
-@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
-.ring { position: relative; justify-self: center; width: min(100%, 600px, calc(100svh - 360px)); min-width: 150px; aspect-ratio: 1; animation: drop 900ms var(--out) 100ms both, stamp 500ms var(--out) 2700ms both; }
-.disc { position: absolute; inset: 0; border-radius: 50%; overflow: hidden; border: clamp(5px, .9vw, 9px) solid var(--night); background: var(--cream); }
-.disc img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.disc .baked { animation: wipe 1000ms cubic-bezier(.6, 0, .3, 1) 1500ms both; }
-@keyframes drop { from { opacity: 0; transform: translateY(-70svh) rotate(-16deg); } to { opacity: 1; transform: none; } }
-@keyframes wipe { from { clip-path: circle(0% at 50% 50%); } to { clip-path: circle(75% at 50% 50%); } }
-@keyframes stamp { 0% { transform: scale(1); } 45% { transform: scale(1.045); } 100% { transform: scale(1); } }
-.ring::before, .ring::after { content: ''; position: absolute; inset: 0; border-radius: 50%; border: 3px solid var(--night); opacity: 0; animation: boil 1100ms ease-out both; }
-.ring::before { animation-delay: 850ms; } .ring::after { animation-delay: 1150ms; }
-@keyframes boil { 0% { opacity: .55; transform: scale(1); } 100% { opacity: 0; transform: scale(1.22); } }
+@keyframes fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+.pause { position: absolute; z-index: 2; right: var(--gutter); bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 1.5px solid rgba(254, 247, 229, .7); background: rgba(20, 20, 20, .35); color: var(--cream); font: 600 .9rem/1 var(--font-body); cursor: pointer; }
+.pause { transition: background 160ms var(--out), transform 160ms var(--out); } .pause:hover { background: rgba(20, 20, 20, .7); } .pause:active { transform: scale(.94); }
 @media (max-width: 760px) {
-  .open { height: auto; min-height: 340px; }
-  .open .wrap { grid-template-columns: minmax(0, 1fr) minmax(0, .8fr); padding-block: .6rem 1rem; }
-  .open h1 { font-size: clamp(3.6rem, 21vw, 5.6rem); }
-  .ring { width: min(100%, 44vw, 260px); }
-  .open .lede { font-size: 1rem; }
+  .film { object-position: 62% 50%; }
+  .open::before { background: linear-gradient(0deg, rgba(20, 20, 20, .92) 0%, rgba(20, 20, 20, .8) 50%, rgba(20, 20, 20, .25) 80%); }
+  .open .wrap { justify-content: flex-end; padding-bottom: 5rem; }
+  .open h1 { font-size: clamp(3rem, 15vw, 4.4rem); }
+  .open .lede { font-size: 1.05rem; }
 }
-@media (prefers-reduced-motion: reduce) { .open h1 .w, .open .lede, .ring, .disc .baked, .ring::before, .ring::after { animation: none !important; } .disc .baked { clip-path: none; } .ring::before, .ring::after { display: none; } }
+@media (prefers-reduced-motion: reduce) { .open h1 .w, .open .end { animation: none !important; opacity: 1 !important; } }
 
 /* the two products as cards, right under the opening: colour per product (mustard-light, night) */
 .buy { background: var(--mustard); padding: 0 var(--gutter) clamp(1.2rem, 3vh, 2rem); }

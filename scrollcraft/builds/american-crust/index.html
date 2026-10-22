@@ -25,13 +25,15 @@
 </header>
 <main>
   <section class="open" aria-labelledby="h-open">
+    <video class="film" id="film" muted playsinline preload="auto" poster="assets/film-poster.webp" aria-hidden="true"><source src="assets/opening.mp4" type="video/mp4"></video>
     <div class="wrap">
-      <div>
-        <h1 id="h-open"><span class="w w1">Boil.</span><span class="w w2">Bake.</span><span class="w w3">Brag.</span></h1>
+      <h1 id="h-open"><span class="w w1">Boil.</span><span class="w w2">Bake.</span><span class="w w3">Brag.</span></h1>
+      <div class="end">
         <p class="lede">The American bagel and pizza dough that you've been missing, delivered in Ramat Eshkol, Jerusalem, for ₪25.</p>
+        <a class="btn" href="#buy">Order your dough</a>
       </div>
-      <div class="ring" aria-hidden="true"><div class="disc"><img class="raw" src="assets/bagel-dough.webp" alt="" width="590" height="443"><img class="baked" src="assets/baked-bagels.webp" alt="" width="760" height="760"></div></div>
     </div>
+    <button class="pause" type="button" id="film-pause" aria-label="Pause the film">Pause</button>
   </section>
   <section class="buy" id="buy" aria-label="Our doughs">
     <div class="pcs">
@@ -131,6 +133,21 @@
       window.siteToast('Added: ' + NAMES[k]); b.classList.add('added'); b.querySelector('span').textContent = 'Added'; setTimeout(function () { b.classList.remove('added'); b.querySelector('span').textContent = 'Add'; }, 1100);
     });
   });
+  // the opening film (rule 3h): each word lands on its own chapter, the line and the button when the bagels are out
+  var v = document.getElementById('film'), op = v && v.closest('.open'), pb = document.getElementById('film-pause');
+  if (v) {
+    var marks = [[.2, 'c1'], [4.8, 'c2'], [7.0, 'c3'], [8.2, 'c4']];
+    var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    function at(t) { marks.forEach(function (m) { op.classList.toggle(m[1], t >= m[0]); }); }
+    if (still) { at(99); pb.hidden = true; }
+    else {
+      op.classList.add('playing');
+      v.addEventListener('timeupdate', function () { at(v.currentTime); });
+      v.addEventListener('ended', function () { at(99); pb.hidden = true; });
+      var go = v.play(); if (go && go.catch) go.catch(function () { at(99); pb.hidden = true; });
+      pb.addEventListener('click', function () { if (v.paused) { v.play(); pb.textContent = 'Pause'; pb.setAttribute('aria-label', 'Pause the film'); } else { v.pause(); pb.textContent = 'Play'; pb.setAttribute('aria-label', 'Play the film'); } });
+    }
+  }
   // tile T4: a product card tilts a few degrees toward the pointer (mouse only, never with reduced motion)
   if (matchMedia('(hover: hover) and (pointer: fine) and (prefers-reduced-motion: no-preference)').matches) {
     [].forEach.call(document.querySelectorAll('[data-tilt]'), function (c) {
