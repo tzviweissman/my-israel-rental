@@ -1265,6 +1265,15 @@ the rest is looked at by someone who did not build it:
    a script or a checklist line the same day.
 
 
+**Every rule, every site, before anyone sees it (Tzvi, 22 Oct 2026: "why do we keep skipping rules").**
+`docs/rules-checklist.md` lists every rule that can be judged on a finished site, each with how it is
+checked (a script, or what exactly to look at). Each build keeps a `RULES.md` answering every line
+(`pass:`, `n/a:` or `fix:`, with what was looked at), and `node scripts/check-rules.mjs <build>` must
+pass before a site is shown to Tzvi or the owner or published. It fails when a line is missing or
+unanswered, when a fix is open, or when the site changed after RULES.md was written. Briefs to helpers
+point at the whole checklist, never at chosen sections. A rule added here is added to the checklist the
+same day, with its check.
+
 ## 3s. Feels like a real, high-end website, and checked for glitches (Tzvi, 20 Oct 2026)
 
 From nine design videos Tzvi sent ("learn and tell me how we can apply them to our pages to make them
