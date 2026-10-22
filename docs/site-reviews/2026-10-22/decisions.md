@@ -13,4 +13,6 @@
 
 5. **Gift Boutique, build your own gift: yes** (Tzvi, 22 Oct). The order page lets a customer pick single pieces (napkin holders, bowls, place mats, glasses, openers, baby items) into one gift, with a running total. The order is saved, then sent on WhatsApp, the same way as the other orders. The ready-made gifts stay as they are. Ask the owner how the wrapping or box is priced and whether there is a minimum before building the price line.
 
+6. **Gift Boutique: the owner enters her own products and photos on the site** (Tzvi, 22 Oct). Her page and order page already read her shop live (`mir-catalog.js`, including `p.image`), so what she adds shows up without a rebuild. **Never run `gen/catalog/load_products.py --apply` again:** it replaces her shop's products and would wipe her entries. `products.json` is now only a fallback. Build-your-own must read the same live products, not a copied list.
+
 Next: apply these, re-run the checks and `check-rules` on every site you touch, commit, and show Tzvi. Don't push or publish until he says so.
