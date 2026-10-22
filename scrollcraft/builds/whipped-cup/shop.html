@@ -148,7 +148,12 @@
   // Each package says what it allows, and its choices sit under it (page
   // rules 3l): the Duo and the Cloud Bundle mix any flavours to exactly 2 or
   // 6 jars, One Flavour is one flavour, Assorted is a mix of all three.
-  var WA = '19299936768';
+  var WA = '19299936768', GIG = 'cbf185df-6652-4fc4-bd2d-0954b4d13731';
+  // Every order is saved to MyIsraelRental before WhatsApp opens (page rules 3k). The ids are the listing's
+  // own products, named exactly as the listing names them (added 22 Oct 2026 by add_site_products.py).
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var PID = { classic: 'a7be8afd6138', caramel: '30dbd6bc98ac', vanilla: '02af21299635',
+    bundle: 'd465aae6e291', assorted: '430c01b7727b', one: '565d11aa4f12', duo: '404ecb4855c1' };
   var JARS = { classic: ['Classic Cloud', 40], caramel: ['Caramel Cloud', 48], vanilla: ['Vanilla Cloud', 48] };
   var PACKS = {
     bundle: { name: 'Cloud Bundle', price: 220, jars: 6, mode: 'mix', meta: '6 jars · Monthly', allows: 'Any 6 jars, mix and match' },
@@ -329,9 +334,26 @@
     out.push('Deliver to: ' + v('addr'));
     out.push('First delivery: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
     out.push('Name: ' + v('me') + ', ' + v('ph'));
-    var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(out.join('\n'));
-    var tab = window.open(url, '_blank'); if (!tab) location.href = url;
-    var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+    var ls = []; for (var k5 in q) if (q[k5]) ls.push({ product_id: PID[k5], qty: q[k5] });
+    if (PACKS[pack]) ls.push({ product_id: PID[pack], qty: 1 });
+    var notes = [PACKS[pack] ? PACKS[pack].name + ': ' + packDesc() : '', v('note'), 'Sent from The Whipped Cup page by WhatsApp'].filter(Boolean).join('\n');
+    var sending = send.getAttribute('aria-busy') === 'true'; if (sending) return;
+    send.setAttribute('aria-busy', 'true');
+    var label = send.firstElementChild.textContent; send.firstElementChild.textContent = 'Sending';
+    // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
+    var tab = window.open('', '_blank');
+    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })
+      .catch(function (err) { console.warn('Order not saved', err); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var text = out.join('\n');
+      if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      send.removeAttribute('aria-busy'); send.firstElementChild.textContent = label;
+      var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+    });
   });
   document.getElementById('deal').querySelector('button').addEventListener('click', function () {
     var k = document.getElementById('deal').dataset.pack; pack = k; oneFlav = ''; mixQ = { classic: 0, caramel: 0, vanilla: 0 };

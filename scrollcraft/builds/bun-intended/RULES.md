@@ -140,11 +140,12 @@ R3.14 pass: prices are large but the business has fixed public prices
 ## 6. Order and booking flow
 R3k.7 n/a: the order is one builder form on a single page rather than three steps; restructuring it is outside the category rework and is listed in the reply; check-site FLOW passed on it
 R3k.8 n/a: the builder has a quantity stepper, no multi-line basket
+R3k.9 pass: the Order button validates the day, name, phone (and address for delivery), POSTs to /api/marketplace/order-form/c42107a6-.../orders with the box's product id (nine new products only) while a blank WhatsApp tab is already open, then fills the tab with the message and the tracking link; a failed POST still opens WhatsApp. Added required fields: day (was optional), name, phone, delivery address. Intercepted pickup and delivery orders in Playwright (all fields match WebsiteOrderIn); check-site SAVE and FLOW pass; nothing sent to the live site
 R3k.6 n/a: single page: tapping a flavour card starts the box in the builder on the same page
 R3.15 pass: order has the builder; contact has call and WhatsApp; pick-up place is shown
 R7.1 pass: CONCEPT.md names the chosen direction; no options page
 R8.5 pass: main button goes to the builder, their order route; WhatsApp is the final step
-R0b.13 n/a: the tracking link needs the business live shop record and product ids, which exist only after publishing; this local build has no shop to save an order into yet. Listed in the reply
+R0b.13 pass: the order is saved with a tracking link before WhatsApp opens (see R3k.9)
 R3l.1 n/a: no message to the owner exists to show the question was asked
 R3l.2 pass: each box says its size and flavour in the card, builder and the message
 R3l.3 pass: the mix option appears only for the 8-box; one flavour is radio; site FLOW passed

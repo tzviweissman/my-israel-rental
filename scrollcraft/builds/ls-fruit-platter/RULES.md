@@ -140,11 +140,12 @@ R3.14 pass: prices are loud because prices exist; this is a priced shop
 ## 6. Order and booking flow
 R3k.7 pass: check-site FLOW: Step 1 basket, Step 2 when and where, Step 3 details; the three step buttons have a pointer cursor, hover, pressed and focus states and a later step can be tapped (it goes as far as the filled-in steps allow and shows what is missing); Back button; browser back goes back a step; total beside each step
 R3k.8 pass: every basket line has a 40 px remove button
+R3k.9 pass: the Send button POSTs to /api/marketplace/order-form/cbf66136-.../orders (platter product ids 55113012e889 etc. from the 22 Oct add_site_products run; the time goes in notes) while a blank WhatsApp tab is already open, then fills the tab with the message and the tracking link; a failed POST still opens WhatsApp. Intercepted a full order in Playwright (fulfilment delivery, city jerusalem, address, date, name, phone, notes match WebsiteOrderIn); check-site SAVE and FLOW pass; nothing sent to the live site. Live saving also needs the listing converted to a store (convert_to_store in site_products_plan.json) and whether she delivers: listed in the reply
 R3k.6 pass: Add on a home card opens shop.html#order with that size already in the basket (add=1)
 R3.15 pass: ordering has the shop; messaging has contact
 R7.1 pass: CONCEPT.md names the pick (film plus slat stage) and the reason
 R8.5 pass: every main button goes to the shop and its order steps; WhatsApp is the last step
-R0b.13 n/a: she has no shop products with ids in her record, so there is no board to save an order to; adding them writes to the production database and needs Tzvi's go-ahead. The order opens in WhatsApp complete
+R0b.13 pass: the order is saved with a tracking link before WhatsApp opens (see R3k.9); the live save waits for the listing to be a store
 R3l.1 pass: message-to-owner.md question 3 asks what a customer can choose
 R3l.2 n/a: no size allows a choice; each is one platter
 R3l.3 n/a: no item has options
