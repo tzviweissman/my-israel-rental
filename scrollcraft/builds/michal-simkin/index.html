@@ -117,6 +117,9 @@
     transition: background var(--sc-d-fast) var(--sc-ease-out), transform var(--sc-d-fast) var(--sc-ease-out);
   }
   .cta:hover { background: var(--navy-2); transform: translateY(-1px); }
+  .cta:active { transform: translateY(1px) scale(.98); background: var(--navy); }
+  .on-navy .cta:active { background: #E2B79F; }
+  .top__nav a:active { color: var(--rose-text); }
   .cta:focus-visible { outline: 2px solid var(--rose-text); outline-offset: 3px; }
   .on-navy .cta { background: var(--rose-gold); color: var(--navy); }
   .on-navy .cta:hover { background: #F2D3C2; }
@@ -232,8 +235,9 @@
     .top__cta { display: none; }
     .top__nav { order: 3; flex-basis: 100%; margin: 0; overflow-x: auto; scrollbar-width: none; gap: 0; }
     .top__nav::-webkit-scrollbar { display: none; }
-    .top__nav a { white-space: nowrap; padding: 0 0.7rem; min-height: 40px; display: inline-flex; align-items: center; }
-    .top__nav a[aria-current="true"]::after { bottom: 0.3rem; inset-inline: 0.7rem; }
+    .top__nav a { white-space: nowrap; padding: 0 0.4rem; font-size: 0.8rem; min-height: 40px; display: inline-flex; align-items: center; }
+    .top__nav a[aria-current="true"]::after { bottom: 0.3rem; inset-inline: 0.45rem; }
+    .top__nav { justify-content: space-between; }
     .top__mark { min-height: 40px; }
     .bar { display: flex; }
     body { padding-block-end: var(--bar-h); }
@@ -247,12 +251,13 @@
     .hero .lede { font-size: var(--sc-t-base); }
     .deck { width: min(58vw, 260px); inset-inline-end: var(--sc-gutter); top: auto; bottom: calc(var(--bar-h) + 2rem); translate: none; }
     .consult .sc-wrap { grid-template-columns: 1fr; gap: var(--sc-6); }
-    .same .sc-copy--lead { top: clamp(3.5rem, 7vh, 5rem); inset-inline: var(--sc-gutter); max-width: none; }
+    .same [data-sc-stage] { display: flex; flex-direction: column; justify-content: space-between; gap: var(--sc-3); padding: 7rem var(--sc-gutter) calc(var(--bar-h) + 2.5rem); }
+    .same .sc-copy--lead, .same .pairs, .same .voices { position: static; inset: auto; translate: none; margin: 0; width: auto; max-width: none; }
     .same .sc-copy--lead h2 { font-size: clamp(1.5rem, 6.4vw, 2rem); }
-    .pairs { width: auto; inset-inline: var(--sc-gutter); top: 30vh; translate: none; gap: 0.35rem; }
+    .pairs { gap: 0.35rem; }
     .pair { gap: var(--sc-3); }
     .pair .before { font-size: 1rem; } .pair .after { font-size: 1.1rem; } .pair .after small { font-size: 0.7rem; }
-    .voices { width: auto; inset-inline: var(--sc-gutter); top: auto; bottom: calc(var(--bar-h) + 1rem); translate: none; gap: var(--sc-3); }
+    .voices { gap: var(--sc-3); }
     .voice { grid-template-columns: 40px 1fr; } .voice img { width: 40px; height: 40px; } .voice p { font-size: var(--sc-t-xs); }
     .voice:nth-child(1), .voice:nth-child(2) { display: none; }
     .courses { grid-template-columns: 1fr; }
@@ -266,7 +271,7 @@
     .hero .sc-copy--lead { max-width: 34rem; }
   }
 
-  .hero { min-height: 280svh; } .same { min-height: 340svh; }
+  .hero { min-height: 280svh; } .same { min-height: 250svh; }
   .hero__bg { position: absolute; inset: 0; z-index: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; background: var(--navy); }
   .hero__bg img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; filter: saturate(.75); }
   .hero__bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(14,31,57,.94) 0%, rgba(14,31,57,.82) 45%, rgba(14,31,57,.66) 100%); }
@@ -437,29 +442,29 @@
   </section>
 
   <!-- 3  Relief, the peak: the same wig -->
-  <section class="same on-blush" id="same" data-sc-act="pin" data-sc-span="3.4" aria-labelledby="sameTitle">
+  <section class="same on-blush" id="same" data-sc-act="pin" data-sc-span="2.5" aria-labelledby="sameTitle">
     <div data-sc-stage>
-      <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
+      <div class="sc-copy sc-copy--lead" data-sc-cue="0.00 1 0 0">
         <h2 id="sameTitle">The same wig, <span class="accent">in their words.</span></h2>
         <p>What clients said about the wig they walked in with, and what they said after. Every pair is one woman's own review.</p>
       </div>
       <ul class="pairs" id="pairs" aria-label="Before and after, in clients' own words">
-        <li class="pair" data-at="0.06"><span class="before"><span class="w">"it's fine"</span></span><span class="after" data-sc-cue="0.10 1 0.3 0"><em>cute, light, works amazingly</em><small>Miriam</small></span></li>
-        <li class="pair" data-at="0.18"><span class="before"><span class="w">"dread wearing it"</span></span><span class="after" data-sc-cue="0.22 1 0.3 0"><em>brought the sheitl back to life</em><small>Debbie</small></span></li>
-        <li class="pair" data-at="0.30"><span class="before"><span class="w">"super old style</span> <span class="w">and uncomfortable"</span></span><span class="after" data-sc-cue="0.34 1 0.3 0"><em>I finally feel myself</em><small>Shaina</small></span></li>
-        <li class="pair" data-at="0.42"><span class="before"><span class="w">"lost its wow factor"</span></span><span class="after" data-sc-cue="0.46 1 0.3 0"><em>a fabulous fit</em><small>Tova Leah</small></span></li>
-        <li class="pair" data-at="0.54"><span class="before"><span class="w">"hating all my wigs"</span></span><span class="after" data-sc-cue="0.58 1 0.3 0"><em>2 years later, still love it</em><small>Yael</small></span></li>
+        <li class="pair" data-at="0.03"><span class="before"><span class="w">"it's fine"</span></span><span class="after" data-sc-cue="0.06 1 0.3 0"><em>cute, light, works amazingly</em><small>Miriam</small></span></li>
+        <li class="pair" data-at="0.10"><span class="before"><span class="w">"dread wearing it"</span></span><span class="after" data-sc-cue="0.12 1 0.3 0"><em>brought the sheitl back to life</em><small>Debbie</small></span></li>
+        <li class="pair" data-at="0.17"><span class="before"><span class="w">"super old style</span> <span class="w">and uncomfortable"</span></span><span class="after" data-sc-cue="0.19 1 0.3 0"><em>I finally feel myself</em><small>Shaina</small></span></li>
+        <li class="pair" data-at="0.23"><span class="before"><span class="w">"lost its wow factor"</span></span><span class="after" data-sc-cue="0.25 1 0.3 0"><em>a fabulous fit</em><small>Tova Leah</small></span></li>
+        <li class="pair" data-at="0.30"><span class="before"><span class="w">"hating all my wigs"</span></span><span class="after" data-sc-cue="0.32 1 0.3 0"><em>2 years later, still love it</em><small>Yael</small></span></li>
       </ul>
       <div class="voices">
-        <figure class="voice" data-sc-cue="0.12 1 0.3 0">
+        <figure class="voice" data-sc-cue="0.07 1 0.3 0">
           <img src="assets/debbie.jpg" width="160" height="160" alt="">
           <figcaption><p>"I had a sheitl that I wore regularly, but every time I put it on I was frustrated by how it looked. Instead of throwing it out, I brought it to Michal. Immediately, she saw the problems and brought the sheitl back to life. Now, I love it, and I can't believe that my new &amp; improved look is actually from the same sheitl I used to dread wearing."<b>Debbie Burack</b></p></figcaption>
         </figure>
-        <figure class="voice" data-sc-cue="0.30 1 0.3 0">
+        <figure class="voice" data-sc-cue="0.17 1 0.3 0">
           <img src="assets/yael.jpg" width="160" height="160" alt="">
           <figcaption><p>"I came to Michal, with a tight budget, after going to 3 other wig places and hating all my wigs since I got married. She had a ton of options and she tried so many on me, giving her honest opinion, with no pressure to buy. I felt like she had all the time in the world. Its not surprising that 2 years later I still love the wig I got."<b>Yael Stoolback</b></p></figcaption>
         </figure>
-        <figure class="voice" data-sc-cue="0.50 1 0.3 0">
+        <figure class="voice" data-sc-cue="0.28 1 0.3 0">
           <img src="assets/miriam.jpg" width="160" height="160" alt="">
           <figcaption><p>"I cannot thank Michal enough for transforming my 'its fine' wig that I got as a hand-me down from my aunt, into something I actually think is cute, light, and works amazingly for me."<b>Miriam Campbell</b></p></figcaption>
         </figure>

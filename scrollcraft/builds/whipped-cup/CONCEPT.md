@@ -26,7 +26,7 @@ The first two together, driven by her own tagline. The page opens full screen on
 - reveal: R9, from 21st search "scroll reveal mask wipe" ("Dual Wipe Reveal"), made round to echo the cloud window
 - steps: S6, from docs/inspo/awwwards-food-2026-10-18/mam-com-3-recipe-servings.webp
 - price: P9, from her own menu card (price over "a jar")
-- touch: X20, the mouse pointer is a cloud, from Tzvi's idea (20 Oct 2026) and her tagline "your cup, your cloud"
+- touch: X20, the mouse pointer is a cloud (site.css, the last block before .toast; desktop mouse only via hover:hover and pointer:fine; a still image, so nothing moves), from Tzvi's idea (20 Oct 2026) and her tagline "your cup, your cloud"
 - heading: H6, from docs/inspo/awwwards-food-2026-10-18/morpho-water-1-film-chapters-big-type.webp
 
 ## Not alike

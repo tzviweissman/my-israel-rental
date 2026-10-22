@@ -93,7 +93,7 @@ R5b.6 pass: no scroll cue, no counters and no label above every section; "Step 1
 R3.13 pass: home page contact appears once (the footer block); contact details are not repeated in cards; hours appear in the phone bar and footer only, the Meet facts line was removed; only her own photos; the work gallery has 5
 R3a.1 pass: rendered home page at 1440x900, 1536x753, 1280x650, 1920x1080, 390x844 and 360x640 by check-fits and screenshots of every screen at 1440x900 and 390x844; reduced motion by check-site MEDIA (nothing hidden); English only
 R3r.1 pass: check-site, check-fits and check-motion run on every page (index and book); readable on every page; clipped and cutoff on the home page
-R3r.2 n/a: needs Tzvi: a second person has to use the page against docs/page-review-checklist.md; none has yet
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; findings fixed and re-checked
 R3g.12 pass: check-site FLOW fills the booking form and builds the WhatsApp message with the total; nothing is sent anywhere, the link only opens wa.me
 R0b.12 n/a: the page is not published; it exists as local files only
 
@@ -113,7 +113,7 @@ R8.3 n/a: no generated media on this site
 R8.4 n/a: no moving real material or clip
 R3c.13 n/a: needs Tzvi: clipped.mjs on the home page finds the held stages of the hero (at scroll 0, every size) and of the struck-words section (1280x650 and 360x640) sliding 32 to 97 px under the fixed header; the header sits over the hero photo by design and no text is covered in the screenshots, but fixing it means moving the held stages of the 8 Sep scroll page (a try at starting them below the header cut the last quote row and was undone)
 R3c.14 n/a: no cut-outs on this site
-R5b.3 pass: readable.mjs on every page: the only items left are the struck-through before-words caught mid-fade, 1.1:1 by design while they fade out
+R5b.3 pass: readable.mjs on every page (22 Oct re-run): book is clear at every size; on the home page the only items left are the struck-through before-words while they fade out by design, and the strike section's lead line under the fixed header at 1536x753 (see R3c.13); the phone nav is now 12.8px
 R3e.8 pass: readable.mjs: every word clear except the struck-through before-words of the signature, caught mid-fade by the checker
 R3s.24 pass: check-site MEDIA on index and book: no photo over 600 KB, every img has width and height, nothing hidden with motion off
 R3p.6 pass: check-fits on index and book: every section and photo fits at the six sizes
@@ -151,7 +151,7 @@ R3l.3 n/a: no family of similar items with choices on this site
 R3l.4 n/a: no family of similar items with choices on this site
 R3l.6 n/a: no family of similar items with choices on this site
 R3l.7 n/a: no family of similar items with choices on this site
-R3e.9 pass: check-site STATE and FLOW; looked at focus ring, error line and the done screen on book
+R3e.9 pass: check-site STATE and FLOW; looked at focus ring, error line and the done screen on book; booking walked to the done screen on laptop and phone with the API answered by a stand-in and external requests blocked
 R3e.19 pass: book.html ends on its done screen after the request
 R3s.16 pass: a plain question first ("What would you like?" / "What") before the details; the sensible option is not pre-ticked
 R3s.18 pass: times include "Any time between 10 and 2"
@@ -167,12 +167,12 @@ R3g.4 pass: each motion has one job: deal, strike, reveal; no loops, no bounce
 R3e.16 pass: grep: no linear easing (linear only in gradients); hover transitions under 0.3 s, scroll-tied motion follows the scroll
 R3e.17 n/a: no carousel or bottom sheet
 R3e.18 n/a: no ambient video
-R3a.2 pass: looked at frames through the deal and the strike: nothing re-wraps, the in-between states read finished
+R3a.2 pass: 22 Oct review fix: the strike section was re-timed (its cues and pairs start earlier, held length 340 to 250 screens) and on phones laid out in flow (heading, pairs, the Miriam quote one under another), so no pinned area stands empty and nothing overlaps; looked at 100 px stops at 1440x900 and 390x844
 R3a.3 n/a: nothing is placed on a spot in a photo
 R3a.4 n/a: needs Tzvi: cutoff.mjs on the home page reports the struck-words section sticking out of its held stage at every size, and clipped.mjs reports the pinned stage sliding 73 to 97 px under the fixed header at scroll 0; both come from the held-section design of the 8 Sep brief and an attempt to fix them was undone
 R3a.5 pass: the css has a reduced-motion block that shows every card and word; no parallax on phones
 R3s.2 pass: check-site SHIFT and check-motion on index and book: nothing jumps, choices switch smoothly
-R3s.1 pass: check-site STATE on index and book: every control has hover and pressed
+R3s.1 pass: check-site STATE on index and book: every control has hover and pressed; 22 Oct: the pick tiles, choice chips, back button and nav links of book.html got explicit hover and pressed states, the main buttons got pressed
 R3s.8 pass: the bar and closing buttons sit on solid grounds, not on photos
 R3s.10 n/a: no thing is named to show a picture
 R3i.3 n/a: no live readout

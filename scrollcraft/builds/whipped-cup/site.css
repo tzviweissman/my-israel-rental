@@ -586,3 +586,29 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 @media (max-width: 860px) { .story-in, .door-top { grid-template-columns: 1fr; } .story-pics img, .story-pics img:nth-child(2) { height: 34svh; } .trust { grid-template-columns: 1fr 1fr; } }
 
 @media (max-width: 860px) { .pack .meta { font-size: .9rem; letter-spacing: .08em; white-space: nowrap; } }
+
+/* 22 Oct review: the four packages share one layout. Square photo, name and what it allows, price and Choose in one column. */
+.bento { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.bento .pack.has-pic { display: grid; grid-template-columns: 104px minmax(0, 1fr) auto; align-items: center; gap: 0 1rem; padding: .9rem 1.1rem; }
+.bento .pack.has-pic .pic { grid-column: 1; grid-row: 1; flex: none; width: 104px; height: 104px; min-height: 0; max-height: none; flex: none; border-radius: var(--r-sm); object-fit: cover; object-position: 50% 40%; }
+.bento .pack.has-pic > div:not(.row) { grid-column: 2; } .bento .pack.has-pic .row { grid-column: 3; flex-direction: column; align-items: flex-end; gap: .5rem; }
+.bento .pack.has-pic h3 { font-size: 1.45rem; } .bento .pack.has-pic .price { font-size: 2rem; }
+.bento .pack.has-pic .was { display: inline; font-size: .7em; margin: 0 .3em 0 0; }
+.bento .pack.best { background: var(--blush); border-color: var(--pink-ink); }
+.bento .pack.best .meta { color: var(--pink-ink); }
+@media (max-width: 860px) { .bento { grid-template-columns: 1fr; } }
+@media (max-width: 460px) { .bento .pack.has-pic { grid-template-columns: 76px minmax(0, 1fr); } .bento .pack.has-pic .pic { width: 76px; height: 76px; }
+  .bento .pack.has-pic .row { grid-column: 1 / -1; grid-row: 2; flex-direction: row; align-items: center; justify-content: space-between; margin-top: .6rem; } }
+/* the flavour cards on the home page: the whole jar, the same frame for all three */
+.room-pic img { object-fit: contain; object-position: 50% 50%; }
+
+/* 22 Oct review: the opening question over bright sky gets a soft shade round it (5b.3), and the wide
+   panel's dark fades out over a long, eased run so there is no vertical edge at the middle of the screen. */
+.sky-line { isolation: isolate; }
+.sky-line::before { content: ''; position: absolute; inset: -70% -25%; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse closest-side at 50% 50%, rgb(60 20 40 / .5), rgb(60 20 40 / .34) 30%, rgb(60 20 40 / .16) 62%, transparent 100%); }
+.sky-line h1 { text-shadow: 0 1px 3px rgb(40 15 30 / .45), 0 2px 26px rgb(60 20 40 / .6); }
+.sky.wide .sky-end::before { inset: -100vh -34vw -100vh -10vw;
+  background: linear-gradient(90deg, rgb(42 20 11 / .9) 0%, rgb(42 20 11 / .88) 36%, rgb(42 20 11 / .8) 46%, rgb(42 20 11 / .66) 54%, rgb(42 20 11 / .5) 62%, rgb(42 20 11 / .34) 70%, rgb(42 20 11 / .2) 79%, rgb(42 20 11 / .09) 90%, transparent 100%); }
+@media (max-width: 560px) { .bento .pack.best { padding-top: 1.7rem; } .bento .pack.best .tab { right: 1rem; } }
+.bento .pack.best { padding-top: 1.7rem; } .bento .pack.best .tab { right: 1rem; }

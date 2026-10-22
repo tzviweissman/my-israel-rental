@@ -93,7 +93,7 @@ R5b.6 pass: no scroll counters or labels above every section; the Scroll hint on
 R3.13 pass: no doubled contact; the close band and footer share the one set of contacts
 R3a.1 pass: walked 1440x900 and 390x844 at every section on the home page, shop and contact; reduced motion not separately captured
 R3r.1 pass: check-site, check-fits, check-motion and readable run on every page (see the reply)
-R3r.2 n/a: the second reader is the coordinator, who did not build these pages, working from the reply and the screenshots; that review cannot be recorded before the reply exists
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; findings fixed and re-checked
 R3g.12 pass: check-site FLOW walked the order form empty (it says what is missing) and filled, and read the WhatsApp message with the total; nothing was sent to the owner
 R0b.12 n/a: nothing published, so no pages-list preview clip to refresh
 
@@ -101,7 +101,7 @@ R0b.12 n/a: nothing published, so no pages-list preview clip to refresh
 R8.1 pass: the three flavour photos are her own matching jar-on-beans photos, one jar each, same angle and light; the story pair and delivery pair are her own two other shoots
 R8.6 n/a: the jar photos are her photos on coffee beans, not hero shots on a plinth; hero shots listed in the reply to be made from her photos
 R8.2 pass: every image is the owner own photo from the build; none generated in this task
-R3p.7 pass: every flavour thumbnail and room photo is one jar; hovering shows each flavour its own photo on the shop page
+R3p.7 pass: every flavour thumbnail, room photo and package photo is one jar or one product; the home flavour cards now show the whole jar in the same frame for all three (contain, 500x1111 files, the largest we have, shown under 215 px wide so a 2x phone is sharp); the four packages share one layout: same square photo, price and Choose in the same place
 R3h.12 pass: the same jar photo appears on the room, the shop picker and the basket, edited from one master per flavour
 R3h.10 pass: shop picker: each flavour changes photo, words, price and button; check-motion colour clean there
 R3g.14 pass: looked at all images on the home page: her photos share warm window light
@@ -113,8 +113,8 @@ R8.3 pass: no generated media of items; the clouds film is scenery only, no pers
 R8.4 n/a: no new moving real material; no generation done
 R3c.13 pass: clipped.mjs run on every page at seven sizes: nothing cut off (the Bun numeral and the Whipped Cup shop summary were fixed first)
 R3c.14 n/a: no cut-out made in this task
-R5b.3 pass: over the film the words sit on the edge shade of the end card; everywhere else words sit on flat light grounds
-R3e.8 pass: readable.mjs run on every page at six sizes: every word clear (after fixing five contrast and size findings)
+R5b.3 pass: 22 Oct: the opening question over bright sky now has a soft shade round it and a stronger text shadow, and the wide end panel's dark fades out over a long eased run (no edge near the middle); over the film the words sit on the edge shade of the end card; everywhere else words sit on flat light grounds
+R3e.8 pass: readable.mjs run on every page at six sizes: every word clear (22 Oct: the Best value tab no longer touches the Cloud Bundle price, which had read 2.56:1)
 R3s.24 pass: check-site MEDIA clean on every page
 R3p.6 pass: check-fits clean at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844, 360x640 on every page
 R3o.5 pass: check-site GLYPH clean on every page
@@ -130,8 +130,8 @@ R3j.4 n/a: no group discount offered by the owner
 R3j.5 n/a: no stamp card or reorder feature offered
 R3j.6 pass: no invented option; only their own sizes and packages
 R3j.7 pass: struck prices 240, 160 and 80 are the same items bought separately at her own prices (6 Classic jars 240; 4 Classic jars 160; 2 Classic jars 80)
-R3j.8 pass: per jar: bundle 220/6 = 36.67, one flavour 148/4 = 37, duo 75/2 = 37.5, assorted 155/4 = 38.75, single 40 and 48: the bigger option is lower than every smaller one
-R3j.9 pass: each package group shows its own saving only against its own separate price; assorted shows none
+R3j.8 pass: per jar: bundle 220/6 = 36.67, one flavour 148/4 = 37, duo 75/2 = 37.5, assorted 155/4 = 38.75, single 40 and 48: the bigger option is lower than every smaller one except Assorted (38.75 is above the Duo's 37.50), so Assorted shows no saving; its separate price would be 176 (cheapest four jars of its flavours), reason written in gen/shop.js beside was()
+R3j.9 pass: each package group shows its own saving only against its own separate price; Assorted shows none, as it fails the per-jar test against the Duo (see R3j.8)
 R3j.10 pass: recomputed: 8% off (220 of 240 = 8.33), 7% (148 of 160 = 7.5, rounded down), 6% (75 of 80 = 6.25)
 R3j.11 n/a: no combined service or basket-package switch on this page
 R3j.12 n/a: no owner savings claim contradicts the prices
@@ -187,7 +187,7 @@ R3s.23 pass: check-site PHONE clean: no sideways scroll
 R3t.1 pass: CONCEPT.md has the Category line and every page has the site-category meta; check-site CATEGORY clean
 R3t.2 pass: check-site BUY clean; every card (flavour or package) carries photo or name, size or servings, price and a button
 R3t.3 n/a: category is food-shop, not trainer
-R3t.4 pass: the footer is the same on index, shop and contact (name line, button, link columns, contact, MyIsraelRental line)
+R3t.4 pass: the footer is the same on index and shop (name line, button, link columns, contact, MyIsraelRental line); the contact page already shows the contact cards, so its footer is the page links and the MyIsraelRental line only (22 Oct)
 R3a.7 pass: phone passes used touch emulation in the checkers (check-site PHONE/TAP) and the 390x844 screenshots
 R3a.8 pass: looked at the 390x844 and 360x640 screenshots of every dotted line (pack meta, proof lines): none wraps after the nowrap fix on the pack meta line
 

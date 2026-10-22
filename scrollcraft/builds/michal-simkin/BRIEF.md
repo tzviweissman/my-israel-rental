@@ -123,7 +123,7 @@ flow+in, reveal, kinetic, two bespoke transforms. No family twice in a row.
 
 ## Nav and CTA
 
-No top bar. A fixed bottom bar, the booking pattern a phone already knows:
+A slim top bar (her mark, the on-page links, and on a laptop the booking button) plus, on phones, a fixed bottom bar, the booking pattern a phone already knows:
 her mark, one button, **Message Michal Simkin**, and beside it the one
 line of reassurance, "Consultation ₪100. Sun to Thu, 10 to 2, by
 appointment. Bet Shemesh." Same label at the close. The academy's enrol

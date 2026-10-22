@@ -115,6 +115,14 @@
   .total b { font-weight: 800; font-size: 1.6rem; color: var(--navy); font-variant-numeric: tabular-nums; }
   .cta { display: inline-flex; align-items: center; justify-content: center; width: 100%; min-height: 54px; margin-top: 1rem; border: 0; border-radius: var(--pill); background: var(--navy); color: #fff; font-weight: 700; font-size: 1.05rem; }
   .cta:hover { background: var(--navy-2); }
+  @media (max-width: 560px) { .head { padding-block: 1.2rem .2rem; } .head h1 { font-size: 1.9rem; } .head p { font-size: .95rem; } .steps { margin-top: .9rem; } section.step { padding-top: 1rem; } }
+  .cta:active:not(:disabled) { transform: scale(.98); background: #060F1F; }
+  .pick:active { transform: scale(.985); background: var(--blush-pale); }
+  .pick:focus-visible, .choice:focus-visible { outline: 2px solid var(--rose-text); outline-offset: 2px; }
+  .choice:hover { border-color: var(--blush); }
+  .choice:active { transform: scale(.97); }
+  .backbtn:hover { text-decoration: underline; } .backbtn:active { opacity: .7; }
+  .nav__links a:active { color: var(--rose-text); }
   .cta:disabled { opacity: 0.55; cursor: not-allowed; }
   .assure { margin: 0.8rem 0 0; color: var(--muted); font-size: 0.85rem; line-height: 1.45; }
   .assure b { color: var(--navy); font-weight: 600; }
@@ -161,6 +169,12 @@
 
   <div class="grid">
     <div>
+      <section class="step" id="step-what">
+        <h2>What would you like?</h2>
+        <p class="lead">Our prices, as we publish them.</p>
+        <div id="groups"></div>
+        <p class="err" id="errWhat"></p>
+      </section>
       <div class="gallery" aria-label="Her clients">
         <figure class="lead"><img src="assets/client-1.jpg" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" style="object-fit: cover"></figure>
         <div class="more">
@@ -171,12 +185,6 @@
         </div>
         <figcaption>Our clients, from our website.</figcaption>
       </div>
-      <section class="step" id="step-what">
-        <h2>What would you like?</h2>
-        <p class="lead">Our prices, as we publish them.</p>
-        <div id="groups"></div>
-        <p class="err" id="errWhat"></p>
-      </section>
 
       <section class="step" id="step-when">
         <button type="button" class="backbtn" data-back>Back</button>
@@ -243,8 +251,10 @@
 
 <script>
 (function () {
-  var API = 'http://localhost:8001/api';
-  var APP = 'http://localhost:3210';
+  /* A LOCAL test (the dev API on 8001) only on localhost; on the real host the page's own /api and origin. */
+  var LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /\.html$/.test(location.pathname);
+  var API = LOCAL ? 'http://localhost:8001/api' : '/api';
+  var APP = LOCAL ? 'http://localhost:3210' : location.origin;
   var SLUG = 'michal-simkin';
   var SYM = { USD: '$', ILS: '₪', EUR: '€', GBP: '£' };
   var $ = function (s) { return document.querySelector(s); };
@@ -258,7 +268,7 @@
   }).then(function (form) {
     state.gig = form.gig; state.products = form.products;
     render(); initDate();
-    var want = location.hash === '#academy' ? /both courses/ : /consultation/i;
+    var want = location.hash === '#academy' ? /both courses/i : /consultation/i;
     var def = state.products.filter(function (p) { return want.test(p.name); })[0];
     if (def) choose(def.id);
   }).catch(function (e) { $('#errWhat').textContent = 'Could not load. Is the local API running on 8001? (' + e.message + ')'; });
@@ -268,7 +278,7 @@
     state.products.forEach(function (p) { var g = p.group || 'Other'; if (!groups[g]) { groups[g] = []; order.push(g); } groups[g].push(p); });
     $('#groups').innerHTML = order.map(function (g) {
       return '<div class="group"><h3>' + g + '</h3><div class="picks">' + groups[g].map(function (p) {
-        var bundle = /both courses/.test(p.name);
+        var bundle = /both courses/i.test(p.name);
         return '<button type="button" class="pick' + (bundle ? ' bundle' : '') + '" data-id="' + p.id + '" aria-pressed="false">'
           + '<span class="name">' + p.name.replace('Academy · ', '') + '</span>'
           + '<span class="price">' + money(p.price, p.currency) + (bundle ? '<small>₪16,000</small><em class="savebadge">25% off</em>' : '') + '</span>'

@@ -93,12 +93,12 @@ R5b.6 pass: no scroll cue, no counters and no label above every section; "Step 1
 R3.13 pass: home page contact appears once (the footer block); contact details are not repeated in cards (contact page cards now hold Book, Email and Where; the numbers are in the closing block); only her own photos; the work gallery has 5
 R3a.1 pass: rendered home page at 1440x900, 1536x753, 1280x650, 1920x1080, 390x844 and 360x640 by check-fits and screenshots of every screen at 1440x900 and 390x844; reduced motion by check-site MEDIA (nothing hidden); English only
 R3r.1 pass: check-site, check-fits and check-motion run on every page (index, book, contact); readable on every page; clipped and cutoff on the home page
-R3r.2 n/a: needs Tzvi: a second person has to use the page against docs/page-review-checklist.md; none has yet
+R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; findings fixed and re-checked
 R3g.12 pass: check-site FLOW fills the booking form and builds the WhatsApp message with the total; nothing is sent anywhere, the link only opens wa.me
 R0b.12 n/a: the page is not published; it exists as local files only
 
 ## 4. Photos and media
-R8.1 pass: the five Recent work photos are one set (hands on a white towel, same crop 4:5) and the six shade photos one set; looked at on the home and book screens
+R8.1 pass: the five Recent work photos are one set (hands on a white towel, same crop 4:5) and the four shade photos one set; looked at on the home and book screens
 R8.6 n/a: services business, no product hero shots; the photos are her real work
 R8.2 pass: every image is cropped from her own photos in src/owner (gen/crops.py); no stock, no generated photos
 R3p.7 pass: pointed at and tapped every shade: each shows its own photo the same way; service rows look alike
@@ -107,20 +107,20 @@ R3h.10 pass: choosing a shade changes its picture, name and the button link, one
 R3g.14 pass: looked at all images on the home and book screens: one soft daylight grade on white towels, no filter mix
 R3o.1 n/a: not a food business; no generated food
 R3o.2 n/a: no liquids or generated media
-R3o.3 pass: looked at every shade photo: colours read true, no cast from cloth or light
+R3o.3 pass: looked at every shade photo: colours read true, no cast from cloth or light; 22 Oct: Sheer pink (a near twin of Soft nude) and With a touch of blue (nude nails with two blue accents, not blue nails) were dropped, four shades remain
 R3o.6 pass: src/owner holds her 14 photos; the page uses her shade, work, studio and towel photos, no photo twice in one view
 R8.3 n/a: no generated media on this site
 R8.4 n/a: no moving real material or clip
 R3c.13 pass: clipped.mjs on the home page at seven sizes: nothing cut off
 R3c.14 n/a: no cut-outs on this site
-R5b.3 pass: readable.mjs on every page (words over her photos sit on the soft edge shade and read clearly at six sizes)
+R5b.3 pass: readable.mjs on every page, including the ruby state of the booking page (22 Oct: the unchosen service cards and style chips turn light on ruby, the "about 60 minutes" lines now read clearly); words over her photos sit on the soft edge shade
 R3e.8 pass: readable.mjs on every page: every word clear at every size checked
 R3s.24 pass: check-site MEDIA on index, book, contact: no photo over 600 KB, every img has width and height, nothing hidden with motion off
 R3p.6 pass: check-fits on index, book, contact: every section and photo fits at the six sizes
 R3o.5 pass: check-site GLYPH on index, book, contact: the shekel sign renders in its own font
 
 ## 5. Prices and savings
-R3c.5 pass: grep finds no select element; services, shades, times and courses are tiles to tap; no "most popular" badge
+R3c.5 pass: grep finds no select element; services, styles, shades, times are tiles to tap; no "most popular" badge; Gel removal hides the colour choice, Nail art asks French, gradient or nail art and sends it in the message
 R3c.6 pass: buttons say what happens next: "Book a time", "Continue to day and time", "Continue to your details"; none says Submit
 R3c.7 pass: the only offer is a standing saving on gel with removal (no date claimed, none needed)
 R3j.1 n/a: the owner offers no guarantee, so none is shown
@@ -152,7 +152,7 @@ R3l.4 n/a: no family of similar items with choices on this site
 R3l.6 n/a: no family of similar items with choices on this site
 R3l.7 n/a: no family of similar items with choices on this site
 R3e.9 pass: check-site STATE and FLOW; looked at disabled, focus ring, error message and the confirmation toast on book
-R3e.19 pass: the booking ends with a visible toast "Booking written out" and the WhatsApp message open
+R3e.19 pass: the booking ends with a visible toast "Booking written out", the WhatsApp message open, and the button reads "Opened in WhatsApp" with a tick (22 Oct: it was a tick alone); walked to the last step on laptop and phone with external requests blocked
 R3s.16 pass: a plain question first ("What would you like?" / "What") before the details; the sensible option is not pre-ticked
 R3s.18 pass: colour is optional; "Ask about a design" is the way out for designs not listed
 R3s.25 pass: check-site FLOW on book.html: empty sends nothing and shows what is missing; filled sends a WhatsApp message carrying the total
