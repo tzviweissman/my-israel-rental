@@ -8,6 +8,7 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="site-category" content="trainer">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Michal Yodaiken · Personal training for women in Jerusalem</title>
 <meta name="description" content="Personal training for women that comes to you, in Jerusalem: at your home, at your gym, online, or at my private gym. ₪60 for a 30-minute session. Training in English.">
@@ -223,6 +224,45 @@
   /* the narrowest phones: the bar's button drops its arrow to keep the price in view */
   @media (max-width: 380px) { .bar .btn svg { display: none; } .bar { padding-inline: 12px; } .clock b { min-width: 4.4ch; } }
   @media (prefers-reduced-motion: reduce) { .btn, .btn::before, .btn svg, .bar { transition: none; } }
+
+  /* CATEGORY trainer (rule 3t, 22 Oct 2026; after The Performance Lab, Nick Ho and Reel Motion): black and white alternate, one accent,
+     the offer as cards with a price each, side by side; the numbers on black; a short FAQ. */
+  .offers { margin: 0; padding: 0; list-style: none; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: clamp(.8rem, 1.6vw, 1.4rem); }
+  .paper .wrap:has(.offers) { grid-template-columns: 1fr; row-gap: var(--sc-5); }
+  .paper .wrap:has(.offers) .head { grid-template-columns: 1fr auto; align-items: end; justify-items: stretch; }
+  .offers li { display: flex; flex-direction: column; border: 1px solid #0B0A0C; background: #fff; }
+  .offers img { width: 100%; height: clamp(90px, 17svh, 230px); object-fit: cover; }
+  .offers .ob { padding: 1.1rem; display: flex; flex-direction: column; gap: .5rem; flex: 1; }
+  .offers .n, .group .n { font: 700 var(--sc-t-sm)/1 var(--sc-font-text); letter-spacing: 0.14em; color: #6B6470; }
+  .offers h3, .group h3 { margin: 0; font-size: clamp(1.5rem, 1.1rem + 1vw, 2.1rem); line-height: 1; }
+  .offers p, .group p { margin: 0; font: 400 var(--sc-t-sm)/1.45 var(--sc-font-text); color: #4A444F; text-transform: none; letter-spacing: 0; }
+  .offers .amt, .group .amt { margin-top: auto; padding-top: .8rem; border-top: 1px solid #D9D5DB; font: 400 clamp(1.7rem, 1.2rem + 1vw, 2.3rem)/1 var(--sc-font-display); color: #0B0A0C; }
+  .offers .amt.ask, .group .amt.ask { font: 700 var(--sc-t-sm)/1.3 var(--sc-font-text); color: #4A444F; }
+  .offers .amt small, .group .amt small { display: block; margin-top: .3rem; font: 500 var(--sc-t-sm)/1.3 var(--sc-font-text); color: #4A444F; }
+  .group { display: grid; grid-template-columns: 2.4rem auto 1fr auto; gap: var(--sc-4); align-items: baseline; padding: 1rem 0; border-top: 1px solid #0B0A0C; border-bottom: 1px solid #D9D5DB; }
+  .group .amt { margin: 0; padding: 0; border: 0; }
+  @media (max-width: 1000px) { .offers { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 560px) { .offers { grid-template-columns: 1fr; } .group { grid-template-columns: 2.4rem 1fr; } .group p, .group .amt { grid-column: 2; } .paper .wrap:has(.offers) .head { grid-template-columns: 1fr; } }
+  @media (max-height: 760px) and (min-width: 1001px) { #ways.paper { padding-block: 1rem; } #ways .wrap { row-gap: .8rem; } .offers .ob { padding: .7rem; gap: .3rem; } .offers p { line-height: 1.35; } .offers .amt { padding-top: .5rem; } .offers img { height: 13svh; } .group { padding: .6rem 0; } #ways .big { font-size: 3rem; } }
+  .proof-blk { background: #000; padding: clamp(3.5rem, 10vh, 7rem) var(--sc-gutter); }
+  .proof-blk .wrap { max-width: 80rem; margin: 0 auto; }
+  .stats { margin: clamp(1.5rem, 5vh, 3rem) 0 0; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); border-top: 1px solid #3A353D; }
+  .stats > div { padding: 1.4rem 1rem 0 0; border-right: 1px solid #3A353D; margin-right: 1rem; }
+  .stats > div:last-child { border-right: 0; margin-right: 0; }
+  .stats dt { color: var(--sc-ink-soft); font-size: var(--sc-t-sm); letter-spacing: 0.1em; text-transform: uppercase; }
+  .stats dd { margin: .5rem 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-base); }
+  .stats b { display: block; color: #fff; font: 400 clamp(3rem, 1rem + 6vw, 7rem)/0.95 var(--sc-font-display); text-transform: uppercase; }
+  .proof-blk .wa { margin: clamp(1.5rem, 4vh, 2.5rem) 0 0; color: var(--sc-ink-soft); }
+  .proof-blk .wa a { color: var(--sc-accent); font-weight: 700; }
+  @media (max-width: 760px) { .stats { grid-template-columns: 1fr 1fr; } .stats > div:nth-child(2) { border-right: 0; margin-right: 0; } .stats > div:nth-child(n+3) { margin-top: 1.4rem; border-top: 1px solid #3A353D; } }
+  .faq .qa { border-top: 1px solid #0B0A0C; }
+  .faq details { border-bottom: 1px solid #D9D5DB; }
+  .faq summary { cursor: pointer; padding: 1rem 0; min-height: 44px; font: 700 var(--sc-t-base)/1.3 var(--sc-font-text); list-style: none; display: flex; justify-content: space-between; gap: 1rem; }
+  .faq summary::-webkit-details-marker { display: none; }
+  .faq summary::after { content: "+"; font: 400 1.6rem/1 var(--sc-font-display); }
+  .faq details[open] summary::after { content: "\2212"; }
+  .faq details p { margin: 0 0 1rem; max-width: 40rem; color: #4A444F; line-height: 1.5; }
+  .faq .wrap { align-items: start; }
 </style>
 </head>
 <body>
@@ -254,22 +294,22 @@
   <section class="paper" id="ways">
     <div class="wrap">
       <div class="head"><h2 class="big" data-sc-in>Five ways <span>to train.</span></h2><a class="btn on-light" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
-      <ol class="rows" data-sc-in>
-        <li><span class="n">01</span><div><h3>At your home</h3><p>1-to-1 training tailored to your goals and fitness level. I come to your home, or any place you prefer.</p></div><span class="amt">&#8362;60<small>for 30 minutes</small></span></li>
-        <li><span class="n">02</span><div><h3>At your gym</h3><p>I come with you to your gym, with guidance, motivation and support throughout your workout.</p></div><span class="amt ask">Message for a price</span></li>
-        <li><span class="n">03</span><div><h3>Online</h3><p>Virtual sessions from the comfort of your home.</p></div><span class="amt ask">Message for a price</span></li>
-        <li><span class="n">04</span><div><h3>Small group circuits</h3><p>Fun, motivating circuit sessions for groups of 3 or more.</p></div><span class="amt ask">Message for a price</span></li>
-        <li><span class="n">05</span><div><h3>My private gym</h3><p>One to one in my private gym in Jerusalem, with a squat rack, free weights, a treadmill and a rowing machine.</p></div><span class="amt ask">Message for a price</span></li>
+      <ol class="offers" data-sc-in>
+        <li><img src="assets/home.webp" alt="Pink dumbbells and an exercise mat on a sunlit living-room floor" width="2048" height="1152" loading="lazy"><div class="ob"><span class="n">01</span><h3>At your home</h3><p>1-to-1 training tailored to your goals and fitness level. I come to your home, or any place you prefer.</p><span class="amt">&#8362;60<small>for 30 minutes</small></span></div></li>
+        <li id="gym"><img src="assets/gym.webp" alt="An empty gym with a dumbbell rack, a bench and pink dumbbells on the floor" width="2048" height="1152" loading="lazy"><div class="ob"><span class="n">02</span><h3>At your gym</h3><p>I come with you to your gym, with guidance, motivation and support throughout your workout.</p><span class="amt ask">Message for a price</span></div></li>
+        <li><img src="assets/online.webp" alt="A laptop beside a yoga mat and a pink resistance band" width="2048" height="1152" loading="lazy"><div class="ob"><span class="n">03</span><h3>Online</h3><p>Virtual sessions from the comfort of your home.</p><span class="amt ask">Message for a price</span></div></li>
+        <li><img src="assets/private-gym.webp" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy"><div class="ob"><span class="n">04</span><h3>My private gym</h3><p>One to one in my private gym in Jerusalem, with a squat rack, free weights, a treadmill and a rowing machine.</p><span class="amt ask">Message for a price</span></div></li>
       </ol>
+      <div class="group" data-sc-in><span class="n">05</span><h3>Small group circuits</h3><p>Fun, motivating circuit sessions for groups of 3 or more.</p><span class="amt ask">Message for a price</span></div>
     </div>
   </section>
 
-  <section class="cut pic gym shade-b" id="gym">
-    <img class="photo" src="assets/gym.webp" alt="An empty gym with a dumbbell rack, a bench and pink dumbbells on the floor" width="2048" height="1152" loading="lazy">
+  <section class="cut pic private shade-b" id="private">
+    <img class="photo" src="assets/private-gym.webp" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy">
     <div class="in">
-      <span class="tag">At your gym</span>
-      <h2 class="big" data-sc-in>I come <span>with you.</span></h2>
-      <p class="sub">Guidance, motivation and support throughout your workout.</p>
+      <span class="tag">Photo of my gym</span>
+      <h2 class="big" data-sc-in>Or come <span>to me.</span></h2>
+      <p class="sub">One to one in my private gym in Jerusalem.</p>
     </div>
   </section>
 
@@ -286,25 +326,29 @@
     </div>
   </section>
 
-  <section class="cut pic private shade-b" id="private">
-    <img class="photo" src="assets/private-gym.webp" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy">
-    <div class="in">
-      <span class="tag">Photo of my gym</span>
-      <h2 class="big" data-sc-in>Or come <span>to me.</span></h2>
-      <p class="sub">One to one in my private gym in Jerusalem.</p>
+  <section class="proof-blk" id="session">
+    <div class="wrap">
+      <h2 class="big" data-sc-in>Your <span>session.</span></h2>
+      <dl class="stats" data-sc-in>
+        <div><dt>Length</dt><dd><b>30</b> minutes</dd></div>
+        <div><dt>One&#8209;to&#8209;one</dt><dd><b>&#8362;60</b> at your home</dd></div>
+        <div><dt>Ways to train</dt><dd><b>5</b> to choose from</dd></div>
+        <div><dt>Who</dt><dd><b>Women</b> only</dd></div>
+      </dl>
+      <p class="wa">Training in English. WhatsApp <a href="https://wa.me/447563299474">07563 299474</a></p>
     </div>
   </section>
 
-  <section class="glance" id="session">
+  <section class="paper faq" id="faq">
     <div class="wrap">
-      <h2 class="big" data-sc-in>Your <span>session.</span></h2>
-      <dl data-sc-in>
-        <div><dt>Length</dt><dd>30 minutes, &#8362;60 one&#8209;to&#8209;one</dd></div>
-        <div><dt>Who</dt><dd>Women only</dd></div>
-        <div><dt>Where</dt><dd>At your home, your gym, online, or at my private gym, in Jerusalem</dd></div>
-        <div><dt>Language</dt><dd>English</dd></div>
-        <div><dt>WhatsApp</dt><dd><a href="https://wa.me/447563299474">07563 299474</a></dd></div>
-      </dl>
+      <div class="head"><h2 class="big" data-sc-in>Good <span>to know.</span></h2></div>
+      <div class="qa" data-sc-in>
+        <details><summary>Where do we train?</summary><p>At your home or any place you prefer, at your gym, online, or one to one in my private gym in Jerusalem.</p></details>
+        <details><summary>How long is a session, and what does it cost?</summary><p>A session is 30 minutes, and one to one at your home is &#8362;60. For the gym, online, circuits and my private gym, message me for a price.</p></details>
+        <details><summary>Who is it for?</summary><p>Women only. Sessions are tailored to your goals and fitness level.</p></details>
+        <details><summary>What do we work on?</summary><p>Aerobic fitness, core, strength, balance, and pre and post natal training.</p></details>
+        <details><summary>Which language?</summary><p>Training is in English.</p></details>
+      </div>
     </div>
   </section>
 
@@ -325,7 +369,7 @@
       <div class="act"><a class="btn" href="https://myisraelrental.com/business/michal-yodaiken">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
       <div class="cols">
         <div><h4>Train</h4><ul><li><a href="#ways">At your home</a></li><li><a href="#gym">At your gym</a></li><li><a href="#ways">Online</a></li><li><a href="#private">My private gym</a></li></ul></div>
-        <div><h4>The session</h4><ul><li><a href="#session">30 minutes, &#8362;60</a></li><li><a href="#session">Women only</a></li><li><a href="#session">Training in English</a></li></ul></div>
+        <div><h4>The session</h4><ul><li><a href="#session">30 minutes, &#8362;60</a></li><li><a href="#faq">Women only</a></li><li><a href="#faq">Training in English</a></li></ul></div>
         <div><h4>Contact</h4><ul><li><a href="https://wa.me/447563299474">WhatsApp 07563 299474</a></li><li><a href="https://myisraelrental.com/business/michal-yodaiken">Message to book</a></li></ul></div>
       </div>
       <p class="legal">Michal Yodaiken, personal training for women in Jerusalem. <a href="https://myisraelrental.com/business/michal-yodaiken">Listed on MyIsraelRental</a></p>
