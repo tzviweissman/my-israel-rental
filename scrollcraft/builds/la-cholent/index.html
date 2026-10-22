@@ -10,9 +10,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="site-category" content="food-shop">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>L.A. Cholent by Rabbi Samuels · Shabbos, done</title>
 <meta name="description" content="Rabbi Samuels' famous cholent, as a raw kit: into your crock pot, add water, low for about 20 hours. Kosher, hechsher from Rabbi Weiner. Made in Jerusalem, delivered across Israel. From ₪100.">
+<meta property="og:title" content="L.A. Cholent by Rabbi Samuels · Shabbos, done">
+<meta property="og:description" content="Rabbi Samuels' famous cholent, as a raw kit: into your crock pot, add water, low for about 20 hours. Kosher, hechsher from Rabbi Weiner. Made in Jerusalem, delivered across Israel. From ₪100.">
+<meta property="og:image" content="https://myisraelrental.com/pages/la-cholent/assets/tubs.webp">
 <link rel="icon" href="assets/seal.webp">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -137,7 +141,7 @@
   .knob .ring-shade { fill: url(#steel); }
   .knob .grip { fill: #0B0907; }
   .knob .pointer { stroke: var(--sc-ink); stroke-width: 5; stroke-linecap: round; }
-  .knob .rot { transform-origin: 100px 100px; transform: rotate(var(--a, -100deg)); transition: transform 90ms linear; }
+  .knob .rot { transform-origin: 100px 100px; transform: rotate(var(--a, -100deg)); transition: transform 90ms ease-out; }
   .knob .tick { stroke: var(--sc-ink-soft); stroke-width: 2; }
   .knob text { font: 600 13px var(--sc-font-text); fill: var(--sc-ink); letter-spacing: 0.06em; }
   .knob .lamp { fill: #3A140F; transition: fill 200ms var(--sc-ease-out); }
@@ -322,26 +326,6 @@
   /* ---------- the worlds after the opening (page rules 3t) ------------------
      Picture, then a calm rest on marble, then a picture, then the dark order,
      then the footer. Words sit on the picture with a soft edge shade. */
-  .world { position: relative; isolation: isolate; overflow: hidden; height: calc(100svh - 64px); min-height: 30rem; display: grid; align-items: end; background: var(--sc-canvas); }
-  .world-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; display: block; }
-  .world-shade { position: absolute; inset: 0; z-index: -1; pointer-events: none;
-    background:
-      linear-gradient(0deg, rgb(15 12 10 / 0.82) 0%, rgb(15 12 10 / 0.5) 30%, rgb(15 12 10 / 0) 62%),
-      linear-gradient(90deg, rgb(15 12 10 / 0.5) 0%, rgb(15 12 10 / 0) 55%); }
-  .world-copy { padding-block: clamp(5rem, 14svh, 9rem) clamp(3rem, 9svh, 6rem); display: grid; justify-items: start; gap: var(--sc-5); }
-  .world-copy h2 { margin: 0; max-width: 12ch; font-family: var(--sc-font-display); font-weight: 200; text-transform: uppercase; letter-spacing: 0.01em;
-    font-size: clamp(3rem, min(1.6rem + 7.4vw, 15svh), 8.6rem); line-height: 0.92; color: var(--sc-ink); text-shadow: 0 2px 28px rgb(0 0 0 / 0.35); }
-  .world-line { margin: 0; max-width: 34rem; font-size: var(--sc-t-lg); line-height: 1.5; color: var(--sc-ink); text-shadow: 0 1px 18px rgb(0 0 0 / 0.5); }
-  .world .occasions { margin: 0; padding: 0; gap: 0.5rem; display: flex; flex-wrap: wrap; list-style: none; max-width: 44rem;
-    font: 600 var(--sc-t-xs)/1 var(--sc-font-text); letter-spacing: 0.14em; text-transform: uppercase; color: var(--sc-ink); }
-  .world .occasions li { white-space: nowrap; padding: 0.6rem 0.9rem; border: 1px solid rgb(242 235 223 / 0.45); border-radius: var(--sc-r-pill);
-    background: rgb(15 12 10 / 0.35); backdrop-filter: blur(6px); }
-  .world .occasions li::after { display: none; }
-  .world--tubs .world-bg { object-position: 50% 20%; }
-  .world--tubs .world-shade { background:
-      linear-gradient(0deg, rgb(15 12 10 / 0.88) 0%, rgb(15 12 10 / 0.6) 34%, rgb(15 12 10 / 0) 66%),
-      linear-gradient(90deg, rgb(15 12 10 / 0.45) 0%, rgb(15 12 10 / 0) 50%); }
-  .world--table .world-bg { object-position: 50% 40%; }
 
   /* the rest on marble: the page turns light, the facts sit in numbered rows */
   .rest { --sc-ink: #1B1612; --sc-ink-soft: #5A4F43; --sc-accent-text: #7A530F;
@@ -373,17 +357,78 @@
   .closing-base a { display: inline; margin: 0; text-decoration: underline; text-underline-offset: 3px; }
 
   @media (max-width: 860px) {
-    .world { height: auto; min-height: 82svh; }
-    .world--tubs { min-height: 76svh; }
-    .world-copy { padding-block: 5rem 4.5rem; gap: var(--sc-4); }
-    .world-copy h2 { font-size: clamp(3rem, 15vw, 4.6rem); }
-    .world--table .world-bg { object-position: 50% 45%; }
-    .world--tubs .world-bg { object-position: 28% 45%; }
     .rest-grid { grid-template-columns: 1fr; }
     .rows li { grid-template-columns: 2.4rem 1fr; }
     .rows li p { grid-column: 2; }
     .closing-cols { grid-template-columns: 1fr; }
     .closing { padding-bottom: 6.5rem; }
+  }
+
+
+  /* ---------- category rework (page rules 3t, 22 Oct 2026): a food shop ----------
+     After the candlelit opening the page turns bright and warm: one colour room per
+     size with its servings and price, the steps, the occasions, the facts, then the order
+     dial on the same light ground. The dark is the opening, the dial's face and the footer. */
+  :root { --lt-ground: #FBF3E4; --lt-ink: #1B1612; --lt-soft: #5A4F43; --plum: #5A1A33; --steel: #2B2623; }
+  .shop, .how, .occ, #order { --sc-ink: var(--lt-ink); --sc-ink-soft: var(--lt-soft); --sc-accent-text: #7A530F;
+    --sc-hairline: color-mix(in oklab, #1B1612 14%, transparent); --sc-hairline-strong: color-mix(in oklab, #1B1612 28%, transparent); color: var(--lt-ink); }
+  .shop, .how, #order { background: var(--lt-ground); }
+  .occ { background: #E9C46A; }
+  #order { background: var(--lt-ground); }
+  #order .knob { --sc-ink: #F2EBDF; }
+  .order-tag { color: #7A530F; }
+  .size-pick button[aria-pressed="true"] { border-color: var(--lt-ink); background: #fff; }
+  .size-pick button:hover { border-color: var(--lt-ink); }
+  .size-pick .tab { background: var(--lt-ink); color: #fff; }
+  .reassure svg { stroke: var(--lt-ink); }
+  .topbar { background: rgb(251 243 228 / .94); --sc-ink: var(--lt-ink); --sc-hairline: color-mix(in oklab, #1B1612 14%, transparent); }
+  .topbar .tb-links a:hover { border-color: var(--lt-ink); }
+
+  .shop-head { padding-block: clamp(1.6rem, 4svh, 3rem) clamp(.8rem, 2svh, 1.4rem); }
+  .shop h2, .how h2, .occ h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; letter-spacing: .01em;
+    font-size: clamp(2.2rem, min(1.2rem + 3.6vw, 8svh), 4.6rem); line-height: .98; color: var(--lt-ink); }
+  .shop-head p { margin: .6rem 0 0; color: var(--lt-soft); font-size: var(--sc-t-base); max-width: 40rem; }
+  .rooms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .room { --c: #D9A54A; --t: #1B1612; display: flex; flex-direction: column; justify-content: space-between; gap: .7rem; background: var(--c); color: var(--t);
+    padding: clamp(.9rem, 2.6svh, 1.8rem) clamp(1rem, 2.4vw, 2.2rem); }
+  .room.plum { --c: var(--plum); --t: #fff; } .room.steel { --c: var(--steel); --t: #fff; }
+  .room .ph { position: relative; border-radius: 16px; overflow: hidden; height: min(28svh, 16rem); background: rgb(255 255 255 / .16); }
+  .room .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .room .ph .tag { position: absolute; left: 10px; top: 10px; padding: .3rem .7rem; border-radius: 999px; background: #fff; color: #1B1612; font: 700 .8rem/1.2 var(--sc-font-text); letter-spacing: .05em; text-transform: uppercase; }
+  .room h3 { margin: 0; font: 300 clamp(1.6rem, min(2.4vw, 5svh), 2.2rem)/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: .03em; }
+  .room .feeds { margin: .3rem 0 0; font: 700 1rem/1.3 var(--sc-font-text); }
+  .room .what { margin: .2rem 0 0; font-size: .95rem; line-height: 1.4; }
+  .room .rf { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; }
+  .room .price { font: 300 clamp(2.4rem, min(3.6vw, 7svh), 3.4rem)/1 var(--sc-font-display); font-variant-numeric: tabular-nums; }
+  .room .price .was { display: block; margin-bottom: .2rem; font: 400 1rem/1 var(--sc-font-text); text-decoration: line-through; }
+  .btn-line { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 2px solid currentColor;
+    background: transparent; color: inherit; font: 700 .95rem/1 var(--sc-font-text); text-decoration: none; cursor: pointer; transition: background 160ms ease-out, color 160ms ease-out, transform 140ms ease-out; }
+  .room .btn-line:hover { background: var(--t); color: var(--c); }
+  .btn-line:active { transform: scale(.97); }
+
+  .how { padding-block: clamp(1.6rem, 5svh, 3.6rem); }
+  .how-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.4rem, 4vw, 3.5rem); align-items: center; }
+  .how .ph { border-radius: 22px; overflow: hidden; height: min(48svh, 28rem); }
+  .how .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .steps { list-style: none; margin: clamp(.8rem, 2svh, 1.4rem) 0 0; padding: 0; display: grid; gap: .6rem; }
+  .steps li { display: grid; grid-template-columns: 2.4rem 1fr; gap: .8rem; align-items: baseline; padding-block: .6rem; border-top: 1px solid var(--sc-hairline-strong); font-size: var(--sc-t-base); line-height: 1.4; }
+  .steps b { font: 300 1.6rem/1 var(--sc-font-display); }
+  .fine { margin: .9rem 0 0; font-size: var(--sc-t-sm); color: var(--lt-soft); }
+
+  .occ { padding-block: clamp(1.6rem, 5svh, 3.6rem); }
+  .occ-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(1.4rem, 4vw, 3.5rem); align-items: center; }
+  .occ .ph { border-radius: 22px; overflow: hidden; height: min(44svh, 26rem); }
+  .occ .ph img, .occ .ph video { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+  .occ .occasions { margin: clamp(.8rem, 2svh, 1.4rem) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; list-style: none; }
+  .occ .occasions li { white-space: nowrap; padding: .6rem 1rem; border: 2px solid var(--lt-ink); border-radius: 999px; font: 700 var(--sc-t-sm)/1 var(--sc-font-text); color: var(--lt-ink); }
+  .occ .occasions li::after { display: none; }
+  .rest { background: var(--lt-ground); }
+
+  @media (max-width: 860px) {
+    .rooms { grid-template-columns: 1fr; }
+    .room .ph { height: min(30svh, 15rem); }
+    .how-grid, .occ-grid { grid-template-columns: 1fr; }
+    .how .ph { height: 30svh; } .occ .ph { height: 30svh; order: -1; }
   }
 
 </style>
@@ -439,7 +484,7 @@
           <p class="proofline"><span>From ₪100</span><span>Kosher, hechsher from Rabbi Weiner</span><span>Made in Jerusalem, delivered across Israel</span></p>
         </div>
 
-        <p class="alone" data-sc-cue="0.44 0.55 0.02 0.03">Just throw our raw ingredients into your crock pot, add water, and enjoy!
+        <p class="alone" data-sc-cue="0.44 0.55 0.02 0.03">Just throw our raw ingredients into your crock pot, add water, and enjoy.
           <cite>Rabbi Samuels, L.A. Cholent</cite></p>
 
         <div class="peak" data-sc-cue="0.57 1 0.04 0">
@@ -482,16 +527,46 @@
     </div>
   </section>
 
-  <!-- WORLD 2: their Shabbos table, edge to edge (rule 3t). -->
-  <section class="world world--table" id="occasions" aria-labelledby="occ-h">
-    <video class="table-clip world-bg" muted loop playsinline preload="none" poster="assets/table.webp" aria-label="A long Shabbos table at night, candles lit, challah under its cover, places set and waiting."></video>
-    <div class="world-shade" aria-hidden="true"></div>
-    <div class="sc-wrap world-copy" data-sc-in data-sc-stagger="70">
-      <h2 id="occ-h">Any size.<br>Any occasion.</h2>
-      <ul class="occasions" aria-label="What people order it for">
-        <li>Shabbos meals</li><li>Yom Tov</li><li>Thursday nights</li><li>Kiddushim</li><li>Shalom zachors</li><li>Bar mitzvahs</li><li>Family visiting</li><li>Simchos of any size</li>
-      </ul>
-      <a class="btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
+  <!-- The shop (page rules 3t, food-shop): one colour room per size, each with its servings and price. -->
+  <section class="shop" id="sizes" aria-labelledby="sizes-h">
+    <div class="sc-wrap shop-head"><h2 id="sizes-h">Pick your size</h2><p>A raw kit for your crock pot, in Original or Spicy. Add water and cook on low for about 20 hours.</p></div>
+    <div class="rooms">
+      <article class="room gold"><div class="ph"><img src="assets/tubs.webp" alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps." width="1600" height="1066" loading="lazy" style="object-position:20% 50%"></div>
+        <div class="rb"><h3>Medium</h3><p class="feeds">Feeds 4 to 6</p><p class="what">Add your own meat or keep it parve: &#8362;55</p></div>
+        <div class="rf"><div class="price">&#8362;100</div><a class="btn-line add" href="#order" data-size="0" aria-label="Order Medium, see the price and send your order">Order this size</a></div></article>
+      <article class="room plum"><div class="ph"><img src="assets/tubs.webp" alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps." width="1600" height="1066" loading="lazy" style="object-position:50% 50%"><span class="tag">10% off</span></div>
+        <div class="rb"><h3>Large</h3><p class="feeds">Feeds 8 to 12</p><p class="what">Add your own meat or keep it parve: &#8362;85</p></div>
+        <div class="rf"><div class="price"><s class="was">&#8362;200</s> &#8362;180</div><a class="btn-line add" href="#order" data-size="1" aria-label="Order Large, see the price and send your order">Order this size</a></div></article>
+      <article class="room steel"><div class="ph"><img src="assets/tubs.webp" alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps." width="1600" height="1066" loading="lazy" style="object-position:80% 50%"></div>
+        <div class="rb"><h3>Extra Large / Kiddush</h3><p class="feeds">Sized to your guest list</p><p class="what">Sizes are customizable depending on the number of guests</p></div>
+        <div class="rf"><div class="price">&#8362;250</div><a class="btn-line add" href="#order" data-size="2" aria-label="Order Extra Large / Kiddush, see the price and send your order">Order this size</a></div></article>
+    </div>
+  </section>
+
+  <section class="how" id="kit" aria-labelledby="kit-h">
+    <div class="sc-wrap how-grid">
+      <div class="ph"><img src="assets/tubs.webp" width="1600" height="1066" loading="lazy" alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps."></div>
+      <div>
+        <h2 id="kit-h">Add water. It cooks itself.</h2>
+        <ol class="steps">
+          <li><b>1</b>Select your cholent size.</li>
+          <li><b>2</b>Place the raw L.A. Cholent kit in your crock pot and add water.</li>
+          <li><b>3</b>Cook on low for about 20 hours.</li>
+        </ol>
+        <p class="fine">Each tub yields about 3 to 4 pounds. Slow cooker liner free. Extra meat &#8362;50 / lb, marrow bones &#8362;40 / lb.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="occ" id="occasions" aria-labelledby="occ-h">
+    <div class="sc-wrap occ-grid">
+      <div>
+        <h2 id="occ-h">Any size.<br>Any occasion.</h2>
+        <ul class="occasions" aria-label="What people order it for">
+          <li>Shabbos meals</li><li>Yom Tov</li><li>Thursday nights</li><li>Kiddushim</li><li>Shalom zachors</li><li>Bar mitzvahs</li><li>Family visiting</li><li>Simchos of any size</li>
+        </ul>
+      </div>
+      <div class="ph"><video class="table-clip" muted loop playsinline preload="none" poster="assets/table.webp" width="2048" height="1152" aria-label="A long Shabbos table at night, candles lit, challah under its cover, places set and waiting."></video></div>
     </div>
   </section>
 
@@ -503,7 +578,7 @@
         <blockquote class="quote">
           <img src="assets/seal.webp" width="480" height="480" alt="The L.A. Cholent seal: convenient and consistent, a higher standard of flavor.">
           <div>
-            <p>Rabbi Samuels LA Cholent has been a fan favorite for over a decade, and now we've opened an Israel line!</p>
+            <p>Rabbi Samuels LA Cholent has been a fan favorite for over a decade, and now we've opened an Israel line.</p>
             <cite>Rabbi Samuels, on L.A. Cholent</cite>
           </div>
         </blockquote>
@@ -514,18 +589,6 @@
         <li><b>03</b><span>Each tub</span><p>Yields about 3 to 4 pounds</p></li>
         <li><b>04</b><span>Delivery</span><p>Free local delivery on your first order</p></li>
       </ol>
-    </div>
-  </section>
-
-  <!-- WORLD 4: their own tubs, edge to edge. -->
-  <section class="world world--tubs" id="kit" aria-labelledby="kit-h">
-    <img class="world-bg" src="assets/tubs.webp" width="1600" height="1066" loading="lazy"
-         alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps.">
-    <div class="world-shade" aria-hidden="true"></div>
-    <div class="sc-wrap world-copy" data-sc-in data-sc-stagger="70">
-      <h2 id="kit-h">Add water. It cooks itself.</h2>
-      <p class="world-line">Our raw ingredients, ready for your crock pot. Cook on low for about 20 hours.</p>
-      <a class="btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
     </div>
   </section>
 
@@ -779,7 +842,7 @@
     // the words that change ease in, so a size change is never one hard swap
     if (was !== cur && !reduce && document.getElementById('price').animate) {
       ['size-name', 'feeds', 'price', 'alt', 'order-label'].forEach(function (id) {
-        document.getElementById(id).animate([{ opacity: 0.2 }, { opacity: 1 }], { duration: 420, easing: 'ease-out' });
+        document.getElementById(id).animate([{ opacity: 0.6 }, { opacity: 1 }], { duration: 240, easing: "ease-out" });
       });
     }
   }
@@ -800,6 +863,7 @@
   dial.addEventListener('pointermove', function (e) { if (dragging) { var a = angleAt(e); pick(nearest(a), a); } });
   dial.addEventListener('pointerup', function () { dragging = false; pick(cur); });
   dial.addEventListener('pointercancel', function () { dragging = false; pick(cur); });
+  document.querySelectorAll('[data-size]').forEach(function (a) { a.addEventListener('click', function () { pick(+a.dataset.size); }); });
   pick(1);
 }());
 </script>
