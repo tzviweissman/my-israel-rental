@@ -141,6 +141,7 @@ R3.14 pass: the consultation price is small in the bar and the courses are rows;
 R3k.7 pass: check-site FLOW walks the booking steps on book.html (what, when, your details), total in the side panel, Back buttons
 R3k.8 n/a: one booking, no basket lines to remove
 R3k.6 n/a: no basket between pages
+R3k.9 pass: book.html reads and POSTs to /api/marketplace/order-form/<her listing> (the consultation, the two courses and the bundle, saved as a request), shows its own done screen, and also opens WhatsApp to her listing's number with the request typed and the tracking link; if saving fails WhatsApp still opens with the request; check-site SAVE and FLOW pass (run on a copy with the API answered by a stub, because the local API has no copy of her listing)
 R3.15 pass: what the brief asks (book) has the booking page; contact has numbers and hours; visit has hours and the place
 R7.1 pass: CONCEPT.md names the pick (the Own idea) and why; no options page was put to anyone
 R8.5 pass: followed every main button: all go to book.html, her booking page; WhatsApp is the quiet second route

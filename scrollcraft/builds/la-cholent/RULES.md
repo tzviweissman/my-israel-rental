@@ -141,6 +141,7 @@ R3.14 pass: loud prices only because prices exist (boxes, pans, sizes), none inv
 R3k.7 n/a: single page with a dial and a link to his chat, no basket steps exist
 R3k.8 n/a: no basket exists
 R3k.6 n/a: no basket exists
+R3k.9 pass: the dial's Message to order button leads to a Your order section (how many, pick-up or delivery, address, day, name, phone, note) whose submit POSTs to /api/marketplace/order-form/<his listing>/orders with the dial's size as the product and only then opens WhatsApp to his listing's number with the order and the tracking link; if saving fails WhatsApp still opens; own-meat, parve and per-pound extras are notes, not products; check-site SAVE and FLOW pass
 R3.15 pass: ordering is the message to his page, one button everywhere
 R7.1 pass: CONCEPT.md names the pick and the reason; no options page
 R8.5 pass: every main button goes to his MyIsraelRental chat page, the only way to order he has

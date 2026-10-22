@@ -141,6 +141,7 @@ R3.14 pass: one priced item at her listing price, shown plainly; not a quote-bas
 R3k.7 pass: check-site FLOW walks Step 1 basket, Step 2 collecting, Step 3 details with Back and the browser back button; total beside every step
 R3k.8 pass: the basket line has a Remove button of 40px or more (check-site TAP)
 R3k.6 pass: clicked Add on the home page card: arrived at shop.html#order with the skirt in the basket and total 320
+R3k.9 pass: Step 3 of the shop's order POSTs to /api/marketplace/order-form/<her listing>/orders (product Premium Modest Sports Skirt, pickup, day, name, phone, note with size and colour) and only then opens WhatsApp to her number with the order and the tracking link; if saving fails WhatsApp still opens and the failure is console-logged; a Which day field was added to Step 2 because the endpoint needs a date; check-site SAVE and FLOW pass
 R3.15 pass: the action is buy or visit: the shop has the order form and the address and directions are on the home and contact pages
 R7.1 pass: CONCEPT.md names the chosen direction and the reason
 R8.5 pass: every main button goes to the shop page, which is the order page; WhatsApp is only the contact link

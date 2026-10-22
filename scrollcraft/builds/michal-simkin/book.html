@@ -255,17 +255,13 @@
   var LOCAL = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) && /\.html$/.test(location.pathname);
   var API = LOCAL ? 'http://localhost:8001/api' : '/api';
   var APP = LOCAL ? 'http://localhost:3210' : location.origin;
-  var SLUG = 'michal-simkin';
+  var GIG = '8d16bfc0-9da6-4e5d-8c94-a0057cdf247c', WA = '972546826258';   /* her listing and its WhatsApp number */
   var SYM = { USD: '$', ILS: '₪', EUR: '€', GBP: '£' };
   var $ = function (s) { return document.querySelector(s); };
   var state = { gig: null, products: [], chosen: null };
   function money(n, cur) { return (SYM[cur] || cur + ' ') + (Math.round(n * 100) / 100).toLocaleString('en-US'); }
 
-  fetch(API + '/marketplace/business/' + SLUG).then(function (r) { return r.json(); }).then(function (d) {
-    var gigs = d.listings || d.gigs || [];
-    var store = gigs.filter(function (g) { return g.gig_type === 'store'; })[0] || gigs[0];
-    return fetch(API + '/marketplace/order-form/' + store.id).then(function (r) { return r.json(); });
-  }).then(function (form) {
+  fetch(API + '/marketplace/order-form/' + GIG).then(function (r) { return r.json(); }).then(function (form) {
     state.gig = form.gig; state.products = form.products;
     render(); initDate();
     var want = location.hash === '#academy' ? /both courses/i : /consultation/i;
@@ -348,15 +344,27 @@
     var body = { lines: [{ product_id: state.chosen.id, qty: 1 }], fulfilment: 'pickup', date: $('#date').value, window: null, address: null,
       customer_name: $('#name').value.trim(), customer_phone: $('#phone').value.trim(), customer_email: $('#email').value.trim() || null, notes: notes };
     $('#place').disabled = true; $('#placeBar').disabled = true; $('#place').textContent = 'Sending…';
-    fetch(API + '/marketplace/order-form/' + state.gig.id + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+    /* saved to her board first, then WhatsApp with the request typed (rule 3k). The tab opens now so a pop-up blocker allows it. */
+    var what = state.chosen.name.replace('Academy · ', 'Academy: ');
+    var out = ['Hi Michal, I would like to book:', '\u2022 ' + what + ' (' + money(state.chosen.price, state.chosen.currency) + ')',
+      'Day: ' + new Date($('#date').value + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + ', ' + $('#time').value];
+    if ($('#notes').value.trim()) out.push('Notes: ' + $('#notes').value.trim());
+    out.push('Name: ' + $('#name').value.trim() + ', ' + $('#phone').value.trim());
+    var tab = window.open('', '_blank');
+    function wa(track) {
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(out.join('\n') + (track ? '\n\nFollow the request: ' + track : ''));
+      if (tab) tab.location.href = url; else window.open(url, '_blank');
+    }
+    fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.json().then(function (j) { if (!r.ok) throw new Error(j.detail || 'Could not send the request'); return j; }); })
       .then(function (j) {
-        $('#doneWhat').textContent = state.chosen.name.replace('Academy · ', 'Academy: ') + ' · ' + money(j.total || 0, j.currency || 'ILS') + '.';
+        $('#doneWhat').textContent = what + ' \u00b7 ' + money(j.total || 0, j.currency || 'ILS') + '.';
         $('#doneWhen').textContent = 'Preferred: ' + $('#date').value + ', ' + $('#time').value + '.';
         $('#track').href = APP + '/orders/track/' + j.track_token;
+        wa(APP + '/orders/track/' + j.track_token);
         document.body.classList.add('is-done'); window.scrollTo(0, 0);
       })
-      .catch(function (e) { $('#errYou').textContent = e.message; $('#place').disabled = false; $('#placeBar').disabled = false; paint(); });
+      .catch(function (e) { console.error(e); wa(''); $('#errYou').textContent = e.message + '. WhatsApp is open with your request: send it there.'; $('#place').disabled = false; $('#placeBar').disabled = false; paint(); });
   }
   $('#place').addEventListener('click', next); $('#placeBar').addEventListener('click', next);
 })();
