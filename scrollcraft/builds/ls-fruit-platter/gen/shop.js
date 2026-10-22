@@ -17,8 +17,9 @@
     stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' × ' + BY[sel].name : ''; stage.querySelector('[data-d="-1"]').disabled = n <= 1; }
   // decode every size photo up front, so a wipe never starts on an undecoded picture (check-motion JUMP, 22 Oct 2026)
   [].forEach.call(ph.querySelectorAll('img.sl'), function (i) { if (i.decode) i.decode().catch(function () {}); });
+  var ROOM = { small: '#F8D4D0', medium: '#FCE2B4', large: '#EAD6E4', xl: '#DBE8BF' };
   function show(k) {
-    sel = k; bl.go(BY[k].i);
+    sel = k; stage.style.setProperty('--room', ROOM[k]); bl.go(BY[k].i);
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.k === k ? 'true' : 'false'); });
     document.getElementById('st-name').textContent = BY[k].name; document.getElementById('st-price').innerHTML = P(BY[k].price);
     n = 1; label();
@@ -109,6 +110,8 @@
   document.getElementById('back').addEventListener('click', function () { history.back(); });
   document.getElementById('steps').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
   show(BY[qs.get('size')] ? qs.get('size') : 'small');
+  // "Add" on a home page card arrives here with the size and add=1: it is already in the basket
+  if (qs.get('add') === '1' && BY[qs.get('size')]) { q[sel] = Math.min(20, q[sel] + 1); label(); say('Added: 1 × ' + BY[sel].name); }
   update();
   var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
 })();

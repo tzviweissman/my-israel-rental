@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Shop · Ls Fruit Platter</title>
+<meta name="site-category" content="food-shop">
 <meta name="description" content="Fruit platters in four sizes, Small ₪300, Medium ₪400, Large ₪500 and Extra large ₪850. Order in three steps.">
 <meta property="og:title" content="Shop · Ls Fruit Platter">
 <meta property="og:description" content="Fruit platters in four sizes, Small ₪300, Medium ₪400, Large ₪500 and Extra large ₪850. Order in three steps.">
@@ -47,10 +48,10 @@
           <li><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5h16v11H9l-5 4z"/></svg>Your order opens in WhatsApp</li>
         </ul>
         <div class="st-pick" aria-label="Sizes">
-          <button type="button" data-k="small" aria-pressed="true"><img src="assets/size-1-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Small</b><i><span class="sym">₪</span>300</i></span></button>
-          <button type="button" data-k="medium" aria-pressed="false"><img src="assets/size-2-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Medium</b><i><span class="sym">₪</span>400</i></span></button>
-          <button type="button" data-k="large" aria-pressed="false"><img src="assets/size-3-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Large</b><i><span class="sym">₪</span>500</i></span></button>
-          <button type="button" data-k="xl" aria-pressed="false"><img src="assets/size-4-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Extra large</b><i><span class="sym">₪</span>850</i></span></button>
+          <button type="button" data-k="small" style="--c:#F8D4D0" aria-pressed="true"><img src="assets/size-1-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Small</b><i><span class="sym">₪</span>300</i></span></button>
+          <button type="button" data-k="medium" style="--c:#FCE2B4" aria-pressed="false"><img src="assets/size-2-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Medium</b><i><span class="sym">₪</span>400</i></span></button>
+          <button type="button" data-k="large" style="--c:#EAD6E4" aria-pressed="false"><img src="assets/size-3-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Large</b><i><span class="sym">₪</span>500</i></span></button>
+          <button type="button" data-k="xl" style="--c:#DBE8BF" aria-pressed="false"><img src="assets/size-4-t.webp" width="520" height="390" alt="" loading="lazy"><span class="ring"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9"/></svg></span><span class="t"><b>Extra large</b><i><span class="sym">₪</span>850</i></span></button>
         </div>
       </div>
     </div>
@@ -138,8 +139,9 @@
     stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' × ' + BY[sel].name : ''; stage.querySelector('[data-d="-1"]').disabled = n <= 1; }
   // decode every size photo up front, so a wipe never starts on an undecoded picture (check-motion JUMP, 22 Oct 2026)
   [].forEach.call(ph.querySelectorAll('img.sl'), function (i) { if (i.decode) i.decode().catch(function () {}); });
+  var ROOM = { small: '#F8D4D0', medium: '#FCE2B4', large: '#EAD6E4', xl: '#DBE8BF' };
   function show(k) {
-    sel = k; bl.go(BY[k].i);
+    sel = k; stage.style.setProperty('--room', ROOM[k]); bl.go(BY[k].i);
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.k === k ? 'true' : 'false'); });
     document.getElementById('st-name').textContent = BY[k].name; document.getElementById('st-price').innerHTML = P(BY[k].price);
     n = 1; label();
@@ -230,6 +232,8 @@
   document.getElementById('back').addEventListener('click', function () { history.back(); });
   document.getElementById('steps').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
   show(BY[qs.get('size')] ? qs.get('size') : 'small');
+  // "Add" on a home page card arrives here with the size and add=1: it is already in the basket
+  if (qs.get('add') === '1' && BY[qs.get('size')]) { q[sel] = Math.min(20, q[sel] + 1); label(); say('Added: 1 × ' + BY[sel].name); }
   update();
   var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
 })();
