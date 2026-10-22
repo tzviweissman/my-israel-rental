@@ -11,4 +11,6 @@
 
    About 62 credits in total, out of about 620. Run one job at a time and call `get_cost` before each one.
 
+5. **Gift Boutique, build your own gift: yes** (Tzvi, 22 Oct). The order page lets a customer pick single pieces (napkin holders, bowls, place mats, glasses, openers, baby items) into one gift, with a running total. The order is saved, then sent on WhatsApp, the same way as the other orders. The ready-made gifts stay as they are. Ask the owner how the wrapping or box is priced and whether there is a minimum before building the price line.
+
 Next: apply these, re-run the checks and `check-rules` on every site you touch, commit, and show Tzvi. Don't push or publish until he says so.

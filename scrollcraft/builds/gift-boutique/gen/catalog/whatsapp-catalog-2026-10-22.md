@@ -4,7 +4,7 @@ Transcribed from 15 phone screenshots Tzvi sent. This copy is the reference unti
 
 ## What changed in kind
 - **She now has her own product photos, all from one shoot:** every item is shot on the same marble counter in front of her boutique shelves, with "The Gift Boutique" on the wall. Baby items use a second matching set: a cream bag and gypsophila. This already meets rule 8 (one shoot), so **the 22 generated Gift Boutique photos (about 44 credits) are no longer needed.** Use her originals at full size. The catalog thumbnails in the screenshots are about 190 px, which is too small.
-- **She now sells single pieces as well as ready-made gifts** (napkin holders, bowls, $3 place mats, wine glasses). This looks like "build your own gift". Ask whether the site should offer that.
+- **She now sells single pieces as well as ready-made gifts** (napkin holders, bowls, $3 place mats, wine glasses). This looks like "build your own gift". Tzvi said yes (22 Oct): the site will offer it.
 - **Collections in the catalog:** Ready Made Gifts, The Home Collection, Gifts for Him, Gifts for Her, Baby Gifts, Custom Gifts, All items.
 
 ## Items (name, price as the catalog shows it)
@@ -94,6 +94,6 @@ Baby gifts:
 
 ## Questions for the owner (add to message-to-*.md)
 1. Can you send the original product photos (full size)? The catalog ones are too small for the website.
-2. Should the website let customers build their own gift from the single pieces?
+2. Customers will be able to build their own gift from your single pieces on the website. Is there a charge for the box and wrapping, and is there a minimum order?
 3. Bottle Opener at $45 - $80: what makes the price change?
 4. Gold Rimmed Bowl at $24 / $28 / $30: which sizes are these?
