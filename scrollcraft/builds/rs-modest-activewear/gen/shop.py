@@ -57,6 +57,7 @@ SHOP = f'''  <form id="form" novalidate>
               <!-- delivery waits for Ravit's answer (message-to-ravit.md, question 3): not offered until she says she delivers -->
             </div>
             <p class="err" id="e-how"></p>
+            <div id="w-when"><label class="f" for="when">Which day will you collect it?</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p></div>
             <div id="w-addr" hidden><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, city"><p class="err" id="e-addr"></p></div>
           </div>
           <div class="card ostep" data-s="3" hidden>

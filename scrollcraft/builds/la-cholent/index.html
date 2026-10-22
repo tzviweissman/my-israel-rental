@@ -467,6 +467,26 @@
     .size-pick button em { font-size: var(--s4); }
     .size-pick .tab { padding: .2rem .35rem; letter-spacing: .02em; }
   }
+
+  /* the on-page order (rule 3k): saved to the shop first, then WhatsApp */
+  .details { background: var(--lt-ground); color: var(--lt-ink); --sc-ink: var(--lt-ink); --sc-ink-soft: var(--lt-soft); --sc-hairline-strong: color-mix(in oklab, #1B1612 28%, transparent); padding-block: clamp(2.5rem, 7vw, 4.5rem); border-top: 1px solid var(--sc-hairline-strong); }
+  .details h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--s5); line-height: .96; }
+  .details .osum { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); font-weight: 600; }
+  .oform { display: grid; gap: .6rem; max-width: 36rem; }
+  .oform .orow { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .6rem; }
+  .oform label { display: block; font: 600 var(--s1)/1.2 var(--sc-font-text); letter-spacing: .04em; text-transform: uppercase; color: var(--sc-ink-soft); margin-bottom: .25rem; }
+  .oform input, .oform select { width: 100%; min-height: 44px; padding: 0 .8rem; border: 1px solid var(--sc-hairline-strong); border-radius: 10px; background: #fff; color: var(--lt-ink); font: 500 var(--sc-t-sm)/1 var(--sc-font-text); }
+  .oform .bad input, .oform .bad select { border-color: #A32020; }
+  .oform .err { margin: .25rem 0 0; color: #A32020; font-size: var(--s1); }
+  .oform .err:empty { display: none; }
+  .oform .qty { display: flex; align-items: center; justify-content: space-between; min-height: 44px; border: 1px solid var(--sc-hairline-strong); border-radius: 10px; background: #fff; }
+  .oform .qty button { width: 44px; min-height: 44px; border: 0; background: transparent; font-size: 1.3rem; cursor: pointer; color: var(--lt-ink); }
+  .oform .qty output { font-weight: 700; }
+  .oform .act { margin-top: .4rem; gap: .8rem; }
+  .oform .btn[aria-busy="true"] { opacity: .7; }
+  .details .btn-line { transition: background 140ms, color 140ms; }
+  .details .btn-line:hover { background: var(--lt-ink); color: #fff; }
+  .details .btn-line:active { transform: translateY(1px) scale(.98); }
 </style>
 </head>
 <body>
@@ -516,7 +536,7 @@
             <li><b>2</b><span>Place raw LA Cholent kit in your crock pot and add water.</span></li>
             <li><b>3</b><span>Cook on low for about 20 hours.</span></li>
           </ol>
-          <a class="btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
+          <a class="btn" href="#order">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
           <p class="proofline"><span>From ₪100</span><span>Kosher, hechsher from Rabbi Weiner</span><span>Made in Jerusalem, delivered across Israel</span></p>
         </div>
 
@@ -569,13 +589,13 @@
     <div class="rooms">
       <article class="room gold"><div class="ph"><img src="assets/tubs.webp" alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps." width="1600" height="1066" loading="lazy" style="object-position:20% 50%"></div>
         <div class="rb"><h3>Medium</h3><p class="feeds">Feeds 4 to 6</p><p class="what">Add your own meat or keep it parve: &#8362;55</p></div>
-        <div class="rf"><div class="price">&#8362;100</div><a class="btn-line add" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels" data-size="0" aria-label="Message to order Medium">Message to order</a></div></article>
+        <div class="rf"><div class="price">&#8362;100</div><a class="btn-line add" href="#order" data-size="0" aria-label="Message to order Medium">Message to order</a></div></article>
       <article class="room plum"><div class="ph"><img src="assets/tubs.webp" alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps." width="1600" height="1066" loading="lazy" style="object-position:50% 50%"><span class="tag">10% off</span></div>
         <div class="rb"><h3>Large</h3><p class="feeds">Feeds 8 to 12</p><p class="what">Add your own meat or keep it parve: &#8362;85</p></div>
-        <div class="rf"><div class="price"><span class="was"><s>&#8362;200</s><small>2 Mediums, &#8362;200</small></span> &#8362;180</div><a class="btn-line add" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels" data-size="1" aria-label="Message to order Large">Message to order</a></div></article>
+        <div class="rf"><div class="price"><span class="was"><s>&#8362;200</s><small>2 Mediums, &#8362;200</small></span> &#8362;180</div><a class="btn-line add" href="#order" data-size="1" aria-label="Message to order Large">Message to order</a></div></article>
       <article class="room steel"><div class="ph"><img src="assets/tubs.webp" alt="Four sealed tubs of L.A. Cholent on white marble, each labelled L.A. Cholent by Rabbi Samuels with the cooking steps." width="1600" height="1066" loading="lazy" style="object-position:80% 50%"></div>
         <div class="rb"><h3>Extra Large / Kiddush</h3><p class="feeds">Sized to your guest list</p><p class="what">Sizes are customizable depending on the number of guests</p></div>
-        <div class="rf"><div class="price">&#8362;250</div><a class="btn-line add" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels" data-size="2" aria-label="Message to order Extra Large / Kiddush">Message to order</a></div></article>
+        <div class="rf"><div class="price">&#8362;250</div><a class="btn-line add" href="#order" data-size="2" aria-label="Message to order Extra Large / Kiddush">Message to order</a></div></article>
     </div>
   </section>
 
@@ -654,11 +674,37 @@
           </div>
           <p class="reassure"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg><b>Free local delivery on your first order</b></p>
           <div class="act">
-            <a class="btn" id="order-btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels"><span id="order-label">Message to order Large, &#8362;180</span><span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
+            <a class="btn" id="order-btn" href="#details"><span id="order-label">Message to order Large, &#8362;180</span><span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
             <p>Delivered across Israel.</p>
           </div>
+</div>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- The order details (rule 3k): saved to the shop first, then WhatsApp. -->
+  <section id="details" class="details" aria-labelledby="details-h">
+    <div class="sc-wrap">
+      <form class="oform" id="oform" novalidate>
+        <h2 id="details-h">Your <em>order</em></h2>
+        <p class="osum" id="osum"></p>
+      <div class="orow">
+        <div class="of"><label for="o-qty">How many</label><span class="qty" role="group" aria-label="How many"><button type="button" data-d="-1" aria-label="One fewer">&minus;</button><output id="o-qty">1</output><button type="button" data-d="1" aria-label="One more">+</button></span></div>
+        <div class="of"><label for="o-how">Pick-up or delivery</label><select id="o-how"><option value="pickup">Pick-up</option><option value="delivery">Delivery</option></select></div>
+      </div>
+      <div class="of" id="w-addr" hidden><label for="o-addr">Delivery address</label><input id="o-addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, city"><p class="err" id="e-addr"></p></div>
+      <div class="orow">
+        <div class="of" id="w-when"><label for="o-when">Which day</label><input id="o-when" type="date"><p class="err" id="e-when"></p></div>
+        <div class="of" id="w-me"><label for="o-me">Your name</label><input id="o-me" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
+        <div class="of" id="w-ph"><label for="o-ph">Your phone</label><input id="o-ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
+      </div>
+      <div class="of"><label for="o-note">Anything else</label><input id="o-note" maxlength="300" placeholder="Own meat or parve? Extra meat or marrow bones by the pound?"></div>
+        <div class="act">
+          <button class="btn" id="order-send" type="submit"><span id="order-send-label">Send on WhatsApp</span></button>
+          <a class="btn-line" href="#order">Change the size</a>
+        </div>
+      </form>
     </div>
   </section>
 
@@ -667,11 +713,11 @@
 <footer class="closing" id="closing">
   <div class="sc-wrap">
     <p class="closing-line"><span class="script">Convenient and consistent.</span>A higher standard of flavor.</p>
-    <a class="btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
+    <a class="btn" href="#order">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
     <div class="closing-cols">
       <nav aria-label="On this page"><h3>This page</h3><a href="#occasions">Occasions</a><a href="#proof">Kosher and delivery</a><a href="#kit">The kit</a><a href="#order">Sizes and prices</a></nav>
       <div><h3>Sizes</h3><a href="#order">Medium, feeds 4 to 6, &#8362;100</a><a href="#order">Large, feeds 8 to 12, &#8362;180</a><a href="#order">Kiddush, sized to your guests, &#8362;250</a></div>
-      <div><h3>Find us</h3><p>Made in Jerusalem, delivered across Israel.</p><p>Kosher: Vaad HaKashrus, Rabbi Shmuel Weiner.</p><a href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels">Message to order</a></div>
+      <div><h3>Find us</h3><p>Made in Jerusalem, delivered across Israel.</p><p>Kosher: Vaad HaKashrus, Rabbi Shmuel Weiner.</p><a href="#order">Message to order</a></div>
     </div>
     <p class="closing-base"><span>L.A. Cholent by Rabbi Samuels</span><a href="#top">Back to the top</a></p>
   </div>
@@ -680,14 +726,14 @@
 <header class="topbar" id="topbar"><nav class="tb-nav" aria-label="Site menu">
   <a class="tb-brand" href="#top"><img src="assets/seal.webp" width="40" height="40" alt=""><span>L.A. Cholent</span></a>
   <div class="tb-links"><a href="#occasions" tabindex="-1">Occasions</a><a href="#proof" tabindex="-1">Kosher</a><a href="#order" tabindex="-1">Sizes and prices</a></div>
-  <a class="btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels" tabindex="-1">Message to order</a>
+  <a class="btn" href="#order" tabindex="-1">Message to order</a>
 </nav></header>
 
 <!-- Phones only: the order, pinned to the bottom with the price, once the
      opening screen's button is gone and until the close is on screen. -->
 <div class="buybar" id="buybar" aria-hidden="true">
   <span class="buybar__price">From <b>₪100</b></span>
-  <a class="btn" href="https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels" tabindex="-1">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
+  <a class="btn" href="#order" tabindex="-1">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
 </div>
 
 <script src="scrollcraft.js"></script>
@@ -890,7 +936,7 @@
     document.getElementById('price').innerHTML = '<small>₪</small>' + s.price;
     document.getElementById('alt').textContent = s.alt;
     document.getElementById('was').style.opacity = cur === 1 ? '1' : '0';
-    document.getElementById('order-label').textContent = 'Message to order ' + s.label.charAt(0) + s.label.slice(1).toLowerCase() + ', \u20aa' + s.price;
+    if (window.labelOrder) window.labelOrder(); else document.getElementById('order-label').textContent = 'Message to order Large, \u20aa180';
     buttons.forEach(function (b, n) { b.setAttribute('aria-pressed', n === cur ? 'true' : 'false'); });
     // the words that change ease in, so a size change is never one hard swap
     if (was !== cur && !reduce && document.getElementById('price').animate) {
@@ -917,6 +963,59 @@
   dial.addEventListener('pointerup', function () { dragging = false; pick(cur); });
   dial.addEventListener('pointercancel', function () { dragging = false; pick(cur); });
   document.querySelectorAll('[data-size]').forEach(function (a) { a.addEventListener('click', function () { pick(+a.dataset.size); }); });
+
+  /* ---- the order: saved to the shop first, then WhatsApp (rule 3k) ----- */
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var GIG = '637d78ae-abc0-432d-9506-2a739e320f5e', WA = '972553311442';
+  var PIDS = ['fcad3e98c5be', '70887e3339f2', '09a030487819'], NAMES = ['Medium', 'Large', 'Extra Large / Kiddush'];
+  var qty = 1, sending = false;
+  function $(id) { return document.getElementById(id); }
+  function v(id) { return $(id).value.trim(); }
+  function mark(id, msg) { var w = $('w-' + id); if (w) w.classList.toggle('bad', !!msg); $('e-' + id).textContent = msg || ''; }
+  $('o-when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  $('oform').querySelector('.qty').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; qty = Math.max(1, Math.min(20, qty + (+b.dataset.d))); $('o-qty').textContent = qty; window.labelOrder(); });
+  $('o-how').addEventListener('change', function () { $('w-addr').hidden = this.value !== 'delivery'; });
+  function label() { var s = sizes[cur]; $('order-label').textContent = 'Message to order ' + (qty > 1 ? qty + ' \u00d7 ' : '') + s.label.charAt(0) + s.label.slice(1).toLowerCase() + ', \u20aa' + qty * s.price; }
+  function check(show) {
+    var ok = true, e;
+    e = v('o-when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e);
+    e = $('o-how').value !== 'delivery' || v('o-addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
+    e = v('o-me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
+    e = /\d{9,}/.test(v('o-ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);
+    return ok;
+  }
+  ['o-when', 'o-addr', 'o-me', 'o-ph'].forEach(function (id) { $(id).addEventListener('input', function () { check(false); }); });
+  function save(notes) {
+    var d = $('o-how').value === 'delivery';
+    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ lines: [{ product_id: PIDS[cur], qty: qty }], fulfilment: d ? 'delivery' : 'pickup', address: d ? v('o-addr') : undefined, date: v('o-when'), customer_name: v('o-me'), customer_phone: v('o-ph'), notes: notes }) })
+      .then(function (r) { if (!r.ok) throw new Error('order not saved: ' + r.status); return r.json(); }).catch(function (err) { console.error(err); return null; });
+    return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
+  }
+  $('oform').addEventListener('submit', function (e) {
+    e.preventDefault();
+    if (sending) return;
+    if (!check(true)) { var bad = document.querySelector('#oform .bad input'); if (bad) bad.focus(); return; }
+    var s = sizes[cur], d = $('o-how').value === 'delivery', out = ['Hi L.A. Cholent, I would like to order:', '\u2022 ' + qty + ' \u00d7 ' + NAMES[cur] + ' (\u20aa' + qty * s.price + ')'];
+    if (v('o-note')) out.push('Notes: ' + v('o-note'));
+    out.push('Total: \u20aa' + qty * s.price);
+    out.push(d ? 'Deliver to: ' + v('o-addr') : 'Pick-up');
+    out.push('For: ' + new Date(v('o-when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
+    out.push('Name: ' + v('o-me') + ', ' + v('o-ph'));
+    var notes = [v('o-note'), 'Sent from the L.A. Cholent page by WhatsApp'].filter(Boolean).join('\n');
+    var btn = $('order-send'), lab = $('order-send-label').textContent;
+    sending = true; btn.setAttribute('aria-busy', 'true'); $('order-send-label').textContent = 'Sending';
+    var tab = window.open('', '_blank');
+    save(notes).then(function (saved) {
+      var text = out.join('\n');
+      if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      sending = false; btn.removeAttribute('aria-busy'); $('order-send-label').textContent = lab; 
+    });
+  });
+  function summary() { var s = sizes[cur]; $('osum').textContent = qty + ' \u00d7 ' + NAMES[cur] + ', \u20aa' + qty * s.price; $('order-send-label').textContent = 'Send on WhatsApp, \u20aa' + qty * s.price; }
+  window.labelOrder = function () { label(); summary(); };
   pick(1);
 }());
 </script>
