@@ -2,7 +2,7 @@
      lighter; red for the word that matters, yellow for prices and the one
      solid button. Anton (his logo's heavy condensed letters) and Archivo. */
   :root {
-    --black: #0E0D0C; --bg: #FFF3D6; --card: #FFFFFF; --card-2: #FFE7B0; --line: #E8D2A0; --ink: #14110F; --soft: #4F4034; --dim: #6B5B4D;
+    --black: #0E0D0C; --bg: #0E0D0C; --card: #1A1817; --card-2: #24211F; --line: #34302C; --ink: #FFFFFF; --soft: #CFC8BD; --dim: #A39B90;
     --red: #EF2B2B; --red-dk: #C8141C; --navy: #1F2D5E; --gold: #FAA519; --gold-dk: #D98A06;
     --r: 20px; --font-head: 'Anton', 'Heebo', Impact, sans-serif; --font-body: 'Archivo', 'Heebo', system-ui, sans-serif;
     --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
@@ -320,56 +320,43 @@
   @media (max-height: 700px) and (max-width: 760px) { .open { } .open .bowl { width: min(70vw, 36svh); } .open-foot { margin-top: 6px; padding: 8px 0 12px; } }
   .tile .tag { font-size: var(--t1); }
 
-/* ── category rework (page rules 3t, 22 Oct 2026): a food shop. Light warm ground,
-   one colour room per product (each box, pan and kind of chicken brings its own colour),
-   the packed product with name, size, price and Add on every card. The dark is only
-   the opening film, the kosher band and the footer, his logo's black. ── */
-.top { background: rgb(255 243 214 / .94); }
-.top.solid { border-bottom-color: var(--line); }
-.mark b { color: var(--red-dk); }
+/* ── dark theme (owner asked for it, 22 Oct 2026; rule 3t: the owner's own look wins over the category's ground).
+   Food-shop pattern kept: one colour room per product with photo, name, feeds, price and Add. Ground is his black,
+   cards a step lighter, his reds, gold and navy stay as the rooms. Gold is the one solid button; prices are in text colour. ── */
+.top { background: rgb(14 13 12 / .94); }
+.mark b { color: var(--red); }
 .red, .gold { color: inherit; }
-.btn-line { border-color: var(--ink); }
-.btn-line:hover { background: rgb(20 17 15 / .08); }
-.nav a:hover { background: rgb(20 17 15 / .07); }
-.nav a[aria-current="page"] { color: var(--ink); background: var(--card-2); }
-.menu-btn { border-color: var(--line); background: #fff; }
-.tile .feeds, .opts h5, .menu-list h3 { color: var(--red-dk); }
-.steps li.on, .steps li.done { border-color: var(--red-dk); }
-.line .allows { background: rgb(200 20 28 / .1); color: var(--red-dk); }
-.line .allows.one { background: rgb(20 17 15 / .08); color: var(--ink); }
-.err { color: var(--red-dk); }
-.card { background: #fff; }
-.fld { background: #fff; }
+.tile .feeds, .opts h5, .menu-list h3 { color: var(--ink); }
+.opts h5 { color: var(--soft); }
+.steps li.on, .steps li.done { border-color: var(--ink); }
+.line .allows { background: rgb(255 255 255 / .1); color: var(--ink); }
+.line .allows.one { background: rgb(239 43 43 / .18); color: #FF8A8A; }
+.err { color: #FF8A8A; }
+.card { background: var(--card); }
+.fld { background: #fff; color: #14110F; border-color: #CFC8BD; }
+.fld::placeholder { color: #6B5B4D; opacity: 1; }
 input[type=date].fld { color-scheme: light; }
-.chip span { background: #fff; border-color: var(--line); }
-.step { background: #fff; }
-.step button:hover { background: rgb(20 17 15 / .08); }
-.line .rm:hover { background: rgb(200 20 28 / .12); color: var(--red-dk); }
-.faq-q summary::after { color: var(--red-dk); }
-@media (max-width: 760px) { .nav { background: var(--bg); } .nav a[aria-current="page"] { color: var(--red-dk); } }
+.chip span { background: var(--card-2); border-color: var(--line); }
+.faq-q summary::after { color: var(--ink); }
 .tile.pick { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
-.tile .tag { background: var(--ink); color: #fff; }
+.tile .tag { background: #fff; color: #14110F; }
 .tile .tag.off { background: var(--card-2); color: var(--ink); }
-.count { background: var(--ink); color: #fff; }
-.stage { background: var(--card-2); }
-.stage figcaption, .shot figcaption { background: #fff; color: var(--ink); }
-.menu-list li.has:hover, .menu-list li.has.cur { background: #fff; }
-.suggest { border-color: var(--ink); }
-.bar { background: var(--card-2); border-top-color: var(--line); }
-.page-head .lede, .sec .lede { color: var(--soft); }
-.styles { background: var(--bg); }
-.order { background: var(--bg); }
-
-/* dark parts keep his black */
-.open, .kosher, .close, .foot { --ink: #fff; --soft: #CFC8BD; --dim: #A39B90; --line: #34302C; --card-2: #24211F; }
+.stage figcaption, .shot figcaption { background: var(--black); color: var(--ink); }
+.suggest { border-color: var(--line); }
+.styles, .order, .story { background: var(--bg); }
+.styles, .order { background: var(--card); }
+.menu-list li.has:hover, .menu-list li.has.cur { background: var(--card-2); }
+.menu-btn { border-color: var(--line); background: var(--card-2); }
+.close, .foot { background: var(--black); }
+.close { border-top: 1px solid var(--line); }
 .open { background: var(--black); color: #fff; }
 .open .btn-line { color: #fff; border-color: #fff; }
-.open .label, .open .proof b { color: var(--gold); }
-.close { background: var(--black); color: #fff; }
-.close h3 { color: var(--gold); }
+.open .label, .open .proof b { color: #FFC24D; }
+.close h3 { color: var(--ink); }
 .close .btn-line { color: #fff; border-color: #fff; }
-.foot { background: var(--black); color: var(--dim); }
+.foot { color: var(--dim); }
 .foot a { color: var(--soft); }
+.kosher { background: #C8141C; }
 
 /* colour rooms: one per product */
 .rooms { display: grid; gap: 0; grid-template-columns: repeat(var(--n, 3), minmax(0, 1fr)); }
@@ -389,7 +376,7 @@ input[type=date].fld { color-scheme: light; }
 .room .price .alt { font: 700 var(--t2)/1 var(--font-body); }
 .room .btn-line { border-color: currentColor; color: inherit; background: transparent; }
 .room .btn-line:hover { background: var(--t); color: var(--c); }
-.room.red { --c: var(--red-dk); --t: #fff; } .room.navy { --c: var(--navy); --t: #fff; } .room.gold { --c: #FAA519; } .room.orange { --c: #F26B1D; } .room.black { --c: #14110F; --t: #fff; } .room.sun { --c: #FFD34E; }
+.room.red { --c: var(--red-dk); --t: #fff; } .room.navy { --c: var(--navy); --t: #fff; } .room.gold { --c: #FAA519; } .room.orange { --c: #F26B1D; } .room.black { --c: #24211F; --t: #fff; } .room.sun { --c: #FFD34E; }
 .shop-head { padding: clamp(1.6rem, 4svh, 3rem) 0 clamp(.8rem, 2svh, 1.4rem); }
 .shop-head h2 { font-size: var(--t4); }
 .shop-head p { margin: .4rem 0 0; color: var(--soft); }
@@ -408,7 +395,7 @@ input[type=date].fld { color-scheme: light; }
 .kind p { margin: 0; font-size: var(--t1); line-height: 1.35; }
 .kind.nophoto h3 { font-size: var(--t3); margin-top: auto; }
 .kind.nophoto p { margin-bottom: auto; }
-.kind.red { --c: var(--red-dk); --t: #fff; } .kind.navy { --c: var(--navy); --t: #fff; } .kind.orange { --c: #F26B1D; } .kind.black { --c: #14110F; --t: #fff; } .kind.sun { --c: #FFD34E; }
+.kind.red { --c: var(--red-dk); --t: #fff; } .kind.navy { --c: var(--navy); --t: #fff; } .kind.orange { --c: #F26B1D; } .kind.black { --c: #24211F; --t: #fff; } .kind.sun { --c: #FFD34E; }
 
 /* the kitchen band: the marinade and the sauces */
 .story { background: var(--bg); padding-block: clamp(1.6rem, 5svh, 3.6rem); }
@@ -417,7 +404,7 @@ input[type=date].fld { color-scheme: light; }
 .story .ph img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
 .story h2 { font-size: var(--t4); }
 .story .line1 { margin: .6rem 0 1.1rem; color: var(--soft); font-size: var(--t2); }
-.story .sauce-row span { background: #fff; border-color: var(--line); }
+.story .sauce-row span { background: var(--card-2); border-color: var(--line); }
 .story .row { margin-top: 1.2rem; }
 
 /* Shabbos band */
@@ -436,7 +423,7 @@ input[type=date].fld { color-scheme: light; }
   .story .ph { height: 34svh; }
   .shabbos img { max-height: 26svh; }
 }
-.top .mark { color: var(--ink); }
+.top .mark { color: var(--gold); }
 .close .mark, .open .mark { color: var(--gold); }
 .sidebar { padding: .5rem 0 clamp(.6rem, 1.6svh, 1.4rem); }
 #pans .room .ph { height: min(24svh, 14rem); }
@@ -470,3 +457,4 @@ input[type=date].fld { color-scheme: light; }
 .room .ph.pack .tag { background: #14110F; color: #fff; }
 .gallery-hold h2 { font-size: var(--t4); }
 .open .label { color: #FFC24D; }
+.price .pp s { margin-left: .5rem; opacity: .85; }

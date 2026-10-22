@@ -49,7 +49,7 @@ R3h.2 pass: no film opening exists (the opening is his photo with code letters)
 R3h.3 pass: no film opening exists
 R3h.5 pass: no film chapter lines exist
 R3h.7 pass: no film joins exist
-R3h.8 pass: no film exists; the section after the opening turns bright and bold (cream with colour rooms)
+R3h.8 pass: no film exists; the section after the opening is a dark food shop (his black ground, colour rooms in his gold, red, navy and orange)
 R3h.11 pass: no film or generated still set exists on this site
 R3h.13 pass: no generated effect exists
 R3h.14 pass: no film effect exists
@@ -59,9 +59,9 @@ R3h.17 pass: the page does not use words-and-film turns
 R3.12 pass: dramatic opening, a features section (boxes and pans with price and what is included), a closing band with the order button beside the hechsher line in the footer
 R3c.1 pass: three category-study pictures cited in CONCEPT.md, plus a fresh Mobbin and Inspo search on 22 Oct (Touchy Coffee product row, re_, Graza, Mooala) named in CONCEPT.md; 21st search failed twice so nothing is from it
 R3g.17 pass: pieces came from searches named in CONCEPT.md (Mobbin Touchy Coffee for the product row with name, size and price and an ADD pill; Best Bean Best Cup for the colour room); 21st search failed twice, so no piece is from 21st; each effect has a reason
-R3c.2 pass: not cream plus serif plus italic: loud Anton on his own colours; one ground that is a contrasting black in the opening and footer
+R3c.2 pass: not cream plus serif plus italic: loud Anton on his own colours; one ground, his black, all through (22 Oct: the owner asked for a dark theme, rule 3t, the owner's own look wins over the category's ground)
 R3g.1 pass: CONCEPT.md gives the colours and faces; site.css tokens match (gold, red, navy, orange, black; Anton and Archivo)
-R3g.3 pass: facts script: prices are in the card text colour (ink or white), the accent yellow is only the main button; no emphasised word in colour
+R3g.3 pass: facts script: prices are in the card text colour (white on his black, or the card's own text colour), the accent yellow is only the main button; no emphasised word in colour
 R3g.7 pass: one closing signature, the giant CHICKEN MUNCH in the footer, away from the order path
 R3g.11 pass: Anton, Archivo and Heebo (Hebrew fallback) are from the approved list; unchanged from the earlier build
 R3p.3 fix: check-fingerprints still reports Anton shared with michal-yodaiken and tile and reveal effects alike with the-brown-box and the-gift-boutique; scrollcraft/fingerprints.json may not be touched in this task and Anton is his logo face: needs Tzvi or the coordinator
@@ -113,7 +113,7 @@ R8.3 pass: nothing generated on the page
 R8.4 pass: nothing generated or moving as real material exists on the page
 R3c.13 pass: check-fits found nothing cut; check-site found nothing cut
 R3c.14 pass: the only cut-out is the opening bowl; looked at on the dark opening and on the red Shabbos band with no fringe
-R5b.3 pass: words on pictures sit on a darkened photo with white or gold letters (the opening) and cards put words on solid colour; looked at in the 1440x900 and 390x844 screenshots; no frosted glass
+R5b.3 pass: words on pictures sit on a darkened photo with white or gold letters (the opening) and cards put words on solid colour; on the dark ground every light word is white or soft grey (#CFC8BD, 12:1 on #0E0D0C), the form fields are white with near-black text; looked at in the 1440x900 and 390x844 screenshots; no frosted glass
 R3e.8 pass: readable.mjs is clean on the order and contact pages; on the menu page its two hits are list lines passing under the sticky photo at 390x844 (the photo covers them); on the home page its hits are the opening animation (the letters of MUNCH over the golden glaze of the bowl, the Kosher sticker scaling in) and are the same on the file before this review; the label under the opening name was lightened to #FFC24D (it measured 4.32:1)
 R3s.24 pass: check-site MEDIA (photos light and sized, every img has width and height, checked in the page facts script)
 R3p.6 pass: check-fits passed at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844 and 360x640
@@ -128,11 +128,11 @@ R3j.2 pass: the order page offers a 9x13 rice after a pan with Add rice and No t
 R3j.3 pass: no taster is shown because none is offered
 R3j.4 pass: no group discount is shown because none is offered
 R3j.5 pass: no come-back feature is shown
-R3j.6 pass: the Grand box is tagged Family size; no invented option
-R3j.7 pass: every struck price is the real price of the same items bought separately: $276 is four Mini boxes, ₪825 is three 9x13 pans (the tag title says so); no .99 endings
-R3j.8 pass: per unit: Mini $69 feeds 3 to 4; Supreme $220 for 16 against four Minis $276; pans: three 9x13 pans ₪825 for 18 to 20 against the Roaster ₪650
+R3j.6 pass: the Grand box carries a real saving per person (see R3j.10); no invented option
+R3j.7 pass: every struck price is the real price of the same food bought separately: $276 is four Mini boxes, ₪825 is three 9x13 pans, $17.25 a person is the Mini's own price per person (the tag titles say so); no .99 endings
+R3j.8 pass: per person at the top of each range: Mini $69 feeds 3 to 4 ($17.25 a person at 4), Grand $140 feeds 8 to 10 ($14 a person at 10); Supreme $220 for 16 against four Minis $276; pans: three 9x13 pans ₪825 for 18 to 20 against the Roaster ₪650
 R3j.9 pass: each small group (the boxes, the pans) shows its own saving, not a lone saving
-R3j.10 pass: Supreme 20% off: (276-220)/276 = 20.3 rounded down to 20, $276 struck beside $220; Roaster 21% off: (825-650)/825 = 21.2 rounded down to 21 in shekels, ₪825 struck beside ₪650, with $210 as a plain second line (no struck dollar figure); the earlier 17% was the dollar pair
+R3j.10 pass: Grand 18% off: Mini $69 / 4 = $17.25 a person, Grand $140 / 10 = $14 a person, (17.25-14)/17.25 = 18.8 rounded down to 18, "$14 a person" with "$17.25 a person" struck beside it, arithmetic in a comment above the cards on index and menu; Supreme 20% off: (276-220)/276 = 20.3 rounded down to 20, $276 struck beside $220; Roaster 21% off: (825-650)/825 = 21.2 rounded down to 21 in shekels, ₪825 struck beside ₪650, with $210 as a plain second line
 R3j.11 pass: no combined service or package exists to compare; the basket offers no switch lines
 R3j.12 pass: the owner made no savings claim; the savings shown were derived from his prices
 R3.14 pass: loud prices only because prices exist (boxes, pans, sizes), none invented

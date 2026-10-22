@@ -4,6 +4,8 @@ Category: food-shop
 
 Reworked 22 Oct 2026 to rule 3t (each site looks like real sites of its own category). Yesterday's dark full-bleed photo screens (Moto Card's look) became a food shop: light warm ground, one colour room per product, every card with photo, name, size, price and Add. Facts, prices, savings, the order flow and the opening are unchanged.
 
+Owner asked for a dark theme, 22 Oct 2026. The food-shop pattern stays (colour room per box and pan with photo, name, feeds, price and Add; one action wording; yellow only on the main button; prices in text colour) but on his black ground (the site's original dark palette: black #0E0D0C, cards #1A1817, soft white text), his reds, gold, navy and orange as the rooms, white form fields with near-black text so forms stay readable. Rule 3t: the owner's own look wins over the category's ground. Also 22 Oct: the Grand shows 18% off, $14 a person with the Mini's $17.25 a person struck (top of each range: $69/4 and $140/10).
+
 ## Ideas
 - **A colour room per product** (docs/inspo/awwwards-anatomy-2026-10-22/food/bestbean-colour-per-product.webp): Best Bean Best Cup stacks full-height panels, one per coffee, each on its own colour with name, notes and a plus button. For them: each box and each pan is a panel on its own colour (gold, red, navy, orange, black) with feeds, price and Add.
 - **Shop first, price on every card** (docs/inspo/awwwards-anatomy-2026-10-22/food/theobroma-shop-grid.webp): Theobroma puts the packed product on a plain card with price and Add to cart straight under the opening. For them: "Pick your box" is the second screen, three cards side by side, no text before the prices.
