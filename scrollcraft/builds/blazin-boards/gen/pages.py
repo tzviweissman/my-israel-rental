@@ -132,7 +132,7 @@ page('boards.html', "Every board · Blazin' Boards",
     var stage = p.cm
       ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815" loading="lazy" style="width:' + (p.cm[1] * PX / 0.98).toFixed(0) + 'px"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
       : '<div class="stage"><span style="font-weight:700;color:var(--gold-text)">Size on request</span></div>';
-    return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + (BB.saving(p) ? '<span class="save-b">Save $' + BB.saving(p) + '</span>' : '') + stage
+    return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + BB.dealHtml(p) + stage
       + '<div class="body"><span class="line">' + BB.LINES[p.line] + '</span><h3>' + BB.esc(p.short) + '</h3>'
       + '<span class="price">' + BB.money(p.price, p.currency) + '</span>'
       + (p.what ? '<p class="what">' + BB.esc(p.what) + '</p>' : '')
@@ -227,7 +227,7 @@ page('order.html', "Your order · Blazin' Boards",
         [c[i], c[i + 1]].forEach(function (p) {
           if (!p) { h += '<td></td>'; return; }
           var on = (o.cart[p.id] || 0) > 0;
-          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + (BB.saving(p) ? '<span class="save-b">Save $' + BB.saving(p) + '</span>' : '') + '</button></td>';
+          h += '<td><button type="button" class="pick" data-toggle="' + p.id + '" aria-pressed="' + on + '"><span class="name" data-size="' + (p.cm ? p.cm[0] + ' × ' + p.cm[1] + ' cm' : '') + '">' + BB.esc(p.short) + '</span><span class="price">' + BB.money(p.price, p.currency) + '</span>' + (/Medium Blazin/.test(p.short) ? '<span class="start">A good place to start</span>' : '') + BB.dealHtml(p) + '</button></td>';
         });
         h += '</tr>';
       }

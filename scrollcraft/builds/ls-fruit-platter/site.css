@@ -168,7 +168,7 @@ section.sec { padding-block: clamp(2.4rem, 7svh, 4.5rem); }
 .row .th .noph-t img, .st-pick .noph-t img { width: auto; height: 70%; aspect-ratio: 1; border-radius: 50%; object-fit: cover; }
 .st-pick .noph-t { aspect-ratio: 4 / 3; height: auto; }
 .cap { position: absolute; left: clamp(.8rem, 1.6vw, 1.4rem); bottom: clamp(.8rem, 1.6vw, 1.4rem); z-index: 5; display: flex; align-items: center; gap: 1.2rem; padding: .7rem .8rem .7rem 1.2rem; border-radius: var(--r); background: var(--ground); box-shadow: 0 3px 30px rgba(23,38,28,.16); }
-.cap-t { margin: 0; font: 700 2.5rem/1 var(--font-head); white-space: nowrap; } .cap-t span { margin-left: .6rem; color: var(--accent); }
+.cap-t { margin: 0; font: 700 2.5rem/1 var(--font-head); white-space: nowrap; } .cap-t span { margin-left: .6rem; color: var(--ink); }
 .pills { display: flex; gap: .35rem; }
 .pills button { min-width: 44px; height: 44px; padding: 0 .6rem; border-radius: 999px; border: 2px solid var(--line); background: var(--ground); color: var(--ink); font: 700 .9rem/1 var(--font-body); cursor: pointer; transition: background 160ms, border-color 160ms, color 160ms, transform 120ms; }
 @media (hover: hover) { .pills button:hover { border-color: var(--leaf); } }
@@ -187,7 +187,7 @@ section.sec { padding-block: clamp(2.4rem, 7svh, 4.5rem); }
 .row .th img { width: 100%; height: 100%; object-fit: cover; transition: transform 500ms var(--out); }
 .row .nm { font: 700 clamp(2.6rem, 4.6vw, 3.8rem)/1 var(--font-head); }
 .row .dots { align-self: end; margin-bottom: .9em; height: 0; border-bottom: 3px dotted var(--gold); transition: border-color 200ms; }
-.row .pr { font: 700 clamp(2.4rem, 4.2vw, 3.4rem)/1 var(--font-head); color: var(--accent); }
+.row .pr { font: 700 clamp(2.4rem, 4.2vw, 3.4rem)/1 var(--font-head); color: var(--ink); }
 .row .go { width: 28px; height: 28px; stroke: var(--ink); fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; transition: transform 220ms var(--out); }
 @media (hover: hover) { .row:hover .th img { transform: scale(1.05); } .row:hover .dots { border-color: var(--accent); } .row:hover .go { transform: translateX(6px); } }
 .row { margin-inline: -.9rem; padding-inline: .9rem; border-radius: 12px; transition: background 200ms; }
@@ -223,7 +223,7 @@ section.sec { padding-block: clamp(2.4rem, 7svh, 4.5rem); }
 .st-ph { position: relative; width: min(calc(100svh - var(--top-h) - clamp(60px, 9svh, 100px)), 46vw, 600px); aspect-ratio: 1; border-radius: var(--r); overflow: hidden; background: var(--melon); }
 .st-info h1 { font-size: clamp(4rem, 8vw, 7rem); line-height: .85; }
 .kick { margin: 0 0 .5rem; font: 700 .8rem/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; color: var(--leaf); }
-.st-price { margin: .3rem 0 0; font: 700 clamp(3rem, 5vw, 4.4rem)/1 var(--font-head); color: var(--accent); } .st-price small { font: 600 1rem var(--font-body); color: var(--soft); margin-left: .3rem; }
+.st-price { margin: .3rem 0 0; font: 700 clamp(3rem, 5vw, 4.4rem)/1 var(--font-head); color: var(--ink); } .st-price small { font: 600 1rem var(--font-body); color: var(--soft); margin-left: .3rem; }
 .st-buy { display: flex; flex-wrap: wrap; align-items: center; gap: .8rem; margin: .9rem 0 .4rem; }
 .step { display: inline-flex; align-items: center; gap: .15rem; background: var(--ground); border-radius: 999px; padding: 3px; border: 1px solid var(--line); }
 .step button { width: 40px; height: 40px; border-radius: 999px; border: 0; background: transparent; font: 700 1.25rem/1 var(--font-body); color: var(--ink); cursor: pointer; transition: background 160ms, transform 100ms; }
@@ -237,7 +237,7 @@ section.sec { padding-block: clamp(2.4rem, 7svh, 4.5rem); }
 .st-pick button { position: relative; display: block; padding: 0; border: 2px solid var(--line); border-radius: var(--r); background: var(--ground); cursor: pointer; text-align: left; overflow: hidden; transition: border-color 160ms, transform 120ms; font-family: var(--font-body); color: var(--ink); }
 .st-pick img { width: 100%; height: auto; aspect-ratio: 4 / 3; object-fit: cover; }
 .st-pick span.t { display: flex; flex-direction: column; gap: 0; padding: .35rem .6rem .5rem; font-weight: 600; font-size: .9rem; }
-.st-pick b { font: 700 1.6rem/1 var(--font-head); white-space: nowrap; } .st-pick i { font-style: normal; font-weight: 700; color: var(--accent); }
+.st-pick b { font: 700 1.6rem/1 var(--font-head); white-space: nowrap; } .st-pick i { font-style: normal; font-weight: 700; color: var(--ink); }
 .st-pick .ring { position: absolute; top: 6px; right: 6px; width: 24px; height: 24px; border-radius: 50%; background: var(--accent); opacity: 0; transform: scale(.4); transition: opacity 160ms, transform 240ms var(--out); } .st-pick .ring svg { width: 24px; height: 24px; stroke: #fff; fill: none; stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
 @media (hover: hover) { .st-pick button:hover { border-color: var(--leaf); } }
 .st-pick button:active { transform: scale(.97); }

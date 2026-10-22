@@ -1721,6 +1721,19 @@ kosher-appropriate in every image: no meat with cheese or cream, no
 shellfish, no pork.
 
 
+**The product hero shot** (Tzvi, 22 Oct 2026, after 16 advertising product photos: "do you see a pattern or a rule you can make for showing products ... we should make this a rule"; pictures in docs/inspo/product-shots-2026-10-22/). Every main product picture (a hero, a size or flavour photo, a product card) is set up the way those adverts are:
+1. **One product, the hero.** Large, centred or on the thirds, pin sharp, seen at eye level or a little below, turned slightly (three-quarter), never flat from straight above unless every picture in the set is.
+2. **It stands on something from its own world.** A stone, a block of wood, moss, a rock, marble, a board: a plinth that lifts it off the ground. Never floating in empty space, unless its ingredients float with it.
+3. **Its own ingredients around it.** The props say what is inside: mint leaves round a mint cream, cinnamon and vanilla round an amber perfume, pineapple slices round a pineapple drink, honey round a honey balm. For our food: the raw fruit beside a platter, coffee beans and cream by a coffee jar, cinnamon sticks by a bun. Only what is really in it.
+4. **One colour story.** The background is a soft gradient of the product's own colour (or its complement), and the props share that palette. No second loud colour.
+5. **One light.** A warm key light from the side or behind, a soft glow or rim on the edges, soft shadows; the background softly out of focus.
+6. **Still or caught mid-air, one or the other.** A calm still life for luxury, care and gifts; ingredients or a splash frozen mid-air for energy (drinks, snacks). Never both in one picture.
+7. **The product is theirs, exactly.** Their real item, edited from their own photo (relit, set on the plinth, props and background added round it), never redrawn from words. Check every piece against their photo; redo any that changed (the Small platter lost its pineapple crown on the first try, 22 Oct).
+8. **A set shares one scene** (the rule above): every size or flavour gets the same plinth, props, light and angle.
+
+Prompt shape that gives this (one line each, reused word for word across a set): the product and its plinth; the ingredients round it; the background colour; the light; the camera (eye level, three-quarter, shallow depth); "photorealistic advertising product photography, sharp product, no text added".
+
+
 **AI images and video** (Higgsfield). Tzvi, 23 Sep 2026: owners should be
 able to look professional even when their own photos aren't, "a moist steaming
 piece of meat being sliced" on Blazin' Boards (food in motion is now film-only,

@@ -547,3 +547,4 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 .duo-words p { color: #fff; }
 .foot-legal { font-size: .95rem; }
 @media (max-width: 760px) { .flavpic .wtitle { background: var(--choc); } }
+.deal .save-b { margin: 0 0 0 .4em; background: #fff; color: #1F5C3A; }

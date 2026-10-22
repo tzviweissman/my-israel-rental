@@ -122,8 +122,15 @@ PACKS = [('bundle', 'Cloud Bundle', '6 jars · Monthly', 'Any 6 jars, mix and ma
 
 
 def was(k):
-    # the same jars bought one by one at the lowest single price (₪40), so the saving is always true
-    return {'duo': 2 * 40, 'one': 4 * 40, 'assorted': 40 + 48 + 48 + 40, 'bundle': 6 * 40}[k]
+    # the same jars bought one by one at the lowest single price (₪40), so the saving is always true.
+    # Assorted shows none (22 Oct 2026): at ₪38.75 a jar it is dearer a jar than the Duo (₪37.50), and a
+    # bigger option only shows a saving when it beats every smaller one.
+    return {'duo': 2 * 40, 'one': 4 * 40, 'assorted': 0, 'bundle': 6 * 40}[k]
+
+
+def pct(k, p):
+    # percent off, rounded DOWN to a whole number (Tzvi, 22 Oct 2026)
+    return (was(k) - p) * 100 // was(k)
 
 
 def pack_html(k, n, meta, allows, p, lead):
@@ -132,8 +139,11 @@ def pack_html(k, n, meta, allows, p, lead):
     own = {'duo': ('bottles.webp', 1023, 1537), 'one': ('jar-classic.webp', 500, 1111)}.get(k)  # her own photos, one in each tile
     if own: pic = f'<img class="pic" src="assets/{own[0]}" alt="" width="{own[1]}" height="{own[2]}" loading="lazy">'
     tab = '<span class="tab">Best value</span>' if lead else ''
-    return f'''        <article class="pack{' lead' if lead else ''}{' has-pic' if own else ''} rev">{tab}{pic if own else ''}<div><p class="meta">{meta}</p><h3>{n}</h3><span class="allows">{allows}</span><span class="save-b">Save ₪{was(k) - p}</span></div>{'' if own else pic}
-          <div class="row"><span class="price"><s class="was" aria-label="instead of ₪{was(k)}">₪{was(k)}</s> ₪{p}{save}</span><a class="btn-line" href="shop.html?pack={k}" data-pack="{k}">Choose</a></div></article>
+    w = was(k)
+    badge = f'<span class="save-b">{pct(k, p)}% off</span>' if w else ''
+    wasp = f'<s class="was" aria-label="instead of ₪{w}">₪{w}</s> ' if w else ''
+    return f'''        <article class="pack{' lead' if lead else ''}{' has-pic' if own else ''} rev">{tab}{pic if own else ''}<div><p class="meta">{meta}</p><h3>{n}</h3><span class="allows">{allows}</span>{badge}</div>{'' if own else pic}
+          <div class="row"><span class="price">{wasp}₪{p}{save}</span><a class="btn-line" href="shop.html?pack={k}" data-pack="{k}">Choose</a></div></article>
 '''
 
 

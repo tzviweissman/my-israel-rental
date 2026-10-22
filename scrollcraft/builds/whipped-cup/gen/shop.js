@@ -65,10 +65,11 @@
   // shown the way shops show a deal (Tzvi, 20 Oct 2026, from the strawberry video: the original price
   // with a slash through it next to the price, and a short badge, not a sentence). The jars bought one
   // by one at the lowest single price, so the saving is always true whatever the flavours.
-  function was(k) { return singles(k)[0]; }
+  function was(k) { return k === 'assorted' ? 0 : singles(k)[0]; }  // Assorted shows no saving (22 Oct 2026): dearer a jar than the Duo
+  function pct(k) { return Math.floor((was(k) - PACKS[k].price) * 100 / was(k)); }  // percent off, rounded down
   plans.innerHTML = Object.keys(PACKS).map(function (k) {
     var p = PACKS[k];
-    return '<label class="plan' + (k === 'bundle' ? ' lead' : '') + '"><input type="radio" name="pack" value="' + k + '"><span class="box">' + (k === 'bundle' ? '<span class="tab">Best value</span>' : '') + '<span><b>' + p.name + '</b><br><span class="pr">' + p.meta + ' · ' + perJar(p) + '</span></span><span class="p"><s class="was" aria-label="instead of ₪' + was(k) + '">₪' + was(k) + '</s> ₪' + p.price + '</span><span class="allows">' + p.allows + '</span><span class="save-b" data-save="Save ₪' + (was(k) - p.price) + '">Save ₪' + (was(k) - p.price) + '</span></span></label>';
+    return '<label class="plan' + (k === 'bundle' ? ' lead' : '') + '"><input type="radio" name="pack" value="' + k + '"><span class="box">' + (k === 'bundle' ? '<span class="tab">Best value</span>' : '') + '<span><b>' + p.name + '</b><br><span class="pr">' + p.meta + ' · ' + perJar(p) + '</span></span><span class="p">' + (was(k) ? '<s class="was" aria-label="instead of ₪' + was(k) + '">₪' + was(k) + '</s> ' : '') + '₪' + p.price + '</span><span class="allows">' + p.allows + '</span>' + (was(k) ? '<span class="save-b" data-save="' + pct(k) + '% off">' + pct(k) + '% off</span>' : '') + '</span></label>';
   }).join('');
   function choosePack(v) { pack = v; mixQ = { classic: 0, caramel: 0, vanilla: 0 }; oneFlav = ''; drawMix(); update(); check(false);
     if (v) say(PACKS[v].name + ' in your basket');
@@ -120,7 +121,7 @@
     var html = ''; for (var k in q) if (q[k]) html += '<li class="bl"><span>' + JARS[k][0] + '<span class="step sm"><button type="button" data-k="' + k + '" data-d="-1" aria-label="One fewer ' + JARS[k][0] + '">−</button><output>' + q[k] + '</output><button type="button" data-k="' + k + '" data-d="1" aria-label="One more ' + JARS[k][0] + '">+</button></span></span><span class="bl-r">₪' + q[k] * JARS[k][1] + '<button type="button" class="rm" data-rm="' + k + '" aria-label="Remove ' + JARS[k][0] + ' from the basket">' + BIN + '</button></span></li>';
     if (PACKS[pack]) html += '<li class="bl"><span>' + PACKS[pack].name + (packDesc() ? ': ' + packDesc() : '') + '</span><span class="bl-r">₪' + PACKS[pack].price + '<button type="button" class="rm" data-rm="pack" aria-label="Remove the ' + PACKS[pack].name + ' from the basket">' + BIN + '</button></span></li>';
     document.getElementById('sum-list').innerHTML = html || '<li><span>Your basket is empty. Pick a jar or a package above.</span></li>';
-    [].forEach.call(plans.querySelectorAll('.plan'), function (l) { var sb = l.querySelector('.save-b'); sb.textContent = l.querySelector('input').value === pack ? 'In your basket' : sb.dataset.save; });
+    [].forEach.call(plans.querySelectorAll('.plan'), function (l) { var sb = l.querySelector('.save-b'); if (!sb) return; sb.textContent = l.querySelector('input').value === pack ? 'In your basket' : sb.dataset.save; });
     var mini = ''; for (var km in q) if (q[km]) mini += '<li><span>' + q[km] + ' × ' + JARS[km][0] + '</span><span>₪' + q[km] * JARS[km][1] + '</span></li>';
     if (PACKS[pack]) mini += '<li><span>' + PACKS[pack].name + '</span><span>₪' + PACKS[pack].price + '</span></li>';
     document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
@@ -137,7 +138,7 @@
     }
     deal.hidden = !sw;
     // the deal shown, not described (old price struck through)
-    if (sw) { deal.dataset.pack = sw; deal.querySelector('span').innerHTML = extra ? 'Make it 6 jars: Cloud Bundle <s>₪' + cost + '</s> ₪220' : 'As the ' + PACKS[sw].name + ': <s>₪' + cost + '</s> ₪' + PACKS[sw].price; }
+    if (sw) { deal.dataset.pack = sw; deal.querySelector('span').innerHTML = extra ? 'Make it 6 jars: Cloud Bundle <s>₪' + cost + '</s> ₪220' : 'As the ' + PACKS[sw].name + ': <s>₪' + cost + '</s> ₪' + PACKS[sw].price + ' <span class="save-b">' + Math.floor((cost - PACKS[sw].price) * 100 / cost) + '% off</span>'; }  // same jars, so a true percent; the 6th-jar case adds a jar, so it names no percent
     document.getElementById('total').textContent = '₪' + total();
     drawStep();
     var b = { jars: {} }; for (var k2 in q) if (q[k2]) b.jars[k2] = q[k2]; if (pack) b.pack = pack; window.twcBasket.set(b);

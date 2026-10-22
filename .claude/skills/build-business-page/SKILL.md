@@ -1080,6 +1080,7 @@ the same rules: section 3c is its Part 10, and its Part 1 is section 1 here.
   product being chosen); stock only from one photographer's series, never
   cut-outs mixed from many. Check the contact sheet; food stays
   kosher-appropriate. Full text: `reference/full-rules.md` §8.
+- **The product hero shot** (Tzvi, 22 Oct 2026): every main product picture is one product, large and sharp, at eye level, turned slightly, standing on a plinth from its own world (stone, wood, marble, moss), with its own real ingredients round it, one colour story with a soft gradient background, one warm side or back light, either still or caught mid-air. The product is theirs, edited from their photo, never redrawn; a set shares one scene. Full rule and prompt shape: rules doc section 8.
 - Find what the business actually has before choosing a look; the page is
   built around the one thing that is really theirs.
 - **The product performs, not the camera.** Motion shows what they sell; no zooming for its own sake (a camera that follows the product's journey is fine, 3h).
