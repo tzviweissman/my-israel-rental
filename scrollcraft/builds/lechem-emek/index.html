@@ -4,6 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Lechem Emek. Flour at four, bread by seven.</title>
+<meta name="site-category" content="place">
 <meta name="description" content="A small bakery on Emek Refaim, Jerusalem, since 1998. Everything on the shelf was baked in this room today.">
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%2314100C'/><circle cx='16' cy='16' r='7' fill='%23C9A227'/></svg>">
 <!--
@@ -158,9 +159,9 @@
     opacity: calc(0.46 - var(--dawn) * 0.36);
   }
   .hero .sc-copy--lead { bottom: clamp(3rem, 12vh, 9rem); max-width: min(44rem, 78vw); }
-  .hero h1 { max-width: 12ch; }
+  .hero h1 { max-width: 6.6em; }
   .hero .sc-label { display: block; margin-block-end: var(--sc-4); }
-  .hero .sc-lede { margin-block-start: var(--sc-5); max-width: 36ch; }
+  .hero .sc-lede { margin-block-start: var(--sc-5); max-width: 19.8em; }
   .hero__link {
     display: inline-block; margin-block-start: var(--sc-5);
     font-weight: 600; text-underline-offset: 0.28em;
@@ -212,7 +213,7 @@
     opacity: 0.14; z-index: 0;
   }
   .bake .sc-wrap { text-align: center; }
-  .bake .sc-lede { max-width: 30ch; margin-inline: auto; color: var(--sc-ink-soft); }
+  .bake .sc-lede { max-width: 16.5em; margin-inline: auto; color: var(--sc-ink-soft); }
 
   /* ------------------------------------------------------------------ door --
      THE PEAK. Flat limestone for the entry viewport (the lights coming on),
@@ -222,8 +223,8 @@
   .door figure { position: absolute; inset: 0; margin: 0; }
   .door figure img { width: 100%; height: 100%; object-fit: cover; }
   .door .sc-copy--lead { max-width: min(40rem, 78vw); }
-  .door h2 { max-width: 13ch; }
-  .door .sc-lede { margin-block-start: var(--sc-5); max-width: 34ch; }
+  .door h2 { max-width: 7.2em; }
+  .door .sc-lede { margin-block-start: var(--sc-5); max-width: 18.7em; }
   @media (max-width: 700px) { .door h2 { font-size: var(--sc-t-2xl); max-width: none; } }
 
   /* --------------------------------------------------------------- counter --
@@ -242,7 +243,7 @@
   .item__name { font-family: var(--font-head); font-size: var(--sc-t-lg); line-height: 1.15; margin: 0; }
   .item__name em { font-style: italic; color: var(--sc-accent); }
   .item__price { font-weight: 700; font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .item__note { margin: var(--sc-2) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); max-width: 28ch; }
+  .item__note { margin: var(--sc-2) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink-soft); max-width: 15.4em; }
   .rail__end { flex: 0 0 auto; width: clamp(13rem, 20vw, 18rem); align-self: center; }
   .rail__end .sc-lede { font-size: var(--sc-t-lg); }
   /* Staggered settle from the act's progress, so the rail reads as a drawer
@@ -286,8 +287,8 @@
      never a child, or the harness hides it along with the text. */
   .close .sc-scrim--vignette { --sc-canvas: #1A1410; }
   .close .sc-copy--center { max-width: min(42rem, 86vw); }
-  .close h2 { max-width: 16ch; margin-inline: auto; }
-  .close .sc-lede { margin: var(--sc-5) auto 0; max-width: 36ch; color: #E4DBC9; }
+  .close h2 { max-width: 8.8em; margin-inline: auto; }
+  .close .sc-lede { margin: var(--sc-5) auto 0; max-width: 19.8em; color: #E4DBC9; }
   .cta {
     display: inline-flex; align-items: center; min-height: 52px; padding: 0 var(--sc-6);
     margin-block-start: var(--sc-6); border-radius: var(--sc-r-pill);
@@ -391,11 +392,11 @@
   .hero__actions { display: flex; flex-wrap: wrap; gap: var(--sc-3); margin-block-start: var(--sc-5); }
   .hero__actions .cta { margin-block-start: 0; --sc-accent: #C9A227; --sc-accent-ink: #23201B; }
   .cta { border: 0; cursor: pointer; font-family: var(--font-body); font-size: var(--sc-t-base); }
-  .cta--ghost { background: color-mix(in oklab, #14100C 55%, transparent) !important; color: #EFE9DC !important; border: 1px solid rgba(239,233,220,.55) !important; backdrop-filter: blur(8px); }
+  .cta--ghost { background: rgba(20,16,12,.82) !important; color: #EFE9DC; border: 1px solid rgba(239,233,220,.55) !important; }
   .cta--dark { --sc-accent: #23201B; --sc-accent-ink: #F7F3EA; margin-block-start: var(--sc-5); }
   .cta--full { width: 100%; justify-content: center; margin: 0; }
   .item__price { font-size: var(--sc-t-lg); }
-  .item__note { font-size: var(--sc-t-base); max-width: 30ch; }
+  .item__note { font-size: var(--sc-t-base); max-width: 16.5em; }
   .item__add { width: 100%; min-height: 48px; margin-block-start: var(--sc-4); border: 0; border-radius: var(--sc-r-pill); cursor: pointer;
     background: #23201B; color: #F7F3EA; font: 700 var(--sc-t-base) var(--font-body); transition: background .15s ease, transform .1s ease; }
   .item__add:hover { background: #3A332A; } .item__add:active { transform: scale(.98); }
@@ -484,7 +485,7 @@
   .scene > .scene__copy { position: relative; z-index: 2; }
   .scene .sc-stack { max-width: 34rem; }
   .scene .sc-lede { margin-block-start: var(--sc-4); }
-  .scene .sc-body { margin-block-start: var(--sc-4); color: #D8CEBC; font-size: var(--sc-t-base); max-width: 40ch; }
+  .scene .sc-body { margin-block-start: var(--sc-4); color: #D8CEBC; font-size: var(--sc-t-base); max-width: 22em; }
   .scene--shop { color: #EFE9DC; --sc-ink: #EFE9DC; --sc-ink-soft: #CFC4B2; --sc-accent: #C9A227; background: var(--night); align-items: end; }
   .scene__copy--end { padding-block-end: clamp(3rem, 10vh, 7rem); }
   .scene--shop .sc-lede { color: #EFE9DC; }
@@ -492,7 +493,7 @@
   .scene__row .cta { margin-block-start: 0; }
   .maplink--light { color: #EFE9DC; font-weight: 600; text-underline-offset: .22em; }
   .making { padding: 0; }
-  .details { padding-block: var(--sc-section); background: #fff; --sc-canvas: #fff; }
+  .details { padding-block: var(--sc-section); background: var(--cream); --sc-canvas: var(--cream); }
   .details__grid { display: grid; gap: var(--sc-7); align-items: start; }
   @media (min-width: 880px) { .details__grid { grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: var(--sc-9); } }
   .details .facts { margin-block-start: 0; }
@@ -500,7 +501,7 @@
   main .cta { --sc-accent: #C9A227; --sc-accent-ink: #23201B; }
   .counter .rail__end .cta { margin-block-start: var(--sc-5); }
   .sitefoot { padding-block: var(--sc-section) var(--sc-6); background: var(--night); color: #EFE9DC; --sc-ink: #EFE9DC; --sc-ink-soft: #CFC4B2; }
-  .sitefoot .sitefoot__big { font-family: var(--font-head); font-size: clamp(2.4rem, 6.4vw, 5.6rem); line-height: 1.04; letter-spacing: var(--sc-track-snug); margin: 0; max-width: 14ch; text-wrap: balance; }
+  .sitefoot .sitefoot__big { font-family: var(--font-head); font-size: clamp(2.4rem, 6.4vw, 5.6rem); line-height: 1.04; letter-spacing: var(--sc-track-snug); margin: 0; max-width: 7.7em; text-wrap: balance; }
   .sitefoot .sitefoot__big em { font-style: italic; color: #C9A227; }
   .sitefoot__cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(12rem, 1fr)); gap: var(--sc-6); margin-block-start: var(--sc-8, 5rem); padding-block-start: var(--sc-6); border-block-start: 1px solid rgba(239,233,220,.22); }
   .sitefoot h3 { font-family: var(--font-head); font-size: var(--sc-t-xl); font-weight: 500; color: #EFE9DC; margin: 0 0 var(--sc-3); }
@@ -514,6 +515,46 @@
     .scene__shade--left { background: linear-gradient(to top, rgba(20,16,12,.94) 0%, rgba(20,16,12,.84) 38%, rgba(20,16,12,.3) 70%, transparent 88%); }
     .making.scene { align-items: end; padding-block-end: var(--sc-7); }
     .making .sc-display { font-size: var(--sc-t-2xl); }
+  }
+
+  /* ====== CATEGORY place (rule 3t, 22 Oct 2026): night opening that cuts to one warm ground, pictures framed, menu as a priced list ====== */
+  .trust { padding-block: var(--sc-6); border-block-end: 1px solid var(--sc-hairline); }
+  .trust__row { display: grid; gap: var(--sc-5); grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: start; }
+  .trust__row > div { font-size: var(--sc-t-base); line-height: 1.5; }
+  .trust__row b { display: block; margin-block-end: var(--sc-1); font-size: var(--sc-t-xs); font-weight: 700; letter-spacing: .13em; text-transform: uppercase; color: var(--sc-ink-soft); }
+  .trust__cta { justify-self: end; }
+  .trust__cta .cta { margin-block-start: 0; }
+  .counter { padding-block: var(--sc-section); }
+  .counter .sc-wrap, .trust .sc-wrap, .details .sc-wrap { max-width: 72rem; }
+  .group { margin: var(--sc-7) 0 var(--sc-3); font: 700 var(--sc-t-xs) var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--sc-ink-soft); padding-block-end: var(--sc-2); border-block-end: 1px solid var(--sc-hairline-strong); }
+  .menu { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0 var(--sc-8); }
+  .menu .item { width: auto; display: grid; grid-template-columns: 5.5rem 1fr auto; grid-template-areas: "shot meta add" "shot note add"; gap: var(--sc-1) var(--sc-4); align-items: center; padding-block: var(--sc-4); border-block-end: 1px solid var(--sc-hairline); }
+  .menu .item__shot { grid-area: shot; width: 5.5rem; height: 5.5rem; border-radius: 50%; box-shadow: none; }
+  .menu .item__shot img { width: 100%; height: 100%; aspect-ratio: 1; }
+  .menu .item__meta { grid-area: meta; margin: 0; align-self: end; justify-content: flex-start; gap: var(--sc-3); }
+  .menu .item__name { font-size: var(--sc-t-lg); }
+  .menu .item__price { font-size: var(--sc-t-base); color: var(--sc-ink); }
+  .menu .item__note { grid-area: note; margin: 0; font-size: var(--sc-t-sm); max-width: none; align-self: start; }
+  .menu .item__add { grid-area: add; width: auto; margin: 0; padding: 0 var(--sc-4); min-height: 44px; font-size: var(--sc-t-sm); white-space: nowrap; }
+  .counter__end { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sc-5); margin-block-start: var(--sc-7); }
+  .counter__end .sc-lede { margin: 0; font-size: var(--sc-t-lg); }
+  .counter__end .cta { margin-block-start: 0; }
+  .story, .visit, .close { padding-block: var(--sc-section); }
+  .story .sc-wrap, .visit .sc-wrap, .close .sc-wrap { max-width: 72rem; }
+  .menu .item__meta { flex-wrap: wrap; }
+  .story .split, .visit .split, .close .split { gap: var(--sc-8); }
+  .story .frame img, .visit .frame img, .close .frame img { width: 100%; height: auto; max-height: 34rem; object-fit: cover; border-radius: 14px; box-shadow: var(--sc-e2); }
+  .story .sc-body, .visit .sc-body { color: var(--sc-ink-soft); }
+  .close h2 { margin-inline: 0; font-size: var(--sc-t-2xl); max-width: 9.9em; }
+  .close .sc-lede { margin-inline: 0; color: var(--sc-ink); }
+  .maplink { color: #6B5210; }
+  @media (max-width: 860px) {
+    .trust__row { grid-template-columns: 1fr 1fr; }
+    .trust__cta { justify-self: start; grid-column: 1 / -1; }
+    .menu { grid-template-columns: 1fr; }
+    .menu .item { grid-template-columns: 4.5rem 1fr; grid-template-areas: "shot meta" "shot note" "add add"; }
+    .menu .item__shot { width: 4.5rem; height: 4.5rem; }
+    .menu .item__add { justify-self: stretch; margin-block-start: var(--sc-2); }
   }
 </style>
 </head>
@@ -557,24 +598,10 @@
     </div>
   </section>
 
-  <!-- 2 · INTIMACY · the making. A full-bleed picture of the hands, words on it. -->
-  <section class="making scene night" data-sc-act="flow" aria-label="How it is made">
-    <img class="scene__img" src="assets/hands.jpg" width="1000" height="1241" alt="Flour-dusted hands shaping a round of dough on a worn wooden bench">
-    <div class="ember" aria-hidden="true"></div>
-    <div class="scene__shade scene__shade--left" aria-hidden="true"></div>
-    <div class="sc-wrap scene__copy">
-      <div class="sc-stack" data-sc-in data-sc-stagger="70">
-        <h2 class="sc-display sc-display--lg">Four things go in.</h2>
-        <p class="sc-lede">Flour, water, salt, and a starter fed every day since the year the shop opened.</p>
-        <p class="sc-body">Nothing else, which is why the list on the wall has never needed a second page. Batya opened with one oven and her mother's proportions. The proportions have not changed. The oven has, twice.</p>
-      </div>
-    </div>
-  </section>
-
   <!-- 3 · PATIENCE · 05:15 -->
   <section class="shaping night" data-sc-act="pin" data-sc-span="1.8" aria-label="Shaping">
     <div data-sc-stage>
-      <p class="line" data-sc-cue="0 0.36 0">Every loaf is shaped by hand.</p>
+      <p class="line" data-sc-cue="0.05 0.36 0">Every loaf is shaped by hand.</p>
       <p class="line" data-sc-cue="0.30 0.64">By whoever is in that morning.</p>
 <!-- Ends at 1, not 0.92: a middle act's last cue closes at the end of the
            pin so the line is still lit when the stage starts to slide, and the
@@ -610,64 +637,84 @@
     </div>
   </section>
 
-  <!-- 6 · APPETITE · the counter -->
-  <section class="counter day day--cream" id="counter" data-sc-act="pan" data-sc-span="2.8" aria-label="The counter">
-    <div data-sc-stage>
-      <div class="rail" data-sc-pan="0.06">
-        <div class="rail__lead">
-          <h2 class="sc-display sc-display--md">The counter.</h2>
-          <p class="sc-body">Baked in one batch each morning. When a shelf is empty, that is the day.</p>
-        </div>
+  <!-- 5b · TRUST · hours, address and kosher straight after the door -->
+  <section class="trust day day--cream" id="trust" data-sc-act="flow" aria-label="Hours and address">
+    <div class="sc-wrap trust__row">
+      <div><b>Open</b>Sunday to Thursday, 07:00 to 19:00<br>Friday, 07:00 to 14:00</div>
+      <div><b>Address</b>Emek Refaim 41, Jerusalem<br><a class="maplink" href="https://www.google.com/maps/search/?api=1&amp;query=Emek+Refaim+41+Jerusalem" target="_blank" rel="noopener">Open in Maps</a></div>
+      <div><b>Kosher</b>Rabbanut Yerushalayim</div>
+      <div class="trust__cta"><button class="cta" type="button" data-open-basket>Start your order</button></div>
+    </div>
+  </section>
 
+  <!-- 6 · THE COUNTER · a plain priced list, grouped, one ground (category place) -->
+  <section class="counter day day--cream" id="counter" data-sc-act="flow" aria-label="The counter">
+    <div class="sc-wrap">
+      <div class="counter__head sc-stack" data-sc-in>
+        <h2 class="sc-display sc-display--md">The counter.</h2>
+        <p class="sc-body">Baked in one batch each morning. When a shelf is empty, that is the day.</p>
+      </div>
+      <h3 class="group">Bread</h3>
+      <div class="menu">
         <article class="item" data-id="challah" data-name="Challah, plain" data-price="18">
-          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-challah.jpg" width="900" height="1117" alt="A plain braided challah"></div>
+          <div class="item__shot"><img src="assets/item-challah.jpg" width="900" height="1117" alt="A plain braided challah"></div>
           <div class="item__meta"><h3 class="item__name">Challah, <em>plain</em></h3><span class="item__price">₪18</span></div>
           <p class="item__note">Six strands. A long cold prove, brushed twice.</p>
           <button class="item__add" type="button" data-add="challah"><span class="item__add-label">Add, ₪18</span></button>
         </article>
-
-        <article class="item" data-id="babka" data-name="Babka, chocolate" data-price="46">
-          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-babka.jpg" width="900" height="1117" alt="A chocolate babka, two slices cut"></div>
-          <div class="item__meta"><h3 class="item__name">Babka, <em>chocolate</em></h3><span class="item__price">₪46</span></div>
-          <p class="item__note">Laminated Thursday night, baked Friday morning.</p>
-          <button class="item__add" type="button" data-add="babka"><span class="item__add-label">Add, ₪46</span></button>
-        </article>
-
-        <article class="item" data-id="rugelach" data-name="Rugelach, a box" data-price="38">
-          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-rugelach.jpg" width="900" height="1117" alt="An open box of chocolate rugelach"></div>
-          <div class="item__meta"><h3 class="item__name">Rugelach, <em>a box</em></h3><span class="item__price">₪38</span></div>
-          <p class="item__note">Twelve. Still warm if you are here before nine.</p>
-          <button class="item__add" type="button" data-add="rugelach"><span class="item__add-label">Add, ₪38</span></button>
-        </article>
-
         <article class="item" data-id="sourdough" data-name="Sourdough boule" data-price="32">
-          <div class="item__shot" data-sc-tilt="5"><img src="assets/item-sourdough.jpg" width="900" height="1117" alt="A round sourdough boule with a scored crust"></div>
+          <div class="item__shot"><img src="assets/item-sourdough.jpg" width="900" height="1117" alt="A round sourdough boule with a scored crust"></div>
           <div class="item__meta"><h3 class="item__name">Sourdough <em>boule</em></h3><span class="item__price">₪32</span></div>
           <p class="item__note">One starter, fed since the year we opened.</p>
           <button class="item__add" type="button" data-add="sourdough"><span class="item__add-label">Add, ₪32</span></button>
         </article>
-
-        <div class="rail__end">
-          <p class="sc-lede">Shabbos orders close Thursday at two.</p>
-          <button class="cta" type="button" data-open-basket>Start your order</button>
-        </div>
+      </div>
+      <h3 class="group">Pastry</h3>
+      <div class="menu">
+        <article class="item" data-id="babka" data-name="Babka, chocolate" data-price="46">
+          <div class="item__shot"><img src="assets/item-babka.jpg" width="900" height="1117" alt="A chocolate babka, two slices cut"></div>
+          <div class="item__meta"><h3 class="item__name">Babka, <em>chocolate</em></h3><span class="item__price">₪46</span></div>
+          <p class="item__note">Laminated Thursday night, baked Friday morning.</p>
+          <button class="item__add" type="button" data-add="babka"><span class="item__add-label">Add, ₪46</span></button>
+        </article>
+        <article class="item" data-id="rugelach" data-name="Rugelach, a box" data-price="38">
+          <div class="item__shot"><img src="assets/item-rugelach.jpg" width="900" height="1117" alt="An open box of chocolate rugelach"></div>
+          <div class="item__meta"><h3 class="item__name">Rugelach, <em>a box</em></h3><span class="item__price">₪38</span></div>
+          <p class="item__note">Twelve. Still warm if you are here before nine.</p>
+          <button class="item__add" type="button" data-add="rugelach"><span class="item__add-label">Add, ₪38</span></button>
+        </article>
+      </div>
+      <div class="counter__end">
+        <p class="sc-lede">Shabbos orders close Thursday at two.</p>
+        <button class="cta" type="button" data-open-basket>Start your order</button>
       </div>
     </div>
   </section>
 
-  <!-- 7 · WARMTH · come in. The shopfront, edge to edge, the address on it. -->
-  <section class="visit scene scene--shop" id="visit" data-sc-act="flow" aria-label="Visit">
-    <img class="scene__img" src="assets/shopfront.jpg" width="1400" height="1128" alt="The bakery's stone shopfront on Emek Refaim, loaves in the window">
-    <div class="scene__shade scene__shade--bottom" aria-hidden="true"></div>
-    <div class="sc-wrap scene__copy scene__copy--end">
+  <!-- 7 · THE BAKER · framed photo beside her words, on the same ground -->
+  <section class="making story day day--cream" id="making" data-sc-act="flow" aria-label="How it is made">
+    <div class="sc-wrap split split--photo-first">
+      <figure class="frame" data-sc-in><img src="assets/hands.jpg" width="1000" height="1241" alt="Flour-dusted hands shaping a round of dough on a worn wooden bench"></figure>
+      <div class="sc-stack" data-sc-in data-sc-stagger="70">
+        <h2 class="sc-display sc-display--lg">Four things go in.</h2>
+        <p class="sc-lede">Flour, water, salt, and a starter fed every day since the year the shop opened.</p>
+        <p class="sc-body">Nothing else, which is why the list on the wall has never needed a second page. Batya opened with one oven and her mother's proportions. The proportions have not changed. The oven has, twice.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 · COME IN · framed shopfront beside the address -->
+  <section class="visit day day--cream" id="visit" data-sc-act="flow" aria-label="Visit">
+    <div class="sc-wrap split">
       <div class="sc-stack" data-sc-in data-sc-stagger="70">
         <h2 class="sc-display sc-display--xl">Come in.</h2>
         <p class="sc-lede">Emek Refaim 41, Jerusalem. Open from 07:00.</p>
         <div class="scene__row">
           <button class="cta" type="button" data-open-basket>Start your order</button>
-          <a class="maplink maplink--light" href="https://www.google.com/maps/search/?api=1&amp;query=Emek+Refaim+41+Jerusalem" target="_blank" rel="noopener">Open in Maps</a>
+          <a class="maplink" href="https://www.google.com/maps/search/?api=1&amp;query=Emek+Refaim+41+Jerusalem" target="_blank" rel="noopener">Open in Maps</a>
         </div>
       </div>
+      <figure class="frame" data-sc-in><img src="assets/shopfront.jpg" width="1400" height="1128" alt="The bakery's stone shopfront on Emek Refaim, loaves in the window"></figure>
     </div>
   </section>
 
@@ -691,17 +738,15 @@
     </div>
   </section>
 
-  <!-- 8 · RESOLVE · the last element on the page -->
-  <section class="close day" id="order" data-sc-act="pin" data-sc-span="1.2" aria-label="Order">
-    <div data-sc-stage>
-      <img class="close__img" src="assets/cta.jpg" width="2000" height="1116" alt="" aria-hidden="true">
-      <div class="sc-scrim sc-scrim--vignette" aria-hidden="true"></div>
-      <div class="close__plate" aria-hidden="true"></div>
-      <div class="sc-copy sc-copy--center" data-sc-cue="0.06">
-        <h2 class="sc-display sc-display--lg" data-sc-kinetic="lines">Order for Shabbos before Thursday at two.</h2>
+  <!-- 9 · RESOLVE -->
+  <section class="close day day--cream" id="order" data-sc-act="flow" aria-label="Order">
+    <div class="sc-wrap split">
+      <div class="sc-stack" data-sc-in data-sc-stagger="70">
+        <h2 class="sc-display sc-display--lg">Order for Shabbos before Thursday at two.</h2>
         <p class="sc-lede">Tell us what you want and when you are coming. It will be wrapped and waiting with your name on it.</p>
-        <button class="cta" type="button" data-open-basket data-sc-magnet="0.26" data-sc-cue="0.06" data-sc-rise="0">Start your order</button>
+        <button class="cta" type="button" data-open-basket>Start your order</button>
       </div>
+      <figure class="frame" data-sc-in><img src="assets/cta.jpg" width="2000" height="1116" alt="" aria-hidden="true"></figure>
     </div>
   </section>
 
