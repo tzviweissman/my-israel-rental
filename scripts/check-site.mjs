@@ -226,7 +226,13 @@ for (const url of urls) {
     const a = await page.screenshot(); await page.waitForTimeout(2500); const b = await page.screenshot();
     await page.mouse.wheel(0, 500); await page.waitForTimeout(900); const c = await page.screenshot();
     const differ = (x, y) => { let d = 0; for (let i = 0; i < x.length && i < y.length; i += 997) d += x[i] !== y[i] ? 1 : 0; return d / (Math.min(x.length, y.length) / 997); };
-    if (cover < .7 && ['events', 'beauty', 'place', 'trainer'].includes(category)) fail(url, 'OPENING', `the first screen is only ${Math.round(cover * 100)}% picture: the opening must be a full-screen film or photo, not a box beside the words (3h.1)`);
+    // every category (Tzvi, 22 Oct 2026, "why do i keep needing to tell you to make the wow moment": limiting this
+    // to four categories let American Crust open at 13% picture; a shop's price and Add fit on the second screen, BUY allows it)
+    if (cover < .7) fail(url, 'OPENING', `the first screen is only ${Math.round(cover * 100)}% picture: the opening must be a full-screen film or photo, not a box beside the words (3h.1)`);
+    // and it is a film: a playing video on the first screen, unless FILM.md beside the page records Tzvi's no to a film (3h)
+    const film = await page.evaluate(() => [...document.querySelectorAll('video')].some((v) => { const r = v.getBoundingClientRect(); return r.top < innerHeight && r.width * r.height > innerWidth * innerHeight * .5; }));
+    const declined = url.startsWith('file:') ? false : await fetch(new URL('FILM.md', url)).then((r) => r.ok ? r.text() : '').then((t) => /declined by Tzvi/i.test(t)).catch(() => false);
+    if (!film && !declined) fail(url, 'OPENING', 'no film on the first screen: every site opens on a generated advert film from their own product (3h); bring the numbered steps and the cost, or write FILM.md "declined by Tzvi" with his words');
     if (differ(a, b) < .05 && differ(b, c) < .05) fail(url, 'OPENING', 'nothing happens on the first screen, on its own or when you start to scroll: the opening must be an event (3h)');
     await ctx.close();
   }
