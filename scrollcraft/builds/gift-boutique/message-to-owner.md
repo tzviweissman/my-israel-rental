@@ -13,6 +13,10 @@ We are building the page for The Gift Boutique from your WhatsApp catalogue, you
 9. Photos. A clear photo of each gift on a plain light background, all taken the same way, would make the collection look like one shoot. Can you send them?
 10. Your words. One true sentence about why your gifts cost what they do.
 
+11. Bottle openers. Your catalogue lists two items called Bottle Opener: one from $45 to $80 (photo with red roses in a black box) and one at $25 (photo with snacks). We named them Bottle Opener with Roses and Bottle Opener with Snacks. Are those the right names, and for the roses one, which versions cost $45 and which cost $80? Until we know, the order page asks the customer to write which one they want.
+12. Sharper photos. The gift photos reached us small (238 by 240 pixels), so on a phone they look soft. If you can send the original photo of each gift, the collection will look sharp.
+13. Kosher wording. Your catalogue says food and drinks are store-bought and pre-packaged, Badatz Eida Hachareidis or Badatz HaRav Rubin only. Should the page also say that items and wrapping may differ because of hashgacha or availability? We left that out because it is not in your files.
+
 Example questions for a short FAQ, to answer in your own words:
 - How far ahead should I order?
 - Can I add a card with my message?

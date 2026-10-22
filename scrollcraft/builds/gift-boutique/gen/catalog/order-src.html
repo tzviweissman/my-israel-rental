@@ -13,6 +13,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Order a gift · The Gift Boutique</title>
+<meta name="site-category" content="fashion-shop">
 <meta name="description" content="Choose your gifts, say who they are for and where they are going, and send the order to The Gift Boutique on WhatsApp. Delivered across Israel.">
 <link rel="icon" href="assets/logo-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -207,6 +208,42 @@
   .foot a:hover { color: var(--gold-hi); }
   .foot .fine { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
   @media (max-width: 760px) { .foot .cols3 { grid-template-columns: 1fr; } }
+
+  /* RULE 3t, fashion-shop (22 Oct 2026): one ivory ground; the bar and footer follow the home page. The order summary stays dark as the one solid block. */
+  .bar { background: rgb(246 240 228 / .95); border-bottom: 1px solid var(--line-ivory); }
+  .brand, .brand span { color: var(--ink); }
+  .bar .back, .nav a.link { color: var(--soft); }
+  .bar .back:hover, .nav a.link:hover { color: var(--ink); }
+  .nav .ghost { color: var(--ink); border-color: var(--ink); }
+  .nav .ghost:hover { background: var(--ink); color: var(--ivory); }
+  .nav .ghost[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--ivory); }
+  .nav .ghost .cnt { background: var(--ivory); color: var(--ink); }
+  .foot { background: var(--ivory-2); color: var(--soft); border-top: 1px solid var(--line-ivory); }
+  .foot a { color: var(--ink); }
+  .foot h4 { color: var(--gold-ink); }
+  .foot .fine { border-color: var(--line-ivory); }
+  .prog li { color: var(--ink); }
+  /* one corner radius (rule 3c.9): 14px for buttons, tiles, photos and cards; circles only for the round Add chip and step numbers */
+  body .btn, body .ghost, body .pills button, body .cat .ph, body .hero .rise li, body .cat .is-out .rowp .pr, body .brand img { border-radius: 14px !important; }
+  body .btn { box-shadow: none !important; }
+  body .nav a.link, body .cnt, body input, body textarea, body button.add, body button.back, body .back, body .ph, body .toast, body .sum { border-radius: 14px !important; }
+  body .brand span { font-size: var(--t-s) !important; }
+  @media (max-width: 1000px), (max-height: 760px) { .sum { position: static; } }
+  /* type scale (rule 3e.14): five sizes */
+  :root { --t-s: .875rem; --t-b: 1.0625rem; --t-m: 1.25rem; --t-h2: clamp(1.9rem, 1.2rem + 2.2vw, 3rem); --t-h1: clamp(2.6rem, 1.2rem + 4.2vw, 5.6rem); }
+  @media (max-width: 760px) { :root { --t-h1: clamp(2.4rem, 1rem + 8vw, 3.4rem); } }
+  body :not(h1):not(h2):not(h3):not(h4):not(dt):not(small):not(em):not(script):not(style) { font-size: var(--t-b) !important; }
+  body dt, body h4, body small, body .addchip, body .cue, body .fine, body .hrs, body .cnt, body .dock > span, body .dock small, body .label { font-size: var(--t-s) !important; }
+  body h3, body .cat-h, body .steps b, body .sum .tot b, body .dock b { font-size: var(--t-m) !important; }
+  body h1 { font-size: var(--t-h2) !important; }
+  body h2 { font-size: var(--t-m) !important; }
+  body .foot .cta b { font-size: var(--t-h2) !important; }
+  body .sign b { font-size: 7.1vw !important; }
+  .sum .saved { font-size: .9rem; }
+
+  /* ── 22 Oct 2026, independent review fixes ── */
+  .which { margin-top: 1.2rem; }
+  @media (max-width: 420px) { .bar .wrap { gap: .5rem; } .brand { min-width: 0; gap: .4rem; } body .brand span { font-size: .76rem !important; letter-spacing: .02em; white-space: nowrap; } .nav .ghost { padding-inline: .7rem; white-space: nowrap; flex: none; } }
 </style>
 </head>
 <body>
@@ -237,7 +274,8 @@
         <h2 id="s1"><span class="n">1</span>Your gifts</h2>
         <p class="hint">Prices in US dollars, as in our catalogue.</p>
         <div class="find"><input type="search" id="q" placeholder="Search gifts" aria-label="Search gifts" autocomplete="off"><div class="pills" id="pills" role="group" aria-label="Choose a group of gifts"></div></div>
-        <div id="gifts"></div><p class="none" id="none" hidden>No gift matches that. Message us on WhatsApp and we will help.</p>
+        <div id="gifts"></div>
+        <div id="which" class="which" hidden data-need><label for="whichin" id="whichl"></label><input id="whichin" name="which" autocomplete="off" maxlength="120"><p class="msg">Tell us which one you want.</p></div><p class="none" id="none" hidden>No gift matches that. Message us on WhatsApp and we will help.</p>
       </section>
 
       <section class="step" data-step="2" aria-labelledby="s2">
@@ -272,7 +310,7 @@
       <p class="reassure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span>Nothing is paid on this page. We confirm the delivery fee with you on WhatsApp first.</span></p>
       <a class="btn" id="send" href="#" aria-disabled="true">
         <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
-        <span style="position:relative">Send order on WhatsApp</span>
+        <span style="position:relative">Send on WhatsApp</span>
       </a>
       <button type="button" class="back" id="back" hidden>Back</button>
       <p class="why" id="why" aria-live="polite"></p>
@@ -379,7 +417,7 @@ document.addEventListener('DOMContentLoaded', function () {
     p._li.classList.toggle('has', n > 0);
     if (!n) {
       var a = document.createElement('button'); a.type = 'button'; a.className = 'add'; a.textContent = 'Add';
-      a.setAttribute('aria-label', 'Add ' + p.name);
+      a.setAttribute('aria-label', 'Add to order, ' + p.name);
       a.onclick = function () { q[p._k] = 1; toast('Added: ' + p.name); update(); var m = p._ctl.querySelector('[data-plus]'); if (m) m.focus(); };
       ctl.appendChild(a); return;
     }
@@ -411,6 +449,9 @@ document.addEventListener('DOMContentLoaded', function () {
     lines.textContent = '';
     var c = chosen();
     empty.hidden = c.length > 0;
+    var rg = c.filter(function (p) { return p.price_to != null && Number(p.price_to) > Number(p.price); });
+    document.getElementById('which').hidden = !rg.length;
+    if (rg.length) document.getElementById('whichl').textContent = 'Which one? ' + rg.map(function (p) { return p.name + ' is ' + priceText(p); }).join('; ') + '. Write which one you want.';
     c.forEach(function (p) {
       var li = document.createElement('li');
       var a = document.createElement('span'); a.className = 'lt';
@@ -434,7 +475,12 @@ document.addEventListener('DOMContentLoaded', function () {
   var stepNo = 1;
   function stepMissing(n, show) {
     var m = [];
-    if (n === 1) { if (!chosen().length) m.push('choose a gift'); return m; }
+    if (n === 1) {
+      if (!chosen().length) m.push('choose a gift');
+      var wb = document.getElementById('which');
+      if (!wb.hidden) { var wok = document.getElementById('whichin').value.trim().length > 0; if (show) wb.classList.toggle('bad', !wok); if (!wok) m.push('which one'); }
+      return m;
+    }
     document.querySelectorAll('.step[data-step="' + n + '"] [data-need]').forEach(function (box) {
       var ok = box.querySelector('input,textarea').value.trim().length > 0;
       if (show) box.classList.toggle('bad', !ok);
@@ -449,10 +495,10 @@ document.addEventListener('DOMContentLoaded', function () {
     why.textContent = ready ? '' : (show ? 'Still needed: ' + missing.join(', ') + '.' : '');
     return ready;
   }
-  var LAB = { 1: 'Continue to delivery', 2: 'Continue to your details' };
+  var LAB = { 1: 'Continue', 2: 'Continue' };
   function paintBtn() {
     var t = totals().text;
-    var l = stepNo < 3 ? LAB[stepNo] : 'Send order on WhatsApp, ' + t;
+    var l = stepNo < 3 ? LAB[stepNo] : 'Send on WhatsApp';
     var l2 = stepNo < 3 ? 'Continue' : 'Send on WhatsApp';
     if (!sending) { document.getElementById('send').lastElementChild.textContent = l; document.getElementById('send2').lastElementChild.textContent = l2; }
     document.getElementById('back').hidden = stepNo === 1;
@@ -477,6 +523,7 @@ document.addEventListener('DOMContentLoaded', function () {
   function message() {
     var L = ['Hi, I would like to order:'];
     chosen().forEach(function (p) { L.push('• ' + q[p._k] + ' × ' + p.name + ' (' + priceText(p) + ')'); });
+    if (v('whichin') && !document.getElementById('which').hidden) L.push('Which one: ' + v('whichin'));
     L.push('Gifts total: ' + totals().text + ', plus delivery');
     L.push('');
     L.push('For: ' + v('to') + (v('tophone') ? ', ' + v('tophone') : ''));

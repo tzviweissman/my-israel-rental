@@ -16,7 +16,7 @@
 
   var stN = $('st-n'), stAdd = $('st-add'), stIn = $('st-in');
   function label() { stAdd.firstElementChild.textContent = 'Add ' + (n === 1 ? 'to basket' : n + ' to basket') + ', ₪' + n * PRICE; stN.textContent = n;
-    stIn.textContent = qty ? 'In your basket: ' + qty + (qty === 1 ? ' skirt' : ' skirts') + '. You choose the size and colour there.' : 'You choose the size and colour in your basket.'; }
+    stIn.textContent = qty ? 'In your basket: ' + qty + (qty === 1 ? ' skirt' : ' skirts') + '. You write your size and colour in the note there.' : 'You write your size and colour in the note in your basket.'; }
   document.querySelector('.st-buy .step').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; n = Math.max(1, Math.min(MAX, n + (+b.dataset.d))); label(); });
 
   // a short note that slides in at the top and leaves by itself
@@ -61,7 +61,7 @@
     var bar = document.querySelector('#bar .p'), barBtn = document.querySelector('#bar .btn');
     if (barBtn) { barBtn.textContent = 'Basket'; barBtn.setAttribute('href', '#order'); }
     if (bar) bar.innerHTML = qty ? '<b>Basket, ₪' + total() + '</b>' + qty + (qty === 1 ? ' skirt' : ' skirts') : '<b>₪320</b>Premium Modest Sports Skirt';
-    stIn.textContent = qty ? 'In your basket: ' + qty + (qty === 1 ? ' skirt' : ' skirts') + '. You choose the size and colour there.' : 'You choose the size and colour in your basket.';
+    stIn.textContent = qty ? 'In your basket: ' + qty + (qty === 1 ? ' skirt' : ' skirts') + '. You write your size and colour in the note there.' : 'You write your size and colour in the note in your basket.';
     drawStep();
   }
   function mark(id, msg) { var w = $('w-' + id) || $('c-' + id); if (w) w.classList.toggle('bad', !!msg); $('e-' + id).textContent = msg || ''; }
