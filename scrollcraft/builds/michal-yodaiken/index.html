@@ -464,7 +464,7 @@
 <script>
 (function () {
   // The request is saved with Michal on MyIsraelRental first (page rules 3k), then WhatsApp opens with it typed.
-  // Her start times are the ones in her listing: Sunday to Friday, 09:00 to 21:00; offered on the hour.
+  // Her start times are the ones in her listing: Sunday to Friday, 09:00 to 21:00; offered every half hour (Tzvi, 22 Oct 2026).
   var WA = '447563299474', GIG = '135e7aac-13fa-4a1e-a0b8-822cfbd2c111', TIER = 'Personal Training';
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
   var $ = function (id) { return document.getElementById(id); };
@@ -477,7 +477,7 @@
     if (!d) { box.innerHTML = '<p class="hint">Choose a day first.</p>'; return; }
     if (new Date(d + 'T12:00').getDay() === 6) { box.innerHTML = '<p class="hint">Closed on Shabbat. Choose another day.</p>'; return; }
     var out = [];
-    for (var m = 540; m + 30 <= 1260; m += 60) {
+    for (var m = 540; m + 30 <= 1260; m += 30) {
       if (d === today) { var n = new Date(); if (m <= n.getHours() * 60 + n.getMinutes() + 60) continue; }
       var t = pad(Math.floor(m / 60)) + ':' + pad(m % 60); out.push('<label class="opt"><input type="radio" name="time" value="' + t + '"' + (t === keep ? ' checked' : '') + '><span class="box">' + t + '</span></label>');
     }
