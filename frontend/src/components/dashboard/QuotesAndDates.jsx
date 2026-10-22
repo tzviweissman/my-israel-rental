@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import { Loader2, Calculator, CalendarDays, ChevronDown, ChevronUp } from 'lucide-react';
 import { money } from '../../utils/currency';
 import CustomFieldsEditor from './CustomFieldsEditor';
+import { LinesEditor, ShareRow, PayFromQuote, NewQuoteForm, cleanLines, linesTotal } from './QuoteTools';
 
 const box = 'px-3 py-2 rounded-lg border text-sm bg-white min-h-[40px]';
 const boxStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
@@ -19,12 +20,14 @@ function QuoteCard({ q, API, auth, onChanged }) {
   const [open, setOpen] = useState(q.status === 'new');
   const [price, setPrice] = useState(q.quote?.price || '');
   const [note, setNote] = useState(q.quote?.note || '');
+  const [lines, setLines] = useState(() => (q.quote?.lines || []).map((l) => ({ label: l.label, amount: String(l.amount) })));
+  const total = lines.length ? linesTotal(cleanLines(lines)) : Number(price);
   const [days, setDays] = useState(14);
   const [busy, setBusy] = useState('');
   const reply = async (action) => {
     setBusy(action);
     try {
-      await axios.post(`${API}/marketplace/quote-requests/${q.id}/reply`, { action, price: action === 'quote' ? Number(price) : null, note, valid_days: Number(days) }, auth);
+      await axios.post(`${API}/marketplace/quote-requests/${q.id}/reply`, { action, price: action === 'quote' && !lines.length ? Number(price) : null, lines: action === 'quote' ? cleanLines(lines) : [], note, valid_days: Number(days) }, auth);
       toast.success(action === 'quote' ? t('quotes.sentPrice', 'Price sent. The customer can accept it with one tap.') : t('quotes.declinedOk', 'Declined. The customer is told.'));
       onChanged();
     } catch (err) { toast.error(err?.response?.data?.detail || t('auto.failed', 'Could not save. Try again.')); } finally { setBusy(''); }
@@ -38,7 +41,7 @@ function QuoteCard({ q, API, auth, onChanged }) {
     <li className="rounded-xl border bg-white" style={{ borderColor: q.status === 'new' || q.status === 'accepted' ? 'var(--ink)' : 'var(--brand-border)' }} data-testid={`quote-${q.id}`}>
       <button type="button" onClick={() => setOpen(!open)} className="w-full flex items-start justify-between gap-2 p-3 text-start" aria-expanded={open}>
         <span className="min-w-0">
-          <span className="block text-sm font-semibold" style={{ color: 'var(--ink)' }} dir="auto">{q.name} · {q.gig_title}</span>
+          <span className="block text-sm font-semibold" style={{ color: 'var(--ink)' }} dir="auto">{q.name} · {q.gig_title || q.description.slice(0, 60)}</span>
           <span className="block text-xs" style={{ color: 'var(--brand-muted)' }}>{STATUS[q.status]}{q.quote ? ` · ${money(q.quote.price, 'ILS')}` : ''}</span>
         </span>
         {open ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
@@ -69,19 +72,20 @@ function QuoteCard({ q, API, auth, onChanged }) {
           {(q.status === 'new' || q.status === 'quoted') && (
             <div className="rounded-lg p-3 space-y-2" style={{ background: '#F9FAFB' }}>
               <div className="flex flex-wrap items-center gap-2">
-                <label className="inline-flex items-center gap-2">{t('quotes.price', 'Price ₪')}
+                {!lines.length && <label className="inline-flex items-center gap-2">{t('quotes.price', 'Price ₪')}
                   <input type="number" min="1" value={price} onChange={(e) => setPrice(e.target.value)} className={`${box} w-28`} style={boxStyle} data-testid={`quote-price-${q.id}`} />
-                </label>
+                </label>}
                 <label className="inline-flex items-center gap-2">{t('quotes.valid', 'Holds for')}
                   <select value={days} onChange={(e) => setDays(e.target.value)} className={box} style={boxStyle}>
                     {[3, 7, 14, 30].map((d) => <option key={d} value={d}>{t('quotes.days', '{{n}} days', { n: d })}</option>)}
                   </select>
                 </label>
               </div>
+              <LinesEditor lines={lines} setLines={setLines} />
               <textarea rows={2} maxLength={1000} dir="auto" value={note} onChange={(e) => setNote(e.target.value)} placeholder={t('quotes.notePh', 'What the price includes, e.g. two movers, half a day')}
                         className={`${box} w-full`} style={boxStyle} />
               <div className="flex gap-2">
-                <button type="button" disabled={!!busy || !Number(price)} onClick={() => reply('quote')} className="inline-flex items-center gap-1.5 px-4 min-h-[40px] rounded-full text-sm font-semibold disabled:opacity-50"
+                <button type="button" disabled={!!busy || !(total > 0)} onClick={() => reply('quote')} className="inline-flex items-center gap-1.5 px-4 min-h-[40px] rounded-full text-sm font-semibold disabled:opacity-50"
                         style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid={`quote-send-${q.id}`}>
                   {busy === 'quote' && <Loader2 size={13} className="animate-spin" />} {q.status === 'quoted' ? t('quotes.update', 'Send a new price') : t('quotes.send', 'Send price')}
                 </button>
@@ -89,6 +93,13 @@ function QuoteCard({ q, API, auth, onChanged }) {
               </div>
             </div>
           )}
+          {q.status === 'quoted' && q.message && (
+            <div className="space-y-1">
+              <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{t('quoteSend.shareHint', 'Send the customer the link to the price:')}</p>
+              <ShareRow item={q} subject={t('quoteSend.mailSubject', 'Your price')} />
+            </div>
+          )}
+          {q.status === 'accepted' && q.quote && q.business_id && <PayFromQuote API={API} auth={auth} q={q} />}
         </div>
       )}
     </li>
@@ -105,6 +116,7 @@ export default function QuotesAndDates({ API, token }) {
   // business, not a switcher; add one if an owner with several ever asks
   // for different questions per business.
   const [bizId, setBizId] = useState(null);
+  const [writing, setWriting] = useState(false);
   const load = useCallback(() => {
     axios.get(`${API}/marketplace/quote-requests`, auth).then(({ data }) => setQuotes(data.quotes || [])).catch(() => {});
     axios.get(`${API}/marketplace/session-reservations`, auth).then(({ data }) => setDates(data || [])).catch(() => {});
@@ -126,9 +138,16 @@ export default function QuotesAndDates({ API, token }) {
       {(quotes.length > 0 || bizId) && (
         <section data-testid="quotes-inbox">
           <h2 className="text-lg font-bold mb-1 inline-flex items-center gap-2" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}><Calculator size={18} /> {t('quotes.title', 'Quote requests')}</h2>
-          <p className="text-sm mb-3" style={{ color: 'var(--brand-muted)' }}>{t('quotes.body', 'Customers describe a job and ask for your price. Send one, and they accept or decline with a tap.')}</p>
+          <p className="text-sm mb-3" style={{ color: 'var(--brand-muted)' }}>{t('quoteSend.inboxBody', 'Customers describe a job and ask for your price, or you send a price yourself after a call or a visit. They accept or decline with a tap.')}</p>
           {/* Collapsed to one line until opened, so it never crowds the
               inbox underneath it. */}
+          {bizId && !writing && (
+            <button type="button" onClick={() => setWriting(true)} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold mb-3"
+                    style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="quote-new-open">
+              {t('quoteSend.open', 'Send a price')}
+            </button>
+          )}
+          {bizId && writing && <NewQuoteForm API={API} auth={auth} businessId={bizId} onDone={load} onClose={() => setWriting(false)} />}
           {bizId && <div className="mb-3"><CustomFieldsEditor API={API} auth={auth} businessId={bizId} form="quote" /></div>}
           <ul className="space-y-2">{quotes.map((q) => <QuoteCard key={q.id} q={q} API={API} auth={auth} onChanged={load} />)}</ul>
         </section>

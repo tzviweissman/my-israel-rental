@@ -82,6 +82,9 @@ def _public(q: dict[str, Any], gig: dict[str, Any], biz: dict[str, Any]) -> dict
         "gig_title": gig.get("title") or "", "gig_title_he": gig.get("title_he"),
         "description": q["description"], "photos": q.get("photos") or [], "preferred_date": q.get("preferred_date"),
         "area": q.get("area"), "status": q["status"], "quote": q.get("quote"), "created_at": q.get("created_at"),
+        # A price the business sent first: the page says "A price from",
+        # not "Your quote request to".
+        "from_business": q.get("source") == "business", "lang": q.get("lang") or "en",
     }
 
 
@@ -227,7 +230,37 @@ def _row(q: dict[str, Any], titles: dict[str, str]) -> dict[str, Any]:
             "photos": q.get("photos") or [], "preferred_date": q.get("preferred_date"), "area": q.get("area"),
             "name": q["name"], "phone": q.get("phone"), "email": q.get("email"), "status": q["status"],
             "answers": q.get("answers") or [],
-            "quote": q.get("quote"), "created_at": q.get("created_at")}
+            "quote": q.get("quote"), "created_at": q.get("created_at"),
+            "business_id": q.get("business_id"), "source": q.get("source") or "customer", "lang": q.get("lang") or "en",
+            # To send the price on WhatsApp or by text: the link and a
+            # ready message (Tzvi, 22 Oct 2026). Only once there is a price.
+            **(_share(q, titles.get(q["gig_id"], "")) if q.get("quote") else {})}
+
+
+def _track_url(q: dict[str, Any]) -> str:
+    from .orders import _frontend_url
+    return f"{_frontend_url()}/quotes/{q['track_token']}"
+
+
+def quote_message(biz_name: str, q: dict[str, Any], title: str = "") -> str:
+    """The message a business sends with its price. Pure."""
+    first = (q.get("name") or "").strip().split(" ")[0]
+    what = " ".join((title or q.get("description") or "").split())
+    what = what if len(what) <= 80 else what[:79].rstrip() + "…"
+    price = f"₪{q['quote']['price']:,.2f}".replace(".00", "")
+    hello = ("שלום " + first if first else "שלום") if q.get("lang") == "he" else ("Hello " + first if first else "Hello")
+    if q.get("lang") == "he":
+        return (f"{hello},\nזו הצעת המחיר של {biz_name} עבור: {what}\nסה\"כ {price}.\n"
+                f"אפשר לראות את הפירוט ולאשר כאן: {_track_url(q)}")
+    return (f"{hello},\nHere is the price from {biz_name} for: {what}\nTotal {price}.\n"
+            f"You can see the details and accept here: {_track_url(q)}")
+
+
+def _share(q: dict[str, Any], title: str) -> dict[str, Any]:
+    from utils.whatsapp_link import normalize_whatsapp_number
+    phone = normalize_whatsapp_number(q.get("phone")) if q.get("phone") else None
+    return {"link": _track_url(q), "message": quote_message(q.get("_biz_name") or "", q, title),
+            "whatsapp_to": phone.lstrip("+") if phone else None}
 
 
 @router.get("/quote-requests")
@@ -235,12 +268,78 @@ async def my_quote_requests(user=Depends(verify_token)):
     rows = await db.quote_requests.find({"provider_user_id": user["user_id"]}).sort("created_at", -1).to_list(200)
     ids = list({r["gig_id"] for r in rows})
     titles = {g["_id"]: g.get("title") or "" async for g in db.marketplace_gigs.find({"_id": {"$in": ids}}, {"title": 1})}
+    names = {b["_id"]: b.get("name") or "" async for b in db.businesses.find(
+        {"_id": {"$in": list({r.get("business_id") for r in rows})}}, {"name": 1})}
+    for r in rows:
+        r["_biz_name"] = names.get(r.get("business_id"), "")
     return {"quotes": [_row(r, titles) for r in rows], "new": sum(1 for r in rows if r["status"] == "new")}
+
+
+class NewQuote(BaseModel):
+    """A price the business sends first, after a call or a visit (Tzvi,
+    22 Oct 2026). Lands in the same inbox, page and accept flow as a
+    price answering a customer's request."""
+    name: str = Field(..., min_length=2, max_length=80)
+    phone: Optional[str] = Field(None, max_length=40)
+    email: Optional[str] = Field(None, max_length=200)
+    description: str = Field(..., min_length=2, max_length=2000)
+    gig_id: Optional[str] = None
+    price: Optional[float] = Field(None, gt=0, le=10_000_000)
+    lines: list[Line] = Field(default_factory=list, max_length=20)
+    note: str = Field("", max_length=1000)
+    valid_days: int = Field(14, ge=1, le=90)
+    lang: Literal["en", "he"] = "he"
+
+
+@router.post("/businesses/{business_id}/quotes")
+async def send_quote(business_id: str, body: NewQuote, user=Depends(verify_token)):
+    from utils.business_access import business_access
+    biz = await business_access(db, business_id, user, "orders")
+    email = (body.email or "").strip().lower() or None
+    if email and not _EMAIL.match(email):
+        raise HTTPException(status_code=400, detail="Please check the email address")
+    gig = {}
+    if body.gig_id:
+        gig = await db.marketplace_gigs.find_one({"_id": body.gig_id, "business_id": business_id}) or {}
+        if not gig:
+            raise HTTPException(status_code=404, detail="Listing not found")
+    now = datetime.now(UTC)
+    q = {
+        "_id": str(uuid.uuid4()), "gig_id": body.gig_id or "", "business_id": business_id, "source": "business",
+        "provider_user_id": biz.get("owner_user_id"), "customer_user_id": None,
+        "description": body.description.strip(), "photos": [], "preferred_date": None, "area": None,
+        "name": body.name.strip(), "phone": (body.phone or "").strip() or None, "email": email,
+        "lang": body.lang, "status": "quoted", "answers": [],
+        "quote": _priced(body.price, body.lines, body.note, body.valid_days, now),
+        "track_token": secrets.token_urlsafe(16), "created_at": now.isoformat(), "updated_at": now.isoformat(),
+    }
+    await db.quote_requests.insert_one(q)
+    await _email_customer(q, gig or {"provider_user_id": q["provider_user_id"]}, biz, "quoted")
+    q["_biz_name"] = biz.get("name") or ""
+    return _row(q, {q["gig_id"]: gig.get("title") or ""})
+
+
+class Line(BaseModel):
+    label: str = Field(..., min_length=1, max_length=80)
+    amount: float = Field(..., gt=0, le=10_000_000)
+
+
+def _priced(price: Optional[float], lines: list[Line], note: str, valid_days: int, now: datetime) -> dict[str, Any]:
+    """The quote as stored. With lines, the price IS their total, so the
+    breakdown the customer sees always adds up to what they accept."""
+    if lines:
+        price = sum(ln.amount for ln in lines)
+    if not price:
+        raise HTTPException(status_code=422, detail="Add a price")
+    return {"price": round(price, 2), "currency": "ILS", "note": note.strip(),
+            "lines": [{"label": ln.label.strip(), "amount": round(ln.amount, 2)} for ln in lines],
+            "valid_until": (now.date() + timedelta(days=valid_days)).isoformat(), "at": now.isoformat()}
 
 
 class Reply(BaseModel):
     action: Literal["quote", "decline"]
     price: Optional[float] = Field(None, gt=0, le=10_000_000)
+    lines: list[Line] = Field(default_factory=list, max_length=20)
     note: str = Field("", max_length=1000)
     valid_days: int = Field(14, ge=1, le=90)
 
@@ -254,11 +353,7 @@ async def reply_quote(quote_id: str, body: Reply, user=Depends(verify_token)):
         raise HTTPException(status_code=409, detail="The customer has already answered")
     now = datetime.now(UTC)
     if body.action == "quote":
-        if not body.price:
-            raise HTTPException(status_code=422, detail="Add a price")
-        quote = {"price": round(body.price, 2), "currency": "ILS", "note": body.note.strip(),
-                 "valid_until": (now.date() + timedelta(days=body.valid_days)).isoformat(), "at": now.isoformat()}
-        sets = {"status": "quoted", "quote": quote}
+        sets = {"status": "quoted", "quote": _priced(body.price, body.lines, body.note, body.valid_days, now)}
         event = "quoted"
     else:
         sets = {"status": "declined", "decline_note": body.note.strip()}
@@ -267,6 +362,7 @@ async def reply_quote(quote_id: str, body: Reply, user=Depends(verify_token)):
     q.update(sets)
     gig, biz = await _gig_biz(q)
     await _email_customer(q, gig, biz, event)
+    q["_biz_name"] = biz.get("name") or ""
     return _row(q, {q["gig_id"]: gig.get("title") or ""})
 
 

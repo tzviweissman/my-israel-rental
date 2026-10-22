@@ -14,10 +14,18 @@ import { money } from '../utils/currency';
 
 export default function QuoteTrackPage() {
   const { token } = useParams();
-  const { t, i18n } = useTranslation();
+  const { i18n } = useTranslation();
   const [d, setD] = useState(null);
   const [busy, setBusy] = useState('');
-  const lang = String(i18n.language || 'en').split('-')[0];
+  // A price the business sent first is shown in the language it was written
+  // in (Hebrew loads on demand, i18n.js); a customer's own request follows the site.
+  const [langReady, setLangReady] = useState(false);
+  const lang = (d && d.from_business && d.lang) || String(i18n.language || 'en').split('-')[0];
+  const t = i18n.getFixedT(lang);
+  useEffect(() => {
+    if (!d) return;
+    i18n.loadLanguages(lang).then(() => setLangReady(true), () => setLangReady(true));
+  }, [d && lang]); // eslint-disable-line react-hooks/exhaustive-deps
   const load = useCallback(() => axios.get(`${API}/marketplace/quotes/track/${encodeURIComponent(token)}`)
     .then(({ data }) => setD(data)).catch(() => setD(false)), [token]);
   useEffect(() => { document.body.classList.add('orders-bare'); return () => document.body.classList.remove('orders-bare'); }, []);
@@ -32,7 +40,7 @@ export default function QuoteTrackPage() {
     } catch (err) { toast.error(err?.response?.data?.detail || t('quote.failed', 'Could not send. Try again.')); } finally { setBusy(''); }
   };
 
-  if (d === null) return <div className="py-24 text-center"><Loader2 className="animate-spin inline" size={20} /></div>;
+  if (d === null || (d && !langReady)) return <div className="py-24 text-center"><Loader2 className="animate-spin inline" size={20} /></div>;
   if (d === false) return <div className="max-w-md mx-auto px-4 py-24 text-center"><h1 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('bookingTrack.badLink', 'This link no longer works')}</h1></div>;
   const biz = (lang === 'he' && d.business.name_he) || d.business.name;
   const title = (lang === 'he' && d.gig_title_he) || d.gig_title;
@@ -45,13 +53,21 @@ export default function QuoteTrackPage() {
   };
   return (
     <div className="min-h-screen" style={{ background: 'var(--bg)' }} data-testid="quote-track-page" data-status={d.status}>
-      <main className="max-w-md mx-auto px-4 py-10">
-        <p className="text-xs uppercase tracking-wide" style={{ color: 'var(--brand-muted)' }}>{t('quote.yourRequest', 'Your quote request to')}</p>
+      <main className="max-w-md mx-auto px-4 py-10" dir={lang === 'he' ? 'rtl' : 'ltr'} lang={lang}>
+        <p className="text-xs uppercase tracking-wide" style={{ color: 'var(--brand-muted)' }}>{d.from_business ? t('quoteSend.priceFrom', 'A price from') : t('quote.yourRequest', 'Your quote request to')}</p>
         <h1 className="text-xl font-semibold" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }} dir="auto">{biz}</h1>
         <section className="mt-5 rounded-2xl border bg-white p-5" style={{ borderColor: 'var(--brand-border)' }}>
           <p className="inline-flex items-center gap-2 font-semibold" style={{ color: 'var(--ink)' }} data-testid="quote-status"><Calculator size={17} /> {STATUS[d.status] || d.status}</p>
           {d.status === 'quoted' || d.status === 'accepted' || d.status === 'declined_by_customer' ? (
             <div className="mt-3 rounded-xl p-4" style={{ background: '#F9FAFB' }}>
+              {(d.quote.lines || []).length > 0 && (
+                <ul className="text-sm mb-2 space-y-1" style={{ color: 'var(--ink)' }} data-testid="quote-lines-view">
+                  {d.quote.lines.map((l, i) => (
+                    <li key={i} className="flex justify-between gap-3"><span dir="auto">{l.label}</span><span className="tabular-nums shrink-0">{money(l.amount, d.quote.currency || 'ILS')}</span></li>
+                  ))}
+                  <li className="border-t pt-1 text-xs font-semibold" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }}>{t('quoteSend.total', 'Total')}</li>
+                </ul>
+              )}
               <p className="text-2xl font-bold tabular-nums" style={{ color: 'var(--ink)' }} data-testid="quote-price">{money(d.quote.price, d.quote.currency || 'ILS')}</p>
               {d.quote.note && <p className="text-sm mt-1 whitespace-pre-line" dir="auto" style={{ color: 'var(--ink)' }}>{d.quote.note}</p>}
               {d.quote.valid_until && <p className="text-xs mt-1" style={{ color: 'var(--brand-muted)' }}>{t('quote.validUntil', 'Valid until {{d}}', { d: d.quote.valid_until })}</p>}
@@ -69,7 +85,7 @@ export default function QuoteTrackPage() {
             </div>
           ) : null}
           <div className="mt-4 text-sm" style={{ color: 'var(--ink)' }}>
-            <p className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>{title}</p>
+            {title && <p className="text-xs font-semibold" style={{ color: 'var(--brand-muted)' }}>{title}</p>}
             <p className="whitespace-pre-line mt-1 text-start" dir="auto">{d.description}</p>
             {(d.preferred_date || d.area) && <p className="text-xs mt-1" style={{ color: 'var(--brand-muted)' }}>{[d.preferred_date, d.area].filter(Boolean).join(' · ')}</p>}
             {d.photos.length > 0 && (
@@ -77,7 +93,7 @@ export default function QuoteTrackPage() {
             )}
           </div>
         </section>
-        <p className="text-xs mt-6 text-center" style={{ color: 'var(--brand-muted)' }}>{t('quote.keep', 'Keep this page: the price appears here.')}</p>
+        {!d.from_business && <p className="text-xs mt-6 text-center" style={{ color: 'var(--brand-muted)' }}>{t('quote.keep', 'Keep this page: the price appears here.')}</p>}
       </main>
     </div>
   );
