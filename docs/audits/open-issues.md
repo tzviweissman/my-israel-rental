@@ -9,11 +9,19 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 ## Open
 
+- [Medium] Holidays: Sukkot fallback dates ended 3 Oct; if Hebcal is down the Sukkot booking calendar is all greyed out. First seen 22 Oct (site audit).
+- [Medium] Leads board shows customers' profile phone numbers to the business; decision needed. First seen 22 Oct (site audit).
+- [Low] Reorder: a send that errors leaves the run stuck on "sending" (suspected, needs database). First seen 22 Oct (site audit).
+- [Low] Dashboard checklist: "category" item points at a form with no category control (test-completeness-actions fails). First seen 22 Oct (site audit).
+- [Medium] Services marketplace: 14 basket.* strings missing from en.js and he.js, so Hebrew visitors see English on card quantity buttons. First seen 22 Oct (UI audit).
+- [Low] New dashboard panels use hardcoded hexes (#B45309 amber) instead of tokens. First seen 22 Oct (UI audit).
 - [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
 - [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
 
 ## Fixed
 
+- [Medium] Payment request page sent the business's phone to link holders. Fixed 22 Oct, d718eeed.
+- [Low] Jobs board area box was English for Hebrew visitors. Fixed 22 Oct, da0754f6.
 - [Low] KasherMyBnb: the "what we kasher" lists on the kitchen and pots pages are now a split price list (add-ons left, ticked parts right; on a phone the list first). 13 Oct.
 
 - [Medium] Subscriptions: a paying business can now see its plan and cancel it in Settings ("Your plan", shown only to a business with a paid plan). Fixed 13 Oct.
