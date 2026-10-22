@@ -2168,7 +2168,14 @@ def _products_for_order(gig: dict[str, Any]) -> list[dict[str, Any]]:
 
 async def _store_for_ordering(gig_id: str) -> tuple[dict[str, Any], dict[str, Any]]:
     gig = await db.marketplace_gigs.find_one({"_id": gig_id})
-    if not gig or (gig.get("gig_type") or "deliverable") != "store" or gig.get("status", "published") != "published":
+    # A store, or any other listing that has products: a business site's
+    # order button saves its order here before WhatsApp opens, and several
+    # sites (The Whipped Cup, LS Fruit Platter, RS Modest, L.A. Cholent,
+    # Michal Simkin) are service listings that also sell products (Tzvi,
+    # 22 Oct 2026: let the order form take any listing with products, rather
+    # than converting them to stores, which would change their listing page).
+    sells = (gig or {}).get("gig_type") == "store" or bool((gig or {}).get("products"))
+    if not gig or not sells or gig.get("status", "published") != "published":
         raise HTTPException(status_code=404, detail="This store is not taking orders")
     biz = await db.businesses.find_one({"_id": gig.get("business_id")}) if gig.get("business_id") else None
     if not biz or not biz.get("active", True):

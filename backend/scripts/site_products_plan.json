@@ -1,0 +1,58 @@
+{
+  "_note": "Products (and service tiers) each business site shows but its live listing lacks. Read by add_site_products.py. convert_to_store: the listing is not a store yet, so the order form (/api/marketplace/order-form/<gig>/orders) answers 404 until it is; only applied with --convert-to-store, a separate decision. images_from_tier copies that tier's own owner photos.",
+  "listings": [
+    {"label": "The Whipped Cup (rena-lipschitz)", "gig_id": "cbf185df-6652-4fc4-bd2d-0954b4d13731", "business_id": "e81cb0a0-901b-4525-91e1-58f5121ea59e", "convert_to_store": true,
+     "products": [
+      {"name": "Classic Cloud", "price": 40, "currency": "ILS", "group": "Jars", "description": "Original whipped coffee. One jar makes 3 to 4 coffees."},
+      {"name": "Caramel Cloud", "price": 48, "currency": "ILS", "group": "Jars", "description": "Whipped coffee and caramel. One jar makes 3 to 4 coffees."},
+      {"name": "Vanilla Cloud", "price": 48, "currency": "ILS", "group": "Jars", "description": "Whipped coffee and vanilla. One jar makes 3 to 4 coffees."},
+      {"name": "Cloud Bundle", "price": 220, "currency": "ILS", "group": "Packages", "description": "6 jars, monthly. Any 6 jars, mix and match."},
+      {"name": "Assorted", "price": 155, "currency": "ILS", "group": "Packages", "description": "4 jars, weekly. A mix of all three flavours, every week."},
+      {"name": "One Flavour", "price": 148, "currency": "ILS", "group": "Packages", "description": "4 jars, weekly. One flavour, 4 jars every week."},
+      {"name": "Try It Duo", "price": 75, "currency": "ILS", "group": "Packages", "description": "2 jars, starter. 2 jars, any flavours.", "images_from_tier": "Try it duo"}
+     ]},
+    {"label": "Bun Intended (aidy-yaniv)", "gig_id": "c42107a6-615e-45dc-8e87-7164a1cd6a87", "business_id": "9cf8b8ae-c4e8-432c-a040-2486316827d0", "convert_to_store": false,
+     "products": [
+      {"name": "Classic cinnamon, 4 piece box", "price": 55, "currency": "ILS", "group": "4 piece box", "description": "Four classic cinnamon buns. Pareve."},
+      {"name": "Espresso, 4 piece box", "price": 55, "currency": "ILS", "group": "4 piece box", "description": "Four espresso buns. Pareve."},
+      {"name": "Lotus, 4 piece box", "price": 65, "currency": "ILS", "group": "4 piece box", "description": "Four Lotus buns. Pareve."},
+      {"name": "Chocolate, 4 piece box", "price": 65, "currency": "ILS", "group": "4 piece box", "description": "Four chocolate buns. Pareve."},
+      {"name": "Classic cinnamon, 8 piece box", "price": 100, "currency": "ILS", "group": "8 piece box", "description": "Eight classic cinnamon buns. Pareve."},
+      {"name": "Espresso, 8 piece box", "price": 100, "currency": "ILS", "group": "8 piece box", "description": "Eight espresso buns. Pareve."},
+      {"name": "Lotus, 8 piece box", "price": 120, "currency": "ILS", "group": "8 piece box", "description": "Eight Lotus buns. Pareve."},
+      {"name": "Chocolate, 8 piece box", "price": 120, "currency": "ILS", "group": "8 piece box", "description": "Eight chocolate buns. Pareve."},
+      {"name": "2 flavour mix, 8 piece box", "price": 120, "currency": "ILS", "group": "8 piece box", "description": "Eight buns, your choice of any 2 flavours. Pareve."}
+     ]},
+    {"label": "Ls Fruit Platter", "gig_id": "cbf66136-5504-4bf9-9c41-837cc9bd2d37", "business_id": "b6c83b18-f01f-41b7-af91-bf2a4c84febd", "convert_to_store": true,
+     "products": [
+      {"name": "Small", "price": 300, "currency": "ILS", "group": "Fruit platters", "description": "Small fruit platter.", "images_from_tier": "Small"},
+      {"name": "Medium", "price": 400, "currency": "ILS", "group": "Fruit platters", "description": "Medium fruit platter."},
+      {"name": "Large", "price": 500, "currency": "ILS", "group": "Fruit platters", "description": "Large fruit platter.", "images_from_tier": "Large"},
+      {"name": "Extra large", "price": 850, "currency": "ILS", "group": "Fruit platters", "description": "Extra large fruit platter.", "images_from_tier": "Extra large"}
+     ]},
+    {"label": "RS Modest Activewear (ravit-hen)", "gig_id": "ffb66390-ee89-48c0-9b8d-f707057d64e4", "business_id": "db9cba64-5a2f-4da3-a2f3-19fd0c88fc32", "convert_to_store": true,
+     "products": [
+      {"name": "Premium Modest Sports Skirt", "price": 320, "currency": "ILS", "description": "Premium sports skirt with built-in leggings.", "images_from_tier": "Premium Modest Sports Skirt"}
+     ]},
+    {"label": "Michal Simkin (wig salon and academy)", "gig_id": "8d16bfc0-9da6-4e5d-8c94-a0057cdf247c", "business_id": "946c8789-4777-4d41-b126-d6730a769fe5", "convert_to_store": true,
+     "products": [
+      {"name": "Custom wig consultation", "price": 100, "currency": "ILS", "group": "At the salon", "description": "At the salon in Bet Shemesh. Sunday to Thursday, 10 to 2, by appointment.", "images_from_tier": "Custom wig consultation"},
+      {"name": "Academy · Styling Mastery", "price": 8000, "currency": "ILS", "group": "The Academy", "description": "Ten in-depth lessons: curls, blow-dry techniques, volume, tool control. Starts 3 November 2026, Sunday and Tuesday mornings at 10:00."},
+      {"name": "Academy · Cutting Mastery", "price": 8000, "currency": "ILS", "group": "The Academy", "description": "Nine advanced lessons: wig construction, weight, balance, natural flow. Starts 3 November 2026, Sunday and Tuesday mornings at 10:00."},
+      {"name": "Academy · both courses", "price": 12000, "currency": "ILS", "group": "The Academy", "description": "Styling Mastery and Cutting Mastery together, ₪16,000 separately. Sign up before chag and the toolkit, worth ₪3,000, is free."}
+     ]},
+    {"label": "L.A. Cholent", "gig_id": "637d78ae-abc0-432d-9506-2a739e320f5e", "business_id": "fe453110-5383-4be0-9fac-afb105036047", "convert_to_store": true,
+     "products": [
+      {"name": "Medium", "price": 100, "currency": "ILS", "description": "Feeds 4-6 people", "images_from_tier": "Medium"},
+      {"name": "Large", "price": 180, "currency": "ILS", "description": "Feeds 8-12 people", "images_from_tier": "Large"},
+      {"name": "Extra Large / Kiddush", "price": 250, "currency": "ILS", "description": "Sizes are customizable depending on amount of guests.", "images_from_tier": "Extra Large / Kiddush"}
+     ]},
+    {"label": "NOA LEVI (home styling), services as tiers", "gig_id": "5885df8d-7bd6-43d9-af01-273ec2108a0b", "business_id": "6981e93f-73ba-4f4c-b2d9-c5374994f9fe", "convert_to_store": false,
+     "tiers": [
+      {"name": "Closet organizing", "price": 160, "currency": "ILS", "description": "Per hour, accessories not included."},
+      {"name": "Home organizing", "price": 160, "currency": "ILS", "description": "Per hour, accessories not included."},
+      {"name": "Home styling", "price": 160, "currency": "ILS", "description": "Per hour, accessories not included."},
+      {"name": "Personal shopping", "price": 160, "currency": "ILS", "description": "Per hour, accessories not included."}
+     ]}
+  ]
+}
