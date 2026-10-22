@@ -146,6 +146,8 @@ async def record_sale(business_id: str, payload: CounterSaleIn, user=Depends(ver
         "track_token": secrets.token_urlsafe(16),
     }
     await db.store_orders.insert_one(doc)
+    from .reorder import in_background, products_sold
+    in_background(products_sold(business_id, doc.get("gig_id"), lines))
     logger.info("[counter] sale: business=%s order=%s total=%s", business_id, doc["_id"], total)
     return _public(doc)
 

@@ -2458,6 +2458,9 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         "track_token": secrets.token_urlsafe(16),
     }
     await db.store_orders.insert_one(doc)
+    # "Every N sold" reorders (reorder.py), in the background.
+    from .reorder import in_background, products_sold
+    in_background(products_sold(biz["_id"], doc.get("gig_id"), doc.get("lines") or []))
     from .birthdays import remember
     await remember(biz["_id"], payload.customer_email, payload.customer_name, payload.birthday, None, "order")
     doc = await auto_assign(doc, biz)

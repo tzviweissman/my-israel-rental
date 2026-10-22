@@ -79,6 +79,10 @@ async def _after_change(gig_id: str, taken: list[dict[str, Any]]) -> None:
         if not p or p.get("stock") is None:
             continue
         left, before = int(p["stock"]), int(p["stock"]) + t["qty"]
+        # Reorder rules on this product (reorder.py), in the background:
+        # a sale never waits on, or fails because of, a supplier.
+        from .reorder import in_background, stock_dropped
+        in_background(stock_dropped(gig_id, gig.get("business_id"), p, before, left))
         if left <= 0:
             await db.marketplace_gigs.update_one({"_id": gig_id, "products.id": p["id"]}, {"$set": {"products.$.in_stock": False}})
             alerts.append((p.get("name") or "", 0))
