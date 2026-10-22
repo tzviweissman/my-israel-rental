@@ -293,6 +293,7 @@ BOOK = f'''  <form id="form" novalidate>
 BOOK_JS = r'''<script>
 (function () {
   var WA = '972556730875', RATE = 160, MAXH = 8;
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api', GIG = '5885df8d-7bd6-43d9-af01-273ec2108a0b';
   var SERVICES = { closet: 'Closet organizing', home: 'Home organizing', styling: 'Home styling', shopping: 'Personal shopping' };
   var STAGE = { closet: 'drawer', home: 'linen', styling: null, shopping: null };
   var CAP = { drawer: "Our work: a clothes drawer", linen: "Our work: a linen cupboard" };
@@ -389,9 +390,19 @@ BOOK_JS = r'''<script>
     var total = RATE * hrs, lines = ['Hi Noa, I would like to book:', '• ' + SERVICES[svc] + ', ' + hrLabel() + ' at ₪' + RATE + ' an hour', 'Where: ' + city(), 'When: ' + nice(v('day')) + ', ' + time + ' to ' + endOf(time)];
     if (v('note')) lines.push('To organize: ' + v('note'));
     lines.push('Total: ₪' + total + ' (accessories not included)', 'Name: ' + v('me') + ', ' + v('ph'));
-    var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(lines.join('\n'));
+    var text = lines.join('\n'), msg = lines.slice(1, -1).join('; ');
     phase = 'open'; setSend();
-    var tab = window.open(url, '_blank'); if (!tab) location.href = url;
+    // saved on MyIsraelRental first (page rules 3k); the WhatsApp tab opens first so the pop-up blocker allows it
+    var tab = window.open('', '_blank');
+    var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ tier_name: SERVICES[svc], preferred_date: v('day'), time_slot: time, guest_name: v('me'), contact_phone: v('ph'), message: msg, lang: 'en' }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
+      .catch(function (err) { console.warn('booking not saved', err); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      if (saved && saved.track_path) text += '\n\nFollow the booking: https://myisraelrental.com' + saved.track_path;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+    });
     toast();
     setTimeout(function () { phase = ''; setSend(); }, 1400);
   });

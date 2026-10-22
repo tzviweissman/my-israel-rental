@@ -128,10 +128,11 @@ R3.14 n/a: the page shows no loud prices as a selling device
 R3k.7 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3k.8 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3k.6 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
+R3k.9 pass: check-site SAVE passes: Step 3 now asks for a name and phone and the Send button POSTs to /api/marketplace/gigs/4db9f8d5-.../quote-requests with description (what, date, where, occasion, colours, name and phone), preferred_date, area, name, phone, lang he or en; WhatsApp opens first and carries the tracking link; a failed save still opens WhatsApp
 R3.15 pass: the quote card and phone/WhatsApp are on the page
 R7.1 pass: hand build; one direction chosen in CONCEPT.md
 R8.5 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
-R0b.13 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
+R0b.13 pass: the request is saved with a tracking link (/quotes/...) before WhatsApp opens, and the message carries that link (see R3k.9)
 R3l.1 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3l.2 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3l.3 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food

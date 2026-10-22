@@ -141,10 +141,11 @@ R3.14 pass: loud prices (2 rem) only where prices exist; this is a priced servic
 R3k.7 pass: check-site FLOW walks the three steps on book.html: Step 1 your nails, Step 2 day and time, Step 3 details, total beside, Back button
 R3k.8 n/a: one booking, no basket lines to remove
 R3k.6 n/a: no basket between pages; a service row passes ?service= to the booking page
+R3k.9 pass: check-site SAVE passes: the Send step POSTs to /api/marketplace/gigs/a6e275b1-.../book (appointment listing) with tier_name mapped to the live tier names (Gel Nails, Gel nails with removal, Gel Removal, Nail art / French Nails / Gradient nails), preferred_date, time_slot HH:MM from her real hours, guest_name, contact_phone, message; the WhatsApp tab opens first and is filled after the save, with the tracking link; if the save fails WhatsApp still opens and the failure is console-logged
 R3.15 pass: what the brief asks (book) has the booking page; contact has numbers and hours; visit has hours and the place
 R7.1 pass: CONCEPT.md names the pick (the Own idea) and why; no options page was put to anyone
 R8.5 pass: followed every main button: all go to book.html, her booking page; WhatsApp is the quiet second route
-R0b.13 n/a: a booking is a request sent as a WhatsApp message; these builds keep no order record or tracking page to save first
+R0b.13 pass: the booking is saved with a tracking link (/bookings/track/...) before WhatsApp opens, and the message carries that link (see R3k.9)
 R3l.1 n/a: no family of similar items; the four services are different things
 R3l.2 n/a: no family of similar items with choices on this site
 R3l.3 n/a: no family of similar items with choices on this site

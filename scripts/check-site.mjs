@@ -319,7 +319,7 @@ for (const url of urls) {
       else if (res.total && !res.sent.replace(/\s/g, '').includes(res.total.replace(/\s/g, ''))) fail(url, 'FLOW', `the message does not carry the total the page shows (${res.total})`);
       else if (!/wa\.me|whatsapp/i.test(res.sent + '') && !res.sent) fail(url, 'FLOW', 'no WhatsApp message');
       if (res.sent) {
-        const saved = await page.evaluate(() => (window.__posts || []).some((p) => /\/api\//.test(p.u) && /order|booking|quote|enquir|request/i.test(p.u) && p.t <= (window.__sentAt || Infinity)));
+        const saved = await page.evaluate(() => (window.__posts || []).some((p) => /\/api\//.test(p.u) && /order|book|quote|enquir|request/i.test(p.u) && p.t <= (window.__sentAt || Infinity)));
         if (!saved) fail(url, 'SAVE', 'the order goes straight to WhatsApp without being saved to MyIsraelRental first (POST it through the order form, then open WhatsApp; rules 3k)');
       }
     }

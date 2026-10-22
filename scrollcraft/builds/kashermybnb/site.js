@@ -21,14 +21,14 @@
     if (live['Kashering of Pots, Cutlery & Utensils'] > 0) PRICE.pots = live['Kashering of Pots, Cutlery & Utensils'];
   } catch (e) { /* the prices as written */ }
   var NAMES = { kitchen: 'Whole kitchen', pots: 'Pots, cutlery and utensils', oven: 'Oven cleaning and kashering', pan: 'New frying pan' };
-  var TIMES = { any: 'Any time', morning: 'Morning', afternoon: 'Afternoon', evening: 'Evening' };
-  var EMPTY = { kitchen: false, pots: false, oven: false, pans: 0, date: '', time: 'any', place: '', city: '', address: '', name: '', phone: '', notes: '' };
+  var EMPTY = { track: '', kitchen: false, pots: false, oven: false, pans: 0, date: '', time: '', place: '', city: '', address: '', name: '', phone: '', notes: '' };
 
   function load() {
     var o = {};
     try { o = JSON.parse(sessionStorage.getItem(KEY) || '{}') || {}; } catch (e) { o = {}; }
     var out = {};
     Object.keys(EMPTY).forEach(function (k) { out[k] = o[k] !== undefined ? o[k] : EMPTY[k]; });
+    if (!/^\d\d:\d\d$/.test(out.time)) out.time = '';  // an older choice (Morning, Evening) is not a start time
     return out;
   }
   function save(o) { try { sessionStorage.setItem(KEY, JSON.stringify(o)); } catch (e) { /* private window: the page still works */ } }
@@ -44,10 +44,10 @@
   function total(o) { return lines(o).reduce(function (s, x) { return s + x[1]; }, 0); }
   function money(n) { return '$' + n; }
   function when(o) {
-    if (!o.date) return o.time && o.time !== 'any' ? TIMES[o.time] : '';
+    if (!o.date) return o.time || '';
     var d = new Date(o.date + 'T12:00:00');
     var day = d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
-    return day + (o.time && o.time !== 'any' ? ', ' + TIMES[o.time].toLowerCase() : '');
+    return day + (o.time ? ' at ' + o.time : '');
   }
   function where(o) {
     if (o.place === 'jerusalem') return 'Jerusalem' + (o.address ? ', ' + o.address : '');
@@ -89,7 +89,20 @@
     if (o.notes) m.push('Notes: ' + o.notes);
     m.push('Name: ' + o.name);
     if (o.phone) m.push('Phone: ' + o.phone);
+    if (o.track) m.push('', 'Follow the booking: ' + o.track);
     return m.join('\n');
+  }
+  // Saved on MyIsraelRental before WhatsApp opens (page rules 3k). The start times are the ones in their listing
+  // (Sunday to Friday evenings, 18:00 to 23:00), and the booking is made on the tier the visitor chose.
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api', GIG = 'd2a374fd-a0cd-49ca-9c8d-f7ff258b838c';
+  var TIER = { kitchen: 'Kashering Kitchen', pots: 'Kashering of Pots, Cutlery & Utensils' };
+  function submit(o) {
+    var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ tier_name: o.kitchen ? TIER.kitchen : TIER.pots, preferred_date: o.date, time_slot: o.time, guest_name: o.name, contact_phone: o.phone, message: message(o).split('\n').slice(1).join('\n'), lang: 'en' }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
+      .catch(function (err) { console.warn('booking not saved', err); return null; })
+      .then(function (j) { return j && j.track_path ? 'https://myisraelrental.com' + j.track_path : ''; });
+    return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(''); }, 5000); })]);
   }
   function waLink(o) { return 'https://wa.me/' + WA + '?text=' + encodeURIComponent(message(o)); }
 
@@ -117,7 +130,7 @@
     else location.reload();
   });
 
-  window.KMB = { load: load, save: save, lines: lines, total: total, money: money, when: when, where: where, paint: paintSummary, waLink: waLink, message: message, PRICE: PRICE, NAMES: NAMES, TIMES: TIMES };
+  window.KMB = { load: load, save: save, lines: lines, total: total, money: money, when: when, where: where, paint: paintSummary, waLink: waLink, submit: submit, message: message, PRICE: PRICE, NAMES: NAMES };
 })();
 // the phone's booking dock steps aside while the footer is on screen, so it never covers the footer text
 (function () {
