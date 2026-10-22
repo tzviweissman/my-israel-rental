@@ -796,7 +796,12 @@ const GigDetail = () => {
           );
         })()}
 
-        <div className="grid md:grid-cols-3 gap-8">
+        {/* grid-cols-1, not the implicit track: on a phone the single implicit
+            column is `auto`, which grows to the cover photo's own width (its
+            aspect ratio and max height make it wider than the screen), so a
+            portrait flyer was cut off at the side (American Crust, 22 Oct
+            2026). grid-cols-1 is minmax(0, 1fr) and keeps it to the screen. */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* min-w-0 is load-bearing. A grid item defaults to
               `min-width: auto`, so it refuses to shrink below its
               content's intrinsic width — and the thumbnail strip below is
