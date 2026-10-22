@@ -38,22 +38,22 @@ R3g.13 pass: 1440x900 and 390x844 first screens: one picture (the ring), the hea
 R3b.1 pass: first screen answers what (American bagel and pizza dough), where (Ramat Eshkol, Jerusalem), trust (their own line and flyer words) and what to do (Add on each card)
 R3b.2 pass: the prices touch the Add buttons on each card; kosher is stated once on the home page (delivery band tile), once on the shop (facts line) and not on the contact page: at most two per page
 R3b.3 pass: first screen: the header Order is outline, the two Add buttons are the only solid actions, one per card with the same label; the phone bar and closing band repeat Order
-R3h.1 n/a: food-shop sells from the first screen (3t): the opening shares the screen with both product cards, so the ring is about 13 percent of the 1440x900 first screen, not 70. Something does happen (see R3n.5). Judgement call listed for Tzvi in the report
-R3n.1 n/a: same reason as R3h.1: the strongest photo (the everything bagels) fills a 460 px ring and the left half of the kitchen section, not half the first screen, because both cards must be on the first screen. Listed for Tzvi in the report
+R3h.1 pass: the home page opens on a full-screen film (assets/opening.mp4, 11.8 s, Tzvi approved the three stills and the clips on 22 Oct): check-site OPENING passes (picture and a playing film on the first screen); the two dough cards are on the second screen (BUY passes)
+R3n.1 pass: the strongest picture, their everything bagels (the Brag chapter, made from their own photo p03), fills the whole first screen at the end of the film and is its poster
 R3n.2 pass: the ring: raw bagel dough drops in as Boil lands and their baked everything bagels wipe over it as Bake lands, then the basket counts what you will bake; only this business has those three words and those two pictures
 R3n.3 pass: choosing the pizza dough turns the whole shop stage from mustard to black with its own photo, name, price and makes line (check-motion passes); the basket text and phone bar change with what is added
 R3n.4 pass: compared the first screen with Best Bean Best Cup (docs/inspo/awwwards-anatomy-2026-10-22/food/bestbean-colour-per-product.webp) and the Mobbin Touchy Coffee shop cards: same buy-from-the-top pattern, ours adds an opening event; not plainly weaker
 R3n.5 pass: you land and Boil. Bake. Brag. drop in word by word while their raw dough becomes a baked bagel in a ring; checked as frames every 150 ms for 4 seconds: raw dough ring with ripples, wipe to baked, settle, line fades in
 R3g.15 pass: the opening uses their own photos at their own size (check-fits: no photo over 1.35x); the ring crop of the flyer render is shown at about 0.8x and the baked photo at 0.6x; nothing generated
-R3h.2 n/a: no film: the opening is built in code from their own photos (no generation allowed on this task)
-R3h.3 n/a: no film: the opening is built in code from their own photos (no generation allowed on this task)
-R3h.5 n/a: no film: the opening is built in code from their own photos (no generation allowed on this task)
-R3h.7 n/a: no film: the opening is built in code from their own photos (no generation allowed on this task)
-R3h.8 n/a: no film: the opening is built in code from their own photos (no generation allowed on this task)
-R3h.11 n/a: no film and no generated stills: every picture is the owner own photo
-R3h.13 n/a: no film: the opening is built in code from their own photos (no generation allowed on this task)
-R3h.14 n/a: no film: the opening is built in code from their own photos (no generation allowed on this task)
-R3h.17 n/a: no film: the opening is built in code from their own photos (no generation allowed on this task)
+R3h.2 pass: walked at 1.5, 5.6, 7.8 and 11.5 s: their raw dough rings boil, bake on the tray, and end as the everything bagels on the board with the line and the Order your dough button; each step is a real step of using their dough
+R3h.3 pass: 1920x1080 H.264 at full screen (object-fit cover), looked at on 1440x900 and 390x844; not shrunk, masked or in a column
+R3h.5 pass: the chapter words are Boil. / Bake. / Brag. (one word each), at the left edge on a soft left shade, at most 10svh a line so the three stay under a third of the screen height (6.5rem cap, 15vw on a phone); looked at every chapter: they never cover the pot, the tray or the bagels
+R3h.7 pass: the two joins are chapter dissolves of 0.35 s between different scenes (pot, oven, board); frames either side of both joins looked at, no jump inside a scene
+R3h.8 pass: after the dark film the dough cards sit on the bright mustard band, a bold change of mood
+R3h.11 pass: measured every 0.5 s: whole frame at least 55, average 76, middle third at least 72; the bagels are the brightest thing in every chapter
+R3h.13 pass: one motion per clip: the ring drops in and the rings bob (Boil), the tray bakes with the glowing elements (Bake), steam rises and the glow breathes (Brag); contact sheets at 4 fps looked at
+R3h.14 pass: the dough rings and the bagels stay whole and recognisable through every clip (contact sheets c1, c2, c3 in gen/film); on a phone the film is cropped at 62% so the bagels stay in frame
+R3h.17 n/a: the page does not use the giant-name-then-film device; the words sit over the film on its left shade (R3h.5)
 
 ## 3. Sections and worlds
 R3.12 pass: hero (opening), features (the two cards and the kitchen section with Pareve; Premium quality and Fresh and ready to use show on the pizza stage in the shop), a closing call-to-action band with Order, the phone numbers and the giant name
@@ -99,7 +99,7 @@ R0b.12 n/a: nothing published yet
 
 ## 4. Photos and media
 R8.1 n/a: the two products come from different sources (their flyer render of the bagel pack, their photo of the pizza tub), so they do not read as one shoot; both kept as honest crops until product hero shots are made, listed in the report
-R8.6 n/a: no generation on this task: the pack and tub pictures are crops, the hero-shot candidates and their starting photos are listed in the report
+R8.6 pass: the Brag still is a product hero shot from their own photo: one product (their everything bagels) on a board from its own world, its own seeds around it, one mustard colour story, one warm light, still; the film ends on it
 R8.2 pass: every image is the owner own: p02 (bagel pack flyer render), p03 (everything bagels), p05 (tubs) and p01 (logo); nothing generated, no stock
 R3p.7 pass: the two doughs are shown the same way on the card, the stage and the picker: photo, name, makes line, price, Add; tapping either picker changes the big photo
 R3h.12 pass: each dough is the same object in the ring, card, stage and picker (one crop each); the baked-bagels and tubs-in-a-row photos are labelled as in use pictures, not the same item
