@@ -152,32 +152,33 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
 .pr::after { content: ''; position: absolute; left: 0; right: 0; bottom: -.2em; height: .09em; background: var(--mustard); }
 .sym { font-size: .55em; }
 
-/* the opening (rule 3h): a full-screen film, their dough boiled, baked and bragged about; each word lands on its chapter */
-.open { position: relative; height: 100svh; min-height: 520px; overflow: hidden; background: var(--night); color: var(--cream); }
-.film { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.open::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgba(20, 20, 20, .88) 0%, rgba(20, 20, 20, .72) 34%, rgba(20, 20, 20, .3) 52%, rgba(20, 20, 20, 0) 68%), linear-gradient(0deg, rgba(20, 20, 20, .6), rgba(20, 20, 20, 0) 35%); }
+/* the opening (rule 3h): their dough boiled, baked and bragged about, a full-screen film the scroll drives; each word lights on its chapter */
+.open { position: relative; height: 380vh; background: var(--night); color: var(--cream); }
+.open .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+#cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.open .stage::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgba(20, 20, 20, .88) 0%, rgba(20, 20, 20, .72) 34%, rgba(20, 20, 20, .3) 52%, rgba(20, 20, 20, 0) 68%), linear-gradient(0deg, rgba(20, 20, 20, .6), rgba(20, 20, 20, 0) 35%); }
 .open .wrap { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 1.4rem; padding-top: var(--top-h); }
 .open h1 { font-size: clamp(3rem, min(10vw, 10svh), 6.5rem); line-height: .9; color: var(--cream); }
-.open h1 .w { display: block; }
+.open h1 .w { display: block; transition: color 400ms var(--out), opacity 400ms var(--out), transform 500ms var(--out); }
+.open .w1 { color: var(--mustard); }
+.open .w2, .open .w3 { opacity: .22; transform: translateX(-.15em); }
+.open.c2 .w1 { color: var(--cream); } .open.c2 .w2 { opacity: 1; transform: none; color: var(--mustard); }
+.open.c3 .w2 { color: var(--cream); } .open.c3 .w3 { opacity: 1; transform: none; color: var(--mustard); }
 .open .lede { margin: 0; font-size: 1.2rem; max-width: 24rem; color: var(--cream); }
 .open .end { display: grid; gap: 1.1rem; justify-items: start; }
 .open .btn { background: var(--mustard); color: var(--ink); }
-.open.playing h1 .w, .open.playing .end { opacity: 0; }
-.open.c1 .w1, .open.c2 .w2, .open.c3 .w3 { animation: land 760ms var(--out) both; }
-.open.c4 .end { animation: fadein 700ms var(--out) both; }
-.open.c1 .w1 { color: var(--mustard); } .open.c2 .w1 { color: var(--cream); } .open.c2 .w2 { color: var(--mustard); } .open.c3 .w2 { color: var(--cream); } .open.c3 .w3 { color: var(--mustard); }
-@keyframes land { from { opacity: 0; transform: translateY(-.35em) scale(1.12); filter: blur(7px); } to { opacity: 1; transform: none; filter: none; } }
-@keyframes fadein { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
-.pause { position: absolute; z-index: 2; right: var(--gutter); bottom: calc(1rem + env(safe-area-inset-bottom, 0px)); min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 1.5px solid rgba(254, 247, 229, .7); background: rgba(20, 20, 20, .35); color: var(--cream); font: 600 .9rem/1 var(--font-body); cursor: pointer; }
-.pause { transition: background 160ms var(--out), transform 160ms var(--out); } .pause:hover { background: rgba(20, 20, 20, .7); } .pause:active { transform: scale(.94); }
+.open .go { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
+.open .from { margin: 0; font: 600 1rem/1.35 var(--font-body); color: var(--cream); }
+.open .hint { position: absolute; z-index: 2; right: var(--gutter); bottom: 1.4rem; color: var(--cream); font: 600 .85rem/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; transition: opacity 300ms; }
 @media (max-width: 760px) {
-  .film { object-position: 62% 50%; }
-  .open::before { background: linear-gradient(0deg, rgba(20, 20, 20, .92) 0%, rgba(20, 20, 20, .8) 50%, rgba(20, 20, 20, .25) 80%); }
-  .open .wrap { justify-content: flex-end; padding-bottom: 5rem; }
+  .open { height: 340vh; }
+  .open .stage::before { background: linear-gradient(0deg, rgba(20, 20, 20, .92) 0%, rgba(20, 20, 20, .8) 50%, rgba(20, 20, 20, .25) 80%); }
+  .open .wrap { justify-content: flex-end; padding-bottom: 2.4rem; }
   .open h1 { font-size: clamp(3rem, 15vw, 4.4rem); }
   .open .lede { font-size: 1.05rem; }
+  .open .hint { display: none; }
 }
-@media (prefers-reduced-motion: reduce) { .open h1 .w, .open .end { animation: none !important; opacity: 1 !important; } }
+@media (prefers-reduced-motion: reduce) { .open { height: 100vh; height: 100svh; } .open .w2, .open .w3 { opacity: 1; transform: none; } .open .hint { display: none; } }
 
 /* the two products as cards, right under the opening: colour per product (mustard-light, night) */
 .buy { background: var(--mustard); padding: 0 var(--gutter) clamp(1.2rem, 3vh, 2rem); }
