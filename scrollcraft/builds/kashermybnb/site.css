@@ -273,3 +273,13 @@ a.extra:hover { border-color: var(--sc-accent); }
 /* a line added to the summary fades in instead of appearing in one frame */
 @keyframes lineIn { from { opacity: 0; translate: 0 6px; } to { opacity: 1; translate: 0 0; } }
 .lines li.is-new { animation: lineIn 320ms ease-out both; }
+
+/* the same closing footer as the home page (rule 3t.4, 22 Oct 2026) */
+.foot.big { display: block; background: #0F1A24; color: rgb(255 255 255 / 0.78); padding: clamp(4rem, 9vw, 7rem) var(--sc-gutter, 24px) 3rem; font-size: inherit; }
+.foot.big .last { margin: 0 0 var(--sc-6, 2.5rem); font: 700 clamp(2.4rem, 1.2rem + 4.4vw, 5.4rem)/1 var(--sc-font-display); letter-spacing: -0.035em; color: #fff; max-width: 14ch; }
+.foot.big .foot-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-5, 2rem); border-top: 1px solid rgb(255 255 255 / 0.2); padding-top: var(--sc-5, 2rem); }
+.foot.big .foot-nav { display: grid; gap: 0.5rem; align-content: start; font-size: 0.9rem; }
+.foot.big .foot-nav b { color: #fff; font-weight: 600; margin-bottom: 0.2rem; }
+.foot.big a { color: rgb(255 255 255 / 0.9); }
+@media (max-width: 860px) { .foot.big .foot-cols { grid-template-columns: 1fr; } }
+@media (max-width: 860px) { .eyebrow { font-size: 0.88rem; } .foot.big { padding-bottom: 7.5rem; } }

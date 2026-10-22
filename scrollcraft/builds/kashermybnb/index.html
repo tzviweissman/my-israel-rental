@@ -9,9 +9,13 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
+<meta name="site-category" content="service">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>KasherMyBnb · Kitchen kashering in Jerusalem and across Israel</title>
 <meta name="description" content="Kitchen kashering for vacation rentals, new homes and Pesach, in Jerusalem and across Israel. Whole kitchen $350, pots and cutlery $180. Expert mashgichim, following cRc guidelines. Since 2019.">
+<meta property="og:title" content="KasherMyBnb · Kitchen kashering in Jerusalem and across Israel">
+<meta property="og:description" content="Kitchen kashering for vacation rentals, new homes and Pesach, in Jerusalem and across Israel. Whole kitchen $350, pots and cutlery $180. Expert mashgichim, following cRc guidelines. Since 2019.">
+<meta property="og:image" content="assets/kitchen.webp">
 <link rel="icon" href="assets/logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -326,6 +330,31 @@
   @media (prefers-reduced-motion: reduce) {
     .card, .mark i, .tick, .tick svg, .buybar, .btn, .btn .ab, .btn .sw svg, .feat::after, #ready-list .tick, #ready-list .tick svg { transition: none !important; }
   }
+
+  /* ---- service category (rule 3t, 22 Oct 2026): light ground, services as named panels with one picture each, numbered steps, a places list ---- */
+  .kick2 { margin: 0 0 var(--sc-3); font: 600 0.875rem/1 var(--sc-font-text); letter-spacing: 0.12em; text-transform: uppercase; color: #801B16; }
+  .svc h2 { max-width: none; }
+  .svc-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--sc-4); margin-top: var(--sc-5); }
+  .svc-card { background: var(--sc-surface); border-radius: 14px; overflow: hidden; display: grid; grid-template-rows: auto 1fr; }
+  .svc-card img { width: 100%; height: auto; aspect-ratio: 16 / 9; object-fit: cover; object-position: 60% 80%; display: block; }
+  .svc-card img.cut { height: auto; object-fit: contain; background: #C9D9EA; mix-blend-mode: normal; object-position: 50% 50%; }
+  .svc-body { padding: 1.4rem 1.5rem 1.6rem; display: grid; gap: 0.6rem; align-content: start; justify-items: start; }
+  .svc-body p { margin: 0; line-height: 1.5; }
+  .svc-n { font: 600 0.8rem/1 var(--sc-font-text); letter-spacing: 0.12em; color: var(--sc-ink-soft); }
+  .svc-body h3 { margin: 0; font-size: clamp(1.6rem, 1.2rem + 1.4vw, 2.3rem); line-height: 1.05; }
+  .svc-price b { font: 700 1.5rem/1 var(--sc-font-display); margin-inline-end: 0.5rem; color: var(--sc-ink); }
+  .svc-body .btn { margin-top: 0.6rem; }
+  .stp { list-style: none; margin: var(--sc-5) 0 0; padding: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--sc-4); }
+  .stp li { border-top: 2px solid var(--sc-ink); padding-top: 0.9rem; display: grid; gap: 0.4rem; align-content: start; }
+  .stp i { font: normal 600 0.85rem/1 var(--sc-font-text); letter-spacing: 0.1em; color: var(--sc-ink-soft); }
+  .stp b { font: 600 1.35rem/1.1 var(--sc-font-display); }
+  .stp span { line-height: 1.45; color: var(--sc-ink-soft); }
+  .places { margin-top: var(--sc-4); display: grid; gap: 0.5rem; }
+  .places ul { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: 0.5rem 1.6rem; font: 600 1.4rem/1.2 var(--sc-font-display); }
+  .places small { color: var(--sc-ink-soft); }
+  @media (min-width: 861px) and (max-height: 800px) { .svc-card img { aspect-ratio: 3.2 / 1; } .svc-body { padding: 1rem 1.3rem 1.2rem; gap: 0.4rem; } .svc-body h3 { font-size: 1.6rem; } .svc.rest, #who.rest { padding-block: 1.6rem; } .svc h2, #who h2 { font-size: min(2.4rem, 6.5svh); } #who .asks li { padding: 0.8rem 1rem; } #who .nums b { font-size: 2.2rem; } #who .places ul { font-size: 1.1rem; } .svc-grid { margin-top: var(--sc-3); } }
+  @media (max-width: 860px) { .svc-grid { grid-template-columns: 1fr; } .stp { grid-template-columns: 1fr 1fr; } .svc-body { padding: 1.1rem 1.1rem 1.3rem; } }
+  @media (max-width: 480px) { .stp { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -351,8 +380,8 @@
       <div class="hero">
         <div class="hero-wash"></div>
         <div class="hero-top">
-          <h1>Kitchen kashering for rentals, in Jerusalem and <em>across Israel.</em></h1>
-          <p class="lede">We kasher your kitchen so you can settle in with confidence: fully prepared, strictly kosher and ready to use.</p>
+          <h1>Kitchen kashering <em>across Israel.</em></h1>
+          <p class="lede">For vacation rentals, new homes and Pesach, from Jerusalem.</p>
         </div>
         <div class="panel act">
           <a class="btn" href="book.html"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
@@ -380,14 +409,32 @@
     </div>
   </section>
 
-  <section class="pic pic--kitchen" id="features">
-    <img src="assets/kitchen.webp" alt="" width="2048" height="1152" loading="lazy">
-    <div class="shade shade--l"></div>
-    <div class="pic-copy" data-sc-in>
-      <p class="kick">Whole kitchen</p>
-      <h2>A whole kitchen, <em>$350.</em></h2>
-      <p class="line">About 2 hours, oven to hot plate.</p>
-      <a class="btn" href="book.html"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+  <section class="rest rest--white svc" id="features">
+    <div class="wrap">
+      <p class="kick2" data-sc-in>What we kasher</p>
+      <h2 data-sc-in>Two services, one price each.</h2>
+      <div class="svc-grid" data-sc-in>
+        <article class="svc-card">
+          <img src="assets/kitchen.webp" alt="A kitchen wall with oven, microwave, gas hob, countertop and sink" width="2048" height="1152" loading="lazy">
+          <div class="svc-body">
+            <p class="svc-n">01</p>
+            <h3>Whole kitchen</h3>
+            <p class="svc-price"><b>$350</b> about 2 hours</p>
+            <p>Oven (with racks), stovetop (electric or gas), microwave, countertops, sinks and faucets, hot plate. Pots, pans and cutlery are not included.</p>
+            <a class="btn" href="book.html"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+          </div>
+        </article>
+        <article class="svc-card" id="pots">
+          <img class="cut" src="assets/pots.webp" alt="Stainless steel pots, a colander and cutlery" width="1200" height="1200" loading="lazy">
+          <div class="svc-body">
+            <p class="svc-n">02</p>
+            <h3>Pots, cutlery and utensils</h3>
+            <p class="svc-price"><b>$180</b> about 1 hour</p>
+            <p>Stainless steel pots only; other materials cannot be kashered. Frying pans cannot be kashered; a new one is $15.</p>
+            <a class="btn" href="book.html"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+          </div>
+        </article>
+      </div>
     </div>
   </section>
 
@@ -411,14 +458,15 @@
     </div>
   </section>
 
-  <section class="pic pic--pots" id="pots">
-    <img src="assets/pots.webp" alt="Stainless steel pots, a colander and cutlery" width="1200" height="1200" loading="lazy">
-    <div class="shade shade--l"></div>
-    <div class="pic-copy" data-sc-in>
-      <p class="kick">Pots, cutlery and utensils</p>
-      <h2>Pots and cutlery, <em>$180.</em></h2>
-      <p class="line">About 1 hour. Stainless steel pots only; frying pans cannot be kashered, a new one is $15.</p>
-      <a class="btn" href="book.html"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
+  <section class="rest rest--white steps" id="how">
+    <div class="wrap">
+      <h2 data-sc-in>How it works.</h2>
+      <ol class="stp" data-sc-in>
+        <li><i>01</i><b>Choose</b><span>The whole kitchen, pots and cutlery, or both.</span></li>
+        <li><i>02</i><b>Pick a day</b><span>Send it on the booking page. Nothing to pay on this site.</span></li>
+        <li><i>03</i><b>We confirm</b><span>The day and time, with you on WhatsApp.</span></li>
+        <li><i>04</i><b>Kashered</b><span>By expert mashgichim, following cRc guidelines. Ready to use.</span></li>
+      </ol>
     </div>
   </section>
 
@@ -436,6 +484,7 @@
         <li><b>2 hrs</b><span>about, for a whole kitchen</span></li>
         <li><b>2</b><span>languages: English and Hebrew</span></li>
       </ul>
+      <div class="places" data-sc-in><b>Where we work</b><ul><li>Jerusalem</li><li>Tel Aviv</li><li>Herzliya</li><li>Across Israel</li></ul><small>Prices are for Jerusalem; elsewhere there may be a fee by distance.</small></div>
       <p class="who-line" data-sc-in><b>Done by expert mashgichim, following cRc guidelines.</b> We confirm the day and time with you on WhatsApp.</p>
     </div>
   </section>

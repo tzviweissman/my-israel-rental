@@ -119,3 +119,9 @@
 
   window.KMB = { load: load, save: save, lines: lines, total: total, money: money, when: when, where: where, paint: paintSummary, waLink: waLink, message: message, PRICE: PRICE, NAMES: NAMES, TIMES: TIMES };
 })();
+// the phone's booking dock steps aside while the footer is on screen, so it never covers the footer text
+(function () {
+  var f = document.querySelector('.foot.big'), d = document.querySelector('.dock');
+  if (!f || !d || !('IntersectionObserver' in window)) return;
+  new IntersectionObserver(function (e) { d.style.visibility = e[0].isIntersecting ? 'hidden' : ''; }, { threshold: 0.05 }).observe(f);
+})();
