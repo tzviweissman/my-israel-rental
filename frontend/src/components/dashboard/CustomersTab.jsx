@@ -15,6 +15,7 @@ import { stateLabel } from '../members/memberText';
 import MessageComposer from './MessageComposer';
 import OccasionsCard from './OccasionsCard';
 import PaymentRequestsPanel from './PaymentRequestsPanel';
+import LeadsBoard from './LeadsBoard';
 import { ImportCustomersPanel } from './OrdersTab';
 
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
@@ -171,6 +172,8 @@ export default function CustomersTab({ API, token }) {
   const [open, setOpen] = useState(null);
   const [composing, setComposing] = useState(false);
   const [importing, setImporting] = useState(false);
+  // The customer list, or the leads board (leads.py). ?view=leads opens the board.
+  const [view, setView] = useState(() => { try { return new URLSearchParams(window.location.search).get('view') === 'leads' ? 'leads' : 'list'; } catch { return 'list'; } });
   // ?pay=1: the notification "a customer says they paid" opens the requests.
   const [paying, setPaying] = useState(() => { try { return new URLSearchParams(window.location.search).get('pay') === '1'; } catch { return false; } });
 
@@ -223,7 +226,7 @@ export default function CustomersTab({ API, token }) {
     <div data-testid="customers-tab">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
         <h2 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('customers.title', 'Customers')}</h2>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           {businesses.length > 1 && (
             <select value={biz.id} onChange={(e) => setBizId(e.target.value)} className="px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]" style={fieldStyle} aria-label={t('orders.pickBusiness', 'Business')}>
               {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
@@ -246,6 +249,13 @@ export default function CustomersTab({ API, token }) {
       <p className="text-sm mb-4" style={{ color: 'var(--brand-muted)' }}>
         {t('customers.body', 'Everyone who ordered, joined or booked with you, in one place. Add a note or tags to remember who is who.')}
       </p>
+      <div className="inline-flex rounded-full border p-1 mb-4" style={{ borderColor: 'var(--brand-border)' }} role="tablist" data-testid="customers-view">
+        {[['list', t('leads.viewList', 'Customers')], ['leads', t('leads.viewBoard', 'Leads')]].map(([k, l]) => (
+          <button key={k} type="button" role="tab" aria-selected={view === k} onClick={() => setView(k)}
+                  className="px-4 min-h-[36px] rounded-full text-sm font-semibold"
+                  style={view === k ? { background: 'var(--ink)', color: '#fff' } : { color: 'var(--ink)' }} data-testid={`customers-view-${k}`}>{l}</button>
+        ))}
+      </div>
 
       {importing && (
         <div className="mb-4">
@@ -257,6 +267,7 @@ export default function CustomersTab({ API, token }) {
         <PaymentRequestsPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPaying(false)} />
       )}
 
+      {view === 'leads' ? <LeadsBoard API={API} auth={auth} businessId={biz.id} /> : (<>
       {!composing && (biz.permissions || []).includes('messages') && (
         <OccasionsCard API={API} auth={auth} biz={biz} onCompose={(m) => setComposing(m)} />
       )}
@@ -337,6 +348,7 @@ export default function CustomersTab({ API, token }) {
         <Detail API={API} auth={auth} businessId={biz.id} row={open} lang={lang} onClose={() => setOpen(null)}
                 onSaved={(c) => { setOpen((o) => ({ ...o, note: c.note, tags: c.tags })); load(); }} />
       )}
+      </>)}
     </div>
   );
 }

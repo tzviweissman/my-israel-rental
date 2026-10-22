@@ -585,6 +585,8 @@ async def startup_tasks() -> None:
         await ensure_message_indexes()
         from routes.marketplace.payment_requests import ensure_payment_request_indexes
         await ensure_payment_request_indexes()
+        from routes.marketplace.leads import ensure_lead_indexes
+        await ensure_lead_indexes()
         from routes.marketplace.discounts import ensure_discount_indexes
         await ensure_discount_indexes()
         from routes.marketplace.referrals import ensure_referral_indexes
