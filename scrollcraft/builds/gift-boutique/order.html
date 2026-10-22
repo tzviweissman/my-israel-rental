@@ -13,6 +13,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Order a gift · The Gift Boutique</title>
+<meta name="site-category" content="fashion-shop">
 <meta name="description" content="Choose your gifts, say who they are for and where they are going, and send the order to The Gift Boutique on WhatsApp. Delivered across Israel.">
 <link rel="icon" href="assets/logo-192.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -207,6 +208,38 @@
   .foot a:hover { color: var(--gold-hi); }
   .foot .fine { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
   @media (max-width: 760px) { .foot .cols3 { grid-template-columns: 1fr; } }
+
+  /* RULE 3t, fashion-shop (22 Oct 2026): one ivory ground; the bar and footer follow the home page. The order summary stays dark as the one solid block. */
+  .bar { background: rgb(246 240 228 / .95); border-bottom: 1px solid var(--line-ivory); }
+  .brand, .brand span { color: var(--ink); }
+  .bar .back, .nav a.link { color: var(--soft); }
+  .bar .back:hover, .nav a.link:hover { color: var(--ink); }
+  .nav .ghost { color: var(--ink); border-color: var(--ink); }
+  .nav .ghost:hover { background: var(--ink); color: var(--ivory); }
+  .nav .ghost[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--ivory); }
+  .nav .ghost .cnt { background: var(--ivory); color: var(--ink); }
+  .foot { background: var(--ivory-2); color: var(--soft); border-top: 1px solid var(--line-ivory); }
+  .foot a { color: var(--ink); }
+  .foot h4 { color: var(--gold-ink); }
+  .foot .fine { border-color: var(--line-ivory); }
+  .prog li { color: var(--ink); }
+  /* one corner radius (rule 3c.9): 14px for buttons, tiles, photos and cards; circles only for the round Add chip and step numbers */
+  body .btn, body .ghost, body .pills button, body .cat .ph, body .hero .rise li, body .cat .is-out .rowp .pr, body .brand img { border-radius: 14px !important; }
+  body .btn { box-shadow: none !important; }
+  body .nav a.link, body .cnt, body input, body textarea, body button.add, body button.back, body .back, body .ph, body .toast, body .sum { border-radius: 14px !important; }
+  body .brand span { font-size: var(--t-s) !important; }
+  @media (max-width: 1000px), (max-height: 760px) { .sum { position: static; } }
+  /* type scale (rule 3e.14): five sizes */
+  :root { --t-s: .875rem; --t-b: 1.0625rem; --t-m: 1.25rem; --t-h2: clamp(1.9rem, 1.2rem + 2.2vw, 3rem); --t-h1: clamp(2.6rem, 1.2rem + 4.2vw, 5.6rem); }
+  @media (max-width: 760px) { :root { --t-h1: clamp(2.4rem, 1rem + 8vw, 3.4rem); } }
+  body :not(h1):not(h2):not(h3):not(h4):not(dt):not(small):not(em):not(script):not(style) { font-size: var(--t-b) !important; }
+  body dt, body h4, body small, body .addchip, body .cue, body .fine, body .hrs, body .cnt, body .dock > span, body .dock small, body .label { font-size: var(--t-s) !important; }
+  body h3, body .cat-h, body .steps b, body .sum .tot b, body .dock b { font-size: var(--t-m) !important; }
+  body h1 { font-size: var(--t-h2) !important; }
+  body h2 { font-size: var(--t-m) !important; }
+  body .foot .cta b { font-size: var(--t-h2) !important; }
+  body .sign b { font-size: 7.1vw !important; }
+  .sum .saved { font-size: .9rem; }
 </style>
 </head>
 <body>
