@@ -11,20 +11,15 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged), each line re-checked against main.
 
-- [Medium] Reorder: if sending raises (not just fails), the run stays "sending" and can never be sent or skipped (reorder.py:279-289). First seen 22 Oct.
-- [Medium] Appointment reminder is logged as sent before the email; a failed send is never retried (appointment_reminders.py:107, 133). First seen 21 Oct.
-- [Medium] Table orders appear in the order form's returning-customer suggestions as "Table 5" (orders.py returning_customers groups by name). First seen 20 Oct.
-- [Medium] Gift-card order email goes to any typed address with no confirmation and no unsubscribe link (gift_cards.py:151-203). First seen 21 Oct.
-- [Low] Five count texts have no singular/plural forms (customers.more, editListing.extrasPairs, restaurants.more, summary.appointments, summary.visits); test-i18n-parity fails on them. 23 Oct.
-- [Low] Customer messages: any "[text]" of 3+ letters blocks sending (customer_messages.py:185). First seen 21 Oct.
-- [Low] Calendar import downloads the whole file before checking its size (calendar_sync.py:283; property iCal sync has no cap). First seen 16 Oct.
-- [Low] Hardcoded colours in new panels (PaymentRequestsPanel, AutomationsPanel, LeadsBoard, AppointmentsTab, RestockNotify) and the services map popup. First seen 21 Oct.
 - [Low] Page editor link filter accepts "/%2F/evil.com"; stays a path on this site, probably harmless. First seen 12 Oct.
 - [To check] The Brown Box and Blazin' Boards: pinned opening reported 64 to 96px taller than the room under the header at 360 to 768 wide (23 Oct UI audit; screenshots show nothing hidden); check on a real phone.
 - [To fix] Audit setup: most runs since 15 Oct could not download Playwright or MongoDB in the sandbox, so pages behind sign-in, Hebrew renders and order flows were not checked.
 
 ## Fixed
 
+- [Low] Two status colours have no design token, so they stay fixed: amber "waiting" (#B45309: payment requests, automations, deposits) and red error text (#B42318: restock box). Adding --attention and --danger tokens is a design-system choice for Tzvi. 23 Oct.
+- Fixed 23 Oct: reorder crash returns the run to waiting; failed appointment reminders are retried; table orders without a phone left out of customer suggestions; gift-card order email at most once a day per address, never after an unsubscribe, with an unsubscribe link; restaurants "show more" plural forms and the plural check's false alarms (the language check now passes fully); only our own [Your ...] template gaps block a message; calendar import stops at the size limit; map popup and green status colours use tokens.
+- Fixed 23 Oct, from older audits that were never merged: 'delivery not available' no longer turns delivery on (14 Oct); join rules page starts below the nav (14 Oct); customers list footer total (15 Oct); insights empty average hyphen (15 Oct); Gift Boutique "Scroll to open" cue removed (15 Oct).
 - [Decided, fixed] Leads board is for new leads (Tzvi, 23 Oct): chats from people who already ordered or booked are left out, and chat cards no longer show the customer's profile phone. 23 Oct.
 - [Decided, fixed] Table orders: each table's QR link carries its own code and a table order without it is refused (no business had table ordering on, so no printed codes broke). 23 Oct.
 - [Decided, fixed] Calendar feed: customer phone, email and address left out; the event links to the dashboard. 23 Oct.
