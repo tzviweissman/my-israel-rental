@@ -175,7 +175,7 @@ report(
 const KNOWN_UNPLURALISED = new Set([
   'admin.bulkDeleteTitle', 'admin.markBookedDescBulk',
   'admin.selectedCount', 'admin.usersSuppressed',
-  'auth.verifyPending.resendIn', 'blocks.count', 'bulk.addedPhotos',
+  'auth.verifyPending.resendIn', 'bulk.addedPhotos',
   'bulk.addedPhotosPerProp', 'bulk.photosPropertiesSelected', 'bulk.revertLast',
   'bulk.saveAndApply', 'bulk.selectedCount', 'bulk.selectedPropertiesHint',
   'bulk.totalCount', 'bulk.updatedCount', 'bulk.visibleCount',
