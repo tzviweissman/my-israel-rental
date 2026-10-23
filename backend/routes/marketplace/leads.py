@@ -22,6 +22,11 @@ customer accepts the price, the business replies): then the card follows
 the enquiry again. So a move is never silently undone, and a real event
 is never hidden behind an old move.
 
+The board is for new leads, not old customers (Tzvi, 23 Oct 2026): a chat
+from someone who had already ordered or booked from the business before it
+is left out, and a chat card never shows the customer's profile phone (they
+did not give it to the business; the card links to the chat instead).
+
 Only enquiries active in the last DAYS days are shown, and a card that
 has sat in "won" or "lost" for more than a fortnight drops off.
 """
@@ -79,6 +84,14 @@ def chat_leads(messages: list[dict[str, Any]], owner_id: str, titles: dict[str, 
     return convs
 
 
+def new_leads_only(cards: dict[str, dict[str, Any]], first_bought: dict[str, str]) -> dict[str, dict[str, Any]]:
+    """Drops chat cards from people who had already ordered or booked from the
+    business before the chat began (first_bought: user id -> their earliest
+    order or booking). Pure, for tests."""
+    return {k: c for k, c in cards.items()
+            if not (c.get("source") == "chat" and first_bought.get(c["customer_id"], "~") <= (c.get("created_at") or ""))}
+
+
 def apply_move(card: dict[str, Any], move: Optional[dict[str, Any]]) -> str:
     """The stage shown: the business's move while the enquiry is where it
     was when moved, else the enquiry's own stage. Pure."""
@@ -100,12 +113,18 @@ async def leads_board(business_id: str, user=Depends(verify_token)):
                                        "$or": [{"sender_id": owner}, {"receiver_id": owner}]},
                                       {"_id": 0, "property_id": 1, "sender_id": 1, "receiver_id": 1, "message": 1, "created_at": 1}
                                       ).sort("created_at", 1).to_list(5000)
-        cards.update(chat_leads(msgs, owner, gigs))
-        ids = list({c["customer_id"] for c in cards.values()})
-        users = {u["id"]: u async for u in db.users.find({"id": {"$in": ids}}, {"_id": 0, "id": 1, "name": 1, "phone": 1})}
-        for c in cards.values():
-            u = users.get(c["customer_id"], {})
-            c["name"], c["phone"] = u.get("name") or "", u.get("phone")
+        chats = chat_leads(msgs, owner, gigs)
+        ids = list({c["customer_id"] for c in chats.values()})
+        first: dict[str, str] = {}
+        async for o in db.store_orders.find({"business_id": business_id, "customer_user_id": {"$in": ids}}, {"_id": 0, "customer_user_id": 1, "created_at": 1}):
+            first[o["customer_user_id"]] = min(first.get(o["customer_user_id"], "~"), str(o.get("created_at") or "~"))
+        async for b in db.marketplace_bookings.find({"gig_id": {"$in": list(gigs)}, "client_user_id": {"$in": ids}}, {"_id": 0, "client_user_id": 1, "created_at": 1}):
+            first[b["client_user_id"]] = min(first.get(b["client_user_id"], "~"), str(b.get("created_at") or "~"))
+        chats = new_leads_only(chats, first)
+        cards.update(chats)
+        users = {u["id"]: u async for u in db.users.find({"id": {"$in": ids}}, {"_id": 0, "id": 1, "name": 1})}
+        for c in chats.values():
+            c["name"], c["phone"] = users.get(c["customer_id"], {}).get("name") or "", None
             c["link"] = f"/chat/{c['gig_id']}?with={c['customer_id']}"
 
     async for q in db.quote_requests.find({"business_id": business_id, "updated_at": {"$gte": since}}):
