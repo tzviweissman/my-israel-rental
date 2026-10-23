@@ -736,7 +736,12 @@ out to the jar, with a new line of huge words over each scene.
    full-screen event in code counts as the wow, a photo or type beside the
    cards does not (22 Oct 2026, "why do i keep needing to tell you to make the
    wow moment", then "these have a wow moment already"; check-site OPENING,
-   every category).
+   every category). Each wow idea is found, not
+   invented: search Mobbin, Inspo and 21st (and docs/inspo) for that kind of
+   business's openings first, and every idea names the reference it came
+   from (Tzvi, 23 Oct 2026: "for the wow use mobbin and our inspo and 21st for
+   inspiration"); check-concept fails a Wow gate with no Mobbin link and no
+   Inspo or docs/inspo reference.
 7. **Seams checked.** Every clip starts on the last frame of the one before
    (one clip per physical step, as before); after rendering, compare the
    frames either side of each join and regenerate a clip whose join jumps.
