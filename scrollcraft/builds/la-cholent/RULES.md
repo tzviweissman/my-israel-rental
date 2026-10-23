@@ -98,9 +98,9 @@ R3g.12 pass: there is no form; the main buttons and the three card buttons were 
 R0b.12 n/a: not published, so there is no pages-list preview clip yet
 
 ## 4. Photos and media
-R8.1 n/a: owner must send a photo of each size (Medium, Large, Kiddush); today all three cards show the same photograph of the four tubs: listed in the report
-R8.6 n/a: owner must send a clean photo of each size so hero shots can be made from them (the brief forbids generating now); listed in the report
-R8.2 pass: their own photograph plus generated scenery stills made earlier; no stock
+R8.1 pass: the three size cards show one product hero shot of their own tub in three colours (gold, plum, steel), the same slate block, light and camera; the sizes differ only in their words, because they have no photo of each size (asked in the report)
+R8.6 pass: the size cards are product hero shots edited from their own tub photo: one sealed tub on a slate block, dry beans, barley, a potato and a marrow bone round it (what the label says goes in), one colour story per card, one warm light, still; label read line by line against their photo
+R8.2 pass: their own photograph plus generated scenery stills made earlier; the tub hero shots are edited from their tub photo (Higgsfield nano_banana_2); the steel version's label was put back from the gold one in code (the model wrote 'Stir wall')
 R3p.7 pass: the three sizes are shown the same way and the dial buttons show the three the same way
 R3h.12 pass: the product looks the same everywhere: the same photograph of the four tubs in the opening, the three cards and the how-it-works band
 R3h.10 pass: choosing a size on the dial or a card changes its name, feeds, price and button words (check-motion: 2 choices tapped, smooth); one photograph for all sizes (see R8.1)
@@ -109,7 +109,7 @@ R3o.1 pass: no food in motion; the only cholent shown is their own photograph; t
 R3o.2 pass: no generated liquid exists on the page
 R3o.3 pass: the tubs look true on the cream and colour grounds
 R3o.6 pass: one photo of the tubs from src; the flyers are not shown as photos
-R8.3 pass: generated media is scenery only and was approved in the earlier review (BRIEF.md)
+R8.3 pass: generated media is scenery and their own tub; no person, no premises, no text but their own label; Tzvi approved 22 Oct; the owner sees them before anything goes live
 R8.4 pass: the clips (kitchen scratch, pot, table) are generated clips in the earlier build; reduced motion shows the still
 R3c.13 pass: check-fits found nothing cut; check-site found nothing cut
 R3c.14 n/a: there are no cut-outs on the page

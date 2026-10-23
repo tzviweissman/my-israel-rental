@@ -98,7 +98,7 @@ PILLARS = '''  <section class="sec pillars" id="about" aria-labelledby="h-about"
 
 def card():
     return f'''        <li class="pcard rev">
-          <a class="pph full" href="shop.html" tabindex="-1" aria-hidden="true"><img src="assets/skirts.webp" alt="" width="1023" height="1209" loading="lazy"></a>
+          <a class="pph full" href="shop.html" tabindex="-1" aria-hidden="true"><img src="assets/skirt-hero.webp" alt="" width="960" height="1192" loading="lazy"></a>
           <div class="pinfo">
             <h3><a href="shop.html">Premium Modest Sports Skirt</a></h3>
             <p class="pmeta">With built-in leggings</p>

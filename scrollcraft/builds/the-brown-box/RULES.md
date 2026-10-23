@@ -98,9 +98,9 @@ R3g.12 pass: check-site FLOW built the order message with the total and opened t
 R0b.12 n/a: the site is not published, so there is no pages-list preview yet
 
 ## 4. Photos and media
-R8.1 pass: put the five bowl photos (assets/bowls) on one sheet at the rendered size: same round crop, light and ground; one shoot
-R8.6 n/a: the five bowls and the gift boxes are generated stills and their own menu photos, not yet hero shots on a plinth with ingredients; the two gift boxes (239 px) and the five bowls need hero shots, listed in the report
-R8.2 pass: the bowls were generated in one pass from their own bowl; the menu photos are their own
+R8.1 pass: put the five bowl hero shots on one sheet: the same travertine plinth, cream ground, light and camera; shown as rounded squares so the plinth stays in
+R8.6 n/a: the five bowls are product hero shots (23 Oct, plinth, their own fruit and granola round each, one warm light); the two gift boxes are not, because their only photos are 239 px and the try invented words on the tags; a bigger photo of each box is asked for in the report
+R8.2 pass: the bowl hero shots are edited from the bowl photos generated in one pass from their own bowl; the menu photos are their own
 R3p.7 pass: all five bowls are shown the same way: round photo, name, toppings, price, Add
 R3h.12 pass: each bowl looks the same in the film, the panel and the menu
 R3h.10 n/a: the panels show every bowl at once; there is no option that swaps a picture
@@ -109,7 +109,7 @@ R3o.1 pass: generated food in motion only in the opening film; the bowl and gift
 R3o.2 n/a: no generated liquid outside the opening film (see R3o.1)
 R3o.3 pass: colours look true against their bowls
 R3o.6 pass: menu photos are their own, one per item
-R8.3 pass: only items they sell; no person; no baked text; kosher; the owner has not yet approved the generated pieces (listed in the report)
+R8.3 pass: only items they sell; no person; no baked text; kosher; Tzvi approved 22 Oct; the owner has not yet approved the generated pieces (listed in the report)
 R8.4 n/a: no moving real material beyond the opening film
 R3c.13 pass: clipped clean on order.html; on index.html the only remaining line is the full-screen film stage at 768, 390 and 360 wide (64 px under the translucent bar by design, rule 3h), a checker limit for a canvas film
 R3c.14 n/a: no cut-out image: every picture is a whole photo

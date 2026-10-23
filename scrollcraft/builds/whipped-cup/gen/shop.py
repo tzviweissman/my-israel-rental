@@ -6,7 +6,7 @@
 # (8), the packages with their choices under them (rules 3l), then the basket
 # and delivery on the same page.
 
-JAR_IMGS = ''.join(f'''        <img class="{'on' if i == 0 else ''}" data-flav="{k}" src="assets/jar-{k}.webp" alt="A jar of {n} on coffee beans" width="500" height="1111"{' fetchpriority="high"' if i == 0 else ' loading="lazy"'}>
+JAR_IMGS = ''.join(f'''        <img class="{'on' if i == 0 else ''}" data-flav="{k}" src="assets/jar-{k}-hero.webp" alt="A jar of {n} on a stone plinth" width="960" height="1192"{' fetchpriority="high"' if i == 0 else ' loading="lazy"'}>
 ''' for i, (k, n) in enumerate([('classic', 'Classic Cloud'), ('caramel', 'Caramel Cloud'), ('vanilla', 'Vanilla Cloud')]))
 PICKS = ''.join(f'''          <button type="button" data-flav="{k}" aria-pressed="{'true' if i == 0 else 'false'}"><img src="assets/jar-{k}.webp" alt="" width="500" height="1111" loading="lazy"><span><b>{n}</b>₪{p}</span></button>
 ''' for i, (k, n, p) in enumerate([('classic', 'Classic Cloud', 40), ('caramel', 'Caramel Cloud', 48), ('vanilla', 'Vanilla Cloud', 48)]))

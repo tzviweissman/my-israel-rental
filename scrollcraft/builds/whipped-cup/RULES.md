@@ -98,9 +98,9 @@ R3g.12 pass: check-site FLOW walked the order form empty (it says what is missin
 R0b.12 n/a: nothing published, so no pages-list preview clip to refresh
 
 ## 4. Photos and media
-R8.1 pass: the three flavour photos are her own matching jar-on-beans photos, one jar each, same angle and light; the story pair and delivery pair are her own two other shoots
-R8.6 n/a: the jar photos are her photos on coffee beans, not hero shots on a plinth; hero shots listed in the reply to be made from her photos
-R8.2 pass: every image is the owner own photo from the build; none generated in this task
+R8.1 pass: the three flavour photos (shop stage, home rooms, thumbs) are one set of product hero shots, 23 Oct: the same travertine plinth, amber ground, light from the left and camera; the thumbs and room tiles are cut from those same masters
+R8.6 pass: every main jar picture is a product hero shot made from her own jar photo: one jar large and turned slightly, on a travertine plinth, its own flavour beside it (one caramel dish, a dish of coffee beans, vanilla pods), one amber colour story, one warm light, still; each compared with her photo, label words checked letter by letter
+R8.2 pass: the jars are her own photos edited (Higgsfield nano_banana_2, one shared scene); vanilla's small print was hidden by beans in her photo and was redrawn with the wording of her other two labels; the other images are her own photos
 R3p.7 pass: every flavour thumbnail, room photo and package photo is one jar or one product; the home flavour cards now show the whole jar in the same frame for all three (contain, 500x1111 files, the largest we have, shown under 215 px wide so a 2x phone is sharp); the four packages share one layout: same square photo, price and Choose in the same place
 R3h.12 pass: the same jar photo appears on the room, the shop picker and the basket, edited from one master per flavour
 R3h.10 pass: shop picker: each flavour changes photo, words, price and button; check-motion colour clean there
@@ -109,7 +109,7 @@ R3o.1 n/a: no generated food in motion outside the opening film; nothing generat
 R3o.2 n/a: no generated liquid on this page in this task
 R3o.3 pass: colours look true: jars on beans keep their own labels; the caramel and vanilla rooms are flat tints behind
 R3o.6 n/a: no new owner photos were used; the photos on the page are the ones already in the build, unchanged by this rework
-R8.3 pass: no generated media of items; the clouds film is scenery only, no person except a tiny figure as scale
+R8.3 pass: generated media is only her three jars as she sells them; no person, no premises, no text added beyond her own label; Tzvi approved the hero shots 22 Oct; the owner sees them before anything goes live
 R8.4 n/a: no new moving real material; no generation done
 R3c.13 pass: clipped.mjs run on every page at seven sizes: nothing cut off (the Bun numeral and the Whipped Cup shop summary were fixed first)
 R3c.14 n/a: no cut-out made in this task

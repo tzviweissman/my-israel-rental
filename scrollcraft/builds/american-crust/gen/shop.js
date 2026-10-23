@@ -30,7 +30,7 @@
   stage.querySelector('.st-pick').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.p); });
   useBtn.addEventListener('click', function () {   // an action button whose label says what happens next (no pressed state)
     using = !using; photo();
-    useBtn.setAttribute('aria-label', using ? 'Show the dough' : P[sel].useLabel); useImg.src = using ? (sel === 'bagel' ? 'assets/bagel-dough.webp' : 'assets/pizza-dough.webp') : P[sel].useImg;
+    useBtn.setAttribute('aria-label', using ? 'Show the dough' : P[sel].useLabel); useImg.src = using ? (sel === 'bagel' ? 'assets/bagel-hero.webp' : 'assets/pizza-hero.webp') : P[sel].useImg;
   });
   stage.querySelector('.st-buy .step').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; n = Math.max(1, Math.min(20, n + (+b.dataset.d))); label(); });
   stAdd.addEventListener('click', function () {

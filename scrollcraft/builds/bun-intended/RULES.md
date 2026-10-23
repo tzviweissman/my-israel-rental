@@ -98,9 +98,9 @@ R3g.12 pass: check-site FLOW walked the order form empty (it says what is missin
 R0b.12 n/a: nothing published, so no pages-list preview clip to refresh
 
 ## 4. Photos and media
-R8.1 pass: the four flavour cut-outs on the cards are one shoot (same angle, light and size), as are the builder buns
-R8.6 n/a: the buns are their own cut-outs on flat colour, not hero shots on a plinth with ingredients; hero shots listed in the reply
-R8.2 pass: every image is their own photo or a cut-out or pour made earlier from it, except the Chocolate bun (assets/bun-choc.webp, from gen/chocolate.png), which is not in the owner's sources and looks generated: kept, and asked in message-to-owner.md (question 1)
+R8.1 pass: the four flavour cards show one set of product hero shots (23 Oct): the same oak board, overhead camera, light from the upper left and bun size, each on its card's own colour; the builder still uses the matching cut-outs
+R8.6 pass: each flavour card is a product hero shot edited from their own bun (overhead, as their photo was taken, so the whole set is overhead): one bun on an oak board, its own topping beside it (cinnamon sticks, coffee beans, Lotus biscuits, dark chocolate), one colour per flavour, one warm light, still; each compared with the cut-out it came from
+R8.2 pass: every image is their own photo or made from it; the four hero shots are edited from the bun cut-outs (Higgsfield nano_banana_2, one scene); the Chocolate bun's source (bun-choc.webp) is still the open question 1 in message-to-owner.md
 R3p.7 pass: every flavour card shows one bun; every list item picks a flavour
 R3h.12 pass: the bun on the card, the builder and the box come from one master per flavour
 R3h.10 pass: choosing a flavour changes the bun, pour, label and the button price (check-motion)
@@ -109,7 +109,7 @@ R3o.1 n/a: no generated food in motion outside the opening film; nothing generat
 R3o.2 n/a: no generated liquid on this page in this task
 R3o.3 pass: colours are true on the cut-outs
 R3o.6 n/a: no new owner photos were used; the photos on the page are the ones already in the build, unchanged by this rework
-R8.3 pass: no generated media in this task; earlier pour clips are of their own buns
+R8.3 pass: generated media only of the four flavours they sell; no person, no premises, no text added (the Lotus biscuits carry their own stamp because Lotus is what goes on the bun); Tzvi approved 22 Oct; the owner sees them before anything goes live
 R8.4 n/a: no new moving real material; no generation done
 R3c.13 pass: clipped.mjs run on every page at seven sizes: nothing cut off (the Bun numeral and the Whipped Cup shop summary were fixed first)
 R3c.14 n/a: no cut-out made in this task

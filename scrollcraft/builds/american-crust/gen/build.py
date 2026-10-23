@@ -35,7 +35,7 @@ ICON = {
 CARDS = f'''  <section class="buy" id="buy" aria-label="Our doughs">
     <div class="pcs">
       <article class="pc" data-tilt>
-        <div class="ph"><img src="assets/bagel-dough.webp" alt="American style bagel dough: six pre shaped bagels in their tray" width="590" height="443" fetchpriority="high"></div>
+        <div class="ph"><img src="assets/bagel-hero.webp" alt="American style bagel dough: six pre shaped bagels in their tray" width="1200" height="896" fetchpriority="high"></div>
         <div class="info">
           <h3>American style bagel dough</h3>
           <p class="sub">6 pre shaped bagels</p>
@@ -44,7 +44,7 @@ CARDS = f'''  <section class="buy" id="buy" aria-label="Our doughs">
         </div>
       </article>
       <article class="pc night" data-tilt>
-        <div class="ph"><img src="assets/pizza-dough.webp" alt="Classic American pizza dough in its tub with the American Crust label" width="480" height="360" fetchpriority="high"></div>
+        <div class="ph"><img src="assets/pizza-hero.webp" alt="Classic American pizza dough in its tub with the American Crust label" width="1200" height="896" fetchpriority="high"></div>
         <div class="info">
           <h3>Classic American pizza dough</h3>
           <p class="sub">100% parve</p>
@@ -175,8 +175,8 @@ SHOP = f'''  <form id="form" novalidate>
   <section class="stage" id="doughs" data-room="bagel" aria-labelledby="h-shop">
     <div class="wrap st-grid">
       <div class="st-ph">
-        <img class="on" data-p="bagel" src="assets/bagel-dough.webp" alt="American style bagel dough: six pre shaped bagels in their tray" width="590" height="443" fetchpriority="high">
-        <img data-p="pizza" src="assets/pizza-dough.webp" alt="Classic American pizza dough in its tub with the American Crust label" width="480" height="360">
+        <img class="on" data-p="bagel" src="assets/bagel-hero.webp" alt="American style bagel dough: six pre shaped bagels in their tray" width="1200" height="896" fetchpriority="high">
+        <img data-p="pizza" src="assets/pizza-hero.webp" alt="Classic American pizza dough in its tub with the American Crust label" width="1200" height="896">
         <img data-p="bagel-use" src="assets/baked-bagels.webp" alt="Everything bagels" width="760" height="760" loading="lazy">
         <img data-p="pizza-use" src="assets/pizza-tubs.webp" alt="Tubs of American Crust pizza dough in rows" width="1024" height="890" loading="lazy">
         <button type="button" class="st-use" id="st-use" aria-label="Show everything bagels"><img id="st-use-img" src="assets/baked-bagels.webp" alt="" width="64" height="64"></button>
@@ -197,8 +197,8 @@ SHOP = f'''  <form id="form" novalidate>
           <li>{ICON['pareve']}Pareve, hechsher from Rabbi Akiva Dershowitz</li><li data-for="pizza">{ICON['quality']}Premium quality</li><li data-for="pizza">{ICON['fresh']}Fresh and ready to use</li>
         </ul>
         <div class="st-pick" aria-label="Our doughs">
-          <button type="button" data-p="bagel" aria-pressed="true"><img src="assets/bagel-dough.webp" alt="" width="44" height="44"><span>Bagel dough<br>₪30</span></button>
-          <button type="button" data-p="pizza" aria-pressed="false"><img src="assets/pizza-dough.webp" alt="" width="44" height="44"><span>Pizza dough<br>₪27</span></button>
+          <button type="button" data-p="bagel" aria-pressed="true"><img src="assets/bagel-hero.webp" alt="" width="44" height="44"><span>Bagel dough<br>₪30</span></button>
+          <button type="button" data-p="pizza" aria-pressed="false"><img src="assets/pizza-hero.webp" alt="" width="44" height="44"><span>Pizza dough<br>₪27</span></button>
         </div>
       </div>
     </div>

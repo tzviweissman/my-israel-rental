@@ -99,8 +99,8 @@ R0b.12 n/a: not published, so there is no pages-list preview clip to compare
 
 ## 4. Photos and media
 R8.1 pass: the two product cards are crops of the one flyer photo (same light, ground, scale); the third tile is the store, a visit tile and not a product
-R8.6 n/a: her photos are the flyer shot, not product hero shots, and generating them is outside this task; the current photo stays and the hero shots needed are listed in the report
-R8.2 pass: every picture is one of her own five photos; nothing generated or stock
+R8.6 pass: the product card shows a product hero shot of her black skirt (23 Oct), edited from her flyer photo: the one skirt hung on a travertine block, warm stone ground, one warm light, still; the doors keep her flyer photo
+R8.2 pass: every picture is one of her own five photos, and the skirt hero shot is edited from her flyer photo (Higgsfield nano_banana_2)
 R3p.7 pass: the one product card and each of the three shop thumbnails change the stage photo; tapped all three
 R3h.12 pass: the product card comes from the same master photo shown on the shop stage
 R3h.10 n/a: no option on this site changes a picture; colour and size are written in the basket
@@ -109,7 +109,7 @@ R3o.1 n/a: not a food business
 R3o.2 n/a: no liquid or food
 R3o.3 pass: black and white look true to her photo, no colour cast added
 R3o.6 pass: five photos used, one per kind (skirts, store, sign, bag, og); the LinkedIn screenshot is left out; originals of the sign and bag are asked in message-to-ravit.md question 5
-R8.3 n/a: nothing on this site is generated
+R8.3 pass: generated media only of the skirt she sells, from her photo; no person, no premises, no text but her own RS mark; Tzvi approved 22 Oct; she sees it before anything goes live
 R8.4 n/a: no moving real material; the doors and hang tags are scroll transforms of her photos and reduced motion shows the still
 R3c.13 pass: clipped.mjs reports nothing cut off on the pages at the seven sizes
 R3c.14 n/a: no cut-out on this site

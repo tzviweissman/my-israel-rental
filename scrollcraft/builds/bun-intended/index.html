@@ -222,8 +222,10 @@
   .wall .fl { transition: box-shadow 250ms var(--ease), scale 120ms; }
   .wall .fl:hover { box-shadow: inset 0 0 0 7px rgb(255 247 239 / .6); } .wall .fl:active { scale: .985; }
   .wall .fl:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
-  .wall .fl img { position: absolute; inset: auto 0 68px 0; width: 100%; height: calc(100% - 220px); object-fit: contain; object-position: 50% 60%; transform: scale(1.08) rotate(-6deg); transition: transform 900ms var(--ease); z-index: 1; }
-  @media (hover: hover) { .wall .fl:hover img { transform: scale(1.26) rotate(2deg); } }
+  /* each card shows that flavour's product hero shot (rule 8, 23 Oct): their bun on one oak board, its own topping
+     beside it, shot on the card's own colour, so the photo sits in the card without a seam */
+  .wall .fl img { position: absolute; inset: auto 12px 68px 12px; width: calc(100% - 24px); height: calc(100% - 220px); object-fit: cover; object-position: 50% 50%; border-radius: 16px; transition: transform 900ms var(--ease); z-index: 1; }
+  @media (hover: hover) { .wall .fl:hover img { transform: scale(1.04); } }
   /* their price, as texture: the box-of-4 price, huge, behind the bun */
   .wall .fl .big { position: absolute; z-index: 0; right: 6%; bottom: 76px; font: 600 clamp(4.5rem, 8vw, 8rem)/1 var(--display); letter-spacing: -.04em; opacity: .07; font-variant-numeric: lining-nums; pointer-events: none; }
   .wall .fl .cap { position: absolute; z-index: 2; left: clamp(14px, 1.6vw, 24px); right: 14px; top: clamp(14px, 1.8vw, 26px); }
@@ -323,7 +325,7 @@
     .chip, .choice .chip { font-size: .875rem; }
     .close { grid-template-columns: 1fr; } .close .copy { padding: 18px 8px 8px; } .wall { gap: 10px; }
    
-    .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); height: auto; } .wall .fl { height: min(58svh, 420px); } .wall .fl img { transform: scale(1.02) rotate(-6deg); object-position: 50% 60%; height: calc(100% - 240px); }
+    .wall { grid-template-columns: repeat(2, minmax(0, 1fr)); height: auto; } .wall .fl { height: min(58svh, 420px); } .wall .fl img { height: calc(100% - 240px); }
     .build-grid { grid-template-columns: minmax(0, 1fr); }
     .box { order: -1; width: min(78%, 330px); }
     .box .stage { margin: -17% 0 -9%; }
@@ -434,10 +436,10 @@
       <p class="sub">Tap one to start your box with it.</p>
     </div>
     <div class="wall">
-      <button type="button" class="fl f-cin" data-pick="4:cinnamon" aria-label="Start a box with Classic cinnamon"><span class="big" aria-hidden="true">55</span><span class="cap"><span class="nm">Classic cinnamon</span><span class="pp">₪55 <small>for 4</small></span><span class="eight">Box of 8: <s>₪110</s> ₪100</span></span> <span class="addb" aria-hidden="true">Add a box</span><img src="assets/bun-cinnamon.webp" alt="" width="720" height="720" loading="lazy" decoding="async"></button>
-      <button type="button" class="fl f-esp" data-pick="4:espresso" aria-label="Start a box with Espresso"><span class="big" aria-hidden="true">55</span><span class="cap"><span class="nm">Espresso</span><span class="pp">₪55 <small>for 4</small></span><span class="eight">Box of 8: <s>₪110</s> ₪100</span></span> <span class="addb" aria-hidden="true">Add a box</span><img src="assets/bun-espresso.webp" alt="" width="720" height="720" loading="lazy" decoding="async"></button>
-      <button type="button" class="fl f-lot" data-pick="4:lotus" aria-label="Start a box with Lotus"><span class="big" aria-hidden="true">65</span><span class="cap"><span class="nm">Lotus</span><span class="pp">₪65 <small>for 4</small></span><span class="eight">Box of 8: <s>₪130</s> ₪120</span></span> <span class="addb" aria-hidden="true">Add a box</span><img src="assets/bun-lotus.webp" alt="" width="720" height="720" loading="lazy" decoding="async"></button>
-      <button type="button" class="fl f-cho" data-pick="4:chocolate" aria-label="Start a box with Chocolate"><span class="big" aria-hidden="true">65</span><span class="cap"><span class="nm">Chocolate</span><span class="pp">₪65 <small>for 4</small></span><span class="eight">Box of 8: <s>₪130</s> ₪120</span></span> <span class="addb" aria-hidden="true">Add a box</span><img src="assets/bun-choc.webp" alt="" width="720" height="720" loading="lazy" decoding="async"></button>
+      <button type="button" class="fl f-cin" data-pick="4:cinnamon" aria-label="Start a box with Classic cinnamon"><span class="big" aria-hidden="true">55</span><span class="cap"><span class="nm">Classic cinnamon</span><span class="pp">₪55 <small>for 4</small></span><span class="eight">Box of 8: <s>₪110</s> ₪100</span></span> <span class="addb" aria-hidden="true">Add a box</span><img src="assets/bun-cinnamon-hero.webp" alt="" width="900" height="900" loading="lazy" decoding="async"></button>
+      <button type="button" class="fl f-esp" data-pick="4:espresso" aria-label="Start a box with Espresso"><span class="big" aria-hidden="true">55</span><span class="cap"><span class="nm">Espresso</span><span class="pp">₪55 <small>for 4</small></span><span class="eight">Box of 8: <s>₪110</s> ₪100</span></span> <span class="addb" aria-hidden="true">Add a box</span><img src="assets/bun-espresso-hero.webp" alt="" width="900" height="900" loading="lazy" decoding="async"></button>
+      <button type="button" class="fl f-lot" data-pick="4:lotus" aria-label="Start a box with Lotus"><span class="big" aria-hidden="true">65</span><span class="cap"><span class="nm">Lotus</span><span class="pp">₪65 <small>for 4</small></span><span class="eight">Box of 8: <s>₪130</s> ₪120</span></span> <span class="addb" aria-hidden="true">Add a box</span><img src="assets/bun-lotus-hero.webp" alt="" width="900" height="900" loading="lazy" decoding="async"></button>
+      <button type="button" class="fl f-cho" data-pick="4:chocolate" aria-label="Start a box with Chocolate"><span class="big" aria-hidden="true">65</span><span class="cap"><span class="nm">Chocolate</span><span class="pp">₪65 <small>for 4</small></span><span class="eight">Box of 8: <s>₪130</s> ₪120</span></span> <span class="addb" aria-hidden="true">Add a box</span><img src="assets/bun-choc-hero.webp" alt="" width="900" height="900" loading="lazy" decoding="async"></button>
     </div>
   </section>
 

@@ -393,7 +393,8 @@
   /* ── food-shop (page rules 3t, 22 Oct 2026): a light ground, one colour panel per bowl or box, a card with photo, name, price and Add ── */
   .bpns { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: clamp(.6rem, 1.4vw, 1.1rem); margin-top: 1.8rem; }
   .bpn { display: flex; flex-direction: column; background: var(--c); color: #fff; border-radius: 24px; padding: 1rem 1rem 1.1rem; }
-  .bpn img { width: 100%; aspect-ratio: 1; border-radius: 50%; object-fit: cover; box-shadow: 0 0 0 6px rgb(255 255 255 / .16); margin-bottom: .9rem; }
+  /* the product hero shot (rule 8, 23 Oct): a rounded square, so the plinth and the fruit round the bowl stay in */
+  .bpn img { width: 100%; aspect-ratio: 1; border-radius: 16px; object-fit: cover; box-shadow: 0 0 0 6px rgb(255 255 255 / .16); margin-bottom: .9rem; }
   .bpn h3 { font-size: 1.45rem; line-height: 1.1; color: #fff; }
   .bpn .t { margin: .35rem 0 .7rem; font-size: .92rem; line-height: 1.4; color: rgb(255 255 255 / .94); }
   .bpn .pr { margin: auto 0 .6rem; font: 700 1.15rem/1 var(--font-body); color: #fff; }
@@ -507,35 +508,35 @@
       <p class="lede rev">Every bowl starts from our signature acai base, sugar free and almond milk based, and comes with two extras of your choice.</p>
       <div class="bpns">
         <article class="bpn" style="--c:#6E2A57">
-          <img src="assets/bowls/classic.webp" alt="A Classic bowl: banana, frozen blueberries and super granola on our acai base" width="640" height="640" loading="lazy">
+          <img src="assets/bowls/classic-hero.webp" alt="A Classic bowl: banana, frozen blueberries and super granola on our acai base" width="900" height="900" loading="lazy">
           <h3>Classic bowl</h3>
           <p class="t">Banana, frozen blueberries and super granola</p>
           <p class="pr">₪60</p>
           <a class="btn" href="order.html?add=Acai%20bowl&amp;bowl=classic">Add, <b>₪60</b></a>
         </article>
         <article class="bpn" style="--c:#A0560A">
-          <img src="assets/bowls/tropical.webp" alt="A Tropical bowl: frozen mango, frozen pineapple and super granola on our acai base" width="640" height="640" loading="lazy">
+          <img src="assets/bowls/tropical-hero.webp" alt="A Tropical bowl: frozen mango, frozen pineapple and super granola on our acai base" width="900" height="900" loading="lazy">
           <h3>Tropical bowl</h3>
           <p class="t">Frozen mango, frozen pineapple and super granola</p>
           <p class="pr">₪60</p>
           <a class="btn" href="order.html?add=Acai%20bowl&amp;bowl=tropical">Add, <b>₪60</b></a>
         </article>
         <article class="bpn" style="--c:#44691A">
-          <img src="assets/bowls/sunrise.webp" alt="A Sunrise bowl: green apple, frozen mango and super granola on our acai base" width="640" height="640" loading="lazy">
+          <img src="assets/bowls/sunrise-hero.webp" alt="A Sunrise bowl: green apple, frozen mango and super granola on our acai base" width="900" height="900" loading="lazy">
           <h3>Sunrise bowl</h3>
           <p class="t">Green apple, frozen mango and super granola</p>
           <p class="pr">₪60</p>
           <a class="btn" href="order.html?add=Acai%20bowl&amp;bowl=sunrise">Add, <b>₪60</b></a>
         </article>
         <article class="bpn" style="--c:#2E4A9B">
-          <img src="assets/bowls/superfruit.webp" alt="A Superfruit bowl: kiwi, frozen blueberries and banana on our acai base" width="640" height="640" loading="lazy">
+          <img src="assets/bowls/superfruit-hero.webp" alt="A Superfruit bowl: kiwi, frozen blueberries and banana on our acai base" width="900" height="900" loading="lazy">
           <h3>Superfruit bowl</h3>
           <p class="t">Kiwi, frozen blueberries and banana</p>
           <p class="pr">₪60</p>
           <a class="btn" href="order.html?add=Acai%20bowl&amp;bowl=superfruit">Add, <b>₪60</b></a>
         </article>
         <article class="bpn" style="--c:#4A2E17">
-          <img src="assets/bowls/own.webp" alt="A Build your own bowl on our acai base, with four toppings of your choice" width="640" height="640" loading="lazy">
+          <img src="assets/bowls/own-hero.webp" alt="A Build your own bowl on our acai base, with four toppings of your choice" width="900" height="900" loading="lazy">
           <h3>Build your own bowl</h3>
           <p class="t">Four toppings of your choice</p>
           <p class="pr">₪66</p>

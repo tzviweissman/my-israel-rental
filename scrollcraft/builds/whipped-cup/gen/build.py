@@ -78,15 +78,16 @@ FOOTER = f'''  <section class="close" aria-label="Order from The Whipped Cup">
 # her photos of each flavour (her listing's product photos, 19 Oct 2026). Every thumbnail is ONE jar of
 # that flavour, and each flavour has its own big photo, which shows when you point at or tap its row
 # (Tzvi, 20 Oct 2026: Classic showed one jar and the others four; pointing at Caramel changed nothing).
-# One master photo per flavour, all the same: one jar standing on coffee beans (her own photos; the
-# caramel and vanilla jars lay on the beans, shot from above, so their photos are turned upright).
-# The thumbnail is cut from the same master (rules 3o, one look per product).
-FLAVS = [('classic', 'Classic Cloud', 'Original whipped coffee', 40, 'jar-classic.webp', '50% 50%', 'jar-classic.webp', 'A jar of Classic Cloud on coffee beans'),
-         ('caramel', 'Caramel Cloud', 'Whipped coffee and caramel', 48, 'jar-caramel.webp', '50% 50%', 'jar-caramel.webp', 'A jar of Caramel Cloud on coffee beans'),
-         ('vanilla', 'Vanilla Cloud', 'Whipped coffee and vanilla', 48, 'jar-vanilla.webp', '50% 50%', 'jar-vanilla.webp', 'A jar of Vanilla Cloud on coffee beans')]
+# One master photo per flavour, all the same: since 23 Oct the product hero shot (rule 8), her own jar
+# edited onto one travertine plinth with its own flavour beside it (Higgsfield nano_banana_2 from her
+# photos; vanilla's small print was redrawn from her other labels). The thumbnail is cut from the same
+# master (rules 3o, one look per product).
+FLAVS = [('classic', 'Classic Cloud', 'Original whipped coffee', 40, 'jar-classic.webp', '50% 50%', 'jar-classic-hero.webp', 'A jar of Classic Cloud on a stone plinth'),
+         ('caramel', 'Caramel Cloud', 'Whipped coffee and caramel', 48, 'jar-caramel.webp', '50% 50%', 'jar-caramel-hero.webp', 'A jar of Caramel Cloud on a stone plinth'),
+         ('vanilla', 'Vanilla Cloud', 'Whipped coffee and vanilla', 48, 'jar-vanilla.webp', '50% 50%', 'jar-vanilla-hero.webp', 'A jar of Vanilla Cloud on a stone plinth')]
 FLAV_HTML = ''.join(f'''          <div class="flav rev{' on' if i == 0 else ''}" data-flav="{k}" tabindex="0" aria-label="{n}, show the photo"><img class="thumb" src="assets/{c}" alt="A jar of {n}" width="500" height="1111" loading="lazy"><h3>{n}</h3><div class="price">₪{p}<small>a jar</small></div><p>{d}</p><a class="btn-line add" href="shop.html?jar={k}" data-jar="{k}">Add</a></div>
 ''' for i, (k, n, d, p, c, pos, big, alt) in enumerate(FLAVS))
-BIG_HTML = ''.join(f'''          <img class="big{' on' if i == 0 else ''}" data-flav="{k}" src="assets/{big}" alt="{alt}" width="500" height="1111" loading="lazy">
+BIG_HTML = ''.join(f'''          <img class="big{' on' if i == 0 else ''}" data-flav="{k}" src="assets/{big}" alt="{alt}" width="960" height="1192" loading="lazy">
 ''' for i, (k, n, d, p, c, pos, big, alt) in enumerate(FLAVS))
 FLAVOURS = f'''  <section class="sec" id="flavours" aria-labelledby="h-flav">
     <div class="wrap">

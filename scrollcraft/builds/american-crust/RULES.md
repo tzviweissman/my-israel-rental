@@ -98,9 +98,9 @@ R3g.12 pass: walked the whole order at 390x844 with external requests blocked an
 R0b.12 n/a: nothing published yet
 
 ## 4. Photos and media
-R8.1 n/a: the two products come from different sources (their flyer render of the bagel pack, their photo of the pizza tub), so they do not read as one shoot; both kept as honest crops until product hero shots are made, listed in the report
-R8.6 pass: the Brag still is a product hero shot from their own photo: one product (their everything bagels) on a board from its own world, its own seeds around it, one mustard colour story, one warm light, still; the film ends on it
-R8.2 pass: every image is the owner own: p02 (bagel pack flyer render), p03 (everything bagels), p05 (tubs) and p01 (logo); nothing generated, no stock
+R8.1 pass: the bagel pack and pizza tub are now one shoot (product hero shots, 23 Oct): the same walnut block, mustard ground, light from the left and camera height
+R8.6 pass: both products are product hero shots edited from their own pictures: one product on a floured walnut block, its own ingredients beside it (everything-bagel seeds; tomatoes, basil and flour), one mustard colour story, one warm light, still; the Brag still remains the bagel hero
+R8.2 pass: the pack and tub are edited from their flyer render (p02) and tub photo (p05) in Higgsfield nano_banana_2; the tub's label was put back from their own photo in code because the model misread 500GRAM; everything else is their own
 R3p.7 pass: the two doughs are shown the same way on the card, the stage and the picker: photo, name, makes line, price, Add; tapping either picker changes the big photo
 R3h.12 pass: each dough is the same object in the ring, card, stage and picker (one crop each); the baked-bagels and tubs-in-a-row photos are labelled as in use pictures, not the same item
 R3h.10 pass: check-motion: choosing a dough switches photo, words, price and button smoothly
@@ -109,7 +109,7 @@ R3o.1 pass: no generated food anywhere; food is their real photos, the ring only
 R3o.2 n/a: no generated liquid
 R3o.3 pass: product colours look true: the dough is cream, labels black and mustard as on their flyer and tub
 R3o.6 pass: one photo per kind from the numbered sheet: p01 logo, p02 flyer render crop, p03 everything bagels, p05 tubs; p04 and p06 repeat p02 artwork with other lines and are not used
-R8.3 pass: nothing generated, no person, no made-up premises, no text baked in by us (the labels on their pack are in their photo)
+R8.3 pass: generated media only of the two products they sell, no person, no premises; the only text is their own labels (the tub label pasted from their photo); Tzvi approved 22 Oct; the owner sees them before anything goes live
 R8.4 n/a: no moving real material
 R3c.13 pass: clipped.mjs: nothing cut off at seven sizes on index, shop and contact
 R3c.14 n/a: no cut-outs
