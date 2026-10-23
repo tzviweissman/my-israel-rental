@@ -820,7 +820,9 @@ async def returning_customers(
     await _owned_business(business_id, user)
     needle = q.strip().lower()
     pipeline: list[dict[str, Any]] = [
-        {"$match": {"business_id": business_id}},
+        # a table order with no phone is "Table 5", a table, not a customer to suggest (20 Oct audit)
+        {"$match": {"business_id": business_id,
+                    "$or": [{"table": None}, {"customer_phone_e164": {"$nin": [None, ""]}}]}},
         {"$sort": {"created_at": -1}},
         {"$group": {
             "_id": {"$ifNull": ["$customer_phone_e164", {"$toLower": "$customer_name"}]},

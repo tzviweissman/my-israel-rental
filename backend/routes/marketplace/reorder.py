@@ -280,8 +280,14 @@ async def send_waiting(run_id: str, via: str = "auto", user=Depends(verify_token
     if not claimed.modified_count:
         raise HTTPException(status_code=409, detail="This was already sent or skipped")
     extra = {k: run[k] for k in ("why", "refill") if run.get(k)}
-    done = await _send(rule, {**(run.get("trigger_event") or {}), "by": user["user_id"]}, extra,
-                       via="whatsapp" if via == "whatsapp" else "auto")
+    try:
+        done = await _send(rule, {**(run.get("trigger_event") or {}), "by": user["user_id"]}, extra,
+                           via="whatsapp" if via == "whatsapp" else "auto")
+    except Exception:
+        # A crash mid-send (not a plain failure) used to leave the run "sending" for good, so it
+        # could never be sent or skipped again (22 Oct audit): give it back to the owner.
+        await db.automation_runs.update_one({"_id": run_id, "result": "sending"}, {"$set": {"result": "awaiting"}})
+        raise
     # The send wrote its own run; this one becomes the record that it was sent.
     await db.automation_runs.update_one({"_id": run_id}, {"$set": {"result": "sent_on", "sent_run_id": done["_id"]}})
     if done["result"] in ("failed", "skipped"):

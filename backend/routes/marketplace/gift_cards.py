@@ -179,14 +179,23 @@ async def buy(slug_or_id: str, body: BuyIn, request: Request):
                  tag="gift-card-ordered", button=("Open gift cards", "/dashboard?tab=discounts"))
     he = body.lang == "he"
     name = (biz.get("name_he") if he and biz.get("name_he") else biz.get("name")) or ""
-    await _email(body.buyer_email, _subject(f"{name}: " + ("הזמנת כרטיס מתנה" if he else "your gift card order")),
-                 (f"<p>שלום {_esc(card['buyer']['name'])},</p><p>הזמנת כרטיס מתנה על סך ₪{body.amount} מ{_esc(name)}. "
-                  "העסק ייצור איתך קשר לגבי התשלום, ומיד אחריו הכרטיס יישלח עם הקוד.</p>"
-                  if he else
-                  f"<p>Hi {_esc(card['buyer']['name'])},</p><p>You ordered a ₪{body.amount} gift card from {_esc(name)}. "
-                  "Pay the business as shown on the page; as soon as they confirm it, the card is sent with its code.</p>")
-                 + (f"<p>{_esc(st['note'])}</p>" if st["note"] else ""),
-                 tag="gift-card-ordered-customer", button=("לכרטיס" if he else "Your gift card", f"{_frontend_url()}/gift/{card['token']}"))
+    # The order page sends to whatever address was typed, unconfirmed (21 Oct audit): at most one of these
+    # a day to an address, none to an address that unsubscribed from this business, and an unsubscribe link.
+    from .customer_messages import unsubscribe_url
+    since = (datetime.now(UTC) - timedelta(days=1)).isoformat()
+    recent = await db.gift_cards.count_documents({"buyer.email": body.buyer_email, "created_at": {"$gte": since}})
+    unsubscribed = await db.message_unsubscribes.find_one({"business_id": biz["_id"], "email": body.buyer_email}, {"_id": 1})
+    if recent <= 1 and not unsubscribed:
+        await _email(body.buyer_email, _subject(f"{name}: " + ("הזמנת כרטיס מתנה" if he else "your gift card order")),
+                     (f"<p>שלום {_esc(card['buyer']['name'])},</p><p>הזמנת כרטיס מתנה על סך ₪{body.amount} מ{_esc(name)}. "
+                      "העסק ייצור איתך קשר לגבי התשלום, ומיד אחריו הכרטיס יישלח עם הקוד.</p>"
+                      if he else
+                      f"<p>Hi {_esc(card['buyer']['name'])},</p><p>You ordered a ₪{body.amount} gift card from {_esc(name)}. "
+                      "Pay the business as shown on the page; as soon as they confirm it, the card is sent with its code.</p>")
+                     + (f"<p>{_esc(st['note'])}</p>" if st["note"] else "")
+                     + f'<p style="font-size:12px;color:#666;"><a href="{_esc(unsubscribe_url(biz["_id"], body.buyer_email))}" style="color:#666;">'
+                     + ("להסרה מרשימת התפוצה" if he else "Unsubscribe") + "</a></p>",
+                     tag="gift-card-ordered-customer", button=("לכרטיס" if he else "Your gift card", f"{_frontend_url()}/gift/{card['token']}"))
     logger.info("[gift_cards] ordered business=%s amount=%s", biz["_id"], body.amount)
     return {"token": card["token"], "path": f"/gift/{card['token']}"}
 

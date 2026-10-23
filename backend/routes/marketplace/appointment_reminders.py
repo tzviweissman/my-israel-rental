@@ -129,10 +129,18 @@ async def send_reminder(b: dict[str, Any], gig: dict[str, Any], biz: dict[str, A
     )
     owner = await db.users.find_one({"id": biz.get("owner_user_id")}, {"email": 1}) or {}
     subject = _subject(tx["subject"].format(service=service, when=when))
-    ok = await em.send_email(to, subject, em._wrap(inner, preheader=subject, lang=lang), tag="appointment-reminder",
-                             from_name=business or None, reply_to=owner.get("email"))
+    try:
+        ok = await em.send_email(to, subject, em._wrap(inner, preheader=subject, lang=lang), tag="appointment-reminder",
+                                 from_name=business or None, reply_to=owner.get("email"))
+    except Exception:
+        logger.exception("[appointment-reminders] send crashed booking=%s", b["_id"])
+        ok = False
     if not ok:
-        logger.warning("[appointment-reminders] send failed booking=%s", b["_id"])
+        # The log row claims the reminder so two runs never both send it; a send that failed gives the
+        # claim back, so the next run tries again while the appointment is still ahead (21 Oct audit).
+        logger.warning("[appointment-reminders] send failed booking=%s, will retry", b["_id"])
+        await db.appointment_reminder_log.delete_one({"_id": b["_id"]})
+        return False
     return True
 
 
