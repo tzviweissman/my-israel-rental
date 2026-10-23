@@ -84,6 +84,7 @@ export default function OrderPage() {
   // ?table=5 from a table's QR code (backend tables.py): an order for now,
   // served at the table, no phone or date asked.
   const tableParam = parseInt(params.get('table') || '', 10);
+  const tableCode = params.get('k') || '';
   const [busy, setBusy] = useState(false);
   const [done, setDone] = useState(null);       // {track_url, total}
 
@@ -255,6 +256,7 @@ export default function OrderPage() {
         extra_items: extra.trim(), notes: notes.trim(), fulfilment: table ? 'pickup' : fulfilment, date: table ? data.today : date,
         window: !table && w ? { weekday: w.weekday, start: w.start, end: w.end } : null,
         table,
+        table_code: table ? tableCode : null,
         city: !table && fulfilment === 'delivery' ? (city || null) : null,
         address: !table && fulfilment === 'delivery' ? address.trim() : null,
         customer_name: name.trim(), customer_phone: phone.trim(), customer_email: email.trim() || null,

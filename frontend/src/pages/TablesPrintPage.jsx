@@ -32,7 +32,7 @@ export default function TablesPrintPage() {
     return <p className="max-w-md mx-auto px-4 py-24 text-center text-sm" style={{ color: 'var(--brand-muted)' }}>{t('tableOrder.noStore', 'Add a shop listing with your menu first: the table codes open its order form.')}</p>;
   }
   const name = (i18n.language?.startsWith('he') && biz?.name_he) || biz?.name || '';
-  const url = (n) => `${window.location.origin}/order/${d.store_id}?table=${n}`;
+  const url = (n) => `${window.location.origin}/order/${d.store_id}?table=${n}&k=${(d.codes || {})[n] || ''}`;
 
   return (
     <div className="max-w-4xl mx-auto px-4 pb-6 pt-[calc(var(--nav-h,68px)+24px)] print:p-0" data-testid="tables-print">

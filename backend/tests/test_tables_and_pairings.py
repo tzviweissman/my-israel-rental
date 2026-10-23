@@ -42,7 +42,7 @@ def cafe():
     # must ignore both.
     db.businesses.insert_one({"_id": BIZ, "slug": "tbp-test-cafe", "name": "TBP Cafe", "owner_user_id": f"{M}-pro", "marker": M,
                               "order_settings": {"windows": {"pickup": [{"weekday": 5, "start": "08:00", "end": "09:00"}]}},
-                              "table_ordering": {"on": True, "tables": 8}})
+                              "table_ordering": {"on": True, "tables": 8, "key": "k" * 32}})
     db.marketplace_gigs.insert_one({"_id": STORE, "marker": M, "business_id": BIZ, "provider_user_id": f"{M}-pro", "gig_type": "store",
                                     "status": "published", "title": "Menu",
                                     "products": [{"id": "coffee", "name": "Coffee", "price": 12, "goes_with": ["cake", "ghost"]},
@@ -54,7 +54,14 @@ def cafe():
         db[col].delete_many(q)
 
 
+def _code(n):
+    from routes.marketplace.tables import table_code
+    return table_code({"_id": BIZ, "table_ordering": {"key": "k" * 32}}, n)
+
+
 def _order(**kw):
+    if kw.get("table") and "table_code" not in kw:
+        kw["table_code"] = _code(kw["table"])   # what the printed QR link carries
     body = {"lines": [{"product_id": "coffee", "qty": 2}], "fulfilment": "pickup",
             "date": (datetime.now(IL).date() + timedelta(days=1)).isoformat(), **kw}
     return requests.post(f"{API}/marketplace/order-form/{STORE}/orders", json=body, timeout=15)
@@ -72,6 +79,8 @@ def test_table_order_needs_no_phone_date_or_window():
 
 def test_table_numbers_and_switch_are_checked():
     assert _order(table=9).status_code == 400          # only 8 tables
+    assert _order(table=2, table_code=None).status_code == 400   # a guessed link without the table's code
+    assert _order(table=2, table_code=_code(3)).status_code == 400   # table 3's code used on table 2
     _db().businesses.update_one({"_id": BIZ}, {"$set": {"table_ordering.on": False}})
     try:
         assert _order(table=2).status_code == 400

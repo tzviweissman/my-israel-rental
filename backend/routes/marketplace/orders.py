@@ -2108,6 +2108,7 @@ class WebsiteOrderIn(BaseModel):
     # the table's QR code. A table order is for now, needs no phone, and
     # is served at the table.
     table: Optional[int] = Field(None, ge=1, le=500)
+    table_code: Optional[str] = Field(None, max_length=40)  # the code in that table's QR link (tables.py)
     # How the customer intends to pay, in the store's own terms (its
     # payment_note lists them). Recorded, never charged: the site does
     # not process payments.
@@ -2279,7 +2280,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     now = datetime.now(_IL_TZ)
     if payload.table is not None:
         from .tables import table_ok
-        if not table_ok(biz, payload.table):
+        if not table_ok(biz, payload.table, payload.table_code):
             raise HTTPException(status_code=400, detail="This table cannot order here right now")
         payload.date = now.date().isoformat()
         payload.window = None
