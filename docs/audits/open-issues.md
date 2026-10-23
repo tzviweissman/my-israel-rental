@@ -154,3 +154,6 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - Not a bug: business page tab title (uses "|"), Deliveries links (phone, WhatsApp and Waze open outside the app), renter Contracts tab (shows where contracts are). Checked 13 Oct.
 - (info, audit tooling, 2026-10-16) Sandbox blocks MongoDB and Playwright downloads, so UI audits cannot run the API; see docs/audits/2026-10-16-ui-audit.md
 - [Low] Dashboard business form: hours placeholder is hard-coded English (also shown in Hebrew); en dashes removed 18 Oct. First seen 18 Oct, 2026-10-18-ui-audit.md.
+- [Medium] Hebrew UI: 14 t() keys (basket.* on marketplace cards, jobsBoard.areaPh/areaFreeText) missing from en.js and he.js; Hebrew users see English. First seen 23 Oct (2026-10-23-ui-audit).
+- [Low] Hebrew UI: 7 count strings with no plural set (basket.items, summary.visits and others). First seen 23 Oct (2026-10-23-ui-audit).
+- [Low] Business pages: clipped.mjs flags pinned opening block under the header on the-brown-box and blazin-boards at phone widths; screenshots look fine. First seen 23 Oct (2026-10-23-ui-audit). Unconfirmed.
