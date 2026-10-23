@@ -229,6 +229,9 @@ for (const url of urls) {
     // every category (Tzvi, 22 Oct 2026, "why do i keep needing to tell you to make the wow moment": limiting this
     // to four categories let American Crust open at 13% picture; a shop's price and Add fit on the second screen, BUY allows it)
     if (cover < .7) fail(url, 'OPENING', `the first screen is only ${Math.round(cover * 100)}% picture: the opening must be a full-screen film or photo, not a box beside the words (3h.1)`);
+    // no scroll cues (rules: "No scroll cues"; the 17 Oct audit found one on The Brown Box and I added another to American Crust on 22 Oct)
+    const cue = await page.evaluate(() => [...document.querySelectorAll('body *')].some((e) => !e.children.length && /^\s*(scroll( down| to (explore|see more))?|swipe up)\s*[↓⌄]?\s*$/i.test(e.textContent) && e.getBoundingClientRect().height > 0));
+    if (cue) fail(url, 'OPENING', 'a "Scroll" cue on the page: scroll cues are banned (page rules, no scroll cues)');
     if (differ(a, b) < .05 && differ(b, c) < .05) fail(url, 'OPENING', 'nothing happens on the first screen, on its own or when you start to scroll: the opening must be an event (3h)');
     await ctx.close();
   }

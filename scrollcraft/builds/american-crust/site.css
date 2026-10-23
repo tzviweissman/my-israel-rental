@@ -169,16 +169,14 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
 .open .btn { background: var(--mustard); color: var(--ink); }
 .open .go { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
 .open .from { margin: 0; font: 600 1rem/1.35 var(--font-body); color: var(--cream); }
-.open .hint { position: absolute; z-index: 2; right: var(--gutter); bottom: 1.4rem; color: var(--cream); font: 600 .85rem/1 var(--font-body); letter-spacing: .12em; text-transform: uppercase; transition: opacity 300ms; }
 @media (max-width: 760px) {
   .open { height: 340vh; }
   .open .stage::before { background: linear-gradient(0deg, rgba(20, 20, 20, .92) 0%, rgba(20, 20, 20, .8) 50%, rgba(20, 20, 20, .25) 80%); }
   .open .wrap { justify-content: flex-end; padding-bottom: 2.4rem; }
   .open h1 { font-size: clamp(3rem, 15vw, 4.4rem); }
   .open .lede { font-size: 1.05rem; }
-  .open .hint { display: none; }
-}
-@media (prefers-reduced-motion: reduce) { .open { height: 100vh; height: 100svh; } .open .w2, .open .w3 { opacity: 1; transform: none; } .open .hint { display: none; } }
+  }
+@media (prefers-reduced-motion: reduce) { .open { height: 100vh; height: 100svh; } .open .w2, .open .w3 { opacity: 1; transform: none; } }
 
 /* the two products as cards, right under the opening: colour per product (mustard-light, night) */
 .buy { background: var(--mustard); padding: 0 var(--gutter) clamp(1.2rem, 3vh, 2rem); }

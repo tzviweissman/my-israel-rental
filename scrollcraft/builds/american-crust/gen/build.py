@@ -66,7 +66,6 @@ HOME = f'''  <section class="open" id="film" aria-labelledby="h-open">
           <div class="go"><a class="btn" href="#buy">Order your dough</a><p class="from">Bagel dough ₪30<br>Pizza dough ₪27</p></div>
         </div>
       </div>
-      <div class="hint" id="hint" aria-hidden="true">Scroll</div>
     </div>
   </section>
 {CARDS}
@@ -145,13 +144,12 @@ HOME_JS = '''<script>
       cx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
     };
     var size = function () { var d = Math.min(2, devicePixelRatio || 1); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; draw(); };
-    var hint = document.getElementById('hint'), raf = 0;
+    var raf = 0;
     var paint = function () {
       raf = 0;
       var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight;
       p = still ? 1 : Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
       film.classList.toggle('c2', p >= .4); film.classList.toggle('c3', p >= .59);
-      hint.style.opacity = p > .02 ? 0 : 1;
       draw();
     };
     addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });
