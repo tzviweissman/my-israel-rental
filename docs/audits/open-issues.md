@@ -9,11 +9,34 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 ## Open
 
-- [Low] Page editor link filter accepts "/%2F/evil.com"; it stays a path on this site, so probably harmless. First seen 12 Oct (site audit).
-- [To check] Emails: replies now go to support@myisraelrental.com (EMAIL_REPLY_TO). The domain receives mail (Private Email); confirm that mailbox exists and is read.
+Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged), each line re-checked against main.
+
+- [Decide] Leads board shows a chat-only customer's profile phone to the business (leads.py:105). First seen 22 Oct (site audit). Needs Tzvi.
+- [Decide] Table orders: anyone with a restaurant's order link can send table orders with no name or phone (20 per 10 min per address; no per-table secret). First seen 20 Oct. Needs Tzvi.
+- [Decide] Business calendar feed (private link) carries customer phone, email and delivery address. First seen 18 Oct. Needs Tzvi.
+- [Medium] Reorder: if sending raises (not just fails), the run stays "sending" and can never be sent or skipped (reorder.py:279-289). First seen 22 Oct.
+- [Medium] Appointment reminder is logged as sent before the email; a failed send is never retried (appointment_reminders.py:107, 133). First seen 21 Oct.
+- [Medium] Table orders appear in the order form's returning-customer suggestions as "Table 5" (orders.py returning_customers groups by name). First seen 20 Oct.
+- [Medium] Gift-card order email goes to any typed address with no confirmation and no unsubscribe link (gift_cards.py:151-203). First seen 21 Oct.
+- [Low] Five count texts have no singular/plural forms (customers.more, editListing.extrasPairs, restaurants.more, summary.appointments, summary.visits); test-i18n-parity fails on them. 23 Oct.
+- [Low] Customer messages: any "[text]" of 3+ letters blocks sending (customer_messages.py:185). First seen 21 Oct.
+- [Low] Calendar import downloads the whole file before checking its size (calendar_sync.py:283; property iCal sync has no cap). First seen 16 Oct.
+- [Low] Hardcoded colours in new panels (PaymentRequestsPanel, AutomationsPanel, LeadsBoard, AppointmentsTab, RestockNotify) and the services map popup. First seen 21 Oct.
+- [Low] Page editor link filter accepts "/%2F/evil.com"; stays a path on this site, probably harmless. First seen 12 Oct.
+- [To check] Emails: replies go to support@myisraelrental.com; confirm that mailbox exists and is read. Tzvi.
+- [To check] The Brown Box: pinned film reported 64px taller than the room under the header; check on a real phone.
 
 ## Fixed
 
+- [Medium] Shop basket buttons (14 texts) showed fallback English in both languages because a second `basket` block in en.js and he.js replaced the first. Renamed to basketReminder (audit fix d261160c, 16 Oct), merged 23 Oct.
+- [Medium] Payment request page sent the business's phone to link holders. Fix d718eeed (22 Oct), merged 23 Oct.
+- [Low] Jobs board area box English for Hebrew visitors (da0754f6); map count Hebrew dual forms (d9603292); services map city aliases with a hyphen or apostrophe (0492ea09); leads delete button 44px (eb2e7136); hours placeholder en dashes (6d1048c3); server.js comment (95f81cd0). Merged 23 Oct.
+- [Low] The Brown Box: banned "Scroll" cue removed (c67e586c, 17 Oct); also removed from American Crust, and check-site now fails any Scroll cue. 23 Oct.
+- [Low] Sukkot fallback dates rolled to 5788 (5787 had passed); restock box 44px; checklist "category" item confirmed correct (category is set per service), test updated. 23 Oct.
+- Dropped: Chicken Munch steppers 44px (19 Oct) and its bar-opacity and English-only notes; the page was rebuilt on 22 Oct and passes check-site.
+
+- [Medium] Payment request page sent the business's phone to link holders. Fixed 22 Oct, d718eeed.
+- [Low] Jobs board area box was English for Hebrew visitors. Fixed 22 Oct, da0754f6.
 - [Low] KasherMyBnb: the "what we kasher" lists on the kitchen and pots pages are now a split price list (add-ons left, ticked parts right; on a phone the list first). 13 Oct.
 
 - [Medium] Subscriptions: a paying business can now see its plan and cancel it in Settings ("Your plan", shown only to a business with a paid plan). Fixed 13 Oct.
