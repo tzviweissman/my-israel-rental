@@ -34,7 +34,7 @@ export default function RestockNotify({ gigId, productId, initialEmail = '' }) {
   }
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center gap-1 text-xs font-semibold underline min-h-[36px]" style={{ color: 'var(--ink)' }} data-testid={`restock-open-${productId}`}>
+      <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center gap-1 text-xs font-semibold underline min-h-[44px]" style={{ color: 'var(--ink)' }} data-testid={`restock-open-${productId}`}>
         <Bell size={13} aria-hidden="true" /> {t('restock.ask', "Tell me when it's back")}
       </button>
     );
@@ -42,10 +42,10 @@ export default function RestockNotify({ gigId, productId, initialEmail = '' }) {
   return (
     <div className="mt-1 flex flex-wrap items-center gap-2">
       <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="name@example.com" autoFocus
-             className="flex-1 min-w-[12rem] px-3 py-2 rounded-lg border text-sm bg-white min-h-[40px]" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
+             className="flex-1 min-w-[12rem] px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
              aria-label={t('restock.emailLabel', 'Your email')} data-testid={`restock-email-${productId}`} />
       <button type="button" disabled={state === 'busy' || !email.includes('@')} onClick={send}
-              className="inline-flex items-center gap-1.5 px-4 min-h-[40px] rounded-full text-sm font-semibold border disabled:opacity-50"
+              className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold border disabled:opacity-50"
               style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }} data-testid={`restock-send-${productId}`}>
         {state === 'busy' && <Loader2 size={13} className="animate-spin" />} {t('restock.send', 'Email me')}
       </button>
