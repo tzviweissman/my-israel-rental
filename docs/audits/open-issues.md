@@ -14,6 +14,7 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] Page editor link filter accepts "/%2F/evil.com"; stays a path on this site, probably harmless. First seen 12 Oct.
 - [To check] The Brown Box and Blazin' Boards: pinned opening reported 64 to 96px taller than the room under the header at 360 to 768 wide (23 Oct UI audit; screenshots show nothing hidden); check on a real phone.
 - [To fix] Audit setup: most runs since 15 Oct could not download Playwright or MongoDB in the sandbox, so pages behind sign-in, Hebrew renders and order flows were not checked.
+- [Could not confirm] Table ordering codes (23 Oct, code audit): a business that had table ordering on before the codes shipped has no key until the owner opens the table sheet; two simultaneous loads could create two keys. Needs a database to show. Report: 2026-10-23-site-audit.md
 
 ## Fixed
 
