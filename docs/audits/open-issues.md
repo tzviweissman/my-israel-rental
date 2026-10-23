@@ -11,9 +11,6 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged), each line re-checked against main.
 
-- [Decide] Leads board shows a chat-only customer's profile phone to the business (leads.py:105). First seen 22 Oct (site audit). Needs Tzvi.
-- [Decide] Table orders: anyone with a restaurant's order link can send table orders with no name or phone (20 per 10 min per address; no per-table secret). First seen 20 Oct. Needs Tzvi.
-- [Decide] Business calendar feed (private link) carries customer phone, email and delivery address. First seen 18 Oct. Needs Tzvi.
 - [Medium] Reorder: if sending raises (not just fails), the run stays "sending" and can never be sent or skipped (reorder.py:279-289). First seen 22 Oct.
 - [Medium] Appointment reminder is logged as sent before the email; a failed send is never retried (appointment_reminders.py:107, 133). First seen 21 Oct.
 - [Medium] Table orders appear in the order form's returning-customer suggestions as "Table 5" (orders.py returning_customers groups by name). First seen 20 Oct.
@@ -23,12 +20,15 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] Calendar import downloads the whole file before checking its size (calendar_sync.py:283; property iCal sync has no cap). First seen 16 Oct.
 - [Low] Hardcoded colours in new panels (PaymentRequestsPanel, AutomationsPanel, LeadsBoard, AppointmentsTab, RestockNotify) and the services map popup. First seen 21 Oct.
 - [Low] Page editor link filter accepts "/%2F/evil.com"; stays a path on this site, probably harmless. First seen 12 Oct.
-- [To check] Emails: replies go to support@myisraelrental.com; confirm that mailbox exists and is read. Tzvi.
 - [To check] The Brown Box and Blazin' Boards: pinned opening reported 64 to 96px taller than the room under the header at 360 to 768 wide (23 Oct UI audit; screenshots show nothing hidden); check on a real phone.
 - [To fix] Audit setup: most runs since 15 Oct could not download Playwright or MongoDB in the sandbox, so pages behind sign-in, Hebrew renders and order flows were not checked.
 
 ## Fixed
 
+- [Decided, fixed] Leads board is for new leads (Tzvi, 23 Oct): chats from people who already ordered or booked are left out, and chat cards no longer show the customer's profile phone. 23 Oct.
+- [Decided, fixed] Table orders: each table's QR link carries its own code and a table order without it is refused (no business had table ordering on, so no printed codes broke). 23 Oct.
+- [Decided, fixed] Calendar feed: customer phone, email and address left out; the event links to the dashboard. 23 Oct.
+- [Done] support@myisraelrental.com is read (Tzvi, 23 Oct).
 - [Medium] Shop basket buttons (14 texts) showed fallback English in both languages because a second `basket` block in en.js and he.js replaced the first. Renamed to basketReminder (audit fix d261160c, 16 Oct), merged 23 Oct.
 - [Medium] Payment request page sent the business's phone to link holders. Fix d718eeed (22 Oct), merged 23 Oct.
 - [Low] Jobs board area box English for Hebrew visitors (da0754f6); map count Hebrew dual forms (d9603292); services map city aliases with a hyphen or apostrophe (0492ea09); leads delete button 44px (eb2e7136); hours placeholder en dashes (6d1048c3); server.js comment (95f81cd0). Merged 23 Oct.

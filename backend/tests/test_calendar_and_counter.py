@@ -172,7 +172,7 @@ def test_calendar_feeds_list_bookings_and_team_feed_only_theirs(shop):
     token = everyone["url"].rsplit("/", 1)[1].split(".ics")[0]
     feed = requests.get(f"{API}/marketplace/calendar/{token}.ics", timeout=30)
     assert feed.status_code == 200 and feed.headers["content-type"].startswith("text/calendar")
-    assert "Rivka" in feed.text and "050-1234567" in feed.text and "With: Dana" in feed.text
+    assert "Rivka" in feed.text and "050-1234567" not in feed.text and "With: Dana" in feed.text   # no customer phone in the feed (23 Oct)
     dtoken = dana["url"].rsplit("/", 1)[1].split(".ics")[0]
     assert "Rivka" in requests.get(f"{API}/marketplace/calendar/{dtoken}.ics", timeout=30).text
     # Reset: the old link stops working.

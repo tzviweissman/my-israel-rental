@@ -150,9 +150,9 @@ async def build_feed(business: dict, team_id: Optional[str], lang: str) -> bytes
         ev.add("dtend", (start + timedelta(minutes=int(b.get("duration_minutes") or 30))).astimezone(UTC))
         ev.add("summary", summary)
         ev.add("status", "TENTATIVE" if b.get("status") == "pending" else "CONFIRMED")
-        lines = [f"{w['phone']}: {b['contact_phone']}" if b.get("contact_phone") else "",
-                 f"{w['email']}: {b['contact_email']}" if b.get("contact_email") else "",
-                 f"{w['with']}: {b['staff_name']}" if b.get("staff_name") and not team_id else "",
+        # no customer phone, email or address in the feed (Tzvi, 23 Oct 2026, after the 18 Oct audit): the
+        # link is synced into phone calendars and shared onward; the dashboard link holds the contact details
+        lines = [f"{w['with']}: {b['staff_name']}" if b.get("staff_name") and not team_id else "",
                  f"{w['note']}: {b['message']}" if b.get("message") else "",
                  f"https://{public_site_host()}/dashboard?tab=appointments"]
         ev.add("description", "\n".join(x for x in lines if x))
@@ -196,8 +196,7 @@ async def build_feed(business: dict, team_id: Optional[str], lang: str) -> bytes
                 ev.add("dtend", d + timedelta(days=1))
             ev.add("summary", f"{kind}: {o.get('customer_name') or w['order']}")
             items = o.get("items") or ", ".join(f"{ln.get('qty')}× {ln.get('name')}" for ln in o.get("lines") or [])
-            lines = [str(items)[:500], f"{w['phone']}: {o['customer_phone']}" if o.get("customer_phone") else "",
-                     o.get("address") or "", f"https://{public_site_host()}/dashboard?tab=orders"]
+            lines = [str(items)[:500], f"https://{public_site_host()}/dashboard?tab=orders"]
             ev.add("description", "\n".join(x for x in lines if x))
             cal.add_component(ev)
     return cal.to_ical()
