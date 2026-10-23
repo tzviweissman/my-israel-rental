@@ -52,6 +52,10 @@ const canSet = {
     // The listings tab is where photos are added to a service; the
     // checklist points there for the photo item.
     photo: true,
+    // the category is chosen per service (EditListingModal's CategoryPicker,
+    // and the add-service wizard), so "Add a service to set your category"
+    // rightly opens the services list (23 Oct audit follow-up)
+    category: true,
   },
 };
 
