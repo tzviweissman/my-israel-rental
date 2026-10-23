@@ -30,7 +30,7 @@ export default function RestockNotify({ gigId, productId, initialEmail = '' }) {
     }
   };
   if (state === 'done') {
-    return <p className="text-xs inline-flex items-center gap-1 mt-1" style={{ color: '#1F5F3A' }} role="status" data-testid={`restock-done-${productId}`}><Check size={13} /> {t('restock.done', 'We will email you once when it is back.')}</p>;
+    return <p className="text-xs inline-flex items-center gap-1 mt-1" style={{ color: 'var(--status-open-ink)' }} role="status" data-testid={`restock-done-${productId}`}><Check size={13} /> {t('restock.done', 'We will email you once when it is back.')}</p>;
   }
   if (!open) {
     return (

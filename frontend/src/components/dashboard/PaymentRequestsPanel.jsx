@@ -57,7 +57,7 @@ export default function PaymentRequestsPanel({ API, auth, businessId, onClose })
     paid: t('payReq.st.paid', 'Paid'),
     cancelled: t('payReq.st.cancelled', 'Withdrawn'),
   };
-  const statusColor = { open: 'var(--brand-muted)', customer_paid: '#B45309', paid: '#2E7D4F', cancelled: 'var(--brand-muted)' };
+  const statusColor = { open: 'var(--brand-muted)', customer_paid: '#B45309', paid: 'var(--status-open)', cancelled: 'var(--brand-muted)' };
   const sendRow = (r) => (
     <div className="flex flex-wrap gap-2">
       <a href={wa(r)} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold"
@@ -90,7 +90,7 @@ export default function PaymentRequestsPanel({ API, auth, businessId, onClose })
         </p>
       ) : made ? (
         <div className="rounded-xl p-3 space-y-2" style={{ background: '#F9FAFB' }} data-testid="payreq-made">
-          <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: '#2E7D4F' }}><Check size={16} /> {t('payReq.ready', 'Ready to send')}</p>
+          <p className="text-sm font-semibold flex items-center gap-1.5" style={{ color: 'var(--status-open)' }}><Check size={16} /> {t('payReq.ready', 'Ready to send')}</p>
           <p className="text-sm whitespace-pre-line" style={{ color: 'var(--ink)' }} dir="auto">{made.message}</p>
           {sendRow(made)}
           <button type="button" onClick={() => setMade(null)} className="text-sm font-semibold underline underline-offset-4 min-h-[44px]" style={{ color: 'var(--gold)' }}>

@@ -56,7 +56,7 @@ const countIcon = (n) => new L.DivIcon({
            style="filter: drop-shadow(0 3px 6px rgba(15,58,58,0.35));">
         <path d="M15 0C6.72 0 0 6.72 0 15c0 10.5 13.16 23.15 14.34 24.32a.94.94 0 0 0 1.32 0C16.84 38.15 30 25.5 30 15 30 6.72 23.28 0 15 0Z" fill="${TEAL}"/>
       </svg>
-      <span style="position:absolute;top:4px;left:0;width:30px;text-align:center;font:700 12px/22px system-ui,sans-serif;color:#fff;">${n > 99 ? '99+' : n}</span>
+      <span style="position:absolute;top:4px;left:0;width:30px;text-align:center;font:700 12px/22px var(--font-body);color:var(--surface);">${n > 99 ? '99+' : n}</span>
     </div>`,
 });
 
@@ -201,16 +201,16 @@ const ServicesMapView = ({ gigs, userCoords, maxDistanceKm, activeId, onPinClick
         return `
           <button type="button" data-gig-id="${esc(g.id)}"
             data-testid="services-map-pin-${esc(g.id)}"
-            style="display:block;width:100%;text-align:start;padding:6px 4px;border:0;background:transparent;border-bottom:1px solid #f3f4f6;cursor:pointer;font-family:inherit;">
-            <div style="font-weight:600;font-size:13px;color:#111827;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${title}</div>
-            <div style="font-size:11px;color:#6b7280;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${provider}${area}${dist}</div>
+            style="display:block;width:100%;text-align:start;padding:6px 4px;border:0;background:transparent;border-bottom:1px solid var(--brand-border);cursor:pointer;font-family:inherit;">
+            <div style="font-weight:600;font-size:13px;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${title}</div>
+            <div style="font-size:11px;color:var(--brand-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${provider}${area}${dist}</div>
           </button>`;
       }).join('');
       const more = extra > 0
-        ? `<div style="font-size:11px;color:#6b7280;padding-top:4px;">+ ${extra} more</div>`
+        ? `<div style="font-size:11px;color:var(--brand-muted);padding-top:4px;">+ ${extra} more</div>`
         : '';
       const head = items.length > 1
-        ? `<div style="font-size:12px;font-weight:700;color:#111827;padding:0 4px 6px;">${esc(t('services.mapCount', { count: items.length, defaultValue: '{{count}} businesses here' }))}</div>`
+        ? `<div style="font-size:12px;font-weight:700;color:var(--ink);padding:0 4px 6px;">${esc(t('services.mapCount', { count: items.length, defaultValue: '{{count}} businesses here' }))}</div>`
         : '';
       const html = `<div data-testid="services-map-popup" style="min-width:220px;max-width:280px;">${head}<div style="max-height:260px;overflow-y:auto;">${rows}${more}</div></div>`;
 
