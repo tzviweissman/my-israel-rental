@@ -182,7 +182,9 @@ async def preview(business_id: str, aud: Audience, user=Depends(verify_token)):
 
 # A ready-made message (occasions) marks the parts the business must write
 # itself in square brackets. Nothing is sent while one is left.
-_UNFILLED = re.compile(r"\[[^\]\n]{3,}\]")
+# Only our own template gaps ("[Your opening hours over the holiday.]", "[שעות הפתיחה שלכם בחג.]"): any
+# bracket used to block sending, so an owner's real "[VIP]" or "[sale]" could not go out (21 Oct audit).
+_UNFILLED = re.compile(r"\[(?:Your |[^\]\n]*שלכם)[^\]\n]*\]")
 
 
 class MessageIn(BaseModel):

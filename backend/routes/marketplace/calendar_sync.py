@@ -285,15 +285,19 @@ async def _fetch(url: str) -> str:
         for _ in range(4):
             if not _is_public_ical_url(url):
                 raise CalendarError("That address cannot be read. Paste the calendar's private iCal address.")
-            r = await http.get(url, headers={"user-agent": "MyIsraelRental calendar sync"})
-            if r.status_code in (301, 302, 303, 307, 308) and r.headers.get("location"):
-                url = urljoin(url, r.headers["location"])
-                continue
-            if r.status_code != 200:
-                raise CalendarError(f"The calendar answered {r.status_code}. Check the address and that it is the private (secret) one.")
-            if len(r.content) > MAX_BYTES:
-                raise CalendarError("That calendar is too large to read.")
-            return r.text
+            # streamed, so a huge file stops at MAX_BYTES instead of being read whole first (16 Oct audit)
+            async with http.stream("GET", url, headers={"user-agent": "MyIsraelRental calendar sync"}) as r:
+                if r.status_code in (301, 302, 303, 307, 308) and r.headers.get("location"):
+                    url = urljoin(url, r.headers["location"])
+                    continue
+                if r.status_code != 200:
+                    raise CalendarError(f"The calendar answered {r.status_code}. Check the address and that it is the private (secret) one.")
+                body = bytearray()
+                async for chunk in r.aiter_bytes():
+                    body.extend(chunk)
+                    if len(body) > MAX_BYTES:
+                        raise CalendarError("That calendar is too large to read.")
+                return body.decode(r.encoding or "utf-8", errors="replace")
     raise CalendarError("That address kept redirecting.")
 
 
