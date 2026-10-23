@@ -99,7 +99,7 @@ R0b.12 n/a: not published, so there is no pages-list preview clip yet
 
 ## 4. Photos and media
 R8.1 n/a: owner must send a matching set (one photo per box and per pan, same angle and ground); today the three box photos come from three shoots (Mini and Grand are one box photo at two crops, the Supreme is a pile of chicken on yellow) and the 9x13 pan photo is cut flat at its bottom edge in the file the owner sent, so it runs off the bottom of its frame; no uncut copy exists in src/owner: listed for the owner
-R8.6 n/a: the Cornflake, Fruity and Rice Krispie tiles are now product hero shots edited from his own bowl photos (dark plinth, its own cereal round it, one warm light); Classic and Hot Poppers keep his photos, and the boxes and pans still need a clean photo each from the owner (listed in the report)
+R8.6 n/a: all five kinds with a photo (Classic, Hot Poppers, Cornflake, Fruity, Rice Krispie) are now product hero shots edited from his own photos (dark plinth, its own coating round it, one warm light; Classic's lid number checked: 055-331-6975); the boxes and pans still need a clean photo each from the owner (listed in the report)
 R8.2 pass: his own photos, and three hero shots edited from his own bowl photos (Higgsfield nano_banana_2); no stock
 R3p.7 pass: every kind of chicken is a tile; five show his photo, the three without (Shnitzel Bites, Pretzel, Buffalo Wings) are plain colour tiles
 R3h.12 pass: each item looks the same everywhere (the same photo file on home, menu and order)
@@ -109,7 +109,7 @@ R3o.1 pass: no generated food anywhere on the page; every food picture is his ow
 R3o.2 pass: no generated liquid exists on the page
 R3o.3 pass: colours look true, no cast on any photo
 R3o.6 pass: one photo per kind taken from src/owner and assets; duplicates left out
-R8.3 pass: generated media only of three kinds he sells, from his own bowls; no person, no premises; only his own lid sticker; Tzvi approved 22 Oct; the owner sees them before anything goes live
+R8.3 pass: generated media only of five kinds he sells, from his own bowls and plate; no person, no premises; only his own lid sticker; Tzvi approved 22 Oct; the owner sees them before anything goes live
 R8.4 pass: nothing generated or moving as real material exists on the page
 R3c.13 pass: check-fits found nothing cut; check-site found nothing cut
 R3c.14 pass: the only cut-out is the opening bowl; looked at on the dark opening and on the red Shabbos band with no fringe

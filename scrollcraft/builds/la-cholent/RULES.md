@@ -98,7 +98,7 @@ R3g.12 pass: there is no form; the main buttons and the three card buttons were 
 R0b.12 n/a: not published, so there is no pages-list preview clip yet
 
 ## 4. Photos and media
-R8.1 pass: the three size cards show one product hero shot of their own tub in three colours (gold, plum, steel), the same slate block, light and camera; the sizes differ only in their words, because they have no photo of each size (asked in the report)
+R8.1 pass: the three size cards show one product hero shot of their own tub in three colours (gold, olive, steel), the same slate block, light and camera; the sizes differ only in their words, because they have no photo of each size (asked in the report)
 R8.6 pass: the size cards are product hero shots edited from their own tub photo: one sealed tub on a slate block, dry beans, barley, a potato and a marrow bone round it (what the label says goes in), one colour story per card, one warm light, still; label read line by line against their photo
 R8.2 pass: their own photograph plus generated scenery stills made earlier; the tub hero shots are edited from their tub photo (Higgsfield nano_banana_2); the steel version's label was put back from the gold one in code (the model wrote 'Stir wall')
 R3p.7 pass: the three sizes are shown the same way and the dial buttons show the three the same way
