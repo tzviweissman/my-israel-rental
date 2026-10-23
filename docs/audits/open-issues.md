@@ -24,7 +24,8 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] Hardcoded colours in new panels (PaymentRequestsPanel, AutomationsPanel, LeadsBoard, AppointmentsTab, RestockNotify) and the services map popup. First seen 21 Oct.
 - [Low] Page editor link filter accepts "/%2F/evil.com"; stays a path on this site, probably harmless. First seen 12 Oct.
 - [To check] Emails: replies go to support@myisraelrental.com; confirm that mailbox exists and is read. Tzvi.
-- [To check] The Brown Box: pinned film reported 64px taller than the room under the header; check on a real phone.
+- [To check] The Brown Box and Blazin' Boards: pinned opening reported 64 to 96px taller than the room under the header at 360 to 768 wide (23 Oct UI audit; screenshots show nothing hidden); check on a real phone.
+- [To fix] Audit setup: most runs since 15 Oct could not download Playwright or MongoDB in the sandbox, so pages behind sign-in, Hebrew renders and order flows were not checked.
 
 ## Fixed
 
