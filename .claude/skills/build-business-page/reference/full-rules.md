@@ -1763,6 +1763,17 @@ shellfish, no pork.
 Prompt shape that gives this (one line each, reused word for word across a set): the product and its plinth; the ingredients round it; the background colour; the light; the camera (eye level, three-quarter, shallow depth); "photorealistic advertising product photography, sharp product, no text added".
 
 
+**Right the first time, before any paid generation** (Tzvi, 24 Oct 2026, after the Bun Intended bun took two tries: "make a rule that will help us get it right the first time so we dont waste credits and waste time"). Before the first credit is spent, write `gen/<name>-brief.md` in the build and check it against these, then generate once:
+1. **The reference is cut first**: a close crop of the one item to show (their exact bun, platter, board), saved beside the brief. Never their whole photo of several items.
+2. **Describe what the crop shows**: look at the crop and write the item's own traits as they are (shape, height, colour, how it is rolled, poured or cut, topping, container, how many). The prompt keeps all of them, word for word.
+3. **Change only what the page needs**: the camera angle, the light, the setting. Say "keep it exactly as it is, only change ..." and name the change.
+4. **No idealising or design words**: never "perfect", "neat", "symmetrical", "clearly readable", "crisp lines", or what the page will do with it. Those make a stock photo.
+5. **Match the set**: if other shots of this business exist, reuse their setting and light lines word for word (point 8 above).
+6. **Stills before video**: a 2-credit still is checked and approved before a 10-credit clip, and the clip starts from that approved still.
+7. **Compare before showing**: put the result beside their photo and check each trait from step 2; any that changed is fixed in one redo that names only that trait. Then show Tzvi the pair.
+8. **Log it**: the brief keeps the reference, the exact prompt, the model and the result, so the next shot for that business reuses what worked.
+
+
 **AI images and video** (Higgsfield). Tzvi, 23 Sep 2026: owners should be
 able to look professional even when their own photos aren't, "a moist steaming
 piece of meat being sliced" on Blazin' Boards (food in motion is now film-only,
