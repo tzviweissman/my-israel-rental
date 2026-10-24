@@ -15,7 +15,7 @@ import React, { useContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
-import { BadgeCheck, ExternalLink, Flag, Loader2, Star } from 'lucide-react';
+import { BadgeCheck, ExternalLink, Flag, Loader2, Sparkles, Star } from 'lucide-react';
 import { API, AuthContext } from '../../App';
 import StarRating from '../marketplace/StarRating';
 
@@ -145,6 +145,18 @@ function ReportForm({ review, token, onDone, t }) {
 function RespondForm({ review, token, onSaved, onCancel, t }) {
   const [text, setText] = useState(review.owner_response?.text || '');
   const [busy, setBusy] = useState(false);
+  const [drafting, setDrafting] = useState(false);
+  // A suggestion only: it lands in the box and nothing posts until the owner taps Post.
+  const draft = async () => {
+    setDrafting(true);
+    try {
+      const { data } = await axios.post(`${API}/reviews/${review.id}/response-draft`, {}, { headers: { Authorization: `Bearer ${token}` } });
+      setText(data.text || '');
+    } catch {
+      toast.error(t('reviews.draftFailed', 'Could not write a draft. Write your own, or try again.'));
+    }
+    setDrafting(false);
+  };
   const save = async (e) => {
     e.preventDefault();
     if (!text.trim()) return;
@@ -159,11 +171,17 @@ function RespondForm({ review, token, onSaved, onCancel, t }) {
   };
   return (
     <form onSubmit={save} className="mt-3 space-y-2" data-testid="review-respond-form">
-      <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={2000} rows={3} required
+      <textarea value={text} onChange={(e) => setText(e.target.value)} maxLength={2000} rows={5} required
         aria-label={t('reviews.respondLabel', 'Your public response')}
         placeholder={t('reviews.respondPlaceholder', 'Your public response. Everyone who reads the review will see it.')}
-        className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: BORDER }} />
-      <div className="flex gap-3">
+        className="w-full px-3 py-2 rounded-lg border text-sm" style={{ borderColor: BORDER }} dir="auto" />
+      <p className="text-xs" style={{ color: MUTED }}>{t('reviews.draftHint', 'Check the draft and change anything before you post it.')}</p>
+      <div className="flex flex-wrap gap-3">
+        <button type="button" onClick={draft} disabled={drafting || busy} data-testid="review-respond-draft"
+          className="btn-accent min-h-[44px] px-4 rounded-full text-sm font-bold inline-flex items-center gap-2 disabled:opacity-50">
+          {drafting ? <Loader2 size={16} className="animate-spin" aria-hidden="true" /> : <Sparkles size={16} aria-hidden="true" />}
+          {drafting ? t('reviews.drafting', 'Writing...') : t('reviews.draft', 'Write a reply for me')}
+        </button>
         <button type="submit" disabled={busy || !text.trim()} className="min-h-[44px] px-4 rounded-full text-sm font-bold disabled:opacity-50"
           style={{ background: 'var(--action)', color: 'var(--action-ink)' }}>
           {t('reviews.respondSave', 'Post response')}

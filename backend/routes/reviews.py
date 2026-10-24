@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 from datetime import UTC, datetime, timedelta
 
 import httpx
@@ -185,6 +186,54 @@ async def respond_to_review(review_id: str, payload: dict = Body(...), user=Depe
     except rv.ReviewError as e:
         _raise(e)
     return rv.public_review(doc)
+
+
+_DRAFT_SYSTEM = (
+    "You write a short public reply from a small business in Israel to one customer review. "
+    "2 to 4 sentences, warm and plain, like a real owner. Thank them; mention one specific thing they said. "
+    "If the review is negative, apologise once, do not argue, and invite them to get in touch to put it right. "
+    "Never invent facts, never promise refunds, discounts or gifts, never ask for a better rating. "
+    "No signature, no name at the end, no hashtags, no emoji, no long dashes. "
+    "Output only the reply text."
+)
+
+
+@router.post("/reviews/{review_id}/response-draft")
+async def draft_review_response(review_id: str, request: Request, user=Depends(verify_token)) -> dict:
+    """A suggested reply the owner edits and posts themselves; nothing is
+    saved here. Same owner and source checks as posting a response."""
+    _need_native()
+    r = await db.reviews.find_one({"_id": review_id})
+    if not r:
+        raise HTTPException(status_code=404, detail={"code": "not_found", "message": "Review not found."})
+    if user["user_id"] not in (r.get("owner_user_ids") or []):
+        raise HTTPException(status_code=403, detail={"code": "not_owner", "message": "Only the listing's owner can respond."})
+    if r["source"] != "native":
+        raise HTTPException(status_code=403, detail={"code": "reply_on_google", "message": "Reply to Google reviews on Google."})
+    check_rate(request, bucket="review-draft-user", limit=30, window_seconds=86400, key_extra=user["user_id"], ip_agnostic=True)
+
+    from routes.deps import ANTHROPIC_API_KEY
+    from utils.llm import LlmChat, UserMessage
+    if not ANTHROPIC_API_KEY:
+        raise HTTPException(status_code=503, detail={"code": "unavailable", "message": "Drafting is not available right now."})
+    biz = await db.businesses.find_one({"_id": r.get("business_id")}, {"name": 1}) or {}
+    body = (r.get("text") or "")[:3000]
+    # Told, not guessed: left to itself the model answered an English review in Hebrew.
+    lang = "Hebrew" if re.search(r"[֐-׿]", body) else "English"
+    prompt = (f"Write the reply in {lang}.\n"
+              f"Business: {biz.get('name') or 'our business'}\n"
+              f"Reviewer's first name: {r.get('author_display_name') or 'unknown'}\n"
+              f"Rating: {r.get('rating')} out of 5\n"
+              f"Review:\n{body or '(no text, rating only)'}")
+    chat = LlmChat(api_key=ANTHROPIC_API_KEY, session_id=review_id, system_message=_DRAFT_SYSTEM)
+    # Sonnet, not Haiku: Haiku's Hebrew came back with broken words.
+    chat.with_model("anthropic", "claude-sonnet-4-6").with_params(max_tokens=400)
+    try:
+        text = (await chat.send_message(UserMessage(text=prompt))).strip().strip('"')
+    except Exception as exc:  # noqa: BLE001 - the owner can still write their own
+        logger.warning("[reviews] draft failed: %s", exc)
+        raise HTTPException(status_code=502, detail={"code": "draft_failed", "message": "Could not write a draft."}) from exc
+    return {"text": text.replace("—", ",").replace("–", ",")[:2000]}
 
 
 @router.post("/reviews/{review_id}/report")
