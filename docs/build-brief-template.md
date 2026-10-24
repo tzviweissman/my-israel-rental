@@ -20,7 +20,7 @@ Build [new site / rework] for **[business name]** ([category: food-shop, place, 
 
 **6. Copy.** Their words first; "we" for the business, "you" for the visitor; no long dashes, no exclamation marks, no slogans; a headline says what the customer gets.
 
-**7. Prove it** (rule 3a, every rule, every site). `node scripts/check-build.mjs scrollcraft/builds/[folder]` must pass: it runs check-site, check-fits, check-motion and readable on every page, then check-concept, check-fingerprints and check-rules. RULES.md answers every checklist line with a real reason ("not judged" and the like are refused). Then put screenshots on one sheet (laptop 1440x900 and phone 390x844, the opening at several scroll points) and look at it yourself; fix what looks weak before replying.
+**7. Prove it** (rule 3a, every rule, every site). `node scripts/check-build.mjs scrollcraft/builds/[folder]` must pass: it runs check-site, check-fits, check-motion and readable on every page, then check-concept, check-fingerprints and check-rules. RULES.md answers every checklist line with a real reason ("not judged" and the like are refused). It also measures the opening (check-site SMOOTH: 60 fps; SLOW: at least 3 screens of scroll). Then put screenshots on one sheet (laptop 1440x900 and phone 390x844, the opening at several scroll points) and look at it yourself (the product on a plain ground of its own world, never on a photo of the same food; nothing cut by an edge; no half props) and fix what looks weak before replying.
 
 **Never:** commit, push or publish; touch other sites, fingerprints.json (unless told), backend or frontend; kill processes by name; print secrets; sign as Tzvi.
 

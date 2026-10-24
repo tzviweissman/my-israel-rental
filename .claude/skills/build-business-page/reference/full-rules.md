@@ -697,6 +697,14 @@ make their sites so beautiful: the imagery first, and almost nothing else.
 
 ## 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
 
+**Smooth, slow enough to see, and clean** (Tzvi, 24-25 Oct 2026, Blazin' Boards: "the board flies in but not smoothly ... a meatboard on a meatboard ... part of the picture is cut off ... the effects and the pictures are a little delayed"; Bun Intended: "it moves too glitchy and quick for me to see the full effect clearly"). Every scroll-driven opening:
+1. **Runs at 60 fps.** Scrolling it keeps frames under 20 ms. No full-screen blended (mix-blend-mode) or blurred (backdrop-filter) layers over a moving scene, no filters on moving images, no per-frame redraw of text on a canvas (draw it once offscreen), and the shown progress eases toward the scroll so wheel notches glide.
+2. **Is long enough to see.** At least 3 screens of scroll, about 4 to 4.5 for a story with several beats; each beat holds long enough to read.
+3. **Shows the product on a plain ground of its own world**, never on a photo of the same kind of product (a board on a board).
+4. **Keeps the product and every photo whole**: nothing cut by the screen edge or by the photo's own framing, unless the bleed is clearly deliberate; crop out half props.
+5. **Loads the first screen first**: the opening's images preloaded, everything below lazy.
+check-site SMOOTH and SLOW enforce 1 and 2; 3 to 5 are looked at on the sheet before showing.
+
 Tzvi: "it looks wow, much nicer than what you made for the brown box ... every
 detail is crisp and clear and makes a person want to try some." Side by side,
 The Brown Box's first opening was a locked camera on a small bowl against a
