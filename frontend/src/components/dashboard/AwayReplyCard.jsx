@@ -45,7 +45,7 @@ export default function AwayReplyCard({ API, auth, businessId }) {
                    className="w-5 h-5 shrink-0" style={{ accentColor: 'var(--gold)' }} data-testid="away-reply-on" />
           </label>
           <p className="text-xs mb-2" style={{ color: 'var(--brand-muted)' }}>
-            {t('awayReply.body', 'When a customer messages you here and you have not answered within {{count}} minutes, they get one friendly reply in your name, so they wait for you instead of asking someone else. Once a day per customer. Messages on WhatsApp are not included.', { count: s.minutes || 10 })}
+            {t('awayReply.body', 'When a customer messages you here and you have not answered within {{minutes}} minutes, they get one friendly reply in your name, so they wait for you instead of asking someone else. Once a day per customer. Messages on WhatsApp are not included.', { minutes: s.minutes || 10 })}
           </p>
           {s.on && (
             <>
