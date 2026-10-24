@@ -148,7 +148,7 @@ export default function CalendarSyncPanel({ API, token }) {
                       <li key={i.id} className="flex items-center gap-3 rounded-xl border px-3 py-2" style={{ borderColor: BORDER }}>
                         <span className="flex-1 min-w-0 text-[13px]">
                           <span dir="ltr" className="block truncate" style={{ color: 'var(--ink)' }}>{i.label}</span>
-                          <span className="block" style={{ color: i.error ? '#B42318' : MUTED }}>
+                          <span className="block" style={{ color: i.error ? 'var(--error-text)' : MUTED }}>
                             {i.error || t('calSync.busyCount', '{{n}} busy times blocked', { n: i.busy_times })}
                           </span>
                         </span>

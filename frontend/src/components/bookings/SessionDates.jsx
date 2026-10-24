@@ -67,7 +67,7 @@ export default function SessionDates({ gig }) {
                 <div className="min-w-0">
                   <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{label(d)}{d.time ? ` · ${d.time}` : ''}</p>
                   {d.note && <p className="text-xs" dir="auto" style={{ color: 'var(--brand-muted)' }}>{d.note}</p>}
-                  <p className="text-xs mt-0.5" style={{ color: full ? '#B42318' : 'var(--brand-muted)' }}>
+                  <p className="text-xs mt-0.5" style={{ color: full ? 'var(--error-text)' : 'var(--brand-muted)' }}>
                     {full ? t('sessions.full', 'Full') : t('sessions.left', '{{n}} of {{total}} places left', { n: d.left, total: d.places })}
                   </p>
                 </div>

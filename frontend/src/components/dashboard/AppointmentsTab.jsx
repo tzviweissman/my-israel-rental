@@ -94,7 +94,7 @@ const DepositLine = ({ booking, API, token, onChanged }) => {
   const active = ['pending', 'accepted'].includes(booking.status);
   return (
     <div className="mt-3 flex flex-wrap items-center gap-2 text-xs" data-testid={`appointment-deposit-${booking.id}`}>
-      <span className="font-semibold" style={{ color: dep.status === 'due' || dep.status === 'to_return' ? '#B45309' : 'var(--ink)' }}>{label}</span>
+      <span className="font-semibold" style={{ color: dep.status === 'due' || dep.status === 'to_return' ? 'var(--waiting)' : 'var(--ink)' }}>{label}</span>
       {dep.status === 'due' && active && <button type="button" disabled={busy} onClick={() => set('paid')} className={btn} data-testid={`deposit-paid-${booking.id}`}>{t('deposit.markPaid', 'It arrived')}</button>}
       {dep.status === 'paid' && booking.status === 'accepted' && <button type="button" disabled={busy} onClick={() => set('kept')} className={btn} data-testid={`deposit-kept-${booking.id}`}>{t('deposit.noShow', 'They did not come, keep it')}</button>}
       {['paid', 'to_return', 'kept'].includes(dep.status) && !active && <button type="button" disabled={busy} onClick={() => set('returned')} className={btn}>{t('deposit.returned', 'I returned it')}</button>}

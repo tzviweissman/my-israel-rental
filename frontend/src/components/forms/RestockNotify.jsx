@@ -49,7 +49,7 @@ export default function RestockNotify({ gigId, productId, initialEmail = '' }) {
               style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }} data-testid={`restock-send-${productId}`}>
         {state === 'busy' && <Loader2 size={13} className="animate-spin" />} {t('restock.send', 'Email me')}
       </button>
-      {error && <p className="w-full text-xs" role="alert" style={{ color: '#B42318' }}>{error}</p>}
+      {error && <p className="w-full text-xs" role="alert" style={{ color: 'var(--error-text)' }}>{error}</p>}
     </div>
   );
 }

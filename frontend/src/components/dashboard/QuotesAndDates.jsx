@@ -162,7 +162,7 @@ export default function QuotesAndDates({ API, token }) {
                 <li key={k} className="rounded-xl border bg-white" style={{ borderColor: 'var(--brand-border)' }}>
                   <button type="button" onClick={() => setOpenDate(openDate === k ? null : k)} className="w-full flex items-center justify-between gap-2 p-3 text-start" aria-expanded={openDate === k}>
                     <span className="text-sm" style={{ color: 'var(--ink)' }}><b>{label(d)}{d.time ? ` · ${d.time}` : ''}</b> · {d.gig_title}</span>
-                    <span className="text-xs shrink-0" style={{ color: d.taken >= d.places ? '#B42318' : 'var(--brand-muted)' }}>{t('sessions.ownerCount', '{{n}} of {{total}} taken', { n: d.taken, total: d.places })}</span>
+                    <span className="text-xs shrink-0" style={{ color: d.taken >= d.places ? 'var(--error-text)' : 'var(--brand-muted)' }}>{t('sessions.ownerCount', '{{n}} of {{total}} taken', { n: d.taken, total: d.places })}</span>
                   </button>
                   {openDate === k && (
                     <ul className="px-3 pb-3 text-sm space-y-1" style={{ color: 'var(--ink)' }}>

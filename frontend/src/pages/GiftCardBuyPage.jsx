@@ -132,7 +132,7 @@ export default function GiftCardBuyPage() {
             <input type="tel" maxLength={20} autoComplete="tel" value={form.buyer_phone} onChange={set('buyer_phone')} className={field} style={fieldStyle} placeholder={t('gift.phone', 'Phone, so the business can arrange payment (optional)')} />
           </fieldset>
 
-          {error && <p className="text-sm" role="alert" style={{ color: '#B42318' }}>{error}</p>}
+          {error && <p className="text-sm" role="alert" style={{ color: 'var(--error-text)' }}>{error}</p>}
           <button type="submit" disabled={!amountOk || sending} className="w-full inline-flex justify-center items-center gap-2 min-h-[52px] rounded-full text-base font-semibold disabled:opacity-60"
                   style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="gift-submit">
             {sending && <Loader2 size={16} className="animate-spin" />}

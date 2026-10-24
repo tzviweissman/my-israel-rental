@@ -146,7 +146,7 @@ export default function MembershipSignupPage() {
               </div>
             );
           })()}
-          {error && <p className="text-sm" role="alert" style={{ color: '#B42318' }}>{error}</p>}
+          {error && <p className="text-sm" role="alert" style={{ color: 'var(--error-text)' }}>{error}</p>}
           <button type="submit" disabled={!pick || sending} className="w-full inline-flex justify-center items-center gap-2 min-h-[52px] rounded-full text-base font-semibold disabled:opacity-60"
                   style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="signup-submit">
             {sending && <Loader2 size={16} className="animate-spin" />} {t('members.signUp', 'Sign up')}

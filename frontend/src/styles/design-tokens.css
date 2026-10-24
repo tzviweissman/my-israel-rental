@@ -70,6 +70,12 @@
   /* Functional RED: destructive and urgent ONLY. The value its two callers
      already fell back to; defined so it lives in one place (site audit 27 Sep). */
   --destructive-solid:#DC2626;
+  /* Status text, from the values the dashboard already used (Tzvi, 24 Oct 2026; the 21 Oct audit found
+     them hardcoded in 16 places). WAITING: amber, for "waiting on you" (a customer says they paid, a deposit
+     is due); 5.0:1 on white. ERROR TEXT: a field or form error, a full class; 6.5:1 on white. Text only,
+     never a fill or a brand accent. */
+  --waiting:#B45309;
+  --error-text:#B42318;
 
   /* Shadows — reconciled to the preview's premium values (authoritative) */
   --shadow-sm:0 1px 2px rgba(30,45,60,.05),0 4px 14px rgba(30,45,60,.05);

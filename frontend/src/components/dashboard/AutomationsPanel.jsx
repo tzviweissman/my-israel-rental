@@ -821,7 +821,7 @@ export default function AutomationsPanel({ API, token, bizId, partners, listings
                   return (
                     <li key={r.id} className="py-2 border-t first:border-t-0 flex items-start gap-2" style={{ borderColor: 'var(--brand-border)' }} data-testid="automation-run">
                       {r.result === 'awaiting'
-                        ? <Clock size={14} className="mt-0.5 shrink-0" style={{ color: '#B45309' }} aria-hidden="true" />
+                        ? <Clock size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--waiting)' }} aria-hidden="true" />
                         : bad || r.result === 'skipped' || r.result === 'dismissed'
                         ? <AlertTriangle size={14} className="mt-0.5 shrink-0" style={{ color: bad ? 'var(--destructive-solid, #DC2626)' : 'var(--brand-muted)' }} aria-hidden="true" />
                         : <CheckCircle2 size={14} className="mt-0.5 shrink-0" style={{ color: 'var(--success, #1F8A50)' }} aria-hidden="true" />}

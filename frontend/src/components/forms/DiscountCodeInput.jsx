@@ -70,7 +70,7 @@ export default function DiscountCodeInput({ businessId, form, amount, phone, app
         </button>
         <button type="button" className="grid place-content-center w-11" aria-label={t('discounts.close', 'Close')} onClick={() => { setOpen(false); setError(''); }}><X size={16} /></button>
       </div>
-      {error && <p className="text-sm mt-1" role="alert" style={{ color: '#B42318' }} data-testid="discount-error">{error}</p>}
+      {error && <p className="text-sm mt-1" role="alert" style={{ color: 'var(--error-text)' }} data-testid="discount-error">{error}</p>}
     </div>
   );
 }

@@ -32,7 +32,7 @@ export default function NoticeEditor({ notice, onChange }) {
           <input type="date" className={`${box} mt-1`} style={boxStyle} value={n.ends_on || ''} onChange={set('ends_on')} data-testid="notice-until" />
         </label>
       </div>
-      {badDates && <p className="text-xs mt-1" role="alert" style={{ color: '#B42318' }}>{t('notice.badDates', 'The end date is before the start date.')}</p>}
+      {badDates && <p className="text-xs mt-1" role="alert" style={{ color: 'var(--error-text)' }}>{t('notice.badDates', 'The end date is before the start date.')}</p>}
       {n.text && (
         <button type="button" onClick={() => onChange(null)} className="text-xs underline mt-2 min-h-[36px]" style={{ color: 'var(--brand-muted)' }} data-testid="notice-remove">
           {t('notice.remove', 'Remove the notice')}

@@ -120,7 +120,7 @@ export default function BusinessInsights({ API, auth, businessId, onClose }) {
         </div>
       </div>
 
-      {err && <p className="text-sm" style={{ color: '#B42318' }}>{err}</p>}
+      {err && <p className="text-sm" style={{ color: 'var(--error-text)' }}>{err}</p>}
       {!data && !err && <div className="py-8 text-center"><Loader2 className="animate-spin inline" size={18} /></div>}
 
       {data && !data.since && (

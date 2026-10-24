@@ -101,7 +101,7 @@ export default function WebAddressField({ business, API, token, onChanged }) {
     ? { color: '#2E7D4F' }
     : state === 'current' || state === 'checking'
       ? { color: 'var(--brand-muted)' }
-      : { color: '#B42318' };
+      : { color: 'var(--error-text)' };
 
   return (
     <div className="pb-4 border-b" style={{ borderColor: 'var(--brand-border)' }} data-testid="web-address-field">

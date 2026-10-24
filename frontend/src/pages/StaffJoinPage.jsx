@@ -59,7 +59,7 @@ export default function StaffJoinPage() {
                   style={{ background: 'var(--action)', color: 'var(--action-ink)' }} data-testid="staff-accept">
             {busy && <Loader2 size={16} className="animate-spin" />} {t('staffJoin.accept', 'Accept and join')}
           </button>
-          {error && <p className="text-sm mt-3" role="alert" style={{ color: '#B42318' }}>{error}</p>}
+          {error && <p className="text-sm mt-3" role="alert" style={{ color: 'var(--error-text)' }}>{error}</p>}
         </>
       ) : (
         <>
