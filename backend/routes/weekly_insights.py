@@ -10,6 +10,12 @@ events in a fixed window of Israel calendar days; nothing is estimated.
              rentals by owner_id + source "property", as the dashboard does
   saves      liked_properties, rentals only (a business has no "save")
   reviews    marketplace_reviews, services only (rentals have none)
+  orders     store_orders of the businesses they own, not cancelled or
+             failed (shown once a business has had any order)
+  to do      (24 Oct 2026, from GoHighLevel) enquiries still waiting for an
+             answer on the leads board now, and customers who have not
+             been back for 90 days with an email to write to, as a nudge
+             towards the win-back message. Counts, never names.
 
 Rules from the brief (23 Sep 2026):
   * A week with no activity at all sends NO email. "0 visitors" in an
@@ -121,13 +127,18 @@ async def _count_views(owner_id: str, types: list[str], w: dict) -> dict[str, An
 async def stats_for(user_id: str, w: dict) -> dict[str, Any]:
     """{"services": {...} | None, "rentals": {...} | None} for one person.
     A half is None when they have nothing of that kind listed."""
-    out: dict[str, Any] = {"services": None, "rentals": None}
+    out: dict[str, Any] = {"services": None, "rentals": None, "todo": None}
     if await db.marketplace_gigs.count_documents({"provider_user_id": user_id, "status": "published"}, limit=1):
         out["services"] = {
             "views": await _count_views(user_id, SERVICE_TYPES, w),
             "taps": await _count_iso("lead_events", {"provider_id": user_id, "type": "whatsapp_click"}, w),
             "reviews": await _count_iso("marketplace_reviews", {"provider_user_id": user_id}, w),
         }
+        biz_ids = await db.businesses.distinct("_id", {"owner_user_id": user_id})
+        orders_q = {"business_id": {"$in": biz_ids}, "status": {"$nin": ["cancelled", "failed"]}}
+        if biz_ids and await db.store_orders.count_documents(orders_q, limit=1):
+            out["services"]["orders"] = await _count_iso("store_orders", orders_q, w)
+        out["todo"] = await todo_for(user_id, biz_ids)
     prop_ids = await db.properties.distinct("id", {"owner_id": user_id, "status": {"$ne": "archived"}})
     if prop_ids:
         out["rentals"] = {
@@ -138,8 +149,25 @@ async def stats_for(user_id: str, w: dict) -> dict[str, Any]:
     return out
 
 
+async def todo_for(user_id: str, biz_ids: list[str]) -> dict[str, int]:
+    """Enquiries waiting for an answer now, and customers worth a win-back
+    message, across the person's businesses. Never fails the email."""
+    from routes.marketplace.customer_messages import Audience, _recipients
+    from routes.marketplace.leads import leads_board
+    todo = {"waiting": 0, "lapsed": 0}
+    for bid in biz_ids:
+        try:
+            todo["waiting"] += (await leads_board(bid, {"user_id": user_id}))["counts"]["new"]
+            todo["lapsed"] += len((await _recipients(bid, Audience(kind="lapsed", days=90)))["recipients"])
+        except Exception as e:  # noqa: BLE001
+            logger.warning("[weekly-insights] to-do for %s failed: %s", bid, e)
+    return todo
+
+
 def has_activity(stats: dict) -> bool:
-    return any(m["n"] for half in stats.values() if half for m in half.values())
+    if any((stats.get("todo") or {}).values()):
+        return True
+    return any(m["n"] for k, half in stats.items() if half and k != "todo" for m in half.values())
 
 
 # --------------------------------------------------------------------------
@@ -159,6 +187,14 @@ COPY = {
         "taps": "Tapped to message you",
         "reviews": "New reviews",
         "saves": "Saved",
+        "orders": "Orders",
+        "todo": "Worth doing this week",
+        "waiting_one": "1 enquiry is waiting for your reply.",
+        "waiting": "{n} enquiries are waiting for your reply.",
+        "waiting_go": "Answer them",
+        "lapsed_one": "1 customer has not been back for 3 months. A short \"we miss you\" message often brings people back.",
+        "lapsed": "{n} customers have not been back for 3 months. A short \"we miss you\" message often brings people back.",
+        "lapsed_go": "Write to them",
         "up": "up from {b}",
         "down": "down from {b}",
         "same": "same as the week before",
@@ -179,6 +215,14 @@ COPY = {
         "taps": "לחצו כדי לשלוח לכם הודעה",
         "reviews": "ביקורות חדשות",
         "saves": "נשמר",
+        "orders": "הזמנות",
+        "todo": "כדאי לעשות השבוע",
+        "waiting_one": "פנייה אחת מחכה לתשובה שלכם.",
+        "waiting": "{n} פניות מחכות לתשובה שלכם.",
+        "waiting_go": "לענות",
+        "lapsed_one": "לקוח אחד לא חזר כבר 3 חודשים. הודעת \"מתגעגעים\" קצרה מחזירה הרבה לקוחות.",
+        "lapsed": "{n} לקוחות לא חזרו כבר 3 חודשים. הודעת \"מתגעגעים\" קצרה מחזירה הרבה לקוחות.",
+        "lapsed_go": "לכתוב להם",
         "up": "עלייה מ-{b}",
         "down": "ירידה מ-{b}",
         "same": "כמו בשבוע שלפני",
@@ -214,10 +258,11 @@ def render(name: str, stats: dict, w: dict, lang: str, optout_url: str) -> tuple
     other = "left" if lang == "he" else "right"
     sections = []
     total_views = 0
-    for half, metrics in (("services", ("views", "taps", "reviews")), ("rentals", ("views", "taps", "saves"))):
+    for half, metrics in (("services", ("views", "taps", "orders", "reviews")), ("rentals", ("views", "taps", "saves"))):
         s = stats.get(half)
         if not s:
             continue
+        metrics = [k for k in metrics if k in s]
         total_views += s["views"]["n"]
         rows = "".join(
             f'<tr><td style="padding:10px 0;padding-{other}:12px;border-bottom:1px solid #eee;color:#555;font-size:14px;text-align:{side};">{c[k]}</td>'
@@ -231,6 +276,16 @@ def render(name: str, stats: dict, w: dict, lang: str, optout_url: str) -> tuple
             f'<h3 style="font-size:15px;color:#111827;margin:24px 0 4px;text-align:{side};">{c[half]}</h3>'
             f'<table role="presentation" width="100%" cellspacing="0" cellpadding="0" border="0">{rows}</table>'
         )
+    todo = stats.get("todo") or {}
+    items = []
+    for key, url in (("waiting", "/dashboard?tab=customers&view=leads"), ("lapsed", "/dashboard?tab=customers")):
+        n = todo.get(key) or 0
+        if n:
+            text = c[f"{key}_one"] if n == 1 else c[key].format(n=n)
+            items.append(f'<p style="color:#111827;font-size:14px;line-height:1.7;margin:8px 0;">{_esc(text)} '
+                         f'<a href="{FRONTEND_URL}{url}" style="color:#167AB8;font-weight:bold;">{c[f"{key}_go"]}</a></p>')
+    if items:
+        sections.insert(0, f'<h3 style="font-size:15px;color:#111827;margin:24px 0 4px;text-align:{side};">{c["todo"]}</h3>' + "".join(items))
     subject = (c["subject_one"] if total_views == 1 else c["subject"].format(n=total_views)) if total_views else c["subject_quiet"]
     hi = c["hi"].format(name=_esc(name)) if name else c["hi_anon"]
     inner = (

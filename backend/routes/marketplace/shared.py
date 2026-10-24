@@ -995,8 +995,9 @@ async def record_chat_reply(property_id: str, sender_id: str, receiver_id: str, 
     if not gig or not receiver_id or receiver_id == sender_id:
         return
     convo = {"property_id": property_id}
+    # An automatic reply (away_reply.py) is not the provider answering.
     if await db.messages.find_one({**convo, "sender_id": sender_id, "receiver_id": receiver_id,
-                                   "created_at": {"$lt": sent_at}}, {"_id": 1}):
+                                   "created_at": {"$lt": sent_at}, "auto": {"$exists": False}}, {"_id": 1}):
         return
     first = await db.messages.find_one({**convo, "sender_id": receiver_id, "receiver_id": sender_id,
                                         "created_at": {"$lt": sent_at}}, {"created_at": 1}, sort=[("created_at", 1)])
