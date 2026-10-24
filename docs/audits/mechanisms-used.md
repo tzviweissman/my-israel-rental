@@ -147,3 +147,4 @@ already spent per the task brief even though its entry could not be sourced here
 2026-10-19 - loss aversion avoided; commitment/consistency (progress shown after first item) - Chicken Munch order bar
 2026-10-20 - none proposed - (no new idea; see ui audit)
 2026-10-21 - chunking - multi-business map popup (`ServicesMapView.jsx:213`)
+2026-10-24 - peak-end rule - blazin-boards order confirmation page

@@ -10,6 +10,7 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 ## Open
 
 Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged), each line re-checked against main.
+- [Medium] Chicken Munch (all pages): on phones the page scrolls sideways (439px wide on 375) and the opening word "CHICKEN" runs off both edges. First seen 24 Oct (2026-10-24-ui-audit.md). Open, needs a design choice.
 
 - [Low] Page editor link filter accepts "/%2F/evil.com"; stays a path on this site, probably harmless. First seen 12 Oct.
 - [To check] The Brown Box and Blazin' Boards: pinned opening reported 64 to 96px taller than the room under the header at 360 to 768 wide (23 Oct UI audit; screenshots show nothing hidden); check on a real phone.
