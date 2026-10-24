@@ -19,6 +19,7 @@ MyIsraelRental — a rental/marketplace web app. FastAPI backend (`backend/`) + 
 
 ## Before making changes
 
+- **Business sites have a commit check** (Tzvi, 24 Oct 2026: "the rules get skipped a lot"). `.githooks/pre-commit` refuses a commit that touches a site in `scrollcraft/builds/` unless `check-rules` and `check-concept` pass for it, and refuses a live page in `frontend/public/pages/` that differs from what `scripts/publish-page.mjs` wrote (edit the build, then republish; publishing runs fits, site and motion). Turn it on in every clone or worktree with `git config core.hooksPath .githooks`. Never commit with `--no-verify` to get past it: fix the site. `node scripts/publish-page.mjs <folder> <slug> --check` lists every problem without publishing.
 - **Look for existing code first.** Check `backend/routes/` and `backend/utils/` before adding a new backend module; check `frontend/src/components/` and `frontend/src/utils/` before adding a new frontend one. Don't duplicate what's already there.
 - **Guard costly or irreversible operations.** Confirm before: calls that spend real API credit (Anthropic, Cloudinary uploads at scale), writes to the production Atlas database, `git push`, and anything that triggers a Railway deploy. A dry run first is usually the right move when a script is about to touch production data.
 - **Ask before broad edits to this file or other standing config** (`.gitignore`, `railway.json`, `nixpacks.toml`, CI config). These are load-bearing — a wrong edit breaks the build silently.
