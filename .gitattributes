@@ -1,0 +1,2 @@
+# Git hooks run under sh: a CRLF checkout (core.autocrlf=true here) would break them
+.githooks/* text eol=lf
