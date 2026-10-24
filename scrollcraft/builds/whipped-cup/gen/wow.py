@@ -18,7 +18,6 @@ HERO2 = '''  <section class="hero2" id="open" aria-labelledby="h-open">
         <p class="proof"><b>From ₪40</b> a jar<br>Kosher certified</p>
       </div>
     </div>
-    <span class="scroll-hint" aria-hidden="true">Scroll</span>
   </section>
 '''
 
@@ -169,7 +168,6 @@ SKY = '''  <section class="sky" id="open" aria-labelledby="h-open">
         <p class="lede">Whipped coffee in a jar, handcrafted, fresh and delivered to your door. Each jar makes 3 to 4 coffees.</p>
         <div class="act"><a class="btn light" href="shop.html">Order your jars <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a><p class="proof"><b>From ₪40</b> a jar<br>Kosher certified</p></div>
       </div>
-      <span class="scroll-hint" id="sky-hint" aria-hidden="true">Scroll</span>
     </div>
   </section>
 '''
@@ -178,7 +176,7 @@ SKY_JS = '''<script>
 (function () {
   var sec = document.getElementById('open'); if (!sec) return;
   var v = document.getElementById('sky-v'), svg = document.getElementById('sky-win'), g = document.getElementById('skyclip'), img = document.getElementById('skyimg');
-  var line = sec.querySelector('.sky-line'), end = document.getElementById('sky-end'), hint = document.getElementById('sky-hint');
+  var line = sec.querySelector('.sky-line'), end = document.getElementById('sky-end');
   var tall = matchMedia('(max-aspect-ratio: 3/4)').matches;
   v.poster = tall ? 'assets/clouds-tall.webp' : 'assets/clouds-wide.webp';
   v.src = tall ? 'assets/clouds-tall.mp4' : 'assets/clouds-wide.mp4';
@@ -223,7 +221,6 @@ SKY_JS = '''<script>
     var t = clamp((p - .66) / .08);
     [].forEach.call(end.children, function (c) { c.style.opacity = t; c.style.transform = 'translateY(' + ((1 - t) * 24) + 'px)'; });
     end.style.pointerEvents = p > .7 ? 'auto' : 'none';
-    hint.style.opacity = 1 - clamp(p / .08);
   }
   size(); addEventListener('resize', function () { size(); frame(); });
   if (reduce) { draw(1); line.style.opacity = 1; line.style.transform = 'none'; return; }  // motion off: the question stays in the page for readers, out of sight (the end card is the whole page)

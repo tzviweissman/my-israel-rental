@@ -1,0 +1,306 @@
+/* The STRUCTURE every designed site shares (page rules 3k), from
+   scrollcraft/starter. It sets how things work, not how the business looks:
+   every value marked CHANGE is the brand, chosen fresh for each business from
+   its own logo, photos and menu, and checked with
+   `node scripts/check-fingerprints.mjs <build>` so no two sites look alike.
+   Never start a look from another site's tokens. */
+:root {
+  /* CHANGE: the brand. Ground, surface, ink, soft text, the accent, the line. */
+  --ground: #FEF7E5; --surface: #FFEDBB; --ink: #111111; --soft: #3D3A36; --accent: #111111; --accent-ink: #FEF7E5; --line: #EFCB72; --mustard: #FDB225; --mustard-lt: #FFD267; --cream: #FEF7E5; --d2: clamp(2.4rem, 4.6vw, 4rem); --d3: clamp(1.6rem, 2.4vw, 2rem); --pr: clamp(2.2rem, 3.4vw, 3rem); --night: #141414;
+  /* CHANGE: three faces at most, none the same as another site's heading face. */
+  --font-head: 'League Gothic', 'Heebo', 'Arial Narrow', Impact, sans-serif; --font-body: 'Barlow', 'Heebo', system-ui, sans-serif;
+  /* CHANGE: one radius for images and buttons. */
+  --r: 22px;
+  --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --top-h: 68px; --out: cubic-bezier(.2, .7, .2, 1);
+}
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; overflow-x: clip; background: var(--ground); color: var(--ink); font: 400 1rem/1.6 var(--font-body); -webkit-font-smoothing: antialiased; }
+img { display: block; max-width: 100%; }
+h1, h2, h3 { font-family: var(--font-head); margin: 0; line-height: 1.04; }
+.wrap { max-width: 74rem; margin: 0 auto; padding-inline: var(--gutter); }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+[hidden] { display: none !important; }
+.sym { font-family: var(--font-body); font-weight: 500; font-size: .62em; margin-right: .08em; vertical-align: .18em; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+/* the one solid button and the outline one; every button reacts when pressed */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: .6rem; min-height: 54px; padding: 0 1.7rem; border-radius: 999px; border: 0;
+  background: var(--accent); color: var(--accent-ink); font: 600 1rem/1 var(--font-body); text-decoration: none; cursor: pointer; transition: transform 160ms var(--out), filter 160ms; }
+.btn[aria-busy="true"] { opacity: .7; pointer-events: none; }
+/* CHANGE: the button's hover and press (effects.button in fingerprints.json),
+   found by a fresh 21st search for this business, never copied from the last
+   site. The starter used to hold a lift, press and travelling arrow here, and
+   every site built from it came out with the same button (rules 3p.4). */
+.btn-line { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 1.15rem; border-radius: 999px; border: 2px solid var(--ink);
+  color: var(--ink); font: 600 1rem/1 var(--font-body); text-decoration: none; background: transparent; cursor: pointer; transition: background 160ms, color 160ms, transform 140ms; }
+/* CHANGE: the outline button's hover and press, chosen with the main one */
+
+/* the menu bar: the same on every page; on a phone the pages fold into Menu */
+.top { position: fixed; inset: 0 0 auto; z-index: 30; height: var(--top-h); display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding-inline: var(--gutter);
+  background: var(--night); border-bottom: 1px solid transparent; transition: border-color 240ms; }
+.top.solid { border-bottom-color: #3a3a3a; }
+.mark { display: inline-flex; align-items: center; gap: .6rem; text-decoration: none; color: var(--cream); font: 400 var(--d3)/1 var(--font-head); letter-spacing: .02em; }
+.mark img { width: 40px; height: 40px; border-radius: 50%; }
+.nav { display: flex; gap: .2rem; }
+.nav a { padding: .55rem .9rem; border-radius: 999px; color: #E9DDB8; font: 600 1rem/1 var(--font-body); text-decoration: none; transition: color 160ms, background 160ms; }
+.nav a:hover, .nav a[aria-current="page"] { color: var(--night); background: var(--mustard); }
+.top-r { display: flex; align-items: center; gap: .6rem; }
+.count { display: inline-grid; place-items: center; min-width: 22px; height: 22px; margin-left: .45rem; padding: 0 6px; border-radius: 999px; background: var(--mustard); color: var(--night); font: 800 .875rem/1 var(--font-body); }
+.menu-btn { display: none; min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 2px solid #4a4a4a; background: transparent; color: var(--cream); font: 600 1rem/1 var(--font-body); cursor: pointer; }
+@media (max-width: 800px) {
+  .menu-btn { display: inline-flex; align-items: center; }
+  .top .btn-line { display: none; }
+  .nav { position: fixed; inset: var(--top-h) 0 auto; flex-direction: column; gap: 0; padding: .4rem var(--gutter) 1.2rem; background: var(--night); border-bottom: 1px solid #3a3a3a;
+    transform: translateY(-8px); opacity: 0; visibility: hidden; transition: opacity 200ms var(--out), transform 200ms var(--out), visibility 0s 200ms; }
+  .nav.shown { transform: none; opacity: 1; visibility: visible; transition: opacity 200ms var(--out), transform 200ms var(--out); }
+  .nav a { padding: 1rem .4rem; border-radius: 0; border-bottom: 1px solid #3a3a3a; font-size: 1.125rem; }
+}
+
+/* sections, reveals and inner page heads */
+section.sec { padding-block: clamp(4.5rem, 10vw, 7.5rem); }
+.sec h2 { font-size: var(--d2); }
+.sec .lede { color: var(--soft); font-size: 1.125rem; max-width: 36rem; margin: .9rem 0 0; }
+/* CHANGE: how sections appear (effects.reveal). site.js adds .in to each .rev
+   as it comes into view; the look is chosen per site (fade up was on all nine
+   live pages, 20 Oct 2026). Write .rev and .rev.in below the marked line, and
+   keep .no-js .rev and reduced motion visible. */
+.no-js .rev { opacity: 1; transform: none; }
+.page-head { padding: calc(var(--top-h) + clamp(3rem, 8vw, 5rem)) 0 0; }
+.page-head h1 { font-size: var(--d2); }
+.page-head .lede { color: var(--soft); font-size: 1.125rem; max-width: 38rem; margin: 1rem 0 0; }
+
+/* owner-filled places (3m): gallery and questions */
+.gal-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; margin-top: clamp(2rem, 4vw, 3rem); }
+.gal-grid[data-count="1"] { grid-template-columns: minmax(0, 46rem); }
+.gal-grid[data-count="2"], .gal-grid[data-count="4"] { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.gal-ph { margin: 0; border-radius: var(--r); overflow: hidden; aspect-ratio: 4 / 3; background: var(--surface); }
+.gal-ph img { width: 100%; height: 100%; object-fit: cover; }
+@media (max-width: 760px) { .gal-grid { grid-template-columns: 1fr 1fr; } }
+.faq-list { margin-top: clamp(1.5rem, 3vw, 2.2rem); max-width: 50rem; }
+.faq-q { border-top: 1px solid var(--line); } .faq-q:last-child { border-bottom: 1px solid var(--line); }
+.faq-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 1rem; padding: 1.1rem 0; font: 600 1.125rem/1.35 var(--font-body); }
+.faq-q summary::-webkit-details-marker { display: none; }
+.faq-q summary::after { content: '+'; color: var(--accent); font-size: 1.125rem; line-height: 1; transition: transform 200ms var(--out); }
+.faq-q[open] summary::after { transform: rotate(45deg); }
+.faq-q p { margin: 0 0 1.2rem; color: var(--soft); }
+
+/* forms (order or book) */
+.form { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: clamp(1.5rem, 4vw, 3rem); margin-top: clamp(1.5rem, 3vw, 2.4rem); align-items: start; }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); padding: clamp(1.2rem, 3vw, 1.7rem); }
+.card + .card { margin-top: 1.1rem; }
+label.f { display: block; font-weight: 600; font-size: 1rem; margin: .9rem 0 .35rem; }
+.fld { width: 100%; min-height: 48px; padding: .7rem .9rem; border-radius: 12px; border: 1.5px solid var(--line); background: var(--ground); color: var(--ink); font: 400 1rem/1.4 var(--font-body); }
+textarea.fld { min-height: 88px; resize: vertical; }
+.fld:focus { outline: 3px solid var(--accent); outline-offset: 1px; }
+.bad .fld { border-color: #B3261E; }
+.err { color: #A3221B; font-size: .875rem; margin: .3rem 0 0; min-height: 1.1em; }
+.sum { position: sticky; top: calc(var(--top-h) + 20px); }
+@media (max-width: 860px) { .form { grid-template-columns: 1fr; } .sum { position: static; } }
+
+/* the closing band, footer and phone bar */
+.close { padding-top: clamp(3.5rem, 8vw, 6rem); overflow: hidden; background: var(--ink); color: var(--ground); }
+.close .wrap { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 1.2rem; align-items: center; }
+.close h2 { font-size: var(--d2); }
+.close p { margin: .5rem 0 0; line-height: 1.8; opacity: .9; }
+.close p a { color: inherit; font-weight: 700; white-space: nowrap; }
+.giant { font: 700 min(11vw, 34svh)/1 var(--font-head); white-space: nowrap; text-align: center; margin: clamp(2rem, 5vw, 3rem) 0 0; padding-bottom: .08em; opacity: .9; }
+.foot { background: var(--ink); color: var(--ground); opacity: .95; font-size: .875rem; text-align: center; padding: 1.1rem var(--gutter) calc(1.1rem + var(--pad-bar, 0px)); }
+.foot a { color: inherit; } .foot nav { margin-bottom: .55rem; font-weight: 600; } .foot nav a { margin: 0 .35rem; }
+.bar { position: fixed; inset: auto 0 0; z-index: 25; display: none; align-items: center; justify-content: space-between; gap: .8rem; height: calc(var(--bar-h) + env(safe-area-inset-bottom));
+  padding: 0 var(--gutter) env(safe-area-inset-bottom); background: var(--surface); border-top: 1px solid var(--line); transform: translateY(110%); transition: transform 300ms var(--out); }
+.bar.on { transform: none; }
+.bar .p { font-size: .875rem; line-height: 1.25; margin: 0; color: var(--soft); }
+.bar .p b { color: var(--ink); font: 400 var(--d3)/1 var(--font-head); display: block; }
+.bar .btn { min-height: 46px; padding: 0 1.2rem; }
+@media (max-width: 760px) { .bar { display: flex; } body { --pad-bar: var(--bar-h); } }
+@media (prefers-reduced-motion: reduce) { .rev, .rev.in { opacity: 1 !important; transform: none !important; filter: none !important; clip-path: none !important; transition: none !important; } }
+
+/* ── BELOW HERE: this business only. Its opening, its signature moment, its
+   sections. Nothing here is copied from another site. ── */
+
+/* ── American Crust: mustard and black from their flyers and logo (the owner's look wins, rule 3t) ── */
+.top .btn-line { border-color: var(--cream); color: var(--cream); }
+.top .btn-line:hover { background: var(--cream); color: var(--night); }
+.top .btn-line:active { transform: scale(.96); }
+.menu-btn:hover { border-color: var(--cream); }
+h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
+.kick { margin: 0 0 .5rem; font: 700 .875rem/1.2 var(--font-body); letter-spacing: .12em; text-transform: uppercase; }
+
+/* button B9: a round chip with a plus turns a quarter on hover; pressed sinks */
+.btn { gap: .7rem; }
+.btn .chip { display: inline-grid; place-items: center; width: 24px; height: 24px; border-radius: 50%; background: currentColor; transition: transform 320ms var(--out); flex: none; }
+.btn .chip::before { content: '+'; font: 700 1.125rem/1 var(--font-body); color: var(--accent); margin-top: -1px; }
+.btn:hover .chip { transform: rotate(90deg); }
+.btn:active { transform: scale(.96); }
+.btn.added .chip { transform: rotate(90deg) scale(1.15); }
+.btn.idle { opacity: .55; }
+.close .btn { background: var(--mustard); color: var(--night); }
+.close .btn:hover { background: var(--mustard-lt); }
+/* link L6: a marker stroke grows up behind the words */
+.lnk { color: inherit; font-weight: 700; text-decoration: none; background: linear-gradient(var(--mustard), var(--mustard)) 0 100% / 100% 34% no-repeat; transition: background-size 220ms var(--out); }
+.lnk:hover { background-size: 100% 100%; color: var(--night); }
+.close p a { text-decoration: underline 3px var(--mustard); text-underline-offset: .2em; transition: color 200ms; } .close p a:hover { color: var(--mustard); }
+/* reveal R5: scale up into place */
+.rev { transform-origin: 0 50%; opacity: 0; transform: scale(.95); transition: opacity 600ms var(--out), transform 700ms var(--out); }
+.rev.in { opacity: 1; transform: none; }
+/* heading H4: the key word is underlined by a stroke that draws in */
+.u { background: linear-gradient(currentColor, currentColor) 0 94% / 0 .07em no-repeat; transition: background-size 700ms var(--out) 250ms; }
+.rev.in .u, .no-js .u { background-size: 100% .07em; }
+/* price P6: a mustard marker under the figure, set in the text colour */
+.pr { position: relative; font: 400 var(--pr)/1.3 var(--font-head); display: inline-block; margin-bottom: .2em; padding-inline: .05em; }
+.pr::after { content: ''; position: absolute; left: 0; right: 0; bottom: -.2em; height: .09em; background: var(--mustard); }
+.sym { font-size: .55em; }
+
+/* the opening (rule 3h): their dough boiled, baked and bragged about, a full-screen film the scroll drives; each word lights on its chapter */
+.open { position: relative; height: 380vh; background: var(--night); color: var(--cream); }
+.open .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
+#cv { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+.open .stage::before { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(90deg, rgba(20, 20, 20, .88) 0%, rgba(20, 20, 20, .72) 34%, rgba(20, 20, 20, .3) 52%, rgba(20, 20, 20, 0) 68%), linear-gradient(0deg, rgba(20, 20, 20, .6), rgba(20, 20, 20, 0) 35%); }
+.open .wrap { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: center; gap: 1.4rem; padding-top: var(--top-h); }
+.open h1 { font-size: clamp(3rem, min(10vw, 10svh), 6.5rem); line-height: .9; color: var(--cream); }
+.open h1 .w { display: block; transition: color 400ms var(--out), opacity 400ms var(--out), transform 500ms var(--out); }
+.open .w1 { color: var(--mustard); }
+.open .w2, .open .w3 { opacity: .22; transform: translateX(-.15em); }
+.open.c2 .w1 { color: var(--cream); } .open.c2 .w2 { opacity: 1; transform: none; color: var(--mustard); }
+.open.c3 .w2 { color: var(--cream); } .open.c3 .w3 { opacity: 1; transform: none; color: var(--mustard); }
+.open .lede { margin: 0; font-size: 1.2rem; max-width: 24rem; color: var(--cream); }
+.open .end { display: grid; gap: 1.1rem; justify-items: start; }
+.open .btn { background: var(--mustard); color: var(--ink); }
+.open .go { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
+.open .from { margin: 0; font: 600 1rem/1.35 var(--font-body); color: var(--cream); }
+@media (max-width: 760px) {
+  .open { height: 340vh; }
+  .open .stage::before { background: linear-gradient(0deg, rgba(20, 20, 20, .92) 0%, rgba(20, 20, 20, .8) 50%, rgba(20, 20, 20, .25) 80%); }
+  .open .wrap { justify-content: flex-end; padding-bottom: 2.4rem; }
+  .open h1 { font-size: clamp(3rem, 15vw, 4.4rem); }
+  .open .lede { font-size: 1.05rem; }
+  }
+@media (prefers-reduced-motion: reduce) { .open { height: 100vh; height: 100svh; } .open .w2, .open .w3 { opacity: 1; transform: none; } }
+
+/* the two products as cards, right under the opening: colour per product (mustard-light, night) */
+.buy { background: var(--mustard); padding: 0 var(--gutter) clamp(1.2rem, 3vh, 2rem); }
+.buy .pcs { max-width: calc(74rem - 2 * var(--gutter)); margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.pc { display: grid; grid-template-columns: minmax(130px, 48%) minmax(0, 1fr); border-radius: var(--r); overflow: hidden; background: var(--mustard-lt); color: var(--night); transition: transform 260ms var(--out), box-shadow 260ms; box-shadow: 0 3px 30px rgba(17, 17, 17, .12); }
+.pc.night { background: var(--night); color: var(--cream); }
+.pc .ph { position: relative; min-height: 100%; }
+.pc .ph img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
+.pc .info { padding: clamp(.8rem, 1.6vw, 1.3rem); display: flex; flex-direction: column; gap: .15rem; min-width: 0; }
+.pc h3 { font-size: var(--d3); line-height: 1.02; }
+.pc .sub { margin: 0; font-weight: 600; font-size: 1rem; }
+.pc .mk { margin: .15rem 0 0; font-size: .875rem; opacity: .85; }
+.pc .row { display: flex; align-items: center; justify-content: space-between; gap: .6rem; margin-top: auto; padding-top: .5rem; flex-wrap: wrap; }
+.pc.night .btn { background: var(--mustard); color: var(--night); } .pc.night .btn .chip::before { color: var(--mustard); }
+.pc .btn { min-height: 48px; padding: 0 1.25rem; }
+@media (max-width: 760px) { .buy .pcs { grid-template-columns: 1fr; gap: .7rem; } .pc { grid-template-columns: 150px minmax(0, 1fr); column-gap: .8rem; padding: .7rem; } .pc .info { display: contents; } .pc .ph { grid-row: 1 / span 3; grid-column: 1; align-self: start; aspect-ratio: 4 / 3; min-height: 0; border-radius: 12px; overflow: hidden; } .pc h3, .pc .sub, .pc .mk { grid-column: 2; } .pc .row { grid-column: 1 / -1; margin-top: .4rem; } .pc h3 { font-size: var(--d3); }  .pc .ph img { object-position: 50% 50%; } .open .kick { font-size: .875rem; letter-spacing: .05em; } .mark { font-size: var(--d3); } }
+
+/* now available in: the three shops that stock the dough, plain text */
+.stores { background: var(--night); color: var(--cream); padding-block: clamp(2rem, 6vh, 3.4rem); }
+.stores .wrap { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 2.4fr); gap: 1.5rem 2rem; align-items: center; }
+.stores h2 { font-size: var(--d2); }
+.st-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .8rem 1.5rem; padding: 0; margin: 0; list-style: none; }
+.st-list li { font: 400 var(--d3)/1.1 var(--font-head); color: var(--cream); }
+@media (max-width: 860px) { .stores .wrap { grid-template-columns: 1fr; } .st-list { grid-template-columns: 1fr; } }
+
+/* what you bake */
+.bake .wrap { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: clamp(1.5rem, 4vw, 3.5rem); align-items: center; }
+section.sec.bake { padding-block: clamp(1.8rem, 5vh, 3.2rem); }
+.bake figure { margin: 0; }
+.bake img { width: 100%; max-height: min(58svh, 430px); object-fit: cover; border-radius: var(--r); }
+.bake h2 { font-size: var(--d2); max-width: 11em; }
+.bake p.t { margin: .8rem 0 0; max-width: 33rem; }
+.facts { list-style: none; padding: 0; margin: 1.1rem 0 0; display: flex; flex-wrap: wrap; gap: .6rem 1.4rem; font-weight: 700; }
+.facts li { display: inline-flex; align-items: center; gap: .5rem; white-space: nowrap; }
+.facts svg { width: 26px; height: 26px; flex: none; fill: none; stroke: var(--night); stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; background: var(--mustard); border-radius: 50%; padding: 4px; box-sizing: border-box; }
+@media (max-width: 800px) { .bake .wrap { grid-template-columns: 1fr; } .bake img { max-height: 46svh; } .facts li { white-space: normal; } }
+
+/* delivery, payment, kosher */
+.get { background: var(--mustard); }
+section.sec.get { padding-block: clamp(1.8rem, 5vh, 3.2rem); }
+.get h2 { font-size: var(--d2); }
+.get .tiles { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .9rem; margin-top: 1.3rem; }
+.get .tile { background: var(--cream); border-radius: var(--r); padding: 1.2rem 1.3rem; }
+.get .tile h3 { font-size: var(--d3); } .get .tile p { margin: .4rem 0 0; }
+@media (max-width: 800px) { .get .tiles { grid-template-columns: 1fr; } }
+section.sec.faq { padding-block: clamp(1.8rem, 5vh, 3.2rem); }
+.faq h2 { font-size: var(--d2); }
+.faq-q summary::after { color: var(--night); }
+.faq-q p { color: var(--soft); }
+
+/* shop: one dough at a time on a stage that takes its colour */
+.stage { background: var(--mustard); padding: calc(var(--top-h) + 1rem) 0 1rem; transition: background-color 600ms cubic-bezier(.45, 0, .25, 1), color 600ms cubic-bezier(.45, 0, .25, 1); }
+.stage[data-room="pizza"] { background: var(--night); color: var(--cream); }
+.st-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.2rem, 4vw, 3rem); align-items: center; }
+.st-ph { position: relative; width: min(100%, 540px); aspect-ratio: 5 / 4; justify-self: center; border-radius: var(--r); overflow: hidden; background: var(--cream); }
+.st-ph > img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transition: opacity 520ms cubic-bezier(.45, 0, .25, 1); }
+.st-ph > img.on { opacity: 1; }
+.st-use { position: absolute; right: 12px; bottom: 12px; width: 64px; height: 64px; padding: 0; border-radius: 50%; border: 3px solid var(--night); background: var(--cream); overflow: hidden; cursor: pointer; transition: transform 160ms var(--out); }
+.st-use img { width: 100%; height: 100%; object-fit: cover; } .st-use:active { transform: scale(.94); }
+.st-info h1 { font-size: var(--pr); line-height: .98; }
+.st-info .sub2 { margin: .3rem 0 0; font-weight: 700; }
+.st-desc { margin: .5rem 0 0; max-width: 32rem; }
+.st-price { margin: .6rem 0 0; }
+.st-buy { display: flex; align-items: center; gap: .8rem; margin-top: .8rem; flex-wrap: wrap; }
+.stage[data-room="pizza"] .btn { background: var(--mustard); color: var(--night); } .stage[data-room="pizza"] .btn .chip::before { color: var(--mustard); }
+.step { display: inline-flex; align-items: center; border: 2px solid currentColor; border-radius: 999px; }
+.step button { width: 44px; height: 44px; border: 0; background: transparent; color: inherit; font: 700 1.125rem/1 var(--font-body); cursor: pointer; border-radius: 50%; transition: background 140ms; }
+.step button:hover { background: rgba(127, 127, 127, .22); } .step button:active { transform: scale(.9); } .step button:disabled { opacity: .35; }
+.step output { min-width: 1.5rem; text-align: center; font-weight: 700; }
+.st-in { min-height: 1.5em; margin: .5rem 0 0; font-weight: 600; }
+.st-facts { list-style: none; padding: 0; margin: .5rem 0 0; display: flex; flex-wrap: wrap; gap: .4rem 1.2rem; font-weight: 700; font-size: 1rem; }
+.st-pick { display: flex; gap: .7rem; margin-top: .8rem; flex-wrap: wrap; }
+.st-pick button { display: inline-flex; align-items: center; gap: .6rem; padding: .35rem 1rem .35rem .35rem; min-height: 56px; border-radius: 999px; border: 2px solid currentColor; background: transparent; color: inherit; font: 600 1rem/1.15 var(--font-body); cursor: pointer; text-align: left; transition: background 200ms var(--out); }
+.st-pick button[aria-pressed="true"] { background: var(--cream); color: var(--night); border-color: var(--cream); }
+.st-pick img { width: 44px; height: 44px; border-radius: 50%; object-fit: cover; }
+@media (max-width: 860px) { .st-grid { grid-template-columns: 1fr; } .stage { padding-bottom: 1.2rem; } }
+
+/* the order in steps */
+section.sec#order { padding-block: clamp(1.6rem, 4vh, 2.6rem); background: var(--cream); }
+.osteps { list-style: none; display: flex; gap: .5rem; padding: 0; margin: 0 0 1rem; flex-wrap: wrap; }
+.osteps button { min-height: 44px; padding: 0 1rem; border-radius: 999px; border: 2px solid var(--line); background: transparent; font: 600 1rem/1 var(--font-body); color: var(--soft); cursor: default; }
+.osteps .is-now button { background: var(--night); color: var(--cream); border-color: var(--night); }
+.osteps .is-done button { border-color: var(--night); color: var(--night); cursor: pointer; }
+#order h2 { font-size: var(--d3); }
+#order .form { margin-top: .6rem; }
+.card { background: var(--surface); border-color: var(--line); }
+.blist { list-style: none; padding: 0; margin: .8rem 0 0; }
+.bl { display: flex; justify-content: space-between; align-items: center; gap: .8rem; padding: .6rem 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.bl > span:first-child { display: flex; align-items: center; gap: .8rem; flex-wrap: wrap; font-weight: 600; }
+.bl-r { display: inline-flex; align-items: center; gap: .3rem; font-weight: 700; }
+.step.sm button { width: 40px; height: 40px; }
+.rm { width: 40px; height: 40px; display: inline-grid; place-items: center; border: 0; background: transparent; color: inherit; border-radius: 50%; cursor: pointer; } .rm:hover { background: rgba(127, 127, 127, .2); }
+.bakes { margin: .9rem 0 0; padding: .7rem 1rem; border-radius: 14px; background: var(--mustard); font-weight: 700; display: flex; align-items: center; gap: .7rem; }
+.bakes i { width: 22px; height: 22px; border-radius: 50%; border: 6px solid var(--night); flex: none; }
+.more, .keep { display: inline-block; margin-top: .8rem; }
+.how { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-top: .7rem; }
+label.opt { display: flex; align-items: center; gap: .6rem; min-height: 52px; padding: .5rem 1rem; border-radius: 14px; border: 2px solid var(--line); background: var(--cream); font-weight: 600; cursor: pointer; transition: border-color 160ms, background 160ms; }
+label.opt:has(input:checked) { border-color: var(--night); background: var(--mustard-lt); }
+label.opt input { accent-color: var(--night); width: 20px; height: 20px; }
+.stores-pick { display: grid; gap: .5rem; margin-top: .4rem; }
+.hint { margin: .5rem 0 0; color: var(--soft); font-size: 1rem; }
+.sum h3 { font-size: var(--d3); } .sum ul { list-style: none; padding: 0; margin: .5rem 0; } .sum li { display: flex; justify-content: space-between; gap: .6rem; padding: .25rem 0; }
+.total { display: flex; justify-content: space-between; font: 400 var(--d3)/1 var(--font-head); padding: .6rem 0; border-top: 2px solid var(--night); }
+.sum .btn { width: 100%; } .back { margin-top: .5rem; min-height: 44px; width: 100%; border: 0; background: transparent; font: 600 1rem var(--font-body); text-decoration: underline; cursor: pointer; color: var(--ink); }
+.sum .note, .sum-where { margin: .6rem 0 0; color: var(--soft); font-size: .875rem; }
+.sent { margin: .8rem 0 0; font-weight: 700; }
+.toast { visibility: hidden; opacity: 0; position: fixed; top: calc((var(--top-h) - 44px) / 2); left: 50%; z-index: 40; transform: translate(-50%, -140%); background: var(--night); color: var(--cream); padding: .7rem 1.1rem; border-radius: 999px; font-weight: 600; box-shadow: 0 3px 30px rgba(17, 17, 17, .25); transition: transform 300ms var(--out), opacity 300ms, visibility 0s 300ms; pointer-events: none; max-width: 92vw; }
+.toast.show { transform: translate(-50%, 0); opacity: 1; visibility: visible; transition: transform 300ms var(--out), opacity 300ms; } .toast .tk { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: var(--mustard); margin-right: .6rem; }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none; } .btn:hover .chip { transform: none; } }
+.bar { background: var(--night); border-top-color: #3a3a3a; } .bar .p { color: #E9DDB8; } .bar .p b { color: var(--cream); font-size: var(--d3); font-weight: 400; } .bar .btn { background: var(--mustard); color: var(--night); }
+.foot { background: var(--night); }
+.contact-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; margin-top: 1.2rem; }
+.contact-tiles .tile { background: var(--mustard); border-radius: var(--r); padding: 1.3rem 1.5rem; } .contact-tiles h3 { font-size: var(--d3); } .contact-tiles p { margin: .4rem 0 0; font-size: 1.125rem; font-weight: 600; }
+@media (max-width: 700px) { .contact-tiles { grid-template-columns: 1fr; } }
+
+.btn:hover { filter: brightness(1.18); }
+.st-use:hover { transform: scale(1.08); }
+.arw { display: inline-block; font-size: 0; width: 18px; height: 14px; background: currentColor; -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 14'%3E%3Cpath d='M1 7h15M10 1l6 6-6 6' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 14'%3E%3Cpath d='M1 7h15M10 1l6 6-6 6' fill='none' stroke='black' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E") center / contain no-repeat; }
+.more, .keep { display: inline-flex; align-items: center; min-height: 44px; }
+.st-info h1 { min-height: 2em; }
+.st-desc { min-height: 3.3em; }
+.st-makes { margin: .5rem 0 0; font-weight: 700; min-height: 1.6em; }
+@media (max-width: 860px) { .st-desc { min-height: 4.9em; } }
+.sum { position: static; }
+.opt.far { margin-top: .6rem; font-weight: 500; }
+
+.toast { display: flex; align-items: center; max-width: calc(100vw - 24px); } .toast .tt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
