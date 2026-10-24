@@ -68,3 +68,9 @@ SITE.write('contact', 'Contact · ...', '...', 'og.webp', SITE.page_head('Say he
 `kit.Contact` kinds: `whatsapp` (WhatsApp or call), `whatsapp-only`, `call`
 (call only, no WhatsApp), `text`, `email`. Ask the owner which number takes
 what (rules 3o.4). `kit.price(90)` sets the ₪ in the body face (3o.5).
+
+## Ready parts and the one check (24 Oct 2026)
+
+- **The builder brief**: every build or rework starts from `docs/build-brief-template.md`, filled in, nothing deleted. Each line is a mistake that already reached Tzvi.
+- **`film.js`**: the opening film that follows the scroll (frames on a canvas, chapters by scroll point, passes so it scrubs at once). Copy it into the build, include it after `site.js`; the markup and CSS are at its top. `american-crust/gen/film.sh` makes the frames from a joined film.
+- **`node scripts/check-build.mjs scrollcraft/builds/<folder>`**: every check in one command (site, fits, motion and readable on every page; concept, fingerprints and rules for the site), four at a time. Nothing is shown to Tzvi or published until it passes.
