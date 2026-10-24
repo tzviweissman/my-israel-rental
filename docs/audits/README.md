@@ -15,6 +15,7 @@ had no browser, database or backend packages.
 | Code review | nightly 22:00 | `.claude/skills/site-audit` | The last day's commits **outside** the visual layer: backend routes, data, security, prices, server.js, tests, build. |
 | UI / UX review | daily 06:00 | `.claude/skills/ui-audit` | The last day's **visible** changes: pages as rendered, English and Hebrew, phone and laptop, hand-built business pages, order flows. Plus one improvement idea. |
 | Dead ends | weekly, Sunday 22:00 | `.claude/skills/dead-ends` | The whole site: every button and link, every prompt that sends someone somewhere, every feature nobody can reach. |
+| Audit follow-up | daily 07:15 UTC (10:15 Israel) | `.claude/skills/audit-followup` | Gathers the audits' fix commits not yet on main, reviews and re-checks each, and opens one pull request `Audit fixes <date>` for Tzvi; never merges or deploys itself (24 Oct 2026: two weeks of fixes had piled up unmerged). |
 
 If a finding belongs to another audit's area, add it to `open-issues.md`
 with a one-line note and leave the detail to that audit.
