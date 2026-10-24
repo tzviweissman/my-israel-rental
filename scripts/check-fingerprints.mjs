@@ -27,6 +27,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { readPublished } from './live-hash.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const PAGES = path.join(ROOT, 'frontend', 'public', 'pages');
@@ -35,6 +36,15 @@ const FP = path.join(ROOT, 'scrollcraft', 'fingerprints.json');
 const manual = fs.existsSync(FP) ? JSON.parse(fs.readFileSync(FP, 'utf8')) : {};
 // entries are keyed by build folder; a published page is found by its slug too
 for (const [k, v] of Object.entries({ ...manual })) if (v && v.slug && !manual[v.slug]) manual[v.slug] = v;
+// a build is the same site as the page publish-page.mjs made from it (scrollcraft/published.json), so it is
+// checked under that slug and never against itself (24 Oct 2026: RS Modest clashed with its own live page,
+// ravit-hen, because fingerprints.json still named it by its folder)
+const SLUG_OF = {};
+for (const [slug, rec] of Object.entries(readPublished(ROOT))) {
+  if (!rec?.folder) continue;
+  SLUG_OF[rec.folder] = slug;
+  if (manual[rec.folder] && !manual[slug]) manual[slug] = manual[rec.folder];
+}
 
 function readSite(dir) {
   const files = ['index.html', 'site.css'].map((f) => path.join(dir, f)).filter((f) => fs.existsSync(f));
@@ -126,7 +136,7 @@ const load = (x) => {
   if (fs.existsSync(path.join(PAGES, x, 'index.html'))) return [x, readSite(path.join(PAGES, x))];
   const dir = fs.existsSync(x) ? x : path.join(BUILDS, x);
   if (!fs.existsSync(path.join(dir, 'index.html'))) throw new Error(`no page at ${x}`);
-  return [manual[path.basename(dir)]?.slug || path.basename(dir), readSite(dir)];
+  return [SLUG_OF[path.basename(dir)] || manual[path.basename(dir)]?.slug || path.basename(dir), readSite(dir)];
 };
 const targets = args[0] === '--all' ? published : args;
 if (!targets.length) { console.error('usage: node scripts/check-fingerprints.mjs <build-folder-or-slug> ... | --all'); process.exit(2); }

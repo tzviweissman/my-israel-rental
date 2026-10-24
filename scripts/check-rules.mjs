@@ -24,6 +24,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { spawnSync } from 'node:child_process';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const CHECKLIST = path.join(ROOT, 'docs', 'rules-checklist.md');
@@ -110,17 +111,29 @@ for (const it of items) {
 }
 for (const id of answers.keys()) if (!seen.has(id)) { problems.push(`${id}: not in docs/rules-checklist.md (typo, or the rule was removed)`); counts.bad++; }
 
-// stale: RULES.md older than the newest page file
+// stale: RULES.md older than the newest page file. A file with no uncommitted change is dated by its last commit,
+// not its mtime: a fresh clone or worktree stamps every file with the moment of checkout, in no set order, so
+// mtimes there said "RULES.md is older" for every site at random (24 Oct 2026, all 17 builds in a new worktree)
+const git = (a) => spawnSync('git', a, { cwd: dir, encoding: 'utf8', maxBuffer: 1 << 28 }).stdout || '';
+const top = git(['rev-parse', '--show-toplevel']).trim();
+const dirty = new Set(git(['status', '--porcelain', '-uall', '--', '.']).split(/\r?\n/).filter(Boolean).map((l) => path.resolve(top, l.slice(3).replace(/^.* -> /, ''))));
+const committed = new Map();
+let when = 0;
+for (const l of git(['log', '--format=@%ct', '--name-only', '--', '.']).split(/\r?\n/)) {
+  if (l.startsWith('@')) when = Number(l.slice(1)) * 1000;
+  else if (l && top) { const f = path.resolve(top, l); if (!committed.has(f)) committed.set(f, when); }
+}
+const dated = (f) => (!dirty.has(f) && committed.has(f) ? committed.get(f) : fs.statSync(f).mtimeMs);
 let newest = { t: 0, f: '' };
 (function walk(d) {
   for (const e of fs.readdirSync(d, { withFileTypes: true })) {
     if (e.isDirectory()) { if (!SKIP_DIRS.has(e.name)) walk(path.join(d, e.name)); continue; }
     if (!WATCH.test(e.name)) continue;
-    const f = path.join(d, e.name), t = fs.statSync(f).mtimeMs;
+    const f = path.join(d, e.name), t = dated(f);
     if (t > newest.t) newest = { t, f };
   }
 })(dir);
-const rulesTime = fs.statSync(rulesFile).mtimeMs;
+const rulesTime = dated(rulesFile);
 if (newest.t > rulesTime) problems.push(`RULES.md is older than ${path.relative(dir, newest.f)} (changed ${new Date(newest.t).toISOString().replace('T', ' ').slice(0, 19)}, RULES.md ${new Date(rulesTime).toISOString().replace('T', ' ').slice(0, 19)}): look at every rule again against the current site, then save RULES.md`);
 
 const name = path.basename(dir);
