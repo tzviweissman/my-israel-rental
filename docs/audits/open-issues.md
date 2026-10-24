@@ -93,8 +93,13 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] Calendar import downloads the whole file before checking its size. First seen 19 Oct (2026-10-19-site-audit).
 - [To decide] Business calendar feed lists customer phone and delivery address behind a private link. First seen 19 Oct (2026-10-19-site-audit).
 
+- [Low] Ask this business: forwarding a question has no per-business limit, so many visitors can fill one business's leads board; the shared 300-a-day answer cap can be used up by one visitor. First seen 24 Oct (2026-10-24-site-audit).
+- [Low] Away reply loop queries per business every minute; fine now, will not scale. First seen 24 Oct (2026-10-24-site-audit).
+- [To check] Backend tests that need the database (including test_away_reply_and_weekly_todo) did not run on 24 Oct: MongoDB could not be installed in the sandbox.
+
 ## Fixed
 
+- Fixed 24 Oct: awayReply.body plural-check failure (3361830).
 - [Low] Two status colours have no design token, so they stay fixed: amber "waiting" (#B45309: payment requests, automations, deposits) and red error text (#B42318: restock box). Adding --attention and --danger tokens is a design-system choice for Tzvi. 23 Oct.
 - Fixed 23 Oct: reorder crash returns the run to waiting; failed appointment reminders are retried; table orders without a phone left out of customer suggestions; gift-card order email at most once a day per address, never after an unsubscribe, with an unsubscribe link; restaurants "show more" plural forms and the plural check's false alarms (the language check now passes fully); only our own [Your ...] template gaps block a message; calendar import stops at the size limit; map popup and green status colours use tokens.
 - Fixed 23 Oct, from older audits that were never merged: 'delivery not available' no longer turns delivery on (14 Oct); join rules page starts below the nav (14 Oct); customers list footer total (15 Oct); insights empty average hyphen (15 Oct); Gift Boutique "Scroll to open" cue removed (15 Oct).
