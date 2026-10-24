@@ -221,16 +221,23 @@
     if (hi <= 6) return ['shop.html?pack=bundle', 'Order the Cloud Bundle, ₪220', 'The Cloud Bundle is any 6 jars for ₪220.'];
     return ['shop.html?pack=bundle', 'Order the Cloud Bundle, ₪220', 'The Cloud Bundle is any 6 jars for ₪220. Add ' + (hi - 6 === 1 ? 'a jar' : (hi - 6) + ' jars') + ' to it for the rest.'];
   }
+  // a crossfade for words that change with a choice (check-motion: an instant swap is a JUMP, a fade
+  // through blank is a FLASH): the new words fade in while a copy of the old ones fades out on top
+  function xfade(el, html) {
+    if (el.innerHTML === html) return;
+    var old = el.innerHTML;
+    el.innerHTML = '<span class="xf"><span class="xin">' + html + '</span><span class="xout" aria-hidden="true">' + old + '</span></span>';
+    clearTimeout(el._xf); el._xf = setTimeout(function () { el.innerHTML = html; }, 360);
+  }
   function pick(b) {
     var c = +b.dataset.c, lo = Math.ceil(c / 4), hi = Math.ceil(c / 3), i = btns.indexOf(b);
     btns.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); });
     glide.style.transform = 'translateX(' + (i * 100) + '%)';
     var o = offer(hi);
-    n.textContent = lo === hi ? lo : lo + ' to ' + hi; u.textContent = hi === 1 ? 'jar' : 'jars';
+    xfade(n, String(lo === hi ? lo : lo + ' to ' + hi)); xfade(u, hi === 1 ? 'jar' : 'jars');
     fit.textContent = 'Each jar makes 3 to 4 coffees.';  // the button carries the offer and its price; no sentence about it (Tzvi: "too many words")
-    go.href = o[0]; go.textContent = o[1];
-    // the new number slides up into place, so a choice is spread over several frames
-    [n, go].forEach(function (e) { e.classList.remove('slide'); void e.offsetWidth; e.classList.add('slide'); });
+    go.href = o[0]; xfade(go, o[1]);
+    // the number and the offer crossfade, so a choice is spread over several frames
   }
   btns.forEach(function (b) { b.addEventListener('click', function () { pick(b); }); });
   pick(btns[1]);

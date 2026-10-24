@@ -34,11 +34,11 @@ R6.1 pass: fashion-shop playbook: product row straight after the opening, how-to
 R4.1 pass: missing sizes, hours and delivery are not invented: the basket asks size and colour in words and the gaps are the questions in message-to-ravit.md
 
 ## 2. Opening
-R3g.13 pass: 1440x900 and 390x844 first screens: photo of the doors, headline of 4 words, one short line, one button
+R3g.13 pass: 1440x900 and 390x844 first screens: the doors fill the screen, headline of 4 words on the green fade, one short line, one button
 R3b.1 pass: same screenshots: what (modest activewear skirts), where (Jerusalem, King George 31), the action (Shop the skirt, price)
 R3b.2 pass: the price sits inside the main button on the first screen
 R3b.3 pass: walked the scroll at 1440 and 390: one solid button per screen; header Basket and card Add buttons are outlined
-R3h.1 pass: check-site OPENING passes; the doors swing open onto her store as you scroll, so the first screen changes
+R3h.1 pass: check-site OPENING passes (24 Oct): the doors of her skirts photo fill the screen (upscaled from her own photo to 2160 px so it stays sharp) and swing open onto her store as you scroll
 R3n.1 pass: the skirts photo fills the doorway, over half the first screen on the laptop and the full width on the phone
 R3n.2 pass: two shop doors made of her skirts photo swing open onto her store at King George 31; no other shop has that door or that address
 R3n.3 pass: the scroll opens the doors and changes the words; in the shop a photo tap changes the stage and Add changes the basket and total; check-motion run on every page
@@ -100,6 +100,7 @@ R0b.12 n/a: not published, so there is no pages-list preview clip to compare
 ## 4. Photos and media
 R8.1 pass: the two product cards are crops of the one flyer photo (same light, ground, scale); the third tile is the store, a visit tile and not a product
 R8.6 pass: the product card shows a product hero shot of her black skirt (23 Oct), edited from her flyer photo: the one skirt hung on a travertine block, warm stone ground, one warm light, still; the doors keep her flyer photo
+R8.7 pass (recorded after the fact): the skirt shot was made 23 Oct, before this rule (24 Oct); gen/skirt-brief.md holds the reference, the traits kept, the exact prompt, the model, the side-by-side, and the 24 Oct upscale of the doors photo with its before and after
 R8.2 pass: every picture is one of her own five photos, and the skirt hero shot is edited from her flyer photo (Higgsfield nano_banana_2)
 R3p.7 pass: the one product card and each of the three shop thumbnails change the stage photo; tapped all three
 R3h.12 pass: the product card comes from the same master photo shown on the shop stage

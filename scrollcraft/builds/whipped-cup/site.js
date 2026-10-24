@@ -47,3 +47,13 @@ document.body.classList.remove('no-js');
     });
   });
 })();
+// a photo that arrives late fades in over 300 ms instead of popping in (rule 3s.2; check-motion caught the
+// "How many coffees?" photo landing in one frame while a choice was being tapped, 24 Oct 2026)
+(function () {
+  [].forEach.call(document.querySelectorAll('img[loading="lazy"]'), function (i) {
+    if (i.complete && i.naturalWidth) return;
+    i.classList.add('lz');
+    var done = function () { i.classList.add('lz-in'); };
+    i.addEventListener('load', done, { once: true }); i.addEventListener('error', done, { once: true });
+  });
+})();

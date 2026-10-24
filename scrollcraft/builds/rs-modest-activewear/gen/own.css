@@ -330,15 +330,15 @@ body .hsteps p { font-size: var(--t-s) !important; }
 /* nothing in the opening may widen the page */
 html, body { overflow-x: clip; }
 .open { overflow: clip; }
-/* the opening: the flyer is framed whole at its own proportions (no crop, never larger than its pixels), plain green ground */
-.open-stage::before { display: none; }
-.doorway { -webkit-mask-image: none !important; mask-image: none !important; width: auto; height: 100%; max-height: 1209px; aspect-ratio: 1023 / 1209; justify-self: end; margin-right: var(--gutter); }
-.door img { object-position: 50% 50%; }
-.words { max-width: min(40rem, 46vw); z-index: 2; }
+/* the opening fills the screen (rule 3h.1, check-site OPENING asks 70% picture): her skirts photo as the two doors,
+   upscaled to 2160 px from her own photo on 23 Oct so it is sharp at full size, words on the green fade */
+.doorway { -webkit-mask-image: none !important; mask-image: none !important; grid-area: 1 / 1; width: 100%; height: 100%; justify-self: stretch; margin: 0; }
+.door img { object-position: 50% 30%; }
+.words { max-width: min(40rem, 46vw); z-index: 2; grid-area: 1 / 1; align-self: center; padding-left: var(--gutter); }
 @media (max-width: 860px) {
-  .open-stage { grid-template-rows: minmax(0, 1fr) auto; }
-  .doorway { grid-area: 1 / 1; height: auto; max-height: none; width: min(100%, calc((100svh - var(--top-h) - 20.5rem) * .846)); justify-self: center; margin: .6rem 0 0; }
-  .words { grid-area: 2 / 1; max-width: none; align-self: start; }
+  .open-stage { grid-template-rows: 1fr; }
+  .doorway { grid-area: 1 / 1; }
+  .words { grid-area: 1 / 1; max-width: none; align-self: end; padding: 0 var(--gutter) 1.2rem; }
 }
 /* room around buttons: their corner brackets sit 9px outside */
 .lede + .acts, .addr + .lede + .acts { margin-top: 0; }

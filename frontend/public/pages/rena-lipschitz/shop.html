@@ -1,0 +1,409 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shop · The Whipped Cup</title>
+<meta name="site-category" content="food-shop">
+<meta name="description" content="Classic Cloud ₪40, Caramel Cloud and Vanilla Cloud ₪48 a jar; weekly packages from ₪75. Order on WhatsApp from The Whipped Cup, Ramat Eshkol, Jerusalem.">
+<meta property="og:title" content="Shop · The Whipped Cup">
+<meta property="og:description" content="Classic Cloud ₪40, Caramel Cloud and Vanilla Cloud ₪48 a jar; weekly packages from ₪75. Order on WhatsApp from The Whipped Cup, Ramat Eshkol, Jerusalem.">
+<meta property="og:image" content="/pages/rena-lipschitz/assets/jar-caramel.webp?v=mvmtao9i">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700;800&family=Fraunces:ital,opsz,wght,SOFT@0,9..144,500..700,100;1,9..144,500,100&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Frank+Ruhl+Libre:wght@500;700&family=Heebo:wght@400;500;700&display=swap&text=%E2%82%AA" rel="stylesheet">  <!-- only ₪, which the site's own fonts do not have (scripts/check-site.mjs GLYPH) -->
+<link rel="stylesheet" href="/pages/rena-lipschitz/site.css?v=mvmtao9i">
+</head>
+<body class="no-js" data-page="shop">
+<header class="top" id="top">
+  <a class="mark" href="/business/rena-lipschitz" aria-label="The Whipped Cup, home" data-mir-key="t-73590743-0"><span class="badge" aria-hidden="true">TWC</span>The Whipped Cup</a>
+  <nav class="nav" id="nav" aria-label="The Whipped Cup"><a href="/business/rena-lipschitz" data-mir-key="t-fc43c37b-0">Home</a><a href="/business/rena-lipschitz/shop" aria-current="page" data-mir-key="t-c7ee064b-0">Shop</a><a href="/business/rena-lipschitz/contact" data-mir-key="t-e3e78835-0">Contact</a></nav>
+  <div class="top-r">
+    <a class="btn-line" href="/business/rena-lipschitz/shop#order" data-mir-key="t-8e1cd2d2-0">Basket<span class="count" id="count" hidden></span></a>
+    <a class="btn top-order" href="/business/rena-lipschitz/shop" data-mir-key="t-e5c8a40f-0">Order your jars</a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav" data-mir-key="t-4ee03097-0">Menu</button>
+  </div>
+</header>
+<main>
+  <form id="form" novalidate>
+  <section class="stage" id="jars" data-flav="classic" aria-labelledby="h-shop">
+    <div class="wrap st-grid">
+      <div class="st-ph">
+        <img class="on" data-flav="classic" src="/pages/rena-lipschitz/assets/jar-classic-hero.webp?v=mvmtao9i" alt="A jar of Classic Cloud on a stone plinth" width="960" height="1192" fetchpriority="high" data-mir-key="i-89e7f7d7-0">
+        <img class="" data-flav="caramel" src="/pages/rena-lipschitz/assets/jar-caramel-hero.webp?v=mvmtao9i" alt="A jar of Caramel Cloud on a stone plinth" width="960" height="1192" data-mir-key="i-c63d00b4-0">
+        <img class="" data-flav="vanilla" src="/pages/rena-lipschitz/assets/jar-vanilla-hero.webp?v=mvmtao9i" alt="A jar of Vanilla Cloud on a stone plinth" width="960" height="1192" data-mir-key="i-0dfeb6ed-0">
+        <img data-flav="use" src="/pages/rena-lipschitz/assets/iced.webp?v=mvmtao9i" alt="An iced whipped coffee in the sun" width="1170" height="1213" data-mir-key="i-0788c3e6-0">
+        <button type="button" class="st-use" id="st-use" aria-pressed="false" aria-label="Show the whipped coffee in a glass"><img src="/pages/rena-lipschitz/assets/iced.webp?v=mvmtao9i" alt="" width="56" height="56" data-mir-key="i-8973b902-0"></button>
+      </div>
+      <div class="st-info">
+        <p class="kick" data-mir-key="t-40d6d48a-0">Shop · Whipped coffee in a jar</p>
+        <h1 id="h-shop"><span id="st-name">Classic Cloud</span></h1>
+        <p class="st-desc" id="st-desc">Original whipped coffee</p>
+        <p class="st-price"><span id="st-price">₪40</span> <small data-mir-key="t-5c48b6fc-0">a jar</small></p>
+        <div class="st-buy">
+          <span class="step" role="group" aria-label="How many jars"><button type="button" data-d="-1" aria-label="One fewer" data-mir-key="t-a4fccb8c-0">−</button><output id="st-n">1</output><button type="button" data-d="1" aria-label="One more" data-mir-key="t-e67d47d4-0">+</button></span>
+          <button class="btn" type="button" id="st-add"><span data-mir-key="t-827fc389-0">Add a jar, ₪40</span></button>
+        </div>
+        <p class="st-in" id="st-in" aria-live="polite"></p>
+        <ul class="facts" aria-label="About every jar">
+          <li data-mir-key="t-12e9006e-0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 8h11v6a4 4 0 0 1-4 4H9a4 4 0 0 1-4-4zM16 9h1.5a2.5 2.5 0 0 1 0 5H16"/></svg>Makes 3 to 4 coffees</li>
+          <li data-mir-key="t-87d9f40d-0"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg>Kosher certified</li>
+          <li data-mir-key="t-18a75918-0"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7-4.4-7-10a4 4 0 0 1 7-2.5A4 4 0 0 1 19 10c0 5.6-7 10-7 10z"/></svg>Handcrafted and fresh</li>
+        </ul>
+        <div class="st-pick" aria-label="Flavours">
+          <button type="button" data-flav="classic" aria-pressed="true"><img src="/pages/rena-lipschitz/assets/jar-classic.webp?v=mvmtao9i" alt="" width="500" height="1111" loading="lazy" data-mir-key="i-ac9af622-0"><span data-mir-key="t-314ebb80-0"><b>Classic Cloud</b>₪40</span></button>
+          <button type="button" data-flav="caramel" aria-pressed="false"><img src="/pages/rena-lipschitz/assets/jar-caramel.webp?v=mvmtao9i" alt="" width="500" height="1111" loading="lazy" data-mir-key="i-bd909943-0"><span data-mir-key="t-b6b22719-0"><b>Caramel Cloud</b>₪48</span></button>
+          <button type="button" data-flav="vanilla" aria-pressed="false"><img src="/pages/rena-lipschitz/assets/jar-vanilla.webp?v=mvmtao9i" alt="" width="500" height="1111" loading="lazy" data-mir-key="i-a1244dbe-0"><span data-mir-key="t-6440543d-0"><b>Vanilla Cloud</b>₪48</span></button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec shop-packs" id="packs" aria-labelledby="h-packs">
+    <div class="wrap">
+      <div class="packs-head"><h2 id="h-packs" data-mir-key="t-d9b582b6-0">Weekly packages</h2><p class="lede" data-mir-key="t-bd580579-0">Delivered fresh to your door every week.</p></div>
+      <div class="plans" id="plans" role="radiogroup" aria-labelledby="h-packs"></div>
+      <p class="nopack"><button type="button" id="nopack">Just jars, no package</button></p>
+      <div class="mix" id="mix" hidden><h5 id="mix-h"></h5><p class="left" id="mix-left"></p><div id="mix-body"></div></div>
+    </div>
+  </section>
+
+  <section class="sec" id="order" aria-labelledby="h-basket">
+    <div class="wrap">
+      <!-- the order in steps (Tzvi, 20 Oct 2026: "make steps the rule for order pages", like Blazin
+           Boards): one question per screen, the order and its total beside every step -->
+      <ol class="osteps" id="steps" aria-label="Order steps">
+        <li class="is-now" aria-current="step"><button type="button" data-go="1" data-mir-key="t-6ba841aa-0">Step 1: Your basket</button></li>
+        <li><button type="button" data-go="2" data-mir-key="t-1b1b3491-0">Step 2: Delivery</button></li>
+        <li><button type="button" data-go="3" data-mir-key="t-a27bdc0e-0">Step 3: Your details</button></li>
+      </ol>
+      <div class="form">
+        <div>
+          <div class="card ostep" data-s="1">
+            <h2 id="h-basket" data-mir-key="t-94a32706-0">Your <span class="pink">basket</span></h2>
+            <ul class="blist" id="sum-list"><li><span data-mir-key="t-6629c888-0">Your basket is empty. Pick a jar or a package above.</span></li></ul>
+            <p class="deal" id="deal" hidden><span></span> <button type="button" class="btn-line" data-mir-key="t-5142cdcc-0">Switch</button></p>
+            <p class="err" id="e-items"></p>
+            <a class="more" href="#jars" data-mir-key="t-f39bd7cd-0">Add more jars</a>
+          </div>
+          <div class="card ostep" data-s="2" hidden>
+            <h2 data-mir-key="t-7f87b759-0">Delivery</h2>
+            <p class="deliv" data-mir-key="t-5bf94a19-0">Delivered fresh to your door.</p>
+            <div id="w-addr"><label class="f" for="addr" data-mir-key="t-438c5cbe-0">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p></div>
+            <div id="w-when"><label class="f" for="when" data-mir-key="t-573e7eac-0">First delivery day</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p></div>
+          </div>
+          <div class="card ostep" data-s="3" hidden>
+            <h2 data-mir-key="t-33cb0b75-0">Your details</h2>
+            <div id="w-me"><label class="f" for="me" data-mir-key="t-5c263b1a-0">Your name</label><input class="fld" id="me" autocomplete="name" maxlength="80"><p class="err" id="e-me"></p></div>
+            <div id="w-ph"><label class="f" for="ph" data-mir-key="t-d93db2df-0">Your phone</label><input class="fld" id="ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph"></p></div>
+            <label class="f" for="note" data-mir-key="t-2629cf27-0">Anything else</label>
+            <textarea class="fld" id="note" maxlength="500"></textarea>
+          </div>
+        </div>
+        <aside class="card sum" id="c-items" aria-live="polite">
+          <h3 data-mir-key="t-07d00117-0">Your order</h3>
+          <ul id="sum-mini"><li><span data-mir-key="t-b1bb775d-0">Nothing yet</span></li></ul>
+          <p class="sum-where" id="sum-where" hidden></p>
+          <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><span id="total">₪0</span></div>
+          <button class="btn" id="send" type="submit"><span data-mir-key="t-50e0eaed-0">Continue to delivery</span></button>
+          <button class="back" id="back" type="button" hidden>Back</button>
+          <p class="note" id="send-note">Next: where and when we deliver.</p>
+          <p class="sent" id="sent" role="status" hidden></p>
+          <a class="keep" href="#jars" data-mir-key="t-0130e347-0">Keep shopping</a>
+        </aside>
+      </div>
+    </div>
+  </section>
+  </form>
+  <section class="close" aria-label="Order from The Whipped Cup">
+    <div class="wrap">
+      <div>
+        <h2 data-mir-key="t-bd06f34f-0">Your cup, your cloud.</h2>
+        <p data-mir-key="t-2fac11d0-0">WhatsApp <a href="https://wa.me/19299936768" target="_blank" rel="noopener">+1 929 993 6768</a> · <a href="mailto:thewhippedcup@gmail.com">thewhippedcup@gmail.com</a></p>
+      </div>
+      <a class="btn" href="/business/rena-lipschitz/shop" data-mir-key="t-e5c8a40f-1">Order your jars <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>
+    </div>
+    <p class="giant" aria-hidden="true" data-mir-key="t-931d517a-0">The Whipped Cup</p>
+  </section>
+</main>
+<footer class="foot">
+  <div class="foot-cols">
+    <nav aria-label="Pages"><h3 data-mir-key="t-87163e4e-0">Pages</h3><a href="/business/rena-lipschitz" data-mir-key="t-fc43c37b-1">Home</a><a href="/business/rena-lipschitz/shop" data-mir-key="t-c7ee064b-1">Shop</a><a href="/business/rena-lipschitz/contact" data-mir-key="t-e3e78835-1">Contact</a></nav>
+    <div><h3 data-mir-key="t-03e8de14-0">Contact</h3><a href="https://wa.me/19299936768" target="_blank" rel="noopener" data-mir-key="t-24d9f833-0">WhatsApp +1 929 993 6768</a><a href="mailto:thewhippedcup@gmail.com" data-mir-key="t-aec63114-0">thewhippedcup@gmail.com</a></div>
+    <div><h3 data-mir-key="t-d429045b-0">Where</h3><span data-mir-key="t-a214c27f-0">Ramat Eshkol, Jerusalem</span><span data-mir-key="t-05ad6e2f-0">Kosher certified</span><span data-mir-key="t-a6bf6e42-0">Delivered fresh to your door</span></div>
+  </div>
+  <p class="foot-legal" data-mir-key="t-206e0dc8-0">The Whipped Cup, on <a href="/">MyIsraelRental</a>, free to list, no commission</p>
+</footer>
+
+<div class="bar" id="bar" aria-hidden="true">
+  <p class="p" data-mir-key="t-7f18bdb4-0"><b>From ₪40 a jar</b>Each jar makes 3 to 4 coffees</p>
+  <a class="btn" href="/business/rena-lipschitz/shop" tabindex="-1" data-mir-key="t-e5c8a40f-2">Order your jars</a>
+</div>
+<script src="/pages/rena-lipschitz/site.js?v=mvmtao9i"></script>
+<script>
+(function () {
+  var BIN = '<svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+  // ── the order: written out on WhatsApp to +1 929 993 6768 (her menu card).
+  // Each package says what it allows, and its choices sit under it (page
+  // rules 3l): the Duo and the Cloud Bundle mix any flavours to exactly 2 or
+  // 6 jars, One Flavour is one flavour, Assorted is a mix of all three.
+  var WA = '19299936768', GIG = 'cbf185df-6652-4fc4-bd2d-0954b4d13731';
+  // Every order is saved to MyIsraelRental before WhatsApp opens (page rules 3k). The ids are the listing's
+  // own products, named exactly as the listing names them (added 22 Oct 2026 by add_site_products.py).
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var PID = { classic: 'a7be8afd6138', caramel: '30dbd6bc98ac', vanilla: '02af21299635',
+    bundle: 'd465aae6e291', assorted: '430c01b7727b', one: '565d11aa4f12', duo: '404ecb4855c1' };
+  var JARS = { classic: ['Classic Cloud', 40], caramel: ['Caramel Cloud', 48], vanilla: ['Vanilla Cloud', 48] };
+  var PACKS = {
+    bundle: { name: 'Cloud Bundle', price: 220, jars: 6, mode: 'mix', meta: '6 jars · Monthly', allows: 'Any 6 jars, mix and match' },
+    assorted: { name: 'Assorted', price: 155, jars: 4, mode: 'fixed', meta: '4 jars · Weekly', allows: 'A mix of all three flavours, every week' },
+    one: { name: 'One Flavour', price: 148, jars: 4, mode: 'one', meta: '4 jars · Weekly', allows: 'One flavour, 4 jars every week' },
+    duo: { name: 'Try It Duo', price: 75, jars: 2, mode: 'mix', meta: '2 jars · Starter', allows: '2 jars, any flavours' }
+  };
+  var saved = window.twcBasket.get(), qs = new URLSearchParams(location.search);
+  var q = {}; Object.keys(JARS).forEach(function (k) { q[k] = Math.max(0, Math.min(20, +((saved.jars || {})[k]) || 0)); });
+  var pack = PACKS[saved.pack] ? saved.pack : '';
+  if (JARS[qs.get('jar')]) q[qs.get('jar')] = Math.max(q[qs.get('jar')], Math.min(20, +qs.get('n') || 1));  // ?jar=classic&n=3 from "How many coffees?"
+  if (PACKS[qs.get('pack')]) pack = qs.get('pack');
+  if (qs.toString()) history.replaceState(null, '', location.pathname);
+  var mixQ = { classic: 0, caramel: 0, vanilla: 0 }, oneFlav = '';
+
+  // ── the stage: one flavour at a time, big (Tzvi's product pages, 20 Oct 2026, inspo
+  // product-pages-2026-10-20: one product per screen, the choice recolours it, quantity and the
+  // total in the button). Choosing another flavour crossfades the jar and tints the stage.
+  var stage = document.getElementById('jars'), sel = 'classic', n = 1;
+  var DESC = { classic: 'Original whipped coffee', caramel: 'Whipped coffee and caramel', vanilla: 'Whipped coffee and vanilla' };
+  var stN = document.getElementById('st-n'), stAdd = document.getElementById('st-add'), stIn = document.getElementById('st-in');
+  function label() { stAdd.firstElementChild.textContent = 'Add ' + (n === 1 ? 'a jar' : n + ' jars') + ', ₪' + n * JARS[sel][1]; stN.textContent = n;
+    stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' ' + JARS[sel][0] : ''; }
+  // a crossfade for words that change with a choice (check-motion: an instant swap is a JUMP, a fade
+  // through blank is a FLASH): the new words fade in while a copy of the old ones fades out on top
+  function xfade(el, html) {
+    if (el.innerHTML === html) return;
+    var old = el.innerHTML;
+    el.innerHTML = '<span class="xf"><span class="xin">' + html + '</span><span class="xout" aria-hidden="true">' + old + '</span></span>';
+    clearTimeout(el._xf); el._xf = setTimeout(function () { el.innerHTML = html; }, 360);
+  }
+  function show(k) {
+    sel = k; stage.dataset.flav = k;
+    // the new jar crossfades only once its photo is decoded, so a cold tap never pops it in (check-motion)
+    var next = stage.querySelector('.st-ph > img[data-flav="' + k + '"]');
+    var swap = function () { if (sel !== k) return; [].forEach.call(stage.querySelectorAll('.st-ph > img'), function (i) { i.classList.toggle('on', i === next); }); };
+    if (next.complete && next.naturalWidth) swap(); else (next.decode ? next.decode() : Promise.reject()).then(swap, swap);
+    useBtn.setAttribute('aria-pressed', 'false'); stage.querySelector('.st-ph').classList.remove('use'); useBtn.setAttribute('aria-label', 'Show the whipped coffee in a glass'); useBtn.firstElementChild.src = '/pages/rena-lipschitz/assets/iced.webp?v=mvmtao9i';
+    [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.flav === k ? 'true' : 'false'); });
+    xfade(document.getElementById('st-name'), JARS[k][0]); xfade(document.getElementById('st-desc'), DESC[k]);
+    xfade(document.getElementById('st-price'), '₪' + JARS[k][1]);
+    label();
+  }
+  stage.querySelector('.st-pick').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.flav); });
+  stage.querySelector('.st-buy .step').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; n = Math.max(1, Math.min(20, n + (+b.dataset.d))); label(); });
+  stAdd.addEventListener('click', function () {
+    var addedN = n; q[sel] = Math.min(20, q[sel] + n); n = 1; update(); check(false); label();
+    say('Added: ' + addedN + ' ' + JARS[sel][0]); stAdd.classList.add('added'); setTimeout(function () { stAdd.classList.remove('added'); }, 900);
+  });
+  // a short note that slides in at the top and leaves by itself (page rules 3s, polish stack)
+  var toast = document.createElement('div'), toastT = 0; toast.className = 'toast'; toast.setAttribute('role', 'status');
+  toast.innerHTML = '<span class="tk" aria-hidden="true"></span><span class="tt"></span>'; document.body.appendChild(toast);
+  function say(msg) { toast.lastChild.textContent = msg; toast.classList.add('show'); clearTimeout(toastT); toastT = setTimeout(function () { toast.classList.remove('show'); }, 2200); }
+  // her photo of the coffee in use, beside the jar (a second frame on the stage)
+  var useBtn = document.getElementById('st-use'), useImg = stage.querySelector('.st-ph img[data-flav="use"]');
+  function setUse(on) {
+    useBtn.setAttribute('aria-pressed', on ? 'true' : 'false'); stage.querySelector('.st-ph').classList.toggle('use', on);
+    [].forEach.call(stage.querySelectorAll('.st-ph > img'), function (i) { i.classList.toggle('on', on ? i === useImg : i.dataset.flav === sel); });
+    useBtn.setAttribute('aria-label', on ? 'Show the jar' : 'Show the whipped coffee in a glass');
+    useBtn.firstElementChild.src = on ? '/pages/rena-lipschitz/assets/jar-' + sel + '.webp' : '/pages/rena-lipschitz/assets/iced.webp?v=mvmtao9i';
+  }
+  useBtn.addEventListener('click', function () { setUse(useBtn.getAttribute('aria-pressed') !== 'true'); });
+  function perJar(p) { var u = p.price / p.jars; return '₪' + (u % 1 ? u.toFixed(2) : u) + ' a jar'; }
+  var plans = document.getElementById('plans');
+  // what a package saves against the same jars bought one by one, from her own prices (Tzvi, 20 Oct
+  // 2026: "people feel like they are getting a deal ... it should show what they save"). Honest: the
+  // range is real, "up to" is its top, and the price a jar is the package price divided by its jars.
+  function singles(k) { var p = PACKS[k]; if (p.mode === 'fixed') return [40 + 48 + 48 + 40, 40 + 48 + 48 + 48]; return [p.jars * 40, p.jars * 48]; }
+  // shown the way shops show a deal (Tzvi, 20 Oct 2026, from the strawberry video: the original price
+  // with a slash through it next to the price, and a short badge, not a sentence). The jars bought one
+  // by one at the lowest single price, so the saving is always true whatever the flavours.
+  // Assorted shows NO saving (rule 3j unit-price test, 22 Oct 2026). Its separate price is 4 single jars of
+  // the flavours it holds, the cheapest four: one Classic 40 + one Caramel 48 + one Vanilla 48 + a second
+  // Classic 40 = 176, so on paper 155 is 12% off. But 155 / 4 = 38.75 a jar is above the Try It Duo's
+  // 75 / 2 = 37.50 a jar, a smaller pack, so a % off here would be false against a cheaper way to buy.
+  function was(k) { return k === 'assorted' ? 0 : singles(k)[0]; }
+  function pct(k) { return Math.floor((was(k) - PACKS[k].price) * 100 / was(k)); }  // percent off, rounded down
+  plans.innerHTML = Object.keys(PACKS).map(function (k) {
+    var p = PACKS[k];
+    return '<label class="plan' + (k === 'bundle' ? ' lead' : '') + '"><input type="radio" name="pack" value="' + k + '"><span class="box">' + (k === 'bundle' ? '<span class="tab">Best value</span>' : '') + '<span><b>' + p.name + '</b><br><span class="pr">' + p.meta + ' · ' + perJar(p) + '</span></span><span class="p">' + (was(k) ? '<s class="was" aria-label="instead of ₪' + was(k) + '">₪' + was(k) + '</s> ' : '') + '₪' + p.price + '</span><span class="allows">' + p.allows + '</span>' + (was(k) ? '<span class="save-b" data-save="' + pct(k) + '% off">' + pct(k) + '% off</span>' : '') + '</span></label>';
+  }).join('');
+  function choosePack(v) { pack = v; mixQ = { classic: 0, caramel: 0, vanilla: 0 }; oneFlav = ''; drawMix(); update(); check(false);
+    if (v) say(PACKS[v].name + ' in your basket');
+    if (!mix.hidden) mix.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }
+  plans.addEventListener('change', function (e) { if (e.target.name === 'pack') choosePack(e.target.value); });
+  document.getElementById('nopack').addEventListener('click', function () { if (pack) choosePack(''); });
+
+  var mix = document.getElementById('mix'), mixH = document.getElementById('mix-h'), mixLeft = document.getElementById('mix-left'), mixBody = document.getElementById('mix-body');
+  function mixSum() { return mixQ.classic + mixQ.caramel + mixQ.vanilla; }
+  function drawMix() {
+    var p = PACKS[pack]; mix.hidden = !p; if (!p) return;
+    // the choices sit right under the package they belong to (page rules 3l; Tzvi, 20 Oct 2026:
+    // "it doesn't let me choose which flavours I want", the choices were below every package)
+    var lab = plans.querySelector('input[value="' + pack + '"]'); if (lab) lab.closest('label').after(mix);
+    mixH.textContent = p.mode === 'mix' ? 'Choose your ' + p.jars + ' jars' : p.mode === 'one' ? 'Choose your flavour' : p.name + ': ' + p.allows;
+    if (p.mode === 'mix') {
+      mixBody.innerHTML = Object.keys(JARS).map(function (k) {
+        return '<div class="line" data-m="' + k + '"><div class="nm">' + JARS[k][0] + '</div><div class="step"><button type="button" data-d="-1" aria-label="One fewer ' + JARS[k][0] + ' in the package">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + JARS[k][0] + ' in the package">+</button></div></div>';
+      }).join('');
+      [].forEach.call(mixBody.querySelectorAll('[data-m]'), function (l) {
+        l.addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; var k = l.dataset.m, d = +b.dataset.d;
+          if (d > 0 && mixSum() >= p.jars) return; mixQ[k] = Math.max(0, mixQ[k] + d); drawMixState(); update(); check(false); });
+      });
+    } else if (p.mode === 'one') {
+      mixBody.innerHTML = '<div class="chips">' + Object.keys(JARS).map(function (k) {
+        return '<label class="chip"><input type="radio" name="oneflav" value="' + k + '"><span>' + JARS[k][0] + '</span></label>'; }).join('') + '</div>';
+      mixBody.addEventListener('change', function (e) { if (e.target.name === 'oneflav') { oneFlav = e.target.value; update(); check(false); } });
+    } else mixBody.innerHTML = '';
+    drawMixState();
+  }
+  function drawMixState() {
+    var p = PACKS[pack]; if (!p) return;
+    if (p.mode === 'mix') {
+      var left = p.jars - mixSum();
+      mixLeft.textContent = left ? 'Choose ' + left + ' more jar' + (left > 1 ? 's' : '') : 'All ' + p.jars + ' jars chosen';
+      [].forEach.call(mixBody.querySelectorAll('[data-m]'), function (l) { l.querySelector('output').textContent = mixQ[l.dataset.m]; l.querySelector('[data-d="1"]').disabled = !left; });
+    } else mixLeft.textContent = p.mode === 'one' ? 'Pick your flavour' : 'Nothing to choose: we send a mix of Classic, Caramel and Vanilla Cloud';
+  }
+  function packDesc() {
+    var p = PACKS[pack]; if (!p) return '';
+    if (p.mode === 'mix') return Object.keys(mixQ).filter(function (k) { return mixQ[k]; }).map(function (k) { return mixQ[k] + ' ' + JARS[k][0]; }).join(', ');
+    if (p.mode === 'one') return oneFlav ? '4 ' + JARS[oneFlav][0] : '';
+    return 'a mix of all three flavours';
+  }
+  function total() { var t = 0; for (var k in q) t += q[k] * JARS[k][1]; if (PACKS[pack]) t += PACKS[pack].price; return t; }
+  var send = document.getElementById('send');
+  function update() {
+    [].forEach.call(plans.querySelectorAll('input'), function (i) { i.checked = i.value === pack; });
+    var html = ''; for (var k in q) if (q[k]) html += '<li class="bl"><span>' + JARS[k][0] + '<span class="step sm"><button type="button" data-k="' + k + '" data-d="-1" aria-label="One fewer ' + JARS[k][0] + '">−</button><output>' + q[k] + '</output><button type="button" data-k="' + k + '" data-d="1" aria-label="One more ' + JARS[k][0] + '">+</button></span></span><span class="bl-r">₪' + q[k] * JARS[k][1] + '<button type="button" class="rm" data-rm="' + k + '" aria-label="Remove ' + JARS[k][0] + ' from the basket">' + BIN + '</button></span></li>';
+    if (PACKS[pack]) html += '<li class="bl"><span>' + PACKS[pack].name + (packDesc() ? ': ' + packDesc() : '') + '</span><span class="bl-r">₪' + PACKS[pack].price + '<button type="button" class="rm" data-rm="pack" aria-label="Remove the ' + PACKS[pack].name + ' from the basket">' + BIN + '</button></span></li>';
+    document.getElementById('sum-list').innerHTML = html || '<li><span>Your basket is empty. Pick a jar or a package above.</span></li>';
+    [].forEach.call(plans.querySelectorAll('.plan'), function (l) { var sb = l.querySelector('.save-b'); if (!sb) return; sb.textContent = l.querySelector('input').value === pack ? 'In your basket' : sb.dataset.save; });
+    var mini = ''; for (var km in q) if (q[km]) mini += '<li><span>' + q[km] + ' × ' + JARS[km][0] + '</span><span>₪' + q[km] * JARS[km][1] + '</span></li>';
+    if (PACKS[pack]) mini += '<li><span>' + PACKS[pack].name + '</span><span>₪' + PACKS[pack].price + '</span></li>';
+    document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
+    // single jars a package would make cheaper: say so, with one tap to switch (the deal, shown honestly)
+    var deal = document.getElementById('deal'), jn = 0, cost = 0, kinds = []; for (var kq in q) if (q[kq]) { jn += q[kq]; cost += q[kq] * JARS[kq][1]; kinds.push(kq); }
+    var sw = '';
+    var extra = '';
+    if (!pack) {
+      if (jn === 2 && cost > 75) sw = 'duo';
+      else if (jn === 4 && kinds.length === 1 && cost > 148) sw = 'one';
+      else if (jn === 4 && kinds.length === 3 && cost > 155) sw = 'assorted';
+      else if (jn === 6 && cost > 220) sw = 'bundle';
+      else if (jn === 5 && cost > 220) { sw = 'bundle'; extra = ' and a 6th jar'; }  // one more jar, for less
+    }
+    deal.hidden = !sw;
+    // the deal shown, not described (old price struck through)
+    if (sw) { deal.dataset.pack = sw; deal.querySelector('span').innerHTML = extra ? 'Make it 6 jars: Cloud Bundle <s>₪' + cost + '</s> ₪220' : 'As the ' + PACKS[sw].name + ': <s>₪' + cost + '</s> ₪' + PACKS[sw].price + ' <span class="save-b">' + Math.floor((cost - PACKS[sw].price) * 100 / cost) + '% off</span>'; }  // same jars, so a true percent; the 6th-jar case adds a jar, so it names no percent
+    document.getElementById('total').textContent = '₪' + total();
+    drawStep();
+    var b = { jars: {} }; for (var k2 in q) if (q[k2]) b.jars[k2] = q[k2]; if (pack) b.pack = pack; window.twcBasket.set(b);
+    var bar = document.querySelector('#bar .p'), jarsN = 0; for (var k3 in q) jarsN += q[k3];
+    var barBtn = document.querySelector('#bar .btn'); if (barBtn) { barBtn.textContent = 'Basket'; barBtn.setAttribute('href', '#order'); }
+    if (bar) bar.innerHTML = total() ? '<b>Basket, ₪' + total() + '</b>' + (jarsN ? jarsN + ' jar' + (jarsN > 1 ? 's' : '') : '') + (pack ? (jarsN ? ' and ' : '') + PACKS[pack].name : '') : '<b>From ₪40 a jar</b>Each jar makes 3 to 4 coffees';
+  }
+  function v(id) { return document.getElementById(id).value.trim(); }
+  function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }
+  function check(show, upto) {
+    var ok = true, e, p = PACKS[pack]; upto = upto || 3;
+    e = total() ? '' : 'Add a jar or choose a package';
+    if (!e && p && p.mode === 'mix' && mixSum() !== p.jars) e = 'Choose ' + (p.jars - mixSum()) + ' more jar' + (p.jars - mixSum() > 1 ? 's' : '') + ' for the ' + p.name;
+    if (!e && p && p.mode === 'one' && !oneFlav) e = 'Pick the flavour for One Flavour';
+    if (e) ok = false; if (show || !e) mark('items', e);
+    if (upto < 2) return ok;
+    e = v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
+    e = v('when') ? '' : 'Choose the day'; if (e) ok = false; if (show || !e) mark('when', e);
+    if (upto < 3) return ok;
+    e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
+    e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);
+    return ok;
+  }
+  ['addr', 'when', 'me', 'ph'].forEach(function (id) { document.getElementById(id).addEventListener('input', function () { check(false); drawStep(); }); });
+  // the notes box grows to four lines, then scrolls
+  var note = document.getElementById('note');
+  note.addEventListener('input', function () { var cs = getComputedStyle(note), lh = parseFloat(cs.lineHeight) || 22, bd = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth), ex = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + bd;
+    note.style.height = 'auto'; note.style.height = Math.min(note.scrollHeight + bd, 4 * lh + ex) + 'px'; });
+  document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  document.getElementById('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    // steps 1 and 2: check this step, then on to the next
+    if (step < 3) { if (!check(true, step)) { var bad1 = document.querySelector('.ostep:not([hidden]) .bad .fld'); if (bad1) bad1.focus(); return; } go(step + 1, true); return; }
+    if (!check(true)) { for (var s1 = 1; s1 <= 3; s1++) if (!check(false, s1)) { check(true, s1); go(s1, true); break; } var bad = document.querySelector('.ostep:not([hidden]) .bad .fld'); if (bad) bad.focus(); return; }
+    var out = ['Hi The Whipped Cup, I would like to order:'];
+    for (var k in q) if (q[k]) out.push('• ' + q[k] + ' × ' + JARS[k][0] + ' (₪' + q[k] * JARS[k][1] + ')');
+    if (PACKS[pack]) { var pk = PACKS[pack], every = /Weekly/.test(pk.meta) ? ', weekly' : /Monthly/.test(pk.meta) ? ', monthly' : ''; out.push('• ' + pk.name + ', ' + pk.jars + ' jars' + every + ' (₪' + pk.price + ')'); out.push('   ' + packDesc()); }
+    if (v('note')) out.push('Notes: ' + v('note'));
+    out.push('Total: ₪' + total());
+    out.push('Deliver to: ' + v('addr'));
+    out.push('First delivery: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));
+    out.push('Name: ' + v('me') + ', ' + v('ph'));
+    var ls = []; for (var k5 in q) if (q[k5]) ls.push({ product_id: PID[k5], qty: q[k5] });
+    if (PACKS[pack]) ls.push({ product_id: PID[pack], qty: 1 });
+    var notes = [PACKS[pack] ? PACKS[pack].name + ': ' + packDesc() : '', v('note'), 'Sent from The Whipped Cup page by WhatsApp'].filter(Boolean).join('\n');
+    var sending = send.getAttribute('aria-busy') === 'true'; if (sending) return;
+    send.setAttribute('aria-busy', 'true');
+    var label = send.firstElementChild.textContent; send.firstElementChild.textContent = 'Sending';
+    // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
+    var tab = window.open('', '_blank');
+    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })
+      .catch(function (err) { console.warn('Order not saved', err); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var text = out.join('\n');
+      if (saved && saved.track_url) text += '\n\nFollow the order: ' + saved.track_url;
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      send.removeAttribute('aria-busy'); send.firstElementChild.textContent = label;
+      var first = v('me').split(/\s+/)[0], sent = document.getElementById('sent'); sent.textContent = 'Thanks, ' + first + '. Your order is open in WhatsApp. Send the message there so we get it.'; sent.hidden = false;
+    });
+  });
+  document.getElementById('deal').querySelector('button').addEventListener('click', function () {
+    var k = document.getElementById('deal').dataset.pack; pack = k; oneFlav = ''; mixQ = { classic: 0, caramel: 0, vanilla: 0 };
+    if (PACKS[k].mode === 'one') { for (var j in q) if (q[j]) oneFlav = j; } else { for (var j2 in q) mixQ[j2] = q[j2]; }
+    for (var j3 in q) q[j3] = 0; drawMix();
+    if (oneFlav) { var r = document.querySelector('input[name=oneflav][value="' + oneFlav + '"]'); if (r) r.checked = true; }
+    drawMixState(); update(); check(false); label();
+  });
+  // every line can be taken out of the basket in one tap (Tzvi, 20 Oct 2026: "there needs to be a way to remove items")
+  document.getElementById('sum-list').addEventListener('click', function (e) { var r = e.target.closest('button[data-rm]'); if (!r) return;
+    if (r.dataset.rm === 'pack') { pack = ''; mixQ = { classic: 0, caramel: 0, vanilla: 0 }; oneFlav = ''; drawMix(); } else q[r.dataset.rm] = 0;
+    update(); check(false); label(); });
+  document.getElementById('sum-list').addEventListener('click', function (e) { var b = e.target.closest('button[data-k]'); if (!b) return; q[b.dataset.k] = Math.max(0, Math.min(20, q[b.dataset.k] + (+b.dataset.d))); update(); check(false); label(); });
+  // ── the steps: one screen each, the browser's back button goes back a step (#order, #order-2, #order-3)
+  var step = 1, STEP_BTN = ['', 'Continue to delivery', 'Continue to your details', ''], STEP_NOTE = ['', 'Next: where and when we deliver.', 'Next: your name and phone.', 'Opens WhatsApp with your order written out, to send to The Whipped Cup.'];
+  function drawStep() {
+    [].forEach.call(document.querySelectorAll('.ostep'), function (el) { el.hidden = +el.dataset.s !== step; });
+    [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
+    var day = v('when') ? new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long' }) : '';
+    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? (day ? 'Send for ' + day : 'Send order on WhatsApp') + ', ₪' + total() : 'Send order on WhatsApp');
+    send.classList.toggle('idle', !check(false, step));
+    document.getElementById('send-note').textContent = STEP_NOTE[step];
+    document.getElementById('back').hidden = step === 1;
+    var where = document.getElementById('sum-where'); where.hidden = step < 3 || !v('addr');
+    if (!where.hidden) where.textContent = 'To ' + v('addr') + (v('when') ? ', from ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' }) : '');
+  }
+  function go(s, push) {
+    if (s > 1 && !check(false, s - 1)) s = 1; if (s > 2 && !check(false, 2)) s = 2;
+    step = s; drawStep();
+    if (push) { history.pushState({ step: s }, '', s === 1 ? '#order' : '#order-' + s); document.getElementById('order').scrollIntoView({ block: 'start', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); var f = document.querySelector('.ostep:not([hidden]) .fld'); if (f && s > 1) setTimeout(function () { f.focus({ preventScroll: true }); }, 350); }
+  }
+  addEventListener('popstate', function () { var m = /#order-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
+  document.getElementById('back').addEventListener('click', function () { history.back(); });
+  document.getElementById('steps').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
+  show(JARS[qs.get('jar')] ? qs.get('jar') : 'classic');
+  drawMix(); update();
+  var m0 = /#order-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
+  if (PACKS[qs.get('pack')]) setTimeout(function () { var l = plans.querySelector('input[value="' + pack + '"]'); if (l) l.closest('label').scrollIntoView({ block: 'center' }); }, 60);
+})();
+</script>
+</body>
+</html>

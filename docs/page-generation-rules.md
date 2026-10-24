@@ -1774,6 +1774,12 @@ Prompt shape that gives this (one line each, reused word for word across a set):
 6. **Stills before video**: a 2-credit still is checked and approved before a 10-credit clip, and the clip starts from that approved still.
 7. **Compare before showing**: put the result beside their photo and check each trait from step 2; any that changed is fixed in one redo that names only that trait. Then show Tzvi the pair.
 8. **Log it**: the brief keeps the reference, the exact prompt, the model and the result, so the next shot for that business reuses what worked.
+9. **Their words are pasted, never generated** (24 Oct, the hero-shot run: the tub read 50GRAM, then 60GRAM; a lid had the wrong phone number twice; "Stir wall"; invented tag words). Read every word on the result at full size against their photo. When any word differs, cut their real label from their photo and paste it on in code (perspective-free when the label faces the camera); a second generation to fix small print failed three times out of three.
+10. **2k from the first try**: the default 1K made every small label unreadable and cost a redo; 2k is 2 credits.
+11. **The first shot of a set is the scene for the rest**: pass it as the second reference ("the first image is the product, the second is the scene") rather than describing the scene again in words (that drifted every time). Its flaws copy too, so it is approved before the rest are made.
+12. **Keep their camera**: a photo taken from straight above stays overhead for the whole set (tilting it made a bun and a tub stand on their edge); a side photo stays at eye level.
+13. **Too small to edit**: under about 500 px, or a label that cannot be read in their photo, ask the owner for a photo (message-to-owner.md) instead of generating (the 239 px gift boxes came back with invented tags and a different bowl).
+14. **Look for their photos before saying there is none**: owner photos are often only in the main checkout (src/owner, untracked), not in a fresh worktree; search there and in their listing before asking.
 
 
 **AI images and video** (Higgsfield). Tzvi, 23 Sep 2026: owners should be

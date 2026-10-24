@@ -31,10 +31,10 @@
     <div class="wrap st-grid">
       <div class="st-ph">
         <img class="on" data-flav="classic" src="assets/jar-classic-hero.webp" alt="A jar of Classic Cloud on a stone plinth" width="960" height="1192" fetchpriority="high">
-        <img class="" data-flav="caramel" src="assets/jar-caramel-hero.webp" alt="A jar of Caramel Cloud on a stone plinth" width="960" height="1192" loading="lazy">
-        <img class="" data-flav="vanilla" src="assets/jar-vanilla-hero.webp" alt="A jar of Vanilla Cloud on a stone plinth" width="960" height="1192" loading="lazy">
-        <img data-flav="use" src="assets/iced.webp" alt="An iced whipped coffee in the sun" width="1170" height="1213" loading="lazy">
-        <button type="button" class="st-use" id="st-use" aria-pressed="false" aria-label="Show the whipped coffee in a glass"><img src="assets/iced.webp" alt="" width="56" height="56" loading="lazy"></button>
+        <img class="" data-flav="caramel" src="assets/jar-caramel-hero.webp" alt="A jar of Caramel Cloud on a stone plinth" width="960" height="1192">
+        <img class="" data-flav="vanilla" src="assets/jar-vanilla-hero.webp" alt="A jar of Vanilla Cloud on a stone plinth" width="960" height="1192">
+        <img data-flav="use" src="assets/iced.webp" alt="An iced whipped coffee in the sun" width="1170" height="1213">
+        <button type="button" class="st-use" id="st-use" aria-pressed="false" aria-label="Show the whipped coffee in a glass"><img src="assets/iced.webp" alt="" width="56" height="56"></button>
       </div>
       <div class="st-info">
         <p class="kick">Shop · Whipped coffee in a jar</p>
@@ -177,13 +177,24 @@
   var stN = document.getElementById('st-n'), stAdd = document.getElementById('st-add'), stIn = document.getElementById('st-in');
   function label() { stAdd.firstElementChild.textContent = 'Add ' + (n === 1 ? 'a jar' : n + ' jars') + ', ₪' + n * JARS[sel][1]; stN.textContent = n;
     stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' ' + JARS[sel][0] : ''; }
+  // a crossfade for words that change with a choice (check-motion: an instant swap is a JUMP, a fade
+  // through blank is a FLASH): the new words fade in while a copy of the old ones fades out on top
+  function xfade(el, html) {
+    if (el.innerHTML === html) return;
+    var old = el.innerHTML;
+    el.innerHTML = '<span class="xf"><span class="xin">' + html + '</span><span class="xout" aria-hidden="true">' + old + '</span></span>';
+    clearTimeout(el._xf); el._xf = setTimeout(function () { el.innerHTML = html; }, 360);
+  }
   function show(k) {
     sel = k; stage.dataset.flav = k;
-    [].forEach.call(stage.querySelectorAll('.st-ph > img'), function (i) { i.classList.toggle('on', i.dataset.flav === k); });
+    // the new jar crossfades only once its photo is decoded, so a cold tap never pops it in (check-motion)
+    var next = stage.querySelector('.st-ph > img[data-flav="' + k + '"]');
+    var swap = function () { if (sel !== k) return; [].forEach.call(stage.querySelectorAll('.st-ph > img'), function (i) { i.classList.toggle('on', i === next); }); };
+    if (next.complete && next.naturalWidth) swap(); else (next.decode ? next.decode() : Promise.reject()).then(swap, swap);
     useBtn.setAttribute('aria-pressed', 'false'); stage.querySelector('.st-ph').classList.remove('use'); useBtn.setAttribute('aria-label', 'Show the whipped coffee in a glass'); useBtn.firstElementChild.src = 'assets/iced.webp';
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.flav === k ? 'true' : 'false'); });
-    document.getElementById('st-name').textContent = JARS[k][0]; document.getElementById('st-desc').textContent = DESC[k];
-    document.getElementById('st-price').textContent = '₪' + JARS[k][1];
+    xfade(document.getElementById('st-name'), JARS[k][0]); xfade(document.getElementById('st-desc'), DESC[k]);
+    xfade(document.getElementById('st-price'), '₪' + JARS[k][1]);
     label();
   }
   stage.querySelector('.st-pick').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.flav); });

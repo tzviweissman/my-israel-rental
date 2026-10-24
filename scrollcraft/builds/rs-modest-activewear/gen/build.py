@@ -71,8 +71,8 @@ OPENING = f'''  <section class="open" id="open" aria-label="RS Modest Activewear
       </div>
       <div class="doorway" aria-hidden="true">
         <div class="room"><img src="assets/shop.webp" alt="" width="1800" height="2400" fetchpriority="high"></div>
-        <div class="door l"><img src="assets/skirts.webp" alt="" width="1023" height="1209" fetchpriority="high"></div>
-        <div class="door r"><img src="assets/skirts.webp" alt="" width="1023" height="1209" fetchpriority="high"></div>
+        <div class="door l"><img src="assets/skirts-2k.webp" alt="" width="2160" height="2544" fetchpriority="high"></div>
+        <div class="door r"><img src="assets/skirts-2k.webp" alt="" width="2160" height="2544" fetchpriority="high"></div>
         <div class="seam"></div>
       </div>
     </div>

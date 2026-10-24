@@ -33,13 +33,24 @@
   var stN = document.getElementById('st-n'), stAdd = document.getElementById('st-add'), stIn = document.getElementById('st-in');
   function label() { stAdd.firstElementChild.textContent = 'Add ' + (n === 1 ? 'a jar' : n + ' jars') + ', ₪' + n * JARS[sel][1]; stN.textContent = n;
     stIn.textContent = q[sel] ? 'In your basket: ' + q[sel] + ' ' + JARS[sel][0] : ''; }
+  // a crossfade for words that change with a choice (check-motion: an instant swap is a JUMP, a fade
+  // through blank is a FLASH): the new words fade in while a copy of the old ones fades out on top
+  function xfade(el, html) {
+    if (el.innerHTML === html) return;
+    var old = el.innerHTML;
+    el.innerHTML = '<span class="xf"><span class="xin">' + html + '</span><span class="xout" aria-hidden="true">' + old + '</span></span>';
+    clearTimeout(el._xf); el._xf = setTimeout(function () { el.innerHTML = html; }, 360);
+  }
   function show(k) {
     sel = k; stage.dataset.flav = k;
-    [].forEach.call(stage.querySelectorAll('.st-ph > img'), function (i) { i.classList.toggle('on', i.dataset.flav === k); });
+    // the new jar crossfades only once its photo is decoded, so a cold tap never pops it in (check-motion)
+    var next = stage.querySelector('.st-ph > img[data-flav="' + k + '"]');
+    var swap = function () { if (sel !== k) return; [].forEach.call(stage.querySelectorAll('.st-ph > img'), function (i) { i.classList.toggle('on', i === next); }); };
+    if (next.complete && next.naturalWidth) swap(); else (next.decode ? next.decode() : Promise.reject()).then(swap, swap);
     useBtn.setAttribute('aria-pressed', 'false'); stage.querySelector('.st-ph').classList.remove('use'); useBtn.setAttribute('aria-label', 'Show the whipped coffee in a glass'); useBtn.firstElementChild.src = 'assets/iced.webp';
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.flav === k ? 'true' : 'false'); });
-    document.getElementById('st-name').textContent = JARS[k][0]; document.getElementById('st-desc').textContent = DESC[k];
-    document.getElementById('st-price').textContent = '₪' + JARS[k][1];
+    xfade(document.getElementById('st-name'), JARS[k][0]); xfade(document.getElementById('st-desc'), DESC[k]);
+    xfade(document.getElementById('st-price'), '₪' + JARS[k][1]);
     label();
   }
   stage.querySelector('.st-pick').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.flav); });

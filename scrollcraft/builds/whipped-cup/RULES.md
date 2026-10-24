@@ -34,7 +34,7 @@ R6.1 pass: shops playbook: products with prices come straight after the film (fl
 R4.1 pass: the hechsher name and delivery area are missing and are asked, not invented; Kosher certified is her seal
 
 ## 2. Opening
-R3g.13 pass: 1440x900 and 390x844 first screens: film, the tagline question, the Scroll hint; the header button is the only action
+R3g.13 pass: 1440x900 and 390x844 first screens: film and the tagline question; the header button is the only action; the Scroll hint was removed 24 Oct (scroll cues are banned)
 R3b.1 pass: first screen is the tagline film; what, where and the button come with the end card of the opening one scroll later (same sequence as before)
 R3b.2 pass: end card: price From 40 a jar and Order button touch; Kosher certified sits in the same proof line, stated twice on the page (end card and footer)
 R3b.3 pass: one solid action per screen: Order your jars; flavour Add buttons are outline; the phone bar repeats it
@@ -89,7 +89,7 @@ R3s.9 pass: colour means one thing: the same pink for the saving badge, green fo
 R3s.12 pass: the maker line follows the flavours: Made fresh in Ramat Eshkol with two of her real photos
 R3s.14 n/a: no number block on the page; the only numbers are prices and 3 to 4 coffees per jar
 R3s.11 n/a: the price sentence for why it costs that was not given by the owner; asked in the message
-R5b.6 pass: no scroll counters or labels above every section; the Scroll hint on the first screen is the one cue the opening has
+R5b.6 pass: no scroll cues (the Scroll hint was removed 24 Oct; check-site OPENING finds none), no counters, no label above every section
 R3.13 pass: no doubled contact; the close band and footer share the one set of contacts
 R3a.1 pass: walked 1440x900 and 390x844 at every section on the home page, shop and contact; reduced motion not separately captured
 R3r.1 pass: check-site, check-fits, check-motion and readable run on every page (see the reply)
@@ -100,6 +100,7 @@ R0b.12 n/a: nothing published, so no pages-list preview clip to refresh
 ## 4. Photos and media
 R8.1 pass: the three flavour photos (shop stage, home rooms, thumbs) are one set of product hero shots, 23 Oct: the same travertine plinth, amber ground, light from the left and camera; the thumbs and room tiles are cut from those same masters
 R8.6 pass: every main jar picture is a product hero shot made from her own jar photo: one jar large and turned slightly, on a travertine plinth, its own flavour beside it (one caramel dish, a dish of coffee beans, vanilla pods), one amber colour story, one warm light, still; each compared with her photo, label words checked letter by letter
+R8.7 pass (recorded after the fact): the jars were made 22 and 23 Oct, before this rule (24 Oct); gen/jars-brief.md now holds the reference crops, the traits kept, the exact prompts, the model, the side-by-sides (gen/jar-*-compare.jpg) and what was redone
 R8.2 pass: the jars are her own photos edited (Higgsfield nano_banana_2, one shared scene); vanilla's small print was hidden by beans in her photo and was redrawn with the wording of her other two labels; the other images are her own photos
 R3p.7 pass: every flavour thumbnail, room photo and package photo is one jar or one product; the home flavour cards now show the whole jar in the same frame for all three (contain, 500x1111 files, the largest we have, shown under 215 px wide so a 2x phone is sharp); the four packages share one layout: same square photo, price and Choose in the same place
 R3h.12 pass: the same jar photo appears on the room, the shop picker and the basket, edited from one master per flavour
@@ -172,7 +173,7 @@ R3a.2 pass: walked the opening mid-transition at 4 steps; text does not re-wrap 
 R3a.3 n/a: nothing is placed on a spot in a photo or video
 R3a.4 pass: cutoff.mjs run on every page at nine sizes: ok; the one held section (the Whipped Cup opening) fits 1280x650
 R3a.5 pass: reduced motion shows the end card still (draw(1) path in the page script)
-R3s.2 pass: check-site SHIFT clean; check-motion flags one JUMP on a small button state (the Bun size or delivery tile, which varies run to run and was there before this rework)
+R3s.2 pass: check-site SHIFT clean; check-motion clean three runs in a row (24 Oct: stage photos load with the page and swap only once decoded, changing words crossfade in one grid cell, the coffees answer and its button keep one size, late photos fade in over 300 ms)
 R3s.1 pass: check-site STATE clean on every page
 R3s.8 pass: the Order button over the film sits on the edge shade as a solid white pill; readable clean on shop and contact
 R3s.10 pass: the picture appears the moment a flavour is named on the shop page

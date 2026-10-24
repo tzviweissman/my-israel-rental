@@ -4,7 +4,7 @@
  * live site shows it AT THE BUSINESS'S OWN ADDRESS, /business/<slug>, in
  * place of the standard listing page (Tzvi, 7 Oct 2026, for Blazin' Boards).
  *
- *   node scripts/publish-page.mjs <build-folder> <business-slug>
+ *   node scripts/publish-page.mjs <build-folder> <business-slug> [--check]
  *   e.g. node scripts/publish-page.mjs blazin-boards blazin-boards
  *
  * What it does:
@@ -31,7 +31,7 @@ import path from 'node:path';
 import { createRequire } from 'node:module';
 import crypto from 'node:crypto';
 
-const [folder, slug] = process.argv.slice(2);
+const [folder, slug] = process.argv.slice(2).filter((a) => !a.startsWith('--'));
 if (!folder || !slug || !/^[a-z0-9-]{2,60}$/.test(slug)) {
   console.error('usage: node scripts/publish-page.mjs <build-folder> <business-slug>');
   process.exit(1);
@@ -51,50 +51,58 @@ if (!fs.existsSync(path.join(SRC, 'index.html'))) {
   process.exit(1);
 }
 
-// A page going live for the first time needs its concept sheet (Tzvi, 19 Oct
-// 2026: bland pages were shipped although the rules said otherwise). Pages
-// already live republish as before.
+// Every rule is checked on EVERY publish, new page or republish, and every problem is listed at once
+// (Tzvi, 24 Oct 2026: "the rules get skipped a lot"; that day three first publishes stopped one problem
+// at a time, ten minutes apart, on rules added after the sites were built). Republishes used to skip
+// all of this, so a rule broken by a later change went live unseen.
+//   --check   run everything, list every problem, publish nothing (use it before asking to publish)
+// The concept sheet (Tzvi, 19 Oct 2026: bland pages shipped although the rules said otherwise) and the
+// look-alike check (rules 3p: "why do you keep making everything so similar") stay for new pages only:
+// a live page was compared when it first went up, and comparing it with itself would fail.
+const CHECK_ONLY = process.argv.includes('--check');
 {
   const live = (() => { try { return JSON.parse(fs.readFileSync(path.join(ROOT, 'frontend', 'public', 'pages', 'pages.json'), 'utf8')); } catch { return []; } })();
-  if (!live.includes(slug)) {
+  const isNew = !live.includes(slug);
+  const { spawnSync, spawn } = await import('node:child_process');
+  const problems = [];
+  if (isNew) {
     const { checkConcept } = await import('./check-concept.mjs');
-    const problems = checkConcept(SRC);
-    if (problems.length) {
-      console.error(`Not published: ${slug} is a new page and its concept is not ready.\n- ${problems.join('\n- ')}`);
-      process.exit(1);
-    }
-    // and it must not come out like a live page: fonts, colours, design and
-    // effects (rules 3p; Tzvi, 20 Oct 2026: "why do you keep making everything so similar")
-    const { spawnSync } = await import('node:child_process');
+    const c = checkConcept(SRC);
+    if (c.length) problems.push(`concept not ready (new page):\n- ${c.join('\n- ')}`);
     const fp = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-fingerprints.mjs'), SRC], { encoding: 'utf8' });
-    if (fp.status !== 0) {
-      console.error(`Not published: ${slug} is too like a live page.\n${fp.stdout}${fp.stderr}`);
-      process.exit(1);
-    }
-    // and every page of it fits the screen, with no photo blown up past its size (rules 3c.12,
-    // 3p.6; Tzvi, 20 Oct 2026: "make sure the rules will prevent this in the future")
-    const http = await import('node:http');
-    const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp',
-      '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.mp4': 'video/mp4', '.woff2': 'font/woff2' };
-    const server = http.createServer((req, res) => {
-      const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
-      const file = path.join(SRC, rel);
-      if (!file.startsWith(SRC) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
-      res.writeHead(200, { 'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream' });
-      fs.createReadStream(file).pipe(res);
-    });
-    await new Promise((r) => server.listen(0, '127.0.0.1', r));
-    const base = `http://127.0.0.1:${server.address().port}/`;
-    const pages = fs.readdirSync(SRC).filter((f) => f.endsWith('.html')).map((f) => base + f);
-    const { spawn } = await import('node:child_process');
-    // fits the screen (3c.12), no glitches (3s: check-site), choices switch smoothly (3s: check-motion)
-    for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly']]) {
-      let out = '';
-      const code = await new Promise((r) => { const c = spawn(process.execPath, [path.join(ROOT, 'scripts', script), ...pages], { cwd: ROOT }); c.stdout.on('data', (d) => { out += d; }); c.stderr.on('data', (d) => { out += d; }); c.on('exit', r); });
-      if (code !== 0) { server.close(); console.error(`Not published: ${slug} ${why}.\n${out}`); process.exit(1); }
-    }
-    server.close();
+    if (fp.status !== 0) problems.push(`too like a live page:\n${fp.stdout}${fp.stderr}`);
   }
+  // every line of the rules checklist answered in RULES.md, and answered after the last change
+  const rules = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rules.mjs'), SRC], { encoding: 'utf8' });
+  if (rules.status !== 0) problems.push(`rules not all answered (check-rules):\n${rules.stdout.split('\n').filter((l) => /FAIL|problem/.test(l)).join('\n')}`);
+  // and every page of it fits the screen, with no photo blown up past its size (rules 3c.12,
+  // 3p.6; Tzvi, 20 Oct 2026: "make sure the rules will prevent this in the future"), has no
+  // glitches (3s: check-site) and switches smoothly (3s: check-motion); all three run, all reported
+  const http = await import('node:http');
+  const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp',
+    '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.mp4': 'video/mp4', '.woff2': 'font/woff2' };
+  const server = http.createServer((req, res) => {
+    const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
+    const file = path.join(SRC, rel);
+    if (!file.startsWith(SRC) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
+    res.writeHead(200, { 'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream' });
+    fs.createReadStream(file).pipe(res);
+  });
+  await new Promise((r) => server.listen(0, '127.0.0.1', r));
+  const base = `http://127.0.0.1:${server.address().port}/`;
+  const pages = fs.readdirSync(SRC).filter((f) => f.endsWith('.html') && !SKIP_HTML.test(f)).map((f) => base + f);
+  const run = (script) => new Promise((r) => { let out = ''; const c = spawn(process.execPath, [path.join(ROOT, 'scripts', script), ...pages], { cwd: ROOT });
+    c.stdout.on('data', (d) => { out += d; }); c.stderr.on('data', (d) => { out += d; }); c.on('exit', (code) => r({ code, out })); });
+  // one after another (check-motion times frames, so it must not share the machine), never stopping early
+  const results = [];
+  for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly']]) results.push({ why, ...(await run(script)) });
+  server.close();
+  for (const r of results) if (r.code !== 0) problems.push(`${r.why}:\n${r.out.split('\n').filter((l) => l.trim() && !/: checked$|choices tapped/.test(l)).join('\n')}`);
+  if (problems.length) {
+    console.error(`Not published: ${slug} has ${problems.length} kind(s) of problem. Fix them all, then run again.\n\n${problems.join('\n\n')}`);
+    process.exit(1);
+  }
+  if (CHECK_ONLY) { console.log(`${slug}: every check passes (concept${isNew ? ', look-alike' : ''}, rules, fits, site, motion); nothing published (--check)`); process.exit(0); }
 }
 
 fs.rmSync(OUT, { recursive: true, force: true });

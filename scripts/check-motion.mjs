@@ -63,8 +63,11 @@ for (const url of urls) {
   for (const i of order) {
     const pressed = await page.evaluate((i) => document.querySelector(`[data-motion-i="${i}"]`).getAttribute('aria-pressed'), i);
     if (pressed === 'true') continue;
-    await page.evaluate((i) => { const b = document.querySelector(`[data-motion-i="${i}"]`); document.documentElement.style.scrollBehavior = 'auto'; b.scrollIntoView({ block: 'center', behavior: 'instant' }); }, i);
-    await page.waitForTimeout(500);
+    await page.evaluate((i) => { const b = document.querySelector(`[data-motion-i="${i}"]`); document.documentElement.style.scrollBehavior = 'auto'; b.scrollIntoView({ block: 'nearest', behavior: 'instant' }); }, i);
+    // 'nearest' (no scroll when the choice is already on screen) and 1200 ms, not 500: the recording can run over a
+    // second away from Date.now() on a busy machine, so the scroll to the choice landed inside the tap's window and
+    // read as a JUMP (Whipped Cup's coffees picker and shop stage, 24 Oct 2026)
+    await page.waitForTimeout(1200);
     const colour = await page.evaluate((i) => { const b = document.querySelector(`[data-motion-i="${i}"]`); const cs = getComputedStyle(b);
       const c = b.style.getPropertyValue('--c') || ''; return c.trim() || cs.backgroundColor; }, i);
     const at = Date.now() - t0;
@@ -78,7 +81,7 @@ for (const url of urls) {
   const free = taps.map((t) => t.i).slice(-2);  // now on the last one: tap the one before it, then the last again
   if (free.length === 2) {
     // the same scroll as when the first choice was measured, so its settled look (B) lines up with these frames
-    await page.evaluate((i) => document.querySelector(`[data-motion-i="${i}"]`).scrollIntoView({ block: 'center', behavior: 'instant' }), free[0]);
+    await page.evaluate((i) => document.querySelector(`[data-motion-i="${i}"]`).scrollIntoView({ block: 'nearest', behavior: 'instant' }), free[0]);
     await page.waitForTimeout(700);
     const at = Date.now() - t0;
     await page.evaluate(([a, b]) => { document.querySelector(`[data-motion-i="${a}"]`).click(); setTimeout(() => document.querySelector(`[data-motion-i="${b}"]`).click(), 250); }, free);

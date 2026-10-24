@@ -612,3 +612,19 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
   background: linear-gradient(90deg, rgb(42 20 11 / .9) 0%, rgb(42 20 11 / .88) 36%, rgb(42 20 11 / .8) 46%, rgb(42 20 11 / .66) 54%, rgb(42 20 11 / .5) 62%, rgb(42 20 11 / .34) 70%, rgb(42 20 11 / .2) 79%, rgb(42 20 11 / .09) 90%, transparent 100%); }
 @media (max-width: 560px) { .bento .pack.best { padding-top: 1.7rem; } .bento .pack.best .tab { right: 1rem; } }
 .bento .pack.best { padding-top: 1.7rem; } .bento .pack.best .tab { right: 1rem; }
+
+/* words that change with a choice crossfade (xfade in shop.js and cups.py; check-motion JUMP and FLASH) */
+.xin, .xout { animation: xf-in 340ms var(--out) both; }
+/* old and new words share one grid cell, so the old ones fade out exactly where they were */
+.xf { display: inline-grid; } .xf > span { grid-area: 1 / 1; justify-self: center; }
+.xout { pointer-events: none; animation-name: xf-out; }
+#st-name, #st-desc, #st-price, #cups-n, #cups-u, #cups-go { position: relative; }
+@keyframes xf-in { from { opacity: 0; } }
+@keyframes xf-out { to { opacity: 0; } }
+@media (prefers-reduced-motion: reduce) { .xin, .xout { animation: none; } .xout { display: none; } }
+/* the answer and its button keep one size whatever is chosen, so a choice never moves the layout (check-motion JUMP, rule 3s.2) */
+#cups-n { min-width: 4.4ch; text-align: center; }
+#cups-go { min-width: min(100%, 21.5rem); justify-content: center; text-align: center; }
+img.lz { opacity: 0; transition: opacity 300ms var(--out); }
+img.lz.lz-in { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { img.lz { opacity: 1; transition: none; } }
