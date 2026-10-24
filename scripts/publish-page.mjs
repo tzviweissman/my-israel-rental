@@ -227,6 +227,9 @@ let list = [];
 try { list = JSON.parse(fs.readFileSync(listFile, 'utf8')); } catch { /* first page */ }
 if (!list.includes(slug)) list.push(slug);
 fs.writeFileSync(listFile, `${JSON.stringify(list.sort(), null, 2)}\n`);
+// the commit check refuses a live page that differs from what this script wrote (hand edits go to the build)
+const { recordPublished } = await import('./live-hash.mjs');
+recordPublished(ROOT, slug, folder, OUT);
 console.log(`published ${folder} as /business/${slug} (${files} files in frontend/public/pages/${slug}); pages: ${list.join(', ')}`);
 
 // Every script on every published page must still parse after the

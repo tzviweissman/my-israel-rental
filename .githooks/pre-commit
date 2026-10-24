@@ -1,0 +1,4 @@
+#!/bin/sh
+# Every business site a commit touches must pass its rule checks (scripts/pre-commit-check.mjs).
+# Turned on per clone with: git config core.hooksPath .githooks
+exec node scripts/pre-commit-check.mjs
