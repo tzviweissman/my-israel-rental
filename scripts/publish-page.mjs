@@ -95,7 +95,14 @@ const CHECK_ONLY = process.argv.includes('--check');
     c.stdout.on('data', (d) => { out += d; }); c.stderr.on('data', (d) => { out += d; }); c.on('exit', (code) => r({ code, out })); });
   // one after another (check-motion times frames, so it must not share the machine), never stopping early
   const results = [];
-  for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly']]) results.push({ why, ...(await run(script)) });
+  // A failure that is only a timing measure (SMOOTH frame rate, a FLASH on two quick taps) is run once more before it
+  // counts: on a computer running several sessions' browsers these tripped on pages that pass alone (25 Oct 2026).
+  const onlyTiming = (out) => { const bad = out.split('\n').filter((l) => /^[A-Z]{4,}\s/.test(l)); return bad.length > 0 && bad.every((l) => /^(SMOOTH|FLASH)\s/.test(l)); };
+  for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly']]) {
+    let r = await run(script);
+    if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }
+    results.push({ why, ...r });
+  }
   server.close();
   for (const r of results) if (r.code !== 0) problems.push(`${r.why}:\n${r.out.split('\n').filter((l) => l.trim() && !/: checked$|^\S+: \d+ choices tapped/.test(l)).join('\n')}`);
   if (problems.length) {
@@ -109,7 +116,9 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
 
 // %23 is an escaped # (a fragment inside an inline SVG data URL, Bun Intended 9 Oct 2026).
-const relative = (u) => u && !/^(?:[a-z][a-z0-9+.-]*:|\/|#|%23|\?)/i.test(u);
+// A value starting with ' or ${ is a script building the attribute (src="' + url + '"), not a path: prefixing it
+// pointed every Blazin' Boards card photo at /pages/... (25 Oct 2026).
+const relative = (u) => u && !/^(?:[a-z][a-z0-9+.-]*:|\/|#|%23|\?|'|\$\{)/i.test(u);
 // The site's own pages (a hand-built page can be a small website, Tzvi
 // 12 Oct 2026): a link to "kitchen.html" anywhere, attribute or script
 // string, becomes the clean /business/<slug>/kitchen that server.js answers.
@@ -227,6 +236,15 @@ const site = ['index', ...ORDERED].map((name) => {
   return { page: name, title: name === 'index' ? 'Home' : title };
 });
 fs.writeFileSync(path.join(OUT, 'site.json'), `${JSON.stringify(site, null, 2)}\n`);
+
+// The finished files, as the live site will serve them: every address of this site must load (25 Oct 2026: two
+// rewrite mistakes broke Blazin' Boards' pictures live, because every other check ran before the rewrite).
+{
+  const { spawnSync } = await import('node:child_process');
+  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-published.mjs'), slug], { cwd: ROOT, encoding: 'utf8' });
+  process.stdout.write(c.stdout || '');
+  if (c.status !== 0) { console.error(c.stderr || ''); console.error(`Not published: ${slug}'s finished files have broken addresses (above). frontend/public/pages/${slug} was written but not recorded, so the commit check refuses it until this is fixed.`); process.exit(1); }
+}
 
 const listFile = path.join(ROOT, 'frontend', 'public', 'pages', 'pages.json');
 let list = [];
