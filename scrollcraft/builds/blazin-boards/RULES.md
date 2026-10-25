@@ -6,7 +6,7 @@ Replace every `todo`. `node scripts/check-rules.mjs scrollcraft/builds/blazin-bo
 
 ## 1. Facts and words
 R0b.1 pass: slug blazin-boards, the business record answers at /api/marketplace/business/blazin-boards (HTTP 200, slug and name match); site.js reads that slug
-R0b.3 pass: the nine boards and the six bottles are read live from their store listing (site.js, order-form), sizes and contents come from their price list transcribed in index.html; the prices on boards.html and in the text menu on index.html ($75 to $750) match the listing screen
+R0b.3 pass: the nine boards and the six bottles are read live from their store listing (site.js, order-form), sizes and contents come from their price list transcribed in index.html; the prices on boards.html and in the text menu on index.html ($75 to $750) match the listing screen; the Every board page shows each board's own photo from its listing with its catalog size on it (Mediums 25 x 34 cm, Party 26 x 86 cm), approved by Tzvi 25 Oct
 R2.1 pass: read every sentence of index.html and the five shop pages again after the rework; sizes, contents, prices, 48 hours notice, delivery across Israel, Farn 5, payment ways all trace to their price list and listing; the new facts strip repeats those five facts and adds nothing
 R2.2 pass: read message-to-owner.md: questions 1 to 6 as before, and 7 to 10 added on 22 Oct (which photograph is which board, the six bottle prices, the delivery wording, what "special boards" means); every one is about their business
 R2.3 pass: message-to-owner.md lists seven example visitor questions written from their real details (sizes, notice, delivery, gluten-free, changing a board, payment, cancelling) plus the photo-in-use question
@@ -37,12 +37,12 @@ R4.1 pass: no price is missing; the Party Board shows "Size on request" on the s
 R3g.13 pass: first screen at 1440x900 and 390x844 holds the name and their own board (cut-out; in index-name.html its top edge peeks up under BLAZIN'), the headline comes as you scroll; opening checked by check-site OPENING
 R3b.1 pass: what it is (meat boards), where (Jerusalem, Farn 5), trust (facts strip), what to do (Order a board) all within the first three screens
 R3b.2 pass: price touches the button in the bar of the phone ("From $75" beside "Order a board") and in the range band; no kosher claim is made on the page
-R3b.3 pass: gold solid "Order a board" is the one solid action on each screen; the bar button repeats it
+R3b.3 pass: fire orange solid "Order a board" is the one solid action on each screen; the bar button repeats it
 R3h.1 pass: the opening is the giant BLAZIN' on the plain wine ground with a fine grain tile (the picture layer check-site counts) and their own cut-out board tumbling in and landing in front of the lower part of the letters, then the headline and button; it is an event, not a drift (frames at every 10% looked at)
 R3n.1 pass: their own board (cut from their square photograph) is the large picture of the opening; it lands whole on screen at 1280x650, 1440x900, 1920x1080, 390x844 and 360x640 (rects measured), and on phones it is already in view at the first scroll
 R3n.2 pass: "Five sizes, to scale": one board grows through the real sizes beside a 10 cm ruler and lights the boards of each size with their price; the board is a crop of their own square photograph (assets/board-top.jpg) that keeps the board edge at every size; no other business has these boards and sizes
 R3n.3 pass: the size reached changes the tier shown (boards and prices) and the board itself; check-motion passed on boards.html
-R3n.4 pass: put the first screens next to Qissa (docs/inspo/awwwards-anatomy-2026-10-22/food/qissa.webp): same one dark ground and one gold button; ours opens on the plain wine ground with their own board large
+R3n.4 pass: put the first screens next to Qissa (docs/inspo/awwwards-anatomy-2026-10-22/food/qissa.webp): same one dark ground and one fire orange button; ours opens on the plain wine ground with their own board large
 R3n.5 pass: "you land and their board tumbles in, then grows to real size with the price"
 R3g.15 pass: check-fits: no photo over 1.35x its size at the six sizes; the opening board is their own cut-out and the jars band is a plain crop of their own photograph
 R3h.2 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
@@ -58,13 +58,13 @@ R3h.17 n/a: the opening is a scroll-driven tumble of their cut-out board over a 
 ## 3. Sections and worlds
 R3.12 pass: hero, the sizes section with price and contents per board, a call to action in the close, a footer; no section is doubled
 R3c.1 pass: references for this rework are Qissa, Delice and Theobroma contact sheets in docs/inspo/awwwards-anatomy-2026-10-22/food, cited in CONCEPT.md with their source folder
-R3g.17 pass: the effects in CONCEPT.md name where each came from; the rework added no new effect, only a ground and a framing change
-R3c.2 pass: looked at the whole page at laptop width: oxblood and gold, a heavy sans display plus Playfair, no purple or default gradient; not cream plus one italic word
-R3g.1 pass: CONCEPT.md records colours and faces; the page uses Playfair Display, Manrope, oxblood #3A0812 to #5A1222, cream #F4EADB, gold #E9B23B
-R3g.3 pass: gold is on the main button, the "to scale" word and the small labels; prices are in the cream text colour (computed colour of .price and .num checked on boards and index)
+R3g.17 pass: the effects in CONCEPT.md name where each came from (21st searches 25 Oct 2026): reveal R13 slide from the side and settle, tile T16 lift, tilt and ember edge, price P13 orange tag; sheet docs/site-reviews/2026-10-25/blazin-effects.jpg
+R3c.2 pass: looked at the whole page at laptop width: oxblood and fire orange, a heavy sans display plus Playfair, no purple or default gradient; not cream plus one italic word
+R3g.1 pass: CONCEPT.md records colours and faces; the page uses Playfair Display, Manrope, oxblood #3A0812 to #5A1222, cream #F4EADB, fire orange #FF7A2E (Tzvi chose it over gold, 25 Oct), small text the logo pink #F0E0E0
+R3g.3 pass: fire orange is on the main button, the "to scale" word and the small labels; prices are in the cream text colour (computed colour of .price and .num checked on boards and index)
 R3g.7 pass: one closing signature, the giant footer line; no other
 R3g.11 pass: Playfair Display and Manrope are both on the approved list
-R3p.3 n/a: check-fingerprints still reports clashes inherited from before this rework (warm browns with aidy-yaniv and the-gift-boutique, tile and reveal effects with four sites); the brief keeps colours and fonts and the site is live, so they are listed in the reply and not changed here
+R3p.3 n/a: check-fingerprints no longer reports effect clashes after the 25 Oct own effects; only colour clashes remain (aidy-yaniv, the-gift-boutique). Earlier note: clashes inherited from before this rework (warm browns with aidy-yaniv and the-gift-boutique, tile and reveal effects with four sites); the brief keeps colours and fonts and the site is live, so they are listed in the reply and not changed here
 R3p.5 pass: the ruler beside the growing board is the touch (CONCEPT.md touch line)
 R3q.1 pass: CONCEPT.md has the ideas with inspo pictures, the Own idea, chosen, the five wow answers and effects; its Not alike line names the inherited clashes instead of a passing line (R3p.3)
 R5a.7 pass: one signature (the board growing to scale) and one peak (the sizes section); the ending is the order button
@@ -85,7 +85,7 @@ R3c.9 pass: one pill radius for buttons and one 14 to 18 px radius for images an
 R3s.4 pass: check-site ALIGN passed on every page
 R3s.6 pass: check-site ALIGN passed; the three Order buttons share height and corner
 R3s.7 pass: buttons in sentence case; body line height 1.5 on the shop pages
-R3s.9 pass: gold means action everywhere; no tags that change colour
+R3s.9 pass: fire orange means action everywhere; no tags that change colour
 R3s.12 n/a: no photograph of the maker exists; asked for in message-to-owner.md question 3
 R3s.14 n/a: the owner gave no numbers to show big beyond prices and sizes, which are shown big in the tiers
 R3s.11 pass: the price sits beside contents on every board row and the one true line is the contents list
@@ -152,7 +152,7 @@ R3l.3 n/a: no item has options
 R3l.4 pass: the ten boards are compared in a text list by name, size and price; the sizes screen shows them side by side per size
 R3l.6 pass: one cut-out of their board stands in for every board in the shop and in the home list, shown the same way at the same size so it implies no different boards; the ten boards that need their own photograph are listed in message-to-owner.md question 7; the Party Board shows "Size on request"
 R3l.7 pass: each row names its contents and price
-R3e.9 pass: check-site STATE and FLOW passed on index and (flows) order pages; focus ring is gold
+R3e.9 pass: check-site STATE and FLOW passed on index and (flows) order pages; focus ring is fire orange
 R3e.19 pass: the flow ends on order-done.html with "Your order is with Blazin' Boards" (page read)
 R3s.16 pass: the order starts with picking boards, then date
 R3s.18 n/a: there is no unavailable state on this site

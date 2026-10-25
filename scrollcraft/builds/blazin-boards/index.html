@@ -47,7 +47,7 @@
     --char-0: var(--ox-0);
     --char-1: var(--ox-1);
     --char-2: var(--ox-2);
-    --gold: #E9B23B;
+    --gold: #FF7A2E;
     --ember: #FF7A2E;
     --crimson: #82001E;     /* their logo's badge, as printed */
     --heat: 0;
@@ -55,7 +55,7 @@
     --sc-canvas: var(--ox-1);
     --sc-surface: #63182A;
     --sc-ink: #F4EADB;
-    --sc-ink-soft: #E0C4BA;
+    --sc-ink-soft: #F0E0E0;
     --sc-accent: color-mix(in oklab, var(--gold), var(--ember) calc(var(--heat) * 100%));
     --sc-accent-ink: #3A0812;
     --sc-shadow-color: 350 40% 6%;
@@ -125,7 +125,7 @@
   /* the landing spot: the three layers below share this box and each is moved by the page */
   .fly { position: absolute; z-index: 2; width: var(--tw); aspect-ratio: 1510 / 1230; inset-inline-start: calc(62% - var(--tw) / 2); inset-block-end: 28px; pointer-events: none; }
   .fly > * { position: absolute; will-change: transform, opacity; }
-  .fly__glow { inset: -18% -22% -26%; opacity: 0; background: radial-gradient(closest-side, rgba(255, 138, 54, 0.46), rgba(233, 178, 59, 0.16) 52%, rgba(233, 178, 59, 0) 100%); }
+  .fly__glow { inset: -18% -22% -26%; opacity: 0; background: radial-gradient(closest-side, rgba(255, 138, 54, 0.46), rgba(255, 122, 46, 0.16) 52%, rgba(255, 122, 46, 0) 100%); }
   /* their board's own outline, blurred and baked (assets/board-shadow.webp); the box is 1.2397 x as wide and centred on the board */
   .fly__shadow { left: -11.99%; width: 123.97%; top: -14.72%; aspect-ratio: 1872 / 1592; opacity: 0; background: url(assets/board-shadow.webp) center / 100% 100% no-repeat; }
   .fly__board { inset: 0; width: 100%; height: 100%; display: block; backface-visibility: hidden; }
@@ -257,11 +257,8 @@
   .list li { position: relative; isolation: isolate; }
   .list li::before { content: ""; position: absolute; inset: 0 calc(var(--sc-3) * -1); z-index: -1; border-radius: 10px;
     background: color-mix(in oklab, var(--gold) 14%, transparent); transform: scaleX(0); transform-origin: left; transition: transform 320ms var(--sc-ease-out); }
-  .list li .price { transition: scale 260ms var(--sc-ease-out); transform-origin: right center; }
-  /* their photographs ease closer inside the frame (21st "Card Hover") */
-  .shots img { transition: scale 700ms var(--sc-ease-out); }
   @media (hover: hover) {
-    .list li:hover::before { transform: scaleX(1); } .list li:hover .price { scale: 1.12; }
+    .list li:hover::before { transform: scaleX(1); }
 
   }
   /* every board is a link: to WhatsApp with that board named, or to the order page with it chosen */
@@ -270,7 +267,7 @@
   .list li .go { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; min-height: 40px; padding: 0 1rem; margin-top: .2rem; border: 1px solid color-mix(in oklab, var(--gold) 60%, transparent); border-radius: 999px; font-size: .9rem; font-weight: 700; color: var(--gold); letter-spacing: 0.01em; transition: background 160ms ease-out, color 160ms ease-out, transform 100ms ease-out; }
   .list li:hover .go { background: var(--gold); color: var(--sc-accent-ink); } .list li .go:active { transform: scale(.97); }
   .list li:has(> a.board-link:focus-visible) { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 10px; }
-  @media (prefers-reduced-motion: reduce) { .cta.flip > span, .cta.flip .draw, .list li::before, .list li .price, .shots img { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .cta.flip > span, .cta.flip .draw, .list li::before { transition: none; } }
   .close__assure { margin: var(--sc-5) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink); line-height: 1.5; }
   .close__foot {
     position: absolute; inset-inline: var(--sc-gutter); bottom: var(--sc-4); margin: 0; z-index: var(--sc-z-copy);
@@ -290,20 +287,20 @@
                 linear-gradient(180deg, rgba(58, 8, 18, .7) 0%, rgba(58, 8, 18, 0) 22%); }
   /* category food-shop, premium dark brand (rule 3t, Qissa pattern): one warm dark ground, pictures framed not full-bleed */
   .band { position: relative; display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; max-width: var(--sc-maxw); margin-inline: auto; padding: clamp(4rem, 9vw, 8rem) var(--sc-gutter); }
-  .band__img { position: static; width: 100%; height: auto; aspect-ratio: 1320 / 548; object-fit: cover; display: block; border-radius: var(--sc-r-lg); border: 1px solid rgba(233, 178, 59, .45); box-shadow: 0 24px 60px rgba(0, 0, 0, .35); }
+  .band__img { position: static; width: 100%; height: auto; aspect-ratio: 1320 / 548; object-fit: cover; display: block; border-radius: var(--sc-r-lg); border: 1px solid rgba(255, 122, 46, .45); box-shadow: 0 24px 60px rgba(0, 0, 0, .35); }
   .band--jars .band__img { object-position: 50% 40%; }
   .band__shade { display: none; }
   .band__copy { display: grid; gap: var(--sc-4); justify-items: start; order: 2; padding: 0; margin: 0; }
   .band__title { margin: 0; font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.04em; line-height: .92; font-size: clamp(2.6rem, 6vw, 5.5rem); color: var(--sc-ink); text-wrap: balance; }
   .band__copy p { margin: 0; color: var(--sc-ink); font-size: var(--sc-t-base); max-width: 28rem; }
-  .trust { background: var(--ox-0); border-block: 1px solid rgba(233, 178, 59, .35); }
+  .trust { background: var(--ox-0); border-block: 1px solid rgba(255, 122, 46, .35); }
   .trust ul { list-style: none; margin: 0 auto; padding: var(--sc-5) var(--sc-gutter); max-width: var(--sc-maxw); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sc-5); }
   .trust li { display: grid; gap: 4px; font-size: var(--sc-t-sm); color: var(--sc-ink); line-height: 1.35; }
   .trust li b { font: 700 .8rem/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
   .menu { background: var(--ox-0); }
   .menu .list li .go { color: var(--gold); border-color: color-mix(in oklab, var(--gold) 55%, transparent); }
   .menu .list li:hover .go { background: var(--gold); color: var(--ox-0); }
-  .menu .shots figure { border: 1px solid rgba(233, 178, 59, .45); padding: 0; box-shadow: 0 18px 44px rgba(0, 0, 0, .35); }
+  .menu .shots figure { border: 1px solid rgba(255, 122, 46, .45); padding: 0; box-shadow: 0 18px 44px rgba(0, 0, 0, .35); }
   .facts { background: var(--ox-1); }
   /* closing photograph: words bottom left on a soft edge shade, no card */
   .close__light { background: linear-gradient(90deg, rgba(58, 8, 18, .88) 0%, rgba(58, 8, 18, .5) 40%, rgba(58, 8, 18, 0) 70%), linear-gradient(0deg, rgba(58, 8, 18, .7) 0%, rgba(58, 8, 18, 0) 40%); }
@@ -368,6 +365,40 @@
      follows the hero (review 22 Oct 2026); a line is never shown partly below the screen (cutoff) */
   .sizes .arrive { opacity: 0; transition: opacity 240ms ease-out; }
   @media (prefers-reduced-motion: reduce) { .sizes .arrive { opacity: 1 !important; transition: none; } }
+
+  /* ---- Blazin's own small effects (25 Oct 2026, so the page stops clashing with other sites) ----
+     R13: blocks slide in from alternating sides and settle, like a board being set down on the table.
+       Source: 21st "Hero Parallax" (rotation + translation + opacity on scroll), here as a short side slide with a settle.
+     T16: a board photo lifts, tilts a few degrees and gets a warm ember edge light on hover.
+       Source: 21st "Optimized Tilt Card" (tilt and sheen on hover), kept to a lift and an edge glow.
+     P13: the price on a small gold tag with a punched hole, like a butcher's price tag.
+       Source: 21st "Badge Tag" / "Product Card" (price in a badge in the card footer), shaped as a tag. */
+  [data-sc-in], [data-sc-stagger] > * {
+    --sx: -40px; --sr: -0.8deg;
+    transform: translate3d(var(--sx), 0, 0) rotate(var(--sr));
+    transition: opacity 380ms ease-out, transform 720ms cubic-bezier(.2, .85, .3, 1.12);
+  }
+  [data-sc-stagger] > :nth-child(even) { --sx: 40px; --sr: 0.8deg; }
+  [data-sc-in].sc-in, [data-sc-stagger] > .sc-in { transform: none; }
+  .menu, .facts { overflow-x: clip; }
+  .shots figure[data-sc-in] { transition: opacity 380ms ease-out, transform 720ms cubic-bezier(.2, .85, .3, 1.12), box-shadow 420ms ease-out; }
+  @media (hover: hover) {
+    .shots figure:hover { transform: translateY(-8px) rotate(-1.6deg); box-shadow: 0 26px 50px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 138, 54, .75), 0 0 30px rgba(255, 122, 46, .4); }
+    .list li:hover .thumb { transform: translateY(-3px) rotate(-6deg); }
+  }
+  .list li .thumb { transition: transform 360ms cubic-bezier(.2, .85, .3, 1.12); }
+  .list li .price, .tier li .price {
+    display: inline-block; position: relative; padding: .2em .65em .2em 1.2em; color: var(--ox-0); background: var(--gold);
+    clip-path: polygon(.6em 0, 100% 0, 100% 100%, .6em 100%, 0 50%);
+  }
+  .list li .price::before, .tier li .price::before {
+    content: ""; position: absolute; left: .52em; top: 50%; width: .3em; height: .3em; margin-top: -.15em; border-radius: 50%;
+    background: var(--ox-1); box-shadow: inset 0 1px 1px rgba(0, 0, 0, .45);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-sc-in], [data-sc-stagger] > * { transform: none; transition-duration: 220ms; }
+    .shots figure:hover, .list li:hover .thumb { transform: none; }
+  }
   .buybar { display: none; }
   @media (max-width: 860px) {
     .buybar { position: fixed; inset-inline: 0; inset-block-end: 0; z-index: var(--sc-z-chrome); display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
@@ -510,9 +541,9 @@
       <h2 class="sc-display sc-display--md" id="menuTitle">Every board.</h2>
       <p class="lede">Our full price list, in US dollars. Tell us how many people are coming and what they like.</p>
       <div class="shots">
-        <figure data-sc-reveal="right" data-sc-reveal-at="0 0.12"><img src="assets/their-long.jpg" width="1024" height="683" alt="Our long board on marble: pastrami, brisket, salami and a bone-in rib, with olives and parsley" loading="lazy" decoding="async"></figure>
-        <figure data-sc-reveal="up" data-sc-reveal-at="0.02 0.14"><img src="assets/their-salami.jpg" width="1024" height="683" alt="A square board of sliced meats and salami rounds, with pistachios and olives" loading="lazy" decoding="async"></figure>
-        <figure data-sc-reveal="up" data-sc-reveal-at="0.04 0.16"><img src="assets/their-rustic.jpg" srcset="assets/their-rustic-m.jpg 1000w, assets/their-rustic.jpg 1600w" sizes="(max-width: 860px) 46vw, 30vw" width="1600" height="1031" alt="Sliced steak and candied pastrami piled on a wooden board" loading="lazy" decoding="async"></figure>
+        <figure data-sc-in style="--sx:-44px;--sr:-1deg"><img src="assets/their-long.jpg" width="1024" height="683" alt="Our long board on marble: pastrami, brisket, salami and a bone-in rib, with olives and parsley" loading="lazy" decoding="async"></figure>
+        <figure data-sc-in style="--sx:44px;--sr:1deg;transition-delay:80ms,80ms,0ms"><img src="assets/their-salami.jpg" width="1024" height="683" alt="A square board of sliced meats and salami rounds, with pistachios and olives" loading="lazy" decoding="async"></figure>
+        <figure data-sc-in style="--sx:-44px;--sr:-1deg;transition-delay:160ms,160ms,0ms"><img src="assets/their-rustic.jpg" srcset="assets/their-rustic-m.jpg 1000w, assets/their-rustic.jpg 1600w" sizes="(max-width: 860px) 46vw, 30vw" width="1600" height="1031" alt="Sliced steak and candied pastrami piled on a wooden board" loading="lazy" decoding="async"></figure>
       </div>
       <ul class="list" data-sc-in data-sc-stagger="60">
         <li><span><b>Mini Board <i>15 × 20 cm</i></b><small>Entrecote steak, candied pastrami, salami chips, sometimes brisket or London broil, beef jerky.</small></span><span class="price">$75</span></li>
