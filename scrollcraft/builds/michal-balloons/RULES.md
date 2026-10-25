@@ -46,6 +46,7 @@ R3h.5 n/a: this site has no such element (see the page: no cut-out, carousel, am
 R3h.7 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.8 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.11 pass: brightness.py on assets/arrive.mp4: 20 frames, average 78, bright enough
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at at five points): on phones lengthened 25 Oct to 100svh + 210vh (was + 170vh, 2.7 screens): the arch opening is 3.0 screens on a laptop and 3.1 on a phone, 60 fps (median 16.7 ms, no frame over 50 ms); the arch builds whole on her plain cream room on both sizes; check-site clean
 R3h.13 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.14 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.17 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)

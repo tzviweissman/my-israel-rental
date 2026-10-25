@@ -390,7 +390,7 @@ section.sec { padding-block: clamp(1.6rem, 6.5svh, 4.8rem); }
 }
 
 /* ── 22 Oct 2026, rule 3t (fashion-shop): one light ground, the product row right after the opening, no full-screen photo bands ── */
-.open { height: 220svh; }
+.open { height: 310svh; }  /* 25 Oct, rule 3h: a scroll opening gets at least 3 screens (was 220svh) */
 .close { background: var(--surface); color: var(--ink); border-top: 1px solid var(--line); }
 .close .btn { background: var(--ink); color: var(--ground); --brk: var(--ink); }
 .close .lnk, .close a { color: var(--ink); }

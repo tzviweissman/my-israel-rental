@@ -51,6 +51,7 @@ R3h.5 n/a: the opening is a photograph with a scroll push-in, there is no film o
 R3h.7 n/a: the opening is a photograph with a scroll push-in, there is no film on this site
 R3h.8 n/a: the opening is a photograph with a scroll push-in, there is no film on this site
 R3h.11 n/a: the opening is a photograph with a scroll push-in, there is no film on this site
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at at five points): lengthened 25 Oct to data-sc-span 3.1 (was 2.0 screens): 3.1 screens on both, 60 fps with no frame over 50 ms (an earlier laptop run, with other jobs on the machine, had 22%); their oven photo is the ground, whole; the hero photo loads first; check-site clean
 R3h.13 n/a: the opening is a photograph with a scroll push-in, there is no film on this site
 R3h.14 n/a: the opening is a photograph with a scroll push-in, there is no film on this site
 R3h.17 n/a: the opening is a photograph with a scroll push-in, there is no film on this site

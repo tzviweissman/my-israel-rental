@@ -51,6 +51,7 @@ R3h.5 n/a: no film in this site: the opening is built in code from their own pho
 R3h.7 n/a: no film in this site: the opening is built in code from their own photos
 R3h.8 n/a: no film in this site: the opening is built in code from their own photos
 R3h.11 n/a: no film or generated still set added in this rework; no new generation
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at at five points): lengthened 25 Oct to 310svh (was 270svh, 2.7 screens): 3.1 screens on both, 60 fps with no frame over 50 ms (an earlier laptop run, with other jobs on the machine, had 7 to 12.5%); the tidy pieces land on her messy drawer photo, which is the concept itself; whole; check-site clean
 R3h.13 n/a: no film in this site: the opening is built in code from their own photos
 R3h.14 n/a: no film in this site: the opening is built in code from their own photos
 R3h.17 n/a: no film in this site: the opening is built in code from their own photos

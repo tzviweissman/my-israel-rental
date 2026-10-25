@@ -96,7 +96,7 @@
   /* phones: the whole arch at full width near the top (the clip's cream is
      the page's cream, so no band shows), the words under it */
   @media (max-width: 760px) {
-    .hero { height: calc(100svh + 170vh); }
+    .hero { height: calc(100svh + 210vh); }  /* 25 Oct, rule 3h: at least 3 screens on a phone too (was + 170vh, 2.7) */
     .hero .film { inset: 10svh auto auto -9vw; width: 118vw; height: auto; aspect-ratio: 16 / 9; object-fit: cover;
       -webkit-mask-image: linear-gradient(180deg, #000 82%, transparent); mask-image: linear-gradient(180deg, #000 82%, transparent); }
     .hero .inner { justify-content: flex-start; padding-top: calc(10svh + 118vw * 9 / 16 + 1rem); padding-bottom: 0; }

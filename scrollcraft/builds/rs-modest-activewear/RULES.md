@@ -51,6 +51,7 @@ R3h.5 n/a: no film, so no chapter lines
 R3h.7 n/a: no film, so no seams
 R3h.8 n/a: no lit film; the section after the opening is the light product row
 R3h.11 n/a: no film and no generated stills on this site
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at at five points): lengthened 25 Oct to 310svh (was 220svh, 2.2 screens): the doors opening is now 3.1 screens on both, 60 fps (median 16.7 ms, no frame over 50 ms); the skirts photo doors open onto her store photo, both whole; shop and skirts photos load first; check-site clean
 R3h.13 n/a: no film or cause-and-effect clip; the doors are one scroll-driven transform
 R3h.14 n/a: no film effect
 R3h.17 n/a: the page does not use letters parting over film
