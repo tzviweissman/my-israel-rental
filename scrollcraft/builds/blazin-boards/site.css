@@ -8,10 +8,10 @@
   --font-head: 'Playfair Display', Georgia, serif;
   --font-body: 'Manrope', system-ui, sans-serif;
   --ox-0: #3A0812; --ox-1: #4B0C19; --ox-2: #5A1222;
-  --gold: #E9B23B; --gold-text: #7A5A10;
+  --gold: #FF7A2E; --gold-text: #A8400F;
   --paper: #FFFFFF; --paper-2: #FBF6F3; --wash: #FBF1E4;
   --ink: #2B1017; --soft: #6B5A5E; --line: rgba(58, 8, 18, 0.14);
-  --wood: #C9965E; --wood-2: #B07E48;
+  --wood: #7A3426; --wood-2: #6A1E1C;
   --r: 18px;
   --shadow: 0 1px 2px rgb(58 8 18 / 0.06), 0 18px 40px -24px rgb(58 8 18 / 0.35);
 }
@@ -292,7 +292,7 @@ img { display: block; max-width: 100%; }
 
 /* category food-shop, premium dark brand (rule 3t, 22 Oct 2026): the shop and order pages share the home page's one warm dark
    ground, as Qissa does. Forms stay on light panels so they read. */
-:root { --paper: #3A0812; --paper-2: #4B0C19; --wash: #4B0C19; --ink: #F4EADB; --soft: #E0C4BA; --line: rgba(244, 234, 219, 0.18); --gold-text: #E9B23B; }
+:root { --paper: #3A0812; --paper-2: #4B0C19; --wash: #4B0C19; --ink: #F4EADB; --soft: #F0E0E0; --line: rgba(244, 234, 219, 0.18); --gold-text: #FF7A2E; }
 :focus-visible { outline-color: var(--gold); }
 .nav { background: rgb(58 8 18 / 0.94); }
 .menu a:hover, .menu a[aria-current="page"] { background: var(--ox-2); color: var(--ink); }
@@ -306,7 +306,7 @@ img { display: block; max-width: 100%; }
 .chip[aria-pressed="true"] { background: var(--gold); color: var(--ox-0); }
 .cta { background: var(--gold); color: var(--ox-0); }
 .cta:hover { background: #F1C25A; }
-.pane, .summary, .field, .dock, .picks { --ink: #2B1017; --soft: #6B5A5E; --line: rgba(58, 8, 18, 0.14); --gold-text: #7A5A10; --paper: #FFFFFF; --paper-2: #FBF6F3; --wash: #FBF1E4; }
+.pane, .summary, .field, .dock, .picks { --ink: #2B1017; --soft: #6B5A5E; --line: rgba(58, 8, 18, 0.14); --gold-text: #A8400F; --paper: #FFFFFF; --paper-2: #FBF6F3; --wash: #FBF1E4; }
 .pane .bottle .tg, .summary .bottle .tg { color: var(--ox-1); border-color: var(--ox-1); }
 .pane .bottle .tg[aria-pressed="true"] { background: var(--ox-1); color: #fff; }
 .pane, .summary { color: var(--ink); }

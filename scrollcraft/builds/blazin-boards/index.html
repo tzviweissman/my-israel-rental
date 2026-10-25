@@ -25,13 +25,14 @@
   notice period, delivery and address are transcribed from their price
   list. Nothing generated, no number that is not theirs.
 
-  Scroll speed is still the flame (--heat), kept from the earlier
-  revisions as texture rather than the headline idea. Grounds drift. No
+  Grounds drift. No
   em dash. One CTA label. No scroll cue, no counters.
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="preload" as="image" href="assets/board-cut.webp" imagesrcset="assets/board-cut-m.webp 1000w, assets/board-cut.webp 1510w" imagesizes="(max-width: 860px) 92vw, min(52vw, 760px)" fetchpriority="high">
+<link rel="preload" as="image" href="assets/board-shadow.webp">
 <link rel="stylesheet" href="scrollcraft.css">
 <style>
   :root {
@@ -46,7 +47,7 @@
     --char-0: var(--ox-0);
     --char-1: var(--ox-1);
     --char-2: var(--ox-2);
-    --gold: #E9B23B;
+    --gold: #FF7A2E;
     --ember: #FF7A2E;
     --crimson: #82001E;     /* their logo's badge, as printed */
     --heat: 0;
@@ -54,7 +55,7 @@
     --sc-canvas: var(--ox-1);
     --sc-surface: #63182A;
     --sc-ink: #F4EADB;
-    --sc-ink-soft: #E0C4BA;
+    --sc-ink-soft: #F0E0E0;
     --sc-accent: color-mix(in oklab, var(--gold), var(--ember) calc(var(--heat) * 100%));
     --sc-accent-ink: #3A0812;
     --sc-shadow-color: 350 40% 6%;
@@ -72,16 +73,9 @@
   .sc-display em, .accent { font-style: italic; color: var(--sc-ink); }
   .num { font-family: var(--font-body); font-variant-numeric: tabular-nums; }
 
-  /* ---------------------------------------------------------------- heat -- */
-  .heat {
-    position: fixed; inset: 0; z-index: 2; pointer-events: none;
-    opacity: calc(var(--heat) * 0.7);
-    background:
-      radial-gradient(120% 70% at 50% 112%, rgba(255, 122, 46, 0.6), rgba(255, 122, 46, 0) 62%),
-      radial-gradient(70% 40% at 50% -12%, rgba(233, 178, 59, 0.22), rgba(233, 178, 59, 0) 70%);
-    mix-blend-mode: screen;
-  }
-  .sc-grain { opacity: calc(0.05 + var(--heat) * 0.11); }
+  /* No blended heat glow and no full-screen grain layer: both were fixed full-screen
+     layers repainted while scrolling (heat held the page to 20 fps, grain cost a
+     further frame; 24 Oct 2026). The ground is one still gradient instead. */
 
   /* ----------------------------------------------------------------- bar -- */
   .bar {
@@ -99,7 +93,6 @@
     font-family: var(--font-body); font-size: var(--sc-t-xs); font-weight: 700; text-decoration: none; cursor: pointer;
     color: var(--sc-ink); background: color-mix(in oklab, var(--ox-0) 55%, transparent);
     border: 1px solid color-mix(in oklab, currentColor 28%, transparent);
-    backdrop-filter: blur(10px);
     transition: background var(--sc-d-fast) var(--sc-ease-out);
   }
   .bar__nav { display: flex; gap: var(--sc-1); margin-inline: auto; }
@@ -115,37 +108,30 @@
   .bar__cta:hover { background: #F2C25A; }
 
   /* ---------------------------------------------------------------- hero --
-     The tumble. A perspective stage; the board's transform is written by
-     the page each frame from --sc-p. Type is the ground it lands on. */
-  .hero .stage3d { position: absolute; inset: 0; perspective: 1400px; perspective-origin: 50% 40%; overflow: hidden; }
+     Combined opening (Tzvi, 25 Oct 2026: "do the flying board and it lands in
+     front of the giant blazin"). A giant BLAZIN' fills the top of the wine
+     ground from the start; their board tumbles in on the opening-3 path and
+     lands in front of the lower part of the letters, a plain-gradient glow and
+     its own baked shadow behind it; then the headline, price and button. */
+  .hero { --fs: min(26vw, 40svh); --top: max(5.2rem, 11svh); --bt: calc(var(--top) + var(--fs) * 0.55);
+          --tw: min(52vw, 760px, calc((100svh - 28px - var(--bt)) * 1.2276)); }
+  .hero .hero__grain { position: absolute; inset: 0; z-index: 0; background: url(assets/table-grain.png); }
+  .hero .hero__bg { background: radial-gradient(62% 72% at 62% 66%, #66192C 0%, #4B0C19 58%, #3A0812 100%); }
   .hero .name {
-    position: absolute; inset-inline-start: var(--sc-gutter); inset-block-start: clamp(5rem, 14vh, 9rem); z-index: 1; margin: 0;
+    position: absolute; inset-inline: 0; inset-block-start: var(--top); z-index: 1; margin: 0; text-align: center;
     font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.045em; line-height: 0.86;
-    font-size: clamp(4.2rem, 17vw, 15rem); color: var(--sc-ink);
-    direction: ltr; unicode-bidi: isolate;
+    font-size: var(--fs); color: #FFF8EE; direction: ltr; unicode-bidi: isolate;
   }
-  .hero .name span { display: block; }
-  .hero .name .b { padding-inline-start: 0.12em; }
-  /* The landed board fits the screen's height too: on a short laptop it ran
-     42px off the bottom (Tzvi, 12 Oct 2026). Landing centre is 9vh below the
-     middle and the board is 0.815 as tall as wide, so its width is held to
-     what the remaining height allows. */
-  .hero { --tw: min(56vw, 860px, calc((41svh - 14px) * 2.454)); }
-  .tumble {
-    position: absolute; left: 50%; top: 50%; width: var(--tw); z-index: 2;
-    margin-left: calc(var(--tw) / -2); margin-top: calc(var(--tw) * -0.407);
-    transform-style: preserve-3d; will-change: transform; backface-visibility: hidden;
-  }
-  .tumble img { display: block; width: 100%; height: auto; }
-  .tumble__shadow {
-    position: absolute; left: 50%; top: 50%; width: var(--tw); aspect-ratio: 1.6; z-index: 1; pointer-events: none;
-    margin-left: calc(var(--tw) / -2); margin-top: calc(var(--tw) * -0.30);
-    background: radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.28) 40%, rgba(0, 0, 0, 0) 70%);
-    opacity: 0; will-change: transform, opacity;
-  }
+  /* the landing spot: the three layers below share this box and each is moved by the page */
+  .fly { position: absolute; z-index: 2; width: var(--tw); aspect-ratio: 1510 / 1230; inset-inline-start: calc(62% - var(--tw) / 2); inset-block-end: 28px; pointer-events: none; }
+  .fly > * { position: absolute; will-change: transform, opacity; }
+  .fly__glow { inset: -18% -22% -26%; opacity: 0; background: radial-gradient(closest-side, rgba(255, 138, 54, 0.46), rgba(255, 122, 46, 0.16) 52%, rgba(255, 122, 46, 0) 100%); }
+  /* their board's own outline, blurred and baked (assets/board-shadow.webp); the box is 1.2397 x as wide and centred on the board */
+  .fly__shadow { left: -11.99%; width: 123.97%; top: -14.72%; aspect-ratio: 1872 / 1592; opacity: 0; background: url(assets/board-shadow.webp) center / 100% 100% no-repeat; }
+  .fly__board { inset: 0; width: 100%; height: 100%; display: block; backface-visibility: hidden; }
   .hero .land {
-    position: absolute; inset-inline-start: var(--sc-gutter); inset-block-start: clamp(5rem, 14vh, 9rem); z-index: 3;
-    display: grid; gap: var(--sc-5); max-width: 24rem; justify-items: start;
+    position: absolute; inset-inline-start: var(--sc-gutter); inset-block-end: 28px; z-index: 3;
+    display: grid; gap: var(--sc-5); max-width: 24rem; justify-items: start; will-change: opacity, transform;
   }
   .hero .land h1 { margin: 0; font-size: var(--sc-t-xl); font-style: italic; line-height: 1.15; }
   .hero .land h1 b { font-style: normal; font-weight: 500; color: var(--sc-ink); }
@@ -271,11 +257,8 @@
   .list li { position: relative; isolation: isolate; }
   .list li::before { content: ""; position: absolute; inset: 0 calc(var(--sc-3) * -1); z-index: -1; border-radius: 10px;
     background: color-mix(in oklab, var(--gold) 14%, transparent); transform: scaleX(0); transform-origin: left; transition: transform 320ms var(--sc-ease-out); }
-  .list li .price { transition: scale 260ms var(--sc-ease-out); transform-origin: right center; }
-  /* their photographs ease closer inside the frame (21st "Card Hover") */
-  .shots img { transition: scale 700ms var(--sc-ease-out); }
   @media (hover: hover) {
-    .list li:hover::before { transform: scaleX(1); } .list li:hover .price { scale: 1.12; }
+    .list li:hover::before { transform: scaleX(1); }
 
   }
   /* every board is a link: to WhatsApp with that board named, or to the order page with it chosen */
@@ -284,7 +267,7 @@
   .list li .go { grid-column: 1 / -1; justify-self: start; display: inline-flex; align-items: center; min-height: 40px; padding: 0 1rem; margin-top: .2rem; border: 1px solid color-mix(in oklab, var(--gold) 60%, transparent); border-radius: 999px; font-size: .9rem; font-weight: 700; color: var(--gold); letter-spacing: 0.01em; transition: background 160ms ease-out, color 160ms ease-out, transform 100ms ease-out; }
   .list li:hover .go { background: var(--gold); color: var(--sc-accent-ink); } .list li .go:active { transform: scale(.97); }
   .list li:has(> a.board-link:focus-visible) { outline: 2px solid var(--gold); outline-offset: 4px; border-radius: 10px; }
-  @media (prefers-reduced-motion: reduce) { .cta.flip > span, .cta.flip .draw, .list li::before, .list li .price, .shots img { transition: none; } }
+  @media (prefers-reduced-motion: reduce) { .cta.flip > span, .cta.flip .draw, .list li::before { transition: none; } }
   .close__assure { margin: var(--sc-5) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink); line-height: 1.5; }
   .close__foot {
     position: absolute; inset-inline: var(--sc-gutter); bottom: var(--sc-4); margin: 0; z-index: var(--sc-z-copy);
@@ -304,20 +287,20 @@
                 linear-gradient(180deg, rgba(58, 8, 18, .7) 0%, rgba(58, 8, 18, 0) 22%); }
   /* category food-shop, premium dark brand (rule 3t, Qissa pattern): one warm dark ground, pictures framed not full-bleed */
   .band { position: relative; display: grid; grid-template-columns: 1.25fr 1fr; gap: clamp(2rem, 5vw, 5rem); align-items: center; max-width: var(--sc-maxw); margin-inline: auto; padding: clamp(4rem, 9vw, 8rem) var(--sc-gutter); }
-  .band__img { position: static; width: 100%; height: auto; aspect-ratio: 1600 / 942; object-fit: cover; display: block; border-radius: var(--sc-r-lg); border: 1px solid rgba(233, 178, 59, .45); box-shadow: 0 24px 60px rgba(0, 0, 0, .35); }
+  .band__img { position: static; width: 100%; height: auto; aspect-ratio: 1320 / 548; object-fit: cover; display: block; border-radius: var(--sc-r-lg); border: 1px solid rgba(255, 122, 46, .45); box-shadow: 0 24px 60px rgba(0, 0, 0, .35); }
   .band--jars .band__img { object-position: 50% 40%; }
   .band__shade { display: none; }
   .band__copy { display: grid; gap: var(--sc-4); justify-items: start; order: 2; padding: 0; margin: 0; }
   .band__title { margin: 0; font-family: var(--font-body); font-weight: 800; text-transform: uppercase; letter-spacing: -0.04em; line-height: .92; font-size: clamp(2.6rem, 6vw, 5.5rem); color: var(--sc-ink); text-wrap: balance; }
   .band__copy p { margin: 0; color: var(--sc-ink); font-size: var(--sc-t-base); max-width: 28rem; }
-  .trust { background: var(--ox-0); border-block: 1px solid rgba(233, 178, 59, .35); }
+  .trust { background: var(--ox-0); border-block: 1px solid rgba(255, 122, 46, .35); }
   .trust ul { list-style: none; margin: 0 auto; padding: var(--sc-5) var(--sc-gutter); max-width: var(--sc-maxw); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--sc-5); }
   .trust li { display: grid; gap: 4px; font-size: var(--sc-t-sm); color: var(--sc-ink); line-height: 1.35; }
   .trust li b { font: 700 .8rem/1 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
   .menu { background: var(--ox-0); }
   .menu .list li .go { color: var(--gold); border-color: color-mix(in oklab, var(--gold) 55%, transparent); }
   .menu .list li:hover .go { background: var(--gold); color: var(--ox-0); }
-  .menu .shots figure { border: 1px solid rgba(233, 178, 59, .45); padding: 0; box-shadow: 0 18px 44px rgba(0, 0, 0, .35); }
+  .menu .shots figure { border: 1px solid rgba(255, 122, 46, .45); padding: 0; box-shadow: 0 18px 44px rgba(0, 0, 0, .35); }
   .facts { background: var(--ox-1); }
   /* closing photograph: words bottom left on a soft edge shade, no card */
   .close__light { background: linear-gradient(90deg, rgba(58, 8, 18, .88) 0%, rgba(58, 8, 18, .5) 40%, rgba(58, 8, 18, 0) 70%), linear-gradient(0deg, rgba(58, 8, 18, .7) 0%, rgba(58, 8, 18, 0) 40%); }
@@ -351,10 +334,11 @@
     .bar__nav { order: 3; flex-basis: 100%; margin: 0; overflow-x: auto; scrollbar-width: none; gap: 0; }
     .bar__nav::-webkit-scrollbar { display: none; }
     .bar__nav a { white-space: nowrap; padding: 0 0.6rem; min-height: 40px; display: inline-flex; align-items: center; }
-    .hero .name { font-size: clamp(3.6rem, 21vw, 8rem); inset-block-start: clamp(4.5rem, 12vh, 7rem); }
-    .tumble, .tumble__shadow { width: 90vw; margin-left: -45vw; }
-    .tumble { margin-top: calc(90vw * -0.407); } .tumble__shadow { margin-top: calc(90vw * -0.30); }
-    .hero .land { inset-inline-end: var(--sc-gutter); max-width: none; inset-block-start: clamp(4.5rem, 12vh, 7rem); }
+    .hero { --fs: 26vw; --top: calc(96px + 8svh); --bt: calc(var(--top) + var(--fs) * 0.55);
+            --tw: min(92vw, calc((100svh - var(--bt) - 230px) * 1.2276)); }
+    .fly { inset-block-end: auto; inset-block-start: var(--bt); inset-inline-start: calc(50% - var(--tw) / 2); }
+    .hero .land { inset-block-end: auto; inset-block-start: calc(var(--bt) + var(--tw) * 0.8146 + clamp(16px, 6svh, 56px)); inset-inline-end: var(--sc-gutter); max-width: none; }
+    .hero .land p { display: none; }
     .sizes .sc-copy--lead { top: clamp(4rem, 9vh, 6rem); inset-inline: var(--sc-gutter); max-width: none; }
     .scale { width: calc(100vw - var(--sc-gutter) * 2); height: 34vh; inset-block-end: auto; top: 24vh; align-items: flex-end; }
     .ruler { inset-block-end: auto; top: calc(24vh + 34vh + 0.6rem); }
@@ -381,6 +365,40 @@
      follows the hero (review 22 Oct 2026); a line is never shown partly below the screen (cutoff) */
   .sizes .arrive { opacity: 0; transition: opacity 240ms ease-out; }
   @media (prefers-reduced-motion: reduce) { .sizes .arrive { opacity: 1 !important; transition: none; } }
+
+  /* ---- Blazin's own small effects (25 Oct 2026, so the page stops clashing with other sites) ----
+     R13: blocks slide in from alternating sides and settle, like a board being set down on the table.
+       Source: 21st "Hero Parallax" (rotation + translation + opacity on scroll), here as a short side slide with a settle.
+     T16: a board photo lifts, tilts a few degrees and gets a warm ember edge light on hover.
+       Source: 21st "Optimized Tilt Card" (tilt and sheen on hover), kept to a lift and an edge glow.
+     P13: the price on a small gold tag with a punched hole, like a butcher's price tag.
+       Source: 21st "Badge Tag" / "Product Card" (price in a badge in the card footer), shaped as a tag. */
+  [data-sc-in], [data-sc-stagger] > * {
+    --sx: -40px; --sr: -0.8deg;
+    transform: translate3d(var(--sx), 0, 0) rotate(var(--sr));
+    transition: opacity 380ms ease-out, transform 720ms cubic-bezier(.2, .85, .3, 1.12);
+  }
+  [data-sc-stagger] > :nth-child(even) { --sx: 40px; --sr: 0.8deg; }
+  [data-sc-in].sc-in, [data-sc-stagger] > .sc-in { transform: none; }
+  .menu, .facts { overflow-x: clip; }
+  .shots figure[data-sc-in] { transition: opacity 380ms ease-out, transform 720ms cubic-bezier(.2, .85, .3, 1.12), box-shadow 420ms ease-out; }
+  @media (hover: hover) {
+    .shots figure:hover { transform: translateY(-8px) rotate(-1.6deg); box-shadow: 0 26px 50px rgba(0, 0, 0, .45), 0 0 0 1px rgba(255, 138, 54, .75), 0 0 30px rgba(255, 122, 46, .4); }
+    .list li:hover .thumb { transform: translateY(-3px) rotate(-6deg); }
+  }
+  .list li .thumb { transition: transform 360ms cubic-bezier(.2, .85, .3, 1.12); }
+  .list li .price, .tier li .price {
+    display: inline-block; position: relative; padding: .2em .65em .2em 1.2em; color: var(--ox-0); background: var(--gold);
+    clip-path: polygon(.6em 0, 100% 0, 100% 100%, .6em 100%, 0 50%);
+  }
+  .list li .price::before, .tier li .price::before {
+    content: ""; position: absolute; left: .52em; top: 50%; width: .3em; height: .3em; margin-top: -.15em; border-radius: 50%;
+    background: var(--ox-1); box-shadow: inset 0 1px 1px rgba(0, 0, 0, .45);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    [data-sc-in], [data-sc-stagger] > * { transform: none; transition-duration: 220ms; }
+    .shots figure:hover, .list li:hover .thumb { transform: none; }
+  }
   .buybar { display: none; }
   @media (max-width: 860px) {
     .buybar { position: fixed; inset-inline: 0; inset-block-end: 0; z-index: var(--sc-z-chrome); display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
@@ -400,9 +418,8 @@
   /* short phones: the sizes heading keeps its line and the photo keeps clear of text */
   @media (max-width: 860px) and (max-height: 700px) { .sizes .sc-copy--lead p { display: none; } }
   @media (prefers-reduced-motion: reduce) {
-    .heat { display: none; }
     /* motion off: the big name and the growing plank are motion; the bar carries the name and the full price list is below */
-    .hero .name, .scale, .ruler, .tiers, .sizes .sc-copy--lead p { display: none; }
+    .scale, .ruler, .tiers, .sizes .sc-copy--lead p { display: none; }
     .close .sc-copy, .close .sc-copy h2, .close .sc-copy a, .close .sc-copy p { opacity: 1 !important; }
   }
 </style>
@@ -424,23 +441,20 @@
 <!-- Phones: the order pinned under the thumb with its price, from after the
      opening until the order section (rules 3b.6). -->
 <div class="buybar" id="buybar" aria-hidden="true"><span class="buybar__price">From <b>$75</b></span><a class="cta" href="order.html" tabindex="-1">Order a board</a></div>
-<div class="heat" aria-hidden="true"></div>
-<div class="sc-grain" aria-hidden="true"></div>
 
 <main>
   <!-- 1  The tumble -->
   <section class="hero" id="hero" data-sc-act="pin" data-sc-span="3.2" data-sc-drift="#4B0C19" aria-label="Blazin' Boards">
     <div data-sc-stage>
-      <picture class="hero__bg" aria-hidden="true"><img src="assets/their-rustic.jpg" alt="" width="1600" height="1031" fetchpriority="high"></picture>
-      <div class="hero__shade" aria-hidden="true"></div>
-      <div class="stage3d">
-        <p class="name" data-sc-cue="0 0.44 0 0.38" aria-hidden="true"><span>Blazin’</span><span class="b">Boards</span></p>
-        <div class="tumble__shadow" id="tumbleShadow" aria-hidden="true"></div>
-        <div class="tumble" id="tumble" data-clip-ok>
-          <img src="assets/board-cut.webp" width="1510" height="1230" alt="A Blazin' Boards meat board: rows of sliced steak, candied pastrami, jerky and a bone-in rib, on a wooden board" fetchpriority="high">
-        </div>
+      <div class="hero__bg" aria-hidden="true"></div>
+      <div class="hero__grain" aria-hidden="true"></div>
+      <p class="name" aria-hidden="true">Blazin’</p>
+      <div class="fly" id="fly">
+        <div class="fly__glow" id="flyGlow" aria-hidden="true"></div>
+        <div class="fly__shadow" id="flyShadow" aria-hidden="true"></div>
+        <img class="fly__board" id="flyBoard" src="assets/board-cut.webp" srcset="assets/board-cut-m.webp 1000w, assets/board-cut.webp 1510w" sizes="(max-width: 860px) 92vw, min(52vw, 760px)" width="1510" height="1230" decoding="sync" fetchpriority="high" alt="A Blazin' Boards meat board: rows of sliced steak, candied pastrami, jerky and a bone-in rib, on a wooden board">
       </div>
-      <div class="land" data-sc-cue="0.6 1 0.3 0">
+      <div class="land" data-sc-cue="0.7 1 0.3 0">
         <div>
           <h1>Premium meat boards, <b>grilled to perfection.</b></h1>
           <p>Jerusalem. Orders 48 hours ahead. Delivery throughout Israel.</p>
@@ -512,7 +526,7 @@
 
   <!-- 3  A picture: the price range, on their own jars-and-board photograph -->
   <section class="band band--jars" id="range" aria-labelledby="rangeTitle">
-    <img class="band__img" src="assets/their-jars.jpg" alt="A board of sliced steaks, pastrami and jerky with two jars of sauce and a bottle of wine" width="1600" height="942">
+    <img class="band__img" src="assets/their-jars-crop.jpg" srcset="assets/their-jars-crop-m.jpg 800w, assets/their-jars-crop.jpg 1320w" sizes="(max-width: 860px) 92vw, 55vw" alt="A board of sliced steaks, pastrami and jerky with a jar of sauce at each side" width="1320" height="548" loading="lazy" decoding="async">
     <div class="band__shade" aria-hidden="true"></div>
     <div class="band__copy">
       <h2 class="band__title" id="rangeTitle">From $75 to $750.</h2>
@@ -527,9 +541,9 @@
       <h2 class="sc-display sc-display--md" id="menuTitle">Every board.</h2>
       <p class="lede">Our full price list, in US dollars. Tell us how many people are coming and what they like.</p>
       <div class="shots">
-        <figure data-sc-reveal="right" data-sc-reveal-at="0 0.12"><img src="assets/their-long.jpg" width="1024" height="683" alt="Our long board on marble: pastrami, brisket, salami and a bone-in rib, with olives and parsley" loading="lazy"></figure>
-        <figure data-sc-reveal="up" data-sc-reveal-at="0.02 0.14"><img src="assets/their-salami.jpg" width="1024" height="683" alt="A square board of sliced meats and salami rounds, with pistachios and olives" loading="lazy"></figure>
-        <figure data-sc-reveal="up" data-sc-reveal-at="0.04 0.16"><img src="assets/their-rustic.jpg" width="1600" height="1031" alt="Sliced steak and candied pastrami piled on a wooden board" loading="lazy"></figure>
+        <figure data-sc-in style="--sx:-44px;--sr:-1deg"><img src="assets/their-long.jpg" width="1024" height="683" alt="Our long board on marble: pastrami, brisket, salami and a bone-in rib, with olives and parsley" loading="lazy" decoding="async"></figure>
+        <figure data-sc-in style="--sx:44px;--sr:1deg;transition-delay:80ms,80ms,0ms"><img src="assets/their-salami.jpg" width="1024" height="683" alt="A square board of sliced meats and salami rounds, with pistachios and olives" loading="lazy" decoding="async"></figure>
+        <figure data-sc-in style="--sx:-44px;--sr:-1deg;transition-delay:160ms,160ms,0ms"><img src="assets/their-rustic.jpg" srcset="assets/their-rustic-m.jpg 1000w, assets/their-rustic.jpg 1600w" sizes="(max-width: 860px) 46vw, 30vw" width="1600" height="1031" alt="Sliced steak and candied pastrami piled on a wooden board" loading="lazy" decoding="async"></figure>
       </div>
       <ul class="list" data-sc-in data-sc-stagger="60">
         <li><span><b>Mini Board <i>15 × 20 cm</i></b><small>Entrecote steak, candied pastrami, salami chips, sometimes brisket or London broil, beef jerky.</small></span><span class="price">$75</span></li>
@@ -575,7 +589,7 @@
   <section class="close" id="order" data-sc-act="pin" data-sc-span="1.2" data-sc-drift="#3A0812" data-sc-spotlight aria-label="Order">
     <div data-sc-stage>
       <!-- the product hero shot (rule 8, 23 Oct): their own board edited onto slate on the dark ground -->
-      <img class="close__img" src="assets/board-hero.webp" alt="" width="1600" height="1195">
+      <img class="close__img" src="assets/board-hero.webp" alt="" width="1600" height="1195" loading="lazy" decoding="async">
       <div class="close__light" aria-hidden="true"></div>
       <div class="sc-copy sc-copy--center" data-sc-cue="0.06">
         <h2 class="sc-display sc-display--lg" data-sc-kinetic="lines">Ready when you are.</h2>
@@ -653,12 +667,13 @@
     var ease = function (t) { return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; };
     var lerp = function (a, b, t) { return a + (b - a) * t; };
 
-    /* ------------------------------------------------------------ tumble --
-       Keyframes over p. Position in vw/vh, scale, and three rotations. */
-    var tumble = document.getElementById('tumble');
-    var shadow = document.getElementById('tumbleShadow');
+    /* ------------------------------------------------------------- flight --
+       The opening-3 path (Catmull-Rom through the keyframes) and glide, with
+       the keyframes read as offsets from the landing spot: the last key is
+       (15vw, 9vh), where the board sits. Phones: it comes up from below. */
+    var fly = document.getElementById('fly'), board = document.getElementById('flyBoard'), shadow = document.getElementById('flyShadow'), glow = document.getElementById('flyGlow');
     var K = [
-      { p: 0.00, x: 42, y: -64, s: 0.30, rx: 78, ry: -22, rz: -300 },
+      { p: 0.00, x: 41, y: -44, s: 0.30, rx: 78, ry: -22, rz: -300 },
       { p: 0.30, x: 35, y: -18, s: 0.58, rx: 48, ry: -8,  rz: -160 },
       { p: 0.50, x: 29, y: -4,  s: 0.76, rx: 26, ry: -3,  rz: -70 },
       { p: 0.68, x: 19, y: 6,   s: 0.94, rx: 10, ry: 0,   rz: -16 },
@@ -687,40 +702,34 @@
       });
       return out;
     }
-    function paintTumble(p) {
-      /* Reduced motion: no flight. The board parks lower right, clear of the name. */
-      var f = reduce ? { x: 27, y: 16, s: 0.62, rx: 0, ry: 0, rz: 0 } : frameAt(p);
+    function paintFlight(p) {
+      var f = reduce ? { x: 15, y: 9, s: 1, rx: 0, ry: 0, rz: 0 } : frameAt(0.14 + 0.86 * p);
       var mob = small();
-      /* Phones: no room beside the name, so the board comes up from below
-         it and lands in the lower half, under nothing. */
-      var x = mob ? f.x * 0.15 : f.x, y = mob ? 18 - f.y * 0.45 : f.y;
-      tumble.style.transform = 'translate3d(' + x + 'vw,' + y + 'vh,0) scale(' + f.s + ') rotateX(' + f.rx + 'deg) rotateY(' + f.ry + 'deg) rotateZ(' + f.rz + 'deg)';
-      /* The shadow lives on the table: it grows and darkens as the board
-         comes down flat. */
-      var down = 1 - Math.min(f.rx / 78, 1);
-      shadow.style.transform = 'translate3d(' + x + 'vw,' + (y + 4) + 'vh,0) scale(' + (f.s * 1.08) + ')';
-      shadow.style.opacity = (down * 0.9).toFixed(3);
+      var dx = mob ? (f.x - 15) * 0.15 : f.x - 15, dy = mob ? -(f.y - 9) * 0.55 : f.y - 9, sc = mob ? 0.5 + 0.5 * f.s : f.s;
+      var pos = 'translate3d(' + dx.toFixed(2) + 'vw,' + dy.toFixed(2) + 'vh,0) scale(' + sc.toFixed(4) + ')';
+      board.style.transform = 'perspective(1400px) ' + pos + ' rotateX(' + f.rx.toFixed(2) + 'deg) rotateY(' + f.ry.toFixed(2) + 'deg) rotateZ(' + f.rz.toFixed(2) + 'deg)';
+      var down = Math.max(1 - f.rx / 30, 0); down *= down;
+      shadow.style.transform = pos + ' rotateZ(' + f.rz.toFixed(2) + 'deg)';
+      shadow.style.opacity = down.toFixed(3);
+      glow.style.transform = pos;
+      glow.style.opacity = down.toFixed(3);
     }
-    /* The board follows the scroll through its own easing, so a mouse wheel's
-       steps arrive as one glide rather than a jump per notch: the shown
-       progress closes on the scrolled one by a time-based fraction each
-       frame. Reduced motion has no flight, so nothing to smooth. */
-    if (tumble) {
+    if (fly) {
       var flyTo = 0, flyAt = 0, flyRaf = 0, flyLast = 0;
       var flyStep = function (now) {
         var dt = flyLast ? Math.min(now - flyLast, 64) : 16; flyLast = now;
         flyAt += (flyTo - flyAt) * (1 - Math.exp(-dt / 110));
         if (Math.abs(flyTo - flyAt) < 0.0004) flyAt = flyTo;
-        paintTumble(flyAt);
+        paintFlight(flyAt);
         flyRaf = flyAt === flyTo ? 0 : requestAnimationFrame(flyStep);
         if (!flyRaf) flyLast = 0;
       };
       onProgress(document.getElementById('hero'), function (p) {
         flyTo = p;
-        if (reduce) { flyAt = p; paintTumble(p); return; }
+        if (reduce) { flyAt = p; paintFlight(p); return; }
         if (!flyRaf) flyRaf = requestAnimationFrame(flyStep);
       });
-      paintTumble(flyTo);
+      paintFlight(flyTo);
     }
 
     /* ------------------------------------------------------------- sizes --
@@ -794,29 +803,6 @@
       addEventListener('resize', spy, { passive: true });
       spy();
     })();
-    /* ----------------------------------------------------------- the flame -- */
-    if (!reduce) {
-      var lastY = scrollY, lastT = performance.now();
-      var target = 0, heat = 0, raf = 0;
-      var frame = function () {
-        raf = 0;
-        var k = target > heat ? 0.32 : 0.045;
-        heat += (target - heat) * k;
-        if (heat < 0.003 && target === 0) heat = 0;
-        root.style.setProperty('--heat', heat.toFixed(3));
-        target *= 0.82;
-        if (target < 0.01) target = 0;
-        if (heat > 0 || target > 0) raf = requestAnimationFrame(frame);
-      };
-      addEventListener('scroll', function () {
-        var now = performance.now(), dt = Math.max(now - lastT, 8);
-        var v = Math.abs(scrollY - lastY) / dt;
-        lastY = scrollY; lastT = now;
-        target = Math.max(target, Math.min(v / 2.6, 1));
-        if (!raf) raf = requestAnimationFrame(frame);
-      }, { passive: true });
-    }
-
   })();
 </script>
 </body>
