@@ -35,6 +35,7 @@ const { chromium } = createRequire(process.cwd() + '/')('playwright');
 
 const urls = process.argv.slice(2);
 if (!urls.length) { console.error('usage: node scripts/check-site.mjs <url> [more urls]'); process.exit(2); }
+let warnedApi = false;
 const fails = [];
 const fail = (url, kind, msg) => { fails.push(1); console.log(`${kind.padEnd(6)} ${msg}  (${url.replace(/\?.*$/, '')})`); };
 const browser = await chromium.launch();
@@ -46,7 +47,21 @@ for (const url of urls) {
     const page = await browser.newPage({ viewport: { width: 1440, height: 900 } });
     const big = [];
     page.on('pageerror', (e) => fail(url, 'BROKEN', `script error: ${e.message}`));
-    page.on('console', (m) => { if (m.type() === 'error' && !/favicon/i.test(m.text())) fail(url, 'BROKEN', `console error: ${m.text().slice(0, 140)}`); });
+    // A built page calls the local API (localhost:8001) only when served on this computer; the live site uses /api.
+    // When that local server is down or refuses this check's random port (CORS), it is the computer's setup, not
+    // the page: noted once, not failed (25 Oct 2026, it blocked publishing Blazin' Boards).
+    let localApiDown = false;
+    page.on('requestfailed', (r) => { if (/localhost:8001\//.test(r.url())) localApiDown = true; });
+    page.on('console', (m) => {
+      const t = m.text();
+      if (m.type() !== 'error' || /favicon/i.test(t)) return;
+      if (/localhost:8001\//.test(t) || (localApiDown && /^Failed to load resource: net::ERR_(FAILED|CONNECTION_REFUSED)/.test(t))) {
+        if (!localApiDown) localApiDown = true;
+        if (!warnedApi) { warnedApi = true; console.log('note: the local API (localhost:8001) did not answer this page; its live data was not tested here'); }
+        return;
+      }
+      fail(url, 'BROKEN', `console error: ${t.slice(0, 140)}`);
+    });
     page.on('response', async (r) => {
       const u = r.url(); if (!u.startsWith(origin) || /favicon/.test(u)) return;
       if (r.status() >= 400) fail(url, 'BROKEN', `${r.status()} for ${u.replace(origin, '')}`);
