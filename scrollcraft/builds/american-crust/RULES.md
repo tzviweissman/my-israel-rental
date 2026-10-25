@@ -138,7 +138,7 @@ R3j.12 n/a: the owner made no savings claim
 R3.14 pass: loud prices on a two-product food shop with fixed prices; both prices come from the record
 
 ## 6. Order and booking flow
-R3k.7 pass: site FLOW passes: Step 1 basket, Step 2 delivery address and the day (delivery only until the owner answers message item 3), Step 3 details, three-step bar, order and total beside every step with the 25 shekel delivery line, button names the next step then the total, Back, browser back goes back one step, each step checks only its fields
+R3k.7 pass: site FLOW passes: Step 1 basket, Step 2 delivery or pickup (two tiles; owner answered item 3 on 25 Oct: pickup in Sanhedria, exact address on WhatsApp), the address for delivery only, and the day, Step 3 details, three-step bar, order and total beside every step with the 25 shekel delivery line (not for pickup), button names the next step then the total, Back, browser back goes back one step, each step checks only its fields
 R3k.8 pass: every basket line has a 40 px bin button labelled Remove X from the basket beside its stepper; check-site TAP passes
 R3k.6 pass: home Add buttons put the dough in the basket (localStorage) and the shop shows it with the total (walked: one bagel and two pizza gave 84)
 R3k.9 pass: check-site SAVE passes: the order is POSTed through the order form of the listing 4ed30fc8 before WhatsApp opens, with the product ids c071ddf18cff (30) and f0651cac7342 (27), and WhatsApp still opens if the POST fails; the page names match the listing except the comma, the capital and the exclamation mark tidied; the saved copy in the owner dashboard can only be read after publishing because no local API runs
@@ -195,3 +195,4 @@ R3a.8 pass: no dotted line of items; checked the small label and facts at 360x64
 ## 9. Finish
 R3r.3 pass: check-rules passes except R3r.2; every script passed on every page after the last edit
 R3r.4 pass: the only new rule during this build (every order saved before WhatsApp opens) is already in the checklist as R3k.9 with check-site SAVE; no other correction was received
+R3g.12b pass: 25 Oct 2026 pickup added (owner via Tzvi): walked a pickup order and a delivery order at 390x844 with external requests blocked and the POST intercepted; pickup POST fulfilment pickup, no city, no address, bagel x1 and pizza x2, WhatsApp "Pickup in Sanhedria (please send me the exact address)", Total 84; delivery POST unchanged, Total 109; nothing was sent to the owner or the live site

@@ -40,7 +40,8 @@
   // Tzvi 22 Oct: delivery is 25 shekels in Ramat Eshkol and surrounding areas, and the server adds it to every delivery order; further away the fee is confirmed on WhatsApp
   var DEL = 25, farEl = document.getElementById('far');
   function far() { return farEl.checked; }
-  function fee() { return total() && !far() ? DEL : 0; }
+  function pick() { return document.querySelector('input[name=ful]:checked').value === 'pickup'; }
+  function fee() { return total() && !pick() && !far() ? DEL : 0; }
   function grand() { return total() + fee(); }
   function total() { var t = 0; for (var k in q) t += q[k] * P[k].price; return t; }
   function bakes() {
@@ -58,7 +59,7 @@
     document.getElementById('sum-list').innerHTML = html || '<li><span>Your basket is empty. Pick a dough above.</span></li>';
     document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
     var bk = bakes(), bel = document.getElementById('bakes'); bel.hidden = !bk; document.getElementById('bakes-t').textContent = bk;
-    if (total()) mini += far() ? '<li><span>Delivery</span><span>fee confirmed on WhatsApp</span></li>' : '<li><span>Delivery</span><span>' + money(DEL) + '</span></li>';
+    if (total() && !pick()) mini += far() ? '<li><span>Delivery</span><span>fee confirmed on WhatsApp</span></li>' : '<li><span>Delivery</span><span>' + money(DEL) + '</span></li>';
     document.getElementById('sum-mini').innerHTML = mini || '<li><span>Nothing yet</span></li>';
     document.getElementById('total').textContent = money(grand());
     var s = {}; for (var k2 in q) if (q[k2]) s[k2] = q[k2]; window.siteBasket.set(s);
@@ -90,7 +91,7 @@
     var ok = true, e; upto = upto || 3;
     e = total() ? '' : 'Add a dough to your basket'; if (e) ok = false; if (show || !e) mark('items', e);
     if (upto < 2) return ok;
-    e = v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
+    e = pick() || v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
     e = !v('when') ? 'Choose the day' : closedDay(v('when')) ? CLOSED : ''; if (e) ok = false; if (show || !e || closedDay(v('when'))) mark('when', e);
     if (upto < 3) return ok;
     e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
@@ -102,12 +103,13 @@
   note.addEventListener('input', function () { var cs = getComputedStyle(note), lh = parseFloat(cs.lineHeight) || 22, bd = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth), ex = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + bd; note.style.height = 'auto'; note.style.height = Math.min(note.scrollHeight + bd, 4 * lh + ex) + 'px'; });
   document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   function dayName(opt) { return new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', opt); }
+  [].forEach.call(document.querySelectorAll('input[name=ful]'), function (i) { i.addEventListener('change', function () { update(); }); });
   farEl.addEventListener('change', function () { update(); });
   var sending = false;
   function save(notes) {
     var ls = []; for (var k in q) if (q[k]) ls.push({ product_id: P[k].id, qty: q[k] });
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: ls, fulfilment: 'delivery', city: 'jerusalem', address: v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      body: JSON.stringify({ lines: ls, fulfilment: pick() ? 'pickup' : 'delivery', city: pick() ? undefined : 'jerusalem', address: pick() ? undefined : v('addr'), date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
       .then(function (r) { return r.json().then(function (j) { return r.ok ? j : { error: (typeof j.detail === 'string' && j.detail) || 'It could not be saved.' }; }, function () { return r.ok ? null : { error: 'It could not be saved.' }; }); }).catch(function () { return null; });
     return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
@@ -119,8 +121,9 @@
     var out = ['Hi American Crust, I would like to order:'];
     for (var k in q) if (q[k]) out.push('• ' + q[k] + ' × ' + P[k].full + ' (' + money(q[k] * P[k].price) + ')');
     if (v('note')) out.push('Notes: ' + v('note'));
-    if (far()) { out.push('Delivery: fee confirmed on WhatsApp (further away)'); out.push('Total: ' + money(total()) + ' plus delivery'); } else { out.push('Delivery: ' + money(DEL)); out.push('Total: ' + money(grand())); }
-    out.push('Delivery to: ' + v('addr')); out.push('Delivery day: ' + dayName({ weekday: 'long', day: 'numeric', month: 'long' }));
+    if (pick()) { out.push('Total: ' + money(grand())); out.push('Pickup in Sanhedria (please send me the exact address)'); out.push('Pickup day: ' + dayName({ weekday: 'long', day: 'numeric', month: 'long' })); }
+    else { if (far()) { out.push('Delivery: fee confirmed on WhatsApp (further away)'); out.push('Total: ' + money(total()) + ' plus delivery'); } else { out.push('Delivery: ' + money(DEL)); out.push('Total: ' + money(grand())); }
+    out.push('Delivery to: ' + v('addr')); out.push('Delivery day: ' + dayName({ weekday: 'long', day: 'numeric', month: 'long' })); }
     out.push('Name: ' + v('me') + ', ' + v('ph'));
     var text = out.join('\n'), notes = [v('note'), 'Sent from the American Crust page by WhatsApp'].filter(Boolean).join('\n');
     sending = true; send.setAttribute('aria-busy', 'true');
@@ -138,18 +141,19 @@
     var b = e.target.closest('button[data-k]'); if (!b) return; q[b.dataset.k] = Math.max(0, Math.min(20, q[b.dataset.k] + (+b.dataset.d))); update(); check(false); label();
   });
   // the steps: one screen each; the browser's back button goes back a step (#order, #order-2, #order-3)
-  var STEP_BTN = ['', 'Continue to delivery', 'Continue to your details', ''], STEP_NOTE = ['', 'Next: where to deliver and the day.', 'Next: your name and phone.', 'Opens WhatsApp with your order written out, to send to American Crust.'];
+  var STEP_BTN = ['', 'Continue to delivery or pickup', 'Continue to your details', ''], STEP_NOTE = ['', 'Next: delivery or pickup, and the day.', 'Next: your name and phone.', 'Opens WhatsApp with your order written out, to send to American Crust.'];
   function drawStep() {
     if (step > 1 && !loaded) loadClosures();
     [].forEach.call(document.querySelectorAll('.ostep'), function (el) { el.hidden = +el.dataset.s !== step; });
     [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
+    var pk = pick(); document.getElementById('w-addr').hidden = pk; document.getElementById('h-pick').hidden = !pk; document.getElementById('when-l').textContent = pk ? 'Pickup day' : 'Delivery day';
     var day = v('when') ? dayName({ weekday: 'long' }) : '';
     send.lastElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? (day ? 'Send for ' + day : 'Send order on WhatsApp') + ', ' + money(grand()) : 'Send order on WhatsApp');
     send.classList.toggle('idle', !check(false, step));
     document.getElementById('send-note').textContent = STEP_NOTE[step];
     document.getElementById('back').hidden = step === 1;
-    var where = document.getElementById('sum-where'); where.hidden = step < 3 || !v('addr');
-    if (!where.hidden) where.textContent = 'To ' + v('addr') + (v('when') ? ', ' + dayName({ weekday: 'short', day: 'numeric', month: 'short' }) : '');
+    var where = document.getElementById('sum-where'); where.hidden = step < 3 || (!pick() && !v('addr'));
+    if (!where.hidden) where.textContent = (pick() ? 'Pickup in Sanhedria' : 'To ' + v('addr')) + (v('when') ? ', ' + dayName({ weekday: 'short', day: 'numeric', month: 'short' }) : '');
   }
   function go(s, push) {
     if (s > 1 && !check(false, s - 1)) s = 1; if (s > 2 && !check(false, 2)) s = 2;

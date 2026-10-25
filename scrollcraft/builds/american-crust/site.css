@@ -304,3 +304,5 @@ label.opt input { accent-color: var(--night); width: 20px; height: 20px; }
 .opt.far { margin-top: .6rem; font-weight: 500; }
 
 .toast { display: flex; align-items: center; max-width: calc(100vw - 24px); } .toast .tt { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.ful { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; } @media (max-width: 420px) { .ful { grid-template-columns: 1fr; } }
