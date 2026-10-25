@@ -3,7 +3,7 @@
 Hi, the new look of your site is ready for you to see: bright, one colour per box and pan, the price and Add on every card. A few things only you know will make it better. Short answers are fine.
 
 1. A photo of you, or of your kitchen with the chicken being made. We would put it in the "Handcrafted chicken" part. Which photo is your favourite?
-2. Do you have photos of Shnitzel Bites, Pretzel and Buffalo Wings? They are shown as plain colour tiles for now. Photos of each box (Mini, Grand, Supreme) and each pan (9x13, Roaster) taken on their own would help too.
+2. Thank you for the Shnitzel Bites and Pretzel photos (25 Oct), they are on the site. Buffalo Wings stays a colour tile until there is a photo. Photos of each box (Mini, Grand, Supreme) and each pan (9x13, Roaster) taken on their own would help too.
 3. Which days do you take Shabbos orders, and what is the last day and hour to order?
 4. Where do you deliver, and what does it cost outside central Jerusalem? Is there pickup, and from where?
 5. Why do your boxes cost what they cost? One true sentence (the cut of chicken, the marinade, the time) goes next to the price.

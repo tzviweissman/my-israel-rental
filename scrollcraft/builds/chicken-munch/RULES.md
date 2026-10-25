@@ -31,7 +31,7 @@ R3o.4 pass: contact page and footer label "WhatsApp or call" and "From the US, c
 R3e.22 n/a: owner must send a photo of himself or his kitchen; his WhatsApp number is in the footer and contact page
 R3s.19 pass: facts script on the home page shows its own title, description, og:title, og:description and og:image (bowl); menu, order and contact have their own
 R6.1 pass: lead block is the product with its prices and the order button; boxes, kinds, kosher and contact all present
-R4.1 pass: 9x13 rice has no photo so it is a text row; Shnitzel Bites, Pretzel and Buffalo Wings have no photo so they are plain colour tiles; listed for the owner
+R4.1 pass: 9x13 rice has no photo so it is a text row; Buffalo Wings has no photo so it is a plain colour tile (he has none yet, 25 Oct); Shnitzel Bites and Pretzel show the photos he sent on 25 Oct
 
 ## 2. Opening
 R3g.13 pass: first screen at 1440x900 and 390x844: his photo, the headline "The taste of America" (4 words), one small line (Kosher American fried chicken, Jerusalem), the price line beside the one button; the old lede line was removed on 22 Oct
@@ -102,9 +102,9 @@ R0b.12 n/a: not published, so there is no pages-list preview clip yet
 R8.1 n/a: owner must send a matching set (one photo per box and per pan, same angle and ground); today the three box photos come from three shoots (Mini and Grand are one box photo at two crops, the Supreme is a pile of chicken on yellow) and the 9x13 pan photo is cut flat at its bottom edge in the file the owner sent, so it runs off the bottom of its frame; no uncut copy exists in src/owner: listed for the owner
 R8.6 n/a: all five kinds with a photo (Classic, Hot Poppers, Cornflake, Fruity, Rice Krispie) are now product hero shots edited from his own photos (dark plinth, its own coating round it, one warm light; Classic's lid number checked: 055-331-6975); the boxes and pans still need a clean photo each from the owner (listed in the report)
 R8.2 pass: his own photos and five hero shots edited from his bowl photos (Higgsfield nano_banana_2); no stock. The generated box-full.webp was removed 25 Oct (Tzvi asked): the Supreme box card on home and menu is now his own listing photo, assets/box-yellow.webp cut unchanged from src/owner/shot-box.png; looked at on laptop 1440 and phone 390, the labelled sauce pots show. All three box cards are the same box, his only box photo; photos of each box are asked for in message-to-owner.md item 2
-R3p.7 pass: every kind of chicken is a tile; five show his photo, the three without (Shnitzel Bites, Pretzel, Buffalo Wings) are plain colour tiles
+R3p.7 pass: every kind of chicken is a tile; seven show his photo (Shnitzel Bites and Pretzel added 25 Oct from his own photos, cropped only), Buffalo Wings is a plain colour tile until he has a photo
 R3h.12 pass: each item looks the same everywhere (the same photo file on home, menu and order)
-R3h.10 pass: the menu page list swaps the stage and caption for every one of the eight kinds: five with his photo (Classic added), three on their own colour tile (Shnitzel Bites, Pretzel, Buffalo Wings); the home page has no option picker
+R3h.10 pass: the menu page list swaps the stage and caption for every one of the eight kinds: seven with his photo (Shnitzel Bites and Pretzel clicked and looked at on 25 Oct, laptop and phone), Buffalo Wings on its own colour tile; the home page has no option picker
 R3g.14 n/a: owner must send a matching photo set; the photos now on the page come from different shoots and grounds: listed in the report
 R3o.1 pass: no generated food anywhere on the page; every food picture is his own photo
 R3o.2 pass: no generated liquid exists on the page
