@@ -29,7 +29,8 @@ for (const f of files) {
   for (const m of text.matchAll(/\s(?:src|href|poster)="([^"]*)"/g)) urls.push(m[1]);
   for (const m of text.matchAll(/\s(?:srcset|imagesrcset)="([^"]*)"/g)) for (const part of m[1].split(',')) urls.push(part.trim().split(/\s+/)[0]);
   for (const m of text.matchAll(/url\((['"]?)([^)'"]+)\1\)/g)) urls.push(m[2]);
-  for (const m of text.matchAll(/(['"])(\/pages\/[^'"\s]+)\1/g)) urls.push(m[2]);
+  // a quoted '/pages/<slug>/assets/jar-' + sel + '.webp' is completed by the script: not a file on its own
+  for (const m of text.matchAll(/(['"])(\/pages\/[^'"\s]+)\1(\s*\+)?/g)) if (!m[3]) urls.push(m[2]);
   for (const u of urls) {
     if (u.startsWith(BASE)) {
       const rest = u.slice(BASE.length);
@@ -38,6 +39,9 @@ for (const f of files) {
       if (/'\s*\+|\$\{/.test(rest)) continue;  // a path the page's script completes at run time
       const file = decodeURIComponent(rest.split(/[?#]/)[0]);
       if (file && !/\/$/.test(file) && !fs.existsSync(path.join(OUT, file))) problems.push(`${f}: ${u.split('?')[0]} is not in the published folder`);
+    } else if (/\.css$/i.test(f) && /^(?:\.\/)?assets\//.test(u)) {
+      // url() in a stylesheet loads from the stylesheet's own folder (/pages/<slug>/), so it works when the file is there
+      if (!fs.existsSync(path.join(OUT, path.dirname(f), u.split(/[?#]/)[0]))) problems.push(`${f}: ${u} is not in the published folder`);
     } else if (/^(?:\.\/)?assets\//.test(u)) {
       problems.push(`${f}: "${u}" was left relative; on the live site it loads from /business/ and breaks`);
     }

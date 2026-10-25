@@ -11,6 +11,8 @@
   'use strict';
   var WA = '972584031989';
   var KEY = 'kmb-order';
+  // pictures load from this script's own folder: on the live site the page is /business/... but the files are /pages/<slug>/
+  var HERE = document.currentScript ? document.currentScript.src.replace(/[^/]*$/, '') : '';
   var PRICE = { kitchen: 350, pots: 180, oven: 40, pan: 15 };
   // The live prices from their listing, when the site server adds them
   // (frontend/server.js, #mir-live-prices), so a price changed in their
@@ -65,7 +67,7 @@
         keys[x[2]] = 1;
         var fresh = had && !had[x[2]] ? ' class="is-new"' : '';
         var pic = x[2] === 'kitchen' ? 'kitchen' : x[2] === 'pots' ? 'pots' : '';
-        return '<li' + fresh + '>' + (pic ? '<img class="th" src="assets/' + pic + '.webp" alt="" width="44" height="44">' : '<span class="th th--none"></span>') +
+        return '<li' + fresh + '>' + (pic ? '<img class="th" src="' + HERE + 'assets/' + pic + '.webp" alt="" width="44" height="44">' : '<span class="th th--none"></span>') +
           '<span class="nm">' + esc(x[0]) + '</span><span class="pr">' + money(x[1]) + '</span>' +
           '<button type="button" class="rm" data-rm="' + x[2] + '" aria-label="Remove ' + esc(x[0]) + ' from the booking"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16M10 11v6M14 11v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3"/></svg></button></li>';
       }).join('')

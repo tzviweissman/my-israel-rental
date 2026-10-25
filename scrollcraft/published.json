@@ -15,9 +15,13 @@
     "folder": "chicken-munch",
     "hash": "0dd4ff39ceaa324e145aa31917cb653fc1ee3f45"
   },
+  "elisheva-brandeis": {
+    "folder": "elisheva-nails",
+    "hash": "a69c1e672030b413c193b413b4116c6000ea33e6"
+  },
   "kashermybnb-kashering-services": {
     "folder": "kashermybnb",
-    "hash": "f7d3e59b9899b5f5462b6f1f7a6be06359a686da"
+    "hash": "38612336b278727dc22e57aa73fd3e6ef01f3ea2"
   },
   "l-a-cholent-by-rabbi-samuels": {
     "folder": "la-cholent",
@@ -29,19 +33,27 @@
   },
   "michal-balloons": {
     "folder": "michal-balloons",
-    "hash": "9fae744e7627087312705666339889af2e3fbd9a"
+    "hash": "e7a20223fc640c6793b5d62777b99c144b675ed0"
+  },
+  "michal-simkin": {
+    "folder": "michal-simkin",
+    "hash": "021aacb08d392088bf7081048da384ea977b3416"
   },
   "michal-yodaiken": {
     "folder": "michal-yodaiken",
     "hash": "2a4f262c8bf64fafaf92216500124bd59c9ea88d"
   },
+  "noa-levi": {
+    "folder": "noa-levi-home-styling",
+    "hash": "33aabe5c3ab4f070bc31a995a4678818859b4b2f"
+  },
   "ravit-hen": {
     "folder": "rs-modest-activewear",
-    "hash": "d94021d7d226ba988b4b6eb5dac56f98dadca5d5"
+    "hash": "4992abbe7f3a5a981a7f64acfacfd8efb08a0468"
   },
   "rena-lipschitz": {
     "folder": "whipped-cup",
-    "hash": "0bdd3088df5e7d2a7dd1b9e75ab21a19914869ae"
+    "hash": "81b701974d0cb37de12d20886c18c96aec17403a"
   },
   "the-brown-box": {
     "folder": "the-brown-box",

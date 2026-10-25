@@ -330,6 +330,17 @@
   #book.sec { padding-block: clamp(2rem, 5svh, 4rem); }
   .plate { padding: clamp(1.25rem, 3svh, 2.5rem) clamp(1.5rem, 4vw, 3rem); }
   .plate img { width: 48px; height: 48px; }
+  /* Motion switched off: no walk. The kitchen and the opening words stay as one screen, and every station card
+     and the Ready panel sit open under it as a plain list, so nothing is hidden behind a scroll (check-site MEDIA, 25 Oct 2026). */
+  @media (prefers-reduced-motion: reduce) {
+    #walk { height: auto !important; }
+    #walk [data-sc-stage] { position: relative !important; top: auto !important; height: auto !important; min-height: 0 !important; padding-top: 100svh; background: var(--sc-canvas, #fff); }
+    #walk .hero { bottom: auto; height: 100svh; opacity: 1 !important; visibility: visible !important; }
+    #walk .cards, #walk .ready { position: relative !important; z-index: 2; inset: auto !important; width: auto; margin: 0; padding: var(--sc-4) var(--sc-gutter); background: var(--sc-canvas, #fff); }
+    #walk .cards { display: grid; gap: var(--sc-3); }
+    #walk .card { position: static !important; opacity: 1 !important; visibility: visible !important; transform: none !important; }
+    #walk .ready { opacity: 1 !important; visibility: visible !important; border-radius: 0; box-shadow: none; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .card, .mark i, .tick, .tick svg, .buybar, .btn, .btn .ab, .btn .sw svg, .feat::after, #ready-list .tick, #ready-list .tick svg { transition: none !important; }
   }

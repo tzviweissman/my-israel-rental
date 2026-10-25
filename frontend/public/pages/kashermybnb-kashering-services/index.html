@@ -15,12 +15,12 @@
 <meta name="description" content="Kitchen kashering for vacation rentals, new homes and Pesach, in Jerusalem and across Israel. Whole kitchen $350, pots and cutlery $180. Expert mashgichim, following cRc guidelines. Since 2019.">
 <meta property="og:title" content="KasherMyBnb · Kitchen kashering in Jerusalem and across Israel">
 <meta property="og:description" content="Kitchen kashering for vacation rentals, new homes and Pesach, in Jerusalem and across Israel. Whole kitchen $350, pots and cutlery $180. Expert mashgichim, following cRc guidelines. Since 2019.">
-<meta property="og:image" content="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvjw3bv8">
-<link rel="icon" href="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvjw3bv8">
+<meta property="og:image" content="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvo89630">
+<link rel="icon" href="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvo89630">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/kashermybnb-kashering-services/scrollcraft.css?v=mvjw3bv8">
+<link rel="stylesheet" href="/pages/kashermybnb-kashering-services/scrollcraft.css?v=mvo89630">
 <style>
   /* Their logo: the blue K, the red roof, on white. */
   :root {
@@ -330,6 +330,17 @@
   #book.sec { padding-block: clamp(2rem, 5svh, 4rem); }
   .plate { padding: clamp(1.25rem, 3svh, 2.5rem) clamp(1.5rem, 4vw, 3rem); }
   .plate img { width: 48px; height: 48px; }
+  /* Motion switched off: no walk. The kitchen and the opening words stay as one screen, and every station card
+     and the Ready panel sit open under it as a plain list, so nothing is hidden behind a scroll (check-site MEDIA, 25 Oct 2026). */
+  @media (prefers-reduced-motion: reduce) {
+    #walk { height: auto !important; }
+    #walk [data-sc-stage] { position: relative !important; top: auto !important; height: auto !important; min-height: 0 !important; padding-top: 100svh; background: var(--sc-canvas, #fff); }
+    #walk .hero { bottom: auto; height: 100svh; opacity: 1 !important; visibility: visible !important; }
+    #walk .cards, #walk .ready { position: relative !important; z-index: 2; inset: auto !important; width: auto; margin: 0; padding: var(--sc-4) var(--sc-gutter); background: var(--sc-canvas, #fff); }
+    #walk .cards { display: grid; gap: var(--sc-3); }
+    #walk .card { position: static !important; opacity: 1 !important; visibility: visible !important; transform: none !important; }
+    #walk .ready { opacity: 1 !important; visibility: visible !important; border-radius: 0; box-shadow: none; }
+  }
   @media (prefers-reduced-motion: reduce) {
     .card, .mark i, .tick, .tick svg, .buybar, .btn, .btn .ab, .btn .sw svg, .feat::after, #ready-list .tick, #ready-list .tick svg { transition: none !important; }
   }
@@ -364,7 +375,7 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></symbol></svg>
 
 <header class="bar">
-  <a class="brand" href="#top"><img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvjw3bv8" alt="" width="30" height="30" data-mir-key="i-149272c6-0">KasherMyBnb</a>
+  <a class="brand" href="#top"><img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvo89630" alt="" width="30" height="30" data-mir-key="i-149272c6-0">KasherMyBnb</a>
   <nav aria-label="What we kasher">
     <ol class="index" id="index"></ol>
   </nav>
@@ -377,7 +388,7 @@
   <section id="walk" data-sc-act="pin" data-sc-span="6">
     <div data-sc-stage>
       <div class="cam" id="cam">
-        <img src="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvjw3bv8" alt="A rental kitchen: oven, microwave, gas stovetop, countertops, sink and a hot plate along one wall" width="2048" height="1152" data-mir-key="i-d27ed8aa-0">
+        <img src="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvo89630" alt="A rental kitchen: oven, microwave, gas stovetop, countertops, sink and a hot plate along one wall" width="2048" height="1152" data-mir-key="i-d27ed8aa-0">
       </div>
 
       <div class="hero">
@@ -418,7 +429,7 @@
       <h2 data-sc-in data-mir-key="t-b5eb772d-0">Two services, one price each.</h2>
       <div class="svc-grid" data-sc-in>
         <article class="svc-card">
-          <img src="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvjw3bv8" alt="A kitchen wall with oven, microwave, gas hob, countertop and sink" width="2048" height="1152" loading="lazy" data-mir-key="i-50751baf-0">
+          <img src="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvo89630" alt="A kitchen wall with oven, microwave, gas hob, countertop and sink" width="2048" height="1152" loading="lazy" data-mir-key="i-50751baf-0">
           <div class="svc-body">
             <p class="svc-n" data-mir-key="t-521a6fb1-0">01</p>
             <h3 data-mir-key="t-9fbdeb8c-0">Whole kitchen</h3>
@@ -428,7 +439,7 @@
           </div>
         </article>
         <article class="svc-card" id="pots">
-          <img class="cut" src="/pages/kashermybnb-kashering-services/assets/pots.webp?v=mvjw3bv8" alt="Stainless steel pots, a colander and cutlery" width="1200" height="1200" loading="lazy" data-mir-key="i-3be316bc-0">
+          <img class="cut" src="/pages/kashermybnb-kashering-services/assets/pots.webp?v=mvo89630" alt="Stainless steel pots, a colander and cutlery" width="1200" height="1200" loading="lazy" data-mir-key="i-3be316bc-0">
           <div class="svc-body">
             <p class="svc-n" data-mir-key="t-0d75db57-0">02</p>
             <h3 data-mir-key="t-fd253d28-0">Pots, cutlery and utensils</h3>
@@ -494,7 +505,7 @@
 
   <section class="rest rest--blue" id="book">
     <div class="wrap close">
-      <img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvjw3bv8" alt="KasherMyBnb" width="64" height="64" data-mir-key="i-6a94de04-0">
+      <img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvo89630" alt="KasherMyBnb" width="64" height="64" data-mir-key="i-6a94de04-0">
       <h2 data-sc-in data-mir-key="t-03c9f498-0">Book your kashering.</h2>
       <dl class="label" data-sc-in>
         <div><dt data-mir-key="t-4efb61b1-0">Whole kitchen</dt><dd data-mir-key="t-7b499082-0">$350, about 2 hours</dd></div>
@@ -521,7 +532,7 @@
 </div>
 
 <script>if (matchMedia("(max-width: 860px)").matches) document.getElementById("walk").setAttribute("data-sc-span", "4.2");</script>
-<script src="/pages/kashermybnb-kashering-services/scrollcraft.js?v=mvjw3bv8"></script>
+<script src="/pages/kashermybnb-kashering-services/scrollcraft.js?v=mvo89630"></script>
 <script>ScrollCraft.mount(document.body);</script>
 <script>
 (function () {
