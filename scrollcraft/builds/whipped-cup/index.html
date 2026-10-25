@@ -201,8 +201,16 @@
   if (reduce) { draw(1); line.style.opacity = 1; line.style.transform = 'none'; return; }  // motion off: the question stays in the page for readers, out of sight (the end card is the whole page)
   var tick = 0;
   function frame() { tick = 0; var r = sec.getBoundingClientRect(), span = sec.offsetHeight - innerHeight; draw(clamp(-r.top / Math.max(1, span))); }
-  addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
-  (function loop() { frame(); requestAnimationFrame(loop); })();
+  // The sky film rests while the page is being scrolled and drifts again when it stops: a full-screen
+  // film and the moving window together held the opening at 20-30 fps on a laptop (R3h.20, 25 Oct 2026).
+  var rest = 0;
+  addEventListener('scroll', function () {
+    if (!tick) tick = requestAnimationFrame(frame);
+    if (!v.paused) v.pause(); clearTimeout(rest);
+    rest = setTimeout(function () { if (sec.getBoundingClientRect().bottom > 0) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } }, 300);
+  }, { passive: true });
+  // the puffs breathe only while the opening is on screen
+  (function loop() { if (sec.getBoundingClientRect().bottom > 0) frame(); requestAnimationFrame(loop); })();
 })();
 </script>
 <script>

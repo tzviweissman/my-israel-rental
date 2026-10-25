@@ -39,6 +39,7 @@ R3b.1 pass: first screen is the tagline film; what, where and the button come wi
 R3b.2 pass: end card: price From 40 a jar and Order button touch; Kosher certified sits in the same proof line, stated twice on the page (end card and footer)
 R3b.3 pass: one solid action per screen: Order your jars; flavour Add buttons are outline; the phone bar repeats it
 R3h.1 pass: check-site OPENING clean; the sky film plays on its own and the cloud window opens as you scroll
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.4 screens on a laptop and a phone (was 3.0), 60 fps (median 16.7 ms, no frame over 50 ms) after the sky film rests while you scroll and is 1280 px wide (it held the laptop at 20-30 fps); the plain sky of her 'feel the clouds' world, the cloud window opens onto her own photo, whole; the sky poster loads first
 R3n.1 pass: her iced coffee photo fills the end of the opening (wide: a big cloud-shaped photo, tall: whole photo); kept from the build
 R3n.2 pass: signature: the walk on the clouds that becomes the cloud on her coffee, from her tagline; no other business has that line
 R3n.3 pass: check-motion: the servings switch changes number, jars and the package offered; one JUMP flagged on a small number swap

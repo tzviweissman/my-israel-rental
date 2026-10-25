@@ -39,6 +39,7 @@ R3b.1 pass: what (bakery), where (Emek Refaim), why trust (since 1998 line, hour
 R3b.2 pass: the hechsher sits in the trust strip right after the door and again in Good to know and the footer, three mentions of one fact on one page; not beside the button
 R3b.3 pass: the gold "Start your order" is the one solid action per screen; "See the counter" is outlined
 R3h.1 pass: check-site OPENING passed; full-screen oven photograph that pushes in on scroll and the clock starts walking
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop and a phone (was 2.0), 60 fps (median 16.7 ms, no frame over 50 ms) after the full-screen multiply blend became a plain warm wash and the still grain stopped covering four screens; the loaves on the peel in the oven, the bakery's own room, never on more bread photos; loaves whole; the oven photo loads first
 R3n.1 pass: the baker photo (generated practice mockup) fills the whole first screen at both sizes
 R3n.2 pass: "the scroll is the morning": the clock in the corner walks from 04:00 to 07:00 as the dark bakery turns to daylight at the door
 R3n.3 pass: adding items changes the basket, total and the bar; the page itself changes from night to day at the door (check-motion: no choices on the page)
@@ -51,7 +52,6 @@ R3h.5 n/a: the opening is a photograph with a scroll push-in, there is no film o
 R3h.7 n/a: the opening is a photograph with a scroll push-in, there is no film on this site
 R3h.8 n/a: the opening is a photograph with a scroll push-in, there is no film on this site
 R3h.11 n/a: the opening is a photograph with a scroll push-in, there is no film on this site
-R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at at five points): lengthened 25 Oct to data-sc-span 3.1 (was 2.0 screens): 3.1 screens on both, 60 fps with no frame over 50 ms (an earlier laptop run, with other jobs on the machine, had 22%); their oven photo is the ground, whole; the hero photo loads first; check-site clean
 R3h.13 n/a: the opening is a photograph with a scroll push-in, there is no film on this site
 R3h.14 n/a: the opening is a photograph with a scroll push-in, there is no film on this site
 R3h.17 n/a: the opening is a photograph with a scroll push-in, there is no film on this site

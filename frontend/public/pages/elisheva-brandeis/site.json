@@ -1,0 +1,14 @@
+[
+  {
+    "page": "index",
+    "title": "Home"
+  },
+  {
+    "page": "contact",
+    "title": "Contact"
+  },
+  {
+    "page": "book",
+    "title": "Book"
+  }
+]

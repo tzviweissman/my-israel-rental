@@ -80,7 +80,7 @@
   .top {
     position: fixed; inset-inline: 0; inset-block-start: 0; z-index: var(--sc-z-chrome);
     display: flex; align-items: center; gap: var(--sc-4); padding: var(--sc-3) var(--sc-gutter);
-    background: rgba(251, 247, 244, 0.86); backdrop-filter: blur(14px); border-bottom: 1px solid rgba(14, 31, 57, 0.1);
+    background: rgba(251, 247, 244, 0.96); border-bottom: 1px solid rgba(14, 31, 57, 0.1);
     color: var(--navy);
   }
   .on-navy ~ .top { color: var(--navy); }
@@ -104,7 +104,7 @@
     position: fixed; inset-inline: 0; inset-block-end: 0; z-index: var(--sc-z-chrome);
     height: var(--bar-h); display: flex; align-items: center; gap: var(--sc-4);
     padding: 0 var(--sc-gutter); padding-block-end: env(safe-area-inset-bottom);
-    background: rgba(251, 247, 244, 0.86); backdrop-filter: blur(14px);
+    background: rgba(251, 247, 244, 0.96);
     border-top: 1px solid rgba(14, 31, 57, 0.12);
   }
   .bar__mark { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; flex: none; }
@@ -271,12 +271,14 @@
     .hero .sc-copy--lead { max-width: 34rem; }
   }
 
-  .hero { min-height: 280svh; } .same { min-height: 250svh; }
-  .hero__bg { position: absolute; inset: 0; z-index: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; background: var(--navy); }
-  .hero__bg img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 22%; filter: saturate(.75); }
-  .hero__bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(14,31,57,.94) 0%, rgba(14,31,57,.82) 45%, rgba(14,31,57,.66) 100%); }
-  .hero .sc-copy--lead { z-index: 2; }
-  @media (max-width: 860px) { .hero__bg { grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; } }
+  .hero { min-height: 330svh; } .same { min-height: 250svh; }
+  /* the deck of her clients' photos sits on her plain navy, not on a wall of the same photos (rule R3h.20, 25 Oct 2026) */
+  /* The ground is her own salon wall with its glass shelf, empty (edited from her photo, gen/ground-brief.md),
+     under her navy: the clients are dealt onto a plain ground of her world, never onto more client photos
+     (R3h.20, 25 Oct 2026), and the first screen is still a full-screen picture (R3h.1). */
+  .hero__bg { position: absolute; inset: 0; z-index: 0; background: var(--navy); }
+  .hero__bg img { width: 100%; height: 100%; object-fit: cover; object-position: 50% 60%; }
+  .hero__bg::after { content: ""; position: absolute; inset: 0; background: linear-gradient(90deg, rgba(14,31,57,.95) 0%, rgba(14,31,57,.86) 45%, rgba(14,31,57,.74) 100%); }
   /* ---- worlds (rule 3t): pictures edge to edge, plain rests between ---- */
   .wall { position: relative; min-height: 84svh; background: var(--navy); color: #FFFFFF; overflow: hidden; display: flex; align-items: flex-end; }
   .wall__grid { position: absolute; inset: 0; display: grid; grid-template-columns: repeat(4, 1fr); gap: 3px; background: var(--navy); }
@@ -388,9 +390,9 @@
 
 <main>
   <!-- 1  Recognition: her headline, her clients dealt one by one -->
-  <section class="hero on-navy" id="hero" data-sc-act="pin" data-sc-span="2.8" data-sc-dwell="0.2" aria-label="Michal Simkin, boutique wig salon">
+  <section class="hero on-navy" id="hero" data-sc-act="pin" data-sc-span="3.3" data-sc-dwell="0.2" aria-label="Michal Simkin, boutique wig salon">
     <div data-sc-stage>
-      <div class="hero__bg" aria-hidden="true"><img src="assets/client-8.jpg" alt="" width="720" height="960"><img src="assets/client-6.jpg" alt="" width="720" height="960"><img src="assets/client-4.jpg" alt="" width="720" height="960"><img src="assets/client-2.jpg" alt="" width="720" height="960"></div>
+      <div class="hero__bg" aria-hidden="true"><img src="assets/ground.webp" alt="" width="1600" height="894" fetchpriority="high"></div>
       <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
         <p class="who">Michal Simkin, boutique wig salon and academy</p>
         <h1 data-sc-kinetic="lines">A wig <em>you love.</em></h1>
@@ -576,16 +578,28 @@
        angle and offset its markup declares. */
     var cards = Array.prototype.slice.call(document.querySelectorAll('#deck .card'));
     var N = cards.length;
+    /* Smooth at 60 fps (rule R3h.20, 25 Oct 2026: the deck ran at 10 to 15 fps): each card is written only when
+       its own step changes, and a card with three landed cards on top of it is hidden, since it cannot be seen
+       and every stacked, rotated, shadowed photo costs a full repaint of the layer while scrolling. */
+    var lastT = cards.map(function () { return -1; });
+    var geo = cards.map(function (c) {
+      return { r: parseFloat(c.style.getPropertyValue('--r')) || 0, x: parseFloat(c.style.getPropertyValue('--x')) || 0, y: parseFloat(c.style.getPropertyValue('--y')) || 0 };
+    });
     function paintDeck(p) {
-      cards.forEach(function (c, k) {
+      var ts = cards.map(function (c, k) {
         /* Card 0 is already on the table at p=0, so the first screen has a face on it. */
-        var start = -0.16 + k * (0.88 / N), t = reduce ? 1 : ease(clamp((p - start) / 0.16));
-        var r = parseFloat(c.style.getPropertyValue('--r')) || 0;
-        var x = parseFloat(c.style.getPropertyValue('--x')) || 0;
-        var y = parseFloat(c.style.getPropertyValue('--y')) || 0;
-        var fx = 40 * (1 - t), fy = 50 * (1 - t), fr = r + (28 - r) * (1 - t);
+        var start = -0.16 + k * (0.88 / N);
+        return reduce ? 1 : ease(clamp((p - start) / 0.16));
+      });
+      var landed = ts.filter(function (t) { return t >= 1; }).length;
+      cards.forEach(function (c, k) {
+        var t = Math.round(ts[k] * 1000) / 1000, buried = k < landed - 3;
+        c.style.visibility = buried ? 'hidden' : '';
+        if (t === lastT[k] || buried) return;
+        lastT[k] = t;
+        var g = geo[k], fx = 40 * (1 - t), fy = 50 * (1 - t), fr = g.r + (28 - g.r) * (1 - t);
         c.style.opacity = Math.min(t * 3, 1).toFixed(3);
-        c.style.transform = 'translate3d(calc(' + fx.toFixed(2) + 'vw + ' + x + '%), calc(' + fy.toFixed(2) + 'vh + ' + y + '%), 0) rotate(' + fr.toFixed(2) + 'deg)';
+        c.style.transform = 'translate3d(calc(' + fx.toFixed(2) + 'vw + ' + g.x + '%), calc(' + fy.toFixed(2) + 'vh + ' + g.y + '%), 0) rotate(' + fr.toFixed(2) + 'deg)';
       });
     }
     if (N) onProgress(document.getElementById('hero'), paintDeck);

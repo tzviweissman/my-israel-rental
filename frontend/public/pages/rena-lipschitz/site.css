@@ -294,7 +294,7 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 @media (max-width: 760px) { .hero2 .bg { object-position: 60% 50%; } .hero2::before { background: linear-gradient(0deg, rgb(42 20 11 / .88) 0%, rgb(42 20 11 / .5) 55%, rgb(42 20 11 / .1) 100%); } .scroll-hint { display: none; } }
 
 /* ── the walk in the clouds (CONCEPT.md) ── */
-.sky { position: relative; height: 300svh; background: #E9D7E4; }
+.sky { position: relative; height: 340svh; background: #E9D7E4; }  /* at least 3 screens (R3h.20) */
 .sky-stage { position: sticky; top: 68px; height: calc(100svh - 68px); overflow: hidden; isolation: isolate; color: #fff; }
 .sky-v { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
 .sky-shade { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at 50% 30%, rgb(42 20 11 / .28), transparent 65%); }

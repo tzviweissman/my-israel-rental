@@ -34,6 +34,7 @@ R3b.1 pass: what (balloon design), where (Jerusalem and the area), what next (qu
 R3b.2 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3b.3 pass: header button is outline while the hero shows the solid one
 R3h.1 pass: held film opening of balloons gathering into an arch
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop and a phone (was shorter), 60 fps (median 16.7 ms, no frame over 50 ms); the arch builds in a plain empty room, whole; the Hebrew 'scroll down' cue removed (cues are banned); the room loads first
 R3n.1 pass: the arch film fills the first screen; the words sit on it from the start
 R3n.2 pass: balloons rise into an empty cream room and gather into the arch round her line; the closing name made of balloons you can pop
 R3n.3 pass: an occasion chip rearranges her work and the quote card writes the message; check-motion passes (3 choices, quick taps)
@@ -46,7 +47,6 @@ R3h.5 n/a: this site has no such element (see the page: no cut-out, carousel, am
 R3h.7 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.8 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.11 pass: brightness.py on assets/arrive.mp4: 20 frames, average 78, bright enough
-R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at at five points): on phones lengthened 25 Oct to 100svh + 210vh (was + 170vh, 2.7 screens): the arch opening is 3.0 screens on a laptop and 3.1 on a phone, 60 fps (median 16.7 ms, no frame over 50 ms); the arch builds whole on her plain cream room on both sizes; check-site clean
 R3h.13 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.14 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.17 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)

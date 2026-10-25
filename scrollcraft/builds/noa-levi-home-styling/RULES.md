@@ -38,7 +38,8 @@ R3g.13 pass: 1440x900 first screen: picture, headline of 4 words "We organize yo
 R3b.1 pass: first screen says what and the button; the place is in the phone bar and footer
 R3b.2 pass: price 160 shekels an hour sits in the bar beside the button
 R3b.3 pass: one solid action per screen: the bar button and phone bar repeat the same action
-R3h.1 pass: site OPENING passed: the drawer pieces slide into place as you scroll
+R3h.1 pass: site OPENING passed (25 Oct): her empty cupboard fills the screen under her deep green, and the drawer pieces slide into place as you scroll
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.4 screens on a laptop and a phone (was 2.7), 60 fps (median 16.7 ms, no frame over 50 ms); the drawer pieces land on an empty cupboard from her own pantry photo under her deep green (gen/ground-brief.md), no longer a blurred copy of the same drawer; every piece starts whole inside the screen, below the top bar; the cupboard loads first
 R3n.1 pass: her drawer photo is the largest picture of the first screen at both sizes, at most 1.2x its size; on phones the words fill the space above it and the photo sits at the bottom, so no empty dark band is left under it as the opening scrolls away
 R3n.2 pass: her tidy drawer pieces fall into her messy drawer
 R3n.3 pass: room choice swaps both photos; hours on the book page fill the tray and set the total; check-motion passed
@@ -51,7 +52,6 @@ R3h.5 n/a: no film in this site: the opening is built in code from their own pho
 R3h.7 n/a: no film in this site: the opening is built in code from their own photos
 R3h.8 n/a: no film in this site: the opening is built in code from their own photos
 R3h.11 n/a: no film or generated still set added in this rework; no new generation
-R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at at five points): lengthened 25 Oct to 310svh (was 270svh, 2.7 screens): 3.1 screens on both, 60 fps with no frame over 50 ms (an earlier laptop run, with other jobs on the machine, had 7 to 12.5%); the tidy pieces land on her messy drawer photo, which is the concept itself; whole; check-site clean
 R3h.13 n/a: no film in this site: the opening is built in code from their own photos
 R3h.14 n/a: no film in this site: the opening is built in code from their own photos
 R3h.17 n/a: no film in this site: the opening is built in code from their own photos

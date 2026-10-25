@@ -155,8 +155,10 @@
      morning comes. Multiply, so it darkens as it warms. Opacity only. */
   .ember {
     position: absolute; inset: 0; pointer-events: none;
-    background: #B4622A; mix-blend-mode: multiply;
-    opacity: calc(0.46 - var(--dawn) * 0.36);
+    /* A plain warm-dark wash, not a multiply blend: a full-screen blend over the
+       moving photo cost 30-50 ms a frame on a laptop (R3h.20, 25 Oct 2026). */
+    background: #5A2A12;
+    opacity: calc(0.34 - var(--dawn) * 0.27);
   }
   .hero .sc-copy--lead { bottom: clamp(3rem, 12vh, 9rem); max-width: min(44rem, 78vw); }
   .hero h1 { max-width: 6.6em; }
@@ -591,7 +593,7 @@
 <main id="top">
 
   <!-- 1 · STILLNESS · 04:00 -->
-  <section class="hero night" data-sc-act="pin" data-sc-span="3.1" data-sc-dwell="0.3" aria-label="Lechem Emek">
+  <section class="hero night" data-sc-act="pin" data-sc-span="3.3" data-sc-dwell="0.3" aria-label="Lechem Emek">
     <div data-sc-stage>
       <img class="hero__img" src="assets/hero.jpg" width="2000" height="1116" alt="A baker sliding a wooden peel of sourdough loaves out of a stone oven at dawn">
       <div class="ember" aria-hidden="true"></div>

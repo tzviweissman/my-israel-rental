@@ -226,15 +226,23 @@ SKY_JS = '''<script>
   if (reduce) { draw(1); line.style.opacity = 1; line.style.transform = 'none'; return; }  // motion off: the question stays in the page for readers, out of sight (the end card is the whole page)
   var tick = 0;
   function frame() { tick = 0; var r = sec.getBoundingClientRect(), span = sec.offsetHeight - innerHeight; draw(clamp(-r.top / Math.max(1, span))); }
-  addEventListener('scroll', function () { if (!tick) tick = requestAnimationFrame(frame); }, { passive: true });
-  (function loop() { frame(); requestAnimationFrame(loop); })();
+  // The sky film rests while the page is being scrolled and drifts again when it stops: a full-screen
+  // film and the moving window together held the opening at 20-30 fps on a laptop (R3h.20, 25 Oct 2026).
+  var rest = 0;
+  addEventListener('scroll', function () {
+    if (!tick) tick = requestAnimationFrame(frame);
+    if (!v.paused) v.pause(); clearTimeout(rest);
+    rest = setTimeout(function () { if (sec.getBoundingClientRect().bottom > 0) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } }, 300);
+  }, { passive: true });
+  // the puffs breathe only while the opening is on screen
+  (function loop() { if (sec.getBoundingClientRect().bottom > 0) frame(); requestAnimationFrame(loop); })();
 })();
 </script>
 '''
 
 SKY_CSS = '''
 /* ── the walk in the clouds (CONCEPT.md) ── */
-.sky { position: relative; height: 300svh; background: #E9D7E4; }
+.sky { position: relative; height: 340svh; background: #E9D7E4; }  /* at least 3 screens (R3h.20) */
 .sky-stage { position: sticky; top: 68px; height: calc(100svh - 68px); overflow: hidden; isolation: isolate; color: #fff; }
 .sky-v { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: -2; }
 .sky-shade { position: absolute; inset: 0; z-index: -1; background: radial-gradient(ellipse at 50% 30%, rgb(42 20 11 / .28), transparent 65%); }

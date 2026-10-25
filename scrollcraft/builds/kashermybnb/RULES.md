@@ -41,7 +41,7 @@ R3b.3 pass: one solid action per screen: the bar button and phone bar repeat the
 R3h.1 pass: site OPENING passed: the kitchen walk moves the camera to each part as you scroll
 R3n.1 pass: the kitchen photo fills the whole first screen at 1440x900 and 390x844
 R3n.2 pass: the walk: a camera visits oven, microwave, stovetop, countertops, sink and hot plate and ticks each
-R3n.3 pass: the booking steps change the total and the review; the home opening itself responds to scroll only
+R3n.3 pass: the booking steps change the total and the review; the home opening itself responds to scroll only; 25 Oct: the order list's kitchen and pots thumbnails load from the script's own folder, so they show on the live /business/ page too (check-published found them pointing at /business/assets/)
 R3n.4 pass: next to Truck'N Roll and Aventura (services study): ours opens on a real kitchen and names the job in line one, not plainly weaker
 R3n.5 pass: "you land on a kitchen and a camera walks round it ticking off each part they kasher"
 R3g.15 pass: check-fits: no photo over 1.35x; the kitchen picture is a generated setting and is not called their premises
@@ -116,7 +116,7 @@ R3c.13 pass: nothing cut off in screenshots at 1440x900 and 390x844 of every new
 R3c.14 pass: the pots picture is a cut-out on a plain blue ground, looked at: no fringe
 R5b.3 pass: no text over a picture except the opening, which has a soft wash; readable could not be run, so by eye at 1440x900 and 390x844
 R3e.8 pass: readable (reduced to 1440x900 and 390x844, 8 scroll stops, because the full six sizes crash the renderer on this machine) said every word clear on each page
-R3s.24 pass: site MEDIA flags only the four pinned-walk items with motion off, a checker limit: it scrolls the held scene and judges the held copy hidden; reduced-motion screenshots at 0, 17, 50 and 86 percent show the headline at the top and a card at each station
+R3s.24 pass: site MEDIA clean (25 Oct): with motion off the walk is not held; the kitchen and the opening words stay as the first screen and every station card and the Ready panel sit open under it as a list (looked at 1280x800 and 390x844)
 R3p.6 pass: check-fits passed on every page at the six sizes
 R3o.5 pass: site GLYPH passed
 
@@ -172,7 +172,7 @@ R3e.18 n/a: no ambient video
 R3a.2 pass: nothing moves in the new sections
 R3a.3 pass: the marks on the kitchen photo are measured and unchanged
 R3a.4 pass: the held kitchen walk was unchanged; check-fits passed at 1280x650
-R3a.5 pass: reduced motion shows the opening at its first state (looked at)
+R3a.5 pass: reduced motion shows the opening at its first state, then every station as a plain list (looked at, 25 Oct)
 R3s.2 pass: site SHIFT passed, images have width and height
 R3s.1 pass: site STATE passed
 R3s.8 pass: buttons over the opening sit in a white card or solid fill

@@ -42,7 +42,7 @@ R3h.1 pass: check-site OPENING on the home page and looked at it: her photo fill
 R3h.20 n/a: measured 25 Oct (check-site's SMOOTH/SLOW measure at 1440x900 and 390x844): the opening is not scroll-driven (no sticky stage); it is her own hands photo full screen with the words and the shade swatches on a soft shade, nothing to scroll through
 R3n.1 pass: first screen 1440x900 and 390x844: her close-up of nails fills the whole first screen
 R3n.2 pass: signature: tap a shade and her photo of that colour opens out from the chip across the opening; only a nail artist who shoots her work by colour has it
-R3n.3 pass: tapping a shade changes the photo, the page tint, the name and the booking link (check-motion: every choice switches smoothly)
+R3n.3 pass: tapping a shade changes the photo, the page tint, the name and the booking link (check-motion: every choice switches smoothly); 25 Oct: the tint band is stronger (38%, was 16%) and starts higher (90% of the opening, was 78%) so the page plainly turns the tapped colour on every shade, bubblegum included; the top nail in each photo stays clear
 R3n.4 pass: first screens put next to docs/inspo/awwwards-anatomy-2026-10-22/shops/lx-odyssee-sheet.webp: hers opens on a close-up of the work like Odyssee opens on skin, then settles into cream; not plainly weaker
 R3n.5 pass: "you land and her photo of nails in the colour you tap opens across the screen" is about the business, in the first five seconds and the first scroll
 R3g.15 pass: check-fits (no photo shown over 1.35x its size) on every page, and looked at the first screen at 1440x900: her own photos, cropped from the originals in src/owner
