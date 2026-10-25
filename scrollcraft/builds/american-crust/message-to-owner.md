@@ -6,7 +6,7 @@ Your page is built: a home page with both doughs and their prices at the top, a 
 
 1. How far ahead should customers order (the same day, one day, two days)? Which days do you deliver?
 2. Is there a delivery fee, or is delivery in Ramat Eshkol free? What about Ramot and RBS?
-3. Your flyers say the dough is now available in Express Market (in Geula), Arzai Makolets and Good Market (on Paran), so we show them as shops that stock it. Can a customer also order on the page and collect the order from one of them? If yes, from which shop, and from what time? Until you tell us, the order form offers delivery only.
+3. Your flyers say the dough is now available in Express Market (in Geula), Arzai Makolets and Good Market (on Paran), so we show them as shops that stock it. Can a customer also order on the page and collect the order from one of them? If yes, from which shop, and from what time? ANSWERED 25 Oct (via Tzvi): pickup is in Sanhedria, Jerusalem, and we send the exact address on WhatsApp. The site now offers delivery or pickup in Sanhedria. Still open: whether the shops (Geula, Paran, Arzai) are pickup points: not asked again, not shown.
 4. Which other areas do you deliver to besides Ramot and RBS, so we can name them?
 5. Is there a street address or a closing day for Arzai Makolets that we can show beside the name?
 
