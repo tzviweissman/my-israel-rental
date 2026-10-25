@@ -84,9 +84,9 @@
     var img = p.image ? String(p.image).replace('/upload/f_auto,q_auto/', '/upload/f_auto,q_auto,w_800/') : '';
     var dims = p.cm ? '<span class="dims" style="background:#fff;padding:5px 9px;border-radius:999px">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span>' : '';
     var stage = img
-      ? '<div class="stage"><img src="' + BB.esc(img) + '" alt="' + BB.esc(p.short) + '" width="800" height="533" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">' + dims + '</div>'
+      ? '<div class="stage"><img src="' + BB.esc(img) + '" alt="' + BB.esc(p.short) + '" width="800" height="533" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">' + dims + '</div>'
       : p.cm
-      ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815" loading="lazy"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
+      ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
       : '<div class="stage"><span style="font-weight:700;color:var(--gold-text)">Size on request</span></div>';
     return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + BB.dealHtml(p) + stage
       + '<div class="body"><span class="line">' + BB.LINES[p.line] + '</span><h3>' + BB.esc(p.short) + '</h3>'
