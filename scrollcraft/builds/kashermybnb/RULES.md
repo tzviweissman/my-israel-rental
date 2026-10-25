@@ -64,9 +64,9 @@ R3g.1 pass: style sheet in CONCEPT.md and site.css; the new sections use the exi
 R3g.3 pass: accent only on the button and the one emphasised word; prices in ink, checked in the services panels
 R3g.7 pass: one closing signature: the big "Settle in, ready to use." line
 R3g.11 pass: Bricolage Grotesque and Instrument Sans, Google fonts, unchanged
-R3p.3 n/a: check-fingerprints finds a clash only with the same business's own live page (same logo colours and face by design); no other site shares its heading face or colours
+R3p.3 pass: ran check-fingerprints 25 Oct: "kashermybnb-kashering-services: different from all 11 other pages" (checked under its published slug)
 R3p.5 pass: touch: the station index in the bar ticks as the camera visits each part
-R3q.1 pass: CONCEPT.md has Category: service, ideas, Own idea, Chosen, wow gate and Effects
+R3q.1 pass: ran check-concept 25 Oct: concept ready for kashermybnb (Category: service, ideas, Own idea, Mobbin and 21st lines, wow gate, effects)
 R5a.7 pass: one signature (the walk) and one peak ("Ready to use")
 R9.1 pass: the signature uses their own photos
 R3f.2 pass: effect budget unchanged by this rework; no new motion added
@@ -195,4 +195,4 @@ R3a.8 pass: no dot-separated line of items
 ## 9. Finish
 R3r.3 pass: check-rules passes; site, fits and motion run after the last edit
 R3r.4 pass: no new Tzvi correction in this rework beyond rule 3t, already in the checklist
-
+R8.7 pass (recorded after the fact, 25 Oct): the one generated image is the kitchen setting; gen/kitchen-brief.md says what is known (Higgsfield soul, prompt not kept, no brief existed before, no photo of theirs to compare with because it is a setting, not their product); looked at assets/kitchen.webp on 25 Oct: empty kitchen, no people, no text

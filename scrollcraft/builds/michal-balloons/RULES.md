@@ -57,9 +57,9 @@ R3g.1 pass: style sheet is in the page comment (sage, gold, blush, Rubik, one ra
 R3g.3 pass: gold is the one emphasised word per heading; buttons are sage; no prices shown
 R3g.7 pass: the balloon name is the one closing signature
 R3g.11 pass: Rubik, Latin and Hebrew, unchanged
-R3p.3 n/a: not passable by me. check-fingerprints reports a clash that existed before this rework and fingerprints.json is off limits in this task; Tzvi to decide (named in the reply)
+R3p.3 pass: node scripts/check-fingerprints.mjs scrollcraft/builds/michal-balloons printed "michal-balloons: different from all 11 other pages" on 25 Oct
 R3p.5 pass: the name drawn in balloons that scatter and pop
-R3q.1 n/a: CONCEPT.md written now; the Not alike line cannot be pasted because check-fingerprints clashes (see R3p.3); needs Tzvi
+R3q.1 pass: node scripts/check-concept.mjs printed "concept ready for michal-balloons" on 25 Oct
 R5a.7 pass: signature is the arch opening; peak is the balloon name
 R9.1 pass: the held opening uses her own style of arch
 R3f.2 pass: signature = arch opening; accents = work filter, occasion columns reveal, balloon name; quiet touches = hovers
@@ -176,3 +176,4 @@ R3a.7 pass: phone screenshots with touch emulation
 R3a.8 n/a: no dot-separated lines
 R3r.3 pass: check-site, check-fits, check-motion, cutoff clean after the last edit; readable and clipped limited as named
 R3r.4 pass: no new Tzvi correction in this task
+R8.7 pass (recorded after the fact, 25 Oct): the opening film (assets/arrive.mp4) was generated on 14 to 15 Oct 2026 and no brief with a reference crop was written first, so this is a record made now, in gen/arrive-brief.md with a side-by-side at gen/arrive-compare.jpg (her real school arch beside the last frame). I looked at it and the match is only partial: both are a balloon arch on a wall, but hers is bright primary colours with pencil shapes and the generated one is sage, blush and gold, tidier and more polished than her real work. The page says the opening is not her premises. Whether that palette is acceptable is for Tzvi to decide.

@@ -10,6 +10,7 @@ Reworked 22 Oct 2026 to the food-shop pattern of page rules 3t: after the openin
 - **A list where the name leads and a picture shows beside it** (docs/inspo/awwwards-categories-2026-10-18/signal-a-studio-1-hover-image-list.webp): big names on thin rules with a picture. For her: the four sizes as an index list, the price on a dotted line from the name, like a market stall's price board.
 - **Many small photo slices that make one picture** (docs/inspo/awwwards-categories-2026-10-18/maria-vasilyeva-1-film-strip-letters.webp): Maria Vasilyeva cuts one picture into strips. For her: the photo of each platter opens through seven vertical slats, like blinds, each slat swinging open in turn.
 - Own: her logo line "Fresh, beautiful, made with love" and her own Extra large platter, which is laid out in long rows of colour (dark grapes, watermelon, melon, dates, pomegranate, kiwi, green grapes). The row of colour is her signature, so the slats that open on load are those colours, and the scroll bar across the top is a strip cut from that very platter.
+- Mobbin search 25 Oct, after the build, "fruit platter catering product sizes section": Palmer Dinnerware (https://mobbin.com/sites/sections/16393456-af1e-48d1-80f4-2202b25075df: round plates growing in size in a grid) and sweetgreen (https://mobbin.com/sites/sections/ef00c77c-841c-4e12-b207-df44ce97a57a: round bowls from above, name, Order now). Both show sizes side by side in one grid; ours shows one size at a time with the price (Closca idea), so we differ from them, the size steps are the same idea.
 
 ## Chosen
 The first and the fourth, driven by her own rows of colour. The page opens on seven bands of fruit colour that swing open like blinds onto her round Small platter, full height on the right half of the screen. As you scroll, the stage stays put and the photo changes through the same slats to Medium, Large and Extra large, with the name and price in a card on the photo and S, M, L, XL buttons to jump. The same photo-and-slats stage is the shop, and the tiles under it change it too. It is hers because the slats are her platter's colours, every picture is her own photo and the price card is her own list (Small 300, Medium 400, Large 500, Extra large 850).
@@ -20,7 +21,7 @@ Note: no photo of the Medium platter is shown. The one supplied has another busi
 1. Strongest real photo, big: her round Small platter fills the right 58% of the screen at full height on a laptop, and 50% of the height on a phone.
 2. Signature moment from her own thing: you scroll and her four platters, Small to Extra large, change in one frame through slats in the colours of her long platter, with the price on each.
 3. The choice changes the page: scrolling, or tapping S, M, L or XL, changes the photo, the name and the price; the same choice carries into the shop and the basket.
-4. Side by side: Closca's one-product stage and Sunbeam's photo strip (pictures above); ours is the same one-at-a-time stage with her own photo at 58% of the screen.
+4. Side by side: Closca's one-product stage and Sunbeam's photo strip (pictures above); ours is the same one-at-a-time stage with her own photo at 58% of the screen. Sources (recorded 25 Oct): closest Mobbin reference https://mobbin.com/sites/sections/16393456-af1e-48d1-80f4-2202b25075df; Inspo docs/inspo/product-pages-2026-10-20/closca-2-crossfade-to-next-product.webp.
 5. One sentence: you land on bands of fruit colour that swing open onto her platter, and as you scroll her four sizes follow, each with its price.
 
 ## Effects
@@ -36,4 +37,5 @@ Note: no photo of the Medium platter is shown. The one supplied has another busi
 - other: X28, a small photo of the platter flies in an arc to the basket (from 21st "Add to basket", Motion examples)
 
 ## Not alike
-ls-fruit-platter: different from all 9 other pages
+ls-fruit-platter: different from all 12 other pages
+

@@ -64,7 +64,7 @@ R3g.1 pass: style sheet in CONCEPT.md and site.css; the new sections use the exi
 R3g.3 pass: accent only on buttons; the price on the tape is in ink
 R3g.7 pass: one closing signature: the giant "Noa Levi"
 R3g.11 pass: Newsreader, Hanken Grotesk and Heebo, unchanged
-R3p.3 pass: check-fingerprints: different from all 9 other pages
+R3p.3 pass: ran check-fingerprints 25 Oct: noa-levi-home-styling: different from all 12 other pages
 R3p.5 pass: touch: the hours fill a storage tray on the book page
 R3q.1 pass: CONCEPT.md complete, Category line added
 R5a.7 pass: one signature (the drawer sorting)
@@ -195,4 +195,4 @@ R3a.8 pass: no dot-separated line of items
 ## 9. Finish
 R3r.3 pass: check-rules passes; site, fits and motion run after the last edit
 R3r.4 pass: no new Tzvi correction in this rework beyond rule 3t, already in the checklist
-
+R8.7 n/a: nothing was generated: RULES R8.2/R8.3 say all photos are hers; no gen/ brief files, no generation scripts (gen/ holds build.py and own.css only), BRIEF/CONCEPT name no generation tool; git log shows no generation commit

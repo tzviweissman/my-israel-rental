@@ -57,9 +57,9 @@ R3g.1 pass: style sheet is her flyer (black, hot pink, Anton and DM Sans), uncha
 R3g.3 pass: pink is on the main button, the one emphasised word per heading and the bar; prices (60 shekels) are in ink or white. The ask-lines are grey
 R3g.7 pass: closing line "A stronger, healthier you" in the footer is the one closing line
 R3g.11 pass: Anton, DM Sans and Heebo, unchanged from the approved build
-R3p.3 n/a: not passable by me. check-fingerprints reports a clash that existed before this rework and fingerprints.json is off limits in this task; Tzvi to decide (named in the reply)
+R3p.3 pass: node scripts/check-fingerprints.mjs scrollcraft/builds/michal-yodaiken printed "michal-yodaiken: different from all 11 other pages" on 25 Oct
 R3p.5 pass: the session clock
-R3q.1 n/a: CONCEPT.md written now; the Not alike line cannot be pasted because check-fingerprints clashes (see R3p.3); needs Tzvi
+R3q.1 pass: node scripts/check-concept.mjs printed "concept ready for michal-yodaiken" on 25 Oct
 R5a.7 pass: one signature (the session clock), the peak is the bar turning pink at 30:00
 R9.1 n/a: no scroll-scene section on this page
 R3f.2 pass: signature = clock; accents = pink bar at the end, offer cards, FAQ; quiet touches = hover fills on the buttons
@@ -176,3 +176,4 @@ R3a.7 pass: phone screenshots were taken with touch emulation
 R3a.8 n/a: no dot-separated lines
 R3r.3 pass: run after the last edit: check-site, check-fits, check-motion clean; readable crashed (named above)
 R3r.4 pass: no new Tzvi correction in this task
+R8.7 pass (recorded after the fact, 25 Oct): three settings (home, gym, online) were generated on 7 Oct 2026 and no brief was written first, so this is a record made now, in gen/settings-brief.md with a side-by-side at gen/settings-compare.jpg (her flyer crop beside the three results). I looked at it: the pink dumbbells, dark ground, mat, band and bottle carry over; the pink is hotter magenta than her pastel flyer and the rooms are darker. No person is shown and the page does not call them her premises. Prompts were not kept.

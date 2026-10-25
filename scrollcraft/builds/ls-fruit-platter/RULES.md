@@ -64,7 +64,7 @@ R3g.1 pass: CONCEPT.md and the tokens at the top of site.css: ink, ground, one a
 R3g.3 pass: the accent is on the main button only; prices, the stroke under the heading word and the step numerals are in the ink colour
 R3g.7 pass: the footer holds one closing signature at most, below the order path
 R3g.11 pass: the two faces set in the page head and css; checked against reference/design-rules.md
-R3p.3 pass: check-fingerprints: ls-fruit-platter is different from all 9 other pages
+R3p.3 pass: ran check-fingerprints 25 Oct: ls-fruit-platter: different from all 12 other pages
 R3p.5 pass: the scroll bar across the top is cut from her Extra large platter
 R3q.1 pass: check-concept: concept ready for ls-fruit-platter
 R5a.7 pass: one signature: the burst opening; the peak is the four card row
@@ -195,3 +195,4 @@ R3a.8 pass: no dotted line of items wraps at 360x640
 ## 9. Finish
 R3r.3 pass: check-rules passed after the last edit; every script was re-run after the last change to the pages
 R3r.4 pass: no new correction from Tzvi since the last build is missing from this file
+R8.7 pass (recorded after the fact, 25 Oct): gen/platters-brief.md with gen/platters-compare.jpg (the four platter shots beside her photos) and gen/opening-film-brief.md with gen/opening-film-compare.jpg (her Large board beside four frames of the opening film); both looked at on 25 Oct: the fruit and boards match hers, grounds and added props differ and are written down; prompts and model were not kept

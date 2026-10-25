@@ -44,7 +44,7 @@ R3n.2 pass: the ring: raw bagel dough drops in as Boil lands and their baked eve
 R3n.3 pass: choosing the pizza dough turns the whole shop stage from mustard to black with its own photo, name, price and makes line (check-motion passes); the basket text and phone bar change with what is added
 R3n.4 pass: compared the first screen with Best Bean Best Cup (docs/inspo/awwwards-anatomy-2026-10-22/food/bestbean-colour-per-product.webp) and the Mobbin Touchy Coffee shop cards: same buy-from-the-top pattern, ours adds an opening event; not plainly weaker
 R3n.5 pass: you land and Boil. Bake. Brag. drop in word by word while their raw dough becomes a baked bagel in a ring; checked as frames every 150 ms for 4 seconds: raw dough ring with ripples, wipe to baked, settle, line fades in
-R3g.15 pass: the opening uses their own photos at their own size (check-fits: no photo over 1.35x); the ring crop of the flyer render is shown at about 0.8x and the baked photo at 0.6x; nothing generated
+R3g.15 pass: the opening uses their own photos at their own size (check-fits: no photo over 1.35x); the ring crop of the flyer render is shown at about 0.8x and the baked photo at 0.6x; the product photos in the opening are theirs; the film itself is generated (R8.7)
 R3h.2 pass: walked at scroll 0, 0.2, 0.48, 0.75 and 1: their raw dough rings boil, bake on the tray, and end as the everything bagels on the board; the line, the prices and Order your dough stay on screen throughout
 R3h.3 pass: 1680 wide frames on laptop and 720x1280 on a phone, drawn to cover the screen; looked at on 1440x900 and 390x844 at five scroll points; not shrunk, masked or in a column
 R3h.5 pass: the chapter words are Boil. / Bake. / Brag. (one word each), at the left edge on a soft left shade, at most 10svh a line so the three stay under a third of the screen height (6.5rem cap, 15vw on a phone); looked at every chapter: they never cover the pot, the tray or the bagels
@@ -195,3 +195,4 @@ R3a.8 pass: no dotted line of items; checked the small label and facts at 360x64
 ## 9. Finish
 R3r.3 pass: check-rules passes except R3r.2; every script passed on every page after the last edit
 R3r.4 pass: the only new rule during this build (every order saved before WhatsApp opens) is already in the checklist as R3k.9 with check-site SAVE; no other correction was received
+R8.7 pass (recorded after the fact): the hero shots (23 Oct) and the opening film (22 Oct) came before this rule (24 Oct); gen/film-brief.md records references, traits kept, what changed, model and job ids, and that prompts were not kept; gen/hero-compare.jpg and gen/film-compare.jpg are the side-by-sides, looked at 25 Oct, differences written there
