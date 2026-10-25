@@ -32,8 +32,11 @@ for (const f of files) {
   for (const m of text.matchAll(/(['"])(\/pages\/[^'"\s]+)\1/g)) urls.push(m[2]);
   for (const u of urls) {
     if (u.startsWith(BASE)) {
-      if (/'\s*\+|\$\{/.test(u)) { problems.push(`${f}: a script-built address was prefixed with ${BASE}: ${u.slice(0, 90)}`); continue; }
-      const file = decodeURIComponent(u.slice(BASE.length).split(/[?#]/)[0]);
+      const rest = u.slice(BASE.length);
+      // the folder glued straight onto a script piece (src="' + url + '") breaks; "assets/bun-' + c + '.webp" is fine
+      if (/^\s*(?:'|\$\{)/.test(rest)) { problems.push(`${f}: a script-built address was prefixed with ${BASE}: ${u.slice(0, 90)}`); continue; }
+      if (/'\s*\+|\$\{/.test(rest)) continue;  // a path the page's script completes at run time
+      const file = decodeURIComponent(rest.split(/[?#]/)[0]);
       if (file && !/\/$/.test(file) && !fs.existsSync(path.join(OUT, file))) problems.push(`${f}: ${u.split('?')[0]} is not in the published folder`);
     } else if (/^(?:\.\/)?assets\//.test(u)) {
       problems.push(`${f}: "${u}" was left relative; on the live site it loads from /business/ and breaks`);
