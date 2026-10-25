@@ -39,6 +39,7 @@ R3b.1 pass: first screen answers what (gel nails and nail art), where (Romema, J
 R3b.2 pass: the price (gel from ₪90) and the four years touch the button on the first screen; no kosher claim
 R3b.3 pass: one solid white button in the hero, the header button is an outline; service rows use outline buttons; pair sections one solid each, looked at while scrolling
 R3h.1 pass: check-site OPENING on the home page and looked at it: her photo fills the screen and it is an event, the next shade spreads over it every few seconds
+R3h.20 n/a: measured 25 Oct (check-site's SMOOTH/SLOW measure at 1440x900 and 390x844): the opening is not scroll-driven (no sticky stage); it is her own hands photo full screen with the words and the shade swatches on a soft shade, nothing to scroll through
 R3n.1 pass: first screen 1440x900 and 390x844: her close-up of nails fills the whole first screen
 R3n.2 pass: signature: tap a shade and her photo of that colour opens out from the chip across the opening; only a nail artist who shoots her work by colour has it
 R3n.3 pass: tapping a shade changes the photo, the page tint, the name and the booking link (check-motion: every choice switches smoothly)

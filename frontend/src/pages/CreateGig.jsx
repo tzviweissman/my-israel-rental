@@ -44,6 +44,7 @@ import { normalizeWhatsAppNumber, hasValidWhatsApp } from '../utils/whatsappLink
 import { productPhotos } from '../utils/productPhotos';
 import SizeFields, { sizeValue } from '../components/marketplace/SizeFields';
 import PhoneInput from '../components/common/PhoneInput';
+import { apiErrorMessage } from '../utils/apiError';
 import { useTranslation } from 'react-i18next';
 
 // ---- Gig type registry ------------------------------------------------------
@@ -416,7 +417,7 @@ const CreateGig = () => {
       toast.success(t('wizard.extractDone', { count: made.length, defaultValue: '{{count}} products read. Check them, then add a photo to each.' }));
       return true;
     } catch (err) {
-      toast.error(err?.response?.data?.detail || t('wizard.extractFailed', 'Could not read that.'), { duration: 8000 });
+      toast.error(apiErrorMessage(err, t('wizard.extractFailed', 'Could not read that.'), t), { duration: 8000 });
       return false;
     } finally { setExtracting(false); }
   };
@@ -684,7 +685,8 @@ const CreateGig = () => {
       // starts it only if this account has never taken it, on any device.
       navigate(firstBusiness ? '/dashboard?tour=first' : `/businesses/${data.id}`);
     } catch (err) {
-      toast.error(err.response?.data?.detail || t('wizard.publishFailed', 'Could not publish. Please try again.'));
+      // apiErrorMessage: a refused field comes back as a list, which a toast cannot show (salon, 25 Oct 2026).
+      toast.error(apiErrorMessage(err, t('wizard.publishFailed', 'Could not publish. Please try again.'), t), { duration: 10000 });
     } finally {
       setSaving(false);
     }

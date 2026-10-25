@@ -12,7 +12,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Any, Optional
 
 from fastapi import HTTPException
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from routes.deps import db, logger
 
@@ -509,6 +509,39 @@ TOP_RATED_MIN_COUNT = 10
 
 # --------------------------- Models --------------------------- #
 
+def clean_weekly(v: Any) -> Any:
+    """Hours as a browser can really send them: "9:00" and "09:00:00" become
+    "09:00", and a window with a time left blank is dropped. One cleared
+    time box used to refuse the whole listing at Publish, with nothing on
+    screen saying why (a salon, 25 Oct 2026). Anything else passes through
+    for the model to judge."""
+    if not isinstance(v, dict):
+        return v
+    def hhmm(t: Any) -> Optional[str]:
+        m = re.match(r"^\s*(\d{1,2}):(\d{2})(?::\d{2})?\s*$", str(t or ""))
+        return f"{int(m.group(1)):02d}:{m.group(2)}" if m and int(m.group(1)) < 24 else None
+    out = {}
+    for day, wins in v.items():
+        if not isinstance(wins, list):
+            out[day] = wins
+            continue
+        kept = []
+        for w in wins:
+            if isinstance(w, dict):
+                s, e = hhmm(w.get("start")), hhmm(w.get("end"))
+                if s and e:
+                    kept.append({**w, "start": s, "end": e})
+            else:
+                kept.append(w)
+        out[day] = kept
+    return out
+
+
+def blank_to_none(v: Any) -> Any:
+    """An emptied number box arrives as "" and is "not given", not an error."""
+    return None if isinstance(v, str) and not v.strip() else v
+
+
 class PricingTier(BaseModel):
     name: str = "Basic"            # Barber "Haircut" / logo "Basic package"
     price: float                   # ILS by default
@@ -526,6 +559,8 @@ class PricingTier(BaseModel):
     # tour) attach photos specific to each option instead of dumping
     # everything into the gig-wide gallery.
     images: list[str] = Field(default_factory=list)
+
+    _blank_ints = field_validator("delivery_days", "duration_minutes", mode="before")(blank_to_none)
 
 
 class ProductOption(BaseModel):
@@ -608,6 +643,7 @@ class WeeklyWindow(BaseModel):
     end: str = Field(..., pattern=r"^\d{2}:\d{2}$")
 
 
+
 # Empty windows list per day = closed. Providers only fill days they work.
 _DEFAULT_WEEKLY: dict[str, list[WeeklyWindow]] = {
     "mon": [], "tue": [], "wed": [], "thu": [], "fri": [], "sat": [], "sun": [],
@@ -678,6 +714,8 @@ class GigIn(BaseModel):
     # is a dict keyed by weekday abbreviation → list of open windows.
     weekly_availability: Optional[dict[str, list[WeeklyWindow]]] = None
     slot_duration_minutes: Optional[int] = 30
+    _clean_weekly = field_validator("weekly_availability", mode="before")(clean_weekly)
+    _blank_slot = field_validator("slot_duration_minutes", mode="before")(lambda v: 30 if blank_to_none(v) is None else v)
     # Appointment-only: who does it (empty: the business as one calendar),
     # and the weeks after a done appointment to suggest booking again
     # (appointment_extras.py; None: off).
@@ -735,6 +773,8 @@ class GigPatch(BaseModel):
     products: Optional[list[ProductItem]] = None
     weekly_availability: Optional[dict[str, list[WeeklyWindow]]] = None
     slot_duration_minutes: Optional[int] = None
+    _clean_weekly = field_validator("weekly_availability", mode="before")(clean_weekly)
+    _blank_slot = field_validator("slot_duration_minutes", mode="before")(blank_to_none)
     team: Optional[list[TeamMember]] = Field(None, max_length=20)
     rebook_after_weeks: Optional[int] = Field(None, ge=1, le=52)
     # A deposit that holds an appointment, paid to the business directly

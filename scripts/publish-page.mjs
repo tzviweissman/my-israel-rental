@@ -95,7 +95,14 @@ const CHECK_ONLY = process.argv.includes('--check');
     c.stdout.on('data', (d) => { out += d; }); c.stderr.on('data', (d) => { out += d; }); c.on('exit', (code) => r({ code, out })); });
   // one after another (check-motion times frames, so it must not share the machine), never stopping early
   const results = [];
-  for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly']]) results.push({ why, ...(await run(script)) });
+  // A failure that is only a timing measure (SMOOTH frame rate, a FLASH on two quick taps) is run once more before it
+  // counts: on a computer running several sessions' browsers these tripped on pages that pass alone (25 Oct 2026).
+  const onlyTiming = (out) => { const bad = out.split('\n').filter((l) => /^[A-Z]{4,}\s/.test(l)); return bad.length > 0 && bad.every((l) => /^(SMOOTH|FLASH)\s/.test(l)); };
+  for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly']]) {
+    let r = await run(script);
+    if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }
+    results.push({ why, ...r });
+  }
   server.close();
   for (const r of results) if (r.code !== 0) problems.push(`${r.why}:\n${r.out.split('\n').filter((l) => l.trim() && !/: checked$|^\S+: \d+ choices tapped/.test(l)).join('\n')}`);
   if (problems.length) {
@@ -109,7 +116,9 @@ fs.rmSync(OUT, { recursive: true, force: true });
 fs.mkdirSync(OUT, { recursive: true });
 
 // %23 is an escaped # (a fragment inside an inline SVG data URL, Bun Intended 9 Oct 2026).
-const relative = (u) => u && !/^(?:[a-z][a-z0-9+.-]*:|\/|#|%23|\?)/i.test(u);
+// A value starting with ' or ${ is a script building the attribute (src="' + url + '"), not a path: prefixing it
+// pointed every Blazin' Boards card photo at /pages/... (25 Oct 2026).
+const relative = (u) => u && !/^(?:[a-z][a-z0-9+.-]*:|\/|#|%23|\?|'|\$\{)/i.test(u);
 // The site's own pages (a hand-built page can be a small website, Tzvi
 // 12 Oct 2026): a link to "kitchen.html" anywhere, attribute or script
 // string, becomes the clean /business/<slug>/kitchen that server.js answers.
@@ -123,6 +132,12 @@ function rewrite(html) {
     // A link back to the page itself goes to the business's address.
     .replace(/(\shref=")(?:\.\/)?index\.html(#[^"]*)?"/g, (m, a, h) => `${a}/business/${slug}${h || ''}"`)
     .replace(/(\s(?:src|href|poster)=")([^"]+)"/g, (m, a, u) => (relative(u) ? `${a}${BASE}${withStamp(u)}"` : m))
+    // srcset and a preload's imagesrcset hold several addresses ("a.webp 1000w, b.webp 1510w"): each one is
+    // rewritten. Left relative, they pointed at /business/assets/ and Blazin' Boards' board vanished (25 Oct 2026).
+    .replace(/(\s(?:srcset|imagesrcset)=")([^"]+)"/g, (m, a, list) => `${a}${list.split(',').map((part) => {
+      const [u, ...rest] = part.trim().split(/\s+/);
+      return [relative(u) ? `${BASE}${withStamp(u)}` : u, ...rest].join(' ');
+    }).join(', ')}"`)
     // Only a real file path (it has an extension): a script's own
     // `function url(i)` matched this once and broke The Brown Box's film
     // (17 Oct 2026).
@@ -222,6 +237,15 @@ const site = ['index', ...ORDERED].map((name) => {
 });
 fs.writeFileSync(path.join(OUT, 'site.json'), `${JSON.stringify(site, null, 2)}\n`);
 
+// The finished files, as the live site will serve them: every address of this site must load (25 Oct 2026: two
+// rewrite mistakes broke Blazin' Boards' pictures live, because every other check ran before the rewrite).
+{
+  const { spawnSync } = await import('node:child_process');
+  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-published.mjs'), slug], { cwd: ROOT, encoding: 'utf8' });
+  process.stdout.write(c.stdout || '');
+  if (c.status !== 0) { console.error(c.stderr || ''); console.error(`Not published: ${slug}'s finished files have broken addresses (above). frontend/public/pages/${slug} was written but not recorded, so the commit check refuses it until this is fixed.`); process.exit(1); }
+}
+
 const listFile = path.join(ROOT, 'frontend', 'public', 'pages', 'pages.json');
 let list = [];
 try { list = JSON.parse(fs.readFileSync(listFile, 'utf8')); } catch { /* first page */ }
@@ -279,7 +303,7 @@ console.log(`published ${folder} as /business/${slug} (${files} files in fronten
       const he = spawnSync(py, [path.join(ROOT, 'backend', 'scripts', 'he_line.py'), line], { encoding: 'utf8', env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
       if (he.status === 0 && he.stdout.trim()) entry.line_he = he.stdout.trim();
     }
-    const logo = card.logo ? path.join(SRC, card.logo) : ['logo.webp', 'logo.png', 'logo.jpg', 'logo-192.png', 'logo-crop.png'].map((f) => path.join(SRC, 'assets', f)).find((f) => fs.existsSync(f));
+    const logo = card.logo ? path.join(SRC, card.logo) : ['logo.webp', 'logo.png', 'logo.jpg', 'logo-192.png', 'logo-crop.png', 'mark.webp', 'mark.png'].map((f) => path.join(SRC, 'assets', f)).find((f) => fs.existsSync(f));
     if (logo && !card.mark) {
       const { spawnSync } = await import('node:child_process');
       const out = path.join(SHOW, `${slug}-logo.webp`);
