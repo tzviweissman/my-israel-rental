@@ -77,6 +77,20 @@ logging.getLogger("httpx").setLevel(logging.WARNING)
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
+
+from fastapi.exception_handlers import request_validation_exception_handler  # noqa: E402
+from fastapi.exceptions import RequestValidationError  # noqa: E402
+
+
+@app.exception_handler(RequestValidationError)
+async def _log_refused_fields(request, exc):
+    """Which field a request was refused for (names only, never what was
+    typed). A salon's Publish was refused 14 times on 25 Oct 2026 and the
+    log said only "422". The answer itself is FastAPI's usual one."""
+    logger.warning("[422] %s %s %s", request.method, request.url.path,
+                   ["{}: {}".format(".".join(str(x) for x in e.get("loc", ())), e.get("type")) for e in exc.errors()][:6])
+    return await request_validation_exception_handler(request, exc)
+
 for mod in (
     auth,
     properties,
