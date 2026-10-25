@@ -64,9 +64,9 @@ R3g.1 pass: CONCEPT.md gives the colours and faces; site.css tokens match (gold,
 R3g.3 pass: facts script: prices are in the card text colour (white on his black, or the card's own text colour), the accent yellow is only the main button; no emphasised word in colour
 R3g.7 pass: one closing signature, the giant CHICKEN MUNCH in the footer, away from the order path
 R3g.11 pass: Anton, Archivo and Heebo (Hebrew fallback) are from the approved list; unchanged from the earlier build
-R3p.3 fix: check-fingerprints still reports Anton shared with michal-yodaiken and tile and reveal effects alike with the-brown-box and the-gift-boutique; scrollcraft/fingerprints.json may not be touched in this task and Anton is his logo face: needs Tzvi or the coordinator
+R3p.3 pass: ran node scripts/check-fingerprints.mjs scrollcraft/builds/chicken-munch on 25 Oct: "chicken-munch: different from all 11 other pages" (the earlier clashes went when the checker stopped comparing against other sites wrongly)
 R3p.5 pass: CONCEPT.md touch line: the sticker labels drift against the mouse over the bowl; works (seen in the screenshots)
-R3q.1 fix: check-concept passes every part but "Not alike", which cannot pass until the fingerprint clash above is settled
+R3q.1 pass: CONCEPT.md ## Not alike now holds the passing check-fingerprints line (25 Oct); check-concept run
 R5a.7 pass: one signature (the bowl drop), one peak (the opening); the ending resolves on the Shabbos orders and the button
 R9.1 pass: the bowl drop uses his own bowl photo only
 R3f.2 pass: effect budget: one signature (the bowl drop), accents (letters spread on scroll, sticker drift, the Add and card hovers), no more added; captured frames at 0 to 90 percent at three sizes show them
@@ -100,7 +100,7 @@ R0b.12 n/a: not published, so there is no pages-list preview clip yet
 ## 4. Photos and media
 R8.1 n/a: owner must send a matching set (one photo per box and per pan, same angle and ground); today the three box photos come from three shoots (Mini and Grand are one box photo at two crops, the Supreme is a pile of chicken on yellow) and the 9x13 pan photo is cut flat at its bottom edge in the file the owner sent, so it runs off the bottom of its frame; no uncut copy exists in src/owner: listed for the owner
 R8.6 n/a: all five kinds with a photo (Classic, Hot Poppers, Cornflake, Fruity, Rice Krispie) are now product hero shots edited from his own photos (dark plinth, its own coating round it, one warm light; Classic's lid number checked: 055-331-6975); the boxes and pans still need a clean photo each from the owner (listed in the report)
-R8.2 pass: his own photos, and three hero shots edited from his own bowl photos (Higgsfield nano_banana_2); no stock
+R8.2 pass: his own photos and five hero shots edited from his bowl photos (Higgsfield nano_banana_2); no stock. The generated box-full.webp was removed 25 Oct (Tzvi asked): the Supreme box card on home and menu is now his own listing photo, assets/box-yellow.webp cut unchanged from src/owner/shot-box.png; looked at on laptop 1440 and phone 390, the labelled sauce pots show. All three box cards are the same box, his only box photo; photos of each box are asked for in message-to-owner.md item 2
 R3p.7 pass: every kind of chicken is a tile; five show his photo, the three without (Shnitzel Bites, Pretzel, Buffalo Wings) are plain colour tiles
 R3h.12 pass: each item looks the same everywhere (the same photo file on home, menu and order)
 R3h.10 pass: the menu page list swaps the stage and caption for every one of the eight kinds: five with his photo (Classic added), three on their own colour tile (Shnitzel Bites, Pretzel, Buffalo Wings); the home page has no option picker
@@ -194,3 +194,5 @@ R3a.8 pass: no dot-separated line wraps; the footer nav dots fit at 360x640
 ## 9. Finish
 R3r.3 pass: check-rules run; scripts run after the last edit as listed in the report
 R3r.4 pass: the rework itself is Tzvi's correction of 22 Oct (rule 3t); it is in the rules and the checklist already
+R8.7 pass (recorded after the fact, 25 Oct): gen/hero-brief.md holds what is known of the five hero shots and the 18 Oct film, with gen/hero-compare.jpg (they match his bowls); the film frame that differed from his box (gen/box-full-compare.jpg) is no longer on the site, replaced by his real photo on 25 Oct
+R3k.9 pass: ran node scripts/check-site.mjs http://localhost:8791/chicken-munch/order.html on 25 Oct (page served locally, API points at localhost:8001, nothing sent to the live site): FLOW walked the three steps and SAVE reported nothing, so the order was POSTed to /api/marketplace/order-form/<his listing>/orders before WhatsApp opened (order.html save(), product ids from ITEMS, loaded by gen/catalog/load_products.py); I did not compare the listing's products against his live shop in this pass, R0b.3 records that check

@@ -21,7 +21,7 @@ The first two together, with his own opening kept as the event. A visitor lands 
 1. Strongest real photo, big: his bowl of Hot Poppers in the opening, half the screen, on his own cornflake photo.
 2. Signature moment from his own thing: the bowl drops across CHICKEN and the stickers stick on; scrolling spreads the letters apart.
 3. The choice changes the page: Add on a box or pan goes into the basket on every page and opens the order with it in; the order page builds the message with his total.
-4. Side by side: Best Bean Best Cup and Theobroma (pictures above); ours is the same colour-room row with price and Add, with his own boxes.
+4. Side by side: Best Bean Best Cup and Theobroma (pictures above); ours is the same colour-room row with price and Add, with his own boxes. Sources (recorded 25 Oct): closest Mobbin reference https://mobbin.com/sites/sections/a935259d-7fd8-4c7d-ab87-089e2cee1e5c; Inspo docs/inspo/awwwards-anatomy-2026-10-22/food/bestbean-colour-per-product.webp.
 5. One sentence: you land on a bowl of poppers dropping onto the name, scroll once and pick a box.
 
 ## Effects
@@ -35,4 +35,4 @@ The first two together, with his own opening kept as the event. A visitor lands 
 - touch: from his own opening, the sticker labels (Kosher, Now taking Shabbos orders, Original Hot Poppers) drift against the mouse over the bowl
 
 ## Not alike
-check-fingerprints (22 Oct 2026) still reports: same heading face (Anton) as michal-yodaiken, and tile and reveal effects alike with the-brown-box and the-gift-boutique. All come from fingerprints.json, which this task may not edit, and from the owner's own logo face; not changed.
+chicken-munch: different from all 11 other pages
