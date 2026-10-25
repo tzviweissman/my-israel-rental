@@ -64,9 +64,9 @@ R3g.1 pass: CONCEPT.md records colours and faces; the page uses Playfair Display
 R3g.3 pass: gold is on the main button, the "to scale" word and the small labels; prices are in the cream text colour (computed colour of .price and .num checked on boards and index)
 R3g.7 pass: one closing signature, the giant footer line; no other
 R3g.11 pass: Playfair Display and Manrope are both on the approved list
-R3p.3 n/a: check-fingerprints still reports clashes inherited from before this rework (warm browns with aidy-yaniv and the-gift-boutique, tile and reveal effects with four sites); the brief keeps colours and fonts and the site is live, so they are listed in the reply and not changed here
+R3p.3 pass: node scripts/check-fingerprints.mjs run 25 Oct prints "blazin-boards: different from all 11 other pages"; colour pairs accepted by Tzvi on 25 Oct (decision 1a, live pages, not recoloured), recorded in scrollcraft/fingerprints.json _accepted_colours: with aidy-yaniv and the-gift-boutique
 R3p.5 pass: the ruler beside the growing board is the touch (CONCEPT.md touch line)
-R3q.1 pass: CONCEPT.md has the ideas with inspo pictures, the Own idea, chosen, the five wow answers and effects; its Not alike line names the inherited clashes instead of a passing line (R3p.3)
+R3q.1 pass: node scripts/check-concept.mjs reports ready (25 Oct), every part including Not alike
 R5a.7 pass: one signature (the board growing to scale) and one peak (the sizes section); the ending is the order button
 R9.1 pass: the growing board uses their own board photograph cut from their square photo
 R3f.2 pass: effect budget in CONCEPT.md: tumble, size growth, reveal; frames captured at 0, 25, 50, 75 and 100% of the sizes section in the earlier build and the sections around it in this one
@@ -194,3 +194,5 @@ R3a.8 n/a: no line of dot-separated items
 ## 9. Finish
 R3r.3 pass: check-rules passed after the last edit; every script was re-run after the last change to the pages
 R3r.4 pass: the corrections from Tzvi on 22 Oct (percent savings, accent on the button, one look per category) are in rules-checklist.md
+R8.7 pass (recorded after the fact, 25 Oct): gen/board-brief.md written 25 Oct for the board hero shot made 23 Oct; gen/board-hero-compare.jpg looked at (their photo left, the shot right): board, ring, label and every meat pile kept, only ground, props and light changed. Prompt text not kept; the brief says so. No brief existed before the shot
+R3k.9 pass: read order-details.html: place() POSTs /marketplace/order-form/<gig id>/orders and only then goes to order-done.html (no WhatsApp opens in the order at all; the tracking link is the proof); every line is sent as the listing product id and qty, so names and prices are the listing's, loaded live from the form. check-site could not drive it (the three-step order has no form, the button is #place) and the local API on :8001 was off, so no saved order could be opened in a dashboard; judged from the code

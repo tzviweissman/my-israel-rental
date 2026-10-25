@@ -7,6 +7,7 @@ Category: food-shop
 - **Warm cream shop, loud friendly type, price on every card** (docs/inspo/awwwards-anatomy-2026-10-22/food/theobroma.webp): Theobroma sells from the first screens with cut-out products on plain cards and Add to cart on each. For them: cream ground, the headline beside photos, flavour cards before the builder.
 - **Colour per section from one family** (docs/inspo/awwwards-anatomy-2026-10-22/food/delice-colour-per-section.webp): Delice changes flat colour band by band but stays in one family. For them: cream, caramel dough and cocoa only, taken from the logo and price list.
 - Own: "Build your box" as a real box, slot by slot, in their kraft tray (their own photo of the box), with the icing poured over the bun they chose.
+- Mobbin search 25 Oct, after the build, "bakery build your own box product section": Touchy Coffee (https://mobbin.com/sites/sections/fc03a96f-0094-4250-9925-45465c2813c7: product cards with a quantity stepper and Add on one colour ground) and Escape Cafe (https://mobbin.com/sites/sections/c2bdfec6-82d4-4e22-baaa-5f866e5c7cdf: a product grid with one big photo tile). Compared with the chosen opening: both are product grids; our flavour cards with Add are the same grammar, and the slot-by-slot kraft box builder has no match in either.
 
 ## Chosen
 The first two together with their own box builder. The home page opens on their one photo in rising panels beside the headline, then shows the four flavours as colour cards that start a box, then the builder where the box fills slot by slot. It is theirs because the box and the bun are their own photo, and the saving shown is their own price list (8 for 100 instead of 110).
@@ -15,7 +16,7 @@ The first two together with their own box builder. The home page opens on their 
 1. Strongest real photo, big: their box of buns, in three rising panels on the first screen.
 2. Signature moment from their own thing: the box builder, a kraft tray that fills bun by bun with the icing pour.
 3. The choice changes the page: the flavour chosen changes the bun in the box, the pour, the price and the WhatsApp message.
-4. Side by side: Best Bean Best Cup and Theobroma (pictures above); ours is the same colour-card row with Add, with their own buns.
+4. Side by side: Best Bean Best Cup and Theobroma (pictures above); ours is the same colour-card row with Add, with their own buns. Sources (recorded 25 Oct, after the build): closest Mobbin reference https://mobbin.com/sites/sections/fc03a96f-0094-4250-9925-45465c2813c7; Inspo docs/inspo/awwwards-anatomy-2026-10-22/food/bestbean-colour-per-product.webp.
 5. One sentence: you land on their buns, pick a flavour card and watch your box fill.
 
 ## Effects
@@ -29,7 +30,8 @@ The first two together with their own box builder. The home page opens on their 
 - touch: the kraft tray drawn from their own box photo, which fills slot by slot
 
 ## Not alike
-check-fingerprints (22 Oct 2026) reports clashes: with aidy-yaniv (the same business, the live page), and a few shared browns with blazin-boards and the-brown-box, all from this business's own logo palette; not changed (the brief keeps colours and fonts).
+aidy-yaniv: different from all 11 other pages
+colour pairs accepted by Tzvi on 25 Oct (decision 1a, live pages, not recoloured), recorded in scrollcraft/fingerprints.json _accepted_colours: with blazin-boards and the-brown-box
 
 ## Style sheet
 accent caramel #B07A4E and caramel-deep #8A5532 (button outline and the script line); ink #3A2216; grounds paper #FBF5F0, paper-2 #F3E6DC, dough #E8C08E, white for the price list; flavour colours Classic #F3E6DC, Espresso #6B4430, Lotus #C8894B, Chocolate #4A2A1D; faces Cormorant Garamond (headings), Jost (body), Allura (one script line per heading); radius 22 px cards, 18 px controls, 999 px buttons; motion: hover under 300 ms.

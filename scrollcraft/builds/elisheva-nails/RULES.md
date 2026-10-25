@@ -63,10 +63,10 @@ R3c.2 pass: whole home page at 1440x900: cream and thin serif are the beauty row
 R3g.1 pass: CONCEPT.md style sheet against site.css :root tokens (paper, blush, ink, rose, 18px radius, three faces): same
 R3g.3 pass: accent rose is on the main button only; labels, script name, links and icons are in the ink colour; prices are ink (computed colour of every service price: ink)
 R3g.7 pass: one closing signature: the giant script name in the footer block; nothing in the way of booking
-R3g.11 pass: Bodoni Moda with Frank Ruhl Libre named for Hebrew, Outfit with Heebo, Parisienne for her name only: all Google OFL, Hebrew faces from the approved list
-R3p.3 pass: check-fingerprints: elisheva-brandeis is different from all 9 other pages
+R3g.11 pass: Bodoni Moda with Frank Ruhl Libre named for Hebrew, Albert Sans with Assistant (the shekel sign), Sacramento for her name only (all since 25 Oct, Tzvi: away from L.A. Cholent's Heebo and Pinyon Script; were Outfit, Heebo, Parisienne): all Google OFL; computed fonts on the home page: Bodoni Moda, Albert Sans, Sacramento, all loaded; check-site GLYPH clean on all three pages
+R3p.3 pass: node scripts/check-fingerprints.mjs run 25 Oct prints "elisheva-brandeis: different from all 12 other pages"; after Tzvi's 25 Oct decision: body Albert Sans with Assistant for the shekel sign, script Sacramento (were Outfit, Heebo and Parisienne, which matched L.A. Cholent)
 R3p.5 pass: touch: shades named by what they look like, each her own photo (CONCEPT.md touch line, works)
-R3q.1 pass: check-concept: concept ready for elisheva-nails
+R3q.1 pass: node scripts/check-concept.mjs reports ready (25 Oct), every part including Not alike
 R5a.7 pass: one signature (shade reveal) and one peak (the cream closing with her work); the ending resolves on Book a time
 R9.1 pass: the shade photos are her own, one per colour; no signature without material
 R3f.2 pass: signature (shade reveal), accents: arriving opening, work photos easing in mid-page, giant name at the close; quiet touches on buttons
@@ -80,7 +80,7 @@ R3b.4 pass: with few photos facts carry the page: services, times, hours before 
 R3c.3 pass: the worry (paying) is answered beside the button on the booking page: "Nothing to pay on this page"
 R3c.8 n/a: the owner has not yet told us what happens after a booking beyond a confirmation on WhatsApp, which the page says
 R3e.10 pass: check-site ALIGN (name at least 1.25x its line) on every page; service rows have name, price right, button; longest name "Nail art, French or gradient nails" fits
-R3e.14 n/a: needs Tzvi: computed on the home page at 1440x900: one body family Outfit in 3 weights (400, 500, 600) as the rule asks, but 14 distinct text sizes (13 to 20 px body, 27 to 173 px display) against the limit of six; consolidating the type scale is a redesign of every heading clamp
+R3e.14 n/a: needs Tzvi: computed on the home page at 1440x900: one body family Albert Sans (Outfit until 25 Oct) in 3 weights (400, 500, 600) as the rule asks, but 14 distinct text sizes (13 to 20 px body, 27 to 173 px display) against the limit of six; consolidating the type scale is a redesign of every heading clamp
 R3c.9 n/a: needs Tzvi: computed radii on the home page are 18px (photos, cards) and 999px (pill buttons), shadows 2, one icon set (lucide-style inline svg); the rule asks for one radius for images and buttons
 R3s.4 pass: check-site ALIGN on index, book, contact: text starts on the same left edge in every section
 R3s.6 pass: check-site ALIGN on index, book, contact: buttons of one kind have one height and corner
@@ -195,3 +195,4 @@ R3a.8 pass: looked at 360x640: lines of dot-separated items do not wrap
 ## 9. Finish
 R3r.3 pass: check-site, fits and motion run on every page after the last edit; check-rules run last
 R3r.4 pass: Tzvi corrections of this pass (3t beauty row, 3g.3 accent, 5.8 we and our) are lines R3t.1, R3g.3, R5.4 of the checklist, with their checks
+R8.7 n/a: nothing was generated on this site. Looked at: gen/ holds only crops.py, build.py, wow_patch.py, book.js and index.html (no Higgsfield, kie, nano_banana, Seedance or Kling call), every image in assets/ is cropped from her own photos in src/owner, the two .mp4 files in the build root are screen recordings of the page itself, and R8.2 and R8.3 already say no generated media.

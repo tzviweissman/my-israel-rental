@@ -50,7 +50,7 @@ R3h.3 pass: the pot film and the kitchen clip fill the screen at 1440x900 and 12
 R3h.5 pass: the chapter lines (Lid on. Low. Go light the candles.) sit at the left edge on the dark ground, small beside the pot, not over the action
 R3h.7 pass: looked at the frames either side of the kitchen-to-pot join (40 to 55 percent): the scratch side dims to a dark kitchen (never plain black), then the pot appears; no jump
 R3h.8 pass: the section after the film changes boldly: a bright cream shop of three colour rooms
-R3h.11 fix: brightness.py fails on the generated films: pot.mp4 whole 9 middle 14, scratch.mp4 middle 29, table.mp4 whole 17; a gamma of 2 makes the pot film milky grey, so the candlelit mood is a decision for Tzvi
+R3h.11 pass (Tzvi's decision): brightness.py re-run 25 Oct: pot.mp4 and pot-m.mp4 whole 9 middle 14, scratch.mp4 and scratch-m.mp4 whole 30 middle 29, table.mp4 whole 17 middle 32, under the rule's 22 and 33; Tzvi chose to keep the candlelit films dark (22 Oct, docs/site-reviews/2026-10-22/decisions.md point 2, confirmed again 25 Oct, decision 4); a gamma of 2 had made the pot film milky grey
 R3h.13 pass: the pot film is one clip showing the lid, steam and the dial together; frames viewed at 20 hours show no heap or vanish
 R3h.14 pass: the pot stays in frame through the whole film at 1440x900, 1280x650 and 390x844
 R3h.17 pass: the page does not use words-and-film turns
@@ -64,9 +64,9 @@ R3g.1 pass: CONCEPT.md and the :root tokens (gold, plum, steel, cream; Oswald, F
 R3g.3 pass: prices in the card text colour; the gold is the main button and the occasions band; the script tagline is dark brown, not accent
 R3g.7 pass: one closing signature, the script line in the footer
 R3g.11 pass: Oswald, Figtree, Pinyon Script and Heebo are from the approved list; unchanged
-R3p.3 fix: check-fingerprints reports Oswald shared with the live page of the same business, two colours alike with blazin-boards, and no effects listed for la-cholent; scrollcraft/fingerprints.json may not be touched in this task: needs Tzvi or the coordinator
+R3p.3 pass: node scripts/check-fingerprints.mjs run 25 Oct prints "l-a-cholent-by-rabbi-samuels: different from all 11 other pages"
 R3p.5 pass: CONCEPT.md touch line: the crock-pot dial that turns to the size; it works (seen at the end)
-R3q.1 fix: check-concept passes every part but "Not alike", which needs the fingerprints.json entry above
+R3q.1 pass: node scripts/check-concept.mjs reports ready (25 Oct), every part including Not alike
 R5a.7 pass: one signature (the dial), one peak (the pot clicks to Low); the ending resolves on the order
 R9.1 pass: the signature uses their own tubs and a closed slow cooker
 R3f.2 pass: effect budget: one signature (the dial), accents (the split, the pot film, the facts rows); frames captured at three sizes
@@ -195,3 +195,4 @@ R3a.8 pass: no dot-separated line wraps
 ## 9. Finish
 R3r.3 pass: check-rules run; scripts run after the last edit as listed in the report
 R3r.4 pass: the rework itself is Tzvi's correction of 22 Oct (rule 3t); it is in the rules and the checklist already
+R8.7 pass (recorded after the fact): the tub shots (23 Oct) and the scenery stills and clips (5-6 Oct) were made before this rule (24 Oct); gen/tubs-brief.md records the reference, traits kept, what changed, model and job ids, and that the 5-6 Oct prompts and model names were not kept; gen/tubs-compare.jpg is the side-by-side, looked at 25 Oct

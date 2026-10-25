@@ -60,13 +60,13 @@ R3.12 pass: every page has a hero, a features block (one item per service or cou
 R3c.1 pass: CONCEPT.md cites three saved pictures of the beauty category study (docs/inspo/awwwards-anatomy-2026-10-22/shops/odyssee, vero, tengile), check-concept Ideas passes
 R3g.17 pass: check-concept Effects: every effect has its "from"; no new effect was added in this pass
 R3c.2 pass: whole home page at 1440x900: cream and thin serif are the beauty row of rule 3t and her navy and blush site; contrasting grounds are the navy opening
-R3g.1 pass: CONCEPT.md style sheet against the :root tokens of index.html (ivory, blush, navy, 18px radius, Playfair and Manrope): same
+R3g.1 pass: CONCEPT.md style sheet against the :root tokens of index.html and book.html (ivory, blush #D4A5B5, navy, 18px radius, EB Garamond and Manrope), looked at on the courses section at 1440 and 390 on 25 Oct
 R3g.3 pass: the rose accent is gone from text: emphasised words stand out by italic and weight in the navy ink; prices are navy; rose-gold only fills the main button on navy
 R3g.7 pass: one closing signature: the big closing line in the footer; nothing in the way of booking
-R3g.11 pass: Playfair Display with Frank Ruhl Libre named for Hebrew, Manrope with Assistant: all Google OFL, Hebrew faces from the approved list (added this pass)
-R3p.3 n/a: needs Tzvi: michal-simkin has no entry in scrollcraft/fingerprints.json, and the check reports clashes with blazin-boards (same heading face Playfair Display, brand colours #dbb3b1 #e9c4b0 alike) and the-brown-box (colours alike); the new page changes, never the old ones
+R3g.11 pass: EB Garamond (headings, since 25 Oct; Tzvi: away from Blazin's Playfair Display) with Frank Ruhl Libre named for Hebrew, Manrope with Assistant: all Google OFL, Hebrew faces from the approved list; computed font on h1 and h2 is EB Garamond, loaded
+R3p.3 pass: node scripts/check-fingerprints.mjs run 25 Oct prints "michal-simkin: different from all 12 other pages"; after Tzvi's 25 Oct decision: headings EB Garamond (were Playfair Display, as Blazin'), blush #D4A5B5 (was #DBB3B1, alike Blazin', Ravit Hen and The Brown Box), effects added to scrollcraft/fingerprints.json with the price recorded as P9
 R3p.5 pass: touch: every before and after is one reviewer own quotation (CONCEPT.md touch line, works)
-R3q.1 n/a: needs Tzvi: check-concept passes every part of michal-simkin CONCEPT.md except Not alike, which needs a fingerprints.json entry and a way round the clashes listed in R3p.3
+R3q.1 pass: node scripts/check-concept.mjs reports ready (25 Oct), every part including Not alike
 R5a.7 n/a: needs Tzvi: the page has two scroll moves from the 8 Sep brief (the dealt stack and the struck words); rule 5a.7 allows one signature scroll section
 R9.1 pass: the stack and quotations use her real client photos and reviews
 R3f.2 pass: signature (struck words), accents: dealt stack at the opening, five steps on a line, courses at the close
@@ -195,3 +195,4 @@ R3a.8 pass: looked at 360x640: lines of dot-separated items do not wrap
 ## 9. Finish
 R3r.3 pass: check-site, fits and motion run on every page after the last edit; check-rules run last
 R3r.4 pass: Tzvi corrections of this pass (3t beauty row, 3g.3 accent, 5.8 we and our) are lines R3t.1, R3g.3, R5.4 of the checklist, with their checks
+R8.7 n/a: nothing was generated on this site. Looked at: index.html says "Nothing generated", BRIEF.md rule 3 says only her photographs, there is no gen/ or lab/ folder, and every image in assets/ is a client or portrait photo from her own website.

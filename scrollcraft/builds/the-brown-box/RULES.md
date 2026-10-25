@@ -64,9 +64,9 @@ R3g.1 pass: the style sheet is at the top of index.html and in CONCEPT.md: cream
 R3g.3 pass: the accent is on the main button only: the emphasised heading word is italic in the text colour; prices are in the text colour (panel prices are white on the panel colour)
 R3g.7 pass: the footer holds one closing signature at most, below the order path
 R3g.11 pass: the two faces set in the page head and css; checked against reference/design-rules.md
-R3p.3 n/a: check-fingerprints reports a CLASH with the-gift-boutique (tile T8, reveal R1, price P8, heading H2); both effect lists predate 22 Oct and fingerprints.json is not mine to edit, so Tzvi or the gift boutique's agent decides which page changes
+R3p.3 pass: node scripts/check-fingerprints.mjs run 25 Oct prints "the-brown-box: different from all 11 other pages"; colour pairs accepted by Tzvi on 25 Oct (decision 1a, live pages, not recoloured), recorded in scrollcraft/fingerprints.json _accepted_colours: with aidy-yaniv
 R3p.5 pass: the topping tiles drift as the menu scrolls past
-R3q.1 n/a: CONCEPT.md is complete except its Not alike line, which carries the real CLASH line (see R3p.3)
+R3q.1 pass: node scripts/check-concept.mjs reports ready (25 Oct), every part including Not alike
 R5a.7 pass: one signature: the film; the peak is the bowl in its box
 R9.1 pass: the film is made from their own bowl and box
 R3f.2 pass: film (signature), topping drift, reveals, the order dock
@@ -100,7 +100,7 @@ R0b.12 n/a: the site is not published, so there is no pages-list preview yet
 ## 4. Photos and media
 R8.1 pass: put the five bowl hero shots on one sheet: the same travertine plinth, cream ground, light and camera; shown as rounded squares so the plinth stays in
 R8.6 n/a: the five bowls are product hero shots (23 Oct, plinth, their own fruit and granola round each, one warm light); the two gift boxes are not, because their only photos are 239 px and the try invented words on the tags; a bigger photo of each box is asked for in the report
-R8.2 pass: the bowl hero shots are edited from the bowl photos generated in one pass from their own bowl; the menu photos are their own
+R8.2 pass: the menu photos are their own; the bowl photos and the film are generated from written descriptions (gen/bowls.sh, gen/film.sh), not from their photos, and the five hero shots are edited from those generated bowls (see gen/film-bowls-brief.md); shown as bowls and a film, not as their premises
 R3p.7 pass: all five bowls are shown the same way: round photo, name, toppings, price, Add
 R3h.12 pass: each bowl looks the same in the film, the panel and the menu
 R3h.10 n/a: the panels show every bowl at once; there is no option that swaps a picture
@@ -194,3 +194,5 @@ R3a.8 pass: no dotted line wraps at 360x640
 ## 9. Finish
 R3r.3 pass: check-rules passed after the last edit; every script was re-run after the last change to the pages
 R3r.4 pass: no new correction from Tzvi since the last build is missing from this file
+R8.7 pass (recorded after the fact, 25 Oct): gen/film-bowls-brief.md written 25 Oct covering the film (16 Oct), bowl stills and the five hero shots (23 Oct); gen/film-compare.jpg and gen/bowls-compare.jpg looked at. Honest result: the five hero shots match the bowl stills they came from, but the film bowl and gold box are invented and do not match their real bowl photo (strawberry and apple) or their kraft box; stills and clips were made from words, not from their photos; prompts are in gen/*.sh for stills and clips, not for the hero shots. Open for Tzvi
+R3k.9 pass: served the build locally and ran node scripts/check-site.mjs http://localhost:8767/order.html: no FLOW and no SAVE problem (the POST to the order form was recorded before WhatsApp opened; it posted to localhost:8001, nothing reached the live site). Four BROKEN lines were 404s for /pages/the-brown-box/assets/menu/*.webp, which only appear because the build is served from its own folder not under /pages/the-brown-box/; not a site fault. No dashboard view of a saved order was made

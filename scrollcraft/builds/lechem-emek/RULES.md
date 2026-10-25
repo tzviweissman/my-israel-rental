@@ -59,14 +59,14 @@ R3h.17 n/a: the opening is a photograph with a scroll push-in, there is no film 
 R3.12 pass: hero, the counter with price per item, a closing call to action, a footer
 R3c.1 pass: references are Le Saint Georges, Delice and Qissa contact sheets in docs/inspo/awwwards-anatomy-2026-10-22/food, cited in CONCEPT.md
 R3g.17 pass: effects in CONCEPT.md name their source; the rework added no new effect
-R3c.2 pass: looked at the page at laptop width: it is the brand's limestone, ink and gold with Playfair; the italic accent word in two headings is the practice brand, kept as the brief said
-R3g.1 pass: the :root tokens in index.html (Playfair, Manrope, Frank Ruhl and Assistant for RTL, night, limestone, cream, gold) match the brand in BRIEF.md
+R3c.2 pass: looked at the page at laptop width on 25 Oct: it is the brand's limestone, ink and gold with Lora headings (Playfair Display until 25 Oct, changed by Tzvi's decision); the italic accent word in two headings is the practice brand, kept as the brief said
+R3g.1 pass: the :root tokens in index.html (Lora, Manrope, Frank Ruhl and Assistant for RTL, night, limestone, cream, gold) match the brand in BRIEF.md except the heading face, changed from Playfair Display to Lora on 25 Oct (Tzvi)
 R3g.3 pass: gold is the button fill and the italic words in headings and item names; prices are in the ink colour (.item__price set to var(--sc-ink))
 R3g.7 pass: one closing signature, the giant footer line
-R3g.11 pass: Playfair Display, Manrope, Frank Ruhl Libre and Assistant are on the approved Latin and Hebrew list
-R3p.3 n/a: lechem-emek shares the Playfair Display heading face with blazin-boards and has no entry in scrollcraft/fingerprints.json, a file this pass was not to edit; both listed in the reply
+R3g.11 pass: Lora (Latin headings, Google OFL, paired with Frank Ruhl Libre in RTL), Manrope, Frank Ruhl Libre and Assistant; computed h1/h2 font Lora, loaded
+R3p.3 pass: node scripts/check-fingerprints.mjs run 25 Oct prints "lechem-emek: different from all 12 other pages"; after Tzvi's 25 Oct decision: headings Lora (were Playfair Display, as Blazin'), prices on a dotted line (P12, was P8), effects added to scrollcraft/fingerprints.json
 R3p.5 pass: the clock that walks from 04:00 to 07:00 is the touch (CONCEPT.md touch line)
-R3q.1 pass: CONCEPT.md has the ideas with inspo pictures, the Own idea, chosen, the five wow answers and effects; its Not alike line names the missing fingerprints entry (R3p.3)
+R3q.1 pass: node scripts/check-concept.mjs reports ready (25 Oct), every part including Not alike
 R5a.7 pass: one signature (the morning) and one peak (the door at seven); the ending is the order button
 R9.1 pass: the morning uses the practice bakery photographs that exist; no photograph was invented for the rework
 R3f.2 pass: effect budget in CONCEPT.md: sunrise, push-in, reveal; frames of the hero, door and counter captured in this rework
@@ -80,7 +80,7 @@ R3b.4 pass: for a place, hours and address come first after the door (trust stri
 R3c.3 pass: Shabbos cut-off sits beside the counter button and the close button
 R3c.8 n/a: no owner to tell us
 R3e.10 pass: check-site ALIGN passed; item name largest, price next to it, note lighter
-R3e.14 pass: Manrope body in up to three weights and Playfair headings; sizes follow the engine scale
+R3e.14 pass: Manrope body in up to three weights and Lora headings; sizes follow the engine scale
 R3c.9 pass: one pill radius for buttons, 14 px for the framed photos, round item photos; no icon library
 R3s.4 pass: check-site ALIGN passed
 R3s.6 pass: check-site ALIGN passed; the Add buttons share one height and corner
@@ -194,3 +194,5 @@ R3a.8 n/a: no line of dot-separated items
 ## 9. Finish
 R3r.3 pass: check-rules passed after the last edit; every script was re-run after the last change to the page
 R3r.4 pass: the same corrections are in rules-checklist.md
+R8.7 pass (recorded after the fact): the ten photographs were generated on 6 Sep (Nano Banana Pro, one batch) before this rule; gen/photos-brief.md records what is known (prompts not kept) and gen/photos-sheet.jpg is the set looked at on 25 Oct; there is no owner photo to compare with because this is a practice page with no owner, so the compare step cannot apply until a real bakery uses it
+R3k.9 n/a: practice page with no business, no listing and no order form on MyIsraelRental to POST to (R0b.1); its basket sheet opens wa.me with no number and has no POST (grep of index.html on 25 Oct), so check-site SAVE would fail; this must be added when a real bakery takes the page, before it is published

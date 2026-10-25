@@ -114,7 +114,9 @@ function compare(aName, a, bName, b) {
   const oa = own(aName), ob = own(bName);
   const ba = a.colours.filter(brand).filter((c) => !oa.has(c)), bb = b.colours.filter(brand).filter((c) => !ob.has(c));
   const shared = ba.filter((c) => bb.some((d) => near(c, d)));
-  if (shared.length >= 2) out.push(`${shared.length} brand colours alike (${shared.slice(0, 4).map((c) => '#' + c).join(' ')})`);
+  // a colour pair Tzvi has looked at and accepted (fingerprints.json _accepted_colours, with who and when) no longer counts
+  const accepted = (manual._accepted_colours || []).some((x) => [aName, bName].every((n) => x.pair?.includes(n)));
+  if (shared.length >= 2 && !accepted) out.push(`${shared.length} brand colours alike (${shared.slice(0, 4).map((c) => '#' + c).join(' ')})`);
   const ma = manual[aName], mb = manual[bName];
   if (ma?.effects && mb?.effects) {
     const same = effectsAlike(ma.effects, mb.effects);

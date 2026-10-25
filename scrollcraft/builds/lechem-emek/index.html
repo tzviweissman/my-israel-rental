@@ -24,7 +24,7 @@
   to any act).
 
   RULES KEPT. Logical properties, so the direction toggle mirrors it. Headings
-  read var(--font-head), which the RTL rule swaps, because Playfair has no
+  read var(--font-head), which the RTL rule swaps, because Lora has no
   Hebrew glyphs and an inline face would beat the swap. Grounds are painted
   per section and cut, never drifted. No em dash anywhere. No number that is
   not this business's own. One CTA label. No scroll cue, no counters, no
@@ -32,7 +32,7 @@
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@400;500;700&family=Assistant:wght@400;500;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=Manrope:wght@400;500;600;700&family=Frank+Ruhl+Libre:wght@400;500;700&family=Assistant:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="scrollcraft.css">
 <style>
   /* ------------------------------------------------------------ tokens --
@@ -41,7 +41,7 @@
      for a page that hard-cuts light and dark and cannot clear 4.5:1 on both
      with a single value. */
   :root {
-    --font-head: 'Playfair Display', Georgia, serif;
+    --font-head: 'Lora', Georgia, serif;
     --font-body: 'Manrope', system-ui, sans-serif;
     --font-head-he: 'Frank Ruhl Libre', Georgia, serif;
     --font-body-he: 'Assistant', system-ui, sans-serif;
@@ -540,6 +540,10 @@
   .menu .item__meta { grid-area: meta; margin: 0; align-self: end; justify-content: flex-start; gap: var(--sc-3); }
   .menu .item__name { font-size: var(--sc-t-lg); }
   .menu .item__price { font-size: var(--sc-t-base); color: var(--sc-ink); }
+  /* the price sits at the end of a dotted line from the name, like a bakery price board (P12; 25 Oct, the plain price P8 matched Blazin's with its mask headings) */
+  .menu .item__price { flex: 1; min-width: 5.5rem; display: flex; align-items: baseline; gap: var(--sc-2); }
+  .menu .item__price::before { content: ""; flex: 1; border-block-end: 2px dotted currentColor; opacity: .35; }
+  @media (min-width: 861px) { .menu .item__price { flex-basis: 100%; } }  /* two columns: every price line under its name, so the rows match */
   .menu .item__note { grid-area: note; margin: 0; font-size: var(--sc-t-sm); max-width: none; align-self: start; }
   .menu .item__add { grid-area: add; width: auto; margin: 0; padding: 0 var(--sc-4); min-height: 44px; font-size: var(--sc-t-sm); white-space: nowrap; }
   .counter__end { display: flex; flex-wrap: wrap; align-items: center; gap: var(--sc-5); margin-block-start: var(--sc-7); }

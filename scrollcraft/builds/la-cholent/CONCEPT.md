@@ -19,7 +19,7 @@ The shop rooms straight after the opening, with the dial as the one control at t
 1. Strongest real photo, big: their four tubs fill their half of the first screen.
 2. Signature moment from their own thing: the pot clicks to Low and twenty hours pass; at the end the same knob is the size picker.
 3. The choice changes the page: the size changes the dial, who it feeds, the price and the words on the order button.
-4. Side by side: Best Bean Best Cup and Agrumea (pictures above); ours is the same colour rooms and small print, with their tubs.
+4. Side by side: Best Bean Best Cup and Agrumea (pictures above); ours is the same colour rooms and small print, with their tubs. Sources (recorded 25 Oct): closest Mobbin reference https://mobbin.com/sites/sections/a935259d-7fd8-4c7d-ab87-089e2cee1e5c; Inspo docs/inspo/awwwards-anatomy-2026-10-22/food/bestbean-colour-per-product.webp.
 5. One sentence: you land between a messy scratch kitchen and their tubs, scroll and the cholent cooks itself, then turn a crock-pot knob to pick a size.
 
 ## Effects
@@ -33,4 +33,5 @@ The shop rooms straight after the opening, with the dial as the one control at t
 - touch: from their own flyer, the crock-pot dial that turns to the size
 
 ## Not alike
-Not checked against fingerprints.json in this rework (it may not be edited here); the design, colours and fonts of the opening are unchanged from the earlier page.
+l-a-cholent-by-rabbi-samuels: different from all 11 other pages
+

@@ -64,9 +64,9 @@ R3g.1 pass: CONCEPT.md now has a Style sheet section that matches the :root bloc
 R3g.3 pass: prices are ink on every card, row and the builder; caramel is the button outline and the script line only
 R3g.7 pass: one closing signature: the giant name in the footer, outside the order path
 R3g.11 pass: faces are the ones already in the build (listed in R3g.1), unchanged by this task
-R3p.3 pass: check-fingerprints run for this build, see the Not alike line in CONCEPT.md
+R3p.3 pass: node scripts/check-fingerprints.mjs run 25 Oct prints "aidy-yaniv: different from all 11 other pages"; colour pairs accepted by Tzvi on 25 Oct (decision 1a, live pages, not recoloured), recorded in scrollcraft/fingerprints.json _accepted_colours: with blazin-boards and the-brown-box
 R3p.5 pass: touch: the kraft tray drawn from their box photo that fills slot by slot
-R3q.1 pass: node scripts/check-concept.mjs run on the build, see the reply
+R3q.1 pass: node scripts/check-concept.mjs reports ready (25 Oct), every part including Not alike
 R5a.7 pass: one signature (the builder) and one peak (the pour); the ending is the Build your box button
 R9.1 pass: the builder uses their own bun photos
 R3f.2 pass: CONCEPT.md has an Effect budget: one signature (the builder with the pour) and four accents
@@ -195,3 +195,4 @@ R3a.8 pass: looked at the 390x844 and 360x640 screenshots of every dotted line (
 ## 9. Finish
 R3r.3 pass: check-rules is run last, after the final edit; every script was re-run after the last edit
 R3r.4 pass: this rework is itself Tzvi 22 Oct correction (rule 3t) already in the rules and checklist
+R8.7 pass (recorded after the fact, 25 Oct): gen/bun-brief.md written 25 Oct for the four flavour hero shots made 23 Oct; gen/bun-hero-compare.jpg looked at (their cut-out left, the shot right): swirl, glaze and toppings kept; the Lotus biscuit lettering is the model's. Prompt text not kept; the brief says so

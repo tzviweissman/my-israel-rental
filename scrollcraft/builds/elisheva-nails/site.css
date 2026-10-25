@@ -6,7 +6,7 @@
 :root {
   --blush: #F6E1DE; --blush-2: #F3D4D1; --paper: #FFF8F6; --rose: #B76E66; --rose-dk: #84423C; --gold: #C28E8A;
   --ink: #3A2523; --soft: #6E5450; --line: #EBCFCB;
-  --r: 18px; --font-head: 'Bodoni Moda', 'Frank Ruhl Libre', Georgia, serif; --font-script: 'Parisienne', cursive; --font-body: 'Outfit', 'Heebo', system-ui, sans-serif;  /* ₪ and → from Heebo, loaded for those two only */
+  --r: 18px; --font-head: 'Bodoni Moda', 'Frank Ruhl Libre', Georgia, serif; --font-script: 'Sacramento', cursive; --font-body: 'Albert Sans', 'Assistant', system-ui, sans-serif;  /* ₪ from Assistant, loaded for that sign only */
   --gutter: clamp(18px, 4vw, 44px); --bar-h: 64px; --out: cubic-bezier(.2, .7, .2, 1);
 }
 *, *::before, *::after { box-sizing: border-box; }

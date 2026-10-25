@@ -64,9 +64,9 @@ R3g.1 pass: the :root block in index.html holds ground, ink, gold, two faces, ra
 R3g.3 pass: prices are in the ink colour; gold is the main button only; the gold-ink is used for small labels and group headings, which is a label colour, not the accent button
 R3g.7 pass: one closing signature, their name shown whole under the closing button, away from the order path
 R3g.11 pass: Cinzel for headings and Jost for text, faces already in use on the site and licensed Google Fonts
-R3p.3 n/a: scrollcraft/fingerprints.json lists this business under the slug the-gift-boutique while the folder is gift-boutique, so check-fingerprints finds no entry for the folder; that file is outside this task and unchanged
+R3p.3 pass: node scripts/check-fingerprints.mjs run 25 Oct prints "the-gift-boutique: different from all 11 other pages"; colour pairs accepted by Tzvi on 25 Oct (decision 1a, live pages, not recoloured), recorded in scrollcraft/fingerprints.json _accepted_colours: with blazin-boards
 R3p.5 pass: the foil glint runs once across the closing name when it enters (onSign in index.html), like the foil on their logo; the name rendered at 1440 and 390
-R3q.1 n/a: check-concept passes the ideas, effects, touch and wow answers; the one line it still asks for is the fingerprint line, which needs the fingerprints.json entry named in R3p.3
+R3q.1 pass: node scripts/check-concept.mjs reports ready (25 Oct), every part including Not alike
 R5a.7 pass: the signature is the box opening, the peak is the gifts risen from the box; the ending resolves on Order a gift
 R9.1 pass: the scroll film is used because their gifts and gold box support it
 R3f.2 pass: signature opening; accents: the foil glint on the headline word and name, the metallic sheen on the button, the rising gifts; quiet touches on tiles and chips
@@ -194,3 +194,5 @@ R3a.8 n/a: no line of dot-separated items exists on either page
 ## 9. Finish
 R3r.3 pass: every script above passed on both pages after the last edit (final run)
 R3r.4 n/a: no new correction from Tzvi is outstanding since the last build
+R8.7 pass (recorded after the fact, 25 Oct): gen/box-brief.md written 25 Oct for the opening box stills and MiniMax film made 14 Oct; gen/box-compare.jpg looked at (one of their gift photos left, the last film frame right). There is no reference crop because the box is not their item (invented, shown as a box); prompts were not kept and the brief says so. Their six gifts are untouched photographs
+R3k.9 pass: served the build locally and ran node scripts/check-site.mjs http://localhost:8766/order.html: no FLOW and no SAVE problem (it filled the order, the POST to the order form was recorded before the WhatsApp link opened; the check only records, the page posted to localhost:8001 so nothing reached the live site). No dashboard view of a saved order was made; products come from the order form via order-src.html
