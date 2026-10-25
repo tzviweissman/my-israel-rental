@@ -39,6 +39,7 @@ R3b.1 pass: what (bakery), where (Emek Refaim), why trust (since 1998 line, hour
 R3b.2 pass: the hechsher sits in the trust strip right after the door and again in Good to know and the footer, three mentions of one fact on one page; not beside the button
 R3b.3 pass: the gold "Start your order" is the one solid action per screen; "See the counter" is outlined
 R3h.1 pass: check-site OPENING passed; full-screen oven photograph that pushes in on scroll and the clock starts walking
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop and a phone (was 2.0), 60 fps (median 16.7 ms, no frame over 50 ms) after the full-screen multiply blend became a plain warm wash and the still grain stopped covering four screens; the loaves on the peel in the oven, the bakery's own room, never on more bread photos; loaves whole; the oven photo loads first
 R3n.1 pass: the baker photo (generated practice mockup) fills the whole first screen at both sizes
 R3n.2 pass: "the scroll is the morning": the clock in the corner walks from 04:00 to 07:00 as the dark bakery turns to daylight at the door
 R3n.3 pass: adding items changes the basket, total and the bar; the page itself changes from night to day at the door (check-motion: no choices on the page)

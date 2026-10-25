@@ -41,7 +41,7 @@ SITE = kit.Site(
 # ---------- home ----------
 OPENING = f'''  <section class="scene" id="scene" aria-label="Noa Levi, home styling and organizing">
     <div class="pin">
-      <img class="hs-bg" src="assets/drawer-before.webp" alt="" width="565" height="565" aria-hidden="true">
+      <img class="hs-bg" src="assets/ground.webp" alt="" width="1600" height="894" aria-hidden="true" fetchpriority="high">
       <div class="hs-copy">
         <h1><span class="l1">We organize your home.</span><span class="l2">You gain <span class="acc">peace of mind.</span></span></h1>
         <p class="sub">We sort, tidy and set up storage, so the result is easy to keep.</p>
@@ -149,9 +149,10 @@ OPENING_JS = '''<script>
   function measure() { rect = box.getBoundingClientRect(); S = rect.width; tiles.forEach(function (t) {
     var w = S / N, ax = t.sx * S * .62, ay = t.sy * S * .62, left = rect.left + t.c * w, top = rect.top + t.r * w;
     // keep each scattered piece inside the window so nothing scrolls sideways
-    var phone = innerWidth <= 800, m = S * .08;
-    var minX = Math.max(-(left - 6), -(left - (rect.left - m))), maxX = Math.min(innerWidth - 6 - (left + w), (rect.right + m) - (left + w));
-    var minY = phone ? Math.max(-(top - 70), -(top - (rect.top - m))) : -(top - 70), maxY = phone ? Math.min(innerHeight - 6 - (top + w), (rect.bottom + m) - (top + w)) : innerHeight - 6 - (top + w);
+    // whole on the screen, tilted corners and the top bar included (R3h.20: pieces kept whole; 25 Oct 2026)
+    var phone = innerWidth <= 800, m = S * .08, e = w * .2 + 8, bar = (document.querySelector('.top') || { offsetHeight: 64 }).offsetHeight;
+    var minX = Math.max(-(left - e), -(left - (rect.left - m))), maxX = Math.min(innerWidth - e - (left + w), (rect.right + m) - (left + w));
+    var minY = phone ? Math.max(-(top - bar - e), -(top - (rect.top - m))) : -(top - bar - e), maxY = phone ? Math.min(innerHeight - e - (top + w), (rect.bottom + m) - (top + w)) : innerHeight - e - (top + w);
     ax = Math.max(minX, Math.min(maxX, ax)); ay = Math.max(minY, Math.min(maxY, ay));
     // the Before label stays on the messy drawer: no piece starts on top of it
     var cr = chip.getBoundingClientRect(), pad = w * .2 + 10;

@@ -145,7 +145,7 @@ textarea.fld { min-height: 88px; resize: vertical; }
 @media (prefers-reduced-motion: reduce) { .hd, .hd.in { transform: none !important; opacity: 1 !important; transition: none !important; } }
 
 /* the opening: a messy drawer, and pieces of her tidy one settle into it as you scroll (X22) */
-.scene { position: relative; height: 270svh; }
+/* at least 3 screens of scroll (rule R3h.20, check-site SLOW; 25 Oct 2026) */ .scene { position: relative; height: 340svh; }
 .pin { position: sticky; top: var(--top-h); height: calc(100svh - var(--top-h)); padding: 0 var(--gutter); display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: clamp(1.5rem, 4vw, 4rem); max-width: 80rem; margin: 0 auto; --S: min(calc(100svh - var(--top-h) - 48px), 46vw, 700px); }
 .hs-copy { position: relative; z-index: 3; max-width: 36rem; }
 .hs-copy h1 { font-size: clamp(2.6rem, 4.4vw, 4rem); text-wrap: balance; font-weight: 500; letter-spacing: -.025em; line-height: 1.02; margin: .9rem 0 1.1rem; display: grid; }
@@ -350,3 +350,5 @@ section.after { padding: calc(var(--top-h) + clamp(.8rem, 3svh, 2rem)) 0 3rem; }
 .toast { position: static; transform: translateY(-6px); max-width: none; width: 100%; margin: 0 0 .8rem; }
 .toast.in { transform: none; }
 .toast[hidden] { display: none; }
+
+/* The pieces land on an empty cupboard from her own pantry photo (gen/ground-brief.md) under her deep green, never on a blurred copy of the same drawer photo (R3h.20: never on a photo of the same kind of thing; 25 Oct 2026) */ .hs-bg { inset: 0; width: 100%; height: 100%; filter: none; opacity: .3; object-position: 50% 55%; }

@@ -34,6 +34,7 @@ R3b.1 pass: what (balloon design), where (Jerusalem and the area), what next (qu
 R3b.2 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3b.3 pass: header button is outline while the hero shows the solid one
 R3h.1 pass: held film opening of balloons gathering into an arch
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop and a phone (was shorter), 60 fps (median 16.7 ms, no frame over 50 ms); the arch builds in a plain empty room, whole; the Hebrew 'scroll down' cue removed (cues are banned); the room loads first
 R3n.1 pass: the arch film fills the first screen; the words sit on it from the start
 R3n.2 pass: balloons rise into an empty cream room and gather into the arch round her line; the closing name made of balloons you can pop
 R3n.3 pass: an occasion chip rearranges her work and the quote card writes the message; check-motion passes (3 choices, quick taps)

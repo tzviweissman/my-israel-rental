@@ -38,7 +38,8 @@ R3g.13 pass: first screen at 1440x900 and 390x844: client photos, headline "A wi
 R3b.1 pass: first screen answers what (wigs), where (Bet Shemesh in the bar), why trust (her clients), what to do (Book a consultation in the bar)
 R3b.2 pass: the consultation price and hours sit in the bar beside the button; no kosher claim
 R3b.3 pass: header button and fixed bar carry the same action; Meet and closing sections each one solid button; looked at while scrolling
-R3h.1 pass: check-site OPENING and looked at it: full-screen client photos, and her clients are dealt onto a stack as you scroll
+R3h.1 pass: check-site OPENING and looked at it (25 Oct): full-screen picture of her own salon wall and shelf under her navy, and her clients are dealt onto a stack on it as you scroll
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop and a phone (was shorter), 60 fps (median 16.7 ms, no frame over 50 ms) after the deck stopped repainting landed cards, the top bar lost its blur and the still grain stopped covering four screens; her clients are dealt onto her own salon wall and glass shelf, empty, under her navy (edited from her photo, gen/ground-brief.md), never onto more client photos; cards whole; the wall loads first
 R3n.1 pass: first screen 1440x900 and 390x844: her clients photos fill the whole first screen behind the stack
 R3n.2 pass: signature: the words clients used about their old wig are struck through and the words they used after replace them, from her eight real reviews; no other salon has these quotations
 R3n.3 n/a: the page offers no choice that changes it; the booking page choices are plain tiles
