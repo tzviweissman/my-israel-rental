@@ -18,18 +18,18 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Could not confirm] Table ordering codes (23 Oct, code audit): a business that had table ordering on before the codes shipped has no key until the owner opens the table sheet; two simultaneous loads could create two keys. Needs a database to show. Report: 2026-10-23-site-audit.md
 
 - [Low] Restaurants: a non-ASCII X-Restaurant-Admin-Token header gives a 500 instead of 401 (compare_digest on str). First seen 13 Oct (site audit).
-- [Low] Tests: i18n parity fails on restaurants.more (count without plural); completeness script fails on the "category" checklist item. Since 8 Oct (site audit 13 Oct).
+- [Low] Tests: i18n parity fails on restaurants.more (count without plural); completeness script fails on the "category" checklist item. Since 8 Oct (site audit 13 Oct). (25 Oct: scripts/test-i18n-parity.mjs passes on main plus the audit fixes)
 
-- [Low] Tests: i18n parity fails on restaurants.more (count without plural); completeness script fails on the "category" checklist item. Since 8 Oct (site audit 13 Oct).
+- [Low] Tests: i18n parity fails on restaurants.more (count without plural); completeness script fails on the "category" checklist item. Since 8 Oct (site audit 13 Oct). (25 Oct: scripts/test-i18n-parity.mjs passes on main plus the audit fixes)
 - [Low] Gift Boutique: heading contrast flagged 2.73:1 by readable.mjs, probably mid-fade; re-measure. First seen 14 Oct (UI audit).
 
 - [Medium] Restaurants: the photo endpoint has no rate limit; anyone can use up the month's 4,000 Google photos. First seen 14 Oct (site audit 14 Oct).
 - [Low] Holidays: Sukkot fallback window ended 3 Oct; needs 5788 dates. First seen 14 Oct (site audit 14 Oct).
 - [Low] Memberships: sign-up emails any typed address (20 per 10 min per IP). First seen 14 Oct (site audit 14 Oct).
-- [Low] Jobs board area strings: fix 51649002 sits on an unmerged branch, so en.js still lacks them. Since 8 Oct.
+- [Low] Jobs board area strings: fix 51649002 dropped 25 Oct: main already has jobsBoard.areaPh and areaFreeText (fixed 22 Oct, da0754f6). Since 8 Oct.
 
 - [Low] Restaurants: a non-ASCII X-Restaurant-Admin-Token header gives a 500 instead of 401 (compare_digest on str). First seen 13 Oct (site audit).
-- [Low] Tests: i18n parity fails on restaurants.more (count without plural); completeness script fails on the "category" checklist item. Since 8 Oct (site audit 13 Oct).
+- [Low] Tests: i18n parity fails on restaurants.more (count without plural); completeness script fails on the "category" checklist item. Since 8 Oct (site audit 13 Oct). (25 Oct: scripts/test-i18n-parity.mjs passes on main plus the audit fixes)
 - [Low] Gift Boutique: heading contrast flagged 2.73:1 by readable.mjs, probably mid-fade; re-measure. First seen 14 Oct (UI audit).
 - [Medium] Own domains: an address is reserved before the owner proves they own it, so one business can block another's. First seen 15 Oct (site audit). Needs decision.
 - [Low] Own domains: a rejected change has already deleted the old domain in Railway. First seen 15 Oct (site audit).
@@ -70,13 +70,13 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] Dead end: business checklist item "category" opens a form with no category control (test-completeness-actions fails). First seen 18 Oct (2026-10-18-site-audit; for the dead-ends audit).
 - [To check] Database tests (claim links, contract storage) could not run in the audit sandbox on 18 Oct: no MongoDB download allowed.
 
-- [Low] Tests: i18n parity fails on restaurants.more (count without plural); completeness script fails on the "category" checklist item. Since 8 Oct (site audit 13 Oct).
+- [Low] Tests: i18n parity fails on restaurants.more (count without plural); completeness script fails on the "category" checklist item. Since 8 Oct (site audit 13 Oct). (25 Oct: scripts/test-i18n-parity.mjs passes on main plus the audit fixes)
 - [Low] Gift Boutique: heading contrast flagged 2.73:1 by readable.mjs, probably mid-fade; re-measure. First seen 14 Oct (UI audit).
 
 - [Medium] Restaurants: the photo endpoint has no rate limit; anyone can use up the month's 4,000 Google photos. First seen 14 Oct (site audit 14 Oct).
 - [Low] Holidays: Sukkot fallback window ended 3 Oct; needs 5788 dates. First seen 14 Oct (site audit 14 Oct).
 - [Low] Memberships: sign-up emails any typed address (20 per 10 min per IP). First seen 14 Oct (site audit 14 Oct).
-- [Low] Jobs board area strings: fix 51649002 sits on an unmerged branch, so en.js still lacks them. Since 8 Oct.
+- [Low] Jobs board area strings: fix 51649002 dropped 25 Oct: main already has jobsBoard.areaPh and areaFreeText (fixed 22 Oct, da0754f6). Since 8 Oct.
 
 - [Medium] Hebrew: 14 texts (`basket.*` in CardAction, 2 in JobsBoard) are in neither language file, so Hebrew readers see English on shop basket buttons. First seen 19 Oct (2026-10-19-site-audit).
 - [Low] Dashboard setup checklist: "category" opens a form with no category control. First seen 19 Oct (2026-10-19-site-audit).
@@ -163,3 +163,4 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Medium] Hebrew UI: 14 t() keys (basket.* on marketplace cards, jobsBoard.areaPh/areaFreeText) missing from en.js and he.js; Hebrew users see English. First seen 23 Oct (2026-10-23-ui-audit).
 - [Low] Hebrew UI: 7 count strings with no plural set (basket.items, summary.visits and others). First seen 23 Oct (2026-10-23-ui-audit).
 - [Low] Business pages: clipped.mjs flags pinned opening block under the header on the-brown-box and blazin-boards at phone widths; screenshots look fine. First seen 23 Oct (2026-10-23-ui-audit). Unconfirmed.
+- [Low] Away reply card: {{count}} renamed {{minutes}} so the plural check passes, and the default text lost its exclamation mark (copy rule), EN and HE. Fixed 25 Oct in the audit merge (33618306, 05507564).
