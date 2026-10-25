@@ -54,6 +54,7 @@ R3h.11 pass: no film or generated still set exists on this site
 R3h.13 pass: no generated effect exists
 R3h.14 pass: no film effect exists
 R3h.17 pass: the page does not use words-and-film turns
+R3h.20 pass (Tzvi's exception): measured 25 Oct at 1440x900 and 390x844: the opening is one screen, not a pinned scroll section (the bowl drops on load, the letters spread as it scrolls away), so the 3-screen length does not apply; scrolling it runs at 60 fps (median frame 16.7 ms, no frame over 50 ms); bowl and letters whole on both sizes; the first screen's two pictures (backdrop and bowl) load first. The bowl stands on a dimmed photo of his cornflake platter, the same kind of product, which the rule forbids: Tzvi saw it beside the plain-ground version on 25 Oct and made an exception, keep it
 
 ## 3. Sections and worlds
 R3.12 pass: dramatic opening, a features section (boxes and pans with price and what is included), a closing band with the order button beside the hechsher line in the footer
