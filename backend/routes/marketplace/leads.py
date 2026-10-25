@@ -74,6 +74,8 @@ def chat_leads(messages: list[dict[str, Any]], owner_id: str, titles: dict[str, 
             c = convs[key] = {"key": key, "source": "chat", "customer_id": other, "gig_id": m["property_id"],
                               "title": titles.get(m["property_id"], ""), "replied": False,
                               "created_at": m["created_at"]}
+        if m.get("auto"):
+            continue            # the automatic "we got your message" (away_reply.py) is not an answer
         if m["sender_id"] == owner_id:
             c["replied"] = True
         c["last_text"] = (m.get("message") or "").strip()[:140]
@@ -111,7 +113,7 @@ async def leads_board(business_id: str, user=Depends(verify_token)):
     if gigs:
         msgs = await db.messages.find({"property_id": {"$in": list(gigs)}, "created_at": {"$gte": since},
                                        "$or": [{"sender_id": owner}, {"receiver_id": owner}]},
-                                      {"_id": 0, "property_id": 1, "sender_id": 1, "receiver_id": 1, "message": 1, "created_at": 1}
+                                      {"_id": 0, "property_id": 1, "sender_id": 1, "receiver_id": 1, "message": 1, "created_at": 1, "auto": 1}
                                       ).sort("created_at", 1).to_list(5000)
         chats = chat_leads(msgs, owner, gigs)
         ids = list({c["customer_id"] for c in chats.values()})

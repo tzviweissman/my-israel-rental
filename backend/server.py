@@ -340,6 +340,9 @@ async def startup_tasks() -> None:
     asyncio.create_task(seo.indexnow_loop())
     from routes.marketplace.basket_reminders import basket_reminder_loop
     asyncio.create_task(basket_reminder_loop())
+    # "We got your message" when a business has not answered (away_reply.py).
+    from routes.marketplace.away_reply import away_reply_loop
+    asyncio.create_task(away_reply_loop())
     # "Tell me when it's back" (restock.py) and the birthday treat (birthdays.py).
     from routes.marketplace.restock import restock_loop
     asyncio.create_task(restock_loop())
@@ -587,6 +590,8 @@ async def startup_tasks() -> None:
         await ensure_payment_request_indexes()
         from routes.marketplace.leads import ensure_lead_indexes
         await ensure_lead_indexes()
+        from routes.marketplace.away_reply import ensure_away_indexes
+        await ensure_away_indexes()
         from routes.marketplace.discounts import ensure_discount_indexes
         await ensure_discount_indexes()
         from routes.marketplace.referrals import ensure_referral_indexes

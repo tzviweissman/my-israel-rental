@@ -17,7 +17,7 @@
  * (b.calendar) and sales at the counter (b.counter); on 22 Oct the rating
  * badge (b.badge), sending a price first (b.quotes), payment requests
  * (b.payreq), holiday and win-back messages (b.occasions) and the leads
- * board (b.leads); then the reorder when stock runs low (b.reorder). Stops on My page that
+ * board (b.leads), with the automatic reply above it (b.awayreply, 24 Oct); then the reorder when stock runs low (b.reorder). Stops on My page that
  * are not about the details window carry `details=0`, which closes it
  * (MyBusinessesTab), so the one b.biolink opens is not left over them.
  * Someone who is both takes the business walk first and is offered the
@@ -65,6 +65,8 @@ export const WALKS = {
       doIt: { click: ['occasion-holiday', 'customers-email'] } },
     { id: 'b.leads', route: '/dashboard?tab=customers&view=leads', target: 'leads-board',
       doIt: { click: 'leads-add-open' } },
+    // No "Do it now": the switch sends messages in the owner's name, so they turn it on themselves.
+    { id: 'b.awayreply', route: '/dashboard?tab=customers&view=leads', target: 'away-reply' },
     { id: 'b.giftcards', route: '/dashboard?tab=discounts', target: 'gift-cards',
       doIt: { click: 'gift-cards-open' } },
     { id: 'b.network', route: '/dashboard?tab=network&view=partners', target: ['network', 'network-no-business'],

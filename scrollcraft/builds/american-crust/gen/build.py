@@ -16,7 +16,7 @@ SITE = kit.Site(
 SITE.fonts = 'family=League+Gothic&family=Barlow:wght@400;600;700&family=Heebo:wght@500;700'
 
 TITLE = 'American Crust · American bagel and pizza dough, Jerusalem'
-DESC = "The American bagel and pizza dough that you've been missing. Bagel dough ₪30, pizza dough ₪27, delivered in Ramat Eshkol and surrounding areas for ₪25."
+DESC = "The American bagel and pizza dough that you've been missing. Bagel dough ₪30, pizza dough ₪27, delivered in Ramat Eshkol and surrounding areas for ₪25. Pickup in Sanhedria, Jerusalem. Message us on WhatsApp for the exact address."
 OG = 'og.webp'
 
 def finish(page):
@@ -62,7 +62,7 @@ HOME = f'''  <section class="open" id="film" aria-labelledby="h-open">
       <div class="wrap">
         <h1 id="h-open"><span class="w w1">Boil.</span><span class="w w2">Bake.</span><span class="w w3">Brag.</span></h1>
         <div class="end">
-          <p class="lede">The American bagel and pizza dough that you've been missing, delivered in Ramat Eshkol, Jerusalem, for ₪25.</p>
+          <p class="lede">The American bagel and pizza dough that you've been missing, delivered in Ramat Eshkol, Jerusalem, for ₪25, or pick up in Sanhedria.</p>
           <div class="go"><a class="btn" href="#buy">Order your dough</a><p class="from">Bagel dough ₪30<br>Pizza dough ₪27</p></div>
         </div>
       </div>
@@ -95,9 +95,9 @@ HOME = f'''  <section class="open" id="film" aria-labelledby="h-open">
 
   <section class="sec get" aria-labelledby="h-get">
     <div class="wrap">
-      <h2 id="h-get" class="rev">Delivery, payment and kosher</h2>
+      <h2 id="h-get" class="rev">Delivery, pickup, payment and kosher</h2>
       <div class="tiles rev">
-        <div class="tile"><h3>Delivery</h3><p>Delivery ₪25 in Ramat Eshkol and surrounding areas. Further away, the fee depends on where: we confirm it on WhatsApp.</p></div>
+        <div class="tile"><h3>Delivery and pickup</h3><p>Delivery ₪25 in Ramat Eshkol and surrounding areas. Further away, the fee depends on where: we confirm it on WhatsApp. Pickup in Sanhedria, Jerusalem. Message us on WhatsApp for the exact address.</p></div>
         <div class="tile"><h3>Payment</h3><p>Cash or Zelle.</p></div>
         <div class="tile"><h3>Kosher</h3><p>Pareve, with the hechsher of Rabbi Akiva Dershowitz.</p></div>
       </div>
@@ -208,7 +208,7 @@ SHOP = f'''  <form id="form" novalidate>
     <div class="wrap">
       <ol class="osteps" id="steps" aria-label="Order steps">
         <li class="is-now" aria-current="step"><button type="button" data-go="1">Step 1: Your basket</button></li>
-        <li><button type="button" data-go="2">Step 2: Delivery</button></li>
+        <li><button type="button" data-go="2">Step 2: Delivery or pickup</button></li>
         <li><button type="button" data-go="3">Step 3: Your details</button></li>
       </ol>
       <div class="form">
@@ -221,9 +221,10 @@ SHOP = f'''  <form id="form" novalidate>
             <a class="more lnk" href="#doughs">Add more dough</a>
           </div>
           <div class="card ostep" data-s="2" hidden>
-            <h2>Delivery</h2>
+            <h2>Delivery or pickup</h2>
+            <div class="ful" role="radiogroup" aria-label="Delivery or pickup"><label class="opt"><input type="radio" name="ful" value="delivery" checked>Delivery, ₪25</label><label class="opt"><input type="radio" name="ful" value="pickup">Pickup in Sanhedria</label></div>
             <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p><label class="opt far"><input type="checkbox" id="far">My address is further away (Ramot, RBS or elsewhere)</label><p class="hint">Delivery ₪25 in Ramat Eshkol and surrounding areas. Further away, the fee depends on where: we confirm it on WhatsApp.</p></div>
-            <div id="w-when"><label class="f" for="when" id="when-l">Delivery day</label><input class="fld" id="when" type="date"><p class="hint" id="h-when">Closed for Shabbat and holidays: those days cannot be chosen.</p><p class="err" id="e-when"></p></div>
+            <div id="w-when"><label class="f" for="when" id="when-l">Delivery day</label><input class="fld" id="when" type="date"><p class="hint" id="h-pick" hidden>We send you the exact address on WhatsApp.</p><p class="hint" id="h-when">Closed for Shabbat and holidays: those days cannot be chosen.</p><p class="err" id="e-when"></p></div>
           </div>
           <div class="card ostep" data-s="3" hidden>
             <h2>Your details</h2>
@@ -251,7 +252,7 @@ SHOP = f'''  <form id="form" novalidate>
   </form>
 '''
 SHOP_JS = '<script>\n' + open('gen/shop.js', encoding='utf8').read() + '</script>\n'
-SITE.write('shop', 'Shop · American Crust bagel and pizza dough', 'Order American style bagel dough, 6 pre shaped bagels, ₪30, and classic American pizza dough, 100% parve, ₪27. Delivery ₪25 in Ramat Eshkol and surrounding areas.', OG, SHOP, SHOP_JS); finish('shop')
+SITE.write('shop', 'Shop · American Crust bagel and pizza dough', 'Order American style bagel dough, 6 pre shaped bagels, ₪30, and classic American pizza dough, 100% parve, ₪27. Delivery ₪25 in Ramat Eshkol and surrounding areas. Pickup in Sanhedria, Jerusalem. Message us on WhatsApp for the exact address.', OG, SHOP, SHOP_JS); finish('shop')
 
 # ---- contact ----
 CONTACT = SITE.page_head('Contact', 'Order, ask a question, or tell us where to deliver.') + f'''  <section class="sec" style="padding-block: 1.5rem 2.5rem" aria-label="How to reach us">
@@ -264,9 +265,9 @@ CONTACT = SITE.page_head('Contact', 'Order, ask a question, or tell us where to 
   </section>
   <section class="sec get" aria-labelledby="h-get2" style="padding-block: 2rem">
     <div class="wrap">
-      <h2 id="h-get2">Delivery and payment</h2>
+      <h2 id="h-get2">Delivery, pickup and payment</h2>
       <div class="tiles">
-        <div class="tile"><h3>Delivery</h3><p>Delivery ₪25 in Ramat Eshkol and surrounding areas. Further away, the fee depends on where: we confirm it on WhatsApp.</p></div>
+        <div class="tile"><h3>Delivery and pickup</h3><p>Delivery ₪25 in Ramat Eshkol and surrounding areas. Further away, the fee depends on where: we confirm it on WhatsApp. Pickup in Sanhedria, Jerusalem. Message us on WhatsApp for the exact address.</p></div>
         <div class="tile"><h3>Payment</h3><p>Cash or Zelle.</p></div>
         <div class="tile"><h3>Now available in</h3><p>Express Market in Geula, Arzai Makolets and Good Market on Paran.</p></div>
       </div>
@@ -281,6 +282,6 @@ CONTACT = SITE.page_head('Contact', 'Order, ask a question, or tell us where to 
 '''
 # the contact page shows the numbers once, in its tiles: its closing band keeps only the line and the button
 import dataclasses
-dataclasses.replace(SITE, contacts=[]).write('contact', 'Contact · American Crust', 'WhatsApp +1 732 503 1703, text or call 055 336 2730. American Crust bagel and pizza dough, Jerusalem.', OG, CONTACT); finish('contact')
+dataclasses.replace(SITE, contacts=[]).write('contact', 'Contact · American Crust', 'WhatsApp +1 732 503 1703, text or call 055 336 2730. American Crust bagel and pizza dough, Jerusalem. Pickup in Sanhedria, Jerusalem. Message us on WhatsApp for the exact address.', OG, CONTACT); finish('contact')
 _c = open('contact.html', encoding='utf8').read(); open('contact.html', 'w', encoding='utf8').write(_c.replace('\n        <p></p>', ''))   # the contact close band has no numbers: no empty paragraph
 print('built')

@@ -13,6 +13,7 @@
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import ProofLine from '../components/marketplace/ProofLine';
 import ReviewsSection from '../components/reviews/ReviewsSection';
+import AskBusiness from '../components/business/AskBusiness';
 import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPanel';
 import { CATEGORY_LABELS } from '../lib/categories';
 import { localizedTitle } from '../utils/gigLocale';
@@ -924,6 +925,9 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
         {/* On a v3 page the reviews are V3Reviews, above the offer. */}
         {/* When it is usually busy, from its own visits (busy_times.py). */}
         {!extra && <BusyTimes businessId={biz.id} />}
+
+        {/* An instant answer from the page, or the question goes to them (ask.py). */}
+        {!v3 && !extra && !preview && <AskBusiness biz={biz} className="mt-10" />}
 
         {!v3 && !extra && <ReviewsSection
           businessId={biz.id}

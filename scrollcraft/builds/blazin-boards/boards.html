@@ -6,7 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Every board · Blazin' Boards</title>
 <meta name="site-category" content="food-shop">
-<meta name="description" content="Every Blazin' Boards meat board, with its size, price and what is on it. Wine and whisky to add. Orders 48 hours ahead.">
+<meta name="description" content="Every Blazin' Boards meat board, with its own photo, size, price and what is on it. Wine and whisky to add. Orders 48 hours ahead.">
 <link rel="icon" href="assets/their-logo-small.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -27,9 +27,9 @@
 <main>
   <header class="wrap shop-head">
     <p class="eyebrow">Every board</p>
-    <h1>Every board, <em>with its size and price.</em></h1>
+    <h1>Every board, <em>with its own photo.</em></h1>
     <p>Premium meats, cooked and grilled to perfection. Two lines at each size: the Blazin' line adds chicken and sticky beef bites, the Premium Steak line is all steak. Prices in US dollars.</p>
-    <p class="scale-note">The picture shows our board style. The size and what goes on each board are written under it.</p>
+    <p class="scale-note">Each photo is that board. Its size is on the photo, and what goes on it is written under it.</p>
     <div class="chips filters" role="group" aria-label="Show">
       <button type="button" class="chip" data-show="all" aria-pressed="true">All boards</button>
       <button type="button" class="chip" data-show="blazin" aria-pressed="false">Blazin' line</button>
@@ -79,8 +79,14 @@
   var o = BB.load(), F = null, show = 'all';
   function card(p) {
     var q = o.cart[p.id] || 0;
-    var stage = p.cm
-      ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815" loading="lazy"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
+    // His own photo of this board (the product picture on his listing, so a new one he uploads shows here too);
+    // the cut-out only for a board without one. Sizes are from his catalog.
+    var img = p.image ? String(p.image).replace('/upload/f_auto,q_auto/', '/upload/f_auto,q_auto,w_800/') : '';
+    var dims = p.cm ? '<span class="dims" style="background:#fff;padding:5px 9px;border-radius:999px">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span>' : '';
+    var stage = img
+      ? '<div class="stage"><img src="' + BB.esc(img) + '" alt="' + BB.esc(p.short) + '" width="800" height="533" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">' + dims + '</div>'
+      : p.cm
+      ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
       : '<div class="stage"><span style="font-weight:700;color:var(--gold-text)">Size on request</span></div>';
     return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + BB.dealHtml(p) + stage
       + '<div class="body"><span class="line">' + BB.LINES[p.line] + '</span><h3>' + BB.esc(p.short) + '</h3>'
@@ -92,10 +98,16 @@
         : '<button type="button" class="cta" data-inc="' + p.id + '">Add to order</button>')
       + '</div></div></li>';
   }
+  function filter() {
+    [].forEach.call(document.querySelectorAll('#boards .bcard'), function (li) { li.hidden = show !== 'all' && li.dataset.line !== show; });
+  }
   function paint() {
-    var boards = F.products.filter(function (p) { return p.board && (show === 'all' || p.line === show); });
+    // every board is in the list once; a filter only hides the others, so a quick second tap never
+    // catches cards being rebuilt and their photos decoding (check-motion FLASH, 25 Oct 2026)
+    var boards = F.products.filter(function (p) { return p.board; });
     boards.sort(function (a, b) { return a.price - b.price; });
     document.getElementById('boards').innerHTML = boards.map(card).join('');
+    filter();
     var bottles = F.products.filter(function (p) { return !p.board; });
     document.getElementById('bottles-sec').hidden = !bottles.length;
     document.getElementById('bottles').innerHTML = bottles.map(function (p) {
@@ -109,7 +121,7 @@
     if (t.dataset.show) {
       var g = document.getElementById('boards'); g.style.minHeight = g.offsetHeight + 'px';
       show = t.dataset.show; document.querySelectorAll('[data-show]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); });
-      paint(); if (g.animate) g.animate([{ opacity: 0.85 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' }); return; }
+      filter(); return; }
     var id = t.dataset.inc || t.dataset.dec || t.dataset.bottle;
     var p = F.products.filter(function (x) { return x.id === id; })[0];
     var was = o.cart[id] || 0;
