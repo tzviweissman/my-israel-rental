@@ -271,6 +271,14 @@ console.log(`published ${folder} as /business/${slug} (${files} files in fronten
     if (line.length > 72) line = `${line.slice(0, 70).replace(/[ ,;:]+\S*$/, '')}`;
     const entry = { slug, name, line };
     if (card.line_he) entry.line_he = card.line_he;
+    else {
+      // the Hebrew line, written by Claude the same way the listings are translated (backend/scripts/he_line.py;
+      // Tzvi, 25 Oct 2026). Needs backend/.env (its key); without it the card shows the English line.
+      const { spawnSync } = await import('node:child_process');
+      const py = [path.join(ROOT, 'backend', '.venv', 'Scripts', 'python.exe'), path.join(ROOT, 'backend', '.venv', 'bin', 'python')].find((f) => fs.existsSync(f)) || 'python';
+      const he = spawnSync(py, [path.join(ROOT, 'backend', 'scripts', 'he_line.py'), line], { encoding: 'utf8', env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
+      if (he.status === 0 && he.stdout.trim()) entry.line_he = he.stdout.trim();
+    }
     const logo = card.logo ? path.join(SRC, card.logo) : ['logo.webp', 'logo.png', 'logo.jpg', 'logo-192.png', 'logo-crop.png'].map((f) => path.join(SRC, 'assets', f)).find((f) => fs.existsSync(f));
     if (logo && !card.mark) {
       const { spawnSync } = await import('node:child_process');
@@ -279,12 +287,19 @@ console.log(`published ${folder} as /business/${slug} (${files} files in fronten
       if (r.status === 0) entry.logo = `${slug}-logo.webp`;
     }
     if (!entry.logo) Object.assign(entry, { logo: null, mark: card.mark || name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase(), ...(card.markColor ? { markColor: card.markColor, markInk: card.markInk } : {}) });
+    // its business id: /businesses matches it to the business's own listing (that listing is then not repeated
+    // under the business pages, and a search shows the page only when the listing matches)
+    try {
+      const r = await fetch(`https://myisraelrental.com/api/marketplace/business/${slug}`);
+      const b = r.ok ? await r.json() : null;
+      if (b && (b.business || b).id) entry.business_id = (b.business || b).id;
+    } catch { /* offline: the card still shows, its listing just also shows below */ }
     entry.v = '0'; entry.page = '';
     const listFile = path.join(SHOW, 'showcase.json');
     let list = []; try { list = JSON.parse(fs.readFileSync(listFile, 'utf8')); } catch { /* new list */ }
     list.push(entry);
     fs.writeFileSync(listFile, `[\n${list.map((x) => `  ${JSON.stringify(x)}`).join(',\n')}\n]\n`);
-    console.log(`\nadded ${slug} to /showcase: "${name}", "${line}"${entry.logo ? `, logo ${entry.logo}` : `, mark ${entry.mark}`}${entry.line_he ? '' : ' (no Hebrew line yet: add line_he to frontend/public/showcase/showcase.json)'}`);
+    console.log(`\nadded ${slug} to /showcase: "${name}", "${line}"${entry.logo ? `, logo ${entry.logo}` : `, mark ${entry.mark}`}${entry.line_he ? `, Hebrew "${entry.line_he}"` : ' (no Hebrew line yet: add line_he to frontend/public/showcase/showcase.json)'}`);
     listed = true;
   }
   if (listed && !process.argv.includes('--no-preview')) {

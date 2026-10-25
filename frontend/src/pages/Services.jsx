@@ -19,6 +19,7 @@ import { ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin, LayoutGrid,
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
 import ShowcaseStrip from '../components/showcase/ShowcaseStrip';
+import { useShowcase } from '../components/showcase/ShowcaseCard';
 import StarRating from '../components/marketplace/StarRating';
 import GigCard from '../components/marketplace/ServiceCard';
 import CoverPlaceholder from '../components/common/CoverPlaceholder';
@@ -171,6 +172,22 @@ const Services = () => {
     () => (availableNowOnly ? gigs.filter((g) => isAvailableNow(g)) : gigs),
     [gigs, availableNowOnly],
   );
+  // The business pages (frontend/public/showcase/showcase.json) sit above the regular listings, and a
+  // business with a page is not repeated below it (Tzvi, 25 Oct 2026: "if a business is on the business page
+  // section it doesnt need to be on the regular section too and when someone searches their category it will
+  // show the business pages on top and the regular on bottom"). With a search, category, place or filter, a
+  // business page shows only when its own listing is in the results, so the server's search decides for both.
+  const showcase = useShowcase();
+  const showcaseIds = useMemo(() => new Set((showcase || []).map((x) => x.business_id).filter(Boolean)), [showcase]);
+  const searching = Boolean(selectedCat || selectedSubcategory || selectedLoc || q || availableNowOnly
+    || minRating || minPrice || maxPrice || responseTime || languages.length || bookingMode || maxDistance || nearby || availableOn);
+  const pinnedPages = useMemo(() => {
+    if (!showcase) return [];
+    if (!searching) return showcase;
+    const hit = new Set(displayGigs.map((g) => g.business_id));
+    return showcase.filter((x) => hit.has(x.business_id));
+  }, [showcase, searching, displayGigs]);
+  const regularGigs = useMemo(() => displayGigs.filter((g) => !showcaseIds.has(g.business_id)), [displayGigs, showcaseIds]);
   const toggleAvailableNow = () => {
     const next = new URLSearchParams(searchParams);
     if (availableNowOnly) next.delete('available_now');
@@ -421,7 +438,7 @@ const Services = () => {
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
         {/* The hand-built business pages, as live previews (Tzvi, 9 Oct
             2026: "add them at the top of the regular business page"). */}
-        <ShowcaseStrip />
+        <ShowcaseStrip items={pinnedPages} />
         {/* Section headings drop their hardcoded Inter/tracking styles for
             the shared `.section-rhead` rule — the preview's editorial
             Playfair, and the same type as the Stays results header. The
@@ -515,7 +532,7 @@ const Services = () => {
               ? categories.find((c) => c.slug === selectedCat)?.label
               : t('services.allServices', 'All services')}
             <span className="text-sm text-[var(--brand-muted)] font-normal ms-2" data-testid="services-count">
-              ({displayGigs.length})
+              ({pinnedPages.length + regularGigs.length})
             </span>
           </h2>
           <div className="flex items-center gap-2">
@@ -721,7 +738,7 @@ const Services = () => {
           <div className="flex items-center justify-center py-24">
             <Loader2 className="animate-spin text-[var(--brand-primary)]" size={28} />
           </div>
-        ) : displayGigs.length === 0 ? (
+        ) : displayGigs.length === 0 || (viewMode !== 'map' && regularGigs.length === 0 && !pinnedPages.length) ? (
           <div className="bg-white border border-gray-200 rounded-2xl p-10 text-center">
             <p className="text-gray-700 font-semibold mb-2">
               {availableNowOnly
@@ -895,7 +912,7 @@ const Services = () => {
                in full grids too. Now ~265px at lg and ~208px at xl. */
             className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-5 gap-y-8"
           >
-            {displayGigs.map((gig) => (
+            {regularGigs.map((gig) => (
               /* The admin feature-toggle is a SIBLING of the card, not a
                  child: GigCard renders a <button>, and a button inside a
                  button is invalid HTML that browsers reflow unpredictably
