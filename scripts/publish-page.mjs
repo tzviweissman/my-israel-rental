@@ -253,6 +253,40 @@ console.log(`published ${folder} as /business/${slug} (${files} files in fronten
 {
   let listed = false;
   try { listed = JSON.parse(fs.readFileSync(path.join(ROOT, 'frontend', 'public', 'showcase', 'showcase.json'), 'utf8')).some((x) => x.slug === slug); } catch { /* no list */ }
+  // Every published site appears on /showcase and the home page strip, added here the first time it is published
+  // (Tzvi, 24 Oct 2026: "when we publish i want it to automatically add it to the business page section", after
+  // American Crust and RS Modest went live but were missing from the gallery). The card's words come from the
+  // build: an optional scrollcraft/builds/<folder>/showcase.json ({ name, line, line_he, logo or mark }) wins;
+  // otherwise the name is og:site_name or the title before " · ", the line is the meta description's first
+  // sentence, and the logo is the build's assets/logo* file (else a letter mark). line_he, when missing, shows
+  // the English line until it is added. The clip is then recorded below, as for any listed page.
+  if (!listed && !process.argv.includes('--no-preview')) {
+    const SHOW = path.join(ROOT, 'frontend', 'public', 'showcase');
+    const html = fs.readFileSync(path.join(SRC, 'index.html'), 'utf8');
+    const meta = (re) => ((html.match(re) || [])[1] || '').replace(/&#x27;|&#39;|&rsquo;|&apos;/g, "'").replace(/&quot;/g, '"').replace(/&amp;/g, '&').trim();
+    let card = {};
+    try { card = JSON.parse(fs.readFileSync(path.join(SRC, 'showcase.json'), 'utf8')); } catch { /* derive it */ }
+    const name = card.name || meta(/<meta property="og:site_name" content="([^"]+)"/) || meta(/<title>([^<]+)/).split(/\s[·|–-]\s|,\s|\.\s/)[0].trim();
+    let line = card.line || meta(/<meta name="description" content="([^"]+)"/).split(/(?<=[.!?])\s/)[0].replace(/\.$/, '');
+    if (line.length > 72) line = `${line.slice(0, 70).replace(/[ ,;:]+\S*$/, '')}`;
+    const entry = { slug, name, line };
+    if (card.line_he) entry.line_he = card.line_he;
+    const logo = card.logo ? path.join(SRC, card.logo) : ['logo.webp', 'logo.png', 'logo.jpg', 'logo-192.png', 'logo-crop.png'].map((f) => path.join(SRC, 'assets', f)).find((f) => fs.existsSync(f));
+    if (logo && !card.mark) {
+      const { spawnSync } = await import('node:child_process');
+      const out = path.join(SHOW, `${slug}-logo.webp`);
+      const r = spawnSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', logo, '-vf', 'scale=96:96:force_original_aspect_ratio=decrease,pad=96:96:(ow-iw)/2:(oh-ih)/2:color=0x00000000', out]);
+      if (r.status === 0) entry.logo = `${slug}-logo.webp`;
+    }
+    if (!entry.logo) Object.assign(entry, { logo: null, mark: card.mark || name.split(/\s+/).map((w) => w[0]).join('').slice(0, 2).toUpperCase(), ...(card.markColor ? { markColor: card.markColor, markInk: card.markInk } : {}) });
+    entry.v = '0'; entry.page = '';
+    const listFile = path.join(SHOW, 'showcase.json');
+    let list = []; try { list = JSON.parse(fs.readFileSync(listFile, 'utf8')); } catch { /* new list */ }
+    list.push(entry);
+    fs.writeFileSync(listFile, `[\n${list.map((x) => `  ${JSON.stringify(x)}`).join(',\n')}\n]\n`);
+    console.log(`\nadded ${slug} to /showcase: "${name}", "${line}"${entry.logo ? `, logo ${entry.logo}` : `, mark ${entry.mark}`}${entry.line_he ? '' : ' (no Hebrew line yet: add line_he to frontend/public/showcase/showcase.json)'}`);
+    listed = true;
+  }
   if (listed && !process.argv.includes('--no-preview')) {
     const http = await import('node:http');
     const { spawn } = await import('node:child_process');
