@@ -279,7 +279,7 @@ console.log(`published ${folder} as /business/${slug} (${files} files in fronten
       const he = spawnSync(py, [path.join(ROOT, 'backend', 'scripts', 'he_line.py'), line], { encoding: 'utf8', env: { ...process.env, PYTHONIOENCODING: 'utf-8' } });
       if (he.status === 0 && he.stdout.trim()) entry.line_he = he.stdout.trim();
     }
-    const logo = card.logo ? path.join(SRC, card.logo) : ['logo.webp', 'logo.png', 'logo.jpg', 'logo-192.png', 'logo-crop.png'].map((f) => path.join(SRC, 'assets', f)).find((f) => fs.existsSync(f));
+    const logo = card.logo ? path.join(SRC, card.logo) : ['logo.webp', 'logo.png', 'logo.jpg', 'logo-192.png', 'logo-crop.png', 'mark.webp', 'mark.png'].map((f) => path.join(SRC, 'assets', f)).find((f) => fs.existsSync(f));
     if (logo && !card.mark) {
       const { spawnSync } = await import('node:child_process');
       const out = path.join(SHOW, `${slug}-logo.webp`);

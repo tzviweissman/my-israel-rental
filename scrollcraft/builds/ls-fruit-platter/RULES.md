@@ -39,6 +39,7 @@ R3b.1 pass: first screen says what (fruit platters), where (Jerusalem), trust (K
 R3b.2 pass: the kosher band follows the opening; the certificate is stated twice (the band and the trust row)
 R3b.3 pass: one solid action per screen: the bar button is the outline version over the film
 R3h.1 pass: check-site OPENING clean: the home page opens on a full-screen film that plays once on load
+R3h.20 n/a: measured 25 Oct (check-site's SMOOTH/SLOW measure at 1440x900 and 390x844): the opening is not scroll-driven (no sticky stage); it is the full-screen platter film that plays on its own, on a plain red ground of its own colour, the platter whole
 R3n.1 pass: her Large platter fills the whole first screen on laptop and phone
 R3n.2 pass: the fruit bursts up off her Large board in the opening film; no other business has her board
 R3n.3 pass: on the shop page choosing a size changes the stage photo, name, price, button and the page ground to that size's colour; check-motion COLOUR clean
