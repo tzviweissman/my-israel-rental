@@ -98,10 +98,16 @@
         : '<button type="button" class="cta" data-inc="' + p.id + '">Add to order</button>')
       + '</div></div></li>';
   }
+  function filter() {
+    [].forEach.call(document.querySelectorAll('#boards .bcard'), function (li) { li.hidden = show !== 'all' && li.dataset.line !== show; });
+  }
   function paint() {
-    var boards = F.products.filter(function (p) { return p.board && (show === 'all' || p.line === show); });
+    // every board is in the list once; a filter only hides the others, so a quick second tap never
+    // catches cards being rebuilt and their photos decoding (check-motion FLASH, 25 Oct 2026)
+    var boards = F.products.filter(function (p) { return p.board; });
     boards.sort(function (a, b) { return a.price - b.price; });
     document.getElementById('boards').innerHTML = boards.map(card).join('');
+    filter();
     var bottles = F.products.filter(function (p) { return !p.board; });
     document.getElementById('bottles-sec').hidden = !bottles.length;
     document.getElementById('bottles').innerHTML = bottles.map(function (p) {
@@ -115,7 +121,7 @@
     if (t.dataset.show) {
       var g = document.getElementById('boards'); g.style.minHeight = g.offsetHeight + 'px';
       show = t.dataset.show; document.querySelectorAll('[data-show]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); });
-      paint(); if (g.animate) g.animate([{ opacity: 0.85 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' }); return; }
+      filter(); return; }
     var id = t.dataset.inc || t.dataset.dec || t.dataset.bottle;
     var p = F.products.filter(function (x) { return x.id === id; })[0];
     var was = o.cart[id] || 0;

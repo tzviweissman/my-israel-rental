@@ -234,6 +234,7 @@ img { display: block; max-width: 100%; }
 .stepper button:hover, .bottle .tg:hover { background: var(--wash); }
 .bottle .tg[aria-pressed="true"]:hover { background: var(--ox-2); }
 .bcard { position: relative; }
+.bcard[hidden] { display: none; }
 .bcard .body { grid-template-rows: auto auto auto auto 1fr; }
 .bcard .add { align-self: end; }
 .bcard .save-b { position: absolute; top: 14px; right: 14px; z-index: 2; }
