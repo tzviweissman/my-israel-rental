@@ -51,7 +51,7 @@ export default function AwayReplyCard({ API, auth, businessId }) {
             <>
               <textarea value={s.text} onChange={(e) => setS({ ...s, text: e.target.value })} maxLength={500} rows={2} dir="auto"
                         aria-label={t('awayReply.ownLabel', 'Your own words (optional)')}
-                        placeholder={t('awayReply.placeholder', "Thanks for your message! We've got it and will get back to you as soon as we can.")}
+                        placeholder={t('awayReply.placeholder', "Thanks for your message. We've got it and will get back to you as soon as we can.")}
                         className="w-full px-3 py-2 rounded-lg border text-sm bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="away-reply-text" />
               <div className="flex flex-wrap items-center gap-3 mt-2">
                 <button type="button" onClick={() => save(s)} disabled={busy}
