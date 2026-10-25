@@ -393,8 +393,8 @@ body:not(.no-js) .rev[data-dir="u"].in::after { animation-name: sweep-u; }
 .hero { position: relative; isolation: isolate; margin-top: 70px; min-height: calc(100svh - 70px); display: grid; align-items: end; overflow: hidden; background: #E9E2E0; color: #fff; padding: 40px 0 clamp(1.4rem, 5svh, 3rem); }
 .hero .frame { position: absolute; inset: 0; z-index: -2; }
 .hero .frame img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.edge { position: absolute; inset: auto 0 0; height: 78%; z-index: -1; pointer-events: none; background-color: color-mix(in srgb, var(--tint, #F4EFEE) 16%, #2A1513);
-  -webkit-mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 64%, rgb(0 0 0 / .5) 86%, transparent); mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 64%, rgb(0 0 0 / .5) 86%, transparent);
+.edge { position: absolute; inset: auto 0 0; height: 90%; /* 90%, was 78%: on her bubblegum photo the grey cloth above the band read as an untinted page (check-motion COLOUR, 25 Oct) */ z-index: -1; pointer-events: none; background-color: color-mix(in srgb, var(--tint, #F4EFEE) 38%, #2A1513); /* 38%, was 16%: the shade must show on the page (check-motion COLOUR, 25 Oct) */
+  -webkit-mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 56%, rgb(0 0 0 / .6) 84%, transparent); mask-image: linear-gradient(to top, #000 0, rgb(0 0 0 / .94) 56%, rgb(0 0 0 / .6) 84%, transparent);
   transition: background-color 900ms cubic-bezier(.65, 0, .35, 1); }
 .hero .wrap { width: 100%; display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: clamp(1.5rem, 4vw, 4rem); align-items: end; }
 .hero .caps { color: #F6E1DE; text-shadow: 0 1px 12px rgb(30 12 10 / .5); }
@@ -416,7 +416,7 @@ body:not(.no-js) .rev[data-dir="u"].in::after { animation-name: sweep-u; }
   .h-pick { justify-self: start; width: 100%; gap: .5rem; }
   .h-pick .caps { display: none; }
   .chips { gap: .5rem; } .hero .shade { width: 42px; height: 42px; }
-  .edge { height: 84%; }
+  .edge { height: 92%; }
 }
 /* the rest sections: white and dark, hairlines, small calm words */
 .rest { background: #fff; }
