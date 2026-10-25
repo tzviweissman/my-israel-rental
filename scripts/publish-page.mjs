@@ -38,6 +38,17 @@ if (!folder || !slug || !/^[a-z0-9-]{2,60}$/.test(slug)) {
 }
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const SRC = path.join(ROOT, 'scrollcraft', 'builds', folder);
+// The local servers below answer byte ranges, as a real host does: without them a film cannot seek, so a film the
+// page scrubs from the scroll stayed on its first frame in every check and in the business pages clip (Michal
+// Balloons, 25 Oct 2026)
+function sendFile(req, res, file, type) {
+  const size = fs.statSync(file).size, m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+  if (!m || (!m[1] && !m[2])) { res.writeHead(200, { 'content-type': type, 'content-length': size, 'accept-ranges': 'bytes' }); fs.createReadStream(file).pipe(res); return; }
+  const start = m[1] ? +m[1] : Math.max(0, size - +m[2]), end = m[1] && m[2] ? Math.min(+m[2], size - 1) : size - 1;
+  if (start > end || start >= size) { res.writeHead(416, { 'content-range': `bytes */${size}` }); res.end(); return; }
+  res.writeHead(206, { 'content-type': type, 'content-length': end - start + 1, 'content-range': `bytes ${start}-${end}/${size}`, 'accept-ranges': 'bytes' });
+  fs.createReadStream(file, { start, end }).pipe(res);
+}
 const OUT = path.join(ROOT, 'frontend', 'public', 'pages', slug);
 const BASE = `/pages/${slug}/`;
 // Static files are cached for a year by serve.json, so each publish stamps
@@ -85,8 +96,7 @@ const CHECK_ONLY = process.argv.includes('--check');
     const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
     const file = path.join(SRC, rel);
     if (!file.startsWith(SRC) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
-    res.writeHead(200, { 'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream' });
-    fs.createReadStream(file).pipe(res);
+    sendFile(req, res, file, TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream');
   });
   await new Promise((r) => server.listen(0, '127.0.0.1', r));
   const base = `http://127.0.0.1:${server.address().port}/`;
@@ -335,8 +345,7 @@ console.log(`published ${folder} as /business/${slug} (${files} files in fronten
       const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
       const file = path.join(SRC, rel);
       if (!file.startsWith(SRC) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
-      res.writeHead(200, { 'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream' });
-      fs.createReadStream(file).pipe(res);
+      sendFile(req, res, file, TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream');
     });
     await new Promise((r) => server.listen(0, '127.0.0.1', r));
     const url = `http://127.0.0.1:${server.address().port}/`;

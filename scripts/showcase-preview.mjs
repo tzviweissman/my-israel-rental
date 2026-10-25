@@ -27,7 +27,11 @@ execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-i', raw, '-t', '10', '-vf'
 // The still comes from 2.3 s in, not the first frame: record.mjs holds the
 // opening for 2.5 s, and an opening that builds in (Chicken Munch's letters
 // rise and the bowl drops) is only a dark frame at 0 s (19 Oct 2026).
-execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-ss', '2.3', '-i', raw, '-frames:v', '1', '-vf', 'scale=640:-2', '-q:v', '80', join(OUT, `${slug}.webp`)]);
+// An opening that only happens as you scroll is still empty at 2.3 s (Michal Balloons: the arch builds from an
+// empty room), so its showcase.json entry names a later moment as "still_at" (seconds into the clip, 25 Oct 2026).
+let stillAt = '2.3';
+try { stillAt = String(JSON.parse(readFileSync(join(OUT, 'showcase.json'), 'utf8')).find((x) => x.slug === slug)?.still_at || stillAt); } catch { /* no list yet */ }
+execFileSync('ffmpeg', ['-loglevel', 'error', '-y', '-ss', stillAt, '-i', raw, '-frames:v', '1', '-vf', 'scale=640:-2', '-q:v', '80', join(OUT, `${slug}.webp`)]);
 rmSync(tmp, { recursive: true, force: true });
 // Note which version of the page this clip shows (a hash of the published
 // page) and bump v so browsers fetch the new clip. check-showcase-previews.mjs
