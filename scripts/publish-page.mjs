@@ -97,7 +97,7 @@ const CHECK_ONLY = process.argv.includes('--check');
   const results = [];
   for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly']]) results.push({ why, ...(await run(script)) });
   server.close();
-  for (const r of results) if (r.code !== 0) problems.push(`${r.why}:\n${r.out.split('\n').filter((l) => l.trim() && !/: checked$|choices tapped/.test(l)).join('\n')}`);
+  for (const r of results) if (r.code !== 0) problems.push(`${r.why}:\n${r.out.split('\n').filter((l) => l.trim() && !/: checked$|^\S+: \d+ choices tapped/.test(l)).join('\n')}`);
   if (problems.length) {
     console.error(`Not published: ${slug} has ${problems.length} kind(s) of problem. Fix them all, then run again.\n\n${problems.join('\n\n')}`);
     process.exit(1);

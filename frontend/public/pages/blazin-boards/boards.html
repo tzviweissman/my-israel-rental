@@ -6,16 +6,16 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Every board · Blazin' Boards</title>
 <meta name="site-category" content="food-shop">
-<meta name="description" content="Every Blazin' Boards meat board, with its size, price and what is on it. Wine and whisky to add. Orders 48 hours ahead.">
-<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mvkui32v">
+<meta name="description" content="Every Blazin' Boards meat board, with its own photo, size, price and what is on it. Wine and whisky to add. Orders 48 hours ahead.">
+<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mvo0sag4">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mvkui32v">
+<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mvo0sag4">
 </head>
 <body>
 <nav class="nav" aria-label="Blazin' Boards">
-  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mvkui32v" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
+  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mvo0sag4" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
   <ul class="menu">
     <li><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-0">Home</a></li>
     <li><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-0">Every board</a></li>
@@ -27,9 +27,9 @@
 <main>
   <header class="wrap shop-head">
     <p class="eyebrow" data-mir-key="t-89a787ea-0">Every board</p>
-    <h1 data-mir-key="t-3db0911a-0">Every board, <em>with its size and price.</em></h1>
+    <h1 data-mir-key="t-b9ee6f63-0">Every board, <em>with its own photo.</em></h1>
     <p data-mir-key="t-98226ddb-0">Premium meats, cooked and grilled to perfection. Two lines at each size: the Blazin' line adds chicken and sticky beef bites, the Premium Steak line is all steak. Prices in US dollars.</p>
-    <p class="scale-note" data-mir-key="t-b3004d4f-0">The picture shows our board style. The size and what goes on each board are written under it.</p>
+    <p class="scale-note" data-mir-key="t-19d44668-0">Each photo is that board. Its size is on the photo, and what goes on it is written under it.</p>
     <div class="chips filters" role="group" aria-label="Show">
       <button type="button" class="chip" data-show="all" aria-pressed="true" data-mir-key="t-7c6daf94-0">All boards</button>
       <button type="button" class="chip" data-show="blazin" aria-pressed="false" data-mir-key="t-6829743f-0">Blazin' line</button>
@@ -73,14 +73,20 @@
   </div>
   <p class="foot2__small" data-mir-key="t-906a2884-0">Blazin' Boards. Every photograph on this site is our own. Nothing is paid on this site: you pay us directly.</p>
 </footer>
-<script src="/pages/blazin-boards/site.js?v=mvkui32v"></script>
+<script src="/pages/blazin-boards/site.js?v=mvo0sag4"></script>
 <script>
 (function () {
   var o = BB.load(), F = null, show = 'all';
   function card(p) {
     var q = o.cart[p.id] || 0;
-    var stage = p.cm
-      ? '<div class="stage"><img class="board" src="/pages/blazin-boards/assets/board-cut-m.webp?v=mvkui32v" alt="" width="1000" height="815" loading="lazy"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
+    // His own photo of this board (the product picture on his listing, so a new one he uploads shows here too);
+    // the cut-out only for a board without one. Sizes are from his catalog.
+    var img = p.image ? String(p.image).replace('/upload/f_auto,q_auto/', '/upload/f_auto,q_auto,w_800/') : '';
+    var dims = p.cm ? '<span class="dims" style="background:#fff;padding:5px 9px;border-radius:999px">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span>' : '';
+    var stage = img
+      ? '<div class="stage"><img src="/pages/blazin-boards/' + BB.esc(img) + '?v=mvo0sag4" alt="' + BB.esc(p.short) + '" width="800" height="533" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">' + dims + '</div>'
+      : p.cm
+      ? '<div class="stage"><img class="board" src="/pages/blazin-boards/assets/board-cut-m.webp?v=mvo0sag4" alt="" width="1000" height="815"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
       : '<div class="stage"><span style="font-weight:700;color:var(--gold-text)">Size on request</span></div>';
     return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + BB.dealHtml(p) + stage
       + '<div class="body"><span class="line">' + BB.LINES[p.line] + '</span><h3>' + BB.esc(p.short) + '</h3>'
@@ -92,10 +98,16 @@
         : '<button type="button" class="cta" data-inc="' + p.id + '">Add to order</button>')
       + '</div></div></li>';
   }
+  function filter() {
+    [].forEach.call(document.querySelectorAll('#boards .bcard'), function (li) { li.hidden = show !== 'all' && li.dataset.line !== show; });
+  }
   function paint() {
-    var boards = F.products.filter(function (p) { return p.board && (show === 'all' || p.line === show); });
+    // every board is in the list once; a filter only hides the others, so a quick second tap never
+    // catches cards being rebuilt and their photos decoding (check-motion FLASH, 25 Oct 2026)
+    var boards = F.products.filter(function (p) { return p.board; });
     boards.sort(function (a, b) { return a.price - b.price; });
     document.getElementById('boards').innerHTML = boards.map(card).join('');
+    filter();
     var bottles = F.products.filter(function (p) { return !p.board; });
     document.getElementById('bottles-sec').hidden = !bottles.length;
     document.getElementById('bottles').innerHTML = bottles.map(function (p) {
@@ -109,7 +121,7 @@
     if (t.dataset.show) {
       var g = document.getElementById('boards'); g.style.minHeight = g.offsetHeight + 'px';
       show = t.dataset.show; document.querySelectorAll('[data-show]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); });
-      paint(); if (g.animate) g.animate([{ opacity: 0.85 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' }); return; }
+      filter(); return; }
     var id = t.dataset.inc || t.dataset.dec || t.dataset.bottle;
     var p = F.products.filter(function (x) { return x.id === id; })[0];
     var was = o.cart[id] || 0;
