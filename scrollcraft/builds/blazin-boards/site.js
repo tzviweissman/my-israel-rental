@@ -22,12 +22,12 @@
     { re: /mini/i, name: 'Mini Board', cm: [15, 20], line: 'special', what: 'Entrecote steak, candied pastrami, salami chips, sometimes brisket or London broil, beef jerky.' },
     { re: /small.*blazin/i, name: "Small Blazin' Board", cm: [20, 30], line: 'blazin', what: 'Salami chips, sticky beef bites, candied pastrami, brisket, London broil, beef jerky.' },
     { re: /small.*premium/i, name: 'Small Premium Steak Board', cm: [20, 30], line: 'premium', what: 'Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.' },
-    { re: /med[iu]*m.*blazin/i, name: "Medium Blazin' Board", cm: [25, 34], line: 'blazin', what: 'Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, brisket, London broil, beef jerky.' },
-    { re: /med[iu]*m.*premium/i, name: 'Medium Premium Steak Board', cm: [25, 34], line: 'premium', what: 'Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.' },
+    { re: /med[iu]*m.*blazin/i, name: "Medium Blazin' Board", cm: [24, 35], line: 'blazin', what: 'Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, brisket, London broil, beef jerky.' },
+    { re: /med[iu]*m.*premium/i, name: 'Medium Premium Steak Board', cm: [24, 35], line: 'premium', what: 'Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.' },
     { re: /large.*blazin/i, name: "Large Blazin' Board", cm: [33, 47], line: 'blazin', what: 'Sliced entrecote, maple herb baby chicken, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef jerky.' },
     { re: /large.*premium/i, name: 'Large Premium Steak Board', cm: [33, 47], line: 'premium', what: 'Oyster steak, entrecote, candied pastrami, brisket, skirt or hanger steak, beef jerky.' },
     { re: /vip/i, name: 'Extra Large VIP Board', cm: [37, 57], line: 'special', what: 'Rib steak, oyster steak, sliced entrecote, salami chips, sticky beef bites, candied pastrami, London broil, brisket, beef facon, beef jerky.' },
-    { re: /party/i, name: 'The Party Board', cm: [26, 86], line: 'special', what: 'Two rib steaks, oyster steak, entrecote, candied pastrami, brisket, London broil, skirt or hanger steak, beef jerky.' },
+    { re: /party/i, name: 'The Party Board', cm: null, line: 'special', what: 'Two rib steaks, oyster steak, entrecote, candied pastrami, brisket, London broil, skirt or hanger steak, beef jerky.' },
     { re: /jerky/i, name: 'The All Jerky Board', cm: [20, 30], line: 'special', what: '' }
   ];
   var LINES = { blazin: "Blazin' line", premium: 'Premium Steak line', special: 'Specials' };
