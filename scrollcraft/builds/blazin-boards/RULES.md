@@ -18,7 +18,7 @@ R3.5 pass: the first screen is the name; the next screen says "Premium meat boar
 R3.6 n/a: the site has no Hebrew version (BRIEF.md: "you dont need any hebrew for now"); every line is English and the page is dir=ltr
 R3.7 pass: scrolled index and boards at 1440x900 and 390x844: no FAQ, no reviews, no stars, no empty section or placeholder (the load error line only shows when the local API is blocked by CORS)
 R3.8 pass: no logo wall, laurel, popular badge, stars or count on any page (screenshots of every screen)
-R3.9 pass: the first screen carries their own listing sentence and the photograph from their flyer and website; the same words are in the page description
+R3.9 pass: the headline with their own listing sentence comes on the same scroll as their board (both openings); the first screen is their name and their own board; the same words are in the page description
 R3.10 pass: no strengths listed on the page beyond facts from the price list (48 hours notice, gluten-free on request)
 R5.1 pass: read every line aloud on index and boards; every line names a board, a size, a price or a step
 R5.2 pass: read every line as the owner printing it on a menu; no teasing, slang or jokes
@@ -34,26 +34,26 @@ R6.1 pass: the food-shop pattern comes first: product sizes with prices, a facts
 R4.1 pass: no price is missing; the Party Board shows "Size on request" on the shop page where its size is unknown
 
 ## 2. Opening
-R3g.13 pass: first screen at 1440x900 and 390x844 holds their photograph and the name (two words), one line comes on the next screen; opening checked by check-site OPENING
+R3g.13 pass: first screen at 1440x900 and 390x844 holds the name and their own board (cut-out; in index-name.html its top edge peeks up under BLAZIN'), the headline comes as you scroll; opening checked by check-site OPENING
 R3b.1 pass: what it is (meat boards), where (Jerusalem, Farn 5), trust (facts strip), what to do (Order a board) all within the first three screens
 R3b.2 pass: price touches the button in the bar of the phone ("From $75" beside "Order a board") and in the range band; no kosher claim is made on the page
 R3b.3 pass: gold solid "Order a board" is the one solid action on each screen; the bar button repeats it
-R3h.1 pass: check-site OPENING passed on index; the first screen is a full-screen photograph and their board tumbles in as you scroll
-R3n.1 pass: their square-board photograph fills the whole first screen at 1440x900 and 390x844
+R3h.1 pass: the opening is the giant BLAZIN' on the plain wine ground with a fine grain tile (the picture layer check-site counts) and their own cut-out board tumbling in and landing in front of the lower part of the letters, then the headline and button; it is an event, not a drift (frames at every 10% looked at)
+R3n.1 pass: their own board (cut from their square photograph) is the large picture of the opening; it lands whole on screen at 1280x650, 1440x900, 1920x1080, 390x844 and 360x640 (rects measured), and on phones it is already in view at the first scroll
 R3n.2 pass: "Five sizes, to scale": one board grows through the real sizes beside a 10 cm ruler and lights the boards of each size with their price; the board is a crop of their own square photograph (assets/board-top.jpg) that keeps the board edge at every size; no other business has these boards and sizes
 R3n.3 pass: the size reached changes the tier shown (boards and prices) and the board itself; check-motion passed on boards.html
-R3n.4 pass: put the first screens next to Qissa (docs/inspo/awwwards-anatomy-2026-10-22/food/qissa.webp): same one dark ground and one gold button; ours opens bigger on the product photograph
+R3n.4 pass: put the first screens next to Qissa (docs/inspo/awwwards-anatomy-2026-10-22/food/qissa.webp): same one dark ground and one gold button; ours opens on the plain wine ground with their own board large
 R3n.5 pass: "you land and their board tumbles in, then grows to real size with the price"
-R3g.15 pass: check-fits: no photo over 1.35x its size at the six sizes; the opening photograph is their own website photograph
-R3h.2 n/a: the opening is a scroll tumble of their still photograph, there is no film on this site
-R3h.3 n/a: the opening is a scroll tumble of their still photograph, there is no film on this site
-R3h.5 n/a: the opening is a scroll tumble of their still photograph, there is no film on this site
-R3h.7 n/a: the opening is a scroll tumble of their still photograph, there is no film on this site
-R3h.8 n/a: the opening is a scroll tumble of their still photograph, there is no film on this site
-R3h.11 n/a: the opening is a scroll tumble of their still photograph, there is no film on this site
-R3h.13 n/a: the opening is a scroll tumble of their still photograph, there is no film on this site
-R3h.14 n/a: the opening is a scroll tumble of their still photograph, there is no film on this site
-R3h.17 n/a: the opening is a scroll tumble of their still photograph, there is no film on this site
+R3g.15 pass: check-fits: no photo over 1.35x its size at the six sizes; the opening board is their own cut-out and the jars band is a plain crop of their own photograph
+R3h.2 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
+R3h.3 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
+R3h.5 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
+R3h.7 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
+R3h.8 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
+R3h.11 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
+R3h.13 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
+R3h.14 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
+R3h.17 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
 
 ## 3. Sections and worlds
 R3.12 pass: hero, the sizes section with price and contents per board, a call to action in the close, a footer; no section is doubled
@@ -102,6 +102,7 @@ R8.1 pass: put the three board photographs, the plank crop and the cut-out on on
 R8.6 n/a: no new product picture was made in this pass; their own board photographs stay in place. Product hero shots of each board size are listed in the reply for the owner or a later pass
 R8.2 pass: every picture is their own photograph or a cut-out of it
 R3p.7 pass: every board row is the same text row; the three photographs have the same height; no pointing changes a photo
+R3h.20 pass: check-site SMOOTH and SLOW passed on the opening (hero 320svh, median frame 16.7 ms normal and about 33 ms at 4x CPU in headless Chromium); the board sits on a plain oxblood ground, never on a photo of meat; the board is whole at five sizes; the board and shadow are preloaded and the images below the first screen are lazy; sheet docs/site-reviews/2026-10-25/blazin-opening-final.jpg
 R3h.12 pass: the board looks the same in the tumble, the cut-out and the sizes (cut from one master); the menu photographs are of the real boards
 R3h.10 n/a: choosing a size has no picture swap on this page, the board scales; the order flow picks boards by name
 R3g.14 pass: all images on one sheet: warm daylight on marble or wood, same red-brown grade
@@ -113,7 +114,7 @@ R8.3 pass: no generated media on this site
 R8.4 n/a: no moving real material
 R3c.13 pass: clipped on index.html reports only held stages sliding under the fixed bar at scroll 0 and at pin entries and exits (24 px at 2040 and 23 px at 7345 at 1280x650; 59 px and 76 px at 360x640), the same kind of lines as before the review (checker limit for a held section under a fixed bar); cutoff clean at nine sizes
 R3c.14 n/a: the cut-outs (board-cut.webp) are not new; checked on dark and light in the earlier build; no cutout.py run in this pass because nothing was cut
-R5b.3 pass: readable passed on index, boards and order; the hero words sit on the soft edge shade and no card or frosted glass is used
+R5b.3 pass: readable passed on index, boards and order; the hero words sit on the plain wine ground and no card or frosted glass is used
 R3e.8 pass: readable ran on index, boards, order, order-when and order-details (the last three with a basket in place): every word clear at every size except one report on index.html, the "24 × 35" size readout at 360x640 stop 5, which is mid-handoff between two sizes at opacity near 0 and reads fine at rest; fixed in this review: labels under 12px, the "start here" line and the bottle prices that had the same colour as their card, hints under 14px on a phone
 R3s.24 pass: check-site MEDIA passed on every page; no photo over 600 KB (the largest is 530 KB)
 R3p.6 pass: check-fits passed on all six pages at the six sizes
@@ -194,3 +195,5 @@ R3a.8 n/a: no line of dot-separated items
 ## 9. Finish
 R3r.3 pass: check-rules passed after the last edit; every script was re-run after the last change to the pages
 R3r.4 pass: the corrections from Tzvi on 22 Oct (percent savings, accent on the button, one look per category) are in rules-checklist.md
+R8.7 n/a: no paid generation: the board is their own cut-out, the shadow is baked from its outline, the jars band is a plain crop of their own photograph
+R3k.9 pass: order-details.html POSTs the order to /marketplace/order-form/<gig id>/orders before the WhatsApp message opens (line 114), unchanged in this pass
