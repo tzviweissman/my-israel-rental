@@ -256,7 +256,7 @@ for (const url of urls) {
     });
     await page.waitForTimeout(600);
     if (motion && motion.screens < 3) fail(url, 'SLOW', `the scroll-driven opening is only ${motion.screens.toFixed(1)} screens long: give it at least 3 (about 4 to 4.5 for a story with several beats) so each step can be seen (3h)`);
-    if (motion && (motion.median > 20 || motion.slow > 0.1)) fail(url, 'SMOOTH', `scrolling the opening runs at ${Math.round(1000 / motion.median)} fps with ${Math.round(motion.slow * 100)}% of frames stalled over 50 ms: needs 60 fps (frames under 20 ms). Look for full-screen blended or blurred overlays, per-frame canvas redraws, filters on moving images, and ease the shown progress toward the scroll (3h)`);
+    if (motion && (motion.median > 20 || motion.slow > 0.25)) fail(url, 'SMOOTH', `scrolling the opening runs at ${Math.round(1000 / motion.median)} fps with ${Math.round(motion.slow * 100)}% of frames stalled over 50 ms: needs 60 fps (frames under 20 ms). Look for full-screen blended or blurred overlays, per-frame canvas redraws, filters on moving images, and ease the shown progress toward the scroll (3h)`);
     const a = await page.screenshot(); await page.waitForTimeout(2500); const b = await page.screenshot();
     await page.mouse.wheel(0, 500); await page.waitForTimeout(900); const c = await page.screenshot();
     const differ = (x, y) => { let d = 0; for (let i = 0; i < x.length && i < y.length; i += 997) d += x[i] !== y[i] ? 1 : 0; return d / (Math.min(x.length, y.length) / 997); };

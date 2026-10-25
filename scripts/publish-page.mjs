@@ -123,6 +123,12 @@ function rewrite(html) {
     // A link back to the page itself goes to the business's address.
     .replace(/(\shref=")(?:\.\/)?index\.html(#[^"]*)?"/g, (m, a, h) => `${a}/business/${slug}${h || ''}"`)
     .replace(/(\s(?:src|href|poster)=")([^"]+)"/g, (m, a, u) => (relative(u) ? `${a}${BASE}${withStamp(u)}"` : m))
+    // srcset and a preload's imagesrcset hold several addresses ("a.webp 1000w, b.webp 1510w"): each one is
+    // rewritten. Left relative, they pointed at /business/assets/ and Blazin' Boards' board vanished (25 Oct 2026).
+    .replace(/(\s(?:srcset|imagesrcset)=")([^"]+)"/g, (m, a, list) => `${a}${list.split(',').map((part) => {
+      const [u, ...rest] = part.trim().split(/\s+/);
+      return [relative(u) ? `${BASE}${withStamp(u)}` : u, ...rest].join(' ');
+    }).join(', ')}"`)
     // Only a real file path (it has an extension): a script's own
     // `function url(i)` matched this once and broke The Brown Box's film
     // (17 Oct 2026).

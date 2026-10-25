@@ -7,15 +7,15 @@
 <title>Your order · Blazin' Boards</title>
 <meta name="site-category" content="food-shop">
 <meta name="description" content="Order a Blazin' Boards meat board: pick the size, add a bottle, say when and where. Orders 48 hours ahead. You pay the business directly.">
-<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mvo0sag4">
+<link rel="icon" href="/pages/blazin-boards/assets/their-logo-small.png?v=mvo3hq6l">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;1,400;1,500&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mvo0sag4">
+<link rel="stylesheet" href="/pages/blazin-boards/site.css?v=mvo3hq6l">
 </head>
 <body>
 <nav class="nav" aria-label="Blazin' Boards">
-  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mvo0sag4" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
+  <a class="nav__mark" href="/business/blazin-boards"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mvo3hq6l" alt="" width="120" height="120" data-mir-key="i-0746f29b-0"> Blazin' Boards</a>
   <ul class="menu">
     <li><a href="/business/blazin-boards" data-mir-key="t-fc43c37b-0">Home</a></li>
     <li><a href="/business/blazin-boards/boards" data-mir-key="t-5d8dc598-0">Every board</a></li>
@@ -46,7 +46,7 @@
         <div class="next"><a class="cta" id="go" href="/business/blazin-boards/order-when" data-mir-key="t-f78a4fc0-0">Continue</a><a class="back" href="/business/blazin-boards/boards" data-mir-key="t-e3e389c9-0">Keep looking</a></div>
       </div>
       <aside class="summary" aria-label="Your order" aria-live="polite">
-        <div class="who"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mvo0sag4" alt="" width="44" height="44" data-mir-key="i-0746f29b-1"><div><b data-mir-key="t-ba61b3de-0">Your order</b><small data-mir-key="t-645d4e11-0">Blazin' Boards, Jerusalem</small></div></div>
+        <div class="who"><img src="/pages/blazin-boards/assets/their-logo-small.png?v=mvo3hq6l" alt="" width="44" height="44" data-mir-key="i-0746f29b-1"><div><b data-mir-key="t-ba61b3de-0">Your order</b><small data-mir-key="t-645d4e11-0">Blazin' Boards, Jerusalem</small></div></div>
         <ul class="lines" data-lines></ul>
         <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><b data-total data-mir-key="t-e2b2a704-0">$0</b></div>
         <ul class="promise">
@@ -70,7 +70,7 @@
   </div>
   <p class="foot2__small" data-mir-key="t-906a2884-0">Blazin' Boards. Every photograph on this site is our own. Nothing is paid on this site: you pay us directly.</p>
 </footer>
-<script src="/pages/blazin-boards/site.js?v=mvo0sag4"></script>
+<script src="/pages/blazin-boards/site.js?v=mvo3hq6l"></script>
 <script>
 (function () {
   var o = BB.load(), F = null, open = false;
@@ -82,7 +82,7 @@
     var ls = BB.lines(F, o), now = {};
     document.getElementById('cartlines').innerHTML = ls.map(function (l) {
       now[l.p.id] = 1;
-      return '<li' + (seenLines && !seenLines[l.p.id] ? ' class="fresh"' : '') + '><span class="thumb"><img src="/pages/blazin-boards/assets/board-cut-m.webp?v=mvo0sag4" alt="" width="1000" height="815"></span><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
+      return '<li' + (seenLines && !seenLines[l.p.id] ? ' class="fresh"' : '') + '><span class="thumb"><img src="/pages/blazin-boards/assets/board-cut-m.webp?v=mvo3hq6l" alt="" width="1000" height="815"></span><span><b>' + BB.esc(l.p.short) + '</b><small>' + (l.p.cm ? l.p.cm[0] + ' × ' + l.p.cm[1] + ' cm, ' : '') + BB.money(l.p.price, l.p.currency) + ' each</small></span>'
         + '<span class="stepper"><button type="button" data-dec="' + l.p.id + '" aria-label="One fewer">−</button><output>' + l.qty + '</output><button type="button" data-inc="' + l.p.id + '" aria-label="One more">+</button></span>'
         + '<span class="amt">' + BB.money(l.p.price * l.qty, l.p.currency) + '</span><button type="button" class="rm" data-rm="' + l.p.id + '" aria-label="Remove ' + BB.esc(l.p.short) + ' from the order"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 7h16"/><path d="M9 7V4h6v3"/><path d="M6 7l1 13h10l1-13"/><path d="M10 11v6M14 11v6"/></svg></button></li>';
     }).join('');
