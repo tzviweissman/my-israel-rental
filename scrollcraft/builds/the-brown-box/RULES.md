@@ -51,6 +51,7 @@ R3h.5 pass: chapter lines are two to six words at the lower left on a soft edge 
 R3h.7 pass: five clips each started on the previous last frame; the joins were looked at when the film was built
 R3h.8 pass: after the film the page turns to a light ground with colour panels
 R3h.11 pass: brightness.py: desktop frames average 43, phone frames 53, bright enough; graded up with gamma on 22 Oct (two frames had a middle of 30)
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned frame film 6.2 screens on a laptop and 5.6 on a phone, 60 fps (median 16.7 ms; 8.8% and 5.9% of frames over 50 ms, under the 10% limit); the bowl stands on its own plain dark ground; bowl and box whole; logo and the first film frames load first
 R3h.13 pass: the toppings fall and land in one clip; looked at its frames
 R3h.14 pass: the bowl stays recognisable
 R3h.17 n/a: the page does not use a giant name over the film

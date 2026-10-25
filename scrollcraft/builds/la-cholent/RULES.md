@@ -51,6 +51,7 @@ R3h.5 pass: the chapter lines (Lid on. Low. Go light the candles.) sit at the le
 R3h.7 pass: looked at the frames either side of the kitchen-to-pot join (40 to 55 percent): the scratch side dims to a dark kitchen (never plain black), then the pot appears; no jump
 R3h.8 pass: the section after the film changes boldly: a bright cream shop of three colour rooms
 R3h.11 pass (Tzvi's decision): brightness.py re-run 25 Oct: pot.mp4 and pot-m.mp4 whole 9 middle 14, scratch.mp4 and scratch-m.mp4 whole 30 middle 29, table.mp4 whole 17 middle 32, under the rule's 22 and 33; Tzvi chose to keep the candlelit films dark (22 Oct, docs/site-reviews/2026-10-22/decisions.md point 2, confirmed again 25 Oct, decision 4); a gamma of 2 had made the pot film milky grey
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 7.0 screens on both, 60 fps (median 16.7 ms, 0.7% of frames over 50 ms on a laptop); their own ingredients and slow cooker on their own dark kitchen, never on another cholent photo; tubs, pot and words whole; the first screen's tubs and pot load first (the dark films are Tzvi's decision, R3h.11)
 R3h.13 pass: the pot film is one clip showing the lid, steam and the dial together; frames viewed at 20 hours show no heap or vanish
 R3h.14 pass: the pot stays in frame through the whole film at 1440x900, 1280x650 and 390x844
 R3h.17 pass: the page does not use words-and-film turns

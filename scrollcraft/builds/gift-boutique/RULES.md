@@ -51,6 +51,7 @@ R3h.5 pass: there are no chapter lines, only the headline that lands in the ligh
 R3h.7 n/a: the film is one clip with no joins to compare
 R3h.8 pass: after the lit dark film the collection section is bright ivory, a bold change of mood
 R3h.11 n/a: the laptop film was graded up on 22 Oct and brightness.py now passes it (20 frames, average 52); the phone film is a black box that fills the middle third, graded to gamma 1.5 (box still black, ground lit) and still reads 22 to 23 in the middle on its last frames against the 33 asked, which needs a regenerated brighter phone clip and Tzvi's yes; listed in the report
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop and 3.0 on a phone, 60 fps (median 16.7 ms, no frame over 50 ms); the box opens on its own dark room and her gift photos come out around it, nothing behind them of the same kind; box and photos whole; the film and the first gift photos load first
 R3h.13 pass: untying, lid lift and light are one clip; the gifts start rising on the open-lid frame; walked 12 scroll positions at laptop and phone with no jump
 R3h.14 pass: the box stays in frame and recognisable through the whole opening on laptop and on phone
 R3h.17 n/a: the page does not use giant letters parting over film

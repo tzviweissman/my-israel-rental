@@ -46,6 +46,7 @@ R3h.5 n/a: this site has no such element (see the page: no cut-out, carousel, am
 R3h.7 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.8 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.11 n/a: no film on this page
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): not a pinned scroll section (one screen, her dumbbells photo), 60 fps on both (median 16.7 ms, no frame over 50 ms); headline and photo whole; the opening photo loads first
 R3h.13 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.14 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.17 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)

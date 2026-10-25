@@ -51,6 +51,7 @@ R3h.5 n/a: the opening is photo panels, not a film, so it has no chapter lines
 R3h.7 n/a: the opening is photo panels, not a film, so it has no joins
 R3h.8 n/a: the opening is photo panels, not a film
 R3h.11 n/a: the opening is photo panels, not a film; no film or still set was made
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): not a pinned scroll section, so the check-site SMOOTH and SLOW tests do not run on it (the opening is their bun photo in panels beside the headline); phone 60 fps; their buns are the photos, on a plain cream ground, whole; the bun photo loads first. Noted for Tzvi: scrolling the first screen on a laptop measured 20 fps (median 50 ms, 67% of frames over 50 ms), twice
 R3h.13 n/a: no film effect on the page
 R3h.14 n/a: no film effect on the page
 R3h.17 n/a: the page does not use a giant name over film

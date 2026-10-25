@@ -51,6 +51,7 @@ R3h.5 n/a: no film in this site: the opening is built in code from their own pho
 R3h.7 n/a: no film in this site: the opening is built in code from their own photos
 R3h.8 n/a: no film in this site: the opening is built in code from their own photos
 R3h.11 n/a: no film or generated still set added in this rework; no new generation
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned walk 6.0 screens on a laptop and 4.2 on a phone, 60 fps (median 16.7 ms, no frame over 50 ms); the kitchen is a plain setting with the stops drawn on it, cards whole; the kitchen picture loads first
 R3h.13 n/a: no film in this site: the opening is built in code from their own photos
 R3h.14 n/a: no film in this site: the opening is built in code from their own photos
 R3h.17 n/a: no film in this site: the opening is built in code from their own photos
