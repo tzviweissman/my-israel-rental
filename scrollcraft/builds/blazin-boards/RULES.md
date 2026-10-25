@@ -99,8 +99,8 @@ R0b.12 n/a: the site is not published by this pass
 
 ## 4. Photos and media
 R8.1 pass: put the three board photographs, the plank crop and the cut-out on one sheet: all their own marble-and-wood board photographs; the plank uses a crop of their square photograph that shows the board edge at every size; boards.html and the home list show the one cut-out the same way on every board because none of their five photographs is named by size or line (owner question 7 asks which board each one shows)
-R8.6 n/a: no new product picture was made in this pass; their own board photographs stay in place. Product hero shots of each board size are listed in the reply for the owner or a later pass
-R8.2 pass: every picture is their own photograph or a cut-out of it
+R8.6 pass: the closing screen now shows a product hero shot of their own board (23 Oct): their board exactly, overhead as photographed, on a slate slab with rosemary, salt and pepper on the dark ground, one warm light; the tumble keeps the cut-out; no per-size shots, because they have one board photo and the size ruler grows it in code
+R8.2 pass: every picture is their own photograph, a cut-out of it, or the hero shot edited from it (Higgsfield nano_banana_2)
 R3p.7 pass: every board row is the same text row; the three photographs have the same height; no pointing changes a photo
 R3h.20 pass: check-site SMOOTH and SLOW passed on the opening (hero 320svh, median frame 16.7 ms normal and about 33 ms at 4x CPU in headless Chromium); the board sits on a plain oxblood ground, never on a photo of meat; the board is whole at five sizes; the board and shadow are preloaded and the images below the first screen are lazy; sheet docs/site-reviews/2026-10-25/blazin-opening-final.jpg
 R3h.12 pass: the board looks the same in the tumble, the cut-out and the sizes (cut from one master); the menu photographs are of the real boards
@@ -110,7 +110,7 @@ R3o.1 n/a: no generated food in motion on this site
 R3o.2 n/a: no generated liquid
 R3o.3 pass: the meat colours look true on both the dark and the marble photographs
 R3o.6 pass: one photo per kind from what their website and flyer have; the rework added none
-R8.3 pass: no generated media on this site
+R8.3 pass: generated media only of their own board, no person, no premises, no text added; Tzvi approved 22 Oct; the owner sees it before anything goes live
 R8.4 n/a: no moving real material
 R3c.13 pass: clipped on index.html reports only held stages sliding under the fixed bar at scroll 0 and at pin entries and exits (24 px at 2040 and 23 px at 7345 at 1280x650; 59 px and 76 px at 360x640), the same kind of lines as before the review (checker limit for a held section under a fixed bar); cutoff clean at nine sizes
 R3c.14 n/a: the cut-outs (board-cut.webp) are not new; checked on dark and light in the earlier build; no cutout.py run in this pass because nothing was cut

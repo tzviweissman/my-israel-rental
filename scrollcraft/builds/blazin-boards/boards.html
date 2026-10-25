@@ -84,9 +84,9 @@
     var img = p.image ? String(p.image).replace('/upload/f_auto,q_auto/', '/upload/f_auto,q_auto,w_800/') : '';
     var dims = p.cm ? '<span class="dims" style="background:#fff;padding:5px 9px;border-radius:999px">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span>' : '';
     var stage = img
-      ? '<div class="stage"><img src="' + BB.esc(img) + '" alt="' + BB.esc(p.short) + '" width="800" height="533" loading="lazy" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">' + dims + '</div>'
+      ? '<div class="stage"><img src="' + BB.esc(img) + '" alt="' + BB.esc(p.short) + '" width="800" height="533" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover">' + dims + '</div>'
       : p.cm
-      ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815" loading="lazy"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
+      ? '<div class="stage"><img class="board" src="assets/board-cut-m.webp" alt="" width="1000" height="815"><span class="dims">' + p.cm[0] + ' × ' + p.cm[1] + ' cm</span></div>'
       : '<div class="stage"><span style="font-weight:700;color:var(--gold-text)">Size on request</span></div>';
     return '<li class="bcard' + (q ? ' is-in' : '') + '" data-line="' + p.line + '">' + BB.dealHtml(p) + stage
       + '<div class="body"><span class="line">' + BB.LINES[p.line] + '</span><h3>' + BB.esc(p.short) + '</h3>'
@@ -98,10 +98,16 @@
         : '<button type="button" class="cta" data-inc="' + p.id + '">Add to order</button>')
       + '</div></div></li>';
   }
+  function filter() {
+    [].forEach.call(document.querySelectorAll('#boards .bcard'), function (li) { li.hidden = show !== 'all' && li.dataset.line !== show; });
+  }
   function paint() {
-    var boards = F.products.filter(function (p) { return p.board && (show === 'all' || p.line === show); });
+    // every board is in the list once; a filter only hides the others, so a quick second tap never
+    // catches cards being rebuilt and their photos decoding (check-motion FLASH, 25 Oct 2026)
+    var boards = F.products.filter(function (p) { return p.board; });
     boards.sort(function (a, b) { return a.price - b.price; });
     document.getElementById('boards').innerHTML = boards.map(card).join('');
+    filter();
     var bottles = F.products.filter(function (p) { return !p.board; });
     document.getElementById('bottles-sec').hidden = !bottles.length;
     document.getElementById('bottles').innerHTML = bottles.map(function (p) {
@@ -115,7 +121,7 @@
     if (t.dataset.show) {
       var g = document.getElementById('boards'); g.style.minHeight = g.offsetHeight + 'px';
       show = t.dataset.show; document.querySelectorAll('[data-show]').forEach(function (b) { b.setAttribute('aria-pressed', String(b === t)); });
-      paint(); if (g.animate) g.animate([{ opacity: 0.85 }, { opacity: 1 }], { duration: 200, easing: 'ease-out' }); return; }
+      filter(); return; }
     var id = t.dataset.inc || t.dataset.dec || t.dataset.bottle;
     var p = F.products.filter(function (x) { return x.id === id; })[0];
     var was = o.cart[id] || 0;
