@@ -197,3 +197,4 @@ R3a.8 pass: the dotted lines were replaced by commas; the one dot line left is t
 ## 9. Finish
 R3r.3 pass: every script above passed on every page after the last edit (final run)
 R3r.4 n/a: no new correction from Tzvi is outstanding since the last build
+R3h.18 n/a: no film: the doors are her own skirts photo opened in code (checked 26 Oct)

@@ -197,3 +197,4 @@ R3a.8 pass: looked at the 390x844 and 360x640 screenshots of every dotted line (
 ## 9. Finish
 R3r.3 pass: check-rules is run last, after the final edit; every script was re-run after the last edit
 R3r.4 pass: this rework is itself Tzvi 22 Oct correction (rule 3t) already in the rules and checklist
+R3h.18 pass: 8 fps frame sheet of every clip looked at object by object on 26 Oct (recorded after the fact: the object list was not written before generating, the films predate the rule): the sky film holds the sea of clouds, the sun and one small figure on the clouds, all in frame from the first frame to the last; only the clouds drift

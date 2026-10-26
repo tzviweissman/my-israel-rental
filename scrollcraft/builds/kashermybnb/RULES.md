@@ -197,3 +197,4 @@ R3a.8 pass: no dot-separated line of items
 R3r.3 pass: check-rules passes; site, fits and motion run after the last edit
 R3r.4 pass: no new Tzvi correction in this rework beyond rule 3t, already in the checklist
 R8.7 pass (recorded after the fact, 25 Oct): the one generated image is the kitchen setting; gen/kitchen-brief.md says what is known (Higgsfield soul, prompt not kept, no brief existed before, no photo of theirs to compare with because it is a setting, not their product); looked at assets/kitchen.webp on 25 Oct: empty kitchen, no people, no text
+R3h.18 n/a: no film: the walk is drawn in code over one still kitchen picture (checked 26 Oct)
