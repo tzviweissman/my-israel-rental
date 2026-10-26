@@ -24,9 +24,16 @@ for (const [w, h] of sizes) {
   for (let i = 0; i <= stops; i++) {
     await p.evaluate((y) => scrollTo(0, y), Math.round((max * i) / stops));
     await p.waitForTimeout(700);
+    // let entrance animations and fades finish first (up to 3 s, endless loops ignored): measuring mid fade-in called
+    // Chicken Munch's MUNCH letters, its Kosher sticker and its menu lines faint when they were not (26 Oct 2026)
+    await p.evaluate(() => Promise.race([
+      Promise.all(document.getAnimations().filter((a) => a.playState === 'running' && Number.isFinite(a.effect?.getComputedTiming?.().endTime)).map((a) => a.finished.catch(() => {}))),
+      new Promise((r) => setTimeout(r, 3000)),
+    ]));
     const items = await p.evaluate(() => {
       const out = [];
       const seen = new Set();
+      const stuck = [...document.querySelectorAll('body *')].filter((n) => getComputedStyle(n).position === 'sticky');
       const walk = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
       while (walk.nextNode()) {
         const node = walk.currentNode, el = node.parentElement;
@@ -56,6 +63,13 @@ for (const [w, h] of sizes) {
           if (f.contains(el)) { inBar = true; continue; }
           if (fr.top <= 1) topCover = Math.max(topCover, fr.bottom);
           else if (fr.bottom >= innerHeight - 1 && fr.top < innerHeight) barTop = Math.min(barTop, fr.top);
+        }
+        // anything else held in place right under the top bar (a sticky picture, Chicken Munch's menu photo on a phone)
+        // also covers text scrolling under it: judged against the picture, not being read (26 Oct 2026)
+        if (topCover > 0) for (const f of stuck) {
+          if (f.contains(el) || el.contains(f)) continue;
+          const fr = f.getBoundingClientRect();
+          if (fr.top <= topCover + 2 && fr.bottom > topCover && fr.height < innerHeight * 0.5) topCover = Math.max(topCover, fr.bottom);
         }
         // text touching the menu bar is scrolling under it, not being read (it was judged against the bar)
         if (!inBar && (rects[0].top < Math.max(4, topCover) + 6 || rects[rects.length - 1].bottom > Math.min(innerHeight - 4, barTop))) continue;
