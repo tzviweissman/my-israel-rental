@@ -305,11 +305,17 @@ for (const url of urls) {
     const page = await ctx.newPage(); await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(800);
     const hidden = await page.evaluate(async () => {
       document.documentElement.style.scrollBehavior = 'auto';
-      for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight * .8) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 120)); }
+      const els = [...document.querySelectorAll('main h1, main h2, main h3, main p, main .btn')].filter((e) => e.getBoundingClientRect().height && e.textContent.trim()).slice(0, 60);
+      const op = (e) => { let o = 1; for (let n = e; n; n = n.parentElement) o *= +getComputedStyle(n).opacity; return o; };
+      // anything seen on screen at any stop of the scroll was shown: words in a pinned scene fade out again later in the
+      // scene, and scrollIntoView lands past their moment (L.A. Cholent's opening words, 26 Oct 2026)
+      const seen = new Set();
+      for (let y = 0; y < document.documentElement.scrollHeight; y += innerHeight * .8) { scrollTo(0, y); await new Promise((r) => setTimeout(r, 120));
+        for (const e of els) { const r = e.getBoundingClientRect(); if (r.bottom > 0 && r.top < innerHeight && op(e) >= .3) seen.add(e); } }
       // judge each item while it is on screen: a scroll engine may fade things out again once they are scrolled past
-      const out = [], els = [...document.querySelectorAll('main h1, main h2, main h3, main p, main .btn')].filter((e) => e.getBoundingClientRect().height && e.textContent.trim()).slice(0, 60);
-      for (const e of els) { e.scrollIntoView({ block: 'center', behavior: 'instant' }); await new Promise((r) => setTimeout(r, 450));
-        let o = 1; for (let n = e; n; n = n.parentElement) o *= +getComputedStyle(n).opacity; if (o < .3) out.push(e.textContent.trim().slice(0, 30)); if (out.length >= 4) break; }
+      const out = [];
+      for (const e of els.filter((x) => !seen.has(x))) { e.scrollIntoView({ block: 'center', behavior: 'instant' }); await new Promise((r) => setTimeout(r, 450));
+        if (op(e) < .3) out.push(e.textContent.trim().slice(0, 30)); if (out.length >= 4) break; }
       return out;
     });
     for (const t of hidden) fail(url, 'MEDIA', `with motion switched off, "${t}" stays hidden`);

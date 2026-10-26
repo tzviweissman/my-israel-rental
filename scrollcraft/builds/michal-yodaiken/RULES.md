@@ -50,6 +50,7 @@ R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW
 R3h.13 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.14 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.17 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
+R3h.18 n/a: the page has no generated film (stills only)
 R3.12 pass: hero, offers with price, booking section near the end with the price beside the button
 R3c.1 pass: references are in CONCEPT.md (Performance Lab, Reel Motion, Sixes sheets under docs/inspo/awwwards-anatomy-2026-10-22)
 R3g.17 pass: effects named in CONCEPT.md with sources; nothing new added in this rework beyond plain cards and details/summary
@@ -103,7 +104,7 @@ R3o.3 n/a: no shop, basket or products on this site (a service enquiry only); th
 R3o.6 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R8.3 pass: the four photos are the same generated-setting shoot (no people, one light) plus her own gym photo; not a product set; nothing with a generated person
 R8.4 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
-R3c.13 pass: clipped.mjs reported nothing cut off at seven sizes
+R3c.13 pass: clipped.mjs reported nothing cut off at seven sizes; framing (26 Oct 2026): on a phone the hero room photo sits whole at its own shape at the top, a blurred copy fills behind the words (it showed a 26% slice): check-fits framing passes at all six sizes
 R3c.14 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R5b.3 pass: words over photos sit on soft edge shades; the booking close shade was deepened after readable said the WhatsApp line was 3.15:1; looked at the hero and the close at 1440 and 390
 R3e.8 pass: readable.mjs crashed the renderer (checker limit); by contrast calculation the smallest greys (#6B6470 on white 5.7:1, #4A444F 9.4:1, #C9C3CC on black 12.2:1) pass; sizes use the token scale, 14 px minimum

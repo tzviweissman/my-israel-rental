@@ -55,6 +55,7 @@ R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW
 R3h.13 pass: the pot film is one clip showing the lid, steam and the dial together; frames viewed at 20 hours show no heap or vanish
 R3h.14 pass: the pot stays in frame through the whole film at 1440x900, 1280x650 and 390x844
 R3h.17 pass: the page does not use words-and-film turns
+R3h.18 pass: objects in each generated clip, all in frame from the first frame to the last: pot film = the crock pot, its lid, the dial (turns to Low) and steam (rises from the lid and leaves past the top edge); kitchen clip = the counter, beans, barley bag, peelings, onion skins and knife, which stay put (only the light flickers, the water ripples and a drip falls into the bowl); table clip = the Shabbos table and candles, the flames flicker. Nothing appears, changes into something else or vanishes
 
 ## 3. Sections and worlds
 R3.12 pass: dramatic opening, a features section (sizes with price and what is included), a closing order section with the proof beside the button
@@ -112,7 +113,7 @@ R3o.3 pass: the tubs look true on the cream and colour grounds
 R3o.6 pass: one photo of the tubs from src; the flyers are not shown as photos
 R8.3 pass: generated media is scenery and their own tub; no person, no premises, no text but their own label; Tzvi approved 22 Oct; the owner sees them before anything goes live
 R8.4 pass: the clips (kitchen scratch, pot, table) are generated clips in the earlier build; reduced motion shows the still
-R3c.13 pass: check-fits found nothing cut; check-site found nothing cut
+R3c.13 pass: check-fits found nothing cut; check-site found nothing cut; framing (26 Oct 2026): the kitchen photo is no wider than the scratch side gets (a square at most), and on a phone the tubs sit whole at their own shape: check-fits framing passes at all six sizes
 R3c.14 n/a: there are no cut-outs on the page
 R5b.3 pass: words on pictures sit on a darkened photo with white or gold letters (the opening) and cards put words on solid colour; looked at in the 1440x900 and 390x844 screenshots; no frosted glass
 R3e.8 pass: readable.mjs hung on this scroll page after 300 s again, so the earlier contrast script over every text on a solid ground (sizes, steps, occasions, facts, order; no word under 4.5:1, or 3:1 for large) is carried over and was not re-run after the type sizes changed (colours did not change); the opening and film words were looked at in the frames at 1440x900
