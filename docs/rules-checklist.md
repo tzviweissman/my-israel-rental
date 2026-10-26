@@ -33,7 +33,7 @@ Lines are `id | rule | reference | HOW`. Scripts, all run from the repo root aga
 (`scripts/serve-builds.mjs`) except where noted:
 
 - `site` = `node scripts/check-site.mjs <every page>` (BROKEN SHIFT GLYPH STATE TAP ALIGN PHONE MEDIA FLOW; OPENING and WORLDS on the home page only)
-- `fits` = `node scripts/check-fits.mjs <every page>` (sections and photos fit the screen at the six sizes of 3p.6; photo not shown over 1.35x its size)
+- `fits` = `node scripts/check-fits.mjs <every page>` (sections and photos fit the screen at the six sizes of 3p.6; photo not shown over 1.35x its size; a big photo shows at least 70% of its width and height)
 - `motion` = `node scripts/check-motion.mjs <every page>` (choices switch smoothly, no flash, take their colour)
 - `prints` = `node scripts/check-fingerprints.mjs <build>`; `concept` = `node scripts/check-concept.mjs <build>`
 - `readable`, `cutoff`, `clipped`, `scroll-finish`, `overlay-truth`, `cutout`, `brightness` = the scripts in `.claude/skills/build-business-page/scripts/`

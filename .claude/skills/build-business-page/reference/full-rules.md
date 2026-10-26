@@ -336,6 +336,14 @@ code. Each rule names what it prevents.
     sizes and how to cap photos and headlines: 3p.6.
     *Prevents: seeing half a picture and scrolling to find what it is about
     (Michal Yodaiken's 1-to-1 tile was 940px tall).*
+    **A big photo keeps its own shape** (Tzvi, 26 Oct 2026, RS Modest
+    Activewear: "the wow page is too zoomed in so i cant see many details").
+    A photo is never forced into a box of a very different shape: a tall
+    photo of the product in a wide opening showed only a slice of it. Give
+    the photo a frame of its own shape (and fill the rest of the screen with
+    colour, words, or a soft blurred copy of the same photo), or use a photo
+    of the frame's shape. check-fits fails a big photo that shows under 70%
+    of its width or height, the opening's included.
 
 **Three more questions for the owner**, asked with the FAQ request
 (section 3, cont.) and only when their page does not already answer them:

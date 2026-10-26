@@ -63,6 +63,20 @@ for (const url of urls) {
           if (fit > 1.35) out.push(`photo ${img.getAttribute('src') || ''} is shown at ${fit.toFixed(1)}x its own size (soft and zoomed in); show it smaller or get a bigger photo`);
         }
       }
+      // A big photo keeps most of itself in view (Tzvi, 26 Oct 2026, RS Modest Activewear: "the wow page is too zoomed
+      // in so i cant see many details": a portrait photo of two skirts filled a wide box, so only a slice showed).
+      // object-fit: cover on a box of a very different shape cuts the photo; a big one must show at least 70% of its
+      // width and height. Pinned openings and aria-hidden pictures count here; a blurred backdrop does not.
+      for (const img of document.querySelectorAll('img')) {
+        const r = img.getBoundingClientRect(), cs = getComputedStyle(img);
+        // a faint or blurred backdrop, or a picture the page marks data-crop-ok (a texture or ground behind the words), is not a product photo
+        if (!img.naturalWidth || !r.width || !r.height || cs.visibility === 'hidden' || +cs.opacity < 0.6 || cs.objectFit !== 'cover' || /blur/.test(cs.filter) || img.closest('[data-crop-ok]')) continue;
+        const vis = Math.max(0, Math.min(r.right, innerWidth) - Math.max(r.left, 0)) * Math.max(0, Math.min(r.bottom, innerHeight) - Math.max(r.top, 0));
+        if (vis < innerWidth * innerHeight * 0.3) continue;
+        const box = r.width / r.height, own = img.naturalWidth / img.naturalHeight;
+        const shown = Math.min(box / own, own / box);
+        if (shown < 0.7) out.push(`photo ${img.getAttribute('src') || ''} shows only ${Math.round(shown * 100)}% of its ${box > own ? 'height' : 'width'} (a ${own < 1 ? 'tall' : 'wide'} photo in a ${box < 1 ? 'tall' : 'wide'} box): give it a box of its own shape, or a photo of the box's shape, so the whole product shows (page rules 3c.12)`);
+      }
       return out;
     }, w >= 1000);
     // photos drawn inside an SVG (a shaped window, often in a pinned scene) at the size the page gives them
