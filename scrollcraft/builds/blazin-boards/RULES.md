@@ -54,6 +54,7 @@ R3h.11 n/a: the opening is a scroll-driven tumble of their cut-out board over a 
 R3h.13 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
 R3h.14 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
 R3h.17 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
+R3h.18 n/a: the opening is their cut-out board tumbling in code over a giant word; no generated film
 
 ## 3. Sections and worlds
 R3.12 pass: hero, the sizes section with price and contents per board, a call to action in the close, a footer; no section is doubled
@@ -185,6 +186,7 @@ R3f.7 pass: the bar button label fits at 360 px
 R3a.6 pass: check-site PHONE passed; room kept for the bar
 R3s.22 pass: check-site TAP passed
 R3s.23 pass: check-site PHONE clean; document scrollWidth equals the viewport at every 100 px stop of every page at 1440x900, 390x844 and 360x640 (order pages with a basket and a long delivery address); the order pages were 535 to 795 px wide on a phone before this review
+R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026); it found the "10 cm" ruler label under the "20 x 30" size on phones, fixed: the size and its boards hang below the ruler, compact on short phones
 R3t.1 pass: site-category food-shop on every page and in CONCEPT.md; compared the home and shop pages with Qissa, Delice and Theobroma contact sheets: one dark ground, framed photos, text menu, facts strip, shop cards with price and Add
 R3t.2 pass: check-site BUY: price and an Order control show in the first two screens; every board card on boards.html shows size, name, price and Add to order
 R3t.3 n/a: the category is food-shop, not trainer

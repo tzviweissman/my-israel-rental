@@ -231,6 +231,7 @@ R3f.7 | The bottom bar fits at 360 px: its label shrinks or wraps, its button ne
 R3a.6 | A fixed bar never covers content (room is kept for it, including the last line and the end of the page) | 3a table | script: site PHONE
 R3s.22 | Everything to tap is at least 40 px on a phone and no two taps overlap | 3s TAP | script: site TAP
 R3s.23 | The page never scrolls sideways on a phone | 3s PHONE | script: site PHONE
+R3s.26 | No words sit on other words anywhere on the page, pinned scenes included, on short laptops (1366x768, 1280x720), 1440x900 and a phone | 3s OVERLAP | script: site OVERLAP
 R3t.1 | The site declares its category (CONCEPT.md and a site-category meta on every page) and follows that category's row of the 3t table: ground and colour, pictures, how it sells, type | 3t | check-site CATEGORY; LOOK: compare the home and shop pages with the category's screenshots in docs/inspo/awwwards-anatomy-2026-10-22/
 R3t.2 | food-shop and fashion-shop: a price and an Add or Order control within the first two screens; every product card has photo, name, size or servings, price and a button | 3t | check-site BUY; LOOK: every card
 R3t.3 | trainer: at least a third of sections are picture, never three plain sections in a row | 3t | check-site WORLDS

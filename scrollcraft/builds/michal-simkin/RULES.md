@@ -55,6 +55,7 @@ R3h.11 n/a: the opening is photographs, not a film, so there is no film to judge
 R3h.13 n/a: the opening is photographs, not a film, so there is no film to judge
 R3h.14 n/a: the opening is photographs, not a film, so there is no film to judge
 R3h.17 n/a: the opening is photographs, not a film, so there is no film to judge
+R3h.18 n/a: the opening is her real client photos dealt onto a stack in code; no generated film
 
 ## 3. Sections and worlds
 R3.12 pass: every page has a hero, a features block (one item per service or course with price) and a closing section with the button and proof beside it
@@ -186,6 +187,7 @@ R3f.7 pass: 360x640 looked at: the bar label wraps, the button keeps its size
 R3a.6 pass: check-site PHONE on index and book: the bar never covers something to tap; room is kept at the end
 R3s.22 pass: check-site TAP on index and book: everything at least 40 px, no overlaps
 R3s.23 pass: check-site PHONE on index and book: no sideways scroll
+R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026); it found the quote pairs on the "in their words" paragraph at 1280x720 and 1366x768 (Tzvi's screenshot), fixed: heading, quotes and reviews share one grid on laptops
 R3t.1 pass: site-category beauty on every page and Category: beauty in CONCEPT.md; home compared with lx-odyssee-sheet.webp: cream or ivory after the opening, photos framed inside it, courses as rows, her portrait beside her words, the button in the top bar all the way down
 R3t.2 n/a: category beauty, not food-shop or fashion-shop
 R3t.3 n/a: category beauty, not trainer

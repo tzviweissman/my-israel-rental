@@ -414,6 +414,15 @@
     /* the heading starts below the two-row top bar, never under it */
     .sizes .sc-copy--lead { top: max(5.6rem, 9vh); }
     .scale { top: 26vh; height: 32vh; } .ruler { top: calc(26vh + 32vh + 0.6rem); }
+    /* the size and its boards hang below the ruler, so a size with three boards grows down, never up over the
+       "10 cm" label and the plank (Tzvi, 26 Oct 2026: words on words; check-site OVERLAP) */
+    .tiers { inset-block-end: auto; top: calc(26vh + 32vh + 2.4rem); }
+    .tier { inset-block-end: auto; top: 0; }
+  }
+  @media (max-width: 860px) and (max-height: 700px) {
+    .scale { height: 21vh; } .ruler { top: calc(26vh + 21vh + 0.6rem); } .tiers { top: calc(26vh + 21vh + 2.2rem); }
+    .tier__size { font-size: clamp(1.8rem, 9vw, 2.6rem); }
+    .tier ul { margin-top: 0.4rem; gap: 0.3rem; } .tier li { padding-block-end: 0.3rem; } .tier li b, .tier li .price { font-size: var(--sc-t-base); }
   }
   /* short phones: the sizes heading keeps its line and the photo keeps clear of text */
   @media (max-width: 860px) and (max-height: 700px) { .sizes .sc-copy--lead p { display: none; } }

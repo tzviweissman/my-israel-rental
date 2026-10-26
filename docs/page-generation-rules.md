@@ -1426,7 +1426,9 @@ console error, a 404, a dead link between pages), SHIFT (layout moves after load
 tapped), GLYPH (a character the fonts lack, like ₪ or →: load a face that has it, or draw it), STATE
 (a button with no hover or pressed state), TAP (under 40 px on a phone, or overlapping), ALIGN (text
 2 to 12 px off its section's edge, same-kind buttons of different sizes, a card name under 1.25x its
-line), PHONE (sideways scroll, the bottom bar over a button at the end), MEDIA (a photo over 600 KB,
+line), OVERLAP (two lines of words cover each other anywhere, pinned scenes included, at 1366x768,
+1280x720, 1440x900 or 390x844: the common short laptops, where Michal Simkin's quotes sat on her heading
+on 26 Oct 2026 while every check looked at 1440x900), PHONE (sideways scroll, the bottom bar over a button at the end), MEDIA (a photo over 600 KB,
 an image without its size, a video without a poster, words left hidden with motion off) and FLOW (an
 empty form that sends or says nothing, a filled one that sends no message or not the shown total).
 `node scripts/check-motion.mjs <pages>` fails a choice that jumps, flashes a blank or old frame

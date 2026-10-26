@@ -189,6 +189,26 @@
   .voice img { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; }
   .voice p { margin: 0; font-size: var(--sc-t-sm); line-height: 1.45; color: var(--navy); }
   .voice b { display: block; margin-top: 3px; font-family: var(--font-body); font-weight: 700; font-size: var(--sc-t-xs); color: var(--rose-text); }
+  /* Laptops: the heading, the quotes under it and the reviews beside them share one grid, so a short screen
+     pushes the quotes down instead of sliding them up under the heading (Tzvi, 26 Oct 2026: at 1280x720 and
+     1366x768 the centred quotes sat on the heading's paragraph). */
+  @media (min-width: 861px) {
+    .same [data-sc-stage] { display: grid; grid-template-columns: min(44vw, 34rem) minmax(0, 1fr); grid-template-rows: auto auto;
+      align-content: safe center; column-gap: clamp(2rem, 6vw, 6rem); row-gap: clamp(1rem, 3vh, 2rem); padding: calc(72px + 1rem) var(--sc-gutter) 1.5rem; }
+    .same .sc-copy--lead, .same .pairs, .same .voices { position: static; inset: auto; translate: none; margin: 0; }
+    .same .sc-copy--lead { grid-column: 1 / -1; grid-row: 1; }
+    .same .pairs { grid-column: 1; grid-row: 2; width: auto; align-self: center; align-content: start; }
+    .same .voices { grid-column: 2; grid-row: 2; align-self: center; width: min(100%, 30rem); justify-self: end; }
+  }
+  /* short laptop screens: smaller quotes and tighter gaps so the whole block fits under the bar */
+  @media (min-width: 861px) and (max-height: 780px) {
+    .same .sc-copy--lead h2 { font-size: clamp(1.6rem, 5vh, 2.4rem); }
+    .same .pairs { gap: 0.4rem; }
+    .same .pair .before { font-size: clamp(1rem, 2.6vh, 1.3rem); } .same .pair .after { font-size: clamp(1.05rem, 2.9vh, 1.45rem); }
+    .same .voices { gap: var(--sc-3); }
+    .same .voice:nth-child(3) { display: none; }  /* two reviews fit a short screen; Miriam still speaks in the first quote pair */
+    .same .voice p { font-size: var(--sc-t-xs); }
+  }
 
   /* ------------------------------------------------------------- academy -- */
   .academy { padding-block: clamp(4rem, 9vw, 8rem); }
