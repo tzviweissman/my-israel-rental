@@ -38,7 +38,7 @@ R3g.13 pass: 1440x900 and 390x844 first screens: the doors fill the screen, head
 R3b.1 pass: same screenshots: what (modest activewear skirts), where (Jerusalem, King George 31), the action (Shop the skirt, price)
 R3b.2 pass: the price sits inside the main button on the first screen
 R3b.3 pass: walked the scroll at 1440 and 390: one solid button per screen; header Basket and card Add buttons are outlined
-R3h.1 pass: check-site OPENING passes (24 Oct): the doors of her skirts photo fill the screen (upscaled from her own photo to 2160 px so it stays sharp) and swing open onto her store as you scroll
+R3h.1 pass: check-site OPENING passes (24 Oct): the doors of her skirts photo fill the screen (upscaled from her own photo to 2160 px so it stays sharp) and swing open onto her store as you scroll; 26 Oct: the doorway photo now keeps its own shape (a tall frame on the right on a laptop, full width at the top on a phone) so the whole outfit shows, after Tzvi said it was too zoomed in
 R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.4 screens on a laptop and a phone (was 2.2), 60 fps (median 16.7 ms, no frame over 50 ms); her skirt beside a plain stone block and wall (the approved skirt shot, gen/skirt-brief.md), never on other clothes, skirt whole; the doors photo loads first
 R3n.1 pass: the skirts photo fills the doorway, over half the first screen on the laptop and the full width on the phone
 R3n.2 pass: two shop doors made of her skirts photo swing open onto her store at King George 31; no other shop has that door or that address
