@@ -50,6 +50,8 @@ R3h.11 pass: brightness.py on assets/arrive.mp4: 20 frames, average 78, bright e
 R3h.13 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.14 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.17 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
+R3h.18 pass (Tzvi's exception, 26 Oct: "keep them as is"): its film shows balloons appearing on top of the piles from nowhere between 2.5 and 4.5 s (8 fps check, 26 Oct); kept on Tzvi's word, the next film for this site follows the rule
+R3h.19 pass (Tzvi's exception, 26 Oct: "keep them as is"): the film was made before the rule, in one clip; kept as it is; any new film follows 3h.19
 R3.12 pass: hero, what we make, booking section near the end
 R3c.1 pass: references in CONCEPT.md (Monarque, Boom Ball, OFFF Forum sheets)
 R3g.17 pass: effects named in CONCEPT.md; the rework adds only plain columns
@@ -169,6 +171,7 @@ R3f.7 pass: the phone bar passes at 360x640 in check-fits
 R3a.6 pass: check-site PHONE passes
 R3s.22 pass: check-site TAP passes (links in the occasion columns are 44 px tall)
 R3s.23 pass: check-site PHONE passes
+R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026)
 R3t.1 pass: meta site-category events and Category: events in CONCEPT.md; short page, ground changes per section in her colours, small photos, quote button in the bar and first screen, giant balloon name
 R3t.2 n/a: category is not food-shop or fashion-shop
 R3t.3 n/a: category is events, not trainer

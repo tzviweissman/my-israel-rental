@@ -55,6 +55,8 @@ R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW
 R3h.13 pass: the toppings fall and land in one clip; looked at its frames
 R3h.14 pass: the bowl stays recognisable
 R3h.17 n/a: the page does not use a giant name over the film
+R3h.18 pass (Tzvi's exception, 26 Oct: "keep them as is"): its film's purée ribbon shrinks to nothing as the camera turns (frames about 130 to 140) and the toppings rearrange when the box arrives (frames about 250 to 260) (8 fps check, 26 Oct); kept on Tzvi's word, the next film for this site follows the rule
+R3h.19 pass (Tzvi's exception, 26 Oct: "keep them as is"): the film was made before the rule, in one clip; kept as it is; any new film follows 3h.19
 
 ## 3. Sections and worlds
 R3.12 pass: hero film, product panels with price, a gift section, a close with the button
@@ -185,6 +187,7 @@ R3f.7 pass: the dock fits at 360x640
 R3a.6 pass: check-site PHONE clean
 R3s.22 pass: check-site TAP clean on every page
 R3s.23 pass: check-site PHONE clean on every page
+R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026)
 R3t.1 pass: check-site CATEGORY clean: site-category food-shop on every page and in CONCEPT.md; the home page was set beside the food contact sheets (bestbean, theobroma, delice) in docs/inspo/awwwards-anatomy-2026-10-22/food: light ground, one colour panel per product, price and Add on every card
 R3t.2 pass: check-site BUY clean (a price and an Order or Add control inside the first two screens); looked at every card: photo, name, price, button
 R3t.3 n/a: trainer rule; this site is food-shop
