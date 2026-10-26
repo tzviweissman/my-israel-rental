@@ -879,6 +879,49 @@ that policy).*
    room. The readability check failed both ways on Chicken Munch until they
    took turns.
 
+18. **The story must be physically possible before anything is generated**
+   (Tzvi, 25 Oct 2026, on LS Fruit Platter: "the watermelon inside just
+   disappears ... before you make a video you need to make sure everything
+   looks natural and makes sense"). Write the film as a list of every object
+   on screen and, for each one, where it comes from and where it ends up:
+   in frame at the start, enters past an edge, is cut from something we
+   saw, or leaves past an edge. If any object appears from nowhere, turns
+   into a different thing, or leaves no trace (a watermelon's red flesh, a
+   grape that was never there), the idea is wrong; change the idea, not the
+   prompt. A start and end frame cannot fix an impossible middle: the model
+   fills it with a morph. "A watermelon bursts into a whole platter of other
+   fruit" failed twice for exactly this reason, both times on its middle.
+   Show Tzvi the object list with the steps, and watch every generated clip
+   at 8 fps asking the same question of each object.
+19. **Generate once: plan the clips so the model never has to invent**
+   (Tzvi, 26 Oct 2026, after Noa Levi's drawer took two films and the fruit
+   burst two: "make a rule that will help prevent needing to make many
+   generations from mistakes"). Most bad clips are bad plans, not bad luck:
+   a video model blends its first frame into its last, and whatever has no
+   route between them comes out as a morph. Before any video is generated:
+   1. **The ends hold the same things.** List the objects in the start
+      frame and in the end frame. Every object in the end frame is in the
+      start frame, or enters past an edge during the clip, and everything
+      in the start frame is still there or leaves past an edge. If one has
+      no route (boxes in the after photo that the before photo does not
+      have), do not prompt around it: split the film at that point with a
+      still made in between, or change the idea.
+   2. **One kind of action per clip** (taking out, or putting in, or
+      pouring; never taking out and putting in and folding in one clip).
+      A second kind of action is a second clip, chained: the end frame of
+      one is the start frame of the next.
+   3. **Stills before video.** Make every in-between still first (2
+      credits each, edited from the owner's photo), check each against the
+      object list, and only then spend on video.
+   4. **Write what frame 1, the middle and the last frame show** for each
+      clip in the brief before generating, and judge the 8 fps watch
+      against that, object by object.
+   5. **Two tries per clip at most.** A clip that fails twice means the
+      plan is wrong: bring a new plan to Tzvi instead of a third try.
+   Worked example: scrollcraft/builds/noa-levi-home-styling/gen/tidy-brief-v3.md
+   (the drawer is emptied, then filled boxes go in, in three clips between
+   four stills).
+
 ## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
 
 Tzvi: "pull out other things from these professional websites ... watch the
