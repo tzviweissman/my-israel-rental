@@ -897,7 +897,11 @@ that policy).*
    burst two: "make a rule that will help prevent needing to make many
    generations from mistakes"). Most bad clips are bad plans, not bad luck:
    a video model blends its first frame into its last, and whatever has no
-   route between them comes out as a morph. Before any video is generated:
+   route between them comes out as a morph. **A better prompt helps a
+   little; the real fix is choosing a story that is physically possible
+   before generating** (Tzvi, 26 Oct 2026). Never answer a failed clip with
+   a reworded prompt alone: first ask which object had no route, and change
+   the story. Before any video is generated:
    1. **The ends hold the same things.** List the objects in the start
       frame and in the end frame. Every object in the end frame is in the
       start frame, or enters past an edge during the clip, and everything
