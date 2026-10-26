@@ -56,6 +56,7 @@ R3h.13 n/a: the opening is photographs, not a film, so there is no film to judge
 R3h.14 n/a: the opening is photographs, not a film, so there is no film to judge
 R3h.17 n/a: the opening is photographs, not a film, so there is no film to judge
 R3h.18 n/a: the opening is her real client photos dealt onto a stack in code; no generated film
+R3h.19 n/a: no generated film: the opening is her real client photos dealt in code
 
 ## 3. Sections and worlds
 R3.12 pass: every page has a hero, a features block (one item per service or course with price) and a closing section with the button and proof beside it
