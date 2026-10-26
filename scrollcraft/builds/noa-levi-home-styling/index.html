@@ -35,7 +35,7 @@
       <div class="hs-photo" data-clip-ok>
         <img src="assets/drawer-before.webp" alt="A clothes drawer packed with loose, crumpled clothes before the session" width="565" height="565" fetchpriority="high">
         <img class="hs-full" src="assets/drawer-after.webp" alt="" width="565" height="565" aria-hidden="true">
-        <div class="hs-tiles" id="tiles" aria-hidden="true"></div>
+        <canvas class="hs-film" id="tidy" aria-hidden="true"></canvas>
         <p class="hs-chip" role="status"><span class="b">Before</span><span class="a">After</span></p>
       </div>
     </div>
@@ -117,64 +117,41 @@
 <script src="site.js"></script>
 <script>
 (function () {
-  var scene = document.getElementById('scene'), box = document.getElementById('tiles');
-  if (!scene || !box) return;
+  // The opening (Tzvi, 26 Oct 2026: "real items that look messy that rearrange when you scroll to make it
+  // orderly and neat"): as you scroll her real messy drawer is emptied, then her filled boxes go in, ending on
+  // her real after photo. Three generated clips chained by stills (gen/tidy-brief-v3.md, rules 3h.18 and 3h.19),
+  // 120 frames drawn on a canvas; scrolling back plays it backwards.
+  // Frames load in passes (every 8th, then 4th, 2nd, all) so it scrubs early; the nearest loaded frame is drawn.
+  var scene = document.getElementById('scene'), cv = document.getElementById('tidy');
+  if (!scene || !cv) return;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var N = 4, tiles = [], seed = 7;
-  function rnd() { seed = (seed * 9301 + 49297) % 233280; return seed / 233280; }
-  var photo = box.parentNode, chip = photo.querySelector('.hs-chip');
-  for (var i = 0; i < N * N; i++) {
-    var r = Math.floor(i / N), c = i % N, el = document.createElement('div');
-    // her after photo has a blurred box (bottom right) that would show as grey smudges: no piece is cut from it, the whole picture fades in at the end
-    if (c >= 1 && r >= 2) continue;
-    el.className = 'tl'; el.style.left = c * 25 + '%'; el.style.top = r * 25 + '%';
-    el.style.width = 'calc(25% + 1px)'; el.style.height = 'calc(25% + 1px)';
-    el.style.backgroundPosition = (c * 100 / (N - 1)) + '% ' + (r * 100 / (N - 1)) + '%';
-    box.appendChild(el);
-    tiles.push({ el: el, sx: (rnd() - .5) * 2, sy: (rnd() - .5) * 2, rot: (rnd() - .5) * 34, d: rnd() * .35, c: c, r: r, x: 0, y: 0 });
-  }
-  var rect, S, intro = reduce ? 1 : 0, p = 0;
-  function measure() { rect = box.getBoundingClientRect(); S = rect.width; tiles.forEach(function (t) {
-    var w = S / N, ax = t.sx * S * .62, ay = t.sy * S * .62, left = rect.left + t.c * w, top = rect.top + t.r * w;
-    // keep each scattered piece inside the window so nothing scrolls sideways
-    // whole on the screen, tilted corners and the top bar included (R3h.20: pieces kept whole; 25 Oct 2026)
-    var phone = innerWidth <= 800, m = S * .08, e = w * .2 + 8, bar = (document.querySelector('.top') || { offsetHeight: 64 }).offsetHeight;
-    var minX = Math.max(-(left - e), -(left - (rect.left - m))), maxX = Math.min(innerWidth - e - (left + w), (rect.right + m) - (left + w));
-    var minY = phone ? Math.max(-(top - bar - e), -(top - (rect.top - m))) : -(top - bar - e), maxY = phone ? Math.min(innerHeight - e - (top + w), (rect.bottom + m) - (top + w)) : innerHeight - e - (top + w);
-    ax = Math.max(minX, Math.min(maxX, ax)); ay = Math.max(minY, Math.min(maxY, ay));
-    // the Before label stays on the messy drawer: no piece starts on top of it
-    var cr = chip.getBoundingClientRect(), pad = w * .2 + 10;
-    function hit(x, y) { var L = left + x, T = top + y; return L + w + pad > cr.left && L - pad < cr.right && T + w + pad > cr.top && T - pad < cr.bottom; }
-    if (hit(ax, ay)) {
-      var tries = [[cr.right + pad - left, ay], [ax, cr.bottom + pad - top], [ax, cr.top - pad - w - top], [cr.left - pad - w - left, ay]];
-      for (var k = 0; k < tries.length; k++) { var tx = tries[k][0], ty = tries[k][1]; if (tx >= minX && tx <= maxX && ty >= minY && ty <= maxY && !hit(tx, ty)) { ax = tx; ay = ty; break; } }
-    }
-    t.x = ax; t.y = ay; }); }
-  function ease(x) { return 1 - Math.pow(1 - x, 3); }
+  var photo = cv.parentNode, cx = cv.getContext('2d'), N = 120, imgs = new Array(N), p = 0;
+  function url(i) { return 'assets/tidy/' + String(i + 1).padStart(3, '0') + '.webp'; }
+  var order = [], seen = {};
+  [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });
+  if (!reduce) (function next(k) {
+    var batch = order.slice(k, k + 6), left = batch.length; if (!left) return;
+    batch.forEach(function (i) { var im = new Image(); im.decoding = 'async'; im.onload = im.onerror = function () { if (im.naturalWidth) imgs[i] = im; if (--left === 0) { draw(); next(k + 6); } }; im.src = url(i); });
+  })(0);
+  function frameAt(q) { var f = Math.round(q * (N - 1)); for (var d = 0; d < N; d++) { if (imgs[f - d]) return imgs[f - d]; if (imgs[f + d]) return imgs[f + d]; } return null; }
+  function size() { var d = Math.min(2, devicePixelRatio || 1); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; draw(); }
   function draw() {
-    var q = Math.min(1, p / .82);
-    tiles.forEach(function (t) {
-      var k = ease(Math.max(0, Math.min(1, (q - t.d) / .65))), k2 = 1 - k, fly = 1 + (1 - intro) * 2.4;
-      t.el.style.transform = 'translate(' + (t.x * k2 * fly).toFixed(1) + 'px,' + (t.y * k2 * fly).toFixed(1) + 'px) rotate(' + (t.rot * k2).toFixed(2) + 'deg)';
-      t.el.style.opacity = Math.min(1, intro * 1.4);
-      t.el.style.setProperty('--lift', k2.toFixed(3));
-    });
-    photo.style.setProperty('--fill', Math.max(0, Math.min(1, (q - .65) / .35)).toFixed(3));
-    box.style.visibility = q >= 1 ? 'hidden' : 'visible';
+    var q = Math.min(1, p / .9), im = frameAt(q);
+    if (im) cx.drawImage(im, 0, 0, cv.width, cv.height);
+    cv.style.opacity = im ? 1 : 0;
+    // the last frame is her after photo itself: it takes over, sharp, at the very end
+    photo.style.setProperty('--fill', Math.max(0, Math.min(1, (q - .96) / .04)).toFixed(3));
     scene.classList.toggle('is-done', p > .88);
   }
   function onScroll() {
     var top = scene.offsetTop, h = scene.offsetHeight - innerHeight;
     p = h > 0 ? Math.max(0, Math.min(1, (scrollY - top) / h)) : 1; draw();
   }
-  measure();
   if (reduce) { p = 1; draw(); return; }
-  draw();
-  var t0 = performance.now();
-  (function step(now) { intro = Math.min(1, (now - t0) / 1100); intro = 1 - Math.pow(1 - intro, 3); draw(); if (intro < 1) requestAnimationFrame(step); })(t0);
-  addEventListener('scroll', function () { requestAnimationFrame(onScroll); }, { passive: true });
-  addEventListener('resize', function () { measure(); onScroll(); });
-  onScroll();
+  var raf = 0;
+  addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(function () { raf = 0; onScroll(); }); }, { passive: true });
+  addEventListener('resize', size);
+  size(); onScroll();
 
   // before and after: choose a room, both photos change
   var cmp = document.getElementById('cmp'), z = 2, cur = cmp.querySelector('.lay.on'), done = 0;

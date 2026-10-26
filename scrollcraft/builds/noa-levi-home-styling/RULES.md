@@ -38,8 +38,8 @@ R3g.13 pass: 1440x900 first screen: picture, headline of 4 words "We organize yo
 R3b.1 pass: first screen says what and the button; the place is in the phone bar and footer
 R3b.2 pass: price 160 shekels an hour sits in the bar beside the button
 R3b.3 pass: one solid action per screen: the bar button and phone bar repeat the same action
-R3h.1 pass: site OPENING passed (25 Oct): her empty cupboard fills the screen under her deep green, and the drawer pieces slide into place as you scroll
-R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.4 screens on a laptop and a phone (was 2.7), 60 fps (median 16.7 ms, no frame over 50 ms); the drawer pieces land on an empty cupboard from her own pantry photo under her deep green (gen/ground-brief.md), no longer a blurred copy of the same drawer; every piece starts whole inside the screen, below the top bar; the cupboard loads first
+R3h.1 pass: site OPENING passed (26 Oct): her own messy drawer fills the opening; as you scroll it is emptied, then her filled boxes go in, ending on her real after photo (three generated clips chained by stills, gen/tidy-brief-v3.md, Tzvi approved), on her empty cupboard under her deep green
+R3h.20 pass: measured 26 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.4 screens, 60 fps; the drawer is her own, on an empty cupboard from her pantry photo under her deep green (gen/ground-brief.md); the drawer is whole on a laptop; its first frame is her before photo, shown before the film's frames arrive
 R3n.1 pass: her drawer photo is the largest picture of the first screen at both sizes, at most 1.2x its size; on phones the words fill the space above it and the photo sits at the bottom, so no empty dark band is left under it as the opening scrolls away
 R3n.2 pass: her tidy drawer pieces fall into her messy drawer
 R3n.3 pass: room choice swaps both photos; hours on the book page fill the tray and set the total; check-motion passed
@@ -51,10 +51,12 @@ R3h.3 n/a: no film in this site: the opening is built in code from their own pho
 R3h.5 n/a: no film in this site: the opening is built in code from their own photos
 R3h.7 n/a: no film in this site: the opening is built in code from their own photos
 R3h.8 n/a: no film in this site: the opening is built in code from their own photos
-R3h.11 n/a: no film or generated still set added in this rework; no new generation
-R3h.13 n/a: no film in this site: the opening is built in code from their own photos
-R3h.14 n/a: no film in this site: the opening is built in code from their own photos
-R3h.17 n/a: no film in this site: the opening is built in code from their own photos
+R3h.11 pass: brightness.py on all 120 frames of the joined film (26 Oct): average 51, every frame passes; no grading needed; looked at on a phone
+R3h.13 pass: one cause, one motion per clip: clip 1 only takes clothes out, clips 2 and 3 only set filled boxes in; watched at 8 fps, no pause, no fall-then-fly, nothing appears from nowhere; scrolling back plays it backwards (boxes lifted out, clothes dropped back in), which is still possible
+R3h.14 pass: the same drawer throughout, overhead; the camera settles once in clip 1 to her after photo's framing and is fixed after that; on a phone the drawer shows below the headline
+R3h.17 n/a: no giant name on plain ground; the headline sits beside the drawer and swaps to 'You gain peace of mind.' as the film ends
+R3h.18 pass: the object list was written and shown to Tzvi before generating (gen/tidy-brief-v3.md): every garment leaves past an edge in clip 1, every box enters past an edge already filled in clips 2 and 3; checked at 8 fps object by object, the boxes stay rigid with the same contents, and her privacy box stays blurred in every frame
+R3h.19 pass: the first rule-following film (26 Oct): each clip's ends hold the same objects (stills K1, K2 made and checked first, 4 credits), one kind of action per clip, frame 1 / middle / last written in the brief before generating; one try per clip (the two earlier single-clip films, before this rule, failed and are the reason for it)
 
 ## 3. Sections and worlds
 R3.12 pass: home page: a hero, services and rooms, a closing band with the button and price
@@ -186,6 +188,7 @@ R3f.7 pass: the bar fits at 390x844; 360x640 passed check-fits
 R3a.6 pass: site PHONE passed
 R3s.22 pass: site TAP passed
 R3s.23 pass: site PHONE passed: no sideways scroll
+R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026)
 R3t.1 pass: Category: service in CONCEPT.md and the site-category meta on all three pages; light ground, rooms as flat colour tiles with a photo each, numbered process, one dark close
 R3t.2 n/a: category is service
 R3t.3 n/a: category is service
