@@ -121,7 +121,11 @@ for (const url of urls) {
     const A = fr[fi(rapid.at - 120)], C = fr[fi(rapid.at + 2100)];
     const first = taps.find((t) => t.i === free[0]); const B = first ? fr[fi(first.at + 1800)] : null;
     const near = (f, x, y) => diff(f, x) + diff(f, y) <= diff(x, y) * 1.6 + 4;
-    for (let k = fi(rapid.at) + 1; k < fi(rapid.at + 2100); k++) {
+    // the same 1.5 floor as a single tap: when neither choice changes the page (Blazin's boards with no
+    // listings server on this computer), what moves is the video's own noise on a dark grainy ground, not a flash
+    const still = diff(A, C) < 1.5 && (!B || diff(A, B) < 1.5);
+    if (still) console.log(`note: the two quick taps changed nothing on screen here, so there is no switch to judge  (${url})`);
+    for (let k = fi(rapid.at) + 1; !still && k < fi(rapid.at + 2100); k++) {
       const f = fr[k];
       if (!near(f, A, C) && !(B && (near(f, A, B) || near(f, B, C)))) { bad += 1; console.log(`FLASH two choices tapped 250 ms apart: a frame ${Math.round((k - fi(rapid.at)) / FPS * 1000)} ms in is between none of the states  (${url})`); break; }
     }

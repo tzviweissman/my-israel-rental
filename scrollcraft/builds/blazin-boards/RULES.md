@@ -55,6 +55,7 @@ R3h.13 n/a: the opening is a scroll-driven tumble of their cut-out board over a 
 R3h.14 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
 R3h.17 n/a: the opening is a scroll-driven tumble of their cut-out board over a giant word on a plain ground; there is no film on this site
 R3h.18 n/a: the opening is their cut-out board tumbling in code over a giant word; no generated film
+R3h.19 n/a: no generated film: the opening is their cut-out board tumbling in code
 
 ## 3. Sections and worlds
 R3.12 pass: hero, the sizes section with price and contents per board, a call to action in the close, a footer; no section is doubled
