@@ -179,3 +179,5 @@ R3a.8 n/a: no dot-separated lines
 R3r.3 pass: run after the last edit: check-site, check-fits, check-motion clean; readable crashed (named above)
 R3r.4 pass: no new Tzvi correction in this task
 R8.7 pass (recorded after the fact, 25 Oct): three settings (home, gym, online) were generated on 7 Oct 2026 and no brief was written first, so this is a record made now, in gen/settings-brief.md with a side-by-side at gen/settings-compare.jpg (her flyer crop beside the three results). I looked at it: the pink dumbbells, dark ground, mat, band and bottle carry over; the pink is hotter magenta than her pastel flyer and the rooms are darker. No person is shown and the page does not call them her premises. Prompts were not kept.
+R3h.19 n/a: no generated film, the page uses stills only (R3h.18)
+R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)

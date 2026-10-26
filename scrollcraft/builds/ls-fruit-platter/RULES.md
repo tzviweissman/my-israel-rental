@@ -198,3 +198,5 @@ R3a.8 pass: no dotted line of items wraps at 360x640
 R3r.3 pass: check-rules passed after the last edit; every script was re-run after the last change to the pages
 R3r.4 pass: no new correction from Tzvi since the last build is missing from this file
 R8.7 pass: gen/opening-film-v3-brief.md written before generating (steps approved by Tzvi 26 Oct, object list, start still gen/v3-start-empty-board.jpg from assets/opening-end.webp, which is matched to her photo); earlier: gen/platters-brief.md, gen/opening-film-brief.md, gen/opening-film-v2-brief.md (the dropped burst idea and why)
+R3h.19 pass: gen/opening-film-v3-brief.md was written before generating with the steps (approved by Tzvi 26 Oct) and every object's start and end; start and end stills pinned (the empty board edited from assets/opening-end.webp, and opening-end.webp itself), one action (fruit falls in past the top edge and settles), one clip between them; the number of tries is not recorded
+R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)

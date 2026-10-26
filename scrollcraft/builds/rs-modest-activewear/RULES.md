@@ -198,3 +198,5 @@ R3a.8 pass: the dotted lines were replaced by commas; the one dot line left is t
 R3r.3 pass: every script above passed on every page after the last edit (final run)
 R3r.4 n/a: no new correction from Tzvi is outstanding since the last build
 R3h.18 n/a: no film: the doors are her own skirts photo opened in code (checked 26 Oct)
+R3h.19 n/a: no generated film; the doors are her photo opened in code
+R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)

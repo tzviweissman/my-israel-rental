@@ -198,3 +198,5 @@ R3r.3 pass: check-site, fits and motion run on every page after the last edit; c
 R3r.4 pass: Tzvi corrections of this pass (3t beauty row, 3g.3 accent, 5.8 we and our) are lines R3t.1, R3g.3, R5.4 of the checklist, with their checks
 R8.7 n/a: nothing was generated on this site. Looked at: gen/ holds only crops.py, build.py, wow_patch.py, book.js and index.html (no Higgsfield, kie, nano_banana, Seedance or Kling call), every image in assets/ is cropped from her own photos in src/owner, the two .mp4 files in the build root are screen recordings of the page itself, and R8.2 and R8.3 already say no generated media.
 R3h.18 n/a: no film: the pages show only her photos (checked 26 Oct)
+R3h.19 n/a: no generated film; only her own photos
+R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
