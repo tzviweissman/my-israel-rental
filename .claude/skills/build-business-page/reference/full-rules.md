@@ -893,6 +893,15 @@ that policy).*
    fruit" failed twice for exactly this reason, both times on its middle.
    Show Tzvi the object list with the steps, and watch every generated clip
    at 8 fps asking the same question of each object.
+   **The test is whether it looks off, not strict physics** (Tzvi, 26 Oct
+   2026: "as long as it doesnt look off its ok if it appears"). Something
+   may appear on the way (more balloons filling an arch, a few more rolls in
+   a box) if, watched at normal speed, it looks natural and nobody would
+   notice. It fails when a viewer would see something wrong: a thing melting
+   into a different thing, a pile morphing into boxes, a piece popping in or
+   vanishing in plain sight. The 8 fps watch finds candidates; the normal-
+   speed watch decides. Plan with the object list all the same: a plan where
+   everything has a route is what keeps a clip from looking off.
 19. **Generate once: plan the clips so the model never has to invent**
    (Tzvi, 26 Oct 2026, after Noa Levi's drawer took two films and the fruit
    burst two: "make a rule that will help prevent needing to make many

@@ -55,7 +55,7 @@ R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW
 R3h.13 pass: the toppings fall and land in one clip; looked at its frames
 R3h.14 pass: the bowl stays recognisable
 R3h.17 n/a: the page does not use a giant name over the film
-R3h.18 pass (Tzvi's exception, 26 Oct: "keep them as is"): its film's purée ribbon shrinks to nothing as the camera turns (frames about 130 to 140) and the toppings rearrange when the box arrives (frames about 250 to 260) (8 fps check, 26 Oct); kept on Tzvi's word, the next film for this site follows the rule
+R3h.18 pass (Tzvi, 26 Oct: "keep them as is" and "as long as it doesnt look off its ok if it appears"): at normal speed it looks natural; the 8 fps watch found its film's purée ribbon shrinks to nothing as the camera turns (frames about 130 to 140) and the toppings rearrange when the box arrives (frames about 250 to 260) (8 fps check, 26 Oct); the next film for this site is planned with an object list
 R3h.19 pass (Tzvi's exception, 26 Oct: "keep them as is"): the film was made before the rule, in one clip; kept as it is; any new film follows 3h.19
 
 ## 3. Sections and worlds

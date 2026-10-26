@@ -50,7 +50,7 @@ R3h.11 pass: brightness.py on assets/arrive.mp4: 20 frames, average 78, bright e
 R3h.13 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.14 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.17 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
-R3h.18 pass (Tzvi's exception, 26 Oct: "keep them as is"): its film shows balloons appearing on top of the piles from nowhere between 2.5 and 4.5 s (8 fps check, 26 Oct); kept on Tzvi's word, the next film for this site follows the rule
+R3h.18 pass (Tzvi, 26 Oct: "keep them as is" and "as long as it doesnt look off its ok if it appears"): at normal speed it looks natural; the 8 fps watch found its film shows balloons appearing on top of the piles from nowhere between 2.5 and 4.5 s (8 fps check, 26 Oct); the next film for this site is planned with an object list
 R3h.19 pass (Tzvi's exception, 26 Oct: "keep them as is"): the film was made before the rule, in one clip; kept as it is; any new film follows 3h.19
 R3.12 pass: hero, what we make, booking section near the end
 R3c.1 pass: references in CONCEPT.md (Monarque, Boom Ball, OFFF Forum sheets)
