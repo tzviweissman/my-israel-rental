@@ -38,7 +38,7 @@ R3g.13 pass: 1440x900 and 390x844 first screens: the film frame, a three word he
 R3b.1 pass: first screen says what (fruit platters), where (Jerusalem), trust (Kosher) and what to do (Order a platter)
 R3b.2 pass: the kosher band follows the opening; the certificate is stated twice (the band and the trust row)
 R3b.3 pass: one solid action per screen: the bar button is the outline version over the film
-R3h.1 pass: check-site OPENING clean: the home page opens on a full-screen film that plays once on load
+R3h.1 pass: the home page opens on a full-screen film that plays on load (fruit rain, 26 Oct): it holds on her platter, then fades back to the empty board and plays again
 R3h.20 n/a: measured 25 Oct (check-site's SMOOTH/SLOW measure at 1440x900 and 390x844): the opening is not scroll-driven (no sticky stage); it is the full-screen platter film that plays on its own, on a plain red ground of its own colour, the platter whole
 R3n.1 pass: her Large platter fills the whole first screen on laptop and phone
 R3n.2 pass: the fruit bursts up off her Large board in the opening film; no other business has her board
@@ -46,14 +46,15 @@ R3n.3 pass: on the shop page choosing a size changes the stage photo, name, pric
 R3n.4 pass: set the first screen beside Best Bean and Theobroma in the food study: ours is a film of her own board, theirs a still pack shot
 R3n.5 pass: "you land and her fruit bursts up off the board, then four sizes sit in a row, each with a price and Add"
 R3g.15 pass: the film is made from her own Large photo; check-fits shows no photo over 1.35x its size
-R3h.2 pass: walked the film: her board on a red ground, the fruit bursts up and holds; every fruit is on her board
+R3h.2 pass: walked the film: her empty board on the red ground, the fruit falls in from above and lands as her Large board, ending on her platter picture
 R3h.3 pass: full screen, video at screen size, looked at at 1440x900 and 1920x1080
 R3h.5 n/a: the film has no chapter lines; the headline sits on the calm left
-R3h.7 pass: one clip, no joins
+R3h.7 pass: one clip, no joins (Kling 3.0 Pro, first and last frame pinned, gen/film_v3.py)
 R3h.8 pass: after the red film the page turns to a light ground with four colour cards
 R3h.11 pass: brightness.py on assets/opening.mp4: 25 frames, average 37, bright enough
-R3h.13 pass: the burst is one clip from one cause; looked at its frames
-R3h.14 pass: the board stays recognisable through the burst
+R3h.13 pass: one cause (falling), one motion per piece: each piece falls and lands; watched at 8 fps on 26 Oct, no fall-then-fly, no heap from nowhere
+R3h.14 pass: the board is in every frame and never moves; it only fills
+R3h.18 pass: gen/opening-film-v3-brief.md lists every object (board, ground, each fruit, droplets) with where it comes from and ends; the clip was watched at 8 fps object by object on 26 Oct: every piece enters past the top edge and stays on the board, nothing changes or vanishes. The burst idea (one watermelon becoming a platter) was dropped for failing this
 R3h.17 n/a: the page does not use a giant name over the film
 
 ## 3. Sections and worlds
@@ -196,4 +197,4 @@ R3a.8 pass: no dotted line of items wraps at 360x640
 ## 9. Finish
 R3r.3 pass: check-rules passed after the last edit; every script was re-run after the last change to the pages
 R3r.4 pass: no new correction from Tzvi since the last build is missing from this file
-R8.7 pass (recorded after the fact, 25 Oct): gen/platters-brief.md with gen/platters-compare.jpg (the four platter shots beside her photos) and gen/opening-film-brief.md with gen/opening-film-compare.jpg (her Large board beside four frames of the opening film); both looked at on 25 Oct: the fruit and boards match hers, grounds and added props differ and are written down; prompts and model were not kept
+R8.7 pass: gen/opening-film-v3-brief.md written before generating (steps approved by Tzvi 26 Oct, object list, start still gen/v3-start-empty-board.jpg from assets/opening-end.webp, which is matched to her photo); earlier: gen/platters-brief.md, gen/opening-film-brief.md, gen/opening-film-v2-brief.md (the dropped burst idea and why)

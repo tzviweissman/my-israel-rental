@@ -878,6 +878,20 @@ that policy).*
    the end the film moves aside first and the headline arrives once there is
    room. The readability check failed both ways on Chicken Munch until they
    took turns.
+18. **The story must be physically possible before anything is generated**
+   (Tzvi, 25 Oct 2026, on LS Fruit Platter: "the watermelon inside just
+   disappears ... before you make a video you need to make sure everything
+   looks natural and makes sense"). Write the film as a list of every object
+   on screen and, for each one, where it comes from and where it ends up:
+   in frame at the start, enters past an edge, is cut from something we
+   saw, or leaves past an edge. If any object appears from nowhere, turns
+   into a different thing, or leaves no trace (a watermelon's red flesh, a
+   grape that was never there), the idea is wrong; change the idea, not the
+   prompt. A start and end frame cannot fix an impossible middle: the model
+   fills it with a morph. "A watermelon bursts into a whole platter of other
+   fruit" failed twice for exactly this reason, both times on its middle.
+   Show Tzvi the object list with the steps, and watch every generated clip
+   at 8 fps asking the same question of each object.
 
 ## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
 

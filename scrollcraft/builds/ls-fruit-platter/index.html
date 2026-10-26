@@ -25,10 +25,7 @@
 </header>
 <main>
   <section class="film" aria-label="Fruit platters">
-    <video class="film-v" id="film" muted playsinline preload="auto" poster="assets/opening-poster.webp" aria-hidden="true">
-      <source src="assets/opening-sm.mp4" type="video/mp4" media="(max-width: 860px)">
-      <source src="assets/opening.mp4" type="video/mp4">
-    </video>
+    <video class="film-v" id="film" muted playsinline preload="auto" poster="assets/opening-poster.webp" aria-hidden="true"></video>
     <img class="film-end" src="assets/opening-end.webp" width="1920" height="1080" alt="Our Large platter on a red ground: watermelon, grapes, pomegranate, lychees, melon and pineapple on a wooden board">
     <div class="film-copy">
       <p class="eyebrow">Jerusalem · Kosher</p>
@@ -119,14 +116,29 @@
 <script src="site.js"></script>
 <script>
 (function () {
-  // play the burst once, then hold its last frame; with motion switched off, only the held frame shows
+  // The fruit rain (26 Oct 2026, gen/opening-film-v3-brief.md): it plays, holds on her platter,
+  // then the platter fades back to the empty board and it plays again (Tzvi: "repeat smoothly
+  // so they can rewatch the wow moment"). A tall phone gets its own film with the whole board
+  // in it (the wide one cut both ends off). With motion switched off, only the platter shows.
   var v = document.getElementById('film'), film = document.querySelector('.film');
   if (!v) return;
-  function end() { film.classList.add('done'); }
-  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { end(); return; }
-  v.addEventListener('ended', end); v.addEventListener('error', end);
-  var p = v.play(); if (p && p.catch) p.catch(end);
-  setTimeout(function () { if (!film.classList.contains('done') && v.paused) end(); }, 2500);
+  var endImg = film.querySelector('.film-end');
+  var tall = matchMedia('(max-aspect-ratio: 3/4)').matches, narrow = matchMedia('(max-width: 860px)').matches;
+  if (tall) { endImg.src = 'assets/opening-end-tall.webp'; v.poster = 'assets/opening-poster-tall.webp'; }
+  v.src = tall ? 'assets/opening-tall.mp4' : narrow ? 'assets/opening-sm.mp4' : 'assets/opening.mp4';
+  function show() { film.classList.add('done'); }
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) { show(); return; }
+  var HOLD = 3500, FADE = 900, timer = 0;
+  function play() { var p = v.play(); if (p && p.catch) p.catch(show); }
+  function again() {
+    v.currentTime = 0;                 // the empty board, under the platter picture
+    film.classList.remove('done');     // the platter fades away to it
+    timer = setTimeout(play, FADE);
+  }
+  v.addEventListener('ended', function () { show(); clearTimeout(timer); timer = setTimeout(again, HOLD); });
+  v.addEventListener('error', show);
+  play();
+  setTimeout(function () { if (!film.classList.contains('done') && v.paused && !v.currentTime) show(); }, 2500);
 })();
 </script>
 </body>
