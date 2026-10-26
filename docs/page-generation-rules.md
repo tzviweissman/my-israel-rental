@@ -1428,6 +1428,17 @@ docs/ui-videos/notes/2026-10-20-nine-videos.md). He approved all of them ("yes a
    in 3b).
 10. The picture appears the moment a thing is named.
 
+**Same thing, same place (3s.27)** (Tzvi, 26 Oct 2026, on Blazin' Boards' sizes on a phone: "the sizes are
+written in different places for different ones ... make a rule that these type of things need to be
+consistent"). When one kind of thing repeats (each size in a size walk, each step, each card, each
+slide, each state of a scroll scene), it is written in the same place, the same way, every time: the
+same position on screen, the same size and style. A block that grows (a size with three boards
+against a size with one) hangs from a fixed top line and grows downward, so its heading never moves;
+anchored at the bottom, the size with three boards rode up into the photo and the size with one sat
+low. Checked by stepping through every state on a phone and a laptop and measuring the label's top:
+it must not change.
+
+
 **It sells like a premium brand (honestly)
 11. One true sentence beside the price says why it costs that (handmade,
     the ingredient, the time it takes), not hidden on an About page.

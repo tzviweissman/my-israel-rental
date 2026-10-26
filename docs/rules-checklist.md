@@ -222,6 +222,7 @@ R3s.2 | Nothing jumps: late photos fade in over 200 to 400 ms into space kept fo
 R3s.1 | Everything pressable answers within 100 ms with a hover and a pressed state | 3s.1 | script: site STATE
 R3s.8 | Buttons over a photo sit in a soft container, checked on a light and a dark photo | 3s.8 | LOOK
 R3s.10 | The picture appears the moment a thing is named | 3s.10 | LOOK
+R3s.27 | Same thing, same place: a repeated kind of thing (each size, step, card, slide, scroll state) is written in the same place and style every time, and a growing block hangs from a fixed top so its heading never moves | 3s.27 | LOOK: step through every state on a phone and a laptop; the label's top must not change; n/a if nothing repeats
 R3i.3 | A live readout tied to the scroll shows only a true fact of their process, small mono at a corner, never a made-up number | 3i.3 | LOOK; n/a if none
 R3s.21 | No script errors, console errors, 404s or dead links between the site's pages | 3s BROKEN | script: site BROKEN
 

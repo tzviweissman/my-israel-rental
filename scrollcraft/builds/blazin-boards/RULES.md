@@ -178,6 +178,7 @@ R3s.2 pass: check-motion clean on index, boards, order-when and order-details; o
 R3s.1 pass: check-site STATE passed
 R3s.8 pass: the nav and buttons over the hero sit on a soft container or solid fill
 R3s.10 n/a: no item is named before its picture; every picture is shown with its name
+R3s.27 pass: the live sizes walk stepped through all five sizes on a 390x844 and a 375x667 phone on 26 Oct: the big size's top stays at one height for every size (528 and 349 px), never over the photo, and the list grows downward and clears the order bar
 R3i.3 n/a: no live readout
 R3s.21 pass: check-site BROKEN found no 404 or dead link; the platform API (localhost:8001) is not running here, so the checks answered it from a stub of their price list (prices.json) so the shop and order pages could be exercised
 
