@@ -104,7 +104,7 @@ R8.1 pass: put the three board photographs, the plank crop and the cut-out on on
 R8.6 pass: the closing screen now shows a product hero shot of their own board (23 Oct): their board exactly, overhead as photographed, on a slate slab with rosemary, salt and pepper on the dark ground, one warm light; the tumble keeps the cut-out; no per-size shots, because they have one board photo and the size ruler grows it in code
 R8.2 pass: every picture is their own photograph, a cut-out of it, or the hero shot edited from it (Higgsfield nano_banana_2)
 R3p.7 pass: every board row is the same text row; the three photographs have the same height; no pointing changes a photo
-R3h.20 pass: check-site SMOOTH and SLOW passed on the opening (hero 320svh, median frame 16.7 ms normal and about 33 ms at 4x CPU in headless Chromium); the board sits on a plain oxblood ground, never on a photo of meat; the board is whole at five sizes; the board and shadow are preloaded and the images below the first screen are lazy; sheet docs/site-reviews/2026-10-25/blazin-opening-final.jpg
+R3h.20 pass: check-site SMOOTH and SLOW passed on the opening (hero 320svh, median frame 16.7 ms normal and about 33 ms at 4x CPU in headless Chromium); the board sits on a plain oxblood ground, never on a photo of meat; the board is whole at five sizes; the board and shadow are preloaded and the images below the first screen are lazy; sheet docs/site-reviews/2026-10-25/blazin-opening-final.jpg; 27 Oct: the scroll engine now writes a value only when it changes and its progress no longer restyles the whole scene, 18 ms a frame on a phone slowed 4x
 R3h.12 pass: the board looks the same in the tumble, the cut-out and the sizes (cut from one master); the menu photographs are of the real boards
 R3h.10 n/a: choosing a size has no picture swap on this page, the board scales; the order flow picks boards by name
 R3g.14 pass: all images on one sheet: warm daylight on marble or wood, same red-brown grade
@@ -178,7 +178,7 @@ R3s.2 pass: check-motion clean on index, boards, order-when and order-details; o
 R3s.1 pass: check-site STATE passed
 R3s.8 pass: the nav and buttons over the hero sit on a soft container or solid fill
 R3s.10 n/a: no item is named before its picture; every picture is shown with its name
-R3s.27 pass: the live sizes walk stepped through all five sizes on a 390x844 and a 375x667 phone on 26 Oct: the big size's top stays at one height for every size (528 and 349 px), never over the photo, and the list grows downward and clears the order bar
+R3s.27 pass: the live sizes walk stepped through all five sizes on a 390x844 and a 375x667 phone on 26 Oct: the big size's top stays at one height for every size (528 and 349 px), never over the photo, and the list grows downward and clears the order bar; on a laptop (1440x900, 27 Oct) each size now hangs from the top of its box too, so the size number no longer climbs with a longer list (it sat at 455 to 641 px)
 R3i.3 n/a: no live readout
 R3s.21 pass: check-site BROKEN found no 404 or dead link; the platform API (localhost:8001) is not running here, so the checks answered it from a stub of their price list (prices.json) so the shop and order pages could be exercised
 

@@ -742,6 +742,10 @@
   <a class="btn" href="#order" tabindex="-1">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
 </div>
 
+<script>
+/* A style value is written only when it changes (26 Oct 2026): rewriting a custom property every frame restyles everything under it, and these frames run even while nobody scrolls */
+function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); if (c[k] !== v) { c[k] = v; el.style.setProperty(k, v); } }
+</script>
 <script src="scrollcraft.js"></script>
 <script>ScrollCraft.mount(document.body);</script>
 <script>
@@ -855,15 +859,15 @@
       var col = ease(span(p, 0.50, 0.64));
       // A phone stacks the halves, and their half needs the room for its copy.
       var base = phone.matches ? 38 : 50, more = phone.matches ? 8 : 12;
-      act.style.setProperty('--x', ((base + more * grow) * (1 - col)).toFixed(3));
-      act.style.setProperty('--dim', span(p, 0.42, 0.50).toFixed(3));
-      act.style.setProperty('--gone', span(p, 0.56, 0.64).toFixed(3));
-      act.style.setProperty('--pot', span(p, 0.55, 0.62).toFixed(3));
+      setCss(act, '--x', ((base + more * grow) * (1 - col)).toFixed(3));
+      setCss(act, '--dim', span(p, 0.42, 0.50).toFixed(3));
+      setCss(act, '--gone', span(p, 0.56, 0.64).toFixed(3));
+      setCss(act, '--pot', span(p, 0.55, 0.62).toFixed(3));
       // The knob creeps from Off toward Low while the argument runs, and
       // clicks onto Low once their side has the screen.
       var on = col > 0.97;
       var ang = on ? -35 : -100 + 50 * span(p, 0.04, 0.6);
-      knob.style.setProperty('--a', ang + 'deg');
+      setCss(knob, '--a', ang + 'deg');
       knob.classList.toggle('is-on', on);
       // The knob rides the divider, then at the collapse it flies onto the
       // slow cooker's own dial in the frame and shrinks to its size: the
@@ -878,26 +882,26 @@
       var hy = phone.matches ? home.top : home.top + home.height / 2;
       var ct = pot.ready && video.duration ? video.currentTime / video.duration : 0;
       var D = dialAt(ct);
-      potFrame.style.setProperty('--dx', D[0].toFixed(4));
-      potFrame.style.setProperty('--dy', D[1].toFixed(4));
-      potFrame.style.setProperty('--dd', D[2].toFixed(4));
+      setCss(potFrame, '--dx', D[0].toFixed(4));
+      setCss(potFrame, '--dy', D[1].toFixed(4));
+      setCss(potFrame, '--dd', D[2].toFixed(4));
       var tx = fr.left + fr.width * D[0], ty = fr.top + fr.height * D[1];
       var tScale = (fr.width * D[2]) / (kw.width / knobScale || 1) / 0.48;
       knobScale = 1 + (tScale - 1) * land;
-      knobWrap.style.transform = 'translate(' + ((tx - hx) * land).toFixed(1) + 'px,' + ((ty - hy) * land).toFixed(1) + 'px) scale(' + knobScale.toFixed(3) + ')';
-      knob.style.setProperty('--face', (1 - land).toFixed(3));
+      setCss(knobWrap, 'transform', 'translate(' + ((tx - hx) * land).toFixed(1) + 'px,' + ((ty - hy) * land).toFixed(1) + 'px) scale(' + knobScale.toFixed(3) + ')');
+      setCss(knob, '--face', (1 - land).toFixed(3));
       // Landed: hand over to the knob inside the frame, which scrolls with it.
       var landed = land > 0.995 ? 1 : 0;
       // On a phone the knob would sit on the chores list, so it arrives in
       // the pause, when the list has gone, and flies to the pot from there.
       var show = phone.matches ? span(p, 0.42, 0.48) : 1;
-      knobWrap.style.opacity = (1 - landed) * show;
-      potFrame.style.setProperty('--landed', landed);
-      knobPot.style.setProperty('--a', ang + 'deg');
+      setCss(knobWrap, 'opacity', (1 - landed) * show);
+      setCss(potFrame, '--landed', landed);
+      setCss(knobPot, '--a', ang + 'deg');
       knobPot.classList.toggle('is-on', on);
       chores.forEach(function (li, i) { li.classList.toggle('on', p > 0.11 + i * 0.033); });
       var h = span(p, 0.64, 0.92);
-      hours.textContent = Math.round(20 * h);
+      var hv = String(Math.round(20 * h)); if (hours.textContent !== hv) hours.textContent = hv;   // a new text every frame meant a layout every frame
       if (pot.ready) pot.target = span(p, 0.54, 1) * (video.duration || 0);
       if (kitchen.ready) kitchen.target = span(p, 0, 0.42) * (kitchen.el.duration || 0);
     }
@@ -933,7 +937,7 @@
     var was = cur;
     cur = Math.max(0, Math.min(2, i));
     var s = sizes[cur];
-    dial.style.setProperty('--a', (free == null ? s.angle : free) + 'deg');
+    setCss(dial, '--a', (free == null ? s.angle : free) + 'deg');
     dial.classList.add('is-on');
     dial.setAttribute('aria-valuenow', cur);
     dial.setAttribute('aria-valuetext', s.name + ', ' + s.feeds.toLowerCase() + ', ' + s.price + ' shekels');

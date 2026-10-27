@@ -189,6 +189,7 @@ R3a.6 pass: check-site PHONE on index and book: the bar never covers something t
 R3s.22 pass: check-site TAP on index and book: everything at least 40 px, no overlaps
 R3s.23 pass: check-site PHONE on index and book: no sideways scroll
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026); it found the quote pairs on the "in their words" paragraph at 1280x720 and 1366x768 (Tzvi's screenshot), fixed: heading, quotes and reviews share one grid on laptops
+R3s.27 pass: the client photos land on one stack in one spot, one after another, and the tab line under the menu bar never moves; stepped through on a 390x844 phone and at 1440x900 on 27 Oct
 R3t.1 pass: site-category beauty on every page and Category: beauty in CONCEPT.md; home compared with lx-odyssee-sheet.webp: cream or ivory after the opening, photos framed inside it, courses as rows, her portrait beside her words, the button in the top bar all the way down
 R3t.2 n/a: category beauty, not food-shop or fashion-shop
 R3t.3 n/a: category beauty, not trainer

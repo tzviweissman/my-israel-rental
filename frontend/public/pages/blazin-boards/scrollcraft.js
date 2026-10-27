@@ -149,6 +149,12 @@
   var clamp01 = function (x) { return clamp(x, 0, 1); };
   var smooth = function (x) { x = clamp01(x); return x * x * (3 - 2 * x); };
   var lerp = function (a, b, t) { return a + (b - a) * t; };
+  // A custom property is written only when its value changes: a write restyles everything under the element (the root, for
+  // --sc-canvas and --sc-seg), and read() runs on every scroll step (26 Oct 2026, phones at 4x slower spent most of a frame on it).
+  var setVar = function (el, k, v) { var c = el.__scv || (el.__scv = {}); if (c[k] !== v) { c[k] = v; el.style.setProperty(k, v); } };
+  // --sc-p and the route numbers are read from the element's own style, never inherited by CSS, so they stop at the element:
+  // inherited, one write restyled the whole pinned scene under it on every scroll step
+  try { ['--sc-p', '--sc-seg', '--sc-segp'].forEach(function (n) { CSS.registerProperty({ name: n, syntax: '*', inherits: false }); }); } catch (e) {}
 
   // Monotone dwell remap. Settles the camera mid-act (where the copy peaks) and
   // moves quicker at the edges. f(0)=0 and f(1)=1 always, so seam frames between
@@ -798,10 +804,10 @@
       // set of chapter dots are all the same two numbers, and a runtime that
       // ships one of them ships it to every page that uses this mode.
       var cur = W.segs[k];
-      W.el.style.setProperty('--sc-seg', String(k));
-      W.el.style.setProperty('--sc-segp', cur.local.toFixed(4));
-      docEl.style.setProperty('--sc-seg', String(k));
-      docEl.style.setProperty('--sc-segp', cur.local.toFixed(4));
+      setVar(W.el, '--sc-seg', String(k));
+      setVar(W.el, '--sc-segp', cur.local.toFixed(4));
+      setVar(docEl, '--sc-seg', String(k));
+      setVar(docEl, '--sc-segp', cur.local.toFixed(4));
       if (k !== W.index) {
         W.index = k;
         try {
@@ -851,7 +857,7 @@
           a.vp = a.dwell ? dwell(vraw, a.dwell) : vraw;
         }
         a.live = (y > a.top - vh * 1.25) && (y < a.top + a.height + vh * 1.25);
-        a.el.style.setProperty('--sc-p', a.p.toFixed(4));
+        setVar(a.el, '--sc-p', a.p.toFixed(4));
 
         // Fetch earlier than we drive. A 1080p clip is megabytes, and a reader
         // who scrolls briskly will otherwise arrive at a stage that is still
@@ -977,7 +983,7 @@
         if (D.act.raw >= 1) { driftA = D; driftB = D; driftT = 1; }
       }
       if (driftA) {
-        docEl.style.setProperty('--sc-canvas', mixColor(driftB.rgb, driftA.rgb, driftT));
+        setVar(docEl, '--sc-canvas', mixColor(driftB.rgb, driftA.rgb, driftT));
       }
 
       if (progressBar) {

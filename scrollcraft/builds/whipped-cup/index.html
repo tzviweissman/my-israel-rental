@@ -209,8 +209,13 @@
     if (!v.paused) v.pause(); clearTimeout(rest);
     rest = setTimeout(function () { if (sec.getBoundingClientRect().bottom > 0) { var p = v.play(); if (p && p.catch) p.catch(function () {}); } }, 300);
   }, { passive: true });
-  // the puffs breathe only while the opening is on screen
-  (function loop() { if (sec.getBoundingClientRect().bottom > 0) frame(); requestAnimationFrame(loop); })();
+  // the puffs breathe only while the window is open on screen: the loop used to run every frame forever and kept a phone
+  // busy 78% of the time while nobody scrolled (26 Oct 2026); it stops on its own and the next scroll starts it again
+  var looping = false;
+  function breathing() { var r = sec.getBoundingClientRect(), q = clamp(-r.top / Math.max(1, sec.offsetHeight - innerHeight)); return r.bottom > 0 && q > .12 && q < .85; }
+  function loop() { if (!breathing()) { looping = false; return; } frame(); requestAnimationFrame(loop); }
+  function wake() { if (!looping && breathing()) { looping = true; requestAnimationFrame(loop); } }
+  addEventListener('scroll', wake, { passive: true }); wake();
 })();
 </script>
 <script>

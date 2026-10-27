@@ -174,6 +174,8 @@
   .ruler span { position: absolute; inset-inline-start: calc(100% + 10px); top: -0.6em; font-family: var(--font-body); font-size: var(--sc-t-xs); color: var(--sc-ink-soft); letter-spacing: 0.08em; white-space: nowrap; }
   .tiers { position: absolute; inset-inline-end: var(--sc-gutter); inset-block-end: clamp(2rem, 7vh, 4rem); width: min(40vw, 30rem); height: 58vh; }
   .tier { position: absolute; inset-inline: 0; inset-block-end: 0; margin: 0; }
+  /* on a laptop too each size hangs from the top of its box, so the size number sits at one height for every board and a longer list grows down (rule 3s.27; it sat at 455 to 641 px) */
+  @media (min-width: 861px) { .tier { inset-block-end: auto; inset-block-start: 0; } }
   .tier__size { margin: 0; font-family: var(--font-body); font-weight: 800; font-size: clamp(2.6rem, 6vw, 5rem); letter-spacing: -0.03em; line-height: 1; }
   .tier__size small { font-size: max(0.42em, 14px); font-weight: 600; letter-spacing: 0.04em; color: var(--sc-ink-soft); margin-inline-start: 0.2em; }
   .tier ul { list-style: none; margin: var(--sc-4) 0 0; padding: 0; display: grid; gap: var(--sc-3); }

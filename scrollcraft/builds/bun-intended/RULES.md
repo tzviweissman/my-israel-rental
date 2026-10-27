@@ -201,3 +201,4 @@ R3h.20 pass: 450vh on a laptop and 400vh on a phone (4.5 and 4 screens); the sho
 R3h.18 n/a: no film: the opening is their own bun photo moved in code (the swirl), checked 26 Oct
 R3h.19 n/a: no generated film; the opening is their bun photo moved in code
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
+R3s.27 pass: the swirl has one heading and one card, which arrive once and stay put; the box builder's tiles sit in one fixed grid; stepped through on a 390x844 phone and at 1440x900 on 27 Oct

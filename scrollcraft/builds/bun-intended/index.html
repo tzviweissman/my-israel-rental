@@ -897,7 +897,8 @@
     }
     function measure() {
       var sr = st.getBoundingClientRect(), rr = rb.getBoundingClientRect(), W = sr.width, H = sr.height, phone = innerWidth < 861;
-      dpr = Math.min(2, window.devicePixelRatio || 1);
+      // a phone's flying letters at 1.5x, not 2x: the canvas was half of each scrolled frame on a slowed phone (26 Oct 2026)
+      dpr = Math.min(phone ? 1.5 : 2, window.devicePixelRatio || 1);
       cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr);
       lay.W = W; lay.H = H; lay.cx0 = rr.left + rr.width / 2 - sr.left; lay.cy0 = rr.top + rr.height / 2 - sr.top; lay.sc = rr.width / 670;
       var D0 = rr.width, De, xe, ye;

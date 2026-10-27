@@ -179,7 +179,7 @@ R3s.1 pass: check-site STATE clean
 R3s.8 pass: over the opening photo the buttons are solid cream on a soft edge shade; looked at on the light and dark frames
 R3s.10 pass: every item is named beside its photo
 R3i.3 n/a: no scroll readout on this site
-R3s.21 pass: check-site BROKEN clean on every page
+R3s.21 pass: check-site BROKEN clean on every page; 27 Oct: the order page's spare menu photos (shown when the menu cannot be fetched) now point to the page's own folder, so they load wherever the page is served (two came up 404 in the publish check)
 
 ## 8. Phone
 R3b.6 pass: the phone dock carries the price and the button after the film; 360x640 looked at
@@ -188,6 +188,7 @@ R3a.6 pass: check-site PHONE clean
 R3s.22 pass: check-site TAP clean on every page
 R3s.23 pass: check-site PHONE clean on every page
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026)
+R3s.27 pass: the film's four lines (acai base, sugar free, topped your way, and the closing brunch line with its button) each take the room of the tallest, so every heading starts at the same height (764/667 px before; one height after, scripts/check-same-place.mjs on a 390x844 phone and at 1440x900 on 27 Oct)
 R3t.1 pass: check-site CATEGORY clean: site-category food-shop on every page and in CONCEPT.md; the home page was set beside the food contact sheets (bestbean, theobroma, delice) in docs/inspo/awwwards-anatomy-2026-10-22/food: light ground, one colour panel per product, price and Add on every card
 R3t.2 pass: check-site BUY clean (a price and an Order or Add control inside the first two screens); looked at every card: photo, name, price, button
 R3t.3 n/a: trainer rule; this site is food-shop

@@ -544,6 +544,10 @@
 </footer>
 
 
+<script>
+/* A style value is written only when it changes (26 Oct 2026): rewriting a custom property every frame restyles everything under it, and these frames run even while nobody scrolls */
+function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); if (c[k] !== v) { c[k] = v; el.style.setProperty(k, v); } }
+</script>
 <script src="scrollcraft.js"></script>
 <script>
   ScrollCraft.mount(document.body);
@@ -552,7 +556,7 @@
     /* The bar wraps on phones, so its height is measured, not assumed. On
        desktop it is hidden and the padding it reserves goes to zero. */
     var bar = document.querySelector('.bar');
-    function barH() { var h = getComputedStyle(bar).display === 'none' ? 0 : Math.ceil(bar.getBoundingClientRect().height); document.documentElement.style.setProperty('--bar-h', h + 'px'); }
+    function barH() { var h = getComputedStyle(bar).display === 'none' ? 0 : Math.ceil(bar.getBoundingClientRect().height); setCss(document.documentElement, '--bar-h', h + 'px'); }
     if (bar) { barH(); new ResizeObserver(barH).observe(bar); addEventListener('resize', barH, { passive: true }); }
     /* ------------------------------------------------------------ nav spy --
        The nav says where you are: the section whose box holds the middle
@@ -632,7 +636,7 @@
       pairs.forEach(function (li) {
         var at = parseFloat(li.getAttribute('data-at')) || 0;
         var t = reduce ? 1 : ease(clamp((p - at) / 0.08));
-        li.querySelector('.before').style.setProperty('--t', t.toFixed(3));
+        setCss(li.querySelector('.before'), '--t', t.toFixed(3));
       });
     }
     if (pairs.length) onProgress(document.getElementById('same'), paintStrike);

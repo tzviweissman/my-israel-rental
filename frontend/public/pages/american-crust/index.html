@@ -12,11 +12,11 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=League+Gothic&family=Barlow:wght@400;600;700&family=Heebo:wght@500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/american-crust/site.css?v=mvo164sc">
+<link rel="stylesheet" href="/pages/american-crust/site.css?v=mvqoigm1">
 </head>
 <body class="no-js" data-page="index">
 <header class="top" id="top">
-  <a class="mark" href="/business/american-crust" aria-label="American Crust, home"><img src="/pages/american-crust/assets/logo.webp?v=mvo164sc" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-921e6eca-0">American Crust</span></a>
+  <a class="mark" href="/business/american-crust" aria-label="American Crust, home"><img src="/pages/american-crust/assets/logo.webp?v=mvqoigm1" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-921e6eca-0">American Crust</span></a>
   <nav class="nav" id="nav" aria-label="American Crust"><a href="/business/american-crust" aria-current="page" data-mir-key="t-fc43c37b-0">Home</a><a href="/business/american-crust/shop" data-mir-key="t-c7ee064b-0">Shop</a><a href="/business/american-crust/contact" data-mir-key="t-e3e78835-0">Contact</a></nav>
   <div class="top-r">
     <a class="btn-line" href="/business/american-crust/shop#order" data-mir-key="t-af6f86d3-0">Order<span class="count" id="count" hidden></span></a>
@@ -39,7 +39,7 @@
   <section class="buy" id="buy" aria-label="Our doughs">
     <div class="pcs">
       <article class="pc" data-tilt>
-        <div class="ph"><img src="/pages/american-crust/assets/bagel-hero.webp?v=mvo164sc" alt="American style bagel dough: six pre shaped bagels in their tray" width="1200" height="896" fetchpriority="high" data-mir-key="i-4b8f0e93-0"></div>
+        <div class="ph"><img src="/pages/american-crust/assets/bagel-hero.webp?v=mvqoigm1" alt="American style bagel dough: six pre shaped bagels in their tray" width="1200" height="896" fetchpriority="high" data-mir-key="i-4b8f0e93-0"></div>
         <div class="info">
           <h3 data-mir-key="t-516b5423-0">American style bagel dough</h3>
           <p class="sub" data-mir-key="t-706d4538-0">6 pre shaped bagels</p>
@@ -48,7 +48,7 @@
         </div>
       </article>
       <article class="pc night" data-tilt>
-        <div class="ph"><img src="/pages/american-crust/assets/pizza-hero.webp?v=mvo164sc" alt="Classic American pizza dough in its tub with the American Crust label" width="1200" height="896" fetchpriority="high" data-mir-key="i-0335b71a-0"></div>
+        <div class="ph"><img src="/pages/american-crust/assets/pizza-hero.webp?v=mvqoigm1" alt="Classic American pizza dough in its tub with the American Crust label" width="1200" height="896" fetchpriority="high" data-mir-key="i-0335b71a-0"></div>
         <div class="info">
           <h3 data-mir-key="t-7d23d746-0">Classic American pizza dough</h3>
           <p class="sub" data-mir-key="t-c429d231-0">100% parve</p>
@@ -72,7 +72,7 @@
 
   <section class="sec bake" aria-labelledby="h-bake">
     <div class="wrap">
-      <figure class="rev"><img src="/pages/american-crust/assets/baked-wide.webp?v=mvo164sc" alt="Everything bagels on baking paper" width="720" height="625" loading="lazy" data-mir-key="i-78073213-0"></figure>
+      <figure class="rev"><img src="/pages/american-crust/assets/baked-wide.webp?v=mvqoigm1" alt="Everything bagels on baking paper" width="720" height="625" loading="lazy" data-mir-key="i-78073213-0"></figure>
       <div class="rev">
         <h2 id="h-bake" data-mir-key="t-97139d81-0">America Just Landed in Your <span class="u">Kitchen</span>.</h2>
         <p class="t" data-mir-key="t-f004b315-0">Make fresh American tasting bagels straight from your home. Just follow our simple instructions and enjoy. For pizza, meat pizza or classic American pie, this dough is sure to impress.</p>
@@ -124,7 +124,7 @@
   <p class="p" data-mir-key="t-7e864c8e-0"><b>From ₪27</b>American bagel and pizza dough</p>
   <a class="btn" href="/business/american-crust/shop#order" tabindex="-1" data-mir-key="t-af6f86d3-2">Order</a>
 </div>
-<script src="/pages/american-crust/site.js?v=mvo164sc"></script>
+<script src="/pages/american-crust/site.js?v=mvqoigm1"></script>
 <script>
 (function () {
   var NAMES = { bagel: 'American style bagel dough', pizza: 'Classic American pizza dough' };
@@ -150,13 +150,30 @@
       var batch = order.slice(k, k + 6), left = batch.length; if (!left) return;
       batch.forEach(function (i) { var im = new Image(); im.decoding = 'async'; im.onload = im.onerror = function () { if (im.naturalWidth) imgs[i] = im; if (--left === 0) { draw(); next(k + 6); } }; im.src = url(i); });
     })(0);
-    var frameAt = function (q) { var f = Math.round(q * (N - 1)); for (var d = 0; d < N; d++) { if (imgs[f - d]) return imgs[f - d]; if (imgs[f + d]) return imgs[f + d]; } return null; };
+    // Smooth on a phone, as on The Brown Box (26 Oct 2026): draw only when the frame changes, keep the frames around the
+    // current one decoded (createImageBitmap; a plain image is decoded again on every draw), and never make the canvas
+    // sharper than the frames themselves
+    var FW = kind === 'm' ? 720 : 1680, FH = kind === 'm' ? 1280 : 946, shown = -1, bmp = {}, asked = {}, WIN = 8;
+    var frameAt = function (q) { var f = Math.round(q * (N - 1)); for (var d = 0; d < N; d++) { if (imgs[f - d]) return f - d; if (imgs[f + d]) return f + d; } return -1; };
+    var keep = function (f) {
+      if (!window.createImageBitmap) return;
+      Object.keys(bmp).forEach(function (i) { if (Math.abs(i - f) > WIN + 2) { bmp[i].close(); delete bmp[i]; } });
+      for (var i = Math.max(0, f - WIN); i <= Math.min(N - 1, f + WIN); i++) if (imgs[i] && !bmp[i] && !asked[i]) (function (i) {
+        asked[i] = 1;
+        createImageBitmap(imgs[i]).then(function (b) { delete asked[i]; if (Math.abs(i - Math.round(p * (N - 1))) > WIN + 2) b.close(); else bmp[i] = b; }, function () { delete asked[i]; });
+      })(i);
+    };
     var draw = function () {
-      var im = frameAt(still ? 1 : p); if (!im) return;
-      var W = cv.width, H = cv.height, sc = Math.max(W / im.naturalWidth, H / im.naturalHeight), w = im.naturalWidth * sc, h = im.naturalHeight * sc;
+      var q = still ? 1 : p, f = frameAt(q); if (f < 0) return;
+      keep(Math.round(q * (N - 1)));
+      if (f === shown) return; shown = f;
+      var im = bmp[f] || imgs[f], W = cv.width, H = cv.height, sc = Math.max(W / im.width, H / im.height), w = im.width * sc, h = im.height * sc;
       cx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
     };
-    var size = function () { var d = Math.min(2, devicePixelRatio || 1); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; draw(); };
+    var size = function () {
+      var sc = Math.max(cv.clientWidth / FW, cv.clientHeight / FH), d = Math.min(2, devicePixelRatio || 1, 1 / sc);
+      cv.width = Math.round(cv.clientWidth * d); cv.height = Math.round(cv.clientHeight * d); shown = -1; draw();
+    };
     var raf = 0;
     var paint = function () {
       raf = 0;
