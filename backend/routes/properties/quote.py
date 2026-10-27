@@ -22,9 +22,13 @@ deliberately returns ``None`` for them. The caller shows its ordinary
 label in that case — never ``₪0``, which would be a lie about a free stay
 rather than an admission that there is no one number to give.
 """
+import asyncio
+
 from fastapi import APIRouter, HTTPException, Query
+from pydantic import BaseModel, Field
 
 from models import BookingCreate
+from routes.deps import db
 from routes.bookings import (
     _booking_window,
     _compute_booking_total,
@@ -91,3 +95,32 @@ async def get_property_quote(
         # into what anyone is charged.
         "per_night_avg": round(total / nights, 2) if total is not None else None,
     }
+
+
+class QuoteBatchIn(BaseModel):
+    start: str
+    end: str
+    ids: list[str] = Field(default_factory=list, max_length=200)
+
+
+@api_router.post("/properties/quote-batch")
+async def get_property_quotes(body: QuoteBatchIn) -> dict:
+    """Totals for many listings over one date window: the Stays cards show
+    "₪9,000 for 5 nights" once dates are picked. Same pricing function as
+    the single quote and the booking, so a card can never disagree with the
+    reserve button. Listings with no single total are left out."""
+    booking = BookingCreate(property_id="-", start_date=body.start, end_date=body.end)
+    window_start, window_end, nights = _booking_window(booking)
+    if window_start is None or window_end is None or window_end <= window_start:
+        raise HTTPException(status_code=400, detail="Invalid start or end date")
+    props = await db.properties.find({"id": {"$in": body.ids}}, {"_id": 0}).to_list(200)
+
+    async def one(p: dict) -> tuple[str, dict] | None:
+        data = BookingCreate(property_id=p["id"], start_date=body.start, end_date=body.end)
+        total = await _compute_booking_total(data, p, None)
+        if total is None:
+            return None
+        return p["id"], {"total": total, "currency": p.get("currency", "ILS")}
+
+    results = await asyncio.gather(*(one(p) for p in props))
+    return {"nights": nights, "quotes": dict(r for r in results if r)}

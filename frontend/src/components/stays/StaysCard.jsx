@@ -58,6 +58,10 @@ const StaysCard = ({
   // grid converts with the same number and none of them fetch it. Falls
   // back to the constant when a caller hasn't wired it through yet.
   fxRate = FX_USD_TO_ILS,
+  // { total, currency } for the dates the renter picked, from the server's
+  // booking pricing; absent when there are no dates or no single total.
+  stayTotal = null,
+  stayNights = 0,
 }) => {
   const { t } = useTranslation();
   const cover = getCoverImage(property.images, 400, '', property.videos, property.id);
@@ -230,6 +234,14 @@ const StaysCard = ({
                 <span className="unit"> / {unit}</span>
               </span>
             </div>
+            {stayTotal && stayNights > 0 && (
+              <p className="text-[13px] font-semibold text-[var(--ink)] mt-0.5" data-testid={`stays-card-total-${property.id}`}>
+                {t(stayNights === 1 ? 'stays.totalForOneNight' : 'stays.totalForNights', {
+                  amount: `${stayTotal.currency === 'USD' ? '$' : '₪'}${Math.round(stayTotal.total).toLocaleString()}`,
+                  count: stayNights,
+                })}
+              </p>
+            )}
             {convertedHint && (
               <p className="text-[11px] text-[var(--brand-muted)] mt-0.5" data-testid={`stays-card-fx-${property.id}`}>
                 {convertedHint} / {unit}

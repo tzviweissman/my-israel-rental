@@ -4,7 +4,7 @@ import axios from 'axios';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { shownPrice, unitLabel } from '../../utils/listingPrice';
-import { Mail, MessageCircle, X } from 'lucide-react';
+import { Clock, Mail, MessageCircle, X } from 'lucide-react';
 import { Calendar } from '../ui/calendar';
 import { format } from 'date-fns';
 import { HOLIDAY_WINDOWS } from '../../constants/holidayWindows';
@@ -1111,6 +1111,18 @@ const BookingSidebar = ({
             <MessageCircle size={18} />
             {t('property.messageOwner')}
           </button>
+          {/* Measured from real replies (backend utils/reply_time); absent
+              under 3 replies or slower than a day, so it never flatters. */}
+          {property.owner_reply_hours > 0 && property.owner_reply_hours <= 24 && (
+            <p className="flex items-center justify-center gap-1.5 text-xs text-[var(--brand-muted)]" data-testid="owner-reply-time">
+              <Clock size={13} aria-hidden="true" />
+              {property.owner_reply_hours <= 1
+                ? t('stays.repliesWithinHour', 'Usually replies within an hour')
+                : property.owner_reply_hours <= 12
+                  ? t('stays.repliesWithinHours', { count: property.owner_reply_hours, defaultValue: 'Usually replies within {{count}} hours' })
+                  : t('stays.repliesWithinDay', 'Usually replies within a day')}
+            </p>
+          )}
         </div>
 
         <button

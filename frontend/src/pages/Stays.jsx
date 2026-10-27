@@ -478,6 +478,24 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
   // to 3 listings would keep a window sized for the previous search.
   useEffect(() => { setVisibleCount(PAGE); }, [filteredWithDistance.length]);
 
+  // Real totals for the picked dates, from the same pricing function the
+  // booking uses (POST /properties/quote-batch). Never nightly × nights:
+  // Smart Pricing overrides change individual nights. Precise dates only.
+  const [stayQuotes, setStayQuotes] = useState({ nights: 0, quotes: {} });
+  const quoteIds = useMemo(
+    () => filteredWithDistance.slice(0, 200).map((p) => p.id).join(','),
+    [filteredWithDistance],
+  );
+  useEffect(() => {
+    setStayQuotes({ nights: 0, quotes: {} });
+    if (!checkin || !checkout || flexible || !quoteIds) return undefined;
+    let cancelled = false;
+    axios.post(`${API}/properties/quote-batch`, { start: checkin, end: checkout, ids: quoteIds.split(',') })
+      .then(({ data }) => { if (!cancelled) setStayQuotes(data); })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [checkin, checkout, flexible, quoteIds]);
+
   // Extend as the sentinel below the grid comes into view. An observer
   // fires once per crossing rather than on every frame of scrolling.
   useEffect(() => {
@@ -490,7 +508,8 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
     }, { rootMargin: '600px' });   // ready before it is reached
     io.observe(el);
     return () => io.disconnect();
-  }, [filteredWithDistance.length]);
+    // viewMode: the map view's list has its own sentinel on the same ref.
+  }, [filteredWithDistance.length, viewMode]);
 
   // Address input → Nominatim (via our /api/geocode/search proxy which
   // handles the 1 rps cap + caching). On success we set coords in memory
@@ -769,14 +788,51 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
               </button>
             )}
           </div>
-          <div className="relative">
+          {/* Tablet and up: list beside the map (Airbnb / Zillow). Hovering a
+              card opens its pin; clicking a pin scrolls to its card. On a
+              phone the map stays full width with the bottom sheet. */}
+          <div className="md:grid md:grid-cols-[minmax(0,1fr)_minmax(0,1.15fr)] md:gap-6">
+          <div
+            className="hidden md:grid grid-cols-1 lg:grid-cols-2 gap-x-5 gap-y-8 content-start md:max-h-[78vh] overflow-y-auto pe-1"
+            data-testid="stays-map-list"
+          >
+            {filteredWithDistance.slice(0, visibleCount).map((p) => (
+              <div
+                key={p.id}
+                data-map-card={p.id}
+                onMouseEnter={() => setActiveMapId(p.id)}
+                className={`rounded-2xl transition-shadow ${p.id === activeMapId ? 'ring-2 ring-[var(--brand-primary)] ring-offset-4' : ''}`}
+              >
+                <StaysCard
+                  property={p}
+                  fullWidth
+                  liked={likedIds.has(p.id)}
+                  onToggleLike={(e) => toggleLike(p.id, e)}
+                  displayCurrency={priceCurrency} fxRate={fxRate}
+                  stayTotal={stayQuotes.quotes[p.id]} stayNights={stayQuotes.nights}
+                  onClick={() => {
+                    saveReturnPath();
+                    navigate(`/property/${p.id}`);
+                  }}
+                />
+              </div>
+            ))}
+            {visibleCount < filteredWithDistance.length && (
+              <div ref={moreRef} className="h-10 col-span-full" aria-hidden="true" />
+            )}
+          </div>
+          <div className="relative md:sticky md:top-24 md:self-start">
             <StaysMapView
               properties={filteredWithDistance}
               userCoords={nearCoords}
               focusOnUser={Boolean(nearCoords)}
               displayCurrency={priceCurrency} fxRate={fxRate}
               activeId={activeMapId}
-              onPinClick={setActiveMapId}
+              onPinClick={(id) => {
+                setActiveMapId(id);
+                document.querySelector(`[data-map-card="${id}"]`)
+                  ?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+              }}
             />
             {/* Density strip — only when the renter has picked an
                 address. Floats over the top-left of the map so users
@@ -792,6 +848,7 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
                 />
               </div>
             )}
+          </div>
           </div>
 
           {/* Mobile-only peekable bottom sheet — lets renters glance at
@@ -886,6 +943,7 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
                     liked={likedIds.has(p.id)}
                     onToggleLike={(e) => toggleLike(p.id, e)}
                     displayCurrency={priceCurrency} fxRate={fxRate}
+                    stayTotal={stayQuotes.quotes[p.id]} stayNights={stayQuotes.nights}
                     onClick={() => {
                       saveReturnPath();
                       navigate(`/property/${p.id}`);
@@ -972,6 +1030,7 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
                 liked={likedIds.has(p.id)}
                 onToggleLike={(e) => toggleLike(p.id, e)}
                 displayCurrency={priceCurrency} fxRate={fxRate}
+                  stayTotal={stayQuotes.quotes[p.id]} stayNights={stayQuotes.nights}
                 onClick={() => {
                   saveReturnPath();
                   navigate(`/property/${p.id}`);

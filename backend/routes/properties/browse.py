@@ -21,6 +21,7 @@ from utils import view_tracking
 from utils.whatsapp_link import build_whatsapp_link
 from utils.area_filter import area_mongo_query
 from utils.dedupe import find_duplicate
+from utils.reply_time import owner_reply_hours
 from utils.helpers import get_usd_ils_rate
 from utils.property_rows import keep_valid_property_rows
 from utils.user_contact import WHATSAPP_PROJECTION, user_whatsapp
@@ -758,6 +759,8 @@ async def get_property(
     property_data['is_featured'] = property_id in featured_ids
     # The paid page upgrade (utils/page_upgrade), for the lister.
     property_data['page_upgrade'] = await has_page_upgrade(property_data.get('owner_id'))
+    # "Usually replies within …" (utils/reply_time); None hides the line.
+    property_data['owner_reply_hours'] = await owner_reply_hours(property_data.get('owner_id'))
 
     # Public, anonymous, identical for every caller (owner_name/email/
     # whatsapp are listing contact details shown to everyone, not

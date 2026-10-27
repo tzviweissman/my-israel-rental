@@ -3854,6 +3854,13 @@ const en = {
         // keys): card fallbacks, price units, aria-labels, map popup copy.
         untitledProperty: 'Property',
         priceOnRequest: 'Price on request',
+        // Card total once dates are picked (POST /properties/quote-batch).
+        totalForNights: '{{amount}} for {{count}} nights',
+        totalForOneNight: '{{amount}} for 1 night',
+        // Reply-time badge on the listing page.
+        repliesWithinHour: 'Usually replies within an hour',
+        repliesWithinHours: 'Usually replies within {{count}} hours',
+        repliesWithinDay: 'Usually replies within a day',
         // Result ordering.
         sortBy: 'Sort',
         sortNewest: 'Newest',

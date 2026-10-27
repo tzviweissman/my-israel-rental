@@ -3750,6 +3750,11 @@ const he = {
         // t() at all.
         untitledProperty: 'נכס',
         priceOnRequest: 'מחיר לפי בקשה',
+        totalForNights: '{{amount}} ל-{{count}} לילות',
+        totalForOneNight: '{{amount}} ללילה אחד',
+        repliesWithinHour: 'בדרך כלל עונה תוך שעה',
+        repliesWithinHours: 'בדרך כלל עונה תוך {{count}} שעות',
+        repliesWithinDay: 'בדרך כלל עונה תוך יום',
         // Result ordering.
         sortBy: 'מיון',
         sortNewest: 'החדשים ביותר',
