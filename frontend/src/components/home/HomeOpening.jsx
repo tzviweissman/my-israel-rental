@@ -29,6 +29,24 @@ import '../../styles/home-opening.css';
 
 const STILL = typeof window !== 'undefined' && !!window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
 const isPhone = () => typeof window !== 'undefined' && window.innerWidth <= 760;
+// The screen height the opening measures against. On an iPhone the address bar shrinks the
+// moment you start scrolling and window.innerHeight grows by ~90 px; the opening re-measured
+// against it and every piece jumped (Tzvi, 26 Oct 2026: "the hero page glitches a lot on
+// mobile"). The height is taken once and only re-taken when the width changes (a rotation).
+let steadyH = typeof window !== 'undefined' ? window.innerHeight : 800;
+let steadyW = typeof window !== 'undefined' ? window.innerWidth : 0;
+const screenH = () => {
+  if (window.innerWidth !== steadyW) { steadyW = window.innerWidth; steadyH = window.innerHeight; }
+  return steadyH;
+};
+// Writes a style only when it changed: rewriting the same values on 35 pieces every frame
+// made the browser restyle the whole wall each frame, the heaviest part of the opening on a phone.
+const put = (el, k, v) => {
+  const c = el.__put || (el.__put = {});
+  if (c[k] === v) return;
+  c[k] = v;
+  if (k.startsWith('--')) el.style.setProperty(k, v); else el.style[k] = v;
+};
 const lin = (x, a, b) => Math.min(1, Math.max(0, (x - a) / (b - a)));
 const ease = (x) => 1 - (1 - Math.min(1, Math.max(0, x))) ** 3;
 
@@ -133,46 +151,60 @@ export default function HomeOpening({ counts }) {
     const paint = () => {
       raf = 0;
       const r = el.getBoundingClientRect();
-      const p = STILL ? 1 : lin(-r.top, 0, r.height - window.innerHeight);
+      const p = STILL ? 1 : lin(-r.top, 0, r.height - screenH());
       // 1. the words lift away
       const w = lin(p, 0.03, 0.11);
-      scene.current.style.opacity = 1 - w;
-      scene.current.style.transform = `translateY(${-30 * w}px)`;
+      put(scene.current, 'opacity', String(1 - w));
+      put(scene.current, 'transform', `translateY(${-30 * w}px)`);
       scene.current.classList.toggle('on', w < 0.5);
       // 2. the picture cracks and the pieces part
-      shift.current.style.transform = 'none';
       const c = ease(lin(p, 0.12, 0.24));
-      film.current.style.opacity = p < 0.12 ? 1 : 0;
+      put(film.current, 'opacity', p < 0.12 ? '1' : '0');
       const g = grid.current;
-      g.style.setProperty('--gap', `${c * (phone ? 6 : 12)}px`);
-      g.style.setProperty('--pad', `${c * (phone ? 124 : 112)}px ${c * (phone ? 10 : 24)}px ${c * (phone ? 10 : 24)}px`);
-      g.style.setProperty('--rad', `${c * 12}px`);
+      // Written straight onto the grid and the faces, not as --gap/--pad/--rad: a custom
+      // property is inherited, so changing one on the grid restyled every element in the wall
+      // each frame (about 45 ms a frame on a phone-speed test, the whole cost of the opening).
+      put(g, 'gap', `${c * (phone ? 6 : 12)}px`);
+      put(g, 'padding', `${c * (phone ? 124 : 112)}px ${c * (phone ? 10 : 24)}px ${c * (phone ? 10 : 24)}px`);
+      const rad = `${(c * 12).toFixed(1)}px`;
       const vw = window.innerWidth;
-      const vh = window.innerHeight;
+      const vh = screenH();
       const sc = Math.max(vw / IW, vh / IH);
       const k = 1 - c * 0.12;
       const W = IW * sc * k;
       const H = IH * sc * k;
       const ox = (vw - W) / 2;
       const oy = (vh - H) / 2;
-      // 3. each piece shows its own part of the picture, then turns over
+      // 3. each piece shows its own part of the picture, then turns over. All the pieces are
+      // measured first, then all are written: measuring each after writing the one before
+      // made the browser lay the page out 35 times a frame, which a phone cannot keep up with.
+      const boxes = pieces.map((t) => t.getBoundingClientRect());
       pieces.forEach((t, i) => {
-        const b = t.getBoundingClientRect();
+        const b = boxes[i];
         const front = t.firstChild.firstChild;
-        front.style.backgroundSize = `${W}px ${H}px`;
-        front.style.backgroundPosition = `${ox - b.left}px ${oy - b.top}px`;
+        put(front, 'backgroundSize', `${W.toFixed(1)}px ${H.toFixed(1)}px`);
+        put(front, 'backgroundPosition', `${(ox - b.left).toFixed(1)}px ${(oy - b.top).toFixed(1)}px`);
         const d = cells[i].d / maxD;
         const turn = ease(lin(p, 0.26 + d * 0.26, 0.36 + d * 0.26));
-        t.firstChild.style.setProperty('--turn', `${turn * 180}deg`);
+        put(t.firstChild, 'transform', `rotateY(${(turn * 180).toFixed(1)}deg)`);
+        put(front, 'borderRadius', rad);
+        put(t.firstChild.lastChild, 'borderRadius', rad);
+        // a clip plays only once its piece has turned to show it, and is on screen
+        const v = t.__clip;
+        if (v) {
+          const want = !STILL && turn > 0.5 && t.__seen;
+          if (want && v.paused) v.play().catch(() => {});
+          else if (!want && !v.paused) v.pause();
+        }
       });
       // 4. the wall steps aside and the headline comes in
       const q = ease(lin(p, 0.72, 0.9));
-      shift.current.style.transformOrigin = phone ? '50% 100%' : (document.dir === 'rtl' ? '0% 50%' : '100% 50%');
-      shift.current.style.transform = phone
+      put(shift.current, 'transformOrigin', phone ? '50% 100%' : (document.dir === 'rtl' ? '0% 50%' : '100% 50%'));
+      put(shift.current, 'transform', phone
         ? `translateY(${-q}vh) scale(${1 - q * 0.48})`
-        : `scale(${1 - q * (1 - fit)})`;
-      copy.current.style.opacity = q;
-      copy.current.style.transform = `translateX(${(document.dir === 'rtl' ? 24 : -24) * (1 - q)}px)`;
+        : `scale(${1 - q * (1 - fit)})`);
+      put(copy.current, 'opacity', String(q));
+      put(copy.current, 'transform', `translateX(${(document.dir === 'rtl' ? 24 : -24) * (1 - q)}px)`);
       copy.current.classList.toggle('on', q > 0.5);
       // only once the pieces have parted and the nav sits on the sand, not the sky
       document.body.classList.toggle('hv2-light-nav', p > 0.24);
@@ -181,12 +213,13 @@ export default function HomeOpening({ counts }) {
     paint();
     window.addEventListener('scroll', queue, { passive: true });
     window.addEventListener('resize', queue);
-    // only the clips in view play
-    const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => es.forEach((e) => {
-      const v = e.target.querySelector('video');
-      if (!v) return;
-      if (e.isIntersecting && !STILL) v.play().catch(() => {}); else v.pause();
-    })) : null;
+    // only the clips in view, on a piece that has turned, play (paint decides; this says
+    // which are on screen): up to 29 clips decoding at once was too much for a phone
+    pieces.forEach((t) => { t.__clip = t.querySelector('video'); t.__seen = !('IntersectionObserver' in window); });
+    const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => {
+      es.forEach((e) => { e.target.__seen = e.isIntersecting; });
+      queue();
+    }) : null;
     pieces.forEach((t) => io?.observe(t));
     return () => {
       window.removeEventListener('scroll', queue);
