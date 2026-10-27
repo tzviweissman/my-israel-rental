@@ -15,12 +15,12 @@
 <meta name="description" content="Kitchen kashering for vacation rentals, new homes and Pesach, in Jerusalem and across Israel. Whole kitchen $350, pots and cutlery $180. Expert mashgichim, following cRc guidelines. Since 2019.">
 <meta property="og:title" content="KasherMyBnb · Kitchen kashering in Jerusalem and across Israel">
 <meta property="og:description" content="Kitchen kashering for vacation rentals, new homes and Pesach, in Jerusalem and across Israel. Whole kitchen $350, pots and cutlery $180. Expert mashgichim, following cRc guidelines. Since 2019.">
-<meta property="og:image" content="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvo89630">
-<link rel="icon" href="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvo89630">
+<meta property="og:image" content="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvr0xc2j">
+<link rel="icon" href="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvr0xc2j">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,600;12..96,700&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/kashermybnb-kashering-services/scrollcraft.css?v=mvo89630">
+<link rel="stylesheet" href="/pages/kashermybnb-kashering-services/scrollcraft.css?v=mvr0xc2j">
 <style>
   /* Their logo: the blue K, the red roof, on white. */
   :root {
@@ -104,6 +104,9 @@
   .card { position: absolute; left: 0; bottom: 0; width: 100%; opacity: 0; transform: translateY(10px);
     transition: opacity 260ms var(--sc-ease-out), transform 260ms var(--sc-ease-out); visibility: hidden; }
   .card.is-on { opacity: 1; transform: none; visibility: visible; }
+  /* every station card is as tall as the tallest, so its title starts at the same height for each station (rule 3s.27) */
+  /* the stack now has the tallest card's height, so it lets the pointer through except on the card that is showing (it covered the opening's button) */
+  .cards { display: grid; pointer-events: none; } .card { position: relative; grid-area: 1 / 1; bottom: auto; } .card.is-on { pointer-events: auto; }
   /* when the station would sit under the card, the card moves aside */
   @media (min-width: 861px) { .cards.is-flip { left: auto; right: var(--sc-gutter); } }
   .card .n { font: 600 var(--sc-t-xs)/1 var(--sc-font-text); letter-spacing: 0.14em; text-transform: uppercase; color: var(--roof); }
@@ -338,7 +341,7 @@
     #walk .hero { bottom: auto; height: 100svh; opacity: 1 !important; visibility: visible !important; }
     #walk .cards, #walk .ready { position: relative !important; z-index: 2; inset: auto !important; width: auto; margin: 0; padding: var(--sc-4) var(--sc-gutter); background: var(--sc-canvas, #fff); }
     #walk .cards { display: grid; gap: var(--sc-3); }
-    #walk .card { position: static !important; opacity: 1 !important; visibility: visible !important; transform: none !important; }
+    #walk .card { grid-area: auto; position: static !important; opacity: 1 !important; visibility: visible !important; transform: none !important; }
     #walk .ready { opacity: 1 !important; visibility: visible !important; border-radius: 0; box-shadow: none; }
   }
   @media (prefers-reduced-motion: reduce) {
@@ -375,7 +378,7 @@
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><symbol id="ok" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5" stroke-linecap="round" stroke-linejoin="round"/></symbol></svg>
 
 <header class="bar">
-  <a class="brand" href="#top"><img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvo89630" alt="" width="30" height="30" data-mir-key="i-149272c6-0">KasherMyBnb</a>
+  <a class="brand" href="#top"><img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvr0xc2j" alt="" width="30" height="30" data-mir-key="i-149272c6-0">KasherMyBnb</a>
   <nav aria-label="What we kasher">
     <ol class="index" id="index"></ol>
   </nav>
@@ -388,7 +391,7 @@
   <section id="walk" data-sc-act="pin" data-sc-span="6">
     <div data-sc-stage>
       <div class="cam" id="cam">
-        <img src="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvo89630" alt="A rental kitchen: oven, microwave, gas stovetop, countertops, sink and a hot plate along one wall" width="2048" height="1152" data-mir-key="i-d27ed8aa-0">
+        <img src="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvr0xc2j" alt="A rental kitchen: oven, microwave, gas stovetop, countertops, sink and a hot plate along one wall" width="2048" height="1152" data-mir-key="i-d27ed8aa-0">
       </div>
 
       <div class="hero">
@@ -429,7 +432,7 @@
       <h2 data-sc-in data-mir-key="t-b5eb772d-0">Two services, one price each.</h2>
       <div class="svc-grid" data-sc-in>
         <article class="svc-card">
-          <img src="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvo89630" alt="A kitchen wall with oven, microwave, gas hob, countertop and sink" width="2048" height="1152" loading="lazy" data-mir-key="i-50751baf-0">
+          <img src="/pages/kashermybnb-kashering-services/assets/kitchen.webp?v=mvr0xc2j" alt="A kitchen wall with oven, microwave, gas hob, countertop and sink" width="2048" height="1152" loading="lazy" data-mir-key="i-50751baf-0">
           <div class="svc-body">
             <p class="svc-n" data-mir-key="t-521a6fb1-0">01</p>
             <h3 data-mir-key="t-9fbdeb8c-0">Whole kitchen</h3>
@@ -439,7 +442,7 @@
           </div>
         </article>
         <article class="svc-card" id="pots">
-          <img class="cut" src="/pages/kashermybnb-kashering-services/assets/pots.webp?v=mvo89630" alt="Stainless steel pots, a colander and cutlery" width="1200" height="1200" loading="lazy" data-mir-key="i-3be316bc-0">
+          <img class="cut" src="/pages/kashermybnb-kashering-services/assets/pots.webp?v=mvr0xc2j" alt="Stainless steel pots, a colander and cutlery" width="1200" height="1200" loading="lazy" data-mir-key="i-3be316bc-0">
           <div class="svc-body">
             <p class="svc-n" data-mir-key="t-0d75db57-0">02</p>
             <h3 data-mir-key="t-fd253d28-0">Pots, cutlery and utensils</h3>
@@ -505,7 +508,7 @@
 
   <section class="rest rest--blue" id="book">
     <div class="wrap close">
-      <img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvo89630" alt="KasherMyBnb" width="64" height="64" data-mir-key="i-6a94de04-0">
+      <img src="/pages/kashermybnb-kashering-services/assets/logo.png?v=mvr0xc2j" alt="KasherMyBnb" width="64" height="64" data-mir-key="i-6a94de04-0">
       <h2 data-sc-in data-mir-key="t-03c9f498-0">Book your kashering.</h2>
       <dl class="label" data-sc-in>
         <div><dt data-mir-key="t-4efb61b1-0">Whole kitchen</dt><dd data-mir-key="t-7b499082-0">$350, about 2 hours</dd></div>
@@ -531,8 +534,12 @@
   <a class="btn" href="/business/kashermybnb-kashering-services/book" tabindex="-1"><span class="lb" data-mir-key="t-c035e0ea-5">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
 </div>
 
+<script>
+/* A style value is written only when it changes (26 Oct 2026): rewriting a custom property every frame restyles everything under it, and these frames run even while nobody scrolls */
+function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); if (c[k] !== v) { c[k] = v; el.style.setProperty(k, v); } }
+</script>
 <script>if (matchMedia("(max-width: 860px)").matches) document.getElementById("walk").setAttribute("data-sc-span", "4.2");</script>
-<script src="/pages/kashermybnb-kashering-services/scrollcraft.js?v=mvo89630"></script>
+<script src="/pages/kashermybnb-kashering-services/scrollcraft.js?v=mvr0xc2j"></script>
 <script>ScrollCraft.mount(document.body);</script>
 <script>
 (function () {
@@ -624,18 +631,19 @@
     var A = place(from[0], from[1], from[2]), B = place(to[0], to[1], to[2]);
     if (reduce) A = B;
     var z = lerp(A[2], B[2], t);
-    cam.style.transform = 'translate3d(' + lerp(A[0], B[0], t).toFixed(1) + 'px,' + lerp(A[1], B[1], t).toFixed(1) + 'px,0) scale(' + z.toFixed(4) + ')';
+    setCss(cam, 'transform', 'translate3d(' + lerp(A[0], B[0], t).toFixed(1) + 'px,' + lerp(A[1], B[1], t).toFixed(1) + 'px,0) scale(' + z.toFixed(4) + ')');
     // Marks keep one size on screen whatever the camera does (smaller on
     // the phone's whole-wall strip).
-    cam.style.setProperty('--zs', ((z < 1 ? 0.62 : 1) / z).toFixed(4));
+    setCss(cam, '--zs', ((z < 1 ? 0.62 : 1) / z).toFixed(4));
 
     // The copy: the opening leaves before the first visit; the cards swap
     // whole (no text reflows); the peak arrives once the camera is back.
-    act.style.setProperty('--out', span(p, 0.06, 0.10).toFixed(3));
-    act.style.setProperty('--hero-vis', p < 0.10 ? 'visible' : 'hidden');
+    // written on the two panels themselves: as custom properties on the scene they restyled all of it every frame
+    setCss(hero, 'opacity', (1 - span(p, 0.06, 0.10)).toFixed(3));
+    setCss(hero, 'visibility', p < 0.10 ? 'visible' : 'hidden');
     var r = span(p, W1 + 0.06, W1 + 0.075);
-    act.style.setProperty('--ready', r.toFixed(3));
-    act.style.setProperty('--ready-vis', r > 0 ? 'visible' : 'hidden');
+    setCss(ready, 'opacity', r.toFixed(3));
+    setCss(ready, 'visibility', r > 0 ? 'visible' : 'hidden');
     readyBtn.tabIndex = r > 0.5 ? 0 : -1;
     ready.classList.toggle('is-in', r > 0.5);
     // The card and the index follow the last station reached, so a card
@@ -651,7 +659,7 @@
     }
     S.forEach(function (s, i) {
       var done = i <= cur;
-      s.mark.style.setProperty('--m', done ? 1 : 0);
+      setCss(s.mark, '--m', done ? 1 : 0);
       s.li.classList.toggle('is-done', done);
       s.li.classList.toggle('is-here', i === cur && p < W1);
       // The last card stays until "Ready to use" is half in: never a gap with no words.

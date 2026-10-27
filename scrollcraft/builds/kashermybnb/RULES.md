@@ -200,3 +200,4 @@ R8.7 pass (recorded after the fact, 25 Oct): the one generated image is the kitc
 R3h.18 n/a: no film: the walk is drawn in code over one still kitchen picture (checked 26 Oct)
 R3h.19 n/a: no generated film; the walk is drawn in code over one still
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
+R3s.27 pass: every station card is as tall as the tallest, so its title starts at one height (642 px on a 390x844 phone, 698 px at 1440x900, 27 Oct); the card changes side only for the oven (and the microwave on a laptop), so it never covers the mark it describes: Tzvi chose to keep that on 27 Oct
