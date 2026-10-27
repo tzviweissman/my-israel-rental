@@ -11,6 +11,8 @@
  * A label is measured only when it is fully shown and still (opacity 1, not mid-move). Fails (exit 1):
  *   MOVES  a repeated label rests at different heights or sides from one state to the next
  * A heading of another section scrolling past is not a repeat: it belongs to another stage.
+ * A move Tzvi chose on purpose is marked data-same-place-ok on the element or a parent, with the reason in
+ * the site's RULES.md R3s.27 line (KasherMyBnb's station cards switch sides so they never cover their mark, 27 Oct).
  * Started from the site-building session's sameplace.mjs (27 Oct); this one keys by stage and checks
  * the side as well as the height (KasherMyBnb's station card moved sideways).
  */
@@ -42,7 +44,7 @@ for (const url of urls) {
             const sr = st.getBoundingClientRect(); if (sr.top > 80 || sr.bottom < innerHeight * 0.6) return;   // a stage held on screen
             for (const e of st.querySelectorAll('h1, h2, h3, h4, [class*="label"], [class*="size"], [class*="step"], [class*="title"], [class*="price"]')) {
               const r = e.getBoundingClientRect();
-              if (!r.height || r.bottom < 0 || r.top > innerHeight || !still(e)) continue;
+              if (!r.height || r.bottom < 0 || r.top > innerHeight || !still(e) || e.closest('[data-same-place-ok]')) continue;
               let moving = false;
               for (let n = e; n && n !== st; n = n.parentElement) { const t = getComputedStyle(n).transform; if (t !== 'none' && !/^matrix\(1, 0, 0, 1, 0, 0\)$/.test(t)) { moving = true; break; } }
               if (moving) continue;
