@@ -358,6 +358,10 @@ code. Each rule names what it prevents.
        never change. Look at the seam at full size.
     4. One version per screen shape: wide (16:9) and extra wide (21:9; stretching only the plain wall is fine) for
        laptops, tall (9:16) for phones, chosen with `<picture>`.
+    The steps are one script, `scrollcraft/starter/extend_photo.py` (`pad`,
+    then the fill, then `paste` and `ultra`; it refuses a fill in which the
+    model resized or moved the photo). Done at build-order step 2 (§0b),
+    before the first draft.
     Worked example: rs-modest-activewear/gen/wide-brief.md. A photo of a
     real place (the owner's store, a venue) is not extended, since that
     invents a place that does not exist: it keeps a crop that shows its main
@@ -498,6 +502,17 @@ a round with Tzvi. Done in this order, none of them happens.
    placeholders, no "coming soon"). Ask only for what is needed, or for what
    would make the page significantly better, such as more photos. When the
    answers arrive, they slot into a page that already passes its checks.
+   **Check the shape of every big photo now, not after the first draft**
+   (Tzvi, 27 Oct 2026, after RS Modest's opening was cropped, then framed,
+   then extended: "make sure we know how to make a page for it the correct
+   way the first time"). For the opening photo and any photo shown
+   full-screen or large, compare its shape to a laptop (16:9) and a phone
+   (9:16). If it differs, extend it before the first draft with
+   `scrollcraft/starter/extend_photo.py` (§3c.12): `pad`, one nano_banana_2
+   fill per shape (about 1.5 credits each, named with the cost in the
+   owner's first message), `paste`, `ultra`. The page is built on the
+   extended pictures from the start, so it never ships zoomed or framed. A
+   photo of a real place is not extended: it keeps a crop and `data-crop-ok`.
 3. **List every live-site action the build needs and ask for all of them in
    one go**: loading products, turning on delivery, settings. A blocked write
    discovered after a push left the Gift Boutique page showing one ₪10 item.

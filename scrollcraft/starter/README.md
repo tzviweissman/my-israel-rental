@@ -18,6 +18,20 @@ build that comes out too close to another.
    numbered `sheet.jpg`. Read the sheet first (rules 3o.6). Draft the
    owner's questions now and start building while they answer (rules 0b.2a).
 
+   **Extend any big photo that is not the screen's shape** (rules 3c.12,
+   27 Oct 2026). Run it with the backend venv python; `extend_photo.py -h`
+   has the full steps:
+
+   ```bash
+   python ../../starter/extend_photo.py pad assets/<photo>.webp gen/ext
+   # one nano_banana_2 fill (2k, canvas as image_references) per canvas -> gen/ext/fill-wide.png, fill-tall.png
+   python ../../starter/extend_photo.py paste gen/ext/canvas-wide.json gen/ext/fill-wide.png assets/<photo>-wide.webp --width 3600
+   python ../../starter/extend_photo.py paste gen/ext/canvas-tall.json gen/ext/fill-tall.png assets/<photo>-tall.webp --width 1200
+   python ../../starter/extend_photo.py ultra gen/ext/canvas-wide.json assets/<photo>-wide.webp assets/<photo>-ultra.webp --width 4200
+   ```
+
+   Serve the three with `<picture>` as RS Modest's doors do.
+
 2. **Copy the skeleton** into `scrollcraft/builds/<folder>/`: `site.css`,
    `site.js` and a `gen/build.py` that imports `sitekit` (example below).
    In `site.js` set `BASKET_KEY`. In `site.css` replace every CHANGE token

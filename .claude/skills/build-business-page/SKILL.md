@@ -111,6 +111,11 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
    leave out what only their answers can fill; no placeholders on the page.
    Ask only for what is needed, or what would make the page significantly
    better (more photos, a menu detail). When answers come, slot them in.
+2b. Check every big photo's shape before the first draft (Tzvi, 27 Oct
+   2026). An opening or full-screen photo that is not 16:9 (laptop) or 9:16
+   (phone) is extended with `scrollcraft/starter/extend_photo.py` (pad, one
+   nano_banana_2 fill per shape at ~1.5 credits, paste, ultra; rules 3c.12),
+   never zoomed or framed. A real place keeps a crop and `data-crop-ok`.
 3. List every live-site write the build needs; ask for all at once. Check the
    listing's prices and currency against their menu first and flag mismatches;
    load the real menu with fixed product ids so the page's order form saves
