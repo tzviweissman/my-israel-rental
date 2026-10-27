@@ -148,7 +148,7 @@ any question they skip is left off.
 
 ## 3a. Look through it, fix it, then show it (Tzvi, 5 Oct 2026)
 
-**One command runs every check** (24 Oct 2026): `node scripts/check-build.mjs scrollcraft/builds/<folder>` runs check-site, check-fits, check-motion and readable on every page, then check-concept, check-fingerprints and check-rules. A site is shown or published only after it passes. Builders start from `docs/build-brief-template.md`.
+**One command runs every check** (24 Oct 2026): `node scripts/check-build.mjs scrollcraft/builds/<folder>` runs check-site, check-fits, check-motion, check-speed, check-same-place and readable on every page, then check-concept, check-fingerprints and check-rules. A site is shown or published only after it passes. Since 27 Oct 2026 it also fails until `<folder>/review.md` holds an independent reviewer's "Verdict: PASS" (a Sonnet subagent that did not build the site, working from `docs/page-review-checklist.md`) dated after the site's last change, and publish-page refuses a new site without one; Tzvi: "how can we get it right more often the first time". Builders start from `docs/build-brief-template.md`.
 
 "In the future look through the page the AI creates before showing the
 business owner and implement the fixes and then show the finished product."

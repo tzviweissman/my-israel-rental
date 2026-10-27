@@ -85,6 +85,10 @@ const CHECK_ONLY = process.argv.includes('--check');
   }
   // every line of the rules checklist answered in RULES.md, and answered after the last change
   const rules = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rules.mjs'), SRC], { encoding: 'utf8' });
+  // a new site is reviewed by someone who did not build it (rules 3a, 27 Oct 2026; check-build.mjs says how)
+  const review = path.join(SRC, 'review.md');
+  if (isNew && !(fs.existsSync(review) && /^Verdict:\s*PASS\b/m.test(fs.readFileSync(review, 'utf8'))))
+    problems.push('no independent review: review.md with "Verdict: PASS" from a Sonnet subagent that did not build the site (docs/page-review-checklist.md)');
   if (rules.status !== 0) problems.push(`rules not all answered (check-rules):\n${rules.stdout.split('\n').filter((l) => /FAIL|problem/.test(l)).join('\n')}`);
   // and every page of it fits the screen, with no photo blown up past its size (rules 3c.12,
   // 3p.6; Tzvi, 20 Oct 2026: "make sure the rules will prevent this in the future"), has no
@@ -107,8 +111,10 @@ const CHECK_ONLY = process.argv.includes('--check');
   const results = [];
   // A failure that is only a timing measure (SMOOTH frame rate, a FLASH on two quick taps) is run once more before it
   // counts: on a computer running several sessions' browsers these tripped on pages that pass alone (25 Oct 2026).
-  const onlyTiming = (out) => { const bad = out.split('\n').filter((l) => /^[A-Z]{4,}\s/.test(l)); return bad.length > 0 && bad.every((l) => /^(SMOOTH|FLASH)\s/.test(l)); };
-  for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly']]) {
+  const onlyTiming = (out) => { const bad = out.split('\n').filter((l) => /^[A-Z]{4,}\s/.test(l)); return bad.length > 0 && bad.every((l) => /^(SMOOTH|FLASH|HEAVY|BUSY)\s/.test(l)); };
+  for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly'],
+    // smooth on a slowed phone, and repeated labels keep one place (Tzvi, 26-27 Oct 2026; rules 3s.27)
+    ['check-speed.mjs', 'is not smooth on a phone'], ['check-same-place.mjs', 'moves a repeated label']]) {
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }
     results.push({ why, ...r });
@@ -119,7 +125,7 @@ const CHECK_ONLY = process.argv.includes('--check');
     console.error(`Not published: ${slug} has ${problems.length} kind(s) of problem. Fix them all, then run again.\n\n${problems.join('\n\n')}`);
     process.exit(1);
   }
-  if (CHECK_ONLY) { console.log(`${slug}: every check passes (concept${isNew ? ', look-alike' : ''}, rules, fits, site, motion); nothing published (--check)`); process.exit(0); }
+  if (CHECK_ONLY) { console.log(`${slug}: every check passes (concept${isNew ? ', look-alike, review' : ''}, rules, fits, site, motion, speed, same place); nothing published (--check)`); process.exit(0); }
 }
 
 fs.rmSync(OUT, { recursive: true, force: true });
