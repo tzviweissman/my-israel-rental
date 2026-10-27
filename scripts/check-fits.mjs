@@ -75,7 +75,7 @@ for (const url of urls) {
         if (vis < innerWidth * innerHeight * 0.3) continue;
         const box = r.width / r.height, own = img.naturalWidth / img.naturalHeight;
         const shown = Math.min(box / own, own / box);
-        if (shown < 0.7) out.push(`photo ${img.getAttribute('src') || ''} shows only ${Math.round(shown * 100)}% of its ${box > own ? 'height' : 'width'} (a ${own < 1 ? 'tall' : 'wide'} photo in a ${box < 1 ? 'tall' : 'wide'} box): give it a box of its own shape, or a photo of the box's shape, so the whole product shows (page rules 3c.12)`);
+        if (shown < 0.7) out.push(`photo ${img.getAttribute('src') || ''} shows only ${Math.round(shown * 100)}% of its ${box > own ? 'height' : 'width'} (a ${own < 1 ? 'tall' : 'wide'} photo in a ${box < 1 ? 'tall' : 'wide'} box): extend the photo to the box's shape (pad it, generate only the new edges, paste the original back; a real place is marked data-crop-ok instead) so the whole product shows (page rules 3c.12)`);
       }
       return out;
     }, w >= 1000);

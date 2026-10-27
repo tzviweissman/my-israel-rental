@@ -339,11 +339,30 @@ code. Each rule names what it prevents.
     **A big photo keeps its own shape** (Tzvi, 26 Oct 2026, RS Modest
     Activewear: "the wow page is too zoomed in so i cant see many details").
     A photo is never forced into a box of a very different shape: a tall
-    photo of the product in a wide opening showed only a slice of it. Give
-    the photo a frame of its own shape (and fill the rest of the screen with
-    colour, words, or a soft blurred copy of the same photo), or use a photo
-    of the frame's shape. check-fits fails a big photo that shows under 70%
-    of its width or height, the opening's included.
+    photo of the product in a wide opening showed only a slice of it.
+    **Extend the photo to the screen's shape; never zoom, never frame it**
+    (Tzvi, 27 Oct 2026: "we cant make it fill the screen and not zoom in?",
+    then "you should always do this"). A framed photo with a blurred copy
+    around it read as a grey area, and filling the screen by cropping cut
+    the outfit in half; both were taken back. Done every time a full-screen
+    or large photo has another shape than its box:
+    1. Pad the photo to the box's shape with its own edge colour (the
+       product where it should sit, empty space where the words go), so
+       the generator only has to continue plain wall and floor.
+    2. Ask an image model (nano_banana_2, 2k, the canvas's aspect ratio) to
+       fill only the padded area with more of the same room, no new objects.
+       The outpaint tool is not used: it re-made the whole scene twice
+       (moved the bag, added plants, cut the leggings).
+    3. Paste the original photo back over its own place with a feathered
+       seam (align with SIFT if the model moved it), so the product's pixels
+       never change. Look at the seam at full size.
+    4. One version per screen shape: wide (16:9) and extra wide (21:9; stretching only the plain wall is fine) for
+       laptops, tall (9:16) for phones, chosen with `<picture>`.
+    Worked example: rs-modest-activewear/gen/wide-brief.md. A photo of a
+    real place (the owner's store, a venue) is not extended, since that
+    invents a place that does not exist: it keeps a crop that shows its main
+    thing and is marked `data-crop-ok`. check-fits fails a big photo that
+    shows under 70% of its width or height, the opening's included.
 
 **Three more questions for the owner**, asked with the FAQ request
 (section 3, cont.) and only when their page does not already answer them:

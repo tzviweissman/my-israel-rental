@@ -159,7 +159,7 @@ R3c.14 | A cut-out is one subject: no stray garnish, specks or pale fringe, look
 R5b.3 | Text over imagery: words sit on the picture with a soft edge shade (or a small solid card), never big dark pools, full-frame darkening or frosted glass, and meet contrast at the brightest frame; a plain strip under the photo only where the picture is too busy | 5b.3, 3e.12, 3g.8, 3t.2 | script: readable on every page
 R3e.8 | Every word is at least 12 px (14 px for a sentence on a phone) and 4.5:1 contrast (3:1 large), button text 4.5:1 on its fill | 3e.8, 5b.3 | script: readable on every page
 R3s.24 | Media is light and sized: no photo over 600 KB, every `<img>` has width and height, every video has a poster, nothing stays hidden with motion off | 3s MEDIA | script: site MEDIA
-R3p.6 | Fits on one screen: every section fits below the menu bar at the laptop sizes; no photo taller than the screen at any of the six sizes; no photo shown over 1.35x its own size | 3c.12, 3p.6, 3a | script: fits on every page
+R3p.6 | Fits on one screen: every section fits below the menu bar at the laptop sizes; no photo taller than the screen at any of the six sizes; no photo shown over 1.35x its own size; a big photo of another shape than its box is extended to the box's shape (padded, the new edges generated, the original pasted back), never zoomed or framed (3c.12, Tzvi 27 Oct) | 3c.12, 3p.6, 3a | script: fits on every page
 R3o.5 | Every special character (₪, arrows, Hebrew, dots) renders in the font used for it | 3o.5, 3s GLYPH | script: site GLYPH
 
 ## 5. Prices and savings

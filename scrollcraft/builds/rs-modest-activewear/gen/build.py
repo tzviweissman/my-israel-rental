@@ -69,10 +69,10 @@ OPENING = f'''  <section class="open" id="open" aria-label="RS Modest Activewear
           <div class="acts"><a class="btn" href="shop.html" tabindex="-1">Shop the skirt, {kit.price(320)}</a><a class="lnk" href="{MAPS}" target="_blank" rel="noopener" tabindex="-1">Get directions</a></div>
         </div>
       </div>
-      <div class="doorway" aria-hidden="true" data-crop-ok>
-        <div class="room"><img src="assets/shop.webp" alt="" width="1800" height="2400" fetchpriority="high"></div>
-        <div class="door l"><img src="assets/skirts-2k.webp" alt="" width="2160" height="2544" fetchpriority="high"></div>
-        <div class="door r"><img src="assets/skirts-2k.webp" alt="" width="2160" height="2544" fetchpriority="high"></div>
+      <div class="doorway" aria-hidden="true">
+        <div class="room" data-crop-ok><img src="assets/shop.webp" alt="" width="1800" height="2400" fetchpriority="high"></div>
+        <div class="door l"><picture><source media="(max-width: 860px)" srcset="assets/skirts-tall.webp" width="1200" height="2532"><source media="(min-aspect-ratio: 17/10)" srcset="assets/skirts-ultra.webp" width="4200" height="1800"><img src="assets/skirts-wide.webp" alt="" width="3600" height="2025" fetchpriority="high"></picture></div>
+        <div class="door r"><picture><source media="(max-width: 860px)" srcset="assets/skirts-tall.webp" width="1200" height="2532"><source media="(min-aspect-ratio: 17/10)" srcset="assets/skirts-ultra.webp" width="4200" height="1800"><img src="assets/skirts-wide.webp" alt="" width="3600" height="2025" fetchpriority="high"></picture></div>
         <div class="seam"></div>
       </div>
     </div>

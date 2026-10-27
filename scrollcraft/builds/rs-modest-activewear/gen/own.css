@@ -363,3 +363,9 @@ body .sym { font-size: 1.16em !important; font-weight: 600; margin-right: 0; }
 .bar.solo .btn { flex: 1; max-width: 26rem; justify-content: center; }
 @media (max-width: 860px) { .words .w2 .lede { display: none; } .words h2 { margin-bottom: 1.4rem; } }
 .visit .acts, .close .acts { display: flex; flex-wrap: wrap; align-items: center; }
+/* the doors photo in the screen's own shape (Tzvi, 27 Oct 2026: "we cant make it fill the screen and not zoom in?"): her
+   skirts photo extended with more of the same plain wall and floor, her own pixels untouched (gen/wide-brief.md), a wide
+   and an extra wide one for laptops (the extra wide one stretches only the plain wall and floor), a tall one for phones, so the whole outfit shows while the photo still fills the screen */
+.door picture { display: contents; }
+.door img { object-position: 100% 50%; }
+@media (max-width: 860px) { .door img { object-position: 50% 0%; } }

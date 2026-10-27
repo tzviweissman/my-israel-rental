@@ -38,7 +38,7 @@ R3g.13 pass: 1440x900 and 390x844 first screens: the doors fill the screen, head
 R3b.1 pass: same screenshots: what (modest activewear skirts), where (Jerusalem, King George 31), the action (Shop the skirt, price)
 R3b.2 pass: the price sits inside the main button on the first screen
 R3b.3 pass: walked the scroll at 1440 and 390: one solid button per screen; header Basket and card Add buttons are outlined
-R3h.1 pass: check-site OPENING passes (24 Oct): the doors of her skirts photo fill the screen (upscaled from her own photo to 2160 px so it stays sharp) and swing open onto her store as you scroll; 26 Oct a framed version (photo in its own shape, a dark blurred copy round it) was tried after Tzvi said it was too zoomed in, and taken back 27 Oct when Tzvi said the whole screen opening looked better (the doorway is marked data-crop-ok: a full-screen crop of the photo is the chosen look)
+R3h.1 pass: check-site OPENING passes (24 Oct): the doors of her skirts photo fill the screen (upscaled from her own photo to 2160 px so it stays sharp) and swing open onto her store as you scroll; 26 Oct a framed version (photo in its own shape, a dark blurred copy round it) was tried after Tzvi said it was too zoomed in, and taken back 27 Oct when Tzvi said the whole screen opening looked better; 27 Oct the skirts photo was extended to the screen's shape instead (gen/wide-brief.md: more of the same plain wall and floor, her pixels pasted back untouched), wide and extra wide for laptops and tall for phones, so it fills the screen with the whole outfit showing; only the store photo behind the doors keeps a marked crop (data-crop-ok), since extending a real store would invent it
 R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.4 screens on a laptop and a phone (was 2.2), 60 fps (median 16.7 ms, no frame over 50 ms); her skirt beside a plain stone block and wall (the approved skirt shot, gen/skirt-brief.md), never on other clothes, skirt whole; the doors photo loads first
 R3n.1 pass: the skirts photo fills the doorway, over half the first screen on the laptop and the full width on the phone
 R3n.2 pass: two shop doors made of her skirts photo swing open onto her store at King George 31; no other shop has that door or that address
@@ -118,7 +118,7 @@ R3c.14 n/a: no cut-out on this site
 R5b.3 pass: readable passes on every page; words over the opening sit on a soft green edge shade
 R3e.8 pass: readable.mjs reports every word clear at every size on all three pages
 R3s.24 pass: check-site MEDIA reports no problem; every img has width and height
-R3p.6 pass: check-fits passes at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844 and 360x640 on all pages
+R3p.6 pass: check-fits passes at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844 and 360x640 on all pages; 27 Oct: the opening skirts photo is extended to each screen shape, not cropped (3c.12)
 R3o.5 pass: check-site GLYPH passes; the shekel sign is set in Heebo
 
 ## 5. Prices and savings
