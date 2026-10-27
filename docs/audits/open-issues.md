@@ -60,3 +60,9 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Medium] Page editor: an owner could save a link to another site ("//evil.com"). Fixed 12 Oct, 8e2da7fb.
 - [Low] Hand-built pages: anyone could skip the cache with `?fresh` as often as they liked. Fixed 12 Oct, 8e2da7fb.
 - Not a bug: business page tab title (uses "|"), Deliveries links (phone, WhatsApp and Waze open outside the app), renter Contracts tab (shows where contracts are). Checked 13 Oct.
+
+- [Low] i18n: `awayReply.body` uses `{{count}}` with no plural set; `test-i18n-parity.mjs` fails. First seen 27 Oct (added 25 Oct). Report: 2026-10-27-site-audit.md
+- [Low] Reply time reads the oldest 5000 messages, not the newest, for very busy listers (`utils/reply_time.py`). First seen 27 Oct.
+- [Low] Hidden-as-duplicate on import (shared photos + same bedrooms) could hide a real second flat; Tzvi to decide. 27 Oct.
+- [Low] `/properties/quote-batch` is unauthenticated and quotes hidden listings; could not confirm rate limit. 27 Oct.
+- [Low] Plural forms for `stays.repliesWithinHours`. Fixed 27 Oct, 43bc464.
