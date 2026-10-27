@@ -424,7 +424,14 @@ async def _resolve_or_create_owner(
     if not email_lc:
         raise ValueError("Missing owner email")
 
-    owner = await db.users.find_one({"email": email_lc}, {"_id": 0, "id": 1})
+    # Case-insensitive: older accounts stored the email as typed
+    # ("Rlproperties23@..."), and an exact lower-case match made a second
+    # account for the same business, so its listings were imported twice
+    # beside the originals (Mavo Refidim penthouse, 27 Oct 2026).
+    owner = await db.users.find_one(
+        {"email": {"$regex": f"^{re.escape(email_lc)}$", "$options": "i"}},
+        {"_id": 0, "id": 1},
+    )
     if owner is not None:
         return owner["id"], False
 

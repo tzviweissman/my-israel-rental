@@ -535,6 +535,17 @@ async def startup_tasks() -> None:
         await db.external_bookings.create_index([("start_date", 1), ("end_date", 1)], background=True)
         await db.admin_blocks.create_index("property_id", background=True)
         await db.users.create_index("email", unique=True, background=True)
+        # One account per email whatever the capitals: "Name@x" and "name@x"
+        # are the same address. Capital-letter emails made second accounts for
+        # two businesses (27 Oct 2026). Its own try, so a conflict here cannot
+        # stop the indexes after it.
+        try:
+            await db.users.create_index(
+                "email", name="email_ci_unique", unique=True, background=True,
+                collation={"locale": "en", "strength": 2},
+            )
+        except Exception as e:  # noqa: BLE001
+            logger.warning(f"email_ci_unique index not created: {e}")
         await db.users.create_index("id", unique=True, background=True)
         await db.messages.create_index([("property_id", 1), ("created_at", -1)], background=True)
         # `GET /chat/conversations` filters `$or: [{sender_id}, {receiver_id}]`

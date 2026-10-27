@@ -1227,7 +1227,7 @@ async def invite_courier(business_id: str, payload: CourierInviteIn, user=Depend
         raise HTTPException(status_code=400, detail="That person is already on your courier list")
     if len(couriers) >= 20:
         raise HTTPException(status_code=400, detail="Up to 20 couriers per business")
-    account = await db.users.find_one({"email": payload.email}, {"_id": 0, "id": 1, "name": 1, "phone": 1, "whatsapp_number": 1})
+    account = await db.users.find_one({"email": payload.email.strip().lower()}, {"_id": 0, "id": 1, "name": 1, "phone": 1, "whatsapp_number": 1})
     if account and account["id"] == biz.get("owner_user_id"):
         raise HTTPException(status_code=400, detail="That is your own account")
     now = _now_iso()

@@ -30,12 +30,11 @@
  *     than disappearing. This fallback is load-bearing — do not "fix" it
  *     into an empty string or a placeholder.
  *
- * Three entries are STREETS, not neighbourhoods ("Machal", "Levi Eshkol",
- * "Mishmar HaGvul" — all inside Ramat Eshkol). They keep their own canonical
- * key, labelled "<Street>, <Neighbourhood>": the lister typed a street on
- * purpose, so folding them into plain "Ramat Eshkol" would throw away
- * precision they intended, and a Ramat Eshkol filter must not silently
- * swallow them. The label still tells a renter where the street is.
+ * Three stored values are STREETS inside Ramat Eshkol ("Machal", "Levi
+ * Eshkol", "Mishmar HaGvul"). They used to keep their own entries; since
+ * 27 Oct 2026 (Tzvi) they fold into plain "Ramat Eshkol", because search
+ * showed "Ramat Eshkol" and "Machal St, Ramat Eshkol" as two places. The
+ * street stays in the stored value and in the listing's address.
  *
  * Adding a neighbourhood: add a row to AREA_CANONICALS (canonical label +
  * the stored spellings that fold onto it) and the matching `areas.<key>`
@@ -55,14 +54,14 @@ import { LOCATION_OPTIONS } from '../constants/locations';
  * trips through a group key work.
  */
 export const AREA_CANONICALS = [
-  ['Ramat Eshkol', ['Ramat Eshkol', 'Ramat Eshkol, Jerusalem', 'Jerusalem - Ramat Eshkol']],
+  ['Ramat Eshkol', ['Ramat Eshkol', 'Ramat Eshkol, Jerusalem', 'Jerusalem - Ramat Eshkol',
+    // Streets inside Ramat Eshkol, folded in on purpose (see header).
+    'Machal', 'Machal, Jerusalem', 'Levi Eshkol', 'Mishmar HaGvul']],
   ['Geula', ['Geula', 'Jerusalem - Geula']],
   ['Nachlaot', ['Nachlaot', 'Jerusalem - Nachlaot']],
   ['Old City', ['Old City']],
   ['City Center', ['City Center', 'Yaffo Street / City Center, Jerusalem']],
   ['Romema', ['Romema']],
-  // Street inside Ramat Eshkol — its central block. Own key on purpose.
-  ['Machal St, Ramat Eshkol', ['Machal', 'Machal, Jerusalem']],
   ['Rehavia', ['Rehavia', 'Jerusalem - Rehavia']],
   ['Shaarei Chessed', ['Shaarei Chessed', 'Jerusalem - Shaare Hesed']],
   ['Givat Hamivtar', ['Givat Hamivtar', 'Givat Hamivtar, Jerusalem']],
@@ -76,8 +75,6 @@ export const AREA_CANONICALS = [
   ['Maalot Dafna', ['Maalot Dafna', 'Jerusalem - Maalot Dafna', 'Maalot Dafna, Jerusalem']],
   ['Baka', ['Baka']],
   ['Arzei Habira', ['Arzei Habira', 'Arzei HaBirah', 'Arzei HaBirah, Jerusalem', 'Jerusalem - Arzei HaBira']],
-  // Sderot Eshkol — the boulevard named for PM Levi Eshkol, in Ramat Eshkol.
-  ['Eshkol Blvd, Ramat Eshkol', ['Levi Eshkol']],
   ['Ramat Shlomo', ['Ramat Shlomo', 'Ramat Shlomo, Jerusalem']],
   // Real west-Jerusalem neighbourhood. Missed on the first pass because the
   // area census was accidentally truncated before this row.
@@ -86,8 +83,6 @@ export const AREA_CANONICALS = [
   ['Har Nof', ['Har Nof']],
   ['Gush 80', ['Gush 80']],
   ['Belz', ['Belz']],
-  // Street running north-south off Eshkol Blvd, inside Ramat Eshkol.
-  ['Mishmar HaGvul St, Ramat Eshkol', ['Mishmar HaGvul']],
   ['German Colony', ['German Colony']],
   ['Mamilla', ['Mamilla']],
   // "Mekor Chaim" is the catalogue (and dropdown) spelling; "Mekor Haim" is

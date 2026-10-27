@@ -87,6 +87,10 @@ STATIC_NEIGHBORHOOD_ALIASES: dict[str, str] = {
     "levi eshkol": "ramat eshkol",
     "levi eshkol blvd": "ramat eshkol",
     "levi eshkol boulevard": "ramat eshkol",
+    # Streets inside Ramat Eshkol, so a Ramat Eshkol search finds them
+    # (Tzvi, 27 Oct 2026: they showed as separate places in search).
+    "machal": "ramat eshkol",
+    "mishmar hagvul": "ramat eshkol",
 }
 
 # Backwards-compat alias: existing callers import ``NEIGHBORHOOD_ALIASES``.

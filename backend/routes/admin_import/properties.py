@@ -284,14 +284,37 @@ async def _background_mirror_properties(
                 (r["url"] if r and r.get("url") else src)
                 for src, r in zip(video_urls, vid_results, strict=True)
             ] if video_urls else []
-            await db.properties.update_one(
-                {"id": prop_id},
-                {"$set": {
-                    "images": final_images,
-                    "videos": final_videos,
-                    "mirror_pending": False,
-                }},
-            )
+            etags = sorted({r["etag"] for r in img_results if r and r.get("etag")})
+            update: dict = {
+                "images": final_images,
+                "videos": final_videos,
+                "mirror_pending": False,
+                "image_etags": etags,
+            }
+            # Most of these photo files already on another visible listing of
+            # the same rental type → this one is a copy (the Mavo Refidim
+            # penthouse went in three times, 27 Oct 2026). Hidden, not
+            # skipped, so an admin can undo. Not one shared photo: flats in
+            # one building share lobby and view shots (a 3BR and a 2BR on one
+            # floor share half their photos), hence same bedrooms too. Not across rental
+            # types: a long-term + vacation twin is allowed (utils/dedupe.py).
+            original = None
+            if etags:
+                me = await db.properties.find_one({"id": prop_id}, {"_id": 0, "rental_type": 1, "bedrooms": 1})
+                async for c in db.properties.find(
+                    {"id": {"$ne": prop_id}, "image_etags": {"$in": etags},
+                     "is_hidden": {"$ne": True},
+                     "rental_type": (me or {}).get("rental_type"),
+                     "bedrooms": (me or {}).get("bedrooms")},
+                    {"_id": 0, "id": 1, "image_etags": 1},
+                ):
+                    if 2 * len(set(etags) & set(c.get("image_etags") or [])) >= len(etags):
+                        original = c
+                        break
+            if original:
+                update.update({"is_hidden": True, "hidden_reason": "duplicate",
+                               "duplicate_of": original["id"]})
+            await db.properties.update_one({"id": prop_id}, {"$set": update})
         except Exception as e:  # noqa: BLE001
             logger.exception(f"Background mirror failed for property {prop_id}: {e}")
             await db.properties.update_one(

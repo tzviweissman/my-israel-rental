@@ -148,6 +148,8 @@ class TestAreaFilterWithAliases:
     def test_picking_ramat_eshkol_matches_levi_eshkol_listings(self):
         assert area_matches("Levi Eshkol", "Jerusalem - Ramat Eshkol")
         assert area_matches("Levi Eshkol 12", "Jerusalem - Ramat Eshkol")
+        assert area_matches("Machal, Jerusalem", "Jerusalem - Ramat Eshkol")
+        assert area_matches("Mishmar HaGvul", "Ramat Eshkol")
 
     def test_picking_ramat_eshkol_matches_bare_ramat_eshkol(self):
         assert area_matches("Ramat Eshkol", "Jerusalem - Ramat Eshkol")

@@ -81,6 +81,8 @@ async def upload_bytes_to_cloudinary(
         "url": _with_auto_transforms(secure_url, is_video),
         "public_id": res.get("public_id"),
         "bytes": res.get("bytes", len(content)),
+        # md5 of the file: the same photo uploaded twice has the same etag.
+        "etag": res.get("etag"),
         "format": res.get("format"),
         "resource_type": res.get("resource_type"),
         # Cloudinary's own reading of a video, for callers that check it.
@@ -89,6 +91,19 @@ async def upload_bytes_to_cloudinary(
         "height": res.get("height"),
         "codec": (res.get("video") or {}).get("codec"),
     }
+
+
+def file_md5(url: str) -> str | None:
+    """md5 of a stored file, the same value as Cloudinary's ``etag``. Used as
+    a photo fingerprint: a copied listing re-uploads the same bytes under a
+    new URL. Fetches the original, so no transformation changes the bytes."""
+    import hashlib
+    import urllib.request
+    try:
+        with urllib.request.urlopen(url, timeout=30) as r:
+            return hashlib.md5(r.read()).hexdigest()
+    except Exception:  # noqa: BLE001
+        return None
 
 
 async def mirror_url_to_cloudinary(url: str, *, is_video: bool = False, folder: str = "myisraelrental/imported") -> dict[str, Any] | None:
@@ -124,6 +139,7 @@ async def mirror_url_to_cloudinary(url: str, *, is_video: bool = False, folder: 
                 "url": _with_auto_transforms(secure_url, is_video),
                 "public_id": res.get("public_id"),
                 "bytes": res.get("bytes", 0),
+                "etag": res.get("etag") or file_md5(secure_url),
                 "format": res.get("format"),
                 "resource_type": res.get("resource_type"),
             }
