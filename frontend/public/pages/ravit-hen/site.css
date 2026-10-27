@@ -496,17 +496,3 @@ body .sym { font-size: 1.16em !important; font-weight: 600; margin-right: 0; }
 .bar.solo .btn { flex: 1; max-width: 26rem; justify-content: center; }
 @media (max-width: 860px) { .words .w2 .lede { display: none; } .words h2 { margin-bottom: 1.4rem; } }
 .visit .acts, .close .acts { display: flex; flex-wrap: wrap; align-items: center; }
-/* the doorway in the photo's own shape, so the whole outfit shows (Tzvi, 26 Oct 2026: "the wow page is too zoomed in so
-   i cant see many details"): a portrait photo forced into a wide box only showed a slice of the skirts. On a laptop a
-   tall frame on the right, the words on green beside it; on a phone the photo full width at the top, the words under it */
-.doorway { width: auto; height: 100%; aspect-ratio: 1023 / 1209; max-width: 64%; justify-self: end; -webkit-mask-image: none; mask-image: none; }
-.door img, .door.r img { object-position: 50% 50%; }
-.open-stage::before { background: linear-gradient(90deg, rgba(31, 58, 49, .96) 0%, rgba(31, 58, 49, .9) 30%, rgba(31, 58, 49, 0) 50%); }
-@media (max-width: 860px) {
-  .doorway { width: min(100%, calc((100svh - var(--top-h) - 17.5rem) * 1023 / 1209)); height: auto; max-width: none; justify-self: center; align-self: start; }
-  .open-stage::before { background: linear-gradient(0deg, rgba(31, 58, 49, 1) 0%, rgba(31, 58, 49, .95) 34%, rgba(31, 58, 49, 0) 48%); }
-}
-/* the rest of the first screen is the same photo, soft and dark behind the words, so the opening stays all picture (rule 3h.1)
-   while the sharp outfit shows whole in its own frame */
-.open-stage .ambient { grid-area: 1 / 1; position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 45%; filter: blur(26px) brightness(.55) saturate(.8); transform: scale(1.12); z-index: 0; }
-.doorway { position: relative; z-index: 0; }
