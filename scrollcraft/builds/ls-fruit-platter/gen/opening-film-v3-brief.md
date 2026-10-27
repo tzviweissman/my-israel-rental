@@ -2,6 +2,8 @@
 
 Tzvi chose this idea on 26 Oct ("go with 1, fruit rain"). Kept from before (his words): the fruit and the red background.
 
+Approved by Tzvi: 26 Oct 2026, "yes" to the seven steps and the object list below; "go" after seeing the empty-board start picture
+
 ## Steps (for Tzvi's yes)
 1. Her empty long wooden board with its handle on the red ground, the same warm light. A short beat.
 2. Watermelon wedges fall in from the top of the screen and land along the back of the board with a small bounce and a few juice droplets.

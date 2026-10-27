@@ -378,7 +378,7 @@ section.rest { padding-block: clamp(2.2rem, 8svh, 6rem); }
 .bar .p b { font-family: var(--font-body); font-weight: 700; }
 .close .fcols { align-items: start; }
 .w-small::after { background: linear-gradient(0deg, rgba(23,38,28,.8) 0%, rgba(23,38,28,.5) 40%, rgba(23,38,28,.15) 70%), linear-gradient(90deg, rgba(23,38,28,.72) 0%, rgba(23,38,28,.25) 55%, rgba(23,38,28,0) 80%); }
-.world-copy .sym, .dark p .sym { font-size: .95em; vertical-align: baseline; margin-right: .05em; }
+.world-copy .sym, .dark p .sym, .film-copy .lede .sym { font-size: .95em; vertical-align: baseline; margin-right: .05em; }
 .world::after { background: linear-gradient(0deg, rgba(23,38,28,.9) 0%, rgba(23,38,28,.62) 34%, rgba(23,38,28,.2) 62%, rgba(23,38,28,0) 78%), linear-gradient(90deg, rgba(23,38,28,.55) 0%, rgba(23,38,28,0) 55%); }
 .world-copy p { color: #FFF8F2; }
 @media (max-width: 760px) { .world::after, .w-small::after { background: linear-gradient(0deg, rgba(23,38,28,.92) 0%, rgba(23,38,28,.7) 42%, rgba(23,38,28,.25) 66%, rgba(23,38,28,0) 82%); } }
@@ -446,3 +446,7 @@ section.rest { padding-block: clamp(1.6rem, 6svh, 3.5rem); }
 .pc-ph img { object-position: 50% 50%; }
 @media (hover: hover) { .pc:hover .pc-ph img { transform: none; } }
 @media (min-width: 601px) { .st-pick b { font-size: clamp(.8rem, 1.2vw, 1rem); } }
+/* the step tabs and the stage stop below the top bar when scrolled to (independent review, 27 Oct 2026) */
+#order, #sizes { scroll-margin-top: calc(var(--top-h) + .75rem); }
+/* the longest card label fits a 360-wide phone on two lines rather than running out of its button */
+@media (max-width: 380px) { .pc-b .btn { height: auto; min-height: 54px; padding-block: .5rem; } .pc-b .btn > span { white-space: normal; line-height: 1.15; } }

@@ -45,22 +45,22 @@
         <article class="pc" style="--room:#F8D4D0">
           <div class="pc-ph"><img src="assets/card-1.webp" width="1000" height="800" alt="The Small platter: a round board with watermelon, red grapes, dates and pineapple" loading="lazy"></div>
           <div class="pc-b"><h3>Small</h3><p class="pc-pr"><span class="sym">₪</span>300</p>
-          <a class="btn" href="shop.html?size=small&amp;add=1#order" aria-label="Add a Small platter, ₪300"><span>Add, <span class="sym">₪</span>300</span></a></div>
+          <a class="btn" href="shop.html?size=small&amp;add=1#order" aria-label="Add a Small platter, ₪300"><span>Add a Small</span></a></div>
         </article>
         <article class="pc" style="--room:#FCE2B4">
           <div class="pc-ph"><img src="assets/card-2.webp" width="1000" height="800" alt="The Medium platter: a wooden board with a pineapple crown, dark grapes, lychees, watermelon, melon and pomegranate" loading="lazy"></div>
           <div class="pc-b"><h3>Medium</h3><p class="pc-pr"><span class="sym">₪</span>400</p>
-          <a class="btn" href="shop.html?size=medium&amp;add=1#order" aria-label="Add a Medium platter, ₪400"><span>Add, <span class="sym">₪</span>400</span></a></div>
+          <a class="btn" href="shop.html?size=medium&amp;add=1#order" aria-label="Add a Medium platter, ₪400"><span>Add a Medium</span></a></div>
         </article>
         <article class="pc" style="--room:#EAD6E4">
           <div class="pc-ph"><img src="assets/card-3.webp" width="1000" height="800" alt="The Large platter: a long wooden board of watermelon, grapes, lychees, pomegranate and melon" loading="lazy"></div>
           <div class="pc-b"><h3>Large</h3><p class="pc-pr"><span class="sym">₪</span>500</p>
-          <a class="btn" href="shop.html?size=large&amp;add=1#order" aria-label="Add a Large platter, ₪500"><span>Add, <span class="sym">₪</span>500</span></a></div>
+          <a class="btn" href="shop.html?size=large&amp;add=1#order" aria-label="Add a Large platter, ₪500"><span>Add a Large</span></a></div>
         </article>
         <article class="pc" style="--room:#DBE8BF">
           <div class="pc-ph"><img src="assets/card-4.webp" width="1000" height="800" alt="The Extra large platter: a very long board in rows of green grapes, watermelon, dates, pomegranate, dark grapes and kiwi" loading="lazy"></div>
           <div class="pc-b"><h3>Extra large</h3><p class="pc-pr"><span class="sym">₪</span>850</p>
-          <a class="btn" href="shop.html?size=xl&amp;add=1#order" aria-label="Add a Extra large platter, ₪850"><span>Add, <span class="sym">₪</span>850</span></a></div>
+          <a class="btn" href="shop.html?size=xl&amp;add=1#order" aria-label="Add an Extra large platter, ₪850"><span>Add an Extra large</span></a></div>
         </article>
       </div>
     </div>
@@ -135,27 +135,51 @@
   [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });
   (function next(k) {
     var batch = order.slice(k, k + 6), left = batch.length; if (!left) return;
+    // kept as files (blobs), decoded off the main thread only when near the frame on screen:
+    // decoding from an <img> ran on the main thread and was the whole cost of a scrolled frame
     batch.forEach(function (i) {
-      var im = new Image(); im.decoding = 'async';
-      im.onload = im.onerror = function () { if (im.naturalWidth) imgs[i] = im; if (--left === 0) { draw(); next(k + 6); } };
-      im.src = url(i);
+      fetch(url(i)).then(function (r) { return r.ok ? r.blob() : null; }).then(function (bl) { if (bl) imgs[i] = bl; })
+        .catch(function () {}).then(function () { if (--left === 0) { keep(want); draw(); next(k + 6); } });
     });
   })(0);
+  // Frames near the one on screen are kept decoded (ImageBitmap) and the rest released: drawing an
+  // <img> made the browser decode it again on every frame, 163 ms a frame on a slowed phone
+  // (scripts/check-speed.mjs, 27 Oct 2026). A frame not yet decoded is never drawn; the nearest
+  // decoded one is, so scrolling never waits on a decode.
+  var bm = new Array(N), WIN = 8, want = 0, making = {};
+  function keep(c) {
+    want = c;
+    for (var i = 0; i < N; i++) {
+      var near = Math.abs(i - c) <= WIN;
+      if (!near && bm[i]) { bm[i].close && bm[i].close(); bm[i] = null; }
+      if (near && !bm[i] && imgs[i] && !making[i] && window.createImageBitmap) {
+        making[i] = 1;
+        (function (i) {
+          createImageBitmap(imgs[i]).then(function (b) {
+            making[i] = 0;
+            if (Math.abs(i - want) <= WIN) { bm[i] = b; draw(); } else if (b.close) b.close();
+          }).catch(function () { making[i] = 0; });
+        })(i);
+      }
+    }
+  }
   function frameAt(q) {
     var f = Math.round(q * (N - 1));
-    for (var d = 0; d < N; d++) { if (imgs[f - d]) return imgs[f - d]; if (imgs[f + d]) return imgs[f + d]; }
-    return null;
+    keep(f);
+    for (var d = 0; d < N; d++) { if (bm[f - d]) return bm[f - d]; if (bm[f + d]) return bm[f + d]; }
+    return null;   // until the first frame is decoded the canvas shows frame 1 as its background
   }
   var shown = 0, target = 0, drawn = null, raf = 0;
   function draw() {
     var im = frameAt(shown); if (!im || im === drawn && !draw.force) return;
     drawn = im; draw.force = false;
-    var W = cv.width, H = cv.height, iw = im.naturalWidth, ih = im.naturalHeight, sc, x, y;
+    var W = cv.width, H = cv.height, iw = im.naturalWidth || im.width, ih = im.naturalHeight || im.height, sc, x, y;
     if (tall) { sc = W / iw; x = 0; y = 0; }  // the tall film, whole, from the top; the ground colour below it
     else { sc = Math.max(W / iw, H / ih); x = (W - iw * sc) * (innerWidth <= 860 ? .66 : .62); y = (H - ih * sc) / 2; }
     cx.clearRect(0, 0, W, H); cx.drawImage(im, x, y, iw * sc, ih * sc);
   }
-  function size() { var d = Math.min(2, devicePixelRatio || 1); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; draw.force = true; draw(); }
+  // no more pixels than the frames have: a tall phone's frames are 720 wide
+  function size() { var d = Math.min(2, devicePixelRatio || 1, tall ? 720 / Math.max(1, cv.clientWidth) : 2); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; draw.force = true; draw(); }
   function progress() { var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight; return Math.min(1, Math.max(0, -r.top / Math.max(1, span))); }
   function tick() {
     raf = 0; shown += (target - shown) * .2;

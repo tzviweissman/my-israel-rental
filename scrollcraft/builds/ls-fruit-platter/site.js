@@ -25,7 +25,7 @@ document.body.classList.remove('no-js');
   var sbar = document.createElement('div'); sbar.className = 'sbar'; sbar.setAttribute('aria-hidden', 'true'); sbar.innerHTML = '<i></i>'; document.body.appendChild(sbar);
   var sfill = sbar.firstChild;
 
-  var top = document.getElementById('top'), bar = document.getElementById('bar'), form = document.getElementById('order') || document.getElementById('book'), hero = document.querySelector('.hero'), tick = 0;
+  var top = document.getElementById('top'), bar = document.getElementById('bar'), form = document.getElementById('order') || document.getElementById('book'), hero = document.querySelector('.hero, .film'), tick = 0;
   function frame() {
     tick = 0;
     var vh = innerHeight, max = document.documentElement.scrollHeight - vh;

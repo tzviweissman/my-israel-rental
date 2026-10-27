@@ -150,7 +150,15 @@
     document.getElementById('st-name').textContent = BY[k].name; document.getElementById('st-price').innerHTML = P(BY[k].price);
     n = 1; label();
   }
-  stage.querySelector('.st-pick').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.k); });
+  stage.querySelector('.st-pick').addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return; show(b.dataset.k);
+    // on a phone the tiles sit under the photo: bring the photo, name and Add back into view (independent review, 27 Oct)
+    // on a short phone the stage is taller than the screen: then the Add button wins over the photo's top
+    var st = stage.getBoundingClientRect().top - (parseFloat(getComputedStyle(stage).scrollMarginTop) || 0), bar = document.getElementById('bar');
+    var y = scrollY + st, room = innerHeight - (bar && getComputedStyle(bar).display !== 'none' ? bar.offsetHeight : 0) - 12;
+    if (stAdd.getBoundingClientRect().bottom - st > room) y = scrollY + stAdd.getBoundingClientRect().bottom - room;
+    if (ph.getBoundingClientRect().top < 0 || stAdd.getBoundingClientRect().bottom > room) scrollTo({ top: y, behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+  });
   stage.querySelector('.st-buy .step').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; n = Math.max(1, Math.min(20, n + (+b.dataset.d))); label(); });
   var toast = document.createElement('div'), toastT = 0; toast.className = 'toast'; toast.setAttribute('role', 'status');
   toast.innerHTML = '<span class="tt"></span>'; document.body.appendChild(toast);
@@ -177,7 +185,7 @@
     drawStep();
     var b = {}; SIZES.forEach(function (s) { if (q[s[0]]) b[s[0]] = q[s[0]]; }); window.siteBasket.set(b);
     var bar = document.querySelector('#bar .p'), barBtn = document.querySelector('#bar .btn');
-    if (barBtn) { barBtn.textContent = total() ? 'Basket' : 'Order'; barBtn.setAttribute('href', total() ? '#order' : '#sizes'); }
+    if (barBtn) { barBtn.textContent = total() ? 'Your basket' : 'Order a platter'; barBtn.setAttribute('href', total() ? '#order' : '#sizes'); }
     if (bar) { var parts = []; SIZES.forEach(function (s) { if (q[s[0]]) parts.push(q[s[0]] + ' ' + s[1]); }); bar.innerHTML = total() ? '<b>Basket, ' + P(total()) + '</b>' + parts.join(', ') : '<b>From ' + P(300) + '</b>Four platter sizes'; }
   }
   function v(id) { return document.getElementById(id).value.trim(); }
