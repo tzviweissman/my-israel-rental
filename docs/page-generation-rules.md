@@ -24,6 +24,30 @@ other places say "see Xn.m". Where two rules disagreed, the newest decision won;
 the lines dated 22 Oct 2026 in `hero`, `urgency`, 3g.3, 3g.13, 3j, 3o.1, 5b.2
 and section 8 are those decisions.
 
+**How a rule is added, so it is right the first time (Tzvi, 27 Oct 2026: "can we make sure our rules are always correct the first time?").**
+RS Modest's opening took three rounds: a crop that zoomed in (3c.12 allowed a crop with `data-crop-ok`),
+then a blurred frame round the photo that was our own idea, written up before Tzvi saw it ("a weird grey
+area"), and only then the extended photo. Each round was a rule or fix decided from a description. So a
+new rule, or a fix that will become one, goes through these steps before it is written down:
+
+1. **Find every line it touches**: search this document, `docs/rules-checklist.md`, the skill and the
+   scripts for the same subject. The new rule changes those lines in the same edit, so it has one home
+   and no two lines disagree.
+2. **Show it working before writing it**: a before and after picture on the site that caused it, at a
+   laptop and a phone size. Tzvi says yes to the picture, not to a description. A fix that is our own
+   design choice, not what Tzvi asked for, is a proposal until he has seen it.
+3. **Try it on every live site it covers** (`frontend/public/pages/pages.json`): run its check, or look,
+   on each, and list the ones that fail. Fix them, or write why they are exempt. A rule that fails sites
+   Tzvi is happy with is wrong, not the sites.
+4. **The check must catch the original mistake**: run it on the before state (it fails) and the after
+   state (it passes). A check that passes both is not checking the rule.
+5. **Write how, not only what**: the steps, the tool and settings, a worked example folder, and what was
+   tried and rejected with why, so the next build does it right without rediscovering it.
+6. **The same day**: the checklist line with its check, the skill's copy (`full-rules.md`), the build
+   order (0b) if it changes when something is done, and a memory note.
+
+When a new kind of case still finds a gap, the rule is fixed at its one home, never patched beside it.
+
 The AI is not switched on yet. When it is, it receives this document's rules as
 its instructions, and nothing it makes reaches an owner without passing the check.
 

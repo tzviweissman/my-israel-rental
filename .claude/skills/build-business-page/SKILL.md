@@ -1175,4 +1175,10 @@ unanswered, when a fix is open, or when the site changed after RULES.md was writ
 point at the whole checklist, never at chosen sections. A rule added here is added to the checklist the
 same day, with its check.
 
+**How a rule is added, so it is right the first time** (Tzvi, 27 Oct 2026): before a new rule or fix is
+written down, find every line it touches and change them in one edit; show Tzvi a before and after picture
+(laptop and phone) and get his yes on the picture; try it on every live site it covers; make its check fail
+on the before and pass on the after; write the steps, tools, worked example and what was rejected. Full
+text: the top of `reference/full-rules.md`.
+
 - **Every order is saved before WhatsApp opens** (Tzvi, 22 Oct 2026): the order button POSTs the order to MyIsraelRental first (order form endpoint, as Chicken Munch does), then opens WhatsApp with the message typed; every product on the site exists in the listing; check-site SAVE enforces it. Rules doc 3k.
