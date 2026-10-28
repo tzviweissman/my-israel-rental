@@ -44,7 +44,7 @@ for (const url of urls) {
       return (performance.now() - t0) / steps;
     });
     const name = url.replace(/^https?:\/\/[^/]+\//, '') || url;
-    if (ms != null && ms > LIMIT_MS) { bad++; console.log(`HEAVY  ${name}: ${Math.round(ms)} ms a scrolled frame on a slowed phone (limit ${LIMIT_MS}). Look for: a picture decoded on every frame (draw only when the frame changes, keep a few decoded), styles rewritten every frame (write only what changed; never set a CSS custom property on a parent of many elements per frame), layout read after each write, a canvas larger than its pictures`); }
+    if (ms != null && ms > LIMIT_MS) { bad++; console.log(`HEAVY  ${name}: ${Math.round(ms)} ms a scrolled frame on a slowed phone (limit ${LIMIT_MS}). Look for: a picture decoded on every frame (draw only when the frame changes, keep a few decoded), styles rewritten every frame (write only what changed; never set a CSS custom property on a parent of many elements per frame), layout read after each write, a canvas larger than its pictures, many pieces moved by style each frame (tie them to the scroll with animations instead, as the home opening does), a big picture inside every piece (give each only its own part)`); }
     if (idle > IDLE_PCT) { bad++; console.log(`BUSY   ${name}: ${idle}% busy while nobody touches it (limit ${IDLE_PCT}%). Look for: a requestAnimationFrame loop that never stops (run it only while its scene is on screen and moving), clips playing out of sight, text rewritten every frame`); }
     console.log(`${name}: ${ms == null ? 'no scroll' : Math.round(ms) + ' ms/frame'}, idle ${idle}%`);
   } catch (e) {

@@ -10,6 +10,10 @@
 
 /* ── Sections ────────────────────────────────────────────────────────── */
 .hn-sec { padding: clamp(56px, 8vw, 104px) 0; border-top: 1px solid rgb(120 80 30 / .14); }
+/* The sections under the opening are not laid out or painted until they come near the screen
+   (the page is ~18,000 px tall on a phone; 27 Oct 2026, about 10 ms a scrolled frame on a
+   phone-speed test). Nothing links into them, so a section that is not yet its real height is harmless. */
+.hn-sec, .hn-close { content-visibility: auto; contain-intrinsic-size: auto 900px; }
 .hn-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 32px; }
 .hn-eyebrow { font-size: .8rem; letter-spacing: .08em; text-transform: uppercase; color: var(--gold-text); font-weight: 600; margin-bottom: 10px; }
 .hn h2 { font-family: var(--font-head); font-weight: 600; letter-spacing: -.015em; font-size: clamp(1.7rem, 3.4vw, 2.6rem); line-height: 1.1; margin: 0; color: var(--ink); }

@@ -79,26 +79,32 @@ function useTiles(he) {
   return [tiles, drop];
 }
 
-/** Counts up from zero once, after a delay, so the lines arrive in turn. */
+/** Counts up from zero once, after a delay, so the lines arrive in turn. While it rises only
+ * the number's own text is rewritten: re-rendering the line every frame kept a phone busy for
+ * the first seconds of the page (27 Oct 2026, a phone-speed test). */
 function Rise({ n, delay, children }) {
   const [v, setV] = useState(STILL ? n : 0);
   const [on, setOn] = useState(STILL);
+  const li = useRef(null);
   useEffect(() => {
     if (STILL || n == null) { setOn(true); setV(n); return undefined; }
     let raf = 0;
     const t = setTimeout(() => {
       setOn(true);
       const t0 = performance.now();
+      const text = n > 0 ? li.current?.querySelector('b')?.firstChild : null;
       const tick = (now) => {
         const x = Math.min(1, (now - t0) / 1600);
-        setV(Math.round(n * (1 - (1 - x) ** 4)));
+        const nv = Math.round(n * (1 - (1 - x) ** 4));
+        if (text) { const s = nv.toLocaleString(); if (text.nodeValue !== s) text.nodeValue = s; }
         if (x < 1) raf = requestAnimationFrame(tick);
+        else setV(n);
       };
       raf = requestAnimationFrame(tick);
     }, delay);
     return () => { clearTimeout(t); cancelAnimationFrame(raf); };
   }, [n, delay]);
-  return <li className={on ? 'in' : ''}>{children(v)}</li>;
+  return <li ref={li} className={on ? 'in' : ''}>{children(v)}</li>;
 }
 
 export default function HomeOpening({ counts }) {
@@ -147,11 +153,102 @@ export default function HomeOpening({ counts }) {
     const cw = Math.min(window.innerWidth * 0.42, 560) + Math.max(16, window.innerWidth * 0.05);
     const fit = Math.min(0.56, (window.innerWidth - cw - 40) / window.innerWidth);
     const pieces = [...grid.current.querySelectorAll('.ho-t')];
+    const rtl = document.dir === 'rtl';
+    // The crack and the turns are animations tied to the scroll (a ViewTimeline on the opening),
+    // which the browser plays by itself as the page scrolls, off the page's main work; where
+    // that is missing they are paused and moved to the scroll's place each frame. Writing each
+    // piece's transform as a style instead made the browser work out all 140 elements' styles
+    // from scratch every frame (27 Oct 2026, a phone-speed test). The grid is laid out once where the pieces end
+    // (the gap and padding in the CSS); while it cracks, each piece is drawn from there back
+    // towards its place in the whole picture, with transforms only, so nothing is laid out or
+    // repainted. Where each piece sits is worked out from the grid's size, never measured between
+    // writes; the stage is pinned at the top of the screen, so the grid starts at 0,0.
+    const G = phone ? 6 : 12;
+    const PT = phone ? 124 : 112;
+    const PS = phone ? 10 : 24;
+    const STEPS = [0, 0.25, 0.5, 0.75, 1];
+    const seek = (a, x) => { if (a.__tied) return; if (a.__x !== x) { a.__x = x; a.currentTime = x * 1000; } };
+    const tl = !STILL && typeof window.ViewTimeline === 'function' && window.CSS?.percent
+      ? new window.ViewTimeline({ subject: el, axis: 'block' }) : null;
+    // an animation over [a, b] of the opening's scroll (the same 0..1 as p below), eased like ease()
+    const still = (el2, frames, a, b) => {
+      if (tl) {
+        const an = el2.animate(frames, {
+          timeline: tl, fill: 'both', easing: 'cubic-bezier(.33, 1, .68, 1)',
+          rangeStart: { rangeName: 'contain', offset: window.CSS.percent(a * 100) },
+          rangeEnd: { rangeName: 'contain', offset: window.CSS.percent(b * 100) },
+        });
+        an.__tied = true;
+        return an;
+      }
+      const an = el2.animate(frames, { duration: 1000, fill: 'both' });
+      an.pause();
+      an.__x = -1;
+      return an;
+    };
+    let anims = [];
+    const build = () => {
+      anims.forEach((a) => a.cancel());
+      anims = [];
+      const gw = grid.current.clientWidth;
+      const gh = grid.current.clientHeight;
+      const box = (cc, i) => {
+        const gap = cc * G;
+        const padT = cc * PT;
+        const padS = cc * PS;
+        const cw2 = (gw - 2 * padS - (COLS - 1) * gap) / COLS;
+        const ch = (gh - padT - padS - (ROWS - 1) * gap) / ROWS;
+        const col = i % COLS;
+        return [rtl ? gw - padS - (col + 1) * cw2 - col * gap : padS + col * (cw2 + gap), padT + Math.floor(i / COLS) * (ch + gap), cw2, ch];
+      };
+      const vw = window.innerWidth;
+      const vh = screenH();
+      const sc = Math.max(vw / IW, vh / IH);
+      const W0 = IW * sc;
+      const H0 = IH * sc;
+      pieces.forEach((t, i) => {
+        const [fl, ft, fw, fh] = box(1, i);
+        const moves = [];
+        // The picture inside the piece: the whole picture at its full-screen size (W0 x H0),
+        // placed by translate (tx, ty) and scale (kx, ky). The piece carries only the part of the
+        // picture it ever shows (u0..u1, plus a little): 35 full-screen pictures, each its own
+        // layer, cost more than the rest of the opening put together.
+        const pl = STEPS.map((cc) => {
+          const [l, tp, w2, h2] = box(cc, i);
+          const sx = w2 / fw;
+          const sy = h2 / fh;
+          const k = 1 - cc * 0.12;
+          moves.push({ offset: cc, transform: `translate(${(l - fl).toFixed(2)}px, ${(tp - ft).toFixed(2)}px) scale(${sx.toFixed(4)}, ${sy.toFixed(4)})` });
+          return { cc, tx: ((vw - W0 * k) / 2 - l) / sx, ty: ((vh - H0 * k) / 2 - tp) / sy, kx: k / sx, ky: k / sy };
+        });
+        const m = 6;
+        const ux0 = Math.max(0, Math.min(...pl.map((q) => -q.tx / q.kx)) - m);
+        const uy0 = Math.max(0, Math.min(...pl.map((q) => -q.ty / q.ky)) - m);
+        const ux1 = Math.min(W0, Math.max(...pl.map((q) => (fw - q.tx) / q.kx)) + m);
+        const uy1 = Math.min(H0, Math.max(...pl.map((q) => (fh - q.ty) / q.ky)) + m);
+        const pics = pl.map((q) => ({ offset: q.cc, transform: `translate(${(q.tx + q.kx * ux0).toFixed(2)}px, ${(q.ty + q.ky * uy0).toFixed(2)}px) scale(${q.kx.toFixed(4)}, ${q.ky.toFixed(4)})` }));
+        put(t.__pic, 'width', `${(ux1 - ux0).toFixed(1)}px`);
+        put(t.__pic, 'height', `${(uy1 - uy0).toFixed(1)}px`);
+        put(t.__pic, 'backgroundSize', `${W0.toFixed(1)}px ${H0.toFixed(1)}px`);
+        put(t.__pic, 'backgroundPosition', `${(-ux0).toFixed(1)}px ${(-uy0).toFixed(1)}px`);
+        const d = cells[i].d / maxD;
+        t.__move = still(t, moves, 0.12, 0.24);
+        t.__picA = still(t.__pic, pics, 0.12, 0.24);
+        t.__turn = still(t.firstChild, [{ transform: 'rotateY(0deg)' }, { transform: 'rotateY(180deg)' }], 0.26 + d * 0.26, 0.36 + d * 0.26);
+        anims.push(t.__move, t.__picA, t.__turn);
+      });
+    };
+    let fresh = true;
+    let built = false;
     let raf = 0;
     const paint = () => {
       raf = 0;
       const r = el.getBoundingClientRect();
       const p = STILL ? 1 : lin(-r.top, 0, r.height - screenH());
+      // The pieces' 105 animations exist only from just before the crack: while the film plays
+      // they made every frame of the page heavier (the counts rising) for nothing on screen.
+      if (p > 0.07 && (fresh || !built)) { build(); built = true; fresh = false; }
+      else if (p < 0.05 && built) { anims.forEach((a) => a.cancel()); anims = []; built = false; }
       // 1. the words lift away
       const w = lin(p, 0.03, 0.11);
       put(scene.current, 'opacity', String(1 - w));
@@ -160,39 +257,31 @@ export default function HomeOpening({ counts }) {
       // 2. the picture cracks and the pieces part
       const c = ease(lin(p, 0.12, 0.24));
       put(film.current, 'opacity', p < 0.12 ? '1' : '0');
-      const g = grid.current;
-      // Written straight onto the grid and the faces, not as --gap/--pad/--rad: a custom
-      // property is inherited, so changing one on the grid restyled every element in the wall
-      // each frame (about 45 ms a frame on a phone-speed test, the whole cost of the opening).
-      put(g, 'gap', `${c * (phone ? 6 : 12)}px`);
-      put(g, 'padding', `${c * (phone ? 124 : 112)}px ${c * (phone ? 10 : 24)}px ${c * (phone ? 10 : 24)}px`);
-      const rad = `${(c * 12).toFixed(1)}px`;
-      const vw = window.innerWidth;
-      const vh = screenH();
-      const sc = Math.max(vw / IW, vh / IH);
-      const k = 1 - c * 0.12;
-      const W = IW * sc * k;
-      const H = IH * sc * k;
-      const ox = (vw - W) / 2;
-      const oy = (vh - H) / 2;
-      // 3. each piece shows its own part of the picture, then turns over. All the pieces are
-      // measured first, then all are written: measuring each after writing the one before
-      // made the browser lay the page out 35 times a frame, which a phone cannot keep up with.
-      const boxes = pieces.map((t) => t.getBoundingClientRect());
+      // the wall is not drawn while the film covers it
+      put(shift.current, 'visibility', p < 0.11 ? 'hidden' : 'visible');
+      // the pieces are all on screen while the opening is (the stage is pinned)
+      const seen = r.bottom > 0 && r.top < window.innerHeight;
+      // the corners round in a few steps, not every frame: each change repaints the faces
+      const rad = `${Math.round(c * 4) * 3}px`;
+      // 3. each piece shows its own part of the picture, then turns over
       pieces.forEach((t, i) => {
-        const b = boxes[i];
-        const front = t.firstChild.firstChild;
-        put(front, 'backgroundSize', `${W.toFixed(1)}px ${H.toFixed(1)}px`);
-        put(front, 'backgroundPosition', `${(ox - b.left).toFixed(1)}px ${(oy - b.top).toFixed(1)}px`);
         const d = cells[i].d / maxD;
         const turn = ease(lin(p, 0.26 + d * 0.26, 0.36 + d * 0.26));
-        put(t.firstChild, 'transform', `rotateY(${(turn * 180).toFixed(1)}deg)`);
-        put(front, 'borderRadius', rad);
+        if (built) {
+          seek(t.__move, c);
+          seek(t.__picA, c);
+          seek(t.__turn, turn);
+        }
+        put(t.firstChild.firstChild, 'borderRadius', rad);
+        // the back (its clip, label and shadow) is left out until the turns begin: while the
+        // picture cracked, every frame repainted all 35 backs
+        put(t.firstChild.lastChild, 'visibility', p < 0.25 ? 'hidden' : 'visible');
         put(t.firstChild.lastChild, 'borderRadius', rad);
-        // a clip plays only once its piece has turned to show it, and is on screen
+        // a clip plays only once its piece has turned to show it, and is on screen; on a phone
+        // only the three nearest the middle play (13 at once was too much), the rest hold a still
         const v = t.__clip;
         if (v) {
-          const want = !STILL && turn > 0.5 && t.__seen;
+          const want = !STILL && turn > 0.5 && seen && t.__play;
           if (want && v.paused) v.play().catch(() => {});
           else if (!want && !v.paused) v.pause();
         }
@@ -210,24 +299,20 @@ export default function HomeOpening({ counts }) {
       document.body.classList.toggle('hv2-light-nav', p > 0.24);
     };
     const queue = () => { if (!raf) raf = requestAnimationFrame(paint); };
+    const resized = () => { fresh = true; queue(); };
+    pieces.forEach((t) => { t.__clip = t.querySelector('video'); t.__pic = t.querySelector('.ho-pic'); });
+    pieces.map((t, i) => i).filter((i) => pieces[i].__clip).sort((a, b) => cells[a].d - cells[b].d)
+      .forEach((i, n) => { pieces[i].__play = !phone || n < 3; });
     paint();
     window.addEventListener('scroll', queue, { passive: true });
-    window.addEventListener('resize', queue);
-    // only the clips in view, on a piece that has turned, play (paint decides; this says
-    // which are on screen): up to 29 clips decoding at once was too much for a phone
-    pieces.forEach((t) => { t.__clip = t.querySelector('video'); t.__seen = !('IntersectionObserver' in window); });
-    const io = 'IntersectionObserver' in window ? new IntersectionObserver((es) => {
-      es.forEach((e) => { e.target.__seen = e.isIntersecting; });
-      queue();
-    }) : null;
-    pieces.forEach((t) => io?.observe(t));
+    window.addEventListener('resize', resized);
     return () => {
       window.removeEventListener('scroll', queue);
-      window.removeEventListener('resize', queue);
+      window.removeEventListener('resize', resized);
       if (raf) cancelAnimationFrame(raf);
-      io?.disconnect();
+      anims.forEach((x) => x.cancel());
     };
-  }, [cells, phone]);
+  }, [cells, phone, COLS, ROWS]);
 
   useEffect(() => {
     const v = video.current;
@@ -262,7 +347,9 @@ export default function HomeOpening({ counts }) {
               <a key={i} className="ho-t" href={tile.href} tabIndex={-1} aria-hidden="true"
                 onClick={(e) => { if (!tile.full) { e.preventDefault(); navigate(tile.href); } }}>
                 <span className="ho-card">
-                  <span className="ho-face ho-front" style={{ backgroundImage: `url(${phone ? '/home/scene-m.webp' : '/home/scene.webp'})` }} />
+                  <span className="ho-face ho-front">
+                    <span className="ho-pic" style={{ backgroundImage: `url(${phone ? '/home/scene-m.webp' : '/home/scene.webp'})` }} />
+                  </span>
                   <span className="ho-face ho-back">
                     {tile.kind === 'clip'
                       ? <video src={tile.src} poster={tile.poster} muted loop playsInline preload="metadata" />
