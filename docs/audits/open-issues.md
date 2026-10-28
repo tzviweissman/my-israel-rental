@@ -13,9 +13,13 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 
 - [Low] Page editor link filter accepts "/%2F/evil.com"; stays a path on this site, probably harmless. First seen 12 Oct.
 - [To check] The Brown Box and Blazin' Boards: pinned opening reported 64 to 96px taller than the room under the header at 360 to 768 wide (23 Oct UI audit; screenshots show nothing hidden); check on a real phone.
+- [Low] i18n check fails on `awayReply.body` (`{{count}}` without plural forms, added 25 Oct). First seen 28 Oct (2026-10-28-ui-audit).
+- [To check] LS Fruit Platter and KashermyBnb also trigger the pinned-opening warning (same pattern, nothing hidden in screenshots). 28 Oct.
 - [To fix] Audit setup: most runs since 15 Oct could not download Playwright or MongoDB in the sandbox, so pages behind sign-in, Hebrew renders and order flows were not checked.
 
 ## Fixed
+
+- Fixed 28 Oct: reply-time line used {{count}} without plural forms (86a365ec).
 
 - [Low] Two status colours have no design token, so they stay fixed: amber "waiting" (#B45309: payment requests, automations, deposits) and red error text (#B42318: restock box). Adding --attention and --danger tokens is a design-system choice for Tzvi. 23 Oct.
 - Fixed 23 Oct: reorder crash returns the run to waiting; failed appointment reminders are retried; table orders without a phone left out of customer suggestions; gift-card order email at most once a day per address, never after an unsubscribe, with an unsubscribe link; restaurants "show more" plural forms and the plural check's false alarms (the language check now passes fully); only our own [Your ...] template gaps block a message; calendar import stops at the size limit; map popup and green status colours use tokens.
@@ -60,3 +64,9 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Medium] Page editor: an owner could save a link to another site ("//evil.com"). Fixed 12 Oct, 8e2da7fb.
 - [Low] Hand-built pages: anyone could skip the cache with `?fresh` as often as they liked. Fixed 12 Oct, 8e2da7fb.
 - Not a bug: business page tab title (uses "|"), Deliveries links (phone, WhatsApp and Waze open outside the app), renter Contracts tab (shows where contracts are). Checked 13 Oct.
+
+- [Low] i18n: `awayReply.body` uses `{{count}}` with no plural set; `test-i18n-parity.mjs` fails. First seen 27 Oct (added 25 Oct). Report: 2026-10-27-site-audit.md
+- [Low] Reply time reads the oldest 5000 messages, not the newest, for very busy listers (`utils/reply_time.py`). First seen 27 Oct.
+- [Low] Hidden-as-duplicate on import (shared photos + same bedrooms) could hide a real second flat; Tzvi to decide. 27 Oct.
+- [Low] `/properties/quote-batch` is unauthenticated and quotes hidden listings; could not confirm rate limit. 27 Oct.
+- [Low] Plural forms for `stays.repliesWithinHours`. Fixed 27 Oct, 43bc464.
