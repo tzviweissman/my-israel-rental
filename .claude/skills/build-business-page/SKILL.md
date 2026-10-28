@@ -120,6 +120,9 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
    listing's prices and currency against their menu first and flag mismatches;
    load the real menu with fixed product ids so the page's order form saves
    orders (tracking link) before WhatsApp.
+   A listing with price tiers but no products cannot take orders at all (the
+   order form 404s): load the products in the same build, and check-site SAVE
+   fails a POST whose product ids the live shop does not list (Bake away, 28 Oct 2026).
 4. Mobbin and 21st per section before building (3g.17). **Every source before any idea**
    (Tzvi, 28 Oct 2026): `REFERENCES.md` names every `docs/inspo` source, Inspo, Mobbin, 21st and the
    fingerprints, and `node scripts/check-references.mjs <build>` passes before any idea is shown or

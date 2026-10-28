@@ -384,7 +384,7 @@ for (const url of urls) {
     const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
     // SAVE (page rules 3k; Tzvi, 22 Oct 2026): every order is saved to MyIsraelRental before WhatsApp opens.
     // Record every POST the page makes, and when the WhatsApp tab is opened.
-    await page.addInitScript(() => { window.__posts = []; const f0 = window.fetch; window.fetch = function (u, o) { try { if (o && /post/i.test(o.method || '')) window.__posts.push({ u: String(u && u.url || u), t: performance.now() }); } catch (e) { /* none */ } return f0.apply(this, arguments); }; const x0 = XMLHttpRequest.prototype.open; XMLHttpRequest.prototype.open = function (m, u) { if (/post/i.test(m)) window.__posts.push({ u: String(u), t: performance.now() }); return x0.apply(this, arguments); }; });
+    await page.addInitScript(() => { window.__posts = []; const f0 = window.fetch; window.fetch = function (u, o) { try { if (o && /post/i.test(o.method || '')) window.__posts.push({ u: String(u && u.url || u), t: performance.now(), b: typeof o.body === 'string' ? o.body : '' }); } catch (e) { /* none */ } return f0.apply(this, arguments); }; const x0 = XMLHttpRequest.prototype.open; XMLHttpRequest.prototype.open = function (m, u) { if (/post/i.test(m)) window.__posts.push({ u: String(u), t: performance.now() }); return x0.apply(this, arguments); }; });
     await page.addInitScript(() => { window.__sent = ''; window.open = (u) => { if (u) { window.__sent = String(u); window.__sentAt = window.__sentAt || performance.now(); } const tab = { closed: false, close() {}, focus() {}, document: { write() {}, title: '' }, location: { set href(x) { window.__sent = String(x); window.__sentAt = window.__sentAt || performance.now(); }, get href() { return window.__sent; }, replace(x) { window.__sent = String(x); }, assign(x) { window.__sent = String(x); } } }; return tab; }; try { localStorage.clear(); } catch (e) { /* none */ } });
     await page.goto(url, { waitUntil: 'load' }); await page.waitForTimeout(900);
     const hasForm = await page.$('form button[type=submit], form#form');
@@ -424,6 +424,15 @@ for (const url of urls) {
       if (res.sent) {
         const saved = await page.evaluate(() => (window.__posts || []).some((p) => /\/api\//.test(p.u) && /order|book|quote|enquir|request/i.test(p.u) && p.t <= (window.__sentAt || Infinity)));
         if (!saved) fail(url, 'SAVE', 'the order goes straight to WhatsApp without being saved to MyIsraelRental first (POST it through the order form, then open WhatsApp; rules 3k)');
+        // SAVE ids (Bake away, 28 Oct 2026): a POST whose product ids are null or not in the live shop is refused by the
+        // server, so the order never saves although a POST went out. Every product_id must be one the live order form lists.
+        for (const p of await page.evaluate(() => (window.__posts || []).filter((x) => /order-form\/[0-9a-f-]{36}\/orders/.test(x.u)))) {
+          let ids = []; try { ids = (JSON.parse(p.b).lines || []).map((l) => l.product_id); } catch (e) { /* not JSON */ }
+          const gig = p.u.match(/order-form\/([0-9a-f-]{36})/)[1];
+          let live = null; try { const r = await fetch(`https://myisraelrental.com/api/marketplace/order-form/${gig}`); live = r.ok ? (await r.json()).products.map((x) => x.id) : []; } catch (e) { /* offline: skip */ }
+          const bad = live ? ids.filter((i) => !live.includes(i)) : [];
+          if (live && (!ids.length || bad.length)) fail(url, 'SAVE', `the order is POSTed with product ids the live shop does not have (${bad.map(String).join(', ') || 'no lines'}), so it is not saved: load the menu as shop products with fixed ids (rules 3k, build step 3)`);
+        }
       }
     }
     await page.close();

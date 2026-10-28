@@ -4,7 +4,7 @@ We're building a website for Ls Fruit Platter from your listing, your flyer and 
 
 1. **Your name.** Your listing says "Ls Fruit Platter" and your logo says "LS fruit platters". How would you like it written on the site?
 
-2. **What is in each size.** About how many people does each platter feed (Small, Medium, Large and Extra large), and is there a size in centimetres or a weight? We left this off the site because we don't want to guess.
+2. **What is in each size.** About how many people does each platter feed (Small, Medium, Large and Extra large)? Thank you for the sizes in centimetres, they are on the site now.
 
 3. **Choosing the fruit.** Can customers ask for fruit to be left out, or for a favourite to be added? Are the fruits the same every time, or do they change with the season?
 

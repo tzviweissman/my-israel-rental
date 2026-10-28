@@ -36,7 +36,7 @@
       <div class="st-info">
         <p class="kick">Shop · Fruit platters</p>
         <h1 id="h-shop"><span id="st-name">Small</span></h1>
-        <p class="st-price"><span id="st-price"><span class="sym">₪</span>300</span> <small>a platter</small></p>
+        <p class="st-price"><span id="st-price"><span class="sym">₪</span>300</span> <small>a platter, <span id="st-size">30 × 30 cm</span></small></p>
         <div class="st-buy">
           <span class="step" role="group" aria-label="How many platters"><button type="button" data-d="-1" aria-label="One fewer" disabled>−</button><output id="st-n">1</output><button type="button" data-d="1" aria-label="One more">+</button></span>
           <button class="btn" type="button" id="st-add"><span>Add a Small, <span class="sym">₪</span>300</span><svg class="tk" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12.5l4.5 4.5L19 7.5" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
@@ -128,8 +128,8 @@
   // products, named exactly as the listing names them (added 22 Oct 2026 by add_site_products.py).
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
   var PID = { small: '55113012e889', medium: 'c94a66979f24', large: 'a549851e62aa', xl: '7d53c8ac348a' };
-  var SIZES = [['small', 'Small', 300], ['medium', 'Medium', 400], ['large', 'Large', 500], ['xl', 'Extra large', 850]];
-  var BY = {}; SIZES.forEach(function (s, i) { BY[s[0]] = { i: i, name: s[1], price: s[2] }; });
+  var SIZES = [['small', 'Small', 300, '30 × 30 cm'], ['medium', 'Medium', 400, '40 × 28 cm'], ['large', 'Large', 500, '58 × 28 cm'], ['xl', 'Extra large', 850, '115 × 25 cm']];
+  var BY = {}; SIZES.forEach(function (s, i) { BY[s[0]] = { i: i, name: s[1], price: s[2], cm: s[3] }; });
   function P(n) { return '<span class="sym">₪</span>' + n; }
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   var saved = window.siteBasket.get(), qs = new URLSearchParams(location.search);
@@ -147,7 +147,7 @@
   function show(k) {
     sel = k; stage.style.setProperty('--room', ROOM[k]); bl.go(BY[k].i);
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.k === k ? 'true' : 'false'); });
-    document.getElementById('st-name').textContent = BY[k].name; document.getElementById('st-price').innerHTML = P(BY[k].price);
+    document.getElementById('st-name').textContent = BY[k].name; document.getElementById('st-price').innerHTML = P(BY[k].price); document.getElementById('st-size').textContent = BY[k].cm;
     n = 1; label();
   }
   stage.querySelector('.st-pick').addEventListener('click', function (e) {

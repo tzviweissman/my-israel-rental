@@ -6,8 +6,8 @@ Replace every `todo`. `node scripts/check-rules.mjs scrollcraft/builds/ls-fruit-
 
 ## 1. Facts and words
 R0b.1 pass: slug ls-fruit-platter equals the slug in src/record.json
-R0b.3 n/a: her listing holds the sizes as tiers, not shop products with fixed ids; loading products writes to the production database and needs Tzvi's go-ahead. Prices on the page match her record and flyer: 300, 400, 500, 850
-R2.1 pass: read every sentence on the three pages; each fact is from the record, her logo line or her flyer
+R0b.3 pass: the four sizes are shop products with fixed ids (PID in shop.html, live order form lists all four, check-site SAVE ids clean); their board sizes in cm written to the products 28 Oct (gen/catalog/sizes.py)
+R2.1 pass: read every sentence on the three pages; each fact is from the record, her logo line or her flyer; the board sizes in cm (Small 30 x 30, Medium 40 x 28, Large 58 x 28, Extra large 115 x 25) are hers, sent through Tzvi on 28 Oct
 R2.2 pass: read message-to-owner.md: only about her business, nothing about our tools; questions 13 to 15 added on 22 Oct (the Party Platter on her flyer, same-day orders, "from our kitchen")
 R2.3 pass: message-to-owner.md question 12 asks for her questions and answers; the FAQ stays hidden until she sends them
 R3.1 pass: searched for kosher, best, guarantee, fresh daily and delivery: kosher is her listing's hechsher in her own words; none of the others appear

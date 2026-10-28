@@ -450,3 +450,6 @@ section.rest { padding-block: clamp(1.6rem, 6svh, 3.5rem); }
 #order, #sizes { scroll-margin-top: calc(var(--top-h) + .75rem); }
 /* the longest card label fits a 360-wide phone on two lines rather than running out of its button */
 @media (max-width: 380px) { .pc-b .btn { height: auto; min-height: 54px; padding-block: .5rem; } .pc-b .btn > span { white-space: normal; line-height: 1.15; } }
+
+/* platter sizes in cm (owner, 28 Oct 2026) */
+.pc-sz { margin: -.2rem 0 .5rem; font: 600 .95rem var(--font-body); color: var(--soft); }
