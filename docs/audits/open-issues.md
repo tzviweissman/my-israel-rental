@@ -288,3 +288,4 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Low] Footer and menu links on the 17 business sites are 19 to 24px tall on phones, under 44px. First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
 - [Low] Blazin' Boards home, phone 360x640: size labels cut by the plank box, "$700" 4.09:1. First seen 27 Oct, 2026-10-27-ui-audit.md.
 - [Low] Michal Simkin reviews, phone 360x640: last quote cut by the stage and covered by the booking bar. First seen 27 Oct, 2026-10-27-ui-audit.md.
+- [Low] Dashboard away-reply card: `awayReply.body` uses {{count}} with no plural forms, fails test-i18n-parity. First seen 28 Oct 2026 (2026-10-28-site-audit.md). Open.
