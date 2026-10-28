@@ -190,8 +190,9 @@
   }
   var off = 0;   // a tapped flavour shifts the scroll's own count, so tapping never moves the page and scrolling on carries on from the tapped one
   function scrollIdx() { var r = sec.getBoundingClientRect(), span = Math.max(1, sec.offsetHeight - innerHeight); return Math.min(N - 1, Math.max(0, Math.floor(Math.min(.999, Math.max(0, -r.top / span)) * N))); }
-  function fromScroll() { raf = 0; var r = sec.getBoundingClientRect(); sec.classList.toggle('on', r.top <= innerHeight * .12 && r.bottom > innerHeight * .6); set(Math.min(N - 1, Math.max(0, scrollIdx() + off))); }
-  addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(fromScroll); }, { passive: true });
+  // lit as it scrolls in, never a blank screen between the film and the flavours (owner video, 28 Oct)
+  function fromScroll() { raf = 0; var r = sec.getBoundingClientRect(); sec.classList.toggle('on', r.top <= innerHeight * .8 && r.bottom > innerHeight * .6); set(Math.min(N - 1, Math.max(0, scrollIdx() + off))); }
+  addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(fromScroll); }, { passive: true }); fromScroll();
   chips.forEach(function (c, i) { c.addEventListener('click', function () { off = i - scrollIdx(); set(i); }); });
   [].forEach.call(sec.querySelectorAll('.seg button'), function (b) {
     b.addEventListener('click', function () { kind = b.dataset.k; [].forEach.call(sec.querySelectorAll('.seg button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); });
