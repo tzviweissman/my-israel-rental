@@ -634,6 +634,11 @@ button:focus-visible,
   max-width: 1080px;
   padding: 0 20px;
 }
+/* Stays on a phone after a search: the band is gone, so the panel sits
+   under the search pill instead of riding up over a photo. */
+@media (max-width: 639px) {
+  .hero-panel-float--compact { margin-top: 12px; padding: 0 16px; }
+}
 .hero-panel {
   background: rgba(255,255,255,.97);
   border-radius: 22px;
