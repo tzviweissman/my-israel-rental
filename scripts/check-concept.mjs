@@ -32,6 +32,7 @@
  */
 import fs from 'node:fs';
 import path from 'node:path';
+import { checkReferences } from './check-references.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 
@@ -40,7 +41,11 @@ export function checkConcept(dir) {
   if (!fs.existsSync(file)) return ['no CONCEPT.md in the build folder (see scripts/check-concept.mjs for what it holds)'];
   const s = fs.readFileSync(file, 'utf8');
   const part = (h) => { const m = new RegExp(`^##\\s*${h}\\s*$([\\s\\S]*?)(?=^##\\s|$(?![\\s\\S]))`, 'im').exec(s); return m ? m[1].trim() : ''; };
-  const problems = [];
+  // every saved source, Inspo, Mobbin and 21st read before the ideas (Tzvi, 28 Oct 2026). Sites already
+  // published before this rule have no REFERENCES.md and are not asked for one; every new build is.
+  const published = (() => { try { return Object.values(JSON.parse(fs.readFileSync(path.join(ROOT, 'scrollcraft', 'published.json'), 'utf8'))).map((v) => v.folder); } catch { return []; } })();
+  const older = published.includes(path.basename(path.resolve(dir))) && !fs.existsSync(path.join(dir, 'REFERENCES.md'));
+  const problems = older ? [] : checkReferences(dir).map((p) => `References: ${p}`);
   const ideas = part('Ideas');
   const refs = [...ideas.matchAll(/docs\/inspo\/[^\s)]+\.(?:webp|png|jpe?g)/gi)].map((m) => m[0]);
   const missing = refs.filter((r) => !fs.existsSync(path.join(ROOT, r)));

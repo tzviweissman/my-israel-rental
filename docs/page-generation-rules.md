@@ -547,6 +547,16 @@ a round with Tzvi. Done in this order, none of them happens.
    order form saves each order with a tracking link before it opens WhatsApp.
 4. **Research before building**: Mobbin and 21st per section (§3g.17). Both
    builds first reused the previous page's effects.
+   **Every source before any idea** (Tzvi, 28 Oct 2026, after Bake away's first three opening ideas were
+   made and paid for from one saved folder: "did you look through all our inspo sources", then "how can
+   we make sure you never skip them"). Before any idea is shown or any credit spent, the build holds
+   `REFERENCES.md`: one line for every source in `docs/inspo/README.md` and every `docs/inspo` folder
+   (a new source is required at once), plus Inspo, Mobbin (mobbin.com links), 21st (21st.dev links) and
+   what other sites already use (fingerprints), each saying what was taken or why nothing fits.
+   `node scripts/check-references.mjs <build>` checks it; check-concept (so publish and the commit check)
+   runs it; and a Claude Code hook (`scripts/hooks/require-references.mjs`) blocks Higgsfield generation
+   for the build being worked on until it passes. Sites published before this rule are not asked for one.
+   Worked example: `scrollcraft/builds/bake-away/REFERENCES.md`.
 5. **Plan the phone frame before generating.** A clip made at 16:9 had to be
    re-cropped three times for phones (the box drifted off centre; the arch
    came out tiny). Generate with the subject centred and a margin, and

@@ -120,7 +120,10 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
    listing's prices and currency against their menu first and flag mismatches;
    load the real menu with fixed product ids so the page's order form saves
    orders (tracking link) before WhatsApp.
-4. Mobbin and 21st per section before building (3g.17).
+4. Mobbin and 21st per section before building (3g.17). **Every source before any idea**
+   (Tzvi, 28 Oct 2026): `REFERENCES.md` names every `docs/inspo` source, Inspo, Mobbin, 21st and the
+   fingerprints, and `node scripts/check-references.mjs <build>` passes before any idea is shown or
+   credit spent; a hook blocks Higgsfield generation until it does (full rules 0b.4).
 5. Plan the phone frame before generating (subject centred, margin).
    Confirm the motion as numbered steps ("1 floats, 2 snaps, 3 blasts apart,
    4 flies back, 5 drops in") and generate only once they are confirmed; ask
