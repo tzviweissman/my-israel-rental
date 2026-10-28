@@ -82,7 +82,7 @@ R8a.1 pass: viewed source of every page: only fonts.googleapis.com and wa.me lin
 R3b.4 pass: facts carry the page: prices, dates, hours and the five steps
 R3c.3 pass: the worry (paying) is answered beside the button on the booking page: "Nothing is paid here"
 R3c.8 n/a: the owner has not yet told us what happens after a booking beyond a confirmation, which the page says
-R3e.10 pass: check-site ALIGN on every page; course rows have name, line, price right
+R3e.10 pass: check-site ALIGN on every page; course rows have name, line, price right; on 28 Oct an iPhone check (Safari's engine) found the "Both courses" tile on the booking page squeezing its words into a narrow column on a phone, now one column, its name starting with a capital
 R3e.14 n/a: needs Tzvi: computed on the home page at 1440x900: Manrope body in 5 weights (400 to 800) and 18 distinct text sizes (12 to 86 px) against the limits of three weights and six sizes; consolidating the scale is a redesign of the scroll engine type ramp
 R3c.9 n/a: needs Tzvi: computed radii on the home page are 18px (photos, cards), 14px, 999px and her own 45px/10px button corner from her website; one shadow; the rule asks for one radius for images and buttons
 R3s.4 pass: check-site ALIGN on index and book: text starts on the same left edge in every section

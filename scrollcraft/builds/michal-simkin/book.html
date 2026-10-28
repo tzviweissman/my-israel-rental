@@ -87,6 +87,7 @@
   /* The bundle is the one to weigh the singles against, so it stands apart. */
   .pick.bundle { grid-column: 1 / -1; grid-template-columns: 1fr auto; align-items: center; column-gap: 1rem; border-color: var(--rose-gold); }
   .pick.bundle .what { grid-column: 1; }
+  @media (max-width: 560px) { .pick.bundle { grid-template-columns: 1fr; } }
   .pick .name { font-family: var(--font-head); font-size: 1.15rem; line-height: 1.2; }
   .pick .price { font-weight: 800; font-size: 1.15rem; color: var(--navy); }
   .pick .price small { font-weight: 500; font-size: 0.75rem; color: var(--muted); margin-inline-start: 0.35rem; text-decoration: line-through; }
@@ -276,7 +277,7 @@
       return '<div class="group"><h3>' + g + '</h3><div class="picks">' + groups[g].map(function (p) {
         var bundle = /both courses/i.test(p.name);
         return '<button type="button" class="pick' + (bundle ? ' bundle' : '') + '" data-id="' + p.id + '" aria-pressed="false">'
-          + '<span class="name">' + p.name.replace('Academy · ', '') + '</span>'
+          + '<span class="name">' + p.name.replace('Academy · ', '').replace(/^./, function (c) { return c.toUpperCase(); }) + '</span>'
           + '<span class="price">' + money(p.price, p.currency) + (bundle ? '<small>₪16,000</small><em class="savebadge">25% off</em>' : '') + '</span>'
           + (p.description ? '<span class="what">' + p.description + '</span>' : '')
           + (/consultation/i.test(p.name) ? '<span class="start">The usual first step</span>' : '')
