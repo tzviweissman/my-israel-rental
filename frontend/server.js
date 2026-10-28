@@ -405,7 +405,24 @@ function styleRules(style) {
   // Laptop edits hold everywhere a phone edit does not override.
   return `${css.d.join('')}@media (max-width:767px){${css.m.join('')}}`;
 }
-function applyEdits(html, edits, editor) {
+const escText = (v) => String(v).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+// public/pages/mir-editor.js shows the same in the editor (boundText there).
+function boundText(inner, bind, live, he) {
+  if (bind === 'hours') return live && live.hours ? escText(live.hours) : inner;
+  const m = /^price:(.{1,200})$/.exec(bind);
+  if (!m || !live) return inner;
+  let out = inner;
+  const p = Number(live.prices && live.prices[m[1]]);
+  if (Number.isFinite(p) && p >= 0) {
+    const fmt = Number.isInteger(p) ? String(p) : p.toFixed(2);
+    let done = false;
+    out = out.replace(/(^|>)([^<]*?)(\d+(?:[.,]\d+)?)/, (x, a, b) => { done = true; return `${a}${b}${fmt}`; });
+    if (!done) out = `${out} ₪${fmt}`;
+  }
+  if (live.soldOut && live.soldOut[m[1]]) out += he ? ' · אזל' : ' · Sold out';
+  return out;
+}
+function applyEdits(html, edits, editor, live) {
   let out = html;
   if (edits) {
     for (const [key, val] of Object.entries(edits.text || {})) {
@@ -422,26 +439,30 @@ function applyEdits(html, edits, editor) {
         .replace(/\s(?:srcset|sizes)="[^"]*"/gi, '')
         .replace(/\ssrc="[^"]*"/i, ` src="${escAttr(url)}"`));
     }
-    // Lines the owner added to a list (Tzvi, 28 Oct 2026): copies of the <li> that holds the marked element, placed
-    // after it, with the new words in the marked element and no keys. public/pages/mir-editor.js makes the same copies.
-    for (const [key, lines] of Object.entries(edits.add || {})) {
-      if (!KEY_OK.test(key) || !Array.isArray(lines) || !lines.length) continue;
-      const at = out.indexOf(`data-mir-key="${key}"`);
-      if (at < 0) continue;
-      const start = out.lastIndexOf('<li', at);
-      if (start < 0 || !/^<li[\s>]/i.test(out.slice(start, start + 4)) || out.slice(start, at).includes('</li>')) continue;
-      const end = out.indexOf('</li>', at);
-      if (end < 0) continue;
-      const line = out.slice(start, end + 5);
-      const inner = new RegExp(`(<([a-z0-9]+)\\b[^>]*\\sdata-mir-key="${key}"[^>]*>)[\\s\\S]*?(</\\2>)`, 'i');
-      const copies = lines.filter((v) => typeof v === 'string').slice(0, 20).map((v) => line
-        .replace(/^<li\b[^>]*>[\s\S]*<\/li>$/i, (li) => (li.match(inner) ? li.replace(inner, (m, open, tag, close) => `${open}${v}${close}`) : li))
-        .replace(/^<li\b/i, '<li data-mir-line')
-        .replace(/\sdata-mir-key="[^"]*"/g, '')).join('');
-      out = out.slice(0, end + 5) + copies + out.slice(end + 5);
+    // Words tied to the dashboard (Tzvi, 28 Oct 2026: set once, every page shows it): "hours" is the opening hours as
+    // set there, "price:<name>" puts that product's or service's price where the number was, "Sold out" while it is.
+    for (const [key, bind] of Object.entries(edits.bind || {})) {
+      if (!KEY_OK.test(key) || typeof bind !== 'string') continue;
+      const re = new RegExp(`(<([a-z0-9]+)\\b[^>]*\\sdata-mir-key="${key}"[^>]*>)([\\s\\S]*?)(</\\2>)`, 'i');
+      out = out.replace(re, (m, open, tag, inner, close) => `${open}${boundText(inner, bind, live, /<html[^>]*\slang="he"/i.test(html))}${close}`);
+    }
+    // The other language of a two-language page (data-en / data-he on the element), plain text.
+    for (const [key, val] of Object.entries(edits.alt || {})) {
+      if (!KEY_OK.test(key) || typeof val !== 'string') continue;
+      const re = new RegExp(`<[a-z0-9]+\\b[^>]*\\sdata-mir-key="${key}"[^>]*>`, 'i');
+      out = out.replace(re, (tag) => tag.replace(/\s(data-(?:en|he))="[^"]*"/i, (m, attr) => ` ${attr}="${escAttr(val)}"`));
     }
     const css = styleRules(edits.style);
     if (!css.endsWith('{}') || css.length > 26) out = out.replace(/<\/head>/i, `<style id="mir-edits">${css}</style></head>`);
+  }
+  // Cards and lines added, removed or reordered (public/pages/mir-items.js), run before the page's own scripts: just
+  // before the first script after the last editable element, so a scroll reveal or a button there sees the copies too.
+  if (editor || (edits && edits.items && Object.keys(edits.items).length)) {
+    const json = JSON.stringify(editor ? {} : edits.items).replace(/</g, '\\u003c');
+    const tag = `<script id="mir-items-data" type="application/json">${json}</script><script src="/pages/mir-items.js?v=${EDITOR_STAMP}"></script>`;
+    const last = out.lastIndexOf('data-mir-key=');
+    const at = last < 0 ? -1 : out.slice(last).search(/<script\b/i);
+    out = at < 0 ? out.replace(/<\/body>/i, `${tag}</body>`) : out.slice(0, last + at) + tag + out.slice(last + at);
   }
   if (editor) {
     // The dashboard's editor (src/pages/PageEditor.jsx) frames the page with
@@ -483,7 +504,15 @@ async function sendHandBuilt(req, res, slug, file) {
   const editor = /[?&]mir-edit=1(?:&|$)/.test(req.url || '');
   const data = await pageEdits(slug, editor || /[?&]fresh(?:=|&|$)/.test(req.url || ''));
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
-  let html = applyPrices(applyEdits(raw, data && data.edits, editor), slug, data && data.prices);
+  const live = data && { hours: data.hours, prices: data.prices, soldOut: Object.fromEntries((data.products || []).filter((p) => !p.in_stock).map((p) => [p.name, true])) };
+  let html = applyPrices(applyEdits(raw, data && data.edits, editor, live), slug, data && data.prices);
+  // The business's notice (dashboard, "Notice at the top"; the API sends it only between its dates), on every page of
+  // the site, in a corner where no design's own bar sits; closed for the visit with its button.
+  if (data && data.notice && data.notice.text && !/id="mir-notice"/.test(html)) {
+    html = html.replace(/<\/body>/i, `<div id="mir-notice" role="note" dir="auto"><span>${escText(data.notice.text)}</span><button type="button" aria-label="Close">&times;</button></div>` +
+      '<style>#mir-notice{position:fixed;z-index:2147483000;inset-inline-start:16px;bottom:calc(16px + env(safe-area-inset-bottom));max-width:min(520px,calc(100vw - 32px));display:flex;gap:8px;align-items:center;padding:10px 8px 10px 18px;border-radius:14px;background:#111827;color:#fff;font:600 15px/1.35 system-ui,sans-serif;box-shadow:0 12px 32px -12px rgba(0,0,0,.55)}#mir-notice button{all:unset;cursor:pointer;min-width:36px;min-height:36px;display:grid;place-items:center;border-radius:10px;font-size:22px;line-height:1}#mir-notice button:hover{background:rgba(255,255,255,.14)}#mir-notice button:focus-visible{outline:2px solid #24AFEB}</style>' +
+      `<script>(function(){var n=document.getElementById('mir-notice'),k='mir-notice:'+${JSON.stringify(data.notice.text).replace(/</g, '\\u003c')};try{if(sessionStorage.getItem(k)){n.remove();return}}catch(e){}n.querySelector('button').onclick=function(){n.remove();try{sessionStorage.setItem(k,1)}catch(e){}}})()</script></body>`);
+  }
   if (file === 'index.html' && !/application\/ld\+json/i.test(html)) {
     const ld = await handBuiltJsonLd(slug);
     if (ld) html = html.replace(/<\/head>/i, `${ld}</head>`);

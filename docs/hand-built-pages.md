@@ -104,6 +104,37 @@ How it fits together:
   With `?mir-edit=1` it also adds `public/pages/mir-editor.js`, which is the
   editing itself; the dashboard frames that.
 
+### Cards, lines, links and the notice (28 Oct 2026)
+
+Tzvi: "make sure its easy for them to add things evenly like they can in a
+professional platform like canva".
+
+- **Rows of cards and list lines** (`public/pages/mir-items.js`): a line of a
+  list, or one of several siblings with the same tag and first class (the
+  rooms on Chicken Munch's menu, the stores on American Crust), is an item.
+  Selecting anything in one gives "+ Add a line / card" (Ctrl+D), arrows,
+  a drag handle and Remove; dragging an item gives it a new place in its row
+  instead of moving it freely, so rows stay even. A copy sits in the page's
+  own flow, so it lines up and spaces like the rest. Saved as
+  `edits.items[group]`, the group's whole order. server.js puts the script
+  before the page's own scripts (just before the first `<script>` after the
+  last editable element), so scroll reveals and buttons see the copies.
+  A copy has no buttons (a copied "Add" would order the original); links
+  stay. Something to order belongs in the dashboard's listings, which a
+  catalogue page shows.
+- **Snap guides**: anything moved freely snaps to its old place, the page's
+  centre and the edges and middles of what is near (pink lines; Alt skips).
+- **Link** ties text to the dashboard: `edits.bind[key]` is `hours` (the
+  business's opening hours) or `price:<listing name>` (the number in the
+  text becomes the listing's price, plus "Sold out" while out of stock).
+- **Other language**: on an element with `data-en` / `data-he`, the bar has
+  English / עברית to set that attribute (`edits.alt`).
+- **Hours and notice** in the editor's top bar edits the business's own
+  `hours` and `notice` (the same fields as Design your page); the notice
+  shows in a corner of every page of the site between its dates.
+- Every save emails the admins a plain list of what changed
+  (`page_edits.what_changed`).
+
 ## Prices follow the dashboard
 
 Put a `prices.json` in the build folder naming which listing each price on

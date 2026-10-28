@@ -9,16 +9,19 @@
  * screen keeps undo and redo, uploads replacement photos, switches between
  * laptop and phone (moves are kept per device), and saves to
  * PUT /api/marketplace/businesses/:id/page-edits, after which the live page
- * shows the change for every visitor.
+ * shows the change for every visitor. "Hours and notice" edits the same
+ * opening hours and notice as the dashboard; "Link" on a piece of text ties
+ * it to the hours or to a price there (Tzvi, 28 Oct 2026).
  */
 import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { ArrowLeft, Laptop, Smartphone, Undo2, Redo2, ExternalLink, Loader2, RotateCcw, Images, X, ChevronLeft, ChevronRight, Trash2, Plus, Wand2 } from 'lucide-react';
+import { ArrowLeft, Laptop, Smartphone, Undo2, Redo2, ExternalLink, Loader2, RotateCcw, Images, X, ChevronLeft, ChevronRight, Trash2, Plus, Wand2, Clock, Link2 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { uploadOneFile } from '../utils/fastUpload';
+import NoticeEditor from '../components/dashboard/NoticeEditor';
 
 const EMPTY = { text: {}, img: {}, style: {} };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -44,6 +47,10 @@ export default function PageEditor() {
   const fileInput = useRef(null);
   const [photosOpen, setPhotosOpen] = useState(false);
   const [askOpen, setAskOpen] = useState(false);
+  const [hoursOpen, setHoursOpen] = useState(false);
+  // The words being linked ({key, bind}) and the dashboard's figures they can show.
+  const [linkFor, setLinkFor] = useState(null);
+  const [live, setLive] = useState(null);
   const picking = useRef(null);
   const auth = token ? { headers: { Authorization: `Bearer ${token}` } } : {};
   const dirty = !same(hist.now, saved);
@@ -74,6 +81,19 @@ export default function PageEditor() {
   const send = useCallback((msg) => {
     frame.current?.contentWindow?.postMessage({ source: 'mir-dashboard', ...msg }, window.location.origin);
   }, []);
+
+  const loadLive = useCallback(() => {
+    if (!biz?.slug) return;
+    axios.get(`${API}/marketplace/business/${biz.slug}/page-edits`)
+      .then((r) => setLive({
+        hours: r.data.hours || null,
+        prices: r.data.prices || {},
+        soldOut: Object.fromEntries((r.data.products || []).filter((p) => !p.in_stock).map((p) => [p.name, true])),
+      }))
+      .catch(() => setLive({ hours: null, prices: {}, soldOut: {} }));
+  }, [biz]);
+  useEffect(loadLive, [loadLive]);
+  useEffect(() => { if (ready && live) send({ type: 'mir:live', ...live }); }, [ready, live, send]);
 
   const push = useCallback((edits) => {
     setHist((h) => (same(h.now, edits) ? h : { past: [...h.past, h.now].slice(-100), now: edits, future: [] }));
@@ -112,6 +132,7 @@ export default function PageEditor() {
       else if (d.type === 'mir:undo') undo();
       else if (d.type === 'mir:redo') redo();
       else if (d.type === 'mir:pick') { picking.current = d.key; fileInput.current?.click(); }
+      else if (d.type === 'mir:link') { setLinkFor({ key: d.key, bind: d.bind }); setAskOpen(false); setPhotosOpen(false); setHoursOpen(false); }
     };
     window.addEventListener('message', onMsg);
     return () => window.removeEventListener('message', onMsg);
@@ -231,11 +252,14 @@ export default function PageEditor() {
           <button type="button" className="pe-icon" onClick={redo} disabled={!hist.future.length} aria-label={t('pageEditor.redo', 'Redo')} title={t('pageEditor.redo', 'Redo')}><Redo2 size={17} className="pe-flip" /></button>
         </div>
         <div className="pe-end">
-          <button type="button" className={`pe-btn pe-ghost${askOpen ? ' on' : ''}`} onClick={() => { setAskOpen((o) => !o); setPhotosOpen(false); }} aria-expanded={askOpen}>
+          <button type="button" className={`pe-btn pe-ghost${askOpen ? ' on' : ''}`} onClick={() => { setAskOpen((o) => !o); setPhotosOpen(false); setHoursOpen(false); setLinkFor(null); }} aria-expanded={askOpen}>
             <Wand2 size={15} /> <span className="pe-hide-sm">{t('pageEditor.ask', 'Ask for a change')}</span>
           </button>
-          <button type="button" className={`pe-btn pe-ghost${photosOpen ? ' on' : ''}`} onClick={() => { setPhotosOpen((o) => !o); setAskOpen(false); }} aria-expanded={photosOpen}>
+          <button type="button" className={`pe-btn pe-ghost${photosOpen ? ' on' : ''}`} onClick={() => { setPhotosOpen((o) => !o); setAskOpen(false); setHoursOpen(false); setLinkFor(null); }} aria-expanded={photosOpen}>
             <Images size={15} /> <span className="pe-hide-sm">{t('pageEditor.photos', 'Photos')}</span>
+          </button>
+          <button type="button" className={`pe-btn pe-ghost${hoursOpen ? ' on' : ''}`} onClick={() => { setHoursOpen((o) => !o); setAskOpen(false); setPhotosOpen(false); setLinkFor(null); }} aria-expanded={hoursOpen}>
+            <Clock size={15} /> <span className="pe-hide-sm">{t('pageEditor.hoursNotice', 'Hours and notice')}</span>
           </button>
           <button type="button" className="pe-btn pe-ghost" onClick={resetAll} title={t('pageEditor.reset', 'Original design')}>
             <RotateCcw size={15} /> <span className="pe-hide-sm">{t('pageEditor.reset', 'Original design')}</span>
@@ -249,7 +273,7 @@ export default function PageEditor() {
           </button>
         </div>
       </header>
-      <p className="pe-help">{t('pageEditor.help', 'Click text to select it, click again to type. Drag anything to move it. Click a photo to replace it. Moves on laptop and on phone are kept separately.')}</p>
+      <p className="pe-help">{t('pageEditor.help', 'Click text to select it, click again to type. Drag anything to move it: it lines up with what is around it. Click a line or a card to add another just like it, or drag it to a new place in its row. Moves on laptop and on phone are kept separately.')}</p>
       <div className="pe-stage" ref={stage}>
         <div className="pe-frame-wrap" style={{ width: W * scale, height: H * scale }}>
           <iframe
@@ -267,6 +291,14 @@ export default function PageEditor() {
       {askOpen && (
         <RequestPanel businessId={businessId} token={token} auth={auth} t={t} dirty={dirty}
           onClose={() => setAskOpen(false)} onApplied={() => { setReady(false); setSaved(EMPTY); setHist({ past: [], now: EMPTY, future: [] }); setFrameKey((k) => k + 1); }} />
+      )}
+      {hoursOpen && (
+        <HoursPanel biz={biz} businessId={businessId} auth={auth} t={t}
+          onClose={() => setHoursOpen(false)} onSaved={(b) => { setBiz((x) => ({ ...x, ...b })); loadLive(); setReady(false); setFrameKey((k) => k + 1); }} />
+      )}
+      {linkFor && (
+        <LinkPanel link={linkFor} live={live} t={t} onClose={() => setLinkFor(null)}
+          onPick={(bind) => { send({ type: 'mir:bind', key: linkFor.key, bind }); setLinkFor(null); }} />
       )}
       {photosOpen && (
         <GalleryPanel slug={slug} businessId={businessId} token={token} auth={auth} t={t}
@@ -395,6 +427,84 @@ function GalleryPanel({ slug, businessId, token, auth, t, onClose, onSaved }) {
         </button>
       </div>
       <input ref={input} type="file" accept="image/*" multiple hidden onChange={add} />
+    </aside>
+  );
+}
+
+
+/**
+ * Opening hours and the notice, the same ones the dashboard's page settings
+ * edit (PATCH /marketplace/businesses/:id): set once, shown on the standard
+ * page, on Google, in the designed page's linked words and in its corner.
+ */
+function HoursPanel({ biz, businessId, auth, t, onClose, onSaved }) {
+  const [hours, setHours] = useState(biz.hours || '');
+  const [notice, setNotice] = useState(biz.notice || null);
+  const [busy, setBusy] = useState(false);
+  const save = async () => {
+    setBusy(true);
+    try {
+      const n = notice && notice.text && notice.text.trim() ? { text: notice.text.trim(), starts_on: notice.starts_on || null, ends_on: notice.ends_on || null } : null;
+      await axios.patch(`${API}/marketplace/businesses/${businessId}`, { hours: hours.trim() || null, notice: n }, auth);
+      toast.success(t('pageEditor.hoursSaved', 'Saved. Your pages show it now.'));
+      onSaved({ hours: hours.trim() || null, notice: n });
+    } catch (err) {
+      toast.error(err.response?.data?.detail || t('pageEditor.saveFailed', 'Could not save. Try again.'));
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <aside className="pe-gal" aria-label={t('pageEditor.hoursNotice', 'Hours and notice')}>
+      <div className="pe-gal-head">
+        <strong>{t('pageEditor.hoursNotice', 'Hours and notice')}</strong>
+        <button type="button" className="pe-icon" onClick={onClose} aria-label={t('pageEditor.close', 'Close')}><X size={18} /></button>
+      </div>
+      <label className="pe-field">
+        <span>{t('pageEditor.hoursLabel', 'Opening hours')}</span>
+        <input value={hours} maxLength={200} onChange={(e) => setHours(e.target.value)} dir="auto"
+          placeholder={t('pageEditor.hoursPlaceholder', 'Sun to Thu 9:00 to 18:00, Fri 9:00 to 13:00')} />
+      </label>
+      <p className="pe-gal-help">{t('pageEditor.hoursHelp', 'To show these hours on your page, click the hours there and choose Link. They then change whenever you change them here.')}</p>
+      <NoticeEditor notice={notice} onChange={setNotice} />
+      <p className="pe-gal-help">{t('pageEditor.noticeHelp', 'The notice shows in a corner of every page of your site between its dates, for example Closed for Sukkot, or Now in Special Market.')}</p>
+      <div className="pe-gal-foot">
+        <button type="button" className="pe-btn pe-ghost" onClick={onClose}>{t('pageEditor.close', 'Close')}</button>
+        <button type="button" className="pe-btn pe-save" onClick={save} disabled={busy}>
+          {busy ? <Loader2 size={15} className="animate-spin" /> : null} {t('pageEditor.save', 'Save')}
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+/** What a piece of text can be linked to: the opening hours, or the price of something the business lists. */
+function LinkPanel({ link, live, t, onClose, onPick }) {
+  const prices = Object.entries(live?.prices || {});
+  return (
+    <aside className="pe-gal" aria-label={t('pageEditor.linkTitle', 'Link these words')}>
+      <div className="pe-gal-head">
+        <strong>{t('pageEditor.linkTitle', 'Link these words')}</strong>
+        <button type="button" className="pe-icon" onClick={onClose} aria-label={t('pageEditor.close', 'Close')}><X size={18} /></button>
+      </div>
+      <p className="pe-gal-help">{t('pageEditor.linkHelp', 'Linked words follow your dashboard: change your hours or a price there and your page changes too. Out of stock shows as Sold out.')}</p>
+      {!live ? <Loader2 className="animate-spin" size={20} /> : (
+        <ul className="pe-links">
+          <li><button type="button" className={link.bind === 'hours' ? 'on' : ''} onClick={() => onPick('hours')} disabled={!live.hours}>
+            <Clock size={16} /> <span><b>{t('pageEditor.linkHours', 'Your opening hours')}</b><small>{live.hours || t('pageEditor.noHours', 'Not set yet: add them under Hours and notice')}</small></span>
+          </button></li>
+          {prices.map(([name, price]) => (
+            <li key={name}><button type="button" className={link.bind === `price:${name}` ? 'on' : ''} onClick={() => onPick(`price:${name}`)}>
+              <Link2 size={16} /> <span><b>{name}</b><small>₪{price}{live.soldOut[name] ? ` · ${t('pageEditor.soldOut', 'Sold out')}` : ''}</small></span>
+            </button></li>
+          ))}
+        </ul>
+      )}
+      {!!live && !prices.length && <p className="pe-gal-help">{t('pageEditor.noPrices', 'Prices you add to your listings in the dashboard show here.')}</p>}
+      <div className="pe-gal-foot">
+        {link.bind ? <button type="button" className="pe-btn pe-ghost" onClick={() => onPick(null)}>{t('pageEditor.unlink', 'Unlink, back to my own words')}</button> : <span />}
+        <button type="button" className="pe-btn pe-ghost" onClick={onClose}>{t('pageEditor.close', 'Close')}</button>
+      </div>
     </aside>
   );
 }
@@ -612,5 +722,16 @@ const CSS = `
 .pe-plan-pics img { aspect-ratio: 4 / 3; height: auto; }
 .pe-plan-design { background: var(--surface); box-shadow: inset 0 0 0 1px var(--brand-border); }
 .pe-gal-foot { margin-top: auto; display: flex; justify-content: space-between; gap: 8px; position: sticky; bottom: 0; background: var(--surface); padding-top: 8px; }
+.pe-field { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: .9rem; color: var(--ink); }
+.pe-field input { min-height: 44px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--brand-border); background: var(--surface); font: inherit; font-weight: 500; }
+.pe-field input:focus-visible { outline: 3px solid var(--gold); outline-offset: 1px; }
+.pe-links { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 6px; }
+.pe-links button { width: 100%; display: flex; gap: 10px; align-items: flex-start; text-align: start; padding: 12px; border-radius: 12px; background: var(--surface-muted); color: var(--ink); min-height: 44px; }
+.pe-links button:hover:not(:disabled) { box-shadow: inset 0 0 0 1px var(--brand-border); }
+.pe-links button.on { box-shadow: inset 0 0 0 2px var(--gold); }
+.pe-links button:disabled { opacity: .5; }
+.pe-links button:focus-visible { outline: 3px solid var(--gold); outline-offset: 2px; }
+.pe-links span { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.pe-links small { color: var(--brand-muted); font-size: .82rem; }
 @media (max-width: 760px) { .pe-hide-sm { display: none; } .pe-title { width: 100%; order: -1; } }
 `;

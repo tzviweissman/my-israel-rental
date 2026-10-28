@@ -11,15 +11,20 @@ visitor never sees the old version first.
 Shape of `edits` (every part optional):
 
     text:  {key: "<limited html>"}     new content of a text element
-    add:   {key: ["<limited html>"]}   lines added to a list after the key's line
     img:   {key: "https://..."}        new photo
+    items: {group: [{k} | {from, t, i}]}  a list's or row of cards' order, copies included
+    bind:  {key: "hours" | "price:<name>"}  words that follow the dashboard
+    alt:   {key: "plain text"}         the other language of a two-language page
     style: {key: {"d": {...}, "m": {...}}}  per device, d = laptop, m = phone:
            x, y   move in px (translate), s  scale, a  align l/c/r, h  hidden
 """
 from __future__ import annotations
 
+import asyncio
+import os
 import re
 from datetime import UTC, datetime
+from zoneinfo import ZoneInfo
 from html import escape
 from html.parser import HTMLParser
 from typing import Any
@@ -35,7 +40,8 @@ router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 KEY = re.compile(r"^[ti]-[0-9a-z]{4,12}-\d{1,3}$")
 MAX_KEYS = 600
 MAX_TEXT = 3000
-MAX_LINES = 20
+MAX_ITEMS = 40
+SITE = os.environ.get("PUBLIC_SITE_URL", "https://myisraelrental.com").rstrip("/")
 # The inline formatting a heading or line may keep (a script-font span, a
 # line break, bold). Nothing that runs, links out or loads anything.
 ALLOWED_TAGS = {"b", "strong", "i", "em", "u", "small", "span", "br", "sup", "sub", "a"}
@@ -148,18 +154,88 @@ def clean_edits(raw: Any) -> dict[str, Any]:
             s = _style(v)
             if s:
                 style[k] = s
-    # Lines added to a list after the marked line (Tzvi, 28 Oct 2026: a new
-    # store), cleaned like any text; frontend/server.js copies the line for each.
-    add: dict[str, list[str]] = {}
-    for k, v in (raw.get("add") or {}).items():
-        if KEY.match(k) and k.startswith("t-") and isinstance(v, list):
-            lines = [clean_html(x) for x in v[:MAX_LINES] if isinstance(x, str) and len(x) <= MAX_TEXT]
-            lines = [x for x in lines if x.strip()]
-            if lines:
-                add[k] = lines
-    if len(text) + len(img) + len(style) + len(add) > MAX_KEYS:
+    # Cards and lines added, removed and put in order (Tzvi, 28 Oct 2026):
+    # each group's whole order, public/pages/mir-items.js. A copy's words are
+    # cleaned like any text and its photos must be https, as above.
+    items: dict[str, list[dict[str, Any]]] = {}
+    for g, v in (raw.get("items") or {}).items():
+        if not KEY.match(g) or not isinstance(v, list):
+            continue
+        out: list[dict[str, Any]] = []
+        for e in v[:MAX_ITEMS]:
+            if not isinstance(e, dict):
+                continue
+            if isinstance(e.get("k"), str) and KEY.match(e["k"]):
+                out.append({"k": e["k"]})
+            elif isinstance(e.get("from"), str) and KEY.match(e["from"]):
+                t = {k: clean_html(x) for k, x in (e.get("t") or {}).items()
+                     if KEY.match(k) and k.startswith("t-") and isinstance(x, str) and len(x) <= MAX_TEXT}
+                i = {k: x for k, x in (e.get("i") or {}).items()
+                     if KEY.match(k) and k.startswith("i-") and isinstance(x, str) and re.match(r"^https://[^\s\"'<>]{8,600}$", x)}
+                out.append({"from": e["from"], "t": t, "i": i})
+        if out:
+            items[g] = out
+    # Words tied to the dashboard (frontend/server.js boundText): the opening
+    # hours, or a listed product's or service's price by its name.
+    bind = {k: v for k, v in (raw.get("bind") or {}).items()
+            if KEY.match(k) and k.startswith("t-") and isinstance(v, str) and (v == "hours" or re.match(r"^price:.{1,200}$", v))}
+    # The other language of a two-language page, plain text in an attribute.
+    alt = {k: " ".join(v.split())[:MAX_TEXT] for k, v in (raw.get("alt") or {}).items()
+           if KEY.match(k) and k.startswith("t-") and isinstance(v, str) and v.strip()}
+    if len(text) + len(img) + len(style) + sum(len(x) for x in items.values()) + len(bind) + len(alt) > MAX_KEYS:
         raise HTTPException(status_code=422, detail="Too many edits")
-    return {"text": text, "img": img, "style": style, "add": add}
+    return {"text": text, "img": img, "style": style, "items": items, "bind": bind, "alt": alt}
+
+
+def _today_il() -> str:
+    return datetime.now(ZoneInfo("Asia/Jerusalem")).date().isoformat()
+
+
+def live_notice(n: Any) -> dict[str, Any] | None:
+    """The business's notice if today is inside its dates (NoticeBar.jsx liveNotice)."""
+    if not isinstance(n, dict) or not n.get("text"):
+        return None
+    today = _today_il()
+    if (n.get("starts_on") and today < n["starts_on"]) or (n.get("ends_on") and today > n["ends_on"]):
+        return None
+    return {"text": n["text"]}
+
+
+def what_changed(before: dict[str, Any], after: dict[str, Any]) -> list[str]:
+    """Plain lines for the email to us when an owner saves (Tzvi, 28 Oct 2026)."""
+    lines: list[str] = []
+    for k, v in (after.get("text") or {}).items():
+        if (before.get("text") or {}).get(k) != v:
+            lines.append(f"Words changed to: {re.sub(r'<[^>]+>', ' ', v).strip()[:200]}")
+    for k in set(before.get("text") or {}) - set(after.get("text") or {}):
+        lines.append("Words put back as designed")
+    for k, v in (after.get("img") or {}).items():
+        if (before.get("img") or {}).get(k) != v:
+            lines.append(f"Photo replaced: {v}")
+    if (before.get("style") or {}) != (after.get("style") or {}):
+        lines.append("Something moved, resized, aligned or hidden")
+    for g, v in (after.get("items") or {}).items():
+        if (before.get("items") or {}).get(g) != v:
+            copies = sum(1 for e in v if "from" in e)
+            lines.append(f"A list or row of cards changed: {copies} added, {len(v)} in all, in a new order or with some removed")
+    if set(before.get("items") or {}) - set(after.get("items") or {}):
+        lines.append("A list or row of cards put back as designed")
+    if (before.get("bind") or {}) != (after.get("bind") or {}):
+        lines.append("Words linked to the opening hours or a price")
+    if (before.get("alt") or {}) != (after.get("alt") or {}):
+        lines.append("The other language changed")
+    return lines
+
+
+async def tell_admins(biz: dict[str, Any], lines: list[str]) -> None:
+    from .orders import _email, _esc
+    if not lines:
+        return
+    body = "".join(f"<li>{_esc(x)}</li>" for x in lines[:40])
+    async for a in db.users.find({"role": "admin"}, {"email": 1}).limit(5):
+        await _email(a.get("email"), f"{biz.get('name') or 'A business'} changed its page",
+                     f"<p>{_esc(biz.get('name'))} saved changes to its designed page:</p><ul>{body}</ul>",
+                     tag="page-edits-saved", button=("See the page", f"{SITE}/business/{biz.get('slug')}"))
 
 
 class EditsBody(BaseModel):
@@ -221,6 +297,9 @@ async def get_page_edits(slug_or_id: str):
         "gallery": doc.get("gallery") or [],
         # questions and answers added through "Ask for a change" (page_requests.py)
         "faq": doc.get("faq") or [],
+        # set once in the dashboard, shown on the designed page (frontend/server.js)
+        "hours": "By appointment only" if biz.get("by_appointment") and not biz.get("hours") else biz.get("hours"),
+        "notice": live_notice(biz.get("notice")),
     }
 
 
@@ -229,6 +308,8 @@ async def put_page_edits(business_id: str, body: EditsBody, user=Depends(verify_
     biz = await _owned(business_id, user)
     edits = clean_edits(body.edits)
     now = datetime.now(UTC).isoformat()
+    before = (await db.page_edits.find_one({"_id": biz["_id"]}, {"edits": 1}) or {}).get("edits") or {}
+    asyncio.create_task(tell_admins(biz, what_changed(before, edits)))
     await db.page_edits.update_one(
         {"_id": biz["_id"]},
         {"$set": {"edits": edits, "slug": biz.get("slug"), "updated_at": now, "updated_by": user["user_id"]}},

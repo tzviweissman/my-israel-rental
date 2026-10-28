@@ -92,14 +92,40 @@ def test_gallery_refuses_duplicates_and_too_many():
         clean_gallery([GalleryPhoto(url=CLD.replace('abc', f'p{i}')) for i in range(25)])
 
 
-def test_added_lines_are_cleaned_and_capped():
-    out = clean_edits({"add": {
-        "t-ab12cd34-0": ["Special Market", "<script>x()</script>", "  ", "<b>14</b> Sorotzkin"] + ["x"] * 30,
-        "i-ab12cd34-0": ["a photo key takes no lines"],
-        "../x": ["bad key"],
-        "t-ab12cd34-1": "not a list",
+def test_items_keep_order_and_clean_copies():
+    out = clean_edits({"items": {
+        "t-ab12cd34-0": [
+            {"k": "t-ab12cd34-0"},
+            {"from": "t-ab12cd34-0", "t": {"t-ab12cd34-0": "Special <script>x()</script>Market", "../x": "no"},
+             "i": {"i-ab12cd34-0": "https://res.cloudinary.com/x/a.jpg", "i-ab12cd34-1": "javascript:alert(1)"}},
+            {"k": "../x"}, "not an item",
+        ] + [{"k": "t-ab12cd34-1"}] * 60,
+        "../x": [{"k": "t-ab12cd34-0"}],
+        "t-ab12cd34-2": "not a list",
     }})
-    lines = out["add"]["t-ab12cd34-0"]
-    assert lines[:3] == ["Special Market", "<b>14</b> Sorotzkin", "x"]
-    assert len(lines) <= 20 and not any("script" in x for x in lines)
-    assert set(out["add"]) == {"t-ab12cd34-0"}
+    g = out["items"]["t-ab12cd34-0"]
+    assert g[0] == {"k": "t-ab12cd34-0"}
+    assert g[1] == {"from": "t-ab12cd34-0", "t": {"t-ab12cd34-0": "Special Market"}, "i": {"i-ab12cd34-0": "https://res.cloudinary.com/x/a.jpg"}}
+    assert len(g) <= 40 and set(out["items"]) == {"t-ab12cd34-0"}
+
+
+def test_bind_and_alt():
+    out = clean_edits({"bind": {"t-ab12cd34-0": "hours", "t-ab12cd34-1": "price:Bagel dough", "t-ab12cd34-2": "evil", "i-ab12cd34-0": "hours"},
+                       "alt": {"t-ab12cd34-0": "  Balloon   arch ", "t-ab12cd34-1": " "}})
+    assert out["bind"] == {"t-ab12cd34-0": "hours", "t-ab12cd34-1": "price:Bagel dough"}
+    assert out["alt"] == {"t-ab12cd34-0": "Balloon arch"}
+
+
+def test_notice_only_between_its_dates():
+    from routes.marketplace.page_edits import live_notice
+    assert live_notice({"text": "Closed for Sukkot", "starts_on": "2000-01-01", "ends_on": "2999-01-01"}) == {"text": "Closed for Sukkot"}
+    assert live_notice({"text": "Old", "ends_on": "2000-01-01"}) is None
+    assert live_notice({"text": "Later", "starts_on": "2999-01-01"}) is None
+    assert live_notice(None) is None
+
+
+def test_what_changed_lists_each_kind():
+    from routes.marketplace.page_edits import what_changed
+    lines = what_changed({}, {"text": {"t-ab12cd34-0": "New <b>store</b>"}, "items": {"t-ab12cd34-0": [{"k": "t-ab12cd34-0"}, {"from": "t-ab12cd34-0"}]}})
+    assert lines[0] == "Words changed to: New  store" and "1 added" in lines[1]
+    assert what_changed({"text": {"a": "x"}}, {"text": {"a": "x"}}) == []
