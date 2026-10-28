@@ -422,6 +422,24 @@ function applyEdits(html, edits, editor) {
         .replace(/\s(?:srcset|sizes)="[^"]*"/gi, '')
         .replace(/\ssrc="[^"]*"/i, ` src="${escAttr(url)}"`));
     }
+    // Lines the owner added to a list (Tzvi, 28 Oct 2026): copies of the <li> that holds the marked element, placed
+    // after it, with the new words in the marked element and no keys. public/pages/mir-editor.js makes the same copies.
+    for (const [key, lines] of Object.entries(edits.add || {})) {
+      if (!KEY_OK.test(key) || !Array.isArray(lines) || !lines.length) continue;
+      const at = out.indexOf(`data-mir-key="${key}"`);
+      if (at < 0) continue;
+      const start = out.lastIndexOf('<li', at);
+      if (start < 0 || !/^<li[\s>]/i.test(out.slice(start, start + 4)) || out.slice(start, at).includes('</li>')) continue;
+      const end = out.indexOf('</li>', at);
+      if (end < 0) continue;
+      const line = out.slice(start, end + 5);
+      const inner = new RegExp(`(<([a-z0-9]+)\\b[^>]*\\sdata-mir-key="${key}"[^>]*>)[\\s\\S]*?(</\\2>)`, 'i');
+      const copies = lines.filter((v) => typeof v === 'string').slice(0, 20).map((v) => line
+        .replace(/^<li\b[^>]*>[\s\S]*<\/li>$/i, (li) => (li.match(inner) ? li.replace(inner, (m, open, tag, close) => `${open}${v}${close}`) : li))
+        .replace(/^<li\b/i, '<li data-mir-line')
+        .replace(/\sdata-mir-key="[^"]*"/g, '')).join('');
+      out = out.slice(0, end + 5) + copies + out.slice(end + 5);
+    }
     const css = styleRules(edits.style);
     if (!css.endsWith('{}') || css.length > 26) out = out.replace(/<\/head>/i, `<style id="mir-edits">${css}</style></head>`);
   }

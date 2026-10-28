@@ -90,3 +90,16 @@ def test_gallery_refuses_duplicates_and_too_many():
         clean_gallery([GalleryPhoto(url=CLD), GalleryPhoto(url=CLD)])
     with pytest.raises(HTTPException):
         clean_gallery([GalleryPhoto(url=CLD.replace('abc', f'p{i}')) for i in range(25)])
+
+
+def test_added_lines_are_cleaned_and_capped():
+    out = clean_edits({"add": {
+        "t-ab12cd34-0": ["Special Market", "<script>x()</script>", "  ", "<b>14</b> Sorotzkin"] + ["x"] * 30,
+        "i-ab12cd34-0": ["a photo key takes no lines"],
+        "../x": ["bad key"],
+        "t-ab12cd34-1": "not a list",
+    }})
+    lines = out["add"]["t-ab12cd34-0"]
+    assert lines[:3] == ["Special Market", "<b>14</b> Sorotzkin", "x"]
+    assert len(lines) <= 20 and not any("script" in x for x in lines)
+    assert set(out["add"]) == {"t-ab12cd34-0"}

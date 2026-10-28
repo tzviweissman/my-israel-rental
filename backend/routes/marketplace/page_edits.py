@@ -11,6 +11,7 @@ visitor never sees the old version first.
 Shape of `edits` (every part optional):
 
     text:  {key: "<limited html>"}     new content of a text element
+    add:   {key: ["<limited html>"]}   lines added to a list after the key's line
     img:   {key: "https://..."}        new photo
     style: {key: {"d": {...}, "m": {...}}}  per device, d = laptop, m = phone:
            x, y   move in px (translate), s  scale, a  align l/c/r, h  hidden
@@ -34,6 +35,7 @@ router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 KEY = re.compile(r"^[ti]-[0-9a-z]{4,12}-\d{1,3}$")
 MAX_KEYS = 600
 MAX_TEXT = 3000
+MAX_LINES = 20
 # The inline formatting a heading or line may keep (a script-font span, a
 # line break, bold). Nothing that runs, links out or loads anything.
 ALLOWED_TAGS = {"b", "strong", "i", "em", "u", "small", "span", "br", "sup", "sub", "a"}
@@ -146,9 +148,18 @@ def clean_edits(raw: Any) -> dict[str, Any]:
             s = _style(v)
             if s:
                 style[k] = s
-    if len(text) + len(img) + len(style) > MAX_KEYS:
+    # Lines added to a list after the marked line (Tzvi, 28 Oct 2026: a new
+    # store), cleaned like any text; frontend/server.js copies the line for each.
+    add: dict[str, list[str]] = {}
+    for k, v in (raw.get("add") or {}).items():
+        if KEY.match(k) and k.startswith("t-") and isinstance(v, list):
+            lines = [clean_html(x) for x in v[:MAX_LINES] if isinstance(x, str) and len(x) <= MAX_TEXT]
+            lines = [x for x in lines if x.strip()]
+            if lines:
+                add[k] = lines
+    if len(text) + len(img) + len(style) + len(add) > MAX_KEYS:
         raise HTTPException(status_code=422, detail="Too many edits")
-    return {"text": text, "img": img, "style": style}
+    return {"text": text, "img": img, "style": style, "add": add}
 
 
 class EditsBody(BaseModel):

@@ -9,6 +9,8 @@
  *   - dragged to move it (separately on laptop and on phone)
  *   - made bigger or smaller, aligned, hidden
  *   - a photo: replaced (the dashboard uploads it)
+ *   - a line of a list: another line added after it, in the same style
+ *     (Tzvi, 28 Oct 2026: American Crust's new store), and an added line removed
  * Each change is sent to the dashboard (src/pages/PageEditor.jsx), which
  * keeps undo/redo and saves. Nothing here saves on its own.
  */
@@ -16,8 +18,8 @@
   'use strict';
   if (window.parent === window) return;
   var dataEl = document.getElementById('mir-edits-data');
-  var edits = { text: {}, img: {}, style: {} };
-  try { var d = JSON.parse(dataEl ? dataEl.textContent : '{}'); edits.text = d.text || {}; edits.img = d.img || {}; edits.style = d.style || {}; } catch (e) { /* none */ }
+  var edits = { text: {}, img: {}, style: {}, add: {} };
+  try { var d = JSON.parse(dataEl ? dataEl.textContent : '{}'); edits.text = d.text || {}; edits.img = d.img || {}; edits.style = d.style || {}; edits.add = d.add || {}; } catch (e) { /* none */ }
 
   var post = function (msg) { window.parent.postMessage(Object.assign({ source: 'mir-editor' }, msg), location.origin); };
   var device = function () { return window.innerWidth < 768 ? 'm' : 'd'; };
@@ -32,10 +34,52 @@
     return all().filter(function (o) { return o === el || (o.parentElement === el.parentElement && keyOf(o).replace(/-\d+$/, '') === base); });
   };
 
+  // Added lines (edits.add[key] = [html, ...]) are copies of the line (<li>) that holds the marked element, placed after
+  // it in order, without its keys: frontend/server.js makes the same copies for visitors. In the editor each copy's text
+  // element carries data-mir-added="<key> <n>" so it can be typed in or removed.
+  var lineOf = function (el) { var li = el.closest('li'); return li && li.parentElement && /^(UL|OL)$/.test(li.parentElement.tagName) ? li : null; };
+  var addedOf = function (el) { var a = el.getAttribute('data-mir-added'); if (!a) return null; var p = a.split(' '); return { key: p[0], i: +p[1] }; };
+  function renderAdded() {
+    if (sel && sel.closest('[data-mir-line]')) select(null);
+    Array.prototype.forEach.call(document.querySelectorAll('[data-mir-line]'), function (n) { n.remove(); });
+    Object.keys(edits.add).forEach(function (k) {
+      var el = document.querySelector('[data-mir-key="' + k + '"]'), line = el && lineOf(el);
+      if (!line) return;
+      var after = line;
+      (edits.add[k] || []).forEach(function (html, i) {
+        var c = line.cloneNode(true), t = line === el ? c : c.querySelector('[data-mir-key="' + k + '"]');
+        c.setAttribute('data-mir-line', '');
+        if (t) { t.innerHTML = html; t.setAttribute('data-mir-added', k + ' ' + i); }
+        [c].concat(Array.prototype.slice.call(c.querySelectorAll('[data-mir-key]'))).forEach(function (n) { n.removeAttribute('data-mir-key'); n.classList.remove('mir-sel', 'mir-hidden', 'mir-typing'); });
+        after.after(c); after = c;
+      });
+    });
+  }
+  function addLine(el) {
+    var a = addedOf(el), k = a ? a.key : keyOf(el), list = edits.add[k] = edits.add[k] || [];
+    if (list.length >= 20) return;
+    var at = a ? a.i + 1 : 0;
+    list.splice(at, 0, 'New line');
+    select(null); renderAdded(); changed();
+    var n = document.querySelector('[data-mir-added="' + k + ' ' + at + '"]');
+    if (n) { select(n); startTyping(n); }
+  }
+  function removeLine(el) {
+    var a = addedOf(el); if (!a || !edits.add[a.key]) return;
+    if (typing === el) { typing = null; el.removeAttribute('contenteditable'); el.classList.remove('mir-typing'); }
+    select(null);
+    edits.add[a.key].splice(a.i, 1);
+    if (!edits.add[a.key].length) delete edits.add[a.key];
+    renderAdded(); changed();
+  }
+
   /* ---- look ------------------------------------------------------------ */
   var ui = document.createElement('style');
   ui.textContent = [
     'html.mir-on img{-webkit-user-drag:none;user-select:none}',
+    'html.mir-on [data-mir-added]{cursor:pointer;outline:1px dashed rgba(22,122,184,.45);outline-offset:3px}',
+    'html.mir-on [data-mir-added].mir-sel{outline:2px solid #167AB8 !important}',
+    'html.mir-on [data-mir-added].mir-typing{outline:2px solid #111827 !important;cursor:text}',
     'html.mir-on [data-mir-key]{cursor:pointer;touch-action:none;outline:1px dashed transparent;outline-offset:3px;transition:outline-color .15s}',
     'html.mir-on [data-mir-key]:hover{outline-color:rgba(22,122,184,.7)}',
     'html.mir-on [data-mir-key].mir-sel{outline:2px solid #167AB8 !important;outline-offset:3px}',
@@ -73,6 +117,7 @@
     all().forEach(function (el) { var v = (edits.style[keyOf(el)] || {})[device()]; el.classList.toggle('mir-hidden', Boolean(v && v.h)); });
   }
   function paint() {
+    if (!typing) renderAdded();
     all().forEach(function (el) {
       var k = keyOf(el);
       if (isImg(el)) {
@@ -109,7 +154,7 @@
   var sel = null, bar = null;
   var tip = document.createElement('div');
   tip.id = 'mir-tip';
-  tip.textContent = 'Click text or a photo to change it. Drag it to move it.';
+  tip.textContent = 'Click text or a photo to change it. Drag it to move it. Click a line in a list to add another.';
   document.body.appendChild(tip);
   setTimeout(function () { tip.style.transition = 'opacity .4s'; tip.style.opacity = '0'; }, 6000);
 
@@ -131,8 +176,19 @@
     el.classList.add('mir-sel');
     bar = document.createElement('div');
     bar.id = 'mir-bar';
+    if (addedOf(el)) {
+      bar.appendChild(button('Edit text', function () { startTyping(el); }));
+      bar.appendChild(sep());
+      bar.appendChild(button('+ Add a line', function () { addLine(el); }, 'Add another line under this one'));
+      bar.appendChild(button('Remove line', function () { removeLine(el); }));
+      document.body.appendChild(bar);
+      place();
+      post({ type: 'mir:select', key: null });
+      return;
+    }
     if (isImg(el)) bar.appendChild(button('Replace photo', function () { post({ type: 'mir:pick', key: keyOf(el) }); }));
     else bar.appendChild(button('Edit text', function () { startTyping(el); }));
+    if (!isImg(el) && lineOf(el)) bar.appendChild(button('+ Add a line', function () { addLine(el); }, 'Add another line under this one, in the same style'));
     bar.appendChild(sep());
     bar.appendChild(button('A−', function () { var v = st(el); v.s = Math.max(0.4, Math.round(((v.s || 1) - 0.1) * 100) / 100); tidy(keyOf(el)); css(); place(); changed(); }, 'Smaller'));
     bar.appendChild(button('A+', function () { var v = st(el); v.s = Math.min(3, Math.round(((v.s || 1) + 0.1) * 100) / 100); tidy(keyOf(el)); css(); place(); changed(); }, 'Bigger'));
@@ -190,6 +246,13 @@
     el.removeAttribute('contenteditable');
     el.classList.remove('mir-typing');
     var html = el.innerHTML.replace(/<div>/g, '<br>').replace(/<\/div>/g, '').replace(/&nbsp;/g, ' ');
+    var a = addedOf(el);
+    if (a) {
+      var list = edits.add[a.key] || [];
+      if (!html.replace(/<br>/g, '').trim()) { removeLine(el); return; }
+      if (list[a.i] !== html) { list[a.i] = html; changed(); }
+      return;
+    }
     var k = keyOf(el);
     var before = edits.text[k] !== undefined ? edits.text[k] : loaded[k];
     if (html === before) return;
@@ -219,6 +282,13 @@
   var drag = null;
   document.addEventListener('pointerdown', function (e) {
     if (bar && bar.contains(e.target)) return;
+    var added = e.target.closest && e.target.closest('[data-mir-added]');
+    if (added) {
+      if (typing === added) return;
+      e.preventDefault();
+      if (sel === added) startTyping(added, e.clientX, e.clientY); else select(added);
+      return;
+    }
     var el = e.target.closest && e.target.closest('[data-mir-key]');
     if (typing && el === typing) return;
     if (!el) { select(null); return; }
@@ -263,7 +333,7 @@
     if (e.origin !== location.origin || !e.data || e.data.source !== 'mir-dashboard') return;
     if (e.data.type === 'mir:load') {
       var n = e.data.edits || {};
-      edits = { text: n.text || {}, img: n.img || {}, style: n.style || {} };
+      edits = { text: n.text || {}, img: n.img || {}, style: n.style || {}, add: n.add || {} };
       paint();
     } else if (e.data.type === 'mir:image' && e.data.key && e.data.url) {
       edits.img[e.data.key] = e.data.url;
