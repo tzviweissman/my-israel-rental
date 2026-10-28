@@ -65,7 +65,8 @@
       <ul class="st-list rev">
         <li>Express Market in Geula</li>
         <li>Arzai Makolets</li>
-        <li>Good Market on Paran</li>
+        <li>The Good Store on Paran</li>
+        <li>Special Market, Zayit Raanan and 14&nbsp;Sorotzkin</li>
       </ul>
     </div>
   </section>
@@ -148,26 +149,27 @@
     if (still) order = [N - 1];
     (function next(k) {
       var batch = order.slice(k, k + 6), left = batch.length; if (!left) return;
-      batch.forEach(function (i) { var im = new Image(); im.decoding = 'async'; im.onload = im.onerror = function () { if (im.naturalWidth) imgs[i] = im; if (--left === 0) { draw(); next(k + 6); } }; im.src = url(i); });
+      batch.forEach(function (i) {
+        fetch(url(i)).then(function (r) { return r.ok ? r.blob() : null; }).catch(function () { return null; })
+          .then(function (b) { if (b) imgs[i] = b; if (--left === 0) { draw(); next(k + 6); } });
+      });
     })(0);
-    // Smooth on a phone, as on The Brown Box (26 Oct 2026): draw only when the frame changes, keep the frames around the
-    // current one decoded (createImageBitmap; a plain image is decoded again on every draw), and never make the canvas
-    // sharper than the frames themselves
+    // Smooth on a phone (28 Oct 2026, as on Noa Levi: 224 ms a frame on a slowed phone before): frames arrive as files and
+    // are decoded off the main thread (createImageBitmap of a blob) only around the current one; only decoded frames are
+    // drawn, and only when the frame changes, on a canvas no sharper than the frames themselves
     var FW = kind === 'm' ? 720 : 1680, FH = kind === 'm' ? 1280 : 946, shown = -1, bmp = {}, asked = {}, WIN = 8;
-    var frameAt = function (q) { var f = Math.round(q * (N - 1)); for (var d = 0; d < N; d++) { if (imgs[f - d]) return f - d; if (imgs[f + d]) return f + d; } return -1; };
     var keep = function (f) {
-      if (!window.createImageBitmap) return;
-      Object.keys(bmp).forEach(function (i) { if (Math.abs(i - f) > WIN + 2) { bmp[i].close(); delete bmp[i]; } });
-      for (var i = Math.max(0, f - WIN); i <= Math.min(N - 1, f + WIN); i++) if (imgs[i] && !bmp[i] && !asked[i]) (function (i) {
-        asked[i] = 1;
-        createImageBitmap(imgs[i]).then(function (b) { delete asked[i]; if (Math.abs(i - Math.round(p * (N - 1))) > WIN + 2) b.close(); else bmp[i] = b; }, function () { delete asked[i]; });
-      })(i);
+      for (var k in asked) if (Math.abs(k - f) > WIN) { if (bmp[k] && bmp[k].close) bmp[k].close(); delete bmp[k]; delete asked[k]; }
+      for (var i = Math.max(0, f - WIN); i <= Math.min(N - 1, f + WIN); i++) if (imgs[i] && !asked[i]) {
+        asked[i] = 1; (function (i) { createImageBitmap(imgs[i]).then(function (b) { if (asked[i]) { bmp[i] = b; draw(); } else if (b.close) b.close(); }).catch(function () {}); })(i);
+      }
     };
+    var nearest = function (f) { for (var d = 0; d < N; d++) { if (bmp[f - d]) return f - d; if (bmp[f + d]) return f + d; } return -1; };
     var draw = function () {
-      var q = still ? 1 : p, f = frameAt(q); if (f < 0) return;
-      keep(Math.round(q * (N - 1)));
-      if (f === shown) return; shown = f;
-      var im = bmp[f] || imgs[f], W = cv.width, H = cv.height, sc = Math.max(W / im.width, H / im.height), w = im.width * sc, h = im.height * sc;
+      var want = Math.round((still ? 1 : p) * (N - 1)), f;
+      keep(want); f = nearest(want);
+      if (f < 0 || f === shown) return; shown = f;
+      var im = bmp[f], W = cv.width, H = cv.height, sc = Math.max(W / im.width, H / im.height), w = im.width * sc, h = im.height * sc;
       cx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
     };
     var size = function () {

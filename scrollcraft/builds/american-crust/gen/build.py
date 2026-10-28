@@ -75,7 +75,8 @@ HOME = f'''  <section class="open" id="film" aria-labelledby="h-open">
       <ul class="st-list rev">
         <li>Express Market in Geula</li>
         <li>Arzai Makolets</li>
-        <li>Good Market on Paran</li>
+        <li>The Good Store on Paran</li>
+        <li>Special Market, Zayit Raanan and 14&nbsp;Sorotzkin</li>
       </ul>
     </div>
   </section>
@@ -269,7 +270,7 @@ CONTACT = SITE.page_head('Contact', 'Order, ask a question, or tell us where to 
       <div class="tiles">
         <div class="tile"><h3>Delivery and pickup</h3><p>Delivery ₪25 in Ramat Eshkol and surrounding areas. Further away, the fee depends on where: we confirm it on WhatsApp. Pickup in Sanhedria, Jerusalem. Message us on WhatsApp for the exact address.</p></div>
         <div class="tile"><h3>Payment</h3><p>Cash or Zelle.</p></div>
-        <div class="tile"><h3>Now available in</h3><p>Express Market in Geula, Arzai Makolets and Good Market on Paran.</p></div>
+        <div class="tile"><h3>Now available in</h3><p>Express Market in Geula, Arzai Makolets, The Good Store on Paran and Special Market (Zayit Raanan and 14&nbsp;Sorotzkin).</p></div>
       </div>
     </div>
   </section>
