@@ -114,7 +114,7 @@ R8.3 n/a: no generated media on this site
 R8.4 n/a: no moving real material or clip
 R3c.13 pass: clipped.mjs on the home page at seven sizes: nothing cut off
 R3c.14 n/a: no cut-outs on this site
-R5b.3 pass: readable.mjs on every page, including the ruby state of the booking page (22 Oct: the unchosen service cards and style chips turn light on ruby, the "about 60 minutes" lines now read clearly); words over her photos sit on the soft edge shade
+R5b.3 pass: readable.mjs on every page, including the ruby state of the booking page (22 Oct: the unchosen service cards and style chips turn light on ruby, the "about 60 minutes" lines now read clearly); words over her photos sit on the soft edge shade; 28 Oct (Tzvi: on a phone her work was hard to see, covered by the words and the shade, worst on soft nude): on a phone her photo now stands clear above the words, nothing over it, each photo framed on her hands; the words sit under it on the shade colour; laptop unchanged. The phone photo box is wider than her tall photos, so towel above and below is trimmed and the frame is marked data-crop-ok: extending the photos sideways to fit would make her nails smaller, the opposite of the point; every nail stays whole at 390x844 and 375x667
 R3e.8 pass: readable.mjs on every page: every word clear at every size checked
 R3s.24 pass: check-site MEDIA on index, book, contact: no photo over 600 KB, every img has width and height, nothing hidden with motion off
 R3p.6 pass: check-fits on index, book, contact: every section and photo fits at the six sizes
