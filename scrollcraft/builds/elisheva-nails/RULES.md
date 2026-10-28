@@ -39,7 +39,7 @@ R3b.1 pass: first screen answers what (gel nails and nail art), where (Romema, J
 R3b.2 pass: the price (gel from ₪90) and the four years touch the button on the first screen; no kosher claim
 R3b.3 pass: one solid white button in the hero, the header button is an outline; service rows use outline buttons; pair sections one solid each, looked at while scrolling
 R3h.1 pass: check-site OPENING on the home page and looked at it: her photo fills the screen and it is an event, the next shade spreads over it every few seconds
-R3h.20 n/a: measured 25 Oct (check-site's SMOOTH/SLOW measure at 1440x900 and 390x844): the opening is not scroll-driven (no sticky stage); it is her own hands photo full screen with the words and the shade swatches on a soft shade, nothing to scroll through
+R3h.20 n/a: measured 25 Oct (check-site's SMOOTH/SLOW measure at 1440x900 and 390x844): the opening is not scroll-driven (no sticky stage); it is her own hands photo full screen with the words and the shade swatches on a soft shade, nothing to scroll through; 28 Oct: the shades change on their own only while her photo is on screen (each change restyles the page; below the photo a slowed phone was 29% busy doing nothing, now 0%); and, Tzvi's choice on 28 Oct, the automatic changes fade plainly while a tapped shade still spreads like polish (the spread running on its own kept a phone 44% busy with her photo on screen, now 2%)
 R3n.1 pass: first screen 1440x900 and 390x844: her close-up of nails fills the whole first screen
 R3n.2 pass: signature: tap a shade and her photo of that colour opens out from the chip across the opening; only a nail artist who shoots her work by colour has it
 R3n.3 pass: tapping a shade changes the photo, the page tint, the name and the booking link (check-motion: every choice switches smoothly); 25 Oct: the tint band is stronger (38%, was 16%) and starts higher (90% of the opening, was 78%) so the page plainly turns the tapped colour on every shade, bubblegum included; the top nail in each photo stays clear
@@ -200,3 +200,4 @@ R8.7 n/a: nothing was generated on this site. Looked at: gen/ holds only crops.p
 R3h.18 n/a: no film: the pages show only her photos (checked 26 Oct)
 R3h.19 n/a: no generated film; only her own photos
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
+R3s.27 pass: check-same-place clean on the home, booking and contact pages at 390x844 and 1440x900 (28 Oct); the shade swatches and their name stay in one place while the photo changes
