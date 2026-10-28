@@ -39,7 +39,7 @@ R3b.1 pass: first screen says what and the button; the place is in the phone bar
 R3b.2 pass: price 160 shekels an hour sits in the bar beside the button
 R3b.3 pass: one solid action per screen: the bar button and phone bar repeat the same action
 R3h.1 pass: site OPENING passed (26 Oct): her own messy drawer fills the opening; as you scroll it is emptied, then her filled boxes go in, ending on her real after photo (three generated clips chained by stills, gen/tidy-brief-v3.md, Tzvi approved), on her empty cupboard under her deep green
-R3h.20 pass: measured 26 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.4 screens, 60 fps; the drawer is her own, on an empty cupboard from her pantry photo under her deep green (gen/ground-brief.md); the drawer is whole on a laptop; its first frame is her before photo, shown before the film's frames arrive
+R3h.20 pass: measured 26 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.4 screens, 60 fps; the drawer is her own, on an empty cupboard from her pantry photo under her deep green (gen/ground-brief.md); the drawer is whole on a laptop; its first frame is her before photo, shown before the film's frames arrive; 28 Oct, on a slowed phone (CPU 4x, 390x844 at 3x) the opening ran at 34 ms a frame because each new frame was decoded while scrolling: frames now arrive as files and are decoded off the main thread for the frames around the current one, drawn only when the frame changes, on a canvas no sharper than the 760px frames: 18 ms a frame
 R3n.1 pass: her drawer photo is the largest picture of the first screen at both sizes, at most 1.2x its size; on phones the words fill the space above it and the photo sits at the bottom, so no empty dark band is left under it as the opening scrolls away
 R3n.2 pass: her tidy drawer pieces fall into her messy drawer
 R3n.3 pass: room choice swaps both photos; hours on the book page fill the tray and set the total; check-motion passed
@@ -189,6 +189,7 @@ R3a.6 pass: site PHONE passed
 R3s.22 pass: site TAP passed
 R3s.23 pass: site PHONE passed: no sideways scroll
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026)
+R3s.27 pass: check-same-place clean on the home, booking and contact pages at 390x844 and 1440x900 (28 Oct); in the opening the before and after label sits in the same corner of the drawer photo all the way through, seen at six scroll stops on a phone
 R3t.1 pass: Category: service in CONCEPT.md and the site-category meta on all three pages; light ground, rooms as flat colour tiles with a photo each, numbered process, one dark close
 R3t.2 n/a: category is service
 R3t.3 n/a: category is service

@@ -125,22 +125,36 @@
   var scene = document.getElementById('scene'), cv = document.getElementById('tidy');
   if (!scene || !cv) return;
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  var photo = cv.parentNode, cx = cv.getContext('2d'), N = 120, imgs = new Array(N), p = 0;
+  var photo = cv.parentNode, cx = cv.getContext('2d'), N = 120, blobs = new Array(N), p = 0;
   function url(i) { return 'assets/tidy/' + String(i + 1).padStart(3, '0') + '.webp'; }
   var order = [], seen = {};
   [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });
+  // Speed on phones (28 Oct): frames arrive as files and are decoded off the main thread
+  // (createImageBitmap of a blob), only for the frames around the current one; a frame is drawn
+  // only when it changes, on a canvas no sharper than the 760px frames.
   if (!reduce) (function next(k) {
     var batch = order.slice(k, k + 6), left = batch.length; if (!left) return;
-    batch.forEach(function (i) { var im = new Image(); im.decoding = 'async'; im.onload = im.onerror = function () { if (im.naturalWidth) imgs[i] = im; if (--left === 0) { draw(); next(k + 6); } }; im.src = url(i); });
+    batch.forEach(function (i) {
+      fetch(url(i)).then(function (r) { return r.ok ? r.blob() : null; }).catch(function () { return null; })
+        .then(function (b) { if (b) blobs[i] = b; if (--left === 0) { draw(); next(k + 6); } });
+    });
   })(0);
-  function frameAt(q) { var f = Math.round(q * (N - 1)); for (var d = 0; d < N; d++) { if (imgs[f - d]) return imgs[f - d]; if (imgs[f + d]) return imgs[f + d]; } return null; }
-  function size() { var d = Math.min(2, devicePixelRatio || 1); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; draw(); }
+  var shown = -1, bmp = {}, asked = {}, WIN = 8, fill = '', vis = '';
+  function keep(f) {
+    for (var k in asked) if (Math.abs(k - f) > WIN) { if (bmp[k] && bmp[k].close) bmp[k].close(); delete bmp[k]; delete asked[k]; }
+    for (var i = Math.max(0, f - WIN); i <= Math.min(N - 1, f + WIN); i++) if (blobs[i] && !asked[i]) {
+      asked[i] = 1; (function (i) { createImageBitmap(blobs[i]).then(function (b) { if (asked[i]) { bmp[i] = b; draw(); } else if (b.close) b.close(); }).catch(function () {}); })(i);
+    }
+  }
+  function nearest(f) { for (var d = 0; d < N; d++) { if (bmp[f - d]) return f - d; if (bmp[f + d]) return f + d; } return -1; }
+  function size() { var d = Math.max(1, Math.min(2, devicePixelRatio || 1, 760 / (cv.clientWidth || 760))); cv.width = Math.round(cv.clientWidth * d); cv.height = Math.round(cv.clientHeight * d); shown = -1; draw(); }
   function draw() {
-    var q = Math.min(1, p / .9), im = frameAt(q);
-    if (im) cx.drawImage(im, 0, 0, cv.width, cv.height);
-    cv.style.opacity = im ? 1 : 0;
+    var q = Math.min(1, p / .9), want = Math.round(q * (N - 1)), f;
+    keep(want); f = nearest(want);
+    if (f !== shown && f >= 0) { cx.drawImage(bmp[f], 0, 0, cv.width, cv.height); shown = f; }
+    var v = f >= 0 || shown >= 0 ? '1' : '0'; if (v !== vis) cv.style.opacity = vis = v;
     // the last frame is her after photo itself: it takes over, sharp, at the very end
-    photo.style.setProperty('--fill', Math.max(0, Math.min(1, (q - .96) / .04)).toFixed(3));
+    var fl = Math.max(0, Math.min(1, (q - .96) / .04)).toFixed(3); if (fl !== fill) photo.style.setProperty('--fill', fill = fl);
     scene.classList.toggle('is-done', p > .88);
   }
   function onScroll() {
