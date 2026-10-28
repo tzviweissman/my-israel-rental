@@ -124,7 +124,7 @@ var SHADES = [{"k": "milky", "n": "Milky white", "f": "milky.webp", "a": "Milky 
   // every photo loaded and decoded up front, so a switch never waits or pops in half-drawn
   var phone = matchMedia('(max-width:760px)').matches, pic = function (s) { return 'assets/hero-' + s.k + (phone ? '-p' : '-l') + '.webp'; };
   var ready = {}; SHADES.forEach(function (s) { var i = new Image(); i.src = pic(s); ready[s.k] = i.decode ? i.decode().catch(function () {}) : Promise.resolve(); });
-  function show(i, from) {
+  function show(i, from, plain) {
     if (i === at) return;
     at = i; var me = ++seq;
     chips.forEach(function (c, j) { c.setAttribute('aria-pressed', j === i ? 'true' : 'false'); });
@@ -140,7 +140,7 @@ var SHADES = [{"k": "milky", "n": "Milky white", "f": "milky.webp", "a": "Milky 
     // start the spread on the photo's edge nearest the chip, so the whole reveal is seen, not its last instant
     cx = Math.max(0, Math.min(100, cx)); cy = Math.max(0, Math.min(100, cy));
     var img = document.createElement('img');
-    img.className = 'next'; img.src = pic(SHADES[i]); img.alt = ''; img.width = 1920; img.height = 1200; img.dataset.seq = me;
+    img.className = plain ? 'next fade' : 'next'; img.src = pic(SHADES[i]); img.alt = ''; img.width = 1920; img.height = 1200; img.dataset.seq = me;
     img.style.setProperty('--cx', cx + '%'); img.style.setProperty('--cy', cy + '%');
     frame.appendChild(img);
     var done = function () {
@@ -152,7 +152,9 @@ var SHADES = [{"k": "milky", "n": "Milky white", "f": "milky.webp", "a": "Milky 
     ready[SHADES[i].k].then(function () { requestAnimationFrame(function () { requestAnimationFrame(function () { img.classList.add('on'); setTimeout(done, 1350); }); }); });
   }
   chips.forEach(function (c, i) { c.addEventListener('click', function () { auto = false; clearInterval(timer); show(i, c); }); });
-  if (!reduce) timer = setInterval(function () { if (auto && !document.hidden) show((at + 1) % SHADES.length, chips[(at + 1) % SHADES.length]); }, 3200);
+  // the shades change only while the photo is on screen: each change restyles the page, which costs a phone mid-scroll (28 Oct)
+  var seen = true; if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { seen = es[0].isIntersecting; }).observe(frame);
+  if (!reduce) timer = setInterval(function () { if (auto && seen && !document.hidden) show((at + 1) % SHADES.length, null, true); }, 3200);
 })();
 </script>
 </body>

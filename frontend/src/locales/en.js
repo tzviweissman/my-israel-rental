@@ -3778,6 +3778,7 @@ const en = {
         mostListings: 'Most listings',
         areas: 'Areas',
         when: 'When',
+        editSearch: 'Change search',
         addDates: 'Add dates',
         filters: 'Filters',
         nearPlaceholder: 'Show stays near an address - e.g. Rothschild Blvd, Tel Aviv',

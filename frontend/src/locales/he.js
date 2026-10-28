@@ -3679,6 +3679,7 @@ const he = {
         mostListings: 'הכי הרבה מודעות',
         areas: 'אזורים',
         when: 'מתי',
+        editSearch: 'שינוי החיפוש',
         addDates: 'בחרו תאריכים',
         filters: 'סינון',
         nearPlaceholder: 'הצג לינה בקרבת כתובת - לדוגמה: שדרות רוטשילד, תל אביב',

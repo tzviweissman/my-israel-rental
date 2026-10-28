@@ -25,7 +25,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import ListingsUnavailable from '../components/common/ListingsUnavailable';
 import { useTranslation } from 'react-i18next';
 import { format } from 'date-fns';
-import { X, Loader2, Bell, LayoutGrid, Map as MapIcon, MapPin, Search } from 'lucide-react';
+import { X, Loader2, Bell, LayoutGrid, Map as MapIcon, MapPin, Search, SlidersHorizontal } from 'lucide-react';
 import { toast } from 'sonner';
 import StaysCard from '../components/stays/StaysCard';
 import AreaRow from '../components/stays/AreaRow';
@@ -96,6 +96,9 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
   // the header even when there are matches. Reset on every filter
   // change so the card doesn't linger after the search changes.
   const [showNotifyCard, setShowNotifyCard] = useState(false);
+  // Phones only: once a search is on, the band and panel give way to a
+  // small pill (Airbnb). Tapping the pill opens the full panel again.
+  const [phoneSearchOpen, setPhoneSearchOpen] = useState(false);
 
   // Hydrate filters from URL so a shared link preserves state
   const [where, setWhere] = useState(searchParams.get('area') || '');
@@ -597,12 +600,67 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
           to live in its own beige strip above the search bar, but two
           stacked headers pushed the listings off the first screen, and the
           band is a better home for a headline than a flat block was. */}
-      <StaysHero landing={landing} t={t} />
+      <div className={isSearchActive ? 'hidden sm:block' : undefined}>
+        <StaysHero landing={landing} t={t} />
+      </div>
+
+      {/* Phones, after a search: the place and dates in one pill, so the
+          cards start on the first screen instead of under the band. */}
+      {isSearchActive && (
+        <div
+          className="sm:hidden px-4 flex items-center gap-2"
+          style={{ paddingTop: 'calc(var(--nav-h, 68px) + 12px)' }}
+          data-testid="stays-phone-pill"
+        >
+          <button
+            type="button"
+            onClick={() => setPhoneSearchOpen((o) => !o)}
+            aria-expanded={phoneSearchOpen}
+            aria-label={t('stays.editSearch', 'Change search')}
+            className="flex-1 min-w-0 flex items-center gap-3 rounded-full border border-[var(--brand-border)] bg-white px-4 py-2.5 text-start shadow-[0_4px_14px_rgba(17,24,39,.08)]"
+          >
+            <Search size={16} className="shrink-0 text-[var(--ink)]" />
+            <span className="min-w-0">
+              <span className="block text-sm font-semibold text-[var(--ink)] truncate">
+                {where ? areaLabel(where, t) : (nearQuery || t('stays.panelAnywhere', 'Anywhere in Israel'))}
+              </span>
+              <span className="block text-xs text-gray-500 truncate">
+                {flexible ? flexLabel(flexible, t)
+                  : checkin && checkout ? `${format(new Date(`${checkin}T00:00`), 'MMM d')} - ${format(new Date(`${checkout}T00:00`), 'MMM d')}`
+                  : t('stays.addDates', 'Add dates')}
+              </span>
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowFilters(true)}
+            aria-label={t('stays.filters', 'Filters')}
+            className="relative shrink-0 w-11 h-11 rounded-full border border-[var(--brand-border)] bg-white flex items-center justify-center"
+            data-testid="stays-phone-filters"
+          >
+            <SlidersHorizontal size={16} />
+            {activeFilterCount > 0 && (
+              <span className="absolute -top-1 -end-1 min-w-[18px] h-[18px] rounded-full bg-black text-white text-[10px] font-bold flex items-center justify-center">
+                {activeFilterCount}
+              </span>
+            )}
+          </button>
+          <button
+            type="button"
+            onClick={() => { clearAllFilters(); setPhoneSearchOpen(false); }}
+            aria-label={t('stays.clearAll', 'Clear all')}
+            className="shrink-0 w-11 h-11 rounded-full border border-[var(--brand-border)] bg-white flex items-center justify-center"
+            data-testid="stays-phone-clear"
+          >
+            <X size={16} />
+          </button>
+        </div>
+      )}
 
       {/* Floating white search panel, riding up over the band. Not sticky:
           it scrolls away with the page so the cards get the full viewport,
           which is how it behaved before 2b and what the user asked for. */}
-      <div className="hero-panel-float">
+      <div className={`hero-panel-float ${isSearchActive ? (phoneSearchOpen ? 'hero-panel-float--compact' : 'hidden sm:block') : ''}`}>
         <div className="hero-panel">
           <StaysSearchBar
             where={where} setWhere={setWhere}
@@ -957,8 +1015,32 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
         </div>
       ) : isSearchActive ? (
         // Flat results grid — Airbnb-style, shown once any search/filter is active
-        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 pt-11 pb-6" data-testid="stays-results-grid">
-          <div className="section-rhead flex items-end justify-between mb-5">
+        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 pt-4 sm:pt-11 pb-6" data-testid="stays-results-grid">
+          {/* Phones: one short line, then the cards. */}
+          <div className="sm:hidden flex items-center justify-between gap-2 mb-3" data-testid="stays-phone-count">
+            <p className="text-sm font-semibold text-[var(--ink)] truncate">
+              {filteredWithDistance.length} {filteredWithDistance.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
+              {nearCoords && !where ? ` ${t('stays.nearAddress', 'near this address')}` : ''}
+            </p>
+            <div className="flex items-center gap-2 shrink-0">
+              <SortSelect
+                value={effectiveSort}
+                onChange={setSort}
+                allowNearest={Boolean(nearCoords)}
+                t={t}
+                testid="stays-sort-select-phone"
+              />
+              <button
+                onClick={() => setShowNotifyCard(true)}
+                aria-label={t('stays.createAlert', 'Create alert')}
+                className="w-9 h-9 rounded-full border border-[var(--brand-border)] bg-white flex items-center justify-center text-[var(--brand-primary)]"
+                data-testid="stays-create-alert-phone"
+              >
+                <Bell size={14} />
+              </button>
+            </div>
+          </div>
+          <div className="section-rhead hidden sm:flex items-end justify-between mb-5">
             <div>
               <h2 className="text-gray-900">
                 {filteredWithDistance.length} {filteredWithDistance.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}

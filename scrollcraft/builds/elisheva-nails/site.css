@@ -87,6 +87,9 @@ h1, h2, h3 { font-family: var(--font-head); font-weight: 600; margin: 0; line-he
   mask-image: radial-gradient(circle farthest-corner at var(--cx, 50%) var(--cy, 100%), #000 calc(var(--r) - 22%), transparent var(--r));
   transition: --r 1300ms cubic-bezier(.4, 0, .2, 1), opacity 250ms ease-out; }
 .frame img.next.on { --r: 125%; opacity: 1; }
+/* the automatic changes fade plainly; the polish spread is kept for a tap (Tzvi, 28 Oct 2026: the spread
+   running on its own every 3 s kept a phone busy whenever the photo was on screen) */
+.frame img.next.fade { -webkit-mask-image: none; mask-image: none; transition: opacity 900ms cubic-bezier(.4, 0, .2, 1); }
 
 section.sec { padding-block: clamp(4.5rem, 10vw, 7rem); }
 .sec h2 { font-size: clamp(2.3rem, 4.6vw, 3.6rem); }
