@@ -1,0 +1,246 @@
+{
+ "business": {
+  "_id": "8e5ad619-878c-4a79-b283-af1a187101be",
+  "owner_user_id": "2d1544ad-9f4b-45b5-811a-2b102e4ce755",
+  "name": "Bake away",
+  "name_he": null,
+  "name_en": null,
+  "source_lang": null,
+  "slug": "bake-away",
+  "logo_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793048649/myisraelrental/jrwxhfhomjolrad0wbut.jpg",
+  "description": "We are a home-based business offering a variety of baked goods—including cakes, cookies, challah, doughnuts, cheesecakes, and more—all featuring a high-quality, homemade taste.",
+  "description_he": "",
+  "description_en": null,
+  "categories": [],
+  "areas": [
+   "jerusalem"
+  ],
+  "serves_nationwide": true,
+  "verified": false,
+  "verified_at": null,
+  "hours": null,
+  "languages": [
+   "Hebrew",
+   "English"
+  ],
+  "founded_year": 2020,
+  "delivery_note": "Jerusalem and more",
+  "lead_time": "24-48 hours",
+  "payment_note": "Cash, bit, bank transfer",
+  "kosher_certification": {
+   "body": "All ingredients are בדץ העדה החרדית",
+   "logo_url": null,
+   "certificate_url": null
+  },
+  "license_number": null,
+  "cover_url": null,
+  "accent": "stone",
+  "payment_links": [],
+  "active": true,
+  "created_at": "2026-10-26T20:51:08.529452+00:00",
+  "updated_at": "2026-10-26T21:05:49.564837+00:00",
+  "by_appointment": false,
+  "shabbat_closing": true,
+  "table_ordering": {
+   "key": "d8510bce4c4a8771118a253451907ea5"
+  },
+  "order_cutoffs": [],
+  "order_settings": {
+   "windows": {
+    "pickup": [],
+    "delivery": []
+   },
+   "delivery_fee": 35.0,
+   "min_order": 20.0,
+   "default_courier_user_id": null,
+   "area_fees": {},
+   "free_over": null,
+   "max_per_day": null,
+   "max_per_window": null,
+   "delivery_on": true
+  }
+ },
+ "listings": [
+  {
+   "_id": "4bfcede3-77c9-4a4a-8848-99afc8f55970",
+   "provider_user_id": "2d1544ad-9f4b-45b5-811a-2b102e4ce755",
+   "provider_id": "e4ed54ea-4fe8-416a-b412-7ae2ada17dce",
+   "business_id": "8e5ad619-878c-4a79-b283-af1a187101be",
+   "title": "Cakes cookies",
+   "title_he": "עוגות ועוגיות",
+   "title_en": null,
+   "source_lang": "en",
+   "category": "events-catering",
+   "subcategory": null,
+   "description": "We are a home-based business offering a variety of baked goods—including cakes, cookies, challah, doughnuts, cheesecakes, and more—all featuring a high-quality, homemade taste.",
+   "description_he": "אנחנו עסק ביתי המציע מגוון מוצרי מאפה – כולל עוגות, עוגיות, חלות, סופגניות, עוגות גבינה ועוד – כולם בטעם ביתי איכותי במיוחד.",
+   "description_en": null,
+   "gig_type": "deliverable",
+   "tiers": [
+    {
+     "name": "Cream Donuts",
+     "price": 18.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "מגוון רחב מאוד של סופגניות ",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046387/myisraelrental/umui5fyjpjtnfgyhnqm6.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046387/myisraelrental/iqxlohosctjat3s2h6qy.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046387/myisraelrental/i7r9tfxwrrbci9ijvris.jpg"
+     ]
+    },
+    {
+     "name": "Milky Donuts",
+     "price": 16.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046505/myisraelrental/uz19rjdxhoiu19rfaznq.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046505/myisraelrental/gbsywqoppgdezflnabdk.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046505/myisraelrental/isfriojllecxvwfyjciw.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046505/myisraelrental/uh7fujozmeaiuztducom.jpg"
+     ]
+    },
+    {
+     "name": "Parve Donuts",
+     "price": 16.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046583/myisraelrental/rr9u8tclrgwgdgwzxnjy.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046582/myisraelrental/payglcyhhvdnd0ai5byq.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046583/myisraelrental/ttqez4ktpkckuei6c4o1.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046582/myisraelrental/gfgphs4vp9q4yfqvnekf.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046583/myisraelrental/zraussr0fxwtfoihg5cx.jpg",
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046582/myisraelrental/t0tylwflzaaos3plwfm8.jpg"
+     ]
+    },
+    {
+     "name": "DIY kit",
+     "price": 70.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": " 8mini cake donuts \nIcings and topping ",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046703/myisraelrental/ngzw055wlfvrarhqgr3h.jpg"
+     ]
+    },
+    {
+     "name": "Trays of cake",
+     "price": 120.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "24 pieces of cake",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046872/myisraelrental/za8ounlxxcqy1ipjg06f.jpg"
+     ]
+    },
+    {
+     "name": "Challos",
+     "price": 40.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046938/myisraelrental/qty2bbxihzbrmj1331a4.jpg"
+     ]
+    },
+    {
+     "name": "Cinnamon buns",
+     "price": 50.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "6 cinnamon buns ",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793046969/myisraelrental/vyvgvfswujrnzl3actdo.jpg"
+     ]
+    },
+    {
+     "name": "Cakes",
+     "price": 45.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "Marble cake ,Honey cake, mocca cake",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793047034/myisraelrental/rkskllqqfjbhdyj3yuqn.jpg"
+     ]
+    },
+    {
+     "name": "Mini cheese cakes",
+     "price": 120.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "12 non baked mini cheese cakes ",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793047239/myisraelrental/c59kzvzi2p3lnmqg4yro.jpg"
+     ]
+    },
+    {
+     "name": "Cheese cakes",
+     "price": 250.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": " A variety of cheese cakes with chocolate caramel ond more",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793047584/myisraelrental/gknjzxtb2bkg7k3qsnps.jpg"
+     ]
+    },
+    {
+     "name": "Babka",
+     "price": 60.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793047782/myisraelrental/t2hefaqghfyz3nhbr2wa.jpg"
+     ]
+    }
+   ],
+   "products": [],
+   "weekly_availability": null,
+   "slot_duration_minutes": null,
+   "team": [],
+   "rebook_after_weeks": null,
+   "enable_date_booking": true,
+   "gallery": [],
+   "booking_mode": "whatsapp",
+   "whatsapp_confirmed": true,
+   "contact_email": "malkyballon@gmail.com",
+   "whatsapp": "+972583233995",
+   "area": " ירושלים ",
+   "faqs": [],
+   "discount": null,
+   "status": "published",
+   "created_at": "2026-10-26T20:51:09.501128+00:00",
+   "updated_at": "2026-10-26T20:51:09.501128+00:00",
+   "geocode_miss": false,
+   "geocoded_at": 1793047870.0535386,
+   "lat": 31.7788472,
+   "lng": 35.2257856
+  }
+ ]
+}
