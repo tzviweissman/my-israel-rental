@@ -3860,7 +3860,7 @@ const en = {
         totalForOneNight: '{{amount}} for 1 night',
         // Reply-time badge on the listing page.
         repliesWithinHour: 'Usually replies within an hour',
-        repliesWithinHours: 'Usually replies within {{count}} hours',
+        repliesWithinHours: 'Usually replies within {{hours}} hours',
         repliesWithinDay: 'Usually replies within a day',
         // Result ordering.
         sortBy: 'Sort',
