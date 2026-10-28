@@ -453,3 +453,5 @@ section.rest { padding-block: clamp(1.6rem, 6svh, 3.5rem); }
 
 /* platter sizes in cm (owner, 28 Oct 2026) */
 .pc-sz { margin: -.2rem 0 .5rem; font: 600 .95rem var(--font-body); color: var(--soft); }
+.pc-pr s, .st-price s { font-size: .72em; font-weight: 400; color: var(--soft); margin-right: .25em; }
+.pc-pr .off, .st-price .off { display: inline-block; vertical-align: middle; font: 700 .85rem/1 var(--font-body); color: var(--accent); border: 1.5px solid currentColor; border-radius: 99px; padding: .3em .6em; margin-left: .3em; }

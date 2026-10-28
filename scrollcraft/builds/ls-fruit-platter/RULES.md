@@ -131,10 +131,10 @@ R3j.3 n/a: no free taster or consultation is offered
 R3j.4 n/a: no group discounts are offered
 R3j.5 n/a: no stamp card or reorder feature is offered
 R3j.6 pass: no invented option; every size or bowl is a real one from their list
-R3j.7 n/a: no struck-through or was price on this site
-R3j.8 n/a: no savings are shown on this site
-R3j.9 n/a: no savings are shown on this site
-R3j.10 n/a: no savings are shown on this site
+R3j.7 pass: the two struck-through prices are the Large and Extra large boards' area priced at the cheapest smaller size's real price a cm2 (Small ₪300 for 900 cm2, Large ₪500 for 1624 cm2): ₪541 and ₪885, worked out in the comment above the size cards in index.html
+R3j.8 pass: per cm2 table (28 Oct, the owner's sizes): Small 300/900 = 0.333, Medium 400/1120 = 0.357, Large 500/1624 = 0.308, Extra large 850/2875 = 0.296. Same product, one line of platters. Large is below Small and Medium, measured against Small (cheapest); Extra large is below all three, measured against Large; Medium is dearer than Small a cm2 and shows none
+R3j.9 pass: one group (the four platter sizes of one product), two of its four show a saving, so neither is a lone badge
+R3j.10 pass: '7% off' (Large, 7.6% rounded down) and '3% off' (Extra large, 3.97% rounded down) beside the real price with ₪541 and ₪885 struck through, on the home cards and the shop stage; the Add buttons carry the price; no sentence explains it and nothing says how much more a size costs
 R3j.11 n/a: no combined service or package that saves money
 R3j.12 n/a: no owner savings claim is printed
 R3.14 pass: prices are loud because prices exist; this is a priced shop
