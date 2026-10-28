@@ -517,7 +517,7 @@ main > section.sec + section, main > section.pair + section { border-top: 1px so
 @media (max-width: 760px) {
   .hero { display: flex; flex-direction: column; justify-content: flex-end; padding-top: 0;
     background-color: color-mix(in srgb, var(--tint, #F4EFEE) 38%, #2A1513); transition: background-color 900ms cubic-bezier(.65, 0, .35, 1); }
-  .hero .frame { position: relative; z-index: 0; inset: auto; flex: 1 1 auto; align-self: stretch; min-height: 40svh; margin-bottom: 1.1rem; }
+  .hero .frame { position: relative; z-index: 0; inset: auto; flex: 1 1 auto; align-self: stretch; min-height: 38svh; margin-bottom: 1.1rem; }
   .hero .frame img { object-position: 50% 58%; }
   /* each photo framed on her hands */
   .hero .frame img[src*="milky"] { object-position: 50% 70%; } .hero .frame img[src*="nude"] { object-position: 50% 72%; }
@@ -525,4 +525,5 @@ main > section.sec + section, main > section.pair + section { border-top: 1px so
   .hero .frame::after { content: ""; position: absolute; inset: auto 0 0; height: 16px; z-index: 5; pointer-events: none;
     background: linear-gradient(to top, color-mix(in srgb, var(--tint, #F4EFEE) 38%, #2A1513), transparent); transition: background 900ms; }
   .hero .edge { display: none; }
+  .hero h1 { font-size: clamp(1.7rem, 7.4vw, 2.2rem); }  /* her headline is long (three lines at 2.6rem pushed the button off the first screen) */
 }
