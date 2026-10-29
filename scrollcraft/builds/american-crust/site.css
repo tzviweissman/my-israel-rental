@@ -169,11 +169,17 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
 .open .btn { background: var(--mustard); color: var(--ink); }
 .open .go { display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
 .open .from { margin: 0; font: 600 1rem/1.35 var(--font-body); color: var(--cream); }
+/* phone (Tzvi, 28 Oct 2026, page rules 5b.3: on a phone the picture stays seen): the film stands on top with nothing
+   over it, the words under it on the night ground, the three words on one line so the film keeps its room */
 @media (max-width: 760px) {
   .open { height: 340vh; }
-  .open .stage::before { background: linear-gradient(0deg, rgba(20, 20, 20, .92) 0%, rgba(20, 20, 20, .8) 50%, rgba(20, 20, 20, .25) 80%); }
-  .open .wrap { justify-content: flex-end; padding-bottom: 2.4rem; }
-  .open h1 { font-size: clamp(3rem, 15vw, 4.4rem); }
+  .open .stage { display: flex; flex-direction: column; padding: var(--top-h) 0 0; background: var(--night); }
+  .open .stage::before { display: none; }
+  #cv { position: relative; inset: auto; flex: 1 1 0; min-height: 36svh; height: auto; }
+  .open .wrap { flex: 0 0 auto; height: auto; justify-content: flex-start; gap: 1rem; padding-top: 1.1rem; padding-bottom: 1.4rem; }
+  .open h1 { font-size: clamp(2.2rem, 11vw, 3rem); line-height: 1; }
+  .open h1 .w { display: inline-block; margin-right: .22em; }
+  .open .w2, .open .w3 { transform: none; }
   .open .lede { font-size: 1.05rem; }
   }
 @media (prefers-reduced-motion: reduce) { .open { height: 100vh; height: 100svh; } .open .w2, .open .w3 { opacity: 1; transform: none; } }

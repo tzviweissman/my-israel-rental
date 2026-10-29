@@ -106,7 +106,7 @@ R8.3 pass: the four photos are the same generated-setting shoot (no people, one 
 R8.4 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3c.13 pass: clipped.mjs reported nothing cut off at seven sizes; framing (26 Oct 2026): on a phone the hero room photo sits whole at its own shape at the top, a blurred copy fills behind the words (it showed a 26% slice): check-fits framing passes at all six sizes
 R3c.14 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
-R5b.3 pass: words over photos sit on soft edge shades; the booking close shade was deepened after readable said the WhatsApp line was 3.15:1; looked at the hero and the close at 1440 and 390
+R5b.3 pass: words over photos sit on soft edge shades; the booking close shade was deepened after readable said the WhatsApp line was 3.15:1; looked at the hero and the close at 1440 and 390; on a phone the room photo stays at full light, the shade starts at its bottom edge where the words begin (28 Oct 2026; check-photo-clear: 26-35% covered, was 68-70%)
 R3e.8 pass: readable.mjs crashed the renderer (checker limit); by contrast calculation the smallest greys (#6B6470 on white 5.7:1, #4A444F 9.4:1, #C9C3CC on black 12.2:1) pass; sizes use the token scale, 14 px minimum
 R3s.24 pass: check-site MEDIA passes (no media complaint)
 R3p.6 pass: check-fits passes at the six sizes after the offers section was capped by height

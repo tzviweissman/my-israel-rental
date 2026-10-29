@@ -114,7 +114,7 @@ R8.3 pass: viewed every generated frame: a plain black ribboned box, no person, 
 R8.4 pass: the moving ribbon and lid are a generated clip (a Higgsfield clip), cause then effect, never SVG or CSS; reduced motion shows the still
 R3c.13 pass: clipped.mjs reports nothing cut off, except the closing name which is cropped on purpose (data-clip-ok)
 R3c.14 n/a: no cut-out on this site; the photographs are shown in rounded frames
-R5b.3 pass: readable passes; words over the film sit on a soft edge shade
+R5b.3 pass: readable passes; words over the film sit on a soft edge shade; on a phone the box is at full light until the headline comes, the shade arrives with the words (28 Oct 2026; check-photo-clear: 3-6% covered, was 37-42%)
 R3e.8 pass: readable.mjs reports every word clear at every size on both pages
 R3s.24 pass: check-site MEDIA reports no problem; every img has width and height and the film has a poster
 R3p.6 pass: check-fits passes at the six sizes on both pages
@@ -200,3 +200,5 @@ R3k.9 pass: served the build locally and ran node scripts/check-site.mjs http://
 R3h.18 pass: 8 fps frame sheet of every clip looked at object by object on 26 Oct (recorded after the fact: the object list was not written before generating, the films predate the rule): the box, its ribbon and the white flower stay in frame; the ribbon unties and slides down around the box onto the table, the flower slides down the front and rests at its foot, the lid lifts and leaves past the top edge, the light comes from inside the box; nothing appears from nowhere
 R3h.19 pass (made before the rule (26 Oct); answered from what the briefs and gen/ files show): one clip between its own first and last stills (gen/ribbon: soul stills, then MiniMax H3), one action, the gift opening (the ribbon unties and falls, the lid lifts out past the top edge, light comes out), the same box, ribbon and flower at start and end; phone clip took two tries (the second, 23 Oct, came out darker and was not used); not met: no written frame plan before
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
+
+R3s.27 pass: scripts/check-same-place.mjs clean on the home and order pages at 390x844 and 1440x900 (28 Oct): the six gifts that rise from the box land in one fixed grid, the headline holds one place, and the order page's gift tiles sit in one grid of equal tiles

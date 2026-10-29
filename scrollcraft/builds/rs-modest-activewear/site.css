@@ -502,3 +502,13 @@ body .sym { font-size: 1.16em !important; font-weight: 600; margin-right: 0; }
 .door picture { display: contents; }
 .door img { object-position: 100% 50%; }
 @media (max-width: 860px) { .door img { object-position: 50% 0%; } }
+/* phone opening (Tzvi, 28 Oct 2026, page rules 5b.3: on a phone the picture stays seen): her skirts stand on top with
+   nothing over them and the words sit under them on the green, not on a shade over the lower half of the skirts */
+@media (max-width: 860px) {
+  .open-stage { grid-template-rows: minmax(0, 1fr) auto; }
+  .open-stage::before { display: none; }
+  .doorway { grid-area: 1 / 1; }
+  .words { grid-area: 2 / 1; align-self: start; min-height: 0; padding: 1rem var(--gutter) calc(var(--bar-h) + .8rem); }
+  .words h1, .words h2 { font-size: clamp(1.9rem, 8.2vw, 2.6rem); }
+  .words .lede { margin: .5rem 0 1.4rem; }
+}

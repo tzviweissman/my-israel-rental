@@ -257,7 +257,22 @@
     .dial { width: min(15rem, 62vw); }
     .price .now { font-size: var(--s6); }
     .order-stage { padding-top: var(--sc-7); }
+    /* On a phone the pictures stay seen (Tzvi, 28 Oct 2026, page rules 5b.3): the kitchen starts under its words
+       instead of under a wash, and their tubs stand whole at the top of their half, at full light, with the words
+       under them on the dark ground, not under a shade. */
+    .scratch-wash { display: none; }
+    .scratch-photo { top: 11.6rem; }
+    .scratch-copy h2 { font-size: clamp(1.6rem, 7.6vw, 2.1rem); }
+    .theirs-photo { top: calc(var(--x) * 1% + 0.8rem); height: max(5rem, min(62vw, calc(100% - var(--x) * 1% - var(--copy-h, 15rem) - 3.4rem))); object-fit: contain; filter: brightness(calc(1 - var(--dim) * 0.6)); }
+    .theirs-shade { background: none; }
+    .lockup h1 { font-size: var(--s5); }
+    .lockup .script { font-size: var(--s3); }
+    .lockup .tag { margin-top: var(--sc-2); }
+    .theirs-copy .btn { margin-top: var(--sc-3); }
+    .proofline { flex-direction: row; flex-wrap: wrap; column-gap: 0.9rem; row-gap: 0; font-size: var(--s1); }
   }
+  /* a short phone: the line under the name gives its room to the tubs (the quote that follows says the same) */
+  @media (max-width: 860px) and (max-height: 700px) { .theirs-copy .lockup .tag { display: none; } }
   .buybar { display: none; }
   @media (max-width: 860px) {
     .buybar { position: fixed; inset-inline: 0; bottom: 0; z-index: 70; display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
@@ -817,6 +832,8 @@ function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); 
   var peakEl = document.querySelector('.peak');
   function measurePeak() {
     var f = document.querySelector('.pot-frame');
+    // their tubs fill the room between the divider and their words (rules 5b.3)
+    act.style.setProperty('--copy-h', document.querySelector('.theirs-copy').offsetHeight + 'px');
     if (!phone.matches) { f.style.width = f.style.height = f.style.left = ''; return; }
     // The space above the words and the order bar; the picture keeps 16:9,
     // fills the screen's width, and puts the pot (70% across) in the middle

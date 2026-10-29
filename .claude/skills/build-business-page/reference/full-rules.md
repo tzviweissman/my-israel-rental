@@ -1699,7 +1699,18 @@ What Blazin' Boards, Lechem Emek and Michal Simkin taught, in the order they mat
    on, contrast measured on the brightest frame (`readable.mjs`); a small solid
    card is allowed; big dark pools, full-frame darkening and frosted glass are
    not. A plain strip under the photo only where the picture is too busy for
-   words to sit on it. 3a, 3e.12, 3g.8, 3h.5, 3h.9, 3t.2 and 0b.7 point here.
+   words to sit on it. **On a phone the picture stays seen** (Tzvi, 28 Oct 2026, Nails by
+   Elisheva: "hard to actually see her work in the photo ... covered by words and especially the tan
+   colour"): at 390x844 and 360x640, words, shades, tints and cards cover at most 40% of the opening
+   picture's detail (its edges and textures, where the product or the work is; plain ground does not
+   count). A shade that tints most of the photo is not an edge shade, however soft. When the words
+   will not fit beside the subject on a phone, the photo stands on top with nothing over it and the
+   words go under it on a plain strip in the page's colour; the laptop layout stays (worked example:
+   `scrollcraft/builds/elisheva-nails/site.css`, the phone block at its end). `check-photo-clear.mjs`
+   measures it and `publish-page.mjs` runs it on every page; no attribute skips it. Its sheet,
+   `docs/inspo/photo-clear-sheet.png`, shows what fails and what passes. Rejected: counting every
+   changed pixel (words on a plain sand ground failed Bun Intended), and checking only that the words
+   are readable (that is how Elisheva's covered nails passed). 3a, 3e.12, 3g.8, 3h.5, 3h.9, 3t.2 and 0b.7 point here.
 4. **No default "premium" palette** (warm cream with brass or oxblood) and no
    AI purple. The palette comes from their logo and photos.
 5. **No fake screenshots, no generic names or faces, no too-perfect numbers.**

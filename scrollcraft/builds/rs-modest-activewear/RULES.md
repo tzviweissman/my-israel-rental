@@ -115,7 +115,7 @@ R8.3 pass: generated media only of the skirt she sells, from her photo; no perso
 R8.4 n/a: no moving real material; the doors and hang tags are scroll transforms of her photos and reduced motion shows the still
 R3c.13 pass: clipped.mjs reports nothing cut off on the pages at the seven sizes
 R3c.14 n/a: no cut-out on this site
-R5b.3 pass: readable passes on every page; words over the opening sit on a soft green edge shade
+R5b.3 pass: readable passes on every page; words over the opening sit on a soft green edge shade; on a phone her skirts stand on top with nothing over them and the words sit under them on the green (28 Oct 2026; check-photo-clear: 7-9% covered, was 41-52%); on a phone the doors use crops of her already-extended wide photo shaped for the phone box (skirts-phone, skirts-short for short phones), so the whole skirts show (check-fits passes); the shop's second and third photos load with the page so their fade runs on the first tap (check-motion JUMP)
 R3e.8 pass: readable.mjs reports every word clear at every size on all three pages
 R3s.24 pass: check-site MEDIA reports no problem; every img has width and height
 R3p.6 pass: check-fits passes at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844 and 360x640 on all pages; 27 Oct: the opening skirts photo is extended to each screen shape, not cropped (3c.12)

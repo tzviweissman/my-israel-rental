@@ -97,7 +97,7 @@ const CHECK_ONLY = process.argv.includes('--check');
   const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp',
     '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.mp4': 'video/mp4', '.woff2': 'font/woff2' };
   const server = http.createServer((req, res) => {
-    const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
+    const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '').replace(new RegExp('^pages/' + slug + '/'), '') || 'index.html'; // the page's own published address (/pages/<slug>/..., The Gift Boutique's fallback photos) is served from the build
     const file = path.join(SRC, rel);
     if (!file.startsWith(SRC) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
     sendFile(req, res, file, TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream');
@@ -114,7 +114,9 @@ const CHECK_ONLY = process.argv.includes('--check');
   const onlyTiming = (out) => { const bad = out.split('\n').filter((l) => /^[A-Z]{4,}\s/.test(l)); return bad.length > 0 && bad.every((l) => /^(SMOOTH|FLASH|HEAVY|BUSY)\s/.test(l)); };
   for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly'],
     // smooth on a slowed phone, and repeated labels keep one place (Tzvi, 26-27 Oct 2026; rules 3s.27)
-    ['check-speed.mjs', 'is not smooth on a phone'], ['check-same-place.mjs', 'moves a repeated label'], ['check-one-scroll.mjs', 'has two scroll effects']]) {
+    ['check-speed.mjs', 'is not smooth on a phone'], ['check-same-place.mjs', 'moves a repeated label'], ['check-one-scroll.mjs', 'has two scroll effects'],
+    // on a phone the opening photo is seen, not covered by words and shades (Tzvi, 28 Oct 2026; rules 5b.3)
+    ['check-photo-clear.mjs', 'covers its opening photo on a phone']]) {
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }
     results.push({ why, ...r });
@@ -348,7 +350,7 @@ console.log(`published ${folder} as /business/${slug} (${files} files in fronten
     const TYPES = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript', '.css': 'text/css', '.json': 'application/json', '.webp': 'image/webp',
       '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.mp4': 'video/mp4', '.woff2': 'font/woff2' };
     const server = http.createServer((req, res) => {
-      const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '') || 'index.html';
+      const rel = decodeURIComponent(req.url.split('?')[0]).replace(/^\/+/, '').replace(new RegExp('^pages/' + slug + '/'), '') || 'index.html'; // the page's own published address (/pages/<slug>/..., The Gift Boutique's fallback photos) is served from the build
       const file = path.join(SRC, rel);
       if (!file.startsWith(SRC) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) { res.writeHead(404); res.end(); return; }
       sendFile(req, res, file, TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream');

@@ -113,7 +113,7 @@ R8.3 pass: generated media only of the two products they sell, no person, no pre
 R8.4 n/a: no moving real material
 R3c.13 pass: clipped.mjs: nothing cut off at seven sizes on index, shop and contact
 R3c.14 n/a: no cut-outs
-R5b.3 pass: no text over photos except the small cream circle button on the stage photo; readable.mjs passes on every page
+R5b.3 pass: no text over photos except the small cream circle button on the stage photo; readable.mjs passes on every page; on a phone the film stands on top with nothing over it and the words sit under it on the night ground (28 Oct 2026; check-photo-clear: 0% covered, was 91%)
 R3e.8 pass: readable.mjs: every word clear at every size checked on all three pages; button labels are ink on mustard or cream on black
 R3s.24 pass: check-site MEDIA passes: every image has width and height, none over 600 KB (largest 185 KB), no video, nothing hidden with motion off
 R3p.6 pass: check-fits.mjs: every section and photo fits at 1280x650, 1440x900, 1536x753, 1920x1080, 390x844 and 360x640

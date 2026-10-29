@@ -129,6 +129,9 @@
     .hero .film { object-position: 50% 50%; }
     .hero h1 { font-size: clamp(2.4rem, 1rem + 8vw, 3.4rem); }
     .hero .rise li { width: 25vw; top: 66%; }
+    /* the box at full light until the headline comes (Tzvi, 28 Oct 2026, page rules 5b.3: on a phone the picture
+       stays seen); the shade arrives with the words it is for */
+    .hero .stage::after { opacity: var(--h, 0); }
   }
   /* reduced motion: no hold, the box already open, the gifts in place */
   @media (prefers-reduced-motion: reduce) {
@@ -136,6 +139,7 @@
     .hero .stage { position: relative; top: 0; height: calc(100svh - var(--bar-h)); }
     .hero h1, .hero .act { opacity: 1; translate: 0 0; filter: none; }
     .hero .cue { display: none; }
+    .hero .stage::after { opacity: 1; }
   }
   @keyframes fade { to { opacity: 1; } }
   @keyframes settle { to { opacity: 1; translate: 0 0; filter: blur(0); } }
@@ -612,7 +616,7 @@
   var open = document.getElementById('open'), film = document.getElementById('film');
   var small = window.matchMedia('(max-width: 760px)').matches;
   var h1 = document.getElementById('h1'), cue = document.getElementById('cue');
-  var rise = [].slice.call(document.querySelectorAll('#rise li'));
+  var rise = [].slice.call(document.querySelectorAll('#rise li')), stage = document.querySelector('.hero .stage');
   film.poster = film.dataset[still ? (small ? 'sm' : 'sd') : (small ? 'pm' : 'pd')];
   if (!still) { film.src = film.dataset[small ? 'm' : 'd']; film.load(); }
   var fWant = 0, fBusy = false;
@@ -633,7 +637,7 @@
     fWant = seg(p, 0, .55);
     if (!fBusy) fSeek();
     var hh = ease(seg(p, .45, .6));
-    h1.style.setProperty('--h', hh.toFixed(3));
+    h1.style.setProperty('--h', hh.toFixed(3)); stage.style.setProperty('--h', hh.toFixed(3));
     if (hh > .98 && !glinted) { glinted = true; var em = h1.querySelector('em'); em.classList.add('glint'); em.addEventListener('animationend', function () { em.classList.remove('glint'); }, { once: true }); }
     if (cue) cue.style.setProperty('--cue', (1 - seg(p, .03, .12)).toFixed(3));
     rise.forEach(function (li, i) {

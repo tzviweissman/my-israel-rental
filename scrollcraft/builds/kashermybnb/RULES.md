@@ -114,7 +114,7 @@ R8.3 pass: the kitchen is a generated setting and not claimed as theirs; no gene
 R8.4 n/a: nothing of this kind on the site
 R3c.13 pass: nothing cut off in screenshots at 1440x900 and 390x844 of every new section, and check-fits passed at six sizes
 R3c.14 pass: the pots picture is a cut-out on a plain blue ground, looked at: no fringe
-R5b.3 pass: no text over a picture except the opening, which has a soft wash; readable could not be run, so by eye at 1440x900 and 390x844
+R5b.3 pass: no text over a picture except the opening, which has a soft wash; readable could not be run, so by eye at 1440x900 and 390x844; on a phone the white wash ends just under the words, the kitchen below at full light (28 Oct 2026; check-photo-clear: 16-20% covered, was 41-43%)
 R3e.8 pass: readable (reduced to 1440x900 and 390x844, 8 scroll stops, because the full six sizes crash the renderer on this machine) said every word clear on each page
 R3s.24 pass: site MEDIA clean (25 Oct): with motion off the walk is not held; the kitchen and the opening words stay as the first screen and every station card and the Ready panel sit open under it as a list (looked at 1280x800 and 390x844)
 R3p.6 pass: check-fits passed on every page at the six sizes
