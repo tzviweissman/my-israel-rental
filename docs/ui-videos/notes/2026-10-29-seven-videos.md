@@ -19,7 +19,7 @@ U7jTCgIWS4w (uxpeak, design thinking) was already studied: 2026-10-20-nine-video
 
 ## Not adopted, and why
 - A flat 40% dark overlay on the hero film (5QM78yqpONI): our 3h.9 bans scrims over the film; his own frame at 20:44 shows it failing on bright frames.
-- Parallax layers, rotating headline words, particle logo clouds, a mascot that follows the pointer (m491R3ewNgE, DCwh7SIfWL4, ncQUil5c2Gw): one scroll effect per page (3h point 20) and 8a's ban on decorative pointer motion.
+- Not banned, to be used in moderation (Tzvi, 29 Oct: "we dont need only 1 affect it just cant be too much"): parallax layers, rotating headline words, particle logos (m491R3ewNgE, DCwh7SIfWL4) fit within 3h point 20's budget when they never hold up the products or the order. A mascot that follows the pointer (ncQUil5c2Gw) still meets 8a's ban on decorative pointer motion.
 - A/B/C variants of each component for the owner to pick (ncQUil5c2Gw): Tzvi's rule is to choose ourselves from research; options only when he asks.
 - Confirm-shaming, deadline banners, progress bars that count sign-up as done, sunk-cost reminders, "just 2.6%" price framing (2TlIg3VokY8): dishonest, 3j Never.
 - Figma-first grids, Spline 3D, iOS/Expo material: not our stack.

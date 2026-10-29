@@ -833,6 +833,15 @@ out to the jar, with a new line of huge words over each scene.
    from (Tzvi, 23 Oct 2026: "for the wow use mobbin and our inspo and 21st for
    inspiration"); check-concept fails a Wow gate with no Mobbin link and no
    Inspo or docs/inspo reference.
+   **Sketch first** (Tzvi, 29 Oct 2026, from Jack Roberts' video DCwh7SIfWL4,
+   whose film was storyboarded as four rough line drawings, approved, then
+   four photoreal stills): before any photoreal still, one storyboard sheet
+   of rough black line drawings on white, one row per concept, three or four
+   panels per row (the film's start, middle and end, the words under each).
+   One cheap generation (or drawn in SVG), no colour, no detail. Tzvi picks a
+   row or asks for changes on the sketch, where a change costs nothing; only
+   the chosen concept is then made as photoreal stills and keyframes. The
+   sheet is `gen/storyboard.png`, named in the film brief.
 7. **Seams checked.** Every clip starts on the last frame of the one before
    (one clip per physical step, as before); after rendering, compare the
    frames either side of each join and regenerate a clip whose join jumps.
@@ -1007,17 +1016,21 @@ that policy).*
    Worked example: scrollcraft/builds/noa-levi-home-styling/gen/tidy-brief-v3.md
    (the drawer is emptied, then filled boxes go in, in three clips between
    four stills).
-20. **One scroll effect per page** (Tzvi, 29 Oct 2026: "there shouldnt be two
+20. **Effects, never too much** (Tzvi, 29 Oct 2026: "there shouldnt be two
     scroll affects on one page especially on mobile where people just want to
-    see the products and order fast its a bit annoying"). The opening film is
-    the page's one scroll effect; everything after it scrolls normally. A
-    second thing that holds the page while the scroll changes it (a flavour,
-    size or step that turns as you scroll) becomes a tap: the same spot, the
-    same pictures, changed by tapping a chip or a photo. Bake away's flavour
-    spot held the page for eight screens after the film; it now changes on a
-    tap. `scripts/check-one-scroll.mjs` fails any page with two sections that
-    pin while the page scrolls more than half a screen (run by check-build and
-    publish-page).
+    see the products and order fast its a bit annoying", then the same day:
+    "we dont need only 1 affect it just cant be too much. these people are
+    proffesional designers and we need to learn from them"). A page may have
+    several effects, learned from the designers we study (docs/inspo,
+    docs/ui-videos), but none may stand between a phone visitor and the
+    products or the order. The opening film may hold the page for its length;
+    any other section that holds the page while the scroll changes it is
+    short, at most a screen and a half, and the page has at most three such
+    sections in all. Longer turning (flavours, sizes, steps) becomes a tap.
+    Bake away's flavour spot held the page for eight screens after the film;
+    it now changes on a tap. `scripts/check-one-scroll.mjs` fails a page
+    whose sections after the first hold the page for more than 1.6 screens
+    each, or that has more than three (run by check-build and publish-page).
 
 ## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
 
@@ -1219,6 +1232,16 @@ small website. A single page stays fine for a business with little to say
 7. **Check every page**, not only the home page: clipped.mjs and readable.mjs
    on each, the phone menu opened, and an Add on one page reaching the order
    page.
+8. **The order form arrives filled in** (Tzvi, 29 Oct 2026, from uxpeak's
+   video 2TlIg3VokY8: five empty booking fields against the same form with
+   tomorrow, 7:00 and 2 guests already chosen; "every blank field is a
+   decision"). The day field holds the first day the business can do (its
+   lead time, skipping Shabbat and holidays when it closes for them), the
+   quantity is 1, and any choice the owner says most customers make is
+   already chosen; all of it changeable. A customer's own pick is never
+   overwritten. `scripts/check-prefill.mjs` fails an empty day field (run by
+   check-build and publish-page) and notes choice groups with nothing chosen.
+   Worked examples: Bake away and LS Fruit Platter's shop.html.
 
 
 **Every order is saved before WhatsApp opens** (Tzvi, 22 Oct 2026: "when someone clicks order it saves all the information to the site and then redirects them to WhatsApp with a pre typed message"). The order or booking button first POSTs the order to MyIsraelRental through the business's order form (`/api/marketplace/order-form/<gig>/orders`, the way Chicken Munch's order.html does; bookings and quotes through their own endpoints), so it reaches the owner's dashboard, the customer gets a tracking link and the review request follows; only then does it open WhatsApp with the order written out. Every product on the site exists as a product of that business's listing (same name and price), so the saved order names real products. If saving fails, WhatsApp still opens (the customer is never stuck), and the failure is logged. check-site SAVE fails a page whose order reaches WhatsApp without that POST first.

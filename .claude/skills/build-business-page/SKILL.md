@@ -139,10 +139,14 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 9. One idea per page, used once (section 4).
 10. Wow test, clipped.mjs, readable.mjs BEFORE any link or video is sent.
 11. Owner video last, from the live page.
-11b. **One scroll effect per page** (Tzvi, 29 Oct 2026): the opening film is
-   the one thing that follows the scroll; flavours, sizes or steps after it
-   change on a tap and the page scrolls normally (rules 3h.20,
-   `check-one-scroll.mjs`). Phone visitors want the products and the order.
+5b. **Sketch the film first** (Tzvi, 29 Oct 2026): one sheet of rough line
+   drawings, a row per concept, before any photoreal still; Tzvi picks a row,
+   then only that concept is made (rules 3h.6 "Sketch first", R3h.22).
+11b. **Effects, never too much** (Tzvi, 29 Oct 2026): learn effects from the
+   designers we study and use several, but none stands between a phone
+   visitor and the products or the order. The opening film may hold the page;
+   any later scroll scene is at most 1.5 screens, three in all; longer turning
+   is a tap (rules 3h.20, `check-one-scroll.mjs`).
 12. A page on the business pages list: `publish-page.mjs` re-records its preview
     clip automatically; `node scripts/check-showcase-previews.mjs` fails if any
     tile shows an older version of its page (The Gift Boutique, 18 Oct 2026).

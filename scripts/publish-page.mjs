@@ -121,9 +121,11 @@ const CHECK_ONLY = process.argv.includes('--check');
   const newer = newerRules(ROOT, SRC);
   for (const [script, why, rule] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly'],
     // smooth on a slowed phone, and repeated labels keep one place (Tzvi, 26-27 Oct 2026; rules 3s.27)
-    ['check-speed.mjs', 'is not smooth on a phone'], ['check-overlap.mjs', 'has words on words', 'R3s.26'], ['check-opening-scroll.mjs', 'has an opening scroll that is not smooth or too short', 'R3h.20'], ['check-same-place.mjs', 'moves a repeated label', 'R3s.27'], ['check-one-scroll.mjs', 'has two scroll effects', 'R3h.21'],
+    ['check-speed.mjs', 'is not smooth on a phone'], ['check-overlap.mjs', 'has words on words', 'R3s.26'], ['check-opening-scroll.mjs', 'has an opening scroll that is not smooth or too short', 'R3h.20'], ['check-same-place.mjs', 'moves a repeated label', 'R3s.27'], ['check-one-scroll.mjs', 'holds the scroll too much', 'R3h.21'],
     // on a phone the opening photo is seen, not covered by words and shades (Tzvi, 28 Oct 2026; rules 5b.3)
-    ['check-photo-clear.mjs', 'covers its opening photo on a phone', 'R5b.3']]) {
+    ['check-photo-clear.mjs', 'covers its opening photo on a phone', 'R5b.3'],
+    // from Tzvi's seven videos (29 Oct 2026): no blank screen in the scroll, the order form arrives filled in
+    ['check-blank.mjs', 'shows a blank screen', 'R3s.28'], ['check-prefill.mjs', 'has an order form that is not filled in', 'R3k.10']]) {
     if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }

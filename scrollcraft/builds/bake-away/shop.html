@@ -208,7 +208,7 @@
   // are refused here. The closures come from the order form; if they cannot be loaded, Saturdays are still refused.
   var closures = [], loaded = false;
   function loadClosures() { loaded = true; fetch(API + '/marketplace/order-form/' + GIG).then(function (r) { return r.ok ? r.json() : null; }).then(function (j) {
-    var sc = j && j.business && j.business.shabbat_closing; closures = (sc && sc.closures) || []; check(false); drawStep();
+    var sc = j && j.business && j.business.shabbat_closing; closures = (sc && sc.closures) || []; prefill(); check(false); drawStep();
   }).catch(function () {}); }
   function closedDay(iso) {
     if (!iso) return false;
@@ -222,6 +222,13 @@
   // she asks for 24 to 48 hours: the earliest day is the one 24 hours from now
   var earliest = new Date(Date.now() + 864e5), minDay = new Date(earliest.getTime() - earliest.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   document.getElementById('when').min = minDay;
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k Pre-filled): the first day she can bake for that is not
+  // Shabbat or a holiday, changeable; filled again when the closures arrive, unless the customer already chose a day
+  var picked = false;
+  function firstOpen() { var d = new Date(minDay + 'T12:00'); for (var i = 0; i < 14; i++) { var iso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); if (!closedDay(iso)) return iso; d.setDate(d.getDate() + 1); } return minDay; }
+  function prefill() { if (!picked) document.getElementById('when').value = firstOpen(); }
+  document.getElementById('when').addEventListener('input', function () { picked = true; });
+  prefill();
   function check(show, upto) {
     var ok = true, e; upto = upto || 3;
     e = total() ? '' : 'Add a bake to your basket'; if (e) ok = false; if (show || !e) mark('items', e);

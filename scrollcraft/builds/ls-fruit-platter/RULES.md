@@ -41,6 +41,7 @@ R3b.3 pass: one solid action per screen: the bar button is the outline version o
 R3h.1 pass: the home page opens on the fruit rain, which follows the scroll (26 Oct, Tzvi: "why is it not scrollable"): her empty board fills as you scroll, empties on the way back up
 R3h.20 pass: scroll-driven since 26 Oct: the film section is 3.2 screens (320svh) with a sticky stage; frames on a canvas (assets/film/d and m), loaded in passes, shown point eased toward the scroll; her board on a plain red ground, the whole board on a tall phone (frames m); check-site SMOOTH/SLOW run by publish-page
 R3h.21 pass: check-one-scroll clean at 390x844 and 1440x900 (29 Oct)
+R3h.22 n/a: the fruit rain film was made before the rule (gen/opening-film-v3-brief.md)
 R3n.1 pass: her Large platter fills the whole first screen on laptop and phone
 R3n.2 pass: the fruit bursts up off her Large board in the opening film; no other business has her board
 R3n.3 pass: on the shop page choosing a size changes the stage photo, name, price, button and the page ground to that size's colour; check-motion COLOUR clean
@@ -144,6 +145,7 @@ R3.14 pass: prices are loud because prices exist; this is a priced shop
 R3k.7 pass: check-site FLOW: Step 1 basket, Step 2 when and where, Step 3 details; the three step buttons have a pointer cursor, hover, pressed and focus states and a later step can be tapped (it goes as far as the filled-in steps allow and shows what is missing); Back button; browser back goes back a step; total beside each step
 R3k.8 pass: every basket line has a 40 px remove button
 R3k.9 pass: the Send button POSTs to /api/marketplace/order-form/cbf66136-.../orders (platter product ids 55113012e889 etc. from the 22 Oct add_site_products run; the time goes in notes) while a blank WhatsApp tab is already open, then fills the tab with the message and the tracking link; a failed POST still opens WhatsApp. Intercepted a full order in Playwright (fulfilment delivery, city jerusalem, address, date, name, phone, notes match WebsiteOrderIn); check-site SAVE and FLOW pass; nothing sent to the live site. Live saving also needs the listing converted to a store (convert_to_store in site_products_plan.json) and whether she delivers: listed in the reply
+R3k.10 pass: check-prefill clean: the day field opens on tomorrow (same-day is question 14 to her), changeable; quantity 1
 R3k.6 pass: Add on a home card opens shop.html#order with that size already in the basket (add=1)
 R3.15 pass: ordering has the shop; messaging has contact
 R7.1 pass: CONCEPT.md names the pick (film plus slat stage) and the reason
@@ -202,3 +204,4 @@ R8.7 pass: gen/opening-film-v3-brief.md written before generating (steps approve
 R3h.19 pass: gen/opening-film-v3-brief.md was written before generating with the steps (approved by Tzvi 26 Oct) and every object's start and end; start and end stills pinned (the empty board edited from assets/opening-end.webp, and opening-end.webp itself), one action (fruit falls in past the top edge and settles), one clip between them; the number of tries is not recorded
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 pass: scripts/check-same-place.mjs clean on index, shop and contact at 390x844 and 1440x900 (27 Oct): the four sizes on the one-at-a-time stage share one place for name, size and price; the shop's size boxes sit in one row of equal boxes
+R3s.28 pass: check-blank run on every page at 390x844 and 1440x900 before publishing (29 Oct)
