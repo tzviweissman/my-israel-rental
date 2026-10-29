@@ -60,3 +60,18 @@ async def convert_amount(amount: float, from_currency: str, to_currency: str) ->
         logger.warning("No FX rate cached for %s; returning amount unchanged", rate_key)
         return amount
     return amount * rate
+
+
+def normalize_currency(v: str | None) -> str | None:
+    """A currency as typed ("₪", "nis", "$", "usd") as its code. Unknown
+    values pass through upper-cased; empty stays as it was."""
+    t = str(v or "").strip().lower()
+    if not t:
+        return v
+    if "₪" in t or t in ("ils", "nis") or "shekel" in t or "שח" in t or "ש״ח" in t:
+        return "ILS"
+    if "$" in t or t == "usd" or "dollar" in t:
+        return "USD"
+    if "€" in t or t == "eur" or "euro" in t:
+        return "EUR"
+    return t.upper()

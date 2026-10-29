@@ -287,6 +287,10 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
     if (propertyForm.rental_type === 'long-term' && !propertyForm.starting_date) {
       missing.push('Starting date');
     }
+    // New listings only: an old one without photos can still be edited.
+    if (!editingProperty?.id && !(propertyForm.images || []).length) {
+      missing.push('At least one photo');
+    }
     return missing;
   // holiday_tags / holiday_lump_price belong here now that they can satisfy
   // the price requirement. Without them the memo wouldn't recompute when a
@@ -295,7 +299,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
   }, [propertyForm.title, propertyForm.area, propertyForm.monthly_price,
       propertyForm.nightly_price, propertyForm.starting_date,
       propertyForm.rental_type, propertyForm.holiday_tags,
-      propertyForm.holiday_lump_price]);
+      propertyForm.holiday_lump_price, propertyForm.images, editingProperty?.id]);
   const canSubmit = missingRequiredFields.length === 0;
 
   const handleSubmit = async (e) => {

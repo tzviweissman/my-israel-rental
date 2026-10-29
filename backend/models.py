@@ -4,6 +4,7 @@ from typing import List
 from pydantic import Field, BaseModel, EmailStr, field_validator
 
 from utils.area_normalize import normalize_area
+from utils.fx import normalize_currency
 from utils.whatsapp_link import normalize_whatsapp_number
 
 
@@ -216,6 +217,13 @@ class PropertyCreate(BaseModel):
     @classmethod
     def _canonicalize_area(cls, v: str) -> str:
         return normalize_area(v)
+
+    # Every reader compares against "ILS"/"USD", so a stored "₪" was shown
+    # as dollars: 72 live listings carried it (fixed 29 Oct 2026).
+    @field_validator("currency", "agent_fee_currency", "cleaning_fee_currency", "holiday_lump_currency")
+    @classmethod
+    def _currency_code(cls, v: str | None) -> str | None:
+        return normalize_currency(v)
 
 
 class BookingCreate(BaseModel):
