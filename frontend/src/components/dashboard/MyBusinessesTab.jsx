@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer } from 'lucide-react';
+import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer, Megaphone } from 'lucide-react';
 import { toast } from 'sonner';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import BusinessDetailsForm from './BusinessDetailsForm';
@@ -28,6 +28,7 @@ import { BusinessHoursPanel } from './OrdersTab';
 import LookingForYou from './LookingForYou';
 import ShareListingsPanel from './ShareListingsPanel';
 import ReviewBadgePanel from './ReviewBadgePanel';
+import AdMaker from './AdMaker';
 import { businessPublicUrl } from '../../utils/businessHost';
 import { handBuiltList } from '../../utils/handBuiltPages';
 
@@ -48,6 +49,7 @@ export default function MyBusinessesTab({ API, token }) {
   // WITHIN it, so the tab bar and the browser's back button behave the
   // way someone expects from a dashboard rather than a page tree.
   const [openBiz, setOpenBiz] = useState(null);
+  const [adBiz, setAdBiz] = useState(null);
   // Which business is having its Good-to-know facts edited (spec C6).
   const [detailsBiz, setDetailsBiz] = useState(null);
   // K3 — which business's PAGE is being designed. A separate full-screen
@@ -226,6 +228,7 @@ export default function MyBusinessesTab({ API, token }) {
 
   return (
     <div data-testid="my-businesses-tab">
+      {adBiz && <AdMaker API={API} token={token} targetType="business" target={adBiz} onClose={() => setAdBiz(null)} />}
       {/* S3a — blocked time is per PERSON, not per business, so it sits
           above the list rather than inside one of the cards. */}
       <BlockTimePanel API={API} token={token} />
@@ -426,6 +429,16 @@ export default function MyBusinessesTab({ API, token }) {
                     testidPrefix={`business-share-${b.id}`}
                     tour={items[0]?.id === b.id ? 'business-share' : undefined}
                   />
+                  <button
+                    type="button"
+                    onClick={() => setAdBiz(b)}
+                    className="inline-flex items-center gap-1.5 ps-2.5 pe-3 py-1.5 rounded-full text-xs font-semibold border"
+                    style={{ borderColor: 'var(--brand-border)', background: '#fafaf5', color: 'var(--brand-primary)' }}
+                    data-testid={`business-make-ad-${b.id}`}
+                  >
+                    <Megaphone size={13} aria-hidden="true" />
+                    {t('ads.makeButton', 'Make an ad')}
+                  </button>
                   <ReviewBadgePanel API={API} business={b} pageUrl={businessPublicUrl(b.slug, b.id, { origin: 'https://myisraelrental.com' })} />
                   {!b.active && (
                     <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>

@@ -670,7 +670,7 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
                 </div>
               </div>
 
-              <ListingStrength property={property} onEdit={onEdit} />
+              <ListingStrength property={property} onEdit={onEdit} API={API} token={token} />
 
               {/* Automatic messages to guests: stays only. */}
               {(property.rental_type === 'vacation' || property.rental_type === 'short-term') && (
