@@ -33,6 +33,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { checkReferences } from './check-references.mjs';
+import { checkIdeas } from './check-ideas.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 
@@ -46,6 +47,11 @@ export function checkConcept(dir) {
   const published = (() => { try { return Object.values(JSON.parse(fs.readFileSync(path.join(ROOT, 'scrollcraft', 'published.json'), 'utf8'))).map((v) => v.folder); } catch { return []; } })();
   const older = published.includes(path.basename(path.resolve(dir))) && !fs.existsSync(path.join(dir, 'REFERENCES.md'));
   const problems = older ? [] : checkReferences(dir).map((p) => `References: ${p}`);
+  // the ideas themselves, from that reading and unlike other sites' (Tzvi, 29 Oct 2026); every new build,
+  // and any published one that already keeps an IDEAS.md
+  if (!published.includes(path.basename(path.resolve(dir))) || fs.existsSync(path.join(dir, 'IDEAS.md'))) {
+    problems.push(...checkIdeas(dir).filter((p) => !p.startsWith('References: ')).map((p) => `Ideas: ${p}`));
+  }
   const ideas = part('Ideas');
   const refs = [...ideas.matchAll(/docs\/inspo\/[^\s)]+\.(?:webp|png|jpe?g)/gi)].map((m) => m[0]);
   const missing = refs.filter((r) => !fs.existsSync(path.join(ROOT, r)));

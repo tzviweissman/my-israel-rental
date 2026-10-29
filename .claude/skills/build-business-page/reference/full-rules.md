@@ -557,6 +557,23 @@ a round with Tzvi. Done in this order, none of them happens.
    runs it; and a Claude Code hook (`scripts/hooks/require-references.mjs`) blocks Higgsfield generation
    for the build being worked on until it passes. Sites published before this rule are not asked for one.
    Worked example: `scrollcraft/builds/bake-away/REFERENCES.md`.
+   **The ideas themselves come from the reading, and repeat no other site** (Tzvi, 29 Oct 2026, on Krysp's
+   first four openings: "all your food wow moments are too similar ... did you look at our inspo sources",
+   then "make sure that you dont keep skipping looking through the inspo sources"). REFERENCES.md passed,
+   but a helper had written it and the ideas came from three of its pictures; two were the same kind of
+   event as earlier sites (pieces filling the board, crumbs dropping onto it). So before any idea is shown
+   (a message, a sketch) or any credit spent, the build holds `IDEAS.md`: at least three ideas, one headed
+   "Own", each with `- motion:` (the kind of event, then what happens), `- sources:` (two or more saved
+   pictures from two or more saved sources, each opened by the builder and each named in REFERENCES.md)
+   and `- steps:` (numbered). `node scripts/check-ideas.mjs <build>` fails an idea whose kind
+   `scrollcraft/motions.json` says another site uses (drop, pour, window, assemble, burst, stickers,
+   slats, tumble, untie, journey, dial), a picture that does not exist or is not in REFERENCES.md, and
+   REFERENCES.md naming a picture that is not saved. When an idea is chosen, write `## Chosen: <letter>`
+   and add its kind to motions.json with the build's folder, so the next site cannot repeat it.
+   check-concept runs it for every new build, and a hook (`~/.claude/hooks/ideas-gate.mjs`) blocks paid
+   generation and any sketch widget titled as ideas, openings, concepts or films until it passes. A helper
+   may read the sources too, but the builder opens every picture an idea cites. Worked example:
+   `scrollcraft/builds/krysp/IDEAS.md` (round 1 fails on four counts, round 2 passes).
 5. **Plan the phone frame before generating.** A clip made at 16:9 had to be
    re-cropped three times for phones (the box drifted off centre; the arch
    came out tiny). Generate with the subject centred and a margin, and
