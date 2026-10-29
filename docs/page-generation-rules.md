@@ -784,7 +784,7 @@ make their sites so beautiful: the imagery first, and almost nothing else.
 3. **Shows the product on a plain ground of its own world**, never on a photo of the same kind of product (a board on a board).
 4. **Keeps the product and every photo whole**: nothing cut by the screen edge or by the photo's own framing, unless the bleed is clearly deliberate; crop out half props.
 5. **Loads the first screen first**: the opening's images preloaded, everything below lazy.
-check-site SMOOTH and SLOW enforce 1 and 2; 3 to 5 are looked at on the sheet before showing.
+check-opening-scroll (SMOOTH and SLOW) enforces 1 and 2; 3 to 5 are looked at on the sheet before showing.
 
 Tzvi: "it looks wow, much nicer than what you made for the brown box ... every
 detail is crisp and clear and makes a person want to try some." Side by side,
@@ -1562,7 +1562,7 @@ console error, a 404, a dead link between pages), SHIFT (layout moves after load
 tapped), GLYPH (a character the fonts lack, like ₪ or →: load a face that has it, or draw it), STATE
 (a button with no hover or pressed state), TAP (under 40 px on a phone, or overlapping), ALIGN (text
 2 to 12 px off its section's edge, same-kind buttons of different sizes, a card name under 1.25x its
-line), OVERLAP (two lines of words cover each other anywhere, pinned scenes included, at 1366x768,
+line), OVERLAP (in its own script, `scripts/check-overlap.mjs`, since 29 Oct 2026: two lines of words cover each other anywhere, pinned scenes included, at 1366x768,
 1280x720, 1440x900 or 390x844: the common short laptops, where Michal Simkin's quotes sat on her heading
 on 26 Oct 2026 while every check looked at 1440x900), PHONE (sideways scroll, the bottom bar over a button at the end), MEDIA (a photo over 600 KB,
 an image without its size, a video without a poster, words left hidden with motion off) and FLOW (an

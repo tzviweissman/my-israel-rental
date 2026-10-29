@@ -6,7 +6,7 @@
  *
  *   node scripts/check-build.mjs scrollcraft/builds/<folder>     (the site must be served, see below)
  *
- * Per page: check-site, check-fits, check-motion, check-speed, check-same-place, check-one-scroll, readable. Per site: check-concept,
+ * Per page: check-site, check-fits, check-motion, check-speed, check-same-place, check-one-scroll, check-photo-clear, check-overlap, check-opening-scroll, readable. Per site: check-concept,
  * check-fingerprints, check-rules, and the independent review (below). Prints one line per check and the first problems of each failure; exits 1 if any fails.
  * Pages are read from http://127.0.0.1:8990/<folder>/ (scripts/serve-builds.mjs); set CHECK_BASE to change it.
  * A site is shown to Tzvi or published only after this passes (page rules 3a).
@@ -43,7 +43,7 @@ try {
 const runs = [];
 for (const p of pages) {
   const url = `${base}/${folder}/${p}`;
-  for (const s of ['check-site', 'check-fits', 'check-motion', 'check-speed', 'check-same-place', 'check-one-scroll']) runs.push([`${s} ${p}`, [path.join(ROOT, 'scripts', `${s}.mjs`), url]]);
+  for (const s of ['check-site', 'check-fits', 'check-motion', 'check-speed', 'check-same-place', 'check-one-scroll', 'check-photo-clear', 'check-overlap', 'check-opening-scroll']) runs.push([`${s} ${p}`, [path.join(ROOT, 'scripts', `${s}.mjs`), url]]);
   if (fs.existsSync(readable)) runs.push([`readable ${p}`, [readable, url]]);
 }
 for (const s of ['check-concept', 'check-fingerprints', 'check-rules']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), dir]]);
