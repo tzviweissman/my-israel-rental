@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import { API, AuthContext } from '../App';
+import { noteSearch } from '../utils/visitorId';
 import PageMeta from '../components/PageMeta';
 import ShowcaseStrip from '../components/showcase/ShowcaseStrip';
 import { useShowcase } from '../components/showcase/ShowcaseCard';
@@ -241,6 +242,8 @@ const Services = () => {
       params.set('lng', coords.lng.toFixed(4));
       if (maxDistance) params.set('max_distance_km', maxDistance);
     }
+    // Counted for the "who is looking" lines (components/common/DemandLines).
+    noteSearch(API, 'services', selectedLoc, selectedCat);
     setLoading(true);
     axios.get(`${API}/marketplace/gigs?${params.toString()}`)
       .then((r) => setGigs(r.data))

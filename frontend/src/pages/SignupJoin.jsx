@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import WelcomePopups from '../components/WelcomePopups';
+import DemandLines from '../components/common/DemandLines';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import AuthShell from '../components/auth/AuthShell';
 
@@ -392,6 +393,8 @@ const SignupJoin = () => {
                 and password — offering the one-tap route after the form
                 is filled in is offering it too late to be worth
                 anything. */}
+
+            <DemandLines compact className="mt-4 flex justify-center [@media(max-height:760px)]:hidden" />
 
             {/* F4 — the feature library, linked from /join. Someone still
                 deciding which card to press is exactly who benefits from

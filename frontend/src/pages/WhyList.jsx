@@ -25,6 +25,7 @@
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import DemandLines from '../components/common/DemandLines';
 import BackLink from '../components/common/BackLink';
 import { GetFoundCard, TakeBookingsCard, LivePageCard } from '../components/common/WhyListDemos';
 import { Link, useNavigate } from 'react-router-dom';
@@ -121,6 +122,7 @@ const WhyList = () => {
               {t('whyList.pasteAdLink', 'Start here')}
             </Link>
           </p>
+          <DemandLines className="mt-8 inline-block text-start rounded-xl border border-[var(--brand-border)] bg-white px-5 py-4" />
         </div>
       </section>
 

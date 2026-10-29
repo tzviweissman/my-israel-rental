@@ -48,6 +48,7 @@ import BackLink from '../components/common/BackLink';
 import { useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import PageMeta from '../components/PageMeta';
+import DemandLines from '../components/common/DemandLines';
 import SITE_ASSETS from '../lib/siteAssets';
 import SkylineRule from '../components/common/SkylineRule';
 
@@ -198,6 +199,7 @@ const WhyHost = () => {
               {t('whyHost.cta', 'List your property free')}
               <ArrowRight size={16} className="rtl:rotate-180" />
             </button>
+            <DemandLines stays className="mt-8" />
           </div>
 
           {/* The star of the page, and it has to earn that by referring to

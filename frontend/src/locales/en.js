@@ -4269,6 +4269,13 @@ const en = {
         closingTitle: 'Your next tenant is already looking',
         closingBody: 'Listing takes a few minutes and costs nothing.',
       },
+      demand: {
+        heading: 'Who is looking right now',
+        stays: '{{n}} people looked for a place to stay this week',
+        topArea: 'Most searched area: {{area}} ({{n}} people)',
+        services: '{{n}} people looked for a local business or pro this week',
+        requests: '{{n}} requests posted in the last 30 days by people looking for something',
+      },
       whyList: {
         bookingsTitle: 'Take bookings without a phone call',
         bookingsBody: 'A request arrives with what they need and when. You accept it, and it is in your calendar - no missed call, no chasing.',

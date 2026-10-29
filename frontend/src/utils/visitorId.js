@@ -66,3 +66,22 @@ export function visitorHeaders() {
 }
 
 export default getVisitorId;
+
+/**
+ * Note what someone is searching for, for the "who is looking" lines on
+ * the Why list, Why host and join pages (backend routes/site_visits.py).
+ * Waits until the filters have stopped changing, so typing an area or
+ * flicking through options counts as one search, and never throws.
+ */
+let searchTimer = null;
+export function noteSearch(api, kind, area = '', what = '') {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    fetch(`${api}/site/search`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...visitorHeaders() },
+      body: JSON.stringify({ kind, area, what }),
+      keepalive: true,
+    }).catch(() => {});
+  }, 1500);
+}
