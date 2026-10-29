@@ -458,12 +458,7 @@ input[type=date].fld { color-scheme: light; }
 .gallery-hold h2 { font-size: var(--t4); }
 .open .label { color: #FFC24D; }
 .price .pp s { margin-left: .5rem; opacity: .85; }
-/* by the pan: one large picture of a pan beside the two sizes, no photo per size (the owner, 29 Oct 2026:
-   "just show a large pan or remove the pictures"; the cut 9x13 and the roaster were the same tray) */
-.pans { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); }
-.pan-big { background: #fff; display: grid; place-items: center; min-height: 0; }
-.pan-big img { width: 100%; max-height: min(62svh, 34rem); object-fit: contain; padding: 4%; }
-.rooms.one { --n: 1; }
+/* by the pan: no pictures, the two sizes side by side (the owner, 29 Oct 2026: he did not like the cut 9x13
+   and the roaster photos, the same tray twice, and asked to remove them) */
 .room h3 .tag { display: inline-block; vertical-align: middle; margin-inline-start: .5rem; padding: .3rem .7rem; border-radius: 999px; background: #fff; color: #14110F;
   font: 800 var(--t1)/1.2 var(--font-body); letter-spacing: .05em; text-transform: uppercase; }
-@media (max-width: 860px) { .pans { grid-template-columns: 1fr; } .pan-big img { max-height: 34svh; } }
