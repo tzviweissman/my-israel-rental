@@ -1001,6 +1001,17 @@ that policy).*
    Worked example: scrollcraft/builds/noa-levi-home-styling/gen/tidy-brief-v3.md
    (the drawer is emptied, then filled boxes go in, in three clips between
    four stills).
+20. **One scroll effect per page** (Tzvi, 29 Oct 2026: "there shouldnt be two
+    scroll affects on one page especially on mobile where people just want to
+    see the products and order fast its a bit annoying"). The opening film is
+    the page's one scroll effect; everything after it scrolls normally. A
+    second thing that holds the page while the scroll changes it (a flavour,
+    size or step that turns as you scroll) becomes a tap: the same spot, the
+    same pictures, changed by tapping a chip or a photo. Bake away's flavour
+    spot held the page for eight screens after the film; it now changes on a
+    tap. `scripts/check-one-scroll.mjs` fails any page with two sections that
+    pin while the page scrolls more than half a screen (run by check-build and
+    publish-page).
 
 ## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
 

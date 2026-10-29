@@ -22,8 +22,7 @@ Roman capitals (src/owner/p01.jpg), so the ground stays dark and the rest follow
 ## Chosen
 A (Tzvi, 28 Oct 2026: "go with A"; the five motion steps confirmed with "Yes, make it"). It opens on a real
 event with her own doughnut, it hands straight into the thing only she has (more doughnut flavours than
-any business we have built for), and the visitor drives both: the scroll pours, the scroll or a tap
-chooses the flavour, and Add is beside every flavour.
+any business we have built for), and the visitor drives both: the scroll pours, a tap chooses the flavour, and Add is beside every flavour.
 
 ## Style sheet (3g.1)
 - Ground: warm near-black slate #241B1B (the film's own top band, so page and film meet); a deeper band
@@ -33,11 +32,11 @@ chooses the flavour, and Add is beside every flavour.
 - Faces: Forum (Roman capitals like her card) for headings; Work Sans for text; the shekel sign in the
   text face (3o.5).
 - One radius 14px; one soft shadow tinted with the ground; no gradients except the film's soft edges.
-- Motion: under 0.5 s, eased, never linear; the film and the flavour spot follow the scroll.
+- Motion: under 0.5 s, eased, never linear; only the film follows the scroll; the flavour spot changes on a tap.
 
 ## Effect budget (3f.2)
 - Signature: the drizzle film into the flavour spot (X31).
-- Accents: the flavours turn on the same spot as the scroll passes (part of X31); the range cards' details
+- Accents: tapping a flavour changes the doughnut on the same spot (part of X31; never a second scroll effect, Tzvi 29 Oct 2026); the range cards' details
   slide up (T6); the closing band answers the opening with her card's line under a giant copper BAKE AWAY.
 - Quiet touches: B19 drip on the main button, L1 links, R4 sections slide in, H1 headings rise from a mask.
 
@@ -52,8 +51,8 @@ chooses the flavour, and Add is beside every flavour.
 4. Side by side with a reference: Savor's opening film of chocolate poured into moulds
    (https://mobbin.com/sites/sections/9578c9fe-7f5c-4d32-b868-786881a90d32) and the saved flavour swap
    (docs/inspo/awwwards-food-2026-10-18/still-2-flavour-glow-swap.webp); ours is a closer, single product.
-5. One sentence: you land and chocolate is drizzled across her doughnut as you scroll, then her other
-   doughnuts turn in its place, each with its price and an Add button.
+5. One sentence: you land and chocolate is drizzled across her doughnut as you scroll, then you tap through her
+   other doughnuts in its place, each with its price and an Add button.
 
 ## Effects
 - button: B19, new, from the drizzle itself (her chocolate line); compared with 21st search "bakery donut product showcase scroll"

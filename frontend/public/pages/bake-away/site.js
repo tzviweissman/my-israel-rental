@@ -21,13 +21,17 @@ document.body.classList.remove('no-js');
   function parts(key) { return key.split('~'); }
   function unit(key) { var it = ITEMS[parts(key)[0]]; return it ? it.price : 0; }
   // the line as it is said on the order, the same words on the item, in the basket and in the message (3l.2)
+  // her three cream doughnuts, named from her own photos (p02 to p04); names to be confirmed by her (message-to-owner 14)
+  var CREAM = [['jam', 'Jam and cream', 'p02'], ['plain', 'Cream', 'p03'], ['choc', 'Chocolate cream', 'p04']];
+  function cream(id) { for (var i = 0; i < CREAM.length; i++) if (CREAM[i][0] === id) return CREAM[i][1]; return ''; }
   function label(key) {
     var p = parts(key), it = ITEMS[p[0]]; if (!it) return key;
     if (p[0] === 'dn') return 'Doughnut: ' + lower(flavour(p[2])) + ', ' + (KIND[p[1]] || p[1]);
+    if (p[0] === 'cream' && p[1]) return 'Cream doughnut, ' + lower(cream(p[1]));
     if (p[0] === 'cakes') return 'Cake, ' + (CAKE[p[1]] || p[1]);
     return it.one;
   }
-  window.BA = { FL: FL, ITEMS: ITEMS, flavour: flavour, label: label, unit: unit, money: money };
+  window.BA = { CREAM: CREAM, cream: cream, FL: FL, ITEMS: ITEMS, flavour: flavour, label: label, unit: unit, money: money };
 
   window.siteBasket = {
     get: function () { try { return JSON.parse(localStorage.getItem(BASKET_KEY)) || {}; } catch (e) { return {}; } },

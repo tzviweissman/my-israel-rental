@@ -187,10 +187,9 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
 }
 @media (prefers-reduced-motion: reduce) { .film { height: auto; } .film .stage { position: relative; top: 0; } .film .chap span { transition: none; } .film .chap .k1 { opacity: 0; } .film .chap .k3 { opacity: 1; transform: none; } .film h1 .ln > span { animation: none; } .ln > span { transform: none; } }
 
-/* ── the flavour spot (X31): the doughnut stays, the same place turns through her flavours as you scroll on or tap one ── */
-.spot { position: relative; height: calc(100svh + 8 * 52svh); background: var(--ground); }
-.spot .sticky { position: sticky; top: var(--top-h); height: calc(100vh - var(--top-h)); height: calc(100svh - var(--top-h)); display: flex; flex-direction: column; justify-content: center; gap: clamp(.8rem, 2.4svh, 1.6rem); overflow: hidden; }
-.spot .sticky > * { opacity: 0; transition: opacity 450ms var(--out); } .spot.on .sticky > *, .no-js .spot .sticky > * { opacity: 1; }
+/* ── the flavour spot (X31): the doughnut stays, tap a flavour and the same place shows it (one scroll effect per page: the film) ── */
+.spot { position: relative; background: var(--ground); padding-block: clamp(2.5rem, 8svh, 5rem); }   /* a plain section: one scroll effect per page, the film (Tzvi, 29 Oct 2026) */
+.spot .sticky { display: flex; flex-direction: column; justify-content: center; gap: clamp(.8rem, 2.4svh, 1.6rem); overflow: hidden; }
 .sp-grid { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: clamp(1.2rem, 3vw, 3rem); width: 100%; }
 .sp-l h2 { font-size: clamp(1.8rem, 3vw, 2.8rem); line-height: 1.06; min-height: 4.3em; }   /* room for the longest flavour name, so the name's top never moves */
 .sp-l h2 span { display: block; animation: fade 420ms var(--out); }
@@ -214,16 +213,15 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
 .chips button:hover, .fl button:hover { background: rgba(255, 255, 255, .12); } .chips button:active, .fl button:active { transform: scale(.94); }
 .chips button[aria-pressed="true"], .fl button[aria-pressed="true"] { border-color: var(--ivory); background: rgba(255, 255, 255, .14); }
 @media (max-width: 860px) {
-  .spot { height: calc(100svh + 8 * 46svh); }
   .sp-grid { grid-template-columns: 1fr; gap: .7rem; justify-items: center; text-align: center; }
-  .spot .sticky { justify-content: flex-start; padding-top: 2.5svh; } .sp-l { justify-self: stretch; }   /* hung from the top, so the name never moves (3s.27) */
+  .sp-l { justify-self: stretch; }   /* hung from the top, so the name never moves (3s.27) */
   .sp-l h2 { min-height: 3.2em; font-size: clamp(1.5rem, 6.4vw, 2rem); }
   .sp-ph { --box: min(74vw, 34svh); }
   .sp-r { justify-items: center; gap: .6rem; } .sp-r .tag { display: none; }
   .sp-r .grp-l { display: none; }
   .chips { flex-wrap: wrap; max-width: 21rem; margin-inline: auto; gap: .45rem; } .chips button { width: 64px; height: 48px; }
 }
-@media (prefers-reduced-motion: reduce) { .spot .sticky > * { opacity: 1; transition: none; } .sp-ph img { transition: none; } .sp-l h2 span { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .sp-ph img { transition: none; } .sp-l h2 span { animation: none; } }
 
 /* ── her cream doughnuts: three photos, price and Add ── */
 section.sec.cream { background: var(--deep); padding-block: clamp(1.8rem, 6svh, 4rem); }
@@ -343,3 +341,9 @@ label.opt input { accent-color: var(--ivory); width: 20px; height: 20px; }
 @media (max-width: 700px) { .contact-tiles { grid-template-columns: 1fr; } }
 .seg button[aria-pressed="true"]:hover, .chipb[aria-pressed="true"]:hover, .chips button[aria-pressed="true"]:hover, .fl button[aria-pressed="true"]:hover { background: rgba(255, 255, 255, .24); }
 @media (max-width: 860px) { .st-l { display: contents; } .st-ph { order: 1; justify-self: center; width: min(100%, 40svh, 440px); } .st-info { order: 2; } .st-pick { order: 3; justify-self: center; } }
+/* her three cream doughnuts are the choice: the one tapped is the one Add puts in the basket */
+.cream .trio button { padding: 0; border: 3px solid transparent; border-radius: calc(var(--r) + 3px); background: none; cursor: pointer; transition: border-color 180ms, transform 120ms; }
+.cream .trio button:hover { border-color: var(--soft); } .cream .trio button:active { transform: scale(.97); }
+.cream .trio button[aria-pressed="true"] { border-color: var(--ivory); }
+.cream .trio button img { display: block; }
+.cream .cr-n { margin: .2rem 0 .8rem; font: 600 1.05rem var(--font-body); color: var(--ivory); }

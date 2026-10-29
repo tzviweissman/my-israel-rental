@@ -58,13 +58,14 @@
   <section class="sec cream" aria-labelledby="h-cream">
     <div class="wrap">
       <div class="trio rev">
-        <img src="assets/cream-p02.webp" alt="A sugar dusted doughnut filled with cream and red jam" width="1080" height="1078" loading="lazy">
-        <img src="assets/cream-p03.webp" alt="A sugar dusted doughnut filled with cream" width="1080" height="1078" loading="lazy">
-        <img src="assets/cream-p04.webp" alt="A sugar dusted doughnut filled with cream and chocolate" width="1080" height="1078" loading="lazy">
+        <button type="button" data-c="jam" aria-pressed="true" aria-label="Jam and cream"><img src="assets/cream-p02.webp" alt="A sugar dusted doughnut filled with cream and red jam" width="1080" height="1078" loading="lazy"></button>
+        <button type="button" data-c="plain" aria-pressed="false" aria-label="Cream"><img src="assets/cream-p03.webp" alt="A sugar dusted doughnut filled with cream" width="1080" height="1078" loading="lazy"></button>
+        <button type="button" data-c="choc" aria-pressed="false" aria-label="Chocolate cream"><img src="assets/cream-p04.webp" alt="A sugar dusted doughnut filled with cream and chocolate" width="1080" height="1078" loading="lazy"></button>
       </div>
       <div class="rev r">
         <h2 id="h-cream"><span class="ln"><span>Cream doughnuts</span></span></h2>
-        <p class="t">A very wide variety of doughnuts.</p>
+        <p class="t">A very wide variety of doughnuts. Tap the one you want.</p>
+        <p class="cr-n" id="cr-n" aria-live="polite">Jam and cream</p>
         <div class="buyrow"><span class="pr"><span class="sym">₪</span>18</span><button class="btn" type="button" data-buy="cream" aria-label="Add Cream doughnuts to your order, ₪18"><span>Add</span></button></div>
       </div>
     </div>
@@ -171,13 +172,16 @@
   var BA = window.BA;
   // Add on a card: one into the basket
   function add(key, n) { var b = window.siteBasket.get(); b[key] = Math.min(20, (+b[key] || 0) + (n || 1)); window.siteBasket.set(b); }
+  // the cream doughnut tapped is the one Add puts in the basket
+  var creamSel = 'jam', crBtns = [].slice.call(document.querySelectorAll('.cream .trio button'));
+  crBtns.forEach(function (b) { b.addEventListener('click', function () { creamSel = b.dataset.c; crBtns.forEach(function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); document.getElementById('cr-n').textContent = BA.cream(creamSel); }); });
   [].forEach.call(document.querySelectorAll('[data-buy]'), function (b) {
     b.addEventListener('click', function () {
-      var k = b.dataset.buy; add(k); window.siteToast('Added: ' + BA.label(k)); var s = b.querySelector('span'), t = s.textContent;
+      var k = b.dataset.buy === 'cream' ? 'cream~' + creamSel : b.dataset.buy; add(k); window.siteToast('Added: ' + BA.label(k)); var s = b.querySelector('span'), t = s.textContent;
       b.classList.add('added'); s.textContent = 'Added'; setTimeout(function () { b.classList.remove('added'); s.textContent = t; }, 1100);
     });
   });
-  // the flavour spot (X31): the same place turns through her flavours as the scroll passes, or when a flavour is tapped
+  // the flavour spot (X31): the same place shows the flavour tapped
   var sec = document.getElementById('flavours'); if (!sec) return;
   var imgs = [].slice.call(sec.querySelectorAll('#sp-ph img')), chips = [].slice.call(sec.querySelectorAll('#sp-chips button')), N = imgs.length;
   var nameEl = document.getElementById('sp-name'), cntEl = document.getElementById('sp-n'), addBtn = document.getElementById('sp-add'), idx = 0, kind = 'milky', raf = 0;
@@ -188,12 +192,8 @@
     var s = document.createElement('span'); s.textContent = BA.FL[i][1]; nameEl.innerHTML = ''; nameEl.appendChild(s);
     cntEl.textContent = (i + 1) + ' of ' + N;
   }
-  var off = 0;   // a tapped flavour shifts the scroll's own count, so tapping never moves the page and scrolling on carries on from the tapped one
-  function scrollIdx() { var r = sec.getBoundingClientRect(), span = Math.max(1, sec.offsetHeight - innerHeight); return Math.min(N - 1, Math.max(0, Math.floor(Math.min(.999, Math.max(0, -r.top / span)) * N))); }
-  // lit as it scrolls in, never a blank screen between the film and the flavours (owner video, 28 Oct)
-  function fromScroll() { raf = 0; var r = sec.getBoundingClientRect(); sec.classList.toggle('on', r.top <= innerHeight * .8 && r.bottom > innerHeight * .6); set(Math.min(N - 1, Math.max(0, scrollIdx() + off))); }
-  addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(fromScroll); }, { passive: true }); fromScroll();
-  chips.forEach(function (c, i) { c.addEventListener('click', function () { off = i - scrollIdx(); set(i); }); });
+  // tap only (Tzvi, 29 Oct 2026: never two scroll effects on one page; the film is the one): a flavour changes when tapped, the page scrolls on normally
+  chips.forEach(function (c, i) { c.addEventListener('click', function () { set(i); }); });
   [].forEach.call(sec.querySelectorAll('.seg button'), function (b) {
     b.addEventListener('click', function () { kind = b.dataset.k; [].forEach.call(sec.querySelectorAll('.seg button'), function (x) { x.setAttribute('aria-pressed', x === b ? 'true' : 'false'); }); });
   });
@@ -201,7 +201,6 @@
     var k = 'dn~' + kind + '~' + BA.FL[idx][0]; add(k); window.siteToast('Added: ' + BA.label(k));
     var s = addBtn.querySelector('span'), t = s.innerHTML; addBtn.classList.add('added'); s.textContent = 'Added'; setTimeout(function () { addBtn.classList.remove('added'); s.innerHTML = t; }, 1100);
   });
-  fromScroll();
 })();
 </script>
 </body>

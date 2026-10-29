@@ -114,7 +114,7 @@ const CHECK_ONLY = process.argv.includes('--check');
   const onlyTiming = (out) => { const bad = out.split('\n').filter((l) => /^[A-Z]{4,}\s/.test(l)); return bad.length > 0 && bad.every((l) => /^(SMOOTH|FLASH|HEAVY|BUSY)\s/.test(l)); };
   for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly'],
     // smooth on a slowed phone, and repeated labels keep one place (Tzvi, 26-27 Oct 2026; rules 3s.27)
-    ['check-speed.mjs', 'is not smooth on a phone'], ['check-same-place.mjs', 'moves a repeated label']]) {
+    ['check-speed.mjs', 'is not smooth on a phone'], ['check-same-place.mjs', 'moves a repeated label'], ['check-one-scroll.mjs', 'has two scroll effects']]) {
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }
     results.push({ why, ...r });

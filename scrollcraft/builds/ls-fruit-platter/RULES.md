@@ -40,6 +40,7 @@ R3b.2 pass: the kosher band follows the opening; the certificate is stated twice
 R3b.3 pass: one solid action per screen: the bar button is the outline version over the film
 R3h.1 pass: the home page opens on the fruit rain, which follows the scroll (26 Oct, Tzvi: "why is it not scrollable"): her empty board fills as you scroll, empties on the way back up
 R3h.20 pass: scroll-driven since 26 Oct: the film section is 3.2 screens (320svh) with a sticky stage; frames on a canvas (assets/film/d and m), loaded in passes, shown point eased toward the scroll; her board on a plain red ground, the whole board on a tall phone (frames m); check-site SMOOTH/SLOW run by publish-page
+R3h.21 pass: check-one-scroll clean at 390x844 and 1440x900 (29 Oct)
 R3n.1 pass: her Large platter fills the whole first screen on laptop and phone
 R3n.2 pass: the fruit bursts up off her Large board in the opening film; no other business has her board
 R3n.3 pass: on the shop page choosing a size changes the stage photo, name, price, button and the page ground to that size's colour; check-motion COLOUR clean
