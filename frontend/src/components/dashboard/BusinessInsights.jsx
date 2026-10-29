@@ -18,14 +18,14 @@ import formatDate from '../../utils/formatDate';
 
 const PERIODS = [30, 90, 365];
 
-export function Change({ now, before, shown, compare, t }) {
+export function Change({ now, before, shown, compare, t, versus }) {
   if (!compare) return <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('insights.tooNew', 'Not enough history yet to compare.')}</p>;
   const Arrow = now > before ? ArrowUp : now < before ? ArrowDown : Minus;
   const word = now > before ? t('insights.up', 'up from') : now < before ? t('insights.down', 'down from') : t('insights.same', 'the same as');
   return (
     <p className="text-xs mt-1 inline-flex items-center gap-1" style={{ color: 'var(--ink)' }}>
       <Arrow size={13} aria-hidden="true" className="shrink-0" />
-      <span>{word} {shown ?? before} {t('insights.before', 'the period before')}</span>
+      <span>{word} {shown ?? before} {versus || t('insights.before', 'the period before')}</span>
     </p>
   );
 }
@@ -67,20 +67,24 @@ export function Bars({ rows, label, value, title }) {
   );
 }
 
-export default function BusinessInsights({ API, auth, businessId, onClose }) {
+// `params`: the sales summary's own period (AnalyticsKit), so the detail shows the same dates; without it, its own buttons.
+export default function BusinessInsights({ API, auth, businessId, onClose, params = null }) {
   const { t, i18n } = useTranslation();
   const [days, setDays] = useState(30);
+  const query = params || { days };
+  const qkey = JSON.stringify(query);
   const [data, setData] = useState(null);
   const [err, setErr] = useState('');
 
   useEffect(() => {
     let alive = true;
     setData(null); setErr('');
-    axios.get(`${API}/marketplace/businesses/${businessId}/insights`, { ...auth, params: { days } })
+    axios.get(`${API}/marketplace/businesses/${businessId}/insights`, { ...auth, params: query })
       .then(({ data: d }) => { if (alive) setData(d); })
       .catch(() => { if (alive) setErr(t('insights.failed', 'Could not load the numbers. Try again in a moment.')); });
     return () => { alive = false; };
-  }, [API, auth, businessId, days, t]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [API, auth, businessId, qkey, t]);
 
   const lang = i18n.language;
   const cur = data?.currency;
@@ -99,7 +103,7 @@ export default function BusinessInsights({ API, auth, businessId, onClose }) {
           )}
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="inline-flex rounded-full border p-0.5" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('insights.period', 'Period')}>
+          {!params && <div className="inline-flex rounded-full border p-0.5" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('insights.period', 'Period')}>
             {PERIODS.map((d) => (
               <button
                 key={d}
@@ -113,7 +117,7 @@ export default function BusinessInsights({ API, auth, businessId, onClose }) {
                 {d === 30 ? t('insights.d30', '30 days') : d === 90 ? t('insights.d90', '3 months') : t('insights.d365', '12 months')}
               </button>
             ))}
-          </div>
+          </div>}
           <button type="button" onClick={onClose} className="w-9 h-9 rounded-full inline-flex items-center justify-center hover:bg-gray-100" aria-label={t('common.close', 'Close')} data-testid="insights-close">
             <X size={16} />
           </button>

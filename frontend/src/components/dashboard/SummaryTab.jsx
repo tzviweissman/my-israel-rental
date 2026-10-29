@@ -2,7 +2,10 @@
  * Dashboard → Sales summary (backend routes/marketplace/sales_summary.py):
  * one page across everything the business runs here, orders, memberships,
  * door visits, appointments and discount codes, for 30 days, 3 months or
- * 12 months against the period before. Sections only appear for what the
+ * 12 months against the period before. Since 29 Oct 2026 (Tzvi: "by month
+ * day or year" as on Shopify): any dates against the period before or last
+ * year, a chart day by day or month by month, visitors and how many of them
+ * ordered, and the orders to download (AnalyticsKit). Sections only appear for what the
  * business actually uses. The order detail is the existing "How it's
  * going" panel, opened from here rather than repeated.
  */
@@ -13,8 +16,7 @@ import { Loader2, BarChart3 } from 'lucide-react';
 import { money } from '../../utils/currency';
 import BusinessInsights, { Change, Tile, Section, Bars } from './BusinessInsights';
 import CustomerFeedback from './CustomerFeedback';
-
-const PERIODS = [30, 90, 365];
+import { PeriodPicker, TrendChart, DownloadButton, usePeriod } from './AnalyticsKit';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 
 // `embedded`: shown inside Overview for anyone who runs a business (Tzvi,
@@ -26,7 +28,8 @@ export default function SummaryTab({ API, token, embedded = false }) {
   const auth = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
   const [businesses, setBusinesses] = useState(null);
   const [bizId, setBizId] = useState(() => { try { return localStorage.getItem('orders.business') || ''; } catch { return ''; } });
-  const [days, setDays] = useState(30);
+  const { period, setPeriod, params, days, key } = usePeriod();
+  const [show, setShow] = useState('revenue');
   const [d, setD] = useState(null);
   const [orderDetail, setOrderDetail] = useState(false);
 
@@ -44,10 +47,14 @@ export default function SummaryTab({ API, token, embedded = false }) {
   useEffect(() => { try { if (bizId) localStorage.setItem('orders.business', bizId); } catch { /* private mode */ } }, [bizId]);
   const ready = businesses && businesses.some((b) => b.id === bizId);
   useEffect(() => {
-    if (!ready) return;
+    if (!ready || (params.start && (!params.end || params.end < params.start))) return;
+    // Only the answer for the dates now chosen: one for dates changed since must not land after it.
+    let alive = true;
     setD(null);
-    axios.get(`${API}/marketplace/businesses/${bizId}/summary`, { ...auth, params: { days } }).then(({ data }) => setD(data)).catch(() => setD(false));
-  }, [ready, API, bizId, auth, days]);
+    axios.get(`${API}/marketplace/businesses/${bizId}/summary`, { ...auth, params }).then(({ data }) => alive && setD(data)).catch(() => alive && setD(false));
+    return () => { alive = false; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ready, API, bizId, auth, key]);
 
   if (businesses === null) return embedded ? null : <div className="py-16 text-center"><Loader2 className="animate-spin inline" size={18} /></div>;
   if (businesses.length === 0 && embedded) return null;
@@ -56,7 +63,8 @@ export default function SummaryTab({ API, token, embedded = false }) {
   const dayNames = lang === 'he' ? ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'] : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
   const cur = d?.currency || 'ILS';
   const o = d?.orders;
-  const nothing = d && !o.orders && !o.compare && !d.memberships.has_any && !d.appointments.has_any && !d.visits.count;
+  const nothing = d && !o.orders && !o.compare && !d.memberships.has_any && !d.appointments.has_any && !d.visits.count && !d.visitors?.count;
+  const versus = d?.compare_with === 'year' ? t('analytics.lastYearShort', 'last year') : t('insights.before', 'the period before');
 
   return (
     <div data-testid="summary-tab" data-tour="sales-summary">
@@ -69,14 +77,7 @@ export default function SummaryTab({ API, token, embedded = false }) {
         )}
       </div>
       <p className={`text-sm mb-4 ${embedded ? 'hidden sm:block' : ''}`} style={{ color: 'var(--brand-muted)' }}>{t('summary.body', 'How the business is doing across orders, memberships, visits and appointments. Every number is counted from your own records.')}</p>
-      <div className="inline-flex rounded-full border p-1 mb-4" style={{ borderColor: 'var(--brand-border)' }} role="group" aria-label={t('summary.period', 'Period')}>
-        {PERIODS.map((p) => (
-          <button key={p} type="button" onClick={() => setDays(p)} aria-pressed={days === p} className="px-3.5 min-h-[36px] rounded-full text-xs font-semibold"
-                  style={days === p ? { background: 'var(--ink)', color: 'var(--action-ink)' } : { color: 'var(--brand-muted)' }} data-testid={`summary-days-${p}`}>
-            {p === 30 ? t('insights.d30', '30 days') : p === 90 ? t('insights.d90', '3 months') : t('insights.d365', '12 months')}
-          </button>
-        ))}
-      </div>
+      <PeriodPicker period={period} setPeriod={setPeriod} t={t} />
 
       {d === null ? <div className="py-10 text-center"><Loader2 className="animate-spin inline" size={18} /></div>
         : d === false ? <p className="text-sm" style={{ color: 'var(--brand-muted)' }}>{t('summary.loadFailed', 'Could not load the summary. Try again.')}</p>
@@ -89,10 +90,10 @@ export default function SummaryTab({ API, token, embedded = false }) {
             <>
               <div className="grid gap-3 grid-cols-2 lg:grid-cols-4 mb-4">
                 <Tile label={t('summary.revenue', 'Sales from orders')} value={money(o.revenue, cur)} testid="summary-revenue">
-                  <Change now={o.revenue} before={o.revenue_before} shown={money(o.revenue_before, cur)} compare={o.compare} t={t} />
+                  <Change now={o.revenue} before={o.revenue_before} shown={money(o.revenue_before, cur)} compare={o.compare} t={t} versus={versus} />
                 </Tile>
                 <Tile label={t('summary.orders', 'Orders')} value={o.orders} testid="summary-orders">
-                  <Change now={o.orders} before={o.orders_before} compare={o.compare} t={t} />
+                  <Change now={o.orders} before={o.orders_before} compare={o.compare} t={t} versus={versus} />
                 </Tile>
                 {d.memberships.has_any && (
                   <Tile label={t('summary.activeMembers', 'Active members')} value={d.memberships.active} testid="summary-members">
@@ -102,6 +103,36 @@ export default function SummaryTab({ API, token, embedded = false }) {
                 <Tile label={t('summary.customers', 'Customers')} value={d.customers.in_period} testid="summary-customers">
                   <p className="text-xs mt-1" style={{ color: 'var(--ink)' }}>{t('summary.newReturning', '{{a}} new, {{b}} returning', { a: d.customers.new, b: d.customers.returning })}</p>
                 </Tile>
+              </div>
+
+              <div className="grid gap-3 md:grid-cols-3 mb-3">
+                <div className="md:col-span-2">
+                  <Section title={o.series.unit === 'day' ? t('analytics.byDay', 'Day by day') : t('analytics.byMonth', 'Month by month')} testid="summary-chart">
+                    <div className="inline-flex rounded-full border p-0.5 mb-3" style={{ borderColor: 'var(--brand-border)' }} role="group">
+                      {['revenue', 'orders'].map((k) => (
+                        <button key={k} type="button" onClick={() => setShow(k)} aria-pressed={show === k} className="px-3 min-h-[36px] rounded-full text-xs font-semibold"
+                          style={show === k ? { background: 'var(--ink)', color: 'var(--action-ink)' } : { color: 'var(--brand-muted)' }} data-testid={`summary-show-${k}`}>
+                          {k === 'revenue' ? t('summary.revenue', 'Sales from orders') : t('summary.orders', 'Orders')}
+                        </button>
+                      ))}
+                    </div>
+                    <TrendChart points={o.series.points} unit={o.series.unit} lang={lang} t={t}
+                      value={(p) => (show === 'revenue' ? p.revenue : p.orders)} before={(p) => (show === 'revenue' ? p.revenue_before : p.orders_before)}
+                      format={(v) => (show === 'revenue' ? money(v, cur) : v)} title={t('summary.revenue', 'Sales from orders')} />
+                  </Section>
+                </div>
+                <Section title={t('analytics.visitors', 'Visitors')} testid="summary-visitors">
+                  <p className="text-2xl font-bold tabular-nums" style={{ color: 'var(--ink)' }}>{d.visitors.count}</p>
+                  <Change now={d.visitors.count} before={d.visitors.before} compare={d.visitors.before > 0} t={t} versus={versus} />
+                  <p className="text-sm mt-2" style={{ color: 'var(--ink)' }}>
+                    {d.visitors.rate != null
+                      ? t('analytics.rate', '{{r}} orders or appointment requests for every 100 visitors', { r: d.visitors.rate })
+                      : t('analytics.rateTooFew', 'The rate shows once 20 people have visited in the period.')}
+                  </p>
+                  {d.visitors.rate != null && d.visitors.rate_before != null && (
+                    <p className="text-xs mt-1" style={{ color: 'var(--brand-muted)' }}>{t('analytics.rateBefore', '{{r}} {{versus}}', { r: d.visitors.rate_before, versus })}</p>
+                  )}
+                </Section>
               </div>
 
               <div className="grid gap-3 md:grid-cols-2">
@@ -154,9 +185,10 @@ export default function SummaryTab({ API, token, embedded = false }) {
               </div>
 
               {(o.orders > 0 || o.compare) && (
-                <div className="mt-4">
+                <div className="mt-4 flex flex-wrap gap-2">
+                  {!orderDetail && <DownloadButton url={`${API}/marketplace/businesses/${biz.id}/orders.csv`} params={params} auth={auth} t={t} />}
                   {orderDetail
-                    ? <BusinessInsights API={API} auth={auth} businessId={biz.id} onClose={() => setOrderDetail(false)} />
+                    ? <div className="w-full"><BusinessInsights API={API} auth={auth} businessId={biz.id} params={params} onClose={() => setOrderDetail(false)} /></div>
                     : (
                       <button type="button" onClick={() => setOrderDetail(true)} className="inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full border text-sm font-semibold" style={fieldStyle} data-testid="summary-order-detail">
                         <BarChart3 size={15} /> {t('summary.orderDetail', 'Orders in detail: best sellers, busiest days, top customers')}

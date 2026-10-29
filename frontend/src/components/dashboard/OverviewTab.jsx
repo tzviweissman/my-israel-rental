@@ -37,6 +37,7 @@ import { MessageCircle, Eye, QrCode, CalendarCheck, Bell, ArrowRight } from 'luc
 import ScanChart from '../common/ScanChart';
 import LookingForYou from './LookingForYou';
 import SummaryTab from './SummaryTab';
+import RentalSummary from './RentalSummary';
 import formatDate from '../../utils/formatDate';
 
 function StatCard({ Icon, label, value, sub, chart, testid, onClick, cta }) {
@@ -250,6 +251,9 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
           <SummaryTab API={API} token={token} embedded />
         </div>
       )}
+
+      {/* The same for rentals: bookings, nights, how full, visitors (RentalSummary). */}
+      {isPropertyLister && <RentalSummary API={API} token={token} />}
 
       <LookingForYou API={API} token={token} className="mb-6" />
 

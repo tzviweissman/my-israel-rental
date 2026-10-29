@@ -14,6 +14,7 @@ from .shared import (
     _assert_not_in_holiday_window,
     _assert_within_availability_window,
     _build_booking_doc,
+    _compute_booking_total,
     _load_property_and_sublease,
     _queue_booking_emails,
     _send_booking_notifications,
@@ -36,6 +37,13 @@ async def create_booking(booking_data: BookingCreate, payload: dict = Depends(ve
         sublease_data=sublease_data,
         renter_id=payload['user_id'],
     )
+    # Its value at the listing's prices, kept for the owner's rental figures (properties/browse.py
+    # property_analytics; Tzvi, 29 Oct 2026). None where the listing has no nightly or sublease price.
+    try:
+        booking_doc['total_price'] = await _compute_booking_total(booking_data, property_data, sublease_data)
+    except Exception:  # noqa: BLE001 - a figure for a chart never blocks a booking
+        booking_doc['total_price'] = None
+    booking_doc['currency'] = (sublease_data or property_data).get('currency') or 'ILS'
     await db.bookings.insert_one(booking_doc)
     if booking_doc.get("status") == "confirmed":
         # Instant booking: confirmed the moment it is made (automations.py).

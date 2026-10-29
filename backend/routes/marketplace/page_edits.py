@@ -29,7 +29,7 @@ from html import escape
 from html.parser import HTMLParser
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Request, Response
 from pydantic import BaseModel
 
 from routes.deps import db, verify_token
@@ -370,6 +370,27 @@ async def put_page_gallery(business_id: str, body: GalleryBody, user=Depends(ver
         upsert=True,
     )
     return {"gallery": gallery, "updated_at": now}
+
+
+# A visit to the designed site (Tzvi, 29 Oct 2026, sales analytics: until now
+# only the standard business page counted visitors, so a business on a
+# designed site looked unvisited). frontend/server.js puts a one-line script
+# on every page of the site that calls this with the browser's visitor id
+# (mir_vid, the same as the app's), so a visitor counts once a day, a crawler
+# that runs no script never, the same as utils/view_tracking for the rest.
+@router.post("/business/{slug_or_id}/visit", status_code=204)
+async def designed_site_visit(slug_or_id: str, request: Request):
+    from utils import view_tracking
+    from utils.rate_limit import check_rate
+    check_rate(request, bucket="designed_visit", limit=120, window_seconds=600)
+    visitor = (request.headers.get("X-Visitor-Id") or "").strip()
+    if not visitor:
+        return Response(status_code=204)
+    biz = await _resolve(slug_or_id)
+    if biz:
+        await view_tracking.record_view(view_tracking.ENTITY_BUSINESS, biz["_id"], owner_id=biz.get("owner_user_id"),
+                                        visitor=visitor, user_agent=request.headers.get("user-agent") or "")
+    return Response(status_code=204)
 
 
 # The page's other language follows an edit (Tzvi, 29 Oct 2026: "make sure

@@ -859,3 +859,174 @@ async def get_trust_stats(response: Response) -> dict:
     _TRUST_CACHE["data"] = data
     response.headers["Cache-Control"] = PUBLIC_CACHE_CONTROL
     return data
+
+
+# ---------------------------------------------------------------------------
+# Rental figures (Tzvi, 29 Oct 2026: "track sales and growth whether by month
+# day or year", as Shopify does for a store). For the caller's own listings,
+# over any dates (routes/marketplace/insights.window) against the period
+# before or the same dates a year earlier:
+#   requests   bookings asked for in the period, by what became of them
+#   nights     nights booked (confirmed or stayed) that fall in the period
+#   occupancy  those nights out of every night a vacation rental had, in %
+#   value      what confirmed stays starting in the period come to at the
+#              listing's prices, kept on each booking since 29 Oct 2026;
+#              older ones are counted and said to have no value recorded
+#   visitors   people who opened a listing, and requests per hundred of them
+# Every number is a count or a sum of records; the money is not taken here,
+# so it is called the booked value, never income received.
+# ---------------------------------------------------------------------------
+_STAYED = ("confirmed", "completed", "cancellation_requested")
+
+
+def _day(s: object) -> datetime | None:
+    try:
+        return datetime.fromisoformat(str(s)[:10])
+    except ValueError:
+        return None
+
+
+def rental_figures(props: list[dict], bookings: list[dict], win, views_now: int, views_before: int) -> dict[str, Any]:
+    from collections import Counter
+    from datetime import timedelta
+    from routes.marketplace.insights import _IL
+
+    a, b = win.start.replace(tzinfo=None), win.end.replace(tzinfo=None)
+    pa, pb = win.prev_start.replace(tzinfo=None), win.prev_end.replace(tzinfo=None)
+    by_day = (b - a).days <= 92
+    vac = {p["id"] for p in props if p.get("rental_type") == "vacation"}
+
+    def created(bk: dict) -> datetime | None:
+        try:
+            d = datetime.fromisoformat(str(bk.get("created_at")).replace("Z", "+00:00"))
+        except ValueError:
+            return None
+        return (d if d.tzinfo else d.replace(tzinfo=UTC)).astimezone(_IL).replace(tzinfo=None)
+
+    def nights_in(bk: dict, lo: datetime, hi: datetime) -> list[datetime]:
+        s, e = _day(bk.get("start_date")), _day(bk.get("end_date"))
+        if not s or not e or bk.get("status") not in _STAYED:
+            return []
+        out, d = [], max(s, lo.replace(hour=0, minute=0, second=0, microsecond=0))
+        while d < e and d < hi:
+            out.append(d)
+            d += timedelta(days=1)
+        return out
+
+    cur = Counter((bk.get("currency") or "ILS").upper() for bk in bookings if bk.get("total_price") is not None).most_common(1)
+    currency = cur[0][0] if cur else "ILS"
+
+    def period(lo: datetime, hi: datetime) -> dict[str, Any]:
+        asked = [bk for bk in bookings if (c := created(bk)) and lo <= c < hi]
+        status = Counter(bk.get("status") or "pending" for bk in asked)
+        nights = sum(len(nights_in(bk, lo, hi)) for bk in bookings)
+        vac_nights = sum(len(nights_in(bk, lo, hi)) for bk in bookings if bk.get("property_id") in vac)
+        starts = [bk for bk in bookings if bk.get("status") in _STAYED and (s := _day(bk.get("start_date"))) and lo <= s < hi]
+        priced = [bk for bk in starts if bk.get("total_price") is not None and (bk.get("currency") or "ILS").upper() == currency]
+        days = max(1, round((hi - lo).total_seconds() / 86400))
+        return {
+            "requests": len(asked), "accepted": status.get("confirmed", 0) + status.get("completed", 0) + status.get("cancellation_requested", 0),
+            "pending": status.get("pending", 0), "cancelled": status.get("cancelled", 0) + status.get("declined", 0),
+            "nights": nights, "stays": len(starts),
+            "value": round(sum(float(bk["total_price"]) for bk in priced), 2), "unpriced": len(starts) - len(priced),
+            "occupancy": round(100 * vac_nights / (days * len(vac)), 1) if vac else None,
+        }
+
+    now_p, before_p = period(a, b), period(pa, pb)
+
+    # Points: nights and booked value by day (up to 92 days) or by month, each beside the period compared.
+    if by_day:
+        first, last = a.date(), (b - timedelta(microseconds=1)).date()
+        labels = [(first + timedelta(days=i)).isoformat() for i in range((last - first).days + 1)]
+    else:
+        labels, y, m = [], a.year, a.month
+        last = b - timedelta(seconds=1)
+        while (y, m) <= (last.year, last.month):
+            labels.append(f"{y:04d}-{m:02d}")
+            y, m = (y, m + 1) if m < 12 else (y + 1, 1)
+    pts = [{"at": k, "nights": 0, "value": 0.0, "nights_before": 0, "value_before": 0.0} for k in labels]
+
+    def slot(d: datetime, lo: datetime) -> int:
+        return (d - lo.replace(hour=0, minute=0, second=0, microsecond=0)).days if by_day else (d.year - lo.year) * 12 + d.month - lo.month
+
+    for bk in bookings:
+        for lo, hi, n_key, v_key in ((a, b, "nights", "value"), (pa, pb, "nights_before", "value_before")):
+            for d in nights_in(bk, lo, hi):
+                i = slot(d, lo)
+                if 0 <= i < len(pts):
+                    pts[i][n_key] += 1
+            s = _day(bk.get("start_date"))
+            if (bk.get("status") in _STAYED and s and lo <= s < hi and bk.get("total_price") is not None
+                    and (bk.get("currency") or "ILS").upper() == currency):
+                i = slot(s, lo)
+                if 0 <= i < len(pts):
+                    pts[i][v_key] = round(pts[i][v_key] + float(bk["total_price"]), 2)
+
+    per = {p["id"]: {"id": p["id"], "title": p.get("title") or "", "nights": 0, "requests": 0} for p in props}
+    for bk in bookings:
+        row = per.get(bk.get("property_id"))
+        if not row:
+            continue
+        row["nights"] += len(nights_in(bk, a, b))
+        if (c := created(bk)) and a <= c < b:
+            row["requests"] += 1
+
+    def rate(n: int, v: int) -> float | None:
+        return round(100 * n / v, 1) if v >= 20 else None
+
+    return {
+        "start": a.date().isoformat(), "end": (b - timedelta(seconds=1)).date().isoformat(), "compare_with": win.compare,
+        "currency": currency, "listings": len(props), "vacation_listings": len(vac),
+        "now": now_p, "before": before_p,
+        # whether anything at all came before the period compared, so a first month is not called "up"
+        "compare": any((c := created(bk)) and c < pb for bk in bookings),
+        "visitors": {"count": views_now, "before": views_before, "rate": rate(now_p["requests"], views_now),
+                     "rate_before": rate(before_p["requests"], views_before)},
+        "series": {"unit": "day" if by_day else "month", "points": pts},
+        "by_listing": sorted(per.values(), key=lambda r: (-r["nights"], -r["requests"], r["title"]))[:10],
+    }
+
+
+@api_router.get("/properties/performance/analytics")
+async def property_analytics(days: int = Query(30, ge=1, le=366), start: str | None = None, end: str | None = None,
+                             compare: str = Query("prev", pattern="^(prev|year)$"), user=Depends(verify_token)) -> dict:
+    from routes.marketplace.insights import _IL, window
+    owner = user["user_id"]
+    win = window(days, start, end, compare, datetime.now(_IL))
+    props = await db.properties.find({"owner_id": owner}, {"_id": 0, "id": 1, "title": 1, "rental_type": 1}).to_list(None)
+    bookings = await db.bookings.find(
+        {"owner_id": owner},
+        {"_id": 0, "property_id": 1, "start_date": 1, "end_date": 1, "status": 1, "created_at": 1, "total_price": 1, "currency": 1},
+    ).to_list(20000)
+    seen = {"owner_id": owner, "entity_type": view_tracking.ENTITY_PROPERTY}
+    v_now = await db[view_tracking.COLLECTION].count_documents({**seen, "at": {"$gte": win.start.astimezone(UTC), "$lt": win.end.astimezone(UTC)}})
+    v_before = await db[view_tracking.COLLECTION].count_documents({**seen, "at": {"$gte": win.prev_start.astimezone(UTC), "$lt": win.prev_end.astimezone(UTC)}})
+    return rental_figures(props, bookings, win, v_now, v_before)
+
+
+@api_router.get("/properties/performance/bookings.csv")
+async def property_bookings_csv(days: int = Query(30, ge=1, le=366), start: str | None = None, end: str | None = None,
+                                user=Depends(verify_token)) -> Response:
+    """The bookings asked for in the period as a spreadsheet, for the owner's own records."""
+    import csv
+    import io
+    from routes.marketplace.insights import _IL, window
+    owner = user["user_id"]
+    win = window(days, start, end, "prev", datetime.now(_IL))
+    titles = {p["id"]: p.get("title") or "" for p in await db.properties.find({"owner_id": owner}, {"_id": 0, "id": 1, "title": 1}).to_list(None)}
+    rows = await db.bookings.find({"owner_id": owner}, {"_id": 0}).to_list(20000)
+    buf = io.StringIO()
+    w = csv.writer(buf)
+    w.writerow(["Asked on", "Listing", "Check-in", "Check-out", "Status", "Booked value", "Currency"])
+    for bk in sorted(rows, key=lambda r: str(r.get("created_at"))):
+        try:
+            c = datetime.fromisoformat(str(bk.get("created_at")).replace("Z", "+00:00")).astimezone(_IL)
+        except ValueError:
+            continue
+        if not (win.start <= c < win.end):
+            continue
+        w.writerow([c.date().isoformat(), titles.get(bk.get("property_id"), ""), bk.get("start_date") or "", bk.get("end_date") or "",
+                    bk.get("status") or "", "" if bk.get("total_price") is None else bk["total_price"], bk.get("currency") or ""])
+    name = f"bookings-{win.start.date().isoformat()}.csv"
+    return Response("\ufeff" + buf.getvalue(), media_type="text/csv; charset=utf-8",
+                    headers={"Content-Disposition": f'attachment; filename="{name}"'})

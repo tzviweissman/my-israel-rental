@@ -6,6 +6,12 @@ owner's (or an admin's) own orders, nothing estimated: every number is a
 count or a sum of orders that exist, and the screen says from when.
 
 GET /api/marketplace/businesses/<id>/insights?days=30|90|365
+GET /api/marketplace/businesses/<id>/insights?start=YYYY-MM-DD&end=YYYY-MM-DD&compare=prev|year
+
+Any dates, Israel days, both inclusive (Tzvi, 29 Oct 2026: track "by month
+day or year" as on Shopify), against the same length before or the same
+dates a year earlier. A range of up to 92 days is shown day by day, a longer
+one month by month, each point with its counterpart in the period compared.
 
 Cancelled and failed orders are left out. Money is summed in the currency
 most of the orders use; orders in another currency are counted but not
@@ -58,11 +64,89 @@ def _who(o: dict[str, Any]) -> str | None:
     return o.get("customer_phone_e164") or (o.get("customer_phone") or "").replace(" ", "").replace("-", "") or None
 
 
-def compute(orders: Iterable[dict[str, Any]], days: int, now: datetime) -> dict[str, Any]:
+class Window:
+    """The period asked for and the one it is compared with: [start, end) in Israel time."""
+
+    def __init__(self, start: datetime, end: datetime, prev_start: datetime, prev_end: datetime, compare: str) -> None:
+        self.start, self.end, self.prev_start, self.prev_end, self.compare = start, end, prev_start, prev_end, compare
+
+    @property
+    def days(self) -> int:
+        return max(1, round((self.end - self.start).total_seconds() / 86400))
+
+
+def _year_back(d: datetime) -> datetime:
+    try:
+        return d.replace(year=d.year - 1)
+    except ValueError:   # 29 February
+        return d.replace(year=d.year - 1, day=28)
+
+
+def window(days: int | None, start: str | None, end: str | None, compare: str, now: datetime) -> Window:
+    """From ?days, or ?start and ?end (dates, both included), compared with the period before or a year earlier."""
+    if start or end:
+        try:
+            a = datetime.fromisoformat(str(start)).replace(tzinfo=_IL) if start else None
+            b = datetime.fromisoformat(str(end)).replace(tzinfo=_IL) + timedelta(days=1) if end else None
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail="Dates are YYYY-MM-DD") from exc
+        b = b or now
+        a = a or b - timedelta(days=30)
+        if b <= a or (b - a).days > 3 * 366:
+            raise HTTPException(status_code=422, detail="Choose an end date after the start, at most three years apart")
+    else:
+        # up to and including this moment
+        b, a = now + timedelta(microseconds=1), now - timedelta(days=days or 30)
+    if compare == "year":
+        return Window(a, b, _year_back(a), _year_back(b), "year")
+    return Window(a, b, a - (b - a), a, "prev")
+
+
+def _series(live, win: Window, currency: str) -> dict[str, Any]:
+    """Points across the window (days up to 92, else months), each with the period compared beside it."""
+    by_day = (win.end - win.start).days <= 92
+
+    def key(w: datetime) -> str:
+        return w.date().isoformat() if by_day else f"{w.year:04d}-{w.month:02d}"
+
+    if by_day:
+        # Calendar days, the first and the last included even when the period starts or ends partway through one.
+        first, last = win.start.date(), (win.end - timedelta(microseconds=1)).date()
+        labels = [(first + timedelta(days=i)).isoformat() for i in range((last - first).days + 1)]
+    else:
+        labels, y, m = [], win.start.year, win.start.month
+        while (y, m) <= ((win.end - timedelta(seconds=1)).year, (win.end - timedelta(seconds=1)).month):
+            labels.append(f"{y:04d}-{m:02d}")
+            y, m = (y, m + 1) if m < 12 else (y + 1, 1)
+    now_b = {k: [0, 0.0] for k in labels}
+    before = [[0, 0.0] for _ in labels]
+    for o, w in live:
+        mv = _money(o) if (o.get("currency") or "ILS").upper() == currency else None
+        if win.start <= w < win.end:
+            k = key(w)
+            if k in now_b:
+                now_b[k][0] += 1
+                now_b[k][1] += mv or 0
+        elif win.prev_start <= w < win.prev_end:
+            # Lined up by position: day 3 beside day 3 of the period compared, a month beside the same month.
+            if by_day:
+                i = (w.date() - win.prev_start.date()).days
+            else:
+                i = (w.year - win.prev_start.year) * 12 + w.month - win.prev_start.month
+            if 0 <= i < len(before):
+                before[i][0] += 1
+                before[i][1] += mv or 0
+    return {"unit": "day" if by_day else "month", "points": [
+        {"at": k, "orders": now_b[k][0], "revenue": round(now_b[k][1], 2), "orders_before": before[i][0], "revenue_before": round(before[i][1], 2)}
+        for i, k in enumerate(labels)]}
+
+
+def compute(orders: Iterable[dict[str, Any]], days: int, now: datetime, win: Window | None = None) -> dict[str, Any]:
     live = [(o, _when(o)) for o in orders if o.get("status") not in _SKIP]
     live = [(o, w) for o, w in live if w is not None]
     live.sort(key=lambda x: x[1])
-    start, prev_start = now - timedelta(days=days), now - timedelta(days=2 * days)
+    win = win or window(days, None, None, "prev", now)
+    start = win.start
     cur = Counter((o.get("currency") or "ILS").upper() for o, _ in live).most_common(1)
     currency = cur[0][0] if cur else "ILS"
 
@@ -70,8 +154,8 @@ def compute(orders: Iterable[dict[str, Any]], days: int, now: datetime) -> dict[
         same = [m for o, _ in rows if (o.get("currency") or "ILS").upper() == currency and (m := _money(o)) is not None]
         return round(sum(same), 2), len(same)
 
-    now_rows = [(o, w) for o, w in live if w >= start]
-    prev_rows = [(o, w) for o, w in live if prev_start <= w < start]
+    now_rows = [(o, w) for o, w in live if start <= w < win.end]
+    prev_rows = [(o, w) for o, w in live if win.prev_start <= w < win.prev_end]
     revenue, priced = money_of(now_rows)
     prev_revenue, _ = money_of(prev_rows)
 
@@ -137,7 +221,11 @@ def compute(orders: Iterable[dict[str, Any]], days: int, now: datetime) -> dict[
     sources = Counter("website" if o.get("source") == "website" else "entered" for o, _ in now_rows)
 
     return {
-        "days": days,
+        "days": win.days,
+        "start": win.start.date().isoformat(),
+        "end": (win.end - timedelta(seconds=1)).date().isoformat(),
+        "compare_with": win.compare,
+        "series": _series(live, win, currency),
         "since": live[0][1].date().isoformat() if live else None,
         "currency": currency,
         "orders": len(now_rows),
@@ -148,7 +236,7 @@ def compute(orders: Iterable[dict[str, Any]], days: int, now: datetime) -> dict[
         "other_currency_orders": len(now_rows) - priced - sum(1 for o, _ in now_rows if _money(o) is None),
         # Whether the period before was counted at all: an answer of "up"
         # against a period with no orders yet would only be counting starting.
-        "compare": bool(live) and live[0][1] < start,
+        "compare": bool(live) and live[0][1] < win.prev_end,
         "months": [{"month": f"{y:04d}-{m:02d}", "orders": by_month[(y, m)][0], "revenue": round(by_month[(y, m)][1], 2)} for y, m in months],
         "weekdays": weekdays,
         "best_sellers": [{"name": n, "qty": int(v[0]), "revenue": round(v[1], 2)} for n, v in best],
@@ -163,7 +251,8 @@ def compute(orders: Iterable[dict[str, Any]], days: int, now: datetime) -> dict[
 
 
 @router.get("/businesses/{business_id}/insights")
-async def business_insights(business_id: str, days: int = Query(30, ge=7, le=366), user=Depends(verify_token)):
+async def business_insights(business_id: str, days: int = Query(30, ge=1, le=366), start: str | None = None, end: str | None = None,
+                            compare: str = Query("prev", pattern="^(prev|year)$"), user=Depends(verify_token)):
     biz = await db.businesses.find_one({"_id": business_id}, {"owner_user_id": 1})
     if not biz:
         raise HTTPException(status_code=404, detail="Business not found")
@@ -172,4 +261,49 @@ async def business_insights(business_id: str, days: int = Query(30, ge=7, le=366
     fields = {"_id": 0, "status": 1, "created_at": 1, "total": 1, "subtotal": 1, "currency": 1, "lines": 1, "fulfilment": 1,
               "city": 1, "address": 1, "customer_phone_e164": 1, "customer_phone": 1, "customer_name": 1, "source": 1}
     orders = await db.store_orders.find({"business_id": business_id}, fields).to_list(20000)
-    return compute(orders, days, datetime.now(_IL))
+    now = datetime.now(_IL)
+    return compute(orders, days, now, window(days, start, end, compare, now))
+
+
+def orders_csv(orders: Iterable[dict[str, Any]], win: Window) -> str:
+    """The orders in the window as a spreadsheet, oldest first. Cancelled ones are in it, marked: it is their record."""
+    import csv
+    import io
+    buf = io.StringIO()
+    w = csv.writer(buf)
+
+    def cell(v: Any) -> Any:
+        # Names and notes come from anyone who orders: one starting with = + - or @ would run as a formula in Excel.
+        return "'" + v if isinstance(v, str) and v[:1] in ("=", "+", "-", "@", "\t", "\r") else v
+    w.writerow(["Date", "Time", "Order", "Customer", "Phone", "Items", "Total", "Currency", "Status",
+                "Delivery or pickup", "Address", "Came from", "Notes"])
+    rows = sorted(((o, _when(o)) for o in orders), key=lambda x: x[1] or win.start)
+    for o, at in rows:
+        if at is None or not (win.start <= at < win.end):
+            continue
+        lines = o.get("lines") or []
+        items = "; ".join(f"{int(ln.get('qty') or 0)} x {ln.get('name') or ''}" for ln in lines) if lines else (o.get("items") or "")
+        w.writerow([cell(v) for v in [at.date().isoformat(), at.strftime("%H:%M"), str(o.get("_id") or "")[:8], o.get("customer_name") or "",
+                    o.get("customer_phone_e164") or o.get("customer_phone") or "", items,
+                    "" if _money(o) is None else _money(o), (o.get("currency") or "ILS").upper(), o.get("status") or "",
+                    o.get("fulfilment") or "", o.get("address") or "",
+                    "Your page" if o.get("source") == "website" else "Entered by you", (o.get("notes") or "").replace("\n", " ")]])
+    # A byte-order mark, so Excel reads Hebrew names as Hebrew.
+    return "\ufeff" + buf.getvalue()
+
+
+@router.get("/businesses/{business_id}/orders.csv")
+async def business_orders_csv(business_id: str, days: int = Query(30, ge=1, le=366), start: str | None = None, end: str | None = None,
+                              user=Depends(verify_token)):
+    from fastapi import Response
+    biz = await db.businesses.find_one({"_id": business_id}, {"slug": 1})
+    if not biz:
+        raise HTTPException(status_code=404, detail="Business not found")
+    from utils.business_access import business_access
+    await business_access(db, business_id, user, "summary")
+    now = datetime.now(_IL)
+    win = window(days, start, end, "prev", now)
+    orders = await db.store_orders.find({"business_id": business_id}).to_list(20000)
+    name = f"orders-{biz.get('slug') or 'business'}-{win.start.date().isoformat()}-to-{(win.end - timedelta(seconds=1)).date().isoformat()}.csv"
+    return Response(orders_csv(orders, win), media_type="text/csv; charset=utf-8",
+                    headers={"Content-Disposition": f'attachment; filename="{name}"'})

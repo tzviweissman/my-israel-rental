@@ -529,6 +529,11 @@ async function sendHandBuilt(req, res, slug, file) {
     const json = JSON.stringify(data.products).replace(/</g, '\\u003c');
     html = html.replace(/<\/body>/i, `<script id="mir-live-products" type="application/json">${json}</script><script src="/pages/mir-catalog.js?v=${EDITOR_STAMP}"></script></body>`);
   }
+  // A visit, counted for the owner's sales summary (backend page_edits.py designed_site_visit): the browser's
+  // visitor id, so one visitor counts once a day; never in the editor or the owner's "View live" (?fresh).
+  if (!editor && !/[?&]fresh(?:=|&|$)/.test(req.url || '')) {
+    html = html.replace(/<\/body>/i, `<script>(function(){try{var k='mir_vid',v=localStorage.getItem(k);if(!v){v=window.crypto&&crypto.randomUUID?crypto.randomUUID():'r'+Math.random().toString(36).slice(2)+Date.now().toString(36);localStorage.setItem(k,v)}fetch('/api/marketplace/business/${slug}/visit',{method:'POST',headers:{'X-Visitor-Id':v},keepalive:true}).catch(function(){})}catch(e){}})()</script></body>`);
+  }
   // A page with a gallery ([data-mir-gallery]) shows the photos its owner
   // added in the dashboard, laid out in the page's own style
   // (public/pages/mir-gallery.js). With none, the gallery stays hidden.
