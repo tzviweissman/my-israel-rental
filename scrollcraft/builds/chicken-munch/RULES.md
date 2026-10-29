@@ -80,13 +80,13 @@ R8a.1 pass: no 21st components or external script hosts; only the Google Fonts s
 R3b.4 pass: facts carry the page, nothing padded
 R3c.3 pass: the kosher worry is answered by the band under the opening and in the footer
 R3c.8 n/a: the owner has not told us what happens after the order (asked in message-to-owner.md questions 3 and 4)
-R3e.10 pass: each card has the name largest, feeds line, one line of what is in it and the price in the card colour; the cards of a row are built as photo, text, price row so titles and prices sit at the same height (looked at at 1440x900 and 390x844); check-site ALIGN passed
+R3e.10 pass: each card has the name largest, feeds line, one line of what is in it and the price in the card colour; the cards of a row are built as photo, text, price row so titles and prices sit at the same height; the two pan cards (29 Oct) have no photo of their own and stack beside one large pan picture, title then price row (looked at at 1440x900 and 390x844); check-site ALIGN passed
 R3e.14 pass: six text sizes as CSS variables in site.css: --t1 14px small, --t2 17px body, --t3 titles and prices, --t4 headings, and --f and --f2, the two sizes of his logo name (opening CHICKEN and MUNCH; MUNCH and the footer name share --f2); every font-size in the file reads one of them; computed sizes counted on every page: home 6, menu 5, order 5, contact 5 at 1440x900 and 1280x650, and 5 on every page at 390x844. Cost: prices are now the same size as card titles (they were larger), headings top out at 4.4rem, the footer name is one line on a laptop and two on a phone
 R3c.9 pass: radii 999px pills and 14 to 22px photos; one icon (the arrow, lucide shape); no two-colour gradients; one shadow style on the opening bowl
 R3s.4 pass: check-site ALIGN passed
 R3s.6 pass: check-site ALIGN passed; Add buttons are all the same outline pill
 R3s.7 pass: buttons in sentence case, pale dividers, body line height 1.5 or more
-R3s.9 pass: the kosher band is one red band, the savings tag is one style everywhere (a white pill on a photo, black on the white pan photos)
+R3s.9 pass: the kosher band is one red band, the savings tag is one style everywhere (a white pill on a photo or on the dark Roaster card, black on a white photo)
 R3s.12 n/a: owner must send a photo of himself or his kitchen; his real product photos come right after the opening
 R3s.14 n/a: the owner has given no counts or numbers; only prices are shown big
 R3s.11 n/a: owner must tell us why the boxes cost what they cost (asked in message-to-owner.md, question 5)
@@ -99,7 +99,7 @@ R3g.12 pass: check-site FLOW filled the order form and followed it to the writte
 R0b.12 n/a: not published, so there is no pages-list preview clip yet
 
 ## 4. Photos and media
-R8.1 n/a: owner must send a matching set (one photo per box and per pan, same angle and ground); today the three box photos come from three shoots (Mini and Grand are one box photo at two crops, the Supreme is a pile of chicken on yellow) and the 9x13 pan photo is cut flat at its bottom edge in the file the owner sent, so it runs off the bottom of its frame; no uncut copy exists in src/owner: listed for the owner
+R8.1 n/a: owner must send a matching set (one photo per box and per pan, same angle and ground); today the three box photos come from three shoots (Mini and Grand are one box photo at two crops, the Supreme is a pile of chicken on yellow) ; the pans show one large picture of his pan (assets/tray.webp, whole, from his listing photo shot-tray.png) beside both sizes, since 29 Oct when he did not like the cut 9x13 and the roaster shown as two photos of the same tray: a photo of each size is listed for the owner
 R8.6 n/a: all five kinds with a photo (Classic, Hot Poppers, Cornflake, Fruity, Rice Krispie) are now product hero shots edited from his own photos (dark plinth, its own coating round it, one warm light; Classic's lid number checked: 055-331-6975); the boxes and pans still need a clean photo each from the owner (listed in the report)
 R8.2 pass: his own photos and five hero shots edited from his bowl photos (Higgsfield nano_banana_2); no stock. The generated box-full.webp was removed 25 Oct (Tzvi asked): the Supreme box card on home and menu is now his own listing photo, assets/box-yellow.webp cut unchanged from src/owner/shot-box.png; looked at on laptop 1440 and phone 390, the labelled sauce pots show. All three box cards are the same box, his only box photo; photos of each box are asked for in message-to-owner.md item 2
 R3p.7 pass: every kind of chicken is a tile; seven show his photo (Shnitzel Bites and Pretzel added 25 Oct from his own photos, cropped only), Buffalo Wings is a plain colour tile until he has a photo
