@@ -66,6 +66,8 @@ if (!fs.existsSync(path.join(SRC, 'index.html'))) {
 // (Tzvi, 24 Oct 2026: "the rules get skipped a lot"; that day three first publishes stopped one problem
 // at a time, ten minutes apart, on rules added after the sites were built). Republishes used to skip
 // all of this, so a rule broken by a later change went live unseen.
+// A rule added after the site was first published is the exception (Tzvi, 29 Oct 2026: "new rules
+// shouldnt affect already made sites"): its check is not run until the site's RULES.md answers it.
 //   --check   run everything, list every problem, publish nothing (use it before asking to publish)
 // The concept sheet (Tzvi, 19 Oct 2026: bland pages shipped although the rules said otherwise) and the
 // look-alike check (rules 3p: "why do you keep making everything so similar") stay for new pages only:
@@ -112,11 +114,17 @@ const CHECK_ONLY = process.argv.includes('--check');
   // A failure that is only a timing measure (SMOOTH frame rate, a FLASH on two quick taps) is run once more before it
   // counts: on a computer running several sessions' browsers these tripped on pages that pass alone (25 Oct 2026).
   const onlyTiming = (out) => { const bad = out.split('\n').filter((l) => /^[A-Z]{4,}\s/.test(l)); return bad.length > 0 && bad.every((l) => /^(SMOOTH|FLASH|HEAVY|BUSY)\s/.test(l)); };
-  for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly'],
+  // A check that belongs to a checklist rule added after this site was first published is not run (Tzvi, 29 Oct
+  // 2026: "new rules shouldnt affect already made sites"; scripts/rule-dates.mjs). A new check gets its own script
+  // and its rule id here, so it can be told apart from the rules the site was made under.
+  const { newerRules } = await import('./rule-dates.mjs');
+  const newer = newerRules(ROOT, SRC);
+  for (const [script, why, rule] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly'],
     // smooth on a slowed phone, and repeated labels keep one place (Tzvi, 26-27 Oct 2026; rules 3s.27)
-    ['check-speed.mjs', 'is not smooth on a phone'], ['check-same-place.mjs', 'moves a repeated label'], ['check-one-scroll.mjs', 'has two scroll effects'],
+    ['check-speed.mjs', 'is not smooth on a phone'], ['check-same-place.mjs', 'moves a repeated label', 'R3s.27'], ['check-one-scroll.mjs', 'has two scroll effects', 'R3h.21'],
     // on a phone the opening photo is seen, not covered by words and shades (Tzvi, 28 Oct 2026; rules 5b.3)
-    ['check-photo-clear.mjs', 'covers its opening photo on a phone']]) {
+    ['check-photo-clear.mjs', 'covers its opening photo on a phone', 'R5b.3']]) {
+    if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }
     results.push({ why, ...r });

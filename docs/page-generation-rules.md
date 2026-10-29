@@ -37,8 +37,13 @@ new rule, or a fix that will become one, goes through these steps before it is w
    laptop and a phone size. Tzvi says yes to the picture, not to a description. A fix that is our own
    design choice, not what Tzvi asked for, is a proposal until he has seen it.
 3. **Try it on every live site it covers** (`frontend/public/pages/pages.json`): run its check, or look,
-   on each, and list the ones that fail. Fix them, or write why they are exempt. A rule that fails sites
-   Tzvi is happy with is wrong, not the sites.
+   on each, and list the ones that fail. A rule that fails sites Tzvi is happy with is wrong, not the
+   sites. **A new rule does not hold up a site that is already made** (Tzvi, 29 Oct 2026: "new rules
+   shouldnt affect already made sites"): a site is held to the checklist rules that existed when it was
+   first published, plus any later rule its RULES.md answers. check-rules lists a newer unanswered rule as
+   "not required" and publish-page does not run that rule's check (`scripts/rule-dates.mjs`). Show Tzvi
+   which live sites fail it; they change only if he asks. So a new check gets its own script, with its
+   rule id in publish-page's list, never a new test inside an existing script.
 4. **The check must catch the original mistake**: run it on the before state (it fails) and the after
    state (it passes). A check that passes both is not checking the rule.
 5. **Write how, not only what**: the steps, the tool and settings, a worked example folder, and what was

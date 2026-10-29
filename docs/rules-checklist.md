@@ -22,6 +22,9 @@ be answered for every site before anyone is shown it.
    to Tzvi, the owner, or published. It fails on a missing id, a `todo`, a `fix:`, a line with no
    reason, or a RULES.md older than the newest .html/.css/.js/.py in the build (any edit means
    the rules are looked at again).
+   A line added here after a site was first published is not required of that site until its
+   RULES.md answers it (Tzvi, 29 Oct 2026: "new rules shouldnt affect already made sites";
+   `scripts/rule-dates.mjs`). A new site answers every line.
 5. The person who did not build the site also answers `docs/page-review-checklist.md` (3r.2).
 
 **A rule added to `docs/page-generation-rules.md` (or to the skill's SKILL.md) must be added to

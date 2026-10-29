@@ -21,10 +21,15 @@
  * not in the checklist (a typo or a removed rule); or RULES.md is older than the newest .html, .css,
  * .js or .py in the build (folders named lab, gen, node_modules, .git are skipped), because then the
  * rules were looked at before the last change.
+ *
+ * A rule added to the checklist after the site was first published is not required (Tzvi, 29 Oct 2026: "new
+ * rules shouldnt affect already made sites"; scripts/rule-dates.mjs). It is listed as a note; once RULES.md
+ * answers it, the answer is checked like any other.
  */
 import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
+import { newerRules } from './rule-dates.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const CHECKLIST = path.join(ROOT, 'docs', 'rules-checklist.md');
@@ -93,10 +98,12 @@ fs.readFileSync(rulesFile, 'utf8').split(/\r?\n/).forEach((line, i) => {
 });
 
 const counts = { pass: 0, na: 0, fix: 0, todo: 0, missing: 0, bad: 0 };
+const newer = newerRules(ROOT, dir), skipped = [];
 const byGroup = new Map();
 const note = (it, msg, kind) => { counts[kind]++; problems.push(`${it.id}: ${msg}`); const g = byGroup.get(it.group) || []; g.push(it.id); byGroup.set(it.group, g); };
 for (const it of items) {
   const a = answers.get(it.id);
+  if (!a && newer.has(it.id)) { skipped.push(it.id); continue; }
   if (!a) { note(it, `missing from RULES.md. Rule: ${it.rule.slice(0, 90)}`, 'missing'); continue; }
   const m = /^(pass|n\/a|fix|todo)\b\s*:?\s*(.*)$/i.exec(a.rest);
   if (!m) { note(it, `line ${a.line} must start with pass, n/a or fix (got "${a.rest.slice(0, 40)}")`, 'bad'); continue; }
@@ -139,6 +146,7 @@ if (newest.t > rulesTime) problems.push(`RULES.md is older than ${path.relative(
 const name = path.basename(dir);
 console.log(`${name}: ${items.length} rules in the checklist`);
 console.log(`  pass ${counts.pass}   n/a ${counts.na}   fix ${counts.fix}   todo ${counts.todo}   missing ${counts.missing}   malformed ${counts.bad}`);
+if (skipped.length) console.log(`  not required, added after ${name} was made: ${skipped.join(' ')}`);
 if (problems.length) {
   console.log('');
   for (const [g, ids] of byGroup) console.log(`  ${g}: ${ids.length} open (${ids.slice(0, 12).join(' ')}${ids.length > 12 ? ' ...' : ''})`);
@@ -148,4 +156,4 @@ if (problems.length) {
   console.error(`\n${problems.length} problem(s). Do not show or publish ${name} until check-rules passes (docs/rules-checklist.md).`);
   process.exit(1);
 }
-console.log(`rules: every one of ${items.length} rules answered for ${name}`);
+console.log(`rules: every one of ${items.length - skipped.length} rules answered for ${name}`);
