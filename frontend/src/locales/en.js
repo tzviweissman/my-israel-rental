@@ -4269,6 +4269,16 @@ const en = {
         closingTitle: 'Your next tenant is already looking',
         closingBody: 'Listing takes a few minutes and costs nothing.',
       },
+      strength: {
+        title: 'Listing strength',
+        photos: 'Add at least {{min}} photos ({{n}} now)',
+        price: 'Add a price',
+        description: 'Write a few lines about the place',
+        share: 'Share this listing',
+        picture: 'Picture to post in groups',
+        pictureHint: 'Post the picture in Facebook groups or your WhatsApp status, with the link under it.',
+        pictureFailed: 'Could not make the picture. Try again.',
+      },
       demand: {
         heading: 'Who is looking right now',
         stays: '{{n}} people looked for a place to stay this week',

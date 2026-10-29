@@ -271,6 +271,10 @@ async def get_properties(
     # is a no-op there; it still does the trimming for the owner-scoped
     # (full-document) path.
     for p in properties:
+        if is_owner_scoped:
+            # The owner's "listing strength" check needs how many photos
+            # there are, not just the cover (components/dashboard/ListingStrength).
+            p["image_count"] = len(p.get("images") or [])
         if p.get("images"):
             p["images"] = p["images"][:1]
         # videos are tiny in count (usually 0-1) — leave intact so the

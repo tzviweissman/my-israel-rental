@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { holidayShown, priceSymbol, regularShown, unitLabel } from '../../utils/listingPrice';
 import ShareListingsPanel from './ShareListingsPanel';
+import ListingStrength from './ListingStrength';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -668,6 +669,8 @@ const PropertyList = ({ properties, bookings = [], onEdit, onAddProperty, onRefr
                   </button>
                 </div>
               </div>
+
+              <ListingStrength property={property} onEdit={onEdit} />
 
               {/* Automatic messages to guests: stays only. */}
               {(property.rental_type === 'vacation' || property.rental_type === 'short-term') && (
