@@ -116,7 +116,7 @@ const WhyList = () => {
             {t('whyList.trialNote', 'Free to list - no card needed.')}
           </p>
           <p className="text-sm text-gray-600 mt-4" data-testid="why-list-paste-ad">
-            {t('whyList.pasteAdLine', 'Renting out a home? Paste the ad you already have and the form fills itself in.')}{' '}
+            {t('whyList.pasteAdLine', 'Already advertised on Facebook, Yad2 or WhatsApp? Paste your ad and the form fills itself in.')}{' '}
             <Link to="/join" className="font-semibold text-[var(--brand-primary)] hover:underline">
               {t('whyList.pasteAdLink', 'Start here')}
             </Link>

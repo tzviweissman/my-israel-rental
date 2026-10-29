@@ -88,7 +88,7 @@ const ROLE_CARDS = [
     tDescKey: 'signupJoin.providerDesc',
     defaultDesc: 'Cleaner, mover, tour guide, or any local service',
     tValueKey: 'signupJoin.providerValue',
-    defaultValue: 'Free to list · no booking fees · no commission',
+    defaultValue: 'Free to list · no commission · paste the ad you already have',
     // /why-list lives here rather than on the Host card: it is the
     // provider value page. This keeps it reachable now that "List / Offer"
     // has left the nav, which was the point of linking it at all.

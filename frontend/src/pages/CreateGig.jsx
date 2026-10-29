@@ -31,7 +31,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Loader2, Plus, Trash2, ArrowLeft, ArrowRight, X,
-  Store, Package, CalendarClock, ImagePlus, Copy,
+  Store, Package, CalendarClock, ImagePlus, Copy, Sparkles,
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import PageMeta from '../components/PageMeta';
@@ -142,6 +142,8 @@ const CreateGig = () => {
   // The two slow-path spinners in the products step.
   const [bulkPhotos, setBulkPhotos] = useState(false);
   const [extracting, setExtracting] = useState(false);
+  const [adText, setAdText] = useState('');
+  const [adReading, setAdReading] = useState(false);
   useEffect(() => {
     let alive = true;
     axios.get(`${API}/marketplace/businesses`, { headers: { Authorization: `Bearer ${token}` } })
@@ -420,6 +422,54 @@ const CreateGig = () => {
       toast.error(apiErrorMessage(err, t('wizard.extractFailed', 'Could not read that.'), t), { duration: 8000 });
       return false;
     } finally { setExtracting(false); }
+  };
+
+  // The ad the business already runs -> the whole form, which the owner
+  // then checks. Nothing is saved (29 Oct 2026).
+  const fillFromAd = async () => {
+    if (!adText.trim()) { toast.error(t('wizard.pasteAdEmpty', 'Paste your ad first')); return; }
+    setAdReading(true);
+    try {
+      const { data } = await axios.post(`${API}/marketplace/ad/extract`, { text: adText }, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      const type = data.gig_type || form.gig_type;
+      const items = data.items || [];
+      const price = (r) => (r.price == null ? '' : String(r.price));
+      setForm((f) => {
+        const next = {
+          ...f,
+          gig_type: type,
+          title: data.title || f.title,
+          category: data.category || f.category,
+          subcategory: data.category ? '' : f.subcategory,
+          description: data.description || f.description,
+          area: data.area || f.area,
+          whatsapp: data.whatsapp || f.whatsapp,
+          contact_email: data.contact_email || f.contact_email,
+        };
+        if (type === 'store') {
+          next.tiers = [];
+          next.products = items.length
+            ? items.map((r) => ({ ...emptyProduct(r.currency), name: r.name, price: price(r), description: r.description || '' }))
+            : (f.products.length ? f.products : [emptyProduct()]);
+        } else {
+          next.products = [];
+          next.tiers = items.length
+            ? items.map((r) => ({
+              ...emptyTierFor(type, r.currency), name: r.name, price: price(r), description: r.description || '',
+              ...(type === 'appointment' && r.duration_minutes ? { duration_minutes: r.duration_minutes } : {}),
+            }))
+            : (f.tiers.length ? f.tiers : [emptyTierFor(type)]);
+        }
+        return next;
+      });
+      if (data.business_name && firstBusiness && !bizName.trim()) setBizName(data.business_name);
+      setAdText('');
+      toast.success(t('wizard.pasteAdDone', 'Filled in. Check each step and add your photos.'));
+    } catch (err) {
+      toast.error(apiErrorMessage(err, t('wizard.pasteAdFailed', 'Could not read that ad. Try again, or fill in the form yourself.'), t), { duration: 8000 });
+    } finally { setAdReading(false); }
   };
 
   // ---- Availability helpers (appointment) -----------------------------------
@@ -734,6 +784,43 @@ const CreateGig = () => {
         <h1 className="text-2xl font-bold mb-6" style={{ fontFamily: 'var(--font-head)' }}>
           {stepLabels[step]}
         </h1>
+
+        {/* First, because most businesses already run an ad somewhere. */}
+        {step === 1 && (
+          <div className="mb-6 p-4 rounded-xl bg-[var(--surface-muted)] border border-[var(--brand-border)]" data-testid="wizard-paste-ad">
+            <div className="flex items-start gap-2 mb-2">
+              <Sparkles size={18} className="text-[var(--gold)] mt-0.5 shrink-0" />
+              <div>
+                <h2 className="text-base font-semibold">{t('wizard.pasteAdTitle', 'Already advertised somewhere?')}</h2>
+                <p className="text-sm text-gray-600">
+                  {t('wizard.pasteAdBody', "Paste your post from Facebook, Instagram, WhatsApp or your website and we'll fill in the form for you. Check it, add photos, and you're done.")}
+                </p>
+              </div>
+            </div>
+            <textarea
+              value={adText}
+              onChange={(e) => setAdText(e.target.value)}
+              placeholder={t('wizard.pasteAdPlaceholder', 'e.g. Cohen Cleaning - apartment cleaning in Jerusalem. Regular clean ₪250, deep clean ₪450. WhatsApp 050-000-0000')}
+              rows={adText ? 5 : 3}
+              maxLength={8000}
+              dir="auto"
+              className="w-full px-3 py-2 rounded-lg border border-gray-300 bg-white text-sm focus:outline-none focus:border-[var(--brand-primary)]"
+              data-testid="wizard-paste-ad-input"
+            />
+            <div className="flex justify-end mt-2">
+              <button
+                type="button"
+                onClick={fillFromAd}
+                disabled={adReading || !adText.trim()}
+                className="btn-primary px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
+                data-testid="wizard-paste-ad-btn"
+              >
+                {adReading ? <Loader2 size={14} className="animate-spin" /> : <Sparkles size={14} />}
+                {adReading ? t('wizard.pasteAdReading', 'Reading your ad…') : t('wizard.pasteAdFill', 'Fill in the form')}
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* --- Step 1: Gig type picker --- */}
         {step === 1 && (
