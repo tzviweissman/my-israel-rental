@@ -140,7 +140,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
 
   const handleSmartPaste = async () => {
     if (!smartPaste.trim()) {
-      toast.error('Paste some property text first');
+      toast.error(t('dashboard.pasteAdEmpty', 'Paste your ad first'));
       return;
     }
     setSmartPasting(true);
@@ -152,7 +152,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       );
       const extracted = (res.data.properties || [])[0];
       if (!extracted) {
-        toast.error('Could not find a property in that text');
+        toast.error(t('dashboard.pasteAdNone', 'We could not find a listing in that text'));
         return;
       }
       // Merge extracted fields into the current form, keeping defaults for
@@ -172,9 +172,9 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       if (merged.is_shabbat_elevator) merged.has_elevator = true;
       setPropertyForm(merged);
       setSmartPaste('');
-      toast.success('Filled in fields - review and save');
+      toast.success(t('dashboard.pasteAdDone', 'Filled in. Check the details, add photos and save.'));
     } catch (e) {
-      toast.error(e.response?.data?.detail || 'AI extraction failed');
+      toast.error(t('dashboard.pasteAdFailed', 'Could not read that ad. Try again, or fill in the form yourself.'));
     } finally {
       setSmartPasting(false);
     }
@@ -372,7 +372,7 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
         <button
           type="button"
           onClick={onClose}
-          className="sticky top-0 float-right -mt-3 -me-3 z-10 p-2 rounded-full bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 shadow-sm transition-colors"
+          className="sticky top-0 float-end -mt-3 -me-3 z-10 p-2 rounded-full bg-white/95 backdrop-blur-sm border border-gray-200 text-gray-500 hover:text-gray-900 hover:bg-gray-50 shadow-sm transition-colors"
           aria-label="Close"
           data-testid="add-property-close-x"
         >
@@ -382,6 +382,46 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
           {editingProperty && editingProperty.id ? t('dashboard.editProperty') : t('dashboard.addNewProperty')}
         </h2>
         <form onSubmit={handleSubmit} className="space-y-6">
+          {/* First, because most people already have an ad on Yad2, Facebook
+              or WhatsApp: pasting it fills the form below (29 Oct 2026). */}
+          {!editingProperty?.id && (
+            <div
+              className="p-4 rounded-xl bg-[var(--surface-muted)] border border-[var(--brand-border)]"
+              data-testid="smart-paste-panel"
+            >
+              <div className="flex items-start gap-2 mb-2">
+                <Sparkles size={18} className="text-[var(--gold)] mt-0.5 shrink-0" />
+                <div>
+                  <h3 className="text-base font-semibold">{t('dashboard.pasteAdTitle', 'Already advertised somewhere?')}</h3>
+                  <p className="text-sm text-gray-600">
+                    {t('dashboard.pasteAdBody', "Paste your ad from Yad2, Facebook, WhatsApp or anywhere else and we'll fill in the form for you. Check it, add photos, and you're done.")}
+                  </p>
+                </div>
+              </div>
+              <textarea
+                value={smartPaste}
+                onChange={(e) => setSmartPaste(e.target.value)}
+                placeholder={t('dashboard.pasteAdPlaceholder', 'e.g. 3 rooms for rent in Rechavia, 4th floor, Shabbat elevator, furnished, ₪7,500 a month, available 1 October')}
+                rows={smartPaste ? 5 : 3}
+                className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]/50 text-sm bg-white"
+                maxLength={30000}
+                data-testid="smart-paste-input"
+              />
+              <div className="flex justify-end mt-2">
+                <button
+                  type="button"
+                  onClick={handleSmartPaste}
+                  disabled={smartPasting || !smartPaste.trim()}
+                  className="btn-primary px-4 py-2 rounded-lg text-sm font-semibold disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
+                  data-testid="smart-paste-btn"
+                >
+                  <Sparkles size={14} />
+                  {smartPasting ? t('dashboard.pasteAdReading', 'Reading your ad…') : t('dashboard.pasteAdFill', 'Fill in the form')}
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Photos/videos first so users see the most engaging step at the
               top of the form, then fill in the remaining details below. */}
           <MediaUploadSection
@@ -401,44 +441,6 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
             <Tour3DUpload propertyId={editingProperty.id} token={token} />
           )}
 
-          {!editingProperty?.id && (
-            <div
-              className="p-4 rounded-xl bg-gradient-to-br from-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/5 to-[rgb(var(--gold-rgb)/<alpha-value>)]/10 border border-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/20"
-              data-testid="smart-paste-panel"
-            >
-              <div className="flex items-start gap-2 mb-2">
-                <Sparkles size={18} className="text-[var(--gold)] mt-0.5 shrink-0" />
-                <div>
-                  <h3 className="text-sm font-semibold">AI smart paste</h3>
-                  <p className="text-xs text-gray-600">
-                    Paste a property description from WhatsApp, email, a listing site - anything. Claude reads it and pre-fills the form below.
-                  </p>
-                </div>
-              </div>
-              <textarea
-                value={smartPaste}
-                onChange={(e) => setSmartPaste(e.target.value)}
-                placeholder='e.g. "2BR for rent in Rechavia, 4th floor, shabbat elevator, fully furnished, 7,500₪/mo, available October 1. Great area, near supermarket. WhatsApp 050-XXX-XXXX."'
-                rows={smartPaste ? 5 : 2}
-                className="w-full px-3 py-2 rounded-lg border border-[#E5E5E5] focus:outline-none focus:ring-2 focus:ring-[rgb(var(--brand-primary-rgb)/<alpha-value>)]/50 text-sm bg-white/80"
-                maxLength={30000}
-                data-testid="smart-paste-input"
-              />
-              <div className="flex items-center justify-between mt-2">
-                <p className="text-[11px] text-gray-500">{smartPaste.length.toLocaleString()} / 30,000 characters</p>
-                <button
-                  type="button"
-                  onClick={handleSmartPaste}
-                  disabled={smartPasting || !smartPaste.trim()}
-                  className="px-4 py-1.5 rounded-lg bg-[var(--brand-primary)] text-white text-sm font-semibold hover:bg-[#175757] transition-colors disabled:opacity-50 disabled:cursor-not-allowed inline-flex items-center gap-1.5"
-                  data-testid="smart-paste-btn"
-                >
-                  <Sparkles size={14} />
-                  {smartPasting ? 'Reading…' : 'Extract & fill'}
-                </button>
-              </div>
-            </div>
-          )}
 
           <div>
             <label className="block text-sm font-medium mb-2">Title</label>

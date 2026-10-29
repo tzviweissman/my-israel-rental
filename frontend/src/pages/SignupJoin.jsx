@@ -66,7 +66,7 @@ const ROLE_CARDS = [
     tDescKey: 'signupJoin.hostDesc',
     defaultDesc: 'I want to list my vacation rental or property',
     tValueKey: 'signupJoin.hostValue',
-    defaultValue: 'Free to list · no booking fees · no commission',
+    defaultValue: 'Free to list · no commission · paste the ad you already have',
     // /why-host, NOT /why-list — the latter is the service-provider value
     // page and would mis-describe itself to a property owner.
     learnMoreHref: '/why-host',

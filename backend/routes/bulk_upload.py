@@ -133,7 +133,7 @@ def _normalize_rental_type(row: dict) -> None:
     rt = str(row["rental_type"]).strip().lower().replace(" ", "-")
     if rt not in _VALID_RENTAL_TYPES:
         raise ValueError(
-            f"rental_type must be long-term/short-term/vacation/storage (got '{row['rental_type']}')"
+            f"rental_type must be long-term/short-term/vacation (got '{row['rental_type']}')"
         )
     row["rental_type"] = rt
 
@@ -590,13 +590,13 @@ Required fields (always emit):
   - description    (string, 1-3 sentences summarising what's in the source text, in English)
   - area           (string, neighbourhood or city + neighbourhood, in English)
   - address        (string, best-guess address; empty string if not in source)
-  - rental_type    (one of: long-term | short-term | vacation | storage; default long-term)
+  - rental_type    (one of: long-term | short-term | vacation; default long-term)
   - property_type  (one of: apartment | house | villa; default apartment)
   - bedrooms       (number; if "1.5 bedroom" -> 1.5, if "studio" -> 0)
   - bathrooms      (number; default 1 if not mentioned)
   - floor          (integer; -1 = basement, 0 = ground; "ground floor" -> 0)
   - currency       (ILS or USD; default ILS for prices in nis/shekels, USD for $; default ILS)
-  - monthly_price  (number -- for long-term/storage; null otherwise)
+  - monthly_price  (number -- for long-term; null otherwise)
   - nightly_price  (number -- for short-term/vacation; null otherwise)
 
 Optional (emit when source mentions them):
