@@ -658,7 +658,11 @@ async def smart_extract(
     chat = LlmChat(
         api_key=ANTHROPIC_API_KEY,
         session_id=str(uuid.uuid4()),
-        system_message=_EXTRACT_SYSTEM_PROMPT,
+        # Without today's date "1 December" came back as a past year.
+        system_message=_EXTRACT_SYSTEM_PROMPT + (
+            f"\nToday is {datetime.now(UTC).date().isoformat()}. A date given "
+            "without a year is its next occurrence from today."
+        ),
     )
     chat.with_model("anthropic", "claude-sonnet-4-6")
     raw = await chat.send_message(UserMessage(text=text))

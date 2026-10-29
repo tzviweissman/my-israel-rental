@@ -160,7 +160,9 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       const merged = { ...propertyForm };
       for (const [k, v] of Object.entries(extracted)) {
         if (v === null || v === undefined) continue;
-        merged[k] = v;
+        // The reader answers yes/no as words (the CSV path wants them so);
+        // left as strings, "no" ticked its checkbox.
+        merged[k] = v === 'yes' ? true : v === 'no' ? false : v;
       }
       if (typeof merged.amenities === 'string') {
         merged.amenities = merged.amenities.split(/[,;]/).map(a => a.trim()).filter(Boolean);
@@ -170,6 +172,9 @@ const AddPropertyModal = ({ isOpen, onClose, editingProperty, onSaved, API, toke
       // Shabbat elevator implies regular elevator (backend does this for
       // bulk uploads — replicate here so the UI stays consistent pre-save).
       if (merged.is_shabbat_elevator) merged.has_elevator = true;
+      // A porch size or a sukkah without a count left porches at 0, which
+      // hides both fields while still saving them.
+      if (!merged.porches && (merged.porch_square_meters || merged.sukkah_compatible)) merged.porches = 1;
       setPropertyForm(merged);
       setSmartPaste('');
       toast.success(t('dashboard.pasteAdDone', 'Filled in. Check the details, add photos and save.'));
