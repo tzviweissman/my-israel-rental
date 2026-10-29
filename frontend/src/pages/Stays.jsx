@@ -823,8 +823,10 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
         // can just flip to "show me everything on a map" from the
         // default view too. When an address is set, we center on it and
         // show a "you searched here" pin.
-        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 pt-11 pb-6" data-testid="stays-map-container">
-          <div className="section-rhead flex items-end justify-between mb-5">
+        <div className="max-w-[1760px] mx-auto px-4 sm:px-6 lg:px-10 pt-3 sm:pt-11 pb-6" data-testid="stays-map-container">
+          {/* Phones: the map fills the screen under the search pill and the
+              count sits in the bottom sheet, as on Airbnb. */}
+          <div className="section-rhead hidden sm:flex items-end justify-between mb-5">
             <div>
               <h2 className="text-gray-900">
                 {filteredWithDistance.length} {filteredWithDistance.length === 1 ? t('stays.stay', 'stay') : t('stays.staysLabel', 'stays')}
@@ -1209,31 +1211,32 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
           breakpoint precisely because this element takes over on mobile,
           giving the address input a full clean row of its own.
 
-          Only renders in LIST view — in map view the peekable bottom
-          sheet already exposes a "swipe up for details" affordance, so
-          adding a second toggle would clutter the screen and overlap
-          the sheet handle. */}
-      {!loading && filtered.length > 0 && viewMode !== 'map' && (
+          In map view it reads "List" and sits above the peek sheet, so
+          there is always one tap back (Tzvi, 29 Oct 2026). */}
+      {!loading && filtered.length > 0 && (
         <button
           type="button"
           onClick={() => setSearchParams((prev) => {
             const n = new URLSearchParams(prev);
-            n.set('view', 'map');
+            if (viewMode === 'map') n.delete('view'); else n.set('view', 'map');
             return n;
           }, { replace: true })}
-          className="sm:hidden fixed start-1/2 -translate-x-1/2 z-40 inline-flex items-center gap-2 rounded-full bg-gray-900 text-white px-4 py-2.5 text-sm font-semibold shadow-[0_10px_25px_-5px_rgba(0,0,0,0.35)] hover:bg-gray-800 active:scale-95 transition-transform"
+          className="sm:hidden fixed inset-x-0 mx-auto w-fit z-40 flex items-center gap-2 rounded-full bg-gray-900 text-white px-4 py-2.5 text-sm font-semibold shadow-[0_10px_25px_-5px_rgba(0,0,0,0.35)] hover:bg-gray-800 active:scale-95 transition-transform"
           style={{
             // Match AccessibilityButton / WhatsAppButton positioning:
             // clear the iOS home-indicator + any mobile bottom nav +
             // a comfortable thumb-reach margin. Users who tap the FAB
             // never accidentally hit the nav bar behind it.
-            bottom: 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-h, 0px) + 1.5rem)',
+            // In map view it rides just above the peek sheet (132px).
+            bottom: viewMode === 'map'
+              ? 'calc(env(safe-area-inset-bottom, 0px) + 132px + 1rem)'
+              : 'calc(env(safe-area-inset-bottom, 0px) + var(--bottom-nav-h, 0px) + 1.5rem)',
           }}
           data-testid="stays-view-fab"
-          aria-label={t('stays.viewMap', 'Show map')}
+          aria-label={viewMode === 'map' ? t('stays.viewList', 'List') : t('stays.viewMap', 'Show map')}
         >
-          <MapIcon size={14} />
-          {t('stays.viewMap', 'Map')}
+          {viewMode === 'map' ? <LayoutGrid size={14} /> : <MapIcon size={14} />}
+          {viewMode === 'map' ? t('stays.viewList', 'List') : t('stays.viewMap', 'Map')}
         </button>
       )}
     </div>
