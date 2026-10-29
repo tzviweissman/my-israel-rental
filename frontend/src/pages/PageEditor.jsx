@@ -133,10 +133,20 @@ export default function PageEditor() {
       else if (d.type === 'mir:redo') redo();
       else if (d.type === 'mir:pick') { picking.current = d.key; fileInput.current?.click(); }
       else if (d.type === 'mir:link') { setLinkFor({ key: d.key, bind: d.bind }); setAskOpen(false); setPhotosOpen(false); setHoursOpen(false); }
+      else if (d.type === 'mir:translate') {
+        // A two-language page: the other language follows what the owner typed (page_edits.py page-translate).
+        const lang = d.to === 'he' ? t('pageEditor.inHebrew', 'Hebrew') : t('pageEditor.inEnglish', 'English');
+        axios.post(`${API}/marketplace/businesses/${businessId}/page-translate`, { texts: d.texts, to: d.to }, { headers: { Authorization: `Bearer ${token}` } })
+          .then((r) => {
+            send({ type: 'mir:translated', id: d.id, texts: r.data.texts });
+            toast.success(t('pageEditor.translated', 'The {{lang}} version is updated too. To change it, click the words and choose {{lang}}.', { lang }));
+          })
+          .catch(() => toast.error(t('pageEditor.translateFailed', 'The {{lang}} version could not be updated. Click the words and choose {{lang}} to type it.', { lang })));
+      }
     };
     window.addEventListener('message', onMsg);
     return () => window.removeEventListener('message', onMsg);
-  }, [push, undo, redo, send]);
+  }, [push, undo, redo, send, businessId, token, t]);
 
   useEffect(() => {
     const onKey = (e) => {

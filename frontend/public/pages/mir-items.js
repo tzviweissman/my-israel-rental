@@ -78,6 +78,9 @@
       if (n.tagName === 'IMG') {
         if (e.i && e.i[k]) { n.removeAttribute('srcset'); n.removeAttribute('sizes'); n.setAttribute('src', e.i[k]); }
       } else if (e.t && typeof e.t[k] === 'string') n.innerHTML = e.t[k];
+      // A two-language page swaps data-en / data-he in: a copy has its own, not its original's.
+      var alt = n.hasAttribute('data-en') ? 'data-en' : n.hasAttribute('data-he') ? 'data-he' : null;
+      if (alt && e.a && typeof e.a[k] === 'string') n.setAttribute(alt, e.a[k]);
       if (editor) n.setAttribute('data-mir-field', k);
     });
     // A copied "Add" button would order the card it was copied from: a copy has none (a link, WhatsApp or a page,

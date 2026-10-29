@@ -107,6 +107,8 @@ def test_items_keep_order_and_clean_copies():
     assert g[0] == {"k": "t-ab12cd34-0"}
     assert g[1] == {"from": "t-ab12cd34-0", "t": {"t-ab12cd34-0": "Special Market"}, "i": {"i-ab12cd34-0": "https://res.cloudinary.com/x/a.jpg"}}
     assert len(g) <= 40 and set(out["items"]) == {"t-ab12cd34-0"}
+    other = clean_edits({"items": {"t-ab12cd34-0": [{"from": "t-ab12cd34-0", "a": {"t-ab12cd34-0": "  Balloon  wall ", "../x": "no", "t-ab12cd34-1": " "}}]}})
+    assert other["items"]["t-ab12cd34-0"][0]["a"] == {"t-ab12cd34-0": "Balloon wall"}
 
 
 def test_bind_and_alt():

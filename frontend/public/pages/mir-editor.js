@@ -34,6 +34,24 @@
   // The dashboard's own figures, for linked words (mir:live).
   var live = { hours: null, prices: {}, soldOut: {} };
 
+  // The editor speaks the dashboard's language (the dashboard frames this page, same origin).
+  var heUI = false;
+  try { heUI = /^he/i.test(window.parent.document.documentElement.lang || ''); } catch (e) { /* stays English */ }
+  var HE = {
+    'Edit text': 'עריכת טקסט', 'Link': 'קישור', 'Replace photo': 'החלפת תמונה', 'Change': 'שינוי',
+    'Shows your opening hours': 'מציג את שעות הפתיחה', 'Shows the price of ': 'מציג את המחיר של ',
+    '+ Add a line': '+ הוספת שורה', '+ Add a card': '+ הוספת כרטיס', '+ Add another': '+ הוספת עוד אחד',
+    'Remove line': 'הסרת שורה', 'Remove card': 'הסרת כרטיס', 'Remove ': 'הסרה', 'Removed': 'הוסר', 'Put back': 'החזרה',
+    'Smaller': 'קטן יותר', 'Bigger': 'גדול יותר', 'Align left': 'יישור לשמאל', 'Centre': 'מרכוז', 'Align right': 'יישור לימין',
+    'Hide': 'הסתרה', 'Hide or show': 'הסתרה או הצגה', 'Reset': 'איפוס', 'Back to where it was': 'חזרה למקום המקורי', 'Done': 'סיום',
+    'In Hebrew': 'בעברית', 'In English': 'באנגלית', 'Earlier': 'מוקדם יותר', 'Later': 'מאוחר יותר',
+    'Drag to put it somewhere else in the row': 'גררו כדי להעביר למקום אחר בשורה', 'Remove it from the page': 'הסרה מהדף',
+    'Put it back on the page': 'החזרה לדף', 'Add another just like this, in line with the others': 'הוספת עוד אחד בדיוק כזה, בשורה עם האחרים',
+    'Show your opening hours or a price from your dashboard here, so it changes when you change it there': 'הצגת שעות הפתיחה או מחיר מלוח הבקרה, כך שישתנה כשתשנו אותו שם',
+    'The same words in Hebrew': 'אותן מילים בעברית', 'The same words in English': 'אותן מילים באנגלית',
+    'Click text or a photo to change it. Drag it to move it. Click a line or a card to add another just like it.': 'לחצו על טקסט או תמונה כדי לשנות. גררו כדי להזיז. לחצו על שורה או כרטיס כדי להוסיף עוד אחד בדיוק כמוהו.'
+  };
+  var T = function (s) { return heUI && HE[s] ? HE[s] : s; };
   var post = function (msg) { window.parent.postMessage(Object.assign({ source: 'mir-editor' }, msg), location.origin); };
   var device = function () { return window.innerWidth < 768 ? 'm' : 'd'; };
   var slice = function (l) { return Array.prototype.slice.call(l); };
@@ -261,33 +279,51 @@
   var sel = null, bar = null;
   var tip = document.createElement('div');
   tip.id = 'mir-tip';
-  tip.textContent = 'Click text or a photo to change it. Drag it to move it. Click a line or a card to add another just like it.';
+  tip.textContent = T('Click text or a photo to change it. Drag it to move it. Click a line or a card to add another just like it.');
+  if (heUI) tip.dir = 'rtl';
   document.body.appendChild(tip);
   setTimeout(function () { tip.style.transition = 'opacity .4s'; tip.style.opacity = '0'; }, 7000);
 
   function button(label, fn, title, cls) {
     var b = document.createElement('button');
-    b.type = 'button'; b.textContent = label; if (title) { b.title = title; b.setAttribute('aria-label', title); }
+    b.type = 'button'; b.textContent = T(label); if (title) { b.title = T(title); b.setAttribute('aria-label', T(title)); }
     if (cls) b.className = cls;
     b.addEventListener('pointerdown', function (e) { e.stopPropagation(); });
     b.addEventListener('click', function (e) { e.preventDefault(); e.stopPropagation(); fn(); });
     return b;
   }
   function sep() { var s = document.createElement('span'); s.className = 'sep'; return s; }
-  function note(text) { var s = document.createElement('span'); s.className = 'note'; s.textContent = text; return s; }
-  // The words of a two-language page in its other language, typed in the bar.
+  function note(text) { var s = document.createElement('span'); s.className = 'note'; s.textContent = T(text); return s; }
+  // Where an element's other-language words live: edits.alt by key, or a copy's own "a".
+  function altSlot(el) {
+    if (!isField(el)) return { get: function () { return edits.alt[keyOf(el)]; }, set: function (v) { if (v == null) delete edits.alt[keyOf(el)]; else edits.alt[keyOf(el)] = v; }, base: loadedAlt[keyOf(el)] };
+    var c = el.closest('[data-mir-copy]').getAttribute('data-mir-copy').split(' '), e = (edits.items[c[0]] || [])[+c[1]] || {}, f = el.getAttribute('data-mir-field');
+    return { get: function () { return (e.a || {})[f]; }, set: function (v) { e.a = e.a || {}; if (v == null) delete e.a[f]; else e.a[f] = v; if (!Object.keys(e.a).length) delete e.a; }, base: null };
+  }
+  // After the owner types, the other language follows (the dashboard asks the API, mir:translate); they can correct it.
+  var asked = 0, pending = {};
+  function translate(el) {
+    var a = altAttr(el);
+    if (!a) return;
+    var text = el.textContent.replace(/\s+/g, ' ').trim();
+    if (!text) return;
+    asked += 1;
+    pending[asked] = altSlot(el);
+    post({ type: 'mir:translate', id: asked, texts: [text], to: a === 'data-he' ? 'he' : 'en' });
+  }
   function askAlt(el) {
-    var k = keyOf(el), a = altAttr(el);
+    var slot = altSlot(el), a = altAttr(el);
     bar.innerHTML = '';
     var input = document.createElement('input');
-    input.value = edits.alt[k] !== undefined ? edits.alt[k] : (loadedAlt[k] || '');
+    input.value = slot.get() !== undefined ? slot.get() : (slot.base || el.getAttribute(a) || '');
     input.dir = a === 'data-he' ? 'rtl' : 'ltr';
     input.setAttribute('aria-label', a === 'data-he' ? 'In Hebrew' : 'In English');
     var done = function (keepIt) {
       if (keepIt) {
         var v = input.value.replace(/\s+/g, ' ').trim();
-        if (!v || v === loadedAlt[k]) delete edits.alt[k]; else edits.alt[k] = v;
-        paint(); changed();
+        slot.set(!v || v === slot.base ? null : v);
+        if (isField(el)) renderItems(); else paint();
+        changed();
       }
       var s = sel; select(null); select(s);
     };
@@ -307,15 +343,17 @@
       bar.appendChild(button('Put back', function () { putBack(el); }, 'Put it back on the page'));
       return;
     }
-    bar.appendChild(button(noun === 'one' ? '+ Add another' : '+ Add a ' + noun, function () { duplicate(el); }, 'Add another ' + (noun === 'one' ? 'just like this' : noun + ' just like this') + ', in line with the others'));
+    bar.appendChild(button({ line: '+ Add a line', card: '+ Add a card', one: '+ Add another' }[noun], function () { duplicate(el); }, 'Add another just like this, in line with the others'));
     if (i.list.length > 1) {
-      bar.appendChild(button(i.across ? '←' : '↑', function () { moveItem(el, i.idx - 1); }, 'Earlier'));
-      bar.appendChild(button(i.across ? '→' : '↓', function () { moveItem(el, i.idx + 1); }, 'Later'));
+      // Across a right-to-left row, earlier is to the right.
+      var rtl = getComputedStyle(i.item).direction === 'rtl';
+      bar.appendChild(button(i.across ? (rtl ? '→' : '←') : '↑', function () { moveItem(el, i.idx - 1); }, 'Earlier'));
+      bar.appendChild(button(i.across ? (rtl ? '←' : '→') : '↓', function () { moveItem(el, i.idx + 1); }, 'Later'));
       var grip = button('⠿', function () {}, 'Drag to put it somewhere else in the row', 'mir-grip');
       grip.addEventListener('pointerdown', function (e) { e.preventDefault(); startOrder(el, e); });
       bar.appendChild(grip);
     }
-    bar.appendChild(button('Remove ' + (noun === 'one' ? '' : noun), function () { removeItem(el); }, 'Remove it from the page'));
+    bar.appendChild(button({ line: 'Remove line', card: 'Remove card', one: 'Remove ' }[noun], function () { removeItem(el); }, 'Remove it from the page'));
   }
   function select(el) {
     if (sel === el) return;
@@ -327,6 +365,7 @@
     el.classList.add('mir-sel');
     bar = document.createElement('div');
     bar.id = 'mir-bar';
+    if (heUI) bar.dir = 'rtl';
     var i = info(el), k = isField(el) ? null : keyOf(el);
     if (i && i.idx < 0) {
       itemButtons(el, i);
@@ -334,11 +373,12 @@
     } else if (isField(el)) {
       if (isImg(el)) bar.appendChild(button('Replace photo', function () { var c = el.closest('[data-mir-copy]').getAttribute('data-mir-copy').split(' '); post({ type: 'mir:pick', key: '@' + c[0] + ' ' + c[1] + ' ' + el.getAttribute('data-mir-field') }); }));
       else bar.appendChild(button('Edit text', function () { startTyping(el); }));
+      if (!isImg(el) && altAttr(el)) bar.appendChild(button(altAttr(el) === 'data-he' ? 'עברית' : 'English', function () { askAlt(el); }, altAttr(el) === 'data-he' ? 'The same words in Hebrew' : 'The same words in English'));
       if (i) itemButtons(el, i);
     } else {
       if (isImg(el)) bar.appendChild(button('Replace photo', function () { post({ type: 'mir:pick', key: k }); }));
       else if (edits.bind[k]) {
-        bar.appendChild(note(edits.bind[k] === 'hours' ? 'Shows your opening hours' : 'Shows the price of ' + edits.bind[k].slice(6)));
+        bar.appendChild(note(edits.bind[k] === 'hours' ? 'Shows your opening hours' : T('Shows the price of ') + edits.bind[k].slice(6)));
         bar.appendChild(button('Change', function () { post({ type: 'mir:link', key: k, bind: edits.bind[k] }); }));
       } else bar.appendChild(button('Edit text', function () { startTyping(el); }));
       if (!isImg(el) && !edits.bind[k]) bar.appendChild(button('Link', function () { post({ type: 'mir:link', key: k, bind: null }); }, 'Show your opening hours or a price from your dashboard here, so it changes when you change it there'));
@@ -408,7 +448,7 @@
       // An emptied line goes, as it would in a list anywhere.
       if (!html.replace(/<br>/g, '').trim() && el.closest('[data-mir-copy]').tagName === 'LI') { removeItem(el); return; }
       e.t = e.t || {};
-      if (e.t[el.getAttribute('data-mir-field')] !== html) { e.t[el.getAttribute('data-mir-field')] = html; changed(); }
+      if (e.t[el.getAttribute('data-mir-field')] !== html) { e.t[el.getAttribute('data-mir-field')] = html; changed(); translate(el); }
       return;
     }
     var k = keyOf(el);
@@ -416,6 +456,7 @@
     if (html === before) return;
     twins(el).forEach(function (t) { edits.text[keyOf(t)] = html; if (t !== el) t.innerHTML = html; });
     changed();
+    translate(el);
   }
   document.addEventListener('paste', function (e) {
     if (!typing) return;
@@ -583,6 +624,12 @@
       var s = sel; select(null);
       paint(); changed();
       if (s) select(s);
+    } else if (d.type === 'mir:translated' && pending[d.id]) {
+      var slot = pending[d.id];
+      delete pending[d.id];
+      if (!d.texts || !d.texts[0]) return;
+      slot.set(d.texts[0]);
+      paint(); changed();
     } else if (d.type === 'mir:deselect') {
       select(null);
     }

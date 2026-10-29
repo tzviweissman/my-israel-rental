@@ -5625,6 +5625,10 @@ const en = {
         soldOut: 'Sold out',
         noPrices: 'Prices you add to your listings in the dashboard show here.',
         unlink: 'Unlink, back to my own words',
+        inHebrew: 'עברית',
+        inEnglish: 'English',
+        translated: 'The {{lang}} version is updated too. To change it, click the words and choose {{lang}}.',
+        translateFailed: 'The {{lang}} version could not be updated. Click the words and choose {{lang}} to type it.',
       },
       // A business's own domain (backend custom_domains.py).
       domain: {

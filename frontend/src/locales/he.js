@@ -5443,6 +5443,10 @@ const he = {
         soldOut: 'אזל',
         noPrices: 'מחירים שתוסיפו למודעות בלוח הבקרה יופיעו כאן.',
         unlink: 'ביטול הקישור, חזרה למילים שלי',
+        inHebrew: 'עברית',
+        inEnglish: 'English',
+        translated: 'גם הגרסה בשפה השנייה עודכנה. כדי לשנות אותה, לחצו על המילים ובחרו {{lang}}.',
+        translateFailed: 'לא הצלחנו לעדכן את הגרסה בשפה השנייה. לחצו על המילים ובחרו {{lang}} כדי להקליד אותה.',
       },
       // A business's own domain (backend custom_domains.py).
       domain: {
