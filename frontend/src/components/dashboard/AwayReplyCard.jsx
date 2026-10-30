@@ -45,13 +45,13 @@ export default function AwayReplyCard({ API, auth, businessId }) {
                    className="w-5 h-5 shrink-0" style={{ accentColor: 'var(--gold)' }} data-testid="away-reply-on" />
           </label>
           <p className="text-xs mb-2" style={{ color: 'var(--brand-muted)' }}>
-            {t('awayReply.body', 'When a customer messages you here and you have not answered within {{count}} minutes, they get one friendly reply in your name, so they wait for you instead of asking someone else. Once a day per customer. Messages on WhatsApp are not included.', { count: s.minutes || 10 })}
+            {t('awayReply.body', 'When a customer messages you here and you have not answered within {{minutes}} minutes, they get one friendly reply in your name, so they wait for you instead of asking someone else. Once a day per customer. Messages on WhatsApp are not included.', { minutes: s.minutes || 10 })}
           </p>
           {s.on && (
             <>
               <textarea value={s.text} onChange={(e) => setS({ ...s, text: e.target.value })} maxLength={500} rows={2} dir="auto"
                         aria-label={t('awayReply.ownLabel', 'Your own words (optional)')}
-                        placeholder={t('awayReply.placeholder', "Thanks for your message! We've got it and will get back to you as soon as we can.")}
+                        placeholder={t('awayReply.placeholder', "Thanks for your message. We've got it and will get back to you as soon as we can.")}
                         className="w-full px-3 py-2 rounded-lg border text-sm bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="away-reply-text" />
               <div className="flex flex-wrap items-center gap-3 mt-2">
                 <button type="button" onClick={() => save(s)} disabled={busy}
