@@ -213,3 +213,4 @@ R3u.12 pass: pieces taken from scrollcraft/starter/kit (question cards), tried o
 R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 30 Oct: rules re-read after joining the two 29 Oct changes (pans without pictures from main, the short-laptop fit and question cards from the 3u round); nothing else changed -->
