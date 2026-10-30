@@ -252,6 +252,7 @@ const en = {
         sendTrack: 'Send status link',
         trackShareText: 'Hi {{name}}, you can follow your order here: {{url}}',
         track: {
+          howToPay: 'How to pay',
           partSeparate: 'Coming separately: {{items}}',
           partDelivered: 'delivered',
           partOnTheWay: 'on its way',

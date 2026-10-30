@@ -41,6 +41,7 @@ from routes import (  # noqa: E402
     guest_messages,
     home_tiles,
     seo,
+    whatsapp_webhook,
     ical,
     marketplace,
     misc,
@@ -122,6 +123,7 @@ for mod in (
     restaurants,
     home_tiles,
     seo,
+    whatsapp_webhook,
 ):
     api_router.include_router(mod.router)
 

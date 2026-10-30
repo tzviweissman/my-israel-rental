@@ -96,21 +96,9 @@ def _meta_config() -> Optional[dict]:
     }
 
 
-async def _send_meta_template(cfg: dict, raw_phone: str, lang: str, params: list) -> bool:
-    """POST one template message to the Graph API. Never raises."""
-    digits = normalize_whatsapp_number(raw_phone)
-    if not digits:
-        return False
+async def _post_meta(cfg: dict, payload: dict) -> bool:
+    """POST one message to the Graph API. Never raises."""
     import httpx
-    payload = {
-        "messaging_product": "whatsapp", "to": digits, "type": "template",
-        "template": {
-            "name": cfg["template"], "language": {"code": lang},
-            "components": [{"type": "body", "parameters": [
-                # Meta refuses an empty parameter, so a blank becomes "-".
-                {"type": "text", "text": str(p) or "-"} for p in params]}],
-        },
-    }
     try:
         async with httpx.AsyncClient(timeout=10) as client:
             r = await client.post(
@@ -122,11 +110,64 @@ async def _send_meta_template(cfg: dict, raw_phone: str, lang: str, params: list
             # wrong language code, no payment method) and holds no secret.
             log.warning("Meta WhatsApp send failed: %s %s", r.status_code, r.text[:300])
             return False
-        log.info("WhatsApp sent via Meta to=%s***", digits[:6])
+        log.info("WhatsApp sent via Meta to=%s***", payload["to"][:6])
         return True
     except Exception as exc:  # noqa: BLE001
         log.warning("Meta WhatsApp send failed: %s", type(exc).__name__)
         return False
+
+
+async def _send_meta_template(
+    cfg: dict, raw_phone: str, lang: str, params: list,
+    template: Optional[str] = None, buttons: Optional[list] = None,
+) -> bool:
+    """Send one template message. `buttons` are extra components, e.g. the
+    quick-reply buttons of the order-confirm template. Never raises."""
+    digits = normalize_whatsapp_number(raw_phone)
+    if not digits:
+        return False
+    components = [{"type": "body", "parameters": [
+        # Meta refuses an empty parameter, so a blank becomes "-".
+        {"type": "text", "text": str(p) or "-"} for p in params]}]
+    components += buttons or []
+    return await _post_meta(cfg, {
+        "messaging_product": "whatsapp", "to": digits, "type": "template",
+        "template": {"name": template or cfg["template"],
+                     "language": {"code": lang}, "components": components},
+    })
+
+
+def _quick_reply(index: int, payload: str) -> dict:
+    return {"type": "button", "sub_type": "quick_reply", "index": str(index),
+            "parameters": [{"type": "payload", "payload": payload}]}
+
+
+async def send_order_confirmed_to_customer(
+    *, recipient_phone: str, business_name: str, track_url: str, language: str = "he",
+) -> bool:
+    """Tell the customer the business confirmed, with their private order
+    link. Template named by WHATSAPP_TEMPLATE_ORDER_CONFIRMED."""
+    meta = _meta_config()
+    if not meta:
+        return False
+    return await _send_meta_template(
+        meta, recipient_phone, "he" if language == "he" else "en",
+        [business_name, track_url],
+        template=os.environ.get("WHATSAPP_TEMPLATE_ORDER_CONFIRMED") or "order_confirmed",
+    )
+
+
+async def send_whatsapp_text(*, recipient_phone: str, body: str) -> bool:
+    """Free-form text. Only delivered inside Meta's 24-hour window, e.g.
+    right after the owner tapped a button. Never raises."""
+    meta = _meta_config()
+    digits = normalize_whatsapp_number(recipient_phone) if meta else None
+    if not digits:
+        return False
+    return await _post_meta(meta, {
+        "messaging_product": "whatsapp", "to": digits,
+        "type": "text", "text": {"body": body},
+    })
 
 
 def _client(cfg: dict):
@@ -279,6 +320,7 @@ async def send_contract_signed_notification(
 async def send_new_order_notification(
     *, recipient_phone: str, customer_name: str, summary: str,
     path: str, kind: str = "order", language: str = "he",
+    order_id: Optional[str] = None,
 ) -> bool:
     """Tell a business on WhatsApp that an order or booking came in on the
     site (Tzvi, 22 Oct 2026).
@@ -291,6 +333,9 @@ async def send_new_order_notification(
     (TWILIO_CONTENT_SID_NEW_ORDER, and _HE for Hebrew). Until one is set,
     Twilio refuses the free-form body outside a 24-hour window and this
     returns False quietly; the email and the bell still go out.
+    With Meta, an order_id and WHATSAPP_TEMPLATE_NEW_ORDER_CONFIRM set, the
+    message carries Confirm / Decline quick-reply buttons whose payloads
+    (order_confirm:<id>, order_decline:<id>) the webhook reads.
     `summary` is cut short because a template variable over ~1000
     characters is refused, and a long basket reads better on the page.
     """
@@ -309,7 +354,14 @@ async def send_new_order_notification(
         f"New {word} on MyIsraelRental from {who}: {what}\nSee it and reply: {link}"
     )
     if meta:
-        return await _send_meta_template(meta, recipient_phone, "he" if he else "en", [word, who, what, link])
+        params = [word, who, what, link]
+        confirm_tpl = os.environ.get("WHATSAPP_TEMPLATE_NEW_ORDER_CONFIRM")
+        if order_id and confirm_tpl:
+            return await _send_meta_template(
+                meta, recipient_phone, "he" if he else "en", params, template=confirm_tpl,
+                buttons=[_quick_reply(0, f"order_confirm:{order_id}"),
+                         _quick_reply(1, f"order_decline:{order_id}")])
+        return await _send_meta_template(meta, recipient_phone, "he" if he else "en", params)
     key = "tpl_new_order_he" if he and cfg.get("tpl_new_order_he") else "tpl_new_order"
     return await _send(
         recipient_phone=recipient_phone,

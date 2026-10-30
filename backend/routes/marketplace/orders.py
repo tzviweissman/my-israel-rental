@@ -1639,6 +1639,12 @@ async def track_order(token: str, request: Request):
         "reorder_path": reorder_path(o) if o.get("status") == "done" else None,
         "delivery_fee": o.get("delivery_fee"),
         "paid": bool((o.get("payment") or {}).get("method")),
+        # How to pay the store, until it is paid: the WhatsApp "your order is
+        # confirmed" message (whatsapp_webhook.py) sends the customer here for it.
+        "payment_links": [] if (o.get("payment") or {}).get("method") or o.get("status") in ("cancelled", "failed")
+        else allowed_payment_links(biz.get("payment_links")),
+        "payment_note": None if (o.get("payment") or {}).get("method") or o.get("status") in ("cancelled", "failed")
+        else biz.get("payment_note"),
         # Parts a partner supplies and delivers separately, without its name.
         "parts": parts,
         # For "message them on WhatsApp about this order": the listing to
@@ -2487,7 +2493,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     # hold up the customer's confirmation.
     from utils.bg_tasks import spawn
     spawn(alert_business_on_whatsapp(gig, biz.get("owner_user_id"), payload.customer_name,
-                                     items_text, "/dashboard?tab=orders", "order"))
+                                     items_text, "/dashboard?tab=orders", "order", order_id=doc["_id"]))
     owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"_id": 0, "email": 1})
     await _email(
         (owner or {}).get("email"), f"New order from table {payload.table}" if payload.table else f"New order from {payload.customer_name}",
@@ -2542,7 +2548,7 @@ async def my_orders(user=Depends(verify_token)):
 
 
 async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optional[str], customer_name: str,
-                                     summary: str, path: str, kind: str) -> None:
+                                     summary: str, path: str, kind: str, order_id: Optional[str] = None) -> None:
     """A new order or booking, to the business's own WhatsApp (the number
     on the listing). Never raises: the order is already saved, and the
     email and the bell have already gone out."""
@@ -2556,6 +2562,7 @@ async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optiona
         await send_new_order_notification(
             recipient_phone=number, customer_name=customer_name or "", summary=summary or "",
             path=path, kind=kind, language=owner.get("preferred_language") or "en",
+            order_id=order_id,
         )
     except Exception as exc:  # noqa: BLE001
         logger.warning("WhatsApp new-%s alert failed: %s", kind, type(exc).__name__)

@@ -238,6 +238,7 @@ const he = {
         sendTrack: 'שליחת קישור מעקב',
         trackShareText: 'היי {{name}}, אפשר לעקוב אחרי ההזמנה כאן: {{url}}',
         track: {
+          howToPay: 'איך משלמים',
           partSeparate: 'מגיע בנפרד: {{items}}',
           partDelivered: 'נמסר',
           partOnTheWay: 'בדרך אליך',

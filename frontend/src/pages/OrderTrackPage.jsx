@@ -185,6 +185,15 @@ export default function OrderTrackPage() {
               {data.paid && <span className="ms-2" style={{ color: 'var(--status-open)' }}>· {t('orders.paidShort', 'paid')}</span>}
             </p>
           )}
+          {(data.payment_note || data.payment_links?.length > 0) && (
+            <div className="pt-1" data-testid="track-pay">
+              <p className="font-semibold" style={{ color: 'var(--ink)' }}>{t('orders.track.howToPay', 'How to pay')}</p>
+              {data.payment_note && <p style={{ color: 'var(--brand-muted)' }}>{data.payment_note}</p>}
+              {(data.payment_links || []).map((l) => (
+                <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" className="block underline" style={{ color: 'var(--gold-text-on-light)' }}>{l.label || l.url}</a>
+              ))}
+            </div>
+          )}
         </section>
 
         {/* Order here, then talk on WhatsApp: the order is already on the
