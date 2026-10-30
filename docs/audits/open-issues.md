@@ -150,3 +150,5 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Low] Copy: exclamation mark in the away-reply placeholder (en.js:915). First seen 29 Oct, 2026-10-29-ui-audit.md.
 - [Low] Ad maker close button about 34px, under the 44px touch size (`AdMaker.jsx:309`). First seen 30 Oct 2026 (2026-10-30-ui-audit.md).
 - [Low] New hardcoded hex classes in `AdMaker.jsx` and `ListingStrength.jsx`. First seen 30 Oct 2026 (2026-10-30-ui-audit.md).
+- Fixed (merged 30 Oct): awayReply.body plural-check failure (ef559ca8); away-reply default text exclamation mark removed, EN and HE (5943bd5d); stays.repliesWithinHours plural-check failure (1c4c8d33).
+- Dropped (30 Oct): Gift Boutique "Scroll to open" cue fix 669299b7 is already on main (the cue is gone from both copies).
