@@ -616,6 +616,39 @@ async def _ad_facts(target_type: str, target_id: str) -> tuple[dict[str, Any], d
     }
 
 
+# Praise the model adds from its own idea of a place ("prestigious Rehavia",
+# "central location") even when told not to: it has read a million ads
+# like that, and to it a well-known fact about a neighbourhood is not an
+# invention. The prompt asks; this enforces. A word passes only when the
+# owner's own listing uses it. Stems, so Hebrew prefixes and endings match.
+_PRAISE = (
+    "prestig", "luxur", "central", "spacious", "roomy", "quiet", "peaceful",
+    "heart of", "sought", "stunning", "breathtaking", "renovated", "prime",
+    "well-known", "exclusive", "upscale",
+    "יוקרת", "מרכזי", "מרווח", "שקט", "שלוו", "בלב ", "מבוקש", "משופצ", "משופץ",
+    "מדהימ", "עוצר נשימה", "אקסקלוסיבי", "מפואר", "מבוקשת", "יוקרה",
+)
+
+
+def _unclaimed(text: str, source: str) -> bool:
+    """True when `text` praises with a word the listing itself never uses."""
+    t, src = f" {text.lower()} ", source.lower()
+    return any(w in t and w.strip() not in src for w in _PRAISE)
+
+
+def _strip_praise(words: dict[str, Any], source: str, fallback_headline: str) -> dict[str, Any]:
+    """Points and caption sentences with unclaimed praise are dropped; a
+    headline with it becomes the listing's own title."""
+    import re
+    headline = words["headline"]
+    if _unclaimed(headline, source):
+        headline = fallback_headline[:60]
+    points = [p for p in words["points"] if not _unclaimed(p, source)]
+    sentences = re.split(r"(?<=[.!?])\s+", words["caption"])
+    caption = " ".join(x for x in sentences if not _unclaimed(x, source))
+    return {"headline": headline, "points": points, "caption": caption}
+
+
 class AdIn(BaseModel):
     target_type: str
     target_id: str
@@ -662,11 +695,13 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
         # The copy rules ban the long dash; the model reaches for it anyway.
         return re.sub(r"\s*[–—]\s*", ", ", str(v or "")).strip()[:n]
 
-    points = [clean(p, 40) for p in (data.get("points") or []) if str(p).strip()][:3]
-    return {
+    words = _strip_praise({
         "headline": clean(data.get("headline"), 60),
-        "points": points,
+        "points": [clean(p, 40) for p in (data.get("points") or []) if str(p).strip()][:3],
         "caption": clean(data.get("caption"), 800),
+    }, json.dumps(facts, ensure_ascii=False, default=str), str(facts.get("title") or facts.get("business_name") or ""))
+    return {
+        **words,
         "link": link,
         **extra,
     }
