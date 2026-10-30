@@ -34,6 +34,7 @@
           <div class="two">
             <div class="field" id="f-date"><label for="date">Day</label><input id="date" type="date" required><span class="err" id="dateErr">Choose a day (not Shabbos).</span></div>
           </div>
+          <div class="note" id="dayFix" hidden><span id="dayFixText"></span><button type="button" class="chip" id="dayFixBtn"></button></div>
           <span class="err" id="timeErr" style="color:var(--roof);font-size:.88rem" hidden>Choose a start time.</span>
         </div>
         <div class="q">
@@ -119,6 +120,24 @@
   }
   $('times').addEventListener('click', function (e) { var b = e.target.closest('[data-time]'); if (b) { o.time = b.dataset.time; $('timeErr').hidden = true; paint(); } });
   document.querySelectorAll('[data-place]').forEach(function (b) { b.addEventListener('click', function () { o.place = b.dataset.place; $('placeErr').hidden = true; paint(); }); });
+  // a day we cannot do (Shabbos, or before tomorrow): one plain line naming the next day we can, and a button that sets it (page rules 3u.2); the pick is never changed for them
+  var nextDay = '';
+  function dayFix() {
+    var d = $('date').value, box = $('dayFix');
+    if (!d) { box.hidden = true; return; }
+    var min = $('date').min, t = new Date(d + 'T12:00:00'), why = '';
+    if (d < min) { why = 'We book from tomorrow.'; t = new Date(min + 'T12:00:00'); }
+    else if (t.getDay() === 6) { why = 'We do not book on Shabbos.'; t.setDate(t.getDate() + 1); }
+    else { box.hidden = true; return; }
+    if (t.getDay() === 6) t.setDate(t.getDate() + 1);
+    nextDay = t.getFullYear() + '-' + ('0' + (t.getMonth() + 1)).slice(-2) + '-' + ('0' + t.getDate()).slice(-2);
+    $('dayFixText').textContent = why + ' The first day we can do is ' + t.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + '.';
+    $('dayFixBtn').textContent = 'Choose ' + t.toLocaleDateString('en-GB', { weekday: 'long' });
+    box.hidden = false;
+  }
+  $('date').addEventListener('input', dayFix); $('date').addEventListener('change', dayFix);
+  $('dayFixBtn').addEventListener('click', function () { $('date').value = nextDay; o.date = nextDay; $('f-date').classList.remove('is-bad'); KMB.save(o); KMB.paint(o); dayFix(); });
+  dayFix();
   function check(e) {
     var bad = [];
     // No Shabbos bookings: their calendar has no Saturday hours.

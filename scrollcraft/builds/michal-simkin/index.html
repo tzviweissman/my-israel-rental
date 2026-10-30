@@ -68,6 +68,18 @@
   body { font-size: 17px; background: var(--ivory); color: var(--navy); padding-block-end: var(--bar-h); }
   h1, h2, h3 { font-family: var(--font-head); font-weight: 500; }
   section { position: relative; }
+  /* 3u.5 Arrival (from scrollcraft/starter/kit): the first screen comes in in a set order, once; the page script adds .arrive-go, so without JS or with motion off everything is simply there */
+  html.arrive-go [data-arrive] { animation: arrive 700ms cubic-bezier(.2,.7,.2,1) backwards; animation-delay: calc(var(--n, 0) * 220ms); }
+  html.arrive-go [data-arrive="0"] { --n: 0; animation-name: arrive-drop; animation-duration: 500ms; }
+  html.arrive-go [data-arrive="1"] { --n: 1; }
+  html.arrive-go [data-arrive="2"] { --n: 2; }
+  html.arrive-go [data-arrive="3"] { --n: 2.5; animation-name: arrive-rise; animation-duration: 1100ms; }
+  html.arrive-go [data-arrive="4"] { --n: 4; animation-name: arrive-pop; animation-duration: 450ms; }
+  @keyframes arrive { from { opacity: 0; transform: translateY(28px); } }
+  @keyframes arrive-drop { from { opacity: 0; transform: translateY(-14px); } }
+  @keyframes arrive-rise { from { opacity: 0; transform: translateY(110px); } }
+  @keyframes arrive-pop { from { opacity: 0; transform: scale(.92); } }
+  @media (prefers-reduced-motion: reduce) { html.arrive-go [data-arrive] { animation: none; } }
   .on-navy { background: var(--navy); color: #FFFFFF; --sc-ink: #FFFFFF; --sc-ink-soft: #C9CFDA; --sc-accent: var(--rose-gold); }
   .on-ivory { background: var(--ivory); color: var(--navy); }
   .on-blush { background: var(--blush-pale); color: var(--navy); }
@@ -391,7 +403,7 @@
 <body id="top">
 <div class="sc-grain" aria-hidden="true"></div>
 
-<header class="top">
+<header class="top" data-arrive="0">
   <a class="top__mark" href="#top"><img src="assets/mark.jpg" alt="" width="96" height="96"> Michal Simkin</a>
   <nav class="top__nav" aria-label="On this page" data-spy>
     <a href="#hero">Clients</a>
@@ -400,7 +412,7 @@
     <a href="#same">In their words</a>
     <a href="#academy">Courses</a>
   </nav>
-  <a class="cta top__cta" href="book.html">Book a consultation</a>
+  <a class="cta top__cta" data-arrive="4" href="book.html">Book a consultation</a>
 </header>
 <nav class="bar" aria-label="Book">
   <img class="bar__mark" src="assets/mark.jpg" width="96" height="96" alt="">
@@ -415,10 +427,10 @@
       <div class="hero__bg" aria-hidden="true" data-crop-ok><img src="assets/ground.webp" alt="" width="1600" height="894" fetchpriority="high"></div>
       <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
         <p class="who">Michal Simkin, boutique wig salon and academy</p>
-        <h1 data-sc-kinetic="lines">A wig <em>you love.</em></h1>
-        <p class="lede">We create wigs that are a joy to wear, because when your wig feels right, you feel right.</p>
+        <h1 data-sc-kinetic="lines" data-arrive="1">A wig <em>you love.</em></h1>
+        <p class="lede" data-arrive="2">We create wigs that are a joy to wear, because when your wig feels right, you feel right.</p>
       </div>
-      <div class="deck" id="deck" aria-label="Clients in the salon">
+      <div class="deck" id="deck" data-arrive="3" aria-label="Clients in the salon">
         <figure class="card" style="--r: -7deg; --x: -6%; --y: 3%"><img src="assets/client-8.jpg" width="720" height="960" alt="A client in the salon chair, long dark wig, the wig shelves behind her" loading="eager"></figure>
         <figure class="card" style="--r: 5deg; --x: 5%; --y: -2%"><img src="assets/client-7.jpg" width="720" height="960" alt="A client smiling in a shoulder-length dark wig"></figure>
         <figure class="card" style="--r: -3deg; --x: 2%; --y: 4%"><img src="assets/client-6.jpg" width="720" height="960" alt="A client in a long wavy honey-brown wig"></figure>
@@ -551,6 +563,8 @@ function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); 
 <script src="scrollcraft.js"></script>
 <script>
   ScrollCraft.mount(document.body);
+  // 3u.5: the first screen arrives in order, once, unless motion is off
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) { document.documentElement.classList.add('arrive-go'); setTimeout(function () { document.documentElement.classList.remove('arrive-go'); }, 1800); }  // done: let go of the finished animations so scrolling stays smooth
   (function () {
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     /* The bar wraps on phones, so its height is measured, not assumed. On

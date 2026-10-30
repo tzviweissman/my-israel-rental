@@ -3,6 +3,8 @@
 // and a basket kept between pages. From scrollcraft/starter: copy into the
 // build, set BASKET_KEY, and keep business-only code in the page itself.
 document.body.classList.remove('no-js');
+// 3u.5: the first screen arrives in order, once, unless motion is off
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches && document.querySelector('[data-arrive]')) { document.documentElement.classList.add('arrive-go'); setTimeout(function () { document.documentElement.classList.remove('arrive-go'); }, 1600); }  // done: let go of the finished animations so scrolling stays smooth
 (function () {
   var BASKET_KEY = 'rsm-basket-v1';   // one per site, e.g. 'twc-basket-v1'
   window.siteBasket = {

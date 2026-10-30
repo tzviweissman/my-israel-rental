@@ -134,6 +134,10 @@
     .hero .stage::after { opacity: var(--h, 0); }
   }
   /* reduced motion: no hold, the box already open, the gifts in place */
+  /* 3u.8 gift tag: a small tilted tag, cut corners and a string hole, over two headings (this site's own shape, the tag tied to a gift box) */
+  .tag { display: inline-block; position: relative; rotate: -4deg; margin: 0 0 .7rem; padding: .5em .9em .5em 1.9em; background: var(--gold); color: var(--night); font: 600 .78rem/1 var(--font-body); letter-spacing: .08em; clip-path: polygon(.8em 0, 100% 0, 100% 100%, .8em 100%, 0 50%); }
+  .tag::before { content: ""; position: absolute; left: .85em; top: 50%; width: .5em; height: .5em; margin-top: -.25em; border-radius: 50%; background: var(--ivory); box-shadow: inset 0 0 0 1px rgb(14 12 9 / .35); }
+  .howto .tag { background: var(--ink); color: var(--gold-hi); }
   @media (prefers-reduced-motion: reduce) {
     .hero { height: auto; }
     .hero .stage { position: relative; top: 0; height: calc(100svh - var(--bar-h)); }
@@ -472,6 +476,7 @@
 
   <section class="sec" id="prices" aria-labelledby="h-prices">
     <div class="wrap">
+      <span class="tag" data-rev>Hand wrapped</span>
       <h2 id="h-prices" data-rev>The collection, <em class="acc">with prices</em></h2>
       <p class="lede" data-rev>Tap a gift to add it to your order, then send the whole order to us on WhatsApp.</p>
       <!-- Live from their shop when the site serves this page (mir-catalog.js):
@@ -528,6 +533,7 @@
   <section class="sec howto" id="order" aria-labelledby="h-order">
     <div class="wrap split">
       <div data-rev>
+        <span class="tag">Three steps</span>
         <h2 id="h-order">How to <em class="acc">order</em></h2>
         <p class="lede">Choose online, and we arrange the rest with you on WhatsApp, in English or Hebrew.</p>
         <div class="act">

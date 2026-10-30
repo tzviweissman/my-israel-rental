@@ -88,3 +88,11 @@ what (rules 3o.4). `kit.price(90)` sets the ₪ in the body face (3o.5).
 - **The builder brief**: every build or rework starts from `docs/build-brief-template.md`, filled in, nothing deleted. Each line is a mistake that already reached Tzvi.
 - **`film.js`**: the opening film that follows the scroll (frames on a canvas, chapters by scroll point, passes so it scrubs at once). Copy it into the build, include it after `site.js`; the markup and CSS are at its top. `american-crust/gen/film.sh` makes the frames from a joined film.
 - **`node scripts/check-build.mjs scrollcraft/builds/<folder>`**: every check in one command (site, fits, motion and readable on every page; concept, fingerprints and rules for the site), four at a time. Nothing is shown to Tzvi or published until it passes.
+
+## The kit (rules 3u, 29 Oct 2026)
+
+`kit/kit.css` and `kit/kit.js` hold the tested moving pieces from the seven videos: the first screen
+arriving in order (`data-arrive`), laptop-only depth (`data-depth`), one rotating headline word
+(`.rot`), a tilted label (`.tilt`) and question cards (`details.faq-q`). Copy the parts a site uses
+into its own site.css and site.js. `kit/test.html` has buttons that replay each piece; a new moving
+piece is tried there first (3u.12), then added to the kit.

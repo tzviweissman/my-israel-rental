@@ -464,6 +464,9 @@
   /* the quiet moment keeps the kitchen (dimmed) on the left, never a plain black half */
   .scratch-photo { opacity: calc(0.92 - var(--dim) * 0.5); }
   .scratch-photo { filter: saturate(calc(0.85 - var(--dim) * 0.5)) brightness(calc(1 - var(--dim) * 0.45)); }
+  /* the kitchen clip dims by fading on the dark ground, not by a filter: a filter that changes with the scroll redrew
+     the whole clip every frame and held the opening at 30 fps (check-site SMOOTH, 29 Oct 2026); the still keeps it */
+  video.scratch-photo { filter: none; opacity: calc(0.92 - var(--dim) * 0.62); }
   /* the gap under the rest, before the dial */
   .rest { padding-block: clamp(1.6rem, 5svh, 3.4rem) clamp(1rem, 3svh, 2.2rem); }
   #order { min-height: 0; }
@@ -609,10 +612,10 @@
     <div class="sc-wrap shop-head"><h2 id="sizes-h">Pick your size</h2><p>A raw kit for your crock pot, in Original or Spicy. Add water and cook on low for about 20 hours.</p></div>
     <div class="rooms">
       <article class="room gold"><div class="ph"><img src="assets/tub-gold.webp" alt="A sealed tub of L.A. Cholent by Rabbi Samuels with the cooking steps on its label, on a slate block beside dry beans and barley." width="1200" height="896" loading="lazy"></div>
-        <div class="rb"><h3>Medium</h3><p class="feeds">Feeds 4 to 6</p><p class="what">Add your own meat or keep it parve: &#8362;55</p></div>
+        <div class="rb"><h3>Medium</h3><p class="feeds">Feeds 4 to 6, about &#8362;16 a person</p><p class="what">Add your own meat or keep it parve: &#8362;55</p></div>
         <div class="rf"><div class="price">&#8362;100</div><a class="btn-line add" href="#order" data-size="0" aria-label="Message to order Medium">Message to order</a></div></article>
       <article class="room plum"><div class="ph"><img src="assets/tub-olive.webp" alt="A sealed tub of L.A. Cholent by Rabbi Samuels with the cooking steps on its label, on a slate block beside dry beans and barley." width="1200" height="896" loading="lazy"><span class="tag">10% off</span></div>
-        <div class="rb"><h3>Large</h3><p class="feeds">Feeds 8 to 12</p><p class="what">Add your own meat or keep it parve: &#8362;85</p></div>
+        <div class="rb"><h3>Large</h3><p class="feeds">Feeds 8 to 12, about &#8362;15 a person</p><p class="what">Add your own meat or keep it parve: &#8362;85</p></div>
         <div class="rf"><div class="price"><span class="was"><s>&#8362;200</s><small>2 Mediums, &#8362;200</small></span> &#8362;180</div><a class="btn-line add" href="#order" data-size="1" aria-label="Message to order Large">Message to order</a></div></article>
       <article class="room steel"><div class="ph"><img src="assets/tub-steel.webp" alt="A sealed tub of L.A. Cholent by Rabbi Samuels with the cooking steps on its label, on a slate block beside dry beans and barley." width="1200" height="896" loading="lazy"></div>
         <div class="rb"><h3>Extra Large / Kiddush</h3><p class="feeds">Sized to your guest list</p><p class="what">Sizes are customizable depending on the number of guests</p></div>
@@ -686,7 +689,7 @@
             <button type="button" data-i="1" aria-pressed="true"><b>Large</b><span>Feeds 8 to 12</span><em>&#8362;180</em><i class="tab">10% off</i></button>
             <button type="button" data-i="2" aria-pressed="false"><b>Kiddush</b><span>Sized to your guests</span><em>&#8362;250</em></button>
           </div>
-          <p class="pick"><span class="size-name" id="size-name">Large</span><span class="feeds" id="feeds">Feeds 8 to 12</span></p>
+          <p class="pick"><span class="size-name" id="size-name">Large</span><span class="feeds" id="feeds">Feeds 8 to 12, about &#8362;15 a person</span></p>
           <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="was" id="was"><s>&#8362;200</s><b>10% off</b><small>2 Mediums, &#8362;200</small></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
           <div class="menu">
             <div><span>Slow cooker liner</span><b>Free</b></div>
@@ -722,7 +725,7 @@
       </div>
       <div class="of"><label for="o-note">Anything else</label><input id="o-note" maxlength="300" placeholder="Own meat or parve? Extra meat or marrow bones by the pound?"></div>
         <div class="act">
-          <button class="btn" id="order-send" type="submit"><span id="order-send-label">Send on WhatsApp</span></button>
+          <button class="btn" id="order-send" type="submit"><span id="order-send-label">Send my order on WhatsApp</span></button>
           <a class="btn-line" href="#order">Change the size</a>
         </div>
       </form>
@@ -942,8 +945,8 @@ function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); 
 
   /* ---- the close: the knob is the order -------------------------------- */
   var sizes = [
-    { name: 'Medium', feeds: 'Feeds 4 to 6', price: 100, alt: '₪55 if you add your own meat, or keep it parve.', angle: -60, label: 'MEDIUM' },
-    { name: 'Large', feeds: 'Feeds 8 to 12', price: 180, alt: '₪85 if you add your own meat, or keep it parve.', angle: 0, label: 'LARGE' },
+    { name: 'Medium', feeds: 'Feeds 4 to 6, about ₪16 a person', price: 100, alt: '₪55 if you add your own meat, or keep it parve.', angle: -60, label: 'MEDIUM' },
+    { name: 'Large', feeds: 'Feeds 8 to 12, about ₪15 a person', price: 180, alt: '₪85 if you add your own meat, or keep it parve.', angle: 0, label: 'LARGE' },
     { name: 'Extra Large / Kiddush', feeds: 'Sized to your guest list', price: 250, alt: 'Sizes are customizable depending on amount of guests.', angle: 60, label: 'KIDDUSH' }
   ];
   var dial = document.getElementById('dial');
@@ -1000,6 +1003,8 @@ function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); 
   function v(id) { return $(id).value.trim(); }
   function mark(id, msg) { var w = $('w-' + id); if (w) w.classList.toggle('bad', !!msg); $('e-' + id).textContent = msg || ''; }
   $('o-when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k.8): tomorrow, changeable; no lead time given yet, so no same-day promise (Shabbos cut-off is question 6 to the owner)
+  $('o-when').value = new Date(Date.now() + 864e5 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   $('oform').querySelector('.qty').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; qty = Math.max(1, Math.min(20, qty + (+b.dataset.d))); $('o-qty').textContent = qty; window.labelOrder(); });
   $('o-how').addEventListener('change', function () { $('w-addr').hidden = this.value !== 'delivery'; });
   function label() { var s = sizes[cur]; $('order-label').textContent = 'Message to order ' + (qty > 1 ? qty + ' \u00d7 ' : '') + s.label.charAt(0) + s.label.slice(1).toLowerCase() + ', \u20aa' + qty * s.price; }
@@ -1041,7 +1046,7 @@ function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); 
       sending = false; btn.removeAttribute('aria-busy'); $('order-send-label').textContent = lab; 
     });
   });
-  function summary() { var s = sizes[cur]; $('osum').textContent = qty + ' \u00d7 ' + NAMES[cur] + ', \u20aa' + qty * s.price; $('order-send-label').textContent = 'Send on WhatsApp, \u20aa' + qty * s.price; }
+  function summary() { var s = sizes[cur]; $('osum').textContent = qty + ' \u00d7 ' + NAMES[cur] + ', \u20aa' + qty * s.price; $('order-send-label').textContent = 'Send my order on WhatsApp, \u20aa' + qty * s.price; }
   window.labelOrder = function () { label(); summary(); };
   pick(1);
 }());

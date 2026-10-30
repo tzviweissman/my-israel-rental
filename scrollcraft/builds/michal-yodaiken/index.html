@@ -298,19 +298,41 @@
   .proof-blk .wa { margin: clamp(1.5rem, 4vh, 2.5rem) 0 0; color: var(--sc-ink-soft); }
   .proof-blk .wa a { color: var(--sc-accent); font-weight: 700; }
   @media (max-width: 760px) { .stats { grid-template-columns: 1fr 1fr; } .stats > div:nth-child(2) { border-right: 0; margin-right: 0; } .stats > div:nth-child(n+3) { margin-top: 1.4rem; border-top: 1px solid #3A353D; } }
-  .faq .qa { border-top: 1px solid #0B0A0C; }
-  .faq details { border-bottom: 1px solid #D9D5DB; }
-  .faq summary { cursor: pointer; padding: 1rem 0; min-height: 44px; font: 700 var(--sc-t-base)/1.3 var(--sc-font-text); list-style: none; display: flex; justify-content: space-between; gap: 1rem; }
+  /* 3u.9 question cards (from scrollcraft/starter/kit): a rounded card each, + in a pink circle turning to x, the answer opens inside the card */
+  .faq details { background: #F6F4F7; border: 1px solid #D9D5DB; border-radius: 10px; padding: 0 1.25rem; margin: 0 0 .75rem; interpolate-size: allow-keywords; }
+  .faq summary { cursor: pointer; padding: 1rem 0; min-height: 44px; font: 700 var(--sc-t-base)/1.3 var(--sc-font-text); list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
   .faq summary::-webkit-details-marker { display: none; }
-  .faq summary::after { content: "+"; font: 800 1.6rem/1 var(--sc-font-display); }
-  .faq details[open] summary::after { content: "\2212"; }
-  .faq details p { margin: 0 0 1rem; max-width: 40rem; color: #4A444F; line-height: 1.5; }
+  .faq summary::after { content: "+"; flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--sc-accent); color: var(--sc-accent-ink); font: 800 1.2rem/1 var(--sc-font-display); transition: transform 250ms cubic-bezier(.2,.7,.2,1); }
+  .faq details[open] summary::after { transform: rotate(45deg); }
+  .faq details::details-content { block-size: 0; overflow: hidden; transition: block-size 300ms cubic-bezier(.2,.7,.2,1), content-visibility 300ms allow-discrete; }
+  .faq details[open]::details-content { block-size: auto; }
+  .faq details p { margin: 0 0 1.1rem; max-width: 40rem; color: #4A444F; line-height: 1.5; }
+  @media (prefers-reduced-motion: reduce) { .faq details::details-content, .faq summary::after { transition: none; } }
+  /* 3u.2 a day she cannot do: the line names the next one, the button sets it */
+  .req .times-note { flex: 1 1 100%; margin: 0; }
+  .req .choose-day { min-height: 44px; padding: 0 1.1rem; border-radius: 4px; border: 2px solid var(--sc-accent); background: transparent; color: var(--sc-ink); font: 700 var(--sc-t-sm)/1 var(--sc-font-text); cursor: pointer; }
+  .req .choose-day:hover { background: var(--sc-accent); color: var(--sc-accent-ink); }
+  /* 3u.5 arrival (from scrollcraft/starter/kit): bar, headline, line, photo, button, once. The photo fills the first screen, so it fades in instead of rising. */
+  html.arrive-go [data-arrive] { animation: arrive 700ms cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--n, 0) * 220ms); }
+  html.arrive-go [data-arrive="0"] { --n: 0; animation-name: arrive-drop; animation-duration: 500ms; }
+  html.arrive-go [data-arrive="1"] { --n: 1; }
+  html.arrive-go [data-arrive="2"] { --n: 2; }
+  html.arrive-go [data-arrive="3"] { --n: 2.5; animation-name: arrive-fade; animation-duration: 1100ms; }
+  html.arrive-go [data-arrive="4"] { --n: 4; animation-name: arrive-pop; animation-duration: 450ms; }
+  @keyframes arrive { from { opacity: 0; transform: translateY(28px); } }
+  @keyframes arrive-drop { from { opacity: 0; transform: translateY(-14px); } }
+  @keyframes arrive-fade { from { opacity: 0; } }
+  @keyframes arrive-pop { from { opacity: 0; transform: scale(.92); } }
+  @media (prefers-reduced-motion: reduce) { html.arrive-go [data-arrive] { animation: none; } }
+  /* a short laptop screen: the filled-in form (3k.8) shows every start time, so it is made compact to keep the request on one screen
+     (written last so it wins over the rules above; a mouse, so 34px boxes are fine) */
+  @media (min-width: 900px) and (max-height: 760px) and (pointer: fine) { .reqsec { padding-block: var(--sc-3); } .req { gap: var(--sc-2); } .req .opt .box { min-height: 34px; } .req #times .box { padding: 0 .45rem; } .req .opts { gap: .4rem; } }
   .faq .wrap { align-items: start; }
 </style>
 </head>
 <body>
 
-<header class="bar" id="bar">
+<header class="bar" id="bar" data-arrive="0">
   <a class="who" href="#top">Michal Yodaiken <span>· Let's workout</span></a>
   <div class="clock" aria-hidden="true"><b id="clock">00:00</b><span>of a 30-minute session</span><span class="tag">₪60 · 30 min</span><span class="done">A stronger, healthier you</span></div>
   <a class="btn" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -319,13 +341,13 @@
 <main id="top">
   <section class="cut hero shade-r">
     <img class="ambient" src="assets/home.webp" alt="" aria-hidden="true" width="2048" height="1152">
-    <img class="photo" src="assets/home.webp" alt="Pink dumbbells and an exercise mat on a sunlit living-room floor" width="2048" height="1152">
+    <img class="photo" data-arrive="3" src="assets/home.webp" alt="Pink dumbbells and an exercise mat on a sunlit living-room floor" width="2048" height="1152">
     <div class="in">
       <span class="kick">Women only</span>
-      <h1>Personal training for women that <em>comes to you</em>, in Jerusalem</h1>
-      <p class="lede">Helping women feel stronger, healthier and more confident through personalised fitness training.</p>
+      <h1 data-arrive="1">Personal training for women that <em>comes to you</em>, in Jerusalem</h1>
+      <p class="lede" data-arrive="2">Helping women feel stronger, healthier and more confident through personalised fitness training.</p>
       <div class="act">
-        <a class="btn" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn" data-arrive="4" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <ul class="proof">
           <li><b>₪60</b> for a 30-minute session</li>
           <li>Sessions tailored to your goals and fitness level</li>
@@ -440,7 +462,9 @@
 </main>
 
 <script src="scrollcraft.js"></script>
-<script>ScrollCraft.mount(document.body);</script>
+<script>ScrollCraft.mount(document.body);
+// 3u.5 the first screen arrives in order, once (not with motion off; CSS above)
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('arrive-go');</script>
 <script>
 (function () {
   // The session clock: her session is 30 minutes, and the scroll runs it,
@@ -480,18 +504,47 @@
   var today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   $('day').min = today;
   function pad(n) { return (n < 10 ? '0' : '') + n; }
+  // the form arrives filled in (page rules 3k.8): the first day the page itself would accept, with a start time still to offer
+  function firstDay(lastStart) {
+    var n = new Date(), t = new Date(n.getFullYear(), n.getMonth(), n.getDate(), 12);
+    for (var i = 0; i < 14; i++, t.setDate(t.getDate() + 1)) {
+      var l = lastStart(t.getDay());
+      if (!l || (i === 0 && l <= n.getHours() * 60 + n.getMinutes() + 60)) continue;
+      return t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+    }
+    return '';
+  }
   function drawTimes() {
     var box = $('times'), d = v('day'), keep = (document.querySelector('#times input:checked') || {}).value;
     if (!d) { box.innerHTML = '<p class="hint">Choose a day first.</p>'; return; }
-    if (new Date(d + 'T12:00').getDay() === 6) { box.innerHTML = '<p class="hint">Closed on Shabbat. Choose another day.</p>'; return; }
+    if (new Date(d + 'T12:00').getDay() === 6) { box.innerHTML = nextLine('Michal is closed on Shabbat.', d); return; }
     var out = [];
     for (var m = 540; m + 30 <= 1260; m += 30) {
       if (d === today) { var n = new Date(); if (m <= n.getHours() * 60 + n.getMinutes() + 60) continue; }
       var t = pad(Math.floor(m / 60)) + ':' + pad(m % 60); out.push('<label class="opt"><input type="radio" name="time" value="' + t + '"' + (t === keep ? ' checked' : '') + '><span class="box">' + t + '</span></label>');
     }
-    box.innerHTML = out.length ? out.join('') : '<p class="hint">No times left that day. Choose another day.</p>';
+    box.innerHTML = out.length ? out.join('') : nextLine('No times are left that day.', d);
   }
+  // a day she cannot do: one plain line naming the next day she can, and a button that sets it (page rules 3u.2); the pick is never changed for the customer
+  function nextLine(why, d) {
+    var t = new Date(d + 'T12:00');
+    do { t.setDate(t.getDate() + 1); } while (t.getDay() === 6);
+    var iso = t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+    return '<p class="hint times-note">' + why + ' The next day we can do is ' + t.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + '.</p><button type="button" class="choose-day" data-d="' + iso + '">Choose ' + t.toLocaleDateString('en-GB', { weekday: 'long' }) + '</button>';
+  }
+  $('times').addEventListener('click', function (e) { var b = e.target.closest('.choose-day'); if (b) { $('day').value = b.dataset.d; drawTimes(); setLabel(); } });
+  // the button says what happens and the real total (3u.1): only "at your home" has a price on the page, ₪60 for 30 minutes; the others are priced on WhatsApp
+  function setLabel() {
+    if (sending) return;
+    var w = val('way'), t = val('time'), d = v('day');
+    var day = d ? new Date(d + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short' }) : '';
+    $('send-l').textContent = 'Send' + (d && t ? ' ' + day + ' ' + t : '') + ' on WhatsApp' + (w === 'At your home' ? ', ₪60' : '');
+    $('fine').textContent = w && w !== 'At your home' ? 'Michal tells you the price on WhatsApp. Your request is saved with her on MyIsraelRental, then WhatsApp opens with it written out.' : 'Saved with Michal on MyIsraelRental, then WhatsApp opens with your request written out.';
+  }
+  $('req').addEventListener('change', setLabel);
   function val(name) { var r = document.querySelector('#req input[name=' + name + ']:checked'); return r ? r.value : ''; }
+  if (!$('day').value) $('day').value = firstDay(function (w) { return w === 6 ? 0 : 1230; });
+  drawTimes(); setLabel();
   $('day').addEventListener('change', drawTimes);
   function mark(id, msg) { $('w-' + id).classList.toggle('bad', !!msg); $('e-' + id).textContent = msg || ''; }
   function check() {

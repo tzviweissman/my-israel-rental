@@ -79,12 +79,16 @@ section.sec { padding-block: clamp(4.5rem, 10vw, 7.5rem); }
 .gal-ph img { width: 100%; height: 100%; object-fit: cover; }
 @media (max-width: 760px) { .gal-grid { grid-template-columns: 1fr 1fr; } }
 .faq-list { margin-top: clamp(1.5rem, 3vw, 2.2rem); max-width: 50rem; }
-.faq-q { border-top: 1px solid var(--line); } .faq-q:last-child { border-bottom: 1px solid var(--line); }
-.faq-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 1rem; padding: 1.1rem 0; font: 600 1.1rem/1.35 var(--font-body); }
+/* 3u.9 question cards (from scrollcraft/starter/kit): a rounded card each, + in an accent circle turning to x, the answer opening inside the card */
+.faq-q { background: var(--surface); border: 1px solid var(--line); border-radius: calc(var(--r) * 1.6); padding: 0 1.25rem; margin: 0 0 .75rem; interpolate-size: allow-keywords; }
+.faq-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 44px; padding: 1rem 0; font: 600 1.1rem/1.35 var(--font-body); }
 .faq-q summary::-webkit-details-marker { display: none; }
-.faq-q summary::after { content: '+'; color: var(--accent); font-size: 1.5rem; line-height: 1; transition: transform 200ms var(--out); }
+.faq-q summary::after { content: '+'; flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; line-height: 1; transition: transform 250ms var(--out); }
 .faq-q[open] summary::after { transform: rotate(45deg); }
-.faq-q p { margin: 0 0 1.2rem; color: var(--soft); }
+.faq-q::details-content { block-size: 0; overflow: hidden; transition: block-size 300ms var(--out), content-visibility 300ms allow-discrete; }
+.faq-q[open]::details-content { block-size: auto; }
+.faq-q p { margin: 0 0 1.1rem; color: var(--soft); }
+@media (prefers-reduced-motion: reduce) { .faq-q::details-content, .faq-q summary::after { transition: none; } }
 
 /* forms (order or book) */
 .form { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: clamp(1.5rem, 4vw, 3rem); margin-top: clamp(1.5rem, 3vw, 2.4rem); align-items: start; }
@@ -351,3 +355,7 @@ section.after { padding: calc(var(--top-h) + clamp(.8rem, 3svh, 2rem)) 0 3rem; }
 .toast[hidden] { display: none; }
 
 /* The pieces land on an empty cupboard from her own pantry photo (gen/ground-brief.md) under her deep green, never on a blurred copy of the same drawer photo (R3h.20: never on a photo of the same kind of thing; 25 Oct 2026) */ .hs-bg { inset: 0; width: 100%; height: 100%; filter: none; opacity: .3; object-position: 50% 55%; }
+
+/* 3u.2 a day with no start time left: the line names the next day, the button sets it */
+.times .choose-day { grid-column: 1 / -1; justify-self: start; min-height: 44px; padding: 0 1.15rem; border-radius: var(--r); border: 1.5px solid var(--ink); background: transparent; color: var(--ink); font: 600 .95rem/1 var(--font-body); cursor: pointer; }
+.times .choose-day:hover { background: var(--ink); color: #fff; }

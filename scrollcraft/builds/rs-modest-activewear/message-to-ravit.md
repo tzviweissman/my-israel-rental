@@ -33,3 +33,5 @@ Example questions for the FAQ, to answer in your own words:
 - How do I wash the skirt?
 
 Three more, in your own words: What do customers worry about before buying a skirt? What happens in the first days after someone orders? Is it all right to show customers' photos of the skirt in use?
+
+12. **How many skirts per order.** Is there a most skirts you can set aside for one order, and how many days ahead should a customer order? Until we know, the order page lets a customer add up to 10 and does not name any closed day.

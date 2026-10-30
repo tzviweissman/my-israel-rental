@@ -40,7 +40,7 @@
         <p class="kick">Shop · Whipped coffee in a jar</p>
         <h1 id="h-shop"><span id="st-name">Classic Cloud</span></h1>
         <p class="st-desc" id="st-desc">Original whipped coffee</p>
-        <p class="st-price"><span id="st-price">₪40</span> <small>a jar</small></p>
+        <p class="st-price"><span id="st-price">₪40</span> <small>a jar</small> <small class="st-pc" id="st-pc">about ₪10 a coffee</small></p>
         <div class="st-buy">
           <span class="step" role="group" aria-label="How many jars"><button type="button" data-d="-1" aria-label="One fewer">−</button><output id="st-n">1</output><button type="button" data-d="1" aria-label="One more">+</button></span>
           <button class="btn" type="button" id="st-add"><span>Add a jar, ₪40</span></button>
@@ -195,6 +195,7 @@
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.flav === k ? 'true' : 'false'); });
     xfade(document.getElementById('st-name'), JARS[k][0]); xfade(document.getElementById('st-desc'), DESC[k]);
     xfade(document.getElementById('st-price'), '₪' + JARS[k][1]);
+    xfade(document.getElementById('st-pc'), 'about ₪' + Math.floor(JARS[k][1] / 4) + ' a coffee');  // 3u.3: her jar makes 3 to 4 coffees; the top of the range, rounded down
     label();
   }
   stage.querySelector('.st-pick').addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.flav); });
@@ -332,6 +333,8 @@
   note.addEventListener('input', function () { var cs = getComputedStyle(note), lh = parseFloat(cs.lineHeight) || 22, bd = parseFloat(cs.borderTopWidth) + parseFloat(cs.borderBottomWidth), ex = parseFloat(cs.paddingTop) + parseFloat(cs.paddingBottom) + bd;
     note.style.height = 'auto'; note.style.height = Math.min(note.scrollHeight + bd, 4 * lh + ex) + 'px'; });
   document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k Pre-filled): the first day the page accepts (today), changeable; a day the customer picked is never overwritten
+  var w = document.getElementById('when'); if (!w.value) w.value = w.min;
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();
     // steps 1 and 2: check this step, then on to the next
@@ -384,7 +387,7 @@
     [].forEach.call(document.querySelectorAll('.ostep'), function (el) { el.hidden = +el.dataset.s !== step; });
     [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
     var day = v('when') ? new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long' }) : '';
-    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? (day ? 'Send for ' + day : 'Send order on WhatsApp') + ', ₪' + total() : 'Send order on WhatsApp');
+    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? (day ? 'Send on WhatsApp for ' + day : 'Send order on WhatsApp') + ', ₪' + total() : 'Send order on WhatsApp');
     send.classList.toggle('idle', !check(false, step));
     document.getElementById('send-note').textContent = STEP_NOTE[step];
     document.getElementById('back').hidden = step === 1;

@@ -201,3 +201,15 @@ R3a.8 pass: looked at 360x640: lines of dot-separated items do not wrap
 R3r.3 pass: check-site, fits and motion run on every page after the last edit; check-rules run last
 R3r.4 pass: Tzvi corrections of this pass (3t beauty row, 3g.3 accent, 5.8 we and our) are lines R3t.1, R3g.3, R5.4 of the checklist, with their checks
 R8.7 n/a: nothing was generated on this site. Looked at: index.html says "Nothing generated", BRIEF.md rule 3 says only her photographs, there is no gen/ or lab/ folder, and every image in assets/ is a client or portrait photo from her own website.
+R3u.2 pass: book.html, picked Saturday 31 Oct and then a Friday: "We are closed on Shabbat (or Fridays). The first day we can do is Sunday 1 November." with a button "Choose Sunday" that sets it; Continue does not move on and nothing is changed by itself (closure from the page's own Sunday to Thursday hours); no quantity is asked
+R3u.3 n/a: courses and the consultation are single items with their own price, no sizes or servings
+R3u.5 pass: check-arrival passes on the home page (bar, headline, line, client photos, button in the bar arrive in order, about 1.5 s, once); looked at 0.1 s and 2 s at 1440x900 and 390x844; all there without JS or with motion off. check-site SMOOTH on this page already failed before this change (20 fps on the unchanged page) and still does
+R3u.6 n/a: the first screen is a stack of whole client photos dealt by the scroll, not separate cut-out pieces
+R3u.7 n/a: the headline "A wig you love." has no list of occasions to rotate and the first screen has moving kinetic lines
+R3u.8 n/a: not added (not asked for this site)
+R3u.9 n/a: no questions section on any page; the testimonials are quotes, not questions
+R3u.10 n/a: one salon, Bet Shemesh
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: pieces taken from scrollcraft/starter/kit, tried on kit/test.html
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

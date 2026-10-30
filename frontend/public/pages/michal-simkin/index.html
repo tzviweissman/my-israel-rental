@@ -34,7 +34,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Manrope:wght@400;500;600;700;800&family=Frank+Ruhl+Libre:wght@500;700&family=Assistant:wght@400;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/michal-simkin/scrollcraft.css?v=mvrutast">
+<link rel="stylesheet" href="/pages/michal-simkin/scrollcraft.css?v=mvuxp78r">
 <style>
   :root {
     --font-head: 'EB Garamond', 'Frank Ruhl Libre', Georgia, serif;  /* Hebrew page: Frank Ruhl Libre (3g.11) */
@@ -68,6 +68,18 @@
   body { font-size: 17px; background: var(--ivory); color: var(--navy); padding-block-end: var(--bar-h); }
   h1, h2, h3 { font-family: var(--font-head); font-weight: 500; }
   section { position: relative; }
+  /* 3u.5 Arrival (from scrollcraft/starter/kit): the first screen comes in in a set order, once; the page script adds .arrive-go, so without JS or with motion off everything is simply there */
+  html.arrive-go [data-arrive] { animation: arrive 700ms cubic-bezier(.2,.7,.2,1) backwards; animation-delay: calc(var(--n, 0) * 220ms); }
+  html.arrive-go [data-arrive="0"] { --n: 0; animation-name: arrive-drop; animation-duration: 500ms; }
+  html.arrive-go [data-arrive="1"] { --n: 1; }
+  html.arrive-go [data-arrive="2"] { --n: 2; }
+  html.arrive-go [data-arrive="3"] { --n: 2.5; animation-name: arrive-rise; animation-duration: 1100ms; }
+  html.arrive-go [data-arrive="4"] { --n: 4; animation-name: arrive-pop; animation-duration: 450ms; }
+  @keyframes arrive { from { opacity: 0; transform: translateY(28px); } }
+  @keyframes arrive-drop { from { opacity: 0; transform: translateY(-14px); } }
+  @keyframes arrive-rise { from { opacity: 0; transform: translateY(110px); } }
+  @keyframes arrive-pop { from { opacity: 0; transform: scale(.92); } }
+  @media (prefers-reduced-motion: reduce) { html.arrive-go [data-arrive] { animation: none; } }
   .on-navy { background: var(--navy); color: #FFFFFF; --sc-ink: #FFFFFF; --sc-ink-soft: #C9CFDA; --sc-accent: var(--rose-gold); }
   .on-ivory { background: var(--ivory); color: var(--navy); }
   .on-blush { background: var(--blush-pale); color: var(--navy); }
@@ -391,8 +403,8 @@
 <body id="top">
 <div class="sc-grain" aria-hidden="true"></div>
 
-<header class="top">
-  <a class="top__mark" href="#top"><img src="/pages/michal-simkin/assets/mark.jpg?v=mvrutast" alt="" width="96" height="96" data-mir-key="i-70d395cc-0"> Michal Simkin</a>
+<header class="top" data-arrive="0">
+  <a class="top__mark" href="#top"><img src="/pages/michal-simkin/assets/mark.jpg?v=mvuxp78r" alt="" width="96" height="96" data-mir-key="i-70d395cc-0"> Michal Simkin</a>
   <nav class="top__nav" aria-label="On this page" data-spy>
     <a href="#hero" data-mir-key="t-aa09bb1b-0">Clients</a>
     <a href="#consult" data-mir-key="t-e277af9d-0">The consult</a>
@@ -400,10 +412,10 @@
     <a href="#same" data-mir-key="t-85225267-0">In their words</a>
     <a href="#academy" data-mir-key="t-fde3bf82-0">Courses</a>
   </nav>
-  <a class="cta top__cta" href="/business/michal-simkin/book" data-mir-key="t-b3a743f4-0">Book a consultation</a>
+  <a class="cta top__cta" data-arrive="4" href="/business/michal-simkin/book" data-mir-key="t-b3a743f4-0">Book a consultation</a>
 </header>
 <nav class="bar" aria-label="Book">
-  <img class="bar__mark" src="/pages/michal-simkin/assets/mark.jpg?v=mvrutast" width="96" height="96" alt="" data-mir-key="i-70d395cc-1">
+  <img class="bar__mark" src="/pages/michal-simkin/assets/mark.jpg?v=mvuxp78r" width="96" height="96" alt="" data-mir-key="i-70d395cc-1">
   <p class="bar__assure" data-mir-key="t-fd3e751b-0"><b>Consultation ₪100.</b> Sun to Thu, 10 to 2, by appointment. Bet Shemesh.</p>
   <a class="cta" href="/business/michal-simkin/book" data-mir-key="t-b3a743f4-1">Book a consultation</a>
 </nav>
@@ -412,21 +424,21 @@
   <!-- 1  Recognition: her headline, her clients dealt one by one -->
   <section class="hero on-navy" id="hero" data-sc-act="pin" data-sc-span="3.3" data-sc-dwell="0.2" aria-label="Michal Simkin, boutique wig salon">
     <div data-sc-stage>
-      <div class="hero__bg" aria-hidden="true" data-crop-ok><img src="/pages/michal-simkin/assets/ground.webp?v=mvrutast" alt="" width="1600" height="894" fetchpriority="high" data-mir-key="i-35bee6f6-0"></div>
+      <div class="hero__bg" aria-hidden="true" data-crop-ok><img src="/pages/michal-simkin/assets/ground.webp?v=mvuxp78r" alt="" width="1600" height="894" fetchpriority="high" data-mir-key="i-35bee6f6-0"></div>
       <div class="sc-copy sc-copy--lead" data-sc-cue="0 1 0 0">
         <p class="who" data-mir-key="t-c4f4e875-0">Michal Simkin, boutique wig salon and academy</p>
-        <h1 data-sc-kinetic="lines" data-mir-key="t-8e159d59-0">A wig <em>you love.</em></h1>
-        <p class="lede" data-mir-key="t-d46ddbd6-0">We create wigs that are a joy to wear, because when your wig feels right, you feel right.</p>
+        <h1 data-sc-kinetic="lines" data-arrive="1" data-mir-key="t-8e159d59-0">A wig <em>you love.</em></h1>
+        <p class="lede" data-arrive="2" data-mir-key="t-d46ddbd6-0">We create wigs that are a joy to wear, because when your wig feels right, you feel right.</p>
       </div>
-      <div class="deck" id="deck" aria-label="Clients in the salon">
-        <figure class="card" style="--r: -7deg; --x: -6%; --y: 3%"><img src="/pages/michal-simkin/assets/client-8.jpg?v=mvrutast" width="720" height="960" alt="A client in the salon chair, long dark wig, the wig shelves behind her" loading="eager" data-mir-key="i-623ed5c1-0"></figure>
-        <figure class="card" style="--r: 5deg; --x: 5%; --y: -2%"><img src="/pages/michal-simkin/assets/client-7.jpg?v=mvrutast" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" data-mir-key="i-46fbc92a-0"></figure>
-        <figure class="card" style="--r: -3deg; --x: 2%; --y: 4%"><img src="/pages/michal-simkin/assets/client-6.jpg?v=mvrutast" width="720" height="960" alt="A client in a long wavy honey-brown wig" data-mir-key="i-cb17fbe5-0"></figure>
-        <figure class="card" style="--r: 6deg; --x: -4%; --y: -3%"><img src="/pages/michal-simkin/assets/client-5.jpg?v=mvrutast" width="720" height="960" alt="A client with glasses in a dark shoulder-length wig" data-mir-key="i-c9cf0c45-0"></figure>
-        <figure class="card" style="--r: -5deg; --x: 4%; --y: 2%"><img src="/pages/michal-simkin/assets/client-4.jpg?v=mvrutast" width="720" height="960" alt="A client laughing in a dark curled wig" data-mir-key="i-6b9f751b-0"></figure>
-        <figure class="card" style="--r: 3deg; --x: -2%; --y: -4%"><img src="/pages/michal-simkin/assets/client-3.jpg?v=mvrutast" width="720" height="960" alt="A client in a long wavy light-brown wig with a green cardigan" data-mir-key="i-4aa119db-0"></figure>
-        <figure class="card" style="--r: -4deg; --x: 3%; --y: 1%"><img src="/pages/michal-simkin/assets/client-2.jpg?v=mvrutast" width="720" height="960" alt="A client in a striped sweater with a soft shoulder-length brown wig" data-mir-key="i-236b5c73-0"></figure>
-        <figure class="card" style="--r: 2deg; --x: 0%; --y: 0%"><img src="/pages/michal-simkin/assets/client-1.jpg?v=mvrutast" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" data-mir-key="i-3bbf0edf-0"></figure>
+      <div class="deck" id="deck" data-arrive="3" aria-label="Clients in the salon">
+        <figure class="card" style="--r: -7deg; --x: -6%; --y: 3%"><img src="/pages/michal-simkin/assets/client-8.jpg?v=mvuxp78r" width="720" height="960" alt="A client in the salon chair, long dark wig, the wig shelves behind her" loading="eager" data-mir-key="i-623ed5c1-0"></figure>
+        <figure class="card" style="--r: 5deg; --x: 5%; --y: -2%"><img src="/pages/michal-simkin/assets/client-7.jpg?v=mvuxp78r" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" data-mir-key="i-46fbc92a-0"></figure>
+        <figure class="card" style="--r: -3deg; --x: 2%; --y: 4%"><img src="/pages/michal-simkin/assets/client-6.jpg?v=mvuxp78r" width="720" height="960" alt="A client in a long wavy honey-brown wig" data-mir-key="i-cb17fbe5-0"></figure>
+        <figure class="card" style="--r: 6deg; --x: -4%; --y: -3%"><img src="/pages/michal-simkin/assets/client-5.jpg?v=mvuxp78r" width="720" height="960" alt="A client with glasses in a dark shoulder-length wig" data-mir-key="i-c9cf0c45-0"></figure>
+        <figure class="card" style="--r: -5deg; --x: 4%; --y: 2%"><img src="/pages/michal-simkin/assets/client-4.jpg?v=mvuxp78r" width="720" height="960" alt="A client laughing in a dark curled wig" data-mir-key="i-6b9f751b-0"></figure>
+        <figure class="card" style="--r: 3deg; --x: -2%; --y: -4%"><img src="/pages/michal-simkin/assets/client-3.jpg?v=mvuxp78r" width="720" height="960" alt="A client in a long wavy light-brown wig with a green cardigan" data-mir-key="i-4aa119db-0"></figure>
+        <figure class="card" style="--r: -4deg; --x: 3%; --y: 1%"><img src="/pages/michal-simkin/assets/client-2.jpg?v=mvuxp78r" width="720" height="960" alt="A client in a striped sweater with a soft shoulder-length brown wig" data-mir-key="i-236b5c73-0"></figure>
+        <figure class="card" style="--r: 2deg; --x: 0%; --y: 0%"><img src="/pages/michal-simkin/assets/client-1.jpg?v=mvuxp78r" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" data-mir-key="i-3bbf0edf-0"></figure>
       </div>
     </div>
   </section>
@@ -454,11 +466,11 @@
 
   <!-- 5  Meet Michal: her photograph, her letter -->
   <section class="meet" id="meet" aria-labelledby="meetTitle">
-    <div class="meet__pic"><img src="/pages/michal-simkin/assets/michal.jpg?v=mvrutast" width="900" height="1125" alt="Michal Simkin, smiling, long wavy hair" loading="lazy" data-mir-key="i-585dacf6-0"></div>
+    <div class="meet__pic"><img src="/pages/michal-simkin/assets/michal.jpg?v=mvuxp78r" width="900" height="1125" alt="Michal Simkin, smiling, long wavy hair" loading="lazy" data-mir-key="i-585dacf6-0"></div>
     <div class="meet__text on-ivory">
       <h2 id="meetTitle" data-mir-key="t-9e4dfee7-0">Meet <span class="accent">Michal.</span></h2>
       <p class="body" data-mir-key="t-995d5df0-0">I'd be honored to get to know you and create the wig that makes you look and feel your best. I can't wait to meet you.</p>
-      <div class="sign"><img src="/pages/michal-simkin/assets/michal-small.jpg?v=mvrutast" width="160" height="160" alt="" data-mir-key="i-8eeb41bc-0"><p data-mir-key="t-adeb964e-0">Michal<small>Bet Shemesh</small></p></div>
+      <div class="sign"><img src="/pages/michal-simkin/assets/michal-small.jpg?v=mvuxp78r" width="160" height="160" alt="" data-mir-key="i-8eeb41bc-0"><p data-mir-key="t-adeb964e-0">Michal<small>Bet Shemesh</small></p></div>
       <a class="cta" href="/business/michal-simkin/book" data-mir-key="t-b3a743f4-2">Book a consultation</a>
     </div>
   </section>
@@ -479,15 +491,15 @@
       </ul>
       <div class="voices">
         <figure class="voice" data-sc-cue="0.07 1 0.3 0">
-          <img src="/pages/michal-simkin/assets/debbie.jpg?v=mvrutast" width="160" height="160" alt="" data-mir-key="i-0479194e-0">
+          <img src="/pages/michal-simkin/assets/debbie.jpg?v=mvuxp78r" width="160" height="160" alt="" data-mir-key="i-0479194e-0">
           <figcaption><p data-mir-key="t-762a9d25-0">"I had a sheitl that I wore regularly, but every time I put it on I was frustrated by how it looked. Instead of throwing it out, I brought it to Michal. Immediately, she saw the problems and brought the sheitl back to life. Now, I love it, and I can't believe that my new &amp; improved look is actually from the same sheitl I used to dread wearing."<b>Debbie Burack</b></p></figcaption>
         </figure>
         <figure class="voice" data-sc-cue="0.17 1 0.3 0">
-          <img src="/pages/michal-simkin/assets/yael.jpg?v=mvrutast" width="160" height="160" alt="" data-mir-key="i-c7ecbdcd-0">
+          <img src="/pages/michal-simkin/assets/yael.jpg?v=mvuxp78r" width="160" height="160" alt="" data-mir-key="i-c7ecbdcd-0">
           <figcaption><p data-mir-key="t-6c581857-0">"I came to Michal, with a tight budget, after going to 3 other wig places and hating all my wigs since I got married. She had a ton of options and she tried so many on me, giving her honest opinion, with no pressure to buy. I felt like she had all the time in the world. Its not surprising that 2 years later I still love the wig I got."<b>Yael Stoolback</b></p></figcaption>
         </figure>
         <figure class="voice" data-sc-cue="0.28 1 0.3 0">
-          <img src="/pages/michal-simkin/assets/miriam.jpg?v=mvrutast" width="160" height="160" alt="" data-mir-key="i-beac240f-0">
+          <img src="/pages/michal-simkin/assets/miriam.jpg?v=mvuxp78r" width="160" height="160" alt="" data-mir-key="i-beac240f-0">
           <figcaption><p data-mir-key="t-4465c833-0">"I cannot thank Michal enough for transforming my 'its fine' wig that I got as a hand-me down from my aunt, into something I actually think is cute, light, and works amazingly for me."<b>Miriam Campbell</b></p></figcaption>
         </figure>
       </div>
@@ -524,10 +536,10 @@
   <section class="wall wall--end" id="close" aria-labelledby="closeTitle">
     <div class="wall__copy"><h2 id="closeTitle" data-mir-key="t-d3c9cd72-0">You deserve to love <span class="accent">your wig, too.</span></h2><p data-mir-key="t-3435a635-0">Consultation &#8362;100, by appointment.</p><a class="cta" href="/business/michal-simkin/book" data-mir-key="t-b3a743f4-3">Book a consultation</a></div>
     <div class="wall__grid">
-      <img src="/pages/michal-simkin/assets/client-7.jpg?v=mvrutast" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" loading="lazy" data-mir-key="i-46fbc92a-1">
-      <img src="/pages/michal-simkin/assets/client-5.jpg?v=mvrutast" width="720" height="960" alt="A client with glasses in a dark shoulder-length wig" loading="lazy" data-mir-key="i-c9cf0c45-1">
-      <img src="/pages/michal-simkin/assets/client-3.jpg?v=mvrutast" width="720" height="960" alt="A client in a long wavy light-brown wig" loading="lazy" data-mir-key="i-d7f10817-0">
-      <img src="/pages/michal-simkin/assets/client-1.jpg?v=mvrutast" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" loading="lazy" data-mir-key="i-3bbf0edf-1">
+      <img src="/pages/michal-simkin/assets/client-7.jpg?v=mvuxp78r" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" loading="lazy" data-mir-key="i-46fbc92a-1">
+      <img src="/pages/michal-simkin/assets/client-5.jpg?v=mvuxp78r" width="720" height="960" alt="A client with glasses in a dark shoulder-length wig" loading="lazy" data-mir-key="i-c9cf0c45-1">
+      <img src="/pages/michal-simkin/assets/client-3.jpg?v=mvuxp78r" width="720" height="960" alt="A client in a long wavy light-brown wig" loading="lazy" data-mir-key="i-d7f10817-0">
+      <img src="/pages/michal-simkin/assets/client-1.jpg?v=mvuxp78r" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" loading="lazy" data-mir-key="i-3bbf0edf-1">
     </div>
   </section>
 </main>
@@ -548,9 +560,11 @@
 /* A style value is written only when it changes (26 Oct 2026): rewriting a custom property every frame restyles everything under it, and these frames run even while nobody scrolls */
 function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); if (c[k] !== v) { c[k] = v; el.style.setProperty(k, v); } }
 </script>
-<script src="/pages/michal-simkin/scrollcraft.js?v=mvrutast"></script>
+<script src="/pages/michal-simkin/scrollcraft.js?v=mvuxp78r"></script>
 <script>
   ScrollCraft.mount(document.body);
+  // 3u.5: the first screen arrives in order, once, unless motion is off
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches) { document.documentElement.classList.add('arrive-go'); setTimeout(function () { document.documentElement.classList.remove('arrive-go'); }, 1800); }  // done: let go of the finished animations so scrolling stays smooth
   (function () {
     var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
     /* The bar wraps on phones, so its height is measured, not assumed. On

@@ -201,3 +201,17 @@ R3r.3 pass: check-rules passed after the last edit; every script was re-run afte
 R3r.4 pass: no new correction from Tzvi since the last build is missing from this file
 R8.7 pass (recorded after the fact, 25 Oct): gen/film-bowls-brief.md written 25 Oct covering the film (16 Oct), bowl stills and the five hero shots (23 Oct); gen/film-compare.jpg and gen/bowls-compare.jpg looked at. Honest result: the five hero shots match the bowl stills they came from, but the film bowl and gold box are invented and do not match their real bowl photo (strawberry and apple) or their kraft box; stills and clips were made from words, not from their photos; prompts are in gen/*.sh for stills and clips, not for the hero shots. Open for Tzvi
 R3k.9 pass: served the build locally and ran node scripts/check-site.mjs http://localhost:8767/order.html: no FLOW and no SAVE problem (the POST to the order form was recorded before WhatsApp opened; it posted to localhost:8001, nothing reached the live site). Four BROKEN lines were 404s for /pages/the-brown-box/assets/menu/*.webp, which only appear because the build is served from its own folder not under /pages/the-brown-box/; not a site fault. No dashboard view of a saved order was made
+R3k.10 pass: the day field fills with today, the first day the page accepts (it states no lead time or closed days); choices left to the customer; check-prefill clean
+R3u.2 n/a: the page states no closed days, lead time or limits (asked in message-to-owner.md question 4), so there is nothing real to name
+R3u.3 n/a: nothing is sold by size (bowls and gift boxes at fixed prices)
+R3u.5 n/a: the home page opens on a scroll film (check-arrival run on index.html reports it opens on a film, so the arrival is left out)
+R3u.6 n/a: the first screen is a scroll film, no separate cut-out pieces
+R3u.7 n/a: the first screen is a scroll film with its own chapter lines
+R3u.8 n/a: not added to this site (not asked for it)
+R3u.9 n/a: the site has no questions section
+R3u.10 n/a: one shop, no branches
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 n/a: no kit pieces were added to this site
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 29 Oct: all rules re-read against the current index.html; only change since is how the film frames load and show (decoded off the main thread, each frame handed to the canvas whole at its own size and covering the screen by CSS) so the film scrolls smoothly on a phone (check-speed 19 ms a frame, 0% busy); screenshots at 0.2, 0.5 and 0.9 of the film on 390x844 and 1440x900 look the same as before -->

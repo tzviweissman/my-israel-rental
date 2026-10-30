@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kit test page</title>
+<!-- rules 3u.12: every new moving piece is watched here, with buttons that fire each state, before a site gets it -->
+<link rel="stylesheet" href="kit.css">
+<style>
+  :root { --accent: #167AB8; --wash: rgba(22,122,184,.14); --ink: #111827; --card: #fff; }
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: var(--ink); background: #F9FAFB; }
+  header { display: flex; justify-content: space-between; padding: 1rem 1.25rem; background: #fff; border-bottom: 1px solid #E3E3E3; }
+  .hero { min-height: 88svh; display: grid; place-items: center; text-align: center; padding: 2rem 1rem; position: relative; overflow: hidden; }
+  h1 { font-size: clamp(2rem, 6vw, 4rem); line-height: 1.1; margin: 0 0 .6rem; }
+  .pic { width: 260px; height: 180px; border-radius: 20px; background: linear-gradient(135deg,#f3c27a,#d9774b); margin: 1.5rem auto; }
+  .bean { position: absolute; width: 60px; height: 60px; border-radius: 50%; background: #8a5a3b; }
+  .bean.far { filter: blur(3px); opacity: .6; }
+  .btn { display: inline-block; background: #000; color: #fff; border: 0; border-radius: 999px; padding: .8rem 1.4rem; font: inherit; cursor: pointer; }
+  .controls { position: fixed; bottom: 12px; right: 12px; display: flex; gap: 8px; z-index: 9; }
+  .controls button { background: #fff; border: 1px solid #ccc; border-radius: 999px; padding: .5rem .9rem; cursor: pointer; }
+  section { max-width: 720px; margin: 0 auto; padding: 4rem 1.25rem; }
+</style>
+</head>
+<body>
+<header data-arrive="0"><b>Kit test</b><span>Menu</span></header>
+<div class="hero">
+  <div class="bean far" data-depth="0.8" style="left:8%;top:20%"></div>
+  <div class="bean" data-depth="1.2" style="right:10%;top:30%"></div>
+  <div class="bean far" data-depth="0.85" style="right:22%;bottom:12%"></div>
+  <div>
+    <h1 data-arrive="1">Cakes for <span class="rot" data-words="birthdays|weddings|Shabbat">birthdays</span></h1>
+    <p data-arrive="2">The line under the headline, plainly.</p>
+    <div class="pic" data-arrive="3"></div>
+    <a class="btn" href="#" data-arrive="4">Order</a>
+  </div>
+</div>
+<section>
+  <span class="tilt">Our questions</span>
+  <h2>Your questions</h2>
+  <details class="faq-q"><summary>Do you deliver on Friday?</summary><p>An answer opens inside the same card, and several can be open at once.</p></details>
+  <details class="faq-q"><summary>How far ahead should I order?</summary><p>A second answer, longer, so the open height can be watched growing smoothly over two or three lines on a phone.</p></details>
+</section>
+<section style="height:120vh"><p>Scroll room for the depth test.</p></section>
+<div class="controls">
+  <button id="replay">Replay arrival</button>
+  <button id="toggle">Open/close questions</button>
+</div>
+<script src="kit.js"></script>
+<script>
+  replay.onclick = () => { const h = document.documentElement; h.classList.remove('arrive-go'); void h.offsetWidth; h.classList.add('arrive-go'); };
+  toggle.onclick = () => document.querySelectorAll('.faq-q').forEach((d) => { d.open = !d.open; });
+</script>
+</body>
+</html>

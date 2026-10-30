@@ -5,9 +5,9 @@
  * ground between its film and its flavours (28 Oct); no check saw it, only the owner video's contact sheet.
  *
  * The page is scrolled top to bottom in steps of a third of a screen, each step held long enough for
- * entrance fades. At each stop a 5 x 7 grid of points below the top bar is tested: a point counts when the
- * topmost thing there is something to look at (words, a picture, a canvas or video, a button or field),
- * visible (not faded out). A stop where under 3 of the 35 points land on something is a blank screen.
+ * entrance fades, and the screen below the top bar is photographed. A screen whose light hardly changes
+ * from pixel to pixel (spread under 6 of 255) is plain ground: a blank screen. (A first version looked at
+ * page elements; film canvases under shades and grounds made it report blanks that were not there.)
  *
  *   node scripts/check-blank.mjs <url> [more urls]      exit 1 on any blank screen
  */
@@ -16,33 +16,30 @@ import { chromium } from 'playwright';
 const urls = process.argv.slice(2);
 if (!urls.length) { console.error('usage: node scripts/check-blank.mjs <url> [more urls]'); process.exit(2); }
 const browser = await chromium.launch();
+const reader = await browser.newPage();   // decodes screenshots (no image library needed)
 let bad = 0;
 for (const url of urls) {
   for (const [w, h] of [[390, 844], [1440, 900]]) {
     const p = await browser.newPage({ viewport: { width: w, height: h } });
-    await p.goto(url, { waitUntil: 'load' }); await p.waitForTimeout(700);
+    try { await p.goto(url, { waitUntil: 'load', timeout: 60000 }); } catch (e) { console.log(`note   ${url}: did not finish loading (${e.message.split('\n')[0]}), checked as it is`); }
+    await p.waitForTimeout(700);
     const total = await p.evaluate(() => document.documentElement.scrollHeight);
     const blanks = [];
     for (let y = 0; y <= total - h; y += Math.round(h / 3)) {
       await p.evaluate((y) => window.scrollTo(0, y), y); await p.waitForTimeout(650);
-      const hits = await p.evaluate(() => {
-        // elementFromPoint skips anything with pointer-events: none (a film canvas, a decorative picture): count it anyway
-        let pe = document.getElementById('__blank_pe'); if (!pe) { pe = document.createElement('style'); pe.id = '__blank_pe'; pe.textContent = '* { pointer-events: auto !important; }'; document.head.appendChild(pe); }
-        const top = (document.querySelector('header, .top, nav') || { getBoundingClientRect: () => ({ bottom: 0 }) }).getBoundingClientRect().bottom;
-        const seen = (e) => { for (let n = e; n && n !== document.documentElement; n = n.parentElement) { const s = getComputedStyle(n); if (+s.opacity < 0.15 || s.visibility === 'hidden') return false; } return true; };
-        const content = (e) => {
-          if (!e) return false;
-          if (e.matches('img, picture, canvas, video, svg, button, input, select, textarea, iframe')) return true;
-          if ([...e.childNodes].some((c) => c.nodeType === 3 && c.textContent.trim())) return true;
-          const bg = getComputedStyle(e).backgroundImage; return bg && bg !== 'none' && !/gradient/.test(bg);
-        };
-        let n = 0;
-        for (let i = 0; i < 5; i++) for (let j = 0; j < 7; j++) {
-          const x = innerWidth * (i + 0.5) / 5, y = top + (innerHeight - top) * (j + 0.5) / 7;
-          const e = document.elementFromPoint(x, y); if (content(e) && seen(e)) n++;
-        }
-        return n;
-      });
+      // what a person sees: the screenshot below the top bar. A screen of plain ground has almost no change in light
+      // from pixel to pixel; anything to look at (words, a photo, the film) has plenty
+      const top = await p.evaluate(() => Math.min(Math.round(innerHeight * 0.25), Math.round((document.querySelector('header, .top, nav') || { getBoundingClientRect: () => ({ bottom: 0 }) }).getBoundingClientRect().bottom)));
+      const shot = (await p.screenshot({ type: 'jpeg', quality: 70, clip: { x: 0, y: Math.max(0, top), width: w, height: h - Math.max(0, top) } })).toString('base64');
+      const spread = await reader.evaluate(async (b64) => {
+        const im = new Image(); im.src = 'data:image/jpeg;base64,' + b64; await im.decode();
+        const c = document.createElement('canvas'); c.width = 160; c.height = Math.round(160 * im.height / im.width);
+        const x = c.getContext('2d'); x.drawImage(im, 0, 0, c.width, c.height);
+        const d = x.getImageData(0, 0, c.width, c.height).data; let n = 0, sum = 0, sq = 0;
+        for (let k = 0; k < d.length; k += 4) { const l = 0.2126 * d[k] + 0.7152 * d[k + 1] + 0.0722 * d[k + 2]; sum += l; sq += l * l; n++; }
+        const m = sum / n; return Math.sqrt(Math.max(0, sq / n - m * m));
+      }, shot);
+      const hits = spread >= 6 ? 3 : 0;
       if (hits < 3) blanks.push(y);
     }
     await p.close();

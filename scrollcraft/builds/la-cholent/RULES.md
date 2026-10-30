@@ -201,3 +201,17 @@ R8.7 pass (recorded after the fact): the tub shots (23 Oct) and the scenery stil
 R3h.19 pass (made before the rule (26 Oct); answered from what the briefs and gen/ files show): stills first (pot, scratch, table), then each film from its own still, one action each (the dial turns and steam rises; light flickers and a drip falls; candle flames flicker), the same objects first to last (R3h.18); not met: no written frame plan, and models, prompts and tries were not kept (gen/tubs-brief.md part B)
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 pass: the chores sit in one fixed list, the knob stays on the dial, and the hours number counts in one place; the opening and the close are different headings, not one repeated thing; stepped through on a 390x844 phone and at 1440x900 on 27 Oct
+R3k.10 pass: the day field defaults to tomorrow (the page accepts from today; no lead time or Shabbos cut-off is stated yet, so the page does not promise same-day; set on load, a picked day is never overwritten); check-prefill clean
+R3u.2 n/a: the page states no closed days, lead time or limit (the form starts on tomorrow; her Shabbos cut-off is asked in message-to-owner.md item 6)
+R3u.3 pass: Medium "Feeds 4 to 6, about ₪16 a person" (₪100 over 6) and Large "Feeds 8 to 12, about ₪15 a person" (₪180 over 12), on the size cards and the dial line, looked at 1440x900; Kiddush has no figure, so the question is message-to-owner.md item 9
+R3u.5 n/a: the home page opens on a scrubbed video; check-arrival skips it
+R3u.6 n/a: the first screen is a scrubbed video, no separate pieces
+R3u.7 n/a: the first screen is a film with its own moving words
+R3u.8 n/a: not used on this site
+R3u.9 n/a: no questions section on the page yet (her questions are listed in message-to-owner.md)
+R3u.10 n/a: one place, Jerusalem
+R3u.12 n/a: no kit piece moved in; text changes only
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 29 Oct: all rules re-read against the current index.html; the kitchen clip now dims by fading on the dark ground instead of a filter (same look, frames compared at 0.1 to 0.7 of the split) so the opening scrolls smoothly (R3h.20) -->

@@ -12,6 +12,7 @@ A few answers would make your page more complete. Short replies are fine.
 8. Please check the six bottle prices we show: Bartenura Moscato $35, Psagot Cabernet $50, Pardes Merlot $65, Four Roses $65, Glenlivet 12 $75, Woodford Reserve $85. Are they right, and are they the whole list?
 9. Delivery: we write "Delivery throughout Israel. The fee depends on the city; we confirm it on WhatsApp." Is that how you want to say it? Is there a fee list we can show, and a minimum order for delivery?
 10. We removed "special boards on request" because we could not tell what it means. Do you make special boards (a bigger size, a set of meats chosen by the customer)? If yes, how does a customer ask, and is there a price from?
+11. How many people does each size serve (Mini, Small, Medium, Large, Extra Large, The Party Board)? With those numbers the order page can say "about $12 a person" beside each size.
 
 ## Example questions visitors ask (please answer in your words)
 - How many people does each board feed?

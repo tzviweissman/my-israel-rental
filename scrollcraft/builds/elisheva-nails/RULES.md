@@ -201,3 +201,18 @@ R3h.18 n/a: no film: the pages show only her photos (checked 26 Oct)
 R3h.19 n/a: no generated film; only her own photos
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 pass: check-same-place clean on the home, booking and contact pages at 390x844 and 1440x900 (28 Oct); the shade swatches and their name stay in one place while the photo changes
+
+R3k.10 pass: the day field arrives as the first day the page itself accepts: her Sunday-to-Friday hours (Shabbat closed, today only if a start time is still offered after the 60-minute margin); never overwrites a picked day; service/city/time left unchosen (no stated default); check-prefill clean
+
+R3u.2 pass: book.html, a Shabbat pick (or a day with nothing free) shows one line "The studio is closed on Shabbat. The next day I can do is Sunday 1 November." and a button "Choose Sunday" that sets it; the pick is never changed for her; looked at 390x844 and clicked, day became Sunday and 5 times appeared; no quantity on the page
+R3u.3 n/a: sells services by time (gel 45 min, art 60 min), nothing by size or portion; no question needed
+R3u.5 pass: check-arrival clean at 390x844 and 1440x900: bar drops, headline, line, shade photo fades in (full-screen, so no 110 px rise), button pops last; kit CSS in site.css, one JS line in site.js; all there without JS and with motion off; looked at 0.1 s and 2 s on both sizes
+R3u.6 n/a: the first screen is one whole photo of her nails with the shade chips; no cut-out or scattered pieces
+R3u.7 n/a: the headline already names her two services ("Gel nails and nail art") and the shade chips move the first screen; a rotating word would only repeat them
+R3u.8 n/a: no tilted label added (not on the 29 Oct list for this site)
+R3u.9 n/a: no questions section on any page (contact.html has only a line saying questions go by WhatsApp)
+R3u.10 n/a: one studio (Luxe Nail Studio, Romema)
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: arrival and question-card pieces taken from scrollcraft/starter/kit (tried on kit/test.html); the next-day button is a plain button, no new motion
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

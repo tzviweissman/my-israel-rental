@@ -48,7 +48,7 @@
         </div>
         <dl class="rev" id="rev"></dl>
         <p class="errline" id="err"></p>
-        <div class="next"><button type="button" class="cta" id="place">Place order</button><a class="back" href="order-when.html">Back</a></div>
+        <div class="next"><button type="button" class="cta" id="place">Place my order</button><a class="back" href="order-when.html">Back</a></div>
       </div>
       <aside class="summary" aria-label="Your order" aria-live="polite">
         <div class="who"><img src="assets/their-logo-small.png" alt="" width="44" height="44"><div><b>Your order</b><small>Blazin' Boards, Jerusalem</small></div></div>
@@ -63,7 +63,7 @@
     </div>
   </div>
 </main>
-<div class="dock dockbar"><div><small>Total</small><b data-total>$0</b></div><button type="button" class="cta" id="place2">Place order</button></div>
+<div class="dock dockbar"><div><small>Total</small><b data-total>$0</b></div><button type="button" class="cta" id="place2">Place my order</button></div>
 
 <footer class="foot2">
   <p class="foot2__big">Premium meat boards, grilled to perfection.</p>
@@ -91,8 +91,8 @@
     $('rev').innerHTML = '<div><dt>Your order</dt><dd>' + ls.map(function (l) { return (l.qty > 1 ? l.qty + ' × ' : '') + BB.esc(l.p.short); }).join('<br>') + '<br><a class="back" href="order.html">Change</a></dd></div>'
       + '<div><dt>When</dt><dd>' + BB.esc(BB.when(o)) + '<br><a class="back" href="order-when.html">Change</a></dd></div>'
       + '<div><dt>How</dt><dd>' + BB.esc(BB.where(o)) + '</dd></div>';
-    var label = 'Place order, ' + BB.money(BB.total(F, o), BB.cur(F));
-    $('place').textContent = label; $('place2').textContent = 'Place order';
+    var label = 'Place my order, ' + BB.money(BB.total(F, o), BB.cur(F));
+    $('place').textContent = label; $('place2').textContent = 'Place my order';
     BB.paint(F, o);
   }
   $('payBy').addEventListener('click', function (e) { var b = e.target.closest('[data-pay]'); if (!b) return; o.payBy = b.dataset.pay; $('payErr').hidden = true; BB.save(o); [].forEach.call($('payBy').children, function (c) { c.setAttribute('aria-pressed', String(c.dataset.pay === o.payBy)); }); BB.paint(F, o); });

@@ -133,11 +133,16 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
    whenever not 100% sure what is wanted.
 6. Generate in the background while writing the page; scripts keep the job
    number and retry slow status checks.
+6a. **The whole page is right before the film goes in** (3u.11): build and check it with a still
+   where the film will be, then put the film in and run the checks again. New motion is tried on a
+   test page with buttons first (3u.12, `scrollcraft/starter/kit/test.html`).
 7. Text over imagery gets its edge shade (or small solid card) from the start
    (section 4, 5b.3).
 8. Header and main buttons go to the quickest order path from draft one.
 9. One idea per page, used once (section 4).
 10. Wow test, clipped.mjs, readable.mjs BEFORE any link or video is sent.
+10a. **The report ends with "Not done yet" and "For your call"** (3u.13, `gen/report.md`), after a
+    writing pass that tries a shorter version of every long line (3u.14, `gen/copy-pass.md`).
 11. Owner video last, from the live page.
 5b. **Sketch the film first** (Tzvi, 29 Oct 2026): one sheet of rough line
    drawings, a row per concept, before any photoreal still; Tzvi picks a row,

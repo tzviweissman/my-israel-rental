@@ -1,0 +1,44 @@
+/* Pieces from the seven videos of 29 Oct 2026 (rules 3u). Copy the part a site uses into its site.css and
+   swap the colour tokens for the site's own (--accent, --ink, --ground, --card). Tried first on test.html. */
+
+/* 3u.5 Arrival: the first screen comes in in a set order, once (no film opening only). site.js adds
+   .arrive-go to <html>; without JS, or with reduced motion, everything is simply there. Give each piece
+   data-arrive="N" (0 menu bar, 1 headline, 2 line under it, 3 picture, 4 button). */
+html.arrive-go [data-arrive] { animation: arrive 700ms cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--n, 0) * 220ms); }
+html.arrive-go [data-arrive="0"] { --n: 0; animation-name: arrive-drop; animation-duration: 500ms; }
+html.arrive-go [data-arrive="1"] { --n: 1; }
+html.arrive-go [data-arrive="2"] { --n: 2; }
+html.arrive-go [data-arrive="3"] { --n: 2.5; animation-name: arrive-rise; animation-duration: 1100ms; }
+html.arrive-go [data-arrive="4"] { --n: 4; animation-name: arrive-pop; animation-duration: 450ms; }
+@keyframes arrive { from { opacity: 0; transform: translateY(28px); } }
+@keyframes arrive-drop { from { opacity: 0; transform: translateY(-14px); } }
+@keyframes arrive-rise { from { opacity: 0; transform: translateY(110px); } }
+@keyframes arrive-pop { from { opacity: 0; transform: scale(.92); } }
+
+/* 3u.6 Depth, laptops only: site.js moves [data-depth] pieces; near pieces (sharp) > 1, far (soft) < 1. */
+[data-depth] { will-change: transform; }
+
+/* 3u.7 One rotating word in the headline. The pill sizes to the word in view. */
+.rot { position: relative; display: inline-grid; justify-items: start; vertical-align: bottom; line-height: 1.25; padding: 0 .28em .04em; border-radius: .3em; background: var(--wash, rgba(0,0,0,.06)); transition: width 450ms cubic-bezier(.2,.7,.2,1); overflow: hidden; }
+.rot > span { grid-area: 1 / 1; white-space: nowrap; transition: transform 450ms cubic-bezier(.2,.7,.2,1), opacity 300ms; }
+.rot > span[aria-hidden="true"] { opacity: 0; transform: translateY(1.2em); }
+.rot > span.out { opacity: 0; transform: translateY(-1.2em); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* 3u.8 A small tilted label over a section heading, the site's own repeated touch. Shape per site. */
+.tilt { display: inline-block; transform: rotate(-4deg); padding: .3em .7em; border-radius: .35em; background: var(--accent); color: #fff; font: 700 .78rem/1 var(--font-body, sans-serif); letter-spacing: .04em; margin-bottom: .6rem; }
+
+/* 3u.9 Question cards: each question a rounded card, + turns into x, the answer opens inside the card. */
+.faq-q { background: var(--card, #fff); border: 1px solid var(--line, rgba(0,0,0,.08)); border-radius: 18px; padding: 0 1.25rem; margin: 0 0 .75rem; interpolate-size: allow-keywords; }
+.faq-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 44px; padding: 1rem 0; font-weight: 600; }
+.faq-q summary::-webkit-details-marker { display: none; }
+.faq-q summary::after { content: '+'; flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 1.2rem; line-height: 1; transition: transform 250ms cubic-bezier(.2,.7,.2,1); }
+.faq-q[open] summary::after { transform: rotate(45deg); }
+.faq-q::details-content { block-size: 0; overflow: hidden; transition: block-size 300ms cubic-bezier(.2,.7,.2,1), content-visibility 300ms allow-discrete; }
+.faq-q[open]::details-content { block-size: auto; }
+.faq-q p { margin: 0 0 1.1rem; }
+
+@media (prefers-reduced-motion: reduce) {
+  html.arrive-go [data-arrive] { animation: none; }
+  .rot, .rot > span, .faq-q::details-content, .faq-q summary::after { transition: none; }
+}

@@ -258,13 +258,17 @@
   .close p a { white-space: nowrap; }
   /* questions in the owner's words (page rules 3m), filled by mir-faq.js */
   .faq-list { margin-top: clamp(1.5rem, 3vw, 2.2rem); max-width: 50rem; }
-  .faq-q { border-top: 1px solid var(--line); }
-  .faq-q:last-child { border-bottom: 1px solid var(--line); }
-  .faq-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 1rem; padding: 1.1rem 0; font: 700 var(--t2)/1.35 var(--font-body); }
+  .faq-q { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 0 1.25rem; margin: 0 0 .75rem; interpolate-size: allow-keywords; }
+  .faq-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 44px; padding: 1rem 0; font: 700 var(--t2)/1.35 var(--font-body); }
   .faq-q summary::-webkit-details-marker { display: none; }
-  .faq-q summary::after { content: '+'; color: var(--gold); font: 400 var(--t3)/1 var(--font-head); transition: transform 200ms var(--out); }
+  .faq-q summary::after { content: '+'; flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--gold); color: var(--black); font: 700 1.2rem/1 var(--font-body); transition: transform 250ms var(--out); }
   .faq-q[open] summary::after { transform: rotate(45deg); }
-  .faq-q p { margin: 0 0 1.2rem; color: var(--soft); max-width: 42rem; }
+  .faq-q::details-content { block-size: 0; overflow: hidden; transition: block-size 300ms var(--out), content-visibility 300ms allow-discrete; }
+  .faq-q[open]::details-content { block-size: auto; }
+  .faq-q p { margin: 0 0 1.1rem; color: var(--soft); max-width: 42rem; }
+  /* 3u.8 a sticker over section headings, from the stickers on his opening bowl */
+  .tilt { display: inline-block; rotate: -4deg; margin: 0 0 .7rem; padding: .4em .8em .35em; border-radius: 14px; background: var(--gold); color: var(--black); font: 800 var(--t1)/1.05 var(--font-body); text-transform: uppercase; letter-spacing: .02em; box-shadow: 0 0 0 3px var(--black), 0 6px 14px rgb(0 0 0 / .4); }
+  @media (prefers-reduced-motion: reduce) { .faq-q::details-content, .faq-q summary::after { transition: none; } }
 
   /* proposed: the natural pick, the menu stage, the order in steps */
   .tile.pick { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
@@ -337,7 +341,6 @@
 .fld::placeholder { color: #6B5B4D; opacity: 1; }
 input[type=date].fld { color-scheme: light; }
 .chip span { background: var(--card-2); border-color: var(--line); }
-.faq-q summary::after { color: var(--ink); }
 .tile.pick { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
 .tile .tag { background: #fff; color: #14110F; }
 .tile .tag.off { background: var(--card-2); color: var(--ink); }

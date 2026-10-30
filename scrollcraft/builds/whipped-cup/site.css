@@ -338,6 +338,7 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 .st-desc { margin: .5rem 0 0; color: var(--soft); font-size: 1.1rem; }
 .st-price { margin: .6rem 0 0; font: 700 min(clamp(2.2rem, 4vw, 3.2rem), 7svh)/1 var(--font-head); color: var(--choc); }
 .st-price small { font: 500 1rem/1 var(--font-body); color: var(--soft); }
+.st-price .st-pc { display: inline-block; margin-left: .5rem; }
 /* the facts as small "+" labels beside the product (inspo: hotspot labels) */
 .facts { list-style: none; display: flex; flex-wrap: wrap; gap: .45rem; margin: 1rem 0 0; padding: 0; }
 .facts li { padding: .4rem .8rem; border-radius: 999px; background: rgb(255 255 255 / .6); font: 700 .9rem/1.2 var(--font-body); color: var(--choc); }
@@ -618,7 +619,7 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 /* old and new words share one grid cell, so the old ones fade out exactly where they were */
 .xf { display: inline-grid; } .xf > span { grid-area: 1 / 1; justify-self: center; }
 .xout { pointer-events: none; animation-name: xf-out; }
-#st-name, #st-desc, #st-price, #cups-n, #cups-u, #cups-go { position: relative; }
+#st-name, #st-desc, #st-price, #st-pc, #cups-n, #cups-u, #cups-go { position: relative; }
 @keyframes xf-in { from { opacity: 0; } }
 @keyframes xf-out { to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .xin, .xout { animation: none; } .xout { display: none; } }

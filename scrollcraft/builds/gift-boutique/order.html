@@ -43,6 +43,9 @@
   .btn:active { transform: scale(.97); }
   .btn[aria-disabled="true"] { background: var(--line-ivory); color: var(--soft); cursor: not-allowed; }
   .btn[aria-disabled="true"]::after { display: none; }
+  .closed { margin: .5rem 0 0; font-size: .92rem; line-height: 1.4; color: var(--ink); }
+  .closed .pickday { min-height: 44px; margin-top: .3rem; padding: 0 1rem; border-radius: 14px; border: 1px solid var(--gold-ink); background: #fff; color: var(--ink); font: 600 .92rem/1 var(--font-body); cursor: pointer; }
+  .closed .pickday:hover { background: var(--ivory-2); }
   .btn svg { width: 20px; height: 20px; flex: none; position: relative; }
   :focus-visible { outline: 3px solid var(--gold); outline-offset: 3px; }
 
@@ -285,7 +288,7 @@
           <div data-need><label for="to">Who is it for?</label><input id="to" name="to" autocomplete="off"><p class="msg">Tell us who the gift is for.</p></div>
           <div data-need><label for="city">City</label><input id="city" name="city" autocomplete="address-level2"><p class="msg">Which city is it going to?</p></div>
           <div class="full" data-need><label for="addr">Address</label><input id="addr" name="addr" autocomplete="street-address"><p class="msg">Add the street and number.</p></div>
-          <div data-need><label for="when">Delivery date</label><input id="when" name="when" type="date"><p class="msg">Pick the day it should arrive.</p></div>
+          <div data-need><label for="when">Delivery date</label><input id="when" name="when" type="date"><p class="msg">Pick the day it should arrive.</p><p class="closed" id="closed" aria-live="polite" hidden><span id="closedt"></span> <button type="button" id="closedb" class="pickday"></button></p></div>
           <div><label for="tophone">Their phone <small>(optional, for the delivery)</small></label><input id="tophone" name="tophone" type="tel" inputmode="tel" autocomplete="off"></div>
           <div class="full"><label for="card">Message for the card <small>(optional)</small></label><textarea id="card" name="card" maxlength="400"></textarea></div>
         </div>
@@ -498,8 +501,8 @@ document.addEventListener('DOMContentLoaded', function () {
   var LAB = { 1: 'Continue', 2: 'Continue' };
   function paintBtn() {
     var t = totals().text;
-    var l = stepNo < 3 ? LAB[stepNo] : 'Send on WhatsApp';
-    var l2 = stepNo < 3 ? 'Continue' : 'Send on WhatsApp';
+    var l = stepNo < 3 ? LAB[stepNo] : 'Send my order on WhatsApp, ' + t;
+    var l2 = stepNo < 3 ? 'Continue' : 'Send my order, ' + t;
     if (!sending) { document.getElementById('send').lastElementChild.textContent = l; document.getElementById('send2').lastElementChild.textContent = l2; }
     document.getElementById('back').hidden = stepNo === 1;
     document.querySelector('#send svg').style.display = stepNo < 3 ? 'none' : '';
@@ -591,6 +594,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var when = document.getElementById('when');
   when.min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k Pre-filled): the first day the page accepts (today), changeable; a day the customer picked is never overwritten
+  if (!when.value) when.value = when.min;
+  // 3u.2: we are closed on Shabbat (hours: Sunday to Thursday, Friday to 12:00). Say so, offer Sunday, never change the pick.
+  var closed = document.getElementById('closed'), closedb = document.getElementById('closedb');
+  function iso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function checkDay() {
+    var d = when.value ? new Date(when.value + 'T12:00:00') : null;
+    if (!d || d.getDay() !== 6) { closed.hidden = true; return; }
+    var n = new Date(d.getTime() + 86400000);
+    closed.hidden = false;
+    document.getElementById('closedt').textContent = 'We are closed on Shabbat. The first day we can do is Sunday ' + n.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) + '.';
+    closedb.textContent = 'Choose Sunday';
+    closedb.onclick = function () { when.value = iso(n); checkDay(); };
+  }
+  when.addEventListener('input', checkDay); when.addEventListener('change', checkDay);
+  checkDay();
 
   var m0 = /order-(\d)/.exec(location.hash); setStep(1, false);
   update();

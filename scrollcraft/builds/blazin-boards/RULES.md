@@ -201,3 +201,18 @@ R3r.3 pass: check-rules passed after the last edit; every script was re-run afte
 R3r.4 pass: the corrections from Tzvi on 22 Oct (percent savings, accent on the button, one look per category) are in rules-checklist.md
 R8.7 pass (recorded after the fact, 25 Oct): gen/board-brief.md written 25 Oct for the board hero shot made 23 Oct; gen/board-hero-compare.jpg looked at (their photo left, the shot right): board, ring, label and every meat pile kept, only ground, props and light changed. Prompt text not kept; the brief says so. No brief existed before the shot
 R3k.9 pass: read order-details.html: place() POSTs /marketplace/order-form/<gig id>/orders and only then goes to order-done.html (no WhatsApp opens in the order at all; the tracking link is the proof); every line is sent as the listing product id and qty, so names and prices are the listing's, loaded live from the form. check-site could not drive it (the three-step order has no form, the button is #place) and the local API on :8001 was off, so no saved order could be opened in a dashboard; judged from the code
+
+R3k.10 pass: order-when.html now opens with the first day after the 2 day notice that is not Shabbos (the first chip, the page own rule) in the Needed on field, changeable, a saved pick kept; the order has no quantity field and no default delivery-or-pickup choice was stated by the owner, so none is pre-chosen
+R3h.21 pass: the sizes scene was 2.6 screens after the hero; its span is now 2.4 (1.4 screens), same content and order; node scripts/check-one-scroll.mjs on index.html and order-done.html passes (hero is the opening)
+R3u.2 pass: order-when.html, picking a Saturday shows "We are closed on Shabbos. The first day we can do is Sunday 1 November." with a button "Choose Sunday" that sets it; a day inside the 48 hours' notice shows the notice line the same way; the pick is never changed for them; Saturday picked and looked at 390x844 and 1440x900
+R3u.3 n/a: no figures for how many people a board serves; asked in message-to-owner.md item 11
+R3u.5 n/a: the home first screen is a pinned scroll scene (the board tumbles in with the scroll and the headline lands at 70 percent of it), so it is a scroll-driven opening; check-arrival reports STILL and LATE because it does not see it as a film, left as built
+R3u.6 n/a: the board is one cut-out moved by the scroll scene already
+R3u.7 n/a: the opening is a scroll scene with the name BLAZIN' as its words
+R3u.8 n/a: not used on this site
+R3u.9 n/a: no questions section on any page (the Before you order list is facts, not questions)
+R3u.10 n/a: one place, Jerusalem
+R3u.12 n/a: no kit piece moved in; one plain line and a button under the day field
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

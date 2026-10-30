@@ -26,6 +26,21 @@
     var order = [], seen = {};
     [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });
     if (still) order = [N - 1];
+    // On a phone the film plays by itself on repeat instead of following the scroll (Tzvi, 29 Oct 2026: "on mobile
+    // we should remove the scroll and it should just play on repeat"): one short video made from the same phone
+    // frames (data-loop), the finished doughnut held a moment, then a soft fade back to the start; the section is
+    // one screen tall (.film.loop in site.css) and its words hold still. Motion off keeps the last frame as a still.
+    var vid = null;
+    if (kind === 'm' && !still && film.dataset.loop) {
+      film.classList.add('loop'); order = [];
+      vid = document.createElement('video'); vid.muted = true; vid.loop = true; vid.playsInline = true; vid.setAttribute('playsinline', ''); vid.preload = 'auto'; vid.src = film.dataset.loop;
+      // the video itself is shown (the browser plays it without work on the page), placed as the frames were;
+      // drawing it into the canvas on every frame kept a phone 99% busy (check-speed BUSY, 29 Oct 2026)
+      vid.setAttribute('aria-hidden', 'true'); vid.style.cssText = 'position:absolute;left:0;width:100%;height:auto;display:block';
+      cv.style.background = '#241B1B'; cv.after(vid);
+      vid.addEventListener('loadedmetadata', function () { draw(true); });
+      new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) vid.play().catch(function () {}); else vid.pause(); }); }).observe(film);
+    }
     // Frames are kept as files (blobs) and only those near the one on screen are decoded, off the main thread
     // (createImageBitmap), as on LS Fruit Platter: drawing an <img> decoded it on every scrolled frame
     // (check-motion HEAVY, 135 ms a frame on a slowed phone, 28 Oct 2026). The nearest decoded frame is drawn.
@@ -60,8 +75,9 @@
     }
     var last = null;
     function draw(force) {
-      var im = frameAt(still ? 1 : p); if (!im || (im === last && !force)) return; last = im;   // only when the frame changes
+      var im = vid ? (vid.videoWidth ? vid : null) : frameAt(still ? 1 : p); if (!im || (im === last && !force)) return; last = im;   // only when the frame changes
       var W = cv.width, H = cv.height;
+      if (vid) { var vh = vid.videoHeight * cv.clientWidth / vid.videoWidth, Hc = cv.clientHeight, top = Math.min(.41 * Hc - .39 * vh, Hc - 354 - .55 * vh); top = Math.max(top, Math.min(14 - .23 * vh, Hc - 354 - .55 * vh)); vid.style.top = Math.round(top) + 'px'; return; }   // the same placing as below, in screen pixels
       // Bake away: on a phone the frame is fitted to the screen's width (never cropped at the sides, her doughnut stays whole) on the film's own slate colour
       if (kind === 'm') { cx.fillStyle = '#241B1B'; cx.fillRect(0, 0, W, H); var fh = (im.naturalHeight || im.height) * W / (im.naturalWidth || im.width), d = W / cv.clientWidth;
         // her doughnut (23% to 55% of the frame's height) sits about 41% down the screen, clear of the menu bar and of the words, which take the bottom 330px
@@ -79,7 +95,7 @@
       marks.forEach(function (m, i) { film.classList.toggle('c' + (i + 2), p >= m); });
       draw();
     }
-    addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });
+    if (!vid) addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });
     addEventListener('resize', size);
     size(); paint();
   });

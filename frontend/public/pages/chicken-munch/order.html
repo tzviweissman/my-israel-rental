@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Archivo:wght@400;500;700;800&family=Heebo:wght@400;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/chicken-munch/site.css?v=mvtvvhbc">
+<link rel="stylesheet" href="/pages/chicken-munch/site.css?v=mvuwl6en">
 </head>
 <body class="no-js" data-page="order">
 <header class="top" id="top">
@@ -62,7 +62,7 @@
           <h3 data-mir-key="t-1b40ab81-0">So far</h3>
           <ul id="sum-list"><li><span data-mir-key="t-b1bb775d-0">Nothing yet</span></li></ul>
           <div class="total"><span data-mir-key="t-2dbb1798-0">Total</span><span id="total">0</span></div>
-          <button class="btn" id="send" type="submit"><span data-mir-key="t-568fb5eb-0">Send order on WhatsApp</span></button>
+          <button class="btn" id="send" type="submit"><span data-mir-key="t-dcd3e841-0">Send my order on WhatsApp</span></button>
           <p class="note" data-mir-key="t-5b8fb678-0">Opens WhatsApp with your order written out, to send to Chicken Munch.</p>
         </aside>
       </form>
@@ -83,7 +83,7 @@
   <a class="btn" href="/business/chicken-munch/order" tabindex="-1" data-mir-key="t-6a348caa-2">Order now</a>
 </div>
 
-<script src="/pages/chicken-munch/site.js?v=mvtvvhbc"></script>
+<script src="/pages/chicken-munch/site.js?v=mvuwl6en"></script>
 <script>
 (function () {
   // ── the order: saved to his shop first (a tracking link), then WhatsApp.
@@ -107,6 +107,9 @@
   // what each item lets you choose, said on the item before it is added (Tzvi, 19 Oct 2026: make it clearer)
   var ALLOWS = { mini: 'Up to 4 kinds of chicken · 3 sauces', grand: 'Up to 5 kinds of chicken · 4 sauces', supreme: 'Up to 6 kinds of chicken · 5 sauces',
     pan913: '1 kind of chicken', roaster: 'Up to 3 kinds of chicken', rice: '' };
+  // 3u.3: price per person, worked from the top of each "Feeds" range, rounded down to whole units
+  var SERVES = { mini: 4, grand: 10, supreme: 16, pan913: 8, roaster: 20 };
+  function perPerson(k) { return SERVES[k] ? ' · about ' + money(Math.floor(ITEMS[k][1] / SERVES[k]), ITEMS[k][2]) + ' a person' : ''; }
   var STYLES = ['Classic American Crunch', 'Original Hot Poppers', 'Shnitzel Bites', 'Fruity Chicken', 'Crispy Cornflake', 'Rice Krispie', 'Pretzel', 'Buffalo Wings'];
   var SAUCES = ['Garlic Mayo', 'Sweet BBQ', 'Honey Mustard', 'Spicy Mayo', 'Buffalo'];
   var DELIVERY = 'Delivery ₪30 to ₪50';
@@ -127,7 +130,7 @@
   Object.keys(ITEMS).forEach(function (k) {
     var it = ITEMS[k], c = CHOICE[k], d = document.createElement('div');
     d.className = 'line'; d.dataset.k = k;
-    d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + priceOf(k, 1) + (it[5] ? ' · ' + it[5] : '') + '</div>' + (ALLOWS[k] ? '<div class="allows' + (CHOICE[k][0] === 1 ? ' one' : '') + '">' + ALLOWS[k] + '</div>' : '') + '</div>' +
+    d.innerHTML = '<div><div class="nm">' + it[0] + '</div><div class="pr">' + priceOf(k, 1) + (it[5] ? ' · ' + it[5] : '') + perPerson(k) + '</div>' + (ALLOWS[k] ? '<div class="allows' + (CHOICE[k][0] === 1 ? ' one' : '') + '">' + ALLOWS[k] + '</div>' : '') + '</div>' +
       '<div class="ctl"><div class="step"><button type="button" data-d="-1" aria-label="One fewer ' + it[0] + '">−</button><output>0</output><button type="button" data-d="1" aria-label="One more ' + it[0] + '">+</button></div><button type="button" class="rm" data-rm="1" aria-label="Remove ' + it[0] + ' from the basket" hidden><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14M10 10v6M14 10v6"/></svg></button></div>';
     var host = document.getElementById(it[4] === 'box' ? 'lines-box' : 'lines-pan');
     host.appendChild(d);
@@ -165,7 +168,7 @@
     if (html) html += '<li><span>' + DELIVERY + '</span><span>by where</span></li>';
     document.getElementById('sum-list').innerHTML = html || '<li><span>Nothing yet</span></li>';
     document.getElementById('total').textContent = totalText() !== '0' ? totalText() + ' + delivery' : '0';
-    send.firstElementChild.textContent = step < 3 ? NEXT[step] : totalText() !== '0' ? 'Send order on WhatsApp, ' + totalText() : 'Send order on WhatsApp';
+    send.firstElementChild.textContent = step < 3 ? NEXT[step] : totalText() !== '0' ? 'Send my order on WhatsApp, ' + totalText() : 'Send my order on WhatsApp';
     var b = {}; for (var k2 in q) if (q[k2]) b[k2] = q[k2]; window.cmBasket.set(b);
     // one real add-on, only with a pan, and only until it is added or turned down
     document.getElementById('suggest').hidden = !((q.pan913 || q.roaster) && !q.rice && !noRice);
@@ -191,6 +194,8 @@
   }
   ['addr', 'when', 'me', 'ph'].forEach(function (id) { document.getElementById(id).addEventListener('input', function () { check(false); }); });
   document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k Pre-filled): the first day the page accepts, which is today (it states no lead time or closed days); changeable
+  document.getElementById('when').value = document.getElementById('when').min;
   function described(k) {
     var bits = [], kinds = picked(k, 'kind'), sauces = picked(k, 'sauce');
     if (kinds.length) bits.push('Chicken: ' + kinds.join(', '));

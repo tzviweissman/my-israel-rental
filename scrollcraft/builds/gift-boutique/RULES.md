@@ -202,3 +202,17 @@ R3h.19 pass (made before the rule (26 Oct); answered from what the briefs and ge
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 
 R3s.27 pass: scripts/check-same-place.mjs clean on the home and order pages at 390x844 and 1440x900 (28 Oct): the six gifts that rise from the box land in one fixed grid, the headline holds one place, and the order page's gift tiles sit in one grid of equal tiles
+
+R3k.10 pass: order.html now opens with Delivery date set to today, the first day its own date field accepts (the owner has not yet said how far ahead to order, asked in message-to-owner.md); changeable, a picked day is never overwritten; quantity 1 per added gift; no owner default choice stated
+R3u.2 pass: order.html, picked Saturday 31 Oct in the delivery date: one line "We are closed on Shabbat. The first day we can do is Sunday 1 November." with a button "Choose Sunday" that sets it; the pick is never changed by itself, and the line is gone for a Sunday to Friday date (closure taken from the page's own hours, Sunday to Thursday and Friday to 12:00). No quantity limit is given by the owner, so none is shown
+R3u.3 n/a: gifts are sold one by one, not by size, tray or portion, and no figures for how many a gift serves exist
+R3u.5 n/a: the home page opens on a scroll film (the black box); check-arrival reports it as a film and skips it
+R3u.6 n/a: the first screen is a film, not separate cut-out pieces on a still ground
+R3u.7 n/a: the first screen is a film with its own chapter lines, and the headline has no list of occasions to rotate
+R3u.8 pass: a gift tag (a small tag with a cut left end and a string hole, turned minus 4 degrees, gold on ivory and ink on the how-to-order strip) over two headings, "Hand wrapped" and "Three steps", from the tag tied to every gift box; looked at at 1440x900 and 390x844. Shape for scrollcraft/fingerprints.json: "gift tag, cut left end with string hole"; fingerprints.json not edited here (not allowed), the lead adds it
+R3u.9 n/a: neither page has a questions section; "Good to know" is a list of facts and the owner has not yet sent questions (asked in message-to-owner.md)
+R3u.10 n/a: one place (Jerusalem, delivery across Israel)
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: the tag is plain CSS on the page; no moving piece was added
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

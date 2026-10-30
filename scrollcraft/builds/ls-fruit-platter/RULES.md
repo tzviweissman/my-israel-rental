@@ -205,3 +205,15 @@ R3h.19 pass: gen/opening-film-v3-brief.md was written before generating with the
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 pass: scripts/check-same-place.mjs clean on index, shop and contact at 390x844 and 1440x900 (27 Oct): the four sizes on the one-at-a-time stage share one place for name, size and price; the shop's size boxes sit in one row of equal boxes
 R3s.28 pass: check-blank run on every page at 390x844 and 1440x900 before publishing (29 Oct)
+R3u.2 n/a: the page has no closed days or lead time from the owner (record lead_time and notice are null, asked in message-to-owner.md questions 5 and 14), so there is nothing real to name; day field only refuses past days
+R3u.3 n/a: the four sizes have centimetres (30x30, 40x28, 58x28, 115x25) but the owner has not said how many people each serves; the question is in message-to-owner.md question 2
+R3u.5 n/a: the home page opens on a scroll film (check-arrival run on index.html reports it opens on a film, so the arrival is left out)
+R3u.6 n/a: the first screen is a scroll film of one whole platter, no separate cut-out pieces
+R3u.7 n/a: the first screen is a scroll film with its own moving copy
+R3u.8 n/a: not added to this site (not asked for it)
+R3u.9 pass: contact.html question question cards, the "+" in an accent circle turning to "x", and the smooth open were taken from scrollcraft/starter/kit (kit.css .faq-q), tried on kit/test.html, in the site's own colours; the questions fill from the owner's data (data-mir-qs), shown here with two test questions on a laptop
+R3u.10 n/a: one maker, no branches, no places to buy
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: pieces taken from scrollcraft/starter/kit, tried on kit/test.html (question cards)
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

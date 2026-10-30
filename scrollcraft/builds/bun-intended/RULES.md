@@ -202,3 +202,15 @@ R3h.18 n/a: no film: the opening is their own bun photo moved in code (the swirl
 R3h.19 n/a: no generated film; the opening is their bun photo moved in code
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 pass: the swirl has one heading and one card, which arrive once and stay put; the box builder's tiles sit in one fixed grid; stepped through on a 390x844 phone and at 1440x900 on 27 Oct
+R3u.2 n/a: the page states no closed days, lead time or limit (Shabbos days and last hour are asked in message-to-owner.md item 3); the 9 box cap is a page limit, not the owner's
+R3u.3 pass: the total line already says "₪13.75 a bun" for the chosen box (price over 4 or 8 buns, her own counts), looked at 390x844; no other size figures exist
+R3u.5 n/a: the home page opens on the swirl of words scroll film; check-arrival skips it
+R3u.6 n/a: the first screen is one photo wrapped in words, a whole photo
+R3u.7 n/a: the first screen has the swirling words of its own
+R3u.8 n/a: not used on this site
+R3u.9 n/a: no questions section on the page
+R3u.10 n/a: one place, Ramat Eshkol
+R3u.12 n/a: no kit piece moved in; text changes only
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

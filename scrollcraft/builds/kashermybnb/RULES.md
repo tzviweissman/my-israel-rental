@@ -201,3 +201,16 @@ R3h.18 n/a: no film: the walk is drawn in code over one still kitchen picture (c
 R3h.19 n/a: no generated film; the walk is drawn in code over one still
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 pass: every station card is as tall as the tallest, so its title starts at one height (642 px on a 390x844 phone, 698 px at 1440x900, 27 Oct); the card changes side only for the oven (and the microwave on a laptop), so it never covers the mark it describes: Tzvi chose to keep that on 27 Oct; the stack is marked data-same-place-ok for that reason
+
+R3u.2 pass: book-details.html, a Saturday (or a day before tomorrow, the page's own lead time) shows "We do not book on Shabbos. The first day we can do is Sunday 1 November." and a button "Choose Sunday" that sets it; the pick is never changed for them; tried at 390x844 and 1440x900, clicking set the day and hid the line; the last button already reads "Send on WhatsApp, $350" (R3u.1) and the order sits beside every step (R3u.4)
+R3u.3 n/a: two services at fixed prices (whole kitchen, pots and cutlery), nothing sold by size or portion
+R3u.5 pass: check-arrival clean at both sizes: bar, headline, line, kitchen picture (fade only; the walk moves it), button last; kit CSS in the page style, one JS line after ScrollCraft.mount; nothing hidden without JS or with motion off; looked at 0.1 s and 2 s on 1440x900 and 390x844; the walk itself is untouched
+R3u.6 n/a: the first screen is one whole kitchen photo; no separate pieces
+R3u.7 n/a: the headline "Kitchen kashering across Israel" has one product; the opening already has moving station marks
+R3u.8 n/a: no tilted label added (not on the 29 Oct list for this site)
+R3u.9 n/a: no questions section on any page; her FAQ answers were already asked for in message-to-owner.md
+R3u.10 n/a: no places to buy or collect; "Where we work" lists cities they travel to
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: arrival and question-card pieces taken from scrollcraft/starter/kit (tried on kit/test.html); the next-day button is a plain button, no new motion
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

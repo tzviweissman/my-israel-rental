@@ -310,3 +310,9 @@ a.extra:hover { border-color: var(--sc-accent); }
   .bar .btn .lb, .bar .btn .ab { min-height: 44px; } .bar .btn .ab { width: 40px; }
   .bar-menu { min-width: 4.4rem; padding: 0 0.8rem; margin-left: 0.2rem; }
 }
+
+/* 3u.2 a day we cannot do: the line names the next one, the button sets it */
+.note[hidden] { display: none; }
+#dayFix { flex-wrap: wrap; align-items: center; margin-top: .75rem; }
+#dayFix span { flex: 1 1 18rem; }
+#dayFix .chip { min-height: 44px; }

@@ -181,3 +181,17 @@ R3a.8 n/a: no dot-separated lines
 R3r.3 pass: check-site, check-fits, check-motion, cutoff clean after the last edit; readable and clipped limited as named
 R3r.4 pass: no new Tzvi correction in this task
 R8.7 pass (recorded after the fact, 25 Oct): the opening film (assets/arrive.mp4) was generated on 14 to 15 Oct 2026 and no brief with a reference crop was written first, so this is a record made now, in gen/arrive-brief.md with a side-by-side at gen/arrive-compare.jpg (her real school arch beside the last frame). I looked at it and the match is only partial: both are a balloon arch on a wall, but hers is bright primary colours with pencil shapes and the generated one is sage, blush and gold, tidier and more polished than her real work. The page says the opening is not her premises. Whether that palette is acceptable is for Tzvi to decide.
+R3k.10 pass: the event date defaults to tomorrow (the page accepts from today; no lead time stated; the "I do not know the date yet" box still clears it and the date stays optional; a picked day is never overwritten); check-prefill clean
+R3u.2 n/a: hours are "by appointment" and no closed days, lead time or limit are in the page or record; the event date stays free
+R3u.3 n/a: no sizes and no prices on the page (Michal asked for none)
+R3u.5 n/a: the home page opens on a scroll film; check-arrival reports it as a film and skips it
+R3u.6 n/a: the first screen is a film
+R3u.7 n/a: the first screen is a film with its own moving line
+R3u.8 n/a: not added (not asked for this site)
+R3u.9 n/a: no questions section on the page; "Good to know" is a list of facts
+R3u.10 n/a: one business serving Jerusalem and the area, no places to collect
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 n/a: no moving piece was added
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 29 Oct: all rules re-read against the current pages; only change since is tighter spacing in the booking section and its summary so it fits a short laptop screen (check-fits passes on all three pages) -->

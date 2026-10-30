@@ -201,3 +201,18 @@ R3a.8 pass: no dot-separated line of items
 R3r.3 pass: check-rules passes; site, fits and motion run after the last edit
 R3r.4 pass: no new Tzvi correction in this rework beyond rule 3t, already in the checklist
 R8.7 n/a: nothing was generated: RULES R8.2/R8.3 say all photos are hers; no gen/ brief files, no generation scripts (gen/ holds build.py and own.css only), BRIEF/CONCEPT name no generation tool; git log shows no generation commit
+
+R3k.10 pass: the day field arrives as the first day the page itself accepts: today if a start time for the chosen hours is still offered after the 60-minute margin, else tomorrow (no closed days on the page); never overwrites a picked day; service/city/time left unchosen (no stated default); check-prefill clean
+
+R3u.2 pass: book.html, a day with nothing free (today after the last start) shows "No start times are left that day. The next day we can do is Friday 30 October." and a button "Choose Friday"; tried with the clock at 22:00 at 390x844 and 1440x900, button set the next day and 25 times appeared; she has no closed days on the page and the 1 to 8 hour stepper stops at its end without changing a pick
+R3u.3 n/a: sells hours at ₪160 an hour, nothing by size or portion
+R3u.5 n/a: the home page opens on the pinned before and after scene with a canvas film, so check-arrival does not test it
+R3u.6 n/a: the first screen is a film scene, not separate cut-out pieces
+R3u.7 n/a: the first screen is a film with its own words; no rotating word beside it
+R3u.8 n/a: no tilted label added (not on the 29 Oct list for this site)
+R3u.9 pass: contact.html questions list (still empty and hidden until she sends her questions) now draws rounded cards on <details> with the accent circle + turning to x and a smooth open; looked at with three test questions injected, 390x844, two open
+R3u.10 n/a: she works at clients' homes in Jerusalem and Beit Shemesh; no places to buy or collect
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: arrival and question-card pieces taken from scrollcraft/starter/kit (tried on kit/test.html); the next-day button is a plain button, no new motion
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

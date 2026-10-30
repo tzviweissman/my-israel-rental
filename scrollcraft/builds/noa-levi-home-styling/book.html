@@ -139,6 +139,16 @@
   });
   [].forEach.call(document.querySelectorAll('#cities input'), function (i) { i.addEventListener('change', function () { update(); check(false); }); });
 
+  // the form arrives filled in (page rules 3k.8): the first day the page itself would accept, with a start time still to offer
+  function firstDay(lastStart) {
+    var n = new Date(), t = new Date(n.getFullYear(), n.getMonth(), n.getDate(), 12);
+    for (var i = 0; i < 14; i++, t.setDate(t.getDate() + 1)) {
+      var l = lastStart(t.getDay());
+      if (!l || (i === 0 && l <= n.getHours() * 60 + n.getMinutes() + 60)) continue;
+      return t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+    }
+    return '';
+  }
   // start times in her hours, 09:00 to 23:00, so the session ends by 23:00
   function drawTimes() {
     var box = $('times'), d = $('day').value;
@@ -148,12 +158,18 @@
       if (d === today) { var now = new Date(); if (m <= now.getHours() * 60 + now.getMinutes() + 60) continue; }
       out.push(m);
     }
-    if (!out.length) { box.innerHTML = '<p class="hint">No start times left that day. Choose another day.</p>'; time = ''; return; }
+    if (!out.length) {
+      // nothing left that day: one plain line naming the next day, and a button that sets it (page rules 3u.2); the pick is never changed for the customer
+      var t = new Date(d + 'T12:00'); t.setDate(t.getDate() + 1);
+      var iso = t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+      box.innerHTML = '<p class="hint">No start times are left that day. The next day we can do is ' + nice(iso) + '.</p><button type="button" class="choose-day" data-d="' + iso + '">Choose ' + t.toLocaleDateString('en-GB', { weekday: 'long' }) + '</button>'; time = ''; return;
+    }
     if (out.map(hhmm).indexOf(time) < 0) time = '';
     box.innerHTML = out.map(function (m) { var t = hhmm(m); return '<label class="opt"><input type="radio" name="time" value="' + t + '"' + (t === time ? ' checked' : '') + '><span class="box">' + t + '</span></label>'; }).join('');
     [].forEach.call(box.querySelectorAll('input'), function (i) { i.addEventListener('change', function () { time = i.value; update(); check(false); }); });
   }
   $('day').addEventListener('change', function () { drawTimes(); update(); check(false); });
+  $('times').addEventListener('click', function (e) { var b = e.target.closest('.choose-day'); if (b) { $('day').value = b.dataset.d; drawTimes(); update(); check(false); } });
 
   function endOf(t) { var p = t.split(':'); return hhmm(+p[0] * 60 + +p[1] + hrs * 60); }
   function chg(n, what) { return step > n ? ' <button type="button" class="chg" data-go="' + n + '" aria-label="Change ' + what + '">Change</button>' : ''; }
@@ -230,6 +246,7 @@
   addEventListener('popstate', function () { var m = /#book-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
   $('back').addEventListener('click', function () { history.back(); });
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
+  if (!$('day').value) $('day').value = firstDay(function () { return 1380 - hrs * 60; });
   drawHours(); drawStage(); drawTimes(); update();
   var m0 = /#book-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
 })();

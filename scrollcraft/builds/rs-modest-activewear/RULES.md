@@ -201,3 +201,16 @@ R3h.18 n/a: no film: the doors are her own skirts photo opened in code (checked 
 R3h.19 n/a: no generated film; the doors are her photo opened in code
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 pass: stepped the opening through 30 scroll states at 1440x900 and 390x844 on 27 Oct: her name headline holds one top (299-301 px laptop, 575-576 px phone) and the store line under the doors holds another (351-356, 589-594, a 5 px rise as it fades in), each in one size throughout; the shop cards sit in a fixed grid; nothing else repeats
+R3k.10 pass: the Which day field defaults to tomorrow (the page accepts from today; her open days are still question 2 to her, so the page does not promise same-day; set on load, a picked day is never overwritten); check-prefill clean
+R3u.2 n/a: the owner has not said which days she is open or any lead time (question 2 and the new question 12 in message-to-ravit.md), so there is no real closure to name; the page does not name a closed day. The 10 skirt cap in the basket is a page limit, not hers
+R3u.3 n/a: one skirt at one price, no sizes by servings or pieces
+R3u.5 pass: check-arrival passes on the home page; the bar drops in, the headline, line and button arrive in order and the doorway photo arrives by a green cover lifting off it (a rise or fade of the whole pinned 3D door scene stalled scrolling to 15 to 30 fps in check-site SMOOTH); looked at 0.1 s and 2 s at 1440x900 and 390x844; all there without JS or with motion off
+R3u.6 n/a: the first screen is one whole photo in a pinned door scene, no separate cut-out pieces
+R3u.7 n/a: one product and no list of occasions, so no word to rotate
+R3u.8 n/a: not added (no tilted label asked for this site)
+R3u.9 pass: contact.html FAQ (filled from the shop) restyled as rounded cards, "+" in a dark circle turning into "x", smooth open; looked at on 390x844 with two test questions, one open, one closed (no question is published yet, the section stays hidden until the owner sends some)
+R3u.10 n/a: one shop, King George 31
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: pieces taken from scrollcraft/starter/kit, tried on kit/test.html
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

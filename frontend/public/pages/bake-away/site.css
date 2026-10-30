@@ -185,6 +185,10 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
   .film .chap { height: 1.5em; font-size: .875rem; }
   .film .go { grid-template-columns: auto 1fr; align-items: center; gap: 1rem; }
 }
+/* phone: the film plays on repeat in one screen (film.js adds .loop); the page scrolls on normally and one chapter line holds still */
+.film.loop { height: auto; }
+.film.loop .stage { position: relative; top: 0; }
+.film.loop .chap .k1, .film.loop .chap .k3 { opacity: 0; } .film.loop .chap .k2 { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .film { height: auto; } .film .stage { position: relative; top: 0; } .film .chap span { transition: none; } .film .chap .k1 { opacity: 0; } .film .chap .k3 { opacity: 1; transform: none; } .film h1 .ln > span { animation: none; } .ln > span { transform: none; } }
 
 /* ── the flavour spot (X31): the doughnut stays, tap a flavour and the same place shows it (one scroll effect per page: the film) ── */
@@ -347,3 +351,5 @@ label.opt input { accent-color: var(--ivory); width: 20px; height: 20px; }
 .cream .trio button[aria-pressed="true"] { border-color: var(--ivory); }
 .cream .trio button img { display: block; }
 .cream .cr-n { margin: .2rem 0 .8rem; font: 600 1.05rem var(--font-body); color: var(--ivory); }
+.nxt { margin: .5rem 0 0; min-height: 44px; padding: 0 1.1rem; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font: 600 .95rem/1 var(--font-body); cursor: pointer; }
+.nxt[hidden] { display: none; }

@@ -10,6 +10,7 @@ Hi, the new look of your page is ready for you to see: bright, one colour per si
 6. Which days and what last hour for Shabbos and Yom Tov orders? Does delivery to the whole country cost anything beyond the first free local order?
 7. The Heimish recipe is "coming soon" on your flyer. When it is ready, should it be added?
 8. The Large is ₪180 and two Mediums are ₪200, so the page shows ₪200 struck through and "10% off", with the words "2 Mediums, ₪200" beside it. Is that how you want it said?
+9. How many people does the Extra Large / Kiddush feed? We show "about ₪16 a person" for Medium and "about ₪15 a person" for Large from your 4 to 6 and 8 to 12, and would add it for this size too.
 
 Questions we can show on the site once you answer (we only publish what you say):
 - Which size do I need for my guests?
@@ -21,3 +22,4 @@ Questions we can show on the site once you answer (we only publish what you say)
 - Do you deliver outside Jerusalem?
 
 If someone is worried it will not taste like yours, what do you tell them? And which of your photos and flyers may we use on the site and in link previews?
+

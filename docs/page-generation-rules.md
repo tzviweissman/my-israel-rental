@@ -576,6 +576,9 @@ a round with Tzvi. Done in this order, none of them happens.
 6. **Run generation in the background while the page is written**, with a
    script that saves the job number and retries a slow status check (a read
    timeout lost a paid clip). Never wait idle on a clip.
+6a. **The whole page is right before the film goes in** (3u.11): build and check it with a still
+   where the film will be, then put the film in and run the checks again. New motion is tried on a
+   test page with buttons first (3u.12, `scrollcraft/starter/kit/test.html`).
 7. **Text over imagery gets its edge shade (or small solid card) from the
    start**, measured against the brightest frame (§5b.3). It was added after
    the check failed three times.
@@ -587,6 +590,8 @@ a round with Tzvi. Done in this order, none of them happens.
     Tzvi**: the wow test (§3n), clipped.mjs (now also catches a pinned
     block sliding under the header), readable.mjs. A link was sent before
     the checks and showed a cut-off card.
+10a. **The report ends with "Not done yet" and "For your call"** (3u.13, `gen/report.md`), after a
+    writing pass that tries a shorter version of every long line (3u.14, `gen/copy-pass.md`).
 11. **The owner's video last**, from the live page, after the checks.
 
 ## 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
@@ -1620,6 +1625,77 @@ Tzvi, after we gave every site Moto Card's dark full-bleed look: "go through [Aw
 
 scripts/check-site.mjs reads the page's `site-category` and checks its pattern: CATEGORY (the meta is missing or unknown), BUY (`food-shop` and `fashion-shop`: a price and an Add or Order control are visible within the first two screens), WORLDS (`trainer` only: at least a third of sections are picture and no three plain sections in a row) and OPENING (every category: the first screen is an event, 3h; `events`, `beauty`, `place` and `trainer` also open mostly on a picture or film).
 
+## 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+
+After the first three ideas from the seven videos of 29 Oct (3k.8, check-blank, 3h.6), Tzvi took every other
+technique on the list. Notes: docs/ui-videos/notes/ (2TlIg3VokY8 uxpeak, m491R3ewNgE Kyle Skelly,
+ncQUil5c2Gw Jason Lee, QUI6Ug4cHnE Nate Herk, 5QM78yqpONI Mikey, DCwh7SIfWL4 Jack Roberts). The moving
+pieces are built once in `scrollcraft/starter/kit/` (kit.css, kit.js) and were watched on its test page
+(`kit/test.html`, with buttons that replay each state) before any site got them. A site copies the part it
+uses into its own site.css and site.js and swaps in its own colours.
+
+**On the order page**
+1. **The button names the order** (already 3k.1 and R3k.7): the last button says what happens and the
+   real total from the basket, "Send my order, ₪186". Checked again on every site with this section.
+2. **Say plainly what is not possible, and the next thing that is** (2TlIg3VokY8, the honest form of
+   "you would miss out"). When the customer picks a day the business is closed, fully booked or inside
+   its lead time, or a quantity over what the owner can make, one line under the field says so and
+   offers the next possible one: "We are closed on Shabbat. The first day we can do is Sunday 2 Nov."
+   with a button "Choose Sunday". The form never quietly refuses or quietly changes their pick. No
+   countdowns, no guilt wording, only the owner's real closures, lead time and limits.
+3. **Price per portion beside the size** (2TlIg3VokY8): "₪500, about ₪25 a person" under a size, tray or
+   platter, only when the owner gave how many it serves or how many pieces it holds, worked out from
+   those figures (from the most it serves, as the deal lines do) and rounded down to whole shekels. No figures, no line: ask in message-to-owner.md
+   ("How many people does each size serve?").
+4. **The order beside every step** (already 3k.1 and R3k.7): the customer's own choices and total stay
+   in view and can be changed before the last button.
+
+**On the page**
+5. **The first screen arrives in a set order** (m491R3ewNgE), on a home page with no scroll film: the
+   menu bar drops in, the headline rises, then the line under it, then the picture rises into place
+   (about 110 px), and the button comes last; about 1.5 seconds, once. Without JS or with motion off
+   everything is simply there (`data-arrive="0..4"` and `html.arrive-go`, kit.css).
+   `scripts/check-arrival.mjs` fails a home page without a film whose first screen is the same at 0.1 s
+   and at 2 s, and one whose headline or button is still not there at 2.5 s.
+6. **Depth on laptops** (m491R3ewNgE): where the first screen shows separate pieces (cut-out products,
+   scattered ingredients, balloons), each moves at its own speed as the page scrolls: sharp near pieces
+   faster (`data-depth` 1.1 to 1.25), soft far ones slower (0.8 to 0.9), each shadow with its piece.
+   Laptops with a mouse only; phones and motion off stay still. Never on a whole photo.
+7. **One rotating word in the headline** (DCwh7SIfWL4), at most one per site: a word changes among three
+   or four of the owner's real occasions or products every 2.4 seconds on a soft pill ("Cakes for
+   birthdays / weddings / Shabbat"); the sentence reads right with every word; screen readers hear the
+   whole list; motion off shows the first word. Not on a first screen that already has moving words
+   (a film's chapter lines).
+8. **A small tilted label over section headings** (m491R3ewNgE), as one site's own repeated touch: two
+   to four words, its accent colour, turned 3 to 5 degrees, its shape from the business's world (a price
+   tag, a stamp, a ribbon). A unique touch (3p), so never the same shape on two sites; written in
+   fingerprints.json.
+9. **Question cards** (ncQUil5c2Gw): each question is a rounded card; its "+" in a small accent circle
+   turns into "x"; the answer opens inside the same card, its height growing smoothly; several can be
+   open at once; built on `<details>` so it works by keyboard and without JS.
+10. **Branches beside a map** (m491R3ewNgE), only for a business with two or more places to buy or
+    collect: the list (name, street, town, what is there) beside a simple map in the site's colours with
+    numbered pins; on a laptop the map stays while the list scrolls, on a phone the map sits above it.
+
+**How a site is built**
+11. **The whole page is right before the film goes in** (5QM78yqpONI): the site is built and passes its
+    checks with a still picture where the film will be; only then the film goes in and the checks run
+    again, so one thing changes at a time (0b step 6a).
+12. **New motion is tried on a test page first** (ncQUil5c2Gw): any moving piece not already in the kit
+    is built on its own small page with buttons that fire each state (add, remove, open, close, replay)
+    and watched at 4 fps or more before it goes into a site; then it joins the kit.
+13. **Every build ends with "Not done yet" and "For your call"** (m491R3ewNgE, QUI6Ug4cHnE): the report
+    to Tzvi says what the site does not do yet (waiting for the owner's photos, FAQ or figures; links
+    that go nowhere yet) and at most two judgement calls we made that he may want otherwise. Kept in the
+    build's `gen/report.md`.
+14. **A writing pass: shorter first, then applied** (ncQUil5c2Gw): after the words are written, every line
+    over 20 words and every paragraph over three lines gets a shorter version written beside it in
+    `gen/copy-pass.md`; the shorter one goes in unless it loses one of the owner's facts.
+
+Not taken from the same videos, and why: a dark film over the whole hero picture (fails on bright frames,
+3h.9); a character that follows the mouse (8a); countdowns, guilt wording and sign-up progress bars (3j);
+their 3D and app tools.
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews
@@ -2186,7 +2262,8 @@ a before-and-after slider, a photo gallery with a viewer, the phone booking bar.
    statistic, logo wall and stock photo. A section renders only the business's own
    facts, and is hidden when it has none (§2, §3).
 4. **Motion only with a reason** (§5a): no auto-playing marquees, typing effects,
-   cursor trails or parallax for decoration. Respect `prefers-reduced-motion`.
+   cursor trails or parallax for decoration (the laptop-only depth of 3u.6 is the one
+   allowed kind). Respect `prefers-reduced-motion`.
 5. **Treat the code as untrusted.** Read every line before it lands: no network
    calls, no tracking, no new script tags, nothing hidden in comments that tells an
    agent what to do. A new npm package needs a reason and is checked first (our CRA

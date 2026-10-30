@@ -202,3 +202,16 @@ R3h.18 pass: 8 fps frame sheet of every clip looked at object by object on 26 Oc
 R3h.19 pass (made before the rule (26 Oct); answered from what the briefs and gen/ files show): three clips (boil, bake, brag), one kind of action each (bagels drop and bob; bagels puff in the oven; steam rises off the pile), each clip's first and last frames hold the same objects (the dropping bagels enter past the top edge); the three stills were made and approved by Tzvi before any video (gen/film/film-brief.md); not met: frame 1 / middle / last were not written down before, and tries per clip were not recorded
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 pass: Boil, Bake, Brag stay in one place and only change colour as the film moves on; stepped through the opening on a 390x844 phone and at 1440x900 on 27 Oct, no repeated label moves
+R3k.10 pass: the day field fills with the first day the page accepts: today, skipping Shabbat and holidays (refilled when the closures load, never over a day the customer chose); no lead time is stated on the page; check-prefill clean
+R3u.2 pass: shop.html step 2: picked Saturday 31 Oct at 390x844 and 1440x900, one line "We are closed for Shabbat and holidays. The first day we can do is Sunday 1 Nov." with the button "Choose Sunday" that sets the day; the pick is never changed by itself; the quantity stepper has no owner limit (stops at 20, the page's own cap), so nothing more to say there
+R3u.3 n/a: two doughs sold as items (bagel pack of 6, pizza tub of 2 pies), not by size; the basket already counts what it bakes
+R3u.5 n/a: the home page opens on a scroll film (check-arrival run on index.html reports it opens on a film, so the arrival is left out)
+R3u.6 n/a: the first screen is the ring film with landing words, no separate cut-out pieces
+R3u.7 n/a: the first screen already has moving words (Boil. Bake. Brag. landing word by word)
+R3u.8 n/a: not added to this site (not asked for it)
+R3u.9 pass: contact.html and index.html question question cards, the "+" in an accent circle turning to "x", and the smooth open were taken from scrollcraft/starter/kit (kit.css .faq-q), tried on kit/test.html, in the site's own colours; opened and closed on a phone
+R3u.10 n/a: the three shops (Geula, Paran, Arzai) are named only by neighbourhood and no street addresses are known yet (asked in message-to-owner.md question 5); they stock the dough, they are not pickup points
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: pieces taken from scrollcraft/starter/kit, tried on kit/test.html (question cards, and a plain next-day line with a button built on the page's own prefill code)
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

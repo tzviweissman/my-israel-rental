@@ -125,7 +125,9 @@ const CHECK_ONLY = process.argv.includes('--check');
     // on a phone the opening photo is seen, not covered by words and shades (Tzvi, 28 Oct 2026; rules 5b.3)
     ['check-photo-clear.mjs', 'covers its opening photo on a phone', 'R5b.3'],
     // from Tzvi's seven videos (29 Oct 2026): no blank screen in the scroll, the order form arrives filled in
-    ['check-blank.mjs', 'shows a blank screen', 'R3s.28'], ['check-prefill.mjs', 'has an order form that is not filled in', 'R3k.10']]) {
+    ['check-blank.mjs', 'shows a blank screen', 'R3s.28'], ['check-prefill.mjs', 'has an order form that is not filled in', 'R3k.10'],
+    // the rest of the seven videos (29 Oct 2026, rules 3u.5): a home page with no film arrives in order
+    ['check-arrival.mjs', 'has a first screen that does not arrive', 'R3u.5']]) {
     if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }

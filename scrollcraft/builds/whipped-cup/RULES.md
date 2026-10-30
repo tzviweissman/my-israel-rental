@@ -201,3 +201,17 @@ R3h.18 pass: 8 fps frame sheet of every clip looked at object by object on 26 Oc
 R3h.19 pass (made before the rule (26 Oct); answered from what the briefs and gen/ files show): one clip per shape (wide, tall), each from its own soul still (gen/clouds/c1-0.png, c2-0.png) then MiniMax H3 image-to-video, one try each (one .req per clip); one action (the clouds drift), the same clouds, sun and small figure from first to last frame; not met: no written frame plan before
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 n/a: nothing repeats in the opening (one window opens into one end card); the pages below are plain sections
+
+R3k.10 pass: shop.html now opens with First delivery day set to today, the first day its own check accepts (no lead time is stated anywhere in the page or message-to-rena.md, her answer is still asked in item 8); changeable, a picked day is never overwritten; quantity starts at 1; the pack is left unchosen because Rena states no default
+R3u.2 n/a: the page states no closed days, lead time or limit (first delivery day starts on today; her lead time is asked in message-to-rena.md item 8)
+R3u.3 pass: shop.html shows "about ₪10 a coffee" under Classic and "about ₪12" under Caramel and Vanilla (₪40 and ₪48 over the 4 of "Makes 3 to 4 coffees", rounded down), fading with the flavour; packages already show ₪ a jar; looked at 1440x900
+R3u.5 n/a: the home page opens on the scroll film of clouds; check-arrival skips it
+R3u.6 n/a: the first screen is a film, no separate pieces
+R3u.7 n/a: the first screen is a film with its own line, "Ever wanted to feel the clouds?"
+R3u.8 n/a: not used here; the touch was given to Chicken Munch (a sticker); this site already has the cloud pointer
+R3u.9 n/a: no questions section on any page yet (her questions are asked in message-to-rena.md item 8)
+R3u.10 n/a: one place, Ramat Eshkol
+R3u.12 n/a: no kit piece moved in; the only change is a line of words that fades with the flavour like the price beside it
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

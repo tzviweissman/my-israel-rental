@@ -527,3 +527,22 @@ main > section.sec + section, main > section.pair + section { border-top: 1px so
   .hero .edge { display: none; }
   .hero h1 { font-size: clamp(1.7rem, 7.4vw, 2.2rem); }  /* her headline is long (three lines at 2.6rem pushed the button off the first screen) */
 }
+
+/* 3u.2 a day she cannot do: the line names the next one, the button sets it */
+.times > .hint { flex: 1 1 100%; margin: 0; }
+.choose-day { min-height: 44px; padding: 0 1.2rem; border-radius: 999px; border: 1.5px solid var(--rose-dk); background: transparent; color: var(--rose-dk); font: 600 .95rem/1 var(--font-body); cursor: pointer; }
+.choose-day:hover { background: var(--rose-dk); color: #fff; }
+.stage[data-tone="dark"] .choose-day { border-color: #FFF4F2; color: #FFF4F2; }
+
+/* 3u.5 arrival (from scrollcraft/starter/kit): bar, headline, line, picture, button, once. The shade picture is full-screen, so it fades in instead of rising. */
+html.arrive-go [data-arrive] { animation: arrive 700ms cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--n, 0) * 220ms); }
+html.arrive-go [data-arrive="0"] { --n: 0; animation-name: arrive-drop; animation-duration: 500ms; }
+html.arrive-go [data-arrive="1"] { --n: 1; }
+html.arrive-go [data-arrive="2"] { --n: 2; }
+html.arrive-go [data-arrive="3"] { --n: 2.5; animation-name: arrive-fade; animation-duration: 1100ms; }
+html.arrive-go [data-arrive="4"] { --n: 4; animation-name: arrive-pop; animation-duration: 450ms; }
+@keyframes arrive { from { opacity: 0; transform: translateY(28px); } }
+@keyframes arrive-drop { from { opacity: 0; transform: translateY(-14px); } }
+@keyframes arrive-fade { from { opacity: 0; } }
+@keyframes arrive-pop { from { opacity: 0; transform: scale(.92); } }
+@media (prefers-reduced-motion: reduce) { html.arrive-go [data-arrive] { animation: none; } }

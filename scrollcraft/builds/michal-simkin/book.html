@@ -104,6 +104,8 @@
   .choices { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .choice { padding: 0.55rem 0.9rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--navy); font-weight: 600; font-size: 0.9rem; min-height: 44px; }
   .choice[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: transparent; }
+  .err .pickday { display: block; min-height: 44px; margin-top: .5rem; padding: 0 1.1rem; border-radius: var(--pill, 999px); border: 1.5px solid var(--navy); background: transparent; color: var(--navy); font-weight: 700; font-size: .9rem; font-family: inherit; cursor: pointer; }
+  .err.closed { color: var(--navy); font-size: .95rem; }
   .err { color: #B3261E; font-size: 0.85rem; margin: 0.4rem 0 0; min-height: 1.2em; }
   .summary { position: sticky; top: 76px; display: grid; gap: 1rem; }
   .card { padding: 1.2rem 1.3rem; border-radius: 18px; background: var(--ivory); border: 1px solid var(--line); }
@@ -288,14 +290,26 @@
   }
   function choose(id) { state.chosen = state.products.filter(function (p) { return p.id === id; })[0] || null; paint(); }
 
+  /* 3u.2: Friday and Shabbat are closed (Sun to Thu, 10 to 2). Say so, name the next day we can do, offer a button; never change their pick. */
+  function localIso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function closedNote() {
+    var e = $('#errWhen'), v = $('#date').value, wd = v ? new Date(v + 'T12:00:00').getDay() : -1;
+    e.textContent = ''; e.classList.remove('closed');
+    if (wd !== 5 && wd !== 6) return false;
+    var n = new Date(v + 'T12:00:00'); while ([5, 6].indexOf(n.getDay()) !== -1) n.setDate(n.getDate() + 1);
+    e.classList.add('closed');
+    e.appendChild(document.createTextNode('We are closed on ' + (wd === 5 ? 'Fridays' : 'Shabbat') + '. The first day we can do is Sunday ' + n.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) + '.'));
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'pickday'; b.textContent = 'Choose Sunday';
+    b.addEventListener('click', function () { $('#date').value = localIso(n); closedNote(); paint(); });
+    e.appendChild(b); return true;
+  }
   function initDate() {
     var d = new Date(); d.setDate(d.getDate() + 1);
     while ([5, 6].indexOf(d.getDay()) !== -1) d.setDate(d.getDate() + 1);   /* not Friday, not Shabbat */
     var iso = d.toISOString().slice(0, 10);
     $('#date').min = iso; $('#date').value = iso;
     $('#date').addEventListener('change', function () {
-      var wd = new Date($('#date').value + 'T12:00:00').getDay();
-      $('#errWhen').textContent = (wd === 5 || wd === 6) ? 'The salon is open Sunday to Thursday.' : '';
+      closedNote();
       paint();
     });
   }
@@ -313,7 +327,7 @@
     var s3 = s2 && $('#name').value.trim() && $('#phone').value.trim().length >= 9;
     var li = document.querySelectorAll('#steps li');
     for (var i = 0; i < 3; i++) li[i].className = (i + 1 < step) ? 'done' : ((i + 1 === step) ? 'now' : '');
-    var label = step === 1 ? 'Continue to the day' : (step === 2 ? 'Continue to your details' : (p ? 'Request the time · ' + tot : 'Request the time'));
+    var label = step === 1 ? 'Continue to the day' : (step === 2 ? 'Continue to your details' : (p ? 'Send my request to Michal, ' + tot : 'Send my request to Michal'));
     $('#place').textContent = label; $('#placeBar').textContent = label;
     $('#place').disabled = !s1; $('#placeBar').disabled = !s1;
   }
@@ -330,7 +344,8 @@
     if (step === 1) { if (!state.chosen) { $('#errWhat').textContent = 'Choose one.'; return; } return go(2); }
     if (step === 2) {
       var wd = new Date($('#date').value + 'T12:00:00').getDay();
-      if (!$('#date').value || wd === 5 || wd === 6) { $('#errWhen').textContent = 'Pick a day, Sunday to Thursday.'; return; }
+      if (!$('#date').value) { $('#errWhen').textContent = 'Pick a day, Sunday to Thursday.'; return; }
+      if (closedNote()) return;
       return go(3);
     }
     place();
@@ -339,7 +354,8 @@
     $('#errWhat').textContent = ''; $('#errWhen').textContent = ''; $('#errYou').textContent = '';
     if (!state.chosen) { $('#errWhat').textContent = 'Choose one.'; return; }
     var wd = new Date($('#date').value + 'T12:00:00').getDay();
-    if (!$('#date').value || wd === 5 || wd === 6) { $('#errWhen').textContent = 'Pick a day, Sunday to Thursday.'; $('#step-when').scrollIntoView(); return; }
+    if (!$('#date').value) { $('#errWhen').textContent = 'Pick a day, Sunday to Thursday.'; $('#step-when').scrollIntoView(); return; }
+    if (closedNote()) { $('#step-when').scrollIntoView(); return; }
     if (!$('#name').value.trim() || $('#phone').value.trim().length < 9) { $('#errYou').textContent = 'Your name and a mobile number, so we can confirm.'; $('#step-you').scrollIntoView(); return; }
     var notes = ('Preferred time: ' + $('#time').value + ($('#notes').value.trim() ? '\n' + $('#notes').value.trim() : ''));
     var body = { lines: [{ product_id: state.chosen.id, qty: 1 }], fulfilment: 'pickup', date: $('#date').value, window: null, address: null,

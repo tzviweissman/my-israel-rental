@@ -248,6 +248,21 @@ R3t.4 | A real footer on every page, identical: a last big line, the button, lin
 R3a.7 | Every state is checked on the device that shows it (touch emulation for phones, never a narrow desktop window; hover-only looks have a touch version) | 3a table, 3e.9 | LOOK: record which emulation was used
 R3a.8 | A line of items separated by dots never wraps | 3a table | LOOK at 360x640
 
+## 8b. From the seven videos, part two (29 Oct 2026)
+
+R3u.2 | A day the business cannot do (closed, full, inside the lead time) or a quantity over its limit gets one plain line under the field naming the next possible one, with a button to choose it; the form never quietly refuses or changes the pick | 3u.2 | LOOK: pick a closed day and an over-limit quantity on the order page; n/a if the site takes no day or quantity
+R3u.3 | Price per portion beside each size ("about ₪25 a person") when the owner gave servings or pieces, rounded down; without figures the question is in message-to-owner.md | 3u.3 | LOOK: every size against the owner's figures; n/a if nothing is sold by size
+R3u.5 | A home page with no scroll film: the first screen arrives in order (bar, headline, line, picture, button), about 1.5 s, once; all there without JS or with motion off | 3u.5 | script: check-arrival; n/a if the home page opens on a scroll film
+R3u.6 | Depth on laptops: separate pieces on the first screen move at their own speeds with the scroll (near faster, far slower), laptops with a mouse only, still on phones and with motion off | 3u.6 | LOOK at 1440x900 scrolled 0 and 300 px, and on a phone; n/a if the first screen has no separate pieces
+R3u.7 | At most one rotating word, in the headline, from the owner's real occasions or products; reads right with each; full list for screen readers; first word with motion off; not beside a film's moving words | 3u.7 | LOOK; n/a if none
+R3u.8 | A tilted label over headings, if used, is this site's own shape from its world and in fingerprints.json, never another site's | 3u.8 | LOOK: its "label" in fingerprints.json differs from every other site's; n/a if none
+R3u.9 | Questions are rounded cards on `<details>`, "+" in an accent circle turning into "x", the answer opening smoothly inside the card | 3u.9 | LOOK: open two on a phone; n/a if no questions section
+R3u.10 | A business with two or more places has its list beside a map in the site's colours with numbered pins, the map held on a laptop and above the list on a phone | 3u.10 | LOOK; n/a with one place or none
+R3u.11 | The page passed its checks with a still where the film goes before the film went in | 3u.11 | LOOK: the build's report or commits; n/a with no film
+R3u.12 | Every moving piece not in the kit was tried on a test page with buttons for each state before it went in | 3u.12 | LOOK: the test page in gen/ or the kit
+R3u.13 | gen/report.md ends with "Not done yet" and "For your call" (at most two) | 3u.13 | LOOK: gen/report.md
+R3u.14 | gen/copy-pass.md holds a shorter version of every line over 20 words and paragraph over three lines; the shorter is used unless it drops a fact | 3u.14 | LOOK: gen/copy-pass.md against the pages
+
 ## 9. Finish
 
 R3r.3 | `check-rules` passes, every script above passed on every page after the last edit, and a fix was checked on the screen it was for | 3a.4, 3r | script: check-rules (this file)

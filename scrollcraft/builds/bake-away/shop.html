@@ -68,7 +68,7 @@
             <h2>Delivery or pickup</h2>
             <div class="ful" role="radiogroup" aria-label="Delivery or pickup"><label class="opt"><input type="radio" name="ful" value="delivery" checked>Delivery</label><label class="opt"><input type="radio" name="ful" value="pickup">Pickup</label></div>
             <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr"></p><p class="hint">We deliver in Jerusalem and more. We confirm the fee on WhatsApp.</p></div>
-            <div id="w-when"><label class="f" for="when" id="when-l">Delivery day</label><input class="fld" id="when" type="date"><p class="hint" id="h-pick" hidden>We send the pickup address on WhatsApp.</p><p class="hint" id="h-when">We bake to order: choose a day at least 24 hours ahead. Closed for Shabbat and holidays: those days cannot be chosen.</p><p class="err" id="e-when"></p></div>
+            <div id="w-when"><label class="f" for="when" id="when-l">Delivery day</label><input class="fld" id="when" type="date"><p class="hint" id="h-pick" hidden>We send the pickup address on WhatsApp.</p><p class="hint" id="h-when">We bake to order: choose a day at least 24 hours ahead. Closed for Shabbat and holidays: those days cannot be chosen.</p><p class="err" id="e-when"></p><button type="button" class="nxt" id="nxt" hidden></button></div>
           </div>
           <div class="card ostep" data-s="3" hidden>
             <h2>Your details</h2>
@@ -218,7 +218,11 @@
       return (sd < iso || (sd === iso && st <= '12:00')) && (iso < ed || (iso === ed && et > '12:00'));
     });
   }
-  var CLOSED = 'Closed for Shabbat or a holiday. Choose another day.';
+  // 3u.2: a day we cannot do (closed, or inside the 24 hours) is named with the next day we can do and a button that sets it; the pick is never changed for them
+  function addDay(iso, n) { var d = new Date(iso + 'T12:00'); d.setDate(d.getDate() + n); return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); }
+  function nextOpen(iso) { for (var i = 0; i < 30; i++) { iso = addDay(iso, 1); if (iso >= minDay && !closedDay(iso)) return iso; } return ''; }
+  function nice(iso, o) { return new Date(iso + 'T12:00').toLocaleDateString('en-GB', o); }
+  function sayNext(n) { return n ? ' The first day we can do is ' + nice(n, { weekday: 'long', day: 'numeric', month: 'short' }) + '.' : ''; }
   // she asks for 24 to 48 hours: the earliest day is the one 24 hours from now
   var earliest = new Date(Date.now() + 864e5), minDay = new Date(earliest.getTime() - earliest.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   document.getElementById('when').min = minDay;
@@ -228,13 +232,15 @@
   function firstOpen() { var d = new Date(minDay + 'T12:00'); for (var i = 0; i < 14; i++) { var iso = new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); if (!closedDay(iso)) return iso; d.setDate(d.getDate() + 1); } return minDay; }
   function prefill() { if (!picked) document.getElementById('when').value = firstOpen(); }
   document.getElementById('when').addEventListener('input', function () { picked = true; });
+  document.getElementById('nxt').addEventListener('click', function () { picked = true; document.getElementById('when').value = this.dataset.d; check(false); drawStep(); });
   prefill();
   function check(show, upto) {
     var ok = true, e; upto = upto || 3;
     e = total() ? '' : 'Add a bake to your basket'; if (e) ok = false; if (show || !e) mark('items', e);
     if (upto < 2) return ok;
     e = pickup() || v('addr') ? '' : 'Where should we deliver?'; if (e) ok = false; if (show || !e) mark('addr', e);
-    e = !v('when') ? 'Choose the day' : v('when') < minDay ? 'Please order at least 24 hours ahead' : closedDay(v('when')) ? CLOSED : ''; if (e) ok = false; if (show || !e || closedDay(v('when'))) mark('when', e);
+    e = !v('when') ? 'Choose the day' : v('when') < minDay ? 'We bake to order, so we need 24 hours.' + sayNext(nextOpen(addDay(minDay, -1))) : closedDay(v('when')) ? 'We are closed for Shabbat and holidays.' + sayNext(nextOpen(v('when'))) : ''; if (e) ok = false; if (show || !e || closedDay(v('when')) || (v('when') && v('when') < minDay)) mark('when', e);
+    var nb = document.getElementById('nxt'), nn = v('when') && (v('when') < minDay || closedDay(v('when'))) ? nextOpen(v('when') < minDay ? addDay(minDay, -1) : v('when')) : ''; nb.hidden = !nn; document.getElementById('h-when').hidden = !!nn; if (nn) { nb.dataset.d = nn; nb.textContent = 'Choose ' + nice(nn, { weekday: 'long' }); }
     if (upto < 3) return ok;
     e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
     e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);
@@ -288,7 +294,7 @@
     [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
     var pk = pickup(); document.getElementById('w-addr').hidden = pk; document.getElementById('h-pick').hidden = !pk; document.getElementById('when-l').textContent = pk ? 'Pickup day' : 'Delivery day';
     var day = v('when') ? dayName({ weekday: 'long' }) : '';
-    send.lastElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? (day ? 'Send for ' + day : 'Send order on WhatsApp') + ', ' + money(total()) : 'Send order on WhatsApp');
+    send.lastElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? (day ? 'Send on WhatsApp for ' + day : 'Send order on WhatsApp') + ', ' + money(total()) : 'Send order on WhatsApp');
     send.classList.toggle('idle', !check(false, step));
     document.getElementById('send-note').textContent = STEP_NOTE[step];
     document.getElementById('back').hidden = step === 1;

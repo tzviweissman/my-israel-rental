@@ -15,7 +15,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@800&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,700&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="/pages/michal-yodaiken/scrollcraft.css?v=mvt9sqi9">
+<link rel="stylesheet" href="/pages/michal-yodaiken/scrollcraft.css?v=mvuwbf9v">
 <style>
   /* Her flyer: black, hot pink, condensed caps. */
   :root {
@@ -298,19 +298,41 @@
   .proof-blk .wa { margin: clamp(1.5rem, 4vh, 2.5rem) 0 0; color: var(--sc-ink-soft); }
   .proof-blk .wa a { color: var(--sc-accent); font-weight: 700; }
   @media (max-width: 760px) { .stats { grid-template-columns: 1fr 1fr; } .stats > div:nth-child(2) { border-right: 0; margin-right: 0; } .stats > div:nth-child(n+3) { margin-top: 1.4rem; border-top: 1px solid #3A353D; } }
-  .faq .qa { border-top: 1px solid #0B0A0C; }
-  .faq details { border-bottom: 1px solid #D9D5DB; }
-  .faq summary { cursor: pointer; padding: 1rem 0; min-height: 44px; font: 700 var(--sc-t-base)/1.3 var(--sc-font-text); list-style: none; display: flex; justify-content: space-between; gap: 1rem; }
+  /* 3u.9 question cards (from scrollcraft/starter/kit): a rounded card each, + in a pink circle turning to x, the answer opens inside the card */
+  .faq details { background: #F6F4F7; border: 1px solid #D9D5DB; border-radius: 10px; padding: 0 1.25rem; margin: 0 0 .75rem; interpolate-size: allow-keywords; }
+  .faq summary { cursor: pointer; padding: 1rem 0; min-height: 44px; font: 700 var(--sc-t-base)/1.3 var(--sc-font-text); list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; }
   .faq summary::-webkit-details-marker { display: none; }
-  .faq summary::after { content: "+"; font: 800 1.6rem/1 var(--sc-font-display); }
-  .faq details[open] summary::after { content: "\2212"; }
-  .faq details p { margin: 0 0 1rem; max-width: 40rem; color: #4A444F; line-height: 1.5; }
+  .faq summary::after { content: "+"; flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--sc-accent); color: var(--sc-accent-ink); font: 800 1.2rem/1 var(--sc-font-display); transition: transform 250ms cubic-bezier(.2,.7,.2,1); }
+  .faq details[open] summary::after { transform: rotate(45deg); }
+  .faq details::details-content { block-size: 0; overflow: hidden; transition: block-size 300ms cubic-bezier(.2,.7,.2,1), content-visibility 300ms allow-discrete; }
+  .faq details[open]::details-content { block-size: auto; }
+  .faq details p { margin: 0 0 1.1rem; max-width: 40rem; color: #4A444F; line-height: 1.5; }
+  @media (prefers-reduced-motion: reduce) { .faq details::details-content, .faq summary::after { transition: none; } }
+  /* 3u.2 a day she cannot do: the line names the next one, the button sets it */
+  .req .times-note { flex: 1 1 100%; margin: 0; }
+  .req .choose-day { min-height: 44px; padding: 0 1.1rem; border-radius: 4px; border: 2px solid var(--sc-accent); background: transparent; color: var(--sc-ink); font: 700 var(--sc-t-sm)/1 var(--sc-font-text); cursor: pointer; }
+  .req .choose-day:hover { background: var(--sc-accent); color: var(--sc-accent-ink); }
+  /* 3u.5 arrival (from scrollcraft/starter/kit): bar, headline, line, photo, button, once. The photo fills the first screen, so it fades in instead of rising. */
+  html.arrive-go [data-arrive] { animation: arrive 700ms cubic-bezier(.2,.7,.2,1) both; animation-delay: calc(var(--n, 0) * 220ms); }
+  html.arrive-go [data-arrive="0"] { --n: 0; animation-name: arrive-drop; animation-duration: 500ms; }
+  html.arrive-go [data-arrive="1"] { --n: 1; }
+  html.arrive-go [data-arrive="2"] { --n: 2; }
+  html.arrive-go [data-arrive="3"] { --n: 2.5; animation-name: arrive-fade; animation-duration: 1100ms; }
+  html.arrive-go [data-arrive="4"] { --n: 4; animation-name: arrive-pop; animation-duration: 450ms; }
+  @keyframes arrive { from { opacity: 0; transform: translateY(28px); } }
+  @keyframes arrive-drop { from { opacity: 0; transform: translateY(-14px); } }
+  @keyframes arrive-fade { from { opacity: 0; } }
+  @keyframes arrive-pop { from { opacity: 0; transform: scale(.92); } }
+  @media (prefers-reduced-motion: reduce) { html.arrive-go [data-arrive] { animation: none; } }
+  /* a short laptop screen: the filled-in form (3k.8) shows every start time, so it is made compact to keep the request on one screen
+     (written last so it wins over the rules above; a mouse, so 34px boxes are fine) */
+  @media (min-width: 900px) and (max-height: 760px) and (pointer: fine) { .reqsec { padding-block: var(--sc-3); } .req { gap: var(--sc-2); } .req .opt .box { min-height: 34px; } .req #times .box { padding: 0 .45rem; } .req .opts { gap: .4rem; } }
   .faq .wrap { align-items: start; }
 </style>
 </head>
 <body>
 
-<header class="bar" id="bar">
+<header class="bar" id="bar" data-arrive="0">
   <a class="who" href="#top" data-mir-key="t-82b3490c-0">Michal Yodaiken <span>· Let's workout</span></a>
   <div class="clock" aria-hidden="true"><b id="clock">00:00</b><span data-mir-key="t-ca9c4ce7-0">of a 30-minute session</span><span class="tag" data-mir-key="t-36a5d752-0">₪60 · 30 min</span><span class="done" data-mir-key="t-ca3e5511-0">A stronger, healthier you</span></div>
   <a class="btn" href="#book" data-mir-key="t-8b133375-0">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -318,14 +340,14 @@
 
 <main id="top">
   <section class="cut hero shade-r">
-    <img class="ambient" src="/pages/michal-yodaiken/assets/home.webp?v=mvt9sqi9" alt="" aria-hidden="true" width="2048" height="1152" data-mir-key="i-694667d9-0">
-    <img class="photo" src="/pages/michal-yodaiken/assets/home.webp?v=mvt9sqi9" alt="Pink dumbbells and an exercise mat on a sunlit living-room floor" width="2048" height="1152" data-mir-key="i-7ad78cc7-0">
+    <img class="ambient" src="/pages/michal-yodaiken/assets/home.webp?v=mvuwbf9v" alt="" aria-hidden="true" width="2048" height="1152" data-mir-key="i-694667d9-0">
+    <img class="photo" data-arrive="3" src="/pages/michal-yodaiken/assets/home.webp?v=mvuwbf9v" alt="Pink dumbbells and an exercise mat on a sunlit living-room floor" width="2048" height="1152" data-mir-key="i-7ad78cc7-0">
     <div class="in">
       <span class="kick" data-mir-key="t-f9af8d21-0">Women only</span>
-      <h1 data-mir-key="t-9f928e6f-0">Personal training for women that <em>comes to you</em>, in Jerusalem</h1>
-      <p class="lede" data-mir-key="t-a68c1bd2-0">Helping women feel stronger, healthier and more confident through personalised fitness training.</p>
+      <h1 data-arrive="1" data-mir-key="t-9f928e6f-0">Personal training for women that <em>comes to you</em>, in Jerusalem</h1>
+      <p class="lede" data-arrive="2" data-mir-key="t-a68c1bd2-0">Helping women feel stronger, healthier and more confident through personalised fitness training.</p>
       <div class="act">
-        <a class="btn" href="#book" data-mir-key="t-8b133375-1">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn" data-arrive="4" href="#book" data-mir-key="t-8b133375-1">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <ul class="proof">
           <li data-mir-key="t-1f703e10-0"><b>₪60</b> for a 30-minute session</li>
           <li data-mir-key="t-511019dc-0">Sessions tailored to your goals and fitness level</li>
@@ -339,17 +361,17 @@
     <div class="wrap">
       <div class="head"><h2 class="big" data-sc-in data-mir-key="t-65ab3a27-0">Five ways <span>to train.</span></h2><a class="btn on-light" href="#book" data-mir-key="t-8b133375-2">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
       <ol class="offers" data-sc-in>
-        <li><img src="/pages/michal-yodaiken/assets/home.webp?v=mvt9sqi9" alt="Pink dumbbells and an exercise mat on a sunlit living-room floor" width="2048" height="1152" loading="lazy" data-mir-key="i-7ad78cc7-1"><div class="ob"><span class="n" data-mir-key="t-ab903dcc-0">01</span><h3 data-mir-key="t-08136edb-0">At your home</h3><p data-mir-key="t-a80df2f1-0">1-to-1 training tailored to your goals and fitness level. I come to your home, or any place you prefer.</p><span class="amt" data-mir-key="t-a7e7a1b6-0">&#8362;60<small>for 30 minutes</small></span></div></li>
-        <li id="gym"><img src="/pages/michal-yodaiken/assets/gym.webp?v=mvt9sqi9" alt="An empty gym with a dumbbell rack, a bench and pink dumbbells on the floor" width="2048" height="1152" loading="lazy" data-mir-key="i-6cb53885-0"><div class="ob"><span class="n" data-mir-key="t-c0bca411-0">02</span><h3 data-mir-key="t-ff64e8a0-0">At your gym</h3><p data-mir-key="t-f301a566-0">I come with you to your gym, with guidance, motivation and support throughout your workout.</p><span class="amt ask" data-mir-key="t-4691997f-0">Message for a price</span></div></li>
-        <li><img src="/pages/michal-yodaiken/assets/online.webp?v=mvt9sqi9" alt="A laptop beside a yoga mat and a pink resistance band" width="2048" height="1152" loading="lazy" data-mir-key="i-c59f78f6-0"><div class="ob"><span class="n" data-mir-key="t-99a3d626-0">03</span><h3 data-mir-key="t-8ffd12fa-0">Online</h3><p data-mir-key="t-2f65bbc1-0">Virtual sessions from the comfort of your home.</p><span class="amt ask" data-mir-key="t-4691997f-1">Message for a price</span></div></li>
-        <li><img src="/pages/michal-yodaiken/assets/private-gym.webp?v=mvt9sqi9" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy" data-mir-key="i-24f6926f-0"><div class="ob"><span class="n" data-mir-key="t-54ec6d81-0">04</span><h3 data-mir-key="t-3d4c4830-0">My private gym</h3><p data-mir-key="t-62410d14-0">One to one in my private gym in Jerusalem, with a squat rack, free weights, a treadmill and a rowing machine.</p><span class="amt ask" data-mir-key="t-4691997f-2">Message for a price</span></div></li>
+        <li><img src="/pages/michal-yodaiken/assets/home.webp?v=mvuwbf9v" alt="Pink dumbbells and an exercise mat on a sunlit living-room floor" width="2048" height="1152" loading="lazy" data-mir-key="i-7ad78cc7-1"><div class="ob"><span class="n" data-mir-key="t-ab903dcc-0">01</span><h3 data-mir-key="t-08136edb-0">At your home</h3><p data-mir-key="t-a80df2f1-0">1-to-1 training tailored to your goals and fitness level. I come to your home, or any place you prefer.</p><span class="amt" data-mir-key="t-a7e7a1b6-0">&#8362;60<small>for 30 minutes</small></span></div></li>
+        <li id="gym"><img src="/pages/michal-yodaiken/assets/gym.webp?v=mvuwbf9v" alt="An empty gym with a dumbbell rack, a bench and pink dumbbells on the floor" width="2048" height="1152" loading="lazy" data-mir-key="i-6cb53885-0"><div class="ob"><span class="n" data-mir-key="t-c0bca411-0">02</span><h3 data-mir-key="t-ff64e8a0-0">At your gym</h3><p data-mir-key="t-f301a566-0">I come with you to your gym, with guidance, motivation and support throughout your workout.</p><span class="amt ask" data-mir-key="t-4691997f-0">Message for a price</span></div></li>
+        <li><img src="/pages/michal-yodaiken/assets/online.webp?v=mvuwbf9v" alt="A laptop beside a yoga mat and a pink resistance band" width="2048" height="1152" loading="lazy" data-mir-key="i-c59f78f6-0"><div class="ob"><span class="n" data-mir-key="t-99a3d626-0">03</span><h3 data-mir-key="t-8ffd12fa-0">Online</h3><p data-mir-key="t-2f65bbc1-0">Virtual sessions from the comfort of your home.</p><span class="amt ask" data-mir-key="t-4691997f-1">Message for a price</span></div></li>
+        <li><img src="/pages/michal-yodaiken/assets/private-gym.webp?v=mvuwbf9v" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy" data-mir-key="i-24f6926f-0"><div class="ob"><span class="n" data-mir-key="t-54ec6d81-0">04</span><h3 data-mir-key="t-3d4c4830-0">My private gym</h3><p data-mir-key="t-62410d14-0">One to one in my private gym in Jerusalem, with a squat rack, free weights, a treadmill and a rowing machine.</p><span class="amt ask" data-mir-key="t-4691997f-2">Message for a price</span></div></li>
       </ol>
       <div class="group" data-sc-in><span class="n" data-mir-key="t-bda50acb-0">05</span><h3 data-mir-key="t-e08cbb52-0">Small group circuits</h3><p data-mir-key="t-01eeb57a-0">Fun, motivating circuit sessions for groups of 3 or more.</p><span class="amt ask" data-mir-key="t-4691997f-3">Message for a price</span></div>
     </div>
   </section>
 
   <section class="cut pic private shade-b" id="private">
-    <img class="photo" src="/pages/michal-yodaiken/assets/private-gym.webp?v=mvt9sqi9" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy" data-mir-key="i-24f6926f-1">
+    <img class="photo" src="/pages/michal-yodaiken/assets/private-gym.webp?v=mvuwbf9v" alt="Michal's private training gym: a squat rack with a loaded barbell, a bench, a treadmill, a rowing machine and mirrored walls" width="1600" height="1200" loading="lazy" data-mir-key="i-24f6926f-1">
     <div class="in">
       <span class="tag" data-mir-key="t-0c7a025c-0">My private gym</span>
       <h2 class="big" data-sc-in data-mir-key="t-daafddc0-0">Or come <span>to me.</span></h2>
@@ -397,7 +419,7 @@
   </section>
 
   <section class="cut pic close shade-b" id="book">
-    <img class="photo" src="/pages/michal-yodaiken/assets/private-gym.webp?v=mvt9sqi9" alt="The rowing machine, the wall slogan and the dumbbells in Michal's private gym" width="1600" height="1200" loading="lazy" data-mir-key="i-628a963f-0">
+    <img class="photo" src="/pages/michal-yodaiken/assets/private-gym.webp?v=mvuwbf9v" alt="The rowing machine, the wall slogan and the dumbbells in Michal's private gym" width="1600" height="1200" loading="lazy" data-mir-key="i-628a963f-0">
     <div class="in">
       <h2 class="big" data-sc-in data-mir-key="t-220da76f-0">Book your <span>first session.</span></h2>
       <p class="sub" data-mir-key="t-a47a6a6f-0">At your home, in my private gym, or online.</p>
@@ -420,7 +442,7 @@
           <div class="fld full" id="w-time" role="group" aria-labelledby="l-time"><span class="lab" id="l-time" data-mir-key="t-75bb75f7-0">Start time</span><div class="opts" id="times"><p class="hint" data-mir-key="t-ee35c4cc-0">Choose a day first.</p></div><span class="err" id="e-time"></span></div>
           <div class="fld" id="w-ph"><label for="ph" data-mir-key="t-2295f282-0">Phone</label><input id="ph" type="tel" inputmode="tel" autocomplete="tel"><span class="err" id="e-ph"></span></div>
           <div class="act"><button class="btn" type="submit" id="send"><span id="send-l">Send on WhatsApp</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
-          <p class="fine full" id="fine" data-mir-key="t-82d7b69f-0">Saved with Michal on MyIsraelRental, then WhatsApp opens with your request written out.</p>
+          <p class="fine full" id="fine">Saved with Michal on MyIsraelRental, then WhatsApp opens with your request written out.</p>
         </form>
     </div>
   </section>
@@ -439,8 +461,10 @@
   </footer>
 </main>
 
-<script src="/pages/michal-yodaiken/scrollcraft.js?v=mvt9sqi9"></script>
-<script>ScrollCraft.mount(document.body);</script>
+<script src="/pages/michal-yodaiken/scrollcraft.js?v=mvuwbf9v"></script>
+<script>ScrollCraft.mount(document.body);
+// 3u.5 the first screen arrives in order, once (not with motion off; CSS above)
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentElement.classList.add('arrive-go');</script>
 <script>
 (function () {
   // The session clock: her session is 30 minutes, and the scroll runs it,
@@ -480,18 +504,47 @@
   var today = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   $('day').min = today;
   function pad(n) { return (n < 10 ? '0' : '') + n; }
+  // the form arrives filled in (page rules 3k.8): the first day the page itself would accept, with a start time still to offer
+  function firstDay(lastStart) {
+    var n = new Date(), t = new Date(n.getFullYear(), n.getMonth(), n.getDate(), 12);
+    for (var i = 0; i < 14; i++, t.setDate(t.getDate() + 1)) {
+      var l = lastStart(t.getDay());
+      if (!l || (i === 0 && l <= n.getHours() * 60 + n.getMinutes() + 60)) continue;
+      return t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+    }
+    return '';
+  }
   function drawTimes() {
     var box = $('times'), d = v('day'), keep = (document.querySelector('#times input:checked') || {}).value;
     if (!d) { box.innerHTML = '<p class="hint">Choose a day first.</p>'; return; }
-    if (new Date(d + 'T12:00').getDay() === 6) { box.innerHTML = '<p class="hint">Closed on Shabbat. Choose another day.</p>'; return; }
+    if (new Date(d + 'T12:00').getDay() === 6) { box.innerHTML = nextLine('Michal is closed on Shabbat.', d); return; }
     var out = [];
     for (var m = 540; m + 30 <= 1260; m += 30) {
       if (d === today) { var n = new Date(); if (m <= n.getHours() * 60 + n.getMinutes() + 60) continue; }
       var t = pad(Math.floor(m / 60)) + ':' + pad(m % 60); out.push('<label class="opt"><input type="radio" name="time" value="' + t + '"' + (t === keep ? ' checked' : '') + '><span class="box">' + t + '</span></label>');
     }
-    box.innerHTML = out.length ? out.join('') : '<p class="hint">No times left that day. Choose another day.</p>';
+    box.innerHTML = out.length ? out.join('') : nextLine('No times are left that day.', d);
   }
+  // a day she cannot do: one plain line naming the next day she can, and a button that sets it (page rules 3u.2); the pick is never changed for the customer
+  function nextLine(why, d) {
+    var t = new Date(d + 'T12:00');
+    do { t.setDate(t.getDate() + 1); } while (t.getDay() === 6);
+    var iso = t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+    return '<p class="hint times-note">' + why + ' The next day we can do is ' + t.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + '.</p><button type="button" class="choose-day" data-d="' + iso + '">Choose ' + t.toLocaleDateString('en-GB', { weekday: 'long' }) + '</button>';
+  }
+  $('times').addEventListener('click', function (e) { var b = e.target.closest('.choose-day'); if (b) { $('day').value = b.dataset.d; drawTimes(); setLabel(); } });
+  // the button says what happens and the real total (3u.1): only "at your home" has a price on the page, ₪60 for 30 minutes; the others are priced on WhatsApp
+  function setLabel() {
+    if (sending) return;
+    var w = val('way'), t = val('time'), d = v('day');
+    var day = d ? new Date(d + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short' }) : '';
+    $('send-l').textContent = 'Send' + (d && t ? ' ' + day + ' ' + t : '') + ' on WhatsApp' + (w === 'At your home' ? ', ₪60' : '');
+    $('fine').textContent = w && w !== 'At your home' ? 'Michal tells you the price on WhatsApp. Your request is saved with her on MyIsraelRental, then WhatsApp opens with it written out.' : 'Saved with Michal on MyIsraelRental, then WhatsApp opens with your request written out.';
+  }
+  $('req').addEventListener('change', setLabel);
   function val(name) { var r = document.querySelector('#req input[name=' + name + ']:checked'); return r ? r.value : ''; }
+  if (!$('day').value) $('day').value = firstDay(function (w) { return w === 6 ? 0 : 1230; });
+  drawTimes(); setLabel();
   $('day').addEventListener('change', drawTimes);
   function mark(id, msg) { $('w-' + id).classList.toggle('bad', !!msg); $('e-' + id).textContent = msg || ''; }
   function check() {

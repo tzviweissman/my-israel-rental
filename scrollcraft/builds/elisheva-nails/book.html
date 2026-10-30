@@ -147,17 +147,38 @@ var SHADE_C = {"milky": "#F4EFEE", "bubblegum": "#F3A9C6", "nude": "#E7C4B5", "r
   $('day').min = today;
   function pad(n) { return (n < 10 ? '0' : '') + n; }
   function hhmm(m) { return pad(Math.floor(m / 60)) + ':' + pad(m % 60); }
+  // the form arrives filled in (page rules 3k.8): the first day the page itself would accept, with a start time still to offer
+  function firstDay(lastStart) {
+    var n = new Date(), t = new Date(n.getFullYear(), n.getMonth(), n.getDate(), 12);
+    for (var i = 0; i < 14; i++, t.setDate(t.getDate() + 1)) {
+      var l = lastStart(t.getDay());
+      if (!l || (i === 0 && l <= n.getHours() * 60 + n.getMinutes() + 60)) continue;
+      return t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+    }
+    return '';
+  }
+  // a day she cannot do: one plain line naming the next day she can, and a button that sets it (page rules 3u.2); the pick is never changed for the customer
+  function nextLine(why, d) {
+    var t = new Date(d + 'T12:00');
+    for (var i = 0; i < 8; i++) {
+      t.setDate(t.getDate() + 1);
+      if (HOURS[t.getDay()]) { var iso = t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate()), w = t.toLocaleDateString('en-GB', { weekday: 'long' });
+        return '<p class="hint">' + why + ' The next day I can do is ' + nice(iso) + '.</p><button type="button" class="choose-day" data-d="' + iso + '">Choose ' + w + '</button>'; }
+    }
+    return '<p class="hint">' + why + '</p>';
+  }
+  $('times').addEventListener('click', function (e) { var b = e.target.closest('.choose-day'); if (b) { $('day').value = b.dataset.d; drawTimes(); update(); check(false); } });
   function drawTimes() {
     var box = $('times'), d = $('day').value;
     if (!d) { box.innerHTML = '<p class="hint">Choose a day first.</p>'; return; }
     var wd = new Date(d + 'T12:00').getDay(), h = HOURS[wd];
-    if (!h) { box.innerHTML = '<p class="hint">The studio is closed on Shabbat. Choose another day.</p>'; time = ''; return; }
+    if (!h) { box.innerHTML = nextLine('The studio is closed on Shabbat.', d); time = ''; return; }
     var len = svc ? SERVICES[svc].m : 45, out = [];
     for (var m = h[0]; m + len <= h[1]; m += 30) {
       if (d === today) { var now = new Date(); if (m <= now.getHours() * 60 + now.getMinutes() + 60) continue; }
       out.push(m);
     }
-    if (!out.length) { box.innerHTML = '<p class="hint">No times left that day. Choose another day.</p>'; time = ''; return; }
+    if (!out.length) { box.innerHTML = nextLine('No times are left that day.', d); time = ''; return; }
     if (out.map(hhmm).indexOf(time) < 0) time = '';
     box.innerHTML = out.map(function (m) { var t = hhmm(m); return '<label class="opt"><input type="radio" name="time" value="' + t + '"' + (t === time ? ' checked' : '') + '><span class="box">' + t + '</span></label>'; }).join('');
     [].forEach.call(box.querySelectorAll('input'), function (i) { i.addEventListener('change', function () { time = i.value; update(); check(false); }); });
@@ -266,6 +287,7 @@ var SHADE_C = {"milky": "#F4EFEE", "bubblegum": "#F3A9C6", "nude": "#E7C4B5", "r
   $('back').addEventListener('click', function () { history.back(); });
   $('sum').addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
   [].forEach.call(document.querySelectorAll('.osteps'), function (ol) { ol.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); }); });
+  if (!$('day').value) $('day').value = firstDay(function (w) { return HOURS[w] ? HOURS[w][1] - 45 : 0; });
   drawShade(); drawSvc(); drawTimes(); update();
   var m0 = /#book-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
 })();

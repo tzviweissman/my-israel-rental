@@ -512,3 +512,29 @@ body .sym { font-size: 1.16em !important; font-weight: 600; margin-right: 0; }
   .words h1, .words h2 { font-size: clamp(1.9rem, 8.2vw, 2.6rem); }
   .words .lede { margin: .5rem 0 1.4rem; }
 }
+
+/* 3u.5 Arrival (from scrollcraft/starter/kit): the first screen comes in in a set order, once; site.js adds .arrive-go, so without JS or with motion off everything is simply there */
+html.arrive-go [data-arrive] { animation: arrive 700ms cubic-bezier(.2,.7,.2,1) backwards; animation-delay: calc(var(--n, 0) * 220ms); }
+html.arrive-go [data-arrive="0"] { --n: 0; animation-name: arrive-drop; animation-duration: 500ms; }
+html.arrive-go [data-arrive="1"] { --n: 1; }
+html.arrive-go [data-arrive="2"] { --n: 2; }
+html.arrive-go [data-arrive="3"] { --n: 2.5; animation-name: arrive-rise; animation-duration: 1100ms; }
+html.arrive-go [data-arrive="4"] { --n: 4; animation-name: arrive-pop; animation-duration: 450ms; }
+@keyframes arrive { from { opacity: 0; transform: translateY(28px); } }
+@keyframes arrive-drop { from { opacity: 0; transform: translateY(-14px); } }
+@keyframes arrive-rise { from { opacity: 0; transform: translateY(110px); } }
+@keyframes arrive-pop { from { opacity: 0; transform: scale(.92); } }
+@media (prefers-reduced-motion: reduce) { html.arrive-go [data-arrive] { animation: none; } }
+
+/* 3u.9 Question cards (from the kit): rounded cards on <details>, + in a circle turning into x, the answer opens smoothly */
+.faq-q { background: var(--surface); border: 1px solid var(--line); border-radius: 18px; padding: 0 1.25rem; margin: 0 0 .75rem; interpolate-size: allow-keywords; }
+.faq-q:last-child { border-bottom: 1px solid var(--line); }
+.faq-q summary { align-items: center; min-height: 44px; padding: 1rem 0; }
+.faq-q summary::after { flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); font-size: 1.2rem; }
+.faq-q::details-content { block-size: 0; overflow: hidden; transition: block-size 300ms cubic-bezier(.2,.7,.2,1), content-visibility 300ms allow-discrete; }
+.faq-q[open]::details-content { block-size: auto; }
+@media (prefers-reduced-motion: reduce) { .faq-q::details-content, .faq-q summary::after { transition: none; } }
+/* the doorway is a pinned 3D scene (perspective doors, mask): moving or fading the whole scene stalled scrolling to 15 to 30 fps (check-site SMOOTH), so the picture arrives by a green cover lifting off it instead of rising */
+html.arrive-go .doorway[data-arrive="3"] { animation: none; }
+html.arrive-go .doorway[data-arrive="3"]::after { content: ""; position: absolute; inset: 0; z-index: 9; background: var(--green); pointer-events: none; animation: arrive-cover 900ms cubic-bezier(.2,.7,.2,1) 400ms forwards; }
+@keyframes arrive-cover { to { opacity: 0; } }

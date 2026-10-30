@@ -38,7 +38,7 @@ R3g.13 pass: 1440x900 and 390x844 first screens: the film picture, the headline 
 R3b.1 pass: first screen answers what (doughnuts, cakes, challah, cheesecakes), where (baked at home in Jerusalem), trust (her high-quality homemade taste, the price) and what to do (Order)
 R3b.2 pass: From ₪16 a doughnut sits directly under the Order button; she has no kosher certificate (certificate_url empty), so there is no band; the Badatz ingredients sentence appears once per page (home tile, shop facts line, contact tile)
 R3b.3 pass: first screen has one solid button (Order) and an outline one in the header; each later screen has the Add buttons of its own cards (copper, same label) and nothing else solid
-R3h.20 pass: check-site SMOOTH and SLOW pass: the film runs 4.3 screens of scroll (430vh, 4 on a phone) on a canvas; the doughnut is whole on plain slate (her own photo's world, never a photo of other doughnuts); the first screen loads first (every 8th frame, then sharper passes); 28 Oct: the flavour spot now lights as it scrolls in (it was blank for about a screen after the film, seen in the owner video's contact sheet; check-site re-run clean after the change)
+R3h.20 pass: check-site SMOOTH and SLOW pass: the film runs 4.3 screens of scroll (430vh) on a canvas on a laptop; on a phone it plays by itself on repeat in a one-screen section (Tzvi, 29 Oct: "on mobile we should remove the scroll and it should just play on repeat"), as a muted video made from the same phone frames (assets/film/phone-loop.mp4), the doughnut at the same place as before; check-speed 17 ms a frame, 0% busy; the doughnut is whole on plain slate (her own photo's world, never a photo of other doughnuts); the first screen loads first (every 8th frame, then sharper passes); 28 Oct: the flavour spot now lights as it scrolls in (it was blank for about a screen after the film, seen in the owner video's contact sheet; check-site re-run clean after the change)
 R3h.21 pass: check-one-scroll clean: the film is the one scroll effect; the flavour spot now changes on a tap and scrolls normally (29 Oct, Tzvi)
 R3h.22 n/a: the film was made on 28 Oct, before the rule; its three concepts went to Tzvi as photoreal stills (gen/concepts.jpg) and he chose A
 R3h.1 pass: check-site OPENING passes: a full-screen film that the scroll drives, an event (chocolate is drizzled across her doughnut); Tzvi confirmed concept A and its five steps on 28 Oct
@@ -171,7 +171,7 @@ R3f.8 n/a: both scroll-tied effects run inside held stages that fill the screen,
 R3f.9 n/a: no list that runs item by item exists; the flavour chips wrap into two rows on a phone
 R3f.5 pass: grep css: no ch units, no background-clip: text
 R3f.4 n/a: no logo motif is reused as an effect
-R3g.4 pass: every motion has one job: the film reveals, the lines rise to reveal, the flavour crossfade guides, the drip confirms a hover; no loops; no bounce on text; menu hover is 160ms
+R3g.4 pass: every motion has one job: the film reveals, the lines rise to reveal, the flavour crossfade guides, the drip confirms a hover; no loops except the phone film, which repeats by Tzvi's request (29 Oct); no bounce on text; menu hover is 160ms
 R3e.16 pass: grep css and js: no linear easing (ease-out curves only); every motion finishes in 480ms or less (headline lines 380ms plus 100ms of stagger, slides 480ms, the flavour crossfade 480ms, the drip 480ms, hovers 160 to 200ms)
 R3e.17 n/a: no carousel exists on the page; the ranges are a grid
 R3e.18 n/a: no ambient background video; the film is scroll-driven frames
@@ -205,3 +205,16 @@ R3a.8 pass: no dotted lines of items exist on the pages; the footer links use a 
 ## 9. Finish
 R3r.3 pass: check-build was run after the last edit: check-site, check-fits, check-motion and readable on all three pages, then check-concept, check-fingerprints and check-rules; the fixes were checked on the screens they were for
 R3r.4 pass: no new Tzvi correction since the last build is missing from this file; the photo-shape rule (3c.12) is followed by showing every photo whole
+R3u.2 pass: shop.html step 2: picked Saturday 31 Oct and today (inside the 24 hours) at 390x844 and 1440x900, one line naming the next day we can do ("The first day we can do is Sunday 1 Nov." and "...Friday 30 Oct.") with the button "Choose Sunday" or "Choose Friday" that sets it; the pick is never changed by itself; no quantity limit stated by the owner
+R3u.3 n/a: nothing is sold by size; each item has one fixed count (tray 24 pieces, 6 buns, 12 minis) and its price, and the cheesecake size and servings are already asked in message-to-owner.md question 6
+R3u.5 n/a: the home page opens on a scroll film (check-arrival run on index.html reports it opens on a film, so the arrival is left out)
+R3u.6 n/a: the first screen is a scroll film, no separate cut-out pieces
+R3u.7 n/a: the first screen is a scroll film with its own chapter lines
+R3u.8 n/a: not added to this site (not asked for it)
+R3u.9 n/a: the site has no questions section (contact.html and shop.html hold none)
+R3u.10 n/a: one baker, no branches, no places to buy
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: pieces taken from scrollcraft/starter/kit only as the next-day line built on the page's own prefill code; the film itself is unchanged; film.js now shows the phone loop as a video instead of drawing it into the canvas every frame (it kept a phone 99% busy)
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 29 Oct: all rules re-read against the current pages and film.js; the only changes are the phone film on repeat and the next-day line (R3u.2/R3u.12) -->

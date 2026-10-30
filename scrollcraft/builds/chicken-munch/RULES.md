@@ -200,3 +200,16 @@ R3k.9 pass: ran node scripts/check-site.mjs http://localhost:8791/chicken-munch/
 R3h.18 n/a: no film on any page (checked 26 Oct: assets/film is an old opening no page loads); the opening is his photo with code letters
 R3h.19 n/a: no film on any page; assets/film is an old opening no page loads
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
+R3k.10 pass: the day field fills with today, the first day the page accepts (it states no lead time or closed days); quantity and choices left to the customer; check-prefill clean
+R3u.2 n/a: the order page states no closed days, lead time or limit (the day field starts on today; the owner's last day to order is asked in message-to-owner.md item 3); the 20 cap on a quantity is a page limit, not the owner's
+R3u.3 pass: order.html shows "about $17 a person" (Mini, $69 over the 4 of "Feeds 3 to 4"), $14 (Grand, 10), $13 (Supreme, 16), ₪34 (9x13, 8), ₪32 (Roaster, 20), from the top of each "Feeds" range rounded down, looked at at 1440x900 and 390x844; home and menu already show $14 a person for the Grand
+R3u.5 n/a: the home page already arrives in its own set order (letters, bowl, stickers, line, button over about 1.5 s); check-arrival passes unchanged
+R3u.6 n/a: the first screen is one bowl on one backdrop; the three stickers already drift against the mouse
+R3u.7 n/a: the first screen has its own moving letters, and the headline "The taste of America" has no list of occasions
+R3u.8 pass: a gold sticker with a black ring, turned 4 degrees (the shape of the Kosher and Shabbos stickers on his opening bowl), over the headings "Pick your box" and "By the pan" on home and "Premium chicken boxes" and "By the pan" on menu (the one over "Eight kinds of chicken" was taken off on 29 Oct so that section fits a short laptop screen, check-fits), looked at at 390x844 and 1440x900; shape recorded for fingerprints.json by the lead
+R3u.9 pass: contact.html questions (filled by mir-faq.js once the owner answers) restyled as rounded cards on details with a gold "+" circle turning to "x" and a smooth open; two filled in by hand and opened at 390x844
+R3u.10 n/a: one place, Jerusalem
+R3u.12 pass: pieces taken from scrollcraft/starter/kit (question cards), tried on kit/test.html
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film

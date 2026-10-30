@@ -698,7 +698,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // (every 8th, then every 4th, ...) so the whole film scrubs early and
   // sharpens as the rest arrive; the nearest loaded frame is drawn.
   var FILM = { d: 300, m: 300 };
-  var filmEl = document.getElementById('film'), cv = document.getElementById('cv'), cx = cv.getContext('2d');
+  var filmEl = document.getElementById('film'), cv = document.getElementById('cv'), cx = cv.getContext('bitmaprenderer') || cv.getContext('2d'), br = !cx.drawImage;
   var chaps = [].slice.call(document.querySelectorAll('.chap'));
   var kind = phone() ? 'm' : 'd', N = FILM[kind], imgs = new Array(N), got = 0;
   // never a black screen while the frames arrive: the first frame is the
@@ -712,9 +712,10 @@ document.addEventListener('DOMContentLoaded', function () {
     var batch = order.slice(k, k + 6); if (!batch.length) { load.style.opacity = 0; return; }
     var left = batch.length;
     batch.forEach(function (i) {
-      var im = new Image(); im.decoding = 'async';
-      im.onload = im.onerror = function () { if (im.naturalWidth) { imgs[i] = im; got++; } load.style.width = (got / N * 100) + '%'; if (--left === 0) { draw(); next(k + 6); } };
-      im.src = url(i);
+      // kept as files (blobs), decoded off the main thread by createImageBitmap: decoding an <img> ran on the main thread
+      // inside every scrolled frame (check-speed HEAVY, ~190 ms a frame on a slowed phone, 29 Oct 2026; Bake away's film.js)
+      fetch(url(i)).then(function (r) { return r.ok ? r.blob() : null; }).then(function (bl) { if (bl) { imgs[i] = bl; got++; } }).catch(function () {})
+        .then(function () { load.style.width = (got / N * 100) + '%'; if (--left === 0) { draw(); next(k + 6); } });
     });
   })(0);
   // Smooth on a phone (26 Oct 2026, an iPhone stuttered at ~280 ms a frame when slowed 4x): a frame is drawn only when it
@@ -733,6 +734,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function size() {
     evenLines();
+    // a decoded frame is handed to the canvas whole (bitmaprenderer) at its own size and covers the screen by CSS: drawing it
+    // into a screen-sized 2D canvas copied ~3 MB a frame on a phone (check-speed HEAVY, 50 ms a frame slowed, 29 Oct 2026)
+    if (br) { if (cv.width !== FW) { cv.width = FW; cv.height = FH; cv.style.objectFit = 'cover'; } return; }
     var sc = Math.max(cv.clientWidth / FW, cv.clientHeight / FH), d = Math.min(2, devicePixelRatio || 1, 1 / sc);
     cv.width = Math.round(cv.clientWidth * d); cv.height = Math.round(cv.clientHeight * d); shown = -1; draw();
   }
@@ -743,18 +747,22 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   var p = 0, shown = -1, bmp = {}, asked = {}, WIN = 8;
   function keep(f) {
-    if (!window.createImageBitmap) return;
     Object.keys(bmp).forEach(function (i) { if (Math.abs(i - f) > WIN + 2) { bmp[i].close(); delete bmp[i]; } });
     for (var i = Math.max(0, f - WIN); i <= Math.min(N - 1, f + WIN); i++) if (imgs[i] && !bmp[i] && !asked[i]) (function (i) {
       asked[i] = 1;
-      createImageBitmap(imgs[i]).then(function (b) { delete asked[i]; if (Math.abs(i - Math.round(p * (N - 1))) > WIN + 2) b.close(); else bmp[i] = b; }, function () { delete asked[i]; });
+      createImageBitmap(imgs[i]).then(function (b) { delete asked[i]; if (Math.abs(i - Math.round(p * (N - 1))) > WIN + 2) b.close(); else { bmp[i] = b; draw(); } }, function () { delete asked[i]; });
     })(i);
   }
   function draw() {
     var f = frameAt(p); if (f < 0) return;
     keep(Math.round(p * (N - 1)));
-    if (f === shown) return; shown = f;
-    var im = bmp[f] || imgs[f];
+    // the nearest frame already decoded is drawn (the canvas's background shows the first frame until one is)
+    var g = -1; for (var d = 0; d < N && g < 0; d++) { if (bmp[f - d]) g = f - d; else if (bmp[f + d]) g = f + d; }
+    if (g < 0 || g === shown) return; shown = g;
+    var im = bmp[g];
+    // the bitmap becomes the canvas's own; a marker keeps its place (deleting it made two frames take turns for ever)
+    // and a frame shown before is decoded again when it is wanted back
+    if (br) { if (im.gone) { delete bmp[g]; shown = -1; keep(g); return; } cx.transferFromImageBitmap(im); bmp[g] = { gone: 1, close: function () {} }; return; }
     var W = cv.width, H = cv.height, sc = Math.max(W / im.width, H / im.height);
     var w = im.width * sc, h = im.height * sc;
     cx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
@@ -766,12 +774,15 @@ document.addEventListener('DOMContentLoaded', function () {
   function paint() {
     p = still ? 0 : progress();
     draw();
+    // written only when a chapter or the bar changes, never on every scrolled frame
     chaps.forEach(function (c) {
       var on = p >= +c.dataset.from && p < +c.dataset.to;
+      if (c._on === on) return; c._on = on;
       c.classList.toggle('on', on); c.setAttribute('aria-hidden', on ? 'false' : 'true');
       c.querySelectorAll('a').forEach(function (a) { a.tabIndex = on ? 0 : -1; });
     });
-    document.body.classList.toggle('on-film', filmEl.getBoundingClientRect().bottom > 64);
+    var onFilm = filmEl.getBoundingClientRect().bottom > 64;
+    if (onFilm !== paint.onFilm) { paint.onFilm = onFilm; document.body.classList.toggle('on-film', onFilm); }
   }
   var raf = 0;
   addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(function () { raf = 0; paint(); }); }, { passive: true });
