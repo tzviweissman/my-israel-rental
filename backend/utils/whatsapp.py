@@ -79,6 +79,56 @@ def _config() -> Optional[dict]:
     }
 
 
+def _meta_config() -> Optional[dict]:
+    """Meta's own WhatsApp Cloud API (Tzvi chose it over Twilio, 22 Oct
+    2026). Used for the new-order alert only; set both or neither.
+    The token is a permanent System User token from Business Settings."""
+    token = os.environ.get("WHATSAPP_ACCESS_TOKEN")
+    phone_id = os.environ.get("WHATSAPP_PHONE_NUMBER_ID")
+    if not (token and phone_id):
+        return None
+    return {
+        "token": token, "phone_id": phone_id,
+        "public_url": (os.environ.get("PLATFORM_PUBLIC_URL") or "").rstrip("/"),
+        # The template is approved per language under one name; the
+        # Meta language codes are "en" and "he".
+        "template": os.environ.get("WHATSAPP_TEMPLATE_NEW_ORDER") or "new_order",
+    }
+
+
+async def _send_meta_template(cfg: dict, raw_phone: str, lang: str, params: list) -> bool:
+    """POST one template message to the Graph API. Never raises."""
+    digits = normalize_whatsapp_number(raw_phone)
+    if not digits:
+        return False
+    import httpx
+    payload = {
+        "messaging_product": "whatsapp", "to": digits, "type": "template",
+        "template": {
+            "name": cfg["template"], "language": {"code": lang},
+            "components": [{"type": "body", "parameters": [
+                # Meta refuses an empty parameter, so a blank becomes "-".
+                {"type": "text", "text": str(p) or "-"} for p in params]}],
+        },
+    }
+    try:
+        async with httpx.AsyncClient(timeout=10) as client:
+            r = await client.post(
+                f"https://graph.facebook.com/v21.0/{cfg['phone_id']}/messages",
+                json=payload, headers={"Authorization": f"Bearer {cfg['token']}"},
+            )
+        if r.status_code >= 400:
+            # The error body names the problem (template not approved,
+            # wrong language code, no payment method) and holds no secret.
+            log.warning("Meta WhatsApp send failed: %s %s", r.status_code, r.text[:300])
+            return False
+        log.info("WhatsApp sent via Meta to=%s***", digits[:6])
+        return True
+    except Exception as exc:  # noqa: BLE001
+        log.warning("Meta WhatsApp send failed: %s", type(exc).__name__)
+        return False
+
+
 def _client(cfg: dict):
     """Lazy Twilio Client. Importing twilio at module import time would
     slow every other unrelated test, so we defer it to first send."""
@@ -244,7 +294,8 @@ async def send_new_order_notification(
     `summary` is cut short because a template variable over ~1000
     characters is refused, and a long basket reads better on the page.
     """
-    cfg = _config()
+    meta = _meta_config()
+    cfg = meta or _config()
     if not cfg:
         return False
     link = _build_deep_link(cfg, path)
@@ -257,6 +308,8 @@ async def send_new_order_notification(
         if he else
         f"New {word} on MyIsraelRental from {who}: {what}\nSee it and reply: {link}"
     )
+    if meta:
+        return await _send_meta_template(meta, recipient_phone, "he" if he else "en", [word, who, what, link])
     key = "tpl_new_order_he" if he and cfg.get("tpl_new_order_he") else "tpl_new_order"
     return await _send(
         recipient_phone=recipient_phone,
