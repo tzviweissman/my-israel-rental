@@ -15,6 +15,11 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [To check] The Brown Box and Blazin' Boards: pinned opening reported 64 to 96px taller than the room under the header at 360 to 768 wide (23 Oct UI audit; screenshots show nothing hidden); check on a real phone.
 - [To fix] Audit setup: most runs since 15 Oct could not download Playwright or MongoDB in the sandbox, so pages behind sign-in, Hebrew renders and order flows were not checked.
 
+- [Medium] Truthfulness: the new "people searched" lines on Why list, Why host and join can be made up by anyone. /site/search takes the visitor id from a request header, so three made-up ids reach MIN_SHOWN=3, and the free-text `area` becomes the public "most searched area". First seen 29 Oct (2026-10-29-site-audit.md).
+- [Low] Rental figures: a designed-site visit (`/business/{slug}/visit`) trusts the client's visitor id, so an owner's visitor count and requests-per-hundred rate can be inflated (120 per 10 min per IP). First seen 29 Oct (2026-10-29-site-audit.md).
+- [Low] Page translate: the daily translation allowance (300) is used up by calls that failed, because the counter is raised before the model is called. First seen 29 Oct (2026-10-29-site-audit.md).
+- [Low] Tests: audit sandbox had no MongoDB again, so the full backend suite and API checks could not run (the 45 tests that need no database pass). 29 Oct (2026-10-29-site-audit.md).
+
 ## Fixed
 
 - [Low] Two status colours have no design token, so they stay fixed: amber "waiting" (#B45309: payment requests, automations, deposits) and red error text (#B42318: restock box). Adding --attention and --danger tokens is a design-system choice for Tzvi. 23 Oct.
@@ -73,6 +78,10 @@ Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged
 - [Low] Tests: audit sandbox had no MongoDB again, so the full backend suite and API checks could not run (the 45 tests that need no database pass). 29 Oct (2026-10-29-site-audit.md).
 ## Added by the audit merge of 29 Oct 2026
 Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat older items in other words; kept as written).
+## Added by the audit merge of 29 Oct 2026
+
+Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat older items in other words; kept as written).
+
 - [To fix] Audit setup: most runs since 15 Oct could not download Playwright or MongoDB in the sandbox, so pages behind sign-in, Hebrew renders and order flows were not checked. Still so on 25 Oct (MongoDB download 403); the preinstalled Chromium at /opt/pw-browsers/chromium works if the setup script launches it with executablePath.
 - [Low] Ask this business: forwarding a question has no per-business limit, so many visitors can fill one business's leads board; the shared 300-a-day answer cap can be used up by one visitor. First seen 24 Oct (2026-10-24-site-audit).
 - [Low] Away reply loop queries per business every minute; fine now, will not scale. First seen 24 Oct (2026-10-24-site-audit).
@@ -174,3 +183,10 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Low] WhatsApp confirm webhook: a button tap is marked "seen" before the order is moved, so if the move fails (database hiccup, a 409 race) the tap is lost and the owner gets no reply. Not reproduced. First seen 30 Oct (2026-10-30-site-audit.md).
 - [Low] Tests: `tests/test_type_coverage.py` (mypy) fails on old untyped code across the backend, including the new `whatsapp.py`, `whatsapp_webhook.py` and the ad maker. Not new tonight, but the new files add to it. 30 Oct (2026-10-30-site-audit.md).
 - [Low] Tests: audit sandbox had no MongoDB and no Chromium again (30 Oct); full backend suite and the live price check could not run.
+- [Low] Blazin' Boards home, phone 360x640: size labels cut by the plank box, "$700" 4.09:1. First seen 27 Oct, 2026-10-27-ui-audit.md.
+- [Low] Michal Simkin reviews, phone 360x640: last quote cut by the stage and covered by the booking bar. First seen 27 Oct, 2026-10-27-ui-audit.md.
+- [Low] Dashboard away-reply card: `awayReply.body` uses {{count}} with no plural forms, fails test-i18n-parity. First seen 28 Oct 2026 (2026-10-28-site-audit.md). Fixed 29 Oct in the audit merge (02b65ebe).
+- [Low] i18n: `awayReply.body` and `stays.repliesWithinHours` use a count with no plural set, so the parity check fails. First seen 29 Oct, 2026-10-29-ui-audit.md. Fixed 29 Oct in the audit merge (02b65ebe, b0f3bbff).
+- [Low] Copy: exclamation mark in the away-reply placeholder (en.js:915). First seen 29 Oct, 2026-10-29-ui-audit.md. Fixed 29 Oct in the audit merge (7f048e75).
+- [Low] Ad maker close button about 34px, under the 44px touch size (`AdMaker.jsx:309`). First seen 30 Oct 2026 (2026-10-30-ui-audit.md).
+- [Low] New hardcoded hex classes in `AdMaker.jsx` and `ListingStrength.jsx`. First seen 30 Oct 2026 (2026-10-30-ui-audit.md).
