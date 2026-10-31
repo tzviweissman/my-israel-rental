@@ -39,8 +39,8 @@ LOOP_SECONDS = 60
 AUTO = "away_reply"
 
 DEFAULT_TEXT = {
-    "en": "Thanks for your message! We've got it and will get back to you as soon as we can.",
-    "he": "תודה על ההודעה! קיבלנו אותה ונחזור אליכם בהקדם.",
+    "en": "Thanks for your message. We've got it and will get back to you as soon as we can.",
+    "he": "תודה על ההודעה. קיבלנו אותה ונחזור אליכם בהקדם.",
 }
 
 

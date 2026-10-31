@@ -911,9 +911,9 @@ const en = {
       },
       awayReply: {
         title: 'Automatic reply when you are busy',
-        body: 'When a customer messages you here and you have not answered within {{count}} minutes, they get one friendly reply in your name, so they wait for you instead of asking someone else. Once a day per customer. Messages on WhatsApp are not included.',
+        body: 'When a customer messages you here and you have not answered within {{minutes}} minutes, they get one friendly reply in your name, so they wait for you instead of asking someone else. Once a day per customer. Messages on WhatsApp are not included.',
         ownLabel: 'Your own words (optional)',
-        placeholder: "Thanks for your message! We've got it and will get back to you as soon as we can.",
+        placeholder: "Thanks for your message. We've got it and will get back to you as soon as we can.",
         save: 'Save',
         ownNote: 'Sent as you wrote it.',
         defaultNote: 'Left empty, customers get the words above in their own language.',
@@ -3878,7 +3878,7 @@ const en = {
         totalForOneNight: '{{amount}} for 1 night',
         // Reply-time badge on the listing page.
         repliesWithinHour: 'Usually replies within an hour',
-        repliesWithinHours: 'Usually replies within {{count}} hours',
+        repliesWithinHours: 'Usually replies within {{hours}} hours',
         repliesWithinDay: 'Usually replies within a day',
         // Result ordering.
         sortBy: 'Sort',
