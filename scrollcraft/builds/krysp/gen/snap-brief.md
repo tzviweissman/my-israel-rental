@@ -5,8 +5,10 @@ chew is framed so tight that both its ends run past the edges of the screen. It 
 outside the frame, so what the visitor sees is only the middle of the chew bending and breaking.
 Physically true, and nothing appears from nowhere (rules 3h.18, 3h.19).
 
-Waiting on: Chaya's photo of a chew broken in half (OWNER-QUESTIONS 10). The inside on screen must be
-hers (3h.12); no inside is generated before it.
+The inside on screen must be hers (3h.12). Her board photo already shows it: the cut ends of the bars
+(columns 3 and 5 of p02.jpg) are the same crisp rice bound in peanut butter all the way through, so the
+broken face is made from those cut ends. Tzvi, 31 Oct 2026: "and create the film", without waiting for her
+broken-chew photo; if she sends one and it differs, clip 2 is redone from it.
 
 ## Every object
 - The chew: one half-dipped peanut chew from her board (src/owner/p02.jpg, the dark-chocolate half-dipped
@@ -30,6 +32,8 @@ hers (3h.12); no inside is generated before it.
 2. Clip 2, about 6 s, start S1, end S2. The moment stays frozen; only the camera moves half way round the break
    (from the front to looking into the broken face), showing the inside. Code pins three labels to the inside:
    crisp rice, peanut butter, dark and white chocolate (placed by measurement on the frames, rule 5).
+   Removed 31 Oct after the independent review: what is inside her chews is not in her record (OWNER-QUESTIONS 3); they go
+   back only with her words.
 3. Clip 3, about 6 s, start S2, end S3. Time runs again: the halves move apart and out past the screen edges, the
    grains fall below the frame, and the camera tilts down onto her board. S3 is her real photo, extended.
 4. The page, in code: the scroll drives the three clips as one film (canvas frames, 3h.4); a thin crack line

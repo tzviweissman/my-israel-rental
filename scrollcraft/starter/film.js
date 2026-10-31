@@ -7,20 +7,23 @@
 //     <div class="stage"><canvas aria-hidden="true"></canvas> ...words, button... </div>
 //   </section>
 // CSS: .film { height: 380vh; position: relative }  .film .stage { position: sticky; top: 0; height: 100svh;
-//      overflow: hidden }  .film canvas { position: absolute; inset: 0; width: 100%; height: 100% }
+//      overflow: hidden }  .film canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover }
 //      @media (prefers-reduced-motion: reduce) { .film { height: 100svh } }
 // Frames: <data-src>/d/0001.webp ... (laptop, 16:9) and <data-src>/m/0001.webp ... (phone, 9:16), made from
 // the joined film with ffmpeg (american-crust/gen/film.sh is the worked example). data-marks are scroll
 // points (0 to 1) where chapters begin: the section gets c2, c3 ... as each is passed, and loses it on the way
 // back, so CSS can light each chapter's words. Frames load in passes (every 8th, 4th, 2nd, all) so the film
-// scrubs at once and sharpens; the nearest loaded frame is drawn, never a blank. Reduced motion: last frame.
+// scrubs at once and sharpens; the nearest decoded frame is drawn, never a blank. Reduced motion: last frame.
+// Smooth on a slowed phone (American Crust, 28 Oct 2026; Krysp, 31 Oct: 137 ms a frame with plain images): frames arrive
+// as files and are decoded off the main thread (createImageBitmap of a blob) only around the current one; only decoded
+// frames are drawn, only when the frame changes, at their own size on a canvas CSS scales to cover.
 (function () {
   [].forEach.call(document.querySelectorAll('.film[data-frames]'), function (film) {
     var cv = film.querySelector('canvas'); if (!cv) return;
     var cx = cv.getContext('2d'), N = +film.dataset.frames, src = film.dataset.src || 'assets/film';
     var marks = (film.dataset.marks || '').split(',').filter(Boolean).map(Number);
     var still = matchMedia('(prefers-reduced-motion: reduce)').matches;
-    var kind = innerWidth <= 760 ? 'm' : 'd', imgs = new Array(N), p = 0, raf = 0;
+    var kind = innerWidth <= 760 ? 'm' : 'd', blobs = new Array(N), p = 0, raf = 0;
     function url(i) { return src + '/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; }
     cv.style.background = 'url(' + url(still ? N - 1 : 0) + ') center / cover no-repeat';
     var order = [], seen = {};
@@ -29,23 +32,30 @@
     (function next(k) {
       var batch = order.slice(k, k + 6), left = batch.length; if (!left) return;
       batch.forEach(function (i) {
-        var im = new Image(); im.decoding = 'async';
-        im.onload = im.onerror = function () { if (im.naturalWidth) imgs[i] = im; if (--left === 0) { draw(); next(k + 6); } };
-        im.src = url(i);
+        fetch(url(i)).then(function (r) { return r.ok ? r.blob() : null; }).catch(function () { return null; })
+          .then(function (b) { if (b) blobs[i] = b; if (--left === 0) { draw(); next(k + 6); } });
       });
     })(0);
-    function frameAt(q) {
-      var f = Math.round(q * (N - 1));
-      for (var d = 0; d < N; d++) { if (imgs[f - d]) return imgs[f - d]; if (imgs[f + d]) return imgs[f + d]; }
-      return null;
+    var fw = 0, fh = 0, shown = -1, bmp = {}, asked = {}, WIN = 8;
+    function keep(f) {
+      for (var k in asked) if (Math.abs(k - f) > WIN) { if (bmp[k] && bmp[k].close) bmp[k].close(); delete bmp[k]; delete asked[k]; }
+      for (var i = Math.max(0, f - WIN); i <= Math.min(N - 1, f + WIN); i++) if (blobs[i] && !asked[i]) (function (i) {
+        asked[i] = 1;
+        createImageBitmap(blobs[i]).then(function (b) {
+          if (!asked[i]) { if (b.close) b.close(); return; }
+          bmp[i] = b; if (!fw) { fw = b.width; fh = b.height; size(); } else draw();
+        }).catch(function () {});
+      })(i);
     }
+    function nearest(f) { for (var d = 0; d < N; d++) { if (bmp[f - d]) return f - d; if (bmp[f + d]) return f + d; } return -1; }
     function draw() {
-      var im = frameAt(still ? 1 : p); if (!im) return;
-      var W = cv.width, H = cv.height, sc = Math.max(W / im.naturalWidth, H / im.naturalHeight);
-      var w = im.naturalWidth * sc, h = im.naturalHeight * sc;
-      cx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
+      var want = Math.round((still ? 1 : p) * (N - 1)), f;
+      keep(want); f = nearest(want);
+      if (f < 0 || f === shown) return; shown = f;
+      cx.drawImage(bmp[f], 0, 0);
     }
-    function size() { var d = Math.min(2, devicePixelRatio || 1); cv.width = cv.clientWidth * d; cv.height = cv.clientHeight * d; draw(); }
+    // the canvas is the frame's own size and CSS scales it (object-fit: cover): no scaling on every draw
+    function size() { if (fw && (cv.width !== fw || cv.height !== fh)) { cv.width = fw; cv.height = fh; } shown = -1; draw(); }
     function paint() {
       raf = 0;
       var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight;

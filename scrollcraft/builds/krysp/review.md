@@ -1,25 +1,24 @@
-# Krysp review (docs/page-review-checklist.md)
+# Krysp review (docs/page-review-checklist.md), re-review of the scroll film opening
 
-Used with Playwright at 1440x900, 1280x650, 390x844 and 360x640 (touch): all three pages scrolled and viewed section by section, buttons hovered and clicked, board added, all three order steps with error states, phone menu opened, order endpoint and wa.me stubbed. No horizontal scroll at any size. No console errors other than the expected 404 from the stubbed catalogue fetch.
+Used with Playwright at 1440x900, 1280x650, 390x844 and 360x640 (touch), plus reduced motion at 1440 and 390: the home film scrolled at every 5% (21 screenshots per size, contact sheets and full-size looks), the section after it, the phone menu, shop and contact, a board added in the shop and all three order steps with error states at 1440 and 390 (order POST and wa.me stubbed; the saved order and WhatsApp text were read). Also measured the frame files (assets/film/d and m) for blank frames. No console or page errors, no horizontal scroll at any size. Screenshots are in gen/review-shots/ (sheet-*.jpg, cmp*.jpg and the per-scroll PNGs).
 
-1. PASS. One product; the same photo (luxe) in the opening, the tile and the shop, cropped the same way.
-2. PASS. Price and the Add button sit together on the home tile and in the shop; the price is in the same style everywhere.
-3. PASS (re-run: both links now read "Keep shopping"). Was: two words for one purpose: step 1 of the order says "Add more" and the order card says "Keep shopping", both going to the same place (#items). Pick one.
-4. PASS. Buttons, tile, nav, steppers, bin and back all have pointer cursor, hover and press (button press draws a thin crack for 0.9 s, over the label but brief and intended).
-5. PASS. One item; the photo and name match.
-6. PASS. The only choices (how many, the day, a note) sit right at the thing they belong to.
-7. PASS. 3 boards: $114 is right; message is "Hi Krysp, I would like to order:", the line, total, preferred day, note, name and phone, then the tracking link when saved. The saved order notes say collection or delivery is to be agreed on WhatsApp. Empty-field errors show per step.
-7a. PASS. No savings shown, none missing (single product).
-8. PASS. Photo whole and sharp at every size; the opening one is tilted but whole.
-9. PASS. Same photo everywhere.
-10. PASS. Stopping points show a photo with its words and price, or a full section.
-11. PASS. No blank bands, laptop or phone.
-12. PASS. The phone bar hides on the opening, the shop and the order form, and never sits over a control you need.
-13. PASS (re-run: Saturday is accepted, field now "A note for us"). Was: order form said "Shabbat: choose another day" and refuses Saturday: a rule about her availability that nothing in her sources says. Remove it or ask her. Also note, not counted: the order sent to her dashboard carries fulfilment "pickup" (hidden field; the page text correctly leaves it to WhatsApp) and the step is titled "When and where" with "Where you are", which hints at delivery; consider "When" and "Anything we should know". All printed facts otherwise match her record (Luxe $38, Rabbi Wiener, Jerusalem, WhatsApp and email).
-14. PASS. The crack: a line drawn beside the board as you scroll, cracks between sections and on pressed buttons, all working.
+1. PASS. One product; Luxe looks the same in tile, shop and order.
+2. PASS. Price and Add together on tile and shop; Order card/button in the same place at the end of the film.
+3. PASS. "Order" everywhere, "Keep shopping" in both places.
+4. PASS. Buttons, nav, steppers and the end Order card have cursor/hover/press; the card is clickable at the end (hit-tested at 1440 and 1280).
+5. PASS. One item only.
+6. PASS. The day, note, name and phone sit on the step they belong to.
+7. PASS. 3 boards = $114; message is complete (items, total, day, note, name and phone, tracking link); saved order carries the same lines; per-step errors show.
+7a. PASS. No savings shown, none missing.
+8. PASS. The final board photo is whole and sharp on laptop (1440 and 1280) and phone (390 and 360); frames are sharp, nothing zoomed.
+9. PASS, for the owner's call. The film's chew is a half-dipped crisp-rice bar with white drizzle; her board has half-dipped pieces with the same drizzle, so it still reads as one of her kinds of pieces, though thicker and bigger than the pieces on the board. Coordinator is putting it to Chaya.
+10. PASS. Re-run at every 5%: every stop shows a photo, with the words or the price card. One short stop (about 80% on laptop, 1280 included) shows only the blurred cloth on peach with no words yet (the card appears at 84%); on phone the words stay under it. Brief, but see note under 11.
+11. PASS. Frame files re-measured: no blank frame (lowest contrast 42 laptop, 36 phone, was 19.7 and 2.8). No blank screen at any of the 21 stops at 1440x900, 1280x650, 390x844 or 360x640. Note, not counted: the join from the break to the cloth (frames 144 to 148) is still a hard cut (the biggest jump in the film), where a short dissolve would be smoother.
+12. PASS. Phone: the Order button is inside the words under the 4:3 frame the whole time, the sticky bar is hidden on the home opening; the phone has no price card (hidden by CSS), so laptop and phone differ in that price and Order sit in a card over the board on laptop and in the words on phone, which is acceptable.
+13. PASS. The three labels and the screen-reader line are gone (no `pin` in index.html); every printed fact matches src/record.json (Luxe $38, Rabbi Wiener, Jerusalem, +972 53-485-7841, kryspboards@gmail.com). Note: the inside of the chew in the film is generated, not her own photo (OWNER-QUESTIONS 10 still open); it makes no claim in words.
+14. PASS. The snap and the crack lines between sections still work (a thin crack draws on pressed buttons).
 
-## Re-run
-Re-ran the order flow at 1440x900 and 390x844: three steps work, Saturday accepted, thanks message shows, no errors, no horizontal scroll. Fulfilment "pickup" is a hidden default the builder keeps; the order note says collection is agreed on WhatsApp (accepted).
+Film checks that passed: no words cover the break on laptop; the board is whole at the end on laptop and both phone sizes; the Order card is clickable at the end (1440 and 1280, hit-tested); phone has no card and keeps Order in the words; reduced motion shows the last frame with the words.
 
 ## FAILs
 None.

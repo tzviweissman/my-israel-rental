@@ -42,18 +42,19 @@ def hh(t):
 SEAM = ('<svg class="seam" viewBox="0 0 40 1000" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
         '<path d="M20 0 L14 90 L25 170 L12 270 L27 360 L16 450 L26 560 L13 650 L24 760 L17 850 L22 940 L20 1000 M16 450 L4 470 M26 560 L38 576"/></svg>')
 
-HOME = f'''  <section class="film" id="film" aria-labelledby="h-open">
-    <!-- A still stands where the film will be: her board photo whole on her peach, built on the starter film markup
-         (section.film > .stage). When the snap film exists, a canvas and data-frames go in (scrollcraft/starter/film.js). -->
+# The snap film (gen/snap-brief.md, gen/film.sh): one chew bends and snaps, the moment freezes and the camera goes
+# round the break, then time runs and the camera tilts down onto her board. Marks follow film.sh's joins (19.95 s):
+# c2 0.15 the intro steps back as it snaps, c3 0.83 the board's price and button. The break carries no labels: what is
+# inside her chews is not in her record (OWNER-QUESTIONS 3).
+HOME = f'''  <section class="film" id="film" aria-labelledby="h-open" data-frames="180" data-src="assets/film" data-marks="0.15,0.83">
     <div class="stage">
-      <p class="giant" aria-hidden="true">KRYSP</p>
-      {SEAM}
+      <div class="screen"><canvas aria-hidden="true"></canvas></div>
       <div class="words">
         <h1 id="h-open">Deluxe peanut chew boards</h1>
-        <p class="lede">Made at home in Jerusalem.</p>
-        <div class="go"><a class="btn" href="shop.html#order"><span>Order</span></a><p class="from">Luxe board, {P(38)}</p></div>
+        <div class="go"><p class="lede">Made at home in Jerusalem.</p><a class="btn" href="shop.html#order"><span>Order</span></a><p class="from">Luxe board, {P(38)}</p></div>
       </div>
-      <figure class="still"><img src="assets/luxe.webp" alt="A bamboo board of peanut chews, plain, half-dipped in dark chocolate and drizzled with white, seen from above" width="1448" height="1086"></figure>
+      <p class="giant" aria-hidden="true">KRYSP</p>
+      <div class="card"><p>Luxe board, {P(38)}</p><a class="btn" href="shop.html#order"><span>Order</span></a></div>
     </div>
   </section>
 
@@ -97,17 +98,7 @@ HOME = f'''  <section class="film" id="film" aria-labelledby="h-open">
   </section>
 {kit.gallery(hh('Photos'))}'''
 
-HOME_JS = '''<script>
-(function () {
-  // the still's crack: a thin line runs down the peach beside the board as the scroll passes the opening (a drawing, not the snap)
-  var f = document.getElementById('film'); if (!f || matchMedia('(prefers-reduced-motion: reduce)').matches || innerWidth <= 760) return;
-  var seam = f.querySelector('.seam path'), shown = 0, target = 0, raf = 0;
-  function tgt() { var r = f.getBoundingClientRect(), span = f.offsetHeight - innerHeight; target = Math.min(1, Math.max(0, -r.top / Math.max(1, span))); if (!raf) raf = requestAnimationFrame(step); }
-  function step() { raf = 0; shown += (target - shown) * .16; if (Math.abs(target - shown) < .002) shown = target; seam.style.strokeDashoffset = ((1 - shown) * 2000).toFixed(1); if (shown !== target) raf = requestAnimationFrame(step); }
-  addEventListener('scroll', tgt, { passive: true }); tgt();
-})();
-</script>
-'''
+HOME_JS = '<script src="film.js"></script>' + chr(10)
 SITE.write('index', TITLE, DESC, OG, HOME, HOME_JS); finish('index')
 
 # ---- shop: menu and order on one page (rules 3k) ----

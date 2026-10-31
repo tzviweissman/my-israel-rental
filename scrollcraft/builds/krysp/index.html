@@ -24,18 +24,15 @@
   </div>
 </header>
 <main>
-  <section class="film" id="film" aria-labelledby="h-open">
-    <!-- A still stands where the film will be: her board photo whole on her peach, built on the starter film markup
-         (section.film > .stage). When the snap film exists, a canvas and data-frames go in (scrollcraft/starter/film.js). -->
+  <section class="film" id="film" aria-labelledby="h-open" data-frames="180" data-src="assets/film" data-marks="0.15,0.83">
     <div class="stage">
-      <p class="giant" aria-hidden="true">KRYSP</p>
-      <svg class="seam" viewBox="0 0 40 1000" preserveAspectRatio="none" aria-hidden="true" focusable="false"><path d="M20 0 L14 90 L25 170 L12 270 L27 360 L16 450 L26 560 L13 650 L24 760 L17 850 L22 940 L20 1000 M16 450 L4 470 M26 560 L38 576"/></svg>
+      <div class="screen"><canvas aria-hidden="true"></canvas></div>
       <div class="words">
         <h1 id="h-open">Deluxe peanut chew boards</h1>
-        <p class="lede">Made at home in Jerusalem.</p>
-        <div class="go"><a class="btn" href="shop.html#order"><span>Order</span></a><p class="from">Luxe board, <span class="sym">$</span>38</p></div>
+        <div class="go"><p class="lede">Made at home in Jerusalem.</p><a class="btn" href="shop.html#order"><span>Order</span></a><p class="from">Luxe board, <span class="sym">$</span>38</p></div>
       </div>
-      <figure class="still"><img src="assets/luxe.webp" alt="A bamboo board of peanut chews, plain, half-dipped in dark chocolate and drizzled with white, seen from above" width="1448" height="1086"></figure>
+      <p class="giant" aria-hidden="true">KRYSP</p>
+      <div class="card"><p>Luxe board, <span class="sym">$</span>38</p><a class="btn" href="shop.html#order"><span>Order</span></a></div>
     </div>
   </section>
 
@@ -104,15 +101,6 @@
   <a class="btn" href="shop.html#order" tabindex="-1">Order</a>
 </div>
 <script src="site.js"></script>
-<script>
-(function () {
-  // the still's crack: a thin line runs down the peach beside the board as the scroll passes the opening (a drawing, not the snap)
-  var f = document.getElementById('film'); if (!f || matchMedia('(prefers-reduced-motion: reduce)').matches || innerWidth <= 760) return;
-  var seam = f.querySelector('.seam path'), shown = 0, target = 0, raf = 0;
-  function tgt() { var r = f.getBoundingClientRect(), span = f.offsetHeight - innerHeight; target = Math.min(1, Math.max(0, -r.top / Math.max(1, span))); if (!raf) raf = requestAnimationFrame(step); }
-  function step() { raf = 0; shown += (target - shown) * .16; if (Math.abs(target - shown) < .002) shown = target; seam.style.strokeDashoffset = ((1 - shown) * 2000).toFixed(1); if (shown !== target) raf = requestAnimationFrame(step); }
-  addEventListener('scroll', tgt, { passive: true }); tgt();
-})();
-</script>
+<script src="film.js"></script>
 </body>
 </html>

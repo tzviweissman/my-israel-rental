@@ -165,31 +165,40 @@ b, strong { font-weight: 800; }
 .nav a { font-weight: 800; }
 .nav a:hover, .nav a[aria-current="page"] { background: var(--ground); }
 
-/* ── the opening: a still for now (her board whole on her peach), built on the film markup so the film drops in ── */
-.film { position: relative; height: 320vh; background: var(--peach) url(assets/ground.webp) center / cover no-repeat; }
-.film .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); align-items: center; gap: clamp(1rem, 3vw, 3rem); grid-template-rows: minmax(0, 1fr) auto; padding: var(--top-h) var(--gutter) 0; }
-.film .giant { grid-column: 1 / -1; grid-row: 2; margin: 0; padding-bottom: .3em; text-align: center; white-space: nowrap; font: 900 min(15vw, 22svh)/.85 var(--font-head); color: var(--ink); letter-spacing: -.02em; user-select: none; pointer-events: none; }
-.film .words { position: relative; z-index: 2; max-width: 34rem; grid-row: 1; }
-.film .still { grid-row: 1; }
-.film h1 { font-size: min(clamp(2.6rem, 6.2vw, 5.4rem), 10svh); }
-.film .lede { margin: 1.1rem 0 0; font-size: 1.2rem; color: var(--ink); max-width: 26rem; }
-.film .go { margin-top: 1.7rem; display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
+/* ── the opening: the snap film follows the scroll (film.js; gen/film.sh). Words sit on the peach above and below the
+      chew, and the board ends with its price on a small solid card ── */
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+.film { position: relative; height: 480vh; background: var(--peach); }
+.film .stage { position: sticky; top: 0; height: 100svh; overflow: hidden; }
+.film .screen { position: absolute; inset: 0; }
+.film canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; object-fit: cover; will-change: transform; }
+.film .screen { contain: strict; }
+.film .words { position: absolute; z-index: 2; left: calc(var(--gutter) - 1rem); top: calc(var(--top-h) + 1.2svh); width: fit-content; max-width: calc(100% - 2 * var(--gutter) + 2rem); padding: .6rem 1rem .8rem; border-radius: var(--r); background: var(--peach); transition: opacity .5s, transform .5s; }
+.film h1 { font-size: min(clamp(2rem, 3.6vw, 3.4rem), 6.5svh); }
+.film .go { margin-top: .7rem; display: flex; align-items: center; gap: 1.1rem; flex-wrap: wrap; }
+.film .lede { margin: 0; font-size: 1.15rem; color: var(--ink); }
 .film .from { margin: 0; font-weight: 800; color: var(--ink); }
-.film .still { position: relative; z-index: 1; margin: 0; justify-self: center; width: min(100%, 54svh * 1.3333, 1448px); }
-.film .still img { width: 100%; height: auto; aspect-ratio: 1448 / 1086; border-radius: var(--r); box-shadow: var(--shadow); transform: rotate(-1.6deg); }
-.film .seam { position: absolute; z-index: 1; left: calc(var(--gutter) + (100% - 2 * var(--gutter) - clamp(1rem, 3vw, 3rem)) * .45 + clamp(1rem, 3vw, 3rem) / 2); top: var(--top-h); width: 40px; margin-left: -20px; height: calc(100% - var(--top-h) - min(15vw, 22svh) * 1.55); color: var(--ink); opacity: .6; overflow: visible; pointer-events: none; }
-.film .seam path { fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; vector-effect: non-scaling-stroke; stroke-dasharray: 2000; stroke-dashoffset: 2000; }
+.film .giant { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; margin: 0; padding-bottom: .12em; text-align: center; white-space: nowrap; font: 900 min(13vw, 17svh)/.85 var(--font-head); color: var(--ink); letter-spacing: -.02em; user-select: none; pointer-events: none; transition: opacity .5s; }
+.film.c2 .words, .film.c2 .giant { opacity: 0; transform: translateY(-.6rem); pointer-events: none; }
+.film.c2 .giant { transform: none; }
+.film .card { position: absolute; z-index: 2; left: 50%; bottom: max(1rem, 3svh); transform: translate(-50%, .6rem); display: flex; align-items: center; gap: 1.2rem; background: var(--ground); padding: .7rem .8rem .7rem 1.4rem; border-radius: 999px; box-shadow: var(--shadow); opacity: 0; visibility: hidden; transition: opacity .5s, transform .5s, visibility 0s .5s; }
+.film .card p, .film .card .sym, .film .from .sym { margin: 0; font-weight: 800; color: var(--ink); white-space: nowrap; }
+.film.c3 .card { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition: opacity .5s, transform .5s; }
 @media (max-width: 760px) {
-  .film { height: auto; background-color: var(--peach); }
-  .film .stage { position: relative; height: auto; display: flex; flex-direction: column; gap: 1.4rem; padding: calc(var(--top-h) + 1.2rem) var(--gutter) 2.2rem; }
-  .film .still { width: 100%; order: 1; }
-  .film .words { order: 2; }
-  .film .still img { transform: none; }
-  .film .giant { position: static; order: 3; text-align: left; font-size: 26vw; margin-top: .6rem; }
-  .film .seam { display: none; }
-  .film h1 { font-size: clamp(2.3rem, 11vw, 3.2rem); }
+  /* phone: the frames are a 4:3 crop (her board fits whole at the end), the words stay put on the peach under it */
+  .film .screen { top: var(--top-h); bottom: auto; height: 75vw; }
+  .film .stage { display: flex; flex-direction: column; padding: calc(var(--top-h) + 75vw + 1.2rem) var(--gutter) 1rem; }
+  .film .words { position: static; padding: 0; background: none; max-width: none; }
+  .film.c2 .words { opacity: 1; transform: none; pointer-events: auto; }
+  .film h1 { font-size: clamp(2rem, 9.5vw, 2.8rem); }
+  .film .giant { position: static; font-size: min(26vw, 13svh); text-align: left; margin-top: 1.4rem; }
+  .film.c2 .giant { opacity: 1; }
+  .film .card { display: none; }
 }
-@media (prefers-reduced-motion: reduce) { .film { height: auto; } .film .stage { position: relative; height: 100svh; } .film .seam path { stroke-dashoffset: 0; } }
+/* a short phone has no room under the words for the big name: it would be cut off at the stage's foot */
+@media (max-width: 760px) and (max-height: 700px) { .film .giant { display: none; } }
+@media (prefers-reduced-motion: reduce) { .film { height: auto; } .film .stage { position: relative; height: 100svh; }
+  .film.c2 .words, .film.c2 .giant { opacity: 1; transform: none; pointer-events: auto; } .film.c3 .card { display: none; } }
 
 /* ── hashgacha band: a dark brown ground that breaks the peach ── */
 .band { background: var(--ink); color: #FBF1E6; padding-block: clamp(3.5rem, 8vw, 6rem); }

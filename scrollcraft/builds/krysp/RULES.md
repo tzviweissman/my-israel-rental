@@ -38,26 +38,26 @@ R3g.13 pass: 1440x900 and 390x844 first screens hold her board photo, the headli
 R3b.1 pass: first screen says what (deluxe peanut chew boards), where (Jerusalem), the price ($38) and what to do (Order); trust is the dark band straight after the opening
 R3b.2 pass: the price touches the Order button; the hashgacha is a labelled dark band right after the opening and is stated once on the home page
 R3b.3 pass: one solid Order per screen; the header Order is outline; Add buttons sit on tiles; walked the page at several scroll positions
-R3h.20 pass: check-site SMOOTH and SLOW passed (the opening holds 3.2 screens and scrolls at 60 fps); the product is whole on her peach; the opening image loads first, the rest is lazy
-R3h.21 pass: check-one-scroll passed; only the opening follows the scroll (a thin line draws), the rest scrolls normally and the shop changes on a tap
-R3h.1 pass: check-site OPENING passed: the first screen is over 70% picture (her board and the peach ground) and the crack line draws as the scroll starts. The snap film itself is still to come; the wow gate in CONCEPT.md says so
+R3h.20 pass: check-site SMOOTH and SLOW passed; the film holds 3.8 screens; check-speed 23 to 26 ms a frame on a slowed phone; the chew is on her peach; the first frame loads first
+R3h.21 pass: check-one-scroll passed; only the opening film follows the scroll, the rest scrolls normally and the shop changes on a tap
+R3h.1 pass: check-site OPENING passed: the home page opens full screen on the snap film (31 Oct), one of her chews bending and breaking under the scroll, made from her own photo
 R3n.1 pass: her board photo is about 720 x 540 of 1440 x 900 on a laptop and the full width on a phone, whole, with her peach around it
-R3n.2 pass: the signature is the snap (a peanut chew breaking, under the word KRYSP); no other business has a chew to break. The film is waiting for her photo, named in CONCEPT.md
+R3n.2 pass: the signature is the snap: one of her chews breaks in two and the moment freezes; no other business has a chew to break
 R3n.3 pass: on the Shop, picking a board changes its photo, name, price and Add button (one board today, so the picker is hidden); quantity changes the total in the button
-R3n.4 pass: first screen compared with Mobbin re_ (huge letters behind a product on a warm ground) and docs/inspo/product-films-2026-10-21/can-6.8.jpg; ours has the same giant name and one product, the frozen break is still to come
-R3n.5 pass: "you land and her chew board lies on her peach under a giant KRYSP while a thin crack runs down the page"; written in CONCEPT.md; the snap film makes the stronger sentence when it exists
+R3n.4 pass: first screen compared with docs/inspo/product-films-2026-10-21/can-6.8.jpg (a product held with its ingredients frozen round it) and Mobbin re_ (huge letters under a product on a warm ground); ours has both and the break
+R3n.5 pass: "you land and one of her peanut chews bends and snaps in two, the instant freezes and you look inside it, then you see her whole board"; written in CONCEPT.md
 R3g.15 pass: check-fits passed (no photo shown over 1.35 times its size); the opening picture is her own 1448 px photo, shown at most at its own size
-R3h.2 n/a: the snap film is not made yet (it waits for the owner's photo of a broken chew, OWNER-QUESTIONS 10); the opening is a still in the film markup, so this applies when the film is added
-R3h.3 n/a: the snap film is not made yet (it waits for the owner's photo of a broken chew, OWNER-QUESTIONS 10); the opening is a still in the film markup, so this applies when the film is added
-R3h.5 n/a: the snap film is not made yet (it waits for the owner's photo of a broken chew, OWNER-QUESTIONS 10); the opening is a still in the film markup, so this applies when the film is added
-R3h.7 n/a: the snap film is not made yet (it waits for the owner's photo of a broken chew, OWNER-QUESTIONS 10); the opening is a still in the film markup, so this applies when the film is added
-R3h.8 n/a: the snap film is not made yet (it waits for the owner's photo of a broken chew, OWNER-QUESTIONS 10); the opening is a still in the film markup, so this applies when the film is added
-R3h.11 n/a: the snap film is not made yet (it waits for the owner's photo of a broken chew, OWNER-QUESTIONS 10); the opening is a still in the film markup, so this applies when the film is added
-R3h.13 n/a: the snap film is not made yet (it waits for the owner's photo of a broken chew, OWNER-QUESTIONS 10); the opening is a still in the film markup, so this applies when the film is added
-R3h.14 n/a: the snap film is not made yet (it waits for the owner's photo of a broken chew, OWNER-QUESTIONS 10); the opening is a still in the film markup, so this applies when the film is added
-R3h.18 pass: the film's object list is written in gen/snap-brief.md (the chew, the grains and flakes from the break, the board below the frame, the word in code), every object with where it comes from and where it ends; no film exists yet
-R3h.19 pass: gen/snap-brief.md plans three clips between four stills with the ends holding the same objects and one kind of action per clip; nothing has been generated
-R3h.17 n/a: the snap film is not made yet (it waits for the owner's photo of a broken chew, OWNER-QUESTIONS 10); the opening is a still in the film markup, so this applies when the film is added
+R3h.2 pass: walked at every 5% of the film: the chew snaps, the camera goes round the frozen break into the inside, then down onto her real board photo, with the price and Order button on a card at the end
+R3h.3 pass: full screen, 180 sharp frames (1680 wide on a laptop, a 4:3 crop on a phone so her board ends whole), drawn at their own size and scaled by CSS; looked at 1440x900 and 1920x1080
+R3h.5 pass: no lines in the film itself; the intro words sit on a peach card above the chew and step back as it snaps, the price card comes at the end on the board's grey; readable passed. The labels on the break were removed: what is inside her chews is not in her record
+R3h.7 pass: joins compared frame by frame (gen/film/c1-sheet.jpg, c2-sheet.jpg, c3-sheet.jpg): each clip starts on the still the one before ends on; clip 1 starts at 1.9 s (before that the model drew chocolate onto the plain half) and clip 3 is cut from 2.25 to 3.9 s, where the peach was empty (the review found a blank there); no frame is under 37 in contrast
+R3h.8 pass: the film ends on her board on grey stone, and the next section is the dark brown hashgacha band
+R3h.11 pass: brightness.py on gen/film/opening.mp4: average 60, bright enough; the chew and then the board are the brightest things in every chapter
+R3h.13 pass: the break and its grains are one clip (clip 1: bend, crack, snap, grains out of the break); watched at 4 and 8 fps; no code pieces join the film
+R3h.14 pass: the chew stays in frame through the snap and the orbit; on a phone the 4:3 crop keeps the break centred and the board whole
+R3h.18 pass: gen/snap-brief.md lists every object with where it comes from and ends; checked on the film: grains and flakes only leave the break, the halves leave past the edges, the cut goes to the cloth and board as the camera tilts, nothing appears or vanishes in the air
+R3h.19 pass: three clips between four stills (S0 to S3, gen/film), each start and end frame holding the same objects; clip 1's glitch was cut, not regenerated, since the rest of the clip is right
+R3h.17 pass: the giant KRYSP sits on the plain peach under the chew, and it and the headline step back as the chew snaps; readable passed
 
 ## 3. Sections and worlds
 R3.12 pass: hero (the opening), features (the board tile with photo, name and price, then the three steps), and a call-to-action section of its own near the end (the closing band, with the price in its heading)
@@ -71,8 +71,8 @@ R3g.11 pass: Nunito and Mulish are open licence (SIL OFL) faces on Google Fonts;
 R3p.3 pass: check-fingerprints prints "different from all 17 other pages" (heading face Nunito and body face Mulish are new; her logo colours are listed as own_colours)
 R3p.5 pass: the touch is the crack: pressing an order button cracks its face with a thin line and a crack line runs between sections; checked by pressing Order on the home page and the Shop
 R3q.1 pass: check-concept passed
-R5a.7 pass: one signature (the snap, a still stands in) and one peak (the opening); everything after it is plain sections
-R9.1 pass: the signature uses her real photo and her real product; until the film exists the page stays a still
+R5a.7 pass: one signature (the snap film) and one peak (the opening); everything after it is plain sections; it ends on the board, its price and Order
+R9.1 pass: the snap is made from her own photo (the half-dipped chew and the cut bars show the inside) and ends on her real board photo
 R3f.2 pass: CONCEPT.md budget: signature (the opening), accents (the crack lines between sections, the tile light, the headings closing up), quiet touches (button crack, squiggle links, big price); each seen on the captured frames
 R3m.1 pass: index.html has data-mir-gallery with its template (hidden until she adds photos) and the board tile inside data-mir-catalog with data-mir-list, group and item templates
 R3m.3 n/a: the page shows no hours, areas, fees, guarantee, FAQ or reviews yet, so there are no places for them to fill
@@ -95,7 +95,7 @@ R3s.14 n/a: no numbers beyond the price are known (size, count and servings are 
 R3s.11 pass: beside the price on the Shop: "A deluxe peanut chew board, made at home in Jerusalem."
 R5b.6 pass: no scroll cue, no counters; one small label (Shop) above the Shop heading only
 R3.13 pass: one contact band per page, no doubled facts, the gallery is a single place, no two crack dividers in a row, and the page does not end on a divider
-R3a.1 pass: rendered at 1440x900, 1280x650, 390x844 and 360x640 (touch emulation on phones) for all three pages, opening at four scroll points (gen/shots, gen/sheet-review.png); reduced motion shows the still; English only
+R3a.1 pass: rendered at 1440x900, 1280x650, 390x844 and 360x640 (touch on phones), the film at six scroll points on laptop and phone, reduced motion shows her board with the words; English only
 R3r.1 pass: check-build ran check-site, check-fits, check-motion, check-speed, check-same-place, check-one-scroll and readable on index, shop and contact
 R3r.2 pass: reviewed by an independent reviewer; the verdict is in review.md
 R3g.12 pass: ran the Shop form in Playwright against a stubbed order endpoint: two Luxe boards, a day, a note, name and phone; the POST (product 827fb8e8720d, qty 2) went out before the WhatsApp message opened, with the tracking link in it; the saving into her dashboard is confirmed once the page is live
@@ -103,19 +103,19 @@ R0b.12 n/a: the site is not published yet, so no pages-list preview clip exists
 
 ## 4. Photos and media
 R8.1 n/a: no row or grid of pictures; the only product picture is her board photo, shown at one size in the opening, the tile and the Shop stage
-R8.6 n/a: the main product picture is her own photograph of the board, kept as she took it; nothing was re-staged or generated
-R8.7 n/a: no image or video was generated for this site; every picture is made by cropping or resizing her two photos
-R8.2 n/a: no image or video was generated for this site; every picture is made by cropping or resizing her two photos
+R8.6 n/a: the main product picture is still her own photograph of the board; the generated stills are only the film's frames
+R8.7 pass: gen/snap-brief.md was written and approved before any generation (a close crop of her half-dipped chew as reference, its traits kept, only camera and setting changed); each still was compared beside her photo before the clips
+R8.2 pass: the film's stills were edited from her own photo (her half-dipped chew and her board as references, S3 is her photo extended); every other picture is her two photos
 R3p.7 n/a: one product, so there are no similar items to show the same way
 R3h.12 pass: the board appears in the opening, the tile and the Shop stage as the same photo (assets/luxe.webp and a smaller copy), side by side on the sheet
 R3h.10 n/a: she sells one board with no options; the Shop stage swaps photo, name, price and Add when she adds a board to her shop
 R3g.14 pass: all pictures are the one board photo and the logo mark, one grade
-R3o.1 pass: no generated food and no food in motion on the page; the only food picture is her real photo
-R3o.2 n/a: no image or video was generated for this site; every picture is made by cropping or resizing her two photos
+R3o.1 pass: generated food in motion only in the full-screen opening film, checked at 4 and 8 fps (no food from nowhere after the trim, satin chocolate, not glass, the halves and grains leave past the edges); everywhere else food is her real photo
+R3o.2 n/a: no liquid in the film
 R3o.3 pass: the board's colours are as in her photo, unedited
 R3o.6 pass: she sent two photos (the logo, the board; sheet.jpg); both used once for what they are, no duplicates
-R8.3 n/a: no image or video was generated for this site; every picture is made by cropping or resizing her two photos
-R8.4 n/a: no image or video was generated for this site; every picture is made by cropping or resizing her two photos
+R8.3 pass: generated media only of what she sells (her peanut chews), no person, no premises, no text in images; Tzvi approved the steps 29 Oct and asked for the film 31 Oct; Chaya sees it before anything goes live
+R8.4 pass: the only moving real material is the chew breaking, a generated clip from Higgsfield showing cause then effect; reduced motion shows her board
 R3c.13 pass: readable and check-site OVERLAP passed; nothing cut by its section at the sizes run; the rotated board stays inside its column
 R3c.14 n/a: no cut-out photo is used
 R5b.3 pass: no words sit on a photo; on a phone the photo is on top and the words are on the plain peach below, covering none of it
@@ -176,7 +176,7 @@ R3e.18 n/a: no background video
 R3a.2 pass: nothing moves behind text; text does not re-wrap while animating (headings change by a transform only); mid-states looked at on the shots
 R3a.3 n/a: no overlay is placed on a spot in a photo or video
 R3a.4 pass: check-fits and check-motion passed; the held opening fits 1280x650; the order section is not held
-R3a.5 pass: reduced motion shows the still with the line fully drawn; on a phone the opening is not held and nothing is parallax; the scroll's speed is never changed
+R3a.5 pass: the film is pinned and scrubbed, the scroll's speed is never changed, nothing is parallax on a phone, reduced motion shows the last frame (her board) with the words
 R3s.2 pass: check-site SHIFT and check-motion passed
 R3s.1 pass: check-site STATE passed
 R3s.8 n/a: no button sits over a photo
