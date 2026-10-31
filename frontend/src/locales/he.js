@@ -3772,7 +3772,7 @@ const he = {
         totalForNights: '{{amount}} ל-{{count}} לילות',
         totalForOneNight: '{{amount}} ללילה אחד',
         repliesWithinHour: 'בדרך כלל עונה תוך שעה',
-        repliesWithinHours: 'בדרך כלל עונה תוך {{count}} שעות',
+        repliesWithinHours: 'בדרך כלל עונה תוך {{hours}} שעות',
         repliesWithinDay: 'בדרך כלל עונה תוך יום',
         // Result ordering.
         sortBy: 'מיון',
