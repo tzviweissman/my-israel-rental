@@ -39,6 +39,9 @@ class Coll:
             raise DuplicateKeyError("dup")
         self.docs.append(d)
 
+    async def delete_one(self, q):
+        self.docs = [d for d in self.docs if not all(d.get(k) == v for k, v in q.items())]
+
     async def find_one_and_update(self, q, upd, return_document=None):
         d = await self.find_one(q)
         if d:
@@ -125,6 +128,18 @@ def test_duplicate_message_is_a_noop(world):
     _post(_body("order_confirm:o1"))
     _post(_body("order_confirm:o1"))
     assert customer.await_count == 1 and text.await_count == 1
+
+
+def test_failed_move_is_not_lost(world):
+    """A database failure while moving the order: the owner is told to tap
+    again, and the second tap is handled (code audit 30 Oct 2026)."""
+    order, customer, text = world
+    with patch.object(orders, "_transition", AsyncMock(side_effect=RuntimeError("db down"))):
+        _post(_body("order_confirm:o1"))
+    assert order["status"] == "new" and customer.await_count == 0
+    assert "again" in text.await_args.kwargs["body"]
+    _post(_body("order_confirm:o1"))
+    assert order["status"] == "preparing" and customer.await_count == 1
 
 
 def test_stranger_is_ignored(world):

@@ -138,7 +138,16 @@ async def _handle_message(msg: dict[str, Any]) -> None:
         return
 
     confirm = action == "order_confirm"
-    await _transition(order, StatusIn(status=CONFIRMED_STATUS if confirm else DECLINED_STATUS), by="whatsapp")
+    try:
+        await _transition(order, StatusIn(status=CONFIRMED_STATUS if confirm else DECLINED_STATUS), by="whatsapp")
+    except Exception as exc:  # noqa: BLE001
+        # The tap must not vanish (code audit 30 Oct 2026): forget the message
+        # id so a second tap is handled, and tell the owner to try again.
+        logger.warning("WhatsApp order move failed for %s: %s", order_id, type(exc).__name__)
+        await db.whatsapp_webhook_events.delete_one({"_id": msg["id"]})
+        await tell_owner("That did not go through. Please tap the button again, or open the order on the site.",
+                         "הפעולה לא הצליחה. אפשר ללחוץ שוב על הכפתור, או לפתוח את ההזמנה באתר.")
+        return
     if not confirm:
         # _transition emails nobody on a cancel, so say only what happened.
         await tell_owner("Declined.", "ההזמנה נדחתה.")

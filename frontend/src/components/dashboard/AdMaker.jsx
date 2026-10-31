@@ -306,7 +306,7 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
       <div className="bg-white w-full sm:max-w-4xl max-h-[95vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-4 sm:p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>{t('ads.title', 'Make an ad')}</h2>
-          <button type="button" onClick={onClose} aria-label={t('common.close', 'Close')} className="p-2 rounded-full hover:bg-[#F9FAFB]"><X size={18} /></button>
+          <button type="button" onClick={onClose} aria-label={t('common.close', 'Close')} className="p-3 rounded-full hover:bg-[#F9FAFB]"><X size={18} /></button>
         </div>
         <div className="grid sm:grid-cols-2 gap-5">
           <div className="bg-[#F9FAFB] rounded-xl flex items-center justify-center p-3 min-h-[280px]">
