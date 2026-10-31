@@ -190,3 +190,10 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Low] Copy: exclamation mark in the away-reply placeholder (en.js:915). First seen 29 Oct, 2026-10-29-ui-audit.md. Fixed 29 Oct in the audit merge (7f048e75).
 - [Low] Ad maker close button about 34px, under the 44px touch size (`AdMaker.jsx:309`). First seen 30 Oct 2026 (2026-10-30-ui-audit.md).
 - [Low] New hardcoded hex classes in `AdMaker.jsx` and `ListingStrength.jsx`. First seen 30 Oct 2026 (2026-10-30-ui-audit.md).
+
+## Follow-up of 31 Oct 2026
+- [Low] WhatsApp webhook: a tap whose order move failed was recorded and lost (2026-10-30-site-audit.md #2). Fixed in the 31 Oct follow-up: the id is forgotten and the owner is asked to tap again (test_failed_move_is_not_lost).
+- [Low] Ad maker close button about 34px (2026-10-30-ui-audit.md #1). Fixed in the 31 Oct follow-up (p-3, 44px).
+- [Low] Plural checks awayReply.body and stays.repliesWithinHours, and the away-reply exclamation marks: reached main with the 31 Oct follow-up merge (test-i18n-parity passes; it failed on main before).
+- [Low] Chicken Munch order page shows "Total 0" with no currency while the basket is empty (2026-10-31-ui-audit.md). Open: a business site change needs a full republish; left for the next Chicken Munch change.
+- [Low] Hardcoded #F9FAFB / #E3E3E3 class names in AdMaker.jsx and ListingStrength.jsx (2026-10-30-ui-audit.md #2). Open, nit; values match the flow theme.
