@@ -442,9 +442,6 @@ const Services = () => {
 
       {/* Locations + Categories */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
-        {/* The hand-built business pages, as live previews (Tzvi, 9 Oct
-            2026: "add them at the top of the regular business page"). */}
-        <ShowcaseStrip items={pinnedPages} />
         {/* Section headings drop their hardcoded Inter/tracking styles for
             the shared `.section-rhead` rule — the preview's editorial
             Playfair, and the same type as the Stays results header. The
@@ -736,6 +733,14 @@ const Services = () => {
             </button>
           </div>
         )}
+      </div>
+
+      {/* The hand-built business pages, as live previews (Tzvi, 9 Oct
+          2026: "add them at the top of the regular business page"). They
+          sit under the location chips and the results bar, not above them
+          (Tzvi, 1 Nov 2026), since they are the top of the same results. */}
+      <div className="max-w-6xl mx-auto px-4">
+        <ShowcaseStrip items={pinnedPages} />
       </div>
 
       {/* Gigs grid */}
