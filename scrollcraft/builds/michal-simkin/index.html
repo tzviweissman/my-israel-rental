@@ -398,6 +398,33 @@
   .bar__assure { color: #4A5466; }
   @media (max-width: 860px) { .voice p, .bar__assure { font-size: 14px; } }
   .hero h1 em { color: #FFFFFF; } .hero .who { color: #D5DAE3; }
+
+.foot.full { --gutter: var(--sc-gutter, clamp(1.25rem, 5vw, 3rem)); background: var(--blush-pale); color: var(--navy); border-top: 1px solid var(--blush); }
+
+/* the full footer (rules 3v.1): who we are, every page, how to book or visit, how to reach us, then one base line */
+.foot.full { text-align: start; font-size: .92rem; padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.4rem + var(--pad-bar, 0px)); opacity: 1; }
+.foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+.foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--navy); }
+.foot.full nav { margin: 0; font-weight: 400; }
+.foot.full nav a { margin: 0 0 .55rem; }
+.foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; margin: 0 0 .55rem; color: var(--navy); text-decoration: none; }
+.foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="sms:"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+.foot .fgrid a.fname { font: 400 1.7rem/1.1 var(--font-head); letter-spacing: .04em; margin-bottom: .9rem; }
+.foot .fbrand p { max-width: 30ch; color: var(--muted); line-height: 1.55; }
+.foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+.foot .fgrid p.fmut { color: var(--muted); }
+.foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid var(--blush); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .82rem; color: var(--muted); }
+.foot .fbase a { color: var(--navy); text-decoration: underline; }
+@media (max-width: 760px) { .foot .fgrid { grid-template-columns: 1fr 1fr; } .foot .fbrand, .foot .fwide { grid-column: 1 / -1; } }
+/* three true facts under the main button (rules 3v.14) */
+.btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem; color: var(--soft); }
+.btn-facts li { display: inline-block; }
+.btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; border-radius: 50%; background: currentColor; margin-inline-end: .45em; margin-bottom: .15em; }
+.btn-facts .sym { font-size: 1em; vertical-align: 0; margin: 0; padding: 0; }
+.foot .fgrid a.fname { font-weight: 500; letter-spacing: 0; font-size: 1.9rem; }
+@media (max-width: 860px) { .foot.full { padding-block-end: calc(var(--bar-h) + 1.4rem); } }
+.hero .hero__go { margin: var(--sc-4) 0 var(--sc-3); }
+.hero .btn-facts { color: #C9CFDA; }
 </style>
 </head>
 <body id="top">
@@ -429,6 +456,8 @@
         <p class="who">Michal Simkin, boutique wig salon and academy</p>
         <h1 data-sc-kinetic="lines" data-arrive="1">A wig <em>you love.</em></h1>
         <p class="lede" data-arrive="2">We create wigs that are a joy to wear, because when your wig feels right, you feel right.</p>
+        <p class="hero__go"><a class="cta" href="book.html">Book a consultation</a></p>
+        <ul class="btn-facts"><li>Consultation <span class="sym">₪</span>100</li><li>Sun to Thu, 10 to 2, by appointment</li><li>Bet Shemesh</li></ul>
       </div>
       <div class="deck" id="deck" data-arrive="3" aria-label="Clients in the salon">
         <figure class="card" style="--r: -7deg; --x: -6%; --y: 3%"><img src="assets/client-8.jpg" width="720" height="960" alt="A client in the salon chair, long dark wig, the wig shelves behind her" loading="eager"></figure>
@@ -544,15 +573,14 @@
   </section>
 </main>
 
-<footer class="foot on-blush">
-  <p class="foot__big">A wig you love, in <span class="accent">Bet Shemesh.</span></p>
-  <a class="cta" href="book.html">Book a consultation</a>
-  <div class="foot__cols">
-    <div><h3>On this page</h3><a href="#hero">Clients</a><a href="#consult">The consult</a><a href="#same">In their words</a><a href="#academy">Courses</a></div>
-    <div><h3>Book</h3><a href="book.html">Book a consultation</a><a href="book.html#academy">Enrol in the Academy</a></div>
-    <div><h3>Contact</h3><p>Bet Shemesh</p><p>Sunday to Thursday, 10 to 2, by appointment</p><p>WhatsApp 054-682-6258</p><p>English and Hebrew</p></div>
+<footer class="foot full on-blush">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">Michal Simkin</a><p>We create wigs that are a joy to wear, because when your wig feels right, you feel right.</p><a class="fcta" href="book.html">Book a consultation <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="book.html">Book a consultation</a><a href="book.html#academy">Enrol in the Academy</a></nav>
+    <div><h4>Visit</h4><p>Bet Shemesh</p><p class="fmut">Sunday to Thursday, 10 to 2, by appointment</p><p>Consultation <span class="sym">₪</span>100</p><p class="fmut">English and Hebrew</p></div>
+    <div class="fwide"><h4>Reach us</h4><a href="https://wa.me/972546826258" target="_blank" rel="noopener">WhatsApp 054-682-6258</a></div>
   </div>
-  <p class="foot__small">Michal Simkin, on MyIsraelRental. Every photograph on this page is from our website.</p>
+  <div class="fbase"><span>© 2026 Michal Simkin. Every photograph here is from our website.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
 </footer>
 
 

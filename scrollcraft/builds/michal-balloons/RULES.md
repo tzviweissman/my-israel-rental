@@ -196,3 +196,7 @@ R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
 <!-- 29 Oct: all rules re-read against the current pages; only change since is tighter spacing in the booking section and its summary so it fits a short laptop screen (check-fits passes on all three pages) -->
 <!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->
+R3v.1 pass: full footer in Hebrew and English (who we are with a quiet quote link, Pages as the page's own sections, Booking: area, by appointment, payment; Reach us: WhatsApp and phone; base line with since 2024 and Privacy); the closing line kept; the solid button in the old footer became a quiet link because the band above has one
+R3v.2 pass: the site is one page with no other pages, so the menu bar keeps its jumps
+R3v.14 pass: Jerusalem and the area, By appointment, Bank transfer or Bit (the page's own Good to know lines; she asked for no prices on the page)
+<!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->

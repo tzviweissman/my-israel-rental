@@ -216,3 +216,6 @@ R3u.12 pass: pieces taken from scrollcraft/starter/kit, tried on kit/test.html (
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
 <!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->
+R3v.1 pass: full footer on index, shop and contact (who we are with an Order link, Pages, Ordering from the page's own text: delivery ₪25 in Ramat Eshkol, pickup in Sanhedria, cash or Zelle, hechsher of Rabbi Akiva Dershowitz; Reach us with WhatsApp and phone; base line with ESTD 5786 from the owner's logo and Privacy); no hours or email in the record, so none shown; check-footer passes
+R3v.2 pass: the menu bar on all three pages lists Home, Shop, Contact, no jumps; unchanged by this pass; check-menu passes
+R3v.14 pass: Dough from ₪27, Delivery ₪25 in Ramat Eshkol, Cash or Zelle (from the shop and contact pages' own text; the old two-price line became the first fact); check-facts passes

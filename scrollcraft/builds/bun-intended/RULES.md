@@ -24,7 +24,7 @@ R5.1 pass: read every line as the owner: each names their own product, place or 
 R5.2 pass: read every line: plain and warm, nothing teasing or slangy
 R5.3 pass: labels are full phrases (Pick-up in Ramat Eshkol, Boxes of 4 or 8, from 55)
 R5.4 pass: searched the visible text for they, them, their: none
-R5b.2 pass: Build your box goes to #build in the bar, hero, close, footer and phone bar
+R5b.2 pass: Build your box goes to #order-box in the bar, hero, close, footer and phone bar
 R5b.8 pass: closing lines read "Your cup, your cloud." / "Your box is ready when you are." (what the customer gets); no line starts with or or prefer
 R3.11 pass: order: what it is, the four flavours with prices, build your box, the price list, facts, close
 R3o.4 pass: Call or text 055-332-1956 and WhatsApp +1 848 221 6022 use the price list own wording
@@ -214,3 +214,7 @@ R3u.12 n/a: no kit piece moved in; text changes only
 R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+R3v.1 pass: full footer on the one page (who we are with a Build your box link, Pages, Ordering: boxes of 4 or 8 from ₪55, pick-up in Ramat Eshkol, delivery on request, pareve; Reach us with WhatsApp and phone; base line with Privacy); no hours, payment, founding year or email in the record, so none shown; check-footer passes
+R3v.2 pass: a site of Home alone keeps its jumps (Prices, Find us, Build your box); no other pages to list; check-menu passes
+R3v.14 pass: the existing proof list (boxes of 4 or 8 from ₪55, Pareve, Pick-up in Ramat Eshkol, all from the record's description and price list) now carries the btn-facts class under the Build your box button; check-facts passes
+<!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->

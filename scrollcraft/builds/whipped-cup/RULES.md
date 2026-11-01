@@ -215,3 +215,6 @@ R3u.12 n/a: no kit piece moved in; the only change is a line of words that fades
 R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+R3v.1 pass: full footer on index, shop and contact (who we are with an Order your jars link, Pages, Ordering: from ₪40 a jar, delivered fresh to your door, made in Ramat Eshkol, kosher certified; Reach us with WhatsApp and email; base line with Privacy); no hours, payment, street address or founding year in the record, so none shown; menu.html and order.html are redirects to the shop and carry no footer; check-footer passes
+R3v.2 pass: the menu bar on all pages lists Home, Shop, Contact, no jumps; unchanged by this pass; check-menu passes
+R3v.14 pass: From ₪40 a jar, Delivered to your door, Made in Ramat Eshkol, Jerusalem (the page's own words; kosher is not used because the certificate is not named); check-facts passes

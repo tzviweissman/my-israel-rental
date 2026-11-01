@@ -213,3 +213,6 @@ R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.12 pass: pieces taken from scrollcraft/starter/kit, tried on kit/test.html
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+R3v.1 pass: full footer on index and book (who we are, Pages, Visit, Reach us, base line), the same on both; the old footer's hours, languages, WhatsApp and photograph line are kept; no founding year in her record so no "Since"; no email in the record so none shown
+R3v.2 pass: the site is Home plus its booking page, so the menu bar keeps its jumps on the home page and the book page lists Home sections plus Book (3v.2); unchanged
+R3v.14 pass: three facts under a "Book a consultation" button added to the first screen (consultation ₪100, Sun to Thu 10 to 2 by appointment, Bet Shemesh), all from her record and the page's own bar line

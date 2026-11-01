@@ -203,14 +203,6 @@
   .toast.on { translate: -50% 0; opacity: 1; }
   .toast i { width: 22px; height: 22px; border-radius: 50%; background: var(--gold); color: var(--night); display: grid; place-items: center; font-style: normal; }
   .toast svg { width: 13px; height: 13px; }
-  .foot { background: var(--night); color: var(--on-night-soft); border-top: 1px solid var(--line-night); padding-block: 1.75rem 6rem; font-size: .9rem; }
-  .foot .cols3 { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr; gap: 1.5rem 2.5rem; }
-  .foot h4 { margin: 0 0 .6rem; font: 500 .8rem/1.2 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
-  .foot p { margin: 0 0 .35rem; }
-  .foot a { color: var(--on-night-soft); text-decoration: none; }
-  .foot a:hover { color: var(--gold-hi); }
-  .foot .fine { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
-  @media (max-width: 760px) { .foot .cols3 { grid-template-columns: 1fr; } }
 
   /* RULE 3t, fashion-shop (22 Oct 2026): one ivory ground; the bar and footer follow the home page. The order summary stays dark as the one solid block. */
   .bar { background: rgb(246 240 228 / .95); border-bottom: 1px solid var(--line-ivory); }
@@ -221,10 +213,6 @@
   .nav .ghost:hover { background: var(--ink); color: var(--ivory); }
   .nav .ghost[aria-current="page"] { background: var(--ink); border-color: var(--ink); color: var(--ivory); }
   .nav .ghost .cnt { background: var(--ivory); color: var(--ink); }
-  .foot { background: var(--ivory-2); color: var(--soft); border-top: 1px solid var(--line-ivory); }
-  .foot a { color: var(--ink); }
-  .foot h4 { color: var(--gold-ink); }
-  .foot .fine { border-color: var(--line-ivory); }
   .prog li { color: var(--ink); }
   /* one corner radius (rule 3c.9): 14px for buttons, tiles, photos and cards; circles only for the round Add chip and step numbers */
   body .btn, body .ghost, body .pills button, body .cat .ph, body .hero .rise li, body .cat .is-out .rowp .pr, body .brand img { border-radius: 14px !important; }
@@ -247,6 +235,23 @@
   /* ── 22 Oct 2026, independent review fixes ── */
   .which { margin-top: 1.2rem; }
   @media (max-width: 420px) { .bar .wrap { gap: .5rem; } .brand { min-width: 0; gap: .4rem; } body .brand span { font-size: .76rem !important; letter-spacing: .02em; white-space: nowrap; } .nav .ghost { padding-inline: .7rem; white-space: nowrap; flex: none; } }
+  /* the full footer (rules 3v.1): who we are, every page, how ordering works, how to reach us, then one base line */
+  .foot.full { text-align: start; font-size: .92rem; background: var(--ivory-2); color: var(--soft); border-top: 1px solid var(--line-ivory); padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) 6rem; }
+  .foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+  .foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--gold-ink); }
+  .foot.full nav { margin: 0; font-weight: 400; }
+  .foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; max-width: 100%; margin: 0 0 .55rem; color: var(--ink); text-decoration: none; line-height: 1.5; }
+  .foot .fgrid a:hover { color: var(--gold-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+  .foot .fgrid a.fname { font: 600 1.25rem/1.1 var(--font-head); letter-spacing: .08em; margin-bottom: .9rem; }
+  .foot .fbrand p { max-width: 30ch; color: var(--soft); line-height: 1.55; }
+  .foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+  .foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid var(--line-ivory); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .82rem; color: var(--soft); }
+  .foot .fbase a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 760px) { .foot .fgrid { grid-template-columns: max-content minmax(0, 1fr); column-gap: 1.75rem; } .foot .fbrand, .foot .fgrid > :last-child { grid-column: 1 / -1; } }
+  /* three true facts under the main button (rules 3v.14) */
+  .btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem;  }
+  .btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; margin-inline-end: .45em; margin-bottom: .15em; border-radius: 50%; background: var(--gold); }
 </style>
 </head>
 <body>
@@ -324,15 +329,14 @@
 </main>
 
 <div class="toast" id="toast" role="status" aria-live="polite"><i><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg></i><span id="toastt"></span></div>
-<footer class="foot">
-  <div class="wrap">
-    <div class="cols3">
-      <div><h4>The Gift Boutique</h4><p>Jerusalem, with delivery across Israel.</p><p>Hand wrapped gifts for every occasion.</p></div>
-      <div><h4>Pages</h4><p><a href="index.html">Home</a></p><p><a href="index.html#prices">The collection</a></p><p><a href="order.html">Order a gift</a></p></div>
-      <div><h4>Reach us</h4><p><a href="https://wa.me/972535386042" target="_blank" rel="noopener">WhatsApp +972 53-538-6042</a></p><p><a href="mailto:thegiftboutiqueisrael@gmail.com">thegiftboutiqueisrael@gmail.com</a></p><p>Sunday to Thursday, 8:00 to midnight. Friday, 8:00 to 12:00.</p></div>
-      <div class="fine"><span>The Gift Boutique, Jerusalem. Gifts for every occasion since 2025.</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
-    </div>
+<footer class="foot full">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">THE GIFT BOUTIQUE</a><p>Hand wrapped gifts for every occasion, from Jerusalem.</p><a class="fcta" href="order.html">Order a gift <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="index.html#prices">The collection</a><a href="order.html">Order a gift</a></nav>
+    <div><h4>Ordering</h4><p>Delivery across Israel</p><p>Pay by Bit, bank transfer, PayPal or Revolut</p><p>Sunday to Thursday, 8:00 to midnight</p><p>Friday, 8:00 to 12:00</p></div>
+    <div><h4>Reach us</h4><a href="https://wa.me/972535386042" target="_blank" rel="noopener">WhatsApp +972 53-538-6042</a><a href="mailto:thegiftboutiqueisrael@gmail.com">thegiftboutiqueisrael@gmail.com</a></div>
   </div>
+  <div class="fbase"><span>© 2026 The Gift Boutique. Since 2025.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
 </footer>
 
 <div class="dock order-bar" id="dock">

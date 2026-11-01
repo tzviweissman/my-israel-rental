@@ -256,9 +256,6 @@
     -webkit-mask: linear-gradient(100deg, transparent 40%, #000 50%, transparent 60%) 160% 0 / 260% 100% no-repeat;
             mask: linear-gradient(100deg, transparent 40%, #000 50%, transparent 60%) 160% 0 / 260% 100% no-repeat; }
   .sign b.glint::after { opacity: 1; animation: glintm 1800ms ease-in-out forwards; }
-  .foot { background: var(--night); color: var(--on-night-soft); border-top: 1px solid var(--line-night); padding-block: 1.75rem calc(1.75rem + var(--pad-bottom, 0px)); font-size: .9rem; }
-  .foot .wrap { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; justify-content: space-between; }
-  .foot a { color: var(--on-night-soft); }
 
   /* phone: the action pinned to the bottom once past the first screen */
   .dock { display: none; }
@@ -304,13 +301,6 @@
   .sec.make .index b { font-size: clamp(1.4rem, 1rem + 1.8vw, 2.4rem); }
   .index .go { display: inline-flex; align-items: center; min-height: 44px; margin-inline-start: .35rem; color: var(--gold-ink); font-weight: 600; text-decoration: none; border-bottom: 1px solid currentColor; }
   .index .go:hover { color: var(--ink); }
-  .foot .cols3 { display: grid; grid-template-columns: 1.3fr 1fr 1.3fr; gap: 1.5rem 2.5rem; width: 100%; }
-  .foot h4 { margin: 0 0 .6rem; font: 500 .8rem/1.2 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--gold); }
-  .foot .cols3 p { margin: 0 0 .35rem; }
-  .foot .cols3 a { text-decoration: none; }
-  .foot .cols3 a:hover { color: var(--gold-hi); }
-  .foot .fine { grid-column: 1 / -1; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-top: 1rem; border-top: 1px solid var(--line-night); }
-  @media (max-width: 760px) { .foot .cols3 { grid-template-columns: 1fr; } }
 
   /* WORLDS (page rules 3t, Tzvi 21 Oct 2026): after the opening the page
      changes ground: a wall of their photographs, a calm ivory rest, the
@@ -360,9 +350,6 @@
   .scene.last .words { padding-block: clamp(4rem, 8vw, 6rem) 0; width: 100%; }
   .scene.last .sign { margin-top: clamp(2rem, 6vw, 4.5rem); }
   .scene.last h2 { max-width: 13em; margin-inline: auto; }
-  .foot .cta { grid-column: 1 / -1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem 2rem; padding-bottom: 1.25rem; margin-bottom: .25rem; border-bottom: 1px solid var(--line-night); }
-  .foot .cta b { font: 600 clamp(1.5rem, 1rem + 2vw, 2.4rem)/1.1 var(--font-head); color: #fff; letter-spacing: .01em; }
-  .foot .cta .btn { color: var(--night); }
   .sec.know { background: var(--ivory-2); }
   /* RULE 3t, fashion-shop (22 Oct 2026): the opening is the one dark screen; after it the page is ivory throughout,
      the collection comes straight after it, how to order is a strip of three cards, no full-bleed photo bands. */
@@ -394,12 +381,6 @@
   .pic.close h2 em { color: var(--ink); font-style: italic; }
   .pic.close .sign b { color: var(--ink); opacity: .9; }
   .pic.close .sign b::after { color: var(--gold-ink); }
-  .foot { background: var(--ivory-2); color: var(--soft); border-top: 1px solid var(--line-ivory); }
-  .foot a { color: var(--ink); }
-  .foot h4 { color: var(--gold-ink); }
-  .foot .cta, .foot .fine { border-color: var(--line-ivory); }
-  .foot .cta b { color: var(--ink); }
-  .foot .cols3 a:hover { color: var(--gold-ink); }
   .dock { background: rgb(246 240 228 / .97); border-top-color: var(--line-ivory); }
   .dock > span { color: var(--soft); }
   .hero h1 em { text-shadow: 0 0 12px rgb(14 12 9 / .95), 0 0 26px rgb(14 12 9 / .9), 0 2px 28px rgb(14 12 9 / .85); }
@@ -442,6 +423,25 @@
   .pic.close .sign { height: auto; margin: clamp(1.5rem, 4vw, 3rem) 0 0; overflow: visible; padding-bottom: .1em; }
   .pic.close .sign b { position: relative; left: auto; top: auto; translate: none; display: inline-block; line-height: 1.1; }
   @media (max-width: 420px) { .bar .wrap { gap: .5rem; } .brand { min-width: 0; gap: .4rem; } body .brand span { font-size: .76rem !important; letter-spacing: .02em; white-space: nowrap; } .nav .ghost { padding-inline: .7rem; white-space: nowrap; flex: none; } }
+  /* the full footer (rules 3v.1): who we are, every page, how ordering works, how to reach us, then one base line */
+  .foot.full { text-align: start; font-size: .92rem; background: var(--ivory-2); color: var(--soft); border-top: 1px solid var(--line-ivory); padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.4rem + var(--pad-bottom, 0px)); }
+  .foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+  .foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--gold-ink); }
+  .foot.full nav { margin: 0; font-weight: 400; }
+  .foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; max-width: 100%; margin: 0 0 .55rem; color: var(--ink); text-decoration: none; line-height: 1.5; }
+  .foot .fgrid a:hover { color: var(--gold-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+  .foot .fgrid a.fname { font: 600 1.25rem/1.1 var(--font-head); letter-spacing: .08em; margin-bottom: .9rem; }
+  .foot .fbrand p { max-width: 30ch; color: var(--soft); line-height: 1.55; }
+  .foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+  .foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid var(--line-ivory); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .82rem; color: var(--soft); }
+  .foot .fbase a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 760px) { .foot .fgrid { grid-template-columns: max-content minmax(0, 1fr); column-gap: 1.75rem; } .foot .fbrand, .foot .fgrid > :last-child { grid-column: 1 / -1; } }
+  /* three true facts under the main button (rules 3v.14) */
+  .btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem;  }
+  .btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; margin-inline-end: .45em; margin-bottom: .15em; border-radius: 50%; background: var(--gold); }
+  .hero .btn-facts { justify-content: center; color: #fff; text-shadow: 0 1px 10px rgb(0 0 0 / .6); }
+  .hero .btn-facts li::before { background: var(--gold-hi); }
 </style>
 <script>document.documentElement.classList.add('js');</script>
 </head>
@@ -483,7 +483,7 @@
           <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 12v9H4v-9"/><path d="M2 7h20v5H2z"/><path d="M12 21V7"/><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7Zm0 0h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7Z"/></svg>
           <span style="position:relative">Order a gift</span>
         </a>
-        <p class="line">Wrapped by hand in Jerusalem, gifts from $25</p>
+        <ul class="btn-facts"><li>Gifts from $25</li><li>Delivery across Israel</li><li>Bit, bank transfer, PayPal or Revolut</li></ul>
       </div>
     </div>
   </section>
@@ -606,15 +606,14 @@
   </section>
 </main>
 
-<footer class="foot">
-  <div class="wrap">
-    <div class="cols3">
-      <div><h4>The Gift Boutique</h4><p>Jerusalem, with delivery across Israel.</p><p>Hand wrapped gifts for every occasion.</p></div>
-      <div><h4>Pages</h4><p><a href="index.html">Home</a></p><p><a href="#prices">The collection</a></p><p><a href="order.html">Order a gift</a></p></div>
-      <div><h4>Reach us</h4><p><a href="https://wa.me/972535386042" target="_blank" rel="noopener">WhatsApp +972 53-538-6042</a></p><p><a href="mailto:thegiftboutiqueisrael@gmail.com">thegiftboutiqueisrael@gmail.com</a></p><p>Sunday to Thursday, 8:00 to midnight. Friday, 8:00 to 12:00.</p></div>
-      <div class="fine"><span>The Gift Boutique, Jerusalem. Gifts for every occasion since 2025.</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
-    </div>
+<footer class="foot full">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">THE GIFT BOUTIQUE</a><p>Hand wrapped gifts for every occasion, from Jerusalem.</p><a class="fcta" href="order.html">Order a gift <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="index.html#prices">The collection</a><a href="order.html">Order a gift</a></nav>
+    <div><h4>Ordering</h4><p>Delivery across Israel</p><p>Pay by Bit, bank transfer, PayPal or Revolut</p><p>Sunday to Thursday, 8:00 to midnight</p><p>Friday, 8:00 to 12:00</p></div>
+    <div><h4>Reach us</h4><a href="https://wa.me/972535386042" target="_blank" rel="noopener">WhatsApp +972 53-538-6042</a><a href="mailto:thegiftboutiqueisrael@gmail.com">thegiftboutiqueisrael@gmail.com</a></div>
   </div>
+  <div class="fbase"><span>© 2026 The Gift Boutique. Since 2025.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
 </footer>
 
 <div class="dock order-bar" id="dock" aria-hidden="true">

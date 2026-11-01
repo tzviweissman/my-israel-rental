@@ -198,3 +198,7 @@ R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.12 pass: arrival and question-card pieces taken from scrollcraft/starter/kit (tried on kit/test.html); the next-day button is a plain button, no new motion
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+R3v.1 pass: the closing footer is now in parts: who she is (name, her own line from the opening, a link with an arrow to Message to book), On this page (a site of Home alone, so its sections), Booking (30 minutes, ₪60 at home, a price on message for the rest, Jerusalem, women only, English), Reach us (WhatsApp, our MyIsraelRental page), then "© 2026 Michal Yodaiken." with the MyIsraelRental and Privacy line; no founding year in the record; check-footer clean; looked at it at 1366 and 390
+R3v.2 n/a: a site of Home alone; the bar keeps the session clock and its one button
+R3v.14 pass: under Message to book on the first screen: ₪60 for a 30-minute session / Sessions tailored to your goals and fitness level / Training in English (her listing and flyer); the list is class btn-facts and now sits under the button instead of beside it; check-facts clean at 390 and 1366
+<!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->

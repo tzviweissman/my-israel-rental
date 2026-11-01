@@ -127,7 +127,10 @@ const CHECK_ONLY = process.argv.includes('--check');
     // from Tzvi's seven videos (29 Oct 2026): no blank screen in the scroll, the order form arrives filled in
     ['check-blank.mjs', 'shows a blank screen', 'R3s.28'], ['check-prefill.mjs', 'has an order form that is not filled in', 'R3k.10'],
     // the rest of the seven videos (29 Oct 2026, rules 3u.5): a home page with no film arrives in order
-    ['check-arrival.mjs', 'has a first screen that does not arrive', 'R3u.5']]) {
+    ['check-arrival.mjs', 'has a first screen that does not arrive', 'R3u.5'],
+    // the ten videos and five real sites (Tzvi, 1 Nov 2026, rules 3v): a full footer, a menu of pages, three facts, varied heights
+    ['check-footer.mjs', 'has no full footer', 'R3v.1'], ['check-menu.mjs', 'has a menu bar that does not list its pages', 'R3v.2'],
+    ['check-facts.mjs', 'has no three facts under the main button', 'R3v.14'], ['check-heights.mjs', 'has sections all of one height', 'R3v.6']]) {
     if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }

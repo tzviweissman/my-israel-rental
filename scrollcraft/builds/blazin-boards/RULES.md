@@ -216,3 +216,7 @@ R3u.12 n/a: no kit piece moved in; one plain line and a button under the day fie
 R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+R3v.1 pass: all six pages (index, boards, order, order-details, order-when, order-done) end on the same full footer: who we are (name, "Every photograph on this site is our own", a link with an arrow to Order a board), Pages (Home, Every board, Your order), Ordering (48 hours ahead, delivery and its fee, payment, gluten-free on request, the kitchen at Farn 5 with a Google Maps directions link, nothing paid on the site), Reach us, then "© 2026 Blazin' Boards." with the MyIsraelRental and Privacy line; no founding year in the record. Reach us has no WhatsApp number because the record has none (message-to-owner.md question 1); it links to the order page and our MyIsraelRental page until they send it
+R3v.2 pass: the home bar was already Home, Every board, Your order, the same as boards.html and the order pages; unchanged; check-menu clean
+R3v.14 pass: under the Order a board button on the opening: From $75 a board (Mini Board, their price list) / Orders 48 hours ahead / Delivery throughout Israel (both from their website); the line above the button now says only "Made in our kitchen in Jerusalem"; class btn-facts
+<!-- 1 Nov 2026: footer checked again after a last fix (phone footer columns, duplicate page list, contact link); check-footer, check-menu and check-facts pass -->

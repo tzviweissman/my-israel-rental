@@ -214,3 +214,7 @@ R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
 <!-- 30 Oct: rules re-read after joining the two 29 Oct changes (pans without pictures from main, the short-laptop fit and question cards from the 3u round); nothing else changed -->
+R3v.1 pass: full footer on index, menu, order and contact (who we are with an Order now link, Pages, Ordering: Munch boxes from $69, pans from ₪275 or $85, delivery in central Jerusalem ₪30 to ₪50, hechsher of Rav Akiva Dershowitz; Reach us with WhatsApp, US phone and email; base line with Privacy); no hours or founding year in the record, so none shown; check-footer passes
+R3v.2 pass: the menu bar on all four pages lists Home, Menu, Order, Contact, no jumps; unchanged by this pass; check-menu passes
+R3v.14 pass: Munch boxes from $69, Delivery in central Jerusalem, Hechsher of Rav Akiva Dershowitz (the page's own price, delivery and kosher lines; the old two-line price proof became the first fact); check-facts passes
+<!-- 1 Nov 2026: footer checked again after a last fix (phone footer columns, duplicate page list, contact link); check-footer, check-menu and check-facts pass -->

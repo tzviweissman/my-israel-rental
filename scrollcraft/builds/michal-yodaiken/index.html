@@ -95,7 +95,14 @@
   .hero .proof { color: var(--sc-ink); }
   .hero .proof li:first-child { display: flex; align-items: baseline; gap: 0.5rem; margin-bottom: 0.3rem; }
   .hero .proof li:first-child b { font: 800 3rem/1 var(--sc-font-display); color: var(--sc-ink); }
-  .hero .act { margin-top: var(--sc-6); display: flex; flex-direction: row-reverse; flex-wrap: wrap; align-items: center; gap: var(--sc-5); text-align: left; }
+  .hero .act { margin-top: var(--sc-5); display: flex; flex-direction: column; align-items: flex-end; gap: var(--sc-3); text-align: right; }
+  .hero .proof li:first-child { justify-content: flex-end; }
+  @media (min-width: 861px) {
+    .hero .proof { display: flex; flex-wrap: wrap; justify-content: flex-end; align-items: baseline; gap: 0.2rem 1rem; max-width: 36rem; }
+    .hero .proof li:first-child { margin-bottom: 0; }
+    .hero .proof li:first-child b { font-size: 2.1rem; }
+    .hero .proof li:not(:first-child)::before { content: ""; display: inline-block; width: .4em; height: .4em; border-radius: 50%; background: var(--sc-accent); vertical-align: middle; margin-inline-end: .45em; margin-bottom: .15em; }
+  }
 
   /* ---------- sections change worlds (rule 3t, Tzvi 21 Oct 2026) --------
      hero photo, white rest, photo, her pink, photo, black rest, photo close. */
@@ -199,6 +206,15 @@
   .cols a:hover { color: var(--sc-accent); }
   .foot .legal { margin: var(--sc-6) 0 0; }
   .foot .legal a { color: var(--sc-accent); }
+  /* the full footer (rules 3v.1) */
+  .cols.cols { grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr)); }
+  .cols li { color: var(--sc-ink-soft); line-height: 1.5; }
+  .cols .fbrand a.fname { display: block; width: fit-content; margin-bottom: 0.8rem; color: #fff; font: 800 1.6rem/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: 0.02em; }
+  .cols .fbrand p { margin: 0 0 0.6rem; max-width: 30ch; color: var(--sc-ink-soft); line-height: 1.5; }
+  .cols a[href^="https://wa.me"] { white-space: nowrap; }
+  .cols a.fcta { color: #fff; font-weight: 700; text-decoration: underline; text-underline-offset: 3px; }
+  .foot .legal { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 1.5rem; padding-top: var(--sc-4); border-top: 1px solid #3A353D; font-size: var(--sc-t-xs); }
+  .foot .legal a { text-decoration: underline; text-underline-offset: 3px; }
 
   /* a short laptop: the hero's words and button stay on the first screen */
   @media (max-height: 760px) and (min-width: 861px) {
@@ -229,7 +245,8 @@
     .clock { gap: 0.45rem; min-width: 0; }
     .cut .in { padding: var(--sc-7) 16px calc(var(--sc-7) + 76px); }
     .hero .in { justify-items: start; text-align: left; }
-    .hero .act { flex-direction: column; align-items: flex-start; gap: var(--sc-4); }
+    .hero .act { flex-direction: column; align-items: flex-start; gap: var(--sc-4); text-align: left; }
+    .hero .proof li:first-child { justify-content: flex-start; }
     /* A big photo keeps its own shape (rule 3c.12, 26 Oct 2026): on a phone the wide room photo sits whole at the top of
        the hero instead of a 26% slice, and a soft blurred copy of it fills the rest behind the words. */
     .hero .photo { bottom: auto; height: auto; aspect-ratio: 2048 / 1152; }
@@ -241,7 +258,7 @@
     .hero .in { align-self: end; }
     .rows li { grid-template-columns: 2.4rem 1fr; gap: var(--sc-3); }
     .rows .amt, .rows .amt.ask { grid-column: 2; justify-self: start; text-align: left; }
-    .cols { grid-template-columns: 1fr 1fr; }
+    .cols.cols { grid-template-columns: 1fr 1fr; } .cols .fbrand { grid-column: 1 / -1; }
     .glance dl > div { grid-template-columns: 5.5rem 1fr; }
         .pic { height: calc(100svh - 76px); }
     .pic .in { padding-bottom: var(--sc-5); }
@@ -348,7 +365,7 @@
       <p class="lede" data-arrive="2">Helping women feel stronger, healthier and more confident through personalised fitness training.</p>
       <div class="act">
         <a class="btn" data-arrive="4" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
-        <ul class="proof">
+        <ul class="proof btn-facts">
           <li><b>₪60</b> for a 30-minute session</li>
           <li>Sessions tailored to your goals and fitness level</li>
           <li>Training in English</li>
@@ -452,11 +469,12 @@
       <p class="last">A stronger, healthier <span>you.</span></p>
       <div class="act"><a class="btn" href="#book">Message to book<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
       <div class="cols">
-        <div><h4>Train</h4><ul><li><a href="#ways">At your home</a></li><li><a href="#gym">At your gym</a></li><li><a href="#ways">Online</a></li><li><a href="#private">My private gym</a></li></ul></div>
-        <div><h4>The session</h4><ul><li><a href="#session">30 minutes, &#8362;60</a></li><li><a href="#faq">Women only</a></li><li><a href="#faq">Training in English</a></li></ul></div>
-        <div><h4>Contact</h4><ul><li><a href="https://wa.me/447563299474">WhatsApp <span class="nb">07563 299474</span></a></li><li><a href="https://myisraelrental.com/business/michal-yodaiken">Message to book</a></li></ul></div>
+        <div class="fbrand"><a class="fname" href="#top">Michal Yodaiken</a><p>Helping women feel stronger, healthier and more confident through personalised fitness training.</p><a class="fcta" href="#book">Message to book <span aria-hidden="true">&rarr;</span></a></div>
+        <div><h4>On this page</h4><ul><li><a href="#ways">Ways to train</a></li><li><a href="#session">Your session</a></li><li><a href="#faq">Good to know</a></li><li><a href="#book">Book</a></li></ul></div>
+        <div><h4>Booking</h4><ul><li>30 minutes, &#8362;60 at your home</li><li>Gym, online, circuits and my private gym: message me for a price</li><li>Jerusalem, women only</li><li>Training in English</li></ul></div>
+        <div><h4>Reach us</h4><ul><li><a href="https://wa.me/447563299474" target="_blank" rel="noopener">WhatsApp <span class="nb">07563 299474</span></a></li><li><a href="https://myisraelrental.com/business/michal-yodaiken">Our MyIsraelRental page</a></li></ul></div>
       </div>
-      <p class="legal">Michal Yodaiken, personal training for women in Jerusalem. <a href="https://myisraelrental.com/business/michal-yodaiken">Listed on MyIsraelRental</a></p>
+      <p class="legal"><span>&copy; 2026 Michal Yodaiken.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission &middot; <a href="https://myisraelrental.com/privacy">Privacy</a></span></p>
     </div>
   </footer>
 </main>
