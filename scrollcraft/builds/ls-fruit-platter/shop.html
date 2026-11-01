@@ -129,8 +129,6 @@
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
   var PID = { small: '55113012e889', medium: 'c94a66979f24', large: 'a549851e62aa', xl: '7d53c8ac348a' };
   var SIZES = [['small', 'Small', 300, '30 × 30 cm'], ['medium', 'Medium', 400, '40 × 28 cm'], ['large', 'Large', 500, '58 × 28 cm'], ['xl', 'Extra large', 850, '115 × 25 cm']];
-  // per cm2 savings, worked out in index.html above the size cards (rules 3j)
-  var WAS = { large: [541, 7], xl: [885, 3] };
   var BY = {}; SIZES.forEach(function (s, i) { BY[s[0]] = { i: i, name: s[1], price: s[2], cm: s[3] }; });
   function P(n) { return '<span class="sym">₪</span>' + n; }
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -149,7 +147,7 @@
   function show(k) {
     sel = k; stage.style.setProperty('--room', ROOM[k]); bl.go(BY[k].i);
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.k === k ? 'true' : 'false'); });
-    document.getElementById('st-name').textContent = BY[k].name; var w = WAS[k]; document.getElementById('st-price').innerHTML = (w ? '<s aria-label="was ₪' + w[0] + '">' + P(w[0]) + '</s> ' : '') + P(BY[k].price) + (w ? ' <span class="off">' + w[1] + '% off</span>' : ''); document.getElementById('st-size').textContent = BY[k].cm;
+    document.getElementById('st-name').textContent = BY[k].name; document.getElementById('st-price').innerHTML = P(BY[k].price); document.getElementById('st-size').textContent = BY[k].cm;
     n = 1; label();
   }
   stage.querySelector('.st-pick').addEventListener('click', function (e) {
