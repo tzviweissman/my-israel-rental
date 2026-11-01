@@ -616,6 +616,30 @@ async def _ad_facts(target_type: str, target_id: str) -> tuple[dict[str, Any], d
     }
 
 
+async def _ad_reviews(target_type: str, target_id: str) -> list[dict[str, Any]]:
+    """Real reviews for the "Review" ad design (docs/static-ad-rules.md 4,
+    9.1): the ones the public page already shows, best first, short enough
+    to sit on an ad. Only from sources that are switched on, so an ad never
+    shows a review the page itself hides. The words are the reviewer's own;
+    the picture may shorten them by cutting, never by rewording."""
+    from utils import reviews as rv
+    sources = [s for s, on in (("native", rv.native_enabled()), ("google", rv.google_enabled())) if on]
+    if not sources:
+        return []
+    key = "listing_id" if target_type == "property" else "business_id"
+    q = rv.visible_query({key: target_id, "source": {"$in": sources}, "rating": {"$gte": 4}})
+    rows = await db.reviews.find(q).sort([("rating", -1), ("source_created_at", -1)]).to_list(30)
+    out = []
+    for r in rows:
+        text = " ".join((r.get("text") or "").split())
+        if 15 <= len(text) <= 400:
+            out.append({"text": text, "rating": r.get("rating"), "name": (r.get("author_display_name") or "").strip()[:40],
+                        "source": r.get("source")})
+        if len(out) >= 5:
+            break
+    return out
+
+
 # Praise the model adds from its own idea of a place ("prestigious Rehavia",
 # "central location") even when told not to: it has read a million ads
 # like that, and to it a well-known fact about a neighbourhood is not an
@@ -703,5 +727,6 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
     return {
         **words,
         "link": link,
+        "reviews": await _ad_reviews(body.target_type, body.target_id),
         **extra,
     }
