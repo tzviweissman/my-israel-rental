@@ -50,8 +50,8 @@ R3h.3 pass: sharp frames on a canvas, full screen; looked at at 1440x900 and 192
 R3h.5 pass: chapter lines are two to six words at the lower left on a soft edge shade; readable shows two words (2.8:1 and 2.2:1) only at one scroll position while the opening line fades out, and at rest they are cream on the dark shade (looked at at 1280x650)
 R3h.7 pass: five clips each started on the previous last frame; the joins were looked at when the film was built
 R3h.8 pass: after the film the page turns to a light ground with colour panels
-R3h.11 pass: brightness.py: desktop frames average 43, phone frames 53, bright enough; graded up with gamma on 22 Oct (two frames had a middle of 30)
-R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned frame film 6.2 screens on a laptop and 5.6 on a phone, 60 fps (median 16.7 ms; 8.8% and 5.9% of frames over 50 ms, under the 10% limit); the bowl stands on its own plain dark ground; bowl and box whole; logo and the first film frames load first
+R3h.11 pass: brightness.py: desktop frames average 43, phone frames 53 (the phone loop video is made from them), bright enough; graded up with gamma on 22 Oct (two frames had a middle of 30)
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned frame film 6.2 screens on a laptop (on a phone since 31 Oct the film plays on repeat in one screen, no pinned scroll, Tzvi 29 Oct), 60 fps (median 16.7 ms; 8.8% and 5.9% of frames over 50 ms, under the 10% limit); the bowl stands on its own plain dark ground; bowl and box whole; logo and the first film frames load first
 R3h.13 pass: the toppings fall and land in one clip; looked at its frames
 R3h.14 pass: the bowl stays recognisable
 R3h.17 n/a: the page does not use a giant name over the film
@@ -161,7 +161,7 @@ R3s.18 n/a: every size or item is always available; nothing unavailable to repla
 R3s.25 pass: check-site FLOW clean: an empty form sends nothing, a filled one builds the WhatsApp message with the total; each message line carries its bowl extras (+6, +5) so the lines add up to the total, two muffins of one kind read "2 x name", and the order summary names the extras actually picked ("Build your own bowl +6")
 
 ## 7. Motion
-R3f.1 pass: the film plays under the scroll while the stage holds; checked at 1280x650 and 390x844
+R3f.1 pass: the film plays under the scroll while the stage holds on a laptop (on a phone it plays on repeat in one screen, a muted video); checked at 1280x650 and 390x844
 R3f.8 n/a: no scroll-tied effect finishes in a section
 R3f.9 n/a: no list lights item by item
 R3f.5 pass: grepped css: no ch widths, no background-clip text
@@ -215,3 +215,4 @@ R3u.12 n/a: no kit pieces were added to this site
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
 <!-- 29 Oct: all rules re-read against the current index.html; only change since is how the film frames load and show (decoded off the main thread, each frame handed to the canvas whole at its own size and covering the screen by CSS) so the film scrolls smoothly on a phone (check-speed 19 ms a frame, 0% busy); screenshots at 0.2, 0.5 and 0.9 of the film on 390x844 and 1440x900 look the same as before -->
+<!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->

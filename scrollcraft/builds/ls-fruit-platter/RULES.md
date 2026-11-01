@@ -39,7 +39,7 @@ R3b.1 pass: first screen says what (fruit platters), where (Jerusalem), trust (K
 R3b.2 pass: the kosher band follows the opening; the certificate is stated twice (the band and the trust row)
 R3b.3 pass: one solid action per screen: the bar button is the outline version over the film
 R3h.1 pass: the home page opens on the fruit rain, which follows the scroll (26 Oct, Tzvi: "why is it not scrollable"): her empty board fills as you scroll, empties on the way back up
-R3h.20 pass: scroll-driven since 26 Oct: the film section is 3.2 screens (320svh) with a sticky stage; frames on a canvas (assets/film/d and m), loaded in passes, shown point eased toward the scroll; her board on a plain red ground, the whole board on a tall phone (frames m); check-site SMOOTH/SLOW run by publish-page
+R3h.20 pass: on a laptop scroll-driven since 26 Oct: the film section is 3.2 screens (320svh) with a sticky stage; frames on a canvas (assets/film/d), loaded in passes, shown point eased toward the scroll. On a phone (760px or narrower) since 31 Oct the film is not scroll-driven: assets/film/phone-loop.mp4 (8 s, from the tall frames m) plays by itself on repeat in one screen, muted, paused off screen, the whole board on plain red; check-site SMOOTH/SLOW run by publish-page
 R3h.21 pass: check-one-scroll clean at 390x844 and 1440x900 (29 Oct)
 R3h.22 n/a: the fruit rain film was made before the rule (gen/opening-film-v3-brief.md)
 R3n.1 pass: her Large platter fills the whole first screen on laptop and phone
@@ -217,3 +217,4 @@ R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.12 pass: pieces taken from scrollcraft/starter/kit, tried on kit/test.html (question cards)
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->

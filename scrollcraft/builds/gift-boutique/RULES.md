@@ -51,7 +51,7 @@ R3h.5 pass: there are no chapter lines, only the headline that lands in the ligh
 R3h.7 n/a: the film is one clip with no joins to compare
 R3h.8 pass: after the lit dark film the collection section is bright ivory, a bold change of mood
 R3h.11 n/a: the laptop film was graded up on 22 Oct and brightness.py now passes it (20 frames, average 52); the phone film is a black box that fills the middle third, graded to gamma 1.5 (box still black, ground lit) and still reads 22 to 23 in the middle on its last frames against the 33 asked, which needs a regenerated brighter phone clip and Tzvi's yes; listed in the report
-R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop and 3.0 on a phone, 60 fps (median 16.7 ms, no frame over 50 ms); the box opens on its own dark room and her gift photos come out around it, nothing behind them of the same kind; box and photos whole; the film and the first gift photos load first
+R3h.20 pass: measured 25 Oct at 1440x900 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop, 60 fps (median 16.7 ms, no frame over 50 ms); on a phone since 31 Oct the opening is one screen and plays on repeat (assets/open-m-loop.mp4), no scroll length, the six gifts rising out of the light once the lid is off (about 7 s in) and sinking back as it fades to the start, so the film is uncovered most of the time (check-photo-clear); the box opens on its own dark room and her gift photos come out around it, nothing behind them of the same kind; box and photos whole; the film and the first gift photos load first
 R3h.13 pass: untying, lid lift and light are one clip; the gifts start rising on the open-lid frame; walked 12 scroll positions at laptop and phone with no jump
 R3h.14 pass: the box stays in frame and recognisable through the whole opening on laptop and on phone
 R3h.17 n/a: the page does not use giant letters parting over film
@@ -167,11 +167,11 @@ R3f.4 n/a: no logo motif is animated onto the logo
 R3g.4 pass: reveals settle soft to sharp without bounce, rows about 90ms apart, hover under 300ms
 R3e.16 pass: grepped css and js: no linear easing; transitions under 0.5 seconds except the 700ms section reveal
 R3e.17 n/a: no carousel or bottom sheet
-R3e.18 n/a: the film is scrubbed by scroll, not an ambient looping video
+R3e.18 pass: on a laptop the film is scrubbed by scroll; on a phone it is a muted loop of the box opening (Tzvi's request, 29 Oct), played only while on screen, the still for reduced motion
 R3a.2 pass: viewed frames mid-opening at 1440 and 390: no unfinished state
 R3a.3 n/a: no label is placed on a spot of a photo or film
 R3a.4 pass: the held opening fits 1280x650 (check-fits); cutoff.mjs run on both pages; the order section is not held
-R3a.5 pass: the scroll sets the film's time and never takes the scroll; reduced motion shows the opened box; no parallax on phone
+R3a.5 pass: on a laptop the scroll sets the film's time and never takes the scroll (on a phone the film plays on repeat); reduced motion shows the opened box; no parallax on phone
 R3s.2 pass: check-site SHIFT and check-motion report no jump on choices
 R3s.1 pass: check-site STATE passes
 R3s.8 pass: buttons over the film are solid gold, viewed over the light and the dark frame
@@ -216,3 +216,4 @@ R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.12 pass: the tag is plain CSS on the page; no moving piece was added
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->

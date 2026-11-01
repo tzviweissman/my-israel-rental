@@ -24,7 +24,7 @@
   </div>
 </header>
 <main>
-  <section class="film" id="film" aria-label="Fruit platters">
+  <section class="film" id="film" data-loop="assets/film/phone-loop.mp4" aria-label="Fruit platters">
     <div class="film-stage">
     <canvas id="cv" aria-hidden="true"></canvas>
     <img class="film-end" src="assets/opening-end.webp" width="1920" height="1080" alt="Our Large platter on a red ground: watermelon, grapes, pomegranate, lychees, melon and pineapple on a wooden board">
@@ -132,6 +132,19 @@
   var film = document.getElementById('film'), cv = document.getElementById('cv');
   if (!film || !cv || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   film.classList.add('js');
+  // On a phone the film plays by itself on repeat instead of following the scroll (Tzvi, 29 Oct 2026: "on mobile
+  // we should remove the scroll and it should just play on repeat"): one short video made from the same tall
+  // frames, the finished platter held a moment, then a soft fade back to the empty board. The section is one
+  // screen tall (.film.loop in site.css), the page scrolls on, and the video is shown as an element (drawing it
+  // into a canvas every frame kept a phone busy), paused when off screen. Motion off keeps the finished still.
+  if (innerWidth <= 760 && film.dataset.loop) {
+    film.classList.add('loop');
+    var v = document.createElement('video'); v.className = 'film-loopv'; v.muted = true; v.loop = true; v.playsInline = true;
+    v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true'); v.preload = 'auto'; v.src = film.dataset.loop;
+    cv.after(v);
+    new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) v.play().catch(function () {}); else v.pause(); }); }).observe(film);
+    return;
+  }
   var cx = cv.getContext('2d'), tall = matchMedia('(max-aspect-ratio: 3/4)').matches;
   var kind = tall ? 'm' : 'd', N = 161, imgs = new Array(N), dir = 'assets/film/' + kind + '/';
   function url(i) { return dir + String(i + 1).padStart(4, '0') + '.webp'; }

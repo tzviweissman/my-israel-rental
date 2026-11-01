@@ -185,6 +185,12 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
   .open .w2, .open .w3 { transform: none; }
   .open .lede { font-size: 1.05rem; }
   }
+/* phone: the film plays on repeat in one screen (index.html adds .loop); the page scrolls on normally and the three words all show (Tzvi, 29 Oct 2026) */
+.open.loop { height: auto; }
+.open.loop .stage { position: relative; top: 0; }
+.open .loopvid { position: relative; flex: 1 1 0; min-height: 36svh; width: 100%; height: auto; object-fit: cover; object-position: 50% 50%; display: block; background: var(--night); }
+.open.loop .w2, .open.loop .w3 { opacity: 1; transform: none; }
+.open.loop .w1, .open.loop .w2, .open.loop .w3 { color: var(--cream); } .open.loop .w1 { color: var(--mustard); }
 @media (prefers-reduced-motion: reduce) { .open { height: 100vh; height: 100svh; } .open .w2, .open .w3 { opacity: 1; transform: none; } }
 
 /* the two products as cards, right under the opening: colour per product (mustard-light, night) */

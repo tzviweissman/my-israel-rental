@@ -133,6 +133,20 @@
        stays seen); the shade arrives with the words it is for */
     .hero .stage::after { opacity: var(--h, 0); }
   }
+  /* On a phone the opening plays by itself on repeat instead of following the scroll (Tzvi, 29 Oct 2026: "on mobile
+     we should remove the scroll and it should just play on repeat"): one screen tall, the film fitted to the
+     screen's width so the box stays whole, the headline, the six gifts and the button already in place. */
+  .hero.loop { height: auto; }
+  .hero.loop .stage { position: relative; top: 0; }
+  .hero.loop .rise li { transition: transform 900ms cubic-bezier(.2,.7,.2,1), opacity 500ms; }
+  .hero.loop .film { object-fit: contain; object-position: 50% 52%; background: var(--night); }
+  /* the clip's top edge melts into the night ground (a still shade, not a mask on the playing clip: that was slow) */
+  .hero.loop .stage::before { content: ""; position: absolute; left: 0; right: 0; z-index: 1; pointer-events: none; height: 26vw;
+    top: calc((100% - 100vw * 4 / 3) * .52 - 1px); background: linear-gradient(var(--night), transparent); }
+  /* the full-screen shade is for words over the scrolled film; here the words sit on the night ground above and below
+     the clip, so only its bottom edge is softened and the box is seen (check-photo-clear, 31 Oct 2026: 50% covered) */
+  .hero.loop .stage::after { inset: auto 0 calc((100% - 100vw * 4 / 3) * .48 - 1px) 0; height: 20vw; opacity: 1;
+    background: linear-gradient(transparent, var(--night)); }
   /* reduced motion: no hold, the box already open, the gifts in place */
   /* 3u.8 gift tag: a small tilted tag, cut corners and a string hole, over two headings (this site's own shape, the tag tied to a gift box) */
   .tag { display: inline-block; position: relative; rotate: -4deg; margin: 0 0 .7rem; padding: .5em .9em .5em 1.9em; background: var(--gold); color: var(--night); font: 600 .78rem/1 var(--font-body); letter-spacing: .08em; clip-path: polygon(.8em 0, 100% 0, 100% 100%, .8em 100%, 0 50%); }
@@ -450,7 +464,7 @@
   <section class="hero" id="open" aria-labelledby="h1">
     <div class="stage">
       <video class="film" id="film" muted playsinline preload="auto" aria-hidden="true"
-        data-d="assets/open.mp4" data-m="assets/open-m.mp4"
+        data-d="assets/open.mp4" data-m="assets/open-m.mp4" data-loop="assets/open-m-loop.mp4"
         data-pd="assets/open-first.webp" data-pm="assets/open-m-first.webp"
         data-sd="assets/open-last.webp" data-sm="assets/open-m-last.webp"></video>
       <div class="top">
@@ -624,10 +638,16 @@
   var h1 = document.getElementById('h1'), cue = document.getElementById('cue');
   var rise = [].slice.call(document.querySelectorAll('#rise li')), stage = document.querySelector('.hero .stage');
   film.poster = film.dataset[still ? (small ? 'sm' : 'sd') : (small ? 'pm' : 'pd')];
-  if (!still) { film.src = film.dataset[small ? 'm' : 'd']; film.load(); }
+  // phone, motion allowed: the clip plays on repeat (data-loop: the opening, the box held open a moment, a soft fade
+  // back to the start), paused while off screen; the scroll no longer sets its time (Tzvi, 29 Oct 2026)
+  var loopMode = small && !still && !!film.dataset.loop;
+  if (loopMode) {
+    open.classList.add('loop'); film.loop = true; film.src = film.dataset.loop; film.load();
+    new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) film.play().catch(function () {}); else film.pause(); }); }).observe(open);
+  } else if (!still) { film.src = film.dataset[small ? 'm' : 'd']; film.load(); }
   var fWant = 0, fBusy = false;
   function fSeek() {
-    if (!film.duration) return;
+    if (loopMode || !film.duration) return;
     var t = fWant * (film.duration - .05);
     if (Math.abs(film.currentTime - t) < .02) { fBusy = false; return; }
     fBusy = true; film.currentTime = t;
@@ -639,6 +659,11 @@
     ? [[-31, -19], [0, -22], [31, -19], [-31, 1], [0, -2], [31, 1]]
     : [[-38, -1], [-25, -11], [-8.5, -15], [8.5, -15], [25, -11], [38, -1]];
   var glinted = false;
+  function place(li, i, k) {
+    var to = ARC[i], x = to[0] * k, y = to[1] * k;
+    li.style.opacity = String(Math.min(1, k * 2.2));
+    li.style.transform = 'translate(' + x + 'vw,' + y + 'svh) scale(' + (.35 + .65 * k) + ') rotate(' + ((1 - k) * (i % 2 ? 8 : -8)) + 'deg)';
+  }
   function openAt(p) {
     fWant = seg(p, 0, .55);
     if (!fBusy) fSeek();
@@ -646,16 +671,23 @@
     h1.style.setProperty('--h', hh.toFixed(3)); stage.style.setProperty('--h', hh.toFixed(3));
     if (hh > .98 && !glinted) { glinted = true; var em = h1.querySelector('em'); em.classList.add('glint'); em.addEventListener('animationend', function () { em.classList.remove('glint'); }, { once: true }); }
     if (cue) cue.style.setProperty('--cue', (1 - seg(p, .03, .12)).toFixed(3));
-    rise.forEach(function (li, i) {
-      var k = ease(seg(p, .55 + i * .05, .72 + i * .05));
-      var to = ARC[i];
-      var x = to[0] * k, y = to[1] * k;
-      li.style.opacity = String(Math.min(1, k * 2.2));
-      li.style.transform = 'translate(' + x + (small ? 'vw' : 'vw') + ',' + y + 'svh) scale(' + (.35 + .65 * k) + ') rotate(' + ((1 - k) * (i % 2 ? 8 : -8)) + 'deg)';
-    });
+    rise.forEach(function (li, i) { place(li, i, ease(seg(p, .55 + i * .05, .72 + i * .05))); });
     open.querySelector('.act').style.setProperty('--a', ease(seg(p, .82, .95)).toFixed(3));
   }
+  // phone loop: the headline and button stay in place; the gifts rise out of the light once the lid is off (about 7 s
+  // into the clip) and sink back as it fades to the start, so the film is seen most of the time (check-photo-clear)
+  if (loopMode) {
+    openAt(1);
+    var out = null;
+    var gifts = function (on) {
+      if (on === out) return; out = on;
+      rise.forEach(function (li, i) { li.style.transitionDelay = (on ? i * 120 : 0) + 'ms'; place(li, i, on ? 1 : 0); });
+    };
+    gifts(false);
+    film.addEventListener('timeupdate', function () { var t = film.currentTime; gifts(t > 7 && t < 10.6); });
+  }
   function onOpen() {
+    if (loopMode) return;
     var r = open.getBoundingClientRect();
     var stageH = window.innerHeight - 64;
     var travel = r.height - stageH;

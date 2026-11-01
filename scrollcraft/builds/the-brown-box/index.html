@@ -246,6 +246,13 @@
   }
   /* review changes */
   @media (prefers-reduced-motion: reduce) { .film { height: 100vh; height: 100svh; } .film .hint { display: none; } }
+  /* phone: the film plays on repeat in one screen (script adds .loop); the page scrolls on after it, and only the closing line
+     (headline and the Order button) shows, holding still (Tzvi, 29 Oct 2026: "on mobile we should remove the scroll and it should just play on repeat") */
+  .film.loop { height: auto; }
+  .film.loop .stage { position: relative; }
+  .film.loop canvas, .film.loop .load { display: none; }
+  .film.loop video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .film.loop .chap[data-from="0"] { opacity: 0; pointer-events: none; transform: none; filter: none; }
   .arw { display: inline-flex; } .arw svg { display: block; }
   .btn.dark-on { background: var(--paper); }
   /* menu: section chips, two columns, an Add pill on every row */
@@ -701,12 +708,30 @@ document.addEventListener('DOMContentLoaded', function () {
   var filmEl = document.getElementById('film'), cv = document.getElementById('cv'), cx = cv.getContext('bitmaprenderer') || cv.getContext('2d'), br = !cx.drawImage;
   var chaps = [].slice.call(document.querySelectorAll('.chap'));
   var kind = phone() ? 'm' : 'd', N = FILM[kind], imgs = new Array(N), got = 0;
+  // On a phone the film is one short video (assets/film/phone-loop.mp4, made from the same phone frames: the box held a moment,
+  // then a soft fade back to the start) that plays by itself on repeat, muted, while it is on screen; the scroll frames are not
+  // loaded. Motion off keeps the held frame (Tzvi, 29 Oct 2026; Bake away's film.js). The video element itself is shown, never
+  // drawn into the canvas every frame.
+  var loop = kind === 'm' && !still;
+  if (loop) {
+    filmEl.classList.add('loop');
+    var vid = document.createElement('video');
+    vid.muted = true; vid.loop = true; vid.playsInline = true; vid.setAttribute('playsinline', ''); vid.preload = 'auto';
+    vid.poster = 'assets/film/m/0001.webp'; vid.src = 'assets/film/phone-loop.mp4'; vid.setAttribute('aria-hidden', 'true');
+    cv.after(vid);
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) vid.play().catch(function () {}); else vid.pause(); }); }).observe(filmEl);
+    else vid.autoplay = true;
+    var closing = chaps[chaps.length - 1];
+    closing.classList.add('on'); closing.setAttribute('aria-hidden', 'false'); closing.querySelector('a').tabIndex = 0;
+    chaps[0].classList.remove('on'); chaps[0].querySelector('a').tabIndex = -1;
+  }
   // never a black screen while the frames arrive: the first frame is the
   // canvas's own background until it is drawn over
   cv.style.background = '#120A05 url(assets/film/' + kind + '/0001.webp) center / cover no-repeat';
   function url(i) { return 'assets/film/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; }
   var order = [], seen = {};
   [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });
+  if (loop) order = [];
   var load = document.getElementById('load');
   (function next(k) {
     var batch = order.slice(k, k + 6); if (!batch.length) { load.style.opacity = 0; return; }
@@ -772,6 +797,7 @@ document.addEventListener('DOMContentLoaded', function () {
     return Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
   }
   function paint() {
+    if (loop) { var of = filmEl.getBoundingClientRect().bottom > 64; if (of !== paint.onFilm) { paint.onFilm = of; document.body.classList.toggle('on-film', of); } return; }
     p = still ? 0 : progress();
     draw();
     // written only when a chapter or the bar changes, never on every scrolled frame

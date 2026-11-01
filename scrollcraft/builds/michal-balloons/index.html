@@ -102,6 +102,13 @@
     .hero .inner { justify-content: flex-start; padding-top: calc(10svh + 118vw * 9 / 16 + 1rem); padding-bottom: 0; }
     .hero h1 { font-size: clamp(2.5rem, 1rem + 8vw, 3.4rem); }
   }
+  /* phone, motion allowed: the opening plays on repeat in one screen (script adds .loop; Tzvi, 29 Oct 2026) */
+  .hero.loop { height: auto; }
+  .hero.loop .stage { position: relative; top: 0; }
+  @media (max-width: 760px) { /* the whole arch fits the screen's width on the loop, not cropped at the sides */
+    .hero.loop .film { inset: 6svh auto auto 0; width: 100vw; }
+    .hero.loop .inner { padding-top: calc(6svh + 100vw * 9 / 16 + 1.4rem); }
+  }
   @media (prefers-reduced-motion: reduce) {
     .hero { height: auto; }
     .hero .stage { position: relative; top: 0; }
@@ -385,7 +392,7 @@
   <section class="hero" id="open" aria-labelledby="h1">
     <div class="stage">
       <video class="film" id="film" muted playsinline preload="auto" aria-hidden="true"
-        data-d="assets/arrive.mp4" data-m="assets/arrive-m.mp4"
+        data-d="assets/arrive.mp4" data-m="assets/arrive-m.mp4" data-loop="assets/arrive-m-loop.mp4"
         data-pd="assets/arrive-first.webp" data-pm="assets/arrive-m-first.webp"
         data-sd="assets/arrive-last.webp" data-sm="assets/arrive-m-last.webp"></video>
       <div class="inner">
@@ -661,7 +668,16 @@
   var open = document.getElementById('open'), film = document.getElementById('film');
   var h1 = document.getElementById('h1'), act = document.getElementById('act');
   film.poster = film.dataset[still ? (small ? 'sm' : 'sd') : (small ? 'pm' : 'pd')];
-  if (!still) { film.src = film.dataset[small ? 'm' : 'd']; film.load(); }
+  // On a phone the opening plays by itself on repeat instead of following the scroll (Tzvi, 29 Oct 2026: "on mobile
+  // we should remove the scroll and it should just play on repeat"): one short clip made from the phone clip, the
+  // finished arch held a moment, then a soft fade back to the empty room (assets/arrive-m-loop.mp4). The words were
+  // never tied to the scroll here, so they already hold still; the section is one screen tall (.hero.loop). The
+  // <video> itself is shown, paused when off screen. Motion off keeps the still of the finished arch; laptop unchanged.
+  var loopOn = small && !still;
+  if (loopOn) {
+    open.classList.add('loop'); film.loop = true; film.src = film.dataset.loop; film.load();
+    new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) film.play().catch(function () {}); else film.pause(); }); }).observe(open);
+  } else if (!still) { film.src = film.dataset[small ? 'm' : 'd']; film.load(); }
   var want = 0, busy = false;
   function seek() {
     if (!film.duration) return;
@@ -672,6 +688,7 @@
   film.addEventListener('seeked', function () { busy = false; seek(); });
   film.addEventListener('loadedmetadata', seek);
   function openAt(p) {
+    if (loopOn) return;
     want = seg(p, 0, .7); if (!busy) seek();
   }
   function onOpen() {

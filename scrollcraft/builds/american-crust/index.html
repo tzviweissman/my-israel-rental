@@ -24,7 +24,7 @@
   </div>
 </header>
 <main>
-  <section class="open" id="film" aria-labelledby="h-open">
+  <section class="open" id="film" data-loop="assets/film/phone-loop.mp4" aria-labelledby="h-open">
     <div class="stage">
       <canvas id="cv" aria-hidden="true"></canvas>
       <div class="wrap">
@@ -147,6 +147,17 @@
     var order = [], seen = {};
     [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });
     if (still) order = [N - 1];
+    // On a phone the film plays by itself on repeat instead of following the scroll (Tzvi, 29 Oct 2026: "on mobile we
+    // should remove the scroll and it should just play on repeat"): one short video made from the same phone frames
+    // (data-loop), the finished bagels held a moment, then a soft fade back to the start. The section is one screen tall
+    // (.open.loop in site.css); motion off keeps the last frame as a still. The <video> itself is shown, never drawn
+    // into the canvas, and paused when off screen.
+    if (kind === 'm' && !still && film.dataset.loop) {
+      film.classList.add('loop'); order = [];
+      var vid = document.createElement('video'); vid.muted = true; vid.loop = true; vid.playsInline = true; vid.setAttribute('playsinline', ''); vid.preload = 'auto'; vid.src = film.dataset.loop;
+      vid.setAttribute('aria-hidden', 'true'); vid.className = 'loopvid'; cv.style.display = 'none'; cv.after(vid);
+      new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) vid.play().catch(function () {}); else vid.pause(); }); }).observe(film);
+    }
     (function next(k) {
       var batch = order.slice(k, k + 6), left = batch.length; if (!left) return;
       batch.forEach(function (i) {
