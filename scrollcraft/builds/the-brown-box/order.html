@@ -171,6 +171,26 @@
   .sum li .rm { width: 40px; height: 40px; flex: none; border: 0; border-radius: 99px; background: none; color: var(--on-night-soft); cursor: pointer; display: grid; place-items: center; transition: background 120ms ease-out, color 120ms ease-out, transform 100ms ease-out; }
   .sum li .rm:hover { background: rgb(255 255 255 / .14); color: #fff; } .sum li .rm:active { transform: scale(.92); }
   .sum .btn:hover, .dock .btn:hover { background: var(--ivory-2); }
+  /* the full footer (rules 3v.1): who we are, every page, how ordering works, how to reach us, then one base line */
+  .foot.full { text-align: start; font-size: .92rem; background: #1A0F08; color: #BFAE97; border-top: 1px solid rgb(255 246 234 / .18); padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) 6.5rem; }
+  .foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+  .foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: #F1C9A0; }
+  .foot.full nav { margin: 0; font-weight: 400; }
+  .foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; max-width: 100%; margin: 0 0 .55rem; color: #E8D9C2; text-decoration: none; line-height: 1.5; }
+  .foot .fgrid a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  .foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+  .foot .fgrid a.fname { font: 700 1.5rem/1.1 var(--font-head); margin-bottom: .9rem; }
+  .foot .fbrand p { max-width: 30ch; color: #BFAE97; line-height: 1.55; }
+  .foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+  .foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid rgb(255 246 234 / .18); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .82rem; color: #BFAE97; }
+  .foot .fbase a { color: #E8D9C2; text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 760px) { .foot .fgrid { grid-template-columns: max-content minmax(0, 1fr); column-gap: 1.75rem; } .foot .fbrand, .foot .fgrid > :last-child { grid-column: 1 / -1; } }
+  /* three true facts under the main button (rules 3v.14) */
+  .btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem;  }
+  .btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; margin-inline-end: .45em; margin-bottom: .15em; border-radius: 50%; background: #F6CCE6; }
+  .foot .fgrid p.fk { display: flex; gap: .7rem; align-items: center; margin-top: 1rem; font-size: .85rem; max-width: 34ch; }
+  .foot .fk img { width: 40px; height: 40px; object-fit: contain; flex: none; background: #fff; border-radius: 8px; padding: 2px; }
+  .foot .fbase .fnote { flex-basis: 100%; }
 </style>
 </head>
 <body>
@@ -238,6 +258,16 @@
     </aside>
   </div>
 </main>
+
+<footer class="foot full">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">The Brown Box</a><p>Artisanal superfoods, delivered across Jerusalem. A home business.</p><a class="fcta" href="order.html?add=Acai%20bowl">Order a bowl <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><p class="fk"><img src="assets/hechsher.webp" alt="Seal of the Vaad HaKashrus of Rabbi Shmuel Weiner" width="40" height="40"><span>Kosher, Vaad HaKashrus of Rabbi Shmuel Weiner, Rav of Khal Zichron Nosson Tzvi.</span></p></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="index.html#bowls">Bowls</a><a href="index.html#menu">Menu</a><a href="index.html#gifts">Gift boxes</a><a href="order.html">Order</a></nav>
+    <div><h4>Ordering</h4><p>Delivery throughout Jerusalem, the fee confirmed on WhatsApp</p><p>Cash, Zelle, Israeli bank transfer, or credit card with a 4% charge</p></div>
+    <div><h4>Reach us</h4><a href="https://wa.me/972533452048" target="_blank" rel="noopener">WhatsApp or call +972 53-345-2048</a><a href="mailto:thebrownboxjlm@gmail.com">thebrownboxjlm@gmail.com</a><a href="https://www.instagram.com/thebrownbox_jlm/" rel="noopener" target="_blank">Instagram @thebrownbox_jlm</a></div>
+  </div>
+  <div class="fbase"><span>© 2026 The Brown Box.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span><span class="fnote">The film of a bowl being made, and the pictures taken from it, are generated for this page; the menu photos are our own.</span></div>
+</footer>
 
 <div class="dock order-bar" id="dock">
   <div><small>Before delivery</small><b id="dtotal">₪0</b></div>

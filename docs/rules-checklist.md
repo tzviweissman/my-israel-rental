@@ -8,6 +8,11 @@ be answered for every site before anyone is shown it.
 
 ## How to use it
 
+**Since 1 Nov 2026 a new site is built from this list, not checked against it afterwards** (page rules 0b.0):
+`node scripts/blueprint.mjs scrollcraft/builds/<site>` turns every line below into a step of `BLUEPRINT.md`, in
+build order, planned before each stage is built and ticked as it is built; RULES.md is then written from it.
+The steps below are how sites made before then keep their RULES.md.
+
 1. `node scripts/check-rules.mjs --template scrollcraft/builds/<site>` writes `<site>/RULES.md`
    with every id below set to `todo`.
 2. Run the scripts named in the HOW column on every page of the site, and do every LOOK by
@@ -244,7 +249,7 @@ R3s.26 | No words sit on other words anywhere on the page, pinned scenes include
 R3t.1 | The site declares its category (CONCEPT.md and a site-category meta on every page) and follows that category's row of the 3t table: ground and colour, pictures, how it sells, type | 3t | check-site CATEGORY; LOOK: compare the home and shop pages with the category's screenshots in docs/inspo/awwwards-anatomy-2026-10-22/
 R3t.2 | food-shop and fashion-shop: a price and an Add or Order control within the first two screens; every product card has photo, name, size or servings, price and a button | 3t | check-site BUY; LOOK: every card
 R3t.3 | trainer: at least a third of sections are picture, never three plain sections in a row | 3t | check-site WORLDS
-R3t.4 | A real footer on every page, identical: a last big line, the button, link columns, contact, the MyIsraelRental line | 3t, 3k.3 | LOOK: footer of every page
+R3t.4 | A real footer on every page, identical: a last big line, the button, link columns, contact, the MyIsraelRental line (since 1 Nov 2026 the full footer of R3v.1) | 3t, 3k.3 | LOOK: footer of every page
 R3a.7 | Every state is checked on the device that shows it (touch emulation for phones, never a narrow desktop window; hover-only looks have a touch version) | 3a table, 3e.9 | LOOK: record which emulation was used
 R3a.8 | A line of items separated by dots never wraps | 3a table | LOOK at 360x640
 
@@ -262,6 +267,15 @@ R3u.11 | The page passed its checks with a still where the film goes before the 
 R3u.12 | Every moving piece not in the kit was tried on a test page with buttons for each state before it went in | 3u.12 | LOOK: the test page in gen/ or the kit
 R3u.13 | gen/report.md ends with "Not done yet" and "For your call" (at most two) | 3u.13 | LOOK: gen/report.md
 R3u.14 | gen/copy-pass.md holds a shorter version of every line over 20 words and paragraph over three lines; the shorter is used unless it drops a fact | 3u.14 | LOOK: gen/copy-pass.md against the pages
+
+## 8c. From the ten design videos and five real sites (1 Nov 2026)
+
+R3v.1 | A full footer, the same on every page: who they are (name, one line, a quiet link to the main action), every page, how ordering works or Visit, Reach us, and a base line with © year, the MyIsraelRental line and a Privacy link; parts only when the record fills them | 3v.1 | script: check-footer
+R3v.2 | The menu bar lists the site's pages, the same on every page; a site with other pages has no #jumps in the bar; order and booking steps may keep a quieter bar | 3v.2 | script: check-menu
+R3v.6 | Sections of different heights: at least two sizes on a page, never three in a row the same height | 3v.6 | script: check-heights
+R3v.7 | Layouts (bento, zigzag steps, callouts, picture beside four facts, peek row) chosen by what the business has, never the same layout twice in a row on a page | 3v.7 | LOOK: name each section's layout in CONCEPT.md; n/a if none of these is used
+R3v.8 | Effects from 3v (light on cards, fanned photos, rolling letters, circle reveal, curtain between pages, picture buttons, statement band) are chosen for this business, not the set of the site built before it, each with its phone and reduced-motion version | 3v.8-16 | LOOK: CONCEPT.md names the effects and the previous site's set; n/a if none
+R3v.14 | Three true facts from the record right under the main button on the home page (class btn-facts) | 3v.14 | script: check-facts
 
 ## 9. Finish
 

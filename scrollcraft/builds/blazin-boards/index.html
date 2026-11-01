@@ -317,6 +317,22 @@
   .foot__cols a { color: var(--sc-ink); text-decoration: none; min-height: 32px; display: inline-flex; align-items: center; }
   .foot__cols a:hover { color: var(--gold); }
   .foot__cols span { color: var(--sc-ink-soft); }
+  /* three true facts under the main button (rules 3v.14) */
+  .btn-facts { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0.2rem 1rem; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.4; }
+  .btn-facts li::before { content: ""; display: inline-block; width: .4em; height: .4em; border-radius: 50%; background: var(--gold); vertical-align: middle; margin-inline-end: .45em; margin-bottom: .15em; }
+  /* the full footer (rules 3v.1) */
+  .foot.full .foot__big + .cta, .foot.full .cta { margin-bottom: var(--sc-6); }
+  .foot.full .fgrid { display: grid; grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr)); gap: var(--sc-6); padding-block: var(--sc-6); border-top: 1px solid rgb(255 255 255 / .18); }
+  .foot.full h4 { margin: 0 0 .9rem; font: 700 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: rgb(255 255 255 / .62); }
+  .foot.full .fgrid a, .foot.full .fgrid p { display: block; width: fit-content; margin: 0 0 .55rem; color: var(--sc-ink); font-size: .92rem; line-height: 1.5; text-decoration: none; }
+  .foot.full .fgrid a:hover { color: var(--gold); text-decoration: underline; }
+  .foot.full .fgrid nav { display: block; }
+  .foot.full .fgrid a.fname { font: 800 1.5rem/1 var(--font-body); letter-spacing: -.02em; text-transform: uppercase; margin-bottom: .9rem; }
+  .foot.full .fbrand p { max-width: 28ch; color: var(--sc-ink-soft); }
+  .foot.full .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; color: var(--gold); }
+  .foot.full .fbase { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-top: 1.2rem; border-top: 1px solid rgb(255 255 255 / .18); font-size: .82rem; color: var(--sc-ink-soft); }
+  .foot.full .fbase a { color: var(--sc-ink); text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 860px) { .foot.full .fgrid { grid-template-columns: 1fr 1fr; } .foot.full .fbrand { grid-column: 1 / -1; } }
   .foot__small { margin-block: var(--sc-5) 0; font-size: .875rem; color: var(--sc-ink-soft); line-height: 1.5; }
   @media (max-width: 860px) {
     .band { grid-template-columns: 1fr; padding-block: 3rem; }
@@ -438,12 +454,10 @@
 <body id="top">
 <header class="bar">
   <a class="bar__mark" href="#top"><img src="assets/their-logo-small.png" alt="" width="120" height="120"> Blazin' Boards</a>
-  <nav class="bar__nav" aria-label="On this page" data-spy>
-    <a href="#hero">The board</a>
-    <a href="#sizes">Sizes</a>
+  <nav class="bar__nav" aria-label="Blazin' Boards">
+    <a href="index.html" aria-current="true">Home</a>
     <a href="boards.html">Every board</a>
-    <a href="#facts">How it goes</a>
-    <a href="#order">Order</a>
+    <a href="order.html">Your order</a>
   </nav>
   <div class="bar__end">
     <a class="bar__cta" href="order.html">Order a board</a>
@@ -468,9 +482,10 @@
       <div class="land" data-sc-cue="0.7 1 0.3 0">
         <div>
           <h1>Premium meat boards, <b>grilled to perfection.</b></h1>
-          <p>Jerusalem. Orders 48 hours ahead. Delivery throughout Israel.</p>
+          <p>Made in our kitchen in Jerusalem.</p>
         </div>
         <a class="cta flip" href="#order" aria-label="Order a board, from $75 to $750"><span class="f">Order a board</span><span class="k"><b>From $75</b>to $750<svg class="draw" viewBox="0 0 24 24" aria-hidden="true"><path d="M4 12h15M13 6l6 6-6 6"/></svg></span></a>
+        <ul class="btn-facts"><li>From $75 a board</li><li>Orders 48 hours ahead</li><li>Delivery throughout Israel</li></ul>
       </div>
     </div>
   </section>
@@ -610,15 +625,16 @@
     </div>
   </section>
 </main>
-<footer class="foot">
+<footer class="foot full">
   <p class="foot__big">Premium meat boards, grilled to perfection.</p>
   <a class="cta" href="order.html">Order a board</a>
-  <div class="foot__cols">
-    <nav aria-label="Pages"><b>The site</b><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Your order</a></nav>
-    <div><b>Find us</b><span>Farn 5, Jerusalem</span><span>Orders 48 hours ahead</span><span>Delivery throughout Israel</span></div>
-    <div><b>Pay us by</b><span>Card, Zelle or bank transfer</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">Blazin' Boards</a><p>Every photograph on this site is our own.</p><a class="fcta" href="order.html">Order a board <span aria-hidden="true">&rarr;</span></a></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Your order</a></nav>
+    <div><h4>Ordering</h4><p>Orders 48 hours ahead</p><p>Delivery throughout Israel, the fee depends on the city</p><p>Credit card, Zelle or bank transfer, paid to us directly</p><p>Gluten-free and soy-free on request</p><a href="https://www.google.com/maps/search/?api=1&amp;query=Farn+5+Jerusalem" target="_blank" rel="noopener">Kitchen: Farn 5, Jerusalem, directions</a></div>
+    <div><h4>Reach us</h4><a href="order.html">Send your order, we confirm it on WhatsApp</a><a href="https://myisraelrental.com/business/blazin-boards">Message us on MyIsraelRental</a></div>
   </div>
-  <p class="foot__small">Blazin' Boards. Every photograph on this site is our own. Nothing is paid on this site: you pay us directly.</p>
+  <div class="fbase"><span>&copy; 2026 Blazin' Boards.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission &middot; <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
 </footer>
 
 <script src="scrollcraft.js"></script>

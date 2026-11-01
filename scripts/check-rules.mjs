@@ -141,7 +141,9 @@ let newest = { t: 0, f: '' };
   }
 })(dir);
 const rulesTime = dated(rulesFile);
-if (newest.t > rulesTime) problems.push(`RULES.md is older than ${path.relative(dir, newest.f)} (changed ${new Date(newest.t).toISOString().replace('T', ' ').slice(0, 19)}, RULES.md ${new Date(rulesTime).toISOString().replace('T', ' ').slice(0, 19)}): look at every rule again against the current site, then save RULES.md`);
+// a merge or a fresh checkout writes RULES.md and the pages in the same instant, a few ms apart in no set order
+// (1 Nov 2026, merging every branch onto main): within 2 s is the same moment, not an edit after the rules
+if (newest.t > rulesTime + 2000) problems.push(`RULES.md is older than ${path.relative(dir, newest.f)} (changed ${new Date(newest.t).toISOString().replace('T', ' ').slice(0, 19)}, RULES.md ${new Date(rulesTime).toISOString().replace('T', ' ').slice(0, 19)}): look at every rule again against the current site, then save RULES.md`);
 
 const name = path.basename(dir);
 console.log(`${name}: ${items.length} rules in the checklist`);

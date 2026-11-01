@@ -217,3 +217,7 @@ R3u.12 pass: the tag is plain CSS on the page; no moving piece was added
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
 <!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->
+R3v.1 pass: full footer on index and order (who we are with a quiet Order a gift link, Pages, Ordering from the record: delivery across Israel, Bit/bank transfer/PayPal/Revolut, hours; Reach us: WhatsApp and email; base line with since 2025 as the old footer said, and Privacy); no lead time or address in the record, so none shown
+R3v.2 pass: the site is Home plus its order page, so the menu bar keeps its jumps (What we make, Prices, How to order)
+R3v.14 pass: Gifts from $25, Delivery across Israel, Bit/bank transfer/PayPal/Revolut (the page's own price line, delivery and payment lines; the lone price line became one of the three)
+<!-- 1 Nov 2026: footer checked again after a last fix (phone footer columns, duplicate page list, contact link); check-footer, check-menu and check-facts pass -->

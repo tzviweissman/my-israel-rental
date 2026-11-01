@@ -172,6 +172,18 @@
     color: var(--sc-ink-soft); font-size: var(--sc-t-sm); background: var(--sc-surface); }
   .foot a { color: var(--sc-accent); }
 
+  /* the bar lists the site's pages (rules 3v.2); the station checklist lives on the stage */
+  .menu { display: flex; gap: 0.25rem; margin: 0 0 0 auto; padding: 0; list-style: none; }
+  .menu a { display: flex; align-items: center; min-height: 44px; padding: 0.55rem 0.85rem; border-radius: 999px; color: var(--sc-ink-soft); font: 500 0.95rem/1 var(--sc-font-text); text-decoration: none; }
+  .menu a:hover, .menu a[aria-current="page"] { background: var(--sc-surface); color: var(--sc-ink); }
+  .walk-index { position: absolute; z-index: 4; right: var(--sc-gutter); bottom: 7.6rem; background: rgb(255 255 255 / 0.94); border: 1px solid var(--sc-hairline); border-radius: var(--sc-r-pill); padding: 0.15rem 0.3rem; }
+  .walk-index .index { margin: 0; }
+  @media (min-width: 861px) { .bar-menu { display: none; } }
+  @media (max-width: 860px) { .menu, .walk-index { display: none; } }
+  /* three true facts under the main button (rules 3v.14) */
+  .btn-facts { margin: 0; padding: 0; list-style: none; display: flex; flex-wrap: wrap; gap: 0.15rem 1rem; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.35; }
+  .btn-facts b { color: var(--sc-ink); font-weight: 600; }
+  .btn-facts li::before { content: ""; display: inline-block; width: .4em; height: .4em; border-radius: 50%; background: var(--sc-accent); vertical-align: middle; margin-inline-end: .45em; margin-bottom: .15em; }
   .buybar { display: none; }
   /* the rest of the site (12 Oct 2026): a Book pill in the bar, links on the cards */
   .bar-book { white-space: nowrap; min-width: 9.6rem; justify-content: center; margin-left: 0.5rem; display: inline-flex; align-items: center; min-height: 40px; padding: 0 1.1rem; border-radius: 999px; background: var(--sc-accent); color: #fff;
@@ -386,6 +398,20 @@
   @keyframes arrive-fade { from { opacity: 0; } }
   @keyframes arrive-pop { from { opacity: 0; transform: scale(.92); } }
   @media (prefers-reduced-motion: reduce) { html.arrive-go [data-arrive] { animation: none; } }
+
+/* the full footer (rules 3v.1): who we are, every page, how booking works, how to reach us, then one base line */
+.foot.full .fgrid { max-width: 74rem; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3rem); border-top: 1px solid rgb(255 255 255 / 0.2); padding-top: var(--sc-5, 2rem); }
+.foot.full h4 { margin: 0 0 0.9rem; font: 600 0.74rem/1.2 var(--sc-font-text); letter-spacing: 0.16em; text-transform: uppercase; color: rgb(255 255 255 / 0.62); }
+.foot.full .fgrid a, .foot.full .fgrid p { display: block; width: fit-content; margin: 0 0 0.55rem; color: rgb(255 255 255 / 0.9); font-size: 0.92rem; line-height: 1.5; }
+.foot.full .fgrid nav { display: block; }
+.foot.full .fgrid a[href^="https://wa.me"], .foot.full .fgrid a[href^="tel:"] { white-space: nowrap; }
+.foot.full .fgrid a.fname { font: 700 1.5rem/1 var(--sc-font-display); letter-spacing: -0.02em; color: #fff; margin-bottom: 0.9rem; }
+.foot.full .fbrand p { max-width: 30ch; color: rgb(255 255 255 / 0.7); }
+.foot.full .fgrid a.fcta { display: inline-flex; align-items: center; gap: 0.5rem; margin-top: 0.4rem; font-weight: 700; color: #fff; }
+.foot.full .fgrid a:hover { color: #fff; text-decoration: underline; }
+.foot.full .fbase { max-width: 74rem; margin-top: clamp(2rem, 5vw, 3rem); padding-top: 1.2rem; border-top: 1px solid rgb(255 255 255 / 0.2); display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.5rem 1.5rem; font-size: 0.82rem; color: rgb(255 255 255 / 0.7); }
+.foot.full .fbase a { color: rgb(255 255 255 / 0.9); }
+@media (max-width: 860px) { .foot.full .fgrid { grid-template-columns: 1fr 1fr; } .foot.full .fbrand { grid-column: 1 / -1; } }
 </style>
 </head>
 <body>
@@ -393,9 +419,7 @@
 
 <header class="bar" data-arrive="0">
   <a class="brand" href="#top"><img src="assets/logo.png" alt="" width="30" height="30">KasherMyBnb</a>
-  <nav aria-label="What we kasher">
-    <ol class="index" id="index"></ol>
-  </nav>
+  <ul class="menu"><li><a href="index.html" aria-current="page">Home</a></li><li><a href="kitchen.html">Whole kitchen</a></li><li><a href="pots.html">Pots and cutlery</a></li></ul>
   <button type="button" class="bar-menu" id="menuBtn" aria-expanded="false" aria-controls="menuPanel">Pages</button>
   <a class="bar-book" href="book.html">Book a kashering</a>
   <div class="bar-panel" id="menuPanel" hidden><a href="index.html">Home</a><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book</a><button type="button" id="menuClose">Close</button></div>
@@ -404,6 +428,7 @@
 <main id="top">
   <section id="walk" data-sc-act="pin" data-sc-span="6">
     <div data-sc-stage>
+      <nav class="walk-index" aria-label="What we kasher, ticked off as the walk passes"><ol class="index" id="index"></ol></nav>
       <div class="cam" id="cam" data-arrive="3">
         <img src="assets/kitchen.webp" alt="A rental kitchen: oven, microwave, gas stovetop, countertops, sink and a hot plate along one wall" width="2048" height="1152">
       </div>
@@ -416,10 +441,10 @@
         </div>
         <div class="panel act">
           <a class="btn" data-arrive="4" href="book.html"><span class="lb">Book a kashering</span><span class="ab" aria-hidden="true"><span class="sw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></span></a>
-          <ul class="proof">
+          <ul class="btn-facts">
             <li><b>Whole kitchen $350</b>, about 2 hours</li>
-            <li>Expert mashgichim, following cRc guidelines</li>
-            <li>Kashering kitchens since 2019</li>
+            <li>Following cRc guidelines</li>
+            <li>Jerusalem and across Israel</li>
           </ul>
         </div>
       </div>
@@ -533,14 +558,16 @@
       <p class="fine">Choose what you need and a day. We confirm the time with you on WhatsApp. Nothing to pay on this site.</p>
     </div>
   </section>
-  <footer class="foot after">
-    <p class="last">Settle in, ready to use.</p>
-    <div class="foot-cols">
-      <nav class="foot-nav" aria-label="Pages"><b>Pages</b><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book a kashering</a></nav>
-      <div class="foot-nav"><b>Where</b><span>Jerusalem and across Israel</span><span>English and Hebrew</span><span>Since 2019</span></div>
-      <div class="foot-nav"><b>Contact</b><span>Message us on WhatsApp</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
-    </div>
-  </footer>
+  <footer class="foot after big full">
+  <p class="last">Settle in, ready to use.</p>
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">KasherMyBnb</a><p>We kasher your kitchen so you can settle in with confidence, knowing it is fully prepared, strictly kosher, and ready to use.</p><a class="fcta" href="book.html">Book a kashering <span aria-hidden="true">→</span></a></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="kitchen.html">Whole kitchen</a><a href="pots.html">Pots and cutlery</a><a href="book.html">Book a kashering</a></nav>
+    <div><h4>Booking</h4><p>Whole kitchen $350, about 2 hours</p><p>Pots and cutlery $180, about 1 hour</p><p>Jerusalem and across Israel, a fee by distance outside Jerusalem</p><p>English and Hebrew</p></div>
+    <div><h4>Reach us</h4><a href="https://wa.me/972584031989" target="_blank" rel="noopener">Message us on WhatsApp</a><a href="https://myisraelrental.com/businesses">Our MyIsraelRental page</a></div>
+  </div>
+  <div class="fbase"><span>© 2026 KasherMyBnb. Since 2019.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
+</footer>
 </main>
 
 <div class="buybar" id="buybar" aria-hidden="true">

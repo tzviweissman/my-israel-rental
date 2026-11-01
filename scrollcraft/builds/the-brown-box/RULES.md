@@ -216,3 +216,7 @@ R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
 <!-- 29 Oct: all rules re-read against the current index.html; only change since is how the film frames load and show (decoded off the main thread, each frame handed to the canvas whole at its own size and covering the screen by CSS) so the film scrolls smoothly on a phone (check-speed 19 ms a frame, 0% busy); screenshots at 0.2, 0.5 and 0.9 of the film on 390x844 and 1440x900 look the same as before -->
 <!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->
+R3v.1 pass: full footer on index and order (who we are with the kosher seal and a quiet Order a bowl link, Pages, Ordering: delivery throughout Jerusalem and payment, Reach us: WhatsApp, email, Instagram; base line; the generated-film note kept); no founding year or lead time in the page, so none shown
+R3v.2 pass: the site is Home plus its order page, so the menu bar keeps its jumps (Bowls, Menu, Gift boxes)
+R3v.14 pass: Bowls from ₪60, Delivery throughout Jerusalem, Cash, Zelle, bank transfer or card (the page's own price, delivery and payment lines)
+<!-- 1 Nov 2026: footer checked again after a last fix (phone footer columns, duplicate page list, contact link); check-footer, check-menu and check-facts pass -->

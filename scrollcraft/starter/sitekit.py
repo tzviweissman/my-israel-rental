@@ -14,8 +14,9 @@ Use from a build's gen/build.py (see scrollcraft/starter/README.md):
 What it writes around the body: the head (title, description, og tags,
 fonts, site.css), the menu bar (name, pages with aria-current, the one CTA
 with a basket count, the phone Menu button), a closing band with every
-contact labelled by what it does (3o.4), the footer with page links and the
-MyIsraelRental line, the phone bar, and site.js. Copy starter/site.css and
+contact labelled by what it does (3o.4), the full footer of rules 3v.1 (who they
+are, the pages, how ordering works, reach us, the base line), the phone bar,
+and site.js. Copy starter/site.css and
 starter/site.js into the build and restyle site.css's tokens.
 """
 from __future__ import annotations
@@ -67,7 +68,12 @@ class Site:
     count: bool = True            # show a basket count on the CTA
     close_extra: str = ''         # a giant line under the closing band
     lang: str = 'en'
-    footer_note: str = 'on <a href="/">MyIsraelRental</a>, free to list, no commission'
+    footer_note: str = 'Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission'
+    about: str = ''               # footer: one line in the owner's words under the name (3v.1)
+    ordering: tuple[str, list[str]] = ('', [])  # footer part: ('Ordering', ['24 to 48 hours ahead', ...]) or ('Visit', [address, hours])
+    socials: list[tuple[str, str]] = field(default_factory=list)  # [('Instagram', url)], only real ones
+    since: int | None = None      # founding year, for the base line
+    year: int = 2026
     og_base: str = field(init=False, default='')
 
     def __post_init__(self):
@@ -124,7 +130,7 @@ class Site:
     </div>{giant}
   </section>
 </main>
-<footer class="foot"><nav aria-label="Pages">{links}</nav>{escape(self.name)}, {escape(self.place)} · {self.footer_note}</footer>
+{self.full_footer()}
 
 <div class="bar" id="bar" aria-hidden="true">
   <p class="p"><b>{escape(self.bar[0])}</b>{escape(self.bar[1])}</p>
@@ -132,6 +138,25 @@ class Site:
 </div>
 <script src="site.js"></script>
 '''
+
+    def full_footer(self) -> str:
+        # rules 3v.1: parts with a heading, each only when the record fills it, then one base line
+        pages = ''.join(f'<a href="{p}.html">{escape(t)}</a>' for p, t in self.pages)
+        reach = ''.join(f'<a href="{KINDS[c.kind][1].format(d=c.digits, v=c.value)}"{' target="_blank" rel="noopener"' if KINDS[c.kind][2] else ''}>'
+                        f'{escape(KINDS[c.kind][0].split(",")[0])} {escape(c.value)}</a>' for c in self.contacts)
+        reach += ''.join(f'<a href="{u}" target="_blank" rel="noopener">{escape(n)}</a>' for n, u in self.socials)
+        parts = [f'<div class="fbrand"><a class="fname" href="index.html">{escape(self.short)}</a>'
+                 + (f'<p>{escape(self.about)}</p>' if self.about else '')
+                 + f'<a class="fcta" href="{self.cta[0]}">{escape(self.cta[1])} <span class="arw" aria-hidden="true">→</span></a></div>',
+                 f'<nav aria-label="Pages"><h4>Pages</h4>{pages}</nav>']
+        if self.ordering[1]:
+            parts.append(f'<div><h4>{escape(self.ordering[0])}</h4>' + ''.join(f'<p>{escape(x)}</p>' for x in self.ordering[1]) + '</div>')
+        if reach:
+            parts.append(f'<div><h4>Reach us</h4>{reach}</div>')
+        since = f' Since {self.since}.' if self.since else ''
+        return ('<footer class="foot full">\n  <div class="fgrid">\n    ' + '\n    '.join(parts) + '\n  </div>\n'
+                f'  <div class="fbase"><span>© {self.year} {escape(self.name)}.{since}</span><span>{self.footer_note} · '
+                '<a href="https://myisraelrental.com/privacy">Privacy</a></span></div>\n</footer>')
 
     def write(self, page: str, title: str, desc: str, og: str, body: str, tail: str = '') -> None:
         html = self.head(page, title, desc, og) + self.header(page) + body + self.footer() + tail + '</body>\n</html>\n'

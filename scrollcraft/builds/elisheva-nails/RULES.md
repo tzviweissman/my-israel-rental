@@ -216,3 +216,7 @@ R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.12 pass: arrival and question-card pieces taken from scrollcraft/starter/kit (tried on kit/test.html); the next-day button is a plain button, no new motion
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+R3v.1 pass: full footer on index, book and contact (who, Pages, Visit with hours and directions, Reach us, base line); contents from the page's own hours, phones and email; no founding year in the record so no "Since"
+R3v.2 pass: the menu bar lists Home, Book and Contact on every page, no jumps in it; looked at all three pages
+R3v.14 pass: three facts under "Book a time" on the first screen (Gel from ₪90, about 45 minutes, more than four years of experience), from her own service rows and studio card; the lede no longer repeats the price
+<!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->

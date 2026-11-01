@@ -215,3 +215,6 @@ R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
 <!-- 29 Oct: all rules re-read against the current index.html; the kitchen clip now dims by fading on the dark ground instead of a filter (same look, frames compared at 0.1 to 0.7 of the split) so the opening scrolls smoothly (R3h.20) -->
+R3v.1 pass: the closing footer is now in parts: who we are (name, Rabbi Samuels' own line from the page, a link with an arrow to Message to order), This page (the page has no other page, so its sections), Ordering (three sizes with prices, free local delivery on a first order), Reach us (WhatsApp, made in Jerusalem, kosher by Vaad HaKashrus), then "© 2026 L.A. Cholent by Rabbi Samuels." with the MyIsraelRental and Privacy line; no founding year in the record so no Since line; check-footer clean; looked at it at 1366 and 390
+R3v.2 n/a: a site of Home alone; the top bar keeps its jumps (Occasions, Kosher, Sizes and prices)
+R3v.14 pass: the line under Message to order on the opening is now the list class btn-facts: From ₪100 / Kosher, hechsher from Rabbi Weiner / Made in Jerusalem, delivered across Israel (all three were already on the page, from their flyer and listing); check-facts clean at 390 and 1366

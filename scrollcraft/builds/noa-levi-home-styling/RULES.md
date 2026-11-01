@@ -216,3 +216,7 @@ R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.12 pass: arrival and question-card pieces taken from scrollcraft/starter/kit (tried on kit/test.html); the next-day button is a plain button, no new motion
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+R3v.1 pass: full footer on index, book and contact (who we are, Pages, Booking, Reach us, base line) replacing the three-column one; contents from the page's own price, areas, hours, WhatsApp and email; no founding year in the record so no "Since"
+R3v.2 pass: the menu bar lists Home, Book and Contact on every page, no jumps; looked at all three pages
+R3v.14 pass: three facts under "Book a session" on the first screen (₪160 an hour, Jerusalem and Beit Shemesh, open 09:00 to 23:00), all from the page's own price block and her record hours
+<!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->

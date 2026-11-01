@@ -218,3 +218,6 @@ R3u.12 pass: pieces taken from scrollcraft/starter/kit only as the next-day line
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
 <!-- 29 Oct: all rules re-read against the current pages and film.js; the only changes are the phone film on repeat and the next-day line (R3u.2/R3u.12) -->
+R3v.1 pass: full footer on index, shop and contact (who we are, Pages, Ordering from the record: 24-48 h lead time, delivery in Jerusalem, cash/bit/bank transfer; Reach us; base line with since 2020 and Privacy); check-footer passes
+R3v.2 pass: the menu bar on all three pages lists Home, Shop, Contact; check-menu passes
+R3v.14 pass: From ₪16 a doughnut, Delivery in Jerusalem, Cash, bit or bank transfer (record: delivery_note, payment_note; price from the shop); check-facts passes

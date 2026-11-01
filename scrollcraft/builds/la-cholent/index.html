@@ -119,7 +119,7 @@
   .btn:focus-visible, .dial:focus-visible, .size-pick button:focus-visible, a:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; }
   .theirs-copy .btn { margin-top: var(--sc-6); }
   /* The proof touching the button: price, supervision, where (their facts). */
-  .proofline { margin: var(--sc-3) 0 0; display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem;
+  .proofline { margin: var(--sc-3) 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem;
     font: 600 var(--sc-t-xs)/1.5 var(--sc-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-soft); }
 
   /* the peak copy, left, over the dark side of the frame */
@@ -301,7 +301,7 @@
   .topbar .tb-links a:hover { border-color: var(--sc-accent); }
   .topbar .btn { min-height: 42px; padding-right: 1.6rem; }
   @media (max-width: 860px) { .topbar { display: none; } }
-  .proofline span:first-child { font-size: var(--sc-t-base); color: var(--sc-ink); font-weight: 700; letter-spacing: 0.04em; }  /* a price is text colour, not the accent (22 Oct 2026) */
+  .proofline li:first-child { font-size: var(--sc-t-base); color: var(--sc-ink); font-weight: 700; letter-spacing: 0.04em; }  /* a price is text colour, not the accent (22 Oct 2026) */
   #order { min-height: calc(100svh - 4rem); }
   .order-stage { padding-top: clamp(4.5rem, 10svh, 6rem); }
   .order-stage > .order { padding-bottom: var(--sc-5); }
@@ -383,11 +383,19 @@
   .closing-base { margin: var(--sc-7) 0 0; padding-top: var(--sc-4); border-top: 1px solid var(--sc-hairline); display: flex; justify-content: space-between; gap: var(--sc-4); flex-wrap: wrap; font-size: var(--sc-t-xs); color: var(--sc-ink-soft); }
   .closing-base a { display: inline; margin: 0; text-decoration: underline; text-underline-offset: 3px; }
 
+  /* the full footer (rules 3v.1) and three true facts under the button (rules 3v.14) */
+  .closing-cols { grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr)); }
+  .closing-cols .fbrand a.fname { font: 300 var(--sc-t-xl)/1.1 var(--sc-font-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink); margin-bottom: 0.8rem; }
+  .closing-cols .fbrand p { max-width: 30ch; }
+  .closing-cols a.fcta { margin-top: 0.4rem; font-weight: 700; color: var(--sc-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .closing-cols a[href^="https://wa.me"] { white-space: nowrap; }
+  .closing-cols a, .closing-cols p { width: fit-content; }
+  .proofline li::before { content: ""; display: inline-block; width: 0.4em; height: 0.4em; border-radius: 50%; background: var(--sc-accent); margin-inline-end: 0.5em; vertical-align: middle; margin-bottom: 0.15em; }
   @media (max-width: 860px) {
     .rest-grid { grid-template-columns: 1fr; }
     .rows li { grid-template-columns: 2.4rem 1fr; }
     .rows li p { grid-column: 2; }
-    .closing-cols { grid-template-columns: 1fr; }
+    .closing-cols { grid-template-columns: 1fr 1fr; } .closing-cols .fbrand { grid-column: 1 / -1; }
     .closing { padding-bottom: 6.5rem; }
   }
 
@@ -561,7 +569,7 @@
             <li><b>3</b><span>Cook on low for about 20 hours.</span></li>
           </ol>
           <a class="btn" href="#order">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
-          <p class="proofline"><span>From ₪100</span><span>Kosher, hechsher from Rabbi Weiner</span><span>Made in Jerusalem, delivered across Israel</span></p>
+          <ul class="proofline btn-facts"><li>From ₪100</li><li>Kosher, hechsher from Rabbi Weiner</li><li>Made in Jerusalem, delivered across Israel</li></ul>
         </div>
 
         <p class="alone" data-sc-cue="0.44 0.55 0.02 0.03">Just throw our raw ingredients into your crock pot, add water, and enjoy.
@@ -739,11 +747,12 @@
     <p class="closing-line"><span class="script">Convenient and consistent.</span>A higher standard of flavor.</p>
     <a class="btn" href="#order">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
     <div class="closing-cols">
+      <div class="fbrand"><a class="fname" href="#top">L.A. Cholent by Rabbi Samuels</a><p>Just throw our raw ingredients into your crock pot, add water, and enjoy.</p><a class="fcta" href="#order">Message to order <span aria-hidden="true">&rarr;</span></a></div>
       <nav aria-label="On this page"><h3>This page</h3><a href="#occasions">Occasions</a><a href="#proof">Kosher and delivery</a><a href="#kit">The kit</a><a href="#order">Sizes and prices</a></nav>
-      <div><h3>Sizes</h3><a href="#order">Medium, feeds 4 to 6, &#8362;100</a><a href="#order">Large, feeds 8 to 12, &#8362;180</a><a href="#order">Kiddush, sized to your guests, &#8362;250</a></div>
-      <div><h3>Find us</h3><p>Made in Jerusalem, delivered across Israel.</p><p>Kosher: Vaad HaKashrus, Rabbi Shmuel Weiner.</p><a href="#order">Message to order</a></div>
+      <div><h3>Ordering</h3><a href="#order">Medium, feeds 4 to 6, &#8362;100</a><a href="#order">Large, feeds 8 to 12, &#8362;180</a><a href="#order">Kiddush, sized to your guests, &#8362;250</a><p>Free local delivery on your first order</p></div>
+      <div><h3>Reach us</h3><a href="https://wa.me/972553311442" target="_blank" rel="noopener">WhatsApp +972 55-331-1442</a><p>Made in Jerusalem, delivered across Israel.</p><p>Kosher: Vaad HaKashrus, Rabbi Shmuel Weiner.</p></div>
     </div>
-    <p class="closing-base"><span>L.A. Cholent by Rabbi Samuels</span><a href="#top">Back to the top</a></p>
+    <p class="closing-base"><span>&copy; 2026 L.A. Cholent by Rabbi Samuels.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission &middot; <a href="https://myisraelrental.com/privacy">Privacy</a></span><a href="#top">Back to the top</a></p>
   </div>
 </footer>
 

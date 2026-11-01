@@ -517,6 +517,21 @@ pages so that you can create them faster". Each step below is a mistake from
 The Gift Boutique (13 to 14 Oct) or Michal Balloons (14 to 15 Oct) that cost
 a round with Tzvi. Done in this order, none of them happens.
 
+0. **Build from the blueprint, never check against the rules afterwards** (Tzvi, 1 Nov 2026: "can we
+   make it build with using the rules as a blueprint rather than building and checking afterwards what
+   was kept and what was skipped which makes it take much longer and isnt perfect"). After fetching the
+   record, `node scripts/blueprint.mjs <build>` writes `BLUEPRINT.md`: every line of the rules checklist
+   as a step, in build order (facts, photos, opening, sections, site structure, prices, order flow,
+   motion, phone, finish), with what the record already decides filled in (the three facts, the footer
+   parts, no kosher or "since" line when the record has none, the first order day). Before building a
+   stage, write the plan for each of its lines: what this site does for that rule, or `n/a: <why the
+   site has no such thing>`; `node scripts/blueprint.mjs --check <build> <stage>` must pass first, and
+   filler ("done", "as rule") is not a plan. Tick each line as it is built. Helpers get the stage of the
+   blueprint they build, never a hand-picked list of rules. RULES.md is no longer answered at the end:
+   check-build and publish-page write it from the blueprint (`--rules`), so it is never stale, and the
+   scripts confirm what was planned instead of discovering what was skipped. Sites made before 1 Nov 2026
+   keep their RULES.md. Rejected: answering RULES.md after building (rules were found missing at the end
+   and every later edit made the whole list "stale" and answered again, 1 Nov 2026 on all 17 sites).
 1. **Read the record, then the real address.** Use the business's actual
    slug from the live record when publishing (Michal Balloons was first
    published under a made-up slug the site would never serve).
@@ -1220,8 +1235,8 @@ small website. A single page stays fine for a business with little to say
    The current page is marked (`aria-current="page"`). On a phone the pages
    fold into a Menu button that opens a panel with a Close button and closes
    on Escape or a tap on a link.
-3. **One footer on every page**: how to reach them, the page links, the
-   MyIsraelRental line.
+3. **One footer on every page**: the full footer of 3v.1 (who they are, the pages, how ordering
+   works, how to reach them, the base line).
 4. **Shared files**: `site.css` (all styles) and `site.js` (menu bar, phone
    bar, reveals, basket) used by every page; page-only code stays in that
    page. A class name used by a page section (`.open`, `.in`) is never reused
@@ -1685,6 +1700,91 @@ uses into its own site.css and site.js and swaps in its own colours.
 Not taken from the same videos, and why: a dark film over the whole hero picture (fails on bright frames,
 3h.9); a character that follows the mouse (8a); countdowns, guilt wording and sign-up progress bars (3j);
 their 3D and app tools.
+
+## 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+
+Tzvi asked for professional designers' scroll and mouse effects and "the general structure they use for
+websites so our sites can feel more like real sites". Ten videos were watched as frames and five real
+business sites were opened (Tartine, Blue Bottle, Sally Hershberger, Olive & June, Barry's). Notes:
+docs/ui-videos/notes/2026-10-31-*.md. He chose 1, 2, 6, 7, 8 to 13 and 16 from the list. He did not choose
+the notice line above the menu, an "Our story" page, or the menu bar that slides away. He also had the
+hand-drawn circle and underline (15) taken out after seeing it. Do not bring those back unasked.
+
+**Structure, on every site.** These make a site read as a real website rather than a long page.
+
+1. **A full footer on every page, the same on each.** Ours ended on one line; every real site ends on a
+   footer in parts, each with a small heading, and each part only when the record fills it:
+   - **who they are**: the name, one line in the owner's words, and a quiet link to the main action. It is a
+     link with an arrow, not a second solid button, because the closing band above already has one (3.3).
+   - **Pages**: every page of the site.
+   - **how ordering works**, or **Visit** for a place: lead time, delivery area, payment, hours, address
+     with a directions link.
+   - **Reach us**: WhatsApp, phone and email, each labelled. Instagram or Facebook only when the record has
+     them.
+   - **a base line** under a hairline: "© 2026 <Name>", a founding-year line when there is one ("Baking
+     since 2020"), "Listed on MyIsraelRental, free to list, no commission" and a Privacy link to
+     https://myisraelrental.com/privacy. Orders go through us, so our privacy page is the one that applies.
+
+   On a phone the parts stack, two to a row, the name part across the top. A phone number never breaks
+   over two lines. This replaces the one-line footer of 3k.3 and sitekit, and says what R3t.4 means by
+   "a real footer". Worked example: scrollcraft/builds/bake-away (the `.foot.full` block in site.css).
+   Check: scripts/check-footer.mjs (R3v.1).
+2. **The menu bar lists the site's pages**, the same pages on every page, with the one main button.
+   Jumps down the home page (#sizes, #prices) are not in the bar of a site that has other pages: they
+   belong on the page itself. A site of Home alone, or Home and its order steps, has no other pages to
+   list, so its jumps stay. Order and booking steps may keep a quieter bar, as real checkouts do.
+   Worked example: Blazin' Boards' home bar went from five jumps to Home, Every board, Your order, as on
+   its other pages. Check: scripts/check-menu.mjs (R3v.2).
+6. **Sections of different heights**, so the scroll has a rhythm: a thin strip, a short band, a middling
+   block and a tall scene in some mix. Never three sections in a row of the same height (within 15%).
+   Check: scripts/check-heights.mjs (R3v.6). Pages under 2.5 screens, or with fewer than four sections, are
+   not judged.
+14. **Three true facts right under the main button** on the home page, small, in one row with a dot each.
+    They come from the record or the owner's own words, never invented: the price from, delivery area,
+    lead time, payment, certificate, area served. Example for Bake away: "From ₪16 a doughnut · Delivery in
+    Jerusalem · Cash, bit or bank transfer". They replace a lone price line there, so the price is one of
+    the three (proof touches the button, 3.2). The class is `btn-facts`; `.facts` was already used for
+    product facts on six sites. Check: scripts/check-facts.mjs (R3v.14).
+
+**Layouts to choose from (7).** Pick by what the business has, never the same layout twice in a row on a
+page. They are in scrollcraft/starter/kit/kit.css, tried on kit/test.html.
+- **bento**: boxes of mixed sizes with the key one biggest and first. Suits shops, beauty, events.
+- **zigzag steps**: a picture and the words change sides each step, labelled "Step 1". Suits services,
+  events, rentals ("how booking works"). It is one of the few places two lanes are right; one left edge
+  (3s.4) still holds inside each lane.
+- **callouts**: one product in the middle, its true facts around it. Needs a clean product shot.
+- **pic-facts**: a picture beside four short facts. Suits rentals, salons, trainers.
+- **peek-row**: a row of cards whose last one is cut off at the edge, swiped sideways. It says there are
+  more. Suits flavours, rooms, past events.
+
+**Effects to choose from, never on every site** (Tzvi: "there are many other mouse and scroll affects we
+can choose from"). They join the kit pieces of 3u, the effects library and docs/inspo as options. A site
+takes the ones that suit its business, never the same set as the site built before it, within the
+budget of 3h.20.
+8. **Light on the cards** (`.glow-cards`): a soft light follows the mouse across a row of price or
+   treatment cards and the borders glow, the neighbours' too. Mouse only, plain on a phone, best on a dark
+   ground. Salons, trainers, home services; wrong for photo menus.
+9. **Fanned photos** (`.fan`): five or more of the owner's own photos under the headline, spread by the
+   mouse; on a phone they spread once in view. Salons, decorators, trainers.
+10. **Rolling letters** (`.roll`): the letters of a link or button roll up on hover. Hebrew rolls word by
+    word. Any category.
+11. **Circle reveal** (`.iris`): a second photo opens in a circle where the mouse enters; a tap on a
+    phone. Before and after, closed and open. Galleries.
+12. **Curtain between pages** (`.curtain`, kit.js): slabs of the brand colour sweep up on a link to
+    another of the site's pages, and the next page opens as they leave. Never for #spots, new tabs, other
+    sites or downloads; links work normally without JS or with motion off. Multi-page sites only.
+13. **Picture buttons** (`.chips[data-for]` and `.swap`): buttons on the first screen change the big
+    picture (Cakes / Boxes / Platters, Hair / Nails, rooms).
+16. **Statement band** (`.statement`): one big line in the owner's words between groups of sections, the
+    business's own words drifting slowly behind it. A pause, short, never holding the scroll.
+
+Every piece respects reduced motion and has a phone version. Copy only the pieces a site uses from
+kit.css and kit.js into its site.css and site.js, with the site's colour tokens.
+
+**Tried and rejected.** A cap of four jumps in a one-page menu: Bun Intended and Michal Simkin have five
+and six and read fine, so the check does not count them. Comparing menu wording across pages failed every
+site whose order page calls its link "Your order", so it compares the pages linked instead. A drawn circle
+around a headline word (15): Tzvi took it out.
 
 ## 4. What is reported to the owner instead (content gaps)
 

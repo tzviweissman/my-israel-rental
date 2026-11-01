@@ -218,3 +218,7 @@ R3u.12 pass: pieces taken from scrollcraft/starter/kit, tried on kit/test.html (
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
 <!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->
+R3v.1 pass: full footer on index, shop and contact (who we are with a quiet Order a platter link, Pages, Ordering from the record: four sizes from ₪300, Jerusalem, payment; Reach us: WhatsApp and phone; base line with Privacy); no founding year, lead time or email in the record, so none shown
+R3v.2 pass: the menu bar on all three pages already lists Home, Shop, Contact; unchanged
+R3v.14 pass: From ₪300 a platter, Serving Jerusalem, Cash, Zelle or bank transfer (record: payment_note, areas; the sizes on the page)
+<!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->

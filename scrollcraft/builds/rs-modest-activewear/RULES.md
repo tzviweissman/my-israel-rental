@@ -214,3 +214,6 @@ R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.12 pass: pieces taken from scrollcraft/starter/kit, tried on kit/test.html
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+R3v.1 pass: full footer on index, shop and contact (who we are, Pages, Visit with directions, Reach us, base line) replacing the three-column one; contents from the page's own address, WhatsApp and email and the record description; no founding year in the record so no "Since"
+R3v.2 pass: the menu bar lists Home, Shop and Contact on every page, no jumps; looked at all three pages
+R3v.14 pass: three facts under "Shop the skirt, ₪320" on the first screen (built-in leggings, collect from the store, send your order on WhatsApp), from the shop page's own collecting step and listing title; the price is the button's own label
