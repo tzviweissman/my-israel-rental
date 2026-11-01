@@ -25,6 +25,21 @@ broken-chew photo; if she sends one and it differs, clip 2 is redone from it.
 - Ground: warm peach from her logo (#F3D7BF family) behind the chew, lit bright and warm (3h.11).
 - Nothing else is on screen. No hands, no fingers, no text in the film.
 
+## How it really happens
+Added 1 Nov 2026 after Tzvi: "the bend and the snap dont look natural". A peanut chew is a sticky block of crisp rice bound in
+peanut butter, so it does not snap clean like glass or a biscuit: it bows first, the bound rice gives way along one line at
+the top of the bend, and it tears apart slowly, grains pulling loose from both faces. Only the chocolate shell cracks sharply,
+along the same line. References: her own photo src/owner/p02.jpg (the cut bars show the inside: loose puffed grains held by
+peanut butter, open holes between them) and slow-motion stock footage of chocolate cracking,
+https://www.gettyimages.in/detail/video/chocolate-cubes-cracking-on-cacao-powder-cocoa-stock-footage/1138362315 (found by search;
+its preview, not a frame-by-frame watch). Her own photo of a chew broken in half (OWNER-QUESTIONS 10) is still the reference to
+check the inside against when it comes.
+
+## Key moment
+The break. It gets its own clip (1b) between its own before still (S0b: bowed, one crack open at the line where it breaks) and
+after still (S1: just apart, grains in the air), filmed as slow motion so it takes the whole clip, never one frame. The bend is
+clip 1a (S0 to S0b) on its own.
+
 ## Steps and clips (one cause, one motion: 3h.13)
 1. Clip 1, about 6 s, start frame S0, end frame S1. The whole chew lies across the screen on peach. It bends
    slowly upward in the middle; a fine crack runs across the chocolate; it snaps into two halves a finger's
@@ -39,6 +54,18 @@ broken-chew photo; if she sends one and it differs, clip 2 is redone from it.
 4. The page, in code: the scroll drives the three clips as one film (canvas frames, 3h.4); a thin crack line
    carries on down the page from the film's end; a "sound on" switch plays a recorded snap only after a tap;
    the order button cracks slightly when pressed.
+
+## Remade 1 Nov 2026 (what the film is now)
+Tzvi: "the bend and the the snap dont look natural". Clip 1 lay still while cracks crawled over the chocolate, broke
+somewhere else and was apart in one smeared frame (check-clip: JUMP; and RUSH where it redrew the plain half). Now:
+1a. S0 to S0b (new still: bowed, one crack at the line where it breaks, clean ground): the bend. check-clip pass.
+1b. S0b to S1, asked for as slow motion: the crack widens, grains pull loose, the halves part; the tear is slowed to half
+    speed again in gen/film.sh. check-clip pass.
+2.  Unchanged (round the frozen break).
+3.  Dropped: check-clip found it rushing at up to 47 a frame and an empty second; her real board photo dissolves in over
+    0.8 s instead and draws back slowly. Ticked off at 8 fps: bend seen, one crack seen at the break line, tear over
+    0.75 s plus the slow-down seen, grains only from the crack seen; a few hairline cracks also show in the chocolate
+    near the bend (not asked for).
 
 ## Stills (Higgsfield nano_banana_2, 2k, 16:9, her photo as the reference)
 - S0: the whole chew across the screen on peach, from her photo's half-dipped piece (kept: rice-crisp texture,

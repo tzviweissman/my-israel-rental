@@ -43,10 +43,11 @@ SEAM = ('<svg class="seam" viewBox="0 0 40 1000" preserveAspectRatio="none" aria
         '<path d="M20 0 L14 90 L25 170 L12 270 L27 360 L16 450 L26 560 L13 650 L24 760 L17 850 L22 940 L20 1000 M16 450 L4 470 M26 560 L38 576"/></svg>')
 
 # The snap film (gen/snap-brief.md, gen/film.sh): one chew bends and snaps, the moment freezes and the camera goes
-# round the break, then time runs and the camera tilts down onto her board. Marks follow film.sh's joins (19.95 s):
-# c2 0.15 the intro steps back as it snaps, c3 0.83 the board's price and button. The break carries no labels: what is
-# inside her chews is not in her record (OWNER-QUESTIONS 3).
-HOME = f'''  <section class="film" id="film" aria-labelledby="h-open" data-frames="180" data-src="assets/film" data-marks="0.15,0.83">
+# round the break, then her real board dissolves in. Marks follow film.sh's joins (23.5 s):
+# c2 0.35 the intro steps back as the tear begins and the small price-and-Order card takes its place for the rest of
+# the film (the review: half the film had no price on a laptop). The break carries no labels:
+# what is inside her chews is not in her record (OWNER-QUESTIONS 3).
+HOME = f'''  <section class="film" id="film" aria-labelledby="h-open" data-frames="200" data-src="assets/film" data-marks="0.35">
     <div class="stage">
       <div class="screen"><canvas aria-hidden="true"></canvas></div>
       <div class="words">

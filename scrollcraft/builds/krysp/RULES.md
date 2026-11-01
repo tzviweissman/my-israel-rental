@@ -38,8 +38,9 @@ R3g.13 pass: 1440x900 and 390x844 first screens hold her board photo, the headli
 R3b.1 pass: first screen says what (deluxe peanut chew boards), where (Jerusalem), the price ($38) and what to do (Order); trust is the dark band straight after the opening
 R3b.2 pass: the price touches the Order button; the hashgacha is a labelled dark band right after the opening and is stated once on the home page
 R3b.3 pass: one solid Order per screen; the header Order is outline; Add buttons sit on tiles; walked the page at several scroll positions
-R3h.20 pass: check-site SMOOTH and SLOW passed; the film holds 3.8 screens; check-speed 23 to 26 ms a frame on a slowed phone; the chew is on her peach; the first frame loads first
+R3h.20 pass: check-site SMOOTH and SLOW passed; the film holds 5 screens; check-speed under the limit on a slowed phone; the chew is on her peach; the first frame loads first
 R3h.21 pass: check-one-scroll passed; only the opening film follows the scroll, the rest scrolls normally and the shop changes on a tap
+R3h.23 pass: check-clip passes every clip used (c1a-bend, c1b-tear, c2-round) and the joined gen/film/opening.mp4 with its one dissolve listed in gen/film.sh; gen/snap-brief.md has How it really happens (her photo's cut bars, a stock slow-motion chocolate crack) and the Key moment (the tear, its own clip between S0b and S1); each step ticked off at 8 fps in the brief, including what was not asked for (a few hairline cracks near the bend)
 R3h.1 pass: check-site OPENING passed: the home page opens full screen on the snap film (31 Oct), one of her chews bending and breaking under the scroll, made from her own photo
 R3n.1 pass: her board photo is about 720 x 540 of 1440 x 900 on a laptop and the full width on a phone, whole, with her peach around it
 R3n.2 pass: the signature is the snap: one of her chews breaks in two and the moment freezes; no other business has a chew to break
@@ -47,16 +48,16 @@ R3n.3 pass: on the Shop, picking a board changes its photo, name, price and Add 
 R3n.4 pass: first screen compared with docs/inspo/product-films-2026-10-21/can-6.8.jpg (a product held with its ingredients frozen round it) and Mobbin re_ (huge letters under a product on a warm ground); ours has both and the break
 R3n.5 pass: "you land and one of her peanut chews bends and snaps in two, the instant freezes and you look inside it, then you see her whole board"; written in CONCEPT.md
 R3g.15 pass: check-fits passed (no photo shown over 1.35 times its size); the opening picture is her own 1448 px photo, shown at most at its own size
-R3h.2 pass: walked at every 5% of the film: the chew snaps, the camera goes round the frozen break into the inside, then down onto her real board photo, with the price and Order button on a card at the end
-R3h.3 pass: full screen, 180 sharp frames (1680 wide on a laptop, a 4:3 crop on a phone so her board ends whole), drawn at their own size and scaled by CSS; looked at 1440x900 and 1920x1080
-R3h.5 pass: no lines in the film itself; the intro words sit on a peach card above the chew and step back as it snaps, the price card comes at the end on the board's grey; readable passed. The labels on the break were removed: what is inside her chews is not in her record
-R3h.7 pass: joins compared frame by frame (gen/film/c1-sheet.jpg, c2-sheet.jpg, c3-sheet.jpg): each clip starts on the still the one before ends on; clip 1 starts at 1.9 s (before that the model drew chocolate onto the plain half) and clip 3 is cut from 2.25 to 3.9 s, where the peach was empty (the review found a blank there); no frame is under 37 in contrast
+R3h.2 pass: walked at every 5% of the film: the chew bows, one crack opens, it tears in slow motion with grains pulling loose, the camera goes round the frozen break, then her real board photo dissolves in, with the price and Order button on a card at the end
+R3h.3 pass: full screen, 200 sharp frames (1680 wide on a laptop, a 4:3 crop on a phone so her board ends whole), drawn at their own size and scaled by CSS; looked at 1440x900 and 1920x1080
+R3h.5 pass: no lines in the film itself; the intro words sit on a peach card above the chew and step back as the tear begins, and on a laptop a small solid card with the price and Order takes their place for the rest of the film, at the bottom on the peach, never over the break; readable passed. The labels on the break were removed: what is inside her chews is not in her record
+R3h.7 pass: joins compared frame by frame (gen/film/tear-sheet.jpg, end-sheet.jpg, c1a-sheet.jpg, c1b-sheet.jpg): the bend ends on S0b where the tear starts, the tear ends on S1 where the round starts (its last drift sped up so the grains land on clip 2's first frame), and her board dissolves in over 0.8 s; check-clip passes the joined film with that one dissolve marked
 R3h.8 pass: the film ends on her board on grey stone, and the next section is the dark brown hashgacha band
 R3h.11 pass: brightness.py on gen/film/opening.mp4: average 60, bright enough; the chew and then the board are the brightest things in every chapter
-R3h.13 pass: the break and its grains are one clip (clip 1: bend, crack, snap, grains out of the break); watched at 4 and 8 fps; no code pieces join the film
+R3h.13 pass: the bend and the tear are two clips, each one action (1a bend with one crack, 1b the tear as slow motion with grains only from the crack); watched at 4 and 8 fps; no code pieces join the film
 R3h.14 pass: the chew stays in frame through the snap and the orbit; on a phone the 4:3 crop keeps the break centred and the board whole
-R3h.18 pass: gen/snap-brief.md lists every object with where it comes from and ends; checked on the film: grains and flakes only leave the break, the halves leave past the edges, the cut goes to the cloth and board as the camera tilts, nothing appears or vanishes in the air
-R3h.19 pass: three clips between four stills (S0 to S3, gen/film), each start and end frame holding the same objects; clip 1's glitch was cut, not regenerated, since the rest of the clip is right
+R3h.18 pass: gen/snap-brief.md lists every object with where it comes from and ends; checked on the film: grains and flakes only leave the crack, nothing on the ground until they land, the board arrives by a dissolve, nothing appears or vanishes in the air (check-clip VANISH and APPEAR pass)
+R3h.19 pass: clips between stills that hold the same objects (S0, S0b, S1, S2, then her photo); the first snap failed (check-clip JUMP and RUSH), so the story changed (a bend clip and a slow tear clip, Tzvi 1 Nov) instead of a re-prompt; clip 3 failed check-clip (RUSH, BLANK) and was dropped for a dissolve into her photo
 R3h.17 pass: the giant KRYSP sits on the plain peach under the chew, and it and the headline step back as the chew snaps; readable passed
 
 ## 3. Sections and worlds

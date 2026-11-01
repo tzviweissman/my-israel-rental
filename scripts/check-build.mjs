@@ -7,7 +7,7 @@
  *   node scripts/check-build.mjs scrollcraft/builds/<folder>     (the site must be served, see below)
  *
  * Per page: check-site, check-fits, check-motion, check-speed, check-same-place, check-one-scroll, readable. Per site: check-concept,
- * check-fingerprints, check-rules, and the independent review (below). Prints one line per check and the first problems of each failure; exits 1 if any fails.
+ * check-fingerprints, check-rules, check-clip on gen/film/opening.mp4 if there is one, and the independent review (below). Prints one line per check and the first problems of each failure; exits 1 if any fails.
  * Pages are read from http://127.0.0.1:8990/<folder>/ (scripts/serve-builds.mjs); set CHECK_BASE to change it.
  * A site is shown to Tzvi or published only after this passes (page rules 3a).
  *
@@ -47,6 +47,15 @@ for (const p of pages) {
   if (fs.existsSync(readable)) runs.push([`readable ${p}`, [readable, url]]);
 }
 for (const s of ['check-concept', 'check-fingerprints', 'check-rules']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), dir]]);
+// the opening film as the visitor sees it (Tzvi, 1 Nov 2026: crumbs vanishing, a snap over in one frame); intended hard
+// cuts are listed in gen/film.sh as "# cuts: <seconds> ..." (times in gen/film/opening.mp4)
+{
+  const film = path.join(ROOT, dir, 'gen', 'film', 'opening.mp4'), sh = path.join(ROOT, dir, 'gen', 'film.sh');
+  if (fs.existsSync(film)) {
+    const cuts = ((fs.existsSync(sh) ? fs.readFileSync(sh, 'utf8') : '').match(/^#\s*cuts:\s*([\d.\s]+)$/m)?.[1] || '').trim().split(/\s+/).filter(Boolean);
+    runs.push(['check-clip opening film', [path.join(ROOT, 'scripts', 'check-clip.mjs'), film, ...cuts.flatMap((c) => ['--cut', c])]]);
+  }
+}
 
 // four at a time (each opens its own browser); results printed in the order above
 const run1 = ([name, args]) => new Promise((done) => {

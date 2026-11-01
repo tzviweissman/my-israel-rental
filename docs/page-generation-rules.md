@@ -1029,6 +1029,24 @@ that policy).*
     tap. `scripts/check-one-scroll.mjs` fails any page with two sections that
     pin while the page scrolls more than half a screen (run by check-build and
     publish-page).
+21. **Every clip is measured, and the brief says how it really happens** (Tzvi, 1 Nov 2026, Krysp: "the bend and
+    the snap dont look natural ... is there a way to control the video creation better so we dont keep having these small
+    issues like random crumbs disappearing"). Krysp's chew lay still while cracks crawled over it, broke somewhere else
+    and was apart in one smeared frame, because the bend and the snap shared one clip and nobody had looked at how a chew
+    really breaks. Three things, before the film goes in:
+   1. **How it really happens.** The brief has a "## How it really happens" section written from a real video or saved
+      reference of the action (its link or docs/inspo path in the section): what the material does, step by step (a
+      chew bows, its chocolate cracks along one line, the sticky inside tears, grains pull loose). The prompts follow it.
+   2. **The key moment gets its own clip.** The brief has a "## Key moment" section naming the one step the film is
+      about; it gets its own clip between its own before and after stills, never shared with the step before it, and is
+      asked for as slow motion so it fills the clip. `~/.claude/hooks/film-gate.mjs` refuses a paid video until the
+      brief has both sections, the object list and Tzvi's approval.
+   3. **Measured, then ticked off.** `node scripts/check-clip.mjs <clip>` on every clip (and check-build on the joined
+      `gen/film/opening.mp4`, intended hard cuts listed in gen/film.sh as `# cuts: <seconds>`): JUMP (a change over in a
+      frame: a one-frame snap, a smear, a pop), RUSH (the whole picture lurching: the model redrawing the product), BLANK
+      (almost nothing on screen), VANISH and APPEAR (on a plain light ground, a crumb that is there and then gone in the
+      open, or turns up from nowhere). Then each numbered step of the brief is ticked off against the clip at 8 fps:
+      seen, or not seen. It caught all three faults of Krysp's first film and passed every other clip we have.
 
 ## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
 

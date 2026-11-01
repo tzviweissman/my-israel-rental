@@ -24,9 +24,9 @@ REFERENCES.md; all ideas and their steps: IDEAS.md.
 ## Chosen
 F (Tzvi, 29 Oct 2026: asked for it bigger, "do it without hands if you can", "yes"). It is the only idea whose event is her product
 breaking, the one moment every peanut chew shares, and the name Krysp says it. The film (gen/snap-brief.md, made 31 Oct
-when Tzvi said "and create the film") is four stills from her photo and three MiniMax H3 clips joined by gen/film.sh: one of her
-half-dipped chews bends and snaps on her peach under the giant KRYSP, the moment freezes and the camera goes round into the broken face
-(no labels: what is inside her chews is not in her record), then time runs and the camera tilts down onto her real board,
+when Tzvi said "and create the film") (remade 1 Nov after "the bend and the snap dont look natural") is five stills from her photo and three
+MiniMax H3 clips joined by gen/film.sh: one of her half-dipped chews bows, one crack opens, and it tears apart in slow motion on her peach under the giant KRYSP, the moment freezes and the camera goes round into the broken face
+(no labels: what is inside her chews is not in her record), then her real board dissolves in,
 where the price and Order wait on a card. The inside is taken from the cut ends of the bars in her photo; if her broken-chew photo
 differs, clip 2 is redone. Scroll-driven frames on a canvas (film.js).
 
