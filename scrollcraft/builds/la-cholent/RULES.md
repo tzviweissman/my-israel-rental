@@ -16,7 +16,7 @@ R3.3 pass: searched for generic lines: none
 R3.4 pass: the facts script found two exclamation marks, both in his own quoted lines; I changed them to full stops; no long dashes; capitals are display type
 R3.5 pass: the first screen names cholent, the crock pot kit and the price from ₪100
 R3.6 n/a: the site is English only, there is no Hebrew version
-R3.7 pass: no FAQ, review or gallery section is shown (the FAQ and gallery blocks stay hidden until the owner sends content); no placeholder text
+R3.7 pass: no FAQ or gallery is shown until the owner sends content; the "What customers wrote to us" section (six WhatsApp messages, 1 Nov 2026) is built but hidden until Rabbi Samuels confirms each customer agreed (message-to-owner.md); remove "hidden" from section#said when he does
 R3.8 pass: searched visible text and markup: no logo wall, laurels, stars, counts, "popular" badges or intro prices
 R3.9 n/a: no ad or flyer message brings visitors here; the first screen carries the flyer words anyway
 R3.10 pass: the only strength on the page is the hechsher, with its rabbi named
