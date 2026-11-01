@@ -4865,6 +4865,7 @@ const he = {
         browse: 'עיון לפי קטגוריה',
         showAll: 'הצג הכל',
         allServices: 'כל העסקים',
+        showMore: 'הצגת {{n}} נוספים',
         viewToggle: 'מצב תצוגה',
         viewList: 'רשימה',
         viewMap: 'מפה',

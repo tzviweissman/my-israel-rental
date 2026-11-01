@@ -5034,6 +5034,7 @@ const en = {
         browse: 'Browse by category',
         showAll: 'Show all',
         allServices: 'All businesses',
+        showMore: 'Show {{n}} more',
         viewToggle: 'View mode',
         viewList: 'List',
         viewMap: 'Map',

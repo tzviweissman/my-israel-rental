@@ -43,6 +43,7 @@ import FeaturedProviders from '../components/marketplace/FeaturedProviders';
 
 const TEAL = 'var(--brand-primary)';
 const GOLD = 'var(--gold)';
+const PAGE = 60;   // business cards per screenful in the grid
 
 // Sort options the dropdown surfaces — keys map 1:1 to the backend
 // `sort` query param (see `list_gigs` in routes/marketplace.py).
@@ -98,6 +99,7 @@ const Services = () => {
   // price ceiling. It is hidden entirely when nothing is flagged.
   const [featuredGigs, setFeaturedGigs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [shown, setShown] = useState(PAGE);   // cards in the grid; Show more adds PAGE
   const [filtersOpen, setFiltersOpen] = useState(false);
   // Nearby-mode local state — coords live in memory only, never on the
   // URL, so shared links can't leak location. Cleared on tab close.
@@ -218,10 +220,10 @@ const Services = () => {
   // Re-fetch gigs whenever any server-side filter changes. Backend does
   // all the heavy lifting so the client is a thin cache.
   useEffect(() => {
-    // The endpoint returns 60 by default: with 62 businesses the two oldest were missing and the
-    // heading said 60 (Tzvi, 1 Nov 2026). Ask for its maximum.
-    // ponytail: one page of up to 200; add paging when there are more businesses than that
-    const params = new URLSearchParams({ limit: '200' });
+    // Every match (limit=0): the endpoint's default of 60 hid the two oldest of 62 businesses and the
+    // heading said 60 (Tzvi, 1 Nov 2026). The count, the business pages on top and the map all need the
+    // whole list; the grid shows it PAGE at a time with a Show more button.
+    const params = new URLSearchParams({ limit: '0' });
     if (selectedCat)   params.set('category', selectedCat);
     // Only send subcategory when a top-level category is also selected
     // — matches the backend's contract and avoids leaking useless
@@ -248,6 +250,7 @@ const Services = () => {
     // Counted for the "who is looking" lines (components/common/DemandLines).
     noteSearch(API, 'services', selectedLoc, selectedCat);
     setLoading(true);
+    setShown(PAGE);
     axios.get(`${API}/marketplace/gigs?${params.toString()}`)
       .then((r) => setGigs(r.data))
       .catch((e) => { console.error(e); toast.error(t('services.loadError', 'Failed to load')); })
@@ -923,7 +926,7 @@ const Services = () => {
                in full grids too. Now ~265px at lg and ~208px at xl. */
             className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-5 gap-y-8"
           >
-            {regularGigs.map((gig) => (
+            {regularGigs.slice(0, shown).map((gig) => (
               /* The admin feature-toggle is a SIBLING of the card, not a
                  child: GigCard renders a <button>, and a button inside a
                  button is invalid HTML that browsers reflow unpredictably
@@ -954,6 +957,18 @@ const Services = () => {
                 )}
               </div>
             ))}
+          </div>
+        )}
+        {viewMode !== 'map' && !loading && regularGigs.length > shown && (
+          <div className="flex justify-center mt-8">
+            <button
+              type="button"
+              onClick={() => setShown((n) => n + PAGE)}
+              className="btn-primary px-6 py-3 rounded-full text-sm font-semibold"
+              data-testid="services-show-more"
+            >
+              {t('services.showMore', 'Show {{n}} more', { n: Math.min(PAGE, regularGigs.length - shown) })}
+            </button>
           </div>
         )}
       </div>
