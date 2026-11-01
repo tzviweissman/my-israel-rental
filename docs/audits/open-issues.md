@@ -291,3 +291,7 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Low] Dashboard away-reply card: `awayReply.body` uses {{count}} with no plural forms, fails test-i18n-parity. First seen 28 Oct 2026 (2026-10-28-site-audit.md). Open.
 - [Low] i18n: `awayReply.body` and `stays.repliesWithinHours` use a count with no plural set, so the parity check fails. First seen 29 Oct, 2026-10-29-ui-audit.md.
 - [Low] Copy: exclamation mark in the away-reply placeholder (en.js:915). First seen 29 Oct, 2026-10-29-ui-audit.md.
+
+## Dead-ends audit of 1 Nov 2026
+- [Low] `POST /notifications/preferences` saves a document nothing reads and no screen writes. Seen 1 Nov (2026-11-01-dead-ends.md). Orphaned; no site promise depends on it.
+- Dead-ends audit 1 Nov: no new broken links or empty promises; still no database in the sandbox, so signed-in clicking was not possible (see "Audit setup" above).
