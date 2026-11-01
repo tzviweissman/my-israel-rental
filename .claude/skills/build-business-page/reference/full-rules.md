@@ -517,6 +517,21 @@ pages so that you can create them faster". Each step below is a mistake from
 The Gift Boutique (13 to 14 Oct) or Michal Balloons (14 to 15 Oct) that cost
 a round with Tzvi. Done in this order, none of them happens.
 
+0. **Build from the blueprint, never check against the rules afterwards** (Tzvi, 1 Nov 2026: "can we
+   make it build with using the rules as a blueprint rather than building and checking afterwards what
+   was kept and what was skipped which makes it take much longer and isnt perfect"). After fetching the
+   record, `node scripts/blueprint.mjs <build>` writes `BLUEPRINT.md`: every line of the rules checklist
+   as a step, in build order (facts, photos, opening, sections, site structure, prices, order flow,
+   motion, phone, finish), with what the record already decides filled in (the three facts, the footer
+   parts, no kosher or "since" line when the record has none, the first order day). Before building a
+   stage, write the plan for each of its lines: what this site does for that rule, or `n/a: <why the
+   site has no such thing>`; `node scripts/blueprint.mjs --check <build> <stage>` must pass first, and
+   filler ("done", "as rule") is not a plan. Tick each line as it is built. Helpers get the stage of the
+   blueprint they build, never a hand-picked list of rules. RULES.md is no longer answered at the end:
+   check-build and publish-page write it from the blueprint (`--rules`), so it is never stale, and the
+   scripts confirm what was planned instead of discovering what was skipped. Sites made before 1 Nov 2026
+   keep their RULES.md. Rejected: answering RULES.md after building (rules were found missing at the end
+   and every later edit made the whole list "stale" and answered again, 1 Nov 2026 on all 17 sites).
 1. **Read the record, then the real address.** Use the business's actual
    slug from the live record when publishing (Michal Balloons was first
    published under a made-up slug the site would never serve).

@@ -100,6 +100,11 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 
 ## 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
 
+**Build from the blueprint, never check afterwards** (Tzvi, 1 Nov 2026): after fetching the record,
+`node scripts/blueprint.mjs <build>` writes BLUEPRINT.md, every checklist rule as a step in build order with
+what the record decides filled in. Plan each stage (`--check <build> <stage>` passes) before building it,
+tick lines as built; RULES.md is written from it at check-build and publish. Full text: full-rules 0b.0.
+
 1. Real slug from the live record before publishing.
    Start with `scrollcraft/starter/fetch_business.py` and the starter
    skeleton (rules 3p); choose the look and pass `check-fingerprints.mjs`

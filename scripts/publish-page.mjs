@@ -85,7 +85,9 @@ const CHECK_ONLY = process.argv.includes('--check');
     const fp = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-fingerprints.mjs'), SRC], { encoding: 'utf8' });
     if (fp.status !== 0) problems.push(`too like a live page:\n${fp.stdout}${fp.stderr}`);
   }
-  // every line of the rules checklist answered in RULES.md, and answered after the last change
+  // every line of the rules checklist answered in RULES.md, and answered after the last change. A site built from a
+  // blueprint (scripts/blueprint.mjs, Tzvi 1 Nov 2026) has RULES.md written from it here, so it is never stale
+  if (fs.existsSync(path.join(SRC, 'BLUEPRINT.md'))) spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--rules', SRC], { encoding: 'utf8' });
   const rules = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rules.mjs'), SRC], { encoding: 'utf8' });
   // a new site is reviewed by someone who did not build it (rules 3a, 27 Oct 2026; check-build.mjs says how)
   const review = path.join(SRC, 'review.md');

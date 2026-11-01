@@ -32,6 +32,10 @@ build that comes out too close to another.
 
    Serve the three with `<picture>` as RS Modest's doors do.
 
+1a. **Write the blueprint before anything else** (page rules 0b.0): `node scripts/blueprint.mjs <folder>` (from the
+   repo root) writes `BLUEPRINT.md`, every rule as a step with what the record decides filled in. Plan each
+   stage, `node scripts/blueprint.mjs --check <folder> <stage>`, then build it and tick its lines.
+
 2. **Copy the skeleton** into `scrollcraft/builds/<folder>/`: `site.css`,
    `site.js` and a `gen/build.py` that imports `sitekit` (example below).
    In `site.js` set `BASKET_KEY`. In `site.css` replace every CHANGE token

@@ -8,6 +8,11 @@ be answered for every site before anyone is shown it.
 
 ## How to use it
 
+**Since 1 Nov 2026 a new site is built from this list, not checked against it afterwards** (page rules 0b.0):
+`node scripts/blueprint.mjs scrollcraft/builds/<site>` turns every line below into a step of `BLUEPRINT.md`, in
+build order, planned before each stage is built and ticked as it is built; RULES.md is then written from it.
+The steps below are how sites made before then keep their RULES.md.
+
 1. `node scripts/check-rules.mjs --template scrollcraft/builds/<site>` writes `<site>/RULES.md`
    with every id below set to `todo`.
 2. Run the scripts named in the HOW column on every page of the site, and do every LOOK by

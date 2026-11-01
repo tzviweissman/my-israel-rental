@@ -16,7 +16,7 @@
  * not build the site, from docs/page-review-checklist.md, with a line "Verdict: PASS". It must be newer
  * than every page, style and script of the site, so any change after the review needs a new one.
  */
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -46,6 +46,11 @@ for (const p of pages) {
   for (const s of ['check-site', 'check-fits', 'check-motion', 'check-speed', 'check-same-place', 'check-one-scroll', 'check-photo-clear', 'check-overlap', 'check-opening-scroll', 'check-blank', 'check-prefill', 'check-arrival']) runs.push([`${s} ${p}`, [path.join(ROOT, 'scripts', `${s}.mjs`), url]]);
   if (fs.existsSync(readable)) runs.push([`readable ${p}`, [readable, url]]);
 }
+// the site-wide checks of rules 3v take every page at once (the same footer and menu on each)
+const all = pages.map((p) => `${base}/${folder}/${p}`);
+for (const s of ['check-footer', 'check-menu', 'check-facts', 'check-heights']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), ...all]]);
+// a site built from a blueprint has RULES.md written from it first (scripts/blueprint.mjs)
+if (fs.existsSync(path.join(dir, 'BLUEPRINT.md'))) spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--rules', dir], { encoding: 'utf8' });
 for (const s of ['check-concept', 'check-fingerprints', 'check-rules']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), dir]]);
 
 // four at a time (each opens its own browser); results printed in the order above
