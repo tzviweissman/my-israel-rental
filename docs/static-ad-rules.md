@@ -224,7 +224,7 @@ videos.
 
 Ordered by how strongly the videos back them and how well they fit people
 posting in groups and on WhatsApp. 1 and 2 were built on 1 Nov 2026; 3 to 5
-are proposals, not built.
+are proposals, not built. The six designs in 9b were built the same day.
 
 1. **A "Review" design** (3 videos): when the business or listing has a real
    review, the headline becomes that review in a comment bubble with the star
@@ -253,6 +253,103 @@ are proposals, not built.
 Not proposed: generated scenes, fake screenshots, sellout and humble-brag
 formats (section 5), and "meme" and "ugly" ads. Those last two are allowed,
 but too easy to get wrong in an ad maker that works for every business at once.
+
+## 9b. Standing out (12 more videos, 1 Nov 2026)
+
+Tzvi, 1 Nov 2026: the five designs "all sound very basic". Twelve more videos
+were read in full (captions) and three were checked frame by frame. What they
+agree on, counted across videos:
+
+- **It must not look like an ad** (8 of 12). Every winner the videos show
+  looks like something people post themselves, or is so plain it reads as a
+  sign. Our white card with a framed photo, headline and three ticks is the
+  "middle ground" one video says ads die in: neither raw nor bold.
+- **The photo and the headline complete each other** (3). Neither works
+  alone, like a video title and its thumbnail. A headline that repeats the
+  photo ("Beautiful apartment") wastes it.
+- **Call out the reader in five to seven words** (5): a place or kind of
+  job plus who it is for ("Moving in Haifa?", "For families of six"). This is
+  the headline, not a tagline. It replaces the AI's general description.
+- **One strong colour, not white** (1, and every poster ad sampled): a full
+  flood of one colour stops the thumb before any word is read.
+- **Several looks at once** (2): in one team only 9% of ads became winners,
+  so the maker should hand over several different designs, not one.
+
+### New designs (all six built 1 Nov 2026, `AdMaker.jsx`)
+
+Each is drawable in code from what we already hold (photos, title, price,
+items, reviews, link), honest, and works in Hebrew.
+
+1. **Colour block** *(seen: Fraser, the three-column soap ad)*. The whole ad
+   is one strong colour taken from the owner's own photo (its most saturated
+   area, darkened until white text passes 4.5:1). The photo sits large and
+   whole; the headline is huge, in white; the link is a white strip at the
+   foot. Two businesses never get the same ad, because the colour is theirs.
+2. **Grid** (2 videos; Dara Denney's top ad of 2024, over $2M spent). Four
+   tiles: two or three of the owner's photos, each whole on its own edge
+   colour, and one tile in the photo's colour holding the headline, the price
+   and the QR. For a business with fewer than three photos, the design is
+   greyed out.
+3. **Side by side** *(seen: Fraser)*. For a business with items or price
+   tiers: three columns, each one item's photo, name and real price, each on
+   its own tint of one colour, with the link in a band across the foot. Real
+   items only; greyed out with fewer than three that have a photo.
+4. **Big words** (2 videos; "billboard", "text-heavy"). Half the ad is the
+   callout headline at the largest size that fits, on a flat colour; the
+   photo takes the other half. Reads at thumbnail size in a WhatsApp group.
+5. **Sticky note** (3 videos, one warning it is overused). A yellow note
+   "stuck" on the photo with a short line in a marker font: the price, or a
+   real review cut short. It must sit over the photo's emptiest part and
+   never cover the subject (page rules 3c). Hebrew needs a handwriting face
+   with Hebrew letters (Amatic SC has them).
+6. **Question and answer** *(seen: Aazar Shad, the Instagram question
+   sticker; Matt Shiver's story ads)*. A question box in the story style with
+   a question a customer would really ask ("Is there parking?") and the
+   owner's answer under it. Needs the owner's question and answer; until the
+   business has them, it is not offered.
+
+And a change to every design: **the headline becomes the callout** (place or
+job plus who it is for), and **the maker draws every design at once** as a row
+of small previews, so the owner picks one instead of guessing.
+
+### Seen in these videos and not adopted
+
+| Format | Why not |
+|---|---|
+| Reddit or tweet lookalike with a second "user" replying | The replies in the example came from the founder's own accounts: a fake review (section 5). Our Review design already holds a real one. |
+| A billboard mockup photo with the ad on it *(seen: Aazar Shad's Munich ad)* | Shows an advert that never stood on a street. |
+| Memes, cartoons, mascots, "Microsoft Paint" fonts | Need a person's joke or an artist per ad; one video says the Paint font split results. |
+| Before and after | Only from the owner's real before and after photos, which we do not hold yet. Worth adding as an upload later for cleaners, movers and renovators. |
+| "Looking for five families…" | The number is a scarcity claim unless it is real. |
+| Made-up statistics ("96% of users") | One video says they work even when invented. Never (section 5). |
+| Negative reviews or "regret" headlines | Would harm the owner or invent a feeling. |
+
+## 9c. How ads are worded (12 more videos, 1 Nov 2026)
+
+Tzvi, 1 Nov 2026: "learn how they structure and word the ads". What the
+copywriting videos agree on, and what the ad maker's prompt (`_AD_SYSTEM` in
+`short_links.py`) now asks for:
+
+- **One idea** (3 videos; Michael Masterson's "rule of one": 91 of 100 top
+  offers were built on a single idea). The points only back it up.
+- **Say who it is for, or where** (5 videos): "Home cleaning in Tel Aviv",
+  "Flat for 6, near the beach", "Moving in Haifa?". The most concrete fact
+  first: the place, the size, how many it sleeps, the kind of service.
+- **Clear before clever** (3): words a ten-year-old follows, one idea a
+  sentence (Jim Edwards' third-grader test).
+- **The reader's situation, not a boast** (2): "for families of 6", not "we
+  are the best". A family, couple or group only when the listing says so.
+- **The caption in order** (2): who or where first, then what it is and one
+  or two facts, then one plain invitation (look, book, message). One action
+  only.
+- **The squint test** (1, Evan Seech): on the picture, the headline is what
+  the eye lands on first; one size and colour step above everything else.
+  Every design here keeps the headline the largest text.
+
+Not adopted: power words ("proven", "secret", "accelerator"), made-up
+"mechanism" names, durations the listing never states ("28-day"), the P.S.
+with a deadline, intro discounts, and "even if" lines that assume the
+reader's pain. All break section 5.
 
 ---
 
@@ -284,3 +381,28 @@ but too easy to get wrong in an ad maker that works for every business at once.
 | [The Only Static Ads Tutorial You'll Ever Need](https://youtu.be/tNe7Y9YU1y8) | Alessio Cordeddu | 29 formats, three layers, stacking formats, which formats we refuse |
 | [The Ultimate Guide to Static Image Ads](https://youtu.be/1FpqxqbHxVQ) | Fraser Cottrell | review in a comment bubble, native storytelling captions, mining reviews, variations |
 | [How I Make Static Image Ads](https://youtu.be/JzwW3hbggXU) | Matthew, founder of Goodo Studios | research before design, headline is 80%, three comparisons max, room for words in the photo |
+| [I Tested 500 Static Ads](https://youtu.be/TouPE2n7mzo) | Fraser Cottrell | colour block, collage grid, side by side, story native (frames checked) |
+| [How To Make Ugly Meta Ads That Convert](https://youtu.be/quXF9Z172MY) | Aazar Shad | the "pretty ugly" headline formula, big words, question sticker, what was refused (frames checked) |
+| [107 Creative Poster Ads](https://youtu.be/9RQoA9FG3xs) | All The Things | one object on one flat colour (frames only) |
+| [10 Meta Ads Creative Formats](https://youtu.be/_ZHS6tW3f_Q) | Dara Denney | grid ad, text-heavy ads, 9% winners, so several looks |
+| [The Ugly Ads Formula](https://youtu.be/OzkRU3Wx_1w) | Alex Cooper | raw or bold, never the middle |
+| [The ONLY Marketing Video A Graphic Designer Needs](https://youtu.be/CzyCiQfqjEg) | Satori Graphics | one clear message (no formats) |
+| [8 Static Creatives Analysed](https://youtu.be/jzXV-U_rSEk) | Blue Sense Digital | photo and headline complete each other, five-to-six-word callouts |
+| [5 Static Ad Formats](https://youtu.be/4STF6AeiTjQ) | Carlos Lorio | sticky note, stars and quote, us versus them |
+| [Psychology of Scroll-Stopping Ads](https://youtu.be/ScEbrSCN6Bs) | Motion | surprise and trust signals (video only, little used) |
+| [Showing the Moment, Not the Problem](https://youtu.be/m_xSpYZE76w) | blake ecom | the moment line as a headline |
+| [I Tested 1,000+ Static Ads](https://youtu.be/4mGhk4heWOc) | Jared Robinson | review that answers a doubt, headliners |
+| [I Analysed 400+ Static Ads](https://youtu.be/UbGPW7N8S18) | Deniz Sancar | contrarian headlines must be backed up, objection answers |
+| [4 Types of Static Ads That Generate Leads](https://youtu.be/wVtwwADTN3U) | Matt Shiver | story-native ads for services, hi-fi and lo-fi mix |
+| [How To Make Ad Headlines That Get Clicks](https://youtu.be/kGfzLjPNsBU) | Alex Hormozi | headline on the banner, caption says who it is for |
+| [The Copy Rule I Learned From The Best Copywriter](https://youtu.be/OyGKFhTf0go) | Alex Hormozi | Masterson's rule of one |
+| [#1 Tip For Headlines That Hook](https://youtu.be/hk42MRVlNzM) | Jim Edwards | benefit-led headline, third-grader test |
+| [Writing Ad Copy: The 4 Rules](https://youtu.be/qGGhnUE7sxY) | Stuff About Advertising | clear first |
+| [7 Catchy Headline Formulas](https://youtu.be/SZb6NA0_ILc) | Jason Whaling | formulas; most refused (section 9c) |
+| [Copy Hacks for Facebook Ads](https://youtu.be/fSZDxK0xfww) | Dara Denney | write the points first, then the lead line |
+| [Facebook Ads for a Home Service Business](https://youtu.be/KAuxJabBkpA) | Jonas Olson | local call-out, caption order, one action |
+| [Facebook Ad Copy for Local Businesses](https://youtu.be/MiYFfa0OEW8) | Travis Peters | short question opening |
+| [Copywriting for Hotel Websites](https://youtu.be/6xLYqVsI0jo) | More Direct Bookings | one ideal guest, the local angle |
+| [What I Learned Running $50M+ in Static Ads](https://youtu.be/h5dn_PTURjc) | Evan Seech | one idea, squint test, cut words |
+| [I Made 150+ Static Ads](https://youtu.be/9hr1uEEap2o) | Nik Pakhrin | who it is for within half a second |
+| [Static Ads Masterclass 2026](https://youtu.be/2BrGawWj1aI) | Fraser Cottrell | skimmable, objection, proof |
