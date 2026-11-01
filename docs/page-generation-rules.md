@@ -577,6 +577,23 @@ a round with Tzvi. Done in this order, none of them happens.
    runs it; and a Claude Code hook (`scripts/hooks/require-references.mjs`) blocks Higgsfield generation
    for the build being worked on until it passes. Sites published before this rule are not asked for one.
    Worked example: `scrollcraft/builds/bake-away/REFERENCES.md`.
+   **The ideas themselves come from the reading, and repeat no other site** (Tzvi, 29 Oct 2026, on Krysp's
+   first four openings: "all your food wow moments are too similar ... did you look at our inspo sources",
+   then "make sure that you dont keep skipping looking through the inspo sources"). REFERENCES.md passed,
+   but a helper had written it and the ideas came from three of its pictures; two were the same kind of
+   event as earlier sites (pieces filling the board, crumbs dropping onto it). So before any idea is shown
+   (a message, a sketch) or any credit spent, the build holds `IDEAS.md`: at least three ideas, one headed
+   "Own", each with `- motion:` (the kind of event, then what happens), `- sources:` (two or more saved
+   pictures from two or more saved sources, each opened by the builder and each named in REFERENCES.md)
+   and `- steps:` (numbered). `node scripts/check-ideas.mjs <build>` fails an idea whose kind
+   `scrollcraft/motions.json` says another site uses (drop, pour, window, assemble, burst, stickers,
+   slats, tumble, untie, journey, dial), a picture that does not exist or is not in REFERENCES.md, and
+   REFERENCES.md naming a picture that is not saved. When an idea is chosen, write `## Chosen: <letter>`
+   and add its kind to motions.json with the build's folder, so the next site cannot repeat it.
+   check-concept runs it for every new build, and a hook (`~/.claude/hooks/ideas-gate.mjs`) blocks paid
+   generation and any sketch widget titled as ideas, openings, concepts or films until it passes. A helper
+   may read the sources too, but the builder opens every picture an idea cites. Worked example:
+   `scrollcraft/builds/krysp/IDEAS.md` (round 1 fails on four counts, round 2 passes).
 5. **Plan the phone frame before generating.** A clip made at 16:9 had to be
    re-cropped three times for phones (the box drifted off centre; the arch
    came out tiny). Generate with the subject centred and a margin, and
@@ -1050,6 +1067,24 @@ that policy).*
     it now changes on a tap. `scripts/check-one-scroll.mjs` fails a page
     whose sections after the first hold the page for more than 1.6 screens
     each, or that has more than three (run by check-build and publish-page).
+21. **Every clip is measured, and the brief says how it really happens** (Tzvi, 1 Nov 2026, Krysp: "the bend and
+    the snap dont look natural ... is there a way to control the video creation better so we dont keep having these small
+    issues like random crumbs disappearing"). Krysp's chew lay still while cracks crawled over it, broke somewhere else
+    and was apart in one smeared frame, because the bend and the snap shared one clip and nobody had looked at how a chew
+    really breaks. Three things, before the film goes in:
+   1. **How it really happens.** The brief has a "## How it really happens" section written from a real video or saved
+      reference of the action (its link or docs/inspo path in the section): what the material does, step by step (a
+      chew bows, its chocolate cracks along one line, the sticky inside tears, grains pull loose). The prompts follow it.
+   2. **The key moment gets its own clip.** The brief has a "## Key moment" section naming the one step the film is
+      about; it gets its own clip between its own before and after stills, never shared with the step before it, and is
+      asked for as slow motion so it fills the clip. `~/.claude/hooks/film-gate.mjs` refuses a paid video until the
+      brief has both sections, the object list and Tzvi's approval.
+   3. **Measured, then ticked off.** `node scripts/check-clip.mjs <clip>` on every clip (and check-build on the joined
+      `gen/film/opening.mp4`, intended hard cuts listed in gen/film.sh as `# cuts: <seconds>`): JUMP (a change over in a
+      frame: a one-frame snap, a smear, a pop), RUSH (the whole picture lurching: the model redrawing the product), BLANK
+      (almost nothing on screen), VANISH and APPEAR (on a plain light ground, a crumb that is there and then gone in the
+      open, or turns up from nowhere). Then each numbered step of the brief is ticked off against the clip at 8 fps:
+      seen, or not seen. It caught all three faults of Krysp's first film and passed every other clip we have.
 
 ## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
 

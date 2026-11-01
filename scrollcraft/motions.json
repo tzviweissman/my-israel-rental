@@ -1,0 +1,83 @@
+{
+  "_about": "The kinds of opening event our sites already use (Tzvi, 29 Oct 2026: 'all your food wow moments are too similar'). Every idea in a build's IDEAS.md names one kind; scripts/check-ideas.mjs refuses an idea whose kind another site already uses. When an idea is chosen, add its kind here with the build's folder, so the next site cannot repeat it.",
+  "drop": {
+    "what": "the product, or something onto it, drops or falls into place",
+    "used_by": [
+      "chicken-munch",
+      "american-crust",
+      "the-brown-box"
+    ]
+  },
+  "pour": {
+    "what": "a liquid is poured, drizzled or blended over or into the product",
+    "used_by": [
+      "bake-away",
+      "the-brown-box"
+    ]
+  },
+  "window": {
+    "what": "a window, ring, arch, cloud shape or pair of doors opens onto the product or photo",
+    "used_by": [
+      "whipped-cup",
+      "elisheva-nails",
+      "rs-modest-activewear",
+      "american-crust"
+    ]
+  },
+  "assemble": {
+    "what": "pieces fly, slide or are set in one by one until they build the product, an arch or a grid",
+    "used_by": [
+      "noa-levi-home-styling",
+      "michal-balloons",
+      "bun-intended"
+    ]
+  },
+  "burst": {
+    "what": "the product or its pieces explode outward",
+    "used_by": [
+      "chicken-munch"
+    ]
+  },
+  "stickers": {
+    "what": "labels or stickers are stuck onto the product or photo",
+    "used_by": [
+      "chicken-munch"
+    ]
+  },
+  "slats": {
+    "what": "bands, blinds or slats of colour swing aside to show the product",
+    "used_by": [
+      "ls-fruit-platter"
+    ]
+  },
+  "tumble": {
+    "what": "the product, cut out, turns or tumbles in 3D",
+    "used_by": [
+      "blazin-boards"
+    ]
+  },
+  "untie": {
+    "what": "a ribbon, wrapping or lid is undone to show the product",
+    "used_by": [
+      "gift-boutique"
+    ]
+  },
+  "journey": {
+    "what": "one film travels from where the product comes from to the finished product",
+    "used_by": [
+      "the-brown-box"
+    ]
+  },
+  "dial": {
+    "what": "a knob or dial on the product is turned",
+    "used_by": [
+      "la-cholent"
+    ]
+  },
+  "snap": {
+    "what": "a solid piece is bent until it breaks in two; the instant freezes",
+    "used_by": [
+      "krysp"
+    ]
+  }
+}

@@ -132,6 +132,10 @@ tick lines as built; RULES.md is written from it at check-build and publish. Ful
    (Tzvi, 28 Oct 2026): `REFERENCES.md` names every `docs/inspo` source, Inspo, Mobbin, 21st and the
    fingerprints, and `node scripts/check-references.mjs <build>` passes before any idea is shown or
    credit spent; a hook blocks Higgsfield generation until it does (full rules 0b.4).
+   **The ideas too** (Tzvi, 29 Oct 2026: "all your food wow moments are too similar"): `IDEAS.md`, each
+   idea citing two saved pictures (from two sources, opened yourself) and naming its kind of event, and
+   `node scripts/check-ideas.mjs <build>` passes before ideas are shown or sketched; it refuses a kind
+   another site uses (`scrollcraft/motions.json`). A hook blocks generation and idea sketches until it does.
 5. Plan the phone frame before generating (subject centred, margin).
    Confirm the motion as numbered steps ("1 floats, 2 snaps, 3 blasts apart,
    4 flies back, 5 drops in") and generate only once they are confirmed; ask
