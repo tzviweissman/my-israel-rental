@@ -262,6 +262,12 @@ R3u.11 | The page passed its checks with a still where the film goes before the 
 R3u.12 | Every moving piece not in the kit was tried on a test page with buttons for each state before it went in | 3u.12 | LOOK: the test page in gen/ or the kit
 R3u.13 | gen/report.md ends with "Not done yet" and "For your call" (at most two) | 3u.13 | LOOK: gen/report.md
 R3u.14 | gen/copy-pass.md holds a shorter version of every line over 20 words and paragraph over three lines; the shorter is used unless it drops a fact | 3u.14 | LOOK: gen/copy-pass.md against the pages
+R3w.1 | Every generated food shot has a real cause on screen (a hand, a spoon, gravity), one event of 2 to 4 s, and its end stays; nothing floats into place or appears, no smoke or flash wipes between shots | 3w.1, 3w.2 | LOOK: the film's frame sheet at 4+ fps; n/a without generated food
+R3w.2 | Generated liquids and steam look real: sauces opaque and thick, no glassy drips or big glass bubbles, steam thin wisps lit from behind, never a cloud | 3w.3, 3w.4 | LOOK: frame sheet; n/a with no liquid or steam
+R3w.3 | Generated food is lit from the side and behind with the camera side darker, never flat from the front; a pour or fall stays sharp when paused | 3w.4, 3w.6 | LOOK: frame sheet, pause the fastest moment; n/a without generated food
+R3w.4 | The film's motion was tried as a cheap draft and judged at 4+ fps before the final was made | 3w.10 | LOOK: gen/ report or the generation log; n/a with no generated film
+R3w.5 | No bite, chew or tear is shown in motion unless Tzvi approved that take; otherwise the film cuts to the result | 3w.12 | LOOK; n/a if the film has none
+R3w.6 | A scroll film's scrub ends where the clip's motion ends (check-clip's figure), the last hold is short, and its last frame is the picture the next section shows | 3w.13, 3w.14 | LOOK: scroll the film's end on a laptop; n/a with no scroll film
 
 ## 9. Finish
 

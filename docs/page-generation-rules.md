@@ -1696,6 +1696,65 @@ Not taken from the same videos, and why: a dark film over the whole hero picture
 3h.9); a character that follows the mouse (8a); countdowns, guilt wording and sign-up progress bars (3j);
 their 3D and app tools.
 
+## 3w. From the seventeen film videos (Tzvi, 1 Nov 2026)
+
+Tzvi asked for many videos on cinematic websites and on realistic food films. Seventeen were watched as
+video, with the words and frame sheets read together. Six were cinematic-website builds. Four were guides to
+realistic AI video. Three were AI food adverts plus one Kling food study, all judged frame by frame. Six were
+on filming real food and drink adverts. Notes and pictures are in `docs/inspo/videos-2026-11-01/`. Each
+line says how many separate videos showed it. What we already do (scroll-bound frames, a plan and price
+before paying, frosted or shaded text over film, the phone loop) is not repeated here.
+
+**Food that looks filmed, not generated**
+
+1. **A real cause is on screen, and it is ordinary.** It is a hand, a spoon or gravity, in a real kitchen
+   or shop light. The best AI food advert has hands in an everyday kitchen, one thing per shot: lifting
+   bacon, a sauce poured from a spoon, tomato laid down. The worst has fries and burger layers floating into
+   place in mid-air, with sparks, and a smoke wall used as the cut. Floating assembly, pieces from nowhere
+   and smoke or flash wipes are refused. (3 AI adverts, frames.) This is 3h.18 seen on real examples.
+2. **One event per shot, 2 to 4 s, and its end stays.** The sauce lands, forms a mound and stays there.
+   Nothing springs back, and nothing else moves except a little steam. (3 videos.)
+3. **Thick and opaque reads as real; clear and glossy reads as AI.** Opaque sauce, burrata, cream and
+   purée read real. Red syrup drips and big bubbles read as glass. This adds to 3o.2. (2 videos, frames.)
+4. **Light it in words the way a food shoot is lit.** Use one large soft light from the side, and a
+   narrower light behind and above that gives glass a thin bright edge and lights the steam. The camera
+   side stays darker. Never use flat light from the front, which washes out the texture. Steam shows only
+   where it is lit from behind, as thin wisps drifting one way, never as a cloud. Keep 3o.2's material
+   words with it, because a backlight alone makes sauce look like glass. (4 filming videos; the lighting
+   plan at 3:20 of qAa0n-Qxmng.)
+5. **Light the background apart from the food.** The food is warm. The background is a little cooler or
+   carries one soft window or leaf shadow, with a few warm lamps far behind as soft circles. Props are in
+   a colour that stands apart from the food. (3 videos.)
+6. **Fast things are sharp.** A pour, a falling piece or a drop is slow motion with sharp edges, and a
+   stream with body folds where it lands. A take whose drops smear when paused is refused. (2 filming
+   videos; the sharp-against-smeared shutter demo.)
+7. **The camera is slow and steady.** It is locked, pushes in slowly, or moves in a slow arc, and the
+   product is never filmed with shaky handheld. Open close on texture and pull out, then end on a push-in
+   or a view from above. (3 videos.)
+8. **Whatever must be in the picture is in the start picture.** Words alone did not stop an extra item.
+   Higgsfield's own workflow video removed an extra place setting only with a layout picture. (1 video.)
+   This joins "keep its traits" in section 8.
+9. **The prompt shape.** Give the time of each shot, the lens, the camera path and the light. Name the one
+   action and the second it lands, add texture words, and finish with plain "Do not" lines: no particles,
+   glow, smoke or flash, no pieces appearing, no change of count. The template is in the folder README.
+   (3 videos, prompts seen on screen.)
+10. **Draft cheap, finish once.** Try the motion as a draft (480p, about a quarter of the price; Seedance
+    draft at 5 s cost 15 credits on screen), look at it at 4 or more frames a second, and only then make
+    the final. check-clip still runs on the final. (2 videos.)
+11. **A refused close-up gets a step back, not new words.** Macro shots of warm, soft surfaces were refused
+    as unsafe twice. If a food close-up is refused, move the camera back a little. (1 video.)
+12. **Biting, chewing and tearing are not solved.** None of the seventeen shows a convincing one; the one
+    bite was hidden behind a face. A film shows what happens after a tear or a bite (a cut to the pieces),
+    not the act itself, unless a draft shows it right frame by frame and Tzvi approves it. (All.)
+
+**On the page**
+
+13. **The scrub ends where the motion ends.** check-clip measures when the clip starts and stops moving. A
+    still start gets little scroll, the scrub ends where the motion ends, and the last hold is short. A
+    clip whose camera does not move gets a slow zoom in code. (1 video, with its figures on screen.)
+14. **The film's last frame is the next section's picture**, so nothing jumps where the film hands over to
+    the page. (3 videos.)
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews
