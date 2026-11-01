@@ -15,14 +15,10 @@ For every template: Category = **Utility**. Name exactly as written below (lower
 ### Template A: `new_order_confirm` (to the business)
 
 1. Name: `new_order_confirm`. Language: English. Category: Utility.
-2. Body, exactly:
-   `New {{1}} on MyIsraelRental from {{2}}: {{3}}`
-   `See it and reply: {{4}}`
-3. Buttons > Add a button > **Quick reply**. Add two: `Confirm` and `Decline`.
-4. Submit. Then create it again in Hebrew (same name, language Hebrew):
-   `{{1}} חדשה ב-MyIsraelRental מ{{2}}: {{3}}`
-   `לצפייה ולמענה: {{4}}`
-   Buttons: `אישור` and `דחייה`.
+2. Body, exactly as submitted:
+   `You received a new {{1}} from {{2}}. Items: {{3}} Order details: {{4}} Please confirm or decline this order with the buttons below.`
+3. Buttons > Add a button > **Custom**. Add two: `Confirm` and `Decline`.
+4. Submit. Then create it again in Hebrew (same name, language Hebrew), with the same four {{ }} in the same order. Buttons: `אישור` and `דחייה`. The Hebrew one was resubmitted with a longer body.
 
 Meta asks for an example for each {{ }}. Use: 1 = order, 2 = Dani, 3 = 2 x Family board, 4 = https://myisraelrental.com/dashboard
 
@@ -31,12 +27,12 @@ The order of the four {{ }} must stay as written, our code fills them in that or
 ### Template B: `order_confirmed` (to the customer)
 
 1. Name: `order_confirmed`. Language: English. Category: Utility. No buttons.
-2. Body: `Your order from {{1}} is confirmed. See your order and how to pay: {{2}}`
-3. Create it again in Hebrew: `ההזמנה שלך מ{{1}} אושרה. לצפייה בהזמנה ובדרכי התשלום: {{2}}`
+2. Body starts: `Your order from {{1}} has been confirmed.` and carries the order link as {{2}}.
+3. Create it again in Hebrew with the same two {{ }} in the same order.
 
 Examples: 1 = Blazin Boards, 2 = https://myisraelrental.com/orders/track/abc123
 
-Approval usually takes minutes to a day. When both are approved, tell Claude and it switches the feature on. Until then the old message (no buttons) keeps going out, so nothing breaks in the meantime.
+Approval usually takes minutes to a day. When both are approved, tell Claude and it switches the feature on. Until then no WhatsApp goes out at all (Meta's business check has the account locked); owners still get email and the bell.
 
 ## 2. Connect the webhook
 
