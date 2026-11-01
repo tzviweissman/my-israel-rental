@@ -218,7 +218,10 @@ const Services = () => {
   // Re-fetch gigs whenever any server-side filter changes. Backend does
   // all the heavy lifting so the client is a thin cache.
   useEffect(() => {
-    const params = new URLSearchParams();
+    // The endpoint returns 60 by default: with 62 businesses the two oldest were missing and the
+    // heading said 60 (Tzvi, 1 Nov 2026). Ask for its maximum.
+    // ponytail: one page of up to 200; add paging when there are more businesses than that
+    const params = new URLSearchParams({ limit: '200' });
     if (selectedCat)   params.set('category', selectedCat);
     // Only send subcategory when a top-level category is also selected
     // — matches the backend's contract and avoids leaking useless
