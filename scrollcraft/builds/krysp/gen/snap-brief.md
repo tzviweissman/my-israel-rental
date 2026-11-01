@@ -67,6 +67,19 @@ somewhere else and was apart in one smeared frame (check-clip: JUMP; and RUSH wh
     0.75 s plus the slow-down seen, grains only from the crack seen; a few hairline cracks also show in the chocolate
     near the bend (not asked for).
 
+## Tear remade again (Tzvi, 1 Nov 2026: "fix it")
+After the 1 Nov remake the review and Claude still saw hairline cracks creeping over the chocolate before the tear, the plain
+half staying a stiff block, and a clean brittle break with no sticky strands. Clip 1b again, S0b to S1, two takes, the one
+that passes check-clip and the 8 fps tick-off kept:
+1. Only the one crack at the break line moves; no other line appears anywhere on the chocolate.
+2. Both halves flex a little as they are pulled apart; the plain half is not a rigid block.
+3. Sticky peanut-butter strands stretch across the widening gap, thin out and break, each end springing back into its own
+   face before the halves settle (S1 has no strands).
+4. Grains pull loose only from the crack and drift out slowly.
+Result: take A failed check-clip (JUMP at 2.0 s). Take B passed and is used; ticked off at 4 fps: 1 seen (no other line on
+the chocolate), 2 seen (the chocolate half tips as it parts), 3 seen (strands stretch from 1.5 s, thin, break and spring
+back by 4.25 s), 4 seen (grains and flakes only from the gap; one flake leaves past the top edge).
+
 ## Stills (Higgsfield nano_banana_2, 2k, 16:9, her photo as the reference)
 - S0: the whole chew across the screen on peach, from her photo's half-dipped piece (kept: rice-crisp texture,
   peanut-butter colour, dark chocolate on one half with white drizzle lines).

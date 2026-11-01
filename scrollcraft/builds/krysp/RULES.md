@@ -40,7 +40,7 @@ R3b.2 pass: the price touches the Order button; the hashgacha is a labelled dark
 R3b.3 pass: one solid Order per screen; the header Order is outline; Add buttons sit on tiles; walked the page at several scroll positions
 R3h.20 pass: check-site SMOOTH and SLOW passed; the film holds 5 screens; check-speed under the limit on a slowed phone; the chew is on her peach; the first frame loads first
 R3h.21 pass: check-one-scroll passed; only the opening film follows the scroll, the rest scrolls normally and the shop changes on a tap
-R3h.23 pass: check-clip passes every clip used (c1a-bend, c1b-tear, c2-round) and the joined gen/film/opening.mp4 with its one dissolve listed in gen/film.sh; gen/snap-brief.md has How it really happens (her photo's cut bars, a stock slow-motion chocolate crack) and the Key moment (the tear, its own clip between S0b and S1); each step ticked off at 8 fps in the brief, including what was not asked for (a few hairline cracks near the bend)
+R3h.23 pass: check-clip passes every clip used (c1a-bend, c1b-tear, c2-round) and the joined gen/film/opening.mp4 with its one dissolve listed in gen/film.sh; gen/snap-brief.md has How it really happens (her photo's cut bars, a stock slow-motion chocolate crack) and the Key moment (the tear, its own clip between S0b and S1); each step ticked off at 8 fps in the brief, the tear in two takes, the one failing check-clip (JUMP) left out
 R3h.1 pass: check-site OPENING passed: the home page opens full screen on the snap film (31 Oct), one of her chews bending and breaking under the scroll, made from her own photo
 R3n.1 pass: her board photo is about 720 x 540 of 1440 x 900 on a laptop and the full width on a phone, whole, with her peach around it
 R3n.2 pass: the signature is the snap: one of her chews breaks in two and the moment freezes; no other business has a chew to break
@@ -54,10 +54,10 @@ R3h.5 pass: no lines in the film itself; the intro words sit on a peach card abo
 R3h.7 pass: joins compared frame by frame (gen/film/tear-sheet.jpg, end-sheet.jpg, c1a-sheet.jpg, c1b-sheet.jpg): the bend ends on S0b where the tear starts, the tear ends on S1 where the round starts (its last drift sped up so the grains land on clip 2's first frame), and her board dissolves in over 0.8 s; check-clip passes the joined film with that one dissolve marked
 R3h.8 pass: the film ends on her board on grey stone, and the next section is the dark brown hashgacha band
 R3h.11 pass: brightness.py on gen/film/opening.mp4: average 60, bright enough; the chew and then the board are the brightest things in every chapter
-R3h.13 pass: the bend and the tear are two clips, each one action (1a bend with one crack, 1b the tear as slow motion with grains only from the crack); watched at 4 and 8 fps; no code pieces join the film
+R3h.13 pass: the bend and the tear are two clips, each one action (1a bend with one crack; 1b the tear as slow motion, sticky strands stretching and breaking back into each face, grains only from the gap); watched at 4 and 8 fps; no code pieces join the film
 R3h.14 pass: the chew stays in frame through the snap and the orbit; on a phone the 4:3 crop keeps the break centred and the board whole
 R3h.18 pass: gen/snap-brief.md lists every object with where it comes from and ends; checked on the film: grains and flakes only leave the crack, nothing on the ground until they land, the board arrives by a dissolve, nothing appears or vanishes in the air (check-clip VANISH and APPEAR pass)
-R3h.19 pass: clips between stills that hold the same objects (S0, S0b, S1, S2, then her photo); the first snap failed (check-clip JUMP and RUSH), so the story changed (a bend clip and a slow tear clip, Tzvi 1 Nov) instead of a re-prompt; clip 3 failed check-clip (RUSH, BLANK) and was dropped for a dissolve into her photo
+R3h.19 pass: clips between stills that hold the same objects (S0, S0b, S1, S2, then her photo); the first snap failed (check-clip JUMP and RUSH), so the story changed (a bend clip and a slow tear clip, Tzvi 1 Nov); the tear was made in two takes and the one that passed check-clip kept; clip 3 failed check-clip (RUSH, BLANK) and was dropped for a dissolve into her photo
 R3h.17 pass: the giant KRYSP sits on the plain peach under the chew, and it and the headline step back as the chew snaps; readable passed
 
 ## 3. Sections and worlds

@@ -20,16 +20,15 @@ Used with Playwright at 1440x900, 1280x650, 390x844 and 360x640 (touch), plus re
 
 ## The film
 
-Honest view: better than a one-piece cartoon bend, but still not fully natural.
+Re-looked after the tear clip was remade (frames 45 to 99 of assets/film/d as a contact sheet, and the scroll from 25% to 55% in 2% steps at 1440x900 and 390x844). Honest view: now clearly more natural, and it finally reads as a chewy bar.
 
-What works: the cracks in the chocolate (frames 61 to 73) appear where the surface is under strain, the interior then shows the real crisp-rice texture, grains and chocolate flakes fly out of the break in slow motion, and the camera moves in on the break so the close-up looks like a real macro shot. No words cover the break. The end photo is whole and the Order card is in place.
+What works: the caramel pulls into a sheet of sticky strands between the halves, the strands thin and snap one after another, the pieces flex and settle, grains and chocolate flakes drift out in slow motion, and the macro close-up that follows still looks like a real camera move. The chocolate cracks, the long crawling crack in the old clip, are gone. No words or card cover the break on laptop or phone, and no blank screen.
 
-What still looks off:
-- The bar is already bowed at 0% and stays bowed for the first third of the scroll; nothing pushes it, so the bend has no visible cause (no hands, no weight). It simply sits there until the crack.
-- The crack is in the chocolate only; the crisp-rice side stays a rigid block with a sharp vertical edge. At frames 69 to 77 the dipped half suddenly changes: the coating pops open and the inside appears between two frames, a quick morph rather than a continuous tear.
-- A chewy bar should stretch (caramel strands, a stringy tear). Here it breaks clean like brittle chocolate; no strands appear at any point.
-- The two halves move apart quickly after 77 and the left half changes from a long shape to a short block; the shapes do not match from frame to frame.
-- Small: the grains hang in the air the same way in the last 10% of the break, and the left piece is blurred to the point where the drizzle looks smeared (frames 85 to 97).
+What is still a little off:
+- Frames 63 to 66 (about 36 to 38% on the page): the closed bar goes to a wide gap full of strands within one step, so the strands seem to appear at once rather than grow out of the join; the coating on the right half is already open when they show. A small pop, not a jump to another scene.
+- The strands are very even (a comb of five or six parallel threads) and several let go in the same frame (84 to 87); real caramel would thin unevenly and break at different times.
+- The left half goes from bowed at the start to straight and block-shaped once it separates, and the bar is still bowed with no visible cause for a third of the scroll.
+- Small: the left half is still blurred in the close-up so its drizzle looks smeared.
 
 ## FAILs
 None.
