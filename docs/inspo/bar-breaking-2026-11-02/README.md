@@ -33,3 +33,11 @@ Source: https://www.pinterest.com/pin/468796642486651042/ (0 to 3 s)
 Also seen, not kept: AI chocolate adverts (pins 1146869861386947315, 127578601938968152, 675962225366040171)
 with floating bars, explosions and smoke, exactly what 3w.1 refuses; YouTube chocolate snap ASMR clips
 were dark and too close to judge the break.
+
+## ai-stretch-held-apart.jpg — liked by Tzvi (AI, "Neon Bite" advert on Pinterest)
+Tzvi, 2 Nov 2026: "this one looks pretty good" (his screen recording; frames at 6 fps, first 2.4 s).
+- The bar is already in two halves, held a little apart and still; the camera pushes in slowly.
+- The caramel spans the gap as a web, not threads: thick at the faces, thinning in the middle, with
+  uneven holes opening. The filling layer shows in both faces.
+- Why it works: one slow event, nothing breaks on screen, so there is nothing for the model to get wrong.
+- Not to copy: the sprinkles that then burst out of the gap from nowhere (3w.1).
