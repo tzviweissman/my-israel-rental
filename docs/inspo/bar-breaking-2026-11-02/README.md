@@ -67,3 +67,12 @@ Floating truffles, swirls and fruit bursting in mid-air: nothing has a cause (3w
 ### What the five liked adverts share
 Not one shows the bar being torn in close-up. They start from the halves already apart, or a crack line
 that only opens; the sticky web is the whole event; the camera hardly moves.
+
+## How those adverts were made (found 2 Nov 2026)
+The account behind the five liked adverts ("AI network visualization" on Pinterest) links its prompts at
+https://adprompts.stunprompt.com (81 prompts, 48 food and drink). The model is never named. What they share:
+- One long text-to-video prompt for the whole advert, 10 to 15 s, split into timed beats of 1.5 to 2 s
+  (impact, freeze, transform, orbit, macro, collision, settle, hero shot), camera and "Phantom camera" lighting
+  words, and a long negative list. Several start from a 6-panel storyboard image made first.
+- Famous products the model already knows (KitKat, Sprite, Cadbury, Milka), invented freely, not one real
+  item from a photo; everything moves all the time (orbits, swirls, splashes), which hides small faults.
