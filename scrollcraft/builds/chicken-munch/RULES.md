@@ -80,13 +80,13 @@ R8a.1 pass: no 21st components or external script hosts; only the Google Fonts s
 R3b.4 pass: facts carry the page, nothing padded
 R3c.3 pass: the kosher worry is answered by the band under the opening and in the footer
 R3c.8 n/a: the owner has not told us what happens after the order (asked in message-to-owner.md questions 3 and 4)
-R3e.10 pass: each card has the name largest, feeds line, one line of what is in it and the price in the card colour; the cards of a row are built as photo, text, price row so titles and prices sit at the same height (looked at at 1440x900 and 390x844); check-site ALIGN passed
+R3e.10 pass: each card has the name largest, feeds line, one line of what is in it and the price in the card colour; the cards of a row are built as photo, text, price row so titles and prices sit at the same height; the two pan cards have no photo (29 Oct, the owner asked), title then price row at the same heights (looked at at 1440x900 and 390x844); check-site ALIGN passed
 R3e.14 pass: six text sizes as CSS variables in site.css: --t1 14px small, --t2 17px body, --t3 titles and prices, --t4 headings, and --f and --f2, the two sizes of his logo name (opening CHICKEN and MUNCH; MUNCH and the footer name share --f2); every font-size in the file reads one of them; computed sizes counted on every page: home 6, menu 5, order 5, contact 5 at 1440x900 and 1280x650, and 5 on every page at 390x844. Cost: prices are now the same size as card titles (they were larger), headings top out at 4.4rem, the footer name is one line on a laptop and two on a phone
 R3c.9 pass: radii 999px pills and 14 to 22px photos; one icon (the arrow, lucide shape); no two-colour gradients; one shadow style on the opening bowl
 R3s.4 pass: check-site ALIGN passed
 R3s.6 pass: check-site ALIGN passed; Add buttons are all the same outline pill
 R3s.7 pass: buttons in sentence case, pale dividers, body line height 1.5 or more
-R3s.9 pass: the kosher band is one red band, the savings tag is one style everywhere (a white pill on a photo, black on the white pan photos)
+R3s.9 pass: the kosher band is one red band, the savings tag is one style everywhere (a white pill on a photo or on the dark Roaster card, black on a white photo)
 R3s.12 n/a: owner must send a photo of himself or his kitchen; his real product photos come right after the opening
 R3s.14 n/a: the owner has given no counts or numbers; only prices are shown big
 R3s.11 n/a: owner must tell us why the boxes cost what they cost (asked in message-to-owner.md, question 5)
@@ -99,7 +99,7 @@ R3g.12 pass: check-site FLOW filled the order form and followed it to the writte
 R0b.12 n/a: not published, so there is no pages-list preview clip yet
 
 ## 4. Photos and media
-R8.1 n/a: owner must send a matching set (one photo per box and per pan, same angle and ground); today the three box photos come from three shoots (Mini and Grand are one box photo at two crops, the Supreme is a pile of chicken on yellow) and the 9x13 pan photo is cut flat at its bottom edge in the file the owner sent, so it runs off the bottom of its frame; no uncut copy exists in src/owner: listed for the owner
+R8.1 n/a: owner must send a matching set (one photo per box and per pan, same angle and ground); today the three box photos come from three shoots (Mini and Grand are one box photo at two crops, the Supreme is a pile of chicken on yellow) ; the pans have no picture since 29 Oct (he did not like the cut 9x13 and the roaster shown as two photos of the same tray and asked to remove them): a photo of each size is listed for the owner
 R8.6 n/a: all five kinds with a photo (Classic, Hot Poppers, Cornflake, Fruity, Rice Krispie) are now product hero shots edited from his own photos (dark plinth, its own coating round it, one warm light; Classic's lid number checked: 055-331-6975); the boxes and pans still need a clean photo each from the owner (listed in the report)
 R8.2 pass: his own photos and five hero shots edited from his bowl photos (Higgsfield nano_banana_2); no stock. The generated box-full.webp was removed 25 Oct (Tzvi asked): the Supreme box card on home and menu is now his own listing photo, assets/box-yellow.webp cut unchanged from src/owner/shot-box.png; looked at on laptop 1440 and phone 390, the labelled sauce pots show. All three box cards are the same box, his only box photo; photos of each box are asked for in message-to-owner.md item 2
 R3p.7 pass: every kind of chicken is a tile; seven show his photo (Shnitzel Bites and Pretzel added 25 Oct from his own photos, cropped only), Buffalo Wings is a plain colour tile until he has a photo
@@ -200,3 +200,21 @@ R3k.9 pass: ran node scripts/check-site.mjs http://localhost:8791/chicken-munch/
 R3h.18 n/a: no film on any page (checked 26 Oct: assets/film is an old opening no page loads); the opening is his photo with code letters
 R3h.19 n/a: no film on any page; assets/film is an old opening no page loads
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
+R3k.10 pass: the day field fills with today, the first day the page accepts (it states no lead time or closed days); quantity and choices left to the customer; check-prefill clean
+R3u.2 n/a: the order page states no closed days, lead time or limit (the day field starts on today; the owner's last day to order is asked in message-to-owner.md item 3); the 20 cap on a quantity is a page limit, not the owner's
+R3u.3 pass: order.html shows "about $17 a person" (Mini, $69 over the 4 of "Feeds 3 to 4"), $14 (Grand, 10), $13 (Supreme, 16), ₪34 (9x13, 8), ₪32 (Roaster, 20), from the top of each "Feeds" range rounded down, looked at at 1440x900 and 390x844; home and menu already show $14 a person for the Grand
+R3u.5 n/a: the home page already arrives in its own set order (letters, bowl, stickers, line, button over about 1.5 s); check-arrival passes unchanged
+R3u.6 n/a: the first screen is one bowl on one backdrop; the three stickers already drift against the mouse
+R3u.7 n/a: the first screen has its own moving letters, and the headline "The taste of America" has no list of occasions
+R3u.8 pass: a gold sticker with a black ring, turned 4 degrees (the shape of the Kosher and Shabbos stickers on his opening bowl), over the headings "Pick your box" and "By the pan" on home and "Premium chicken boxes" and "By the pan" on menu (the one over "Eight kinds of chicken" was taken off on 29 Oct so that section fits a short laptop screen, check-fits), looked at at 390x844 and 1440x900; shape recorded for fingerprints.json by the lead
+R3u.9 pass: contact.html questions (filled by mir-faq.js once the owner answers) restyled as rounded cards on details with a gold "+" circle turning to "x" and a smooth open; two filled in by hand and opened at 390x844
+R3u.10 n/a: one place, Jerusalem
+R3u.12 pass: pieces taken from scrollcraft/starter/kit (question cards), tried on kit/test.html
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 30 Oct: rules re-read after joining the two 29 Oct changes (pans without pictures from main, the short-laptop fit and question cards from the 3u round); nothing else changed -->
+R3v.1 pass: full footer on index, menu, order and contact (who we are with an Order now link, Pages, Ordering: Munch boxes from $69, pans from ₪275 or $85, delivery in central Jerusalem ₪30 to ₪50, hechsher of Rav Akiva Dershowitz; Reach us with WhatsApp, US phone and email; base line with Privacy); no hours or founding year in the record, so none shown; check-footer passes
+R3v.2 pass: the menu bar on all four pages lists Home, Menu, Order, Contact, no jumps; unchanged by this pass; check-menu passes
+R3v.14 pass: Munch boxes from $69, Delivery in central Jerusalem, Hechsher of Rav Akiva Dershowitz (the page's own price, delivery and kosher lines; the old two-line price proof became the first fact); check-facts passes
+<!-- 1 Nov 2026: footer checked again after a last fix (phone footer columns, duplicate page list, contact link); check-footer, check-menu and check-facts pass -->

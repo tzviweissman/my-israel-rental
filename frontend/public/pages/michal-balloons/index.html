@@ -19,7 +19,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>מיכל בלונס · עיצוב בלונים בירושלים</title>
 <meta name="description" content="עיצוב בלונים לאירועים בירושלים והסביבה: שערי בלונים, מרכזי שולחן, עמדות צילום ובלונים בהתאמה אישית. בתיאום מראש בוואטסאפ.">
-<link rel="icon" href="/pages/michal-balloons/assets/balloon.webp?v=mvo6y10z">
+<link rel="icon" href="/pages/michal-balloons/assets/balloon.webp?v=mvyanu09">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -101,6 +101,13 @@
       -webkit-mask-image: linear-gradient(180deg, #000 82%, transparent); mask-image: linear-gradient(180deg, #000 82%, transparent); }
     .hero .inner { justify-content: flex-start; padding-top: calc(10svh + 118vw * 9 / 16 + 1rem); padding-bottom: 0; }
     .hero h1 { font-size: clamp(2.5rem, 1rem + 8vw, 3.4rem); }
+  }
+  /* phone, motion allowed: the opening plays on repeat in one screen (script adds .loop; Tzvi, 29 Oct 2026) */
+  .hero.loop { height: auto; }
+  .hero.loop .stage { position: relative; top: 0; }
+  @media (max-width: 760px) { /* the whole arch fits the screen's width on the loop, not cropped at the sides */
+    .hero.loop .film { inset: 6svh auto auto 0; width: 100vw; }
+    .hero.loop .inner { padding-top: calc(6svh + 100vw * 9 / 16 + 1.4rem); }
   }
   @media (prefers-reduced-motion: reduce) {
     .hero { height: auto; }
@@ -191,7 +198,7 @@
   .gal { padding-bottom: clamp(1.5rem, 5svh, 3rem); }
   .work figcaption { font-size: .85rem; }
   .gal .chips2 { margin-top: 1rem; } .gal .work { margin-top: 1rem; } .gal .showall { margin-top: .9rem; }
-  .book.sec { padding-block: clamp(1.5rem, 5svh, 4rem); } .book .card { margin-top: 1.2rem; }
+  .book.sec { padding-block: clamp(1.5rem, 4svh, 4rem); } .book .card { margin-top: 1.2rem; }
   @media (max-width: 760px) { .chips2 { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); } .chip { flex: none; } }
   .work img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; scale: 1.07; border-radius: 26%; box-shadow: var(--shadow); background: var(--cream-2); clip-path: inset(3.5% round 24%); }
   .work figcaption { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -229,7 +236,7 @@
   .nodate { display: flex; align-items: center; gap: .6rem; margin-top: 1rem; min-height: 44px; cursor: pointer; }
   .nodate input { width: 20px; height: 20px; accent-color: var(--sage-ink); }
   .err { margin: .8rem 0 0; color: #9A3B2E; font-weight: 500; }
-  .sum { margin-top: 1.2rem; padding: .9rem 1.1rem; border-radius: 14px; background: var(--cream); display: grid; gap: .2rem; font-size: .95rem; }
+  .sum { margin-top: .8rem; padding: .6rem 1.1rem; border-radius: 14px; background: var(--cream); display: grid; gap: .2rem; font-size: .95rem; }
   .sum:empty { display: none; }
   .card .send .ghost { min-height: 52px; }
   /* good to know: calm */
@@ -250,8 +257,6 @@
   @media (max-width: 640px) { .sign { aspect-ratio: 1.25 / 1; } }
   .sign canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
   .sign .hint { position: absolute; inset: auto 0 -1.6rem 0; font-size: .85rem; color: var(--soft); }
-  .foot { background: var(--cream-2); border-top: 1px solid var(--line); color: var(--soft); padding-block: 1.6rem calc(1.6rem + var(--pad-bottom, 0px)); font-size: .9rem; }
-  .foot .wrap { display: flex; flex-wrap: wrap; gap: .6rem 1.5rem; justify-content: space-between; }
 
   /* phone: the action pinned to the bottom after the opening */
   .dock { display: none; }
@@ -301,23 +306,12 @@
   .book .sum { background: #fff; }
   .book.sec { padding-block: clamp(3rem, 9svh, 6rem); }
   .know { background: var(--cream); }
-  .close { position: relative; min-height: min(100svh, 56rem); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: clamp(4rem, 10svh, 7rem) 0; background: var(--cream) url(/pages/michal-balloons/assets/arrive-last.webp?v=mvo6y10z) 50% 50% / cover no-repeat; }
+  .close { position: relative; min-height: min(100svh, 56rem); display: flex; flex-direction: column; justify-content: center; align-items: center; padding: clamp(4rem, 10svh, 7rem) 0; background: var(--cream) url(/pages/michal-balloons/assets/arrive-last.webp?v=mvyanu09) 50% 50% / cover no-repeat; }
   .close .wrap { position: relative; }
   .close h2, .close h2 .acc { color: var(--sage-ink); }
-  @media (max-width: 760px) { .close { background-image: url(/pages/michal-balloons/assets/arrive-m-last.webp?v=mvo6y10z); background-size: 190% auto; background-position: 50% 35%; min-height: 80svh; } }
+  @media (max-width: 760px) { .close { background-image: url(/pages/michal-balloons/assets/arrive-m-last.webp?v=mvyanu09); background-size: 190% auto; background-position: 50% 35%; min-height: 80svh; } }
   .signsec { background: var(--cream-2); text-align: center; padding-block: clamp(2rem, 6svh, 4rem) clamp(1.5rem, 4svh, 2.5rem); overflow: hidden; }
   .signsec .sign { margin-top: 0; }
-  .foot { background: var(--night); color: #C9D3CF; border-top: 0; padding-block: clamp(3rem, 8svh, 5rem) calc(1.6rem + var(--pad-bottom, 0px)); font-size: .95rem; }
-  .foot .wrap { display: block; }
-  .foot .last { margin: 0; color: #fff; font-weight: 700; font-size: clamp(2.2rem, 1rem + 4.4vw, 4.8rem); line-height: 1; letter-spacing: -.02em; max-width: 12em; }
-  .foot .last .acc { color: var(--gold); }
-  .foot .act { margin: 1.8rem 0 clamp(2rem, 6svh, 3.5rem); }
-  .foot .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem 2rem; padding-top: 2rem; border-top: 1px solid rgb(255 255 255 / .18); }
-  .foot h3 { font-size: .8rem; letter-spacing: .1em; color: var(--gold); font-weight: 600; margin-bottom: .6rem; }
-  .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
-  .foot a { text-decoration: none; color: #fff; } .foot a:hover { text-decoration: underline; }
-  .foot .legal { margin-top: 2.2rem; display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; justify-content: space-between; font-size: .95rem; color: #9FB0A9; }
-  @media (max-width: 640px) { .foot .cols { grid-template-columns: 1fr 1fr; } }
 
   /* CATEGORY events (rule 3t, 22 Oct 2026; after Monarque and Boom Ball): a short page; one loud opening, then
      ground that changes per section in her own balloon colours (cream, sage, blush, gold), small photos, little text. */
@@ -364,6 +358,28 @@
     .chips2:not([data-end]) { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent); }
     [dir=rtl] .chips2:not([data-end]) { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 44px), transparent); }
   }
+  /* the full footer (rules 3v.1): who we are, every page, how ordering works, how to reach us, then one base line */
+  .foot.full { text-align: start; font-size: .92rem; background: var(--night); color: #B6C4BE; border-top: 1px solid rgb(255 255 255 / .18); padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.6rem + var(--pad-bottom, 0px)); }
+  .foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+  .foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font); letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+  .foot.full nav { margin: 0; font-weight: 400; }
+  .foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; max-width: 100%; margin: 0 0 .55rem; color: #fff; text-decoration: none; line-height: 1.5; }
+  .foot .fgrid a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  .foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+  .foot .fgrid a.fname { font: 700 1.6rem/1.1 var(--font); margin-bottom: .9rem; }
+  .foot .fbrand p { max-width: 30ch; color: #B6C4BE; line-height: 1.55; }
+  .foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+  .foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid rgb(255 255 255 / .18); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .82rem; color: #B6C4BE; }
+  .foot .fbase a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 760px) { .foot .fgrid { grid-template-columns: 1fr 1fr; } .foot .fbrand { grid-column: 1 / -1; } }
+  /* three true facts under the main button (rules 3v.14) */
+  .btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem;  }
+  .btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; margin-inline-end: .45em; margin-bottom: .15em; border-radius: 50%; background: var(--gold-ink); }
+  .foot .last { margin: 0 auto clamp(2rem, 5vw, 3rem); max-width: 74rem; color: #fff; font-weight: 700; font-size: clamp(2.2rem, 1rem + 4.4vw, 4.8rem); line-height: 1; letter-spacing: -.02em; }
+  .foot .last .acc { color: var(--gold); }
+  [dir=rtl] .foot .arw { transform: scaleX(-1); }
+  .foot .fbase > span { max-width: 100%; }
+  .hero .btn-facts { justify-content: center; margin-top: 1rem; color: var(--soft); }
 </style>
 <script>document.documentElement.classList.add('js');</script>
 </head>
@@ -371,7 +387,7 @@
 
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="#top" aria-label="מיכל בלונס, לראש העמוד" data-en-label="Michal Balloons, back to the top"><img src="/pages/michal-balloons/assets/logo-mark.webp?v=mvo6y10z" alt="" width="695" height="298" data-mir-key="i-d07f1aaa-0"></a>
+    <a class="brand" href="#top" aria-label="מיכל בלונס, לראש העמוד" data-en-label="Michal Balloons, back to the top"><img src="/pages/michal-balloons/assets/logo-mark.webp?v=mvyanu09" alt="" width="695" height="298" data-mir-key="i-d07f1aaa-0"></a>
     <nav class="nav" aria-label="בעמוד" data-en-label="On this page">
       <a class="link" href="#make" data-en="What we make" data-mir-key="t-ff5af1bd-0">מה אנחנו עושים</a>
       <a class="link" href="#booth" data-en="Photo station" data-mir-key="t-2cd4f76d-0">עמדת צילום</a>
@@ -385,9 +401,9 @@
   <section class="hero" id="open" aria-labelledby="h1">
     <div class="stage">
       <video class="film" id="film" muted playsinline preload="auto" aria-hidden="true"
-        data-d="/pages/michal-balloons/assets/arrive.mp4?v=mvo6y10z" data-m="/pages/michal-balloons/assets/arrive-m.mp4?v=mvo6y10z"
-        data-pd="/pages/michal-balloons/assets/arrive-first.webp?v=mvo6y10z" data-pm="/pages/michal-balloons/assets/arrive-m-first.webp?v=mvo6y10z"
-        data-sd="/pages/michal-balloons/assets/arrive-last.webp?v=mvo6y10z" data-sm="/pages/michal-balloons/assets/arrive-m-last.webp?v=mvo6y10z"></video>
+        data-d="/pages/michal-balloons/assets/arrive.mp4?v=mvyanu09" data-m="/pages/michal-balloons/assets/arrive-m.mp4?v=mvyanu09" data-loop="/pages/michal-balloons/assets/arrive-m-loop.mp4?v=mvyanu09"
+        data-pd="/pages/michal-balloons/assets/arrive-first.webp?v=mvyanu09" data-pm="/pages/michal-balloons/assets/arrive-m-first.webp?v=mvyanu09"
+        data-sd="/pages/michal-balloons/assets/arrive-last.webp?v=mvyanu09" data-sm="/pages/michal-balloons/assets/arrive-m-last.webp?v=mvyanu09"></video>
       <div class="inner">
         <h1 id="h1" data-en-html="Balloon design that <span class=&quot;acc&quot;>lifts</span> your event">עיצוב <span class="acc" data-mir-key="t-1fac77ae-0">שמעיף</span> אירוע</h1>
         <p class="line" data-en="Balloon arches, centrepieces and photo stations in Jerusalem and the area" data-mir-key="t-87b3657b-0">שערי בלונים, מרכזי שולחן ועמדות צילום בירושלים והסביבה</p>
@@ -396,6 +412,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
             <span data-en="Ask for a quote" data-mir-key="t-76424f9f-0">לבקש הצעת מחיר</span>
           </a>
+          <ul class="btn-facts"><li data-en="Jerusalem and the area" data-mir-key="t-4ea459ad-0">ירושלים והסביבה</li><li data-en="By appointment" data-mir-key="t-ce82372d-0">בתיאום מראש</li><li data-en="Bank transfer or Bit" data-mir-key="t-6d2c9bfe-0">העברה בנקאית או ביט</li></ul>
         </div>
       </div>
     </div>
@@ -404,7 +421,7 @@
   <section class="strip" aria-labelledby="h-strip">
     <div class="wrap">
       <p class="big" id="h-strip" data-rev data-en="Every photo here is from an event we dressed." data-mir-key="t-975c0cbb-0">כל התמונות כאן הן מאירועים שעיצבנו.</p>
-      <div class="row" aria-hidden="true"><img src="/pages/michal-balloons/assets/work/booth-bat.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-dae51871-0"><img src="/pages/michal-balloons/assets/work/table-brit-bear.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-791a36fb-0"><img src="/pages/michal-balloons/assets/work/room-birthday.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-3bee47e8-0"><img src="/pages/michal-balloons/assets/work/kiddush-gold.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-f63d2a04-0"><img src="/pages/michal-balloons/assets/work/gate.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-18b5a505-0"><img src="/pages/michal-balloons/assets/work/num-12-pink.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-b6373328-0"></div>
+      <div class="row" aria-hidden="true"><img src="/pages/michal-balloons/assets/work/booth-bat.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-dae51871-0"><img src="/pages/michal-balloons/assets/work/table-brit-bear.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-791a36fb-0"><img src="/pages/michal-balloons/assets/work/room-birthday.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-3bee47e8-0"><img src="/pages/michal-balloons/assets/work/kiddush-gold.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-f63d2a04-0"><img src="/pages/michal-balloons/assets/work/gate.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-18b5a505-0"><img src="/pages/michal-balloons/assets/work/num-12-pink.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-b6373328-0"></div>
     </div>
   </section>
 
@@ -412,10 +429,10 @@
     <div class="wrap">
       <h2 id="h-occ" data-rev data-en-html="For every <span class=&quot;acc&quot;>occasion</span>" data-mir-key="t-07097a1a-0">לכל <span class="acc">אירוע</span></h2>
       <div class="cols4">
-        <div class="col4" data-rev><img src="/pages/michal-balloons/assets/work/booth-bat.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-dae51871-1"><h3 data-en="Bar and bat mitzvahs" data-mir-key="t-067b34ba-0">בר ובת מצווה</h3><p data-en="Photo stations, number columns and centrepieces." data-mir-key="t-963131c2-0">עמדות צילום, עמודי ספרות ומרכזי שולחן.</p><a href="#work-sec" data-f="mitzvah" data-en="See the work" data-mir-key="t-c8e1c7a6-0">לראות את העבודות</a></div>
-        <div class="col4" data-rev style="--i:1"><img src="/pages/michal-balloons/assets/work/table-brit-bear.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-791a36fb-1"><h3 data-en="Brits and babies" data-mir-key="t-2e9097b3-0">ברית ותינוקות</h3><p data-en="Centrepieces and photo stations for a brit." data-mir-key="t-d25364ca-0">מרכזי שולחן ועמדות צילום לברית.</p><a href="#work-sec" data-f="brit" data-en="See the work" data-mir-key="t-c8e1c7a6-1">לראות את העבודות</a></div>
-        <div class="col4" data-rev style="--i:2"><img src="/pages/michal-balloons/assets/work/room-birthday.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-3bee47e8-1"><h3 data-en="Birthdays" data-mir-key="t-75fdc3b8-0">ימי הולדת</h3><p data-en="Birthday rooms, number columns and dedication balloons." data-mir-key="t-96d94ba2-0">חדרי יומולדת, עמודי ספרות ובלוני הקדשה.</p><a href="#work-sec" data-f="birthday" data-en="See the work" data-mir-key="t-c8e1c7a6-2">לראות את העבודות</a></div>
-        <div class="col4" data-rev style="--i:3"><img src="/pages/michal-balloons/assets/work/kiddush-gold.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-f63d2a04-1"><h3 data-en="Kiddush and tables" data-mir-key="t-e7e38c7f-0">קידוש ושולחנות</h3><p data-en="Centrepieces that dress every table." data-mir-key="t-dd0a2347-0">מרכזי שולחן שמלבישים כל שולחן.</p><a href="#work-sec" data-f="kiddush" data-en="See the work" data-mir-key="t-c8e1c7a6-3">לראות את העבודות</a></div>
+        <div class="col4" data-rev><img src="/pages/michal-balloons/assets/work/booth-bat.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-dae51871-1"><h3 data-en="Bar and bat mitzvahs" data-mir-key="t-067b34ba-0">בר ובת מצווה</h3><p data-en="Photo stations, number columns and centrepieces." data-mir-key="t-963131c2-0">עמדות צילום, עמודי ספרות ומרכזי שולחן.</p><a href="#work-sec" data-f="mitzvah" data-en="See the work" data-mir-key="t-c8e1c7a6-0">לראות את העבודות</a></div>
+        <div class="col4" data-rev style="--i:1"><img src="/pages/michal-balloons/assets/work/table-brit-bear.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-791a36fb-1"><h3 data-en="Brits and babies" data-mir-key="t-2e9097b3-0">ברית ותינוקות</h3><p data-en="Centrepieces and photo stations for a brit." data-mir-key="t-d25364ca-0">מרכזי שולחן ועמדות צילום לברית.</p><a href="#work-sec" data-f="brit" data-en="See the work" data-mir-key="t-c8e1c7a6-1">לראות את העבודות</a></div>
+        <div class="col4" data-rev style="--i:2"><img src="/pages/michal-balloons/assets/work/room-birthday.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-3bee47e8-1"><h3 data-en="Birthdays" data-mir-key="t-75fdc3b8-0">ימי הולדת</h3><p data-en="Birthday rooms, number columns and dedication balloons." data-mir-key="t-96d94ba2-0">חדרי יומולדת, עמודי ספרות ובלוני הקדשה.</p><a href="#work-sec" data-f="birthday" data-en="See the work" data-mir-key="t-c8e1c7a6-2">לראות את העבודות</a></div>
+        <div class="col4" data-rev style="--i:3"><img src="/pages/michal-balloons/assets/work/kiddush-gold.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-f63d2a04-1"><h3 data-en="Kiddush and tables" data-mir-key="t-e7e38c7f-0">קידוש ושולחנות</h3><p data-en="Centrepieces that dress every table." data-mir-key="t-dd0a2347-0">מרכזי שולחן שמלבישים כל שולחן.</p><a href="#work-sec" data-f="kiddush" data-en="See the work" data-mir-key="t-c8e1c7a6-3">לראות את העבודות</a></div>
       </div>
     </div>
   </section>
@@ -424,19 +441,19 @@
     <div class="wrap">
       <h2 id="h-make" data-rev data-en-html="What we <span class=&quot;acc&quot;>make</span>" data-mir-key="t-f8744ca8-0">מה אנחנו <span class="acc">עושים</span></h2>
       <div class="mk"><ul class="words" id="rows">
-        <li><b data-en="Balloon arches" data-mir-key="t-ea0a281c-0">שערי בלונים</b><span data-en="An arch for the entrance, the stage or the photo corner, in your colours." data-mir-key="t-7f9cd181-0">שער לכניסה, לבמה או לפינת הצילום, בצבעים שלכם.</span><i class="pop" aria-hidden="true"><img src="/pages/michal-balloons/assets/work/gate.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-18b5a505-1"></i></li>
-        <li><b data-en="Table centrepieces" data-mir-key="t-0f87e94e-0">מרכזי שולחן</b><span data-en="Balloon centrepieces that dress every table." data-mir-key="t-5aef50ab-0">מרכזי שולחן מבלונים שמלבישים כל שולחן.</span><i class="pop" aria-hidden="true"><img src="/pages/michal-balloons/assets/work/kiddush-gold.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-f63d2a04-2"></i></li>
-        <li><b data-en="Photo stations" data-mir-key="t-2713de93-0">עמדות צילום</b><span data-en="A finished corner for photos, with a personal dedication." data-mir-key="t-bc2efdcb-0">פינה מוכנה לצילומים, עם הקדשה אישית.</span><i class="pop" aria-hidden="true"><img src="/pages/michal-balloons/assets/work/booth-yossi.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-4602b110-0"></i></li>
-        <li><b data-en="Custom balloons" data-mir-key="t-61285962-0">בלונים בהתאמה אישית</b><span data-en="Made for your event, your colours and your idea." data-mir-key="t-7f157b33-0">לפי האירוע, הצבעים והרעיון שלכם.</span><i class="pop" aria-hidden="true"><img src="/pages/michal-balloons/assets/work/print-balloon.webp?v=mvo6y10z" alt="" width="230" height="230" loading="lazy" data-mir-key="i-e28dcaf3-0"></i></li>
+        <li><b data-en="Balloon arches" data-mir-key="t-ea0a281c-0">שערי בלונים</b><span data-en="An arch for the entrance, the stage or the photo corner, in your colours." data-mir-key="t-7f9cd181-0">שער לכניסה, לבמה או לפינת הצילום, בצבעים שלכם.</span><i class="pop" aria-hidden="true"><img src="/pages/michal-balloons/assets/work/gate.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-18b5a505-1"></i></li>
+        <li><b data-en="Table centrepieces" data-mir-key="t-0f87e94e-0">מרכזי שולחן</b><span data-en="Balloon centrepieces that dress every table." data-mir-key="t-5aef50ab-0">מרכזי שולחן מבלונים שמלבישים כל שולחן.</span><i class="pop" aria-hidden="true"><img src="/pages/michal-balloons/assets/work/kiddush-gold.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-f63d2a04-2"></i></li>
+        <li><b data-en="Photo stations" data-mir-key="t-2713de93-0">עמדות צילום</b><span data-en="A finished corner for photos, with a personal dedication." data-mir-key="t-bc2efdcb-0">פינה מוכנה לצילומים, עם הקדשה אישית.</span><i class="pop" aria-hidden="true"><img src="/pages/michal-balloons/assets/work/booth-yossi.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-4602b110-0"></i></li>
+        <li><b data-en="Custom balloons" data-mir-key="t-61285962-0">בלונים בהתאמה אישית</b><span data-en="Made for your event, your colours and your idea." data-mir-key="t-7f157b33-0">לפי האירוע, הצבעים והרעיון שלכם.</span><i class="pop" aria-hidden="true"><img src="/pages/michal-balloons/assets/work/print-balloon.webp?v=mvyanu09" alt="" width="230" height="230" loading="lazy" data-mir-key="i-e28dcaf3-0"></i></li>
       </ul>
-      <figure class="mstage" aria-hidden="true" id="mstage"><img class="on" src="/pages/michal-balloons/assets/work/gate.webp?v=mvo6y10z" alt="" width="230" height="230" data-mir-key="i-18b5a505-2"><img src="/pages/michal-balloons/assets/work/kiddush-gold.webp?v=mvo6y10z" alt="" width="230" height="230" data-mir-key="i-f63d2a04-3"><img src="/pages/michal-balloons/assets/booth.webp?v=mvo6y10z" alt="" width="800" height="800" data-mir-key="i-1277cadf-0"><img src="/pages/michal-balloons/assets/work/print-balloon.webp?v=mvo6y10z" alt="" width="230" height="230" data-mir-key="i-e28dcaf3-1"></figure></div>
+      <figure class="mstage" aria-hidden="true" id="mstage"><img class="on" src="/pages/michal-balloons/assets/work/gate.webp?v=mvyanu09" alt="" width="230" height="230" data-mir-key="i-18b5a505-2"><img src="/pages/michal-balloons/assets/work/kiddush-gold.webp?v=mvyanu09" alt="" width="230" height="230" data-mir-key="i-f63d2a04-3"><img src="/pages/michal-balloons/assets/booth.webp?v=mvyanu09" alt="" width="800" height="800" data-mir-key="i-1277cadf-0"><img src="/pages/michal-balloons/assets/work/print-balloon.webp?v=mvyanu09" alt="" width="230" height="230" data-mir-key="i-e28dcaf3-1"></figure></div>
       <div class="mkact" data-rev><a class="btn" href="#book"><span data-en="Ask for a quote" data-mir-key="t-76424f9f-1">לבקש הצעת מחיר</span></a></div>
     </div>
   </section>
 
   <section class="sec booth" id="booth" aria-labelledby="h-booth">
     <div class="wrap grid">
-      <figure><img src="/pages/michal-balloons/assets/booth.webp?v=mvo6y10z" alt="עמדת צילום של מיכל בלונס: קשת בלונים ורודה, ירוקה וזהובה סביב קשת לבנה עם הקדשה אישית ועמודים עם עציצים" data-en-alt="A Michal Balloons photo station: a pink, green and gold balloon arch around a white arch with a personal dedication, and plant stands" width="800" height="800" loading="lazy" data-mir-key="i-47fec9ce-0"></figure>
+      <figure><img src="/pages/michal-balloons/assets/booth.webp?v=mvyanu09" alt="עמדת צילום של מיכל בלונס: קשת בלונים ורודה, ירוקה וזהובה סביב קשת לבנה עם הקדשה אישית ועמודים עם עציצים" data-en-alt="A Michal Balloons photo station: a pink, green and gold balloon arch around a white arch with a personal dedication, and plant stands" width="800" height="800" loading="lazy" data-mir-key="i-47fec9ce-0"></figure>
       <div class="txt">
         <h2 id="h-booth" data-rev data-en-html="The photo <span class=&quot;acc&quot;>station</span>" data-mir-key="t-aab47a06-0">עמדת <span class="acc">צילום</span></h2>
         <ul class="incl" data-rev style="--i:2">
@@ -465,48 +482,48 @@
       </div>
     </div>
     <div class="work" id="work">
-        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/booth-yossi.webp?v=mvo6y10z" alt="עמדת צילום לבר מצווה" data-en-alt="A bar mitzvah photo station" width="230" height="230" loading="lazy" data-mir-key="i-05fa688b-0"><figcaption data-en="A bar mitzvah photo station" data-mir-key="t-44109b84-0">עמדת צילום לבר מצווה</figcaption></figure>
-        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/booth-bat.webp?v=mvo6y10z" alt="עמדת צילום נשפכת מתוך שער בת מצווה" data-en-alt="A bat mitzvah photo station spilling from an arch" width="230" height="230" loading="lazy" data-mir-key="i-9462db0a-0"><figcaption data-en="A bat mitzvah photo station spilling from an arch" data-mir-key="t-19ee8a84-0">עמדת צילום נשפכת מתוך שער בת מצווה</figcaption></figure>
-        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/booth-sara.webp?v=mvo6y10z" alt="עמדת צילום לבת מצווה" data-en-alt="A bat mitzvah photo station" width="230" height="230" loading="lazy" data-mir-key="i-ef9c33a3-0"><figcaption data-en="A bat mitzvah photo station" data-mir-key="t-858ee80c-0">עמדת צילום לבת מצווה</figcaption></figure>
-        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/booth-bar-black.webp?v=mvo6y10z" alt="עמדת צילום לבר מצווה" data-en-alt="A bar mitzvah photo station" width="230" height="230" loading="lazy" data-mir-key="i-07ba7311-0"><figcaption data-en="A bar mitzvah photo station" data-mir-key="t-44109b84-1">עמדת צילום לבר מצווה</figcaption></figure>
-        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/booth-plain.webp?v=mvo6y10z" alt="עמדת צילום ללא בד" data-en-alt="A photo station" width="230" height="230" loading="lazy" data-mir-key="i-2f24390a-0"><figcaption data-en="A photo station" data-mir-key="t-17960661-0">עמדת צילום ללא בד</figcaption></figure>
-        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/num-12-pink.webp?v=mvo6y10z" alt="עמודי ספרות לבת מצווה" data-en-alt="Number columns for a bat mitzvah" width="230" height="230" loading="lazy" data-mir-key="i-4aae54cd-0"><figcaption data-en="Number columns for a bat mitzvah" data-mir-key="t-5d4e4eb4-0">עמודי ספרות לבת מצווה</figcaption></figure>
-        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/num-12-gold.webp?v=mvo6y10z" alt="בת מצווה" data-en-alt="Bat mitzvah" width="230" height="230" loading="lazy" data-mir-key="i-c5149c07-0"><figcaption data-en="Bat mitzvah" data-mir-key="t-ecc9c607-0">בת מצווה</figcaption></figure>
-        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/bar-boy.webp?v=mvo6y10z" alt="ילד בר מצווה מחזיק בלון" data-en-alt="A bar mitzvah boy holding a balloon" width="230" height="230" loading="lazy" data-mir-key="i-d150105c-0"><figcaption data-en="A bar mitzvah boy holding a balloon" data-mir-key="t-f78fd2fe-0">ילד בר מצווה מחזיק בלון</figcaption></figure>
-        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/table-bar.webp?v=mvo6y10z" alt="מרכז שולחן לבר מצווה" data-en-alt="A bar mitzvah centrepiece" width="230" height="230" loading="lazy" data-mir-key="i-bea38dd0-0"><figcaption data-en="A bar mitzvah centrepiece" data-mir-key="t-1e705ba6-0">מרכז שולחן לבר מצווה</figcaption></figure>
-        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/booth-brit.webp?v=mvo6y10z" alt="עמדת צילום לברית" data-en-alt="A brit photo station" width="230" height="230" loading="lazy" data-mir-key="i-062da654-0"><figcaption data-en="A brit photo station" data-mir-key="t-e0f780fe-0">עמדת צילום לברית</figcaption></figure>
-        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/table-brit-bear.webp?v=mvo6y10z" alt="מרכז שולחן לברית" data-en-alt="A brit centrepiece" width="230" height="230" loading="lazy" data-mir-key="i-468a7324-0"><figcaption data-en="A brit centrepiece" data-mir-key="t-6b193439-0">מרכז שולחן לברית</figcaption></figure>
-        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/table-brit-small.webp?v=mvo6y10z" alt="מרכז שולחן לברית" data-en-alt="A brit centrepiece" width="230" height="230" loading="lazy" data-mir-key="i-8b70584d-0"><figcaption data-en="A brit centrepiece" data-mir-key="t-6b193439-1">מרכז שולחן לברית</figcaption></figure>
-        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/table-brit-glass.webp?v=mvo6y10z" alt="מרכז שולחן לברית" data-en-alt="A brit centrepiece" width="230" height="230" loading="lazy" data-mir-key="i-f41eafbf-0"><figcaption data-en="A brit centrepiece" data-mir-key="t-6b193439-2">מרכז שולחן לברית</figcaption></figure>
-        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/baby-balloon.webp?v=mvo6y10z" alt="תינוק מחזיק בלון בהקדשה אישית" data-en-alt="A baby holding a balloon with a dedication" width="230" height="230" loading="lazy" data-mir-key="i-437e5848-0"><figcaption data-en="A baby holding a balloon with a dedication" data-mir-key="t-47a6e8ee-0">תינוק מחזיק בלון בהקדשה אישית</figcaption></figure>
-        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/reveal.webp?v=mvo6y10z" alt="בלון לגילוי מין העובר" data-en-alt="A gender reveal balloon" width="230" height="230" loading="lazy" data-mir-key="i-9d0177b5-0"><figcaption data-en="A gender reveal balloon" data-mir-key="t-86b90a31-0">בלון לגילוי מין העובר</figcaption></figure>
-        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/room-20.webp?v=mvo6y10z" alt="חדר יומולדת" data-en-alt="A birthday room" width="230" height="230" loading="lazy" data-mir-key="i-93c5ab47-0"><figcaption data-en="A birthday room" data-mir-key="t-e80f8e5a-0">חדר יומולדת</figcaption></figure>
-        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/room-40.webp?v=mvo6y10z" alt="עיצוב חדר יומולדת" data-en-alt="A birthday room" width="230" height="230" loading="lazy" data-mir-key="i-797c23d3-0"><figcaption data-en="A birthday room" data-mir-key="t-9db0e8af-0">עיצוב חדר יומולדת</figcaption></figure>
-        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/room-birthday.webp?v=mvo6y10z" alt="חדר יומולדת" data-en-alt="A birthday room" width="230" height="230" loading="lazy" data-mir-key="i-cb3ad2b5-0"><figcaption data-en="A birthday room" data-mir-key="t-e80f8e5a-1">חדר יומולדת</figcaption></figure>
-        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/heart-40.webp?v=mvo6y10z" alt="מעמד לב גבוה" data-en-alt="A tall heart stand" width="230" height="230" loading="lazy" data-mir-key="i-fcf1dbf5-0"><figcaption data-en="A tall heart stand" data-mir-key="t-491a9733-0">מעמד לב גבוה</figcaption></figure>
-        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/num-18.webp?v=mvo6y10z" alt="בסיס עם ספרות" data-en-alt="A base with numbers" width="230" height="230" loading="lazy" data-mir-key="i-be54feea-0"><figcaption data-en="A base with numbers" data-mir-key="t-632e2b95-0">בסיס עם ספרות</figcaption></figure>
-        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/num-62.webp?v=mvo6y10z" alt="עמודי ספרות" data-en-alt="Number columns" width="230" height="230" loading="lazy" data-mir-key="i-9d84b4c4-0"><figcaption data-en="Number columns" data-mir-key="t-6be4b380-0">עמודי ספרות</figcaption></figure>
-        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/led-balloon.webp?v=mvo6y10z" alt="בלון הקדשה בהליום עם לד" data-en-alt="A helium dedication balloon with LED" width="230" height="230" loading="lazy" data-mir-key="i-39e24266-0"><figcaption data-en="A helium dedication balloon with LED" data-mir-key="t-eb59f75d-0">בלון הקדשה בהליום עם לד</figcaption></figure>
-        <figure data-k="kiddush"><img src="/pages/michal-balloons/assets/work/kiddush-gold.webp?v=mvo6y10z" alt="מרכזי שולחן לקידוש" data-en-alt="Kiddush centrepieces" width="230" height="230" loading="lazy" data-mir-key="i-e6733d9e-0"><figcaption data-en="Kiddush centrepieces" data-mir-key="t-79cb3def-0">מרכזי שולחן לקידוש</figcaption></figure>
-        <figure data-k="kiddush"><img src="/pages/michal-balloons/assets/work/kiddush-purple.webp?v=mvo6y10z" alt="מרכזי שולחן לקידוש" data-en-alt="Kiddush centrepieces" width="230" height="230" loading="lazy" data-mir-key="i-8fd98cf4-0"><figcaption data-en="Kiddush centrepieces" data-mir-key="t-79cb3def-1">מרכזי שולחן לקידוש</figcaption></figure>
-        <figure data-k="kiddush"><img src="/pages/michal-balloons/assets/work/table-small.webp?v=mvo6y10z" alt="מרכז שולחן עם בלונים קטנים" data-en-alt="A centrepiece with small balloons" width="230" height="230" loading="lazy" data-mir-key="i-b1dd3428-0"><figcaption data-en="A centrepiece with small balloons" data-mir-key="t-f1c1c615-0">מרכז שולחן עם בלונים קטנים</figcaption></figure>
-        <figure data-k="kiddush"><img src="/pages/michal-balloons/assets/work/table-bear.webp?v=mvo6y10z" alt="מרכז שולחן עם דובי" data-en-alt="A centrepiece with a teddy bear" width="230" height="230" loading="lazy" data-mir-key="i-7058e282-0"><figcaption data-en="A centrepiece with a teddy bear" data-mir-key="t-d668f076-0">מרכז שולחן עם דובי</figcaption></figure>
-        <figure data-k="entry"><img src="/pages/michal-balloons/assets/work/gate.webp?v=mvo6y10z" alt="שער" data-en-alt="An arch" width="230" height="230" loading="lazy" data-mir-key="i-7058bf06-0"><figcaption data-en="An arch" data-mir-key="t-f9f094f0-0">שער</figcaption></figure>
-        <figure data-k="entry"><img src="/pages/michal-balloons/assets/work/columns-entry.webp?v=mvo6y10z" alt="עמודי כניסה אלגנטיים" data-en-alt="Elegant entrance columns" width="230" height="230" loading="lazy" data-mir-key="i-6da02337-0"><figcaption data-en="Elegant entrance columns" data-mir-key="t-2b842e65-0">עמודי כניסה אלגנטיים</figcaption></figure>
-        <figure data-k="entry"><img src="/pages/michal-balloons/assets/work/columns-2.webp?v=mvo6y10z" alt="שני עמודים ובלון זכוכית" data-en-alt="Two columns and a clear balloon" width="230" height="230" loading="lazy" data-mir-key="i-41416118-0"><figcaption data-en="Two columns and a clear balloon" data-mir-key="t-395bfeea-0">שני עמודים ובלון זכוכית</figcaption></figure>
-        <figure data-k="entry"><img src="/pages/michal-balloons/assets/work/arch-school.webp?v=mvo6y10z" alt="קשת לפתיחת שנה" data-en-alt="An arch for the start of the school year" width="230" height="230" loading="lazy" data-mir-key="i-b70b3530-0"><figcaption data-en="An arch for the start of the school year" data-mir-key="t-15a74171-0">קשת לפתיחת שנה</figcaption></figure>
-        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/clowns.webp?v=mvo6y10z" alt="כמה סוגי ליצנים" data-en-alt="Clowns" width="230" height="230" loading="lazy" data-mir-key="i-e69617dc-0"><figcaption data-en="Clowns" data-mir-key="t-4ffbe130-0">כמה סוגי ליצנים</figcaption></figure>
-        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/clown-bubble.webp?v=mvo6y10z" alt="ליצן מחזיק בלון בועה" data-en-alt="A clown holding a bubble balloon" width="230" height="230" loading="lazy" data-mir-key="i-98b98f1c-0"><figcaption data-en="A clown holding a bubble balloon" data-mir-key="t-05e0660f-0">ליצן מחזיק בלון בועה</figcaption></figure>
-        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/clown-fair.webp?v=mvo6y10z" alt="ליצן ליריד" data-en-alt="A clown for a school fair" width="230" height="230" loading="lazy" data-mir-key="i-e3ff681e-0"><figcaption data-en="A clown for a school fair" data-mir-key="t-f3db4a98-0">ליצן ליריד</figcaption></figure>
-        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/clown-gil.webp?v=mvo6y10z" alt="ליצן" data-en-alt="A clown" width="230" height="230" loading="lazy" data-mir-key="i-006bfd12-0"><figcaption data-en="A clown" data-mir-key="t-f389aa52-0">ליצן</figcaption></figure>
-        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/chanukiah.webp?v=mvo6y10z" alt="חנוכיה בגן ילדים" data-en-alt="A balloon chanukiah for a kindergarten" width="230" height="230" loading="lazy" data-mir-key="i-f511ec1a-0"><figcaption data-en="A balloon chanukiah for a kindergarten" data-mir-key="t-3d90aa1d-0">חנוכיה בגן ילדים</figcaption></figure>
-        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/bride-groom.webp?v=mvo6y10z" alt="חתן כלה" data-en-alt="Bride and groom" width="230" height="230" loading="lazy" data-mir-key="i-a7e07817-0"><figcaption data-en="Bride and groom" data-mir-key="t-6fad8b8d-0">חתן כלה</figcaption></figure>
-        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/room-anniv.webp?v=mvo6y10z" alt="חדר ליום נישואין" data-en-alt="An anniversary room" width="230" height="230" loading="lazy" data-mir-key="i-ea28fe26-0"><figcaption data-en="An anniversary room" data-mir-key="t-bddcf629-0">חדר ליום נישואין</figcaption></figure>
-        <figure data-k="print"><img src="/pages/michal-balloons/assets/work/print-balloon.webp?v=mvo6y10z" alt="הדפסה אישית על בלון" data-en-alt="Personal printing on a balloon" width="230" height="230" loading="lazy" data-mir-key="i-c0857ec1-0"><figcaption data-en="Personal printing on a balloon" data-mir-key="t-efd84d18-0">הדפסה אישית על בלון</figcaption></figure>
-        <figure data-k="print"><img src="/pages/michal-balloons/assets/work/glass-print.webp?v=mvo6y10z" alt="בלון זכוכית בהדפסה אישית" data-en-alt="A clear balloon with personal printing" width="230" height="230" loading="lazy" data-mir-key="i-16366fc5-0"><figcaption data-en="A clear balloon with personal printing" data-mir-key="t-9d9d1d0c-0">בלון זכוכית בהדפסה אישית</figcaption></figure>
-        <figure data-k="print"><img src="/pages/michal-balloons/assets/work/print-cup.webp?v=mvo6y10z" alt="הדפסה אישית על כוס" data-en-alt="Personal printing on a cup" width="230" height="230" loading="lazy" data-mir-key="i-b5d20830-0"><figcaption data-en="Personal printing on a cup" data-mir-key="t-bb5342cd-0">הדפסה אישית על כוס</figcaption></figure>
-        <figure data-k="print"><img src="/pages/michal-balloons/assets/work/print-bottle.webp?v=mvo6y10z" alt="בקבוק בהדפסה אישית" data-en-alt="A bottle with personal printing" width="230" height="230" loading="lazy" data-mir-key="i-ff025762-0"><figcaption data-en="A bottle with personal printing" data-mir-key="t-5b689f42-0">בקבוק בהדפסה אישית</figcaption></figure>
-        <figure data-k="print"><img src="/pages/michal-balloons/assets/work/print-jar.webp?v=mvo6y10z" alt="צנצנת עוגיות בהדפסה אישית" data-en-alt="A cookie jar with personal printing" width="230" height="230" loading="lazy" data-mir-key="i-6b216863-0"><figcaption data-en="A cookie jar with personal printing" data-mir-key="t-a31ee70f-0">צנצנת עוגיות בהדפסה אישית</figcaption></figure>
+        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/booth-yossi.webp?v=mvyanu09" alt="עמדת צילום לבר מצווה" data-en-alt="A bar mitzvah photo station" width="230" height="230" loading="lazy" data-mir-key="i-05fa688b-0"><figcaption data-en="A bar mitzvah photo station" data-mir-key="t-44109b84-0">עמדת צילום לבר מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/booth-bat.webp?v=mvyanu09" alt="עמדת צילום נשפכת מתוך שער בת מצווה" data-en-alt="A bat mitzvah photo station spilling from an arch" width="230" height="230" loading="lazy" data-mir-key="i-9462db0a-0"><figcaption data-en="A bat mitzvah photo station spilling from an arch" data-mir-key="t-19ee8a84-0">עמדת צילום נשפכת מתוך שער בת מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/booth-sara.webp?v=mvyanu09" alt="עמדת צילום לבת מצווה" data-en-alt="A bat mitzvah photo station" width="230" height="230" loading="lazy" data-mir-key="i-ef9c33a3-0"><figcaption data-en="A bat mitzvah photo station" data-mir-key="t-858ee80c-0">עמדת צילום לבת מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/booth-bar-black.webp?v=mvyanu09" alt="עמדת צילום לבר מצווה" data-en-alt="A bar mitzvah photo station" width="230" height="230" loading="lazy" data-mir-key="i-07ba7311-0"><figcaption data-en="A bar mitzvah photo station" data-mir-key="t-44109b84-1">עמדת צילום לבר מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/booth-plain.webp?v=mvyanu09" alt="עמדת צילום ללא בד" data-en-alt="A photo station" width="230" height="230" loading="lazy" data-mir-key="i-2f24390a-0"><figcaption data-en="A photo station" data-mir-key="t-17960661-0">עמדת צילום ללא בד</figcaption></figure>
+        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/num-12-pink.webp?v=mvyanu09" alt="עמודי ספרות לבת מצווה" data-en-alt="Number columns for a bat mitzvah" width="230" height="230" loading="lazy" data-mir-key="i-4aae54cd-0"><figcaption data-en="Number columns for a bat mitzvah" data-mir-key="t-5d4e4eb4-0">עמודי ספרות לבת מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/num-12-gold.webp?v=mvyanu09" alt="בת מצווה" data-en-alt="Bat mitzvah" width="230" height="230" loading="lazy" data-mir-key="i-c5149c07-0"><figcaption data-en="Bat mitzvah" data-mir-key="t-ecc9c607-0">בת מצווה</figcaption></figure>
+        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/bar-boy.webp?v=mvyanu09" alt="ילד בר מצווה מחזיק בלון" data-en-alt="A bar mitzvah boy holding a balloon" width="230" height="230" loading="lazy" data-mir-key="i-d150105c-0"><figcaption data-en="A bar mitzvah boy holding a balloon" data-mir-key="t-f78fd2fe-0">ילד בר מצווה מחזיק בלון</figcaption></figure>
+        <figure data-k="mitzvah"><img src="/pages/michal-balloons/assets/work/table-bar.webp?v=mvyanu09" alt="מרכז שולחן לבר מצווה" data-en-alt="A bar mitzvah centrepiece" width="230" height="230" loading="lazy" data-mir-key="i-bea38dd0-0"><figcaption data-en="A bar mitzvah centrepiece" data-mir-key="t-1e705ba6-0">מרכז שולחן לבר מצווה</figcaption></figure>
+        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/booth-brit.webp?v=mvyanu09" alt="עמדת צילום לברית" data-en-alt="A brit photo station" width="230" height="230" loading="lazy" data-mir-key="i-062da654-0"><figcaption data-en="A brit photo station" data-mir-key="t-e0f780fe-0">עמדת צילום לברית</figcaption></figure>
+        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/table-brit-bear.webp?v=mvyanu09" alt="מרכז שולחן לברית" data-en-alt="A brit centrepiece" width="230" height="230" loading="lazy" data-mir-key="i-468a7324-0"><figcaption data-en="A brit centrepiece" data-mir-key="t-6b193439-0">מרכז שולחן לברית</figcaption></figure>
+        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/table-brit-small.webp?v=mvyanu09" alt="מרכז שולחן לברית" data-en-alt="A brit centrepiece" width="230" height="230" loading="lazy" data-mir-key="i-8b70584d-0"><figcaption data-en="A brit centrepiece" data-mir-key="t-6b193439-1">מרכז שולחן לברית</figcaption></figure>
+        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/table-brit-glass.webp?v=mvyanu09" alt="מרכז שולחן לברית" data-en-alt="A brit centrepiece" width="230" height="230" loading="lazy" data-mir-key="i-f41eafbf-0"><figcaption data-en="A brit centrepiece" data-mir-key="t-6b193439-2">מרכז שולחן לברית</figcaption></figure>
+        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/baby-balloon.webp?v=mvyanu09" alt="תינוק מחזיק בלון בהקדשה אישית" data-en-alt="A baby holding a balloon with a dedication" width="230" height="230" loading="lazy" data-mir-key="i-437e5848-0"><figcaption data-en="A baby holding a balloon with a dedication" data-mir-key="t-47a6e8ee-0">תינוק מחזיק בלון בהקדשה אישית</figcaption></figure>
+        <figure data-k="brit"><img src="/pages/michal-balloons/assets/work/reveal.webp?v=mvyanu09" alt="בלון לגילוי מין העובר" data-en-alt="A gender reveal balloon" width="230" height="230" loading="lazy" data-mir-key="i-9d0177b5-0"><figcaption data-en="A gender reveal balloon" data-mir-key="t-86b90a31-0">בלון לגילוי מין העובר</figcaption></figure>
+        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/room-20.webp?v=mvyanu09" alt="חדר יומולדת" data-en-alt="A birthday room" width="230" height="230" loading="lazy" data-mir-key="i-93c5ab47-0"><figcaption data-en="A birthday room" data-mir-key="t-e80f8e5a-0">חדר יומולדת</figcaption></figure>
+        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/room-40.webp?v=mvyanu09" alt="עיצוב חדר יומולדת" data-en-alt="A birthday room" width="230" height="230" loading="lazy" data-mir-key="i-797c23d3-0"><figcaption data-en="A birthday room" data-mir-key="t-9db0e8af-0">עיצוב חדר יומולדת</figcaption></figure>
+        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/room-birthday.webp?v=mvyanu09" alt="חדר יומולדת" data-en-alt="A birthday room" width="230" height="230" loading="lazy" data-mir-key="i-cb3ad2b5-0"><figcaption data-en="A birthday room" data-mir-key="t-e80f8e5a-1">חדר יומולדת</figcaption></figure>
+        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/heart-40.webp?v=mvyanu09" alt="מעמד לב גבוה" data-en-alt="A tall heart stand" width="230" height="230" loading="lazy" data-mir-key="i-fcf1dbf5-0"><figcaption data-en="A tall heart stand" data-mir-key="t-491a9733-0">מעמד לב גבוה</figcaption></figure>
+        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/num-18.webp?v=mvyanu09" alt="בסיס עם ספרות" data-en-alt="A base with numbers" width="230" height="230" loading="lazy" data-mir-key="i-be54feea-0"><figcaption data-en="A base with numbers" data-mir-key="t-632e2b95-0">בסיס עם ספרות</figcaption></figure>
+        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/num-62.webp?v=mvyanu09" alt="עמודי ספרות" data-en-alt="Number columns" width="230" height="230" loading="lazy" data-mir-key="i-9d84b4c4-0"><figcaption data-en="Number columns" data-mir-key="t-6be4b380-0">עמודי ספרות</figcaption></figure>
+        <figure data-k="birthday"><img src="/pages/michal-balloons/assets/work/led-balloon.webp?v=mvyanu09" alt="בלון הקדשה בהליום עם לד" data-en-alt="A helium dedication balloon with LED" width="230" height="230" loading="lazy" data-mir-key="i-39e24266-0"><figcaption data-en="A helium dedication balloon with LED" data-mir-key="t-eb59f75d-0">בלון הקדשה בהליום עם לד</figcaption></figure>
+        <figure data-k="kiddush"><img src="/pages/michal-balloons/assets/work/kiddush-gold.webp?v=mvyanu09" alt="מרכזי שולחן לקידוש" data-en-alt="Kiddush centrepieces" width="230" height="230" loading="lazy" data-mir-key="i-e6733d9e-0"><figcaption data-en="Kiddush centrepieces" data-mir-key="t-79cb3def-0">מרכזי שולחן לקידוש</figcaption></figure>
+        <figure data-k="kiddush"><img src="/pages/michal-balloons/assets/work/kiddush-purple.webp?v=mvyanu09" alt="מרכזי שולחן לקידוש" data-en-alt="Kiddush centrepieces" width="230" height="230" loading="lazy" data-mir-key="i-8fd98cf4-0"><figcaption data-en="Kiddush centrepieces" data-mir-key="t-79cb3def-1">מרכזי שולחן לקידוש</figcaption></figure>
+        <figure data-k="kiddush"><img src="/pages/michal-balloons/assets/work/table-small.webp?v=mvyanu09" alt="מרכז שולחן עם בלונים קטנים" data-en-alt="A centrepiece with small balloons" width="230" height="230" loading="lazy" data-mir-key="i-b1dd3428-0"><figcaption data-en="A centrepiece with small balloons" data-mir-key="t-f1c1c615-0">מרכז שולחן עם בלונים קטנים</figcaption></figure>
+        <figure data-k="kiddush"><img src="/pages/michal-balloons/assets/work/table-bear.webp?v=mvyanu09" alt="מרכז שולחן עם דובי" data-en-alt="A centrepiece with a teddy bear" width="230" height="230" loading="lazy" data-mir-key="i-7058e282-0"><figcaption data-en="A centrepiece with a teddy bear" data-mir-key="t-d668f076-0">מרכז שולחן עם דובי</figcaption></figure>
+        <figure data-k="entry"><img src="/pages/michal-balloons/assets/work/gate.webp?v=mvyanu09" alt="שער" data-en-alt="An arch" width="230" height="230" loading="lazy" data-mir-key="i-7058bf06-0"><figcaption data-en="An arch" data-mir-key="t-f9f094f0-0">שער</figcaption></figure>
+        <figure data-k="entry"><img src="/pages/michal-balloons/assets/work/columns-entry.webp?v=mvyanu09" alt="עמודי כניסה אלגנטיים" data-en-alt="Elegant entrance columns" width="230" height="230" loading="lazy" data-mir-key="i-6da02337-0"><figcaption data-en="Elegant entrance columns" data-mir-key="t-2b842e65-0">עמודי כניסה אלגנטיים</figcaption></figure>
+        <figure data-k="entry"><img src="/pages/michal-balloons/assets/work/columns-2.webp?v=mvyanu09" alt="שני עמודים ובלון זכוכית" data-en-alt="Two columns and a clear balloon" width="230" height="230" loading="lazy" data-mir-key="i-41416118-0"><figcaption data-en="Two columns and a clear balloon" data-mir-key="t-395bfeea-0">שני עמודים ובלון זכוכית</figcaption></figure>
+        <figure data-k="entry"><img src="/pages/michal-balloons/assets/work/arch-school.webp?v=mvyanu09" alt="קשת לפתיחת שנה" data-en-alt="An arch for the start of the school year" width="230" height="230" loading="lazy" data-mir-key="i-b70b3530-0"><figcaption data-en="An arch for the start of the school year" data-mir-key="t-15a74171-0">קשת לפתיחת שנה</figcaption></figure>
+        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/clowns.webp?v=mvyanu09" alt="כמה סוגי ליצנים" data-en-alt="Clowns" width="230" height="230" loading="lazy" data-mir-key="i-e69617dc-0"><figcaption data-en="Clowns" data-mir-key="t-4ffbe130-0">כמה סוגי ליצנים</figcaption></figure>
+        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/clown-bubble.webp?v=mvyanu09" alt="ליצן מחזיק בלון בועה" data-en-alt="A clown holding a bubble balloon" width="230" height="230" loading="lazy" data-mir-key="i-98b98f1c-0"><figcaption data-en="A clown holding a bubble balloon" data-mir-key="t-05e0660f-0">ליצן מחזיק בלון בועה</figcaption></figure>
+        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/clown-fair.webp?v=mvyanu09" alt="ליצן ליריד" data-en-alt="A clown for a school fair" width="230" height="230" loading="lazy" data-mir-key="i-e3ff681e-0"><figcaption data-en="A clown for a school fair" data-mir-key="t-f3db4a98-0">ליצן ליריד</figcaption></figure>
+        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/clown-gil.webp?v=mvyanu09" alt="ליצן" data-en-alt="A clown" width="230" height="230" loading="lazy" data-mir-key="i-006bfd12-0"><figcaption data-en="A clown" data-mir-key="t-f389aa52-0">ליצן</figcaption></figure>
+        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/chanukiah.webp?v=mvyanu09" alt="חנוכיה בגן ילדים" data-en-alt="A balloon chanukiah for a kindergarten" width="230" height="230" loading="lazy" data-mir-key="i-f511ec1a-0"><figcaption data-en="A balloon chanukiah for a kindergarten" data-mir-key="t-3d90aa1d-0">חנוכיה בגן ילדים</figcaption></figure>
+        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/bride-groom.webp?v=mvyanu09" alt="חתן כלה" data-en-alt="Bride and groom" width="230" height="230" loading="lazy" data-mir-key="i-a7e07817-0"><figcaption data-en="Bride and groom" data-mir-key="t-6fad8b8d-0">חתן כלה</figcaption></figure>
+        <figure data-k="fun"><img src="/pages/michal-balloons/assets/work/room-anniv.webp?v=mvyanu09" alt="חדר ליום נישואין" data-en-alt="An anniversary room" width="230" height="230" loading="lazy" data-mir-key="i-ea28fe26-0"><figcaption data-en="An anniversary room" data-mir-key="t-bddcf629-0">חדר ליום נישואין</figcaption></figure>
+        <figure data-k="print"><img src="/pages/michal-balloons/assets/work/print-balloon.webp?v=mvyanu09" alt="הדפסה אישית על בלון" data-en-alt="Personal printing on a balloon" width="230" height="230" loading="lazy" data-mir-key="i-c0857ec1-0"><figcaption data-en="Personal printing on a balloon" data-mir-key="t-efd84d18-0">הדפסה אישית על בלון</figcaption></figure>
+        <figure data-k="print"><img src="/pages/michal-balloons/assets/work/glass-print.webp?v=mvyanu09" alt="בלון זכוכית בהדפסה אישית" data-en-alt="A clear balloon with personal printing" width="230" height="230" loading="lazy" data-mir-key="i-16366fc5-0"><figcaption data-en="A clear balloon with personal printing" data-mir-key="t-9d9d1d0c-0">בלון זכוכית בהדפסה אישית</figcaption></figure>
+        <figure data-k="print"><img src="/pages/michal-balloons/assets/work/print-cup.webp?v=mvyanu09" alt="הדפסה אישית על כוס" data-en-alt="Personal printing on a cup" width="230" height="230" loading="lazy" data-mir-key="i-b5d20830-0"><figcaption data-en="Personal printing on a cup" data-mir-key="t-bb5342cd-0">הדפסה אישית על כוס</figcaption></figure>
+        <figure data-k="print"><img src="/pages/michal-balloons/assets/work/print-bottle.webp?v=mvyanu09" alt="בקבוק בהדפסה אישית" data-en-alt="A bottle with personal printing" width="230" height="230" loading="lazy" data-mir-key="i-ff025762-0"><figcaption data-en="A bottle with personal printing" data-mir-key="t-5b689f42-0">בקבוק בהדפסה אישית</figcaption></figure>
+        <figure data-k="print"><img src="/pages/michal-balloons/assets/work/print-jar.webp?v=mvyanu09" alt="צנצנת עוגיות בהדפסה אישית" data-en-alt="A cookie jar with personal printing" width="230" height="230" loading="lazy" data-mir-key="i-6b216863-0"><figcaption data-en="A cookie jar with personal printing" data-mir-key="t-a31ee70f-0">צנצנת עוגיות בהדפסה אישית</figcaption></figure>
     </div>
     <button type="button" class="ghost showall" id="showall" >להציג את כל 42</button>
   </section>
@@ -549,14 +566,14 @@
             <div><label class="f" for="occ" data-en="The occasion (optional)" data-mir-key="t-a202b4c8-0">סוג האירוע (לא חובה)</label><input id="occ" type="text" autocomplete="off"></div>
             <div><label class="f" for="cols" data-en="Colours (optional)" data-mir-key="t-ea8be187-0">צבעים (לא חובה)</label><input id="cols" type="text" autocomplete="off"></div>
           </div>
-          <div class="sum" id="sum" aria-live="polite"></div>
         </div>
+        <div class="sum" id="sum" aria-live="polite"></div>
         <div class="send">
           <button type="button" class="ghost" id="back" hidden></button>
           <button type="button" class="btn" id="next"></button>
           <a class="btn" id="send" href="https://wa.me/972527644973" target="_blank" rel="noopener" hidden>
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
-            <span data-en="Send on WhatsApp" data-mir-key="t-383406ec-0">שליחה בוואטסאפ</span>
+            <span data-en="Send my request on WhatsApp" data-mir-key="t-bb5037a5-0">שליחת הבקשה שלי בוואטסאפ</span>
           </a>
           <p class="note" data-en="Or call: 052-764-4973" data-mir-key="t-aa1aa33a-0">או בטלפון: <a href="tel:+972527644973" dir="ltr">052-764-4973</a></p>
         </div>
@@ -590,26 +607,15 @@
   </section>
 </main>
 
-<footer class="foot">
-  <div class="wrap">
-    <p class="last" data-en-html="Your event, <span class=&quot;acc&quot;>lifted</span>" data-mir-key="t-1f4355f2-0">האירוע שלכם, <span class="acc">באוויר</span></p>
-    <div class="act"><a class="btn" href="#book"><span data-en="Ask for a quote" data-mir-key="t-76424f9f-4">לבקש הצעת מחיר</span></a></div>
-    <div class="cols">
-      <div><h3 data-en="ON THIS PAGE" data-mir-key="t-8b3e4f9b-0">בעמוד</h3><ul>
-        <li><a href="#make" data-en="What we make" data-mir-key="t-ff5af1bd-1">מה אנחנו עושים</a></li>
-        <li><a href="#booth" data-en="Photo station" data-mir-key="t-2cd4f76d-1">עמדת צילום</a></li>
-        <li><a href="#work-sec" data-en="Our work" data-mir-key="t-e1eaca52-0">העבודות שלנו</a></li>
-        <li><a href="#book" data-en="Ask for a quote" data-mir-key="t-7556c9d6-1">לבקש הצעת מחיר</a></li></ul></div>
-      <div><h3 data-en="CONTACT" data-mir-key="t-fb0f4671-0">יצירת קשר</h3><ul>
-        <li><a href="tel:+972527644973" dir="ltr" data-mir-key="t-6512e3bd-1">052-764-4973</a></li>
-        <li><a href="https://wa.me/972527644973" target="_blank" rel="noopener" data-mir-key="t-aa883ea7-0">WhatsApp</a></li></ul></div>
-      <div><h3 data-en="AREA" data-mir-key="t-e7c0ca08-0">אזור</h3><ul>
-        <li data-en="Jerusalem and the area" data-mir-key="t-4ea459ad-0">ירושלים והסביבה</li>
-        <li data-en="By appointment" data-mir-key="t-ce82372d-0">בתיאום מראש</li></ul></div>
-    </div>
-    <div class="legal"><span data-en="Michal Balloons, Jerusalem. Balloon design since 2024." data-mir-key="t-0e0f62b9-0">מיכל בלונס, ירושלים. עיצוב בלונים מאז 2024.</span>
-      <a href="https://myisraelrental.com/businesses" data-en="Listed on MyIsraelRental" data-mir-key="t-624f416e-0">רשומים ב-MyIsraelRental</a></div>
+<footer class="foot full">
+  <p class="last" data-en-html="Your event, <span class=&quot;acc&quot;>lifted</span>" data-mir-key="t-1f4355f2-0">האירוע שלכם, <span class="acc">באוויר</span></p>
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="#top" data-en="Michal Balloons" data-mir-key="t-c2f6f258-0">מיכל בלונס</a><p data-en="Balloon arches, centrepieces and photo stations in Jerusalem and the area" data-mir-key="t-87b3657b-1">שערי בלונים, מרכזי שולחן ועמדות צילום בירושלים והסביבה</p><a class="fcta" href="#book"><span data-en="Ask for a quote" data-mir-key="t-76424f9f-4">לבקש הצעת מחיר</span> <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <nav aria-label="Pages" data-en-label="Pages"><h4 data-en="Pages" data-mir-key="t-c3bcae68-0">דפים</h4><a href="#top" data-en="Home" data-mir-key="t-340a903f-0">ראשי</a><a href="#make" data-en="What we make" data-mir-key="t-ff5af1bd-1">מה אנחנו עושים</a><a href="#booth" data-en="Photo station" data-mir-key="t-2cd4f76d-1">עמדת צילום</a><a href="#work-sec" data-en="Our work" data-mir-key="t-e1eaca52-0">העבודות שלנו</a></nav>
+    <div><h4 data-en="Booking" data-mir-key="t-d48d3bf6-0">הזמנה</h4><p data-en="Jerusalem and the area" data-mir-key="t-38b46113-0">ירושלים והסביבה</p><p data-en="By appointment" data-mir-key="t-12d9f7bd-0">בתיאום מראש</p><p data-en="Bank transfer or Bit" data-mir-key="t-3d6cea8c-0">העברה בנקאית או ביט</p></div>
+    <div><h4 data-en="Reach us" data-mir-key="t-b286f4ed-0">יצירת קשר</h4><a href="https://wa.me/972527644973" target="_blank" rel="noopener">WhatsApp <bdi dir="ltr">+972 52-764-4973</bdi></a><a href="tel:+972527644973"><span data-en="Phone" data-mir-key="t-96639ee9-0">טלפון</span> <bdi dir="ltr">052-764-4973</bdi></a></div>
   </div>
+  <div class="fbase"><span data-en="© 2026 Michal Balloons. Since 2024." data-mir-key="t-67e1a8ee-0">© 2026 מיכל בלונס. מאז 2024.</span><span data-en-html="Listed on &lt;a href=&quot;https://myisraelrental.com/&quot;&gt;MyIsraelRental&lt;/a&gt;, free to list, no commission · &lt;a href=&quot;https://myisraelrental.com/privacy&quot;&gt;Privacy&lt;/a&gt;" data-mir-key="t-f781fef7-0">רשומים ב-<a href="https://myisraelrental.com/">MyIsraelRental</a>, רישום חינם, בלי עמלה · <a href="https://myisraelrental.com/privacy">פרטיות</a></span></div>
 </footer>
 
 <div class="dock order-bar" id="dock" aria-hidden="true">
@@ -661,7 +667,16 @@
   var open = document.getElementById('open'), film = document.getElementById('film');
   var h1 = document.getElementById('h1'), act = document.getElementById('act');
   film.poster = film.dataset[still ? (small ? 'sm' : 'sd') : (small ? 'pm' : 'pd')];
-  if (!still) { film.src = film.dataset[small ? 'm' : 'd']; film.load(); }
+  // On a phone the opening plays by itself on repeat instead of following the scroll (Tzvi, 29 Oct 2026: "on mobile
+  // we should remove the scroll and it should just play on repeat"): one short clip made from the phone clip, the
+  // finished arch held a moment, then a soft fade back to the empty room (assets/arrive-m-loop.mp4). The words were
+  // never tied to the scroll here, so they already hold still; the section is one screen tall (.hero.loop). The
+  // <video> itself is shown, paused when off screen. Motion off keeps the still of the finished arch; laptop unchanged.
+  var loopOn = small && !still;
+  if (loopOn) {
+    open.classList.add('loop'); film.loop = true; film.src = film.dataset.loop; film.load();
+    new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) film.play().catch(function () {}); else film.pause(); }); }).observe(open);
+  } else if (!still) { film.src = film.dataset[small ? 'm' : 'd']; film.load(); }
   var want = 0, busy = false;
   function seek() {
     if (!film.duration) return;
@@ -672,6 +687,7 @@
   film.addEventListener('seeked', function () { busy = false; seek(); });
   film.addEventListener('loadedmetadata', seek);
   function openAt(p) {
+    if (loopOn) return;
     want = seg(p, 0, .7); if (!busy) seek();
   }
   function onOpen() {
@@ -859,6 +875,8 @@
   document.getElementById('nodate').addEventListener('change', function () { document.getElementById('when').disabled = this.checked; write(); });
   f.addEventListener('input', write); f.addEventListener('change', write);
   document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k.8): tomorrow, changeable; no lead time given yet, so same-day is not assumed (a booked event, the day stays optional with the no-date box)
+  document.getElementById('when').value = new Date(Date.now() + 864e5 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   // the request is saved with Michal on MyIsraelRental first (page rules 3k), then WhatsApp opens with it typed
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api', GIG = '4db9f8d5-038f-4b83-b0a4-f1adf988aa26';
   var sending = false;

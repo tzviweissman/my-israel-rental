@@ -102,6 +102,13 @@
     .hero .inner { justify-content: flex-start; padding-top: calc(10svh + 118vw * 9 / 16 + 1rem); padding-bottom: 0; }
     .hero h1 { font-size: clamp(2.5rem, 1rem + 8vw, 3.4rem); }
   }
+  /* phone, motion allowed: the opening plays on repeat in one screen (script adds .loop; Tzvi, 29 Oct 2026) */
+  .hero.loop { height: auto; }
+  .hero.loop .stage { position: relative; top: 0; }
+  @media (max-width: 760px) { /* the whole arch fits the screen's width on the loop, not cropped at the sides */
+    .hero.loop .film { inset: 6svh auto auto 0; width: 100vw; }
+    .hero.loop .inner { padding-top: calc(6svh + 100vw * 9 / 16 + 1.4rem); }
+  }
   @media (prefers-reduced-motion: reduce) {
     .hero { height: auto; }
     .hero .stage { position: relative; top: 0; }
@@ -191,7 +198,7 @@
   .gal { padding-bottom: clamp(1.5rem, 5svh, 3rem); }
   .work figcaption { font-size: .85rem; }
   .gal .chips2 { margin-top: 1rem; } .gal .work { margin-top: 1rem; } .gal .showall { margin-top: .9rem; }
-  .book.sec { padding-block: clamp(1.5rem, 5svh, 4rem); } .book .card { margin-top: 1.2rem; }
+  .book.sec { padding-block: clamp(1.5rem, 4svh, 4rem); } .book .card { margin-top: 1.2rem; }
   @media (max-width: 760px) { .chips2 { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; margin-inline: calc(var(--gutter) * -1); padding-inline: var(--gutter); } .chip { flex: none; } }
   .work img { width: 100%; height: auto; aspect-ratio: 1; object-fit: cover; scale: 1.07; border-radius: 26%; box-shadow: var(--shadow); background: var(--cream-2); clip-path: inset(3.5% round 24%); }
   .work figcaption { display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
@@ -229,7 +236,7 @@
   .nodate { display: flex; align-items: center; gap: .6rem; margin-top: 1rem; min-height: 44px; cursor: pointer; }
   .nodate input { width: 20px; height: 20px; accent-color: var(--sage-ink); }
   .err { margin: .8rem 0 0; color: #9A3B2E; font-weight: 500; }
-  .sum { margin-top: 1.2rem; padding: .9rem 1.1rem; border-radius: 14px; background: var(--cream); display: grid; gap: .2rem; font-size: .95rem; }
+  .sum { margin-top: .8rem; padding: .6rem 1.1rem; border-radius: 14px; background: var(--cream); display: grid; gap: .2rem; font-size: .95rem; }
   .sum:empty { display: none; }
   .card .send .ghost { min-height: 52px; }
   /* good to know: calm */
@@ -250,8 +257,6 @@
   @media (max-width: 640px) { .sign { aspect-ratio: 1.25 / 1; } }
   .sign canvas { position: absolute; inset: 0; width: 100%; height: 100%; }
   .sign .hint { position: absolute; inset: auto 0 -1.6rem 0; font-size: .85rem; color: var(--soft); }
-  .foot { background: var(--cream-2); border-top: 1px solid var(--line); color: var(--soft); padding-block: 1.6rem calc(1.6rem + var(--pad-bottom, 0px)); font-size: .9rem; }
-  .foot .wrap { display: flex; flex-wrap: wrap; gap: .6rem 1.5rem; justify-content: space-between; }
 
   /* phone: the action pinned to the bottom after the opening */
   .dock { display: none; }
@@ -307,17 +312,6 @@
   @media (max-width: 760px) { .close { background-image: url(assets/arrive-m-last.webp); background-size: 190% auto; background-position: 50% 35%; min-height: 80svh; } }
   .signsec { background: var(--cream-2); text-align: center; padding-block: clamp(2rem, 6svh, 4rem) clamp(1.5rem, 4svh, 2.5rem); overflow: hidden; }
   .signsec .sign { margin-top: 0; }
-  .foot { background: var(--night); color: #C9D3CF; border-top: 0; padding-block: clamp(3rem, 8svh, 5rem) calc(1.6rem + var(--pad-bottom, 0px)); font-size: .95rem; }
-  .foot .wrap { display: block; }
-  .foot .last { margin: 0; color: #fff; font-weight: 700; font-size: clamp(2.2rem, 1rem + 4.4vw, 4.8rem); line-height: 1; letter-spacing: -.02em; max-width: 12em; }
-  .foot .last .acc { color: var(--gold); }
-  .foot .act { margin: 1.8rem 0 clamp(2rem, 6svh, 3.5rem); }
-  .foot .cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem 2rem; padding-top: 2rem; border-top: 1px solid rgb(255 255 255 / .18); }
-  .foot h3 { font-size: .8rem; letter-spacing: .1em; color: var(--gold); font-weight: 600; margin-bottom: .6rem; }
-  .foot ul { list-style: none; margin: 0; padding: 0; display: grid; gap: .35rem; }
-  .foot a { text-decoration: none; color: #fff; } .foot a:hover { text-decoration: underline; }
-  .foot .legal { margin-top: 2.2rem; display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; justify-content: space-between; font-size: .95rem; color: #9FB0A9; }
-  @media (max-width: 640px) { .foot .cols { grid-template-columns: 1fr 1fr; } }
 
   /* CATEGORY events (rule 3t, 22 Oct 2026; after Monarque and Boom Ball): a short page; one loud opening, then
      ground that changes per section in her own balloon colours (cream, sage, blush, gold), small photos, little text. */
@@ -364,6 +358,28 @@
     .chips2:not([data-end]) { -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(to right, #000 calc(100% - 44px), transparent); }
     [dir=rtl] .chips2:not([data-end]) { -webkit-mask-image: linear-gradient(to left, #000 calc(100% - 44px), transparent); mask-image: linear-gradient(to left, #000 calc(100% - 44px), transparent); }
   }
+  /* the full footer (rules 3v.1): who we are, every page, how ordering works, how to reach us, then one base line */
+  .foot.full { text-align: start; font-size: .92rem; background: var(--night); color: #B6C4BE; border-top: 1px solid rgb(255 255 255 / .18); padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.6rem + var(--pad-bottom, 0px)); }
+  .foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+  .foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font); letter-spacing: .16em; text-transform: uppercase; color: var(--gold); }
+  .foot.full nav { margin: 0; font-weight: 400; }
+  .foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; max-width: 100%; margin: 0 0 .55rem; color: #fff; text-decoration: none; line-height: 1.5; }
+  .foot .fgrid a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  .foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+  .foot .fgrid a.fname { font: 700 1.6rem/1.1 var(--font); margin-bottom: .9rem; }
+  .foot .fbrand p { max-width: 30ch; color: #B6C4BE; line-height: 1.55; }
+  .foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+  .foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid rgb(255 255 255 / .18); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .82rem; color: #B6C4BE; }
+  .foot .fbase a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 760px) { .foot .fgrid { grid-template-columns: 1fr 1fr; } .foot .fbrand { grid-column: 1 / -1; } }
+  /* three true facts under the main button (rules 3v.14) */
+  .btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem;  }
+  .btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; margin-inline-end: .45em; margin-bottom: .15em; border-radius: 50%; background: var(--gold-ink); }
+  .foot .last { margin: 0 auto clamp(2rem, 5vw, 3rem); max-width: 74rem; color: #fff; font-weight: 700; font-size: clamp(2.2rem, 1rem + 4.4vw, 4.8rem); line-height: 1; letter-spacing: -.02em; }
+  .foot .last .acc { color: var(--gold); }
+  [dir=rtl] .foot .arw { transform: scaleX(-1); }
+  .foot .fbase > span { max-width: 100%; }
+  .hero .btn-facts { justify-content: center; margin-top: 1rem; color: var(--soft); }
 </style>
 <script>document.documentElement.classList.add('js');</script>
 </head>
@@ -385,7 +401,7 @@
   <section class="hero" id="open" aria-labelledby="h1">
     <div class="stage">
       <video class="film" id="film" muted playsinline preload="auto" aria-hidden="true"
-        data-d="assets/arrive.mp4" data-m="assets/arrive-m.mp4"
+        data-d="assets/arrive.mp4" data-m="assets/arrive-m.mp4" data-loop="assets/arrive-m-loop.mp4"
         data-pd="assets/arrive-first.webp" data-pm="assets/arrive-m-first.webp"
         data-sd="assets/arrive-last.webp" data-sm="assets/arrive-m-last.webp"></video>
       <div class="inner">
@@ -396,6 +412,7 @@
             <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18"/></svg>
             <span data-en="Ask for a quote">לבקש הצעת מחיר</span>
           </a>
+          <ul class="btn-facts"><li data-en="Jerusalem and the area">ירושלים והסביבה</li><li data-en="By appointment">בתיאום מראש</li><li data-en="Bank transfer or Bit">העברה בנקאית או ביט</li></ul>
         </div>
       </div>
     </div>
@@ -549,14 +566,14 @@
             <div><label class="f" for="occ" data-en="The occasion (optional)">סוג האירוע (לא חובה)</label><input id="occ" type="text" autocomplete="off"></div>
             <div><label class="f" for="cols" data-en="Colours (optional)">צבעים (לא חובה)</label><input id="cols" type="text" autocomplete="off"></div>
           </div>
-          <div class="sum" id="sum" aria-live="polite"></div>
         </div>
+        <div class="sum" id="sum" aria-live="polite"></div>
         <div class="send">
           <button type="button" class="ghost" id="back" hidden></button>
           <button type="button" class="btn" id="next"></button>
           <a class="btn" id="send" href="https://wa.me/972527644973" target="_blank" rel="noopener" hidden>
             <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
-            <span data-en="Send on WhatsApp">שליחה בוואטסאפ</span>
+            <span data-en="Send my request on WhatsApp">שליחת הבקשה שלי בוואטסאפ</span>
           </a>
           <p class="note" data-en="Or call: 052-764-4973">או בטלפון: <a href="tel:+972527644973" dir="ltr">052-764-4973</a></p>
         </div>
@@ -590,26 +607,15 @@
   </section>
 </main>
 
-<footer class="foot">
-  <div class="wrap">
-    <p class="last" data-en-html="Your event, <span class=&quot;acc&quot;>lifted</span>">האירוע שלכם, <span class="acc">באוויר</span></p>
-    <div class="act"><a class="btn" href="#book"><span data-en="Ask for a quote">לבקש הצעת מחיר</span></a></div>
-    <div class="cols">
-      <div><h3 data-en="ON THIS PAGE">בעמוד</h3><ul>
-        <li><a href="#make" data-en="What we make">מה אנחנו עושים</a></li>
-        <li><a href="#booth" data-en="Photo station">עמדת צילום</a></li>
-        <li><a href="#work-sec" data-en="Our work">העבודות שלנו</a></li>
-        <li><a href="#book" data-en="Ask for a quote">לבקש הצעת מחיר</a></li></ul></div>
-      <div><h3 data-en="CONTACT">יצירת קשר</h3><ul>
-        <li><a href="tel:+972527644973" dir="ltr">052-764-4973</a></li>
-        <li><a href="https://wa.me/972527644973" target="_blank" rel="noopener">WhatsApp</a></li></ul></div>
-      <div><h3 data-en="AREA">אזור</h3><ul>
-        <li data-en="Jerusalem and the area">ירושלים והסביבה</li>
-        <li data-en="By appointment">בתיאום מראש</li></ul></div>
-    </div>
-    <div class="legal"><span data-en="Michal Balloons, Jerusalem. Balloon design since 2024.">מיכל בלונס, ירושלים. עיצוב בלונים מאז 2024.</span>
-      <a href="https://myisraelrental.com/businesses" data-en="Listed on MyIsraelRental">רשומים ב-MyIsraelRental</a></div>
+<footer class="foot full">
+  <p class="last" data-en-html="Your event, <span class=&quot;acc&quot;>lifted</span>">האירוע שלכם, <span class="acc">באוויר</span></p>
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="#top" data-en="Michal Balloons">מיכל בלונס</a><p data-en="Balloon arches, centrepieces and photo stations in Jerusalem and the area">שערי בלונים, מרכזי שולחן ועמדות צילום בירושלים והסביבה</p><a class="fcta" href="#book"><span data-en="Ask for a quote">לבקש הצעת מחיר</span> <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <nav aria-label="Pages" data-en-label="Pages"><h4 data-en="Pages">דפים</h4><a href="#top" data-en="Home">ראשי</a><a href="#make" data-en="What we make">מה אנחנו עושים</a><a href="#booth" data-en="Photo station">עמדת צילום</a><a href="#work-sec" data-en="Our work">העבודות שלנו</a></nav>
+    <div><h4 data-en="Booking">הזמנה</h4><p data-en="Jerusalem and the area">ירושלים והסביבה</p><p data-en="By appointment">בתיאום מראש</p><p data-en="Bank transfer or Bit">העברה בנקאית או ביט</p></div>
+    <div><h4 data-en="Reach us">יצירת קשר</h4><a href="https://wa.me/972527644973" target="_blank" rel="noopener">WhatsApp <bdi dir="ltr">+972 52-764-4973</bdi></a><a href="tel:+972527644973"><span data-en="Phone">טלפון</span> <bdi dir="ltr">052-764-4973</bdi></a></div>
   </div>
+  <div class="fbase"><span data-en="© 2026 Michal Balloons. Since 2024.">© 2026 מיכל בלונס. מאז 2024.</span><span data-en-html="Listed on &lt;a href=&quot;https://myisraelrental.com/&quot;&gt;MyIsraelRental&lt;/a&gt;, free to list, no commission · &lt;a href=&quot;https://myisraelrental.com/privacy&quot;&gt;Privacy&lt;/a&gt;">רשומים ב-<a href="https://myisraelrental.com/">MyIsraelRental</a>, רישום חינם, בלי עמלה · <a href="https://myisraelrental.com/privacy">פרטיות</a></span></div>
 </footer>
 
 <div class="dock order-bar" id="dock" aria-hidden="true">
@@ -661,7 +667,16 @@
   var open = document.getElementById('open'), film = document.getElementById('film');
   var h1 = document.getElementById('h1'), act = document.getElementById('act');
   film.poster = film.dataset[still ? (small ? 'sm' : 'sd') : (small ? 'pm' : 'pd')];
-  if (!still) { film.src = film.dataset[small ? 'm' : 'd']; film.load(); }
+  // On a phone the opening plays by itself on repeat instead of following the scroll (Tzvi, 29 Oct 2026: "on mobile
+  // we should remove the scroll and it should just play on repeat"): one short clip made from the phone clip, the
+  // finished arch held a moment, then a soft fade back to the empty room (assets/arrive-m-loop.mp4). The words were
+  // never tied to the scroll here, so they already hold still; the section is one screen tall (.hero.loop). The
+  // <video> itself is shown, paused when off screen. Motion off keeps the still of the finished arch; laptop unchanged.
+  var loopOn = small && !still;
+  if (loopOn) {
+    open.classList.add('loop'); film.loop = true; film.src = film.dataset.loop; film.load();
+    new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) film.play().catch(function () {}); else film.pause(); }); }).observe(open);
+  } else if (!still) { film.src = film.dataset[small ? 'm' : 'd']; film.load(); }
   var want = 0, busy = false;
   function seek() {
     if (!film.duration) return;
@@ -672,6 +687,7 @@
   film.addEventListener('seeked', function () { busy = false; seek(); });
   film.addEventListener('loadedmetadata', seek);
   function openAt(p) {
+    if (loopOn) return;
     want = seg(p, 0, .7); if (!busy) seek();
   }
   function onOpen() {
@@ -859,6 +875,8 @@
   document.getElementById('nodate').addEventListener('change', function () { document.getElementById('when').disabled = this.checked; write(); });
   f.addEventListener('input', write); f.addEventListener('change', write);
   document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k.8): tomorrow, changeable; no lead time given yet, so same-day is not assumed (a booked event, the day stays optional with the no-date box)
+  document.getElementById('when').value = new Date(Date.now() + 864e5 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   // the request is saved with Michal on MyIsraelRental first (page rules 3k), then WhatsApp opens with it typed
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api', GIG = '4db9f8d5-038f-4b83-b0a4-f1adf988aa26';
   var sending = false;

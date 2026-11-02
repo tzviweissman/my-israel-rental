@@ -102,7 +102,7 @@ export default function OrderTrackPage() {
         <div className="flex items-center gap-3 mb-6">
           {data.business?.logo_url && <img src={data.business.logo_url} alt="" className="w-11 h-11 rounded-xl object-cover" />}
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.yourOrderFrom', 'Your order from')}</p>
+            <p className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.yourOrderFrom', 'Your order from')}{data.order_no ? ` · ${t('ownerOrder.orderNo', 'Order {{no}}', { no: data.order_no })}` : ''}</p>
             <h1 className="text-lg font-bold truncate" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>
               {data.business?.slug ? <Link to={`/business/${data.business.slug}`}>{bizName}</Link> : bizName}
             </h1>
@@ -184,6 +184,15 @@ export default function OrderTrackPage() {
               {t('orders.track.total', 'Total: {{n}}', { n: money(data.total, data.currency) })}
               {data.paid && <span className="ms-2" style={{ color: 'var(--status-open)' }}>· {t('orders.paidShort', 'paid')}</span>}
             </p>
+          )}
+          {(data.payment_note || data.payment_links?.length > 0) && (
+            <div className="pt-1" data-testid="track-pay">
+              <p className="font-semibold" style={{ color: 'var(--ink)' }}>{t('orders.track.howToPay', 'How to pay')}</p>
+              {data.payment_note && <p style={{ color: 'var(--brand-muted)' }}>{data.payment_note}</p>}
+              {(data.payment_links || []).map((l) => (
+                <a key={l.url} href={l.url} target="_blank" rel="noopener noreferrer" className="block underline" style={{ color: 'var(--gold-text-on-light)' }}>{l.label || l.url}</a>
+              ))}
+            </div>
           )}
         </section>
 

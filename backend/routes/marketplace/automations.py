@@ -566,7 +566,8 @@ async def _create_partner_order(rule: dict[str, Any], *, source: Optional[dict[s
         "history": history,
         "track_token": secrets.token_urlsafe(16),
     }
-    await db.store_orders.insert_one(doc)
+    from .order_texts import insert_order
+    await insert_order(doc)
     run = await _record(rule, result="auto_accepted" if land else "created", event=event, order_id=order_id)
     await db.store_orders.update_one({"_id": order_id}, {"$set": {"automation.run_id": run["_id"]}})
 

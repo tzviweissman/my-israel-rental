@@ -39,8 +39,9 @@ R3b.1 pass: first screen says what (fruit platters), where (Jerusalem), trust (K
 R3b.2 pass: the kosher band follows the opening; the certificate is stated twice (the band and the trust row)
 R3b.3 pass: one solid action per screen: the bar button is the outline version over the film
 R3h.1 pass: the home page opens on the fruit rain, which follows the scroll (26 Oct, Tzvi: "why is it not scrollable"): her empty board fills as you scroll, empties on the way back up
-R3h.20 pass: scroll-driven since 26 Oct: the film section is 3.2 screens (320svh) with a sticky stage; frames on a canvas (assets/film/d and m), loaded in passes, shown point eased toward the scroll; her board on a plain red ground, the whole board on a tall phone (frames m); check-site SMOOTH/SLOW run by publish-page
+R3h.20 pass: on a laptop scroll-driven since 26 Oct: the film section is 3.2 screens (320svh) with a sticky stage; frames on a canvas (assets/film/d), loaded in passes, shown point eased toward the scroll. On a phone (760px or narrower) since 31 Oct the film is not scroll-driven: assets/film/phone-loop.mp4 (8 s, from the tall frames m) plays by itself on repeat in one screen, muted, paused off screen, the whole board on plain red; check-site SMOOTH/SLOW run by publish-page
 R3h.21 pass: check-one-scroll clean at 390x844 and 1440x900 (29 Oct)
+R3h.22 n/a: the fruit rain film was made before the rule (gen/opening-film-v3-brief.md)
 R3n.1 pass: her Large platter fills the whole first screen on laptop and phone
 R3n.2 pass: the fruit bursts up off her Large board in the opening film; no other business has her board
 R3n.3 pass: on the shop page choosing a size changes the stage photo, name, price, button and the page ground to that size's colour; check-motion COLOUR clean
@@ -132,10 +133,10 @@ R3j.3 n/a: no free taster or consultation is offered
 R3j.4 n/a: no group discounts are offered
 R3j.5 n/a: no stamp card or reorder feature is offered
 R3j.6 pass: no invented option; every size or bowl is a real one from their list
-R3j.7 pass: the two struck-through prices are the Large and Extra large boards' area priced at the cheapest smaller size's real price a cm2 (Small ₪300 for 900 cm2, Large ₪500 for 1624 cm2): ₪541 and ₪885, worked out in the comment above the size cards in index.html
-R3j.8 pass: per cm2 table (28 Oct, the owner's sizes): Small 300/900 = 0.333, Medium 400/1120 = 0.357, Large 500/1624 = 0.308, Extra large 850/2875 = 0.296. Same product, one line of platters. Large is below Small and Medium, measured against Small (cheapest); Extra large is below all three, measured against Large; Medium is dearer than Small a cm2 and shows none
-R3j.9 pass: one group (the four platter sizes of one product), two of its four show a saving, so neither is a lone badge
-R3j.10 pass: '7% off' (Large, 7.6% rounded down) and '3% off' (Extra large, 3.97% rounded down) beside the real price with ₪541 and ₪885 struck through, on the home cards and the shop stage; the Add buttons carry the price; no sentence explains it and nothing says how much more a size costs
+R3j.7 n/a: the owner asked for no discounts on the site (1 Nov 2026), so no struck price or '% off' is shown
+R3j.8 n/a: the owner asked for no discounts on the site (1 Nov 2026), so no struck price or '% off' is shown; the four real prices (₪300, ₪400, ₪500, ₪850) stand alone
+R3j.9 n/a: the owner asked for no discounts on the site (1 Nov 2026), so no struck price or '% off' is shown
+R3j.10 n/a: the owner asked for no discounts on the site (1 Nov 2026), so no struck price or '% off' is shown
 R3j.11 n/a: no combined service or package that saves money
 R3j.12 n/a: no owner savings claim is printed
 R3.14 pass: prices are loud because prices exist; this is a priced shop
@@ -144,6 +145,7 @@ R3.14 pass: prices are loud because prices exist; this is a priced shop
 R3k.7 pass: check-site FLOW: Step 1 basket, Step 2 when and where, Step 3 details; the three step buttons have a pointer cursor, hover, pressed and focus states and a later step can be tapped (it goes as far as the filled-in steps allow and shows what is missing); Back button; browser back goes back a step; total beside each step
 R3k.8 pass: every basket line has a 40 px remove button
 R3k.9 pass: the Send button POSTs to /api/marketplace/order-form/cbf66136-.../orders (platter product ids 55113012e889 etc. from the 22 Oct add_site_products run; the time goes in notes) while a blank WhatsApp tab is already open, then fills the tab with the message and the tracking link; a failed POST still opens WhatsApp. Intercepted a full order in Playwright (fulfilment delivery, city jerusalem, address, date, name, phone, notes match WebsiteOrderIn); check-site SAVE and FLOW pass; nothing sent to the live site. Live saving also needs the listing converted to a store (convert_to_store in site_products_plan.json) and whether she delivers: listed in the reply
+R3k.10 pass: check-prefill clean: the day field opens on tomorrow (same-day is question 14 to her), changeable; quantity 1
 R3k.6 pass: Add on a home card opens shop.html#order with that size already in the basket (add=1)
 R3.15 pass: ordering has the shop; messaging has contact
 R7.1 pass: CONCEPT.md names the pick (film plus slat stage) and the reason
@@ -202,3 +204,21 @@ R8.7 pass: gen/opening-film-v3-brief.md written before generating (steps approve
 R3h.19 pass: gen/opening-film-v3-brief.md was written before generating with the steps (approved by Tzvi 26 Oct) and every object's start and end; start and end stills pinned (the empty board edited from assets/opening-end.webp, and opening-end.webp itself), one action (fruit falls in past the top edge and settles), one clip between them; the number of tries is not recorded
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 pass: scripts/check-same-place.mjs clean on index, shop and contact at 390x844 and 1440x900 (27 Oct): the four sizes on the one-at-a-time stage share one place for name, size and price; the shop's size boxes sit in one row of equal boxes
+R3s.28 pass: check-blank run on every page at 390x844 and 1440x900 before publishing (29 Oct)
+R3u.2 n/a: the page has no closed days or lead time from the owner (record lead_time and notice are null, asked in message-to-owner.md questions 5 and 14), so there is nothing real to name; day field only refuses past days
+R3u.3 n/a: the four sizes have centimetres (30x30, 40x28, 58x28, 115x25) but the owner has not said how many people each serves; the question is in message-to-owner.md question 2
+R3u.5 n/a: the home page opens on a scroll film (check-arrival run on index.html reports it opens on a film, so the arrival is left out)
+R3u.6 n/a: the first screen is a scroll film of one whole platter, no separate cut-out pieces
+R3u.7 n/a: the first screen is a scroll film with its own moving copy
+R3u.8 n/a: not added to this site (not asked for it)
+R3u.9 pass: contact.html question question cards, the "+" in an accent circle turning to "x", and the smooth open were taken from scrollcraft/starter/kit (kit.css .faq-q), tried on kit/test.html, in the site's own colours; the questions fill from the owner's data (data-mir-qs), shown here with two test questions on a laptop
+R3u.10 n/a: one maker, no branches, no places to buy
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: pieces taken from scrollcraft/starter/kit, tried on kit/test.html (question cards)
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->
+R3v.1 pass: full footer on index, shop and contact (who we are with a quiet Order a platter link, Pages, Ordering from the record: four sizes from ₪300, Jerusalem, payment; Reach us: WhatsApp and phone; base line with Privacy); no founding year, lead time or email in the record, so none shown
+R3v.2 pass: the menu bar on all three pages already lists Home, Shop, Contact; unchanged
+R3v.14 pass: From ₪300 a platter, Serving Jerusalem, Cash, Zelle or bank transfer (record: payment_note, areas; the sizes on the page)
+<!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->

@@ -25,6 +25,7 @@
  */
 import React from 'react';
 import { useTranslation } from 'react-i18next';
+import DemandLines from '../components/common/DemandLines';
 import BackLink from '../components/common/BackLink';
 import { GetFoundCard, TakeBookingsCard, LivePageCard } from '../components/common/WhyListDemos';
 import { Link, useNavigate } from 'react-router-dom';
@@ -115,6 +116,13 @@ const WhyList = () => {
           <p className="text-xs text-gray-500 mt-3">
             {t('whyList.trialNote', 'Free to list - no card needed.')}
           </p>
+          <p className="text-sm text-gray-600 mt-4" data-testid="why-list-paste-ad">
+            {t('whyList.pasteAdLine', 'Already advertised on Facebook, Yad2 or WhatsApp? Paste your ad and the form fills itself in.')}{' '}
+            <Link to="/join" className="font-semibold text-[var(--brand-primary)] hover:underline">
+              {t('whyList.pasteAdLink', 'Start here')}
+            </Link>
+          </p>
+          <DemandLines className="mt-8 inline-block text-start rounded-xl border border-[var(--brand-border)] bg-white px-5 py-4" />
         </div>
       </section>
 

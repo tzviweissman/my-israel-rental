@@ -100,6 +100,11 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
 
 ## 0b. Build order (learned from the last builds, Tzvi 15 Oct 2026)
 
+**Build from the blueprint, never check afterwards** (Tzvi, 1 Nov 2026): after fetching the record,
+`node scripts/blueprint.mjs <build>` writes BLUEPRINT.md, every checklist rule as a step in build order with
+what the record decides filled in. Plan each stage (`--check <build> <stage>` passes) before building it,
+tick lines as built; RULES.md is written from it at check-build and publish. Full text: full-rules 0b.0.
+
 1. Real slug from the live record before publishing.
    Start with `scrollcraft/starter/fetch_business.py` and the starter
    skeleton (rules 3p); choose the look and pass `check-fingerprints.mjs`
@@ -137,16 +142,25 @@ Python with OpenCV (finding spots in frames, steadying clips, motion masks).
    whenever not 100% sure what is wanted.
 6. Generate in the background while writing the page; scripts keep the job
    number and retry slow status checks.
+6a. **The whole page is right before the film goes in** (3u.11): build and check it with a still
+   where the film will be, then put the film in and run the checks again. New motion is tried on a
+   test page with buttons first (3u.12, `scrollcraft/starter/kit/test.html`).
 7. Text over imagery gets its edge shade (or small solid card) from the start
    (section 4, 5b.3).
 8. Header and main buttons go to the quickest order path from draft one.
 9. One idea per page, used once (section 4).
 10. Wow test, clipped.mjs, readable.mjs BEFORE any link or video is sent.
+10a. **The report ends with "Not done yet" and "For your call"** (3u.13, `gen/report.md`), after a
+    writing pass that tries a shorter version of every long line (3u.14, `gen/copy-pass.md`).
 11. Owner video last, from the live page.
-11b. **One scroll effect per page** (Tzvi, 29 Oct 2026): the opening film is
-   the one thing that follows the scroll; flavours, sizes or steps after it
-   change on a tap and the page scrolls normally (rules 3h.20,
-   `check-one-scroll.mjs`). Phone visitors want the products and the order.
+5b. **Sketch the film first** (Tzvi, 29 Oct 2026): one sheet of rough line
+   drawings, a row per concept, before any photoreal still; Tzvi picks a row,
+   then only that concept is made (rules 3h.6 "Sketch first", R3h.22).
+11b. **Effects, never too much** (Tzvi, 29 Oct 2026): learn effects from the
+   designers we study and use several, but none stands between a phone
+   visitor and the products or the order. The opening film may hold the page;
+   any later scroll scene is at most 1.5 screens, three in all; longer turning
+   is a tap (rules 3h.20, `check-one-scroll.mjs`).
 12. A page on the business pages list: `publish-page.mjs` re-records its preview
     clip automatically; `node scripts/check-showcase-previews.mjs` fails if any
     tile shows an older version of its page (The Gift Boutique, 18 Oct 2026).
@@ -714,8 +728,8 @@ small website. A single page stays fine for a business with little to say
    The current page is marked (`aria-current="page"`). On a phone the pages
    fold into a Menu button that opens a panel with a Close button and closes
    on Escape or a tap on a link.
-3. **One footer on every page**: how to reach them, the page links, the
-   MyIsraelRental line.
+3. **One footer on every page**: the full footer of 3v.1 (who they are, the pages, how ordering
+   works, how to reach them, the base line).
 4. **Shared files**: `site.css` (all styles) and `site.js` (menu bar, phone
    bar, reveals, basket) used by every page; page-only code stays in that
    page. A class name used by a page section (`.open`, `.in`) is never reused
@@ -1053,6 +1067,18 @@ relevant, the same day.
 ## 3t. Each site looks like real sites of its own category (Tzvi, 22 Oct 2026)
 
 Replaces "sections change worlds" (Moto Card's dark full-bleed look given to every site). Every site declares one category in CONCEPT.md and `<meta name="site-category">`: `food-shop` (bright, colour per product, buy from the first screen, price and Add on every card), `place` (one ground, hours and map near the top, menu as a text list), `fashion-shop` (white or beige, product grid near the top, name and price under each), `beauty` (cream, thin serif, close-ups, Book fixed in the bar, "from" price and duration), `events` (open on real past events, short, packages with "from" prices), `trainer` (black and white, action photos, booking on the first screen, offer cards, proof block), `service` (real people and work, steps, one button to a quote), `rental` (calendar on every listing, numbered facts). **The owner's own look wins over the category's ground** (Tzvi, 22 Oct 2026: Chicken Munch's owner wanted a dark theme): if the owner asked for dark or light, or their brand is plainly one, keep it and follow the rest of the category's pattern (how it sells, pictures, type) on that ground. Write the owner's wish in CONCEPT.md. Full table and which of our sites is which: rules doc 3t; studies in docs/inspo/awwwards-anatomy-2026-10-22/. check-site checks CATEGORY, BUY, WORLDS (trainer) and OPENING by category.
+
+## 3v. Real-website structure, and effects to choose from (Tzvi, 1 Nov 2026)
+
+From ten design videos and five real business sites (full text: reference/full-rules.md section 3v).
+Every site: a full footer on every page (who they are, Pages, Ordering or Visit, Reach us, a base line
+with ©, MyIsraelRental and Privacy; check-footer), the menu bar lists the site's pages (check-menu),
+sections of different heights (check-heights), and three true facts under the main button
+(`btn-facts`; check-facts). Layouts to choose from: bento, zigzag steps, callouts, picture beside four
+facts, peek row. Effects to choose from, never on every site and never the last site's set: light on
+cards, fanned photos, rolling letters, circle reveal, curtain between pages, picture buttons, statement
+band. All are in scrollcraft/starter/kit (kit.css, kit.js, test.html). The hand-drawn circle around a
+word was taken out by Tzvi; do not use it.
 
 ## 3d. The page builder's design rules (v3, the other half of this skill)
 

@@ -352,6 +352,19 @@
   .foot .giant { margin: 0; padding: 0 var(--gutter); text-align: center; font: 600 clamp(2.6rem, 12vw, 11rem)/.95 var(--display); letter-spacing: -.03em; color: #FFF7EF; opacity: .14; white-space: nowrap; overflow: hidden; }
   .foot .legal { border-top: 1px solid rgb(246 233 222 / .22); padding-block: 14px 18px; font-size: 0.85rem; }
   .foot .legal a { display: inline; padding: 0; color: #E6D2C2; }
+  /* the full footer (rules 3v.1) */
+  .foot-grid { grid-template-columns: 1.4fr .8fr 1.2fr 1.2fr; }
+  .foot nav { margin: 0; }
+  .foot span:not(.script) { display: block; padding: 6px 0; color: #FFF7EF; }
+  .foot .fbrand p { color: #E6D2C2; }
+  .foot .giant { max-width: none; }
+  .foot a.fcta { display: inline-flex; align-items: center; gap: 8px; margin-top: 12px; font-weight: 600; color: #F2C79B; }
+  .foot a.fcta svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+  .foot a[href^="https://wa.me"], .foot a[href^="tel:"] { white-space: nowrap; }
+  .foot .legal.fbase { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 24px; color: #E6D2C2; }
+  .foot .legal.fbase span { display: inline; padding: 0; color: #E6D2C2; }
+  .foot .legal.fbase a { color: #FFF7EF; text-decoration: underline; }
+  @media (max-width: 860px) { .foot-grid { grid-template-columns: 1fr 1fr; gap: 24px 20px; } .foot .fbrand { grid-column: 1 / -1; } }
 
   /* ---------- phone bar --------------------------------------------------- */
   .bar { display: none; }
@@ -379,7 +392,7 @@
     .topbar nav { display: none; } .mbtn { display: inline-flex; align-items: center; }
     .total .sum small.u { display: none; } .total .sum small.n { display: flex; }
     .total .sum s { font-size: .9rem; margin-left: 6px; } .total .px { display: none; }
-    .foot-grid { grid-template-columns: 1fr; gap: 20px; padding-block: 32px 20px; }
+    .foot-grid { grid-template-columns: 1fr 1fr; gap: 24px 20px; padding-block: 32px 20px; }
     .when { gap: 10px 14px; }
     .facts .row { grid-template-columns: 1fr 1fr; }
     .bar { position: fixed; inset: auto 0 0 0; z-index: 20; display: flex; align-items: center; justify-content: space-between; gap: 12px;
@@ -427,7 +440,7 @@
     <nav aria-label="Pages">
       <a href="#prices">Prices</a>
       <a href="#contact">Find us</a>
-      <a class="send" href="#build" data-send="scroll">
+      <a class="send" href="#order-box" data-send="scroll">
         <span class="dot" aria-hidden="true"></span>
         <span class="a">Build your box</span>
         <span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span>
@@ -436,7 +449,7 @@
     <button type="button" class="mbtn" id="mbtn" aria-expanded="false" aria-controls="mpanel">Menu</button>
   </div>
   <div class="mpanel" id="mpanel">
-    <a href="#build">Build your box</a><a href="#prices">Prices</a><a href="#contact">Find us</a><a href="tel:+972553321956">Call or text 055-332-1956</a>
+    <a href="#order-box">Build your box</a><a href="#prices">Prices</a><a href="#contact">Find us</a><a href="tel:+972553321956">Call or text 055-332-1956</a>
   </div>
 </header>
 
@@ -465,12 +478,12 @@
       </div>
       <div class="cta">
         <p class="kick" aria-hidden="true">Cinnamon buns, baked at home in Ramat Eshkol</p>
-        <a class="send" href="#build" data-send="scroll" aria-label="Build your box, then order on WhatsApp">
+        <a class="send" href="#order-box" data-send="scroll" aria-label="Build your box, then order on WhatsApp">
           <span class="dot" aria-hidden="true"></span>
           <span class="a">Build your box</span>
           <span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span>
         </a>
-        <ul class="proof">
+        <ul class="proof btn-facts">
           <li><b>Boxes of 4 or 8, from ₪55</b></li>
           <li>Pareve</li>
           <li>Pick-up in Ramat Eshkol</li>
@@ -497,7 +510,7 @@
     </div>
   </section>
 
-  <section class="build" id="build" aria-labelledby="bh">
+  <section class="build" id="order-box" aria-labelledby="bh">
     <div class="wrap build-grid">
       <div>
         <h2 id="bh">Build your box</h2>
@@ -534,8 +547,8 @@
           <span class="mini" id="mini" aria-hidden="true"></span><span class="sum" id="sum" aria-live="polite">₪55<small>4 buns</small></span>
           <a class="send" id="order" href="#" target="_blank" rel="noopener">
             <span class="dot" aria-hidden="true"></span>
-            <span class="a">Order on WhatsApp<span class="px" data-px></span></span>
-            <span class="b"><span class="go">Order on WhatsApp<span class="px" data-px></span></span><span class="busy"><span class="spin" aria-hidden="true"></span>Opening WhatsApp</span><span class="done"><svg><use href="#tick"/></svg>Sent to WhatsApp</span><svg class="go"><use href="#wa"/></svg></span>
+            <span class="a">Send my order on WhatsApp<span class="px" data-px></span></span>
+            <span class="b"><span class="go">Send my order on WhatsApp<span class="px" data-px></span></span><span class="busy"><span class="spin" aria-hidden="true"></span>Opening WhatsApp</span><span class="done"><svg><use href="#tick"/></svg>Sent to WhatsApp</span><svg class="go"><use href="#wa"/></svg></span>
           </a>
         </div>
       </div>
@@ -572,7 +585,7 @@
     <div class="copy wrap">
       <h2 id="ch">Your box is ready when you are.<span class="script">Sweet things ahead</span></h2>
       <div class="act">
-        <a class="send" href="#build" data-send="scroll" aria-label="Build your box, then order on WhatsApp">
+        <a class="send" href="#order-box" data-send="scroll" aria-label="Build your box, then order on WhatsApp">
           <span class="dot" aria-hidden="true"></span>
           <span class="a">Build your box</span>
           <span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span>
@@ -584,18 +597,19 @@
 </main>
 <footer class="foot" id="contact">
   <div class="wrap foot-grid">
-    <div><div class="nm2">Bun Intended<span class="script">Sweet things ahead</span></div><p>Homemade cinnamon buns, baked in Ramat Eshkol, Jerusalem. All pareve.</p>
-      <a class="send" href="#build" data-send="scroll"><span class="dot" aria-hidden="true"></span><span class="a">Build your box</span><span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span></a></div>
-    <div><h3 class="caps">Pages</h3><a href="#build">Build your box</a><a href="#prices">Prices</a><a href="#top">Back to the top</a></div>
-    <div><h3 class="caps">Find us</h3><a href="tel:+972553321956">Call or text 055-332-1956</a><a href="https://wa.me/18482216022" target="_blank" rel="noopener">WhatsApp +1 848 221 6022</a><span>Pick-up from Ramat Eshkol</span></div>
+    <div class="fbrand"><div class="nm2">Bun Intended<span class="script">Sweet things ahead</span></div><p>Homemade cinnamon buns, baked in Ramat Eshkol, Jerusalem. All pareve.</p>
+      <a class="fcta" href="#order-box">Build your box <svg class="fa" aria-hidden="true"><use href="#arr"/></svg></a></div>
+    <nav aria-label="Pages"><h3 class="caps">Pages</h3><a href="#top">Home</a><a href="#order-box">Build your box</a><a href="#prices">Prices</a></nav>
+    <div><h3 class="caps">Ordering</h3><span>Boxes of 4 or 8, from ₪55</span><span>Pick-up in Ramat Eshkol</span><span>Delivery on request</span><span>Pareve</span></div>
+    <div><h3 class="caps">Reach us</h3><a href="https://wa.me/18482216022" target="_blank" rel="noopener">WhatsApp +1 848 221 6022</a><a href="tel:+972553321956">Call or text 055-332-1956</a></div>
   </div>
   <p class="giant" aria-hidden="true">Bun Intended</p>
-  <div class="wrap legal"><a href="https://myisraelrental.com/business/aidy-yaniv">Listed on MyIsraelRental</a></div>
+  <div class="wrap legal fbase"><span>© 2026 Bun Intended.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
 </footer>
 
 <div class="bar" id="bar" aria-hidden="true">
   <span class="pr">From<b>₪55</b></span>
-  <a class="send" href="#build" data-send="scroll" tabindex="-1">
+  <a class="send" href="#order-box" data-send="scroll" tabindex="-1">
     <span class="dot" aria-hidden="true"></span><span class="a">Build your box</span>
     <span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span>
   </a>
@@ -747,7 +761,7 @@
     waNotes = (state.mix ? '2 flavour mix: ' + n.join(' and ') + '\n' : '') + 'Sent from the Bun Intended page by WhatsApp';
     $('#addrw').classList.toggle('is-on', state.ful === 'delivery'); $('#addrw').inert = state.ful !== 'delivery';
     var a = $('#order');
-    a.href = need ? '#build' : 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+    a.href = need ? '#order-box' : 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
     a.setAttribute('aria-disabled', String(need));
   }
 
@@ -763,7 +777,7 @@
       var pp = pk.getAttribute('data-pick').split(':'); state.size = +pp[0];
       if (pp[1] === 'mix') { state.mix = true; if (state.picks.length < 2) state.picks = [state.picks[0], F.filter(function (x) { return x.id !== state.picks[0]; })[0].id]; }
       else { state.mix = false; state.picks = [pp[1]]; }
-      paint(); $('#build').scrollIntoView({ behavior: still ? 'auto' : 'smooth' }); return;
+      paint(); $('#order-box').scrollIntoView({ behavior: still ? 'auto' : 'smooth' }); return;
     }
     var m = e.target.closest('[data-mix]');
     if (m && state.size === 4) { state.size = 8; state.mix = true; if (state.picks.length < 2) state.picks = [state.picks[0], F.filter(function (x) { return x.id !== state.picks[0]; })[0].id]; paint(); return; }
@@ -836,7 +850,7 @@
   function barState() {
     var phone = matchMedia('(max-width: 860px)').matches;
     var inView = function (el) { var r = el.getBoundingClientRect(); return r.top < innerHeight && r.bottom > 0; };
-    var on = phone && hero.getBoundingClientRect().bottom < 0 && !inView(document.getElementById('build')) && !inView(close); /* off while the box builder, with its own button, is on screen */
+    var on = phone && hero.getBoundingClientRect().bottom < 0 && !inView(document.getElementById('order-box')) && !inView(close); /* off while the box builder, with its own button, is on screen */
     if (on !== bar.classList.contains('is-on')) { bar.classList.toggle('is-on', on); bar.setAttribute('aria-hidden', String(!on)); bar.querySelector('a').tabIndex = on ? 0 : -1; }
   }
   addEventListener('scroll', barState, { passive: true }); addEventListener('resize', barState);

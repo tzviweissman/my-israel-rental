@@ -246,6 +246,13 @@
   }
   /* review changes */
   @media (prefers-reduced-motion: reduce) { .film { height: 100vh; height: 100svh; } .film .hint { display: none; } }
+  /* phone: the film plays on repeat in one screen (script adds .loop); the page scrolls on after it, and only the closing line
+     (headline and the Order button) shows, holding still (Tzvi, 29 Oct 2026: "on mobile we should remove the scroll and it should just play on repeat") */
+  .film.loop { height: auto; }
+  .film.loop .stage { position: relative; }
+  .film.loop canvas, .film.loop .load { display: none; }
+  .film.loop video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+  .film.loop .chap[data-from="0"] { opacity: 0; pointer-events: none; transform: none; filter: none; }
   .arw { display: inline-flex; } .arw svg { display: block; }
   .btn.dark-on { background: var(--paper); }
   /* menu: section chips, two columns, an Add pill on every row */
@@ -359,23 +366,9 @@
   @keyframes tick { to { transform: translateX(-50%); } }
   @media (prefers-reduced-motion: reduce) { .ticker .tk { animation: none; flex-wrap: wrap; white-space: normal; } .ticker { white-space: normal; } }
   /* footer: a real one, dark, in columns */
-  .foot { background: #1A0F08; color: #E8D9C2; padding: clamp(2.6rem, 6vw, 4.5rem) 0 6.5rem; text-align: start; font-size: .95rem; }
-  .fcols { display: grid; grid-template-columns: 1.3fr .8fr 1.2fr 1.2fr; gap: 2rem; }
-  .foot p { margin: 0 0 .7rem; line-height: 1.5; }
-  .foot .fh { font: 700 1.2rem/1.2 var(--font-head); color: #FFF6EA; margin-bottom: .9rem; }
-  .foot nav, .foot .fcols > div { display: flex; flex-direction: column; align-items: flex-start; }
-  .foot a { color: #E8D9C2; text-decoration: none; display: inline-flex; align-items: center; min-height: 44px; }
-  .foot a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
-  .foot .fk { display: flex; gap: .7rem; align-items: center; margin-top: .6rem; }
-  .foot .fk img { width: 40px; height: 40px; object-fit: contain; flex: none; background: #fff; border-radius: 8px; padding: 2px; }
-  .foot .fsmall { margin: 2.4rem 0 0; padding-top: 1.2rem; border-top: 1px solid rgb(255 246 234 / .18); font-size: .85rem; color: #BFAE97; }
-  .foot .fsmall a { display: inline; min-height: 0; color: #E8D9C2; text-decoration: underline; }
-  @media (max-width: 900px) { .fcols { grid-template-columns: 1fr 1fr; } }
-  @media (max-width: 560px) { .fcols { grid-template-columns: 1fr; } }
   /* the good to know section is a calm rest between two pictures */
   #know { background: var(--cream); }
   @media (max-width: 760px) {
-    .foot .fsmall { font-size: .95rem; }
     .w-gift .shade-b { height: 88%; background: linear-gradient(to top, rgb(18 10 5 / .94) 0%, rgb(18 10 5 / .88) 45%, rgb(18 10 5 / .64) 75%, rgb(18 10 5 / 0) 100%); }
   }
   @media (max-width: 760px) { .w-top .shade-l { height: 82%; background: linear-gradient(to top, rgb(18 10 5 / .94) 0%, rgb(18 10 5 / .86) 50%, rgb(18 10 5 / .55) 78%, rgb(18 10 5 / 0) 100%); } }
@@ -456,6 +449,28 @@
     .cat[hidden] { display: none; }
     .cat li { flex: 0 0 min(210px, 58vw); scroll-snap-align: start; }
   }
+  /* the full footer (rules 3v.1): who we are, every page, how ordering works, how to reach us, then one base line */
+  .foot.full { text-align: start; font-size: .92rem; background: #1A0F08; color: #BFAE97; border-top: 1px solid rgb(255 246 234 / .18); padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) 6.5rem; }
+  .foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+  .foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: #F1C9A0; }
+  .foot.full nav { margin: 0; font-weight: 400; }
+  .foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; max-width: 100%; margin: 0 0 .55rem; color: #E8D9C2; text-decoration: none; line-height: 1.5; }
+  .foot .fgrid a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  .foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+  .foot .fgrid a.fname { font: 700 1.5rem/1.1 var(--font-head); margin-bottom: .9rem; }
+  .foot .fbrand p { max-width: 30ch; color: #BFAE97; line-height: 1.55; }
+  .foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+  .foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid rgb(255 246 234 / .18); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .82rem; color: #BFAE97; }
+  .foot .fbase a { color: #E8D9C2; text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 760px) { .foot .fgrid { grid-template-columns: max-content minmax(0, 1fr); column-gap: 1.75rem; } .foot .fbrand, .foot .fgrid > :last-child { grid-column: 1 / -1; } }
+  /* three true facts under the main button (rules 3v.14) */
+  .btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem;  }
+  .btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; margin-inline-end: .45em; margin-bottom: .15em; border-radius: 50%; background: #F6CCE6; }
+  .foot .fgrid p.fk { display: flex; gap: .7rem; align-items: center; margin-top: 1rem; font-size: .85rem; max-width: 34ch; }
+  .foot .fk img { width: 40px; height: 40px; object-fit: contain; flex: none; background: #fff; border-radius: 8px; padding: 2px; }
+  .foot .fbase .fnote { flex-basis: 100%; }
+  .chap .btn-facts { margin-top: .9rem; color: #F4E8DA; text-shadow: 0 1px 10px rgb(18 10 5 / .6); }
+  @media (max-width: 480px) and (max-height: 700px) { .chap .btn-facts { font-size: .8rem; gap: 3px 12px; margin-top: .6rem; text-shadow: none; } }
 </style>
 </head>
 <body>
@@ -482,6 +497,7 @@
         <h1>Acai bowls, <span class="acc">delivered</span> across Jerusalem</h1>
         <p class="line">Sugar free and almond milk based.</p>
         <a class="btn" href="order.html?add=Acai%20bowl">Order a bowl, <b>₪60</b> <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+        <ul class="btn-facts"><li>Bowls from ₪60</li><li>Delivery throughout Jerusalem</li><li>Cash, Zelle, bank transfer or card</li></ul>
       </div>
       <div class="chap" data-from="0.2" data-to="0.36" aria-hidden="true"><h2>Our signature <span class="acc">acai</span> base.</h2></div>
       <div class="chap" data-from="0.4" data-to="0.55" aria-hidden="true"><h2>Sugar free. <span class="acc">Almond milk</span> based.</h2></div>
@@ -490,6 +506,7 @@
         <h2>A delicious &amp; healthy <span class="acc">brunch.</span></h2>
         <p class="line">The Brown Box, delivered across Jerusalem.</p>
         <a class="btn" href="order.html?add=Acai%20bowl" tabindex="-1">Order a bowl, <b>₪60</b> <span class="arw" aria-hidden="true"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+        <ul class="btn-facts"><li>Bowls from ₪60</li><li>Delivery throughout Jerusalem</li><li>Cash, Zelle, bank transfer or card</li></ul>
       </div>
       <div class="load" id="load"></div>
     </div>
@@ -648,35 +665,14 @@
   </section>
 </main>
 
-<footer class="foot">
-  <div class="wrap">
-    <div class="fcols">
-      <div>
-        <p class="fh">The Brown Box</p>
-        <p>Artisanal superfoods, delivered across Jerusalem.</p>
-        <p class="fk"><img src="assets/hechsher.webp" alt="Seal of the Vaad HaKashrus of Rabbi Shmuel Weiner" width="40" height="40"><span>Kosher, Vaad HaKashrus of Rabbi Shmuel Weiner, Rav of Khal Zichron Nosson Tzvi. A home business.</span></p>
-      </div>
-      <nav aria-label="Footer">
-        <p class="fh">Order</p>
-        <a href="#bowls">Bowls</a>
-        <a href="#menu">Menu</a>
-        <a href="#gifts">Gift boxes</a>
-        <a href="order.html?add=Acai%20bowl">Order a bowl</a>
-      </nav>
-      <div>
-        <p class="fh">Good to know</p>
-        <p>Delivery throughout Jerusalem, the fee confirmed on WhatsApp.</p>
-        <p>Cash, Zelle, Israeli bank transfer, or credit card with a 4% charge.</p>
-      </div>
-      <div>
-        <p class="fh">Get in touch</p>
-        <a href="https://wa.me/972533452048">WhatsApp or call +972 53-345-2048</a>
-        <a href="mailto:thebrownboxjlm@gmail.com">thebrownboxjlm@gmail.com</a>
-        <a href="https://www.instagram.com/thebrownbox_jlm/" rel="noopener" target="_blank">Instagram @thebrownbox_jlm</a>
-      </div>
-    </div>
-    <p class="fsmall">The film of a bowl being made, and the pictures taken from it, are generated for this page; the menu photos are our own. <a href="https://myisraelrental.com">MyIsraelRental</a></p>
+<footer class="foot full">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">The Brown Box</a><p>Artisanal superfoods, delivered across Jerusalem. A home business.</p><a class="fcta" href="order.html?add=Acai%20bowl">Order a bowl <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><p class="fk"><img src="assets/hechsher.webp" alt="Seal of the Vaad HaKashrus of Rabbi Shmuel Weiner" width="40" height="40"><span>Kosher, Vaad HaKashrus of Rabbi Shmuel Weiner, Rav of Khal Zichron Nosson Tzvi.</span></p></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="index.html#bowls">Bowls</a><a href="index.html#menu">Menu</a><a href="index.html#gifts">Gift boxes</a><a href="order.html">Order</a></nav>
+    <div><h4>Ordering</h4><p>Delivery throughout Jerusalem, the fee confirmed on WhatsApp</p><p>Cash, Zelle, Israeli bank transfer, or credit card with a 4% charge</p></div>
+    <div><h4>Reach us</h4><a href="https://wa.me/972533452048" target="_blank" rel="noopener">WhatsApp or call +972 53-345-2048</a><a href="mailto:thebrownboxjlm@gmail.com">thebrownboxjlm@gmail.com</a><a href="https://www.instagram.com/thebrownbox_jlm/" rel="noopener" target="_blank">Instagram @thebrownbox_jlm</a></div>
   </div>
+  <div class="fbase"><span>© 2026 The Brown Box.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span><span class="fnote">The film of a bowl being made, and the pictures taken from it, are generated for this page; the menu photos are our own.</span></div>
 </footer>
 
 <div class="dock" id="dock" aria-hidden="true">
@@ -698,23 +694,42 @@ document.addEventListener('DOMContentLoaded', function () {
   // (every 8th, then every 4th, ...) so the whole film scrubs early and
   // sharpens as the rest arrive; the nearest loaded frame is drawn.
   var FILM = { d: 300, m: 300 };
-  var filmEl = document.getElementById('film'), cv = document.getElementById('cv'), cx = cv.getContext('2d');
+  var filmEl = document.getElementById('film'), cv = document.getElementById('cv'), cx = cv.getContext('bitmaprenderer') || cv.getContext('2d'), br = !cx.drawImage;
   var chaps = [].slice.call(document.querySelectorAll('.chap'));
   var kind = phone() ? 'm' : 'd', N = FILM[kind], imgs = new Array(N), got = 0;
+  // On a phone the film is one short video (assets/film/phone-loop.mp4, made from the same phone frames: the box held a moment,
+  // then a soft fade back to the start) that plays by itself on repeat, muted, while it is on screen; the scroll frames are not
+  // loaded. Motion off keeps the held frame (Tzvi, 29 Oct 2026; Bake away's film.js). The video element itself is shown, never
+  // drawn into the canvas every frame.
+  var loop = kind === 'm' && !still;
+  if (loop) {
+    filmEl.classList.add('loop');
+    var vid = document.createElement('video');
+    vid.muted = true; vid.loop = true; vid.playsInline = true; vid.setAttribute('playsinline', ''); vid.preload = 'auto';
+    vid.poster = 'assets/film/m/0001.webp'; vid.src = 'assets/film/phone-loop.mp4'; vid.setAttribute('aria-hidden', 'true');
+    cv.after(vid);
+    if ('IntersectionObserver' in window) new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) vid.play().catch(function () {}); else vid.pause(); }); }).observe(filmEl);
+    else vid.autoplay = true;
+    var closing = chaps[chaps.length - 1];
+    closing.classList.add('on'); closing.setAttribute('aria-hidden', 'false'); closing.querySelector('a').tabIndex = 0;
+    chaps[0].classList.remove('on'); chaps[0].querySelector('a').tabIndex = -1;
+  }
   // never a black screen while the frames arrive: the first frame is the
   // canvas's own background until it is drawn over
   cv.style.background = '#120A05 url(assets/film/' + kind + '/0001.webp) center / cover no-repeat';
   function url(i) { return 'assets/film/' + kind + '/' + String(i + 1).padStart(4, '0') + '.webp'; }
   var order = [], seen = {};
   [8, 4, 2, 1].forEach(function (st) { for (var i = 0; i < N; i += st) if (!seen[i]) { seen[i] = 1; order.push(i); } });
+  if (loop) order = [];
   var load = document.getElementById('load');
   (function next(k) {
     var batch = order.slice(k, k + 6); if (!batch.length) { load.style.opacity = 0; return; }
     var left = batch.length;
     batch.forEach(function (i) {
-      var im = new Image(); im.decoding = 'async';
-      im.onload = im.onerror = function () { if (im.naturalWidth) { imgs[i] = im; got++; } load.style.width = (got / N * 100) + '%'; if (--left === 0) { draw(); next(k + 6); } };
-      im.src = url(i);
+      // kept as files (blobs), decoded off the main thread by createImageBitmap: decoding an <img> ran on the main thread
+      // inside every scrolled frame (check-speed HEAVY, ~190 ms a frame on a slowed phone, 29 Oct 2026; Bake away's film.js)
+      fetch(url(i)).then(function (r) { return r.ok ? r.blob() : null; }).then(function (bl) { if (bl) { imgs[i] = bl; got++; } }).catch(function () {})
+        .then(function () { load.style.width = (got / N * 100) + '%'; if (--left === 0) { draw(); next(k + 6); } });
     });
   })(0);
   // Smooth on a phone (26 Oct 2026, an iPhone stuttered at ~280 ms a frame when slowed 4x): a frame is drawn only when it
@@ -733,6 +748,9 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   function size() {
     evenLines();
+    // a decoded frame is handed to the canvas whole (bitmaprenderer) at its own size and covers the screen by CSS: drawing it
+    // into a screen-sized 2D canvas copied ~3 MB a frame on a phone (check-speed HEAVY, 50 ms a frame slowed, 29 Oct 2026)
+    if (br) { if (cv.width !== FW) { cv.width = FW; cv.height = FH; cv.style.objectFit = 'cover'; } return; }
     var sc = Math.max(cv.clientWidth / FW, cv.clientHeight / FH), d = Math.min(2, devicePixelRatio || 1, 1 / sc);
     cv.width = Math.round(cv.clientWidth * d); cv.height = Math.round(cv.clientHeight * d); shown = -1; draw();
   }
@@ -743,18 +761,22 @@ document.addEventListener('DOMContentLoaded', function () {
   }
   var p = 0, shown = -1, bmp = {}, asked = {}, WIN = 8;
   function keep(f) {
-    if (!window.createImageBitmap) return;
     Object.keys(bmp).forEach(function (i) { if (Math.abs(i - f) > WIN + 2) { bmp[i].close(); delete bmp[i]; } });
     for (var i = Math.max(0, f - WIN); i <= Math.min(N - 1, f + WIN); i++) if (imgs[i] && !bmp[i] && !asked[i]) (function (i) {
       asked[i] = 1;
-      createImageBitmap(imgs[i]).then(function (b) { delete asked[i]; if (Math.abs(i - Math.round(p * (N - 1))) > WIN + 2) b.close(); else bmp[i] = b; }, function () { delete asked[i]; });
+      createImageBitmap(imgs[i]).then(function (b) { delete asked[i]; if (Math.abs(i - Math.round(p * (N - 1))) > WIN + 2) b.close(); else { bmp[i] = b; draw(); } }, function () { delete asked[i]; });
     })(i);
   }
   function draw() {
     var f = frameAt(p); if (f < 0) return;
     keep(Math.round(p * (N - 1)));
-    if (f === shown) return; shown = f;
-    var im = bmp[f] || imgs[f];
+    // the nearest frame already decoded is drawn (the canvas's background shows the first frame until one is)
+    var g = -1; for (var d = 0; d < N && g < 0; d++) { if (bmp[f - d]) g = f - d; else if (bmp[f + d]) g = f + d; }
+    if (g < 0 || g === shown) return; shown = g;
+    var im = bmp[g];
+    // the bitmap becomes the canvas's own; a marker keeps its place (deleting it made two frames take turns for ever)
+    // and a frame shown before is decoded again when it is wanted back
+    if (br) { if (im.gone) { delete bmp[g]; shown = -1; keep(g); return; } cx.transferFromImageBitmap(im); bmp[g] = { gone: 1, close: function () {} }; return; }
     var W = cv.width, H = cv.height, sc = Math.max(W / im.width, H / im.height);
     var w = im.width * sc, h = im.height * sc;
     cx.drawImage(im, (W - w) / 2, (H - h) / 2, w, h);
@@ -764,14 +786,18 @@ document.addEventListener('DOMContentLoaded', function () {
     return Math.min(1, Math.max(0, -r.top / Math.max(1, span)));
   }
   function paint() {
+    if (loop) { var of = filmEl.getBoundingClientRect().bottom > 64; if (of !== paint.onFilm) { paint.onFilm = of; document.body.classList.toggle('on-film', of); } return; }
     p = still ? 0 : progress();
     draw();
+    // written only when a chapter or the bar changes, never on every scrolled frame
     chaps.forEach(function (c) {
       var on = p >= +c.dataset.from && p < +c.dataset.to;
+      if (c._on === on) return; c._on = on;
       c.classList.toggle('on', on); c.setAttribute('aria-hidden', on ? 'false' : 'true');
       c.querySelectorAll('a').forEach(function (a) { a.tabIndex = on ? 0 : -1; });
     });
-    document.body.classList.toggle('on-film', filmEl.getBoundingClientRect().bottom > 64);
+    var onFilm = filmEl.getBoundingClientRect().bottom > 64;
+    if (onFilm !== paint.onFilm) { paint.onFilm = onFilm; document.body.classList.toggle('on-film', onFilm); }
   }
   var raf = 0;
   addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(function () { raf = 0; paint(); }); }, { passive: true });

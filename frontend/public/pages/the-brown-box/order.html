@@ -18,8 +18,8 @@
 <meta property="og:title" content="Order · The Brown Box">
 <meta property="og:description" content="Order acai bowls, acai boards, brunch gift boxes, snacks and drinks from The Brown Box, delivered across Jerusalem. Kosher.">
 <meta property="og:type" content="website">
-<meta property="og:image" content="/pages/the-brown-box/assets/og.webp?v=mvqqf5ku">
-<link rel="icon" href="/pages/the-brown-box/assets/logo-192.png?v=mvqqf5ku">
+<meta property="og:image" content="/pages/the-brown-box/assets/og.webp?v=mvywalj7">
+<link rel="icon" href="/pages/the-brown-box/assets/logo-192.png?v=mvywalj7">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bona+Nova:wght@400;700&family=Heebo:wght@400;500;700&display=swap" rel="stylesheet">
@@ -171,13 +171,33 @@
   .sum li .rm { width: 40px; height: 40px; flex: none; border: 0; border-radius: 99px; background: none; color: var(--on-night-soft); cursor: pointer; display: grid; place-items: center; transition: background 120ms ease-out, color 120ms ease-out, transform 100ms ease-out; }
   .sum li .rm:hover { background: rgb(255 255 255 / .14); color: #fff; } .sum li .rm:active { transform: scale(.92); }
   .sum .btn:hover, .dock .btn:hover { background: var(--ivory-2); }
+  /* the full footer (rules 3v.1): who we are, every page, how ordering works, how to reach us, then one base line */
+  .foot.full { text-align: start; font-size: .92rem; background: #1A0F08; color: #BFAE97; border-top: 1px solid rgb(255 246 234 / .18); padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) 6.5rem; }
+  .foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+  .foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: #F1C9A0; }
+  .foot.full nav { margin: 0; font-weight: 400; }
+  .foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; max-width: 100%; margin: 0 0 .55rem; color: #E8D9C2; text-decoration: none; line-height: 1.5; }
+  .foot .fgrid a:hover { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+  .foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+  .foot .fgrid a.fname { font: 700 1.5rem/1.1 var(--font-head); margin-bottom: .9rem; }
+  .foot .fbrand p { max-width: 30ch; color: #BFAE97; line-height: 1.55; }
+  .foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+  .foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid rgb(255 246 234 / .18); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .82rem; color: #BFAE97; }
+  .foot .fbase a { color: #E8D9C2; text-decoration: underline; text-underline-offset: 3px; }
+  @media (max-width: 760px) { .foot .fgrid { grid-template-columns: max-content minmax(0, 1fr); column-gap: 1.75rem; } .foot .fbrand, .foot .fgrid > :last-child { grid-column: 1 / -1; } }
+  /* three true facts under the main button (rules 3v.14) */
+  .btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem;  }
+  .btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; margin-inline-end: .45em; margin-bottom: .15em; border-radius: 50%; background: #F6CCE6; }
+  .foot .fgrid p.fk { display: flex; gap: .7rem; align-items: center; margin-top: 1rem; font-size: .85rem; max-width: 34ch; }
+  .foot .fk img { width: 40px; height: 40px; object-fit: contain; flex: none; background: #fff; border-radius: 8px; padding: 2px; }
+  .foot .fbase .fnote { flex-basis: 100%; }
 </style>
 </head>
 <body>
 
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="/business/the-brown-box" aria-label="The Brown Box, home"><img src="/pages/the-brown-box/assets/logo.webp?v=mvqqf5ku" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-d5dc6302-0">The Brown Box</span></a>
+    <a class="brand" href="/business/the-brown-box" aria-label="The Brown Box, home"><img src="/pages/the-brown-box/assets/logo.webp?v=mvywalj7" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-d5dc6302-0">The Brown Box</span></a>
     <a class="back" href="/business/the-brown-box#menu"><span class="lg" data-mir-key="t-b87b998b-0">Back to the menu</span><span class="sm" data-mir-key="t-01a6d712-0">Menu</span></a>
   </div>
 </header>
@@ -239,12 +259,22 @@
   </div>
 </main>
 
+<footer class="foot full">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="/business/the-brown-box" data-mir-key="t-24c27f66-0">The Brown Box</a><p data-mir-key="t-e9cb1e14-0">Artisanal superfoods, delivered across Jerusalem. A home business.</p><a class="fcta" href="/business/the-brown-box/order?add=Acai%20bowl" data-mir-key="t-f5d5fa6b-0">Order a bowl <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><p class="fk"><img src="/pages/the-brown-box/assets/hechsher.webp?v=mvywalj7" alt="Seal of the Vaad HaKashrus of Rabbi Shmuel Weiner" width="40" height="40" data-mir-key="i-1389c19b-0"><span data-mir-key="t-545eed18-0">Kosher, Vaad HaKashrus of Rabbi Shmuel Weiner, Rav of Khal Zichron Nosson Tzvi.</span></p></div>
+    <nav aria-label="Pages"><h4 data-mir-key="t-b22a94f3-0">Pages</h4><a href="/business/the-brown-box" data-mir-key="t-fc43c37b-0">Home</a><a href="/business/the-brown-box#bowls" data-mir-key="t-5b61f375-0">Bowls</a><a href="/business/the-brown-box#menu" data-mir-key="t-97f12060-0">Menu</a><a href="/business/the-brown-box#gifts" data-mir-key="t-dcb2a33b-0">Gift boxes</a><a href="/business/the-brown-box/order" data-mir-key="t-af6f86d3-0">Order</a></nav>
+    <div><h4 data-mir-key="t-a5c7e5f9-0">Ordering</h4><p data-mir-key="t-4a2e3df1-0">Delivery throughout Jerusalem, the fee confirmed on WhatsApp</p><p data-mir-key="t-368cd0e7-0">Cash, Zelle, Israeli bank transfer, or credit card with a 4% charge</p></div>
+    <div><h4 data-mir-key="t-49e826dc-0">Reach us</h4><a href="https://wa.me/972533452048" target="_blank" rel="noopener" data-mir-key="t-63d7704d-0">WhatsApp or call +972 53-345-2048</a><a href="mailto:thebrownboxjlm@gmail.com" data-mir-key="t-50d7c7d2-0">thebrownboxjlm@gmail.com</a><a href="https://www.instagram.com/thebrownbox_jlm/" rel="noopener" target="_blank" data-mir-key="t-559467a3-0">Instagram @thebrownbox_jlm</a></div>
+  </div>
+  <div class="fbase"><span data-mir-key="t-a507b3e3-0">© 2026 The Brown Box.</span><span data-mir-key="t-69529cb0-0">Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span><span class="fnote" data-mir-key="t-40579ed0-0">The film of a bowl being made, and the pictures taken from it, are generated for this page; the menu photos are our own.</span></div>
+</footer>
+
 <div class="dock order-bar" id="dock">
   <div><small data-mir-key="t-e4656d46-0">Before delivery</small><b id="dtotal">₪0</b></div>
   <a class="btn" id="send2" href="#" aria-disabled="true"><span style="position:relative" data-mir-key="t-2b634993-0">To delivery</span></a>
 </div>
 
-<script id="fallback-products" type="application/json">[{"name":"Acai bowl","price":60,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/acai-bowl.webp?v=mvqqf5ku","group":"Acai bowls","in_stock":true},{"name":"Mini acai bowls","price":30,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/mini-bowls.webp?v=mvqqf5ku","group":"Acai bowls","in_stock":true},{"name":"Large acai board","price":390,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/large-board.webp?v=mvqqf5ku","group":"Acai boards","in_stock":true},{"name":"Small acai board","price":220,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/small-board.webp?v=mvqqf5ku","group":"Acai boards","in_stock":true},{"name":"Small gift box","price":135,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/small-gift-box.webp?v=mvqqf5ku","group":"Gifting","in_stock":true},{"name":"Large gift box","price":250,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/large-gift-box.webp?v=mvqqf5ku","group":"Gifting","in_stock":true},{"name":"Energy bites","price":50,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/energy-bites.webp?v=mvqqf5ku","group":"Snacks","in_stock":true},{"name":"Super granola","price":40,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/super-granola.webp?v=mvqqf5ku","group":"Snacks","in_stock":true},{"name":"Date snacks","price":55,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/date-snacks.webp?v=mvqqf5ku","group":"Snacks","in_stock":true},{"name":"Oatmeal chocolate chip muffin","price":17,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/oat-muffin.webp?v=mvqqf5ku","group":"Snacks","in_stock":true},{"name":"Blueberry sourdough muffin","price":17,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/blueberry-muffin.webp?v=mvqqf5ku","group":"Snacks","in_stock":true},{"name":"Iced coffee","price":20,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/iced-coffee.webp?v=mvqqf5ku","group":"Drinks","in_stock":true},{"name":"Passion fruit iced tea","price":20,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/passion-tea.webp?v=mvqqf5ku","group":"Drinks","in_stock":true}]</script>
+<script id="fallback-products" type="application/json">[{"name":"Acai bowl","price":60,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/acai-bowl.webp?v=mvywalj7","group":"Acai bowls","in_stock":true},{"name":"Mini acai bowls","price":30,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/mini-bowls.webp?v=mvywalj7","group":"Acai bowls","in_stock":true},{"name":"Large acai board","price":390,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/large-board.webp?v=mvywalj7","group":"Acai boards","in_stock":true},{"name":"Small acai board","price":220,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/small-board.webp?v=mvywalj7","group":"Acai boards","in_stock":true},{"name":"Small gift box","price":135,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/small-gift-box.webp?v=mvywalj7","group":"Gifting","in_stock":true},{"name":"Large gift box","price":250,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/large-gift-box.webp?v=mvywalj7","group":"Gifting","in_stock":true},{"name":"Energy bites","price":50,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/energy-bites.webp?v=mvywalj7","group":"Snacks","in_stock":true},{"name":"Super granola","price":40,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/super-granola.webp?v=mvywalj7","group":"Snacks","in_stock":true},{"name":"Date snacks","price":55,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/date-snacks.webp?v=mvywalj7","group":"Snacks","in_stock":true},{"name":"Oatmeal chocolate chip muffin","price":17,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/oat-muffin.webp?v=mvywalj7","group":"Snacks","in_stock":true},{"name":"Blueberry sourdough muffin","price":17,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/blueberry-muffin.webp?v=mvywalj7","group":"Snacks","in_stock":true},{"name":"Iced coffee","price":20,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/iced-coffee.webp?v=mvywalj7","group":"Drinks","in_stock":true},{"name":"Passion fruit iced tea","price":20,"price_to":null,"currency":"ILS","image":"/pages/the-brown-box/assets/menu/passion-tea.webp?v=mvywalj7","group":"Drinks","in_stock":true}]</script>
 <script>
 document.addEventListener('DOMContentLoaded', function () {
   var WA = '972533452048';
@@ -569,6 +599,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
   var when = document.getElementById('when');
   when.min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k Pre-filled): the first day the page accepts, which is today (it states no lead time or closed days); changeable
+  when.value = when.min;
 
   update();
   var bowl = new URLSearchParams(location.search).get('bowl');

@@ -104,6 +104,8 @@
   .choices { display: flex; flex-wrap: wrap; gap: 0.5rem; }
   .choice { padding: 0.55rem 0.9rem; border-radius: 999px; border: 1px solid var(--line); background: #fff; color: var(--navy); font-weight: 600; font-size: 0.9rem; min-height: 44px; }
   .choice[aria-pressed="true"] { background: var(--navy); color: #fff; border-color: transparent; }
+  .err .pickday { display: block; min-height: 44px; margin-top: .5rem; padding: 0 1.1rem; border-radius: var(--pill, 999px); border: 1.5px solid var(--navy); background: transparent; color: var(--navy); font-weight: 700; font-size: .9rem; font-family: inherit; cursor: pointer; }
+  .err.closed { color: var(--navy); font-size: .95rem; }
   .err { color: #B3261E; font-size: 0.85rem; margin: 0.4rem 0 0; min-height: 1.2em; }
   .summary { position: sticky; top: 76px; display: grid; gap: 1rem; }
   .card { padding: 1.2rem 1.3rem; border-radius: 18px; background: var(--ivory); border: 1px solid var(--line); }
@@ -149,11 +151,38 @@
   }
   @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
   @media (max-width: 760px) { .assure, .voice p, .badge, .err, .f .hint, #errWhat, .pick .what, .contents { font-size: 14px; } }
+
+.foot.full { --gutter: var(--sc-gutter, clamp(1.25rem, 5vw, 3rem)); background: var(--blush-pale); color: var(--navy); border-top: 1px solid var(--blush); }
+
+/* the full footer (rules 3v.1): who we are, every page, how to book or visit, how to reach us, then one base line */
+.foot.full { text-align: start; font-size: .92rem; padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.4rem + var(--pad-bar, 0px)); opacity: 1; }
+.foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+.foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--navy); }
+.foot.full nav { margin: 0; font-weight: 400; }
+.foot.full nav a { margin: 0 0 .55rem; }
+.foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; margin: 0 0 .55rem; color: var(--navy); text-decoration: none; }
+.foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="sms:"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+.foot .fgrid a.fname { font: 400 1.7rem/1.1 var(--font-head); letter-spacing: .04em; margin-bottom: .9rem; }
+.foot .fbrand p { max-width: 30ch; color: var(--muted); line-height: 1.55; }
+.foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+.foot .fgrid p.fmut { color: var(--muted); }
+.foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid var(--blush); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .82rem; color: var(--muted); }
+.foot .fbase a { color: var(--navy); text-decoration: underline; }
+@media (max-width: 760px) { .foot .fgrid { grid-template-columns: 1fr 1fr; } .foot .fbrand, .foot .fwide { grid-column: 1 / -1; } }
+/* three true facts under the main button (rules 3v.14) */
+.btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem; color: var(--soft); }
+.btn-facts li { display: inline-block; }
+.btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; border-radius: 50%; background: currentColor; margin-inline-end: .45em; margin-bottom: .15em; }
+.btn-facts .sym { font-size: 1em; vertical-align: 0; margin: 0; padding: 0; }
+.foot .fgrid a.fname { font-weight: 500; letter-spacing: 0; font-size: 1.9rem; }
+@media (max-width: 860px) { .foot.full { padding-block-end: calc(var(--bar-h) + 1.4rem); } }
+.hero .hero__go { margin: var(--sc-4) 0 var(--sc-3); }
+.hero .btn-facts { color: #C9CFDA; }
 </style>
 </head>
 <body data-step="1">
 <nav class="nav" aria-label="Book">
-  <a class="nav__mark" href="/business/michal-simkin"><img src="/pages/michal-simkin/assets/mark.jpg?v=mvrutast" alt="" width="96" height="96" data-mir-key="i-70d395cc-0"> Michal Simkin</a>
+  <a class="nav__mark" href="/business/michal-simkin"><img src="/pages/michal-simkin/assets/mark.jpg?v=mvyasxu4" alt="" width="96" height="96" data-mir-key="i-70d395cc-0"> Michal Simkin</a>
   <div class="nav__links"><a href="/business/michal-simkin#consult" data-mir-key="t-e277af9d-0">The consult</a><a href="/business/michal-simkin#same" data-mir-key="t-85225267-0">In their words</a><a href="/business/michal-simkin#academy" data-mir-key="t-fde3bf82-0">Courses</a><a href="/business/michal-simkin/book" aria-current="page" data-mir-key="t-3c02b9cf-0">Book</a></div>
 </nav>
 
@@ -177,12 +206,12 @@
         <p class="err" id="errWhat"></p>
       </section>
       <div class="gallery" aria-label="Her clients">
-        <figure class="lead"><img src="/pages/michal-simkin/assets/client-1.jpg?v=mvrutast" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" style="object-fit: cover" data-mir-key="i-3bbf0edf-0"></figure>
+        <figure class="lead"><img src="/pages/michal-simkin/assets/client-1.jpg?v=mvyasxu4" width="720" height="960" alt="A client in the salon chair in a long brown wig, smiling" style="object-fit: cover" data-mir-key="i-3bbf0edf-0"></figure>
         <div class="more">
-          <figure><img src="/pages/michal-simkin/assets/client-2.jpg?v=mvrutast" width="720" height="960" alt="A client in a soft shoulder-length brown wig" loading="lazy" data-mir-key="i-3c3f9c4c-0"></figure>
-          <figure><img src="/pages/michal-simkin/assets/client-3.jpg?v=mvrutast" width="720" height="960" alt="A client in a long wavy light-brown wig" loading="lazy" data-mir-key="i-d7f10817-0"></figure>
-          <figure><img src="/pages/michal-simkin/assets/client-6.jpg?v=mvrutast" width="720" height="960" alt="A client in a long wavy honey-brown wig" loading="lazy" data-mir-key="i-cb17fbe5-0"></figure>
-          <figure><img src="/pages/michal-simkin/assets/client-7.jpg?v=mvrutast" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" loading="lazy" data-mir-key="i-46fbc92a-0"></figure>
+          <figure><img src="/pages/michal-simkin/assets/client-2.jpg?v=mvyasxu4" width="720" height="960" alt="A client in a soft shoulder-length brown wig" loading="lazy" data-mir-key="i-3c3f9c4c-0"></figure>
+          <figure><img src="/pages/michal-simkin/assets/client-3.jpg?v=mvyasxu4" width="720" height="960" alt="A client in a long wavy light-brown wig" loading="lazy" data-mir-key="i-d7f10817-0"></figure>
+          <figure><img src="/pages/michal-simkin/assets/client-6.jpg?v=mvyasxu4" width="720" height="960" alt="A client in a long wavy honey-brown wig" loading="lazy" data-mir-key="i-cb17fbe5-0"></figure>
+          <figure><img src="/pages/michal-simkin/assets/client-7.jpg?v=mvyasxu4" width="720" height="960" alt="A client smiling in a shoulder-length dark wig" loading="lazy" data-mir-key="i-46fbc92a-0"></figure>
         </div>
         <figcaption data-mir-key="t-237fd175-0">Our clients, from our website.</figcaption>
       </div>
@@ -225,9 +254,9 @@
       <div class="card" aria-label="What clients say">
         <h2 data-mir-key="t-5102e93b-0">In their words</h2>
         <div style="display:grid;gap:.9rem">
-          <figure class="voice"><img src="/pages/michal-simkin/assets/yael.jpg?v=mvrutast" width="88" height="88" alt="" data-mir-key="i-c7ecbdcd-0"><figcaption><p data-mir-key="t-cef544f8-0">"She had a ton of options and she tried so many on me, giving her honest opinion, with no pressure to buy. Its not surprising that 2 years later I still love the wig I got."<b>Yael Stoolback</b></p></figcaption></figure>
-          <figure class="voice"><img src="/pages/michal-simkin/assets/debbie.jpg?v=mvrutast" width="88" height="88" alt="" data-mir-key="i-0479194e-0"><figcaption><p data-mir-key="t-a3aae529-0">"Immediately, she saw the problems and brought the sheitl back to life. Now, I love it."<b>Debbie Burack</b></p></figcaption></figure>
-          <figure class="voice"><img src="/pages/michal-simkin/assets/miriam.jpg?v=mvrutast" width="88" height="88" alt="" data-mir-key="i-beac240f-0"><figcaption><p data-mir-key="t-ebaa2600-0">"Something I actually think is cute, light, and works amazingly for me."<b>Miriam Campbell</b></p></figcaption></figure>
+          <figure class="voice"><img src="/pages/michal-simkin/assets/yael.jpg?v=mvyasxu4" width="88" height="88" alt="" data-mir-key="i-c7ecbdcd-0"><figcaption><p data-mir-key="t-cef544f8-0">"She had a ton of options and she tried so many on me, giving her honest opinion, with no pressure to buy. Its not surprising that 2 years later I still love the wig I got."<b>Yael Stoolback</b></p></figcaption></figure>
+          <figure class="voice"><img src="/pages/michal-simkin/assets/debbie.jpg?v=mvyasxu4" width="88" height="88" alt="" data-mir-key="i-0479194e-0"><figcaption><p data-mir-key="t-a3aae529-0">"Immediately, she saw the problems and brought the sheitl back to life. Now, I love it."<b>Debbie Burack</b></p></figcaption></figure>
+          <figure class="voice"><img src="/pages/michal-simkin/assets/miriam.jpg?v=mvyasxu4" width="88" height="88" alt="" data-mir-key="i-beac240f-0"><figcaption><p data-mir-key="t-ebaa2600-0">"Something I actually think is cute, light, and works amazingly for me."<b>Miriam Campbell</b></p></figcaption></figure>
         </div>
       </div>
     </aside>
@@ -244,6 +273,16 @@
     <p style="margin-top:1.2rem;color:var(--muted)"><a href="/business/michal-simkin" data-mir-key="t-e137d938-0">Back to the page</a></p>
   </section>
 </main>
+
+<footer class="foot full on-blush">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="/business/michal-simkin" data-mir-key="t-1ee5f1ef-0">Michal Simkin</a><p data-mir-key="t-d46ddbd6-0">We create wigs that are a joy to wear, because when your wig feels right, you feel right.</p><a class="fcta" href="/business/michal-simkin/book" data-mir-key="t-b3a743f4-0">Book a consultation <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
+    <nav aria-label="Pages"><h4 data-mir-key="t-b22a94f3-0">Pages</h4><a href="/business/michal-simkin" data-mir-key="t-fc43c37b-0">Home</a><a href="/business/michal-simkin/book" data-mir-key="t-b3a743f4-1">Book a consultation</a><a href="/business/michal-simkin/book#academy" data-mir-key="t-37c343be-0">Enrol in the Academy</a></nav>
+    <div><h4 data-mir-key="t-d167b7e2-0">Visit</h4><p data-mir-key="t-8f74f9eb-0">Bet Shemesh</p><p class="fmut" data-mir-key="t-69822ce9-0">Sunday to Thursday, 10 to 2, by appointment</p><p data-mir-key="t-290f66f1-0">Consultation <span class="sym">₪</span>100</p><p class="fmut" data-mir-key="t-5ad24894-0">English and Hebrew</p></div>
+    <div class="fwide"><h4 data-mir-key="t-49e826dc-0">Reach us</h4><a href="https://wa.me/972546826258" target="_blank" rel="noopener" data-mir-key="t-1c6c5015-0">WhatsApp 054-682-6258</a></div>
+  </div>
+  <div class="fbase"><span data-mir-key="t-963418ac-0">© 2026 Michal Simkin. Every photograph here is from our website.</span><span data-mir-key="t-69529cb0-0">Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
+</footer>
 
 <div class="bar" aria-hidden="true">
   <div class="t"><small data-mir-key="t-9263db8f-0">Total</small><b id="totalBar">₪0</b></div>
@@ -288,14 +327,26 @@
   }
   function choose(id) { state.chosen = state.products.filter(function (p) { return p.id === id; })[0] || null; paint(); }
 
+  /* 3u.2: Friday and Shabbat are closed (Sun to Thu, 10 to 2). Say so, name the next day we can do, offer a button; never change their pick. */
+  function localIso(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+  function closedNote() {
+    var e = $('#errWhen'), v = $('#date').value, wd = v ? new Date(v + 'T12:00:00').getDay() : -1;
+    e.textContent = ''; e.classList.remove('closed');
+    if (wd !== 5 && wd !== 6) return false;
+    var n = new Date(v + 'T12:00:00'); while ([5, 6].indexOf(n.getDay()) !== -1) n.setDate(n.getDate() + 1);
+    e.classList.add('closed');
+    e.appendChild(document.createTextNode('We are closed on ' + (wd === 5 ? 'Fridays' : 'Shabbat') + '. The first day we can do is Sunday ' + n.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' }) + '.'));
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'pickday'; b.textContent = 'Choose Sunday';
+    b.addEventListener('click', function () { $('#date').value = localIso(n); closedNote(); paint(); });
+    e.appendChild(b); return true;
+  }
   function initDate() {
     var d = new Date(); d.setDate(d.getDate() + 1);
     while ([5, 6].indexOf(d.getDay()) !== -1) d.setDate(d.getDate() + 1);   /* not Friday, not Shabbat */
     var iso = d.toISOString().slice(0, 10);
     $('#date').min = iso; $('#date').value = iso;
     $('#date').addEventListener('change', function () {
-      var wd = new Date($('#date').value + 'T12:00:00').getDay();
-      $('#errWhen').textContent = (wd === 5 || wd === 6) ? 'The salon is open Sunday to Thursday.' : '';
+      closedNote();
       paint();
     });
   }
@@ -313,7 +364,7 @@
     var s3 = s2 && $('#name').value.trim() && $('#phone').value.trim().length >= 9;
     var li = document.querySelectorAll('#steps li');
     for (var i = 0; i < 3; i++) li[i].className = (i + 1 < step) ? 'done' : ((i + 1 === step) ? 'now' : '');
-    var label = step === 1 ? 'Continue to the day' : (step === 2 ? 'Continue to your details' : (p ? 'Request the time · ' + tot : 'Request the time'));
+    var label = step === 1 ? 'Continue to the day' : (step === 2 ? 'Continue to your details' : (p ? 'Send my request to Michal, ' + tot : 'Send my request to Michal'));
     $('#place').textContent = label; $('#placeBar').textContent = label;
     $('#place').disabled = !s1; $('#placeBar').disabled = !s1;
   }
@@ -330,7 +381,8 @@
     if (step === 1) { if (!state.chosen) { $('#errWhat').textContent = 'Choose one.'; return; } return go(2); }
     if (step === 2) {
       var wd = new Date($('#date').value + 'T12:00:00').getDay();
-      if (!$('#date').value || wd === 5 || wd === 6) { $('#errWhen').textContent = 'Pick a day, Sunday to Thursday.'; return; }
+      if (!$('#date').value) { $('#errWhen').textContent = 'Pick a day, Sunday to Thursday.'; return; }
+      if (closedNote()) return;
       return go(3);
     }
     place();
@@ -339,7 +391,8 @@
     $('#errWhat').textContent = ''; $('#errWhen').textContent = ''; $('#errYou').textContent = '';
     if (!state.chosen) { $('#errWhat').textContent = 'Choose one.'; return; }
     var wd = new Date($('#date').value + 'T12:00:00').getDay();
-    if (!$('#date').value || wd === 5 || wd === 6) { $('#errWhen').textContent = 'Pick a day, Sunday to Thursday.'; $('#step-when').scrollIntoView(); return; }
+    if (!$('#date').value) { $('#errWhen').textContent = 'Pick a day, Sunday to Thursday.'; $('#step-when').scrollIntoView(); return; }
+    if (closedNote()) { $('#step-when').scrollIntoView(); return; }
     if (!$('#name').value.trim() || $('#phone').value.trim().length < 9) { $('#errYou').textContent = 'Your name and a mobile number, so we can confirm.'; $('#step-you').scrollIntoView(); return; }
     var notes = ('Preferred time: ' + $('#time').value + ($('#notes').value.trim() ? '\n' + $('#notes').value.trim() : ''));
     var body = { lines: [{ product_id: state.chosen.id, qty: 1 }], fulfilment: 'pickup', date: $('#date').value, window: null, address: null,

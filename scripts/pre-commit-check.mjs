@@ -29,6 +29,11 @@ for (const f of staged) {
   m = f.match(/^frontend\/public\/pages\/([^/]+)\//);
   if (m) live.add(m[1]);
 }
+// a rule changed in the repo copy of the skill or hooks must be changed in the copy sessions load too (1 Nov 2026)
+if (staged.some((f) => /^(\.claude\/skills\/build-business-page|scripts\/hooks)\//.test(f))) {
+  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-copies.mjs')], { cwd: ROOT, encoding: 'utf8' });
+  if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
+}
 if (!builds.size && !live.size) process.exit(0);
 
 const problems = [];

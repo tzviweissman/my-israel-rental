@@ -66,6 +66,8 @@ if (!fs.existsSync(path.join(SRC, 'index.html'))) {
 // (Tzvi, 24 Oct 2026: "the rules get skipped a lot"; that day three first publishes stopped one problem
 // at a time, ten minutes apart, on rules added after the sites were built). Republishes used to skip
 // all of this, so a rule broken by a later change went live unseen.
+// A rule added after the site was first published is the exception (Tzvi, 29 Oct 2026: "new rules
+// shouldnt affect already made sites"): its check is not run until the site's RULES.md answers it.
 //   --check   run everything, list every problem, publish nothing (use it before asking to publish)
 // The concept sheet (Tzvi, 19 Oct 2026: bland pages shipped although the rules said otherwise) and the
 // look-alike check (rules 3p: "why do you keep making everything so similar") stay for new pages only:
@@ -83,7 +85,9 @@ const CHECK_ONLY = process.argv.includes('--check');
     const fp = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-fingerprints.mjs'), SRC], { encoding: 'utf8' });
     if (fp.status !== 0) problems.push(`too like a live page:\n${fp.stdout}${fp.stderr}`);
   }
-  // every line of the rules checklist answered in RULES.md, and answered after the last change
+  // every line of the rules checklist answered in RULES.md, and answered after the last change. A site built from a
+  // blueprint (scripts/blueprint.mjs, Tzvi 1 Nov 2026) has RULES.md written from it here, so it is never stale
+  if (fs.existsSync(path.join(SRC, 'BLUEPRINT.md'))) spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--rules', SRC], { encoding: 'utf8' });
   const rules = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rules.mjs'), SRC], { encoding: 'utf8' });
   // a new site is reviewed by someone who did not build it (rules 3a, 27 Oct 2026; check-build.mjs says how)
   const review = path.join(SRC, 'review.md');
@@ -112,11 +116,24 @@ const CHECK_ONLY = process.argv.includes('--check');
   // A failure that is only a timing measure (SMOOTH frame rate, a FLASH on two quick taps) is run once more before it
   // counts: on a computer running several sessions' browsers these tripped on pages that pass alone (25 Oct 2026).
   const onlyTiming = (out) => { const bad = out.split('\n').filter((l) => /^[A-Z]{4,}\s/.test(l)); return bad.length > 0 && bad.every((l) => /^(SMOOTH|FLASH|HEAVY|BUSY)\s/.test(l)); };
-  for (const [script, why] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly'],
+  // A check that belongs to a checklist rule added after this site was first published is not run (Tzvi, 29 Oct
+  // 2026: "new rules shouldnt affect already made sites"; scripts/rule-dates.mjs). A new check gets its own script
+  // and its rule id here, so it can be told apart from the rules the site was made under.
+  const { newerRules } = await import('./rule-dates.mjs');
+  const newer = newerRules(ROOT, SRC);
+  for (const [script, why, rule] of [['check-fits.mjs', 'does not fit the screen'], ['check-site.mjs', 'has glitches'], ['check-motion.mjs', 'does not switch smoothly'],
     // smooth on a slowed phone, and repeated labels keep one place (Tzvi, 26-27 Oct 2026; rules 3s.27)
-    ['check-speed.mjs', 'is not smooth on a phone'], ['check-same-place.mjs', 'moves a repeated label'], ['check-one-scroll.mjs', 'has two scroll effects'],
+    ['check-speed.mjs', 'is not smooth on a phone'], ['check-overlap.mjs', 'has words on words', 'R3s.26'], ['check-opening-scroll.mjs', 'has an opening scroll that is not smooth or too short', 'R3h.20'], ['check-same-place.mjs', 'moves a repeated label', 'R3s.27'], ['check-one-scroll.mjs', 'holds the scroll too much', 'R3h.21'],
     // on a phone the opening photo is seen, not covered by words and shades (Tzvi, 28 Oct 2026; rules 5b.3)
-    ['check-photo-clear.mjs', 'covers its opening photo on a phone']]) {
+    ['check-photo-clear.mjs', 'covers its opening photo on a phone', 'R5b.3'],
+    // from Tzvi's seven videos (29 Oct 2026): no blank screen in the scroll, the order form arrives filled in
+    ['check-blank.mjs', 'shows a blank screen', 'R3s.28'], ['check-prefill.mjs', 'has an order form that is not filled in', 'R3k.10'],
+    // the rest of the seven videos (29 Oct 2026, rules 3u.5): a home page with no film arrives in order
+    ['check-arrival.mjs', 'has a first screen that does not arrive', 'R3u.5'],
+    // the ten videos and five real sites (Tzvi, 1 Nov 2026, rules 3v): a full footer, a menu of pages, three facts, varied heights
+    ['check-footer.mjs', 'has no full footer', 'R3v.1'], ['check-menu.mjs', 'has a menu bar that does not list its pages', 'R3v.2'],
+    ['check-facts.mjs', 'has no three facts under the main button', 'R3v.14'], ['check-heights.mjs', 'has sections all of one height', 'R3v.6']]) {
+    if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }
     results.push({ why, ...r });

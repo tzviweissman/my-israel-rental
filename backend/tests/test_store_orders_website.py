@@ -126,13 +126,17 @@ def test_rules_are_enforced(store):
 
 
 def test_closed_day_is_refused(store, owner):
-    fri = _next_friday()
-    # Close Friday orders yesterday at 00:01: every Friday is past its cutoff.
-    y = (datetime.now(IL) - timedelta(days=1))
-    requests.put(f"{BASE}/marketplace/businesses/{store['biz']}/orders/settings", json={
-        "cutoffs": [{"for_day": 5, "closes_day": (y.weekday() + 1) % 7, "closes_time": "00:01"}],
+    # The coming Friday, today included: a cutoff reaches at most 6 days back,
+    # so a Friday a week out (what _next_friday gives on a Friday) can never be
+    # closed yet. Closing it on today's weekday at 00:00 puts the cutoff at
+    # today 00:00 whatever day the suite runs.
+    today = datetime.now(IL).date()
+    fri = today + timedelta(days=(4 - today.weekday()) % 7)
+    st = requests.put(f"{BASE}/marketplace/businesses/{store['biz']}/orders/settings", json={
+        "cutoffs": [{"for_day": 5, "closes_day": (today.weekday() + 1) % 7, "closes_time": "00:00"}],
         "pickup_windows": [], "delivery_windows": [], "delivery_fee": None, "min_order": None, "default_courier_user_id": None,
     }, headers=_auth(owner), timeout=30)
+    assert st.status_code == 200, st.text
     f = requests.get(f"{BASE}/marketplace/order-form/{store['gig']}", timeout=30).json()
     r = requests.post(f"{BASE}/marketplace/order-form/{store['gig']}/orders", json={
         "lines": [{"product_id": f["products"][0]["id"], "qty": 1}], "fulfilment": "pickup", "date": fri.isoformat(),

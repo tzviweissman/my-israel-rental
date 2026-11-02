@@ -26,6 +26,7 @@ import {
 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import WelcomePopups from '../components/WelcomePopups';
+import DemandLines from '../components/common/DemandLines';
 import GoogleSignInButton from '../components/auth/GoogleSignInButton';
 import AuthShell from '../components/auth/AuthShell';
 
@@ -66,7 +67,7 @@ const ROLE_CARDS = [
     tDescKey: 'signupJoin.hostDesc',
     defaultDesc: 'I want to list my vacation rental or property',
     tValueKey: 'signupJoin.hostValue',
-    defaultValue: 'Free to list · no booking fees · no commission',
+    defaultValue: 'Free to list · no commission · paste the ad you already have',
     // /why-host, NOT /why-list — the latter is the service-provider value
     // page and would mis-describe itself to a property owner.
     learnMoreHref: '/why-host',
@@ -88,7 +89,7 @@ const ROLE_CARDS = [
     tDescKey: 'signupJoin.providerDesc',
     defaultDesc: 'Cleaner, mover, tour guide, or any local service',
     tValueKey: 'signupJoin.providerValue',
-    defaultValue: 'Free to list · no booking fees · no commission',
+    defaultValue: 'Free to list · no commission · paste the ad you already have',
     // /why-list lives here rather than on the Host card: it is the
     // provider value page. This keeps it reachable now that "List / Offer"
     // has left the nav, which was the point of linking it at all.
@@ -392,6 +393,8 @@ const SignupJoin = () => {
                 and password — offering the one-tap route after the form
                 is filled in is offering it too late to be worth
                 anything. */}
+
+            <DemandLines compact className="mt-4 flex justify-center [@media(max-height:760px)]:hidden" />
 
             {/* F4 — the feature library, linked from /join. Someone still
                 deciding which card to press is exactly who benefits from

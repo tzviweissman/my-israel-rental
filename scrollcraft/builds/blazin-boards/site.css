@@ -377,3 +377,20 @@ img { display: block; max-width: 100%; }
 .field .hint { font-size: .9rem; }
 @media (max-width: 640px) { .daychips { flex-wrap: wrap; overflow: visible; } }
 @media (max-width: 640px) { .bcard .start { font-size: .88rem; } }
+
+/* 3u.2 the line under the day field when the picked day cannot be done */
+.dayfix { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem .75rem; margin: .6rem 0 0; padding: .7rem .9rem; border-radius: 12px; background: var(--wash); border: 1px solid var(--line); color: var(--ink); font-size: .95rem; }
+.dayfix[hidden] { display: none; }
+
+/* the full footer (rules 3v.1) */
+.foot2.full .fgrid { display: grid; grid-template-columns: 1.6fr repeat(3, minmax(0, 1fr)); gap: 2rem; padding-block: 2rem; margin-top: 2.5rem; border-top: 1px solid rgb(255 255 255 / .18); }
+.foot2.full h4 { margin: 0 0 .9rem; font: 700 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: rgb(255 255 255 / .62); }
+.foot2.full .fgrid a, .foot2.full .fgrid p { display: block; width: fit-content; margin: 0 0 .55rem; color: #fff; font-size: .92rem; line-height: 1.5; text-decoration: none; }
+.foot2.full .fgrid a:hover { color: var(--gold); text-decoration: underline; }
+.foot2.full .fgrid nav { display: block; }
+.foot2.full .fgrid a.fname { font: 800 1.5rem/1 var(--font-body); letter-spacing: -.02em; text-transform: uppercase; margin-bottom: .9rem; }
+.foot2.full .fbrand p { max-width: 28ch; color: rgb(255 255 255 / .72); }
+.foot2.full .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; color: var(--gold); }
+.foot2.full .fbase { display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; padding-top: 1.2rem; border-top: 1px solid rgb(255 255 255 / .18); font-size: .82rem; color: rgb(255 255 255 / .72); }
+.foot2.full .fbase a { color: #fff; text-decoration: underline; text-underline-offset: 3px; }
+@media (max-width: 860px) { .foot2.full .fgrid { grid-template-columns: 1fr 1fr; } .foot2.full .fbrand { grid-column: 1 / -1; } }

@@ -90,7 +90,15 @@
     <p class="giant" aria-hidden="true">Noa Levi</p>
   </section>
 </main>
-<footer class="foot foot-cols"><div class="fc"><b>Pages</b><a href="index.html">Home</a><a href="book.html">Book a session</a><a href="contact.html">Contact</a></div><div class="fc"><b>Where</b><span>Jerusalem and Beit Shemesh</span><span>09:00 to 23:00</span></div><div class="fc"><b>Contact</b><a href="https://wa.me/972556730875" target="_blank" rel="noopener">WhatsApp or call +972 55 673 0875</a><a href="mailto:noare2133@gmail.com">Email</a><span>Noa Levi, Home Styling &amp; Organizing &middot; on <a href="/">MyIsraelRental</a>, free to list, no commission</span></div></footer>
+<footer class="foot full">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">Noa Levi</a><p>We sort, tidy and set up storage, so the result is easy to keep.</p><a class="fcta" href="book.html">Book a session <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="book.html">Book a session</a><a href="contact.html">Contact</a></nav>
+    <div><h4>Booking</h4><p><span class="sym">₪</span>160 an hour</p><p class="fmut">Accessories not included</p><p>Jerusalem and Beit Shemesh</p><p class="fmut">Open 09:00 to 23:00</p></div>
+    <div class="fwide"><h4>Reach us</h4><a href="https://wa.me/972556730875" target="_blank" rel="noopener">WhatsApp +972 55 673 0875</a><a href="mailto:noare2133@gmail.com">noare2133@gmail.com</a></div>
+  </div>
+  <div class="fbase"><span>© 2026 Noa Levi.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
+</footer>
 
 <div class="bar" id="bar" aria-hidden="true">
   <p class="p"><b>₪160 an hour</b>Jerusalem and Beit Shemesh</p>
@@ -139,6 +147,16 @@
   });
   [].forEach.call(document.querySelectorAll('#cities input'), function (i) { i.addEventListener('change', function () { update(); check(false); }); });
 
+  // the form arrives filled in (page rules 3k.8): the first day the page itself would accept, with a start time still to offer
+  function firstDay(lastStart) {
+    var n = new Date(), t = new Date(n.getFullYear(), n.getMonth(), n.getDate(), 12);
+    for (var i = 0; i < 14; i++, t.setDate(t.getDate() + 1)) {
+      var l = lastStart(t.getDay());
+      if (!l || (i === 0 && l <= n.getHours() * 60 + n.getMinutes() + 60)) continue;
+      return t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+    }
+    return '';
+  }
   // start times in her hours, 09:00 to 23:00, so the session ends by 23:00
   function drawTimes() {
     var box = $('times'), d = $('day').value;
@@ -148,12 +166,18 @@
       if (d === today) { var now = new Date(); if (m <= now.getHours() * 60 + now.getMinutes() + 60) continue; }
       out.push(m);
     }
-    if (!out.length) { box.innerHTML = '<p class="hint">No start times left that day. Choose another day.</p>'; time = ''; return; }
+    if (!out.length) {
+      // nothing left that day: one plain line naming the next day, and a button that sets it (page rules 3u.2); the pick is never changed for the customer
+      var t = new Date(d + 'T12:00'); t.setDate(t.getDate() + 1);
+      var iso = t.getFullYear() + '-' + pad(t.getMonth() + 1) + '-' + pad(t.getDate());
+      box.innerHTML = '<p class="hint">No start times are left that day. The next day we can do is ' + nice(iso) + '.</p><button type="button" class="choose-day" data-d="' + iso + '">Choose ' + t.toLocaleDateString('en-GB', { weekday: 'long' }) + '</button>'; time = ''; return;
+    }
     if (out.map(hhmm).indexOf(time) < 0) time = '';
     box.innerHTML = out.map(function (m) { var t = hhmm(m); return '<label class="opt"><input type="radio" name="time" value="' + t + '"' + (t === time ? ' checked' : '') + '><span class="box">' + t + '</span></label>'; }).join('');
     [].forEach.call(box.querySelectorAll('input'), function (i) { i.addEventListener('change', function () { time = i.value; update(); check(false); }); });
   }
   $('day').addEventListener('change', function () { drawTimes(); update(); check(false); });
+  $('times').addEventListener('click', function (e) { var b = e.target.closest('.choose-day'); if (b) { $('day').value = b.dataset.d; drawTimes(); update(); check(false); } });
 
   function endOf(t) { var p = t.split(':'); return hhmm(+p[0] * 60 + +p[1] + hrs * 60); }
   function chg(n, what) { return step > n ? ' <button type="button" class="chg" data-go="' + n + '" aria-label="Change ' + what + '">Change</button>' : ''; }
@@ -230,6 +254,7 @@
   addEventListener('popstate', function () { var m = /#book-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
   $('back').addEventListener('click', function () { history.back(); });
   document.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b && +b.dataset.go < step) go(+b.dataset.go, true); });
+  if (!$('day').value) $('day').value = firstDay(function () { return 1380 - hrs * 60; });
   drawHours(); drawStage(); drawTimes(); update();
   var m0 = /#book-(\d)/.exec(location.hash); if (m0) go(+m0[1], false);
 })();

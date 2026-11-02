@@ -1,6 +1,8 @@
 // Nails by Elisheva, the parts every page shares (page rules 3k): the menu
 // bar (and its phone menu), the header and phone bar on scroll, the reveals.
 document.body.classList.remove('no-js');
+// 3u.5 the first screen arrives in order, once (not with motion off; the CSS is in site.css)
+if (!matchMedia('(prefers-reduced-motion: reduce)').matches && document.querySelector('[data-arrive]')) document.documentElement.classList.add('arrive-go');
 (function () {
   var nav = document.getElementById('nav'), btn = document.getElementById('menu-btn');
   function setMenu(open) { nav.classList.toggle('shown', open); btn.setAttribute('aria-expanded', open); btn.textContent = open ? 'Close' : 'Menu'; }

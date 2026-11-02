@@ -41,6 +41,7 @@ from routes import (  # noqa: E402
     guest_messages,
     home_tiles,
     seo,
+    whatsapp_webhook,
     ical,
     marketplace,
     misc,
@@ -122,6 +123,7 @@ for mod in (
     restaurants,
     home_tiles,
     seo,
+    whatsapp_webhook,
 ):
     api_router.include_router(mod.router)
 
@@ -346,6 +348,11 @@ async def startup_tasks() -> None:
     if os.environ.get("RAILWAY_ENVIRONMENT_NAME"):
         from utils.contract_files import mirror_local_contracts
         asyncio.create_task(mirror_local_contracts())
+        # The ad cut-out model (utils/cutout.py): the disk is wiped at every
+        # deploy, so fetch it now in the background rather than make the
+        # first owner who presses "Generate ads" wait for it.
+        from utils.cutout import prefetch_model
+        asyncio.create_task(asyncio.to_thread(prefetch_model))
     # Busy times from owners' own calendars (calendar_sync.py).
     from routes.marketplace import calendar_sync
     await calendar_sync.ensure_indexes()

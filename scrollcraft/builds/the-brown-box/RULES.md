@@ -50,8 +50,8 @@ R3h.3 pass: sharp frames on a canvas, full screen; looked at at 1440x900 and 192
 R3h.5 pass: chapter lines are two to six words at the lower left on a soft edge shade; readable shows two words (2.8:1 and 2.2:1) only at one scroll position while the opening line fades out, and at rest they are cream on the dark shade (looked at at 1280x650)
 R3h.7 pass: five clips each started on the previous last frame; the joins were looked at when the film was built
 R3h.8 pass: after the film the page turns to a light ground with colour panels
-R3h.11 pass: brightness.py: desktop frames average 43, phone frames 53, bright enough; graded up with gamma on 22 Oct (two frames had a middle of 30)
-R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned frame film 6.2 screens on a laptop and 5.6 on a phone, 60 fps (median 16.7 ms; 8.8% and 5.9% of frames over 50 ms, under the 10% limit); the bowl stands on its own plain dark ground; bowl and box whole; logo and the first film frames load first
+R3h.11 pass: brightness.py: desktop frames average 43, phone frames 53 (the phone loop video is made from them), bright enough; graded up with gamma on 22 Oct (two frames had a middle of 30)
+R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned frame film 6.2 screens on a laptop (on a phone since 31 Oct the film plays on repeat in one screen, no pinned scroll, Tzvi 29 Oct), 60 fps (median 16.7 ms; 8.8% and 5.9% of frames over 50 ms, under the 10% limit); the bowl stands on its own plain dark ground; bowl and box whole; logo and the first film frames load first
 R3h.13 pass: the toppings fall and land in one clip; looked at its frames
 R3h.14 pass: the bowl stays recognisable
 R3h.17 n/a: the page does not use a giant name over the film
@@ -161,7 +161,7 @@ R3s.18 n/a: every size or item is always available; nothing unavailable to repla
 R3s.25 pass: check-site FLOW clean: an empty form sends nothing, a filled one builds the WhatsApp message with the total; each message line carries its bowl extras (+6, +5) so the lines add up to the total, two muffins of one kind read "2 x name", and the order summary names the extras actually picked ("Build your own bowl +6")
 
 ## 7. Motion
-R3f.1 pass: the film plays under the scroll while the stage holds; checked at 1280x650 and 390x844
+R3f.1 pass: the film plays under the scroll while the stage holds on a laptop (on a phone it plays on repeat in one screen, a muted video); checked at 1280x650 and 390x844
 R3f.8 n/a: no scroll-tied effect finishes in a section
 R3f.9 n/a: no list lights item by item
 R3f.5 pass: grepped css: no ch widths, no background-clip text
@@ -201,3 +201,25 @@ R3r.3 pass: check-rules passed after the last edit; every script was re-run afte
 R3r.4 pass: no new correction from Tzvi since the last build is missing from this file
 R8.7 pass (recorded after the fact, 25 Oct): gen/film-bowls-brief.md written 25 Oct covering the film (16 Oct), bowl stills and the five hero shots (23 Oct); gen/film-compare.jpg and gen/bowls-compare.jpg looked at. Honest result: the five hero shots match the bowl stills they came from, but the film bowl and gold box are invented and do not match their real bowl photo (strawberry and apple) or their kraft box; stills and clips were made from words, not from their photos; prompts are in gen/*.sh for stills and clips, not for the hero shots. Open for Tzvi
 R3k.9 pass: served the build locally and ran node scripts/check-site.mjs http://localhost:8767/order.html: no FLOW and no SAVE problem (the POST to the order form was recorded before WhatsApp opened; it posted to localhost:8001, nothing reached the live site). Four BROKEN lines were 404s for /pages/the-brown-box/assets/menu/*.webp, which only appear because the build is served from its own folder not under /pages/the-brown-box/; not a site fault. No dashboard view of a saved order was made
+R3k.10 pass: the day field fills with today, the first day the page accepts (it states no lead time or closed days); choices left to the customer; check-prefill clean
+R3u.2 n/a: the page states no closed days, lead time or limits (asked in message-to-owner.md question 4), so there is nothing real to name
+R3u.3 n/a: nothing is sold by size (bowls and gift boxes at fixed prices)
+R3u.5 n/a: the home page opens on a scroll film (check-arrival run on index.html reports it opens on a film, so the arrival is left out)
+R3u.6 n/a: the first screen is a scroll film, no separate cut-out pieces
+R3u.7 n/a: the first screen is a scroll film with its own chapter lines
+R3u.8 n/a: not added to this site (not asked for it)
+R3u.9 n/a: the site has no questions section
+R3u.10 n/a: one shop, no branches
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 n/a: no kit pieces were added to this site
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 29 Oct: all rules re-read against the current index.html; only change since is how the film frames load and show (decoded off the main thread, each frame handed to the canvas whole at its own size and covering the screen by CSS) so the film scrolls smoothly on a phone (check-speed 19 ms a frame, 0% busy); screenshots at 0.2, 0.5 and 0.9 of the film on 390x844 and 1440x900 look the same as before -->
+<!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->
+R3v.1 pass: full footer on index and order (who we are with the kosher seal and a quiet Order a bowl link, Pages, Ordering: delivery throughout Jerusalem and payment, Reach us: WhatsApp, email, Instagram; base line; the generated-film note kept); no founding year or lead time in the page, so none shown
+R3v.2 pass: the site is Home plus its order page, so the menu bar keeps its jumps (Bowls, Menu, Gift boxes)
+R3v.14 pass: Bowls from ₪60, Delivery throughout Jerusalem, Cash, Zelle, bank transfer or card (the page's own price, delivery and payment lines)
+<!-- 1 Nov 2026: footer checked again after a last fix (phone footer columns, duplicate page list, contact link); check-footer, check-menu and check-facts pass -->
+
+Note, 1 Nov 2026: the facts under the button are a little smaller on short phones (360x640), so the opening picture stays seen (check-photo-clear). No rule answer changes.
+Note, 1 Nov 2026: and no glow behind those facts on short phones.

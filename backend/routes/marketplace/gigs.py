@@ -158,7 +158,11 @@ async def list_gigs(
     # to browse the un-featured set, and reading it that way would make a
     # stray `?featured=false` silently hide every featured gig.
     featured: Optional[bool] = None,
-    limit: int = Query(60, ge=1, le=200),
+    # 0 = every match. The /services page asks for all of them and pages them
+    # itself: it shows "All businesses (N)", puts business pages first and
+    # draws the map from the whole list, and a cap here silently dropped the
+    # oldest listings (60 of 62 shown, 1 Nov 2026).
+    limit: int = Query(60, ge=0, le=200),
 ):
     query: dict[str, Any] = {"status": "published"}
     if featured:
@@ -246,11 +250,13 @@ async def list_gigs(
         # used by weekly_availability (sun/mon/…/sat).
         available_weekday_key = ["mon", "tue", "wed", "thu", "fri", "sat", "sun"][d.weekday()]
 
-    # Fetch more than `limit` because the post-filters (rating floor,
-    # price band, response bucket, languages, availability) may prune the
-    # initial page down below the requested count.
-    fetch_multiplier = 3 if any(v is not None for v in (min_rating, min_price, max_price, response_time, languages, available_weekday_key)) else 1
-    cursor = db.marketplace_gigs.find(query).sort("created_at", -1).limit(limit * fetch_multiplier)
+    # Every match is read, then filtered and sorted below, and only then cut to
+    # `limit`. Cutting first (it read the newest limit x 1-3) meant "best match"
+    # and "top rated" only ranked the newest listings, and an older, better
+    # rated business could never appear.
+    # ponytail: reads every published listing per request; page in Mongo
+    # (store rating and price on the gig) if listings run into the thousands
+    cursor = db.marketplace_gigs.find(query).sort("created_at", -1)
     raw = [g async for g in cursor]
 
     # One providers lookup covers every gig, dedup'd by user_id.
@@ -388,7 +394,7 @@ async def list_gigs(
     else:
         kept.sort(key=_match_score)
 
-    return [_clean_gig(g) for g in kept[:limit]]
+    return [_clean_gig(g) for g in (kept[:limit] if limit else kept)]
 
 
 

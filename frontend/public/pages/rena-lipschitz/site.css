@@ -338,6 +338,7 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 .st-desc { margin: .5rem 0 0; color: var(--soft); font-size: 1.1rem; }
 .st-price { margin: .6rem 0 0; font: 700 min(clamp(2.2rem, 4vw, 3.2rem), 7svh)/1 var(--font-head); color: var(--choc); }
 .st-price small { font: 500 1rem/1 var(--font-body); color: var(--soft); }
+.st-price .st-pc { display: inline-block; margin-left: .5rem; }
 /* the facts as small "+" labels beside the product (inspo: hotspot labels) */
 .facts { list-style: none; display: flex; flex-wrap: wrap; gap: .45rem; margin: 1rem 0 0; padding: 0; }
 .facts li { padding: .4rem .8rem; border-radius: 999px; background: rgb(255 255 255 / .6); font: 700 .9rem/1.2 var(--font-body); color: var(--choc); }
@@ -618,7 +619,7 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 /* old and new words share one grid cell, so the old ones fade out exactly where they were */
 .xf { display: inline-grid; } .xf > span { grid-area: 1 / 1; justify-self: center; }
 .xout { pointer-events: none; animation-name: xf-out; }
-#st-name, #st-desc, #st-price, #cups-n, #cups-u, #cups-go { position: relative; }
+#st-name, #st-desc, #st-price, #st-pc, #cups-n, #cups-u, #cups-go { position: relative; }
 @keyframes xf-in { from { opacity: 0; } }
 @keyframes xf-out { to { opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .xin, .xout { animation: none; } .xout { display: none; } }
@@ -628,3 +629,23 @@ textarea.fld { min-height: 88px; resize: none; overflow-y: auto; }
 img.lz { opacity: 0; transition: opacity 300ms var(--out); }
 img.lz.lz-in { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { img.lz { opacity: 1; transition: none; } }
+
+/* the full footer (rules 3v.1) */
+.foot.full { text-align: start; font-size: .95rem; padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.4rem + var(--pad-bar, 0px)); }
+.foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.6fr 1fr 1.4fr 1.4fr; gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+.foot.full h4 { margin: 0 0 .9rem; font: 700 .76rem/1.2 var(--font-body); letter-spacing: .14em; text-transform: uppercase; color: var(--kraft); }
+.foot.full nav { margin: 0; font-weight: 400; }
+.foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; margin: 0 0 .55rem; color: var(--cream); text-decoration: none; }
+.foot .fgrid a:hover { text-decoration: underline; }
+.foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+.foot .fgrid nav a { margin: 0 0 .55rem; }
+.foot .fgrid a.fname { font: 700 1.7rem/1.05 var(--font-head); font-variation-settings: 'SOFT' 100, 'opsz' 96; margin-bottom: .9rem; }
+.foot .fbrand p { max-width: 30ch; color: #E8CFC7; line-height: 1.55; }
+.foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; color: #fff; }
+.foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid #4A2618; display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .85rem; color: #E8CFC7; }
+.foot .fbase a { color: var(--cream); }
+@media (max-width: 860px) { .foot .fgrid { grid-template-columns: 1fr 1fr; } .foot .fbrand { grid-column: 1 / -1; } }
+/* three true facts under the main button (rules 3v.14) */
+.btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .95rem; line-height: 1.4; color: #F4E6E1; flex-basis: 100%; }
+.btn-facts li::before { content: ''; display: inline-block; width: .4em; height: .4em; border-radius: 50%; background: var(--pink); vertical-align: middle; margin-inline-end: .45em; margin-bottom: .15em; }
+.btn-facts .sym { font-size: 1em; vertical-align: 0; margin: 0; padding: 0; }

@@ -53,6 +53,7 @@ import SortSelect, {
 } from '../components/search/SortSelect';
 
 import { API } from '../lib/apiBase';
+import { noteSearch } from '../utils/visitorId';
 
 // Stays = everything that's not storage. Storage was retired this session.
 const STAY_RENTAL_TYPES = ['vacation', 'short-term', 'long-term'];
@@ -207,6 +208,9 @@ const SERVER_SORTS = [SORT_NEWEST, SORT_PRICE_ASC, SORT_PRICE_DESC];
     // every sort change would trade an instant re-order for a round trip.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  // Counted for the "who is looking" lines (components/common/DemandLines).
+  useEffect(() => { noteSearch(API, 'stays', where, bedrooms); }, [where, bedrooms]);
 
   // How many cards are actually rendered. Every matching listing used to
   // be mounted at once — 196 of them on an unfiltered /stays — so the

@@ -24,7 +24,7 @@
   </div>
 </header>
 <main>
-  <section class="film" id="film" aria-label="Fruit platters">
+  <section class="film" id="film" data-loop="assets/film/phone-loop.mp4" aria-label="Fruit platters">
     <div class="film-stage">
     <canvas id="cv" aria-hidden="true"></canvas>
     <img class="film-end" src="assets/opening-end.webp" width="1920" height="1080" alt="Our Large platter on a red ground: watermelon, grapes, pomegranate, lychees, melon and pineapple on a wooden board">
@@ -33,15 +33,11 @@
       <h1>Fresh, beautiful fruit platters</h1>
       <p class="lede">For your home and events, in four sizes, from <span class="sym">₪</span>300.</p>
       <a class="btn btn-light" href="shop.html#sizes"><span>Order a platter</span></a>
+      <ul class="btn-facts"><li>From <span class="sym">₪</span>300 a platter</li><li>Serving Jerusalem</li><li>Cash, Zelle or bank transfer</li></ul>
     </div>
     </div>
   </section>
   <div class="kosher"><div class="wrap"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8 12.5l3 3 5-6"/></svg><span>Kosher, hechsher: <span lang="he" dir="rtl">בד"ץ העדה החרדית או שארית</span></span></div></div>
-  <!-- Savings (rules 3j), per square centimetre of board: Small 300/900 = 0.333, Medium 400/1120 = 0.357,
-       Large 500/1624 = 0.308, Extra large 850/2875 = 0.296 shekels a cm2. Each saving is against the cheapest smaller size.
-       Large against Small: 1624 cm2 at 0.333 = 541; (541.33 - 500) / 541.33 = 7.6%, rounded down: 7% off.
-       Extra large against Large: 2875 cm2 at 0.308 = 885; (885.16 - 850) / 885.16 = 3.97%, rounded down: 3% off.
-       Medium costs more a cm2 than Small, so it shows none. -->
   <section class="sec rest" id="sizes" aria-labelledby="h-sizes">
     <div class="wrap">
       <div class="rest-head"><h2 id="h-sizes" class="rev">Four <span class="hl">sizes<svg viewBox="0 0 200 12" preserveAspectRatio="none" aria-hidden="true"><path pathLength="1" d="M3 8 C 38 2, 72 12, 112 6 S 178 4, 197 8"/></svg></span></h2>
@@ -59,12 +55,12 @@
         </article>
         <article class="pc" style="--room:#EAD6E4">
           <div class="pc-ph"><img src="assets/card-3.webp" width="1000" height="800" alt="The Large platter: a long wooden board of watermelon, grapes, lychees, pomegranate and melon" loading="lazy"></div>
-          <div class="pc-b"><h3>Large</h3><p class="pc-sz">58 × 28 cm</p><p class="pc-pr"><s aria-label="was ₪541"><span class="sym">₪</span>541</s> <span class="sym">₪</span>500 <span class="off">7% off</span></p>
+          <div class="pc-b"><h3>Large</h3><p class="pc-sz">58 × 28 cm</p><p class="pc-pr"><span class="sym">₪</span>500</p>
           <a class="btn" href="shop.html?size=large&amp;add=1#order" aria-label="Add a Large platter, ₪500"><span>Add a Large</span></a></div>
         </article>
         <article class="pc" style="--room:#DBE8BF">
           <div class="pc-ph"><img src="assets/card-4.webp" width="1000" height="800" alt="The Extra large platter: a very long board in rows of green grapes, watermelon, dates, pomegranate, dark grapes and kiwi" loading="lazy"></div>
-          <div class="pc-b"><h3>Extra large</h3><p class="pc-sz">115 × 25 cm</p><p class="pc-pr"><s aria-label="was ₪885"><span class="sym">₪</span>885</s> <span class="sym">₪</span>850 <span class="off">3% off</span></p>
+          <div class="pc-b"><h3>Extra large</h3><p class="pc-sz">115 × 25 cm</p><p class="pc-pr"><span class="sym">₪</span>850</p>
           <a class="btn" href="shop.html?size=xl&amp;add=1#order" aria-label="Add an Extra large platter, ₪850"><span>Add an Extra large</span></a></div>
         </article>
       </div>
@@ -111,10 +107,18 @@
       </div>
       <a class="btn" href="shop.html#sizes">Order a platter <svg class="go arw" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
-    <div class="wrap fcols"><div><h3>Pages</h3><a href="index.html">Home</a><a href="shop.html">Shop</a><a href="contact.html">Contact</a><a href="shop.html#sizes">Sizes and prices</a></div><div><h3>Order</h3><a href="shop.html#sizes">Order a platter</a><a href="https://wa.me/972587298718" target="_blank" rel="noopener">WhatsApp</a></div><div><h3>Contact</h3><a href="https://wa.me/972587298718" target="_blank" rel="noopener">WhatsApp +972 58 729 8718</a><a href="tel:+972527146952">Call +972 52 714 6952</a></div></div><p class="giant" aria-hidden="true">Ls Fruit Platter</p>
+    <p class="giant" aria-hidden="true">Ls Fruit Platter</p>
   </section>
 </main>
-<footer class="foot"><nav aria-label="Pages"><a href="index.html">Home</a> · <a href="shop.html">Shop</a> · <a href="contact.html">Contact</a></nav>Ls Fruit Platter, Jerusalem · on <a href="/">MyIsraelRental</a>, free to list, no commission</footer>
+<footer class="foot full">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">Ls Fruit Platter</a><p>Fresh, beautiful fruit platters for your home and events, in Jerusalem.</p><a class="fcta" href="shop.html#sizes">Order a platter <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="shop.html">Shop</a><a href="contact.html">Contact</a></nav>
+    <div><h4>Ordering</h4><p>Four sizes, from ₪300</p><p>Serving Jerusalem</p><p>Cash, Zelle or an Israeli bank transfer</p></div>
+    <div><h4>Reach us</h4><a href="https://wa.me/972587298718" target="_blank" rel="noopener">WhatsApp +972 58 729 8718</a><a href="tel:+972527146952">Call +972 52 714 6952</a></div>
+  </div>
+  <div class="fbase"><span>© 2026 Ls Fruit Platter.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
+</footer>
 
 <div class="bar" id="bar" aria-hidden="true">
   <p class="p"><b>From ₪300</b>Four platter sizes</p>
@@ -132,6 +136,19 @@
   var film = document.getElementById('film'), cv = document.getElementById('cv');
   if (!film || !cv || matchMedia('(prefers-reduced-motion: reduce)').matches) return;
   film.classList.add('js');
+  // On a phone the film plays by itself on repeat instead of following the scroll (Tzvi, 29 Oct 2026: "on mobile
+  // we should remove the scroll and it should just play on repeat"): one short video made from the same tall
+  // frames, the finished platter held a moment, then a soft fade back to the empty board. The section is one
+  // screen tall (.film.loop in site.css), the page scrolls on, and the video is shown as an element (drawing it
+  // into a canvas every frame kept a phone busy), paused when off screen. Motion off keeps the finished still.
+  if (innerWidth <= 760 && film.dataset.loop) {
+    film.classList.add('loop');
+    var v = document.createElement('video'); v.className = 'film-loopv'; v.muted = true; v.loop = true; v.playsInline = true;
+    v.setAttribute('playsinline', ''); v.setAttribute('aria-hidden', 'true'); v.preload = 'auto'; v.src = film.dataset.loop;
+    cv.after(v);
+    new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) v.play().catch(function () {}); else v.pause(); }); }).observe(film);
+    return;
+  }
   var cx = cv.getContext('2d'), tall = matchMedia('(max-aspect-ratio: 3/4)').matches;
   var kind = tall ? 'm' : 'd', N = 161, imgs = new Array(N), dir = 'assets/film/' + kind + '/';
   function url(i) { return dir + String(i + 1).padStart(4, '0') + '.webp'; }

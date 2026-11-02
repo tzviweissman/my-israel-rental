@@ -45,9 +45,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import BackLink from '../components/common/BackLink';
-import { useNavigate } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { ArrowRight } from 'lucide-react';
 import PageMeta from '../components/PageMeta';
+import DemandLines from '../components/common/DemandLines';
 import SITE_ASSETS from '../lib/siteAssets';
 import SkylineRule from '../components/common/SkylineRule';
 
@@ -198,6 +199,14 @@ const WhyHost = () => {
               {t('whyHost.cta', 'List your property free')}
               <ArrowRight size={16} className="rtl:rotate-180" />
             </button>
+            {/* Same line and keys as Why list: most owners already have an ad on Yad2 or Facebook. */}
+            <p className="text-sm mt-4 max-w-[48ch]" style={{ color: 'var(--brand-muted)' }} data-testid="why-host-paste-ad">
+              {t('whyList.pasteAdLine', 'Already advertised on Facebook, Yad2 or WhatsApp? Paste your ad and the form fills itself in.')}{' '}
+              <Link to="/join" className="font-semibold hover:underline" style={{ color: 'var(--brand-primary)' }}>
+                {t('whyList.pasteAdLink', 'Start here')}
+              </Link>
+            </p>
+            <DemandLines stays className="mt-8" />
           </div>
 
           {/* The star of the page, and it has to earn that by referring to

@@ -6,7 +6,7 @@
  *
  *   node scripts/check-build.mjs scrollcraft/builds/<folder>     (the site must be served, see below)
  *
- * Per page: check-site, check-fits, check-motion, check-speed, check-same-place, check-one-scroll, readable. Per site: check-concept,
+ * Per page: check-site, check-fits, check-motion, check-speed, check-same-place, check-one-scroll, check-photo-clear, check-overlap, check-opening-scroll, check-blank, check-prefill, check-arrival, readable. Per site: check-concept,
  * check-fingerprints, check-rules, check-clip on gen/film/opening.mp4 if there is one, and the independent review (below). Prints one line per check and the first problems of each failure; exits 1 if any fails.
  * Pages are read from http://127.0.0.1:8990/<folder>/ (scripts/serve-builds.mjs); set CHECK_BASE to change it.
  * A site is shown to Tzvi or published only after this passes (page rules 3a).
@@ -16,7 +16,7 @@
  * not build the site, from docs/page-review-checklist.md, with a line "Verdict: PASS". It must be newer
  * than every page, style and script of the site, so any change after the review needs a new one.
  */
-import { spawn } from 'node:child_process';
+import { spawn, spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
@@ -43,9 +43,14 @@ try {
 const runs = [];
 for (const p of pages) {
   const url = `${base}/${folder}/${p}`;
-  for (const s of ['check-site', 'check-fits', 'check-motion', 'check-speed', 'check-same-place', 'check-one-scroll']) runs.push([`${s} ${p}`, [path.join(ROOT, 'scripts', `${s}.mjs`), url]]);
+  for (const s of ['check-site', 'check-fits', 'check-motion', 'check-speed', 'check-same-place', 'check-one-scroll', 'check-photo-clear', 'check-overlap', 'check-opening-scroll', 'check-blank', 'check-prefill', 'check-arrival']) runs.push([`${s} ${p}`, [path.join(ROOT, 'scripts', `${s}.mjs`), url]]);
   if (fs.existsSync(readable)) runs.push([`readable ${p}`, [readable, url]]);
 }
+// the site-wide checks of rules 3v take every page at once (the same footer and menu on each)
+const all = pages.map((p) => `${base}/${folder}/${p}`);
+for (const s of ['check-footer', 'check-menu', 'check-facts', 'check-heights']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), ...all]]);
+// a site built from a blueprint has RULES.md written from it first (scripts/blueprint.mjs)
+if (fs.existsSync(path.join(dir, 'BLUEPRINT.md'))) spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--rules', dir], { encoding: 'utf8' });
 for (const s of ['check-concept', 'check-fingerprints', 'check-rules']) runs.push([s, [path.join(ROOT, 'scripts', `${s}.mjs`), dir]]);
 // the opening film as the visitor sees it (Tzvi, 1 Nov 2026: crumbs vanishing, a snap over in one frame); intended hard
 // cuts are listed in gen/film.sh as "# cuts: <seconds> ..." (times in gen/film/opening.mp4)

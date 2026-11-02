@@ -258,13 +258,17 @@
   .close p a { white-space: nowrap; }
   /* questions in the owner's words (page rules 3m), filled by mir-faq.js */
   .faq-list { margin-top: clamp(1.5rem, 3vw, 2.2rem); max-width: 50rem; }
-  .faq-q { border-top: 1px solid var(--line); }
-  .faq-q:last-child { border-bottom: 1px solid var(--line); }
-  .faq-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; gap: 1rem; padding: 1.1rem 0; font: 700 var(--t2)/1.35 var(--font-body); }
+  .faq-q { background: var(--card); border: 1px solid var(--line); border-radius: 18px; padding: 0 1.25rem; margin: 0 0 .75rem; interpolate-size: allow-keywords; }
+  .faq-q summary { cursor: pointer; list-style: none; display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 44px; padding: 1rem 0; font: 700 var(--t2)/1.35 var(--font-body); }
   .faq-q summary::-webkit-details-marker { display: none; }
-  .faq-q summary::after { content: '+'; color: var(--gold); font: 400 var(--t3)/1 var(--font-head); transition: transform 200ms var(--out); }
+  .faq-q summary::after { content: '+'; flex: none; display: grid; place-items: center; width: 30px; height: 30px; border-radius: 50%; background: var(--gold); color: var(--black); font: 700 1.2rem/1 var(--font-body); transition: transform 250ms var(--out); }
   .faq-q[open] summary::after { transform: rotate(45deg); }
-  .faq-q p { margin: 0 0 1.2rem; color: var(--soft); max-width: 42rem; }
+  .faq-q::details-content { block-size: 0; overflow: hidden; transition: block-size 300ms var(--out), content-visibility 300ms allow-discrete; }
+  .faq-q[open]::details-content { block-size: auto; }
+  .faq-q p { margin: 0 0 1.1rem; color: var(--soft); max-width: 42rem; }
+  /* 3u.8 a sticker over section headings, from the stickers on his opening bowl */
+  .tilt { display: inline-block; rotate: -4deg; margin: 0 0 .7rem; padding: .4em .8em .35em; border-radius: 14px; background: var(--gold); color: var(--black); font: 800 var(--t1)/1.05 var(--font-body); text-transform: uppercase; letter-spacing: .02em; box-shadow: 0 0 0 3px var(--black), 0 6px 14px rgb(0 0 0 / .4); }
+  @media (prefers-reduced-motion: reduce) { .faq-q::details-content, .faq-q summary::after { transition: none; } }
 
   /* proposed: the natural pick, the menu stage, the order in steps */
   .tile.pick { border-color: var(--gold); box-shadow: 0 0 0 1px var(--gold); }
@@ -337,7 +341,6 @@
 .fld::placeholder { color: #6B5B4D; opacity: 1; }
 input[type=date].fld { color-scheme: light; }
 .chip span { background: var(--card-2); border-color: var(--line); }
-.faq-q summary::after { color: var(--ink); }
 .tile.pick { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
 .tile .tag { background: #fff; color: #14110F; }
 .tile .tag.off { background: var(--card-2); color: var(--ink); }
@@ -458,3 +461,29 @@ input[type=date].fld { color-scheme: light; }
 .gallery-hold h2 { font-size: var(--t4); }
 .open .label { color: #FFC24D; }
 .price .pp s { margin-left: .5rem; opacity: .85; }
+/* by the pan: no pictures, the two sizes side by side (the owner, 29 Oct 2026: he did not like the cut 9x13
+   and the roaster photos, the same tray twice, and asked to remove them) */
+.room h3 .tag { display: inline-block; vertical-align: middle; margin-inline-start: .5rem; padding: .3rem .7rem; border-radius: 999px; background: #fff; color: #14110F;
+  font: 800 var(--t1)/1.2 var(--font-body); letter-spacing: .05em; text-transform: uppercase; }
+
+/* the full footer (rules 3v.1) */
+.foot.full { text-align: start; font-size: .95rem; padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.4rem + var(--pad-bar, 0px)); }
+.foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.5fr 1fr 1.5fr 1.5fr; gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+.foot.full h4 { margin: 0 0 .9rem; font: 700 .76rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: #FFC24D; }
+.foot.full nav { margin: 0; font-weight: 400; }
+.foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; margin: 0 0 .55rem; color: var(--ink); }
+.foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+.foot .fgrid nav a { margin: 0 0 .55rem; }
+.foot .fgrid a.fname { font: 400 2rem/1 var(--font-head); letter-spacing: .02em; text-transform: uppercase; margin-bottom: .9rem; }
+.foot .fbrand p { max-width: 30ch; color: var(--soft); line-height: 1.55; }
+.foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; color: #FFC24D; }
+.foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .85rem; color: var(--soft); }
+.foot .fbase a { color: var(--ink); }
+@media (max-width: 860px) { .foot .fgrid { grid-template-columns: 1fr 1fr; } .foot .fbrand { grid-column: 1 / -1; } }
+/* three true facts under the main button (rules 3v.14) */
+.btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font: 600 .95rem/1.35 var(--font-body); color: #fff; text-shadow: 0 1px 8px rgba(0, 0, 0, .7); }
+.btn-facts li::before { content: ''; display: inline-block; width: .4em; height: .4em; border-radius: 50%; background: #FFC24D; vertical-align: middle; margin-inline-end: .45em; margin-bottom: .15em; }
+.btn-facts .sym { font-size: 1em; vertical-align: 0; margin: 0; padding: 0; }
+.open-foot .r { flex-direction: column; align-items: flex-end; gap: 14px; }
+.open-foot .r .btn-facts { justify-content: flex-end; max-width: 42rem; }
+@media (max-width: 760px) { .open-foot .r { align-items: flex-start; } .open-foot .r .btn-facts { justify-content: flex-start; } }

@@ -113,12 +113,15 @@
     <p class="giant" aria-hidden="true">RS</p>
   </section>
 </main>
-<footer class="foot"><div class="fcols">
-  <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="shop.html">Shop</a><a href="contact.html">Contact</a></nav>
-  <div><h4>Visit</h4><p>31 King George Street, Jerusalem</p><a href="https://www.google.com/maps/search/?api=1&query=King+George+31+Jerusalem" target="_blank" rel="noopener">Get directions</a></div>
-  <div><h4>Reach us</h4><a href="https://wa.me/972546152968" target="_blank" rel="noopener">WhatsApp +972 54 615 2968</a><a href="mailto:ravitandshifra@gmail.com">ravitandshifra@gmail.com</a></div>
-  <p class="fine">RS Modest Activewear, King George 31, Jerusalem, on <a href="/">MyIsraelRental</a>, free to list, no commission</p>
-</div></footer>
+<footer class="foot full">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">RS Modest Activewear</a><p>Premium modest activewear for women, in Jerusalem.</p><a class="fcta" href="shop.html">Shop the skirt <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="shop.html">Shop</a><a href="contact.html">Contact</a></nav>
+    <div><h4>Visit</h4><p>31 King George Street, Jerusalem</p><a href="https://www.google.com/maps/search/?api=1&amp;query=King+George+31+Jerusalem" target="_blank" rel="noopener">Get directions</a><p class="fmut">Collect your order from the store</p></div>
+    <div class="fwide"><h4>Reach us</h4><a href="https://wa.me/972546152968" target="_blank" rel="noopener">WhatsApp +972 54 615 2968</a><a href="mailto:ravitandshifra@gmail.com">ravitandshifra@gmail.com</a></div>
+  </div>
+  <div class="fbase"><span>© 2026 RS Modest Activewear.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
+</footer>
 
 <div class="bar" id="bar" aria-hidden="true">
   <p class="p"><b><span class="sym">₪</span>320</b>Premium Modest Sports Skirt</p>
@@ -221,7 +224,7 @@
   function drawStep() {
     [].forEach.call(document.querySelectorAll('.ostep'), function (el) { el.hidden = +el.dataset.s !== step; });
     [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
-    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? 'Send order on WhatsApp, ₪' + total() : 'Send order on WhatsApp');
+    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? 'Send my order on WhatsApp, ₪' + total() : 'Send my order on WhatsApp');
     send.classList.toggle('idle', !check(false, step));
     $('send-note').textContent = STEP_NOTE[step];
     $('back').hidden = step === 1;
@@ -234,6 +237,8 @@
     if (push) { history.pushState({ step: s }, '', s === 1 ? '#order' : '#order-' + s); $('order').scrollIntoView({ block: 'start', behavior: reduce ? 'auto' : 'smooth' }); var f = document.querySelector('.ostep:not([hidden]) .fld'); if (f && s > 1 && !f.closest('[hidden]')) setTimeout(function () { f.focus({ preventScroll: true }); }, 350); }
   }
   $('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k.8): tomorrow, changeable; no lead time given yet, so no same-day promise (her open days are question 2 to her)
+  $('when').value = new Date(Date.now() + 864e5 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   var sending = false;
   // saved to her shop first (a tracking link), then WhatsApp; if saving fails WhatsApp still opens (rule 3k)
   function save(notes) {

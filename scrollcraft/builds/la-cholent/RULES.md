@@ -16,7 +16,7 @@ R3.3 pass: searched for generic lines: none
 R3.4 pass: the facts script found two exclamation marks, both in his own quoted lines; I changed them to full stops; no long dashes; capitals are display type
 R3.5 pass: the first screen names cholent, the crock pot kit and the price from ₪100
 R3.6 n/a: the site is English only, there is no Hebrew version
-R3.7 pass: no FAQ, review or gallery section is shown (the FAQ and gallery blocks stay hidden until the owner sends content); no placeholder text
+R3.7 pass: no FAQ or gallery is shown until the owner sends content; the "What customers wrote to us" section (six WhatsApp messages, 1 Nov 2026) is built but hidden until Rabbi Samuels confirms each customer agreed (message-to-owner.md); remove "hidden" from section#said when he does
 R3.8 pass: searched visible text and markup: no logo wall, laurels, stars, counts, "popular" badges or intro prices
 R3.9 n/a: no ad or flyer message brings visitors here; the first screen carries the flyer words anyway
 R3.10 pass: the only strength on the page is the hechsher, with its rabbi named
@@ -201,3 +201,22 @@ R8.7 pass (recorded after the fact): the tub shots (23 Oct) and the scenery stil
 R3h.19 pass (made before the rule (26 Oct); answered from what the briefs and gen/ files show): stills first (pot, scratch, table), then each film from its own still, one action each (the dial turns and steam rises; light flickers and a drip falls; candle flames flicker), the same objects first to last (R3h.18); not met: no written frame plan, and models, prompts and tries were not kept (gen/tubs-brief.md part B)
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 pass: the chores sit in one fixed list, the knob stays on the dial, and the hours number counts in one place; the opening and the close are different headings, not one repeated thing; stepped through on a 390x844 phone and at 1440x900 on 27 Oct
+R3k.10 pass: the day field defaults to tomorrow (the page accepts from today; no lead time or Shabbos cut-off is stated yet, so the page does not promise same-day; set on load, a picked day is never overwritten); check-prefill clean
+R3u.2 n/a: the page states no closed days, lead time or limit (the form starts on tomorrow; her Shabbos cut-off is asked in message-to-owner.md item 6)
+R3u.3 pass: Medium "Feeds 4 to 6, about ₪16 a person" (₪100 over 6) and Large "Feeds 8 to 12, about ₪15 a person" (₪180 over 12), on the size cards and the dial line, looked at 1440x900; Kiddush has no figure, so the question is message-to-owner.md item 9
+R3u.5 n/a: the home page opens on a scrubbed video; check-arrival skips it
+R3u.6 n/a: the first screen is a scrubbed video, no separate pieces
+R3u.7 n/a: the first screen is a film with its own moving words
+R3u.8 n/a: not used on this site
+R3u.9 n/a: no questions section on the page yet (her questions are listed in message-to-owner.md)
+R3u.10 n/a: one place, Jerusalem
+R3u.12 n/a: no kit piece moved in; text changes only
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 29 Oct: all rules re-read against the current index.html; the kitchen clip now dims by fading on the dark ground instead of a filter (same look, frames compared at 0.1 to 0.7 of the split) so the opening scrolls smoothly (R3h.20) -->
+R3v.1 pass: the closing footer is now in parts: who we are (name, Rabbi Samuels' own line from the page, a link with an arrow to Message to order), This page (the page has no other page, so its sections), Ordering (three sizes with prices, free local delivery on a first order), Reach us (WhatsApp, made in Jerusalem, kosher by Vaad HaKashrus), then "© 2026 L.A. Cholent by Rabbi Samuels." with the MyIsraelRental and Privacy line; no founding year in the record so no Since line; check-footer clean; looked at it at 1366 and 390
+R3v.2 n/a: a site of Home alone; the top bar keeps its jumps (Occasions, Kosher, Sizes and prices)
+R3v.14 pass: the line under Message to order on the opening is now the list class btn-facts: From ₪100 / Kosher, hechsher from Rabbi Weiner / Made in Jerusalem, delivered across Israel (all three were already on the page, from their flyer and listing); check-facts clean at 390 and 1366
+
+Note, 1 Nov 2026: the arrow after the footer button was removed (its font has no arrow; check-site GLYPH). No rule answer changes.

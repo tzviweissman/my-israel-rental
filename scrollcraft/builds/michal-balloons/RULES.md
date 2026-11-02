@@ -34,7 +34,7 @@ R3b.1 pass: what (balloon design), where (Jerusalem and the area), what next (qu
 R3b.2 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3b.3 pass: header button is outline while the hero shows the solid one
 R3h.1 pass: held film opening of balloons gathering into an arch
-R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop and a phone (was shorter), 60 fps (median 16.7 ms, no frame over 50 ms); the arch builds in a plain empty room, whole; the Hebrew 'scroll down' cue removed (cues are banned); the room loads first
+R3h.20 pass: measured 25 Oct at 1440x900 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop (on a phone since 31 Oct the opening plays on repeat in one screen, no pinned scroll), 60 fps (median 16.7 ms, no frame over 50 ms); the arch builds in a plain empty room, whole; the Hebrew 'scroll down' cue removed (cues are banned); the room loads first
 R3n.1 pass: the arch film fills the first screen; the words sit on it from the start
 R3n.2 pass: balloons rise into an empty cream room and gather into the arch round her line; the closing name made of balloons you can pop
 R3n.3 pass: an occasion chip rearranges her work and the quote card writes the message; check-motion passes (3 choices, quick taps)
@@ -181,3 +181,22 @@ R3a.8 n/a: no dot-separated lines
 R3r.3 pass: check-site, check-fits, check-motion, cutoff clean after the last edit; readable and clipped limited as named
 R3r.4 pass: no new Tzvi correction in this task
 R8.7 pass (recorded after the fact, 25 Oct): the opening film (assets/arrive.mp4) was generated on 14 to 15 Oct 2026 and no brief with a reference crop was written first, so this is a record made now, in gen/arrive-brief.md with a side-by-side at gen/arrive-compare.jpg (her real school arch beside the last frame). I looked at it and the match is only partial: both are a balloon arch on a wall, but hers is bright primary colours with pencil shapes and the generated one is sage, blush and gold, tidier and more polished than her real work. The page says the opening is not her premises. Whether that palette is acceptable is for Tzvi to decide.
+R3k.10 pass: the event date defaults to tomorrow (the page accepts from today; no lead time stated; the "I do not know the date yet" box still clears it and the date stays optional; a picked day is never overwritten); check-prefill clean
+R3u.2 n/a: hours are "by appointment" and no closed days, lead time or limit are in the page or record; the event date stays free
+R3u.3 n/a: no sizes and no prices on the page (Michal asked for none)
+R3u.5 n/a: the home page opens on a scroll film; check-arrival reports it as a film and skips it
+R3u.6 n/a: the first screen is a film
+R3u.7 n/a: the first screen is a film with its own moving line
+R3u.8 n/a: not added (not asked for this site)
+R3u.9 n/a: no questions section on the page; "Good to know" is a list of facts
+R3u.10 n/a: one business serving Jerusalem and the area, no places to collect
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 n/a: no moving piece was added
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 29 Oct: all rules re-read against the current pages; only change since is tighter spacing in the booking section and its summary so it fits a short laptop screen (check-fits passes on all three pages) -->
+<!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->
+R3v.1 pass: full footer in Hebrew and English (who we are with a quiet quote link, Pages as the page's own sections, Booking: area, by appointment, payment; Reach us: WhatsApp and phone; base line with since 2024 and Privacy); the closing line kept; the solid button in the old footer became a quiet link because the band above has one
+R3v.2 pass: the site is one page with no other pages, so the menu bar keeps its jumps
+R3v.14 pass: Jerusalem and the area, By appointment, Bank transfer or Bit (the page's own Good to know lines; she asked for no prices on the page)
+<!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->

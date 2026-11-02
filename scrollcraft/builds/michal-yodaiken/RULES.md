@@ -182,3 +182,25 @@ R8.7 pass (recorded after the fact, 25 Oct): three settings (home, gym, online) 
 R3h.19 n/a: no generated film, the page uses stills only (R3h.18)
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 n/a: no scene repeats a kind of thing; the sections scroll as plain blocks
+
+R3k.10 pass: the day field arrives as the first day the page itself accepts: the first non-Shabbat day with a start time still offered (today only after the 60-minute margin); never overwrites a picked day; service/city/time left unchosen (no stated default); check-prefill clean
+<!-- 29 Oct: all rules re-read against the current index.html; only change since is the pre-filled day (R3k.10) and a short-laptop spacing rule so the request section (559px at 1280x650 and 1536x753) fits the screen (R3c.12 still passes) -->
+
+R3u.2 pass: index.html request form, a Shabbat pick (or a day with nothing free) shows "Michal is closed on Shabbat. The next day we can do is Sunday 1 November." and a button "Choose Sunday"; clicked at 390x844 and 1440x900, day and 24 times set; the send button now reads "Send Sun 09:30 on WhatsApp, ₪60" for at-home (the only priced way), without a price for the others, with a line saying Michal gives the price on WhatsApp (R3u.1/4); no quantity field
+R3u.3 n/a: one price (₪60 for 30 minutes at home), no sizes; the other ways are "message for a price" and she gave no servings or pieces
+R3u.5 pass: check-arrival clean at both sizes: bar, headline, line, photo (fade, it fills the first screen), button last; kit CSS in the page style, one JS line after ScrollCraft.mount; nothing hidden without JS or with motion off; looked at 0.1 s and 2 s on 1440x900 and 390x844
+R3u.6 n/a: the first screen is one whole photo; no separate pieces
+R3u.7 n/a: her headline "comes to you" is her own line; her five ways do not fit its sentence as swapped words
+R3u.8 n/a: no tilted label added (not on the 29 Oct list for this site)
+R3u.9 pass: the "Good to know" questions are rounded cards on <details>, pink circle with + turning to x, answer opening smoothly inside the card, several open at once; looked at 390x844 with two open
+R3u.10 n/a: one place (her private gym, plus visits to clients); no list of places to buy or collect
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: arrival and question-card pieces taken from scrollcraft/starter/kit (tried on kit/test.html); the next-day button is a plain button, no new motion
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+R3v.1 pass: the closing footer is now in parts: who she is (name, her own line from the opening, a link with an arrow to Message to book), On this page (a site of Home alone, so its sections), Booking (30 minutes, ₪60 at home, a price on message for the rest, Jerusalem, women only, English), Reach us (WhatsApp, our MyIsraelRental page), then "© 2026 Michal Yodaiken." with the MyIsraelRental and Privacy line; no founding year in the record; check-footer clean; looked at it at 1366 and 390
+R3v.2 n/a: a site of Home alone; the bar keeps the session clock and its one button
+R3v.14 pass: under Message to book on the first screen: ₪60 for a 30-minute session / Sessions tailored to your goals and fitness level / Training in English (her listing and flyer); the list is class btn-facts and now sits under the button instead of beside it; check-facts clean at 390 and 1366
+<!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->
+
+Note, 1 Nov 2026: the arrow after the footer button was removed (its font has no arrow; check-site GLYPH). No rule answer changes.

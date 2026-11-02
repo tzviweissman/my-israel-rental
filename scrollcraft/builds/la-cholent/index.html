@@ -119,7 +119,7 @@
   .btn:focus-visible, .dial:focus-visible, .size-pick button:focus-visible, a:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; }
   .theirs-copy .btn { margin-top: var(--sc-6); }
   /* The proof touching the button: price, supervision, where (their facts). */
-  .proofline { margin: var(--sc-3) 0 0; display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem;
+  .proofline { margin: var(--sc-3) 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem;
     font: 600 var(--sc-t-xs)/1.5 var(--sc-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-soft); }
 
   /* the peak copy, left, over the dark side of the frame */
@@ -301,7 +301,7 @@
   .topbar .tb-links a:hover { border-color: var(--sc-accent); }
   .topbar .btn { min-height: 42px; padding-right: 1.6rem; }
   @media (max-width: 860px) { .topbar { display: none; } }
-  .proofline span:first-child { font-size: var(--sc-t-base); color: var(--sc-ink); font-weight: 700; letter-spacing: 0.04em; }  /* a price is text colour, not the accent (22 Oct 2026) */
+  .proofline li:first-child { font-size: var(--sc-t-base); color: var(--sc-ink); font-weight: 700; letter-spacing: 0.04em; }  /* a price is text colour, not the accent (22 Oct 2026) */
   #order { min-height: calc(100svh - 4rem); }
   .order-stage { padding-top: clamp(4.5rem, 10svh, 6rem); }
   .order-stage > .order { padding-bottom: var(--sc-5); }
@@ -383,11 +383,19 @@
   .closing-base { margin: var(--sc-7) 0 0; padding-top: var(--sc-4); border-top: 1px solid var(--sc-hairline); display: flex; justify-content: space-between; gap: var(--sc-4); flex-wrap: wrap; font-size: var(--sc-t-xs); color: var(--sc-ink-soft); }
   .closing-base a { display: inline; margin: 0; text-decoration: underline; text-underline-offset: 3px; }
 
+  /* the full footer (rules 3v.1) and three true facts under the button (rules 3v.14) */
+  .closing-cols { grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr)); }
+  .closing-cols .fbrand a.fname { font: 300 var(--sc-t-xl)/1.1 var(--sc-font-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink); margin-bottom: 0.8rem; }
+  .closing-cols .fbrand p { max-width: 30ch; }
+  .closing-cols a.fcta { margin-top: 0.4rem; font-weight: 700; color: var(--sc-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .closing-cols a[href^="https://wa.me"] { white-space: nowrap; }
+  .closing-cols a, .closing-cols p { width: fit-content; }
+  .proofline li::before { content: ""; display: inline-block; width: 0.4em; height: 0.4em; border-radius: 50%; background: var(--sc-accent); margin-inline-end: 0.5em; vertical-align: middle; margin-bottom: 0.15em; }
   @media (max-width: 860px) {
     .rest-grid { grid-template-columns: 1fr; }
     .rows li { grid-template-columns: 2.4rem 1fr; }
     .rows li p { grid-column: 2; }
-    .closing-cols { grid-template-columns: 1fr; }
+    .closing-cols { grid-template-columns: 1fr 1fr; } .closing-cols .fbrand { grid-column: 1 / -1; }
     .closing { padding-bottom: 6.5rem; }
   }
 
@@ -464,6 +472,9 @@
   /* the quiet moment keeps the kitchen (dimmed) on the left, never a plain black half */
   .scratch-photo { opacity: calc(0.92 - var(--dim) * 0.5); }
   .scratch-photo { filter: saturate(calc(0.85 - var(--dim) * 0.5)) brightness(calc(1 - var(--dim) * 0.45)); }
+  /* the kitchen clip dims by fading on the dark ground, not by a filter: a filter that changes with the scroll redrew
+     the whole clip every frame and held the opening at 30 fps (check-site SMOOTH, 29 Oct 2026); the still keeps it */
+  video.scratch-photo { filter: none; opacity: calc(0.92 - var(--dim) * 0.62); }
   /* the gap under the rest, before the dial */
   .rest { padding-block: clamp(1.6rem, 5svh, 3.4rem) clamp(1rem, 3svh, 2.2rem); }
   #order { min-height: 0; }
@@ -508,6 +519,20 @@
   .details .btn-line { transition: background 140ms, color 140ms; }
   .details .btn-line:hover { background: var(--lt-ink); color: #fff; }
   .details .btn-line:active { transform: translateY(1px) scale(.98); }
+
+  /* Customers' own words (1 Nov 2026): message bubbles on the light ground; a row to swipe on a phone */
+  .said { padding-block: clamp(2.4rem, 7svh, 5rem); }
+  .said h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--s5); line-height: 0.96; color: var(--sc-ink); }
+  .said-note { margin: var(--sc-3) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  .said-list { list-style: none; margin: clamp(1.5rem, 4svh, 2.5rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  .said-list li { background: #fff; border-radius: 18px 18px 18px 4px; padding: 1.1rem 1.25rem 1rem; box-shadow: 0 3px 30px rgb(122 83 15 / 0.10); }
+  .said-list blockquote { margin: 0; }
+  .said-list p { margin: 0; font-size: var(--sc-t-base); line-height: 1.5; color: var(--sc-ink); }
+  .said-list .from { display: block; margin-top: 0.7rem; font: 600 var(--sc-t-xs)/1.4 var(--sc-font-text); letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc-ink-soft); }
+  @media (max-width: 760px) {
+    .said-list { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 78%; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+    .said-list li { scroll-snap-align: start; }
+  }
 </style>
 </head>
 <body>
@@ -558,7 +583,7 @@
             <li><b>3</b><span>Cook on low for about 20 hours.</span></li>
           </ol>
           <a class="btn" href="#order">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
-          <p class="proofline"><span>From ₪100</span><span>Kosher, hechsher from Rabbi Weiner</span><span>Made in Jerusalem, delivered across Israel</span></p>
+          <ul class="proofline btn-facts"><li>From ₪100</li><li>Kosher, hechsher from Rabbi Weiner</li><li>Made in Jerusalem, delivered across Israel</li></ul>
         </div>
 
         <p class="alone" data-sc-cue="0.44 0.55 0.02 0.03">Just throw our raw ingredients into your crock pot, add water, and enjoy.
@@ -609,10 +634,10 @@
     <div class="sc-wrap shop-head"><h2 id="sizes-h">Pick your size</h2><p>A raw kit for your crock pot, in Original or Spicy. Add water and cook on low for about 20 hours.</p></div>
     <div class="rooms">
       <article class="room gold"><div class="ph"><img src="assets/tub-gold.webp" alt="A sealed tub of L.A. Cholent by Rabbi Samuels with the cooking steps on its label, on a slate block beside dry beans and barley." width="1200" height="896" loading="lazy"></div>
-        <div class="rb"><h3>Medium</h3><p class="feeds">Feeds 4 to 6</p><p class="what">Add your own meat or keep it parve: &#8362;55</p></div>
+        <div class="rb"><h3>Medium</h3><p class="feeds">Feeds 4 to 6, about &#8362;16 a person</p><p class="what">Add your own meat or keep it parve: &#8362;55</p></div>
         <div class="rf"><div class="price">&#8362;100</div><a class="btn-line add" href="#order" data-size="0" aria-label="Message to order Medium">Message to order</a></div></article>
       <article class="room plum"><div class="ph"><img src="assets/tub-olive.webp" alt="A sealed tub of L.A. Cholent by Rabbi Samuels with the cooking steps on its label, on a slate block beside dry beans and barley." width="1200" height="896" loading="lazy"><span class="tag">10% off</span></div>
-        <div class="rb"><h3>Large</h3><p class="feeds">Feeds 8 to 12</p><p class="what">Add your own meat or keep it parve: &#8362;85</p></div>
+        <div class="rb"><h3>Large</h3><p class="feeds">Feeds 8 to 12, about &#8362;15 a person</p><p class="what">Add your own meat or keep it parve: &#8362;85</p></div>
         <div class="rf"><div class="price"><span class="was"><s>&#8362;200</s><small>2 Mediums, &#8362;200</small></span> &#8362;180</div><a class="btn-line add" href="#order" data-size="1" aria-label="Message to order Large">Message to order</a></div></article>
       <article class="room steel"><div class="ph"><img src="assets/tub-steel.webp" alt="A sealed tub of L.A. Cholent by Rabbi Samuels with the cooking steps on its label, on a slate block beside dry beans and barley." width="1200" height="896" loading="lazy"></div>
         <div class="rb"><h3>Extra Large / Kiddush</h3><p class="feeds">Sized to your guest list</p><p class="what">Sizes are customizable depending on the number of guests</p></div>
@@ -669,6 +694,23 @@
     </div>
   </section>
 
+  <!-- Customers' own words, sent to Rabbi Samuels on WhatsApp (Tzvi, 1 Nov 2026). Quoted as written;
+       shown only once the owner confirms each customer agreed (message-to-owner.md). Not star reviews. -->
+  <section class="rest said" id="said" aria-labelledby="said-h" hidden>
+    <div class="sc-wrap">
+      <h2 id="said-h">What customers wrote to us</h2>
+      <p class="said-note">Messages customers sent us on WhatsApp, in their own words.</p>
+      <ul class="said-list" data-sc-in data-sc-stagger="70">
+        <li><blockquote><p>Thank you! The Cholent was amazing!! Such clear easy instructions and awesome consistency and flavor!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li><blockquote><p>WOW IT WAS SOO DELICIOUS. Mamash perfect in flavor and consistency and everything!!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li><blockquote><p>Thank you so much it was completely polished off and was really amazing. We told the oylam that it was the famous LA cholent</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li><blockquote><p>Was so amazing!!!! Was a little bit of an issue cuz we barely had any left for shabbos</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li><blockquote><p>The cholent was a huge hit! It was delish!</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+        <li><blockquote><p>Hey, we loved ur cholent so much last week! Can we get again this week?</p></blockquote><span class="from">A customer, on WhatsApp</span></li>
+      </ul>
+    </div>
+  </section>
+
   <!-- The close. The knob from the divider, now the order. Last element. -->
   <section id="order">
     <div class="order-stage">
@@ -686,7 +728,7 @@
             <button type="button" data-i="1" aria-pressed="true"><b>Large</b><span>Feeds 8 to 12</span><em>&#8362;180</em><i class="tab">10% off</i></button>
             <button type="button" data-i="2" aria-pressed="false"><b>Kiddush</b><span>Sized to your guests</span><em>&#8362;250</em></button>
           </div>
-          <p class="pick"><span class="size-name" id="size-name">Large</span><span class="feeds" id="feeds">Feeds 8 to 12</span></p>
+          <p class="pick"><span class="size-name" id="size-name">Large</span><span class="feeds" id="feeds">Feeds 8 to 12, about &#8362;15 a person</span></p>
           <p class="price"><span class="now" id="price"><small>₪</small>180</span><span class="was" id="was"><s>&#8362;200</s><b>10% off</b><small>2 Mediums, &#8362;200</small></span><span class="alt" id="alt">₪85 if you add your own meat, or keep it parve.</span></p>
           <div class="menu">
             <div><span>Slow cooker liner</span><b>Free</b></div>
@@ -722,7 +764,7 @@
       </div>
       <div class="of"><label for="o-note">Anything else</label><input id="o-note" maxlength="300" placeholder="Own meat or parve? Extra meat or marrow bones by the pound?"></div>
         <div class="act">
-          <button class="btn" id="order-send" type="submit"><span id="order-send-label">Send on WhatsApp</span></button>
+          <button class="btn" id="order-send" type="submit"><span id="order-send-label">Send my order on WhatsApp</span></button>
           <a class="btn-line" href="#order">Change the size</a>
         </div>
       </form>
@@ -736,11 +778,12 @@
     <p class="closing-line"><span class="script">Convenient and consistent.</span>A higher standard of flavor.</p>
     <a class="btn" href="#order">Message to order<span class="btn-dial" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path class="ptr" d="M12 12V5.5"/></svg></span></a>
     <div class="closing-cols">
+      <div class="fbrand"><a class="fname" href="#top">L.A. Cholent by Rabbi Samuels</a><p>Just throw our raw ingredients into your crock pot, add water, and enjoy.</p><a class="fcta" href="#order">Message to order</a></div>
       <nav aria-label="On this page"><h3>This page</h3><a href="#occasions">Occasions</a><a href="#proof">Kosher and delivery</a><a href="#kit">The kit</a><a href="#order">Sizes and prices</a></nav>
-      <div><h3>Sizes</h3><a href="#order">Medium, feeds 4 to 6, &#8362;100</a><a href="#order">Large, feeds 8 to 12, &#8362;180</a><a href="#order">Kiddush, sized to your guests, &#8362;250</a></div>
-      <div><h3>Find us</h3><p>Made in Jerusalem, delivered across Israel.</p><p>Kosher: Vaad HaKashrus, Rabbi Shmuel Weiner.</p><a href="#order">Message to order</a></div>
+      <div><h3>Ordering</h3><a href="#order">Medium, feeds 4 to 6, &#8362;100</a><a href="#order">Large, feeds 8 to 12, &#8362;180</a><a href="#order">Kiddush, sized to your guests, &#8362;250</a><p>Free local delivery on your first order</p></div>
+      <div><h3>Reach us</h3><a href="https://wa.me/972553311442" target="_blank" rel="noopener">WhatsApp +972 55-331-1442</a><p>Made in Jerusalem, delivered across Israel.</p><p>Kosher: Vaad HaKashrus, Rabbi Shmuel Weiner.</p></div>
     </div>
-    <p class="closing-base"><span>L.A. Cholent by Rabbi Samuels</span><a href="#top">Back to the top</a></p>
+    <p class="closing-base"><span>&copy; 2026 L.A. Cholent by Rabbi Samuels.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission &middot; <a href="https://myisraelrental.com/privacy">Privacy</a></span><a href="#top">Back to the top</a></p>
   </div>
 </footer>
 
@@ -942,8 +985,8 @@ function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); 
 
   /* ---- the close: the knob is the order -------------------------------- */
   var sizes = [
-    { name: 'Medium', feeds: 'Feeds 4 to 6', price: 100, alt: '₪55 if you add your own meat, or keep it parve.', angle: -60, label: 'MEDIUM' },
-    { name: 'Large', feeds: 'Feeds 8 to 12', price: 180, alt: '₪85 if you add your own meat, or keep it parve.', angle: 0, label: 'LARGE' },
+    { name: 'Medium', feeds: 'Feeds 4 to 6, about ₪16 a person', price: 100, alt: '₪55 if you add your own meat, or keep it parve.', angle: -60, label: 'MEDIUM' },
+    { name: 'Large', feeds: 'Feeds 8 to 12, about ₪15 a person', price: 180, alt: '₪85 if you add your own meat, or keep it parve.', angle: 0, label: 'LARGE' },
     { name: 'Extra Large / Kiddush', feeds: 'Sized to your guest list', price: 250, alt: 'Sizes are customizable depending on amount of guests.', angle: 60, label: 'KIDDUSH' }
   ];
   var dial = document.getElementById('dial');
@@ -1000,6 +1043,8 @@ function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); 
   function v(id) { return $(id).value.trim(); }
   function mark(id, msg) { var w = $('w-' + id); if (w) w.classList.toggle('bad', !!msg); $('e-' + id).textContent = msg || ''; }
   $('o-when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k.8): tomorrow, changeable; no lead time given yet, so no same-day promise (Shabbos cut-off is question 6 to the owner)
+  $('o-when').value = new Date(Date.now() + 864e5 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   $('oform').querySelector('.qty').addEventListener('click', function (e) { var b = e.target.closest('button'); if (!b) return; qty = Math.max(1, Math.min(20, qty + (+b.dataset.d))); $('o-qty').textContent = qty; window.labelOrder(); });
   $('o-how').addEventListener('change', function () { $('w-addr').hidden = this.value !== 'delivery'; });
   function label() { var s = sizes[cur]; $('order-label').textContent = 'Message to order ' + (qty > 1 ? qty + ' \u00d7 ' : '') + s.label.charAt(0) + s.label.slice(1).toLowerCase() + ', \u20aa' + qty * s.price; }
@@ -1041,7 +1086,7 @@ function setCss(el, k, v) { v = String(v); var c = el.__css || (el.__css = {}); 
       sending = false; btn.removeAttribute('aria-busy'); $('order-send-label').textContent = lab; 
     });
   });
-  function summary() { var s = sizes[cur]; $('osum').textContent = qty + ' \u00d7 ' + NAMES[cur] + ', \u20aa' + qty * s.price; $('order-send-label').textContent = 'Send on WhatsApp, \u20aa' + qty * s.price; }
+  function summary() { var s = sizes[cur]; $('osum').textContent = qty + ' \u00d7 ' + NAMES[cur] + ', \u20aa' + qty * s.price; $('order-send-label').textContent = 'Send my order on WhatsApp, \u20aa' + qty * s.price; }
   window.labelOrder = function () { label(); summary(); };
   pick(1);
 }());

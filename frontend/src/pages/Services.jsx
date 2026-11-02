@@ -17,6 +17,7 @@ import { toast } from 'sonner';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Loader2, SlidersHorizontal, Award, Zap, MapPin, LayoutGrid, Map as MapIcon } from 'lucide-react';
 import { API, AuthContext } from '../App';
+import { noteSearch } from '../utils/visitorId';
 import PageMeta from '../components/PageMeta';
 import ShowcaseStrip from '../components/showcase/ShowcaseStrip';
 import { useShowcase } from '../components/showcase/ShowcaseCard';
@@ -42,6 +43,7 @@ import FeaturedProviders from '../components/marketplace/FeaturedProviders';
 
 const TEAL = 'var(--brand-primary)';
 const GOLD = 'var(--gold)';
+const PAGE = 60;   // business cards per screenful in the grid
 
 // Sort options the dropdown surfaces — keys map 1:1 to the backend
 // `sort` query param (see `list_gigs` in routes/marketplace.py).
@@ -97,6 +99,7 @@ const Services = () => {
   // price ceiling. It is hidden entirely when nothing is flagged.
   const [featuredGigs, setFeaturedGigs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [shown, setShown] = useState(PAGE);   // cards in the grid; Show more adds PAGE
   const [filtersOpen, setFiltersOpen] = useState(false);
   // Nearby-mode local state — coords live in memory only, never on the
   // URL, so shared links can't leak location. Cleared on tab close.
@@ -217,7 +220,10 @@ const Services = () => {
   // Re-fetch gigs whenever any server-side filter changes. Backend does
   // all the heavy lifting so the client is a thin cache.
   useEffect(() => {
-    const params = new URLSearchParams();
+    // Every match (limit=0): the endpoint's default of 60 hid the two oldest of 62 businesses and the
+    // heading said 60 (Tzvi, 1 Nov 2026). The count, the business pages on top and the map all need the
+    // whole list; the grid shows it PAGE at a time with a Show more button.
+    const params = new URLSearchParams({ limit: '0' });
     if (selectedCat)   params.set('category', selectedCat);
     // Only send subcategory when a top-level category is also selected
     // — matches the backend's contract and avoids leaking useless
@@ -241,7 +247,10 @@ const Services = () => {
       params.set('lng', coords.lng.toFixed(4));
       if (maxDistance) params.set('max_distance_km', maxDistance);
     }
+    // Counted for the "who is looking" lines (components/common/DemandLines).
+    noteSearch(API, 'services', selectedLoc, selectedCat);
     setLoading(true);
+    setShown(PAGE);
     axios.get(`${API}/marketplace/gigs?${params.toString()}`)
       .then((r) => setGigs(r.data))
       .catch((e) => { console.error(e); toast.error(t('services.loadError', 'Failed to load')); })
@@ -436,9 +445,6 @@ const Services = () => {
 
       {/* Locations + Categories */}
       <div className="max-w-7xl mx-auto px-4 md:px-6 py-10">
-        {/* The hand-built business pages, as live previews (Tzvi, 9 Oct
-            2026: "add them at the top of the regular business page"). */}
-        <ShowcaseStrip items={pinnedPages} />
         {/* Section headings drop their hardcoded Inter/tracking styles for
             the shared `.section-rhead` rule — the preview's editorial
             Playfair, and the same type as the Stays results header. The
@@ -732,6 +738,14 @@ const Services = () => {
         )}
       </div>
 
+      {/* The hand-built business pages, as live previews (Tzvi, 9 Oct
+          2026: "add them at the top of the regular business page"). They
+          sit under the location chips and the results bar, not above them
+          (Tzvi, 1 Nov 2026), since they are the top of the same results. */}
+      <div className="max-w-6xl mx-auto px-4">
+        <ShowcaseStrip items={pinnedPages} />
+      </div>
+
       {/* Gigs grid */}
       <div className="max-w-6xl mx-auto px-4 pb-16">
         {loading ? (
@@ -912,7 +926,7 @@ const Services = () => {
                in full grids too. Now ~265px at lg and ~208px at xl. */
             className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-x-5 gap-y-8"
           >
-            {regularGigs.map((gig) => (
+            {regularGigs.slice(0, shown).map((gig) => (
               /* The admin feature-toggle is a SIBLING of the card, not a
                  child: GigCard renders a <button>, and a button inside a
                  button is invalid HTML that browsers reflow unpredictably
@@ -943,6 +957,18 @@ const Services = () => {
                 )}
               </div>
             ))}
+          </div>
+        )}
+        {viewMode !== 'map' && !loading && regularGigs.length > shown && (
+          <div className="flex justify-center mt-8">
+            <button
+              type="button"
+              onClick={() => setShown((n) => n + PAGE)}
+              className="btn-primary px-6 py-3 rounded-full text-sm font-semibold"
+              data-testid="services-show-more"
+            >
+              {t('services.showMore', 'Show {{n}} more', { n: Math.min(PAGE, regularGigs.length - shown) })}
+            </button>
           </div>
         )}
       </div>

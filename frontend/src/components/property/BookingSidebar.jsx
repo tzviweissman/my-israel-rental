@@ -1119,7 +1119,7 @@ const BookingSidebar = ({
               {property.owner_reply_hours <= 1
                 ? t('stays.repliesWithinHour', 'Usually replies within an hour')
                 : property.owner_reply_hours <= 12
-                  ? t('stays.repliesWithinHours', { count: property.owner_reply_hours, defaultValue: 'Usually replies within {{count}} hours' })
+                  ? t('stays.repliesWithinHours', { hours: property.owner_reply_hours, defaultValue: 'Usually replies within {{hours}} hours' })
                   : t('stays.repliesWithinDay', 'Usually replies within a day')}
             </p>
           )}

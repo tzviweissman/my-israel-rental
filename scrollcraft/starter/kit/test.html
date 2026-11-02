@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kit test page</title>
+<!-- rules 3u.12: every new moving piece is watched here, with buttons that fire each state, before a site gets it -->
+<link rel="stylesheet" href="kit.css">
+<style>
+  :root { --accent: #167AB8; --wash: rgba(22,122,184,.14); --ink: #111827; --card: #fff; }
+  body { margin: 0; font: 16px/1.5 system-ui, sans-serif; color: var(--ink); background: #F9FAFB; }
+  header { display: flex; justify-content: space-between; padding: 1rem 1.25rem; background: #fff; border-bottom: 1px solid #E3E3E3; }
+  .hero { min-height: 88svh; display: grid; place-items: center; text-align: center; padding: 2rem 1rem; position: relative; overflow: hidden; }
+  h1 { font-size: clamp(2rem, 6vw, 4rem); line-height: 1.1; margin: 0 0 .6rem; }
+  .pic { width: 260px; height: 180px; border-radius: 20px; background: linear-gradient(135deg,#f3c27a,#d9774b); margin: 1.5rem auto; }
+  .bean { position: absolute; width: 60px; height: 60px; border-radius: 50%; background: #8a5a3b; }
+  .bean.far { filter: blur(3px); opacity: .6; }
+  .btn { display: inline-block; background: #000; color: #fff; border: 0; border-radius: 999px; padding: .8rem 1.4rem; font: inherit; cursor: pointer; }
+  .controls { position: fixed; bottom: 12px; right: 12px; display: flex; gap: 8px; z-index: 9; }
+  .controls button { background: #fff; border: 1px solid #ccc; border-radius: 999px; padding: .5rem .9rem; cursor: pointer; }
+  section { max-width: 720px; margin: 0 auto; padding: 4rem 1.25rem; }
+</style>
+</head>
+<body>
+<header data-arrive="0"><b>Kit test</b><span>Menu</span></header>
+<div class="hero">
+  <div class="bean far" data-depth="0.8" style="left:8%;top:20%"></div>
+  <div class="bean" data-depth="1.2" style="right:10%;top:30%"></div>
+  <div class="bean far" data-depth="0.85" style="right:22%;bottom:12%"></div>
+  <div>
+    <h1 data-arrive="1">Cakes for <span class="rot" data-words="birthdays|weddings|Shabbat">birthdays</span></h1>
+    <p data-arrive="2">The line under the headline, plainly.</p>
+    <div class="pic" data-arrive="3"></div>
+    <a class="btn" href="#" data-arrive="4">Order</a>
+  </div>
+</div>
+<section>
+  <span class="tilt">Our questions</span>
+  <h2>Your questions</h2>
+  <details class="faq-q"><summary>Do you deliver on Friday?</summary><p>An answer opens inside the same card, and several can be open at once.</p></details>
+  <details class="faq-q"><summary>How far ahead should I order?</summary><p>A second answer, longer, so the open height can be watched growing smoothly over two or three lines on a phone.</p></details>
+</section>
+<section style="height:120vh"><p>Scroll room for the depth test.</p></section>
+
+<!-- 31 Oct 2026 pieces (rules 3v). Photos borrowed from The Gift Boutique for the test only. -->
+<section id="v14">
+  <h2>3v.14 Three true facts under the button, and 3v.10 rolling letters</h2>
+  <a class="btn" href="#v14"><span class="roll">Order a gift</span></a>
+  <ul class="btn-facts"><li>Delivered across Jerusalem</li><li>Order by Thursday</li><li>From ₪120</li></ul>
+</section>
+<section id="v13" style="max-width:980px">
+  <h2>3v.13 Buttons that change the big picture</h2>
+  <div class="chips" data-for="swap1" role="group" aria-label="Show"><button type="button" aria-pressed="true">Boxes</button><button type="button" aria-pressed="false">Baskets</button><button type="button" aria-pressed="false">Trays</button></div>
+  <div class="swap" id="swap1" style="height:340px;border-radius:18px;margin-top:1rem"><img class="on" src="../../../frontend/public/pages/the-gift-boutique/assets/gift-1.webp" alt="A gift box"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-2.webp" alt="A gift basket"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-3.webp" alt="A gift tray"></div>
+</section>
+<section id="v9" style="max-width:1100px;text-align:center">
+  <h2>3v.9 A fanned stack of their photos (move the mouse across)</h2>
+  <div class="fan"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-1.webp" alt=""><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-2.webp" alt=""><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-3.webp" alt=""><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-4.webp" alt=""><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-5.webp" alt=""></div>
+</section>
+<section id="v11">
+  <h2>3v.11 A second photo opens in a circle</h2>
+  <a class="iris" style="height:320px"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-4.webp" alt="A gift box, closed"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-5.webp" alt="The same box, open"></a>
+</section>
+<div style="background:#111827;color:#fff;padding:4rem 1.25rem;--card:#1b1f27;--line:rgba(255,255,255,.14)">
+  <div style="max-width:980px;margin:0 auto">
+    <h2>3v.8 Light on the cards (move the mouse over them)</h2>
+    <div class="glow-cards"><div><div class="in"><b>Small box</b><p>Four treats, a card.</p><b>₪120</b></div></div><div><div class="in"><b>Medium box</b><p>Eight treats, a card.</p><b>₪180</b></div></div><div><div class="in"><b>Large box</b><p>Twelve treats, a card.</p><b>₪240</b></div></div></div>
+  </div>
+</div>
+<div class="statement" style="background:#F3EDE4"><div class="drift" aria-hidden="true"><span>Birthdays · Shabbat · Thank you · New baby ·</span><span>Birthdays · Shabbat · Thank you · New baby ·</span></div><p>Every box is wrapped by hand in Jerusalem</p></div>
+<section style="max-width:1100px">
+  <h2>3v.7 Layouts: bento</h2>
+  <div class="bento"><div style="background:#e8dcc8;border-radius:16px;padding:1rem">The key box, biggest</div><div style="background:#efe7da;border-radius:16px;padding:1rem">Two</div><div style="background:#efe7da;border-radius:16px;padding:1rem">Three</div><div style="background:#efe7da;border-radius:16px;padding:1rem">Four</div><div style="background:#efe7da;border-radius:16px;padding:1rem">Five</div></div>
+  <h2 style="margin-top:3rem">Zigzag steps</h2>
+  <div class="zigzag"><div><div style="background:#e8dcc8;border-radius:16px;height:180px"></div><div class="step"><h3>Choose a box</h3><p>One line.</p></div></div><div><div style="background:#e8dcc8;border-radius:16px;height:180px"></div><div class="step"><h3>Pick the day</h3><p>One line.</p></div></div><div><div style="background:#e8dcc8;border-radius:16px;height:180px"></div><div class="step"><h3>We deliver it</h3><p>One line.</p></div></div></div>
+  <h2 style="margin-top:3rem">One product, its facts around it</h2>
+  <div class="callouts"><ul><li><b>Twelve treats</b><br>Chosen each week</li><li><b>Card included</b><br>Your words, handwritten</li></ul><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-6.webp" alt="" style="width:100%;border-radius:16px"><ul><li><b>Kosher</b><br>Every item</li><li><b>Wrapped by hand</b><br>Ribbon in your colour</li></ul></div>
+  <h2 style="margin-top:3rem">A picture beside four facts</h2>
+  <div class="pic-facts"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-2.webp" alt="" style="width:100%;border-radius:16px"><div><h3>Why people order</h3><div class="four"><div><b>Same week</b><p>One line.</p></div><div><b>Any budget</b><p>One line.</p></div><div><b>Your card</b><p>One line.</p></div><div><b>To the door</b><p>One line.</p></div></div></div></div>
+  <h2 style="margin-top:3rem">A row that shows there are more</h2>
+  <div class="peek-row"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-1.webp" alt="" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-2.webp" alt="" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-3.webp" alt="" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-4.webp" alt="" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px"><img src="../../../frontend/public/pages/the-gift-boutique/assets/gift-5.webp" alt="" style="width:100%;aspect-ratio:4/5;object-fit:cover;border-radius:14px"></div>
+</section>
+<section><h2>3v.12 The curtain between pages</h2><p><a href="test.html?page=2">Go to another page</a> (the slabs sweep up, the page opens behind them).</p></section>
+<div class="controls">
+  <button id="replay">Replay arrival</button>
+  <button id="toggle">Open/close questions</button>
+</div>
+<script src="kit.js"></script>
+<script>
+  replay.onclick = () => { const h = document.documentElement; h.classList.remove('arrive-go'); void h.offsetWidth; h.classList.add('arrive-go'); };
+  toggle.onclick = () => document.querySelectorAll('.faq-q').forEach((d) => { d.open = !d.open; });
+</script>
+</body>
+</html>

@@ -109,10 +109,18 @@
       </div>
       <a class="btn" href="shop.html#sizes">Order a platter <svg class="go arw" viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
-    <div class="wrap fcols"><div><h3>Pages</h3><a href="index.html">Home</a><a href="shop.html">Shop</a><a href="contact.html">Contact</a><a href="shop.html#sizes">Sizes and prices</a></div><div><h3>Order</h3><a href="shop.html#sizes">Order a platter</a><a href="https://wa.me/972587298718" target="_blank" rel="noopener">WhatsApp</a></div><div><h3>Contact</h3><a href="https://wa.me/972587298718" target="_blank" rel="noopener">WhatsApp +972 58 729 8718</a><a href="tel:+972527146952">Call +972 52 714 6952</a></div></div><p class="giant" aria-hidden="true">Ls Fruit Platter</p>
+    <p class="giant" aria-hidden="true">Ls Fruit Platter</p>
   </section>
 </main>
-<footer class="foot"><nav aria-label="Pages"><a href="index.html">Home</a> · <a href="shop.html">Shop</a> · <a href="contact.html">Contact</a></nav>Ls Fruit Platter, Jerusalem · on <a href="/">MyIsraelRental</a>, free to list, no commission</footer>
+<footer class="foot full">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">Ls Fruit Platter</a><p>Fresh, beautiful fruit platters for your home and events, in Jerusalem.</p><a class="fcta" href="shop.html#sizes">Order a platter <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="shop.html">Shop</a><a href="contact.html">Contact</a></nav>
+    <div><h4>Ordering</h4><p>Four sizes, from ₪300</p><p>Serving Jerusalem</p><p>Cash, Zelle or an Israeli bank transfer</p></div>
+    <div><h4>Reach us</h4><a href="https://wa.me/972587298718" target="_blank" rel="noopener">WhatsApp +972 58 729 8718</a><a href="tel:+972527146952">Call +972 52 714 6952</a></div>
+  </div>
+  <div class="fbase"><span>© 2026 Ls Fruit Platter.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
+</footer>
 
 <div class="bar" id="bar" aria-hidden="true">
   <p class="p"><b>From ₪300</b>Four platter sizes</p>
@@ -129,8 +137,6 @@
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
   var PID = { small: '55113012e889', medium: 'c94a66979f24', large: 'a549851e62aa', xl: '7d53c8ac348a' };
   var SIZES = [['small', 'Small', 300, '30 × 30 cm'], ['medium', 'Medium', 400, '40 × 28 cm'], ['large', 'Large', 500, '58 × 28 cm'], ['xl', 'Extra large', 850, '115 × 25 cm']];
-  // per cm2 savings, worked out in index.html above the size cards (rules 3j)
-  var WAS = { large: [541, 7], xl: [885, 3] };
   var BY = {}; SIZES.forEach(function (s, i) { BY[s[0]] = { i: i, name: s[1], price: s[2], cm: s[3] }; });
   function P(n) { return '<span class="sym">₪</span>' + n; }
   var reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -149,7 +155,7 @@
   function show(k) {
     sel = k; stage.style.setProperty('--room', ROOM[k]); bl.go(BY[k].i);
     [].forEach.call(stage.querySelectorAll('.st-pick button'), function (b) { b.setAttribute('aria-pressed', b.dataset.k === k ? 'true' : 'false'); });
-    document.getElementById('st-name').textContent = BY[k].name; var w = WAS[k]; document.getElementById('st-price').innerHTML = (w ? '<s aria-label="was ₪' + w[0] + '">' + P(w[0]) + '</s> ' : '') + P(BY[k].price) + (w ? ' <span class="off">' + w[1] + '% off</span>' : ''); document.getElementById('st-size').textContent = BY[k].cm;
+    document.getElementById('st-name').textContent = BY[k].name; document.getElementById('st-price').innerHTML = P(BY[k].price); document.getElementById('st-size').textContent = BY[k].cm;
     n = 1; label();
   }
   stage.querySelector('.st-pick').addEventListener('click', function (e) {
@@ -206,6 +212,8 @@
   }
   ['when', 'time', 'addr', 'me', 'ph'].forEach(function (id) { document.getElementById(id).addEventListener('input', function () { check(false); drawStep(); }); });
   document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k Pre-filled): tomorrow, changeable (same-day orders are question 14 to her)
+  document.getElementById('when').value = new Date(Date.now() + 864e5 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   function day(long) { return new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', long ? { weekday: 'long', day: 'numeric', month: 'long' } : { weekday: 'short', day: 'numeric', month: 'short' }); }
   document.getElementById('form').addEventListener('submit', function (e) {
     e.preventDefault();

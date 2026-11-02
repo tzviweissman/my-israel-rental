@@ -45,6 +45,7 @@
             <div class="field" id="f-date"><label for="date">Needed on</label><input type="date" id="date"><span class="hint">The earliest day is two days from today.</span><span class="err">Choose a day, two days from today or later, not Shabbos.</span></div>
             <div class="field" id="f-window" hidden><label for="window">Time</label><select id="window"></select></div>
           </div>
+          <p class="dayfix" id="dayFix" role="status" hidden><span id="dayFixText"></span> <button type="button" class="chip" id="dayFixBtn"></button></p>
         </div>
         <div class="q is-shut" id="addrQ" inert><div>
           <div class="field" id="f-address"><label for="address">Delivery address</label><input id="address" autocomplete="street-address" placeholder="Street, number, city, plus floor or entrance" maxlength="400"><span class="hint">The delivery fee depends on the city. We confirm it with you on WhatsApp before the day.</span><span class="err">Where should it go?</span></div>
@@ -68,15 +69,16 @@
 </main>
 <div class="dock dockbar"><div><small>Total</small><b data-total>$0</b></div><a class="cta" id="go2" href="order-details.html">Continue</a></div>
 
-<footer class="foot2">
+<footer class="foot2 full">
   <p class="foot2__big">Premium meat boards, grilled to perfection.</p>
   <a class="cta" href="order.html">Order a board</a>
-  <div class="foot2__cols">
-    <nav aria-label="Pages"><b>The site</b><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Your order</a></nav>
-    <div><b>Find us</b><span>Farn 5, Jerusalem</span><span>Orders 48 hours ahead</span><span>Delivery throughout Israel</span></div>
-    <div><b>Pay us by</b><span>Card, Zelle or bank transfer</span><a href="https://myisraelrental.com/businesses">Listed on MyIsraelRental</a></div>
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">Blazin' Boards</a><p>Every photograph on this site is our own.</p><a class="fcta" href="order.html">Order a board</a></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="boards.html">Every board</a><a href="order.html">Your order</a></nav>
+    <div><h4>Ordering</h4><p>Orders 48 hours ahead</p><p>Delivery throughout Israel, the fee depends on the city</p><p>Credit card, Zelle or bank transfer, paid to us directly</p><p>Gluten-free and soy-free on request</p><a href="https://www.google.com/maps/search/?api=1&amp;query=Farn+5+Jerusalem" target="_blank" rel="noopener">Kitchen: Farn 5, Jerusalem, directions</a></div>
+    <div><h4>Reach us</h4><a href="order.html">Send your order, we confirm it on WhatsApp</a><a href="https://myisraelrental.com/business/blazin-boards">Message us on MyIsraelRental</a></div>
   </div>
-  <p class="foot2__small">Blazin' Boards. Every photograph on this site is our own. Nothing is paid on this site: you pay us directly.</p>
+  <div class="fbase"><span>&copy; 2026 Blazin' Boards.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission &middot; <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
 </footer>
 <script src="site.js"></script>
 <script>
@@ -85,6 +87,8 @@
   if (!BB.count(o)) { location.replace('order.html'); return; }
   var min = new Date(); min.setDate(min.getDate() + BB.NOTICE_DAYS);
   $('date').min = min.toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k Pre-filled): the first day after the 2 day notice that is not Shabbos (the first chip), changeable; a saved pick is kept
+  (function () { var d = new Date(min); while (d.getDay() === 6) d.setDate(d.getDate() + 1); if (!o.date) o.date = d.toISOString().slice(0, 10); })();
   $('date').value = o.date || ''; $('address').value = o.address || '';
   function windows() {
     var wins = [];
@@ -96,7 +100,25 @@
     $('window').innerHTML = wins.map(function (w) { var v = w.start + '|' + w.end; return '<option value="' + v + '"' + (o.window === v ? ' selected' : '') + '>' + w.start + ' to ' + w.end + '</option>'; }).join('');
     o.window = wins.length ? $('window').value : '';
   }
+  // 3u.2: a day we cannot do gets one plain line naming the first day we can, and a button to choose it; the pick is never changed for them
+  function firstDay() { var d = new Date(min); while (d.getDay() === 6) d.setDate(d.getDate() + 1); return d.toISOString().slice(0, 10); }
+  function dayFix() {
+    var box = $('dayFix'), v = o.date, bad = '';
+    if (v) {
+      var d = new Date(v + 'T12:00:00');
+      if (d.getDay() === 6) bad = 'We are closed on Shabbos.';
+      else if (v < $('date').min) bad = 'We need ' + BB.NOTICE_DAYS * 24 + ' hours’ notice.';
+    }
+    box.hidden = !bad;
+    if (!bad) return;
+    var f = firstDay(), fd = new Date(f + 'T12:00:00');
+    $('dayFixText').textContent = bad + ' The first day we can do is ' + fd.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + '.';
+    $('dayFixBtn').textContent = 'Choose ' + fd.toLocaleDateString('en-GB', { weekday: 'long' });
+    $('dayFixBtn').dataset.day = f;
+  }
+  $('dayFixBtn').addEventListener('click', function () { $('date').value = this.dataset.day; $('date').dispatchEvent(new Event('change')); });
   function paint() {
+    dayFix();
     document.querySelectorAll('[data-ful]').forEach(function (b) { b.setAttribute('aria-pressed', String(o.ful === b.dataset.ful)); });
     $('addrQ').classList.toggle('is-shut', o.ful !== 'delivery'); $('addrQ').inert = o.ful !== 'delivery';
     // A store that is not nationwide delivers only to its own cities, and the

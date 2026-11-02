@@ -37,8 +37,13 @@ new rule, or a fix that will become one, goes through these steps before it is w
    laptop and a phone size. Tzvi says yes to the picture, not to a description. A fix that is our own
    design choice, not what Tzvi asked for, is a proposal until he has seen it.
 3. **Try it on every live site it covers** (`frontend/public/pages/pages.json`): run its check, or look,
-   on each, and list the ones that fail. Fix them, or write why they are exempt. A rule that fails sites
-   Tzvi is happy with is wrong, not the sites.
+   on each, and list the ones that fail. A rule that fails sites Tzvi is happy with is wrong, not the
+   sites. **A new rule does not hold up a site that is already made** (Tzvi, 29 Oct 2026: "new rules
+   shouldnt affect already made sites"): a site is held to the checklist rules that existed when it was
+   first published, plus any later rule its RULES.md answers. check-rules lists a newer unanswered rule as
+   "not required" and publish-page does not run that rule's check (`scripts/rule-dates.mjs`). Show Tzvi
+   which live sites fail it; they change only if he asks. So a new check gets its own script, with its
+   rule id in publish-page's list, never a new test inside an existing script.
 4. **The check must catch the original mistake**: run it on the before state (it fails) and the after
    state (it passes). A check that passes both is not checking the rule.
 5. **Write how, not only what**: the steps, the tool and settings, a worked example folder, and what was
@@ -512,6 +517,21 @@ pages so that you can create them faster". Each step below is a mistake from
 The Gift Boutique (13 to 14 Oct) or Michal Balloons (14 to 15 Oct) that cost
 a round with Tzvi. Done in this order, none of them happens.
 
+0. **Build from the blueprint, never check against the rules afterwards** (Tzvi, 1 Nov 2026: "can we
+   make it build with using the rules as a blueprint rather than building and checking afterwards what
+   was kept and what was skipped which makes it take much longer and isnt perfect"). After fetching the
+   record, `node scripts/blueprint.mjs <build>` writes `BLUEPRINT.md`: every line of the rules checklist
+   as a step, in build order (facts, photos, opening, sections, site structure, prices, order flow,
+   motion, phone, finish), with what the record already decides filled in (the three facts, the footer
+   parts, no kosher or "since" line when the record has none, the first order day). Before building a
+   stage, write the plan for each of its lines: what this site does for that rule, or `n/a: <why the
+   site has no such thing>`; `node scripts/blueprint.mjs --check <build> <stage>` must pass first, and
+   filler ("done", "as rule") is not a plan. Tick each line as it is built. Helpers get the stage of the
+   blueprint they build, never a hand-picked list of rules. RULES.md is no longer answered at the end:
+   check-build and publish-page write it from the blueprint (`--rules`), so it is never stale, and the
+   scripts confirm what was planned instead of discovering what was skipped. Sites made before 1 Nov 2026
+   keep their RULES.md. Rejected: answering RULES.md after building (rules were found missing at the end
+   and every later edit made the whole list "stale" and answered again, 1 Nov 2026 on all 17 sites).
 1. **Read the record, then the real address.** Use the business's actual
    slug from the live record when publishing (Michal Balloons was first
    published under a made-up slug the site would never serve).
@@ -588,6 +608,9 @@ a round with Tzvi. Done in this order, none of them happens.
 6. **Run generation in the background while the page is written**, with a
    script that saves the job number and retries a slow status check (a read
    timeout lost a paid clip). Never wait idle on a clip.
+6a. **The whole page is right before the film goes in** (3u.11): build and check it with a still
+   where the film will be, then put the film in and run the checks again. New motion is tried on a
+   test page with buttons first (3u.12, `scrollcraft/starter/kit/test.html`).
 7. **Text over imagery gets its edge shade (or small solid card) from the
    start**, measured against the brightest frame (§5b.3). It was added after
    the check failed three times.
@@ -599,6 +622,8 @@ a round with Tzvi. Done in this order, none of them happens.
     Tzvi**: the wow test (§3n), clipped.mjs (now also catches a pinned
     block sliding under the header), readable.mjs. A link was sent before
     the checks and showed a cut-off card.
+10a. **The report ends with "Not done yet" and "For your call"** (3u.13, `gen/report.md`), after a
+    writing pass that tries a shorter version of every long line (3u.14, `gen/copy-pass.md`).
 11. **The owner's video last**, from the live page, after the checks.
 
 ## 3f. Effects are seen whole, and there are enough of them (Tzvi, 13 Oct 2026)
@@ -796,7 +821,7 @@ make their sites so beautiful: the imagery first, and almost nothing else.
 3. **Shows the product on a plain ground of its own world**, never on a photo of the same kind of product (a board on a board).
 4. **Keeps the product and every photo whole**: nothing cut by the screen edge or by the photo's own framing, unless the bleed is clearly deliberate; crop out half props.
 5. **Loads the first screen first**: the opening's images preloaded, everything below lazy.
-check-site SMOOTH and SLOW enforce 1 and 2; 3 to 5 are looked at on the sheet before showing.
+check-opening-scroll (SMOOTH and SLOW) enforces 1 and 2; 3 to 5 are looked at on the sheet before showing.
 
 Tzvi: "it looks wow, much nicer than what you made for the brown box ... every
 detail is crisp and clear and makes a person want to try some." Side by side,
@@ -845,6 +870,15 @@ out to the jar, with a new line of huge words over each scene.
    from (Tzvi, 23 Oct 2026: "for the wow use mobbin and our inspo and 21st for
    inspiration"); check-concept fails a Wow gate with no Mobbin link and no
    Inspo or docs/inspo reference.
+   **Sketch first** (Tzvi, 29 Oct 2026, from Jack Roberts' video DCwh7SIfWL4,
+   whose film was storyboarded as four rough line drawings, approved, then
+   four photoreal stills): before any photoreal still, one storyboard sheet
+   of rough black line drawings on white, one row per concept, three or four
+   panels per row (the film's start, middle and end, the words under each).
+   One cheap generation (or drawn in SVG), no colour, no detail. Tzvi picks a
+   row or asks for changes on the sketch, where a change costs nothing; only
+   the chosen concept is then made as photoreal stills and keyframes. The
+   sheet is `gen/storyboard.png`, named in the film brief.
 7. **Seams checked.** Every clip starts on the last frame of the one before
    (one clip per physical step, as before); after rendering, compare the
    frames either side of each join and regenerate a clip whose join jumps.
@@ -1019,17 +1053,21 @@ that policy).*
    Worked example: scrollcraft/builds/noa-levi-home-styling/gen/tidy-brief-v3.md
    (the drawer is emptied, then filled boxes go in, in three clips between
    four stills).
-20. **One scroll effect per page** (Tzvi, 29 Oct 2026: "there shouldnt be two
+20. **Effects, never too much** (Tzvi, 29 Oct 2026: "there shouldnt be two
     scroll affects on one page especially on mobile where people just want to
-    see the products and order fast its a bit annoying"). The opening film is
-    the page's one scroll effect; everything after it scrolls normally. A
-    second thing that holds the page while the scroll changes it (a flavour,
-    size or step that turns as you scroll) becomes a tap: the same spot, the
-    same pictures, changed by tapping a chip or a photo. Bake away's flavour
-    spot held the page for eight screens after the film; it now changes on a
-    tap. `scripts/check-one-scroll.mjs` fails any page with two sections that
-    pin while the page scrolls more than half a screen (run by check-build and
-    publish-page).
+    see the products and order fast its a bit annoying", then the same day:
+    "we dont need only 1 affect it just cant be too much. these people are
+    proffesional designers and we need to learn from them"). A page may have
+    several effects, learned from the designers we study (docs/inspo,
+    docs/ui-videos), but none may stand between a phone visitor and the
+    products or the order. The opening film may hold the page for its length;
+    any other section that holds the page while the scroll changes it is
+    short, at most a screen and a half, and the page has at most three such
+    sections in all. Longer turning (flavours, sizes, steps) becomes a tap.
+    Bake away's flavour spot held the page for eight screens after the film;
+    it now changes on a tap. `scripts/check-one-scroll.mjs` fails a page
+    whose sections after the first hold the page for more than 1.6 screens
+    each, or that has more than three (run by check-build and publish-page).
 21. **Every clip is measured, and the brief says how it really happens** (Tzvi, 1 Nov 2026, Krysp: "the bend and
     the snap dont look natural ... is there a way to control the video creation better so we dont keep having these small
     issues like random crumbs disappearing"). Krysp's chew lay still while cracks crawled over it, broke somewhere else
@@ -1232,8 +1270,8 @@ small website. A single page stays fine for a business with little to say
    The current page is marked (`aria-current="page"`). On a phone the pages
    fold into a Menu button that opens a panel with a Close button and closes
    on Escape or a tap on a link.
-3. **One footer on every page**: how to reach them, the page links, the
-   MyIsraelRental line.
+3. **One footer on every page**: the full footer of 3v.1 (who they are, the pages, how ordering
+   works, how to reach them, the base line).
 4. **Shared files**: `site.css` (all styles) and `site.js` (menu bar, phone
    bar, reveals, basket) used by every page; page-only code stays in that
    page. A class name used by a page section (`.open`, `.in`) is never reused
@@ -1249,6 +1287,16 @@ small website. A single page stays fine for a business with little to say
 7. **Check every page**, not only the home page: clipped.mjs and readable.mjs
    on each, the phone menu opened, and an Add on one page reaching the order
    page.
+8. **The order form arrives filled in** (Tzvi, 29 Oct 2026, from uxpeak's
+   video 2TlIg3VokY8: five empty booking fields against the same form with
+   tomorrow, 7:00 and 2 guests already chosen; "every blank field is a
+   decision"). The day field holds the first day the business can do (its
+   lead time, skipping Shabbat and holidays when it closes for them), the
+   quantity is 1, and any choice the owner says most customers make is
+   already chosen; all of it changeable. A customer's own pick is never
+   overwritten. `scripts/check-prefill.mjs` fails an empty day field (run by
+   check-build and publish-page) and notes choice groups with nothing chosen.
+   Worked examples: Bake away and LS Fruit Platter's shop.html.
 
 
 **Every order is saved before WhatsApp opens** (Tzvi, 22 Oct 2026: "when someone clicks order it saves all the information to the site and then redirects them to WhatsApp with a pre typed message"). The order or booking button first POSTs the order to MyIsraelRental through the business's order form (`/api/marketplace/order-form/<gig>/orders`, the way Chicken Munch's order.html does; bookings and quotes through their own endpoints), so it reaches the owner's dashboard, the customer gets a tracking link and the review request follows; only then does it open WhatsApp with the order written out. Every product on the site exists as a product of that business's listing (same name and price), so the saved order names real products. If saving fails, WhatsApp still opens (the customer is never stuck), and the failure is logged. check-site SAVE fails a page whose order reaches WhatsApp without that POST first.
@@ -1582,7 +1630,7 @@ console error, a 404, a dead link between pages), SHIFT (layout moves after load
 tapped), GLYPH (a character the fonts lack, like ₪ or →: load a face that has it, or draw it), STATE
 (a button with no hover or pressed state), TAP (under 40 px on a phone, or overlapping), ALIGN (text
 2 to 12 px off its section's edge, same-kind buttons of different sizes, a card name under 1.25x its
-line), OVERLAP (two lines of words cover each other anywhere, pinned scenes included, at 1366x768,
+line), OVERLAP (in its own script, `scripts/check-overlap.mjs`, since 29 Oct 2026: two lines of words cover each other anywhere, pinned scenes included, at 1366x768,
 1280x720, 1440x900 or 390x844: the common short laptops, where Michal Simkin's quotes sat on her heading
 on 26 Oct 2026 while every check looked at 1440x900), PHONE (sideways scroll, the bottom bar over a button at the end), MEDIA (a photo over 600 KB,
 an image without its size, a video without a poster, words left hidden with motion off) and FLOW (an
@@ -1616,6 +1664,162 @@ Tzvi, after we gave every site Moto Card's dark full-bleed look: "go through [Aw
 **The owner's own look wins over the category's ground** (Tzvi, 22 Oct 2026: Chicken Munch's owner wanted a dark theme): if the owner asked for dark or light, or their brand is plainly one, keep it and follow the rest of the category's pattern (how it sells, pictures, type) on that ground. Write the owner's wish in CONCEPT.md. Moto Card's model (dark, full-bleed photo screens alternating with white rests) fits only `trainer`, a moody `place` or a luxury brand; it is never the default.
 
 scripts/check-site.mjs reads the page's `site-category` and checks its pattern: CATEGORY (the meta is missing or unknown), BUY (`food-shop` and `fashion-shop`: a price and an Add or Order control are visible within the first two screens), WORLDS (`trainer` only: at least a third of sections are picture and no three plain sections in a row) and OPENING (every category: the first screen is an event, 3h; `events`, `beauty`, `place` and `trainer` also open mostly on a picture or film).
+
+## 3u. From the seven videos, part two (Tzvi, 29 Oct 2026: "do them all")
+
+After the first three ideas from the seven videos of 29 Oct (3k.8, check-blank, 3h.6), Tzvi took every other
+technique on the list. Notes: docs/ui-videos/notes/ (2TlIg3VokY8 uxpeak, m491R3ewNgE Kyle Skelly,
+ncQUil5c2Gw Jason Lee, QUI6Ug4cHnE Nate Herk, 5QM78yqpONI Mikey, DCwh7SIfWL4 Jack Roberts). The moving
+pieces are built once in `scrollcraft/starter/kit/` (kit.css, kit.js) and were watched on its test page
+(`kit/test.html`, with buttons that replay each state) before any site got them. A site copies the part it
+uses into its own site.css and site.js and swaps in its own colours.
+
+**On the order page**
+1. **The button names the order** (already 3k.1 and R3k.7): the last button says what happens and the
+   real total from the basket, "Send my order, ₪186". Checked again on every site with this section.
+2. **Say plainly what is not possible, and the next thing that is** (2TlIg3VokY8, the honest form of
+   "you would miss out"). When the customer picks a day the business is closed, fully booked or inside
+   its lead time, or a quantity over what the owner can make, one line under the field says so and
+   offers the next possible one: "We are closed on Shabbat. The first day we can do is Sunday 2 Nov."
+   with a button "Choose Sunday". The form never quietly refuses or quietly changes their pick. No
+   countdowns, no guilt wording, only the owner's real closures, lead time and limits.
+3. **Price per portion beside the size** (2TlIg3VokY8): "₪500, about ₪25 a person" under a size, tray or
+   platter, only when the owner gave how many it serves or how many pieces it holds, worked out from
+   those figures (from the most it serves, as the deal lines do) and rounded down to whole shekels. No figures, no line: ask in message-to-owner.md
+   ("How many people does each size serve?").
+4. **The order beside every step** (already 3k.1 and R3k.7): the customer's own choices and total stay
+   in view and can be changed before the last button.
+
+**On the page**
+5. **The first screen arrives in a set order** (m491R3ewNgE), on a home page with no scroll film: the
+   menu bar drops in, the headline rises, then the line under it, then the picture rises into place
+   (about 110 px), and the button comes last; about 1.5 seconds, once. Without JS or with motion off
+   everything is simply there (`data-arrive="0..4"` and `html.arrive-go`, kit.css).
+   `scripts/check-arrival.mjs` fails a home page without a film whose first screen is the same at 0.1 s
+   and at 2 s, and one whose headline or button is still not there at 2.5 s.
+6. **Depth on laptops** (m491R3ewNgE): where the first screen shows separate pieces (cut-out products,
+   scattered ingredients, balloons), each moves at its own speed as the page scrolls: sharp near pieces
+   faster (`data-depth` 1.1 to 1.25), soft far ones slower (0.8 to 0.9), each shadow with its piece.
+   Laptops with a mouse only; phones and motion off stay still. Never on a whole photo.
+7. **One rotating word in the headline** (DCwh7SIfWL4), at most one per site: a word changes among three
+   or four of the owner's real occasions or products every 2.4 seconds on a soft pill ("Cakes for
+   birthdays / weddings / Shabbat"); the sentence reads right with every word; screen readers hear the
+   whole list; motion off shows the first word. Not on a first screen that already has moving words
+   (a film's chapter lines).
+8. **A small tilted label over section headings** (m491R3ewNgE), as one site's own repeated touch: two
+   to four words, its accent colour, turned 3 to 5 degrees, its shape from the business's world (a price
+   tag, a stamp, a ribbon). A unique touch (3p), so never the same shape on two sites; written in
+   fingerprints.json.
+9. **Question cards** (ncQUil5c2Gw): each question is a rounded card; its "+" in a small accent circle
+   turns into "x"; the answer opens inside the same card, its height growing smoothly; several can be
+   open at once; built on `<details>` so it works by keyboard and without JS.
+10. **Branches beside a map** (m491R3ewNgE), only for a business with two or more places to buy or
+    collect: the list (name, street, town, what is there) beside a simple map in the site's colours with
+    numbered pins; on a laptop the map stays while the list scrolls, on a phone the map sits above it.
+
+**How a site is built**
+11. **The whole page is right before the film goes in** (5QM78yqpONI): the site is built and passes its
+    checks with a still picture where the film will be; only then the film goes in and the checks run
+    again, so one thing changes at a time (0b step 6a).
+12. **New motion is tried on a test page first** (ncQUil5c2Gw): any moving piece not already in the kit
+    is built on its own small page with buttons that fire each state (add, remove, open, close, replay)
+    and watched at 4 fps or more before it goes into a site; then it joins the kit.
+13. **Every build ends with "Not done yet" and "For your call"** (m491R3ewNgE, QUI6Ug4cHnE): the report
+    to Tzvi says what the site does not do yet (waiting for the owner's photos, FAQ or figures; links
+    that go nowhere yet) and at most two judgement calls we made that he may want otherwise. Kept in the
+    build's `gen/report.md`.
+14. **A writing pass: shorter first, then applied** (ncQUil5c2Gw): after the words are written, every line
+    over 20 words and every paragraph over three lines gets a shorter version written beside it in
+    `gen/copy-pass.md`; the shorter one goes in unless it loses one of the owner's facts.
+
+Not taken from the same videos, and why: a dark film over the whole hero picture (fails on bright frames,
+3h.9); a character that follows the mouse (8a); countdowns, guilt wording and sign-up progress bars (3j);
+their 3D and app tools.
+
+## 3v. From the ten design videos and five real sites (Tzvi, 1 Nov 2026)
+
+Tzvi asked for professional designers' scroll and mouse effects and "the general structure they use for
+websites so our sites can feel more like real sites". Ten videos were watched as frames and five real
+business sites were opened (Tartine, Blue Bottle, Sally Hershberger, Olive & June, Barry's). Notes:
+docs/ui-videos/notes/2026-10-31-*.md. He chose 1, 2, 6, 7, 8 to 13 and 16 from the list. He did not choose
+the notice line above the menu, an "Our story" page, or the menu bar that slides away. He also had the
+hand-drawn circle and underline (15) taken out after seeing it. Do not bring those back unasked.
+
+**Structure, on every site.** These make a site read as a real website rather than a long page.
+
+1. **A full footer on every page, the same on each.** Ours ended on one line; every real site ends on a
+   footer in parts, each with a small heading, and each part only when the record fills it:
+   - **who they are**: the name, one line in the owner's words, and a quiet link to the main action. It is a
+     link with an arrow, not a second solid button, because the closing band above already has one (3.3).
+   - **Pages**: every page of the site.
+   - **how ordering works**, or **Visit** for a place: lead time, delivery area, payment, hours, address
+     with a directions link.
+   - **Reach us**: WhatsApp, phone and email, each labelled. Instagram or Facebook only when the record has
+     them.
+   - **a base line** under a hairline: "© 2026 <Name>", a founding-year line when there is one ("Baking
+     since 2020"), "Listed on MyIsraelRental, free to list, no commission" and a Privacy link to
+     https://myisraelrental.com/privacy. Orders go through us, so our privacy page is the one that applies.
+
+   On a phone the parts stack, two to a row, the name part across the top. A phone number never breaks
+   over two lines. This replaces the one-line footer of 3k.3 and sitekit, and says what R3t.4 means by
+   "a real footer". Worked example: scrollcraft/builds/bake-away (the `.foot.full` block in site.css).
+   Check: scripts/check-footer.mjs (R3v.1).
+2. **The menu bar lists the site's pages**, the same pages on every page, with the one main button.
+   Jumps down the home page (#sizes, #prices) are not in the bar of a site that has other pages: they
+   belong on the page itself. A site of Home alone, or Home and its order steps, has no other pages to
+   list, so its jumps stay. Order and booking steps may keep a quieter bar, as real checkouts do.
+   Worked example: Blazin' Boards' home bar went from five jumps to Home, Every board, Your order, as on
+   its other pages. Check: scripts/check-menu.mjs (R3v.2).
+6. **Sections of different heights**, so the scroll has a rhythm: a thin strip, a short band, a middling
+   block and a tall scene in some mix. Never three sections in a row of the same height (within 15%).
+   Check: scripts/check-heights.mjs (R3v.6). Pages under 2.5 screens, or with fewer than four sections, are
+   not judged.
+14. **Three true facts right under the main button** on the home page, small, in one row with a dot each.
+    They come from the record or the owner's own words, never invented: the price from, delivery area,
+    lead time, payment, certificate, area served. Example for Bake away: "From ₪16 a doughnut · Delivery in
+    Jerusalem · Cash, bit or bank transfer". They replace a lone price line there, so the price is one of
+    the three (proof touches the button, 3.2). The class is `btn-facts`; `.facts` was already used for
+    product facts on six sites. Check: scripts/check-facts.mjs (R3v.14).
+
+**Layouts to choose from (7).** Pick by what the business has, never the same layout twice in a row on a
+page. They are in scrollcraft/starter/kit/kit.css, tried on kit/test.html.
+- **bento**: boxes of mixed sizes with the key one biggest and first. Suits shops, beauty, events.
+- **zigzag steps**: a picture and the words change sides each step, labelled "Step 1". Suits services,
+  events, rentals ("how booking works"). It is one of the few places two lanes are right; one left edge
+  (3s.4) still holds inside each lane.
+- **callouts**: one product in the middle, its true facts around it. Needs a clean product shot.
+- **pic-facts**: a picture beside four short facts. Suits rentals, salons, trainers.
+- **peek-row**: a row of cards whose last one is cut off at the edge, swiped sideways. It says there are
+  more. Suits flavours, rooms, past events.
+
+**Effects to choose from, never on every site** (Tzvi: "there are many other mouse and scroll affects we
+can choose from"). They join the kit pieces of 3u, the effects library and docs/inspo as options. A site
+takes the ones that suit its business, never the same set as the site built before it, within the
+budget of 3h.20.
+8. **Light on the cards** (`.glow-cards`): a soft light follows the mouse across a row of price or
+   treatment cards and the borders glow, the neighbours' too. Mouse only, plain on a phone, best on a dark
+   ground. Salons, trainers, home services; wrong for photo menus.
+9. **Fanned photos** (`.fan`): five or more of the owner's own photos under the headline, spread by the
+   mouse; on a phone they spread once in view. Salons, decorators, trainers.
+10. **Rolling letters** (`.roll`): the letters of a link or button roll up on hover. Hebrew rolls word by
+    word. Any category.
+11. **Circle reveal** (`.iris`): a second photo opens in a circle where the mouse enters; a tap on a
+    phone. Before and after, closed and open. Galleries.
+12. **Curtain between pages** (`.curtain`, kit.js): slabs of the brand colour sweep up on a link to
+    another of the site's pages, and the next page opens as they leave. Never for #spots, new tabs, other
+    sites or downloads; links work normally without JS or with motion off. Multi-page sites only.
+13. **Picture buttons** (`.chips[data-for]` and `.swap`): buttons on the first screen change the big
+    picture (Cakes / Boxes / Platters, Hair / Nails, rooms).
+16. **Statement band** (`.statement`): one big line in the owner's words between groups of sections, the
+    business's own words drifting slowly behind it. A pause, short, never holding the scroll.
+
+Every piece respects reduced motion and has a phone version. Copy only the pieces a site uses from
+kit.css and kit.js into its site.css and site.js, with the site's colour tokens.
+
+**Tried and rejected.** A cap of four jumps in a one-page menu: Bun Intended and Michal Simkin have five
+and six and read fine, so the check does not count them. Comparing menu wording across pages failed every
+site whose order page calls its link "Your order", so it compares the pages linked instead. A drawn circle
+around a headline word (15): Tzvi took it out.
 
 ## 4. What is reported to the owner instead (content gaps)
 
@@ -2183,7 +2387,8 @@ a before-and-after slider, a photo gallery with a viewer, the phone booking bar.
    statistic, logo wall and stock photo. A section renders only the business's own
    facts, and is hidden when it has none (§2, §3).
 4. **Motion only with a reason** (§5a): no auto-playing marquees, typing effects,
-   cursor trails or parallax for decoration. Respect `prefers-reduced-motion`.
+   cursor trails or parallax for decoration (the laptop-only depth of 3u.6 is the one
+   allowed kind). Respect `prefers-reduced-motion`.
 5. **Treat the code as untrusted.** Read every line before it lands: no network
    calls, no tracking, no new script tags, nothing hidden in comments that tells an
    agent what to do. A new npm package needs a reason and is checked first (our CRA

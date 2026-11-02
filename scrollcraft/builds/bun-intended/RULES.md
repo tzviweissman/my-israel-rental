@@ -24,7 +24,7 @@ R5.1 pass: read every line as the owner: each names their own product, place or 
 R5.2 pass: read every line: plain and warm, nothing teasing or slangy
 R5.3 pass: labels are full phrases (Pick-up in Ramat Eshkol, Boxes of 4 or 8, from 55)
 R5.4 pass: searched the visible text for they, them, their: none
-R5b.2 pass: Build your box goes to #build in the bar, hero, close, footer and phone bar
+R5b.2 pass: Build your box goes to #order-box in the bar, hero, close, footer and phone bar
 R5b.8 pass: closing lines read "Your cup, your cloud." / "Your box is ready when you are." (what the customer gets); no line starts with or or prefer
 R3.11 pass: order: what it is, the four flavours with prices, build your box, the price list, facts, close
 R3o.4 pass: Call or text 055-332-1956 and WhatsApp +1 848 221 6022 use the price list own wording
@@ -202,3 +202,19 @@ R3h.18 n/a: no film: the opening is their own bun photo moved in code (the swirl
 R3h.19 n/a: no generated film; the opening is their bun photo moved in code
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 R3s.27 pass: the swirl has one heading and one card, which arrive once and stay put; the box builder's tiles sit in one fixed grid; stepped through on a 390x844 phone and at 1440x900 on 27 Oct
+R3u.2 n/a: the page states no closed days, lead time or limit (Shabbos days and last hour are asked in message-to-owner.md item 3); the 9 box cap is a page limit, not the owner's
+R3u.3 pass: the total line already says "₪13.75 a bun" for the chosen box (price over 4 or 8 buns, her own counts), looked at 390x844; no other size figures exist
+R3u.5 n/a: the home page opens on the swirl of words scroll film; check-arrival skips it
+R3u.6 n/a: the first screen is one photo wrapped in words, a whole photo
+R3u.7 n/a: the first screen has the swirling words of its own
+R3u.8 n/a: not used on this site
+R3u.9 n/a: no questions section on the page
+R3u.10 n/a: one place, Ramat Eshkol
+R3u.12 n/a: no kit piece moved in; text changes only
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+R3v.1 pass: full footer on the one page (who we are with a Build your box link, Pages, Ordering: boxes of 4 or 8 from ₪55, pick-up in Ramat Eshkol, delivery on request, pareve; Reach us with WhatsApp and phone; base line with Privacy); no hours, payment, founding year or email in the record, so none shown; check-footer passes
+R3v.2 pass: a site of Home alone keeps its jumps (Prices, Find us, Build your box); no other pages to list; check-menu passes
+R3v.14 pass: the existing proof list (boxes of 4 or 8 from ₪55, Pareve, Pick-up in Ramat Eshkol, all from the record's description and price list) now carries the btn-facts class under the Build your box button; check-facts passes
+<!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->

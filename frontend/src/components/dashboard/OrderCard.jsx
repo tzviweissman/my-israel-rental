@@ -82,6 +82,7 @@ export default function OrderCard({ order: o, busy, onStatus, onEdit, onAssign, 
                   chip below already says it, in the board's language. */}
               {o.table && o.customer_name === `Table ${o.table}` ? '' : (o.customer_name || (counter ? t('counter.walkIn', 'Sale at the counter') : ''))}
             </span>
+            {o.order_no && <span className="text-[11px] font-semibold tabular-nums" style={{ color: 'var(--brand-muted)' }} data-testid="order-no">{o.order_no}</span>}
             <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-semibold border" style={pillStyle(o.status, false)}>
               {t(`orders.status.${o.status}`, o.status)}
             </span>

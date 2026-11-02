@@ -51,7 +51,7 @@ R3h.5 pass: there are no chapter lines, only the headline that lands in the ligh
 R3h.7 n/a: the film is one clip with no joins to compare
 R3h.8 pass: after the lit dark film the collection section is bright ivory, a bold change of mood
 R3h.11 n/a: the laptop film was graded up on 22 Oct and brightness.py now passes it (20 frames, average 52); the phone film is a black box that fills the middle third, graded to gamma 1.5 (box still black, ground lit) and still reads 22 to 23 in the middle on its last frames against the 33 asked, which needs a regenerated brighter phone clip and Tzvi's yes; listed in the report
-R3h.20 pass: measured 25 Oct at 1440x900 and 390x844 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop and 3.0 on a phone, 60 fps (median 16.7 ms, no frame over 50 ms); the box opens on its own dark room and her gift photos come out around it, nothing behind them of the same kind; box and photos whole; the film and the first gift photos load first
+R3h.20 pass: measured 25 Oct at 1440x900 (the check-site SMOOTH/SLOW method, frames looked at): pinned opening 3.3 screens on a laptop, 60 fps (median 16.7 ms, no frame over 50 ms); on a phone since 31 Oct the opening is one screen and plays on repeat (assets/open-m-loop.mp4), no scroll length, the six gifts rising out of the light once the lid is off (about 7 s in) and sinking back as it fades to the start, so the film is uncovered most of the time (check-photo-clear); the box opens on its own dark room and her gift photos come out around it, nothing behind them of the same kind; box and photos whole; the film and the first gift photos load first
 R3h.13 pass: untying, lid lift and light are one clip; the gifts start rising on the open-lid frame; walked 12 scroll positions at laptop and phone with no jump
 R3h.14 pass: the box stays in frame and recognisable through the whole opening on laptop and on phone
 R3h.17 n/a: the page does not use giant letters parting over film
@@ -167,11 +167,11 @@ R3f.4 n/a: no logo motif is animated onto the logo
 R3g.4 pass: reveals settle soft to sharp without bounce, rows about 90ms apart, hover under 300ms
 R3e.16 pass: grepped css and js: no linear easing; transitions under 0.5 seconds except the 700ms section reveal
 R3e.17 n/a: no carousel or bottom sheet
-R3e.18 n/a: the film is scrubbed by scroll, not an ambient looping video
+R3e.18 pass: on a laptop the film is scrubbed by scroll; on a phone it is a muted loop of the box opening (Tzvi's request, 29 Oct), played only while on screen, the still for reduced motion
 R3a.2 pass: viewed frames mid-opening at 1440 and 390: no unfinished state
 R3a.3 n/a: no label is placed on a spot of a photo or film
 R3a.4 pass: the held opening fits 1280x650 (check-fits); cutoff.mjs run on both pages; the order section is not held
-R3a.5 pass: the scroll sets the film's time and never takes the scroll; reduced motion shows the opened box; no parallax on phone
+R3a.5 pass: on a laptop the scroll sets the film's time and never takes the scroll (on a phone the film plays on repeat); reduced motion shows the opened box; no parallax on phone
 R3s.2 pass: check-site SHIFT and check-motion report no jump on choices
 R3s.1 pass: check-site STATE passes
 R3s.8 pass: buttons over the film are solid gold, viewed over the light and the dark frame
@@ -202,3 +202,22 @@ R3h.19 pass (made before the rule (26 Oct); answered from what the briefs and ge
 R3s.26 pass: check-site OVERLAP clean on every page at 1366x768, 1280x720, 1440x900 and 390x844, pinned scenes scrolled through (26 Oct 2026, run across all 45 pages by the lead session)
 
 R3s.27 pass: scripts/check-same-place.mjs clean on the home and order pages at 390x844 and 1440x900 (28 Oct): the six gifts that rise from the box land in one fixed grid, the headline holds one place, and the order page's gift tiles sit in one grid of equal tiles
+
+R3k.10 pass: order.html now opens with Delivery date set to today, the first day its own date field accepts (the owner has not yet said how far ahead to order, asked in message-to-owner.md); changeable, a picked day is never overwritten; quantity 1 per added gift; no owner default choice stated
+R3u.2 pass: order.html, picked Saturday 31 Oct in the delivery date: one line "We are closed on Shabbat. The first day we can do is Sunday 1 November." with a button "Choose Sunday" that sets it; the pick is never changed by itself, and the line is gone for a Sunday to Friday date (closure taken from the page's own hours, Sunday to Thursday and Friday to 12:00). No quantity limit is given by the owner, so none is shown
+R3u.3 n/a: gifts are sold one by one, not by size, tray or portion, and no figures for how many a gift serves exist
+R3u.5 n/a: the home page opens on a scroll film (the black box); check-arrival reports it as a film and skips it
+R3u.6 n/a: the first screen is a film, not separate cut-out pieces on a still ground
+R3u.7 n/a: the first screen is a film with its own chapter lines, and the headline has no list of occasions to rotate
+R3u.8 pass: a gift tag (a small tag with a cut left end and a string hole, turned minus 4 degrees, gold on ivory and ink on the how-to-order strip) over two headings, "Hand wrapped" and "Three steps", from the tag tied to every gift box; looked at at 1440x900 and 390x844. Shape for scrollcraft/fingerprints.json: "gift tag, cut left end with string hole"; fingerprints.json not edited here (not allowed), the lead adds it
+R3u.9 n/a: neither page has a questions section; "Good to know" is a list of facts and the owner has not yet sent questions (asked in message-to-owner.md)
+R3u.10 n/a: one place (Jerusalem, delivery across Israel)
+R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.12 pass: the tag is plain CSS on the page; no moving piece was added
+R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
+R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
+<!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->
+R3v.1 pass: full footer on index and order (who we are with a quiet Order a gift link, Pages, Ordering from the record: delivery across Israel, Bit/bank transfer/PayPal/Revolut, hours; Reach us: WhatsApp and email; base line with since 2025 as the old footer said, and Privacy); no lead time or address in the record, so none shown
+R3v.2 pass: the site is Home plus its order page, so the menu bar keeps its jumps (What we make, Prices, How to order)
+R3v.14 pass: Gifts from $25, Delivery across Israel, Bit/bank transfer/PayPal/Revolut (the page's own price line, delivery and payment lines; the lone price line became one of the three)
+<!-- 1 Nov 2026: footer checked again after a last fix (phone footer columns, duplicate page list, contact link); check-footer, check-menu and check-facts pass -->

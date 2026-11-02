@@ -16,7 +16,7 @@
 <link rel="stylesheet" href="site.css">
 </head>
 <body class="no-js" data-page="index">
-<header class="top" id="top">
+<header class="top" id="top" data-arrive="0">
   <a class="mark" href="index.html" aria-label="Nails by Elisheva, home"><img src="assets/logo.webp" alt="" width="240" height="287"><span>Nails by Elisheva</span></a>
   <nav class="nav" id="nav" aria-label="Nails by Elisheva"><a href="index.html" aria-current="page">Home</a><a href="book.html">Book</a><a href="contact.html">Contact</a></nav>
   <div class="top-r">
@@ -26,7 +26,7 @@
 </header>
 <main>
   <section class="hero" id="open" aria-labelledby="h-open">
-    <div class="frame" id="frame" data-crop-ok>
+    <div class="frame" id="frame" data-crop-ok data-arrive="3">
       <img class="cur" id="cur" src="assets/hero-milky-l.webp" alt="Milky white gel nails on a client" width="1920" height="1200" fetchpriority="high">
       <script>if (matchMedia('(max-width:760px)').matches) document.getElementById('cur').src = 'assets/hero-milky-p.webp';</script>
     </div>
@@ -34,14 +34,15 @@
     <div class="wrap">
       <div class="h-text">
         <p class="caps">Luxe Nail Studio · Romema, Jerusalem</p>
-        <h1 id="h-open">Gel nails and nail art<span class="script">by Elisheva</span></h1>
-        <p class="lede">Gel from ₪90. More than four years of experience.</p>
+        <h1 id="h-open" data-arrive="1">Gel nails and nail art<span class="script">by Elisheva</span></h1>
+        <p class="lede" data-arrive="2">Gel, French nails and nail art, done by Elisheva.</p>
       </div>
       <div class="h-pick">
         <p class="caps">Tap a shade</p>
         <div class="chips" id="chips"><button class="shade" type="button" data-k="milky" style="--c:#F4EFEE" aria-pressed="true" aria-label="Milky white"></button><button class="shade" type="button" data-k="bubblegum" style="--c:#F3A9C6" aria-pressed="false" aria-label="Bubblegum pink"></button><button class="shade" type="button" data-k="nude" style="--c:#E7C4B5" aria-pressed="false" aria-label="Soft nude"></button><button class="shade" type="button" data-k="ruby" style="--c:#8F1D2B" aria-pressed="false" aria-label="Ruby red"></button></div>
         <p class="shade-name" id="shade-name" aria-live="polite">Milky white</p>
-        <a class="btn" href="book.html" id="book-shade">Book a time <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>
+        <a class="btn" href="book.html" id="book-shade" data-arrive="4">Book a time <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a>
+        <ul class="btn-facts"><li>Gel from <span class="sym">₪</span>90</li><li>About 45 minutes</li><li>More than four years of experience</li></ul>
       </div>
     </div>
   </section>
@@ -104,7 +105,15 @@
     <p class="giant" aria-hidden="true">Nails by Elisheva</p>
   </section>
 </main>
-<footer class="foot"><nav aria-label="Pages"><a href="index.html">Home</a> · <a href="book.html">Book</a> · <a href="contact.html">Contact</a></nav>Luxe Nail Studio, Romema, Jerusalem · on <a href="/">MyIsraelRental</a>, free to list, no commission</footer>
+<footer class="foot full">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">Nails by Elisheva</a><p>Gel, French nails and nail art in Romema, Jerusalem.</p><a class="fcta" href="book.html">Book a time <span class="arw" aria-hidden="true"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M2 8h11M9 4l4 4-4 4"/></svg></span></a></div>
+    <nav aria-label="Pages"><h4>Pages</h4><a href="index.html">Home</a><a href="book.html">Book</a><a href="contact.html">Contact</a></nav>
+    <div><h4>Visit</h4><p>Luxe Nail Studio, Romema, Jerusalem</p><a href="https://www.google.com/maps/search/?api=1&amp;query=Luxe+Nail+Studio+Romema+Jerusalem" target="_blank" rel="noopener">Get directions</a><p class="fmut">Sun, Fri 10 to 13</p><p class="fmut">Mon to Thu 10 to 19</p><p class="fmut">Shabbat closed</p></div>
+    <div class="fwide"><h4>Reach us</h4><a href="https://wa.me/447871822590" target="_blank" rel="noopener">WhatsApp +44 7871 822590</a><a href="sms:+972533484521">Text +972 53 348 4521</a><a href="mailto:elishevaberlinger@gmail.com">elishevaberlinger@gmail.com</a></div>
+  </div>
+  <div class="fbase"><span>© 2026 Nails by Elisheva.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
+</footer>
 
 <div class="bar" id="bar" aria-hidden="true">
   <p class="p"><b>Gel nails ₪90</b>Romema, Jerusalem</p>

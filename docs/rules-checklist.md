@@ -8,6 +8,11 @@ be answered for every site before anyone is shown it.
 
 ## How to use it
 
+**Since 1 Nov 2026 a new site is built from this list, not checked against it afterwards** (page rules 0b.0):
+`node scripts/blueprint.mjs scrollcraft/builds/<site>` turns every line below into a step of `BLUEPRINT.md`, in
+build order, planned before each stage is built and ticked as it is built; RULES.md is then written from it.
+The steps below are how sites made before then keep their RULES.md.
+
 1. `node scripts/check-rules.mjs --template scrollcraft/builds/<site>` writes `<site>/RULES.md`
    with every id below set to `todo`.
 2. Run the scripts named in the HOW column on every page of the site, and do every LOOK by
@@ -22,6 +27,9 @@ be answered for every site before anyone is shown it.
    to Tzvi, the owner, or published. It fails on a missing id, a `todo`, a `fix:`, a line with no
    reason, or a RULES.md older than the newest .html/.css/.js/.py in the build (any edit means
    the rules are looked at again).
+   A line added here after a site was first published is not required of that site until its
+   RULES.md answers it (Tzvi, 29 Oct 2026: "new rules shouldnt affect already made sites";
+   `scripts/rule-dates.mjs`). A new site answers every line.
 5. The person who did not build the site also answers `docs/page-review-checklist.md` (3r.2).
 
 **A rule added to `docs/page-generation-rules.md` (or to the skill's SKILL.md) must be added to
@@ -75,8 +83,9 @@ R3g.13 | The first screen holds a picture, a headline of 2 to 5 words that says 
 R3b.1 | The first screen answers: what it is, where, why trust it, what to do next | 3b.1 | LOOK: same screenshots
 R3b.2 | Proof (price, credential or rating) touches the main button; for food a kosher band sits just after the opening, not crowding the button, and the certificate is stated at most twice as a sentence or band (a small identical kosher tag on items does not count) | 3b.2, 3b, 3s.9 | LOOK: first screen and the next; count the kosher sentences and bands on every page
 R3b.3 | One solid action per screen: header button and phone bar repeat it; the header button is outline when the hero shows a solid one; everything else is outline, link or tile | 3b.3 | LOOK: every screen position while scrolling
-R3h.20 | A scroll-driven opening runs at 60 fps, is at least 3 screens long, shows the product on a plain ground of its own world (never on a photo of the same kind of product), keeps the product and photos whole, and loads the first screen first | 3h (smooth, slow enough, clean) | script: site SMOOTH and SLOW; LOOK at the sheet for ground, cut-offs and late pictures
-R3h.21 | One scroll effect per page: only the opening film follows the scroll; anything after it that changes (flavours, sizes, steps) changes on a tap and the page scrolls normally | 3h.20 | script: check-one-scroll
+R3h.20 | A scroll-driven opening runs at 60 fps, is at least 3 screens long, shows the product on a plain ground of its own world (never on a photo of the same kind of product), keeps the product and photos whole, and loads the first screen first | 3h (smooth, slow enough, clean) | script: check-opening-scroll (SMOOTH, SLOW); LOOK at the sheet for ground, cut-offs and late pictures
+R3h.21 | Effects, never too much: the opening film may hold the page for its length; any other section that holds the page while the scroll changes it is at most a screen and a half, at most three in all; longer turning becomes a tap; nothing stands between a phone visitor and the products or the order | 3h.20 | script: check-one-scroll
+R3h.22 | A film starts as one storyboard sheet of rough line drawings (one row per concept, 3 to 4 panels), approved by Tzvi before any photoreal still; only the chosen concept is made as stills | 3h.6 (Sketch first) | LOOK: gen/storyboard.png named in the film brief, Tzvi's pick quoted; n/a for a site with no generated film
 R3h.23 | Every film clip passes check-clip (no JUMP, RUSH, BLANK, VANISH or APPEAR), its brief has "How it really happens" from a real reference and a "Key moment" with its own clip, and each numbered step was ticked off against the clip at 8 fps | 3h.21 | script: check-clip (check-build runs it on gen/film/opening.mp4); film-gate hook; n/a if no film
 R3h.1 | The home page opens on a full-screen picture or film (at least 70% picture) and it is an event from their own thing (a film, or an event built in code), proposed with the first build, never after | 3h.1, 3n | script: site OPENING (home page) plus LOOK to confirm it is an event, not a drift
 R3n.1 | The owner's strongest real photo fills at least half the first screen on a laptop and on a phone, not a small card or cut-out shape | 3n.1 | LOOK: first screen at 1440x900 and 390x844
@@ -190,6 +199,7 @@ R3k.7 | The order is in steps after choosing: Step 1 basket, Step 2 when and whe
 R3k.8 | Every basket line, packages included, has a remove button (40 px, "Remove X from the basket") beside its stepper | 3k.1 | script: site TAP (size) plus LOOK on a basket with a package
 R3k.6 | The basket lives between pages: an Add on any page puts the item in and opens the order page with it there | 3k.6, 3k.7 | LOOK: add on one page, arrive on the order page
 R3k.9 | Every order or booking is POSTed to MyIsraelRental (the business's order form) before WhatsApp opens; every product on the site is a product of the listing with the same name and price | 3k | check-site SAVE (also fails product ids the live shop does not list); LOOK: the saved order in the owner's dashboard names real products
+R3k.10 | The order form arrives filled in: the day field holds the first day the business can do (lead time, closures), quantity 1, the owner's most common choice pre-chosen; all changeable, a customer's pick never overwritten | 3k.8 | script: check-prefill
 R3.15 | What the brief asks visitors to do has a place to do it (book or order needs the services block, message needs contact, visit needs hours and address) | 3 action | LOOK
 R7.1 | Three options are for the automatic page builder only; a hand build picks one direction itself and says why in one line in CONCEPT.md, with no options page put to Tzvi or the owner unless asked | 3, 7, 3c.1, 8a | LOOK: CONCEPT.md names the pick and the reason
 R8.5 | Every main button goes to the quickest route to a finished order the business has: its order page, then its price list, only then WhatsApp; WhatsApp stays the quiet secondary; the how-to-order steps describe the real path | 8 (The quickest way to order) | LOOK: follow every main button
@@ -226,6 +236,7 @@ R3s.1 | Everything pressable answers within 100 ms with a hover and a pressed st
 R3s.8 | Buttons over a photo sit in a soft container, checked on a light and a dark photo | 3s.8 | LOOK
 R3s.10 | The picture appears the moment a thing is named | 3s.10 | LOOK
 R3s.27 | Same thing, same place: a repeated kind of thing (each size, step, card, slide, scroll state) is written in the same place and style every time, and a growing block hangs from a fixed top so its heading never moves | 3s.27 | LOOK: step through every state on a phone and a laptop; the label's top must not change; n/a if nothing repeats
+R3s.28 | No blank screen anywhere in the scroll: at every stop something is there to look at (words, a picture, the film), never a screen of plain ground | 3s | script: check-blank
 R3i.3 | A live readout tied to the scroll shows only a true fact of their process, small mono at a corner, never a made-up number | 3i.3 | LOOK; n/a if none
 R3s.21 | No script errors, console errors, 404s or dead links between the site's pages | 3s BROKEN | script: site BROKEN
 
@@ -236,13 +247,43 @@ R3f.7 | The bottom bar fits at 360 px: its label shrinks or wraps, its button ne
 R3a.6 | A fixed bar never covers content (room is kept for it, including the last line and the end of the page) | 3a table | script: site PHONE
 R3s.22 | Everything to tap is at least 40 px on a phone and no two taps overlap | 3s TAP | script: site TAP
 R3s.23 | The page never scrolls sideways on a phone | 3s PHONE | script: site PHONE
-R3s.26 | No words sit on other words anywhere on the page, pinned scenes included, on short laptops (1366x768, 1280x720), 1440x900 and a phone | 3s OVERLAP | script: site OVERLAP
+R3s.26 | No words sit on other words anywhere on the page, pinned scenes included, on short laptops (1366x768, 1280x720), 1440x900 and a phone | 3s OVERLAP | script: check-overlap
 R3t.1 | The site declares its category (CONCEPT.md and a site-category meta on every page) and follows that category's row of the 3t table: ground and colour, pictures, how it sells, type | 3t | check-site CATEGORY; LOOK: compare the home and shop pages with the category's screenshots in docs/inspo/awwwards-anatomy-2026-10-22/
 R3t.2 | food-shop and fashion-shop: a price and an Add or Order control within the first two screens; every product card has photo, name, size or servings, price and a button | 3t | check-site BUY; LOOK: every card
 R3t.3 | trainer: at least a third of sections are picture, never three plain sections in a row | 3t | check-site WORLDS
-R3t.4 | A real footer on every page, identical: a last big line, the button, link columns, contact, the MyIsraelRental line | 3t, 3k.3 | LOOK: footer of every page
+R3t.4 | A real footer on every page, identical: a last big line, the button, link columns, contact, the MyIsraelRental line (since 1 Nov 2026 the full footer of R3v.1) | 3t, 3k.3 | LOOK: footer of every page
 R3a.7 | Every state is checked on the device that shows it (touch emulation for phones, never a narrow desktop window; hover-only looks have a touch version) | 3a table, 3e.9 | LOOK: record which emulation was used
 R3a.8 | A line of items separated by dots never wraps | 3a table | LOOK at 360x640
+
+## 8b. From the seven videos, part two (29 Oct 2026)
+
+R3u.2 | A day the business cannot do (closed, full, inside the lead time) or a quantity over its limit gets one plain line under the field naming the next possible one, with a button to choose it; the form never quietly refuses or changes the pick | 3u.2 | LOOK: pick a closed day and an over-limit quantity on the order page; n/a if the site takes no day or quantity
+R3u.3 | Price per portion beside each size ("about ₪25 a person") when the owner gave servings or pieces, rounded down; without figures the question is in message-to-owner.md | 3u.3 | LOOK: every size against the owner's figures; n/a if nothing is sold by size
+R3u.5 | A home page with no scroll film: the first screen arrives in order (bar, headline, line, picture, button), about 1.5 s, once; all there without JS or with motion off | 3u.5 | script: check-arrival; n/a if the home page opens on a scroll film
+R3u.6 | Depth on laptops: separate pieces on the first screen move at their own speeds with the scroll (near faster, far slower), laptops with a mouse only, still on phones and with motion off | 3u.6 | LOOK at 1440x900 scrolled 0 and 300 px, and on a phone; n/a if the first screen has no separate pieces
+R3u.7 | At most one rotating word, in the headline, from the owner's real occasions or products; reads right with each; full list for screen readers; first word with motion off; not beside a film's moving words | 3u.7 | LOOK; n/a if none
+R3u.8 | A tilted label over headings, if used, is this site's own shape from its world and in fingerprints.json, never another site's | 3u.8 | LOOK: its "label" in fingerprints.json differs from every other site's; n/a if none
+R3u.9 | Questions are rounded cards on `<details>`, "+" in an accent circle turning into "x", the answer opening smoothly inside the card | 3u.9 | LOOK: open two on a phone; n/a if no questions section
+R3u.10 | A business with two or more places has its list beside a map in the site's colours with numbered pins, the map held on a laptop and above the list on a phone | 3u.10 | LOOK; n/a with one place or none
+R3u.11 | The page passed its checks with a still where the film goes before the film went in | 3u.11 | LOOK: the build's report or commits; n/a with no film
+R3u.12 | Every moving piece not in the kit was tried on a test page with buttons for each state before it went in | 3u.12 | LOOK: the test page in gen/ or the kit
+R3u.13 | gen/report.md ends with "Not done yet" and "For your call" (at most two) | 3u.13 | LOOK: gen/report.md
+R3u.14 | gen/copy-pass.md holds a shorter version of every line over 20 words and paragraph over three lines; the shorter is used unless it drops a fact | 3u.14 | LOOK: gen/copy-pass.md against the pages
+R3w.1 | Every generated food shot has a real cause on screen (a hand, a spoon, gravity), one event of 2 to 4 s, and its end stays; nothing floats into place or appears, no smoke or flash wipes between shots; except in the opening film, where the owner's own ingredients may swirl and float round the product in advert style, marked in the brief (the product itself never changes, nothing pops in or out in the open) | 3w.1, 3w.2 | LOOK: the film's frame sheet at 4+ fps; n/a without generated food
+R3w.2 | Generated liquids and steam look real: sauces opaque and thick, no glassy drips or big glass bubbles, steam thin wisps lit from behind, never a cloud | 3w.3, 3w.4 | LOOK: frame sheet; n/a with no liquid or steam
+R3w.3 | Generated food is lit from the side and behind with the camera side darker, never flat from the front; a pour or fall stays sharp when paused | 3w.4, 3w.6 | LOOK: frame sheet, pause the fastest moment; n/a without generated food
+R3w.4 | The film's start and end pictures were right before any clip was made; each clip was made once at full quality (a draft only where get_cost showed it under a third of the price); simple motion (a growing crack, push-in, drift, holds) is done in code; every clip judged at 4+ fps | 3w.10 | LOOK: gen/ report or the generation log; n/a with no generated film
+R3w.5 | No bite, chew or tear is shown in motion unless Tzvi approved that take; otherwise the film cuts to the result | 3w.12 | LOOK; n/a if the film has none
+R3w.6 | A scroll film's scrub ends where the clip's motion ends (check-clip's figure), the last hold is short, and its last frame is the picture the next section shows | 3w.13, 3w.14 | LOOK: scroll the film's end on a laptop; n/a with no scroll film
+
+## 8c. From the ten design videos and five real sites (1 Nov 2026)
+
+R3v.1 | A full footer, the same on every page: who they are (name, one line, a quiet link to the main action), every page, how ordering works or Visit, Reach us, and a base line with © year, the MyIsraelRental line and a Privacy link; parts only when the record fills them | 3v.1 | script: check-footer
+R3v.2 | The menu bar lists the site's pages, the same on every page; a site with other pages has no #jumps in the bar; order and booking steps may keep a quieter bar | 3v.2 | script: check-menu
+R3v.6 | Sections of different heights: at least two sizes on a page, never three in a row the same height | 3v.6 | script: check-heights
+R3v.7 | Layouts (bento, zigzag steps, callouts, picture beside four facts, peek row) chosen by what the business has, never the same layout twice in a row on a page | 3v.7 | LOOK: name each section's layout in CONCEPT.md; n/a if none of these is used
+R3v.8 | Effects from 3v (light on cards, fanned photos, rolling letters, circle reveal, curtain between pages, picture buttons, statement band) are chosen for this business, not the set of the site built before it, each with its phone and reduced-motion version | 3v.8-16 | LOOK: CONCEPT.md names the effects and the previous site's set; n/a if none
+R3v.14 | Three true facts from the record right under the main button on the home page (class btn-facts) | 3v.14 | script: check-facts
 
 ## 9. Finish
 

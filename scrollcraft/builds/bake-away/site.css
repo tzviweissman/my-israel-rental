@@ -185,6 +185,10 @@ h1, h2, h3 { font-weight: 400; letter-spacing: .005em; }
   .film .chap { height: 1.5em; font-size: .875rem; }
   .film .go { grid-template-columns: auto 1fr; align-items: center; gap: 1rem; }
 }
+/* phone: the film plays on repeat in one screen (film.js adds .loop); the page scrolls on normally and one chapter line holds still */
+.film.loop { height: auto; }
+.film.loop .stage { position: relative; top: 0; }
+.film.loop .chap .k1, .film.loop .chap .k3 { opacity: 0; } .film.loop .chap .k2 { opacity: 1; transform: none; }
 @media (prefers-reduced-motion: reduce) { .film { height: auto; } .film .stage { position: relative; top: 0; } .film .chap span { transition: none; } .film .chap .k1 { opacity: 0; } .film .chap .k3 { opacity: 1; transform: none; } .film h1 .ln > span { animation: none; } .ln > span { transform: none; } }
 
 /* ── the flavour spot (X31): the doughnut stays, tap a flavour and the same place shows it (one scroll effect per page: the film) ── */
@@ -347,3 +351,25 @@ label.opt input { accent-color: var(--ivory); width: 20px; height: 20px; }
 .cream .trio button[aria-pressed="true"] { border-color: var(--ivory); }
 .cream .trio button img { display: block; }
 .cream .cr-n { margin: .2rem 0 .8rem; font: 600 1.05rem var(--font-body); color: var(--ivory); }
+.nxt { margin: .5rem 0 0; min-height: 44px; padding: 0 1.1rem; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font: 600 .95rem/1 var(--font-body); cursor: pointer; }
+.nxt[hidden] { display: none; }
+
+/* the full footer (rules 3v.1): who they are, every page, how ordering works, how to reach them, then one base line */
+.foot.full { text-align: start; font-size: .92rem; padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.4rem + var(--pad-bar, 0px)); }
+.foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+.foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--soft); }
+.foot.full nav { margin: 0; font-weight: 400; }
+.foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; margin: 0 0 .55rem; color: var(--ivory); }
+.foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+.foot .fgrid a.fname { font: 400 1.7rem/1 var(--font-head); letter-spacing: .08em; margin-bottom: .9rem; }
+.foot .fbrand p { max-width: 30ch; color: var(--soft); line-height: 1.55; }
+.foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+.foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .82rem; color: var(--soft); }
+.foot .fbase a { color: var(--ivory); }
+@media (max-width: 760px) { .foot .fgrid { grid-template-columns: 1fr 1fr; } .foot .fbrand { grid-column: 1 / -1; } }
+/* three true facts under the main button (rules 3v.14) */
+.btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem; color: var(--soft); }
+.btn-facts li { display: inline-block; }
+.btn-facts li::before { content: ''; width: .4em; height: .4em; border-radius: 50%; background: var(--accent); }
+.btn-facts li::before { display: inline-block; vertical-align: middle; margin-inline-end: .45em; margin-bottom: .15em; }
+.btn-facts .sym { font-size: 1em; vertical-align: 0; margin: 0; padding: 0; }
