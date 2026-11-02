@@ -432,12 +432,6 @@ section.sec { padding-block: clamp(1.6rem, 6.5svh, 4.8rem); }
 .ptag { background: var(--surface); color: var(--ink); }
 .ptag::before { background: var(--ink); }
 .foot { padding: 2.2rem var(--gutter) calc(2.2rem + var(--pad-bar, 0px)); text-align: left; }
-.fcols { max-width: 72rem; margin: 0 auto; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.5rem 2.5rem; }
-.fcols h4 { margin: 0 0 .6rem; font: 600 .85rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--soft); }
-.fcols nav, .fcols > div { display: grid; gap: .35rem; align-content: start; }
-.fcols p { margin: 0; }
-.fcols .fine { grid-column: 1 / -1; padding-top: 1rem; border-top: 1px solid var(--line); font-size: .9rem; }
-@media (max-width: 760px) { .fcols { grid-template-columns: 1fr; } }
 
 /* ── type scale (rule 3e.14): six sizes on the whole site: 14 labels, 17 text and buttons, 20 lead lines and prices,
    one section heading, one page heading, the giant RS mark. ── */
@@ -538,3 +532,25 @@ html.arrive-go [data-arrive="4"] { --n: 4; animation-name: arrive-pop; animation
 html.arrive-go .doorway[data-arrive="3"] { animation: none; }
 html.arrive-go .doorway[data-arrive="3"]::after { content: ""; position: absolute; inset: 0; z-index: 9; background: var(--green); pointer-events: none; animation: arrive-cover 900ms cubic-bezier(.2,.7,.2,1) 400ms forwards; }
 @keyframes arrive-cover { to { opacity: 0; } }
+/* the full footer (rules 3v.1): who we are, every page, how to book or visit, how to reach us, then one base line */
+.foot.full { text-align: start; font-size: .92rem; padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.4rem + var(--pad-bar, 0px)); opacity: 1; }
+.foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+.foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--soft); }
+.foot.full nav { margin: 0; font-weight: 400; }
+.foot.full nav a { margin: 0 0 .55rem; }
+.foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; margin: 0 0 .55rem; color: var(--ink); text-decoration: none; }
+.foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="sms:"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+.foot .fgrid a.fname { font: 400 1.7rem/1.1 var(--font-head); letter-spacing: .04em; margin-bottom: .9rem; }
+.foot .fbrand p { max-width: 30ch; color: var(--soft); line-height: 1.55; }
+.foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; }
+.foot .fgrid p.fmut { color: var(--soft); }
+.foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid var(--line); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .82rem; color: var(--soft); }
+.foot .fbase a { color: var(--ink); text-decoration: underline; }
+@media (max-width: 760px) { .foot .fgrid { grid-template-columns: 1fr 1fr; } .foot .fbrand, .foot .fwide { grid-column: 1 / -1; } }
+/* three true facts under the main button (rules 3v.14) */
+.btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem; color: var(--soft); }
+.btn-facts li { display: inline-block; }
+.btn-facts li::before { content: ''; display: inline-block; vertical-align: middle; width: .4em; height: .4em; border-radius: 50%; background: currentColor; margin-inline-end: .45em; margin-bottom: .15em; }
+.btn-facts .sym { font-size: 1em; vertical-align: 0; margin: 0; padding: 0; }
+.foot .fgrid a.fname { text-transform: uppercase; letter-spacing: .12em; font-size: 1.3rem; }
+.open-stage .btn-facts { color: var(--ground); margin-top: 1.1rem; }

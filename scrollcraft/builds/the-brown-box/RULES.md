@@ -220,3 +220,6 @@ R3v.1 pass: full footer on index and order (who we are with the kosher seal and 
 R3v.2 pass: the site is Home plus its order page, so the menu bar keeps its jumps (Bowls, Menu, Gift boxes)
 R3v.14 pass: Bowls from ₪60, Delivery throughout Jerusalem, Cash, Zelle, bank transfer or card (the page's own price, delivery and payment lines)
 <!-- 1 Nov 2026: footer checked again after a last fix (phone footer columns, duplicate page list, contact link); check-footer, check-menu and check-facts pass -->
+
+Note, 1 Nov 2026: the facts under the button are a little smaller on short phones (360x640), so the opening picture stays seen (check-photo-clear). No rule answer changes.
+Note, 1 Nov 2026: and no glow behind those facts on short phones.

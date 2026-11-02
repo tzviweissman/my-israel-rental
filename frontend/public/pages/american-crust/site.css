@@ -321,3 +321,22 @@ label.opt input { accent-color: var(--night); width: 20px; height: 20px; }
 .ful { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; margin-bottom: 1rem; } @media (max-width: 420px) { .ful { grid-template-columns: 1fr; } }
 .nxt { margin: .5rem 0 0; min-height: 44px; padding: 0 1.1rem; border: 0; border-radius: 999px; background: var(--accent); color: var(--accent-ink); font: 600 .95rem/1 var(--font-body); cursor: pointer; }
 .nxt[hidden] { display: none; }
+
+/* the full footer (rules 3v.1) */
+.foot.full { text-align: start; opacity: 1; font-size: .95rem; padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.4rem + var(--pad-bar, 0px)); }
+.foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.6fr 1fr 1.4fr 1.3fr; gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
+.foot.full h4 { margin: 0 0 .9rem; font: 600 .76rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; color: var(--mustard); }
+.foot.full nav { margin: 0; font-weight: 400; }
+.foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; margin: 0 0 .55rem; color: var(--cream); }
+.foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }
+.foot .fgrid nav a { margin: 0 0 .55rem; }
+.foot .fgrid a.fname { font: 400 2.2rem/1 var(--font-head); letter-spacing: .03em; text-transform: uppercase; margin-bottom: .9rem; }
+.foot .fbrand p { max-width: 30ch; color: #E9DDB8; line-height: 1.55; }
+.foot .fgrid a.fcta { display: inline-flex; align-items: center; gap: .5rem; margin-top: .4rem; font-weight: 700; color: var(--mustard); }
+.foot .fbase { max-width: 74rem; margin: clamp(2rem, 5vw, 3rem) auto 0; padding-top: 1.2rem; border-top: 1px solid rgba(254, 247, 229, .22); display: flex; flex-wrap: wrap; justify-content: space-between; gap: .5rem 1.5rem; font-size: .85rem; color: #E9DDB8; }
+.foot .fbase a { color: var(--cream); }
+@media (max-width: 860px) { .foot .fgrid { grid-template-columns: 1fr 1fr; } .foot .fbrand { grid-column: 1 / -1; } }
+/* three true facts under the main button (rules 3v.14) */
+.btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: .9rem 0 0; padding: 0; list-style: none; font: 600 .95rem/1.35 var(--font-body); color: var(--cream); width: 100%; }
+.btn-facts li::before { content: ''; display: inline-block; width: .4em; height: .4em; border-radius: 50%; background: var(--mustard); vertical-align: middle; margin-inline-end: .45em; margin-bottom: .15em; }
+.btn-facts .sym { font-size: 1em; vertical-align: 0; margin: 0; padding: 0; }
