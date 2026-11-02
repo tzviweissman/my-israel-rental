@@ -299,3 +299,5 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 ## Code review of 1 Nov 2026
 - [Low] `GET /marketplace/gigs?limit=0` (public) now reads every published listing on each request before cutting; fine at 62, worth paging in Mongo past a few hundred. Seen 1 Nov (2026-11-01-site-audit.md). Noted by the author in a code comment.
 - [To fix] Audit setup still fails: MongoDB download 403 again (1 Nov), Chromium download fails; `pytest_asyncio` is also missing from the backend venv, so test_dropship, test_jobs_end_to_end, test_page_products fail to collect and the DB tests (including the new test_gigs_list_all.py) error. The preinstalled /opt/pw-browsers/chromium is still not used by the script.
+- [Low] Chicken Munch home scrolls 7px sideways at 375 (closing block `.go-order`, `site.css:312`). First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
+- [Low] Footer and menu links on the 17 business sites are 19 to 24px tall on phones, under 44px. First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
