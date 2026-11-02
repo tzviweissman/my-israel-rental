@@ -9,6 +9,10 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 ## Open
 
+- [Medium] Audit setup: 2 Nov run again had no MongoDB (403) and no Chromium, so the full backend suite could not run (only 30 tests that need no database passed). First seen 15 Oct, still open (2026-11-02-site-audit.md).
+- [Low] Ad cut-outs: the cut-out step downloads each item photo URL from the server (utils/cutout.py); whether that URL is checked against the allowed-media list was not confirmed. First seen 2 Nov (2026-11-02-site-audit.md).
+- [Fixed 2 Nov, 26b56084] Orders: the no-login Confirm page looked orders up by an unindexed key (full scan per request).
+
 Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged), each line re-checked against main.
 
 - [Low] Page editor link filter accepts "/%2F/evil.com"; stays a path on this site, probably harmless. First seen 12 Oct.
@@ -299,5 +303,17 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 ## Code review of 1 Nov 2026
 - [Low] `GET /marketplace/gigs?limit=0` (public) now reads every published listing on each request before cutting; fine at 62, worth paging in Mongo past a few hundred. Seen 1 Nov (2026-11-01-site-audit.md). Noted by the author in a code comment.
 - [To fix] Audit setup still fails: MongoDB download 403 again (1 Nov), Chromium download fails; `pytest_asyncio` is also missing from the backend venv, so test_dropship, test_jobs_end_to_end, test_page_products fail to collect and the DB tests (including the new test_gigs_list_all.py) error. The preinstalled /opt/pw-browsers/chromium is still not used by the script.
+- [Low] Chicken Munch home scrolls 7px sideways at 375 (closing block `.go-order`, `site.css:312`). First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
+- [Low] Footer and menu links on the 17 business sites are 19 to 24px tall on phones, under 44px. First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
+
+## Dead-ends audit of 1 Nov 2026
+- [Low] `POST /notifications/preferences` saves a document nothing reads and no screen writes. Seen 1 Nov (2026-11-01-dead-ends.md). Orphaned; no site promise depends on it.
+- Dead-ends audit 1 Nov: no new broken links or empty promises; still no database in the sandbox, so signed-in clicking was not possible (see "Audit setup" above).
+
+## Code review of 1 Nov 2026
+- [Low] `GET /marketplace/gigs?limit=0` (public) now reads every published listing on each request before cutting; fine at 62, worth paging in Mongo past a few hundred. Seen 1 Nov (2026-11-01-site-audit.md). Noted by the author in a code comment.
+- [To fix] Audit setup still fails: MongoDB download 403 again (1 Nov), Chromium download fails; `pytest_asyncio` is also missing from the backend venv, so test_dropship, test_jobs_end_to_end, test_page_products fail to collect and the DB tests (including the new test_gigs_list_all.py) error. The preinstalled /opt/pw-browsers/chromium is still not used by the script.
+
+## UI audit of 2 Nov 2026
 - [Low] Chicken Munch home scrolls 7px sideways at 375 (closing block `.go-order`, `site.css:312`). First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
 - [Low] Footer and menu links on the 17 business sites are 19 to 24px tall on phones, under 44px. First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
