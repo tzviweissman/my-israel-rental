@@ -274,3 +274,5 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Low] Plural checks awayReply.body and stays.repliesWithinHours, and the away-reply exclamation marks: reached main with the 31 Oct follow-up merge (test-i18n-parity passes; it failed on main before).
 - [Low] Chicken Munch order page shows "Total 0" with no currency while the basket is empty (2026-10-31-ui-audit.md). Open: a business site change needs a full republish; left for the next Chicken Munch change.
 - [Low] Hardcoded #F9FAFB / #E3E3E3 class names in AdMaker.jsx and ListingStrength.jsx (2026-10-30-ui-audit.md #2). Open, nit; values match the flow theme.
+- [Low] Chicken Munch home scrolls 7px sideways at 375 (closing block `.go-order`, `site.css:312`). First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
+- [Low] Footer and menu links on the 17 business sites are 19 to 24px tall on phones, under 44px. First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
