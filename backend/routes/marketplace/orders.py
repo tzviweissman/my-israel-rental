@@ -291,6 +291,8 @@ async def ensure_order_indexes() -> None:
         )
         await db.store_standing_orders.create_index([("business_id", 1), ("active", 1)], background=True)
         await db.store_customers.create_index([("business_id", 1), ("key", 1)], unique=True, background=True)
+        # The one-order Confirm page looks orders up by this key with no login.
+        await db.store_orders.create_index("owner_token", sparse=True, background=True)
         # No two orders of one store share a number (order_texts.insert_order).
         await db.store_orders.create_index(
             [("business_id", 1), ("order_no", 1)], unique=True,
