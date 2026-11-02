@@ -41,3 +41,29 @@ Tzvi, 2 Nov 2026: "this one looks pretty good" (his screen recording; frames at 
   uneven holes opening. The filling layer shows in both faces.
 - Why it works: one slow event, nothing breaks on screen, so there is nothing for the model to get wrong.
 - Not to copy: the sprinkles that then burst out of the gap from nowhere (3w.1).
+
+## Four more AI adverts Tzvi sent (2 Nov 2026, "look at these too")
+His screen recordings of Pinterest pins by "AI network visuali...". All generated; kept for the look of the web.
+
+### ai-caramel-crunch-held-apart.jpg — the closest to Krysp (Cadbury Caramel Crunch, 5.2 to 7.2 s)
+- The same idea as Neon Bite: two halves already apart, held still, the caramel web across the gap.
+- The web has crunchy bits stuck in it, like Krysp's rice in peanut butter; it thins, holes open, one
+  thick strand stays to the end. The torn faces show the crunch layer.
+- Not to copy: crumbs flying upward from nowhere, and the hard cut to a bar in a caramel splash (3w.1).
+
+### ai-crack-runs-then-web.jpg — the best order of events (Milka cookie, 2.4 to 5.4 s)
+- A crack line shows first and runs top to bottom; then the halves part slowly and the chocolate
+  stretches as a web pinched in the middle, with crumbs falling down (gravity, not upward).
+- Not to copy: no hands, it splits by itself (3w.1); later chocolate ribbons fly in from nowhere.
+
+### ai-cookie-web-holes.jpg — the web at its best, and what goes wrong (Oniro cookie, 7.6 to 10 s)
+- The web is thick at both faces with big round holes between, crumbs stuck in it: the best web of all.
+- Not to copy: the halves then close again and the web goes back in (3w.2, nothing springs back);
+  a chocolate pour comes from nowhere before it.
+
+### Not kept: the truffle and swirl clip
+Floating truffles, swirls and fruit bursting in mid-air: nothing has a cause (3w.1).
+
+### What the five liked adverts share
+Not one shows the bar being torn in close-up. They start from the halves already apart, or a crack line
+that only opens; the sticky web is the whole event; the camera hardly moves.
