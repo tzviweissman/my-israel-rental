@@ -1009,6 +1009,7 @@ that policy).*
    prompt. A start and end frame cannot fix an impossible middle: the model
    fills it with a morph. "A watermelon bursts into a whole platter of other
    fruit" failed twice for exactly this reason, both times on its middle.
+   (The owner's ingredients swirling round the product in an opening film are allowed: 3w.1, exception.)
    Show Tzvi the object list with the steps, and watch every generated clip
    at 8 fps asking the same question of each object.
    **The test is whether it looks off, not strict physics** (Tzvi, 26 Oct
@@ -1410,7 +1411,8 @@ list of still sections. The film opening that delivers the wow is 3h.
 1. **Generated food in motion is allowed only in the full-screen opening film
    (3h)** (Tzvi, 22 Oct 2026). It is made in advert style and checked frame by
    frame at 4 frames a second or more: no food appearing from nowhere, no
-   glass or neon look, pieces never fade or vanish. **Everywhere else on the
+   glass or neon look, pieces never fade or vanish. (Advert-style ingredients
+   swirling round the product: 3w.1, exception.) **Everywhere else on the
    page, food stays the owner's real photo.** The single home of this policy;
    3h.13 to 3h.16, 3e and section 8 point here. Why the limit: in the page body
    generated food motion (a split piece, crumbs flying, a sauce splash, a toss,
@@ -1847,6 +1849,14 @@ before paying, frosted or shaded text over film, the phone loop) is not repeated
    bacon, a sauce poured from a spoon, tomato laid down. The worst has fries and burger layers floating into
    place in mid-air, with sparks, and a smoke wall used as the cut. Floating assembly, pieces from nowhere
    and smoke or flash wipes are refused. (3 AI adverts, frames.) This is 3h.18 seen on real examples.
+   **Exception: advert style in the opening film** (Tzvi, 2 Nov 2026, on Krysp, after five AI chocolate
+   adverts he liked, `docs/inspo/bar-breaking-2026-11-02/`: "allow it in the rules"). In the full-screen
+   opening film only, the product's own ingredients may swirl, orbit, float and splash round it as in a
+   studio advert, with no cause on screen, and may come in or go out past an edge or from out of focus
+   behind it. Still refused: anything that is not one of the owner's own ingredients, the product
+   changing shape, colour or size, pieces fading or popping in or out in the open, smoke or flash wipes,
+   glass or neon liquid. The brief's object list marks which objects are advert style; the single home of
+   this exception, 3h.18 and 3o.1 point here.
 2. **One event per shot, 2 to 4 s, and its end stays.** The sauce lands, forms a mound and stays there.
    Nothing springs back, and nothing else moves except a little steam. (3 videos.)
 3. **Thick and opaque reads as real; clear and glossy reads as AI.** Opaque sauce, burrata, cream and
