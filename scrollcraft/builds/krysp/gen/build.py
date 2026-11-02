@@ -42,10 +42,10 @@ def hh(t):
 SEAM = ('<svg class="seam" viewBox="0 0 40 1000" preserveAspectRatio="none" aria-hidden="true" focusable="false">'
         '<path d="M20 0 L14 90 L25 170 L12 270 L27 360 L16 450 L26 560 L13 650 L24 760 L17 850 L22 940 L20 1000 M16 450 L4 470 M26 560 L38 576"/></svg>')
 
-# The snap film (gen/snap-brief.md, gen/film.sh): one chew bends and snaps, the moment freezes and the camera goes
-# round the break, then her real board dissolves in. Marks follow film.sh's joins (23.5 s):
-# c2 0.35 the intro steps back as the tear begins and the small price-and-Order card takes its place for the rest of
-# the film (the review: half the film had no price on a laptop). The break carries no labels:
+# The advert film (gen/advert-brief.md, gen/film.sh, 2 Nov 2026): peanut butter and chocolate swirl round the whole chew,
+# a close-up, the halves broken open on a board, then her real board dissolves in. Marks follow film.sh's joins (11.2 s):
+# c2 0.35 (3.9 s, the close-up) the intro steps back and the small price-and-Order card takes its place for the rest of
+# the film (the review: half the film had no price on a laptop). No labels on the film:
 # what is inside her chews is not in her record (OWNER-QUESTIONS 3).
 HOME = f'''  <section class="film" id="film" aria-labelledby="h-open" data-frames="200" data-src="assets/film" data-marks="0.35">
     <div class="stage">

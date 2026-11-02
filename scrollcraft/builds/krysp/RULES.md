@@ -40,25 +40,25 @@ R3b.2 pass: the price touches the Order button; the hashgacha is a labelled dark
 R3b.3 pass: one solid Order per screen; the header Order is outline; Add buttons sit on tiles; walked the page at several scroll positions
 R3h.20 pass: check-site SMOOTH and SLOW passed; the film holds 5 screens; check-speed under the limit on a slowed phone; the chew is on her peach; the first frame loads first
 R3h.21 pass: check-one-scroll passed; only the opening film follows the scroll, the rest scrolls normally and the shop changes on a tap
-R3h.23 pass: check-clip passes every clip used (c1a-bend, c1b-tear, c2-round) and the joined gen/film/opening.mp4 with its one dissolve listed in gen/film.sh; gen/snap-brief.md has How it really happens (her photo's cut bars, a stock slow-motion chocolate crack) and the Key moment (the tear, its own clip between S0b and S1); each step ticked off at 8 fps in the brief, the tear in two takes, the one failing check-clip (JUMP) left out
-R3h.1 pass: check-site OPENING passed: the home page opens full screen on the snap film (31 Oct), one of her chews bending and breaking under the scroll, made from her own photo
+R3h.23 pass: check-clip passes every clip used (film/advert-B-norice.mp4 with its three shot cuts) and the joined gen/film/opening.mp4 with the cuts and the one dissolve listed in gen/film.sh; gen/advert-brief.md has How it really happens (docs/inspo/bar-breaking-2026-11-02 and the advert prompts it links) and the Key moment; the crack and web were cut out after Tzvi saw them (2 Nov)
+R3h.1 pass: check-site OPENING passed: the home page opens full screen on the advert film (2 Nov), peanut butter and chocolate swirling round one of her chews, made from her own photo
 R3n.1 pass: her board photo is about 720 x 540 of 1440 x 900 on a laptop and the full width on a phone, whole, with her peach around it
-R3n.2 pass: the signature is the snap: one of her chews breaks in two and the moment freezes; no other business has a chew to break
+R3n.2 pass: the signature is her own ingredients swirling round one whole chew, then the chew broken open on a board and her real board; no other site of ours has it (check-fingerprints passed)
 R3n.3 pass: on the Shop, picking a board changes its photo, name, price and Add button (one board today, so the picker is hidden); quantity changes the total in the button
-R3n.4 pass: first screen compared with docs/inspo/product-films-2026-10-21/can-6.8.jpg (a product held with its ingredients frozen round it) and Mobbin re_ (huge letters under a product on a warm ground); ours has both and the break
-R3n.5 pass: "you land and one of her peanut chews bends and snaps in two, the instant freezes and you look inside it, then you see her whole board"; written in CONCEPT.md
+R3n.4 pass: first screen compared with docs/inspo/product-films-2026-10-21/can-6.8.jpg (a product held with its ingredients frozen round it) and Mobbin re_ (huge letters under a product on a warm ground); ours has both: her ingredients swirl round her chew under the huge KRYSP
+R3n.5 pass: "you land and peanut butter and chocolate swirl round one of her chews, you see its crisp rice close, then it lies broken open on a board and you see her whole board"; written in CONCEPT.md
 R3g.15 pass: check-fits passed (no photo shown over 1.35 times its size); the opening picture is her own 1448 px photo, shown at most at its own size
-R3h.2 pass: walked at every 5% of the film: the chew bows, one crack opens, it tears in slow motion with grains pulling loose, the camera goes round the frozen break, then her real board photo dissolves in, with the price and Order button on a card at the end
+R3h.2 pass: walked at every 5% of the film: the ribbon and chunks sweep in, circle the chew, the close-up, the halves on the board, then her real board photo dissolves in, with the price and Order button on a card at the end
 R3h.3 pass: full screen, 200 sharp frames (1680 wide on a laptop, a 4:3 crop on a phone so her board ends whole), drawn at their own size and scaled by CSS; looked at 1440x900 and 1920x1080
-R3h.5 pass: no lines in the film itself; the intro words sit on a peach card above the chew and step back as the tear begins, and on a laptop a small solid card with the price and Order takes their place for the rest of the film, at the bottom on the peach, never over the break; readable passed. The labels on the break were removed: what is inside her chews is not in her record
-R3h.7 pass: joins compared frame by frame (gen/film/tear-sheet.jpg, end-sheet.jpg, c1a-sheet.jpg, c1b-sheet.jpg): the bend ends on S0b where the tear starts, the tear ends on S1 where the round starts (its last drift sped up so the grains land on clip 2's first frame), and her board dissolves in over 0.8 s; check-clip passes the joined film with that one dissolve marked
+R3h.5 pass: no lines in the film itself; the intro words sit on a peach card above the chew and step back at the close-up, and on a laptop a small solid card with the price and Order takes their place for the rest of the film, at the bottom, never over the chew; readable passed. No labels: what is inside her chews is not in her record
+R3h.7 pass: joins looked at frame by frame (gen/film/norice-sheet.jpg, advert-B-cut-sheet.jpg): three hard cuts between shots, as in an advert, the close-up slowed 1.5x so it does not lurch, and her board dissolves in over 0.8 s; check-clip passes the joined film with those marked
 R3h.8 pass: the film ends on her board on grey stone, and the next section is the dark brown hashgacha band
-R3h.11 pass: brightness.py on gen/film/opening.mp4: average 60, bright enough; the chew and then the board are the brightest things in every chapter
-R3h.13 pass: the bend and the tear are two clips, each one action (1a bend with one crack; 1b the tear as slow motion, sticky strands stretching and breaking back into each face, grains only from the gap); watched at 4 and 8 fps; no code pieces join the film
-R3h.14 pass: the chew stays in frame through the snap and the orbit; on a phone the 4:3 crop keeps the break centred and the board whole
-R3h.18 pass: gen/snap-brief.md lists every object with where it comes from and ends; checked on the film: grains and flakes only leave the crack, nothing on the ground until they land, the board arrives by a dissolve, nothing appears or vanishes in the air (check-clip VANISH and APPEAR pass)
-R3h.19 pass: clips between stills that hold the same objects (S0, S0b, S1, S2, then her photo); the first snap failed (check-clip JUMP and RUSH), so the story changed (a bend clip and a slow tear clip, Tzvi 1 Nov); the tear was made in two takes and the one that passed check-clip kept; clip 3 failed check-clip (RUSH, BLANK) and was dropped for a dissolve into her photo
-R3h.17 pass: the giant KRYSP sits on the plain peach under the chew, and it and the headline step back as the chew snaps; readable passed
+R3h.11 pass: brightness.py on gen/film/opening.mp4: average 52, bright enough; the chew and then the board are the brightest things in every chapter
+R3h.13 pass: one action per shot (sweep in, orbit, close-up, the halves resting); watched at 2 and 4 fps; no code pieces join the film
+R3h.14 pass: the chew stays in frame in every shot; on a phone the 4:3 crop keeps the chew centred and the board whole (looked at 375x812)
+R3h.18 pass: gen/advert-brief.md lists every object with where it comes from and ends; the swirling peanut butter and chunks are marked advert style (3w.1 exception, Tzvi 2 Nov) and come in past the edges; the loose rice was removed (Tzvi: "cut the random rice peices"); the board arrives by a cut, her photo by a dissolve
+R3h.19 pass: one 12 s clip made from the storyboard (gen/film/SB-a.png) and her chew; Tzvi chose take B of two; the crack and web shots were cut out ("the crack isnt smooth"), then the loose rice removed by a video edit, all checked with check-clip
+R3h.17 pass: the giant KRYSP sits on the plain peach under the chew, and it and the headline step back at the close-up; readable passed
 
 ## 3. Sections and worlds
 R3.12 pass: hero (the opening), features (the board tile with photo, name and price, then the three steps), and a call-to-action section of its own near the end (the closing band, with the price in its heading)
@@ -72,8 +72,8 @@ R3g.11 pass: Nunito and Mulish are open licence (SIL OFL) faces on Google Fonts;
 R3p.3 pass: check-fingerprints prints "different from all 17 other pages" (heading face Nunito and body face Mulish are new; her logo colours are listed as own_colours)
 R3p.5 pass: the touch is the crack: pressing an order button cracks its face with a thin line and a crack line runs between sections; checked by pressing Order on the home page and the Shop
 R3q.1 pass: check-concept passed
-R5a.7 pass: one signature (the snap film) and one peak (the opening); everything after it is plain sections; it ends on the board, its price and Order
-R9.1 pass: the snap is made from her own photo (the half-dipped chew and the cut bars show the inside) and ends on her real board photo
+R5a.7 pass: one signature (the advert film) and one peak (the opening); everything after it is plain sections; it ends on the board, its price and Order
+R9.1 pass: the film is made from her own photo (the half-dipped chew) and ends on her real board photo
 R3f.2 pass: CONCEPT.md budget: signature (the opening), accents (the crack lines between sections, the tile light, the headings closing up), quiet touches (button crack, squiggle links, big price); each seen on the captured frames
 R3m.1 pass: index.html has data-mir-gallery with its template (hidden until she adds photos) and the board tile inside data-mir-catalog with data-mir-list, group and item templates
 R3m.3 n/a: the page shows no hours, areas, fees, guarantee, FAQ or reviews yet, so there are no places for them to fill
@@ -105,18 +105,18 @@ R0b.12 n/a: the site is not published yet, so no pages-list preview clip exists
 ## 4. Photos and media
 R8.1 n/a: no row or grid of pictures; the only product picture is her board photo, shown at one size in the opening, the tile and the Shop stage
 R8.6 n/a: the main product picture is still her own photograph of the board; the generated stills are only the film's frames
-R8.7 pass: gen/snap-brief.md was written and approved before any generation (a close crop of her half-dipped chew as reference, its traits kept, only camera and setting changed); each still was compared beside her photo before the clips
+R8.7 pass: gen/advert-brief.md and the storyboard were approved before the clip (her chew picture W0 as reference, its traits kept); the stills were compared beside her photo first
 R8.2 pass: the film's stills were edited from her own photo (her half-dipped chew and her board as references, S3 is her photo extended); every other picture is her two photos
 R3p.7 n/a: one product, so there are no similar items to show the same way
 R3h.12 pass: the board appears in the opening, the tile and the Shop stage as the same photo (assets/luxe.webp and a smaller copy), side by side on the sheet
 R3h.10 n/a: she sells one board with no options; the Shop stage swaps photo, name, price and Add when she adds a board to her shop
 R3g.14 pass: all pictures are the one board photo and the logo mark, one grade
-R3o.1 pass: generated food in motion only in the full-screen opening film, checked at 4 and 8 fps (no food from nowhere after the trim, satin chocolate, not glass, the halves and grains leave past the edges); everywhere else food is her real photo
+R3o.1 pass: generated food in motion only in the full-screen opening film, checked at 2 and 4 fps (satin peanut butter, real chocolate, not glass; nothing pops in or out in the open, the loose rice removed); everywhere else food is her real photo
 R3o.2 n/a: no liquid in the film
 R3o.3 pass: the board's colours are as in her photo, unedited
 R3o.6 pass: she sent two photos (the logo, the board; sheet.jpg); both used once for what they are, no duplicates
-R8.3 pass: generated media only of what she sells (her peanut chews), no person, no premises, no text in images; Tzvi approved the steps 29 Oct and asked for the film 31 Oct; Chaya sees it before anything goes live
-R8.4 pass: the only moving real material is the chew breaking, a generated clip from Higgsfield showing cause then effect; reduced motion shows her board
+R8.3 pass: generated media only of what she sells (her peanut chews and their ingredients), no person, no premises, no text in images; Tzvi approved the storyboard and asked for it on the site 2 Nov; Chaya sees it before anything goes live
+R8.4 pass: the moving real material is peanut butter and chocolate swirling round the chew, a generated clip from Higgsfield (API for the edit); reduced motion shows her board
 R3c.13 pass: readable and check-site OVERLAP passed; nothing cut by its section at the sizes run; the rotated board stays inside its column
 R3c.14 n/a: no cut-out photo is used
 R5b.3 pass: no words sit on a photo; on a phone the photo is on top and the words are on the plain peach below, covering none of it
@@ -149,7 +149,7 @@ R3k.8 pass: every basket line has a 40 px Remove button with the label "Remove L
 R3k.6 pass: Add on the home tile (shop.html?add=Luxe) opens the Shop with the board already in the basket; the basket is kept in localStorage between pages
 R3k.9 pass: check-site SAVE passed; the POST body carries product id 827fb8e8720d (her listing) with the name Luxe and price 38 as saved there
 R3.15 pass: the brief is to order; the Shop has the order form, and contact has WhatsApp and email
-R7.1 pass: CONCEPT.md names the one chosen direction (F, the snap) and why; no options page was made
+R7.1 pass: CONCEPT.md names the chosen direction (F, now the advert film, 2 Nov) and why; no options page was made
 R8.5 pass: every main button goes to shop.html#order, her order page; WhatsApp is the last step of that order and the quiet contact on the contact page
 R0b.13 pass: with the stubbed endpoint the order POST carried the lines, day, name, phone and notes before WhatsApp opened and the tracking link was added to the message; the fulfilment is sent as pickup with a note that how it is collected is agreed on WhatsApp, because delivery and pickup are unknown (OWNER-QUESTIONS 5)
 R3l.1 n/a: she has one item, so there is no family of similar items; her catalog is asked for in OWNER-QUESTIONS 1
@@ -202,4 +202,4 @@ R3a.8 pass: no dotted line of items; looked at 360x640
 
 ## 9. Finish
 R3r.3 pass: check-build passed after the last edit; this file was written after it
-R3r.4 pass: no new correction from Tzvi on this build beyond the rules already added (ideas from sources, no hands, snap)
+R3r.4 pass: Tzvi's corrections on this build are in the rules: advert-style ingredients allowed in the opening (3w.1), pictures first and one clip at full quality (3w.10), Higgsfield through the API

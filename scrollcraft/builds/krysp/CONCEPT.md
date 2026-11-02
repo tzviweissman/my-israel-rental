@@ -39,7 +39,7 @@ differs, clip 2 is redone. Scroll-driven frames on a canvas (film.js).
 - Motion: under 0.6 s, eased, never linear; only the opening film follows the scroll; everything else changes on a tap.
 
 ## Effect budget (3f.2)
-- Signature: the opening snap film (X32, idea F).
+- Signature: the opening advert film (idea F, remade 2 Nov 2026 as an advert, gen/advert-brief.md).
 - Accents: the crack lines between sections drawing in (R14); the board tile's light that follows the pointer (T5); headings whose letters
   close up as they arrive (H10).
 - Quiet touches: the button crack on press (B20), squiggle links (L5), the price in large numerals (P7), the phone bar with the price.
@@ -47,16 +47,16 @@ differs, clip 2 is redone. Scroll-driven frames on a canvas (film.js).
 ## Wow gate
 1. Her strongest real photo, big: the Luxe board (src/owner/p02.jpg, whole, never cropped)
    ends the film full screen (extended to the screen's shape, never cropped) and is the shop's picture.
-2. The signature only she could have: a peanut chew snapping under the word KRYSP, the camera going round the break
-   (gen/snap-brief.md), made 31 Oct.
+2. The signature only she could have: her own ingredients, peanut butter and chocolate, swirling round one of her chews under the
+   word KRYSP, then the chew broken open on a board (gen/advert-brief.md), made 2 Nov (the snap film of 31 Oct before it).
 3. The visitor's choice changes the page: the shop stage changes its picture, name, price and Add for each board she adds to her shop
    (one board today, so nothing to choose yet), and the quantity changes the total in the button.
 4. Side by side with a reference: re_'s huge letters behind a product on a warm ground
    (https://mobbin.com/sites/sections/724b94eb-3a56-4a47-aa2d-1fa5ed6b43fb) and the saved product-film still
    docs/inspo/product-films-2026-10-21/can-6.8.jpg (the can held with its ingredients frozen round it); ours has the same giant name, one product
-   and the frozen break.
-5. One sentence: you land and one of her peanut chews bends and snaps in two, the instant freezes and you look inside it, then you see
-   her whole board.
+   and its ingredients swirling round it.
+5. One sentence: you land and peanut butter and chocolate swirl round one of her chews, you see its crisp rice close, then it
+   lies broken open on a board and you see her whole board.
 
 ## Effects
 - button: B20, new, from 21st search "button press crack effect" (Pop Button, https://21st.dev/@tom_ui/components/pop-button, for the press) and the film's break: pressing it draws a thin crack across the face
