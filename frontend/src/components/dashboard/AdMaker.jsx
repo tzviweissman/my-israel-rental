@@ -209,8 +209,10 @@ function drawFooter(ctx, { W, PAD, QR, rtl, dark, cta, shortUrl, qr, body, px, s
 
 // The average colour of a band along one side of a photo: the ground a
 // photo is extended with when its shape differs from its box. Never a
-// blurred copy, which read as "a weird grey area" (Tzvi, 27 Oct).
-function sideColour(img, side) {
+// blurred copy, which read as "a weird grey area" (Tzvi, 27 Oct). Given a
+// fallback, an uneven edge (half meat, half marble) returns the fallback:
+// its average is a muddy colour that matches nothing (Blazin' Boards, 2 Nov).
+function sideColour(img, side, fallback) {
   const c = document.createElement('canvas');
   c.width = 16;
   c.height = 16;
@@ -221,15 +223,21 @@ function sideColour(img, side) {
   const src = { top: [0, 0, w, bh], bottom: [0, h - bh, w, bh], left: [0, 0, bw, h], right: [w - bw, 0, bw, h] }[side];
   ctx.drawImage(img, ...src, 0, 0, 16, 16);
   const d = ctx.getImageData(0, 0, 16, 16).data;
-  let r = 0; let g = 0; let b = 0;
-  for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; }
+  let r = 0; let g = 0; let b = 0; let l2 = 0;
+  for (let i = 0; i < d.length; i += 4) {
+    r += d[i]; g += d[i + 1]; b += d[i + 2];
+    l2 += (d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11) ** 2;
+  }
   const n = d.length / 4;
+  const mean = (r * 0.3 + g * 0.59 + b * 0.11) / n;
+  if (fallback && Math.sqrt(Math.max(0, l2 / n - mean * mean)) > 28) return fallback;
   return `rgb(${Math.round(r / n)},${Math.round(g / n)},${Math.round(b / n)})`;
 }
 const edgeColour = (img, fromTop) => sideColour(img, fromTop ? 'top' : 'bottom');
 
-// A photo whole in a box, the rest of the box its own edge colours.
-function photoInBox(ctx, img, x, y, w, h, r = 0) {
+// A photo whole in a box, the rest of the box its own edge colours, or the
+// ground where an edge is too uneven to extend.
+function photoInBox(ctx, img, x, y, w, h, r = 0, ground = '#FFFFFF') {
   const [cw, ch] = fitIn(img, w, h);
   const ox = Math.round(x + (w - cw) / 2);
   const oy = Math.round(y + (h - ch) / 2);
@@ -238,12 +246,12 @@ function photoInBox(ctx, img, x, y, w, h, r = 0) {
   ctx.roundRect(x, y, w, h, r);
   ctx.clip();
   if (ch < h - 1) {
-    ctx.fillStyle = sideColour(img, 'top'); ctx.fillRect(x, y, w, oy - y + 2);
-    ctx.fillStyle = sideColour(img, 'bottom'); ctx.fillRect(x, oy + ch - 2, w, y + h - oy - ch + 2);
+    ctx.fillStyle = sideColour(img, 'top', ground); ctx.fillRect(x, y, w, oy - y + 2);
+    ctx.fillStyle = sideColour(img, 'bottom', ground); ctx.fillRect(x, oy + ch - 2, w, y + h - oy - ch + 2);
   }
   if (cw < w - 1) {
-    ctx.fillStyle = sideColour(img, 'left'); ctx.fillRect(x, y, ox - x + 2, h);
-    ctx.fillStyle = sideColour(img, 'right'); ctx.fillRect(ox + cw - 2, y, x + w - ox - cw + 2, h);
+    ctx.fillStyle = sideColour(img, 'left', ground); ctx.fillRect(x, y, ox - x + 2, h);
+    ctx.fillStyle = sideColour(img, 'right', ground); ctx.fillRect(ox + cw - 2, y, x + w - ox - cw + 2, h);
   }
   ctx.drawImage(img, ox, oy, cw, ch);
   ctx.restore();
@@ -537,23 +545,25 @@ function drawBigWords(canvas, { format, words, eyebrow, price, cta, shortUrl, rt
   ctx.fillStyle = rgb(col);
   ctx.fillRect(0, 0, W, H);
   const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body });
-  const split = imgs[0] ? Math.round(top + (footTop - top) * 0.55) : footTop;
-  if (imgs[0]) photoInBox(ctx, imgs[0], 0, split, W, footTop - split);
   const PAD = 64;
   const textW = W - PAD * 2;
   const start = rtl ? W - PAD : PAD;
   const fixed = px(44) + (price ? px(64) + 32 : 0);
-  const avail = split - top - fixed - 48;
+  // The words may take up to 55% of the room; the photo gets all the rest.
+  const avail = (imgs[0] ? (footTop - top) * 0.55 : footTop - top) - fixed - 48;
   let size = 56;
   let lines = [];
-  for (let s = 160; s >= 56; s -= 4) {
+  for (let s = 150; s >= 56; s -= 4) {
     ctx.font = `800 ${s}px ${body}`;
     lines = wrap(ctx, words.headline, textW, 99);
     if (lines.length <= 3 && lines.length * s * 1.1 <= avail && lines.every((l) => ctx.measureText(l).width <= textW)) { size = s; break; }
   }
   ctx.font = `800 ${size}px ${body}`;
   lines = wrap(ctx, words.headline, textW, 3);
-  let y = top + Math.max(0, (avail - lines.length * size * 1.1) / 2);
+  const blockH = fixed + lines.length * size * 1.1;
+  const split = imgs[0] ? Math.round(top + blockH + 56) : footTop;
+  if (imgs[0]) photoInBox(ctx, imgs[0], 0, split, W, footTop - split, 0, rgb(col));
+  let y = imgs[0] ? top : top + Math.max(0, (avail - lines.length * size * 1.1) / 2);
   ctx.textAlign = rtl ? 'right' : 'left';
   ctx.fillStyle = 'rgba(255,255,255,.8)';
   ctx.font = `600 ${px(30)}px ${body}`;
@@ -582,7 +592,7 @@ function drawGrid(canvas, { format, words, eyebrow, price, cta, shortUrl, rtl, i
     const cx = i % 2; const cy = Math.floor(i / 2);
     return [(rtl ? 1 - cx : cx) * (tw + G), gTop + cy * (th + G)];
   };
-  imgs.slice(0, 3).forEach((img, i) => { const [x, y] = cell(i); photoInBox(ctx, img, x, y, tw, th); });
+  imgs.slice(0, 3).forEach((img, i) => { const [x, y] = cell(i); photoInBox(ctx, img, x, y, tw, th, 0, rgb(col)); });
   const [x0, y0] = cell(3);
   const P = 40;
   const iw = tw - P * 2;
@@ -627,25 +637,59 @@ function drawItems(canvas, { format, words, eyebrow, cta, shortUrl, rtl, items, 
   const textW = W - PAD * 2;
   const start = rtl ? W - PAD : PAD;
   ctx.textAlign = rtl ? 'right' : 'left';
-  let y = top;
+  ctx.font = `700 ${px(60)}px ${head}`;
+  const headLines = wrap(ctx, words.headline, textW, 2);
+  const headerH = px(40) + headLines.length * px(72);
+  const GAP = 20;
+  const shown = items.slice(0, 3);
+  const nameH = 28 + px(34) * 2 + 20;
+  const priceH = px(40) + 48;
+  const room = footTop - 40 - top - headerH - 36;
+  // Wide photos in narrow columns come out tiny (seen on Blazin' Boards,
+  // 2 Nov): outside the square shape they get a row each, photo beside
+  // the name and price.
+  const wide = format !== 'square' && shown.every((it) => it.img.naturalWidth > it.img.naturalHeight * 1.1);
+  const cw = (textW - GAP * 2) / 3;
+  const rh = (room - GAP * 2) / 3;
+  const sizes = shown.map((it) => (wide ? fitIn(it.img, textW * 0.55, rh - 32) : fitIn(it.img, cw - 32, room - nameH - priceH)));
+  // Every column (or row) the same size; the whole block in the middle.
+  const cH = wide ? Math.max(...sizes.map(([, h]) => h)) + 32 : nameH + Math.max(...sizes.map(([, h]) => h)) + priceH;
+  const blockH = headerH + 36 + (wide ? cH * 3 + GAP * 2 : cH);
+  let y = top + Math.max(0, (footTop - 40 - top - blockH) / 2);
   ctx.fillStyle = MUTED;
   ctx.font = `600 ${px(28)}px ${body}`;
   ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(28));
   y += px(40);
   ctx.fillStyle = INK;
   ctx.font = `700 ${px(60)}px ${head}`;
-  wrap(ctx, words.headline, textW, 2).forEach((l) => { y += px(72); ctx.fillText(l, start, y - px(16)); });
-  const GAP = 20;
-  const cw = (textW - GAP * 2) / 3;
-  // The columns are as tall as their tallest photo needs, the same height
-  // each, and the block sits in the middle of the room left.
-  const nameH = 28 + px(34) * 2 + 20;
-  const priceH = px(40) + 48;
-  const room = footTop - 40 - (y + 36);
-  const shown = items.slice(0, 3);
-  const sizes = shown.map((it) => fitIn(it.img, cw - 32, room - nameH - priceH));
-  const cH = nameH + Math.max(...sizes.map(([, h]) => h)) + priceH;
-  const cTop = y + 36 + (room - cH) / 2;
+  headLines.forEach((l) => { y += px(72); ctx.fillText(l, start, y - px(16)); });
+  const cTop = y + 36;
+  if (wide) {
+    shown.forEach((it, i) => {
+      const ry = cTop + i * (cH + GAP);
+      ctx.fillStyle = rgb(tint(vividColour(it.img), 0.8));
+      ctx.beginPath();
+      ctx.roundRect(PAD, ry, textW, cH, 28);
+      ctx.fill();
+      const [pw, ph] = sizes[i];
+      const px0 = rtl ? W - PAD - 16 - pw : PAD + 16;
+      roundedImage(ctx, it.img, px0, ry + (cH - ph) / 2, pw, ph, 18);
+      const tw = textW - pw - 72;
+      const tx = rtl ? px0 - 32 : px0 + pw + 32;
+      ctx.direction = dirOf(it.name, rtl);
+      ctx.textAlign = rtl ? 'right' : 'left';
+      ctx.fillStyle = INK;
+      ctx.font = `700 ${px(34)}px ${body}`;
+      const names = wrap(ctx, it.name, tw, 2);
+      const tBlock = names.length * px(42) + px(56);
+      let ty = ry + (cH - tBlock) / 2;
+      names.forEach((l) => { ty += px(42); ctx.fillText(l, tx, ty - px(8)); });
+      ctx.direction = rtl ? 'rtl' : 'ltr';
+      ctx.font = `800 ${px(44)}px ${body}`;
+      ctx.fillText(it.priceText, tx, ty + px(52));
+    });
+    return;
+  }
   shown.forEach((it, i) => {
     const x = rtl ? W - PAD - (i + 1) * cw - i * GAP : PAD + i * (cw + GAP);
     ctx.fillStyle = rgb(tint(vividColour(it.img), 0.8));
@@ -668,7 +712,7 @@ function drawItems(canvas, { format, words, eyebrow, cta, shortUrl, rtl, items, 
 
 // "Sticky note" (9b.5): the photo whole, and a yellow note in a marker hand
 // over its emptiest part, measured, so it never covers what the photo shows.
-function drawNote(canvas, { format, words, eyebrow, price, cta, shortUrl, rtl, imgs, qr }) {
+function drawNote(canvas, { format, words, price, cta, shortUrl, rtl, imgs, qr }) {
   const { ctx, W, H, body, px, top } = begin(canvas, format, rtl);
   const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body });
   photoInBox(ctx, imgs[0], 0, 0, W, footTop);
@@ -688,7 +732,17 @@ function drawNote(canvas, { format, words, eyebrow, price, cta, shortUrl, rtl, i
     for (let i = 0; i < d.length; i += 64) { const l = d[i] * 0.3 + d[i + 1] * 0.59 + d[i + 2] * 0.11; s += l; s2 += l * l; n += 1; }
     return s2 / n - (s / n) ** 2;
   };
-  const [nx, ny] = spots.reduce((a, b) => (detail(b) < detail(a) ? b : a));
+  let [nx, ny] = spots.reduce((a, b) => (detail(b) < detail(a) ? b : a));
+  // No plain corner (a busy photo, or one with its own words on it, like
+  // Blazin' Boards' flyer, 2 Nov): the photo moves down and the note is
+  // stuck along its top edge instead, covering only a sliver of it.
+  if (detail([nx, ny]) > 400) {
+    const py = Math.round(top + nh - 40);
+    ctx.fillStyle = sideColour(imgs[0], 'top', '#FFFFFF');
+    ctx.fillRect(0, 0, W, py + 2);
+    photoInBox(ctx, imgs[0], 0, py, W, footTop - py);
+    [nx, ny] = [rtl ? W - M - nw : M, top - 16];
+  }
   ctx.save();
   ctx.translate(nx + nw / 2, ny + nh / 2);
   ctx.rotate(nx < W / 2 ? -0.035 : 0.035);
@@ -709,12 +763,6 @@ function drawNote(canvas, { format, words, eyebrow, price, cta, shortUrl, rtl, i
     ctx.fillText(price, 0, y - size * 0.2);
   }
   ctx.restore();
-  ctx.fillStyle = '#FFFFFF';
-  ctx.shadowColor = 'rgba(0,0,0,.5)'; ctx.shadowBlur = 12;
-  ctx.font = `600 ${px(30)}px ${body}`;
-  ctx.textAlign = rtl ? 'right' : 'left';
-  if (format !== 'story' && eyebrow) ctx.fillText(wrap(ctx, eyebrow, W - 128, 1)[0], rtl ? W - 64 : 64, footTop - 32);
-  ctx.shadowColor = 'transparent';
 }
 
 // "Question" (9b.6): one of the owner's own questions and answers from
@@ -725,7 +773,7 @@ function drawQuestion(canvas, { format, faq, cta, shortUrl, rtl, imgs, qr }) {
   ctx.fillStyle = rgb(col);
   ctx.fillRect(0, 0, W, H);
   const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body });
-  if (imgs[0]) photoInBox(ctx, imgs[0], 0, 0, W, footTop);
+  if (imgs[0]) photoInBox(ctx, imgs[0], 0, 0, W, footTop, 0, rgb(col));
   const cw = W - 160;
   const P = 36;
   ctx.textAlign = 'center';
