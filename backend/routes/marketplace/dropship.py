@@ -241,7 +241,8 @@ async def _create_supplier_order(order: dict[str, Any], store: dict[str, Any], s
         "history": history,
         "track_token": secrets.token_urlsafe(16),
     }
-    await db.store_orders.insert_one(doc)
+    from .order_texts import insert_order
+    await insert_order(doc)
     part.update({"order_id": doc["_id"], "status": doc["status"]})
     try:
         await om.auto_assign(doc, supplier)

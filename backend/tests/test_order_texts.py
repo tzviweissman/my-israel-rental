@@ -146,3 +146,63 @@ def test_text_goes_when_whatsapp_did_not(monkeypatch):
          patch.object(ot, "text_owner_new_order", texted):
         run(orders.alert_business_on_whatsapp({"_id": "g1"}, "u1", "Dani", "2 x board", "/dashboard", "order", order_id="o1"))
     texted.assert_not_awaited()
+
+
+def test_search_finds_number_name_and_phone():
+    o = {"_id": "abcdef123456", "order_no": 1042, "customer_name": "Dani Cohen",
+         "customer_phone": "052-111-2222", "customer_phone_e164": "972521112222", "customer_email": "dani@x.com"}
+    for q in ("1042", "#1042", "dani", "Cohen", "052-111-2222", "0521112222", "+972 52 111 2222", "1112222", "dani@x"):
+        assert ot.matches(o, q), q
+    for q in ("1043", "Moshe", "0529999999", "104"):
+        assert not ot.matches(o, q), q
+    # An old order without a number is found by the code it shows.
+    assert ot.matches({"_id": "abcdef123456"}, "#123456")
+
+
+def test_staff_view_never_carries_the_confirm_key():
+    out = orders._public({"_id": "o1", "order_no": 1042, "owner_token": TOKEN, "customer_name": "Dani"})
+    assert "owner_token" not in out and out["order_no"] == "#1042"
+
+
+class Orders(Coll):
+    """Stand-in with the (business_id, order_no) unique index."""
+    def __init__(self, docs=()):
+        super().__init__(docs)
+
+    async def insert_one(self, d):
+        from pymongo.errors import DuplicateKeyError
+        if any(x["business_id"] == d["business_id"] and x.get("order_no") == d["order_no"] for x in self.docs):
+            raise DuplicateKeyError("E11000 duplicate key error index: business_id_1_order_no_1")
+        self.docs.append(dict(d))
+
+    async def find_one(self, q, proj=None, sort=None):
+        rows = [d for d in self.docs if d["business_id"] == q["business_id"] and "order_no" in d]
+        return max(rows, key=lambda d: d["order_no"]) if rows else None
+
+
+class Counters:
+    def __init__(self):
+        self.n = {}
+
+    async def find_one_and_update(self, q, upd, upsert=False, return_document=None):
+        self.n[q["_id"]] = self.n.get(q["_id"], 0) + upd["$inc"]["n"]
+        return {"n": self.n[q["_id"]]}
+
+    async def update_one(self, q, upd, upsert=False):
+        self.n[q["_id"]] = max(self.n.get(q["_id"], 0), upd["$max"]["n"])
+
+
+def test_numbers_never_repeat_even_if_the_counter_was_reset(monkeypatch):
+    db = type("DB", (), {})()
+    db.store_orders = Orders([{"_id": "old", "business_id": "b1", "order_no": 1001},
+                              {"_id": "old2", "business_id": "b1", "order_no": 1002}])
+    db.counters = Counters()          # reset: would hand out 1001 again
+    monkeypatch.setattr(ot, "db", db)
+    new = {"_id": "n1", "business_id": "b1"}
+    run(ot.insert_order(new))
+    assert new["order_no"] == 1003
+    other = {"_id": "n2", "business_id": "b2"}
+    run(ot.insert_order(other))
+    assert other["order_no"] == 1001  # each store counts its own
+    nums = [d["order_no"] for d in db.store_orders.docs if d["business_id"] == "b1"]
+    assert len(nums) == len(set(nums))

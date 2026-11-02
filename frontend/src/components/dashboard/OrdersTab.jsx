@@ -29,7 +29,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import {
   Plus, Loader2, ClipboardPaste, Store as StoreIcon, Bike, X, Sparkles, ClipboardList,
-  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Pause, Play, ListPlus, ChevronDown, ChevronUp,
+  LayoutList, Table2, Printer, Download, Upload, Link2, Copy, Check, RotateCcw, Pencil, Trash2, Repeat, Pause, Play, ListPlus, ChevronDown, ChevronUp, Search,
 } from 'lucide-react';
 import { phoneError } from '../../utils/phoneValidation';
 import { money } from '../../utils/currency';
@@ -130,6 +130,15 @@ export default function OrdersTab({ API, token }) {
   });
   const [range, setRange] = useState('today');        // today | week | open | done
   const [statusFilter, setStatusFilter] = useState('');
+  // Search every order the store has (number, name, phone, email), any
+  // date: replaces the range while there is something typed.
+  const [search, setSearch] = useState('');
+  const [query, setQuery] = useState('');
+  const loadSeq = useRef(0);
+  useEffect(() => {
+    const id = setTimeout(() => setQuery(search.trim()), 300);
+    return () => clearTimeout(id);
+  }, [search]);
   const [orders, setOrders] = useState([]);
   const [counts, setCounts] = useState({});
   const [loading, setLoading] = useState(false);
@@ -201,9 +210,13 @@ export default function OrdersTab({ API, token }) {
     // until the list arrives and the id is corrected.
     if (!bizId || !businesses || !businesses.some((b) => b.id === bizId)) return;
     setLoading(true);
+    // A slow answer for what was on screen before must not replace the
+    // answer for what is typed now.
+    const seq = ++loadSeq.current;
     try {
-      const params = rangeParams(range);
+      const params = query ? { q: query } : rangeParams(range);
       const { data } = await axios.get(`${API}/marketplace/businesses/${bizId}/orders`, { ...auth, params });
+      if (seq !== loadSeq.current) return;
       setOrders(data.orders || []);
       setCounts(data.status_counts || {});
     } catch (err) {
@@ -211,7 +224,7 @@ export default function OrdersTab({ API, token }) {
     } finally {
       setLoading(false);
     }
-  }, [API, auth, bizId, businesses, range, t]);
+  }, [API, auth, bizId, businesses, range, query, t]);
 
   useEffect(() => { load(); }, [load]);
 
@@ -504,7 +517,22 @@ export default function OrdersTab({ API, token }) {
       {panel === 'couriers' && <CouriersPanel API={API} auth={auth} businessId={biz.id} couriers={couriers} settings={settings} onChanged={() => Promise.all([loadCouriers(), loadSettings(), load()])} onClose={() => setPanel(null)} />}
       {panel === 'standing' && <StandingPanel API={API} auth={auth} standing={standing} onChanged={() => Promise.all([loadSettings(), load()])} onClose={() => setPanel(null)} />}
 
+      <label className="relative block mb-3">
+        <span className="sr-only">{t('orders.searchLabel', 'Search orders')}</span>
+        <Search size={16} className="absolute top-1/2 -translate-y-1/2 start-3 pointer-events-none" style={{ color: 'var(--brand-muted)' }} aria-hidden="true" />
+        <input
+          type="search"
+          value={search}
+          onChange={(e) => { setSearch(e.target.value); setStatusFilter(''); }}
+          placeholder={t('orders.searchPlaceholder', 'Order number, name or phone')}
+          className="w-full min-h-[44px] rounded-xl border ps-9 pe-3 text-sm"
+          style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)', background: 'white' }}
+          data-testid="orders-search"
+        />
+      </label>
+
       {/* Range tabs */}
+      {!query && (
       <div className="flex gap-1 mb-3 overflow-x-auto" data-testid="orders-range">
         {[
           ['today', t('orders.rangeToday', 'Today')],
@@ -527,9 +555,10 @@ export default function OrdersTab({ API, token }) {
           </button>
         ))}
       </div>
+      )}
 
       {/* Status pills = filters + counters */}
-      {range !== 'done' && (
+      {!query && range !== 'done' && (
         <div className="flex flex-wrap gap-1.5 mb-4" data-testid="orders-status-pills">
           {STATUS_ORDER.filter((s) => range === 'open' ? OPEN.has(s) : true).map((s) => {
             const n = counts[s] || 0;
@@ -551,7 +580,7 @@ export default function OrdersTab({ API, token }) {
         </div>
       )}
 
-      {range === 'today' && <MoneyStrip orders={orders} t={t} />}
+      {!query && range === 'today' && <MoneyStrip orders={orders} t={t} />}
 
       {loading && orders.length === 0 ? (
         <div className="py-10 text-center" style={{ color: 'var(--brand-muted)' }}><Loader2 className="animate-spin inline" size={18} /></div>
@@ -559,11 +588,13 @@ export default function OrdersTab({ API, token }) {
         <div className="rounded-2xl border p-8 text-center" style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-muted)' }} data-testid="orders-empty">
           <ClipboardList size={22} className="inline mb-2" />
           <p className="text-sm">
-            {range === 'today'
+            {query
+              ? t('orders.searchNone', 'No orders match "{{q}}".', { q: query })
+              : range === 'today'
               ? t('orders.emptyToday', 'Nothing due today.')
               : t('orders.empty', 'No orders here yet.')}
           </p>
-          {!entryOpen && (
+          {!entryOpen && !query && (
             <button type="button" onClick={() => setEntryOpen(true)} className="mt-3 text-sm font-semibold underline" style={{ color: 'var(--ink)' }}>
               {t('orders.enterFirst', 'Enter the first one')}
             </button>

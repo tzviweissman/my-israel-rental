@@ -67,7 +67,7 @@ from utils.media_url import MAX_MEDIA_URL_LEN, is_allowed_media_url
 # tests/test_order_payment_links.py.
 from utils.payment_links import allowed_payment_links
 from utils.rate_limit import check_rate
-from .order_texts import next_order_no, order_no
+from .order_texts import insert_order, order_no
 from .custom_fields import answers_text, check_answers, public_fields
 from utils.whatsapp_link import normalize_whatsapp_number
 
@@ -235,6 +235,10 @@ def _public(order: dict[str, Any], *, contact: bool = True) -> dict[str, Any]:
     out = dict(order)
     out["id"] = out.pop("_id")
     out.pop("owner_user_id", None)
+    # The one-order Confirm page's key goes only out by text, to the
+    # business's own phone; the staff board must not be able to open it.
+    out.pop("owner_token", None)
+    out["order_no"] = order_no(order)
     if not contact:
         out["has_contact"] = any(out.get(f) for f in _CONTACT_FIELDS)
         for f in _CONTACT_FIELDS:
@@ -287,6 +291,11 @@ async def ensure_order_indexes() -> None:
         )
         await db.store_standing_orders.create_index([("business_id", 1), ("active", 1)], background=True)
         await db.store_customers.create_index([("business_id", 1), ("key", 1)], unique=True, background=True)
+        # No two orders of one store share a number (order_texts.insert_order).
+        await db.store_orders.create_index(
+            [("business_id", 1), ("order_no", 1)], unique=True,
+            partialFilterExpression={"order_no": {"$exists": True}}, background=True,
+        )
     except Exception as exc:  # noqa: BLE001
         logger.warning("[orders] index creation failed: %s", exc)
 
@@ -302,9 +311,14 @@ async def list_orders(
     date_from: Optional[str] = Query(None, alias="from"),
     date_to: Optional[str] = Query(None, alias="to"),
     limit: int = Query(300, ge=1, le=1000),
+    q: Optional[str] = Query(None, max_length=80),
     user=Depends(verify_token),
 ):
     """Orders for one business, soonest `needed_by` first.
+
+    `q` searches every order the business has, any status and any date, by
+    order number, customer name, email or phone (order_texts.matches);
+    newest first.
 
     `status=open` is the working set (new/preparing/ready). `from`/`to`
     are inclusive dates against `needed_by`. `status_counts` is computed
@@ -312,6 +326,16 @@ async def list_orders(
     what is on screen, not for all time.
     """
     await _owned_business(business_id, user)
+    if q and q.strip():
+        from .order_texts import matches
+        found = []
+        # ponytail: scans the newest 5000 orders in Python; a text index when a store passes that.
+        async for d in db.store_orders.find({"business_id": business_id}).sort("created_at", -1).limit(5000):
+            if matches(d, q):
+                found.append(_public(d))
+                if len(found) >= limit:
+                    break
+        return {"orders": found, "status_counts": {}, "total": len(found), "search": True}
     await generate_standing_orders(business_id)
     return await _list(business_id, status, date_from, date_to, limit)
 
@@ -397,7 +421,7 @@ async def create_order(business_id: str, payload: OrderIn, user=Depends(verify_t
         # the owner can send it from the chat thread in the same breath.
         "track_token": secrets.token_urlsafe(16),
     }
-    await db.store_orders.insert_one(doc)
+    await insert_order(doc)
     logger.info("[orders] created: business=%s order=%s source=%s", business_id, doc["_id"], payload.source)
     doc = await auto_assign(doc, biz)
     return _public(doc)
@@ -2038,7 +2062,7 @@ async def generate_standing_orders(business_id: str, *, horizon_days: int = 7) -
             "track_token": secrets.token_urlsafe(16),
         }
         try:
-            await db.store_orders.insert_one(doc)
+            await insert_order(doc)
             created += 1
             await auto_assign(doc)
         except Exception as exc:  # noqa: BLE001 — the unique index caught a race
@@ -2476,10 +2500,9 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         # The business's one-order Confirm / Decline link, sent by text
         # (order_texts.py), and the number both texts quote.
         "owner_token": secrets.token_urlsafe(16),
-        "order_no": await next_order_no(biz["_id"]),
         "lang": "he" if (payload.lang or "").startswith("he") else "en",
     }
-    await db.store_orders.insert_one(doc)
+    await insert_order(doc)
     # "Every N sold" reorders (reorder.py), in the background.
     from .reorder import in_background, products_sold
     in_background(products_sold(biz["_id"], doc.get("gig_id"), doc.get("lines") or []))
@@ -2503,7 +2526,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
                                      items_text, "/dashboard?tab=orders", "order", order_id=doc["_id"]))
     owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"_id": 0, "email": 1})
     await _email(
-        (owner or {}).get("email"), f"New order from table {payload.table}" if payload.table else f"New order from {payload.customer_name}",
+        (owner or {}).get("email"), f"New order {order_no(doc)} from table {payload.table}" if payload.table else f"New order {order_no(doc)} from {payload.customer_name}",
         f"<p><strong>{_esc(payload.customer_name)}</strong> ordered on your page:</p><p>{_esc_ml(items_text)}</p>"
         f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else (f'Table {payload.table}' if payload.table else 'Pickup')} · {_esc(needed_by.replace('T', ' '))}"
         + (f" · {_esc(sym)}{total:g}" if total is not None else "") + "</p>",
@@ -2516,7 +2539,7 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         for l in allowed_payment_links(biz.get("payment_links"))
     )
     await _email(
-        payload.customer_email, f"Your order from {biz.get('name')}",
+        payload.customer_email, f"Your order {order_no(doc)} from {biz.get('name')}",
         f"<p>Thanks, {_esc(payload.customer_name)}. {_esc(biz.get('name'))} has your order:</p><p>{_esc_ml(items_text)}</p>"
         f"<p>{'Delivery to ' + _esc(address) if payload.fulfilment == 'delivery' else (f'Served at table {payload.table}' if payload.table else 'Pickup at the store')} · {_esc(needed_by.replace('T', ' '))}"
         + (f" · {_esc(sym)}{total:g}" if total is not None else "") + "</p>"
@@ -2548,6 +2571,7 @@ async def my_orders(user=Depends(verify_token)):
             "delivered_photo_url": (o.get("delivery") or {}).get("photo_url") if o.get("status") == "done" else None,
             "paid": bool((o.get("payment") or {}).get("method")),
             "track_token": o.get("track_token"),
+            "order_no": order_no(o),
             "reorder_path": reorder_path(o) if o.get("status") == "done" else None,
         })
     return out

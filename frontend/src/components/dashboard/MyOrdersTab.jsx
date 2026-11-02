@@ -94,6 +94,7 @@ export default function MyOrdersTab({ API, token }) {
                 <span className="font-semibold" dir="auto" style={{ color: 'var(--ink)' }}>
                   {o.business?.slug ? <Link to={`/business/${o.business.slug}`}>{(lang === 'he' && o.business.name_he) || o.business.name}</Link> : o.business?.name}
                 </span>
+                {o.order_no && <span className="text-[11px] font-semibold tabular-nums" style={{ color: 'var(--brand-muted)' }}>{o.order_no}</span>}
                 <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border" style={pillStyle(o.status, false)}>{stepLabel(o)}</span>
                 <span className="inline-flex items-center gap-1 text-[11px] ms-auto" style={{ color: 'var(--brand-muted)' }}>
                   {o.fulfilment === 'delivery' ? <Bike size={12} /> : <StoreIcon size={12} />} {fmt(o.needed_by)}{o.window ? ` ${o.window.start}–${o.window.end}` : (o.needed_by || '').includes('T') ? ` ${o.needed_by.slice(11, 16)}` : ''}

@@ -20,6 +20,7 @@ from typing import Any, Optional
 
 from fastapi import APIRouter, HTTPException, Request
 from pymongo import ReturnDocument
+from pymongo.errors import DuplicateKeyError
 
 from routes.deps import db, logger
 from utils.rate_limit import check_rate
@@ -39,6 +40,50 @@ async def next_order_no(business_id: str) -> int:
         upsert=True, return_document=ReturnDocument.AFTER,
     )
     return 1000 + c["n"]
+
+
+async def insert_order(doc: dict[str, Any]) -> None:
+    """Every new order of every kind (website, dashboard, counter sale,
+    standing, partner, automation) is saved here, so every one gets the
+    store's next number. The unique index on (business_id, order_no) is the
+    second lock: if the counter were ever behind (reset, restored from a
+    backup), the clash moves the counter past the highest number in use and
+    tries again, instead of reusing a number. Any other clash (a standing
+    order's date already made) is raised to the caller as before."""
+    for _ in range(5):
+        doc["order_no"] = await next_order_no(doc["business_id"])
+        try:
+            await db.store_orders.insert_one(doc)
+            return
+        except DuplicateKeyError as exc:
+            if "order_no" not in str(exc):
+                raise
+            top = await db.store_orders.find_one(
+                {"business_id": doc["business_id"], "order_no": {"$exists": True}}, sort=[("order_no", -1)])
+            await db.counters.update_one(
+                {"_id": f"order_no:{doc['business_id']}"}, {"$max": {"n": (top or {}).get("order_no", 1000) - 1000}},
+                upsert=True)
+    raise RuntimeError("could not give the order a number")
+
+
+def matches(o: dict[str, Any], q: str) -> bool:
+    """The Orders page search: "1042", "#1042", part of a name, or a phone
+    number in any format (052-111-2222, +972521112222)."""
+    q = (q or "").strip().lower().lstrip("#")
+    if not q:
+        return True
+    digits = "".join(ch for ch in q if ch.isdigit())
+    if digits and digits == q.replace(" ", "").replace("-", "").replace("+", ""):
+        if str(o.get("order_no") or "") == digits or order_no(o).lstrip("#").lower() == q:
+            return True
+        phones = "".join(ch for ch in f"{o.get('customer_phone') or ''} {o.get('customer_phone_e164') or ''}" if ch.isdigit() or ch == " ")
+        # Israeli numbers are stored both as 05x and 9725x: drop the leading 0.
+        if len(digits) >= 6 and digits.lstrip("0") in phones:
+            return True
+        # A number is exact: "104" is not #1042.
+        return False
+    text = f"{o.get('customer_name') or ''} {o.get('customer_email') or ''} {order_no(o)}".lower()
+    return q in text
 
 
 def order_no(o: dict[str, Any]) -> str:
