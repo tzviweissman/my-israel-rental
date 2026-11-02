@@ -353,6 +353,93 @@ reader's pain. All break section 5.
 
 ---
 
+## 9d. Ideas, not layouts (1,194 Pinterest ads, 2 Nov 2026)
+
+Tzvi, 2 Nov 2026: the designs are "very basic, nothing original or eye
+catching, just a picture of their product with a plain background". 1,194 ads
+from Pinterest, about 50 for every category on the site, were labelled and
+scored for how much each stops the thumb
+([docs/inspo/pinterest-ads-2026-11-02/](inspo/pinterest-ads-2026-11-02/README.md)).
+
+- The lowest scores went to what our maker draws: a list of services, a
+  smiling worker, a good photo with a headline (1.9 to 2.8 out of 5).
+- The highest went to ads with one idea that the picture and the words
+  finish together: a visual pun (4.3), a before and after split (4.1), tiny
+  people with a giant product (4.1), letters passing behind the subject
+  (4.0), the photo inside a torn page, a phone or a newspaper (3.7), a fake
+  app screen such as a loading spinner over an empty chair (3.6).
+- Before any new ad design: pick its idea from the library, write in one
+  sentence what the picture says that the words finish, and show it on one
+  real business's own photos.
+- The next designs the free maker can draw honestly from what we hold are
+  listed in that README: fake app screen, torn paper reveal, on the map,
+  this or that, newspaper front page, words behind the subject (needs a
+  cut-out). Puns, giant products and jokes need a new picture per business,
+  so they belong to the paid ads.
+
+## 9e. What the best ads share (second look, 2 Nov 2026)
+
+Tzvi asked for the library to be studied twice. First pass: every ad
+scored 5 (186) beside the weakest (score 1). Second pass: the 147 strong
+ones (4 and 5) that need no generated picture, to see what we can make.
+
+What the 5s do, nearly every time:
+
+1. **One thing, said once.** One subject, one headline of two to six
+   words, the logo small. No list of services, no row of icons, no second
+   headline, the phone number tiny or absent. Every score-1 ad breaks
+   this: a collage of photos, a smiling worker, a services list, three
+   phone numbers.
+2. **Picture and words finish each other.** Neither works alone: "Will
+   you..." over a hand opening a ring box with biryani in it; "Forget the
+   roses, get a cookie" over cookies held as a bouquet; "Lies I tell
+   myself" over a list ending in "just one more bite". Test: cover the
+   words, and the picture should raise a question; cover the picture, and
+   the words should not make full sense.
+3. **The product takes the place of a familiar object, or sits in a
+   familiar screen.** A donut as a padlock, a cup as a rocket, a QR code
+   as the middle layer of a burger, a cookie inside the outline of an
+   alarm clock. Or a format everyone reads in a second: an incoming call
+   ("Cozy home is calling..."), a notification, toggle switches ("Work
+   off, vacation on"), a search box with suggestions, a checklist, a
+   receipt or bill, a newspaper, a map pin. The format does half the
+   telling.
+4. **The headline twists a phrase people already know** ("We'll fix it
+   later", "Don't let life back up", "Stress off", "Bad-hair day? Never
+   heard of her"). Plain description ("Professional cleaning services")
+   never reaches a 5.
+5. **One huge subject on one quiet ground.** The product fills half the
+   frame or more, on one colour taken from it, with two or three colours
+   in all. Small products on busy scenes score low.
+6. **A human touch.** A hand holding, offering or reaching in appears in
+   about a third of the 5s. It makes the product something you could take.
+7. **Words built into the picture.** A giant word with the subject in
+   front of part of it (GET MOVING, CHEESE, MEAT), or one letter replaced
+   by the product (a bean as the O of COFFEE).
+
+8. **One price, and it is the price of what is in the picture.** Tzvi
+   caught "from $75" and "$149" on one Blazin' Boards ad (2 Nov 2026):
+   the sticker said the cheapest board's price while the picture and the
+   shop screen showed the $149 board. Two prices is two messages (rule 1);
+   a price beside a different item tells the reader the pictured board
+   costs $75, which breaks section 5. So: pick the item first, show its
+   own photo, print its own price once. "From $X" only when the item
+   shown is the one that costs $X. The ad maker must pass the price with
+   the photo it belongs to, never a business-wide lowest price beside
+   whatever photo comes first.
+
+What we can make without paying (the second pass): the phone screens
+(call, notification, toggles, search, checklist), giant words behind a
+cut-out, a cut-out inside an everyday outline drawn in code, the QR code
+made part of the picture, and a two-line setup and punchline. Each needs
+only the business's own cut-out product, name, price and link. Generated
+pictures stay for the paid ads (9d).
+
+Applied to Blazin' Boards: "MEAT" behind their board, their board
+bursting out of a phone, and "Dinner is calling..." with their board as
+the caller (Decline: Cook, Accept: Order). A receipt listing their whole
+menu was dropped: eight lines of prices is the list the 1s are made of.
+
 ## 10. What to discount from the videos
 
 - **All five are sales funnels.** Three are from Fraser Cottrell's agency (the

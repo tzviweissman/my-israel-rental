@@ -565,6 +565,16 @@ Return ONE JSON object:
             one or two facts; it ends with one plain invitation to look,
             book or message. No hashtags, no emoji, no link (it is added
             after), no signature.
+  big_word  ONE word, at most 9 letters, for huge letters behind the
+            product: the thing itself, from the listing ("MEAT", "PIZZA",
+            "CLEAN", "SUITE"; in Hebrew "בשר", "פיצה"). In the ad's
+            language; capitals in English.
+  caller    2 or 3 words for a phone screen that says "<caller> is
+            calling...": what the reader gets, plainly ("Dinner", "A clean
+            home", "Your weekend"). No brand name, no claim.
+  decline   ONE or two words under the red "decline" button of that phone
+            screen: the chore the reader skips by ordering ("Cook",
+            "Scrub", "Pack"). Light, never mocking.
 
 Write in {language}. Every fact must come from the listing: never invent a
 view, a distance, a feature, a price or a review, and never add a quality
@@ -621,7 +631,7 @@ async def _ad_facts(target_type: str, target_id: str) -> tuple[dict[str, Any], d
             if isinstance(row.get("price"), (int, float)) and row["price"] > 0:
                 prices.append((float(row["price"]), row.get("currency") or "ILS"))
                 # Tiers are often all called "Standard": one column each.
-                if row_photos and row.get("name") and len(items) < 6 and all(i["name"] != str(row["name"])[:40] for i in items):
+                if row_photos and row.get("name") and all(i["name"] != str(row["name"])[:40] for i in items):
                     items.append({"name": str(row["name"])[:40], "price": float(row["price"]),
                                   "currency": row.get("currency") or "ILS", "photo": row_photos[0]})
         for f in g.get("faqs") or []:
@@ -633,6 +643,9 @@ async def _ad_facts(target_type: str, target_id: str) -> tuple[dict[str, Any], d
             "description": (g.get("description") or "")[:300],
             "items": [r.get("name") for r in (g.get("products") or []) + (g.get("tiers") or []) if r.get("name")][:10],
         })
+    # Cheapest first: the made-for-you ads show the first item, and its own
+    # price is then the lowest price, so "from" is true (ad rules 9e.8).
+    items = sorted(items, key=lambda i: i["price"])[:6]
     facts = {
         "business_name": biz.get("name"),
         "description": (biz.get("description") or biz.get("description_he") or "")[:1200],
@@ -647,6 +660,25 @@ async def _ad_facts(target_type: str, target_id: str) -> tuple[dict[str, Any], d
         "items": items,
         "faqs": faqs,
     }
+
+
+class CutoutsIn(BaseModel):
+    target_type: str
+    target_id: str
+
+
+@router.post("/ads/cutouts")
+async def ad_cutouts(body: CutoutsIn, request: Request, user=Depends(verify_token)):
+    """The business's own items, each with its photo cut out (utils/cutout.py),
+    for the made-for-you ads. Each item keeps its own name and price beside
+    its own picture, so an ad can never pair a photo with another price."""
+    if body.target_type != "business":
+        return {"items": []}
+    await _assert_owns_target(body.target_type, body.target_id, user)
+    check_rate(request, bucket=f"ad_cutouts:{user['user_id']}", limit=30, window_seconds=86400)
+    from utils.cutout import cutouts_for
+    _, extra = await _ad_facts(body.target_type, body.target_id)
+    return {"items": await cutouts_for(extra["items"][:3])}
 
 
 async def _ad_reviews(target_type: str, target_id: str) -> list[dict[str, Any]]:
@@ -752,6 +784,7 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
         # The copy rules ban the long dash; the model reaches for it anyway.
         return re.sub(r"\s*[–—]\s*", ", ", str(v or "")).strip()[:n]
 
+    extra_words = {k: clean(data.get(k), n) for k, n in (("big_word", 12), ("caller", 24), ("decline", 16))}
     words = _strip_praise({
         "headline": clean(data.get("headline"), 60),
         "points": [clean(p, 40) for p in (data.get("points") or []) if str(p).strip()][:3],
@@ -759,6 +792,7 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
     }, json.dumps(facts, ensure_ascii=False, default=str), str(facts.get("title") or facts.get("business_name") or ""))
     return {
         **words,
+        **extra_words,
         "link": link,
         "reviews": await _ad_reviews(body.target_type, body.target_id),
         **extra,
