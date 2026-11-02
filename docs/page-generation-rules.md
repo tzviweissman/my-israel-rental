@@ -1873,9 +1873,19 @@ before paying, frosted or shaded text over film, the phone loop) is not repeated
    action and the second it lands, add texture words, and finish with plain "Do not" lines: no particles,
    glow, smoke or flash, no pieces appearing, no change of count. The template is in the folder README.
    (3 videos, prompts seen on screen.)
-10. **Draft cheap, finish once.** Try the motion as a draft (480p, about a quarter of the price; Seedance
-    draft at 5 s cost 15 credits on screen), look at it at 4 or more frames a second, and only then make
-    the final. check-clip still runs on the final. (2 videos.)
+10. **Spend on the pictures, generate the clip once** (replaced 2 Nov 2026, Tzvi: "is there a way to do this
+    cheaper instead of making a ton of versions per build"). A draft saves little and proves little: on
+    Higgsfield a 5 s MiniMax clip costs 7.5 credits at 480p and 10 at 2K, and the final is a new roll that
+    need not match the draft. So, on every site's film:
+    1. Retry the start and end pictures (about 1 credit each) until both are exactly right; the clip is
+       made from them.
+    2. Make each clip once, straight at full quality. Check the price with get_cost first; a cheap draft
+       only where get_cost shows it under a third of the final's price.
+    3. Simple motion is done in code, free: a crack or line growing, a slow push-in, the background
+       drifting, holds and dissolves. Only what must look physically real (a pour, a stretch, a tear) is
+       generated.
+    4. A small fault is fixed in the edit (trim it, or dissolve in from the still), not by a new clip.
+    Look at every clip at 4 or more frames a second; check-clip runs on it. (2 videos; prices 2 Nov 2026.)
 11. **A refused close-up gets a step back, not new words.** Macro shots of warm, soft surfaces were refused
     as unsafe twice. If a food close-up is refused, move the camera back a little. (1 video.)
 12. **Biting, chewing and tearing are not solved.** None of the seventeen shows a convincing one; the one
