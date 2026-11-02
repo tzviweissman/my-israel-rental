@@ -197,3 +197,11 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 - [Low] Plural checks awayReply.body and stays.repliesWithinHours, and the away-reply exclamation marks: reached main with the 31 Oct follow-up merge (test-i18n-parity passes; it failed on main before).
 - [Low] Chicken Munch order page shows "Total 0" with no currency while the basket is empty (2026-10-31-ui-audit.md). Open: a business site change needs a full republish; left for the next Chicken Munch change.
 - [Low] Hardcoded #F9FAFB / #E3E3E3 class names in AdMaker.jsx and ListingStrength.jsx (2026-10-30-ui-audit.md #2). Open, nit; values match the flow theme.
+
+## Dead-ends audit of 1 Nov 2026
+- [Low] `POST /notifications/preferences` saves a document nothing reads and no screen writes. Seen 1 Nov (2026-11-01-dead-ends.md). Orphaned; no site promise depends on it.
+- Dead-ends audit 1 Nov: no new broken links or empty promises; still no database in the sandbox, so signed-in clicking was not possible (see "Audit setup" above).
+
+## Code review of 1 Nov 2026
+- [Low] `GET /marketplace/gigs?limit=0` (public) now reads every published listing on each request before cutting; fine at 62, worth paging in Mongo past a few hundred. Seen 1 Nov (2026-11-01-site-audit.md). Noted by the author in a code comment.
+- [To fix] Audit setup still fails: MongoDB download 403 again (1 Nov), Chromium download fails; `pytest_asyncio` is also missing from the backend venv, so test_dropship, test_jobs_end_to_end, test_page_products fail to collect and the DB tests (including the new test_gigs_list_all.py) error. The preinstalled /opt/pw-browsers/chromium is still not used by the script.
