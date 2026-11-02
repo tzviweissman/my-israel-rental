@@ -67,6 +67,7 @@ from utils.media_url import MAX_MEDIA_URL_LEN, is_allowed_media_url
 # tests/test_order_payment_links.py.
 from utils.payment_links import allowed_payment_links
 from utils.rate_limit import check_rate
+from .order_texts import next_order_no, order_no
 from .custom_fields import answers_text, check_answers, public_fields
 from utils.whatsapp_link import normalize_whatsapp_number
 
@@ -1617,6 +1618,7 @@ async def track_order(token: str, request: Request):
             "logo_url": biz.get("logo_url"),
             "slug": biz.get("slug"),
         },
+        "order_no": order_no(o),
         "customer_name": o.get("customer_name"),
         "items": o.get("items"),
         "needed_by": o.get("needed_by"),
@@ -2471,6 +2473,11 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         "status_changed_at": stamp,
         "history": [{"status": "new", "at": stamp, "by": "customer"}],
         "track_token": secrets.token_urlsafe(16),
+        # The business's one-order Confirm / Decline link, sent by text
+        # (order_texts.py), and the number both texts quote.
+        "owner_token": secrets.token_urlsafe(16),
+        "order_no": await next_order_no(biz["_id"]),
+        "lang": "he" if (payload.lang or "").startswith("he") else "en",
     }
     await db.store_orders.insert_one(doc)
     # "Every N sold" reorders (reorder.py), in the background.
@@ -2559,10 +2566,15 @@ async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optiona
         if not number:
             return
         owner = await db.users.find_one({"id": owner_user_id}, {"preferred_language": 1}) or {}
-        await send_new_order_notification(
+        sent = await send_new_order_notification(
             recipient_phone=number, customer_name=customer_name or "", summary=summary or "",
             path=path, kind=kind, language=owner.get("preferred_language") or "en",
             order_id=order_id,
         )
+        # No WhatsApp (Meta still checking the business, Nov 2026, or the
+        # send failed): a text with the one-tap confirm link instead.
+        if not sent and kind == "order" and order_id:
+            from .order_texts import text_owner_new_order
+            await text_owner_new_order(order_id, number)
     except Exception as exc:  # noqa: BLE001
         logger.warning("WhatsApp new-%s alert failed: %s", kind, type(exc).__name__)

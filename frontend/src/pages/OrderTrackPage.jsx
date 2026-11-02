@@ -102,7 +102,7 @@ export default function OrderTrackPage() {
         <div className="flex items-center gap-3 mb-6">
           {data.business?.logo_url && <img src={data.business.logo_url} alt="" className="w-11 h-11 rounded-xl object-cover" />}
           <div className="min-w-0">
-            <p className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.yourOrderFrom', 'Your order from')}</p>
+            <p className="text-[11px] uppercase tracking-wide" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.yourOrderFrom', 'Your order from')}{data.order_no ? ` · ${t('ownerOrder.orderNo', 'Order {{no}}', { no: data.order_no })}` : ''}</p>
             <h1 className="text-lg font-bold truncate" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>
               {data.business?.slug ? <Link to={`/business/${data.business.slug}`}>{bizName}</Link> : bizName}
             </h1>

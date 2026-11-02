@@ -7140,6 +7140,21 @@ const en = {
         doorHow: "Scan the member’s QR code with this device’s camera, or type the 5-letter code from their pass.",
         code: "Member code",
       },
+      ownerOrder: {
+        title: "Order {{no}}",
+        confirm: "Confirm order",
+        decline: "Decline",
+        declineAsk: "Decline this order? The customer gets a text saying you can't take it.",
+        declineYes: "Yes, decline",
+        keep: "Keep it",
+        confirmed: "Confirmed. The customer has their order number and tracking link.",
+        declined: "Declined. The customer was told.",
+        failed: "That did not go through. Please tap again.",
+        pickup: "Pickup",
+        badLinkBody: "Open the order from your dashboard instead.",
+        footer: "This order is also in your dashboard.",
+        orderNo: "Order {{no}}",
+      },
     };
 
 export default en;
