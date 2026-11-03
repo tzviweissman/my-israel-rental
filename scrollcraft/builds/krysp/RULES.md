@@ -38,7 +38,7 @@ R3g.13 pass: 1440x900 and 390x844 first screens hold her board photo, the headli
 R3b.1 pass: first screen says what (deluxe peanut chew boards), where (Jerusalem), the price ($38) and what to do (Order); trust is the dark band straight after the opening
 R3b.2 pass: the price touches the Order button; the hashgacha is a labelled dark band right after the opening and is stated once on the home page
 R3b.3 pass: one solid Order per screen; the header Order is outline; Add buttons sit on tiles; walked the page at several scroll positions
-R3h.20 pass: check-site SMOOTH and SLOW passed; the film holds 5 screens; check-speed under the limit on a slowed phone; the chew is on her peach; the first frame loads first
+R3h.20 pass: check-site SMOOTH and SLOW passed; check-speed 18 ms a frame on a slowed phone with the video film (3 Nov); the film holds 5 screens; check-speed under the limit on a slowed phone; the chew is on her peach; the first frame loads first
 R3h.21 pass: check-one-scroll passed; only the opening film follows the scroll, the rest scrolls normally and the shop changes on a tap
 R3h.23 pass: check-clip passes every clip used (film/advert-B-norice.mp4 with its three shot cuts) and the joined gen/film/opening.mp4 with the cuts and the one dissolve listed in gen/film.sh; gen/advert-brief.md has How it really happens (docs/inspo/bar-breaking-2026-11-02 and the advert prompts it links) and the Key moment; the crack and web were cut out after Tzvi saw them (2 Nov)
 R3h.1 pass: check-site OPENING passed: the home page opens full screen on the advert film (2 Nov), peanut butter and chocolate swirling round one of her chews, made from her own photo
@@ -49,7 +49,7 @@ R3n.4 pass: first screen compared with docs/inspo/product-films-2026-10-21/can-6
 R3n.5 pass: "you land and peanut butter and chocolate swirl round one of her chews, you see its crisp rice close, then it lies broken open on a board and you see her whole board"; written in CONCEPT.md
 R3g.15 pass: check-fits passed (no photo shown over 1.35 times its size); the opening picture is her own 1448 px photo, shown at most at its own size
 R3h.2 pass: walked at every 5% of the film: the ribbon and chunks sweep in, circle the chew, the close-up, the halves on the board, then her real board photo dissolves in, with the price and Order button on a card at the end
-R3h.3 pass: full screen, 269 sharp frames, every frame of the film, blended between neighbours as you scroll so a slow scroll is smooth (Tzvi 3 Nov) (1680 wide on a laptop, a 4:3 crop on a phone so her board ends whole), drawn at their own size and scaled by CSS; looked at 1440x900 and 1920x1080
+R3h.3 pass: full screen; the film plays as real video led by the scroll (R3h.24), over 269 sharp frames that show until it plays and stay as the fallback (1680 wide on a laptop, a 4:3 crop on a phone so her board ends whole), drawn at their own size and scaled by CSS; looked at 1440x900 and 1920x1080
 R3h.5 pass: no lines in the film itself; the intro words sit on a peach card above the chew and step back at the close-up, and on a laptop a small solid card with the price and Order takes their place for the rest of the film, at the bottom, never over the chew; readable passed. No labels: what is inside her chews is not in her record
 R3h.7 pass: joins looked at frame by frame (gen/film/norice-sheet.jpg, advert-B-cut-sheet.jpg): three hard cuts between shots, as in an advert, the close-up slowed 1.5x so it does not lurch, and her board dissolves in over 0.8 s; check-clip passes the joined film with those marked
 R3h.8 pass: the film ends on her board on grey stone, and the next section is the dark brown hashgacha band
@@ -230,3 +230,4 @@ R3v.6 pass: check-heights passed on every page
 R3v.7 n/a: none of the 3v layouts is used: one board and one photo give no bento, steps are plain rows (S5), and callouts would need facts about the inside she has not given
 R3v.8 n/a: none of the 3v effects is used; her own set (B20, R14, H10, T5) is named in CONCEPT.md and differs from Bake away's, the site built before it
 R3v.14 pass: check-facts passed: Luxe board, $38 · Under the hashgacha of Rabbi Wiener · Order on WhatsApp, right under the Order button
+R3h.24 pass: check-film-video passed: the film plays as real video led by the scroll (assets/film/opening-d.mp4, opening-m.mp4, starter/film.js), within 0.5 s of the scroll at a quarter, half and three quarters on laptop and phone in real Chrome

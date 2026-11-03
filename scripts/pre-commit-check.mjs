@@ -46,6 +46,19 @@ for (const slug of live) {
   if (liveHash(dir) !== rec.hash) problems.push(`${slug}: the live page was changed after publishing (by hand?). Make the change in scrollcraft/builds/${rec.folder}, then run: node scripts/publish-page.mjs ${rec.folder} ${slug}`);
   builds.add(rec.folder);
 }
+// A site is checked against today's rules, not the ones this branch was cut with (Tzvi, 3 Nov 2026, after Krysp was
+// built on a branch from 29 Oct and missed 27 rules made on main since: "make sure these issues dont happen in the
+// future"). Any rule on main (local or origin) that this checkout's checklist lacks refuses the commit: merge main first.
+if (builds.size) {
+  const ids = (s) => new Set([...s.matchAll(/^(R[0-9][0-9a-z]*\.[0-9]+)\s*\|/gm)].map((m) => m[1]));
+  const mine = ids(fs.readFileSync(path.join(ROOT, 'docs', 'rules-checklist.md'), 'utf8'));
+  const behind = new Set();
+  for (const ref of ['main', 'origin/main']) {
+    const r = spawnSync('git', ['show', `${ref}:docs/rules-checklist.md`], { cwd: ROOT, encoding: 'utf8', maxBuffer: 1 << 26 });
+    if (r.status === 0) for (const id of ids(r.stdout)) if (!mine.has(id)) behind.add(id);
+  }
+  if (behind.size) problems.push(`this checkout is behind main's rules (${[...behind].slice(0, 8).join(', ')}${behind.size > 8 ? ` and ${behind.size - 8} more` : ''}): merge main first (git merge main), then answer the new rules in RULES.md`);
+}
 for (const folder of builds) {
   const dir = path.join('scrollcraft', 'builds', folder);
   if (!fs.existsSync(path.join(ROOT, dir, 'index.html'))) continue;  // not a site (or deleted)

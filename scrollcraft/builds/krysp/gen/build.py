@@ -48,7 +48,7 @@ SEAM = ('<svg class="seam" viewBox="0 0 40 1000" preserveAspectRatio="none" aria
 # c2 0.35 (3.9 s, the close-up) the intro steps back and the small price-and-Order card takes its place for the rest of
 # the film (the review: half the film had no price on a laptop). No labels on the film:
 # what is inside her chews is not in her record (OWNER-QUESTIONS 3).
-HOME = f'''  <section class="film" id="film" aria-labelledby="h-open" data-frames="269" data-src="assets/film" data-marks="0.35">
+HOME = f'''  <section class="film" id="film" aria-labelledby="h-open" data-frames="269" data-src="assets/film" data-video="assets/film/opening-{{k}}.mp4" data-marks="0.35">
     <div class="stage">
       <div class="screen"><canvas aria-hidden="true"></canvas></div>
       <div class="words">

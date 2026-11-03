@@ -1087,6 +1087,18 @@ that policy).*
       open, or turns up from nowhere). Then each numbered step of the brief is ticked off against the clip at 8 fps:
       seen, or not seen. It caught all three faults of Krysp's first film and passed every other clip we have.
 
+22. **A scroll film plays as real video, led by the scroll** (Tzvi, 3 Nov 2026, Krysp: "the motions dont look smooth",
+    then "it still doesnt look so smooth like the video i sent you"). Still frames scrubbed by the scroll stretch the film
+    over several screens into slow motion: Krysp's recording showed 3 to 10 new pictures a second. Using every frame and
+    blending neighbours got it to 30 but read soft, unlike the adverts he compared it with, which play at their own speed.
+    So the film is also a video (`data-video`, two H.264 files, laptop and phone, a keyframe every 12 frames) and
+    `scrollcraft/starter/film.js` plays it while the scroll is ahead, steers its speed (0.35x to 2.5x) to keep up, holds
+    when the scroll stops and jumps back on the way up; it never stops and starts every frame, which freezes it (the
+    first version did). The frames stay as the picture until the video plays, the fallback and reduced motion's still.
+    Test a film by scrolling in real time in real Chrome: Playwright's own Chromium cannot play H.264, and the site's
+    smooth scrolling swallows a scroll sent every frame (scroll with `behavior: 'instant'`). Check:
+    `scripts/check-film-video.mjs` (R3h.24), run by publish-page.
+
 ## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
 
 Tzvi: "pull out other things from these professional websites ... watch the
