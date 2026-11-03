@@ -203,3 +203,30 @@ R3a.8 pass: no dotted line of items; looked at 360x640
 ## 9. Finish
 R3r.3 pass: check-build passed after the last edit; this file was written after it
 R3r.4 pass: Tzvi's corrections on this build are in the rules: advert-style ingredients allowed in the opening (3w.1), pictures first and one clip at full quality (3w.10), Higgsfield through the API
+R3h.22 pass: the film was planned as one storyboard sheet Tzvi approved before the clip (gen/film/SB-a.png, nine pictures; "use whatever is most likely to get it right the first try", 2 Nov). It was made as pictures from her photo, not rough line drawings: this copy of the rules did not yet have 3h.6 when the sheet was made
+R3k.10 pass: check-prefill passed: the day field arrives set to tomorrow, the first day we can promise while her lead time is unknown (OWNER-QUESTIONS 6), quantity 1, the Luxe board is the only board; a customer's pick is never overwritten
+R3s.28 pass: check-blank passed on every page, laptop and phone
+R3u.2 pass: a past day gets one line under the field, "That day has passed. The first day we can do is Wednesday 4 Nov." with a Choose Wednesday button (tried on gen/test.html); she has given no closed days or daily limit yet (OWNER-QUESTIONS 6, 13), so none are invented
+R3u.3 n/a: no pieces or servings are known for the Luxe board; asked in OWNER-QUESTIONS 2
+R3u.5 n/a: the home page opens on a scroll film
+R3u.6 n/a: the first screen is the film with the words on one card, no separate pieces to move at their own speeds
+R3u.7 n/a: no rotating word
+R3u.8 n/a: no tilted label over headings
+R3u.9 n/a: no questions section yet; her customers' questions are asked in OWNER-QUESTIONS
+R3u.10 n/a: one place, Jerusalem, no address given
+R3u.11 pass: on 3 Nov the page was checked with a still (her chew, W0) in every film frame, then the film went back in and every check ran again (publish-page --check)
+R3u.12 pass: her own pieces not in the kit (B20 button crack, R14 crack line, H10 letters, the next-day line) are on gen/test.html with a button for each state, watched at 4 fps before they stay in
+R3u.13 pass: gen/report.md ends with Not done yet and For your call (two)
+R3u.14 pass: gen/copy-pass.md lists every line over the limit with a shorter one; two shorter versions went in, one kept with the reason
+R3w.1 pass: the opening film uses the advert-style exception (Tzvi, 2 Nov): her own ingredients swirl round the chew, marked in gen/advert-brief.md; the chew itself never changes, nothing pops in or out in the open, the loose rice was removed
+R3w.2 pass: the peanut butter is opaque and satin, no glassy drips or bubbles; no steam
+R3w.3 pass: warm light from behind and the side, the camera side darker; the fastest moment (the swirl) stays sharp when paused
+R3w.4 pass: the storyboard and the chew picture were right before the clip; the clip was made once at full quality (2K, MiniMax H3), no draft; the cuts and slow-down were done in the edit; judged at 2 and 4 fps
+R3w.5 pass: no tear or bite in motion: the crack and web shots were cut out (Tzvi: "the crack isnt smooth"); the film cuts from the whole chew to the halves on the board
+R3w.6 pass: the scrub ends on her board photo, held 2.5 s after its 0.8 s dissolve, and the next section is the hashgacha band; the film's last frame is the picture the page goes on to
+R3v.1 pass: check-footer passed: the same full footer on every page (Krysp and her words, Pages, Ordering, Reach us with WhatsApp and email, the base line with © 2026, MyIsraelRental and Privacy)
+R3v.2 pass: check-menu passed: Home, Shop, Contact on every page, no #jumps in the bar
+R3v.6 pass: check-heights passed on every page
+R3v.7 n/a: none of the 3v layouts is used: one board and one photo give no bento, steps are plain rows (S5), and callouts would need facts about the inside she has not given
+R3v.8 n/a: none of the 3v effects is used; her own set (B20, R14, H10, T5) is named in CONCEPT.md and differs from Bake away's, the site built before it
+R3v.14 pass: check-facts passed: Luxe board, $38 · Under the hashgacha of Rabbi Wiener · Order on WhatsApp, right under the Order button

@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Krysp: moving pieces, tried one at a time (rules 3u.12)</title>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@800;900&family=Mulish:wght@400;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../site.css">
+<style>
+  body { padding: 2rem var(--gutter); } .t { margin: 0 0 3rem; padding: 1.5rem; border: 1px solid var(--line); border-radius: var(--r); background: var(--ground); }
+  .t > p:first-child { margin: 0 0 1rem; font-weight: 800; } .ctl { display: flex; gap: .6rem; flex-wrap: wrap; margin-top: 1rem; }
+  .ctl button { font: 700 .9rem var(--font-body); padding: .5rem .9rem; border-radius: 999px; border: 1px solid var(--ink); background: none; cursor: pointer; }
+</style>
+</head>
+<body>
+<h1>Krysp's own moving pieces</h1>
+<p>Each piece not in scrollcraft/starter/kit, with a button for each state. Watched at 4 fps (gen/test-*.jpg).</p>
+
+<div class="t" id="t-btn"><p>B20, the button press crack</p>
+  <a class="btn" href="#t-btn" id="b20"><span>Order</span></a>
+  <div class="ctl"><button type="button" data-do="press">Press</button><button type="button" data-do="rest">Rest</button></div></div>
+
+<div class="t" id="t-crack"><p>R14, the crack drawn between sections</p>
+  <svg class="crack" id="r14" viewBox="0 0 1200 30" preserveAspectRatio="none" aria-hidden="true"><path d="M0 15 L130 11 L190 19 L310 8 L400 18 L520 10 L610 20 L760 9 L850 17 L980 12 L1080 19 L1200 14"/><path d="M610 20 L632 28 M310 8 L296 1"/></svg>
+  <div class="ctl"><button type="button" data-do="draw">Comes into view</button><button type="button" data-do="undraw">Reset</button></div></div>
+
+<div class="t" id="t-h"><p>H10, letters closing up as a heading arrives (laptop only)</p>
+  <h2><span class="hh" id="h10">Three steps to your board</span></h2>
+  <div class="ctl"><button type="button" data-do="arrive">Arrives</button><button type="button" data-do="leave">Reset</button></div></div>
+
+<div class="t" id="t-day"><p>3u.2, a day that cannot be done</p>
+  <label class="f" for="when">Preferred day</label><input class="fld" id="when" type="date"><p class="err" id="e-when"></p>
+  <div class="ctl"><button type="button" data-do="past">Pick a past day</button><button type="button" data-do="ok">Pick tomorrow</button></div></div>
+
+<script>
+  document.body.classList.remove('no-js');
+  var today = new Date(), iso = function (d) { return new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10); };
+  var first = iso(new Date(today.getTime() + 864e5)), w = document.getElementById('when'), e = document.getElementById('e-when');
+  w.value = first;
+  function nextDay() {
+    var d = new Date(first + 'T12:00');
+    e.textContent = 'That day has passed. The first day we can do is ' + d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }) + '. ';
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'lnk'; b.textContent = 'Choose ' + d.toLocaleDateString('en-GB', { weekday: 'long' });
+    b.addEventListener('click', function () { w.value = first; e.textContent = ''; }); e.appendChild(b);
+  }
+  var act = {
+    press: function () { var b = document.getElementById('b20'); b.classList.remove('cracked'); void b.offsetWidth; b.classList.add('cracked'); },
+    rest: function () { document.getElementById('b20').classList.remove('cracked'); },
+    draw: function () { document.getElementById('r14').classList.add('in'); },
+    undraw: function () { document.getElementById('r14').classList.remove('in'); },
+    arrive: function () { document.getElementById('h10').classList.add('in'); },
+    leave: function () { document.getElementById('h10').classList.remove('in'); },
+    past: function () { w.value = iso(new Date(today.getTime() - 3 * 864e5)); nextDay(); },
+    ok: function () { w.value = first; e.textContent = ''; }
+  };
+  document.addEventListener('click', function (ev) { var b = ev.target.closest('[data-do]'); if (b) act[b.dataset.do](); });
+  document.getElementById('b20').addEventListener('click', function (ev) { ev.preventDefault(); act.press(); });
+</script>
+</body>
+</html>

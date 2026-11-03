@@ -193,3 +193,9 @@ section.cat-sec, section.how { padding-block: clamp(2rem, 6svh, 4.5rem); }
 .tile h3 { font-size: 1.5rem; margin-bottom: .5rem; }
 .tile p { margin: 0; font-size: 1.1rem; }
 .page-head { background: var(--peach); padding-bottom: clamp(2rem, 5vw, 3rem); }
+
+/* three true facts under the main button (rules 3v.14) */
+.btn-facts { display: flex; flex-wrap: wrap; gap: 6px 16px; margin: 0; padding: 0; list-style: none; font-size: .9rem; font-weight: 700; color: var(--ink); }
+.btn-facts li::before { content: ''; display: inline-block; width: .4em; height: .4em; border-radius: 50%; background: var(--accent); vertical-align: middle; margin-inline-end: .45em; margin-bottom: .15em; }
+.btn-facts .sym { font-size: 1em; vertical-align: 0; margin: 0; padding: 0; }
+.foot.full { color: #FBF1E6; } .foot .fgrid a, .foot .fgrid p, .foot .fbase a { color: #FBF1E6; } .foot .fbase { color: #E9D3BE; }

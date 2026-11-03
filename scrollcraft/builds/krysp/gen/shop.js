@@ -69,11 +69,22 @@
   function mark(id, msg) { var w = document.getElementById('w-' + id) || document.getElementById('c-' + id); if (w) w.classList.toggle('bad', !!msg); document.getElementById('e-' + id).textContent = msg || ''; }
   var today = new Date(), minDay = new Date(today.getTime() - today.getTimezoneOffset() * 60000).toISOString().slice(0, 10);
   document.getElementById('when').min = minDay;
+  // arrives filled in (rules 3k.8): tomorrow, the first day we can promise while her lead time is unknown (OWNER-QUESTIONS 6); a pick is never overwritten
+  if (!document.getElementById('when').value) { var tm = new Date(today.getTime() - today.getTimezoneOffset() * 60000 + 864e5); document.getElementById('when').value = tm.toISOString().slice(0, 10); }
+  var firstDay = document.getElementById('when').value || minDay;
+  function nextDay() {
+    var el = document.getElementById('e-when'), d = new Date(firstDay + 'T12:00');
+    el.textContent = 'That day has passed. The first day we can do is ' + d.toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'short' }) + '. ';
+    var b = document.createElement('button'); b.type = 'button'; b.className = 'lnk'; b.textContent = 'Choose ' + d.toLocaleDateString('en-GB', { weekday: 'long' });
+    b.addEventListener('click', function () { var w = document.getElementById('when'); w.value = firstDay; w.dispatchEvent(new Event('input')); w.focus(); });
+    el.appendChild(b);
+  }
   function check(show, upto) {
     var ok = true, e; upto = upto || 3;
     e = total() ? '' : 'Add a board to your basket'; if (e) ok = false; if (show || !e) mark('items', e);
     if (upto < 2) return ok;
-    e = !v('when') ? 'Choose a day' : v('when') < minDay ? 'That day has passed' : ''; if (e) ok = false; if (show || !e) mark('when', e);
+    e = !v('when') ? 'Choose a day' : v('when') < firstDay ? 'That day has passed.' : ''; if (e) ok = false; if (show || !e) mark('when', e);
+    if (e && (show || !e) && v('when')) nextDay();   // rules 3u.2: say so and offer the first day we can do, never change the pick quietly
     if (upto < 3) return ok;
     e = v('me') ? '' : 'Your name, please'; if (e) ok = false; if (show || !e) mark('me', e);
     e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number we can reach you on'; if (e) ok = false; if (show || !e) mark('ph', e);

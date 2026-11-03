@@ -11,7 +11,8 @@ SITE = kit.Site(
     fonts='family=Nunito:wght@800;900&family=Mulish:wght@400;700;800',
     cta=('shop.html#order', 'Order'), bar=('Luxe, $38', 'Deluxe peanut chew board'),
     mark_html='<img src="assets/mark.webp" alt="" width="40" height="40">',
-    footer_note='on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission',
+    about='We’re a home business making deluxe peanut chew boards.',
+    ordering=('Ordering', ['Order on WhatsApp', 'Made at home in Jerusalem']),
     place='Jerusalem', close_title='Order your Luxe board, $38', close_extra='KRYSP')
 
 TITLE = 'Krysp · Deluxe peanut chew boards, Jerusalem'
@@ -52,7 +53,7 @@ HOME = f'''  <section class="film" id="film" aria-labelledby="h-open" data-frame
       <div class="screen"><canvas aria-hidden="true"></canvas></div>
       <div class="words">
         <h1 id="h-open">Deluxe peanut chew boards</h1>
-        <div class="go"><p class="lede">Made at home in Jerusalem.</p><a class="btn" href="shop.html#order"><span>Order</span></a><p class="from">Luxe board, {P(38)}</p></div>
+        <div class="go"><p class="lede">Made at home in Jerusalem.</p><a class="btn" href="shop.html#order"><span>Order</span></a><ul class="btn-facts"><li>Luxe board, {P(38)}</li><li>Under the hashgacha of Rabbi Wiener</li><li>Order on WhatsApp</li></ul></div>
       </div>
       <p class="giant" aria-hidden="true">KRYSP</p>
       <div class="card"><p>Luxe board, {P(38)}</p><a class="btn" href="shop.html#order"><span>Order</span></a></div>
@@ -91,8 +92,8 @@ HOME = f'''  <section class="film" id="film" aria-labelledby="h-open" data-frame
         <a class="btn go-more" href="shop.html#order"><span>Order</span></a>
       </div>
       <ol class="hsteps rev">
-        <li><div><b>Add your board</b><span>Choose the Luxe board in the shop and add it to your basket.</span></div></li>
-        <li><div><b>Tell us the day</b><span>Choose the day you would like it and add a note if you want. We confirm the day with you.</span></div></li>
+        <li><div><b>Add your board</b><span>Add the Luxe board to your basket in the shop.</span></div></li>
+        <li><div><b>Tell us the day</b><span>Pick your day and add a note. We confirm the day with you.</span></div></li>
         <li><div><b>Send it on WhatsApp</b><span>Your order opens in WhatsApp, written out. Send it and we reply to you.</span></div></li>
       </ol>
     </div>
@@ -187,6 +188,6 @@ CONTACT = SITE.page_head('Contact', 'Order, or ask us a question.') + f'''  <sec
     </div>
   </section>
 '''
-dataclasses.replace(SITE, contacts=[]).write('contact', 'Contact · Krysp', 'WhatsApp +972 53-485-7841 or email kryspboards@gmail.com. Krysp, a home business in Jerusalem making deluxe peanut chew boards.', OG, CONTACT); finish('contact')
-_c = open('contact.html', encoding='utf8').read(); open('contact.html', 'w', encoding='utf8').write(_c.replace('\n        <p></p>', ''))   # the contact close band has no numbers: no empty paragraph
+SITE.write('contact', 'Contact · Krysp', 'WhatsApp +972 53-485-7841 or email kryspboards@gmail.com. Krysp, a home business in Jerusalem making deluxe peanut chew boards.', OG, CONTACT); finish('contact')
+_c = open('contact.html', encoding='utf8').read(); open('contact.html', 'w', encoding='utf8').write(_c.replace(f'\n        <p>{SITE.contacts_html()}</p>', '', 1))   # the close band repeats no numbers (the tiles above have them); the footer keeps them (3v.1)
 print('built')

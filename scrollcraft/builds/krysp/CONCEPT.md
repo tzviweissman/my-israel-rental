@@ -69,6 +69,11 @@ differs, clip 2 is redone. Scroll-driven frames on a canvas (film.js).
 - other: X32, new, from docs/inspo/awwwards-categories-2026-10-18/easyseller-1-object-through-headline.webp and the snap idea: a thin crack drawn down the peach beside her board by the scroll
 - touch: from her product's own crunch: pressing the order button cracks its face with a thin line, and a crack line runs between the sections, the crunch of a peanut chew, the one thing in her product that is hers
 
+- Compared with the site built before it (Bake away: B19, L1, T6, R4, P1, H1, X31): none of Krysp's effects is shared. Each has its
+  phone and reduced-motion version: the button crack and crack lines draw at once with motion off; the letters only close up on
+  a laptop; the tile's light is mouse only. None of the 3v effects is used (rules 3v.8).
+- Layouts (3v.7): none of the 3v layouts; the steps are plain numbered rows (S5).
+
 ## Not alike
 krysp: different from all 17 other pages
 
