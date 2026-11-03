@@ -1,6 +1,6 @@
 import React, { useState, useContext } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar, Briefcase, MapPin, Mail, Flag, Star, UtensilsCrossed, Send } from 'lucide-react';
+import { Eye, Home, Users, MessageCircle, FileText, Settings, Upload, Sparkles, Calendar, Briefcase, MapPin, Mail, Flag, Star, UtensilsCrossed, Send, Megaphone } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { useApiSWR } from '../hooks/useApiSWR';
 import { useAdminLiveEvents } from '../hooks/useAdminLiveEvents';
@@ -20,6 +20,7 @@ import SmartListsTab from '../components/admin/SmartListsTab';
 import BookingsTab from '../components/admin/BookingsTab';
 import EmailHealthTab from '../components/admin/EmailHealthTab';
 import InviteBusinessesTab from '../components/admin/InviteBusinessesTab';
+import AdStudio from '../components/admin/AdStudio';
 
 /**
  * Grouped navigation (spec A2).
@@ -47,6 +48,8 @@ const TAB_GROUPS = [
     { key: 'restaurants', labelKey: 'admin.restaurantsTab', icon: UtensilsCrossed },
     // A ready invite, plus the joining rules and sign-up links, to send a business.
     { key: 'invite', labelKey: 'admin.inviteTab', icon: Send },
+    // MyIsraelRental's own ads, made and kept here to send on WhatsApp.
+    { key: 'ads', labelKey: 'admin.adsTab', icon: Megaphone },
   ] },
   { group: 'admin.groupDemand', items: [
     { key: 'bookings', labelKey: 'admin.bookings', icon: Calendar },
@@ -206,6 +209,7 @@ const AdminDashboard = () => {
         {activeTab === 'services' && <ServicesTab token={token} initialFilter={servicesFilter} />}
         {activeTab === 'restaurants' && <RestaurantsTab token={token} />}
         {activeTab === 'invite' && <InviteBusinessesTab token={token} />}
+        {activeTab === 'ads' && <AdStudio token={token} />}
         {activeTab === 'requests' && <RequestReportsTab token={token} />}
         {activeTab === 'reviews' && <ReviewsModerationTab token={token} />}
         {activeTab === 'areas' && <AreaAliasManager token={token} />}
