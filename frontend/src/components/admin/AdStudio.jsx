@@ -2,9 +2,10 @@
  * Super Admin → Ads (Tzvi, 2 Nov 2026: "make me an area to create ads and
  * edit them to send on whatsapp").
  *
- * MyIsraelRental's own ads. Three designs from the ads that worked (ad
- * rules 9e): "Group chat" (your post sank in the group), "Our pages" (three
- * real custom pages on phones) and "Photo and words". Every word and picture
+ * MyIsraelRental's own ads, nine designs (DESIGNS) from the ads that worked
+ * (ad rules 9e). The first three: "Group chat" (your post sank in the
+ * group), "Our pages" (three real custom pages on phones) and "Photo and
+ * words"; the six after them are described above drawCall. Every word and picture
  * is editable, the picture redraws as you type, and each ad is saved
  * (routes/admin/ads.py) so it can be opened and changed later. It comes out
  * in two shapes: a chat post (1080x1350) and a WhatsApp status (1080x1920,
@@ -111,7 +112,9 @@ function foot(ctx, { W, H, shape, f, logo, dark }) {
   ctx.textAlign = rtl ? 'right' : 'left';
   ctx.direction = rtl ? 'rtl' : 'ltr';
   ctx.fillStyle = dark ? '#FFFFFF' : INK;
-  ctx.font = `700 50px ${ff.body}`;
+  // The title shrinks to fit on one line rather than being cut.
+  let ts = 50;
+  do { ctx.font = `700 ${ts}px ${ff.body}`; ts -= 2; } while (ts > 30 && ctx.measureText(f.title || '').width > tw);
   ctx.fillText(wrap(ctx, f.title, tw, 1)[0] || '', tx, top + 118);
   ctx.fillStyle = dark ? '#CFD8E3' : '#444444';
   ctx.font = `500 28px ${ff.body}`;
@@ -306,6 +309,303 @@ function drawPhoto(ctx, W, H, shape, f, logo, photo) {
   foot(ctx, { W, H, shape, f, logo, dark: true });
 }
 
+// The six added the next day (Tzvi, 3 Nov 2026: "make more ad options like
+// 6"), each one of the phone-screen or list ideas from the library's idea
+// folders (docs/inspo/pinterest-ads-2026-11-02: call, notify, search,
+// toggle, checklist) and the before-and-after split.
+
+const lines = (s) => (s || '').split('\n').map((l) => l.trim()).filter(Boolean);
+const topOf = (shape) => (shape === 'status' ? 240 : 64);
+const footTopOf = (shape, H) => H - (shape === 'status' ? 230 : 0) - 300;
+
+function text(ctx, s, x, y, { size = 30, weight = 600, colour = INK, align = 'center', head = false, max = 0 } = {}) {
+  const f = fonts(s);
+  ctx.font = `${weight} ${size}px ${head ? f.head : f.body}`;
+  ctx.fillStyle = colour;
+  ctx.textAlign = align;
+  ctx.direction = isHe(s) ? 'rtl' : 'ltr';
+  ctx.fillText(max ? (wrap(ctx, s, max, 1)[0] || '') : (s || ''), x, y);
+}
+
+function gradient(ctx, W, H, a, b) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, a);
+  g.addColorStop(1, b);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+}
+
+// "Incoming call": the next customer calling, decline or answer.
+function drawCall(ctx, W, H, shape, f, logo) {
+  gradient(ctx, W, H, '#1E5F8C', '#0B0F17');
+  const footTop = footTopOf(shape, H);
+  let y = topOf(shape) + 40;
+  const cf = fonts(f.caller);
+  ctx.font = `800 104px ${cf.body}`;
+  ctx.direction = isHe(f.caller) ? 'rtl' : 'ltr';
+  wrap(ctx, f.caller, W - 120, 2).forEach((l) => { y += 108; text(ctx, l, W / 2, y, { size: 104, weight: 800, colour: '#FFFFFF' }); });
+  y += 70;
+  text(ctx, f.calling, W / 2, y, { size: 44, weight: 500, colour: 'rgba(220,235,255,.85)' });
+  const btnY = footTop - 150;
+  const cy = (y + 60 + btnY - 110) / 2;
+  const R = Math.min(190, (btnY - 110 - y - 60) / 2 - 30);
+  [1.5, 1.28, 1.08].forEach((k, i) => {
+    ctx.strokeStyle = `rgba(220,235,255,${0.12 + i * 0.1})`;
+    ctx.lineWidth = 4;
+    ctx.beginPath();
+    ctx.arc(W / 2, cy, R * k, 0, Math.PI * 2);
+    ctx.stroke();
+  });
+  ctx.fillStyle = '#123B57';
+  ctx.beginPath();
+  ctx.arc(W / 2, cy, R, 0, Math.PI * 2);
+  ctx.fill();
+  if (logo) ctx.drawImage(logo, W / 2 - R * 0.62, cy - R * 0.62, R * 1.24, R * 1.24);
+  [[-1, '#EB4034', f.decline], [1, '#34C759', f.accept]].forEach(([side, fill, label]) => {
+    const bx = W / 2 + side * 230;
+    ctx.fillStyle = fill;
+    ctx.beginPath();
+    ctx.arc(bx, btnY, 70, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#FFFFFF';
+    ctx.lineWidth = 12;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    if (side < 0) { ctx.moveTo(bx - 25, btnY - 25); ctx.lineTo(bx + 25, btnY + 25); ctx.moveTo(bx + 25, btnY - 25); ctx.lineTo(bx - 25, btnY + 25); } else { ctx.moveTo(bx - 26, btnY); ctx.lineTo(bx - 6, btnY + 20); ctx.lineTo(bx + 28, btnY - 20); }
+    ctx.stroke();
+    text(ctx, label, bx, btnY + 118, { size: 32, colour: '#FFFFFF', max: 380 });
+  });
+  foot(ctx, { W, H, shape, f, logo, dark: false });
+}
+
+// "Notifications": a lock screen lighting up, the page as the wallpaper.
+function drawNotify(ctx, W, H, shape, f, logo, page) {
+  ctx.fillStyle = '#0B0F17';
+  ctx.fillRect(0, 0, W, H);
+  if (page) {
+    // Below the page's own menu bar, which would sit under the clock.
+    const cut = page.naturalHeight * 0.07;
+    const s = W / page.naturalWidth;
+    // Blurred, as a lock screen's wallpaper sits behind its clock: the
+    // page's own big words would otherwise fight the time.
+    ctx.filter = 'blur(18px)';
+    ctx.drawImage(page, 0, cut, page.naturalWidth, page.naturalHeight - cut, 0, 0, W, (page.naturalHeight - cut) * s);
+    ctx.filter = 'none';
+    ctx.fillStyle = 'rgba(8,12,20,.7)';
+    ctx.fillRect(0, 0, W, H);
+  }
+  const footTop = footTopOf(shape, H);
+  let y = topOf(shape) + 150;
+  text(ctx, f.time, W / 2, y, { size: 190, weight: 300, colour: '#FFFFFF' });
+  y += 70;
+  text(ctx, f.date, W / 2, y, { size: 38, weight: 600, colour: 'rgba(255,255,255,.85)' });
+  y += 80;
+  const ns = lines(f.notes).slice(0, 4).map((l) => { const i = l.indexOf(':'); return i > 0 ? [l.slice(0, i).trim(), l.slice(i + 1).trim()] : ['', l]; });
+  ns.forEach(([title, body]) => {
+    const bf = fonts(body);
+    ctx.font = `500 30px ${bf.body}`;
+    ctx.direction = isHe(body) ? 'rtl' : 'ltr';
+    const bl = wrap(ctx, body, W - 300, 2);
+    const h = 70 + bl.length * 40 + 20;
+    if (y + h > footTop - 30) return;
+    ctx.fillStyle = 'rgba(255,255,255,.92)';
+    ctx.beginPath();
+    ctx.roundRect(70, y, W - 140, h, 34);
+    ctx.fill();
+    const rtl = isHe(title + body);
+    const ix = rtl ? W - 70 - 30 - 64 : 100;
+    ctx.fillStyle = '#123B57';
+    ctx.beginPath();
+    ctx.roundRect(ix, y + 26, 64, 64, 16);
+    ctx.fill();
+    if (logo) ctx.drawImage(logo, ix + 8, y + 34, 48, 48);
+    const tx = rtl ? ix - 24 : ix + 64 + 24;
+    text(ctx, title, tx, y + 56, { size: 30, weight: 800, align: rtl ? 'right' : 'left', max: W - 340 });
+    bl.forEach((l, i) => text(ctx, l, tx, y + 100 + i * 40, { size: 30, weight: 500, colour: '#374151', align: rtl ? 'right' : 'left' }));
+    y += h + 18;
+  });
+  foot(ctx, { W, H, shape, f, logo, dark: false });
+}
+
+// "Search": the reader's own question in the box, the site as the answer.
+function drawSearch(ctx, W, H, shape, f, logo, page) {
+  ctx.fillStyle = '#F6EFE4';
+  ctx.fillRect(0, 0, W, H);
+  const footTop = footTopOf(shape, H);
+  let y = topOf(shape) + 40;
+  text(ctx, f.kicker, W / 2, y + 30, { size: 34, weight: 600, colour: '#786E64' });
+  y += 80;
+  // The search box.
+  ctx.fillStyle = '#FFFFFF';
+  ctx.save();
+  ctx.shadowColor = 'rgba(17,24,39,.15)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 12;
+  ctx.beginPath();
+  ctx.roundRect(70, y, W - 140, 130, 65);
+  ctx.fill();
+  ctx.restore();
+  const rtl = isHe(f.question);
+  ctx.strokeStyle = '#666666';
+  ctx.lineWidth = 6;
+  const gx = rtl ? W - 130 : 130;
+  ctx.beginPath();
+  ctx.arc(gx, y + 60, 20, 0, Math.PI * 2);
+  ctx.moveTo(gx + (rtl ? -14 : 14), y + 74);
+  ctx.lineTo(gx + (rtl ? -32 : 32), y + 92);
+  ctx.stroke();
+  text(ctx, f.question, rtl ? W - 180 : 180, y + 78, { size: 38, weight: 600, align: rtl ? 'right' : 'left', max: W - 300 });
+  y += 190;
+  // The answer card, with the page on a small phone beside it.
+  const cardH = footTop - 60 - y;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.roundRect(70, y, W - 140, cardH, 36);
+  ctx.fill();
+  const pw = Math.min(300, cardH * 0.46 * 390 / 844 * 2);
+  const ph = pw * 844 / 390;
+  const php = Math.min(ph, cardH - 60);
+  const pwx = php * 390 / 844;
+  const prtl = isHe(f.answerTitle + f.answer);
+  const pxx = prtl ? 110 : W - 110 - pwx;
+  phoneFrame(ctx, page, pxx, y + 30, pwx, php, 36);
+  const tx = prtl ? W - 110 : 110;
+  const tw = W - 220 - pwx - 50;
+  let ty = y + 90;
+  text(ctx, f.answerTitle, tx, ty, { size: 46, weight: 800, colour: ACCENT, align: prtl ? 'right' : 'left', max: tw });
+  const af = fonts(f.answer);
+  ctx.font = `500 32px ${af.body}`;
+  ctx.direction = isHe(f.answer) ? 'rtl' : 'ltr';
+  wrap(ctx, f.answer, tw, 7).forEach((l) => { ty += 48; text(ctx, l, tx, ty, { size: 32, weight: 500, colour: '#374151', align: prtl ? 'right' : 'left' }); });
+  foot(ctx, { W, H, shape, f, logo, dark: true });
+}
+
+// "Switches": phone settings toggles, the old way off and the new way on.
+function drawToggles(ctx, W, H, shape, f, logo) {
+  ctx.fillStyle = '#EEF2F6';
+  ctx.fillRect(0, 0, W, H);
+  const footTop = footTopOf(shape, H);
+  let y = headline(ctx, { text: f.headline, hl: f.highlight, y: topOf(shape), size: 88, W, colour: INK, accent: ACCENT });
+  const rows = lines(f.switches).slice(0, 5).map((l) => [l.startsWith('+'), l.replace(/^[+-]\s*/, '')]);
+  const rh = Math.min(170, (footTop - y - 120) / Math.max(rows.length, 1));
+  y += 70;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.roundRect(70, y, W - 140, rh * rows.length, 40);
+  ctx.fill();
+  rows.forEach(([on, label], i) => {
+    const ry = y + i * rh;
+    if (i) { ctx.fillStyle = '#E3E3E3'; ctx.fillRect(110, ry, W - 220, 2); }
+    const rtl = isHe(label);
+    text(ctx, label, rtl ? W - 120 : 120, ry + rh / 2 + 14, { size: 42, weight: on ? 800 : 500, colour: on ? INK : '#666666', align: rtl ? 'right' : 'left', max: W - 460 });
+    const sw = 150; const sh = 86;
+    const sx = rtl ? 120 : W - 120 - sw;
+    const sy = ry + (rh - sh) / 2;
+    ctx.fillStyle = on ? '#34C759' : '#D1D5DB';
+    ctx.beginPath();
+    ctx.roundRect(sx, sy, sw, sh, sh / 2);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(on !== rtl ? sx + sw - sh / 2 : sx + sh / 2, sy + sh / 2, sh / 2 - 7, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  foot(ctx, { W, H, shape, f, logo, dark: true });
+}
+
+// "Checklist": a to-do list, the last line the one that gets the tick.
+function drawChecklist(ctx, W, H, shape, f, logo) {
+  ctx.fillStyle = '#FFE66D';
+  ctx.fillRect(0, 0, W, H);
+  const footTop = footTopOf(shape, H);
+  const items = lines(f.items).slice(0, 6).map((l) => [/^x\s/i.test(l), l.replace(/^x\s+/i, '')]);
+  // A sheet of paper, slightly turned.
+  const top = topOf(shape) + 10;
+  const ph = footTop - top - 50;
+  ctx.save();
+  ctx.translate(W / 2, top + ph / 2);
+  ctx.rotate(-0.02);
+  ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 16;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(-W / 2 + 80, -ph / 2, W - 160, ph);
+  ctx.shadowColor = 'transparent';
+  const L = -W / 2 + 140;
+  const rtl = isHe(f.headline + f.items);
+  let y = -ph / 2 + 110;
+  text(ctx, f.headline, rtl ? W / 2 - 140 : L, y, { size: 64, weight: 700, head: true, align: rtl ? 'right' : 'left', max: W - 280 });
+  y += 50;
+  const rh = Math.min(120, (ph / 2 - y - 40) / Math.max(items.length, 1));
+  items.forEach(([done, label]) => {
+    y += rh;
+    const bx = rtl ? W / 2 - 140 - 56 : L;
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 5;
+    ctx.strokeRect(bx, y - 46, 56, 56);
+    if (done) {
+      ctx.strokeStyle = '#1F8A50';
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.moveTo(bx + 10, y - 20); ctx.lineTo(bx + 26, y - 2); ctx.lineTo(bx + 62, y - 56);
+      ctx.stroke();
+    }
+    const tx = rtl ? bx - 30 : bx + 86;
+    const lf = fonts(label);
+    ctx.font = `${done ? 800 : 500} 42px ${lf.body}`;
+    ctx.direction = isHe(label) ? 'rtl' : 'ltr';
+    const ll = wrap(ctx, label, W - 400, 2);
+    ll.forEach((l, k) => text(ctx, l, tx, y + k * 52, { size: 42, weight: done ? 800 : 500, colour: done ? INK : '#555555', align: rtl ? 'right' : 'left' }));
+    y += (ll.length - 1) * 52;
+    if (!done) {
+      const f2 = fonts(label);
+      ctx.font = `500 42px ${f2.body}`;
+      const w = Math.min(ctx.measureText(label).width, W - 400);
+      ctx.strokeStyle = 'rgba(180,35,24,.8)';
+      ctx.lineWidth = 4;
+      ctx.beginPath();
+      ctx.moveTo(rtl ? tx - w : tx, y - 14);
+      ctx.lineTo(rtl ? tx : tx + w, y - 14);
+      ctx.stroke();
+    }
+  });
+  ctx.restore();
+  foot(ctx, { W, H, shape, f, logo, dark: true });
+}
+
+// "Before and after": the post in a chat, then the page it became.
+function drawBeforeAfter(ctx, W, H, shape, f, logo, page) {
+  ctx.fillStyle = '#F6EFE4';
+  ctx.fillRect(0, 0, W, H);
+  const footTop = footTopOf(shape, H);
+  const y0 = headline(ctx, { text: f.headline, hl: f.highlight, y: topOf(shape), size: 80, W, colour: INK, accent: ACCENT }) + 40;
+  const half = W / 2;
+  ctx.fillStyle = '#EAE3D9';
+  ctx.fillRect(0, y0, half, footTop - y0);
+  ctx.fillStyle = '#123B57';
+  ctx.fillRect(half, y0, half, footTop - y0);
+  text(ctx, f.beforeLabel, half / 2, y0 + 70, { size: 34, weight: 800, colour: '#786E64' });
+  text(ctx, f.afterLabel, half + half / 2, y0 + 70, { size: 34, weight: 800, colour: '#FFD600' });
+  // Before: one grey bubble lost among others.
+  const bf = fonts(f.before);
+  ctx.font = `500 30px ${bf.body}`;
+  ctx.direction = isHe(f.before) ? 'rtl' : 'ltr';
+  const bl = wrap(ctx, f.before, half - 140, 5);
+  let by = y0 + 130;
+  [0.35, 1, 0.35, 0.35].forEach((alpha, i) => {
+    const h = i === 1 ? 40 + bl.length * 40 : 90;
+    ctx.fillStyle = i === 1 ? '#D9FDD3' : `rgba(255,255,255,${0.5 + alpha})`;
+    ctx.beginPath();
+    ctx.roundRect(50, by, half - 100, h, 24);
+    ctx.fill();
+    if (i === 1) bl.forEach((l, k) => text(ctx, l, isHe(f.before) ? half - 74 : 74, by + 50 + k * 40, { size: 30, weight: 500, align: isHe(f.before) ? 'right' : 'left' }));
+    else { ctx.fillStyle = 'rgba(17,24,39,.15)'; ctx.fillRect(74, by + 30, half - 220, 14); ctx.fillRect(74, by + 54, half - 300, 14); }
+    by += h + 22;
+  });
+  // After: the page on a phone.
+  const room = footTop - y0 - 140;
+  const ph = Math.min(room, 760);
+  const pw = ph * 390 / 844;
+  phoneFrame(ctx, page, half + (half - pw) / 2, y0 + 110, pw, ph, 40);
+  foot(ctx, { W, H, shape, f, logo, dark: false });
+}
+
 async function render(canvas, ad, shape) {
   const [W, H] = SHAPES[shape];
   canvas.width = W;
@@ -316,6 +616,12 @@ async function render(canvas, ad, shape) {
   await Promise.all(['700 80px "Playfair Display"', '700 40px Manrope', '500 30px Manrope', '800 30px Manrope',
     '700 80px "Frank Ruhl Libre"', '700 40px Assistant'].map((x) => document.fonts?.load(x).catch(() => null)));
   if (ad.design === 'chat') drawChat(ctx, W, H, shape, f, logo);
+  else if (ad.design === 'call') drawCall(ctx, W, H, shape, f, logo);
+  else if (ad.design === 'notify') drawNotify(ctx, W, H, shape, f, logo, await loadImage(f.page));
+  else if (ad.design === 'search') drawSearch(ctx, W, H, shape, f, logo, await loadImage(f.page));
+  else if (ad.design === 'toggle') drawToggles(ctx, W, H, shape, f, logo);
+  else if (ad.design === 'checklist') drawChecklist(ctx, W, H, shape, f, logo);
+  else if (ad.design === 'beforeafter') drawBeforeAfter(ctx, W, H, shape, f, logo, await loadImage(f.page));
   else if (ad.design === 'showcase') {
     const pages = await Promise.all((f.pages || []).slice(0, 3).map(loadImage));
     drawShowcase(ctx, W, H, shape, f, logo, pages);
@@ -334,8 +640,20 @@ function freshAd(design, t, lang) {
     return { design, lang, name: d('name'), fields: { ...common, line1: d('line1'), line2: d('line2'),
       label: d('label'), pages: PAGES.slice(0, 3).map((p) => `/ads/pages/${p}.jpg`) } };
   }
-  return { design, lang, name: d('name'), fields: { ...common, headline: d('headline'), highlight: d('highlight'), sub: d('sub'), photo: '' } };
+  if (design === 'photo') {
+    return { design, lang, name: d('name'), fields: { ...common, headline: d('headline'), highlight: d('highlight'), sub: d('sub'), photo: '' } };
+  }
+  // The six from 3 Nov: their own words, and a page where they show one.
+  const keys = { call: ['caller', 'calling', 'decline', 'accept'], notify: ['time', 'date', 'notes'],
+    search: ['kicker', 'question', 'answerTitle', 'answer'], toggle: ['headline', 'highlight', 'switches'],
+    checklist: ['headline', 'items'], beforeafter: ['headline', 'highlight', 'beforeLabel', 'before', 'afterLabel'] }[design];
+  const fields = { ...common };
+  keys.forEach((k) => { fields[k] = d(k); });
+  if (['notify', 'search', 'beforeafter'].includes(design)) fields.page = `/ads/pages/${PAGES[0]}.jpg`;
+  return { design, lang, name: d('name'), fields };
 }
+
+export const DESIGNS = ['chat', 'showcase', 'photo', 'call', 'notify', 'search', 'toggle', 'checklist', 'beforeafter'];
 
 export default function AdStudio({ token }) {
   const { t, i18n } = useTranslation();
@@ -444,7 +762,7 @@ export default function AdStudio({ token }) {
       </div>
 
       <div className="flex flex-wrap gap-2">
-        {['chat', 'showcase', 'photo'].map((d) => (
+        {DESIGNS.map((d) => (
           <button key={d} type="button" onClick={() => setAd(freshAd(d, i18n.getFixedT(lang), lang))}
             className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold border"
             style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid={`ad-studio-new-${d}`}>
@@ -523,6 +841,28 @@ export default function AdStudio({ token }) {
                 </div>
                 {box('label')}
               </>
+            )}
+            {ad.design === 'call' && [box('caller'), box('calling'), box('decline'), box('accept')]}
+            {ad.design === 'notify' && [box('time'), box('date'), box('notes', 5)]}
+            {ad.design === 'search' && [box('kicker'), box('question'), box('answerTitle'), box('answer', 3)]}
+            {ad.design === 'toggle' && [box('headline', 2), box('highlight'), box('switches', 5)]}
+            {ad.design === 'checklist' && [box('headline'), box('items', 6)]}
+            {ad.design === 'beforeafter' && [box('headline', 2), box('highlight'), box('beforeLabel'), box('before', 3), box('afterLabel')]}
+            {'page' in ad.fields && (
+              <div className="flex items-end gap-2">
+                <label className="block flex-1">
+                  <span className={label} style={{ color: 'var(--ink)' }}>{t('adStudio.field.page')}</span>
+                  <select className={field} value={PAGES.find((p) => ad.fields.page === `/ads/pages/${p}.jpg`) || ''}
+                    onChange={(e) => set('page', `/ads/pages/${e.target.value}.jpg`)} data-testid="ad-studio-page">
+                    {!PAGES.some((p) => ad.fields.page === `/ads/pages/${p}.jpg`) && <option value="">{t('adStudio.uploadedPicture')}</option>}
+                    {PAGES.map((p) => <option key={p} value={p}>{p.replace(/-/g, ' ')}</option>)}
+                  </select>
+                </label>
+                <label className="shrink-0 inline-flex items-center gap-1 text-xs font-semibold cursor-pointer pb-2.5" style={{ color: 'var(--brand-primary)' }}>
+                  <Upload size={13} /> {t('adStudio.upload')}
+                  <input type="file" accept="image/*" className="hidden" onChange={(e) => upload(e.target.files?.[0], (url) => set('page', url))} />
+                </label>
+              </div>
             )}
             {ad.design === 'photo' && (
               <>
