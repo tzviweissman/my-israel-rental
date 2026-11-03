@@ -48,14 +48,27 @@
       })(i);
     }
     function nearest(f) { for (var d = 0; d < N; d++) { if (bmp[f - d]) return f - d; if (bmp[f + d]) return f + d; } return -1; }
+    // Smooth at any scroll speed (Tzvi, 3 Nov 2026: "the motions dont look smooth"): the picture eases toward the scroll
+    // position (the scroll itself is never changed) and two neighbouring frames are blended by the fraction between them,
+    // so a slow scroll shows motion instead of a step every few frames.
+    var pos = -1, last = '';
     function draw() {
-      var want = Math.round((still ? 1 : p) * (N - 1)), f;
-      keep(want); f = nearest(want);
-      if (f < 0 || f === shown) return; shown = f;
-      cx.drawImage(bmp[f], 0, 0);
+      var target = (still ? 1 : p) * (N - 1);
+      pos = pos < 0 || still ? target : pos + (target - pos) * 0.22;
+      if (Math.abs(target - pos) < 0.02) pos = target;
+      var f0 = Math.floor(pos), a = pos - f0, f;
+      keep(f0); f = bmp[f0] ? f0 : nearest(f0);
+      if (f < 0) return;
+      var b = f === f0 && a > 0.03 && bmp[f0 + 1] ? f0 + 1 : -1, key = f + ':' + (b < 0 ? 0 : Math.round(a * 20));
+      if (key !== last) {
+        last = key; shown = f;
+        cx.globalAlpha = 1; cx.drawImage(bmp[f], 0, 0);
+        if (b >= 0) { cx.globalAlpha = a; cx.drawImage(bmp[b], 0, 0); cx.globalAlpha = 1; }
+      }
+      if (pos !== target && !raf) raf = requestAnimationFrame(paint);
     }
     // the canvas is the frame's own size and CSS scales it (object-fit: cover): no scaling on every draw
-    function size() { if (fw && (cv.width !== fw || cv.height !== fh)) { cv.width = fw; cv.height = fh; } shown = -1; draw(); }
+    function size() { if (fw && (cv.width !== fw || cv.height !== fh)) { cv.width = fw; cv.height = fh; } shown = -1; last = ''; draw(); }
     function paint() {
       raf = 0;
       var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight;

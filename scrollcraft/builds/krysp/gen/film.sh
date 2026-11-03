@@ -16,8 +16,8 @@ ffmpeg -v error -y -i advert-B-norice.mp4 -loop 1 -framerate 24 -t 3.3 -i S3.png
 [a][e]xfade=transition=fade:duration=0.8:offset=$OFF[v]" \
   -map "[v]" -an -c:v libx264 -preset medium -crf 18 -movflags +faststart opening.mp4
 T=$(ffprobe -v error -show_entries format=duration -of csv=p=0 opening.mp4); echo "$T"
-# 200 frames chosen by scroll (film.js). Laptop 16:9 at 1680 wide; phone a centred 4:3 crop, the shape of her photo.
+# Every frame of the film (24 a second), chosen by scroll and blended between neighbours (film.js; Tzvi 3 Nov: "the motions dont look smooth"). Laptop 16:9 at 1680 wide; phone a centred 4:3 crop, the shape of her photo.
 cd ../../assets && rm -rf film && mkdir -p film/d film/m
-ffmpeg -v error -y -i ../gen/film/opening.mp4 -vf "fps=200/$T,scale=1680:-2:flags=lanczos" -frames:v 200 -c:v libwebp -quality 70 film/d/%04d.webp
-ffmpeg -v error -y -i ../gen/film/opening.mp4 -vf "fps=200/$T,crop=ih*4/3:ih:(iw-ih*4/3)/2:0,scale=864:648:flags=lanczos" -frames:v 200 -c:v libwebp -quality 70 film/m/%04d.webp
+ffmpeg -v error -y -i ../gen/film/opening.mp4 -vf "scale=1680:-2:flags=lanczos" -c:v libwebp -quality 70 film/d/%04d.webp
+ffmpeg -v error -y -i ../gen/film/opening.mp4 -vf "crop=ih*4/3:ih:(iw-ih*4/3)/2:0,scale=864:648:flags=lanczos" -c:v libwebp -quality 70 film/m/%04d.webp
 ls film/d | wc -l; ls film/m | wc -l; du -sh film/d film/m
