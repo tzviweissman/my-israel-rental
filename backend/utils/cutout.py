@@ -127,6 +127,13 @@ async def cutout_url(src: str) -> str | None:
             # The photo's own JPEG, not Cloudinary's f_auto pick (AVIF/WebP
             # that Pillow may not open).
             fetch = src.replace("/upload/f_auto,q_auto/", "/upload/f_jpg,q_auto/")
+            # The address is the owner's own data: never let it reach the server's
+            # own network (cloud metadata, the database). ponytail: a public URL
+            # that redirects inward still passes; pin to Cloudinary if that matters.
+            from utils.helpers import _is_public_ical_url
+            if not await asyncio.to_thread(_is_public_ical_url, fetch):
+                logger.warning("[cutout] refused non-public address %s", src[-40:])
+                return None
             content = await asyncio.to_thread(lambda: urllib.request.urlopen(fetch, timeout=30).read())
             png = await asyncio.to_thread(cut, content)
             if png:
