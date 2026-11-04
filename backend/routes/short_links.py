@@ -686,6 +686,56 @@ async def _ad_facts(target_type: str, target_id: str) -> tuple[dict[str, Any], d
     }
 
 
+@router.get("/ads/backgrounds")
+async def ad_backgrounds(q: str, request: Request, lang: str = "en", page: int = 1, user=Depends(verify_token)):
+    """Background photos for "make your own" (Tzvi, 4 Nov 2026), searched on
+    Pixabay: free for ads, no credit needed. Small previews only; the one an
+    owner picks is copied to our storage by /ads/backgrounds/keep, because
+    Pixabay asks that its photos are not linked to permanently."""
+    import httpx
+    key = os.environ.get("PIXABAY_KEY")
+    if not key:
+        raise HTTPException(status_code=503, detail="Photo search is not switched on here.")
+    check_rate(request, bucket=f"ad_bg:{user['user_id']}", limit=120, window_seconds=3600)
+    params = {"key": key, "q": q.strip()[:80], "image_type": "photo", "safesearch": "true",
+              "per_page": 30, "page": max(1, min(page, 10)), "lang": "he" if lang == "he" else "en"}
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.get("https://pixabay.com/api/", params=params)
+    if r.status_code != 200:
+        raise HTTPException(status_code=502, detail="Photo search did not answer. Try again.")
+    hits = r.json().get("hits") or []
+    return {"photos": [{"id": h["id"], "thumb": h.get("webformatURL"), "full": h.get("largeImageURL"),
+                        "w": h.get("imageWidth"), "h": h.get("imageHeight")} for h in hits if h.get("largeImageURL")]}
+
+
+class KeepIn(BaseModel):
+    url: str
+
+
+@router.post("/ads/backgrounds/keep")
+async def keep_background(body: KeepIn, request: Request, user=Depends(verify_token)):
+    """Copy one picked Pixabay photo to our Cloudinary (once per photo) and
+    return our address, which the ad maker can draw (same-origin rules)."""
+    from urllib.parse import urlparse
+
+    import httpx
+    from utils.cloud_storage import upload_bytes_to_cloudinary
+    host = urlparse(body.url).hostname or ""
+    if not (host == "pixabay.com" or host.endswith(".pixabay.com")):
+        raise HTTPException(status_code=400, detail="Only photos from the search can be kept.")
+    check_rate(request, bucket=f"ad_bg_keep:{user['user_id']}", limit=60, window_seconds=3600)
+    row = await db.ad_backgrounds.find_one({"src": body.url})
+    if row:
+        return {"url": row["url"]}
+    async with httpx.AsyncClient(timeout=30) as client:
+        r = await client.get(body.url)
+    if r.status_code != 200 or len(r.content) > 15_000_000:
+        raise HTTPException(status_code=502, detail="Could not fetch that photo. Pick another.")
+    url = (await upload_bytes_to_cloudinary(r.content, is_video=False, folder="myisraelrental/ad-backgrounds"))["url"]
+    await db.ad_backgrounds.insert_one({"src": body.url, "url": url, "by": user["user_id"]})
+    return {"url": url}
+
+
 class CutoutsIn(BaseModel):
     target_type: str
     target_id: str
