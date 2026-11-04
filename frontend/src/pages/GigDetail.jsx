@@ -750,7 +750,7 @@ const GigDetail = () => {
           </div>
         )}
         <Breadcrumb current={displayTitle} testId="gig-breadcrumb" />
-        <button onClick={() => navigate(backTo)} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[var(--brand-primary)]" data-testid="gig-back">
+        <button onClick={() => navigate(backTo, { state: { restoreScroll: true } })} className="text-sm text-gray-600 flex items-center gap-1 mb-4 hover:text-[var(--brand-primary)]" data-testid="gig-back">
           <ArrowLeft size={14} className="rtl:rotate-180" /> {t('gigDetail.backToServices', 'Back to businesses')}
         </button>
 

@@ -1,7 +1,7 @@
-import React, { useState, useEffect, Suspense, lazy } from 'react';
+import React, { useState, useEffect, useLayoutEffect, Suspense, lazy } from 'react';
 import { Helmet } from 'react-helmet-async';
 
-import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigationType } from 'react-router-dom';
 import { apexUrl, currentBusinessHostSlug } from './utils/businessHost';
 import useBuildRefresh from './hooks/useBuildRefresh';
 import { useTranslation } from 'react-i18next';
@@ -76,9 +76,29 @@ function ToAuth({ to = '/auth/login' }) {
   return <Navigate to={`${to}?redirect=${encodeURIComponent(pathname + search)}`} replace />;
 }
 
+/* A new page opens at the top; going back returns to where you were (Tzvi, 4 Nov 2026: "when someone clicks
+   back to businesses it should take them to the part of the page they were before"). Each page's scroll is
+   kept in sessionStorage; the browser's back (POP) and a link with state.restoreScroll bring it back, retried
+   while the list is still loading and the page too short to reach it. */
 function ScrollToTop() {
-  const { pathname } = useLocation();
-  useEffect(() => { window.scrollTo(0, 0); }, [pathname]);
+  const { pathname, search, state } = useLocation();
+  const nav = useNavigationType();
+  const restore = nav === 'POP' || !!state?.restoreScroll;
+  const key = `scroll:${pathname}${search}`;
+  useEffect(() => {
+    let want = 0;
+    if (restore) { try { want = Number(sessionStorage.getItem(key)) || 0; } catch { /* blocked: open at the top */ } }
+    let tries = 0, id;
+    const go = () => { window.scrollTo(0, want); if (want && Math.abs(window.scrollY - want) > 2 && tries++ < 40) id = setTimeout(go, 100); };
+    go();
+    return () => clearTimeout(id);
+  }, [key, restore]);
+  // a layout effect, so the listener is gone before the next page can clamp the scroll and overwrite the spot
+  useLayoutEffect(() => {
+    const save = () => { try { sessionStorage.setItem(key, String(Math.round(window.scrollY))); } catch { /* blocked */ } };
+    window.addEventListener('scroll', save, { passive: true });
+    return () => window.removeEventListener('scroll', save);
+  }, [key]);
   return null;
 }
 

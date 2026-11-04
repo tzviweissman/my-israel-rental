@@ -10,7 +10,7 @@
  * URL state persists every filter so a screenshot-worthy filtered view
  * is always deep-linkable (e.g. shareable /services?category=photography&min_rating=4&sort=rating).
  */
-import { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -99,7 +99,11 @@ const Services = () => {
   // price ceiling. It is hidden entirely when nothing is flagged.
   const [featuredGigs, setFeaturedGigs] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [shown, setShown] = useState(PAGE);   // cards in the grid; Show more adds PAGE
+  // cards in the grid; Show more adds PAGE. Kept for the visit, so coming back from a business deep in the
+  // list shows as many cards as before and the page can return to the same spot (App.js ScrollToTop).
+  const [shown, setShown] = useState(() => { try { return Number(sessionStorage.getItem('services:shown')) || PAGE; } catch { return PAGE; } });
+  const firstLoad = useRef(true);
+  useEffect(() => { try { sessionStorage.setItem('services:shown', String(shown)); } catch { /* blocked */ } }, [shown]);
   const [filtersOpen, setFiltersOpen] = useState(false);
   // Nearby-mode local state — coords live in memory only, never on the
   // URL, so shared links can't leak location. Cleared on tab close.
@@ -250,7 +254,7 @@ const Services = () => {
     // Counted for the "who is looking" lines (components/common/DemandLines).
     noteSearch(API, 'services', selectedLoc, selectedCat);
     setLoading(true);
-    setShown(PAGE);
+    if (firstLoad.current) firstLoad.current = false; else setShown(PAGE);
     axios.get(`${API}/marketplace/gigs?${params.toString()}`)
       .then((r) => setGigs(r.data))
       .catch((e) => { console.error(e); toast.error(t('services.loadError', 'Failed to load')); })
