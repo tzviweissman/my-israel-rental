@@ -465,6 +465,7 @@ function App() {
                 connection, and a chunk fetch before the redirect is dead
                 time on the one screen nobody should have to look at. */}
             <Route path="/p/:slug" element={<ShortLinkRedirect />} />
+            <Route path="/p/:slug/:ad" element={<ShortLinkRedirect />} />
             {/* ToAuth keeps the address, so a reply email clicked while signed
                 out comes back to the conversation (dead ends, 4 Oct). */}
             <Route path="/chat/:propertyId" element={user ? <Chat /> : <ToAuth />} />

@@ -18,6 +18,7 @@ undone once they leave the building:
 """
 from __future__ import annotations
 
+import re
 import secrets
 from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -188,6 +189,9 @@ def _public(doc: dict[str, Any]) -> dict[str, Any]:
         # shape a bar chart wants, so the client never has to reason about
         # missing keys or timezones.
         "daily": _last_30_days(doc.get("daily") or {}),
+        # Visits per ad design (the ad maker's QR and post link carry it,
+        # /p/{slug}/{ad}), so an owner sees which design brought people.
+        "ads": doc.get("ads") or {},
     }
 
 
@@ -281,7 +285,7 @@ async def resolve_short_link(slug: str, request: Request):
     """
     # Token links are unguessable; the limit is hardening, matching orders/track (site audit 27-28 Sep).
     check_rate(request, bucket="short_link_follow", limit=600, window_seconds=600)
-    doc = await _counted_lookup(slug, request)
+    doc = await _counted_lookup(slug, request, request.query_params.get("ad"))
     if not doc:
         raise HTTPException(status_code=404, detail="Unknown short link")
     # `src=qr` so existing analytics can separate scan traffic from a link
@@ -299,7 +303,11 @@ def _today_bucket() -> str:
     return datetime.now(_IL_TZ).strftime("%Y-%m-%d")
 
 
-async def _counted_lookup(slug: str, request: Request):
+# An ad design's name as the ad maker writes it ("behind-cream", "clean").
+_AD_NAME = re.compile(r"^[a-z]{2,12}(-[a-z]{2,8})?$")
+
+
+async def _counted_lookup(slug: str, request: Request, ad: str | None = None):
     """The link doc, with the scan counted — unless a preview bot asked.
 
     Alongside the total, each scan increments a per-day bucket
@@ -310,10 +318,13 @@ async def _counted_lookup(slug: str, request: Request):
     """
     if _is_preview_bot(request):
         return await db.short_links.find_one({"slug": slug})
+    inc = {"scan_count": 1, f"daily.{_today_bucket()}": 1}
+    if ad and _AD_NAME.match(ad):
+        inc[f"ads.{ad}"] = 1
     return await db.short_links.find_one_and_update(
         {"slug": slug},
         {
-            "$inc": {"scan_count": 1, f"daily.{_today_bucket()}": 1},
+            "$inc": inc,
             "$set": {"last_scanned_at": datetime.now(UTC).isoformat()},
         },
     )
@@ -454,7 +465,8 @@ def _preview_html(
 
 
 @router.get("/short-links/{slug}/follow")
-async def follow_short_link(slug: str, request: Request):
+@router.get("/short-links/{slug}/follow/{ad}")
+async def follow_short_link(slug: str, request: Request, ad: str | None = None):
     """Count the scan and 302 to the destination — the true redirect.
 
     In production, `serve` rewrites the brand domain's /p/{slug} straight
@@ -471,7 +483,7 @@ async def follow_short_link(slug: str, request: Request):
     """
     # Token links are unguessable; the limit is hardening, matching orders/track (site audit 27-28 Sep).
     check_rate(request, bucket="short_link_follow", limit=600, window_seconds=600)
-    doc = await _counted_lookup(slug, request)
+    doc = await _counted_lookup(slug, request, ad)
     if not doc:
         # A guessed or mistyped slug still lands somewhere sensible.
         return RedirectResponse(url=_SITE_ORIGIN, status_code=302)
@@ -575,6 +587,18 @@ Return ONE JSON object:
   decline   ONE or two words under the red "decline" button of that phone
             screen: the chore the reader skips by ordering ("Cook",
             "Scrub", "Pack"). Light, never mocking.
+  search    what someone would type into a search box to find this, 3 to 6
+            plain words with the place if the listing has one ("meat boards
+            in Jerusalem"). Lower case, no brand name.
+  switches  three lines for phone-style on/off switches: the first two
+            start with "- " and name a chore or hassle the reader can skip
+            ("- Cooking for 20 guests"); the last starts with "+ " and is
+            what this listing offers, in its own words ("+ A meat board,
+            delivered"). Each at most 32 characters. No claims about others.
+  checklist the reader's own to-do list, four lines: a short title for the
+            occasion ("Friday night guests"), two everyday tasks, then a
+            last line starting "x " that is getting this listing's thing
+            ("x Order the meat board"). Each at most 32 characters.
 
 Write in {language}. Every fact must come from the listing: never invent a
 view, a distance, a feature, a price or a review, and never add a quality
@@ -781,10 +805,15 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
         raise HTTPException(status_code=502, detail="Could not write the ad. Try again.")
 
     def clean(v: Any, n: int) -> str:
+        # The model sometimes answers a several-line field as a list; the
+        # picture reads one line each.
+        if isinstance(v, list):
+            v = "\n".join(str(x) for x in v)
         # The copy rules ban the long dash; the model reaches for it anyway.
         return re.sub(r"\s*[–—]\s*", ", ", str(v or "")).strip()[:n]
 
-    extra_words = {k: clean(data.get(k), n) for k, n in (("big_word", 12), ("caller", 24), ("decline", 16))}
+    extra_words = {k: clean(data.get(k), n) for k, n in (("big_word", 12), ("caller", 24), ("decline", 16),
+                                                    ("search", 60), ("switches", 120), ("checklist", 150))}
     words = _strip_praise({
         "headline": clean(data.get("headline"), 60),
         "points": [clean(p, 40) for p in (data.get("points") or []) if str(p).strip()][:3],
