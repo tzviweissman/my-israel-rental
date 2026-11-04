@@ -16,13 +16,13 @@
  * The link is the target's short link (routes/short_links.py), the same one
  * as the owner's QR code, so visits from an ad show up in its scan count.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { QRCodeCanvas } from 'qrcode.react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Copy, Download, Loader2, RefreshCw, Share2, X } from 'lucide-react';
+import { Copy, Download, ExternalLink, Layers, Loader2, Printer, RefreshCw, Save, Share2, X } from 'lucide-react';
 import { regularShown, holidayShown, formatShownPrice, priceSymbol } from '../../utils/listingPrice';
 import { areaLabel } from '../../utils/areaNames';
 
@@ -301,13 +301,14 @@ function begin(canvas, format, rtl) {
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
-  const body = bodyFont(rtl);
+  // The owner's font choice (FONTS), when the drawing is a gallery layout.
+  const body = (PARTS && PARTS.font) || bodyFont(rtl);
   ctx.bodyFamily = body;
   ctx.direction = rtl ? 'rtl' : 'ltr';
   ctx.textAlign = rtl ? 'right' : 'left';
   const k = format === 'story' ? 1.3 : 1;
   // A story keeps clear of the account name drawn over its top 220px.
-  return { ctx, W, H, body, head: headFont(rtl), px: (n) => Math.round(n * k), top: format === 'story' ? 220 : 64 };
+  return { ctx, W, H, body, head: (PARTS && PARTS.font) || headFont(rtl), px: (n) => Math.round(n * k), top: format === 'story' ? 220 : 64 };
 }
 
 // The link and its code on a band across the foot, white unless a ground
@@ -973,16 +974,166 @@ function drawTorn(canvas, { format, words, eyebrow, price, cta, shortUrl, rtl, i
 // from the second look at the library (ad rules 9e): one product, huge,
 // on one quiet ground, its own name and its own price once.
 const CREAM = '#F6EFE4';
+
+// The colour looks a layout can be drawn in (Tzvi, 3 Nov 2026: a gallery
+// needs more than twelve ads). "own" takes the product's strongest colour,
+// so no two businesses look alike; the others are fixed palettes.
+export const LOOKS = ['own', 'cream', 'night', 'sun', 'navy'];
+// Borrowed from the ad tools (Tzvi, 3 Nov 2026): Canva's brand kit becomes
+// a "brand" look in the business's own brand colour, when it has set one,
+// and its seasonal templates become a look for the next chag, offered in
+// the weeks before it (nextHoliday).
+export const HOLIDAYS = ['rosh', 'chanukah', 'purim', 'pesach', 'shavuot'];
+const hexRgb = (h) => (/^#?[0-9a-f]{6}$/i.test(h || '') ? [0, 2, 4].map((i) => parseInt(h.replace('#', '').slice(i, i + 2), 16)) : null);
+// Whether words in the owner's colour are lost on what is behind them. The
+// pixels of a word piece that are not the word colour are its background;
+// their middle brightness against the word colour must reach 3:1 (large
+// text). Returns black or white, whichever would read, or null when fine.
+function lostWords(canvas, boxes, ink) {
+  const c = hexRgb(ink);
+  if (!c) return null;
+  const ctx = canvas.getContext('2d');
+  const L = lum(c);
+  for (const name of ['word', 'words', 'name']) {
+    const b = boxes[name];
+    if (!b) continue;
+    const x = Math.max(0, Math.floor(b[0]));
+    const y = Math.max(0, Math.floor(b[1]));
+    const w = Math.min(canvas.width - x, Math.ceil(b[2]));
+    const h = Math.min(canvas.height - y, Math.ceil(b[3]));
+    if (w < 4 || h < 4) continue;
+    const d = ctx.getImageData(x, y, w, h).data;
+    const ls = [];
+    for (let i = 0; i < d.length; i += 16) {
+      if (Math.abs(d[i] - c[0]) + Math.abs(d[i + 1] - c[1]) + Math.abs(d[i + 2] - c[2]) > 60) ls.push(lum([d[i], d[i + 1], d[i + 2]]));
+    }
+    // Hardly anything but the word colour: the words sit on their own colour.
+    let bgL = L;
+    if (ls.length > (d.length / 16) * 0.25) { ls.sort((p, q) => p - q); bgL = ls[ls.length >> 1]; }
+    if ((Math.max(L, bgL) + 0.05) / (Math.min(L, bgL) + 0.05) < 3) return bgL > 0.18 ? INK : '#FFFFFF';
+  }
+  return null;
+}
+
+function lookOf(name, brand, img) {
+  const col = vividColour(img);
+  const own = rgb(col);
+  let b = hexRgb(brand) || col;
+  while (1.05 / (lum(b) + 0.05) < 4.5) b = b.map((v) => v * 0.9);
+  const L = {
+    brand: { bg: rgb(b), bg2: rgb(b.map((v) => v * 0.3)), text: '#FFFFFF', sub: 'rgba(255,255,255,.8)', word: '#FFFFFF', foot: INK, footDark: true, ring: '255,255,255', own: rgb(b) },
+    rosh: { bg: '#7A1022', bg2: '#3A0610', text: '#FFFFFF', sub: 'rgba(255,225,200,.85)', word: '#F5C542', foot: '#FFFFFF', footDark: false, ring: '245,197,66', own: '#7A1022' },
+    chanukah: { bg: '#0E2A5C', bg2: '#06142E', text: '#FFFFFF', sub: 'rgba(220,235,255,.8)', word: '#F5C542', foot: '#FFFFFF', footDark: false, ring: '245,197,66', own: '#0E2A5C' },
+    purim: { bg: '#4B1F7A', bg2: '#22093F', text: '#FFFFFF', sub: 'rgba(235,220,255,.85)', word: '#FFD600', foot: '#FFFFFF', footDark: false, ring: '255,214,0', own: '#4B1F7A' },
+    pesach: { bg: '#EAF4E1', bg2: '#D5E8C4', text: INK, sub: '#4B5D3A', word: '#2F6B2F', foot: '#2F6B2F', footDark: true, ring: '47,107,47', own: '#2F6B2F' },
+    shavuot: { bg: '#F4EBD0', bg2: '#E8D9A8', text: INK, sub: '#6B5B2E', word: '#4C7A2E', foot: '#4C7A2E', footDark: true, ring: '76,122,46', own: '#4C7A2E' },
+    own: { bg: own, bg2: rgb(col.map((v) => v * 0.25)), text: '#FFFFFF', sub: 'rgba(255,255,255,.8)', word: '#FFFFFF', foot: INK, footDark: true, ring: '255,230,220', own },
+    cream: { bg: CREAM, bg2: '#EADFCB', text: INK, sub: '#786E64', word: own, foot: own, footDark: true, ring: '17,24,39', own },
+    night: { bg: '#17171A', bg2: '#000000', text: '#FFFFFF', sub: 'rgba(255,255,255,.7)', word: '#FFD600', foot: '#FFFFFF', footDark: false, ring: '255,214,0', own },
+    sun: { bg: '#FFD600', bg2: '#F5B800', text: INK, sub: 'rgba(17,24,39,.7)', word: INK, foot: INK, footDark: true, ring: '17,24,39', own },
+    navy: { bg: '#123B57', bg2: '#08192A', text: '#FFFFFF', sub: 'rgba(220,235,255,.8)', word: '#FFD600', foot: '#FFFFFF', footDark: false, ring: '220,235,255', own },
+  }[name] || null;
+  // The owner's word colour, when they picked one.
+  return L && PARTS && PARTS.ink ? { ...L, text: PARTS.ink, word: PARTS.ink } : L;
+}
+
+// Fonts an owner can pick, each with Hebrew letters too (Google Fonts).
+export const FONTS = [
+  ['Manrope', 'Assistant'], ['Rubik', 'Rubik'], ['Heebo', 'Heebo'], ['Secular One', 'Secular One'],
+  ['Suez One', 'Suez One'], ['Frank Ruhl Libre', 'Frank Ruhl Libre'], ['Amatic SC', 'Amatic SC'], ['Varela Round', 'Varela Round'],
+];
+export const FONT_URL = 'https://fonts.googleapis.com/css2?family=Rubik:wght@500;800&family=Heebo:wght@500;800&family=Secular+One&family=Suez+One&family=Amatic+SC:wght@700&family=Varela+Round&display=swap';
+
+// The chag whose day falls within the next five weeks (or began this week),
+// read from the browser's own Hebrew calendar, so no dates are typed in.
+export function nextHoliday(today = new Date()) {
+  const f = new Intl.DateTimeFormat('en-u-ca-hebrew', { month: 'long', day: 'numeric' });
+  const day = { 'Tishri 1': 'rosh', 'Kislev 25': 'chanukah', 'Adar 14': 'purim', 'Adar II 14': 'purim', 'Nisan 15': 'pesach', 'Sivan 6': 'shavuot' };
+  for (let i = -7; i <= 35; i += 1) {
+    const d = new Date(today.getTime() + i * 86400000);
+    const [n, m] = f.format(d).split(' ').reduce((acc, w) => (/^\d+$/.test(w) ? [w, acc[1]] : [acc[0], acc[1] ? `${acc[1]} ${w}` : w]), ['', '']);
+    if (day[`${m} ${n}`]) return day[`${m} ${n}`];
+  }
+  return null;
+}
+
+// A ribbon across the top corner with the chag greeting. Not on a status,
+// whose corners WhatsApp covers with the name and the close button.
+function holidayRibbon(canvas, format, text, rtl) {
+  if (!text || format === 'story') return;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width;
+  ctx.save();
+  ctx.translate(rtl ? 0 : W, 0);
+  ctx.rotate(rtl ? -Math.PI / 4 : Math.PI / 4);
+  ctx.fillStyle = '#F5C542';
+  ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 12;
+  ctx.fillRect(-260, 120, 520, 64);
+  ctx.shadowColor = 'transparent';
+  ctx.fillStyle = INK;
+  ctx.textAlign = 'center';
+  ctx.direction = dirOf(text, rtl);
+  ctx.font = `800 30px ${bodyFont(rtl)}`;
+  ctx.fillText(wrap(ctx, text, 330, 1)[0] || '', 0, 163);
+  ctx.restore();
+}
 const footTopOf = (format, H) => H - (format === 'story' ? 230 : 0) - (format === 'square' ? 150 : 170) - 80;
+
+// Drag and drop (Tzvi, 4 Nov 2026: "drag and drop like when you make a
+// html"). The gallery layouts draw their movable pieces (the product, the
+// price, the words) through part(): it moves and scales a piece by what the
+// owner dragged (moves[name] = {x, y, s}) and notes where each piece ended
+// up (boxes), which the preview uses to know what was grabbed. render()
+// sets PARTS for the one drawing it is making; drawing is synchronous.
+let PARTS = null;
+function part(ctx, name, [x, y, w, h], draw) {
+  const m = (PARTS && PARTS.moves[name]) || { x: 0, y: 0, s: 1 };
+  const cx = x + w / 2;
+  const cy = y + h / 2;
+  ctx.save();
+  ctx.translate(cx + m.x, cy + m.y);
+  ctx.scale(m.s, m.s);
+  ctx.translate(-cx, -cy);
+  draw();
+  ctx.restore();
+  if (PARTS) PARTS.boxes[name] = [cx + m.x - (w * m.s) / 2, cy + m.y - (h * m.s) / 2, w * m.s, h * m.s];
+}
 
 // The round price sticker: the price of the item in the picture, "from"
 // only when that item is the cheapest one the business sells (9e.8).
-function sticker(ctx, { x, y, r, item, fromWord, body }) {
-  ctx.fillStyle = '#FFD600';
+function sticker(ctx, opts) {
+  part(ctx, 'price', [opts.x - opts.r, opts.y - opts.r, opts.r * 2, opts.r * 2], () => drawSticker(ctx, opts));
+}
+// Whether the ground just outside the sticker is yellow too, where a yellow
+// sticker would vanish. Read in the picture's own pixels, through any move.
+function onYellow(ctx, x, y, r) {
+  try {
+    const m = ctx.getTransform();
+    const c = m.transformPoint(new DOMPoint(x, y));
+    const k = Math.hypot(m.a, m.b) * r * 1.15;
+    let n = 0;
+    let hit = 0;
+    for (let i = 0; i < 16; i += 1) {
+      const px = Math.round(c.x + Math.cos((i / 8) * Math.PI) * k);
+      const py = Math.round(c.y + Math.sin((i / 8) * Math.PI) * k);
+      if (px < 0 || py < 0 || px >= ctx.canvas.width || py >= ctx.canvas.height) continue;
+      const d = ctx.getImageData(px, py, 1, 1).data;
+      n += 1;
+      if (Math.abs(d[0] - 255) + Math.abs(d[1] - 214) + d[2] < 150) hit += 1;
+    }
+    return n > 0 && hit / n > 0.4;
+  } catch {
+    return false;
+  }
+}
+function drawSticker(ctx, { x, y, r, item, fromWord, body }) {
+  // Yellow, or black with white words where the ground is yellow too.
+  const dark = onYellow(ctx, x, y, r);
+  ctx.fillStyle = dark ? INK : '#FFD600';
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = INK;
+  ctx.fillStyle = dark ? '#FFFFFF' : INK;
   ctx.textAlign = 'center';
   ctx.direction = 'ltr';
   if (item.cheapest) {
@@ -996,22 +1147,22 @@ function sticker(ctx, { x, y, r, item, fromWord, body }) {
 }
 
 function shadowed(ctx, img, x, y, w, h, blur = 40, dy = 24) {
-  ctx.save();
-  ctx.shadowColor = 'rgba(30,15,8,.5)'; ctx.shadowBlur = blur; ctx.shadowOffsetY = dy;
-  ctx.drawImage(img, x, y, w, h);
-  ctx.restore();
+  part(ctx, 'product', [x, y, w, h], () => {
+    ctx.shadowColor = 'rgba(30,15,8,.5)'; ctx.shadowBlur = blur; ctx.shadowOffsetY = dy;
+    ctx.drawImage(img, x, y, w, h);
+  });
 }
 
 // "Words behind" (words locked with the subject, 4.0/5): one huge word with
 // the product lying across its lower part, the headline under it.
-function drawBehind(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, item, fromWord }) {
+function drawBehind(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, item, fromWord, brand, look = 'cream' }) {
   const { ctx, W, H, body, px, top } = begin(canvas, format, rtl);
-  const col = vividColour(item.cut);
-  ctx.fillStyle = CREAM;
+  const L = lookOf(look, brand, item.cut);
+  ctx.fillStyle = L.bg;
   ctx.fillRect(0, 0, W, H);
-  const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: rgb(col), dark: true });
+  const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: L.foot, dark: L.footDark });
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#786E64';
+  ctx.fillStyle = L.sub;
   ctx.font = `600 ${px(28)}px ${body}`;
   ctx.fillText(wrap(ctx, (eyebrow || '').toUpperCase(), W - 128, 1)[0] || '', W / 2, top + px(10));
   const word = (words.big_word || '').trim();
@@ -1024,8 +1175,10 @@ function drawBehind(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, it
   ctx.font = `800 ${size}px ${body}`;
   const capH = ctx.measureText(word).actualBoundingBoxAscent || size * 0.72;
   const base = top + px(40) + capH;
-  ctx.fillStyle = rgb(col);
-  ctx.fillText(word, W / 2, base);
+  part(ctx, 'word', [40, base - capH, W - 80, capH * 1.08], () => {
+    ctx.fillStyle = L.word;
+    ctx.fillText(word, W / 2, base);
+  });
   // The headline under the product, then the product in the room between.
   ctx.font = `800 ${px(46)}px ${body}`;
   const sub = wrap(ctx, words.headline, W - 140, 2);
@@ -1037,28 +1190,31 @@ function drawBehind(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, it
   shadowed(ctx, item.cut, bx, boardTop, cw, ch);
   const r = Math.round(Math.min(110, W * 0.1));
   sticker(ctx, { x: rtl ? bx + r * 0.6 : bx + cw - r * 0.6, y: boardTop + ch - r * 0.7, r, item, fromWord, body });
-  ctx.fillStyle = INK;
+  ctx.fillStyle = L.text;
   ctx.font = `800 ${px(46)}px ${body}`;
   ctx.direction = rtl ? 'rtl' : 'ltr';
-  sub.forEach((l, i) => ctx.fillText(l, W / 2, boardTop + ch + 30 + px(46) + i * px(58)));
+  part(ctx, 'words', [70, boardTop + ch + 30, W - 140, sub.length * px(58) + 10],
+    () => sub.forEach((l, i) => ctx.fillText(l, W / 2, boardTop + ch + 30 + px(46) + i * px(58))));
 }
 
 // "Out of the phone" (fake app screen and surprising scale, 3.6 and 4.1):
 // the business's own item on a phone, its product leaping out of the top.
-function drawPhonePop(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, item, addLabel }) {
+function drawPhonePop(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, item, addLabel, brand, look = 'own' }) {
   const { ctx, W, H, body, px, top } = begin(canvas, format, rtl);
+  const L = lookOf(look, brand, item.cut);
   const col = vividColour(item.cut);
-  ctx.fillStyle = rgb(col);
+  ctx.fillStyle = L.bg;
   ctx.fillRect(0, 0, W, H);
   const footTop = footTopOf(format, H);
   ctx.textAlign = 'center';
-  ctx.fillStyle = 'rgba(255,255,255,.75)';
+  ctx.fillStyle = L.sub;
   ctx.font = `600 ${px(28)}px ${body}`;
   ctx.fillText(wrap(ctx, (eyebrow || '').toUpperCase(), W - 128, 1)[0] || '', W / 2, top + px(10));
-  ctx.fillStyle = '#FFFFFF';
+  ctx.fillStyle = L.text;
   ctx.font = `800 ${px(60)}px ${body}`;
   const head = wrap(ctx, words.headline, W - 128, 2);
-  head.forEach((l, i) => ctx.fillText(l, W / 2, top + px(40) + px(60) + i * px(72)));
+  part(ctx, 'words', [64, top + px(40) + px(8), W - 128, head.length * px(72)],
+    () => head.forEach((l, i) => ctx.fillText(l, W / 2, top + px(40) + px(60) + i * px(72))));
   const headBottom = top + px(40) + head.length * px(72);
   const pw = Math.round(Math.min(640, W * 0.6));
   const [cw, ch] = fitIn(item.cut, pw * 1.15, (footTop - headBottom) * 0.55);
@@ -1099,28 +1255,31 @@ function drawPhonePop(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, 
     ctx.font = `600 ${px(30)}px ${body}`;
     ctx.fillText(addLabel, W / 2, y + 46);
   }
-  footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: INK, dark: true });
+  footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: L.foot, dark: L.footDark });
 }
 
 // "Is calling..." (the incoming-call screen, a repeated 5/5 in the library):
 // the product as the caller; decline is the chore, accept is the order.
-function drawCalling(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, item, fromWord, callingLabel, acceptLabel }) {
+function drawCalling(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, item, fromWord, callingLabel, acceptLabel, brand, look = 'own' }) {
   const { ctx, W, H, body, px, top } = begin(canvas, format, rtl);
-  const col = vividColour(item.cut);
+  const L = lookOf(look, brand, item.cut);
   const g = ctx.createLinearGradient(0, 0, 0, H);
-  g.addColorStop(0, rgb(col));
-  g.addColorStop(1, rgb(col.map((v) => v * 0.25)));
+  g.addColorStop(0, L.bg);
+  g.addColorStop(1, L.bg2);
   ctx.fillStyle = g;
   ctx.fillRect(0, 0, W, H);
-  const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: INK, dark: true });
+  const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: L.foot, dark: L.footDark });
   ctx.textAlign = 'center';
-  ctx.fillStyle = '#FFFFFF';
+  ctx.fillStyle = L.text;
   const callerSize = format === 'square' ? 80 : px(104);
   ctx.font = `800 ${callerSize}px ${body}`;
   const callerLines = wrap(ctx, words.caller || '', W - 128, 2);
   let y = top + px(20);
-  callerLines.forEach((l) => { y += callerSize * 1.04; ctx.fillText(l, W / 2, y); });
-  ctx.fillStyle = 'rgba(255,225,215,.9)';
+  const y0 = y;
+  part(ctx, 'words', [64, y0 + callerSize * 0.2, W - 128, callerLines.length * callerSize * 1.04],
+    () => callerLines.forEach((l, i) => ctx.fillText(l, W / 2, y0 + callerSize * 1.04 * (i + 1))));
+  y += callerLines.length * callerSize * 1.04;
+  ctx.fillStyle = L.sub;
   ctx.font = `500 ${px(44)}px ${body}`;
   y += px(64);
   ctx.fillText(callingLabel, W / 2, y);
@@ -1130,15 +1289,15 @@ function drawCalling(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, i
   const room = lineY - 50 - (y + 50);
   const [cw, ch] = fitIn(item.cut, W * 0.62, room);
   const cy = y + 50 + room / 2;
-  [1.12, 0.96, 0.8].forEach((k, i) => {
-    ctx.strokeStyle = `rgba(255,230,220,${0.16 + i * 0.12})`;
+  part(ctx, 'product', [(W - cw) / 2, cy - ch / 2, cw, ch], () => [1.12, 0.96, 0.8].forEach((k, i) => {
+    ctx.strokeStyle = `rgba(${L.ring},${0.16 + i * 0.12})`;
     ctx.lineWidth = 4;
     ctx.beginPath();
     ctx.arc(W / 2, cy, Math.max(cw, ch) * 0.5 * k, 0, Math.PI * 2);
     ctx.stroke();
-  });
+  }));
   shadowed(ctx, item.cut, (W - cw) / 2, cy - ch / 2, cw, ch, 50, 30);
-  ctx.fillStyle = 'rgba(255,225,215,.95)';
+  ctx.fillStyle = L.sub;
   ctx.font = `600 ${px(36)}px ${body}`;
   const price = item.cheapest ? `${fromWord} ${item.priceText}` : item.priceText;
   ctx.fillText(wrap(ctx, `${eyebrow} · ${price}`, W - 128, 1)[0], W / 2, lineY);
@@ -1155,17 +1314,682 @@ function drawCalling(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, i
     const k = btnR * 0.36;
     if (side < 0) { ctx.moveTo(bx - k, btnY - k); ctx.lineTo(bx + k, btnY + k); ctx.moveTo(bx + k, btnY - k); ctx.lineTo(bx - k, btnY + k); } else { ctx.moveTo(bx - k, btnY); ctx.lineTo(bx - k * 0.2, btnY + k * 0.75); ctx.lineTo(bx + k, btnY - k * 0.65); }
     ctx.stroke();
-    ctx.fillStyle = '#FFFFFF';
+    ctx.fillStyle = L.text;
     ctx.font = `600 ${px(32)}px ${body}`;
     ctx.fillText(wrap(ctx, label, W * 0.36, 1)[0] || '', bx, btnY + btnR + px(40));
   });
+}
+
+// Four more from the library's idea folders (docs/inspo/pinterest-ads-
+// 2026-11-02: notify, search, toggle, checklist), for the gallery. Each
+// shows the business's own product, cut out when it can be, with its own
+// price, and words from the listing (POST /ads/make writes search,
+// switches and checklist).
+function product(ctx, item, x, y, w, h) {
+  const img = item.cut || item.img;
+  const [cw, ch] = fitIn(img, w, h);
+  const cx = x + (w - cw) / 2;
+  const cy = y + (h - ch) / 2;
+  if (item.cut) shadowed(ctx, img, cx, cy, cw, ch);
+  else part(ctx, 'product', [cx, cy, cw, ch], () => roundedImage(ctx, img, cx, cy, cw, ch, 24));
+  return [cx, cy, cw, ch];
+}
+const lineList = (s) => (s || '').split('\n').map((l) => l.trim()).filter(Boolean);
+function say(ctx, s, x, y, { size, weight = 600, colour = INK, align = 'center', body, rtl, max = 0 }) {
+  ctx.font = `${weight} ${size}px ${body}`;
+  ctx.fillStyle = colour;
+  ctx.textAlign = align;
+  ctx.direction = dirOf(s, rtl);
+  ctx.fillText(max ? (wrap(ctx, s || '', max, 1)[0] || '') : (s || ''), x, y);
+}
+
+// "Notifications": a lock screen lighting up with the business's own
+// news, one fact a card, the product under them.
+function drawNotify(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, item, todayLabel, brand, look = 'night' }) {
+  const { ctx, W, H, body, px, top } = begin(canvas, format, rtl);
+  const L = lookOf(look, brand, item.cut || item.img);
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, L.bg);
+  g.addColorStop(1, L.bg2);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: L.foot, dark: L.footDark });
+  let y = top + px(130);
+  say(ctx, '9:41', W / 2, y, { size: px(150), weight: 300, colour: L.text, body, rtl: false });
+  y += px(56);
+  say(ctx, todayLabel, W / 2, y, { size: px(32), colour: L.sub, body, rtl });
+  y += px(40);
+  const notes = [words.headline, ...(words.points || []), `${item.name}, ${item.priceText}`].filter(Boolean).slice(0, 3);
+  const I = px(58);
+  const cards = notes.map((n) => {
+    ctx.font = `500 ${px(28)}px ${body}`;
+    ctx.direction = dirOf(n, rtl);
+    const nl = wrap(ctx, n, W - 140 - I - 90, 2);
+    return [nl, px(58) + nl.length * px(36) + 16];
+  });
+  const cardsH = cards.reduce((t, [, h]) => t + h + 14, 0);
+  part(ctx, 'words', [70, y, W - 140, cardsH], () => cards.forEach(([nl, h]) => {
+    ctx.fillStyle = 'rgba(255,255,255,.93)';
+    ctx.beginPath();
+    ctx.roundRect(70, y, W - 140, h, 30);
+    ctx.fill();
+    const ix = rtl ? W - 70 - 26 - I : 96;
+    ctx.fillStyle = L.own;
+    ctx.beginPath();
+    ctx.roundRect(ix, y + 22, I, I, 14);
+    ctx.fill();
+    say(ctx, (eyebrow || '?').trim()[0].toUpperCase(), ix + I / 2, y + 22 + I * 0.7, { size: Math.round(I * 0.55), weight: 800, colour: '#FFFFFF', body, rtl: false });
+    const tx = rtl ? ix - 22 : ix + I + 22;
+    const al = rtl ? 'right' : 'left';
+    say(ctx, eyebrow, tx, y + px(46), { size: px(26), weight: 800, align: al, body, rtl, max: W - 360 });
+    nl.forEach((l, i) => say(ctx, l, tx, y + px(46) + (i + 1) * px(36), { size: px(28), weight: 500, colour: '#374151', align: al, body, rtl }));
+    y += h + 14;
+  }));
+  if (footTop - 40 - (y + 20) > 140) product(ctx, item, 90, y + 20, W - 180, footTop - 40 - (y + 20));
+}
+
+// "Search": what someone would type to find it, and the business as the
+// answer: its name, its headline, its product and price.
+function drawSearch(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, item, searchKicker, brand, look = 'cream' }) {
+  const { ctx, W, H, body, px, top } = begin(canvas, format, rtl);
+  const L = lookOf(look, brand, item.cut || item.img);
+  ctx.fillStyle = L.bg;
+  ctx.fillRect(0, 0, W, H);
+  const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: L.foot, dark: L.footDark });
+  let y = top + px(30);
+  say(ctx, searchKicker, W / 2, y, { size: px(32), colour: L.sub, body, rtl });
+  y += px(40);
+  ctx.save();
+  ctx.shadowColor = 'rgba(17,24,39,.18)'; ctx.shadowBlur = 36; ctx.shadowOffsetY = 10;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.roundRect(70, y, W - 140, px(110), px(55));
+  ctx.fill();
+  ctx.restore();
+  const q = words.search || '';
+  const qr2 = dirOf(q, rtl) === 'rtl';
+  const gx = qr2 ? W - 128 : 128;
+  ctx.strokeStyle = '#666666';
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.arc(gx, y + px(50), px(17), 0, Math.PI * 2);
+  ctx.moveTo(gx + (qr2 ? -1 : 1) * px(12), y + px(62));
+  ctx.lineTo(gx + (qr2 ? -1 : 1) * px(28), y + px(78));
+  ctx.stroke();
+  say(ctx, q, qr2 ? W - 175 : 175, y + px(68), { size: px(36), align: qr2 ? 'right' : 'left', body, rtl, max: W - 300 });
+  y += px(110) + 40;
+  const cardH = footTop - 50 - y;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.roundRect(70, y, W - 140, cardH, 34);
+  ctx.fill();
+  const al = rtl ? 'right' : 'left';
+  const tx = rtl ? W - 120 : 120;
+  let ty = y + px(70);
+  say(ctx, eyebrow, tx, ty, { size: px(40), weight: 800, colour: L.own, align: al, body, rtl, max: W - 240 });
+  ctx.font = `600 ${px(32)}px ${body}`;
+  ctx.direction = dirOf(words.headline, rtl);
+  wrap(ctx, words.headline, W - 240, 2).forEach((l) => { ty += px(44); say(ctx, l, tx, ty, { size: px(32), colour: '#374151', align: al, body, rtl }); });
+  ty += px(30);
+  const [, cy, , ch] = product(ctx, item, 110, ty, W - 220, y + cardH - 40 - ty - px(60));
+  say(ctx, `${item.name}, ${item.priceText}`, W / 2, Math.min(cy + ch + px(52), y + cardH - 30), { size: px(32), weight: 800, body, rtl, max: W - 240 });
+}
+
+// "Switches": phone settings, the chores off and the business's offer on,
+// the product under them with its price.
+function drawToggle(canvas, { format, words, cta, shortUrl, rtl, qr, item, fromWord, brand, look = 'cream' }) {
+  const { ctx, W, H, body, px, top } = begin(canvas, format, rtl);
+  const L = lookOf(look, brand, item.cut || item.img);
+  ctx.fillStyle = L.bg;
+  ctx.fillRect(0, 0, W, H);
+  const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: L.foot, dark: L.footDark });
+  let y = top + px(20);
+  ctx.font = `800 ${px(58)}px ${body}`;
+  ctx.direction = dirOf(words.headline, rtl);
+  const hl = wrap(ctx, words.headline, W - 140, 2);
+  const hy = y;
+  part(ctx, 'words', [70, hy + px(10), W - 140, hl.length * px(68)],
+    () => hl.forEach((l, i) => say(ctx, l, W / 2, hy + px(68) * (i + 1), { size: px(58), weight: 800, colour: L.text, body, rtl })));
+  y += hl.length * px(68);
+  y += 40;
+  const rows = lineList(words.switches).slice(0, 3).map((l) => [l.startsWith('+'), l.replace(/^[+-]\s*/, '')]);
+  const rh = px(104);
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.roundRect(70, y, W - 140, rh * rows.length, 34);
+  ctx.fill();
+  rows.forEach(([on, label], i) => {
+    const ry = y + i * rh;
+    if (i) { ctx.fillStyle = '#E3E3E3'; ctx.fillRect(110, ry, W - 220, 2); }
+    const r = dirOf(label, rtl) === 'rtl';
+    say(ctx, label, r ? W - 110 : 110, ry + rh / 2 + px(12), { size: px(34), weight: on ? 800 : 500, colour: on ? INK : '#666666', align: r ? 'right' : 'left', body, rtl, max: W - 400 });
+    const sw = px(112); const sh = px(64);
+    const sx = r ? 110 : W - 110 - sw;
+    const sy = ry + (rh - sh) / 2;
+    ctx.fillStyle = on ? '#34C759' : '#D1D5DB';
+    ctx.beginPath();
+    ctx.roundRect(sx, sy, sw, sh, sh / 2);
+    ctx.fill();
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.arc(on !== r ? sx + sw - sh / 2 : sx + sh / 2, sy + sh / 2, sh / 2 - 6, 0, Math.PI * 2);
+    ctx.fill();
+  });
+  y += rh * rows.length + 30;
+  if (footTop - 30 - y > 140) {
+    const [cx, cy, cw, ch] = product(ctx, item, 90, y, W - 180, footTop - 30 - y);
+    const r = Math.round(Math.min(100, ch * 0.32));
+    sticker(ctx, { x: rtl ? cx + r * 0.6 : cx + cw - r * 0.6, y: cy + ch - r * 0.6, r, item, fromWord, body });
+  }
+}
+
+// "Checklist": the reader's own to-do list, the last line ticked, which is
+// getting this business's thing; the product beside the paper.
+function drawChecklist(canvas, { format, words, cta, shortUrl, rtl, qr, item, fromWord, brand, look = 'sun' }) {
+  const { ctx, W, H, body, head, px, top } = begin(canvas, format, rtl);
+  const L = lookOf(look, brand, item.cut || item.img);
+  ctx.fillStyle = L.bg;
+  ctx.fillRect(0, 0, W, H);
+  const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: L.foot, dark: L.footDark });
+  const all = lineList(words.checklist);
+  const title = all[0] || '';
+  let list = all.slice(1, 5).map((l) => [/^x\s/i.test(l), l.replace(/^x\s+/i, '')]);
+  if (list.length && !list.some(([d]) => d)) list = list.map(([, l], i) => [i === list.length - 1, l]);
+  const rh = px(78);
+  const ph = px(120) + list.length * rh + px(40);
+  const py = top + px(10);
+  part(ctx, 'words', [80, py, W - 160, ph], () => {
+  ctx.save();
+  ctx.translate(W / 2, py + ph / 2);
+  ctx.rotate(-0.02);
+  ctx.shadowColor = 'rgba(0,0,0,.22)'; ctx.shadowBlur = 36; ctx.shadowOffsetY = 14;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.fillRect(-W / 2 + 80, -ph / 2, W - 160, ph);
+  ctx.shadowColor = 'transparent';
+  const r = dirOf(title + list.map(([, l]) => l).join(' '), rtl) === 'rtl';
+  const L0 = -W / 2 + 130;
+  const R0 = W / 2 - 130;
+  let y = -ph / 2 + px(84);
+  ctx.font = `700 ${px(50)}px ${head}`;
+  ctx.fillStyle = INK;
+  ctx.textAlign = r ? 'right' : 'left';
+  ctx.direction = r ? 'rtl' : 'ltr';
+  ctx.fillText(wrap(ctx, title, W - 260, 1)[0] || '', r ? R0 : L0, y);
+  list.forEach(([done, label]) => {
+    y += rh;
+    const B = px(44);
+    const bx = r ? R0 - B : L0;
+    ctx.strokeStyle = INK;
+    ctx.lineWidth = 4;
+    ctx.strokeRect(bx, y - B + 6, B, B);
+    if (done) {
+      ctx.strokeStyle = '#1F8A50';
+      ctx.lineWidth = 8;
+      ctx.beginPath();
+      ctx.moveTo(bx + 8, y - B / 2 + 6); ctx.lineTo(bx + B * 0.42, y + 2); ctx.lineTo(bx + B + 10, y - B - 4);
+      ctx.stroke();
+    }
+    const tx = r ? bx - 24 : bx + B + 24;
+    ctx.font = `${done ? 800 : 500} ${px(36)}px ${body}`;
+    ctx.fillStyle = done ? INK : '#555555';
+    ctx.textAlign = r ? 'right' : 'left';
+    ctx.direction = dirOf(label, rtl);
+    const shown = wrap(ctx, label, W - 380, 1)[0] || '';
+    ctx.fillText(shown, tx, y);
+    if (!done) {
+      const w = ctx.measureText(shown).width;
+      ctx.strokeStyle = 'rgba(180,35,24,.75)';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(r ? tx - w : tx, y - px(11));
+      ctx.lineTo(r ? tx : tx + w, y - px(11));
+      ctx.stroke();
+    }
+  });
+  ctx.restore();
+  });
+  const y2 = py + ph + 30;
+  if (footTop - 30 - y2 > 140) {
+    const [cx, cy, cw, ch] = product(ctx, item, 90, y2, W - 180, footTop - 30 - y2);
+    const rr = Math.round(Math.min(100, ch * 0.32));
+    sticker(ctx, { x: rtl ? cx + rr * 0.6 : cx + cw - rr * 0.6, y: cy + ch - rr * 0.6, r: rr, item, fromWord, body });
+  }
+}
+
+// The layouts from docs/static-ad-rules.md 9f (4 Nov 2026): each is words
+// the model wrote from the listing and its reviews, the business's own
+// product and price, and the link band. Nothing generated.
+
+// The look's ground and the link band, shared by these layouts.
+function ground(canvas, a) {
+  const g = begin(canvas, a.format, a.rtl);
+  const L = lookOf(a.look, a.brand, a.item.cut || a.item.img);
+  g.ctx.fillStyle = L.bg;
+  g.ctx.fillRect(0, 0, g.W, g.H);
+  const footTop = footBand(g.ctx, { W: g.W, H: g.H, format: a.format, rtl: a.rtl, cta: a.cta, shortUrl: a.shortUrl, qr: a.qr,
+    body: g.body, ground: L.foot, dark: L.footDark });
+  return { ...g, L, footTop };
+}
+// The product and its own price in whatever room is left above the band.
+function productBelow(ctx, a, y, footTop, W, body) {
+  if (footTop - 30 - y <= 140) return;
+  const [cx, cy, cw, ch] = product(ctx, a.item, 90, y, W - 180, footTop - 30 - y);
+  const r = Math.round(Math.min(100, ch * 0.32));
+  sticker(ctx, { x: a.rtl ? cx + r * 0.6 : cx + cw - r * 0.6, y: cy + ch - r * 0.6, r, item: a.item, fromWord: a.fromWord, body });
+}
+function card(ctx, x, y, w, h, r = 36) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(17,24,39,.18)'; ctx.shadowBlur = 36; ctx.shadowOffsetY = 10;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+  ctx.fill();
+  ctx.restore();
+}
+// The photo itself (not the cut-out) in a box, with its price on a corner.
+function photoWithPrice(ctx, a, x, y, w, h, body) {
+  const img = a.item.img || a.item.cut;
+  const [pw, ph] = fitIn(img, w, h);
+  const px0 = x + (w - pw) / 2;
+  part(ctx, 'product', [px0, y, pw, ph], () => roundedImage(ctx, img, px0, y, pw, ph, 28));
+  const r = Math.round(Math.min(90, ph * 0.28));
+  sticker(ctx, { x: a.rtl ? px0 + r * 0.7 : px0 + pw - r * 0.7, y: y + ph - r * 0.7, r, item: a.item, fromWord: a.fromWord, body });
+}
+
+// "A real moment" (9f.1, Levi Knox's situation formula): the moment
+// someone needs this, then the plain answer, then the product.
+function drawSituation(canvas, a) {
+  const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
+  const [setup = '', answer = ''] = (a.situation || '').split('|').map((x) => x.trim());
+  ctx.font = `800 ${px(66)}px ${body}`;
+  const s1 = wrap(ctx, setup, W - 140, 3);
+  ctx.font = `800 ${px(56)}px ${body}`;
+  const s2 = wrap(ctx, answer, W - 140, 2);
+  const y0 = top + px(20);
+  const h = s1.length * px(78) + px(30) + s2.length * px(68);
+  part(ctx, 'words', [70, y0, W - 140, h], () => {
+    s1.forEach((l, i) => say(ctx, l, W / 2, y0 + px(64) + i * px(78), { size: px(66), weight: 800, colour: L.text, body, rtl: a.rtl }));
+    const y1 = y0 + s1.length * px(78) + px(30);
+    s2.forEach((l, i) => say(ctx, l, W / 2, y1 + px(54) + i * px(68), { size: px(56), weight: 800, colour: L.word, body, rtl: a.rtl }));
+  });
+  productBelow(ctx, a, y0 + h + px(40), footTop, W, body);
+}
+
+// "Is this you?" (9f.2, Simon's "Rude teenager?"): a question naming the
+// reader in crayon colours, three lines of their moment, then the product.
+const CRAYON = ['#E5484D', '#E8590C', '#2F9E44', '#1C7ED6', '#AE3EC9'];
+function drawMirror(canvas, a) {
+  const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
+  const [q = '', ...rest] = lineList(a.words.mirror);
+  const size = px(92);
+  ctx.font = `800 ${size}px ${body}`;
+  const qs = wrap(ctx, q, W - 140, 2);
+  ctx.font = `600 ${px(38)}px ${body}`;
+  const ls = rest.slice(0, 3).flatMap((l) => wrap(ctx, l, W - 160, 2));
+  const lh = px(52);
+  const y0 = top + px(10);
+  const h = qs.length * size * 1.08 + px(36) + ls.length * lh;
+  part(ctx, 'words', [70, y0, W - 140, h], () => {
+    let y = y0 + size * 0.92;
+    let k = 0;
+    qs.forEach((line) => {
+      ctx.font = `800 ${size}px ${body}`;
+      const r = dirOf(line, a.rtl) === 'rtl';
+      const ws = line.split(' ').filter(Boolean);
+      const gap = ctx.measureText(' ').width;
+      const total = ws.reduce((t, w) => t + ctx.measureText(w).width, 0) + gap * (ws.length - 1);
+      let x = r ? (W + total) / 2 : (W - total) / 2;
+      ws.forEach((w) => {
+        const colour = (PARTS && PARTS.ink) || CRAYON[k % CRAYON.length];
+        say(ctx, w, x, y, { size, weight: 800, colour, align: r ? 'right' : 'left', body, rtl: a.rtl });
+        const step = ctx.measureText(w).width + gap;
+        x += r ? -step : step;
+        k += 1;
+      });
+      y += size * 1.08;
+    });
+    y = y0 + qs.length * size * 1.08 + px(36) + px(38);
+    ls.forEach((l) => { say(ctx, l, W / 2, y, { size: px(38), weight: 600, colour: L.text, body, rtl: a.rtl }); y += lh; });
+  });
+  productBelow(ctx, a, y0 + h + px(40), footTop, W, body);
+}
+
+// "Text messages" (9f.6): a customer asking and the business answering
+// with facts from the listing, then the business sending its photo.
+function drawChat(canvas, a) {
+  const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
+  const msgs = lineList(a.words.chat).slice(0, 4);
+  const x0 = 60;
+  const w0 = W - 120;
+  const y0 = top - px(10);
+  card(ctx, x0, y0, w0, footTop - 30 - y0, 44);
+  // The business at the top, like a chat's header.
+  const av = px(78);
+  ctx.fillStyle = a.brand || ACCENT;
+  ctx.beginPath();
+  ctx.arc(W / 2, y0 + px(26) + av / 2, av / 2, 0, Math.PI * 2);
+  ctx.fill();
+  say(ctx, (a.name || '?').trim().charAt(0).toUpperCase(), W / 2, y0 + px(26) + av / 2 + px(14), { size: px(38), weight: 800, colour: '#FFFFFF', body, rtl: a.rtl });
+  say(ctx, a.name || '', W / 2, y0 + px(26) + av + px(38), { size: px(28), weight: 700, colour: INK, body, rtl: a.rtl, max: w0 - 80 });
+  ctx.fillStyle = '#E3E3E3';
+  ctx.fillRect(x0, y0 + av + px(84), w0, 2);
+  let y = y0 + av + px(112);
+  const pad = px(22);
+  const fs = px(32);
+  const boxes = [];
+  msgs.forEach((m, i) => {
+    const mine = i % 2 === 1;
+    ctx.font = `500 ${fs}px ${body}`;
+    const ls = wrap(ctx, m, w0 * 0.6, 3);
+    const bw = Math.max(...ls.map((l) => ctx.measureText(l).width)) + pad * 2;
+    const bh = ls.length * px(42) + pad * 1.6;
+    // The business on the far side of whoever reads, in both directions.
+    const right = mine !== a.rtl;
+    boxes.push({ ls, bw, bh, y, mine, bx: right ? x0 + w0 - 34 - bw : x0 + 34 });
+    y += bh + px(16);
+  });
+  part(ctx, 'words', [x0 + 20, y0 + av + px(100), w0 - 40, y - (y0 + av + px(100))], () => boxes.forEach(({ ls, bw, bh, y: by, mine, bx }) => {
+    ctx.fillStyle = mine ? ACCENT : '#E9E9EB';
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, px(30));
+    ctx.fill();
+    ls.forEach((l, j) => {
+      const r = dirOf(l, a.rtl) === 'rtl';
+      say(ctx, l, r ? bx + bw - pad : bx + pad, by + pad + px(30) + j * px(42), { size: fs, weight: 500, colour: mine ? '#FFFFFF' : INK, align: r ? 'right' : 'left', body, rtl: a.rtl });
+    });
+  }));
+  const room = footTop - 60 - y;
+  if (room > 160) {
+    const w = w0 * 0.58;
+    const bx = a.rtl ? x0 + 34 : x0 + w0 - 34 - w;
+    photoWithPrice(ctx, a, bx, y + px(6), w, room - px(10), body);
+  }
+}
+
+// "Social post" (9f.6): the business's own post, in its own voice, with
+// its photo. No counts of likes or followers: those would be invented.
+function drawPost(canvas, a) {
+  const { ctx, W, body, px, top, footTop } = ground(canvas, a);
+  const x0 = 60;
+  const w0 = W - 120;
+  const y0 = top - px(10);
+  card(ctx, x0, y0, w0, footTop - 30 - y0, 36);
+  const av = px(84);
+  const r = a.rtl;
+  const ax = r ? x0 + w0 - 40 - av / 2 : x0 + 40 + av / 2;
+  ctx.fillStyle = a.brand || ACCENT;
+  ctx.beginPath();
+  ctx.arc(ax, y0 + 40 + av / 2, av / 2, 0, Math.PI * 2);
+  ctx.fill();
+  say(ctx, (a.name || '?').trim().charAt(0).toUpperCase(), ax, y0 + 40 + av / 2 + px(14), { size: px(40), weight: 800, colour: '#FFFFFF', body, rtl: r });
+  const tx = r ? ax - av / 2 - 24 : ax + av / 2 + 24;
+  say(ctx, a.name || '', tx, y0 + 40 + px(36), { size: px(34), weight: 800, align: r ? 'right' : 'left', body, rtl: r, max: w0 - av - 120 });
+  say(ctx, a.nowLabel || '', tx, y0 + 40 + px(76), { size: px(26), weight: 500, colour: '#666666', align: r ? 'right' : 'left', body, rtl: r });
+  const sx = r ? x0 + w0 - 40 : x0 + 40;
+  ctx.font = `500 ${px(36)}px ${body}`;
+  const ls = wrap(ctx, a.words.post || '', w0 - 80, 4);
+  const ty = y0 + 40 + av + px(54);
+  part(ctx, 'words', [x0 + 30, ty - px(40), w0 - 60, ls.length * px(48) + px(10)],
+    () => ls.forEach((l, i) => say(ctx, l, sx, ty + i * px(48), { size: px(36), weight: 500, align: r ? 'right' : 'left', body, rtl: r })));
+  const iy = ty + ls.length * px(48) + px(10);
+  const actH = px(80);
+  const room = footTop - 30 - actH - iy;
+  if (room > 160) photoWithPrice(ctx, a, x0 + 40, iy, w0 - 80, room - 10, body);
+  // Comment, share and like, drawn as outlines, no numbers.
+  const ay = footTop - 30 - actH / 2 - 10;
+  ctx.strokeStyle = '#666666';
+  ctx.lineWidth = 4;
+  [0.2, 0.5, 0.8].forEach((f, i) => {
+    const cx = x0 + w0 * f;
+    ctx.beginPath();
+    if (i === 0) ctx.roundRect(cx - 20, ay - 16, 40, 30, 10);
+    if (i === 1) { ctx.moveTo(cx - 18, ay + 14); ctx.lineTo(cx - 18, ay - 4); ctx.lineTo(cx + 16, ay - 4); ctx.moveTo(cx + 6, ay - 14); ctx.lineTo(cx + 16, ay - 4); ctx.lineTo(cx + 6, ay + 6); }
+    if (i === 2) { ctx.moveTo(cx, ay + 16); ctx.bezierCurveTo(cx - 34, ay - 6, cx - 14, ay - 30, cx, ay - 12); ctx.bezierCurveTo(cx + 14, ay - 30, cx + 34, ay - 6, cx, ay + 16); }
+    ctx.stroke();
+  });
+}
+
+// "Us vs the usual way" (9f.6, Dr. Squatch's checklist): this business
+// beside the usual way of getting the same thing, never a named rival.
+function drawVersus(canvas, a) {
+  const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
+  const [usual = '', ...rest] = lineList(a.words.versus);
+  const rows = rest.slice(0, 3).map((l) => l.split('|').map((x) => x.trim()));
+  ctx.font = `800 ${px(56)}px ${body}`;
+  const hl = wrap(ctx, a.words.headline || '', W - 140, 2);
+  const y0 = top + px(10);
+  const rh = px(104);
+  const headH = px(84);
+  const tableY = y0 + hl.length * px(66) + px(28);
+  const tableH = headH + rows.length * rh;
+  part(ctx, 'words', [60, y0, W - 120, tableY + tableH - y0], () => {
+    hl.forEach((l, i) => say(ctx, l, W / 2, y0 + px(56) + i * px(66), { size: px(56), weight: 800, colour: L.text, body, rtl: a.rtl }));
+    card(ctx, 60, tableY, W - 120, tableH, 32);
+    const colW = (W - 120) / 2;
+    // Ours on the reading side: left in English, right in Hebrew.
+    const oursX = a.rtl ? 60 + colW : 60;
+    const theirsX = a.rtl ? 60 : 60 + colW;
+    ctx.fillStyle = a.brand || ACCENT;
+    ctx.beginPath();
+    ctx.roundRect(oursX + 14, tableY + 14, colW - 28, headH - 28, 18);
+    ctx.fill();
+    say(ctx, a.name || '', oursX + colW / 2, tableY + headH / 2 + px(12), { size: px(32), weight: 800, colour: '#FFFFFF', body, rtl: a.rtl, max: colW - 60 });
+    say(ctx, usual, theirsX + colW / 2, tableY + headH / 2 + px(12), { size: px(32), weight: 700, colour: '#666666', body, rtl: a.rtl, max: colW - 40 });
+    rows.forEach(([ours = '', theirs = ''], i) => {
+      const ry = tableY + headH + i * rh;
+      ctx.fillStyle = '#E3E3E3';
+      ctx.fillRect(80, ry, W - 160, 2);
+      [[oursX, ours, true], [theirsX, theirs, false]].forEach(([cx, text, good]) => {
+        const mark = px(22);
+        const mx = a.rtl ? cx + colW - 34 - mark : cx + 34 + mark;
+        ctx.fillStyle = good ? '#1F8A50' : '#B42318';
+        ctx.beginPath();
+        ctx.arc(mx, ry + rh / 2, mark, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        if (good) { ctx.moveTo(mx - 10, ry + rh / 2); ctx.lineTo(mx - 3, ry + rh / 2 + 8); ctx.lineTo(mx + 11, ry + rh / 2 - 9); } else { ctx.moveTo(mx - 8, ry + rh / 2 - 8); ctx.lineTo(mx + 8, ry + rh / 2 + 8); ctx.moveTo(mx + 8, ry + rh / 2 - 8); ctx.lineTo(mx - 8, ry + rh / 2 + 8); }
+        ctx.stroke();
+        const tw = colW - mark * 2 - 80;
+        ctx.font = `${good ? 700 : 500} ${px(28)}px ${body}`;
+        const tl = wrap(ctx, text, tw, 2);
+        const tx = a.rtl ? mx - mark - 16 : mx + mark + 16;
+        tl.forEach((l, j) => say(ctx, l, tx, ry + rh / 2 + px(10) - (tl.length - 1) * px(17) + j * px(34),
+          { size: px(28), weight: good ? 700 : 500, colour: good ? INK : '#666666', align: a.rtl ? 'right' : 'left', body, rtl: a.rtl }));
+      });
+    });
+  });
+  productBelow(ctx, a, tableY + tableH + px(30), footTop, W, body);
+}
+
+// "Reasons" (9f, Tube Science's "five reasons", in a notes app): a title
+// and one reason a line, numbered, then the product.
+function drawReasons(canvas, a) {
+  const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
+  const [title = '', ...rest] = lineList(a.words.reasons);
+  const reasons = rest.slice(0, 5);
+  const x0 = 70;
+  const w0 = W - 140;
+  const y0 = top;
+  const r = dirOf(title + reasons.join(' '), a.rtl) === 'rtl';
+  const sx = r ? x0 + w0 - 50 : x0 + 50;
+  const al = r ? 'right' : 'left';
+  ctx.font = `800 ${px(50)}px ${body}`;
+  const tl = wrap(ctx, title, w0 - 100, 2);
+  const lh = px(60);
+  const h = px(70) + tl.length * px(60) + px(20) + reasons.length * lh + px(30);
+  part(ctx, 'words', [x0, y0, w0, h], () => {
+    card(ctx, x0, y0, w0, h, 30);
+    say(ctx, `${r ? '›' : '‹'} ${a.notesLabel || 'Notes'}`, sx, y0 + px(50), { size: px(28), weight: 600, colour: '#C99400', align: al, body, rtl: a.rtl });
+    let y = y0 + px(70);
+    tl.forEach((l) => { y += px(60); say(ctx, l, sx, y - px(8), { size: px(50), weight: 800, align: al, body, rtl: a.rtl }); });
+    y += px(20);
+    reasons.forEach((l, i) => {
+      y += lh;
+      const n = `${i + 1}.`;
+      say(ctx, n, sx, y - px(10), { size: px(36), weight: 800, colour: '#C99400', align: al, body, rtl: a.rtl });
+      say(ctx, l, r ? sx - px(52) : sx + px(52), y - px(10), { size: px(36), weight: 500, colour: '#333333', align: al, body, rtl: a.rtl, max: w0 - 160 });
+    });
+  });
+  productBelow(ctx, a, y0 + h + px(30), footTop, W, body);
+}
+
+// "Honest" (9f.4, Simon's "This stuff taste nasty"): a plain trade-off the
+// listing itself states, why it is good for the reader, the product beside.
+function drawHonest(canvas, a) {
+  const { ctx, W, body, head, px, top, L, footTop } = ground(canvas, a);
+  const [hl = '', ...rest] = lineList(a.words.honest);
+  const r = dirOf(hl, a.rtl) === 'rtl';
+  const al = r ? 'right' : 'left';
+  const sx = r ? W - 80 : 80;
+  ctx.font = `700 ${px(70)}px ${head}`;
+  const hs = wrap(ctx, `“${hl}”`, W - 160, 3);
+  const y0 = top + px(10);
+  const hh = hs.length * px(80);
+  part(ctx, 'words', [70, y0, W - 140, hh + px(10)], () => {
+    hs.forEach((l, i) => {
+      ctx.font = `700 ${px(70)}px ${head}`;
+      ctx.fillStyle = L.text;
+      ctx.textAlign = al;
+      ctx.direction = r ? 'rtl' : 'ltr';
+      ctx.fillText(l, sx, y0 + px(68) + i * px(80));
+    });
+  });
+  const colW = (W - 160) * 0.56;
+  ctx.font = `500 ${px(34)}px ${body}`;
+  const ls = rest.slice(0, 3).flatMap((l) => [...wrap(ctx, l, colW, 3), '']);
+  const ly = y0 + hh + px(50);
+  part(ctx, 'name', [r ? W - 80 - colW : 80, ly - px(30), colW, ls.length * px(42)],
+    () => ls.forEach((l, i) => say(ctx, l, sx, ly + i * px(42), { size: px(34), weight: 500, colour: L.text, align: al, body, rtl: a.rtl })));
+  const px0 = r ? 80 : 80 + colW + 30;
+  const pw = W - 160 - colW - 30;
+  const ph = footTop - 30 - ly;
+  if (ph > 160) {
+    const [cx, cy, cw, ch] = product(ctx, a.item, px0, ly - px(20), pw, ph);
+    const rr = Math.round(Math.min(90, ch * 0.3));
+    sticker(ctx, { x: r ? cx + rr * 0.6 : cx + cw - rr * 0.6, y: cy + ch - rr * 0.6, r: rr, item: a.item, fromWord: a.fromWord, body });
+  }
+}
+
+// "A moment in the day" (9f.8, the FLO ads): one serif line placing it in
+// the reader's day, its key words in italic in the look's accent colour.
+function drawMoment(canvas, a) {
+  const { ctx, W, body, head, px, top, L, footTop } = ground(canvas, a);
+  const raw = a.words.moment || '';
+  const words = [];
+  raw.split(/(\*[^*]+\*)/).forEach((seg) => {
+    const acc = /^\*.*\*$/.test(seg);
+    seg.replace(/\*/g, '').split(' ').filter(Boolean).forEach((w) => {
+      // A full stop or comma alone stays with the word before it.
+      if (/^[.,!?;:]+$/.test(w) && words.length) words[words.length - 1][0] += w;
+      else words.push([w, acc]);
+    });
+  });
+  const fontOf = (acc, size) => `${acc ? 'italic 600' : '600'} ${size}px ${head}`;
+  let size = px(78);
+  let lines = [];
+  for (; size >= px(44); size -= 4) {
+    lines = [[]];
+    let width = 0;
+    words.forEach(([w, acc]) => {
+      ctx.font = fontOf(acc, size);
+      const ww = ctx.measureText(`${w} `).width;
+      if (width + ww > W - 140 && lines[lines.length - 1].length) { lines.push([]); width = 0; }
+      lines[lines.length - 1].push([w, acc, ww]);
+      width += ww;
+    });
+    if (lines.length <= 2) break;
+  }
+  const y0 = top + px(70);
+  say(ctx, (a.eyebrow || '').toUpperCase(), W / 2, y0 - px(20), { size: px(28), weight: 700, colour: L.sub, body, rtl: a.rtl, max: W - 160 });
+  const lh = size * 1.15;
+  part(ctx, 'words', [70, y0, W - 140, lines.length * lh + px(10)], () => lines.forEach((ln, i) => {
+    const r = dirOf(ln.map(([w]) => w).join(' '), a.rtl) === 'rtl';
+    const total = ln.reduce((t, [, , ww]) => t + ww, 0);
+    let x = r ? (W + total) / 2 : (W - total) / 2;
+    ln.forEach(([w, acc, ww]) => {
+      ctx.font = fontOf(acc, size);
+      ctx.fillStyle = acc ? L.word : L.text;
+      ctx.textAlign = r ? 'right' : 'left';
+      ctx.direction = r ? 'rtl' : 'ltr';
+      ctx.fillText(w, x, y0 + size + i * lh);
+      x += r ? -ww : ww;
+    });
+  }));
+  productBelow(ctx, a, y0 + lines.length * lh + px(50), footTop, W, body);
+}
+
+// "Make your own" (Tzvi, 4 Nov 2026): a background the owner picks (a
+// photo from the search, one of their own, or one drawn here), with their
+// product, their words and the price on it, each one draggable.
+export const BACKDROPS = [
+  ['sunset', ['#FF9A5A', '#C2185B']], ['sea', ['#2BC0E4', '#0F4C81']], ['mint', ['#D4F5E9', '#7BC8A4']],
+  ['sand', ['#F6EFE4', '#E3CFAE']], ['night', ['#2B2D31', '#0B0B0F']], ['berry', ['#7F00FF', '#E100FF']],
+  ['dots', ['#FFD600', '#FFD600'], 'dots'], ['stripes', ['#F7D9D0', '#F7D9D0'], 'stripes'],
+];
+function drawBackdrop(ctx, W, H, bg) {
+  if (bg?.img) {
+    // A background fills the whole ad, so it is cropped to it; the
+    // owner's own product is never cropped (it sits on top, whole).
+    const s = Math.max(W / bg.img.naturalWidth, H / bg.img.naturalHeight);
+    const w = bg.img.naturalWidth * s; const h = bg.img.naturalHeight * s;
+    ctx.drawImage(bg.img, (W - w) / 2, (H - h) / 2, w, h);
+    return;
+  }
+  const [, [c1, c2], pattern] = BACKDROPS.find(([k]) => k === bg?.id) || BACKDROPS[3];
+  const g = ctx.createLinearGradient(0, 0, W, H);
+  g.addColorStop(0, c1);
+  g.addColorStop(1, c2);
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = 'rgba(0,0,0,.08)';
+  if (pattern === 'dots') for (let y = 20; y < H; y += 60) for (let x = (y / 60) % 2 ? 50 : 20; x < W; x += 60) { ctx.beginPath(); ctx.arc(x, y, 9, 0, Math.PI * 2); ctx.fill(); }
+  if (pattern === 'stripes') { ctx.save(); ctx.rotate(-Math.PI / 4); for (let x = -H; x < W + H; x += 70) ctx.fillRect(x, -H, 28, H * 3); ctx.restore(); }
+}
+export const backdropIsLight = (bg) => {
+  if (bg?.img) return false;
+  const c = hexRgb((BACKDROPS.find(([k]) => k === bg?.id) || BACKDROPS[3])[1][0]);
+  return lum(c) > 0.45;
+};
+
+function drawCustom(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, item, fromWord, bg }) {
+  const { ctx, W, H, body, px, top } = begin(canvas, format, rtl);
+  drawBackdrop(ctx, W, H, bg);
+  const light = backdropIsLight(bg);
+  const ink = (PARTS && PARTS.ink) || (light ? INK : '#FFFFFF');
+  const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: light ? INK : '#FFFFFF', dark: light });
+  ctx.textAlign = 'center';
+  ctx.font = `800 ${px(70)}px ${body}`;
+  ctx.direction = dirOf(words.headline, rtl);
+  const head = wrap(ctx, words.headline, W - 140, 3);
+  const y0 = top + px(20);
+  part(ctx, 'words', [70, y0, W - 140, head.length * px(82) + 20], () => {
+    // A soft shadow keeps the words readable on any photo.
+    if (!light) { ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 18; }
+    ctx.fillStyle = ink;
+    head.forEach((l, i) => ctx.fillText(l, W / 2, y0 + px(82) * (i + 1)));
+  });
+  const ey = y0 + head.length * px(82) + px(52);
+  part(ctx, 'name', [70, ey - px(34), W - 140, px(44)], () => {
+    if (!light) { ctx.shadowColor = 'rgba(0,0,0,.55)'; ctx.shadowBlur = 12; }
+    say(ctx, (eyebrow || '').toUpperCase(), W / 2, ey, { size: px(30), weight: 700, colour: ink, body, rtl, max: W - 160 });
+  });
+  const py = ey + px(40);
+  if (footTop - 40 - py > 140) {
+    const [cx, cy, cw, ch] = product(ctx, item, 90, py, W - 180, footTop - 40 - py);
+    const r = Math.round(Math.min(105, ch * 0.32));
+    sticker(ctx, { x: rtl ? cx + r * 0.6 : cx + cw - r * 0.6, y: cy + ch - r * 0.6, r, item, fromWord, body });
+  }
 }
 
 // Words that would contradict the picture (ad rules 9e.8): a price typed
 // into the words that is not the price of the item in the ad.
 export function adIssues(words, item) {
   if (!words) return [];
-  const text = [words.headline, ...(words.points || []), words.big_word, words.caller, words.decline].join(' ');
+  const text = [words.headline, ...(words.points || []), words.big_word, words.caller, words.decline,
+    words.search, words.switches, words.checklist, words.situations, words.mirror, words.chat, words.post,
+    words.versus, words.reasons, words.honest, words.moment].join(' ');
   const prices = text.match(/[$€£₪]\s?\d[\d,.]*|\d[\d,.]*\s?(?:₪|ILS|NIS|USD|EUR|\$|ש"ח|שקל)/gi) || [];
   const own = item ? String(Math.round(item.price)) : null;
   return prices.filter((p) => p.replace(/[^\d]/g, '') !== own).length ? ['price'] : [];
@@ -1173,10 +1997,29 @@ export function adIssues(words, item) {
 
 // Every design, drawn the same way for the big picture and the small
 // previews. `native` (Story) is drawn in the story shape only.
+// A gallery design is "layout:look" (THEMED below); the rest are one look.
+// The words each 9f layout reads, and edits in the panel.
+const NEW_FIELDS = ['situations', 'mirror', 'chat', 'post', 'versus', 'reasons', 'honest', 'moment', 'people'];
+const FIELD_OF = { situation: 'situations', mirror: 'mirror', chat: 'chat', post: 'post', versus: 'versus',
+  reasons: 'reasons', honest: 'honest', moment: 'moment' };
+const THEMED = { behind: drawBehind, phonepop: drawPhonePop, calling: drawCalling,
+  notify: drawNotify, search: drawSearch, toggle: drawToggle, checklist: drawChecklist, custom: drawCustom,
+  situation: drawSituation, mirror: drawMirror, chat: drawChat, post: drawPost, versus: drawVersus,
+  reasons: drawReasons, honest: drawHonest, moment: drawMoment };
 function render(canvas, design, a) {
-  if (design === 'behind') return drawBehind(canvas, a);
-  if (design === 'phonepop') return drawPhonePop(canvas, a);
-  if (design === 'calling') return drawCalling(canvas, a);
+  const [layout, lookKey] = design.split(':');
+  const look = lookKey || a.look;
+  if (THEMED[layout]) {
+    PARTS = { moves: a.moves || {}, boxes: a.boxes || {}, font: a.font || null, ink: a.ink || null };
+    try {
+      THEMED[layout](canvas, look ? { ...a, look } : a);
+    } finally {
+      PARTS = null;
+    }
+    // "Make your own" has its own ground and words where the ribbon would sit.
+    if (HOLIDAYS.includes(look) && layout !== 'custom') holidayRibbon(canvas, a.format, a.greeting, a.rtl);
+    return undefined;
+  }
   if (design === 'phone') return drawPhone(canvas, a);
   if (design === 'torn') return drawTorn(canvas, a);
   if (design === 'review') return drawReview(canvas, a);
@@ -1190,19 +2033,47 @@ function render(canvas, design, a) {
   return draw(canvas, { ...a, design });
 }
 
-export default function AdMaker({ API, token, targetType, target, onClose }) {
+export default function AdMaker({ API, token, targetType, target, onClose, start = null }) {
   const { t, i18n } = useTranslation();
   const [lang, setLang] = useState(i18n.language?.startsWith('he') ? 'he' : 'en');
   const [format, setFormat] = useState('feed');
-  const [design, setDesignRaw] = useState('phone');
+  const [design, setDesignRaw] = useState('behind');
+  // The owner's own choices (Tzvi, 4 Nov 2026): one card per layout in the
+  // gallery, and the colour, font and word colour picked here instead.
+  const [look, setLook] = useState(start?.look || 'cream');
+  const [customHex, setCustomHex] = useState('');
+  const [fontIdx, setFontIdx] = useState(0);
+  const [ink, setInk] = useState('');
+  const [lost, setLost] = useState(null);
+  // Saved ads (Canva's "your designs"): each reopens as it was left, and the
+  // last one comes back when the maker opens, so no paid writing is repeated.
+  const [saved, setSaved] = useState(null);
+  const [savedId, setSavedId] = useState('');
+  // A design or product asked for before it can be drawn (the cut-outs come
+  // a moment after the words): taken as soon as it can.
+  const wantDesign = useRef('behind');
+  const wantItem = useRef(start?.item || '');
+  // Dragged pieces, per design and shape: { 'behind|feed': { product: {x, y, s} } }.
+  const [moves, setMoves] = useState({});
+  const [boxes, setBoxes] = useState({});
+  const [sel, setSel] = useState('');
+  // "Make your own": its background, and the photo search.
+  const [bg, setBg] = useState({ id: 'sand' });
+  const [bgQuery, setBgQuery] = useState('');
+  const [bgResults, setBgResults] = useState([]);
+  const [bgBusy, setBgBusy] = useState(false);
   const [reviewIdx, setReviewIdx] = useState(0);
+  // Which "real moment" line the situation ad shows, and which reader the
+  // words were written for (9f.1, 9f.7).
+  const [situationIdx, setSituationIdx] = useState(0);
+  const [forWhom, setForWhom] = useState('');
   const [faqIdx, setFaqIdx] = useState(0);
   const [itemImgs, setItemImgs] = useState([]);
   const [thumbs, setThumbs] = useState({});
   // Story is drawn for the tall status shape only, so picking it picks the
   // shape, and picking another shape leaves it.
   const setDesign = (d) => { setDesignRaw(d); if (d === 'native') setFormat('story'); };
-  const pickFormat = (f) => { setFormat(f); if (f !== 'story' && design === 'native') setDesignRaw('phone'); };
+  const pickFormat = (f) => { setFormat(f); if (f !== 'story' && design === 'native') setDesignRaw('clean'); };
   const [ad, setAd] = useState(null);
   const [words, setWords] = useState(null);
   const [imgs, setImgs] = useState([]);
@@ -1221,16 +2092,24 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
   // being written must not let the older reply land on top.
   const langNow = useRef(lang);
   langNow.current = lang;
-  const write = async () => {
+  const write = async (row = null, who = forWhom) => {
     setBusy(true);
     try {
       const { data } = await axios.post(`${API}/ads/make`,
-        { target_type: targetType, target_id: target.id, lang },
+        { target_type: targetType, target_id: target.id, lang, words: !row, for_whom: who },
         { headers: { Authorization: `Bearer ${token}` } });
       if (langNow.current !== lang) return;
       setAd(data);
-      setWords({ headline: data.headline, points: data.points, caption: data.caption,
-        big_word: data.big_word || '', caller: data.caller || '', decline: data.decline || '' });
+      if (row) {
+        setWords({ ...row.words });
+        applySaved(row);
+      } else {
+        setSavedId('');
+        setWords({ headline: data.headline, points: data.points, caption: data.caption,
+          big_word: data.big_word || '', caller: data.caller || '', decline: data.decline || '',
+          search: data.search || '', switches: data.switches || '', checklist: data.checklist || '',
+          ...Object.fromEntries(NEW_FIELDS.map((k) => [k, data[k] || ''])) });
+      }
       const [loaded, its] = await Promise.all([
         Promise.all((data.photos || []).slice(0, 4).map(loadImage)),
         Promise.all((data.items || []).map(async (it) => ({ ...it, img: await loadImage(it.photo) }))),
@@ -1246,10 +2125,35 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
   // Once per language: each call is paid, and React's development mode
   // runs effects twice.
   const wroteFor = useRef('');
+  const auth = { headers: { Authorization: `Bearer ${token}` } };
+  const loadSaved = () => axios.get(`${API}/ads/saved`, { ...auth, params: { target_type: targetType, target_id: target.id } })
+    .then(({ data }) => { setSaved(data.ads || []); return data.ads || []; }).catch(() => []);
+  const applySaved = async (row) => {
+    const st = row.settings || {};
+    setSavedId(row.id);
+    wantDesign.current = row.design;
+    setDesignRaw(row.design);
+    if (st.format) setFormat(st.format);
+    if (st.look) setLook(st.look);
+    setCustomHex(st.customHex || '');
+    setFontIdx(st.fontIdx || 0);
+    setInk(st.ink || '');
+    setMoves(st.moves || {});
+    wantItem.current = row.item || '';
+    const img = st.bg?.src ? await loadImage(st.bg.src) : null;
+    setBg(img ? { img, src: st.bg.src } : { id: st.bg?.id || 'sand' });
+  };
   useEffect(() => {
     if (wroteFor.current === lang) return;
     wroteFor.current = lang;
-    write();
+    (async () => {
+      const list = saved || await loadSaved();
+      // Asked for something new from the dashboard: a fresh ad, not the last one.
+      const last = !start && list.find((r) => r.lang === lang);
+      // The last ad was in the other language: open that one in its own.
+      if (!start && !last && !saved && list[0]) { wroteFor.current = ''; setLang(list[0].lang); return; }
+      write(last || null);
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
@@ -1258,7 +2162,7 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
   useEffect(() => {
     if (targetType !== 'business') return undefined;
     let gone = false;
-    axios.post(`${API}/ads/cutouts`, { target_type: targetType, target_id: target.id },
+    axios.post(`${API}/ads/cutouts`, { target_type: targetType, target_id: target.id, first: start?.item || null },
       { headers: { Authorization: `Bearer ${token}` } })
       .then(async ({ data }) => {
         const loaded = await Promise.all((data.items || []).map(async (it) => ({
@@ -1287,51 +2191,114 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
   }
   const shownImgs = featured ? [featured.img, ...imgs.filter((i) => i.src !== featured.img.src)] : imgs;
   const issues = adIssues(words, targetType === 'property' ? null : featured);
+  // One message per ad (9f.3): a long headline is a sign of two.
+  const headlineWords = (words?.headline || '').split(/\s+/).filter(Boolean).length;
   const reviews = ad?.reviews || NONE;
   const eyebrow = targetType === 'property' ? areaLabel(target.area, lt) : target.name;
   const cta = targetType === 'property' ? lt('ads.ctaStay', 'See photos and book') : lt('ads.ctaBusiness', 'See more and order');
 
   const faqs = ad?.faqs || NONE;
   const items = itemImgs.map((it) => ({ ...it, priceText: `${priceSymbol(it.currency)}${Math.round(it.price).toLocaleString()}` }));
-  // [key, label, available]. Story is drawn in the story shape only.
-  // The three made for you first (Tzvi, 2 Nov 2026); the plainer ones after.
-  const cutOk = !!featured?.cut && !!words?.big_word;
-  const designs = [
-    ...(cutOk ? [
-      ['behind', t('ads.behind', 'Big word'), true],
-      ['phonepop', t('ads.phonepop', 'Out of the phone'), true],
-      ['calling', t('ads.calling', 'Is calling'), !!words?.caller],
-    ] : [
-      ['phone', t('ads.phone', 'Phone screen'), imgs.length > 0],
-      ['torn', t('ads.torn', 'Torn paper'), imgs.length > 0],
-      ['colour', t('ads.colour', 'Colour'), true],
-    ]),
-    ['clean', t('ads.clean', 'Light'), true],
-    ...(cutOk ? [['colour', t('ads.colour', 'Colour'), true]] : []),
-    ['bigwords', t('ads.bigwords', 'Big words'), true],
-    ['night', t('ads.night', 'Dark'), true],
-    ['grid', t('ads.grid', 'Grid'), imgs.length >= 3],
-    ['gallery', t('ads.gallery', 'More photos'), imgs.length >= 3],
-    ['items', t('ads.items', 'Side by side'), items.length >= 3],
-    ['note', t('ads.note', 'Sticky note'), imgs.length > 0],
-    ['review', t('ads.review', 'A real review'), reviews.length > 0],
-    ['question', t('ads.question', 'Question'), faqs.length > 0],
-    ['native', t('ads.storyDesign', 'Story'), imgs.length > 0],
+  // The gallery (Tzvi, 3 Nov 2026): seven layouts in five colour looks
+  // each, then the single-look designs. [key, label, available, look].
+  // Story is drawn in the story shape only.
+  const cut = !!featured?.cut;
+  const LAYOUTS = [
+    ['behind', t('ads.behind', 'Big word'), cut && !!words?.big_word],
+    ['phonepop', t('ads.phonepop', 'Out of the phone'), cut],
+    ['calling', t('ads.calling', 'Is calling'), cut && !!words?.caller],
+    ['notify', t('ads.notifyL', 'Notifications'), !!featured],
+    ['search', t('ads.searchL', 'Search'), !!featured && !!words?.search],
+    ['toggle', t('ads.toggleL', 'Switches'), !!featured && lineList(words?.switches).length >= 2],
+    // Offered only when the words came back as a real list, not one line.
+    ['checklist', t('ads.checklistL', 'Checklist'), !!featured && lineList(words?.checklist).length >= 3],
+    // From the 4 Nov videos (docs/static-ad-rules.md 9f).
+    ['situation', t('ads.situationL', 'A real moment'), !!featured && lineList(words?.situations).length > 0],
+    ['mirror', t('ads.mirrorL', 'Is this you?'), !!featured && lineList(words?.mirror).length >= 3],
+    ['chat', t('ads.chatL', 'Text messages'), !!featured && lineList(words?.chat).length >= 2],
+    ['post', t('ads.postL', 'Social post'), !!featured && !!words?.post],
+    ['versus', t('ads.versusL', 'Us vs the usual'), !!featured && lineList(words?.versus).length >= 3],
+    ['reasons', t('ads.reasonsL', 'Reasons list'), !!featured && lineList(words?.reasons).length >= 3],
+    ['honest', t('ads.honestL', 'Honest'), !!featured && lineList(words?.honest).length >= 2],
+    ['moment', t('ads.momentL', 'Moment in the day'), !!featured && !!words?.moment],
   ];
+  const holiday = useMemo(() => nextHoliday(), []);
+  const looks = [...(target.brand_color ? ['brand'] : []), ...(holiday ? [holiday] : []), ...LOOKS];
+  const designs = [
+    ['custom', t('ads.custom', 'Make your own'), !!featured, 'mine'],
+    ...LAYOUTS.map(([k, label, ok]) => [k, label, ok, 'layout']),
+    ['phone', t('ads.phone', 'Phone screen'), imgs.length > 0, 'classic'],
+    ['torn', t('ads.torn', 'Torn paper'), imgs.length > 0, 'classic'],
+    ['clean', t('ads.clean', 'Light'), true, 'classic'],
+    ['colour', t('ads.colour', 'Colour'), true, 'classic'],
+    ['bigwords', t('ads.bigwords', 'Big words'), true, 'classic'],
+    ['night', t('ads.night', 'Dark'), true, 'classic'],
+    ['grid', t('ads.grid', 'Grid'), imgs.length >= 3, 'classic'],
+    ['gallery', t('ads.gallery', 'More photos'), imgs.length >= 3, 'classic'],
+    ['items', t('ads.items', 'Side by side'), items.length >= 3, 'classic'],
+    ['note', t('ads.note', 'Sticky note'), imgs.length > 0, 'classic'],
+    ['review', t('ads.review', 'A real review'), reviews.length > 0, 'classic'],
+    ['question', t('ads.question', 'Question'), faqs.length > 0, 'classic'],
+    ['native', t('ads.storyDesign', 'Story'), imgs.length > 0, 'classic'],
+  ];
+  // Visits per design, read from the short link (routes/short_links.py).
+  const [visitCounts, setVisitCounts] = useState({});
+  const [weekCounts, setWeekCounts] = useState({});
+  const slug = ad?.link?.slug;
   useEffect(() => {
-    if (cutOk && ['phone', 'torn', 'colour'].includes(design)) setDesignRaw('behind');
+    if (!slug) return;
+    axios.get(`${API}/short-links/${slug}`, { headers: { Authorization: `Bearer ${token}` } })
+      .then(({ data }) => { setVisitCounts(data.ads || {}); setWeekCounts(data.ads_week || {}); }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cutOk]);
+  }, [slug]);
+  const visits = Object.entries(visitCounts).sort((x, y) => y[1] - x[1]);
+  const designName = (k) => {
+    const [lay, lk] = k.split('-');
+    const row = designs.find(([key]) => key === lay);
+    return row ? (lk ? `${row[1]} (${t(`ads.look.${lk}`, lk)})` : row[1]) : k;
+  };
+  const shown = designs.filter(([, , ok]) => ok);
+  const layout = design.split(':')[0];
+  const themed = !!THEMED[layout];
+  const brandHex = customHex || target.brand_color || null;
+  const lookNow = customHex ? 'brand' : look;
+  const fontPair = FONTS[fontIdx] || FONTS[0];
+  const fontCss = `"${rtl ? fontPair[1] : fontPair[0]}", system-ui, sans-serif`;
+  const moveKey = `${design}|${format}`;
+  // The picked design may not be drawable yet (the cut-outs come a moment
+  // after the words): fall back to the first one that is.
+  const okKeys = designs.filter(([, , ok]) => ok).map(([k]) => k).join(',');
+  useEffect(() => {
+    const ok = okKeys.split(',');
+    if (wantDesign.current && ok.includes(wantDesign.current)) {
+      setDesignRaw(wantDesign.current);
+      wantDesign.current = '';
+      return;
+    }
+    if (okKeys && !ok.includes(design)) setDesignRaw(ok.includes('behind') ? 'behind' : ok[0]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [okKeys]);
+  useEffect(() => {
+    if (!wantItem.current) return;
+    const i = pool.findIndex((it) => it.name === wantItem.current);
+    if (i >= 0) setPick(i);
+    if (i >= 0 && cutItems.length) wantItem.current = '';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cutItems, itemImgs]);
   const args = (d) => {
     const review = reviews.length ? reviews[reviewIdx % reviews.length] : null;
     return {
       format: d === 'native' ? 'story' : format, words, eyebrow, price, cta, shortUrl, rtl, imgs: shownImgs, items, qr: qrRef.current,
       item: featured, fromWord: lt('ads.fromWord', 'from'), addLabel: lt('ads.addToOrder', 'Add to order'),
       callingLabel: lt('ads.isCalling', 'is calling…'), acceptLabel: lt('ads.callAccept', 'Order'),
+      todayLabel: lt('ads.today', 'Today'), brand: brandHex, look: lookNow, bg,
+      font: fontIdx ? fontCss : null, ink: ink || null,
+      greeting: holiday ? lt(`ads.greeting.${holiday}`) : '', searchKicker: lt('ads.searchKicker', 'Someone near you is searching for:'),
       review, faq: faqs.length ? faqs[faqIdx % faqs.length] : null,
       sourceLabel: review?.source === 'google' ? lt('ads.googleReview', 'Google review') : '',
       name: targetType === 'property' ? (target.title || '') : target.name,
-      nowLabel: lt('ads.now', 'now'),
+      nowLabel: lt('ads.now', 'now'), notesLabel: lt('ads.notes', 'Notes'),
+      situation: (() => { const all = lineList(words?.situations); return all.length ? all[situationIdx % all.length] : ''; })(),
     };
   };
 
@@ -1347,11 +2314,21 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
       document.head.appendChild(link);
       await new Promise((r) => { link.onload = r; link.onerror = r; });
     }
+    if (fontIdx && !document.getElementById('ad-pick-fonts')) {
+      const link = document.createElement('link');
+      link.id = 'ad-pick-fonts';
+      link.rel = 'stylesheet';
+      link.href = FONT_URL;
+      document.head.appendChild(link);
+      await new Promise((r) => { link.onload = r; link.onerror = r; });
+    }
     const head = rtl ? 'Frank Ruhl Libre' : 'Playfair Display';
     const body = rtl ? 'Assistant' : 'Manrope';
     const hand = rtl ? 'Amatic SC' : 'Caveat';
+    const picked = rtl ? fontPair[1] : fontPair[0];
     await Promise.all([`600 64px "${head}"`, `700 64px "${head}"`, `600 30px "${body}"`, `700 34px "${body}"`,
-      `800 90px "${body}"`, `700 60px "${hand}"`].map((f) => document.fonts?.load(f, rtl ? 'אב' : 'ab').catch(() => null)));
+      `800 90px "${body}"`, `700 60px "${hand}"`, `800 60px "${picked}"`, `500 30px "${picked}"`]
+      .map((f) => document.fonts?.load(f, rtl ? 'אב' : 'ab').catch(() => null)));
   };
 
   useEffect(() => {
@@ -1361,12 +2338,16 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
       await fontsReady();
       if (cancelled) return;
       const on = designs.find(([k]) => k === design)?.[2];
-      render(canvasRef.current, on ? design : 'clean', args(design));
-      setPreview(canvasRef.current.toDataURL('image/jpeg', 0.85));
+      const got = {};
+      render(canvasRef.current, on ? design : 'clean', { ...args(design), moves: moves[moveKey] || {}, boxes: got });
+      setBoxes(got);
+      setLost(ink ? lostWords(canvasRef.current, got, ink) : null);
+      setPreview('drawn');
     })();
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [words, format, design, imgs, itemImgs, cutItems, pick, rtl, eyebrow, price, cta, shortUrl, reviews, reviewIdx, faqs, faqIdx]);
+  }, [words, format, design, imgs, itemImgs, cutItems, pick, rtl, eyebrow, price, cta, shortUrl, reviews, reviewIdx, faqs, faqIdx,
+    look, customHex, fontIdx, ink, bg, moves, situationIdx]);
 
   // Every design at once, small, so the owner picks one by eye (rules 9b).
   // A moment after typing stops: each preview is a full drawing.
@@ -1378,24 +2359,38 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
       const big = document.createElement('canvas');
       const small = document.createElement('canvas');
       const out = {};
-      designs.filter(([, , ok]) => ok).forEach(([k]) => {
-        render(big, k, args(k));
-        small.width = 360;
-        small.height = Math.round((360 * big.height) / big.width);
+      const todo = designs.filter(([, , ok]) => ok).map(([k]) => k);
+      // A few at a time, so the window stays responsive while some forty
+      // full-size drawings are made.
+      for (let i = 0; i < todo.length; i += 1) {
+        if (cancelled) return;
+        render(big, todo[i], args(todo[i]));
+        small.width = 240;
+        small.height = Math.round((240 * big.height) / big.width);
         small.getContext('2d').drawImage(big, 0, 0, small.width, small.height);
-        out[k] = small.toDataURL('image/jpeg', 0.75);
-      });
-      if (!cancelled) setThumbs(out);
+        out[todo[i]] = small.toDataURL('image/jpeg', 0.72);
+        if (i % 4 === 3 || i === todo.length - 1) {
+          setThumbs({ ...out });
+          await new Promise((r) => { setTimeout(r, 0); });
+        }
+      }
     }, 300);
     return () => { cancelled = true; clearTimeout(timer); };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [words, format, imgs, itemImgs, cutItems, pick, rtl, eyebrow, price, cta, shortUrl, reviews, reviewIdx, faqs, faqIdx]);
+  }, [words, format, imgs, itemImgs, cutItems, pick, rtl, eyebrow, price, cta, shortUrl, reviews, reviewIdx, faqs, faqIdx,
+    look, customHex, fontIdx, ink, bg]);
 
-  const postText = words ? `${words.caption}\n\n${shortUrl}` : '';
+  // The QR code and the post's link name the design (/p/{slug}/{design}),
+  // so the owner can see which design brought visits (borrowed from the ad
+  // tools that score designs, but counted from real visits). The short
+  // link printed on the picture stays short.
+  const adName = themed && layout !== 'custom' ? `${layout}-${lookNow}` : layout;
+  const adUrl = ad ? `${shortUrl}/${adName}` : shortUrl;
+  const postText = words ? `${words.caption}\n\n${adUrl}` : '';
   const copyText = async () => {
     try { await navigator.clipboard.writeText(postText); toast.success(t('ads.copied', 'Post text copied')); } catch { /* shown in the box */ }
   };
-  const sharePicture = () => canvasRef.current.toBlob(async (blob) => {
+  const sharePicture = () => { saveAd(true); canvasRef.current.toBlob(async (blob) => {
     const file = new File([blob], `ad-${format}.jpg`, { type: 'image/jpeg' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], text: postText }).catch(() => {});
@@ -1407,7 +2402,260 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
       setTimeout(() => URL.revokeObjectURL(a.href), 5000);
       copyText();
     }
-  }, 'image/jpeg', 0.92);
+  }, 'image/jpeg', 0.92); };
+
+  // Every shape of the picked design in one tap (Canva's "resize"): the
+  // square post, the feed post and the status, shared or saved together.
+  const allShapes = async () => {
+    saveAd(true);
+    const files = [];
+    for (const f of (design === 'native' ? ['story'] : ['square', 'feed', 'story'])) {
+      const c = document.createElement('canvas');
+      render(c, design, { ...args(design), format: f, moves: moves[`${design}|${f}`] || {} });
+      // eslint-disable-next-line no-await-in-loop
+      const blob = await new Promise((r) => { c.toBlob(r, 'image/jpeg', 0.92); });
+      files.push(new File([blob], `ad-${f}.jpg`, { type: 'image/jpeg' }));
+    }
+    if (navigator.canShare && navigator.canShare({ files })) {
+      await navigator.share({ files, text: postText }).catch(() => {});
+      return;
+    }
+    files.forEach((file, i) => setTimeout(() => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(file);
+      a.download = file.name;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+    }, i * 400));
+  };
+  // Saving: the choices and words, and a small preview for the list. The
+  // posting, printing and sharing buttons save quietly too, so every ad
+  // that went out is in "Your ads" with its visits.
+  const saveAd = async (quiet = false, asNew = false) => {
+    if (!words || !canvasRef.current) return;
+    const c = document.createElement('canvas');
+    c.width = 240;
+    c.height = Math.round((240 * canvasRef.current.height) / canvasRef.current.width);
+    c.getContext('2d').drawImage(canvasRef.current, 0, 0, c.width, c.height);
+    try {
+      const { data } = await axios.post(`${API}/ads/saved`, {
+        target_type: targetType, target_id: target.id, id: asNew ? null : (savedId || null), lang, design,
+        item: featured?.name || '', words, thumb: c.toDataURL('image/jpeg', 0.7),
+        settings: { format, look, customHex, fontIdx, ink, moves, adName, bg: bg.src ? { src: bg.src } : { id: bg.id || 'sand' } },
+      }, auth);
+      setSavedId(data.id);
+      loadSaved();
+      if (!quiet) toast.success(t('ads.saved', 'Saved to your ads'));
+    } catch (err) {
+      if (!quiet) toast.error(err?.response?.data?.detail || t('ads.saveFailed', 'Could not save the ad. Try again.'));
+    }
+  };
+  const removeSaved = async (id) => {
+    await axios.delete(`${API}/ads/saved/${id}`, auth).catch(() => {});
+    if (id === savedId) setSavedId('');
+    loadSaved();
+  };
+
+  const adCanvas = (f) => {
+    const c = document.createElement('canvas');
+    render(c, design, { ...args(design), format: f, moves: moves[`${design}|${f}`] || {} });
+    return c;
+  };
+  const saveFile = (file) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = file.name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  };
+  // One tap to WhatsApp Status (Buffer's and Later's "post now"): the tall
+  // shape, handed to the phone's share sheet with the post text.
+  const shareStatus = async () => {
+    saveAd(true);
+    const blob = await new Promise((r) => { adCanvas('story').toBlob(r, 'image/jpeg', 0.92); });
+    const file = new File([blob], 'ad-status.jpg', { type: 'image/jpeg' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], text: postText }).catch(() => {});
+    } else {
+      saveFile(file);
+      copyText();
+    }
+  };
+
+  // Things to print (Vistaprint's range), each an A4 page at 150 dpi made
+  // from the same ad, link and code.
+  const PW = 1240;
+  const PH = 1754;
+  const page = () => {
+    const c = document.createElement('canvas');
+    c.width = PW;
+    c.height = PH;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, PW, PH);
+    return [c, ctx];
+  };
+  const dashed = (ctx, draw) => {
+    ctx.save();
+    ctx.setLineDash([12, 10]);
+    ctx.strokeStyle = '#B8B8B8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    draw();
+    ctx.stroke();
+    ctx.restore();
+  };
+  const PRINTS = {
+    // The feed ad across the page, the name once under it. The ad's own
+    // code is about 3cm wide on paper, enough to scan from a noticeboard.
+    flyer: () => {
+      const [c, ctx] = page();
+      const ad = adCanvas('feed');
+      const adH = Math.round((PW * ad.height) / ad.width);
+      ctx.drawImage(ad, 0, 0, PW, adH);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.direction = rtl ? 'rtl' : 'ltr';
+      ctx.fillStyle = INK;
+      ctx.font = `800 64px ${fontIdx ? fontCss : bodyFont(rtl)}`;
+      ctx.fillText(wrap(ctx, args(design).name || '', PW - 120, 1)[0] || '', PW / 2, adH + (PH - adH) / 2);
+      return c;
+    },
+    // Folded across the middle to stand on a table: the top half upside
+    // down, so it reads from both sides.
+    table: () => {
+      const [c, ctx] = page();
+      const ad = adCanvas('square');
+      const half = PH / 2;
+      const sz = half - 80;
+      ctx.drawImage(ad, (PW - sz) / 2, half + 40, sz, sz);
+      ctx.save();
+      ctx.translate(PW / 2, half / 2);
+      ctx.rotate(Math.PI);
+      ctx.drawImage(ad, -sz / 2, -sz / 2, sz, sz);
+      ctx.restore();
+      dashed(ctx, () => { ctx.moveTo(0, half); ctx.lineTo(PW, half); });
+      return c;
+    },
+    // Ten 85 x 55mm cards: the name, what to do, the code and the link.
+    cards: () => {
+      const [c, ctx] = page();
+      const cw = 502;
+      const ch = 325;
+      const x0 = (PW - cw * 2) / 2;
+      const y0 = (PH - ch * 5) / 2;
+      const font = fontIdx ? fontCss : bodyFont(rtl);
+      const name = args(design).name || '';
+      const q = 160;
+      ctx.direction = rtl ? 'rtl' : 'ltr';
+      ctx.textAlign = rtl ? 'right' : 'left';
+      for (let i = 0; i < 10; i += 1) {
+        const x = x0 + (i % 2) * cw;
+        const y = y0 + Math.floor(i / 2) * ch;
+        ctx.fillStyle = brandHex || ACCENT;
+        ctx.fillRect(x, y, cw, 10);
+        if (qrRef.current) ctx.drawImage(qrRef.current, rtl ? x + 24 : x + cw - 24 - q, y + 34, q, q);
+        const tx = rtl ? x + cw - 28 : x + 28;
+        const tw = cw - q - 80;
+        ctx.fillStyle = INK;
+        ctx.font = `800 34px ${font}`;
+        wrap(ctx, name, tw, 2).forEach((l, j) => ctx.fillText(l, tx, y + 76 + j * 40));
+        ctx.fillStyle = '#666666';
+        ctx.font = `500 22px ${font}`;
+        wrap(ctx, cta, tw, 2).forEach((l, j) => ctx.fillText(l, tx, y + 172 + j * 28));
+        ctx.fillStyle = ACCENT;
+        ctx.font = `600 22px ${font}`;
+        ctx.fillText(shortUrl.replace(/^https?:\/\//, ''), tx, y + ch - 34);
+        ctx.strokeStyle = '#D0D0D0';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, cw, ch);
+      }
+      return c;
+    },
+    // The square ad 18.6cm wide with a line to cut along, for a window.
+    sticker: () => {
+      const [c, ctx] = page();
+      const sz = 1100;
+      const x = (PW - sz) / 2;
+      const y = (PH - sz) / 2;
+      ctx.drawImage(adCanvas('square'), x, y, sz, sz);
+      dashed(ctx, () => ctx.rect(x - 20, y - 20, sz + 40, sz + 40));
+      return c;
+    },
+  };
+  const printIt = (kind) => {
+    saveAd(true);
+    const c = PRINTS[kind]();
+    const frame = document.createElement('iframe');
+    frame.style.cssText = 'position:fixed;width:0;height:0;border:0;';
+    document.body.appendChild(frame);
+    const doc = frame.contentDocument;
+    doc.open();
+    doc.write(`<!doctype html><title>${kind}</title><style>@page{size:A4;margin:0}html,body{margin:0}img{display:block;width:100vw;height:100vh;object-fit:contain}</style><img src="${c.toDataURL('image/jpeg', 0.95)}">`);
+    doc.close();
+    const img = doc.querySelector('img');
+    const go = () => { frame.contentWindow.focus(); frame.contentWindow.print(); setTimeout(() => frame.remove(), 60000); };
+    if (img.complete) go(); else img.onload = go;
+  };
+  // Real ads running now in the same field, from Meta's public Ad Library.
+  const adLibraryUrl = `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=IL&q=${encodeURIComponent((words?.search || target.name || '').slice(0, 60))}`;
+
+  // Dragging a piece on the preview. The boxes are in the picture's own
+  // pixels; the preview is shown smaller, so a move is scaled back up.
+  const drag = useRef(null);
+  const onDown = (name, mode) => (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setSel(name);
+    const rect = canvasRef.current.getBoundingClientRect();
+    const cur = (moves[moveKey] || {})[name] || { x: 0, y: 0, s: 1 };
+    drag.current = { name, mode, sx: e.clientX, sy: e.clientY, k: canvasRef.current.width / rect.width, cur, box: boxes[name] };
+    e.currentTarget.setPointerCapture?.(e.pointerId);
+  };
+  const onMove = (e) => {
+    const d = drag.current;
+    if (!d) return;
+    const dx = (e.clientX - d.sx) * d.k;
+    const dy = (e.clientY - d.sy) * d.k;
+    const next = d.mode === 'size'
+      ? { ...d.cur, s: Math.max(0.3, Math.min(3, d.cur.s * (1 + (dx + dy) / (d.box[2] + d.box[3])))) }
+      : { ...d.cur, x: d.cur.x + dx, y: d.cur.y + dy };
+    setMoves((m) => ({ ...m, [moveKey]: { ...(m[moveKey] || {}), [d.name]: next } }));
+  };
+  const onUp = () => { drag.current = null; };
+  const resetMoves = () => { setMoves((m) => ({ ...m, [moveKey]: {} })); setSel(''); };
+  const W0 = canvasRef.current?.width || 1080;
+  const H0 = canvasRef.current?.height || 1350;
+
+  const searchBackgrounds = async (e) => {
+    e?.preventDefault();
+    if (!bgQuery.trim()) return;
+    setBgBusy(true);
+    try {
+      const { data } = await axios.get(`${API}/ads/backgrounds`, { params: { q: bgQuery, lang }, headers: { Authorization: `Bearer ${token}` } });
+      setBgResults(data.photos || []);
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('ads.bgFailed', 'Photo search did not answer. Try again.'));
+    } finally {
+      setBgBusy(false);
+    }
+  };
+  const pickBackground = async (photo) => {
+    setBgBusy(true);
+    try {
+      const { data } = await axios.post(`${API}/ads/backgrounds/keep`, { url: photo.full }, { headers: { Authorization: `Bearer ${token}` } });
+      const img = await loadImage(data.url);
+      if (img) setBg({ img, src: data.url });
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || t('ads.bgFailed', 'Photo search did not answer. Try again.'));
+    } finally {
+      setBgBusy(false);
+    }
+  };
+  const swatch = (name) => {
+    const L = lookOf(name, brandHex, featured?.cut || featured?.img);
+    return L ? L.bg : '#ccc';
+  };
 
   const chip = (on) => `px-3 py-1.5 rounded-full text-xs font-semibold border ${on ? 'text-white border-transparent' : ''}`;
   const chipStyle = (on) => (on ? { background: '#000' } : { borderColor: 'var(--brand-border)', color: 'var(--ink)' });
@@ -1433,47 +2681,165 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
           <h2 className="text-xl font-semibold" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>{t('ads.title', 'Make an ad')}</h2>
           <button type="button" onClick={onClose} aria-label={t('common.close', 'Close')} className="p-3 rounded-full hover:bg-[#F9FAFB]"><X size={18} /></button>
         </div>
-        {/* The three made-for-you ads, side by side, before anything else. */}
-        <p className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('ads.madeForYou', 'Three ads made for you. Pick one to change its words or post it.')}</p>
-        <div className="grid grid-cols-3 gap-2 sm:gap-4 mb-5" data-testid="ad-three">
-          {designs.slice(0, 3).map(([k, label, ok]) => (
-            <button key={k} type="button" disabled={!ok} onClick={() => setDesign(k)} aria-pressed={design === k}
-              className="text-center disabled:opacity-40" data-testid={`ad-pro-${k}`}>
-              <span className="block rounded-xl overflow-hidden border-2 bg-[#F9FAFB] aspect-[4/5] flex items-center justify-center"
+        {saved?.some((r) => r.lang === lang) && (
+          <div className="mb-4" data-testid="ad-saved">
+            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('ads.savedTitle', 'Your saved ads')}</p>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {saved.filter((r) => r.lang === lang).map((r) => (
+                <div key={r.id} className="relative shrink-0 w-[84px]">
+                  <button type="button" onClick={() => write(r)} disabled={busy} aria-pressed={r.id === savedId}
+                    className="block w-full rounded-lg overflow-hidden border-2" style={{ borderColor: r.id === savedId ? '#000' : 'var(--brand-border)' }} data-testid={`ad-saved-${r.id}`}>
+                    <img src={r.thumb} alt={designName(r.settings?.adName || r.design)} className="w-full block" />
+                  </button>
+                  <span className="block mt-1 text-[10px] leading-tight text-center" style={{ color: 'var(--brand-muted)' }}>
+                    {t('ads.weekVisits', 'Visits this week: {{count}}', { count: weekCounts[r.settings?.adName] || 0 })}
+                  </span>
+                  <button type="button" onClick={() => removeSaved(r.id)} aria-label={t('ads.deleteSaved', 'Delete this ad')}
+                    className="absolute top-1 end-1 rounded-full bg-white/90 p-1" data-testid={`ad-saved-delete-${r.id}`}>
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+        {(() => {
+          const used = new Set((saved || []).map((r) => (r.design || '').split(':')[0]));
+          const next = used.size ? shown.find(([k]) => !used.has(k) && k !== design && k !== 'custom') : null;
+          return next ? (
+            <p className="text-xs mb-3" style={{ color: 'var(--brand-muted)' }} data-testid="ad-try-next">
+              {t('ads.tryNextWhy', 'Different-looking ads reach more people than the same one again.')}{' '}
+              <button type="button" onClick={() => setDesign(next[0])} className="font-semibold underline" style={{ color: 'var(--brand-primary)' }}>
+                {t('ads.tryNext', 'Try {{name}}', { name: next[1] })}
+              </button>
+            </p>
+          ) : null;
+        })()}
+        {/* The gallery: every design, already made from this business. */}
+        <p className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('ads.galleryTitle', 'Pick a look. Every ad is made from your own product, name and price.')}</p>
+        <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 max-h-[36vh] overflow-y-auto mb-5 pe-1" data-testid="ad-gallery">
+          {shown.map(([k, label]) => (
+            <button key={k} type="button" onClick={() => setDesign(k)} aria-pressed={design === k}
+              className="text-center min-w-0" data-testid={`ad-g-${k}`}>
+              <span className={`block rounded-lg overflow-hidden border-2 bg-[#F9FAFB] flex items-center justify-center ${format === 'square' ? 'aspect-square' : format === 'story' ? 'aspect-[9/16]' : 'aspect-[4/5]'}`}
                 style={{ borderColor: design === k ? '#000' : 'var(--brand-border)' }}>
-                {ok && thumbs[k] ? <img src={thumbs[k]} alt={label} className="max-h-full max-w-full" />
-                  : <Loader2 className="animate-spin" size={20} aria-hidden="true" />}
+                {thumbs[k] ? <img src={thumbs[k]} alt={label} className="max-h-full max-w-full" />
+                  : <Loader2 className="animate-spin" size={16} aria-hidden="true" />}
               </span>
-              <span className="block mt-1.5 text-xs font-semibold" style={{ color: 'var(--ink)' }}>{label}</span>
+              <span className="block mt-1 text-[11px] leading-tight font-semibold truncate" style={{ color: 'var(--ink)' }}>{label}</span>
             </button>
           ))}
         </div>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-          <div className="bg-[#F9FAFB] rounded-xl flex items-center justify-center p-3 min-h-[280px] min-w-0">
-            {preview && !busy
-              ? <img src={preview} alt={t('ads.previewAlt', 'Your ad')} className="max-h-[60vh] max-w-full w-auto rounded-lg shadow" data-testid="ad-preview" />
-              : <Loader2 className="animate-spin" size={28} aria-label={t('ads.writing', 'Writing your ad…')} />}
+          <div className="min-w-0 space-y-2">
+            <div className="bg-[#F9FAFB] rounded-xl flex items-center justify-center p-3 min-h-[280px]" onPointerDown={() => setSel('')}>
+              {(!preview || busy) && <Loader2 className="animate-spin" size={28} aria-label={t('ads.writing', 'Writing your ad…')} />}
+              <div className={`relative ${!preview || busy ? 'hidden' : 'inline-block'}`} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
+                <canvas ref={canvasRef} className="block max-h-[60vh] max-w-full w-auto h-auto rounded-lg shadow" role="img"
+                  aria-label={t('ads.previewAlt', 'Your ad')} data-testid="ad-preview" />
+                {themed && Object.entries(boxes).map(([name, [x, y, w, h]]) => (
+                  <div key={name} onPointerDown={onDown(name, 'move')} data-testid={`ad-piece-${name}`}
+                    className="absolute cursor-move" style={{ left: `${(x / W0) * 100}%`, top: `${(y / H0) * 100}%`, width: `${(w / W0) * 100}%`,
+                      height: `${(h / H0) * 100}%`, touchAction: 'none', outline: sel === name ? '2px dashed #167AB8' : 'none' }}>
+                    {sel === name && (
+                      <span onPointerDown={onDown(name, 'size')} data-testid={`ad-size-${name}`}
+                        className="absolute -bottom-2 -end-2 w-5 h-5 rounded-full border-2 border-white cursor-nwse-resize" style={{ background: '#167AB8', touchAction: 'none' }} />
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+            {themed && (
+              <div className="flex items-center justify-between gap-2 text-xs" style={{ color: 'var(--brand-muted)' }}>
+                <span>{t('ads.dragHint', 'Drag the product, the words or the price to move them. Pull the blue dot to resize.')}</span>
+                {Object.keys(moves[moveKey] || {}).length > 0 && (
+                  <button type="button" onClick={resetMoves} className="font-semibold shrink-0" style={{ color: 'var(--brand-primary)' }} data-testid="ad-reset-moves">
+                    {t('ads.resetMoves', 'Put back')}
+                  </button>
+                )}
+              </div>
+            )}
           </div>
           <div className="space-y-4">
+            {themed && layout !== 'custom' && (
+              <div className="space-y-1.5">
+                <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.colourTitle', 'Background colour')}</p>
+                <div className="flex flex-wrap items-center gap-2" data-testid="ad-colours">
+                  {looks.map((k) => (
+                    <button key={k} type="button" onClick={() => { setLook(k); setCustomHex(''); }} aria-pressed={!customHex && look === k}
+                      title={t(`ads.look.${k}`)} aria-label={t(`ads.look.${k}`)} data-testid={`ad-colour-${k}`}
+                      className="w-8 h-8 rounded-full border-2" style={{ background: swatch(k), borderColor: !customHex && look === k ? '#000' : 'var(--brand-border)' }} />
+                  ))}
+                  <label className="inline-flex items-center gap-1 text-xs font-semibold cursor-pointer" style={{ color: 'var(--brand-primary)' }}>
+                    <input type="color" value={customHex || '#167AB8'} onChange={(e) => setCustomHex(e.target.value)} className="w-8 h-8 p-0 border-0 bg-transparent" data-testid="ad-colour-custom" />
+                    {t('ads.anyColour', 'Any colour')}
+                  </label>
+                </div>
+              </div>
+            )}
+            {layout === 'custom' && (
+              <div className="space-y-2" data-testid="ad-backgrounds">
+                <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.bgTitle', 'Background')}</p>
+                <div className="flex flex-wrap gap-2">
+                  {BACKDROPS.map(([k, [c1, c2]]) => (
+                    <button key={k} type="button" onClick={() => setBg({ id: k })} aria-pressed={bg.id === k} aria-label={k} data-testid={`ad-bg-${k}`}
+                      className="w-9 h-9 rounded-lg border-2" style={{ background: `linear-gradient(135deg, ${c1}, ${c2})`, borderColor: bg.id === k ? '#000' : 'var(--brand-border)' }} />
+                  ))}
+                  {imgs.slice(0, 4).map((im) => (
+                    <button key={im.src} type="button" onClick={() => setBg({ img: im, src: im.src })} aria-pressed={bg.src === im.src}
+                      className="w-9 h-9 rounded-lg border-2 overflow-hidden" style={{ borderColor: bg.src === im.src ? '#000' : 'var(--brand-border)' }}>
+                      <img src={im.src} alt="" className="w-full h-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+                <form onSubmit={searchBackgrounds} className="flex gap-2">
+                  <input className={field} value={bgQuery} onChange={(e) => setBgQuery(e.target.value)} dir="auto"
+                    placeholder={t('ads.bgSearch', 'Search photos: wood table, beach, kitchen…')} data-testid="ad-bg-query" />
+                  <button type="submit" disabled={bgBusy} className="shrink-0 px-3 rounded-lg text-sm font-semibold text-white disabled:opacity-60" style={{ background: '#000' }} data-testid="ad-bg-go">
+                    {bgBusy ? <Loader2 className="animate-spin" size={14} /> : t('ads.bgGo', 'Search')}
+                  </button>
+                </form>
+                {bgResults.length > 0 && (
+                  <div className="grid grid-cols-4 gap-1.5 max-h-48 overflow-y-auto" data-testid="ad-bg-results">
+                    {bgResults.map((ph) => (
+                      <button key={ph.id} type="button" onClick={() => pickBackground(ph)} disabled={bgBusy} className="aspect-square rounded overflow-hidden">
+                        <img src={ph.thumb} alt="" loading="lazy" className="w-full h-full object-cover" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+                {bgResults.length > 0 && <p className="text-[10px]" style={{ color: 'var(--brand-muted)' }}>{t('ads.bgCredit', 'Photos from Pixabay, free to use in ads.')}</p>}
+              </div>
+            )}
+            {themed && (
+              <div className="grid grid-cols-2 gap-2">
+                <label className="block text-xs font-semibold" style={{ color: 'var(--ink)' }}>
+                  {t('ads.fontTitle', 'Font')}
+                  <select className={`${field} mt-1`} value={fontIdx} onChange={(e) => setFontIdx(Number(e.target.value))} data-testid="ad-font">
+                    {FONTS.map(([en, he], i) => <option key={en} value={i} style={{ fontFamily: `"${rtl ? he : en}"` }}>{rtl ? he : en}</option>)}
+                  </select>
+                </label>
+                <div className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>
+                  {t('ads.inkTitle', 'Word colour')}
+                  <div className="flex items-center gap-2 mt-1">
+                    <input type="color" value={ink || '#ffffff'} onChange={(e) => setInk(e.target.value)} className="w-9 h-9 p-0 border-0 bg-transparent" data-testid="ad-ink" />
+                    {ink && <button type="button" onClick={() => setInk('')} className="font-semibold" style={{ color: 'var(--brand-primary)' }}>{t('ads.inkAuto', 'Automatic')}</button>}
+                  </div>
+                </div>
+                {lost && (
+                  <p className="col-span-2 text-xs font-semibold rounded-lg px-2.5 py-2" style={{ background: '#FFF4E5', color: '#7A4100' }} role="status" data-testid="ad-ink-warning">
+                    {t('ads.inkWarning', 'Your words are hard to see on this background.')}{' '}
+                    <button type="button" onClick={() => setInk(lost)} className="underline" data-testid="ad-ink-fix">{t('ads.inkFix', 'Fix it')}</button>
+                  </p>
+                )}
+              </div>
+            )}
             <div className="space-y-1.5">
               <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.shape', 'Where will you post it?')}</p>
               <Chips value={format} set={pickFormat} options={[
                 ['square', t('ads.square', 'Square post')], ['feed', t('ads.feed', 'Facebook / Instagram')], ['story', t('ads.story', 'WhatsApp status / story')]]} />
             </div>
             <div className="space-y-1.5">
-              <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.moreDesigns', 'Simpler designs')}</p>
-              <div className="flex gap-2 overflow-x-auto pb-1" data-testid="ad-designs">
-                {designs.slice(3).map(([k, label, ok]) => (
-                  <button key={k} type="button" disabled={!ok} onClick={() => setDesign(k)} aria-pressed={design === k}
-                    className="shrink-0 w-[76px] text-center disabled:opacity-40" data-testid={`ad-${k}`}>
-                    <span className="block h-[96px] rounded-lg overflow-hidden border-2 bg-[#F9FAFB] flex items-center justify-center"
-                      style={{ borderColor: design === k ? '#000' : 'var(--brand-border)' }}>
-                      {ok && thumbs[k] && <img src={thumbs[k]} alt="" className="max-h-full max-w-full" />}
-                    </span>
-                    <span className="block mt-1 text-[11px] leading-tight font-semibold" style={{ color: 'var(--ink)' }}>{label}</span>
-                  </button>
-                ))}
-              </div>
               {design === 'question' && faqs.length > 0 && (
                 <div className="flex items-center justify-between gap-2 text-xs" style={{ color: 'var(--brand-muted)' }}>
                   <span>{t('ads.questionNote', 'A question from your page, with your own answer')}</span>
@@ -1499,11 +2865,25 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
               <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.language', 'Language of the ad')}</p>
               <Chips value={lang} set={setLang} options={[['en', 'English'], ['he', 'עברית']]} />
             </div>
+            {lineList(words?.people).length > 0 && (
+              <div className="space-y-1.5" data-testid="ad-who">
+                <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.whoTitle', 'Who is this ad for?')}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {[['', t('ads.whoAll', 'Everyone')], ...lineList(words.people).map((x) => [x, x])].map(([k, label]) => (
+                    <button key={k || 'all'} type="button" disabled={busy} aria-pressed={forWhom === k}
+                      onClick={() => { setForWhom(k); write(null, k); }} className={`${chip(forWhom === k)} disabled:opacity-40`} style={chipStyle(forWhom === k)}
+                      data-testid={`ad-who-${k ? 'p' : 'all'}`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {words && (
               <div className="space-y-2" dir={rtl ? 'rtl' : 'ltr'}>
                 <div className="flex items-center justify-between" dir="auto">
                   <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.words', 'The words (change anything)')}</p>
-                  <button type="button" onClick={write} disabled={busy} className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-rewrite">
+                  <button type="button" onClick={() => write(null, forWhom)} disabled={busy} className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-rewrite">
                     <RefreshCw size={12} /> {t('ads.rewrite', 'Write again')}
                   </button>
                 </div>
@@ -1524,11 +2904,38 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
                   </div>
                 )}
                 <input className={field} value={words.headline} maxLength={60} onChange={(e) => setWords({ ...words, headline: e.target.value })} aria-label={t('ads.headline', 'Headline')} />
-                {design === 'behind' && (
+                {headlineWords > 9 && (
+                  <p className="text-xs font-semibold rounded-lg px-2.5 py-2" style={{ background: '#FFF4E5', color: '#7A4100' }} data-testid="ad-one-message">
+                    {t('ads.oneMessage', 'One idea per ad works best: try 9 words or fewer in the headline.')}
+                  </p>
+                )}
+                {FIELD_OF[layout] && (
+                  <textarea className={field} rows={FIELD_OF[layout] === 'post' || FIELD_OF[layout] === 'moment' ? 2 : 4} value={words[FIELD_OF[layout]] || ''}
+                    onChange={(e) => setWords({ ...words, [FIELD_OF[layout]]: e.target.value })}
+                    aria-label={t(`ads.${FIELD_OF[layout]}Field`)} placeholder={t(`ads.${FIELD_OF[layout]}Field`)} data-testid={`ad-field-${FIELD_OF[layout]}`} />
+                )}
+                {layout === 'situation' && lineList(words.situations).length > 1 && (
+                  <button type="button" onClick={() => setSituationIdx((i) => i + 1)} className="text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-next-situation">
+                    {t('ads.anotherMoment', 'Another moment')}
+                  </button>
+                )}
+                {layout === 'behind' && (
                   <input className={field} value={words.big_word} maxLength={12} onChange={(e) => setWords({ ...words, big_word: e.target.value })}
                     aria-label={t('ads.bigWordField', 'The big word')} placeholder={t('ads.bigWordField', 'The big word')} />
                 )}
-                {design === 'calling' && (
+                {layout === 'search' && (
+                  <input className={field} value={words.search} maxLength={60} onChange={(e) => setWords({ ...words, search: e.target.value })}
+                    aria-label={t('ads.searchField', 'What they search for')} placeholder={t('ads.searchField', 'What they search for')} data-testid="ad-search-words" />
+                )}
+                {layout === 'toggle' && (
+                  <textarea className={field} rows={3} value={words.switches} onChange={(e) => setWords({ ...words, switches: e.target.value })}
+                    aria-label={t('ads.switchesField', 'Switches')} placeholder={t('ads.switchesField', 'Switches')} />
+                )}
+                {layout === 'checklist' && (
+                  <textarea className={field} rows={4} value={words.checklist} onChange={(e) => setWords({ ...words, checklist: e.target.value })}
+                    aria-label={t('ads.checklistField', 'The list')} placeholder={t('ads.checklistField', 'The list')} />
+                )}
+                {layout === 'calling' && (
                   <div className="grid grid-cols-2 gap-2">
                     <input className={field} value={words.caller} maxLength={24} onChange={(e) => setWords({ ...words, caller: e.target.value })}
                       aria-label={t('ads.callerField', 'Who is calling')} placeholder={t('ads.callerField', 'Who is calling')} />
@@ -1549,20 +2956,67 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
               </div>
             )}
             <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={shareStatus} disabled={!preview || busy || issues.length > 0}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-60" style={{ background: '#000' }} data-testid="ad-status">
+                <Share2 size={15} /> {t('ads.status', 'Share to WhatsApp Status')}
+              </button>
+              <button type="button" onClick={() => saveAd()} disabled={!preview || busy}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-save">
+                <Save size={15} /> {t('ads.save', 'Save')}
+              </button>
               <button type="button" onClick={sharePicture} disabled={!preview || busy || issues.length > 0}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-60" style={{ background: '#000' }} data-testid="ad-share">
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-share">
                 {navigator.canShare ? <Share2 size={15} /> : <Download size={15} />} {t('ads.share', 'Post the picture')}
               </button>
               <button type="button" onClick={copyText} disabled={!words}
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-copy">
                 <Copy size={15} /> {t('ads.copy', 'Copy the post text')}
               </button>
+              <button type="button" onClick={allShapes} disabled={!preview || busy || issues.length > 0}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-all-shapes">
+                <Layers size={15} /> {t('ads.allShapes', 'All three shapes')}
+              </button>
             </div>
+            {savedId && (
+              <button type="button" onClick={() => saveAd(false, true)} className="text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-save-new">
+                {t('ads.saveNew', 'Save as a new ad')}
+              </button>
+            )}
+            {design !== 'native' && (
+              <div className="flex flex-wrap items-center gap-1.5" data-testid="ad-print">
+                <span className="inline-flex items-center gap-1 text-xs font-semibold me-1" style={{ color: 'var(--ink)' }}>
+                  <Printer size={14} aria-hidden="true" /> {t('ads.printTitle', 'Print')}
+                </span>
+                {[['flyer', t('ads.printFlyer', 'A4 flyer')], ['table', t('ads.printTable', 'Table card')],
+                  ['cards', t('ads.printCards', 'Business cards')], ['sticker', t('ads.printSticker', 'Window sticker')]].map(([k, label]) => (
+                  <button key={k} type="button" onClick={() => printIt(k)} disabled={!preview || busy || issues.length > 0}
+                    className={`${chip(false)} disabled:opacity-40`} style={chipStyle(false)} data-testid={`ad-print-${k}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {targetType === 'business' && (
+              <a href={adLibraryUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold"
+                style={{ color: 'var(--brand-primary)' }} data-testid="ad-library-link">
+                <ExternalLink size={12} /> {t('ads.adLibrary', 'See real ads others in your field are running')}
+              </a>
+            )}
+            {visits.length > 0 && (
+              <div className="text-xs rounded-lg p-2.5" style={{ background: '#F9FAFB', color: 'var(--ink)' }} data-testid="ad-visits">
+                <p className="flex justify-between gap-2 font-semibold mb-1">
+                  <span>{t('ads.visitsTitle', 'Visits from your ads so far')}</span>
+                  <span className="font-normal" style={{ color: 'var(--brand-muted)' }}>{t('ads.visitsWeekAll', 'this week · in all')}</span>
+                </p>
+                {visits.slice(0, 4).map(([k, n]) => (
+                  <p key={k} className="flex justify-between gap-2"><span>{designName(k)}</span><span className="font-semibold">{weekCounts[k] || 0} · {n}</span></p>
+                ))}
+              </div>
+            )}
             <p className="text-[11px] text-gray-600">{t('ads.hint', 'The link on the ad is your own short link, so you can see how many people opened it under "Share & QR code".')}</p>
           </div>
         </div>
-        <canvas ref={canvasRef} className="hidden" />
-        <div className="hidden"><QRCodeCanvas ref={qrRef} value={shortUrl} size={380} marginSize={2} level="M" fgColor={INK} /></div>
+        <div className="hidden"><QRCodeCanvas ref={qrRef} value={adUrl} size={380} marginSize={2} level="M" fgColor={INK} /></div>
       </div>
     </div>,
     document.body,

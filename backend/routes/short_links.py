@@ -18,6 +18,7 @@ undone once they leave the building:
 """
 from __future__ import annotations
 
+import re
 import secrets
 from datetime import UTC, datetime, timedelta
 from zoneinfo import ZoneInfo
@@ -188,7 +189,21 @@ def _public(doc: dict[str, Any]) -> dict[str, Any]:
         # shape a bar chart wants, so the client never has to reason about
         # missing keys or timezones.
         "daily": _last_30_days(doc.get("daily") or {}),
+        # Visits per ad design (the ad maker's QR and post link carry it,
+        # /p/{slug}/{ad}), so an owner sees which design brought people.
+        "ads": doc.get("ads") or {},
+        "ads_week": _ads_week(doc.get("ad_days") or {}),
     }
+
+
+def _ads_week(days: dict[str, dict[str, int]]) -> dict[str, int]:
+    """Visits per ad design over the last 7 Israel-calendar days."""
+    today = datetime.now(_IL_TZ).date()
+    out: dict[str, int] = {}
+    for i in range(7):
+        for ad, n in (days.get((today - timedelta(days=i)).strftime("%Y-%m-%d")) or {}).items():
+            out[ad] = out.get(ad, 0) + int(n or 0)
+    return out
 
 
 def _last_30_days(buckets: dict[str, int]) -> list[dict[str, int | str]]:
@@ -281,7 +296,7 @@ async def resolve_short_link(slug: str, request: Request):
     """
     # Token links are unguessable; the limit is hardening, matching orders/track (site audit 27-28 Sep).
     check_rate(request, bucket="short_link_follow", limit=600, window_seconds=600)
-    doc = await _counted_lookup(slug, request)
+    doc = await _counted_lookup(slug, request, request.query_params.get("ad"))
     if not doc:
         raise HTTPException(status_code=404, detail="Unknown short link")
     # `src=qr` so existing analytics can separate scan traffic from a link
@@ -299,7 +314,11 @@ def _today_bucket() -> str:
     return datetime.now(_IL_TZ).strftime("%Y-%m-%d")
 
 
-async def _counted_lookup(slug: str, request: Request):
+# An ad design's name as the ad maker writes it ("behind-cream", "clean").
+_AD_NAME = re.compile(r"^[a-z]{2,12}(-[a-z]{2,8})?$")
+
+
+async def _counted_lookup(slug: str, request: Request, ad: str | None = None):
     """The link doc, with the scan counted — unless a preview bot asked.
 
     Alongside the total, each scan increments a per-day bucket
@@ -310,10 +329,16 @@ async def _counted_lookup(slug: str, request: Request):
     """
     if _is_preview_bot(request):
         return await db.short_links.find_one({"slug": slug})
+    inc = {"scan_count": 1, f"daily.{_today_bucket()}": 1}
+    if ad and _AD_NAME.match(ad):
+        inc[f"ads.{ad}"] = 1
+        # Per day as well, so the owner hears "this ad brought 14 visits
+        # this week", not only a total since the start.
+        inc[f"ad_days.{_today_bucket()}.{ad}"] = 1
     return await db.short_links.find_one_and_update(
         {"slug": slug},
         {
-            "$inc": {"scan_count": 1, f"daily.{_today_bucket()}": 1},
+            "$inc": inc,
             "$set": {"last_scanned_at": datetime.now(UTC).isoformat()},
         },
     )
@@ -454,7 +479,8 @@ def _preview_html(
 
 
 @router.get("/short-links/{slug}/follow")
-async def follow_short_link(slug: str, request: Request):
+@router.get("/short-links/{slug}/follow/{ad}")
+async def follow_short_link(slug: str, request: Request, ad: str | None = None):
     """Count the scan and 302 to the destination — the true redirect.
 
     In production, `serve` rewrites the brand domain's /p/{slug} straight
@@ -471,7 +497,7 @@ async def follow_short_link(slug: str, request: Request):
     """
     # Token links are unguessable; the limit is hardening, matching orders/track (site audit 27-28 Sep).
     check_rate(request, bucket="short_link_follow", limit=600, window_seconds=600)
-    doc = await _counted_lookup(slug, request)
+    doc = await _counted_lookup(slug, request, ad)
     if not doc:
         # A guessed or mistyped slug still lands somewhere sensible.
         return RedirectResponse(url=_SITE_ORIGIN, status_code=302)
@@ -575,6 +601,61 @@ Return ONE JSON object:
   decline   ONE or two words under the red "decline" button of that phone
             screen: the chore the reader skips by ordering ("Cook",
             "Scrub", "Pack"). Light, never mocking.
+  search    what someone would type into a search box to find this, 3 to 6
+            plain words with the place if the listing has one ("meat boards
+            in Jerusalem"). Lower case, no brand name.
+  switches  three lines for phone-style on/off switches: the first two
+            start with "- " and name a chore or hassle the reader can skip
+            ("- Cooking for 20 guests"); the last starts with "+ " and is
+            what this listing offers, in its own words ("+ A meat board,
+            delivered"). Each at most 32 characters. No claims about others.
+  checklist the reader's own to-do list, four lines: a short title for the
+            occasion ("Friday night guests"), two everyday tasks, then a
+            last line starting "x " that is getting this listing's thing
+            ("x Order the meat board"). Each at most 32 characters.
+
+From docs/static-ad-rules.md 9f. Every line below is built only from the
+listing and its customer reviews; leave a field "" when they do not give it.
+  situations up to four lines, each one real moment when someone needs
+            this, then a bar, then the plain answer: "Cooking for twenty on
+            Friday? | Order the board." The moment first, the thing they
+            would do instead is implied. Take moments from the reviews when
+            a customer names one. Each line at most 70 characters.
+  mirror    four lines naming the exact reader. First a short question
+            naming them by their moment, at most 22 characters ("Twenty
+            guests on Friday?"); then three short lines describing that
+            moment as they live it, each at most 40 characters, warm, never
+            mocking. No product name in these four lines.
+  chat      four short text messages, at most 40 characters each, a reader
+            asking and this business answering, alternating, the reader
+            first: real questions a customer would ask, answered only with
+            facts from the listing.
+  post      what this business would post on its own social page about
+            this, in its own voice, at most 140 characters. No numbers of
+            likes or followers, no quotes from customers.
+  versus    four lines comparing this with the usual way of getting the
+            same thing (never a named competitor). First line: that usual
+            way in at most 22 characters ("Cooking it yourself"). Then three
+            lines "this listing's fact | the usual way's matching fact", each
+            side at most 26 characters. Only facts the listing states.
+  reasons   a title "N reasons to ..." (at most 34 characters), then three
+            to five lines, each one reason from the listing, at most 34
+            characters, with no number in front.
+  honest    only when the listing itself states a limit or a trade-off
+            (made to order, a few a day, closed on Shabbat, needs a day's
+            notice): a short first-person headline that says it plainly, at
+            most 36 characters, then two or three lines saying why that is
+            good for the reader, each at most 44 characters. Otherwise "".
+  moment    one line at most 38 characters placing it in a moment of the
+            day or week, with the two or three most important words wrapped
+            in *stars*: "Friday dinner, *already sorted*."
+  people    three kinds of reader this suits, one per line, each at most
+            30 characters, plainly ("Families hosting on Shabbat"), only
+            as the listing and reviews support.
+
+Each field is ONE string; a field of several lines has them separated by
+line breaks, never as a list or an object. In Hebrew, speak to the reader
+in the plural (אתם, תזמינו), never as one man or one woman.
 
 Write in {language}. Every fact must come from the listing: never invent a
 view, a distance, a feature, a price or a review, and never add a quality
@@ -662,9 +743,62 @@ async def _ad_facts(target_type: str, target_id: str) -> tuple[dict[str, Any], d
     }
 
 
+@router.get("/ads/backgrounds")
+async def ad_backgrounds(q: str, request: Request, lang: str = "en", page: int = 1, user=Depends(verify_token)):
+    """Background photos for "make your own" (Tzvi, 4 Nov 2026), searched on
+    Pixabay: free for ads, no credit needed. Small previews only; the one an
+    owner picks is copied to our storage by /ads/backgrounds/keep, because
+    Pixabay asks that its photos are not linked to permanently."""
+    import httpx
+    key = os.environ.get("PIXABAY_KEY")
+    if not key:
+        raise HTTPException(status_code=503, detail="Photo search is not switched on here.")
+    check_rate(request, bucket=f"ad_bg:{user['user_id']}", limit=120, window_seconds=3600)
+    params = {"key": key, "q": q.strip()[:80], "image_type": "photo", "safesearch": "true",
+              "per_page": 30, "page": max(1, min(page, 10)), "lang": "he" if lang == "he" else "en"}
+    async with httpx.AsyncClient(timeout=15) as client:
+        r = await client.get("https://pixabay.com/api/", params=params)
+    if r.status_code != 200:
+        raise HTTPException(status_code=502, detail="Photo search did not answer. Try again.")
+    hits = r.json().get("hits") or []
+    return {"photos": [{"id": h["id"], "thumb": h.get("webformatURL"), "full": h.get("largeImageURL"),
+                        "w": h.get("imageWidth"), "h": h.get("imageHeight")} for h in hits if h.get("largeImageURL")]}
+
+
+class KeepIn(BaseModel):
+    url: str
+
+
+@router.post("/ads/backgrounds/keep")
+async def keep_background(body: KeepIn, request: Request, user=Depends(verify_token)):
+    """Copy one picked Pixabay photo to our Cloudinary (once per photo) and
+    return our address, which the ad maker can draw (same-origin rules)."""
+    from urllib.parse import urlparse
+
+    import httpx
+    from utils.cloud_storage import upload_bytes_to_cloudinary
+    host = urlparse(body.url).hostname or ""
+    if not (host == "pixabay.com" or host.endswith(".pixabay.com")):
+        raise HTTPException(status_code=400, detail="Only photos from the search can be kept.")
+    check_rate(request, bucket=f"ad_bg_keep:{user['user_id']}", limit=60, window_seconds=3600)
+    row = await db.ad_backgrounds.find_one({"src": body.url})
+    if row:
+        return {"url": row["url"]}
+    async with httpx.AsyncClient(timeout=30) as client:
+        r = await client.get(body.url)
+    if r.status_code != 200 or len(r.content) > 15_000_000:
+        raise HTTPException(status_code=502, detail="Could not fetch that photo. Pick another.")
+    url = (await upload_bytes_to_cloudinary(r.content, is_video=False, folder="myisraelrental/ad-backgrounds"))["url"]
+    await db.ad_backgrounds.insert_one({"src": body.url, "url": url, "by": user["user_id"]})
+    return {"url": url}
+
+
 class CutoutsIn(BaseModel):
     target_type: str
     target_id: str
+    # The item the owner came to advertise (the dashboard's "its ad is
+    # ready"), cut out first even when it is not among the cheapest three.
+    first: str | None = None
 
 
 @router.post("/ads/cutouts")
@@ -678,7 +812,84 @@ async def ad_cutouts(body: CutoutsIn, request: Request, user=Depends(verify_toke
     check_rate(request, bucket=f"ad_cutouts:{user['user_id']}", limit=30, window_seconds=86400)
     from utils.cutout import cutouts_for
     _, extra = await _ad_facts(body.target_type, body.target_id)
-    return {"items": await cutouts_for(extra["items"][:3])}
+    items = extra["items"]
+    if body.first:
+        items = sorted(items, key=lambda i: i["name"] != body.first)
+    return {"items": await cutouts_for(items[:3])}
+
+
+# Saved ads (Canva's "your designs"): the owner's choices and words, so an
+# ad reopens as they left it and the dashboard can say which products have
+# no ad yet. The picture itself is redrawn from these; only a small preview
+# is kept, for the list.
+class SavedAdIn(BaseModel):
+    target_type: str
+    target_id: str
+    id: str | None = None
+    lang: str = "en"
+    design: str
+    item: str = ""
+    settings: dict[str, Any] = {}
+    words: dict[str, Any] = {}
+    thumb: str = ""
+
+
+@router.get("/ads/saved")
+async def saved_ads(target_type: str, target_id: str, user=Depends(verify_token)):
+    await _assert_owns_target(target_type, target_id, user)
+    rows = await db.saved_ads.find({"target_type": target_type, "target_id": target_id, "owner_user_id": user["user_id"]},
+                                   {"_id": 0}).sort("updated_at", -1).to_list(60)
+    return {"ads": rows}
+
+
+@router.post("/ads/saved")
+async def save_ad(body: SavedAdIn, user=Depends(verify_token)):
+    import json
+    import uuid
+    if body.target_type not in ("property", "business") or not _AD_NAME.match(body.design.replace("_", "")):
+        raise HTTPException(status_code=400, detail="Not an ad.")
+    await _assert_owns_target(body.target_type, body.target_id, user)
+    if not body.thumb.startswith("data:image/jpeg;base64,") or len(body.thumb) > 60_000:
+        raise HTTPException(status_code=400, detail="The preview is too large.")
+    if len(json.dumps(body.settings, default=str)) > 20_000 or len(json.dumps(body.words, default=str)) > 6_000:
+        raise HTTPException(status_code=400, detail="The ad is too large.")
+    now = datetime.now(UTC).isoformat()
+    key = {"owner_user_id": user["user_id"], "target_type": body.target_type, "target_id": body.target_id}
+    row = {"lang": "he" if body.lang == "he" else "en", "design": body.design, "item": body.item[:60],
+           "settings": body.settings, "words": body.words, "thumb": body.thumb, "updated_at": now}
+    if body.id and await db.saved_ads.find_one({**key, "id": body.id}):
+        await db.saved_ads.update_one({**key, "id": body.id}, {"$set": row})
+        return {"id": body.id}
+    if await db.saved_ads.count_documents(key) >= 50:
+        raise HTTPException(status_code=400, detail="You have 50 saved ads. Delete one to save another.")
+    new_id = str(uuid.uuid4())
+    await db.saved_ads.insert_one({**key, **row, "id": new_id, "created_at": now})
+    return {"id": new_id}
+
+
+@router.delete("/ads/saved/{ad_id}")
+async def delete_saved_ad(ad_id: str, user=Depends(verify_token)):
+    r = await db.saved_ads.delete_one({"id": ad_id, "owner_user_id": user["user_id"]})
+    if not r.deleted_count:
+        raise HTTPException(status_code=404, detail="No such ad.")
+    return {"ok": True}
+
+
+@router.get("/ads/summary")
+async def ads_summary(user=Depends(verify_token)):
+    """For the dashboard: per business the caller owns, its visits from ads
+    this week and the products that have a photo and a price but no saved
+    ad yet ("the ad for X is ready")."""
+    out: dict[str, Any] = {}
+    async for biz in db.businesses.find({"owner_user_id": user["user_id"]}, {"_id": 1}):
+        bid = biz["_id"]
+        link = await db.short_links.find_one({"target_type": "business", "target_id": bid})
+        week = sum(_ads_week((link or {}).get("ad_days") or {}).values())
+        _, extra = await _ad_facts("business", bid)
+        done = {r.get("item") for r in await db.saved_ads.find(
+            {"owner_user_id": user["user_id"], "target_type": "business", "target_id": bid}, {"item": 1}).to_list(60)}
+        out[bid] = {"week_visits": week, "unadvertised": [i["name"] for i in extra["items"] if i["name"] not in done]}
+    return {"businesses": out}
 
 
 async def _ad_reviews(target_type: str, target_id: str) -> list[dict[str, Any]]:
@@ -742,6 +953,12 @@ class AdIn(BaseModel):
     target_type: str
     target_id: str
     lang: str = "en"
+    # False when a saved ad is reopened: its own words come back with it,
+    # so only the facts and photos are fetched and nothing is paid for.
+    words: bool = True
+    # One of the "people" lines the owner picked: every word is written for
+    # that reader (who it is for comes first, 9f.7).
+    for_whom: str = ""
 
 
 @router.post("/ads/make")
@@ -751,10 +968,14 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
     if body.target_type not in ("property", "business"):
         raise HTTPException(status_code=400, detail="Ads are for a listing or a business.")
     await _assert_owns_target(body.target_type, body.target_id, user)
-    # Each call spends real API credit: about a cent, so 20 a day per person.
-    check_rate(request, bucket=f"ad_make:{user['user_id']}", limit=20, window_seconds=86400)
     facts, extra = await _ad_facts(body.target_type, body.target_id)
     link = _public(await ensure_short_link(body.target_type, body.target_id, user["user_id"]))
+    reviews = await _ad_reviews(body.target_type, body.target_id)
+    if not body.words:
+        check_rate(request, bucket=f"ad_facts:{user['user_id']}", limit=200, window_seconds=86400)
+        return {"link": link, "reviews": reviews, **extra}
+    # Each call spends real API credit: about a cent, so 20 a day per person.
+    check_rate(request, bucket=f"ad_make:{user['user_id']}", limit=20, window_seconds=86400)
 
     import json
     import re
@@ -764,6 +985,12 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
 
     if not ANTHROPIC_API_KEY:
         raise HTTPException(status_code=503, detail="The ad maker is not switched on here.")
+    # The customers' own words, so situations and the mirror come from real
+    # moments (9f.1), and the reader the owner picked, if any (9f.7).
+    if reviews:
+        facts["customer_reviews"] = [r["text"] for r in reviews]
+    if body.for_whom.strip():
+        facts["write_every_field_for_this_reader"] = body.for_whom.strip()[:60]
     chat = LlmChat(
         api_key=ANTHROPIC_API_KEY, session_id=str(uuid.uuid4()),
         system_message=_AD_SYSTEM.format(language="Hebrew" if body.lang == "he" else "English"),
@@ -781,19 +1008,36 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
         raise HTTPException(status_code=502, detail="Could not write the ad. Try again.")
 
     def clean(v: Any, n: int) -> str:
+        # The model sometimes answers a several-line field as a list; the
+        # picture reads one line each. Or as an object of a title and lines:
+        # flattened the same way.
+        if isinstance(v, dict):
+            v = [y for x in v.values() for y in (x if isinstance(x, list) else [x])]
+        if isinstance(v, list):
+            v = "\n".join(str(x) for x in v)
         # The copy rules ban the long dash; the model reaches for it anyway.
         return re.sub(r"\s*[–—]\s*", ", ", str(v or "")).strip()[:n]
 
-    extra_words = {k: clean(data.get(k), n) for k, n in (("big_word", 12), ("caller", 24), ("decline", 16))}
+    extra_words = {k: clean(data.get(k), n) for k, n in (("big_word", 12), ("caller", 24), ("decline", 16),
+                                                    ("search", 60), ("switches", 120), ("checklist", 150),
+                                                    ("situations", 300), ("mirror", 170), ("chat", 180),
+                                                    ("post", 160), ("versus", 240), ("reasons", 220),
+                                                    ("honest", 180), ("moment", 50), ("people", 100))}
+    # The same rule as the headline: unclaimed praise drops the line (9c).
+    # Praise counts as claimed only when the owner's own listing says it,
+    # not because a customer review did.
+    source = json.dumps({k: v for k, v in facts.items() if k != "customer_reviews"}, ensure_ascii=False, default=str)
+    for k in ("situations", "mirror", "chat", "post", "versus", "reasons", "honest", "moment"):
+        extra_words[k] = "\n".join(line for line in extra_words[k].split("\n") if not _unclaimed(line, source))
     words = _strip_praise({
         "headline": clean(data.get("headline"), 60),
         "points": [clean(p, 40) for p in (data.get("points") or []) if str(p).strip()][:3],
         "caption": clean(data.get("caption"), 800),
-    }, json.dumps(facts, ensure_ascii=False, default=str), str(facts.get("title") or facts.get("business_name") or ""))
+    }, source, str(facts.get("title") or facts.get("business_name") or ""))
     return {
         **words,
         **extra_words,
         "link": link,
-        "reviews": await _ad_reviews(body.target_type, body.target_id),
+        "reviews": reviews,
         **extra,
     }

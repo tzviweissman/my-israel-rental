@@ -1,6 +1,11 @@
 {
   "redirects": [
     {
+      "source": "/p/:slug/:ad",
+      "destination": "/api/short-links/:slug/follow/:ad",
+      "type": 302
+    },
+    {
       "source": "/p/:slug",
       "destination": "/api/short-links/:slug/follow",
       "type": 302

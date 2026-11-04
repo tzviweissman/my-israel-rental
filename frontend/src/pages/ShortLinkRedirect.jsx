@@ -24,7 +24,7 @@ import axios from 'axios';
 import { BACKEND_URL as API } from '../lib/apiBase';
 
 const ShortLinkRedirect = () => {
-  const { slug } = useParams();
+  const { slug, ad } = useParams();
   const { t } = useTranslation();
   const [failed, setFailed] = useState(false);
 
@@ -32,7 +32,7 @@ const ShortLinkRedirect = () => {
     let cancelled = false;
     (async () => {
       try {
-        const { data } = await axios.get(`${API}/api/short-links/${slug}/resolve`);
+        const { data } = await axios.get(`${API}/api/short-links/${slug}/resolve`, { params: ad ? { ad } : {} });
         if (cancelled) return;
         // `replace`, not `assign`: pressing Back should return to whatever
         // the person was doing before scanning, not bounce them through
@@ -43,7 +43,7 @@ const ShortLinkRedirect = () => {
       }
     })();
     return () => { cancelled = true; };
-  }, [slug]);
+  }, [slug, ad]);
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 text-center">
