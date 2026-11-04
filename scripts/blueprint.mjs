@@ -82,6 +82,7 @@ function prefill() {
   const products = listings.flatMap((l) => l.products || []), sized = listings.flatMap((l) => l.tiers || []);
   out.set('R3x.7', 'write BRAND.md (colours with uses, two fonts, logo on light and dark, textures, Design bans) before any picture is generated');
   out.set('R3x.8', 'sitekit writes the skip link, live basket count, footer h2s and JSON-LD (set ld_type for this business); the build adds a 1200x630 share picture, fetchpriority="high" on the opening picture, loading="lazy" far down, labelled fields with type and autocomplete, and a role="status" line on the form');
+  out.set('R3x.13', 'every text size from the starter scale --t-1..--t5 and every gap from --s1..--s10, written into BRAND.md; nothing sized in between');
   if (products.length + sized.length < 2) { out.set('R3x.3', 'n/a: one item in one size in the record, so no tabs'); out.set('R3x.4', 'n/a: one item in one size in the record, nothing to compare'); }
   if (products.length) out.set('R3x.9', 'n/a: a shop with products and a basket, not a request form');
   if (!prices.length) out.set('R3x.10', 'n/a: no prices in the record');
