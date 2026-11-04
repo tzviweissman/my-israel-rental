@@ -34,6 +34,11 @@ if (staged.some((f) => /^(\.claude\/skills\/build-business-page|scripts\/hooks)\
   const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'check-rule-copies.mjs')], { cwd: ROOT, encoding: 'utf8' });
   if (c.status !== 0) { console.error(`Commit refused: ${c.stdout}`); process.exit(1); }
 }
+// every checklist rule is a step of the build blueprint: a new section must have a stage (4 Nov 2026, "8d")
+if (staged.includes('docs/rules-checklist.md') || staged.includes('scripts/blueprint.mjs')) {
+  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--order'], { cwd: ROOT, encoding: 'utf8' });
+  if (c.status !== 0) { console.error(`Commit refused: ${c.stderr || c.stdout}`); process.exit(1); }
+}
 if (!builds.size && !live.size) process.exit(0);
 
 const problems = [];

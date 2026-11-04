@@ -16,6 +16,7 @@
  *   node scripts/blueprint.mjs --rules <build>         writes RULES.md from the blueprint (ticked = pass with
  *                                                      its plan, n/a = n/a), so check-rules needs no second pass
  *   node scripts/blueprint.mjs --update <build>        adds rules added to the checklist since, keeping plans
+ *   node scripts/blueprint.mjs --order                 every checklist section has a stage (run by the commit check)
  *
  * A line looks like:
  *   - [ ] R3v.14 Three true facts ... (check: check-facts)
@@ -36,7 +37,9 @@ const STAGE_NAMES = { '1': 'Facts and words', '4': 'Photos and media', '2': 'Ope
 const args = process.argv.slice(2);
 const mode = (['--check', '--done', '--rules', '--update'].find((m) => args.includes(m)) || '--write').slice(2);
 const rest = args.filter((a) => !a.startsWith('--'));
-const target = rest[0];
+// --order: only check that every checklist section has a place in the build order (the commit check runs it
+// whenever the checklist changes; 4 Nov 2026 a new section "8d" left every build without a blueprint)
+const target = args.includes('--order') ? ROOT : rest[0];
 if (!target) { console.error('usage: node scripts/blueprint.mjs [--check <stage> | --done | --rules | --update] <build>'); process.exit(2); }
 const dir = fs.existsSync(target) && fs.statSync(target).isDirectory() ? path.resolve(target) : path.join(ROOT, 'scrollcraft', 'builds', target);
 if (!fs.existsSync(dir)) { console.error(`no build folder: ${target}`); process.exit(2); }
@@ -55,6 +58,7 @@ for (const line of fs.readFileSync(CHECKLIST, 'utf8').split(/\r?\n/)) {
 const stages = ORDER.filter((s) => items.some((i) => i.sec === s)).map((s, k) => ({ n: k + 1, sec: s, name: STAGE_NAMES[s] || s, items: items.filter((i) => i.sec === s) }));
 const missingSec = [...new Set(items.map((i) => i.sec))].filter((s) => !ORDER.includes(s));
 if (missingSec.length) { console.error(`checklist sections not placed in the build order: ${missingSec.join(', ')} (add them to ORDER in scripts/blueprint.mjs)`); process.exit(2); }
+if (args.includes('--order')) { console.log(`blueprint: all ${items.length} checklist rules have a build stage`); process.exit(0); }
 
 // what the business record already decides (src/record.json from fetch_business.py)
 function prefill() {
@@ -74,6 +78,13 @@ function prefill() {
   out.set('R3v.1', `who: ${b.name}${b.description ? `, "${String(b.description).split(/[.!\n]/)[0].trim()}"` : ''} · Pages · ${b.hours ? 'Visit or Ordering with hours' : 'Ordering'}: ${[b.lead_time && `${b.lead_time} ahead`, b.delivery_note, b.payment_note].filter(Boolean).join(', ') || 'from the owner'} · Reach us · base line${b.founded_year ? `, since ${b.founded_year}` : ', no founding year so no "since"'}`);
   if (!kosher) say(/kosher|hechsher|certificat/i, 'n/a: no certificate in the record, so nothing on the page says kosher');
   if (!b.founded_year) say(/founding year|"since"|\bsince\b/i, 'n/a: no founding year in the record, so no "since" line');
+  // rules 3x (4 Nov 2026): what the record already decides
+  const products = listings.flatMap((l) => l.products || []), sized = listings.flatMap((l) => l.tiers || []);
+  out.set('R3x.7', 'write BRAND.md (colours with uses, two fonts, logo on light and dark, textures, Design bans) before any picture is generated');
+  out.set('R3x.8', 'sitekit writes the skip link, live basket count, footer h2s and JSON-LD (set ld_type for this business); the build adds a 1200x630 share picture, fetchpriority="high" on the opening picture, loading="lazy" far down, labelled fields with type and autocomplete, and a role="status" line on the form');
+  if (products.length + sized.length < 2) { out.set('R3x.3', 'n/a: one item in one size in the record, so no tabs'); out.set('R3x.4', 'n/a: one item in one size in the record, nothing to compare'); }
+  if (products.length) out.set('R3x.9', 'n/a: a shop with products and a basket, not a request form');
+  if (!prices.length) out.set('R3x.10', 'n/a: no prices in the record');
   if (b.lead_time) say(/order form arrives filled|first day the business can/i, `the day field starts at the first day after the ${b.lead_time} lead time`);
   return out;
 }

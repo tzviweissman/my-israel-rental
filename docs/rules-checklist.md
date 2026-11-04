@@ -107,6 +107,7 @@ R3h.14 | The product stays recognisable through the whole effect; a moving camer
 R3h.18 | The film is physically possible: every object on screen is listed with where it comes from and where it goes (in frame, enters or leaves past an edge, cut from something seen); nothing appears, turns into something else or vanishes in a way that looks off at normal speed (something filling in naturally is fine: Tzvi, 26 Oct); list shown with the steps before generating | 3h.18 | LOOK: the object list in gen/<film>-brief.md, then every clip at 8 fps checked object by object; n/a if no generated film
 R3h.19 | Generate once, by choosing a physically possible story before generating (a better prompt only helps a little; a failed clip changes the story, not just the prompt): each clip's start and end frames hold the same objects (or they enter or leave past an edge), one kind of action per clip, clips chained by stills made and checked before any video, frame 1 / middle / last written in the brief first, at most two tries per clip | 3h.19 | LOOK: the clip plan in gen/<film>-brief.md and the number of generations; n/a if no generated film
 R3h.17 | Words and film take turns: a giant name sits on plain ground, the film appears as letters part, the film moves aside before the headline arrives | 3h.17 | script: readable; n/a if the page does not use it
+R3x.5 | A following light is used only for a dark-world business, has an off button, sweeps once by itself on a phone and with reduced motion, and never dims the words or main button | 3x.5 | LOOK on laptop and phone; n/a if not used
 
 ## 3. Sections and worlds
 
@@ -151,6 +152,11 @@ R3r.1 | Every script above was run on EVERY page of the site, not only the home 
 R3r.2 | Someone who did not build the page used it against `docs/page-review-checklist.md`, the builder fixed every FAIL and the reviewer looked again | 3r.2 | LOOK: note the reviewer and the result
 R3g.12 | A real test went through every form and order button (to a test business, never the owner's live inbox) before the owner saw it | 3g.12 | LOOK: say what was ordered and what arrived
 R0b.12 | The business's pages-list preview clip shows the current version of the page | 0b.12 (skill) | script: `node scripts/check-showcase-previews.mjs`; n/a before publishing
+R3x.1 | A product to turn is made from the owner's photo through the API and compared beside it; its dots (at most four, 44 px) say only the owner's facts; buttons turn it too; it loads after the page and is their photo with no script or reduced motion | 3x.1 | LOOK: the model beside the photo, drag and swipe it; n/a if not used
+R3x.2 | A counted number is a real figure from the record, counts once, ends exact, and is in the page text so it shows with no script or reduced motion | 3x.2 | LOOK; n/a if no number counts
+R3x.3 | Tabs for sizes or packages change one panel in place: picture, price and facts stay in the same spot | 3x.3, 3s.27 | LOOK: switch every tab; n/a with no tabs
+R3x.4 | With two or more sizes or packages, each is a card with its picture, price and the same measures in the same order | 3x.4 | LOOK; n/a with one size and no packages
+R3x.11 | A product to turn passed the suitability check, was made from a grey-ground source of the owner's photo as two candidates reviewed from four angles, has two or three light buttons named for the business, and keeps touch-action pan-y on a phone | 3x.11 | LOOK: the review sheet and a phone swipe; n/a if not used
 
 ## 4. Photos and media
 
@@ -175,6 +181,7 @@ R3e.8 | Every word is at least 12 px (14 px for a sentence on a phone) and 4.5:1
 R3s.24 | Media is light and sized: no photo over 600 KB, every `<img>` has width and height, every video has a poster, nothing stays hidden with motion off | 3s MEDIA | script: site MEDIA
 R3p.6 | Fits on one screen: every section fits below the menu bar at the laptop sizes; no photo taller than the screen at any of the six sizes; no photo shown over 1.35x its own size; a big photo of another shape than its box is extended to the box's shape (padded, the new edges generated, the original pasted back), never zoomed or framed (3c.12, Tzvi 27 Oct) | 3c.12, 3p.6, 3a | script: fits on every page
 R3o.5 | Every special character (₪, arrows, Hebrew, dots) renders in the font used for it | 3o.5, 3s GLYPH | script: site GLYPH
+R3x.7 | BRAND.md in the build folder (colours with their uses, two fonts, logo on light and dark, textures, Design bans) was written before any picture was generated, and the site uses it | 3x.7 | LOOK: BRAND.md against the CSS
 
 ## 5. Prices and savings
 
@@ -217,6 +224,8 @@ R3e.19 | Every flow has a visible end: a clear "Done" screen after ordering, lis
 R3s.16 | Fewer choices first: a plain question ("How many people?") before a long list; the sensible option is chosen on purpose | 3s.16 | LOOK
 R3s.18 | Not available shows the nearest real alternative; every choice list has a way out ("None", "Other", "I'm not sure") | 3s.18 | LOOK
 R3s.25 | The order or booking form sends nothing when empty and shows what is missing; filled, it sends a WhatsApp message carrying the total the page shows | 3s FLOW | script: site FLOW
+R3x.9 | A request-type business's form builds a plain summary beside it as the fields fill, sends that summary, and states no price or promise the record lacks | 3x.9 | LOOK: fill the form on laptop and phone; n/a for a shop with a basket
+R3x.10 | The prices or running total stay in view beside the order or booking form on a laptop, and a total line sits above the send button on a phone | 3x.10 | LOOK: fill the form on laptop and phone; n/a with no prices
 
 ## 7. Motion
 
@@ -241,6 +250,8 @@ R3s.27 | Same thing, same place: a repeated kind of thing (each size, step, card
 R3s.28 | No blank screen anywhere in the scroll: at every stop something is there to look at (words, a picture, the film), never a screen of plain ground | 3s | script: check-blank
 R3i.3 | A live readout tied to the scroll shows only a true fact of their process, small mono at a corner, never a made-up number | 3i.3 | LOOK; n/a if none
 R3s.21 | No script errors, console errors, 404s or dead links between the site's pages | 3s BROKEN | script: site BROKEN
+R3x.6 | At most one sentence lights up word by word, and the site built just before does not have one | 3x.6 | LOOK; n/a if none
+R3x.12 | A progress line is used only on a page of six screens or more, 2 to 3 px in the accent, aria-hidden, never over the menu or phone bar | 3x.12 | LOOK; n/a if none
 
 ## 8. Phone
 
@@ -286,21 +297,7 @@ R3v.6 | Sections of different heights: at least two sizes on a page, never three
 R3v.7 | Layouts (bento, zigzag steps, callouts, picture beside four facts, peek row) chosen by what the business has, never the same layout twice in a row on a page | 3v.7 | LOOK: name each section's layout in CONCEPT.md; n/a if none of these is used
 R3v.8 | Effects from 3v (light on cards, fanned photos, rolling letters, circle reveal, curtain between pages, picture buttons, statement band) are chosen for this business, not the set of the site built before it, each with its phone and reduced-motion version | 3v.8-16 | LOOK: CONCEPT.md names the effects and the previous site's set; n/a if none
 R3v.14 | Three true facts from the record right under the main button on the home page (class btn-facts) | 3v.14 | script: check-facts
-
-## 8d. From the four videos of 4 Nov 2026
-
-R3x.1 | A product to turn is made from the owner's photo through the API and compared beside it; its dots (at most four, 44 px) say only the owner's facts; buttons turn it too; it loads after the page and is their photo with no script or reduced motion | 3x.1 | LOOK: the model beside the photo, drag and swipe it; n/a if not used
-R3x.2 | A counted number is a real figure from the record, counts once, ends exact, and is in the page text so it shows with no script or reduced motion | 3x.2 | LOOK; n/a if no number counts
-R3x.3 | Tabs for sizes or packages change one panel in place: picture, price and facts stay in the same spot | 3x.3, 3s.27 | LOOK: switch every tab; n/a with no tabs
-R3x.4 | With two or more sizes or packages, each is a card with its picture, price and the same measures in the same order | 3x.4 | LOOK; n/a with one size and no packages
-R3x.5 | A following light is used only for a dark-world business, has an off button, sweeps once by itself on a phone and with reduced motion, and never dims the words or main button | 3x.5 | LOOK on laptop and phone; n/a if not used
-R3x.6 | At most one sentence lights up word by word, and the site built just before does not have one | 3x.6 | LOOK; n/a if none
-R3x.7 | BRAND.md in the build folder (colours with their uses, two fonts, logo on light and dark, textures, Design bans) was written before any picture was generated, and the site uses it | 3x.7 | LOOK: BRAND.md against the CSS
 R3x.8 | Web basics on every page: skip link first, one h1 and no skipped levels, focus rings, labelled fields with type and autocomplete, live basket count and form messages, opening picture first and far ones lazy, two font families at most, title 60 and description 155 at most, og:title and a 1200x630 share picture, JSON-LD for the business on the home page | 3x.8 | script: check-web-basics
-R3x.9 | A request-type business's form builds a plain summary beside it as the fields fill, sends that summary, and states no price or promise the record lacks | 3x.9 | LOOK: fill the form on laptop and phone; n/a for a shop with a basket
-R3x.10 | The prices or running total stay in view beside the order or booking form on a laptop, and a total line sits above the send button on a phone | 3x.10 | LOOK: fill the form on laptop and phone; n/a with no prices
-R3x.11 | A product to turn passed the suitability check, was made from a grey-ground source of the owner's photo as two candidates reviewed from four angles, has two or three light buttons named for the business, and keeps touch-action pan-y on a phone | 3x.11 | LOOK: the review sheet and a phone swipe; n/a if not used
-R3x.12 | A progress line is used only on a page of six screens or more, 2 to 3 px in the accent, aria-hidden, never over the menu or phone bar | 3x.12 | LOOK; n/a if none
 
 ## 9. Finish
 
