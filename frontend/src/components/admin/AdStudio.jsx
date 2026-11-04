@@ -18,7 +18,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Copy, Download, Loader2, Plus, Save, Share2, Trash2, Upload } from 'lucide-react';
+import { Copy, Download, Loader2, Save, Share2, Trash2, Upload } from 'lucide-react';
 import { API } from '../../App';
 
 const SHAPES = { post: [1080, 1350], status: [1080, 1920] };
@@ -641,7 +641,7 @@ function freshAd(design, t, lang) {
       label: d('label'), pages: PAGES.slice(0, 3).map((p) => `/ads/pages/${p}.jpg`) } };
   }
   if (design === 'photo') {
-    return { design, lang, name: d('name'), fields: { ...common, headline: d('headline'), highlight: d('highlight'), sub: d('sub'), photo: '' } };
+    return { design, lang, name: d('name'), fields: { ...common, headline: d('headline'), highlight: d('highlight'), sub: d('sub'), photo: `/ads/pages/${PAGES[1]}.jpg` } };
   }
   // The six from 3 Nov: their own words, and a page where they show one.
   const keys = { call: ['caller', 'calling', 'decline', 'accept'], notify: ['time', 'date', 'notes'],
@@ -666,6 +666,50 @@ export default function AdStudio({ token }) {
   const [uploading, setUploading] = useState(false);
   const canvasRef = useRef(null);
   const lang = i18n.language?.startsWith('he') ? 'he' : 'en';
+  // A picture of every design, and of every saved ad (Tzvi, 4 Nov 2026:
+  // people do not know which kind will speak to them until they see it).
+  const [thumbs, setThumbs] = useState({});
+  const [savedThumbs, setSavedThumbs] = useState({});
+  const small = async (big, a) => {
+    await render(big, a, 'post');
+    const c = document.createElement('canvas');
+    c.width = 270;
+    c.height = Math.round((270 * big.height) / big.width);
+    c.getContext('2d').drawImage(big, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', 0.75);
+  };
+  useEffect(() => {
+    let gone = false;
+    (async () => {
+      const big = document.createElement('canvas');
+      const out = {};
+      for (const d of DESIGNS) {
+        // eslint-disable-next-line no-await-in-loop
+        out[d] = await small(big, freshAd(d, i18n.getFixedT(lang), lang));
+        if (gone) return;
+        setThumbs({ ...out });
+      }
+    })();
+    return () => { gone = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lang]);
+  useEffect(() => {
+    let gone = false;
+    (async () => {
+      const big = document.createElement('canvas');
+      const out = {};
+      for (const a of ads) {
+        // eslint-disable-next-line no-await-in-loop
+        out[a.id] = await small(big, a);
+        if (gone) return;
+        setSavedThumbs({ ...out });
+      }
+    })();
+    return () => { gone = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ads]);
+  // Open on the first design, so there is always an ad to change.
+  useEffect(() => { if (!ad) setAd(freshAd(DESIGNS[0], i18n.getFixedT(lang), lang)); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
 
   const load = () => axios.get(`${API}/admin/ads`, auth).then(({ data }) => setAds(data.ads || [])).catch(() => {});
   useEffect(() => { load(); /* eslint-disable-next-line react-hooks/exhaustive-deps */ }, []);
@@ -761,26 +805,42 @@ export default function AdStudio({ token }) {
         <p className="text-sm mt-1" style={{ color: 'var(--brand-muted)' }}>{t('adStudio.intro')}</p>
       </div>
 
-      <div className="flex flex-wrap gap-2">
-        {DESIGNS.map((d) => (
-          <button key={d} type="button" onClick={() => setAd(freshAd(d, i18n.getFixedT(lang), lang))}
-            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm font-semibold border"
-            style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid={`ad-studio-new-${d}`}>
-            <Plus size={14} /> {t(`adStudio.design.${d}`)}
-          </button>
-        ))}
+      <div className="space-y-1.5">
+        <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('adStudio.galleryTitle', 'Pick a look. Every word and picture can be changed after.')}</p>
+        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2" data-testid="ad-studio-gallery">
+          {DESIGNS.map((d) => {
+            const on = ad && !ad.id && ad.design === d;
+            return (
+              <button key={d} type="button" onClick={() => setAd(freshAd(d, i18n.getFixedT(lang), lang))} aria-pressed={on}
+                className="text-center min-w-0" data-testid={`ad-studio-new-${d}`}>
+                <span className="block aspect-[4/5] rounded-lg overflow-hidden border-2 bg-[#F9FAFB] flex items-center justify-center"
+                  style={{ borderColor: on ? '#000' : 'var(--brand-border)' }}>
+                  {thumbs[d] ? <img src={thumbs[d]} alt="" className="w-full h-full object-cover" />
+                    : <Loader2 className="animate-spin" size={16} aria-hidden="true" />}
+                </span>
+                <span className="block mt-1 text-[11px] leading-tight font-semibold truncate" style={{ color: 'var(--ink)' }}>{t(`adStudio.design.${d}`)}</span>
+              </button>
+            );
+          })}
+        </div>
       </div>
 
       {ads.length > 0 && (
         <div className="space-y-1.5">
           <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('adStudio.savedAds')}</p>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex gap-2 overflow-x-auto pb-1" data-testid="ad-studio-saved">
             {ads.map((a) => (
-              <span key={a.id} className="inline-flex items-center gap-1 rounded-full border ps-3 pe-1 py-1 text-xs"
-                style={{ borderColor: ad?.id === a.id ? '#000' : 'var(--brand-border)' }}>
-                <button type="button" onClick={() => setAd(a)} className="font-semibold" dir="auto" data-testid={`ad-studio-open-${a.id}`}>{a.name}</button>
-                <button type="button" onClick={() => remove(a)} aria-label={t('adStudio.delete')} className="p-1 rounded-full hover:bg-[#F9FAFB]"><Trash2 size={12} /></button>
-              </span>
+              <div key={a.id} className="relative shrink-0 w-[96px]">
+                <button type="button" onClick={() => setAd(a)} aria-pressed={ad?.id === a.id} className="block w-full text-center" data-testid={`ad-studio-open-${a.id}`}>
+                  <span className="block aspect-[4/5] rounded-lg overflow-hidden border-2 bg-[#F9FAFB] flex items-center justify-center"
+                    style={{ borderColor: ad?.id === a.id ? '#000' : 'var(--brand-border)' }}>
+                    {savedThumbs[a.id] ? <img src={savedThumbs[a.id]} alt="" className="w-full h-full object-cover" />
+                      : <Loader2 className="animate-spin" size={16} aria-hidden="true" />}
+                  </span>
+                  <span className="block mt-1 text-[11px] leading-tight font-semibold truncate" dir="auto" style={{ color: 'var(--ink)' }}>{a.name}</span>
+                </button>
+                <button type="button" onClick={() => remove(a)} aria-label={t('adStudio.delete')} className="absolute top-1 end-1 p-1 rounded-full bg-white/90"><Trash2 size={12} /></button>
+              </div>
             ))}
           </div>
         </div>

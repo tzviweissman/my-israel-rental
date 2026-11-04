@@ -4275,6 +4275,7 @@ const en = {
         closingBody: 'Listing takes a few minutes and costs nothing.',
       },
       adStudio: {
+        galleryTitle: "Pick a look. Every word and picture can be changed after.",
         title: "Ads",
         intro: "Make ads for MyIsraelRental to send on WhatsApp. Change any word or picture, save it, and open it again later.",
         design: {
