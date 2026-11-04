@@ -28,7 +28,7 @@ import { BusinessHoursPanel } from './OrdersTab';
 import LookingForYou from './LookingForYou';
 import ShareListingsPanel from './ShareListingsPanel';
 import ReviewBadgePanel from './ReviewBadgePanel';
-import AdMaker from './AdMaker';
+import AdMaker, { nextHoliday } from './AdMaker';
 import { businessPublicUrl } from '../../utils/businessHost';
 import { handBuiltList } from '../../utils/handBuiltPages';
 
@@ -50,6 +50,12 @@ export default function MyBusinessesTab({ API, token }) {
   // way someone expects from a dashboard rather than a page tree.
   const [openBiz, setOpenBiz] = useState(null);
   const [adBiz, setAdBiz] = useState(null);
+  const [adStart, setAdStart] = useState(null);
+  // Per business: visits from its ads this week and the products with no ad
+  // yet (GET /ads/summary), for the "your ad is ready" line on its card.
+  const [adSummary, setAdSummary] = useState({});
+  const [holiday] = useState(() => nextHoliday());
+  const openAd = (b, start = null) => { setAdStart(start); setAdBiz(b); };
   // Which business is having its Good-to-know facts edited (spec C6).
   const [detailsBiz, setDetailsBiz] = useState(null);
   // K3 — which business's PAGE is being designed. A separate full-screen
@@ -71,6 +77,11 @@ export default function MyBusinessesTab({ API, token }) {
   }, [API, token]);
 
   useEffect(() => { load(); }, [load]);
+  const loadAdSummary = useCallback(() => {
+    axios.get(`${API}/ads/summary`, auth).then(({ data }) => setAdSummary(data.businesses || {})).catch(() => {});
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [API, token]);
+  useEffect(() => { loadAdSummary(); }, [loadAdSummary]);
 
   // `?details=<business id | 1>` opens the Business details form on
   // arrival. The setup checklist, the listing page's owner link and the
@@ -228,7 +239,8 @@ export default function MyBusinessesTab({ API, token }) {
 
   return (
     <div data-testid="my-businesses-tab">
-      {adBiz && <AdMaker API={API} token={token} targetType="business" target={adBiz} onClose={() => setAdBiz(null)} />}
+      {adBiz && <AdMaker API={API} token={token} targetType="business" target={adBiz} start={adStart}
+        onClose={() => { setAdBiz(null); loadAdSummary(); }} />}
       {/* S3a — blocked time is per PERSON, not per business, so it sits
           above the list rather than inside one of the cards. */}
       <BlockTimePanel API={API} token={token} />
@@ -431,7 +443,7 @@ export default function MyBusinessesTab({ API, token }) {
                   />
                   <button
                     type="button"
-                    onClick={() => setAdBiz(b)}
+                    onClick={() => openAd(b)}
                     className="inline-flex items-center gap-1.5 ps-2.5 pe-3 py-1.5 rounded-full text-xs font-semibold border"
                     style={{ borderColor: 'var(--brand-border)', background: '#fafaf5', color: 'var(--brand-primary)' }}
                     data-testid={`business-make-ad-${b.id}`}
@@ -446,6 +458,27 @@ export default function MyBusinessesTab({ API, token }) {
                     </span>
                   )}
                 </div>
+                {/* An ad already made for them (Shopify's and Wix's "your ad is
+                    ready"): for the coming holiday, else for a product that has
+                    none yet; and what their ads brought this week. */}
+                {adSummary[b.id] && (holiday || adSummary[b.id].unadvertised?.length > 0 || adSummary[b.id].week_visits > 0) && (
+                  <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs mt-2 rounded-lg px-3 py-2" style={{ background: '#F9FAFB', color: 'var(--ink)' }} data-testid={`business-ad-nudge-${b.id}`}>
+                    {holiday ? (
+                      <button type="button" onClick={() => openAd(b, { look: holiday })} className="inline-flex items-center gap-1.5 font-semibold text-start" style={{ color: 'var(--brand-primary)' }} data-testid={`business-ad-holiday-${b.id}`}>
+                        <Megaphone size={13} aria-hidden="true" />
+                        {t('ads.nudgeHoliday', '{{holiday}} is coming: your {{holiday}} ad is ready', { holiday: t(`ads.look.${holiday}`) })}
+                      </button>
+                    ) : adSummary[b.id].unadvertised?.length > 0 && (
+                      <button type="button" onClick={() => openAd(b, { item: adSummary[b.id].unadvertised[0] })} className="inline-flex items-center gap-1.5 font-semibold text-start" style={{ color: 'var(--brand-primary)' }} data-testid={`business-ad-item-${b.id}`}>
+                        <Megaphone size={13} aria-hidden="true" />
+                        {t('ads.nudgeItem', 'Your ad for {{item}} is ready', { item: adSummary[b.id].unadvertised[0] })}
+                      </button>
+                    )}
+                    {adSummary[b.id].week_visits > 0 && (
+                      <span data-testid={`business-ad-visits-${b.id}`}>{t('ads.nudgeVisits', 'Visits from your ads this week: {{count}}', { count: adSummary[b.id].week_visits })}</span>
+                    )}
+                  </div>
+                )}
 
                 {/* C6 — until this existed the only editable thing about
                     a business was its name, so every fact the public page

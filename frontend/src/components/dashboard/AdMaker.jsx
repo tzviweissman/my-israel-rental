@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { QRCodeCanvas } from 'qrcode.react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Copy, Download, ExternalLink, Layers, Loader2, Printer, RefreshCw, Share2, X } from 'lucide-react';
+import { Copy, Download, ExternalLink, Layers, Loader2, Printer, RefreshCw, Save, Share2, X } from 'lucide-react';
 import { regularShown, holidayShown, formatShownPrice, priceSymbol } from '../../utils/listingPrice';
 import { areaLabel } from '../../utils/areaNames';
 
@@ -1104,12 +1104,36 @@ function part(ctx, name, [x, y, w, h], draw) {
 function sticker(ctx, opts) {
   part(ctx, 'price', [opts.x - opts.r, opts.y - opts.r, opts.r * 2, opts.r * 2], () => drawSticker(ctx, opts));
 }
+// Whether the ground just outside the sticker is yellow too, where a yellow
+// sticker would vanish. Read in the picture's own pixels, through any move.
+function onYellow(ctx, x, y, r) {
+  try {
+    const m = ctx.getTransform();
+    const c = m.transformPoint(new DOMPoint(x, y));
+    const k = Math.hypot(m.a, m.b) * r * 1.15;
+    let n = 0;
+    let hit = 0;
+    for (let i = 0; i < 16; i += 1) {
+      const px = Math.round(c.x + Math.cos((i / 8) * Math.PI) * k);
+      const py = Math.round(c.y + Math.sin((i / 8) * Math.PI) * k);
+      if (px < 0 || py < 0 || px >= ctx.canvas.width || py >= ctx.canvas.height) continue;
+      const d = ctx.getImageData(px, py, 1, 1).data;
+      n += 1;
+      if (Math.abs(d[0] - 255) + Math.abs(d[1] - 214) + d[2] < 150) hit += 1;
+    }
+    return n > 0 && hit / n > 0.4;
+  } catch {
+    return false;
+  }
+}
 function drawSticker(ctx, { x, y, r, item, fromWord, body }) {
-  ctx.fillStyle = '#FFD600';
+  // Yellow, or black with white words where the ground is yellow too.
+  const dark = onYellow(ctx, x, y, r);
+  ctx.fillStyle = dark ? INK : '#FFD600';
   ctx.beginPath();
   ctx.arc(x, y, r, 0, Math.PI * 2);
   ctx.fill();
-  ctx.fillStyle = INK;
+  ctx.fillStyle = dark ? '#FFFFFF' : INK;
   ctx.textAlign = 'center';
   ctx.direction = 'ltr';
   if (item.cheapest) {
@@ -1621,7 +1645,8 @@ function render(canvas, design, a) {
     } finally {
       PARTS = null;
     }
-    if (HOLIDAYS.includes(look)) holidayRibbon(canvas, a.format, a.greeting, a.rtl);
+    // "Make your own" has its own ground and words where the ribbon would sit.
+    if (HOLIDAYS.includes(look) && layout !== 'custom') holidayRibbon(canvas, a.format, a.greeting, a.rtl);
     return undefined;
   }
   if (design === 'phone') return drawPhone(canvas, a);
@@ -1637,18 +1662,26 @@ function render(canvas, design, a) {
   return draw(canvas, { ...a, design });
 }
 
-export default function AdMaker({ API, token, targetType, target, onClose }) {
+export default function AdMaker({ API, token, targetType, target, onClose, start = null }) {
   const { t, i18n } = useTranslation();
   const [lang, setLang] = useState(i18n.language?.startsWith('he') ? 'he' : 'en');
   const [format, setFormat] = useState('feed');
   const [design, setDesignRaw] = useState('behind');
   // The owner's own choices (Tzvi, 4 Nov 2026): one card per layout in the
   // gallery, and the colour, font and word colour picked here instead.
-  const [look, setLook] = useState('cream');
+  const [look, setLook] = useState(start?.look || 'cream');
   const [customHex, setCustomHex] = useState('');
   const [fontIdx, setFontIdx] = useState(0);
   const [ink, setInk] = useState('');
   const [lost, setLost] = useState(null);
+  // Saved ads (Canva's "your designs"): each reopens as it was left, and the
+  // last one comes back when the maker opens, so no paid writing is repeated.
+  const [saved, setSaved] = useState(null);
+  const [savedId, setSavedId] = useState('');
+  // A design or product asked for before it can be drawn (the cut-outs come
+  // a moment after the words): taken as soon as it can.
+  const wantDesign = useRef('behind');
+  const wantItem = useRef(start?.item || '');
   // Dragged pieces, per design and shape: { 'behind|feed': { product: {x, y, s} } }.
   const [moves, setMoves] = useState({});
   const [boxes, setBoxes] = useState({});
@@ -1684,17 +1717,23 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
   // being written must not let the older reply land on top.
   const langNow = useRef(lang);
   langNow.current = lang;
-  const write = async () => {
+  const write = async (row = null) => {
     setBusy(true);
     try {
       const { data } = await axios.post(`${API}/ads/make`,
-        { target_type: targetType, target_id: target.id, lang },
+        { target_type: targetType, target_id: target.id, lang, words: !row },
         { headers: { Authorization: `Bearer ${token}` } });
       if (langNow.current !== lang) return;
       setAd(data);
-      setWords({ headline: data.headline, points: data.points, caption: data.caption,
-        big_word: data.big_word || '', caller: data.caller || '', decline: data.decline || '',
-        search: data.search || '', switches: data.switches || '', checklist: data.checklist || '' });
+      if (row) {
+        setWords({ ...row.words });
+        applySaved(row);
+      } else {
+        setSavedId('');
+        setWords({ headline: data.headline, points: data.points, caption: data.caption,
+          big_word: data.big_word || '', caller: data.caller || '', decline: data.decline || '',
+          search: data.search || '', switches: data.switches || '', checklist: data.checklist || '' });
+      }
       const [loaded, its] = await Promise.all([
         Promise.all((data.photos || []).slice(0, 4).map(loadImage)),
         Promise.all((data.items || []).map(async (it) => ({ ...it, img: await loadImage(it.photo) }))),
@@ -1710,10 +1749,35 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
   // Once per language: each call is paid, and React's development mode
   // runs effects twice.
   const wroteFor = useRef('');
+  const auth = { headers: { Authorization: `Bearer ${token}` } };
+  const loadSaved = () => axios.get(`${API}/ads/saved`, { ...auth, params: { target_type: targetType, target_id: target.id } })
+    .then(({ data }) => { setSaved(data.ads || []); return data.ads || []; }).catch(() => []);
+  const applySaved = async (row) => {
+    const st = row.settings || {};
+    setSavedId(row.id);
+    wantDesign.current = row.design;
+    setDesignRaw(row.design);
+    if (st.format) setFormat(st.format);
+    if (st.look) setLook(st.look);
+    setCustomHex(st.customHex || '');
+    setFontIdx(st.fontIdx || 0);
+    setInk(st.ink || '');
+    setMoves(st.moves || {});
+    wantItem.current = row.item || '';
+    const img = st.bg?.src ? await loadImage(st.bg.src) : null;
+    setBg(img ? { img, src: st.bg.src } : { id: st.bg?.id || 'sand' });
+  };
   useEffect(() => {
     if (wroteFor.current === lang) return;
     wroteFor.current = lang;
-    write();
+    (async () => {
+      const list = saved || await loadSaved();
+      // Asked for something new from the dashboard: a fresh ad, not the last one.
+      const last = !start && list.find((r) => r.lang === lang);
+      // The last ad was in the other language: open that one in its own.
+      if (!start && !last && !saved && list[0]) { wroteFor.current = ''; setLang(list[0].lang); return; }
+      write(last || null);
+    })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lang]);
 
@@ -1722,7 +1786,7 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
   useEffect(() => {
     if (targetType !== 'business') return undefined;
     let gone = false;
-    axios.post(`${API}/ads/cutouts`, { target_type: targetType, target_id: target.id },
+    axios.post(`${API}/ads/cutouts`, { target_type: targetType, target_id: target.id, first: start?.item || null },
       { headers: { Authorization: `Bearer ${token}` } })
       .then(async ({ data }) => {
         const loaded = await Promise.all((data.items || []).map(async (it) => ({
@@ -1792,11 +1856,12 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
   ];
   // Visits per design, read from the short link (routes/short_links.py).
   const [visitCounts, setVisitCounts] = useState({});
+  const [weekCounts, setWeekCounts] = useState({});
   const slug = ad?.link?.slug;
   useEffect(() => {
     if (!slug) return;
     axios.get(`${API}/short-links/${slug}`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(({ data }) => setVisitCounts(data.ads || {})).catch(() => {});
+      .then(({ data }) => { setVisitCounts(data.ads || {}); setWeekCounts(data.ads_week || {}); }).catch(() => {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slug]);
   const visits = Object.entries(visitCounts).sort((x, y) => y[1] - x[1]);
@@ -1818,9 +1883,21 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
   const okKeys = designs.filter(([, , ok]) => ok).map(([k]) => k).join(',');
   useEffect(() => {
     const ok = okKeys.split(',');
+    if (wantDesign.current && ok.includes(wantDesign.current)) {
+      setDesignRaw(wantDesign.current);
+      wantDesign.current = '';
+      return;
+    }
     if (okKeys && !ok.includes(design)) setDesignRaw(ok.includes('behind') ? 'behind' : ok[0]);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [okKeys]);
+  useEffect(() => {
+    if (!wantItem.current) return;
+    const i = pool.findIndex((it) => it.name === wantItem.current);
+    if (i >= 0) setPick(i);
+    if (i >= 0 && cutItems.length) wantItem.current = '';
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cutItems, itemImgs]);
   const args = (d) => {
     const review = reviews.length ? reviews[reviewIdx % reviews.length] : null;
     return {
@@ -1919,12 +1996,13 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
   // so the owner can see which design brought visits (borrowed from the ad
   // tools that score designs, but counted from real visits). The short
   // link printed on the picture stays short.
-  const adUrl = ad ? `${shortUrl}/${themed && layout !== 'custom' ? `${layout}-${lookNow}` : layout}` : shortUrl;
+  const adName = themed && layout !== 'custom' ? `${layout}-${lookNow}` : layout;
+  const adUrl = ad ? `${shortUrl}/${adName}` : shortUrl;
   const postText = words ? `${words.caption}\n\n${adUrl}` : '';
   const copyText = async () => {
     try { await navigator.clipboard.writeText(postText); toast.success(t('ads.copied', 'Post text copied')); } catch { /* shown in the box */ }
   };
-  const sharePicture = () => canvasRef.current.toBlob(async (blob) => {
+  const sharePicture = () => { saveAd(true); canvasRef.current.toBlob(async (blob) => {
     const file = new File([blob], `ad-${format}.jpg`, { type: 'image/jpeg' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], text: postText }).catch(() => {});
@@ -1936,11 +2014,12 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
       setTimeout(() => URL.revokeObjectURL(a.href), 5000);
       copyText();
     }
-  }, 'image/jpeg', 0.92);
+  }, 'image/jpeg', 0.92); };
 
   // Every shape of the picked design in one tap (Canva's "resize"): the
   // square post, the feed post and the status, shared or saved together.
   const allShapes = async () => {
+    saveAd(true);
     const files = [];
     for (const f of (design === 'native' ? ['story'] : ['square', 'feed', 'story'])) {
       const c = document.createElement('canvas');
@@ -1961,35 +2040,170 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
       setTimeout(() => URL.revokeObjectURL(a.href), 5000);
     }, i * 400));
   };
-  // A flyer to print (Vistaprint's and Canva's print sizes): the feed ad
-  // across an A4 page, the name and link large under it. The ad's own code
-  // is about 3cm wide on the page, enough to scan from a noticeboard.
-  const printFlyer = () => {
-    const a = args(design);
-    const ad = document.createElement('canvas');
-    render(ad, design, { ...a, format: 'feed', moves: moves[`${design}|feed`] || {} });
-    const W = 1240; const H = 1754; // A4 at 150 dpi
-    const adH = Math.round((W * ad.height) / ad.width);
+  // Saving: the choices and words, and a small preview for the list. The
+  // posting, printing and sharing buttons save quietly too, so every ad
+  // that went out is in "Your ads" with its visits.
+  const saveAd = async (quiet = false, asNew = false) => {
+    if (!words || !canvasRef.current) return;
     const c = document.createElement('canvas');
-    c.width = W;
-    c.height = H;
+    c.width = 240;
+    c.height = Math.round((240 * canvasRef.current.height) / canvasRef.current.width);
+    c.getContext('2d').drawImage(canvasRef.current, 0, 0, c.width, c.height);
+    try {
+      const { data } = await axios.post(`${API}/ads/saved`, {
+        target_type: targetType, target_id: target.id, id: asNew ? null : (savedId || null), lang, design,
+        item: featured?.name || '', words, thumb: c.toDataURL('image/jpeg', 0.7),
+        settings: { format, look, customHex, fontIdx, ink, moves, adName, bg: bg.src ? { src: bg.src } : { id: bg.id || 'sand' } },
+      }, auth);
+      setSavedId(data.id);
+      loadSaved();
+      if (!quiet) toast.success(t('ads.saved', 'Saved to your ads'));
+    } catch (err) {
+      if (!quiet) toast.error(err?.response?.data?.detail || t('ads.saveFailed', 'Could not save the ad. Try again.'));
+    }
+  };
+  const removeSaved = async (id) => {
+    await axios.delete(`${API}/ads/saved/${id}`, auth).catch(() => {});
+    if (id === savedId) setSavedId('');
+    loadSaved();
+  };
+
+  const adCanvas = (f) => {
+    const c = document.createElement('canvas');
+    render(c, design, { ...args(design), format: f, moves: moves[`${design}|${f}`] || {} });
+    return c;
+  };
+  const saveFile = (file) => {
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(file);
+    a.download = file.name;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 5000);
+  };
+  // One tap to WhatsApp Status (Buffer's and Later's "post now"): the tall
+  // shape, handed to the phone's share sheet with the post text.
+  const shareStatus = async () => {
+    saveAd(true);
+    const blob = await new Promise((r) => { adCanvas('story').toBlob(r, 'image/jpeg', 0.92); });
+    const file = new File([blob], 'ad-status.jpg', { type: 'image/jpeg' });
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      await navigator.share({ files: [file], text: postText }).catch(() => {});
+    } else {
+      saveFile(file);
+      copyText();
+    }
+  };
+
+  // Things to print (Vistaprint's range), each an A4 page at 150 dpi made
+  // from the same ad, link and code.
+  const PW = 1240;
+  const PH = 1754;
+  const page = () => {
+    const c = document.createElement('canvas');
+    c.width = PW;
+    c.height = PH;
     const ctx = c.getContext('2d');
     ctx.fillStyle = '#FFFFFF';
-    ctx.fillRect(0, 0, W, H);
-    ctx.drawImage(ad, 0, 0, W, adH);
-    // The ad already carries the link and code: the strip says the name once.
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.direction = rtl ? 'rtl' : 'ltr';
-    ctx.fillStyle = INK;
-    ctx.font = `800 64px ${a.font || bodyFont(rtl)}`;
-    ctx.fillText(wrap(ctx, a.name || '', W - 120, 1)[0] || '', W / 2, adH + (H - adH) / 2);
+    ctx.fillRect(0, 0, PW, PH);
+    return [c, ctx];
+  };
+  const dashed = (ctx, draw) => {
+    ctx.save();
+    ctx.setLineDash([12, 10]);
+    ctx.strokeStyle = '#B8B8B8';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    draw();
+    ctx.stroke();
+    ctx.restore();
+  };
+  const PRINTS = {
+    // The feed ad across the page, the name once under it. The ad's own
+    // code is about 3cm wide on paper, enough to scan from a noticeboard.
+    flyer: () => {
+      const [c, ctx] = page();
+      const ad = adCanvas('feed');
+      const adH = Math.round((PW * ad.height) / ad.width);
+      ctx.drawImage(ad, 0, 0, PW, adH);
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.direction = rtl ? 'rtl' : 'ltr';
+      ctx.fillStyle = INK;
+      ctx.font = `800 64px ${fontIdx ? fontCss : bodyFont(rtl)}`;
+      ctx.fillText(wrap(ctx, args(design).name || '', PW - 120, 1)[0] || '', PW / 2, adH + (PH - adH) / 2);
+      return c;
+    },
+    // Folded across the middle to stand on a table: the top half upside
+    // down, so it reads from both sides.
+    table: () => {
+      const [c, ctx] = page();
+      const ad = adCanvas('square');
+      const half = PH / 2;
+      const sz = half - 80;
+      ctx.drawImage(ad, (PW - sz) / 2, half + 40, sz, sz);
+      ctx.save();
+      ctx.translate(PW / 2, half / 2);
+      ctx.rotate(Math.PI);
+      ctx.drawImage(ad, -sz / 2, -sz / 2, sz, sz);
+      ctx.restore();
+      dashed(ctx, () => { ctx.moveTo(0, half); ctx.lineTo(PW, half); });
+      return c;
+    },
+    // Ten 85 x 55mm cards: the name, what to do, the code and the link.
+    cards: () => {
+      const [c, ctx] = page();
+      const cw = 502;
+      const ch = 325;
+      const x0 = (PW - cw * 2) / 2;
+      const y0 = (PH - ch * 5) / 2;
+      const font = fontIdx ? fontCss : bodyFont(rtl);
+      const name = args(design).name || '';
+      const q = 160;
+      ctx.direction = rtl ? 'rtl' : 'ltr';
+      ctx.textAlign = rtl ? 'right' : 'left';
+      for (let i = 0; i < 10; i += 1) {
+        const x = x0 + (i % 2) * cw;
+        const y = y0 + Math.floor(i / 2) * ch;
+        ctx.fillStyle = brandHex || ACCENT;
+        ctx.fillRect(x, y, cw, 10);
+        if (qrRef.current) ctx.drawImage(qrRef.current, rtl ? x + 24 : x + cw - 24 - q, y + 34, q, q);
+        const tx = rtl ? x + cw - 28 : x + 28;
+        const tw = cw - q - 80;
+        ctx.fillStyle = INK;
+        ctx.font = `800 34px ${font}`;
+        wrap(ctx, name, tw, 2).forEach((l, j) => ctx.fillText(l, tx, y + 76 + j * 40));
+        ctx.fillStyle = '#666666';
+        ctx.font = `500 22px ${font}`;
+        wrap(ctx, cta, tw, 2).forEach((l, j) => ctx.fillText(l, tx, y + 172 + j * 28));
+        ctx.fillStyle = ACCENT;
+        ctx.font = `600 22px ${font}`;
+        ctx.fillText(shortUrl.replace(/^https?:\/\//, ''), tx, y + ch - 34);
+        ctx.strokeStyle = '#D0D0D0';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(x, y, cw, ch);
+      }
+      return c;
+    },
+    // The square ad 18.6cm wide with a line to cut along, for a window.
+    sticker: () => {
+      const [c, ctx] = page();
+      const sz = 1100;
+      const x = (PW - sz) / 2;
+      const y = (PH - sz) / 2;
+      ctx.drawImage(adCanvas('square'), x, y, sz, sz);
+      dashed(ctx, () => ctx.rect(x - 20, y - 20, sz + 40, sz + 40));
+      return c;
+    },
+  };
+  const printIt = (kind) => {
+    saveAd(true);
+    const c = PRINTS[kind]();
     const frame = document.createElement('iframe');
     frame.style.cssText = 'position:fixed;width:0;height:0;border:0;';
     document.body.appendChild(frame);
     const doc = frame.contentDocument;
     doc.open();
-    doc.write(`<!doctype html><title>flyer</title><style>@page{size:A4;margin:0}html,body{margin:0}img{display:block;width:100vw;height:100vh;object-fit:contain}</style><img src="${c.toDataURL('image/jpeg', 0.95)}">`);
+    doc.write(`<!doctype html><title>${kind}</title><style>@page{size:A4;margin:0}html,body{margin:0}img{display:block;width:100vw;height:100vh;object-fit:contain}</style><img src="${c.toDataURL('image/jpeg', 0.95)}">`);
     doc.close();
     const img = doc.querySelector('img');
     const go = () => { frame.contentWindow.focus(); frame.contentWindow.print(); setTimeout(() => frame.remove(), 60000); };
@@ -2079,6 +2293,28 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
           <h2 className="text-xl font-semibold" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>{t('ads.title', 'Make an ad')}</h2>
           <button type="button" onClick={onClose} aria-label={t('common.close', 'Close')} className="p-3 rounded-full hover:bg-[#F9FAFB]"><X size={18} /></button>
         </div>
+        {saved?.some((r) => r.lang === lang) && (
+          <div className="mb-4" data-testid="ad-saved">
+            <p className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('ads.savedTitle', 'Your saved ads')}</p>
+            <div className="flex gap-2 overflow-x-auto pb-1">
+              {saved.filter((r) => r.lang === lang).map((r) => (
+                <div key={r.id} className="relative shrink-0 w-[84px]">
+                  <button type="button" onClick={() => write(r)} disabled={busy} aria-pressed={r.id === savedId}
+                    className="block w-full rounded-lg overflow-hidden border-2" style={{ borderColor: r.id === savedId ? '#000' : 'var(--brand-border)' }} data-testid={`ad-saved-${r.id}`}>
+                    <img src={r.thumb} alt={designName(r.settings?.adName || r.design)} className="w-full block" />
+                  </button>
+                  <span className="block mt-1 text-[10px] leading-tight text-center" style={{ color: 'var(--brand-muted)' }}>
+                    {t('ads.weekVisits', 'Visits this week: {{count}}', { count: weekCounts[r.settings?.adName] || 0 })}
+                  </span>
+                  <button type="button" onClick={() => removeSaved(r.id)} aria-label={t('ads.deleteSaved', 'Delete this ad')}
+                    className="absolute top-1 end-1 rounded-full bg-white/90 p-1" data-testid={`ad-saved-delete-${r.id}`}>
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {/* The gallery: every design, already made from this business. */}
         <p className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('ads.galleryTitle', 'Pick a look. Every ad is made from your own product, name and price.')}</p>
         <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 max-h-[36vh] overflow-y-auto mb-5 pe-1" data-testid="ad-gallery">
@@ -2233,7 +2469,7 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
               <div className="space-y-2" dir={rtl ? 'rtl' : 'ltr'}>
                 <div className="flex items-center justify-between" dir="auto">
                   <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.words', 'The words (change anything)')}</p>
-                  <button type="button" onClick={write} disabled={busy} className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-rewrite">
+                  <button type="button" onClick={() => write()} disabled={busy} className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-rewrite">
                     <RefreshCw size={12} /> {t('ads.rewrite', 'Write again')}
                   </button>
                 </div>
@@ -2291,8 +2527,16 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
               </div>
             )}
             <div className="flex flex-wrap gap-2">
+              <button type="button" onClick={shareStatus} disabled={!preview || busy || issues.length > 0}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-60" style={{ background: '#000' }} data-testid="ad-status">
+                <Share2 size={15} /> {t('ads.status', 'Share to WhatsApp Status')}
+              </button>
+              <button type="button" onClick={() => saveAd()} disabled={!preview || busy}
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-save">
+                <Save size={15} /> {t('ads.save', 'Save')}
+              </button>
               <button type="button" onClick={sharePicture} disabled={!preview || busy || issues.length > 0}
-                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white disabled:opacity-60" style={{ background: '#000' }} data-testid="ad-share">
+                className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-share">
                 {navigator.canShare ? <Share2 size={15} /> : <Download size={15} />} {t('ads.share', 'Post the picture')}
               </button>
               <button type="button" onClick={copyText} disabled={!words}
@@ -2303,13 +2547,26 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-all-shapes">
                 <Layers size={15} /> {t('ads.allShapes', 'All three shapes')}
               </button>
-              {design !== 'native' && (
-                <button type="button" onClick={printFlyer} disabled={!preview || busy || issues.length > 0}
-                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-flyer">
-                  <Printer size={15} /> {t('ads.flyer', 'Print a flyer')}
-                </button>
-              )}
             </div>
+            {savedId && (
+              <button type="button" onClick={() => saveAd(false, true)} className="text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-save-new">
+                {t('ads.saveNew', 'Save as a new ad')}
+              </button>
+            )}
+            {design !== 'native' && (
+              <div className="flex flex-wrap items-center gap-1.5" data-testid="ad-print">
+                <span className="inline-flex items-center gap-1 text-xs font-semibold me-1" style={{ color: 'var(--ink)' }}>
+                  <Printer size={14} aria-hidden="true" /> {t('ads.printTitle', 'Print')}
+                </span>
+                {[['flyer', t('ads.printFlyer', 'A4 flyer')], ['table', t('ads.printTable', 'Table card')],
+                  ['cards', t('ads.printCards', 'Business cards')], ['sticker', t('ads.printSticker', 'Window sticker')]].map(([k, label]) => (
+                  <button key={k} type="button" onClick={() => printIt(k)} disabled={!preview || busy || issues.length > 0}
+                    className={`${chip(false)} disabled:opacity-40`} style={chipStyle(false)} data-testid={`ad-print-${k}`}>
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
             {targetType === 'business' && (
               <a href={adLibraryUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold"
                 style={{ color: 'var(--brand-primary)' }} data-testid="ad-library-link">
@@ -2318,9 +2575,12 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
             )}
             {visits.length > 0 && (
               <div className="text-xs rounded-lg p-2.5" style={{ background: '#F9FAFB', color: 'var(--ink)' }} data-testid="ad-visits">
-                <p className="font-semibold mb-1">{t('ads.visitsTitle', 'Visits from your ads so far')}</p>
+                <p className="flex justify-between gap-2 font-semibold mb-1">
+                  <span>{t('ads.visitsTitle', 'Visits from your ads so far')}</span>
+                  <span className="font-normal" style={{ color: 'var(--brand-muted)' }}>{t('ads.visitsWeekAll', 'this week · in all')}</span>
+                </p>
                 {visits.slice(0, 4).map(([k, n]) => (
-                  <p key={k} className="flex justify-between gap-2"><span>{designName(k)}</span><span className="font-semibold">{n}</span></p>
+                  <p key={k} className="flex justify-between gap-2"><span>{designName(k)}</span><span className="font-semibold">{weekCounts[k] || 0} · {n}</span></p>
                 ))}
               </div>
             )}

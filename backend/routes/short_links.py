@@ -192,7 +192,18 @@ def _public(doc: dict[str, Any]) -> dict[str, Any]:
         # Visits per ad design (the ad maker's QR and post link carry it,
         # /p/{slug}/{ad}), so an owner sees which design brought people.
         "ads": doc.get("ads") or {},
+        "ads_week": _ads_week(doc.get("ad_days") or {}),
     }
+
+
+def _ads_week(days: dict[str, dict[str, int]]) -> dict[str, int]:
+    """Visits per ad design over the last 7 Israel-calendar days."""
+    today = datetime.now(_IL_TZ).date()
+    out: dict[str, int] = {}
+    for i in range(7):
+        for ad, n in (days.get((today - timedelta(days=i)).strftime("%Y-%m-%d")) or {}).items():
+            out[ad] = out.get(ad, 0) + int(n or 0)
+    return out
 
 
 def _last_30_days(buckets: dict[str, int]) -> list[dict[str, int | str]]:
@@ -321,6 +332,9 @@ async def _counted_lookup(slug: str, request: Request, ad: str | None = None):
     inc = {"scan_count": 1, f"daily.{_today_bucket()}": 1}
     if ad and _AD_NAME.match(ad):
         inc[f"ads.{ad}"] = 1
+        # Per day as well, so the owner hears "this ad brought 14 visits
+        # this week", not only a total since the start.
+        inc[f"ad_days.{_today_bucket()}.{ad}"] = 1
     return await db.short_links.find_one_and_update(
         {"slug": slug},
         {
@@ -739,6 +753,9 @@ async def keep_background(body: KeepIn, request: Request, user=Depends(verify_to
 class CutoutsIn(BaseModel):
     target_type: str
     target_id: str
+    # The item the owner came to advertise (the dashboard's "its ad is
+    # ready"), cut out first even when it is not among the cheapest three.
+    first: str | None = None
 
 
 @router.post("/ads/cutouts")
@@ -752,7 +769,84 @@ async def ad_cutouts(body: CutoutsIn, request: Request, user=Depends(verify_toke
     check_rate(request, bucket=f"ad_cutouts:{user['user_id']}", limit=30, window_seconds=86400)
     from utils.cutout import cutouts_for
     _, extra = await _ad_facts(body.target_type, body.target_id)
-    return {"items": await cutouts_for(extra["items"][:3])}
+    items = extra["items"]
+    if body.first:
+        items = sorted(items, key=lambda i: i["name"] != body.first)
+    return {"items": await cutouts_for(items[:3])}
+
+
+# Saved ads (Canva's "your designs"): the owner's choices and words, so an
+# ad reopens as they left it and the dashboard can say which products have
+# no ad yet. The picture itself is redrawn from these; only a small preview
+# is kept, for the list.
+class SavedAdIn(BaseModel):
+    target_type: str
+    target_id: str
+    id: str | None = None
+    lang: str = "en"
+    design: str
+    item: str = ""
+    settings: dict[str, Any] = {}
+    words: dict[str, Any] = {}
+    thumb: str = ""
+
+
+@router.get("/ads/saved")
+async def saved_ads(target_type: str, target_id: str, user=Depends(verify_token)):
+    await _assert_owns_target(target_type, target_id, user)
+    rows = await db.saved_ads.find({"target_type": target_type, "target_id": target_id, "owner_user_id": user["user_id"]},
+                                   {"_id": 0}).sort("updated_at", -1).to_list(60)
+    return {"ads": rows}
+
+
+@router.post("/ads/saved")
+async def save_ad(body: SavedAdIn, user=Depends(verify_token)):
+    import json
+    import uuid
+    if body.target_type not in ("property", "business") or not _AD_NAME.match(body.design.replace("_", "")):
+        raise HTTPException(status_code=400, detail="Not an ad.")
+    await _assert_owns_target(body.target_type, body.target_id, user)
+    if not body.thumb.startswith("data:image/jpeg;base64,") or len(body.thumb) > 60_000:
+        raise HTTPException(status_code=400, detail="The preview is too large.")
+    if len(json.dumps(body.settings, default=str)) > 20_000 or len(json.dumps(body.words, default=str)) > 6_000:
+        raise HTTPException(status_code=400, detail="The ad is too large.")
+    now = datetime.now(UTC).isoformat()
+    key = {"owner_user_id": user["user_id"], "target_type": body.target_type, "target_id": body.target_id}
+    row = {"lang": "he" if body.lang == "he" else "en", "design": body.design, "item": body.item[:60],
+           "settings": body.settings, "words": body.words, "thumb": body.thumb, "updated_at": now}
+    if body.id and await db.saved_ads.find_one({**key, "id": body.id}):
+        await db.saved_ads.update_one({**key, "id": body.id}, {"$set": row})
+        return {"id": body.id}
+    if await db.saved_ads.count_documents(key) >= 50:
+        raise HTTPException(status_code=400, detail="You have 50 saved ads. Delete one to save another.")
+    new_id = str(uuid.uuid4())
+    await db.saved_ads.insert_one({**key, **row, "id": new_id, "created_at": now})
+    return {"id": new_id}
+
+
+@router.delete("/ads/saved/{ad_id}")
+async def delete_saved_ad(ad_id: str, user=Depends(verify_token)):
+    r = await db.saved_ads.delete_one({"id": ad_id, "owner_user_id": user["user_id"]})
+    if not r.deleted_count:
+        raise HTTPException(status_code=404, detail="No such ad.")
+    return {"ok": True}
+
+
+@router.get("/ads/summary")
+async def ads_summary(user=Depends(verify_token)):
+    """For the dashboard: per business the caller owns, its visits from ads
+    this week and the products that have a photo and a price but no saved
+    ad yet ("the ad for X is ready")."""
+    out: dict[str, Any] = {}
+    async for biz in db.businesses.find({"owner_user_id": user["user_id"]}, {"_id": 1}):
+        bid = biz["_id"]
+        link = await db.short_links.find_one({"target_type": "business", "target_id": bid})
+        week = sum(_ads_week((link or {}).get("ad_days") or {}).values())
+        _, extra = await _ad_facts("business", bid)
+        done = {r.get("item") for r in await db.saved_ads.find(
+            {"owner_user_id": user["user_id"], "target_type": "business", "target_id": bid}, {"item": 1}).to_list(60)}
+        out[bid] = {"week_visits": week, "unadvertised": [i["name"] for i in extra["items"] if i["name"] not in done]}
+    return {"businesses": out}
 
 
 async def _ad_reviews(target_type: str, target_id: str) -> list[dict[str, Any]]:
@@ -816,6 +910,9 @@ class AdIn(BaseModel):
     target_type: str
     target_id: str
     lang: str = "en"
+    # False when a saved ad is reopened: its own words come back with it,
+    # so only the facts and photos are fetched and nothing is paid for.
+    words: bool = True
 
 
 @router.post("/ads/make")
@@ -825,10 +922,13 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
     if body.target_type not in ("property", "business"):
         raise HTTPException(status_code=400, detail="Ads are for a listing or a business.")
     await _assert_owns_target(body.target_type, body.target_id, user)
-    # Each call spends real API credit: about a cent, so 20 a day per person.
-    check_rate(request, bucket=f"ad_make:{user['user_id']}", limit=20, window_seconds=86400)
     facts, extra = await _ad_facts(body.target_type, body.target_id)
     link = _public(await ensure_short_link(body.target_type, body.target_id, user["user_id"]))
+    if not body.words:
+        check_rate(request, bucket=f"ad_facts:{user['user_id']}", limit=200, window_seconds=86400)
+        return {"link": link, "reviews": await _ad_reviews(body.target_type, body.target_id), **extra}
+    # Each call spends real API credit: about a cent, so 20 a day per person.
+    check_rate(request, bucket=f"ad_make:{user['user_id']}", limit=20, window_seconds=86400)
 
     import json
     import re
