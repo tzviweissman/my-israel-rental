@@ -997,6 +997,11 @@ that policy).*
    the end the film moves aside first and the headline arrives once there is
    room. The readability check failed both ways on Chicken Munch until they
    took turns.
+   **Measured since 4 Nov 2026** (Tzvi, Krysp: "this is blocking a lot of the action", "dont we have a rule already about
+   blocking the film?"): this rule and 3h.5 were LOOK lines and a headline card over the top of the film and a giant name
+   over its foot passed them. `scripts/check-film-clear.mjs` (R3h.25) scrolls the film to 20, 40 and 60% on a laptop and
+   a phone and fails when words, cards or names cover more than 3% of it (the site's own menu bar is not counted). The
+   words wait for the end of the film, or sit beside or under it.
 18. **The story must be physically possible before anything is generated**
    (Tzvi, 25 Oct 2026, on LS Fruit Platter: "the watermelon inside just
    disappears ... before you make a video you need to make sure everything
@@ -1087,17 +1092,17 @@ that policy).*
       open, or turns up from nowhere). Then each numbered step of the brief is ticked off against the clip at 8 fps:
       seen, or not seen. It caught all three faults of Krysp's first film and passed every other clip we have.
 
-22. **A scroll film plays as real video, led by the scroll** (Tzvi, 3 Nov 2026, Krysp: "the motions dont look smooth",
-    then "it still doesnt look so smooth like the video i sent you"). Still frames scrubbed by the scroll stretch the film
-    over several screens into slow motion: Krysp's recording showed 3 to 10 new pictures a second. Using every frame and
-    blending neighbours got it to 30 but read soft, unlike the adverts he compared it with, which play at their own speed.
-    So the film is also a video (`data-video`, two H.264 files, laptop and phone, a keyframe every 12 frames) and
-    `scrollcraft/starter/film.js` plays it while the scroll is ahead, steers its speed (0.35x to 2.5x) to keep up, holds
-    when the scroll stops and jumps back on the way up; it never stops and starts every frame, which freezes it (the
-    first version did). The frames stay as the picture until the video plays, the fallback and reduced motion's still.
-    Test a film by scrolling in real time in real Chrome: Playwright's own Chromium cannot play H.264, and the site's
-    smooth scrolling swallows a scroll sent every frame (scroll with `behavior: 'instant'`). Check:
-    `scripts/check-film-video.mjs` (R3h.24), run by publish-page.
+22. **A scroll film is real video, tied exactly to the scroll** (Tzvi, 3 and 4 Nov 2026, Krysp: "the motions dont look
+    smooth", "it still doesnt look so smooth like the video i sent you", "it keeps freezing", "its not playing in sync
+    with scrolling"). Still frames scrubbed by the scroll showed 3 to 10 new pictures a second. A video played and
+    steered to keep up ran ahead on a slow scroll, stopped and started, and stood still 57% of the time. What works:
+    the film is also a video (`data-video`, two H.264 files, laptop and phone, **every frame a keyframe**, `-g 1`) and
+    `scrollcraft/starter/film.js` never plays it: each frame it moves it to the scroll position, eased so a wheel does not
+    jolt it. In sync within 0.2 s and moving on 98% of frames at any scroll speed. The frames stay as the picture until
+    the video shows, the fallback and reduced motion's still. A server must answer Range requests or every move fails
+    (`scripts/serve-builds.mjs` did not until 4 Nov). Test in real Chrome (Playwright's own Chromium cannot play H.264)
+    and scroll with `behavior: 'instant'` (the sites' smooth scrolling swallows a scroll sent every frame). Check:
+    `scripts/check-film-video.mjs` (R3h.24: FOLLOW, FREEZE), run by publish-page and check-build.
 
 ## 3i. From the professional sites in five videos (Tzvi, 16 Oct 2026)
 

@@ -18,8 +18,8 @@
 // as files and are decoded off the main thread (createImageBitmap of a blob) only around the current one; only decoded
 // frames are drawn, only when the frame changes, at their own size on a canvas CSS scales to cover.
 // Played as real video (3 Nov 2026, rules 3h.22, check-film-video): data-video names two files, {k} = d (laptop 16:9) or
-// m (phone, the frames' crop), H.264 with a keyframe every 12 frames so jumping back is quick:
-//   ffmpeg -i opening.mp4 -vf scale=1920:-2 -c:v libx264 -crf 22 -g 12 -pix_fmt yuv420p -an -movflags +faststart opening-d.mp4
+// m (phone, the frames' crop), H.264 with every frame a keyframe so any moment shows at once:
+//   ffmpeg -i opening.mp4 -vf scale=1920:-2 -c:v libx264 -g 1 -crf 24 -pix_fmt yuv420p -an -movflags +faststart opening-d.mp4
 // The frames stay: the picture until the video can play, the fallback without it, and reduced motion's last frame.
 (function () {
   [].forEach.call(document.querySelectorAll('.film[data-frames]'), function (film) {
@@ -83,36 +83,34 @@
     }
     addEventListener('scroll', function () { if (!raf) raf = requestAnimationFrame(paint); }, { passive: true });
 
-    // Played as real video, led by the scroll (data-video; Tzvi, 3 Nov 2026: "it still doesnt look so smooth like the
-    // video i sent you"). Scrubbed frames stretch the film into slow motion; here it plays at its own speed while the
-    // scroll is ahead of it, pauses when the scroll stops, and jumps back when the visitor scrolls up. The frames above
-    // stay as the fallback (no video, reduced motion) and as the picture until the video can play.
+    // Played as real video, tied exactly to the scroll (data-video; Tzvi, 3 Nov 2026: "it still doesnt look so smooth like
+    // the video i sent you", then 4 Nov: "its not playing in sync with scrolling"). Every scroll position is one moment of
+    // the film: the video is never played, only moved to the eased scroll position, and it is encoded with every frame a
+    // keyframe (-g 1) so each move shows at once. A first version played it and steered its speed: on a slow scroll it
+    // ran ahead, stopped and started, and stood still 57% of the time. The frames above stay as the picture until the
+    // video can play, the fallback without it, and reduced motion's still; they stop once the video shows.
     if (film.dataset.video && !still) (function () {
       var v = document.createElement('video');
       v.muted = true; v.playsInline = true; v.preload = 'auto'; v.setAttribute('muted', ''); v.setAttribute('playsinline', '');
       v.src = film.dataset.video.replace('{k}', kind); v.poster = url(0); v.setAttribute('aria-hidden', 'true');
       v.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0';
       cv.parentNode.appendChild(v);
-      var ready = false;
+      var ready = false, on = 0, rest = 0, shownT = -1;
       v.addEventListener('canplaythrough', function () {
-        if (ready) return; ready = true; v.style.opacity = 1; vid = true; cv.style.visibility = 'hidden';
+        if (ready) return; ready = true; v.pause(); v.style.opacity = 1; vid = true; cv.style.visibility = 'hidden';
         for (var k in bmp) if (bmp[k] && bmp[k].close) bmp[k].close(); bmp = {}; blobs = [];   // the frames are not needed now
         addEventListener('scroll', wake, { passive: true }); wake();
       });
-      var on = 0, still2 = 0;
-      function wake() { still2 = 0; if (!on) { on = 1; requestAnimationFrame(follow); } }
       v.addEventListener('error', function () { v.remove(); });
+      function wake() { rest = 0; if (!on) { on = 1; requestAnimationFrame(follow); } }
       function follow() {
-        var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight;
-        var q = Math.min(1, Math.max(0, -r.top / Math.max(1, span))), dur = v.duration || 1, want = q * dur, t = v.currentTime;
-        // steer the speed, never stop and start every frame (starting a video takes a moment, so that would freeze it)
-        if (want < t - 0.6) { v.pause(); v.currentTime = want; }                    // scrolled back up: jump back
-        else if (v.paused) { if (want > t + 0.08) v.play().catch(function () {}); }  // scroll ahead of the film: play
-        else if (t > want + 0.25) v.pause();                                         // scroll stopped: hold the picture
-        else v.playbackRate = Math.min(2.5, Math.max(0.35, 1 + (want - t) * 1.2)); // close: speed up or ease to match
-        // keep steering while the scroll moves or the film is catching up; rest after half a second of nothing to do
-        if (Math.abs(want - v.currentTime) < 0.05 && v.paused) still2++; else still2 = 0;
-        if (still2 > 30) { on = 0; return; }
+        var r = film.getBoundingClientRect(), span = film.offsetHeight - innerHeight, dur = v.duration || 1;
+        var want = Math.min(1, Math.max(0, -r.top / Math.max(1, span))) * (dur - 0.05);
+        shownT = shownT < 0 ? want : shownT + (want - shownT) * 0.2;          // ease toward the scroll: no jolts from a wheel
+        if (Math.abs(want - shownT) < 0.004) shownT = want;
+        if (!v.seeking && Math.abs(v.currentTime - shownT) > 0.004) v.currentTime = shownT;
+        if (shownT === want && !v.seeking) rest++; else rest = 0;
+        if (rest > 20) { on = 0; return; }
         requestAnimationFrame(follow);
       }
     })();

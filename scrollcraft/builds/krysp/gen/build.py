@@ -45,10 +45,11 @@ SEAM = ('<svg class="seam" viewBox="0 0 40 1000" preserveAspectRatio="none" aria
 
 # The advert film (gen/advert-brief.md, gen/film.sh, 2 Nov 2026): peanut butter and chocolate swirl round the whole chew,
 # a close-up, the halves broken open on a board, then her real board dissolves in. Marks follow film.sh's joins (11.2 s):
-# c2 0.35 (3.9 s, the close-up) the intro steps back and the small price-and-Order card takes its place for the rest of
-# the film (the review: half the film had no price on a laptop). No labels on the film:
+# c2 0.82 (her board; Tzvi 4 Nov: "this is blocking a lot of the action", "make it fade in near the end") the words fade in;
+# until then the film runs clear on a laptop, with the Order button in the bar above it (on a phone the words sit under
+# the film). No labels on the film:
 # what is inside her chews is not in her record (OWNER-QUESTIONS 3).
-HOME = f'''  <section class="film" id="film" aria-labelledby="h-open" data-frames="269" data-src="assets/film" data-video="assets/film/opening-{{k}}.mp4" data-marks="0.35">
+HOME = f'''  <section class="film" id="film" aria-labelledby="h-open" data-frames="269" data-src="assets/film" data-video="assets/film/opening-{{k}}.mp4" data-marks="0.82">
     <div class="stage">
       <div class="screen"><canvas aria-hidden="true"></canvas></div>
       <div class="words">

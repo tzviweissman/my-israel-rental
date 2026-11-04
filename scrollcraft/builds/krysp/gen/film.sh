@@ -21,3 +21,6 @@ cd ../../assets && rm -rf film && mkdir -p film/d film/m
 ffmpeg -v error -y -i ../gen/film/opening.mp4 -vf "scale=1680:-2:flags=lanczos" -c:v libwebp -quality 70 film/d/%04d.webp
 ffmpeg -v error -y -i ../gen/film/opening.mp4 -vf "crop=ih*4/3:ih:(iw-ih*4/3)/2:0,scale=864:648:flags=lanczos" -c:v libwebp -quality 70 film/m/%04d.webp
 ls film/d | wc -l; ls film/m | wc -l; du -sh film/d film/m
+# the film as video, tied to the scroll (film.js data-video, rules 3h.22): every frame a keyframe so any moment shows at once
+ffmpeg -v error -y -i ../gen/film/opening.mp4 -vf "scale=1920:-2:flags=lanczos" -c:v libx264 -g 1 -crf 24 -preset slow -pix_fmt yuv420p -an -movflags +faststart film/opening-d.mp4
+ffmpeg -v error -y -i ../gen/film/opening.mp4 -vf "crop=ih*4/3:ih:(iw-ih*4/3)/2:0,scale=1024:768:flags=lanczos" -c:v libx264 -g 1 -crf 24 -preset slow -pix_fmt yuv420p -an -movflags +faststart film/opening-m.mp4

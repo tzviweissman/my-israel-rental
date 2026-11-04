@@ -61,17 +61,20 @@ b, strong { font-weight: 800; }
 .film .lede { margin: 0; font-size: 1.15rem; color: var(--ink); }
 .film .from { margin: 0; font-weight: 800; color: var(--ink); }
 .film .giant { position: absolute; z-index: 1; left: 0; right: 0; bottom: 0; margin: 0; padding-bottom: .12em; text-align: center; white-space: nowrap; font: 900 min(13vw, 17svh)/.85 var(--font-head); color: var(--ink); letter-spacing: -.02em; user-select: none; pointer-events: none; transition: opacity .5s; }
-.film.c2 .words, .film.c2 .giant { opacity: 0; transform: translateY(-.6rem); pointer-events: none; }
-.film.c2 .giant { transform: none; }
+/* the film runs clear (Tzvi, 4 Nov 2026: "this is blocking a lot of the action ... they need to be able to see the different
+   textures and the stuff flowing around", then "you can make it fade in near the end of the cinematic"): with JS the words
+   and the big name wait, and the words fade in over her board near the end (c2). Without JS they simply show. */
+body:not(.no-js) .film:not(.c2) .words, body:not(.no-js) .film .giant { opacity: 0; transform: translateY(.6rem); pointer-events: none; }
+.film.c2 .words { opacity: 1; transform: none; transition: opacity .8s, transform .8s; }
 .film .card { position: absolute; z-index: 2; left: 50%; bottom: max(1rem, 3svh); transform: translate(-50%, .6rem); display: flex; align-items: center; gap: 1.2rem; background: var(--ground); padding: .7rem .8rem .7rem 1.4rem; border-radius: 999px; box-shadow: var(--shadow); opacity: 0; visibility: hidden; transition: opacity .5s, transform .5s, visibility 0s .5s; }
 .film .card p, .film .card .sym, .film .from .sym { margin: 0; font-weight: 800; color: var(--ink); white-space: nowrap; }
-.film.c2 .card { opacity: 1; visibility: visible; transform: translate(-50%, 0); transition: opacity .5s, transform .5s; }
+.film .card { display: none; }   /* the words, with their Order button and price, arrive at the end instead */
 @media (max-width: 760px) {
   /* phone: the frames are a 4:3 crop (her board fits whole at the end), the words stay put on the peach under it */
   .film .screen { top: var(--top-h); bottom: auto; height: 75vw; }
   .film .stage { display: flex; flex-direction: column; padding: calc(var(--top-h) + 75vw + 1.2rem) var(--gutter) 1rem; }
   .film .words { position: static; padding: 0; background: none; max-width: none; }
-  .film.c2 .words { opacity: 1; transform: none; pointer-events: auto; }
+  body:not(.no-js) .film:not(.c2) .words, body:not(.no-js) .film .giant { opacity: 1; transform: none; pointer-events: auto; }   /* under the film, not over it */
   .film h1 { font-size: clamp(2rem, 9.5vw, 2.8rem); }
   .film .giant { position: static; font-size: min(26vw, 13svh); text-align: left; margin-top: 1.4rem; }
   .film.c2 .giant { opacity: 1; }
@@ -80,7 +83,7 @@ b, strong { font-weight: 800; }
 /* a short phone has no room under the words for the big name: it would be cut off at the stage's foot */
 @media (max-width: 760px) and (max-height: 700px) { .film .giant { display: none; } }
 @media (prefers-reduced-motion: reduce) { .film { height: auto; } .film .stage { position: relative; height: 100svh; }
-  .film.c2 .words, .film.c2 .giant { opacity: 1; transform: none; pointer-events: auto; } .film.c2 .card { display: none; } }
+  body:not(.no-js) .film .words, body:not(.no-js) .film .giant { opacity: 1; transform: none; pointer-events: auto; } }
 
 /* ── hashgacha band: a dark brown ground that breaks the peach ── */
 .band { background: var(--ink); color: #FBF1E6; padding-block: clamp(3.5rem, 8vw, 6rem); }

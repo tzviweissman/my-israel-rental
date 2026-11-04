@@ -134,7 +134,9 @@ const CHECK_ONLY = process.argv.includes('--check');
     ['check-footer.mjs', 'has no full footer', 'R3v.1'], ['check-menu.mjs', 'has a menu bar that does not list its pages', 'R3v.2'],
     ['check-facts.mjs', 'has no three facts under the main button', 'R3v.14'], ['check-heights.mjs', 'has sections all of one height', 'R3v.6'],
     // a scroll film plays as real video led by the scroll, not stretched still frames (Tzvi, 3 Nov 2026, rules 3h.22)
-    ['check-film-video.mjs', 'has a scroll film that is not played as video', 'R3h.24']]) {
+    ['check-film-video.mjs', 'has a scroll film that is not played as video', 'R3h.24'],
+    // nothing over the film while it plays (Tzvi, 4 Nov 2026: "this is blocking a lot of the action")
+    ['check-film-clear.mjs', 'covers its film with words while it plays', 'R3h.25']]) {
     if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }

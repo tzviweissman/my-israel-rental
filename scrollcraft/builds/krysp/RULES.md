@@ -50,7 +50,7 @@ R3n.5 pass: "you land and peanut butter and chocolate swirl round one of her che
 R3g.15 pass: check-fits passed (no photo shown over 1.35 times its size); the opening picture is her own 1448 px photo, shown at most at its own size
 R3h.2 pass: walked at every 5% of the film: the ribbon and chunks sweep in, circle the chew, the close-up, the halves on the board, then her real board photo dissolves in, with the price and Order button on a card at the end
 R3h.3 pass: full screen; the film plays as real video led by the scroll (R3h.24), over 269 sharp frames that show until it plays and stay as the fallback (1680 wide on a laptop, a 4:3 crop on a phone so her board ends whole), drawn at their own size and scaled by CSS; looked at 1440x900 and 1920x1080
-R3h.5 pass: no lines in the film itself; the intro words sit on a peach card above the chew and step back at the close-up, and on a laptop a small solid card with the price and Order takes their place for the rest of the film, at the bottom, never over the chew; readable passed. No labels: what is inside her chews is not in her record
+R3h.5 pass: no lines in the film itself; on a laptop the film runs clear and the words (headline, Order, three facts) fade in on a peach card over her board near the end (Tzvi 4 Nov: "make it fade in near the end"), the bar's Order button stays above the film throughout; on a phone the words sit under the film; readable passed. No labels: what is inside her chews is not in her record
 R3h.7 pass: joins looked at frame by frame (gen/film/norice-sheet.jpg, advert-B-cut-sheet.jpg): three hard cuts between shots, as in an advert, the close-up slowed 1.5x so it does not lurch, and her board dissolves in over 0.8 s; check-clip passes the joined film with those marked
 R3h.8 pass: the film ends on her board on grey stone, and the next section is the dark brown hashgacha band
 R3h.11 pass: brightness.py on gen/film/opening.mp4: average 52, bright enough; the chew and then the board are the brightest things in every chapter
@@ -58,7 +58,7 @@ R3h.13 pass: one action per shot (sweep in, orbit, close-up, the halves resting)
 R3h.14 pass: the chew stays in frame in every shot; on a phone the 4:3 crop keeps the chew centred and the board whole (looked at 375x812)
 R3h.18 pass: gen/advert-brief.md lists every object with where it comes from and ends; the swirling peanut butter and chunks are marked advert style (3w.1 exception, Tzvi 2 Nov) and come in past the edges; the loose rice was removed (Tzvi: "cut the random rice peices"); the board arrives by a cut, her photo by a dissolve
 R3h.19 pass: one 12 s clip made from the storyboard (gen/film/SB-a.png) and her chew; Tzvi chose take B of two; the crack and web shots were cut out ("the crack isnt smooth"), then the loose rice removed by a video edit, all checked with check-clip
-R3h.17 pass: the giant KRYSP sits on the plain peach under the chew, and it and the headline step back at the close-up; readable passed
+R3h.17 pass: words and film take turns: on a laptop nothing sits over the film until her board, then the words fade in; the giant KRYSP shows only on a phone, under the film; readable passed
 
 ## 3. Sections and worlds
 R3.12 pass: hero (the opening), features (the board tile with photo, name and price, then the three steps), and a call-to-action section of its own near the end (the closing band, with the price in its heading)
@@ -230,4 +230,5 @@ R3v.6 pass: check-heights passed on every page
 R3v.7 n/a: none of the 3v layouts is used: one board and one photo give no bento, steps are plain rows (S5), and callouts would need facts about the inside she has not given
 R3v.8 n/a: none of the 3v effects is used; her own set (B20, R14, H10, T5) is named in CONCEPT.md and differs from Bake away's, the site built before it
 R3v.14 pass: check-facts passed: Luxe board, $38 · Under the hashgacha of Rabbi Wiener · Order on WhatsApp, right under the Order button
-R3h.24 pass: check-film-video passed: the film plays as real video led by the scroll (assets/film/opening-d.mp4, opening-m.mp4, starter/film.js), within 0.5 s of the scroll at a quarter, half and three quarters on laptop and phone in real Chrome
+R3h.24 pass: check-film-video passed: the film is real video tied to the scroll (assets/film/opening-d.mp4, opening-m.mp4, every frame a keyframe), within 0.2 s of the scroll and moving on 98% of frames at slow and fast scrolls, laptop and phone in real Chrome
+R3h.25 pass: check-film-clear passed: on a laptop nothing sits over the film until her board, then the words fade in; on a phone the words are under the film (the old card covered 13% at 20% and failed)

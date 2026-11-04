@@ -25,6 +25,13 @@ http.createServer((req, res) => {
     file = path.join(file, 'index.html');
   }
   if (!fs.existsSync(file)) { res.statusCode = 404; return res.end('not found'); }
-  res.writeHead(200, { 'content-type': TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream', 'cache-control': 'no-store' });
-  fs.createReadStream(file).pipe(res);
+  // part-of-file requests (Range), as every real server answers: without them a video cannot jump to a moment, and a
+  // film tied to the scroll stood still (Krysp, 4 Nov 2026)
+  const type = TYPES[path.extname(file).toLowerCase()] || 'application/octet-stream', size = fs.statSync(file).size;
+  const m = /^bytes=(\d*)-(\d*)$/.exec(req.headers.range || '');
+  if (!m || (!m[1] && !m[2])) { res.writeHead(200, { 'content-type': type, 'content-length': size, 'accept-ranges': 'bytes', 'cache-control': 'no-store' }); return fs.createReadStream(file).pipe(res); }
+  const start = m[1] ? +m[1] : Math.max(0, size - +m[2]), end = m[1] && m[2] ? Math.min(+m[2], size - 1) : size - 1;
+  if (start > end || start >= size) { res.writeHead(416, { 'content-range': `bytes */${size}` }); return res.end(); }
+  res.writeHead(206, { 'content-type': type, 'content-length': end - start + 1, 'content-range': `bytes ${start}-${end}/${size}`, 'accept-ranges': 'bytes', 'cache-control': 'no-store' });
+  fs.createReadStream(file, { start, end }).pipe(res);
 }).listen(PORT, '127.0.0.1', () => console.log(`builds on http://127.0.0.1:${PORT}/`));
