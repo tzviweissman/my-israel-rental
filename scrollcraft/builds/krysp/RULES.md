@@ -121,7 +121,7 @@ R3c.13 pass: readable and check-site OVERLAP passed; nothing cut by its section 
 R3c.14 n/a: no cut-out photo is used
 R5b.3 pass: no words sit on a photo; on a phone the photo is on top and the words are on the plain peach below, covering none of it
 R3e.8 pass: readable passed on every page (the opening lettering is dark brown on peach, button text white on golden brown)
-R3s.24 pass: check-site MEDIA passed: largest photo 365 KB, every image has width and height, no video
+R3s.24 pass: check-site MEDIA passed: largest photo 365 KB, every image has width and height; the film video has its poster still and loads after the page
 R3p.6 pass: check-fits passed on every page at the six sizes; her photo is shown whole at 4:3 on a 4:3 box, never cropped or zoomed
 R3o.5 pass: check-site GLYPH passed; the dollar sign is set in the heading face
 
@@ -209,7 +209,7 @@ R3s.28 pass: check-blank passed on every page, laptop and phone
 R3u.2 pass: a past day gets one line under the field, "That day has passed. The first day we can do is Wednesday 4 Nov." with a Choose Wednesday button (tried on gen/test.html); she has given no closed days or daily limit yet (OWNER-QUESTIONS 6, 13), so none are invented
 R3u.3 n/a: no pieces or servings are known for the Luxe board; asked in OWNER-QUESTIONS 2
 R3u.5 n/a: the home page opens on a scroll film
-R3u.6 n/a: the first screen is the film with the words on one card, no separate pieces to move at their own speeds
+R3u.6 n/a: the first screen is the film alone, the words fade in over her board at the end, no separate pieces to move at their own speeds
 R3u.7 n/a: no rotating word
 R3u.8 n/a: no tilted label over headings
 R3u.9 n/a: no questions section yet; her customers' questions are asked in OWNER-QUESTIONS
