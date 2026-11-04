@@ -232,3 +232,10 @@ R3v.8 n/a: none of the 3v effects is used; her own set (B20, R14, H10, T5) is na
 R3v.14 pass: check-facts passed: Luxe board, $38 · Under the hashgacha of Rabbi Wiener · Order on WhatsApp, right under the Order button
 R3h.24 pass: check-film-video passed: the film is real video tied to the scroll (assets/film/opening-d.mp4, opening-m.mp4, every frame a keyframe), within 0.2 s of the scroll and moving on 98% of frames at slow and fast scrolls, laptop and phone in real Chrome
 R3h.25 pass: check-film-clear passed: on a laptop nothing sits over the film until her board, then the words fade in; on a phone the words are under the film (the old card covered 13% at 20% and failed)
+R3x.1 n/a: not used; the opening film already shows her chew from every side, and turning the board is For your call in gen/report.md
+R3x.2 n/a: no number counts; the only figure she gave is the price, $38
+R3x.3 n/a: no tabs; she has one board in one size
+R3x.4 n/a: one product in one size, so there is nothing to compare side by side
+R3x.5 n/a: no following light; Krysp's world is a warm kitchen, not a dark one
+R3x.6 n/a: no sentence lights up word by word
+R3x.7 pass: BRAND.md holds her colours with their uses, Nunito and Mulish, her logo on light and the name on the dark footer, and the peach ground; written 4 Nov after the pictures (the rule came later), from the same values gen/krysp.css and site.css use

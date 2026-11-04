@@ -287,6 +287,16 @@ R3v.7 | Layouts (bento, zigzag steps, callouts, picture beside four facts, peek 
 R3v.8 | Effects from 3v (light on cards, fanned photos, rolling letters, circle reveal, curtain between pages, picture buttons, statement band) are chosen for this business, not the set of the site built before it, each with its phone and reduced-motion version | 3v.8-16 | LOOK: CONCEPT.md names the effects and the previous site's set; n/a if none
 R3v.14 | Three true facts from the record right under the main button on the home page (class btn-facts) | 3v.14 | script: check-facts
 
+## 8d. From the four videos of 4 Nov 2026
+
+R3x.1 | A product to turn is made from the owner's photo through the API and compared beside it; its dots (at most four, 44 px) say only the owner's facts; buttons turn it too; it loads after the page and is their photo with no script or reduced motion | 3x.1 | LOOK: the model beside the photo, drag and swipe it; n/a if not used
+R3x.2 | A counted number is a real figure from the record, counts once, ends exact, and is in the page text so it shows with no script or reduced motion | 3x.2 | LOOK; n/a if no number counts
+R3x.3 | Tabs for sizes or packages change one panel in place: picture, price and facts stay in the same spot | 3x.3, 3s.27 | LOOK: switch every tab; n/a with no tabs
+R3x.4 | With two or more sizes or packages, each is a card with its picture, price and the same measures in the same order | 3x.4 | LOOK; n/a with one size and no packages
+R3x.5 | A following light is used only for a dark-world business, has an off button, sweeps once by itself on a phone and with reduced motion, and never dims the words or main button | 3x.5 | LOOK on laptop and phone; n/a if not used
+R3x.6 | At most one sentence lights up word by word, and the site built just before does not have one | 3x.6 | LOOK; n/a if none
+R3x.7 | BRAND.md in the build folder (colours with their uses, two fonts, logo on light and dark, textures) was written before any picture was generated, and the site uses it | 3x.7 | LOOK: BRAND.md against the CSS
+
 ## 9. Finish
 
 R3r.3 | `check-rules` passes, every script above passed on every page after the last edit, and a fix was checked on the screen it was for | 3a.4, 3r | script: check-rules (this file)

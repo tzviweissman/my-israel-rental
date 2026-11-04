@@ -1927,6 +1927,42 @@ before paying, frosted or shaded text over film, the phone loop) is not repeated
 14. **The film's last frame is the next section's picture**, so nothing jumps where the film hands over to
     the page. (3 videos.)
 
+## 3x. From the four videos of 4 Nov 2026 (Tzvi: "yes")
+
+Four videos: a list of 38 inspiration galleries, a flashlight hero, a 3D product site and brand kits. Notes,
+frames and the gallery list are in `docs/inspo/videos-2026-11-04/`. Items 1 to 4 are options a shop site
+picks from by what the business has. Items 5 and 6 are occasional touches. Item 7 is on every paid site.
+
+1. **The product you can turn.** A shop with one main item may let the visitor turn it: a 3D model, dragged
+   or swiped round, with up to four small dots on its parts, each opening one line of the owner's own facts
+   (the hashgacha, what is inside, the size). The model is made from the owner's photo, through the API
+   (Higgsfield API rule, cost checked first), and compared beside that photo before it stays; it looks
+   the same as the item in the film and tiles. Two buttons turn it too. It loads after the page, and with
+   no script or reduced motion it is their photo. The dots are 44 px to tap. ("Turn it over. Look
+   closer.", video 3.)
+2. **Numbers that count.** A real number from the record (pieces in a box, years, minutes to deliver)
+   may count up once when it is reached, ending on the exact figure; the figure is in the page's text, so
+   with no script or reduced motion it simply shows. Never a number we made up or rounded. (Video 3.)
+3. **Tabs that change one panel in place.** For sizes or packages, tabs change the picture, price and
+   facts in one panel that does not move (3s.27). (Video 3.)
+4. **Choices side by side.** Where the owner has two or more sizes or packages, each is a card with its
+   picture, price and the same measures in the same order, so they compare at a glance (3j, 3l). (Video 3.)
+5. **A light that follows the visitor**, only for a business whose own world is dark (a night tour, a
+   bar, candles): the opening photo is dim and a soft light follows the mouse, with a button to turn it
+   off. On a phone, and with reduced motion, the light sweeps once by itself, then the photo is lit. It
+   never dims the words or the main button. This is the one cursor effect 8a.4 allows, as a unique
+   touch. (Video 2.)
+6. **One sentence that lights up as you read**, word by word from grey to ink as it scrolls past: at most
+   one per site, and not on the site built just before. It is common on AI-built sites. (Video 4.)
+7. **A brand kit before the first picture.** Every paid build keeps `BRAND.md` in its folder, written
+   and shown to Tzvi before any picture is generated: the colours (each with its use), the two fonts,
+   the logo versions (on light and on dark), and the textures or backgrounds, generated in the brand's
+   colours from the owner's own photos if needed. Every picture and page uses it. (Videos 3 and 4.)
+
+**Sources.** The galleries in the notes (Godly for scrolling videos of whole sites, Hover States for what
+buttons and pictures do, Unsection for single sections, Commerce Cream for shops on a phone, and the rest)
+are searched for each build; the build's REFERENCES.md line for `videos-2026-11-04` names the ones used.
+
 ## 4. What is reported to the owner instead (content gaps)
 
 Some things are missing because of the business's data, not the page: no reviews

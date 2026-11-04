@@ -15,3 +15,4 @@ first possible day, a writing pass (gen/copy-pass.md), her own moving pieces tri
 ## For your call
 1. The order day arrives set to tomorrow, because her lead time is unknown. If she needs more notice, it moves.
 2. Prices stay in US dollars, as on her listing; whether customers pay in dollars or shekels is asked (OWNER-QUESTIONS 2).
+3. Her board could be a 3D model you turn by hand, with dots on what is inside (rules 3x.1). It would be generated from her photo (paid, cost checked first). Left out for now, because the opening film already shows the chew from every side.
