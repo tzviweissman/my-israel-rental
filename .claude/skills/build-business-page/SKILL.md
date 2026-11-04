@@ -45,7 +45,14 @@ learned with. Check what is connected in this session first.
   printed; worked example `backend/higgsfield_demo/main.py` in the
   MyIsraelRental repo) when a site or script must generate on its own. API
   credits are prepaid and separate from the web plan; every call is billable,
-  so confirm before running one. Methods and model choices in
+  so check its price with get_cost first. **Standing OK for build media**
+  (Tzvi, 4 Nov 2026: "always do what you can with code ... and whatever will
+  look significantly better when using higgsfield then do that so you dont
+  need to ask me by every build"). Code does what code does well. What looks
+  significantly better generated is generated without asking, brief and
+  check-clip as always, and the spend goes in the report. If a code effect
+  does not look good or real, generate a better one. Ask only for something
+  unusually expensive. Methods and model choices in
   `reference/media-and-video.md`.
 - **21st.dev** (`21st` connection): a library of React + Tailwind + shadcn
   components (FAQ, reviews, pricing tiles, galleries). Used while building, never
