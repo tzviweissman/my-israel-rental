@@ -125,8 +125,32 @@ def test_sender_by_country(monkeypatch):
     assert sms._sender_for("972521112222") == "+15550001111"
 
 
+def test_israel_goes_through_cellact_when_set(monkeypatch):
+    import httpx
+    monkeypatch.setenv("TWILIO_ACCOUNT_SID", "AC1")
+    monkeypatch.setenv("TWILIO_AUTH_TOKEN", "t")
+    monkeypatch.setenv("TWILIO_SMS_FROM", "+15550001111")
+    monkeypatch.setenv("CELLACT_API_KEY", "k")
+    monkeypatch.setenv("CELLACT_SENDER", "MyIsraelRnt")
+    monkeypatch.delenv("SMS_DRY_RUN", raising=False)
+    assert sms._request_for("972521112222", "hi")["url"] == sms.CELLACT_URL
+    assert "twilio" in sms._request_for("12125551234", "hi")["url"]
+
+    def answer(body):
+        return AsyncMock(return_value=httpx.Response(200, json=body, request=httpx.Request("POST", sms.CELLACT_URL)))
+
+    with patch.object(httpx.AsyncClient, "post", answer({"result": True, "id": "x"})) as post:
+        assert run(sms.send_sms(to="052-111-2222", body="hi")) is True
+    assert post.call_args.kwargs["json"] == {"to_s": ["+972521112222"], "text": "hi", "sender": "MyIsraelRnt"}
+    assert post.call_args.kwargs["headers"] == {"Authorization": "Bearer k"}
+    # Cellact refuses with a 200 and result false.
+    with patch.object(httpx.AsyncClient, "post", answer({"result": False, "errorCode": 10})):
+        assert run(sms.send_sms(to="+972521112222", body="hi")) is False
+
+
 def test_not_configured_sends_nothing(monkeypatch):
-    for k in ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_SMS_FROM", "TWILIO_SMS_FROM_IL"):
+    for k in ("TWILIO_ACCOUNT_SID", "TWILIO_AUTH_TOKEN", "TWILIO_SMS_FROM", "TWILIO_SMS_FROM_IL",
+              "CELLACT_API_KEY", "CELLACT_SENDER"):
         monkeypatch.delenv(k, raising=False)
     assert run(sms.send_sms(to="+972521112222", body="hi")) is False
 
