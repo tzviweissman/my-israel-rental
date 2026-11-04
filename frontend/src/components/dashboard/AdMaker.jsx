@@ -22,7 +22,7 @@ import { useTranslation } from 'react-i18next';
 import { QRCodeCanvas } from 'qrcode.react';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Copy, Download, ExternalLink, Layers, Loader2, RefreshCw, Share2, X } from 'lucide-react';
+import { Copy, Download, ExternalLink, Layers, Loader2, Printer, RefreshCw, Share2, X } from 'lucide-react';
 import { regularShown, holidayShown, formatShownPrice, priceSymbol } from '../../utils/listingPrice';
 import { areaLabel } from '../../utils/areaNames';
 
@@ -985,6 +985,36 @@ export const LOOKS = ['own', 'cream', 'night', 'sun', 'navy'];
 // the weeks before it (nextHoliday).
 export const HOLIDAYS = ['rosh', 'chanukah', 'purim', 'pesach', 'shavuot'];
 const hexRgb = (h) => (/^#?[0-9a-f]{6}$/i.test(h || '') ? [0, 2, 4].map((i) => parseInt(h.replace('#', '').slice(i, i + 2), 16)) : null);
+// Whether words in the owner's colour are lost on what is behind them. The
+// pixels of a word piece that are not the word colour are its background;
+// their middle brightness against the word colour must reach 3:1 (large
+// text). Returns black or white, whichever would read, or null when fine.
+function lostWords(canvas, boxes, ink) {
+  const c = hexRgb(ink);
+  if (!c) return null;
+  const ctx = canvas.getContext('2d');
+  const L = lum(c);
+  for (const name of ['word', 'words', 'name']) {
+    const b = boxes[name];
+    if (!b) continue;
+    const x = Math.max(0, Math.floor(b[0]));
+    const y = Math.max(0, Math.floor(b[1]));
+    const w = Math.min(canvas.width - x, Math.ceil(b[2]));
+    const h = Math.min(canvas.height - y, Math.ceil(b[3]));
+    if (w < 4 || h < 4) continue;
+    const d = ctx.getImageData(x, y, w, h).data;
+    const ls = [];
+    for (let i = 0; i < d.length; i += 16) {
+      if (Math.abs(d[i] - c[0]) + Math.abs(d[i + 1] - c[1]) + Math.abs(d[i + 2] - c[2]) > 60) ls.push(lum([d[i], d[i + 1], d[i + 2]]));
+    }
+    // Hardly anything but the word colour: the words sit on their own colour.
+    let bgL = L;
+    if (ls.length > (d.length / 16) * 0.25) { ls.sort((p, q) => p - q); bgL = ls[ls.length >> 1]; }
+    if ((Math.max(L, bgL) + 0.05) / (Math.min(L, bgL) + 0.05) < 3) return bgL > 0.18 ? INK : '#FFFFFF';
+  }
+  return null;
+}
+
 function lookOf(name, brand, img) {
   const col = vividColour(img);
   const own = rgb(col);
@@ -1618,6 +1648,7 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
   const [customHex, setCustomHex] = useState('');
   const [fontIdx, setFontIdx] = useState(0);
   const [ink, setInk] = useState('');
+  const [lost, setLost] = useState(null);
   // Dragged pieces, per design and shape: { 'behind|feed': { product: {x, y, s} } }.
   const [moves, setMoves] = useState({});
   const [boxes, setBoxes] = useState({});
@@ -1845,6 +1876,7 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
       const got = {};
       render(canvasRef.current, on ? design : 'clean', { ...args(design), moves: moves[moveKey] || {}, boxes: got });
       setBoxes(got);
+      setLost(ink ? lostWords(canvasRef.current, got, ink) : null);
       setPreview('drawn');
     })();
     return () => { cancelled = true; };
@@ -1928,6 +1960,40 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 5000);
     }, i * 400));
+  };
+  // A flyer to print (Vistaprint's and Canva's print sizes): the feed ad
+  // across an A4 page, the name and link large under it. The ad's own code
+  // is about 3cm wide on the page, enough to scan from a noticeboard.
+  const printFlyer = () => {
+    const a = args(design);
+    const ad = document.createElement('canvas');
+    render(ad, design, { ...a, format: 'feed', moves: moves[`${design}|feed`] || {} });
+    const W = 1240; const H = 1754; // A4 at 150 dpi
+    const adH = Math.round((W * ad.height) / ad.width);
+    const c = document.createElement('canvas');
+    c.width = W;
+    c.height = H;
+    const ctx = c.getContext('2d');
+    ctx.fillStyle = '#FFFFFF';
+    ctx.fillRect(0, 0, W, H);
+    ctx.drawImage(ad, 0, 0, W, adH);
+    // The ad already carries the link and code: the strip says the name once.
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.direction = rtl ? 'rtl' : 'ltr';
+    ctx.fillStyle = INK;
+    ctx.font = `800 64px ${a.font || bodyFont(rtl)}`;
+    ctx.fillText(wrap(ctx, a.name || '', W - 120, 1)[0] || '', W / 2, adH + (H - adH) / 2);
+    const frame = document.createElement('iframe');
+    frame.style.cssText = 'position:fixed;width:0;height:0;border:0;';
+    document.body.appendChild(frame);
+    const doc = frame.contentDocument;
+    doc.open();
+    doc.write(`<!doctype html><title>flyer</title><style>@page{size:A4;margin:0}html,body{margin:0}img{display:block;width:100vw;height:100vh;object-fit:contain}</style><img src="${c.toDataURL('image/jpeg', 0.95)}">`);
+    doc.close();
+    const img = doc.querySelector('img');
+    const go = () => { frame.contentWindow.focus(); frame.contentWindow.print(); setTimeout(() => frame.remove(), 60000); };
+    if (img.complete) go(); else img.onload = go;
   };
   // Real ads running now in the same field, from Meta's public Ad Library.
   const adLibraryUrl = `https://www.facebook.com/ads/library/?active_status=active&ad_type=all&country=IL&q=${encodeURIComponent((words?.search || target.name || '').slice(0, 60))}`;
@@ -2124,6 +2190,12 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
                     {ink && <button type="button" onClick={() => setInk('')} className="font-semibold" style={{ color: 'var(--brand-primary)' }}>{t('ads.inkAuto', 'Automatic')}</button>}
                   </div>
                 </div>
+                {lost && (
+                  <p className="col-span-2 text-xs font-semibold rounded-lg px-2.5 py-2" style={{ background: '#FFF4E5', color: '#7A4100' }} role="status" data-testid="ad-ink-warning">
+                    {t('ads.inkWarning', 'Your words are hard to see on this background.')}{' '}
+                    <button type="button" onClick={() => setInk(lost)} className="underline" data-testid="ad-ink-fix">{t('ads.inkFix', 'Fix it')}</button>
+                  </p>
+                )}
               </div>
             )}
             <div className="space-y-1.5">
@@ -2231,6 +2303,12 @@ export default function AdMaker({ API, token, targetType, target, onClose }) {
                 className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-all-shapes">
                 <Layers size={15} /> {t('ads.allShapes', 'All three shapes')}
               </button>
+              {design !== 'native' && (
+                <button type="button" onClick={printFlyer} disabled={!preview || busy || issues.length > 0}
+                  className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold border disabled:opacity-60" style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }} data-testid="ad-flyer">
+                  <Printer size={15} /> {t('ads.flyer', 'Print a flyer')}
+                </button>
+              )}
             </div>
             {targetType === 'business' && (
               <a href={adLibraryUrl} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs font-semibold"
