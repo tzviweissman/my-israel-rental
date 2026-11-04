@@ -440,6 +440,65 @@ bursting out of a phone, and "Dinner is calling..." with their board as
 the caller (Decline: Cook, Accept: Order). A receipt listing their whole
 menu was dropped: eight lines of prices is the list the 1s are made of.
 
+## 9f. Three more videos (4 Nov 2026)
+
+Watched as video, not only words: frames every 5s of Simon's "Psychology
+of High Converting Static Ads" (adswithsimon, Statiq agency) and Jordan
+Hayes' "100 winning ecommerce ads in 13 minutes", contact sheets read in
+full; the Sweat Equity podcast with Levi Knox (Ultra pouches, ex Tube
+Science) by its words, since its frames are three people on a sofa.
+
+1. **The situation formula** (Levi; the strongest idea here). Not "Ultra
+   is better than nicotine" but "nicotine in the gym sucks, Ultra is better
+   in the gym": the thing people use now, in one real situation, and why
+   ours wins there. Run the same product through six situations, one ad
+   each. For a local business: "Cooking for twenty on Friday? Order the
+   board." Find the situations in the reviews: one customer using it for
+   something nobody else says is an angle to amplify.
+2. **The mirror** (Simon, frame-verified): "Rude teenager?" in crayon
+   letters, then three lines describing that exact home ("They snap
+   before you finish a sentence / One-word answers at dinner / A
+   different kid at home than at school"), then the product. Shown
+   beside a wall of look-alike vitamin ads ("Your daily vitamin C" on
+   pastel): the specific one is the one you see. Name the person and
+   their situation, not the category.
+3. **One message** (Simon, frame-verified): a yellow shoe ad built up
+   layer by layer (three arrow labels, 25% off burst, SHOP NOW, "street
+   deals") as the example of too many claims. The winning "This stuff
+   taste nasty" ad is a logo, a quoted headline, a short honest letter and
+   a hand holding the spoon. Text-heavy is fine; several claims is not.
+4. **Honest and reverse** (Simon): saying the downside first ("tastes
+   nasty... that's intentional") stopped the scroll and earned belief.
+5. **The want behind the feature** (Simon): a features ad (20g protein,
+   milk protein, muscle recovery badges) against the desire it serves.
+6. **Variety, not reuse** (Jordan and Levi, two sources): Meta now
+   rewards different-looking ads and punishes the same visual run for
+   months. Jordan's 20 Dr. Squatch concepts, frame-verified names:
+   notes-app list ("why i finally switched"), us vs them checklist
+   (✓ ours / ✗ big soap), before/after, text messages, a tweet with
+   counts, ingredients burst, two-panel meme ("POV: ..."), selfie,
+   editorial, typographic, flat lay, Google autocomplete, review card
+   ("Don't take our word for it"), ingredient label, subscription, gift.
+7. **Who first, then what** (Jordan): the AI proposes three or four
+   customer types, each with how aware they are of the problem, and the
+   owner picks before any words are written.
+8. **A moment in the day** (Jordan, frame-verified FLO ads): the product
+   in a real moment with a time or place in the headline ("It lives in
+   my bag now", "One before bed. Every night.", "3pm, the week before,
+   and still myself"), serif headlines with one italic phrase in the
+   brand colour. The real product photo is kept, never regenerated.
+
+For the ad maker: (1) and (2) are words the model can write from the
+listing and its reviews, each drawn by layouts we already have or by a
+plain "mirror" card; the chat, post, us vs them and notes formats in (6)
+need only the cut-out, words and code, so they stay free (9e).
+
+Discount: Simon and Jordan both close on "book a call" with their
+agencies, and every spend figure ($300k at 2x, $93k) is their own claim.
+Jordan's system generates every picture through a paid image service,
+which our free ads do not (9d). The podcast carries two sponsor reads
+(Social Snowball) and one host is an investor in Tribe, which it praises.
+
 ## 10. What to discount from the videos
 
 - **All five are sales funnels.** Three are from Fraser Cottrell's agency (the

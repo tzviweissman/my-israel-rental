@@ -1556,6 +1556,370 @@ function drawChecklist(canvas, { format, words, cta, shortUrl, rtl, qr, item, fr
   }
 }
 
+// The layouts from docs/static-ad-rules.md 9f (4 Nov 2026): each is words
+// the model wrote from the listing and its reviews, the business's own
+// product and price, and the link band. Nothing generated.
+
+// The look's ground and the link band, shared by these layouts.
+function ground(canvas, a) {
+  const g = begin(canvas, a.format, a.rtl);
+  const L = lookOf(a.look, a.brand, a.item.cut || a.item.img);
+  g.ctx.fillStyle = L.bg;
+  g.ctx.fillRect(0, 0, g.W, g.H);
+  const footTop = footBand(g.ctx, { W: g.W, H: g.H, format: a.format, rtl: a.rtl, cta: a.cta, shortUrl: a.shortUrl, qr: a.qr,
+    body: g.body, ground: L.foot, dark: L.footDark });
+  return { ...g, L, footTop };
+}
+// The product and its own price in whatever room is left above the band.
+function productBelow(ctx, a, y, footTop, W, body) {
+  if (footTop - 30 - y <= 140) return;
+  const [cx, cy, cw, ch] = product(ctx, a.item, 90, y, W - 180, footTop - 30 - y);
+  const r = Math.round(Math.min(100, ch * 0.32));
+  sticker(ctx, { x: a.rtl ? cx + r * 0.6 : cx + cw - r * 0.6, y: cy + ch - r * 0.6, r, item: a.item, fromWord: a.fromWord, body });
+}
+function card(ctx, x, y, w, h, r = 36) {
+  ctx.save();
+  ctx.shadowColor = 'rgba(17,24,39,.18)'; ctx.shadowBlur = 36; ctx.shadowOffsetY = 10;
+  ctx.fillStyle = '#FFFFFF';
+  ctx.beginPath();
+  ctx.roundRect(x, y, w, h, r);
+  ctx.fill();
+  ctx.restore();
+}
+// The photo itself (not the cut-out) in a box, with its price on a corner.
+function photoWithPrice(ctx, a, x, y, w, h, body) {
+  const img = a.item.img || a.item.cut;
+  const [pw, ph] = fitIn(img, w, h);
+  const px0 = x + (w - pw) / 2;
+  part(ctx, 'product', [px0, y, pw, ph], () => roundedImage(ctx, img, px0, y, pw, ph, 28));
+  const r = Math.round(Math.min(90, ph * 0.28));
+  sticker(ctx, { x: a.rtl ? px0 + r * 0.7 : px0 + pw - r * 0.7, y: y + ph - r * 0.7, r, item: a.item, fromWord: a.fromWord, body });
+}
+
+// "A real moment" (9f.1, Levi Knox's situation formula): the moment
+// someone needs this, then the plain answer, then the product.
+function drawSituation(canvas, a) {
+  const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
+  const [setup = '', answer = ''] = (a.situation || '').split('|').map((x) => x.trim());
+  ctx.font = `800 ${px(66)}px ${body}`;
+  const s1 = wrap(ctx, setup, W - 140, 3);
+  ctx.font = `800 ${px(56)}px ${body}`;
+  const s2 = wrap(ctx, answer, W - 140, 2);
+  const y0 = top + px(20);
+  const h = s1.length * px(78) + px(30) + s2.length * px(68);
+  part(ctx, 'words', [70, y0, W - 140, h], () => {
+    s1.forEach((l, i) => say(ctx, l, W / 2, y0 + px(64) + i * px(78), { size: px(66), weight: 800, colour: L.text, body, rtl: a.rtl }));
+    const y1 = y0 + s1.length * px(78) + px(30);
+    s2.forEach((l, i) => say(ctx, l, W / 2, y1 + px(54) + i * px(68), { size: px(56), weight: 800, colour: L.word, body, rtl: a.rtl }));
+  });
+  productBelow(ctx, a, y0 + h + px(40), footTop, W, body);
+}
+
+// "Is this you?" (9f.2, Simon's "Rude teenager?"): a question naming the
+// reader in crayon colours, three lines of their moment, then the product.
+const CRAYON = ['#E5484D', '#E8590C', '#2F9E44', '#1C7ED6', '#AE3EC9'];
+function drawMirror(canvas, a) {
+  const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
+  const [q = '', ...rest] = lineList(a.words.mirror);
+  const size = px(92);
+  ctx.font = `800 ${size}px ${body}`;
+  const qs = wrap(ctx, q, W - 140, 2);
+  ctx.font = `600 ${px(38)}px ${body}`;
+  const ls = rest.slice(0, 3).flatMap((l) => wrap(ctx, l, W - 160, 2));
+  const lh = px(52);
+  const y0 = top + px(10);
+  const h = qs.length * size * 1.08 + px(36) + ls.length * lh;
+  part(ctx, 'words', [70, y0, W - 140, h], () => {
+    let y = y0 + size * 0.92;
+    let k = 0;
+    qs.forEach((line) => {
+      ctx.font = `800 ${size}px ${body}`;
+      const r = dirOf(line, a.rtl) === 'rtl';
+      const ws = line.split(' ').filter(Boolean);
+      const gap = ctx.measureText(' ').width;
+      const total = ws.reduce((t, w) => t + ctx.measureText(w).width, 0) + gap * (ws.length - 1);
+      let x = r ? (W + total) / 2 : (W - total) / 2;
+      ws.forEach((w) => {
+        const colour = (PARTS && PARTS.ink) || CRAYON[k % CRAYON.length];
+        say(ctx, w, x, y, { size, weight: 800, colour, align: r ? 'right' : 'left', body, rtl: a.rtl });
+        const step = ctx.measureText(w).width + gap;
+        x += r ? -step : step;
+        k += 1;
+      });
+      y += size * 1.08;
+    });
+    y = y0 + qs.length * size * 1.08 + px(36) + px(38);
+    ls.forEach((l) => { say(ctx, l, W / 2, y, { size: px(38), weight: 600, colour: L.text, body, rtl: a.rtl }); y += lh; });
+  });
+  productBelow(ctx, a, y0 + h + px(40), footTop, W, body);
+}
+
+// "Text messages" (9f.6): a customer asking and the business answering
+// with facts from the listing, then the business sending its photo.
+function drawChat(canvas, a) {
+  const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
+  const msgs = lineList(a.words.chat).slice(0, 4);
+  const x0 = 60;
+  const w0 = W - 120;
+  const y0 = top - px(10);
+  card(ctx, x0, y0, w0, footTop - 30 - y0, 44);
+  // The business at the top, like a chat's header.
+  const av = px(78);
+  ctx.fillStyle = a.brand || ACCENT;
+  ctx.beginPath();
+  ctx.arc(W / 2, y0 + px(26) + av / 2, av / 2, 0, Math.PI * 2);
+  ctx.fill();
+  say(ctx, (a.name || '?').trim().charAt(0).toUpperCase(), W / 2, y0 + px(26) + av / 2 + px(14), { size: px(38), weight: 800, colour: '#FFFFFF', body, rtl: a.rtl });
+  say(ctx, a.name || '', W / 2, y0 + px(26) + av + px(38), { size: px(28), weight: 700, colour: INK, body, rtl: a.rtl, max: w0 - 80 });
+  ctx.fillStyle = '#E3E3E3';
+  ctx.fillRect(x0, y0 + av + px(84), w0, 2);
+  let y = y0 + av + px(112);
+  const pad = px(22);
+  const fs = px(32);
+  const boxes = [];
+  msgs.forEach((m, i) => {
+    const mine = i % 2 === 1;
+    ctx.font = `500 ${fs}px ${body}`;
+    const ls = wrap(ctx, m, w0 * 0.6, 3);
+    const bw = Math.max(...ls.map((l) => ctx.measureText(l).width)) + pad * 2;
+    const bh = ls.length * px(42) + pad * 1.6;
+    // The business on the far side of whoever reads, in both directions.
+    const right = mine !== a.rtl;
+    boxes.push({ ls, bw, bh, y, mine, bx: right ? x0 + w0 - 34 - bw : x0 + 34 });
+    y += bh + px(16);
+  });
+  part(ctx, 'words', [x0 + 20, y0 + av + px(100), w0 - 40, y - (y0 + av + px(100))], () => boxes.forEach(({ ls, bw, bh, y: by, mine, bx }) => {
+    ctx.fillStyle = mine ? ACCENT : '#E9E9EB';
+    ctx.beginPath();
+    ctx.roundRect(bx, by, bw, bh, px(30));
+    ctx.fill();
+    ls.forEach((l, j) => {
+      const r = dirOf(l, a.rtl) === 'rtl';
+      say(ctx, l, r ? bx + bw - pad : bx + pad, by + pad + px(30) + j * px(42), { size: fs, weight: 500, colour: mine ? '#FFFFFF' : INK, align: r ? 'right' : 'left', body, rtl: a.rtl });
+    });
+  }));
+  const room = footTop - 60 - y;
+  if (room > 160) {
+    const w = w0 * 0.58;
+    const bx = a.rtl ? x0 + 34 : x0 + w0 - 34 - w;
+    photoWithPrice(ctx, a, bx, y + px(6), w, room - px(10), body);
+  }
+}
+
+// "Social post" (9f.6): the business's own post, in its own voice, with
+// its photo. No counts of likes or followers: those would be invented.
+function drawPost(canvas, a) {
+  const { ctx, W, body, px, top, footTop } = ground(canvas, a);
+  const x0 = 60;
+  const w0 = W - 120;
+  const y0 = top - px(10);
+  card(ctx, x0, y0, w0, footTop - 30 - y0, 36);
+  const av = px(84);
+  const r = a.rtl;
+  const ax = r ? x0 + w0 - 40 - av / 2 : x0 + 40 + av / 2;
+  ctx.fillStyle = a.brand || ACCENT;
+  ctx.beginPath();
+  ctx.arc(ax, y0 + 40 + av / 2, av / 2, 0, Math.PI * 2);
+  ctx.fill();
+  say(ctx, (a.name || '?').trim().charAt(0).toUpperCase(), ax, y0 + 40 + av / 2 + px(14), { size: px(40), weight: 800, colour: '#FFFFFF', body, rtl: r });
+  const tx = r ? ax - av / 2 - 24 : ax + av / 2 + 24;
+  say(ctx, a.name || '', tx, y0 + 40 + px(36), { size: px(34), weight: 800, align: r ? 'right' : 'left', body, rtl: r, max: w0 - av - 120 });
+  say(ctx, a.nowLabel || '', tx, y0 + 40 + px(76), { size: px(26), weight: 500, colour: '#666666', align: r ? 'right' : 'left', body, rtl: r });
+  const sx = r ? x0 + w0 - 40 : x0 + 40;
+  ctx.font = `500 ${px(36)}px ${body}`;
+  const ls = wrap(ctx, a.words.post || '', w0 - 80, 4);
+  const ty = y0 + 40 + av + px(54);
+  part(ctx, 'words', [x0 + 30, ty - px(40), w0 - 60, ls.length * px(48) + px(10)],
+    () => ls.forEach((l, i) => say(ctx, l, sx, ty + i * px(48), { size: px(36), weight: 500, align: r ? 'right' : 'left', body, rtl: r })));
+  const iy = ty + ls.length * px(48) + px(10);
+  const actH = px(80);
+  const room = footTop - 30 - actH - iy;
+  if (room > 160) photoWithPrice(ctx, a, x0 + 40, iy, w0 - 80, room - 10, body);
+  // Comment, share and like, drawn as outlines, no numbers.
+  const ay = footTop - 30 - actH / 2 - 10;
+  ctx.strokeStyle = '#666666';
+  ctx.lineWidth = 4;
+  [0.2, 0.5, 0.8].forEach((f, i) => {
+    const cx = x0 + w0 * f;
+    ctx.beginPath();
+    if (i === 0) ctx.roundRect(cx - 20, ay - 16, 40, 30, 10);
+    if (i === 1) { ctx.moveTo(cx - 18, ay + 14); ctx.lineTo(cx - 18, ay - 4); ctx.lineTo(cx + 16, ay - 4); ctx.moveTo(cx + 6, ay - 14); ctx.lineTo(cx + 16, ay - 4); ctx.lineTo(cx + 6, ay + 6); }
+    if (i === 2) { ctx.moveTo(cx, ay + 16); ctx.bezierCurveTo(cx - 34, ay - 6, cx - 14, ay - 30, cx, ay - 12); ctx.bezierCurveTo(cx + 14, ay - 30, cx + 34, ay - 6, cx, ay + 16); }
+    ctx.stroke();
+  });
+}
+
+// "Us vs the usual way" (9f.6, Dr. Squatch's checklist): this business
+// beside the usual way of getting the same thing, never a named rival.
+function drawVersus(canvas, a) {
+  const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
+  const [usual = '', ...rest] = lineList(a.words.versus);
+  const rows = rest.slice(0, 3).map((l) => l.split('|').map((x) => x.trim()));
+  ctx.font = `800 ${px(56)}px ${body}`;
+  const hl = wrap(ctx, a.words.headline || '', W - 140, 2);
+  const y0 = top + px(10);
+  const rh = px(104);
+  const headH = px(84);
+  const tableY = y0 + hl.length * px(66) + px(28);
+  const tableH = headH + rows.length * rh;
+  part(ctx, 'words', [60, y0, W - 120, tableY + tableH - y0], () => {
+    hl.forEach((l, i) => say(ctx, l, W / 2, y0 + px(56) + i * px(66), { size: px(56), weight: 800, colour: L.text, body, rtl: a.rtl }));
+    card(ctx, 60, tableY, W - 120, tableH, 32);
+    const colW = (W - 120) / 2;
+    // Ours on the reading side: left in English, right in Hebrew.
+    const oursX = a.rtl ? 60 + colW : 60;
+    const theirsX = a.rtl ? 60 : 60 + colW;
+    ctx.fillStyle = a.brand || ACCENT;
+    ctx.beginPath();
+    ctx.roundRect(oursX + 14, tableY + 14, colW - 28, headH - 28, 18);
+    ctx.fill();
+    say(ctx, a.name || '', oursX + colW / 2, tableY + headH / 2 + px(12), { size: px(32), weight: 800, colour: '#FFFFFF', body, rtl: a.rtl, max: colW - 60 });
+    say(ctx, usual, theirsX + colW / 2, tableY + headH / 2 + px(12), { size: px(32), weight: 700, colour: '#666666', body, rtl: a.rtl, max: colW - 40 });
+    rows.forEach(([ours = '', theirs = ''], i) => {
+      const ry = tableY + headH + i * rh;
+      ctx.fillStyle = '#E3E3E3';
+      ctx.fillRect(80, ry, W - 160, 2);
+      [[oursX, ours, true], [theirsX, theirs, false]].forEach(([cx, text, good]) => {
+        const mark = px(22);
+        const mx = a.rtl ? cx + colW - 34 - mark : cx + 34 + mark;
+        ctx.fillStyle = good ? '#1F8A50' : '#B42318';
+        ctx.beginPath();
+        ctx.arc(mx, ry + rh / 2, mark, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#FFFFFF';
+        ctx.lineWidth = 5;
+        ctx.beginPath();
+        if (good) { ctx.moveTo(mx - 10, ry + rh / 2); ctx.lineTo(mx - 3, ry + rh / 2 + 8); ctx.lineTo(mx + 11, ry + rh / 2 - 9); } else { ctx.moveTo(mx - 8, ry + rh / 2 - 8); ctx.lineTo(mx + 8, ry + rh / 2 + 8); ctx.moveTo(mx + 8, ry + rh / 2 - 8); ctx.lineTo(mx - 8, ry + rh / 2 + 8); }
+        ctx.stroke();
+        const tw = colW - mark * 2 - 80;
+        ctx.font = `${good ? 700 : 500} ${px(28)}px ${body}`;
+        const tl = wrap(ctx, text, tw, 2);
+        const tx = a.rtl ? mx - mark - 16 : mx + mark + 16;
+        tl.forEach((l, j) => say(ctx, l, tx, ry + rh / 2 + px(10) - (tl.length - 1) * px(17) + j * px(34),
+          { size: px(28), weight: good ? 700 : 500, colour: good ? INK : '#666666', align: a.rtl ? 'right' : 'left', body, rtl: a.rtl }));
+      });
+    });
+  });
+  productBelow(ctx, a, tableY + tableH + px(30), footTop, W, body);
+}
+
+// "Reasons" (9f, Tube Science's "five reasons", in a notes app): a title
+// and one reason a line, numbered, then the product.
+function drawReasons(canvas, a) {
+  const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
+  const [title = '', ...rest] = lineList(a.words.reasons);
+  const reasons = rest.slice(0, 5);
+  const x0 = 70;
+  const w0 = W - 140;
+  const y0 = top;
+  const r = dirOf(title + reasons.join(' '), a.rtl) === 'rtl';
+  const sx = r ? x0 + w0 - 50 : x0 + 50;
+  const al = r ? 'right' : 'left';
+  ctx.font = `800 ${px(50)}px ${body}`;
+  const tl = wrap(ctx, title, w0 - 100, 2);
+  const lh = px(60);
+  const h = px(70) + tl.length * px(60) + px(20) + reasons.length * lh + px(30);
+  part(ctx, 'words', [x0, y0, w0, h], () => {
+    card(ctx, x0, y0, w0, h, 30);
+    say(ctx, `${r ? '›' : '‹'} ${a.notesLabel || 'Notes'}`, sx, y0 + px(50), { size: px(28), weight: 600, colour: '#C99400', align: al, body, rtl: a.rtl });
+    let y = y0 + px(70);
+    tl.forEach((l) => { y += px(60); say(ctx, l, sx, y - px(8), { size: px(50), weight: 800, align: al, body, rtl: a.rtl }); });
+    y += px(20);
+    reasons.forEach((l, i) => {
+      y += lh;
+      const n = `${i + 1}.`;
+      say(ctx, n, sx, y - px(10), { size: px(36), weight: 800, colour: '#C99400', align: al, body, rtl: a.rtl });
+      say(ctx, l, r ? sx - px(52) : sx + px(52), y - px(10), { size: px(36), weight: 500, colour: '#333333', align: al, body, rtl: a.rtl, max: w0 - 160 });
+    });
+  });
+  productBelow(ctx, a, y0 + h + px(30), footTop, W, body);
+}
+
+// "Honest" (9f.4, Simon's "This stuff taste nasty"): a plain trade-off the
+// listing itself states, why it is good for the reader, the product beside.
+function drawHonest(canvas, a) {
+  const { ctx, W, body, head, px, top, L, footTop } = ground(canvas, a);
+  const [hl = '', ...rest] = lineList(a.words.honest);
+  const r = dirOf(hl, a.rtl) === 'rtl';
+  const al = r ? 'right' : 'left';
+  const sx = r ? W - 80 : 80;
+  ctx.font = `700 ${px(70)}px ${head}`;
+  const hs = wrap(ctx, `“${hl}”`, W - 160, 3);
+  const y0 = top + px(10);
+  const hh = hs.length * px(80);
+  part(ctx, 'words', [70, y0, W - 140, hh + px(10)], () => {
+    hs.forEach((l, i) => {
+      ctx.font = `700 ${px(70)}px ${head}`;
+      ctx.fillStyle = L.text;
+      ctx.textAlign = al;
+      ctx.direction = r ? 'rtl' : 'ltr';
+      ctx.fillText(l, sx, y0 + px(68) + i * px(80));
+    });
+  });
+  const colW = (W - 160) * 0.56;
+  ctx.font = `500 ${px(34)}px ${body}`;
+  const ls = rest.slice(0, 3).flatMap((l) => [...wrap(ctx, l, colW, 3), '']);
+  const ly = y0 + hh + px(50);
+  part(ctx, 'name', [r ? W - 80 - colW : 80, ly - px(30), colW, ls.length * px(42)],
+    () => ls.forEach((l, i) => say(ctx, l, sx, ly + i * px(42), { size: px(34), weight: 500, colour: L.text, align: al, body, rtl: a.rtl })));
+  const px0 = r ? 80 : 80 + colW + 30;
+  const pw = W - 160 - colW - 30;
+  const ph = footTop - 30 - ly;
+  if (ph > 160) {
+    const [cx, cy, cw, ch] = product(ctx, a.item, px0, ly - px(20), pw, ph);
+    const rr = Math.round(Math.min(90, ch * 0.3));
+    sticker(ctx, { x: r ? cx + rr * 0.6 : cx + cw - rr * 0.6, y: cy + ch - rr * 0.6, r: rr, item: a.item, fromWord: a.fromWord, body });
+  }
+}
+
+// "A moment in the day" (9f.8, the FLO ads): one serif line placing it in
+// the reader's day, its key words in italic in the look's accent colour.
+function drawMoment(canvas, a) {
+  const { ctx, W, body, head, px, top, L, footTop } = ground(canvas, a);
+  const raw = a.words.moment || '';
+  const words = [];
+  raw.split(/(\*[^*]+\*)/).forEach((seg) => {
+    const acc = /^\*.*\*$/.test(seg);
+    seg.replace(/\*/g, '').split(' ').filter(Boolean).forEach((w) => {
+      // A full stop or comma alone stays with the word before it.
+      if (/^[.,!?;:]+$/.test(w) && words.length) words[words.length - 1][0] += w;
+      else words.push([w, acc]);
+    });
+  });
+  const fontOf = (acc, size) => `${acc ? 'italic 600' : '600'} ${size}px ${head}`;
+  let size = px(78);
+  let lines = [];
+  for (; size >= px(44); size -= 4) {
+    lines = [[]];
+    let width = 0;
+    words.forEach(([w, acc]) => {
+      ctx.font = fontOf(acc, size);
+      const ww = ctx.measureText(`${w} `).width;
+      if (width + ww > W - 140 && lines[lines.length - 1].length) { lines.push([]); width = 0; }
+      lines[lines.length - 1].push([w, acc, ww]);
+      width += ww;
+    });
+    if (lines.length <= 2) break;
+  }
+  const y0 = top + px(70);
+  say(ctx, (a.eyebrow || '').toUpperCase(), W / 2, y0 - px(20), { size: px(28), weight: 700, colour: L.sub, body, rtl: a.rtl, max: W - 160 });
+  const lh = size * 1.15;
+  part(ctx, 'words', [70, y0, W - 140, lines.length * lh + px(10)], () => lines.forEach((ln, i) => {
+    const r = dirOf(ln.map(([w]) => w).join(' '), a.rtl) === 'rtl';
+    const total = ln.reduce((t, [, , ww]) => t + ww, 0);
+    let x = r ? (W + total) / 2 : (W - total) / 2;
+    ln.forEach(([w, acc, ww]) => {
+      ctx.font = fontOf(acc, size);
+      ctx.fillStyle = acc ? L.word : L.text;
+      ctx.textAlign = r ? 'right' : 'left';
+      ctx.direction = r ? 'rtl' : 'ltr';
+      ctx.fillText(w, x, y0 + size + i * lh);
+      x += r ? -ww : ww;
+    });
+  }));
+  productBelow(ctx, a, y0 + lines.length * lh + px(50), footTop, W, body);
+}
+
 // "Make your own" (Tzvi, 4 Nov 2026): a background the owner picks (a
 // photo from the search, one of their own, or one drawn here), with their
 // product, their words and the price on it, each one draggable.
@@ -1624,7 +1988,8 @@ function drawCustom(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, it
 export function adIssues(words, item) {
   if (!words) return [];
   const text = [words.headline, ...(words.points || []), words.big_word, words.caller, words.decline,
-    words.search, words.switches, words.checklist].join(' ');
+    words.search, words.switches, words.checklist, words.situations, words.mirror, words.chat, words.post,
+    words.versus, words.reasons, words.honest, words.moment].join(' ');
   const prices = text.match(/[$€£₪]\s?\d[\d,.]*|\d[\d,.]*\s?(?:₪|ILS|NIS|USD|EUR|\$|ש"ח|שקל)/gi) || [];
   const own = item ? String(Math.round(item.price)) : null;
   return prices.filter((p) => p.replace(/[^\d]/g, '') !== own).length ? ['price'] : [];
@@ -1633,8 +1998,14 @@ export function adIssues(words, item) {
 // Every design, drawn the same way for the big picture and the small
 // previews. `native` (Story) is drawn in the story shape only.
 // A gallery design is "layout:look" (THEMED below); the rest are one look.
+// The words each 9f layout reads, and edits in the panel.
+const NEW_FIELDS = ['situations', 'mirror', 'chat', 'post', 'versus', 'reasons', 'honest', 'moment', 'people'];
+const FIELD_OF = { situation: 'situations', mirror: 'mirror', chat: 'chat', post: 'post', versus: 'versus',
+  reasons: 'reasons', honest: 'honest', moment: 'moment' };
 const THEMED = { behind: drawBehind, phonepop: drawPhonePop, calling: drawCalling,
-  notify: drawNotify, search: drawSearch, toggle: drawToggle, checklist: drawChecklist, custom: drawCustom };
+  notify: drawNotify, search: drawSearch, toggle: drawToggle, checklist: drawChecklist, custom: drawCustom,
+  situation: drawSituation, mirror: drawMirror, chat: drawChat, post: drawPost, versus: drawVersus,
+  reasons: drawReasons, honest: drawHonest, moment: drawMoment };
 function render(canvas, design, a) {
   const [layout, lookKey] = design.split(':');
   const look = lookKey || a.look;
@@ -1692,6 +2063,10 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const [bgResults, setBgResults] = useState([]);
   const [bgBusy, setBgBusy] = useState(false);
   const [reviewIdx, setReviewIdx] = useState(0);
+  // Which "real moment" line the situation ad shows, and which reader the
+  // words were written for (9f.1, 9f.7).
+  const [situationIdx, setSituationIdx] = useState(0);
+  const [forWhom, setForWhom] = useState('');
   const [faqIdx, setFaqIdx] = useState(0);
   const [itemImgs, setItemImgs] = useState([]);
   const [thumbs, setThumbs] = useState({});
@@ -1717,11 +2092,11 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   // being written must not let the older reply land on top.
   const langNow = useRef(lang);
   langNow.current = lang;
-  const write = async (row = null) => {
+  const write = async (row = null, who = forWhom) => {
     setBusy(true);
     try {
       const { data } = await axios.post(`${API}/ads/make`,
-        { target_type: targetType, target_id: target.id, lang, words: !row },
+        { target_type: targetType, target_id: target.id, lang, words: !row, for_whom: who },
         { headers: { Authorization: `Bearer ${token}` } });
       if (langNow.current !== lang) return;
       setAd(data);
@@ -1732,7 +2107,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
         setSavedId('');
         setWords({ headline: data.headline, points: data.points, caption: data.caption,
           big_word: data.big_word || '', caller: data.caller || '', decline: data.decline || '',
-          search: data.search || '', switches: data.switches || '', checklist: data.checklist || '' });
+          search: data.search || '', switches: data.switches || '', checklist: data.checklist || '',
+          ...Object.fromEntries(NEW_FIELDS.map((k) => [k, data[k] || ''])) });
       }
       const [loaded, its] = await Promise.all([
         Promise.all((data.photos || []).slice(0, 4).map(loadImage)),
@@ -1815,6 +2191,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   }
   const shownImgs = featured ? [featured.img, ...imgs.filter((i) => i.src !== featured.img.src)] : imgs;
   const issues = adIssues(words, targetType === 'property' ? null : featured);
+  // One message per ad (9f.3): a long headline is a sign of two.
+  const headlineWords = (words?.headline || '').split(/\s+/).filter(Boolean).length;
   const reviews = ad?.reviews || NONE;
   const eyebrow = targetType === 'property' ? areaLabel(target.area, lt) : target.name;
   const cta = targetType === 'property' ? lt('ads.ctaStay', 'See photos and book') : lt('ads.ctaBusiness', 'See more and order');
@@ -1834,6 +2212,15 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     ['toggle', t('ads.toggleL', 'Switches'), !!featured && lineList(words?.switches).length >= 2],
     // Offered only when the words came back as a real list, not one line.
     ['checklist', t('ads.checklistL', 'Checklist'), !!featured && lineList(words?.checklist).length >= 3],
+    // From the 4 Nov videos (docs/static-ad-rules.md 9f).
+    ['situation', t('ads.situationL', 'A real moment'), !!featured && lineList(words?.situations).length > 0],
+    ['mirror', t('ads.mirrorL', 'Is this you?'), !!featured && lineList(words?.mirror).length >= 3],
+    ['chat', t('ads.chatL', 'Text messages'), !!featured && lineList(words?.chat).length >= 2],
+    ['post', t('ads.postL', 'Social post'), !!featured && !!words?.post],
+    ['versus', t('ads.versusL', 'Us vs the usual'), !!featured && lineList(words?.versus).length >= 3],
+    ['reasons', t('ads.reasonsL', 'Reasons list'), !!featured && lineList(words?.reasons).length >= 3],
+    ['honest', t('ads.honestL', 'Honest'), !!featured && lineList(words?.honest).length >= 2],
+    ['moment', t('ads.momentL', 'Moment in the day'), !!featured && !!words?.moment],
   ];
   const holiday = useMemo(() => nextHoliday(), []);
   const looks = [...(target.brand_color ? ['brand'] : []), ...(holiday ? [holiday] : []), ...LOOKS];
@@ -1910,7 +2297,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       review, faq: faqs.length ? faqs[faqIdx % faqs.length] : null,
       sourceLabel: review?.source === 'google' ? lt('ads.googleReview', 'Google review') : '',
       name: targetType === 'property' ? (target.title || '') : target.name,
-      nowLabel: lt('ads.now', 'now'),
+      nowLabel: lt('ads.now', 'now'), notesLabel: lt('ads.notes', 'Notes'),
+      situation: (() => { const all = lineList(words?.situations); return all.length ? all[situationIdx % all.length] : ''; })(),
     };
   };
 
@@ -1959,7 +2347,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [words, format, design, imgs, itemImgs, cutItems, pick, rtl, eyebrow, price, cta, shortUrl, reviews, reviewIdx, faqs, faqIdx,
-    look, customHex, fontIdx, ink, bg, moves]);
+    look, customHex, fontIdx, ink, bg, moves, situationIdx]);
 
   // Every design at once, small, so the owner picks one by eye (rules 9b).
   // A moment after typing stops: each preview is a full drawing.
@@ -2315,6 +2703,18 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
             </div>
           </div>
         )}
+        {(() => {
+          const used = new Set((saved || []).map((r) => (r.design || '').split(':')[0]));
+          const next = used.size ? shown.find(([k]) => !used.has(k) && k !== design && k !== 'custom') : null;
+          return next ? (
+            <p className="text-xs mb-3" style={{ color: 'var(--brand-muted)' }} data-testid="ad-try-next">
+              {t('ads.tryNextWhy', 'Different-looking ads reach more people than the same one again.')}{' '}
+              <button type="button" onClick={() => setDesign(next[0])} className="font-semibold underline" style={{ color: 'var(--brand-primary)' }}>
+                {t('ads.tryNext', 'Try {{name}}', { name: next[1] })}
+              </button>
+            </p>
+          ) : null;
+        })()}
         {/* The gallery: every design, already made from this business. */}
         <p className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('ads.galleryTitle', 'Pick a look. Every ad is made from your own product, name and price.')}</p>
         <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 max-h-[36vh] overflow-y-auto mb-5 pe-1" data-testid="ad-gallery">
@@ -2465,11 +2865,25 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
               <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.language', 'Language of the ad')}</p>
               <Chips value={lang} set={setLang} options={[['en', 'English'], ['he', 'עברית']]} />
             </div>
+            {lineList(words?.people).length > 0 && (
+              <div className="space-y-1.5" data-testid="ad-who">
+                <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.whoTitle', 'Who is this ad for?')}</p>
+                <div className="flex flex-wrap gap-1.5">
+                  {[['', t('ads.whoAll', 'Everyone')], ...lineList(words.people).map((x) => [x, x])].map(([k, label]) => (
+                    <button key={k || 'all'} type="button" disabled={busy} aria-pressed={forWhom === k}
+                      onClick={() => { setForWhom(k); write(null, k); }} className={`${chip(forWhom === k)} disabled:opacity-40`} style={chipStyle(forWhom === k)}
+                      data-testid={`ad-who-${k ? 'p' : 'all'}`}>
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
             {words && (
               <div className="space-y-2" dir={rtl ? 'rtl' : 'ltr'}>
                 <div className="flex items-center justify-between" dir="auto">
                   <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.words', 'The words (change anything)')}</p>
-                  <button type="button" onClick={() => write()} disabled={busy} className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-rewrite">
+                  <button type="button" onClick={() => write(null, forWhom)} disabled={busy} className="inline-flex items-center gap-1 text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-rewrite">
                     <RefreshCw size={12} /> {t('ads.rewrite', 'Write again')}
                   </button>
                 </div>
@@ -2490,6 +2904,21 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                   </div>
                 )}
                 <input className={field} value={words.headline} maxLength={60} onChange={(e) => setWords({ ...words, headline: e.target.value })} aria-label={t('ads.headline', 'Headline')} />
+                {headlineWords > 9 && (
+                  <p className="text-xs font-semibold rounded-lg px-2.5 py-2" style={{ background: '#FFF4E5', color: '#7A4100' }} data-testid="ad-one-message">
+                    {t('ads.oneMessage', 'One idea per ad works best: try 9 words or fewer in the headline.')}
+                  </p>
+                )}
+                {FIELD_OF[layout] && (
+                  <textarea className={field} rows={FIELD_OF[layout] === 'post' || FIELD_OF[layout] === 'moment' ? 2 : 4} value={words[FIELD_OF[layout]] || ''}
+                    onChange={(e) => setWords({ ...words, [FIELD_OF[layout]]: e.target.value })}
+                    aria-label={t(`ads.${FIELD_OF[layout]}Field`)} placeholder={t(`ads.${FIELD_OF[layout]}Field`)} data-testid={`ad-field-${FIELD_OF[layout]}`} />
+                )}
+                {layout === 'situation' && lineList(words.situations).length > 1 && (
+                  <button type="button" onClick={() => setSituationIdx((i) => i + 1)} className="text-xs font-semibold" style={{ color: 'var(--brand-primary)' }} data-testid="ad-next-situation">
+                    {t('ads.anotherMoment', 'Another moment')}
+                  </button>
+                )}
                 {layout === 'behind' && (
                   <input className={field} value={words.big_word} maxLength={12} onChange={(e) => setWords({ ...words, big_word: e.target.value })}
                     aria-label={t('ads.bigWordField', 'The big word')} placeholder={t('ads.bigWordField', 'The big word')} />

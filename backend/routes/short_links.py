@@ -614,6 +614,49 @@ Return ONE JSON object:
             last line starting "x " that is getting this listing's thing
             ("x Order the meat board"). Each at most 32 characters.
 
+From docs/static-ad-rules.md 9f. Every line below is built only from the
+listing and its customer reviews; leave a field "" when they do not give it.
+  situations up to four lines, each one real moment when someone needs
+            this, then a bar, then the plain answer: "Cooking for twenty on
+            Friday? | Order the board." The moment first, the thing they
+            would do instead is implied. Take moments from the reviews when
+            a customer names one. Each line at most 70 characters.
+  mirror    four lines naming the exact reader. First a short question
+            naming them by their moment, at most 22 characters ("Twenty
+            guests on Friday?"); then three short lines describing that
+            moment as they live it, each at most 40 characters, warm, never
+            mocking. No product name in these four lines.
+  chat      four short text messages, at most 40 characters each, a reader
+            asking and this business answering, alternating, the reader
+            first: real questions a customer would ask, answered only with
+            facts from the listing.
+  post      what this business would post on its own social page about
+            this, in its own voice, at most 140 characters. No numbers of
+            likes or followers, no quotes from customers.
+  versus    four lines comparing this with the usual way of getting the
+            same thing (never a named competitor). First line: that usual
+            way in at most 22 characters ("Cooking it yourself"). Then three
+            lines "this listing's fact | the usual way's matching fact", each
+            side at most 26 characters. Only facts the listing states.
+  reasons   a title "N reasons to ..." (at most 34 characters), then three
+            to five lines, each one reason from the listing, at most 34
+            characters, with no number in front.
+  honest    only when the listing itself states a limit or a trade-off
+            (made to order, a few a day, closed on Shabbat, needs a day's
+            notice): a short first-person headline that says it plainly, at
+            most 36 characters, then two or three lines saying why that is
+            good for the reader, each at most 44 characters. Otherwise "".
+  moment    one line at most 38 characters placing it in a moment of the
+            day or week, with the two or three most important words wrapped
+            in *stars*: "Friday dinner, *already sorted*."
+  people    three kinds of reader this suits, one per line, each at most
+            30 characters, plainly ("Families hosting on Shabbat"), only
+            as the listing and reviews support.
+
+Each field is ONE string; a field of several lines has them separated by
+line breaks, never as a list or an object. In Hebrew, speak to the reader
+in the plural (אתם, תזמינו), never as one man or one woman.
+
 Write in {language}. Every fact must come from the listing: never invent a
 view, a distance, a feature, a price or a review, and never add a quality
 the listing does not state (spacious, luxurious, quiet, prestigious, central,
@@ -913,6 +956,9 @@ class AdIn(BaseModel):
     # False when a saved ad is reopened: its own words come back with it,
     # so only the facts and photos are fetched and nothing is paid for.
     words: bool = True
+    # One of the "people" lines the owner picked: every word is written for
+    # that reader (who it is for comes first, 9f.7).
+    for_whom: str = ""
 
 
 @router.post("/ads/make")
@@ -924,9 +970,10 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
     await _assert_owns_target(body.target_type, body.target_id, user)
     facts, extra = await _ad_facts(body.target_type, body.target_id)
     link = _public(await ensure_short_link(body.target_type, body.target_id, user["user_id"]))
+    reviews = await _ad_reviews(body.target_type, body.target_id)
     if not body.words:
         check_rate(request, bucket=f"ad_facts:{user['user_id']}", limit=200, window_seconds=86400)
-        return {"link": link, "reviews": await _ad_reviews(body.target_type, body.target_id), **extra}
+        return {"link": link, "reviews": reviews, **extra}
     # Each call spends real API credit: about a cent, so 20 a day per person.
     check_rate(request, bucket=f"ad_make:{user['user_id']}", limit=20, window_seconds=86400)
 
@@ -938,6 +985,12 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
 
     if not ANTHROPIC_API_KEY:
         raise HTTPException(status_code=503, detail="The ad maker is not switched on here.")
+    # The customers' own words, so situations and the mirror come from real
+    # moments (9f.1), and the reader the owner picked, if any (9f.7).
+    if reviews:
+        facts["customer_reviews"] = [r["text"] for r in reviews]
+    if body.for_whom.strip():
+        facts["write_every_field_for_this_reader"] = body.for_whom.strip()[:60]
     chat = LlmChat(
         api_key=ANTHROPIC_API_KEY, session_id=str(uuid.uuid4()),
         system_message=_AD_SYSTEM.format(language="Hebrew" if body.lang == "he" else "English"),
@@ -956,23 +1009,35 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
 
     def clean(v: Any, n: int) -> str:
         # The model sometimes answers a several-line field as a list; the
-        # picture reads one line each.
+        # picture reads one line each. Or as an object of a title and lines:
+        # flattened the same way.
+        if isinstance(v, dict):
+            v = [y for x in v.values() for y in (x if isinstance(x, list) else [x])]
         if isinstance(v, list):
             v = "\n".join(str(x) for x in v)
         # The copy rules ban the long dash; the model reaches for it anyway.
         return re.sub(r"\s*[–—]\s*", ", ", str(v or "")).strip()[:n]
 
     extra_words = {k: clean(data.get(k), n) for k, n in (("big_word", 12), ("caller", 24), ("decline", 16),
-                                                    ("search", 60), ("switches", 120), ("checklist", 150))}
+                                                    ("search", 60), ("switches", 120), ("checklist", 150),
+                                                    ("situations", 300), ("mirror", 170), ("chat", 180),
+                                                    ("post", 160), ("versus", 240), ("reasons", 220),
+                                                    ("honest", 180), ("moment", 50), ("people", 100))}
+    # The same rule as the headline: unclaimed praise drops the line (9c).
+    # Praise counts as claimed only when the owner's own listing says it,
+    # not because a customer review did.
+    source = json.dumps({k: v for k, v in facts.items() if k != "customer_reviews"}, ensure_ascii=False, default=str)
+    for k in ("situations", "mirror", "chat", "post", "versus", "reasons", "honest", "moment"):
+        extra_words[k] = "\n".join(line for line in extra_words[k].split("\n") if not _unclaimed(line, source))
     words = _strip_praise({
         "headline": clean(data.get("headline"), 60),
         "points": [clean(p, 40) for p in (data.get("points") or []) if str(p).strip()][:3],
         "caption": clean(data.get("caption"), 800),
-    }, json.dumps(facts, ensure_ascii=False, default=str), str(facts.get("title") or facts.get("business_name") or ""))
+    }, source, str(facts.get("title") or facts.get("business_name") or ""))
     return {
         **words,
         **extra_words,
         "link": link,
-        "reviews": await _ad_reviews(body.target_type, body.target_id),
+        "reviews": reviews,
         **extra,
     }
