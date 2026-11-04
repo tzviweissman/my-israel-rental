@@ -8,6 +8,7 @@ rules (docs/page-generation-rules.md).
 
 | Date | Source | Notes |
 |---|---|---|
+| 4 Nov 2026 | Four YouTube videos: inspiration galleries, a flashlight hero, a 3D product site, brand kits | [videos-2026-11-04/](videos-2026-11-04/README.md): product to turn, counted numbers, compare cards, following light, new galleries; proposals wait for Tzvi |
 | 2 Nov 2026 | Pinterest ads, about 50 for every category on the site (24 folders, 1,194 ads; plus 8 idea folders, 267 ads, of what the free ad maker can draw) | [pinterest-ads-2026-11-02/](pinterest-ads-2026-11-02/README.md): each ad labelled by idea, how it could be made and how much it stands out; `index.html` filters them. Read before designing any ad |
 | 1 Nov 2026 | Seventeen YouTube videos: cinematic websites, realistic AI food, how real food adverts are filmed | [videos-2026-11-01/](videos-2026-11-01/README.md): page rules 3w, a food-shot prompt template, real against fake frames |
 | 22 Oct 2026 | Awwwards Sites of the Day by business category: how whole sites are built (page anatomy, not effects) | [awwwards-anatomy-2026-10-22/](awwwards-anatomy-2026-10-22/): food, shops, events-sports-homes, services; the source of rule 3t (each site looks like its category) |
