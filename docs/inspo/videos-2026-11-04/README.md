@@ -175,3 +175,34 @@ Items 1 to 6 became rules 3x on 4 Nov 2026 (Tzvi: "yes"). From the second look:
 9. Prices beside the booking form, so the price is in view while filling it.
 10. Light buttons on a product to turn (shop light, evening), where the owner's item is shown in use.
 11. A thin scroll progress line on long single pages.
+
+Items 7 to 11 became rules 3x.8 to 3x.12 on 4 Nov 2026 (Tzvi: "yes do all five and download the file"), with
+`scripts/check-web-basics.mjs` for 3x.8 (it fails Bake away on eight counts and passes a page made from the
+updated starter kit).
+
+## The 3D site's build file (CLAUDE.md, 81 KB, from the video's Notion page, read 4 Nov 2026)
+
+Six phases, each ending on one question and a "next": a silent preflight, a brand kit file, the hero
+still and the choice of experience, bringing it to life, the build, revisions, publishing. What we took:
+
+- **Is it suitable for 3D?** Image-to-3D handles solid, opaque, chunky things and fails on thin or
+  see-through parts (spokes, cables, glass, mesh, hair, foliage), people and places. It recommends the
+  film for those, honestly, before any credit (3x.11).
+- **The 3D source picture:** the same item, alone, whole, three-quarter view at eye level, plain mid-grey
+  ground, even light, no props or floor reflections; a pure side view for long thin things.
+- **Two 3D candidates** (Meshy 7 with textures and PBR, and Tripo), each reviewed on one page from four
+  angles: outline matches the photo, the key detail is crisp, the back and base believable, nothing
+  fused to the base, no smeared letters, not toy-like. Never ship a model you would not put on the
+  thumbnail.
+- **Hotspots** carry the direction their surface faces, so a dot hides when that side turns away; the drag
+  layer keeps `touch-action: pan-y` or a phone cannot scroll past it.
+- **Design bans** live in the brand kit and grow with every look the owner dislikes (its starting list:
+  no cream background, no italic accent words in headlines, no "01 / 02" section labels, no monospace
+  labels, no pill buttons, no gradient headline text, no emoji icons, no three identical cards in a row,
+  no purple-to-blue gradients, no glass on every card) (3x.7).
+- **A copy gate:** a search for long dashes and stock words (leverage, seamless, empower, unlock, robust,
+  elevate, delve...) before showing. We already ban the long dash and stock phrases in 5.
+- **Gotchas we had already hit:** a scrubbed film needs every frame a keyframe and a server with Range
+  support (our 3h.22); a hidden preview pane pauses animation, so blank screenshots are not a broken site.
+- Discount: it lets the AI invent specs and contact details as "placeholders", and sends the form to an
+  email link. Both are refused by our rules (1, 3k).

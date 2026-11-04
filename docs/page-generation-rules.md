@@ -1957,7 +1957,48 @@ picks from by what the business has. Items 5 and 6 are occasional touches. Item 
 7. **A brand kit before the first picture.** Every paid build keeps `BRAND.md` in its folder, written
    and shown to Tzvi before any picture is generated: the colours (each with its use), the two fonts,
    the logo versions (on light and on dark), and the textures or backgrounds, generated in the brand's
-   colours from the owner's own photos if needed. Every picture and page uses it. (Videos 3 and 4.)
+   colours from the owner's own photos if needed, and a **Design bans** list: looks this site must not
+   use, starting from the bans in 3c and grown with every look Tzvi turns down on it. Every picture and
+   page uses it. (Videos 3 and 4; the bans list from the 3D site's build file.)
+
+**From the second look** (Tzvi, 4 Nov 2026: "yes do all five"; frames, the 3D site's build file and the
+power-design web rulebook, notes in the same folder):
+
+8. **The web basics, on every page** (`scripts/check-web-basics.mjs`, run by publish-page). A "Skip to
+   content" link is the first thing Tab reaches. There is exactly one h1, and no heading level is
+   skipped. Every link, button and field shows a focus ring of 2 px or more. Every field has a label a
+   screen reader reads (a placeholder is not one), and phone, email and name fields have the right type
+   and autocomplete so a phone fills them in. The basket count and the form's errors and sent message
+   are in a live region. The opening picture loads first and pictures far down load lazily. There are at
+   most two font families. Each page has a title of 60 characters or less, a description of 155 or
+   less, og:title and a 1200x630 share picture. The home page describes the business for Google
+   (JSON-LD of its kind, Bakery, Store, LocalBusiness, from the record's facts only). `starter/sitekit.py`
+   writes the skip link, the live count, the footer headings and the JSON-LD.
+9. **A request form that writes the summary as you fill it**, for a business whose order is a request
+   (a caterer, a mover, a cleaner, a photographer, events). Choices are chips, and beside the form (under
+   it on a phone) one plain paragraph builds as the fields fill ("A deep clean of a 4-room flat in Beit
+   Shemesh, Sunday 9 Nov, morning"). That paragraph is what is sent. It never states a price or a promise
+   the record does not give. (Video 4, the brief form.)
+10. **The price stays in view while the form is filled.** On a laptop the prices or the running total sit
+    beside the order or booking form. On a phone a total line sits above the send button. (Video 3, the
+    booking section.)
+11. **Making a product to turn** (3x.1), from the 3D site's build file:
+    - **Suitability first.** Use 3D only for a solid, opaque item: a box, a cake, a jar, a bottle, a
+      board. Thin or see-through parts (strings, balloons, glass, wire, hair, foliage), people and places
+      get the film instead.
+    - **The source picture.** Made from the owner's photo: the whole item, a three-quarter view, on a
+      plain mid-grey ground with even light. A long, thin item gets a side view.
+    - **Two candidates, reviewed.** Make two, from two 3D models, through the API with the cost checked
+      first. Look at each from four angles. Keep one only if its outline matches the photo, the key detail
+      is crisp, the back and base are believable, nothing of the ground is fused on, and no letters are
+      smeared on it. If neither passes, use the photo.
+    - **Lights.** Two or three light buttons named for the business's own world ("Kitchen light",
+      "Shabbat table"), each checked for readable words.
+    - **On a phone.** The drag area keeps `touch-action: pan-y`, so a swipe up or down still scrolls. A dot
+      hides when its side turns away.
+12. **A thin progress line** may run down the edge of a long single page (six screens or more). It is 2
+    to 3 px, in the accent colour, hidden from screen readers, and never over the menu bar or the phone
+    bar. (Video 3.)
 
 **Sources.** The galleries in the notes (Godly for scrolling videos of whole sites, Hover States for what
 buttons and pictures do, Unsection for single sections, Commerce Cream for shops on a phone, and the rest)

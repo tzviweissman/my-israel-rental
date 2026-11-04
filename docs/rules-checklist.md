@@ -295,7 +295,12 @@ R3x.3 | Tabs for sizes or packages change one panel in place: picture, price and
 R3x.4 | With two or more sizes or packages, each is a card with its picture, price and the same measures in the same order | 3x.4 | LOOK; n/a with one size and no packages
 R3x.5 | A following light is used only for a dark-world business, has an off button, sweeps once by itself on a phone and with reduced motion, and never dims the words or main button | 3x.5 | LOOK on laptop and phone; n/a if not used
 R3x.6 | At most one sentence lights up word by word, and the site built just before does not have one | 3x.6 | LOOK; n/a if none
-R3x.7 | BRAND.md in the build folder (colours with their uses, two fonts, logo on light and dark, textures) was written before any picture was generated, and the site uses it | 3x.7 | LOOK: BRAND.md against the CSS
+R3x.7 | BRAND.md in the build folder (colours with their uses, two fonts, logo on light and dark, textures, Design bans) was written before any picture was generated, and the site uses it | 3x.7 | LOOK: BRAND.md against the CSS
+R3x.8 | Web basics on every page: skip link first, one h1 and no skipped levels, focus rings, labelled fields with type and autocomplete, live basket count and form messages, opening picture first and far ones lazy, two font families at most, title 60 and description 155 at most, og:title and a 1200x630 share picture, JSON-LD for the business on the home page | 3x.8 | script: check-web-basics
+R3x.9 | A request-type business's form builds a plain summary beside it as the fields fill, sends that summary, and states no price or promise the record lacks | 3x.9 | LOOK: fill the form on laptop and phone; n/a for a shop with a basket
+R3x.10 | The prices or running total stay in view beside the order or booking form on a laptop, and a total line sits above the send button on a phone | 3x.10 | LOOK: fill the form on laptop and phone; n/a with no prices
+R3x.11 | A product to turn passed the suitability check, was made from a grey-ground source of the owner's photo as two candidates reviewed from four angles, has two or three light buttons named for the business, and keeps touch-action pan-y on a phone | 3x.11 | LOOK: the review sheet and a phone swipe; n/a if not used
+R3x.12 | A progress line is used only on a page of six screens or more, 2 to 3 px in the accent, aria-hidden, never over the menu or phone bar | 3x.12 | LOOK; n/a if none
 
 ## 9. Finish
 

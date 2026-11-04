@@ -20,6 +20,9 @@ img { display: block; max-width: 100%; }
 h1, h2, h3 { font-family: var(--font-head); margin: 0; line-height: 1.04; }
 .wrap { max-width: 74rem; margin: 0 auto; padding-inline: var(--gutter); }
 :focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+/* the first Tab stop (rules 3x.8): hidden until a keyboard reaches it */
+.skip { position: absolute; left: -999px; top: .6rem; z-index: 100; padding: .6rem 1rem; background: var(--ink); color: var(--ground); border-radius: 6px; font-weight: 700; }
+.skip:focus { left: .6rem; }
 [hidden] { display: none !important; }
 .sym { font-family: var(--font-body); font-weight: 500; font-size: .62em; margin-right: .08em; vertical-align: .18em; }
 @media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
@@ -110,7 +113,7 @@ textarea.fld { min-height: 88px; resize: vertical; }
 /* the full footer (rules 3v.1): parts with a small heading, two to a row on a phone, then the base line */
 .foot.full { text-align: start; font-size: .92rem; padding: clamp(2.6rem, 6vw, 4rem) var(--gutter) calc(1.4rem + var(--pad-bar, 0px)); }
 .foot .fgrid { max-width: 74rem; margin: 0 auto; display: grid; grid-template-columns: 1.7fr repeat(3, 1fr); gap: 2rem clamp(1.5rem, 4vw, 3.5rem); }
-.foot.full h4 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; opacity: .7; }
+.foot.full h4, .foot.full h2 { margin: 0 0 .9rem; font: 600 .74rem/1.2 var(--font-body); letter-spacing: .16em; text-transform: uppercase; opacity: .7; }
 .foot.full nav { margin: 0; font-weight: 400; } .foot.full nav a { margin: 0 0 .55rem; }
 .foot .fgrid a, .foot .fgrid p { display: block; width: fit-content; margin: 0 0 .55rem; }
 .foot .fgrid a[href^="https://wa.me"], .foot .fgrid a[href^="tel:"] { white-space: nowrap; }

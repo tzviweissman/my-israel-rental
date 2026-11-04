@@ -136,7 +136,9 @@ const CHECK_ONLY = process.argv.includes('--check');
     // a scroll film plays as real video led by the scroll, not stretched still frames (Tzvi, 3 Nov 2026, rules 3h.22)
     ['check-film-video.mjs', 'has a scroll film that is not played as video', 'R3h.24'],
     // nothing over the film while it plays (Tzvi, 4 Nov 2026: "this is blocking a lot of the action")
-    ['check-film-clear.mjs', 'covers its film with words while it plays', 'R3h.25']]) {
+    ['check-film-clear.mjs', 'covers its film with words while it plays', 'R3h.25'],
+    // the web basics: skip link, headings, focus, labelled fields, live regions, images, share layer (Tzvi, 4 Nov 2026, rules 3x.8)
+    ['check-web-basics.mjs', 'misses web basics', 'R3x.8']]) {
     if (rule && newer.has(rule)) { console.log(`${script}: not run, rule ${rule} was added after this site was made`); continue; }
     let r = await run(script);
     if (r.code !== 0 && onlyTiming(r.out)) { console.log(`${script}: only a timing measure failed, running it once more`); r = await run(script); }

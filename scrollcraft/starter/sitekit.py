@@ -23,6 +23,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from html import escape
+import json
 
 KINDS = {
     # what each kind of number can do, said on the page (3o.4)
@@ -74,6 +75,8 @@ class Site:
     socials: list[tuple[str, str]] = field(default_factory=list)  # [('Instagram', url)], only real ones
     since: int | None = None      # founding year, for the base line
     year: int = 2026
+    ld_type: str = 'LocalBusiness'  # schema.org kind for Google (Bakery, Store, FoodEstablishment...), 3x.8
+    ld_extra: dict = field(default_factory=dict)  # more JSON-LD fields from the record (openingHours, makesOffer...)
     og_base: str = field(init=False, default='')
 
     def __post_init__(self):
@@ -95,14 +98,15 @@ class Site:
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?{self.fonts}&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="site.css">
-</head>
+{self.ld(desc, og) if page == 'index' else ''}</head>
 <body class="no-js" data-page="{page}">
+<a class="skip" href="#main">Skip to content</a>
 '''
 
     def header(self, page: str) -> str:
         cur = ' aria-current="page"'
         links = ''.join(f'<a href="{p}.html"{cur if p == page else ""}>{escape(t)}</a>' for p, t in self.pages)
-        count = '<span class="count" id="count" hidden></span>' if self.count else ''
+        count = '<span class="count" id="count" aria-live="polite" hidden></span>' if self.count else ''
         return f'''<header class="top" id="top">
   <a class="mark" href="index.html" aria-label="{escape(self.short)}, home">{self.mark_html}<span>{escape(self.short)}</span></a>
   <nav class="nav" id="nav" aria-label="{escape(self.short)}">{links}</nav>
@@ -111,8 +115,21 @@ class Site:
     <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
   </div>
 </header>
-<main>
+<main id="main">
 '''
+
+    def ld(self, desc: str, og: str) -> str:
+        # the business described for Google (rules 3x.8): only facts the record gives
+        d = {'@context': 'https://schema.org', '@type': self.ld_type, 'name': self.name, 'description': self.about or desc,
+             'url': f'https://myisraelrental.com/pages/{self.slug}/', 'image': self.og_base + og,
+             'address': {'@type': 'PostalAddress', 'addressLocality': self.place, 'addressCountry': 'IL'}}
+        tel = next((c.value for c in self.contacts if c.kind in ('whatsapp', 'whatsapp-only', 'call', 'text')), None)
+        mail = next((c.value for c in self.contacts if c.kind == 'email'), None)
+        if tel: d['telephone'] = tel
+        if mail: d['email'] = mail
+        if self.socials: d['sameAs'] = [u for _, u in self.socials]
+        d.update(self.ld_extra)
+        return '<script type="application/ld+json">' + json.dumps(d, ensure_ascii=False).replace('</', '<\\/') + '</script>\n'
 
     def contacts_html(self) -> str:
         return '<br>'.join(c.html() for c in self.contacts)
@@ -148,11 +165,11 @@ class Site:
         parts = [f'<div class="fbrand"><a class="fname" href="index.html">{escape(self.short)}</a>'
                  + (f'<p>{escape(self.about)}</p>' if self.about else '')
                  + f'<a class="fcta" href="{self.cta[0]}">{escape(self.cta[1])} <span class="arw" aria-hidden="true">→</span></a></div>',
-                 f'<nav aria-label="Pages"><h4>Pages</h4>{pages}</nav>']
+                 f'<nav aria-label="Pages"><h2>Pages</h2>{pages}</nav>']
         if self.ordering[1]:
-            parts.append(f'<div><h4>{escape(self.ordering[0])}</h4>' + ''.join(f'<p>{escape(x)}</p>' for x in self.ordering[1]) + '</div>')
+            parts.append(f'<div><h2>{escape(self.ordering[0])}</h2>' + ''.join(f'<p>{escape(x)}</p>' for x in self.ordering[1]) + '</div>')
         if reach:
-            parts.append(f'<div><h4>Reach us</h4>{reach}</div>')
+            parts.append(f'<div><h2>Reach us</h2>{reach}</div>')
         since = f' Since {self.since}.' if self.since else ''
         return ('<footer class="foot full">\n  <div class="fgrid">\n    ' + '\n    '.join(parts) + '\n  </div>\n'
                 f'  <div class="fbase"><span>© {self.year} {escape(self.name)}.{since}</span><span>{self.footer_note} · '

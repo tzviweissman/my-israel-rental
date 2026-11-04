@@ -40,6 +40,12 @@ build that comes out too close to another.
    `site.js` and a `gen/build.py` that imports `sitekit` (example below).
    In `site.js` set `BASKET_KEY`. In `site.css` replace every CHANGE token
    with this business's brand, from its own logo, photos and menu.
+   The web basics (rules 3x.8, `scripts/check-web-basics.mjs`) come with the kit: the skip link, the
+   live basket count, footer headings as h2, and the business for Google (set `ld_type`, e.g. `Bakery`,
+   and `ld_extra` from the record). The build still owes: a 1200x630 share picture, `fetchpriority="high"`
+   on the opening picture, `loading="lazy"` far down, labelled fields with type and autocomplete, and a
+   `role="status"` line for the form's errors and sent message. A build made before 4 Nov that is
+   regenerated adds `.foot.full h2` to its own site.css (its footer headings were h4).
 
 3. **Write CONCEPT.md first** (page rules 3q): three ideas from saved effects in `docs/inspo` (cite the pictures), one from the business's own words, the choice, the wow gate. `node scripts/check-concept.mjs <folder>` checks it, and publishing a new page refuses without it.
 
