@@ -88,6 +88,73 @@ REFERENCES.md searches, by what each is good for:
   galleries; Lapa Ninja and web-design-inspiration are full of adverts.
 - **Refero styles** (video 4): a site's look written out as a style guide.
 
+## Second look: structure and details (Tzvi: "look at structure and as much details as you can")
+
+Frames every 3 s through each finished site (about 220), the builders' own text on screen, the 3D site's
+skill page and Jack Roberts' published web rulebook (power-design, `principles/web-principles.md`, MIT).
+
+### The e-bike site, section by section (video 3, frames 19:46 to 22:20)
+
+1. **Menu bar:** logo left; four page links; one solid "Book a test ride" button right. A thin progress
+   line runs down the right edge the whole way, filling as you scroll.
+2. **Opening:** full photo, headline lower left ("Built for the climb."), one line under it naming the
+   product, the town and what you can do, then a solid button and a quiet text link. `opening-photo.jpg`.
+3. **Scroll scene:** the product alone on black, turning as you scroll. Short headlines come in on
+   alternating sides ("90 Nm. Barely a whisper.", "One bike. Pavement to pine.", "75 miles. Every climb on
+   the map.") with one line under each. The last one carries the button. `chapter-lines-alternate.jpg`.
+4. **One big number:** the figure counts up while a line draws to it. `count-up-chart.jpg`.
+5. **Modes:** a heading ("Four modes. One button."), tabs, two figures that change in place, and a close-up
+   photo card captioned "Sealed for Sierra weather." `mode-tabs-numbers.jpg`.
+6. **A full-width film** of the product in use, scrubbed by the scroll, with a small heading.
+7. **Turn it over:** drag to spin, dots on the parts, and three light buttons ("Shop light", "Night ride",
+   "Alpenglow") that change the light on the model. `turn-it-light-modes.jpg`.
+8. **Two models side by side**, with the same bars in the same order. `compare-cards.jpg`.
+9. **The numbers:** a plain table of specs, with a switch between the two models.
+10. **Booking:** a heading and one reassuring line ("Forty-five minutes on the bike... No charge, no
+    pressure."), both prices listed on the left, and the form on the right: name, email, phone, model as
+    chips, a time-of-day choice, and an optional note. Address, hours and phone sit under the prices.
+    `prices-beside-booking.jpg`.
+11. **Footer:** the headline again, huge and faded, then four columns (Shop with the address and
+    Directions, Hours, Contact, Follow) and a small base line. `footer-faded-headline.jpg`.
+
+**What the builder itself said it left undone** (its "Things to know"): the booking form has no server and
+opens an email, the specs were made up and marked as placeholders, and one scene was changed. Our rules
+refuse made-up figures and require saved orders, so that site would not pass ours.
+
+**How it asked for the brand first** (Phase 1 of 6): 11 questions in one message (slogan, who it is for and
+the price range, personality in a few words, colours with hex codes, fonts, logo, the product's specs, the
+benefits to show, the visual mood, the site's main goal, contact details), then "skip what you don't have
+and I'll mark it as a placeholder". It asked for a real product photo. Then six phases, each needing a "next".
+
+### The dive site (video 2)
+
+Menu of six pages plus "Book your dive"; the flashlight opening, with a small "Mode: reef light" switch in
+the corner and a "Descend" cue at the foot; small vertical labels on the side edges; then an editorial
+section with expedition cards and their prices; a month calendar of departures whose chosen date fills in
+the booking form (the same idea as our pre-filled forms, 3s and check-prefill). The prompt asked for one
+HTML file, icons as inline SVG, sizes from 1920 down to 380, and the light kept at 60 fps with
+requestAnimationFrame and CSS variables.
+
+### Jack Roberts' sites and rulebook (video 4)
+
+- **A brief form that writes the summary as you fill it:** name, email, a line about the project, chips
+  for what you want, chips for budget and timing, colour dots for mood; on the right, a live panel shows
+  the request taking shape. `brief-form-live-summary.jpg`. For a service business (a caterer, a mover, a
+  photographer) this turns a contact form into "here is exactly what you are asking for".
+- **"Your favourite sites in DESIGN.md"** (Refero styles): a site's whole look written as one file. This is
+  what BRAND.md (3x.7) is.
+- **The web rulebook**, 20 rules with numbers. Most we already have (one main button per screen, the first
+  screen answering what, where and what next, 44 px taps, phone checks, no layout shift, reduced motion).
+  The ones our checks do not test yet:
+  - every page has a skip link, exactly one h1, no skipped heading levels;
+  - every button and link shows a clear focus ring (2 px, 3:1) for keyboard users;
+  - form fields have visible labels, the right type and autocomplete (name, tel, email), and errors shown
+    beside the field when you leave it;
+  - the basket count and form errors are announced to screen readers (aria-live);
+  - the opening picture loads first (fetchpriority high), the rest lazily, at most two font families;
+  - the share layer: a title of 60 characters or less, a description of 155 or less, a 1200x630 share
+    picture, and the business described for Google (JSON-LD LocalBusiness, with its products).
+
 ## Proposals (wait for Tzvi)
 
 1. Add "turn the product" (idea 1) to the effects a shop site can pick, made from
@@ -99,3 +166,12 @@ REFERENCES.md searches, by what each is good for:
 4. Allow one lit sentence (idea 5) per site.
 5. A saved brand kit per paid site (idea 6), before the first picture.
 6. Add the galleries above to the sources every REFERENCES.md checks.
+
+Items 1 to 6 became rules 3x on 4 Nov 2026 (Tzvi: "yes"). From the second look:
+
+7. A web basics check on every site: skip link, one h1, focus rings, labelled fields with autocomplete,
+   announced basket and errors, the opening picture first, the share layer and JSON-LD.
+8. A brief form with a live summary, for service businesses whose order is a request.
+9. Prices beside the booking form, so the price is in view while filling it.
+10. Light buttons on a product to turn (shop light, evening), where the owner's item is shown in use.
+11. A thin scroll progress line on long single pages.
