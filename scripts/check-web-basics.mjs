@@ -11,6 +11,8 @@
  *            fields have the right type and autocomplete, so a phone fills them in
  *   LIVE     a basket count, and a form's errors, are in a live region, so a screen reader hears them change
  *   IMAGES   the opening picture loads first (not lazy); pictures far down load lazily; at most two font families
+ *   SCALE    the words use one type scale: at most 10 text sizes on the page (power-design-web, 4 Nov 2026: our
+ *            sites used 12 to 22, each heading and label sized on its own); aria-hidden display names do not count
  *   SHARE    a title of 60 characters or less, a description of 155 or less, a share picture (og:image) of 1200x630,
  *            og:title; the home page describes the business for Google (JSON-LD, LocalBusiness or a kind of it)
  *
@@ -61,6 +63,10 @@ for (const url of urls) {
     out.eager = imgs.filter((i) => i.getBoundingClientRect().top + scrollY > innerHeight * 2.5 && i.loading !== 'lazy').map((i) => (i.currentSrc || i.src).split('/').pop()).slice(0, 4);
     await document.fonts.ready;
     out.families = [...new Set([...document.fonts].filter((f) => f.status === 'loaded').map((f) => f.family.replace(/["']/g, '')))];
+    // SCALE: distinct text sizes of the words a visitor reads
+    const sizes = new Map(), tw = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+    for (let n; (n = tw.nextNode());) { const e = n.parentElement; if (!n.textContent.trim() || !e || !e.getClientRects().length || e.closest('[aria-hidden="true"], script, style, noscript')) continue; const z = Math.round(parseFloat(getComputedStyle(e).fontSize)); sizes.set(z, (sizes.get(z) || 0) + 1); }
+    out.sizes = [...sizes.keys()].sort((a, b) => a - b);
     // SHARE
     const meta = (k) => document.querySelector(`meta[name="${k}"], meta[property="${k}"]`)?.content || '';
     out.title = document.title; out.desc = meta('description'); out.ogTitle = meta('og:title'); out.og = meta('og:image');
@@ -99,6 +105,7 @@ for (const url of urls) {
   if (r.lcpLazy) why.push(`IMAGES the opening picture ${r.lcpLazy} is lazy-loaded; it loads first (fetchpriority="high")`);
   if (r.eager.length) why.push(`IMAGES pictures far down the page load at once: ${r.eager.join(', ')} (loading="lazy")`);
   if (r.families.length > 2) why.push(`IMAGES ${r.families.length} font families (${r.families.join(', ')}), two at most`);
+  if (r.sizes.length > 10) why.push(`SCALE  ${r.sizes.length} text sizes (${r.sizes.join(', ')} px), 10 at most from one type scale (--t-1 to --t5 in starter/site.css)`);
   if (!r.title || r.title.length > 60) why.push(`SHARE  the title is ${r.title.length} characters ("${r.title}"), 1 to 60`);
   if (!r.desc || r.desc.length > 155) why.push(`SHARE  the description is ${r.desc.length} characters, 1 to 155`);
   if (!r.ogTitle) why.push('SHARE  no og:title');

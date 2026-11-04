@@ -206,3 +206,25 @@ still and the choice of experience, bringing it to life, the build, revisions, p
   support (our 3h.22); a hidden preview pane pauses animation, so blank screenshots are not a broken site.
 - Discount: it lets the AI invent specs and contact details as "placeholders", and sends the form to an
   email link. Both are refused by our rules (1, 3k).
+
+## power-design-web (Jack Roberts' companion, read 4 Nov 2026)
+
+Not a skill: one long page explaining the layers of a modern design system (tokens, shadcn, Tailwind v4,
+Radix, OKLCH colour, the 8-point grid and a modular type scale, motion curves, theming) with its sources.
+What helps our sites, and what we did with it:
+
+- **One type scale and one spacing scale** (Bryn Jackson's 8-point grid; one ratio, 1.25, from the body
+  size). Our sites showed 12 to 22 text sizes on a page. Now rule 3x.13, the starter's `--t-1`..`--t5` and
+  `--s1`..`--s10` tokens, and check-web-basics SCALE.
+- **Tokens first:** every colour, size and radius named once and used by name. Our starter and BRAND.md
+  already work this way (3x.7).
+- **Colour steps with jobs** (Radix's 12 steps: grounds, borders, solid, text) and OKLCH for even
+  lightness: useful when a site needs hover and pressed shades of its accent; `color-mix(in oklch, ...)`
+  derives them from one token.
+- **Motion curves with meaning** (Material 3): standard 200 ms, emphasised 500 ms, enter 150 ms, exit 200
+  ms. Our motion rules already set these ranges.
+- **Systems worth studying** for how components behave: Vercel Geist, GitHub Primer, IBM Carbon,
+  Material 3, Apple HIG, Atlassian.
+- Not for us: Next.js, shadcn and Tailwind as a build stack, and dark mode toggles. Our business sites
+  are plain HTML with one theme each.
+

@@ -1999,6 +1999,13 @@ power-design web rulebook, notes in the same folder):
 12. **A thin progress line** may run down the edge of a long single page (six screens or more). It is 2
     to 3 px, in the accent colour, hidden from screen readers, and never over the menu bar or the phone
     bar. (Video 3.)
+13. **One type scale and one spacing scale** (Tzvi, 4 Nov 2026: "look at power-design-web too and add what
+    helps"; its sections on the 8-point grid and the modular type scale). Every text size is a step of one
+    scale: the starter's `--t-1` to `--t5`, a ratio of 1.25 from a 17 px body, with the display steps growing
+    with the screen. Every gap and padding is a step of `--s1` to `--s10` (4 to 128 px). BRAND.md records
+    both, and nothing is sized in between. A page shows at most 10 text sizes (check-web-basics SCALE;
+    measured 4 Nov: Bake away had 14, The Whipped Cup 22, a starter page 5). Display names hidden from
+    screen readers do not count.
 
 **Sources.** The galleries in the notes (Godly for scrolling videos of whole sites, Hover States for what
 buttons and pictures do, Unsection for single sections, Commerce Cream for shops on a phone, and the rest)

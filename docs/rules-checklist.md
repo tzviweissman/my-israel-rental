@@ -298,6 +298,7 @@ R3v.7 | Layouts (bento, zigzag steps, callouts, picture beside four facts, peek 
 R3v.8 | Effects from 3v (light on cards, fanned photos, rolling letters, circle reveal, curtain between pages, picture buttons, statement band) are chosen for this business, not the set of the site built before it, each with its phone and reduced-motion version | 3v.8-16 | LOOK: CONCEPT.md names the effects and the previous site's set; n/a if none
 R3v.14 | Three true facts from the record right under the main button on the home page (class btn-facts) | 3v.14 | script: check-facts
 R3x.8 | Web basics on every page: skip link first, one h1 and no skipped levels, focus rings, labelled fields with type and autocomplete, live basket count and form messages, opening picture first and far ones lazy, two font families at most, title 60 and description 155 at most, og:title and a 1200x630 share picture, JSON-LD for the business on the home page | 3x.8 | script: check-web-basics
+R3x.13 | One type scale and one spacing scale: every text size is a step of --t-1 to --t5 and every gap of --s1 to --s10, recorded in BRAND.md; at most 10 text sizes on a page | 3x.13 | script: check-web-basics (SCALE)
 
 ## 9. Finish
 
