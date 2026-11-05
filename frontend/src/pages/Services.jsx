@@ -221,6 +221,15 @@ const Services = () => {
       .catch(() => setFeaturedGigs([]));
   }, []);
 
+  // A name search lands on its results, once they are in: the new URL sends the page to the top first (ScrollToTop).
+  const jumpToResults = useRef('');
+  const scrollToResults = () => document.getElementById('services-results')?.scrollIntoView({ behavior: 'smooth' });
+  const searchName = (name) => {
+    if (name && name === q) { scrollToResults(); return; }
+    jumpToResults.current = name;
+    patchUrl({ q: name });
+  };
+
   // Re-fetch gigs whenever any server-side filter changes. Backend does
   // all the heavy lifting so the client is a thin cache.
   useEffect(() => {
@@ -258,7 +267,10 @@ const Services = () => {
     axios.get(`${API}/marketplace/gigs?${params.toString()}`)
       .then((r) => setGigs(r.data))
       .catch((e) => { console.error(e); toast.error(t('services.loadError', 'Failed to load')); })
-      .finally(() => setLoading(false));
+      .finally(() => {
+        setLoading(false);
+        if (q && jumpToResults.current === q) { jumpToResults.current = ''; requestAnimationFrame(scrollToResults); }
+      });
   }, [
     selectedCat, selectedSubcategory, selectedLoc, q,
     minRating, minPrice, maxPrice, responseTime,
@@ -374,11 +386,6 @@ const Services = () => {
   // How many "More filters" chips are active — drives the badge on
   // the Filters button so users can see filters are on at a glance.
   const advCount =
-    /* `q` still counts even though no control sets it any more (the hero
-       search box was removed 28 Aug 2026 — see ServicesHeroSearch). A
-       shared or hand-edited link carrying `?q=` still filters, and a
-       filter with no visible cause and no way out is worse than one that
-       announces itself. The chip below is the way out. */
     (q ? 1 : 0) +
     (minRating ? 1 : 0) +
     (minPrice || maxPrice ? 1 : 0) +
@@ -436,6 +443,8 @@ const Services = () => {
         <div className="hero-panel">
           <ServicesHeroSearch
             categories={categories}
+            q={q}
+            onSearchName={searchName}
             selectedCat={selectedCat}
             minPrice={minPrice}
             maxPrice={maxPrice}
@@ -535,7 +544,7 @@ const Services = () => {
       />
 
       {/* Results header — Sort + Filters button + count */}
-      <div className="max-w-6xl mx-auto px-4">
+      <div id="services-results" className="max-w-6xl mx-auto px-4" style={{ scrollMarginTop: 88 }}>
         <div className="section-rhead flex items-center justify-between mb-4 gap-3 flex-wrap">
           <h2 className="text-gray-900">
             {selectedCat

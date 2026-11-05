@@ -33,6 +33,7 @@ from .shared import (
     GigIn,
     GigPatch,
     ReviewIn,
+    _business_name_filter,
     _search_clauses,
     _LANGUAGE_SET,
     _LOCATION_BY_SLUG,
@@ -164,6 +165,7 @@ async def list_gigs(
     # oldest listings (60 of 62 shown, 1 Nov 2026).
     limit: int = Query(60, ge=0, le=200),
 ):
+    named_businesses: set[str] = set()
     query: dict[str, Any] = {"status": "published"}
     if featured:
         query["featured"] = True
@@ -236,7 +238,9 @@ async def list_gigs(
         # cannot build a huge pipeline on this unauthenticated endpoint.
         clauses = _search_clauses(q)
         if clauses:
-            query["$and"] = query.get("$and", []) + clauses
+            # Or the name of the business the listing belongs to, which ranks first below.
+            named_businesses = {b["_id"] async for b in db.businesses.find(_business_name_filter(q), {"_id": 1})}
+            query["$and"] = query.get("$and", []) + [{"$or": [{"$and": clauses}, {"business_id": {"$in": list(named_businesses)}}]}]
     if booking_mode:
         query["booking_mode"] = booking_mode
 
@@ -393,6 +397,9 @@ async def list_gigs(
             kept.sort(key=_match_score)
     else:
         kept.sort(key=_match_score)
+
+    if named_businesses:
+        kept.sort(key=lambda g: g.get("business_id") not in named_businesses)
 
     return [_clean_gig(g) for g in (kept[:limit] if limit else kept)]
 

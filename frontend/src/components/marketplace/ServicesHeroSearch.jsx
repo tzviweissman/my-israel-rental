@@ -12,30 +12,16 @@
  * comes from the parent via props (categories list + patchUrl + current
  * URL params) so this component stays a pure controlled surface.
  *
- * NO FREE-TEXT BOX HERE, on purpose (Tzvi, 28 Aug 2026). One was built and
- * removed the same day, and the reasoning is worth keeping because it will
- * come up again.
- *
- * The argument for it: a category cannot go below itself. Picking
- * "Cleaning" returns every cleaner; typing "oven" returns the one listing
- * that does ovens, and "windows" also finds a deep-clean whose DESCRIPTION
- * mentions them. Search also bridges the visitor's vocabulary and ours —
- * somebody types "handyman", the category is `home-services-repair`.
- *
- * The argument against, which won: at roughly 200 listings, browsing seven
- * cleaners is not a hardship. Search earns its place at 2,000, and until
- * then it is a fourth segment in a bar that reads better with three. The
- * cost is now and the benefit is later.
- *
- * The BACKEND search stays wired and is not dead: `Services.jsx` still
- * reads `q` from the URL and forwards it, so a link carrying `?q=` filters
- * correctly and shows a removable chip. Putting the box back is this
- * component's job alone — see the commit that removed it.
+ * THE NAME BOX (Tzvi, 5 Nov 2026). A free-text box was removed on 28 Aug 2026
+ * as a fourth segment the bar did not need at 200 listings. This one answers
+ * another question, someone who already knows the business and wants to reach
+ * it, so it sits above the bar rather than in it. It sets the same `q` the
+ * server has always read, and the server now also matches business names.
  */
 import { Link } from 'react-router-dom';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Briefcase, Calendar as CalendarIcon, Wallet, SlidersHorizontal, ChevronDown, Check, Coins } from 'lucide-react';
+import { Briefcase, Calendar as CalendarIcon, Wallet, SlidersHorizontal, ChevronDown, Check, Coins, Search, X } from 'lucide-react';
 import { iconForCategory } from './categoryTheme';
 import { groupCategories } from '../../lib/categoryGroups';
 import { Popover, PopoverTrigger, PopoverContent } from '../ui/popover';
@@ -342,11 +328,21 @@ export default function ServicesHeroSearch({
   minPrice,
   maxPrice,
   availableOn,
+  q = '',
+  onSearchName,
   onPatch,
   onOpenFilters,
   locale = 'en-US',
 }) {
   const { t } = useTranslation();
+  const [name, setName] = useState(q);
+  // A search cleared from its chip under the results empties the box too.
+  useEffect(() => setName(q), [q]);
+  const submitName = (e) => {
+    e.preventDefault();
+    e.target.querySelector('input')?.blur();
+    onSearchName(name.trim());
+  };
 
   // Options for the Service dropdown, grouped (spec N2).
   //
@@ -401,6 +397,42 @@ export default function ServicesHeroSearch({
     <div className="w-full max-w-3xl mx-auto">
       {/* Main segmented pill. On mobile the three segments stack; on md+
           they sit side-by-side with subtle dividers between them. */}
+      <form onSubmit={submitName} role="search" className="flex items-center gap-2 mb-3" data-testid="services-name-search">
+        <div className="relative flex-1 min-w-0">
+          <Search size={16} strokeWidth={2.25} className="absolute start-4 top-1/2 -translate-y-1/2 text-[var(--brand-primary)] pointer-events-none" aria-hidden="true" />
+          <input
+            type="text"
+            inputMode="search"
+            enterKeyHint="search"
+            dir={name ? 'auto' : undefined}
+            value={name}
+            maxLength={80}
+            onChange={(e) => setName(e.target.value)}
+            placeholder={t('services.hero.nameSearch.placeholder', 'Business name')}
+            aria-label={t('services.hero.nameSearch.label', 'Search for a business by name')}
+            className="w-full h-12 rounded-full border border-[var(--brand-border)] bg-white ps-11 pe-11 text-base text-[var(--ink)] placeholder:text-[var(--brand-muted)] focus:outline-none focus:ring-2 focus:ring-[var(--brand-primary)]"
+            data-testid="services-name-search-input"
+          />
+          {name && (
+            <button
+              type="button"
+              onClick={() => { setName(''); onSearchName(''); }}
+              className="absolute end-2 top-1/2 -translate-y-1/2 w-8 h-8 inline-flex items-center justify-center rounded-full text-[var(--brand-muted)] hover:bg-black/[0.05]"
+              aria-label={t('services.hero.nameSearch.clear', 'Clear the search')}
+              data-testid="services-name-search-clear"
+            >
+              <X size={16} />
+            </button>
+          )}
+        </div>
+        <button
+          type="submit"
+          className="h-12 px-5 rounded-full bg-[var(--brand-primary)] hover:bg-[var(--brand-primary-dark)] text-white text-sm font-semibold shrink-0"
+          data-testid="services-name-search-submit"
+        >
+          {t('services.hero.nameSearch.submit', 'Search')}
+        </button>
+      </form>
       <div
         className="flex flex-col md:flex-row bg-white rounded-3xl md:rounded-full shadow-2xl divide-y md:divide-y-0 md:divide-x divide-[var(--brand-border)] overflow-hidden"
         data-testid="services-hero-search"

@@ -1261,3 +1261,20 @@ def _search_clauses(q: str) -> list[dict[str, Any]]:
             {"tiers.name": rx}, {"products.name": rx},
         ]})
     return clauses
+
+
+def _business_name_filter(q: str) -> dict[str, Any]:
+    """Which businesses a search box names, every word in the name (Tzvi, 5 Nov 2026).
+
+    A listing's title is rarely its business's name: The Brown Box sells under
+    "Acai bowls", so someone who knew the business and typed "brown box" found
+    nothing. Same word rules as ``_search_clauses``.
+    """
+    tokens = [t for t in re.split(r"[^\w\u0590-\u05FF]+", q.strip()[:80].lower()) if t][:8]
+    if not tokens:
+        return {"_id": {"$in": []}}
+    words = []
+    for token in tokens:
+        rx = {"$regex": "(" + "|".join(re.escape(a) for a in _token_alternatives(token)) + ")", "$options": "i"}
+        words.append({"$or": [{"name": rx}, {"name_he": rx}]})
+    return {"$and": words}

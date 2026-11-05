@@ -5234,6 +5234,12 @@ const he = {
           bookingMode: 'שיטת הזמנה'
         },
         hero: {
+          nameSearch: {
+            placeholder: "שם העסק",
+            label: "חיפוש עסק לפי שם",
+            clear: "ניקוי החיפוש",
+            submit: "חיפוש",
+          },
           day: {
             any: 'בכל זמן',
             today: 'היום',

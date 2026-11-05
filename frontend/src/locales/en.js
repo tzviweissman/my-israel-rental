@@ -5403,6 +5403,12 @@ const en = {
           bookingMode: 'Booking method'
         },
         hero: {
+          nameSearch: {
+            placeholder: "Business name",
+            label: "Search for a business by name",
+            clear: "Clear the search",
+            submit: "Search",
+          },
           day: {
             any: 'Anytime',
             today: 'Today',
