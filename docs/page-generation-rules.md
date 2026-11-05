@@ -2006,6 +2006,12 @@ power-design web rulebook, notes in the same folder):
     both, and nothing is sized in between. A page shows at most 10 text sizes (check-web-basics SCALE;
     measured 4 Nov: Bake away had 14, The Whipped Cup 22, a starter page 5). Display names hidden from
     screen readers do not count.
+14. **Gift cards are bought on the page** (Tzvi, 5 Nov 2026: "add gift card purchases straight from the page and
+    not through a separate link"). Every paid site has `SITE.gift_section()` and `gift.js` on its order page. The
+    section stays hidden until the owner switches gift cards on in the dashboard, so turning them on later needs
+    no rebuild. The buyer never leaves the page or signs in. When it is sent, the section says how to pay and
+    shows the owner's own payment links; the card goes out once the business confirms payment. It uses only the
+    amounts, note and links the owner set. Standard business pages open the same order in place.
 
 **Sources.** The galleries in the notes (Godly for scrolling videos of whole sites, Hover States for what
 buttons and pictures do, Unsection for single sections, Commerce Cream for shops on a phone, and the rest)

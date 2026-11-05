@@ -226,6 +226,7 @@ R3s.18 | Not available shows the nearest real alternative; every choice list has
 R3s.25 | The order or booking form sends nothing when empty and shows what is missing; filled, it sends a WhatsApp message carrying the total the page shows | 3s FLOW | script: site FLOW
 R3x.9 | A request-type business's form builds a plain summary beside it as the fields fill, sends that summary, and states no price or promise the record lacks | 3x.9 | LOOK: fill the form on laptop and phone; n/a for a shop with a basket
 R3x.10 | The prices or running total stay in view beside the order or booking form on a laptop, and a total line sits above the send button on a phone | 3x.10 | LOOK: fill the form on laptop and phone; n/a with no prices
+R3x.14 | The order page has the gift card section (SITE.gift_section, gift.js): hidden until the owner switches gift cards on, bought in place with no sign-in, and it shows only the owner's amounts, note and payment links | 3x.14 | script: check-web-basics (GIFT)
 
 ## 7. Motion
 

@@ -13,6 +13,7 @@
  *   IMAGES   the opening picture loads first (not lazy); pictures far down load lazily; at most two font families
  *   SCALE    the words use one type scale: at most 10 text sizes on the page (power-design-web, 4 Nov 2026: our
  *            sites used 12 to 22, each heading and label sized on its own); aria-hidden display names do not count
+ *   GIFT     one of the site's pages has the gift card section ([data-mir-gift], rules 3x.14); hidden is fine
  *   SHARE    a title of 60 characters or less, a description of 155 or less, a share picture (og:image) of 1200x630,
  *            og:title; the home page describes the business for Google (JSON-LD, LocalBusiness or a kind of it)
  *
@@ -45,6 +46,7 @@ for (const url of urls) {
       const name = f.name || f.id || '?';
       if (!lab) { out.unlabelled.push(name); continue; }
       const t = `${lab} ${f.name} ${f.id}`.toLowerCase(), ac = (f.getAttribute('autocomplete') || '').toLowerCase();
+      if (ac === 'off') continue;   // deliberately someone else's details, such as who a gift card is for
       if (/phone|\btel\b|mobile|whatsapp|טלפון|נייד/.test(t) && !/time|day|date/.test(t) && (f.type !== 'tel' || !/tel/.test(ac))) out.fill.push(`${name}: type="tel" autocomplete="tel"`);
       else if (/e-?mail|דוא"?ל|מייל/.test(t) && (f.type !== 'email' || !/email/.test(ac))) out.fill.push(`${name}: type="email" autocomplete="email"`);
       else if (/(^|\s)(your |full )?name\b|^שם/.test(t) && !/business|company|board|product/.test(t) && !/name/.test(ac)) out.fill.push(`${name}: autocomplete="name"`);
@@ -118,5 +120,8 @@ for (const url of urls) {
   console.log(`${url}: checked`);
   await p.close();
 }
+// GIFT: on one page of the site; it stays hidden until the owner switches gift cards on, so it is looked for in the HTML
+const htmls = await Promise.all(urls.map((u) => fetch(u).then((r) => r.text()).catch(() => '')));
+if (!htmls.some((h) => /data-mir-gift/.test(h))) { bad++; console.log(`BASICS  ${home}\n  GIFT   no page has the gift card section (SITE.gift_section(), gift.js, rules 3x.14)`); }
 await browser.close();
 process.exitCode = bad ? 1 : 0;   // not process.exit: on Windows it aborts while fetch's connections are still closing (libuv assertion, exit 127)

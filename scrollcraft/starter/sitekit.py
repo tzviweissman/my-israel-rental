@@ -180,6 +180,17 @@ class Site:
         with open(f'{page}.html', 'w', encoding='utf8') as f:
             f.write(html)
 
+    def gift_section(self, title_html: str = 'Give a gift card') -> str:
+        """Gift cards bought right here (3x.14). Hidden until gift.js finds them switched on for this business.
+        Put it on the order page, and add <script src="gift.js"></script> to that page's tail."""
+        return f'''  <section class="sec gift" id="gift" aria-labelledby="h-gift" data-mir-gift="{escape(self.slug)}" hidden>
+    <div class="wrap">
+      <h2 id="h-gift">{title_html}</h2>
+      <div data-mir-gift-box></div>
+    </div>
+  </section>
+'''
+
     def page_head(self, title_html: str, lede: str) -> str:
         """The top of an inner page (Menu, Order, Contact)."""
         return f'''  <header class="page-head"><div class="wrap">

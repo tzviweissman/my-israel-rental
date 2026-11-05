@@ -113,6 +113,28 @@ textarea.fld { min-height: 88px; resize: vertical; }
 .close p { margin: .5rem 0 0; line-height: 1.8; opacity: .9; }
 .close p a { color: inherit; font-weight: 700; white-space: nowrap; }
 .giant { font: 700 min(11vw, 34svh)/1 var(--font-head); white-space: nowrap; text-align: center; margin: clamp(2rem, 5vw, 3rem) 0 0; padding-bottom: .08em; opacity: .9; }
+/* gift cards on the page (gift.js, rules 3x.14); restyle with the brand like any other section */
+.gift-form { display: grid; gap: var(--s5); max-width: 36rem; margin-top: var(--s5); }
+.gift-form fieldset { border: 0; margin: 0; padding: 0; display: grid; gap: var(--s3); }
+.gift-form legend { padding: 0; margin-bottom: var(--s3); font-weight: 700; }
+.gift-tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(6.5rem, 1fr)); gap: var(--s2); }
+.gift-tile { min-height: 64px; border: 1px solid var(--line); border-radius: var(--r); background: var(--ground); color: var(--ink); font: 700 var(--t1)/1.1 var(--font-body); cursor: pointer; }
+.gift-tile[aria-pressed="true"] { border-color: var(--ink); box-shadow: 0 0 0 1px var(--ink); }
+.gift-switch { display: inline-flex; justify-self: start; padding: var(--s1); border: 1px solid var(--line); border-radius: 999px; }
+.gift-switch button { min-height: 44px; padding: 0 var(--s4); border: 0; border-radius: 999px; background: transparent; color: var(--soft); font: 700 var(--t0)/1 var(--font-body); cursor: pointer; }
+.gift-switch button[aria-pressed="true"] { background: var(--ink); color: var(--ground); }
+.gift-to { display: grid; gap: var(--s3); }
+.gift-to[hidden] { display: none; }
+.gift-field { display: grid; gap: var(--s1); }
+.gift-field[hidden] { display: none; }
+.gift-field label { font-weight: 700; }
+.gift-field input, .gift-field textarea { width: 100%; min-height: 48px; padding: var(--s3); border: 1px solid var(--line); border-radius: 8px; background: var(--ground); color: var(--ink); font: 400 var(--t0)/1.4 var(--font-body); }
+.gift-note, .gift-msg { margin: 0; color: var(--soft); font-size: var(--t-1); }
+.gift-msg:empty { display: none; }
+.gift-msg { color: var(--ink); font-weight: 700; }
+.gift-done { display: grid; gap: var(--s3); justify-items: start; max-width: 36rem; margin-top: var(--s5); }
+.gift-done h3, .gift-done p { margin: 0; }
+.gift-see { font-weight: 700; color: var(--ink); }
 .foot { background: var(--ink); color: var(--ground); opacity: .95; font-size: var(--t-1); text-align: center; padding: 1.1rem var(--gutter) calc(1.1rem + var(--pad-bar, 0px)); }
 .foot a { color: inherit; } .foot nav { margin-bottom: .55rem; font-weight: 600; } .foot nav a { margin: 0 .35rem; }
 /* the full footer (rules 3v.1): parts with a small heading, two to a row on a phone, then the base line */

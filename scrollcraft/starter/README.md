@@ -46,6 +46,8 @@ build that comes out too close to another.
    on the opening picture, `loading="lazy"` far down, labelled fields with type and autocomplete, and a
    `role="status"` line for the form's errors and sent message. A build made before 4 Nov that is
    regenerated adds `.foot.full h2` to its own site.css (its footer headings were h4).
+   Gift cards (rules 3x.14): copy `gift.js` beside `site.js`, put `SITE.gift_section()` on the order page and
+   `<script src="gift.js"></script>` in its tail. It stays hidden until the owner switches gift cards on.
 
 3. **Write CONCEPT.md first** (page rules 3q): three ideas from saved effects in `docs/inspo` (cite the pictures), one from the business's own words, the choice, the wow gate. `node scripts/check-concept.mjs <folder>` checks it, and publishing a new page refuses without it.
 

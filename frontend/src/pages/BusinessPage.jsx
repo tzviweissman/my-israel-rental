@@ -22,6 +22,7 @@ import { Link, useParams, useNavigate } from 'react-router-dom';
 import { useHandBuilt } from '../utils/handBuiltPages';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
+import { GiftCardPanel } from '../components/marketplace/GiftCardForm';
 import { Star, BadgeCheck, MapPin, Loader2, MessageCircle, Zap, CreditCard, Globe, Users, Gift } from 'lucide-react';
 import BusyTimes from '../components/business/BusyTimes';
 import { API, AuthContext } from '../App';
@@ -77,6 +78,7 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
   const { token, user } = useContext(AuthContext);
   const [fetched, setFetched] = useState(null);
   const [missing, setMissing] = useState(false);
+  const [giftOpen, setGiftOpen] = useState(false);
   /* An injected business wins outright and nothing is requested. Merging
      the two would give the editor a race it cannot win: the fetch would
      land after an edit and quietly put the saved value back on screen,
@@ -731,7 +733,8 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
               {biz.gift_cards_on && !preview && (
                 <button
                   type="button"
-                  onClick={() => navigate(`/gift-cards/${biz.slug || biz.id}`)}
+                  onClick={() => setGiftOpen((v) => !v)}
+                  aria-expanded={giftOpen}
                   className="mt-3 ms-2 inline-flex items-center gap-1.5 px-4 min-h-[44px] rounded-full text-sm font-semibold border"
                   style={{ borderColor: 'var(--ink)', color: 'var(--ink)' }}
                   data-testid="business-gift-cards"
@@ -739,6 +742,8 @@ const BusinessPage = ({ business: injected = null, preview = false, pageSlug: pr
                   <Gift size={15} aria-hidden="true" /> {t('gift.button', 'Gift cards')}
                 </button>
               )}
+              {/* Bought right here, not on a separate page (Tzvi, 5 Nov 2026). */}
+              {giftOpen && biz.gift_cards_on && !preview && <GiftCardPanel slug={biz.slug || biz.id} bizName={(i18n.language?.startsWith('he') && biz.name_he) || biz.name} />}
 
               {Array.isArray(biz.payment_links) && biz.payment_links.length > 0 && (
                 <div className="mt-3 flex flex-wrap items-center gap-2" data-testid="business-payment-links">
