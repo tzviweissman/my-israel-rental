@@ -119,4 +119,4 @@ for (const url of urls) {
   await p.close();
 }
 await browser.close();
-process.exit(bad ? 1 : 0);
+process.exitCode = bad ? 1 : 0;   // not process.exit: on Windows it aborts while fetch's connections are still closing (libuv assertion, exit 127)
