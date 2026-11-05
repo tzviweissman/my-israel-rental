@@ -112,7 +112,9 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 ## Stage 3. Opening
 
 - [x] R3g.13 The first screen holds a picture, a headline of 2 to 5 words that says what the customer gets, at most one short line (where the business is: the line or the small label, not both; trust goes there or right under the button) and one button; the header does not count
-  plan: picture (the strings), headline of five words plus the occasion, the small label "Aaron Dovid · Jerusalem" as the one short line, one Book button, three facts under it
+  plan: picture (the strings), headline of four words naming both offers, the small label "Aaron Dovid · Jerusalem" as the one short line, one Book button, three facts under it
+- [x] R3g.18 The first screen shows what the business offers before any scroll: one kind may be shown by the picture or the words; two or more different kinds are each named in the headline or big words; the home page lists them in <meta name="offers"> (check: check-says-offer)
+  plan: <meta name="offers" content="kumzits|guitar lesson">; the headline is "Kumzitzes and guitar lessons"; the one Book button opens the Book page, where they choose
 - [x] R3b.1 The first screen answers: what it is, where, why trust it, what to do next
   plan: what: a kumzits for your occasion; where: Jerusalem; trust: the price beside the button; next: Book
 - [x] R3b.2 Proof (price, credential or rating) touches the main button; for food a kosher band sits just after the opening, not crowding the button, and the certificate is stated at most twice as a sentence or band (a small identical kosher tag on items does not count)
@@ -379,7 +381,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [ ] R3f.4 A motif from the logo (a bow) never lands on the logo that already has it
   plan: n/a: no logo motif
 - [x] R3g.4 Every motion has one job (guide, confirm, reveal); loops start and end on the same frame; text settles soft to sharp without bounce; list rows about 100 ms apart; menu hover under 300 ms
-  plan: each motion has one job: the strum shows the craft, the arrival guides, the button string confirms the pointer; nothing loops but the rotating word
+  plan: each motion has one job: the strum shows the craft, the arrival guides, the button string confirms the pointer; nothing loops
 - [x] R3e.16 No linear easing (ease-out or a spring); a transition grows from what was tapped and finishes under 0.5 s
   plan: eased curves only, all under 0.6 s except the strings ringing out
 - [ ] R3e.17 A carousel shows a sliver of the next card, with visible buttons or dots (mirrored in Hebrew); a bottom sheet closes by swipe-down AND a close button
@@ -453,7 +455,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [ ] R3u.6 Depth on laptops: separate pieces on the first screen move at their own speeds with the scroll (near faster, far slower), laptops with a mouse only, still on phones and with motion off
   plan: n/a: no depth pieces
 - [x] R3u.7 At most one rotating word, in the headline, from the owner's real occasions or products; reads right with each; full list for screen readers; first word with motion off; not beside a film's moving words
-  plan: one rotating word from his own occasions (Bar Mitzvah, Chuppah, Bris Milah, simcha); the full list for screen readers; the first word with motion off
+  plan: n/a: no rotating word; the headline names both offers (3g.18), and his occasions are the list in the kumzits band
 - [ ] R3u.8 A tilted label over headings, if used, is this site's own shape from its world and in fingerprints.json, never another site's
   plan: n/a: no tilted label
 - [x] R3u.9 Questions are rounded cards on `<details>`, "+" in an accent circle turning into "x", the answer opening smoothly inside the card

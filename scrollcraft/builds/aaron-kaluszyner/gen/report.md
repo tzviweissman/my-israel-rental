@@ -6,7 +6,9 @@ Moving the mouse across them (or tapping on a phone) plucks them. With "Sound" s
 Then: the kumzits on a dark band (₪1,200, his occasions as a list that opens booking with that occasion chosen), his
 lessons (₪100 for 40 minutes, online too, his "Learn. Play. Grow."), how booking works, and the full footer.
 
-**Booking.** One page, three steps: what (kumzits, lesson, or guitar and mentoring), when (his Sunday to Thursday
+**First screen (5 Nov).** The headline names both offers, "Kumzitzes and guitar lessons", and the one Book button opens the Book page, where they choose (rule 3g.18).
+
+**Booking.** A time taken on either listing is now gone on both. One page, three steps: what (kumzits, lesson, or guitar and mentoring), when (his Sunday to Thursday
 calendar, taken times crossed out), your details. The request is written out beside the form as you fill it, saved
 to MyIsraelRental, then sent on WhatsApp with a tracking link.
 

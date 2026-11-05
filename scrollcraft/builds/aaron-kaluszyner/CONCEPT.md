@@ -42,8 +42,7 @@ are the lessons section without the chord animation.
 
 ## Effect budget (3f.2)
 - Signature: the strings opening (X33), strummed on arrival and on the first scroll, plucked by the visitor.
-- Accents: the first screen arriving in order (kit 3u.5); the one rotating occasion word in the headline (kit 3u.7);
-  the occasion rows that fill when pointed at and open the form with that occasion chosen; the booking summary that
+- Accents: the first screen arriving in order (kit 3u.5);   the occasion rows that fill when pointed at and open the form with that occasion chosen; the booking summary that
   writes itself as you fill the form (3x.9), the closing payoff.
 - Quiet touches: the button's string that twangs on hover (B21), Learn, Play, Grow set a step lower each, numbered
   booking cards (S2), prices large beside their unit (P5), sections fading in (R6).

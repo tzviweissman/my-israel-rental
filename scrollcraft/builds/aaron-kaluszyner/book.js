@@ -18,11 +18,13 @@
   function nice(v) { return new Date(v + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }); }
   function slots() { var s = SVC[svc] || SVC.kumzits, out = []; for (var m = 540; m + (svc === 'kumzits' ? 30 : 40) <= 1020; m += s.step) out.push(String(m / 60 | 0).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0')); return out; }
   function v(id) { return $(id).value.trim(); }
+  function mins(t) { var a = t.split(':'); return +a[0] * 60 + +a[1]; }
 
   var day = $('day'); day.min = iso(firstDay()); day.value = iso(firstDay());
   function drawTimes() {
     var box = $('times'), dv = day.value, d = dv ? new Date(dv + 'T12:00') : null, open = d && OPEN.indexOf(d.getDay()) >= 0;
-    var gone = taken[dv] || [];
+    var len = (SVC[svc] || SVC.kumzits).step;
+    function isGone(t) { var m = mins(t); return (taken[dv] || []).some(function (r) { return m < r[1] && m + len > r[0]; }); }
     box.innerHTML = '';
     $('t-hint').innerHTML = '';
     if (dv && !open) {
@@ -34,15 +36,20 @@
     }
     slots().forEach(function (t) {
       var l = document.createElement('label'); l.className = 'chip';
-      var off = gone.indexOf(t) >= 0;
+      var off = isGone(t);
       l.innerHTML = '<input type="radio" name="time" value="' + t + '"' + (t === time ? ' checked' : '') + (off ? ' disabled' : '') + '><span>' + t + '</span>';
       box.appendChild(l);
     });
-    if (time && gone.indexOf(time) >= 0) time = '';
+    if (time && isGone(time)) time = '';
   }
+  // Aaron is one person: a time taken on either listing is gone on both, however the two lengths line up
   function loadTaken() {
-    var s = SVC[svc]; if (!s) return;
-    fetch(API + '/marketplace/gigs/' + s.gig + '/taken-slots').then(function (r) { return r.ok ? r.json() : {}; }).then(function (t) { taken = t || {}; drawTimes(); }).catch(function () {});
+    var all = [SVC.kumzits, SVC.lesson].map(function (g) {
+      return fetch(API + '/marketplace/gigs/' + g.gig + '/taken-slots').then(function (r) { return r.ok ? r.json() : {}; }).catch(function () { return {}; }).then(function (t) {
+        Object.keys(t).forEach(function (d) { if (Array.isArray(t[d])) t[d].forEach(function (x) { (taken[d] = taken[d] || []).push([mins(x), mins(x) + g.step]); }); });
+      });
+    });
+    Promise.all(all).then(function () { drawTimes(); update(); });
   }
 
   function summary() {
@@ -102,7 +109,7 @@
     svc = k; time = '';
     $('occ-box').hidden = k !== 'kumzits'; $('how-box').hidden = !k || k === 'kumzits';
     [].forEach.call(document.querySelectorAll('input[name=svc]'), function (i) { i.checked = i.value === k; });
-    taken = {}; drawTimes(); loadTaken(); check(false, 1); drawStep();
+    drawTimes(); check(false, 1); drawStep();
   }
   document.addEventListener('change', function (e) {
     var t = e.target;
@@ -139,6 +146,7 @@
   });
 
   // arriving filled in (rules 3k.10): the service and occasion from the link, the first day he works, quantity none
+  loadTaken();
   var pre = q.get('svc'); setSvc(SVC[pre] ? pre : '');
   var oc = q.get('occasion'), OCC = { 'bar-mitzvah': 'Bar Mitzvah', chuppah: 'Chuppah', bris: 'Bris Milah', other: 'Any other occasion', kumzits: 'Just a kumzits' };
   if (oc && OCC[oc] && svc === 'kumzits') { occ = OCC[oc]; [].forEach.call(document.querySelectorAll('input[name=occ]'), function (i) { i.checked = i.value === occ; }); }

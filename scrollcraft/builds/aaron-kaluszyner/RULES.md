@@ -27,7 +27,8 @@ R3e.22 pass: built to the blueprint: his name in the bar, label and every bookin
 R3s.19 pass: built to the blueprint: each page has its own title, description, og:title, og:description and the share picture (assets/og.jpg, the opening)
 R6.1 pass: built to the blueprint: events playbook: what the event is and its price lead, then the occasions, then booking
 R4.1 pass: built to the blueprint: mentoring price missing: "Ask for the price"; past-event videos: "ask Aaron on WhatsApp"; listed in OWNER-QUESTIONS.md
-R3g.13 pass: built to the blueprint: picture (the strings), headline of five words plus the occasion, the small label "Aaron Dovid · Jerusalem" as the one short line, one Book button, three facts under it
+R3g.13 pass: built to the blueprint: picture (the strings), headline of four words naming both offers, the small label "Aaron Dovid · Jerusalem" as the one short line, one Book button, three facts under it
+R3g.18 pass: built to the blueprint: <meta name="offers" content="kumzits|guitar lesson">; the headline is "Kumzitzes and guitar lessons"; the one Book button opens the Book page, where they choose
 R3b.1 pass: built to the blueprint: what: a kumzits for your occasion; where: Jerusalem; trust: the price beside the button; next: Book
 R3b.2 pass: built to the blueprint: Kumzits ₪1,200 and Guitar lessons ₪100 right under the Book button
 R3b.3 pass: built to the blueprint: one solid button per screen (Book on the card); the header Book and the Sound switch are outline
@@ -167,7 +168,7 @@ R3f.8 n/a: nothing is tied to the scroll except the one strum, played in full on
 R3f.9 n/a: no list that lights up
 R3f.5 pass: built to the blueprint: widths in rem; no shimmer
 R3f.4 n/a: no logo motif
-R3g.4 pass: built to the blueprint: each motion has one job: the strum shows the craft, the arrival guides, the button string confirms the pointer; nothing loops but the rotating word
+R3g.4 pass: built to the blueprint: each motion has one job: the strum shows the craft, the arrival guides, the button string confirms the pointer; nothing loops
 R3e.16 pass: built to the blueprint: eased curves only, all under 0.6 s except the strings ringing out
 R3e.17 n/a: no carousel or sheet
 R3e.18 n/a: no background video
@@ -201,7 +202,7 @@ R3u.2 pass: built to the blueprint: a Friday or Saturday gets one line naming th
 R3u.3 n/a: no servings or pieces
 R3u.5 pass: built to the blueprint: the first screen arrives in order once (label and headline, then the button) with the strum; check-arrival
 R3u.6 n/a: no depth pieces
-R3u.7 pass: built to the blueprint: one rotating word from his own occasions (Bar Mitzvah, Chuppah, Bris Milah, simcha); the full list for screen readers; the first word with motion off
+R3u.7 n/a: no rotating word; the headline names both offers (3g.18), and his occasions are the list in the kumzits band
 R3u.8 n/a: no tilted label
 R3u.9 pass: built to the blueprint: questions are rounded cards on details with the + in a circle, ready for his answers
 R3u.10 n/a: one place

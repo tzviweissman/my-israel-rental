@@ -20,7 +20,7 @@ SITE = kit.Site(
         {'@type': 'Offer', 'name': 'Kumzits', 'price': 1200, 'priceCurrency': 'ILS'},
         {'@type': 'Offer', 'name': 'Music Lessons, 40 minutes', 'price': 100, 'priceCurrency': 'ILS'}]})
 
-HEAD_EXTRA = '<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 20 24%27%3E%3Cpath fill=%27%23B4470F%27 d=%27M10 23C5 17 1 11 1 6.5 1 3 4.5 1 10 1s9 2 9 5.5C19 11 15 17 10 23z%27/%3E%3C/svg%3E">' + '<meta name="site-category" content="events">\n'
+HEAD_EXTRA = '<meta name="offers" content="kumzits|guitar lesson">\n<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 20 24%27%3E%3Cpath fill=%27%23B4470F%27 d=%27M10 23C5 17 1 11 1 6.5 1 3 4.5 1 10 1s9 2 9 5.5C19 11 15 17 10 23z%27/%3E%3C/svg%3E">' + '<meta name="site-category" content="events">\n'
 _head = SITE.head
 SITE.head = lambda page, title, desc, og: _head(page, title, desc, og).replace('<link rel="stylesheet" href="site.css">', HEAD_EXTRA + '<link rel="stylesheet" href="site.css">')
 
@@ -32,9 +32,9 @@ OPENING = f'''  <section class="open" id="open" aria-labelledby="h-open">
     <div class="open-in wrap">
       <div class="open-card">
         <p class="label" data-arrive="1">Aaron Dovid · Jerusalem</p>
-        <h1 id="h-open" data-arrive="1">A kumzits for your<br><span class="rot" data-words="Bar Mitzvah|Chuppah|Bris Milah|simcha"></span></h1>
+        <h1 id="h-open" data-arrive="1">Kumzitzes and<br>guitar lessons</h1>
         <div class="open-act" data-arrive="4">
-          <a class="btn" href="book.html?svc=kumzits"><span>Book</span><i class="twang" aria-hidden="true"></i></a>
+          <a class="btn" href="book.html"><span>Book</span><i class="twang" aria-hidden="true"></i></a>
           <ul class="btn-facts"><li>Kumzits {kit.price('1,200')}</li><li>Guitar lessons {kit.price(100)}</li><li>Online lessons too</li></ul>
         </div>
       </div>

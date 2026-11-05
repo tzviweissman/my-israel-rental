@@ -35,6 +35,19 @@ for (const [svc, tier, price] of [['kumzits', 'Kumzits', '1,200'], ['lesson', 'M
   ok(/Sent/.test(await page.textContent('#status')), `${svc}: the status says it was sent`);
   await ctx.close();
 }
+// a time taken on one listing is gone on the other too: he is one person
+{
+  const ctx = await b.newContext({ viewport: { width: 1280, height: 800 } });
+  const page = await ctx.newPage();
+  await page.goto(`${base}/book.html`); const day = await page.inputValue('#day');
+  await ctx.route('**/marketplace/gigs/f45f0cd9*/taken-slots', (r) => r.fulfill({ json: { [day]: ['09:00'] } }));
+  await ctx.route('**/marketplace/gigs/ce870646*/taken-slots', (r) => r.fulfill({ json: { [day]: ['10:30'] } }));
+  const off = async (svc) => { await page.goto(`${base}/book.html?svc=${svc}`); await page.waitForTimeout(400); return page.$$eval('#times input:disabled', (x) => x.map((i) => i.value).join(' ')); };
+  const k = await off('kumzits'), l = await off('lesson');
+  ok(k === '09:00 10:30 11:00', `kumzits: a kumzits at 9:00 and a lesson at 10:30 block ${k}`);
+  ok(l === '09:00 10:30', `lesson: the same two block ${l}`);
+  await ctx.close();
+}
 await b.close();
 console.log(fails ? `${fails} failed` : 'booking form: all passed');
 process.exit(fails ? 1 : 0);
