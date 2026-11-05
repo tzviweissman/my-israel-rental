@@ -20,6 +20,7 @@ import axios from 'axios';
 import { toast } from 'sonner';
 import { Copy, Download, Loader2, Save, Share2, Trash2, Upload } from 'lucide-react';
 import { API } from '../../App';
+import BackgroundGallery from '../dashboard/BackgroundGallery';
 
 const SHAPES = { post: [1080, 1350], status: [1080, 1920] };
 const INK = '#111827';
@@ -305,6 +306,32 @@ function drawPhoto(ctx, W, H, shape, f, logo, photo) {
     ctx.clip();
     ctx.drawImage(photo, (W - w) / 2, y + 50 + (bh - h) / 2, w, h);
     ctx.restore();
+  }
+  foot(ctx, { W, H, shape, f, logo, dark: true });
+}
+
+// "Photo background" (Tzvi, 4 Nov 2026): a photo from the background gallery
+// fills the whole ad, the words large on it.
+function drawBackdropPhoto(ctx, W, H, shape, f, logo, photo) {
+  if (photo) {
+    const s = Math.max(W / photo.naturalWidth, H / photo.naturalHeight);
+    const w = photo.naturalWidth * s;
+    const h = photo.naturalHeight * s;
+    ctx.drawImage(photo, (W - w) / 2, (H - h) / 2, w, h);
+  } else gradient(ctx, W, H, '#167AB8', '#111827');
+  const g = ctx.createLinearGradient(0, 0, 0, H * 0.6);
+  g.addColorStop(0, 'rgba(0,0,0,.62)');
+  g.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = g;
+  ctx.fillRect(0, 0, W, H);
+  let y = headline(ctx, { text: f.headline, hl: f.highlight, y: shape === 'status' ? 240 : 64, size: 96, W, colour: '#FFFFFF', accent: '#FFD600' });
+  if (f.sub) {
+    const sf = fonts(f.sub);
+    ctx.font = `600 36px ${sf.body}`;
+    ctx.fillStyle = '#FFFFFF';
+    ctx.textAlign = 'center';
+    ctx.direction = isHe(f.sub) ? 'rtl' : 'ltr';
+    wrap(ctx, f.sub, W - 160, 2).forEach((l) => { y += 50; ctx.fillText(l, W / 2, y); });
   }
   foot(ctx, { W, H, shape, f, logo, dark: true });
 }
@@ -617,6 +644,7 @@ async function render(canvas, ad, shape) {
     '700 80px "Frank Ruhl Libre"', '700 40px Assistant'].map((x) => document.fonts?.load(x).catch(() => null)));
   if (ad.design === 'chat') drawChat(ctx, W, H, shape, f, logo);
   else if (ad.design === 'call') drawCall(ctx, W, H, shape, f, logo);
+  else if (ad.design === 'bgphoto') drawBackdropPhoto(ctx, W, H, shape, f, logo, f.photo ? await loadImage(f.photo) : null);
   else if (ad.design === 'notify') drawNotify(ctx, W, H, shape, f, logo, await loadImage(f.page));
   else if (ad.design === 'search') drawSearch(ctx, W, H, shape, f, logo, await loadImage(f.page));
   else if (ad.design === 'toggle') drawToggles(ctx, W, H, shape, f, logo);
@@ -643,6 +671,9 @@ function freshAd(design, t, lang) {
   if (design === 'photo') {
     return { design, lang, name: d('name'), fields: { ...common, headline: d('headline'), highlight: d('highlight'), sub: d('sub'), photo: `/ads/pages/${PAGES[1]}.jpg` } };
   }
+  if (design === 'bgphoto') {
+    return { design, lang, name: d('name'), fields: { ...common, headline: d('headline'), highlight: d('highlight'), sub: d('sub'), photo: '' } };
+  }
   // The six from 3 Nov: their own words, and a page where they show one.
   const keys = { call: ['caller', 'calling', 'decline', 'accept'], notify: ['time', 'date', 'notes'],
     search: ['kicker', 'question', 'answerTitle', 'answer'], toggle: ['headline', 'highlight', 'switches'],
@@ -653,7 +684,7 @@ function freshAd(design, t, lang) {
   return { design, lang, name: d('name'), fields };
 }
 
-export const DESIGNS = ['chat', 'showcase', 'photo', 'call', 'notify', 'search', 'toggle', 'checklist', 'beforeafter'];
+export const DESIGNS = ['bgphoto', 'chat', 'showcase', 'photo', 'call', 'notify', 'search', 'toggle', 'checklist', 'beforeafter'];
 
 export default function AdStudio({ token }) {
   const { t, i18n } = useTranslation();
@@ -760,6 +791,13 @@ export default function AdStudio({ token }) {
     }
   };
 
+  // A photo from the gallery fills a photo design, or opens one with it.
+  const pickBg = (url) => {
+    if (ad.design === 'photo' || ad.design === 'bgphoto') { set('photo', url); return; }
+    const fresh = freshAd('bgphoto', i18n.getFixedT(lang), lang);
+    setAd({ ...fresh, fields: { ...fresh.fields, photo: url } });
+  };
+
   const fileName = () => `${(ad.name || 'ad').replace(/[^\w֐-׿-]+/g, '-')}-${shape}.jpg`;
   const blob = () => new Promise((r) => canvasRef.current.toBlob(r, 'image/jpeg', 0.92));
   const download = async () => {
@@ -807,7 +845,7 @@ export default function AdStudio({ token }) {
 
       <div className="space-y-1.5">
         <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('adStudio.galleryTitle', 'Pick a look. Every word and picture can be changed after.')}</p>
-        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 gap-2" data-testid="ad-studio-gallery">
+        <div className="grid grid-cols-3 sm:grid-cols-5 lg:grid-cols-10 gap-2" data-testid="ad-studio-gallery">
           {DESIGNS.map((d) => {
             const on = ad && !ad.id && ad.design === d;
             return (
@@ -924,7 +962,8 @@ export default function AdStudio({ token }) {
                 </label>
               </div>
             )}
-            {ad.design === 'photo' && (
+            <BackgroundGallery API={API} token={token} lang={lang} onPick={pickBg} />
+            {(ad.design === 'photo' || ad.design === 'bgphoto') && (
               <>
                 {box('headline', 2)}
                 {box('highlight')}

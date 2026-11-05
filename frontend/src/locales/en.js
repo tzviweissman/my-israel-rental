@@ -4279,6 +4279,7 @@ const en = {
         title: "Ads",
         intro: "Make ads for MyIsraelRental to send on WhatsApp. Change any word or picture, save it, and open it again later.",
         design: {
+          bgphoto: "Photo background",
           call: "Incoming call",
           notify: "Notifications",
           search: "Search",
@@ -4426,6 +4427,15 @@ const en = {
             line: "Ask about one for your business.",
             caption: "These are local businesses with websites we designed on MyIsraelRental. Want one for yours? https://myisraelrental.com",
           },
+          bgphoto: {
+            name: "Photo background",
+            headline: "Your business. Free to be found.",
+            highlight: "Free",
+            sub: "Stays, local businesses and restaurants across Israel.",
+            title: "MyIsraelRental",
+            line: "Add your business, free.",
+            caption: "https://myisraelrental.com",
+          },
           photo: {
             name: "Photo ad",
             headline: "Stays, local businesses and restaurants across Israel",
@@ -4497,6 +4507,8 @@ const en = {
         oneMessage: "One idea per ad works best: try 9 words or fewer in the headline.",
         tryNextWhy: "Different-looking ads reach more people than the same one again.",
         tryNext: "Try {{name}}",
+        bgGalleryTitle: "Background gallery",
+        bgTopic: { wood: "Wood", marble: "Marble", kitchen: "Kitchen", food: "Food", nature: "Nature", beach: "Beach", city: "City", sky: "Sky", home: "Home", texture: "Texture" },
         inkAuto: "Automatic",
         dragHint: "Drag the product, the words or the price to move them. Pull the blue dot to resize.",
         resetMoves: "Put back",

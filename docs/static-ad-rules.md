@@ -499,6 +499,51 @@ Jordan's system generates every picture through a paid image service,
 which our free ads do not (9d). The podcast carries two sponsor reads
 (Social Snowball) and one host is an investor in Tribe, which it praises.
 
+## 9g. Three more videos: why an ad catches the eye (4 Nov 2026)
+
+Janson Smith "How I Use AI to Copy Winning Ads", Fraser Cottrell "The Ultimate
+Guide to Static Image Ads", and Higgsfield's own "GPT-6 Astra Changed Meta Ads
+Forever". All three read in full; contact sheets of frames every 5s sampled,
+not every sheet (4 of 8, 3 of 14, 2 of 11), chosen where ads are on screen.
+
+1. **Start from an ad that already works, never a blank page** (all three).
+   Meta's Ad Library, sorted by reach, or how long an ad has run (Higgsfield's
+   slide: 200 reach against 20,000 on the same money); Pinterest when no spend
+   is known. Our library in docs/inspo/pinterest-ads-2026-11-02 is that board.
+2. **Describe the reference, do not ask for a swap** (Janson, frame-verified).
+   "Swap the bottle for a Nivea bottle" gave a product that looked pasted in.
+   A long description of the reference (subject, composition, camera, light,
+   background, materials), rebuilt around the attached product photo and its
+   colours, gave a new scene that looked made for it: the Kdelle checkerboard
+   room came back blue with Nivea, her hand on the bottle. Take the idea and
+   the composition; never another brand's marks or wording.
+3. **Eye-catching is mostly three things** (Fraser, frame-verified): one
+   saturated colour that stands out on a white or dark feed (protein.com's
+   yellow); a sharp, vibrant product front and centre; or something that does
+   not look like an ad at all. Then a headline and one call to action, nothing
+   more. Simon (9f) and Higgsfield's video say the same: the simplest win.
+4. **Looks-native formats** (Fraser, frame-verified): a real review cut short
+   in a comment bubble with a face and a heart over the product; a phone photo
+   of a hand holding it with Instagram-story white boxes and an underlined
+   @name, made in 15 minutes; a shocking close-up whose caption tells a long
+   customer story, its first line working as the headline.
+5. **A headline about the reader's world**: "Claim it before the group chat
+   does" (Fraser). One such line then fed many other ads.
+6. **Mine the reviews** (Fraser; Levi in 9f): a real line becomes the headline.
+7. **Three kinds that convert** (Higgsfield, frame-verified): a callout diagram
+   (thin lines from the product to circles showing each feature, saying what
+   it does for the reader), a review card, an offer card with the old price
+   struck through. For services: a pain, the result, and something free.
+8. **Words stay out of the generated picture** (Fraser): changing a word must
+   not mean paying for a new image. The picture is generated, the words stay
+   editable on top.
+9. **One message, many different-looking ads** (Fraser, with 9f.6): not the
+   same design with another headline.
+
+Discount: Janson sells a coaching community and pushes an account-sharing
+service for paid tools, which we will not use. Fraser sells a course and an
+agency. The third is Higgsfield promoting Higgsfield, its numbers its own.
+
 ## 10. What to discount from the videos
 
 - **All five are sales funnels.** Three are from Fraser Cottrell's agency (the

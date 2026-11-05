@@ -20,6 +20,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { QRCodeCanvas } from 'qrcode.react';
+import BackgroundGallery from './BackgroundGallery';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Copy, Download, ExternalLink, Layers, Loader2, Printer, RefreshCw, Save, Share2, X } from 'lucide-react';
@@ -2059,9 +2060,6 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const [sel, setSel] = useState('');
   // "Make your own": its background, and the photo search.
   const [bg, setBg] = useState({ id: 'sand' });
-  const [bgQuery, setBgQuery] = useState('');
-  const [bgResults, setBgResults] = useState([]);
-  const [bgBusy, setBgBusy] = useState(false);
   const [reviewIdx, setReviewIdx] = useState(0);
   // Which "real moment" line the situation ad shows, and which reader the
   // words were written for (9f.1, 9f.7).
@@ -2627,30 +2625,13 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const W0 = canvasRef.current?.width || 1080;
   const H0 = canvasRef.current?.height || 1350;
 
-  const searchBackgrounds = async (e) => {
-    e?.preventDefault();
-    if (!bgQuery.trim()) return;
-    setBgBusy(true);
-    try {
-      const { data } = await axios.get(`${API}/ads/backgrounds`, { params: { q: bgQuery, lang }, headers: { Authorization: `Bearer ${token}` } });
-      setBgResults(data.photos || []);
-    } catch (err) {
-      toast.error(err?.response?.data?.detail || t('ads.bgFailed', 'Photo search did not answer. Try again.'));
-    } finally {
-      setBgBusy(false);
-    }
-  };
-  const pickBackground = async (photo) => {
-    setBgBusy(true);
-    try {
-      const { data } = await axios.post(`${API}/ads/backgrounds/keep`, { url: photo.full }, { headers: { Authorization: `Bearer ${token}` } });
-      const img = await loadImage(data.url);
-      if (img) setBg({ img, src: data.url });
-    } catch (err) {
-      toast.error(err?.response?.data?.detail || t('ads.bgFailed', 'Photo search did not answer. Try again.'));
-    } finally {
-      setBgBusy(false);
-    }
+  // A photo from the gallery goes behind "Make your own", whichever design
+  // the owner was looking at when they picked it.
+  const pickBackground = async (url) => {
+    const img = await loadImage(url);
+    if (!img) return;
+    setBg({ img, src: url });
+    if (layout !== 'custom') setDesign('custom');
   };
   const swatch = (name) => {
     const L = lookOf(name, brandHex, featured?.cut || featured?.img);
@@ -2792,24 +2773,10 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                     </button>
                   ))}
                 </div>
-                <form onSubmit={searchBackgrounds} className="flex gap-2">
-                  <input className={field} value={bgQuery} onChange={(e) => setBgQuery(e.target.value)} dir="auto"
-                    placeholder={t('ads.bgSearch', 'Search photos: wood table, beach, kitchen…')} data-testid="ad-bg-query" />
-                  <button type="submit" disabled={bgBusy} className="shrink-0 px-3 rounded-lg text-sm font-semibold text-white disabled:opacity-60" style={{ background: '#000' }} data-testid="ad-bg-go">
-                    {bgBusy ? <Loader2 className="animate-spin" size={14} /> : t('ads.bgGo', 'Search')}
-                  </button>
-                </form>
-                {bgResults.length > 0 && (
-                  <div className="grid grid-cols-4 gap-1.5 max-h-48 overflow-y-auto" data-testid="ad-bg-results">
-                    {bgResults.map((ph) => (
-                      <button key={ph.id} type="button" onClick={() => pickBackground(ph)} disabled={bgBusy} className="aspect-square rounded overflow-hidden">
-                        <img src={ph.thumb} alt="" loading="lazy" className="w-full h-full object-cover" />
-                      </button>
-                    ))}
-                  </div>
-                )}
-                {bgResults.length > 0 && <p className="text-[10px]" style={{ color: 'var(--brand-muted)' }}>{t('ads.bgCredit', 'Photos from Pixabay, free to use in ads.')}</p>}
               </div>
+            )}
+            {themed && targetType === 'business' && (
+              <BackgroundGallery API={API} token={token} lang={lang} onPick={pickBackground} />
             )}
             {themed && (
               <div className="grid grid-cols-2 gap-2">

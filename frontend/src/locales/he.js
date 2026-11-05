@@ -4146,6 +4146,7 @@ const he = {
         title: "מודעות",
         intro: "יצירת מודעות של MyIsraelRental לשליחה בוואטסאפ. אפשר לשנות כל מילה ותמונה, לשמור ולפתוח שוב אחר כך.",
         design: {
+          bgphoto: "תמונת רקע",
           call: "שיחה נכנסת",
           notify: "התראות",
           search: "חיפוש",
@@ -4293,6 +4294,15 @@ const he = {
             line: "שאלו על אחד לעסק שלכם.",
             caption: "אלה עסקים מקומיים עם אתרים שעיצבנו ב-MyIsraelRental. רוצים אחד לעסק שלכם? https://myisraelrental.com",
           },
+          bgphoto: {
+            name: "תמונת רקע",
+            headline: "העסק שלכם. למצוא אותו בחינם.",
+            highlight: "בחינם",
+            sub: "מקומות לינה, עסקים מקומיים ומסעדות בכל הארץ.",
+            title: "MyIsraelRental",
+            line: "הוסיפו את העסק, בחינם.",
+            caption: "https://myisraelrental.com",
+          },
           photo: {
             name: "מודעת תמונה",
             headline: "מקומות לינה, עסקים מקומיים ומסעדות בכל הארץ",
@@ -4364,6 +4374,8 @@ const he = {
         oneMessage: "רעיון אחד למודעה עובד הכי טוב: נסו עד 9 מילים בכותרת.",
         tryNextWhy: "מודעות שנראות שונה מגיעות ליותר אנשים מאותה מודעה שוב.",
         tryNext: "לנסות {{name}}",
+        bgGalleryTitle: "גלריית רקעים",
+        bgTopic: { wood: "עץ", marble: "שיש", kitchen: "מטבח", food: "אוכל", nature: "טבע", beach: "ים", city: "עיר", sky: "שמיים", home: "בית", texture: "מרקם" },
         inkAuto: "אוטומטי",
         dragHint: "גררו את המוצר, המילים או המחיר כדי להזיז. משכו את הנקודה הכחולה כדי לשנות גודל.",
         resetMoves: "להחזיר",
