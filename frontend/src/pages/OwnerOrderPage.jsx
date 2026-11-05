@@ -5,7 +5,9 @@
  * Tzvi, 2 Nov 2026: no sign-in for each order. Everything the owner needs
  * is on one screen, with Confirm and Decline; on Confirm the customer and
  * the business each get a text with the order number and their link.
- * The order is in the dashboard as well, as every order is.
+ * Once confirmed it shows the same steps as the customer's tracking link
+ * and refreshes itself while open. The order is in the dashboard as well,
+ * as every order is, and that is where it is moved along.
  */
 import React, { useCallback, useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
@@ -14,6 +16,9 @@ import axios from 'axios';
 import { Loader2, ClipboardList, Check, X, Bike, Store as StoreIcon, Clock, MapPin, Phone, Mail } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { money } from '../utils/currency';
+import OrderSteps from '../components/orders/OrderSteps';
+
+const REFRESH_MS = 30_000;
 
 export default function OwnerOrderPage() {
   const { token } = useParams();
@@ -38,6 +43,10 @@ export default function OwnerOrderPage() {
     }
   }, [url]);
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    const id = setInterval(() => { if (!document.hidden) load(); }, REFRESH_MS);
+    return () => clearInterval(id);
+  }, [load]);
 
   const decide = async (what) => {
     setBusy(what);
@@ -70,6 +79,7 @@ export default function OwnerOrderPage() {
   const nb = data.needed_by || '';
   const when = nb ? new Intl.DateTimeFormat(lang === 'he' ? 'he-IL' : 'en-GB', { weekday: 'long', day: 'numeric', month: 'long', ...(nb.includes('T') ? { hour: '2-digit', minute: '2-digit' } : {}) }).format(new Date(nb.includes('T') ? nb : `${nb}T00:00`)) : '';
   const isNew = data.status === 'new';
+  const moving = ['preparing', 'ready', 'done'].includes(data.status);
   const btn = 'flex items-center justify-center gap-2 w-full min-h-[52px] rounded-full text-base font-semibold disabled:opacity-60';
 
   return (
@@ -85,7 +95,7 @@ export default function OwnerOrderPage() {
           </div>
         </div>
 
-        {!isNew && (
+        {!isNew && data.status !== 'ready' && data.status !== 'done' && (
           <p className="rounded-2xl border p-4 mb-3 text-base font-semibold flex items-center gap-2" role="status" data-testid="owner-order-state"
              style={data.status === 'cancelled'
                ? { borderColor: 'var(--brand-border)', background: 'var(--surface-muted)', color: 'var(--ink)' }
@@ -97,6 +107,12 @@ export default function OwnerOrderPage() {
                 ? t('ownerOrder.confirmed', 'Confirmed. The customer has their order number and tracking link.')
                 : t(`orders.status.${data.status}`, data.status)}
           </p>
+        )}
+
+        {moving && (
+          <section className="rounded-2xl border bg-white p-4 mb-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="owner-order-steps">
+            <OrderSteps status={data.status} fulfilment={data.fulfilment} table={data.table} />
+          </section>
         )}
 
         <section className="rounded-2xl border bg-white p-4 text-sm space-y-2" style={{ borderColor: 'var(--brand-border)' }}>
