@@ -7,7 +7,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Megaphone, Plus } from 'lucide-react';
 import AdMaker from './AdMaker';
 import QrShareCard from '../common/QrShareCard';
 import ShareLinkButtons from '../common/ShareLinkButtons';
@@ -31,9 +30,6 @@ export default function AdvertisingTab({ API, token, targets }) {
   const { t } = useTranslation();
   const [idx, setIdx] = useState(0);
   const [link, setLink] = useState(null);
-  const [saved, setSaved] = useState([]);
-  // null: closed. Otherwise what AdMaker opens with.
-  const [open, setOpen] = useState(null);
   const target = targets[Math.min(idx, targets.length - 1)];
   const type = target?.type;
   const id = target?.id;
@@ -41,14 +37,9 @@ export default function AdvertisingTab({ API, token, targets }) {
   const load = useCallback(async () => {
     if (!id) return;
     const auth = { headers: { Authorization: `Bearer ${token}` } };
-    const [l, s] = await Promise.all([
-      axios.post(`${API}/short-links`, { target_type: type, target_id: id }, auth).then((r) => r.data).catch(() => null),
-      axios.get(`${API}/ads/saved`, { ...auth, params: { target_type: type, target_id: id } }).then((r) => r.data.ads || []).catch(() => []),
-    ]);
-    setLink(l);
-    setSaved(s);
+    setLink(await axios.post(`${API}/short-links`, { target_type: type, target_id: id }, auth).then((r) => r.data).catch(() => null));
   }, [API, token, type, id]);
-  useEffect(() => { setLink(null); setSaved([]); load(); }, [load]);
+  useEffect(() => { setLink(null); load(); }, [load]);
 
   if (!target) return null;
   const url = link ? `${window.location.origin}${link.path}` : '';
@@ -69,30 +60,8 @@ export default function AdvertisingTab({ API, token, targets }) {
       )}
 
       <section className={card} style={border} data-testid="advertising-ads">
-        <div className="flex flex-wrap items-center justify-between gap-3 mb-3">
-          <h2 className="text-lg font-semibold" style={heading}>{t('advertising.adsTitle', 'Your ads')}</h2>
-          <button type="button" onClick={() => setOpen({ fresh: true })}
-            className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-lg text-sm font-semibold text-white" style={{ background: '#000' }} data-testid="advertising-new">
-            <Plus size={15} aria-hidden="true" /> {t('ads.makeButton', 'Make an ad')}
-          </button>
-        </div>
-        {saved.length === 0 ? (
-          <p className="text-sm flex items-center gap-2" style={{ color: 'var(--brand-muted)' }} data-testid="advertising-none">
-            <Megaphone size={16} aria-hidden="true" />
-            {t('advertising.none', 'No ads yet. Your first one is made from your own photos and details, ready to change.')}
-          </p>
-        ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-6 gap-3">
-            {saved.map((r) => (
-              <button key={r.id} type="button" onClick={() => setOpen({ saved: r.id, savedLang: r.lang })} className="text-center min-w-0" data-testid={`advertising-ad-${r.id}`}>
-                <img src={r.thumb} alt={t('advertising.openAd', 'Open this ad')} className="w-full rounded-lg border" style={border} />
-                <span className="block mt-1 text-[11px] leading-tight" style={{ color: 'var(--brand-muted)' }}>
-                  {t('ads.weekVisits', 'Visits this week: {{count}}', { count: link?.ads_week?.[r.settings?.adName] || 0 })}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
+        <h2 className="text-lg font-semibold mb-3" style={heading}>{t('advertising.adsTitle', 'Your ads')}</h2>
+        <AdMaker key={`${type}-${id}`} inline API={API} token={token} targetType={type} target={target} />
       </section>
 
       <section className={card} style={border} data-testid="advertising-link">
@@ -116,10 +85,6 @@ export default function AdvertisingTab({ API, token, targets }) {
         )}
       </section>
 
-      {open && (
-        <AdMaker API={API} token={token} targetType={type} target={target} start={open}
-          onClose={() => { setOpen(null); load(); }} />
-      )}
     </div>
   );
 }

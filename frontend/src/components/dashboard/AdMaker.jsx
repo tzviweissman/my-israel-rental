@@ -131,25 +131,29 @@ function draw(canvas, { format, design, words, eyebrow, price, cta, shortUrl, rt
 
   if (cover) {
     const cx = (W - cw) / 2;
-    if (gallery && cw >= W - 1) ctx.drawImage(cover, 0, 0, cw, ch);
-    else {
-      if (!dark) { ctx.shadowColor = 'rgba(17,24,39,.18)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 12; }
-      roundedImage(ctx, cover, cx, y, cw, ch, 28);
-      ctx.shadowColor = 'transparent';
-    }
-    y += ch;
-    if (rowH) {
-      y += gap;
-      const widths = row.map((i) => Math.round(rowH * i.naturalWidth / i.naturalHeight));
-      const total = widths.reduce((a, b) => a + b, 0) + gap * (row.length - 1);
-      let x = (W - total) / 2;
-      row.forEach((img, i) => { roundedImage(ctx, img, x, y, widths[i], rowH, 18); x += widths[i] + gap; });
-      y += rowH;
-    }
-    y += 40;
+    const y0 = y;
+    const photosTall = ch + (rowH ? gap + rowH : 0);
+    part(ctx, 'product', [cx, y0, cw, photosTall], () => {
+      if (gallery && cw >= W - 1) ctx.drawImage(cover, 0, y0, cw, ch);
+      else {
+        if (!dark) { ctx.shadowColor = 'rgba(17,24,39,.18)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 12; }
+        roundedImage(ctx, cover, cx, y0, cw, ch, 28);
+        ctx.shadowColor = 'transparent';
+      }
+      if (rowH) {
+        const ry = y0 + ch + gap;
+        const widths = row.map((i) => Math.round(rowH * i.naturalWidth / i.naturalHeight));
+        const total = widths.reduce((a, b) => a + b, 0) + gap * (row.length - 1);
+        let x = (W - total) / 2;
+        row.forEach((img, i) => { roundedImage(ctx, img, x, ry, widths[i], rowH, 18); x += widths[i] + gap; });
+      }
+    });
+    y += photosTall + 40;
     if (gallery && cw >= W - 1) y += spare;
   }
 
+  const wordsY = y;
+  part(ctx, 'words', [PAD, wordsY, textW, blockH], () => {
   ctx.fillStyle = dark ? 'rgba(255,255,255,.7)' : MUTED;
   ctx.font = `600 ${px(30)}px ${body}`;
   ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(30));
@@ -186,6 +190,7 @@ function draw(canvas, { format, design, words, eyebrow, price, cta, shortUrl, rt
       ctx.fillText(wrap(ctx, pt, textW - px(36), 1)[0] || '', rtl ? W - PAD - px(34) : PAD + px(34), y);
     });
   }
+  });
 
   drawFooter(ctx, { W, PAD, QR, rtl, dark, cta, shortUrl, qr, body, px, start, textW, bottom: H - PAD - safe });
 }
@@ -195,19 +200,53 @@ function draw(canvas, { format, design, words, eyebrow, price, cta, shortUrl, rt
 function drawFooter(ctx, { W, PAD, QR, rtl, dark, cta, shortUrl, qr, body, px, start, textW, bottom }) {
   const qy = bottom - QR;
   const qx = rtl ? PAD : W - PAD - QR;
-  ctx.fillStyle = '#FFFFFF';
-  ctx.beginPath();
-  ctx.roundRect(qx - 10, qy - 10, QR + 20, QR + 20, 16);
-  ctx.fill();
-  if (qr) ctx.drawImage(qr, qx, qy, QR, QR);
+  qrTile(ctx, qr, qx, qy, QR, 10);
   const linkW = textW - QR - 40;
-  ctx.textAlign = rtl ? 'right' : 'left';
-  ctx.fillStyle = dark ? '#FFFFFF' : INK;
-  ctx.font = `700 ${px(34)}px ${body}`;
-  ctx.fillText(wrap(ctx, cta, linkW, 1)[0], start, qy + QR / 2 - 6);
-  ctx.fillStyle = dark ? 'rgba(255,255,255,.7)' : ACCENT;
-  ctx.font = `600 ${px(30)}px ${body}`;
-  ctx.fillText(wrap(ctx, shortUrl.replace(/^https?:\/\//, ''), linkW, 1)[0], start, qy + QR / 2 + px(40));
+  linkPiece(ctx, { rtl, x: start, lines: [
+    { text: cta, y: qy + QR / 2 - 6, font: `700 ${px(34)}px ${body}`, size: px(34), colour: dark ? '#FFFFFF' : INK, strong: INK },
+    { text: shortUrl.replace(/^https?:\/\//, ''), y: qy + QR / 2 + px(40), font: `600 ${px(30)}px ${body}`, size: px(30), colour: dark ? 'rgba(255,255,255,.7)' : ACCENT, strong: ACCENT },
+  ], width: linkW });
+}
+
+// The code on its white tile: never under the size that scans (rules 8).
+function qrTile(ctx, qr, qx, qy, QR, m) {
+  part(ctx, 'qr', [qx - m, qy - m, QR + m * 2, QR + m * 2], () => {
+    ctx.fillStyle = '#FFFFFF';
+    ctx.beginPath();
+    ctx.roundRect(qx - m, qy - m, QR + m * 2, QR + m * 2, 16);
+    ctx.fill();
+    if (qr) ctx.drawImage(qr, qx, qy, QR, QR);
+  }, { later: true, minScale: 150 / QR });
+}
+
+// The call to action and short link. Moved off its band it brings a white
+// plate, so it stays readable on any picture, and stays at least 30px.
+function linkPiece(ctx, { rtl, x, lines, width }) {
+  const shown = lines.map((l) => {
+    ctx.font = l.font;
+    const text = wrap(ctx, l.text, width, 1)[0] || '';
+    return { ...l, text, w: ctx.measureText(text).width };
+  });
+  const w = Math.max(...shown.map((l) => l.w));
+  const top = shown[0].y - shown[0].size;
+  const h = shown[shown.length - 1].y + 10 - top;
+  const x0 = rtl ? x - w : x;
+  part(ctx, 'link', [x0 - 18, top - 12, w + 36, h + 24], () => {
+    const plate = isMoved('link');
+    if (plate) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.roundRect(x0 - 18, top - 12, w + 36, h + 24, 14);
+      ctx.fill();
+    }
+    ctx.direction = rtl ? 'rtl' : 'ltr';
+    ctx.textAlign = rtl ? 'right' : 'left';
+    shown.forEach((l) => {
+      ctx.font = l.font;
+      ctx.fillStyle = plate ? l.strong : l.colour;
+      ctx.fillText(l.text, x, l.y);
+    });
+  }, { later: true, minScale: 1 });
 }
 
 // The average colour of a band along one side of a photo: the ground a
@@ -381,6 +420,8 @@ function drawReview(canvas, { format, review, eyebrow, price, cta, shortUrl, rtl
   let y = format === 'story' ? 220 : PAD; // a story's account name covers its top 220px (rules 8)
 
   // The comment card, with a small tail pointing down at the photo.
+  const cardY = y;
+  part(ctx, 'words', [PAD, cardY, textW, cardH + 26], () => {
   ctx.shadowColor = 'rgba(17,24,39,.12)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = 8;
   ctx.fillStyle = '#FFFFFF';
   ctx.beginPath();
@@ -421,23 +462,30 @@ function drawReview(canvas, { format, review, eyebrow, price, cta, shortUrl, rtl
   lines.forEach((l) => { ly += px(qLine); ctx.fillText(l, qRtl ? W - PAD - 36 : PAD + 36, ly - px(14)); });
   ctx.direction = rtl ? 'rtl' : 'ltr';
   ctx.textAlign = rtl ? 'right' : 'left';
-  y += cardH + 60;
+  });
+  y = cardY + cardH + 60;
 
   // The photo, whole, in whatever room is left.
   const room = H - y - tailH - footH - PAD - 40;
   if (imgs[0] && room > 120) {
     const [cw, ch] = fitIn(imgs[0], textW, room);
-    ctx.shadowColor = 'rgba(17,24,39,.18)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 12;
-    roundedImage(ctx, imgs[0], (W - cw) / 2, y + (room - ch) / 2, cw, ch, 28);
-    ctx.shadowColor = 'transparent';
+    const py = y + (room - ch) / 2;
+    part(ctx, 'product', [(W - cw) / 2, py, cw, ch], () => {
+      ctx.shadowColor = 'rgba(17,24,39,.18)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 12;
+      roundedImage(ctx, imgs[0], (W - cw) / 2, py, cw, ch, 28);
+      ctx.shadowColor = 'transparent';
+    });
   }
   y = H - PAD - footH - tailH;
+  const nameY = y;
+  part(ctx, 'name', [PAD, nameY, textW, tailH], () => {
+    ctx.textAlign = rtl ? 'right' : 'left';
+    ctx.fillStyle = MUTED;
+    ctx.font = `600 ${px(30)}px ${body}`;
+    ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, nameY + px(30));
+    if (price) pricePill(ctx, { price, x: start, y: nameY + px(44) + 20, h: px(64), maxW: textW, rtl, size: px(38), W });
+  });
   ctx.textAlign = rtl ? 'right' : 'left';
-  ctx.fillStyle = MUTED;
-  ctx.font = `600 ${px(30)}px ${body}`;
-  ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(30));
-  y += px(44);
-  if (price) pricePill(ctx, { price, x: start, y: y + 20, h: px(64), maxW: textW, rtl, size: px(38), W });
   drawFooter(ctx, { W, PAD, QR, rtl, dark: false, cta, shortUrl, qr, body, px, start, textW, bottom: H - PAD - safe });
 }
 
@@ -474,27 +522,30 @@ function drawStory(canvas, { words, price, cta, shortUrl, rtl, imgs, qr }) {
   const lines = [words.headline, ...words.points.slice(0, 2)].filter((l) => (l || '').trim());
   ctx.font = `600 46px ${body}`;
   const boxes = [];
-  lines.forEach((l, i) => wrap(ctx, l, textW - 56, i === 0 ? 2 : 1).forEach((part) => boxes.push(part)));
+  lines.forEach((l, i) => wrap(ctx, l, textW - 56, i === 0 ? 2 : 1).forEach((line) => boxes.push(line)));
   const BH = 76;
   const GAP = 10;
   const QR = 170;
   const panelH = QR + 60;
   const panelTop = H - 230 - panelH;
-  let y = panelTop - 40 - (boxes.length * (BH + GAP) + (price ? 92 : 0));
-  ctx.textAlign = 'center';
-  boxes.forEach((part) => {
-    ctx.font = `600 46px ${body}`;
-    const w = Math.min(ctx.measureText(part).width + 56, textW);
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath();
-    ctx.roundRect((W - w) / 2, y, w, BH, 12);
-    ctx.fill();
-    ctx.fillStyle = INK;
+  const stackH = boxes.length * (BH + GAP) + (price ? 92 : 0);
+  let y = panelTop - 40 - stackH;
+  part(ctx, 'words', [PAD, y, textW, stackH], () => {
     ctx.textAlign = 'center';
-    ctx.fillText(part, W / 2, y + 52);
-    y += BH + GAP;
+    boxes.forEach((line) => {
+      ctx.font = `600 46px ${body}`;
+      const w = Math.min(ctx.measureText(line).width + 56, textW);
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.roundRect((W - w) / 2, y, w, BH, 12);
+      ctx.fill();
+      ctx.fillStyle = INK;
+      ctx.textAlign = 'center';
+      ctx.fillText(line, W / 2, y + 52);
+      y += BH + GAP;
+    });
+    if (price) pricePill(ctx, { price, y: y + 16, h: 76, maxW: textW, rtl, centre: true, size: 42, W });
   });
-  if (price) pricePill(ctx, { price, y: y + 16, h: 76, maxW: textW, rtl, centre: true, size: 42, W });
 
   ctx.fillStyle = '#FFFFFF';
   ctx.beginPath();
@@ -524,22 +575,25 @@ function drawColour(canvas, { format, words, eyebrow, price, cta, shortUrl, rtl,
   const room = footTop - top - textH - 48 - 40;
   const [cw, ch] = imgs[0] && room > 160 ? fitIn(imgs[0], textW, room) : [0, 0];
   let y = top + Math.max(0, (footTop - top - 48 - textH - (ch ? ch + 40 : 0)) / 2);
-  ctx.fillStyle = 'rgba(255,255,255,.8)';
-  ctx.font = `600 ${px(30)}px ${body}`;
-  ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(30));
-  y += px(44);
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = `700 ${px(80)}px ${head}`;
-  lines.forEach((l) => { y += px(92); ctx.fillText(l, start, y - px(18)); });
-  if (price) {
-    pricePill(ctx, { price, x: start, y: y + 28, h: px(64), maxW: textW, rtl, size: px(38), W, bg: '#FFFFFF', fg: rgb(col) });
-    y += px(64) + 28;
-  }
+  const wordsY = y;
+  const photoY = wordsY + textH + 40;
   if (ch) {
-    ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 14;
-    roundedImage(ctx, imgs[0], (W - cw) / 2, y + 40, cw, ch, 28);
-    ctx.shadowColor = 'transparent';
+    part(ctx, 'product', [(W - cw) / 2, photoY, cw, ch], () => {
+      ctx.shadowColor = 'rgba(0,0,0,.25)'; ctx.shadowBlur = 40; ctx.shadowOffsetY = 14;
+      roundedImage(ctx, imgs[0], (W - cw) / 2, photoY, cw, ch, 28);
+      ctx.shadowColor = 'transparent';
+    });
   }
+  part(ctx, 'words', [PAD, wordsY, textW, textH], () => {
+    ctx.fillStyle = 'rgba(255,255,255,.8)';
+    ctx.font = `600 ${px(30)}px ${body}`;
+    ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(30));
+    y += px(44);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `700 ${px(80)}px ${head}`;
+    lines.forEach((l) => { y += px(92); ctx.fillText(l, start, y - px(18)); });
+    if (price) pricePill(ctx, { price, x: start, y: y + 28, h: px(64), maxW: textW, rtl, size: px(38), W, bg: '#FFFFFF', fg: rgb(col) });
+  });
 }
 
 // "Big words" (9b.4): the headline at the largest size that fits, on the
@@ -569,15 +623,17 @@ function drawBigWords(canvas, { format, words, eyebrow, price, cta, shortUrl, rt
   const split = imgs[0] ? Math.round(top + blockH + 56) : footTop;
   if (imgs[0]) photoInBox(ctx, imgs[0], 0, split, W, footTop - split, 0, rgb(col));
   let y = imgs[0] ? top : top + Math.max(0, (avail - lines.length * size * 1.1) / 2);
-  ctx.textAlign = rtl ? 'right' : 'left';
-  ctx.fillStyle = 'rgba(255,255,255,.8)';
-  ctx.font = `600 ${px(30)}px ${body}`;
-  ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(30));
-  y += px(44);
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = `800 ${size}px ${body}`;
-  lines.forEach((l) => { y += size * 1.1; ctx.fillText(l, start, y - size * 0.22); });
-  if (price) pricePill(ctx, { price, x: start, y: y + 32, h: px(64), maxW: textW, rtl, size: px(38), W, bg: '#FFFFFF', fg: rgb(col) });
+  part(ctx, 'words', [PAD, y, textW, blockH], () => {
+    ctx.textAlign = rtl ? 'right' : 'left';
+    ctx.fillStyle = 'rgba(255,255,255,.8)';
+    ctx.font = `600 ${px(30)}px ${body}`;
+    ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(30));
+    y += px(44);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `800 ${size}px ${body}`;
+    lines.forEach((l) => { y += size * 1.1; ctx.fillText(l, start, y - size * 0.22); });
+    if (price) pricePill(ctx, { price, x: start, y: y + 32, h: px(64), maxW: textW, rtl, size: px(38), W, bg: '#FFFFFF', fg: rgb(col) });
+  });
 }
 
 // "Grid" (9b.2): three of the owner's photos and one tile in their colour
@@ -604,28 +660,47 @@ function drawGrid(canvas, { format, words, eyebrow, price, cta, shortUrl, rtl, i
   const s = rtl ? x0 + tw - P : x0 + P;
   ctx.textAlign = rtl ? 'right' : 'left';
   let y = y0 + P;
-  ctx.fillStyle = 'rgba(255,255,255,.8)';
-  ctx.font = `600 30px ${body}`;
-  ctx.fillText(wrap(ctx, eyebrow, iw, 1)[0] || '', s, y + 26);
-  y += 40;
   const QR = 150;
   const bottomH = QR + 20 + 44 + 34;
   ctx.font = `700 50px ${head}`;
   const maxLines = Math.max(1, Math.floor((th - P * 2 - 40 - bottomH - (price ? 80 : 0)) / 60));
-  ctx.fillStyle = '#FFFFFF';
-  wrap(ctx, words.headline, iw, Math.min(4, maxLines)).forEach((l) => { y += 60; ctx.fillText(l, s, y - 14); });
-  if (price) pricePill(ctx, { price, x: s, y: y + 20, h: 56, maxW: iw, rtl, size: 32, W });
+  const headLines = wrap(ctx, words.headline, iw, Math.min(4, maxLines));
+  part(ctx, 'words', [x0 + P, y, iw, 40 + headLines.length * 60 + (price ? 76 : 0)], () => {
+    ctx.fillStyle = 'rgba(255,255,255,.8)';
+    ctx.font = `600 30px ${body}`;
+    ctx.fillText(wrap(ctx, eyebrow, iw, 1)[0] || '', s, y + 26);
+    y += 40;
+    ctx.font = `700 50px ${head}`;
+    ctx.fillStyle = '#FFFFFF';
+    headLines.forEach((l) => { y += 60; ctx.fillText(l, s, y - 14); });
+    if (price) pricePill(ctx, { price, x: s, y: y + 20, h: 56, maxW: iw, rtl, size: 32, W });
+  });
   const qy = y0 + th - P - 34 - QR;
   const qx = rtl ? x0 + tw - P - QR : x0 + P;
-  ctx.fillStyle = '#FFFFFF';
-  ctx.beginPath();
-  ctx.roundRect(qx - 8, qy - 8, QR + 16, QR + 16, 14);
-  ctx.fill();
-  if (qr) ctx.drawImage(qr, qx, qy, QR, QR);
+  qrTile(ctx, qr, qx, qy, QR, 8);
+  ctx.textAlign = rtl ? 'right' : 'left';
+  ctx.font = `700 30px ${body}`;
+  const ctaLines = wrap(ctx, cta, iw - QR - 28, 2);
+  const ctaX = rtl ? qx - 28 : qx + QR + 28;
+  const ctaW = Math.max(...ctaLines.map((l) => ctx.measureText(l).width));
+  part(ctx, 'link', [(rtl ? ctaX - ctaW : ctaX) - 18, qy + QR / 2 - 42, ctaW + 36, ctaLines.length * 38 + 32], () => {
+    const plate = isMoved('link');
+    if (plate) {
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.roundRect((rtl ? ctaX - ctaW : ctaX) - 18, qy + QR / 2 - 42, ctaW + 36, ctaLines.length * 38 + 32, 14);
+      ctx.fill();
+    }
+    ctx.direction = rtl ? 'rtl' : 'ltr';
+    ctx.textAlign = rtl ? 'right' : 'left';
+    ctx.font = `700 30px ${body}`;
+    ctx.fillStyle = plate ? INK : '#FFFFFF';
+    ctaLines.forEach((l, i) => ctx.fillText(l, ctaX, qy + QR / 2 + i * 38));
+  }, { later: true, minScale: 1 });
+  // The short link has its own line here, so it goes with the code's tile on the ground.
+  ctx.direction = rtl ? 'rtl' : 'ltr';
   ctx.textAlign = rtl ? 'right' : 'left';
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = `700 30px ${body}`;
-  wrap(ctx, cta, iw - QR - 28, 2).forEach((l, i) => ctx.fillText(l, rtl ? qx - 28 : qx + QR + 28, qy + QR / 2 + i * 38));
   ctx.font = `600 30px ${body}`;
   ctx.fillText(wrap(ctx, shortUrl.replace(/^https?:\/\//, ''), iw, 1)[0], s, y0 + th - P);
 }
@@ -660,17 +735,20 @@ function drawItems(canvas, { format, words, eyebrow, cta, shortUrl, rtl, items, 
   // Every column (or row) the same size; the whole block in the middle.
   const cH = wide ? Math.max(...sizes.map(([, h]) => h)) + 32 : nameH + Math.max(...sizes.map(([, h]) => h)) + priceH;
   const blockH = headerH + 36 + (wide ? cH * 3 + GAP * 2 : cH);
-  let y = top + Math.max(0, (footTop - 40 - top - blockH) / 2);
-  ctx.fillStyle = MUTED;
-  ctx.font = `600 ${px(30)}px ${body}`;
-  ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(28));
-  y += px(40);
-  ctx.fillStyle = INK;
-  ctx.font = `700 ${px(60)}px ${head}`;
-  headLines.forEach((l) => { y += px(72); ctx.fillText(l, start, y - px(16)); });
-  const cTop = y + 36;
+  const wordsY = top + Math.max(0, (footTop - 40 - top - blockH) / 2);
+  part(ctx, 'words', [PAD, wordsY, textW, headerH], () => {
+    let y = wordsY;
+    ctx.fillStyle = MUTED;
+    ctx.font = `600 ${px(30)}px ${body}`;
+    ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(28));
+    y += px(40);
+    ctx.fillStyle = INK;
+    ctx.font = `700 ${px(60)}px ${head}`;
+    headLines.forEach((l) => { y += px(72); ctx.fillText(l, start, y - px(16)); });
+  });
+  const cTop = wordsY + headerH + 36;
   if (wide) {
-    shown.forEach((it, i) => {
+    part(ctx, 'product', [PAD, cTop, textW, cH * 3 + GAP * 2], () => shown.forEach((it, i) => {
       const ry = cTop + i * (cH + GAP);
       ctx.fillStyle = rgb(tint(vividColour(it.img), 0.8));
       ctx.beginPath();
@@ -692,10 +770,10 @@ function drawItems(canvas, { format, words, eyebrow, cta, shortUrl, rtl, items, 
       ctx.direction = rtl ? 'rtl' : 'ltr';
       ctx.font = `800 ${px(44)}px ${body}`;
       ctx.fillText(it.priceText, tx, ty + px(52));
-    });
+    }));
     return;
   }
-  shown.forEach((it, i) => {
+  part(ctx, 'product', [PAD, cTop, textW, cH], () => shown.forEach((it, i) => {
     const x = rtl ? W - PAD - (i + 1) * cw - i * GAP : PAD + i * (cw + GAP);
     ctx.fillStyle = rgb(tint(vividColour(it.img), 0.8));
     ctx.beginPath();
@@ -712,7 +790,7 @@ function drawItems(canvas, { format, words, eyebrow, cta, shortUrl, rtl, items, 
     roundedImage(ctx, it.img, x + (cw - pw) / 2, cTop + nameH + (cH - nameH - priceH - ph) / 2, pw, ph, 18);
     ctx.font = `800 ${px(40)}px ${body}`;
     ctx.fillText(it.priceText, x + cw / 2, cTop + cH - 36);
-  });
+  }));
 }
 
 // "Sticky note" (9b.5): the photo whole, and a yellow note in a marker hand
@@ -748,6 +826,7 @@ function drawNote(canvas, { format, words, price, cta, shortUrl, rtl, imgs, qr }
     photoInBox(ctx, imgs[0], 0, py, W, footTop - py);
     [nx, ny] = [rtl ? W - M - nw : M, top - 16];
   }
+  part(ctx, 'words', [nx, ny, nw, nh], () => {
   ctx.save();
   ctx.translate(nx + nw / 2, ny + nh / 2);
   ctx.rotate(nx < W / 2 ? -0.035 : 0.035);
@@ -768,6 +847,7 @@ function drawNote(canvas, { format, words, price, cta, shortUrl, rtl, imgs, qr }
     ctx.fillText(price, 0, y - size * 0.2);
   }
   ctx.restore();
+  });
 }
 
 // "Question" (9b.6): one of the owner's own questions and answers from
@@ -791,6 +871,7 @@ function drawQuestion(canvas, { format, faq, cta, shortUrl, rtl, imgs, qr }) {
   const qH = P * 2 + qLines.length * px(52);
   const aH = P * 2 + aLines.length * px(48);
   const cy = Math.max(top, footTop - 48 - qH - aH);
+  part(ctx, 'words', [80, cy, cw, qH + aH], () => {
   ctx.shadowColor = 'rgba(0,0,0,.3)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = 10;
   ctx.fillStyle = '#FFFFFF';
   ctx.beginPath();
@@ -809,6 +890,7 @@ function drawQuestion(canvas, { format, faq, cta, shortUrl, rtl, imgs, qr }) {
   ctx.direction = dirOf(faq.a, rtl);
   ctx.font = `500 ${px(36)}px ${body}`;
   aLines.forEach((l, i) => ctx.fillText(l, W / 2, cy + qH + P + px(48) * (i + 1) - px(12)));
+  });
   ctx.direction = rtl ? 'rtl' : 'ltr';
 }
 
@@ -831,6 +913,7 @@ function drawPhone(canvas, { format, words, name, price, cta, shortUrl, rtl, img
   const pw = Math.min(W - 160, Math.round(ph * 0.6));
   const x = (W - pw) / 2;
   const y = top;
+  part(ctx, 'product', [x, y, pw, footTop - y], () => {
   ctx.save();
   ctx.beginPath();
   ctx.rect(0, 0, W, footTop);
@@ -909,6 +992,7 @@ function drawPhone(canvas, { format, words, name, price, cta, shortUrl, rtl, img
   ctx.roundRect(W / 2 - 60, sy + 14, 120, 34, 17);
   ctx.fill();
   ctx.restore();
+  });
 }
 
 // A torn edge across the ad, the same every time for the same width.
@@ -960,16 +1044,19 @@ function drawTorn(canvas, { format, words, eyebrow, price, cta, shortUrl, rtl, i
   if (imgs[0]) photoInBox(ctx, imgs[0], 0, tearTop - 30, W, tearBot - tearTop + 60, 0, '#FFFFFF');
   paperPiece(ctx, W, tornEdge(W, tearTop, 7), 'top', rgb(col), H);
   paperPiece(ctx, W, tornEdge(W, tearBot, 31, 12), 'bottom', rgb(col), H);
-  ctx.textAlign = rtl ? 'right' : 'left';
   let y = top;
-  ctx.fillStyle = 'rgba(255,255,255,.8)';
-  ctx.font = `600 ${px(30)}px ${body}`;
-  ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(30));
-  y += px(40);
-  ctx.fillStyle = '#FFFFFF';
-  ctx.font = `700 ${px(84)}px ${head}`;
-  lines.forEach((l) => { y += px(96); ctx.fillText(l, start, y - px(20)); });
-  if (price) pricePill(ctx, { price, x: start, y: y + 28, h: px(64), maxW: textW, rtl, size: px(38), W, bg: '#FFFFFF', fg: rgb(col) });
+  part(ctx, 'words', [PAD, y, textW, textH], () => {
+    ctx.textAlign = rtl ? 'right' : 'left';
+    ctx.fillStyle = 'rgba(255,255,255,.8)';
+    ctx.font = `600 ${px(30)}px ${body}`;
+    ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(30));
+    y += px(40);
+    ctx.fillStyle = '#FFFFFF';
+    ctx.font = `700 ${px(84)}px ${head}`;
+    lines.forEach((l) => { y += px(96); ctx.fillText(l, start, y - px(20)); });
+    if (price) pricePill(ctx, { price, x: start, y: y + 28, h: px(64), maxW: textW, rtl, size: px(38), W, bg: '#FFFFFF', fg: rgb(col) });
+  });
+  ctx.textAlign = rtl ? 'right' : 'left';
   drawFooter(ctx, { W, PAD, QR, rtl, dark: true, cta, shortUrl, qr, body, px: (n) => n,
     start, textW, bottom: H - (format === 'story' ? 230 : 0) - 40 });
 }
@@ -1090,17 +1177,42 @@ const footTopOf = (format, H) => H - (format === 'story' ? 230 : 0) - (format ==
 // up (boxes), which the preview uses to know what was grabbed. render()
 // sets PARTS for the one drawing it is making; drawing is synchronous.
 let PARTS = null;
-function part(ctx, name, [x, y, w, h], draw) {
-  const m = (PARTS && PARTS.moves[name]) || { x: 0, y: 0, s: 1 };
+function isMoved(name) {
+  const m = PARTS && PARTS.moves[name];
+  return !!m && (m.x !== 0 || m.y !== 0 || m.s !== 1);
+}
+function part(ctx, name, [x, y, w, h], draw, { later = false, minScale = 0.3 } = {}) {
+  const raw = (PARTS && PARTS.moves[name]) || { x: 0, y: 0, s: 1 };
+  const moved = isMoved(name);
   const cx = x + w / 2;
   const cy = y + h / 2;
-  ctx.save();
-  ctx.translate(cx + m.x, cy + m.y);
-  ctx.scale(m.s, m.s);
-  ctx.translate(-cx, -cy);
-  draw();
-  ctx.restore();
-  if (PARTS) PARTS.boxes[name] = [cx + m.x - (w * m.s) / 2, cy + m.y - (h * m.s) / 2, w * m.s, h * m.s];
+  let m = raw;
+  // Words, price and code stay whole on the picture and clear of what a status
+  // covers (rules 8). Only once moved: nothing shifts in a design left as made.
+  if (moved && name !== 'product') {
+    const sc = Math.max(minScale, Math.min(3, raw.s));
+    const W = ctx.canvas.width;
+    const H = ctx.canvas.height;
+    const hold = (v, half, lo, hi) => (lo + half > hi - half ? (lo + hi) / 2 : Math.max(lo + half, Math.min(hi - half, v)));
+    m = {
+      s: sc,
+      x: hold(cx + raw.x, (w * sc) / 2, 0, W) - cx,
+      y: hold(cy + raw.y, (h * sc) / 2, H === 1920 ? 220 : 0, H === 1920 ? H - 230 : H) - cy,
+    };
+  }
+  const paint = () => {
+    ctx.save();
+    ctx.translate(cx + m.x, cy + m.y);
+    ctx.scale(m.s, m.s);
+    ctx.translate(-cx, -cy);
+    draw();
+    ctx.restore();
+  };
+  // A moved code goes over whatever the design draws after its foot band.
+  if (later && moved && PARTS) PARTS.later.push(paint);
+  else paint();
+  // The last three are where it really is, so the next drag starts from there.
+  if (PARTS) PARTS.boxes[name] = [cx + m.x - (w * m.s) / 2, cy + m.y - (h * m.s) / 2, w * m.s, h * m.s, m.x, m.y, m.s];
 }
 
 // The round price sticker: the price of the item in the picture, "from"
@@ -2012,10 +2124,15 @@ function render(target, design, a) {
   const canvas = sharpCanvas(target, a.scale || 1);
   const [layout, lookKey] = design.split(':');
   const look = lookKey || a.look;
+  const finish = (ctx) => {
+    ctx.shadowColor = 'transparent';
+    PARTS.later.forEach((paint) => paint());
+  };
   if (THEMED[layout]) {
-    PARTS = { moves: a.moves || {}, boxes: a.boxes || {}, font: a.font || null, ink: a.ink || null };
+    PARTS = { moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: a.font || null, ink: a.ink || null };
     try {
       THEMED[layout](canvas, look ? { ...a, look } : a);
+      finish(canvas.getContext('2d'));
     } finally {
       PARTS = null;
     }
@@ -2023,20 +2140,21 @@ function render(target, design, a) {
     if (HOLIDAYS.includes(look) && layout !== 'custom') holidayRibbon(canvas, a.format, a.greeting, a.rtl);
     return undefined;
   }
-  if (design === 'phone') return drawPhone(canvas, a);
-  if (design === 'torn') return drawTorn(canvas, a);
-  if (design === 'review') return drawReview(canvas, a);
-  if (design === 'native') return drawStory(canvas, a);
-  if (design === 'colour') return drawColour(canvas, a);
-  if (design === 'bigwords') return drawBigWords(canvas, a);
-  if (design === 'grid') return drawGrid(canvas, a);
-  if (design === 'items') return drawItems(canvas, a);
-  if (design === 'note') return drawNote(canvas, a);
-  if (design === 'question') return drawQuestion(canvas, a);
-  return draw(canvas, { ...a, design });
+  // One look each, so no font or word colour here; pieces move all the same.
+  PARTS = { moves: a.moves || {}, boxes: a.boxes || {}, later: [], font: null, ink: null };
+  try {
+    const fixed = { phone: drawPhone, torn: drawTorn, review: drawReview, native: drawStory, colour: drawColour,
+      bigwords: drawBigWords, grid: drawGrid, items: drawItems, note: drawNote, question: drawQuestion }[design];
+    if (fixed) fixed(canvas, a);
+    else draw(canvas, { ...a, design });
+    finish(canvas.getContext('2d'));
+  } finally {
+    PARTS = null;
+  }
+  return undefined;
 }
 
-export default function AdMaker({ API, token, targetType, target, onClose, start = null }) {
+export default function AdMaker({ API, token, targetType, target, onClose, start = null, inline = false }) {
   const { t, i18n } = useTranslation();
   const [lang, setLang] = useState(start?.savedLang || (i18n.language?.startsWith('he') ? 'he' : 'en'));
   const [format, setFormat] = useState('feed');
@@ -2452,6 +2570,15 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       if (!quiet) toast.error(err?.response?.data?.detail || t('ads.saveFailed', 'Could not save the ad. Try again.'));
     }
   };
+  // On the page, the first ad is kept as soon as it is drawn: the page opens
+  // with it next time, so just visiting never pays for the words again.
+  const keptFirst = useRef('');
+  useEffect(() => {
+    if (!inline || preview !== 'drawn' || busy || !words || savedId || !saved || saved.some((r) => r.lang === lang) || keptFirst.current === lang) return;
+    keptFirst.current = lang;
+    saveAd(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inline, preview, busy, words, savedId, saved, lang]);
   const removeSaved = async (id) => {
     await axios.delete(`${API}/ads/saved/${id}`, auth).catch(() => {});
     if (id === savedId) setSavedId('');
@@ -2611,7 +2738,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     e.stopPropagation();
     setSel(name);
     const rect = canvasRef.current.getBoundingClientRect();
-    const cur = (moves[moveKey] || {})[name] || { x: 0, y: 0, s: 1 };
+    const b = boxes[name] || [];
+    const cur = { x: b[4] || 0, y: b[5] || 0, s: b[6] || 1 };
     drag.current = { name, mode, sx: e.clientX, sy: e.clientY, k: canvasRef.current.width / rect.width, cur, box: boxes[name] };
     e.currentTarget.setPointerCapture?.(e.pointerId);
   };
@@ -2670,14 +2798,14 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
 
   // A portal: the listing card it opens from lifts on hover with a
   // transform, and a fixed overlay inside a transform is drawn inside the card.
-  return createPortal(
-    <div className="fixed inset-0 z-[60] bg-black/50 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true"
-      aria-label={t('ads.title', 'Make an ad')} onClick={onClose} data-testid="ad-maker">
-      <div className="bg-white w-full sm:max-w-4xl max-h-[95vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-4 sm:p-6" onClick={(e) => e.stopPropagation()}>
+  const panel = (
+      <div className={inline ? 'bg-white w-full' : 'bg-white w-full sm:max-w-4xl max-h-[95vh] overflow-y-auto rounded-t-2xl sm:rounded-2xl p-4 sm:p-6'} onClick={(e) => e.stopPropagation()}>
+        {!inline && (
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>{t('ads.title', 'Make an ad')}</h2>
           <button type="button" onClick={onClose} aria-label={t('common.close', 'Close')} className="p-3 rounded-full hover:bg-[#F9FAFB]"><X size={18} /></button>
         </div>
+        )}
         {saved?.some((r) => r.lang === lang) && (
           <div className="mb-4" data-testid="ad-saved">
             <p className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('ads.savedTitle', 'Your saved ads')}</p>
@@ -2739,7 +2867,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
               <div className={`relative ${!preview || busy ? 'hidden' : 'inline-block'}`} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}>
                 <canvas ref={canvasRef} className="block max-h-[60vh] max-w-full w-auto h-auto rounded-lg shadow" role="img"
                   aria-label={t('ads.previewAlt', 'Your ad')} data-testid="ad-preview" />
-                {themed && Object.entries(boxes).map(([name, [x, y, w, h]]) => (
+                {Object.entries(boxes).sort(([a], [b]) => ['qr', 'link'].includes(a) - ['qr', 'link'].includes(b)).map(([name, [x, y, w, h]]) => (
                   <div key={name} onPointerDown={onDown(name, 'move')} data-testid={`ad-piece-${name}`}
                     className="absolute cursor-move" style={{ left: `${(x / W0) * 100}%`, top: `${(y / H0) * 100}%`, width: `${(w / W0) * 100}%`,
                       height: `${(h / H0) * 100}%`, touchAction: 'none', outline: sel === name ? '2px dashed #167AB8' : 'none' }}>
@@ -2751,9 +2879,9 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                 ))}
               </div>
             </div>
-            {themed && (
+            {(
               <div className="flex items-center justify-between gap-2 text-xs" style={{ color: 'var(--brand-muted)' }}>
-                <span>{t('ads.dragHint', 'Drag the product, the words or the price to move them. Pull the blue dot to resize.')}</span>
+                <span>{t('ads.dragHint', 'Drag the product, the words, the price, the QR code or the link to move them. Pull the blue dot to resize.')}</span>
                 {Object.keys(moves[moveKey] || {}).length > 0 && (
                   <button type="button" onClick={resetMoves} className="font-semibold shrink-0" style={{ color: 'var(--brand-primary)' }} data-testid="ad-reset-moves">
                     {t('ads.resetMoves', 'Put back')}
@@ -3006,6 +3134,13 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
         </div>
         <div className="hidden"><QRCodeCanvas ref={qrRef} value={adUrl} size={380} marginSize={2} level="M" fgColor={INK} /></div>
       </div>
+  );
+  // On the Advertising page the whole maker sits on the page itself (Tzvi, 5 Nov 2026).
+  if (inline) return <div data-testid="ad-maker">{panel}</div>;
+  return createPortal(
+    <div className="fixed inset-0 z-[60] bg-black/50 flex items-end sm:items-center justify-center" role="dialog" aria-modal="true"
+      aria-label={t('ads.title', 'Make an ad')} onClick={onClose} data-testid="ad-maker">
+      {panel}
     </div>,
     document.body,
   );

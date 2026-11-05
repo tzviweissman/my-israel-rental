@@ -80,7 +80,7 @@ A8.2 | No text under 30px at 1080 wide. | 8 | auto:text-size
 A8.3 | Nothing cut off: every line inside the picture. | 8 | auto:text-inside
 A8.4 | A story keeps the top 220px and bottom 230px clear. | 8 | auto:story-safe
 A8.5 | Words over a photo cover at most 40% of it, and never the subject. | 8 | decide
-A8.6 | The QR is at least 150px at 1080 wide, dark on white, with the short link printed beside it. | 8 | auto:qr
+A8.6 | The QR is at least 150px at 1080 wide, dark on white, with the short link printed on the ad, beside it unless the owner moved them. No drag can shrink it below 150px, cut it off or put it where a story covers it. | 8, Tzvi 5 Nov | auto:qr
 A8.7 | Works in Hebrew and English: right-aligned, the QR moves to the left, letters in a font that has them. | 8 | auto:languages
 A8.8 | Words readable on their background: 3:1 for large text; the price circle stays visible. | ad maker 4 Nov | decide
 A8.9 | The picture that leaves the site is drawn at double size (2160 wide) from the best copy of the photo, never the preview. | Tzvi 5 Nov | auto:sharp

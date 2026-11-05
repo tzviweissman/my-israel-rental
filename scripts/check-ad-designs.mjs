@@ -139,6 +139,48 @@ for (const l of ['en', 'he']) {
   }
 }
 
+// Every design can be rearranged, and no drag breaks the rules: the code and link pulled hard into a corner and shrunk.
+const pullTo = async (name, tx, ty) => {
+  const piece = p.locator(`[data-testid="ad-piece-${name}"]`);
+  await piece.scrollIntoViewIfNeeded();
+  const r = await piece.boundingBox();
+  await p.mouse.move(r.x + r.width / 2, r.y + r.height / 2);
+  await p.mouse.down();
+  await p.mouse.move(tx, ty, { steps: 3 });
+  await p.mouse.up();
+};
+const dragKeys = await p.locator('[data-testid="ad-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-g-', '')));
+for (const k of dragKeys) {
+  if (only && !only.has(k)) continue;
+  await p.locator('[data-testid="ad-story"]').click();
+  await p.locator(`[data-testid="ad-g-${k}"]`).click();
+  await p.waitForTimeout(700);
+  const names = await p.locator('[data-testid^="ad-piece-"]').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-piece-', '')));
+  if (!names.includes('qr') || !names.includes('link')) fails.push(`drag ${k}: the code or link cannot be moved (${names})`);
+  if (!names.some((n) => ['words', 'word', 'product'].includes(n))) fails.push(`drag ${k}: nothing else can be moved (${names})`);
+  const box = await p.locator('[data-testid="ad-preview"]').boundingBox();
+  const drawn = await drawOf(async () => {
+    await pullTo('qr', box.x - 300, box.y - 300);
+    await p.waitForTimeout(250);
+    await pullTo('link', box.x + box.width + 300, box.y + box.height + 300);
+    await p.waitForTimeout(250);
+    await p.locator('[data-testid="ad-piece-qr"]').click();
+    const handle = p.locator('[data-testid="ad-size-qr"]');
+    const h = await handle.boundingBox();
+    await p.mouse.move(h.x + h.width / 2, h.y + h.height / 2);
+    await p.mouse.down();
+    await p.mouse.move(h.x - 900, h.y - 900, { steps: 3 });
+    await p.mouse.up();
+  });
+  measure(`drag ${k} story`, drawn, 1920, { price: false, link: true });
+  if (pictures) {
+    const d = await p.locator('[data-testid="ad-preview"]').evaluate((c) => c.toDataURL('image/jpeg', 0.8));
+    fs.writeFileSync(path.join(pictures, `drag-${k}.jpg`), Buffer.from(d.split(',')[1], 'base64'));
+  }
+  await p.locator('[data-testid="ad-reset-moves"]').click();
+  count += 1;
+}
+
 // The picture that leaves is drawn at double size (A8.9): read the width from the file a person gets.
 await p.evaluate(() => { navigator.canShare = () => false; });
 await p.locator('[data-testid="ad-g-behind"]').click();
@@ -149,13 +191,16 @@ while (at < jpg.length && !(jpg[at + 1] >= 0xC0 && jpg[at + 1] <= 0xC2)) at += 2
 const sharpW = jpg.readUInt16BE(at + 7);
 if (sharpW !== 2160) fails.push(`sharp: the downloaded picture is ${sharpW} wide, not 2160`);
 
+// The Advertising page has the whole maker on it, with nothing to click first.
+await p.keyboard.press('Escape');
+await p.goto(`${SITE}/dashboard?tab=advertising&as=owner`, { timeout: 180000 });
+await p.locator('[data-testid="ad-gallery"]').waitFor();
+await p.locator('[data-testid="ad-piece-qr"]').waitFor();
+await p.locator('[data-testid="advertising-url"]').waitFor();
+if (await p.locator('[role="dialog"]').count()) fails.push('advertising page: the maker should be on the page, not in a pop-up');
+
 // --- the Super Admin Ads area (its own words, in the dashboard's language)
 await freshPage();
-await p.goto(`${SITE}/admin?as=admin`, { timeout: 180000 });
-await p.getByRole('button', { name: /^(Ads|מודעות)$/ }).first().click();
-await p.locator('[data-testid="ad-studio-gallery"]').waitFor();
-const studio = await p.locator('[data-testid="ad-studio-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-studio-new-', '')));
-console.log(`super admin: ${studio.length} designs`);
 // The same maker for the site: its facts and pictures from the API (words:false costs nothing), test words on top.
 await p.route('**/api/ads/make', async (r) => {
   const body = r.request().postDataJSON();
@@ -164,8 +209,13 @@ await p.route('**/api/ads/make', async (r) => {
   r.fulfill({ json: { ...words, ...real, reviews: [] } });
 });
 await p.route('**/api/ads/saved**', (r) => (r.request().method() === 'GET' ? r.fulfill({ json: { ads: [] } }) : r.fulfill({ json: { id: 'x' } })));
-await p.locator('[data-testid="advertising-new"]').click();
+await p.goto(`${SITE}/admin?as=admin`, { timeout: 180000 });
+await p.getByRole('button', { name: /^(Ads|מודעות)$/ }).first().click();
+await p.locator('[data-testid="ad-studio-gallery"]').waitFor();
+const studio = await p.locator('[data-testid="ad-studio-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-studio-new-', '')));
+console.log(`super admin: ${studio.length} designs`);
 await p.locator('[data-testid="ad-gallery"]').waitFor();
+if (await p.locator('[role="dialog"]').count()) fails.push('site maker: should be on the page, not in a pop-up');
 for (const l of ['en', 'he']) {
   await p.locator(`[data-testid="ad-${l}"]`).click();
   await p.waitForFunction(() => document.querySelector('[data-testid="ad-g-behind"] img'));
@@ -189,7 +239,7 @@ for (const l of ['en', 'he']) {
     }
   }
 }
-await p.locator('[data-testid="ad-maker"] button[aria-label]').first().click();
+
 for (const k of studio) {
   if (only && !only.has(k)) continue;
   for (const f of ['post', 'status']) {

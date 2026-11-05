@@ -101,7 +101,7 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
   plan: measured by check-ad-designs (story-safe)
 - [ ] A8.5 Words over a photo cover at most 40% of it, and never the subject.
   plan: Words sit on quiet ground above the subject.
-- [ ] A8.6 The QR is at least 150px at 1080 wide, dark on white, with the short link printed beside it.
+- [ ] A8.6 The QR is at least 150px at 1080 wide, dark on white, with the short link printed on the ad, beside it unless the owner moved them. No drag can shrink it below 150px, cut it off or put it where a story covers it.
   plan: measured by check-ad-designs (qr)
 - [ ] A8.7 Works in Hebrew and English: right-aligned, the QR moves to the left, letters in a font that has them.
   plan: measured by check-ad-designs (languages)

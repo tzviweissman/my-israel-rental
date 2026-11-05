@@ -4451,8 +4451,6 @@ const en = {
       advertising: {
         which: "What are you advertising?",
         adsTitle: "Your ads",
-        none: "No ads yet. Your first one is made from your own photos and details, ready to change.",
-        openAd: "Open this ad",
         linkTitle: "Your link and QR code",
         linkBody: "Both go to the same place and stay the same forever, so they are safe to print.",
         visits: "Visits so far: {{count}}",
@@ -4523,7 +4521,7 @@ const en = {
         bgGalleryTitle: "Background gallery",
         bgTopic: { wood: "Wood", marble: "Marble", kitchen: "Kitchen", food: "Food", nature: "Nature", beach: "Beach", city: "City", sky: "Sky", home: "Home", texture: "Texture" },
         inkAuto: "Automatic",
-        dragHint: "Drag the product, the words or the price to move them. Pull the blue dot to resize.",
+        dragHint: "Drag the product, the words, the price, the QR code or the link to move them. Pull the blue dot to resize.",
         resetMoves: "Put back",
         galleryTitle: "Pick a look. Every ad is made from your own product, name and price.",
         notifyL: "Notifications",
