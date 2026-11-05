@@ -20,6 +20,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { useTranslation } from 'react-i18next';
 import { QRCodeCanvas } from 'qrcode.react';
+import { sharpCanvas, bestPhoto } from '../../utils/sharpCanvas';
 import BackgroundGallery from './BackgroundGallery';
 import axios from 'axios';
 import { toast } from 'sonner';
@@ -39,7 +40,7 @@ const loadImage = (src) => new Promise((resolve) => {
   img.crossOrigin = 'anonymous';
   img.onload = () => resolve(img);
   img.onerror = () => resolve(null);
-  img.src = src;
+  img.src = bestPhoto(src);
 });
 
 // Word-wrapped lines, the last one shortened with "…" if it does not fit.
@@ -103,7 +104,8 @@ function draw(canvas, { format, design, words, eyebrow, price, cta, shortUrl, rt
   ctx.font = `600 ${px(64)}px ${head}`;
   const headLines = wrap(ctx, words.headline, textW, 2);
   const QR = format === 'square' ? 150 : px(190);
-  const footH = QR + 48;
+  const safe = format === 'story' ? 230 : 0; // a story's reply bar covers its bottom 230px (rules 8)
+  const footH = QR + 48 + safe;
   const pointsH = 3 * px(54) + 16;
   const textH = px(44) + headLines.length * px(76) + (price ? px(64) + 20 : 0);
   const [cover, ...rest] = imgs;
@@ -185,7 +187,7 @@ function draw(canvas, { format, design, words, eyebrow, price, cta, shortUrl, rt
     });
   }
 
-  drawFooter(ctx, { W, PAD, QR, rtl, dark, cta, shortUrl, qr, body, px, start, textW, bottom: H - PAD });
+  drawFooter(ctx, { W, PAD, QR, rtl, dark, cta, shortUrl, qr, body, px, start, textW, bottom: H - PAD - safe });
 }
 
 // The link and its code. The code sits on a white tile even on the dark
@@ -373,9 +375,10 @@ function drawReview(canvas, { format, review, eyebrow, price, cta, shortUrl, rtl
   const AV = px(72);
   const cardH = 36 + AV + 24 + lines.length * px(qLine) + 36;
   const QR = format === 'square' ? 150 : px(190);
-  const footH = QR + 48;
+  const safe = format === 'story' ? 230 : 0; // a story's reply bar covers its bottom 230px (rules 8)
+  const footH = QR + 48 + safe;
   const tailH = px(44) + (price ? px(64) + 20 : 0);
-  let y = PAD;
+  let y = format === 'story' ? 220 : PAD; // a story's account name covers its top 220px (rules 8)
 
   // The comment card, with a small tail pointing down at the photo.
   ctx.shadowColor = 'rgba(17,24,39,.12)'; ctx.shadowBlur = 30; ctx.shadowOffsetY = 8;
@@ -435,7 +438,7 @@ function drawReview(canvas, { format, review, eyebrow, price, cta, shortUrl, rtl
   ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(30));
   y += px(44);
   if (price) pricePill(ctx, { price, x: start, y: y + 20, h: px(64), maxW: textW, rtl, size: px(38), W });
-  drawFooter(ctx, { W, PAD, QR, rtl, dark: false, cta, shortUrl, qr, body, px, start, textW, bottom: H - PAD });
+  drawFooter(ctx, { W, PAD, QR, rtl, dark: false, cta, shortUrl, qr, body, px, start, textW, bottom: H - PAD - safe });
 }
 
 // "Story" (docs/static-ad-rules.md 9.2): the photo across the whole width,
@@ -602,7 +605,7 @@ function drawGrid(canvas, { format, words, eyebrow, price, cta, shortUrl, rtl, i
   ctx.textAlign = rtl ? 'right' : 'left';
   let y = y0 + P;
   ctx.fillStyle = 'rgba(255,255,255,.8)';
-  ctx.font = `600 26px ${body}`;
+  ctx.font = `600 30px ${body}`;
   ctx.fillText(wrap(ctx, eyebrow, iw, 1)[0] || '', s, y + 26);
   y += 40;
   const QR = 150;
@@ -621,9 +624,9 @@ function drawGrid(canvas, { format, words, eyebrow, price, cta, shortUrl, rtl, i
   if (qr) ctx.drawImage(qr, qx, qy, QR, QR);
   ctx.textAlign = rtl ? 'right' : 'left';
   ctx.fillStyle = '#FFFFFF';
-  ctx.font = `700 26px ${body}`;
-  ctx.fillText(wrap(ctx, cta, iw - QR - 28, 2)[0] || '', rtl ? qx - 28 : qx + QR + 28, qy + QR / 2);
-  ctx.font = `600 24px ${body}`;
+  ctx.font = `700 30px ${body}`;
+  wrap(ctx, cta, iw - QR - 28, 2).forEach((l, i) => ctx.fillText(l, rtl ? qx - 28 : qx + QR + 28, qy + QR / 2 + i * 38));
+  ctx.font = `600 30px ${body}`;
   ctx.fillText(wrap(ctx, shortUrl.replace(/^https?:\/\//, ''), iw, 1)[0], s, y0 + th - P);
 }
 
@@ -659,7 +662,7 @@ function drawItems(canvas, { format, words, eyebrow, cta, shortUrl, rtl, items, 
   const blockH = headerH + 36 + (wide ? cH * 3 + GAP * 2 : cH);
   let y = top + Math.max(0, (footTop - 40 - top - blockH) / 2);
   ctx.fillStyle = MUTED;
-  ctx.font = `600 ${px(28)}px ${body}`;
+  ctx.font = `600 ${px(30)}px ${body}`;
   ctx.fillText(wrap(ctx, eyebrow, textW, 1)[0] || '', start, y + px(28));
   y += px(40);
   ctx.fillStyle = INK;
@@ -856,7 +859,7 @@ function drawPhone(canvas, { format, words, name, price, cta, shortUrl, rtl, img
   ctx.direction = rtl ? 'rtl' : 'ltr';
   const N = 22;
   const nw = sw - N * 2;
-  const tSize = Math.max(26, Math.round(sw * 0.062));
+  const tSize = Math.max(30, Math.round(sw * 0.062));
   ctx.font = `700 ${tSize}px ${body}`;
   ctx.direction = dirOf(words.headline, rtl);
   const tLines = wrap(ctx, words.headline, nw - 56, 3);
@@ -877,12 +880,12 @@ function drawPhone(canvas, { format, words, name, price, cta, shortUrl, rtl, img
   ctx.fill();
   ctx.fillStyle = '#FFFFFF';
   ctx.textAlign = 'center';
-  ctx.font = `800 ${Math.round(tSize * 0.6)}px ${body}`;
+  ctx.font = `800 ${Math.max(30, Math.round(tSize * 0.6))}px ${body}`;
   ctx.fillText((name || '?').trim()[0].toUpperCase(), ix + tSize / 2, ny + 24 + tSize * 0.72);
   ctx.textAlign = rtl ? 'right' : 'left';
   const tx = rtl ? sx + N + nw - 28 : sx + N + 28;
   ctx.fillStyle = MUTED;
-  ctx.font = `600 ${Math.round(tSize * 0.75)}px ${body}`;
+  ctx.font = `600 ${Math.max(30, Math.round(tSize * 0.75))}px ${body}`;
   ctx.direction = dirOf(name, rtl);
   ctx.fillText(wrap(ctx, (name || '').toUpperCase(), nw - tSize - 160, 1)[0] || '', rtl ? ix - 16 : ix + tSize + 16, ny + 24 + tSize * 0.78);
   ctx.direction = rtl ? 'rtl' : 'ltr';
@@ -897,7 +900,7 @@ function drawPhone(canvas, { format, words, name, price, cta, shortUrl, rtl, img
   ctx.direction = rtl ? 'rtl' : 'ltr';
   if (sub) {
     ctx.fillStyle = '#374151';
-    ctx.font = `500 ${Math.round(tSize * 0.9)}px ${body}`;
+    ctx.font = `500 ${Math.max(30, Math.round(tSize * 0.9))}px ${body}`;
     ctx.fillText(wrap(ctx, sub, nw - 56, 1)[0], tx, ty + tSize * 1.05);
   }
   ctx.restore();
@@ -1102,7 +1105,9 @@ function part(ctx, name, [x, y, w, h], draw) {
 
 // The round price sticker: the price of the item in the picture, "from"
 // only when that item is the cheapest one the business sells (9e.8).
-function sticker(ctx, opts) {
+function sticker(ctx, given) {
+  // Big enough that "from" stays 30px, the smallest text an ad may have (rules 8).
+  const opts = { ...given, r: Math.max(given.r, 94) };
   part(ctx, 'price', [opts.x - opts.r, opts.y - opts.r, opts.r * 2, opts.r * 2], () => drawSticker(ctx, opts));
 }
 // Whether the ground just outside the sticker is yellow too, where a yellow
@@ -1164,8 +1169,8 @@ function drawBehind(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, it
   const footTop = footBand(ctx, { W, H, format, rtl, cta, shortUrl, qr, body, ground: L.foot, dark: L.footDark });
   ctx.textAlign = 'center';
   ctx.fillStyle = L.sub;
-  ctx.font = `600 ${px(28)}px ${body}`;
-  ctx.fillText(wrap(ctx, (eyebrow || '').toUpperCase(), W - 128, 1)[0] || '', W / 2, top + px(10));
+  ctx.font = `600 ${px(30)}px ${body}`;
+  ctx.fillText(wrap(ctx, (eyebrow || '').toUpperCase(), W - 128, 1)[0] || '', W / 2, top + px(26));
   const word = (words.big_word || '').trim();
   let size = 80;
   for (let s = 420; s >= 80; s -= 6) {
@@ -1209,8 +1214,8 @@ function drawPhonePop(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, 
   const footTop = footTopOf(format, H);
   ctx.textAlign = 'center';
   ctx.fillStyle = L.sub;
-  ctx.font = `600 ${px(28)}px ${body}`;
-  ctx.fillText(wrap(ctx, (eyebrow || '').toUpperCase(), W - 128, 1)[0] || '', W / 2, top + px(10));
+  ctx.font = `600 ${px(30)}px ${body}`;
+  ctx.fillText(wrap(ctx, (eyebrow || '').toUpperCase(), W - 128, 1)[0] || '', W / 2, top + px(26));
   ctx.fillStyle = L.text;
   ctx.font = `800 ${px(60)}px ${body}`;
   const head = wrap(ctx, words.headline, W - 128, 2);
@@ -1363,7 +1368,7 @@ function drawNotify(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, it
   const notes = [words.headline, ...(words.points || []), `${item.name}, ${item.priceText}`].filter(Boolean).slice(0, 3);
   const I = px(58);
   const cards = notes.map((n) => {
-    ctx.font = `500 ${px(28)}px ${body}`;
+    ctx.font = `500 ${px(30)}px ${body}`;
     ctx.direction = dirOf(n, rtl);
     const nl = wrap(ctx, n, W - 140 - I - 90, 2);
     return [nl, px(58) + nl.length * px(36) + 16];
@@ -1382,8 +1387,8 @@ function drawNotify(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, it
     say(ctx, (eyebrow || '?').trim()[0].toUpperCase(), ix + I / 2, y + 22 + I * 0.7, { size: Math.round(I * 0.55), weight: 800, colour: '#FFFFFF', body, rtl: false });
     const tx = rtl ? ix - 22 : ix + I + 22;
     const al = rtl ? 'right' : 'left';
-    say(ctx, eyebrow, tx, y + px(46), { size: px(26), weight: 800, align: al, body, rtl, max: W - 360 });
-    nl.forEach((l, i) => say(ctx, l, tx, y + px(46) + (i + 1) * px(36), { size: px(28), weight: 500, colour: '#374151', align: al, body, rtl }));
+    say(ctx, eyebrow, tx, y + px(46), { size: px(30), weight: 800, align: al, body, rtl, max: W - 360 });
+    nl.forEach((l, i) => say(ctx, l, tx, y + px(46) + (i + 1) * px(38), { size: px(30), weight: 500, colour: '#374151', align: al, body, rtl }));
     y += h + 14;
   }));
   if (footTop - 40 - (y + 20) > 140) product(ctx, item, 90, y + 20, W - 180, footTop - 40 - (y + 20));
@@ -1655,8 +1660,9 @@ function drawMirror(canvas, a) {
   productBelow(ctx, a, y0 + h + px(40), footTop, W, body);
 }
 
-// "Text messages" (9f.6): a customer asking and the business answering
-// with facts from the listing, then the business sending its photo.
+// "Questions and answers" (9b.6, 9f.6): the owner's own questions and answers
+// from their page, as messages, then their photo. Never a made-up exchange:
+// a conversation that did not happen is a fake screenshot (rules 5).
 function drawChat(canvas, a) {
   const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
   const msgs = lineList(a.words.chat).slice(0, 4);
@@ -1671,7 +1677,7 @@ function drawChat(canvas, a) {
   ctx.arc(W / 2, y0 + px(26) + av / 2, av / 2, 0, Math.PI * 2);
   ctx.fill();
   say(ctx, (a.name || '?').trim().charAt(0).toUpperCase(), W / 2, y0 + px(26) + av / 2 + px(14), { size: px(38), weight: 800, colour: '#FFFFFF', body, rtl: a.rtl });
-  say(ctx, a.name || '', W / 2, y0 + px(26) + av + px(38), { size: px(28), weight: 700, colour: INK, body, rtl: a.rtl, max: w0 - 80 });
+  say(ctx, a.name || '', W / 2, y0 + px(26) + av + px(38), { size: px(30), weight: 700, colour: INK, body, rtl: a.rtl, max: w0 - 80 });
   ctx.fillStyle = '#E3E3E3';
   ctx.fillRect(x0, y0 + av + px(84), w0, 2);
   let y = y0 + av + px(112);
@@ -1681,7 +1687,7 @@ function drawChat(canvas, a) {
   msgs.forEach((m, i) => {
     const mine = i % 2 === 1;
     ctx.font = `500 ${fs}px ${body}`;
-    const ls = wrap(ctx, m, w0 * 0.6, 3);
+    const ls = wrap(ctx, m, w0 * 0.6, 4);
     const bw = Math.max(...ls.map((l) => ctx.measureText(l).width)) + pad * 2;
     const bh = ls.length * px(42) + pad * 1.6;
     // The business on the far side of whoever reads, in both directions.
@@ -1701,7 +1707,7 @@ function drawChat(canvas, a) {
   }));
   const room = footTop - 60 - y;
   if (room > 160) {
-    const w = w0 * 0.58;
+    const w = w0 * 0.8;
     const bx = a.rtl ? x0 + 34 : x0 + w0 - 34 - w;
     photoWithPrice(ctx, a, bx, y + px(6), w, room - px(10), body);
   }
@@ -1725,7 +1731,7 @@ function drawPost(canvas, a) {
   say(ctx, (a.name || '?').trim().charAt(0).toUpperCase(), ax, y0 + 40 + av / 2 + px(14), { size: px(40), weight: 800, colour: '#FFFFFF', body, rtl: r });
   const tx = r ? ax - av / 2 - 24 : ax + av / 2 + 24;
   say(ctx, a.name || '', tx, y0 + 40 + px(36), { size: px(34), weight: 800, align: r ? 'right' : 'left', body, rtl: r, max: w0 - av - 120 });
-  say(ctx, a.nowLabel || '', tx, y0 + 40 + px(76), { size: px(26), weight: 500, colour: '#666666', align: r ? 'right' : 'left', body, rtl: r });
+  say(ctx, a.nowLabel || '', tx, y0 + 40 + px(76), { size: px(30), weight: 500, colour: '#666666', align: r ? 'right' : 'left', body, rtl: r });
   const sx = r ? x0 + w0 - 40 : x0 + 40;
   ctx.font = `500 ${px(36)}px ${body}`;
   const ls = wrap(ctx, a.words.post || '', w0 - 80, 4);
@@ -1761,7 +1767,7 @@ function drawVersus(canvas, a) {
   const y0 = top + px(10);
   const rh = px(104);
   const headH = px(84);
-  const tableY = y0 + hl.length * px(66) + px(28);
+  const tableY = y0 + hl.length * px(66) + px(30);
   const tableH = headH + rows.length * rh;
   part(ctx, 'words', [60, y0, W - 120, tableY + tableH - y0], () => {
     hl.forEach((l, i) => say(ctx, l, W / 2, y0 + px(56) + i * px(66), { size: px(56), weight: 800, colour: L.text, body, rtl: a.rtl }));
@@ -1793,19 +1799,20 @@ function drawVersus(canvas, a) {
         if (good) { ctx.moveTo(mx - 10, ry + rh / 2); ctx.lineTo(mx - 3, ry + rh / 2 + 8); ctx.lineTo(mx + 11, ry + rh / 2 - 9); } else { ctx.moveTo(mx - 8, ry + rh / 2 - 8); ctx.lineTo(mx + 8, ry + rh / 2 + 8); ctx.moveTo(mx + 8, ry + rh / 2 - 8); ctx.lineTo(mx - 8, ry + rh / 2 + 8); }
         ctx.stroke();
         const tw = colW - mark * 2 - 80;
-        ctx.font = `${good ? 700 : 500} ${px(28)}px ${body}`;
+        ctx.font = `${good ? 700 : 500} ${px(30)}px ${body}`;
         const tl = wrap(ctx, text, tw, 2);
         const tx = a.rtl ? mx - mark - 16 : mx + mark + 16;
         tl.forEach((l, j) => say(ctx, l, tx, ry + rh / 2 + px(10) - (tl.length - 1) * px(17) + j * px(34),
-          { size: px(28), weight: good ? 700 : 500, colour: good ? INK : '#666666', align: a.rtl ? 'right' : 'left', body, rtl: a.rtl }));
+          { size: px(30), weight: good ? 700 : 500, colour: good ? INK : '#666666', align: a.rtl ? 'right' : 'left', body, rtl: a.rtl }));
       });
     });
   });
   productBelow(ctx, a, tableY + tableH + px(30), footTop, W, body);
 }
 
-// "Reasons" (9f, Tube Science's "five reasons", in a notes app): a title
-// and one reason a line, numbered, then the product.
+// "Reasons" (9f, Tube Science's "five reasons"): a title and one reason a
+// line, numbered, then the product. No notes-app chrome: that is a fake
+// screenshot (rules 5).
 function drawReasons(canvas, a) {
   const { ctx, W, body, px, top, L, footTop } = ground(canvas, a);
   const [title = '', ...rest] = lineList(a.words.reasons);
@@ -1819,11 +1826,10 @@ function drawReasons(canvas, a) {
   ctx.font = `800 ${px(50)}px ${body}`;
   const tl = wrap(ctx, title, w0 - 100, 2);
   const lh = px(60);
-  const h = px(70) + tl.length * px(60) + px(20) + reasons.length * lh + px(30);
+  const h = px(10) + tl.length * px(60) + px(20) + reasons.length * lh + px(30);
   part(ctx, 'words', [x0, y0, w0, h], () => {
     card(ctx, x0, y0, w0, h, 30);
-    say(ctx, `${r ? '›' : '‹'} ${a.notesLabel || 'Notes'}`, sx, y0 + px(50), { size: px(28), weight: 600, colour: '#C99400', align: al, body, rtl: a.rtl });
-    let y = y0 + px(70);
+    let y = y0 + px(10);
     tl.forEach((l) => { y += px(60); say(ctx, l, sx, y - px(8), { size: px(50), weight: 800, align: al, body, rtl: a.rtl }); });
     y += px(20);
     reasons.forEach((l, i) => {
@@ -1857,20 +1863,13 @@ function drawHonest(canvas, a) {
       ctx.fillText(l, sx, y0 + px(68) + i * px(80));
     });
   });
-  const colW = (W - 160) * 0.56;
-  ctx.font = `500 ${px(34)}px ${body}`;
-  const ls = rest.slice(0, 3).flatMap((l) => [...wrap(ctx, l, colW, 3), '']);
+  ctx.font = `500 ${px(36)}px ${body}`;
+  const ls = rest.slice(0, 3).flatMap((l) => wrap(ctx, l, W - 160, 2));
   const ly = y0 + hh + px(50);
-  part(ctx, 'name', [r ? W - 80 - colW : 80, ly - px(30), colW, ls.length * px(42)],
-    () => ls.forEach((l, i) => say(ctx, l, sx, ly + i * px(42), { size: px(34), weight: 500, colour: L.text, align: al, body, rtl: a.rtl })));
-  const px0 = r ? 80 : 80 + colW + 30;
-  const pw = W - 160 - colW - 30;
-  const ph = footTop - 30 - ly;
-  if (ph > 160) {
-    const [cx, cy, cw, ch] = product(ctx, a.item, px0, ly - px(20), pw, ph);
-    const rr = Math.round(Math.min(90, ch * 0.3));
-    sticker(ctx, { x: r ? cx + rr * 0.6 : cx + cw - rr * 0.6, y: cy + ch - rr * 0.6, r: rr, item: a.item, fromWord: a.fromWord, body });
-  }
+  const lh = px(48);
+  part(ctx, 'name', [80, ly - px(30), W - 160, ls.length * lh],
+    () => ls.forEach((l, i) => say(ctx, l, sx, ly + i * lh, { size: px(36), weight: 500, colour: L.text, align: al, body, rtl: a.rtl })));
+  productBelow(ctx, a, ly + ls.length * lh, footTop, W, body);
 }
 
 // "A moment in the day" (9f.8, the FLO ads): one serif line placing it in
@@ -1903,7 +1902,7 @@ function drawMoment(canvas, a) {
     if (lines.length <= 2) break;
   }
   const y0 = top + px(70);
-  say(ctx, (a.eyebrow || '').toUpperCase(), W / 2, y0 - px(20), { size: px(28), weight: 700, colour: L.sub, body, rtl: a.rtl, max: W - 160 });
+  say(ctx, (a.eyebrow || '').toUpperCase(), W / 2, y0 - px(20), { size: px(30), weight: 700, colour: L.sub, body, rtl: a.rtl, max: W - 160 });
   const lh = size * 1.15;
   part(ctx, 'words', [70, y0, W - 140, lines.length * lh + px(10)], () => lines.forEach((ln, i) => {
     const r = dirOf(ln.map(([w]) => w).join(' '), a.rtl) === 'rtl';
@@ -2007,7 +2006,8 @@ const THEMED = { behind: drawBehind, phonepop: drawPhonePop, calling: drawCallin
   notify: drawNotify, search: drawSearch, toggle: drawToggle, checklist: drawChecklist, custom: drawCustom,
   situation: drawSituation, mirror: drawMirror, chat: drawChat, post: drawPost, versus: drawVersus,
   reasons: drawReasons, honest: drawHonest, moment: drawMoment };
-function render(canvas, design, a) {
+function render(target, design, a) {
+  const canvas = sharpCanvas(target, a.scale || 1);
   const [layout, lookKey] = design.split(':');
   const look = lookKey || a.look;
   if (THEMED[layout]) {
@@ -2106,7 +2106,8 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
         setWords({ headline: data.headline, points: data.points, caption: data.caption,
           big_word: data.big_word || '', caller: data.caller || '', decline: data.decline || '',
           search: data.search || '', switches: data.switches || '', checklist: data.checklist || '',
-          ...Object.fromEntries(NEW_FIELDS.map((k) => [k, data[k] || ''])) });
+          ...Object.fromEntries(NEW_FIELDS.map((k) => [k, data[k] || ''])),
+          chat: (data.faqs || []).slice(0, 2).flatMap((f) => [f.q, f.a]).join('\n') });
       }
       const [loaded, its] = await Promise.all([
         Promise.all((data.photos || []).slice(0, 4).map(loadImage)),
@@ -2213,7 +2214,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     // From the 4 Nov videos (docs/static-ad-rules.md 9f).
     ['situation', t('ads.situationL', 'A real moment'), !!featured && lineList(words?.situations).length > 0],
     ['mirror', t('ads.mirrorL', 'Is this you?'), !!featured && lineList(words?.mirror).length >= 3],
-    ['chat', t('ads.chatL', 'Text messages'), !!featured && lineList(words?.chat).length >= 2],
+    ['chat', t('ads.chatL', 'Questions and answers'), !!featured && lineList(words?.chat).length >= 2],
     ['post', t('ads.postL', 'Social post'), !!featured && !!words?.post],
     ['versus', t('ads.versusL', 'Us vs the usual'), !!featured && lineList(words?.versus).length >= 3],
     ['reasons', t('ads.reasonsL', 'Reasons list'), !!featured && lineList(words?.reasons).length >= 3],
@@ -2221,7 +2222,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     ['moment', t('ads.momentL', 'Moment in the day'), !!featured && !!words?.moment],
   ];
   const holiday = useMemo(() => nextHoliday(), []);
-  const looks = [...(target.brand_color ? ['brand'] : []), ...(holiday ? [holiday] : []), ...LOOKS];
+  const looks = [...(target.brand_color ? ['brand'] : []), ...LOOKS];
   const designs = [
     ['custom', t('ads.custom', 'Make your own'), !!featured, 'mine'],
     ...LAYOUTS.map(([k, label, ok]) => [k, label, ok, 'layout']),
@@ -2291,11 +2292,11 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       callingLabel: lt('ads.isCalling', 'is calling…'), acceptLabel: lt('ads.callAccept', 'Order'),
       todayLabel: lt('ads.today', 'Today'), brand: brandHex, look: lookNow, bg,
       font: fontIdx ? fontCss : null, ink: ink || null,
-      greeting: holiday ? lt(`ads.greeting.${holiday}`) : '', searchKicker: lt('ads.searchKicker', 'Someone near you is searching for:'),
+      greeting: HOLIDAYS.includes(lookNow) ? lt(`ads.greeting.${lookNow}`) : '', searchKicker: lt('ads.searchKicker', 'Someone near you is searching for:'),
       review, faq: faqs.length ? faqs[faqIdx % faqs.length] : null,
       sourceLabel: review?.source === 'google' ? lt('ads.googleReview', 'Google review') : '',
       name: targetType === 'property' ? (target.title || '') : target.name,
-      nowLabel: lt('ads.now', 'now'), notesLabel: lt('ads.notes', 'Notes'),
+      nowLabel: lt('ads.now', 'now'),
       situation: (() => { const all = lineList(words?.situations); return all.length ? all[situationIdx % all.length] : ''; })(),
     };
   };
@@ -2388,7 +2389,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const copyText = async () => {
     try { await navigator.clipboard.writeText(postText); toast.success(t('ads.copied', 'Post text copied')); } catch { /* shown in the box */ }
   };
-  const sharePicture = () => { saveAd(true); canvasRef.current.toBlob(async (blob) => {
+  const sharePicture = () => { saveAd(true); adCanvas(format).toBlob(async (blob) => {
     const file = new File([blob], `ad-${format}.jpg`, { type: 'image/jpeg' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], text: postText }).catch(() => {});
@@ -2400,7 +2401,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       setTimeout(() => URL.revokeObjectURL(a.href), 5000);
       copyText();
     }
-  }, 'image/jpeg', 0.92); };
+  }, 'image/jpeg', 0.95); };
 
   // Every shape of the picked design in one tap (Canva's "resize"): the
   // square post, the feed post and the status, shared or saved together.
@@ -2408,10 +2409,9 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     saveAd(true);
     const files = [];
     for (const f of (design === 'native' ? ['story'] : ['square', 'feed', 'story'])) {
-      const c = document.createElement('canvas');
-      render(c, design, { ...args(design), format: f, moves: moves[`${design}|${f}`] || {} });
+      const c = adCanvas(f);
       // eslint-disable-next-line no-await-in-loop
-      const blob = await new Promise((r) => { c.toBlob(r, 'image/jpeg', 0.92); });
+      const blob = await new Promise((r) => { c.toBlob(r, 'image/jpeg', 0.95); });
       files.push(new File([blob], `ad-${f}.jpg`, { type: 'image/jpeg' }));
     }
     if (navigator.canShare && navigator.canShare({ files })) {
@@ -2456,7 +2456,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
 
   const adCanvas = (f) => {
     const c = document.createElement('canvas');
-    render(c, design, { ...args(design), format: f, moves: moves[`${design}|${f}`] || {} });
+    render(c, design, { ...args(design), format: f, moves: moves[`${design}|${f}`] || {}, scale: 2 });
     return c;
   };
   const saveFile = (file) => {
@@ -2470,7 +2470,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   // shape, handed to the phone's share sheet with the post text.
   const shareStatus = async () => {
     saveAd(true);
-    const blob = await new Promise((r) => { adCanvas('story').toBlob(r, 'image/jpeg', 0.92); });
+    const blob = await new Promise((r) => { adCanvas('story').toBlob(r, 'image/jpeg', 0.95); });
     const file = new File([blob], 'ad-status.jpg', { type: 'image/jpeg' });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       await navigator.share({ files: [file], text: postText }).catch(() => {});
@@ -2489,6 +2489,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     c.width = PW;
     c.height = PH;
     const ctx = c.getContext('2d');
+    ctx.imageSmoothingQuality = 'high';
     ctx.fillStyle = '#FFFFFF';
     ctx.fillRect(0, 0, PW, PH);
     return [c, ctx];
@@ -2633,6 +2634,17 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     setBg({ img, src: url });
     if (layout !== 'custom') setDesign('custom');
   };
+  // Tzvi, 5 Nov 2026: "it sticks with channuka doesnt let me change it". The
+  // holiday is its own named choice, any chag or none, not one more colour.
+  const holidayNow = !customHex && HOLIDAYS.includes(look) ? look : '';
+  const holidays = holiday ? [holiday, ...HOLIDAYS.filter((h) => h !== holiday)] : HOLIDAYS;
+  const pickHoliday = (k) => {
+    if (k === 'noholiday') { if (holidayNow) setLook('cream'); return; }
+    setLook(k);
+    setCustomHex('');
+    // Only the gallery layouts wear a holiday: move to one if this design does not.
+    if (!themed || layout === 'custom') setDesign(shown.find(([d]) => THEMED[d] && d !== 'custom')?.[0] || design);
+  };
   const swatch = (name) => {
     const L = lookOf(name, brandHex, featured?.cut || featured?.img);
     return L ? L.bg : '#ccc';
@@ -2696,6 +2708,11 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
             </p>
           ) : null;
         })()}
+        <div className="space-y-1.5 mb-4" data-testid="ad-holidays">
+          <p className="text-xs font-semibold" style={{ color: 'var(--ink)' }}>{t('ads.holidayTitle', 'Holiday')}</p>
+          <Chips value={holidayNow || 'noholiday'} set={pickHoliday} options={[
+            ['noholiday', t('ads.noHoliday', 'No holiday')], ...holidays.map((h) => [h, t(`ads.look.${h}`)])]} />
+        </div>
         {/* The gallery: every design, already made from this business. */}
         <p className="text-xs font-semibold mb-2" style={{ color: 'var(--ink)' }}>{t('ads.galleryTitle', 'Pick a look. Every ad is made from your own product, name and price.')}</p>
         <div className="grid grid-cols-3 sm:grid-cols-7 gap-2 max-h-[36vh] overflow-y-auto mb-5 pe-1" data-testid="ad-gallery">

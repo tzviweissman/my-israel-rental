@@ -26,6 +26,8 @@ MODEL_PATH = os.path.join(os.environ.get("CUTOUT_MODEL_DIR", "/tmp/models"), "is
 
 _session = None
 _lock = asyncio.Lock()
+# Raised when cuts improve: older rows are ignored, so each photo is cut again once, the next time an ad needs it.
+CUT_VERSION = 2
 
 
 def prefetch_model() -> None:
@@ -60,7 +62,7 @@ def largest_part(mask):
     stray leaf or the ghost of a glass the model half keeps (Blazin' Boards'
     photos, 2 Nov). A flood fill on a small copy, so no scipy."""
     import numpy as np
-    from PIL import Image
+    from PIL import Image, ImageFilter
     small = np.array(Image.fromarray(mask).resize((256, 256), Image.NEAREST)) > 0
     seen = np.zeros_like(small)
     best: list[tuple[int, int]] = []
@@ -81,7 +83,10 @@ def largest_part(mask):
     keep = np.zeros((256, 256), np.uint8)
     for y, x in best:
         keep[y, x] = 255
-    keep = np.array(Image.fromarray(keep).resize(mask.shape[::-1], Image.NEAREST))
+    # The small map only says which piece to keep; the edge must stay the fine
+    # mask's. Widened first, or its big squares cut stairs into the product's
+    # edge (Tzvi, 5 Nov 2026: a downloaded ad looked fuzzy).
+    keep = np.array(Image.fromarray(keep).filter(ImageFilter.MaxFilter(5)).resize(mask.shape[::-1], Image.NEAREST))
     return np.where(keep > 0, mask, 0).astype(np.uint8)
 
 
@@ -91,7 +96,7 @@ def cut(content: bytes) -> bytes | None:
     import numpy as np
     from PIL import Image, ImageFilter
     im = Image.open(io.BytesIO(content)).convert("RGB")
-    im.thumbnail((1600, 1600))
+    im.thumbnail((2600, 2600))  # kept large: a downloaded ad is 2160 wide
     x = np.asarray(im.resize((1024, 1024), Image.BILINEAR), dtype=np.float32) / 255.0 - 0.5
     s = _model()
     pred = s.run(None, {s.get_inputs()[0].name: x.transpose(2, 0, 1)[None]})[0][0, 0]
@@ -115,18 +120,18 @@ async def cutout_url(src: str) -> str | None:
     """The cut-out of the photo at `src`, made once and kept."""
     from routes.deps import db, logger
     from utils.cloud_storage import upload_bytes_to_cloudinary
-    row = await db.ad_cutouts.find_one({"src": src})
+    row = await db.ad_cutouts.find_one({"src": src, "v": CUT_VERSION})
     if row:
         return row.get("url")
     async with _lock:
-        row = await db.ad_cutouts.find_one({"src": src})
+        row = await db.ad_cutouts.find_one({"src": src, "v": CUT_VERSION})
         if row:
             return row.get("url")
         url = None
         try:
             # The photo's own JPEG, not Cloudinary's f_auto pick (AVIF/WebP
             # that Pillow may not open).
-            fetch = src.replace("/upload/f_auto,q_auto/", "/upload/f_jpg,q_auto/")
+            fetch = src.replace("/upload/f_auto,q_auto/", "/upload/f_jpg,q_auto:best/")
             # The address is the owner's own data: never let it reach the server's
             # own network (cloud metadata, the database). ponytail: a public URL
             # that redirects inward still passes; pin to Cloudinary if that matters.
@@ -141,7 +146,7 @@ async def cutout_url(src: str) -> str | None:
         except Exception as exc:  # noqa: BLE001 - an ad without a cut-out still works
             logger.warning("[cutout] %s failed: %s", src[-40:], type(exc).__name__)
             return None
-        await db.ad_cutouts.insert_one({"src": src, "url": url})
+        await db.ad_cutouts.insert_one({"src": src, "url": url, "v": CUT_VERSION})
         return url
 
 

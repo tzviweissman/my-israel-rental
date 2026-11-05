@@ -29,3 +29,14 @@ def test_cut_returns_the_object_alone():
     out = Image.open(io.BytesIO(png))
     assert out.mode == "RGBA"
     assert 250 <= out.width <= 330 and 250 <= out.height <= 330  # cropped to the ball
+
+
+def test_edge_is_not_cut_into_stairs():
+    """A diagonal edge keeps every step of the fine mask: the 256-cell map only picks the piece."""
+    import numpy as np
+    from utils.cutout import largest_part
+    mask = np.zeros((1600, 1600), np.uint8)
+    for y in range(1600):
+        mask[y, :max(0, y - 100)] = 255
+    out = largest_part(mask)
+    assert (out == mask).mean() > 0.9999

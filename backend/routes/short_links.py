@@ -626,10 +626,6 @@ listing and its customer reviews; leave a field "" when they do not give it.
             guests on Friday?"); then three short lines describing that
             moment as they live it, each at most 40 characters, warm, never
             mocking. No product name in these four lines.
-  chat      four short text messages, at most 40 characters each, a reader
-            asking and this business answering, alternating, the reader
-            first: real questions a customer would ask, answered only with
-            facts from the listing.
   post      what this business would post on its own social page about
             this, in its own voice, at most 140 characters. No numbers of
             likes or followers, no quotes from customers.
@@ -1020,14 +1016,14 @@ async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
 
     extra_words = {k: clean(data.get(k), n) for k, n in (("big_word", 12), ("caller", 24), ("decline", 16),
                                                     ("search", 60), ("switches", 120), ("checklist", 150),
-                                                    ("situations", 300), ("mirror", 170), ("chat", 180),
+                                                    ("situations", 300), ("mirror", 170),
                                                     ("post", 160), ("versus", 240), ("reasons", 220),
                                                     ("honest", 180), ("moment", 50), ("people", 100))}
     # The same rule as the headline: unclaimed praise drops the line (9c).
     # Praise counts as claimed only when the owner's own listing says it,
     # not because a customer review did.
     source = json.dumps({k: v for k, v in facts.items() if k != "customer_reviews"}, ensure_ascii=False, default=str)
-    for k in ("situations", "mirror", "chat", "post", "versus", "reasons", "honest", "moment"):
+    for k in ("situations", "mirror", "post", "versus", "reasons", "honest", "moment"):
         extra_words[k] = "\n".join(line for line in extra_words[k].split("\n") if not _unclaimed(line, source))
     words = _strip_praise({
         "headline": clean(data.get("headline"), 60),

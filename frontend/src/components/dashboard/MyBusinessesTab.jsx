@@ -463,12 +463,13 @@ export default function MyBusinessesTab({ API, token }) {
                     none yet; and what their ads brought this week. */}
                 {adSummary[b.id] && (holiday || adSummary[b.id].unadvertised?.length > 0 || adSummary[b.id].week_visits > 0) && (
                   <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs mt-2 rounded-lg px-3 py-2" style={{ background: '#F9FAFB', color: 'var(--ink)' }} data-testid={`business-ad-nudge-${b.id}`}>
-                    {holiday ? (
+                    {holiday && (
                       <button type="button" onClick={() => openAd(b, { look: holiday })} className="inline-flex items-center gap-1.5 font-semibold text-start" style={{ color: 'var(--brand-primary)' }} data-testid={`business-ad-holiday-${b.id}`}>
                         <Megaphone size={13} aria-hidden="true" />
                         {t('ads.nudgeHoliday', '{{holiday}} is coming: your {{holiday}} ad is ready', { holiday: t(`ads.look.${holiday}`) })}
                       </button>
-                    ) : adSummary[b.id].unadvertised?.length > 0 && (
+                    )}
+                    {adSummary[b.id].unadvertised?.length > 0 && (
                       <button type="button" onClick={() => openAd(b, { item: adSummary[b.id].unadvertised[0] })} className="inline-flex items-center gap-1.5 font-semibold text-start" style={{ color: 'var(--brand-primary)' }} data-testid={`business-ad-item-${b.id}`}>
                         <Megaphone size={13} aria-hidden="true" />
                         {t('ads.nudgeItem', 'Your ad for {{item}} is ready', { item: adSummary[b.id].unadvertised[0] })}

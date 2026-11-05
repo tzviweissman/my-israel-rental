@@ -17,6 +17,7 @@ import { spawnSync } from 'node:child_process';
 import fs from 'node:fs';
 import path from 'node:path';
 import { liveHash, readPublished } from './live-hash.mjs';
+import { stagedIsMeasured } from './ad-measured.mjs';
 
 const ROOT = path.resolve(path.dirname(new URL(import.meta.url).pathname.replace(/^\/([A-Za-z]:)/, '$1')), '..');
 const staged = spawnSync('git', ['diff', '--cached', '--name-only', '--diff-filter=ACMR'], { cwd: ROOT, encoding: 'utf8' }).stdout.split('\n').filter(Boolean);
@@ -38,6 +39,16 @@ if (staged.some((f) => /^(\.claude\/skills\/build-business-page|scripts\/hooks)\
 if (staged.includes('docs/rules-checklist.md') || staged.includes('scripts/blueprint.mjs')) {
   const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'blueprint.mjs'), '--order'], { cwd: ROOT, encoding: 'utf8' });
   if (c.status !== 0) { console.error(`Commit refused: ${c.stderr || c.stdout}`); process.exit(1); }
+}
+// every ad rule is a step of the ad blueprint: a new design in either ad area needs its blueprint finished (5 Nov 2026)
+if (staged.some((f) => /^(frontend\/src\/components\/(dashboard\/AdMaker|admin\/AdStudio)\.jsx|docs\/ad-rules-checklist\.md|scripts\/ad-blueprint\.mjs)$/.test(f))) {
+  const c = spawnSync(process.execPath, [path.join(ROOT, 'scripts', 'ad-blueprint.mjs'), '--designs'], { cwd: ROOT, encoding: 'utf8' });
+  if (c.status !== 0) { console.error(`Commit refused: ${c.stderr || c.stdout}`); process.exit(1); }
+  // and the drawing that goes out is the drawing that was measured (Tzvi, 5 Nov 2026: "make sure we always use the blueprint")
+  if (!stagedIsMeasured(ROOT)) {
+    console.error('Commit refused: the ad drawing changed since it was last measured. With the local servers up, run: node scripts/check-ad-designs.mjs (then stage the same files).');
+    process.exit(1);
+  }
 }
 if (!builds.size && !live.size) process.exit(0);
 

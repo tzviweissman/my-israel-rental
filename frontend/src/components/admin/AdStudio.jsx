@@ -21,6 +21,7 @@ import { toast } from 'sonner';
 import { Copy, Download, Loader2, Save, Share2, Trash2, Upload } from 'lucide-react';
 import { API } from '../../App';
 import BackgroundGallery from '../dashboard/BackgroundGallery';
+import { sharpCanvas, bestPhoto } from '../../utils/sharpCanvas';
 
 const SHAPES = { post: [1080, 1350], status: [1080, 1920] };
 const INK = '#111827';
@@ -38,7 +39,7 @@ const loadImage = (src) => {
       img.crossOrigin = 'anonymous';
       img.onload = () => resolve(img);
       img.onerror = () => resolve(null);
-      img.src = src;
+      img.src = bestPhoto(src);
     });
   }
   return imgCache[src];
@@ -118,7 +119,7 @@ function foot(ctx, { W, H, shape, f, logo, dark }) {
   do { ctx.font = `700 ${ts}px ${ff.body}`; ts -= 2; } while (ts > 30 && ctx.measureText(f.title || '').width > tw);
   ctx.fillText(wrap(ctx, f.title, tw, 1)[0] || '', tx, top + 118);
   ctx.fillStyle = dark ? '#CFD8E3' : '#444444';
-  ctx.font = `500 28px ${ff.body}`;
+  ctx.font = `500 30px ${ff.body}`;
   ctx.fillText(wrap(ctx, f.line, tw, 1)[0] || '', tx, top + 168);
   ctx.fillStyle = dark ? '#7CC4F2' : ACCENT;
   ctx.font = `700 32px ${ff.body}`;
@@ -179,9 +180,9 @@ function drawChat(ctx, W, H, shape, f, logo) {
   for (let i = all.length - 1; i >= 0 && y > sy; i -= 1) {
     const m = all[i];
     const ff = fonts(m.text);
-    ctx.font = `500 25px ${ff.body}`;
+    ctx.font = `500 30px ${ff.body}`;
     const lines = wrap(ctx, m.text, sw * 0.7 - 36, 3);
-    const bh = 22 + (m.who ? 26 : 0) + lines.length * 33;
+    const bh = 22 + (m.who ? 34 : 0) + lines.length * 38;
     const bw = Math.min(sw * 0.78, Math.max(...lines.map((l) => ctx.measureText(l).width), 120) + 40);
     y -= bh;
     const bx = m.me ? sx + sw - 24 - bw : sx + 24;
@@ -196,13 +197,13 @@ function drawChat(ctx, W, H, shape, f, logo) {
     let ty = y + 8;
     if (m.who) {
       ctx.fillStyle = INK;
-      ctx.font = `700 20px ${ff.body}`;
-      ty += 22;
+      ctx.font = `700 30px ${ff.body}`;
+      ty += 30;
       ctx.fillText(m.who, tx, ty);
     }
     ctx.fillStyle = INK;
-    ctx.font = `500 25px ${ff.body}`;
-    lines.forEach((l) => { ty += 33; ctx.fillText(l, tx, ty - 4); });
+    ctx.font = `500 30px ${ff.body}`;
+    lines.forEach((l) => { ty += 38; ctx.fillText(l, tx, ty - 4); });
     y -= 12;
   }
   // The group's own bar and a fade under it, then the pill pointing up.
@@ -221,16 +222,16 @@ function drawChat(ctx, W, H, shape, f, logo) {
   ctx.fillStyle = '#FFFFFF';
   ctx.textAlign = 'center';
   ctx.direction = 'ltr';
-  ctx.font = `800 26px ${gf.body}`;
+  ctx.font = `800 30px ${gf.body}`;
   ctx.fillText((f.group || '?').trim()[0] || '?', sx + 58, sy + 75);
   ctx.textAlign = isHe(f.group) ? 'right' : 'left';
   ctx.direction = isHe(f.group) ? 'rtl' : 'ltr';
   ctx.fillStyle = INK;
-  ctx.font = `700 28px ${gf.body}`;
+  ctx.font = `700 30px ${gf.body}`;
   ctx.fillText(f.group || '', isHe(f.group) ? sx + sw - 30 : sx + 104, sy + 72);
   if (f.pill) {
     const pf = fonts(f.pill);
-    ctx.font = `700 28px ${pf.body}`;
+    ctx.font = `700 30px ${pf.body}`;
     const w = ctx.measureText(f.pill).width + 50;
     ctx.fillStyle = INK;
     ctx.beginPath();
@@ -272,7 +273,7 @@ function drawShowcase(ctx, W, H, shape, f, logo, pages) {
   if (f.label) {
     const lf = fonts(f.label);
     ctx.fillStyle = '#CFD8E3';
-    ctx.font = `700 28px ${lf.body}`;
+    ctx.font = `700 30px ${lf.body}`;
     ctx.textAlign = 'center';
     ctx.direction = isHe(f.label) ? 'rtl' : 'ltr';
     ctx.fillText(f.label, W / 2, Math.min(cy + ph + 46, footTop - 14));
@@ -415,7 +416,7 @@ function drawNotify(ctx, W, H, shape, f, logo, page) {
     const s = W / page.naturalWidth;
     // Blurred, as a lock screen's wallpaper sits behind its clock: the
     // page's own big words would otherwise fight the time.
-    ctx.filter = 'blur(18px)';
+    ctx.filter = `blur(${18 * (ctx.canvas.scale || 1)}px)`;
     ctx.drawImage(page, 0, cut, page.naturalWidth, page.naturalHeight - cut, 0, 0, W, (page.naturalHeight - cut) * s);
     ctx.filter = 'none';
     ctx.fillStyle = 'rgba(8,12,20,.7)';
@@ -633,8 +634,9 @@ function drawBeforeAfter(ctx, W, H, shape, f, logo, page) {
   foot(ctx, { W, H, shape, f, logo, dark: false });
 }
 
-async function render(canvas, ad, shape) {
+async function render(target, ad, shape, scale = 1) {
   const [W, H] = SHAPES[shape];
+  const canvas = sharpCanvas(target, scale);
   canvas.width = W;
   canvas.height = H;
   const ctx = canvas.getContext('2d');
@@ -799,7 +801,11 @@ export default function AdStudio({ token }) {
   };
 
   const fileName = () => `${(ad.name || 'ad').replace(/[^\w֐-׿-]+/g, '-')}-${shape}.jpg`;
-  const blob = () => new Promise((r) => canvasRef.current.toBlob(r, 'image/jpeg', 0.92));
+  const blob = async () => {
+    const big = document.createElement('canvas');
+    await render(big, ad, shape, 2);
+    return new Promise((r) => { big.toBlob(r, 'image/jpeg', 0.95); });
+  };
   const download = async () => {
     const b = await blob();
     const a = document.createElement('a');

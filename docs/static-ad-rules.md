@@ -11,6 +11,12 @@ and from the page rules (`docs/page-generation-rules.md`) and the voice rules
 disagree about honesty, they win: this file adds to them, it never loosens
 them.
 
+**Start at the blueprint.** Every rule below is a step in
+`docs/ad-rules-checklist.md`, in making order (Tzvi, 5 Nov 2026). No ad, batch or
+new design is made without `node scripts/ad-blueprint.mjs <name>` answered first;
+`node scripts/check-ad-designs.mjs` measures size, cut-offs, safe areas, the QR and
+the price on every design. A rule added here is added there in the same commit.
+
 **How the videos were read.** All five transcripts were read in full. The
 example ads were also checked as pictures: 11 frames from four of the videos
 (the ads from protein.com, Shay & Blue, Pela, Dose and Loop; the price-anchor and
@@ -151,6 +157,7 @@ not make them**, however well they sell:
 | Sellout, "sold out 5 times", "please don't buy", "we apologise for running out so fast" | Invented scarcity, unless the owner tells us it happened, with the dates. |
 | "Limited time", "last chance", "it's always selling out so get one now" (said in a video's own example) | Page rule `urgency`. A real end date only ("Until 31 Oct"). |
 | Fake screenshots: a text from a friend, a Google review, a notes app, a checkout receipt *(seen: the receipt-style ad)* | It shows a conversation or a review that did not happen. Allowed only as a real screenshot of a real message or review, with the person's permission. |
+| (Allowed) Familiar screens where nobody invented speaks (9e.3): the product calling, a search box, switches, the reader's own list, a spinner | The line is an invented person or exchange, not the screen. The owner's real questions and answers may be set as messages (9b.6). |
 | An "@brand" tag underlined to look clickable on an Instagram story (2 videos) | It is designed to be mis-clicked. On a real story with a real tag it is fine; drawn onto a picture it is a trick. |
 | As-seen-in logos, "loved by experts" | Only with proof (page rule `claims`). |
 | A generated person holding the product, presented as a customer | A customer who does not exist. |
@@ -490,8 +497,10 @@ Science) by its words, since its frames are three people on a sofa.
 
 For the ad maker: (1) and (2) are words the model can write from the
 listing and its reviews, each drawn by layouts we already have or by a
-plain "mirror" card; the chat, post, us vs them and notes formats in (6)
-need only the cut-out, words and code, so they stay free (9e).
+plain "mirror" card; the post and us vs them formats in (6) need only the
+cut-out, words and code, so they stay free (9e). Text messages and a notes app
+as Jordan makes them are fake screenshots (section 5): ours are the owner's real
+questions and answers, and a plain numbered list. The post shows no counts.
 
 Discount: Simon and Jordan both close on "book a call" with their
 agencies, and every spend figure ($300k at 2x, $93k) is their own claim.
