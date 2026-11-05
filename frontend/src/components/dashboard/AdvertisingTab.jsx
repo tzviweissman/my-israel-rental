@@ -75,7 +75,7 @@ export default function AdvertisingTab({ API, token, targets }) {
               <p className="text-sm font-semibold break-all" dir="ltr" style={{ color: 'var(--ink)' }} data-testid="advertising-url">{url}</p>
               <ShareLinkButtons url={url} testidPrefix="advertising-share" />
               <p className="text-sm" style={{ color: 'var(--ink)' }} data-testid="advertising-visits">
-                {t('advertising.visits', 'Visits so far: {{count}}', { count: link.scan_count || 0 })}
+                {t('advertising.visits', 'Visits so far: {{n}}', { n: link.scan_count || 0 })}
               </p>
             </div>
             <QrShareCard url={url} filename={`myisraelrental-${link.slug}-qr`} testidPrefix="advertising-qr" />
