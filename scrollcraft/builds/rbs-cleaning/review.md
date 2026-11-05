@@ -24,4 +24,4 @@ Verdict: PASS
 
 
 ## After this review (5 Nov, the builder, not independent)
-The opening changed at Tzvi's request: the camera pulls back into a furnished room and the words moved to a card. Looked at by the builder on laptop and phone; the publish check passes. Not re-read by an independent reviewer.
+The opening changed at Tzvi's request: the camera pulls back into a furnished room and the words moved to a card. Looked at by the builder on laptop and phone; the publish check passes. Not re-read by an independent reviewer. Later the same day the view and stone were replaced with a real-looking view; the builder looked again.

@@ -770,6 +770,7 @@ make their sites so beautiful: the imagery first, and almost nothing else.
       headline.
     - **Trust proof** (a hechsher, "delivered across Israel") is the one short
       line or sits right under the button.
+    - **What it must say or show:** 3g.18.
     - Everything else moves down the page.
 14. **One colour grade across every image.** Every photo and clip on a page
     shares one light and colour mood (warm candlelight, cool morning, soft
@@ -812,6 +813,26 @@ make their sites so beautiful: the imagery first, and almost nothing else.
     effect still needs its reason (3c.9): one that says what a control does
     passes, one that only decorates does not. This is the single home of the
     fresh-search rule; 3c.1, 3e.24, 0b.4 and 8a point here.
+18. **The opening shows what the business offers, before any scroll** (Tzvi, 5 Nov
+    2026, on Aaron Dovid's kumzits headline: "people may think theyre on the wrong
+    site before they even scroll down"). The wow never replaces this: a stranger
+    knows in five seconds what they can get here.
+    - **One kind of offer:** the picture or the words may show it (a doughnut, a
+      pot of bagels). A slogan over a picture that shows something else does not.
+    - **Two or more different kinds, the ones different customers come for**
+      (kumzitzes and guitar lessons, not five flavours of one bun): the headline
+      or other big words name each. It may take 3g.13's 2 to 5 words for each
+      offer; there is still one button, and it opens a page where they choose.
+    - The home page lists the kinds in `<meta name="offers" content="kumzits|guitar lesson">`.
+      `scripts/check-says-offer.mjs` (R3g.18) fails when it is missing, and when a
+      site with two or more kinds does not have each in the big words on the first
+      screen, at a laptop and a phone size.
+    - Worked example: `scrollcraft/builds/aaron-kaluszyner`, Tzvi's headline "Book
+      a kumzits for your (occasion) or your guitar lesson" over the strings. Tried and
+      rejected there: the second offer only in the small facts line (it already was,
+      and it did not help), and a plain "Kumzitzes and guitar lessons" (Tzvi preferred
+      keeping the rotating word). A rotating word may change the occasion, never
+      the offer: the offer you came for may not be showing when you land.
 
 ## 3h. The cinematic film opening (Tzvi, 16 Oct 2026, after a video of a fruit-juice site, PULP)
 
@@ -1091,6 +1112,11 @@ that policy).*
       (almost nothing on screen), VANISH and APPEAR (on a plain light ground, a crumb that is there and then gone in the
       open, or turns up from nowhere). Then each numbered step of the brief is ticked off against the clip at 8 fps:
       seen, or not seen. It caught all three faults of Krysp's first film and passed every other clip we have.
+   4. **Places and materials look photographed** (3w.15; Tzvi, 5 Nov 2026, RBS Cleaning: "the scene and the stone look kind of fake"). Before any
+      clip, the generated still is looked at full size beside a real photograph of that place or material. Hills smooth as dunes,
+      model villages, stones in tidy equal rows, flat soft light: a new still. Prompt it as an ordinary unretouched snapshot from a
+      named real place, saying what is really there. The brief's "## Looks real" section names the photograph (link or docs/inspo
+      path); film-gate refuses a paid video without it.
 
 22. **A scroll film is real video, tied exactly to the scroll** (Tzvi, 3 and 4 Nov 2026, Krysp: "the motions dont look
     smooth", "it still doesnt look so smooth like the video i sent you", "it keeps freezing", "its not playing in sync

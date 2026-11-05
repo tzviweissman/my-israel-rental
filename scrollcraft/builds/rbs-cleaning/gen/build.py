@@ -47,7 +47,7 @@ SITE = kit.Site(
 
 # ---------- home ----------
 N_FRAMES = len(os.listdir('assets/film/d'))
-OPENING = f'''  <section class="film" id="film" data-frames="{N_FRAMES}" data-src="assets/film" data-video="assets/film/opening-{{k}}.mp4" data-marks="0.025,0.95" aria-label="RBS Cleaning, home cleaning in Beit Shemesh">
+OPENING = f'''  <section class="film" id="film" data-frames="{N_FRAMES}" data-src="assets/film" data-video="assets/film/opening-{{k}}.mp4" data-marks="0.025,0.955" aria-label="RBS Cleaning, home cleaning in Beit Shemesh">
     <div class="stage">
       <canvas aria-hidden="true"></canvas>
       <picture class="room">

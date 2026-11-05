@@ -227,12 +227,12 @@ P.update({
 'R3n.1': 'the film, then the room picture, fill the whole first screen on laptop and phone',
 'R3n.2': 'a squeegee pulled down the pane by the scroll',
 'R3n.5': '"you land on a soapy window and, as you scroll, a squeegee pulls it clear and the camera backs away from the glass into a bright clean room"',
-'R3h.20': 'scroll film 7.2 screens long, real video, the first screen is the first frame; check-opening-scroll passes',
+'R3h.20': 'scroll film 7.8 screens long, real video, the first screen is the first frame; check-opening-scroll passes',
 'R3h.21': 'only the film holds the page; nothing later pins',
 'R3h.22': 'n/a: Tzvi waived the sketch for this build: "you dont need my permission to generate if code wont do a good job" (5 Nov); the steps are in gen/wipe-brief.md',
 'R3h.23': 'check-clip passes on the clip used; the first take was rejected; brief has How it really happens from a real video and a Key moment; steps looked at frame by frame',
 'R3h.24': 'data-video, every frame a keyframe, starter/film.js; check-film-video passes in real Chrome',
-'R3h.25': 'the words fade at 2.5% and return at 95%, after the camera has stopped in the room; check-film-clear passes',
+'R3h.25': 'the words fade at 2.5% and return at 95.5%, after the camera has stopped in the room; check-film-clear passes',
 'R3h.2': 'the film goes from a soapy pane to the clean view, then the clean room and the button; every step is the real job',
 'R3h.3': 'full screen, 1920 wide video on a laptop, 720 wide on a phone, never in a column; the clip softens slightly as it is enlarged from the pane',
 'R3h.5': 'n/a: no chapter lines, only the opening words before and after the film',
@@ -253,6 +253,7 @@ P.update({
 'R3p.5': 'the words wait on the soap and come back when the glass is clear',
 'R3x.14': 'SITE.gift_section() and gift.js on the Get a free quote page; hidden until the owner switches gift cards on',
 })
+P['R3w.7'] = 'the view and stone: gen/view/a-0.png, compared at full size with real photographs named in the Looks real section of gen/pull-brief.md; the first, fake-looking view was replaced at the request of Tzvi'
 s = open('BLUEPRINT.md', encoding='utf8').read()
 out, miss, cur = [], [], None
 for ln in s.split('\n'):

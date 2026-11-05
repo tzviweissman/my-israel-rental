@@ -31,12 +31,12 @@ R3g.13 pass: built to the blueprint: picture, the 4-word headline, one short lin
 R3b.1 pass: built to the blueprint: what (home cleaning), where (Beit Shemesh), trust (₪400 price and WhatsApp number), next (Get a free quote)
 R3b.2 n/a: no certificate in the record, so nothing on the page says kosher
 R3b.3 pass: built to the blueprint: one solid green button per screen; header button is outline; links elsewhere
-R3h.20 pass: built to the blueprint: scroll film 7.2 screens long, real video, the first screen is the first frame; check-opening-scroll passes
+R3h.20 pass: built to the blueprint: scroll film 7.8 screens long, real video, the first screen is the first frame; check-opening-scroll passes
 R3h.21 pass: built to the blueprint: only the film holds the page; nothing later pins
 R3h.22 n/a: Tzvi waived the sketch for this build: "you dont need my permission to generate if code wont do a good job" (5 Nov); the steps are in gen/wipe-brief.md
 R3h.23 pass: built to the blueprint: check-clip passes on the clip used; the first take was rejected; brief has How it really happens from a real video and a Key moment; steps looked at frame by frame
 R3h.24 pass: built to the blueprint: data-video, every frame a keyframe, starter/film.js; check-film-video passes in real Chrome
-R3h.25 pass: built to the blueprint: the words fade at 2.5% and return at 95%, after the camera has stopped in the room; check-film-clear passes
+R3h.25 pass: built to the blueprint: the words fade at 2.5% and return at 95.5%, after the camera has stopped in the room; check-film-clear passes
 R3h.1 pass: built to the blueprint: opens full screen on soap running down a pane, an event in a generated film
 R3n.1 pass: built to the blueprint: the film, then the room picture, fill the whole first screen on laptop and phone
 R3n.2 pass: built to the blueprint: a squeegee pulled down the pane by the scroll
@@ -215,6 +215,7 @@ R3w.3 n/a: no food
 R3w.4 pass: built to the blueprint: the start and end stills were right before the clip; simple motion (the room coming in) is in code; judged frame by frame
 R3w.5 n/a: no food
 R3w.6 pass: built to the blueprint: the scrub ends 0.8 s after the blade leaves; the room then takes over
+R3w.7 pass: built to the blueprint: the view and stone: gen/view/a-0.png, compared at full size with real photographs named in the Looks real section of gen/pull-brief.md; the first, fake-looking view was replaced at the request of Tzvi
 R3v.1 pass: built to the blueprint: sitekit full footer: name and his line, pages, where we clean, reach us, base line with Privacy
 R3v.2 pass: built to the blueprint: menu lists the three pages, no #jumps
 R3v.6 pass: built to the blueprint: opening tall, bento long, steps medium, areas short
