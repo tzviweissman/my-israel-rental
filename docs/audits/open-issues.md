@@ -286,3 +286,6 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 ## UI audit of 2 Nov 2026
 - [Low] Chicken Munch home scrolls 7px sideways at 375 (closing block `.go-order`, `site.css:312`). First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
 - [Low] Footer and menu links on the 17 business sites are 19 to 24px tall on phones, under 44px. First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
+## Code review of 5 Nov 2026
+- [Fixed 5 Nov, 512b5b0] Visit counters used {{count}} with no plural forms; test-i18n-parity failed (2026-11-05-site-audit.md).
+- [Medium] Audit setup hung over 40 minutes at the dev-server step on 5 Nov, so no build or full suite ran (2026-11-05-site-audit.md).
