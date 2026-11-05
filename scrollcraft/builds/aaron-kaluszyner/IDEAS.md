@@ -4,9 +4,9 @@
 his own pictures; none needs paid generation to go live. Every picture below was opened by the builder.
 
 ## Own: A. Strum the wall (his flyer: a guitar against Jerusalem stone)
-- motion: strum, six guitar strings stretched across a Jerusalem-stone wall are strummed as the page arrives and ring; the visitor plucks them
+- motion: strum, six strings along a guitar like his flyer's are strummed as the page arrives and ring; the visitor plucks them
 - sources: docs/inspo/awwwards-categories-2026-10-18/bmw-f3-1-start-button.webp, docs/inspo/awwwards-2026-10-18/butter-6-keys-jingle.webp, docs/inspo/moto-card-2026-10-21/hero-2500.webp
-- steps: 1 the whole screen is the stone wall of his flyer with six strings across it, low E at the top, each casting its shadow on the stone. 2 As the page arrives a strum runs down them, low to high, 70 ms apart, and they ring and die away. 3 The card with "A kumzits for your Bar Mitzvah" (the occasion word turning through his own list) and the Book button arrives beside them. 4 Moving the mouse across a string plucks it where you crossed it; a tap plucks the nearest on a phone. 5 The first scroll strums them again. 6 A "Sound off" switch: once turned on, each string plays its note of an open G chord.
+- steps: 1 the whole screen is a close view of a guitar with six strings across it, low E at the top, each casting its shadow on the wood. 2 As the page arrives a strum runs down them, low to high, 70 ms apart, and they ring and die away. 3 The card with "A kumzits for your Bar Mitzvah" (the occasion word turning through his own list) and the Book button arrives beside them. 4 Moving the mouse across a string plucks it where you crossed it; a tap plucks the nearest on a phone. 5 The first scroll strums them again. 6 A "Sound off" switch: once turned on, each string plays its note of an open G chord.
 
 ## B. Pick your simcha
 - motion: index, a big list of his occasions where pointing at one fills its row and sets the headline to it
@@ -21,5 +21,5 @@ his own pictures; none needs paid generation to go live. Every picture below was
 ## Chosen: A
 It is his own picture (the guitar against Jerusalem stone) turned into something that happens: the strings are struck
 by themselves and then by the visitor, and with sound on they are the chord a kumzits starts with. No other site uses
-strings or sound. The strings are code; the wall behind them is one generated still of his flyer's stone (gen/wall-brief.md). His real guitar photo or a
+strings or sound. The strings are code; the guitar behind them is one generated still (gen/guitar-brief.md; Tzvi moved it from the wall on 5 Nov). His real guitar photo or a
 clip of him playing replaces nothing, it joins the page further down when he sends it.

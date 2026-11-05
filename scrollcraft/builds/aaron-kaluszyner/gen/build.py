@@ -32,7 +32,7 @@ OPENING = f'''  <section class="open" id="open" aria-labelledby="h-open">
     <div class="open-in wrap">
       <div class="open-card">
         <p class="label" data-arrive="1">Aaron Dovid · Jerusalem</p>
-        <h1 id="h-open" data-arrive="1">Kumzitzes and<br>guitar lessons</h1>
+        <h1 id="h-open" data-arrive="1">Book a kumzits<br>for your <span class="rot" data-words="Bar Mitzvah|Chuppah|Bris Milah|simcha"></span><br>or your guitar lesson</h1>
         <div class="open-act" data-arrive="4">
           <a class="btn" href="book.html"><span>Book</span><i class="twang" aria-hidden="true"></i></a>
           <ul class="btn-facts"><li>Kumzits {kit.price('1,200')}</li><li>Guitar lessons {kit.price(100)}</li><li>Online lessons too</li></ul>
@@ -203,8 +203,8 @@ CONTACT = SITE.page_head('Talk to Aaron', 'Questions about a kumzits or lessons,
 SITE.write('contact', 'Contact Aaron Dovid · Kumzits and guitar lessons',
            'WhatsApp or call Aaron Dovid on 053-419-3420 about a kumzits or guitar lessons in Jerusalem.',
            'og.jpg', CONTACT)
-PRELOAD = ('<link rel="preload" as="image" href="assets/wall-wide.webp" media="(min-aspect-ratio: 9/10)" fetchpriority="high">'
-           '<link rel="preload" as="image" href="assets/wall-tall.webp" media="(max-aspect-ratio: 9/10)" fetchpriority="high">')
+PRELOAD = ('<link rel="preload" as="image" href="assets/guitar-wide.webp" media="(min-aspect-ratio: 9/10)" fetchpriority="high">'
+           '<link rel="preload" as="image" href="assets/guitar-tall.webp" media="(max-aspect-ratio: 9/10)" fetchpriority="high">')
 # Alef has no arrow: every → (the kit's too) becomes the same small drawn one (3o.5)
 ARROW = '<svg class="arw-i" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"><path d="M2 8h11M9 4l4 4-4 4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>'
 for page in ('index', 'lessons', 'book', 'contact'):

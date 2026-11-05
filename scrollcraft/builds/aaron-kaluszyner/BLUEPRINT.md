@@ -68,8 +68,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: no set of images; he has no photos yet
 - [ ] R8.6 Every main product picture is a product hero shot: one product large and sharp, eye level, slightly turned, on a plinth from its own world, its own real ingredients round it, one colour story, one warm light, still or mid-air (not both); the product is exactly theirs
   plan: n/a: no product pictures; a service with no photos
-- [ ] R8.7 Every paid generation had a gen/<name>-brief.md first: a close crop of the one item, its traits written from the crop and kept, only the camera, light or setting changed, no idealising words, still before video, result compared beside their photo before showing
-  plan: n/a: nothing generated; the only pictures are drawn in code (stone wall, strings) and the share image is a screenshot of them
+- [x] R8.7 Every paid generation had a gen/<name>-brief.md first: a close crop of the one item, its traits written from the crop and kept, only the camera, light or setting changed, no idealising words, still before video, result compared beside their photo before showing
+  plan: the guitar behind the strings is the one generated picture, made through the API from gen/guitar-brief.md, matched beside his flyer; it is a generated guitar, never called his own; the strings are code and the share image is a screenshot
 - [ ] R8.2 The set came from the owner's own matching photos first; else the whole set generated in one pass from one style preamble (product pictures are edited from their own photo, never made again from words alone); stock only from one photographer's matching series; no cut-outs mixed from many photos
   plan: n/a: no image set
 - [x] R3p.7 Similar items are shown the same way: if one flavour's thumbnail is one jar, every flavour's is one jar; a list where pointing at an item changes a big photo does so for every item
@@ -79,7 +79,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [ ] R3h.10 Choosing an option changes its picture, words and button; one photo per option, from one shoot, sharp at the size shown (check: motion)
   plan: n/a: no photo per option; choosing a service changes the words, price and button
 - [x] R3g.14 One colour grade across every image and clip on the page
-  plan: one grade: the drawn stone and strings and the sand palette are the only imagery
+  plan: one grade: the honey guitar, its strings and the sand palette are the only imagery
 - [ ] R3o.1 Generated food in motion appears only in the full-screen opening film (advert style, checked frame by frame at 4 fps or more: no food from nowhere, no glass or neon look, pieces never fade or vanish); everywhere else on the page food is the owner's real photo; outside the film generate only scenery, light, steam or a plain drawing
   plan: n/a: not food
 - [ ] R3o.2 A generated liquid (opening film only) is opaque, satin, with specks, not glass or neon
@@ -88,8 +88,8 @@ file (`--rules`); the scripts named in a line confirm it at publish.
   plan: n/a: no product photos
 - [x] R3o.6 One photo per kind, from everything the owner sent, duplicates skipped, unclear kinds asked about; screenshots cropped at their real resolution
   plan: both his photos looked at (two flyers, no duplicates); neither used as a picture because both have words baked in
-- [ ] R8.3 Generated media only of items they really sell; no generated person shown as their staff or customer; no made-up premises; no text baked into an image; nothing non-kosher in a kosher business's images; the owner approved every piece
-  plan: n/a: nothing generated; the only pictures are drawn in code (stone wall, strings) and the share image is a screenshot of them
+- [x] R8.3 Generated media only of items they really sell; no generated person shown as their staff or customer; no made-up premises; no text baked into an image; nothing non-kosher in a kosher business's images; the owner approved every piece
+  plan: the guitar behind the strings is the one generated picture, made through the API from gen/guitar-brief.md, matched beside his flyer; it is a generated guitar, never called his own; the strings are code and the share image is a screenshot
 - [ ] R8.4 Any moving real material (ribbon, fabric, steam, a pour) is a generated clip made in Higgsfield (kie.ai only if Higgsfield cannot), showing cause then effect, never SVG or CSS; food in motion only per R3o.1; reduced motion shows the still
   plan: n/a: no moving real material; the strings are drawn lines, plucked in code, reduced motion keeps them still
 - [x] R3c.13 Nothing cut off: every label, number, ruler and photo sits wholly in its section at every size (only things marked `data-clip-ok` may be cut while travelling) (check: clipped)
@@ -112,9 +112,9 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 ## Stage 3. Opening
 
 - [x] R3g.13 The first screen holds a picture, a headline of 2 to 5 words that says what the customer gets, at most one short line (where the business is: the line or the small label, not both; trust goes there or right under the button) and one button; the header does not count
-  plan: picture (the strings), headline of four words naming both offers, the small label "Aaron Dovid · Jerusalem" as the one short line, one Book button, three facts under it
+  plan: picture (the strings), Tzvi's headline naming both offers, "Book a kumzits for your (occasion) or your guitar lesson", the small label "Aaron Dovid · Jerusalem" as the one short line, one Book button, three facts under it
 - [x] R3g.18 The first screen shows what the business offers before any scroll: one kind may be shown by the picture or the words; two or more different kinds are each named in the headline or big words; the home page lists them in <meta name="offers"> (check: check-says-offer)
-  plan: <meta name="offers" content="kumzits|guitar lesson">; the headline is "Kumzitzes and guitar lessons"; the one Book button opens the Book page, where they choose
+  plan: <meta name="offers" content="kumzits|guitar lesson">; the headline is "Book a kumzits for your (occasion) or your guitar lesson"; the one Book button opens the Book page, where they choose
 - [x] R3b.1 The first screen answers: what it is, where, why trust it, what to do next
   plan: what: a kumzits for your occasion; where: Jerusalem; trust: the price beside the button; next: Book
 - [x] R3b.2 Proof (price, credential or rating) touches the main button; for food a kosher band sits just after the opening, not crowding the button, and the certificate is stated at most twice as a sentence or band (a small identical kosher tag on items does not count)
@@ -134,17 +134,17 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [ ] R3h.25 Nothing covers a scroll film while it plays: at 20, 40 and 60% of the film, on a laptop and a phone, words, cards and names cover at most 3% of it (the site's menu bar aside); the words wait for its end or sit beside or under it (check: check-film-clear)
   plan: n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 - [x] R3h.1 The home page opens on a full-screen picture or film (at least 70% picture) and it is an event from their own thing (a film, or an event built in code), proposed with the first build, never after (check: site)
-  plan: the home page opens on a full-screen canvas (the strings on stone, about 80% of the screen) and something happens: the strum on arrival and on the first scroll; check-site OPENING
+  plan: the home page opens on a full-screen canvas (the strings on the guitar, about 80% of the screen) and something happens: the strum on arrival and on the first scroll; check-site OPENING
 - [ ] R3n.1 The owner's strongest real photo fills at least half the first screen on a laptop and on a phone, not a small card or cut-out shape
   plan: n/a: he has no real photo (two flyers with words in them, which 3g.15 keeps off the opening); photos asked for first (Q5, Q14)
 - [x] R3n.2 One signature moment only this business could have, driven by the visitor (scroll scene or a choice)
-  plan: the strings of his flyer's guitar on his flyer's Jerusalem stone, plucked by the visitor, with his chord when sound is on
+  plan: the strings of a guitar like the one in his flyer, plucked by the visitor, with his chord when sound is on
 - [x] R3n.3 The visitor's choice changes the page (colour, hero, order), not just one picture (check: motion)
   plan: plucking changes the opening itself; an occasion row opens Book with it chosen; every choice on Book rewrites the request and the price
 - [x] R3n.4 Side by side with the closest reference in docs/inspo for this kind of business, ours is not plainly weaker
   plan: compared with bmw-f3-1-start-button.webp (CONCEPT.md wow 4): a full-screen ground the visitor sets off; ours answers every pass
 - [x] R3n.5 The one-sentence test, told to someone else and run on the first five seconds and the first full scroll: "you land and ___ happens" is about the business, not a decoration ("nothing", "the camera moves", "it fades in" fail)
-  plan: "you land and a strum runs down six guitar strings across a Jerusalem-stone wall, and as your mouse crosses them they ring"
+  plan: "you land and a strum runs down six guitar strings along a guitar, and as your mouse crosses them they ring"
 - [x] R3g.15 The opening is made for this business at full quality: never a flyer crop or low-resolution photo, and a generated setting is never presented as their real premises (check: fits)
   plan: no flyer crop: the opening is drawn in code at the screen's size
 - [ ] R3h.2 A film opening goes from where the product comes from to their real product and the button, every step true
@@ -156,9 +156,9 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [ ] R3h.7 A film's seams are checked: each join compared, a jumping clip regenerated
   plan: n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 - [x] R3h.8 The section after a lit film changes the mood boldly
-  plan: after the light stone opening the kumzits band is dark rosewood
+  plan: after the honey guitar opening the kumzits band is dark rosewood
 - [ ] R3h.11 Every film and generated still set is bright: middle third at least 33, whole frame at least 22, average at least 30; the subject is the brightest thing; viewed on a phone in daylight (check: brightness)
-  plan: n/a: no film or generated stills; the drawn stone is a mid sand ground with the words on a light card
+  plan: n/a: no film or generated stills; the guitar is a mid honey ground with the words on a light card
 - [ ] R3h.13 One cause, one motion: the cause and its result are one clip, code pieces start on the cause frame and match the film's material, and the effect passes a 4 fps watch (no fall-then-fly, no pause, no blocks for flakes, no heap from nowhere, nothing wrong played backwards)
   plan: n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 - [ ] R3h.14 The product stays recognisable through the whole effect; a moving camera never loses it; on a phone the frame widens if pieces travel past the crop
@@ -170,7 +170,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [ ] R3h.17 Words and film take turns: a giant name sits on plain ground, the film appears as letters part, the film moves aside before the headline arrives (check: readable)
   plan: n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 - [ ] R3x.5 A following light is used only for a dark-world business, has an off button, sweeps once by itself on a phone and with reduced motion, and never dims the words or main button
-  plan: n/a: no following light; his world is daytime stone, not dark
+  plan: n/a: no following light; his world is warm daylight, not dark
 
 ## Stage 4. Sections
 
@@ -199,7 +199,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R5a.7 One signature idea and one peak per page; at most one signature scroll section; the ending resolves on the action; not carried over from another business
   plan: one signature (the strings) and one peak; the page ends on Book
 - [x] R9.1 The page's signature section is used only when their own photos or items support it; a page without the right material stays still
-  plan: the signature uses his flyer's own scene (stone and strings), no photo needed
+  plan: the signature uses his flyer's own instrument (a guitar and its strings), no photo needed
 - [x] R3f.2 The effect budget is filled and ticked on captured frames: one signature moment (held where it fits 1280x650, otherwise playing as the page scrolls), at least three accents (arriving opening, a scroll-tied detail mid-page, a closing payoff), quiet touches
   plan: signature: the strings; accents: the arriving first screen, the occasion word, the occasion rows, the booking summary that writes itself; quiet: the button string, stepped Learn/Play/Grow, numbered cards
 - [x] R3m.1 A gallery place on every designed page (`data-mir-gallery` with template), and priced products inside `data-mir-catalog` with `data-mir-list`, group and item templates
@@ -381,7 +381,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [ ] R3f.4 A motif from the logo (a bow) never lands on the logo that already has it
   plan: n/a: no logo motif
 - [x] R3g.4 Every motion has one job (guide, confirm, reveal); loops start and end on the same frame; text settles soft to sharp without bounce; list rows about 100 ms apart; menu hover under 300 ms
-  plan: each motion has one job: the strum shows the craft, the arrival guides, the button string confirms the pointer; nothing loops
+  plan: each motion has one job: the strum shows the craft, the arrival guides, the button string confirms the pointer; nothing loops but the rotating word
 - [x] R3e.16 No linear easing (ease-out or a spring); a transition grows from what was tapped and finishes under 0.5 s
   plan: eased curves only, all under 0.6 s except the strings ringing out
 - [ ] R3e.17 A carousel shows a sliver of the next card, with visible buttons or dots (mirrored in Hebrew); a bottom sheet closes by swipe-down AND a close button
@@ -389,7 +389,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [ ] R3e.18 Ambient background video only: camera locked, subtle, seamless loop of about 6 s, still poster, still for reduced motion
   plan: n/a: no background video
 - [x] R3a.2 Nothing moves without a reason: a clip behind text holds still except its subject; text never re-wraps while its container animates; no in-between state looks unfinished (checked at the middle of every transition)
-  plan: the stone behind the strings is still; only the strings move; the card does not change size while the word turns (the word box sizes, not the card)
+  plan: the guitar behind the strings is still; only the strings move; the card does not change size while the word turns (the word box sizes, not the card)
 - [ ] R3a.3 Anything placed on a spot in a photo/video is placed by measurement and lives inside the media's element; a label never covers what it labels; a caption stays until the next replaces it (check: overlay-truth)
   plan: n/a: nothing placed on a spot in a photo
 - [ ] R3a.4 A held (pinned) section is designed to fit its content at 1280x650; if it truly cannot, it plays as the page scrolls without holding the screen and is still the signature; the order section is never held (check: cutoff)
@@ -455,7 +455,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [ ] R3u.6 Depth on laptops: separate pieces on the first screen move at their own speeds with the scroll (near faster, far slower), laptops with a mouse only, still on phones and with motion off
   plan: n/a: no depth pieces
 - [x] R3u.7 At most one rotating word, in the headline, from the owner's real occasions or products; reads right with each; full list for screen readers; first word with motion off; not beside a film's moving words
-  plan: n/a: no rotating word; the headline names both offers (3g.18), and his occasions are the list in the kumzits band
+  plan: one rotating word from his own occasions (Bar Mitzvah, Chuppah, Bris Milah, simcha); the full list for screen readers; the first word with motion off
 - [ ] R3u.8 A tilted label over headings, if used, is this site's own shape from its world and in fingerprints.json, never another site's
   plan: n/a: no tilted label
 - [x] R3u.9 Questions are rounded cards on `<details>`, "+" in an accent circle turning into "x", the answer opening smoothly inside the card

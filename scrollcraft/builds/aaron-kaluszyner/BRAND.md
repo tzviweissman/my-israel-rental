@@ -10,7 +10,7 @@ capitals, burnt orange, "Learn. Play. Grow."). No logo exists; the name is set i
 |---|---|---|
 | `--ground` | `#F4ECDD` | page ground: pale Jerusalem limestone, the mortar of his flyer |
 | `--surface` | `#EADCC3` | cards, the booking summary, the phone bar |
-| `--stone` | `#C99D5E` | the opening's stone blocks and the stone band (from the flyer wall); never under small text |
+| `--stone` | `#C99D5E` | the opening's ground while the guitar loads (its honey top); never under small text |
 | `--ink` | `#24170D` | all text, prices, the outline buttons; the dark band (the guitar's rosewood fretboard) |
 | `--soft` | `#5E4A38` | secondary text (7.0:1 on the ground) |
 | `--accent` | `#B4470F` | the main button only (burnt orange of the lessons flyer, darkened so white text is 5.3:1) |
@@ -38,7 +38,7 @@ light ground, limestone on the dark band. The owner is asked whether he has a lo
 
 ## Textures
 
-- The stone wall of his flyer: a generated still of the same stone, no guitar, no words (gen/wall-brief.md), behind the strings.
+- A close view of a guitar like the one in his flyer, honey top and black fretboard, generated with no strings and no words (gen/guitar-brief.md), behind the strings. Tzvi, 5 Nov 2026: the strings looked out of place on the wall.
 - Six guitar strings (three plain, three wound) drawn in code across the opening.
 
 ## Design bans

@@ -1,4 +1,4 @@
-// The opening: six guitar strings across Jerusalem stone (the wall of Aaron's own flyer), drawn in code.
+// The opening: six guitar strings along the neck and over the soundhole of a guitar (like the one in Aaron's flyer), drawn in code.
 // They are strummed once as the page arrives and again as you start to scroll; pass the mouse across them
 // (or tap one) to pluck it. "Sound off" turns on a G major chord, one note per string. Reduced motion: still.
 (function () {
@@ -8,8 +8,8 @@
   // low E at the top, as a player looks down at the guitar; the chord is G major (3 2 0 0 0 3)
   var GAUGE = [11, 9.4, 7.8, 5.6, 4.4, 3.4], WOUND = [1, 1, 1, 1, 0, 0], HZ = [98.0, 123.47, 146.83, 196.0, 246.94, 392.0];
 
-  // the wall is a generated still of the stone in his flyer (gen/wall-brief.md); the strings stay code so they can ring
-  var pics = {}, FILE = { wide: 'assets/wall-wide.webp', tall: 'assets/wall-tall.webp' };
+  // the guitar is a generated still with no strings of its own (gen/guitar-brief.md, gen/guitar.py); the strings stay code so they can ring
+  var pics = {}, FILE = { wide: 'assets/guitar-wide.webp', tall: 'assets/guitar-tall.webp' };
   function drawWall() {
     var kind = W / H < .9 ? 'tall' : 'wide', img = pics[kind];
     if (!img) { img = pics[kind] = new Image(); img.onload = function () { drawWall(); draw(performance.now()); }; img.src = FILE[kind]; return; }
@@ -21,7 +21,9 @@
   function layout() {
     var r = cv.getBoundingClientRect(); dpr = Math.min(devicePixelRatio || 1, r.width < 760 ? 1.5 : 2);
     W = r.width; H = r.height; if (W < 2 || H < 2) { requestAnimationFrame(layout); return; } cv.width = W * dpr; cv.height = H * dpr;
-    var top = H * (W < 760 ? .2 : .2), gap = Math.min(H * (W < 760 ? .062 : .125), 120);
+    // on the neck in the picture: where its edges fall on this screen, however the picture is fitted to it
+    var tall = W / H < .9, ih = Math.max(H, W * (tall ? 16 / 9 : 9 / 16)), y0 = (H - ih) / 2, a = tall ? .252 : .308, b = tall ? .424 : .608;
+    var top = y0 + a * ih, gap = (b - a) * ih / 5;
     S = GAUGE.map(function (g, i) { var o = S[i] || {}; return { y: top + i * gap, g: g * (W < 760 ? .6 : Math.min(1.25, W / 1280)), wound: WOUND[i], a: o.a || 0, t0: o.t0 || 0, p: o.p || .5, f: 6.2 + i * .55 }; });
     drawWall(); draw(performance.now());
   }
@@ -40,12 +42,12 @@
   }
   function draw(now) {
     cx.setTransform(dpr, 0, 0, dpr, 0, 0);
-    if (wall) cx.drawImage(wall, 0, 0, W, H); else { cx.fillStyle = '#C99D5E'; cx.fillRect(0, 0, W, H); }
+    if (wall) cx.drawImage(wall, 0, 0, W, H); else { cx.fillStyle = '#C98A34'; cx.fillRect(0, 0, W, H); }
     var live = false, step = Math.max(10, W / 90);
     S.forEach(function (s) {
       var pts = []; for (var x = 0; x <= W + step; x += step) { var d = off(s, x, now); if (d) live = true; pts.push([x, s.y + d]); }
       function line(dy, w, col) { cx.beginPath(); pts.forEach(function (p, k) { k ? cx.lineTo(p[0], p[1] + dy) : cx.moveTo(p[0], p[1] + dy); }); cx.lineWidth = w; cx.strokeStyle = col; cx.stroke(); }
-      line(s.g * .9 + 4, s.g * 1.3, 'rgba(60,34,10,.16)'); line(s.g * .9 + 3, s.g * .7, 'rgba(60,34,10,.28)'); // its soft shadow on the stone
+      line(s.g * .9 + 4, s.g * 1.3, 'rgba(60,34,10,.16)'); line(s.g * .9 + 3, s.g * .7, 'rgba(60,34,10,.28)'); // its soft shadow on the wood
       line(0, s.g, s.wound ? '#5E4220' : '#6E6A62');                              // the dark edge
       line(-s.g * .06, s.g * .78, s.wound ? '#A7793F' : '#B8B4AA');               // bronze wound, or plain steel
       if (s.wound) { cx.setLineDash([s.g * .22, s.g * .26]); line(0, s.g * .74, 'rgba(70,45,15,.55)'); cx.setLineDash([]); }

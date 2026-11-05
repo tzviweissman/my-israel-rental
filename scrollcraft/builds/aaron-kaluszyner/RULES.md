@@ -27,8 +27,8 @@ R3e.22 pass: built to the blueprint: his name in the bar, label and every bookin
 R3s.19 pass: built to the blueprint: each page has its own title, description, og:title, og:description and the share picture (assets/og.jpg, the opening)
 R6.1 pass: built to the blueprint: events playbook: what the event is and its price lead, then the occasions, then booking
 R4.1 pass: built to the blueprint: mentoring price missing: "Ask for the price"; past-event videos: "ask Aaron on WhatsApp"; listed in OWNER-QUESTIONS.md
-R3g.13 pass: built to the blueprint: picture (the strings), headline of four words naming both offers, the small label "Aaron Dovid · Jerusalem" as the one short line, one Book button, three facts under it
-R3g.18 pass: built to the blueprint: <meta name="offers" content="kumzits|guitar lesson">; the headline is "Kumzitzes and guitar lessons"; the one Book button opens the Book page, where they choose
+R3g.13 pass: built to the blueprint: picture (the strings), Tzvi's headline naming both offers, "Book a kumzits for your (occasion) or your guitar lesson", the small label "Aaron Dovid · Jerusalem" as the one short line, one Book button, three facts under it
+R3g.18 pass: built to the blueprint: <meta name="offers" content="kumzits|guitar lesson">; the headline is "Book a kumzits for your (occasion) or your guitar lesson"; the one Book button opens the Book page, where they choose
 R3b.1 pass: built to the blueprint: what: a kumzits for your occasion; where: Jerusalem; trust: the price beside the button; next: Book
 R3b.2 pass: built to the blueprint: Kumzits ₪1,200 and Guitar lessons ₪100 right under the Book button
 R3b.3 pass: built to the blueprint: one solid button per screen (Book on the card); the header Book and the Sound switch are outline
@@ -38,25 +38,25 @@ R3h.22 n/a: no film; the opening is the strings drawn in code (strings.js), no g
 R3h.23 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 R3h.24 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 R3h.25 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
-R3h.1 pass: built to the blueprint: the home page opens on a full-screen canvas (the strings on stone, about 80% of the screen) and something happens: the strum on arrival and on the first scroll; check-site OPENING
+R3h.1 pass: built to the blueprint: the home page opens on a full-screen canvas (the strings on the guitar, about 80% of the screen) and something happens: the strum on arrival and on the first scroll; check-site OPENING
 R3n.1 n/a: he has no real photo (two flyers with words in them, which 3g.15 keeps off the opening); photos asked for first (Q5, Q14)
-R3n.2 pass: built to the blueprint: the strings of his flyer's guitar on his flyer's Jerusalem stone, plucked by the visitor, with his chord when sound is on
+R3n.2 pass: built to the blueprint: the strings of a guitar like the one in his flyer, plucked by the visitor, with his chord when sound is on
 R3n.3 pass: built to the blueprint: plucking changes the opening itself; an occasion row opens Book with it chosen; every choice on Book rewrites the request and the price
 R3n.4 pass: built to the blueprint: compared with bmw-f3-1-start-button.webp (CONCEPT.md wow 4): a full-screen ground the visitor sets off; ours answers every pass
-R3n.5 pass: built to the blueprint: "you land and a strum runs down six guitar strings across a Jerusalem-stone wall, and as your mouse crosses them they ring"
+R3n.5 pass: built to the blueprint: "you land and a strum runs down six guitar strings along a guitar, and as your mouse crosses them they ring"
 R3g.15 pass: built to the blueprint: no flyer crop: the opening is drawn in code at the screen's size
 R3h.2 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 R3h.3 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 R3h.5 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 R3h.7 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
-R3h.8 pass: built to the blueprint: after the light stone opening the kumzits band is dark rosewood
-R3h.11 n/a: no film or generated stills; the drawn stone is a mid sand ground with the words on a light card
+R3h.8 pass: built to the blueprint: after the honey guitar opening the kumzits band is dark rosewood
+R3h.11 n/a: no film or generated stills; the guitar is a mid honey ground with the words on a light card
 R3h.13 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 R3h.14 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 R3h.18 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 R3h.19 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
 R3h.17 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
-R3x.5 n/a: no following light; his world is daytime stone, not dark
+R3x.5 n/a: no following light; his world is warm daylight, not dark
 R3.12 pass: built to the blueprint: hero (the strings), features (kumzits with its price and occasions; lessons with price and what is included), CTA band at the end with his contacts beside the Book button
 R3c.1 pass: built to the blueprint: references kept in CONCEPT.md with links (21st Kokonut, Mobbin Contractbook and Mural, Inspo daptone and thrilljockey, the saved brief form); one direction chosen and said why
 R3g.17 pass: built to the blueprint: every effect line in CONCEPT.md names its fresh 21st, Mobbin or library source; none from the last two sites
@@ -69,7 +69,7 @@ R3p.3 pass: built to the blueprint: check-fingerprints: different from all 17 ot
 R3p.5 pass: built to the blueprint: the strings tuned to an open G chord, low E at the top, with real notes when sound is on
 R3q.1 pass: built to the blueprint: check-concept: concept ready
 R5a.7 pass: built to the blueprint: one signature (the strings) and one peak; the page ends on Book
-R9.1 pass: built to the blueprint: the signature uses his flyer's own scene (stone and strings), no photo needed
+R9.1 pass: built to the blueprint: the signature uses his flyer's own instrument (a guitar and its strings), no photo needed
 R3f.2 pass: built to the blueprint: signature: the strings; accents: the arriving first screen, the occasion word, the occasion rows, the booking summary that writes itself; quiet: the button string, stepped Learn/Play/Grow, numbered cards
 R3m.1 pass: built to the blueprint: gallery place on Home ("From our kumzitzes", data-mir-gallery with template); n/a for a catalog: a booking service with two fixed tiers, no shop
 R3m.3 pass: built to the blueprint: FAQ is the owner-filled place; hours shown from his calendar on Contact
@@ -104,17 +104,17 @@ R3x.4 pass: built to the blueprint: the services on Book are tiles with the same
 R3x.11 n/a: no product to turn
 R8.1 n/a: no set of images; he has no photos yet
 R8.6 n/a: no product pictures; a service with no photos
-R8.7 n/a: nothing generated; the only pictures are drawn in code (stone wall, strings) and the share image is a screenshot of them
+R8.7 pass: built to the blueprint: the guitar behind the strings is the one generated picture, made through the API from gen/guitar-brief.md, matched beside his flyer; it is a generated guitar, never called his own; the strings are code and the share image is a screenshot
 R8.2 n/a: no image set
 R3p.7 pass: built to the blueprint: the three services on Book are shown the same way (name, one line, price on the right)
 R3h.12 n/a: no pictures of items
 R3h.10 n/a: no photo per option; choosing a service changes the words, price and button
-R3g.14 pass: built to the blueprint: one grade: the drawn stone and strings and the sand palette are the only imagery
+R3g.14 pass: built to the blueprint: one grade: the honey guitar, its strings and the sand palette are the only imagery
 R3o.1 n/a: not food
 R3o.2 n/a: no liquids
 R3o.3 n/a: no product photos
 R3o.6 pass: built to the blueprint: both his photos looked at (two flyers, no duplicates); neither used as a picture because both have words baked in
-R8.3 n/a: nothing generated; the only pictures are drawn in code (stone wall, strings) and the share image is a screenshot of them
+R8.3 pass: built to the blueprint: the guitar behind the strings is the one generated picture, made through the API from gen/guitar-brief.md, matched beside his flyer; it is a generated guitar, never called his own; the strings are code and the share image is a screenshot
 R8.4 n/a: no moving real material; the strings are drawn lines, plucked in code, reduced motion keeps them still
 R3c.13 pass: built to the blueprint: clipped and check-fits run on every page
 R3c.14 n/a: no cut-outs
@@ -168,11 +168,11 @@ R3f.8 n/a: nothing is tied to the scroll except the one strum, played in full on
 R3f.9 n/a: no list that lights up
 R3f.5 pass: built to the blueprint: widths in rem; no shimmer
 R3f.4 n/a: no logo motif
-R3g.4 pass: built to the blueprint: each motion has one job: the strum shows the craft, the arrival guides, the button string confirms the pointer; nothing loops
+R3g.4 pass: built to the blueprint: each motion has one job: the strum shows the craft, the arrival guides, the button string confirms the pointer; nothing loops but the rotating word
 R3e.16 pass: built to the blueprint: eased curves only, all under 0.6 s except the strings ringing out
 R3e.17 n/a: no carousel or sheet
 R3e.18 n/a: no background video
-R3a.2 pass: built to the blueprint: the stone behind the strings is still; only the strings move; the card does not change size while the word turns (the word box sizes, not the card)
+R3a.2 pass: built to the blueprint: the guitar behind the strings is still; only the strings move; the card does not change size while the word turns (the word box sizes, not the card)
 R3a.3 n/a: nothing placed on a spot in a photo
 R3a.4 n/a: nothing pinned
 R3a.5 pass: built to the blueprint: no pinning, no parallax; reduced motion: still strings
@@ -202,7 +202,7 @@ R3u.2 pass: built to the blueprint: a Friday or Saturday gets one line naming th
 R3u.3 n/a: no servings or pieces
 R3u.5 pass: built to the blueprint: the first screen arrives in order once (label and headline, then the button) with the strum; check-arrival
 R3u.6 n/a: no depth pieces
-R3u.7 n/a: no rotating word; the headline names both offers (3g.18), and his occasions are the list in the kumzits band
+R3u.7 pass: built to the blueprint: one rotating word from his own occasions (Bar Mitzvah, Chuppah, Bris Milah, simcha); the full list for screen readers; the first word with motion off
 R3u.8 n/a: no tilted label
 R3u.9 pass: built to the blueprint: questions are rounded cards on details with the + in a circle, ready for his answers
 R3u.10 n/a: one place

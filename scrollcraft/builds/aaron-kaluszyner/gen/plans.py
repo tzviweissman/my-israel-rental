@@ -3,7 +3,7 @@ python scrollcraft/builds/aaron-kaluszyner/gen/plans.py). One answer per rule, l
 import re, sys
 
 NOFILM = 'n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip'
-NOGEN = 'n/a: nothing generated; the only pictures are drawn in code (stone wall, strings) and the share image is a screenshot of them'
+NOGEN = 'the guitar behind the strings is the one generated picture, made through the API from gen/guitar-brief.md, matched beside his flyer; it is a generated guitar, never called his own; the strings are code and the share image is a screenshot'
 P = {
  # Stage 1
  'R0b.1': 'slug aaron-kaluszyner, from the live public API record (src/record.json); og and JSON-LD use it',
@@ -41,7 +41,7 @@ P = {
  'R3p.7': 'the three services on Book are shown the same way (name, one line, price on the right)',
  'R3h.12': 'n/a: no pictures of items',
  'R3h.10': 'n/a: no photo per option; choosing a service changes the words, price and button',
- 'R3g.14': 'one grade: the drawn stone and strings and the sand palette are the only imagery',
+ 'R3g.14': 'one grade: the honey guitar, its strings and the sand palette are the only imagery',
  'R3o.1': 'n/a: not food',
  'R3o.2': 'n/a: no liquids',
  'R3o.3': 'n/a: no product photos',
@@ -67,25 +67,25 @@ P = {
  'R3h.23': NOFILM,
  'R3h.24': NOFILM,
  'R3h.25': NOFILM,
- 'R3h.1': 'the home page opens on a full-screen canvas (the strings on stone, about 80% of the screen) and something happens: the strum on arrival and on the first scroll; check-site OPENING',
+ 'R3h.1': 'the home page opens on a full-screen canvas (the strings on the guitar, about 80% of the screen) and something happens: the strum on arrival and on the first scroll; check-site OPENING',
  'R3n.1': 'n/a: he has no real photo (two flyers with words in them, which 3g.15 keeps off the opening); photos asked for first (Q5, Q14)',
- 'R3n.2': 'the strings of his flyer\'s guitar on his flyer\'s Jerusalem stone, plucked by the visitor, with his chord when sound is on',
+ 'R3n.2': 'the strings of a guitar like the one in his flyer, plucked by the visitor, with his chord when sound is on',
  'R3n.3': 'plucking changes the opening itself; an occasion row opens Book with it chosen; every choice on Book rewrites the request and the price',
  'R3n.4': 'compared with bmw-f3-1-start-button.webp (CONCEPT.md wow 4): a full-screen ground the visitor sets off; ours answers every pass',
- 'R3n.5': '"you land and a strum runs down six guitar strings across a Jerusalem-stone wall, and as your mouse crosses them they ring"',
+ 'R3n.5': '"you land and a strum runs down six guitar strings along a guitar, and as your mouse crosses them they ring"',
  'R3g.15': 'no flyer crop: the opening is drawn in code at the screen\'s size',
  'R3h.2': NOFILM,
  'R3h.3': NOFILM,
  'R3h.5': NOFILM,
  'R3h.7': NOFILM,
- 'R3h.8': 'after the light stone opening the kumzits band is dark rosewood',
- 'R3h.11': 'n/a: no film or generated stills; the drawn stone is a mid sand ground with the words on a light card',
+ 'R3h.8': 'after the honey guitar opening the kumzits band is dark rosewood',
+ 'R3h.11': 'n/a: no film or generated stills; the guitar is a mid honey ground with the words on a light card',
  'R3h.13': NOFILM,
  'R3h.14': NOFILM,
  'R3h.18': NOFILM,
  'R3h.19': NOFILM,
  'R3h.17': NOFILM,
- 'R3x.5': 'n/a: no following light; his world is daytime stone, not dark',
+ 'R3x.5': 'n/a: no following light; his world is warm daylight, not dark',
  # Stage 4
  'R3.12': 'hero (the strings), features (kumzits with its price and occasions; lessons with price and what is included), CTA band at the end with his contacts beside the Book button',
  'R3c.1': 'references kept in CONCEPT.md with links (21st Kokonut, Mobbin Contractbook and Mural, Inspo daptone and thrilljockey, the saved brief form); one direction chosen and said why',
@@ -99,7 +99,7 @@ P = {
  'R3p.5': 'the strings tuned to an open G chord, low E at the top, with real notes when sound is on',
  'R3q.1': 'check-concept: concept ready',
  'R5a.7': 'one signature (the strings) and one peak; the page ends on Book',
- 'R9.1': 'the signature uses his flyer\'s own scene (stone and strings), no photo needed',
+ 'R9.1': 'the signature uses his flyer\'s own instrument (a guitar and its strings), no photo needed',
  'R3f.2': 'signature: the strings; accents: the arriving first screen, the occasion word, the occasion rows, the booking summary that writes itself; quiet: the button string, stepped Learn/Play/Grow, numbered cards',
  'R3m.1': 'gallery place on Home ("From our kumzitzes", data-mir-gallery with template); n/a for a catalog: a booking service with two fixed tiers, no shop',
  'R3m.3': 'FAQ is the owner-filled place; hours shown from his calendar on Contact',
@@ -192,7 +192,7 @@ P = {
  'R3e.16': 'eased curves only, all under 0.6 s except the strings ringing out',
  'R3e.17': 'n/a: no carousel or sheet',
  'R3e.18': 'n/a: no background video',
- 'R3a.2': 'the stone behind the strings is still; only the strings move; the card does not change size while the word turns (the word box sizes, not the card)',
+ 'R3a.2': 'the guitar behind the strings is still; only the strings move; the card does not change size while the word turns (the word box sizes, not the card)',
  'R3a.3': 'n/a: nothing placed on a spot in a photo',
  'R3a.4': 'n/a: nothing pinned',
  'R3a.5': 'no pinning, no parallax; reduced motion: still strings',

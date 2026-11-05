@@ -2,7 +2,7 @@
 
 Category: events (rule 3t): open on what the event is, keep it short, packages with their prices. He has no photos of
 past kumzitzes yet (asked for in OWNER-QUESTIONS.md), so the opening is an event built in code from his own flyer's
-world: the Jerusalem-stone wall (a generated still of his flyer's stone, gen/wall-brief.md, on Tzvi's standing instruction of 4 Nov) and the guitar's strings, drawn in code so they can ring. Lessons are the second offer and have their own page. One
+world: a close view of a guitar like his flyer's (a generated still, gen/guitar-brief.md; Tzvi, 5 Nov: the strings looked out of place on a wall) and its strings, drawn in code so they can ring. Lessons are the second offer and have their own page. One
 direction chosen by the builder (rule 7.1): the strings, because they are the one thing both his offers share and no
 other site has sound or strings. All references: REFERENCES.md; ideas and steps: IDEAS.md; brand: BRAND.md.
 
@@ -13,7 +13,7 @@ Inspo daptonerecords-com and thrilljockey-com (warm music labels on sand and pap
 brief-form-live-summary.jpg for the booking summary.
 
 ## Ideas
-- Own: A. Strum the wall: six strings across the Jerusalem-stone wall of his flyer are strummed as the page arrives,
+- Own: A. Strum the guitar: six strings along a guitar like the one in his flyer are strummed as the page arrives,
   then plucked by the visitor; with sound on they are a G chord
   (docs/inspo/awwwards-categories-2026-10-18/bmw-f3-1-start-button.webp, docs/inspo/awwwards-2026-10-18/butter-6-keys-jingle.webp,
   docs/inspo/moto-card-2026-10-21/hero-2500.webp). Own because his flyer is a guitar against Jerusalem stone, and a
@@ -26,13 +26,13 @@ brief-form-live-summary.jpg for the booking summary.
   Not chosen: it leads with lessons, and his first listing is the kumzits.
 
 ## Chosen
-A. It is his own picture made into something that happens, needs only one cheap still of the wall, and shows the craft he sells (playing)
+A. It is his own picture made into something that happens, needs only one cheap still of a guitar, and shows the craft he sells (playing)
 rather than decorating. The occasions list (B) follows it as the dark band, and his lesson words (C's Learn, Play, Grow)
 are the lessons section without the chord animation.
 
 ## Style sheet (3g.1)
 - Ground: pale limestone #F4ECDD; surface #EADCC3 for cards, the booking summary and the lessons band; the opening is
-  the generated stone wall, sand #C99D5E while it loads; one dark band in rosewood ink #24170D for the kumzits.
+  the generated guitar, honey #C98A34 while it loads; one dark band in rosewood ink #24170D for the kumzits.
 - Ink #24170D; muted #5E4A38. Accent, main button only (3g.3): burnt orange #B4470F from his lessons flyer, white text 5.3:1.
 - Faces: Suez One for headings, Alef 400 and 700 for text (both with Hebrew, approved list); the ₪ in the text face.
 - One radius 6px (a pick's small corner), on images, cards and buttons; one soft shadow 0 3px 30px tinted sand.
@@ -42,15 +42,16 @@ are the lessons section without the chord animation.
 
 ## Effect budget (3f.2)
 - Signature: the strings opening (X33), strummed on arrival and on the first scroll, plucked by the visitor.
-- Accents: the first screen arriving in order (kit 3u.5);   the occasion rows that fill when pointed at and open the form with that occasion chosen; the booking summary that
+- Accents: the first screen arriving in order (kit 3u.5); the one rotating occasion word in the headline (kit 3u.7);
+  the occasion rows that fill when pointed at and open the form with that occasion chosen; the booking summary that
   writes itself as you fill the form (3x.9), the closing payoff.
 - Quiet touches: the button's string that twangs on hover (B21), Learn, Play, Grow set a step lower each, numbered
   booking cards (S2), prices large beside their unit (P5), sections fading in (R6).
 
 ## Wow gate
 1. Her strongest real photo, big: he has none yet; his two pictures are flyers with words in them, which rule 3g.15
-   keeps off the opening. The opening is his flyer's own scene (the stone wall and the strings) shown full screen, and his photos and videos are asked for first in OWNER-QUESTIONS.md. Gallery place ready for them.
-2. The signature only he could have: the strings of the guitar on the Jerusalem-stone wall from his own flyer, which
+   keeps off the opening. The opening is his flyer's own instrument (the guitar and its strings) shown full screen, and his photos and videos are asked for first in OWNER-QUESTIONS.md. Gallery place ready for them.
+2. The signature only he could have: the strings of a guitar like the one in his own flyer, which
    ring when struck, and play the chord with sound on.
 3. The visitor's choice changes the page: plucking changes the opening itself; choosing an occasion opens the booking
    page with it chosen, and every choice on the booking page rewrites the request beside it and its price.
@@ -60,7 +61,7 @@ are the lessons section without the chord animation.
    Where the wow came from: 21st search "guitar strings interactive hover pluck" (Kokonut Plucked Text), Mobbin's
    stepped booking form (https://mobbin.com/sites/sections/21a89976-a385-4f85-a174-78feccab7e79) for the booking payoff, and
    docs/inspo/awwwards-categories-2026-10-18/bmw-f3-1-start-button.webp for an opening the visitor sets off.
-5. One sentence: you land and a strum runs down six guitar strings across a Jerusalem-stone wall, and as your mouse
+5. One sentence: you land and a strum runs down six guitar strings along a guitar, and as your mouse
    crosses them they ring.
 
 ## Effects

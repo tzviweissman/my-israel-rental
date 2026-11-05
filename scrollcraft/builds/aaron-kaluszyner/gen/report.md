@@ -6,13 +6,13 @@ Moving the mouse across them (or tapping on a phone) plucks them. With "Sound" s
 Then: the kumzits on a dark band (₪1,200, his occasions as a list that opens booking with that occasion chosen), his
 lessons (₪100 for 40 minutes, online too, his "Learn. Play. Grow."), how booking works, and the full footer.
 
-**First screen (5 Nov).** The headline names both offers, "Kumzitzes and guitar lessons", and the one Book button opens the Book page, where they choose (rule 3g.18).
+**First screen (5 Nov).** The headline names both offers, "Book a kumzits for your (occasion) or your guitar lesson" (Tzvi's wording), and the one Book button opens the Book page, where they choose (rule 3g.18).
 
 **Booking.** A time taken on either listing is now gone on both. One page, three steps: what (kumzits, lesson, or guitar and mentoring), when (his Sunday to Thursday
 calendar, taken times crossed out), your details. The request is written out beside the form as you fill it, saved
 to MyIsraelRental, then sent on WhatsApp with a tracking link.
 
-**Spent.** Two generated stills of the stone wall (one wide, one tall), through the Higgsfield API, for the opening. The price check before them said 2 credits for a pair of images on the nearest model it lists; the API does not report the charge per call, so about 4 credits at most.
+**Spent.** The opening's guitar: four generated images through the Higgsfield API on 5 Nov, one used. Before that, two stills of a stone wall, now replaced. The price check before them said 2 credits for a pair of images on the nearest model it lists; the API does not report the charge per call, so about 4 credits at most.
 
 **His record.** One business (aaron-kaluszyner) with two different listings, Kumzits and Music lessons. Not a
 duplicate. Nothing was deleted or merged.
