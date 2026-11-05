@@ -1439,14 +1439,22 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
   const [areasOpen, setAreasOpen] = useState(Object.keys(settings.area_fees || {}).length > 0);
   const areas = settings.serves_nationwide ? [] : (settings.areas || []);
   const [courier, setCourier] = useState(settings.default_courier_user_id || '');
+  // New-order texts go to the WhatsApp number unless the business gives another.
+  const [textDifferent, setTextDifferent] = useState(!!settings.text_number);
+  const [textNumber, setTextNumber] = useState(settings.text_number || '');
   const [busy, setBusy] = useState(false);
   const dayName = (d) => t(`weekday.${d}`, String(d));
   const active = (couriers || []).filter((c) => c.status === 'active');
 
   const save = async () => {
+    if (textDifferent && textNumber.replace(/\D/g, '').length < 9) {
+      toast.error(t('orderTexts.enterNumber', 'Please enter a mobile number with the leading 0 or a country code'));
+      return;
+    }
     setBusy(true);
     try {
       await axios.put(`${API}/marketplace/businesses/${businessId}/orders/settings`, {
+        text_number: textDifferent ? textNumber.trim() : null,
         delivery_on: deliveryOn, cutoffs: rows, pickup_windows: pickup, delivery_windows: delivery,
         delivery_fee: fee === '' ? null : Number(fee), min_order: minOrder === '' ? null : Number(minOrder),
         free_over: freeOver === '' ? null : Number(freeOver),
@@ -1499,6 +1507,26 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
 
       <BasketReminderSwitch API={API} auth={auth} businessId={businessId} />
       <TableOrdering API={API} auth={auth} businessId={businessId} />
+
+      {h(t('orderTexts.title', 'New order texts'))}
+      <fieldset data-testid="settings-text-number">
+        <legend className="text-[12px] mb-1" style={{ color: 'var(--brand-muted)' }}>{t('orderTexts.body', 'Each new order is texted to this number, with a link to confirm or decline it.')}</legend>
+        <label className="flex items-center gap-2 min-h-[44px] text-sm" style={{ color: 'var(--ink)' }}>
+          <input type="radio" name="settings-text-number" checked={!textDifferent} onChange={() => setTextDifferent(false)} data-testid="settings-text-same" />
+          <span>{t('orderTexts.same', 'Same as my WhatsApp number')}{settings.whatsapp_number && <span dir="ltr" className="ms-1" style={{ color: 'var(--brand-muted)' }}>{settings.whatsapp_number}</span>}</span>
+        </label>
+        {!textDifferent && !settings.whatsapp_number && (
+          <p className="text-[12px] mb-1" role="status" style={{ color: 'var(--ink)' }} data-testid="settings-text-no-whatsapp">{t('orderTexts.noWhatsapp', 'This business has no WhatsApp number yet, so no texts can go out. Add one to your listing, or choose a different number.')}</p>
+        )}
+        <label className="flex items-center gap-2 min-h-[44px] text-sm" style={{ color: 'var(--ink)' }}>
+          <input type="radio" name="settings-text-number" checked={textDifferent} onChange={() => setTextDifferent(true)} data-testid="settings-text-different" />
+          {t('orderTexts.different', 'A different number')}
+        </label>
+        {textDifferent && (
+          <input type="tel" dir="ltr" inputMode="tel" maxLength={30} value={textNumber} onChange={(e) => setTextNumber(e.target.value)} className={`${sel} w-full sm:w-64`} style={selStyle}
+                 placeholder="05X-XXX-XXXX" aria-label={t('orderTexts.numberLabel', 'Number for texts')} data-testid="settings-text-input" />
+        )}
+      </fieldset>
 
       {h(t('orders.defaultCourier', 'Default courier'))}
       <select value={courier} onChange={(e) => setCourier(e.target.value)} className={sel} style={selStyle} data-testid="settings-courier">

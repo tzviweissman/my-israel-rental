@@ -7435,6 +7435,15 @@ const en = {
         doorHow: "Scan the member’s QR code with this device’s camera, or type the 5-letter code from their pass.",
         code: "Member code",
       },
+      orderTexts: {
+        title: "New order texts",
+        body: "Each new order is texted to this number, with a link to confirm or decline it.",
+        same: "Same as my WhatsApp number",
+        noWhatsapp: "This business has no WhatsApp number yet, so no texts can go out. Add one to your listing, or choose a different number.",
+        different: "A different number",
+        numberLabel: "Number for texts",
+        enterNumber: "Please enter a mobile number with the leading 0 or a country code",
+      },
       ownerOrder: {
         title: "Order {{no}}",
         confirm: "Confirm order",

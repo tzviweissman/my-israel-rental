@@ -162,7 +162,7 @@ def test_text_goes_when_whatsapp_did_not(monkeypatch):
          patch("utils.whatsapp.send_new_order_notification", AsyncMock(return_value=False)), \
          patch.object(ot, "text_owner_new_order", texted):
         run(orders.alert_business_on_whatsapp({"_id": "g1"}, "u1", "Dani", "2 x board", "/dashboard", "order", order_id="o1"))
-    texted.assert_awaited_once_with("o1", "+972501234567")
+    texted.assert_awaited_once_with("o1")
 
     texted.reset_mock()
     with patch("routes.marketplace.gigs.gig_whatsapp_number", AsyncMock(return_value="+972501234567")), \
@@ -170,6 +170,20 @@ def test_text_goes_when_whatsapp_did_not(monkeypatch):
          patch.object(ot, "text_owner_new_order", texted):
         run(orders.alert_business_on_whatsapp({"_id": "g1"}, "u1", "Dani", "2 x board", "/dashboard", "order", order_id="o1"))
     texted.assert_not_awaited()
+
+    # No WhatsApp number at all: the texting number may still be set.
+    with patch("routes.marketplace.gigs.gig_whatsapp_number", AsyncMock(return_value="")), \
+         patch.object(ot, "text_owner_new_order", texted):
+        run(orders.alert_business_on_whatsapp({"_id": "g1"}, "u1", "Dani", "2 x board", "/dashboard", "order", order_id="o1"))
+    texted.assert_awaited_once_with("o1")
+
+
+def test_chosen_text_number_beats_whatsapp(world):
+    order, sent = world
+    ot.db.businesses.docs[0]["order_settings"] = {"text_number": "055-337-8799"}
+    run(ot.owner_confirm(TOKEN, None))
+    to = [c.kwargs["to"] for c in sent.await_args_list]
+    assert "055-337-8799" in to and "+972501234567" not in to
 
 
 def test_search_finds_number_name_and_phone():

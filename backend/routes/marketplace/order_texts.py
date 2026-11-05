@@ -7,6 +7,8 @@ Confirm the customer and the business each get a text with the order
 number and their link. Until Meta approves WhatsApp this is the only
 message that reaches a phone; once WhatsApp works, the text goes out
 only when the WhatsApp message did not (orders.alert_business_on_whatsapp).
+Texts go to the number the business chose in its order settings, or its
+WhatsApp number if it chose none.
 
 The owner token is the whole credential, like the customer's track token
 and the staff board's link: it opens one order, and it can only move
@@ -139,11 +141,14 @@ async def _owner_he(o: dict[str, Any]) -> bool:
     return owner.get("preferred_language") == "he"
 
 
-async def text_owner_new_order(order_id: str, number: str) -> bool:
+async def text_owner_new_order(order_id: str) -> bool:
     """The new-order text. Never raises."""
     try:
         o = await db.store_orders.find_one({"_id": order_id})
         if not o or not o.get("owner_token"):
+            return False
+        number = await _business_text_number(o)
+        if not number:
             return False
         return await send_sms(to=number, body=owner_text(o, owner_link(o), await _owner_he(o)))
     except Exception as exc:  # noqa: BLE001
@@ -222,7 +227,7 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool) ->
             await send_sms(to=customer, body=body)
         if confirm:
             # The phone that tapped is the business's: the alert went to it.
-            number = await _business_number(o)
+            number = await _business_text_number(o)
             if number:
                 he = await _owner_he(o)
                 body = (f"אישרת את הזמנה {no} ({o.get('customer_name') or ''}). פרטי ההזמנה: {owner_link(o)}" if he
@@ -232,7 +237,12 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool) ->
         logger.warning("order texts after %s failed: %s", "confirm" if confirm else "decline", type(exc).__name__)
 
 
-async def _business_number(o: dict[str, Any]) -> Optional[str]:
+async def _business_text_number(o: dict[str, Any]) -> Optional[str]:
+    """The number the business chose for texts, else its WhatsApp number."""
+    biz = await db.businesses.find_one({"_id": o.get("business_id")}) or {}
+    own = (biz.get("order_settings") or {}).get("text_number")
+    if own:
+        return own
     from .gigs import gig_whatsapp_number
     gig = await db.marketplace_gigs.find_one({"_id": o.get("gig_id")}) if o.get("gig_id") else None
     return (await gig_whatsapp_number(gig)) if gig else None

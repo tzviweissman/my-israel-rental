@@ -1806,6 +1806,10 @@ class OrderSettingsIn(BaseModel):
     # type one in.
     max_per_day: Optional[int] = Field(None, ge=1, le=10_000)
     max_per_window: Optional[int] = Field(None, ge=1, le=10_000)
+    # Where new-order texts go when it is not the WhatsApp number (Tzvi, 5 Nov
+    # 2026: many businesses text on one number and WhatsApp on another).
+    # Empty: the WhatsApp number. Not sent at all: left as it was.
+    text_number: Optional[str] = Field(None, max_length=30)
 
     @field_validator("area_fees")
     @classmethod
@@ -1859,10 +1863,24 @@ def _settings_out(biz: dict[str, Any], store: Optional[dict[str, Any]] = None) -
     }
 
 
+async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
+    """The settings plus the numbers, for the business's own eyes only: the
+    public order page reads other fields and never these."""
+    from .gigs import gig_whatsapp_number
+    # Any listing that takes orders, as in _store_for_ordering: some are
+    # service listings that also sell products.
+    selling = await db.marketplace_gigs.find_one(
+        {"business_id": biz["_id"], "status": "published", "$or": [{"gig_type": "store"}, {"products.0": {"$exists": True}}]},
+        {"whatsapp": 1, "provider_user_id": 1},
+    )
+    return {**_settings_out(biz, await _store_of(biz["_id"])), "text_number": (biz.get("order_settings") or {}).get("text_number"),
+            "whatsapp_number": (await gig_whatsapp_number(selling)) if selling else ""}
+
+
 @router.get("/businesses/{business_id}/orders/settings")
 async def get_order_settings(business_id: str, user=Depends(verify_token)):
     biz = await _owned_business(business_id, user)
-    return _settings_out(biz, await _store_of(business_id))
+    return await _owner_settings_out(biz)
 
 
 @router.put("/businesses/{business_id}/orders/settings")
@@ -1871,6 +1889,11 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
     cutoffs = [c.model_dump() for c in sorted(payload.cutoffs, key=lambda c: c.for_day)]
     if payload.default_courier_user_id and not await _courier_entry(biz, payload.default_courier_user_id):
         raise HTTPException(status_code=400, detail="That courier has not accepted your invite yet")
+    text_number = (biz.get("order_settings") or {}).get("text_number")
+    if "text_number" in payload.model_fields_set:
+        text_number = (payload.text_number or "").strip() or None
+        if text_number and not normalize_whatsapp_number(text_number):
+            raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
     settings = {
         "windows": {
             "pickup": [w.model_dump() for w in sorted(payload.pickup_windows, key=lambda w: (w.weekday, w.start))],
@@ -1884,6 +1907,7 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         "free_over": payload.free_over,
         "max_per_day": payload.max_per_day,
         "max_per_window": payload.max_per_window,
+        "text_number": text_number,
         # An older client that does not send the switch keeps the old
         # meaning: delivery times set means delivery offered.
         "delivery_on": payload.delivery_on if payload.delivery_on is not None else bool(payload.delivery_windows),
@@ -1892,7 +1916,7 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
     if payload.default_courier_user_id:
         await _assign_unassigned(business_id)
     fresh = await db.businesses.find_one({"_id": business_id})
-    return _settings_out(fresh, await _store_of(business_id))
+    return await _owner_settings_out(fresh)
 
 
 def past_cutoff(needed_by: str, cutoffs: list[dict[str, Any]], now: datetime) -> Optional[dict[str, Any]]:
@@ -2589,18 +2613,19 @@ async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optiona
         from .gigs import gig_whatsapp_number
         from utils.whatsapp import send_new_order_notification
         number = await gig_whatsapp_number(gig)
-        if not number:
-            return
-        owner = await db.users.find_one({"id": owner_user_id}, {"preferred_language": 1}) or {}
-        sent = await send_new_order_notification(
-            recipient_phone=number, customer_name=customer_name or "", summary=summary or "",
-            path=path, kind=kind, language=owner.get("preferred_language") or "en",
-            order_id=order_id,
-        )
+        sent = False
+        if number:
+            owner = await db.users.find_one({"id": owner_user_id}, {"preferred_language": 1}) or {}
+            sent = await send_new_order_notification(
+                recipient_phone=number, customer_name=customer_name or "", summary=summary or "",
+                path=path, kind=kind, language=owner.get("preferred_language") or "en",
+                order_id=order_id,
+            )
         # No WhatsApp (Meta still checking the business, Nov 2026, or the
-        # send failed): a text with the one-tap confirm link instead.
+        # send failed): a text with the one-tap confirm link instead, to the
+        # business's texting number.
         if not sent and kind == "order" and order_id:
             from .order_texts import text_owner_new_order
-            await text_owner_new_order(order_id, number)
+            await text_owner_new_order(order_id)
     except Exception as exc:  # noqa: BLE001
         logger.warning("WhatsApp new-%s alert failed: %s", kind, type(exc).__name__)
