@@ -79,5 +79,11 @@
     "used_by": [
       "krysp"
     ]
+  },
+  "wipe": {
+    "what": "a squeegee, cloth or blade wipes a misted or dirty surface clear in strokes to show the scene behind",
+    "used_by": [
+      "rbs-cleaning"
+    ]
   }
 }
