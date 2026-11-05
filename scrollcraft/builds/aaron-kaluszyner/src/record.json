@@ -1,0 +1,234 @@
+{
+ "source": "public /api/marketplace/business/aaron-kaluszyner, 4 Nov 2026 (the database read was refused)",
+ "business": {
+  "id": "416739f5-192b-4c8c-85e6-5d9bd8f6ed17",
+  "slug": "aaron-kaluszyner",
+  "name": "aaron kaluszyner",
+  "name_he": null,
+  "description": "Guitar Lessons & Mentoring\n\nI offer guitar lessons for beginners and anyone who wants to improve their playing. Lessons are relaxed, patient, and personalized to each person’s level. We can learn chords, songs, strumming, and how to enjoy playing guitar.\n\nI also offer a guitar + mentoring option. This is more than just a guitar lesson. It’s a relaxed time to play guitar, talk, and have someone there to listen and connect with. This can be a great option for someone who would benefit from both music and a supportive mentor.\n\nCall or WhatsApp: 053-419-3420\n\nFeel free to reach out with any questions!",
+  "description_he": "שיעורי גיטרה וליווי אישי\n\nאני מציע שיעורי גיטרה למתחילים ולכל מי שרוצה לשפר את הנגינה שלו. השיעורים נעימים, סבלניים ומותאמים אישית לרמה של כל אחד. נלמד אקורדים, שירים, פריטה – וכיצד פשוט ליהנות מהגיטרה.\n\nאני מציע גם אפשרות של גיטרה + ליווי אישי. זה יותר מסתם שיעור גיטרה – זו שעה נעימה לנגן, לשוחח, ולהרגיש שיש מישהו שמקשיב ומתחבר אליך. אפשרות מצוינת למי שיכול להפיק תועלת גם מהמוזיקה וגם מנוכחות של מלווה תומך.\n\nהתקשרו או כתבו בוואטסאפ: 053-419-3420\n\nמוזמנים לפנות בכל שאלה!",
+  "logo_url": null,
+  "has_memberships": false,
+  "gift_cards_on": false,
+  "categories": [],
+  "areas": [
+   "jerusalem"
+  ],
+  "serves_nationwide": false,
+  "verified": false,
+  "verified_at": null,
+  "rating_avg": null,
+  "rating_count": 0,
+  "member_since": "2026",
+  "owner_user_id": "12c2648b-a6eb-479b-8d14-4c6b8388c8d0",
+  "hours": null,
+  "by_appointment": false,
+  "languages": [],
+  "shabbat": null,
+  "shabbat_closing": null,
+  "vehicle": null,
+  "founded_year": null,
+  "delivery_note": null,
+  "lead_time": null,
+  "payment_note": null,
+  "order_cutoffs": [],
+  "order_settings": {
+   "windows": null,
+   "delivery_fee": null,
+   "min_order": null
+  },
+  "kosher_certification": null,
+  "license_number": null,
+  "accent": "stone",
+  "brand_color": null,
+  "brand_fonts": {
+   "heading": null,
+   "body": null
+  },
+  "notice": null,
+  "cover_url": null,
+  "payment_links": [],
+  "collections": [],
+  "pinned_service_ids": [],
+  "featured_headline": null,
+  "featured_headline_lang": null,
+  "featured_headline_translated": null,
+  "page": null,
+  "pages": [],
+  "testimonials": [],
+  "response_bucket": null,
+  "page_upgrade": false
+ },
+ "listings": [
+  {
+   "provider_user_id": "12c2648b-a6eb-479b-8d14-4c6b8388c8d0",
+   "provider_id": "f402b338-ec33-4c66-9cbf-bc2af8000858",
+   "business_id": "416739f5-192b-4c8c-85e6-5d9bd8f6ed17",
+   "title": "Kumzits",
+   "title_he": "קומזיץ",
+   "category": "events-catering",
+   "subcategory": null,
+   "description": "Book your Kumzitz today!\n\nFor your event, Bar Mitzvah, Chuppah, Bris Milah, or any other occasion.\n\nJust looking to have a Kumzitz? Reach out and book yours today!\n\nTo see videos of previous Kumzitzes, feel free to reach out.\n\nCall or WhatsApp: 053-419-3420",
+   "description_he": "הזמינו את הקומזיץ שלכם עוד היום!\n\nלאירוע שלכם – בר מצווה, חופה, ברית מילה, או כל מעמד אחר.\n\nפשוט רוצים קומזיץ? צרו קשר והזמינו עוד היום!\n\nלצפייה בסרטונים מקומזיצים קודמים, מוזמנים לפנות אלינו.\n\nהתקשרו או וואטסאפ: 053-419-3420",
+   "gig_type": "appointment",
+   "tiers": [
+    {
+     "name": "Kumzits",
+     "price": 1200.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": null,
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1788259321/myisraelrental/klppumhcdt5oa4850gde.jpg"
+     ]
+    }
+   ],
+   "products": [],
+   "weekly_availability": {
+    "mon": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "tue": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "wed": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "thu": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "fri": [],
+    "sat": [],
+    "sun": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ]
+   },
+   "slot_duration_minutes": 30,
+   "enable_date_booking": false,
+   "gallery": [],
+   "booking_mode": "whatsapp",
+   "whatsapp_confirmed": true,
+   "area": "Jerusalem",
+   "faqs": [],
+   "status": "published",
+   "created_at": "2026-09-01T10:43:38.984538+00:00",
+   "updated_at": "2026-09-01T10:43:38.984538+00:00",
+   "geocode_miss": false,
+   "geocoded_at": 1788259419.3068023,
+   "lat": 31.7788472,
+   "lng": 35.2257856,
+   "source_lang": "en",
+   "rating_avg": null,
+   "rating_count": 0,
+   "cheapest_price": 1200.0,
+   "is_top_rated": false,
+   "id": "f45f0cd9-941b-4b79-93a9-05bcf2654830",
+   "contact_channels": [
+    "in_platform"
+   ],
+   "highlights": []
+  },
+  {
+   "provider_user_id": "12c2648b-a6eb-479b-8d14-4c6b8388c8d0",
+   "provider_id": "f402b338-ec33-4c66-9cbf-bc2af8000858",
+   "business_id": "416739f5-192b-4c8c-85e6-5d9bd8f6ed17",
+   "title": "Music lessons",
+   "title_he": "שיעורי מוזיקה",
+   "category": "education-tutoring",
+   "subcategory": null,
+   "description": "Guitar Lessons & Mentoring\n\nI offer guitar lessons for beginners and anyone who wants to improve their playing. Lessons are relaxed, patient, and personalized to each person’s level. We can learn chords, songs, strumming, and how to enjoy playing guitar.\n\nI also offer a guitar + mentoring option. This is more than just a guitar lesson. It’s a relaxed time to play guitar, talk, and have someone there to listen and connect with. This can be a great option for someone who would benefit from both music and a supportive mentor.\n\nCall or WhatsApp: 053-419-3420\n\nFeel free to reach out with any questions!",
+   "description_he": "שיעורי גיטרה וליווי אישי\n\nאני מציע שיעורי גיטרה למתחילים ולכל מי שרוצה לשפר את הנגינה שלו. השיעורים נעימים, סבלניים ומותאמים אישית לרמה של כל אחד. נלמד אקורדים, שירים, פריטה – וכיצד פשוט ליהנות מהגיטרה.\n\nאני מציע גם אפשרות של גיטרה + ליווי אישי. זה יותר מסתם שיעור גיטרה – זו שעה נעימה לנגן, לשוחח, ולהרגיש שיש מישהו שמקשיב ומתחבר אליך. אפשרות מצוינת למי שיכול להפיק תועלת גם מהמוזיקה וגם מנוכחות של מלווה תומך.\n\nהתקשרו או כתבו בוואטסאפ: 053-419-3420\n\nמוזמנים לפנות בכל שאלה!",
+   "gig_type": "appointment",
+   "tiers": [
+    {
+     "name": "Music Lessons",
+     "price": 100.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": 40,
+     "description": "",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1788258606/myisraelrental/wttamfrpdqsststyknap.jpg"
+     ]
+    }
+   ],
+   "products": [],
+   "weekly_availability": {
+    "mon": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "tue": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "wed": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "thu": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ],
+    "fri": [],
+    "sat": [],
+    "sun": [
+     {
+      "start": "09:00",
+      "end": "17:00"
+     }
+    ]
+   },
+   "slot_duration_minutes": 45,
+   "enable_date_booking": false,
+   "gallery": [],
+   "booking_mode": "whatsapp",
+   "whatsapp_confirmed": true,
+   "area": "Jerusalem",
+   "faqs": [],
+   "status": "published",
+   "created_at": "2026-09-01T10:31:26.450374+00:00",
+   "updated_at": "2026-09-01T10:31:26.450374+00:00",
+   "geocode_miss": false,
+   "geocoded_at": 1788258686.7750304,
+   "lat": 31.7788472,
+   "lng": 35.2257856,
+   "source_lang": "en",
+   "rating_avg": null,
+   "rating_count": 0,
+   "cheapest_price": 100.0,
+   "is_top_rated": false,
+   "id": "ce870646-c60c-4611-9c15-70f22522fac3",
+   "contact_channels": [
+    "in_platform"
+   ],
+   "highlights": []
+  }
+ ]
+}

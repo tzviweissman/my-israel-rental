@@ -1,0 +1,227 @@
+# Rules for aaron-kaluszyner, written from BLUEPRINT.md (scripts/blueprint.mjs --rules)
+
+R0b.1 pass: built to the blueprint: slug aaron-kaluszyner, from the live public API record (src/record.json); og and JSON-LD use it
+R0b.3 pass: built to the blueprint: Kumzits ₪1,200 and Music Lessons ₪100 / 40 min, the two tiers in his record, the same on every page; nothing else priced; mentoring says "Ask for the price"
+R2.1 pass: built to the blueprint: every line is from his two listing descriptions, the business description or his flyers (Learn/Play/Grow, online lessons, email); no years, counts or claims
+R2.2 pass: built to the blueprint: OWNER-QUESTIONS.md asks only about his business (what the price includes, evenings, travel, sound, videos, ages, mentoring price), nothing the record answers
+R2.3 pass: built to the blueprint: OWNER-QUESTIONS.md has seven example FAQ questions from his details, plus what families worry about, a promise, which number takes what, and a photo of him
+R3.1 pass: built to the blueprint: no claims needing proof: no reviews, licence, years, kosher or guarantees on the page
+R3.2 pass: built to the blueprint: no urgency anywhere; "book yours today" from his text became "book yours"
+R3.3 pass: built to the blueprint: searched the pages: none of the banned phrases
+R3.4 pass: built to the blueprint: his "!" removed from quoted lines, no long dashes; capitals only in the small label (CSS uppercase) of his name and city
+R3.5 pass: built to the blueprint: the headline names the kumzits and the occasions from his listing
+R3.6 pass: built to the blueprint: English only (his source language); no Hebrew page yet, so no RTL page to check
+R3.7 pass: built to the blueprint: FAQ and gallery stay hidden until he fills them; no reviews; no placeholders
+R3.8 pass: built to the blueprint: none of these on any page
+R3.9 pass: built to the blueprint: the flyer Tzvi showed says "Book your kumzits today with Aaron Dovid": the page opens on the kumzits, his name and Book
+R3.10 pass: built to the blueprint: no strengths claimed beyond his own descriptions
+R5.1 pass: built to the blueprint: lines are his own words (relaxed, patient, personalised; play, talk, connect; Learn Play Grow)
+R5.2 pass: built to the blueprint: plain, professional; read aloud as Aaron
+R5.3 pass: built to the blueprint: labels are full phrases ("Guitar lessons ₪100", "Online lessons too")
+R5.4 pass: built to the blueprint: the business is "Aaron" or "we" ("We can learn chords" is his); searched the text for they/them/their: none about the business
+R5b.2 pass: built to the blueprint: "Book" to book.html in the header, opening, closing band, footer and phone bar; the occasion rows and lesson links add ?svc= to the same page
+R5b.8 pass: built to the blueprint: the closing line "Book your kumzits or your first lesson" names what you get; no "or" without both choices shown
+R3.11 pass: built to the blueprint: headline "A kumzits for your Bar Mitzvah/Chuppah/Bris Milah/simcha"; order: what (opening), the kumzits and its price, lessons and price, how booking works, then the Book page
+R3o.4 pass: built to the blueprint: WhatsApp or call 053-419-3420 (his flyer says "Call or WhatsApp"); email from his lessons flyer; Q13 asks him to confirm
+R3e.22 pass: built to the blueprint: his name in the bar, label and every booking line; WhatsApp direct on Contact and in the closing band; no real photo of him yet (asked, Q14)
+R3s.19 pass: built to the blueprint: each page has its own title, description, og:title, og:description and the share picture (assets/og.jpg, the opening)
+R6.1 pass: built to the blueprint: events playbook: what the event is and its price lead, then the occasions, then booking
+R4.1 pass: built to the blueprint: mentoring price missing: "Ask for the price"; past-event videos: "ask Aaron on WhatsApp"; listed in OWNER-QUESTIONS.md
+R3g.13 pass: built to the blueprint: picture (the strings), headline of five words plus the occasion, the small label "Aaron Dovid · Jerusalem" as the one short line, one Book button, three facts under it
+R3b.1 pass: built to the blueprint: what: a kumzits for your occasion; where: Jerusalem; trust: the price beside the button; next: Book
+R3b.2 pass: built to the blueprint: Kumzits ₪1,200 and Guitar lessons ₪100 right under the Book button
+R3b.3 pass: built to the blueprint: one solid button per screen (Book on the card); the header Book and the Sound switch are outline
+R3h.20 n/a: the opening is not a scroll film; it is one screen that plays on arrival and on the first scroll
+R3h.21 pass: built to the blueprint: no section holds the page; the opening is one screen
+R3h.22 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.23 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.24 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.25 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.1 pass: built to the blueprint: the home page opens on a full-screen canvas (the strings on stone, about 80% of the screen) and something happens: the strum on arrival and on the first scroll; check-site OPENING
+R3n.1 n/a: he has no real photo (two flyers with words in them, which 3g.15 keeps off the opening); photos asked for first (Q5, Q14)
+R3n.2 pass: built to the blueprint: the strings of his flyer's guitar on his flyer's Jerusalem stone, plucked by the visitor, with his chord when sound is on
+R3n.3 pass: built to the blueprint: plucking changes the opening itself; an occasion row opens Book with it chosen; every choice on Book rewrites the request and the price
+R3n.4 pass: built to the blueprint: compared with bmw-f3-1-start-button.webp (CONCEPT.md wow 4): a full-screen ground the visitor sets off; ours answers every pass
+R3n.5 pass: built to the blueprint: "you land and a strum runs down six guitar strings across a Jerusalem-stone wall, and as your mouse crosses them they ring"
+R3g.15 pass: built to the blueprint: no flyer crop: the opening is drawn in code at the screen's size
+R3h.2 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.3 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.5 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.7 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.8 pass: built to the blueprint: after the light stone opening the kumzits band is dark rosewood
+R3h.11 n/a: no film or generated stills; the drawn stone is a mid sand ground with the words on a light card
+R3h.13 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.14 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.18 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.19 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3h.17 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3x.5 n/a: no following light; his world is daytime stone, not dark
+R3.12 pass: built to the blueprint: hero (the strings), features (kumzits with its price and occasions; lessons with price and what is included), CTA band at the end with his contacts beside the Book button
+R3c.1 pass: built to the blueprint: references kept in CONCEPT.md with links (21st Kokonut, Mobbin Contractbook and Mural, Inspo daptone and thrilljockey, the saved brief form); one direction chosen and said why
+R3g.17 pass: built to the blueprint: every effect line in CONCEPT.md names its fresh 21st, Mobbin or library source; none from the last two sites
+R3c.2 pass: built to the blueprint: no cream + serif + italic word; Suez One and Alef; one dark section; no gradients on the interface
+R3g.1 pass: built to the blueprint: style sheet in CONCEPT.md and BRAND.md, followed by site.css tokens
+R3g.3 pass: built to the blueprint: burnt orange only on the Book button (and the pick mark of the name and the FAQ +, kit 3u.9); prices in ink, large
+R3g.7 pass: built to the blueprint: no closing signature beyond the closing band; nothing in the way of booking
+R3g.11 pass: built to the blueprint: Suez One and Alef, both on the approved list, OFL
+R3p.3 pass: built to the blueprint: check-fingerprints: different from all 17 other pages
+R3p.5 pass: built to the blueprint: the strings tuned to an open G chord, low E at the top, with real notes when sound is on
+R3q.1 pass: built to the blueprint: check-concept: concept ready
+R5a.7 pass: built to the blueprint: one signature (the strings) and one peak; the page ends on Book
+R9.1 pass: built to the blueprint: the signature uses his flyer's own scene (stone and strings), no photo needed
+R3f.2 pass: built to the blueprint: signature: the strings; accents: the arriving first screen, the occasion word, the occasion rows, the booking summary that writes itself; quiet: the button string, stepped Learn/Play/Grow, numbered cards
+R3m.1 pass: built to the blueprint: gallery place on Home ("From our kumzitzes", data-mir-gallery with template); n/a for a catalog: a booking service with two fixed tiers, no shop
+R3m.3 pass: built to the blueprint: FAQ is the owner-filled place; hours shown from his calendar on Contact
+R3k.1 pass: built to the blueprint: service site: Home, Guitar lessons, Book, Contact; booking is one page
+R3k.2 pass: built to the blueprint: one menu bar from sitekit on every page, aria-current, Menu button on a phone that closes on Escape or a link
+R3k.4 pass: built to the blueprint: site.css and site.js shared; page-only code in strings.js and book.js; no shared class reused
+R8a.1 pass: built to the blueprint: nothing copied from 21st code; the strings and button were rebuilt from the idea, no demo text
+R3b.4 pass: built to the blueprint: facts carry the page: what he offers, prices, occasions, how booking works
+R3c.3 pass: built to the blueprint: no worries named by him yet (asked, Q11)
+R3c.8 pass: built to the blueprint: the booking steps say what happens: saved, WhatsApp opens, Aaron replies
+R3e.10 pass: built to the blueprint: the service tiles: name largest, price large in ink, one line lighter
+R3e.14 pass: built to the blueprint: Alef 400 and 700 only; sizes from the scale; gaps from --s1 to --s10
+R3c.9 pass: built to the blueprint: one radius 6px, one soft sand shadow, no icon set needed (a single pick mark), no gradients on the interface
+R3s.4 pass: built to the blueprint: one left edge (.wrap); check-site ALIGN
+R3s.6 pass: built to the blueprint: every outline button is .btn-line, every choice is .chip or .svc; check-site
+R3s.7 pass: built to the blueprint: sentence case buttons, pale dividers, no "Price:" labels, body 1.6
+R3s.9 n/a: no tags or meanings coloured
+R3s.12 n/a: no real photo of him or his work yet; his own words about the lessons come right after the kumzits; photos asked for
+R3s.14 pass: built to the blueprint: the two real prices are shown big beside their units
+R3s.11 n/a: he gave no reason for the price; asked what the ₪1,200 includes (Q1)
+R5b.6 pass: built to the blueprint: no scroll cues, counters or labels above sections (the step numbers on Book are real steps)
+R3.13 pass: built to the blueprint: one contact block (closing band) plus the Contact page; no gallery until he adds 3 or more
+R3a.1 pass: built to the blueprint: rendered at laptop and phone sizes, normal and reduced motion, every section looked at (English only)
+R3r.1 pass: built to the blueprint: check-build runs every script on all four pages
+R3r.2 pass: built to the blueprint: a Sonnet reviewer that did not build it used the site against docs/page-review-checklist.md (review.md)
+R3g.12 pass: built to the blueprint: gen/test-form.mjs sends a kumzits and a lesson through every step; the /book call is caught in the browser (never his live inbox) and checked: real tier names, the summary as the message, WhatsApp with the price and tracking link; all passed
+R0b.12 n/a: not published, so no preview clip on the business pages list yet
+R3x.1 n/a: no product to turn; a service
+R3x.2 n/a: no counted numbers
+R3x.3 n/a: no tabs; two services with one price each
+R3x.4 pass: built to the blueprint: the services on Book are tiles with the same measures in the same order (name, what, price)
+R3x.11 n/a: no product to turn
+R8.1 n/a: no set of images; he has no photos yet
+R8.6 n/a: no product pictures; a service with no photos
+R8.7 n/a: nothing generated; the only pictures are drawn in code (stone wall, strings) and the share image is a screenshot of them
+R8.2 n/a: no image set
+R3p.7 pass: built to the blueprint: the three services on Book are shown the same way (name, one line, price on the right)
+R3h.12 n/a: no pictures of items
+R3h.10 n/a: no photo per option; choosing a service changes the words, price and button
+R3g.14 pass: built to the blueprint: one grade: the drawn stone and strings and the sand palette are the only imagery
+R3o.1 n/a: not food
+R3o.2 n/a: no liquids
+R3o.3 n/a: no product photos
+R3o.6 pass: built to the blueprint: both his photos looked at (two flyers, no duplicates); neither used as a picture because both have words baked in
+R8.3 n/a: nothing generated; the only pictures are drawn in code (stone wall, strings) and the share image is a screenshot of them
+R8.4 n/a: no moving real material; the strings are drawn lines, plucked in code, reduced motion keeps them still
+R3c.13 pass: built to the blueprint: clipped and check-fits run on every page
+R3c.14 n/a: no cut-outs
+R5b.3 pass: built to the blueprint: the words sit on a small solid limestone card over the strings; checked by readable
+R3e.8 pass: built to the blueprint: readable run on every page
+R3s.24 pass: built to the blueprint: the only image is og.jpg (85 KB, not on the page); no videos; reveals visible with motion off; check-site MEDIA
+R3p.6 pass: built to the blueprint: check-fits on every page; the opening canvas is drawn at the screen's own shape, so nothing is zoomed
+R3o.5 pass: built to the blueprint: the ₪ is set in Alef (the text face) via .sym; check-site GLYPH
+R3x.7 pass: built to the blueprint: BRAND.md written before anything visual (colours with uses, the two fonts, scales, logo, textures, Design bans) and the site follows it
+R3c.5 pass: built to the blueprint: services, occasions, in person or online and times are tiles; nothing marked popular
+R3c.6 pass: built to the blueprint: the button names the next step, then "Send on WhatsApp, ₪1,200"
+R3c.7 n/a: no offers
+R3j.1 n/a: he offers no guarantee in his record; asked (Q12)
+R3j.2 n/a: no add-on in his record
+R3j.3 n/a: no free taster in his record; asked about a first lesson (Q10)
+R3j.4 n/a: no group discounts
+R3j.5 n/a: no stamp card or reorder
+R3j.6 n/a: two different services, not sizes of one
+R3j.7 pass: built to the blueprint: no struck prices, his prices as given, no endorsements
+R3j.8 n/a: no saving: the two services are different things
+R3j.9 n/a: no savings
+R3j.10 n/a: no savings
+R3j.11 n/a: no combined service with known parts
+R3j.12 n/a: he makes no savings claim
+R3.14 pass: built to the blueprint: his two prices are real and shown; mentoring, which has none, is "Ask for the price"
+R3k.7 pass: built to the blueprint: Book in three steps (What, When and where, Your details), the step bar, the request and price beside every step, the button naming the next step then the send with the price, Back, #book-2 and #book-3 in history, each step checking its own fields
+R3k.8 n/a: no basket; one request at a time
+R3k.6 n/a: no basket; every link to Book carries the choice in its address (?svc=, &occasion=)
+R3k.9 pass: built to the blueprint: the request is POSTed to the listing's /book with its real tier name, then WhatsApp opens with it; the services are the listing's tiers
+R3k.10 pass: built to the blueprint: the day is filled with the first day he works after today, the service and occasion from the link; all changeable
+R3.15 pass: built to the blueprint: booking has its page; contact has its page; hours on Contact and in the footer
+R7.1 pass: built to the blueprint: one direction chosen, said in CONCEPT.md
+R8.5 pass: built to the blueprint: every main button goes to the Book page; WhatsApp is the quiet second in the closing band and Contact
+R0b.13 pass: built to the blueprint: the request is saved before WhatsApp opens and the tracking link is added to the message when the save answers
+R3l.1 n/a: no family of similar items with choices; the kumzits and lessons are asked about in Q1 and Q7
+R3l.2 pass: built to the blueprint: each service says what it is on its own tile (For your event; 40 minutes, in person or online; Play, talk and connect)
+R3l.3 pass: built to the blueprint: the occasion appears only for the kumzits, in person or online only for lessons; the kumzits cannot be sent without an occasion, with the reason beside it
+R3l.4 pass: built to the blueprint: the three services show only what differs: what it is and its price
+R3l.6 n/a: no pictures of items
+R3l.7 pass: built to the blueprint: read each tile alone: each says what you get
+R3e.9 pass: built to the blueprint: buttons with hover, pressed and busy; fields with focus and an error message; "Sent" and a status line after sending
+R3e.19 pass: built to the blueprint: after sending, the status line says the request is saved and WhatsApp is open, and the button reads Sent
+R3s.16 pass: built to the blueprint: the first question is one plain choice of three
+R3s.18 pass: built to the blueprint: a day he does not work names the next one with a button; times already taken are shown crossed out; "Not sure yet" for in person or online; "Just a kumzits" for the occasion
+R3s.25 pass: built to the blueprint: empty, each step shows what is missing and sends nothing; filled, WhatsApp opens with the request and the price shown
+R3x.9 pass: built to the blueprint: the request paragraph beside the form writes itself as the fields fill and is what is sent; it states no price or promise the record lacks
+R3x.10 pass: built to the blueprint: the price sits under the request beside the form on a laptop and above the send button on a phone
+R3x.14 pass: built to the blueprint: SITE.gift_section on Book with gift.js: hidden until he switches gift cards on; check-web-basics GIFT
+R3f.1 pass: built to the blueprint: the strings play on the first screen, where they are wholly in view
+R3f.8 n/a: nothing is tied to the scroll except the one strum, played in full on the first screen
+R3f.9 n/a: no list that lights up
+R3f.5 pass: built to the blueprint: widths in rem; no shimmer
+R3f.4 n/a: no logo motif
+R3g.4 pass: built to the blueprint: each motion has one job: the strum shows the craft, the arrival guides, the button string confirms the pointer; nothing loops but the rotating word
+R3e.16 pass: built to the blueprint: eased curves only, all under 0.6 s except the strings ringing out
+R3e.17 n/a: no carousel or sheet
+R3e.18 n/a: no background video
+R3a.2 pass: built to the blueprint: the stone behind the strings is still; only the strings move; the card does not change size while the word turns (the word box sizes, not the card)
+R3a.3 n/a: nothing placed on a spot in a photo
+R3a.4 n/a: nothing pinned
+R3a.5 pass: built to the blueprint: no pinning, no parallax; reduced motion: still strings
+R3s.2 pass: built to the blueprint: nothing loads late into the layout; choices change no layout; check-site SHIFT
+R3s.1 pass: built to the blueprint: every button and tile has hover and pressed states; check-site STATE
+R3s.8 pass: built to the blueprint: the Book button sits on the solid card, not on the picture
+R3s.10 n/a: no item pictures to show
+R3s.27 pass: built to the blueprint: the three services, the steps and the cards each keep one place and style
+R3s.28 pass: built to the blueprint: check-blank: no blank screens
+R3i.3 n/a: no readout
+R3s.21 pass: built to the blueprint: check-site BROKEN on every page
+R3x.6 n/a: no word-by-word sentence
+R3x.12 n/a: no progress line
+R3b.6 pass: built to the blueprint: the phone bar with both prices and Book shows after the first screen and hides at the booking form
+R3f.7 pass: built to the blueprint: the bar fits at 360 px: the label wraps, the button keeps its size
+R3a.6 pass: built to the blueprint: the bar keeps room under the last line (--pad-bar); check-site PHONE
+R3s.22 pass: built to the blueprint: every tap target 44 px or more; check-site TAP
+R3s.23 pass: built to the blueprint: no sideways scroll; check-site PHONE
+R3s.26 pass: built to the blueprint: check-overlap on every page
+R3t.1 pass: built to the blueprint: category events, in CONCEPT.md and the site-category meta on every page; follows the events row: short, packages with prices
+R3t.2 n/a: not a food or fashion shop
+R3t.3 n/a: not a trainer
+R3t.4 pass: built to the blueprint: the full footer of R3v.1 on every page
+R3a.7 pass: built to the blueprint: phones checked with touch emulation; the pluck has a tap version
+R3a.8 pass: built to the blueprint: the facts under the button are separate spans that wrap whole, never a dot mid-line
+R3u.2 pass: built to the blueprint: a Friday or Saturday gets one line naming the next day he works with a button to choose it
+R3u.3 n/a: no servings or pieces
+R3u.5 pass: built to the blueprint: the first screen arrives in order once (label and headline, then the button) with the strum; check-arrival
+R3u.6 n/a: no depth pieces
+R3u.7 pass: built to the blueprint: one rotating word from his own occasions (Bar Mitzvah, Chuppah, Bris Milah, simcha); the full list for screen readers; the first word with motion off
+R3u.8 n/a: no tilted label
+R3u.9 pass: built to the blueprint: questions are rounded cards on details with the + in a circle, ready for his answers
+R3u.10 n/a: one place
+R3u.11 n/a: no film
+R3u.12 pass: built to the blueprint: the strings were tried alone on the page before the rest was built (strum, pluck, sound, reduced motion)
+R3u.13 pass: built to the blueprint: gen/report.md ends with Not done yet and For your call
+R3u.14 pass: built to the blueprint: gen/copy-pass.md holds the long lines and their shorter versions
+R3w.1 n/a: no generated food
+R3w.2 n/a: no generated liquids
+R3w.3 n/a: no generated food
+R3w.4 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3w.5 n/a: no food
+R3w.6 n/a: no film; the opening is the strings drawn in code (strings.js), no generated clip
+R3v.1 pass: built to the blueprint: sitekit full footer on every page: name, his line and Book; Pages; Booking (how it works and his hours); Reach us; © 2026 and the MyIsraelRental line with Privacy
+R3v.2 pass: built to the blueprint: the bar lists the four pages, the same everywhere, no #jumps
+R3v.6 pass: built to the blueprint: sections of different heights (full-screen opening, the dark band, lessons, the shorter booking cards)
+R3v.7 pass: built to the blueprint: index list beside a price, stepped columns, numbered cards: never the same twice in a row
+R3v.8 n/a: none of the 3v effects used
+R3v.14 pass: built to the blueprint: btn-facts under Book: Kumzits ₪1,200 · Guitar lessons ₪100 · Online lessons too
+R3x.8 pass: built to the blueprint: skip link, one h1, focus rings, labelled fields with type and autocomplete, live status, two families, short titles and descriptions, og with a 1200x630 picture, JSON-LD LocalBusiness on Home; check-web-basics
+R3x.13 pass: built to the blueprint: every size from --t-1 to --t5 and every gap from --s1 to --s10 (BRAND.md); check-web-basics SCALE
+R3r.3 pass: built to the blueprint: check-build passes after the last edit; check-rules passes
+R3r.4 n/a: no rule pointed out twice on this site
