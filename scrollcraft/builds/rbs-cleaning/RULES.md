@@ -31,23 +31,23 @@ R3g.13 pass: built to the blueprint: picture, the 4-word headline, one short lin
 R3b.1 pass: built to the blueprint: what (home cleaning), where (Beit Shemesh), trust (₪400 price and WhatsApp number), next (Get a free quote)
 R3b.2 n/a: no certificate in the record, so nothing on the page says kosher
 R3b.3 pass: built to the blueprint: one solid green button per screen; header button is outline; links elsewhere
-R3h.20 pass: built to the blueprint: scroll film 4.2 screens long, real video, the first screen is the first frame; check-opening-scroll passes
+R3h.20 pass: built to the blueprint: scroll film 7.2 screens long, real video, the first screen is the first frame; check-opening-scroll passes
 R3h.21 pass: built to the blueprint: only the film holds the page; nothing later pins
 R3h.22 n/a: Tzvi waived the sketch for this build: "you dont need my permission to generate if code wont do a good job" (5 Nov); the steps are in gen/wipe-brief.md
 R3h.23 pass: built to the blueprint: check-clip passes on the clip used; the first take was rejected; brief has How it really happens from a real video and a Key moment; steps looked at frame by frame
 R3h.24 pass: built to the blueprint: data-video, every frame a keyframe, starter/film.js; check-film-video passes in real Chrome
-R3h.25 pass: built to the blueprint: the words fade at 4% and return at 87%, after the blade has left; check-film-clear passes
+R3h.25 pass: built to the blueprint: the words fade at 2.5% and return at 95%, after the camera has stopped in the room; check-film-clear passes
 R3h.1 pass: built to the blueprint: opens full screen on soap running down a pane, an event in a generated film
 R3n.1 pass: built to the blueprint: the film, then the room picture, fill the whole first screen on laptop and phone
 R3n.2 pass: built to the blueprint: a squeegee pulled down the pane by the scroll
 R3n.3 pass: built to the blueprint: on the quote page each chip rewrites the sentence, price line and button
 R3n.4 pass: built to the blueprint: beside Flux Theory's misted glass, ours is wiped by the visitor (CONCEPT.md wow 4)
-R3n.5 pass: built to the blueprint: "you land on a soapy window and, as you scroll, a squeegee pulls it clear and a bright clean room comes in"
+R3n.5 pass: built to the blueprint: "you land on a soapy window and, as you scroll, a squeegee pulls it clear and the camera backs away from the glass into a bright clean room"
 R3g.15 pass: built to the blueprint: never the flyer: the film and room are made for the page and never called our premises
 R3h.2 pass: built to the blueprint: the film goes from a soapy pane to the clean view, then the clean room and the button; every step is the real job
 R3h.3 pass: built to the blueprint: full screen, 1920 wide video on a laptop, 720 wide on a phone, never in a column; the clip softens slightly as it is enlarged from the pane
 R3h.5 n/a: no chapter lines, only the opening words before and after the film
-R3h.7 n/a: one clip, no joins; the room comes in by a dissolve after the blade has left
+R3h.7 pass: built to the blueprint: two clips joined at the clear view: the second starts on the last frame of the first (gen/film.sh, gen/pull-brief.md)
 R3h.8 pass: built to the blueprint: the section after the bright opening is the white bento with the navy price card
 R3h.11 pass: built to the blueprint: the room picture is bright, morning light; brightness checked when it exists
 R3h.13 pass: built to the blueprint: one cause, one motion: the blade pulled down, the glass clear above it, in one clip

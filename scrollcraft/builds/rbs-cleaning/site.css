@@ -182,18 +182,20 @@ h1, h2, h3 { font-weight: 400; letter-spacing: -.005em; }
 .rev { opacity: 0; transform: translateY(16px); transition: opacity 500ms var(--out), transform 500ms var(--out); }
 .rev.in { opacity: 1; transform: none; }
 
-/* ---------- the opening: a squeegee pulled down a soapy pane by the scroll (gen/wipe-brief.md), then the room ---------- */
-.film { position: relative; height: 420vh; height: 420svh; background: var(--surface); }
+/* ---------- the opening: a squeegee pulled down a soapy pane by the scroll (gen/wipe-brief.md), then the camera backs into the room (gen/pull-brief.md) ---------- */
+.film { position: relative; height: 720vh; height: 720svh; background: var(--surface); }
 .film .stage { position: sticky; top: 0; height: 100vh; height: 100svh; overflow: hidden; }
 .film canvas { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .room, .room img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-/* the room comes in after the blade has left; without a script, or with motion off, it is simply there */
+/* the crisp room picture settles over the film's last frame, which is the same picture; without a script it is simply there */
 .film .room { z-index: 1; opacity: 0; transition: opacity 600ms var(--out); }
 .film.c3 .room, .no-js .film .room { opacity: 1; }
-/* the words: on the soap at the start, away while the blade passes, back on the clean room (rules 3h.25) */
-.film .stage::after { content: ''; position: absolute; inset: 0 40% 0 0; z-index: 2; background: linear-gradient(90deg, rgba(255,255,255,.96), rgba(255,255,255,.9) 62%, rgba(255,255,255,0)); pointer-events: none; transition: opacity 120ms linear; }
-.film .hero { z-index: 3; transition: opacity 120ms linear, visibility 120ms; }
-.film.c2:not(.c3) .hero, .film.c2:not(.c3) .stage::after { opacity: 0; visibility: hidden; }
+/* the words: a small card on the soap at the start, away while the film runs, back once the camera has stopped, so the room stays in view (rules 3h.25) */
+.film .hero { z-index: 3; position: absolute; left: var(--gutter); top: calc(var(--top-h) + var(--s4)); height: auto; width: min(30rem, calc(100% - 2 * var(--gutter))); margin: 0; padding: var(--s5) var(--s6); background: rgba(255,255,255,.95); border-radius: 16px; box-shadow: 0 12px 36px rgba(0,0,0,.14); transition: opacity 400ms var(--out), visibility 400ms; }
+.film .hero h1 { font-size: clamp(2rem, 3.4vw, 3.1rem); }
+.film .hero .sub { margin: var(--s3) 0 var(--s4); }
+.film .hero .btn-facts { margin-top: var(--s3); }
+.film.c2:not(.c3) .hero { opacity: 0; visibility: hidden; transition-duration: 120ms; }
 .hero { position: relative; z-index: 2; height: 100%; display: flex; flex-direction: column; justify-content: center; padding-top: var(--top-h); max-width: 74rem; }
 .hero h1 { font-size: var(--t5); line-height: 1; }
 .hero h1 .em { color: var(--accent); }
@@ -204,8 +206,11 @@ h1, h2, h3 { font-weight: 400; letter-spacing: -.005em; }
 .amt .sym { font-size: .62em; vertical-align: .18em; }
 .btn-facts li { display: flex; align-items: center; gap: var(--s2); }
 @media (max-width: 760px) {
-  .film .stage::after { inset: auto 0 0 0; height: 60%; background: linear-gradient(0deg, rgba(255,255,255,.94), rgba(255,255,255,.75) 60%, rgba(255,255,255,0)); }
-  .hero { justify-content: flex-end; padding-bottom: var(--s7); }
+  /* phone: the room slides up as the card rises, so the sofa and floor stay in view above it */
+  .film .hero { top: auto; bottom: var(--s3); left: var(--s3); width: calc(100% - 2 * var(--s3)); padding: var(--s5); }
+  .film .stage > video, .film canvas, .film .room { transition: transform 600ms var(--out), opacity 600ms var(--out); }
+  .film .stage { background: var(--ground, #fff); }
+  .film.c3 .stage > video, .film.c3 canvas, .film.c3 .room { transform: translateY(-20%); }
   .hero .sub { margin: var(--s3) 0 var(--s5); }
   .btn-facts, .foot.full, .foot .fbase, .sum .note { font-size: var(--t0); }
 }

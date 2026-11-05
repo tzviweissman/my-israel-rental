@@ -9,14 +9,14 @@ Approved by Tzvi: 5 Nov 2026, "i thought we made a rule that you dont need my pe
 2. A very wide squeegee blade on a pole enters past the top edge, level, as wide as the pane.
 3. It is pulled straight down in one slow, steady stroke. Above the rubber the glass is clear with a hard edge; below it, lather. The lather gathers in a wet ridge along the blade.
 4. The blade and the ridge leave past the bottom edge. The glass is clear: olive trees, a stone wall, hills.
-5. In code, not generated: the bright room comes in round the view (assets/room-wide.webp) and the words and button arrive.
+5. The camera backs into the room: its own film, gen/pull-brief.md, since Tzvi's note of 5 Nov replaced the dissolve.
 
 ## Every object
 - Glass: fills the frame in every frame.
 - Soap lather: running down the glass at the start of the cut, moved only by the blade, ends as the ridge that leaves past the bottom edge.
 - Squeegee blade and its pole: the blade enters past the top edge, the pole comes up from the bottom edge behind it; both leave past the bottom edge. No person in shot.
 - The view: always behind the glass, seen as the lather goes.
-- The room: seen only in the code step, as a dissolve.
+- The room: seen only in the pull-back film (gen/pull-brief.md).
 
 ## How it really happens
 From a real video: "How to Squeegee (fan) a Window Like The Pros!", Torch Window Cleaning, https://www.youtube.com/watch?v=1CWHINnUH-w (looked at from 0:45 to 1:50). The glass is wet with streaky white lather. The blade is about a third of the glass wide, held at an angle by a hand on a short handle, and never leaves the glass; it moves in a continuous S from the top, each pass overlapping the last. Directly behind the rubber the glass is completely clear, with a hard clean edge. Water gathers along the blade and runs down. Nothing fades: the lather only goes where the blade has been.

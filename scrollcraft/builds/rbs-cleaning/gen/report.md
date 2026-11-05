@@ -7,6 +7,7 @@ Listed as business "Daniel", slug daniel, listing "Del". Facts come only from th
 ## Generated, through the Higgsfield API
 - 2 rooms and 2 retakes, 1 lather photo, 1 view of the hills: 6 stills, of which the second room pair is used.
 - 2 clips of 8 s (16 credits each by get_cost, 5 Nov): the first was not used.
+- The pull-back into the apartment (5 Nov): 1 still of the furnished room, 4 clips of 8 s (16 credits each by get_cost, 64 in all), the last one used; gen/pull-brief.md says why each of the others was not.
 
 ## Not done yet
 - Real photos, real prices beyond the basic clean, hours, what the ₪400 covers, what apartment management includes: all in OWNER-QUESTIONS.md, not yet sent.

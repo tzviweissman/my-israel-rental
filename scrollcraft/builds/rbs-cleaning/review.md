@@ -21,3 +21,7 @@ Re-rendered in real Chrome at 1440x900 and 390x844 (isMobile, hasTouch): index a
 Notes, not fails: the hero facts under the button are now larger and readable. Console shows a CORS error only because the local page asks the gift-card endpoint on localhost:8001, which is not running here; the gift section stays hidden, as intended.
 
 Verdict: PASS
+
+
+## After this review (5 Nov, the builder, not independent)
+The opening changed at Tzvi's request: the camera pulls back into a furnished room and the words moved to a card. Looked at by the builder on laptop and phone; the publish check passes. Not re-read by an independent reviewer.

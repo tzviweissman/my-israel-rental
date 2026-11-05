@@ -47,19 +47,19 @@ SITE = kit.Site(
 
 # ---------- home ----------
 N_FRAMES = len(os.listdir('assets/film/d'))
-OPENING = f'''  <section class="film" id="film" data-frames="{N_FRAMES}" data-src="assets/film" data-video="assets/film/opening-{{k}}.mp4" data-marks="0.04,0.87" aria-label="RBS Cleaning, home cleaning in Beit Shemesh">
+OPENING = f'''  <section class="film" id="film" data-frames="{N_FRAMES}" data-src="assets/film" data-video="assets/film/opening-{{k}}.mp4" data-marks="0.025,0.95" aria-label="RBS Cleaning, home cleaning in Beit Shemesh">
     <div class="stage">
       <canvas aria-hidden="true"></canvas>
       <picture class="room">
         <source media="(max-aspect-ratio: 4/5)" srcset="assets/room-tall.webp" width="648" height="1152">
-        <img src="assets/room-wide.webp" alt="A bright, clean living room with large windows onto green hills" width="1920" height="1080" fetchpriority="high">
+        <img src="assets/room-wide.webp" alt="A bright, clean, furnished living room with a large window onto the hills" width="1920" height="1080" fetchpriority="high">
       </picture>
       <div class="wrap hero">
         <h1>Your home,<br><span class="em">crystal clear.</span></h1>
         <p class="sub">Home cleaning in Beit Shemesh and the surrounding areas.</p>
         <div>
           <a class="btn" href="book.html">Get a free quote <span class="arw" aria-hidden="true">→</span></a>
-          <ul class="btn-facts"><li>Basic home clean {P(400)}</li><li>Regular cleaning weekly, every two weeks or monthly</li><li>WhatsApp 053-526-9002</li></ul>
+          <ul class="btn-facts"><li>Basic home clean {P(400)}</li><li>Weekly, every two weeks or monthly</li><li>WhatsApp 053-526-9002</li></ul>
         </div>
       </div>
     </div>

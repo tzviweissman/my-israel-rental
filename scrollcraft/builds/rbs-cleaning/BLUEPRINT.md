@@ -120,7 +120,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3b.3 One solid action per screen: header button and phone bar repeat it; the header button is outline when the hero shows a solid one; everything else is outline, link or tile
   plan: one solid green button per screen; header button is outline; links elsewhere
 - [x] R3h.20 A scroll-driven opening runs at 60 fps, is at least 3 screens long, shows the product on a plain ground of its own world (never on a photo of the same kind of product), keeps the product and photos whole, and loads the first screen first (check: check-opening-scroll)
-  plan: scroll film 4.2 screens long, real video, the first screen is the first frame; check-opening-scroll passes
+  plan: scroll film 7.2 screens long, real video, the first screen is the first frame; check-opening-scroll passes
 - [x] R3h.21 Effects, never too much: the opening film may hold the page for its length; any other section that holds the page while the scroll changes it is at most a screen and a half, at most three in all; longer turning becomes a tap; nothing stands between a phone visitor and the products or the order (check: check-one-scroll)
   plan: only the film holds the page; nothing later pins
 - [x] R3h.22 A film starts as one storyboard sheet of rough line drawings (one row per concept, 3 to 4 panels), approved by Tzvi before any photoreal still; only the chosen concept is made as stills
@@ -130,7 +130,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3h.24 A scroll film is real video tied exactly to the scroll (data-video, every frame a keyframe, starter/film.js): within 0.4 s of the scroll and never still over 400 ms or on over 15% of frames while scrolling, laptop and phone, in real Chrome (check: check-film-video)
   plan: data-video, every frame a keyframe, starter/film.js; check-film-video passes in real Chrome
 - [x] R3h.25 Nothing covers a scroll film while it plays: at 20, 40 and 60% of the film, on a laptop and a phone, words, cards and names cover at most 3% of it (the site's menu bar aside); the words wait for its end or sit beside or under it (check: check-film-clear)
-  plan: the words fade at 4% and return at 87%, after the blade has left; check-film-clear passes
+  plan: the words fade at 2.5% and return at 95%, after the camera has stopped in the room; check-film-clear passes
 - [x] R3h.1 The home page opens on a full-screen picture or film (at least 70% picture) and it is an event from their own thing (a film, or an event built in code), proposed with the first build, never after (check: site)
   plan: opens full screen on soap running down a pane, an event in a generated film
 - [x] R3n.1 The owner's strongest real photo fills at least half the first screen on a laptop and on a phone, not a small card or cut-out shape
@@ -142,7 +142,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3n.4 Side by side with the closest reference in docs/inspo for this kind of business, ours is not plainly weaker
   plan: beside Flux Theory's misted glass, ours is wiped by the visitor (CONCEPT.md wow 4)
 - [x] R3n.5 The one-sentence test, told to someone else and run on the first five seconds and the first full scroll: "you land and ___ happens" is about the business, not a decoration ("nothing", "the camera moves", "it fades in" fail)
-  plan: "you land on a soapy window and, as you scroll, a squeegee pulls it clear and a bright clean room comes in"
+  plan: "you land on a soapy window and, as you scroll, a squeegee pulls it clear and the camera backs away from the glass into a bright clean room"
 - [x] R3g.15 The opening is made for this business at full quality: never a flyer crop or low-resolution photo, and a generated setting is never presented as their real premises (check: fits)
   plan: never the flyer: the film and room are made for the page and never called our premises
 - [x] R3h.2 A film opening goes from where the product comes from to their real product and the button, every step true
@@ -152,7 +152,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3h.5 A film's chapter lines are 2 to 6 words, small, at an edge, at most a third of the screen's height, on a soft edge shade only, never over the action (check: readable)
   plan: n/a: no chapter lines, only the opening words before and after the film
 - [x] R3h.7 A film's seams are checked: each join compared, a jumping clip regenerated
-  plan: n/a: one clip, no joins; the room comes in by a dissolve after the blade has left
+  plan: two clips joined at the clear view: the second starts on the last frame of the first (gen/film.sh, gen/pull-brief.md)
 - [x] R3h.8 The section after a lit film changes the mood boldly
   plan: the section after the bright opening is the white bento with the navy price card
 - [x] R3h.11 Every film and generated still set is bright: middle third at least 33, whole frame at least 22, average at least 30; the subject is the brightest thing; viewed on a phone in daylight (check: brightness)
