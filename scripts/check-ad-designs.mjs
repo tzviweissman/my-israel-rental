@@ -156,6 +156,40 @@ await p.getByRole('button', { name: /^(Ads|מודעות)$/ }).first().click();
 await p.locator('[data-testid="ad-studio-gallery"]').waitFor();
 const studio = await p.locator('[data-testid="ad-studio-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-studio-new-', '')));
 console.log(`super admin: ${studio.length} designs`);
+// The same maker for the site: its facts and pictures from the API (words:false costs nothing), test words on top.
+await p.route('**/api/ads/make', async (r) => {
+  const body = r.request().postDataJSON();
+  const real = await (await r.fetch({ postData: JSON.stringify({ ...body, words: false }) })).json();
+  const { photos, items, faqs, from_price, logo, cutouts, ...words } = fixture(body.lang);
+  r.fulfill({ json: { ...words, ...real, reviews: [] } });
+});
+await p.route('**/api/ads/saved**', (r) => (r.request().method() === 'GET' ? r.fulfill({ json: { ads: [] } }) : r.fulfill({ json: { id: 'x' } })));
+await p.locator('[data-testid="advertising-new"]').click();
+await p.locator('[data-testid="ad-gallery"]').waitFor();
+for (const l of ['en', 'he']) {
+  await p.locator(`[data-testid="ad-${l}"]`).click();
+  await p.waitForFunction(() => document.querySelector('[data-testid="ad-g-behind"] img'));
+  await p.waitForTimeout(2500);
+  const keys = await p.locator('[data-testid="ad-gallery"] button').evaluateAll((x) => x.map((e) => e.dataset.testid.replace('ad-g-', '')));
+  if (l === 'en') console.log(`site maker: ${keys.length} designs`);
+  for (const k of keys) {
+    if (only && !only.has(k)) continue;
+    for (const f of (k === 'native' ? ['story'] : ['square', 'feed', 'story'])) {
+      const drawn = await drawOf(async () => {
+        await p.locator(`[data-testid="ad-${f}"]`).click();
+        await p.locator(`[data-testid="ad-g-${k}"]`).click();
+      });
+      measure(`site ${k} ${f} ${l}`, drawn, { square: 1080, feed: 1350, story: 1920 }[f], { price: false, link: true });
+      if (/[$₪€£]/.test(drawn.map((d) => d.t || '').join(' '))) fails.push(`site ${k} ${f} ${l}: price: the site has no price`);
+      count += 1;
+      if (pictures) {
+        const d = await p.locator('[data-testid="ad-preview"]').evaluate((c) => c.toDataURL('image/jpeg', 0.8));
+        fs.writeFileSync(path.join(pictures, `site-${k}-${f}-${l}.jpg`), Buffer.from(d.split(',')[1], 'base64'));
+      }
+    }
+  }
+}
+await p.locator('[data-testid="ad-maker"] button[aria-label]').first().click();
 for (const k of studio) {
   if (only && !only.has(k)) continue;
   for (const f of ['post', 'status']) {

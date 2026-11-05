@@ -19,6 +19,7 @@ import BulkUploadModal from '../components/dashboard/BulkUploadModal';
 import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
 import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
+import { AdvertisingSection } from '../components/dashboard/AdvertisingTab';
 import GoogleReviewsCard from '../components/dashboard/GoogleReviewsCard';
 // Upgraded pages only; renders nothing for anyone else (backend routes/seo.py).
 import GetFoundCard from '../components/dashboard/GetFoundCard';
@@ -298,7 +299,7 @@ const Dashboard = () => {
   const activeLabel = nav.groups.flatMap((g) => g.tabs).find((tab) => tab.id === activeTab)?.label;
   // Tabs that already open on their own heading (usually with their main
   // action beside it) get no second one from the shell.
-  const OWN_TITLE = ['properties', 'my-businesses', 'orders', 'members', 'tools', 'customers', 'discounts', 'summary', 'staff', 'checkin', 'classes', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts', 'bookings', 'contracts'];
+  const OWN_TITLE = ['properties', 'my-businesses', 'advertising', 'orders', 'members', 'tools', 'customers', 'discounts', 'summary', 'staff', 'checkin', 'classes', 'network', 'deliveries', 'my-orders', 'my-requests', 'liked', 'settings', 'alerts', 'bookings', 'contracts'];
   const pageTitle = OWN_TITLE.includes(activeTab) ? null : (onOverview || !activeLabel ? t('dashboard.title') : activeLabel);
   // "Add property" and "Bulk upload" on the rentals tabs, and on Overview
   // only for someone who runs rentals and no business: a bakery owner who
@@ -582,6 +583,7 @@ const Dashboard = () => {
             check, which is exactly the drift providerTrial.js warns
             about: fixing only the tab would have shown a My Gigs button
             that rendered an empty panel. */}
+        {activeTab === 'advertising' && <AdvertisingSection API={API} token={token} properties={properties} />}
         {activeTab === 'my-businesses' && showGigTabs && (
           <>
             {/* Renders nothing unless Google review import is switched on. */}

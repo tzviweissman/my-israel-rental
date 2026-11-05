@@ -21,6 +21,7 @@ import BookingsTab from '../components/admin/BookingsTab';
 import EmailHealthTab from '../components/admin/EmailHealthTab';
 import InviteBusinessesTab from '../components/admin/InviteBusinessesTab';
 import AdStudio from '../components/admin/AdStudio';
+import AdvertisingTab from '../components/dashboard/AdvertisingTab';
 
 /**
  * Grouped navigation (spec A2).
@@ -209,7 +210,13 @@ const AdminDashboard = () => {
         {activeTab === 'services' && <ServicesTab token={token} initialFilter={servicesFilter} />}
         {activeTab === 'restaurants' && <RestaurantsTab token={token} />}
         {activeTab === 'invite' && <InviteBusinessesTab token={token} />}
-        {activeTab === 'ads' && <AdStudio token={token} />}
+        {activeTab === 'ads' && (
+          <>
+            <AdvertisingTab API={API} token={token} targets={[{ type: 'site', id: 'home', name: 'MyIsraelRental' }]} />
+            <h2 className="text-lg font-semibold mt-8 mb-3" style={{ fontFamily: 'var(--font-head)', color: 'var(--ink)' }}>{t('advertising.moreDesigns', 'More designs for the site')}</h2>
+            <AdStudio token={token} />
+          </>
+        )}
         {activeTab === 'requests' && <RequestReportsTab token={token} />}
         {activeTab === 'reviews' && <ReviewsModerationTab token={token} />}
         {activeTab === 'areas' && <AreaAliasManager token={token} />}

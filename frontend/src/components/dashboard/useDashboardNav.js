@@ -21,6 +21,7 @@ import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Building2, Layers, Store, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
   Home, MessageCircle, Bell, Heart, KeyRound, FileText, Network, Users, SlidersHorizontal, Contact, TicketPercent, BarChart3, UserCog, DoorOpen, CalendarDays,
+  Megaphone,
 } from 'lucide-react';
 import { canPublishGigs } from '../../utils/providerTrial';
 
@@ -84,6 +85,7 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       label: t('dashboard.groupBusiness', 'My business'),
       tabs: [
         { id: 'my-businesses', label: t('dashboard.myBusinessesPage', 'My page and services'), Icon: Store, show: runsBusiness },
+        { id: 'advertising', label: t('dashboard.advertising', 'Advertising'), Icon: Megaphone, show: runsBusiness || runsRentals },
         // The owner's sales summary is on Overview; the tab stays for staff
         // whose area it is and who have no Overview of the business.
         { id: 'summary', label: t('dashboard.summary', 'Sales summary'), Icon: BarChart3, show: !runsBusiness && staff('summary') },
@@ -158,6 +160,7 @@ export const ALL_TAB_IDS = [
   'bulk-manager',
   'my-businesses',
   'my-gigs',
+  'advertising',
   'contracts',
   'bookings',
   'appointments',

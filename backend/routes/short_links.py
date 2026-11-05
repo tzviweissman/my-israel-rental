@@ -678,9 +678,40 @@ def _ad_photos(urls: list[Any], limit: int = 8) -> list[str]:
     return out
 
 
-async def _ad_facts(target_type: str, target_id: str) -> tuple[dict[str, Any], dict[str, Any]]:
+# What Super Admin's ads say about the site: only what the site states (CLAUDE.md,
+# Positioning), rentals first. Its pictures are real pages made here, each named.
+_SITE_PAGES = (("the-gift-boutique", "The Gift Boutique"), ("chicken-munch", "Chicken Munch"), ("the-brown-box", "The Brown Box"),
+               ("blazin-boards", "Blazin' Boards"), ("american-crust", "American Crust"), ("ls-fruit-platter", "LS Fruit Platter"))
+_SITE_FACTS = {
+    "business_name": "MyIsraelRental",
+    "description": "Stays, local businesses and restaurants across Israel, in English and Hebrew. Anyone with something "
+                   "to offer can add it. Free to list, free to be found, no commission.",
+    "areas": ["Israel"],
+    "offers": [
+        {"title": "Stays", "description": "Long-term, short-term and vacation rentals."},
+        {"title": "Local businesses", "description": "Hire a local pro, or add your own business and reach more customers."},
+        {"title": "Requests board", "description": "Post what you are looking for and owners and pros answer you in chat."},
+    ],
+}
+_SITE_FAQS = {
+    "en": [{"q": "What does it cost to list?", "a": "Nothing. Free to list, free to be found, no commission."},
+           {"q": "Who is it for?", "a": "Anyone with something to offer or something they need, in English and Hebrew."}],
+    "he": [{"q": "כמה עולה לפרסם?", "a": "כלום. פרסום בחינם, נמצאים בחינם, בלי עמלה."},
+           {"q": "למי זה מתאים?", "a": "לכל מי שיש לו מה להציע או שמחפש משהו, בעברית ובאנגלית."}],
+}
+
+
+async def _ad_facts(target_type: str, target_id: str, lang: str = "en") -> tuple[dict[str, Any], dict[str, Any]]:
     """(facts for the model, extra for the picture). Ownership is checked
     by the caller."""
+    if target_type == "site":
+        photos = [f"/ads/pages/{slug}.jpg" for slug, _ in _SITE_PAGES]
+        return dict(_SITE_FACTS), {
+            "photos": photos,
+            "from_price": None,
+            "items": [{"name": name, "price": 0, "currency": "ILS", "photo": f"/ads/pages/{slug}.jpg"} for slug, name in _SITE_PAGES],
+            "faqs": _SITE_FAQS["he" if lang == "he" else "en"],
+        }
     if target_type == "property":
         p = await db.properties.find_one({"id": target_id}) or await db.properties.find_one({"_id": target_id}) or {}
         keys = ("title", "description", "rental_type", "property_type", "bedrooms", "bathrooms", "area",
@@ -842,12 +873,13 @@ async def saved_ads(target_type: str, target_id: str, user=Depends(verify_token)
 async def save_ad(body: SavedAdIn, user=Depends(verify_token)):
     import json
     import uuid
-    if body.target_type not in ("property", "business") or not _AD_NAME.match(body.design.replace("_", "")):
+    if body.target_type not in ("property", "business", "site") or not _AD_NAME.match(body.design.replace("_", "")):
         raise HTTPException(status_code=400, detail="Not an ad.")
     await _assert_owns_target(body.target_type, body.target_id, user)
     if not body.thumb.startswith("data:image/jpeg;base64,") or len(body.thumb) > 60_000:
         raise HTTPException(status_code=400, detail="The preview is too large.")
-    if len(json.dumps(body.settings, default=str)) > 20_000 or len(json.dumps(body.words, default=str)) > 6_000:
+    # ensure_ascii off: Hebrew would count six times over, and every Hebrew ad of ordinary length was refused
+    if len(json.dumps(body.settings, default=str, ensure_ascii=False)) > 20_000 or len(json.dumps(body.words, default=str, ensure_ascii=False)) > 6_000:
         raise HTTPException(status_code=400, detail="The ad is too large.")
     now = datetime.now(UTC).isoformat()
     key = {"owner_user_id": user["user_id"], "target_type": body.target_type, "target_id": body.target_id}
@@ -894,6 +926,8 @@ async def _ad_reviews(target_type: str, target_id: str) -> list[dict[str, Any]]:
     to sit on an ad. Only from sources that are switched on, so an ad never
     shows a review the page itself hides. The words are the reviewer's own;
     the picture may shorten them by cutting, never by rewording."""
+    if target_type == "site":
+        return []
     from utils import reviews as rv
     sources = [s for s, on in (("native", rv.native_enabled()), ("google", rv.google_enabled())) if on]
     if not sources:
@@ -961,10 +995,10 @@ class AdIn(BaseModel):
 async def make_ad(body: AdIn, request: Request, user=Depends(verify_token)):
     """Words, photos and the short link for one advert. Saves nothing but
     the short link, which is minted once per target anyway."""
-    if body.target_type not in ("property", "business"):
+    if body.target_type not in ("property", "business", "site"):
         raise HTTPException(status_code=400, detail="Ads are for a listing or a business.")
     await _assert_owns_target(body.target_type, body.target_id, user)
-    facts, extra = await _ad_facts(body.target_type, body.target_id)
+    facts, extra = await _ad_facts(body.target_type, body.target_id, body.lang)
     link = _public(await ensure_short_link(body.target_type, body.target_id, user["user_id"]))
     reviews = await _ad_reviews(body.target_type, body.target_id)
     if not body.words:

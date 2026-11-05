@@ -1105,7 +1105,9 @@ function part(ctx, name, [x, y, w, h], draw) {
 
 // The round price sticker: the price of the item in the picture, "from"
 // only when that item is the cheapest one the business sells (9e.8).
+const nameAndPrice = (item) => [item.name, item.priceText].filter(Boolean).join(', ');
 function sticker(ctx, given) {
+  if (!given.item?.priceText) return; // the site itself has no price
   // Big enough that "from" stays 30px, the smallest text an ad may have (rules 8).
   const opts = { ...given, r: Math.max(given.r, 94) };
   part(ctx, 'price', [opts.x - opts.r, opts.y - opts.r, opts.r * 2, opts.r * 2], () => drawSticker(ctx, opts));
@@ -1306,7 +1308,7 @@ function drawCalling(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, i
   ctx.fillStyle = L.sub;
   ctx.font = `600 ${px(36)}px ${body}`;
   const price = item.cheapest ? `${fromWord} ${item.priceText}` : item.priceText;
-  ctx.fillText(wrap(ctx, `${eyebrow} · ${price}`, W - 128, 1)[0], W / 2, lineY);
+  ctx.fillText(wrap(ctx, price ? `${eyebrow} · ${price}` : eyebrow, W - 128, 1)[0], W / 2, lineY);
   [[-1, '#EB4034', words.decline || ''], [1, '#34C759', acceptLabel]].forEach(([side, fill, label]) => {
     const bx = W / 2 + side * (rtl ? -1 : 1) * Math.min(230, W * 0.22);
     ctx.fillStyle = fill;
@@ -1365,7 +1367,7 @@ function drawNotify(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, it
   y += px(56);
   say(ctx, todayLabel, W / 2, y, { size: px(32), colour: L.sub, body, rtl });
   y += px(40);
-  const notes = [words.headline, ...(words.points || []), `${item.name}, ${item.priceText}`].filter(Boolean).slice(0, 3);
+  const notes = [words.headline, ...(words.points || []), nameAndPrice(item)].filter(Boolean).slice(0, 3);
   const I = px(58);
   const cards = notes.map((n) => {
     ctx.font = `500 ${px(30)}px ${body}`;
@@ -1438,7 +1440,7 @@ function drawSearch(canvas, { format, words, eyebrow, cta, shortUrl, rtl, qr, it
   wrap(ctx, words.headline, W - 240, 2).forEach((l) => { ty += px(44); say(ctx, l, tx, ty, { size: px(32), colour: '#374151', align: al, body, rtl }); });
   ty += px(30);
   const [, cy, , ch] = product(ctx, item, 110, ty, W - 220, y + cardH - 40 - ty - px(60));
-  say(ctx, `${item.name}, ${item.priceText}`, W / 2, Math.min(cy + ch + px(52), y + cardH - 30), { size: px(32), weight: 800, body, rtl, max: W - 240 });
+  say(ctx, nameAndPrice(item), W / 2, Math.min(cy + ch + px(52), y + cardH - 30), { size: px(32), weight: 800, body, rtl, max: W - 240 });
 }
 
 // "Switches": phone settings, the chores off and the business's offer on,
@@ -2036,7 +2038,7 @@ function render(target, design, a) {
 
 export default function AdMaker({ API, token, targetType, target, onClose, start = null }) {
   const { t, i18n } = useTranslation();
-  const [lang, setLang] = useState(i18n.language?.startsWith('he') ? 'he' : 'en');
+  const [lang, setLang] = useState(start?.savedLang || (i18n.language?.startsWith('he') ? 'he' : 'en'));
   const [format, setFormat] = useState('feed');
   const [design, setDesignRaw] = useState('behind');
   // The owner's own choices (Tzvi, 4 Nov 2026): one card per layout in the
@@ -2115,6 +2117,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
       ]);
       setImgs(loaded.filter(Boolean));
       setItemImgs(its.filter((it) => it.img));
+      if (targetType === 'site') setCutItems(its.filter((it) => it.img).map((it) => ({ ...it, cut: it.img })));
     } catch (e) {
       toast.error(e?.response?.data?.detail || t('ads.failed', 'Could not write the ad. Try again.'));
     } finally {
@@ -2148,7 +2151,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
     (async () => {
       const list = saved || await loadSaved();
       // Asked for something new from the dashboard: a fresh ad, not the last one.
-      const last = !start && list.find((r) => r.lang === lang);
+      const last = start?.saved ? list.find((r) => r.id === start.saved) : !start && list.find((r) => r.lang === lang);
       // The last ad was in the other language: open that one in its own.
       if (!start && !last && !saved && list[0]) { wroteFor.current = ''; setLang(list[0].lang); return; }
       write(last || null);
@@ -2175,7 +2178,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
 
   const shortUrl = ad ? `${SITE}${ad.link.path}` : SITE;
   const money = (amount, currency) => `${priceSymbol(currency)}${Math.round(amount).toLocaleString()}`;
-  const withPrice = (it) => it && ({ ...it, priceText: money(it.price, it.currency),
+  const withPrice = (it) => it && ({ ...it, priceText: it.price ? money(it.price, it.currency) : '',
     cheapest: !!ad?.from_price && it.price <= ad.from_price.amount });
   const pool = cutItems.length ? cutItems : itemImgs;
   const featured = withPrice(pool.length ? pool[pick % pool.length] : null);
@@ -2194,10 +2197,11 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
   const headlineWords = (words?.headline || '').split(/\s+/).filter(Boolean).length;
   const reviews = ad?.reviews || NONE;
   const eyebrow = targetType === 'property' ? areaLabel(target.area, lt) : target.name;
-  const cta = targetType === 'property' ? lt('ads.ctaStay', 'See photos and book') : lt('ads.ctaBusiness', 'See more and order');
+  const cta = targetType === 'site' ? lt('ads.ctaSite', 'Add your business, free')
+    : targetType === 'property' ? lt('ads.ctaStay', 'See photos and book') : lt('ads.ctaBusiness', 'See more and order');
 
   const faqs = ad?.faqs || NONE;
-  const items = itemImgs.map((it) => ({ ...it, priceText: `${priceSymbol(it.currency)}${Math.round(it.price).toLocaleString()}` }));
+  const items = itemImgs.map((it) => ({ ...it, priceText: it.price ? money(it.price, it.currency) : '' }));
   // The gallery (Tzvi, 3 Nov 2026): seven layouts in five colour looks
   // each, then the single-look designs. [key, label, available, look].
   // Story is drawn in the story shape only.
@@ -2792,7 +2796,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                 </div>
               </div>
             )}
-            {themed && targetType === 'business' && (
+            {themed && targetType !== 'property' && (
               <BackgroundGallery API={API} token={token} lang={lang} onPick={pickBackground} />
             )}
             {themed && (
@@ -2881,7 +2885,7 @@ export default function AdMaker({ API, token, targetType, target, onClose, start
                           <img src={(it.cut || it.img).src} alt="" className="h-12 w-full object-contain rounded border-2"
                             style={{ borderColor: pick % pool.length === i ? '#000' : 'var(--brand-border)' }} />
                           <span className="block text-[10px] leading-tight truncate" dir="auto">{it.name}</span>
-                          <span className="block text-[10px] font-semibold">{money(it.price, it.currency)}</span>
+                          {it.price > 0 && <span className="block text-[10px] font-semibold">{money(it.price, it.currency)}</span>}
                         </button>
                       ))}
                     </div>
