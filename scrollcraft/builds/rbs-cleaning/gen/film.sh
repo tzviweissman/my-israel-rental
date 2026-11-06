@@ -1,7 +1,8 @@
 # The whole opening: squeegee (gen/wipe-brief.md), then the pull-back (gen/pull-brief.md), one film. Run from the build folder.
+# gen/view2/pull-timed.mp4 is gen/view2/pull.mp4 ending at 7.3 s, with 3.04-3.5 s slowed 1.6 times by motion interpolation: it rushed (check-clip)
 # cuts: 7.3
-F=assets/film; W=gen/view/wipe.mp4; P=gen/view/pull.mp4
-PAN="875-375*(3*pow(min(1\,t/7.9)\,2)-2*pow(min(1\,t/7.9)\,3))"   # the phone frame drifts left to take in the sofa, easing with the camera
+F=assets/film; W=gen/view2/wipe.mp4; P=gen/view2/pull-timed.mp4; rm -f $F/d/* $F/m/*
+PAN="875-375*(3*pow(min(1\,t/7.3)\,2)-2*pow(min(1\,t/7.3)\,3))"   # the phone frame drifts left to take in the sofa, easing with the camera
 D="[0:v]trim=0.4:7.7,setpts=PTS-STARTPTS,scale=1920:1080:flags=lanczos,setsar=1[a];[1:v]scale=1920:1080:flags=lanczos,setsar=1,tpad=stop_mode=clone:stop_duration=0.6[b];[a][b]concat=n=2:v=1[o]"
 M="[0:v]trim=0.4:7.7,setpts=PTS-STARTPTS,crop=810:1440:875:0,scale=720:1280:flags=lanczos,setsar=1[a];[1:v]crop=810:1440:'$PAN':0,scale=720:1280:flags=lanczos,setsar=1,tpad=stop_mode=clone:stop_duration=0.6[b];[a][b]concat=n=2:v=1[o]"
 ENC="-c:v libx264 -g 1 -crf 29 -preset slow -pix_fmt yuv420p -movflags +faststart -an"

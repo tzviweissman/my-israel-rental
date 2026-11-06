@@ -120,7 +120,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3b.3 One solid action per screen: header button and phone bar repeat it; the header button is outline when the hero shows a solid one; everything else is outline, link or tile
   plan: one solid green button per screen; header button is outline; links elsewhere
 - [x] R3h.20 A scroll-driven opening runs at 60 fps, is at least 3 screens long, shows the product on a plain ground of its own world (never on a photo of the same kind of product), keeps the product and photos whole, and loads the first screen first (check: check-opening-scroll)
-  plan: scroll film 7.8 screens long, real video, the first screen is the first frame; check-opening-scroll passes
+  plan: scroll film 5.45 screens long, sped up 1.5 times at the request of Tzvi, real video, the first screen is the first frame; check-opening-scroll passes
 - [x] R3h.21 Effects, never too much: the opening film may hold the page for its length; any other section that holds the page while the scroll changes it is at most a screen and a half, at most three in all; longer turning becomes a tap; nothing stands between a phone visitor and the products or the order (check: check-one-scroll)
   plan: only the film holds the page; nothing later pins
 - [x] R3h.22 A film starts as one storyboard sheet of rough line drawings (one row per concept, 3 to 4 panels), approved by Tzvi before any photoreal still; only the chosen concept is made as stills
@@ -130,7 +130,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3h.24 A scroll film is real video tied exactly to the scroll (data-video, every frame a keyframe, starter/film.js): within 0.4 s of the scroll and never still over 400 ms or on over 15% of frames while scrolling, laptop and phone, in real Chrome (check: check-film-video)
   plan: data-video, every frame a keyframe, starter/film.js; check-film-video passes in real Chrome
 - [x] R3h.25 Nothing covers a scroll film while it plays: at 20, 40 and 60% of the film, on a laptop and a phone, words, cards and names cover at most 3% of it (the site's menu bar aside); the words wait for its end or sit beside or under it (check: check-film-clear)
-  plan: the words fade at 2.5% and return at 95.5%, after the camera has stopped in the room; check-film-clear passes
+  plan: the words fade at 2.5% and return at 95%, after the camera has stopped in the room; check-film-clear passes
 - [x] R3h.1 The home page opens on a full-screen picture or film (at least 70% picture) and it is an event from their own thing (a film, or an event built in code), proposed with the first build, never after (check: site)
   plan: opens full screen on soap running down a pane, an event in a generated film
 - [x] R3n.1 The owner's strongest real photo fills at least half the first screen on a laptop and on a phone, not a small card or cut-out shape
@@ -481,7 +481,7 @@ file (`--rules`); the scripts named in a line confirm it at publish.
 - [x] R3w.6 A scroll film's scrub ends where the clip's motion ends (check-clip's figure), the last hold is short, and its last frame is the picture the next section shows
   plan: the scrub ends 0.8 s after the blade leaves; the room then takes over
 - [x] R3w.7 Generated places and materials look photographed: no dune-smooth hills, model villages, stones in tidy equal rows or flat soft light, checked at full size beside a real photograph of that place or material before any clip
-  plan: the view and stone: gen/view/a-0.png, compared at full size with real photographs named in the Looks real section of gen/pull-brief.md; the first, fake-looking view was replaced at the request of Tzvi
+  plan: the view and stone: gen/view2/a-0.png, compared at full size with real photographs named in the Looks real section of gen/pull-brief.md; the first, fake-looking view was replaced at the request of Tzvi
 
 ## Stage 11. Finish
 

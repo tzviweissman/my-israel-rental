@@ -43,7 +43,7 @@ Every gap is one of --s1 4px to --s10 128px.
 ## Textures and pictures
 
 - One opening picture, generated (cost approved by Tzvi first): a bright, clean living room in the
-  flyer's style, large windows onto the Judean hills round Beit Shemesh, morning light from the
+  flyer's style, a large window over a park and Jerusalem-stone buildings, morning light from the
   windows, white and pale sky tones, no people, no text, no brand names. Wide (16:9) and tall (9:16)
   from one shoot. It is never presented as a customer's or our own home ("a home like yours").
 - The haze over it, which the scroll wipes clean, is drawn in code (soap film and streaks, in white at

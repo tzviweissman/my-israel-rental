@@ -47,12 +47,12 @@ SITE = kit.Site(
 
 # ---------- home ----------
 N_FRAMES = len(os.listdir('assets/film/d'))
-OPENING = f'''  <section class="film" id="film" data-frames="{N_FRAMES}" data-src="assets/film" data-video="assets/film/opening-{{k}}.mp4" data-marks="0.025,0.955" aria-label="RBS Cleaning, home cleaning in Beit Shemesh">
+OPENING = f'''  <section class="film" id="film" data-frames="{N_FRAMES}" data-src="assets/film" data-video="assets/film/opening-{{k}}.mp4" data-marks="0.025,0.95" aria-label="RBS Cleaning, home cleaning in Beit Shemesh">
     <div class="stage">
       <canvas aria-hidden="true"></canvas>
       <picture class="room">
         <source media="(max-aspect-ratio: 4/5)" srcset="assets/room-tall.webp" width="648" height="1152">
-        <img src="assets/room-wide.webp" alt="A bright, clean, furnished living room with a large window onto the hills" width="1920" height="1080" fetchpriority="high">
+        <img src="assets/room-wide.webp" alt="A bright, clean, furnished living room with a large window over a park and the city" width="1920" height="1080" fetchpriority="high">
       </picture>
       <div class="wrap hero">
         <h1>Your home,<br><span class="em">crystal clear.</span></h1>
