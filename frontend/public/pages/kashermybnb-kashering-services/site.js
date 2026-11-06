@@ -85,7 +85,8 @@
   function message(o) {
     var m = ['Hi KasherMyBnb, I would like to book:'];
     lines(o).forEach(function (x) { m.push('• ' + x[0] + ' (' + money(x[1]) + ')'); });
-    m.push('Total: ' + money(total(o)) + (o.place === 'elsewhere' ? ', plus any travel fee you tell me' : ''));
+    if (o.codeText) m.push(o.codeText);
+    m.push('Total: ' + money(o.after != null ? o.after : total(o)) + (o.place === 'elsewhere' ? ', plus any travel fee you tell me' : ''));
     if (when(o)) m.push('When: ' + when(o));
     if (where(o)) m.push('Where: ' + where(o));
     if (o.notes) m.push('Notes: ' + o.notes);
@@ -100,7 +101,7 @@
   var TIER = { kitchen: 'Kashering Kitchen', pots: 'Kashering of Pots, Cutlery & Utensils' };
   function submit(o) {
     var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ tier_name: o.kitchen ? TIER.kitchen : TIER.pots, preferred_date: o.date, time_slot: o.time, guest_name: o.name, contact_phone: o.phone, message: message(o).split('\n').slice(1).join('\n'), lang: 'en' }) })
+      body: JSON.stringify({ tier_name: o.kitchen ? TIER.kitchen : TIER.pots, preferred_date: o.date, time_slot: o.time, guest_name: o.name, contact_phone: o.phone, message: message({ ...o, codeText: '', after: null }).split('\n').slice(1).join('\n'), lang: 'en', amount: total(o), discount_code: o.code || null }) })
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
       .catch(function (err) { console.warn('booking not saved', err); return null; })
       .then(function (j) { return j && j.track_path ? 'https://myisraelrental.com' + j.track_path : ''; });
@@ -132,7 +133,7 @@
     else location.reload();
   });
 
-  window.KMB = { load: load, save: save, lines: lines, total: total, money: money, when: when, where: where, paint: paintSummary, waLink: waLink, submit: submit, message: message, PRICE: PRICE, NAMES: NAMES };
+  window.KMB = { API: API, GIG: GIG, load: load, save: save, lines: lines, total: total, money: money, when: when, where: where, paint: paintSummary, waLink: waLink, submit: submit, message: message, PRICE: PRICE, NAMES: NAMES };
 })();
 // the phone's booking dock steps aside while the footer is on screen, so it never covers the footer text
 (function () {

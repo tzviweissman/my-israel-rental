@@ -85,6 +85,8 @@ def _public(q: dict[str, Any], gig: dict[str, Any], biz: dict[str, Any]) -> dict
         # A price the business sent first: the page says "A price from",
         # not "Your quote request to".
         "from_business": q.get("source") == "business", "lang": q.get("lang") or "en",
+        "business_id": q.get("business_id"), "phone": q.get("phone"),
+        "discount": {k: (q.get("discount") or {}).get(k) for k in ("code", "amount")} if q.get("discount") else None,
     }
 
 
@@ -191,11 +193,15 @@ async def track_quote(token: str, request: Request):
     out = _public(q, gig, biz)
     vu = (q.get("quote") or {}).get("valid_until")
     out["expired"] = bool(q["status"] == "quoted" and vu and vu < datetime.now(UTC).date().isoformat())
+    from .discounts import has_codes
+    out["has_codes"] = q["status"] == "quoted" and bool(biz) and await has_codes(biz)
     return out
 
 
 class Answer(BaseModel):
     answer: Literal["accept", "decline"]
+    # A code the business made: the same ones an order takes, off the price accepted here.
+    discount_code: Optional[str] = Field(None, max_length=40)
 
 
 @router.post("/quotes/track/{token}/answer")
@@ -207,11 +213,27 @@ async def answer_quote(token: str, body: Answer, request: Request):
     if body.answer == "accept" and vu and vu < datetime.now(UTC).date().isoformat():
         raise HTTPException(status_code=409, detail="This price has expired. Ask the business for a new one.")
     status = "accepted" if body.answer == "accept" else "declined_by_customer"
+    # Claim the answer first, so two taps on Accept cannot use a code twice; a refused code puts the price back.
     r = await db.quote_requests.update_one({"_id": q["_id"], "status": "quoted"},
                                            {"$set": {"status": status, "answered_at": datetime.now(UTC).isoformat(),
                                                      "updated_at": datetime.now(UTC).isoformat()}})
     if not r.modified_count:
         raise HTTPException(status_code=409, detail="This was just answered. Refresh to see it.")
+    discount = None
+    if body.answer == "accept" and body.discount_code and body.discount_code.strip():
+        from .discounts import CodeRefused, say, use_code
+        q_price = (q.get("quote") or {}).get("price")
+        q_currency = (q.get("quote") or {}).get("currency") or "ILS"
+        try:
+            discount = await use_code(q.get("business_id"), body.discount_code, q_price, q.get("phone"), q_currency)
+        except CodeRefused as e:
+            await db.quote_requests.update_one({"_id": q["_id"]}, {"$set": {"status": "quoted"}, "$unset": {"answered_at": ""}})
+            raise HTTPException(status_code=400, detail=say(str(e), q.get("lang"))) from e
+        await db.quote_requests.update_one({"_id": q["_id"]}, {"$set": {"discount": discount}})
+    if status == "accepted" and q.get("phone"):
+        # So this customer counts as known here (discounts._is_returning).
+        from utils.whatsapp_link import normalize_whatsapp_number
+        await db.quote_requests.update_one({"_id": q["_id"]}, {"$set": {"phone_e164": normalize_whatsapp_number(q["phone"])}})
     gig, _ = await _gig_biz(q)
     from .gigs import _notify
     from .orders import _email, _esc
@@ -221,6 +243,7 @@ async def answer_quote(token: str, body: Answer, request: Request):
     contact = " · ".join(x for x in (q.get("phone"), q.get("email")) if x)
     await _email(owner.get("email"), f"Your price was {word}: {q['name']}",
                  f"<p><b>{_esc(q['name'])}</b> {word} your price for {_esc(gig.get('title'))}.</p>"
+                 + (f"<p>Discount code {_esc(discount['code'])}: -{'$' if discount['currency'] == 'USD' else '₪'}{discount['amount']:g} off your price.</p>" if discount else "")
                  + (f"<p>Reach them on {_esc(contact)} to arrange it.</p>" if status == "accepted" else ""),
                  tag="quote-answered", button=("Open quote requests", "/dashboard?tab=appointments"))
     return {"ok": True, "status": status}
@@ -236,6 +259,7 @@ def _row(q: dict[str, Any], titles: dict[str, str]) -> dict[str, Any]:
             "name": q["name"], "phone": q.get("phone"), "email": q.get("email"), "status": q["status"],
             "answers": q.get("answers") or [],
             "quote": q.get("quote"), "created_at": q.get("created_at"),
+            "discount": {k: (q.get("discount") or {}).get(k) for k in ("code", "amount")} if q.get("discount") else None,
             "business_id": q.get("business_id"), "source": q.get("source") or "customer", "lang": q.get("lang") or "en",
             # To send the price on WhatsApp or by text: the link and a
             # ready message (Tzvi, 22 Oct 2026). Only once there is a price.

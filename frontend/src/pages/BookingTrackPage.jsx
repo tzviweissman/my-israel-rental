@@ -100,6 +100,13 @@ export default function BookingTrackPage() {
           </p>
           <p className="mt-3 text-sm" style={{ color: 'var(--ink)' }} dir="auto">{title}{data.tier_name ? ` · ${data.tier_name}` : ''}</p>
           {when && <p className="mt-1 text-sm" style={{ color: 'var(--brand-muted)' }}>{when}</p>}
+          {data.discount && !data.discount.returned && (
+            <p className="mt-1 text-sm font-semibold" style={{ color: 'var(--ink)' }} data-testid="booking-track-discount">
+              {data.discount.amount > 0
+                ? `${t('discounts.line', 'Discount {{code}}', { code: data.discount.code })}: −${money(data.discount.amount, data.currency || 'ILS')} · ${t('discounts.after', 'After the code: {{price}}', { price: money(data.price - data.discount.amount, data.currency || 'ILS') })}`
+                : t('discounts.applied', 'Code {{code}} applied', { code: data.discount.code })}
+            </p>
+          )}
           {data.status === 'accepted' && (
             <AddToCalendar uid={`booking-${token}`} title={`${title}${bizName ? ` · ${bizName}` : ''}`} day={data.preferred_date} time={data.time_slot} minutes={data.duration_minutes} />
           )}

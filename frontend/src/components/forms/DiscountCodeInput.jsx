@@ -17,7 +17,7 @@ export const discountOn = (applied, amount) => {
 };
 
 export default function DiscountCodeInput({ businessId, form, amount, phone, currency, applied, onApplied, initialCode }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   // A friend's link (?ref=CODE, backend referrals.py) opens the box with
   // the code in it and checks it once.
   const [open, setOpen] = useState(!!initialCode);
@@ -31,7 +31,7 @@ export default function DiscountCodeInput({ businessId, form, amount, phone, cur
     setBusy(true); setError('');
     try {
       const { data } = await axios.post(`${API}/marketplace/businesses/${businessId}/discount-codes/check`,
-        { code: code.trim(), form, amount: amount || 0, phone: phone || null, currency: currency || null });
+        { code: code.trim(), form, amount: amount || 0, phone: phone || null, currency: currency || null, lang: i18n.language });
       if (data.ok) { onApplied({ code: data.code, kind: data.kind, value: data.value }); setOpen(false); }
       else setError(data.reason);
     } catch { setError(t('discounts.checkFailed', 'Could not check the code. Try again.')); } finally { setBusy(false); }

@@ -12,6 +12,7 @@ import ProofLine from '../components/marketplace/ProofLine';
 import ReviewsSection from '../components/reviews/ReviewsSection';
 import ClarityPanel, { StrengthChips } from '../components/marketplace/ClarityPanel';
 import { money } from '../utils/currency';
+import DiscountCodeInput, { discountOn } from '../components/forms/DiscountCodeInput';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import WaitlistForm from '../components/bookings/WaitlistForm';
 import QuoteRequest from '../components/bookings/QuoteRequest';
@@ -219,6 +220,12 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
   const [birthday, setBirthday] = useState('');
   const [date, setDate] = useState(initialDate || '');
   const [saving, setSaving] = useState(false);
+  const [code, setCode] = useState(null);
+  // Asked here because this form also opens from a listing card (CardAction), which has only the list's fields.
+  const [codeBox, setCodeBox] = useState(null);
+  useEffect(() => {
+    axios.get(`${API}/marketplace/gigs/${gig.id}/code-box`).then((r) => setCodeBox(r.data)).catch(() => {});
+  }, [gig.id]);
   const guest = !token;
   const submit = async (e) => {
     e.preventDefault();
@@ -244,6 +251,7 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
           lang: String(i18n.language || 'en').startsWith('he') ? 'he' : 'en',
           staff_id: staffId && staffId !== 'any' ? staffId : undefined,
           birthday: gig.birthday_on ? birthdayOrNull(birthday) || undefined : undefined,
+          discount_code: code ? code.code : undefined,
         },
         token ? { headers: { Authorization: `Bearer ${token}` } } : undefined,
       );
@@ -301,6 +309,16 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
         {!slot && <DateField value={date} onChange={setDate} className={`${field} bg-white`} testid="gig-booking-date" />}
         {gig.birthday_on && <BirthdayInput value={birthday} onChange={setBirthday} businessName={gig.provider?.name || ''} testid="gig-booking-birthday" />}
         <textarea value={message} onChange={(e) => setMessage(e.target.value)} placeholder={t('gigDetail.messagePh', 'Tell the provider what you need…')} rows={3} className={field} />
+        {codeBox?.has_codes && (
+          <div>
+            <DiscountCodeInput businessId={codeBox.business.id} form="orders" amount={tier.price} phone={phone} currency={tier.currency} applied={code} onApplied={setCode} />
+            {code && tier.price > 0 && (
+              <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }} data-testid="gig-booking-after">
+                {t('discounts.after', 'After the code: {{price}}', { price: money(tier.price - discountOn(code, tier.price), tier.currency || 'ILS') })}
+              </p>
+            )}
+          </div>
+        )}
         {guest && <p className="text-xs text-gray-500">{t('gigDetail.guestNote', 'No account needed. You get a page that shows the reply.')}</p>}
         {Number(gig.deposit) > 0 && (
           <p className="text-xs rounded-lg p-2.5" style={{ background: '#F9FAFB', color: 'var(--ink)' }} data-testid="gig-booking-deposit">

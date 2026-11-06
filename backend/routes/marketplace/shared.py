@@ -858,6 +858,11 @@ class BookingIn(BaseModel):
     staff_id: Optional[str] = Field(None, max_length=32)
     # "MM-DD", optional, for the birthday treat (birthdays.py).
     birthday: Optional[str] = Field(None, pattern=r"^\d{2}-\d{2}$")
+    # A code the business made, the same ones an order takes (discounts.py).
+    discount_code: Optional[str] = Field(None, max_length=40)
+    # The total on a designed site that works out its own (hours, two services): what
+    # the customer was shown. The business sees it written in the booking.
+    amount: Optional[float] = Field(None, ge=0, le=1_000_000)
 
 
 class BookingPatch(BaseModel):

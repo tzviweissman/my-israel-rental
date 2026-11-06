@@ -219,3 +219,5 @@ R3v.2 pass: the home bar now lists Home, Whole kitchen, Pots and cutlery and the
 R3v.14 pass: under the Book a kashering button on the first screen: Whole kitchen $350, about 2 hours (BRIEF.md, their listing) / Following cRc guidelines (their flyer names cRc) / Jerusalem and across Israel (their record); class btn-facts; check-facts clean at 390 and 1366
 
 Note, 1 Nov 2026: the arrow after the footer button was removed (its font has no arrow; check-site GLYPH). No rule answer changes.
+
+Note, 6 Nov 2026: a discount code box added to the booking form (mir-code.js, Tzvi: a code must work on a service as on a product). It shows only when the business has a code, so with none the page looks as before. With a code, the total and the WhatsApp message show the lower price. Nothing else on the page changed.

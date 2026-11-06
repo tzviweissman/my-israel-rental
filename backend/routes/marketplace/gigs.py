@@ -15,6 +15,7 @@ from typing import Any, Optional
 from urllib.parse import urlparse
 from zoneinfo import ZoneInfo
 
+from pymongo.errors import DuplicateKeyError
 from fastapi import APIRouter, Depends, HTTPException, Query, Request
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, Field
@@ -1348,6 +1349,30 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
                 detail="That time has just been taken - please pick another.",
             )
 
+    from utils.whatsapp_link import normalize_whatsapp_number
+    # A discount code, as on an order: checked again here and counted once the
+    # booking is otherwise sure to go through. A service's price is the tier's.
+    tier = next((t for t in gig.get("tiers") or [] if t.get("name") == payload.tier_name), None) or {}
+    price = float(tier["price"]) if tier.get("price") else None
+    if payload.amount is not None:
+        price = payload.amount or None   # 0: this choice is priced later, as on Michal Yodaiken's page
+    currency = tier.get("currency") or "ILS"
+    discount = None
+    if payload.discount_code and payload.discount_code.strip():
+        from .discounts import CodeRefused, say, use_code
+        if not phone:
+            # A code once per customer, or for first-timers, can only be held to a phone number.
+            raise HTTPException(status_code=400, detail="כדי להשתמש בקוד צריך להוסיף מספר טלפון" if payload.lang == "he" else "Please add your phone number to use a code")
+        try:
+            discount = await use_code(gig.get("business_id"), payload.discount_code, price, phone, currency)
+        except CodeRefused as e:
+            raise HTTPException(status_code=400, detail=say(str(e), payload.lang)) from e
+    message = payload.message
+    if discount:
+        sym = "$" if currency == "USD" else "₪"
+        off = f"-{sym}{discount['amount']:g}" if discount["amount"] else (f"-{discount['value']:g}%" if discount["kind"] == "percent" else f"-{sym}{discount['value']:g}")
+        message = (message + "\n" if message else "") + f"Discount {discount['code']}: {off}" + (f", total {sym}{price - discount['amount']:g}" if price else "")
+
     _now = datetime.now(UTC)
     _hold_h = await _hold_hours(gig.get("provider_user_id"))
     booking = {
@@ -1357,9 +1382,14 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         "client_user_id": (user or {}).get("user_id"),
         "guest_name": None if user else guest_name,
         "tier_name": payload.tier_name,
-        "message": payload.message,
+        "message": message,
         "contact_email": email or None,
         "contact_phone": phone or None,
+        # So this booking counts this customer as known here (discounts._is_returning).
+        "business_id": gig.get("business_id"),
+        "contact_phone_e164": normalize_whatsapp_number(phone) if phone else None,
+        # Frozen, like the deposit: what this customer was told.
+        "price": price, "currency": currency if price else None, "discount": discount,
         # The customer's own status link, the only one a guest has.
         "track_token": secrets.token_urlsafe(16),
         # The business's one-booking Confirm / Decline link, sent by text.
@@ -1382,7 +1412,14 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         # customer was asked for (deposits.py).
         "deposit": {"amount": float(gig["deposit"]), "status": "due"} if gig.get("deposit") else None,
     }
-    await db.marketplace_bookings.insert_one(booking)
+    try:
+        await db.marketplace_bookings.insert_one(booking)
+    except DuplicateKeyError:
+        # Two people on the same time at the same moment: the second is told, not shown a crash.
+        if discount:
+            from .discounts import return_use
+            await return_use(discount, phone)
+        raise HTTPException(status_code=409, detail="That time has just been taken - please pick another.") from None
     from .birthdays import remember
     await remember(gig.get("business_id"), email, guest_name or (user or {}).get("name"), payload.birthday, payload.lang, "booking")
     # Hand the booking to the business's automations (automations.py):
@@ -1408,7 +1445,7 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
     _when = " ".join(x for x in (payload.preferred_date, payload.time_slot) if x)
     spawn(alert_business_on_whatsapp(
         gig, gig.get("provider_user_id"), guest_name or (user or {}).get("name") or "",
-        f"{gig.get('title') or ''} - {payload.tier_name or ''}" + (f" ({_when})" if _when else ""),
+        f"{gig.get('title') or ''} - {payload.tier_name or ''}" + (f" ({_when})" if _when else "") + (f" · {discount['code']}" if discount else ""),
         "/dashboard?tab=appointments", "booking", booking_token=booking["owner_token"]))
     from .order_texts import text_customer_request
     spawn(text_customer_request(gig, payload.contact_phone, f"/bookings/track/{booking['track_token']}", payload.lang == "he"))
@@ -1438,6 +1475,8 @@ async def track_booking(token: str, request: Request):
         "gig_title": gig.get("title") or "", "gig_title_he": gig.get("title_he"),
         "tier_name": b.get("tier_name"), "preferred_date": b.get("preferred_date"), "time_slot": b.get("time_slot"),
         "status": status, "provider_reply": b.get("provider_reply") or "", "created_at": b.get("created_at"),
+        "price": b.get("price"), "currency": b.get("currency"),
+        "discount": {k: (b.get("discount") or {}).get(k) for k in ("code", "amount", "kind", "value", "returned")} if b.get("discount") else None,
         # For cancel or change from this link (appointment_reminders.py):
         # whether it still can be, and what a new time is checked against.
         "can_change": _customer_can_change(b, status),
@@ -1598,6 +1637,8 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
     if payload.status in ("cancelled", "declined") and booking.get("status") in ("pending", "accepted"):
         from .deposits import owed_back
         await owed_back(booking, by_business=True)
+        from .discounts import give_back_booking
+        await give_back_booking(booking_id)
         from .appointment_extras import on_slot_freed
         await on_slot_freed(booking.get("gig_id"), booking.get("preferred_date"), booking.get("staff_id"))
     if payload.status == "cancelled" and booking.get("status") != "cancelled":
@@ -2039,6 +2080,8 @@ async def sweep_expired_holds() -> dict:
             )
             if not res.modified_count:
                 continue
+            from .discounts import give_back_booking
+            await give_back_booking(b["_id"])
             # The time is free again: tell anyone waiting for that day.
             from .appointment_extras import on_slot_freed
             await on_slot_freed(b.get("gig_id"), b.get("preferred_date"), b.get("staff_id"))
@@ -2186,11 +2229,16 @@ async def ensure_booking_indexes() -> None:
         existing = await db.marketplace_bookings.index_information()
         if "uniq_held_slot" in existing:
             await db.marketplace_bookings.drop_index("uniq_held_slot")
+        # Only a chosen day AND time is a slot. Without this, a second request on a
+        # service with no time crashed until the first was answered (6 Nov 2026).
+        built = existing.get("uniq_held_slot_staff")
+        if built and "time_slot" not in (built.get("partialFilterExpression") or {}):
+            await db.marketplace_bookings.drop_index("uniq_held_slot_staff")
         await db.marketplace_bookings.create_index(
             [("gig_id", 1), ("preferred_date", 1), ("time_slot", 1), ("staff_id", 1)],
             name="uniq_held_slot_staff",
             unique=True,
-            partialFilterExpression={"status": {"$in": list(HELD_STATUSES)}},
+            partialFilterExpression={"status": {"$in": list(HELD_STATUSES)}, "preferred_date": {"$type": "string"}, "time_slot": {"$type": "string"}},
         )
     except Exception as e:  # noqa: BLE001
         logger.warning("could not create uniq_held_slot_staff index: %s", e)

@@ -7236,6 +7236,7 @@ const en = {
         remove: "Remove",
         checkFailed: "Could not check the code. Try again.",
         line: "Discount {{code}}",
+        after: "After the code: {{price}}",
         memberPrice: "{{price}} instead of {{was}}",
         memberLine: "code {{code}}: {{price}} to pay",
         passLine: "Code {{code}}: {{amount}} off",

@@ -86,7 +86,7 @@
     busy = true; error = ''; draw();
     lastKey = key();
     return fetch(o.api + '/marketplace/businesses/' + business + '/discount-codes/check', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ code: code, form: 'orders', amount: o.goods() || 0, phone: phone() || null, currency: currency() }) })
+      body: JSON.stringify({ code: code, form: 'orders', amount: o.goods() || 0, phone: phone() || null, currency: currency(), lang: he ? 'he' : 'en' }) })
       .then(function (r) { return r.json(); })
       .then(function (d) {
         busy = false;
@@ -104,7 +104,7 @@
     var gig = typeof o.gig === 'function' ? o.gig() : o.gig;
     if (!gig || gig === askedGig || business) return;
     askedGig = gig;
-    fetch(o.api + '/marketplace/order-form/' + gig).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    fetch(o.api + '/marketplace/gigs/' + gig + '/code-box').then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
       if (!d) return;
       if (d.paused && d.paused.active) { pauseForm(d.paused); return; }
       if (d.has_codes || o.first) business = d.business.id;
@@ -137,6 +137,9 @@
         if (a.dataset.a === 'remove') { applied = null; opened = false; error = ''; o.first = ''; changed(); }
         if (a.dataset.a === 'apply') { var v = box.querySelector('input').value.replace(/\s+/g, '').toUpperCase(); if (v && !busy) check(v); }
       });
+      // Typing here is not a change to the page's own form: a form that redraws on change would redraw this box
+      // as the input loses focus, and the tap on Apply would land on nothing (Michal Yodaiken, 6 Nov 2026).
+      ['input', 'change'].forEach(function (t) { box.addEventListener(t, function (e) { e.stopPropagation(); }); });
       // Enter applies the code; it must not send the order.
       box.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); var b = box.querySelector('[data-a=apply]'); if (b) b.click(); } });
       var p = o.phone && document.getElementById(o.phone);

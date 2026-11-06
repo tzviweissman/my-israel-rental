@@ -53,6 +53,7 @@
           <div class="fld" id="w-me"><label for="me">Your name</label><input id="me" autocomplete="name"><span class="err" id="e-me"></span></div>
           <div class="fld full" id="w-time" role="group" aria-labelledby="l-time"><span class="lab" id="l-time">Start time</span><div class="opts" id="times"><p class="hint">Choose a day first.</p></div><span class="err" id="e-time"></span></div>
           <div class="fld" id="w-ph"><label for="ph">Phone</label><input id="ph" type="tel" inputmode="tel" autocomplete="tel"><span class="err" id="e-ph"></span></div>
+          <style>#mir-code{grid-column:1/-1}#mir-code:empty{display:none}</style><div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
           <div class="act"><button class="btn" type="submit" id="send"><span id="send-l">Send on WhatsApp</span><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></button></div>
           <p class="fine full" id="fine">Saved with Michal on MyIsraelRental, then WhatsApp opens with your request written out.</p>
         </form>
@@ -124,10 +125,10 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentEl
     if (sending) return;
     var w = val('way'), t = val('time'), d = v('day');
     var day = d ? new Date(d + 'T12:00').toLocaleDateString('en-GB', { weekday: 'short' }) : '';
-    $('send-l').textContent = 'Send' + (d && t ? ' ' + day + ' ' + t : '') + ' on WhatsApp' + (w === 'At your home' ? ', ₪60' : '');
+    $('send-l').textContent = 'Send' + (d && t ? ' ' + day + ' ' + t : '') + ' on WhatsApp' + (w === 'At your home' ? ', ₪' + MirCode.after(60) : '');
     $('fine').textContent = w && w !== 'At your home' ? 'Michal tells you the price on WhatsApp. Your request is saved with her on MyIsraelRental, then WhatsApp opens with it written out.' : 'Saved with Michal on MyIsraelRental, then WhatsApp opens with your request written out.';
   }
-  $('req').addEventListener('change', setLabel);
+  $('req').addEventListener('change', function () { MirCode.refresh(); setLabel(); });
   function val(name) { var r = document.querySelector('#req input[name=' + name + ']:checked'); return r ? r.value : ''; }
   if (!$('day').value) $('day').value = firstDay(function (w) { return w === 6 ? 0 : 1230; });
   drawTimes(); setLabel();
@@ -142,18 +143,20 @@ if (!matchMedia('(prefers-reduced-motion: reduce)').matches) document.documentEl
     e = /\d{9,}/.test(v('ph').replace(/\D/g, '')) ? '' : 'A phone number Michal can reach you on'; if (e) ok = false; mark('ph', e);
     return ok;
   }
+  function wayPrice() { return val('way') === 'At your home' ? 60 : 0; }
   var sending = false;
+  MirCode.mount({ api: API, gig: GIG, goods: wayPrice, money: function (n) { return wayPrice() ? '₪' + n : ''; }, phone: 'ph', onChange: setLabel });
   $('req').addEventListener('submit', function (ev) {
     ev.preventDefault();
     if (sending) return;
     if (!check()) { var b = document.querySelector('#req .bad input'); if (b) b.focus(); return; }
     var day = new Date(v('day') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' });
     var lines = ['Hi Michal, I would like to book a session:', 'What: ' + val('way'), 'When: ' + day + ' at ' + val('time'), 'Name: ' + v('me') + ', ' + v('ph')];
-    var text = lines.join('\n'), msg = lines.slice(1, 3).join('; ');
+    var msg = lines.slice(1, 3).join('; '), text = lines.concat(MirCode.code() ? [MirCode.text(wayPrice())] : []).join('\n');
     sending = true; $('send').setAttribute('aria-busy', 'true'); var l = $('send-l'), label = l.textContent; l.textContent = 'Sending';
     var tab = window.open('', '_blank');
     var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ tier_name: TIER, preferred_date: v('day'), time_slot: val('time'), guest_name: v('me'), contact_phone: v('ph'), message: msg, lang: 'en' }) })
+      body: JSON.stringify({ tier_name: TIER, preferred_date: v('day'), time_slot: val('time'), guest_name: v('me'), contact_phone: v('ph'), message: msg, lang: 'en', amount: wayPrice(), discount_code: MirCode.code() }) })
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
       .catch(function (err) { console.warn('booking not saved', err); return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {

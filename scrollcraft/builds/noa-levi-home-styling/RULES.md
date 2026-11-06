@@ -220,3 +220,5 @@ R3v.1 pass: full footer on index, book and contact (who we are, Pages, Booking, 
 R3v.2 pass: the menu bar lists Home, Book and Contact on every page, no jumps; looked at all three pages
 R3v.14 pass: three facts under "Book a session" on the first screen (₪160 an hour, Jerusalem and Beit Shemesh, open 09:00 to 23:00), all from the page's own price block and her record hours
 <!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->
+
+Note, 6 Nov 2026: a discount code box added to the booking form (mir-code.js, Tzvi: a code must work on a service as on a product). It shows only when the business has a code, so with none the page looks as before. With a code, the total and the WhatsApp message show the lower price. Nothing else on the page changed.

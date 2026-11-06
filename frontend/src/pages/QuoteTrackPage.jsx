@@ -11,12 +11,14 @@ import { toast } from 'sonner';
 import { Loader2, Calculator } from 'lucide-react';
 import { API } from '../lib/apiBase';
 import { money } from '../utils/currency';
+import DiscountCodeInput, { discountOn } from '../components/forms/DiscountCodeInput';
 
 export default function QuoteTrackPage() {
   const { token } = useParams();
   const { i18n } = useTranslation();
   const [d, setD] = useState(null);
   const [busy, setBusy] = useState('');
+  const [code, setCode] = useState(null);
   // A price the business sent first is shown in the language it was written
   // in (Hebrew loads on demand, i18n.js); a customer's own request follows the site.
   const [langReady, setLangReady] = useState(false);
@@ -34,7 +36,7 @@ export default function QuoteTrackPage() {
   const answer = async (a) => {
     setBusy(a);
     try {
-      await axios.post(`${API}/marketplace/quotes/track/${encodeURIComponent(token)}/answer`, { answer: a });
+      await axios.post(`${API}/marketplace/quotes/track/${encodeURIComponent(token)}/answer`, { answer: a, discount_code: a === 'accept' && code ? code.code : undefined });
       toast.success(a === 'accept' ? t('quote.acceptedToast', 'Accepted. The business will contact you to arrange it.') : t('quote.declinedToast', 'Declined.'));
       load();
     } catch (err) { toast.error(err?.response?.data?.detail || t('quote.failed', 'Could not send. Try again.')); } finally { setBusy(''); }
@@ -71,6 +73,17 @@ export default function QuoteTrackPage() {
               <p className="text-2xl font-bold tabular-nums" style={{ color: 'var(--ink)' }} data-testid="quote-price">{money(d.quote.price, d.quote.currency || 'ILS')}</p>
               {d.quote.note && <p className="text-sm mt-1 whitespace-pre-line" dir="auto" style={{ color: 'var(--ink)' }}>{d.quote.note}</p>}
               {d.quote.valid_until && <p className="text-xs mt-1" style={{ color: 'var(--brand-muted)' }}>{t('quote.validUntil', 'Valid until {{d}}', { d: d.quote.valid_until })}</p>}
+              {d.discount && (
+                <p className="text-sm font-semibold mt-1" style={{ color: 'var(--ink)' }} data-testid="quote-discount">
+                  {t('discounts.line', 'Discount {{code}}', { code: d.discount.code })}: −{money(d.discount.amount, d.quote.currency || 'ILS')} · {t('discounts.after', 'After the code: {{price}}', { price: money(d.quote.price - d.discount.amount, d.quote.currency || 'ILS') })}
+                </p>
+              )}
+              {d.status === 'quoted' && !d.expired && d.has_codes && (
+                <div className="mt-3" data-testid="quote-code">
+                  <DiscountCodeInput businessId={d.business_id} form="orders" amount={d.quote.price} phone={d.phone} currency={d.quote.currency || 'ILS'} applied={code} onApplied={setCode} />
+                  {code && <p className="text-sm font-semibold" style={{ color: 'var(--ink)' }} data-testid="quote-after">{t('discounts.after', 'After the code: {{price}}', { price: money(d.quote.price - discountOn(code, d.quote.price), d.quote.currency || 'ILS') })}</p>}
+                </div>
+              )}
               {d.status === 'quoted' && !d.expired && (
                 <div className="flex gap-2 mt-4">
                   <button type="button" disabled={!!busy} onClick={() => answer('accept')} className="flex-1 inline-flex items-center justify-center gap-1.5 min-h-[48px] rounded-full text-sm font-semibold disabled:opacity-60"

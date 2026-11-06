@@ -46,6 +46,7 @@
       <aside class="sum" aria-label="Your order">
         <div class="who"><img src="assets/logo.png" alt="" width="30" height="30"><div><b>KasherMyBnb</b><small>Kitchen kashering since 2019</small></div></div>
         <ul class="lines" data-lines></ul>
+        <input type="hidden" id="mir-ph"><div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
         <div class="total"><span>Total</span><b data-total>$0</b></div>
         <p class="fine" data-fee hidden>Outside Jerusalem there may be a fee for the distance. We tell you before the day.</p>
         <ul class="promise">
@@ -84,6 +85,9 @@
   ];
   if (o.notes) rows.push(['Notes', esc(o.notes)]);
   document.getElementById('rev').innerHTML = rows.map(function (r) { return '<div><dt>' + r[0] + '</dt><dd>' + r[1] + '</dd></div>'; }).join('');
+  delete o.code; delete o.codeText; delete o.after;
+  var paintTotal = function () { var t = MirCode.after(KMB.total(o)); document.querySelectorAll('[data-total]').forEach(function (b) { b.textContent = KMB.money(t); }); };
+  document.getElementById('mir-ph').value = o.phone;
   var href = KMB.waLink(o);
   ['send', 'send2'].forEach(function (id) {
     var a = document.getElementById(id);
@@ -93,6 +97,7 @@
       if (a.dataset.busy) return; a.dataset.busy = '1';
       // the WhatsApp tab opens first so the pop-up blocker allows it; it is filled once the booking is saved
       var tab = window.open('', '_blank');
+      if (MirCode.code()) { o.code = MirCode.code(); o.codeText = MirCode.text(KMB.total(o)); o.after = MirCode.after(KMB.total(o)); }
       KMB.submit(o).then(function (track) {
         if (track) { o.track = track; KMB.save(o); }
         var url = KMB.waLink(o);
@@ -102,6 +107,7 @@
     });
   });
   KMB.paint(o);
+  MirCode.mount({ api: KMB.API, gig: KMB.GIG, goods: function () { return KMB.total(o); }, money: KMB.money, phone: 'mir-ph', onChange: paintTotal });
 })();
 </script>
 </body>

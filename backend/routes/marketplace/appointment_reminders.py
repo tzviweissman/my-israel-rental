@@ -232,6 +232,8 @@ async def customer_cancel(token: str, request: Request):
     fire_in_background("appointment.cancelled", {"booking": {**b, "status": "cancelled"}, "gig": gig})
     from .deposits import owed_back
     await owed_back(b, by_business=False)
+    from .discounts import give_back_booking
+    await give_back_booking(b["_id"])
     from .appointment_extras import on_slot_freed
     await on_slot_freed(b.get("gig_id"), b.get("preferred_date"), b.get("staff_id"))
     return {"ok": True, "status": "cancelled"}

@@ -158,6 +158,11 @@ async def _is_returning(business_id: str, phone_e164: Optional[str]) -> bool:
         return False
     if await db.store_orders.count_documents({"business_id": business_id, "customer_phone_e164": phone_e164}, limit=1):
         return True
+    # A service counts as much as a product. ponytail: only bookings since 6 Nov 2026 carry these two fields.
+    if await db.marketplace_bookings.count_documents({"business_id": business_id, "contact_phone_e164": phone_e164}, limit=1):
+        return True
+    if await db.quote_requests.count_documents({"business_id": business_id, "phone_e164": phone_e164, "status": "accepted"}, limit=1):
+        return True
     async for m in db.business_members.find({"business_id": business_id}, {"phone": 1}):
         if normalize_whatsapp_number(m.get("phone")) == phone_e164:
             return True
@@ -194,7 +199,7 @@ async def evaluate(business_id: str, code: str, form: Literal["orders", "members
         raise CodeRefused("This code has expired")
     if c.get("max_uses") and c.get("uses", 0) >= c["max_uses"]:
         raise CodeRefused("This code has been used up")
-    if form == "orders" and c.get("min_order") and amount < c["min_order"]:
+    if form == "orders" and c.get("min_order") and 0 < amount < c["min_order"]:
         raise CodeRefused(f"This code needs an order of at least {'$' if (currency or c.get('currency')) == 'USD' else '₪'}{c['min_order']:g}")
     e164 = normalize_whatsapp_number(phone) if phone else None
     if c.get("referral_of") and e164 == c["referral_of"]:
@@ -226,6 +231,72 @@ async def redeem(c: dict[str, Any], discount: float, phone: Optional[str]) -> bo
     return (await db.discount_codes.update_one(q, upd)).modified_count == 1
 
 
+_HE = {
+    "This code is not valid": "הקוד הזה לא תקף",
+    "This code has expired": "תוקף הקוד הסתיים",
+    "This code has been used up": "הקוד הזה כבר נוצל עד הסוף",
+    "This code is for orders only": "הקוד הזה מיועד להזמנות בלבד",
+    "This code is for memberships only": "הקוד הזה מיועד למנויים בלבד",
+    "This is your own code: send it to a friend": "זה הקוד שלך: שלחו אותו לחבר או חברה",
+    "You have already used this code": "כבר השתמשת בקוד הזה",
+    "This code is for first-time customers": "הקוד הזה מיועד ללקוחות חדשים",
+    "This gift card has been used up": "יתרת שובר המתנה נוצלה",
+    "This gift card has expired": "תוקף שובר המתנה הסתיים",
+    "This code is in dollars and this total is not, so it cannot be used here": "הקוד הזה בדולרים והסכום כאן לא, ולכן אי אפשר להשתמש בו",
+    "This code is in shekels and this total is not, so it cannot be used here": "הקוד הזה בשקלים והסכום כאן לא, ולכן אי אפשר להשתמש בו",
+    "This gift card is in dollars and this total is not, so it cannot be used here": "שובר המתנה הזה בדולרים והסכום כאן לא, ולכן אי אפשר להשתמש בו",
+    "This gift card is in shekels and this total is not, so it cannot be used here": "שובר המתנה הזה בשקלים והסכום כאן לא, ולכן אי אפשר להשתמש בו",
+}
+
+
+def say(reason: str, lang: Optional[str]) -> str:
+    """A refusal in the customer's language. The two with a date or an amount in them are built here."""
+    if not (lang or "").startswith("he"):
+        return reason
+    if reason.startswith("This code starts on "):
+        return "הקוד הזה מתחיל ב-" + reason.rsplit(" ", 1)[1]
+    if reason.startswith("This code needs an order of at least "):
+        return "הקוד הזה דורש הזמנה של " + reason.rsplit(" ", 1)[1] + " לפחות"
+    return _HE.get(reason, reason)
+
+
+async def use_code(business_id: Optional[str], code: str, amount: Optional[float], phone: Optional[str], currency: Optional[str]) -> dict[str, Any]:
+    """Check a code against a service's price and count one use: what a booking or
+    an accepted price keeps. Raises CodeRefused. No price yet (amount None or 0): the
+    code is still noted with what it gives, for the business to take off its own price."""
+    c, off = await evaluate(business_id, code, "orders", amount or 0, phone, currency)
+    if not await redeem(c, off, phone):
+        raise CodeRefused("This code has been used up")
+    return {"id": c["_id"], "code": c["code"], "amount": off, "kind": c["kind"], "value": c["value"],
+            "gift_card": bool(c.get("gift_card")), "referral": bool(c.get("referral_of")), "currency": currency or "ILS"}
+
+
+async def give_back_booking(booking_id: str) -> None:
+    """A booking that was declined, cancelled or ran out never happened, so its code is
+    good again and a gift card gets its money back. Once only, whoever calls first.
+    ponytail: a friend's referral code stays counted; its reward has already gone out (referrals.redeem)."""
+    b = await db.marketplace_bookings.find_one_and_update(
+        {"_id": booking_id, "discount": {"$type": "object"}, "discount.returned": {"$ne": True}},
+        {"$set": {"discount.returned": True}}, {"discount": 1, "contact_phone": 1})
+    if b:
+        await return_use(b["discount"], b.get("contact_phone"))
+
+
+async def return_use(d: dict[str, Any], phone: Optional[str]) -> None:
+    if d.get("referral") or not d.get("id"):
+        return
+    if d.get("gift_card"):
+        if d.get("amount"):
+            await db.gift_cards.update_one({"_id": d["id"]}, {"$inc": {"balance": d["amount"]}, "$set": {"status": "active"},
+                                                              "$push": {"uses": {"at": datetime.now(IL).isoformat(), "amount": -d["amount"], "where": "booking not taken"}}})
+        return
+    upd: dict[str, Any] = {"$inc": {"uses": -1, "discount_given": -(d.get("amount") or 0)}}
+    e164 = normalize_whatsapp_number(phone) if phone else None
+    if e164:
+        upd["$pull"] = {"used_by": e164}
+    await db.discount_codes.update_one({"_id": d["id"]}, upd)
+
+
 async def has_codes(biz: dict[str, Any]) -> bool:
     """Whether a customer could be holding a code here, so a designed site's
     order form knows to offer the box (public/pages/mir-code.js). A code past
@@ -245,6 +316,19 @@ class CheckIn(BaseModel):
     amount: float = Field(0, ge=0, le=1_000_000)
     phone: Optional[str] = Field(None, max_length=40)
     currency: Optional[str] = Field(None, max_length=3)
+    lang: Optional[str] = Field(None, max_length=5)
+
+
+@router.get("/gigs/{gig_id}/code-box")
+async def code_box(gig_id: str):
+    """What a designed site's form needs to know about any listing, product or service
+    (public/pages/mir-code.js): the business, and whether to offer the box."""
+    from .orders import pause_of
+    gig = await db.marketplace_gigs.find_one({"_id": gig_id}, {"business_id": 1, "status": 1})
+    biz = await db.businesses.find_one({"_id": gig.get("business_id")}) if gig and gig.get("business_id") else None
+    if not gig or gig.get("status", "published") != "published" or not biz or not biz.get("active", True):
+        raise HTTPException(status_code=404, detail="This listing is not taking orders")
+    return {"business": {"id": biz["_id"]}, "has_codes": await has_codes(biz), "paused": pause_of(biz)}
 
 
 @router.post("/businesses/{business_id}/discount-codes/check")
@@ -255,9 +339,10 @@ async def check_code(business_id: str, body: CheckIn, request: Request):
     try:
         c, off = await evaluate(business_id, body.code, body.form, body.amount, body.phone, body.currency)
     except CodeRefused as e:
-        return {"ok": False, "reason": str(e)}
+        return {"ok": False, "reason": say(str(e), body.lang)}
     return {"ok": True, "code": c["code"], "kind": c["kind"], "value": c["value"], "discount": off}
 
 
 async def ensure_discount_indexes() -> None:
+    await db.marketplace_bookings.create_index([("business_id", 1), ("contact_phone_e164", 1)], sparse=True)
     await db.discount_codes.create_index([("business_id", 1), ("code", 1)], unique=True)

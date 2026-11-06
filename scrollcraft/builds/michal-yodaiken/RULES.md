@@ -207,3 +207,7 @@ Note, 1 Nov 2026: the arrow after the footer button was removed (its font has no
 
 
 Note, 6 Nov 2026: split into Home, Ways to train and Book (split-four-sites). The lines for the buttons, menu, pages, footer and order of sections were rewritten for it; the footer heading "On this page" is now "Pages", and the Home closing button "Choose a day and time" is now "Message to book". The Book page opens on its heading, the price and the WhatsApp line without a photo (a wide photo in a short band was cropped, 3c.12), so the form is on the first screen; the Home closing band keeps the photo. All rules were read again against the three pages on 6 Nov 2026. Owner edit keys: text and photos moved to the new pages keep the data-mir-key they had (written into the source); only the footer heading "On this page" and the Home button "Choose a day and time" were reworded on purpose, so their old keys are gone.
+
+Note, 6 Nov 2026: a discount code box added to the booking form (mir-code.js, Tzvi: a code must work on a service as on a product). It shows only when the business has a code, so with none the page looks as before. With a code, the total and the WhatsApp message show the lower price. Nothing else on the page changed.
+
+Note, 6 Nov 2026: the empty code box takes no room on the form, so the Book section still fits the screen at 1280x650 when a business has no code.

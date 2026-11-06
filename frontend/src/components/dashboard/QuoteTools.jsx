@@ -76,7 +76,7 @@ export function PayFromQuote({ API, auth, q }) {
     setBusy(true);
     try {
       const { data } = await axios.post(`${API}/marketplace/businesses/${q.business_id}/payment-requests`, {
-        amount: q.quote.price, description: (q.gig_title || q.description || '').slice(0, 160).trim() || t('quoteSend.theJob', 'The job'),
+        amount: q.quote.price - (q.discount?.amount || 0), description: (q.gig_title || q.description || '').slice(0, 160).trim() || t('quoteSend.theJob', 'The job'),
         customer_name: q.name, customer_phone: q.phone || null, customer_email: q.email || null, lang: q.lang || 'he',
       }, auth);
       setMade({ ...data, phone: q.phone, email: q.email });

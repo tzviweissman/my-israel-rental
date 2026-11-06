@@ -68,6 +68,7 @@
         <aside class="card sum" aria-live="polite">
           <h3 id="sum-h">Your session</h3>
           <ul id="sum"><li><span>Nothing chosen yet</span></li></ul>
+          <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
           <p class="assure">Nothing to pay on this page. We confirm your time on WhatsApp.</p>
           <div class="toast" id="toast" role="status" aria-live="polite" hidden><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" style="flex:none"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg><p><b>Session written out</b>Press send in WhatsApp and we will confirm your time.</p></div>
@@ -188,6 +189,8 @@
     if (city()) rows.push('<li><span>' + city() + chg(2, 'place') + '</span><span></span></li>');
     if (v('day') && time) rows.push('<li><span>' + nice(v('day')) + ', ' + time + ' to ' + endOf(time) + chg(2, 'day and time') + '</span><span></span></li>');
     $('sum').innerHTML = rows.join('');
+    MirCode.refresh();
+    total = MirCode.after(total);
     $('total').textContent = '₪' + total;
     if (step === 1) $('next1').textContent = 'Continue to day and time, ₪' + total;
     else if (step === 2) $('send-l').textContent = 'Continue to your details';
@@ -213,20 +216,21 @@
   function toast() { var t = $('toast'); clearTimeout(toastT); t.hidden = false; requestAnimationFrame(function () { requestAnimationFrame(function () { t.classList.add('in'); }); }); toastT = setTimeout(function () { t.classList.remove('in'); setTimeout(function () { t.hidden = true; }, 220); }, 2600); }
   function setSend() { var b = $('send'); b.disabled = phase === 'open'; b.setAttribute('aria-busy', phase === 'open' ? 'true' : 'false'); }
 
+  MirCode.mount({ api: API, gig: GIG, goods: function () { return RATE * hrs; }, phone: 'ph', field: 'fld', onChange: function () { update(); } });
   $('form').addEventListener('submit', function (e) {
     e.preventDefault();
     if (phase) return;
     if (step < 3) { if (!check(true, step)) { var bad1 = document.querySelector('.bad .fld, .bad input'); if (bad1) bad1.focus(); return; } go(step + 1, true); return; }
     if (!check(true)) { for (var s1 = 1; s1 <= 3; s1++) if (!check(false, s1)) { check(true, s1); go(s1, true); break; } var bad = document.querySelector('.bad .fld, .bad input'); if (bad) bad.focus(); return; }
-    var total = RATE * hrs, lines = ['Hi Noa, I would like to book:', '• ' + SERVICES[svc] + ', ' + hrLabel() + ' at ₪' + RATE + ' an hour', 'Where: ' + city(), 'When: ' + nice(v('day')) + ', ' + time + ' to ' + endOf(time)];
+    var total = MirCode.after(RATE * hrs), lines = ['Hi Noa, I would like to book:', '• ' + SERVICES[svc] + ', ' + hrLabel() + ' at ₪' + RATE + ' an hour', 'Where: ' + city(), 'When: ' + nice(v('day')) + ', ' + time + ' to ' + endOf(time)];
     if (v('note')) lines.push('To organize: ' + v('note'));
     lines.push('Total: ₪' + total + ' (accessories not included)', 'Name: ' + v('me') + ', ' + v('ph'));
-    var text = lines.join('\n'), msg = lines.slice(1, -1).join('; ');
+    var msg = lines.slice(1, -1).join('; '), text = lines.concat(MirCode.code() ? [MirCode.text(RATE * hrs)] : []).join('\n');
     phase = 'open'; setSend();
     // saved on MyIsraelRental first (page rules 3k); the WhatsApp tab opens first so the pop-up blocker allows it
     var tab = window.open('', '_blank');
     var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ tier_name: SERVICES[svc], preferred_date: v('day'), time_slot: time, guest_name: v('me'), contact_phone: v('ph'), message: msg, lang: 'en' }) })
+      body: JSON.stringify({ tier_name: SERVICES[svc], preferred_date: v('day'), time_slot: time, guest_name: v('me'), contact_phone: v('ph'), message: msg, lang: 'en', amount: RATE * hrs, discount_code: MirCode.code() }) })
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
       .catch(function (err) { console.warn('booking not saved', err); return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {

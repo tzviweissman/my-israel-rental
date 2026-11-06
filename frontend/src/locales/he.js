@@ -7053,6 +7053,7 @@ const he = {
         applied: "הקוד {{code}} הוחל",
         remove: "הסרה",
         checkFailed: "לא הצלחנו לבדוק את הקוד. נסו שוב.",
+        after: "אחרי הקוד: {{price}}",
         line: "הנחה {{code}}",
         memberPrice: "{{price}} במקום {{was}}",
         memberLine: "קוד {{code}}: לתשלום {{price}}",

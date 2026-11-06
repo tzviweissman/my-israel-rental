@@ -42,7 +42,7 @@ function QuoteCard({ q, API, auth, onChanged }) {
       <button type="button" onClick={() => setOpen(!open)} className="w-full flex items-start justify-between gap-2 p-3 text-start" aria-expanded={open}>
         <span className="min-w-0">
           <span className="block text-sm font-semibold" style={{ color: 'var(--ink)' }} dir="auto">{q.name} · {q.gig_title || q.description.slice(0, 60)}</span>
-          <span className="block text-xs" style={{ color: 'var(--brand-muted)' }}>{STATUS[q.status]}{q.quote ? ` · ${money(q.quote.price, 'ILS')}` : ''}</span>
+          <span className="block text-xs" style={{ color: 'var(--brand-muted)' }}>{STATUS[q.status]}{q.quote ? ` · ${money(q.quote.price, 'ILS')}` : ''}{q.discount ? ` · ${t('discounts.line', 'Discount {{code}}', { code: q.discount.code })}: −${money(q.discount.amount, 'ILS')}` : ''}</span>
         </span>
         {open ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
       </button>

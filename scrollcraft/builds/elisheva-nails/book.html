@@ -62,6 +62,7 @@
         <aside class="card sum" aria-live="polite">
           <h3 id="sum-h">Your booking</h3>
           <ul id="sum"><li><span>Nothing chosen yet</span></li></ul>
+          <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
           <p class="assure"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 8.5l3.2 3.2L13 4.8"/></svg>Nothing to pay on this page. Your time is yours once I confirm it on WhatsApp.</p>
           <button class="btn" id="send" type="submit"><span>Continue to your details</span></button>
@@ -202,7 +203,8 @@ var SHADE_C = {"milky": "#F4EFEE", "bubblegum": "#F3A9C6", "nude": "#E7C4B5", "r
     if (shade) rows.push('<li><span>Shade' + chg(1, 'shade') + '</span><span>' + SHADES[shade] + '</span></li>');
     if ($('day').value && time) rows.push('<li><span>' + nice($('day').value) + chg(2, 'day and time') + '</span><span>' + time + '</span></li>');
     $('sum').innerHTML = rows.join('') || '<li><span>Nothing chosen yet</span></li>';
-    $('total').textContent = '₪' + (s ? s.p : 0);
+    MirCode.refresh();
+    $('total').textContent = '₪' + MirCode.after(s ? s.p : 0);
     // the heading is the honest pause: "Ready to book?" once everything is in, and the first name once given
     var nm = v('me').split(/\s+/)[0], ok = valid();
     $('sum-h').textContent = ok ? 'Ready to book' + (nm ? ', ' + nm : '') + '?' : 'Your booking' + (nm ? ', ' + nm : '');
@@ -248,6 +250,7 @@ var SHADE_C = {"milky": "#F4EFEE", "bubblegum": "#F3A9C6", "nude": "#E7C4B5", "r
     var t = $('toast'); clearTimeout(toastT); t.hidden = false; requestAnimationFrame(function () { requestAnimationFrame(function () { t.classList.add('in'); }); });
     toastT = setTimeout(function () { t.classList.remove('in'); setTimeout(function () { t.hidden = true; }, 220); }, 2400);
   }
+  MirCode.mount({ api: API, gig: GIG, goods: function () { return SERVICES[svc] ? SERVICES[svc].p : 0; }, phone: 'ph', field: 'fld', onChange: function () { update(); } });
   $('form').addEventListener('submit', function (e) {
     e.preventDefault();
     if (phase) return;
@@ -260,12 +263,12 @@ var SHADE_C = {"milky": "#F4EFEE", "bubblegum": "#F3A9C6", "nude": "#E7C4B5", "r
     lines.push('When: ' + nice(v('day')) + ' at ' + time);
     if (v('note')) lines.push('Note: ' + v('note'));
     lines.push('Name: ' + v('me') + ', ' + v('ph'));
-    var text = lines.join('\n'), msg = lines.slice(1, -1).join('; ');
+    var msg = lines.slice(1, -1).join('; '), text = lines.concat(MirCode.code() ? [MirCode.text(s.p)] : []).join('\n');
     phase = 'open'; setSend();
     // the WhatsApp tab opens first so the pop-up blocker allows it; it is filled once the booking is saved
     var tab = window.open('', '_blank');
     var post = fetch(API + '/marketplace/gigs/' + GIG + '/book', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ tier_name: TIER[svc], preferred_date: v('day'), time_slot: time, guest_name: v('me'), contact_phone: v('ph'), message: msg, lang: 'en' }) })
+      body: JSON.stringify({ tier_name: TIER[svc], preferred_date: v('day'), time_slot: time, guest_name: v('me'), contact_phone: v('ph'), message: msg, lang: 'en', amount: s.p, discount_code: MirCode.code() }) })
       .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('booking not saved', r.status, t); return null; }); })
       .catch(function (err) { console.warn('booking not saved', err); return null; });
     Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {

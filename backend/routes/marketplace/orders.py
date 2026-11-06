@@ -2538,12 +2538,12 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     # never the delivery fee.
     discount = None
     if payload.discount_code and payload.discount_code.strip() and lines:
-        from .discounts import CodeRefused, evaluate, redeem
+        from .discounts import CodeRefused, evaluate, redeem, say
         try:
             code_doc, off = await evaluate(biz["_id"], payload.discount_code, "orders", subtotal, payload.customer_phone, currency)
         except CodeRefused as e:
             await _put_back(gig["_id"], stock_taken)
-            raise HTTPException(status_code=400, detail=str(e)) from e
+            raise HTTPException(status_code=400, detail=say(str(e), payload.lang)) from e
         if not await redeem(code_doc, off, payload.customer_phone):
             await _put_back(gig["_id"], stock_taken)
             raise HTTPException(status_code=400, detail="This code has been used up")
