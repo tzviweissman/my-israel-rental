@@ -31,7 +31,7 @@ function Rows({ title, rows, label, testid }) {
 }
 
 export default function VisitBreakdown({ API, token, everyone = false, className = 'mb-6' }) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [d, setD] = useState(null);
   useEffect(() => {
     axios.get(`${API}/marketplace/visits/breakdown`, { params: { days: 30, everyone }, headers: { Authorization: `Bearer ${token}` } })
@@ -50,7 +50,7 @@ export default function VisitBreakdown({ API, token, everyone = false, className
       <h2 className="text-base font-semibold" style={{ color: 'var(--ink)' }}>{t('visits.title', 'Who visits, last {{n}} days', { n: d.days })}</h2>
       <p className="text-xs mt-0.5 mb-4" style={{ color: 'var(--brand-muted)' }}>
         {t('visits.total', '{{n}} visits', { n: d.visits })}
-        {d.since ? ` · ${t('visits.since', 'details counted from {{date}}', { date: d.since })}` : ''}
+        {d.since ? ` · ${t('visits.since', 'details counted from {{date}}', { date: new Date(`${d.since}T12:00:00`).toLocaleDateString(i18n.language?.startsWith('he') ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'long' }) })}` : ''}
       </p>
       <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
         <Rows title={t('visits.sources', 'Where they came from')} rows={d.sources} label={word('source')} testid="visits-sources" />
