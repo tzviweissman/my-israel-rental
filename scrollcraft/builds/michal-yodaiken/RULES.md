@@ -21,9 +21,9 @@ R5.1 pass: read every line in the page source; her words, plain voice
 R5.2 pass: read every line in the page source; her words, plain voice
 R5.3 pass: labels are phrases ("for 30 minutes", "Message for a price", "at your home")
 R5.4 pass: searched for they, them, their: none
-R5b.2 pass: every main button reads "Message to book" and goes to https://myisraelrental.com/business/michal-yodaiken (bar, hero, offers header, booking, footer); card prices have no button
+R5b.2 pass: on every page every main button reads "Message to book" and goes to the booking page (book.html): the bar, the opening, the Ways to train header, the closing band on Home, the footer button and link; card prices have no button; on the booking page itself the form button says "Send on WhatsApp" (it sends the request)
 R5b.8 pass: closing line "A stronger, healthier you" names the gain; "Prefer WhatsApp?" is followed by the visible WhatsApp link
-R3.11 pass: order read top to bottom: promise, five ways with prices, her gym, what we work on, numbers, FAQ, booking
+R3.11 pass: order of the pages: Home (promise, what we work on, numbers, FAQ, the way to book), Ways to train (five ways with prices, her gym), Book (the request)
 R3o.4 pass: the one number 07563 299474 is labelled WhatsApp everywhere and never breaks across lines (no-break)
 R3e.22 n/a: no photo of Michal herself has been sent; asked for in the reply. Her name and WhatsApp are in the bar and footer
 R3s.19 pass: head has title, description; link preview tags are unchanged; the phone number is wrapped so it never breaks across lines
@@ -35,7 +35,7 @@ R3b.2 n/a: no shop, basket or products on this site (a service enquiry only); th
 R3b.3 pass: bar button is outline; hero button is the same outline style on a photo; one per screen on phone (the bar button steps aside)
 R3h.1 pass: first screen is a full-screen photo and the session clock starts in the bar and runs as you scroll
 R3n.1 pass: her setting photo fills the whole first screen on laptop and phone
-R3n.2 pass: the 30-minute session clock in the bar that reaches 30:00 as you reach booking; only a trainer selling 30-minute sessions has it
+R3n.2 pass: the 30-minute session clock in the bar reaches 30:00 as you reach the closing band on Home (the end of the page on the other pages), on every page; only a trainer selling 30-minute sessions has it
 R3n.3 pass: scroll changes the bar (clock, then pink at 30:00) and the FAQ opens; check-motion passes (no choices to tap)
 R3n.4 pass: compared with docs/inspo/awwwards-anatomy-2026-10-22/events-sports-homes/perflab-sheet.webp: same order (photo opening, offer cards, numbers on black, FAQ); ours is plainly weaker on people-in-action photos, which Michal must send
 R3n.5 pass: you land on her training room and a session clock starts and runs while you scroll
@@ -51,7 +51,7 @@ R3h.13 n/a: this site has no such element (see the page: no cut-out, carousel, a
 R3h.14 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.17 n/a: this site has no such element (see the page: no cut-out, carousel, ambient video or film chapter lines)
 R3h.18 n/a: the page has no generated film (stills only)
-R3.12 pass: hero, offers with price, booking section near the end with the price beside the button
+R3.12 pass: hero, then the closing band on Home with the price beside the Message to book button; the offers with price are on Ways to train; the booking page holds the request
 R3c.1 pass: references are in CONCEPT.md (Performance Lab, Reel Motion, Sixes sheets under docs/inspo/awwwards-anatomy-2026-10-22)
 R3g.17 pass: effects named in CONCEPT.md with sources; nothing new added in this rework beyond plain cards and details/summary
 R3c.2 pass: black, white, one pink from her flyer, condensed capitals; a pink section and a black section contrast
@@ -67,8 +67,8 @@ R9.1 n/a: no scroll-scene section on this page
 R3f.2 pass: signature = clock; accents = pink bar at the end, offer cards, FAQ; quiet touches = hover fills on the buttons
 R3m.1 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3m.3 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
-R3k.1 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
-R3k.2 n/a: the site is one page
+R3k.1 pass: split into three pages on 6 Nov 2026 (Tzvi: "split all 4 into separate pages"): Home, Ways to train (ways.html) and Book (book.html); the FAQ and the session numbers stay on Home (five short answers, too thin for a page). Old addresses /business/<slug>#book, #request, #ways, #gym and #private forward to the page that holds them by a short script on Home; #session and #faq are still on Home. No contact page: the record has one WhatsApp number and no address, email or hours, already in every footer
+R3k.2 pass: the bar is the same markup on all three pages: the name to Home, the session clock, Home, Ways to train, Book and the one Message to book button; on a phone the bar sits at the bottom with the clock and the button, and a Menu button at the top right opens the same list (Home, Ways to train, Book) and WhatsApp; it closes on a second tap, a link tap or Escape; the Book page has no bar button on a phone because the page is the booking
 R3k.4 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R8a.1 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
 R3b.4 pass: three of four settings are generated so facts carry the page: offers, numbers, FAQ
@@ -87,7 +87,7 @@ R3s.11 n/a: no shop, basket or products on this site (a service enquiry only); t
 R5b.6 pass: no scroll cue, no counters except the session clock, which is the signature; section labels are minimal
 R3.13 pass: no doubled contact (WhatsApp in the session block, booking and footer is the one number, labelled the same); the gallery rule does not apply
 R3a.1 pass: screenshots walked at 1440x900 and 390x844 (touch), the six fit sizes by check-fits, every screen looked at; reduced motion not separately recorded
-R3r.1 pass: the site has one page; check-site, check-fits, check-motion run on it; readable.mjs crashed the renderer (checker limit, run twice); clipped and cutoff ran clean
+R3r.1 pass: the site has three pages; check-site, check-fits, check-motion run on them; readable.mjs crashed the renderer (checker limit, run twice); clipped and cutoff ran clean
 R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; all findings fixed and re-checked, owner gaps listed in message-to-owner
 R3g.12 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
 R0b.12 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
@@ -130,8 +130,8 @@ R3.14 n/a: the page shows no loud prices as a selling device
 R3k.7 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3k.8 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3k.6 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
-R3k.9 pass: check-site SAVE passes: the new request section POSTs to /api/marketplace/gigs/135e7aac-.../book with tier_name Personal Training, preferred_date, time_slot on the hour from her listing hours (09:00 to 20:00, Sunday to Friday), guest_name, contact_phone, message (what and when); WhatsApp opens first and carries the tracking link; a failed save still opens WhatsApp
-R3.15 pass: the action is booking by message and the button and WhatsApp number are on the page
+R3k.9 pass: the request section moved unchanged to the Book page: check-site SAVE passes: it POSTs to /api/marketplace/gigs/135e7aac-.../book with tier_name Personal Training, preferred_date, time_slot on the hour from her listing hours (09:00 to 20:00, Sunday to Friday), guest_name, contact_phone, message (what and when); WhatsApp opens first and carries the tracking link; a failed save still opens WhatsApp
+R3.15 pass: the action is the booking page, one button everywhere, and the WhatsApp number is on the page
 R7.1 pass: hand build; one direction (her flyer look, trainer pattern) in CONCEPT.md, no options put to anyone
 R8.5 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R0b.13 pass: the request is saved with a tracking link (/bookings/track/...) before WhatsApp opens, and the message carries that link (see R3k.9)
@@ -173,7 +173,7 @@ R3s.23 pass: check-site PHONE passes
 R3t.1 pass: meta site-category trainer on the page and Category: trainer in CONCEPT.md; offers as cards with prices side by side, numbers on black, FAQ
 R3t.2 n/a: category is not food-shop or fashion-shop
 R3t.3 pass: pictures are the hero, her gym and the booking screen: 3 of 7 sections, never three plain sections in a row (offers, gym photo, pink, black, FAQ, photo)
-R3t.4 pass: footer has a last big line, the button, three link columns, contact and the MyIsraelRental line
+R3t.4 pass: footer on every page has a last big line, the button, link columns and contact and the MyIsraelRental line
 R3a.7 pass: phone screenshots were taken with touch emulation
 R3a.8 n/a: no dot-separated lines
 R3r.3 pass: run after the last edit: check-site, check-fits, check-motion clean; readable crashed (named above)
@@ -198,9 +198,12 @@ R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.12 pass: arrival and question-card pieces taken from scrollcraft/starter/kit (tried on kit/test.html); the next-day button is a plain button, no new motion
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
-R3v.1 pass: the closing footer is now in parts: who she is (name, her own line from the opening, a link with an arrow to Message to book), On this page (a site of Home alone, so its sections), Booking (30 minutes, ₪60 at home, a price on message for the rest, Jerusalem, women only, English), Reach us (WhatsApp, our MyIsraelRental page), then "© 2026 Michal Yodaiken." with the MyIsraelRental and Privacy line; no founding year in the record; check-footer clean; looked at it at 1366 and 390
-R3v.2 n/a: a site of Home alone; the bar keeps the session clock and its one button
+R3v.1 pass: the closing footer is now in parts: who she is (name, her own line from the opening, a link with an arrow to Message to book), Pages (Home, Ways to train, Your session, Good to know, Book; the same footer on every page), Booking (30 minutes, ₪60 at home, a price on message for the rest, Jerusalem, women only, English), Reach us (WhatsApp, our MyIsraelRental page), then "© 2026 Michal Yodaiken." with the MyIsraelRental and Privacy line; no founding year in the record; check-footer clean; looked at it at 1366 and 390
+R3v.2 pass: the site has other pages, so the bar lists them (Home, Ways to train, Book) and has no jumps down a page; the same list on every page
 R3v.14 pass: under Message to book on the first screen: ₪60 for a 30-minute session / Sessions tailored to your goals and fitness level / Training in English (her listing and flyer); the list is class btn-facts and now sits under the button instead of beside it; check-facts clean at 390 and 1366
 <!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->
 
 Note, 1 Nov 2026: the arrow after the footer button was removed (its font has no arrow; check-site GLYPH). No rule answer changes.
+
+
+Note, 6 Nov 2026: split into Home, Ways to train and Book (split-four-sites). The lines for the buttons, menu, pages, footer and order of sections were rewritten for it; the footer heading "On this page" is now "Pages", and the Home closing button "Choose a day and time" is now "Message to book". The Book page opens on its heading, the price and the WhatsApp line without a photo (a wide photo in a short band was cropped, 3c.12), so the form is on the first screen; the Home closing band keeps the photo. All rules were read again against the three pages on 6 Nov 2026. Owner edit keys: text and photos moved to the new pages keep the data-mir-key they had (written into the source); only the footer heading "On this page" and the Home button "Choose a day and time" were reworded on purpose, so their old keys are gone.

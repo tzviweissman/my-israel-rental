@@ -2,5 +2,13 @@
   {
     "page": "index",
     "title": "Home"
+  },
+  {
+    "page": "ways",
+    "title": "Five ways to train"
+  },
+  {
+    "page": "book",
+    "title": "Book a session"
   }
 ]
