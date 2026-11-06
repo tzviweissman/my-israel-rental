@@ -207,7 +207,7 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
         <StatCard
           Icon={CalendarCheck}
           label={t('overview.waiting', 'Waiting on you')}
-          value={summaryReady ? waiting : '–'}
+          value={summaryReady ? waiting : '…'}
           sub={!summaryReady ? '' : waiting === 0 ? t('overview.waitingNone', 'Nothing needs a reply') : t('overview.waitingAcross', { defaultValue: 'across {{n}} places, listed above', n: waitingRows.length })}
           testid="waiting"
           onClick={waitingRows.length ? () => onGoToTab(waitingRows[0].tab) : undefined}
@@ -216,7 +216,7 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
         <StatCard
           Icon={MessageCircle}
           label={t('overview.leads', { defaultValue: 'Leads, last {{n}} days', n: windowDays(leads?.days || 30) })}
-          value={!loaded ? '–' : leads ? leads.period : 0}
+          value={!loaded ? '…' : leads ? leads.period : 0}
           sub={!loaded ? '' : leads ? (leads.since ? t('overview.allTime', { defaultValue: '{{n}} all time · counting since {{date}}', n: leads.total, date: formatDate(leads.since) }) : sinceLine(null)) : t('overview.leadsNa', 'Add a listing to start counting')}
           chart={leads?.since ? <div className="max-w-xs"><ScanChart daily={leads.daily} testidPrefix="overview-leads" /></div> : null}
           testid="leads"
@@ -224,7 +224,7 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
         <StatCard
           Icon={Eye}
           label={t('overview.visitorsN', { defaultValue: 'Visitors, last {{n}} days', n: windowDays(30) })}
-          value={!loaded ? '–' : visitors ? visitors.period : 0}
+          value={!loaded ? '…' : visitors ? visitors.period : 0}
           sub={!loaded ? '' : visitors ? sinceLine(visitors.since) : t('overview.leadsNa', 'Add a listing to start counting')}
           chart={visitors?.since ? <div className="max-w-xs"><ScanChart daily={visitors.daily} testidPrefix="overview-visitors" /></div> : null}
           testid="visitors"
@@ -232,7 +232,7 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
         <StatCard
           Icon={QrCode}
           label={t('overview.scans', 'QR & link scans')}
-          value={!loaded ? '–' : scans ? scans.total_scans : 0}
+          value={!loaded ? '…' : scans ? scans.total_scans : 0}
           sub={
             !scans ? '' : scans.links.length === 0
               ? t('overview.noLinks', 'No share links yet')
