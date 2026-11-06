@@ -220,3 +220,5 @@ R3v.14 pass: the existing proof list (boxes of 4 or 8 from ₪55, Pareve, Pick-u
 <!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->
 
 Note, 6 Nov 2026: split into Home, Order and Prices (split-four-sites). The lines for the buttons, menu bar, footer, pages, order and flavour cards were rewritten for it; the opening, the builder and the look are unchanged.
+
+Note, 6 Nov 2026 (later): the Order and Prices headlines are h1 and keep the editing keys their old h2 headlines had (t-549a331c-0, t-5f4945d1-0), so owner edits follow them. All rules re-read against the three pages; no answer changes.
