@@ -9,6 +9,9 @@ Format: `- [Severity] Area: what goes wrong, for whom. First seen DATE (report).
 
 ## Open
 
+- [Fixed 6 Nov] Visit-count strings had no plural forms; dashboard overview showed an en dash while loading. a9625ae8, c02dcc51 (2026-11-06-ui-audit.md).
+- [To check] 6 Nov: discount-code box, order texts, gift-card purchase and new Advertising/Texts dashboard panels were not rendered (no API in the sandbox); green #2E7D4F used for discount lines on orders (2026-11-06-ui-audit.md).
+
 Merged 23 Oct 2026 from every audit branch of 16 to 22 Oct (none had been merged), each line re-checked against main.
 
 - [Low] Page editor link filter accepts "/%2F/evil.com"; stays a path on this site, probably harmless. First seen 12 Oct.
@@ -286,3 +289,6 @@ Lines from the 24 to 29 Oct audit branches that were not yet here (some repeat o
 ## UI audit of 2 Nov 2026
 - [Low] Chicken Munch home scrolls 7px sideways at 375 (closing block `.go-order`, `site.css:312`). First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
 - [Low] Footer and menu links on the 17 business sites are 19 to 24px tall on phones, under 44px. First seen 2 Nov 2026 (2026-11-02-ui-audit.md).
+## Code review of 5 Nov 2026
+- [Fixed 5 Nov, 512b5b0] Visit counters used {{count}} with no plural forms; test-i18n-parity failed (2026-11-05-site-audit.md).
+- [Medium] Audit setup hung over 40 minutes at the dev-server step on 5 Nov, so no build or full suite ran (2026-11-05-site-audit.md).
