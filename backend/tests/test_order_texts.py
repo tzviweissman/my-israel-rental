@@ -268,6 +268,18 @@ def test_dashboard_decision_tells_the_customer_only(world):
     assert sent.await_count == 0
 
 
+def test_customer_told_order_arrived(world):
+    order, sent = world
+    biz = {"name": "Blazin Boards"}
+    run(ot.text_customer_received(order, biz))
+    body = sent.await_args.kwargs["body"]
+    assert sent.await_args.kwargs["to"] == "972521112222"
+    assert "#1042" in body and "confirm" in body and "/orders/track/" in body
+    sent.reset_mock()
+    run(ot.text_customer_received({**order, "table": 4}, biz))
+    assert sent.await_count == 0
+
+
 def test_app_link_opens_the_app():
     from utils.whatsapp_link import build_whatsapp_app_link
     assert build_whatsapp_app_link("052-111-2222", "a b") == "whatsapp://send?phone=972521112222&text=a%20b"

@@ -1439,24 +1439,14 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
   const [areasOpen, setAreasOpen] = useState(Object.keys(settings.area_fees || {}).length > 0);
   const areas = settings.serves_nationwide ? [] : (settings.areas || []);
   const [courier, setCourier] = useState(settings.default_courier_user_id || '');
-  // New-order texts go to the WhatsApp number unless the business gives another.
-  const [textOn, setTextOn] = useState(!!settings.text_on);
-  const [textDifferent, setTextDifferent] = useState(!!settings.text_number);
-  const [textNumber, setTextNumber] = useState(settings.text_number || '');
   const [busy, setBusy] = useState(false);
   const dayName = (d) => t(`weekday.${d}`, String(d));
   const active = (couriers || []).filter((c) => c.status === 'active');
 
   const save = async () => {
-    if (textOn && textDifferent && textNumber.replace(/\D/g, '').length < 9) {
-      toast.error(t('orderTexts.enterNumber', 'Please enter a mobile number with the leading 0 or a country code'));
-      return;
-    }
     setBusy(true);
     try {
       await axios.put(`${API}/marketplace/businesses/${businessId}/orders/settings`, {
-        text_on: textOn,
-        text_number: textOn && textDifferent ? textNumber.trim() : null,
         delivery_on: deliveryOn, cutoffs: rows, pickup_windows: pickup, delivery_windows: delivery,
         delivery_fee: fee === '' ? null : Number(fee), min_order: minOrder === '' ? null : Number(minOrder),
         free_over: freeOver === '' ? null : Number(freeOver),
@@ -1509,50 +1499,6 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
 
       <BasketReminderSwitch API={API} auth={auth} businessId={businessId} />
       <TableOrdering API={API} auth={auth} businessId={businessId} />
-
-      {h(t('orderTexts.title', 'Text notifications'))}
-      <div className="flex items-start gap-3">
-        <div className="flex-1 min-w-0">
-          <p id="settings-text-on-label" className="text-sm font-semibold" style={{ color: 'var(--ink)' }}>{t('orderTexts.on', 'Text me new orders and bookings')}</p>
-          <p className="text-[11px] mt-0.5" style={{ color: 'var(--brand-muted)' }}>{textOn
-            ? t('orderTexts.onHint', 'On: customers stay on the site after they order or book, and are not sent to WhatsApp.')
-            : t('orderTexts.offHint', 'Off: after they order or book, customers are sent to your WhatsApp.')}</p>
-        </div>
-        <button
-          type="button"
-          role="switch"
-          aria-checked={textOn}
-          aria-labelledby="settings-text-on-label"
-          onClick={() => setTextOn((v) => !v)}
-          className="shrink-0 -my-2.5 inline-flex min-h-[44px] min-w-[52px] items-center justify-center"
-          data-testid="settings-text-on"
-        >
-          <span className={`inline-flex h-6 w-11 items-center rounded-full px-1 ${textOn ? 'justify-end' : 'justify-start'}`}
-            style={{ background: textOn ? 'var(--brand-primary)' : 'var(--brand-muted)' }}>
-            <span className="h-4 w-4 rounded-full bg-white shadow-sm" />
-          </span>
-        </button>
-      </div>
-      {textOn && (
-      <fieldset className="mt-2" data-testid="settings-text-number">
-        <legend className="text-[12px] mb-1" style={{ color: 'var(--brand-muted)' }}>{t('orderTexts.body', 'Each new order is texted to this number, with a link to confirm or decline it.')}</legend>
-        <label className="flex items-center gap-2 min-h-[44px] text-sm" style={{ color: 'var(--ink)' }}>
-          <input type="radio" name="settings-text-number" checked={!textDifferent} onChange={() => setTextDifferent(false)} data-testid="settings-text-same" />
-          <span>{t('orderTexts.same', 'Same as my WhatsApp number')}{settings.whatsapp_number && <span dir="ltr" className="ms-1" style={{ color: 'var(--brand-muted)' }}>{settings.whatsapp_number}</span>}</span>
-        </label>
-        {!textDifferent && !settings.whatsapp_number && (
-          <p className="text-[12px] mb-1" role="status" style={{ color: 'var(--ink)' }} data-testid="settings-text-no-whatsapp">{t('orderTexts.noWhatsapp', 'This business has no WhatsApp number yet, so no texts can go out. Add one to your listing, or choose a different number.')}</p>
-        )}
-        <label className="flex items-center gap-2 min-h-[44px] text-sm" style={{ color: 'var(--ink)' }}>
-          <input type="radio" name="settings-text-number" checked={textDifferent} onChange={() => setTextDifferent(true)} data-testid="settings-text-different" />
-          {t('orderTexts.different', 'A different number')}
-        </label>
-        {textDifferent && (
-          <input type="tel" dir="ltr" inputMode="tel" maxLength={30} value={textNumber} onChange={(e) => setTextNumber(e.target.value)} className={`${sel} w-full sm:w-64`} style={selStyle}
-                 placeholder="05X-XXX-XXXX" aria-label={t('orderTexts.numberLabel', 'Number for texts')} data-testid="settings-text-input" />
-        )}
-      </fieldset>
-      )}
 
       {h(t('orders.defaultCourier', 'Default courier'))}
       <select value={courier} onChange={(e) => setCourier(e.target.value)} className={sel} style={selStyle} data-testid="settings-courier">

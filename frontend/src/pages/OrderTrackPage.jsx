@@ -23,6 +23,7 @@ import { money } from '../utils/currency';
 import ReferralCard from '../components/forms/ReferralCard';
 import WhatsAppAboutThis from '../components/marketplace/WhatsAppAboutThis';
 import OrderSteps from '../components/orders/OrderSteps';
+import OrderJourney from '../components/orders/OrderJourney';
 
 const REFRESH_MS = 30_000;
 
@@ -110,7 +111,10 @@ export default function OrderTrackPage() {
                 : t('orders.track.failed', "We couldn't deliver this one. The store will be in touch to sort it out.")}
             </p>
           ) : (
+            <>
+            <OrderJourney status={data.status} fulfilment={data.fulfilment} table={data.table} />
             <OrderSteps status={data.status} fulfilment={data.fulfilment} table={data.table} courierNote={delivery && !data.out_for_delivery} />
+            </>
           )}
           {data.status === 'new' && (
             <p className="text-xs mt-3" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.received', 'The store has your order and will start on it soon.')}</p>

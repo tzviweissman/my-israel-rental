@@ -1812,13 +1812,6 @@ class OrderSettingsIn(BaseModel):
     # type one in.
     max_per_day: Optional[int] = Field(None, ge=1, le=10_000)
     max_per_window: Optional[int] = Field(None, ge=1, le=10_000)
-    # Where new-order texts go when it is not the WhatsApp number (Tzvi, 5 Nov
-    # 2026: many businesses text on one number and WhatsApp on another).
-    # Empty: the WhatsApp number. Not sent at all: left as it was.
-    text_number: Optional[str] = Field(None, max_length=30)
-    # The switch (Tzvi, 6 Nov 2026): on, the business hears by text and its
-    # customers are not also sent to WhatsApp after ordering or booking.
-    text_on: Optional[bool] = None
 
     @field_validator("area_fees")
     @classmethod
@@ -1900,13 +1893,7 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
     cutoffs = [c.model_dump() for c in sorted(payload.cutoffs, key=lambda c: c.for_day)]
     if payload.default_courier_user_id and not await _courier_entry(biz, payload.default_courier_user_id):
         raise HTTPException(status_code=400, detail="That courier has not accepted your invite yet")
-    text_number = (biz.get("order_settings") or {}).get("text_number")
-    if "text_number" in payload.model_fields_set:
-        text_number = (payload.text_number or "").strip() or None
-        if text_number and not normalize_whatsapp_number(text_number):
-            raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
-    from .order_texts import texts_on
-    text_on = payload.text_on if payload.text_on is not None else texts_on(biz)
+    old = biz.get("order_settings") or {}
     settings = {
         "windows": {
             "pickup": [w.model_dump() for w in sorted(payload.pickup_windows, key=lambda w: (w.weekday, w.start))],
@@ -1920,8 +1907,9 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         "free_over": payload.free_over,
         "max_per_day": payload.max_per_day,
         "max_per_window": payload.max_per_window,
-        "text_number": text_number,
-        "text_on": text_on,
+        # Saved by their own section, put_order_texts.
+        "text_number": old.get("text_number"),
+        "text_on": old.get("text_on"),
         # An older client that does not send the switch keeps the old
         # meaning: delivery times set means delivery offered.
         "delivery_on": payload.delivery_on if payload.delivery_on is not None else bool(payload.delivery_windows),
@@ -1931,6 +1919,26 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         await _assign_unassigned(business_id)
     fresh = await db.businesses.find_one({"_id": business_id})
     return await _owner_settings_out(fresh)
+
+
+class OrderTextsIn(BaseModel):
+    # The switch (Tzvi, 6 Nov 2026): on, the business hears by text and its
+    # customers are not also sent to WhatsApp after ordering or booking.
+    text_on: bool
+    # Where the texts go when it is not the WhatsApp number (many businesses
+    # text on one number and WhatsApp on another). Empty: the WhatsApp number.
+    text_number: Optional[str] = Field(None, max_length=30)
+
+
+@router.put("/businesses/{business_id}/orders/texts")
+async def put_order_texts(business_id: str, payload: OrderTextsIn, user=Depends(verify_token)):
+    biz = await _owned_business(business_id, user, None)
+    number = (payload.text_number or "").strip() or None
+    if number and not normalize_whatsapp_number(number):
+        raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
+    settings = {**(biz.get("order_settings") or {}), "text_on": payload.text_on, "text_number": number if payload.text_on else None}
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"order_settings": settings}})
+    return await _owner_settings_out({**biz, "order_settings": settings})
 
 
 def past_cutoff(needed_by: str, cutoffs: list[dict[str, Any]], now: datetime) -> Optional[dict[str, Any]]:
@@ -2567,6 +2575,8 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
     from utils.bg_tasks import spawn
     spawn(alert_business_on_whatsapp(gig, biz.get("owner_user_id"), payload.customer_name,
                                      items_text, "/dashboard?tab=orders", "order", order_id=doc["_id"]))
+    from .order_texts import text_customer_received
+    spawn(text_customer_received(doc, biz))
     owner = await db.users.find_one({"id": biz["owner_user_id"]}, {"_id": 0, "email": 1})
     await _email(
         (owner or {}).get("email"), f"New order {order_no(doc)} from table {payload.table}" if payload.table else f"New order {order_no(doc)} from {payload.customer_name}",

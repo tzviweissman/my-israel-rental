@@ -202,6 +202,23 @@ async def text_customer_booking(b: dict[str, Any], status: str, title: str) -> N
         logger.warning("booking text to the customer failed: %s", type(exc).__name__)
 
 
+async def text_customer_received(o: dict[str, Any], biz: dict[str, Any]) -> None:
+    """The moment the order is placed: it arrived, the business still has to
+    say yes, and here is the link (Tzvi, 6 Nov 2026). Never raises."""
+    try:
+        phone = o.get("customer_phone_e164") or o.get("customer_phone")
+        if not phone or o.get("table"):
+            return
+        he = o.get("lang") == "he"
+        name = biz.get("name_he") if he and biz.get("name_he") else biz.get("name") or ""
+        no = order_no(o)
+        body = (f"קיבלנו את הזמנה {no} מ{name}. נעדכן בהודעה כשהעסק יאשר אותה. מעקב: {track_link(o)}" if he
+                else f"We got your order {no} from {name}. We will text you when they confirm it. Track it: {track_link(o)}")
+        await send_sms(to=phone, body=body)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("order received text failed: %s", type(exc).__name__)
+
+
 async def _order_by_owner_token(token: str) -> dict[str, Any]:
     if not token or len(token) < 16:
         raise HTTPException(status_code=404, detail="This link is not valid")
@@ -276,10 +293,10 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, te
         customer = o.get("customer_phone_e164") or o.get("customer_phone")
         if customer:
             if o.get("lang") == "he":
-                body = (f"ההזמנה שלך {no} מ{name} אושרה. מעקב ופרטי ההזמנה: {track_link(o)}" if confirm
+                body = (f"ההזמנה שלך {no} מ{name} אושרה. הקישור שלך למעקב: {track_link(o)}" if confirm
                         else f"מצטערים, {name} לא יכולים לקבל את ההזמנה שלך {no} הפעם.")
             else:
-                body = (f"Your order {no} from {name} is confirmed. Track it and see the details: {track_link(o)}" if confirm
+                body = (f"Your order {no} from {name} is confirmed. Your tracking link: {track_link(o)}" if confirm
                         else f"Sorry, {name} can't take your order {no} this time.")
             await send_sms(to=customer, body=body)
         await _email_customer(o, name, no, confirm)
@@ -288,8 +305,8 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, te
             number = await _business_text_number(o)
             if number:
                 he = await _owner_he(o)
-                body = (f"אישרת את הזמנה {no} ({o.get('customer_name') or ''}). פרטי ההזמנה: {owner_link(o)}" if he
-                        else f"Confirmed order {no} ({o.get('customer_name') or ''}). Order details: {owner_link(o)}")
+                body = (f"אישרת את הזמנה {no} של {o.get('customer_name') or ''}. הקישור של העסק למעקב: {owner_link(o)}" if he
+                        else f"You confirmed order {no} for {o.get('customer_name') or ''}. Your store's link to follow it: {owner_link(o)}")
                 await send_sms(to=number, body=body)
     except Exception as exc:  # noqa: BLE001
         logger.warning("order texts after %s failed: %s", "confirm" if confirm else "decline", type(exc).__name__)

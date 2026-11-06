@@ -15,7 +15,8 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer, Megaphone } from 'lucide-react';
+import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer, Megaphone, MessageSquare } from 'lucide-react';
+import TextNotificationsPanel from './TextNotificationsPanel';
 import { toast } from 'sonner';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import BusinessDetailsForm from './BusinessDetailsForm';
@@ -91,6 +92,7 @@ export default function MyBusinessesTab({ API, token }) {
   // find where to change his hours. Consumed once, then removed from the
   // URL so a reload or Cancel does not reopen it.
   const [hoursBizId, setHoursBizId] = useState(null);
+  const [textsBizId, setTextsBizId] = useState(null);
   const hoursRef = React.useRef(null);
   useEffect(() => { if (hoursBizId) hoursRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, [hoursBizId]);
   const [searchParams, setSearchParams] = useSearchParams();
@@ -320,6 +322,12 @@ export default function MyBusinessesTab({ API, token }) {
             <BusinessHoursPanel API={API} token={token} businessId={hoursBizId} onClose={() => setHoursBizId(null)} />
           </div>
         )}
+        {textsBizId && items.some((b) => b.id === textsBizId) && (
+          <div className="mb-4" data-testid="business-texts-panel">
+            <p className="text-sm font-semibold mb-2" style={{ color: 'var(--ink)' }}>{items.find((b) => b.id === textsBizId)?.name}</p>
+            <TextNotificationsPanel API={API} token={token} businessId={textsBizId} onClose={() => setTextsBizId(null)} />
+          </div>
+        )}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {items.map((b) => (
             <div
@@ -496,7 +504,7 @@ export default function MyBusinessesTab({ API, token }) {
 
                 <button
                   type="button"
-                  onClick={() => setHoursBizId(hoursBizId === b.id ? null : b.id)}
+                  onClick={() => { setTextsBizId(null); setHoursBizId(hoursBizId === b.id ? null : b.id); }}
                   aria-expanded={hoursBizId === b.id}
                   className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
                   style={{ color: 'var(--brand-primary)' }}
@@ -504,6 +512,17 @@ export default function MyBusinessesTab({ API, token }) {
                   data-tour={items[0]?.id === b.id ? 'business-hours' : undefined}
                 >
                   <Timer size={12} /> {t('businesses.hoursFees', 'Hours, delivery & fees')}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setHoursBizId(null); setTextsBizId(textsBizId === b.id ? null : b.id); window.scrollTo({ top: 0 }); }}
+                  aria-expanded={textsBizId === b.id}
+                  className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
+                  style={{ color: 'var(--brand-primary)' }}
+                  data-testid={`business-texts-${b.id}`}
+                >
+                  <MessageSquare size={12} /> {t('orderTexts.title', 'Text notifications')}
                 </button>
 
                 {/* K3 — accent, cover and payment links, against a live

@@ -239,7 +239,7 @@ export default function OrderPage() {
     && !(phone.trim() && phoneErr)
     && (table || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()))
     && (data.custom_fields || []).every((f) => !f.required || (f.type === 'checkbox' ? answers[f.id] === true : String(answers[f.id] || '').trim()))
-    && (table || fulfilment === 'pickup' || (address.trim() && (data.business.serves_nationwide || city) && !belowMin));
+    && (table || fulfilment === 'pickup' || (address.trim() && city.trim() && !belowMin));
 
   const setQ = (id, n, max = 99) => setQty((q) => ({ ...q, [id]: Math.max(0, Math.min(max, 99, n)) }));
 
@@ -258,7 +258,7 @@ export default function OrderPage() {
         window: !table && w ? { weekday: w.weekday, start: w.start, end: w.end } : null,
         table,
         table_code: table ? tableCode : null,
-        city: !table && fulfilment === 'delivery' ? (city || null) : null,
+        city: !table && fulfilment === 'delivery' ? (city.trim() || null) : null,
         address: !table && fulfilment === 'delivery' ? address.trim() : null,
         customer_name: name.trim(), customer_phone: phone.trim(), customer_email: email.trim() || null,
         answers,
@@ -455,18 +455,20 @@ export default function OrderPage() {
           )}
           {fulfilment === 'delivery' && (
             <div className="space-y-2">
-              {!data.business.serves_nationwide && (
-                <div>
-                  <label className={label} style={labelStyle} htmlFor="order-city">{t('order.city', 'City')}</label>
-                  <select id="order-city" value={city} onChange={(e) => setCity(e.target.value)} className={input} style={inputStyle} data-testid="order-city">
+              <div>
+                <label className={label} style={labelStyle} htmlFor="order-address">{t('order.street', 'Street address')}</label>
+                <input id="order-address" value={address} onChange={(e) => setAddress(e.target.value)} dir="auto" autoComplete="street-address" className={input} style={inputStyle} placeholder={t('order.streetPh', 'Street, number, floor')} required data-testid="order-address" />
+              </div>
+              <div>
+                <label className={label} style={labelStyle} htmlFor="order-city">{t('order.city', 'City')}</label>
+                {data.business.serves_nationwide ? (
+                  <input id="order-city" value={city} onChange={(e) => setCity(e.target.value)} dir="auto" autoComplete="address-level2" maxLength={80} className={input} style={inputStyle} required data-testid="order-city" />
+                ) : (
+                  <select id="order-city" value={city} onChange={(e) => setCity(e.target.value)} className={input} style={inputStyle} required data-testid="order-city">
                     <option value="">{t('order.cityPick', 'Where the store delivers')}</option>
                     {data.business.areas.map((a) => <option key={a.slug} value={a.slug}>{(lang === 'he' && a.label_he) || a.label}</option>)}
                   </select>
-                </div>
-              )}
-              <div>
-                <label className={label} style={labelStyle} htmlFor="order-address">{t('orders.address', 'Delivery address')}</label>
-                <input id="order-address" value={address} onChange={(e) => setAddress(e.target.value)} dir="auto" className={input} style={inputStyle} placeholder={t('orders.addressPh', 'Street, number, city - floor or entrance if it matters')} data-testid="order-address" />
+                )}
               </div>
               {freeOver > 0 && (
                 <p className="text-xs" style={{ color: 'var(--brand-muted)' }} data-testid="order-free-over">
