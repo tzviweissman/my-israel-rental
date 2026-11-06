@@ -1,0 +1,134 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="site-category" content="food-shop">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Shop · Ultimate Feast, Finest Cuts</title>
+<meta name="description" content="Order the Ultimate Feast: an XL chicken board with 4 types of chicken and 3 sauces, $215. Delivery throughout Jerusalem, under Rabbi Weiner.">
+<meta property="og:title" content="Shop · Ultimate Feast, Finest Cuts">
+<meta property="og:description" content="Order the Ultimate Feast: an XL chicken board with 4 types of chicken and 3 sauces, $215. Delivery throughout Jerusalem, under Rabbi Weiner.">
+<meta property="og:image" content="https://myisraelrental.com/pages/finest-cut/assets/og.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Secular+One&family=Rubik:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body class="no-js" data-page="shop">
+<a class="skip" href="#main">Skip to content</a>
+<header class="top" id="top">
+  <a class="mark" href="index.html" aria-label="Finest Cuts, home"><img src="assets/logo.webp" alt="" width="40" height="40"><span>Finest Cuts</span></a>
+  <nav class="nav" id="nav" aria-label="Finest Cuts"><a href="index.html">Home</a><a href="shop.html" aria-current="page">Shop</a><a href="contact.html">Contact</a></nav>
+  <div class="top-r">
+    <a class="btn-line" href="shop.html?add=feast#order">Order the feast<span class="count" id="count" aria-live="polite" hidden></span></a>
+    <button class="menu-btn" id="menu-btn" type="button" aria-expanded="false" aria-controls="nav">Menu</button>
+  </div>
+</header>
+<main id="main">
+  <form id="form" novalidate>
+  <section class="pstage" id="feast" aria-labelledby="h-shop">
+    <div class="wrap st-grid">
+      <div class="st-ph"><img src="assets/board.webp" alt="The Ultimate Feast from above: 4 types of chicken around 3 cups of sauce" width="1400" height="1120" fetchpriority="high"></div>
+      <div class="st-info">
+        <h1 id="h-shop">Ultimate Feast</h1>
+        <p class="st-desc">XL chicken board with 4 types of chicken and 3 sauces. Tastefully tender, presented to impress.</p>
+        <p class="pr-row"><span class="pr"><span class="sym">$</span>215</span><span class="unit">the XL board</span></p>
+        <div class="st-buy">
+          <span class="step" role="group" aria-label="How many"><button type="button" data-d="-1" aria-label="One fewer">−</button><output id="st-n">1</output><button type="button" data-d="1" aria-label="One more">+</button></span>
+          <button class="btn" type="button" id="st-add"><span>Add, $215</span></button>
+        </div>
+        <p class="st-in" id="st-in" aria-live="polite"></p>
+        <ul class="st-facts">
+          <li>Delivery throughout Jerusalem</li>
+          <li>Under the hashgacha of Rabbi Weiner</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="order" aria-labelledby="h-basket">
+    <div class="wrap">
+      <ol class="osteps" id="steps" aria-label="Order steps">
+        <li class="is-now" aria-current="step"><button type="button" data-go="1"><img src="assets/cup-a.webp" alt="" width="40" height="40">Step 1: Your basket</button></li>
+        <li><button type="button" data-go="2"><img src="assets/cup-b.webp" alt="" width="40" height="40">Step 2: When and where</button></li>
+        <li><button type="button" data-go="3"><img src="assets/cup-c.webp" alt="" width="40" height="40">Step 3: Your details</button></li>
+      </ol>
+      <div class="form">
+        <div>
+          <div class="card ostep" data-s="1">
+            <h2 id="h-basket">Your basket</h2>
+            <ul class="blist" id="sum-list"></ul>
+            <p class="err" id="e-items" role="alert"></p>
+            <a class="lnk" href="#feast">Back to the feast</a>
+          </div>
+          <div class="card ostep" data-s="2" hidden>
+            <h2>When and where</h2>
+            <fieldset class="ful"><legend>Whose table is it for?</legend>
+              <label class="opt"><input type="radio" name="who" value="mine" checked>Your table</label>
+              <label class="opt"><input type="radio" name="who" value="else">Someone else’s</label></fieldset>
+            <div id="w-to" hidden><label class="f" for="to">Their name</label><input class="fld" id="to" autocomplete="off" maxlength="80"><p class="err" id="e-to" role="alert"></p></div>
+            <fieldset class="ful"><legend>Where is it going?</legend>
+              <label class="opt"><input type="radio" name="place" value="jer" checked>In Jerusalem</label>
+              <label class="opt"><input type="radio" name="place" value="far">Elsewhere in Israel</label></fieldset>
+            <p class="hint" id="h-far" hidden>We confirm on WhatsApp whether we can reach you.</p>
+            <div id="w-addr"><label class="f" for="addr">Delivery address</label><input class="fld" id="addr" autocomplete="street-address" maxlength="160" placeholder="Street, number, neighbourhood"><p class="err" id="e-addr" role="alert"></p></div>
+            <div id="w-when"><label class="f" for="when">Delivery day</label><input class="fld" id="when" type="date"><p class="err" id="e-when" role="alert"></p><button class="lnk nextday" id="when-next" type="button" hidden></button></div>
+          </div>
+          <div class="card ostep" data-s="3" hidden>
+            <h2>Your details</h2>
+            <div id="w-me"><label class="f" for="me">Your name</label><input class="fld" id="me" autocomplete="name" maxlength="80"><p class="err" id="e-me" role="alert"></p></div>
+            <div id="w-ph"><label class="f" for="ph">Your phone</label><input class="fld" id="ph" type="tel" autocomplete="tel" maxlength="30"><p class="err" id="e-ph" role="alert"></p></div>
+            <label class="f" for="note">Anything else</label>
+            <textarea class="fld" id="note" maxlength="500"></textarea>
+          </div>
+        </div>
+        <aside class="card sum" id="c-items" aria-live="polite">
+          <h3>Your order</h3>
+          <ul id="sum-mini"><li><span>Nothing yet</span></li></ul>
+          <p class="sum-where" id="sum-where" hidden></p>
+          <div class="total"><span>Total</span><span id="total">$0</span></div>
+          <button class="btn" id="send" type="submit"><span>Continue to when and where</span></button>
+          <button class="back" id="back" type="button" hidden>Back</button>
+          <p class="note" id="send-note">Next: the day and the address.</p>
+          <p class="sent" id="sent" role="status" hidden></p>
+        </aside>
+      </div>
+    </div>
+  </section>
+  </form>
+  <section class="sec gift" id="gift" aria-labelledby="h-gift" data-mir-gift="finest-cut" hidden>
+    <div class="wrap">
+      <h2 id="h-gift">Give a gift card</h2>
+      <div data-mir-gift-box></div>
+    </div>
+  </section>
+  <section class="close" aria-label="The crunch you crave, delivered.">
+    <div class="wrap">
+      <div>
+        <h2>The crunch you crave, delivered.</h2>
+        <p>WhatsApp or call <a href="https://wa.me/972587153901" target="_blank" rel="noopener">+972 58 715 3901</a><br>Email <a href="mailto:finestcutsisrael@gmail.com">finestcutsisrael@gmail.com</a></p>
+      </div>
+      <a class="btn" href="shop.html?add=feast#order">Order the feast</a>
+    </div>
+    <p class="giant" aria-hidden="true">Finest Cuts</p>
+  </section>
+</main>
+<footer class="foot full">
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html">Finest Cuts</a><p>Gourmet American schnitzel boards. Enhance your table or someone else’s.</p><a class="fcta" href="shop.html?add=feast#order">Order the feast</a></div>
+    <nav aria-label="Pages"><h2>Pages</h2><a href="index.html">Home</a><a href="shop.html">Shop</a><a href="contact.html">Contact</a></nav>
+    <div><h2>Ordering</h2><p>Delivery throughout Jerusalem</p><p>Elsewhere in Israel: message us</p><p>Under the hashgacha of Rabbi Weiner</p></div>
+    <div><h2>Reach us</h2><a href="https://wa.me/972587153901" target="_blank" rel="noopener">WhatsApp or call +972 58 715 3901</a><a href="mailto:finestcutsisrael@gmail.com">Email finestcutsisrael@gmail.com</a></div>
+  </div>
+  <div class="fbase"><span>© 2026 Finest Cuts.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
+</footer>
+
+<div class="bar" id="bar" aria-hidden="true">
+  <p class="p"><b>$215</b>XL chicken board</p>
+  <a class="btn" href="shop.html?add=feast#order" tabindex="-1">Order the feast</a>
+</div>
+<script src="site.js"></script>
+<script src="gift.js"></script>
+<script src="shop.js"></script>
+</body>
+</html>

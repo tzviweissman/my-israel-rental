@@ -1,0 +1,37 @@
+// A real walk through the order with a stand-in for the API, so nothing reaches the live shop or the owner.
+// From the repo root, with the builds served on 8987: node scrollcraft/builds/finest-cut/gen/test-form.mjs
+import { createRequire } from 'node:module';
+import assert from 'node:assert';
+const { chromium } = createRequire(process.cwd() + '/')('playwright');
+const b = await chromium.launch();
+const p = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage();
+let posted = null, opened = '';
+await p.exposeFunction('__opened', (u) => { opened = u; });
+await p.addInitScript(() => { window.open = () => { const t = { location: { set href(u) { window.__opened(u); } } }; return t; }; });
+await p.route('**/api/marketplace/order-form/**', (r) => { posted = JSON.parse(r.request().postData() || 'null'); r.fulfill({ status: 200, contentType: 'application/json', headers: { 'access-control-allow-origin': '*' }, body: JSON.stringify({ track_url: 'https://example.test/track/1' }) }); });
+await p.goto('http://127.0.0.1:8987/finest-cut/index.html', { waitUntil: 'load' });
+await p.evaluate(() => document.getElementById('who').scrollIntoView());
+await p.click('.seg button[data-w=else]');
+assert.match(await p.getAttribute('#who-go', 'href'), /for=else/);
+await p.click('#who-go');
+await p.waitForURL(/shop\.html/); await p.waitForTimeout(300);
+assert.equal(await p.textContent('#total'), '$215');
+await p.click('#send');
+assert.ok(await p.isChecked('input[name=who][value=else]'));
+await p.click('#send'); assert.match(await p.textContent('#e-to'), /Whose table/);
+await p.fill('#to', 'Dovid'); await p.fill('#addr', 'Test street 1');
+const sat = await p.evaluate(() => { const d = new Date(); d.setDate(d.getDate() + ((6 - d.getDay() + 7) % 7 || 7)); return new Date(d - d.getTimezoneOffset() * 6e4).toISOString().slice(0, 10); });
+await p.fill('#when', sat); await p.waitForTimeout(50);
+assert.match(await p.textContent('#e-when'), /Shabbat/);
+assert.ok(await p.isVisible('#when-next'));
+await p.click('#when-next');
+await p.click('#send');
+await p.fill('#me', 'Test Person'); await p.fill('#ph', '0501234567');
+if (await p.$('#mir-email')) await p.fill('#mir-email', 'test@example.com');
+await p.click('#send'); await p.waitForTimeout(600);
+assert.deepEqual(posted.lines, [{ product_id: 'idx:0', qty: 1 }]);
+assert.equal(posted.fulfilment, 'delivery'); assert.equal(posted.city, 'jerusalem'); assert.match(posted.notes, /Dovid/);
+const text = decodeURIComponent(opened.split('text=')[1]);
+assert.match(opened, /wa\.me\/972587153901/); assert.match(text, /\$215/); assert.match(text, /For: Dovid/); assert.match(text, /track\/1/);
+console.log('order walk passed\n' + text);
+await b.close();

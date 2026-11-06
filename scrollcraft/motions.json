@@ -92,5 +92,11 @@
     "used_by": [
       "rbs-cleaning"
     ]
+  },
+  "flyover": {
+    "what": "a tiny camera flies low over the product as if it were a landscape, then climbs until the whole product is seen",
+    "used_by": [
+      "finest-cut"
+    ]
   }
 }
