@@ -9,7 +9,7 @@ import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, Gift, ChevronDown, ChevronUp, Copy } from 'lucide-react';
-import { money } from '../../utils/currency';
+import { money, symbolFor } from '../../utils/currency';
 
 const box = 'px-3 py-2 rounded-lg border text-sm bg-white min-h-[40px]';
 const boxStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
@@ -33,7 +33,7 @@ function CardRow({ c, base, auth, onChanged }) {
   return (
     <li className="rounded-xl border bg-white p-3 text-sm" style={{ borderColor: c.status === 'awaiting_payment' ? 'var(--ink)' : 'var(--brand-border)', color: 'var(--ink)' }} data-testid="gift-row">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <span className="font-semibold tabular-nums">{money(c.balance, 'ILS')}{c.balance !== c.amount && <span className="font-normal text-xs" style={{ color: 'var(--brand-muted)' }}> / {money(c.amount, 'ILS')}</span>}</span>
+        <span className="font-semibold tabular-nums">{money(c.balance, c.currency)}{c.balance !== c.amount && <span className="font-normal text-xs" style={{ color: 'var(--brand-muted)' }}> / {money(c.amount, c.currency)}</span>}</span>
         <span className="text-xs" style={{ color: 'var(--brand-muted)' }}>{st}</span>
       </div>
       <p className="text-xs mt-0.5" dir="auto" style={{ color: 'var(--brand-muted)' }}>{who}{c.buyer.email ? ` · ${c.buyer.email}` : ''}{c.buyer.phone ? ` · ${c.buyer.phone}` : ''}</p>
@@ -49,7 +49,7 @@ function CardRow({ c, base, auth, onChanged }) {
       {c.status === 'active' && (
         <div className="flex flex-wrap items-center gap-2 mt-2">
           <input type="number" min="1" max={c.balance} step="any" value={use} onChange={(e) => setUse(e.target.value)} className={`${box} w-28`} style={boxStyle}
-                 placeholder="₪" aria-label={t('giftBiz.useAmount', 'Amount to take off')} data-testid="gift-use-amount" />
+                 placeholder={symbolFor(c.currency)} aria-label={t('giftBiz.useAmount', 'Amount to take off')} data-testid="gift-use-amount" />
           <button type="button" disabled={!!busy || !(Number(use) > 0)} onClick={() => act('use', { amount: Number(use) })} className="px-3.5 min-h-[40px] rounded-full border text-sm font-semibold disabled:opacity-50" style={boxStyle} data-testid="gift-use">
             {t('giftBiz.use', 'Use at the counter')}
           </button>
@@ -78,7 +78,7 @@ export default function GiftCardsPanel({ API, auth, businessId, slug }) {
     const amounts = String(next.amountsText).split(/[,\s]+/).map(Number).filter((n) => n > 0);
     setSaving(true);
     try {
-      const { data } = await axios.put(`${API}/marketplace/businesses/${businessId}/gift-card-settings`, { on: next.on, amounts, custom: next.custom, note: next.note || '' }, auth);
+      const { data } = await axios.put(`${API}/marketplace/businesses/${businessId}/gift-card-settings`, { on: next.on, amounts, custom: next.custom, note: next.note || '', currency: next.currency || 'ILS' }, auth);
       setSt({ ...data, amountsText: data.amounts.join(', ') });
       toast.success(t('giftBiz.saved', 'Saved'));
     } catch (err) {
@@ -103,7 +103,7 @@ export default function GiftCardsPanel({ API, auth, businessId, slug }) {
           <Gift size={16} /> {t('giftBiz.title', 'Gift cards')}
           <span className="font-normal text-xs" style={{ color: 'var(--brand-muted)' }}>
             {st?.on ? (waiting ? t('giftBiz.waitingN', '{{n}} waiting for payment', { n: waiting }) : t('giftBiz.onShort', 'On sale')) : t('giftBiz.offShort', 'Off')}
-            {d.outstanding > 0 ? ` · ${t('giftBiz.outstanding', '{{v}} on active cards', { v: money(d.outstanding, 'ILS') })}` : ''}
+            {Object.keys(d.outstanding).length > 0 ? ` · ${t('giftBiz.outstanding', '{{v}} on active cards', { v: Object.entries(d.outstanding).map(([cur, n]) => money(n, cur)).join(' + ') })}` : ''}
           </span>
         </span>
         {open ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
@@ -117,8 +117,15 @@ export default function GiftCardsPanel({ API, auth, businessId, slug }) {
               <span className="absolute top-0.5 w-5 h-5 rounded-full bg-white" style={{ insetInlineStart: st.on ? '18px' : '2px' }} />
             </button>
           </label>
+          <label className="block">{t('giftBiz.currency', 'Sell them in')}
+            <select value={st.currency || 'ILS'} onChange={(e) => setSt({ ...st, currency: e.target.value })} className={`${box} w-full mt-1 sm:w-auto sm:ms-2`} style={boxStyle} data-testid="gift-currency">
+              <option value="ILS">{t('giftBiz.ils', 'Shekels (₪)')}</option>
+              <option value="USD">{t('giftBiz.usd', 'Dollars ($)')}</option>
+            </select>
+            <span className="block text-xs mt-1" style={{ color: 'var(--brand-muted)' }}>{t('giftBiz.currencyHint', 'A card keeps the currency it was sold in, and can only be used on an order in that currency.')}</span>
+          </label>
           <div className="grid gap-3 sm:grid-cols-2">
-            <label className="block">{t('giftBiz.amounts', 'Amounts (₪, separated by commas)')}
+            <label className="block">{t('giftBiz.amounts', 'Amounts (separated by commas)')}
               <input value={st.amountsText} onChange={(e) => setSt({ ...st, amountsText: e.target.value })} className={`${box} w-full mt-1`} style={boxStyle} dir="ltr" data-testid="gift-amounts" />
             </label>
             <label className="flex items-center gap-2 sm:mt-6">
@@ -144,7 +151,7 @@ export default function GiftCardsPanel({ API, auth, businessId, slug }) {
           <div>
             <p className="font-semibold mb-1">{t('giftBiz.sellCounter', 'Sold one in person?')}</p>
             <div className="flex flex-wrap gap-2">
-              <input type="number" min="20" max="5000" value={sell.amount} onChange={(e) => setSell({ ...sell, amount: e.target.value })} className={`${box} w-24`} style={boxStyle} placeholder="₪" data-testid="gift-sell-amount" />
+              <input type="number" min="20" max="5000" value={sell.amount} onChange={(e) => setSell({ ...sell, amount: e.target.value })} className={`${box} w-24`} style={boxStyle} placeholder={symbolFor(st.currency)} data-testid="gift-sell-amount" />
               <input value={sell.to_name} maxLength={80} onChange={(e) => setSell({ ...sell, to_name: e.target.value })} className={`${box} flex-1 min-w-[8rem]`} style={boxStyle} placeholder={t('giftBiz.sellName', 'Name (optional)')} />
               <input type="email" value={sell.email} maxLength={200} onChange={(e) => setSell({ ...sell, email: e.target.value })} className={`${box} flex-1 min-w-[10rem]`} style={boxStyle} placeholder={t('giftBiz.sellEmail', 'Email it to (optional)')} />
               <button type="button" disabled={saving || !(Number(sell.amount) >= 20)} onClick={sellNow} className="px-4 min-h-[40px] rounded-full border text-sm font-semibold disabled:opacity-50" style={boxStyle} data-testid="gift-sell">

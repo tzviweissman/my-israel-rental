@@ -163,9 +163,9 @@ async def _is_returning(business_id: str, phone_e164: Optional[str]) -> bool:
 
 
 async def evaluate(business_id: str, code: str, form: Literal["orders", "memberships"], amount: float,
-                   phone: Optional[str]) -> tuple[dict[str, Any], float]:
-    """(code document, discount in shekels), or CodeRefused(reason) with a
-    sentence the customer can read."""
+                   phone: Optional[str], currency: Optional[str] = None) -> tuple[dict[str, Any], float]:
+    """(code document, discount in the total's currency), or CodeRefused(reason)
+    with a sentence the customer can read."""
     c = await db.discount_codes.find_one({"business_id": business_id, "code": norm_code(code), "deleted": {"$ne": True}})
     if not c:
         # Someone's personal referral code (referrals.py).
@@ -177,6 +177,10 @@ async def evaluate(business_id: str, code: str, form: Literal["orders", "members
         c = await gift_cards.as_code(business_id, norm_code(code))
     if not c or not c.get("active", True):
         raise CodeRefused("This code is not valid")
+    # A gift card holds real money in one currency, and there is no exchange rate here.
+    if c.get("gift_card") and currency and c["currency"] != currency.upper():
+        raise CodeRefused("This gift card is in " + ("dollars" if c["currency"] == "USD" else "shekels")
+                          + " and this total is not, so it cannot be used here")
     if c.get("applies_to", "both") not in (form, "both"):
         raise CodeRefused("This code is for " + ("orders" if form == "memberships" else "memberships") + " only")
     today = datetime.now(IL).date().isoformat()
@@ -223,6 +227,7 @@ class CheckIn(BaseModel):
     form: Literal["orders", "memberships"] = "orders"
     amount: float = Field(0, ge=0, le=1_000_000)
     phone: Optional[str] = Field(None, max_length=40)
+    currency: Optional[str] = Field(None, max_length=3)
 
 
 @router.post("/businesses/{business_id}/discount-codes/check")
@@ -231,7 +236,7 @@ async def check_code(business_id: str, body: CheckIn, request: Request):
     it must not become a way to guess a business's codes."""
     check_rate(request, bucket="discount_check", limit=30, window_seconds=600)
     try:
-        c, off = await evaluate(business_id, body.code, body.form, body.amount, body.phone)
+        c, off = await evaluate(business_id, body.code, body.form, body.amount, body.phone, body.currency)
     except CodeRefused as e:
         return {"ok": False, "reason": str(e)}
     return {"ok": True, "code": c["code"], "kind": c["kind"], "value": c["value"], "discount": off}

@@ -137,7 +137,7 @@ export default function MembershipSignupPage() {
             const off = plan ? discountOn(code, Number(plan.price || 0)) : 0;
             return (
               <div>
-                <DiscountCodeInput businessId={biz.id} form="memberships" amount={plan ? Number(plan.price || 0) : 0} phone={form.phone} applied={code} onApplied={setCode} initialCode={refCode} />
+                <DiscountCodeInput businessId={biz.id} form="memberships" amount={plan ? Number(plan.price || 0) : 0} currency={plan?.currency || 'ILS'} phone={form.phone} applied={code} onApplied={setCode} initialCode={refCode} />
                 {plan && off > 0 && (
                   <p className="text-sm mt-1" style={{ color: 'var(--ink)' }} data-testid="signup-discount">
                     {t('discounts.memberPrice', '{{price}} instead of {{was}}', { price: money(Number(plan.price) - off, plan.currency || 'ILS'), was: money(plan.price, plan.currency || 'ILS') })}

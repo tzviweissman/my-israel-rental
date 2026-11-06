@@ -207,3 +207,44 @@ def test_busy_times_only_with_enough_visits():
     assert d["enough"] is True
     day = str((base.weekday() + 1) % 7)
     assert d["days"][day]["18"] == 100 and d["days"][day]["9"] == 33
+
+
+def test_gift_card_in_dollars_stays_in_dollars():
+    """A business that sells in dollars: the card, its emails and its balance are in dollars, and it
+    never comes off a total in another currency, because there is no exchange rate (Tzvi, 6 Nov 2026)."""
+    db = _db()
+    from routes.marketplace import gift_cards
+    before = db.businesses.find_one({"_id": BIZ}).get("gift_card_settings")
+    db.businesses.update_one({"_id": BIZ}, {"$set": {"gift_card_settings.currency": "USD"}})
+    try:
+        page = requests.get(f"{API}/marketplace/gift-cards/gbd-test-bakery", timeout=10).json()
+        assert page["currency"] == "USD"
+        r = requests.post(f"{API}/marketplace/gift-cards/gbd-test-bakery/buy", json={
+            "amount": 100, "buyer_name": "Dana", "buyer_email": "dana-usd@example.com", "for_self": True}, timeout=10)
+        assert r.status_code == 200, r.text
+        token = r.json()["token"]
+        doc = db.gift_cards.find_one({"token": token})
+        assert doc["currency"] == "USD"
+        _run(gift_cards._activate(doc, db.businesses.find_one({"_id": BIZ})))
+        card = requests.get(f"{API}/marketplace/gift/{token}", timeout=10).json()
+        assert card["currency"] == "USD" and card["balance"] == 100
+
+        def check(currency):
+            return requests.post(f"{API}/marketplace/businesses/{BIZ}/discount-codes/check", json={
+                "code": card["code"], "form": "orders", "amount": 60, "currency": currency}, timeout=10).json()
+        assert check("USD")["ok"] and check("USD")["discount"] == 60
+        refused = check("ILS")
+        assert not refused["ok"] and "dollars" in refused["reason"]
+
+        # The real order refuses it too: this shop's products are in shekels. A card already sold
+        # keeps its dollars after the business switches back.
+        db.businesses.update_one({"_id": BIZ}, {"$set": {"gift_card_settings.currency": "ILS"}})
+        assert db.gift_cards.find_one({"token": token})["currency"] == "USD"
+        order = requests.post(f"{API}/marketplace/order-form/{STORE}/orders", json={
+            "lines": [{"product_id": "challah", "option_id": "big", "qty": 1}], "fulfilment": "pickup", "date": (datetime.now(IL).date() + timedelta(days=7)).isoformat(),
+            "customer_name": "Dana", "customer_phone": "0501234567",
+            "discount_code": card["code"]}, timeout=10)
+        assert order.status_code == 400 and "dollars" in order.text, order.text
+        assert db.gift_cards.find_one({"token": token})["balance"] == 100
+    finally:
+        db.businesses.update_one({"_id": BIZ}, {"$set": {"gift_card_settings": before}})
