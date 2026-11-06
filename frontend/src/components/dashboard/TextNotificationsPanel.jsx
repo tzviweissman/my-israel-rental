@@ -57,7 +57,7 @@ export default function TextNotificationsPanel({ API, token, businessId, onClose
     <div className="rounded-2xl border p-4 mb-4 bg-white" style={{ borderColor: 'var(--brand-border)' }} data-testid="text-notifications-panel">
       <div className="flex items-start justify-between gap-3">
         <h3 className="font-bold" style={{ color: 'var(--ink)' }}>{t('orderTexts.title', 'Text notifications')}</h3>
-        <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -mt-2 rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}><X size={18} /></button>
+        {onClose && <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] -mt-2 rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}><X size={18} /></button>}
       </div>
 
       <div className="flex items-start gap-3 mt-2">

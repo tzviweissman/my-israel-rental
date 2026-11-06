@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer, Megaphone, MessageSquare } from 'lucide-react';
+import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer, Megaphone, MessageSquare, Info } from 'lucide-react';
 import TextNotificationsPanel from './TextNotificationsPanel';
 import { toast } from 'sonner';
 import CoverPlaceholder from '../common/CoverPlaceholder';
@@ -101,6 +101,20 @@ export default function MyBusinessesTab({ API, token }) {
     if (!items || items.length === 0) return;   // items is null until the first load
     const wantDetails = searchParams.get('details');
     const wantServices = searchParams.get('services');
+    // `?design=<business id>`, from the sidebar's Design your page.
+    const wantDesign = searchParams.get('design');
+    if (wantDesign) {
+      const biz = items.find((b) => b.id === wantDesign);
+      searchParams.delete('design');
+      setSearchParams(searchParams, { replace: true });
+      if (biz) {
+        handBuiltList().then((built) => {
+          if (built.includes(biz.slug)) navigate(`/dashboard/page-editor/${biz.id}`);
+          else setDesignBiz(biz);
+        });
+      }
+      return;
+    }
     if (!wantDetails && !wantServices) return;
     if (wantDetails === '0') {
       // `0` closes it: the walk's stops on this page that are not about the
@@ -392,14 +406,6 @@ export default function MyBusinessesTab({ API, token }) {
                   </button>
                 )}
 
-                {/* B6 — what is still missing from the public page, with
-                    each gap wired to the thing that closes it. */}
-                <BusinessCompleteness
-                  business={b}
-                  onEditDetails={() => setDetailsBiz(b)}
-                  onOpenListings={() => setOpenBiz(b)}
-                />
-
                 {/* The services. This was a line of text - "1 listing(s)" -
                     and the only way to the listings themselves was clicking
                     the business NAME above, which nothing marks as a
@@ -489,40 +495,43 @@ export default function MyBusinessesTab({ API, token }) {
                   </div>
                 )}
 
+                {/* Where everyone can see them without scrolling past the card
+                    (Tzvi, 6 Nov 2026), and on the sidebar as well. */}
+                <div className="grid grid-cols-2 gap-2 mt-3" data-testid={`business-settings-${b.id}`}>
                 {/* C6 — until this existed the only editable thing about
                     a business was its name, so every fact the public page
                     can show had no way in. */}
                 <button
                   type="button"
                   onClick={() => setDetailsBiz(b)}
-                  className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
-                  style={{ color: 'var(--brand-primary)' }}
+                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-2 rounded-lg border bg-white text-xs font-semibold text-center"
+                  style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
                   data-testid={`business-details-${b.id}`}
                 >
-                  {t('businesses.editDetails', 'Business details')}
+                  <Info size={13} /> {t('businesses.editDetails', 'Business details')}
                 </button>
 
                 <button
                   type="button"
                   onClick={() => { setTextsBizId(null); setHoursBizId(hoursBizId === b.id ? null : b.id); }}
                   aria-expanded={hoursBizId === b.id}
-                  className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
-                  style={{ color: 'var(--brand-primary)' }}
+                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-2 rounded-lg border bg-white text-xs font-semibold text-center"
+                  style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
                   data-testid={`business-hours-${b.id}`}
                   data-tour={items[0]?.id === b.id ? 'business-hours' : undefined}
                 >
-                  <Timer size={12} /> {t('businesses.hoursFees', 'Hours, delivery & fees')}
+                  <Timer size={13} /> {t('businesses.hoursFees', 'Hours, delivery & fees')}
                 </button>
 
                 <button
                   type="button"
                   onClick={() => { setHoursBizId(null); setTextsBizId(textsBizId === b.id ? null : b.id); window.scrollTo({ top: 0 }); }}
                   aria-expanded={textsBizId === b.id}
-                  className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
-                  style={{ color: 'var(--brand-primary)' }}
+                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-2 rounded-lg border bg-white text-xs font-semibold text-center"
+                  style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
                   data-testid={`business-texts-${b.id}`}
                 >
-                  <MessageSquare size={12} /> {t('orderTexts.title', 'Text notifications')}
+                  <MessageSquare size={13} /> {t('orderTexts.title', 'Text notifications')}
                 </button>
 
                 {/* K3 — accent, cover and payment links, against a live
@@ -531,27 +540,36 @@ export default function MyBusinessesTab({ API, token }) {
                 <button
                   type="button"
                   onClick={() => navigate(`/dashboard/page-editor/${b.id}`)}
-                  className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
-                  style={{ color: 'var(--brand-primary)' }}
+                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-2 rounded-lg border bg-white text-xs font-semibold text-center"
+                  style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
                   data-testid={`business-edit-page-${b.id}`}
                 >
-                  <Palette size={12} /> {t('pageEditor.open', 'Edit your page')}
+                  <Palette size={13} /> {t('pageEditor.open', 'Edit your page')}
                 </button>
                 ) : (
                 <button
                   type="button"
                   onClick={() => setDesignBiz(b)}
-                  className="inline-flex items-center gap-1.5 min-h-[44px] text-xs font-semibold me-3"
-                  style={{ color: 'var(--brand-primary)' }}
+                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-2 rounded-lg border bg-white text-xs font-semibold text-center"
+                  style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
                   data-testid={`business-design-${b.id}`}
                   // The FIRST card only: the tour needs one anchor,
                   // and duplicating it on every business would give
                   // `querySelector` an arbitrary winner.
                   data-tour={items[0]?.id === b.id ? 'business-design' : undefined}
                 >
-                  <Palette size={12} /> {t('pageDesign.open', 'Design your page')}
+                  <Palette size={13} /> {t('pageDesign.open', 'Design your page')}
                 </button>
                 )}
+                </div>
+
+                {/* B6 — what is still missing from the public page, with
+                    each gap wired to the thing that closes it. */}
+                <BusinessCompleteness
+                  business={b}
+                  onEditDetails={() => setDetailsBiz(b)}
+                  onOpenListings={() => setOpenBiz(b)}
+                />
 
                 <button
                   type="button"

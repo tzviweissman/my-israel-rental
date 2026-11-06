@@ -7474,6 +7474,7 @@ const en = {
       },
       orderTexts: {
         title: "Text notifications",
+        pickBusiness: "Which business?",
         saved: "Saved",
         on: "Text me new orders and bookings",
         onHint: "On: customers stay on the site after they order or book, and are not sent to WhatsApp.",

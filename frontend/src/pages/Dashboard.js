@@ -19,6 +19,7 @@ import BulkUploadModal from '../components/dashboard/BulkUploadModal';
 import BulkManagerTab from '../components/dashboard/BulkManagerTab';
 import MessagesTab from '../components/dashboard/MessagesTab';
 import MyBusinessesTab from '../components/dashboard/MyBusinessesTab';
+import BusinessSettingsPane from '../components/dashboard/BusinessSettingsPane';
 import { AdvertisingSection } from '../components/dashboard/AdvertisingTab';
 import GoogleReviewsCard from '../components/dashboard/GoogleReviewsCard';
 // Upgraded pages only; renders nothing for anyone else (backend routes/seo.py).
@@ -584,6 +585,8 @@ const Dashboard = () => {
             about: fixing only the tab would have shown a My Gigs button
             that rendered an empty panel. */}
         {activeTab === 'advertising' && <AdvertisingSection API={API} token={token} properties={properties} />}
+        {activeTab === 'page-design' && <BusinessSettingsPane API={API} token={token} setting="design" />}
+        {activeTab === 'text-notifications' && <BusinessSettingsPane API={API} token={token} setting="texts" />}
         {activeTab === 'my-businesses' && showGigTabs && (
           <>
             {/* Renders nothing unless Google review import is switched on. */}
