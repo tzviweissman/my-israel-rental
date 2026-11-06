@@ -976,6 +976,8 @@ def _strip_praise(words: dict[str, Any], source: str, fallback_headline: str) ->
     points = [p for p in words["points"] if not _unclaimed(p, source)]
     sentences = re.split(r"(?<=[.!?])\s+", words["caption"])
     caption = " ".join(x for x in sentences if not _unclaimed(x, source))
+    if not caption.strip():  # the filter can take every sentence; never an empty post text
+        caption = ". ".join(x for x in [headline, *points] if x)
     return {"headline": headline, "points": points, "caption": caption}
 
 

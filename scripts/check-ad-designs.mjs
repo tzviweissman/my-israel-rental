@@ -139,6 +139,17 @@ for (const l of ['en', 'he']) {
   }
 }
 
+// One business's gallery does not read as one ad repeated (A9g.10): count the ground colours of its previews.
+const grounds = await p.locator('[data-testid="ad-gallery"] img').evaluateAll((ims) => ims.map((im) => {
+  const c = document.createElement('canvas'); c.width = 8; c.height = 8;
+  const x = c.getContext('2d'); x.drawImage(im, 0, 0, 8, 8);
+  const d = x.getImageData(1, 1, 1, 1).data;
+  return [d[0], d[1], d[2]].map((v) => Math.round(v / 32)).join();
+}));
+const commonest = Math.max(...Object.values(grounds.reduce((m, g) => ({ ...m, [g]: (m[g] || 0) + 1 }), {})));
+console.log(`gallery: ${new Set(grounds).size} ground colours across ${grounds.length} designs, at most ${commonest} the same`);
+if (new Set(grounds).size < 6 || commonest > grounds.length * 0.4) fails.push(`variety: ${new Set(grounds).size} ground colours, ${commonest} of ${grounds.length} the same`);
+
 // Every design can be rearranged, and no drag breaks the rules: the code and link pulled hard into a corner and shrunk.
 const pullTo = async (name, tx, ty) => {
   const piece = p.locator(`[data-testid="ad-piece-${name}"]`);
@@ -198,6 +209,14 @@ await p.locator('[data-testid="ad-gallery"]').waitFor();
 await p.locator('[data-testid="ad-piece-qr"]').waitFor();
 await p.locator('[data-testid="advertising-url"]').waitFor();
 if (await p.locator('[role="dialog"]').count()) fails.push('advertising page: the maker should be on the page, not in a pop-up');
+// The preview stays in view while the options are scrolled (Tzvi, 5 Nov 2026).
+await p.evaluate(async () => {
+  const c = document.querySelector('[data-testid="ad-preview-column"]');
+  window.scrollBy(0, c.getBoundingClientRect().top + 300);
+  await new Promise((r) => { setTimeout(r, 200); });
+});
+const held = await p.locator('[data-testid="ad-preview"]').evaluate((c) => { const r = c.getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; });
+if (!held) fails.push('advertising page: the preview left the screen while scrolling the options');
 
 // --- the Super Admin Ads area (its own words, in the dashboard's language)
 await freshPage();

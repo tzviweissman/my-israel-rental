@@ -18,6 +18,8 @@ Every ad rule, in making order (docs/ad-rules-checklist.md). Answer a stage befo
   plan: The exact reader, through the Who is this ad for picker.
 - [x] A9g.9 Is this a different-looking ad from the last ones for this business, and not the same design with another headline?
   plan: Every layout is offered in the gallery, and the try-next line points to one not used yet.
+- [ ] A9g.10 The gallery of one business looks varied at a glance: its designs do not share one colour or one layout, and each starts on its own product where there are several.
+  plan: measured by check-ad-designs (variety)
 
 ## 2. The words
 
