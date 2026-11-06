@@ -2,5 +2,13 @@
   {
     "page": "index",
     "title": "Home"
+  },
+  {
+    "page": "work",
+    "title": "העבודות שלנו"
+  },
+  {
+    "page": "book",
+    "title": "לבקש הצעת מחיר"
   }
 ]

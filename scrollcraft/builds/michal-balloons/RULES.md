@@ -21,12 +21,12 @@ R5.1 pass: read every line
 R5.2 pass: read every line
 R5.3 pass: labels are phrases
 R5.4 pass: searched for they, them, their in English: none
-R5b.2 pass: every main button reads "Ask for a quote" (Hebrew: לבקש הצעת מחיר) and goes to #book; the section it opens is now titled the same ("Ask for a quote" / "לבקש הצעת מחיר"), no longer "Book your event"
+R5b.2 pass: every main button reads "Ask for a quote" (Hebrew: לבקש הצעת מחיר) on every page and goes to the quote page (book.html): the bar, the opening, what we make, the photo station (book.html?need=booth arrives with the photo station ticked), the end of Our work, the closing band, the footer link and the phone bar; the page it opens is titled the same. No button wording changed in the split
 R5b.8 pass: closing line "Your event, lifted" names the gain
-R3.11 pass: order: opening, her events, occasions, what we make, photo station, her work, quote card, good to know
+R3.11 pass: home: opening, her events, occasions, what we make, photo station, close; Our work (the gallery by occasion); Ask for a quote (the quote card, good to know)
 R3o.4 pass: 052-764-4973 is labelled as phone and WhatsApp
 R3e.22 n/a: no photo of Michal sent; asked in the reply
-R3s.19 pass: head tags unchanged except the category meta
+R3s.19 pass: every page (Home, Our work, Ask for a quote) has its own title, description and og tags, in Hebrew and English
 R6.1 pass: events playbook: past work, occasions, how to ask for a quote, area
 R4.1 pass: no price is shown by her request; the card says the price is given on contact
 R3g.13 pass: 22 Oct review fix: headline, one line and "Ask for a quote" show on the first screen from the first pixel at 1440x900, 390x844 and 360x640 while the arch builds behind them (film kept)
@@ -68,9 +68,9 @@ R9.1 pass: the held opening uses her own style of arch
 R3f.2 pass: signature = arch opening; accents = work filter, occasion columns reveal, balloon name; quiet touches = hovers
 R3m.1 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3m.3 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
-R3k.1 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
-R3k.2 n/a: the site is one page
-R3k.4 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
+R3k.1 pass: split into three pages on 6 Nov 2026 (Tzvi: "split all 4 into separate pages"): Home, Our work (work.html) and Ask for a quote (book.html); the photo station and what we make stay on Home (a few lines each, too thin for a page). Old addresses /business/<slug>#book forward to the quote page and #work-sec to Our work by a short script on Home; #make and #booth are still on Home. No contact page: the record has one phone number, no address, hours or email, already in every footer and on the quote page
+R3k.2 pass: the bar is the same markup on all three pages: the name to Home, What we make, Photo station, Our work, the language switch and the one Ask for a quote button; the links fold away on the phone as before and the phone bar and footer carry the pages
+R3k.4 pass: shared site.css and site.js (language switch, reveal, phone bar); the opening and signature scripts stay on Home, the gallery on Our work, the quote card on the quote page
 R8a.1 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
 R3b.4 pass: with 42 photos, the facts (area, hours, payment) sit in their own block
 R3c.3 pass: the worry of price is answered by "the price is given when you get in touch" in the quote card
@@ -88,7 +88,7 @@ R3s.11 n/a: no shop, basket or products on this site (a service enquiry only); t
 R5b.6 pass: one "scroll" cue on the held opening (hidden on short phones where it met the button); on phones the filter chips fade at the edge to show they scroll, and the fade goes at the end
 R3.13 pass: the contact appears in the footer and card as one number; the gallery has 42 photos
 R3a.1 pass: 22 Oct review fixes walked at 1440x900 and 390x844 touch in 300 to 500 px stops (opening, make, gallery, quote, close) in Hebrew; English opening checked at 390x844 (logo not clipped); check-fits six sizes
-R3r.1 pass: single page; check-site, check-fits, check-motion, cutoff ran clean; readable.mjs hung past 5 minutes and clipped.mjs timed out on the held film page (checker limits, named in reply)
+R3r.1 pass: three pages; check-site, check-fits, check-motion, cutoff ran clean; readable.mjs hung past 5 minutes and clipped.mjs timed out on the held film page (checker limits, named in reply)
 R3r.2 pass: independent review on 22 Oct (docs/page-review-checklist.md) by a separate reviewer; all findings fixed and re-checked, owner gaps listed in message-to-owner
 R3g.12 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
 R0b.12 n/a: not published yet; local build only. No 21st component is on the page, no reviewer pass has been asked for, no test business exists before publishing
@@ -132,7 +132,7 @@ R3k.7 n/a: no shop, basket or products on this site (a service enquiry only); th
 R3k.8 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3k.6 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R3k.9 pass: check-site SAVE passes: Step 3 now asks for a name and phone and the Send button POSTs to /api/marketplace/gigs/4db9f8d5-.../quote-requests with description (what, date, where, occasion, colours, name and phone), preferred_date, area, name, phone, lang he or en; WhatsApp opens first and carries the tracking link; a failed save still opens WhatsApp
-R3.15 pass: the quote card and phone/WhatsApp are on the page
+R3.15 pass: the quote card and phone/WhatsApp are on the quote page and in every footer
 R7.1 pass: hand build; one direction chosen in CONCEPT.md
 R8.5 n/a: no shop, basket or products on this site (a service enquiry only); this line is about orders, products or food
 R0b.13 pass: the request is saved with a tracking link (/quotes/...) before WhatsApp opens, and the message carries that link (see R3k.9)
@@ -196,7 +196,11 @@ R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
 <!-- 29 Oct: all rules re-read against the current pages; only change since is tighter spacing in the booking section and its summary so it fits a short laptop screen (check-fits passes on all three pages) -->
 <!-- 31 Oct: all rules re-read against the current pages; the only change is the phone opening, which now plays on repeat in one screen (Tzvi, 29 Oct) -->
-R3v.1 pass: full footer in Hebrew and English (who we are with a quiet quote link, Pages as the page's own sections, Booking: area, by appointment, payment; Reach us: WhatsApp and phone; base line with since 2024 and Privacy); the closing line kept; the solid button in the old footer became a quiet link because the band above has one
-R3v.2 pass: the site is one page with no other pages, so the menu bar keeps its jumps
+R3v.1 pass: the same full footer on all three pages in Hebrew and English (who we are with a quiet quote link, Pages: Home, What we make, Photo station, Our work, Ask for a quote; Booking: area, by appointment, payment; Reach us: WhatsApp and phone; base line with since 2024 and Privacy); the closing line kept
+R3v.2 pass: the site is Home, Our work and Ask for a quote; the bar and the footer list them on every page
 R3v.14 pass: Jerusalem and the area, By appointment, Bank transfer or Bit (the page's own Good to know lines; she asked for no prices on the page)
 <!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->
+
+
+Note, 6 Nov 2026: split into Home, Our work and Ask for a quote (split-four-sites). The lines for the buttons, pages, menu bar, footer and quote flow were rewritten for it; the opening, the quote card behaviour and the look are unchanged.
+Note: the two page headings moved from h2 to h1 keep the owner-edit keys they had before the split (data-mir-key written in the source); rules re-read against the final files.

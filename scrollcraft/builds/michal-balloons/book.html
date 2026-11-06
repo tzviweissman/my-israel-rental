@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="site-category" content="events">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>לבקש הצעת מחיר · מיכל בלונס</title>
+<meta name="description" content="בקשה להצעת מחיר לעיצוב בלונים בירושלים והסביבה, בתיאום מראש. בחרו מה צריך, והפרטים מגיעים אלינו בוואטסאפ.">
+<meta property="og:title" content="לבקש הצעת מחיר · מיכל בלונס">
+<meta property="og:description" content="בקשה להצעת מחיר לעיצוב בלונים בירושלים והסביבה, בתיאום מראש. בחרו מה צריך, והפרטים מגיעים אלינו בוואטסאפ.">
+<link rel="icon" href="assets/balloon.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+<script>document.documentElement.classList.add('js');document.documentElement.dataset.titleEn="Ask for a quote · Michal Balloons";</script>
+</head>
+<body>
+
+<header class="bar">
+  <div class="wrap">
+    <a class="brand" href="index.html" aria-label="מיכל בלונס, לראש העמוד" data-en-label="Michal Balloons, back to the top"><img src="assets/logo-mark.webp" alt="" width="695" height="298"></a>
+    <nav class="nav" aria-label="דפי האתר" data-en-label="Pages of the site">
+      <a class="link" href="index.html#make" data-en="What we make">מה אנחנו עושים</a>
+      <a class="link" href="index.html#booth" data-en="Photo station">עמדת צילום</a>
+      <a class="link" href="work.html" data-en="Our work">העבודות שלנו</a>
+      <button class="lang" type="button" id="lang" aria-label="Switch to English" data-en-label="להחליף לעברית">English</button>
+      <a class="ghost" href="book.html" aria-current="page" data-en="Ask for a quote">לבקש הצעת מחיר</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <section class="sec book" id="book" aria-labelledby="h-book">
+    <div class="wrap">
+      <h1 data-mir-key="t-18735855-0" id="h-book" data-rev data-en-html="Ask for a <span class=&quot;acc&quot;>quote</span>">לבקש <span class="acc">הצעת מחיר</span></h1>
+      <p class="lede" data-rev data-en="By appointment. Choose what you need, and the details reach us on WhatsApp.">בתיאום מראש. בחרו מה צריך, והפרטים מגיעים אלינו בוואטסאפ.</p>
+      <form class="card" id="f" data-rev novalidate>
+        <div class="stepbar" aria-hidden="true"><i class="on"></i><i></i><i></i></div>
+        <p class="stepname" id="stepname" aria-live="polite"></p>
+        <div class="st" data-s="1">
+          <fieldset>
+            <legend data-en="What do you need?">מה צריך?</legend>
+            <div class="chips" id="what">
+              <label><input type="checkbox" value="arch" data-he="שער בלונים" data-en-v="A balloon arch"><span data-en="Balloon arch">שער בלונים</span></label>
+              <label><input type="checkbox" value="centre" data-he="מרכזי שולחן" data-en-v="Table centrepieces"><span data-en="Centrepieces">מרכזי שולחן</span></label>
+              <label><input type="checkbox" value="booth" data-he="עמדת צילום" data-en-v="A photo station"><span data-en="Photo station">עמדת צילום</span></label>
+              <label><input type="checkbox" value="custom" data-he="בלונים בהתאמה אישית" data-en-v="Custom balloons"><span data-en="Custom">בהתאמה אישית</span></label>
+              <label><input type="checkbox" value="unsure" data-he="עוד לא בטוחים" data-en-v="Not sure yet"><span data-en="Not sure yet">עוד לא בטוחים</span></label>
+            </div>
+          </fieldset>
+          <p class="err" id="e1" hidden></p>
+        </div>
+        <div class="st" data-s="2" hidden>
+          <div class="row2">
+            <div><label class="f" for="when" data-en="Date of the event">תאריך האירוע</label><input id="when" type="date"></div>
+            <div><label class="f" for="where" data-en="Where (city or hall)">איפה (עיר או אולם)</label><input id="where" type="text" autocomplete="off"></div>
+          </div>
+          <label class="nodate"><input type="checkbox" id="nodate"><span data-en="We do not have a date yet">עוד אין לנו תאריך</span></label>
+          <p class="err" id="e2" hidden></p>
+        </div>
+        <div class="st" data-s="3" hidden>
+          <div class="row2">
+            <div><label class="f" for="nm" data-en="Your name">השם שלכם</label><input id="nm" type="text" autocomplete="name"></div>
+            <div><label class="f" for="ph" data-en="Phone">טלפון</label><input id="ph" type="tel" inputmode="tel" autocomplete="tel" dir="ltr"></div>
+          </div>
+          <p class="err" id="e3" hidden></p>
+          <div class="row2" style="margin-top:1rem">
+            <div><label class="f" for="occ" data-en="The occasion (optional)">סוג האירוע (לא חובה)</label><input id="occ" type="text" autocomplete="off"></div>
+            <div><label class="f" for="cols" data-en="Colours (optional)">צבעים (לא חובה)</label><input id="cols" type="text" autocomplete="off"></div>
+          </div>
+        </div>
+        <div class="sum" id="sum" aria-live="polite"></div>
+        <div class="send">
+          <button type="button" class="ghost" id="back" hidden></button>
+          <button type="button" class="btn" id="next"></button>
+          <a class="btn" id="send" href="https://wa.me/972527644973" target="_blank" rel="noopener" hidden>
+            <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.5 14.1c-.2.6-1.3 1.2-1.8 1.2-.5.1-1 .2-3.3-.7-2.8-1.1-4.5-3.9-4.7-4.1-.1-.2-1.1-1.5-1.1-2.9 0-1.4.7-2 1-2.3.2-.3.5-.3.7-.3h.5c.2 0 .4 0 .6.5l.8 2c.1.2.1.4 0 .5l-.4.6-.4.4c-.1.2-.3.3-.1.6.2.3.8 1.3 1.7 2.1 1.2 1 2.1 1.4 2.4 1.5.3.2.5.1.6-.1l.9-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.2.1.7-.1 1.4Z"/></svg>
+            <span data-en="Send my request on WhatsApp">שליחת הבקשה שלי בוואטסאפ</span>
+          </a>
+          <p class="note" data-en="Or call: 052-764-4973">או בטלפון: <a href="tel:+972527644973" dir="ltr">052-764-4973</a></p>
+        </div>
+      </form>
+    </div>
+  </section>
+
+  <section class="sec know" aria-labelledby="h-know">
+    <div class="wrap">
+      <h2 id="h-know" data-rev data-en="Good to know">טוב לדעת</h2>
+      <dl class="facts">
+        <div data-rev><dt data-en="AREA">אזור</dt><dd data-en="Jerusalem and the area">ירושלים והסביבה</dd></div>
+        <div data-rev style="--i:1"><dt data-en="HOURS">שעות</dt><dd data-en="By appointment">בתיאום מראש</dd></div>
+        <div data-rev style="--i:2"><dt data-en="PAYMENT">תשלום</dt><dd data-en="Bank transfer or Bit">העברה בנקאית או ביט</dd></div>
+        <div data-rev><dt data-en="LANGUAGES">שפות</dt><dd data-en="Hebrew and English">עברית ואנגלית</dd></div>
+        <div data-rev style="--i:1"><dt data-en="SINCE">מאז</dt><dd>2024</dd></div>
+        <div data-rev style="--i:2"><dt data-en="PHONE">טלפון</dt><dd><a href="tel:+972527644973" dir="ltr">052-764-4973</a></dd></div>
+      </dl>
+    </div>
+  </section>
+</main>
+
+<footer class="foot full">
+  <p class="last" data-en-html="Your event, <span class=&quot;acc&quot;>lifted</span>">האירוע שלכם, <span class="acc">באוויר</span></p>
+  <div class="fgrid">
+    <div class="fbrand"><a class="fname" href="index.html" data-en="Michal Balloons">מיכל בלונס</a><p data-en="Balloon arches, centrepieces and photo stations in Jerusalem and the area">שערי בלונים, מרכזי שולחן ועמדות צילום בירושלים והסביבה</p><a class="fcta" href="book.html"><span data-en="Ask for a quote">לבקש הצעת מחיר</span> <svg class="arw" viewBox="0 0 24 24" width="16" height="16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    <nav aria-label="Pages" data-en-label="Pages"><h4 data-en="Pages">דפים</h4><a href="index.html" data-en="Home">ראשי</a><a href="index.html#make" data-en="What we make">מה אנחנו עושים</a><a href="index.html#booth" data-en="Photo station">עמדת צילום</a><a href="work.html" data-en="Our work">העבודות שלנו</a><a href="book.html" data-en="Ask for a quote">לבקש הצעת מחיר</a></nav>
+    <div><h4 data-en="Booking">הזמנה</h4><p data-en="Jerusalem and the area">ירושלים והסביבה</p><p data-en="By appointment">בתיאום מראש</p><p data-en="Bank transfer or Bit">העברה בנקאית או ביט</p></div>
+    <div><h4 data-en="Reach us">יצירת קשר</h4><a href="https://wa.me/972527644973" target="_blank" rel="noopener">WhatsApp <bdi dir="ltr">+972 52-764-4973</bdi></a><a href="tel:+972527644973"><span data-en="Phone">טלפון</span> <bdi dir="ltr">052-764-4973</bdi></a></div>
+  </div>
+  <div class="fbase"><span data-en="© 2026 Michal Balloons. Since 2024.">© 2026 מיכל בלונס. מאז 2024.</span><span data-en-html="Listed on &lt;a href=&quot;https://myisraelrental.com/&quot;&gt;MyIsraelRental&lt;/a&gt;, free to list, no commission · &lt;a href=&quot;https://myisraelrental.com/privacy&quot;&gt;Privacy&lt;/a&gt;">רשומים ב-<a href="https://myisraelrental.com/">MyIsraelRental</a>, רישום חינם, בלי עמלה · <a href="https://myisraelrental.com/privacy">פרטיות</a></span></div>
+</footer>
+
+<script src="site.js"></script>
+<script>
+(function () {
+  var EN = false;
+  MB.onLang(function (en) { EN = en; write(); steps(); });
+  // the booking card writes the WhatsApp message
+  var f = document.getElementById('f'), send = document.getElementById('send');
+  function v(id) { return document.getElementById(id).value.trim(); }
+  function write() {
+    var picked = [].slice.call(document.querySelectorAll('#what input:checked')).map(function (i) { return EN ? i.dataset.enV : i.dataset.he; });
+    var L = EN ? ['Hi Michal, I would like to book balloon design.'] : ['היי מיכל, אשמח לתאם עיצוב בלונים.'];
+    if (picked.length) L.push((EN ? 'What: ' : 'מה: ') + picked.join(', '));
+    if (document.getElementById('nodate').checked) L.push(EN ? 'Date: not fixed yet' : 'תאריך: עוד לא נקבע');
+    else if (v('when')) L.push((EN ? 'Date: ' : 'תאריך: ') + new Date(v('when') + 'T12:00:00').toLocaleDateString(EN ? 'en-GB' : 'he-IL', { weekday: 'long', day: 'numeric', month: 'long' }));
+    if (v('where')) L.push((EN ? 'Where: ' : 'איפה: ') + v('where'));
+    if (v('occ')) L.push((EN ? 'Occasion: ' : 'אירוע: ') + v('occ'));
+    if (v('cols')) L.push((EN ? 'Colours: ' : 'צבעים: ') + v('cols'));
+    if (v('nm') || v('ph')) L.push((EN ? 'Name: ' : 'שם: ') + v('nm') + (v('ph') ? ', ' + v('ph') : ''));
+    send.href = 'https://wa.me/972527644973?text=' + encodeURIComponent(L.join('\n'));
+    var sum = document.getElementById('sum'); sum.textContent = '';
+    L.slice(1).forEach(function (t) { var d = document.createElement('div'); d.textContent = t; sum.appendChild(d); });
+  }
+  // the booking in three steps: what, when and where, details; each checks only its own part
+  var cur = 1, nextB = document.getElementById('next'), backB = document.getElementById('back');
+  var TX = {
+    he: { n: ['שלב 1: מה צריך', 'שלב 2: מתי ואיפה', 'שלב 3: הפרטים שלכם'], nx: ['המשך: מתי ואיפה', 'המשך: הפרטים שלכם'], back: 'חזרה',
+      e1: 'בחרו לפחות אפשרות אחת, או "עוד לא בטוחים".', e2: 'כתבו איפה האירוע, ובחרו תאריך או סמנו שעוד אין תאריך.',
+      e3: 'כתבו שם ומספר טלפון שאפשר לחזור אליו.' },
+    en: { n: ['Step 1: What you need', 'Step 2: When and where', 'Step 3: Your details'], nx: ['Continue: when and where', 'Continue: your details'], back: 'Back',
+      e1: 'Choose at least one, or "Not sure yet".', e2: 'Say where the event is, and pick a date or tick that you have no date yet.',
+      e3: 'Add your name and a phone number we can reach you on.' }
+  };
+  function steps() {
+    var t = TX[EN ? 'en' : 'he'];
+    [].forEach.call(document.querySelectorAll('.st'), function (e) { e.hidden = +e.dataset.s !== cur; });
+    [].forEach.call(document.querySelectorAll('.stepbar i'), function (e, i) { e.classList.toggle('on', i < cur); });
+    document.getElementById('stepname').textContent = t.n[cur - 1];
+    nextB.hidden = cur === 3; send.hidden = cur !== 3; backB.hidden = cur === 1;
+    if (cur < 3) nextB.textContent = t.nx[cur - 1];
+    backB.textContent = t.back;
+    ['e1', 'e2', 'e3'].forEach(function (k) { var e = document.getElementById(k); if (!e.hidden) e.textContent = t[k]; });
+  }
+  function go(n, push) { cur = n; steps(); if (push) history.pushState({ b: n }, '', n > 1 ? '#book-' + n : '#book'); }
+  nextB.addEventListener('click', function () {
+    var ok = cur === 1 ? !!document.querySelector('#what input:checked')
+      : (!!(v('when') || document.getElementById('nodate').checked) && !!v('where'));
+    var e = document.getElementById('e' + cur); e.hidden = ok; if (!ok) { e.textContent = TX[EN ? 'en' : 'he']['e' + cur]; return; }
+    go(cur + 1, true);
+  });
+  backB.addEventListener('click', function () { history.back(); });
+  window.addEventListener('popstate', function () { var m = /#book-(\d)/.exec(location.hash); go(m ? +m[1] : 1, false); });
+  document.getElementById('nodate').addEventListener('change', function () { document.getElementById('when').disabled = this.checked; write(); });
+  f.addEventListener('input', write); f.addEventListener('change', write);
+  document.getElementById('when').min = new Date(Date.now() - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the form arrives filled in (Tzvi, 29 Oct 2026, rules 3k.8): tomorrow, changeable; no lead time given yet, so same-day is not assumed (a booked event, the day stays optional with the no-date box)
+  document.getElementById('when').value = new Date(Date.now() + 864e5 - new Date().getTimezoneOffset() * 60000).toISOString().slice(0, 10);
+  // the request is saved with Michal on MyIsraelRental first (page rules 3k), then WhatsApp opens with it typed
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api', GIG = '4db9f8d5-038f-4b83-b0a4-f1adf988aa26';
+  var sending = false;
+  send.addEventListener('click', function (ev) {
+    ev.preventDefault();
+    if (sending) return;
+    if (cur < 3) { nextB.click(); return; }
+    var ok = !!v('nm') && /\d{9,}/.test(v('ph').replace(/\D/g, ''));
+    var e3 = document.getElementById('e3'); e3.hidden = ok; if (!ok) { e3.textContent = TX[EN ? 'en' : 'he'].e3; return; }
+    write();
+    var text = decodeURIComponent(send.href.split('text=')[1] || ''), desc = text.split('\n').slice(1).join('\n');
+    sending = true; send.setAttribute('aria-busy', 'true');
+    var tab = window.open('', '_blank');
+    var post = fetch(API + '/marketplace/gigs/' + GIG + '/quote-requests', { method: 'POST', headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ description: desc, preferred_date: document.getElementById('nodate').checked ? null : (v('when') || null), area: v('where') || null, name: v('nm'), phone: v('ph'), lang: EN ? 'en' : 'he' }) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('request not saved', r.status, t); return null; }); })
+      .catch(function (err) { console.warn('request not saved', err); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      if (saved && saved.track_path) text += '\n\n' + (EN ? 'Follow the request: ' : 'מעקב אחר הבקשה: ') + 'https://myisraelrental.com' + saved.track_path;
+      var url = 'https://wa.me/972527644973?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      sending = false; send.removeAttribute('aria-busy');
+    });
+  });
+  // "Ask for a quote" from the photo station arrives with it ticked in the card (book.html?need=booth)
+  var need = new URLSearchParams(location.search).get('need'), box = need && document.querySelector('#what input[value="' + need + '"]');
+  if (box) box.checked = true;
+  write(); steps();
+})();
+</script>
+</body>
+</html>
