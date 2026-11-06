@@ -1810,6 +1810,9 @@ class OrderSettingsIn(BaseModel):
     # 2026: many businesses text on one number and WhatsApp on another).
     # Empty: the WhatsApp number. Not sent at all: left as it was.
     text_number: Optional[str] = Field(None, max_length=30)
+    # The switch (Tzvi, 6 Nov 2026): on, the business hears by text and its
+    # customers are not also sent to WhatsApp after ordering or booking.
+    text_on: Optional[bool] = None
 
     @field_validator("area_fees")
     @classmethod
@@ -1873,7 +1876,9 @@ async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
         {"business_id": biz["_id"], "status": "published", "$or": [{"gig_type": "store"}, {"products.0": {"$exists": True}}]},
         {"whatsapp": 1, "provider_user_id": 1},
     )
-    return {**_settings_out(biz, await _store_of(biz["_id"])), "text_number": (biz.get("order_settings") or {}).get("text_number"),
+    from .order_texts import texts_on
+    return {**_settings_out(biz, await _store_of(biz["_id"])), "text_on": texts_on(biz),
+            "text_number": (biz.get("order_settings") or {}).get("text_number"),
             "whatsapp_number": (await gig_whatsapp_number(selling)) if selling else ""}
 
 
@@ -1894,6 +1899,8 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         text_number = (payload.text_number or "").strip() or None
         if text_number and not normalize_whatsapp_number(text_number):
             raise HTTPException(status_code=400, detail="Please enter a mobile number with the leading 0 or a country code")
+    from .order_texts import texts_on
+    text_on = payload.text_on if payload.text_on is not None else texts_on(biz)
     settings = {
         "windows": {
             "pickup": [w.model_dump() for w in sorted(payload.pickup_windows, key=lambda w: (w.weekday, w.start))],
@@ -1908,6 +1915,7 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         "max_per_day": payload.max_per_day,
         "max_per_window": payload.max_per_window,
         "text_number": text_number,
+        "text_on": text_on,
         # An older client that does not send the switch keeps the old
         # meaning: delivery times set means delivery offered.
         "delivery_on": payload.delivery_on if payload.delivery_on is not None else bool(payload.delivery_windows),
@@ -2261,6 +2269,7 @@ def _areas_out(biz: dict[str, Any]) -> list[dict[str, Any]]:
 
 @router.get("/order-form/{gig_id}")
 async def order_form(gig_id: str):
+    from .order_texts import texts_on
     gig, biz = await _store_for_ordering(gig_id)
     st = biz.get("order_settings") or {}
     return {
@@ -2268,9 +2277,9 @@ async def order_form(gig_id: str):
                 # Whether placing the order should hand the customer to the
                 # business on WhatsApp with the order written in (yes or no
                 # only; the number stays behind the counting redirect).
-                # A business that chose a texting number hears about the order
-                # by text, so the customer is not also sent to WhatsApp.
-                "whatsapp": not st.get("text_number") and await _order_has_whatsapp({"gig_id": gig["_id"]})},
+                # A business with texts on hears about the order that way, so
+                # the customer is not also sent to WhatsApp.
+                "whatsapp": not texts_on(biz) and await _order_has_whatsapp({"gig_id": gig["_id"]})},
         "business": {
             "id": biz["_id"], "name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url"), "slug": biz.get("slug"),
             "birthday_on": bool((biz.get("birthday_settings") or {}).get("on")),
@@ -2629,5 +2638,8 @@ async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optiona
         if not sent and kind == "order" and order_id:
             from .order_texts import text_owner_new_order
             await text_owner_new_order(order_id)
+        elif not sent and kind == "booking":
+            from .order_texts import text_owner_new_booking
+            await text_owner_new_booking(gig, customer_name, summary, path, owner_user_id)
     except Exception as exc:  # noqa: BLE001
         logger.warning("WhatsApp new-%s alert failed: %s", kind, type(exc).__name__)

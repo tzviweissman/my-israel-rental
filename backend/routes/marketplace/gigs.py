@@ -682,6 +682,10 @@ async def get_gig(gig_id: str, request: Request, viewer=Depends(optional_user)):
     gig["discount"] = active_discount(gig)
     # Whether the booking form asks for a birthday (birthdays.py).
     gig["birthday_on"] = bool(((business or {}).get("birthday_settings") or {}).get("on"))
+    # Yes or no only. On, the booking form does not send the customer on to
+    # WhatsApp afterwards: the business hears by text.
+    from .order_texts import texts_on
+    gig["texts_on"] = texts_on(business or {})
     gig["provider"] = {
         "user_id": gig["provider_user_id"],
         "name": _public_provider_name(business, user),

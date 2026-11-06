@@ -7450,7 +7450,10 @@ const en = {
         code: "Member code",
       },
       orderTexts: {
-        title: "New order texts",
+        title: "Text notifications",
+        on: "Text me new orders and bookings",
+        onHint: "On: customers stay on the site after they order or book, and are not sent to WhatsApp.",
+        offHint: "Off: after they order or book, customers are sent to your WhatsApp.",
         body: "Each new order is texted to this number, with a link to confirm or decline it.",
         same: "Same as my WhatsApp number",
         noWhatsapp: "This business has no WhatsApp number yet, so no texts can go out. Add one to your listing, or choose a different number.",

@@ -228,7 +228,7 @@ export const BookingForm = ({ gig, tier, onClose, token, slotDate = null, slot =
     }
     setSaving(true);
     // Opened inside the tap or the browser blocks it (WhatsAppAboutThis.jsx).
-    const handoff = (gig.contact_channels || []).includes('whatsapp') ? reserveWhatsAppTab() : null;
+    const handoff = !gig.texts_on && (gig.contact_channels || []).includes('whatsapp') ? reserveWhatsAppTab() : null;
     try {
       const { data } = await axios.post(
         `${API}/marketplace/gigs/${gig.id}/book`,

@@ -201,6 +201,23 @@ def test_chosen_text_number_beats_whatsapp(world):
     assert "055-337-8799" in to and "+972501234567" not in to
 
 
+def test_switch_and_booking_text(world):
+    order, sent = world
+    biz = ot.db.businesses.docs[0]
+    assert ot.texts_on(biz) is False
+    gig = {"_id": "g1", "business_id": "b1"}
+    assert run(ot.text_owner_new_booking(gig, "Dani", "Haircut", "/dashboard", "u1")) is False
+    assert sent.await_count == 0
+
+    # On with no number of its own: the WhatsApp number.
+    biz["order_settings"] = {"text_on": True}
+    assert ot.texts_on(biz) is True
+    run(ot.text_owner_new_booking(gig, "Dani", "Haircut", "/dashboard", "u1"))
+    assert sent.await_args.kwargs["to"] == "+972501234567" and "Haircut" in sent.await_args.kwargs["body"]
+    # A number chosen before the switch existed counts as on.
+    assert ot.texts_on({"order_settings": {"text_number": "055-337-8799"}}) is True
+
+
 def test_app_link_opens_the_app():
     from utils.whatsapp_link import build_whatsapp_app_link
     assert build_whatsapp_app_link("052-111-2222", "a b") == "whatsapp://send?phone=972521112222&text=a%20b"

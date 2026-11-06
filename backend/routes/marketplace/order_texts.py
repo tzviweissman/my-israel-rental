@@ -88,6 +88,13 @@ def matches(o: dict[str, Any], q: str) -> bool:
     return q in text
 
 
+def texts_on(biz: dict[str, Any]) -> bool:
+    """The business turned text notifications on. A number chosen before the
+    switch existed means the same."""
+    st = biz.get("order_settings") or {}
+    return bool(st.get("text_on") or st.get("text_number"))
+
+
 def order_no(o: dict[str, Any]) -> str:
     # Orders from before 2 Nov 2026 have no number; the id's tail is stable.
     return f"#{o['order_no']}" if o.get("order_no") else "#" + str(o.get("_id", ""))[-6:].upper()
@@ -153,6 +160,26 @@ async def text_owner_new_order(order_id: str) -> bool:
         return await send_sms(to=number, body=owner_text(o, owner_link(o), await _owner_he(o)))
     except Exception as exc:  # noqa: BLE001
         logger.warning("order text to the business failed: %s", type(exc).__name__)
+        return False
+
+
+async def text_owner_new_booking(gig: dict[str, Any], customer_name: str, summary: str, path: str, owner_user_id: Optional[str]) -> bool:
+    """A new booking, by text, only when the business turned texts on: its
+    customers then no longer open WhatsApp to tell it. Never raises."""
+    try:
+        biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
+        if not texts_on(biz):
+            return False
+        number = await _business_text_number({"business_id": gig.get("business_id"), "gig_id": gig.get("_id")})
+        if not number:
+            return False
+        link = f"{_frontend()}{path}"
+        who = customer_name or ""
+        he = await _owner_he({"owner_user_id": owner_user_id})
+        body = f"בקשת תור חדשה מ{who}: {summary}\nלצפייה: {link}" if he else f"New booking from {who}: {summary}\nSee it: {link}"
+        return await send_sms(to=number, body=body)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("booking text to the business failed: %s", type(exc).__name__)
         return False
 
 
