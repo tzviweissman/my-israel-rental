@@ -191,6 +191,9 @@ async def text_customer_booking(b: dict[str, Any], status: str, title: str) -> N
         phone = b.get("contact_phone")
         if not phone or not b.get("track_token"):
             return
+        gig = await db.marketplace_gigs.find_one({"_id": b.get("gig_id")}, {"business_id": 1}) or {}
+        if not texts_on(await db.businesses.find_one({"_id": gig.get("business_id")}) or {}):
+            return
         link = f"{_frontend()}/bookings/track/{b['track_token']}"
         he = (b.get("lang") or "").startswith("he")
         if status == "accepted":
@@ -207,7 +210,7 @@ async def text_customer_received(o: dict[str, Any], biz: dict[str, Any]) -> None
     say yes, and here is the link (Tzvi, 6 Nov 2026). Never raises."""
     try:
         phone = o.get("customer_phone_e164") or o.get("customer_phone")
-        if not phone or o.get("table"):
+        if not phone or o.get("table") or not texts_on(biz):
             return
         he = o.get("lang") == "he"
         name = biz.get("name_he") if he and biz.get("name_he") else biz.get("name") or ""
@@ -323,7 +326,7 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, te
         name = biz.get("name_he") if o.get("lang") == "he" and biz.get("name_he") else biz.get("name") or ""
         no = order_no(o)
         customer = o.get("customer_phone_e164") or o.get("customer_phone")
-        if customer:
+        if customer and texts_on(biz):
             if o.get("lang") == "he":
                 body = (f"ההזמנה שלך {no} מ{name} אושרה. הקישור שלך למעקב: {track_link(o)}" if confirm
                         else f"מצטערים, {name} לא יכולים לקבל את ההזמנה שלך {no} הפעם.")
@@ -360,8 +363,12 @@ async def _email_customer(o: dict[str, Any], name: str, no: str, confirm: bool) 
 
 
 async def _business_text_number(o: dict[str, Any]) -> Optional[str]:
-    """The number the business chose for texts, else its WhatsApp number."""
+    """The number the business chose for texts, else its WhatsApp number.
+    None while its switch is off: texts go only to a business that turned them
+    on (Tzvi, 6 Nov 2026)."""
     biz = await db.businesses.find_one({"_id": o.get("business_id")}) or {}
+    if not texts_on(biz):
+        return None
     own = (biz.get("order_settings") or {}).get("text_number")
     if own:
         return own
