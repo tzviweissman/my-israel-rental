@@ -1,0 +1,26 @@
+# Hadassah Prys: references (scripts/check-references.mjs)
+
+Read 6 Nov 2026 before any idea, for one makeup artist in Jerusalem: one service (Makeup, ₪260, 60 minutes, lashes
+included), a pink script logo and one flyer (a brush and powder, "Now in Jerusalem", "get ready to glow"). I went through
+the README tables and opened the pictures named below myself, on one contact sheet and then singly where cited.
+
+- videos-2026-11-04: docs/inspo/videos-2026-11-04/turn-it-light-modes.jpg (buttons named for a kind of light change the whole opening) gave the mirror's light switch; docs/inspo/videos-2026-11-04/brief-form-live-summary.jpg and docs/inspo/videos-2026-11-04/prices-beside-booking.jpg shape the booking page, the request written beside the form with the price in view; flashlight-hero.jpg is a dark world and is not used.
+- pinterest-ads-2026-11-02: ads, not sites; useful later for her ads, and nothing for the opening of a one-person service, so nothing is taken from it here.
+- videos-2026-11-01: docs/inspo/videos-2026-11-01/lighting-plan.jpg (side and back light, camera side darker) is the lighting brief for the still; the rest is about food films and is not used.
+- awwwards-anatomy-2026-10-22: services row: docs/inspo/awwwards-anatomy-2026-10-22/services/kononenko-text-led.webp (large words with little else) is the model for her statement band, since she has no photos of her work yet; lpas-hero-film.webp is a filmed office and does not fit.
+- product-shots-2026-10-22: advertising product photos for the hero-shot rule; the one object on a plinth in its own colour story is the brief for the brush picture beside the price.
+- product-pages-2026-10-20: docs/inspo/product-pages-2026-10-20/storehouse-2-list-beside-hero-product.webp (facts in a list beside one object) shapes her service section; the colour-chip page change is not used because she has one service.
+- product-films-2026-10-21: drink can films (docs/inspo/product-films-2026-10-21/can-3.6.jpg, one object settling on a plain ground); kept as the shape of the powder film offered to Tzvi in IDEAS.md, nothing used on the page yet.
+- moto-card-2026-10-21: docs/inspo/moto-card-2026-10-21/hero-2500.webp is one lit object under one line, full screen; the same discipline of one lit object is used on a light ground; its dark bands give the one dark closing band.
+- awwwards-food-2026-10-18: docs/inspo/awwwards-food-2026-10-18/zeroz-brand-site-2-light-circle-wipe.webp (a circle of light opens the page) is the closest thing to a bulb coming on; docs/inspo/awwwards-food-2026-10-18/still-2-flavour-glow-swap.webp (soft glow behind one object on pale ground) is the light we want in the room.
+- awwwards-categories-2026-10-18: docs/inspo/awwwards-categories-2026-10-18/halcyon-lighting-1-lights-off-toggle.webp (a lighting maker's site with a working lights control) is the source of the switch; half-the-sky-1-bust-grid-glow.webp (pale relief on pale ground) for pale-on-pale restraint.
+- awwwards-2026-10-18: docs/inspo/awwwards-2026-10-18/butter-5-glow-wordmark.webp (one soft glow under a word) shaped the button's glow; the rest is tech product and does not fit.
+- sites-2026-10-16: text notes on five finished sites; the rhythm of light rooms then one hard break comes from here, one dark band near the end.
+- ui-videos-notes: rules only (contrast bands, one statement breaker, chapters); the statement band and the single closing line follow them.
+- effects-library: buttons, tiles and prices checked; P9 (price over its unit) is taken from it, the button is new because nothing there lights up from behind.
+- ad-videos-2026-11-04: docs/inspo/ad-videos-2026-11-04/flo-moment-in-the-day.jpg (a product in a moment of the day) gives the idea of a getting-ready moment; kept for a later ad, nothing for the site.
+- bar-breaking-2026-11-02: films of snack bars breaking for Krysp; nothing fits a makeup artist.
+- inspo: recommend "one-person freelance makeup artist in Jerusalem" (exemplars bandcamp-com and brightful-me, neither close); search_screens "beauty makeup cosmetics brand soft pink" kept mooala-com for one object lit large with the name low at the left; the archive has no real makeup artist, so the anatomy row above carried more.
+- mobbin: "beauty salon booking service section with price and duration": https://mobbin.com/sites/sections/f365cff8-e8ea-4525-af1d-d87ee93f0bb3 (Fresha, a big serif line above one booking bar) and https://mobbin.com/sites/sections/62605a5b-b047-4feb-aa94-a60be59a6136 (Fresha cards, name then place then tag), kept for reading order; the star counts there are not copied because she has no reviews.
+- 21st: "light switch toggle lamp bulb glow hero": https://21st.dev/@cipriantitire/components/pull-cord-lamp (a lamp that is a switch, the filament warms and light falls on the wall) is the source of the switch and warm-up; "booking time slot picker": https://21st.dev/@klyv-ui/components/time-slot-picker (free and taken times read at a glance) shapes the time chips.
+- fingerprints: taken by others: drop, pour, window, assemble, burst, stickers, slats, tumble, untie, journey, dial, snap; Elisheva Nails has blush with a chosen shade and The Whipped Cup has blush with pink, so her pink stays her own logo pink and the structure differs: a lit mirror, no shade chips, no clouds.

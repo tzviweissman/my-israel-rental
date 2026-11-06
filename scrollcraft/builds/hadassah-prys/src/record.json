@@ -1,0 +1,333 @@
+{
+ "business": {
+  "id": "2d26930e-4ec3-41fb-be84-92d5a9eacd8a",
+  "slug": "hadassah-prys",
+  "name": "Hadassah Prys",
+  "name_he": null,
+  "description": "Your beauty, just elevated. Specialising in natural glam, radiant skin and effortlessly beautiful makeup for every occasion.",
+  "description_he": "היופי הטבעי שלך, רק עם טאץ׳ משודרג. מתמחה באיפור טבעי וזוהר, עם מראה עדין, מחמיא ומוקפד לכל אירוע.",
+  "logo_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793905610/myisraelrental/vtd7pwogajtlj7pzrn8r.jpg",
+  "has_memberships": false,
+  "gift_cards_on": true,
+  "categories": [],
+  "areas": [
+   "jerusalem"
+  ],
+  "serves_nationwide": true,
+  "verified": false,
+  "verified_at": null,
+  "rating_avg": null,
+  "rating_count": 0,
+  "member_since": "2026",
+  "owner_user_id": "999f9291-0a51-4713-9bb5-dd19a4308f1c",
+  "hours": null,
+  "by_appointment": true,
+  "languages": [
+   "English"
+  ],
+  "shabbat": null,
+  "shabbat_closing": {
+   "on": true,
+   "closed_now": null,
+   "closures": [
+    {
+     "start": "2026-11-06T16:07:00+02:00",
+     "end": "2026-11-07T17:24:00+02:00",
+     "kind": "shabbat"
+    },
+    {
+     "start": "2026-11-13T16:02:00+02:00",
+     "end": "2026-11-14T17:19:00+02:00",
+     "kind": "shabbat"
+    },
+    {
+     "start": "2026-11-20T15:58:00+02:00",
+     "end": "2026-11-21T17:16:00+02:00",
+     "kind": "shabbat"
+    },
+    {
+     "start": "2026-11-27T15:56:00+02:00",
+     "end": "2026-11-28T17:15:00+02:00",
+     "kind": "shabbat"
+    },
+    {
+     "start": "2026-12-04T15:55:00+02:00",
+     "end": "2026-12-05T17:14:00+02:00",
+     "kind": "shabbat"
+    }
+   ]
+  },
+  "vehicle": null,
+  "founded_year": 2021,
+  "delivery_note": null,
+  "lead_time": null,
+  "payment_note": "Cash, PayPal, BACS",
+  "order_cutoffs": [],
+  "order_settings": {
+   "windows": null,
+   "delivery_fee": null,
+   "min_order": null
+  },
+  "kosher_certification": null,
+  "license_number": null,
+  "accent": "stone",
+  "brand_color": "#F4CDD4",
+  "brand_fonts": {
+   "heading": "suez-one",
+   "body": "rubik"
+  },
+  "notice": null,
+  "cover_url": null,
+  "payment_links": [],
+  "collections": [],
+  "pinned_service_ids": [
+   "0b499771-4fd2-4977-bb9b-cb98837d65cc"
+  ],
+  "featured_headline": null,
+  "featured_headline_lang": null,
+  "featured_headline_translated": null,
+  "page": {
+   "theme": {
+    "palette": "stone",
+    "type": "geometric",
+    "density": "balanced",
+    "imagery": "full-bleed",
+    "price_prominence": "quiet",
+    "motion": "subtle"
+   },
+   "blocks": [
+    {
+     "id": "catalog",
+     "type": "services",
+     "variant": "grid",
+     "props": {
+      "heading": "",
+      "source": "all",
+      "collection_id": null,
+      "ids": [],
+      "limit": 12
+     },
+     "hidden": false
+    },
+    {
+     "id": "facts",
+     "type": "facts",
+     "variant": "list",
+     "props": {},
+     "hidden": false
+    }
+   ]
+  },
+  "pages": [],
+  "testimonials": [],
+  "response_bucket": null,
+  "listings": [
+   {
+    "provider_user_id": "999f9291-0a51-4713-9bb5-dd19a4308f1c",
+    "provider_id": "eff996c2-b913-4a36-a9ef-662655b74af7",
+    "business_id": "2d26930e-4ec3-41fb-be84-92d5a9eacd8a",
+    "title": "Makeup Artist",
+    "title_he": "אמן/אמנית איפור",
+    "title_en": null,
+    "source_lang": "en",
+    "category": "personal-care",
+    "subcategory": null,
+    "description": "Your beauty, just elevated. Specialising in natural glam, radiant skin and effortlessly beautiful makeup for every occasion.",
+    "description_he": "היופי שלך, רק מורם לגבהים חדשים. מתמחים בגלאם טבעי, עור זוהר ואיפור יפהפה וקליל לכל אירוע.",
+    "description_en": null,
+    "gig_type": "appointment",
+    "tiers": [
+     {
+      "name": "Makeup",
+      "price": 260.0,
+      "currency": "ILS",
+      "delivery_days": null,
+      "duration_minutes": 60,
+      "description": "Lashes included ",
+      "features": [],
+      "images": [
+       "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793905448/myisraelrental/zqxlocw2bwpf7qkeqvvr.jpg"
+      ]
+     }
+    ],
+    "products": [],
+    "weekly_availability": {
+     "mon": [
+      {
+       "start": "09:00",
+       "end": "19:00"
+      }
+     ],
+     "tue": [
+      {
+       "start": "09:00",
+       "end": "19:00"
+      }
+     ],
+     "wed": [
+      {
+       "start": "09:00",
+       "end": "19:00"
+      }
+     ],
+     "thu": [
+      {
+       "start": "09:00",
+       "end": "19:00"
+      }
+     ],
+     "fri": [
+      {
+       "start": "09:00",
+       "end": "13:00"
+      }
+     ],
+     "sat": [],
+     "sun": [
+      {
+       "start": "09:00",
+       "end": "19:00"
+      }
+     ]
+    },
+    "slot_duration_minutes": 60,
+    "team": [],
+    "rebook_after_weeks": null,
+    "enable_date_booking": false,
+    "gallery": [],
+    "booking_mode": "whatsapp",
+    "whatsapp_confirmed": true,
+    "area": "Jerusalem",
+    "faqs": [],
+    "discount": null,
+    "status": "published",
+    "created_at": "2026-11-05T19:06:20.527335+00:00",
+    "updated_at": "2026-11-05T19:06:20.527335+00:00",
+    "geocode_miss": false,
+    "geocoded_at": 1793905581.0440779,
+    "lat": 31.7788472,
+    "lng": 35.2257856,
+    "rating_avg": null,
+    "rating_count": 0,
+    "cheapest_price": 260.0,
+    "is_top_rated": false,
+    "id": "0b499771-4fd2-4977-bb9b-cb98837d65cc",
+    "contact_channels": [
+     "in_platform"
+    ],
+    "highlights": []
+   }
+  ],
+  "page_upgrade": false
+ },
+ "listings": [
+  {
+   "provider_user_id": "999f9291-0a51-4713-9bb5-dd19a4308f1c",
+   "provider_id": "eff996c2-b913-4a36-a9ef-662655b74af7",
+   "business_id": "2d26930e-4ec3-41fb-be84-92d5a9eacd8a",
+   "title": "Makeup Artist",
+   "title_he": "אמן/אמנית איפור",
+   "title_en": null,
+   "source_lang": "en",
+   "category": "personal-care",
+   "subcategory": null,
+   "description": "Your beauty, just elevated. Specialising in natural glam, radiant skin and effortlessly beautiful makeup for every occasion.",
+   "description_he": "היופי שלך, רק מורם לגבהים חדשים. מתמחים בגלאם טבעי, עור זוהר ואיפור יפהפה וקליל לכל אירוע.",
+   "description_en": null,
+   "gig_type": "appointment",
+   "tiers": [
+    {
+     "name": "Makeup",
+     "price": 260.0,
+     "currency": "ILS",
+     "delivery_days": null,
+     "duration_minutes": 60,
+     "description": "Lashes included ",
+     "features": [],
+     "images": [
+      "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793905448/myisraelrental/zqxlocw2bwpf7qkeqvvr.jpg"
+     ]
+    }
+   ],
+   "products": [],
+   "weekly_availability": {
+    "mon": [
+     {
+      "start": "09:00",
+      "end": "19:00"
+     }
+    ],
+    "tue": [
+     {
+      "start": "09:00",
+      "end": "19:00"
+     }
+    ],
+    "wed": [
+     {
+      "start": "09:00",
+      "end": "19:00"
+     }
+    ],
+    "thu": [
+     {
+      "start": "09:00",
+      "end": "19:00"
+     }
+    ],
+    "fri": [
+     {
+      "start": "09:00",
+      "end": "13:00"
+     }
+    ],
+    "sat": [],
+    "sun": [
+     {
+      "start": "09:00",
+      "end": "19:00"
+     }
+    ]
+   },
+   "slot_duration_minutes": 60,
+   "team": [],
+   "rebook_after_weeks": null,
+   "enable_date_booking": false,
+   "gallery": [],
+   "booking_mode": "whatsapp",
+   "whatsapp_confirmed": true,
+   "contact_email": "hadassahmuartist@gmail.com",
+   "whatsapp": "+447712331169",
+   "area": "Jerusalem",
+   "faqs": [],
+   "discount": null,
+   "status": "published",
+   "created_at": "2026-11-05T19:06:20.527335+00:00",
+   "updated_at": "2026-11-05T19:06:20.527335+00:00",
+   "geocode_miss": false,
+   "geocoded_at": 1793905581.0440779,
+   "lat": 31.7788472,
+   "lng": 35.2257856,
+   "provider": {
+    "user_id": "999f9291-0a51-4713-9bb5-dd19a4308f1c",
+    "name": "Hadassah Prys",
+    "avatar": null,
+    "logo_url": "https://res.cloudinary.com/dirvyboe9/image/upload/f_auto,q_auto/v1793905610/myisraelrental/vtd7pwogajtlj7pzrn8r.jpg",
+    "tagline": "",
+    "languages": [],
+    "response_bucket": null,
+    "member_since_year": 2026
+   },
+   "rating_avg": null,
+   "rating_count": 0,
+   "cheapest_price": 260.0,
+   "is_top_rated": false,
+   "id": "0b499771-4fd2-4977-bb9b-cb98837d65cc",
+   "contact_channels": [
+    "whatsapp",
+    "email",
+    "in_platform"
+   ]
+  }
+ ]
+}
