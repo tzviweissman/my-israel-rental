@@ -6889,7 +6889,6 @@ const he = {
       },
       // Discount codes (backend discounts.py).
       discounts: {
-        moreWays: "כרטיסי מתנה, ימי הולדת וחברים",
         title: "קודי הנחה",
         new: "קוד חדש",
         needBusiness: "קודם מוסיפים עסק.",
@@ -6900,6 +6899,11 @@ const he = {
         kind: "הנחה",
         percent: "אחוז הנחה (%)",
         amount: "סכום הנחה (₪)",
+        amountUsd: "סכום הנחה ($)",
+        orderLine: "{{code}}: -{{v}}",
+        pageTitle: "הנחות וכרטיסי מתנה",
+        nActive: "פעילים: {{n}}",
+        valueAmountUsd: "כמה דולרים",
         valuePercent: "כמה אחוזים",
         valueAmount: "כמה שקלים",
         appliesTo: "חל על",
@@ -6908,7 +6912,7 @@ const he = {
         memberships: "מנויים בלבד",
         startsOn: "מתאריך (לא חובה)",
         endsOn: "עד תאריך (לא חובה)",
-        minOrder: "הזמנת מינימום ₪ (לא חובה)",
+        minOrder: "הזמנת מינימום {{s}} (לא חובה)",
         maxUses: "מספר שימושים כולל (לא חובה)",
         oncePer: "פעם אחת ללקוח",
         firstOnly: "ללקוחות חדשים בלבד",

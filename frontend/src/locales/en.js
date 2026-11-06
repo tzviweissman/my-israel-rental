@@ -7071,7 +7071,6 @@ const en = {
       },
       // Discount codes (backend discounts.py).
       discounts: {
-        moreWays: "Gift cards, birthdays and friends",
         title: "Discount codes",
         new: "New code",
         needBusiness: "Add a business first.",
@@ -7082,6 +7081,11 @@ const en = {
         kind: "Discount",
         percent: "Percent off (%)",
         amount: "Amount off (₪)",
+        amountUsd: "Amount off ($)",
+        orderLine: "{{code}}: -{{v}}",
+        pageTitle: "Discounts and gift cards",
+        nActive: "{{n}} active",
+        valueAmountUsd: "How many dollars",
         valuePercent: "How many percent",
         valueAmount: "How many shekels",
         appliesTo: "Works on",
@@ -7090,7 +7094,7 @@ const en = {
         memberships: "Memberships only",
         startsOn: "From (optional)",
         endsOn: "Until (optional)",
-        minOrder: "Minimum order ₪ (optional)",
+        minOrder: "Minimum order {{s}} (optional)",
         maxUses: "Total uses (optional)",
         oncePer: "Once per customer",
         firstOnly: "New customers only",

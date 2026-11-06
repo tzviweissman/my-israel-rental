@@ -6,8 +6,8 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
-import { Loader2, Plus, Pencil, Trash2, Copy, TicketPercent } from 'lucide-react';
-import { money } from '../../utils/currency';
+import { Loader2, Plus, Pencil, Trash2, Copy, TicketPercent, ChevronDown, ChevronUp } from 'lucide-react';
+import { money, symbolFor } from '../../utils/currency';
 import ReferralSettings from './ReferralSettings';
 import GiftCardsPanel from './GiftCardsPanel';
 import BirthdayPanel from './BirthdayPanel';
@@ -15,7 +15,11 @@ import BirthdayPanel from './BirthdayPanel';
 const field = 'w-full px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]';
 const fieldStyle = { borderColor: 'var(--brand-border)', color: 'var(--ink)' };
 const btnOutline = 'inline-flex items-center gap-1.5 px-3 min-h-[44px] rounded-full border text-sm font-semibold';
-const EMPTY = { code: '', kind: 'percent', value: '', applies_to: 'both', starts_on: '', ends_on: '', min_order: '', max_uses: '', once_per_customer: true, first_order_only: false, active: true };
+const EMPTY = { code: '', kind: 'percent', currency: 'ILS', value: '', applies_to: 'both', starts_on: '', ends_on: '', min_order: '', max_uses: '', once_per_customer: true, first_order_only: false, active: true };
+
+// Out here, not inside the form: a component made during render is a new one every time, so React rebuilt
+// the box after each letter and the cursor left it (Tzvi, 6 Nov 2026).
+const L = ({ children, label }) => <label className="block text-sm" style={{ color: 'var(--ink)' }}>{label}<span className="block mt-1">{children}</span></label>;
 
 function CodeForm({ initial, onSave, onCancel, saving }) {
   const { t } = useTranslation();
@@ -27,7 +31,6 @@ function CodeForm({ initial, onSave, onCancel, saving }) {
     onSave({ ...c, code: c.code.trim().toUpperCase(), value: Number(c.value), min_order: num(c.min_order), max_uses: num(c.max_uses),
              starts_on: c.starts_on || null, ends_on: c.ends_on || null });
   };
-  const L = ({ children, label }) => <label className="block text-sm" style={{ color: 'var(--ink)' }}>{label}<span className="block mt-1">{children}</span></label>;
   return (
     <form onSubmit={submit} className="rounded-2xl border bg-white p-4 space-y-3 mb-4" style={{ borderColor: 'var(--brand-border)' }} data-testid="code-form">
       <div className="grid gap-3 sm:grid-cols-3">
@@ -36,12 +39,13 @@ function CodeForm({ initial, onSave, onCancel, saving }) {
                  className={`${field} tracking-wider`} style={fieldStyle} placeholder="FIRST10" data-testid="code-code" />
         </L>
         <L label={t('discounts.kind', 'Discount')}>
-          <select value={c.kind} onChange={set('kind')} className={field} style={fieldStyle} data-testid="code-kind">
+          <select value={c.kind === 'percent' ? 'percent' : `amount:${c.currency || 'ILS'}`} onChange={(e) => { const [kind, currency = 'ILS'] = e.target.value.split(':'); setC({ ...c, kind, currency }); }} className={field} style={fieldStyle} data-testid="code-kind">
             <option value="percent">{t('discounts.percent', 'Percent off (%)')}</option>
-            <option value="amount">{t('discounts.amount', 'Amount off (₪)')}</option>
+            <option value="amount:ILS">{t('discounts.amount', 'Amount off (₪)')}</option>
+            <option value="amount:USD">{t('discounts.amountUsd', 'Amount off ($)')}</option>
           </select>
         </L>
-        <L label={c.kind === 'percent' ? t('discounts.valuePercent', 'How many percent') : t('discounts.valueAmount', 'How many shekels')}>
+        <L label={c.kind === 'percent' ? t('discounts.valuePercent', 'How many percent') : c.currency === 'USD' ? t('discounts.valueAmountUsd', 'How many dollars') : t('discounts.valueAmount', 'How many shekels')}>
           <input required type="number" min="1" max={c.kind === 'percent' ? 100 : 100000} step="any" value={c.value} onChange={set('value')} className={field} style={fieldStyle} data-testid="code-value" />
         </L>
         <L label={t('discounts.appliesTo', 'Works on')}>
@@ -53,7 +57,7 @@ function CodeForm({ initial, onSave, onCancel, saving }) {
         </L>
         <L label={t('discounts.startsOn', 'From (optional)')}><input type="date" value={c.starts_on || ''} onChange={set('starts_on')} className={field} style={fieldStyle} /></L>
         <L label={t('discounts.endsOn', 'Until (optional)')}><input type="date" value={c.ends_on || ''} onChange={set('ends_on')} className={field} style={fieldStyle} data-testid="code-ends" /></L>
-        <L label={t('discounts.minOrder', 'Minimum order ₪ (optional)')}><input type="number" min="0" step="any" value={c.min_order ?? ''} onChange={set('min_order')} className={field} style={fieldStyle} /></L>
+        <L label={t('discounts.minOrder', 'Minimum order {{s}} (optional)', { s: symbolFor(c.kind === 'amount' ? c.currency : 'ILS') })}><input type="number" min="0" step="any" value={c.min_order ?? ''} onChange={set('min_order')} className={field} style={fieldStyle} /></L>
         <L label={t('discounts.maxUses', 'Total uses (optional)')}><input type="number" min="1" step="1" value={c.max_uses ?? ''} onChange={set('max_uses')} className={field} style={fieldStyle} /></L>
       </div>
       <div className="flex flex-wrap gap-x-5 text-sm" style={{ color: 'var(--ink)' }}>
@@ -79,6 +83,7 @@ export default function DiscountsTab({ API, token }) {
   const [codes, setCodes] = useState(null);
   const [editing, setEditing] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     let alive = true;
@@ -115,28 +120,40 @@ export default function DiscountsTab({ API, token }) {
     load();
   };
   const describe = (c) => {
-    const parts = [c.kind === 'percent' ? t('discounts.offPercent', '{{v}}% off', { v: c.value }) : t('discounts.offAmount', '{{v}} off', { v: money(c.value, 'ILS') })];
+    const parts = [c.kind === 'percent' ? t('discounts.offPercent', '{{v}}% off', { v: c.value }) : t('discounts.offAmount', '{{v}} off', { v: money(c.value, c.currency) })];
     if (c.applies_to !== 'both') parts.push(c.applies_to === 'orders' ? t('discounts.orders', 'Orders only') : t('discounts.memberships', 'Memberships only'));
-    if (c.min_order) parts.push(t('discounts.minShort', 'from {{v}}', { v: money(c.min_order, 'ILS') }));
+    if (c.min_order) parts.push(t('discounts.minShort', 'from {{v}}', { v: money(c.min_order, c.currency) }));
     if (c.ends_on) parts.push(t('discounts.until', 'until {{d}}', { d: fmt(c.ends_on) }));
     if (c.first_order_only) parts.push(t('discounts.firstOnly', 'New customers only'));
     return parts.join(' · ');
   };
   const today = new Date().toISOString().slice(0, 10);
+  const liveCodes = (codes || []).filter((c) => c.active && !(c.ends_on && c.ends_on < today) && !(c.max_uses && c.uses >= c.max_uses)).length;
 
   return (
     <div data-testid="discounts-tab">
       <div className="flex flex-wrap items-center justify-between gap-3 mb-1">
-        <h2 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('discounts.title', 'Discount codes')}</h2>
+        <h2 className="text-lg font-bold" style={{ color: 'var(--ink)' }}>{t('discounts.pageTitle', 'Discounts and gift cards')}</h2>
         <div className="flex items-center gap-2">
           {businesses.length > 1 && (
             <select value={biz.id} onChange={(e) => setBizId(e.target.value)} className="px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]" style={fieldStyle} aria-label={t('orders.pickBusiness', 'Business')}>
               {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
             </select>
           )}
-          {!editing && <button type="button" className={btnOutline} style={fieldStyle} onClick={() => setEditing({ ...EMPTY })} data-testid="code-new"><Plus size={15} /> {t('discounts.new', 'New code')}</button>}
         </div>
       </div>
+      {/* All four folded to one matching line (Tzvi, 6 Nov 2026: "so everything looks aligned"), codes first. */}
+      <section className="rounded-2xl border bg-white mb-4 mt-3" style={{ borderColor: 'var(--brand-border)' }} data-testid="codes-panel">
+        <button type="button" onClick={() => setOpen(!open)} aria-expanded={open} className="w-full flex items-center justify-between gap-2 p-3 text-start" data-testid="codes-open">
+          <span className="inline-flex items-center gap-2 text-sm font-semibold" style={{ color: 'var(--ink)' }}>
+            <TicketPercent size={16} /> {t('discounts.title', 'Discount codes')}
+            <span className="font-normal text-xs" style={{ color: 'var(--brand-muted)' }}>{liveCodes ? t('discounts.nActive', '{{n}} active', { n: liveCodes }) : t('discounts.off', 'Off')}</span>
+          </span>
+          {open ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
+        </button>
+        {open && (
+        <div className="px-3 pb-4">
+      {!editing && <button type="button" className={`${btnOutline} mb-3`} style={fieldStyle} onClick={() => setEditing({ ...EMPTY })} data-testid="code-new"><Plus size={15} /> {t('discounts.new', 'New code')}</button>}
       <p className="text-sm mb-4" style={{ color: 'var(--brand-muted)' }}>
         {t('discounts.body', 'Customers type the code on your order form or membership sign-up, and the discount shows on the order. An end date or “new customers only” works better than a discount that never ends.')}
       </p>
@@ -160,7 +177,7 @@ export default function DiscountsTab({ API, token }) {
                   </p>
                   <p className="text-xs" style={{ color: 'var(--brand-muted)' }}>{describe(c)}</p>
                   <p className="text-xs" style={{ color: 'var(--ink)' }}>
-                    {t('discounts.used', 'Used {{n}} times', { n: c.uses })}{c.max_uses ? ` / ${c.max_uses}` : ''}{c.discount_given ? ` · ${t('discounts.given', '{{v}} given', { v: money(c.discount_given, 'ILS') })}` : ''}
+                    {t('discounts.used', 'Used {{n}} times', { n: c.uses })}{c.max_uses ? ` / ${c.max_uses}` : ''}{c.discount_given ? ` · ${t('discounts.given', '{{v}} given', { v: money(c.discount_given, c.currency) })}` : ''}
                   </p>
                 </div>
                 <div className="flex">
@@ -173,12 +190,12 @@ export default function DiscountsTab({ API, token }) {
           })}
         </ul>
       )}
+        </div>
+        )}
+      </section>
 
-      {/* More ways to bring customers back, each folded to one line
-          (Tzvi, 17 Oct 2026: the codes the business makes come first). */}
       {ready && (
-        <div className="mt-8" data-testid="discounts-more">
-          <h3 className="text-sm font-semibold mb-2" style={{ color: 'var(--brand-muted)' }}>{t('discounts.moreWays', 'Gift cards, birthdays and friends')}</h3>
+        <div data-testid="discounts-more">
           <GiftCardsPanel key={`gift-${bizId}`} API={API} auth={auth} businessId={bizId} slug={biz.slug} />
           <BirthdayPanel key={`bday-${bizId}`} API={API} auth={auth} businessId={bizId} />
           <ReferralSettings key={bizId} API={API} auth={auth} businessId={bizId} />

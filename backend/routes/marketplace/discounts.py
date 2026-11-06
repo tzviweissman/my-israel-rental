@@ -56,6 +56,8 @@ async def _owned(business_id: str, user: dict[str, Any]) -> dict[str, Any]:
 class CodeIn(BaseModel):
     code: str = Field(..., min_length=3, max_length=24)
     kind: Literal["percent", "amount"] = "percent"
+    # An amount off is money in one currency (Tzvi, 6 Nov 2026); a percentage fits any total.
+    currency: Literal["ILS", "USD"] = "ILS"
     value: float = Field(..., gt=0, le=100000)
     applies_to: Literal["orders", "memberships", "both"] = "both"
     starts_on: Optional[date] = None
@@ -79,7 +81,7 @@ def _check_in(b: CodeIn) -> str:
 
 
 def _out(d: dict[str, Any]) -> dict[str, Any]:
-    return {"id": d["_id"], "code": d["code"], "kind": d["kind"], "value": d["value"], "applies_to": d.get("applies_to", "both"),
+    return {"id": d["_id"], "code": d["code"], "kind": d["kind"], "currency": d.get("currency", "ILS"), "value": d["value"], "applies_to": d.get("applies_to", "both"),
             "starts_on": d.get("starts_on"), "ends_on": d.get("ends_on"), "min_order": d.get("min_order"),
             "max_uses": d.get("max_uses"), "once_per_customer": d.get("once_per_customer", True),
             "first_order_only": d.get("first_order_only", False), "active": d.get("active", True),
@@ -177,9 +179,11 @@ async def evaluate(business_id: str, code: str, form: Literal["orders", "members
         c = await gift_cards.as_code(business_id, norm_code(code))
     if not c or not c.get("active", True):
         raise CodeRefused("This code is not valid")
-    # A gift card holds real money in one currency, and there is no exchange rate here.
-    if c.get("gift_card") and currency and c["currency"] != currency.upper():
-        raise CodeRefused("This gift card is in " + ("dollars" if c["currency"] == "USD" else "shekels")
+    # A gift card or an amount off is money in one currency, and there is no exchange rate here. Only codes
+    # that say their currency: older ones and referral or birthday codes carry none, and work as they did.
+    if c["kind"] == "amount" and c.get("currency") and currency and c["currency"] != currency.upper():
+        raise CodeRefused(("This gift card is in " if c.get("gift_card") else "This code is in ")
+                          + ("dollars" if c["currency"] == "USD" else "shekels")
                           + " and this total is not, so it cannot be used here")
     if c.get("applies_to", "both") not in (form, "both"):
         raise CodeRefused("This code is for " + ("orders" if form == "memberships" else "memberships") + " only")
@@ -191,7 +195,7 @@ async def evaluate(business_id: str, code: str, form: Literal["orders", "members
     if c.get("max_uses") and c.get("uses", 0) >= c["max_uses"]:
         raise CodeRefused("This code has been used up")
     if form == "orders" and c.get("min_order") and amount < c["min_order"]:
-        raise CodeRefused(f"This code needs an order of at least ₪{c['min_order']:g}")
+        raise CodeRefused(f"This code needs an order of at least {'$' if (currency or c.get('currency')) == 'USD' else '₪'}{c['min_order']:g}")
     e164 = normalize_whatsapp_number(phone) if phone else None
     if c.get("referral_of") and e164 == c["referral_of"]:
         raise CodeRefused("This is your own code: send it to a friend")

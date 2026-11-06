@@ -671,7 +671,7 @@ async def staff_set_status(token: str, order_id: str, payload: StatusIn, request
 
 _CSV_COLUMNS = (
     "date", "time", "customer", "phone", "items", "fulfilment", "address",
-    "total", "currency", "status", "notes", "source", "created_at",
+    "total", "currency", "status", "notes", "source", "created_at", "discount_code", "discount",
 )
 
 
@@ -714,7 +714,8 @@ def orders_to_csv(orders: list[dict[str, Any]]) -> str:
             o.get("items") or "", o.get("fulfilment") or "", o.get("address") or "",
             _csv_number(o.get("total")), o.get("currency") or "ILS",
             o.get("status") or "", o.get("notes") or "", o.get("source") or "",
-            o.get("created_at") or "",
+            o.get("created_at") or "", (o.get("discount") or {}).get("code") or "",
+            _csv_number((o.get("discount") or {}).get("amount")),
         )])
     return buf.getvalue()
 

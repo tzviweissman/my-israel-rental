@@ -34,7 +34,7 @@ import {
 import { phoneError } from '../../utils/phoneValidation';
 import { money } from '../../utils/currency';
 import { pastCutoff } from '../../utils/orderCutoffs';
-import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle } from './OrderCard';
+import OrderCard, { STATUS_ORDER, OPEN, NEXT, pillStyle, notesWithoutCode } from './OrderCard';
 import SendToSupplierDialog from './SendToSupplierDialog';
 import MoreMenu from './MoreMenu';
 import CustomFieldsEditor from './CustomFieldsEditor';
@@ -1048,13 +1048,15 @@ function OrdersTable({ orders, busyId, onStatus, onEdit, t }) {
                 </td>
                 <td className="py-2 px-2 whitespace-pre-line" dir="auto" style={{ color: 'var(--ink)' }}>
                   {o.items}
-                  {o.notes && <div className="text-[11px] italic" style={{ color: 'var(--brand-muted)' }}>{o.notes}</div>}
+                  {notesWithoutCode(o) && <div className="text-[11px] italic" style={{ color: 'var(--brand-muted)' }}>{notesWithoutCode(o)}</div>}
                 </td>
                 <td className="py-2 px-2" style={{ color: 'var(--ink)' }}>
                   {o.table ? t('tableOrder.table', 'Table {{n}}', { n: o.table }) : o.fulfilment === 'delivery' ? t('orders.delivery', 'Delivery') : t('orders.pickup', 'Pickup')}
                   {o.address && <div className="text-[11px]" dir="auto" style={{ color: 'var(--brand-muted)' }}>{o.address}</div>}
                 </td>
-                <td className="py-2 px-2 text-end tabular-nums whitespace-nowrap" style={{ color: 'var(--ink)' }}>{o.total != null ? `\u20aa${Number(o.total).toLocaleString()}` : ''}</td>
+                <td className="py-2 px-2 text-end tabular-nums whitespace-nowrap" style={{ color: 'var(--ink)' }}>{o.total != null ? money(o.total, o.currency) : ''}
+                  {o.discount && <div className="text-[11px] font-semibold" dir="ltr" style={{ color: '#2E7D4F' }} data-testid="order-code-used">{t('discounts.orderLine', '{{code}}: -{{v}}', { code: o.discount.code, v: money(o.discount.amount, o.currency) })}</div>}
+                </td>
                 <td className="py-2 px-2 whitespace-nowrap">
                   <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold border" style={pillStyle(o.status, false)}>{t(`orders.status.${o.status}`, o.status)}</span>
                 </td>

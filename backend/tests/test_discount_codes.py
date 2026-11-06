@@ -104,3 +104,13 @@ def test_code_on_a_membership(shop):
     assert r.status_code == 200, r.text
     me = requests.get(f"{BASE}/marketplace/memberships/me/{r.json()['manage_token']}", timeout=30).json()
     assert me["discount"] == {"code": "JOIN50", "amount": 50, "price_after": 150}
+
+
+def test_amount_off_keeps_its_currency(shop):
+    """$10 off never comes off a shekel total, since there is no exchange rate; a percentage fits any total."""
+    assert _code(shop, code="TENUSD", kind="amount", value=10, currency="USD").status_code == 200
+    assert "dollars" in _order(shop, code="TENUSD", phone="0541112401").text
+    assert _code(shop, code="TENILS", kind="amount", value=10, currency="ILS").status_code == 200
+    assert _order(shop, code="TENILS", phone="0541112402").status_code == 200
+    assert _code(shop, code="TENPCT", value=10, currency="USD").status_code == 200
+    assert _order(shop, code="TENPCT", phone="0541112403").status_code == 200
