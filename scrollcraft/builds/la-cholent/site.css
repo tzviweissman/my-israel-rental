@@ -1,0 +1,522 @@
+  /* Their world: candlelight, steel, marble, their gold. */
+  :root {
+    --sc-canvas:     #0F0C0A;
+    --sc-surface:    #1A1512;
+    --sc-ink:        #F2EBDF;
+    --sc-ink-soft:   #B3A694;
+    --sc-accent:     #D9A54A;
+    --sc-accent-ink: #140F0A;
+    --sc-font-display: "Oswald", "Heebo", system-ui, sans-serif;
+    --sc-font-text:    "Figtree", "Heebo", system-ui, sans-serif;
+    --script: "Pinyon Script", cursive;
+    /* The other world: a kitchen at night under one fluorescent tube. */
+    --cold: #D7DDD5;
+    --cold-ink: #1E2421;
+    --cold-soft: #46504A;
+    --order: "https://myisraelrental.com/business/l-a-cholent-by-rabbi-samuels";
+    /* the six text sizes (page rules 3e.14); the engine's eight --sc-t-* sizes are folded into them */
+    --s1: .8125rem; --s2: .9375rem; --s3: clamp(1rem, .96rem + .22vw, 1.125rem);
+    --s4: clamp(1.5rem, 1.2rem + 1.2vw, 2.1rem); --s5: clamp(2.2rem, 1.2rem + 3.2vw, 3.6rem); --s6: clamp(3.4rem, 2rem + 5vw, 7rem);
+    --sc-t-xs: var(--s1); --sc-t-sm: var(--s2); --sc-t-base: var(--s3); --sc-t-lg: var(--s4); --sc-t-xl: var(--s4);
+    --sc-t-2xl: var(--s5); --sc-t-3xl: var(--s5); --sc-t-4xl: var(--s6);
+  }
+  @media (min-width: 861px) and (max-height: 820px) { :root { --s5: min(clamp(2.2rem, 1.2rem + 3.2vw, 3.6rem), 7vh); --s6: min(clamp(3.4rem, 2rem + 5vw, 7rem), 11vh); } }
+  body { background: var(--sc-canvas); color: var(--sc-ink); }
+  .script { font-family: var(--script); font-weight: 400; color: var(--sc-accent); letter-spacing: 0; text-transform: none; }
+  .caps { font-family: var(--sc-font-display); text-transform: uppercase; letter-spacing: 0.04em; }
+
+  /* ---------- the split ------------------------------------------------ */
+  /* --x is the scratch side's share of the screen, in percent: 50 at the
+     open, 62 as the list piles up, 0 when their side wins. Both sides are
+     full-size layers clipped at the divider, so nothing animates width. */
+  #split { --x: 50; --dim: 0; }
+  #split [data-sc-stage] { overflow: hidden; background: var(--sc-canvas); }
+  .side { position: absolute; inset: 0; }
+  .side--scratch { background: color-mix(in oklab, var(--cold), var(--sc-canvas) calc(var(--dim) * 100%)); color: var(--cold-ink); clip-path: inset(0 calc(100% - var(--x) * 1%) 0 0); z-index: 2; }
+  .side--theirs { clip-path: inset(0 0 0 calc(var(--x) * 1%)); z-index: 1; }
+
+  /* scratch: the photo in the lower half of its column, the list over it */
+  .scratch-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 30% 60%;
+    opacity: calc(0.92 - var(--dim) * 0.92); filter: saturate(0.85); }
+  .scratch-wash { position: absolute; inset: 0; opacity: calc(1 - var(--dim)); background: linear-gradient(180deg, var(--cold) 0%, var(--cold) 34%, color-mix(in oklab, var(--cold) 0%, transparent) 72%); }
+  .scratch-copy { position: absolute; left: var(--sc-gutter); top: clamp(5.5rem, 14vh, 9rem); /* A fixed width, sized for the narrowest the side ever is (50%): as the
+     side widens the words hold still instead of re-wrapping line by line. */
+    width: min(34rem, calc(50vw - var(--sc-gutter) - 5rem));
+    /* The words leave first, before the ground darkens under them. */
+    opacity: max(0, calc(1 - var(--dim) * 2.5)); }
+  .scratch-copy h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.96; letter-spacing: 0; margin: 0; color: var(--cold-ink); }
+  .scratch-copy .lede { margin: var(--sc-4) 0 0; color: var(--cold-ink); font-size: var(--sc-t-lg); max-width: 26ch; }
+  .chores { list-style: none; margin: var(--sc-6) 0 0; padding: 0; display: grid; gap: 0.35rem; }
+  .chores li { font-size: var(--sc-t-lg); font-weight: 600; color: var(--cold-ink); background: var(--cold);
+    width: fit-content; padding: 0.1rem 0.5rem; border-radius: 4px;
+    opacity: 0; transform: translateY(10px); transition: opacity 220ms var(--sc-ease-out), transform 220ms var(--sc-ease-out); }
+  .chores li.on { opacity: 1; transform: none; }
+  .chores li:nth-child(n+7).on { color: #8A2A1E; }
+
+  /* theirs: their own photograph, then the clip, under the copy */
+  .theirs-photo { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 50% 70%; filter: brightness(calc(0.78 - var(--dim) * 0.5)); opacity: calc(1 - var(--pot, 0)); }
+  .theirs-shade { position: absolute; inset: 0; opacity: calc(1 - var(--gone, 0)); background: linear-gradient(90deg, transparent 0%, transparent calc(var(--x) * 1%), color-mix(in oklab, var(--sc-canvas) 55%, transparent) calc(var(--x) * 1% + 4%), color-mix(in oklab, var(--sc-canvas) 96%, transparent) 68%); }
+  .pot-frame { position: absolute; left: 50%; top: 50%; width: max(100vw, 177.78vh); aspect-ratio: 16 / 9; translate: -50% -50%; opacity: var(--pot, 0); }
+  #pot:not(.is-ready), #scratch-clip:not(.is-ready) { visibility: hidden; }
+  .pot-frame img, .pot-frame video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; filter: brightness(1.18) contrast(1.04); }
+  /* The landed knob lives inside the frame, placed in the frame's own
+     fractions, so it moves with the picture with no frame of lag. */
+  .knob.knob-pot { position: absolute; left: calc(var(--dx, 0.6547) * 100%); top: calc(var(--dy, 0.7463) * 100%);
+    width: calc(var(--dd, 0.0834) * 100% / 0.477); height: auto; translate: -50% -50%; --face: 0; opacity: var(--landed, 0); }
+
+  .theirs-copy { position: absolute; right: var(--sc-gutter); top: clamp(5.5rem, 14vh, 9rem); width: min(30rem, 30vw); text-align: right; }
+  .lockup .script { display: block; font-size: var(--s4); line-height: 1; margin-bottom: -0.2em; }
+  .lockup h1 { font-family: var(--sc-font-display); font-weight: 200; text-transform: uppercase; letter-spacing: 0.02em;
+    font-size: var(--s6); line-height: 0.9; margin: 0; color: var(--sc-ink); }
+  .lockup h1 .dot { color: var(--sc-accent); }
+  .lockup .tag { margin: var(--sc-4) 0 0 auto; color: var(--sc-ink); font-size: var(--s3); max-width: 24ch; }
+  .steps { list-style: none; margin: var(--sc-6) 0 0 auto; padding: 0; display: grid; gap: var(--sc-3); max-width: 24rem; }
+  .steps li { display: grid; grid-template-columns: 2.4rem 1fr; gap: var(--sc-3); align-items: baseline; text-align: left; font-size: var(--sc-t-base); color: var(--sc-ink); }
+  .steps b { font-family: var(--sc-font-display); font-weight: 300; font-size: var(--sc-t-xl); color: var(--sc-accent); }
+  .alone { position: absolute; right: var(--sc-gutter); top: 50%; translate: 0 -50%; width: min(28rem, 30vw); text-align: right;
+    font-family: var(--sc-font-display); font-weight: 300; font-size: var(--sc-t-2xl); line-height: 1.12; color: var(--sc-ink); margin: 0; }
+  .alone cite { display: block; margin-top: var(--sc-4); font: 500 var(--sc-t-sm)/1.4 var(--sc-font-text); color: var(--sc-ink-soft); font-style: normal; }
+
+  .btn { display: inline-flex; align-items: center; justify-content: center; min-height: 48px; padding: 0 1.6rem; border-radius: var(--sc-r-pill);
+    background: var(--sc-accent); color: var(--sc-accent-ink); font: 700 var(--sc-t-base)/1 var(--sc-font-text); text-decoration: none; white-space: nowrap;
+    box-shadow: var(--sc-e2); transition: transform 140ms var(--sc-ease-out), filter 140ms var(--sc-ease-out); }
+  .btn:active { transform: translateY(1px) scale(0.98); }
+  /* The button carries the page's own dial: pointed at or pressed, it turns
+     from OFF to LOW, the move the whole page is about. The round chip follows
+     21st "Motion Button"; the dial is the page's (chosen 7 Oct 2026). */
+  .btn { gap: 0.7rem; padding-right: 0.45rem; }
+  .btn-dial { display: inline-grid; place-items: center; width: 34px; height: 34px; border-radius: 50%; background: rgb(20 14 10 / 0.88); flex: none; }
+  .btn-dial svg { width: 22px; height: 22px; fill: none; stroke: var(--sc-accent); stroke-width: 2; stroke-linecap: round; }
+  .btn-dial .ptr { transform-origin: 12px 12px; transform: rotate(-90deg); transition: transform 420ms cubic-bezier(.34,1.56,.64,1); }
+  .btn:active .ptr, .btn:focus-visible .ptr { transform: rotate(-30deg); }
+  @media (hover: hover) and (pointer: fine) { .btn:hover { filter: brightness(1.08); transform: translateY(-1px); } .btn:hover .ptr { transform: rotate(-30deg); } }
+  @media (prefers-reduced-motion: reduce) { .btn-dial .ptr { transition: none; } }
+  .btn:focus-visible, .dial:focus-visible, .size-pick button:focus-visible, a:focus-visible { outline: 2px solid var(--sc-accent); outline-offset: 4px; }
+  .theirs-copy .btn { margin-top: var(--sc-6); }
+  /* The proof touching the button: price, supervision, where (their facts). */
+  .proofline { margin: var(--sc-3) 0 0; padding: 0; list-style: none; display: flex; flex-direction: column; align-items: flex-end; gap: 0.15rem;
+    font: 600 var(--sc-t-xs)/1.5 var(--sc-font-text); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink-soft); }
+
+  /* the peak copy, left, over the dark side of the frame */
+  .peak { position: absolute; left: var(--sc-gutter); bottom: clamp(3rem, 12vh, 8rem); width: min(36rem, 46vw); }
+  .hours { display: flex; align-items: baseline; gap: var(--sc-3); margin: 0; color: var(--sc-accent); }
+  .hours .sc-nums { font-family: var(--sc-font-display); font-weight: 200; font-size: var(--s6); line-height: 0.85; font-variant-numeric: tabular-nums; }
+  .hours span:last-child { font: 600 var(--sc-t-base)/1.3 var(--sc-font-text); color: var(--sc-ink-soft); text-transform: uppercase; letter-spacing: 0.14em; }
+  .peak h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.98; margin: var(--sc-5) 0 0; }
+  .peak .seal-words { margin: var(--sc-5) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-lg); }
+  .peak .seal-words .script { font-size: var(--s4); }
+
+  /* the divider: labels for both sides, and the knob */
+  .divider { position: absolute; top: 0; bottom: 0; left: calc(var(--x) * 1%); width: 0; z-index: 5; pointer-events: none; }
+  .divider::before { content: ""; position: absolute; top: 0; bottom: 0; left: -0.5px; width: 1px; background: color-mix(in oklab, var(--sc-accent) 70%, transparent); opacity: calc(1 - var(--gone, 0)); }
+  .labels { position: absolute; top: clamp(1.2rem, 3vh, 2rem); left: 0; display: flex; translate: -50% 0; gap: 2.6rem; white-space: nowrap;
+    font: 700 var(--sc-t-sm)/1 var(--sc-font-text); letter-spacing: 0.18em; text-transform: uppercase; opacity: calc(1 - var(--gone, 0)); }
+  .labels span:first-child { color: var(--cold-ink); }
+  .labels span:last-child { color: var(--sc-accent); }
+  .knob-wrap { position: absolute; left: 0; top: 50%; translate: -50% -50%; will-change: transform; width: clamp(7rem, 9vw, 9.5rem); }
+
+  /* one knob, drawn once, used twice (the divider and the close) */
+  .knob { display: block; width: 100%; height: auto; overflow: visible; }
+  .knob .face { opacity: var(--face, 1); fill: #17120F; stroke: color-mix(in oklab, var(--sc-accent) 55%, transparent); stroke-width: 1.5; }
+  .knob .ring { fill: #C9CDD1; }
+  .knob .ring-shade { fill: url(#steel); }
+  .knob .grip { fill: #0B0907; }
+  .knob .pointer { stroke: var(--sc-ink); stroke-width: 5; stroke-linecap: round; }
+  .knob .rot { transform-origin: 100px 100px; transform: rotate(var(--a, -100deg)); transition: transform 90ms ease-out; }
+  .knob .tick { stroke: var(--sc-ink-soft); stroke-width: 2; }
+  .knob text { font: 600 var(--s1) var(--sc-font-text); fill: var(--sc-ink); letter-spacing: 0.06em; }
+  .knob .lamp { fill: #3A140F; transition: fill 200ms var(--sc-ease-out); }
+  .knob.is-on .lamp { fill: #FF5A2E; }
+
+  /* ---------- the close: the knob becomes the order ---------------------- */
+  /* Not pinned: a held screen cuts off whatever is taller than it, and on a
+     short laptop the dial, the price and the menu are. A plain section at
+     least one screen tall resolves the page the same way and can grow. */
+  #order { min-height: 100svh; display: grid; background: radial-gradient(70% 80% at 30% 45%, #231B15 0%, var(--sc-canvas) 70%); }
+  .order-stage { display: grid; grid-template-rows: 1fr auto; padding-top: var(--sc-8); }
+  .order-stage > .order { align-self: center; padding-bottom: var(--sc-7); }
+  .order-tag { margin: 0 0 var(--sc-2); font-size: var(--s4); line-height: 1.1; }
+  .order { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); gap: clamp(2rem, 6vw, 6rem); align-items: center; }
+  .dial-col { display: grid; justify-items: center; gap: var(--sc-5); }
+  .dial { width: min(24rem, 34vw); touch-action: none; cursor: grab; border-radius: 50%; }
+  .dial:active { cursor: grabbing; }
+  .size-pick { display: flex; gap: var(--sc-2); flex-wrap: wrap; justify-content: center; }
+  .size-pick button { min-height: 44px; padding: 0 1rem; border-radius: var(--sc-r-pill); border: 1px solid var(--sc-hairline-strong); background: transparent;
+    color: var(--sc-ink); font: 600 var(--sc-t-sm)/1 var(--sc-font-text); cursor: pointer; transition: border-color 140ms var(--sc-ease-out), background 140ms var(--sc-ease-out); }
+  .size-pick button[aria-pressed="true"] { border-color: var(--sc-accent); background: color-mix(in oklab, var(--sc-accent) 16%, transparent); }
+  .order h2 { font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--sc-t-3xl); line-height: 0.96; margin: 0; }
+  .pick { margin: var(--sc-5) 0 0; display: flex; align-items: baseline; gap: var(--sc-4); flex-wrap: wrap; }
+  .pick .size-name { font-family: var(--sc-font-display); font-weight: 400; text-transform: uppercase; font-size: var(--sc-t-xl); letter-spacing: 0.04em; }
+  .pick .feeds { color: var(--sc-ink-soft); }
+  .price { margin: var(--sc-2) 0 0; display: flex; align-items: baseline; gap: var(--sc-4); flex-wrap: wrap; }
+  .price .now { font-family: var(--sc-font-display); font-weight: 200; font-size: var(--s6); line-height: 0.9; color: var(--sc-ink); font-variant-numeric: tabular-nums; }
+  .price .now small { font-size: var(--s2); vertical-align: 0.6em; margin-inline-end: 0.06em; }
+  .price .alt { color: var(--sc-ink-soft); max-width: 18rem; }
+  .menu { margin: var(--sc-5) 0 0; display: grid; gap: var(--sc-2); border-top: 1px solid var(--sc-hairline); padding-top: var(--sc-4); color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  .menu div { display: flex; justify-content: space-between; gap: var(--sc-4); }
+  .menu b { color: var(--sc-ink); font-weight: 600; }
+  .act { margin-top: var(--sc-6); display: flex; align-items: center; gap: var(--sc-5); flex-wrap: wrap; }
+  .act p { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); max-width: 22rem; }
+  .act p b { color: var(--sc-ink); font-weight: 600; }
+  .foot { padding: var(--sc-4) var(--sc-gutter); display: flex; justify-content: space-between; gap: var(--sc-4); flex-wrap: wrap;
+    border-top: 1px solid var(--sc-hairline); color: var(--sc-ink-soft); font-size: var(--sc-t-xs); }
+  .foot a { color: var(--sc-ink-soft); text-underline-offset: 3px; }
+
+  /* ---------- short laptop screens: the split fits the height ----------------- */
+  /* A big photo keeps its own shape (rule 3c.12, 26 Oct 2026): the kitchen photo is as wide as the scratch side ever gets,
+     capped at a square, not the whole screen, so it shows at least 75% of its height instead of under half. */
+  @media (min-width: 861px) { .scratch-photo { width: min(62%, 100svh); -webkit-mask-image: linear-gradient(90deg, #000 85%, transparent); mask-image: linear-gradient(90deg, #000 85%, transparent); } }
+  @media (min-width: 861px) and (max-height: 820px) {
+    .scratch-copy, .theirs-copy { top: clamp(3.6rem, 9vh, 6rem); }
+    .scratch-copy h2 { font-size: var(--s5); }
+    .scratch-copy .lede { font-size: var(--sc-t-base); margin-top: var(--sc-2); }
+    .chores { grid-template-columns: 1fr 1fr; margin-top: var(--sc-4); gap: 0.25rem 0.5rem; }
+    .chores li { font-size: var(--sc-t-sm); }
+    .lockup .script { font-size: var(--s4); }
+    .lockup h1 { font-size: var(--s6); }
+    .lockup .tag { font-size: var(--sc-t-base); margin-top: var(--sc-2); }
+    .steps { margin-top: var(--sc-3); gap: var(--sc-1); }
+    .steps li { font-size: var(--sc-t-sm); }
+    .steps b { font-size: var(--sc-t-lg); }
+    .theirs-copy .btn { margin-top: var(--sc-4); }
+    .peak h2 { font-size: var(--s5); }
+    .hours .sc-nums { font-size: var(--s6); }
+  }
+
+  /* ---------- phones: the split runs top and bottom ------------------------ */
+  @media (max-width: 860px) {
+    .side--scratch { clip-path: inset(0 0 calc(100% - var(--x) * 1%) 0); }
+    .side--theirs { clip-path: inset(calc(var(--x) * 1%) 0 0 0); }
+    .scratch-copy { top: 4.6rem; width: auto; right: var(--sc-gutter); }
+    .scratch-copy h2 { font-size: var(--sc-t-2xl); }
+    .scratch-copy .lede { font-size: var(--sc-t-base); margin-top: var(--sc-2); }
+    .chores { margin-top: var(--sc-3); gap: 0.2rem; grid-template-columns: 1fr 1fr; }
+    .chores li { font-size: var(--sc-t-sm); }
+    /* tall enough on a short phone that the kitchen photo keeps 70% of its height (rule 3c.12) */
+    .scratch-photo { height: max(50%, 94vw); object-position: 50% 62%; }
+    /* the tubs whole, at their own shape, at the top of their half (they were a 31% slice) */
+    .theirs-photo { top: 50%; bottom: auto; height: auto; aspect-ratio: 1600 / 1066; object-position: 50% 50%; }
+    /* Only behind the words: the kitchen below them stays visible. */
+    .scratch-wash { background: linear-gradient(180deg, var(--cold) 0%, var(--cold) 25%, color-mix(in oklab, var(--cold) 60%, transparent) 31%, transparent 40%); }
+    .theirs-shade { background: linear-gradient(180deg, transparent calc(var(--x) * 1%), color-mix(in oklab, var(--sc-canvas) 82%, transparent) calc(var(--x) * 1% + 6%), color-mix(in oklab, var(--sc-canvas) 96%, transparent) calc(var(--x) * 1% + 30%)); }
+    .theirs-copy { top: auto; bottom: 1.6rem; left: var(--sc-gutter); right: var(--sc-gutter); width: auto; text-align: left; }
+    .lockup .tag, .steps { margin-left: 0; }
+    /* On a phone the three steps would push the name up into the light half
+       (they keep their room while faded); the line above already says it. */
+    .theirs-copy .steps { display: none; }
+    .proofline { align-items: flex-start; font-size: var(--sc-t-sm); letter-spacing: 0.05em; }
+    .foot { font-size: var(--sc-t-sm); }
+    .lockup h1 { font-size: var(--s6); }
+    .lockup .tag { font-size: var(--sc-t-base); }
+    .steps { margin-top: var(--sc-3); gap: var(--sc-1); }
+    .steps li { font-size: var(--sc-t-sm); grid-template-columns: 1.8rem 1fr; }
+    .steps b { font-size: var(--sc-t-lg); }
+    .theirs-copy .btn { margin-top: var(--sc-4); }
+    .alone { left: var(--sc-gutter); right: var(--sc-gutter); width: auto; top: auto; bottom: 18vh; translate: none; font-size: var(--sc-t-xl); }
+    .divider { left: 0; right: 0; width: auto; top: calc(var(--x) * 1%); bottom: auto; height: 0; }
+    .divider::before { top: -0.5px; bottom: auto; left: 0; right: 0; width: auto; height: 1px; }
+    .labels { display: none; }
+    .knob-wrap { left: auto; right: var(--sc-gutter); top: 0; translate: 0 -50%; width: 4.4rem; }
+    /* The film takes the top of the screen and fades into the ground; the
+       words sit below it, never on the pot. */
+    /* Sized and placed by the page script (measurePeak): it fills the width,
+       stays 16:9 so the knob's fractions hold, and ends above the words. */
+    .pot-frame { top: 0; translate: none;
+      -webkit-mask-image: linear-gradient(180deg, #000 70%, transparent 100%); mask-image: linear-gradient(180deg, #000 70%, transparent 100%); }
+    .hours .sc-nums { font-size: var(--s6); }
+    .peak h2 { font-size: var(--sc-t-2xl); margin-top: var(--sc-3); }
+    .peak .seal-words { margin-top: var(--sc-3); font-size: var(--sc-t-base); }
+    .peak { width: auto; right: var(--sc-gutter); bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+    .proof { grid-template-columns: 1fr; }
+    .order { grid-template-columns: 1fr; gap: var(--sc-5); }
+    .dial { width: min(15rem, 62vw); }
+    .price .now { font-size: var(--s6); }
+    .order-stage { padding-top: var(--sc-7); }
+    /* On a phone the pictures stay seen (Tzvi, 28 Oct 2026, page rules 5b.3): the kitchen starts under its words
+       instead of under a wash, and their tubs stand whole at the top of their half, at full light, with the words
+       under them on the dark ground, not under a shade. */
+    .scratch-wash { display: none; }
+    .scratch-photo { top: 11.6rem; }
+    .scratch-copy h2 { font-size: clamp(1.6rem, 7.6vw, 2.1rem); }
+    .theirs-photo { top: calc(var(--x) * 1% + 0.8rem); height: max(5rem, min(62vw, calc(100% - var(--x) * 1% - var(--copy-h, 15rem) - 3.4rem))); object-fit: contain; filter: brightness(calc(1 - var(--dim) * 0.6)); }
+    .theirs-shade { background: none; }
+    .lockup h1 { font-size: var(--s5); }
+    .lockup .script { font-size: var(--s3); }
+    .lockup .tag { margin-top: var(--sc-2); }
+    .theirs-copy .btn { margin-top: var(--sc-3); }
+    .proofline { flex-direction: row; flex-wrap: wrap; column-gap: 0.9rem; row-gap: 0; font-size: var(--s1); }
+  }
+  /* a short phone: the line under the name gives its room to the tubs (the quote that follows says the same) */
+  @media (max-width: 860px) and (max-height: 700px) { .theirs-copy .lockup .tag { display: none; } }
+  .buybar { display: none; }
+  @media (max-width: 860px) {
+    .buybar { position: fixed; inset-inline: 0; bottom: 0; z-index: 70; display: flex; align-items: center; justify-content: space-between; gap: var(--sc-4);
+      padding: 0.75rem var(--sc-gutter) calc(0.75rem + env(safe-area-inset-bottom)); background: color-mix(in oklab, var(--sc-surface) 94%, transparent);
+      border-top: 1px solid var(--sc-hairline-strong); transform: translateY(110%); transition: transform 240ms var(--sc-ease-out); }
+    .buybar.is-on { transform: none; }
+    .buybar__price { color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+    .buybar__price b { color: var(--sc-ink); font: 300 var(--s4)/1 var(--sc-font-display); margin-inline-start: 0.25rem; }
+    #order { padding-bottom: 5rem; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .buybar { transition: none; }
+    .chores li, .knob .rot { transition: none; }
+  }
+
+  /* ---------- proposed: menu bar, order that fits, plain sizes ---------- */
+  .tb-nav { display: contents; }
+  .topbar { position: fixed; top: 0; inset-inline: 0; z-index: 80; display: flex; align-items: center; justify-content: space-between; gap: var(--sc-5);
+    padding: 0.5rem var(--sc-gutter); background: color-mix(in oklab, var(--sc-canvas) 88%, transparent); backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--sc-hairline); transform: translateY(-100%); opacity: 0; transition: transform 300ms var(--sc-ease-out), opacity 300ms var(--sc-ease-out); }
+  .topbar.is-on { transform: none; opacity: 1; }
+  .tb-brand { display: flex; align-items: center; gap: 0.7rem; color: var(--sc-ink); text-decoration: none; font: 300 var(--s4)/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: 0.05em; }
+  .tb-brand img { width: 40px; height: 40px; border-radius: 50%; }
+  .topbar .tb-links { display: flex; gap: var(--sc-6); margin-inline-start: auto; }
+  .topbar .tb-links a { color: var(--sc-ink); text-decoration: none; font: 500 var(--sc-t-sm)/1 var(--sc-font-text); padding: 0.6rem 0; border-bottom: 1px solid transparent; transition: border-color 160ms; }
+  .topbar .tb-links a:hover { border-color: var(--sc-accent); }
+  .topbar .btn { min-height: 42px; padding-right: 1.6rem; }
+  @media (max-width: 860px) { .topbar { display: none; } }
+  .proofline li:first-child { font-size: var(--sc-t-base); color: var(--sc-ink); font-weight: 700; letter-spacing: 0.04em; }  /* a price is text colour, not the accent (22 Oct 2026) */
+  #order { min-height: calc(100svh - 4rem); }
+  .order-stage { padding-top: clamp(4.5rem, 10svh, 6rem); }
+  .order-stage > .order { padding-bottom: var(--sc-5); }
+  .dial { width: min(22rem, 32vw, 46svh); }
+  .dial-col { gap: 0; }
+  .order h2 { font-size: var(--s5); }
+  .size-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--sc-3); margin-top: var(--sc-4); justify-content: stretch; }
+  .size-pick button { position: relative; display: grid; gap: 0.25rem; text-align: left; align-content: start; min-height: 5.4rem; padding: 0.8rem 1rem; border-radius: var(--sc-r-md); cursor: pointer;
+    transition: border-color 120ms, background 120ms, transform 100ms; }
+  .size-pick button b { font: 400 var(--s4)/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: 0.04em; }
+  .size-pick button em s { font-size: var(--s2); color: var(--sc-ink-soft); margin-right: 0.3em; text-decoration-thickness: 1.5px; }
+  .size-pick button span { color: var(--sc-ink-soft); font-size: var(--sc-t-xs); }
+  .size-pick button em { font: 300 var(--s4)/1 var(--sc-font-display); font-style: normal; color: var(--sc-ink); }
+  .size-pick button:hover { border-color: var(--sc-accent); }
+  .size-pick button:active { transform: scale(0.97); }
+  .size-pick .tab { position: absolute; top: -0.65rem; right: 0.7rem; font: 700 var(--s1)/1 var(--sc-font-text); font-style: normal; letter-spacing: 0.06em; text-transform: uppercase; background: #E6F4EA; color: #1E5E3A; padding: 0.28rem 0.5rem; border-radius: 3px; }
+  .pick { margin-top: var(--sc-4); }
+  .pick .size-name { font-size: var(--sc-t-lg); }
+  .price .now { font-size: var(--s6); }
+  .price .was { transition: opacity 240ms var(--sc-ease-out); display: inline-flex; align-items: center; gap: 0.6rem; font: 400 var(--sc-t-base)/1 var(--sc-font-text); }
+  .price .was s { color: var(--sc-ink-soft); text-decoration-thickness: 2px; font-size: var(--s4); }
+  .price .was b { background: #E6F4EA; color: #1E5E3A; padding: 0.28rem 0.55rem; border-radius: 4px; font-size: var(--s1); text-transform: uppercase; letter-spacing: 0.04em; }
+  .menu { grid-template-columns: repeat(3, auto); justify-content: space-between; margin-top: var(--sc-4); padding-top: var(--sc-3); }
+  .menu div { gap: 0.5rem; }
+  .reassure { display: flex; align-items: center; gap: 0.5rem; margin: var(--sc-5) 0 0; font-size: var(--sc-t-sm); color: var(--sc-ink); }
+  .reassure svg { width: 18px; height: 18px; fill: none; stroke: var(--sc-accent); stroke-width: 2.4; stroke-linecap: round; stroke-linejoin: round; }
+  .act { margin-top: var(--sc-3); }
+  /* the opening's height is set by script after load; this holds the same space from the first paint so nothing below jumps */
+  #split { height: 700vh; }
+  .pick { display: none; }
+  .order-stage { padding-top: clamp(3.5rem, 8svh, 5rem); }
+  .order h2 { font-size: var(--s5); white-space: nowrap; }
+  .order-tag { font-size: var(--s4); }
+  .size-pick { margin-top: var(--sc-3); }
+  .size-pick button { min-height: 4.6rem; padding: 0.7rem 0.9rem; }
+  .price { margin-top: var(--sc-3); }
+  .price .now { font-size: var(--s5); }
+  .menu { margin-top: var(--sc-3); }
+  .reassure { margin-top: var(--sc-4); }
+  .dial { width: min(20rem, 30vw, 42svh); }
+
+  @media (max-width: 860px) {
+    .dial { width: min(11rem, 50vw); }
+    .menu { grid-template-columns: 1fr; }
+    .menu div { justify-content: space-between; }
+    .order h2 { white-space: normal; }
+  }
+
+  /* ---------- the worlds after the opening (page rules 3t) ------------------
+     Picture, then a calm rest on marble, then a picture, then the dark order,
+     then the footer. Words sit on the picture with a soft edge shade. */
+
+  /* the rest on marble: the page turns light, the facts sit in numbered rows */
+  .rest { --sc-ink: #1B1612; --sc-ink-soft: #5A4F43; --sc-accent-text: #7A530F;
+    --sc-hairline: color-mix(in oklab, #1B1612 14%, transparent); --sc-hairline-strong: color-mix(in oklab, #1B1612 28%, transparent);
+    background: #F3EFE7; color: var(--sc-ink); padding-block: clamp(3rem, 9svh, 8rem); }
+  .rest-grid { display: grid; grid-template-columns: minmax(0, 6fr) minmax(0, 5fr); gap: clamp(2.5rem, 7vw, 8rem); align-items: start; }
+  .rest h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--s5); line-height: 0.96; color: var(--sc-ink); max-width: 14ch; }
+  .rest .quote { margin: clamp(1.5rem, 4svh, 3rem) 0 0; display: grid; grid-template-columns: 4.5rem 1fr; gap: var(--sc-5); align-items: start; max-width: 34rem; }
+  .rest .quote img { width: 4.5rem; height: 4.5rem; border-radius: 50%; box-shadow: 0 2px 10px rgb(27 22 18 / 0.2); }
+  .rest .quote p { margin: 0; font-size: var(--sc-t-base); line-height: 1.55; color: var(--sc-ink); }
+  .rest .quote cite { display: block; margin-top: var(--sc-3); font: 500 var(--sc-t-sm)/1.4 var(--sc-font-text); font-style: normal; color: var(--sc-ink-soft); }
+  .rows { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--sc-hairline-strong); }
+  .rows li { display: grid; grid-template-columns: 3rem minmax(5.5rem, 8rem) 1fr; gap: var(--sc-4); align-items: baseline; padding-block: clamp(1.1rem, 2.4vw, 1.8rem); border-bottom: 1px solid var(--sc-hairline-strong); }
+  .rows b { font: 300 var(--sc-t-lg)/1 var(--sc-font-display); letter-spacing: 0.06em; color: var(--sc-accent-text); }
+  .rows span { font: 700 var(--sc-t-xs)/1.4 var(--sc-font-text); letter-spacing: 0.16em; text-transform: uppercase; color: var(--sc-ink-soft); }
+  .rows p { margin: 0; font-size: var(--sc-t-base); color: var(--sc-ink); }
+
+  /* the footer: a last line, the button, columns */
+  .closing { position: relative; background: #0A0806; color: var(--sc-ink); padding-block: clamp(5rem, 11vw, 9rem) var(--sc-6); border-top: 1px solid var(--sc-hairline-strong); }
+  .closing-line { margin: 0 0 var(--sc-6); font-family: var(--sc-font-display); font-weight: 200; text-transform: uppercase; letter-spacing: 0.01em;
+    font-size: var(--s5); line-height: 0.98; max-width: 22ch; color: var(--sc-ink); }
+  .closing-line .script { display: block; font-size: var(--s4); line-height: 1.05; margin-bottom: 0.1em; text-transform: none; }
+  .closing-cols { margin-top: clamp(3.5rem, 8vw, 6.5rem); padding-top: var(--sc-6); border-top: 1px solid var(--sc-hairline-strong);
+    display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--sc-6) var(--sc-7); }
+  .closing h3 { margin: 0 0 var(--sc-3); font: 300 var(--sc-t-xl)/1 var(--sc-font-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-accent); }
+  .closing-cols a, .closing-cols p { display: block; margin: 0 0 0.55rem; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); line-height: 1.5; text-decoration: none; }
+  .closing-cols a:hover { color: var(--sc-ink); }
+  .closing-base { margin: var(--sc-7) 0 0; padding-top: var(--sc-4); border-top: 1px solid var(--sc-hairline); display: flex; justify-content: space-between; gap: var(--sc-4); flex-wrap: wrap; font-size: var(--sc-t-xs); color: var(--sc-ink-soft); }
+  .closing-base a { display: inline; margin: 0; text-decoration: underline; text-underline-offset: 3px; }
+
+  /* the full footer (rules 3v.1) and three true facts under the button (rules 3v.14) */
+  .closing-cols { grid-template-columns: 1.5fr repeat(3, minmax(0, 1fr)); }
+  .closing-cols .fbrand a.fname { font: 300 var(--sc-t-xl)/1.1 var(--sc-font-display); letter-spacing: 0.08em; text-transform: uppercase; color: var(--sc-ink); margin-bottom: 0.8rem; }
+  .closing-cols .fbrand p { max-width: 30ch; }
+  .closing-cols a.fcta { margin-top: 0.4rem; font-weight: 700; color: var(--sc-ink); text-decoration: underline; text-underline-offset: 3px; }
+  .closing-cols a[href^="https://wa.me"] { white-space: nowrap; }
+  .closing-cols a, .closing-cols p { width: fit-content; }
+  .proofline li::before { content: ""; display: inline-block; width: 0.4em; height: 0.4em; border-radius: 50%; background: var(--sc-accent); margin-inline-end: 0.5em; vertical-align: middle; margin-bottom: 0.15em; }
+  @media (max-width: 860px) {
+    .rest-grid { grid-template-columns: 1fr; }
+    .rows li { grid-template-columns: 2.4rem 1fr; }
+    .rows li p { grid-column: 2; }
+    .closing-cols { grid-template-columns: 1fr 1fr; } .closing-cols .fbrand { grid-column: 1 / -1; }
+    .closing { padding-bottom: 6.5rem; }
+  }
+
+
+  /* ---------- category rework (page rules 3t, 22 Oct 2026): a food shop ----------
+     After the candlelit opening the page turns bright and warm: one colour room per
+     size with its servings and price, the steps, the occasions, the facts, then the order
+     dial on the same light ground. The dark is the opening, the dial's face and the footer. */
+  :root { --lt-ground: #FBF3E4; --lt-ink: #1B1612; --lt-soft: #5A4F43; --plum: #34452A; --steel: #2B2623; }
+  .shop, .how, .occ, #order { --sc-ink: var(--lt-ink); --sc-ink-soft: var(--lt-soft); --sc-accent-text: #7A530F;
+    --sc-hairline: color-mix(in oklab, #1B1612 14%, transparent); --sc-hairline-strong: color-mix(in oklab, #1B1612 28%, transparent); color: var(--lt-ink); }
+  .shop, .how, #order { background: var(--lt-ground); }
+  .occ { background: #E9C46A; }
+  #order { background: var(--lt-ground); }
+  #order .knob { --sc-ink: #F2EBDF; }
+  .order-tag { color: #7A530F; }
+  .size-pick button[aria-pressed="true"] { border-color: var(--lt-ink); background: #fff; }
+  .size-pick button:hover { border-color: var(--lt-ink); }
+  .size-pick .tab { background: var(--lt-ink); color: #fff; }
+  .reassure svg { stroke: var(--lt-ink); }
+  .topbar { background: rgb(251 243 228 / .94); --sc-ink: var(--lt-ink); --sc-hairline: color-mix(in oklab, #1B1612 14%, transparent); }
+  .topbar .tb-links a:hover { border-color: var(--lt-ink); }
+
+  .shop-head { padding-block: clamp(1.6rem, 4svh, 3rem) clamp(.8rem, 2svh, 1.4rem); }
+  .shop h2, .how h2, .occ h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; letter-spacing: .01em;
+    font-size: var(--s5); line-height: .98; color: var(--lt-ink); }
+  .shop-head p { margin: .6rem 0 0; color: var(--lt-soft); font-size: var(--sc-t-base); max-width: 40rem; }
+  .rooms { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .room { --c: #D9A54A; --t: #1B1612; display: flex; flex-direction: column; justify-content: space-between; gap: .7rem; background: var(--c); color: var(--t);
+    padding: clamp(.9rem, 2.6svh, 1.8rem) clamp(1rem, 2.4vw, 2.2rem); }
+  .room.plum { --c: var(--plum); --t: #fff; } .room.steel { --c: var(--steel); --t: #fff; }
+  .room .ph { position: relative; border-radius: 16px; overflow: hidden; height: min(28svh, 16rem); background: rgb(255 255 255 / .16); }
+  .room .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .room .ph .tag { position: absolute; left: 10px; top: 10px; padding: .3rem .7rem; border-radius: 999px; background: #fff; color: #1B1612; font: 700 var(--s1)/1.2 var(--sc-font-text); letter-spacing: .05em; text-transform: uppercase; }
+  .room h3 { margin: 0; font: 300 var(--s4)/1 var(--sc-font-display); text-transform: uppercase; letter-spacing: .03em; }
+  .room .feeds { margin: .3rem 0 0; font: 700 var(--s3)/1.3 var(--sc-font-text); }
+  .room .what { margin: .2rem 0 0; font-size: var(--s2); line-height: 1.4; }
+  .room .rf { display: flex; justify-content: space-between; align-items: flex-end; gap: 1rem; flex-wrap: wrap; }
+  .room .price { font: 300 var(--s5)/1 var(--sc-font-display); font-variant-numeric: tabular-nums; }
+  .room .price .was { display: block; margin-bottom: .2rem; font: 400 var(--s3)/1 var(--sc-font-text); text-decoration: line-through; }
+  .btn-line { display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 1.1rem; border-radius: 999px; border: 2px solid currentColor;
+    background: transparent; color: inherit; font: 700 var(--s2)/1 var(--sc-font-text); text-decoration: none; cursor: pointer; transition: background 160ms ease-out, color 160ms ease-out, transform 140ms ease-out; }
+  .room .btn-line:hover { background: var(--t); color: var(--c); }
+  .btn-line:active { transform: scale(.97); }
+
+  .how { padding-block: clamp(1.6rem, 5svh, 3.6rem); }
+  .how-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: clamp(1.4rem, 4vw, 3.5rem); align-items: center; }
+  .how .ph { border-radius: 22px; overflow: hidden; height: min(48svh, 28rem); }
+  .how .ph img { width: 100%; height: 100%; object-fit: cover; }
+  .steps { list-style: none; margin: clamp(.8rem, 2svh, 1.4rem) 0 0; padding: 0; display: grid; gap: .6rem; }
+  .steps li { display: grid; grid-template-columns: 2.4rem 1fr; gap: .8rem; align-items: baseline; padding-block: .6rem; border-top: 1px solid var(--sc-hairline-strong); font-size: var(--sc-t-base); line-height: 1.4; }
+  .steps b { font: 300 var(--s4)/1 var(--sc-font-display); }
+  .fine { margin: .9rem 0 0; font-size: var(--sc-t-sm); color: var(--lt-soft); }
+
+  .occ { padding-block: clamp(1.6rem, 5svh, 3.6rem); }
+  .occ-grid { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, .9fr); gap: clamp(1.4rem, 4vw, 3.5rem); align-items: center; }
+  .occ .ph { border-radius: 22px; overflow: hidden; height: min(44svh, 26rem); }
+  .occ .ph img, .occ .ph video { width: 100%; height: 100%; object-fit: cover; object-position: 50% 40%; }
+  .occ .occasions { margin: clamp(.8rem, 2svh, 1.4rem) 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: .5rem; list-style: none; }
+  .occ .occasions li { white-space: nowrap; padding: .6rem 1rem; border: 2px solid var(--lt-ink); border-radius: 999px; font: 700 var(--sc-t-sm)/1 var(--sc-font-text); color: var(--lt-ink); }
+  .occ .occasions li::after { display: none; }
+  .rest { background: var(--lt-ground); }
+
+  @media (max-width: 860px) {
+    .rooms { grid-template-columns: 1fr; }
+    .room .ph { height: min(30svh, 15rem); }
+    .how-grid, .occ-grid { grid-template-columns: 1fr; }
+    .how .ph { height: 30svh; } .occ .ph { height: 30svh; order: -1; }
+  }
+
+  @media (max-width: 860px) { .price .now { font-size: var(--s6); } }
+  /* ---------- review fixes, 22 Oct 2026 ---------- */
+  html, body { overflow-x: clip; }
+  /* the quiet moment keeps the kitchen (dimmed) on the left, never a plain black half */
+  .scratch-photo { opacity: calc(0.92 - var(--dim) * 0.5); }
+  .scratch-photo { filter: saturate(calc(0.85 - var(--dim) * 0.5)) brightness(calc(1 - var(--dim) * 0.45)); }
+  /* the kitchen clip dims by fading on the dark ground, not by a filter: a filter that changes with the scroll redrew
+     the whole clip every frame and held the opening at 30 fps (check-site SMOOTH, 29 Oct 2026); the still keeps it */
+  video.scratch-photo { filter: none; opacity: calc(0.92 - var(--dim) * 0.62); }
+  /* the gap under the rest, before the dial */
+  .rest { padding-block: clamp(1.6rem, 5svh, 3.4rem) clamp(1rem, 3svh, 2.2rem); }
+  #order { min-height: 0; }
+  .order-stage { padding-top: clamp(1rem, 3svh, 2rem); }
+  .order-stage > .order { align-self: start; padding-bottom: var(--sc-6); }
+  /* a size that costs less than two of the one below says what it is measured against */
+  .room .price .was { display: flex; align-items: baseline; gap: .6rem; margin-bottom: .3rem; text-decoration: none; }
+  .room .price .was s { text-decoration: line-through; text-decoration-thickness: 1.5px; }
+  .room .price .was small, .price .was small { font: 600 var(--s2)/1.2 var(--sc-font-text); opacity: .9; }
+  .size-pick .tab { position: static; justify-self: start; margin-top: .25rem; font-size: var(--s1); }
+  .price .was { flex-wrap: wrap; }
+  .room .ph { height: min(25svh, 16rem); }
+  .room { justify-content: flex-start; }
+  .room .rb { flex: 1; }
+  .room .rf { flex-wrap: nowrap; min-height: 5.6rem; }
+  .room .price { display: flex; flex-direction: column; }
+  @media (max-height: 700px) and (min-width: 861px) { .room .ph { height: 21svh; } .room .rf { min-height: 0; } }
+  @media (max-width: 860px) {
+    .size-pick { gap: .4rem; }
+    .size-pick button { min-height: 0; padding: .6rem .5rem; }
+    .size-pick button b { font-size: var(--s3); }
+    .size-pick button em { font-size: var(--s4); }
+    .size-pick .tab { padding: .2rem .35rem; letter-spacing: .02em; }
+  }
+
+  /* the on-page order (rule 3k): saved to the shop first, then WhatsApp */
+  .details { background: var(--lt-ground); color: var(--lt-ink); --sc-ink: var(--lt-ink); --sc-ink-soft: var(--lt-soft); --sc-hairline-strong: color-mix(in oklab, #1B1612 28%, transparent); padding-block: clamp(2.5rem, 7vw, 4.5rem); border-top: 1px solid var(--sc-hairline-strong); }
+  .details h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--s5); line-height: .96; }
+  .details .osum { margin: 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); font-weight: 600; }
+  .oform { display: grid; gap: .6rem; max-width: 36rem; }
+  .oform .orow { display: grid; grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr)); gap: .6rem; }
+  .oform label { display: block; font: 600 var(--s1)/1.2 var(--sc-font-text); letter-spacing: .04em; text-transform: uppercase; color: var(--sc-ink-soft); margin-bottom: .25rem; }
+  .oform input, .oform select { width: 100%; min-height: 44px; padding: 0 .8rem; border: 1px solid var(--sc-hairline-strong); border-radius: 10px; background: #fff; color: var(--lt-ink); font: 500 var(--sc-t-sm)/1 var(--sc-font-text); }
+  .oform .bad input, .oform .bad select { border-color: #A32020; }
+  .oform .err { margin: .25rem 0 0; color: #A32020; font-size: var(--s1); }
+  .oform .err:empty { display: none; }
+  .oform .qty { display: flex; align-items: center; justify-content: space-between; min-height: 44px; border: 1px solid var(--sc-hairline-strong); border-radius: 10px; background: #fff; }
+  .oform .qty button { width: 44px; min-height: 44px; border: 0; background: transparent; font-size: 1.3rem; cursor: pointer; color: var(--lt-ink); }
+  .oform .qty output { font-weight: 700; }
+  .oform .act { margin-top: .4rem; gap: .8rem; }
+  .oform .btn[aria-busy="true"] { opacity: .7; }
+  .details .btn-line { transition: background 140ms, color 140ms; }
+  .details .btn-line:hover { background: var(--lt-ink); color: #fff; }
+  .details .btn-line:active { transform: translateY(1px) scale(.98); }
+
+  /* Customers' own words (1 Nov 2026): message bubbles on the light ground; a row to swipe on a phone */
+  .said { padding-block: clamp(2.4rem, 7svh, 5rem); }
+  .said h2 { margin: 0; font-family: var(--sc-font-display); font-weight: 300; text-transform: uppercase; font-size: var(--s5); line-height: 0.96; color: var(--sc-ink); }
+  .said-note { margin: var(--sc-3) 0 0; color: var(--sc-ink-soft); font-size: var(--sc-t-sm); }
+  .said-list { list-style: none; margin: clamp(1.5rem, 4svh, 2.5rem) 0 0; padding: 0; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  .said-list li { background: #fff; border-radius: 18px 18px 18px 4px; padding: 1.1rem 1.25rem 1rem; box-shadow: 0 3px 30px rgb(122 83 15 / 0.10); }
+  .said-list blockquote { margin: 0; }
+  .said-list p { margin: 0; font-size: var(--sc-t-base); line-height: 1.5; color: var(--sc-ink); }
+  .said-list .from { display: block; margin-top: 0.7rem; font: 600 var(--sc-t-xs)/1.4 var(--sc-font-text); letter-spacing: 0.12em; text-transform: uppercase; color: var(--sc-ink-soft); }
+  @media (max-width: 760px) {
+    .said-list { grid-auto-flow: column; grid-template-columns: none; grid-auto-columns: 78%; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 6px; }
+    .said-list li { scroll-snap-align: start; }
+  }
+
+  /* ---------- the order page (6 Nov 2026) ---------- */
+  /* Its menu bar is on from the start and stays on a phone, where the home page's waits for the opening film. */
+  .topbar.tb-always { transform: none; opacity: 1; }
+  .order-page .order-stage { padding-top: clamp(4.5rem, 10svh, 6rem); }
+  .order-page #order { padding-bottom: 0; }
+  @media (max-width: 860px) {
+    .topbar.tb-always { display: flex; }
+    .topbar.tb-always .tb-links a:not(:first-child), .topbar.tb-always > .btn, .topbar.tb-always .tb-nav > .btn { display: none; }
+    .order-page .order-stage { padding-top: 4.5rem; }
+  }
+  @media (max-width: 860px) { .topbar.tb-always .tb-links a { display: inline-flex; align-items: center; min-height: 44px; padding-inline: .4rem; } }

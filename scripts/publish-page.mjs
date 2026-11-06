@@ -207,9 +207,13 @@ function markEditable(html) {
   const doc = parse5.parse(html, { sourceCodeLocationInfo: true });
   const inserts = [];
   const seen = new Map();
+  // A key written into the source is kept (Tzvi, 6 Nov 2026: text moved to another page of the site keeps the key
+  // it had, so the owner's dashboard edits follow it). Automatic keys step around the ones already taken.
+  const pinned = new Set([...html.matchAll(/\sdata-mir-key="([^"]+)"/g)].map((m) => m[1]));
   const key = (p, basis) => {
     const h = crypto.createHash('sha1').update(basis).digest('hex').slice(0, 8);
-    const n = seen.get(p + h) || 0;
+    let n = seen.get(p + h) || 0;
+    while (pinned.has(`${p}-${h}-${n}`)) n++;
     seen.set(p + h, n + 1);
     return `${p}-${h}-${n}`;
   };
@@ -231,6 +235,7 @@ function markEditable(html) {
     const direct = (n.childNodes || []).some((c) => c.nodeName === '#text' && c.value.trim());
     const text = textOf(n).replace(/\s+/g, ' ').trim();
     if (TEXT_TAGS.has(n.nodeName) && direct && text && !scripted(n) && inlineOnly(n) && !hasTag(n, n.nodeName) && loc?.startTag && loc.endTag) {
+      if (attr(n, 'data-mir-key')) return; // already keyed in the source
       inserts.push([loc.startTag.endOffset - 1, ` data-mir-key="${key('t', n.nodeName + '|' + text)}"`]);
       return;
     }
