@@ -58,6 +58,20 @@
     window.addEventListener('scroll', onDock, { passive: true }); window.addEventListener('resize', onDock); onDock();
   }
 
+  // the phone menu: opens a panel, closes on Escape, on a tap on a link or on the button again
+  var bar = document.querySelector('.bar'), mb = document.getElementById('mbtn');
+  if (bar && mb) {
+    var menu = function (o) {
+      bar.classList.toggle('is-open', o); mb.setAttribute('aria-expanded', String(o));
+      mb.firstElementChild.textContent = o ? (EN ? 'Close' : 'סגירה') : (EN ? 'Menu' : 'תפריט');
+      mb.setAttribute('aria-label', o ? (EN ? 'Close the menu' : 'לסגור את התפריט') : (EN ? 'Menu' : 'תפריט'));
+    };
+    mb.addEventListener('click', function () { menu(!bar.classList.contains('is-open')); });
+    bar.querySelectorAll('.mpanel a').forEach(function (a) { a.addEventListener('click', function () { menu(false); }); });
+    addEventListener('keydown', function (e) { if (e.key === 'Escape') menu(false); });
+    hooks.push(function () { menu(bar.classList.contains('is-open')); });
+  }
+
   document.addEventListener('DOMContentLoaded', function () {
     var saved = null; try { saved = localStorage.getItem('mb-lang'); } catch (e) {}
     if (saved === 'en') setLang(true);
