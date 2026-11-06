@@ -17,6 +17,7 @@
  * something to keep track of, even if for a renter that is only bookings
  * and replies.
  */
+import { useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   LayoutDashboard, Building2, Layers, Store, CalendarCheck, CalendarClock, Inbox, Briefcase, ClipboardList, Bike, ShoppingBag,
@@ -45,8 +46,19 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
   const runsBusiness = showGigTabs;
   // Which business tools this person uses, by what the business sells
   // and their own choices (backend utils/business_tools.py, Tzvi 14 Oct
-  // 2026). Until the summary arrives, everything shows, as before.
-  const tool = (id) => runsBusiness && (!summary.business_tools || !!summary.business_tools[id]);
+  // 2026). Until the summary arrives the menu uses what they had last visit,
+  // or leaves these out: showing all of them made Members and Classes appear
+  // and then vanish (Tzvi, 6 Nov 2026).
+  const summaryReady = summary.orders_new !== undefined;
+  const toolsKey = `dashboard.tools.${user?.id || ''}`;
+  useEffect(() => {
+    if (!summary.business_tools) return;
+    try { localStorage.setItem(toolsKey, JSON.stringify(summary.business_tools)); } catch { /* private mode */ }
+  }, [summary.business_tools, toolsKey]);
+  const lastTools = () => {
+    try { return JSON.parse(localStorage.getItem(toolsKey)) || {}; } catch { return {}; }
+  };
+  const tool = (id) => runsBusiness && (summaryReady ? (!summary.business_tools || !!summary.business_tools[id]) : !!lastTools()[id]);
   // Areas this person has as staff at someone else's business (backend
   // routes/marketplace/staff.py): shown whether or not they run one.
   const staff = (area) => (summary.staff_permissions || []).includes(area);
@@ -67,7 +79,7 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
       key: 'daily',
       label: t('dashboard.groupDaily', 'Day to day'),
       tabs: [
-        { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, show: tool('orders') || staff('orders') },
+        { id: 'orders', label: t('dashboard.orders', 'Orders'), Icon: ClipboardList, badge: summary.orders_new, show: tool('orders') || staff('orders') },
         // Waiting appointments always show: a badge nobody can see is a
         // customer nobody answers.
         { id: 'appointments', label: t('dashboard.appointments', 'Appointments'), Icon: CalendarClock, badge: summary.service_bookings_pending, show: tool('appointments') || (runsBusiness && ((summary.service_bookings_pending || 0) > 0 || !!summary.has_sessions)) },
@@ -95,7 +107,7 @@ export default function useDashboardNav({ role, user, unreadMessages = 0, hasPos
         { id: 'discounts', label: t('dashboard.discountsGifts', 'Discounts and gift cards'), Icon: TicketPercent, badge: summary.gift_cards_waiting, show: tool('orders') || tool('members') || staff('discounts') },
         { id: 'network', label: t('dashboard.network', 'Network'), Icon: Network, badge: summary.network_requests_in, show: tool('network') || (summary.network_requests_in || 0) > 0 },
         { id: 'job-requests', label: t('dashboard.jobRequests', 'Work Offers'), Icon: Briefcase, badge: summary.work_offers_open, show: tool('job-requests') },
-        { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, show: runsBusiness && (hasPostedJobs || !summary.business_tools) },
+        { id: 'my-jobs', label: t('dashboard.myJobs', "Jobs I've Posted"), Icon: Briefcase, show: runsBusiness && (hasPostedJobs || (summaryReady && !summary.business_tools)) },
         { id: 'staff', label: t('dashboard.staff', 'Staff'), Icon: UserCog, show: runsBusiness },
         { id: 'tools', label: t('dashboard.toolsOnOff', 'Turn tools on or off'), Icon: SlidersHorizontal, show: runsBusiness },
       ],

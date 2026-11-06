@@ -21,7 +21,7 @@ import { toast } from 'sonner';
 import { ArrowLeft, Laptop, Smartphone, Undo2, Redo2, ExternalLink, Loader2, RotateCcw, Images, X, ChevronLeft, ChevronRight, Trash2, Plus, Wand2, Clock, Link2 } from 'lucide-react';
 import { API, AuthContext } from '../App';
 import { uploadOneFile } from '../utils/fastUpload';
-import NoticeEditor from '../components/dashboard/NoticeEditor';
+import NoticeEditor, { noticeAsked } from '../components/dashboard/NoticeEditor';
 
 const EMPTY = { text: {}, img: {}, style: {} };
 const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
@@ -47,7 +47,7 @@ export default function PageEditor() {
   const fileInput = useRef(null);
   const [photosOpen, setPhotosOpen] = useState(false);
   const [askOpen, setAskOpen] = useState(false);
-  const [hoursOpen, setHoursOpen] = useState(false);
+  const [hoursOpen, setHoursOpen] = useState(noticeAsked);
   // The words being linked ({key, bind}) and the dashboard's figures they can show.
   const [linkFor, setLinkFor] = useState(null);
   const [live, setLive] = useState(null);

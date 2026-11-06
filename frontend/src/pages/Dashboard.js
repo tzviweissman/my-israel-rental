@@ -608,7 +608,7 @@ const Dashboard = () => {
         )}
 
         {activeTab === 'orders' && (showGigTabs || staffIn('orders')) && (
-          <OrdersTab API={API} token={token} />
+          <OrdersTab API={API} token={token} newOrders={summary.orders_new || 0} newByBusiness={summary.orders_new_by_business} />
         )}
         {activeTab === 'members' && (showGigTabs || staffIn('members')) && (
           <MembersTab API={API} token={token} />

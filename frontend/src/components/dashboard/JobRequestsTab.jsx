@@ -9,11 +9,13 @@
  */
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
 import { toast } from 'sonner';
 import { Loader2, MapPin, Coins, Calendar, Send, BellRing, X } from 'lucide-react';
 
 const JobRequestsTab = ({ API, token }) => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -36,9 +38,9 @@ const JobRequestsTab = ({ API, token }) => {
         headers: { Authorization: `Bearer ${token}` },
       });
       setSavedSearches((cur) => cur.filter((s) => s.id !== id));
-      toast.success('Saved search removed.');
+      toast.success(t('myJobs.searchRemoved', 'Saved search removed.'));
     } catch {
-      toast.error('Could not remove');
+      toast.error(t('myJobs.removeFailed', 'Could not remove'));
     }
   };
 
@@ -50,8 +52,8 @@ const JobRequestsTab = ({ API, token }) => {
         <div className="bg-white rounded-2xl border border-gray-100 p-4 sm:p-5 shadow-sm" data-testid="job-saved-searches">
           <div className="flex items-center gap-2 mb-3">
             <BellRing size={16} className="text-[var(--brand-primary)]" />
-            <h3 className="text-sm font-bold text-gray-900">Your saved searches</h3>
-            <span className="text-[11px] text-gray-500">daily digest</span>
+            <h3 className="text-sm font-bold text-gray-900">{t('myJobs.savedSearches', 'Your saved searches')}</h3>
+            <span className="text-[11px] text-gray-500">{t('myJobs.dailyDigestShort', 'daily digest')}</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {savedSearches.map((s) => (
@@ -64,7 +66,7 @@ const JobRequestsTab = ({ API, token }) => {
                 <button
                   onClick={() => removeSaved(s.id)}
                   className="rounded-full w-4 h-4 flex items-center justify-center hover:bg-red-500 hover:text-white transition"
-                  aria-label="Remove saved search"
+                  aria-label={t('myJobs.removeSearch', 'Remove saved search')}
                 >
                   <X size={10} />
                 </button>
@@ -76,21 +78,21 @@ const JobRequestsTab = ({ API, token }) => {
 
       {rows.length === 0 ? (
         <div className="bg-white border border-gray-100 rounded-2xl p-8 text-center" data-testid="job-requests-empty">
-          <p className="text-gray-700 font-semibold mb-1">No open jobs matching your gigs yet.</p>
+          <p className="text-gray-700 font-semibold mb-1">{t('myJobs.noOffers', 'No open jobs in your categories yet.')}</p>
           <p className="text-sm text-gray-500">
-            Whenever a customer posts a job in one of your categories, we&apos;ll email you and show it here.
+            {t('myJobs.noOffersBody', 'When a customer posts a job in one of your categories, we will email you and show it here.')}
           </p>
         </div>
       ) : (
         <div className="space-y-3" data-testid="job-requests-list">
           <p className="text-sm text-gray-600">
-            {rows.length} open job{rows.length === 1 ? '' : 's'} in your categories. Apply directly — no middleman.
+            {rows.length === 1 ? t('myJobs.offersOne', 'One open job in your categories. Apply directly, no middleman.') : t('myJobs.offersMany', '{{n}} open jobs in your categories. Apply directly, no middleman.', { n: rows.length })}
           </p>
           {rows.map((j) => {
             const sym = j.budget_currency === 'USD' ? '$' : '₪';
             const budget = j.budget_type === 'fixed' && j.budget_amount
               ? `${sym}${Number(j.budget_amount).toLocaleString()}`
-              : 'Open to offers';
+              : t('myJobs.openToOffers', 'Open to offers');
             return (
               <button
                 key={j.id}
@@ -102,11 +104,11 @@ const JobRequestsTab = ({ API, token }) => {
                   <h3 className="text-base font-bold text-gray-900 flex-1">{j.title}</h3>
                   {j.already_applied ? (
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-100 whitespace-nowrap">
-                      ✓ Applied
+                      ✓ {t('myJobs.applied', 'Applied')}
                     </span>
                   ) : (
                     <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-[var(--brand-primary)]">
-                      <Send size={11} /> Apply
+                      <Send size={11} /> {t('myJobs.apply', 'Apply')}
                     </span>
                   )}
                 </div>

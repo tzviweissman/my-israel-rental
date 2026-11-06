@@ -15,8 +15,9 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer, Megaphone, MessageSquare, Info } from 'lucide-react';
+import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer, Megaphone, MessageSquare, Info, BellRing } from 'lucide-react';
 import TextNotificationsPanel from './TextNotificationsPanel';
+import { askForNotice } from './NoticeEditor';
 import { toast } from 'sonner';
 import CoverPlaceholder from '../common/CoverPlaceholder';
 import BusinessDetailsForm from './BusinessDetailsForm';
@@ -508,7 +509,7 @@ export default function MyBusinessesTab({ API, token }) {
                   style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
                   data-testid={`business-details-${b.id}`}
                 >
-                  <Info size={13} /> {t('businesses.editDetails', 'Business details')}
+                  <Info size={13} /> {t('businesses.editDetailsHours', 'Details and opening hours')}
                 </button>
 
                 <button
@@ -561,6 +562,16 @@ export default function MyBusinessesTab({ API, token }) {
                   <Palette size={13} /> {t('pageDesign.open', 'Design your page')}
                 </button>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => { askForNotice(); if (handBuilt.includes(b.slug)) navigate(`/dashboard/page-editor/${b.id}`); else setDesignBiz(b); }}
+                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-2 rounded-lg border bg-white text-xs font-semibold text-center"
+                  style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
+                  data-testid={`business-notice-${b.id}`}
+                >
+                  <BellRing size={13} /> {t('notice.cardButton', 'Notice on my page')}
+                </button>
                 </div>
 
                 {/* B6 — what is still missing from the public page, with

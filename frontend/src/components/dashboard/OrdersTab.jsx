@@ -118,7 +118,7 @@ const fromOrder = (o) => ({
   source: o.source || 'manual',
 });
 
-export default function OrdersTab({ API, token }) {
+export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = null }) {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const auth = useMemo(() => ({ headers: { Authorization: `Bearer ${token}` } }), [token]);
@@ -135,6 +135,11 @@ export default function OrdersTab({ API, token }) {
   const [search, setSearch] = useState('');
   const [query, setQuery] = useState('');
   const loadSeq = useRef(0);
+  // New orders wait for an answer whatever day they are for, so with any
+  // waiting the page opens on All open, on the business that has the most:
+  // "Today" showed nothing while the Overview said 15 (6 Nov 2026). Only on
+  // arrival; once someone picks a view or a business it stays theirs.
+  const landed = useRef(false);
   useEffect(() => {
     const id = setTimeout(() => setQuery(search.trim()), 300);
     return () => clearTimeout(id);
@@ -182,6 +187,18 @@ export default function OrdersTab({ API, token }) {
   useEffect(() => {
     try { localStorage.setItem('orders.view', view); } catch { /* private mode */ }
   }, [view]);
+
+  useEffect(() => {
+    if (landed.current || !businesses || !newOrders) return;
+    landed.current = true;
+    setRange('open');
+    const counts = newByBusiness || {};
+    if (!counts[bizId]) {
+      const most = [...businesses].sort((a, b) => (counts[b.id] || 0) - (counts[a.id] || 0))[0];
+      if (most && counts[most.id]) setBizId(most.id);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [businesses, newOrders]);
 
   // ---- businesses -------------------------------------------------------
   useEffect(() => {
@@ -400,13 +417,13 @@ export default function OrdersTab({ API, token }) {
           {businesses.length > 1 && (
             <select
               value={biz.id}
-              onChange={(e) => setBizId(e.target.value)}
+              onChange={(e) => { landed.current = true; setBizId(e.target.value); }}
               className="w-full sm:w-auto px-3 py-2 rounded-lg border text-sm bg-white min-h-[44px]"
               style={{ borderColor: 'var(--brand-border)', color: 'var(--ink)' }}
               aria-label={t('orders.pickBusiness', 'Business')}
               data-testid="orders-business-select"
             >
-              {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}</option>)}
+              {businesses.map((b) => <option key={b.id} value={b.id}>{b.name}{newByBusiness?.[b.id] ? ` (${t('orders.newCount', '{{n}} new', { n: newByBusiness[b.id] })})` : ''}</option>)}
             </select>
           )}
           {!entryOpen && !editing && !counterOpen && (
@@ -545,7 +562,7 @@ export default function OrdersTab({ API, token }) {
             key={key}
             type="button"
             aria-pressed={range === key}
-            onClick={() => { setRange(key); setStatusFilter(''); }}
+            onClick={() => { landed.current = true; setRange(key); setStatusFilter(''); }}
             className="px-3 min-h-[40px] rounded-lg text-sm font-semibold whitespace-nowrap"
             style={range === key
               ? { background: 'var(--ink)', color: 'var(--action-ink)' }
@@ -1499,8 +1516,6 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
         <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}><X size={18} /></button>
       </div>
 
-      <BasketReminderSwitch API={API} auth={auth} businessId={businessId} />
-      <TableOrdering API={API} auth={auth} businessId={businessId} />
 
       {h(t('orders.defaultCourier', 'Default courier'))}
       <select value={courier} onChange={(e) => setCourier(e.target.value)} className={sel} style={selStyle} data-testid="settings-courier">
@@ -1617,6 +1632,9 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
           {busy ? <Loader2 size={14} className="animate-spin" /> : <Check size={14} />} {t('orders.saveSettings', 'Save')}
         </button>
       </div>
+
+      <BasketReminderSwitch API={API} auth={auth} businessId={businessId} />
+      <TableOrdering API={API} auth={auth} businessId={businessId} />
     </div>
   );
 }

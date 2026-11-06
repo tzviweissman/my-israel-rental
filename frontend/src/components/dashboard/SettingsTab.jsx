@@ -153,9 +153,9 @@ const SettingsTab = ({ user, token, API, runsBusiness = false }) => {
         { headers: { Authorization: `Bearer ${token}` } }
       );
       i18n.changeLanguage(language);
-      toast.success('Default language saved');
+      toast.success(t('settings.languageSaved', 'Default language saved'));
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Failed to save language');
+      toast.error(error.response?.data?.detail || t('settings.languageFailed', 'Failed to save language'));
     } finally {
       setSavingLanguage(false);
     }

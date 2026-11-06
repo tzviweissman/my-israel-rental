@@ -538,6 +538,13 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "needed_by": {"$gte": today_il, "$lte": today_il + "￿"},
     })
     orders_new = await db.store_orders.count_documents({"owner_user_id": uid, "status": "new"})
+    # Which business they are in, so Orders can open on the one that has them.
+    orders_new_by_business = {
+        r["_id"]: r["n"] async for r in db.store_orders.aggregate([
+            {"$match": {"owner_user_id": uid, "status": "new"}},
+            {"$group": {"_id": "$business_id", "n": {"$sum": 1}}},
+        ]) if r["_id"]
+    }
     # The other two hats a person can wear on orders: courier (invited or
     # active for some business) and customer (ordered on the site).
     me = await db.users.find_one({"id": uid}, {"_id": 0, "email": 1})
@@ -592,6 +599,7 @@ async def dashboard_summary(payload: dict = Depends(verify_token)) -> dict:
         "gigs_count": gigs_count,
         "orders_due_today": orders_due_today,
         "orders_new": orders_new,
+        "orders_new_by_business": orders_new_by_business,
         "courier_invites": courier_invites,
         # Business connection requests waiting on one of this person's
         # businesses - the Network tab's badge.

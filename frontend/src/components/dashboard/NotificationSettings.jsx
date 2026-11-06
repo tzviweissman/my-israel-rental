@@ -15,6 +15,7 @@
  */
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import axios from 'axios';
+import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { Bell, Zap, Layers, Loader2, X } from 'lucide-react';
 import { CATEGORY_LABELS } from '../../lib/categories';
@@ -23,20 +24,20 @@ const MODES = [
   {
     key: 'instant',
     icon: Zap,
-    title: 'Instant per-post pings',
-    desc: 'Email me the moment a matching job goes live. Best for fast responders.',
+    title: ['myJobs.notifyInstant', 'One email for each job'],
+    desc: ['myJobs.notifyInstantBody', 'Email me the moment a matching job goes live.'],
   },
   {
     key: 'digest',
     icon: Layers,
-    title: 'Daily digest',
-    desc: 'One email at ~9am with every match grouped by category. Quiet inbox.',
+    title: ['myJobs.notifyDigest', 'Once a day'],
+    desc: ['myJobs.notifyDigestBody', 'One email around 9am with every match, grouped by category.'],
   },
   {
     key: 'both',
     icon: Bell,
-    title: 'Both',
-    desc: 'Get the ping AND the digest - belt and braces.',
+    title: ['myJobs.notifyBoth', 'Both'],
+    desc: ['myJobs.notifyBothBody', 'An email for each job and one a day.'],
   },
 ];
 
@@ -44,6 +45,7 @@ const CATEGORY_LABELS_LOCAL = CATEGORY_LABELS;  // local alias for readability i
 const label = (slug) => CATEGORY_LABELS_LOCAL[slug] || slug;
 
 const NotificationSettings = ({ API, token }) => {
+  const { t } = useTranslation();
   const [mode, setMode] = useState(null);
   const [snoozed, setSnoozed] = useState([]);
   const [saving, setSaving] = useState(false);
@@ -91,9 +93,9 @@ const NotificationSettings = ({ API, token }) => {
       );
       setMode(data.mode);
       setSnoozed(data.snoozed_categories || []);
-      toast.success('Notification preference saved');
+      toast.success(t('myJobs.notifySaved', 'Saved'));
     } catch (err) {
-      toast.error(err.response?.data?.detail || 'Could not save preference');
+      toast.error(err.response?.data?.detail || t('myJobs.notifySaveFailed', 'Could not save'));
     } finally {
       setSaving(false);
     }
@@ -110,10 +112,10 @@ const NotificationSettings = ({ API, token }) => {
         `${API}/marketplace/notification-preferences/snooze/${category}`,
         { headers: { Authorization: `Bearer ${token}` } },
       );
-      toast.success(`${label(category)} snooze cleared`);
+      toast.success(t('myJobs.snoozeCleared', '{{name}}: emails are back on', { name: label(category) }));
     } catch (err) {
       setSnoozed(before);
-      toast.error(err.response?.data?.detail || 'Could not clear snooze');
+      toast.error(err.response?.data?.detail || t('myJobs.notifySaveFailed', 'Could not save'));
     }
   };
 
@@ -139,14 +141,14 @@ const NotificationSettings = ({ API, token }) => {
           <Bell size={22} className="text-[var(--brand-primary)]" />
         </div>
         <div>
-          <h3 className="text-lg font-bold text-gray-900">Job match notifications</h3>
+          <h3 className="text-lg font-bold text-gray-900">{t('myJobs.notifyTitle', 'Emails about new jobs')}</h3>
           <p className="text-sm text-gray-500">
-            Choose how often we email you about new job matches. Saves automatically.
+            {t('myJobs.notifyBody', 'Choose how often we email you about jobs that match your business. Saves by itself.')}
           </p>
         </div>
       </div>
 
-      <div className="space-y-2" role="radiogroup" aria-label="Notification frequency">
+      <div className="space-y-2" role="radiogroup" aria-label={t('myJobs.notifyTitle', 'Emails about new jobs')}>
         {MODES.map(({ key, icon: Icon, title, desc }) => {
           const active = key === mode;
           return (
@@ -172,8 +174,8 @@ const NotificationSettings = ({ API, token }) => {
                 <Icon size={16} />
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-gray-900">{title}</p>
-                <p className="text-xs text-gray-500 mt-0.5">{desc}</p>
+                <p className="text-sm font-semibold text-gray-900">{t(title[0], title[1])}</p>
+                <p className="text-xs text-gray-500 mt-0.5">{t(desc[0], desc[1])}</p>
               </div>
               <div
                 className={`w-4 h-4 rounded-full border-2 mt-1 shrink-0 ${
@@ -190,7 +192,7 @@ const NotificationSettings = ({ API, token }) => {
       {snoozed.length > 0 && (
         <div className="mt-6 pt-5 border-t border-gray-100" data-testid="notification-snoozed-section">
           <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">
-            Currently snoozed
+            {t('myJobs.snoozedTitle', 'Paused for now')}
           </p>
           <div className="flex flex-wrap gap-2">
             {snoozed.map((s) => (
@@ -200,12 +202,12 @@ const NotificationSettings = ({ API, token }) => {
                 data-testid={`snooze-chip-${s.category}`}
               >
                 <span className="font-semibold">{label(s.category)}</span>
-                <span className="text-gray-500">· {daysLeft(s.until)}d left</span>
+                <span className="text-gray-500">· {t('myJobs.daysLeft', '{{n}} days left', { n: daysLeft(s.until) })}</span>
                 <button
                   type="button"
                   onClick={() => clearSnooze(s.category)}
                   className="text-gray-400 hover:text-red-500 ml-0.5"
-                  aria-label={`Clear ${label(s.category)} snooze`}
+                  aria-label={t('myJobs.clearSnooze', 'Turn {{name}} emails back on', { name: label(s.category) })}
                   data-testid={`snooze-clear-${s.category}`}
                 >
                   <X size={12} />
