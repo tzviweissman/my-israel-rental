@@ -206,16 +206,66 @@ def test_switch_and_booking_text(world):
     biz = ot.db.businesses.docs[0]
     assert ot.texts_on(biz) is False
     gig = {"_id": "g1", "business_id": "b1"}
-    assert run(ot.text_owner_new_booking(gig, "Dani", "Haircut", "/dashboard", "u1")) is False
+    assert run(ot.text_owner_new_booking(gig, "Dani", "Haircut", "tok", "u1")) is False
     assert sent.await_count == 0
 
     # On with no number of its own: the WhatsApp number.
     biz["order_settings"] = {"text_on": True}
     assert ot.texts_on(biz) is True
-    run(ot.text_owner_new_booking(gig, "Dani", "Haircut", "/dashboard", "u1"))
+    run(ot.text_owner_new_booking(gig, "Dani", "Haircut", "tok", "u1"))
     assert sent.await_args.kwargs["to"] == "+972501234567" and "Haircut" in sent.await_args.kwargs["body"]
+    assert "/bookings/owner/tok" in sent.await_args.kwargs["body"]
     # A number chosen before the switch existed counts as on.
     assert ot.texts_on({"order_settings": {"text_number": "055-337-8799"}}) is True
+
+
+def test_guest_booking_answer_goes_by_text(world):
+    _, sent = world
+    b = {"contact_phone": "052-111-2222", "track_token": "t" * 22, "lang": "en"}
+    run(ot.text_customer_booking(b, "accepted", "Haircut"))
+    assert sent.await_args.kwargs["to"] == "052-111-2222"
+    assert "confirmed" in sent.await_args.kwargs["body"] and "/bookings/track/" in sent.await_args.kwargs["body"]
+    run(ot.text_customer_booking({**b, "lang": "he"}, "declined", "Haircut"))
+    assert "מצטערים" in sent.await_args.kwargs["body"]
+    sent.reset_mock()
+    run(ot.text_customer_booking({"track_token": "t" * 22}, "accepted", "Haircut"))
+    assert sent.await_count == 0
+
+
+def test_owner_token_answers_a_booking_only_while_waiting(world, monkeypatch):
+    b = {"_id": "bk1", "owner_token": "k" * 22, "status": "pending", "provider_user_id": "u1", "gig_id": "g1"}
+    ot.db.marketplace_bookings = Coll([b])
+
+    async def move(bid, patch, user):
+        assert user == {"user_id": "u1"}
+        b["status"] = patch.status
+    from routes.marketplace import gigs
+    monkeypatch.setattr(gigs, "update_booking", AsyncMock(side_effect=move))
+    out = run(ot.owner_booking_confirm("k" * 22, None))
+    assert out["status"] == "accepted" and out["already"] is False
+    again = run(ot.owner_booking_decline("k" * 22, None))
+    assert again["status"] == "accepted" and again["already"] is True
+    assert gigs.update_booking.await_count == 1
+    with pytest.raises(HTTPException):
+        run(ot.owner_booking("short", None))
+
+
+def test_dashboard_decision_tells_the_customer_only(world):
+    order, sent = world
+    order["source"] = "website"
+    run(ot.customer_told_of_decision(order, "preparing"))
+    assert [c.kwargs["to"] for c in sent.await_args_list] == ["972521112222"]
+    assert "confirmed" in sent.await_args.kwargs["body"]
+
+    sent.reset_mock()
+    run(ot.customer_told_of_decision(order, "cancelled"))
+    assert "can't take" in sent.await_args.kwargs["body"]
+
+    # Not a first decision, or an order the business typed in: nothing.
+    sent.reset_mock()
+    run(ot.customer_told_of_decision({**order, "status": "preparing"}, "ready"))
+    run(ot.customer_told_of_decision({**order, "source": "manual"}, "preparing"))
+    assert sent.await_count == 0
 
 
 def test_app_link_opens_the_app():

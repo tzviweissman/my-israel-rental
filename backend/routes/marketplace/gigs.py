@@ -1361,6 +1361,8 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         "contact_phone": phone or None,
         # The customer's own status link, the only one a guest has.
         "track_token": secrets.token_urlsafe(16),
+        # The business's one-booking Confirm / Decline link, sent by text.
+        "owner_token": secrets.token_urlsafe(16),
         "preferred_date": payload.preferred_date,
         "time_slot": payload.time_slot,
         "lang": payload.lang,
@@ -1406,7 +1408,7 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
     spawn(alert_business_on_whatsapp(
         gig, gig.get("provider_user_id"), guest_name or (user or {}).get("name") or "",
         f"{gig.get('title') or ''} - {payload.tier_name or ''}" + (f" ({_when})" if _when else ""),
-        "/dashboard?tab=appointments", "booking"))
+        "/dashboard?tab=appointments", "booking", booking_token=booking["owner_token"]))
     logger.info("[marketplace] booking created: gig=%s client=%s tier=%s", gig_id, (user or {}).get("user_id") or "guest", payload.tier_name)
     return {"ok": True, "booking_id": booking["_id"], "track_path": f"/bookings/track/{booking['track_token']}"}
 
@@ -1618,6 +1620,8 @@ async def update_booking(booking_id: str, payload: BookingPatch, user=Depends(ve
     if booking.get("status") != payload.status and payload.status in ("accepted", "declined"):
         gt = (await db.marketplace_gigs.find_one({"_id": booking.get("gig_id")}, {"title": 1})) or {}
         await _email_guest_status(booking, payload.status, gt.get("title"))
+        from .order_texts import text_customer_booking
+        await text_customer_booking(booking, payload.status, gt.get("title") or "")
 
     fresh = await db.marketplace_bookings.find_one({"_id": booking_id})
     fresh["id"] = fresh.pop("_id")

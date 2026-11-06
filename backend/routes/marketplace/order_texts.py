@@ -163,9 +163,10 @@ async def text_owner_new_order(order_id: str) -> bool:
         return False
 
 
-async def text_owner_new_booking(gig: dict[str, Any], customer_name: str, summary: str, path: str, owner_user_id: Optional[str]) -> bool:
+async def text_owner_new_booking(gig: dict[str, Any], customer_name: str, summary: str, token: str, owner_user_id: Optional[str]) -> bool:
     """A new booking, by text, only when the business turned texts on: its
-    customers then no longer open WhatsApp to tell it. Never raises."""
+    customers then no longer open WhatsApp to tell it. The link is the
+    business's one-booking page, no sign-in, like an order's. Never raises."""
     try:
         biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
         if not texts_on(biz):
@@ -173,14 +174,32 @@ async def text_owner_new_booking(gig: dict[str, Any], customer_name: str, summar
         number = await _business_text_number({"business_id": gig.get("business_id"), "gig_id": gig.get("_id")})
         if not number:
             return False
-        link = f"{_frontend()}{path}"
+        link = f"{_frontend()}/bookings/owner/{token}"
         who = customer_name or ""
         he = await _owner_he({"owner_user_id": owner_user_id})
-        body = f"בקשת תור חדשה מ{who}: {summary}\nלצפייה: {link}" if he else f"New booking from {who}: {summary}\nSee it: {link}"
+        body = f"בקשת תור חדשה מ{who}: {summary}\nאישור או דחייה: {link}" if he else f"New booking from {who}: {summary}\nConfirm or decline: {link}"
         return await send_sms(to=number, body=body)
     except Exception as exc:  # noqa: BLE001
         logger.warning("booking text to the business failed: %s", type(exc).__name__)
         return False
+
+
+async def text_customer_booking(b: dict[str, Any], status: str, title: str) -> None:
+    """The customer's answer by text, with their link, signed in or a guest
+    (Tzvi, 6 Nov 2026). Never raises: the booking has already moved."""
+    try:
+        phone = b.get("contact_phone")
+        if not phone or not b.get("track_token"):
+            return
+        link = f"{_frontend()}/bookings/track/{b['track_token']}"
+        he = (b.get("lang") or "").startswith("he")
+        if status == "accepted":
+            body = f"התור שלך ל{title} אושר. פרטים ומעקב: {link}" if he else f"Your booking for {title} is confirmed. See the details: {link}"
+        else:
+            body = f"מצטערים, לא ניתן לאשר את התור שלך ל{title} הפעם. פרטים: {link}" if he else f"Sorry, your booking for {title} could not be accepted this time. Details: {link}"
+        await send_sms(to=phone, body=body)
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("booking text to the customer failed: %s", type(exc).__name__)
 
 
 async def _order_by_owner_token(token: str) -> dict[str, Any]:
@@ -237,7 +256,18 @@ async def _decide(token: str, request: Request, confirm: bool) -> dict[str, Any]
     return {**_view(fresh, biz), "already": False}
 
 
-async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool) -> None:
+async def customer_told_of_decision(o: dict[str, Any], status: str) -> None:
+    """Answered from the dashboard, not the texted link: the customer hears
+    all the same (Tzvi, 6 Nov 2026). `o` is the order before the move. Website
+    orders only: a customer does not expect a text about an order the business
+    typed in. The business made the decision on screen, so it gets no text."""
+    if o.get("status") != "new" or o.get("source") != "website" or status not in (CONFIRMED_STATUS, "ready", "done", DECLINED_STATUS):
+        return
+    biz = await db.businesses.find_one({"_id": o["business_id"]}) or {}
+    await _texts_after(o, biz, status != DECLINED_STATUS, tell_business=False)
+
+
+async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool, tell_business: bool = True) -> None:
     """The customer and the business each get one text. Never raises: the
     order has already moved."""
     try:
@@ -253,7 +283,7 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool) ->
                         else f"Sorry, {name} can't take your order {no} this time.")
             await send_sms(to=customer, body=body)
         await _email_customer(o, name, no, confirm)
-        if confirm:
+        if confirm and tell_business:
             # The phone that tapped is the business's: the alert went to it.
             number = await _business_text_number(o)
             if number:
@@ -299,3 +329,57 @@ async def owner_confirm(token: str, request: Request):
 @router.post("/orders/owner/{token}/decline")
 async def owner_decline(token: str, request: Request):
     return await _decide(token, request, False)
+
+
+async def _booking_by_owner_token(token: str) -> dict[str, Any]:
+    if not token or len(token) < 16:
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    b = await db.marketplace_bookings.find_one({"owner_token": token})
+    if not b:
+        raise HTTPException(status_code=404, detail="This link is not valid")
+    return b
+
+
+async def _booking_view(b: dict[str, Any]) -> dict[str, Any]:
+    gig = await db.marketplace_gigs.find_one({"_id": b.get("gig_id")}) or {}
+    biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
+    client = await db.users.find_one({"id": b.get("client_user_id")}, {"name": 1}) if b.get("client_user_id") else None
+    return {
+        "status": b.get("status"),
+        "business": {"name": biz.get("name") or "", "name_he": biz.get("name_he"), "logo_url": biz.get("logo_url")},
+        "customer_name": b.get("guest_name") or (client or {}).get("name"),
+        "customer_phone": b.get("contact_phone"), "customer_email": b.get("contact_email"),
+        "title": gig.get("title"), "tier_name": b.get("tier_name"),
+        "date": b.get("preferred_date"), "time": b.get("time_slot"), "message": b.get("message"),
+    }
+
+
+@router.get("/bookings/owner/{token}")
+async def owner_booking(token: str, request: Request):
+    check_rate(request, bucket="orders_owner", limit=300, window_seconds=600)
+    return await _booking_view(await _booking_by_owner_token(token))
+
+
+async def _decide_booking(token: str, request: Request, confirm: bool) -> dict[str, Any]:
+    """The owner token opens one booking and can only answer it while it is
+    waiting. update_booking does the rest, as if from the dashboard, and
+    that is what tells the customer."""
+    check_rate(request, bucket="orders_owner_move", limit=60, window_seconds=600)
+    b = await _booking_by_owner_token(token)
+    if b.get("status") != "pending":
+        return {**await _booking_view(b), "already": True}
+    from .gigs import update_booking
+    from .shared import BookingPatch
+    await update_booking(b["_id"], BookingPatch(status="accepted" if confirm else "declined"), user={"user_id": b["provider_user_id"]})
+    fresh = await db.marketplace_bookings.find_one({"_id": b["_id"]}) or b
+    return {**await _booking_view(fresh), "already": False}
+
+
+@router.post("/bookings/owner/{token}/confirm")
+async def owner_booking_confirm(token: str, request: Request):
+    return await _decide_booking(token, request, True)
+
+
+@router.post("/bookings/owner/{token}/decline")
+async def owner_booking_decline(token: str, request: Request):
+    return await _decide_booking(token, request, False)

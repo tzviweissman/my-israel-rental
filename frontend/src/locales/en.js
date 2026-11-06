@@ -7464,6 +7464,17 @@ const en = {
         numberLabel: "Number for texts",
         enterNumber: "Please enter a mobile number with the leading 0 or a country code",
       },
+      ownerBooking: {
+        title: "New booking request",
+        confirm: "Confirm booking",
+        declineAsk: "Decline this booking? The customer gets a text saying you can't take it.",
+        confirmed: "Confirmed. The customer has their tracking link.",
+        declined: "Declined. The customer was told.",
+        cancelled: "This booking was cancelled.",
+        completed: "This booking is complete.",
+        expired: "The time to answer this booking has passed.",
+        footer: "This booking is also in your dashboard.",
+      },
       ownerOrder: {
         title: "Order {{no}}",
         confirm: "Confirm order",

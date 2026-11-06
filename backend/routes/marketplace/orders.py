@@ -472,7 +472,10 @@ async def set_order_status(order_id: str, payload: StatusIn, user=Depends(verify
     not allow, with the current state in the message so the client can
     refresh rather than retry."""
     order = await _owned_order(order_id, user)
-    return await _transition(order, payload, by=user["user_id"])
+    out = await _transition(order, payload, by=user["user_id"])
+    from .order_texts import customer_told_of_decision
+    await customer_told_of_decision(order, payload.status)
+    return out
 
 
 async def _transition(order: dict[str, Any], payload: StatusIn, *, by: str, contact: bool = True) -> dict[str, Any]:
@@ -656,7 +659,10 @@ async def staff_set_status(token: str, order_id: str, payload: StatusIn, request
     order = await db.store_orders.find_one({"_id": order_id, "business_id": biz["_id"]})
     if not order:
         raise HTTPException(status_code=404, detail="Order not found")
-    return await _transition(order, payload, by="staff", contact=False)
+    out = await _transition(order, payload, by="staff", contact=False)
+    from .order_texts import customer_told_of_decision
+    await customer_told_of_decision(order, payload.status)
+    return out
 
 
 # ---------------------------------------------------------------------------
@@ -2616,7 +2622,8 @@ async def my_orders(user=Depends(verify_token)):
 
 
 async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optional[str], customer_name: str,
-                                     summary: str, path: str, kind: str, order_id: Optional[str] = None) -> None:
+                                     summary: str, path: str, kind: str, order_id: Optional[str] = None,
+                                     booking_token: Optional[str] = None) -> None:
     """A new order or booking, to the business's own WhatsApp (the number
     on the listing). Never raises: the order is already saved, and the
     email and the bell have already gone out."""
@@ -2638,8 +2645,8 @@ async def alert_business_on_whatsapp(gig: dict[str, Any], owner_user_id: Optiona
         if not sent and kind == "order" and order_id:
             from .order_texts import text_owner_new_order
             await text_owner_new_order(order_id)
-        elif not sent and kind == "booking":
+        elif not sent and kind == "booking" and booking_token:
             from .order_texts import text_owner_new_booking
-            await text_owner_new_booking(gig, customer_name, summary, path, owner_user_id)
+            await text_owner_new_booking(gig, customer_name, summary, booking_token, owner_user_id)
     except Exception as exc:  # noqa: BLE001
         logger.warning("WhatsApp new-%s alert failed: %s", kind, type(exc).__name__)

@@ -167,6 +167,7 @@ const OrdersPrintPage = lazy(() => import('./pages/OrdersPrintPage'));
 const OrderPage = lazy(() => import('./pages/OrderPage'));
 const OrderTrackPage = lazy(() => import('./pages/OrderTrackPage'));
 const OwnerOrderPage = lazy(() => import('./pages/OwnerOrderPage'));
+const OwnerBookingPage = lazy(() => import('./pages/OwnerBookingPage'));
 const BookingTrackPage = lazy(() => import('./pages/BookingTrackPage'));
 const QuoteTrackPage = lazy(() => import('./pages/QuoteTrackPage'));
 const ClaimBusinessPage = lazy(() => import('./pages/ClaimBusinessPage'));
@@ -574,6 +575,7 @@ function App() {
             <Route path="/order/:gigId" element={<OrderPage />} />
             <Route path="/orders/track/:token" element={<OrderTrackPage />} />
             <Route path="/orders/owner/:token" element={<OwnerOrderPage />} />
+            <Route path="/bookings/owner/:token" element={<OwnerBookingPage />} />
             <Route path="/bookings/track/:token" element={<BookingTrackPage />} />
             <Route path="/quotes/:token" element={<QuoteTrackPage />} />
             {/* Handing a built page to the business it was built for. Public
