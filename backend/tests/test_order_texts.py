@@ -344,3 +344,19 @@ def test_numbers_never_repeat_even_if_the_counter_was_reset(monkeypatch):
     assert other["order_no"] == 1001  # each store counts its own
     nums = [d["order_no"] for d in db.store_orders.docs if d["business_id"] == "b1"]
     assert len(nums) == len(set(nums))
+
+
+def test_price_request_texts_both_only_with_texts_on(world, monkeypatch):
+    _, sent = world
+    monkeypatch.setattr(ot, "_business_text_number", AsyncMock(return_value="+972501234567"))
+    gig = {"_id": "g1", "business_id": "b1", "provider_user_id": "u1"}
+    q = {"name": "Dani", "description": "Balloons for a party"}
+    run(ot.text_owner_new_quote(gig, q))
+    run(ot.text_customer_request(gig, "0521112222", "/quotes/abc", False))
+    assert sent.await_count == 0
+    ot.db.businesses = Coll([{"_id": "b1", "name": "Blazin Boards", "owner_user_id": "u1", "order_settings": {"text_on": True}}])
+    run(ot.text_owner_new_quote(gig, q))
+    run(ot.text_customer_request(gig, "0521112222", "/quotes/abc", False))
+    assert sent.await_count == 2
+    assert "Balloons for a party" in sent.await_args_list[0].kwargs["body"]
+    assert "/quotes/abc" in sent.await_args_list[1].kwargs["body"]

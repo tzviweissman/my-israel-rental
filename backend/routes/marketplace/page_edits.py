@@ -310,7 +310,10 @@ async def get_page_edits(slug_or_id: str):
     from .orders import pause_of
     paused = pause_of(biz)
     paused = paused if paused and paused["active"] else None
+    from .order_texts import texts_on
     return {
+        # Whether the designed page's order form skips WhatsApp (public/pages/mir-order.js).
+        "texts_on": texts_on(biz),
         "edits": doc.get("edits") or {"text": {}, "img": {}, "style": {}},
         "updated_at": doc.get("updated_at"),
         "prices": prices,

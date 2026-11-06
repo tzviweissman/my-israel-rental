@@ -1410,6 +1410,8 @@ async def book_gig(gig_id: str, payload: BookingIn, request: Request, user=Depen
         gig, gig.get("provider_user_id"), guest_name or (user or {}).get("name") or "",
         f"{gig.get('title') or ''} - {payload.tier_name or ''}" + (f" ({_when})" if _when else ""),
         "/dashboard?tab=appointments", "booking", booking_token=booking["owner_token"]))
+    from .order_texts import text_customer_request
+    spawn(text_customer_request(gig, payload.contact_phone, f"/bookings/track/{booking['track_token']}", payload.lang == "he"))
     logger.info("[marketplace] booking created: gig=%s client=%s tier=%s", gig_id, (user or {}).get("user_id") or "guest", payload.tier_name)
     return {"ok": True, "booking_id": booking["_id"], "track_path": f"/bookings/track/{booking['track_token']}"}
 

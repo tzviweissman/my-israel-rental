@@ -219,6 +219,38 @@ async def text_customer_received(o: dict[str, Any], biz: dict[str, Any]) -> None
         logger.warning("order received text failed: %s", type(exc).__name__)
 
 
+async def text_customer_request(gig: dict[str, Any], phone: Optional[str], path: str, he: bool) -> None:
+    """A booking or a price request arrived, when the business has texts on
+    (its customers then do not open WhatsApp). Never raises."""
+    try:
+        biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
+        if not phone or not texts_on(biz):
+            return
+        name = biz.get("name_he") if he and biz.get("name_he") else biz.get("name") or ""
+        link = f"{_frontend()}{path}"
+        await send_sms(to=phone, body=f"הבקשה שלך נשלחה ל{name}. נעדכן כשיענו. מעקב: {link}" if he
+                       else f"Your request went to {name}. We will let you know when they answer. Track it: {link}")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("request received text failed: %s", type(exc).__name__)
+
+
+async def text_owner_new_quote(gig: dict[str, Any], q: dict[str, Any]) -> None:
+    """A new price request, by text, when the business has texts on. Never raises."""
+    try:
+        biz = await db.businesses.find_one({"_id": gig.get("business_id")}) or {}
+        if not texts_on(biz):
+            return
+        number = await _business_text_number({"business_id": gig.get("business_id"), "gig_id": gig.get("_id")})
+        if not number:
+            return
+        link = f"{_frontend()}/dashboard?tab=appointments"
+        he = await _owner_he({"owner_user_id": gig.get("provider_user_id")})
+        await send_sms(to=number, body=f"בקשת מחיר חדשה מ{q['name']}: {q['description'][:120]}\nלתשובה: {link}" if he
+                       else f"New price request from {q['name']}: {q['description'][:120]}\nAnswer it: {link}")
+    except Exception as exc:  # noqa: BLE001
+        logger.warning("quote text failed: %s", type(exc).__name__)
+
+
 async def _order_by_owner_token(token: str) -> dict[str, Any]:
     if not token or len(token) < 16:
         raise HTTPException(status_code=404, detail="This link is not valid")

@@ -30,6 +30,8 @@ for (const file of htmlFiles(PAGES)) {
   const html = fs.readFileSync(file, 'utf8');
   // An order form of its own needs the code box (mir-code.js): American Crust turned on a code nobody could type (6 Nov 2026).
   if (html.includes('customer_phone') && !html.includes('discount_code')) { bad += 1; console.error(`NO CODE BOX ${path.relative(ROOT, file)}: add mir-code.js and send discount_code with the order`); }
+  // mir-order.js finds the customer's phone by this, to add the email and the line about texts (6 Nov 2026).
+  if (/type="tel"/.test(html) && !/autocomplete="tel"/.test(html)) { bad += 1; console.error(`NO CUSTOMER PHONE ${path.relative(ROOT, file)}: the customer's phone input needs autocomplete="tel"`); }
   const re = /<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/gi;
   let m;
   while ((m = re.exec(html))) {

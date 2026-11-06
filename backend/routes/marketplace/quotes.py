@@ -134,6 +134,11 @@ async def request_quote(gig_id: str, body: QuoteIn, request: Request, viewer=Dep
                  + (f"<p>{len(q['photos'])} photo(s) attached.</p>" if q["photos"] else ""),
                  tag="quote-request", button=("Answer with a price", "/dashboard?tab=appointments"))
     await _email_customer(q, gig, biz, "received")
+    # With texts on the customer is not sent to WhatsApp, so both sides hear by text.
+    from utils.bg_tasks import spawn
+    from .order_texts import text_customer_request, text_owner_new_quote
+    spawn(text_owner_new_quote(gig, q))
+    spawn(text_customer_request(gig, phone, f"/quotes/{q['track_token']}", q["lang"] == "he"))
     logger.info("[quotes] request gig=%s quote=%s", gig_id, q["_id"])
     return {"ok": True, "track_path": f"/quotes/{q['track_token']}"}
 
