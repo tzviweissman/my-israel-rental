@@ -78,7 +78,8 @@ async def send_sms(*, to: str, body: str) -> bool:
             # not approved, no balance) and holds no secret.
             log.warning("SMS send failed: %s %s", r.status_code, r.text[:300])
             return False
-        log.info("SMS sent to=%s***", digits[:6])
+        # Cellact's id is what its support needs to trace one text.
+        log.info("SMS sent to=%s*** id=%s", digits[:6], r.json().get("id") if "json" in req else "")
         return True
     except Exception as exc:  # noqa: BLE001
         log.warning("SMS send failed: %s", type(exc).__name__)

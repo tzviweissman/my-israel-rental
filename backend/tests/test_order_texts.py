@@ -105,6 +105,21 @@ def test_hebrew_order_gets_hebrew_text(world):
     assert "אושרה" in customer and "#1042" in customer
 
 
+def test_customer_is_emailed_the_decision(world, monkeypatch):
+    order, _ = world
+    order["customer_email"] = "dani@x.com"
+    mail = AsyncMock()
+    monkeypatch.setattr(orders, "_email", mail)
+    run(ot.owner_confirm(TOKEN, None))
+    assert mail.await_args.args[0] == "dani@x.com" and "#1042" in mail.await_args.args[1]
+    assert "/orders/track/" in mail.await_args.kwargs["button"][1]
+
+    order["status"] = "new"
+    mail.reset_mock()
+    run(ot.owner_decline(TOKEN, None))
+    assert "Sorry" in mail.await_args.args[2] and mail.await_args.kwargs["button"] is None
+
+
 def test_bad_or_unknown_token_is_404(world):
     for tok in ("short", "x" * 22):
         with pytest.raises(HTTPException) as e:
@@ -184,6 +199,12 @@ def test_chosen_text_number_beats_whatsapp(world):
     run(ot.owner_confirm(TOKEN, None))
     to = [c.kwargs["to"] for c in sent.await_args_list]
     assert "055-337-8799" in to and "+972501234567" not in to
+
+
+def test_app_link_opens_the_app():
+    from utils.whatsapp_link import build_whatsapp_app_link
+    assert build_whatsapp_app_link("052-111-2222", "a b") == "whatsapp://send?phone=972521112222&text=a%20b"
+    assert build_whatsapp_app_link("", "a") is None
 
 
 def test_search_finds_number_name_and_phone():

@@ -237,6 +237,7 @@ export default function OrderPage() {
   const canSubmit = !closedNow && !chosenFull && (lines.length > 0 || extra.trim())
     && (table || (date && !pastCutoff(date, data.settings.cutoffs) && (windowsForDay.length === 0 || windowKey) && name.trim() && phone.trim()))
     && !(phone.trim() && phoneErr)
+    && (table || /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email.trim()))
     && (data.custom_fields || []).every((f) => !f.required || (f.type === 'checkbox' ? answers[f.id] === true : String(answers[f.id] || '').trim()))
     && (table || fulfilment === 'pickup' || (address.trim() && (data.business.serves_nationwide || city) && !belowMin));
 
@@ -535,13 +536,14 @@ export default function OrderPage() {
             <label className={label} style={labelStyle} htmlFor="order-phone">{t('order.phone', 'Mobile')}</label>
             <input id="order-phone" type="tel" inputMode="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className={input} style={{ ...inputStyle, borderColor: phoneErr ? 'var(--ink)' : 'var(--brand-border)' }} placeholder="050-123-4567" required data-testid="order-phone" />
             {phoneErr && <p className="text-[11px] mt-1" style={{ color: 'var(--ink)' }}>{phoneErr}</p>}
+            <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }} data-testid="order-phone-why">{t('order.phoneWhy', 'Use a number that can get text messages, so you get updates about your order.')}</p>
             {fulfilment === 'delivery' && <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('orders.track.phoneNotice', 'The delivery person will see your number to reach you.')}</p>}
           </div>
           )}
           <div>
-            <label className={label} style={labelStyle} htmlFor="order-email">{t('order.email', 'Email')} · {t('orders.optional', 'optional')}</label>
-            <input id="order-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={input} style={inputStyle} placeholder="name@example.com" data-testid="order-email" />
-            <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('order.emailWhy', 'For the confirmation, and the delivery photo when it arrives.')} {t('order.emailBasket', 'If you leave without ordering, we send one reminder of what you chose.')}</p>
+            <label className={label} style={labelStyle} htmlFor="order-email">{t('order.email', 'Email')}{table ? ` · ${t('orders.optional', 'optional')}` : ''}</label>
+            <input id="order-email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={input} style={inputStyle} placeholder="name@example.com" required={!table} data-testid="order-email" />
+            <p className="text-[11px] mt-1" style={{ color: 'var(--brand-muted)' }}>{t('order.emailWhy', 'We email your order confirmation and updates here, and the delivery photo when it arrives.')} {t('order.emailBasket', 'If you leave without ordering, we send one reminder of what you chose.')}</p>
           </div>
           {data.business.birthday_on && (
             <BirthdayInput value={birthday} onChange={setBirthday} businessName={bizName} testid="order-birthday" />

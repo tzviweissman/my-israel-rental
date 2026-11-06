@@ -53,7 +53,7 @@ from .shared import (
     _validate_subcategory,
 )
 from utils.user_contact import user_whatsapp
-from utils.whatsapp_link import build_whatsapp_link
+from utils.whatsapp_link import build_whatsapp_app_link, build_whatsapp_link
 
 router = APIRouter(prefix="/marketplace", tags=["marketplace"])
 
@@ -2369,6 +2369,11 @@ async def contact_gig_on_whatsapp(
     number = await gig_whatsapp_number(gig)
 
     target = build_whatsapp_link(number, text)
+    # Right after an order or booking on a phone: the app itself, not its web
+    # page. Only then, because the site's other buttons are direct taps,
+    # which wa.me handles, and wa.me still works on a phone without the app.
+    if target and after and re.search(r"iPhone|iPod|Android", request.headers.get("user-agent") or ""):
+        target = build_whatsapp_app_link(number, text)
     if not target:
         # No dialable number. Send them back to the gig rather than showing a
         # raw API error — the in-platform inquiry flow is on that page.

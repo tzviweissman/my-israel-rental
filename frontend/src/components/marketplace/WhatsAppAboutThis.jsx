@@ -46,8 +46,15 @@ export const bookingMessage = (t, what, when, link) => t('afterOrder.bookingText
  * it was blocked anyway, `go` returns false and the confirmation page's
  * button is the way through. Call only when the business HAS WhatsApp, or
  * an empty tab flashes open and shut.
+ *
+ * On a phone there is no tab: the confirmation page stays where it is and
+ * the app opens over it (/contact answers a phone with the app's address),
+ * so nobody lands on WhatsApp's web page or comes back to an empty tab.
  */
 export function reserveWhatsAppTab() {
+  if (/iPhone|iPod|Android/.test(navigator.userAgent)) {
+    return { go(url) { window.location.href = url; return true; }, close() {} };
+  }
   let w = null;
   try { w = window.open('', '_blank'); } catch { w = null; }
   if (w) { try { w.opener = null; } catch { /* cross-origin later; fine */ } }

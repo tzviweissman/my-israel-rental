@@ -225,6 +225,7 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool) ->
                 body = (f"Your order {no} from {name} is confirmed. Track it and see the details: {track_link(o)}" if confirm
                         else f"Sorry, {name} can't take your order {no} this time.")
             await send_sms(to=customer, body=body)
+        await _email_customer(o, name, no, confirm)
         if confirm:
             # The phone that tapped is the business's: the alert went to it.
             number = await _business_text_number(o)
@@ -235,6 +236,21 @@ async def _texts_after(o: dict[str, Any], biz: dict[str, Any], confirm: bool) ->
                 await send_sms(to=number, body=body)
     except Exception as exc:  # noqa: BLE001
         logger.warning("order texts after %s failed: %s", "confirm" if confirm else "decline", type(exc).__name__)
+
+
+async def _email_customer(o: dict[str, Any], name: str, no: str, confirm: bool) -> None:
+    """The same news by email (Tzvi, 6 Nov 2026), with the tracking link."""
+    from .orders import _email, _esc, _esc_ml
+    he = o.get("lang") == "he"
+    if confirm:
+        subject = f"ההזמנה שלך {no} מ{name} אושרה" if he else f"Your order {no} from {name} is confirmed"
+        html = f"<p>{_esc(subject)}.</p><p>{_esc_ml(o.get('items') or '')}</p>"
+        button = ("מעקב אחר ההזמנה" if he else "Follow your order", track_link(o))
+    else:
+        subject = f"ההזמנה שלך {no} מ{name}" if he else f"Your order {no} from {name}"
+        sorry = f"מצטערים, {name} לא יכולים לקבל את ההזמנה שלך {no} הפעם." if he else f"Sorry, {name} can't take your order {no} this time."
+        html, button = f"<p>{_esc(sorry)}</p>", None
+    await _email(o.get("customer_email"), subject, html, tag="order-confirmed" if confirm else "order-declined", button=button)
 
 
 async def _business_text_number(o: dict[str, Any]) -> Optional[str]:

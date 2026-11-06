@@ -91,3 +91,13 @@ def build_whatsapp_link(raw: object, message: str = "") -> Optional[str]:
     if not text:
         return base
     return f"{base}?text={quote(text)}"
+
+
+def build_whatsapp_app_link(raw: object, message: str = "") -> Optional[str]:
+    """The same, as the app's own address. A phone that follows wa.me from a
+    page that was not a direct tap stops on WhatsApp's web page instead of
+    opening the app (Tzvi, 6 Nov 2026), and this one goes straight to it."""
+    digits = normalize_whatsapp_number(raw)
+    if not digits:
+        return None
+    return f"whatsapp://send?phone={digits}&text={quote((message or '').strip())}"
