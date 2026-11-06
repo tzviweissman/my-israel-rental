@@ -46,6 +46,7 @@ worst of all.
 from __future__ import annotations
 
 import asyncio
+import re
 from datetime import UTC, datetime, timedelta
 from typing import Any, Coroutine, Optional
 from zoneinfo import ZoneInfo
@@ -105,6 +106,41 @@ def is_bot(user_agent: Optional[str]) -> bool:
 _MAX_VISITOR_LEN = 64
 
 
+_SOURCES = (("google", "google"), ("instagram", "instagram"), ("facebook", "facebook"), ("fb.", "facebook"), ("wa.me", "whatsapp"),
+            ("whatsapp", "whatsapp"), ("tiktok", "tiktok"), ("bing", "bing"), ("yahoo", "yahoo"), ("myisraelrental", "site"))
+
+
+def source_of(raw: Optional[str]) -> str:
+    """Where a visit came from, as one word: the browser sends the other site's
+    host or ?src=, and only the word is kept (the same rule as lead_events)."""
+    v = (raw or "").strip().lower()[:100]
+    if v in ("", "direct"):
+        return "direct"
+    if v in ("qr", "ad"):
+        return v
+    for mark, word in _SOURCES:
+        if mark in v:
+            return word
+    return "other"
+
+
+def visit_facts(request: Any) -> dict[str, str]:
+    """The coarse facts of one visit. Device is one word: the user-agent itself is not stored."""
+    h = request.headers
+    lang = (h.get("X-Visit-Lang") or "").lower()[:2]
+    return {
+        "source": source_of(h.get("X-Visit-Source")),
+        "device": "phone" if re.search(r"mobile|android|iphone|ipad", h.get("user-agent") or "", re.I) else "laptop",
+        **({"lang": lang} if lang in ("he", "en") else {}),
+    }
+
+
+def page_name(raw: Optional[str]) -> Optional[str]:
+    """A designed site's own page name (shop, order); never a path, some of which hold a key."""
+    v = (raw or "").strip().lower()
+    return v if re.fullmatch(r"[a-z0-9-]{1,40}", v) else None
+
+
 async def record_view(
     entity_type: str,
     entity_id: str,
@@ -112,6 +148,7 @@ async def record_view(
     viewer_id: Optional[str] = None,
     visitor: Optional[str] = None,
     user_agent: Optional[str] = None,
+    facts: Optional[dict[str, str]] = None,
 ) -> None:
     """Record one visit. Never raises — a lost metric beats a failed page.
 
@@ -137,11 +174,14 @@ async def record_view(
         "owner_id": owner_id,
         "at": now,
         "day": il_day_of(now),
+        **(facts or {}),
     }
 
     visitor = (visitor or "").strip()[:_MAX_VISITOR_LEN] or None
     try:
         if visitor:
+            doc["returning"] = bool(await db[COLLECTION].find_one(
+                {"entity_id": entity_id, "visitor": visitor, "day": {"$ne": doc["day"]}}, {"_id": 1}))
             # Upsert, not check-then-insert: two requests a millisecond
             # apart would both read "absent" and both write. The unique
             # index below is what actually makes this exclusive; the upsert
@@ -286,6 +326,9 @@ def with_week(fn):
 
 async def ensure_view_indexes() -> None:
     """Indexes matching how this collection is actually queried."""
+    await db.site_taps.create_index([("owner_id", 1), ("day", -1)], background=True)
+    await db.page_view_counts.create_index([("entity_id", 1), ("day", 1), ("page", 1)], unique=True, background=True)
+    await db.page_view_counts.create_index([("owner_id", 1), ("day", -1)], background=True)
     await db[COLLECTION].create_index([("owner_id", 1), ("at", -1)], background=True)
     await db[COLLECTION].create_index(
         [("entity_type", 1), ("entity_id", 1), ("at", -1)], background=True,

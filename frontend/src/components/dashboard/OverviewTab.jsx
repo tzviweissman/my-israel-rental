@@ -29,6 +29,7 @@
  * is shown instead, because a small number on a young counter is not a
  * verdict.
  */
+import VisitBreakdown from './VisitBreakdown';
 import React, { useEffect, useMemo, useState } from 'react';
 import axios from 'axios';
 import { useTranslation } from 'react-i18next';
@@ -241,7 +242,7 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
           }
           chart={scans && scans.total_scans > 0 ? <div className="max-w-xs"><ScanChart daily={scans.daily} testidPrefix="overview-scans" /></div> : null}
           testid="scans"
-          onClick={isPropertyLister ? () => onGoToTab('properties') : showGigTabs ? () => onGoToTab('my-businesses') : undefined}
+          onClick={isPropertyLister || showGigTabs ? () => onGoToTab('advertising') : undefined}
           cta={t('overview.share', 'Share')}
         />
       </div>
@@ -254,6 +255,8 @@ export default function OverviewTab({ setup = null, API, token, user, summary = 
           <SummaryTab API={API} token={token} embedded />
         </div>
       )}
+
+      <VisitBreakdown API={API} token={token} />
 
       {/* The same for rentals: bookings, nights, how full, visitors (RentalSummary). */}
       {isPropertyLister && <RentalSummary API={API} token={token} />}

@@ -23,7 +23,7 @@ from __future__ import annotations
 import asyncio
 import os
 import re
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from zoneinfo import ZoneInfo
 from html import escape
 from html.parser import HTMLParser
@@ -207,6 +207,18 @@ def live_notice(n: Any) -> dict[str, Any] | None:
     return {"text": n["text"]}
 
 
+def paused_notice(paused: dict[str, Any] | None) -> dict[str, Any] | None:
+    """With orders paused and no notice of their own, every page of a designed site says so."""
+    if not paused:
+        return None
+    if paused.get("note"):
+        return {"text": paused["note"]}
+    if paused.get("back_on"):
+        back = date.fromisoformat(paused["back_on"])
+        return {"text": f"We are not taking orders until {back.day} {back.strftime('%B')}"}
+    return {"text": "We are not taking orders right now"}
+
+
 def what_changed(before: dict[str, Any], after: dict[str, Any]) -> list[str]:
     """Plain lines for the email to us when an owner saves (Tzvi, 28 Oct 2026)."""
     lines: list[str] = []
@@ -295,6 +307,9 @@ async def get_page_edits(slug_or_id: str):
                 continue
             if name and price >= 0 and name not in prices:
                 prices[name] = price
+    from .orders import pause_of
+    paused = pause_of(biz)
+    paused = paused if paused and paused["active"] else None
     return {
         "edits": doc.get("edits") or {"text": {}, "img": {}, "style": {}},
         "updated_at": doc.get("updated_at"),
@@ -305,7 +320,9 @@ async def get_page_edits(slug_or_id: str):
         "faq": doc.get("faq") or [],
         # set once in the dashboard, shown on the designed page (frontend/server.js)
         "hours": "By appointment only" if biz.get("by_appointment") and not biz.get("hours") else biz.get("hours"),
-        "notice": live_notice(biz.get("notice")),
+        "notice": live_notice(biz.get("notice")) or paused_notice(paused),
+        # A designed site's order form stops taking orders (public/pages/mir-code.js).
+        "paused": paused,
     }
 
 
@@ -389,7 +406,14 @@ async def designed_site_visit(slug_or_id: str, request: Request):
     biz = await _resolve(slug_or_id)
     if biz:
         await view_tracking.record_view(view_tracking.ENTITY_BUSINESS, biz["_id"], owner_id=biz.get("owner_user_id"),
-                                        visitor=visitor, user_agent=request.headers.get("user-agent") or "")
+                                        visitor=visitor, user_agent=request.headers.get("user-agent") or "",
+                                        facts=view_tracking.visit_facts(request))
+        # A site has several pages and a visit counts once a day, so each page keeps a plain count of its own.
+        page = view_tracking.page_name(request.headers.get("X-Visit-Page"))
+        if page and not view_tracking.is_bot(request.headers.get("user-agent") or ""):
+            await db.page_view_counts.update_one(
+                {"entity_id": biz["_id"], "day": view_tracking.il_day_of(datetime.now(UTC)), "page": page},
+                {"$inc": {"n": 1}, "$setOnInsert": {"owner_id": biz.get("owner_user_id")}}, upsert=True)
     return Response(status_code=204)
 
 

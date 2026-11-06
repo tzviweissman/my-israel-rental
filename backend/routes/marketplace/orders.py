@@ -46,7 +46,7 @@ import os
 import re
 import secrets
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Optional
 from zoneinfo import ZoneInfo
 
@@ -1847,6 +1847,25 @@ def delivery_fee_for(st: dict[str, Any], city: Optional[str], goods: float) -> f
     return float(area if area is not None else (st.get("delivery_fee") or 0))
 
 
+def pause_of(biz: dict[str, Any]) -> Optional[dict[str, Any]]:
+    """Orders paused for a holiday (Tzvi, 6 Nov 2026; PauseOrders.jsx), in force or
+    still to come. None once its last day has passed: orders come back by themselves."""
+    p = (biz.get("order_settings") or {}).get("pause") or {}
+    if not p.get("on"):
+        return None
+    today = datetime.now(_IL_TZ).date().isoformat()
+    until = p.get("until")
+    if until and until < today:
+        return None
+    back_on = (datetime.strptime(until, "%Y-%m-%d").date() + timedelta(days=1)).isoformat() if until else None
+    return {"active": not p.get("from") or p["from"] <= today, "from": p.get("from"), "until": until,
+            "back_on": back_on, "note": p.get("note")}
+
+
+def _paused_on(pause: Optional[dict[str, Any]], day: str) -> bool:
+    return bool(pause) and (not pause["from"] or pause["from"] <= day[:10]) and (not pause["until"] or day[:10] <= pause["until"])
+
+
 def _settings_out(biz: dict[str, Any], store: Optional[dict[str, Any]] = None) -> dict[str, Any]:
     st = biz.get("order_settings") or {}
     return {
@@ -1877,7 +1896,7 @@ async def _owner_settings_out(biz: dict[str, Any]) -> dict[str, Any]:
         {"whatsapp": 1, "provider_user_id": 1},
     )
     from .order_texts import texts_on
-    return {**_settings_out(biz, await _store_of(biz["_id"])), "text_on": texts_on(biz),
+    return {**_settings_out(biz, await _store_of(biz["_id"])), "pause": pause_of(biz), "text_on": texts_on(biz),
             "text_number": (biz.get("order_settings") or {}).get("text_number"),
             "whatsapp_number": (await gig_whatsapp_number(selling)) if selling else ""}
 
@@ -1911,6 +1930,7 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         # Saved by their own section, put_order_texts.
         "text_number": old.get("text_number"),
         "text_on": old.get("text_on"),
+        "pause": old.get("pause"),
         # An older client that does not send the switch keeps the old
         # meaning: delivery times set means delivery offered.
         "delivery_on": payload.delivery_on if payload.delivery_on is not None else bool(payload.delivery_windows),
@@ -1920,6 +1940,35 @@ async def put_order_settings(business_id: str, payload: OrderSettingsIn, user=De
         await _assign_unassigned(business_id)
     fresh = await db.businesses.find_one({"_id": business_id})
     return await _owner_settings_out(fresh)
+
+
+class PauseIn(BaseModel):
+    on: bool
+    # "from" is a keyword, so the field has another name in Python.
+    starts: Optional[date] = Field(None, alias="from")
+    until: Optional[date] = None
+    note: Optional[str] = Field(None, max_length=140)
+
+
+def _pause_out(biz: dict[str, Any]) -> dict[str, Any]:
+    p = (biz.get("order_settings") or {}).get("pause") or {}
+    return {"on": bool(p.get("on")), "from": p.get("from"), "until": p.get("until"), "note": p.get("note"), "state": pause_of(biz)}
+
+
+@router.get("/businesses/{business_id}/orders/pause")
+async def get_order_pause(business_id: str, user=Depends(verify_token)):
+    return _pause_out(await _owned_business(business_id, user))
+
+
+@router.put("/businesses/{business_id}/orders/pause")
+async def put_order_pause(business_id: str, payload: PauseIn, user=Depends(verify_token)):
+    biz = await _owned_business(business_id, user, None)
+    if payload.starts and payload.until and payload.until < payload.starts:
+        raise HTTPException(status_code=422, detail="The last day is before the first day")
+    pause = {"on": payload.on, "from": payload.starts.isoformat() if payload.starts else None,
+             "until": payload.until.isoformat() if payload.until else None, "note": (payload.note or "").strip() or None}
+    await db.businesses.update_one({"_id": business_id}, {"$set": {"order_settings.pause": pause}})
+    return _pause_out(await db.businesses.find_one({"_id": business_id}))
 
 
 class OrderTextsIn(BaseModel):
@@ -2069,6 +2118,7 @@ async def generate_standing_orders(business_id: str, *, horizon_days: int = 7) -
     and the query is indexed. Returns how many were created."""
     today = datetime.now(_IL_TZ).date()
     created = 0
+    pause = pause_of(await db.businesses.find_one({"_id": business_id}, {"order_settings.pause": 1}) or {})
     async for sd in db.store_standing_orders.find({"business_id": business_id, "active": True}):
         wd = int(sd.get("weekday", 0))
         ahead = (wd - _js_weekday(today)) % 7
@@ -2081,6 +2131,8 @@ async def generate_standing_orders(business_id: str, *, horizon_days: int = 7) -
             ahead += 7
         if ahead > horizon_days:
             continue
+        if _paused_on(pause, occurrence.isoformat()):
+            continue  # Closed that day; next week's comes as usual.
         needed_by = occurrence.isoformat() + (f"T{sd['time']}" if sd.get("time") else "")
         now = _now_iso()
         doc = {
@@ -2308,6 +2360,7 @@ async def order_form(gig_id: str):
             "shabbat_closing": shabbat_public_view(biz),
         },
         "has_codes": await has_codes(biz),
+        "paused": pause_of(biz),
         "custom_fields": public_fields(biz, "order"),
         "products": _products_for_order(gig),
         "settings": {
@@ -2384,6 +2437,9 @@ async def place_website_order(gig_id: str, payload: WebsiteOrderIn, request: Req
         raise HTTPException(status_code=400, detail="That day has passed")
     if payload.table is None and past_cutoff(payload.date, biz.get("order_cutoffs") or [], now):
         raise HTTPException(status_code=400, detail="Orders for that day have closed")
+    pause = pause_of(biz)
+    if pause and (pause["active"] or _paused_on(pause, payload.date)):
+        raise HTTPException(status_code=409, detail="Orders are paused for that day")
 
     if payload.fulfilment == "delivery" and not offers_delivery(st, biz, gig):
         raise HTTPException(status_code=400, detail="This store does pickup only")

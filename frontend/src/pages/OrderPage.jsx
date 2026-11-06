@@ -348,6 +348,20 @@ export default function OrderPage() {
     );
   }
 
+  if (data.paused?.active) {
+    const back = data.paused.back_on && new Date(`${data.paused.back_on}T12:00:00`).toLocaleDateString(lang === 'he' ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'long' });
+    return (
+      <div className="max-w-md mx-auto px-4 py-24 text-center" data-testid="order-paused">
+        <PageMeta title={t('order.title', 'Order from {{name}}', { name: bizName })} />
+        <StoreIcon size={26} className="inline mb-3" style={{ color: 'var(--brand-muted)' }} />
+        <h1 className="text-lg font-bold" style={{ color: 'var(--ink)', fontFamily: 'var(--font-head)' }}>{bizName}</h1>
+        <p className="text-sm mt-2" dir="auto" style={{ color: 'var(--ink)' }}>
+          {data.paused.note || (back ? t('pauseOrders.closedUntil', 'We are not taking orders until {{date}}.', { date: back }) : t('pauseOrders.closed', 'We are not taking orders right now.'))}
+        </p>
+        <Link to={`/businesses/${gigId}`} className="inline-block text-sm underline mt-4" style={{ color: 'var(--brand-muted)' }}>{t('pauseOrders.seePage', 'See our page')}</Link>
+      </div>
+    );
+  }
   return (
     <div className="max-w-md mx-auto px-4 py-6" data-testid="order-page">
       <PageMeta title={t('order.title', 'Order from {{name}}', { name: bizName })} />

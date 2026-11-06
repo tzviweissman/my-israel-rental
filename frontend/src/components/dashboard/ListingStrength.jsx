@@ -14,7 +14,7 @@ import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Circle, Megaphone, Share2 } from 'lucide-react';
 import ShareLinkButtons from '../common/ShareLinkButtons';
-import AdMaker from './AdMaker';
+import { useNavigate } from 'react-router-dom';
 import { regularShown, holidayShown } from '../../utils/listingPrice';
 
 const MIN_PHOTOS = 5;
@@ -23,7 +23,7 @@ const isPhoto = (u) => typeof u === 'string' && /^https?:/.test(u) && !/\.(mp4|m
 export default function ListingStrength({ property, onEdit, API, token }) {
   const { t } = useTranslation();
   const [open, setOpen] = useState(false);
-  const [adOpen, setAdOpen] = useState(false);
+  const navigate = useNavigate();
   const p = property;
 
   // The dashboard list carries only the cover; image_count is the full number.
@@ -66,7 +66,7 @@ export default function ListingStrength({ property, onEdit, API, token }) {
       {open && (
         <div className="rounded-lg bg-[#F9FAFB] p-3 space-y-2" data-testid={`share-kit-${p.id}`}>
           <ShareLinkButtons url={url} testidPrefix={`listing-${p.id}`} />
-          <button type="button" onClick={() => setAdOpen(true)}
+          <button type="button" onClick={() => navigate(`/dashboard?tab=advertising&target=${p.id}`)}
             className="w-full inline-flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-semibold text-white"
             style={{ background: 'var(--action, #000)' }} data-testid={`make-ad-${p.id}`}>
             <Megaphone size={13} aria-hidden="true" />
@@ -77,7 +77,6 @@ export default function ListingStrength({ property, onEdit, API, token }) {
           </p>
         </div>
       )}
-      {adOpen && <AdMaker API={API} token={token} targetType="property" target={p} onClose={() => setAdOpen(false)} />}
     </div>
   );
 }

@@ -22,9 +22,9 @@
   'use strict';
   var he = document.documentElement.lang === 'he';
   var T = he
-    ? { open: 'יש לך קוד הנחה?', ph: 'קוד', apply: 'הפעלה', code: 'קוד הנחה', remove: 'הסרה', on: 'הקוד הופעל', off: 'הנחה', fail: 'לא הצלחנו לבדוק את הקוד. נסו שוב.' }
-    : { open: 'Have a discount code?', ph: 'Code', apply: 'Apply', code: 'Discount code', remove: 'Remove', on: 'applied', off: 'Discount', fail: 'Could not check the code. Try again.' };
-  var o = null, box = null, business = null, askedGig = '', applied = null, opened = false, error = '', busy = false, lastKey = '', timer = 0;
+    ? { open: 'יש לך קוד הנחה?', ph: 'קוד', apply: 'הפעלה', code: 'קוד הנחה', remove: 'הסרה', on: 'הקוד הופעל', off: 'הנחה', fail: 'לא הצלחנו לבדוק את הקוד. נסו שוב.', paused: 'איננו מקבלים הזמנות כרגע.', back: 'איננו מקבלים הזמנות עד ' }
+    : { open: 'Have a discount code?', ph: 'Code', apply: 'Apply', code: 'Discount code', remove: 'Remove', on: 'applied', off: 'Discount', fail: 'Could not check the code. Try again.', paused: 'We are not taking orders right now.', back: 'We are not taking orders until ' };
+  var o = null, box = null, business = null, askedGig = '', applied = null, opened = false, error = '', busy = false, lastKey = '', timer = 0, pausedNow = null;
 
   var esc = function (s) { var d = document.createElement('div'); d.textContent = s; return d.innerHTML; };
   var phone = function () { var p = o.phone && document.getElementById(o.phone); return p ? p.value.trim() : ''; };
@@ -39,8 +39,33 @@
     return round(Math.max(0, Math.min(applied.kind === 'percent' ? amount * applied.value / 100 : applied.value, amount)));
   }
 
+  // Orders paused for a holiday (dashboard, PauseOrders.jsx): the form says so and its send button stops, WhatsApp
+  // included, since the server refuses the order and the page would otherwise open WhatsApp anyway.
+  // ponytail: only while the pause is in force. Before it, a day inside it is refused by the server and the page's
+  // own rule applies (WhatsApp opens); greying those days needs each site's date picker.
+  var SEND = '#send,#place,#placeBar,#order-send,.send';
+  function pauseForm(p) {
+    if (pausedNow) return;
+    pausedNow = p;
+    var back = p.back_on && new Date(p.back_on + 'T12:00:00').toLocaleDateString(he ? 'he-IL' : 'en-GB', { day: 'numeric', month: 'long' });
+    var text = p.note || (back ? T.back + back : T.paused);
+    var stop = function (e) {
+      var form = box.closest('form');
+      if ((e.type === 'submit' && form && e.target === form) || (e.target.closest && e.target.closest(SEND))) {
+        e.preventDefault(); e.stopImmediatePropagation();
+        box.scrollIntoView({ block: 'center' });
+      }
+    };
+    document.addEventListener('click', stop, true);
+    document.addEventListener('submit', stop, true);
+    var css = document.createElement('style');
+    css.textContent = SEND.split(',').map(function (x) { return x + '{opacity:.45}'; }).join('');
+    document.head.appendChild(css);
+    box.innerHTML = '<p class="mirc-err" role="status" data-testid="mir-paused">' + esc(text) + '</p>';
+  }
+
   function draw() {
-    if (!box) return;
+    if (!box || pausedNow) return;
     if (!business) { box.innerHTML = ''; return; }
     if (applied) {
       var m = moneyOf(off(o.goods()));
@@ -81,6 +106,7 @@
     askedGig = gig;
     fetch(o.api + '/marketplace/order-form/' + gig).then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
       if (!d) return;
+      if (d.paused && d.paused.active) { pauseForm(d.paused); return; }
       if (d.has_codes || o.first) business = d.business.id;
       if (business && o.first) { opened = true; check(o.first); } else draw();
     }).catch(function () { /* no box; the order form works without it */ });
@@ -115,6 +141,7 @@
       box.addEventListener('keydown', function (e) { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); var b = box.querySelector('[data-a=apply]'); if (b) b.click(); } });
       var p = o.phone && document.getElementById(o.phone);
       if (p) p.addEventListener('input', refresh);
+      if (window.MIR_PAUSED) pauseForm(window.MIR_PAUSED);
       refresh();
     },
     refresh: refresh,

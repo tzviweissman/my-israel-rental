@@ -43,6 +43,7 @@ import CounterSale from './CounterSale';
 // The kitchen's prep list and the delivery route (backend prep_route.py).
 import { DeliveryRoute, PrepList } from './PrepAndRoute';
 import BasketReminderSwitch from './BasketReminderSwitch';
+import PauseOrders from './PauseOrders';
 import RestockWaiting from './RestockWaiting';
 import TableOrdering from './TableOrdering';
 
@@ -509,15 +510,21 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
             ['prep', ClipboardList, t('prep.title', 'Prep list'), () => setPanel('prep')],
             ['route', Bike, t('route.title', 'Delivery route'), () => setPanel('route')],
             ['standing', Repeat, t('orders.standingMenu', 'Weekly orders'), () => setPanel('standing')],
+            ['pause', Pause, t('pauseOrders.title', 'Pause orders'), () => setPanel(panel === 'pause' ? null : 'pause')],
             ['couriers', Bike, t('orders.couriers', 'Couriers'), () => setPanel('couriers')],
             ['staff', Link2, t('orders.staffLink', 'Staff link'), () => setPanel('staff')],
             ['questions', ListPlus, t('fields.ordersMenu', 'Questions on the order form'), () => setPanel('questions')],
             ['export', Download, t('orders.export', 'Export CSV'), exportCsv],
-          ].filter(([key]) => biz.role !== 'staff' || !['staff', 'couriers'].includes(key))
+          ].filter(([key]) => biz.role !== 'staff' || !['staff', 'couriers', 'pause'].includes(key))
             .map(([key, Icon, label, onClick]) => ({ key, Icon, label, onClick, active: panel === key }))}
         />
       </div>
 
+      {settings.pause?.active && panel !== 'pause' && (
+        <button type="button" onClick={() => setPanel('pause')} className="w-full text-start rounded-xl px-4 py-3 mb-3 text-sm font-semibold" style={{ background: 'var(--ink)', color: 'var(--action-ink)' }} data-testid="orders-paused-strip">
+          {t('pauseOrders.strip', 'Orders are paused: customers cannot order. Tap to change.')}
+        </button>
+      )}
       <RestockWaiting API={API} auth={auth} businessId={biz.id} />
 
       {panel === 'questions' && (
@@ -531,6 +538,7 @@ export default function OrdersTab({ API, token, newOrders = 0, newByBusiness = n
       {panel === 'prep' && <PrepList API={API} auth={auth} businessId={biz.id} businessName={biz.name} onClose={() => setPanel(null)} />}
       {panel === 'route' && <DeliveryRoute API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
       {panel === 'staff' && <StaffLinkPanel API={API} auth={auth} businessId={biz.id} onClose={() => setPanel(null)} />}
+      {panel === 'pause' && <PauseOrders API={API} auth={auth} businessId={biz.id} onChanged={loadSettings} />}
       {panel === 'couriers' && <CouriersPanel API={API} auth={auth} businessId={biz.id} couriers={couriers} settings={settings} onChanged={() => Promise.all([loadCouriers(), loadSettings(), load()])} onClose={() => setPanel(null)} />}
       {panel === 'standing' && <StandingPanel API={API} auth={auth} standing={standing} onChanged={() => Promise.all([loadSettings(), load()])} onClose={() => setPanel(null)} />}
 
@@ -1516,6 +1524,8 @@ function SettingsPanel({ API, auth, businessId, settings, couriers, onSaved, onC
         <button type="button" onClick={onClose} className="inline-flex items-center justify-center min-h-[44px] min-w-[44px] rounded-full shrink-0" style={{ color: 'var(--brand-muted)' }} aria-label={t('orders.close', 'Close')}><X size={18} /></button>
       </div>
 
+
+      <PauseOrders API={API} auth={auth} businessId={businessId} />
 
       {h(t('orders.defaultCourier', 'Default courier'))}
       <select value={courier} onChange={(e) => setCourier(e.target.value)} className={sel} style={selStyle} data-testid="settings-courier">

@@ -158,43 +158,8 @@ for (const lng of ['en', 'he']) {
   if (biz?.id) {
     await page.click('[data-testid="sidebar-item-my-businesses"]');
     await page.waitForSelector(`[data-testid="business-card-${biz.id}"]`, { timeout: 15000 }).catch(() => {});
-    const toggle = page.locator(`[data-testid="business-share-${biz.id}-toggle"]`);
-    ok(`${lng}: the business card has a Share & QR button`, await toggle.count() === 1);
-    if (await toggle.count()) {
-      await toggle.click();
-      await page.waitForSelector(`[data-testid="business-share-${biz.id}-qr-svg"], [data-testid="business-share-${biz.id}-qr"] svg`, { timeout: 15000 }).catch(() => {});
-      const link = await page.locator(`[data-testid="business-share-${biz.id}-link"] input`).inputValue().catch(() => '');
-      ok(`${lng}: it shows a short link`, /\/p\/[A-Za-z0-9_-]+$/.test(link), link);
-      ok(`${lng}: and a QR code`, await page.locator(`[data-testid="business-share-${biz.id}-panel"] svg`).count() >= 1);
-      // ...that is actually visible: the card used to clip the popover at
-      // its own edge, and a QR that is in the DOM but cut off scans nothing.
-      const seen = await page.evaluate((id) => {
-        const panel = document.querySelector(`[data-testid="business-share-${id}-panel"]`);
-        const svg = panel?.querySelector('svg');
-        if (!svg) return { ok: false };
-        const r = svg.getBoundingClientRect();
-        const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
-        return { ok: !!hit && panel.contains(hit) && r.top >= 0 && r.bottom <= window.innerHeight && r.left >= 0 && r.right <= window.innerWidth, r: [Math.round(r.left), Math.round(r.top), Math.round(r.right), Math.round(r.bottom)] };
-      }, biz.id);
-      ok(`${lng}: the QR is on screen and not clipped`, seen.ok, JSON.stringify(seen));
-      // The Copy button had a label the same blue as its fill - a blank
-      // block - after the theme put the accent blue into the `--gold` names.
-      const copyBtn = await page.evaluate((id) => {
-        const el = document.querySelector(`[data-testid="business-share-${id}-link-copy-button"]`);
-        if (!el) return null;
-        const cs = getComputedStyle(el);
-        const lum = (c) => { const m = c.match(/\d+(\.\d+)?/g).slice(0, 3).map(Number).map((v) => { v /= 255; return v <= 0.03928 ? v / 12.92 : ((v + 0.055) / 1.055) ** 2.4; }); return 0.2126 * m[0] + 0.7152 * m[1] + 0.0722 * m[2]; };
-        const a = lum(cs.color), b = lum(cs.backgroundColor);
-        return { color: cs.color, bg: cs.backgroundColor, contrast: Math.round(((Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)) * 100) / 100 };
-      }, biz.id);
-      ok(`${lng}: the Copy button's label is readable on its fill`, copyBtn && copyBtn.contrast >= 4.5, JSON.stringify(copyBtn));
-      // the code has to open THIS business's page
-      const slug = link.split('/p/')[1];
-      const target = slug ? await json(await fetch(`${API}/short-links/${slug}/resolve`)) : null;
-      ok(`${lng}: the link opens the business page`, target?.target?.startsWith(`/business/${biz.id}`), JSON.stringify(target));
-      if (process.env.SHOT_DIR) await page.screenshot({ path: `${process.env.SHOT_DIR}/business-share-${lng}.png`, clip: { x: 0, y: 0, width: 1280, height: 900 } });
-      await page.keyboard.press('Escape');
-    }
+    // Since 6 Nov 2026 the link and QR code live under Advertising; the card goes there.
+    ok(`${lng}: the business card has an Advertising button`, await page.locator(`[data-testid="business-advertising-${biz.id}"]`).count() === 1);
   }
 
   // ── pausing a listing, from the card that owns it ───────────────────

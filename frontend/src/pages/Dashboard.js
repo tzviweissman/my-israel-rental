@@ -584,7 +584,7 @@ const Dashboard = () => {
             check, which is exactly the drift providerTrial.js warns
             about: fixing only the tab would have shown a My Gigs button
             that rendered an empty panel. */}
-        {activeTab === 'advertising' && <AdvertisingSection API={API} token={token} properties={properties} />}
+        {activeTab === 'advertising' && <AdvertisingSection API={API} token={token} properties={properties} ownerId={user?.id} />}
         {activeTab === 'page-design' && <BusinessSettingsPane API={API} token={token} setting="design" />}
         {activeTab === 'text-notifications' && <BusinessSettingsPane API={API} token={token} setting="texts" />}
         {activeTab === 'my-businesses' && showGigTabs && (

@@ -15,7 +15,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
-import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer, Megaphone, MessageSquare, Info, BellRing } from 'lucide-react';
+import { Briefcase, Plus, Loader2, Eye, EyeOff, Check, X, Pencil, Palette, LayoutList, Timer, Megaphone, MessageSquare, Info, BellRing, PauseCircle } from 'lucide-react';
 import TextNotificationsPanel from './TextNotificationsPanel';
 import { askForNotice } from './NoticeEditor';
 import { toast } from 'sonner';
@@ -28,9 +28,8 @@ import CalendarSyncPanel from './CalendarSyncPanel';
 import MyGigsTab from './MyGigsTab';
 import { BusinessHoursPanel } from './OrdersTab';
 import LookingForYou from './LookingForYou';
-import ShareListingsPanel from './ShareListingsPanel';
 import ReviewBadgePanel from './ReviewBadgePanel';
-import AdMaker, { nextHoliday } from './AdMaker';
+import { nextHoliday } from './AdMaker';
 import { businessPublicUrl } from '../../utils/businessHost';
 import { handBuiltList } from '../../utils/handBuiltPages';
 
@@ -51,13 +50,15 @@ export default function MyBusinessesTab({ API, token }) {
   // WITHIN it, so the tab bar and the browser's back button behave the
   // way someone expects from a dashboard rather than a page tree.
   const [openBiz, setOpenBiz] = useState(null);
-  const [adBiz, setAdBiz] = useState(null);
-  const [adStart, setAdStart] = useState(null);
   // Per business: visits from its ads this week and the products with no ad
   // yet (GET /ads/summary), for the "your ad is ready" line on its card.
   const [adSummary, setAdSummary] = useState({});
   const [holiday] = useState(() => nextHoliday());
-  const openAd = (b, start = null) => { setAdStart(start); setAdBiz(b); };
+  // One home for ads, the link and the QR code (Tzvi, 6 Nov 2026).
+  const openAd = (b, start = null) => {
+    const q = new URLSearchParams({ tab: 'advertising', target: b.id, ...(start || {}) });
+    navigate(`/dashboard?${q}`);
+  };
   // Which business is having its Good-to-know facts edited (spec C6).
   const [detailsBiz, setDetailsBiz] = useState(null);
   // K3 — which business's PAGE is being designed. A separate full-screen
@@ -256,8 +257,6 @@ export default function MyBusinessesTab({ API, token }) {
 
   return (
     <div data-testid="my-businesses-tab">
-      {adBiz && <AdMaker API={API} token={token} targetType="business" target={adBiz} start={adStart}
-        onClose={() => { setAdBiz(null); loadAdSummary(); }} />}
       {/* S3a — blocked time is per PERSON, not per business, so it sits
           above the list rather than inside one of the cards. */}
       <BlockTimePanel API={API} token={token} />
@@ -442,29 +441,16 @@ export default function MyBusinessesTab({ API, token }) {
                       either. A hidden business keeps its button: the link
                       still resolves, and the owner may be about to print
                       it for the day they switch the business back on. */}
-                  <ShareListingsPanel
-                    API={API}
-                    token={token}
-                    userId={b.owner_id}
-                    target={{ type: 'business', id: b.id }}
-                    // <slug>.myisraelrental.com once REACT_APP_BUSINESS_SUBDOMAINS
-                    // is on; the path form until then (utils/businessHost.js).
-                    longLink={businessPublicUrl(b.slug, b.id)}
-                    title={t('businesses.sharePanelTitle', 'Your business page')}
-                    body={t('businesses.sharePanelBody', 'One link and a QR code for this business - send it in a message, or print the code for a flyer, a van or a sign.')}
-                    filename={`myisraelrental-${(b.slug || 'business').toString().slice(0, 40)}-qr`}
-                    testidPrefix={`business-share-${b.id}`}
-                    tour={items[0]?.id === b.id ? 'business-share' : undefined}
-                  />
                   <button
                     type="button"
                     onClick={() => openAd(b)}
                     className="inline-flex items-center gap-1.5 ps-2.5 pe-3 py-1.5 rounded-full text-xs font-semibold border"
                     style={{ borderColor: 'var(--brand-border)', background: '#fafaf5', color: 'var(--brand-primary)' }}
-                    data-testid={`business-make-ad-${b.id}`}
+                    data-testid={`business-advertising-${b.id}`}
+                    data-tour={items[0]?.id === b.id ? 'business-share' : undefined}
                   >
                     <Megaphone size={13} aria-hidden="true" />
-                    {t('ads.makeButton', 'Make an ad')}
+                    {t('advertising.cardButton', 'Advertising: ads, link and QR code')}
                   </button>
                   <ReviewBadgePanel API={API} business={b} pageUrl={businessPublicUrl(b.slug, b.id, { origin: 'https://myisraelrental.com' })} />
                   {!b.active && (
@@ -562,6 +548,16 @@ export default function MyBusinessesTab({ API, token }) {
                   <Palette size={13} /> {t('pageDesign.open', 'Design your page')}
                 </button>
                 )}
+
+                <button
+                  type="button"
+                  onClick={() => { setTextsBizId(null); setHoursBizId(b.id); }}
+                  className="inline-flex items-center justify-center gap-1.5 min-h-[44px] px-2 rounded-lg border bg-white text-xs font-semibold"
+                  style={{ borderColor: 'var(--brand-border)', color: 'var(--brand-primary)' }}
+                  data-testid={`business-pause-${b.id}`}
+                >
+                  <PauseCircle size={13} /> {t('pauseOrders.cardButton', 'Pause orders for a holiday')}
+                </button>
 
                 <button
                   type="button"
