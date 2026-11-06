@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Build your box · Bun Intended</title>
+<meta name="site-category" content="food-shop">
+<meta name="description" content="Build your box of 4 or 8 homemade cinnamon buns: classic cinnamon, espresso, Lotus or chocolate. Pareve. Pick-up in Ramat Eshkol, Jerusalem. Send the order on WhatsApp.">
+<meta property="og:title" content="Build your box · Bun Intended">
+<meta property="og:description" content="Build your box of 4 or 8 homemade cinnamon buns and send the order on WhatsApp. Pareve. Ramat Eshkol, Jerusalem.">
+<meta property="og:image" content="assets/boxes.webp">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Allura&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="site.css">
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="wa" viewBox="0 0 24 24"><g class="heart"><path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"/><path class="h" d="M15.8 9.2a2.5 2.5 0 0 0-3.5 0l-.3.4-.35-.3a2.42 2.42 0 1 0-3.2 3.6l3.6 3.5 3.6-3.5c1.2-1.2 1.1-2.7.2-3.7"/></g></symbol>
+  <symbol id="arr" viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></symbol>
+  <symbol id="tick" viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></symbol>
+</svg>
+
+<header class="topbar" id="top">
+  <div class="wrap in">
+    <a class="nm" href="index.html">Bun Intended</a>
+    <nav aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="prices.html">Prices</a>
+      <a href="index.html#contact">Find us</a>
+      <a class="send" href="order.html">
+        <span class="dot" aria-hidden="true"></span>
+        <span class="a">Build your box</span>
+        <span class="b"><span class="go">Build your box</span><svg><use href="#arr"/></svg></span>
+      </a>
+    </nav>
+    <button type="button" class="mbtn" id="mbtn" aria-expanded="false" aria-controls="mpanel">Menu</button>
+  </div>
+  <div class="mpanel" id="mpanel">
+    <a href="order.html">Build your box</a><a href="index.html">Home</a><a href="prices.html">Prices</a><a href="index.html#contact">Find us</a><a href="tel:+972553321956">Call or text 055-332-1956</a>
+  </div>
+</header>
+
+<main>
+  <section class="build" id="order-box" aria-labelledby="bh">
+    <div class="wrap build-grid">
+      <div>
+        <h1 id="bh">Build your box</h1>
+        <p class="sub">Choose a box and a flavour.</p>
+
+        <div class="choices size" role="group" aria-label="Box size">
+          <button type="button" class="choice" data-size="4" aria-pressed="true"><span>4 piece box<small>from ₪55</small></span></button>
+          <button type="button" class="choice" data-size="8" aria-pressed="false"><span>8 piece box<small><s>₪110</s> from ₪100</small></span><span class="chip">Up to 9% off</span></button>
+        </div>
+
+        <div class="choices flav" role="group" aria-label="Flavour" id="flavours"></div>
+        <p class="note" id="note" aria-live="polite"></p>
+
+        <div class="choices ful" role="group" aria-label="Pick-up or delivery">
+          <button type="button" class="choice" data-ful="pickup" aria-pressed="true"><span>Pick-up in Ramat Eshkol</span></button>
+          <button type="button" class="choice" data-ful="delivery" aria-pressed="false"><span>Delivery</span></button>
+        </div>
+
+        <div class="when">
+          <label>Needed on <input type="date" id="date" required></label>
+          <span class="qty" role="group" aria-label="Number of boxes"><button type="button" data-q="-1" id="qm" aria-label="One box fewer">&minus;</button><output id="qty" aria-live="polite">1</output><button type="button" data-q="1" id="qp" aria-label="One box more">+</button><span style="margin-left:4px">box</span></span>
+        </div>
+
+        <div class="when who">
+          <label><input id="me" autocomplete="name" maxlength="80" aria-label="Your name" placeholder="Your name"></label>
+          <label><input id="ph" type="tel" autocomplete="tel" maxlength="30" aria-label="Your phone" placeholder="Your phone"></label>
+        </div>
+        <div class="when who" id="addrw">
+          <label><input id="addr" autocomplete="street-address" maxlength="160" aria-label="Delivery address" placeholder="Delivery address: street, number, neighbourhood"></label>
+        </div>
+        <p class="note" id="oerr" role="alert" style="color:#9b2c1d"></p>
+
+        <div class="total">
+          <span class="mini" id="mini" aria-hidden="true"></span><span class="sum" id="sum" aria-live="polite">₪55<small>4 buns</small></span>
+          <a class="send" id="order" href="#" target="_blank" rel="noopener">
+            <span class="dot" aria-hidden="true"></span>
+            <span class="a">Send my order on WhatsApp<span class="px" data-px></span></span>
+            <span class="b"><span class="go">Send my order on WhatsApp<span class="px" data-px></span></span><span class="busy"><span class="spin" aria-hidden="true"></span>Opening WhatsApp</span><span class="done"><svg><use href="#tick"/></svg>Sent to WhatsApp</span><svg class="go"><use href="#wa"/></svg></span>
+          </a>
+        </div>
+      </div>
+      <div class="box" id="box" data-size="4" aria-hidden="true">
+        <div class="stage" id="stage"></div>
+        <div class="trays" id="slots"></div>
+        <span class="label" id="boxlabel">Classic cinnamon</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="facts" aria-label="Good to know">
+    <div class="wrap row">
+      <div><div class="k caps">Pareve</div><div class="v">Every bun<small>All our buns are pareve.</small></div></div>
+      <div><div class="k caps">Pick-up</div><div class="v">Ramat Eshkol<small>Jerusalem. Delivery is also an option: ask when you order.</small></div></div>
+      <div><div class="k caps">Seminaries</div><div class="v">Delivered<small>Seminary deliveries on 5 or more orders.</small></div></div>
+      <div><div class="k caps">For</div><div class="v">Shabbos, gifts<small>Or simply treating yourself to something sweet.</small></div></div>
+    </div>
+  </section>
+
+</main>
+<footer class="foot" id="contact">
+  <div class="wrap foot-grid">
+    <div class="fbrand"><div class="nm2">Bun Intended<span class="script">Sweet things ahead</span></div><p>Homemade cinnamon buns, baked in Ramat Eshkol, Jerusalem. All pareve.</p>
+      <a class="fcta" href="order.html">Build your box <svg class="fa" aria-hidden="true"><use href="#arr"/></svg></a></div>
+    <nav aria-label="Pages"><h3 class="caps">Pages</h3><a href="index.html">Home</a><a href="order.html">Build your box</a><a href="prices.html">Prices</a><a href="index.html#contact">Find us</a></nav>
+    <div><h3 class="caps">Ordering</h3><span>Boxes of 4 or 8, from ₪55</span><span>Pick-up in Ramat Eshkol</span><span>Delivery on request</span><span>Pareve</span></div>
+    <div><h3 class="caps">Reach us</h3><a href="https://wa.me/18482216022" target="_blank" rel="noopener">WhatsApp +1 848 221 6022</a><a href="tel:+972553321956">Call or text 055-332-1956</a></div>
+  </div>
+  <p class="giant" aria-hidden="true">Bun Intended</p>
+  <div class="wrap legal fbase"><span>© 2026 Bun Intended.</span><span>Listed on <a href="https://myisraelrental.com/">MyIsraelRental</a>, free to list, no commission · <a href="https://myisraelrental.com/privacy">Privacy</a></span></div>
+</footer>
+
+<script src="site.js"></script>
+<script>
+(function () {
+  // Their price list, as printed on it.
+  var WA = '18482216022', GIG = 'c42107a6-615e-45dc-8e87-7164a1cd6a87';
+  // Every order is saved to MyIsraelRental before WhatsApp opens (page rules 3k). These are the nine products
+  // added to the listing on 22 Oct 2026 (add_site_products.py), named "<flavour>, <4|8> piece box".
+  var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
+  var PID = { cinnamon: { 4: '3e8fc7b11ba5', 8: '496133c34c8d' }, espresso: { 4: 'a2411e518cfd', 8: 'add54923e23e' },
+    lotus: { 4: '1fe757edcd3c', 8: '14b2e1b51020' }, chocolate: { 4: '1a0afd77ecca', 8: 'a9f847b52153' }, mix: { 8: '0b0622aa4198' } };
+  var waText = '', waNotes = '';
+  var F = BUN.F, MIX8 = BUN.MIX8, SW = BUN.SW, cheaperPair = BUN.cheaperPair;
+  var state = { size: 4, mix: false, picks: ['cinnamon'], qty: 1, ful: 'pickup' };
+  var $ = function (s) { return document.querySelector(s); };
+
+  // The bun, drawn as their buns are: a golden swirl, its topping poured on.
+  // Built in code from their photograph's colours, never generated (a choice
+  // card shows what the customer gets). The pour follows the reference Tzvi
+  // sent (8 Oct 2026): the topping falls from above and coats the bun.
+  var uidN = 0, lastPour = null, still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Their bun, photographed. assets/bun-cinnamon is their own iced bun cut out
+  // of their photo; plain, espresso, chocolate and Lotus are the same bun with
+  // only the topping edited (Higgsfield, 8 Oct 2026, Tzvi's go-ahead), so all
+  // five line up exactly.
+  // The pour is filmed, not drawn (rule: real materials are generated, 8 Oct
+  // 2026). Each clip starts on their plain bun and ends on that flavour's
+  // still, generated between the two frames, colour-matched to the page and
+  // faded at the edges so it sits on the paper with no box. The jug that dips
+  // into the top of some clips fades out with the top edge.
+  function bun(c) {
+    return '<img class="bunimg" src="assets/bun-' + c + '.webp" alt="" width="720" height="720" loading="lazy" decoding="async">';
+  }
+  function stage(c, anim) {
+    if (!anim) return '<img class="pour" src="assets/pour-' + c + '-end.webp" alt="" width="640" height="640" decoding="async">';
+    return '<video class="pour" src="assets/pour-' + c + '.mp4" poster="assets/pour-bare.webp" width="640" height="640" muted playsinline autoplay preload="auto" aria-hidden="true"></video>';
+  }
+  // The first time the box comes into view, the chosen flavour is poured on,
+  // so the pour is seen without having to pick anything first.
+  if (!still && 'IntersectionObserver' in window) {
+    var seenStage = new IntersectionObserver(function (es) {
+      if (!es[0].isIntersecting) return;
+      seenStage.disconnect();
+      var st = $('#stage'), cur = st.querySelector('img.pour');
+      if (cur) st.innerHTML = stage(lastPour, true);
+    }, { threshold: 1, rootMargin: '0px 0px -28% 0px' });
+    seenStage.observe($('#stage'));
+  }
+  // warm the clips once the page is idle, so the first pour starts at once
+  // (the address is read from stage(), which the publish script rewrites)
+  addEventListener('load', function () {
+    setTimeout(function () { ['cinnamon', 'espresso', 'choc', 'lotus'].forEach(function (c) { var l = document.createElement('link'); l.rel = 'prefetch'; l.href = stage(c, true).match(/src="([^"]+)"/)[1]; document.head.appendChild(l); }); }, 1200);
+  });
+
+  function fl(id) { return F.filter(function (x) { return x.id === id; })[0]; }
+  function price() {
+    if (state.size === 8 && state.mix) return MIX8;
+    var f = fl(state.picks[0]);
+    return state.size === 4 ? f.p4 : f.p8;
+  }
+  // What the same buns cost as boxes of 4 (two of them), from their own price list.
+  function was() {
+    if (state.size !== 8) return 0;
+    if (state.mix) { if (state.picks.length < 2) return 0; return fl(state.picks[0]).p4 + fl(state.picks[1]).p4; }
+    return 2 * fl(state.picks[0]).p4;
+  }
+  function names() { return state.picks.map(function (id) { return fl(id).name; }); }
+
+  // The choice cards are built once and only updated, so a tap never rebuilds the
+  // button you are on (focus stays, nothing under it moves).
+  var fHost = $('#flavours');
+  fHost.innerHTML = F.map(function (f) {
+    return '<button type="button" class="choice" data-f="' + f.id + '" aria-pressed="false"><span class="nm"><span class="sw" style="background:' + SW[f.c] + '"></span>' + f.name + '</span><span class="pr"></span></button>';
+  }).join('') + '<button type="button" class="choice mix" data-mix aria-pressed="false"><span>2 flavour mix<small></small></span><span class="pr">\u20aa' + MIX8 + '</span></button>';
+  function renderFlavours() {
+    fHost.querySelectorAll('[data-f]').forEach(function (b) {
+      var f = fl(b.getAttribute('data-f'));
+      b.setAttribute('aria-pressed', String(state.picks.indexOf(f.id) > -1));
+      b.querySelector('.pr').textContent = '\u20aa' + (state.size === 4 ? f.p4 : f.p8);
+    });
+    var m = fHost.querySelector('[data-mix]'), on8 = state.size === 8;
+    m.setAttribute('aria-pressed', String(on8 && state.mix)); m.classList.toggle('dim', !on8);
+    var cp = cheaperPair(), sm = m.querySelector('small');
+    var longT = 'Your choice of any 2 flavours' + (cp ? '. Two 4 piece boxes can cost less: ' + cp.a + ' and ' + cp.b + ' is ₪' + cp.t : '');
+    // the line keeps the height of its longer wording, so choosing a box size never moves what is below (check-site SHIFT)
+    sm.style.minHeight = ''; sm.textContent = longT; sm.style.minHeight = sm.offsetHeight + 'px';
+    sm.textContent = on8 ? longT : '8 piece boxes only, tap to switch';
+  }
+
+  function paint() {
+    document.querySelectorAll('[data-size]').forEach(function (b) { if (b.classList.contains('choice')) b.setAttribute('aria-pressed', String(+b.getAttribute('data-size') === state.size)); });
+    renderFlavours();
+    var p = price(), n = names(), q = state.qty, w = was(), save = w > p ? (w - p) * q : 0, tot = p * q, buns = state.size * q;
+    var each = (tot / buns); each = each % 1 ? each.toFixed(2) : String(each);
+    var chip = save ? '<span class="chip">' + Math.floor(save * 100 / (w * q)) + '% off</span>' : '';  /* percent off, rounded down (Tzvi, 22 Oct 2026) */
+    $('#sum').innerHTML = '<span class="pp">₪' + tot + (save ? '<s>₪' + (w * q) + '</s>' : '') + '</span><small class="u">' + chip + '₪' + each + ' a bun</small><small class="n">' + (save ? chip : buns + ' buns') + '</small>';
+    document.querySelectorAll('[data-px]').forEach(function (x) { x.textContent = ', ₪' + tot; });
+    $('#qty').textContent = q; $('#qm').disabled = q <= 1; $('#qp').disabled = q >= 9;
+    document.querySelectorAll('[data-ful]').forEach(function (b) { b.setAttribute('aria-pressed', String(b.getAttribute('data-ful') === state.ful)); });
+    var need = state.size === 8 && state.mix && state.picks.length < 2;
+    $('#note').textContent = state.size === 8 && state.mix ? (need ? 'Pick a second flavour for your mix.' : 'Half ' + n[0] + ', half ' + n[1] + '.') : '';
+    // The box fills slot by slot in the chosen flavours.
+    var host = $('#slots');
+    if (!host.firstChild) {
+      var h = '';
+      for (var t = 0; t < 2; t++) { h += '<div class="trayw"><div class="tray"><div class="slots">'; for (var k = 0; k < 4; k++) h += '<div class="slot" style="--i:' + (t * 4 + k) + '"></div>'; h += '</div></div></div>'; }
+      host.innerHTML = h;
+    }
+    $('#box').setAttribute('data-size', state.size);
+    host.querySelectorAll('.trayw').forEach(function (tw, t) { tw.classList.toggle('off', t * 4 >= state.size); });
+    host.querySelectorAll('.slot').forEach(function (el, i) {
+      var live = i < state.size;
+      var id = state.mix && state.picks.length === 2 ? state.picks[i < state.size / 2 ? 0 : 1] : state.picks[0];
+      var f = fl(id), fresh = false;
+      // every slot keeps its photo (hidden ones too) so the box's height never changes
+      if (el.getAttribute('data-c') !== f.c) { el.setAttribute('data-c', f.c); el.innerHTML = bun(f.c); fresh = true; if (live) el.classList.remove('in'); }
+      if (!live) { el.classList.remove('in'); return; }
+      if (fresh || !el.classList.contains('in')) requestAnimationFrame(function () { requestAnimationFrame(function () { el.classList.add('in'); }); });
+    });
+    // The big bun takes the latest flavour, poured on as it is chosen.
+    var latest = F.filter(function (x) { return x.id === state.picks[state.picks.length - 1]; })[0];
+    if (latest.c !== lastPour) { var pour = !still && lastPour !== null; $('#stage').innerHTML = stage(latest.c, pour); $('#mini').innerHTML = bun(latest.c); lastPour = latest.c; }
+    $('#boxlabel').textContent = state.mix ? (n.length === 2 ? n[0] + ' & ' + n[1] : n[0] + ' & …') : n[0];
+    // The order, written out for their WhatsApp.
+    var d = $('#date').value;
+    var when = d ? new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) : '';
+    var what = q > 1 ? q + ' x ' + state.size + ' piece boxes' : (state.size === 8 ? 'an ' : 'a ') + state.size + ' piece box';
+    var text = 'Hi Bun Intended, I\'d like to order ' + what + ': '
+      + (state.mix ? '2 flavour mix, ' + n.join(' and ') : n[0]) + ' (₪' + tot + (q > 1 ? ' for ' + q : '') + ').'
+      + (when ? ' For ' + when + '.' : '') + (state.ful === 'delivery' ? ' Delivery to ' + ($('#addr').value.trim() || '(address)') + '.' : ' Pick-up in Ramat Eshkol.')
+      + ($('#me').value.trim() ? ' Name: ' + $('#me').value.trim() + ', ' + $('#ph').value.trim() + '.' : '');
+    waText = text;
+    waNotes = (state.mix ? '2 flavour mix: ' + n.join(' and ') + '\n' : '') + 'Sent from the Bun Intended page by WhatsApp';
+    $('#addrw').classList.toggle('is-on', state.ful === 'delivery'); $('#addrw').inert = state.ful !== 'delivery';
+    var a = $('#order');
+    a.href = need ? '#order-box' : 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+    a.setAttribute('aria-disabled', String(need));
+  }
+
+  document.addEventListener('click', function (e) {
+    var s = e.target.closest('.choice[data-size]');
+    if (s) { state.size = +s.getAttribute('data-size'); if (state.size === 4) { state.mix = false; state.picks = state.picks.slice(0, 1); } paint(); return; }
+    var q = e.target.closest('[data-q]');
+    if (q) { state.qty = Math.max(1, Math.min(9, state.qty + +q.getAttribute('data-q'))); paint(); return; }
+    var fu = e.target.closest('[data-ful]');
+    if (fu) { state.ful = fu.getAttribute('data-ful'); paint(); return; }
+    var m = e.target.closest('[data-mix]');
+    if (m && state.size === 4) { state.size = 8; state.mix = true; if (state.picks.length < 2) state.picks = [state.picks[0], F.filter(function (x) { return x.id !== state.picks[0]; })[0].id]; paint(); return; }
+    if (m) { state.mix = !state.mix; if (!state.mix) state.picks = state.picks.slice(0, 1); paint(); return; }
+    var f = e.target.closest('[data-f]');
+    if (f) {
+      var id = f.getAttribute('data-f');
+      if (state.mix) {
+        var at = state.picks.indexOf(id);
+        if (at > -1 && state.picks.length > 1) state.picks.splice(at, 1);
+        else if (at < 0) { state.picks.push(id); if (state.picks.length > 2) state.picks.shift(); }
+      } else state.picks = [id];
+      paint();
+    }
+  });
+  $('#date').addEventListener('change', paint);
+  ['me', 'ph', 'addr'].forEach(function (id) { $('#' + id).addEventListener('input', function () { $('#oerr').textContent = ''; paint(); }); });
+  var today = new Date(); $('#date').min = today.toISOString().slice(0, 10);
+
+  // The send button: "Opening WhatsApp", then a tick (21st Interactive Hover Button).
+  $('#order').addEventListener('click', function (e) {
+    var a = e.currentTarget;
+    if (a.getAttribute('aria-disabled') === 'true') { e.preventDefault(); $('#note').textContent = 'Pick a second flavour for your mix.'; return; }
+    e.preventDefault();
+    if (a.classList.contains('is-busy')) return;
+    var v = function (id) { return $('#' + id).value.trim(); }, err = '', bad = '';
+    if (!$('#date').value) { err = 'Choose the day you need it.'; bad = 'date'; }
+    else if (!v('me')) { err = 'Your name, please.'; bad = 'me'; }
+    else if (!/\d{9,}/.test(v('ph').replace(/\D/g, ''))) { err = 'A phone number we can reach you on.'; bad = 'ph'; }
+    else if (state.ful === 'delivery' && !v('addr')) { err = 'Where should we deliver?'; bad = 'addr'; }
+    $('#oerr').textContent = err;
+    if (err) { $('#' + bad).focus(); return; }
+    a.classList.add('is-busy');
+    // the WhatsApp tab opens now, inside the tap, so pop-up blockers allow it; it is filled once the order is saved
+    var tab = window.open('', '_blank');
+    var pid = (state.mix ? PID.mix : PID[state.picks[0]])[state.size];
+    var body = { lines: [{ product_id: pid, qty: state.qty }], fulfilment: state.ful, date: v('date'), customer_name: v('me'), customer_phone: v('ph'), notes: waNotes };
+    if (state.ful === 'delivery') { body.city = 'jerusalem'; body.address = v('addr'); }
+    var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
+      .then(function (r) { return r.ok ? r.json() : r.text().then(function (t) { console.warn('Order not saved', r.status, t); return null; }); })
+      .catch(function (er) { console.warn('Order not saved', er); return null; });
+    Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]).then(function (saved) {
+      var text = waText + (saved && saved.track_url ? '\n\nFollow the order: ' + saved.track_url : '');
+      var url = 'https://wa.me/' + WA + '?text=' + encodeURIComponent(text);
+      if (tab) tab.location.href = url; else location.href = url;
+      a.classList.remove('is-busy'); a.classList.add('is-done');
+      setTimeout(function () { a.classList.remove('is-done'); }, 2500);
+    });
+  });
+
+  // order.html?pick=4:cinnamon (a card, a price line or the footer on another page) starts the box with that choice.
+  (function () {
+    var p = (new URLSearchParams(location.search).get('pick') || '').split(':'), sz = +p[0];
+    if (sz !== 4 && sz !== 8) return;
+    if (p[1] === 'mix' && sz === 8) { state.size = 8; state.mix = true; state.picks = [state.picks[0], F.filter(function (x) { return x.id !== state.picks[0]; })[0].id]; }
+    else if (fl(p[1])) { state.size = sz; state.mix = false; state.picks = [p[1]]; }
+  })();
+
+  paint();
+})();
+</script>
+</body>
+</html>

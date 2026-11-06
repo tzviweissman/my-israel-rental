@@ -2,5 +2,13 @@
   {
     "page": "index",
     "title": "Home"
+  },
+  {
+    "page": "prices",
+    "title": "Prices"
+  },
+  {
+    "page": "order",
+    "title": "Build your box"
   }
 ]

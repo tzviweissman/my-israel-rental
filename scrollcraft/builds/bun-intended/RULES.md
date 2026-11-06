@@ -24,12 +24,12 @@ R5.1 pass: read every line as the owner: each names their own product, place or 
 R5.2 pass: read every line: plain and warm, nothing teasing or slangy
 R5.3 pass: labels are full phrases (Pick-up in Ramat Eshkol, Boxes of 4 or 8, from 55)
 R5.4 pass: searched the visible text for they, them, their: none
-R5b.2 pass: Build your box goes to #order-box in the bar, hero, close, footer and phone bar
+R5b.2 pass: the one main button reads "Build your box" on every page and goes to the order page (order.html): the bar, the opening, the card on the opening and the four flavour tiles (order.html?pick=4:cinnamon and so on start the box with that flavour), the closing band, the footer link, the phone bar and the price lines (order.html?pick=8:lotus); the button on the order page is the page itself and the form button there sends the order on WhatsApp
 R5b.8 pass: closing lines read "Your cup, your cloud." / "Your box is ready when you are." (what the customer gets); no line starts with or or prefer
-R3.11 pass: order: what it is, the four flavours with prices, build your box, the price list, facts, close
+R3.11 pass: home: what it is, the four flavours with prices, facts, close; then the order page (build your box, facts) and the prices page (the price list, close)
 R3o.4 pass: Call or text 055-332-1956 and WhatsApp +1 848 221 6022 use the price list own wording
 R3e.22 n/a: owner must send a photo of herself or the baker; none in the build, so the owner is not shown as a person
-R3s.19 pass: single page with its own title, description and og tags
+R3s.19 pass: every page (Home, Order, Prices) has its own title, description and og tags
 R6.1 pass: shops playbook: products with photos and prices come straight after the opening (flavour cards), then the builder and the price list
 R4.1 pass: delivery fee and area are not given and are not shown
 
@@ -37,7 +37,7 @@ R4.1 pass: delivery fee and area are not given and are not shown
 R3g.13 pass: first screen (24 Oct rebuild): their glazed bun filling the screen with Bun Intended . sweet things ahead . in its grooves, the line Cinnamon buns, baked at home in Ramat Eshkol, Build your box and the price line; sheet docs/site-reviews/2026-10-24/bun-intended-swirl-2.jpg at 1440x900 and 390x844
 R3b.1 pass: first screen answers what (cinnamon buns), where (Ramat Eshkol), pareve, price (from 55) and the button
 R3b.2 pass: Boxes of 4 or 8, from 55 and Pareve sit under the button on the first screen
-R3b.3 pass: one main action Build your box (bar and first screen, phone bar after); the Add a box control on the box-of-4 card starts the same builder
+R3b.3 pass: one main action Build your box (bar and first screen, phone bar after) on every page; the card on the opening and the flavour tiles say the same words and open the order page with that flavour chosen
 R3h.1 pass: the opening is an event built in code from their own photo: the bun turns and moves aside, big, while the words peel off its grooves one strand at a time on scroll (both ways), then the headline and box card arrive. The ground is a kraft texture made from their own tray photo (colour and fibre sampled, not blurred) so the check counts it as picture; check-site OPENING clean
 R3n.1 pass: the strongest real photo, a sharp top-down photo of their glazed bun (gen/hero/bun-top-2.png, from a crop of their own bun), is 72 percent of the screen height on a laptop and 92 percent of the width on a phone at the start, and stays large at the end (right side on a laptop, cut by the top on a phone)
 R3n.2 pass: signature: the swirl of words unwound by scroll; no other bakery has their name wound in their own bun
@@ -72,9 +72,9 @@ R9.1 pass: the builder uses their own bun photos
 R3f.2 pass: CONCEPT.md has an Effect budget: one signature (the builder with the pour) and four accents
 R3m.1 n/a: hand-built site, not a designed page of the page builder, so no data-mir hooks
 R3m.3 n/a: hand-built site, hours and fees are not owner-editable places
-R3k.1 n/a: a one-page site by design; the builder is the order, so the menu/order split does not apply
-R3k.2 n/a: a one-page site has one bar; it is the same at every scroll position and folds to Menu on the phone
-R3k.4 n/a: a one-page site with its own inline css and js, no shared files
+R3k.1 pass: split into three pages on 6 Nov 2026 (Tzvi: "split all 4 into separate pages"): Home (the opening, the four flavours, facts, close), Order (the box builder, with the form and WhatsApp exactly as before, and facts) and Prices (the price list and close); old addresses /business/<slug>#order-box and #prices forward to the Order and Prices pages by a short script on Home, and #contact is still the footer on every page. No contact page: the record has two phone numbers, the Ramat Eshkol pick-up and delivery on request, no address, hours or email, and the footer already shows all of it on every page
+R3k.2 pass: the bar is the same markup on all three pages: the name to Home, Home, Prices, Find us (the footer) and the one Build your box button; folds to Menu on the phone, with the same list and the phone number
+R3k.4 pass: shared site.css and site.js (the price list numbers and the phone menu); the opening script stays on Home and the builder script on the Order page
 R8a.1 n/a: no 21st or generated component left over; the effects use only the build own code
 R3b.4 pass: facts band carries pick-up, pareve, delivery and occasions from their own flyer
 R3c.3 pass: price and button sit together on every card and in the builder
@@ -138,10 +138,10 @@ R3j.12 n/a: no owner savings claim contradicts the prices
 R3.14 pass: prices are large but the business has fixed public prices
 
 ## 6. Order and booking flow
-R3k.7 n/a: the order is one builder form on a single page rather than three steps; restructuring it is outside the category rework and is listed in the reply; check-site FLOW passed on it
+R3k.7 n/a: the order is one builder form on the Order page rather than three steps; check-site FLOW is run on it
 R3k.8 n/a: the builder has a quantity stepper, no multi-line basket
 R3k.9 pass: the Order button validates the day, name, phone (and address for delivery), POSTs to /api/marketplace/order-form/c42107a6-.../orders with the box's product id (nine new products only) while a blank WhatsApp tab is already open, then fills the tab with the message and the tracking link; a failed POST still opens WhatsApp. Added required fields: day (was optional), name, phone, delivery address. Intercepted pickup and delivery orders in Playwright (all fields match WebsiteOrderIn); check-site SAVE and FLOW pass; nothing sent to the live site
-R3k.6 n/a: single page: tapping a flavour card starts the box in the builder on the same page
+R3k.6 pass: no basket; tapping a flavour card, a price line or the card on the opening opens order.html with the box started in that flavour
 R3.15 pass: order has the builder; contact has call and WhatsApp; pick-up place is shown
 R7.1 pass: CONCEPT.md names the chosen direction; no options page
 R8.5 pass: main button goes to the builder, their order route; WhatsApp is the final step
@@ -214,7 +214,9 @@ R3u.12 n/a: no kit piece moved in; text changes only
 R3u.11 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.13 n/a: site made before 3u (29 Oct 2026); no new film
 R3u.14 n/a: site made before 3u (29 Oct 2026); no new film
-R3v.1 pass: full footer on the one page (who we are with a Build your box link, Pages, Ordering: boxes of 4 or 8 from ₪55, pick-up in Ramat Eshkol, delivery on request, pareve; Reach us with WhatsApp and phone; base line with Privacy); no hours, payment, founding year or email in the record, so none shown; check-footer passes
-R3v.2 pass: a site of Home alone keeps its jumps (Prices, Find us, Build your box); no other pages to list; check-menu passes
+R3v.1 pass: the same full footer on all three pages (who we are with a Build your box link, Pages (Home, Build your box, Prices, Find us), Ordering: boxes of 4 or 8 from ₪55, pick-up in Ramat Eshkol, delivery on request, pareve; Reach us with WhatsApp and phone; base line with Privacy); no hours, payment, founding year or email in the record, so none shown; check-footer passes
+R3v.2 pass: the site is Home, Order and Prices; the bar lists Home, Prices, Find us and Build your box on every page, the same list in the phone menu; check-menu passes
 R3v.14 pass: the existing proof list (boxes of 4 or 8 from ₪55, Pareve, Pick-up in Ramat Eshkol, all from the record's description and price list) now carries the btn-facts class under the Build your box button; check-facts passes
 <!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->
+
+Note, 6 Nov 2026: split into Home, Order and Prices (split-four-sites). The lines for the buttons, menu bar, footer, pages, order and flavour cards were rewritten for it; the opening, the builder and the look are unchanged.
