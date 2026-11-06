@@ -226,6 +226,19 @@ async def redeem(c: dict[str, Any], discount: float, phone: Optional[str]) -> bo
     return (await db.discount_codes.update_one(q, upd)).modified_count == 1
 
 
+async def has_codes(biz: dict[str, Any]) -> bool:
+    """Whether a customer could be holding a code here, so a designed site's
+    order form knows to offer the box (public/pages/mir-code.js). A code past
+    its end date or kept for memberships does not count."""
+    from . import referrals
+    today = datetime.now(IL).date().isoformat()
+    if await db.discount_codes.count_documents(
+        {"business_id": biz["_id"], "active": True, "deleted": {"$ne": True}, "applies_to": {"$ne": "memberships"},
+         "$or": [{"ends_on": None}, {"ends_on": {"$gte": today}}]}, limit=1):
+        return True
+    return bool(referrals.settings_of(biz)["on"]) or bool(await db.gift_cards.count_documents({"business_id": biz["_id"]}, limit=1))
+
+
 class CheckIn(BaseModel):
     code: str = Field(..., min_length=1, max_length=40)
     form: Literal["orders", "memberships"] = "orders"

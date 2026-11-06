@@ -220,3 +220,4 @@ R3v.2 n/a: a site of Home alone; the top bar keeps its jumps (Occasions, Kosher,
 R3v.14 pass: the line under Message to order on the opening is now the list class btn-facts: From ₪100 / Kosher, hechsher from Rabbi Weiner / Made in Jerusalem, delivered across Israel (all three were already on the page, from their flyer and listing); check-facts clean at 390 and 1366
 
 Note, 1 Nov 2026: the arrow after the footer button was removed (its font has no arrow; check-site GLYPH). No rule answer changes.
+<!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->

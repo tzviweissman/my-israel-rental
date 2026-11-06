@@ -15,7 +15,7 @@
 <title>Order a gift · The Gift Boutique</title>
 <meta name="site-category" content="fashion-shop">
 <meta name="description" content="Choose your gifts, say who they are for and where they are going, and send the order to The Gift Boutique on WhatsApp. Delivered across Israel.">
-<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mvy9rasx">
+<link rel="icon" href="/pages/the-gift-boutique/assets/logo-192.png?v=mw4hekfj">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
@@ -258,7 +258,7 @@
 
 <header class="bar">
   <div class="wrap">
-    <a class="brand" href="/business/the-gift-boutique" aria-label="The Gift Boutique, home"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mvy9rasx" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
+    <a class="brand" href="/business/the-gift-boutique" aria-label="The Gift Boutique, home"><img src="/pages/the-gift-boutique/assets/logo.webp?v=mw4hekfj" alt="" width="40" height="40" data-mir-key="i-4cde4eef-0"><span data-mir-key="t-e8c39563-0">THE GIFT BOUTIQUE</span></a>
     <nav class="nav" aria-label="Pages">
       <a class="link" href="/business/the-gift-boutique#make" data-mir-key="t-4dac8cb1-0">What we make</a>
       <a class="link" href="/business/the-gift-boutique#prices" data-mir-key="t-53b2fbd0-0">Prices</a>
@@ -313,6 +313,7 @@
       <h2 id="sumh" data-mir-key="t-0be66db8-0">Your order</h2>
       <p class="empty" id="empty">No gifts chosen yet.</p>
       <ul id="lines" aria-live="polite"></ul>
+      <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
       <div class="tot"><span data-mir-key="t-08a3f96c-0">Gifts</span><b id="total">$0</b></div>
       <p class="note" data-mir-key="t-b73ddd1c-0">Delivery is added on WhatsApp once we know the city. You pay us directly; nothing is paid on this page.</p>
       <p class="reassure"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12l5 5L20 7"/></svg><span data-mir-key="t-7b950b37-0">Nothing is paid on this page. We confirm the delivery fee with you on WhatsApp first.</span></p>
@@ -447,11 +448,14 @@ document.addEventListener('DOMContentLoaded', function () {
       low += n * Number(p.price);
       if (p.price_to != null && Number(p.price_to) > Number(p.price)) ranged = true;
     });
+    low = MirCode.after(low);
     return { text: (ranged ? 'from ' : '') + money(low, cur) + (ask ? ' + price on request' : ''), low: low, cur: cur };
   }
 
   var lines = document.getElementById('lines'), empty = document.getElementById('empty');
+  function goods() { var low = 0; chosen().forEach(function (p) { if (priced(p)) low += q[p._k] * Number(p.price); }); return low; }
   function update() {
+    MirCode.refresh();
     products.forEach(drawCtl);
     lines.textContent = '';
     var c = chosen();
@@ -531,6 +535,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var L = ['Hi, I would like to order:'];
     chosen().forEach(function (p) { L.push('• ' + q[p._k] + ' × ' + p.name + ' (' + priceText(p) + ')'); });
     if (v('whichin') && !document.getElementById('which').hidden) L.push('Which one: ' + v('whichin'));
+    if (MirCode.code()) L.push(MirCode.text(goods()));
     L.push('Gifts total: ' + totals().text + ', plus delivery');
     L.push('');
     L.push('For: ' + v('to') + (v('tophone') ? ', ' + v('tophone') : ''));
@@ -550,6 +555,7 @@ document.addEventListener('DOMContentLoaded', function () {
   // takes too long, WhatsApp opens anyway: an order is never lost.
   var API = /^(localhost|127\.0\.0\.1)$/.test(location.hostname) ? 'http://localhost:8001/api' : '/api';
   var sending = false;
+  MirCode.mount({ api: API, gig: function () { var c = chosen(); return c.length ? c[0].gig_id : null; }, goods: goods, money: function (n) { return money(n, totals().cur); }, phone: 'myphone', onChange: update });
   function save() {
     var c = chosen();
     var gig = c.length && c.every(function (p) { return p.gig_id && p.id && p.gig_id === c[0].gig_id; }) ? c[0].gig_id : null;
@@ -561,7 +567,7 @@ document.addEventListener('DOMContentLoaded', function () {
     var body = {
       lines: c.map(function (p) { return { product_id: p.id, qty: q[p._k] }; }),
       fulfilment: 'delivery', date: v('when'), city: v('city').slice(0, 80), address: v('addr'),
-      customer_name: v('me'), customer_phone: v('myphone'), notes: notes.join('\n')
+      customer_name: v('me'), customer_phone: v('myphone'), notes: notes.join('\n'), discount_code: MirCode.code()
     };
     var post = fetch(API + '/marketplace/order-form/' + gig + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
       .then(function (r) { return r.ok ? r.json() : null; }).catch(function () { return null; });

@@ -2285,6 +2285,7 @@ def _areas_out(biz: dict[str, Any]) -> list[dict[str, Any]]:
 @router.get("/order-form/{gig_id}")
 async def order_form(gig_id: str):
     from .order_texts import texts_on
+    from .discounts import has_codes
     gig, biz = await _store_for_ordering(gig_id)
     st = biz.get("order_settings") or {}
     return {
@@ -2306,6 +2307,7 @@ async def order_form(gig_id: str):
             # Closed for Shabbat and holidays (shabbat.py).
             "shabbat_closing": shabbat_public_view(biz),
         },
+        "has_codes": await has_codes(biz),
         "custom_fields": public_fields(biz, "order"),
         "products": _products_for_order(gig),
         "settings": {

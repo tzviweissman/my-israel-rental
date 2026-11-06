@@ -46,6 +46,7 @@
           <div class="chips" id="payBy" role="group" aria-label="How you will pay"></div>
           <p class="errline" id="payErr" hidden>Choose how you will pay.</p>
         </div>
+        <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
         <dl class="rev" id="rev"></dl>
         <p class="errline" id="err"></p>
         <div class="next"><button type="button" class="cta" id="place">Place my order</button><a class="back" href="order-when.html">Back</a></div>
@@ -92,9 +93,11 @@
     $('rev').innerHTML = '<div><dt>Your order</dt><dd>' + ls.map(function (l) { return (l.qty > 1 ? l.qty + ' × ' : '') + BB.esc(l.p.short); }).join('<br>') + '<br><a class="back" href="order.html">Change</a></dd></div>'
       + '<div><dt>When</dt><dd>' + BB.esc(BB.when(o)) + '<br><a class="back" href="order-when.html">Change</a></dd></div>'
       + '<div><dt>How</dt><dd>' + BB.esc(BB.where(o)) + '</dd></div>';
-    var label = 'Place my order, ' + BB.money(BB.total(F, o), BB.cur(F));
+    var label = 'Place my order, ' + BB.money(MirCode.after(BB.total(F, o)), BB.cur(F));
     $('place').textContent = label; $('place2').textContent = 'Place my order';
     BB.paint(F, o);
+    document.querySelectorAll('[data-total]').forEach(function (b) { b.textContent = BB.money(MirCode.after(BB.total(F, o)), BB.cur(F)); });
+    MirCode.refresh();
   }
   $('payBy').addEventListener('click', function (e) { var b = e.target.closest('[data-pay]'); if (!b) return; o.payBy = b.dataset.pay; $('payErr').hidden = true; BB.save(o); [].forEach.call($('payBy').children, function (c) { c.setAttribute('aria-pressed', String(c.dataset.pay === o.payBy)); }); BB.paint(F, o); });
   function place() {
@@ -109,7 +112,7 @@
     var body = {
       lines: BB.lines(F, o).map(function (l) { return { product_id: l.p.id, qty: l.qty }; }),
       fulfilment: o.ful, date: o.date, window: win, address: o.ful === 'delivery' ? o.address : null, city: o.ful === 'delivery' ? (o.city || null) : null,
-      customer_name: o.name, customer_phone: o.phone, customer_email: o.email || null, notes: o.notes || '', pay_by: o.payBy
+      customer_name: o.name, customer_phone: o.phone, customer_email: o.email || null, notes: o.notes || '', pay_by: o.payBy, discount_code: MirCode.code()
     };
     ['place', 'place2'].forEach(function (id) { $(id).disabled = true; $(id).classList.add('is-busy'); $(id).textContent = 'Placing your order'; });
     fetch(BB.API + '/marketplace/order-form/' + F.gig.id + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) })
@@ -127,7 +130,7 @@
       });
   }
   $('place').addEventListener('click', place); $('place2').addEventListener('click', place);
-  BB.form().then(function (f) { F = f; paint(); }).catch(function () { $('err').textContent = 'Could not load your order. Please refresh the page.'; });
+  BB.form().then(function (f) { F = f; MirCode.mount({ api: BB.API, gig: F.gig.id, goods: function () { return BB.total(F, o); }, money: function (n) { return BB.money(n, BB.cur(F)); }, phone: 'phone', onChange: paint }); paint(); }).catch(function () { $('err').textContent = 'Could not load your order. Please refresh the page.'; });
 })();
 </script>
 </body>

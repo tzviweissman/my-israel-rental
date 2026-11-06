@@ -247,6 +247,7 @@
         <h2>Your booking</h2>
         <ul class="lines" id="lines"><li>Nothing chosen yet.</li></ul>
         <p class="contents" id="contents" hidden></p>
+        <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
         <div class="total"><span>Total</span><b id="total">₪0</b></div>
         <button type="button" class="cta" id="place" disabled>Request the time</button>
         <p class="assure"><b>Nothing is paid here.</b> We confirm the time with you, and you pay us directly.</p>
@@ -353,11 +354,12 @@
   ['name', 'phone', 'email', 'notes'].forEach(function (id) { $('#' + id).addEventListener('input', paint); });
 
   function paint() {
+    MirCode.refresh();
     document.querySelectorAll('.pick').forEach(function (b) { b.setAttribute('aria-pressed', String(!!state.chosen && b.getAttribute('data-id') === state.chosen.id)); });
     var p = state.chosen;
     $('#lines').innerHTML = p ? '<li><span>' + p.name.replace('Academy · ', 'Academy: ') + '</span><span class="amt">' + money(p.price, p.currency) + '</span></li>' : '<li>Nothing chosen yet.</li>';
     $('#contents').hidden = !(p && p.description); if (p && p.description) $('#contents').textContent = p.description;
-    var tot = p ? money(p.price, p.currency) : '₪0';
+    var tot = p ? money(MirCode.after(p.price), p.currency) : '₪0';
     $('#total').textContent = tot; $('#totalBar').textContent = tot;
     var wd = $('#date').value ? new Date($('#date').value + 'T12:00:00').getDay() : -1;
     var s1 = !!p, s2 = s1 && wd >= 0 && wd !== 5 && wd !== 6;
@@ -387,6 +389,7 @@
     }
     place();
   }
+  MirCode.mount({ api: API, gig: GIG, goods: function () { return state.chosen ? state.chosen.price : 0; }, money: function (n) { return money(n, state.chosen ? state.chosen.currency : 'ILS'); }, phone: 'phone', onChange: paint });
   function place() {
     $('#errWhat').textContent = ''; $('#errWhen').textContent = ''; $('#errYou').textContent = '';
     if (!state.chosen) { $('#errWhat').textContent = 'Choose one.'; return; }
@@ -396,13 +399,14 @@
     if (!$('#name').value.trim() || $('#phone').value.trim().length < 9) { $('#errYou').textContent = 'Your name and a mobile number, so we can confirm.'; $('#step-you').scrollIntoView(); return; }
     var notes = ('Preferred time: ' + $('#time').value + ($('#notes').value.trim() ? '\n' + $('#notes').value.trim() : ''));
     var body = { lines: [{ product_id: state.chosen.id, qty: 1 }], fulfilment: 'pickup', date: $('#date').value, window: null, address: null,
-      customer_name: $('#name').value.trim(), customer_phone: $('#phone').value.trim(), customer_email: $('#email').value.trim() || null, notes: notes };
+      customer_name: $('#name').value.trim(), customer_phone: $('#phone').value.trim(), customer_email: $('#email').value.trim() || null, notes: notes, discount_code: MirCode.code() };
     $('#place').disabled = true; $('#placeBar').disabled = true; $('#place').textContent = 'Sending…';
     /* saved to her board first, then WhatsApp with the request typed (rule 3k). The tab opens now so a pop-up blocker allows it. */
     var what = state.chosen.name.replace('Academy · ', 'Academy: ');
     var out = ['Hi Michal, I would like to book:', '\u2022 ' + what + ' (' + money(state.chosen.price, state.chosen.currency) + ')',
       'Day: ' + new Date($('#date').value + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }) + ', ' + $('#time').value];
     if ($('#notes').value.trim()) out.push('Notes: ' + $('#notes').value.trim());
+    if (MirCode.code()) out.push(MirCode.text(state.chosen.price));
     out.push('Name: ' + $('#name').value.trim() + ', ' + $('#phone').value.trim());
     var tab = window.open('', '_blank');
     function wa(track) {

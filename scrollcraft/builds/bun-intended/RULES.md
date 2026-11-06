@@ -218,3 +218,4 @@ R3v.1 pass: full footer on the one page (who we are with a Build your box link, 
 R3v.2 pass: a site of Home alone keeps its jumps (Prices, Find us, Build your box); no other pages to list; check-menu passes
 R3v.14 pass: the existing proof list (boxes of 4 or 8 from ₪55, Pareve, Pick-up in Ramat Eshkol, all from the record's description and price list) now carries the btn-facts class under the Build your box button; check-facts passes
 <!-- 1 Nov 2026: the last edits were the footer, menu and facts only (R3v.1, R3v.2, R3v.14); those checks and check-fits, check-overlap pass on the final files -->
+<!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->

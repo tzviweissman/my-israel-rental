@@ -222,3 +222,4 @@ R3v.14 pass: under the Order a board button on the opening: From $75 a board (Mi
 <!-- 1 Nov 2026: footer checked again after a last fix (phone footer columns, duplicate page list, contact link); check-footer, check-menu and check-facts pass -->
 
 Note, 1 Nov 2026: the arrow after the footer button was removed (its font has no arrow; check-site GLYPH). No rule answer changes.
+<!-- 6 Nov 2026: the only change is the discount code box on the order form (public/pages/mir-code.js, Tzvi: American Crust's first-time code had nowhere to be typed). Looked at the form with the box and a test order on phone and laptop; the rest of the site is unchanged, so the other rules were not re-read. -->

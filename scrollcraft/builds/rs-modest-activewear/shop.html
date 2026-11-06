@@ -91,6 +91,7 @@
           <h3>Your order</h3>
           <ul class="sum-mini" id="sum-mini"><li><span>Nothing yet</span></li></ul>
           <p class="sum-where" id="sum-where" hidden></p>
+          <div id="mir-code"></div><script>window.MirCode=window.MirCode||{mount:function(){},refresh:function(){},code:function(){return null},after:function(n){return n},text:function(){return ""}};</script>
           <div class="total"><span>Total</span><span id="total">₪0</span></div>
           <button class="btn" id="send" type="submit"><span>Continue to collecting</span></button>
           <button class="back" id="back" type="button" hidden>Back</button>
@@ -181,8 +182,10 @@
 
   // ── the basket, in steps
   var send = $('send');
-  function total() { return qty * PRICE; }
+  function total() { return MirCode.after(goods()); }
+  function goods() { return qty * PRICE; }
   function update() {
+    MirCode.refresh();
     var html = qty ? '<li class="bl"><span class="bl-n">' + NAME + '<span class="step sm" role="group" aria-label="How many"><button type="button" data-d="-1" aria-label="One fewer ' + NAME + '">−</button><output>' + qty + '</output><button type="button" data-d="1" aria-label="One more ' + NAME + '">+</button></span></span><span class="bl-r">₪' + qty * PRICE + '<button type="button" class="rm" data-rm="1" aria-label="Remove ' + NAME + ' from the basket">' + BIN + '</button></span></li>' : '<li class="bl"><span>Your basket is empty. Add the skirt above.</span></li>';
     $('sum-list').innerHTML = html;
     $('w-sc').hidden = !qty;
@@ -224,7 +227,7 @@
   function drawStep() {
     [].forEach.call(document.querySelectorAll('.ostep'), function (el) { el.hidden = +el.dataset.s !== step; });
     [].forEach.call(document.querySelectorAll('#steps li'), function (li, i) { li.className = i + 1 < step ? 'is-done' : i + 1 === step ? 'is-now' : ''; if (i + 1 === step) li.setAttribute('aria-current', 'step'); else li.removeAttribute('aria-current'); });
-    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (total() ? 'Send my order on WhatsApp, ₪' + total() : 'Send my order on WhatsApp');
+    send.firstElementChild.textContent = step < 3 ? STEP_BTN[step] : (goods() ? 'Send my order on WhatsApp, ₪' + total() : 'Send my order on WhatsApp');
     send.classList.toggle('idle', !check(false, step));
     $('send-note').textContent = STEP_NOTE[step];
     $('back').hidden = step === 1;
@@ -243,10 +246,11 @@
   // saved to her shop first (a tracking link), then WhatsApp; if saving fails WhatsApp still opens (rule 3k)
   function save(notes) {
     var post = fetch(API + '/marketplace/order-form/' + GIG + '/orders', { method: 'POST', headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ lines: [{ product_id: PID, qty: qty }], fulfilment: 'pickup', date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes }) })
+      body: JSON.stringify({ lines: [{ product_id: PID, qty: qty }], fulfilment: 'pickup', date: v('when'), customer_name: v('me'), customer_phone: v('ph'), notes: notes, discount_code: MirCode.code() }) })
       .then(function (r) { if (!r.ok) throw new Error('order not saved: ' + r.status); return r.json(); }).catch(function (err) { console.error(err); return null; });
     return Promise.race([post, new Promise(function (res) { setTimeout(function () { res(null); }, 5000); })]);
   }
+  MirCode.mount({ api: API, gig: GIG, goods: goods, phone: 'ph', field: 'fld', onChange: function () { update(); drawStep(); } });
   $('form').addEventListener('submit', function (e) {
     e.preventDefault();
     if (sending) return;
@@ -254,6 +258,7 @@
     if (!check(true)) { for (var s1 = 1; s1 <= 3; s1++) if (!check(false, s1)) { check(true, s1); go(s1, true); break; } var bad = document.querySelector('.ostep:not([hidden]) .bad .fld'); if (bad) bad.focus(); return; }
     var out = ['Hi RS Modest Activewear, I would like to order:', '• ' + qty + ' × ' + NAME + ' (₪' + qty * PRICE + ')', '   Size and colour: ' + v('sc')];
     if (v('note')) out.push('Notes: ' + v('note'));
+    if (MirCode.code()) out.push(MirCode.text(goods()));
     out.push('Total: ₪' + total());
     out.push(how === 'collect' ? 'Collect from the store at King George 31' : 'Deliver to: ' + v('addr'));
     out.push('For: ' + new Date(v('when') + 'T12:00').toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long' }));

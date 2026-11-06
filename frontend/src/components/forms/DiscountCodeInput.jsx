@@ -52,7 +52,7 @@ export default function DiscountCodeInput({ businessId, form, amount, phone, cur
   }
   if (!open) {
     return (
-      <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5 text-sm underline min-h-[44px]" style={{ color: 'var(--ink)' }} data-testid="discount-open">
+      <button type="button" onClick={() => setOpen(true)} className="inline-flex items-center gap-1.5 text-base font-semibold underline min-h-[44px]" style={{ color: 'var(--ink)' }} data-testid="discount-open">
         <Tag size={14} /> {t('discounts.haveCode', 'Have a discount code?')}
       </button>
     );

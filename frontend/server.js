@@ -506,6 +506,8 @@ async function sendHandBuilt(req, res, slug, file) {
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-cache' });
   const live = data && { hours: data.hours, prices: data.prices, soldOut: Object.fromEntries((data.products || []).filter((p) => !p.in_stock).map((p) => [p.name, true])) };
   let html = applyPrices(applyEdits(raw, data && data.edits, editor, live), slug, data && data.prices);
+  // An order form's code box (public/pages/mir-code.js), ahead of the page's own script that uses it.
+  html = html.replace('<div id="mir-code"></div>', `<div id="mir-code"></div><script src="/pages/mir-code.js?v=${EDITOR_STAMP}"></script>`);
   // The business's notice (dashboard, "Notice at the top"; the API sends it only between its dates), on every page of
   // the site, in a corner where no design's own bar sits; closed for the visit with its button.
   if (data && data.notice && data.notice.text && !/id="mir-notice"/.test(html)) {

@@ -28,6 +28,8 @@ let bad = 0;
 let count = 0;
 for (const file of htmlFiles(PAGES)) {
   const html = fs.readFileSync(file, 'utf8');
+  // An order form of its own needs the code box (mir-code.js): American Crust turned on a code nobody could type (6 Nov 2026).
+  if (html.includes('customer_phone') && !html.includes('discount_code')) { bad += 1; console.error(`NO CODE BOX ${path.relative(ROOT, file)}: add mir-code.js and send discount_code with the order`); }
   const re = /<script(?![^>]*\bsrc=)([^>]*)>([\s\S]*?)<\/script>/gi;
   let m;
   while ((m = re.exec(html))) {
